@@ -3,7 +3,7 @@ Theme Name: P2 for make.wordpress.org
 Template: p2
 Description: Child theme of p2, with modifications specifically for make.wordpress.org p2 blogs.
 */
-@import url('../p2/style.css');
+@import url('../../p2/style.css');
 
 html body {
 	line-height:normal;
