@@ -1,0 +1,113 @@
+/*
+Theme Name: P2 for make.wordpress.org
+Template: p2
+Description: Child theme of p2, with modifications specifically for make.wordpress.org p2 blogs.
+*/
+@import url('../p2/style.css');
+
+html body {
+	line-height:normal;
+	background:white;
+}
+
+html #header {
+	width:auto;
+	min-height:0;
+}
+
+#header h1 {
+	display:inline;
+	padding:0;
+}
+
+#header2 {
+	background: #dfdfdf;
+}
+
+body .main-navigation {
+	width: 980px;
+	margin: 0 auto;
+	float: none;
+}
+
+.single #main .controls {
+	position:relative;
+}
+
+html #wrapper {
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	background:white;
+}
+
+html #footer {
+	width:952px;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	margin:0 auto 20px;
+	border:0;
+	padding-bottom:20px;
+}
+
+html #footer p {
+	float:none;
+	font-size:12px;
+}
+
+li a:hover {
+	border:0;
+}
+
+html .alt {
+	background:transparent;
+}
+
+html h4 {
+	border:0;
+}
+
+#searchsubmit {
+	padding:0 !important;
+}
+
+.jetpack_subscription_widget input[type="submit"] {
+	padding:0 10px !important;
+}
+
+/*- bbPress Specific Styles ----------*/
+
+body.bbPress #main ul#postlist li {
+	border-top-style: none;
+	border-top-width: 0;
+	padding: 0;
+	margin: 0;
+}
+
+body.bbPress #main ul#postlist li.bbp-header,
+body.bbPress #main ul#postlist li.bbp-footer {
+	padding: 10px;
+}
+
+body.bbPress #main #bbpress-forums p.bbp-topic-meta img.avatar,
+body.bbPress #main #bbpress-forums ul.bbp-reply-revision-log img.avatar,
+body.bbPress #main #bbpress-forums ul.bbp-topic-revision-log img.avatar,
+body.bbPress #main #bbpress-forums div.bbp-template-notice img.avatar,
+body.bbPress #main #bbpress-forums .widget_display_topics img.avatar,
+body.bbPress #main #bbpress-forums .widget_display_replies img.avatar,
+body.bbPress #main #bbpress-forums p.bbp-topic-meta img.avatar {
+	display: inline;
+	margin: -2px 2px 0 0;
+	border: 1px solid #eee;
+}
+
+body.bbPress #main #bbpress-forums p a {
+	border: none;
+}
+
+body.bbPress #main #bbpress-forums div.bbp-topic-author a.bbp-author-name,
+body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
+	margin: 10px auto -10px;
+	display: block;
+}
