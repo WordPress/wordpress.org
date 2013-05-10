@@ -1,0 +1,556 @@
+/*
+ * Theme Name: Browse Happy
+ * Theme URI: http://browsehappy.com/
+ * Description: The 2011 design for Browse Happy, proudly powered by WordPress.
+ * Author: WordPress
+ * Author URI: http://wordpress.org/
+ * License: GPLv2 or later
+ */
+
+/* Reset */
+
+html, body, div, span, h1, h2, p, code, em, img, ins, strong, ol, ul, li, article, aside, footer, header, hgroup, menu, nav, section {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+
+article,footer,header,hgroup,menu,nav,section {
+	display: block;
+}
+
+ul {
+	list-style: none;
+}
+
+a {
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+
+a:link {
+	-webkit-tap-highlight-color: #F0D200;
+}
+
+html {
+	overflow-y: scroll;
+}
+
+strong {
+	font-weight: bold;
+}
+
+h1, h2 {
+	font-weight: normal;
+}
+
+::-moz-selection {
+	background: #F0D200;
+	color: #fff;
+	text-shadow: none;
+}
+
+::selection {
+	background: #F0D200;
+	color: #fff;
+	text-shadow: none;
+}
+
+/* Generic Stuff */
+
+body {
+	font: 13px/1.5 "lemonde-courrier-1","lemonde-courrier-2", Helvetica, Arial, sans-serif;
+	*font-size: small;
+	background: #2b4141;
+	color: #3F4B4B;
+	min-width: 960px;
+}
+
+#body-wrap {
+	background: #DED3BF url(imgs/bg.jpg) repeat 0 0;
+}
+
+header, #main, footer {
+	width: 100%;
+	min-width: 960px;
+}
+
+.wrap:before, .wrap:after {
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+
+.wrap:after {
+	clear: both;
+}
+
+.wrap {
+	zoom: 1;
+	width: 960px;
+	margin: 0 auto;
+}
+
+a:link, a:visited {
+	color: #1E8585;
+	text-decoration: none;
+}
+
+a:hover, a:active {
+	color: #000;
+}
+
+/* i18n */
+
+#i18n-alert {
+	text-align: center;
+	padding: 10px 0;
+	background: #2B4141 url(imgs/bg-footer.png) repeat-x 0 -10px;
+	width: 100%;
+	font-family: "lemonde-courrier-1","lemonde-courrier-2", Helvetica, Arial, sans-serif;
+}
+
+#i18n-alert p {
+	width: 960px;
+	margin: 0 auto;
+	display: block;
+	color: #efefef;
+	text-shadow: 0 1px 0 #;
+}
+
+#i18n-alert p a {
+	color: #fff;
+	text-decoration: underline;
+}
+#i18n-alert p a:hover {
+	text-decoration: none;
+}
+
+/* Header */
+
+header {
+	text-align: center;
+	border-top: 1px solid #9DC8C3;
+	padding: 70px 0;
+	background: url(imgs/bg-header.png?1) repeat-x left bottom;
+}
+
+header h1 {
+	font: 1100%/1 Impact, Helvetica, sans-serif;
+	text-transform: uppercase;
+	margin: 0;
+	color: #324B4B;
+	text-shadow: 0 1px 0 rgba(255,255,255,.5), 0 -1px 0 rgba(0,0,0,.8);
+}
+
+.wf-leaguegothic1leaguegothic2-n4-active header h1 {
+	font-size: 1491%;
+	font-family: "league-gothic-1","league-gothic-2";
+}
+
+header h1 em {
+	font-style: normal;
+	color: #F0D200;
+	text-shadow: 0 1px 0 rgba(0, 50, 40, 0.5), 0 -1px 0 rgba(255, 255, 0, 0.8);
+}
+
+header h2 {
+	font-size: 177%;
+	font-weight: normal;
+	color: #fff;
+	text-shadow: 0 1px 0 #4C7C7B;
+	font-family: "lemonde-courrier-1","lemonde-courrier-2", Helvetica, Arial, sans-serif  !important;
+}
+
+header h2 em {
+	font-weight: 700;
+}
+
+/* Browser Status Bar */
+
+#browser-status {
+	background: #DC3228;
+	border: 1px solid #c62d24;
+	margin: 20px auto 0;
+	padding: 20px 30px;
+	width: 870px;
+	color: white;
+	font-size: 120%;
+	font-family: "lemonde-courrier-1","lemonde-courrier-2", Helvetica, Arial, sans-serif;
+	text-shadow: 0 2px 0 #c62d24;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	-o-border-radius: 2px;
+	-ms-border-radius: 2px;
+	border-radius: 2px;
+	-webkit-box-shadow: inset 0 0 0 1px #e66f68;
+	-moz-box-shadow: inset 0 0 0 1px #e66f68;
+	-o-box-shadow: inset 0 0 0 1px #e66f68;
+	-ms-box-shadow: inset 0 0 0 1px #e66f68;
+	box-shadow: inset 0 0 0 1px #e66f68;
+}
+
+.browser-status-text {
+	float: left;
+	width: 80%;
+}
+
+.browser-status-action {
+	float: right;
+	width: 18%;
+	text-align: right;
+	margin-right: -10px;
+}
+.browser-status-action a {
+	display: block;
+	background: #333;
+	border: 1px solid #222;
+	color: #efefef;
+	text-align: center;
+	padding: 5px 10px;
+	margin: -5px 0;
+	text-shadow: 0 -2px 0 #000;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	-o-border-radius: 3px;
+	-ms-border-radius: 3px;
+	border-radius: 3px;
+}
+.browser-status-action a:hover {
+	background: #3a3a3a;
+	border: 1px solid #333;
+	color: #fff;
+	text-shadow: 0 -2px 0 #111;
+	-webkit-box-shadow: inset 0 1px 3px #464646;
+	-moz-box-shadow: inset 0 1px 3px #464646;
+	-o-box-shadow: inset 0 1px 3px #464646;
+	-ms-box-shadow: inset 0 1px 3px #464646;
+	box-shadow: inset 0 1px 3px #464646;
+}
+.browser-status-action a:active {
+	background: #2a2a2a;
+	color: #ddd;
+	text-shadow: 0 -2px 0 #000;
+	-webkit-box-shadow: inset 0 1px 3px #1a1a1a;
+	-moz-box-shadow: inset 0 1px 3px #1a1a1a;
+	-o-box-shadow: inset 0 1px 3px #1a1a1a;
+	-ms-box-shadow: inset 0 1px 3px #1a1a1a;
+	box-shadow: inset 0 1px 3px #1a1a1a;
+}
+
+
+/* Main */
+
+#main {
+	padding: 20px 0 50px;
+}
+
+#browserlist:before, #browserlist:after {
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+
+#browserlist:after {
+	clear: both;
+}
+
+#browserlist {
+	zoom: 1;
+}
+
+#browserlist li {
+	width: 192px;
+	float: left;
+	margin: 0;
+}
+
+#browserlist li .icon {
+	width: 125px;
+	height: 135px;
+	margin: 0 auto 20px;
+	background: url(imgs/browsehappy-sprite.png) no-repeat;
+}
+
+#browserlist li#chrome .icon {
+	background-position: 0 0;
+}
+
+#browserlist li#firefox .icon {
+	background-position: -125px 0;
+}
+
+#browserlist li#opera .icon {
+	background-position: -250px 0;
+}
+
+#browserlist li#safari .icon {
+	background-position: -375px 0;
+}
+
+#browserlist li#ie .icon {
+	background-position: -500px 0;
+}
+
+#browserlist h2 {
+	font: 140%/1 Impact, Helvetica, sans-serif;
+	text-align: center;
+	text-transform: uppercase;
+	color: #DC3228;
+	text-shadow: 0 1px 0 #fff;
+	background-color: rgba(255,255,255,.3);
+	margin: 0 0 10px;
+	line-height: 1;
+	padding: 8px 0;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.wf-leaguegothic1leaguegothic2-n4-active #browserlist h2 {
+	font-size: 200%;
+	font-family: "league-gothic-1","league-gothic-2";
+}
+
+.no-rgba #browserlist h2 {
+	background: url(imgs/alphabg.png) repeat;
+}
+
+#browserlist p {
+	padding: 0 5px;
+	text-shadow: 0 1px 0 rgba(255,255,255,.8);
+}
+
+#browserlist p.info {
+	min-height: 120px;
+}
+
+#browserlist p.version {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+#browserlist p.website {
+	background-color: rgba(255,255,255,.3);
+	line-height: 1;
+	margin: 0;
+	padding: 8px 5px;
+	text-align: center;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.no-rgba #browserlist p.website {
+	background: url(imgs/alphabg.png) repeat;
+}
+
+#browserlist li a:link, #browserlist li a:visited {
+	color: #324B4B;
+	padding: 30px 10px 10px;
+	display: block;
+	overflow: hidden;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+#browserlist li a:hover {
+	background: rgba(255,255,255,.3);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+	-o-transform: scale(1.05,1.05);
+	transform: scale(1.05,1.05);
+}
+
+.no-rgba #browserlist li a:hover {
+	background: url(imgs/alphabg.png) repeat;
+}
+
+#browserlist li a:hover .website {
+	background: #4daaa7;
+	color: #fff;
+	text-shadow: 0 1px 0 #266E67;
+}
+
+#browserlist li a:hover .icon {
+	-webkit-transform: scale(1.1,1.1);
+	-moz-transform: scale(1.1,1.1);
+	-o-transform: scale(1.1,1.1);
+	transform: scale(1.1,1.1);
+}
+
+#browserlist li a, #browserlist li a .icon {
+	-webkit-transition: all .1s;
+	-moz-transition: all .1s;
+	-o-transition: all .1s;
+	transition: all .1s;
+}
+
+#browserlist li a .website {
+	-webkit-transition: all .5s ease-in;
+	-moz-transition: all .5s ease-in;
+	-o-transition: all .5s ease-in;
+	transition: all .5s ease-in;
+}
+
+#browserlist li a:hover, #browserlist li a:hover .icon {
+	-webkit-transition: all .8s;
+	-moz-transition: all .8s;
+	-o-transition: all .8s;
+	transition: all .8s;
+}
+
+#browserlist li a:link, #browserlist li a:link .icon {
+	-webkit-transition: all .2s;
+	-moz-transition: all .2s;
+	-o-transition: all .2s;
+	transition: all .2s;
+}
+
+#browserlist li a:hover .website {
+	-webkit-transition: all .3s ease-out;
+	-moz-transition: all .3s ease-out;
+	-o-transition: all .3s ease-out;
+	transition: all .3s ease-out;
+}
+
+#browserlist li a:link .website {
+	-webkit-transition: all .1s ease-out;
+	-moz-transition: all .1s ease-out;
+	-o-transition: all .1s ease-out;
+	transition: all .1s ease-out;
+}
+
+#browserlist p.likebutton {
+	text-align: center;
+	margin: 15px 5px 0
+}
+
+/* Footer */
+
+footer {
+	color: #f1f1f1;
+	padding: 70px 0;
+	overflow: hidden;
+	background: url(imgs/bg-footer.png) repeat-x left top;
+}
+
+footer .wrap {
+	position: relative;
+}
+
+footer h2 {
+	font: 150% Impact, Helvetica, sans-serif;
+	padding-top: 8px;
+	margin-bottom: 10px;
+	color: #F0D200;
+	text-transform: uppercase;
+	text-shadow: 0 1px 0 #333;
+}
+
+.wf-leaguegothic1leaguegothic2-n4-active footer h2 {
+	font-size: 200%;
+	padding-top: 5px;
+	font-family: "league-gothic-1","league-gothic-2";
+}
+
+#about {
+	width: 600px;
+	float: left;
+	margin-left: 15px;
+}
+
+#share {
+	width: 300px;
+	float: right;
+	margin-right: 15px;
+	position: relative;
+}
+
+#share h2 {
+	margin-right: 84px;
+}
+
+#share nav {
+	width: 84px;
+	height: 32px;
+	overflow: hidden;
+	position: absolute;
+	top: 3px;
+	right: 0;
+}
+
+#share nav li {
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin-left: 9px;
+}
+
+#share nav li a {
+	width: 32px;
+	height: 32px;
+	display: block;
+	text-indent: -9999px;
+	background: url(imgs/browsehappy-sprite.png) no-repeat;
+	-moz-opacity: 0.4;
+	-khtml-opacity: 0.4;
+	opacity: 0.4;
+	-webkit-transition: all .5s;
+	-moz-transition: all .5s;
+	-o-transition: all .5s;
+	transition: all .5s;
+}
+
+#share nav li.twitter a {
+	background-position: -300px -135px;
+}
+
+#share nav li.facebook a {
+	background-position: -332px -135px;
+}
+
+#share nav li a:hover {
+	-moz-opacity: 1;
+	-khtml-opacity: 1;
+	opacity: 1;
+}
+
+#byline {
+	position: absolute;
+	bottom: 0;
+	right: 15px;
+	width: 300px;
+	height: 20px;
+}
+
+#byline a {
+	width: 300px;
+	height: 20px;
+	display: block;
+	background: url(imgs/browsehappy-sprite.png) no-repeat 0 -135px;
+	text-indent: -9999px;
+	-moz-opacity: 0.6;
+	-khtml-opacity: 0.6;
+	opacity: 0.6;
+	-webkit-transition: all .5s;
+	-moz-transition: all .5s;
+	-o-transition: all .5s;
+	transition: all .5s;
+}
+
+#byline a:hover {
+	-moz-opacity: 1;
+	-khtml-opacity: 1;
+	opacity: 1;
+}
