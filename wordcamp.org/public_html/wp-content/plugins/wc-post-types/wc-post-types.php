@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WordCamp.org Post Types
- * Plugin Description: Sessions, Speakers, Sponsors and more.
+ * Plugin Description: Sessions, Speakers, Sponsors and much more.
  */
 
 require( 'inc/back-compat.php' );
