@@ -1,0 +1,1301 @@
+# Copyright (C) 2013 
+# This file is distributed under the same license as the  package.
+msgid ""
+msgstr ""
+"Project-Id-Version:  \n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tags/.\n"
+"POT-Creation-Date: 2013-04-26 14:40:48+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: wordcamp-base/404.php:16 wordcamp-base/loop.php:33
+msgid "Not Found"
+msgstr ""
+
+#: wordcamp-base/404.php:18
+msgid ""
+"Apologies, but the page you requested could not be found. Perhaps searching "
+"will help."
+msgstr ""
+
+#: wordcamp-base/archive.php:33
+msgid "Daily Archives: <span>%s</span>"
+msgstr ""
+
+#: wordcamp-base/archive.php:35
+msgid "Monthly Archives: <span>%s</span>"
+msgstr ""
+
+#: wordcamp-base/archive.php:37
+msgid "Yearly Archives: <span>%s</span>"
+msgstr ""
+
+#: wordcamp-base/archive.php:39
+msgid "Blog Archives"
+msgstr ""
+
+#: wordcamp-base/attachment.php:18 wordcamp-base/loop-attachment.php:21
+msgid "Return to %s"
+msgstr ""
+
+#. translators: %s - title of parent post
+#: wordcamp-base/attachment.php:20 wordcamp-base/loop-attachment.php:23
+msgid "<span class=\"meta-nav\">&larr;</span> %s"
+msgstr ""
+
+#: wordcamp-base/attachment.php:29 wordcamp-base/loop-attachment.php:32
+msgid "<span class=\"%1$s\">By</span> %2$s"
+msgstr ""
+
+#: wordcamp-base/attachment.php:33
+#: wordcamp-base/lib/utils/twentyten-functions.php:446
+#: wordcamp-base/lib/utils/twentyten-overrides.php:13
+#: wordcamp-base/loop-attachment.php:36
+#: wordcamp-base-v2/inc/template-tags.php:122
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:444
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:13
+msgid "View all posts by %s"
+msgstr ""
+
+#: wordcamp-base/attachment.php:40 wordcamp-base/loop-attachment.php:43
+msgid "<span class=\"%1$s\">Published</span> %2$s"
+msgstr ""
+
+#: wordcamp-base/attachment.php:50 wordcamp-base/loop-attachment.php:53
+msgid "Full size is %s pixels"
+msgstr ""
+
+#: wordcamp-base/attachment.php:53 wordcamp-base/loop-attachment.php:56
+msgid "Link to full-size image"
+msgstr ""
+
+#: wordcamp-base/attachment.php:60 wordcamp-base/attachment.php:107
+#: wordcamp-base/lib/options/class-wcb-grid-option.php:111
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:48
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:45
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:31
+#: wordcamp-base/lib/utils/twentyten-overrides.php:28
+#: wordcamp-base/loop-attachment.php:63 wordcamp-base/loop-attachment.php:111
+#: wordcamp-base/loop-page.php:30 wordcamp-base/loop-single.php:56
+#: wordcamp-base/loop.php:95 wordcamp-base/loop.php:118
+#: wordcamp-base/loop.php:160 wordcamp-base/page.php:32
+#: wordcamp-base/single-wcb_sponsor.php:36 wordcamp-base/single.php:53
+#: wordcamp-base-v2/content-page.php:18 wordcamp-base-v2/content-single.php:57
+#: wordcamp-base-v2/content.php:59 wordcamp-base-v2/image.php:34
+#: wordcamp-base-v2/image.php:100
+#: wordcamp-base-v2/lib/options/class-wcb-grid-option.php:111
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:48
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:45
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:31
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:28
+msgid "Edit"
+msgstr ""
+
+#: wordcamp-base/attachment.php:100
+#: wordcamp-base/lib/utils/twentyten-functions.php:236
+#: wordcamp-base/loop-attachment.php:104 wordcamp-base/loop.php:110
+#: wordcamp-base/loop.php:138 wordcamp-base-v2/content.php:25
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:234
+msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: wordcamp-base/attachment.php:101 wordcamp-base/loop-attachment.php:105
+#: wordcamp-base/loop-page.php:29 wordcamp-base/loop-single.php:34
+#: wordcamp-base/loop.php:139 wordcamp-base/page.php:31
+#: wordcamp-base/single-wcb_session.php:31
+#: wordcamp-base/single-wcb_sponsor.php:32 wordcamp-base/single.php:31
+#: wordcamp-base-v2/content-page.php:17 wordcamp-base-v2/content-single.php:19
+#: wordcamp-base-v2/content.php:26 wordcamp-base-v2/image.php:86
+msgid "Pages:"
+msgstr ""
+
+#: wordcamp-base/author.php:27 wordcamp-base-v2/archive.php:32
+msgid "Author Archives: %s"
+msgstr ""
+
+#: wordcamp-base/author.php:37 wordcamp-base/loop-single.php:43
+#: wordcamp-base/single.php:40
+msgid "About %s"
+msgstr ""
+
+#: wordcamp-base/category.php:16 wordcamp-base-v2/archive.php:22
+msgid "Category Archives: %s"
+msgstr ""
+
+#: wordcamp-base/comments.php:18
+msgid ""
+"This post is password protected. Enter the password to view any comments."
+msgstr ""
+
+#: wordcamp-base/comments.php:35
+msgid "One Response to %2$s"
+msgid_plural "%1$s Responses to %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: wordcamp-base/comments.php:41 wordcamp-base/comments.php:60
+msgid "<span class=\"meta-nav\">&larr;</span> Older Comments"
+msgstr ""
+
+#: wordcamp-base/comments.php:42 wordcamp-base/comments.php:61
+msgid "Newer Comments <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: wordcamp-base/comments.php:72 wordcamp-base-v2/comments.php:71
+msgid "Comments are closed."
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-button-option.php:29
+#: wordcamp-base-v2/lib/options/class-wcb-button-option.php:29
+msgid "Featured Button"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-button-option.php:36
+#: wordcamp-base-v2/lib/options/class-wcb-button-option.php:36
+msgid "Show a featured button in the menu."
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-button-option.php:39
+#: wordcamp-base-v2/lib/options/class-wcb-button-option.php:39
+msgid "Text:"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-button-option.php:45
+#: wordcamp-base-v2/lib/options/class-wcb-button-option.php:45
+msgid "URL:"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-grid-option.php:120
+#: wordcamp-base-v2/lib/options/class-wcb-grid-option.php:120
+msgid "Front page only"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-grid-option.php:125
+#: wordcamp-base-v2/lib/options/class-wcb-grid-option.php:125
+msgid "Choose a new row layout."
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-grid-option.php:126
+#: wordcamp-base-v2/lib/options/class-wcb-grid-option.php:126
+msgid "Cancel"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:22
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:22
+msgid "Grid Width"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:24
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:24
+msgid "960px wide"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:25
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:25
+msgid "720px wide"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:36
+#: wordcamp-base/lib/structure/class-wcb-structure.php:73
+#: wordcamp-base-v2/functions.php:123
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:36
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:73
+msgid "After Header"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:46
+#: wordcamp-base/lib/structure/class-wcb-structure.php:77
+#: wordcamp-base-v2/functions.php:144
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:46
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:77
+msgid "Before Content"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:59
+#: wordcamp-base/lib/structure/class-wcb-structure.php:81
+#: wordcamp-base/lib/structure/class-wcb-structure.php:111
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:59
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:81
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:111
+msgid "Content"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:70
+#: wordcamp-base/lib/structure/class-wcb-structure.php:85
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:70
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:85
+msgid "After Content"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:80
+#: wordcamp-base/lib/structure/class-wcb-structure.php:89
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:80
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:89
+msgid "Before Footer"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:87
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:87
+msgid "Register now!"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:95
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:95
+msgid "Typekit"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:97
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:97
+msgid "Use the default Typekit fonts."
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:98
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:98
+msgid "Use a custom Typekit key:"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:99
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:99
+msgid "Do not use any Typekit fonts."
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:114
+#: wordcamp-base/lib/options/class-wcb-options.php:144
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:74
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:75
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:114
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:144
+msgid "Theme Options"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:147
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:62
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:147
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:62
+msgid "Options saved"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:152
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:152
+msgid "General Options"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:161
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:161
+msgid "Theme Layout"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:167
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:167
+msgid "Show Rows"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:176
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:176
+msgid "Row Layout"
+msgstr ""
+
+#: wordcamp-base/lib/options/class-wcb-options.php:186
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:79
+#: wordcamp-base-v2/lib/options/class-wcb-options.php:186
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:79
+msgid "Save Options"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-session-template.php:98
+#: wordcamp-base-v2/lib/sessions/class-wcb-session-template.php:98
+msgid "Presented by %s"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-session-template.php:104
+#: wordcamp-base-v2/lib/sessions/class-wcb-session-template.php:104
+msgid "%s Track"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:26
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:32
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:41
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:26
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:32
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:41
+msgid "Speakers"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:44
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:44
+msgid "Sessions"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:45
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:45
+msgid "Session"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:46
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:43
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:29
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:46
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:43
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:29
+msgid "Add New"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:47
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:47
+msgid "Create New Session"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:49
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:49
+msgid "Edit Session"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:50
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:50
+msgid "New Session"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:51
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:52
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:51
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:52
+msgid "View Session"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:53
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:53
+msgid "Search Sessions"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:54
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:54
+msgid "No sessions found"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:55
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:55
+msgid "No sessions found in Trash"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:56
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:56
+msgid "Parent Session:"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:100
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:100
+msgid "Tracks"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:101
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:101
+msgid "Track"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:102
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:102
+msgid "Search Tracks"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:103
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:103
+msgid "Popular Tracks"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:104
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:104
+msgid "All Tracks"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:105
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:105
+msgid "Edit Track"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:106
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:106
+msgid "Update Track"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:107
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:107
+msgid "Add Track"
+msgstr ""
+
+#: wordcamp-base/lib/sessions/class-wcb-sessions.php:108
+#: wordcamp-base-v2/lib/sessions/class-wcb-sessions.php:108
+msgid "New Track"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:25
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:31
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:25
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:31
+msgid "Gravatar Email"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:42
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:42
+msgid "Speaker"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:44
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:44
+msgid "Create New Speaker"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:46
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:46
+msgid "Edit Speaker"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:47
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:47
+msgid "New Speaker"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:48
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:49
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:48
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:49
+msgid "View Speaker"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:50
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:50
+msgid "Search Speakers"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:51
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:51
+msgid "No speakers found"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:52
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:52
+msgid "No speakers found in Trash"
+msgstr ""
+
+#: wordcamp-base/lib/speakers/class-wcb-speakers.php:53
+#: wordcamp-base-v2/lib/speakers/class-wcb-speakers.php:53
+msgid "Parent Speaker:"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:15
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:16
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:59
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:15
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:16
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:59
+msgid "Order Sponsor Levels"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsor-order.php:68
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsor-order.php:68
+msgid ""
+"Change the order of sponsor levels are displayed in the sponsors page "
+"template."
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:27
+#: wordcamp-base/lib/sponsors/class-wcb-widget-sponsors.php:11
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:27
+#: wordcamp-base-v2/lib/sponsors/class-wcb-widget-sponsors.php:10
+msgid "Sponsors"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:28
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:28
+msgid "Sponsor"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:30
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:30
+msgid "Create New Sponsor"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:32
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:32
+msgid "Edit Sponsor"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:33
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:33
+msgid "New Sponsor"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:34
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:35
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:34
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:35
+msgid "View Sponsor"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:36
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:36
+msgid "Search Sponsors"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:37
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:37
+msgid "No sponsors found"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:38
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:38
+msgid "No sponsors found in Trash"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:39
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:39
+msgid "Parent Sponsor:"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:83
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:83
+msgid "Sponsor Levels"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:84
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:84
+msgid "Sponsor Level"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:85
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:85
+msgid "Search Sponsor Levels"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:86
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:86
+msgid "Popular Sponsor Levels"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:87
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:87
+msgid "All Sponsor Levels"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:88
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:88
+msgid "Edit Sponsor Level"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:89
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:89
+msgid "Update Sponsor Level"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:90
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:90
+msgid "Add Sponsor Level"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-sponsors.php:91
+#: wordcamp-base-v2/lib/sponsors/class-wcb-sponsors.php:91
+msgid "New Sponsor Level"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-widget-sponsors.php:9
+#: wordcamp-base-v2/lib/sponsors/class-wcb-widget-sponsors.php:8
+msgid "Your WordCamp&#8217;s Sponsors"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-widget-sponsors.php:40
+#: wordcamp-base/loop.php:62 wordcamp-base/loop.php:83
+#: wordcamp-base/loop.php:126 wordcamp-base/single-wcb_session.php:18
+#: wordcamp-base/single-wcb_sponsor.php:23
+#: wordcamp-base/template-sessions.php:41
+#: wordcamp-base/template-sponsors.php:45 wordcamp-base-v2/content.php:10
+#: wordcamp-base-v2/lib/sponsors/class-wcb-widget-sponsors.php:39
+#: wordcamp-base-v2/template-sessions.php:31
+#: wordcamp-base-v2/template-sponsors.php:50
+msgid "Permalink to %s"
+msgstr ""
+
+#: wordcamp-base/lib/sponsors/class-wcb-widget-sponsors.php:59
+#: wordcamp-base-v2/lib/sponsors/class-wcb-widget-sponsors.php:58
+msgid "Title:"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-footer.php:20
+#: wordcamp-base-v2/lib/structure/class-wcb-footer.php:20
+msgid "http://wordpress.org/"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-footer.php:20
+#: wordcamp-base-v2/lib/structure/class-wcb-footer.php:20
+msgid "Semantic Personal Publishing Platform"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-footer.php:20
+#: wordcamp-base-v2/lib/structure/class-wcb-footer.php:20
+msgid "Proudly powered by %s."
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-header.php:12
+#: wordcamp-base-v2/lib/structure/class-wcb-header.php:12
+msgid "Return to WordPress.org"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-header.php:12
+#: wordcamp-base-v2/lib/structure/class-wcb-header.php:12
+msgid "&larr; WordPress.org"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-header.php:14
+#: wordcamp-base-v2/footer.php:32
+#: wordcamp-base-v2/lib/structure/class-wcb-header.php:14
+msgid "Return to WordCamp Central"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-header.php:14
+#: wordcamp-base-v2/lib/structure/class-wcb-header.php:14
+msgid "&larr; WordCamp Central"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-menu.php:12
+#: wordcamp-base-v2/header.php:63
+#: wordcamp-base-v2/lib/structure/class-wcb-menu.php:12
+msgid "Skip to content"
+msgstr ""
+
+#: wordcamp-base/lib/structure/class-wcb-structure.php:102
+#: wordcamp-base-v2/lib/structure/class-wcb-structure.php:102
+msgid "Front Page: %s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/class-wcb-metabox.php:69
+#: wordcamp-base-v2/lib/utils/class-wcb-metabox.php:69
+msgid "Untitled"
+msgstr ""
+
+#: wordcamp-base/lib/utils/header.php:12
+#: wordcamp-base-v2/lib/utils/header.php:12
+msgid "Posted in %s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/header.php:15
+#: wordcamp-base-v2/lib/utils/header.php:15
+msgid "Tagged %s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/header.php:75 wordcamp-base-v2/header.php:34
+#: wordcamp-base-v2/lib/utils/header.php:75
+msgid "Page %s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:97
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:97
+msgid "Primary Navigation"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:128
+msgid "Berries"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:134
+msgid "Cherry Blossoms"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:140
+msgid "Concave"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:146
+msgid "Fern"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:152
+msgid "Forest Floor"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:158
+msgid "Inkwell"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:164
+msgid "Path"
+msgstr ""
+
+#. translators: header image description
+#: wordcamp-base/lib/utils/twentyten-functions.php:170
+msgid "Sunset"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:303
+#: wordcamp-base-v2/inc/template-tags.php:78
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:301
+msgid "%s <span class=\"says\">says:</span>"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:306
+#: wordcamp-base-v2/inc/template-tags.php:81
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:304
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#. translators: 1: date, 2: time
+#: wordcamp-base/lib/utils/twentyten-functions.php:313
+#: wordcamp-base-v2/inc/template-tags.php:89
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:311
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:313
+#: wordcamp-base/lib/utils/twentyten-functions.php:330
+#: wordcamp-base-v2/inc/template-tags.php:68
+#: wordcamp-base-v2/inc/template-tags.php:91
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:311
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:328
+msgid "(Edit)"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:330
+#: wordcamp-base-v2/inc/template-tags.php:68
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:328
+msgid "Pingback:"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:349
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:347
+msgid "Primary Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:351
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:349
+msgid "The primary widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:360
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:358
+msgid "Secondary Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:362
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:360
+msgid "The secondary widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:371
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:369
+msgid "First Footer Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:373
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:371
+msgid "The first footer widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:382
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:380
+msgid "Second Footer Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:384
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:382
+msgid "The second footer widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:393
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:391
+msgid "Third Footer Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:395
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:393
+msgid "The third footer widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:404
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:402
+msgid "Fourth Footer Widget Area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:406
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:404
+msgid "The fourth footer widget area"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:437
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:435
+msgid ""
+"<span class=\"%1$s\">Posted on</span> %2$s <span class=\"meta-sep\">by</"
+"span> %3$s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:463
+#: wordcamp-base-v2/content-single.php:41
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:461
+msgid ""
+"This entry was posted in %1$s and tagged %2$s. Bookmark the <a href=\"%3$s\" "
+"title=\"Permalink to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:465
+#: wordcamp-base-v2/content-single.php:43
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:463
+msgid ""
+"This entry was posted in %1$s. Bookmark the <a href=\"%3$s\" title="
+"\"Permalink to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-functions.php:467
+#: wordcamp-base-v2/content-single.php:35
+#: wordcamp-base-v2/lib/utils/twentyten-functions.php:465
+msgid ""
+"Bookmark the <a href=\"%3$s\" title=\"Permalink to %4$s\" rel=\"bookmark"
+"\">permalink</a>."
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-overrides.php:5
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:5
+msgid "%1$s <span class=\"meta-sep\">by</span> %2$s"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-overrides.php:22
+#: wordcamp-base/loop.php:94 wordcamp-base/loop.php:117
+#: wordcamp-base/loop.php:159 wordcamp-base-v2/content.php:56
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:22
+msgid "Leave a comment"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-overrides.php:23
+#: wordcamp-base/loop.php:94 wordcamp-base/loop.php:117
+#: wordcamp-base/loop.php:159 wordcamp-base-v2/content.php:56
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:23
+msgid "1 Comment"
+msgstr ""
+
+#: wordcamp-base/lib/utils/twentyten-overrides.php:24
+#: wordcamp-base/loop.php:94 wordcamp-base/loop.php:117
+#: wordcamp-base/loop.php:159 wordcamp-base-v2/content.php:56
+#: wordcamp-base-v2/lib/utils/twentyten-overrides.php:24
+msgid "% Comments"
+msgstr ""
+
+#: wordcamp-base/loop-single.php:21 wordcamp-base/loop-single.php:61
+#: wordcamp-base/single-wcb_sponsor.php:18 wordcamp-base/single.php:18
+#: wordcamp-base/single.php:58 wordcamp-base-v2/inc/template-tags.php:29
+msgctxt "Previous post link"
+msgid "&larr;"
+msgstr ""
+
+#: wordcamp-base/loop-single.php:22 wordcamp-base/loop-single.php:62
+#: wordcamp-base/single-wcb_sponsor.php:19 wordcamp-base/single.php:19
+#: wordcamp-base/single.php:59 wordcamp-base-v2/inc/template-tags.php:30
+msgctxt "Next post link"
+msgid "&rarr;"
+msgstr ""
+
+#: wordcamp-base/loop-single.php:47 wordcamp-base/single.php:44
+msgid "View all posts by %s <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: wordcamp-base/loop.php:25 wordcamp-base/loop.php:173
+#: wordcamp-base-v2/inc/template-tags.php:38
+msgid "<span class=\"meta-nav\">&larr;</span> Older posts"
+msgstr ""
+
+#: wordcamp-base/loop.php:26 wordcamp-base/loop.php:174
+#: wordcamp-base-v2/inc/template-tags.php:42
+msgid "Newer posts <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: wordcamp-base/loop.php:35
+msgid ""
+"Apologies, but no results were found for the requested archive. Perhaps "
+"searching will help find a related post."
+msgstr ""
+
+#: wordcamp-base/loop.php:60 wordcamp-base/loop.php:92
+msgctxt "gallery category slug"
+msgid "gallery"
+msgstr ""
+
+#: wordcamp-base/loop.php:82
+msgid "This gallery contains <a %1$s>%2$s photos</a>."
+msgstr ""
+
+#: wordcamp-base/loop.php:92
+msgid "View posts in the Gallery category"
+msgstr ""
+
+#: wordcamp-base/loop.php:92
+msgid "More Galleries"
+msgstr ""
+
+#: wordcamp-base/loop.php:101
+msgctxt "asides category slug"
+msgid "asides"
+msgstr ""
+
+#: wordcamp-base/loop.php:146
+msgid "<span class=\"%1$s\">Posted in</span> %2$s"
+msgstr ""
+
+#: wordcamp-base/loop.php:155
+msgid "<span class=\"%1$s\">Tagged</span> %2$s"
+msgstr ""
+
+#: wordcamp-base/search.php:16 wordcamp-base-v2/search.php:17
+msgid "Search Results for: %s"
+msgstr ""
+
+#: wordcamp-base/search.php:26 wordcamp-base-v2/no-results.php:14
+msgid "Nothing Found"
+msgstr ""
+
+#: wordcamp-base/search.php:28
+msgid ""
+"Sorry, but nothing matched your search criteria. Please try again with some "
+"different keywords."
+msgstr ""
+
+#: wordcamp-base/tag.php:16 wordcamp-base-v2/archive.php:25
+msgid "Tag Archives: %s"
+msgstr ""
+
+#: wordcamp-base-v2/404.php:16
+msgid "Oops! That page can&rsquo;t be found."
+msgstr ""
+
+#: wordcamp-base-v2/404.php:20
+msgid ""
+"It looks like nothing was found at this location. Maybe try one of the links "
+"below or a search?"
+msgstr ""
+
+#: wordcamp-base-v2/404.php:27
+msgid "Most Used Categories"
+msgstr ""
+
+#. translators: %1$s: smilie
+#: wordcamp-base-v2/404.php:35
+msgid "Try looking in the monthly archives. %1$s"
+msgstr ""
+
+#: wordcamp-base-v2/archive.php:40
+msgid "Daily Archives: %s"
+msgstr ""
+
+#: wordcamp-base-v2/archive.php:43
+msgid "Monthly Archives: %s"
+msgstr ""
+
+#: wordcamp-base-v2/archive.php:46
+msgid "Yearly Archives: %s"
+msgstr ""
+
+#: wordcamp-base-v2/archive.php:49 wordcamp-base-v2/sidebar.php:20
+msgid "Archives"
+msgstr ""
+
+#: wordcamp-base-v2/comments.php:32
+msgid "One thought on &ldquo;%2$s&rdquo;"
+msgid_plural "%1$s thoughts on &ldquo;%2$s&rdquo;"
+msgstr[0] ""
+msgstr[1] ""
+
+#: wordcamp-base-v2/comments.php:39 wordcamp-base-v2/comments.php:59
+msgid "Comment navigation"
+msgstr ""
+
+#: wordcamp-base-v2/comments.php:40 wordcamp-base-v2/comments.php:60
+msgid "&larr; Older Comments"
+msgstr ""
+
+#: wordcamp-base-v2/comments.php:41 wordcamp-base-v2/comments.php:61
+msgid "Newer Comments &rarr;"
+msgstr ""
+
+#. translators: used between list items, there is a space after the comma
+#: wordcamp-base-v2/content-single.php:25 wordcamp-base-v2/content.php:34
+#: wordcamp-base-v2/content.php:44
+msgid ", "
+msgstr ""
+
+#. translators: used between list items, there is a space after the comma
+#: wordcamp-base-v2/content-single.php:33
+msgid ""
+"This entry was tagged %2$s. Bookmark the <a href=\"%3$s\" title=\"Permalink "
+"to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr ""
+
+#: wordcamp-base-v2/content.php:38
+msgid "Posted in %1$s"
+msgstr ""
+
+#: wordcamp-base-v2/content.php:49
+msgid "Tagged %1$s"
+msgstr ""
+
+#: wordcamp-base-v2/footer.php:30
+msgid "A Semantic Personal Publishing Platform"
+msgstr ""
+
+#: wordcamp-base-v2/footer.php:30
+msgid "Proudly powered by %s"
+msgstr ""
+
+#: wordcamp-base-v2/footer.php:32
+msgid "Go to WordCamp Central"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:82
+msgid "Primary Menu"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:102
+msgid "Primary Sidebar"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:104
+msgid "Main Widgets Sidebar. Shows up in all pages."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:112
+msgid "Secondary Sidebar"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:114
+msgid ""
+"Secondary Widgets Sidebar - shows up in all pages after the Primary Sidebar "
+"block."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:125
+msgid ""
+"Will show a widgets area, after the #masthead header, in all pages except "
+"the homepage."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:133
+msgid "After Header (Homepage)"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:135
+msgid ""
+"Will show a widgets area, after the #masthead header, only on the homepage."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:146
+msgid ""
+"Will show a widgets area, inside the #main block, before all the content, in "
+"all pages except the homepage."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:154
+msgid "Before Content (Homepage)"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:156
+msgid ""
+"Will show a widgets area, inside the #main block, before all the content, "
+"only on the homepage."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:167
+msgid "Footer Widget Area 1"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:169 wordcamp-base-v2/functions.php:179
+#: wordcamp-base-v2/functions.php:189 wordcamp-base-v2/functions.php:199
+#: wordcamp-base-v2/functions.php:209
+msgid ""
+"Will Show a widgets area on the footer - can be combined with other Footer "
+"Widget Area blocks."
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:177
+msgid "Footer Widget Area 2"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:187
+msgid "Footer Widget Area 3"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:197
+msgid "Footer Widget Area 4"
+msgstr ""
+
+#: wordcamp-base-v2/functions.php:207
+msgid "Footer Widget Area 5"
+msgstr ""
+
+#: wordcamp-base-v2/header.php:62
+msgid "Menu"
+msgstr ""
+
+#: wordcamp-base-v2/image.php:24
+msgid ""
+"Published <span class=\"entry-date\"><time class=\"entry-date\" datetime="
+"\"%1$s\" pubdate>%2$s</time></span> at <a href=\"%3$s\" title=\"Link to full-"
+"size image\">%4$s &times; %5$s</a> in <a href=\"%6$s\" title=\"Return to %7$s"
+"\" rel=\"gallery\">%7$s</a>"
+msgstr ""
+
+#: wordcamp-base-v2/image.php:38
+msgid "&larr; Previous"
+msgstr ""
+
+#: wordcamp-base-v2/image.php:39
+msgid "Next &rarr;"
+msgstr ""
+
+#: wordcamp-base-v2/image.php:92
+msgid ""
+"<a class=\"comment-link\" href=\"#respond\" title=\"Post a comment\">Post a "
+"comment</a> or leave a trackback: <a class=\"trackback-link\" href=\"%s\" "
+"title=\"Trackback URL for your post\" rel=\"trackback\">Trackback URL</a>."
+msgstr ""
+
+#: wordcamp-base-v2/image.php:94
+msgid ""
+"Comments are closed, but you can leave a trackback: <a class=\"trackback-link"
+"\" href=\"%s\" title=\"Trackback URL for your post\" rel=\"trackback"
+"\">Trackback URL</a>."
+msgstr ""
+
+#: wordcamp-base-v2/image.php:96
+msgid ""
+"Trackbacks are closed, but you can <a class=\"comment-link\" href=\"#respond"
+"\" title=\"Post a comment\">post a comment</a>."
+msgstr ""
+
+#: wordcamp-base-v2/image.php:98
+msgid "Both comments and trackbacks are currently closed."
+msgstr ""
+
+#: wordcamp-base-v2/inc/template-tags.php:28
+#: wordcamp-base-v2/inc/template-tags.php:36
+msgid "Post navigation"
+msgstr ""
+
+#: wordcamp-base-v2/inc/template-tags.php:116
+msgid ""
+"Posted on <a href=\"%1$s\" title=\"%2$s\" rel=\"bookmark\"><time class="
+"\"entry-date\" datetime=\"%3$s\" pubdate>%4$s</time></a><span class=\"byline"
+"\"> by <span class=\"author vcard\"><a class=\"url fn n\" href=\"%5$s\" "
+"title=\"%6$s\" rel=\"author\">%7$s</a></span></span>"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:38
+msgid "Sample Checkbox"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:44
+msgid "Sample Text Input"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:45
+msgid "Sample Select Options"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:46
+msgid "Sample Radio Buttons"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:47
+msgid "Sample Textarea"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:92
+msgid "Zero"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:96
+msgid "One"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:100
+msgid "Two"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:104
+msgid "Three"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:108
+msgid "Four"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:112
+msgid "Five"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:128
+msgid "Yes"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:132
+msgid "No"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:136
+msgid "Maybe"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:174
+msgid "A sample checkbox."
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:186
+msgid "Sample text input"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:212
+msgid "Sample select input"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:243
+msgid "Sample textarea"
+msgstr ""
+
+#: wordcamp-base-v2/inc/theme-options/theme-options.php:256
+msgid "%s Theme Options"
+msgstr ""
+
+#: wordcamp-base-v2/no-results.php:20
+msgid ""
+"Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
+msgstr ""
+
+#: wordcamp-base-v2/no-results.php:24
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with some "
+"different keywords."
+msgstr ""
+
+#: wordcamp-base-v2/no-results.php:29
+msgid ""
+"It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps "
+"searching can help."
+msgstr ""
+
+#: wordcamp-base-v2/searchform.php:10 wordcamp-base-v2/searchform.php:12
+msgid "Search"
+msgstr ""
+
+#: wordcamp-base-v2/searchform.php:11
+msgid "Search &hellip;"
+msgstr ""
+
+#: wordcamp-base-v2/sidebar.php:27
+msgid "Meta"
+msgstr ""
+
+#. Template Name of the plugin/theme
+msgid "Full Width (No Sidebar)"
+msgstr ""

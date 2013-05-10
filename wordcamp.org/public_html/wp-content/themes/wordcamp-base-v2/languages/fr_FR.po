@@ -1,0 +1,800 @@
+# Copyright (C) 2010 WordCamp Base
+# This file is distributed under the same license as the WordCamp Base package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WordCamp Central\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/wordcamp-base-td\n"
+"POT-Creation-Date: 2011-06-28 19:18:18+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2011-10-31 09:52+0100\n"
+"Last-Translator: WordPress Portugal <http;//wp-portugal.com>\n"
+"Language-Team: WordPress Francophone <traduction@wordpress-fr.net>\n"
+"Plural-Forms: nplurals=2; plural=n>1\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-Country: FRANCE\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: 404.php:16
+#: loop.php:33
+msgid "Not Found"
+msgstr "Rien de trouvé"
+
+#: 404.php:18
+msgid "Apologies, but the page you requested could not be found. Perhaps searching will help."
+msgstr "Toutes nos excuses, mais la page que vous demandez est introuvable. Essayez de lancer une recherche."
+
+#: archive.php:33
+msgid "Daily Archives: <span>%s</span>"
+msgstr "Archives quotidiennes&nbsp;: <span>%s</span>"
+
+#: archive.php:35
+msgid "Monthly Archives: <span>%s</span>"
+msgstr "Archives mensuelles&nbsp;: <span>%s</span>"
+
+#: archive.php:37
+msgid "Yearly Archives: <span>%s</span>"
+msgstr "Archives annuelles&nbsp;: <span>%s</span>"
+
+#: archive.php:39
+msgid "Blog Archives"
+msgstr "Archives du blog"
+
+#: attachment.php:18
+#: loop-attachment.php:21
+msgid "Return to %s"
+msgstr "Revenir à %s"
+
+#. translators: %s - title of parent post
+#: attachment.php:20
+#: loop-attachment.php:23
+msgid "<span class=\"meta-nav\">&larr;</span> %s"
+msgstr "<span class=\"meta-nav\">&larr;</span> %s"
+
+#: attachment.php:29
+#: loop-attachment.php:32
+msgid "<span class=\"%1$s\">By</span> %2$s"
+msgstr "<span class=\"%1$s\">Par</span> %2$s"
+
+#: attachment.php:33
+#: lib/utils/twentyten-functions.php:451
+#: lib/utils/twentyten-overrides.php:13
+#: loop-attachment.php:36
+msgid "View all posts by %s"
+msgstr "Afficher tous les articles par %s"
+
+#: attachment.php:40
+#: loop-attachment.php:43
+msgid "<span class=\"%1$s\">Published</span> %2$s"
+msgstr "<span class=\"%1$s\">Publié le</span> %2$s"
+
+#: attachment.php:50
+#: loop-attachment.php:53
+msgid "Full size is %s pixels"
+msgstr "La taille originale est de %s pixels"
+
+#: attachment.php:53
+#: loop-attachment.php:56
+msgid "Link to full-size image"
+msgstr "Lien vers l&rsquo;image originale"
+
+#: attachment.php:60
+#: attachment.php:107
+#: lib/options/class-wcb-grid-option.php:111
+#: lib/sessions/class-wcb-sessions.php:48
+#: lib/speakers/class-wcb-speakers.php:45
+#: lib/sponsors/class-wcb-sponsors.php:31
+#: lib/utils/twentyten-overrides.php:28
+#: loop-attachment.php:63
+#: loop-attachment.php:111
+#: loop-page.php:30
+#: loop-single.php:56
+#: loop.php:95
+#: loop.php:118
+#: loop.php:160
+#: page.php:32
+#: single.php:53
+msgid "Edit"
+msgstr "Modifier"
+
+#: attachment.php:100
+#: lib/utils/twentyten-functions.php:241
+#: loop-attachment.php:104
+#: loop.php:110
+#: loop.php:138
+msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Lire la suite <span class=\"meta-nav\">&rarr;</span>"
+
+#: attachment.php:101
+#: loop-attachment.php:105
+#: loop-page.php:29
+#: loop-single.php:34
+#: loop.php:139
+#: page.php:31
+#: single.php:31
+msgid "Pages:"
+msgstr "Pages&nbsp;:"
+
+#: author.php:27
+msgid "Author Archives: %s"
+msgstr "Archives de l&rquo;auteur %s"
+
+#: author.php:37
+#: loop-single.php:43
+#: single.php:40
+msgid "About %s"
+msgstr "À propos de %s"
+
+#: category.php:16
+msgid "Category Archives: %s"
+msgstr "Archives pour la catégorie %s"
+
+#: comments.php:18
+msgid "This post is password protected. Enter the password to view any comments."
+msgstr "Cet article est protégé par un mot de passe. Veuillez le saisir pour pouvoir lire ses commentaires."
+
+#: comments.php:35
+msgid "One Response to %2$s"
+msgid_plural "%1$s Responses to %2$s"
+msgstr[0] "Une réponse à %2$s"
+msgstr[1] "%1$s  réponses à %2$s"
+
+#: comments.php:41
+#: comments.php:60
+msgid "<span class=\"meta-nav\">&larr;</span> Older Comments"
+msgstr "<span class=\"meta-nav\">&larr;</span> Commentaires plus anciens"
+
+#: comments.php:42
+#: comments.php:61
+msgid "Newer Comments <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Commentaires plus récents <span class=\"meta-nav\">&rarr;</span>"
+
+#: comments.php:72
+msgid "Comments are closed."
+msgstr "Les commentaires sont fermés."
+
+#: lib/options/class-wcb-button-option.php:29
+msgid "Featured Button"
+msgstr "Bouton avancé"
+
+#: lib/options/class-wcb-button-option.php:36
+msgid "Show a featured button in the menu."
+msgstr "Afficher le bouton avancé dans le menu."
+
+#: lib/options/class-wcb-button-option.php:39
+msgid "Text:"
+msgstr "Texte"
+
+#: lib/options/class-wcb-button-option.php:45
+msgid "URL:"
+msgstr "Adresse web&nbsp;:"
+
+#: lib/options/class-wcb-grid-option.php:120
+msgid "Front page only"
+msgstr "Page d&rsquo;accueil personnalisée"
+
+#: lib/options/class-wcb-grid-option.php:125
+msgid "Choose a new row layout."
+msgstr "Choisir une nouvelle ligne de disposition. "
+
+#: lib/options/class-wcb-grid-option.php:126
+msgid "Cancel"
+msgstr "Annuler"
+
+#: lib/options/class-wcb-options.php:22
+msgid "Grid Width"
+msgstr "Largeur de la grille"
+
+#: lib/options/class-wcb-options.php:24
+msgid "960px wide"
+msgstr "Grille 960px"
+
+#: lib/options/class-wcb-options.php:25
+msgid "720px wide"
+msgstr "Grille 720px"
+
+#: lib/options/class-wcb-options.php:36
+#: lib/structure/class-wcb-structure.php:61
+msgid "After Header"
+msgstr "Après l'entête"
+
+#: lib/options/class-wcb-options.php:46
+#: lib/structure/class-wcb-structure.php:65
+msgid "Before Content"
+msgstr "Avant le contenu"
+
+#: lib/options/class-wcb-options.php:59
+#: lib/structure/class-wcb-structure.php:69
+#: lib/structure/class-wcb-structure.php:99
+msgid "Content"
+msgstr "Contenu"
+
+#: lib/options/class-wcb-options.php:70
+#: lib/structure/class-wcb-structure.php:73
+msgid "After Content"
+msgstr "Après le contenu"
+
+#: lib/options/class-wcb-options.php:80
+#: lib/structure/class-wcb-structure.php:77
+msgid "Before Footer"
+msgstr "Avant pied de page"
+
+#: lib/options/class-wcb-options.php:87
+msgid "Register now!"
+msgstr "Inscrivez-vous maintenant !"
+
+#: lib/options/class-wcb-options.php:103
+#: lib/options/class-wcb-options.php:133
+msgid "Theme Options"
+msgstr "Options du thème"
+
+#: lib/options/class-wcb-options.php:136
+#: lib/sponsors/class-wcb-sponsor-order.php:62
+msgid "Options saved"
+msgstr "Options enregistrées."
+
+#: lib/options/class-wcb-options.php:141
+msgid "General Options"
+msgstr "Options générales"
+
+#: lib/options/class-wcb-options.php:149
+msgid "Theme Layout"
+msgstr "Présentation du thème"
+
+#: lib/options/class-wcb-options.php:155
+msgid "Show Rows"
+msgstr "Nombre de lignes"
+
+#: lib/options/class-wcb-options.php:164
+msgid "Row Layout"
+msgstr "Présentation des lignes"
+
+#: lib/options/class-wcb-options.php:174
+#: lib/sponsors/class-wcb-sponsor-order.php:79
+msgid "Save Options"
+msgstr "Enregistrer les options"
+
+#: lib/sessions/class-wcb-session-template.php:96
+msgid "%s Track"
+msgstr "Piste %s"
+
+#: lib/sessions/class-wcb-session-template.php:98
+msgid "Presented by %s"
+msgstr "Présenté par %s"
+
+#: lib/sessions/class-wcb-sessions.php:26
+#: lib/sessions/class-wcb-sessions.php:32
+#: lib/speakers/class-wcb-speakers.php:41
+msgid "Speakers"
+msgstr "Orateurs"
+
+#: lib/sessions/class-wcb-sessions.php:44
+msgid "Sessions"
+msgstr "Sessions"
+
+#: lib/sessions/class-wcb-sessions.php:45
+msgid "Session"
+msgstr "Session"
+
+#: lib/sessions/class-wcb-sessions.php:46
+#: lib/speakers/class-wcb-speakers.php:43
+#: lib/sponsors/class-wcb-sponsors.php:29
+msgid "Add New"
+msgstr "Ajouter"
+
+#: lib/sessions/class-wcb-sessions.php:47
+msgid "Create New Session"
+msgstr "Créer une nouvelle session"
+
+#: lib/sessions/class-wcb-sessions.php:49
+msgid "Edit Session"
+msgstr "Modifier la session"
+
+#: lib/sessions/class-wcb-sessions.php:50
+msgid "New Session"
+msgstr "Nouvelle session"
+
+#: lib/sessions/class-wcb-sessions.php:51
+#: lib/sessions/class-wcb-sessions.php:52
+msgid "View Session"
+msgstr "Voir la session"
+
+#: lib/sessions/class-wcb-sessions.php:53
+msgid "Search Sessions"
+msgstr "Chercher une session"
+
+#: lib/sessions/class-wcb-sessions.php:54
+msgid "No sessions found"
+msgstr "Aucune session trouvée."
+
+#: lib/sessions/class-wcb-sessions.php:55
+msgid "No sessions found in Trash"
+msgstr "Aucune session trouvée dans la corbeille."
+
+#: lib/sessions/class-wcb-sessions.php:56
+msgid "Parent Session:"
+msgstr "Session parent :"
+
+#: lib/sessions/class-wcb-sessions.php:100
+msgid "Tracks"
+msgstr "Pistes"
+
+#: lib/sessions/class-wcb-sessions.php:101
+msgid "Track"
+msgstr "Piste"
+
+#: lib/sessions/class-wcb-sessions.php:102
+msgid "Search Tracks"
+msgstr "Chercher une piste"
+
+#: lib/sessions/class-wcb-sessions.php:103
+msgid "Popular Tracks"
+msgstr "Pistes populaires"
+
+#: lib/sessions/class-wcb-sessions.php:104
+msgid "All Tracks"
+msgstr "Toutes les pistes"
+
+#: lib/sessions/class-wcb-sessions.php:105
+msgid "Edit Track"
+msgstr "Modifier la piste"
+
+#: lib/sessions/class-wcb-sessions.php:106
+msgid "Update Track"
+msgstr "Mettre à jour la piste"
+
+#: lib/sessions/class-wcb-sessions.php:107
+msgid "Add Track"
+msgstr "Ajouter la piste"
+
+#: lib/sessions/class-wcb-sessions.php:108
+msgid "New Track"
+msgstr "Nouvelle piste"
+
+#: lib/speakers/class-wcb-speakers.php:25
+#: lib/speakers/class-wcb-speakers.php:31
+msgid "Gravatar Email"
+msgstr "Email gravatar"
+
+#: lib/speakers/class-wcb-speakers.php:42
+msgid "Speaker"
+msgstr "Orateur"
+
+#: lib/speakers/class-wcb-speakers.php:44
+msgid "Create New Speaker"
+msgstr "Créer une nouveau orateur"
+
+#: lib/speakers/class-wcb-speakers.php:46
+msgid "Edit Speaker"
+msgstr "Modifier l'orateur"
+
+#: lib/speakers/class-wcb-speakers.php:47
+msgid "New Speaker"
+msgstr "Nouveau orateur"
+
+#: lib/speakers/class-wcb-speakers.php:48
+#: lib/speakers/class-wcb-speakers.php:49
+msgid "View Speaker"
+msgstr "Voir l'orateur"
+
+#: lib/speakers/class-wcb-speakers.php:50
+msgid "Search Speakers"
+msgstr "Chercher un orateur"
+
+#: lib/speakers/class-wcb-speakers.php:51
+msgid "No speakers found"
+msgstr "Aucun orateur trouvé."
+
+#: lib/speakers/class-wcb-speakers.php:52
+msgid "No speakers found in Trash"
+msgstr "Aucune orateur trouvé dans la corbeille."
+
+#: lib/speakers/class-wcb-speakers.php:53
+msgid "Parent Speaker:"
+msgstr "Orateur parent:"
+
+#: lib/sponsors/class-wcb-sponsor-order.php:15
+#: lib/sponsors/class-wcb-sponsor-order.php:16
+#: lib/sponsors/class-wcb-sponsor-order.php:59
+msgid "Order Sponsor Levels"
+msgstr "Trier les niveaux de partenariats"
+
+#: lib/sponsors/class-wcb-sponsor-order.php:68
+msgid "Change the order of sponsor levels are displayed in the sponsors page template."
+msgstr "Modifier l'ordre des niveaux de partenariats pour modifier l'affichage des partenaires."
+
+#: lib/sponsors/class-wcb-sponsors.php:27
+#: lib/sponsors/class-wcb-widget-sponsors.php:10
+msgid "Sponsors"
+msgstr "Partenaires"
+
+#: lib/sponsors/class-wcb-sponsors.php:28
+msgid "Sponsor"
+msgstr "Partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:30
+msgid "Create New Sponsor"
+msgstr "Ajouter un nouveau partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:32
+msgid "Edit Sponsor"
+msgstr "Modifier le partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:33
+msgid "New Sponsor"
+msgstr "Nouveau partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:34
+#: lib/sponsors/class-wcb-sponsors.php:35
+msgid "View Sponsor"
+msgstr "Voir le partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:36
+msgid "Search Sponsors"
+msgstr "Chercher un partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:37
+msgid "No sponsors found"
+msgstr "Aucun partenaire trouvé."
+
+#: lib/sponsors/class-wcb-sponsors.php:38
+msgid "No sponsors found in Trash"
+msgstr "Aucun partenaire trouvé dans la corbeille."
+
+#: lib/sponsors/class-wcb-sponsors.php:39
+msgid "Parent Sponsor:"
+msgstr "Partenaire parent:"
+
+#: lib/sponsors/class-wcb-sponsors.php:83
+msgid "Sponsor Levels"
+msgstr "Niveaux de partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:84
+msgid "Sponsor Level"
+msgstr "Niveau de partenaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:85
+msgid "Search Sponsor Levels"
+msgstr "Chercher un niveau de partenariat "
+
+#: lib/sponsors/class-wcb-sponsors.php:86
+msgid "Popular Sponsor Levels"
+msgstr "Niveaux de partenariat populaire"
+
+#: lib/sponsors/class-wcb-sponsors.php:87
+msgid "All Sponsor Levels"
+msgstr "Tous les niveaux de partenariat"
+
+#: lib/sponsors/class-wcb-sponsors.php:88
+msgid "Edit Sponsor Level"
+msgstr "Modifier un niveau de partenariat"
+
+#: lib/sponsors/class-wcb-sponsors.php:89
+msgid "Update Sponsor Level"
+msgstr "Mettre à jour un niveau de partenariat"
+
+#: lib/sponsors/class-wcb-sponsors.php:90
+msgid "Add Sponsor Level"
+msgstr "Ajouter un niveau de partenariat"
+
+#: lib/sponsors/class-wcb-sponsors.php:91
+msgid "New Sponsor Level"
+msgstr "Nouveau niveau de partenariat"
+
+#: lib/sponsors/class-wcb-widget-sponsors.php:8
+msgid "Your WordCamp&#8217;s Sponsors"
+msgstr "Vos partenaires du WordCamp"
+
+#: lib/sponsors/class-wcb-widget-sponsors.php:39
+#: loop.php:62
+#: loop.php:83
+#: loop.php:126
+#: template-sessions.php:39
+#: template-sponsors.php:43
+msgid "Permalink to %s"
+msgstr "Permalien vers %s"
+
+#: lib/sponsors/class-wcb-widget-sponsors.php:58
+msgid "Title:"
+msgstr "Titre&nbsp;:"
+
+#. #-#-#-#-#  wordcampbase.pot (WordCamp Base 0.1)  #-#-#-#-#
+#. Theme URI of the plugin/theme
+#: lib/structure/class-wcb-footer.php:20
+msgid "http://wordpress.org/"
+msgstr "http://wordpress.org/"
+
+#: lib/structure/class-wcb-footer.php:20
+msgid "Semantic Personal Publishing Platform"
+msgstr "Plate-forme de publication personnelle à la pointe de la sémantique"
+
+#: lib/structure/class-wcb-footer.php:20
+msgid "Proudly powered by %s."
+msgstr "Fièrement propulsé par %s"
+
+#: lib/structure/class-wcb-header.php:11
+msgid "Return to WordCamp Central"
+msgstr "Retourner au central WordPress"
+
+#: lib/structure/class-wcb-header.php:11
+msgid "&larr; WordCamp Central"
+msgstr "&larr; WordCamp Central"
+
+#: lib/structure/class-wcb-menu.php:12
+msgid "Skip to content"
+msgstr "Aller au contenu"
+
+#: lib/structure/class-wcb-structure.php:90
+msgid "Front Page: %s"
+msgstr "Page d&rsquo;accueil&nbsp;: %s"
+
+#: lib/utils/class-wcb-metabox.php:69
+msgid "Untitled"
+msgstr "Sans titre"
+
+#: lib/utils/header.php:12
+msgid "Posted in %s"
+msgstr "Publié dans %s"
+
+#: lib/utils/header.php:15
+msgid "Tagged %s"
+msgstr "Taggé %s"
+
+#: lib/utils/header.php:75
+msgid "Page %s"
+msgstr "Page %s"
+
+#: lib/utils/twentyten-functions.php:97
+msgid "Primary Navigation"
+msgstr "Navigation principale"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:133
+msgid "Berries"
+msgstr "Framboises"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:139
+msgid "Cherry Blossoms"
+msgstr "Fleurs de cerisier"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:145
+msgid "Concave"
+msgstr "Mirroir"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:151
+msgid "Fern"
+msgstr "Fougère"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:157
+msgid "Forest Floor"
+msgstr "Paysage forestier"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:163
+msgid "Inkwell"
+msgstr "Encrier"
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:169
+msgid "Path"
+msgstr "Chemin "
+
+#. translators: header image description
+#: lib/utils/twentyten-functions.php:175
+msgid "Sunset"
+msgstr "Coucher du soleil"
+
+#: lib/utils/twentyten-functions.php:308
+msgid "%s <span class=\"says\">says:</span>"
+msgstr "%s <span class=\"says\">dit&nbsp;:</span>"
+
+#: lib/utils/twentyten-functions.php:311
+msgid "Your comment is awaiting moderation."
+msgstr "Votre commentaire est en attente de modération"
+
+#. translators: 1: date, 2: time
+#: lib/utils/twentyten-functions.php:318
+msgid "%1$s at %2$s"
+msgstr "%1$s à %2$s"
+
+#: lib/utils/twentyten-functions.php:318
+#: lib/utils/twentyten-functions.php:335
+msgid "(Edit)"
+msgstr "(Modifier)"
+
+#: lib/utils/twentyten-functions.php:335
+msgid "Pingback:"
+msgstr "Ping&nbsp;:"
+
+#: lib/utils/twentyten-functions.php:354
+msgid "Primary Widget Area"
+msgstr "Zone principale de widgets"
+
+#: lib/utils/twentyten-functions.php:356
+msgid "The primary widget area"
+msgstr "La zone principale de widgets"
+
+#: lib/utils/twentyten-functions.php:365
+msgid "Secondary Widget Area"
+msgstr "Zone secondaire de widgets"
+
+#: lib/utils/twentyten-functions.php:367
+msgid "The secondary widget area"
+msgstr "La zone secondaire de widgets"
+
+#: lib/utils/twentyten-functions.php:376
+msgid "First Footer Widget Area"
+msgstr "1ère zone de pied de page"
+
+#: lib/utils/twentyten-functions.php:378
+msgid "The first footer widget area"
+msgstr "La première zone de widgets pour le pied de page"
+
+#: lib/utils/twentyten-functions.php:387
+msgid "Second Footer Widget Area"
+msgstr "2ème zone de pied de page"
+
+#: lib/utils/twentyten-functions.php:389
+msgid "The second footer widget area"
+msgstr "La deuxième zone de widgets pour le pied de page"
+
+#: lib/utils/twentyten-functions.php:398
+msgid "Third Footer Widget Area"
+msgstr "3ème zone de pied de page"
+
+#: lib/utils/twentyten-functions.php:400
+msgid "The third footer widget area"
+msgstr "La troisième zone de widgets pour le pied de page"
+
+#: lib/utils/twentyten-functions.php:409
+msgid "Fourth Footer Widget Area"
+msgstr "4ème zone de pied de page"
+
+#: lib/utils/twentyten-functions.php:411
+msgid "The fourth footer widget area"
+msgstr "La quatrième zone de widgets pour le pied de page"
+
+#: lib/utils/twentyten-functions.php:442
+msgid "<span class=\"%1$s\">Posted on</span> %2$s <span class=\"meta-sep\">by</span> %3$s"
+msgstr "<span class=\"%1$s\">Publié le</span> %2$s <span class=\"meta-sep\">par</span> %3$s"
+
+#: lib/utils/twentyten-functions.php:468
+msgid "This entry was posted in %1$s and tagged %2$s. Bookmark the <a href=\"%3$s\" title=\"Permalink to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr "Ce contenu a été publié dans %1$s, avec comme mot(s)-clef(s) %2$s. Vous pouvez le mettre en favoris avec <a href=\"%3$s\" title=\"Permalien pour %4$s\" rel=\"bookmark\">ce permalien</a>."
+
+#: lib/utils/twentyten-functions.php:470
+msgid "This entry was posted in %1$s. Bookmark the <a href=\"%3$s\" title=\"Permalink to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr "Ce contenu a été publié dans %1$s. Vous pouvez le mettre en favoris avec <a href=\"%3$s\" title=\"Permalien pour %4$s\" rel=\"bookmark\">ce permalien</a>."
+
+#: lib/utils/twentyten-functions.php:472
+msgid "Bookmark the <a href=\"%3$s\" title=\"Permalink to %4$s\" rel=\"bookmark\">permalink</a>."
+msgstr "Vous pouvez la mettre en favoris avec <a href=\"%3$s\" title=\"Permalien pour %4$s\" rel=\"bookmark\">ce permalien</a>."
+
+#: lib/utils/twentyten-overrides.php:5
+msgid "%1$s <span class=\"meta-sep\">by</span> %2$s"
+msgstr "%1$s <span class=\"meta-sep\">par</span> %2$s"
+
+#: lib/utils/twentyten-overrides.php:22
+#: loop.php:94
+#: loop.php:117
+#: loop.php:159
+msgid "Leave a comment"
+msgstr "Laisser un commentaire"
+
+#: lib/utils/twentyten-overrides.php:23
+#: loop.php:94
+#: loop.php:117
+#: loop.php:159
+msgid "1 Comment"
+msgstr "Un commentaire"
+
+#: lib/utils/twentyten-overrides.php:24
+#: loop.php:94
+#: loop.php:117
+#: loop.php:159
+msgid "% Comments"
+msgstr "% commentaires"
+
+#: loop-single.php:21
+#: loop-single.php:61
+#: single.php:18
+#: single.php:58
+msgctxt "Previous post link"
+msgid "&larr;"
+msgstr "&larr;"
+
+#: loop-single.php:22
+#: loop-single.php:62
+#: single.php:19
+#: single.php:59
+msgctxt "Next post link"
+msgid "&rarr;"
+msgstr "&rarr;"
+
+#: loop-single.php:47
+#: single.php:44
+msgid "View all posts by %s <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Afficher tous les articles de %s <span class=\"meta-nav\">&rarr;</span>"
+
+#: loop.php:25
+#: loop.php:173
+msgid "<span class=\"meta-nav\">&larr;</span> Older posts"
+msgstr "<span class=\"meta-nav\">&larr;</span> Articles plus anciens"
+
+#: loop.php:26
+#: loop.php:174
+msgid "Newer posts <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Articles plus récents <span class=\"meta-nav\">&rarr;</span>"
+
+#: loop.php:35
+msgid "Apologies, but no results were found for the requested archive. Perhaps searching will help find a related post."
+msgstr "Toutes nos excuses, mais votre requête pour cette archive n&rsquo;a donné aucun résultat. Peut-être aurez-vous plus de chance en lançant une recherche..."
+
+#: loop.php:60
+#: loop.php:92
+msgctxt "gallery category slug"
+msgid "gallery"
+msgstr "galerie"
+
+#: loop.php:82
+msgid "This gallery contains <a %1$s>%2$s photos</a>."
+msgstr "Cette galerie contient <a %1$s>%2$s photo</a>."
+
+#: loop.php:92
+msgid "View posts in the Gallery category"
+msgstr "Afficher les articles de la catégorie Galerie"
+
+#: loop.php:92
+msgid "More Galleries"
+msgstr "Toutes les galeries"
+
+#: loop.php:101
+msgctxt "asides category slug"
+msgid "asides"
+msgstr "apartes"
+
+#: loop.php:146
+msgid "<span class=\"%1$s\">Posted in</span> %2$s"
+msgstr "<span class=\"%1$s\">Publié dans</span> %2$s"
+
+#: loop.php:155
+msgid "<span class=\"%1$s\">Tagged</span> %2$s"
+msgstr "<span class=\"%1$s\">Mots-clefs&nbsp;:</span> %2$s"
+
+#: search.php:16
+msgid "Search Results for: %s"
+msgstr "Résultats de recherche pour %s"
+
+#: search.php:26
+msgid "Nothing Found"
+msgstr "Rien n&rsquo;a été trouvé"
+
+#: search.php:28
+msgid "Sorry, but nothing matched your search criteria. Please try again with some different keywords."
+msgstr "Désolé, mais rien ne correspond à votre critères de recherche. Veuillez réessayer avec d&rsquo;autres mots-clefs."
+
+#: tag.php:16
+msgid "Tag Archives: %s"
+msgstr "Archives du mot-clef : %s"
+
+#. Theme Name of the plugin/theme
+msgid "WordCamp Base"
+msgstr "WordCamp Base"
+
+#. Description of the plugin/theme
+msgid "A flexible WordCamp theme made just for you."
+msgstr "A un thème flexible "
+
+#. Author of the plugin/theme
+msgid "Daryl Koopersmith"
+msgstr "Daryl Koopersmith"
+
+#. Tags of the plugin/theme
+msgid "black, blue, white, two-columns, fixed-width, custom-header, custom-background, threaded-comments, sticky-post, translation-ready, microformats, rtl-language-support, editor-style, custom-menu"
+msgstr "black, blue, white, two-columns, fixed-width, custom-header, custom-background, threaded-comments, sticky-post, translation-ready, microformats, rtl-language-support, editor-style, custom-menu"
+

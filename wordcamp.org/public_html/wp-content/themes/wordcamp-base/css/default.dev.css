@@ -1,0 +1,591 @@
+/* =Global
+-------------------------------------------------------------- */
+body {
+	background: #f1f1f1;
+}
+
+
+/* =Fonts
+-------------------------------------------------------------- */
+body,
+input,
+textarea,
+.page-title span,
+.pingback a.url {
+	font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", Georgia, "Bitstream Charter", serif;
+}
+h3#comments-title,
+h3#reply-title,
+#cancel-comment-reply-link,
+.form-allowed-tags,
+#site-info,
+#site-title,
+#wp-calendar,
+.comment-meta,
+.comment-body tr th,
+.comment-body thead th,
+.entry-content label,
+.entry-content tr th,
+.entry-content thead th,
+.entry-title,
+#respond label,
+.navigation,
+.page-title,
+.pingback p,
+.reply,
+.wp-caption-text {
+	font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", Georgia, "Bitstream Charter", serif;
+}
+input[type=submit] {
+	font-family: "Helvetica Neue", Arial, Helvetica, "Nimbus Sans L", sans-serif;
+}
+pre {
+	font-family: "Courier 10 Pitch", Courier, monospace;
+}
+code {
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+}
+h1,h2,h3,h4,h5,h6,
+#site-title,
+#site-description,
+#access .menu,
+#access div.menu ul,
+#access a.button,
+h3#comments-title,
+h3#reply-title,
+.entry-title,
+.entry-meta,
+.entry-utility,
+.widget-title,
+.callout {
+	font-family: "ff-enzo-web-1", "ff-enzo-web-2", "Helvetica Neue", Arial, Helvetica, "Nimbus Sans L", sans-serif;
+}
+
+
+/* =Link Colors
+-------------------------------------------------------------- */
+a:link,
+a:visited {
+	color: #0a8dc7;
+	text-decoration: none;
+}
+a:active,
+a:hover {
+	color: #23af2a;
+	text-decoration: underline;
+}
+
+/* =Sidebar Rows
+-------------------------------------------------------------- */
+
+#after-header,
+#before-content,
+#after-content {
+	background: url(../images/dotted-single.gif) repeat-x bottom;
+}
+#content-row {
+	background: url(../images/dotted-double.png) repeat-x bottom;
+}
+
+
+/* =Header
+-------------------------------------------------------------- */
+#header {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 10px 0 0;
+}
+#masthead {
+	margin: 0 -3px;
+	padding: 2px;
+	border: 1px solid #ccc;
+	-webkit-box-shadow: 0px 0px 24px rgba(0,0,0,0.3);
+	-moz-box-shadow: 0px 0px 24px rgba(0,0,0,0.3);
+	box-shadow: 0px 0px 24px rgba(0,0,0,0.3);
+}
+#return-to-central {
+	margin: 0 5px 10px;
+	font-style: italic;
+}
+#branding {
+	position: relative;
+}
+
+#branding-overlay,
+#branding-logo,
+#site-title,
+#site-description {
+	position: absolute;
+	bottom: 0;
+	height: 80px;
+	line-height: 80px;
+}
+
+#branding-overlay {
+	left: 0;
+	right: 0;
+	background: #000;
+	border-top: #999 solid 1px;
+	opacity: 0.6;
+}
+#branding-logo {
+	left: 10px;
+	width: 80px;
+	background: url('../images/wp-logo.png') no-repeat left center;
+	opacity: 0.7;
+}
+#site-title {
+	left: 85px;
+}
+#site-title a {
+	font-size: 48px;
+	font-style: italic;
+	font-weight: 300;
+	color: #fff;
+}
+#site-description {
+	font-size: 18px;
+	right: 0;
+	color: #ddd;
+	padding-right: 20px;
+	text-align: right;
+	font-weight: 600;
+}
+#site-title,
+#site-description {
+	text-shadow: 0 2px 6px #000;
+	margin: 0;
+	opacity: 0.9;
+}
+
+/* =After Header
+-------------------------------------------------------------- */
+#after-header {
+	padding: 10px 0 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+/* =Menus
+-------------------------------------------------------------- */
+#main-menu {
+	background: url(../images/dotted-double.png) repeat-x bottom;
+}
+#access {
+	margin: 0 10px;
+	background: transparent;
+	padding-bottom: 10px;
+}
+#access .menu-header,
+div.menu {
+	width: auto;
+	margin-left: 0;
+}
+#access a {
+	color: #0A8DC7;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+#access ul ul {
+	background: #fff;
+	top: 38px;
+	padding: 10px;
+}
+#access ul ul a {
+	background-color: transparent;
+}
+
+#access li:hover > a,
+#access ul ul :hover > a {
+	background-color: transparent;
+	color: #23AF2A;
+}
+#access ul li.current_page_item > a,
+#access ul li.current-menu-ancestor > a,
+#access ul li.current-menu-item > a,
+#access ul li.current-menu-parent > a {
+	color: #23AF2A;
+}
+* html #access ul li.current_page_item a,
+* html #access ul li.current-menu-ancestor a,
+* html #access ul li.current-menu-item a,
+* html #access ul li.current-menu-parent a,
+* html #access ul li a:hover {
+	color: #23AF2A;
+}
+#access a {
+	line-height: 22px;
+}
+.menu li {
+	padding: 8px 0;
+}
+.menu .sub-menu li,
+.menu .children li {
+	padding: 0;
+}
+
+.menu a,
+#access li:hover > a { /* Ensure the border doesn't disappear on hover */
+	background: url(../images/dotted-single-vertical.gif) repeat-y left;
+}
+.menu li:first-child a,
+#access li:first-child:hover > a {
+	background: none;
+}
+.menu .sub-menu a,
+.menu .children a {
+	border: 0;
+}
+
+/* =Widgets
+-------------------------------------------------------------- */
+.widget-area .xoxo {
+	margin: 0;
+	padding: 10px;
+}
+.widget-container {
+	margin: 0 0 10px 0;
+}
+
+.widget-area .widget-title {
+	background: url(../images/dotted-single.gif) repeat-x bottom;
+	font-size: 18px;
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+	color: #666;
+	display: block;
+	font-weight: 600;
+}
+.widget-area .widget-title a {
+	color: #666;
+	border-bottom: solid 1px #ccc;
+	line-height: 20px;
+	display: inline-block;
+	text-decoration: none;
+}
+.widget-area .widget-title a:hover {
+	color: #0a8dc7;
+}
+
+.widget-area ul li {
+	padding-bottom: 5px;
+}
+
+/* =Content
+-------------------------------------------------------------- */
+#content-row {
+	padding: 20px 0 40px;
+}
+
+/* =After Content (Footer Widgets)
+-------------------------------------------------------------- */
+#after-content {
+	border-top: 1px dotted #ccc;
+}
+
+
+/* =Post formatting
+-------------------------------------------------------------- */
+
+#content .entry-title {
+	font-weight: normal;
+}
+
+.entry-meta {
+	font-weight: 600;
+}
+.meta-sep-bull {
+	font-size: 200%;
+	vertical-align: bottom;
+	padding: 0 5px;
+}
+
+.entry-meta a,
+.entry-utility a {
+	color: #888;
+}
+
+.entry-content,
+.entry-summary {
+	background: url(../images/dotted-single.gif) repeat-x bottom;
+	padding: 10px 0 1px;
+	margin-bottom: 20px;
+}
+
+.entry-utility {
+	display: none;
+}
+
+.entry-content a,
+.widget-area a {
+	color: #0a8dc7;
+}
+
+.entry-content,
+.entry-content p,
+.entry-content p strong,
+.entry-content input,
+.entry-content textarea {
+	font-size: 16px;
+	line-height: 26px;
+	color: #666;
+}
+
+#content .entry-title,
+#content .entry-title a {
+	font-size: 28px;
+	color: #0A8DC7;
+}
+
+#content h3 {
+	color: #23AF2A;
+	margin-bottom: 0px;
+}
+#content h2 {
+	margin-bottom: 0px;
+}
+#content .entry-content h2 {
+	margin-bottom: 20px;
+}
+
+body.page .edit-link {
+	display: inline;
+}
+
+/* =Appearance
+-------------------------------------------------------------- */
+.callout {
+	font-size: 24px;
+	font-style: italic;
+	line-height: 1.4em;
+	padding: 0 10px;
+	color: #23af2a;
+}
+.lead {
+	padding-bottom: 1px;
+	background: url(../images/dotted-double.png) repeat-x bottom;
+}
+
+/* =CPT Loop
+-------------------------------------------------------------- */
+.cpt-loop .hentry {
+	padding: 20px 10px 0;
+	margin: 0;
+}
+#content .cpt-loop .entry-title {
+	color: #0A8DC7;
+	/*	background: url(../images/dotted-single.gif) repeat-x top;*/
+}
+#content .cpt-loop .entry-title,
+#content .cpt-loop .entry-title a {
+	font-size: 24px;
+}
+.cpt-loop .entry-content {
+	padding: 7px 0 1px;
+	margin: 0;
+	background: none;
+/*	background: url(../images/dotted-single.gif) repeat-x top;*/
+}
+.cpt-loop .avatar,
+#content .cpt-loop .avatar {
+	float: left;
+	padding: 3px;
+	background: #fff;
+	border: 1px solid #ccc;
+	margin-top: 6px;
+	margin-right: 10px;
+}
+
+#content .cpt-loop .hentry .attachment-post-thumbnail {
+	float: left;
+	margin-right: 10px;
+	margin-top: 7px;
+}
+
+
+/* =Speakers
+-------------------------------------------------------------- */
+.speaker-gravatar-list {
+	padding: 20px 10px 10px 10px;
+	margin: 0 -10px 10px 0;
+	background: url(../images/dotted-single.gif) repeat-x bottom;
+}
+.speaker-gravatar-list a .avatar,
+#content .speaker-gravatar-list a .avatar {
+	margin: 0 10px 10px 0;
+	-webkit-box-shadow: 0px 0px 8px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 0px 8px rgba(0,0,0,0.2);
+	box-shadow: 0px 0px 8px rgba(0,0,0,0.2);
+}
+.speaker-gravatar-list a:hover .avatar,
+#content .speaker-gravatar-list a:hover .avatar {
+	border-color: #bbb;
+	-webkit-box-shadow: 0px 0px 10px rgba(0,0,0,0.4);
+	-moz-box-shadow: 0px 0px 10px rgba(0,0,0,0.4);
+	box-shadow: 0px 0px 10px rgba(0,0,0,0.4);
+}
+
+/* The admin bar will overlap the names of speakers. Fix that. */
+.admin-bar .speakers .hentry {
+	padding-top: 38px;
+	margin-top: -18px;
+}
+
+/* =Sponsors
+-------------------------------------------------------------- */
+.sponsor-level-title,
+#content .sponsor-level-title {
+	margin: 10px 0;
+	padding: 0 8px;
+
+	color: #555;
+	border: 1px solid #ccc;
+	text-shadow: 0 1px 1px #fff;
+
+	font-weight: 600;
+	font-size: 13px;
+	text-transform: uppercase;
+
+	background-color: #eee;
+	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.2),  rgba(0,0,0,0.1));
+	background-image: -webkit-gradient(linear, left top, left bottom, from( rgba(255,255,255,0.2) ), to( rgba(0,0,0,0.1) ));
+
+	-webkit-border-radius:40px;
+	-moz-border-radius: 40px;
+	border-radius:40px;
+}
+.sponsors .hentry {
+	padding-top: 20px;
+}
+
+.sponsor-intro .hentry {
+	margin-bottom: 20px;
+}
+.sponsor-intro .entry-content {
+	background: none;
+	margin-bottom: 0;
+}
+
+/* =Sponsor Widget
+-------------------------------------------------------------- */
+.wcb_widget_sponsors .sponsor-logo {
+	padding-bottom: 10px;
+	display: block;
+	font-size: 18px;
+	font-style: italic;
+}
+
+/* =Menu Button
+-------------------------------------------------------------- */
+#access a.button {
+	display: inline-block;
+	float: right;
+	line-height: 15px;
+	margin: 4px 10px 0 0;
+	padding:6px 11px;
+
+	font-size:14px;
+	font-weight: bolder;
+	text-transform: uppercase;
+
+	color: #FFF;
+	border: 1px #FFF solid;
+	text-shadow: rgba(0,0,0,0.4) 0px 1px 1px;
+
+	background-color: #23AF2A;
+	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.2),  rgba(0,0,0,0.2));
+	background-image: -webkit-gradient(linear, left top, left bottom, from( rgba(255,255,255,0.2) ), to( rgba(0,0,0,0.2) ));
+
+	-webkit-border-radius:4px;
+	-moz-border-radius: 4px;
+	border-radius:4px;
+
+	-webkit-box-shadow:#b1b1b1 0px 1px 1px;
+	-moz-box-shadow:#b1b1b1 0px 1px 1px;
+	box-shadow:#b1b1b1 0px 1px 1px;
+}
+#access a.button:hover {
+	text-shadow: rgba(0,0,0,0.4) 0px -1px 1px;
+	background-image: -moz-linear-gradient(bottom,  rgba(255,255,255,0.2),  rgba(0,0,0,0.2));
+	background-image: -webkit-gradient(linear, left bottom, left top, from( rgba(255,255,255,0.2) ), to( rgba(0,0,0,0.2) ));
+}
+
+
+/* =Post-WordCamp Shortcodes and Widgets
+-------------------------------------------------------------- */
+
+/* Videos */
+
+#content .wptv-videos img {
+	width: 100%;
+	padding: 5px;
+	margin: 0 0 5px 0;
+	
+	background: #e5e5e5;
+	border: 1px #ccc solid;
+}
+
+#content .wptv-videos {
+	margin: 10px 0 0 0;
+}
+
+#content .wptv-videos .wptv-video-item {
+	width: 27%;
+	min-width: 145px;
+	height: 180px;
+	
+	margin: 5px 6.3333% 20px 0;
+	float: left;
+	clear: right;
+	position: relative;
+
+	font-family: "Helvetica Neue", Arial, Helvetica, "Nimbus Sans L", sans-serif;	
+	font-size: 13px;
+	line-height: 1.3;	
+	
+	list-style: none;
+}
+
+#content .wptv-videos li strong {
+	display: block;
+	font-weight: normal;
+}
+
+#content .wptv-videos li a:hover img {
+	background: #fff;
+}
+
+.wptv-videos:before,
+.wptv-videos:after {
+    content: "";
+    display: table;
+}
+.wptv-videos:after {
+    clear:both;
+}
+.wptv-videos {
+    zoom:1; /* For IE 6/7 (trigger hasLayout) */
+}
+
+/* Downloads */
+
+.down-arrow {
+	position: absolute;
+	left: 10px;
+	top: 11px;
+}
+
+.wcb-post-budget h3 a,
+.wcb-post-survey h3 a {
+	display: block;
+	position: relative;
+	border: 1px #0A8DC7 solid;
+	padding: 10px;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+h3 a span.download {
+	display: block;
+	padding-left: 20px;
+}
