@@ -358,6 +358,7 @@ class WordCamp_Post_Types_Plugin {
 			'post_type' => 'wcb_session',
 			'posts_per_page' => -1,
 			'meta_query' => array(
+				'relation' => 'AND',
 				array(
 					'key' => '_wcpt_session_time',
 					'compare' => 'EXISTS',
@@ -385,6 +386,18 @@ class WordCamp_Post_Types_Plugin {
 					'terms' => array_values( wp_list_pluck( $tracks, 'term_id' ) ),
 				);
 			}
+		}
+
+		if ( $attr['date'] && strtotime( $attr['date'] ) ) {
+			$query_args['meta_query'][] = array(
+				'key' => '_wcpt_session_time',
+				'value' => array(
+					strtotime( $attr['date'] ),
+					strtotime( $attr['date'] . ' +1 day' ),
+				),
+				'compare' => 'BETWEEN',
+				'type' => 'NUMERIC',
+			);
 		}
 
 		// Use tracks to form the columns.
