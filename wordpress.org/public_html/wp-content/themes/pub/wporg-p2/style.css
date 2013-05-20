@@ -69,6 +69,20 @@ ul#menu-table-of-contents li ul a {
 	font-weight: normal;
 }
 
+#headline .menu {
+	list-style: none;
+	float: right;
+	font-size: 14px;
+	font-weight: bold;
+	padding-top: 22px;
+	margin-right: 15px;
+}
+
+#headline .menu li {
+	display: inline;
+	padding-left: 20px;
+}
+
 html body {
 	line-height:normal;
 	background:white;
