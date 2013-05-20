@@ -40,4 +40,4 @@ require WPORGPATH . 'header.php';
 
 <div id="wrapper">
 
-	<?php get_sidebar(); ?>
+	<?php get_sidebar( get_post_type() ); ?>

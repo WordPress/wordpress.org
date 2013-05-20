@@ -5,6 +5,70 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 */
 @import url('../../p2/style.css');
 
+.post-type-archive-handbook .postcontent,
+.single-handbook .postcontent {
+	padding-left: 0;
+}
+
+.post-type-archive-handbook .sleeve_main,
+.single-handbook .sleeve_main {
+	margin-left: 242px;
+	margin-right: 0;
+}
+
+.post-type-archive-handbook #sidebar,
+.single-handbook #sidebar {
+	float: left;
+	margin-left: 0;
+	margin-right: -1px;
+}
+
+li.type-handbook code {
+    background: #eee;
+	text-shadow: 0 1px 0 #fff;
+	padding: 4px 6px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.handbook-page-title {
+    font-size: 2em;
+    padding-bottom: 4px;
+    color: #777;
+}
+li.type-handbook h2 {
+	font-size: 24px;
+	border-bottom: 1px solid #ddd;
+	margin: 1em 0;
+}
+
+li.type-handbook h3 {
+	text-transform: none;
+	letter-spacing: 0;
+	color: #555;
+	font-size: 20px;
+	font-weight: bold;
+	margin: 1em 0;
+}
+
+li.type-handbook h4 {
+	text-transform: none;
+	letter-spacing: 0;
+	color: #555;
+	font-size: 16px;
+	font-weight: bold;
+	margin: 1em 0;
+}
+
+ul#menu-table-of-contents > li {
+	list-style: none;
+	margin-bottom: 16px;
+}
+
+ul#menu-table-of-contents li ul a {
+	font-weight: normal;
+}
+
 html body {
 	line-height:normal;
 	background:white;
