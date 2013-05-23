@@ -31,7 +31,7 @@ class WPorg_Handbook_TOC {
 		else
 			$pages_header = 'h3';
 
-		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false ) ) )
+		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => self::$post_type ) ) )
 			$toc .= "<$pages_header>Pages</$pages_header><ul class=\"items\">$pages</ul>";
 
 		if ( $items ) {
