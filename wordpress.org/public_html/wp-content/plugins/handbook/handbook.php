@@ -21,6 +21,14 @@ class WPorg_Handbook {
 		);
 	}
 
+	static function editor_caps() {
+		return array(
+			'delete_handbook_pages', 'delete_others_handbook_pages',
+			'delete_published_handbook_pages', 'delete_private_handbook_pages',
+			'edit_private_handbook_pages', 'read_private_handbook_pages',
+		);
+	}
+
 	function __construct() {
 		add_filter( 'user_has_cap', array( $this, 'grant_handbook_caps' ) );
 		add_filter( 'init', array( $this, 'register_post_type' ) );
@@ -36,6 +44,11 @@ class WPorg_Handbook {
 			return $caps;
 		foreach ( self::caps() as $cap ) {
 			$caps[ $cap ] = true;
+		}
+		if ( current_user_can( 'edit_pages' ) ) {
+			foreach ( self::editor_caps() as $cap ) {
+				$caps[ $cap ] = true;
+			}
 		}
 		return $caps;
 	}
