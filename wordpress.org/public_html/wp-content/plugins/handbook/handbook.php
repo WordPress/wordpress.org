@@ -17,12 +17,13 @@ class WPorg_Handbook {
 	static function caps() {
 		return array(
 			'edit_handbook_pages', 'edit_others_handbook_pages',
-			'edit_published_handbook_pages', 'publish_handbook_pages',
+			'edit_published_handbook_pages',
 		);
 	}
 
 	static function editor_caps() {
 		return array(
+			'publish_handbook_pages',
 			'delete_handbook_pages', 'delete_others_handbook_pages',
 			'delete_published_handbook_pages', 'delete_private_handbook_pages',
 			'edit_private_handbook_pages', 'read_private_handbook_pages',
@@ -45,7 +46,7 @@ class WPorg_Handbook {
 		foreach ( self::caps() as $cap ) {
 			$caps[ $cap ] = true;
 		}
-		if ( current_user_can( 'edit_pages' ) ) {
+		if ( ! empty( $caps['edit_pages'] ) ) {
 			foreach ( self::editor_caps() as $cap ) {
 				$caps[ $cap ] = true;
 			}
