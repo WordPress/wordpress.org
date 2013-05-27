@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @author Nikolay
+ */
 class GP_WPorg_Specifics extends GP_Plugin {
 	var $id = 'wporg-specifics';
 

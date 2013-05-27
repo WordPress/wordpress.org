@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Tie roles on Rosetta sites directly into translate.wordpress.org.
+ *
+ * Anyone with the role of Validator, Contributor, Author, or Editor
+ * has the ability to validate strings for that language.
+ *
+ * Future improvements to this would make this more granular (i.e. per-project)
+ * with a UI in Rosetta to control those permissions.
+ *
+ * @author Nacin
+ */
 class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	var $id = 'wporg-rosetta-roles';
 
