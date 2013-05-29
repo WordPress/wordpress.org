@@ -12,6 +12,7 @@ class WPorg_Handbook_Glossary {
 		add_filter( 'post_type_link', array( __CLASS__, 'post_type_link' ), 10, 2 );
 		add_action( 'wporg_email_changes_for_post_types', array( __CLASS__, 'wporg_email_changes_for_post_types' ) );
 		add_action( 'wporg_handbook_glossary', array( __CLASS__, 'page_content' ) );
+		add_action( 'manage_glossary_posts_columns', array( __CLASS__, 'manage_glossary_posts_columns' ) );
 	}
 
 	static function edit_posts_per_page() {
@@ -61,6 +62,11 @@ class WPorg_Handbook_Glossary {
 			$_GET['order']   = $_REQUEST['order']   = 'ASC';
 			$_GET['orderby'] = $_REQUEST['orderby'] = 'title';
 		}
+	}
+
+	static function manage_glossary_posts_columns( $columns ) {
+		$columns['author'] = __( 'Created by' );
+		return $columns;
 	}
 
 	static function post_type_link( $link, $post ) {
