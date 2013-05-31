@@ -1,0 +1,39 @@
+html, body {
+	margin: 0;
+}
+.gp-content {
+	margin: 3px auto 10px;
+	width: 960px;
+}
+.gp-content span.breadcrumb {
+	margin: .5em 0;
+	display: block;
+	float: none;
+}
+.gp-content h2 {
+	margin: 2px 0 .6em;
+}
+#hello {
+	margin-top: 22px;
+	font-size: 1em;
+}
+p.description {
+	margin: 1em;
+}
+#gp-footer {
+	background: none;
+}
+/* custom markup */
+#headline .menu-link {
+	padding-right: 20px;
+}
+/* overrides the global stylesheet: */
+.gp-content blockquote {
+	border: 0;
+	background: none;
+	padding: 0;
+	margin: 0;
+}
+.gp-content ul {
+	padding-left: 20px;
+}
