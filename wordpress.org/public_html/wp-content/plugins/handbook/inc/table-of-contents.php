@@ -5,37 +5,37 @@
  * @author Automattic, modifed by Nacin
  */
 class WPorg_Handbook_TOC {
-	protected static $post_type = 'handbook';
+	protected $post_type = 'handbook';
 
-	protected static $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
+	protected $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
 
-	static function init() {
-		add_action( 'template_redirect', array( __CLASS__, 'load_filters' ) );
+	function __construct() {
+		add_action( 'template_redirect', array( $this, 'load_filters' ) );
 	}
 
-	static function load_filters() {
-		if ( is_singular( self::$post_type ) )
-			add_filter( 'the_content', array( __CLASS__, 'add_toc' ) );
+	function load_filters() {
+		if ( is_singular( $this->post_type ) )
+			add_filter( 'the_content', array( $this, 'add_toc' ) );
 	}
 
-	static function add_toc( $content ) {
+	function add_toc( $content ) {
 		$toc = '';
 
-		$items = self::get_tags( 'h([1-4])', $content );
+		$items = $this->get_tags( 'h([1-4])', $content );
 
 		for ( $i = 1; $i <= 4; $i++ )
-			$content = self::add_ids_and_jumpto_links( "h$i", $content );
+			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
 
 		if ( $items )
 			$contents_header = $pages_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
 		else
 			$pages_header = 'h3';
 
-		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => self::$post_type ) ) )
+		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => $this->post_type ) ) )
 			$toc .= "<$pages_header>Pages</$pages_header><ul class=\"items\">$pages</ul>";
 
 		if ( $items ) {
-			$toc .= self::$styles;
+			$toc .= $this->styles;
 			$toc .= '<div class="table-of-contents">';
 			$toc .= "<$contents_header>Contents</$contents_header><ul class=\"items\">";
 			$last_item = false;
@@ -58,8 +58,8 @@ class WPorg_Handbook_TOC {
 		return $toc . $content;
 	}
 
-	protected static function add_ids_and_jumpto_links( $tag, $content ) {
-		$items = self::get_tags( $tag, $content );
+	protected function add_ids_and_jumpto_links( $tag, $content ) {
+		$items = $this->get_tags( $tag, $content );
 		$first = true;
 
 		foreach ($items as $item) {
@@ -82,7 +82,7 @@ class WPorg_Handbook_TOC {
 		return $content;
 	}
 
-	private static function get_tags( $tag, $content = '' ) {
+	private function get_tags( $tag, $content = '' ) {
 		if ( empty( $content ) )
 			$content = get_the_content();
 		preg_match_all( "/(<{$tag}>)(.*)(<\/{$tag}>)/", $content, $matches, PREG_SET_ORDER );

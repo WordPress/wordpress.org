@@ -9,10 +9,9 @@ require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
 require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
 
 class WPorg_Handbook_TOC_Pages extends WPorg_Handbook_TOC {
-	static $post_type = 'page';
+	protected $post_type = 'page';
 }
-
-WPorg_Handbook_TOC_Pages::init();
+new WPorg_Handbook_TOC_Pages;
 
 add_action( 'widgets_init', 'wporg_handbook_functionality_for_pages_widget', 12 );
 function wporg_handbook_functionality_for_pages_widget() {
