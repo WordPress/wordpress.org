@@ -2,6 +2,7 @@
 wp_enqueue_style( 'base' );
 wp_enqueue_script( 'jquery' );
 
+global $pagetitle;
 $pagetitle = gp_title();
 require WPORGPATH . 'header.php';
 ?>
