@@ -16,7 +16,18 @@
 	background: #eaf2fa;
 	border: none;
 }
-
+#tabs {
+	border-radius: 3px;
+}
+#tabs li li.active {
+	border-radius: 3px;
+}
+.plugin {
+	border-radius: 3px;
+}
+.plugin .foldable > :link, .plugin .foldable > :visited {
+	border-radius: 3px;
+}
 /* =browser.css */
 #content.browser h1 .first:link, h1 .first:visited {
 	color: #999
@@ -35,6 +46,9 @@ table.code tbody th {
 }
 table.code tbody th :link, table.code tbody th :visited {
 	color: #888;
+}
+div.code {
+	border-radius: 3px;
 }
 
 /* =diff.css */
@@ -69,7 +83,12 @@ table.code tbody th :link, table.code tbody th :visited {
 #content.report .tickets tbody tr:hover {
 	background: #eee;
 }
-
+.report div.reports h2 {
+	box-shadow: none;
+}
+h2.report-result {
+	box-shadow: none;
+}
 /* =roadmap.css */
 table.progress td.closed {
     background-color: #83B4D8;
@@ -79,7 +98,15 @@ table.progress td.closed {
     background-image: -webkit-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
     background-image: -ms-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
 }
-
+table.progress {
+	box-shadow: none;
+}
+.milestone .info h2 {
+	box-shadow: none;
+}
+.trac-groupprogress table.progress {
+	box-shadow: none;
+}
 /* =ticket.css */
 #content.ticket {
 	margin-left: 20px; /* formerly internal */
@@ -144,7 +171,18 @@ table.progress td.closed {
 #action div {
 	padding: .2em 0; /* breathing room */
 }
-
+#ticket {
+	border-radius: 3px;
+}
+.ticketdraft {
+	border-radius: 3px;
+}
+ul.children > li.child {
+	border-radius: 3px;
+}
+#changelog h3, #ticketchange h3 {
+	box-shadow: none;
+}
 /* =timeline.css */
 #content.timeline dt :link:hover, dt :visited:hover {
 	background-color: #eee;
@@ -158,7 +196,9 @@ dt.closedticket em {
 #content.timeline dd {
 	color: #777;
 }
-
+h2 {
+	box-shadow: none;
+}
 /* =trac.css */
 body {
 	min-width: 48.5em; /* don't let it get ugly unless responsive */
@@ -265,7 +305,78 @@ table.listing tbody tr:hover {
 .suggestions {
 	border: 1px solid #888;
 }
-
+span:target {
+	box-shadow: none;
+}
+input[type=button], input[type=submit], input[type=reset] {
+	border-radius: 3px;
+}
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+	box-shadow: none;
+}
+input[type=text], input.textwidget, textarea {
+	border-radius: 3px;
+}
+fieldset {
+	border-radius: 3px;
+}
+.inlinebuttons input {
+	border-radius: 3px;
+}
+.inlinebuttons input[type=submit]:hover {
+	box-shadow: none;
+}
+#mainnav {
+	box-shadow: none;
+}
+#mainnav :link, #mainnav :visited {
+	box-shadow: none;
+}
+#mainnav :link:hover, #mainnav :visited:hover {
+	box-shadow: none;
+}
+div.trac-content {
+	border-radius: 3px;
+}
+.foldable :link, .foldable :visited {
+	border-radius: 3px;
+}
+#prefs {
+	border-radius: 3px;
+}
+#prefs fieldset {
+	box-shadow: none;
+}
+pre.wiki, pre.literal-block {
+	box-shadow: none;
+}
+tt {
+	border-radius: 3px;
+}
+table.wiki {
+	box-shadow: none;
+}
+table.listing {
+	box-shadow: none;
+}
+span.system-message {
+	border-radius: 3px;
+}
+div.system-message {
+	border-radius: 3px;
+}
+div.system-message .trac-close-msg {
+	border-radius: 3px;
+}
+div.system-message .trac-close-msg:hover {
+	box-shadow: none;
+}
+div.trac-content {
+	box-shadow: none;
+}
+.foldable :link, .foldable :visited {
+	box-shadow: none;
+}
 /* =wiki.css */
 #content.wiki #pagepath .first:link, #content.wiki #pagepath .first:visited {
 	color: #999;
@@ -279,6 +390,9 @@ table.listing tbody tr:hover {
 }
 #content.wiki .wiki-toc .active {
 	background: #eaf2fa; /* current TOC item */
+}
+.wikipage h2 {
+	box-shadow: none;
 }
 
 /* =Formerly internal */
