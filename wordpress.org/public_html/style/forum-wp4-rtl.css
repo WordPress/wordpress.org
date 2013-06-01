@@ -1,0 +1,83 @@
+
+p.login span.mod-login {
+	left: 0;
+	right:auto;
+}
+
+.frontpageheatmap a {
+	font-family:sans-serif;
+}
+
+.new-topic {
+	margin-right: 3px;
+	margin-left: 0;
+}
+
+.topictitle .col-9 {
+	margin-right: 255px;
+	margin-left: 0;
+}
+
+
+#thread li.postitem {
+	float: right;
+}
+
+.threadauthor .avatar {float: right; margin-left: 12px; margin-right: 0;}
+
+.post {
+	margin-right: 14px;
+	margin-left: 0;
+}
+
+#forum-welcome {
+	float: right;
+	margin-bottom: 22px;}
+#forum-welcome p {
+	padding-left: 10px;
+	padding-right: 0;
+}
+
+#useravatar {
+	float: right;
+}
+
+#pagebody #userlogin, #userlogin {
+	font-family: sans-serif;
+}
+
+dl#userinfo {
+	float: right;
+	margin-right: 12px;
+	margin-left: 0;
+}
+
+dl#userinfo dt {
+	float: right;
+	margin-left: 6px;
+	margin-right: -12px;
+}
+
+#theuser {
+	float: right;
+}
+
+form#profile-form {
+	margin-right: 12px;
+	margin-left: 0;
+}
+
+form#profile-form h3 {
+	margin-right: -12px;
+	margin-left: 0;
+}
+
+form#profile-delete-form {
+	float: left;
+}
+
+#topic-paging {
+	float: left;
+	margin-left: -162px;
+	margin-right: 0;
+}

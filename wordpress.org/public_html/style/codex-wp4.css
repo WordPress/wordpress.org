@@ -1,0 +1,228 @@
+html * {
+	font-variant: normal !important;
+	text-align: left !important;
+}
+
+.printfooter, hr, .urlexpansion {
+	display: none !important;
+}
+
+#bodyContent h1, #bodyContent h2 {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 22px;
+	margin-bottom: 22px;
+	color: #333;
+}
+#bodyContent h2, #bodyContent h3, #bodyContent h4, #bodyContent h5, #bodyContent h6 {
+	font-family: Georgia, "Times New Roman", Times, serif; 
+		border-bottom: 1px solid #dadada;
+		font-weight: normal;
+}
+#bodyContent h2.pagetitle {
+	font-family: sans-serif;
+	font-size: 24px;
+	font-weight: bold;
+	color: #666;
+	padding-bottom: 2px;
+	margin-top: 0;
+	margin-bottom: 24px;
+}
+.col-2 h3 {
+	margin-top: 3px;
+}
+
+#bodyContent h2 {
+	margin-top: 22px;
+	margin-bottom: 11px;
+}
+.editsection {
+font-size: 12px;
+font-weight: normal !important;
+font-family: sans-serif;
+}
+#bodyContent h3 {
+	padding-bottom: 4px;
+	margin-bottom: 4px;
+}
+#bodyContent h2 {
+font-size: 190%;
+}
+#bodyContent h3 {
+font-size: 150%;
+border-color: #eee;
+}
+#bodyContent h4 {
+font-size: 130%;
+}
+h4 b {
+font-weight: normal;
+}
+#bodyContent h5 {
+font-size: 100%;
+font-weight: bold;
+}
+
+#bodyContent {
+color: black;
+}
+#bodyContent p {
+	clear: left;
+}
+#pagebody #bodyContent p,
+#pagebody #bodyContent ul,
+#pagebody #bodyContent dl,
+#pagebody #bodyContent ol {
+	margin-bottom: 22px;
+}
+
+p.login a {
+	margin-right: 6px;
+}
+
+#editpage-copywarn p {
+	margin-top: 18px !important;
+}
+
+blockquote {
+	padding: 11px 22px !important;
+}
+
+#bodyContent div {
+	font-size: 100% !important;
+}
+
+#bodyContent pre, #bodyContent code {
+	margin-bottom: 22px;
+	font-family: Consolas, Monaco, "Courier New", Courier, monospace;
+	font-size: 12px;
+	font-weight: inherit;
+	overflow-x: auto; /* Use horizontal scroller if needed; for Firefox 2, not needed in Firefox 3 */
+	white-space: pre-wrap; /* css-3 */
+	white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+	white-space: -pre-wrap; /* Opera 4-6 */
+	white-space: -o-pre-wrap; /* Opera 7 */
+	/*messes up flow* width: 99%; /* remove horizontal scroll-bar when viewing in IE7 */
+	word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
+
+textarea {
+	width: 100%;
+}
+
+dl dt {
+	font-weight: bold;
+	font-size: 110%;
+}
+
+dl dd {
+	margin-bottom: 11px;
+	margin-left: 1em;
+}
+
+#toc {
+	background: #f1f1f1;
+	border: 1px solid #dadada;
+	-webkit-border-radius: 3px;
+	float: right;
+	margin-left: 16px;
+	padding: 4px 8px;
+	margin-bottom: 12px;
+	font-size: 85%;
+	max-width: 30%;
+}
+#pagebody #toc ul {
+	margin-bottom: 0px;
+}
+
+#toctitle h2{
+	font-size: 18px;
+	margin-top: 0;
+	margin-bottom: 5%;
+}
+#toctitle td {
+	text-align: left !important;
+}
+
+#toctitle td {
+	border-bottom: 1px solid #dadada;
+}
+
+#tocinside td {
+	padding-top: 4px;
+	font-size: 12px;
+}
+
+.tocindent p {
+	padding-left: 12px;
+	margin-bottom: 0 !important;
+}
+
+.tocindent .tocindent p {
+	padding-left: 32px;
+}
+
+input[type="text"], input[type="password"] {
+	margin-right: 2px;
+	font-size: 12px;
+	padding: 3px;
+	margin-bottom: 6px;
+	background: #f5f5f5;
+	border: 1px solid #ccc;
+	-moz-border-radius: 3px;
+	-khtml-border-radius: 3px;	
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	height: 14px;
+	color: #666;
+}
+
+input[type="checkbox"] {
+	margin-right: 4px;
+}
+
+label {
+	margin-right: 8px;
+}
+
+table.diff { background:white; }
+td.diff-otitle { background:#ffffff; }
+td.diff-ntitle { background:#ffffff; }
+td.diff-addedline {
+    background:#ccffcc;
+    font-size: smaller;
+}
+td.diff-deletedline {
+    background:#ffffaa;
+    font-size: smaller;
+}
+td.diff-context {
+    background:#eeeeee;
+    font-size: smaller;
+}
+span.diffchange { color: red; font-weight: bold; }
+
+/* image css */
+a img.alignright, .tright, .floatright, img.alignright, img.right {float:right; margin:0 0 1em 1em}
+a img.alignleft, .tleft, .floatleft, img.alignleft, img.left {float:left; margin:0 1em 1em 0}
+a img.aligncenter, img.aligncenter, img.center {display: block; margin-left: auto; margin-right: auto}
+
+#bodyContent hr {
+display: block !important;
+border: 0;
+border-top: 1px solid #ddd;
+}
+
+#bodyContent #Copyedit {
+border: solid 1px transparent; 
+	-moz-border-radius: 3px;
+	-khtml-border-radius: 3px;	
+	-webkit-border-radius: 3px;
+background-color: #eef; 
+text-align: center; 
+padding: 1em 1em 1px 1em; 
+margin: 1em 0;
+
+}
+
+.new, .new:link, .new:visited { color: red !important; }
+.new:hover, .new:active { text-decoration: underline !important; }

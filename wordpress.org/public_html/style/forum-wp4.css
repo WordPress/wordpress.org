@@ -1,0 +1,414 @@
+a:visited { color: #4ca6cf; }
+
+p.login span.mod-login {
+	position: relative;
+	right: 0;
+	bottom: 0.5em;
+}
+
+.frontpageheatmap a {
+	font-family: Georgia, Times, "Times New Roman", serif;
+	font-weight:normal;
+	line-height:28px;
+	padding-bottom:10px
+}
+
+.alt{background:#fff}
+
+.sticky{background:#f695a9}
+
+.deleted{background:#ff9999}
+
+.post-undelete-link, .deleted .post-delete-link { display: none; }
+.deleted .post-undelete-link { display: inline; }
+
+.bozo{background:#ffff99}
+
+.new-topic {
+	margin-left: 3px;
+}
+
+.topicnav { font-size: 10px;}
+
+#forumlist {
+	font-size: 12px;
+	border-collapse: collapse;
+	width: 100%;
+	margin-top: 5px;
+}
+
+#forumlist .num {
+	font-family: Georgia;
+	font-size: 12px;
+}
+
+#forumlist small, .forumlist .num small {
+	font-size: 12px;
+}
+
+#forumlist a {
+	font-size: 15px;
+}
+
+#forumlist thead th {
+	font-weight: bold;
+	padding: 0;
+	line-height: 1em;
+}
+
+#forumlist tbody tr {
+	border-bottom: 1px solid #dadada !important;
+	vertical-align: top;
+}
+
+#forumlist td {
+	line-height: 1.5em;
+	padding: 8px 0;
+}
+
+ul#views {
+	margin: 2px 0 20px;
+	font-size: 12px;
+}
+
+#views li {
+	list-style: none;
+	display: inline;
+}
+
+.topictitle h2 {
+	font-size: 22px;
+	line-height: 1.2em;
+	color: #333;
+	margin-bottom: 11px;
+}
+
+h2.post-form {
+	font-size: 14px;
+	color: #333;
+	font-weight: bold;
+	clear: both;
+}
+
+.topictitle .col-9 {
+	margin-left: 255px;
+}
+
+#thread{list-style:none;margin: 20px 0 0 0 !important;padding:0;}
+
+#thread li.postitem {
+	float: left;
+	border-bottom: 1px solid #dadada;
+	margin-bottom: 20px;
+}
+
+#thread .threadauthor {
+	margin: 0;
+	overflow-x: hidden;
+}
+
+.topicmeta { padding-top: 19px; }
+
+h4 {
+	font-weight: bold;
+	padding-top: 1px;
+	font-size: 12px;
+	border-bottom: 1px solid #dedede;
+	padding-bottom: 4px;
+	color: #333;
+	margin-bottom: 10px;
+}
+
+.topicmeta ul { margin: 0 0 22px 0 !important; font-size: 12px;}
+
+.topicmeta ul li {
+	list-style: none;
+	padding: 0 0 8px;
+	line-height: 1.5em;
+}
+
+.topicmeta .tags ul, .topicmeta .tags p { margin-bottom: 0 !important;}
+
+input#tag { padding-left: 0; padding-right:	0; width: 80px;}
+
+.postform {font-size: 12px;}
+
+.postform label{display:block; float:left; clear: left;}
+
+.postform textarea{height:20em; width: 97%;font-size: 12px;color: #333;}
+
+.postform p { margin: 0 0 6px !important; }
+
+#content a:visited{font-weight:normal}
+
+.poststuff { font-size: 12px; color: #777; }
+
+.threadauthor { line-height: 1.4em; padding-top: 3px;}
+
+.threadauthor strong { font-size: 12px; color: #333;}
+
+.threadauthor small{font-size:12px }
+
+.threadauthor .avatar {float: left; margin-right: 12px;}
+
+tr.sticky td{background:#fdf4cd}
+
+#hottags{margin: 0; padding: 0;clear:both;}
+
+.post {
+	margin-left: 14px;
+	color: #333;
+	overflow: auto;
+}
+
+.post strong {
+	font-weight: bold;
+}
+
+.post em {
+	font-style: italic;
+}
+
+#thread .post p, #thread .post pre, #thread .post blockquote {
+	margin-bottom: 11px;
+}
+
+#thread .post pre {
+	max-height:40.4em;
+}
+
+.post blockquote {
+	padding: 10px 10px 0 10px;
+	border-color: #dadada;
+	background:none;
+	border-style:solid;
+	border-width: 1px 1px 1px 3px;
+}
+
+#forum-welcome {
+	float: left;
+	margin-bottom: 22px;
+}
+#forum-welcome p {
+	margin-bottom: 0;
+	padding-right: 10px;
+}
+
+#forumsearch {
+	margin-top: 10px;
+	margin-bottom: 22px;
+}
+
+#forumsearch #forumsearchbox {
+	width: 65%;
+	padding: 3px;
+}
+
+.clear { display: block; height: 1px; clear: both;}
+
+.page-numbers {
+	font-size: 10px;
+	padding: 2px 4px;
+	margin-right: 3px;
+	border-width: 1px;
+	border-style: solid;
+	background-color: #fff;
+	border-color: #ccc;
+}
+
+.dots {
+	background-color: none;
+	border: none;
+}
+
+.page-numbers.current {
+	font-weight: bold;
+	border-width: 1px;
+	border-style: solid;
+	background-color: #328ab2;
+	border-color: #328ab2;
+	color: #fff;
+}
+
+a.page-numbers:hover {
+	border-color: #999;
+}
+
+.next, .prev {
+	padding: 0;
+	border: none;
+	background-color: #fff;
+	color: #2583ad;
+}
+
+.next:hover, .prev:hover {
+	color: #d54e21;
+}
+
+#useravatar {
+	float: left;
+	margin: 12px 12px 8px;
+}
+
+#useravatar img {
+	border: 1px solid #fff;
+}
+
+#pagebody #userlogin, #userlogin {
+	font-size: 18px;
+	background: #666;
+	padding: 10px;
+	color: #fff;
+	font-weight: normal;
+	font-family: Georgia, Times, "Times New Roman", serif;
+	-moz-border-radius-topleft: 6px;
+	-khtml-border-top-left-radius: 6px;
+	-webkit-border-top-left-radius: 6px;
+	border-top-left-radius: 6px;
+	-moz-border-radius-topright: 6px;
+	-khtml-border-top-right-radius: 6px;
+	-webkit-border-top-right-radius: 6px;
+	border-top-right-radius: 6px;
+}
+
+dl#userinfo {
+	float: left;
+	margin-left: 12px;
+	margin-bottom: 12px;
+	margin-top: 8px;
+	width: 82%;
+	color: #333;
+}
+
+dl#userinfo dt {
+	float: left;
+	font-size: 10px;
+	color: #888;
+	margin-right: 6px;
+	margin-left: -12px;
+	font-weight: bold;
+}
+
+#useractivity {
+	clear:both;
+	margin-bottom: 22px;
+}
+
+#theuser {
+	border: 1px solid #dadada;
+	float: left;
+	width: 99%;
+	margin-bottom: 22px;
+	-moz-border-radius: 6px;
+	-khtml-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-khtml-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+}
+
+ul#profile-menu {
+	list-style: none;
+	margin: -3px 0 0;
+}
+
+ul#profile-menu li {
+	margin-top: -1px;
+	padding: 2px 0;
+	border-top: 1px solid #dadada;
+	font-size: 10px;
+}
+
+ul#profile-menu li.current a {
+	color: #333;
+	cursor: default;
+}
+
+form#profile-form {
+	clear: both;
+	margin-left: 12px;
+}
+
+form#profile-form h3 {
+	margin-left: -12px;
+	margin-top: 22px;
+}
+
+form#profile-form table th {
+	vertical-align: top;
+}
+
+form#profile-form table input[type=text] {
+	width: 97%;
+}
+
+form#profile-form .submit input {
+	font-size: 1.2em;
+	height: auto;
+	padding: 4px;
+}
+
+form#profile-delete-form {
+	float: right;
+	position: relative;
+	top: -42px;
+}
+
+form#profile-delete-form .delete:hover {
+	background-color: #c00;
+	color: #fff;
+}
+
+#topic-paging {
+	float: right;
+	margin-right: -162px;
+}
+
+ol.searchresults li {
+	list-style: square;
+}
+
+ol.searchresults li a {
+	font-size: 12px !important;
+}
+
+#topic-move, #topic-move fieldset {
+	display: inline;
+}
+
+#pagebody .postform .submit {
+	float: right;
+	border-top: 0;
+	padding-top: 0;
+	padding-right: 23px;
+}
+
+.threadyreply {
+	margin-top: 10px;
+}
+
+.threadreply th {
+	width: 226px;
+	padding: 0;
+	margin: 0;
+}
+.threadreply th a {
+	border: 0;
+}
+
+h2.post-form {
+	clear: left;
+}
+form.postform {
+	clear: right;
+}
+
+form.postform th, .form-table td {
+	margin: 0;
+	padding: 0;
+}
+form.postform input[type='text'] {
+	padding: 4px 2px;
+}

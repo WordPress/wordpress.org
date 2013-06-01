@@ -1,0 +1,333 @@
+/* The Reset ---------------------------------- */
+caption,th { text-align: right; }
+body {
+	font-family: sans-serif;
+	direction:rtl;
+	unicode-bidi:mbed;
+}
+/* -------------------------------------------- */
+
+
+h2 {
+	font-family: sans-serif;
+}
+
+em, cite {
+	font-style: bold;
+}
+
+#header h1 a {
+	background-position:center right;
+	text-indent: -9999px;
+	overflow:hidden;
+	float: right;
+}
+
+#header h2.rosetta a {
+	float: right;
+}
+
+#header ul {
+	margin-left: 14px;
+	margin-right: 0;
+	float: left;
+}
+
+#header ul li {
+	float: right;
+}
+
+#header ul li a {
+	font-family: sans-serif;
+}
+
+
+#header ul li#download a {
+	background-position: bottom right;
+}
+
+#home-welcome img.screenshot {
+	margin-left: 28px;
+	margin-right: 0;
+	float: right;
+}
+
+#home-welcome p {
+	margin-left: 14px;
+	margin-right: 0;
+}
+
+#home-welcome p.intro {
+	font-family: sans-serif;
+}
+
+/* */
+
+.submit input, .button, .button-primary, .button-secondary, input[type=button], input[type=submit] {
+	font-family: sans-serif;
+}
+
+.submit input, .button, .button-secondary, input[type=button], input[type=submit] {
+	background-position: right top;
+}
+
+.submit input:active, .button:active, .button-secondary:active, input[type=button]:active, input[type=submit]:active {
+	background-position: right bottom;
+}
+
+.button-primary {
+	background-position: right top;
+}
+
+
+.button-primary:active {
+	background-position: right bottom;
+}
+
+/* */
+
+.download-button {
+	background-position: right top;
+}
+
+
+a.download-button:active {
+	background-position: right bottom;
+}
+
+
+/* */
+
+#home-welcome .download-button {
+	margin-right: 6px;
+	margin-left: 0;
+}
+
+.col-3 ul {
+	margin-right: 16px;
+	margin-left: 0;
+}
+
+.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12  {
+	float:right;
+}
+#home-below ol.steps li {
+	padding-right: 44px;
+	padding-left: 0;
+}
+
+#home-below ol.steps li.one {
+	background-position: right top;
+}
+
+#home-below ol.steps li.two {
+	background-position: right top;
+}
+
+#home-below ol.steps li.three {
+	background-position: right top;
+}
+
+
+ul#notable-users li a {
+	border-right: 1px solid #f5f5f5;
+	border-left: 1px solid #dedede;
+}
+
+ul#notable-users li a:active {
+	border-right: 1px solid #dedede;
+	border-left: 1px solid #f5f5f5;
+}
+
+input.text {
+	margin-left: 2px;
+	margin-right: 0;
+}
+
+
+#headline h2 {
+	padding-right: 12px;
+	padding-left: 0;
+	float: right;
+}
+
+#headline .login {
+	float: left;
+	margin-left: 15px;
+	margin-right: 0;
+}
+
+#pages {float:left;}
+
+#pagebody .submenu, #pagebody #submenu {
+	margin-right: 0;
+}
+
+#pagebody .submenu li.current {
+	background-position: center right;
+}
+
+#pagebody .submenu li ul {
+	margin-right: 16px !important;
+	margin-left: 0 !important;
+}
+
+#pagebody ul {
+	margin-right: 16px;
+}
+
+a.rsslink {background-position: top right; padding-right: 14px; padding-left:0;}
+
+#pagebody ol {
+	margin-right: 22px;
+	margin-left: 0;
+	list-style: decimal;
+}
+
+#pagebody p.intro {
+	font-family: sans-serif;
+}
+
+.feed {
+	background-position: center right;
+	padding-left: 0;
+	padding-right: 19px;
+}
+
+
+#footer p {
+	font-family:sans-serif;
+	float: right;
+}
+
+
+#footer h6 {
+	float: left;
+}
+
+#footer h6 {
+	text-indent: -9999px;
+	overflow: hidden
+}
+
+#head-search {
+	float: left;
+	margin-left: 14px;
+	margin-right: 0;
+}
+
+#head-search input.text {
+	margin-left: 6px;
+	margin-right: 0;
+	float: right;
+}
+
+#head-search .button {
+	float: right;
+}
+
+#books .image {
+	float: right;
+	border-left: 1px solid #dadada;
+}
+
+#books img {
+	border: 1px solid #dadada;
+}
+
+#books li {
+	border-left-color: #eee;
+	border-right-color: #dadada;
+	float: right;
+
+#books h3 {
+	font-family:sans-serif;
+}
+
+#books p {
+	padding-left: 22px;
+	padding-right: 0;
+}
+
+#books .author {
+	font: normal 15px sans-serif;
+}
+
+.partner img {
+	float: left;
+	margin-left: 4px;
+	margin-right: 12px;
+}
+#pagebody table.widefat th {
+	text-align: right;
+}
+
+.form-table th, form#profile-form table th {
+	text-align: right;
+}
+
+.form-table input, .form-table textarea,
+form#profile-form table input, form#profile-form textarea {
+	border-right-color: #b0c1cf;
+}
+
+#sitesearch label { margin-left: 6px; margin-right: 0;}
+
+#sitesearch .button {
+	margin-right: 4px;
+	margin-left: 0;
+}
+
+ol.searchresults {
+	padding-right: 4px;
+	padding-left: 0;
+}
+
+.searchresults .source, .special .source {
+	float: left;
+}
+
+.heatmap {
+	font-family:sans-serif;
+}
+
+.col-10 .col-5 {
+	padding-left: 20px;
+	padding-right: 0;
+}
+
+#theuser #userinfo {
+	margin-right: 22px;
+	margin-left: 0;
+}
+
+#lang-guess {
+	font-family:sans-serif;
+}
+
+ul.logo {
+	margin: 0 0 14px 14px !important;
+	float: right;
+}
+
+ul.colors li {
+	float: right;
+	margin-right: 60px;
+	padding-left:50px;
+	padding-right: 0;
+	border-left: 1px solid #dfdfdf;
+	border-right: none;
+	margin-left:50px;
+}
+
+ul.colors li:last-child {
+	padding-left: 0;
+	margin-left: 0;
+	border-left: none;
+}
+
+ul.colors li img {
+	float: right;
+	margin-right: -60px;
+	margin-left: 0;
+}

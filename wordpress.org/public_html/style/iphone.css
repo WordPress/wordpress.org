@@ -1,0 +1,3 @@
+html {-webkit-text-size-adjust: none;}
+
+#header ul li a.current, #header ul li#download a.current {padding-bottom: 1px;}

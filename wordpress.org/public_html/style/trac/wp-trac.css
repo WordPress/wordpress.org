@@ -1,0 +1,562 @@
+/* WordPress overrides for Trac styles
+ *
+ * Most colors are to get rid of shades of yellow
+ * Most font sizes are to compensate for sans-serif vs. Verdana
+ ----------------------------------------------- */
+
+/* =admin.css */
+#content.admin #tabs {
+	background: #f9f9f9;
+	border-color: #ccc;
+}
+#content.admin #tabs li {
+	color: #666;
+}
+#content.admin #tabs li li.active {
+	background: #eaf2fa;
+	border: none;
+}
+
+/* =browser.css */
+#content.browser h1 .first:link, h1 .first:visited {
+	color: #999
+}
+#content.browser div.message {
+	background: #f7f7f7;
+}
+
+/* =code.css */
+table.code th {
+	border-bottom: 1px solid #d7d7d7;
+}
+table.code tbody th {
+	background: #eaf2fa;
+	color: #888;
+}
+table.code tbody th :link, table.code tbody th :visited {
+	color: #888;
+}
+
+/* =diff.css */
+.diff h2 {
+	line-height: 1;
+}
+.diff table.trac-diff th {
+	border-bottom: 1px solid #d7d7d7;
+}
+.diff table.trac-diff thead th {
+	background: #eaf2fa;
+}
+.diff table.trac-diff tbody th {
+	background: #eaf2fa;
+	color: #888;
+}
+.diff table.trac-diff tbody.skipped td, .diff table.trac-diff thead td {
+	border: none; /* reset the borders */
+	border-bottom: 1px solid #d7d7d7;
+}
+
+/* =prefs.css */
+#content.prefs #tabs li {
+	border-color: #ccc; /* get rid of the outset look */
+	line-height: 1.2;
+}
+#content.prefs #tabcontent {
+	background: none; /* get rid of the little strip of gradient */
+}
+
+/* =report.css */
+#content.report .tickets tbody tr:hover {
+	background: #eee;
+}
+
+/* =roadmap.css */
+table.progress td.closed {
+    background-color: #83B4D8;
+    background-image: linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+    background-image: -o-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+    background-image: -moz-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+    background-image: -webkit-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+    background-image: -ms-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+}
+
+/* =ticket.css */
+#content.ticket {
+	margin-left: 20px; /* formerly internal */
+	max-width: 58em; /* don't let it get bigger than it was */
+	width: auto; /* but allow for flexibility */
+}
+#ticket {
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+}
+#content.ticket .ticketdraft, #content.ticket #changelog {
+	border: 1px solid #ccc;
+}
+#ticket .date {
+	color: #888;
+}
+#ticket table.properties a:hover {
+	background: #ddd;
+}
+#ticket table.properties, #ticket table.properties .description {
+	border-top: 1px solid #ddd;
+}
+#ticket table.properties :link, #ticket table.properties :visited {
+	color: #000
+}
+#ticket table.properties td, #ticket table.properties th {
+	line-height: 1.4;
+	font-size: 81%;
+}
+#ticket table.properties th {
+	color: #666;
+}
+#ticket .description h3 {
+	border-bottom: 1px solid #ddd;
+	color: #666;
+}
+.comment img {
+	max-width: 100%;
+}
+#trac-comment-editor textarea {
+	background: #fcfcfc;
+}
+#changelog h3, #ticketchange h3 {
+	line-height: 1.1;
+}
+#properties .fullrow input {
+	width: 97.5%;
+}
+#properties .col1 input {
+	width: 87.5%;
+}
+#properties .col2 input {
+	width: 92.5%;
+}
+#properties table td {
+	vertical-align: top; /* align everything */
+	padding: .3em; /* breathing room */
+}
+#properties .col2 #field-cc[type="checkbox"] {
+	width: 2em; /* fix the cc checkbox */
+}
+#action div {
+	padding: .2em 0; /* breathing room */
+}
+
+/* =timeline.css */
+#content.timeline dt :link:hover, dt :visited:hover {
+	background-color: #eee;
+}
+#content.timeline dt.highlight {
+	background-color: #ffc;
+}
+dt.closedticket em {
+	text-decoration: line-through;
+}
+#content.timeline dd {
+	color: #777;
+}
+
+/* =trac.css */
+body {
+	min-width: 48.5em; /* don't let it get ugly unless responsive */
+}
+body, th, tr {
+	line-height: 1.4; /* I don't know how you people read without this */
+}
+hr {
+	border-top: 1px solid #ccc;
+}
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+	background: #ccc;
+}
+input[type=button]:active, input[type=submit]:active, input[type=reset]:active {
+	border-style: inset; /* make "pressed" state more noticeable */
+}
+input[type=text]:focus, input.textwidget:focus, textarea:focus {
+	border: 1px solid #888;
+}
+legend {
+	color: #666;
+}
+.nav ul {
+	padding: 0;
+}
+#mainnav {
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+	line-height: 1.1;
+	overflow: auto; /* magically clear contained floats */
+	padding: 0;
+	width: 100%; /* for IE, surprise */
+}
+#mainnav ul {
+	float: right;
+	font-size: 11px;
+}
+#mainnav li {
+	float: left; /* allow items to wrap around at narrow widths */
+	padding: 0;
+}
+#mainnav :link, #mainnav :visited {
+	background: none;
+	border-right: none;
+	border-left: 1px solid #ccc;
+	color: #000;
+	display: block;
+	padding: .25em 20px;
+}
+#mainnav :link:hover, #mainnav :visited:hover {
+	background-color: #ddd;
+	border-right: none;
+}
+#mainnav .active :link, #mainnav .active :visited {
+	background: #21759b; /* active nav menu background */
+	border-right: none;
+	color: #f9f9f9;
+}
+#mainnav .active :link:hover, #mainnav .active :visited:hover {
+	border-right: none;
+}
+#altlinks {
+	margin-left: 20px;
+	max-width: 58em; /* match the max-width for other items, e.g. #ticket */
+	width: auto;
+}
+#footer {
+	padding: .5em 0; /* more breathing room */
+}
+#prefs {
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+}
+#info {
+	background: #f9f9f9;
+}
+a.missing:link, a.missing:visited, a.missing, span.missing, a.forbidden, span.forbidden {
+	color: #999;
+}
+pre.wiki, pre.literal-block {
+	background: #ffe; /* light yellow for code blocks */
+	font-size: 12px; /* keep font size visually comparable */
+	line-height: 1.3; /* doesn't need as much line-height */
+}
+#attachments > div {
+	border: 1px solid #ccc;
+}
+#attachments dd {
+	margin-left: 10px
+}
+table.listing tr {
+	line-height: 1.3; /* less information, more compact */
+}
+table.listing thead {
+	background: #f9f9f9;
+}
+table.listing thead th {
+	background: #eaf2fa;
+	border-bottom-color: #ccc;
+}
+table.listing tbody tr:hover {
+	background: #eee !important; /* important to override the other important */
+}
+.suggestions {
+	border: 1px solid #888;
+}
+
+/* =wiki.css */
+#content.wiki #pagepath .first:link, #content.wiki #pagepath .first:visited {
+	color: #999;
+}
+#content.wiki .wiki-toc {
+	border: 1px solid #d7d7d7;
+	background: #f9f9f9;
+}
+#content.wiki .wiki-toc li {
+	padding: .05em .4em; /* give individual TOC items more breathing room */
+}
+#content.wiki .wiki-toc .active {
+	background: #eaf2fa; /* current TOC item */
+}
+
+/* =Formerly internal */
+
+/* Gravatars */
+span.avatar img {
+	float: left;
+	margin: 0 8px 0 -4px;
+}
+img.avatar { float: left;
+	margin: 0 6px 0 -30px;
+}
+/* Give the various warnings some formarting */
+.wp-notice,
+.wp-caution {
+	padding: 0 1.2em;
+	margin: 1em 0;
+}
+.wp-notice {
+	background: #eff6f9;
+	border: 2px solid #21759b;
+}
+.wp-caution {
+	border: 2px solid #999;
+	background: #ffb;
+}
+.wp-notice li,
+.wp-caution li {
+	margin-bottom: 0.5em;
+}
+/* Move the AtD  button into the Trac toolbar */
+.wikitoolbar {
+	width: 258px;
+}
+.AtD_proofread_button,
+.AtD_edit_button {
+	float: left;
+	width: 22px;
+	height: 16px;
+	border: 1px solid #fff;
+	border-left-color: #d7d7d7;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.AtD_proofread_button:hover,
+.AtD_edit_button:hover {
+	border-color: #fb2;
+}
+/* Remove nowrap from long titles */
+.tickets tbody td.summary,
+.reports tbody td.summary {
+	white-space: normal;
+}
+/* Add nowrap to milestone and type */
+table.listing tbody td.milestone,
+table.listing tbody td.type,
+table.listing tbody td.component,
+table.listing tbody td.workflow {
+	white-space: nowrap;
+}
+/* Some visual improvements to ticket properties and attachments */
+td[headers=h_keywords] a {
+	margin-right: 10px;
+	white-space: nowrap;
+}
+dl.attachments dt {
+	padding-bottom: 4px;
+}
+
+/* =Link Colors */
+:link,
+:visited,
+dt em,
+.milestone .info h2 em,
+#content.build h2.config :link,
+#content.build h2.config :visited {
+	color: #21759b;
+}
+
+/* =bbPress / BuddyPress */
+body.bbpress .wp-notice {
+	background: #eaf9ed;
+	border: 2px solid #080;
+}
+body.bbpress :link,
+body.bbpress :visited,
+body.bbpress dt em,
+body.bbpress .milestone .info h2 em,
+body.bbpress #content.build h2.config :link,
+body.bbpress #content.build h2.config :visited {
+	color: #080; /* link color */
+}
+body.bbpress #mainnav .active :link,
+body.bbpress #mainnav .active :visited {
+	background: #080; /* active nav item */
+}
+body.buddypress .wp-notice {
+	background: #fff3ec;
+	border: 2px solid #d84800;
+}
+body.buddypress :link,
+body.buddypress :visited,
+body.buddypress dt em,
+body.buddypress .milestone .info h2 em,
+body.buddypress #content.build h2.config :link,
+body.buddypress #content.build h2.config :visited {
+	color: #d84800; /* link color */
+}
+body.bbpress #mainnav .active :link,
+body.bbpress #mainnav .active :visited {
+	background: #d84800; /* active nav item */
+}
+
+/* =Workflow Keywords */
+#properties table td {
+	vertical-align: top;
+}
+#keyword-bin {
+	padding: 8px 0 0 13px;
+	clear: both;
+}
+#keyword-bin span {
+	float: left;
+	margin: 0 25px 8px 0;
+	font-size: 12px;
+}
+#keyword-bin span[title] {
+	cursor: help;
+}
+#keyword-bin span a {
+	margin: 3px 0 0 -13px;
+	cursor: pointer;
+	width: 10px;
+	height: 10px;
+	display: block;
+	float: left;
+	position: absolute;
+	background: url(//wordpress.org/wp-admin/images/xit.gif) no-repeat;
+	border-bottom: 0;
+}
+#edit-keywords {
+	float: right;
+	cursor: pointer;
+	font-size: 8px;
+	color: #999;
+	margin: 6px 6px 0 0;
+}
+#keyword-bin span a:hover {
+	background-position: -10px 0;
+}
+.has-js #field-keywords {
+	width: 92%;
+	display: none;
+	float: left;
+	clear: both;
+}
+#keyword-label {
+	float: left;
+	padding: 5px 6px 5px 0;
+	text-align: right;
+}
+
+/* =Responsive / Mobile
+----------------------------------------------- */
+
+@media (max-width: 640px) {
+	body {
+		min-width: 1em; /* small value to override previous min-width */
+		-webkit-text-size-adjust: 100%;
+	}
+	h1, h2 {
+		-webkit-text-size-adjust: 85%; /* make them relatively smaller */
+	}
+	hr {
+		margin: 1em 0; /* less breathing room */
+	}
+	.nav ul {
+		text-align: left; /* move these to the left */
+	}
+	.nav li, #altlinks li, .milestone .info dl {
+		white-space: normal; /* allow them to wrap */
+	}
+	#metanav ul {
+		overflow: auto; /* magical float clearing */
+	}
+	#metanav li {
+		float: left;
+	}
+	#mainnav :link, #mainnav :visited { /* bigger tap target */
+		padding: .5em 20px;
+		-webkit-text-size-adjust: 120%;
+	}
+	#header img {
+		max-width: 50%; /* prevent the logo and search from colliding (to a point) */
+		height: auto;
+	}
+	#search {
+		margin-bottom: 2em; /* more space below when logo is smaller */
+	}
+	#content.ticket, .milestone .info .progress, .milestone .info dl, #stats {
+		margin-left: 0; /* use all the available space */
+	}
+	#ticket table.properties img.avatar {
+		float: right; /* move it to the right to help prevent collisions */
+		margin: 0 .5em 0 0;
+	}
+	#ticket table.properties th {
+		padding: 0.5em .2em .5em 0; /* reduce side padding */
+	}
+	#ticket table.properties td {
+		padding: 0.5em 0 .5em .2em; /* reduce side padding */
+	}
+	#field-description-help, #content.ticket label[for="comment"] {
+		float: none; /* don't let it collide with the editor buttons */
+	}
+	#keyword-label {
+		min-width: 115px !important;
+		text-align: left;
+	}
+	#properties table tr, #properties table th {
+		display: block; /* one col, labels on top */
+	}
+	#properties table th {
+		padding: 0;
+		text-align: left;
+	}
+	#properties table th.col2 {
+		border-left: none; /* no columns, no divider */
+	}
+	#properties table td.fullrow { /* Webkit fix for overflowing inputs */
+		display: block;
+		width: 95%;
+	}
+	.milestone .info .progress {
+		max-width: 85%; /* override former max-width */
+	}
+	#stats {
+		float: none; /* move it over */
+		max-width: 100%;
+	}
+	#content.prefs #tabs {
+		margin: 1em 0 0 0;
+	}
+	#content.prefs #tabs li { /* bigger tap target */
+		margin: 1em 1em 0 0;
+		padding: .6em 1em;
+	}
+	#content.admin #tabcontent {
+		margin: 0;
+		padding: 0;
+	}
+	#content.admin #tabs, #content.admin #tabcontent form.addnew { /* stop collisions */
+		float: none;
+		margin: 1em 0;
+	}
+	#footer p.left {
+		display: none;
+	}
+}
+@media (max-width: 360px) {
+	#header img {
+		margin-bottom: 0; /* push search down */
+		max-width: 70%;
+	}
+	#search {
+		margin-bottom: .5em; /* less space below */
+	}
+	#info th {
+		white-space: normal; /* allow to wrap */
+	}
+	#prefs {
+		float: none; /* push everything below pref box */
+	}
+	#keyword-label {
+		display: block;
+		float: none;
+	}
+	.milestone .info .progress {
+	    width: 85%;
+	}
+}

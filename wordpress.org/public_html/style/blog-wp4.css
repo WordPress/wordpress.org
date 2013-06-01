@@ -1,0 +1,30 @@
+.feedback {
+	text-align: right;
+	font-size: 10px;
+	text-transform: uppercase;
+	border-bottom: 1px solid #dadada;
+	padding-bottom: 1px;
+	margin-bottom: 25px;
+}
+
+.feedback a {
+	text-decoration: none;
+}
+
+.nextprev {
+	margin-bottom: 2em;
+}
+
+.blog-categories ul li ul {
+	margin-bottom: 0 !important;
+}
+
+.storycontent div {
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+
+.storycontent div.googleplus1_button {
+	margin-top: 0;
+	margin-bottom: 0;
+}
