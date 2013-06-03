@@ -448,7 +448,15 @@ class WordCamp_Post_Types_Plugin {
 			$html .= sprintf( '<tr class="%s">', sanitize_html_class( 'wcpt-time-' . date( $time_format, $time ) ) );
 			$html .= sprintf( '<td class="wcpt-time">%s</td>', str_replace( ' ', '&nbsp;', esc_html( date( $time_format, $time ) ) ) );
 
+			$skip_next = 0;
+
 			foreach ( $columns as $key => $term_id ) {
+
+				// Allow the below to skip some items if needed.
+				if ( $skip_next > 0 ) {
+					$skip_next--;
+					continue;
+				}
 
 				// For empty items print empty cells.
 				if ( empty( $entry[ $term_id ] ) ) {
@@ -463,7 +471,6 @@ class WordCamp_Post_Types_Plugin {
 				}
 
 				$colspan = 1;
-				$break = false;
 				$classes = array();
 				$session = get_post( $entry[ $term_id ] );
 				$session_title = apply_filters( 'the_title', $session->post_title );
@@ -513,18 +520,19 @@ class WordCamp_Post_Types_Plugin {
 				if ( count( $speakers_names ) )
 					$content .= sprintf( ' <span class="wcpt-session-speakers">%s</span>', implode( ', ', $speakers_names ) );
 
-				// For sessions that are in multiple tracks, span the column instead of printing twice.
-				if ( $key != current( $columns ) && ! empty( $entry[ current( $columns ) ] ) && $entry[ current( $columns ) ] == $session->ID ) {
-					$classes[] = 'wcpt-multiple-tracks';
-					$colspan = 2;
-					$break = true;
+				// If the next element in the table is the same as the current one, use colspan
+				if ( $key != key( array_slice( $columns, -1, 1, true ) ) ) {
+					while ( $pair = each( $columns ) ) {
+						if ( ! empty( $entry[ $pair['value'] ] ) && $entry[ $pair['value'] ] == $session->ID ) {
+							$colspan++;
+							$skip_next++;
+						} else {
+							break;
+						}
+					}
 				}
 
 				$html .= sprintf( '<td colspan="%d" class="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $content );
-
-				// Allow the above to break (pun intended).
-				if ( $break )
-					break;
 			}
 
 			$html .= '</tr>';
