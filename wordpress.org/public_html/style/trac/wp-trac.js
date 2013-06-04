@@ -40,7 +40,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 				$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') );
 			});
 
-			// Force 'Modify Ticket' to be shown
+			// Force 'Attachments' and 'Modify Ticket' to be shown
+			$('#attachments').removeClass('collapsed');
 			$("#modify").parent().removeClass('collapsed');
 
 			// Toggle the security notice on component change, if rendered
