@@ -121,7 +121,7 @@ sup {
 #wporg-header ul {
 	list-style: none;
 	width: 100%;
-	margin-top: -15px;
+	margin: -15px 0 0;
 	float:left;
 }
 

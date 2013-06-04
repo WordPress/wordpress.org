@@ -9,12 +9,14 @@
 	font-size: 14px;
 	clear: both;
 }
-#main h3, #main dl, #main p, #main ol, #main ul {
+#main h3, #main dl, #main p {
 	margin-top: 1em;
 	margin-bottom: 1em;
 }
-#main ul, #main ol {
+ul, ol {
 	padding-left: 40px;
+	margin-top: 1em;
+	margin-bottom: 1em;
 }
 fieldset {
 	background: #fafafa;
@@ -28,11 +30,15 @@ blockquote {
 
 /* Fixing display of the header */
 #wporg-header :link, #wporg-header :visited,
-#wporg-header :link:hover, #wporg-header :visited:hover {
+#wporg-header :link:hover, #wporg-header :visited:hover,
+#headline :link, #headline :visited,
+#headline :link:hover, #headline :visited:hover,
+#headline h2 {
 	border: 0;
 }
 #wporg-header ul :link, #wporg-header ul :visited,
-#wporg-header ul :link:hover, #wporg-header ul :visited:hover {
+#wporg-header ul :link:hover, #wporg-header ul :visited:hover,
+#headline :link:hover, #headline :visited:hover {
 	background: 0;
 }
 #headline .menu {
@@ -40,8 +46,8 @@ blockquote {
 	float: right;
 	font-size: 14px;
 	font-weight: bold;
-	padding-top: 22px;
-	margin-right: 15px;
+	padding: 22px 0 0;
+	margin: 0 15px 0 0;
 }
 #headline .menu li {
 	display: inline;
@@ -326,6 +332,9 @@ dt.closedticket em {
 }
 h2 {
 	box-shadow: none;
+}
+#content.timeline h2 {
+	font-size: 105%;
 }
 /* =trac.css */
 body {
