@@ -4,131 +4,6 @@
  * Most font sizes are to compensate for sans-serif vs. Verdana
  ----------------------------------------------- */
 
-/* =WP.org global header & footer */
-#main {
-	font-size: 14px;
-	clear: both;
-}
-#main h3, #main dl, #main p {
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-ul, ol {
-	padding-left: 40px;
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-fieldset {
-	background: #fafafa;
-	padding: 1em;
-	border: 1px solid #d7d7d7;
-}
-blockquote {
-	padding: 0;
-	background: 0;
-}
-
-/* Fixing display of the header */
-#wporg-header :link, #wporg-header :visited,
-#wporg-header :link:hover, #wporg-header :visited:hover,
-#headline :link, #headline :visited,
-#headline :link:hover, #headline :visited:hover,
-#headline h2 {
-	border: 0;
-}
-#wporg-header ul :link, #wporg-header ul :visited,
-#wporg-header ul :link:hover, #wporg-header ul :visited:hover,
-#headline :link:hover, #headline :visited:hover {
-	background: 0;
-}
-#headline .menu {
-	list-style: none;
-	float: right;
-	font-size: 14px;
-	font-weight: bold;
-	padding: 22px 0 0;
-	margin: 0 15px 0 0;
-}
-#headline .menu li {
-	display: inline;
-	padding-left: 20px;
-}
-
-/* More specific overrides of wp4 */
-.change h3 a,
-h3.change a {
-	font-weight: normal; /* overrides wp4 */
-	color: inherit;
-}
-
-/* We like the WP button styles, but they need to be a bit smaller sometimes */
-.inlinebuttons input {
-	margin: 0 .1em .1em; /* restores Trac's own CSS  */
-	font-size: 10px;
-	line-height: 20px;
-	height: 21px;
-}
-
-/* Trying to position Trac's navigation/header */
-#ctxtnav {
-	padding-top: 0;
-}
-#ctxtnav ul {
-	margin: 0 0 .3em;
-}
-#content.ticket .trac-topnav {
-	display: none;
-}
-#pagepath {
-	float: none;
-	padding: 0;
-}
-#banner {
-	position: relative;
-}
-#metanav {
-	position: absolute;
-	top: -22px;
-	right: 0;
-}
-form#search {
-	float: right;
-	margin-top: .5em;
-}
-form#search input {
-	font-size: 13px;
-}
-
-/* Everything should be 960px width, except for reports (too much tabular data for 960px) */
-#banner, #mainnav, #ctxtnav, #pagepath, #content, #footer, #altlinks, #main > h1 {
-	width: 960px;
-	margin: 0 auto;
-}
-#banner, #ctxtnav {
-	width: 930px;
-}
-#content.report {
-	width: 98%;
-}
-#content.report div.reports ~ #help,
-#content.report div.reports,
-#content.report > h1,
-#content.report > form,
-#content.report #description,
-#content.report > .buttons,
-#content.report > .paging,
-#content.report > #report-notfound,
-#content.report > #report-notfound + #help {
-	width: 960px;
-	margin-left: auto;
-	margin-right: auto;
-}
-#content.report form#prefs {
-	float: none;
-	border: 0;
-	background: none;
-}
-
 /* =admin.css */
 #content.admin #tabs {
 	background: #f9f9f9;
@@ -236,6 +111,7 @@ table.progress {
 }
 /* =ticket.css */
 #content.ticket {
+	margin-left: 20px; /* formerly internal */
 	max-width: 58em; /* don't let it get bigger than it was */
 	width: auto; /* but allow for flexibility */
 }
@@ -246,17 +122,11 @@ table.progress {
 #content.ticket .ticketdraft, #content.ticket #changelog {
 	border: 1px solid #ccc;
 }
-#ticket > h2 {
-	font-size: 16px;
-}
 #ticket .date {
 	color: #888;
 }
 #ticket table.properties a:hover {
 	background: #ddd;
-}
-#ticket table.properties th.missing {
-	color: #aaa;
 }
 #ticket table.properties, #ticket table.properties .description {
 	border-top: 1px solid #ddd;
@@ -316,9 +186,6 @@ ul.children > li.child {
 	box-shadow: none;
 }
 /* =timeline.css */
-#content.timeline dl {
-	margin-left: 1em;
-}
 #content.timeline dt :link:hover, dt :visited:hover {
 	background-color: #eee;
 }
@@ -330,16 +197,9 @@ dt.closedticket em {
 }
 #content.timeline dd {
 	color: #777;
-	margin: 0 0 .75em 5.8em;
-}
-#content.timeline :link, #content.timeline :visited {
-	color: #000;
 }
 h2 {
 	box-shadow: none;
-}
-#content.timeline h2 {
-	font-size: 105%;
 }
 /* =trac.css */
 body {
@@ -350,6 +210,12 @@ body, th, tr {
 }
 hr {
 	border-top: 1px solid #ccc;
+}
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+	background: #ccc;
+}
+input[type=button]:active, input[type=submit]:active, input[type=reset]:active {
+	border-style: inset; /* make "pressed" state more noticeable */
 }
 input[type=text]:focus, input.textwidget:focus, textarea:focus {
 	border: 1px solid #888;
@@ -367,20 +233,20 @@ legend {
 	border: 0;
 }
 #mainnav {
-	background: none;
-	border: 0;
-	border-radius: 0;
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+	border-radius: 3px;
 	line-height: 1.1;
-	margin-top: 8px;
+	overflow: auto; /* magically clear contained floats */
 	padding: 0;
-/*	width: 100%; /* for IE, surprise */
+	width: 100%; /* for IE, surprise */
 }
 #mainnav .first, #mainnav .first :link,
 #mainnav .last, #mainnav .last :link {
 	border-radius: 0;
 }
 #mainnav ul {
-	float: left;
+	float: right;
 	font-size: 11px;
 }
 #mainnav li {
@@ -413,6 +279,11 @@ legend {
 }
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
+}
+#altlinks {
+	margin-left: 20px;
+	max-width: 58em; /* match the max-width for other items, e.g. #ticket */
+	width: auto;
 }
 #footer {
 	padding: .5em 0; /* more breathing room */
@@ -621,8 +492,8 @@ dl.attachments dt {
 }
 
 /* =Link Colors */
-a:link,
-a:visited,
+:link,
+:visited,
 dt em,
 .milestone .info h2 em,
 #content.build h2.config :link,
