@@ -93,13 +93,7 @@ form#search input {
 	font-size: 13px;
 }
 
-/* Everything should be 960px width, except for when we could really use the extra space:
- * - attachments/patches (but not when uploading)
- * - changesets
- * - code browser
- * - ticket query
- * - report views (but not /report)
- */
+/* Everything should be 960px width, except for reports (too much tabular data for 960px) */
 #banner, #mainnav, #ctxtnav, #pagepath, #content, #footer, #altlinks, #main > h1 {
 	width: 960px;
 	margin: 0 auto;
@@ -107,24 +101,12 @@ form#search input {
 #banner, #ctxtnav {
 	width: 930px;
 }
-#content.report,
-#content.browser,
-#content.query,
-#content.changeset,
-#content.attachment {
-	width: 100%;
+#content.report {
+	width: 98%;
 }
 #content.report div.reports ~ #help,
 #content.report div.reports,
-#content.changeset > #title,
-#content.changeset #overview,
-#content.attachment > form,
-#content.attachment #info,
-#content.attachment > h1,
 #content.report > h1,
-#content.browser > h1,
-#content.query > h1,
-#content.query #query,
 #content.report > form,
 #content.report #description,
 #content.report > .buttons,
@@ -132,9 +114,6 @@ form#search input {
 	width: 960px;
 	margin-left: auto;
 	margin-right: auto;
-}
-#content.changeset #overview {
-	position: relative;
 }
 #content.report form#prefs {
 	float: none;
