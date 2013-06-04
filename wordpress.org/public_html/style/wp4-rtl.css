@@ -16,33 +16,33 @@ em, cite {
 	font-style: bold;
 }
 
-#header h1 a {
+#wporg-header h1 a {
 	background-position:center right;
 	text-indent: -9999px;
 	overflow:hidden;
 	float: right;
 }
 
-#header h2.rosetta a {
+#wporg-header h2.rosetta a {
 	float: right;
 }
 
-#header ul {
+#wporg-header ul {
 	margin-left: 14px;
 	margin-right: 0;
 	float: left;
 }
 
-#header ul li {
+#wporg-header ul li {
 	float: right;
 }
 
-#header ul li a {
+#wporg-header ul li a {
 	font-family: sans-serif;
 }
 
 
-#header ul li#download a {
+#wporg-header ul li#download a {
 	background-position: bottom right;
 }
 
@@ -195,17 +195,17 @@ a.rsslink {background-position: top right; padding-right: 14px; padding-left:0;}
 }
 
 
-#footer p {
+#wporg-footer p {
 	font-family:sans-serif;
 	float: right;
 }
 
 
-#footer h6 {
+#wporg-footer h6 {
 	float: left;
 }
 
-#footer h6 {
+#wporg-footer h6 {
 	text-indent: -9999px;
 	overflow: hidden
 }

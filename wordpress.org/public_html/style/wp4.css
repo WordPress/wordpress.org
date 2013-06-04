@@ -77,13 +77,13 @@ sup {
 	clear: both;
 }
 
-#header {
+#wporg-header {
 	height: 120px;
 	min-width: 960px;
 	background: #222222;
 }
 
-#header h1 a {
+#wporg-header h1 a {
 	display: block;
 	background: url(http://s.wordpress.org/style/images/wp-header-logo.png?1) center left no-repeat;
 	background-size: 303px 53px;
@@ -92,25 +92,25 @@ sup {
 	text-indent: -9999px;
 	float: left;
 }
-.no-static #header h1 a {
+.no-static #wporg-header h1 a {
 	background-image: url(//wordpress.org/style/images/wp-header-logo.png?1);
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-	#header h1 a {
+	#wporg-header h1 a {
 		background-image: url(http://s.wordpress.org/style/images/wp-header-logo-2x.png?1);
 	}
-	.no-static #header h1 a {
+	.no-static #wporg-header h1 a {
 		background-image: url(//wordpress.org/style/images/wp-header-logo-2x.png?1);
 	}
 }
 
-#header h2.rosetta {
+#wporg-header h2.rosetta {
     font-size: 30px;
     color: #dfdfdf;
     font-family: Georgia, "Times New Roman", serif;
 }
 
-#header h2.rosetta a {
+#wporg-header h2.rosetta a {
     padding: 36px 27px 0;
     float: left;
     display: block;
@@ -118,19 +118,19 @@ sup {
     color: #dfdfdf;
 }
 
-#header ul {
+#wporg-header ul {
 	list-style: none;
 	width: 100%;
 	margin-top: -15px;
 	float:left;
 }
 
-#header ul li {
+#wporg-header ul li {
 	float: left;
 	position:relative;
 }
 
-#header ul li a {
+#wporg-header ul li a {
 	font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
 	font-weight: 600;
 	display: block;
@@ -142,31 +142,31 @@ sup {
 	height: 48px;
 }
 
-#header ul li#download a.current {
+#wporg-header ul li#download a.current {
 	color: #eee;
 }
 
-#header ul.nav-submenu li a {
+#wporg-header ul.nav-submenu li a {
 	height: 34px;
 }
 
-#header ul li a:active {
+#wporg-header ul li a:active {
 	color: #000;
 }
 
-#header ul li a:hover {
+#wporg-header ul li a:hover {
 	color: #2faadd;
 }
 
-#header ul li a.current {
+#wporg-header ul li a.current {
 	color: #2faadd;
 }
 
-#header ul li#download .uparrow {
+#wporg-header ul li#download .uparrow {
 	display:none;
 }
 
-#header ul li a.current ~ .uparrow {
+#wporg-header ul li a.current ~ .uparrow {
 	width: 0; 
 	height: 0; 
 	border-left: 9px solid transparent;
@@ -175,7 +175,7 @@ sup {
 	margin: -9px auto 0 auto;
 }
 
-#header ul li:hover .nav-submenu ~ .uparrow, #header ul li .nav-submenu:hover ~ .uparrow {
+#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
         width: 0;
         height: 0;
         border-left: 9px solid transparent;
@@ -184,26 +184,26 @@ sup {
         margin: -10px auto 0 auto;
 }
 
-#header ul li a.subcurrent {
+#wporg-header ul li a.subcurrent {
 	font-weight: bold;
 }
 
-#header ul li#download {
+#wporg-header ul li#download {
 	height: 34px;
 	padding: 0 12px 34px 12px;
 	float: right;
 	margin-right: 14px;
 }
 
-#header ul li#download a {
+#wporg-header ul li#download a {
 	padding:0;
 }
 
-#header ul li#download a:hover {
+#wporg-header ul li#download a:hover {
 	color: #eee;
 }
 
-#header .nav-submenu {
+#wporg-header .nav-submenu {
 	display:none;
 	min-width: 0;
 	background: #444;
@@ -212,7 +212,7 @@ sup {
 	border-top:0;
 }
 
-#header ul li:hover .nav-submenu, #header ul li .nav-submenu:hover  {
+#wporg-header ul li:hover .nav-submenu, #wporg-header ul li .nav-submenu:hover  {
 	display:block;
 	position:absolute;
 	top:46px;
@@ -221,7 +221,7 @@ sup {
 	width:auto;
 }
 
-#header ul li .nav-submenu li {
+#wporg-header ul li .nav-submenu li {
 	float:none;
 }
 
@@ -870,7 +870,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	background-image: url(//wordpress.org/style/images/feedicon.png);
 }
 
-#footer {
+#wporg-footer {
 	clear: both;
 	border-top: 1px solid #dedede;
 	padding: 6px 14px;
@@ -878,25 +878,25 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	margin: 0 auto;
 }
 
-#footer .wrapper {
+#wporg-footer .wrapper {
 	width: 932px;
 }
 
-#footer p {
+#wporg-footer p {
 	font-size: 12px;
 	float: left;
 	color: #bbb;
 }
 
-#footer p a {
+#wporg-footer p a {
 	border: none;
 }
 
-#footer h6 {
+#wporg-footer h6 {
 	float: right;
 }
 
-#footer h6 {
+#wporg-footer h6 {
 	background: url(http://s.wordpress.org/style/images/codeispoetry.png?1) center center no-repeat;
 	background-size: 133px 11px;
 	width: 133px;
@@ -904,15 +904,15 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	text-indent: -9999px;
 	margin-top: 6px;
 }
-.no-static #footer h6 {
+.no-static #wporg-footer h6 {
 	background-image: url(//wordpress.org/style/images/codeispoetry.png?1);
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-	#footer h6 {
+	#wporg-footer h6 {
 		background-image: url(http://s.wordpress.org/style/images/codeispoetry-2x.png);
 	}
-	.no-static #footer h6 {
+	.no-static #wporg-footer h6 {
 		background-image: url(//wordpress.org/style/images/codeispoetry-2x.png);
 	}
 }
