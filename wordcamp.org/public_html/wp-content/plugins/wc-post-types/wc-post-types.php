@@ -426,6 +426,19 @@ class WordCamp_Post_Types_Plugin {
 		// Sort all sessions by their key (timestamp).
 		ksort( $sessions );
 
+		// Remove empty columns unless tracks have been explicitly specified
+		if ( 'all' == $attr['tracks'] ) {
+			$used_terms = array();
+
+			foreach ( $sessions as $time => $entry )
+				if ( is_array( $entry ) )
+					foreach ( $entry as $term_id => $session_id )
+						$used_terms[ $term_id ] = $term_id;
+
+			$columns = array_intersect( $columns, $used_terms );
+			unset( $used_terms );
+		}
+
 		$html = '<table class="wcpt-schedule" border="0">';
 		$html .= '<thead>';
 		$html .= '<tr>';
