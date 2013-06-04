@@ -18,9 +18,11 @@
 }
 #tabs {
 	border-radius: 3px;
+	box-shadow: none;
 }
 #tabs li li.active {
-	border-radius: 3px;
+	border-radius: 0;
+	box-shadow: none;
 }
 .plugin {
 	border-radius: 3px;
@@ -224,13 +226,24 @@ legend {
 .nav ul {
 	padding: 0;
 }
+#metanav {
+	padding-bottom: 3px;
+}
+#metanav :link, #metanav :visited {
+	border: 0;
+}
 #mainnav {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
+	border-radius: 3px;
 	line-height: 1.1;
 	overflow: auto; /* magically clear contained floats */
 	padding: 0;
 	width: 100%; /* for IE, surprise */
+}
+#mainnav .first, #mainnav .first :link,
+#mainnav .last, #mainnav .last :link {
+	border-radius: 0;
 }
 #mainnav ul {
 	float: right;
@@ -239,6 +252,11 @@ legend {
 #mainnav li {
 	float: left; /* allow items to wrap around at narrow widths */
 	padding: 0;
+	border: 0;
+	background: 0;
+}
+#mainnav * {
+	border: 0 !important;
 }
 #mainnav :link, #mainnav :visited {
 	background: none;
@@ -246,16 +264,18 @@ legend {
 	border-left: 1px solid #ccc;
 	color: #000;
 	display: block;
-	padding: .25em 20px;
+	padding: 4px 20px 3px;
 }
 #mainnav :link:hover, #mainnav :visited:hover {
-	background-color: #ddd;
+	background: #ddd;
 	border-right: none;
+	color: #000;
 }
 #mainnav .active :link, #mainnav .active :visited {
 	background: #21759b; /* active nav menu background */
 	border-right: none;
 	color: #f9f9f9;
+	text-shadow: none;
 }
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
@@ -271,6 +291,7 @@ legend {
 #prefs {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
+	box-shadow: none;
 }
 #info {
 	background: #f9f9f9;
@@ -283,8 +304,12 @@ pre.wiki, pre.literal-block {
 	font-size: 12px; /* keep font size visually comparable */
 	line-height: 1.3; /* doesn't need as much line-height */
 }
-#attachments > div {
+#attachments div.attachments form {
+	margin-top: 1em;
+}
+#attachments > div.attachments {
 	border: 1px solid #ccc;
+	padding-right: 1em;
 }
 #attachments dd {
 	margin-left: 10px
@@ -310,15 +335,19 @@ span:target {
 }
 input[type=button], input[type=submit], input[type=reset] {
 	border-radius: 3px;
+	text-shadow: none;
+	box-shadow: none;
 }
 input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
 	box-shadow: none;
+	text-shadow: none;
 }
 input[type=text], input.textwidget, textarea {
 	border-radius: 3px;
 }
 fieldset {
 	border-radius: 3px;
+	box-shadow: none;
 }
 .inlinebuttons input {
 	border-radius: 3px;
