@@ -87,12 +87,12 @@ html body {
 	background:white;
 }
 
-html #header {
+html #wporg-header {
 	width:auto;
 	min-height:0;
 }
 
-#header h1 {
+#wporg-header h1 {
 	display:inline;
 	padding:0;
 }
@@ -118,7 +118,7 @@ html #wrapper {
 	background:white;
 }
 
-html #footer {
+html #wporg-footer {
 	width:952px;
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
@@ -128,7 +128,7 @@ html #footer {
 	padding-bottom:20px;
 }
 
-html #footer p {
+html #wporg-footer p {
 	float:none;
 	font-size:12px;
 }
@@ -147,6 +147,11 @@ html h4 {
 
 #searchsubmit {
 	padding:0 !important;
+}
+
+/* To account for modifications to the "Post it" button on open access P2s */
+#postbox input#tags {
+	width: 70%;
 }
 
 .jetpack_subscription_widget input[type="submit"] {
