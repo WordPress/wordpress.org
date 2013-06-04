@@ -116,7 +116,9 @@ form#search input {
 #content.report > form,
 #content.report #description,
 #content.report > .buttons,
-#content.report > .paging {
+#content.report > .paging,
+#content.report > #report-notfound,
+#content.report > #report-notfound + #help {
 	width: 960px;
 	margin-left: auto;
 	margin-right: auto;
@@ -243,6 +245,9 @@ table.progress {
 }
 #content.ticket .ticketdraft, #content.ticket #changelog {
 	border: 1px solid #ccc;
+}
+#ticket > h2 {
+	font-size: 16px;
 }
 #ticket .date {
 	color: #888;
