@@ -60,6 +60,12 @@ h3.change a {
 	font-weight: normal; /* overrides wp4 */
 	color: inherit;
 }
+#main #altlinks h3 {
+	margin: 0;
+}
+#main #altlinks ul {
+	padding-left: 0;
+}
 
 /* We like the WP button styles, but they need to be a bit smaller sometimes */
 .inlinebuttons input {
@@ -414,6 +420,9 @@ legend {
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
 	border-right: none;
 }
+#altlinks {
+	padding-bottom: 10px;
+}
 #footer {
 	padding: .5em 0; /* more breathing room */
 }
@@ -530,7 +539,7 @@ div.system-message {
 #warning.system-message,
 .warning.system-message {
 	border-color: #333;
-	color: 3333;
+	color: #333;
 }
 div.system-message .trac-close-msg {
 	border-radius: 3px;
