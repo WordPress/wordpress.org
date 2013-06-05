@@ -1408,18 +1408,18 @@ ul.colors li img {
 	margin-left: -60px;
 }
 
-.meta {
+body .meta {
 	font-size: 12px;
 	color: #777;
 	margin-bottom: 10px;
 }
 
-.meta a { 
+body .meta a { 
 	color: #777;
 	border-bottom: 1px solid #dfdfdf;
 }
 
-.meta a:hover { color: #d54e21; border-bottom-color: #d54e21; }
+body .meta a:hover { color: #d54e21; border-bottom-color: #d54e21; }
 
 hr { border: none; border-top: 1px solid #dfdfdf; }
 
