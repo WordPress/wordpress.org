@@ -626,7 +626,8 @@ a:visited,
 dt em,
 .milestone .info h2 em,
 #content.build h2.config :link,
-#content.build h2.config :visited {
+#content.build h2.config :visited,
+.report div.reports h3 em {
 	color: #21759b;
 }
 
