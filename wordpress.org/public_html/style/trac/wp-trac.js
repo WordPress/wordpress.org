@@ -63,7 +63,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 			// Clear the milestone on wontfix, duplicate, worksforme, invalid
 			wpTrac.field.milestone = $('#field-milestone');
-			if ( ! wpTrac.field.milestone.attr('disabled') ) {
+			if ( ! wpTrac.field.milestone.prop('disabled') ) {
 				$('#propertyform').submit( function() {
 					var action = $('input[name=action]:checked').val();
 					if ( 'duplicate' === action || ( 'resolve' === action && 'fixed' !== $('#action_resolve_resolve_resolution').val() ) ) {
@@ -225,7 +225,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 			// Update the dropdown. Core keywords also get a title attribute with their description.
 			if ( keyword in coreKeywordList ) {
-				wpTrac.field.add.find('option[value=' + keyword + ']').attr('disabled', 'disabled').text('* ' + keyword);
+				wpTrac.field.add.find('option[value=' + keyword + ']').prop('disabled', true).text('* ' + keyword);
 				title = coreKeywordList[keyword];
 			}
 
@@ -259,7 +259,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			});
 			// Update the core keyword dropdown.
 			if ( keyword in coreKeywordList )
-				wpTrac.field.add.find('option[value=' + keyword + ']').attr('disabled', '').text( keyword );
+				wpTrac.field.add.find('option[value=' + keyword + ']').prop('disabled', false).text( keyword );
 			wpTrac.hiddenEl.val( wpTrac.keywords.join(' ') );
 			object.remove();
 		},

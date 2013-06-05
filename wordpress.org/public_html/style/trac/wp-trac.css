@@ -522,11 +522,15 @@ table.wiki {
 table.listing {
 	box-shadow: none;
 }
-span.system-message {
-	border-radius: 3px;
-}
+span.system-message,
 div.system-message {
 	border-radius: 3px;
+	box-shadow: none;
+}
+#warning.system-message,
+.warning.system-message {
+	border-color: #333;
+	color: 3333;
 }
 div.system-message .trac-close-msg {
 	border-radius: 3px;
