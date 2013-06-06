@@ -94,8 +94,20 @@ h3.change a {
 }
 #metanav {
 	position: absolute;
-	top: -22px;
+	top: -24px;
 	right: 0;
+}
+#metanav .first a[href$="/login"] {
+	font-weight: bold;
+}
+#metanav.nav ul {
+	font-size: 12px;
+}
+#metanav.nav li {
+	border-right: 0;
+}
+#metanav.nav li.last {
+	padding-right: 0;
 }
 form#search {
 	float: right;
