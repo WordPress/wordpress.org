@@ -97,6 +97,9 @@ h3.change a {
 	top: -24px;
 	right: 0;
 }
+#headline.no-menu ~ #banner #metanav {
+	top: -40px;
+}
 #metanav .first a[href$="/login"] {
 	font-weight: bold;
 }
