@@ -156,6 +156,10 @@ form#search input {
 	border: 0;
 	background: none;
 }
+/* When blame displays a changeset inline, override the inline style set by blame.js */
+#main ~ .message[style] {
+	width: auto !important;
+}
 
 /* =admin.css */
 #content.admin #tabs {
