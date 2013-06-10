@@ -76,10 +76,24 @@ h3.change a {
 
 /* We like the WP button styles, but they need to be a bit smaller sometimes */
 .inlinebuttons input {
-	margin: 0 .1em .1em; /* restores Trac's own CSS  */
+	margin:  0 .2em .2em; /* Trac is 0 .1em .1em  */
+}
+.inlinebuttons input[name=replyto] + input {
+	margin-left: 15px;
+}
+#prefs .buttons input[type=button],
+#prefs .buttons input[type=submit],
+.inlinebuttons input[type=button],
+.inlinebuttons input[type=submit] {
 	font-size: 10px;
 	line-height: 20px;
 	height: 21px;
+}
+#prefs input {
+	margin: .1em;
+}
+#prefs fieldset label {
+	margin: .1em 0;
 }
 
 /* Trying to position Trac's navigation/header */
@@ -136,7 +150,7 @@ form#search input {
 	width: 930px;
 }
 #content.report {
-	width: 98%;
+	max-width: 98%;
 }
 #content.report div.reports ~ #help,
 #content.report div.reports,
@@ -456,6 +470,7 @@ legend {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
 	box-shadow: none;
+	font-size: 10px;
 }
 #info {
 	background: #f9f9f9;
