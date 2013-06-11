@@ -57,7 +57,7 @@ blockquote {
 	padding-left: 20px;
 }
 
-/* More specific overrides of wp4 */
+/* More specific overrides of wp4.css */
 .change h3 a,
 h3.change a {
 	font-weight: normal; /* overrides wp4 */
