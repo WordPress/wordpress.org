@@ -42,7 +42,7 @@ class WPorg_Handbook_Widget_for_Pages extends WPorg_Handbook_Widget {
 }
 
 class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
-	protected $post_type = 'page';
+	protected $post_type = 'handbook';
 
 	function __construct() {
 		$widget_ops = array('classname' => 'widget_wporg_handbook_pages', 'description' => __( 'Your site&#8217;s Handbook Pages') );
