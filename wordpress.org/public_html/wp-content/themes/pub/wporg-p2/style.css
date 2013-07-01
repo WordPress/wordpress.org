@@ -158,6 +158,17 @@ html h4 {
 	padding:0 10px !important;
 }
 
+/* Fix styling of action links which can clash with the content below it */
+#main h4 {
+	position: static;
+}
+#main ul#postlist li {
+	position: relative;
+}
+#main span.meta span.actions {
+	top: 6px;
+}
+
 /*- bbPress Specific Styles ----------*/
 
 body.bbPress #main ul#postlist li {
