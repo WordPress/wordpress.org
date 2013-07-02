@@ -169,6 +169,11 @@ html h4 {
 	top: 6px;
 }
 
+/* Fix display of empty comments (which can happen on edit) */
+#main .commentlist .commentcontent {
+	min-height: 2.4em;
+}
+
 /*- bbPress Specific Styles ----------*/
 
 body.bbPress #main ul#postlist li {
