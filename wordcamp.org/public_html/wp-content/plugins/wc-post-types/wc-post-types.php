@@ -458,11 +458,10 @@ class WordCamp_Post_Types_Plugin {
 		$time_format = get_option( 'time_format', 'g:i a' );
 
 		foreach ( $sessions as $time => $entry ) {
-			$html .= sprintf( '<tr class="%s">', sanitize_html_class( 'wcpt-time-' . date( $time_format, $time ) ) );
-			$html .= sprintf( '<td class="wcpt-time">%s</td>', str_replace( ' ', '&nbsp;', esc_html( date( $time_format, $time ) ) ) );
 
-			$skip_next = 0;
+			$skip_next = $colspan = 0;
 
+			$columns_html = '';
 			foreach ( $columns as $key => $term_id ) {
 
 				// Allow the below to skip some items if needed.
@@ -473,13 +472,13 @@ class WordCamp_Post_Types_Plugin {
 
 				// For empty items print empty cells.
 				if ( empty( $entry[ $term_id ] ) ) {
-					$html .= '<td class="wcpt-session-empty"></td>';
+					$columns_html .= '<td class="wcpt-session-empty"></td>';
 					continue;
 				}
 
 				// For custom labels print label and continue.
 				if ( is_string( $entry[ $term_id ] ) ) {
-					$html .= sprintf( '<td colspan="%d" class="wcpt-session-custom">%s</td>', count( $columns ), esc_html( $entry[ $term_id ] ) );
+					$columns_html .= sprintf( '<td colspan="%d" class="wcpt-session-custom">%s</td>', count( $columns ), esc_html( $entry[ $term_id ] ) );
 					break;
 				}
 
@@ -545,9 +544,15 @@ class WordCamp_Post_Types_Plugin {
 					}
 				}
 
-				$html .= sprintf( '<td colspan="%d" class="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $content );
+				$columns_html .= sprintf( '<td colspan="%d" class="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $content );
 			}
 
+			$global_session = $colspan == count( $columns ) ? ' global-session' : '';
+			$global_session_slug = $global_session ? ' ' . sanitize_html_class( sanitize_title_with_dashes( $session->post_title ) ) : '';
+
+			$html .= sprintf( '<tr class="%s">', sanitize_html_class( 'wcpt-time-' . date( $time_format, $time ) ) . $global_session . $global_session_slug );
+			$html .= sprintf( '<td class="wcpt-time">%s</td>', str_replace( ' ', '&nbsp;', esc_html( date( $time_format, $time ) ) ) );
+			$html .= $columns_html;
 			$html .= '</tr>';
 		}
 
