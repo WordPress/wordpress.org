@@ -241,15 +241,18 @@ class WordCamp_Post_Types_Plugin {
 			'avatar_size' => 100,
 			'posts_per_page' => -1,
 			'orderby' => 'date',
+			'order' => 'desc',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
+		$attr['order'] = ( in_array( $attr['order'], array( 'asc', 'desc') ) ) ? $attr['order'] : 'desc';
 
 		$speakers = new WP_Query( array(
 			'post_type' => 'wcb_speaker',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
 			'orderby' => $attr['orderby'],
+			'order' => $attr['order'],
 		) );
 
 		if ( ! $speakers->have_posts() )
