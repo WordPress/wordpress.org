@@ -23,3 +23,10 @@ function wporg_p2_comment_profile_urls( $url ) {
 	return $url;
 }
 
+add_filter( 'wp_title', 'wporg_p2_head_wp_title', 10, 2 );
+function wporg_p2_head_wp_title( $title, $sep ) {
+	$out = $title;
+	$out .= ' ' . get_bloginfo( 'name' );
+	
+	return $out;
+}

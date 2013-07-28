@@ -1,6 +1,6 @@
 <?php
 global $pagetitle;
-$pagetitle = wp_title( '&laquo;', false, 'right' ) . ' ' . get_bloginfo( 'name' );
+$pagetitle = wp_title( '&laquo;', false, 'right' );
 require WPORGPATH . 'header.php';
 ?>
 <div id="headline">
