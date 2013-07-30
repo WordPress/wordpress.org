@@ -773,6 +773,14 @@ input.text {
 	margin-right: 15px;
 }
 
+#headline .login a {
+	color: #21759b; 
+} 
+
+#headline .login a:visited { 
+	color: #4ca6cf; 
+} 
+
 #headline input.text {
 	background: #fff;
 	border: 1px solid #c6d9e9;
