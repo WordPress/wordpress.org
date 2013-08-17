@@ -783,6 +783,14 @@ body.bbpress #mainnav .active :visited {
 	text-align: right;
 }
 
+/*
+ * Workaround for Trac bug.
+ * See ​http://trac.edgewall.org/ticket/10751
+ */
+.timeline img {
+	display: none;
+}
+
 /* =Responsive / Mobile
 ----------------------------------------------- */
 
