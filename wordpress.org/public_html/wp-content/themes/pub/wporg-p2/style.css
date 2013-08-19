@@ -23,7 +23,7 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 }
 
 li.type-handbook code {
-    background: #eee;
+	background: #eee;
 	text-shadow: 0 1px 0 #fff;
 	padding: 4px 6px;
 	-webkit-border-radius: 5px;
@@ -31,10 +31,11 @@ li.type-handbook code {
 }
 
 .handbook-page-title {
-    font-size: 2em;
-    padding-bottom: 4px;
-    color: #777;
+	font-size: 2em;
+	padding-bottom: 4px;
+	color: #777;
 }
+
 li.type-handbook h2 {
 	font-size: 24px;
 	border-bottom: 1px solid #ddd;
@@ -83,18 +84,18 @@ ul#menu-table-of-contents li ul a {
 }
 
 html body {
-	line-height:normal;
-	background:white;
+	line-height: normal;
+	background: white;
 }
 
 html #wporg-header {
-	width:auto;
-	min-height:0;
+	width: auto;
+	min-height: 0;
 }
 
 #wporg-header h1 {
-	display:inline;
-	padding:0;
+	display: inline;
+	padding: 0;
 }
 
 #header2 {
@@ -108,45 +109,45 @@ body .main-navigation {
 }
 
 .single #main .controls {
-	position:relative;
+	position: relative;
 }
 
 html #wrapper {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
-	background:white;
+	background: white;
 }
 
 html #wporg-footer {
-	width:952px;
+	width: 952px;
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 	box-shadow: none;
-	margin:0 auto 20px;
-	border:0;
-	padding-bottom:20px;
+	margin: 0 auto 20px;
+	border: 0;
+	padding-bottom: 20px;
 }
 
 html #wporg-footer p {
-	float:none;
-	font-size:12px;
+	float: none;
+	font-size: 12px;
 }
 
 li a:hover {
-	border:0;
+	border: 0;
 }
 
 html .alt {
-	background:transparent;
+	background: transparent;
 }
 
 html h4 {
-	border:0;
+	border: 0;
 }
 
 #searchsubmit {
-	padding:0 !important;
+	padding: 0 !important;
 }
 
 /* To account for modifications to the "Post it" button on open access P2s */
@@ -162,9 +163,11 @@ html h4 {
 #main h4 {
 	position: static;
 }
+
 #main ul#postlist li {
 	position: relative;
 }
+
 #main span.meta span.actions {
 	top: 6px;
 }
@@ -175,7 +178,6 @@ html h4 {
 }
 
 /*- bbPress Specific Styles ----------*/
-
 body.bbPress #main ul#postlist li {
 	border-top-style: none;
 	border-top-width: 0;
