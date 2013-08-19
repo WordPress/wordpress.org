@@ -177,6 +177,11 @@ html h4 {
 	min-height: 2.4em;
 }
 
+/* Fix display of multi-line table cell content */
+.postcontent table td {
+	vertical-align: top;
+}
+
 /*- bbPress Specific Styles ----------*/
 body.bbPress #main ul#postlist li {
 	border-top-style: none;
