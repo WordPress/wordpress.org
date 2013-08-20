@@ -1,0 +1,113 @@
+/*
+Theme Name:     WordPress.org Developer Resources
+Theme URI:      http://developer.wordpress.org/
+Description:    Theme for developer.wordpress.org and the code reference.
+Author:         the WordPress team
+Author URI:     http://wordpress.org/
+Version:        1.0-beta
+*/
+
+p.bbcrumb {
+	margin: 1em 12px;
+}
+
+article.wpapi-function {
+	clear: both;
+	padding: 0 12px;
+	font-size:1.3em;
+	margin: 1em 0 4em;
+}
+
+article.wpapi-function h1 {
+	font-family: 'Droid Sans Mono', Courier New, monospace;
+	font-size: 1.6em;
+	margin: 1em 0;
+}
+article.wpapi-function h1:after {
+	content: '()';
+}
+
+article.wpapi-function .wpfuncref-prototype {	
+	font-family: 'Droid Sans Mono', Courier New, Monospace;
+	font-size: 1.1em;
+	margin: 1em 0;
+}
+
+article.wpapi-function .wpfuncref-prototype span.type {
+	font-style: italic;
+}
+
+article.wpapi-function .wpfuncref-prototype span.variable {
+	color: #21759b;
+}
+
+article.wpapi-function .wpfuncref-description {
+	font-size: 1.4em;
+	font-weight: normal;
+}
+article.wpapi-function h3 {
+	padding: 1em 0 0.5em;
+	font-size: 1.7em;
+}
+article.wpapi-function .wpfuncref-longdesc p {
+	margin: 1em 0;
+}
+article.wpapi-function dl {
+	
+}
+
+article.wpapi-function dl dt {
+	font-weight: 700;
+	font-family: 'Droid Sans Mono', Courier New, Monospace;
+}
+
+article.wpapi-function dl dd {
+	padding: 0 0 1em 1em;
+	font-style: italic;
+}
+
+article.wpapi-function .wpfuncref-arguments h4 {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+article.wpapi-function .wpfuncref-arg {
+	margin-bottom: 1em;
+}
+article.
+#comments .comment {
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+}
+
+#comments label {
+	display: block;
+}
+
+#comments #ace-editor { 
+	width: 60%;
+	height: 250px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	margin-bottom: 5px;
+}
+
+#comments .comment .example-content {
+	margin-bottom: .5em;
+}
+
+#comments .comment-author {
+	padding: 10px 5px;
+	height: 12px;
+	font-size: 12px;
+}
+
+#comments .comment-author img {
+	height: 32px;
+	width: auto;
+	margin: -10px 5px;
+}
+
+#comments .comment-author {
+	
+}
