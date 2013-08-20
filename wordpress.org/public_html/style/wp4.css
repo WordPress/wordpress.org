@@ -14,9 +14,12 @@ body {
 	font-family: sans-serif;
 	line-height: 22px;
 	color: #444;
-	margin-bottom: 40px;
 }
 /* -------------------------------------------- */
+
+html, body {
+	position: relative;  /* this is necessary for children to properly use position: absolute */
+}
 
 code, pre { font-family: Consolas, Monaco, "Courier New", Courier, monospace; color: #000; }
 
@@ -70,6 +73,92 @@ sup {
 	line-height: 1em;
 	font-size: 80%;
 }
+
+
+/* =WordPress Core
+-------------------------------------------------------------- */
+.alignnone {
+	margin: 5px 20px 20px 0;
+}
+
+.aligncenter,
+div.aligncenter {
+	display: block;
+	margin: 5px auto 5px auto;
+}
+
+.alignright {
+	float:right;
+	margin: 5px 0 20px 20px;
+}
+
+.alignleft {
+	float: left;
+	margin: 5px 20px 20px 0;
+}
+
+.aligncenter {
+	display: block;
+	margin: 5px auto 5px auto;
+}
+
+a img.alignright {
+	float: right;
+	margin: 5px 0 20px 20px;
+}
+
+a img.alignnone {
+	margin: 5px 20px 20px 0;
+}
+
+a img.alignleft {
+	float: left;
+	margin: 5px 20px 20px 0;
+}
+
+a img.aligncenter {
+	display: block;
+	margin-left: auto;
+	margin-right: auto
+}
+
+.wp-caption {
+	background: #fff;
+	border: 1px solid #f0f0f0;
+	max-width: 96%; /* Image does not overflow the content area */
+	padding: 5px 3px 10px;
+	text-align: center;
+}
+
+.wp-caption.alignnone {
+	margin: 5px 20px 20px 0;
+}
+
+.wp-caption.alignleft {
+	margin: 5px 20px 20px 0;
+}
+
+.wp-caption.alignright {
+	margin: 5px 0 20px 20px;
+}
+
+.wp-caption img {
+	border: 0 none;
+	height: auto;
+	margin: 0;
+	max-width: 98.5%;
+	padding: 0;
+	width: auto;
+}
+
+.wp-caption p.wp-caption-text {
+	font-size: 11px;
+	line-height: 17px;
+	margin: 0;
+	padding: 0 4px 5px;
+}
+
+/* */
 
 .wrapper {
 	width: 960px;
@@ -881,37 +970,49 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 
 #wporg-footer {
 	clear: both;
-	border-top: 1px solid #dedede;
-	padding: 6px 14px;
-	width: 932px;
+	overflow: auto;
+	min-width: 932px;
 	margin: 0 auto;
+	padding: 22px 14px 65px 14px;
+	border-top: 1px solid #dfdfdf;
+	background-color: #f7f7f7;
 }
 
 #wporg-footer .wrapper {
+	overflow: auto;
 	width: 932px;
 }
 
-#wporg-footer p {
-	font-size: 12px;
+#wporg-footer ul {
 	float: left;
-	color: #bbb;
+	overflow: auto;
+	width: 135px;
+	margin-left: 24px;
 }
 
-#wporg-footer p a {
+#wporg-footer ul:first-child {
+	margin-left: 0;
+}
+
+#wporg-footer ul li {
+	font-size: 14px;
+	margin-bottom: 1px;
+	color: #bbb;
+	list-style-type: none;
+}
+
+#wporg-footer ul li a {
 	border: none;
 }
 
 #wporg-footer h6 {
-	float: right;
-}
-
-#wporg-footer h6 {
+	clear: both;
 	background: url(http://s.wordpress.org/style/images/codeispoetry.png?1) center center no-repeat;
-	background-size: 133px 11px;
-	width: 133px;
-	height: 11px;
+	background-size: 190px 15px;
+	width: 190px;
+	height: 15px;
 	text-indent: -9999px;
-	margin-top: 6px;
+	margin-top: 50px;
 }
 .no-static #wporg-footer h6 {
 	background-image: url(//wordpress.org/style/images/codeispoetry.png?1);
@@ -1435,3 +1536,8 @@ hr { border: none; border-top: 1px solid #dfdfdf; }
 	color: #555;
 }
 
+img#wpstats {
+	position: absolute;
+	left: 5px;
+	bottom: 5px;
+}
