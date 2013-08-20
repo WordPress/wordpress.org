@@ -1007,7 +1007,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 
 #wporg-footer h6 {
 	clear: both;
-	background: url(http://s.wordpress.org/style/images/codeispoetry.png?1) center center no-repeat;
+	background: url(http://s.wordpress.org/style/images/codeispoetry.png?2) center center no-repeat;
 	background-size: 190px 15px;
 	width: 190px;
 	height: 15px;
@@ -1015,15 +1015,15 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	margin-top: 50px;
 }
 .no-static #wporg-footer h6 {
-	background-image: url(//wordpress.org/style/images/codeispoetry.png?1);
+	background-image: url(//wordpress.org/style/images/codeispoetry.png?2);
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	#wporg-footer h6 {
-		background-image: url(http://s.wordpress.org/style/images/codeispoetry-2x.png);
+		background-image: url(http://s.wordpress.org/style/images/codeispoetry-2x.png?2);
 	}
 	.no-static #wporg-footer h6 {
-		background-image: url(//wordpress.org/style/images/codeispoetry-2x.png);
+		background-image: url(//wordpress.org/style/images/codeispoetry-2x.png?2);
 	}
 }
 
