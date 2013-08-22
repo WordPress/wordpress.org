@@ -120,18 +120,7 @@ html #wrapper {
 }
 
 html #wporg-footer {
-	width: 952px;
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-	margin: 0 auto 20px;
-	border: 0;
-	padding-bottom: 20px;
-}
-
-html #wporg-footer p {
-	float: none;
-	font-size: 12px;
+	line-height: 22px;	/* should match value in wp4.css body element */
 }
 
 li a:hover {
