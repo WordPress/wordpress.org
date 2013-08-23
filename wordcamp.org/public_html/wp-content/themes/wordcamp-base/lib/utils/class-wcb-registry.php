@@ -10,7 +10,7 @@ class WCB_Registry {
 	 */
 	function register( $classname ) {
 		if ( ! isset( $this->instances[ $classname ] ) )
-			$this->instances[ $classname ] = & new $classname();
+			$this->instances[ $classname ] = new $classname();
 	}
 	/**
 	 * Retrieve an instance of a class.
