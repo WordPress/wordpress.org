@@ -9,6 +9,11 @@
 	/* a second #content is sometimes printed outside of #main, like when doing blame */
 	font-size: 14px;
 }
+
+#content {
+	width: 940px; /* The width of the content area is smaller for proper padding. */
+}
+
 #main {
 	clear: both;
 }
@@ -38,6 +43,7 @@ blockquote {
 #headline :link:hover, #headline :visited:hover,
 #headline h2 {
 	border: 0;
+	background: none;
 }
 #wporg-header ul :link, #wporg-header ul :visited,
 #wporg-header ul :link:hover, #wporg-header ul :visited:hover,
@@ -147,7 +153,7 @@ form#search input {
 	margin: 0 auto;
 }
 #banner, #ctxtnav {
-	width: 930px;
+	width: 940px;
 }
 #content.report {
 	max-width: 98%;
@@ -426,6 +432,7 @@ legend {
 	border-radius: 0;
 }
 #mainnav ul {
+	margin-left: 15px;
 	float: left;
 	font-size: 11px;
 }
@@ -441,7 +448,6 @@ legend {
 #mainnav :link, #mainnav :visited {
 	background: none;
 	border-right: none;
-	border-left: 1px solid #ccc;
 	color: #000;
 	display: block;
 	padding: 4px 20px 3px;
