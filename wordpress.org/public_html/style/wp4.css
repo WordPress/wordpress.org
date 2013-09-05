@@ -1074,6 +1074,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	background-position: 100% 2px;
 	background-repeat: no-repeat;
 	border-radius:0;
+	padding: 0;
 }
 .no-static #head-search .button {
 	background-image: url(//wordpress.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
