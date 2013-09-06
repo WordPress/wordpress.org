@@ -43,6 +43,8 @@ blockquote {
 #headline :link:hover, #headline :visited:hover,
 #headline h2 {
 	border: 0;
+}
+#headline h2 {
 	background: none;
 }
 #wporg-header ul :link, #wporg-header ul :visited,
