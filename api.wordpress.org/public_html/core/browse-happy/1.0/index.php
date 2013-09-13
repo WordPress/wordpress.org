@@ -25,6 +25,8 @@ if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'WordPress/' ) && 1 === rand( 1,
 
 if ( $jsonp )
 	echo $jsonp.'('.json_encode($data).')';
+elseif ( defined( 'JSON_RESPONSE' ) )
+	echo json_encode( $data );
 else
 	echo serialize( $data );
 
