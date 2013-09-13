@@ -2,7 +2,9 @@
 
 $popular_importers = wporg_api_get_popular_importers();
 # unset( $popular_importers['tumblr'] );
-echo serialize( array( 'importers' => $popular_importers, 'translated' => false ) );
+
+$response = array( 'importers' => $popular_importers, 'translated' => false );
+echo defined( 'JSON_RESPONSE' ) ? json_encode( $response ) : serialize( $response );
 
 function __( $string ) { return $string; }
 
