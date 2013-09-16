@@ -10,8 +10,7 @@
 <div class="sleeve_main">
 
 	<div id="main">
-		<h2>Handbook</h2>
-		<?php /* <h3><?php the_title(); ?></h3> */ ?>
+		<h2><?php _e( 'Handbook', 'p2' ); ?></h2>
 		<?php if ( have_posts() ) : ?>
 
 			<ul id="postlist">
