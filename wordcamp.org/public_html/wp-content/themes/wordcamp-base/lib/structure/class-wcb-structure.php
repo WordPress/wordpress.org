@@ -51,7 +51,7 @@ class WCB_Structure extends WCB_Loader {
 		$child_recs  = array();
 
 		if ( ! $start_fresh ) {
-			wp_enqueue_style( 'wcb-foundation', WCB_URL . '/style.css', array(), '20110212' );
+			wp_enqueue_style( 'wcb-foundation', WCB_URL . '/style.css', array(), '20130917' );
 			$version = isset( $versions[ $grid ] ) ? $versions[ $grid ] : false;
 			wp_enqueue_style( "wcb-$grid", wcb_dev_url( WCB_URL . "/css/$grid.css" ), array('wcb-foundation'), $version );
 			wp_enqueue_style( "wcb-style", wcb_dev_url( WCB_URL . '/css/default.css' ), array('wcb-foundation', "wcb-$grid"), '20110421' );
