@@ -22,7 +22,7 @@
 		<dt>t</dt> <dd><?php _e( 'go to top', 'p2' ); ?></dd>
 		<dt>l</dt> <dd><?php _e( 'go to login', 'p2' ); ?></dd>
 		<dt>h</dt> <dd><?php _e( 'show/hide help', 'p2' ); ?></dd>
-		<dt><?php _e( 'shift', 'p2' ); ?> + esc</dt> <dd><?php _e( 'cancel', 'p2' ); ?></dd>
+		<dt><?php _e( 'shift + esc', 'p2' ); ?></dt> <dd><?php _e( 'cancel', 'p2' ); ?></dd>
 	</dl>
 </div>
 
