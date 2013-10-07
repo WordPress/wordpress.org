@@ -8,7 +8,7 @@
 	<div class="wrapper">
 		<h2 class="section-title"><?php _e( 'There are many different ways for you to get involved with WordPress:', 'make-wporg' ); ?></h2>
 
-		<?php $sites_query = new WP_Query( 'post_type=make_site&posts_per_page=-1' ); ?>
+		<?php $sites_query = new WP_Query( 'post_type=make_site&posts_per_page=-1&order=ASC' ); ?>
 		<?php while( $sites_query->have_posts() ) : $sites_query->the_post(); ?>
 			<article id="site-<?php the_ID(); ?>" <?php post_class(); ?>>
 				<h2><?php the_title(); ?></h2>
