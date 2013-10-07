@@ -3,6 +3,7 @@
 add_action( 'wp_enqueue_scripts', 'make_enqueue_scripts' );
 function make_enqueue_scripts() {
 	wp_enqueue_style( 'make-style', get_stylesheet_uri() );
+	wp_enqueue_style( 'dashicons', get_template_directory_uri() . '/dashicons.css' );
 }
 
 add_action( 'after_setup_theme', 'make_setup_theme' );
