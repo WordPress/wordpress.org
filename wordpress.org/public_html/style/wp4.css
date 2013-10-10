@@ -1296,6 +1296,10 @@ form#profile-form table input[type='text'], form#profile-form textarea {
 	border-left-color: #b0c1cf;
 }
 
+.form-table input[type='text'] {
+	padding: 3px;
+}
+
 .form-table textarea, form#profile-form table textarea {
 	width: 520px !important;
 	font-size: 13px;
