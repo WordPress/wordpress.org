@@ -94,8 +94,8 @@ html #wporg-header {
 }
 
 #wporg-header h1 {
-	display: inline;
-	padding: 0;
+	display: block;
+	padding: 0 0 0 10px;
 }
 
 #header2 {
