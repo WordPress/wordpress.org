@@ -288,13 +288,15 @@ a img.aligncenter {
 
 #wporg-header ul li#download {
 	height: 34px;
-	padding: 0 12px 34px 12px;
+	padding: 0 0 34px;
 	float: right;
 	margin-right: 14px;
+	overflow: hidden;
 }
 
 #wporg-header ul li#download a {
-	padding:0;
+	margin: 0;
+	padding: 0 16px;
 }
 
 #wporg-header ul li#download a:hover {
