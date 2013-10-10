@@ -943,6 +943,8 @@ p.person {
 #pagebody {
 	font-size: 13px;
 	margin-top: 29px;
+	overflow: auto;
+	margin-bottom: 22px;
 }
 
 #pagebody p, #pagebody ol, #pagebody ul {
