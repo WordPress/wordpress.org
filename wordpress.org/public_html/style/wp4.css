@@ -180,6 +180,10 @@ a img.aligncenter {
 	background: #222222;
 }
 
+#wporg-header h1 {
+	padding-left: 10px;
+}
+
 #wporg-header h1 a {
 	display: block;
 	background: url(http://s.wordpress.org/style/images/wp-header-logo.png?1) center left no-repeat;
