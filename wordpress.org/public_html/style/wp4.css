@@ -1069,6 +1069,10 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	border-radius: 0px;
 }
 
+#head-search input.text::-moz-placeholder {
+	color: #eee;
+}
+
 #head-search .button {
 	float: left;
 	text-shadow: none !important;
