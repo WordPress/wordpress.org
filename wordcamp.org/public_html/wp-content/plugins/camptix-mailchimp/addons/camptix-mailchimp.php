@@ -8,6 +8,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 		add_filter( 'camptix_validate_options', array( $this, 'validate_options' ), 10, 2 );
 
 		$this->options = $camptix->get_options();
+
+		if ( $this->options['mailchimp_override_email'] )
+			add_filter( 'camptix_wp_mail_override', '__return_true' );
 	}
 
 	public function setup_sections( $sections ) {
@@ -27,6 +30,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 		if ( ! empty( $this->options['mailchimp_api_key'] ) ) {
 			add_settings_field( 'mailchimp_list', __( 'List', 'camptix' ), array( $this, 'field_mailchimp_list' ), 'camptix_options', 'general' );
 			add_settings_field( 'mailchimp_sync_attendees', __( 'Sync Attendees', 'camptix' ), array( $this, 'field_mailchimp_sync_attendees' ), 'camptix_options', 'general' );
+			$camptix->add_settings_field_helper( 'mailchimp_override_email', __( 'Override E-mail', 'camptix' ), 'field_yesno', false,
+				__( "Enabling this option will prevent CampTix from sending any outgoing e-mails, including ticket receipts, payment results, etc.", 'camptix' )
+			);
 		}
 	}
 
@@ -93,6 +99,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 		// c9b1c6508c
 		if ( isset( $input['mailchimp_list'] ) )
 			$output['mailchimp_list'] = preg_replace( '#[^a-zA-Z0-9]+#', '', $input['mailchimp_list'] );
+
+		if ( isset( $input['mailchimp_override_email'] ) )
+			$output['mailchimp_override_email'] = (bool) $input['mailchimp_override_email'];
 
 		if ( isset( $input['mailchimp_sync_attendees'] ) ) {
 
