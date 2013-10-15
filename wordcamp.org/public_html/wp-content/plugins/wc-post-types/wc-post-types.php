@@ -404,13 +404,18 @@ class WordCamp_Post_Types_Plugin {
 		}
 
 		// Use tracks to form the columns.
-		foreach ( $tracks as $track )
-			$columns[ $track->term_id ] = $track->term_id;
+		if ( $tracks ) {
+			foreach ( $tracks as $track )
+				$columns[ $track->term_id ] = $track->term_id;
+		} else {
+			$columns[ 0 ] = 0;
+		}
 
 		unset( $tracks );
 
 		// Loop through all sessions and assign them into the formatted
 		// $sessions array: $sessions[ $time ][ $track ] = $session_id
+		// Use 0 as the track ID if no tracks exist
 
 		$sessions = array();
 		$sessions_query = new WP_Query( $query_args );
@@ -421,9 +426,12 @@ class WordCamp_Post_Types_Plugin {
 			if ( ! isset( $sessions[ $time ] ) )
 				$sessions[ $time ] = array();
 
-			if ( ! empty( $tracks ) )
+			if ( empty( $tracks ) ) {
+				$sessions[ $time ][ 0 ] = $session->ID;
+			} else {
 				foreach ( $tracks as $track )
 					$sessions[ $time ][ $track->term_id ] = $session->ID;
+			}
 		}
 
 		// Sort all sessions by their key (timestamp).
@@ -450,7 +458,11 @@ class WordCamp_Post_Types_Plugin {
 		$html .= '<th class="wcpt-col-time">Time</th>';
 		foreach ( $columns as $term_id ) {
 			$track = get_term( $term_id, 'wcb_track' );
-			$html .= sprintf( '<th class="wcpt-col-track"><span class="wcpt-track-name">%s</span> <span class="wcpt-track-description">%s</span></th>', esc_html( $track->name ), esc_html( $track->description ) );
+			$html .= sprintf(
+				'<th class="wcpt-col-track"> <span class="wcpt-track-name">%s</span> <span class="wcpt-track-description">%s</span> </th>',
+				isset( $track->term_id ) ? esc_html( $track->name ) : '',
+				isset( $track->term_id ) ? esc_html( $track->description ) : ''
+			);
 		}
 
 		$html .= '</tr>';
