@@ -34,7 +34,7 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 		$message = '';
 		$title   = apply_filters( 'epcsp_subscribe_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base );
 		
-		if ( ! $this->is_supported_epc_post_type( get_post_type() ) ) {
+		if ( ! is_singular() || ! $this->is_supported_epc_post_type( get_post_type() ) ) {
 			return;
 		}
 
