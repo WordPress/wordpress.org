@@ -13,8 +13,9 @@ class EPCSpecificPost {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'widgets_init',              array( $this, 'register_widgets' ) );
-		add_filter( 'email_post_changes_emails', array( $this, 'insert_subscribed_emails' ), 10, 3 );
+		add_action( 'widgets_init',                       array( $this, 'register_widgets' ) );
+		add_filter( 'email_post_changes_default_options', array( $this, 'set_default_epc_options' ) );
+		add_filter( 'email_post_changes_emails',          array( $this, 'insert_subscribed_emails' ), 10, 3 );
 	}
 
 	/**
@@ -22,6 +23,23 @@ class EPCSpecificPost {
 	 */
 	public function register_widgets() {
 		register_widget( 'EPCSP_SubscribeWidget' );
+	}
+
+	/**
+	 * Override EPC's default options
+	 * 
+	 * @param  array $options
+	 * @return array
+	 */
+	public function set_default_epc_options( $options ) {
+		/*
+		 * EPC assumes you always want to e-mail the admin, and will always include the admin_email in the 'Additional Email Addresses' field,
+		 * even if you submit an empty value, so emptying the default value works around that.
+		 */ 
+		$options['emails']     = array();
+		$options['post_types'] = array( 'page' );
+		
+		return $options;
 	}
 
 	/**
