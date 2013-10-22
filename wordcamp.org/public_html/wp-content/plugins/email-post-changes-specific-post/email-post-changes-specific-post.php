@@ -13,9 +13,10 @@ class EPCSpecificPost {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'widgets_init',                       array( $this, 'register_widgets' ) );
-		add_filter( 'email_post_changes_default_options', array( $this, 'set_default_epc_options' ) );
-		add_filter( 'email_post_changes_emails',          array( $this, 'insert_subscribed_emails' ), 10, 3 );
+		add_action( 'widgets_init',                            array( $this, 'register_widgets' ) );
+		add_filter( 'email_post_changes_default_options',      array( $this, 'set_default_epc_options' ) );
+		add_filter( 'email_post_changes_admin_email_fallback', '__return_false' );
+		add_filter( 'email_post_changes_emails',               array( $this, 'insert_subscribed_emails' ), 10, 3 );
 	}
 
 	/**
