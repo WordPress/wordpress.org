@@ -23,3 +23,34 @@ function wporg_p2_comment_profile_urls( $url ) {
 	return $url;
 }
 
+// Return a list of link categories applied to the current post, unless it is uncategorized
+function wporg_p2_get_cats_with_count( $post, $format = 'list', $before = '', $sep = '', $after = '' ) {
+	$cat_links = array();
+	$post_cats = get_the_terms( $post->ID, 'category' );
+
+	if ( ! $post_cats )
+		return '';
+
+	foreach ( $post_cats as $cat ) {
+		if ( 'uncategorized' == $cat->slug ) {
+			continue;
+		}
+
+		if ( $cat->count > 1 && ! is_category( $cat->slug ) ) {
+			$cat_link = '<a href="' . get_term_link( $cat, 'category' ) . '" rel="category">' . $cat->name . ' ( ' . number_format_i18n( $cat->count ) . ' )</a>';
+		} else {
+			$cat_link = $cat->name;
+		}
+
+		if ( $format == 'list' )
+			$cat_link = '<li>' . $cat_link . '</li>';
+
+		$cat_links[] = $cat_link;
+	}
+
+	if ( empty( $cat_links ) ) {
+		return '';
+	}
+
+	return apply_filters( 'cats_with_count', $before . join( $sep, $cat_links ) . $after, $post );
+}

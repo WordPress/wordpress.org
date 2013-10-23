@@ -171,6 +171,12 @@ html h4 {
 	vertical-align: top;
 }
 
+/* Add some space below tag/category descriptions */
+#tag-description,
+#category-description {
+	margin-bottom: 2em;
+}
+
 /*- bbPress Specific Styles ----------*/
 body.bbPress #main ul#postlist li {
 	border-top-style: none;
