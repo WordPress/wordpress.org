@@ -111,6 +111,7 @@ class P2NewPostCategories {
 			'orderby'    => 'name',
 			'id'         => 'p2-new-post-category',
 			'hide_empty' => false,
+			'selected'   => get_option( 'default_category' ),
 		) );
 
 		wp_dropdown_categories( $params );
