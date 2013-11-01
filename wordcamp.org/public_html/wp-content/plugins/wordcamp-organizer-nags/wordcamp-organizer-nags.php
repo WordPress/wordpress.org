@@ -18,7 +18,7 @@ class WordCampOrganizerNags {
 		
 		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
 		add_action( 'admin_init',    array( $this, 'central_about_info' ) );
-		add_action( 'admin_init',    array( $this, 'published_attendees_page' ) );
+		add_action( 'admin_init',    array( $this, 'published_attendees_schedule_pages' ) );
 	}
 
 	/**
@@ -69,10 +69,10 @@ class WordCampOrganizerNags {
 	}
 
 	/**
-	 * Checks if an Attendees page is published along with the Ticket Registration page
+	 * Checks if Attendees and Schedule pages have been published along with the Ticket Registration page
 	 */
-	public function published_attendees_page() {
-		$found_registration = $found_attendees = false;
+	public function published_attendees_schedule_pages() {
+		$found_registration = $found_attendees = $found_schedule = false;
 		$published_pages    = get_posts( array(
 			'post_type'      => 'page',
 			'posts_per_page' => -1
@@ -87,13 +87,21 @@ class WordCampOrganizerNags {
 				$found_attendees = true;
 			}
 
-			if ( $found_registration && $found_attendees ) {
+			if ( has_shortcode( $page->post_content, 'schedule' ) ) {
+				$found_schedule = true;
+			}
+
+			if ( $found_registration && $found_attendees && $found_schedule ) {
 				break;
 			}
 		}
 
 		if ( $found_registration && ! $found_attendees ) {
 			$this->notices['updated'][] = 'Tickets are on sale now! Don’t forget to <a href="http://plan.wordcamp.org/using-camptix/#attendees-list">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.';
+		}
+
+		if ( $found_registration && ! $found_schedule ) {
+			$this->notices['updated'][] = 'Tickets sell a lot faster when people can see who\'s speaking at your WordCamp. How about <a href="http://plan.wordcamp.org/first-steps/web-presence/working-with-speakers-sessions-and-sponsors/#schedule">publishing a schedule</a> today?';
 		}
 	}
 }
