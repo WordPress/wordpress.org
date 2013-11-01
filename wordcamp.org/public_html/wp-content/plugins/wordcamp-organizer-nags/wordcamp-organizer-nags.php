@@ -18,6 +18,7 @@ class WordCampOrganizerNags {
 		
 		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
 		add_action( 'admin_init',    array( $this, 'central_about_info' ) );
+		add_action( 'admin_init',    array( $this, 'published_attendees_page' ) );
 	}
 
 	/**
@@ -65,6 +66,35 @@ class WordCampOrganizerNags {
 		}
 
 		restore_current_blog();
+	}
+
+	/**
+	 * Checks if an Attendees page is published along with the Ticket Registration page
+	 */
+	public function published_attendees_page() {
+		$found_registration = $found_attendees = false;
+		$published_pages    = get_posts( array(
+			'post_type'      => 'page',
+			'posts_per_page' => -1
+		) );
+
+		foreach ( $published_pages as $page ) {
+			if ( has_shortcode( $page->post_content, 'camptix' ) ) {
+				$found_registration = true;
+			}
+
+			if ( has_shortcode( $page->post_content, 'camptix_attendees' ) ) {
+				$found_attendees = true;
+			}
+
+			if ( $found_registration && $found_attendees ) {
+				break;
+			}
+		}
+
+		if ( $found_registration && ! $found_attendees ) {
+			$this->notices['updated'][] = 'Tickets are on sale now! Don’t forget to <a href="http://plan.wordcamp.org/using-camptix/#attendees-list">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.';
+		}
 	}
 }
 
