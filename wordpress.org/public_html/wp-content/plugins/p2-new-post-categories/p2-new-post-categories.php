@@ -2,7 +2,7 @@
 /*
 Plugin Name: P2 New Post Categories
 Description: Adds a category dropdown to P2s new post form.
-Version:     0.1
+Version:     0.2
 License:     GPLv2 or Later
 */
 
@@ -12,20 +12,18 @@ License:     GPLv2 or Later
 
 
 class P2NewPostCategories {
-	protected $new_category;
-	const VERSION = '0.1';
-	const REGEX_CATEGORY_IN_TAG_LIST = '/\[category=(.*)\]/i';
+	const VERSION = '0.2';
 
 	/*
 	 * Register hook callbacks
 	 */
 	public function __construct() {
-		add_action( 'wp_head',        array( $this, 'print_css' ) );
-		add_action( 'wp_footer',      array( $this, 'print_javascript' ) );
+		add_action( 'wp_head',                              array( $this, 'print_css' ) );
+		add_action( 'wp_footer',                            array( $this, 'print_javascript' ) );
 
-		add_action( 'p2_post_form',   array( $this, 'add_new_post_category_dropdown' ) );
-		add_action( 'p2_ajax',        array( $this, 'parse_new_post_category' ) );
-		add_action( 'wp_insert_post', array( $this, 'assign_new_post_to_category' ) );
+		add_action( 'p2_post_form',                         array( $this, 'add_new_post_category_dropdown' ) );
+		add_action( 'wp_ajax_p2npc_assign_category',        array( $this, 'assign_category_to_post' ) );
+		add_action( 'wp_ajax_nopriv_p2npc_assign_category', array( $this, 'assign_category_to_post' ) );
 	}
 
 	/*
@@ -68,34 +66,30 @@ class P2NewPostCategories {
 					 * Initialization
 					 */
 					construct : function() {
-						$( '#p2-new-post-category' ).change( this.appendCategoryToTagList );
+						P2NewPostCategories.dropdown         = $( '#p2-new-post-category' );
+						P2NewPostCategories.dropdown_default = P2NewPostCategories.dropdown.val();
+
+						$( document ).on( 'p2_new_post_submit_success', P2NewPostCategories.new_post );
 					},
 
-					/*
-					 * Adds the name of the selected category to the #tags input field
-					 * See the comments in parse_new_post_category() for details.
+					/**
+					 * Assign the selected category to the new post
+					 * @param object event
+					 * @param object data
 					 */
-					appendCategoryToTagList : function( event ) {
-						var optionalComma = '',
-							tags          = $( '#tags' ).val(),
-							category      = $( this ).children( 'option:selected' ).text();
+					new_post : function( event, data ) {
+						$.post(
+							ajaxUrl.replace( '?p2ajax=true', '' ), {
+								'action'                      : 'p2npc_assign_category',
+								'post_id'                     : parseInt( data.post_id ),
+								'category_id'                 :	parseInt( P2NewPostCategories.dropdown.val() ),
+								'p2npc_assign_category_nonce' : $( '#p2npc_assign_category_nonce' ).val()
+							}
+						);
 
-						tags = tags.replace( /Tag it,?/, '' ).replace( /,?\[category=(.*)\]/, '' );
-						if ( tags.length > 0 && ',' != tags.slice( -1 ) ) {
-							optionalComma = ',';
-						}
-
-						if ( 'Uncategorized' != category ) {
-							tags += optionalComma + '[category=' + category + ']';
-						}
-
-						if ( ',' == tags.substring( 0, 1 ) ) {
-							tags = tags.substring( 1, tags.length );
-						}
-
-						$( '#tags' ).val( tags );
+						P2NewPostCategories.dropdown.val( parseInt( P2NewPostCategories.dropdown_default ) ).change();
 					}
-				}
+				};
 
 				P2NewPostCategories.construct();
 
@@ -115,28 +109,26 @@ class P2NewPostCategories {
 		) );
 
 		wp_dropdown_categories( $params );
+		wp_nonce_field( 'p2npc_assign_category', 'p2npc_assign_category_nonce' );
 	}
 
 	/*
-	 * Since we can't hook into p2.posts.submit() and add a category parameter to the $.ajax() call,
-	 * we append the category to the tags list and then parse it out before P2 processes it.
+	 * Assign a category to a post
+	 * This is an AJAX handler.
 	 */
-	public function parse_new_post_category( $action ) {
-		if ( 'new_post' == $action ) {
-			if ( preg_match( self::REGEX_CATEGORY_IN_TAG_LIST, $_POST['tags'], $matches ) ) {
-				$this->new_category = get_term_by( 'name', $matches[1], 'category' );
-				$_POST['tags'] = preg_replace( self::REGEX_CATEGORY_IN_TAG_LIST, '', $_POST['tags'] );
-			}
+	public function assign_category_to_post() {
+		$assigned    = false;
+		$post_id     = absint( $_REQUEST['post_id'] );
+		$category_id = absint( $_REQUEST['category_id'] );
+		
+		check_ajax_referer( 'p2npc_assign_category', 'p2npc_assign_category_nonce' );
+		
+		if ( current_user_can( 'edit_post', $post_id ) ) { 
+			$assigned = wp_set_object_terms( $post_id, $category_id, 'category' );
+			$assigned = is_array( $assigned ) && ! empty( $assigned );
 		}
-	}
-
-	/*
-	 * When the new post is being saved, we assign the category that we parsed out in parse_new_post_category()
-	 */
-	public function assign_new_post_to_category( $post_id ) {
-		if ( isset( $this->new_category->term_id ) && $this->new_category->term_id ) {
-			wp_set_object_terms( $post_id, $this->new_category->slug, 'category' );
-		}
+		
+		wp_die( $assigned );
 	}
 
 } // end P2NewPostCategories
