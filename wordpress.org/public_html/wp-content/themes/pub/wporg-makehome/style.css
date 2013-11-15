@@ -227,7 +227,14 @@ section.get-involved article.featured-group h2:after {
 	text-transform: uppercase;
 }
 
-section.get-involved article p {
+
+section.get-involved article h2 a {
+	font-weight: 600;
+	color: #444444;
+}
+
+section.get-involved article div.team-description p {
+	display: inline;
 	font-size: 1em;
 	line-height: 1.5;
 }
