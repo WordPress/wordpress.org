@@ -363,8 +363,10 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 							else
 								$groups = array( $answer );
 
-							$groups = array_map( 'the_title', $groups );
-							$groups = array_map( array( $this, 'trim_group' ), $groups );
+							foreach ( $groups as &$group )
+								$group = $this->trim_group( htmlspecialchars( $group ) );
+
+							unset( $group );
 						}
 
 						$groupings[] = array(
