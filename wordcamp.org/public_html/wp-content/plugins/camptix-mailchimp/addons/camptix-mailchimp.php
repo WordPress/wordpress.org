@@ -181,7 +181,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 				) );
 
 				foreach ( $tickets as $ticket ) {
-					$group_name = apply_filters( 'the_title', $ticket->post_title );
+					$group_name = $ticket->post_title;
 
 					// Look into the current MailChimp groupings and skip adding existing groups.
 					if ( isset( $current_groupings[ $grouping_id ] ) && ! empty( $current_groupings[ $grouping_id ]->groups ) ) {
@@ -228,12 +228,12 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 				if ( ! empty( $existing_groups['questions'][ $question->ID ] ) && array_key_exists( $existing_groups['questions'][ $question->ID ], $current_groupings ) )
 					$grouping_id = absint( $existing_groups['questions'][ $question->ID ] );
 
-				$grouping_name = sprintf( 'CampTix: %s', apply_filters( 'the_title', $question->post_title ) );
+				$grouping_name = $this->trim_group( sprintf( 'CampTix: %s', $question->post_title ) );
 
 				// Attempt to find the grouping from MailChimp by name.
 				if ( ! $grouping_id ) {
 					foreach ( $current_groupings as $grouping ) {
-						if ( $grouping_name == $grouping->name ) {
+						if ( $grouping_name == $this->trim_group( $grouping->name ) ) {
 							$grouping_id = $grouping->id;
 							break;
 						}
@@ -244,7 +244,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 				if ( ! $grouping_id ) {
 					$result = $this->api( 'lists/interest-grouping-add', array(
 						'id' => $this->options['mailchimp_list'],
-						'name' => sprintf( 'CampTix: %s', apply_filters( 'the_title', $question->post_title ) ),
+						'name' => $grouping_name,
 						'type' => 'hidden',
 						'groups' => array( 'None' ), // @todo: add groups here vs more api calls
 					) );
@@ -263,10 +263,12 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 				// Create a group for each question value.
 				foreach ( $question->tix_values as $group_name ) {
 
+					$group_name = $this->trim_group( $group_name );
+
 					// Look into the current MailChimp groupings and skip adding existing groups.
 					if ( isset( $current_groupings[ $grouping_id ] ) && ! empty( $current_groupings[ $grouping_id ]->groups ) ) {
 						foreach ( $current_groupings[ $grouping_id ]->groups as $group ) {
-							if ( $group_name == $group->name ) {
+							if ( $group_name == $this->trim_group( $group->name ) ) {
 								continue 2;
 							}
 						}
@@ -360,6 +362,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 								$groups = array_values( $answer );
 							else
 								$groups = array( $answer );
+
+							$groups = array_map( 'the_title', $groups );
+							$groups = array_map( array( $this, 'trim_group' ), $groups );
 						}
 
 						$groupings[] = array(
@@ -372,7 +377,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 					if ( ! empty( $existing_groups['tickets'] ) ) {
 						$groupings[] = array(
 							'id' => $existing_groups['tickets'],
-							'groups' => array( apply_filters( 'the_title', $ticket->post_title ) ),
+							'groups' => array( $ticket->post_title ),
 						);
 					}
 
@@ -457,6 +462,10 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 		}
 
 		return $output;
+	}
+
+	public function trim_group( $group_name ) {
+		return trim( substr( $group_name, 0, 50 ) );
 	}
 
 	public function menu_setup_section_mailchimp() {
