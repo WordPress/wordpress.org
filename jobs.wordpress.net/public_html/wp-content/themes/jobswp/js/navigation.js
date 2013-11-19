@@ -1,34 +1,21 @@
 /**
  * navigation.js
  *
- * Handles toggling the navigation menu for small screens.
+ * Handles toggling the two navigation menus for small screens.
+ *
  */
-( function() {
-	var container, button, menu;
+jQuery(document).ready(function(){
 
-	container = document.getElementById( 'site-navigation' );
-	if ( ! container )
-		return;
+	jQuery('.menu-toggle').click(function () {
+		jQuery('.menu').slideToggle(400, function () {
+			jQuery('.menu').toggleClass('mobile-pop').css('display', '');
+		});
+	});
 
-	button = container.getElementsByTagName( 'h1' )[0];
-	if ( 'undefined' === typeof button )
-		return;
+	jQuery('.menu-jobs-toggle').click(function () {
+		jQuery('.menu-jobs').slideToggle(400, function () {
+			jQuery('.menu-jobs').toggleClass('mobile-pop').css('display', '');
+		});
+	});
 
-	menu = container.getElementsByTagName( 'ul' )[0];
-
-	// Hide menu toggle button if menu is empty and return early.
-	if ( 'undefined' === typeof menu ) {
-		button.style.display = 'none';
-		return;
-	}
-
-	if ( -1 === menu.className.indexOf( 'nav-menu' ) )
-		menu.className += ' nav-menu';
-
-	button.onclick = function() {
-		if ( -1 !== container.className.indexOf( 'toggled' ) )
-			container.className = container.className.replace( ' toggled', '' );
-		else
-			container.className += ' toggled';
-	};
-} )();
+});

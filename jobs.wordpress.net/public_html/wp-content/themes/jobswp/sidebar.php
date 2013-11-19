@@ -10,7 +10,8 @@
 
 			<aside id="cats" class="widget">
 				<h3 class="widget-title"><?php _e( 'Position Types', 'jobswp' ); ?></h3>
-				<ul>
+				<a href="#" class="menu-jobs-toggle"></a>
+				<ul class="menu-jobs">
 					<li class="job-cat-item job-cat-item-all"><a href="/" title="<?php esc_attr_e( 'View all job openings', 'jobswp' ); ?>"><?php _e( 'All Openings', 'jobswp' ) ?></a></li>
 				<?php Jobs_Dot_WP::list_job_categories(); ?>
 				</ul>

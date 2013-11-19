@@ -455,6 +455,9 @@ a:active {
 	cursor: pointer;
 	display: none;
 }
+.menu {
+	display: block;
+}
 
 @media screen and (max-width: 600px) {
 	.menu-toggle,
@@ -758,6 +761,15 @@ li > ul {
 	text-decoration: none;
 	color: #21759b;
 }
+
+/* Small menu */
+.menu-jobs-toggle {
+    display: none;
+}
+.menu-jobs {
+	display: block;
+}
+
 .all-job-categories a:hover, .jobs-group a:hover, #secondary #cats li a:hover {
 	color: #2EA2CC;
 }
@@ -1245,13 +1257,15 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	.container .jobs-group .grid_2,
 	.container .jobs-group .grid_4,
 	.container .jobs-group .grid_7,
-	.post-job-job-info {
+	.post-job-job-info,
+	.container .no-job.grid_9 {
 		width: 100%;
 	}
 	.container .jobs-group .grid_1,
 	.container .jobs-group .grid_2,
 	.container .jobs-group .grid_4,
-	.container .hentry .grid_3 {
+	.container .hentry .grid_3,
+	.container .no-job.grid_9 {
 		padding-left: 20px;
 		padding-right: 20px;
 	}
@@ -1300,7 +1314,58 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		margin-bottom: 0.5em;
 	}
 
+	#cats {
+		position: relative;
+	}
+	#cats h3 {
+		color: #2ea2cc;
+		margin: 0;
+		padding-bottom: 10px;
+	}
+	#cats h3:after {
+		content: '\f228';
+		font: 16px 'dashicons';
+		float: right;
+		vertical-align: top;
+	}
+	.menu-jobs {
+		display: none;
+		margin-top: 10px;
+	}
+	.menu-jobs.mobile-pop {
+		display: block;
+	}
+	.menu-jobs-toggle {
+		background: transparent;
+		display: block;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 50px;
+	}
 	#wporg-footer {
 		min-width: inherit;
+	}
+}
+@media only screen and (max-width: 600px) {
+	.menu {
+		display: none;
+	}
+	.menu.mobile-pop {
+		display: block;
+	}
+	.menu-toggle {
+		color: #ddd;
+		display: block;
+		font-size: 18px;
+		padding-bottom: 20px;
+		text-align: center;
+	}
+	.menu-toggle:after {
+		content: '\f228';
+		font: 16px 'dashicons';
+		margin-left: 15px;
+		vertical-align: middle;
 	}
 }
