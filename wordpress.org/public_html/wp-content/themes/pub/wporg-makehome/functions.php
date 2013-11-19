@@ -16,3 +16,11 @@ function make_query_mods( $query ) {
 	if ( ! is_admin() && $query->is_main_query() && $query->is_home() )
 		$query->set( 'posts_per_page', 1 );
 }
+
+add_filter('post_class','make_home_site_classes', 10, 3);
+function make_home_site_classes($classes, $class, $id) {
+	$title = get_the_title($id);
+	$title = sanitize_title($title);
+	$classes[] = $title;
+	return $classes;
+}
