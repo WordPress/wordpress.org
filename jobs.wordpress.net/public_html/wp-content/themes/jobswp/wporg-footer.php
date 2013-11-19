@@ -47,5 +47,3 @@
 	<h6 class="aligncenter">Code is Poetry</h6>
 </div>
 
-</body>
-</html>
