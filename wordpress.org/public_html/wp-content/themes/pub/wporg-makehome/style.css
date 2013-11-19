@@ -211,14 +211,17 @@ section.get-involved article h2:before {
 	vertical-align: -3px;
 }
 
-section.get-involved article.core          h2:before { content: '\f107'; }
-section.get-involved article.ui            h2:before { content: '\f100'; }
-section.get-involved article.mobile        h2:before { content: '\f166'; }
-section.get-involved article.accessibility h2:before { content: '\f115'; }
-section.get-involved article.polyglots     h2:before { content: '\f125'; }
-section.get-involved article.support       h2:before { content: '\f110'; }
-section.get-involved article.themes        h2:before { content: '\f105'; }
-section.get-involved article.plugins       h2:before { content: '\f106'; }
+section.get-involved article.make-core          h2:before { content: '\f107'; }
+section.get-involved article.make-ui            h2:before { content: '\f100'; }
+section.get-involved article.make-mobile        h2:before { content: '\f166'; }
+section.get-involved article.make-accessibility h2:before { content: '\f115'; }
+section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
+section.get-involved article.make-support       h2:before { content: '\f110'; }
+section.get-involved article.make-themes        h2:before { content: '\f105'; }
+section.get-involved article.make-plugins		h2:before { content: '\f106'; }
+section.get-involved article.make-documentation	h2:before { content: '\f123'; }
+section.get-involved article.make-community		h2:before { content: '\f125'; }
+section.get-involved article.make-meta			h2:before { content: '\f325'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
