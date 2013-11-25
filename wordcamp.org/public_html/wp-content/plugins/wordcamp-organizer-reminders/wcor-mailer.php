@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sends e-mails at time-based intervals and triggers
+ * Sends e-mails at time-based intervals and on triggers
  * @package WordCampOrganizerReminders
  */
 class WCOR_Mailer {
@@ -108,16 +108,23 @@ class WCOR_Mailer {
 		) );
 		
 		foreach ( $recent_or_upcoming_wordcamps as $wordcamp ) {
-			$organizers_email = get_post_meta( $wordcamp->ID, 'E-mail Address', true );
-			$sent_email_ids   = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
+			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
 
-			if ( ! is_email( $organizers_email ) ) {
-				continue;
-			}
-			
 			foreach ( $reminder_emails as $email ) {
+				$send_where = get_post_meta( $email->ID, 'wcor_send_where', true );
+				
+				if ( 'wcor_send_custom' == $send_where ) {
+					$recipient = get_post_meta( $email->ID, 'wcor_send_custom_address', true );
+				} else {
+					$recipient = get_post_meta( $wordcamp->ID, 'E-mail Address', true );
+				}
+				
+				if ( ! is_email( $recipient ) ) {
+					continue;
+				}
+				
 				if ( $this->timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) ) {
-					if ( $this->mail( $organizers_email, $email->post_title, $email->post_content ) ) {
+					if ( $this->mail( $recipient, $email->post_title, $email->post_content ) ) {
 						$sent_email_ids[] = $email->ID;
 						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 					}
@@ -206,11 +213,10 @@ class WCOR_Mailer {
 	 */
 	public function send_trigger_added_to_schedule( $post_id, $post ) {
 		if ( 'wordcamp' == $post->post_type && 'publish' == $post->post_status ) {
-			$start_date       = get_post_meta( $post_id, 'Start Date (YYYY-mm-dd)', true );
-			$organizers_email = get_post_meta( $post_id, 'E-mail Address', true );
-			$sent_email_ids   = (array) get_post_meta( $post_id, 'wcor_sent_email_ids', true );
+			$start_date     = get_post_meta( $post_id, 'Start Date (YYYY-mm-dd)', true );
+			$sent_email_ids = (array) get_post_meta( $post_id, 'wcor_sent_email_ids', true );
 		
-			if ( $start_date && is_email( $organizers_email ) ) {
+			if ( $start_date ) {
 				$emails = get_posts( array(
 					'posts_per_page' => -1,
 					'post_type'      => WCOR_Reminder::POST_TYPE_SLUG,
@@ -227,8 +233,16 @@ class WCOR_Mailer {
 				) );
 				
 				foreach( $emails as $email ) {
-					if ( ! in_array( $email->ID, $sent_email_ids ) ) {
-						if ( $this->mail( $organizers_email, $email->post_title, $email->post_content ) ) {
+					$send_where = get_post_meta( $email->ID, 'wcor_send_where', true );
+
+					if ( 'wcor_send_custom' == $send_where ) {
+						$recipient = get_post_meta( $email->ID, 'wcor_send_custom_address', true );
+					} else {
+						$recipient = get_post_meta( $post_id, 'E-mail Address', true );
+					}
+					
+					if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
+						if ( $this->mail( $recipient, $email->post_title, $email->post_content ) ) {
 							$sent_email_ids[] = $email->ID;
 							update_post_meta( $post_id, 'wcor_sent_email_ids', $sent_email_ids );
 						}

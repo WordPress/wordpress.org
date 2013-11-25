@@ -65,8 +65,8 @@ class WCOR_Reminder {
 			'Reminder Details',
 			array( $this, 'markup_reminder_details' ),
 			self::POST_TYPE_SLUG,
-			'side',
-			'default'
+			'normal',
+			'high'
 		);
 	}
 
@@ -76,14 +76,34 @@ class WCOR_Reminder {
 	 * @param object $post
 	 */
 	public static function markup_reminder_details( $post ) {
-		$send_when        = get_post_meta( $post->ID, 'wcor_send_when', true );
-		$send_days_before = get_post_meta( $post->ID, 'wcor_send_days_before', true );
-		$send_days_after  = get_post_meta( $post->ID, 'wcor_send_days_after', true );
-		$which_trigger    = get_post_meta( $post->ID, 'wcor_which_trigger', true );
+		$send_where          = get_post_meta( $post->ID, 'wcor_send_where', true );
+		$send_custom_address = get_post_meta( $post->ID, 'wcor_send_custom_address', true );
+		$send_when           = get_post_meta( $post->ID, 'wcor_send_when', true );
+		$send_days_before    = get_post_meta( $post->ID, 'wcor_send_days_before', true );
+		$send_days_after     = get_post_meta( $post->ID, 'wcor_send_days_after', true );
+		$which_trigger       = get_post_meta( $post->ID, 'wcor_which_trigger', true );
 		
 		?>
+
+		<h4>Who should this e-mail be sent to?</h4>
+
+		<table>
+			<tbody>
+				<tr>
+					<th><input id="wcor_send_where" name="wcor_send_where" type="radio" value="wcor_send_organizers" <?php checked( $send_where, 'wcor_send_organizers' ); ?>></th>
+					<td colspan="2"><label for="wcor_send_where">The organizers of the WordCamp</label></td>
+				</tr>
+	
+				<tr>
+					<th><input id="wcor_send_custom" name="wcor_send_where" type="radio" value="wcor_send_custom" <?php checked( $send_where, 'wcor_send_custom' ); ?>></th>
+					<td><label for="wcor_send_custom">A custom address: </label></td>
+					<td><input id="wcor_send_custom_address" name="wcor_send_custom_address" type="text" class="regular-text" value="<?php echo esc_attr( $send_custom_address ); ?>" /></td>
+				</tr>
+			</tbody>
+		</table>
 		
-		<p>When should this e-mail be sent?</p>
+		
+		<h4>When should this e-mail be sent?</h4>
 
 		<table>
 			<tbody>
@@ -107,7 +127,7 @@ class WCOR_Reminder {
 
 				<tr>
 					<th><input id="wcor_send_trigger" name="wcor_send_when" type="radio" value="wcor_send_trigger" <?php checked( $send_when, 'wcor_send_trigger' ); ?>></th>
-					<td><label for="wcor_send_trigger">on trigger: </label></td>
+					<td><label for="wcor_send_trigger">on a trigger: </label></td>
 					<td>
 						<select name="wcor_which_trigger">
 							<option value="null" <?php selected( $which_trigger, false ); ?>></option>
@@ -155,6 +175,16 @@ class WCOR_Reminder {
 	 * @param array $new_meta
 	 */
 	protected function save_post_meta( $post, $new_meta ) {
+		if ( isset( $new_meta['wcor_send_where'] ) ) {
+			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_custom' ) ) ) {
+				update_post_meta( $post->ID, 'wcor_send_where', $new_meta['wcor_send_where'] );
+			}
+		}
+
+		if ( isset( $new_meta['wcor_send_custom_address'] ) && is_email( $new_meta['wcor_send_custom_address'] ) ) {
+			update_post_meta( $post->ID, 'wcor_send_custom_address', sanitize_email( $new_meta['wcor_send_custom_address'] ) );
+		}		
+		
 		if ( isset( $new_meta['wcor_send_when'] ) ) {
 			if ( in_array( $new_meta['wcor_send_when'], array( 'wcor_send_before', 'wcor_send_after', 'wcor_send_trigger' ) ) ) {
 				update_post_meta( $post->ID, 'wcor_send_when', $new_meta['wcor_send_when'] );
