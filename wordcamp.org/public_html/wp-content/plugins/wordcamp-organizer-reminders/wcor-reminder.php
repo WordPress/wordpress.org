@@ -141,6 +141,14 @@ class WCOR_Reminder {
 			</tbody>
 		</table>
 
+		<h4>Available Placeholders:</h4>
+		
+		<ul class="ul-disc">
+			<li>[wordcamp_name]</li>
+			<li>[organizer_name]</li>
+			<li>[organizer_address]</li>
+		</ul>
+
 		<?php
 	}
 

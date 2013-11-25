@@ -61,10 +61,6 @@ class WCOR_Mailer {
 	 * we don't want to be flagged as spam for forging the From header, so we set the Sender header.
 	 * @see http://stackoverflow.com/q/4728393/450127
 	 *
-	 * @todo Add the ability to use tags like %organizer_name% and %wordcamp_name% in the e-mail body. Maybe use shortcodes, or just do str_replace.
-	 * Problem is sometimes need info from other sites, so hard to get inside this function, but still want it centralized here to keep it DRY.
-	 * @todo Prefix subject with WordCamp name instead of Central. Same problem as above.
-	 * 
 	 * @param string $to
 	 * @param string $subject
 	 * @param string $body
@@ -77,6 +73,22 @@ class WCOR_Mailer {
 		);
 		
 		return wp_mail( $to, 'WordCamp Central Reminder: ' . $subject, strip_tags( $body ), $headers );
+	}
+
+	/**
+	 * Replaces placeholders with a dynamic string
+	 *
+	 * @param  WP_Post $wordcamp
+	 * @param  WP_Post $email
+	 * @param  string  $content
+	 * @return string
+	 */
+	protected function replace_placeholders( $wordcamp, $email, $content ) {
+		$wordcamp_meta = get_post_custom( $wordcamp->ID );
+		$search        = array( '[wordcamp_name]',     '[organizer_name]',                  '[organizer_address]' );
+		$replace       = array( $wordcamp->post_title, $wordcamp_meta['Organizer Name'][0], $wordcamp_meta['Mailing Address'][0] );
+		
+		return str_replace( $search, $replace, $content );
 	}
 
 	/**
@@ -124,7 +136,10 @@ class WCOR_Mailer {
 				}
 				
 				if ( $this->timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) ) {
-					if ( $this->mail( $recipient, $email->post_title, $email->post_content ) ) {
+					$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
+					$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
+					
+					if ( $this->mail( $recipient, $subject, $body ) ) {
 						$sent_email_ids[] = $email->ID;
 						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 					}
@@ -242,7 +257,10 @@ class WCOR_Mailer {
 					}
 					
 					if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
-						if ( $this->mail( $recipient, $email->post_title, $email->post_content ) ) {
+						$subject = $this->replace_placeholders( $post, $email, $email->post_title );
+						$body    = $this->replace_placeholders( $post, $email, $email->post_content );
+						
+						if ( $this->mail( $recipient, $subject, $body ) ) {
 							$sent_email_ids[] = $email->ID;
 							update_post_meta( $post_id, 'wcor_sent_email_ids', $sent_email_ids );
 						}
