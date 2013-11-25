@@ -67,12 +67,14 @@ class WCOR_Mailer {
 	 * @return bool
 	 */
 	protected function mail( $to, $subject, $body ) {
+		$subject = html_entity_decode( strip_tags( $subject ), ENT_QUOTES, 'UTF-8' );
+		$body    = html_entity_decode( strip_tags( $body ), ENT_QUOTES, 'UTF-8' );
 		$headers = array(
 			'From: WordCamp Central <support@wordcamp.org>',
 			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] )
 		);
 		
-		return wp_mail( $to, 'WordCamp Central Reminder: ' . $subject, strip_tags( $body ), $headers );
+		return wp_mail( $to, 'WordCamp Central Reminder: ' . $subject, $body, $headers );
 	}
 
 	/**
