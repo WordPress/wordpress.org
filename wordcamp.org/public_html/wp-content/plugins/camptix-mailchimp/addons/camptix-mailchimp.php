@@ -40,9 +40,13 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 	 * @todo Cache lists api call
 	 */
 	public function field_mailchimp_list() {
+		global $camptix;
+		
 		$lists = $this->api( 'lists/list' );
-		if ( ! $lists || empty( $lists->data ) )
+		if ( ! $lists || empty( $lists->data ) ) {
+			$camptix->log( 'No lists available.', null, $lists, 'mailchimp' );
 			return;
+		}
 
 		$lists = $lists->data;
 		$value = isset( $this->options['mailchimp_list'] ) ? $this->options['mailchimp_list'] : null;
@@ -66,12 +70,18 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 	}
 
 	public function api( $method, $args = array(), $format = 'json' ) {
-		if ( empty( $this->options['mailchimp_api_key'] ) )
+		global $camptix;
+		
+		if ( empty( $this->options['mailchimp_api_key'] ) ) {
+			$camptix->log( 'Trying to make API call without key.', null, array( 'method' => $method, 'args' => $args, 'format' => $format ), 'mailchimp' );
 			return false;
+		}
 
 		// Example API key: 1bae1653ae3f53224b7a678acb599865-us6 (last bit is the data-center)
-		if ( ! preg_match( '#-([a-zA-Z0-9]+)$#', $this->options['mailchimp_api_key'], $matches ) )
+		if ( ! preg_match( '#-([a-zA-Z0-9]+)$#', $this->options['mailchimp_api_key'], $matches ) ) {
+			$camptix->log( 'Invalid API key.', null, $this->options['mailchimp_api_key'], 'mailchimp' );
 			return false;
+		}
 
 		$url = esc_url_raw( sprintf( 'https://%s.api.mailchimp.com/2.0/%s.%s', $matches[1], $method, $format ) );
 
@@ -79,12 +89,18 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 			'apikey' => $this->options['mailchimp_api_key'],
 		), $args );
 
-		if ( empty( $url ) )
+		if ( empty( $url ) ) {
+			$camptix->log( 'Empty URL.', null, $url, 'mailchimp' );
 			return false;
-
+		}
+		
 		$request = wp_remote_post( $url, array( 'body' => json_encode( $args ) ) );
-		if ( 200 != wp_remote_retrieve_response_code( $request ) )
+		if ( 200 == wp_remote_retrieve_response_code( $request ) ) {
+			$camptix->log( 'API call succeeded.', null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
+		} else {
+			$camptix->log( 'API call failed.', null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
 			return $request;
+		}
 
 		$body = json_decode( wp_remote_retrieve_body( $request ) );
 		return $body;
@@ -105,6 +121,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 
 		if ( isset( $input['mailchimp_sync_attendees'] ) ) {
 
+			$start_time = microtime( true );
+			$camptix->log( 'Starting sync.', null, null, 'mailchimp' );
+			
 			// This may take a while
 			set_time_limit( 600 );
 
@@ -460,8 +479,14 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 				$camptix->filter_post_meta = false;
 			}
 
-			if ( ! get_settings_errors( 'camptix-mailchimp' ) )
+			$settings_errors = get_settings_errors( 'camptix-mailchimp' );
+			if ( $settings_errors ) {
+				$camptix->log( 'Found settings errors after syncing.', null, $settings_errors, 'mailchimp' );
+			} else {
 				add_settings_error( 'camptix-mailchimp', 'success', __( "Everything's been synced. You're good to go.", 'camptix' ), 'updated' );
+			}
+
+			$camptix->log( sprintf( 'Sync completed in %f seconds.', microtime( true ) - $start_time ), null, null, 'mailchimp' );
 		}
 
 		return $output;
