@@ -9,7 +9,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 
 		$this->options = $camptix->get_options();
 
-		if ( $this->options['mailchimp_override_email'] )
+		if ( isset( $this->options['mailchimp_override_email'] ) && $this->options['mailchimp_override_email'] )
 			add_filter( 'camptix_wp_mail_override', '__return_true' );
 	}
 
@@ -45,7 +45,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 			return;
 
 		$lists = $lists->data;
-		$value = $this->options['mailchimp_list'];
+		$value = isset( $this->options['mailchimp_list'] ) ? $this->options['mailchimp_list'] : null;
 		?>
 		<select name="camptix_options[mailchimp_list]">
 		<option value=""><?php _e( 'None', 'camptix' ); ?></option>
@@ -124,7 +124,8 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 
 			if ( is_array( $current_groupings ) )
 				foreach ( $current_groupings as $key => $grouping )
-					$current_groupings_clean[ $grouping->id ] = $grouping;
+					if ( isset ( $grouping->id ) )
+						$current_groupings_clean[ $grouping->id ] = $grouping;
 
 			$current_groupings = $current_groupings_clean;
 			unset( $current_groupings_clean );
