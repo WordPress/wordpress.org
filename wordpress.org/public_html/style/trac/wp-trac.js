@@ -80,6 +80,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			if ( typeof coreKeywordList === 'undefined' )
 				return;
 
+			// If we're not a gardener and we're on /newticket (field-owner check), declutter.
+			if ( ! wpTrac.gardener && $('#field-owner').length ) {
+				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
+			}
+	
 			// Generate the workflow template.
 			wpTrac.template();
 

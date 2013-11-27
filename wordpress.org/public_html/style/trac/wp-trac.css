@@ -348,6 +348,9 @@ table.progress {
 #properties .col2 input {
 	width: 92.5%;
 }
+#properties table th.col2 {
+	border: none;
+}
 #properties table td {
 	vertical-align: top; /* align everything */
 	padding: .3em; /* breathing room */
