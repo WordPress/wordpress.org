@@ -1,0 +1,39 @@
+/*
+Theme Name:  WordCamp Planning
+Author:      WordCamp.org
+Author URI:  http://wordcamp.org/
+Description: A TwentyTwelve child theme for plan.wordcamp.org
+Version:     0.1
+License:     GPL v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Template:    twentytwelve
+*/
+
+@import url( '../twentytwelve/style.css' );
+
+#sidebar-after-header,
+#sidebar-footer {
+	float: none;
+	width: 100%;
+	margin-top: 0;
+	overflow: auto;
+}
+	
+	#sidebar-after-header aside,
+	#sidebar-footer aside {
+		float: left;
+		margin-right: 2rem;
+	}
+
+		#sidebar-after-header aside:last-child,
+		#sidebar-footer aside:last-child {
+			margin-right: 0;
+		}
+
+		#sidebar-after-header aside {
+			margin-bottom: 0;
+		}
+		
+		#sidebar-footer aside {
+			margin-bottom: 1rem;
+		}
