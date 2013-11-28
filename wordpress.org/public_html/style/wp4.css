@@ -283,6 +283,7 @@ a img.aligncenter {
 	-ms-transition: left 0.3s;
 	-o-transition: left 0.3s;
 	transition: left 0.3s;
+	z-index: 1;
 }
 
 #wporg-header ul#wporg-header-menu.active {
@@ -325,11 +326,10 @@ a img.aligncenter {
 	font-weight: bold;
 }
 
-/* TODO Submenu is hidden as we think it is better just to offer main menu items at mobile level. Change display to block to see sub nav */
 #wporg-header .nav-submenu {
 	display: none;
 	position: static;
-	padding-top: 0;
+	padding: 0;
 	margin-top: -15px;
 	margin-bottom: 10px;
 }
@@ -396,6 +396,10 @@ a img.aligncenter {
 	text-decoration: none;
 	font: normal 50px/1 'Dashicons';
 	-webkit-font-smoothing: antialiased;
+}
+
+#mobile-menu-button:hover {
+	background:none;
 }
 
 #download-mobile {
@@ -520,7 +524,7 @@ a img.aligncenter {
 	}
 
 	#wporg-header ul.nav-submenu li a {
-		margin-left: 6;
+		margin-left: 6px;
 		height: 34px;
 		line-height: 34px;
 	}
