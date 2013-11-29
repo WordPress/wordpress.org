@@ -17,10 +17,6 @@ body {
 }
 /* -------------------------------------------- */
 
-html, body {
-	position: relative;  /* this is necessary for children to properly use position: absolute */
-}
-
 code, pre { font-family: Consolas, Monaco, "Courier New", Courier, monospace; color: #000; }
 
 pre {
