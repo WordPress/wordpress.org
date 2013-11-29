@@ -525,6 +525,10 @@ a img.aligncenter {
 		line-height: 34px;
 	}
 
+	#headline h2 {
+		text-rendering: optimizeLegibility;
+	}
+
 	#mobile-menu-button {
 		display: none;
 	}
@@ -1076,7 +1080,6 @@ input.text {
 	padding-top: 18px;
 	padding-left: 9px;
 	float: left;
-	text-rendering: optimizeLegibility;
 }
 
 #headline .login {
