@@ -269,7 +269,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 						'groups' => array( 'None' ), // @todo: add groups here vs more api calls
 					) );
 
-					if ( ! empty( $result ) ) {
+					if ( isset( $result->id ) ) {
 						$grouping_id = $result->id;
 					}
 				}
