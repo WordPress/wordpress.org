@@ -288,6 +288,7 @@ a img.aligncenter {
 
 #wporg-header ul li {
 	position:relative;
+	list-style-type:none;
 }
 
 #wporg-header ul li a {
