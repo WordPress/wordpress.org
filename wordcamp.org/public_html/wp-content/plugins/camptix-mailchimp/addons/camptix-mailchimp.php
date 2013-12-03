@@ -96,9 +96,9 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 		
 		$request = wp_remote_post( $url, array( 'body' => json_encode( $args ) ) );
 		if ( 200 == wp_remote_retrieve_response_code( $request ) ) {
-			$camptix->log( 'API call succeeded.', null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
+			$camptix->log( "API call to $method succeeded.", null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
 		} else {
-			$camptix->log( 'API call failed.', null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
+			$camptix->log( "API call to $method failed.", null, array( 'method' => $method, 'args' => $args, 'format' => $format, 'url' => $url, 'request' => $request ), 'mailchimp' );
 			return $request;
 		}
 
