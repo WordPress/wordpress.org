@@ -31,7 +31,7 @@
 
 @media screen and (max-width:692px) {
 	.col-9 {
-		width:auto;
+		width:100%;
 	}
 }
 
