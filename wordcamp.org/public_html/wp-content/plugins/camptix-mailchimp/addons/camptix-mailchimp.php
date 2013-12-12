@@ -396,7 +396,7 @@ class CampTix_MailChimp_Addon extends CampTix_Addon {
 					}
 
 					// Add the ticket name to the MailChimp groups.
-					if ( ! empty( $existing_groups['tickets'] ) ) {
+					if ( ! empty( $existing_groups['tickets'] ) && isset( $ticket->post_title ) ) {
 						$groupings[] = array(
 							'id' => $existing_groups['tickets'],
 							'groups' => array( $ticket->post_title ),
