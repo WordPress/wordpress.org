@@ -89,6 +89,11 @@ hr {
 	font-weight: bold;
 }
 
+.col-9 h2.aligncenter,
+.col-9 h3.aligncenter {
+	text-align: center;
+}
+
 .col-3 p, .col-3 ul li {
 	font-size: 13px;
 }
