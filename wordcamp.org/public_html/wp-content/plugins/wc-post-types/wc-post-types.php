@@ -1164,6 +1164,24 @@ class WordCamp_Post_Types_Plugin {
 		delete_post_meta( $post_id, '_wcpt_speaker_id' );
 		foreach ( $speaker_ids as $speaker_id )
 			add_post_meta( $post_id, '_wcpt_speaker_id', $speaker_id );
+		
+		// Set the speaker as the author of the session post, so the single
+		// view doesn't confuse users who see "posted by [organizer name]"
+		foreach ( $speaker_ids as $speaker_post ) {
+			$wporg_user_id = get_post_meta( $speaker_post, '_wcpt_user_id', true );
+			$user = get_user_by( 'id', $wporg_user_id );
+			
+			if ( $user ) {
+				remove_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );	// avoid infinite recursion
+				wp_update_post( array(
+					'ID'          => $post_id,
+					'post_author' => $user->ID
+				) );
+				add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
+				
+				break;
+			}
+		}
 	}
 
 	/**
