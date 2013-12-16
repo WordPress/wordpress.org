@@ -344,11 +344,11 @@ class WordCamp_Post_Types_Plugin {
 		$attr = shortcode_atts( array(
 			'date' => null,
 			'tracks' => 'all',
-			'speaker_link' => 'anchor', // anchor|wporg|none
+			'speaker_link' => 'anchor', // anchor|wporg|permalink|none
 			'session_link' => 'permalink', // permalink|anchor|none
 		), $attr );
 
-		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'none' ) ) )
+		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
 			$attr['speaker_link'] = 'anchor';
 
 		if ( ! in_array( $attr['session_link'], array( 'permalink', 'anchor', 'none' ) ) )
@@ -536,6 +536,8 @@ class WordCamp_Post_Types_Plugin {
 						$speaker_permalink = $this->get_speaker_anchor_permalink( $speaker->ID );
 					elseif ( 'wporg' == $attr['speaker_link'] ) // profiles.wordpress.org/user
 						$speaker_permalink = $this->get_speaker_wporg_permalink( $speaker->ID );
+					elseif ( 'permalink' == $attr['speaker_link'] ) // year.city.wordcamp.org/speakers/slug
+						$speaker_permalink = get_permalink( $speaker->ID );
 
 					if ( ! empty( $speaker_permalink ) )
 						$speaker_name = sprintf( '<a href="%s">%s</a>', esc_url( $speaker_permalink ), esc_html( $speaker_name ) );
@@ -1208,10 +1210,10 @@ class WordCamp_Post_Types_Plugin {
 		// Register speaker post type.
 		register_post_type( 'wcb_speaker', array(
 			'labels'            => $labels,
-			'rewrite'           => array( 'slug' => 'speaker', 'with_front' => false ),
+			'rewrite'           => array( 'slug' => 'speaker', 'with_front' => true ),
 			'supports'          => array( 'title', 'editor', 'revisions' ),
 			'menu_position'     => 20,
-			'public'            => false,
+			'public'            => true,
 			'show_ui'           => true,
 			'can_export'        => true,
 			'capability_type'   => 'post',
