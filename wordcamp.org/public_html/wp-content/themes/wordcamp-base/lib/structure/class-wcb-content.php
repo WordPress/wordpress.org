@@ -18,7 +18,7 @@ class WCB_Content extends WCB_Container {
 		parent::after();
 	}
 
-	function render() {
+	function render( $resume_only=false ) {
 		if ( ! $this->open ) {
 			$this->open = true;
 			$this->before();

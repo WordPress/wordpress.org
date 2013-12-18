@@ -10,16 +10,16 @@ class WCB_Metabox {
 	var $id_base;
 	static $registry;
 
-	// PHP4 Compatible constructor
-	function WCB_Metabox( $id_base='' ) {
-		$this->__construct( $id_base );
-	}
-
 	function __construct( $id_base='' ) {
 		$this->id_base = ( empty( $id_base ) ) ? get_class( $this ) : $id_base;
 
 		add_action('admin_init',            array( &$this, '_admin_init' ) );
 		add_action('admin_enqueue_scripts', array( &$this, '_admin_enqueue_scripts' ) ); // @todo styles. also, consider footer.
+	}
+	
+	// PHP4 Compatible constructor
+	function WCB_Metabox( $id_base='' ) {
+		$this->__construct( $id_base );
 	}
 
 	static function registry() {
@@ -211,7 +211,7 @@ class WCB_Metabox {
 	 * @todo Add access when php5+.
 	 * @access protected
 	 */
-	function save() {}
+	function save( $post_id, $post ) {}
 
 
 	/**
@@ -223,7 +223,7 @@ class WCB_Metabox {
 	 * @access protected
 	 * @return boolean Whether to save the metabox.
 	 */
-	function maybe_save() {}
+	function maybe_save( $post_id, $post ) {}
 
 	/**
 	 * Public access, for hooks, but final so it's remains fixed.
