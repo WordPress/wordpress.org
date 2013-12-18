@@ -1,7 +1,7 @@
 --
 -- Trac database schema for a MySQL backend
 --
--- This schema is modified specificially for WordPress. It may work elsewhere
+-- This Trac MySQL DB schema is modified for WordPress. It may work elsewhere
 -- but note that some assumptions are made, such as WP core's username length
 -- of 60 characters. Revisions are given 40 characters as that is a sha1 hash
 -- and IP address fields receive 45 characters to hypothetically handle IPv6.
