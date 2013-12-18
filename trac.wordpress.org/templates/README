@@ -1,0 +1,27 @@
+WORDPRESS.ORG TRAC TEMPLATES
+============================
+
+These templates are used for rendering Trac on WordPress.org. The templates are written in Genshi, a Python library written specifically for Trac. http://genshi.edgewall.org/. Like PHP, Genshi is fickle, more so because it is XML. It is easy to generate an error. Changes to these files must not be deployed without testing. Setting up a local Trac for testing is not a fun process, but is documented fairly well here: http://trac.edgewall.org/wiki/TracInstall.
+
+These templates wrap the make.wordpress.org header and footer, add gravatars, and make a slew of other adjustments.
+
+ *  site.html
+
+    site.html is the main file, loaded in all situations. It is used to parse Trac's core templating output and make our adjustments. This file is shared across all Tracs that use the global header and footer. This file includes other templates, like the header and footer. You can think of this as a cross between functions.php and index.php in a WordPress theme. Kinda.
+
+ *  site-specific.html
+
+    site.html is normally used to customize a Trac install. We share a single site.html across multiple Tracs, and overrides would override the entire file (like an index.php file in a WordPress child theme), rather than supplement it (like functions.php in a child theme). Thus, site.html includes a site-specific.html file, for individual Trac installs that may have customizations.
+
+ *  ticket_change.html and ticket_change.diff
+
+    Okay, so site.html isn't loaded in *all* situations. Specifically, ticket auto-previews added in Trac 1.0 don't load site.html. ticket_change.html overrides a core Trac template, modifying it for our needs. ticket_change.diff shows these modifications. The original file: http://trac.edgewall.org/browser/tags/trac-1.0.1/trac/ticket/templates/ticket_change.html. See also http://trac.edgewall.org/ticket/11199 and https://core.trac.wordpress.org/ticket/24165#comment:17.
+
+ *  wporg-head.html, wporg-header.html and wporg-footer.html
+
+    These files contain manually synced snippets of WP.org's <head>, header and footer. They are included by site.html, which injects them into the page at the right points. The contents of wporg-head.html are merely a few lines injected into Trac's <head>, while wporg-header.html and wporg-footer.html are big chunks of HTML.
+
+ *  wporg-menu.html
+
+    wporg-menu.html is a per-Trac file included by site.html if it exists for that Trac. It is designed to specify the name of the Trac (or more accurately, the make.wordpress.org P2's name) and include a right-hand menu shared with the P2. The one included here is for core.trac.wordpress.org. If the file does not exist for a Trac, then fallback HTML is used. This fallback HTML is seen in site.html and simply uses the Trac's project name.
+

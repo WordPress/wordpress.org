@@ -1,0 +1,20 @@
+Index: 1.0-stable/trac/ticket/templates/ticket_change.html
+===================================================================
+--- 1.0-stable/trac/ticket/templates/ticket_change.html	(revision 11805)
++++ 1.0-stable/trac/ticket/templates/ticket_change.html	(working copy)
+@@ -49,6 +49,15 @@
+       </py:if>
+     </span>
+     <py:choose>
++      <py:when test="'author' in change">
++        <span class="avatar" py:if="change">
++          <a href="http://profiles.wordpress.org/${authorinfo(change.author)}">
++            <img src="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}" height="24" width="24" /> ${authorinfo(change.author)}</a>
++          <py:if test="'date' in change">
++            &#8212; ${dateinfo(change.date)} ago
++          </py:if>
++        </span>
++      </py:when>
+       <py:when test="'date' in change">
+         <i18n:msg params="date, author">Changed ${pretty_dateinfo(change.date)} by ${authorinfo(change.author)}</i18n:msg>
+       </py:when>

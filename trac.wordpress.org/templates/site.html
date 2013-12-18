@@ -1,0 +1,188 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:py="http://genshi.edgewall.org/"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     py:strip="">
+
+<?python
+	scripts_version = 13
+	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
+
+	if project_slug == 'bbpress' :
+		profile_link = 'http://bbpress.org/forums/users/'
+		support_link = 'http://bbpress.org/forums/'
+	elif project_slug == 'buddypress' :
+		profile_link = 'http://buddypress.org/community/members/'
+		support_link = 'http://buddypress.org/support/topics/'
+	else :
+		support_link = 'http://wordpress.org/support/'
+		profile_link = 'http://profiles.wordpress.org/'
+?>
+
+<!--! styles and such -->
+<head py:match="head" py:attrs="select('@*')">
+	${select('*|comment()|text()')}
+	<!--! WP.org Global Header -->
+	<xi:include href="wporg-head.html" />
+
+	<meta name="viewport" content="width=device-width" />
+	<link rel="stylesheet" type="text/css" href="//wordpress.org/style/trac/wp-trac.css?${scripts_version}" />
+	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
+	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
+	<link rel="stylesheet" type="text/css" href="//openatd.svn.wordpress.org/atd-jquery/css/atd.css" media="screen" />
+</head>
+
+<!--! Remove Trac logo and footer -->
+<div py:match="div[@id='header']"></div>
+<div py:match="div[@id='footer']"></div>
+
+<py:match path="div[@id='content' and @class='ticket']/form" py:if="req.environ['PATH_INFO'] == '/newticket'">
+	<div class="wp-notice">
+	<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
+		<p><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
+		<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+		<py:if test="project_slug == 'core'">
+		<hr />
+		<p><strong>REPORTING BUGS</strong></p>
+		<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="http://codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
+		<ul>
+			<li>Are you using the latest and greatest version of WordPress, or the latest development/trunk version? If neither, please stop here and update first.</li>
+			<li>What steps should be taken to <strong>consistently</strong> reproduce the problem?</li>
+			<li>In case it's relevant to the ticket, what is the expected output? What did you see instead?</li>
+			<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
+			<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
+			<li py:if="not req.session['email']">Please add your email address to <a href="/prefs">Trac preferences</a> so you are sent updates.</li>
+		</ul>
+		</py:if>
+	</div>
+	<form py:attrs="select('@*')">
+		${select('*')}
+	</form>
+</py:match>
+
+<!--! Reports are collapsed by default but flicker because it waits for DOM ready to collapse them -->
+<div py:match="div[@id='content' and @class='report']/div[@class='reports']//div" py:if="req.environ['PATH_INFO'] == '/report'" py:attrs="select('@*')" class="collapsed">
+	${select('*|comment()|text()')}
+</div>
+
+<!--! new ticket modifications -->
+<py:if test="req.environ['PATH_INFO'] == '/newticket'">
+
+	<py:if test="'preview' in req.args">
+		<py:match path="form[@id='propertyform']/div[@class='buttons']" once="true">
+
+		<!--! reminder on preview about setting a Trac email -->
+			<py:if test="not req.session['email']">
+				<div class="wp-caution" id="wp-email-pref-notice">
+					<p><strong>Please</strong> add your email address to <a target="_blank" href="/prefs">Trac preferences</a> so you are sent updates.</p>
+				</div>
+			</py:if>
+
+			<!--! security component alert on preview -->
+			<py:if test="'Security' == ticket.component">
+				<div class="wp-notice" id="wp-security-notice">
+					<p><strong>Caution!</strong> This ticket was assigned to the Security component.</p>
+					<p><strong>If this is a potential security vulnerability, DO NOT REPORT IT HERE.</strong></p>
+					<p>Instead, read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+				</div>
+			</py:if>
+
+			<div py:attrs="select('@*')">
+				${select('*|comment()|text()')}
+			</div>
+
+		</py:match>
+	</py:if>
+
+	<!--! force non-gardeners to preview before posting -->
+	<py:if test="not ( 'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource) ) and not 'preview' in req.args">
+		<py:match path="form[@id='propertyform']/div[@class='buttons']" once="true">
+			<div py:attrs="select('@*')">
+				<input type="submit" name="preview" value="Continue to Preview" />
+			</div>
+		</py:match>
+	</py:if>
+
+</py:if>
+
+<!--! reporter-feedback notice. deliberately shows for closed tickets other than 'fixed' -->
+<py:match path="div[@id='content' and @class='ticket']//div[@id='ticketchange']" once="true">
+	<div py:attrs="select('@*')">
+ 		${select('*|comment()|text()')}
+	</div>
+	<div class="wp-notice" id="wp-reporter-feedback-notice" py:if="ticket.reporter == req.authname and 'reporter-feedback' in ticket.keywords and ticket.resolution != 'fixed'">
+		<p><strong>Howdy!</strong></p><p></p>
+		<p>A developer marked this ticket with the reporter-feedback keyword. <strong>That means we need feedback from you.</strong></p>
+		<p>Please answer their questions and address their concerns, then remove the keyword, below.</p>
+		<p>If this is a support question, you're better off in the <a href="${support_link}" class="ext-link"><span class="icon">&nbsp;</span>support forums</a>.</p>
+	</div>
+</py:match>
+
+<!--! license notes when uploading patches -->
+<py:match path="form[@id='attachment']/div[@class='buttons']" once="true">
+	<div class="wp-caution" id="wp-contributions-caution">
+		<p>By contributing code to ${project.name}, you grant its use under the GNU General Public License v2 (or later).</p>
+	</div>
+	<div py:attrs="select('@*')">
+		${select('*|comment()|text()')}
+	</div>
+</py:match>
+
+<py:match path="form[@id='attachment']//input[@type='submit' and @value='Add attachment']" once="true">
+	<input type="submit" value="Agree and Upload" />
+</py:match>
+
+<!--! gravatars for the ticket reporter -->
+<td py:match="td[@headers='h_reporter']" py:attrs="select('@*')">
+	<a href="${profile_link + ticket.reporter}">
+		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.reporter}" height="24" width="24" />
+	</a>
+    ${select('*|comment()|text()')}
+</td>
+
+<!--! gravatars for the ticket owner -->
+<td py:match="td[@headers='h_owner']" py:attrs="select('@*')">
+	<a href="${profile_link + ticket.owner}" py:if="ticket.owner">
+		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.owner}" height="24" width="24" />
+	</a>
+    ${select('*|comment()|text()')}
+</td>
+
+<body py:match="body" id="wordpress-org" class="${project_slug} no-static" py:attrs="select('@*')">
+	<!--! WP.org Global Header -->
+	<xi:include href="wporg-header.html" />
+
+	<xi:include href="wporg-menu.html">
+		<xi:fallback>
+			<div id="headline" class="no-menu">
+				<div class="wrapper">
+					<h2><a href="/">${project.name}</a></h2>
+				</div>
+			</div>
+		</xi:fallback>
+	</xi:include>
+
+	${select('*|comment()|text()')}
+
+	<!--! WP.org Global Footer -->
+	<xi:include href="wporg-footer.html" />
+
+	<!--! footer javascript and such -->
+	<script py:if="'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource)">
+	var wpBugGardener = true;
+	</script>
+	<script src="//wordpress.org/style/trac/wp-trac.js?${scripts_version}"></script>
+	<py:if test="project_slug == 'core'">
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+	try {
+	var pageTracker = _gat._getTracker("UA-52447-27");
+	pageTracker._trackPageview();
+	} catch(err) {}</script>
+	</py:if>
+</body>
+
+<xi:include href="site-specific.html"><xi:fallback /></xi:include>
+</html>
