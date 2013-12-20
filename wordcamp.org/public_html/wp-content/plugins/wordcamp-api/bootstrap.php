@@ -3,7 +3,7 @@
  * Plugin Name:   WordCamp API
  * Description:   Provides API endpoints for WordCamp.org data in JSON and ICS formats
  * Version:       0.1
- * Plugin Author: WordCamp.org
+ * Author:        WordCamp.org
  * Author URI:    http://wordcamp.org
  */
 
