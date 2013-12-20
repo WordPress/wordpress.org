@@ -92,6 +92,7 @@ class WP_38_Credits extends WP_Credits {
 			'bamadesigner',
 			'bananastalktome',
 			'bassgang',
+			'batmoo', // props missed by committer, r26046
 			'binarymoon',
 			'bpetty',
 			'bradyvercher',
@@ -235,6 +236,7 @@ class WP_38_Credits extends WP_Credits {
 			'scottbasgaard',
 			'scribu',
 			'seanchayes',
+			'senlin', // #26059
 			'sergeybiryukov',
 			'shaunandrews',
 			'shinichin',
