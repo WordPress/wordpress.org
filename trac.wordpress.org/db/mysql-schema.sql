@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS `revision` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE IF NOT EXISTS `session` (
-  `sid` varchar(60) COLLATE utf8_bin NOT NULL,
+  `sid` varchar(80) COLLATE utf8_bin NOT NULL,
   `authenticated` int(11) NOT NULL DEFAULT '0',
   `last_visit` int(11) DEFAULT NULL,
   PRIMARY KEY (`sid`,`authenticated`),
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS `session` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE IF NOT EXISTS `session_attribute` (
-  `sid` varchar(60) COLLATE utf8_bin NOT NULL,
+  `sid` varchar(80) COLLATE utf8_bin NOT NULL,
   `authenticated` int(11) NOT NULL DEFAULT '0',
   `name` varchar(100) COLLATE utf8_bin NOT NULL,
   `value` text COLLATE utf8_bin,
