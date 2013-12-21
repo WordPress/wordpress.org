@@ -20,6 +20,7 @@ class WordCamp_Post_Types_Plugin {
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_print_styles', array( $this, 'admin_css' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
 		add_action( 'save_post', array( $this, 'save_post_speaker' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
@@ -184,6 +185,10 @@ class WordCamp_Post_Types_Plugin {
 		}
 	}
 
+	function admin_enqueue_scripts() {
+		wp_enqueue_style( 'campicons', plugins_url( 'fonts/campicons.css', __FILE__ ), array(), 1 );
+	}
+
 	/**
 	 * Runs during admin_print_styles, does some CSS things.
 	 *
@@ -206,26 +211,28 @@ class WordCamp_Post_Types_Plugin {
 
 		// Post types menu icons
 		$menu_icons = array(
-			'wcb_speaker' => plugins_url( 'images/speakers.png', __FILE__ ),
-			'wcb_session' => plugins_url( 'images/sessions.png', __FILE__ ),
-			'wcb_sponsor' => plugins_url( 'images/sponsors.png', __FILE__ ),
+			'wcb_speaker' => '\e602',
+			'wcb_session' => '\e603',
+			'wcb_sponsor' => '\e601',
 		);
 
 		?>
 		<style type="text/css">
-		<?php foreach ( $menu_icons as $post_type => $icon_url ): ?>
+		<?php foreach ( $menu_icons as $post_type => $icon_content ): ?>
 			<?php
 				$class    = sanitize_html_class( $post_type );
 				$icon_url = esc_url( $icon_url );
 			?>
-			#menu-posts-<?php echo $class; ?> .wp-menu-image {
-				background: url(<?php echo $icon_url; ?>) no-repeat 0 -32px;
-			}
-			#menu-posts-<?php echo $class; ?>:hover .wp-menu-image,
-			#menu-posts-<?php echo $class; ?>.wp-has-current-submenu .wp-menu-image {
-				background: url(<?php echo $icon_url; ?>) no-repeat 0 0;
+			#menu-posts-<?php echo $class; ?> .wp-menu-image:before {
+				font-family: 'Campicons' !important;
+				content: '<?php echo $icon_content; ?>' !important;
 			}
 		<?php endforeach; ?>
+
+		#menu-posts-wcb_organizer .wp-menu-image:before {
+			font-family: 'Dashicons';
+			content: "\f338";
+		}
 		</style>
 		<?php
 	}
