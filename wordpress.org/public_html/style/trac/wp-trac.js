@@ -33,6 +33,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 		gardener : typeof wpBugGardener !== 'undefined',
 
 		init : function() {
+			// Change 'Comments' columns to a dashicons glyph to save space
+			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
+
 			// Add After the Deadline
 			$('textarea').addProofreader();
 
