@@ -1447,6 +1447,9 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	.container .content-area.grid_9, .container .widget-area.grid_3 {
 		width: 100%;
 	}
+	.container .jobs-group a {
+		word-wrap: break-word;
+	}
 	.container .jobs-group .job-list-head.grid_7 {
 		width: 235px;
 	}
