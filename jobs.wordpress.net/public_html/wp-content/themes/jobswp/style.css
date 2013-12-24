@@ -848,6 +848,9 @@ li > ul {
 	font-size: 1.5em;
 	margin: 0;
 }
+.job-list-head h2 span {
+	display: none;
+}
 .job-list-head h2 a {
 	text-decoration: none;
 	color: #000;
@@ -1145,7 +1148,6 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 #wporg-footer {
 	clear: both;
 	overflow: auto;
-	min-width: 932px;
 	margin: 0 auto;
 	padding: 22px 14px 65px 14px;
 	border-top: 1px solid #dfdfdf;
@@ -1211,7 +1213,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	padding-right: 0;
 }
 .jobswp #wporg-footer .wrapper {
-	width: inherit;
+	width: 100%;
 	text-align: left;
 }
 .jobswp #wporg-footer p {
@@ -1246,6 +1248,9 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 	#subhead .wporg-link a {
 		font-size: 0.78em;
+	}
+	#wporg-footer ul {
+		width: 110px;
 	}
 }
 @media only screen and (max-width: 767px) {
@@ -1295,7 +1300,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		margin-left: 20px;
 	}
 	#content {
-		padding-top: 30px;
+		padding-top: 20px;
 	}
 	#logo {
 		text-align: center;
@@ -1344,10 +1349,67 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		width: 100%;
 		height: 50px;
 	}
+	.search-form .search-field {
+		font-size: 0.8em;
+	}
+	.search-form input[type="submit"] {
+		padding-top: 11px;
+		padding-bottom: 11px;
+	}
 	#wporg-footer {
 		min-width: inherit;
 	}
+	.container .jobs-group .job-list-head.grid_7 {
+		width: 260px;
+	}
+	.container .jobs-group .job-list-head h2 {
+		display: inline;
+	}
+	.container .jobs-group .jobs-count.grid_2 {
+		display: inline-block;
+		padding-right: 0;
+		width: 116px;
+	}
+	.container .job-list-col-labels {
+		display: none;
+	}
+	.container .jobs-group .job-date {
+		width: 75px;
+		text-align: center;
+		padding-right: 0;
+		float: left;
+		line-height: 1.1em;
+		padding-top: 3px;
+		padding-left: 20px;
+		margin-left: -75px;
+	}
+	.container .jobs-group .job-title.grid_4 {
+		width: 250px;
+		padding-right: 10px;
+		width: 311px;
+		padding-left: 10px;
+	}
+	.container .jobs-group .job-type {
+		display: inline-block;
+		text-align: inherit;
+		width: 120px;
+		padding-right: 10px;
+		padding-left: 10px;
+		font-size: 12px;
+		color: #999;
+	}
+	.container .jobs-group .job-location {
+		display: inline-block;
+		width: 181px;
+		text-align: right;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	.row.row-0, .row.row-1 {
+		padding-left: 65px;
+	}
 }
+
 @media only screen and (max-width: 600px) {
 	.menu {
 		display: none;
@@ -1368,4 +1430,71 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 		margin-left: 15px;
 		vertical-align: middle;
 	}
+
 }
+
+@media only screen and (max-width: 479px) {
+	#subhead .container, #content {
+		padding-left: 10px;
+		padding-right: 10px;
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+	}
+	#subhead .container .grid_9 {
+		width: 100%;
+	}
+	.container .content-area.grid_9, .container .widget-area.grid_3 {
+		width: 100%;
+	}
+	.container .jobs-group .job-list-head.grid_7 {
+		width: 235px;
+	}
+	.container .jobs-group .job-title.grid_4 {
+		width: 100%;
+		padding-left: 0;
+	}
+	.container .jobs-group .job-date {
+		margin-left: -75px;
+		font-size: 0.9em;
+	}
+	.container .jobs-group .job-type {
+		display: inherit;
+		width: inherit;
+		padding-left: 0;
+	}
+	.container .jobs-group .job-location {
+		display: block;
+		width: inherit;
+		text-align: left;
+		padding-left: 0;
+	}
+	.row.row-0, .row.row-1 {
+		padding-left: 65px;
+	}
+	.container .jobs-group .row-head {
+		position: relative;
+	}
+	.job-list-head h2:before {
+		font-size: 28px;
+		margin-top: 2px;
+	}
+	.job-list-head h2 {
+		font-size: 1.35em;
+		margin: 0;
+	}
+	.container .jobs-group .jobs-count.grid_2 {
+		position: absolute;
+		right: 0;
+		top: 4px;
+		font-size: 1em;
+	}
+	.job-list-head h2 span {
+		display: inline;
+		font-size: 0.7em;
+	}
+	.container .jobs-group .jobs-count.grid_2 span {
+		display: none;
+	}
+}
+

@@ -80,10 +80,8 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 			$link .= '>';
 			$link .= apply_filters( 'list_cats', $category->name, $category ).'</a>';
 	}
-	$link .= ' '.$after;        
-	$output .= $link;
-    $output .= '<div class="grid_2 omega jobs-count">';
 
+	$orig_jobscnt = $jobscnt;
 	if ( is_search() ) {
 		$feed_link = get_search_feed_link();
 		$jobscnt = '';
@@ -92,7 +90,11 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 		$jobscnt = sprintf( _n( '%d job', '%d jobs', $jobscnt, 'jobswp' ), $jobscnt );
 	}
 
-	$output .= '<a href="' . $feed_link . '"><div class="dashicons dashicons-rss"></div></a>' . $jobscnt . '</div>
+	$link .= " <span>($orig_jobscnt)</span> $after";
+	$output .= $link;
+    $output .= '<div class="grid_2 omega jobs-count">';
+
+	$output .= '<a href="' . $feed_link . '"><div class="dashicons dashicons-rss"></div></a><span>' . $jobscnt . '</span></div>
 		</div>
 		<div class="clear"></div>
 		<div class="row job-list-col-labels">
@@ -119,7 +121,7 @@ function jobswp_text_field( $field_name, $field_label, $required = false, $type 
 	$field_name  = esc_attr( $field_name );
 	$field_label = esc_html( $field_label );
 
-	echo '<div class="post-job-input post-job-input-$field_name">' . "\n";
+	echo '<div class="post-job-input post-job-input-' . $field_name . '">' . "\n";
 	echo "<label for='$field_name'>$field_label" . ( $required ? '*' : '' ) . "</label>\n";
 
 	$html5_input_types = array( 'color', 'date', 'datetime', 'datetime-local', 'email', 'month', 'number',
