@@ -75,6 +75,29 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 				});
 			}
 
+			// Add a 'Show only commits/attachments' view option to tickets
+			$('label[for="trac-comments-only-toggle"]').text('Show only comment text'); 
+			$'form#prefs')
+				.has('#trac-comments-order')
+					.append('<div><input type="checkbox" id="wp-trac-commits-only" /> <label for="wp-trac-commits-only">Show only commits/attachments</label></div>');
+			$('#wp-trac-commits-only').change( function() {
+				if ( ! this.checked ) {
+					$('div.change').show();
+					return;
+				}
+				$('div.change')
+					.hide()
+						// Best we can do to target a
+						.has('.comment p a.changeset')
+							.has('.comment div.message p a.ticket')
+							.show()
+						.end()
+					.end()
+					.has('li.trac-field-attachment')
+					.show();
+			});
+
+			// Start of Keywords manipulation.
 			wpTrac.hiddenEl = $('#field-keywords');
 			if ( ! wpTrac.hiddenEl.length )
 				return;
