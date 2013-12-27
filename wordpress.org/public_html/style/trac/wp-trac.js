@@ -19,7 +19,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 		'needs-docs' : 'Inline documentation is needed.',
 		'docs-feedback' : 'Feedback is needed from the docs team.',
 		'rtl-feedback' : 'Feedback or work is needed from the RTL perspective.',
-		'needs-codex' : 'The Codex needs to be updated or expandedi.',
+		'needs-codex' : 'The Codex needs to be updated or expanded.',
 		'commit' : 'Patch is a suggested commit candidate.',
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.'
@@ -79,7 +79,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 			// Add a 'Show only commits/attachments' view option to tickets
 			$('label[for="trac-comments-only-toggle"]').text('Show only comment text'); 
-			$'form#prefs')
+			$('form#prefs')
 				.has('#trac-comments-order')
 					.append('<div><input type="checkbox" id="wp-trac-commits-only" /> <label for="wp-trac-commits-only">Show only commits/attachments</label></div>');
 			$('#wp-trac-commits-only').change( function() {
