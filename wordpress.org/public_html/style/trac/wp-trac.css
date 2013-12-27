@@ -65,6 +65,11 @@ blockquote {
 	padding-left: 20px;
 }
 
+/* Centers the footer. Trac is missing the final column (social links). */
+#wporg-footer .wrapper {
+	width: 773px;
+}
+
 /* More specific overrides of wp4.css */
 .change h3 a,
 h3.change a {

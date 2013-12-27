@@ -1218,6 +1218,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	overflow: auto;
 	width: 135px;
 	margin-left: 24px;
+	padding-left: 0; /* override other generic styles */
 }
 
 #wporg-footer ul:first-child {
