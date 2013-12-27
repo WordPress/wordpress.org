@@ -221,7 +221,6 @@ class WordCamp_Post_Types_Plugin {
 		<?php foreach ( $menu_icons as $post_type => $icon_content ): ?>
 			<?php
 				$class    = sanitize_html_class( $post_type );
-				$icon_url = esc_url( $icon_url );
 			?>
 			#menu-posts-<?php echo $class; ?> .wp-menu-image:before {
 				font-family: 'Campicons' !important;
