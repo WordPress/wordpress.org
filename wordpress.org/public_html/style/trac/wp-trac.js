@@ -22,7 +22,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
 		'commit' : 'Patch is a suggested commit candidate.',
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
-		'i18n-change' : 'A string change, used only after string freeze.'
+		'i18n-change' : 'A string change, used only after string freeze.',
+		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.'
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change' ];
