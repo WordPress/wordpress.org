@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = 14
+	scripts_version = 16
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 
 	if project_slug == 'bbpress' :
@@ -116,6 +116,11 @@
 		<p>If this is a support question, you're better off in the <a href="${support_link}" class="ext-link"><span class="icon">&nbsp;</span>support forums</a>.</p>
 	</div>
 </py:match>
+
+<!--! remove 'Replace existing attachment of the same name' checkbox for non-gardeners -->
+<py:if test="not ( 'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource) )">
+	<py:match path="form[@id='attachment']//div[@class='options']" py:strip="" />
+</py:if>
 
 <!--! license notes when uploading patches -->
 <py:match path="form[@id='attachment']/div[@class='buttons']" once="true">
