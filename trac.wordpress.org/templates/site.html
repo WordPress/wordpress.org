@@ -172,6 +172,9 @@
 	</script>
 	<script src="//wordpress.org/style/trac/wp-trac.js?${scripts_version}"></script>
 	<py:if test="project_slug == 'core'">
+		<py:if test="req.environ['PATH_INFO'] == '/newticket'">
+			<script src="//wordpress.org/style/trac/trac-search.js?${scripts_version}"></script>
+		</py:if>
 	<script type="text/javascript">
 	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
