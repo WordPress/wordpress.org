@@ -124,7 +124,7 @@ h3.change a {
 #metanav {
 	position: absolute;
 	top: -24px;
-	right: 0;
+	right: 6px;
 }
 #headline.no-menu ~ #banner #metanav {
 	top: -40px;
@@ -397,6 +397,7 @@ h2 {
 	box-shadow: none;
 }
 #content.timeline h2 {
+	padding: 3px 5px;
 	font-size: 105%;
 }
 /* =trac.css */
@@ -428,7 +429,7 @@ legend {
 	background: none;
 	border: 0;
 	border-radius: 0;
-	line-height: 1.1;
+	line-height: 1;
 	margin-top: 8px;
 	padding: 0;
 /*	width: 100%; /* for IE, surprise */
@@ -438,13 +439,13 @@ legend {
 	border-radius: 0;
 }
 #mainnav ul {
-	margin-left: 15px;
+	margin-left: 5px;
 	float: left;
 	font-size: 11px;
 }
 #mainnav li {
 	float: left; /* allow items to wrap around at narrow widths */
-	padding: 0;
+	padding: 0 1px 0 0;
 	border: 0;
 	background: 0;
 }
@@ -453,10 +454,10 @@ legend {
 }
 #mainnav :link, #mainnav :visited {
 	background: none;
-	border-right: none;
+	border: 0;
 	color: #000;
 	display: block;
-	padding: 4px 20px 3px;
+	padding: 6px 19px;
 }
 #mainnav :link:hover, #mainnav :visited:hover {
 	background: #ddd;
