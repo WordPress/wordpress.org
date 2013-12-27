@@ -49,6 +49,33 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			$('#attachments').removeClass('collapsed');
 			$("#modify").parent().removeClass('collapsed');
 
+			// Push live comment previews above 'Modify Ticket'
+			$('#ticketchange').insertAfter('#trac-add-comment');
+
+			// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
+			// but only if it was already open.
+			(function(){
+				var action, hadClass,
+					form = $('#propertyform'),
+					modify = $('#modify').parent();
+				if ( ! form.length ) {
+					return;
+				}
+				action = form.attr('action');
+				$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
+					if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+						return;
+					}
+					hadClass = modify.hasClass('collapsed');
+				});
+				$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
+					if ( hadClass || 0 !== action.indexOf( ajaxOptions.url ) ) {
+						return;
+					}
+					modify.removeClass('collapsed');
+				});
+			})();
+
 			// Toggle the security notice on component change, if rendered
 			if ( $('#wp-security-notice').length ) {
 				$('#field-component').change( function() {
