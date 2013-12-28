@@ -57,7 +57,8 @@ blockquote {
 	float: right;
 	font-size: 14px;
 	font-weight: bold;
-	padding: 22px 0 0;
+	padding: 22px 0 10px;
+
 	margin: 0 15px 0 0;
 }
 #headline .menu li {
@@ -67,7 +68,7 @@ blockquote {
 
 /* Centers the footer. Trac is missing the final column (social links). */
 #wporg-footer .wrapper {
-	width: 773px;
+	max-width: 773px;
 }
 
 /* More specific overrides of wp4.css */
@@ -160,7 +161,8 @@ form#search input {
 	margin: 0 auto;
 }
 #banner, #ctxtnav {
-	width: 940px;
+	max-width: 928px;
+	padding: 0 6px;
 }
 #content.report {
 	max-width: 98%;

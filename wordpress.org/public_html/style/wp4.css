@@ -533,6 +533,7 @@ a img.aligncenter {
 	#mobile-menu-button {
 		display: none;
 	}
+
 }
 
 @media screen and (min-width:800px) {
@@ -1068,7 +1069,6 @@ input.text {
 
 #headline {
 	height: 62px;
-	min-width: 960px;
 	background: #f7f7f7;
 	border-bottom: 1px solid #dfdfdf;
 }
@@ -1201,7 +1201,6 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 #wporg-footer {
 	clear: both;
 	overflow: auto;
-	min-width: 932px;
 	margin: 0 auto;
 	padding: 22px 14px 65px 14px;
 	border-top: 1px solid #dfdfdf;
@@ -1210,7 +1209,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 
 #wporg-footer .wrapper {
 	overflow: auto;
-	width: 932px;
+	max-width: 932px;
 }
 
 #wporg-footer ul {
@@ -1218,11 +1217,14 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	overflow: auto;
 	width: 135px;
 	margin-left: 24px;
+	margin-bottom: 15px; /* for narrow screens */
 	padding-left: 0; /* override other generic styles */
 }
 
-#wporg-footer ul:first-child {
-	margin-left: 0;
+@media screen and (min-width:960px) {
+	#wporg-footer ul:first-child {
+		margin-left: 0;
+	}
 }
 
 #wporg-footer ul li {
@@ -1243,7 +1245,7 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 	width: 190px;
 	height: 15px;
 	text-indent: -9999px;
-	margin-top: 50px;
+	margin-top: 35px;
 }
 .no-static #wporg-footer h6 {
 	background-image: url(//wordpress.org/style/images/codeispoetry.png?2);
