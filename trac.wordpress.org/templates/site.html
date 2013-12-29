@@ -18,11 +18,14 @@
 		profile_link = 'http://profiles.wordpress.org/'
 
 	# Fix http://meta.trac.wordpress.org/ticket/21
-	import urllib
-	for link in chrome['links']['alternate']:
-		if link['class'] == 'rss':
-			new_link = link['href'].split('/login?referer=')
-			link['href'] = urllib.unquote(new_link[1])
+	try:
+		for link in chrome['links']['alternate']:
+			if link['class'] == 'rss':
+				new_link = link['href'].split('/login?referer=')
+				import urllib
+				link['href'] = urllib.unquote(new_link[1])
+	except IndexError:
+		pass
 ?>
 
 <!--! styles and such -->
