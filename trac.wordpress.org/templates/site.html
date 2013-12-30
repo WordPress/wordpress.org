@@ -24,7 +24,7 @@
 				new_link = link['href'].split('/login?referer=')
 				import urllib
 				link['href'] = urllib.unquote(new_link[1])
-	except IndexError:
+	except (IndexError, KeyError):
 		pass
 ?>
 
