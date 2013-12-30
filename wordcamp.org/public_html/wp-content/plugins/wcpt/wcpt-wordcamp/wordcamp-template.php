@@ -640,3 +640,19 @@ function wcpt_feed_event_info( $content ) {
 }
 add_filter( 'the_content_feed', 'wcpt_feed_event_info' );
 add_filter( 'the_excerpt_rss',  'wcpt_feed_event_info' );
+
+/**
+ * Add feed for WordCamp posts to the head section
+ * 
+ * This helps publicize the feed, because it will show up in feed aggregators when users enter the site URL, even if they don't know the feed exists. 
+ */
+function add_wordcamp_feed_link_to_head() {
+	if ( ! is_post_type_archive( 'wordcamp' ) ) {
+		?>
+		
+		<link rel="alternate" type="<?php echo esc_attr( feed_content_type() ); ?>" title="New WordCamp Announcements" href="<?php echo esc_url( get_post_type_archive_feed_link( 'wordcamp' ) ); ?>" />
+	
+		<?php
+	}
+}
+add_action( 'wp_head', 'add_wordcamp_feed_link_to_head', 4 ); // after feed_links_extra()
