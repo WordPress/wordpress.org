@@ -2,25 +2,9 @@ Index: 1.0-stable/trac/ticket/templates/ticket_change.html
 ===================================================================
 --- 1.0-stable/trac/ticket/templates/ticket_change.html	(revision 12333)
 +++ 1.0-stable/trac/ticket/templates/ticket_change.html	(working copy)
-@@ -48,7 +48,31 @@
-         </py:for>
+@@ -49,6 +49,15 @@
        </py:if>
      </span>
-+    <div py:if="show_buttons" class="trac-ticket-buttons">
-+      <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
-+        <div class="inlinebuttons">
-+          <input type="hidden" name="cnum_edit" value="${cnum}"/>
-+          <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
-+        </div>
-+      </form>
-+      <form py:if="'cnum' in change and can_append" id="reply-to-comment-${cnum}"
-+            method="get" action="#comment">
-+        <div class="inlinebuttons">
-+          <input type="hidden" name="replyto" value="${cnum}"/>
-+          <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
-+        </div>
-+      </form>
-+    </div>
      <py:choose>
 +      <py:when test="'author' in change">
 +        <span class="avatar" py:if="change">
@@ -34,9 +18,25 @@ Index: 1.0-stable/trac/ticket/templates/ticket_change.html
        <py:when test="'date' in change">
          <i18n:msg params="date, author">Changed ${pretty_dateinfo(change.date)} by ${authorinfo(change.author)}</i18n:msg>
        </py:when>
-@@ -58,21 +82,6 @@
+@@ -57,22 +66,23 @@
+       </py:otherwise>
      </py:choose>
      <span py:if="preview or show_editor" class="trac-loading"/>
++    <div py:if="show_buttons" class="trac-ticket-buttons">
++      <form py:if="'cnum' in change and can_append" id="reply-to-comment-${cnum}"
++            method="get" action="#comment">
++        <div class="inlinebuttons">
++          <input type="hidden" name="replyto" value="${cnum}"/>
++          <input type="submit" value="${captioned_button('↳', _('Reply'))}" title="${_('Reply to comment %(cnum)s', cnum=cnum)}" />
++        </div>
++      </form>
++      <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
++        <div class="inlinebuttons">
++          <input type="hidden" name="cnum_edit" value="${cnum}"/>
++          <input type="submit" value="${captioned_button('✎', _('Edit'))}" title="${_('Edit comment %(cnum)s', cnum=cnum)}" />
++        </div>
++      </form>
++    </div>
    </h3>
 -  <div py:if="show_buttons" class="trac-ticket-buttons">
 -    <form py:if="'cnum' in change and can_edit_comment" method="get" action="#comment:${cnum}">
@@ -53,6 +53,7 @@ Index: 1.0-stable/trac/ticket/templates/ticket_change.html
 -      </div>
 -    </form>
 -  </div>
++  <div py:if="show_buttons" class="trac-ticket-buttons" />
    <ul py:if="change.fields" class="changes">
      <li py:for="field_name, field in sorted(change.fields.iteritems(), key=lambda item: item[1].label.lower())"
          class="trac-field-${field_name}${' trac-conflict' if preview and field_name in conflicts else None}">
