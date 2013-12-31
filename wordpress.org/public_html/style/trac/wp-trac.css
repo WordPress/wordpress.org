@@ -661,6 +661,10 @@ span.avatar img {
 	float: left;
 	margin: 0 8px 0 -4px;
 }
+#changelog span:target {
+	background-clip: content-box;
+	padding-top: 24px;
+}
 #changelog h3.change img,
 #ticketchange h3.change img {
 	margin: 0 .8em 0 -2px;
@@ -672,13 +676,22 @@ img.avatar {
 #changelog h3.change,
 #ticketchange h3.change {
 	margin: 0.75em 0 0.5em;
-	height: 40px;
+	min-height: 40px;
 	line-height: 36px;
 	border-bottom: none;
 }
+#changelog h3.change:after,
+#ticketchange h3.change:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+#changelog h3.change span.avatar,
+#ticketchange h3.change span.avatar {
+	float: left;
+}
 .trac-ticket-buttons {
-	position: relative;
-	top: -16px;
+	margin-right: 6em;
 }
 div.change ul.changes {
 	margin-top: 10px;
