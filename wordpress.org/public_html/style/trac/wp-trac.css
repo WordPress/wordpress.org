@@ -92,9 +92,6 @@ h3.change a {
 .inlinebuttons input {
 	margin:  0 .2em .2em; /* Trac is 0 .1em .1em  */
 }
-.inlinebuttons input[name=replyto] + input {
-	margin-left: 15px;
-}
 #prefs .buttons input[type=button],
 #prefs .buttons input[type=submit],
 .inlinebuttons input[type=button],
@@ -677,7 +674,6 @@ img.avatar {
 #ticketchange h3.change {
 	margin: 0.75em 0 0.5em;
 	min-height: 40px;
-	line-height: 36px;
 	border-bottom: none;
 }
 #changelog h3.change:after,
@@ -689,9 +685,17 @@ img.avatar {
 #changelog h3.change span.avatar,
 #ticketchange h3.change span.avatar {
 	float: left;
+	line-height: 36px;
 }
-.trac-ticket-buttons {
-	margin-right: 6em;
+h3 .trac-ticket-buttons:before {
+	content: ".";
+	font-size: 0;
+}
+h3 .trac-ticket-buttons {
+	padding-top: 3px;
+}
+div.change > .trac-ticket-buttons {
+	display: none;
 }
 div.change ul.changes {
 	margin-top: 10px;

@@ -39,6 +39,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			// Change 'Comments' columns to a dashicons glyph to save space
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
 
+			// Bring back 'Delete' comment buttons, if any.
+			$('div.change').children('.trac-ticket-buttons').each( function() {
+				var el = $(this);
+				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
+			});
+
 			// Add After the Deadline
 			$('textarea').addProofreader();
 
