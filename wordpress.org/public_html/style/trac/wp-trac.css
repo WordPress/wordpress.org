@@ -328,7 +328,7 @@ table.progress {
 }
 #ticket table.properties td, #ticket table.properties th {
 	line-height: 1.4;
-	font-size: 81%;
+	font-size: 13px;
 }
 #ticket table.properties th {
 	color: #666;
@@ -408,6 +408,10 @@ h2 {
 	font-size: 105%;
 }
 /* =trac.css */
+body, th, tr, h1, h2, h3, h4 {
+	font-family: "Open Sans", sans-serif;
+}
+
 body {
 	min-width: 48.5em; /* don't let it get ugly unless responsive */
 }
@@ -652,7 +656,7 @@ span.avatar img {
 }
 img.avatar {
 	float: left;
-	margin: 0 6px 0 -30px;
+	margin: 0 6px 0 -42px;
 }
 #changelog h3.change {
 	margin: 0.75em 0 0.5em;
