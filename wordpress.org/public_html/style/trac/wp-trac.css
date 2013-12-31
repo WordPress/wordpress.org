@@ -446,6 +446,7 @@ blockquote.citation {
 	border: 0;
 }
 #mainnav {
+	font: normal 10px "Open Sans",sans-serif;
 	background: none;
 	border: 0;
 	border-radius: 0;
