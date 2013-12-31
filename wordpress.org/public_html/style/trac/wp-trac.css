@@ -380,6 +380,11 @@ ul.children > li.child {
 #changelog h3, #ticketchange h3 {
 	box-shadow: none;
 }
+#comment {
+	padding: 0.75%;
+	width: 98.5%;
+	font-size: 13px;
+}
 /* =timeline.css */
 #content.timeline dl {
 	margin-left: 1em;
@@ -426,6 +431,10 @@ input[type=text]:focus, input.textwidget:focus, textarea:focus {
 }
 legend {
 	color: #666;
+}
+blockquote.citation {
+	margin: -0.3em 0;
+	padding-left: 0.75em;
 }
 .nav ul {
 	padding: 0;
@@ -651,14 +660,16 @@ span.avatar img {
 	float: left;
 	margin: 0 8px 0 -4px;
 }
-#changelog h3.change img {
+#changelog h3.change img,
+#ticketchange h3.change img {
 	margin: 0 .8em 0 -2px;
 }
 img.avatar {
 	float: left;
 	margin: 0 6px 0 -42px;
 }
-#changelog h3.change {
+#changelog h3.change,
+#ticketchange h3.change {
 	margin: 0.75em 0 0.5em;
 	height: 40px;
 	line-height: 36px;
@@ -675,7 +686,8 @@ div.change ul.changes {
 h3.change .profile-link {
 	border-bottom: none;
 }
-#changelog h3.change .username {
+#changelog h3.change .username,
+#ticketchange h3.change .username {
 	color: #333;
 	font-size: 15px;
 }
@@ -687,7 +699,8 @@ h3.change .profile-link {
 	border-bottom: none;
 	padding-bottom: 0;
 }
-#changelog .comment {
+#changelog .comment,
+#ticketchange .comment {
 	margin-left: 0;
 }
 #changelog .trac-lastedit {
