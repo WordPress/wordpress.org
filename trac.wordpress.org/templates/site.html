@@ -45,7 +45,7 @@
 <div py:match="div[@id='header']" py:strip=""></div>
 <div py:match="div[@id='footer']" py:strip=""></div>
 
-<py:if="req.environ['PATH_INFO'] == '/newticket'">
+<py:if test="req.environ['PATH_INFO'] == '/newticket'">
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice">
 		<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
