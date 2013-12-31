@@ -42,32 +42,34 @@
 </head>
 
 <!--! Remove Trac logo and footer -->
-<div py:match="div[@id='header']"></div>
-<div py:match="div[@id='footer']"></div>
+<div py:match="div[@id='header']" py:strip=""></div>
+<div py:match="div[@id='footer']" py:strip=""></div>
 
-<py:match path="div[@id='content' and @class='ticket']/form" py:if="req.environ['PATH_INFO'] == '/newticket'">
-	<div class="wp-notice">
-	<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
-		<p><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
-		<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
-		<py:if test="project_slug == 'core'">
-		<hr />
-		<p><strong>REPORTING BUGS</strong></p>
-		<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="http://codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
-		<ul>
-			<li>Are you using the latest and greatest version of WordPress, or the latest development/trunk version? If neither, please stop here and update first.</li>
-			<li>What steps should be taken to <strong>consistently</strong> reproduce the problem?</li>
-			<li>In case it's relevant to the ticket, what is the expected output? What did you see instead?</li>
-			<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
-			<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
-			<li py:if="not req.session['email']">Please add your email address to <a href="/prefs">Trac preferences</a> so you are sent updates.</li>
-		</ul>
-		</py:if>
-	</div>
-	<form py:attrs="select('@*')">
-		${select('*')}
-	</form>
-</py:match>
+<py:if="req.environ['PATH_INFO'] == '/newticket'">
+	<py:match path="div[@id='content' and @class='ticket']/form">
+		<div class="wp-notice">
+		<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
+			<p><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
+			<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+			<py:if test="project_slug == 'core'">
+			<hr />
+			<p><strong>REPORTING BUGS</strong></p>
+			<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="http://codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
+			<ul>
+				<li>Are you using the latest and greatest version of WordPress, or the latest development/trunk version? If neither, please stop here and update first.</li>
+				<li>What steps should be taken to <strong>consistently</strong> reproduce the problem?</li>
+				<li>In case it's relevant to the ticket, what is the expected output? What did you see instead?</li>
+				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
+				<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
+				<li py:if="not req.session['email']">Please add your email address to <a href="/prefs">Trac preferences</a> so you are sent updates.</li>
+			</ul>
+			</py:if>
+		</div>
+		<form py:attrs="select('@*')">
+			${select('*|comment()|text()')}
+		</form>
+	</py:match>
+</py:if>
 
 <!--! Reports are collapsed by default but flicker because it waits for DOM ready to collapse them -->
 <div py:match="div[@id='content' and @class='report']/div[@class='reports']//div" py:if="req.environ['PATH_INFO'] == '/report'" py:attrs="select('@*')" class="collapsed">
