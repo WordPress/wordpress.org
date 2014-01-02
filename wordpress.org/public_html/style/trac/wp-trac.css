@@ -851,7 +851,7 @@ body.bbpress #mainnav .active :visited {
 	display: block;
 	float: left;
 	position: absolute;
-	background: url(//wordpress.org/wp-admin/images/xit.gif) no-repeat;
+	background: url(//s.w.org/wp-admin/images/xit.gif) no-repeat;
 	border-bottom: 0;
 }
 #edit-keywords {

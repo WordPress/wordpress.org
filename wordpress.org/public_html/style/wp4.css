@@ -185,21 +185,15 @@ a img.aligncenter {
 
 #wporg-header h1 a {
 	display: block;
-	background: url(http://s.wordpress.org/style/images/wp-header-logo.png?1) center left no-repeat;
+	background: url(//s.w.org/style/images/wp-header-logo.png?1) center left no-repeat;
 	background-size: 303px 53px;
 	width: 303px;
 	height: 88px;
 	text-indent: -9999px;
 }
-.no-static #wporg-header h1 a {
-	background-image: url(//wordpress.org/style/images/wp-header-logo.png?1);
-}
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	#wporg-header h1 a {
-		background-image: url(http://s.wordpress.org/style/images/wp-header-logo-2x.png?1);
-	}
-	.no-static #wporg-header h1 a {
-		background-image: url(//wordpress.org/style/images/wp-header-logo-2x.png?1);
+		background-image: url(//s.w.org/style/images/wp-header-logo-2x.png?1);
 	}
 }
 
@@ -254,14 +248,11 @@ a img.aligncenter {
 	height: 30px;
 	width: 26px;
 	background: #131313;
-	background-image: url(http://s.wordpress.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
+	background-image: url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
 	background-position: 100% 2px;
 	background-repeat: no-repeat;
 	border-radius:0;
 	padding: 0;
-}
-.no-static #head-search .button {
-	background-image: url(//wordpress.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
 }
 
 #wporg-header ul#wporg-header-menu {
@@ -996,19 +987,13 @@ h5 {
 	position: absolute;
 	left: 0;
 	top: 0;
-	background-image: url(http://s.wordpress.org/style/images/steps.png);
+	background-image: url(//s.w.org/style/images/steps.png);
 	background-size: 93px 31px;
 	background-repeat: no-repeat;
 }
-.no-static #home-below ol.steps li span {
-	background-image: url(//wordpress.org/style/images/steps.png);
-}
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	#home-below ol.steps li span {
-		background-image: url(http://s.wordpress.org/style/images/steps-2x.png);
-	}
-	.no-static #home-below ol.steps li span {
-		background-image: url(//wordpress.org/style/images/steps-2x.png);
+		background-image: url(//s.w.org/style/images/steps-2x.png);
 	}
 }
 
@@ -1137,11 +1122,8 @@ p.person {
 }
 
 #pagebody .submenu li.current {
-	background: url(http://s.wordpress.org/style/images/arrow.png) center left no-repeat;
+	background: url(//s.w.org/style/images/arrow.png) center left no-repeat;
 	font-weight: bold;
-}
-.no-static #pagebody .submenu li.current {
-	background-image: url(//wordpress.org/style/images/arrow.png);
 }
 
 #pagebody .submenu li ul {
@@ -1170,8 +1152,7 @@ p.person {
 	list-style: square;
 }
 
-a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) top left no-repeat; padding-left: 14px;}
-.no-static a.rsslink { background-image:url(//wordpress.org/style/images/feedicon10.png) }
+a.rsslink {background:url(//s.w.org/style/images/feedicon10.png) top left no-repeat; padding-left: 14px;}
 #pagebody ol {
 	margin-left: 22px;
 	list-style: roman;
@@ -1191,11 +1172,8 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 }
 
 .feed {
-	background: url(http://s.wordpress.org/style/images/feedicon.png) center left no-repeat;
+	background: url(//s.w.org/style/images/feedicon.png) center left no-repeat;
 	padding-left: 19px;
-}
-.no-static .feed {
-	background-image: url(//wordpress.org/style/images/feedicon.png);
 }
 
 #wporg-footer {
@@ -1240,23 +1218,17 @@ a.rsslink {background:url(http://s.wordpress.org/style/images/feedicon10.png) to
 
 #wporg-footer h6 {
 	clear: both;
-	background: url(http://s.wordpress.org/style/images/codeispoetry.png?2) center center no-repeat;
+	background: url(//s.w.org/style/images/codeispoetry.png?1) center center no-repeat;
 	background-size: 190px 15px;
 	width: 190px;
 	height: 15px;
 	text-indent: -9999px;
 	margin-top: 35px;
 }
-.no-static #wporg-footer h6 {
-	background-image: url(//wordpress.org/style/images/codeispoetry.png?2);
-}
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	#wporg-footer h6 {
-		background-image: url(http://s.wordpress.org/style/images/codeispoetry-2x.png?2);
-	}
-	.no-static #wporg-footer h6 {
-		background-image: url(//wordpress.org/style/images/codeispoetry-2x.png?2);
+		background-image: url(//s.w.org/style/images/codeispoetry-2x.png?1);
 	}
 }
 blockquote {
