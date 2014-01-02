@@ -8,16 +8,16 @@
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 
 	if project_slug == 'bbpress' :
-		profile_link = 'http://bbpress.org/forums/users/'
-		support_link = 'http://bbpress.org/forums/'
+		profile_link = '//bbpress.org/forums/users/'
+		support_link = '//bbpress.org/forums/'
 	elif project_slug == 'buddypress' :
-		profile_link = 'http://buddypress.org/community/members/'
-		support_link = 'http://buddypress.org/support/topics/'
+		profile_link = '//buddypress.org/community/members/'
+		support_link = '//buddypress.org/support/topics/'
 	else :
-		support_link = 'http://wordpress.org/support/'
-		profile_link = 'http://profiles.wordpress.org/'
+		support_link = '//wordpress.org/support/'
+		profile_link = '//profiles.wordpress.org/'
 
-	# Fix http://meta.trac.wordpress.org/ticket/21
+	# Fix https://meta.trac.wordpress.org/ticket/21
 	try:
 		for link in chrome['links']['alternate']:
 			if link['class'] == 'rss':
@@ -50,11 +50,11 @@
 		<div class="wp-notice">
 		<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
 			<p><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
-			<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+			<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
 			<py:if test="project_slug == 'core'">
 			<hr />
 			<p><strong>REPORTING BUGS</strong></p>
-			<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="http://codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
+			<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="//codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
 			<ul>
 				<li>Are you using the latest and greatest version of WordPress, or the latest development/trunk version? If neither, please stop here and update first.</li>
 				<li>What steps should be taken to <strong>consistently</strong> reproduce the problem?</li>
@@ -94,7 +94,7 @@
 				<div class="wp-notice" id="wp-security-notice">
 					<p><strong>Caution!</strong> This ticket was assigned to the Security component.</p>
 					<p><strong>If this is a potential security vulnerability, DO NOT REPORT IT HERE.</strong></p>
-					<p>Instead, read the <a class="ext-link" href="http://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+					<p>Instead, read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
 				</div>
 			</py:if>
 
