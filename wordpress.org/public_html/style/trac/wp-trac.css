@@ -77,8 +77,10 @@ h3.change a {
 	font-weight: normal; /* overrides wp4 */
 	color: inherit;
 }
-#main #altlinks h3 {
-	margin: 0;
+#main #altlinks h3,
+#main #altlinks ul {
+	margin: 0 auto;
+	width: 40em;
 }
 #main #altlinks ul {
 	padding-left: 0;
