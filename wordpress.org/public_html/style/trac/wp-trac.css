@@ -782,7 +782,12 @@ td[headers=h_keywords] a {
 dl.attachments dt {
 	padding-bottom: 4px;
 }
-
+/* Trac UI Preferences Link */
+#altlinks .preferences-link {
+	float: right;
+	font-size: 12px;
+	margin-top: 10px;
+}
 /* =Link Colors */
 a:link,
 dt em,
