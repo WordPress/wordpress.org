@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = 21
+	scripts_version = 22
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 
 	if project_slug == 'bbpress' :
@@ -165,6 +165,12 @@
 	</a>
     ${select('*|comment()|text()')}
 </td>
+
+<!--! Demote the nav "Preferences" link to the footer. To hide from header (trac.ini): [metanav] prefs = disabled -->
+<div py:match="div[@id='altlinks']" py:attrs="select('@*')">
+    <a class="preferences-link" href="${href.prefs()}">Trac UI Preferences</a>
+    ${select('*|comment()|text()')}
+</div>
 
 <!--! remove anonymous 'Advanced' session management tab -->
 <py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_advanced']" once="true" py:strip=""></py:match>
