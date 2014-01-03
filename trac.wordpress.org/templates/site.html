@@ -164,7 +164,19 @@
     ${select('*|comment()|text()')}
 </td>
 
-<body py:match="body" id="wordpress-org" class="${project_slug} no-static" py:attrs="select('@*')">
+<!--! remove anonymous 'Advanced' session management tab -->
+<py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_advanced']" once="true" py:strip=""></py:match>
+
+<!--! email addresses are synced with Trac from WP.org, so remove the preference pane -->
+<py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core'">
+	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
+		<div id="tabcontent">
+			Notifications <!--can be configured <a href="//make.wordpress.org/core/notifications/">here</a>. They--> are sent to the email listed in your WordPress.org profile<py:if test="req.session['email']"> (${req.session['email']})</py:if>.
+		</div>
+	</py:match>
+</py:if>
+
+<body py:match="body" id="wordpress-org" class="${project_slug}" py:attrs="select('@*')">
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
 
