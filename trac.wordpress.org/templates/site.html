@@ -17,6 +17,8 @@
 		support_link = '//wordpress.org/support/'
 		profile_link = '//profiles.wordpress.org/'
 
+	profile_to_edit = '//wordpress.org/support/profile/'
+
 	# Fix https://meta.trac.wordpress.org/ticket/21
 	try:
 		for link in chrome['links']['alternate']:
@@ -171,7 +173,7 @@
 <py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core'">
 	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
 		<div id="tabcontent">
-			Notifications <!--can be configured <a href="//make.wordpress.org/core/notifications/">here</a>. They--> are sent to the email listed in your WordPress.org profile<py:if test="req.session['email']"> (${req.session['email']})</py:if>.
+			Notifications <!--can be configured <a href="//make.wordpress.org/core/notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
 		</div>
 	</py:match>
 </py:if>
