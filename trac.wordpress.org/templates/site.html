@@ -41,6 +41,7 @@
 	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
 	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
 	<link rel="stylesheet" type="text/css" href="//openatd.svn.wordpress.org/atd-jquery/css/atd.css" media="screen" />
+	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
 </head>
 
 <!--! Remove Trac logo and footer -->
@@ -176,7 +177,7 @@
 <py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_advanced']" once="true" py:strip=""></py:match>
 
 <!--! email addresses are synced with Trac from WP.org, so remove the preference pane -->
-<py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core'">
+<py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core' and req.session['email'] and req.session['authenticated']">
 	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
 		<div id="tabcontent">
 			Notifications <!--can be configured <a href="//make.wordpress.org/core/notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
@@ -221,6 +222,33 @@
 	var pageTracker = _gat._getTracker("UA-52447-27");
 	pageTracker._trackPageview();
 	} catch(err) {}</script>
+	</py:if>
+
+	<!--! Trac auth check -->
+	<py:if test="req.session['authenticated']">
+		<!--TRAC_WP_USER_IS_LOGGED_IN-->
+		<div id="wp-auth-check-wrap" class="hidden fallback">
+			<div id="wp-auth-check-bg"></div>
+			<div id="wp-auth-check">
+				<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
+				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://make.wordpress.org/core/wp-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+				</div>
+			</div>
+		</div>
+		<script>
+		function wp_trac_auth_check() {
+			$.ajax( '${href('/')}' ).success( function( data ) {
+				var addClass = -1 !== data.indexOf( '<!--TRAC_WP_USER_IS_LOGGED_IN-->' );
+				$( '#wp-auth-check-wrap' ).toggleClass( 'hidden', addClass );
+			});
+		}
+		jQuery(document).ready(function( $ ) {
+			$('.wp-auth-check-close').click( function() {
+				$( '#wp-auth-check-wrap' ).addClass( 'hidden' );
+			});
+			window.setInterval( wp_trac_auth_check, 5 * 60 * 1000 );
+		});
+		</script>
 	</py:if>
 </body>
 
