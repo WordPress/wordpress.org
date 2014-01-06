@@ -14,6 +14,9 @@ class WordCamp_Canonical_Years_Plugin {
 		// Only on the home page.
 		if ( isset( $_SERVER['REQUEST_URI'] ) && $_SERVER['REQUEST_URI'] == '/' )
 			add_action( 'wp_head', array( $this, 'wp_head' ), 9 );
+
+		// WordPress will print rel=conanical for singular posts by default, we don't want that.
+		remove_action( 'wp_head', 'rel_canonical' );
 	}
 
 	/**
@@ -28,9 +31,6 @@ class WordCamp_Canonical_Years_Plugin {
 		// match xxxx.city.wordcamp.org
 		if ( ! preg_match( '/^([0-9]{4})+\.((.+)\.wordcamp\.(lo|dev|org))$/i', $_SERVER['HTTP_HOST'], $matches ) )
 			return;
-
-		// WordPress will print rel=conanical for singular posts by default, we don't want that.
-		remove_action( 'wp_head', 'rel_canonical' );
 
 		$current_domain = $matches[0];
 		$city_domain = $matches[2];
