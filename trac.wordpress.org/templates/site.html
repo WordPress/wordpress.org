@@ -167,6 +167,14 @@
     ${select('*|comment()|text()')}
 </td>
 
+<!--! Show number of Query results even when they fit on one page -->
+<py:match path="div[@id='content' and @class='query']/div/table[@class='listing tickets']">
+	<h2 class="report-result" py:if="not paginator.has_more_pages">Results <span class="numresults">(${paginator.num_items})</span></h2>
+	<table py:attrs="select('@*')">
+	${select('*|comment()|text()')}
+	</table>
+</py:match>
+
 <!--! Demote the nav "Preferences" link to the footer. To hide from header (trac.ini): [metanav] prefs = disabled -->
 <div py:match="div[@id='altlinks']" py:attrs="select('@*')">
     <a class="preferences-link" href="${href.prefs()}">Trac UI Preferences</a>
