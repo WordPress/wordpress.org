@@ -798,6 +798,11 @@ dl.attachments dt {
 	margin-top: 5px;
 }
 
+/* Hide stray dot next to 'leave as new' */
+#action_leave + label + span.hint {
+	display: none;
+}
+
 /* =Link Colors */
 a:link,
 dt em,
