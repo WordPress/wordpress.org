@@ -45,6 +45,29 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
 			});
 
+			// Automatically preview images
+			$('li.trac-field-attachment').each( function() {
+				var href, el, image, li = $(this);
+				el = $(this).find('.trac-rawlink');
+				href = el.attr('href');
+				if ( ! href.match(/\.(jpg|jpeg|png|gif)$/i) ) {
+					return;
+				}
+				image = new Image;
+				image.src = href;
+				image.onload = function() {
+					$('<img />')
+						.attr({
+							src: href,
+							width: image.width,
+							height: image.height,
+							class: 'trac-image-preview'
+						})
+						.appendTo( li )
+						.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
+				};
+			});
+
 			// Add After the Deadline
 			$('textarea').addProofreader();
 

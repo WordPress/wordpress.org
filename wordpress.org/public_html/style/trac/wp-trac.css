@@ -790,6 +790,14 @@ dl.attachments dt {
 	font-size: 12px;
 	margin-top: 10px;
 }
+
+/* Our own image previews */
+.trac-image-preview {
+	display: block;
+	max-width: 100%;
+	margin-top: 5px;
+}
+
 /* =Link Colors */
 a:link,
 dt em,
