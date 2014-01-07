@@ -794,6 +794,7 @@ dl.attachments dt {
 /* Our own image previews */
 .trac-image-preview {
 	display: block;
+	height: auto;
 	max-width: 100%;
 	margin-top: 5px;
 }
