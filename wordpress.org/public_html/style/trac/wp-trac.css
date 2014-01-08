@@ -337,8 +337,10 @@ table.progress {
 	border-bottom: 1px solid #ddd;
 	color: #666;
 }
+#ticket img,
 .comment img {
 	max-width: 100%;
+	height: auto;
 }
 #trac-comment-editor textarea {
 	background: #fcfcfc;
