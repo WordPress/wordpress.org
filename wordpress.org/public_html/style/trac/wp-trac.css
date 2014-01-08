@@ -804,6 +804,69 @@ dl.attachments dt {
 	display: none;
 }
 
+/* = Notifications */
+.ticket-star {
+	font-size: 32px;
+	width: 32px;
+	margin-right: 8px;
+	color: #aaa;
+}
+.ticket-star:hover {
+	cursor: pointer;
+}
+.ticket-star:hover,
+.ticket-star.dashicons-star-filled {
+	color: #21759b;
+}
+#notifications {
+	margin-top: 1em;
+}
+#notifications .dashicons {
+	vertical-align: text-bottom;
+}
+#notifications .star-this-ticket a {
+	color: #333;
+}
+#notifications .count-1,
+#notifications.count-0 .num-stars,
+#notifications.count-1 .count-many {
+	display: none;
+}
+#notifications.count-1 .count-1 {
+	display: inline;
+}
+#notifications .block-notifications,
+#notifications .unblock-notifications {
+	color: #d31313;
+	margin-left: 6px;
+	margin-right: 6px;
+}
+#notifications .num-stars {
+	font-size: 12px;
+	margin-left: 6px;
+}
+#notifications a.watching-ticket,
+#notifications p.receiving-notifications,
+#notifications p.receiving-notifications-because,
+#notifications p.not-receiving-notifications {
+	display: none;
+}
+#notifications.subscribed a.watching-ticket {
+	display: inline-block;
+}
+#notifications.block p.receiving-notifications-because,
+#notifications.blocked p.not-receiving-notifications {
+	display: block;
+}
+#notifications.subscribed p.receiving-notifications-because,
+#notifications.subscribed p.not-receiving-notifications,
+#notifications.subscribed a.watch-this-ticket {
+	display: none;
+}
+#notifications.subscribed p.receiving-notifications {
+	display: block;
+}
+
 /* =Link Colors */
 a:link,
 dt em,

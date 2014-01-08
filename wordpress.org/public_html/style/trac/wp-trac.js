@@ -1,4 +1,4 @@
-var wpTrac, coreKeywordList, gardenerKeywordList;
+var vnpTrac, coreKeywordList, gardenerKeywordList;
 
 (function($){
 
@@ -68,8 +68,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 				};
 			});
 
-			// Add After the Deadline
-			$('textarea').addProofreader();
+			// Add After the Deadline (only add it if it loaded)
+			if ( $.isFunction( $.fn.addProofreader ) ) {
+				$('textarea').addProofreader();
+			}
 
 			$('.AtD_proofread_button').each(function() {
 				$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') );
@@ -365,7 +367,85 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			// If the difference has no length, then restore to the original keyword order.
 			if ( ! testKeywords.length )
 				wpTrac.hiddenEl.val( wpTrac.originalKeywords.join(' ') );
-		}
+		},
+
+		notifications: (function() {
+			var notifications, _endpoint, _ticket, star;
+
+			function init( endpoint, ticket ) {
+				var current_star;
+				_endpoint = endpoint;
+				_ticket = ticket;
+				notifications = $('#notifications');
+				notifications.on( 'click', '.watch-this-ticket', subscribe )
+					.on( 'click', '.watching-ticket', unsubscribe )
+					.on( 'click', '.block-notifications', block )
+					.on( 'click', '.unblock-notifications', unblock );
+
+				current_star = notifications.hasClass('subscribed') ? 'filled' : 'empty';
+				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' + current_star + '"></div>' );
+				star = $('.ticket-star');
+				star.click( function() {
+					$(this).hasClass('dashicons-star-empty') ? subscribe() : unsubscribe();
+				});
+			}
+
+			function save( action ) {
+				$.ajax({
+					type: 'POST',
+					url: _endpoint,
+					xhrFields: { withCredentials: true },
+					data: {
+						'trac-ticket-sub': _ticket,
+						action: action
+					}
+				});
+			}
+
+			function subscribe() {
+				save( 'subscribe' );
+				notifications.removeClass('blocked').addClass('subscribed');
+				star.toggleClass('dashicons-star-empty dashicons-star-filled');
+				if ( notifications.hasClass('receiving') ) {
+					notifications.addClass('block');
+				}
+				change_count( 1 );
+				return false;
+			}
+
+			function unsubscribe() {
+				save( 'unsubscribe' );
+				notifications.removeClass('subscribed');
+				star.toggleClass('dashicons-star-empty dashicons-star-filled');
+				if ( notifications.hasClass('receiving') ) {
+					notifications.addClass('block');
+				}
+				change_count( -1 );
+				return false;
+			}
+
+			function change_count( delta ) {
+				var count = parseInt( notifications.find('.count').text(), 10 ) + delta;
+				notifications.find('.count').text( count );
+				notifications.toggleClass( 'count-0', count === 0 ).toggleClass( 'count-1', count === 1 );
+			}
+
+			function block() {
+				save( 'block' );
+				notifications.removeClass('block').addClass('blocked');
+				return false;
+			}
+
+			function unblock() {
+				save( 'unblock' );
+				notifications.removeClass('blocked').addClass('block');
+				return false;
+			}
+
+			return {
+				init: init
+			};
+		}())
 
 	};
 
