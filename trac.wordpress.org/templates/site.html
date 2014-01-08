@@ -260,7 +260,7 @@
 	</py:if>
 
 	<!--! Trac notifications -->
-	<script py:if="ticket and ticket.exists and req.session['sid'] == 'nacin'">
+	<script py:if="project_slug == 'core' and ticket and ticket.exists">
 	if ( 'notifications' in wpTrac ) {
 		jQuery(document).ready( function( $ ) {
 			var endpoint = '${wporg_endpoint}', ticket = ${ticket.id};
