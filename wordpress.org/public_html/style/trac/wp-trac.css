@@ -296,7 +296,8 @@ table.progress {
 	box-shadow: none;
 }
 /* =ticket.css */
-#content.ticket {
+#content.ticket,
+#content.timeline {
 	max-width: 58em; /* don't let it get bigger than it was */
 	width: auto; /* but allow for flexibility */
 }
@@ -1005,7 +1006,7 @@ body.bbpress #mainnav .active :visited {
 	#search {
 		margin-bottom: 2em; /* more space below when logo is smaller */
 	}
-	#content.ticket, .milestone .info .progress, .milestone .info dl, #stats {
+	#content.ticket, .milestone .info .progress, .milestone .info dl, #content.timeline dl, #stats {
 		margin-left: 0; /* use all the available space */
 	}
 	#ticket table.properties img.avatar {
@@ -1085,5 +1086,11 @@ body.bbpress #mainnav .active :visited {
 	}
 	.milestone .info .progress {
 	    width: 85%;
+	}
+	#content.timeline dl {
+		width: 85%; /* prevent right overflow */
+	}
+	#content.timeline dd {
+		margin-left: 0;
 	}
 }
