@@ -10,7 +10,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
  
  
  class TicketNotificationSystem(Component):
-@@ -94,6 +95,41 @@
+@@ -94,6 +95,43 @@
                  torecipients.append(row[2])
              break
  
@@ -25,15 +25,17 @@ Index: trac-1.0.1/trac/ticket/notification.py
 +
 +            # Retrieve the old milestone/component if it just changed
 +            changes = ticket.get_changelog()
-+            changes.reverse()
-+            last_change = changes[0]
-+            for change in changes:
-+                if change[0] != last_change[0]:
-+                    break
-+                if change[2] == 'component':
-+                    old_component = change[3]
-+                if change[2] == 'milestone':
-+                    old_milestone = change[3]
++            # New tickets do not have changes
++            if changes:
++                changes.reverse()
++                last_change = changes[0]
++                for change in changes:
++                    if change[0] != last_change[0]:
++                        break
++                    if change[2] == 'component':
++                        old_component = change[3]
++                    if change[2] == 'milestone':
++                        old_milestone = change[3]
 +
 +            # Add component subscribers
 +            for row in db("""SELECT username FROM _notifications
@@ -52,7 +54,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
          # Harvest email addresses from the author field of ticket_change(s)
          if notify_updater:
              for author, ticket in db("""
-@@ -126,6 +162,12 @@
+@@ -126,6 +164,12 @@
          elif updater:
              torecipients.append(updater)
  
