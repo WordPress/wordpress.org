@@ -4,8 +4,9 @@
      py:strip="">
 
 <?python
-	scripts_version = 24
+	scripts_version = 25
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
+	wporg_endpoint = '//make.wordpress.org/core/'
 
 	if project_slug == 'bbpress' :
 		profile_link = '//bbpress.org/forums/users/'
@@ -188,7 +189,7 @@
 <py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core' and req.session['email'] and req.session['authenticated']">
 	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
 		<div id="tabcontent">
-			Notifications <!--can be configured <a href="//make.wordpress.org/core/notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
+			Notifications <!--can be configured <a href="//${wporg_endpoint}notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
 		</div>
 	</py:match>
 </py:if>
@@ -238,7 +239,7 @@
 			<div id="wp-auth-check-bg"></div>
 			<div id="wp-auth-check">
 				<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
-				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://make.wordpress.org/core/wp-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="${wporg_endpoint}wp-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
 				</div>
 			</div>
 		</div>
@@ -257,6 +258,24 @@
 		});
 		</script>
 	</py:if>
+
+	<!--! Trac notifications -->
+	<script py:if="ticket and ticket.exists and req.session['sid'] == 'nacin'">
+	if ( 'notifications' in wpTrac ) {
+		jQuery(document).ready( function( $ ) {
+			var endpoint = '${wporg_endpoint}', ticket = ${ticket.id};
+			$.ajax({
+				url: endpoint + '?trac-notifications=' + ticket,
+				xhrFields: { withCredentials: true }
+			}).success( function( data ) {
+				if ( data && data.success ) {
+					$( '#propertyform' ).before( data.data['notifications-box'] );
+					wpTrac.notifications.init( endpoint, ticket );
+				}
+			});
+		});
+	}
+	</script>
 </body>
 
 <xi:include href="site-specific.html"><xi:fallback /></xi:include>
