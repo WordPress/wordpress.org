@@ -25,6 +25,7 @@ class WordCamp_Post_Types_Plugin {
 		add_action( 'save_post', array( $this, 'save_post_speaker' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post_organizer' ), 10, 2);
+		add_action( 'save_post', array( $this, 'save_post_sponsor' ), 10, 2);
 
 		add_filter( 'manage_wcb_speaker_posts_columns', array( $this, 'manage_post_types_columns' ) );
 		add_filter( 'manage_wcb_session_posts_columns', array( $this, 'manage_post_types_columns' ) );
@@ -868,7 +869,7 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 
 		$attr = shortcode_atts( array(
-
+			'link' => 'none'
 		), $attr );
 
 		$terms = $this->get_sponsor_levels();
@@ -895,10 +896,22 @@ class WordCamp_Post_Types_Plugin {
 				<h2><?php echo esc_html( $term->name ); ?></h2>
 
 				<?php while ( $sponsors->have_posts() ) : $sponsors->the_post(); ?>
+				<?php $website = get_post_meta( get_the_ID(), '_wcpt_sponsor_website', true ); ?>
+					
 				<div id="wcorg-sponsor-<?php the_ID(); ?>" class="wcorg-sponsor">
-					<h3><?php the_title(); ?></h3>
+					<?php if ( 'website' == $attr['link'] && $website ) : ?>
+						<h3><a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_title(); ?></a></h3>
+					<?php else : ?>
+						<h3><?php the_title(); ?></h3>
+					<?php endif; ?>
+					
 					<div class="wcorg-sponsor-description">
-						<?php the_post_thumbnail(); ?>
+						<?php if ( 'website' == $attr['link'] && $website ) : ?>
+							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_post_thumbnail(); ?></a>
+						<?php else : ?>
+							<?php the_post_thumbnail(); ?>
+						<?php endif; ?>
+						
 						<?php the_content(); ?>
 					</div>
 				</div><!-- #sponsor -->
@@ -924,6 +937,7 @@ class WordCamp_Post_Types_Plugin {
 		add_meta_box( 'organizer-info', __( 'Organizer Info', $this->textdomain ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
 		add_meta_box( 'speakers-list', __( 'Speakers', $this->textdomain ), array( $this, 'metabox_speakers_list' ), 'wcb_session', 'side' );
 		add_meta_box( 'session-info', __( 'Session Info', $this->textdomain ), array( $this, 'metabox_session_info' ), 'wcb_session', 'side' );
+		add_meta_box( 'sponsor-info', __( 'Sponsor Info', 'wordcampbase' ), array( $this, 'metabox_sponsor_info' ), 'wcb_sponsor', 'side' );
 	}
 
 	/**
@@ -1064,6 +1078,23 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Render the Sponsor Info metabox view
+	 */
+	function metabox_sponsor_info( $sponsor ) {
+		$website = get_post_meta( $sponsor->ID, '_wcpt_sponsor_website', true );
+		wp_nonce_field( 'edit-sponsor-info', 'wcpt-meta-sponsor-info' );
+		
+		?>
+		
+		<p>
+			<label for="_wcpt_sponsor_websitee"><?php _e( 'Website:', 'wordcampbase' ); ?></label>
+			<input type="text" class="widefat" id="_wcpt_sponsor_website" name="_wcpt_sponsor_website" value="<?php echo esc_attr( esc_url( $website ) ); ?>" />
+		</p>
+		
+		<?php
+	}
+
+	/**
 	 * Fired when a post is saved, makes sure additional metadata is also updated.
 	 */
 	function save_post_speaker( $post_id, $post ) {
@@ -1188,6 +1219,27 @@ class WordCamp_Post_Types_Plugin {
 				add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
 				
 				break;
+			}
+		}
+	}
+
+	/**
+	 * Save meta data for Sponsor posts
+	 */
+	function save_post_sponsor( $post_id, $post ) {
+		if ( wp_is_post_revision( $post_id ) || $post->post_type != 'wcb_sponsor' || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['wcpt-meta-sponsor-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-sponsor-info'], 'edit-sponsor-info' ) ) {
+			$website = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
+			
+			// TODO: maybe only allows links to home page, depending on outcome of http://make.wordpress.org/community/2013/12/31/irs-rules-for-corporate-sponsorship-of-wordcamp/
+
+			if ( $website ) {
+				update_post_meta( $post_id, '_wcpt_sponsor_website', $website );
+			} else {
+				delete_post_meta( $post_id, '_wcpt_sponsor_website' );
 			}
 		}
 	}
