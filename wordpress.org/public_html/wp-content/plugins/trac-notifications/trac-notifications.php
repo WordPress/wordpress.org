@@ -56,8 +56,10 @@ class wporg_trac_notifications {
 	}
 
 	function get_trac_milestones() {
+		// Only shoe 3.8+, when this feature was launched.
 		return $this->trac->get_results( "SELECT name, completed FROM milestone
-			WHERE name != 'WordPress.org' ORDER BY (completed = 0) DESC, name != 'MU 2.9.x' DESC, name DESC", OBJECT_K );
+			WHERE name NOT IN ('WordPress.org', '3.5.3', '3.6.2', '3.7.2') AND (completed = 0 OR completed >= 1386864000000000)
+			ORDER BY (completed = 0) DESC, name DESC", OBJECT_K );
 	}
 
 	function get_trac_notifications_for_user( $username ) {
@@ -240,19 +242,35 @@ class wporg_trac_notifications {
 		?>
 
 		<style>
+		#components, #milestones, p.save-changes {
+			clear: both;
+		}
+		#milestones, p.save-changes {
+			padding-top: 1em;
+		}
+		#components li,
+		#milestones li {
+			float: left;
+			width: 25%;
+			list-style: none;
+		}	
 		.completed-milestone {
-			display: none;
+			display: none !important;
 		}
 		.completed-milestone.checked,
 		#milestones.show-completed-milestones .completed-milestone {
-			display: list-item;
+			display: list-item !important;
 		}
 		</style>
 		<script>
 		jQuery(document).ready( function($) {
-			$('#show-completed').on('click', function() {
-				$(this).hide();
+			$('#show-completed').on('click', 'a', function() {
+				$('#show-completed').hide();
 				$('#milestones').addClass( 'show-completed-milestones' );
+				return false;
+			});
+			$('p.select-all').on('click', 'a', function() {
+				$('#components').find('input[type=checkbox]').prop('checked', $(this).data('action') === 'select-all');
 				return false;
 			});
 		});
@@ -262,6 +280,7 @@ class wporg_trac_notifications {
 		wp_nonce_field( 'save-trac-notifications', 'trac-nonce', false );
 		echo '<div id="components">';
 		echo '<h3>Components</h3>';
+		echo '<p class="select-all"><a href="#" data-action="select-all">select all</a> &bull; <a href="#" data-action="clear-all">clear all</a></p>';
 		echo '<ul>';
 		foreach ( $components as $component ) {
 			$checked = checked( ! empty( $notifications['component'][ $component ] ), true, false );
@@ -269,7 +288,6 @@ class wporg_trac_notifications {
 		}
 		echo '</ul>';
 		echo '</div>';
-
 		echo '<div id="milestones">';
 		echo '<h3>Milestones</h3>';
 		echo '<ul>';
@@ -285,10 +303,10 @@ class wporg_trac_notifications {
 			}
 			echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="milestone[' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
 		}
+		echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
 		echo '</ul>';
-		echo '<a id="show-completed" href="#">Show all milestones</a>';
 		echo '</div>';
-		echo '<p><input type="submit" value="Save Changes" /></p>';
+		echo '<p class="save-changes"><input type="submit" value="Save Changes" /></p>';
 		echo '</form>';
 		return ob_get_clean();
 	}
