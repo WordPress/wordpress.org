@@ -1,0 +1,67 @@
+Index: trac/ticket/notification.py
+===================================================================
+--- trac/ticket/notification.py	(revision 12333)
++++ trac/ticket/notification.py	(working copy)
+@@ -29,6 +29,7 @@
+ from trac.util.datefmt import to_utimestamp
+ from trac.util.text import obfuscate_email_address, text_width, wrap
+ from trac.util.translation import deactivate, reactivate
++from trac.ticket import Ticket
+ 
+ 
+ class TicketNotificationSystem(Component):
+@@ -94,6 +95,41 @@
+                 torecipients.append(row[2])
+             break
+ 
++        # Harvest email addresses for ticket subscriptions
++        wordpress_notify = config.getbool('wordpress', 'fine_grained_notifications')
++        if wordpress_notify:
++            ticket = Ticket(env, tktid)
++            component = ticket['component']
++            old_component = component
++            milestone = ticket['milestone']
++            old_milestone = milestone
++
++            # Retrieve the old milestone/component if it just changed
++            changes = ticket.get_changelog()
++            changes.reverse()
++            last_change = changes[0]
++            for change in changes:
++                if change[0] != last_change[0]:
++                    break
++                if change[2] == 'component':
++                    old_component = change[3]
++                if change[2] == 'milestone':
++                    old_milestone = change[3]
++
++            # Add component subscribers
++            for row in db("""SELECT username FROM _notifications
++                WHERE type = 'component' AND value IN ( %s, %s )""", (component, old_component)):
++                torecipients.append(row[0])
++
++            # Add milestone subscribers
++            for row in db("""SELECT username FROM _notifications
++                WHERE type = 'milestone' AND value IN ( %s, %s )""", (milestone, old_milestone)):
++                torecipients.append(row[0])
++
++            # Add individual ticket subscribers
++            for row in db("""SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 1""", (tktid,)):
++                torecipients.append(row[0])
++
+         # Harvest email addresses from the author field of ticket_change(s)
+         if notify_updater:
+             for author, ticket in db("""
+@@ -126,6 +162,12 @@
+         elif updater:
+             torecipients.append(updater)
+ 
++        if wordpress_notify:
++            # If a user has specifically blocked notifications for a ticket, remove them (despite being a reporter, owner, or updater).
++            for row in db("""SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 0""", (tktid,)):
++                torecipients = [r for r in torecipients
++                                if r and r != row[0]]
++
+     return (torecipients, ccrecipients, reporter, owner)
+ 
+ 
