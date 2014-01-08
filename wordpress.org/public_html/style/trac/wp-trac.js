@@ -383,7 +383,7 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 					.on( 'click', '.unblock-notifications', unblock );
 
 				current_star = notifications.hasClass('subscribed') ? 'filled' : 'empty';
-				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' + current_star + '"></div>' );
+				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' + current_star + '" title="Watch/unwatch this ticket"></div>' );
 				star = $('.ticket-star');
 				star.click( function() {
 					$(this).hasClass('dashicons-star-empty') ? subscribe() : unsubscribe();
