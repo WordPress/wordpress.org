@@ -1,7 +1,7 @@
-Index: trac/ticket/notification.py
+Index: trac-1.0.1/trac/ticket/notification.py
 ===================================================================
---- trac/ticket/notification.py	(revision 12333)
-+++ trac/ticket/notification.py	(working copy)
+--- trac-1.0.1/trac/ticket/notification.py	(revision 12333)
++++ trac-1.0.1/trac/ticket/notification.py	(working copy)
 @@ -29,6 +29,7 @@
  from trac.util.datefmt import to_utimestamp
  from trac.util.text import obfuscate_email_address, text_width, wrap
