@@ -832,6 +832,7 @@ dl.attachments dt {
 }
 #notifications .count-1,
 #notifications.count-0 .num-stars,
+#notifications.count-0 .star-list,
 #notifications.count-1 .count-many {
 	display: none;
 }
@@ -848,11 +849,18 @@ dl.attachments dt {
 	font-size: 12px;
 	margin-left: 6px;
 }
+#notifications .star-list a {
+	border-bottom: 0;
+}
+#notifications .star-you,
 #notifications a.watching-ticket,
 #notifications p.receiving-notifications,
 #notifications p.receiving-notifications-because,
 #notifications p.not-receiving-notifications {
 	display: none;
+}
+#notifications.subscribed .star-you {
+	display: inline;
 }
 #notifications.subscribed a.watching-ticket {
 	display: inline-block;
