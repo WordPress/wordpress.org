@@ -311,9 +311,5 @@ class wporg_trac_notifications {
 		return ob_get_clean();
 	}
 }
-
-// Initialize, but only for make.wordpress.org/core.
-if ( get_current_blog_id() === 6 ) {
-	$wporg_trac_notifications = new wporg_trac_notifications;
-}
+$wporg_trac_notifications = new wporg_trac_notifications;
 
