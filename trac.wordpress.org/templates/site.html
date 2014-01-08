@@ -268,7 +268,7 @@
 				url: endpoint + '?trac-notifications=' + ticket,
 				xhrFields: { withCredentials: true }
 			}).success( function( data ) {
-				if ( data && data.success ) {
+				if ( data.success ) {
 					$( '#propertyform' ).before( data.data['notifications-box'] );
 					wpTrac.notifications.init( endpoint, ticket );
 				}
