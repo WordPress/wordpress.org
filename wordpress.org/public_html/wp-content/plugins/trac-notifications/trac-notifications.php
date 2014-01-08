@@ -47,8 +47,8 @@ class wporg_trac_notifications {
 		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE ticket = %d", $ticket_id ) );
 	}
 
-	function get_trac_ticket_star_count( $ticket_id ) {
-		return $this->trac->get_var( $this->trac->prepare( "SELECT COUNT(*) FROM _ticket_subs WHERE ticket = %s AND status = 1", $ticket_id ) );
+	function get_trac_ticket_stars( $ticket_id ) {
+		return $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 1", $ticket_id ) );
 	}
 
 	function get_trac_components() {
@@ -147,7 +147,8 @@ class wporg_trac_notifications {
 
 		$ticket_sub = $this->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
 
-		$stars = $this->get_trac_ticket_star_count( $ticket_id );
+		$stars = $this->get_trac_ticket_stars( $ticket_id );
+		$star_count = count( $stars );
 
 		$participants = $this->get_trac_ticket_participants( $ticket_id );
 
@@ -181,10 +182,9 @@ class wporg_trac_notifications {
 		if ( $reasons ) {
 			$class .= ' receiving';
 		}
-		if ( $stars == 0 ) {
-			$class .= ' count-0';
-		} elseif ( $stars == 1 ) {
-			$class .= ' count-1';
+
+		if ( $star_count === 0 || $star_count === 1 ) {
+			$class .= ' count-' . $star_count;
 		}
 		ob_start();
 		?>
@@ -194,7 +194,23 @@ class wporg_trac_notifications {
 				<p class="star-this-ticket">
 					<a href="#" class="button button-large watching-ticket"><span class="dashicons dashicons-star-filled"></span> Watching ticket</a>
 					<a href="#" class="button button-large watch-this-ticket"><span class="dashicons dashicons-star-empty"></span> Watch this ticket</a>
-					<span class="num-stars"><span class="count"><?php echo $stars; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
+					<span class="num-stars"><span class="count"><?php echo $star_count; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
+					<div class="star-list">
+				<?php
+					foreach ( $stars as $follower ) :
+						if ( $username === $follower ) {
+							continue;
+						}
+						$follower = esc_attr( $follower );
+					?>
+						<a title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
+							<img src="//wordpress.org/grav-redirect.php?user=<?php echo $follower; ?>&amp;s=36" />
+						</a>
+					<?php endforeach; ?>
+					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
+						<img src="//wordpress.org/grav-redirect.php?user=<?php echo esc_attr( $username ); ?>&amp;s=36" />
+					</a>
+					</div>
 				</p>
 				<p class="receiving-notifications">You are receiving notifications.</p>
 			<?php if ( $reasons ) : ?>
