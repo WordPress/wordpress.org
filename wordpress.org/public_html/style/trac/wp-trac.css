@@ -80,7 +80,7 @@ h3.change a {
 #main #altlinks h3,
 #main #altlinks ul {
 	margin: 0 auto;
-	width: 40em;
+	width: 100%;
 }
 #main #altlinks ul {
 	padding-left: 0;
@@ -296,8 +296,7 @@ table.progress {
 	box-shadow: none;
 }
 /* =ticket.css */
-#content.ticket,
-#content.timeline {
+#content.ticket {
 	max-width: 58em; /* don't let it get bigger than it was */
 	width: auto; /* but allow for flexibility */
 }
@@ -388,6 +387,9 @@ ul.children > li.child {
 	font-size: 13px;
 }
 /* =timeline.css */
+#content.timeline {
+	width: 100%;
+}
 #content.timeline dl {
 	margin-left: 1em;
 }
