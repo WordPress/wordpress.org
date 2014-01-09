@@ -784,6 +784,17 @@ table.listing tbody td.component,
 table.listing tbody td.workflow {
 	white-space: nowrap;
 }
+/* right-align number columns */
+.tickets tr.trac-columns th a {
+	padding-right: 0;
+}
+table.listing tr.trac-columns .dashicons {
+	float: right;
+}
+table.listing tbody td.Comments,
+table.listing tbody td.Stars {
+	text-align: right;
+}
 /* Some visual improvements to ticket properties and attachments */
 td[headers=h_keywords] a {
 	margin-right: 10px;

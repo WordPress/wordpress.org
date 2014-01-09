@@ -36,8 +36,9 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 		gardener : typeof wpBugGardener !== 'undefined',
 
 		init : function() {
-			// Change 'Comments' columns to a dashicons glyph to save space
+			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
+			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-filled"></div>');
 
 			// Bring back 'Delete' comment buttons, if any.
 			$('div.change').children('.trac-ticket-buttons').each( function() {
