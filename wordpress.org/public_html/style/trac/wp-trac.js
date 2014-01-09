@@ -369,6 +369,13 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				wpTrac.hiddenEl.val( wpTrac.originalKeywords.join(' ') );
 		},
 
+		hide_cc_field: function() {
+			if ( $('#content').hasClass('query') ) {
+				$('table.trac-clause tr.actions option[value="cc"]').remove();
+				$('#columns').find('input[type="checkbox"][name="col"][value="cc"]').parent().remove();
+			}
+		},
+
 		notifications: (function() {
 			var notifications, _endpoint, _ticket, star;
 
