@@ -260,22 +260,27 @@
 	</py:if>
 
 	<!--! Trac notifications -->
-	<script py:if="project_slug == 'core' and ticket and ticket.exists">
-	if ( 'notifications' in wpTrac ) {
-		jQuery(document).ready( function( $ ) {
-			var endpoint = '${wporg_endpoint}', ticket = ${ticket.id};
-			$.ajax({
-				url: endpoint + '?trac-notifications=' + ticket,
-				xhrFields: { withCredentials: true }
-			}).success( function( data ) {
-				if ( data.success ) {
-					$( '#propertyform' ).before( data.data['notifications-box'] );
-					wpTrac.notifications.init( endpoint, ticket );
-				}
+	<py:if test="project_slug == 'core'">
+		<script>
+		jQuery( wpTrac.hide_cc_field );
+		</script>
+		<script py:if="ticket and ticket.exists">
+		if ( 'notifications' in wpTrac ) {
+			jQuery(document).ready( function( $ ) {
+				var endpoint = '${wporg_endpoint}', ticket = ${ticket.id};
+				$.ajax({
+					url: endpoint + '?trac-notifications=' + ticket,
+					xhrFields: { withCredentials: true }
+				}).success( function( data ) {
+					if ( data.success ) {
+						$( '#propertyform' ).before( data.data['notifications-box'] );
+						wpTrac.notifications.init( endpoint, ticket );
+					}
+				});
 			});
-		});
-	}
-	</script>
+		}
+		</script>
+	</py:if>
 </body>
 
 <xi:include href="site-specific.html"><xi:fallback /></xi:include>
