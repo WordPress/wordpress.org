@@ -323,7 +323,7 @@ table.progress {
 	border-top: 1px solid #ddd;
 }
 #ticket table.properties :link, #ticket table.properties :visited {
-	color: #000
+	color: #000;
 }
 #ticket table.properties td, #ticket table.properties th {
 	line-height: 1.4;
@@ -393,6 +393,9 @@ ul.children > li.child {
 #content.timeline dl {
 	margin-left: 1em;
 }
+#content.timeline dl.unread {
+	margin-left: 0.38em;
+}
 #content.timeline dt :link:hover, dt :visited:hover {
 	background-color: #eee;
 }
@@ -402,9 +405,12 @@ ul.children > li.child {
 dt.closedticket em {
 	text-decoration: line-through;
 }
+dl.unread {
+	border-left-color: #d54e21;
+}
 #content.timeline dd {
 	color: #777;
-	margin: 0 0 .75em 5.8em;
+	margin: 0 0 1.5em 5em;
 }
 #content.timeline :link, #content.timeline :visited {
 	color: #000;
@@ -986,6 +992,89 @@ body.bbpress #mainnav .active :visited {
  */
 .timeline img {
 	display: none;
+}
+
+/**
+ * Dashicons
+ */
+#altlinks li a.rss:before,
+dt.reopenedticket:before,
+dt.closedticket:before,
+dt.changeset:before,
+dt.editedticket:before,
+dt.newticket:before,
+dt.batchmodify:before,
+dt.attachment:before {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	-webkit-font-smoothing: antialiased;
+	font-size: 20px;
+	line-height: 1;
+	font-family: "dashicons";
+	text-decoration: inherit;
+	font-weight: normal;
+	font-style: normal;
+	vertical-align: top;
+	-webkit-transition: color .1s ease-in 0;
+	-moz-transition: color .1s ease-in 0;
+	transition: color .1s ease-in 0;
+	text-align: center;
+	color: #777;
+}
+dt.reopenedticket:hover:before,
+dt.closedticket:hover:before,
+dt.changeset:hover:before,
+dt.editedticket:hover:before,
+dt.newticket:hover:before,
+dt.batchmodify:hover:before,
+dt.attachment:hover:before {
+	color: #21759b;
+}
+dt.attachment:before {
+	content: "\f103"; /* dashicons-admin-links */
+}
+dt.batchmodify:before {
+	content: "\f105"; /* dashicons-admin-page */
+}
+dt.newticket:before {
+	content: "\f133"; /* dashicons-welcome-add-page */
+}
+dt.editedticket:before {
+	content: "\f119"; /* dashicons-welcome-write-blog */
+}
+dt.changeset:before {
+	content: "\f111"; /* dashicons-admin-generic */
+}
+dt.closedticket:before {
+	content: "\f147"; /* dashicons-yes */
+	font-size: 26px;
+	margin-left: -6px;
+	padding-right: 6px;
+}
+dt.reopenedticket:before {
+	content: "\f119"; /* dashicons-welcome-write-blog */
+}
+#content.timeline dt :link, #content.timeline dt :visited {
+	padding-left: 0;
+}
+dt.reopenedticket, dt.reopenedticket a,
+dt.closedticket, dt.closedticket a,
+dt.changeset, dt.changeset a,
+dt.editedticket, dt.editedticket a,
+dt.newticket, dt.newticket a,
+dt.batchmodify, dt.batchmodify a,
+dt.attachment, dt.attachment a {
+	background-image: none !important;
+}
+#altlinks li a.rss {
+	background: none;
+	padding-left: 0;
+}
+#altlinks li a.rss:before {
+	content: "\f303";
+	color: #ff6600;
+	padding-right: 5px
 }
 
 /* =Responsive / Mobile
