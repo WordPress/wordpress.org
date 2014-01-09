@@ -370,9 +370,29 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 		},
 
 		hide_cc_field: function() {
-			if ( $('#content').hasClass('query') ) {
-				$('table.trac-clause tr.actions option[value="cc"]').remove();
-				$('#columns').find('input[type="checkbox"][name="col"][value="cc"]').parent().remove();
+			var content = $( '#content' );
+			if ( content.hasClass( 'query' ) ) {
+				$( 'table.trac-clause tr.actions option[value="cc"]' ).remove();
+				$( '#columns' ).find( 'input[type="checkbox"][name="col"][value="cc"]' ).parent().remove();
+			}
+			if ( content.hasClass( 'ticket' ) ) {
+				$( '#changelog div.change' ).has( 'li.trac-field-cc' ).each( function() {
+					var change = $(this), changes = change.children( 'ul.changes' );
+					/* Three possibilities:
+					   The comment is just a single CC (hide the whole comment)
+					   The comment is a CC plus a comment (hide the CC line)
+					   The comment contains multiple property changes (hide only the CC line)
+					*/
+					if ( changes.children( 'li' ).length === 1 ) {
+						if ( change.children( 'div.comment' ).length === 0 ) {
+							change.hide();
+						} else {
+							changes.hide();
+						}
+					} else {
+						changes.children( 'li.trac-field-cc' ).hide();
+					}
+				});
 			}
 		},
 
