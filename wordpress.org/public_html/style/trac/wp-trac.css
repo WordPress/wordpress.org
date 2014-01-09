@@ -826,6 +826,13 @@ dl.attachments dt {
 #notifications {
 	margin-top: 1em;
 }
+/* Hide "Cc:" from ticket box when there are none */
+#h_cc.missing {
+	visibility: hidden;
+}
+#ticket table.properties tr:last-child {
+	border-bottom: none;
+}
 #notifications .dashicons {
 	vertical-align: text-bottom;
 }
