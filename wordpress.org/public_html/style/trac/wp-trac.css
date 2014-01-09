@@ -31,10 +31,6 @@ fieldset {
 	padding: 1em;
 	border: 1px solid #d7d7d7;
 }
-blockquote {
-	padding: 0;
-	background: 0;
-}
 
 /* Fixing display of the header */
 #wporg-header :link, #wporg-header :visited,
