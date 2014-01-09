@@ -440,7 +440,8 @@ legend {
 }
 blockquote.citation {
 	margin: -0.3em 0;
-	padding-left: 0.75em;
+	padding: 0 0 0 0.75em;
+	background: none;
 }
 .nav ul {
 	padding: 0;
