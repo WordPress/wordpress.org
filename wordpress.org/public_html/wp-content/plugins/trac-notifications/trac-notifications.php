@@ -150,8 +150,6 @@ class wporg_trac_notifications {
 		$stars = $this->get_trac_ticket_stars( $ticket_id );
 		$star_count = count( $stars );
 
-		$participants = $this->get_trac_ticket_participants( $ticket_id );
-
 		$reasons = array();
 
 		if ( $username == $ticket->reporter ) {
@@ -159,9 +157,6 @@ class wporg_trac_notifications {
 		}
 		if ( $username == $ticket->owner ) {
 			$reasons['owner'] = 'you own this ticket';
-		}
-		if ( in_array( $username, $participants ) ) {
-			$reasons['participant'] = 'you have commented';
 		}
 		if ( ! empty( $notifications['component'][ $ticket->component ] ) ) {
 			$reasons['component'] = sprintf( 'you subscribe to the %s component', $ticket->component );
