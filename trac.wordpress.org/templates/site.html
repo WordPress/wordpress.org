@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = 30
+	scripts_version = 31
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 
@@ -268,7 +268,7 @@
 	<py:if test="notifications_enabled">
 		<script>
 		(function() {
-			var settings = { endpoint: '${wporg_endpoint}' };
+			var settings = { endpoint: '${wporg_endpoint}', authenticated: ${int(req.session['authenticated'])} };
 			<py:if test="ticket and ticket.exists">
 			settings.ticket = ${ticket.id};
 			</py:if>
