@@ -184,6 +184,8 @@
 
 <!--! remove anonymous 'Advanced' session management tab -->
 <py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_advanced']" once="true" py:strip=""></py:match>
+<!--! remove useless 'Keyboard Shortcuts' preferences tab -->
+<py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_keybindings']" once="true" py:strip=""></py:match>
 
 <!--! email addresses are synced with Trac from WP.org, so remove the preference pane -->
 <py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core' and req.session['email'] and req.session['authenticated']">
