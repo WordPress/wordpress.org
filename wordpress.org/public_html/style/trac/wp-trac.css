@@ -790,6 +790,9 @@ table.listing tbody td.workflow {
 }
 table.listing tr.trac-columns .dashicons {
 	float: right;
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
 }
 table.listing tbody td.Comments,
 table.listing tbody td.Stars {
@@ -848,6 +851,9 @@ dl.attachments dt {
 	border-bottom: none;
 }
 #notifications .dashicons {
+	height: 16px;
+	width: 16px;
+	font-size: 16px;
 	vertical-align: text-bottom;
 }
 #notifications .star-this-ticket a {
@@ -905,6 +911,9 @@ td.Stars {
 }
 td.Stars .dashicons {
 	color: #999;
+	height: 16px;
+	width: 16px;
+	font-size: 16px;
 }
 td.Stars .dashicons:hover,
 td.Stars .dashicons-star-filled {
