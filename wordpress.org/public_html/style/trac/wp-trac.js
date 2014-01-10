@@ -69,6 +69,15 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				};
 			});
 
+			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
+			var uitab = $('#tab_userinterface');
+			if ( uitab.length ) {
+				uitab.text('Help Links');
+				if ( uitab.hasClass('active') ) {
+					$('input[name="ui.use_symbols"]').closest('div.field').remove();
+				}
+			}
+
 			// Add After the Deadline (only add it if it loaded)
 			if ( $.isFunction( $.fn.addProofreader ) ) {
 				$('textarea').addProofreader();
