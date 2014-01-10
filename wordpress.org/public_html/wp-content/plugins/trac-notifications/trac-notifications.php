@@ -295,7 +295,7 @@ class wporg_trac_notifications {
 			} elseif ( count( $previous_tickets ) < 5 ) {
 				$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
 
-				echo '<p>' . $dashicon .  '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong> Previously:';
+				echo '<p class="ticket-note note-new-reporter">' . $dashicon .  '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong> Previously:';
 
 				foreach ( $previous_tickets as $t ) {
 					if ( $t->id != $ticket->id ) {
