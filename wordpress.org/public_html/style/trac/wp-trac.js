@@ -127,6 +127,12 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				});
 			}
 
+			// Prevent links inside a ticket or comment preview from opening in the same window.
+			$( '.ticketdraft' ).on( 'click', 'a', function() {
+				window.open( $( this ).attr( 'href' ) );
+				return false;
+			});
+
 			// Allow action text inputs to be clicked directly.
 			$('#action')
 				.find('input[type=text]').enable().focus( function() {
