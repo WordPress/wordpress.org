@@ -33,6 +33,9 @@ class wporg_trac_notifications {
 		if ( isset( $_POST['trac-ticket-sub'] ) ) {
 			$this->trac_notifications_box_actions();
 			exit;
+		} elseif ( isset( $_POST['trac-ticket-subs'] ) ) {
+			$this->trac_notifications_query_tickets();
+			exit;
 		} elseif ( isset( $_GET['trac-notifications'] ) ) {
 			$this->trac_notifications_box_render();
 			exit;
@@ -78,6 +81,10 @@ class wporg_trac_notifications {
 			$status = (int) $status;
 		}
 		return $status;
+	}
+
+	function get_trac_ticket_subscriptions_for_user( $username ) {
+		return $this->trac->get_col( $this->trac->prepare( "SELECT ticket FROM _ticket_subs WHERE username = %s AND status = 1", $username ) );
 	}
 
 	function trac_notifications_box_actions() {
@@ -126,6 +133,28 @@ class wporg_trac_notifications {
 		wp_send_json_error();
 	}
 
+	function trac_notifications_query_tickets() {
+		send_origin_headers();
+
+		if ( ! is_user_logged_in() ) {
+			exit;
+		}
+		$username = wp_get_current_user()->user_login;
+
+		$queried_tickets = (array) $_POST['tickets'];
+		if ( count( $queried_tickets ) > 100 ) {
+			wp_send_json_error();
+		}
+
+		$subscribed_tickets = $this->get_trac_ticket_subscriptions_for_user( $username );
+		if ( ! is_array( $subscribed_tickets ) ) {
+			wp_send_json_error();
+		}
+		$tickets = array_intersect( $queried_tickets, $subscribed_tickets );
+		$tickets = array_map( 'intval', array_values( $tickets ) );
+		wp_send_json_success( array( 'tickets' => $tickets ) );
+	}
+
 	function trac_notifications_box_render() {
 		send_origin_headers();
 
@@ -172,6 +201,8 @@ class wporg_trac_notifications {
 				$class = 'block';
 			} elseif ( 0 === $ticket_sub ) {
 				$class = 'blocked';
+			} else {
+				$class = '';
 			}
 		}
 		if ( $reasons ) {
