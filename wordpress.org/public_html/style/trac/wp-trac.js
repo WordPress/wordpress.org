@@ -72,9 +72,11 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
 			var uitab = $('#tab_userinterface');
 			if ( uitab.length ) {
-				uitab.text('Help Links');
 				if ( uitab.hasClass('active') ) {
+					uitab.text('Help Links');
 					$('input[name="ui.use_symbols"]').closest('div.field').remove();
+				} else {
+					uitab.find('a').text('Help Links');
 				}
 			}
 
