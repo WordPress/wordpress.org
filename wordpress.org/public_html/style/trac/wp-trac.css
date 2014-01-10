@@ -516,6 +516,9 @@ blockquote.citation {
 #info {
 	background: #f9f9f9;
 }
+#info th, #info td {
+	font-size: 100%;
+}
 a.missing:link, a.missing:visited, a.missing, span.missing, a.forbidden, span.forbidden {
 	color: #999;
 }
@@ -924,6 +927,23 @@ td.Stars .loading {
 }
 td.Stars .trac-report-star:hover {
 	cursor: pointer;
+}
+#main p.note-new-reporter {
+	line-height: 36px;
+	margin: 2em 0;
+	padding: 1em;
+	border: 1px solid #ccc;
+	text-align: center;
+}
+p.note-new-reporter img {
+	vertical-align: middle;
+	margin-right: 10px;
+}
+p.note-new-reporter .dashicons {
+	font-size: 36px;
+	width: 36px;
+	height: 36px;
+	margin-right: 10px;
 }
 
 /* =Link Colors */
