@@ -900,6 +900,22 @@ dl.attachments dt {
 #notifications.subscribed p.receiving-notifications {
 	display: block;
 }
+td.Stars {
+	white-space: nowrap;
+}
+td.Stars .dashicons {
+	color: #999;
+}
+td.Stars .dashicons:hover,
+td.Stars .dashicons-star-filled {
+	color: #21759b;
+}
+td.Stars .loading {
+	visibility: hidden;
+}
+td.Stars .trac-report-star:hover {
+	cursor: pointer;
+}
 
 /* =Link Colors */
 a:link,

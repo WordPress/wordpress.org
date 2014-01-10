@@ -38,7 +38,7 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 		init : function() {
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
-			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-filled"></div>');
+			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
 			// Bring back 'Delete' comment buttons, if any.
 			$('div.change').children('.trac-ticket-buttons').each( function() {
@@ -409,33 +409,53 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 		},
 
 		notifications: (function() {
-			var notifications, _endpoint, _ticket, star;
+			var notifications, endpoint, _ticket;
 
-			function init( endpoint, ticket ) {
-				var current_star;
-				_endpoint = endpoint;
-				_ticket = ticket;
+			function init( settings ) {
+				endpoint = settings.endpoint;
+				if ( settings.ticket ) {
+					_ticket = settings.ticket;
+					ticketInit( _ticket );
+				}
+				$( reportInit() );
+				$( wpTrac.hide_cc_field );
+			}
+
+			function ticketInit( ticket ) {
+				$.ajax({
+					url: endpoint + '?trac-notifications=' + ticket,
+					xhrFields: { withCredentials: true }
+				}).success( function( data ) {
+					if ( data.success ) {
+						$( render( data ) );
+					}
+				});
+			}
+
+			function render( data ) {
+				$( '#propertyform' ).before( data.data['notifications-box'] );
 				notifications = $('#notifications');
 				notifications.on( 'click', '.watch-this-ticket', subscribe )
 					.on( 'click', '.watching-ticket', unsubscribe )
 					.on( 'click', '.block-notifications', block )
 					.on( 'click', '.unblock-notifications', unblock );
 
-				current_star = notifications.hasClass('subscribed') ? 'filled' : 'empty';
-				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' + current_star + '" title="Watch/unwatch this ticket"></div>' );
+				$('#ticket.trac-content > h2').prepend( '<div class="ticket-star dashicons dashicons-star-' +
+					( notifications.hasClass('subscribed') ? 'filled' : 'empty' ) + '" title="Watch/unwatch this ticket"></div>' );
 				star = $('.ticket-star');
 				star.click( function() {
 					$(this).hasClass('dashicons-star-empty') ? subscribe() : unsubscribe();
 				});
 			}
 
-			function save( action ) {
+			function save( action, ticket ) {
+				ticket = ticket || _ticket;
 				$.ajax({
 					type: 'POST',
-					url: _endpoint,
+					url: endpoint,
 					xhrFields: { withCredentials: true },
 					data: {
-						'trac-ticket-sub': _ticket,
+						'trac-ticket-sub': ticket,
 						action: action
 					}
 				});
@@ -479,6 +499,61 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				save( 'unblock' );
 				notifications.removeClass('blocked').addClass('block');
 				return false;
+			}
+
+			function reportInit() {
+				var stars,
+					tickets = [],
+					cells = $('table.listing').find('td.Stars');
+
+				if ( cells.length === 0 ) {
+					return;
+				}
+				cells.wrapInner( '<span class="count" />' );
+				cells.append(' <div class="dashicons dashicons-star-empty loading trac-report-star"></div>' );
+				stars = $('.trac-report-star');
+				stars.each( function() {
+					var ticket,
+						star = $(this);
+					
+					ticket = parseInt( star.parent().siblings('td.ticket').find('a').text().replace('#', ''), 10 );
+					tickets.push( ticket );
+					star.data( 'ticket', ticket );
+				});
+
+				$.ajax({
+					type: 'POST',
+					url: endpoint,
+					xhrFields: { withCredentials: true },
+					data: {
+						'trac-ticket-subs' : true,
+						'tickets' : tickets
+					}
+				}).success( function( data ) {
+					if ( ! data.success ) {
+						return;
+					}
+
+					stars.each( function() {
+						if ( -1 !== $.inArray( $(this).data( 'ticket' ), data.data.tickets ) ) {
+							$(this).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
+						}
+					}).removeClass('loading').on( 'click', function() {
+						var action, count, delta,
+							star = $(this);
+						star.toggleClass( 'dashicons-star-empty dashicons-star-filled' );
+						action = star.hasClass('dashicons-star-filled') ? 'subscribe' : 'unsubscribe';
+						delta = 'subscribe' === action ? 1 : -1;
+						save( action, star.data( 'ticket' ) );
+
+						count = parseInt( star.prev().text(), 10 );
+						if ( isNaN( count ) ) {
+							count = 0;
+						}
+						count += delta;
+						star.prev().text( count ? count : '' );
+					});
+				});
 			}
 
 			return {
