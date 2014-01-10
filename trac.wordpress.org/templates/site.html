@@ -8,6 +8,9 @@
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 
+	if project_slug == 'core':
+		notifications_enabled = 1
+
 	if project_slug == 'bbpress' :
 		profile_link = '//bbpress.org/forums/users/'
 		support_link = '//bbpress.org/forums/'
@@ -241,7 +244,7 @@
 			<div id="wp-auth-check-bg"></div>
 			<div id="wp-auth-check">
 				<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
-				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="${wporg_endpoint}wp-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="//wordpress.org/support/bb-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
 				</div>
 			</div>
 		</div>
@@ -262,25 +265,15 @@
 	</py:if>
 
 	<!--! Trac notifications -->
-	<py:if test="project_slug == 'core'">
+	<py:if test="notifications_enabled">
 		<script>
-		jQuery( wpTrac.hide_cc_field );
-		</script>
-		<script py:if="ticket and ticket.exists">
-		if ( 'notifications' in wpTrac ) {
-			jQuery(document).ready( function( $ ) {
-				var endpoint = '${wporg_endpoint}', ticket = ${ticket.id};
-				$.ajax({
-					url: endpoint + '?trac-notifications=' + ticket,
-					xhrFields: { withCredentials: true }
-				}).success( function( data ) {
-					if ( data.success ) {
-						$( '#propertyform' ).before( data.data['notifications-box'] );
-						wpTrac.notifications.init( endpoint, ticket );
-					}
-				});
-			});
-		}
+		(function() {
+			var settings = { endpoint: '${wporg_endpoint}' };
+			<py:if test="ticket and ticket.exists">
+			settings.ticket = ${ticket.id};
+			</py:if>
+			wpTrac.notifications.init(settings);
+		})();
 		</script>
 	</py:if>
 </body>
