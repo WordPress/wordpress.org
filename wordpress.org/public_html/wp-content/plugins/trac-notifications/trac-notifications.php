@@ -7,6 +7,8 @@
 
 class wporg_trac_notifications {
 
+	protected $trac_subdomain;
+
 	function __construct() {
 		$this->set_trac( 'core' );
 		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
@@ -15,6 +17,7 @@ class wporg_trac_notifications {
 	}
 
 	function set_trac( $trac ) {
+		$this->trac_subdomain = $trac;
 		if ( function_exists( 'add_db_table' ) ) {
 			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone' );
 			foreach ( $tables as $table ) {
@@ -24,9 +27,25 @@ class wporg_trac_notifications {
 		}
 	}
 
+	function trac_url() {
+		return 'https://' . $this->trac_subdomain . '.trac.wordpress.org';
+	}
+
 	function filter_allowed_http_origins( $origins ) {
-		$origins[] = 'https://core.trac.wordpress.org';
+		$origins[] = $this->trac_url();
 		return $origins;
+	}
+
+	function ticket_link( $ticket ) {
+		$status_res = $ticket->status;
+		if ( $ticket->resolution ) {
+			$status_res .= ': ' . $ticket->resolution;
+		}
+		return sprintf( '<a href="%s" class="%s ticket" title="%s">#%s</a>',
+			$this->trac_url() . '/ticket/' . $ticket->id,
+			$ticket->status,
+			esc_attr( sprintf( "%s: %s (%s)", $ticket->type, $ticket->summary, $status_res ) ),
+			$ticket->id );
 	}
 
 	function action_template_redirect() {
@@ -246,8 +265,46 @@ class wporg_trac_notifications {
 		</fieldset>
 	</div>
 	<?php
+		$this->ticket_notes( $ticket, $username );
 		wp_send_json_success( array( 'notifications-box' => ob_get_clean() ) );
 		exit;
+	}
+
+	function ticket_notes( $ticket, $username ) {
+		if ( $username != $ticket->reporter ) {
+			$previous_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, type, status, resolution
+				FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $ticket->reporter, $ticket->id ) );
+
+			if ( count( $previous_tickets ) < 5 ) {
+				$dashicon = '<span class="dashicons dashicons-welcome-learn-more"></span> ';
+				$dashicon .= '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter ) . '&amp;s=36" /> ';
+			}
+
+			if ( 1 == count( $previous_tickets ) ) {
+				$previous_comments = $this->trac->get_var( $this->trac->prepare( "SELECT ticket FROM ticket_change
+					WHERE field = 'comment' AND author = %s AND ticket <> %d LIMIT 1", $ticket->reporter, $ticket->id ) );
+
+				echo '<p class="ticket-note note-new-reporter">' . $dashicon . '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome</strong> &mdash; ';
+
+				if ( $previous_comments ) {
+					echo 'they&#8217;ve commented before, but it&#8127;s their first bug report!</p>';
+				} else {
+					echo 'it&#8127;s their first bug report!</p>';
+				}
+
+			} elseif ( count( $previous_tickets ) < 5 ) {
+				$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
+
+				echo '<p>' . $dashicon .  '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong> Previously:';
+
+				foreach ( $previous_tickets as $t ) {
+					if ( $t->id != $ticket->id ) {
+						echo ' ' . $this->ticket_link( $t );
+					}
+				}
+				echo '.';
+			}
+		}
 	}
 
 	function notification_settings_page() {
