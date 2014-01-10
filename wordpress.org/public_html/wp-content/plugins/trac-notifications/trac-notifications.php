@@ -230,11 +230,11 @@ class wporg_trac_notifications {
 						$follower = esc_attr( $follower );
 					?>
 						<a title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
-							<img src="//wordpress.org/grav-redirect.php?user=<?php echo $follower; ?>&amp;s=36" />
+							<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo $follower; ?>&amp;s=36" />
 						</a>
 					<?php endforeach; ?>
 					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
-						<img src="//wordpress.org/grav-redirect.php?user=<?php echo esc_attr( $username ); ?>&amp;s=36" />
+						<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo esc_attr( $username ); ?>&amp;s=36" />
 					</a>
 					</div>
 				</p>
