@@ -412,13 +412,16 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 			var notifications, endpoint, _ticket;
 
 			function init( settings ) {
+				$( wpTrac.hide_cc_field );
+				if ( ! settings.authenticated ) {
+					return;
+				}
 				endpoint = settings.endpoint;
 				if ( settings.ticket ) {
 					_ticket = settings.ticket;
 					ticketInit( _ticket );
 				}
 				$( reportInit() );
-				$( wpTrac.hide_cc_field );
 			}
 
 			function ticketInit( ticket ) {
