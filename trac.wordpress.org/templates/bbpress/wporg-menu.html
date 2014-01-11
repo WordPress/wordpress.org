@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:py="http://genshi.edgewall.org/"
+	  py:strip="">
+
+	<!--! Pull #metanav out of div#banner and put it into bbpress.org's #subnav -->
+	<py:match path="div[@id='banner']" buffer="true">
+		<div id="subnav">
+			<div id="subnav-inner">
+					<ul id="nav-user" class="menu">
+						${select("div[@id='metanav']/ul/li")}
+					</ul>
+			</div>
+		</div>
+		<!--! Leave form#search in #banner -->
+		<div id="banner">
+			${select("form[@id='search']")}
+		</div>
+	</py:match>
+
+</html>
