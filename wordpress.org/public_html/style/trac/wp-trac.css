@@ -982,11 +982,13 @@ body.bbpress #main {
 body.bbpress h1 {
 	font-size: 19px;
 }
-body.bbpress #header {
+body.bbpress #header,
+body.buddypress #header {
 	position: static;
 	top: auto;
 }
-body.bbpress #subnav {
+body.bbpress #subnav,
+body.buddypress #subnav {
 	margin-top: auto;
 }
 body.bbpress #footer {
