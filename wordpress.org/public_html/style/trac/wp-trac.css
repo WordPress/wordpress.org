@@ -678,6 +678,7 @@ span.avatar img {
 #changelog h3.change img,
 #ticketchange h3.change img {
 	margin: 0 .8em 0 -2px;
+	border: 0; /* override for bb's */
 }
 img.avatar {
 	float: left;
@@ -716,6 +717,7 @@ div.change ul.changes {
 }
 h3.change .profile-link {
 	border-bottom: none;
+	text-decoration: none; /* override for bb's */
 }
 #changelog h3.change .username,
 #ticketchange h3.change .username {
@@ -957,6 +959,8 @@ dt em,
 }
 
 /* =bbPress / BuddyPress */
+
+/* bbPress colors */
 body.bbpress .wp-notice {
 	background: #eaf9ed;
 	border: 2px solid #080;
@@ -975,11 +979,34 @@ body.bbpress #mainnav .active :link,
 body.bbpress #mainnav .active :visited {
 	background: #080; /* active nav item */
 }
-/* bbPress design overrides */
-body.bbpress #main {
+
+/* BuddyPress colors */
+body.buddypress .wp-notice {
+	background: #fff3ec;
+	border: 2px solid #d84800;
+}
+body.buddypress :link,
+body.buddypress :visited,
+body.buddypress #footer :link,
+body.buddypress #footer :visited,
+body.buddypress dt em,
+body.buddypress .milestone .info h2 em,
+body.buddypress #content.build h2.config :link,
+body.buddypress #content.build h2.config :visited {
+	color: #d84800; /* link color */
+}
+body.buddypress #mainnav .active :link,
+body.buddypress #mainnav .active :visited {
+	background: #d84800; /* active nav item */
+}
+
+/* bbPress/BuddyPress design overrides */
+body.bbpress #main,
+body.buddypress #main {
 	width: auto;
 }
-body.bbpress h1 {
+body.bbpress h1,
+body.buddypress h1 {
 	font-size: 19px;
 }
 body.bbpress #header,
@@ -991,35 +1018,37 @@ body.bbpress #subnav,
 body.buddypress #subnav {
 	margin-top: auto;
 }
-body.bbpress #footer {
+body.bbpress #footer,
+body.buddypress #footer {
 	color: #222;
 	padding: 24px 0;
 	margin: 0 auto 24px;
 }
 body.bbpress #subnav-inner ul li a,
 body.bbpress #footer :link,
-body.bbpress #footer :visited {
+body.bbpress #footer :visited,
+body.buddypress #subnav-inner ul li a,
+body.buddypress #footer :link,
+body.buddypress #footer :visited {
 	border-bottom: none;
 }
 body.bbpress #footer :link:hover,
-body.bbpress #footer :visited:hover {
+body.bbpress #footer :visited:hover,
+body.buddypress #footer :link:hover,
+body.buddypress #footer :visited:hover {
 	background: none;
 }
-body.buddypress .wp-notice {
-	background: #fff3ec;
-	border: 2px solid #d84800;
+body.bbpress #subnav,
+body.buddypress #subnav {
+	line-height: 24px;
 }
-body.buddypress :link,
-body.buddypress :visited,
-body.buddypress dt em,
-body.buddypress .milestone .info h2 em,
-body.buddypress #content.build h2.config :link,
-body.buddypress #content.build h2.config :visited {
-	color: #d84800; /* link color */
+body.bbpress #subnav a:hover,
+body.buddypress #subnav a:hover {
+	text-decoration: none;
 }
-body.buddypress #mainnav .active :link,
-body.buddypress #mainnav .active :visited {
-	background: #d84800; /* active nav item */
+body.bbpress #main,
+body.buddypress #main {
+	padding-top: 6px;
 }
 
 /* =Workflow Keywords */
