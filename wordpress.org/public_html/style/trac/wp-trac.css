@@ -1042,8 +1042,8 @@ body.bbpress #subnav,
 body.buddypress #subnav {
 	line-height: 24px;
 }
-body.bbpress #subnav a:hover,
-body.buddypress #subnav a:hover {
+body.bbpress #mainnav a:hover,
+body.buddypress #mainnav a:hover {
 	text-decoration: none;
 }
 body.bbpress #main,
