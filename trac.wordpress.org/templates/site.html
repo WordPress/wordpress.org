@@ -42,8 +42,6 @@
 
 	<meta name="viewport" content="width=device-width" />
 	<link rel="stylesheet" type="text/css" href="//wordpress.org/style/trac/wp-trac.css?${scripts_version}" />
-	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
-	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
 	<link rel="stylesheet" type="text/css" href="//openatd.svn.wordpress.org/atd-jquery/css/atd.css" media="screen" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
 </head>
@@ -52,6 +50,7 @@
 <div py:match="div[@id='header']" py:strip=""></div>
 <div py:match="div[@id='footer']" py:strip=""></div>
 
+<!--! Notices and instructions when creating a new ticket -->
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice">
@@ -68,7 +67,6 @@
 				<li>In case it's relevant to the ticket, what is the expected output? What did you see instead?</li>
 				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
 				<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
-				<li py:if="not req.session['email']">Please add your email address to <a href="/prefs">Trac preferences</a> so you are sent updates.</li>
 			</ul>
 			</py:if>
 		</div>
@@ -78,23 +76,11 @@
 	</py:match>
 </py:if>
 
-<!--! Reports are collapsed by default but flicker because it waits for DOM ready to collapse them -->
-<div py:match="div[@id='content' and @class='report']/div[@class='reports']//div" py:if="req.environ['PATH_INFO'] == '/report'" py:attrs="select('@*')" class="collapsed">
-	${select('*|comment()|text()')}
-</div>
-
-<!--! new ticket modifications -->
+<!--! New ticket modifications -->
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
 
 	<py:if test="'preview' in req.args">
 		<py:match path="form[@id='propertyform']/div[@class='buttons']" once="true">
-
-		<!--! reminder on preview about setting a Trac email -->
-			<py:if test="not req.session['email']">
-				<div class="wp-caution" id="wp-email-pref-notice">
-					<p><strong>Please</strong> add your email address to <a target="_blank" href="/prefs">Trac preferences</a> so you are sent updates.</p>
-				</div>
-			</py:if>
 
 			<!--! security component alert on preview -->
 			<py:if test="'Security' == ticket.component">
@@ -123,6 +109,11 @@
 
 </py:if>
 
+<!--! Reports are collapsed by default but flicker because it waits for DOM ready to collapse them -->
+<div py:match="div[@id='content' and @class='report']/div[@class='reports']//div" py:if="req.environ['PATH_INFO'] == '/report'" py:attrs="select('@*')" class="collapsed">
+	${select('*|comment()|text()')}
+</div>
+
 <!--! reporter-feedback notice. deliberately shows for closed tickets other than 'fixed' -->
 <py:match path="div[@id='content' and @class='ticket']//div[@id='ticketchange']" once="true">
 	<div py:attrs="select('@*')">
@@ -130,18 +121,27 @@
 	</div>
 	<div class="wp-notice" id="wp-reporter-feedback-notice" py:if="ticket.reporter == req.authname and 'reporter-feedback' in ticket.keywords and ticket.resolution != 'fixed'">
 		<p><strong>Howdy!</strong></p><p></p>
-		<p>A developer marked this ticket with the reporter-feedback keyword. <strong>That means we need feedback from you.</strong></p>
+		<p>A contributor marked this ticket with the reporter-feedback keyword. <strong>That means we need feedback from you.</strong></p>
 		<p>Please answer their questions and address their concerns, then remove the keyword, below.</p>
 		<p>If this is a support question, you're better off in the <a href="${support_link}" class="ext-link"><span class="icon">&nbsp;</span>support forums</a>.</p>
 	</div>
 </py:match>
 
-<!--! remove 'Replace existing attachment of the same name' checkbox for non-gardeners -->
+<!--! Remove 'wiki:Wikistart' and other wiki cruft from home page -->
+<py:if test="req.environ['PATH_INFO'] == '/'">
+	<py:match path="div[@id='pagepath']" py:strip="" />
+	<py:match path="div[@id='ctxtnav']" py:strip="" />
+	<py:match path="div[@class='trac-modifiedby']" py:strip="" />
+	<py:match path="div[@id='altlinks']/h3" py:strip="" />
+	<py:match path="div[@id='altlinks']/ul" py:strip="" />
+</py:if>
+
+<!--! Remove 'Replace existing attachment of the same name' checkbox for non-gardeners -->
 <py:if test="not ( 'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource) )">
 	<py:match path="form[@id='attachment']//div[@class='options']" py:strip="" />
 </py:if>
 
-<!--! license notes when uploading patches -->
+<!--! License notes when uploading patches -->
 <py:match path="form[@id='attachment']/div[@class='buttons']" once="true">
 	<div class="wp-caution" id="wp-contributions-caution">
 		<p>By contributing code to ${project.name}, you grant its use under the GNU General Public License v2 (or later).</p>
@@ -155,7 +155,7 @@
 	<input type="submit" value="Agree and Upload" />
 </py:match>
 
-<!--! gravatars for the ticket reporter -->
+<!--! Gravatars for the ticket reporter -->
 <td py:match="td[@headers='h_reporter']" py:attrs="select('@*')">
 	<a href="${profile_link + ticket.reporter}">
 		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=36" height="36" width="36" />
@@ -163,7 +163,7 @@
     ${select('*|comment()|text()')}
 </td>
 
-<!--! gravatars for the ticket owner -->
+<!--! Gravatars for the ticket owner -->
 <td py:match="td[@headers='h_owner']" py:attrs="select('@*')">
 	<a href="${profile_link + ticket.owner}" py:if="ticket.owner">
 		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=36" height="36" width="36" />
@@ -185,13 +185,13 @@
     ${select('*|comment()|text()')}
 </div>
 
-<!--! remove anonymous 'Advanced' session management tab -->
+<!--! Remove anonymous 'Advanced' session management tab -->
 <py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_advanced']" once="true" py:strip=""></py:match>
 <!--! remove useless 'Keyboard Shortcuts' preferences tab -->
 <py:match path="div[@id='content' and @class='prefs']/ul[@id='tabs']/li[@id='tab_keybindings']" once="true" py:strip=""></py:match>
 
-<!--! email addresses are synced with Trac from WP.org, so remove the preference pane -->
-<py:if test="req.environ['PATH_INFO'] == '/prefs' and project_slug == 'core' and req.session['email'] and req.session['authenticated']">
+<!--! Email addresses are synced with Trac from WP.org, so remove the preference pane -->
+<py:if test="req.environ['PATH_INFO'] == '/prefs' and req.session['email'] and req.session['authenticated']">
 	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
 		<div id="tabcontent">
 			Notifications <!--can be configured <a href="//${wporg_endpoint}notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
@@ -218,23 +218,34 @@
 	<!--! WP.org Global Footer -->
 	<xi:include href="wporg-footer.html" />
 
-	<!--! footer javascript and such -->
 	<script py:if="'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource)">
 	var wpBugGardener = true;
 	</script>
+
+	<!--! JavaScript -->
 	<script src="//wordpress.org/style/trac/wp-trac.js?${scripts_version}"></script>
+
+	<!--! Check for security buzzwords on new tickets -->
 	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="//wordpress.org/style/trac/trac-security.js?${scripts_version}"></script>
+
+	<!--! New ticket possibly related tickets for Core Trac -->
+	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="//wordpress.org/style/trac/trac-search.js?${scripts_version}"></script>
+
+	<!-- After the Deadline -->
+	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
+	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
+
+	<!--! Analytics for Core Trac -->
 	<py:if test="project_slug == 'core'">
-		<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="//wordpress.org/style/trac/trac-search.js?${scripts_version}"></script>
-	<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-	try {
-	var pageTracker = _gat._getTracker("UA-52447-27");
-	pageTracker._trackPageview();
-	} catch(err) {}</script>
+		<script type="text/javascript">
+		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+		</script>
+		<script type="text/javascript">
+		try {
+		var pageTracker = _gat._getTracker("UA-52447-27");
+		pageTracker._trackPageview();
+		} catch(err) {}</script>
 	</py:if>
 
 	<!--! Trac auth check -->
