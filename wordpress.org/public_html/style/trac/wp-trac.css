@@ -963,6 +963,8 @@ body.bbpress .wp-notice {
 }
 body.bbpress :link,
 body.bbpress :visited,
+body.bbpress #footer :link,
+body.bbpress #footer :visited,
 body.bbpress dt em,
 body.bbpress .milestone .info h2 em,
 body.bbpress #content.build h2.config :link,
@@ -972,6 +974,34 @@ body.bbpress #content.build h2.config :visited {
 body.bbpress #mainnav .active :link,
 body.bbpress #mainnav .active :visited {
 	background: #080; /* active nav item */
+}
+/* bbPress design overrides */
+body.bbpress #main {
+	width: auto;
+}
+body.bbpress h1 {
+	font-size: 19px;
+}
+body.bbpress #header {
+	position: static;
+	top: auto;
+}
+body.bbpress #subnav {
+	margin-top: auto;
+}
+body.bbpress #footer {
+	color: #222;
+	padding: 24px 0;
+	margin: 0 auto 24px;
+}
+body.bbpress #subnav-inner ul li a,
+body.bbpress #footer :link,
+body.bbpress #footer :visited {
+	border-bottom: none;
+}
+body.bbpress #footer :link:hover,
+body.bbpress #footer :visited:hover {
+	background: none;
 }
 body.buddypress .wp-notice {
 	background: #fff3ec;
@@ -985,8 +1015,8 @@ body.buddypress #content.build h2.config :link,
 body.buddypress #content.build h2.config :visited {
 	color: #d84800; /* link color */
 }
-body.bbpress #mainnav .active :link,
-body.bbpress #mainnav .active :visited {
+body.buddypress #mainnav .active :link,
+body.buddypress #mainnav .active :visited {
 	background: #d84800; /* active nav item */
 }
 
