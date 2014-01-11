@@ -1,4 +1,4 @@
-var vnpTrac, coreKeywordList, gardenerKeywordList;
+var wpTrac, coreKeywordList, gardenerKeywordList;
 
 (function($){
 
@@ -30,23 +30,20 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 
 	wpTrac = {
 
-		keywords : {},
-		originalKeywords : {},
-		field : {},
 		gardener : typeof wpBugGardener !== 'undefined',
 
 		init : function() {
+			wpTrac.hacks();
+			wpTrac.workflow.init();
+			wpTrac.nonGardeners();
+		},
+
+		hacks: function() {
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
 			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
-			// Bring back 'Delete' comment buttons, if any.
-			$('div.change').children('.trac-ticket-buttons').each( function() {
-				var el = $(this);
-				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
-			});
-
-			// Automatically preview images
+			// Automatically preview images.
 			$('li.trac-field-attachment').each( function() {
 				var href, el, image, li = $(this);
 				el = $(this).find('.trac-rawlink');
@@ -69,25 +66,20 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				};
 			});
 
-			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
-			var uitab = $('#tab_userinterface');
-			if ( uitab.length ) {
-				if ( uitab.hasClass('active') ) {
-					uitab.text('Help Links');
-					$('input[name="ui.use_symbols"]').closest('div.field').remove();
-				} else {
-					uitab.find('a').text('Help Links');
-				}
-			}
+			// Restore the 'Delete' comment buttons, if any. The Trac plugin places them in a location we don't want.
+			// See https://meta.trac.wordpress.org/changeset/204.
+			$('div.change').children('.trac-ticket-buttons').each( function() {
+				var el = $(this);
+				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
+			});
 
 			// Add After the Deadline (only add it if it loaded)
 			if ( $.isFunction( $.fn.addProofreader ) ) {
 				$('textarea').addProofreader();
+				$('.AtD_proofread_button').each(function() {
+					$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') );
+				});
 			}
-
-			$('.AtD_proofread_button').each(function() {
-				$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') );
-			});
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown
 			$('#attachments').removeClass('collapsed');
@@ -102,6 +94,7 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				var action, hadClass,
 					form = $('#propertyform'),
 					modify = $('#modify').parent();
+
 				if ( ! form.length ) {
 					return;
 				}
@@ -144,12 +137,12 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 				});
 
 			// Clear the milestone on wontfix, duplicate, worksforme, invalid
-			wpTrac.field.milestone = $('#field-milestone');
-			if ( ! wpTrac.field.milestone.prop('disabled') ) {
+			var milestone = $('#field-milestone');
+			if ( ! milestone.prop('disabled') ) {
 				$('#propertyform').submit( function() {
 					var action = $('input[name=action]:checked').val();
 					if ( 'duplicate' === action || ( 'resolve' === action && 'fixed' !== $('#action_resolve_resolve_resolution').val() ) ) {
-						wpTrac.field.milestone.val('');
+						milestone.val('');
 					}
 				});
 			}
@@ -176,249 +169,252 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 					.show();
 			});
 
-			// Start of Keywords manipulation.
-			wpTrac.hiddenEl = $('#field-keywords');
-			if ( ! wpTrac.hiddenEl.length )
-				return;
+			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
+			var uitab = $('#tab_userinterface');
+			if ( uitab.length ) {
+				if ( uitab.hasClass('active') ) {
+					uitab.text('Help Links');
+					$('input[name="ui.use_symbols"]').closest('div.field').remove();
+				} else {
+					uitab.find('a').text('Help Links');
+				}
+			}
+		},
 
-			// Designed so the list could have come from another file.
-			if ( typeof coreKeywordList === 'undefined' )
+		// If we're not dealing with a trusted bug gardener:
+		nonGardeners: function() {
+			if ( wpTrac.gardener ) {
 				return;
+			}
 
-			// If we're not a gardener and we're on /newticket (field-owner check), declutter.
-			if ( ! wpTrac.gardener && $('#field-owner').length ) {
+			var version,
+				elements = {},
+				remove = true;
+
+			// If we're on /newticket (based on the field-owner check), declutter.
+			if ( $('#field-owner').length ) {
 				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
 			}
-	
-			// Generate the workflow template.
-			wpTrac.template();
 
-			wpTrac.field.add = $('#keyword-add');
+			elements.type = $('#field-type');
+			elements.version = $('#field-version');
+			version = elements.version.val();
 
-			// Load up the initial keywords and the dropdown.
-			wpTrac.populate();
+			// Remove task (blessed), or make a task ticket read only.
+			if ( 'task (blessed)' === elements.type.val() ) {
+				elements.type.after('<input type="hidden" name="field_type" value="task (blessed)" /> task (blessed)')
+					.parent().css('vertical-align', 'middle').end()
+					.remove();
+			} else {
+				elements.type.find('option[value="task (blessed)"]').remove();
+			}
 
-			// Save these for later.
-			wpTrac.originalKeywords = $.merge([], wpTrac.keywords);
+			// Once a Version is set, remove newer versions.
+			if ( version ) {
+				elements.version.find('option').each( function() {
+					var value = $(this).val();
+					if ( version === value )
+						remove = false;
+					else if ( remove && value )
+						$(this).remove();
+				});
+			}
+		},
 
-			// Catch the submit to see if keywords were simply reordered.
-			wpTrac.hiddenEl.parents('form').submit( wpTrac.submit );
+		workflow: (function() {
+			var keywords = {},
+				originalKeywords = {},
+				elements = {};
 
-			// Keyword removal.
-			$('#keyword-bin').delegate('a', 'click', function(e) {
-				e.preventDefault();
-				wpTrac.removeKeyword( $(this).parent() );
-			});
-
-			// Keyword adds.
-			$('#keyword-add').bind('change keypress', function(e) {
-				if ( e.type === 'keypress' ) {
-					if ( e.which === 13 ) {
-						e.stopPropagation();
-						e.preventDefault();
-					} else {
+			return {
+				init: function() {
+					elements.hiddenEl = $('#field-keywords');
+					if ( ! elements.hiddenEl.length ) {
 						return;
 					}
-				}
-				wpTrac.addKeyword( $(this).val() );
-				$(this).val('');
-			});
 
-			// Manual link.
-			$('#edit-keywords').click( function() {
-				wpTrac.hiddenEl.show().focus();
-				$(this).hide();
-				wpTrac.hiddenEl.change( wpTrac.populate );
-			});
-
-			// If we're not dealing with a trusted bug gardener:
-			if ( ! wpTrac.gardener ) {
-				var remove = true, version;
-				wpTrac.field.type = $('#field-type');
-				wpTrac.field.version = $('#field-version');
-				version = wpTrac.field.version.val();
-
-				// Remove task (blessed), or make a task ticket read only.
-				if ( 'task (blessed)' === wpTrac.field.type.val() ) {
-					wpTrac.field.type.after('<input type="hidden" name="field_type" value="task (blessed)" /> task (blessed)')
-						.parent().css('vertical-align', 'middle').end()
-						.remove();
-				} else {
-					wpTrac.field.type.find('option[value="task (blessed)"]').remove();
-				}
-
-				// Once a Version is set, remove newer versions.
-				if ( version ) {
-					wpTrac.field.version.find('option').each( function() {
-						var value = $(this).val();
-						if ( version === value )
-							remove = false;
-						else if ( remove && value )
-							$(this).remove();
-					});
-				}
-			}
-		},
-
-		// Generates the workflow template.
-		template : function() {
-			var container = wpTrac.hiddenEl.parent(), html, labelWidth;
-
-			// Necessary to keep everything in line. The + 4 is a careful CSS balance.
-			labelWidth = container.prev().width() + 4;
-
-			// Rearrange the table to suit our needs.
-			container.prev().detach().end()
-				.attr('colspan', '2').addClass('has-js')
-				.parents('table').css('table-layout', 'fixed');
-
-			// If the owner field exists, then we're on /newticket. Remove it.
-			$('#field-owner').parents('tr').remove();
-
-			html = '<a id="edit-keywords">manual</a>';
-			html += '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
-			html += '<select id="keyword-add"><option value=""> - Add - </option></select></div>';
-			html += '<div id="keyword-bin"></div>';
-			container.prepend( html );
-
-			// Walk in the footsteps of Firefox autocomplete's trail of destruction,
-			// tidying the radio buttons in its wake. See WP#17051.
-			if ( $.browser.mozilla ) {
-				$('#action input:radio').each( function() {
-					this.checked = this.defaultChecked;
-				});
-			}
-		},
-
-		// Populates the keywords and dropdown.
-		populate : function() {
-			var bin = $('#keyword-bin');
-
-			// For repopulation. Starting over.
-			if ( bin.find('span').length )
-				bin.empty();
-
-			// Replace commas, collapse spaces, trim, then split by space.
-			wpTrac.keywords = $.trim( wpTrac.hiddenEl.val().replace(',', ' ').replace(/ +/g, ' ') ).split(' ');
-
-			// Put our cleaned up version back into the hidden field.
-			wpTrac.hiddenEl.val( wpTrac.keywords.join(' ') );
-
-			// If we have a non-empty keyword, let's go through the process of adding the spans.
-			if ( 1 !== wpTrac.keywords.length || wpTrac.keywords[0] !== '' ) {
-				$.each( wpTrac.keywords, function( k, v ) {
-					var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a href="#" />');
-					if ( v in coreKeywordList )
-						html.attr('title', coreKeywordList[v]);
-					html.appendTo( bin );
-				});
-			}
-
-			// Populate the dropdown.
-			$.each( coreKeywordList, function( k, v ) {
-				// Don't show special (permission-based) ones.
-				if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) )
-					return;
-				wpTrac.field.add.append( '<option value="' + k + ( -1 !== $.inArray( k, wpTrac.keywords ) ? '" disabled="disabled">* ' : '">' ) + k + '</option>' );
-			});
-		},
-
-		// Add a keyword. Takes a sanitized string.
-		addKeyword : function( keyword ) {
-			if ( ! keyword )
-				return;
-			var html, title = '';
-			// Don't add it again.
-			if ( -1 !== $.inArray( keyword, wpTrac.keywords ) )
-				return;
-			wpTrac.keywords.push( keyword );
-
-			// Update the dropdown. Core keywords also get a title attribute with their description.
-			if ( keyword in coreKeywordList ) {
-				wpTrac.field.add.find('option[value=' + keyword + ']').prop('disabled', true).text('* ' + keyword);
-				title = coreKeywordList[keyword];
-			}
-
-			if ( 'has-patch' === keyword )
-				wpTrac.removeKeyword( 'needs-patch' );
-			else if ( 'needs-patch' === keyword )
-				wpTrac.removeKeyword( 'has-patch' );
-
-			// Add it to the bin, and refresh the hidden input.
-			html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a href="#" />');
-			if ( title )
-				html.attr('title', title);
-			html.appendTo( $('#keyword-bin') );
-			wpTrac.hiddenEl.val( wpTrac.keywords.join(' ') );
-		},
-
-		// Remove a keyword. Takes a jQuery object of a keyword in the bin, or a sanitized keyword as a string.
-		removeKeyword : function( object ) {
-			var keyword;
-			if ( typeof object === 'string' ) {
-				keyword = object;
-				object = $('#keyword-bin').find('span[data-keyword="' + keyword + '"]');
-				if ( ! object.length )
-					return;
-			} else {
-				keyword = object.text();
-			}
-
-			wpTrac.keywords = $.grep(wpTrac.keywords, function(v) {
-				return v != keyword;
-			});
-			// Update the core keyword dropdown.
-			if ( keyword in coreKeywordList )
-				wpTrac.field.add.find('option[value=' + keyword + ']').prop('disabled', false).text( keyword );
-			wpTrac.hiddenEl.val( wpTrac.keywords.join(' ') );
-			object.remove();
-		},
-
-		// Check on submit that we're not just re-ordering keywords.
-		// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
-		submit : function(e) {
-			if ( wpTrac.keywords.length !== wpTrac.originalKeywords.length )
-				return;
-			var testKeywords = $.grep(wpTrac.keywords, function(v) {
-				return -1 === $.inArray( v, wpTrac.originalKeywords );
-			});
-			// If the difference has no length, then restore to the original keyword order.
-			if ( ! testKeywords.length )
-				wpTrac.hiddenEl.val( wpTrac.originalKeywords.join(' ') );
-		},
-
-		hide_cc_field: function() {
-			var content = $( '#content' );
-			if ( content.hasClass( 'query' ) ) {
-				$( 'table.trac-clause tr.actions option[value="cc"]' ).remove();
-				$( '#columns' ).find( 'input[type="checkbox"][name="col"][value="cc"]' ).parent().remove();
-			}
-			if ( content.hasClass( 'ticket' ) ) {
-				$( '#changelog div.change' ).has( 'li.trac-field-cc' ).each( function() {
-					var change = $(this), changes = change.children( 'ul.changes' );
-					/* Three possibilities:
-					   The comment is just a single CC (hide the whole comment)
-					   The comment is a CC plus a comment (hide the CC line)
-					   The comment contains multiple property changes (hide only the CC line)
-					*/
-					if ( changes.children( 'li' ).length === 1 ) {
-						if ( change.children( 'div.comment' ).length === 0 ) {
-							change.hide();
-						} else {
-							changes.hide();
-						}
-					} else {
-						changes.children( 'li.trac-field-cc' ).hide();
+					// Designed so the list could have come from another file.
+					if ( typeof coreKeywordList === 'undefined' ) {
+						return;
 					}
-				});
+
+					// Generate the workflow template.
+					wpTrac.workflow.template();
+
+					elements.add = $('#keyword-add');
+
+					// Load up the initial keywords and the dropdown.
+					wpTrac.workflow.populate();
+
+					// Save these for later.
+					originalKeywords = $.merge([], keywords);
+
+					// Catch the submit to see if keywords were simply reordered.
+					elements.hiddenEl.parents('form').submit( wpTrac.workflow.submit );
+
+					// Keyword removal.
+					elements.bin.on( 'click', 'a', function(e) {
+						e.preventDefault();
+						wpTrac.workflow.removeKeyword( $(this).parent() );
+					});
+
+					// Keyword adds.
+					$('#keyword-add').bind('change keypress', function(e) {
+						if ( e.type === 'keypress' ) {
+							if ( e.which === 13 ) {
+								e.stopPropagation();
+								e.preventDefault();
+							} else {
+								return;
+							}
+						}
+						wpTrac.workflow.addKeyword( $(this).val() );
+						$(this).val('');
+					});
+
+					// Manual link.
+					$('#edit-keywords').click( function() {
+						elements.hiddenEl.show().focus();
+						$(this).hide();
+						elements.hiddenEl.change( wpTrac.workflow.populate );
+					});
+				},
+
+				// Generates the workflow template.
+				template : function() {
+					var container = elements.hiddenEl.parent(), html, labelWidth;
+
+					// Necessary to keep everything in line. The + 4 is a careful CSS balance.
+					labelWidth = container.prev().width() + 4;
+
+					// Rearrange the table to suit our needs.
+					container.prev().detach().end()
+						.attr('colspan', '2').addClass('has-js')
+						.parents('table').css('table-layout', 'fixed');
+
+					// If the owner field exists, then we're on /newticket. Remove it.
+					$('#field-owner').parents('tr').remove();
+
+					html = '<a id="edit-keywords">manual</a>';
+					html += '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
+					html += '<select id="keyword-add"><option value=""> - Add - </option></select></div>';
+					html += '<div id="keyword-bin"></div>';
+					container.prepend( html );
+					elements.bin = $('#keyword-bin');
+
+					// Walk in the footsteps of Firefox autocomplete's trail of destruction,
+					// tidying the radio buttons in its wake. See #WP17051.
+					if ( $.browser.mozilla ) {
+						$('#action input:radio').each( function() {
+							this.checked = this.defaultChecked;
+						});
+					}
+				},
+
+				// Populates the keywords and dropdown.
+				populate : function() {
+					// For repopulation. Starting over.
+					if ( elements.bin.find('span').length )
+						elements.bin.empty();
+
+					// Replace commas, collapse spaces, trim, then split by space.
+					keywords = $.trim( elements.hiddenEl.val().replace(',', ' ').replace(/ +/g, ' ') ).split(' ');
+
+					// Put our cleaned up version back into the hidden field.
+					elements.hiddenEl.val( keywords.join(' ') );
+
+					// If we have a non-empty keyword, let's go through the process of adding the spans.
+					if ( 1 !== keywords.length || keywords[0] !== '' ) {
+						$.each( keywords, function( k, v ) {
+							var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a href="#" />');
+							if ( v in coreKeywordList )
+								html.attr('title', coreKeywordList[v]);
+							html.appendTo( elements.bin );
+						});
+					}
+
+					// Populate the dropdown.
+					$.each( coreKeywordList, function( k, v ) {
+						// Don't show special (permission-based) ones.
+						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) )
+							return;
+						elements.add.append( '<option value="' + k + ( -1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">' ) + k + '</option>' );
+					});
+				},
+
+				// Add a keyword. Takes a sanitized string.
+				addKeyword : function( keyword ) {
+					if ( ! keyword )
+						return;
+					var html, title = '';
+					// Don't add it again.
+					if ( -1 !== $.inArray( keyword, keywords ) )
+						return;
+					keywords.push( keyword );
+
+					// Update the dropdown. Core keywords also get a title attribute with their description.
+					if ( keyword in coreKeywordList ) {
+						elements.add.find('option[value=' + keyword + ']').prop('disabled', true).text('* ' + keyword);
+						title = coreKeywordList[keyword];
+					}
+
+					if ( 'has-patch' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-patch' );
+					} else if ( 'needs-patch' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-patch' );
+					}
+
+					// Add it to the bin, and refresh the hidden input.
+					html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a href="#" />');
+					if ( title )
+						html.attr('title', title);
+					html.appendTo( elements.bin );
+					elements.hiddenEl.val( keywords.join(' ') );
+				},
+
+				// Remove a keyword. Takes a jQuery object of a keyword in the bin, or a sanitized keyword as a string.
+				removeKeyword : function( object ) {
+					var keyword;
+					if ( typeof object === 'string' ) {
+						keyword = object;
+						object = elements.bin.find('span[data-keyword="' + keyword + '"]');
+						if ( ! object.length )
+							return;
+					} else {
+						keyword = object.text();
+					}
+
+					keywords = $.grep( keywords, function(v) {
+						return v != keyword;
+					});
+
+					// Update the core keyword dropdown.
+					if ( keyword in coreKeywordList )
+						elements.add.find('option[value=' + keyword + ']').prop('disabled', false).text( keyword );
+					elements.hiddenEl.val( keywords.join(' ') );
+					object.remove();
+				},
+
+				// Check on submit that we're not just re-ordering keywords.
+				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
+				submit : function(e) {
+					if ( keywords.length !== originalKeywords.length )
+						return;
+					var testKeywords = $.grep( keywords, function(v) {
+						return -1 === $.inArray( v, originalKeywords );
+					});
+					// If the difference has no length, then restore to the original keyword order.
+					if ( ! testKeywords.length )
+						elements.hiddenEl.val( originalKeywords.join(' ') );
+				}
 			}
-		},
+		}()),
 
 		notifications: (function() {
 			var notifications, endpoint, _ticket;
 
 			function init( settings ) {
-				$( wpTrac.hide_cc_field );
+				$( hide_cc_field );
 				if ( ! settings.authenticated ) {
 					return;
 				}
@@ -427,7 +423,34 @@ var vnpTrac, coreKeywordList, gardenerKeywordList;
 					_ticket = settings.ticket;
 					ticketInit( _ticket );
 				}
-				$( reportInit() );
+				$( reportInit );
+			}
+
+			function hide_cc_field() {
+				var content = $( '#content' );
+				if ( content.hasClass( 'query' ) ) {
+					$( 'table.trac-clause tr.actions option[value="cc"]' ).remove();
+					$( '#columns' ).find( 'input[type="checkbox"][name="col"][value="cc"]' ).parent().remove();
+				}
+				if ( content.hasClass( 'ticket' ) ) {
+					$( '#changelog div.change' ).has( 'li.trac-field-cc' ).each( function() {
+						var change = $(this), changes = change.children( 'ul.changes' );
+						/* Three possibilities:
+						   The comment is just a single CC (hide the whole comment)
+						   The comment is a CC plus a comment (hide the CC line)
+						   The comment contains multiple property changes (hide only the CC line)
+						*/
+						if ( changes.children( 'li' ).length === 1 ) {
+							if ( change.children( 'div.comment' ).length === 0 ) {
+								change.hide();
+							} else {
+								changes.hide();
+							}
+						} else {
+							changes.children( 'li.trac-field-cc' ).hide();
+						}
+					});
+				}
 			}
 
 			function ticketInit( ticket ) {
