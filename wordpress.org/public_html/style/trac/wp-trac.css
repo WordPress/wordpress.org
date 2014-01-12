@@ -432,6 +432,9 @@ body, th, tr {
 hr {
 	border-top: 1px solid #ccc;
 }
+h1, h2, h3, h4 {
+	letter-spacing: normal;
+}
 input[type=text]:focus, input.textwidget:focus, textarea:focus {
 	border: 1px solid #888;
 }
