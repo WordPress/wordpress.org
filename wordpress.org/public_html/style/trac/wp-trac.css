@@ -972,7 +972,16 @@ body.bbpress #footer :visited,
 body.bbpress dt em,
 body.bbpress .milestone .info h2 em,
 body.bbpress #content.build h2.config :link,
-body.bbpress #content.build h2.config :visited {
+body.bbpress #content.build h2.config :visited
+body.bbpress dt.wiki:hover:before,
+body.bbpress dt.milestone:hover:before,
+body.bbpress dt.reopenedticket:hover:before,
+body.bbpress dt.closedticket:hover:before,
+body.bbpress dt.changeset:hover:before,
+body.bbpress dt.editedticket:hover:before,
+body.bbpress dt.newticket:hover:before,
+body.bbpress dt.batchmodify:hover:before,
+body.bbpress dt.attachment:hover:before {
 	color: #080; /* link color */
 }
 body.bbpress #mainnav .active :link,
@@ -992,7 +1001,16 @@ body.buddypress #footer :visited,
 body.buddypress dt em,
 body.buddypress .milestone .info h2 em,
 body.buddypress #content.build h2.config :link,
-body.buddypress #content.build h2.config :visited {
+body.buddypress #content.build h2.config :visited,
+body.buddypress dt.wiki:hover:before,
+body.buddypress dt.milestone:hover:before,
+body.buddypress dt.reopenedticket:hover:before,
+body.buddypress dt.closedticket:hover:before,
+body.buddypress dt.changeset:hover:before,
+body.buddypress dt.editedticket:hover:before,
+body.buddypress dt.newticket:hover:before,
+body.buddypress dt.batchmodify:hover:before,
+body.buddypress dt.attachment:hover:before {
 	color: #d84800; /* link color */
 }
 body.buddypress #mainnav .active :link,
@@ -1112,6 +1130,8 @@ body.buddypress #main {
  * Dashicons
  */
 #altlinks li a.rss:before,
+dt.wiki:before,
+dt.milestone:before,
 dt.reopenedticket:before,
 dt.closedticket:before,
 dt.changeset:before,
@@ -1136,6 +1156,8 @@ dt.attachment:before {
 	text-align: center;
 	color: #777;
 }
+dt.wiki:hover:before,
+dt.milestone:hover:before,
 dt.reopenedticket:hover:before,
 dt.closedticket:hover:before,
 dt.changeset:hover:before,
@@ -1169,9 +1191,17 @@ dt.closedticket:before {
 dt.reopenedticket:before {
 	content: "\f119"; /* dashicons-welcome-write-blog */
 }
+dt.milestone:before {
+	content: "\f469"; /* dashicons-clock */
+}
+dt.wiki:before {
+	content: "\f330"; /* dashicons-book */
+}
 #content.timeline dt :link, #content.timeline dt :visited {
 	padding-left: 0;
 }
+dt.wiki, dt.wiki a,
+dt.milestone, dt.milestone a,
 dt.reopenedticket, dt.reopenedticket a,
 dt.closedticket, dt.closedticket a,
 dt.changeset, dt.changeset a,
@@ -1186,7 +1216,7 @@ dt.attachment, dt.attachment a {
 	padding-left: 0;
 }
 #altlinks li a.rss:before {
-	content: "\f303";
+	content: "\f303"; /* dashicons-rss */
 	color: #ff6600;
 	padding-right: 5px
 }
