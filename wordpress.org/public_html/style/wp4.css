@@ -638,7 +638,8 @@ input[type="submit"]::-moz-focus-inner {
 
 .button.button-hero,
 .button-group.button-hero .button,
-#plugin-description p.button, .col-3 p.button {
+#plugin-description p.button, .col-3 p.button,
+body.trac #plugin-description .description-right p {
 	font-size: 14px;
 	height: 46px;
 	line-height: 44px;
