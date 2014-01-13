@@ -54,3 +54,13 @@ function wporg_p2_get_cats_with_count( $post, $format = 'list', $before = '', $s
 
 	return apply_filters( 'cats_with_count', $before . join( $sep, $cat_links ) . $after, $post );
 }
+
+// Add each site's slug to the body class, so that CSS rules can target specific sites. 
+add_filter( 'body_class', 'wporg_add_site_slug_to_body_class' ); 
+function wporg_add_site_slug_to_body_class( $classes ) { 
+	global $current_blog;
+	$classes[] = 'make-' . trim( $current_blog->path, '/' ); 
+	return $classes; 
+}
+
+ 
