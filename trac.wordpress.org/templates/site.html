@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '32'
+	scripts_version = '33'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 
@@ -55,9 +55,18 @@
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice">
-		<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
-			<p><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
-			<p><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+			<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
+
+			<py:choose test="">
+				<p py:when="project_slug == 'plugins' and ticket.component and ticket.component != 'not-listed'"><strong>This is not for support.</strong> Please try this plugin's <a class="ext-link" href="${support_link}plugin/${ticket.component}"><span class="icon">&nbsp;</span>support forum</a>.</p>
+				<p py:otherwise=""><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
+			</py:choose>
+
+			<py:choose test="project_slug">
+				<p py:when="'plugins'"><strong>Do not report potential security vulnerabilities here.</strong> Please email <a class="mail-link" href="mailto:plugins@wordpress.org"><span class="icon">&nbsp;</span>plugins@wordpress.org</a>.</p>
+				<p py:otherwise=""><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+			</py:choose>
+
 			<py:if test="project_slug == 'core'">
 			<hr />
 			<p><strong>REPORTING BUGS</strong></p>
@@ -200,7 +209,7 @@
 	</py:match>
 </py:if>
 
-<body py:match="body" id="wordpress-org" class="${project_slug}" py:attrs="select('@*')">
+<body py:match="body" id="wordpress-org" class="${project_slug} trac" py:attrs="select('@*')">
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
 
