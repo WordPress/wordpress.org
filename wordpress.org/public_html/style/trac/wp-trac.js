@@ -34,7 +34,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 		init : function() {
 			wpTrac.hacks();
-			wpTrac.workflow.init();
+			if ( ! $(document.body).hasClass( 'plugins' ) ) {
+				wpTrac.workflow.init();
+			}
 			wpTrac.nonGardeners();
 		},
 
