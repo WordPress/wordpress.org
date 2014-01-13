@@ -1,16 +1,27 @@
 <?php
 /* Plugin Name: Trac Notifications
- * Description: For make.wordpress.org/core only, at the moment. Adds notifications endpoints for Trac, as well as notification management.
+ * Description: Adds notifications endpoints for Trac, as well as notification management.
  * Author: Nacin
- * Version: 1.0
+ * Version: 1.1
  */
 
 class wporg_trac_notifications {
 
 	protected $trac_subdomain;
 
+	protected $tracs_supported = array( 'core', 'meta', 'themes', 'plugins' );
+	protected $tracs_supported_extra = array( 'bbpress', 'buddypress', 'gsoc', 'glotpress' );
+
 	function __construct() {
-		$this->set_trac( 'core' );
+		$make_site = explode( '/', home_url( '' ) );
+		$trac = $make_site[3];
+		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
+			return;
+		}
+		if ( 'core' === $trac && isset( $_GET['trac'] ) && in_array( $_GET['trac'], $this->tracs_supported_extra ) ) {
+			$trac = $_GET['trac'];
+		}
+		$this->set_trac( $trac );
 		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
 		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );
 		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
@@ -78,7 +89,7 @@ class wporg_trac_notifications {
 	}
 
 	function get_trac_milestones() {
-		// Only shoe 3.8+, when this feature was launched.
+		// Only show 3.8+, when this feature was launched.
 		return $this->trac->get_results( "SELECT name, completed FROM milestone
 			WHERE name NOT IN ('WordPress.org', '3.5.3', '3.6.2', '3.7.2') AND (completed = 0 OR completed >= 1386864000000000)
 			ORDER BY (completed = 0) DESC, name DESC", OBJECT_K );
