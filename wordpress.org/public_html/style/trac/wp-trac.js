@@ -245,8 +245,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 					// Generate the workflow template.
 					wpTrac.workflow.template();
 
-					elements.add = $('#keyword-add');
-
 					// Load up the initial keywords and the dropdown.
 					wpTrac.workflow.populate();
 
@@ -338,6 +336,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 					}
 
 					// Populate the dropdown.
+					if ( elements.add ) {
+						elements.add.empty();
+					} else {
+						elements.add = $('#keyword-add');
+					}
+
 					$.each( coreKeywordList, function( k, v ) {
 						// Don't show special (permission-based) ones.
 						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) )
