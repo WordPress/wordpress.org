@@ -47,12 +47,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 			// Automatically preview images.
 			$('li.trac-field-attachment').each( function() {
-				var href, el, image, li = $(this);
-				el = $(this).find('.trac-rawlink');
+				var href, el, image, appendTo,
+					li = $(this);
+				el = li.find('.trac-rawlink');
 				href = el.attr('href');
 				if ( ! href.match(/\.(jpg|jpeg|png|gif)$/i) ) {
 					return;
 				}
+				appendTo = li.parent().parent(); // div.change
 				image = new Image;
 				image.src = href;
 				image.onload = function() {
@@ -63,7 +65,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 							height: image.height,
 							class: 'trac-image-preview'
 						})
-						.appendTo( li )
+						.appendTo( appendTo )
 						.wrap( '<a href="' + href.replace('/raw-attachment/', '/attachment/') + '" />' );
 				};
 			});
