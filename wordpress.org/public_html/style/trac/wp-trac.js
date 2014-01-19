@@ -30,9 +30,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 	wpTrac = {
 
-		gardener : typeof wpBugGardener !== 'undefined',
+		gardener: typeof wpBugGardener !== 'undefined',
 
-		init : function() {
+		init: function() {
 			wpTrac.hacks();
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -40,11 +40,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 			wpTrac.nonGardeners();
 		},
 
-		hacks: function() {
-			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
-			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
-			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
-
+		// These ticket hacks need to be re-run after ticket previews.
+		postPreviewHacks: function() {
 			// Automatically preview images.
 			$('li.trac-field-attachment').each( function() {
 				var href, el, image, appendTo,
@@ -76,6 +73,52 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 				var el = $(this);
 				el.children().appendTo( el.prev().children('.trac-ticket-buttons') ).end().end().remove();
 			});
+		},
+
+		hacks: function() {
+			var content = $( '#content' );
+
+			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
+			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
+			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
+
+			if ( content.hasClass( 'ticket' ) ) {
+				if ( $(document.body).hasClass( 'core' ) ) {
+					wpTrac.coreToMeta();
+				}
+
+				// A collection of ticket hacks that must be run again after previews.
+				wpTrac.postPreviewHacks();
+				content.on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
+
+				// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
+				// but only if it was already open.
+				(function(){
+					var action, hadClass,
+						form = $('#propertyform'),
+						modify = $('#modify').parent();
+
+					if ( ! form.length ) {
+						return;
+					}
+					action = form.attr('action');
+					$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
+						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+							return;
+						}
+						hadClass = modify.hasClass('collapsed');
+					});
+					$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
+						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+							return;
+						}
+						if ( ! hadClass ) {
+							modify.removeClass('collapsed');
+						}
+						content.triggerHandler( 'wpTracPostPreview' );
+					});
+				})();
+			}
 
 			// Add After the Deadline (only add it if it loaded)
 			if ( $.isFunction( $.fn.addProofreader ) ) {
@@ -91,31 +134,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 			// Push live comment previews above 'Modify Ticket'
 			$('#ticketchange').insertAfter('#trac-add-comment');
-
-			// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
-			// but only if it was already open.
-			(function(){
-				var action, hadClass,
-					form = $('#propertyform'),
-					modify = $('#modify').parent();
-
-				if ( ! form.length ) {
-					return;
-				}
-				action = form.attr('action');
-				$(document).ajaxSend( function( event, XMLHttpRequest, ajaxOptions ) {
-					if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
-						return;
-					}
-					hadClass = modify.hasClass('collapsed');
-				});
-				$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
-					if ( hadClass || 0 !== action.indexOf( ajaxOptions.url ) ) {
-						return;
-					}
-					modify.removeClass('collapsed');
-				});
-			})();
 
 			// Toggle the security notice on component change, if rendered
 			if ( $('#wp-security-notice').length ) {
@@ -223,6 +241,44 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 						$(this).remove();
 				});
 			}
+		},
+
+		coreToMeta: function() {
+			var component = $('#field-component');
+			if ( window.location.pathname !== '/newticket' ) {
+				if ( ! wpTrac.gardener && component.val() !== 'WordPress.org site' ) {
+					component.children('option[value="WordPress.org site"]').remove();
+				}
+				return;
+			}
+
+			component.change( function() {
+				var toggle = $('input[name="attachment"]').parent().add('.ticketdraft').add('.wp-notice').add('div.buttons');
+				if ( $(this).val() !== 'WordPress.org site' ) {
+					toggle.show();
+					$('.wp-notice.component').remove();
+					return;
+				}
+				toggle.hide();
+				$('div.buttons').after( '<div class="wp-notice component"><p><strong>The WordPress.org site now has its own Trac</strong> at ' +
+					'<a href="//meta.trac.wordpress.org/">meta.trac.wordpress.org</a>.</p><p>Would you mind opening this ticket over there instead? ' +
+					'<a href="//meta.trac.wordpress.org/newticket" id="new-meta-ticket">Click here</a> to copy your summary and description over.</p></div>' );
+			});
+	
+			$('#propertyform').on( 'click', '#new-meta-ticket', function() {
+				var url, href = $(this).attr( 'href' );
+				url = href + '?' + $.param({ summary: $('#field-summary').val(), description: $('#field-description').val() });
+				if ( url.length > 1500 ) {
+					url = href + '?' + $.param({
+						summary: $('#field-summary').val(),
+						description: "(Couldn't copy over your description as it was too long. Please paste it here. Your old window was not closed.)"
+					});
+					window.open( url );
+				} else {
+					window.location.href = url;
+				}
+				return false;
+			});
 		},
 
 		workflow: (function() {
@@ -441,24 +497,29 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 					$( '#columns' ).find( 'input[type="checkbox"][name="col"][value="cc"]' ).parent().remove();
 				}
 				if ( content.hasClass( 'ticket' ) ) {
-					$( '#changelog div.change' ).has( 'li.trac-field-cc' ).each( function() {
-						var change = $(this), changes = change.children( 'ul.changes' );
-						/* Three possibilities:
-						   The comment is just a single CC (hide the whole comment)
-						   The comment is a CC plus a comment (hide the CC line)
-						   The comment contains multiple property changes (hide only the CC line)
-						*/
-						if ( changes.children( 'li' ).length === 1 ) {
-							if ( change.children( 'div.comment' ).length === 0 ) {
-								change.hide();
-							} else {
-								changes.hide();
-							}
-						} else {
-							changes.children( 'li.trac-field-cc' ).hide();
-						}
-					});
+					hide_cc_comments();
+					content.on( 'wpTracPostPreview', hide_cc_comments );
 				}
+			}
+
+			function hide_cc_comments() {
+				$( '#changelog div.change' ).has( 'li.trac-field-cc' ).each( function() {
+					var change = $(this), changes = change.children( 'ul.changes' );
+					/* Three possibilities:
+					   The comment is just a single CC (hide the whole comment)
+					   The comment is a CC plus a comment (hide the CC line)
+					   The comment contains multiple property changes (hide only the CC line)
+					*/
+					if ( changes.children( 'li' ).length === 1 ) {
+						if ( change.children( 'div.comment' ).length === 0 ) {
+							change.hide();
+						} else {
+							changes.hide();
+						}
+					} else {
+						changes.children( 'li.trac-field-cc' ).hide();
+					}
+				});
 			}
 
 			function ticketInit( ticket ) {
