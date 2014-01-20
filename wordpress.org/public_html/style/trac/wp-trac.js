@@ -107,6 +107,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 							return;
 						}
 						hadClass = modify.hasClass('collapsed');
+						// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
+						$(document.head).append( '<style id="changelog-height"> #changelog { height: ' + $('#changelog').height() + 'px !important; } </style>' );
 					});
 					$(document).ajaxComplete( function( event, XMLHttpRequest, ajaxOptions ) {
 						if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
@@ -116,6 +118,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 							modify.removeClass('collapsed');
 						}
 						content.triggerHandler( 'wpTracPostPreview' );
+						window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
 					});
 				})();
 			}
