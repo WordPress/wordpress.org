@@ -59,6 +59,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			$('li.trac-field-attachment').each( function() {
 				var href, el, image, appendTo,
 					li = $(this);
+				if ( li.parent().parent().find( '.trac-image-preview' ).length ) {
+					return;
+				}
 				el = li.find('.trac-rawlink');
 				href = el.attr('href');
 				if ( ! href.match(/\.(jpg|jpeg|png|gif)$/i) ) {
