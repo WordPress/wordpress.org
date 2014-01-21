@@ -1,4 +1,4 @@
-var wpTrac, coreKeywordList, gardenerKeywordList;
+var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 (function($){
 
@@ -24,6 +24,19 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
 		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.'
+	};
+
+	coreFocusesList = {
+		'ui' : 'UI or design related.',
+		'javascript' : 'Heavy JavaScript focus.',
+		// 'accessibility' : 'Accessibility focus.',
+		'unit tests' : 'PHP or JS unit tests.',
+		'docs' : 'Documentation focus.',
+		'rtl' : 'Right-to-left languages.',
+		'administration' : 'Dashboard related, but assigned a more specifc component.',
+		'template' : 'Relating to theme template functions, but assigned a more specific component.',
+		'performance' : 'Performance or caching (but not the Cache API component).',
+		// 'multisite' : 'Relating to multisite, but assigned a more specific component.'
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change' ];
@@ -356,9 +369,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 					// If the owner field exists, then we're on /newticket. Remove it.
 					$('#field-owner').parents('tr').remove();
 
-					html = '<a id="edit-keywords">manual</a>';
-					html += '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
-					html += '<select id="keyword-add"><option value=""> - Add - </option></select></div>';
+					html = '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
+					html += '<select id="keyword-add"><option value=""> - Add - </option></select> <a id="edit-keywords">manual</a></div>';
 					html += '<div id="keyword-bin"></div>';
 					container.prepend( html );
 					elements.bin = $('#keyword-bin');
@@ -379,7 +391,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 						elements.bin.empty();
 
 					// Replace commas, collapse spaces, trim, then split by space.
-					keywords = $.trim( elements.hiddenEl.val().replace(',', ' ').replace(/ +/g, ' ') ).split(' ');
+					keywords = $.trim( elements.hiddenEl.val().replace(/,/g, ' ').replace(/ +/g, ' ') ).split(' ');
 
 					// Put our cleaned up version back into the hidden field.
 					elements.hiddenEl.val( keywords.join(' ') );
@@ -396,7 +408,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 
 					// Populate the dropdown.
 					if ( elements.add ) {
-						elements.add.empty();
+						elements.add.children().not('[value=""]').remove();
 					} else {
 						elements.add = $('#keyword-add');
 					}
@@ -475,6 +487,103 @@ var wpTrac, coreKeywordList, gardenerKeywordList;
 						elements.hiddenEl.val( originalKeywords.join(' ') );
 				}
 			}
+		}()),
+
+		focuses: (function() {
+			var field, container, focuses, originalFocuses;
+
+			function init() {
+				var ul, classes;
+				if ( typeof coreFocusesList === 'undefined' ) {
+					return;
+				}
+
+				field = $( '#field-focuses' );
+				if ( field.length === 0 ) {
+					return;
+				}
+				$('label[for="field-focuses"]').parent().remove();
+				field.parent().attr({ colspan: 2, id: 'focuses' });
+				field.hide();
+
+				focuses = $.trim( field.val().replace(/,/g, ' ').replace(/ +/g, ' ') );
+				if ( focuses.length === 0 ) {
+					focuses = [];
+				} else {
+					focuses = focuses.split( ' ' );
+				}
+				originalFocuses = $.merge( [], focuses );
+
+				container = $( '#focuses' );
+				container.append( '<span>Focuses:</span>' );
+				ul = $( '<ul />' );
+				$.each( coreFocusesList, function( focus, description ) {
+					classes = focus.replace( ' ', '-' );
+					if ( -1 !== $.inArray( focus, focuses ) ) {
+						classes += ' active';
+					}
+					ul.append( $( '<li />', {
+						'data-focus' : focus,
+						title: description,
+						class: classes
+					} ).html( '<a href="#">' + focus + '</a>' ) );
+				});
+				ul.appendTo( container );
+
+				container.on( 'click', 'a', addRemove );
+				container.closest( 'form' ).on( 'submit', submit );
+			}
+
+			function addRemove() {
+				var focus = $( this ).parent();
+				if ( focus.hasClass( 'active' ) ) {
+					remove( focus );
+				} else {
+					add( focus );
+				}
+				return false;
+			}
+
+			function add( focus ) {
+				focus.addClass( 'active' );
+				focuses.push( focus.data( 'focus' ) );
+				updateField();
+			}
+
+			function remove( focus ) {
+				focus.removeClass( 'active' );
+				var remove = focus.data( 'focus' );
+				focuses = $.grep( focuses, function( value ) {
+					return value != remove;
+				} );
+				updateField();
+			}
+
+			function updateField() {
+				var orderedFocuses = [];
+				$.each( coreFocusesList, function( focus ) {
+					if ( -1 !== $.inArray( focus, focuses ) ) {
+						orderedFocuses.push( focus );
+					}
+				});	
+				field.val( orderedFocuses.join( ', ' ) );
+			}
+
+			function submit() {
+				if ( focuses.length !== originalFocuses.length )
+					return;
+				var testFocuses = $.grep( focuses, function(v) {
+					return -1 === $.inArray( v, originalFocuses );
+				});
+				// If the difference has no length, then restore to the original order.
+				if ( ! testFocuses.length ) {
+					field.val( originalFocuses.join( ', ' ) );
+				}
+			}
+
+			return {
+				init: init
+			};
 		}()),
 
 		notifications: (function() {

@@ -1100,11 +1100,10 @@ body.buddypress #main {
 	border-bottom: 0;
 }
 #edit-keywords {
-	float: right;
 	cursor: pointer;
 	font-size: 8px;
 	color: #999;
-	margin: 6px 6px 0 0;
+	margin: 6px 6px 0 6px;
 }
 #keyword-bin span a:hover {
 	background-position: -10px 0;
@@ -1119,6 +1118,50 @@ body.buddypress #main {
 	float: left;
 	padding: 5px 6px 5px 0;
 	text-align: right;
+}
+
+/* =Focuses */
+#properties table td#focuses {
+	padding: .6em 0 .3em;
+	height: 66px;
+}
+#focuses span {
+	float: left;
+}
+#focuses ul {
+	float: left;
+	width: 356px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#focuses li {
+	font-size: 12px;
+	display: inline-block;
+	float: left;
+	margin: 0 0 6px 6px;
+	border-radius: 3px;
+	background: #eee;
+	color: #aaa;
+}
+#focuses a {
+	display: inline-block;
+	padding: 4px 7px;
+	color: inherit;
+	border-radius: 3px;
+	background: inherit;
+	text-decoration: none;
+	border-bottom: none;
+}
+#focuses li:hover,
+#focuses a:focus {
+	color: #000;
+	cursor: pointer;
+}
+#focuses li.active,
+#focuses li.active a:focus {
+	background: #666;
+	color: #fff;
 }
 
 /*
