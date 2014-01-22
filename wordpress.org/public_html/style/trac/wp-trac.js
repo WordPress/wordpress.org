@@ -154,6 +154,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					}
 					return 'The changes you made will be lost if you navigate away from this page.';
 				};
+				$( '.buttons' ).on( 'click', 'input', function() {
+					window.onbeforeunload = null;
+				});
 			}
 
 			// Add After the Deadline (only add it if it loaded)
