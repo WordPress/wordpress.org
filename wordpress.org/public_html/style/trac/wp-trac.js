@@ -28,15 +28,15 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 	coreFocusesList = {
 		'ui' : 'UI or design related.',
+		'accessibility' : 'Accessibility focus.',
 		'javascript' : 'Heavy JavaScript focus.',
-		// 'accessibility' : 'Accessibility focus.',
-		'unit tests' : 'PHP or JS unit tests.',
-		'docs' : 'Documentation focus.',
-		'rtl' : 'Right-to-left languages.',
-		'administration' : 'Dashboard related, but assigned a more specifc component.',
-		'template' : 'Relating to theme template functions, but assigned a more specific component.',
+		// 'unit tests' : 'PHP or JS unit tests.',
+		// 'administration' : 'Dashboard related, but assigned a more specifc component.',
+		// 'template' : 'Relating to theme template functions, but assigned a more specific component.',
+		'docs' : 'Inline documentation focus.',
+		'multisite' : 'Relating to multisite, but assigned a more specific component.',
 		'performance' : 'Performance or caching (but not the Cache API component).',
-		// 'multisite' : 'Relating to multisite, but assigned a more specific component.'
+		'rtl' : 'Right-to-left languages.'
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change' ];
@@ -47,10 +47,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		init: function() {
 			wpTrac.hacks();
+			wpTrac.nonGardeners();
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
+				if ( $(document.body).hasClass( 'core' ) ) {
+					// wpTrac.focuses.init();
+				}
 			}
-			wpTrac.nonGardeners();
 		},
 
 		// These ticket hacks need to be re-run after ticket previews.
@@ -146,11 +149,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
 				window.onbeforeunload = function() {
 					if ( window.location.pathname === '/newticket' ) {
-						if ( 0 === $( '#field-description' ).val().length && 0 === $( '#field-summary' ).val().length ) {
+						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
 							return;
 						}
-					} else if ( 0 === $( '#comment' ).val().length ) {
+					} else if ( ! $( '#comment' ).val() ) {
 						return;
+					
 					}
 					return 'The changes you made will be lost if you navigate away from this page.';
 				};
@@ -255,6 +259,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			// If we're on /newticket (based on the field-owner check), declutter.
 			if ( $('#field-owner').length ) {
 				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
+				if ( $('#field-focuses').length ) {
+					$('#field-focuses').closest('td').attr( 'colspan', 3 );
+					$('#field-component').parent().add( $('#field-component').parent().prev() ).wrapAll( '<tr />' ).insertBefore( $( '#field-focuses' ).parents( 'tr' ) );
+				}
 			}
 
 			elements.type = $('#field-type');
@@ -526,7 +534,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					return;
 				}
 				$('label[for="field-focuses"]').parent().remove();
-				field.parent().attr({ colspan: 2, id: 'focuses' });
+				if ( field.parent().attr( 'colspan' ) == 3 ) {
+					field.parent().attr( 'id', 'focuses' );
+				} else {
+					field.parent().attr({ colspan: 2, id: 'focuses' });
+				}
 				field.hide();
 
 				focuses = $.trim( field.val().replace(/,/g, ' ').replace(/ +/g, ' ') );
@@ -555,6 +567,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 				container.on( 'click', 'a', addRemove );
 				container.closest( 'form' ).on( 'submit', submit );
+				$( '#field-component' ).on( 'change', componentSync );
 			}
 
 			function addRemove() {
@@ -568,12 +581,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 
 			function add( focus ) {
+				if ( typeof focus === 'string' ) {
+					focus = container.find( 'li.' + focus );
+				}
 				focus.addClass( 'active' );
 				focuses.push( focus.data( 'focus' ) );
 				updateField();
 			}
 
 			function remove( focus ) {
+				if ( typeof focus === 'string' ) {
+					focus = container.find( 'li.' + focus );
+				}
 				focus.removeClass( 'active' );
 				var remove = focus.data( 'focus' );
 				focuses = $.grep( focuses, function( value ) {
@@ -590,6 +609,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					}
 				});	
 				field.val( orderedFocuses.join( ', ' ) );
+			}
+
+			function componentSync() {
+				var component = $(this).val();
+				if ( component === 'Network Admin' || component === 'Networks/Sites' ) {
+					add( 'multisite' );
+				}
 			}
 
 			function submit() {
