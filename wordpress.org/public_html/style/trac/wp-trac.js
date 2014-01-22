@@ -142,6 +142,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function() {
 					window.open( $( this ).attr( 'href' ) );
 				});
+
+				// Rudimentary save alerts for new tickets (summary/description) and comments.
+				window.onbeforeunload = function() {
+					if ( window.location.pathname === '/newticket' ) {
+						if ( 0 === $( '#field-description' ).val().length && 0 === $( '#field-summary' ).val().length ) {
+							return;
+						}
+					} else if ( 0 === $( '#comment' ).val().length ) {
+						return;
+					}
+					return 'The changes you made will be lost if you navigate away from this page.';
+				};
 			}
 
 			// Add After the Deadline (only add it if it loaded)
