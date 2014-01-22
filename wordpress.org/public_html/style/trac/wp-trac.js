@@ -137,6 +137,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						window.setTimeout( function() { $('#changelog-height').remove(); }, 200 );
 					});
 				})();
+
+				// Open WikiFormatting links in a new window.
+				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function() {
+					window.open( $( this ).attr( 'href' ) );
+				});
 			}
 
 			// Add After the Deadline (only add it if it loaded)
