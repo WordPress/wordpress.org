@@ -88,6 +88,7 @@ class WP_38_Credits extends WP_Credits {
 			'aralbald',
 			'atimmer',
 			'aubreypwd',
+			'avryl', // 3.8.1
 			'azaozz',
 			'bamadesigner',
 			'bananastalktome',
@@ -106,6 +107,8 @@ class WP_38_Credits extends WP_Credits {
 			'chrisbliss18',
 			'codebykat',
 			'coffee2code',
+			'cojennin', // 3.8.1
+			'collinsinternet', // 3.8.1
 			'corphi',
 			'danieldudzic',
 			'datafeedrcom',
@@ -128,6 +131,7 @@ class WP_38_Credits extends WP_Credits {
 			'ethitter',
 			'evansolomon',
 			'faison',
+			'fboender', // 3.8.1
 			'fliespl',
 			'frank-klein',
 			'garyj',
@@ -145,6 +149,7 @@ class WP_38_Credits extends WP_Credits {
 			'isaackeyet',
 			'jacklenox',
 			'janhenckens',
+			'janrenn', // 3.8.1
 			'jartes',
 			'jayjdk',
 			'jblz',
@@ -208,6 +213,7 @@ class WP_38_Credits extends WP_Credits {
 			'nickdaugherty',
 			'ninio',
 			'ninnypants',
+			'nivijah', // 3.8.1
 			'nofearinc',
 			'nukaga',
 			'nvwd',
@@ -262,12 +268,14 @@ class WP_38_Credits extends WP_Credits {
 			'tommcfarlin',
 			'trepmal',
 			'trishasalas', // 2014 pre-3.8
+			'undergroundnetwork', // 3.8.1
 			'westi',
 			'westonruter',
 			'wet',
 			'wonderboymusic',
 			'yoavf',
 			'yonasy',
+			'yurivictor', // 3.8.1
 			'zodiac1978',
 		);
 	}
