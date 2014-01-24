@@ -11,7 +11,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'2nd-opinion' : 'A second opinion is desired for the problem or solution.',
 		'close' : 'The ticket is a candidate for closure.',
 		'needs-testing' : 'Patch has a particular need for testing.',
-		'ui-focus' : 'Ticket is focused on user interface changes.',
 		'ui-feedback' : 'Feedback is needed from the user interface perspective, generally from the UI team.',
 		'ux-feedback' : 'Feedback is needed from the user experience perspective, generally from a UX lead.',
 		'needs-ui' : 'Needs user interface work, generally from the UI team.',
@@ -27,7 +26,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 	};
 
 	coreFocusesList = {
-		'ui' : 'UI or design related.',
+		'ui' : 'Ticket is focused on user interface changes.',
 		'accessibility' : 'Accessibility focus.',
 		'javascript' : 'Heavy JavaScript focus.',
 		// 'unit tests' : 'PHP or JS unit tests.',
