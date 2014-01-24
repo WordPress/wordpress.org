@@ -1121,6 +1121,9 @@ body.buddypress #main {
 }
 
 /* =Focuses */
+#ticket table.properties th#h_focuses.missing {
+	display: none;
+}
 #properties table td#focuses {
 	padding: .6em 0 .3em 100px;
 	height: 66px;
