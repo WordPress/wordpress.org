@@ -1121,6 +1121,9 @@ body.buddypress #main {
 }
 
 /* =Focuses */
+body.core #reportfilters {
+	display: none;
+}
 #ticket table.properties th#h_focuses.missing {
 	display: none;
 }
