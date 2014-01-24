@@ -32,6 +32,31 @@
 				link['href'] = urllib.unquote(new_link[1])
 	except (IndexError, KeyError):
 		pass
+
+ 	field_types = [ 'milestone', 'priority', 'type', 'severity', 'version', 'component', 'keywords', 'focuses', ]
+
+ 	# Sorting function
+ 	def sort_nicely(field1, field2):
+		try:
+			idx1 = field_types.index(field1['name'])
+		except ValueError:
+			idx1 = 1000 # no match, push to the end
+
+		try:
+			idx2 = field_types.index(field2['name'])
+		except ValueError:
+			idx2 = 1000 # no match, push to the end
+
+		return cmp(idx1, idx2)
+
+	if ticket and 'fields' in locals():
+ 		# Sort the fields
+ 		fields.sort(cmp=sort_nicely)
+
+ 		# Re-generate fields_map for use within the ticket template
+ 		fields_map = {}
+ 		for i in xrange(0, len(fields)):
+			fields_map[ fields[i]['name'] ] = i
 ?>
 
 <!--! styles and such -->
