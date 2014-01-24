@@ -51,7 +51,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
 				if ( $(document.body).hasClass( 'core' ) ) {
-					// wpTrac.focuses.init();
+					wpTrac.focuses.init();
 				}
 			}
 		},
