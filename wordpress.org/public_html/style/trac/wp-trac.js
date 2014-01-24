@@ -612,7 +612,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 			function componentSync() {
 				var component = $(this).val();
-				if ( component === 'Network Admin' || component === 'Networks/Sites' ) {
+				if ( component === 'Network Admin' || component === 'Networks and Sites' ) {
 					add( 'multisite' );
 				}
 			}
