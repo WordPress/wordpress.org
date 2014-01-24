@@ -657,6 +657,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					$( '#columns' ).find( 'input[type="checkbox"][name="col"][value="cc"]' ).parent().remove();
 				}
 				if ( content.hasClass( 'ticket' ) ) {
+					// Remove the CC field in case the BlackMagic plugin didn't.
+					$('#field-cc').parent().parent().prev().remove().end().remove();
 					hide_cc_comments();
 					content.on( 'wpTracPostPreview', hide_cc_comments );
 				}
