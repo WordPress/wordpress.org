@@ -287,40 +287,45 @@ class wporg_trac_notifications {
 	}
 
 	function ticket_notes( $ticket, $username ) {
-		if ( $username != $ticket->reporter ) {
-			$previous_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, type, status, resolution
-				FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $ticket->reporter, $ticket->id ) );
+		if ( $username == $ticket->reporter ) {
+			return;
+		}
 
-			if ( count( $previous_tickets ) < 5 ) {
-				$dashicon = '<span class="dashicons dashicons-welcome-learn-more"></span> ';
-				$dashicon .= '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter ) . '&amp;s=36" /> ';
+		$previous_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, type, status, resolution
+			FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $ticket->reporter, $ticket->id ) );
+
+		if ( count( $previous_tickets ) >= 5 ) {
+			return;
+		}	
+
+		if ( 1 == count( $previous_tickets ) ) {
+			$previous_comments = $this->trac->get_var( $this->trac->prepare( "SELECT ticket FROM ticket_change
+				WHERE field = 'comment' AND author = %s AND ticket <> %d LIMIT 1", $ticket->reporter, $ticket->id ) );
+
+			$output = '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome.</strong><br/>';
+
+			if ( $previous_comments ) {
+				$output .= 'They&#8217;ve commented before, but it&#8127;s their first bug report!';
+			} else {
+				$output .= 'It&#8127;s their first bug report!';
 			}
+		} else {
+			$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
 
-			if ( 1 == count( $previous_tickets ) ) {
-				$previous_comments = $this->trac->get_var( $this->trac->prepare( "SELECT ticket FROM ticket_change
-					WHERE field = 'comment' AND author = %s AND ticket <> %d LIMIT 1", $ticket->reporter, $ticket->id ) );
-
-				echo '<p class="ticket-note note-new-reporter">' . $dashicon . '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome</strong> &mdash; ';
-
-				if ( $previous_comments ) {
-					echo 'they&#8217;ve commented before, but it&#8127;s their first bug report!</p>';
-				} else {
-					echo 'it&#8127;s their first bug report!</p>';
-				}
-
-			} elseif ( count( $previous_tickets ) < 5 ) {
-				$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
-
-				echo '<p class="ticket-note note-new-reporter">' . $dashicon .  '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong> Previously:';
+			$output = '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong><br/>Previously:';
 
 				foreach ( $previous_tickets as $t ) {
 					if ( $t->id != $ticket->id ) {
-						echo ' ' . $this->ticket_link( $t );
+						$output .= ' ' . $this->ticket_link( $t );
 					}
 				}
-				echo '.';
-			}
+				$output .= '.';
 		}
+
+		echo '<p class="ticket-note note-new-reporter">';
+		echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter ) . '&amp;s=36" /> ';
+		echo '<span class="note">' . $output . '</span>';
+		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
 
 	function notification_settings_page() {
