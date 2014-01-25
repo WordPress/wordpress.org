@@ -934,21 +934,23 @@ td.Stars .trac-report-star:hover {
 	cursor: pointer;
 }
 #main p.note-new-reporter {
-	line-height: 36px;
 	margin: 2em 0;
 	padding: 1em;
 	border: 1px solid #ccc;
 	text-align: center;
 }
+p.note-new-reporter span,
 p.note-new-reporter img {
-	vertical-align: middle;
-	margin-right: 10px;
+	display: inline-block;
+}
+p.note-new-reporter img {
+	margin-right: 25px;
 }
 p.note-new-reporter .dashicons {
 	font-size: 36px;
 	width: 36px;
 	height: 36px;
-	margin-right: 10px;
+	margin-left: 25px;
 }
 
 /* =Link Colors */
