@@ -952,6 +952,13 @@ p.note-new-reporter .dashicons {
 	height: 36px;
 	margin-left: 25px;
 }
+#main p.ticket-reopen-notice {
+	margin: 1em 0 2em;
+}
+p.ticket-reopen-notice .dashicons {
+	float: left;
+	padding-right: 8px;
+}
 
 /* =Link Colors */
 a:link,

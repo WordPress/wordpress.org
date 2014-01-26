@@ -145,6 +145,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					window.open( $( this ).attr( 'href' ) );
 				});
 
+				// Point users to open new tickets when they comment on old tickets.
+				if ( $('#ticket').find('.milestone').hasClass('closed') ) {
+					var component = $('#field-component').val(), ticket_id = $('.trac-id').text(),
+						newticket = '/newticket?component=' + encodeURIComponent( component ) + '&description=' + encodeURIComponent( 'This is a follow-up to ' + ticket_id + '.' );
+					$('#trac-add-comment fieldset').prepend('<p class="ticket-reopen-notice"><span class="dashicons dashicons-info"></span> <strong>This ticket was closed on a completed milestone.</strong><br /> If you have a bug or enhancement to report, please <a href="' + newticket + '">open a new ticket</a>. Be sure to mention this ticket, ' + ticket_id + '.</p>');
+					if ( ! wpTrac.gardener ) {
+						$('#action_reopen').parent().remove();
+					}
+				}
+
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
 				window.onbeforeunload = function() {
 					if ( window.location.pathname === '/newticket' ) {
