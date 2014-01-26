@@ -13,11 +13,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'needs-testing' : 'Patch has a particular need for testing.',
 		'ui-feedback' : 'Feedback is needed from the user interface perspective, generally from the UI team.',
 		'ux-feedback' : 'Feedback is needed from the user experience perspective, generally from a UX lead.',
-		'needs-ui' : 'Needs user interface work, generally from the UI team.',
 		'needs-unit-tests' : 'Ticket has a particular need for unit tests.',
 		'needs-docs' : 'Inline documentation is needed.',
-		'docs-feedback' : 'Feedback is needed from the docs team.',
-		'rtl-feedback' : 'Feedback or work is needed from the RTL perspective.',
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
 		'commit' : 'Patch is a suggested commit candidate.',
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
@@ -38,7 +35,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'rtl' : 'Right-to-left languages.'
 	};
 
-	gardenerKeywordList = [ 'commit', 'early', 'i18n-change' ];
+	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug' ];
 
 	wpTrac = {
 
