@@ -167,12 +167,11 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 		) );
 
 		if ( $subcomponents_query->have_posts() ) {
-			echo '<h4>Subcomponents: ';
 			$subcomponents = array();
 			foreach ( $subcomponents_query->posts as $subcomponent ) {
 				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
 			}
-			echo implode( ', ', $subcomponents ) . '</h4>';
+			echo wp_sprintf( "<h4>Subcomponents: %l.</h4>", $subcomponents );
 		}
 
 
@@ -278,7 +277,7 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			echo '</tr>';
 		}
 		echo '</table>';
-		echo "\n\nLast 30 days: <span title='" . implode( ', ', $history_line ) . "'>";
+		echo "\n\nLast 30 days: <span title='" . wp_sprintf( '%l', $history_line ) . "'>";
 		echo sprintf( "%+d", $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) );
 		echo '<span class="history ' . $direction . '"></span></span>' . "\n\n";
 	}
