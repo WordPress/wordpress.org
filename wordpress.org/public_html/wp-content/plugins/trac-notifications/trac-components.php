@@ -1,0 +1,327 @@
+<?php
+
+class Make_Core_Trac_Components {
+	function __construct() {
+		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'the_content', array( $this, 'the_content' ), 5 );
+		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+		$this->trac = $GLOBALS['wpdb'];
+	}
+
+	function init() {
+		$labels = array(
+			'name' => 'Component Pages',
+			'menu_name' => 'Components',
+			'singular_name' => 'Component Page',
+			'add_new' => 'Add New Page',
+			'add_new_item' => 'Add New Page',
+			'edit_item' => 'Edit Component',
+			'new_item' => 'New Page',
+			'view_item' => 'View Component Page',
+			'search_items' => 'Search Components',
+			'not_found' => 'No components found.',
+			'not_found_in_trash' => 'No components found in trash.',
+			'parent_item_colon' => 'Parent Component:',
+			'all_items' => 'All Components',
+		);
+
+		register_post_type( 'component', array(
+			'public' => true,
+			'show_ui' => true,
+			'labels' => $labels,
+			'capabilities' => array(
+				'delete_published_posts' => 'manage_options',
+			),
+			'menu_icon' => 'dashicons-admin-generic',
+			'menu_position' => 19,
+			'capability_type' => 'post',
+			'map_meta_cap' => true,
+			'hierarchical' => true,
+			'supports' => array( 'title', 'editor', 'page-attributes', 'revisions', 'author' ),
+			'register_meta_box_cb' => array( $this, 'register_meta_box_cb' ),
+			'has_archive' => true,
+			'rewrite' => array(
+				'slug' => 'components',
+				'with_front' => false,
+				'feeds' => true,
+				'pages' => true,
+			),
+			'delete_with_user' => false,
+		) );
+	}
+
+	function register_meta_box_cb( $post ) {
+		if ( $post->post_parent == 0 && $post->post_status !== 'auto-draft' ) {
+			add_meta_box( 'component-settings', 'Settings', array( $this, 'meta_box_cb' ) );
+		}
+	}
+
+	function meta_box_cb( $post ) {
+		$value = get_post_meta( $post->ID, '_active_maintainers', true );
+		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $value ) . '" />';
+	}
+
+	function save_post( $post_id, $post ) {
+		if ( $post->post_type !== 'component' || $post->post_parent != 0 ) {
+			return;
+		}
+		if ( ! isset( $_POST['active-maintainers'] ) ) {
+			return;
+		}
+		update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
+	}
+
+	function admin_menu() {
+		remove_submenu_page( 'edit.php?post_type=component', 'post-new.php?post_type=component' );
+	}
+
+	function the_content( $content ) {
+		$post = get_post();
+		if ( $post->post_type !== 'component' || $post->post_parent != 0 ) {
+			return $content;
+		}
+
+		ob_start();
+?>
+<style>
+.postcontent { padding-left: 0; }
+.component .meta .actions { display: none }
+.component h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
+.trac-summary th, .trac-summary td { padding: 4px 8px; }
+.trac-summary th { font-weight: bold; text-align: right }
+.trac-summary th a { font-weight: bold }
+.trac-summary .count { text-align: right; min-width: 3em }
+.trac-summary .zero { color: #ddd }
+#main ul.maintainers { list-style: none; padding: 0; margin: 0 }
+ul.maintainers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
+ul.maintainers img { float: left; margin-right: 10px; }
+#main ul.ticket-list { list-style: none; margin: 0; padding: 0 }
+ul.ticket-list li { margin-bottom: 4px }
+ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #eee; padding: 2px 6px; margin-right: 4px }
+.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: top }
+.history.growing:before { content: "\f142"; color: red }
+.history.shrinking:before { content: "\f140"; color: green }
+</style>
+<?php
+
+		$recent_posts = new WP_Query( array(
+			'post_type' => 'post',
+			'post_status' => 'publish',
+			'posts_per_page' => 5,
+			'tag_slug__in' => $post->post_name
+		) );
+		if ( $recent_posts->have_posts() ) {
+			echo "<h3>Recent posts on the blog</h3>\n<ul>";
+			while ( $recent_posts->have_posts() ) {
+				$recent_posts->the_post();
+				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+			}
+			echo '</ul>';
+			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			wp_reset_postdata();
+		}
+
+		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false ) );
+		if ( $sub_pages ) {
+			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
+			echo "<ul>$sub_pages</ul>";
+			echo "\n\n";
+		}
+
+		$this->ticket_table( $post->post_title );
+
+		$this->trac_content( $post->post_title );
+
+		echo '<h3>Help maintain this component</h3>';
+
+		if ( $maintainers = get_post_meta( $post->ID, '_active_maintainers', true ) ) {
+			echo 'Component maintainers: ';
+			echo '<ul class="maintainers">';
+			foreach ( array_map( 'trim', explode( ',', $maintainers ) ) as $maintainer ) {
+				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '"><img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $maintainer ) . '&amp;s=36" /></a> ' . $maintainer . '</li>';
+			}
+			echo "</ul>\n\n";
+		}
+
+		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
+		// echo "<strong>Want to help? Start following this component!</strong> <a href='/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo "Want to help? Feel free to dig into any ticket.\n\n";
+
+		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
+		if ( $followers ) {
+			echo "Contributors following this component:\n";
+			foreach ( $followers as $follower ) {
+				$follower = esc_attr( $follower );
+				echo '<a title="' . $follower . '" href="//profiles.wordpress.org/' . $follower . '">';
+				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . $follower . '&amp;s=36" /></a>';
+			}
+		}
+
+		$content .= "\n\n" . ob_get_clean();
+		return $content;
+	}
+
+	function ticket_table( $component ) {
+		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
+
+		// This query is designed to be persistently cached for a few minutes for *all* components. For now, just query directly with a WHERE.
+		$rows = $this->trac->get_results( $this->trac->prepare( "SELECT component, type, milestone, count(*) as count FROM ticket
+			WHERE status <> 'closed' AND component = %s GROUP BY component, type, milestone ORDER BY component, type, milestone", $component ) );
+
+		$component_type_milestone = array();
+		foreach ( $rows as $row ) {
+			if ( empty( $component_type[ $row->component ] ) ) {
+				$component_type[ $row->component ] = $type_filled;
+			}
+			$component_type[ $row->component ][ $row->type ] += $row->count;
+
+			if ( empty( $component_milestone_type[ $row->component ][ $row->milestone ] ) ) {
+				$component_milestone_type[ $row->component ][ $row->milestone ] = $type_filled;
+			}
+			$component_milestone_type[ $row->component ][ $row->milestone ][ $row->type ] += $row->count;
+		}
+
+		if ( ! $count = array_sum( $component_type[ $component ] ) ) {
+			echo '<h3>No open tickets!</h3>';
+			return;
+		}
+		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . ' in the ' . $component . ' component</h3>';
+		$history = $this->get_component_history( $component );
+		$direction = '';
+		if ( $history['change'] > 0 ) {
+			$direction = ' growing';
+		} elseif ( $history['change'] < 0 ) {
+			$direction = ' shrinking';
+		}
+		$history_line = array();
+		foreach ( $history as $action => $count ) {
+			if ( ! $count || 'change' == $action ) {
+				continue;
+			}
+			$history_line[] = $count . ' ' . $action;
+		}
+
+		echo '<table class="trac-summary">';
+		echo '<tr><th></th>';
+		foreach ( $component_type[ $component ] as $type => $count ) {
+			if ( $count ) {
+				echo '<th>' . $this->trac_query_link( $type, array( 'component' => $component, 'type' => $type, 'group' => 'milestone' ) ) . '</th>';
+			}
+		}
+		echo '</tr>';
+		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
+			echo '<tr><th>' . $this->trac_query_link( $milestone, array( 'component' => $component, 'milestone' => $milestone, 'group' => $type ) ) . '</th>';
+			foreach ( $type_count as $type => $count ) {
+				if ( $component_type[ $component ][ $type ] ) {
+					if ( $count ) {
+						echo '<td class="count">' . $this->trac_query_link( $count, compact( 'component', 'milestone', 'type' ) ) . '</td>';
+					} else {
+						echo '<td class="count zero">0</td>';
+					}
+				}
+			}
+			echo '</tr>';
+		}
+		echo '</table>';
+		echo "\n\nLast 30 days: <span title='" . implode( ', ', $history_line ) . "'>";
+		echo sprintf( "%+d", $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) );
+		echo '<span class="history ' . $direction . '"></span></span>' . "\n\n";
+	}
+
+	function trac_content( $component ) {
+		if ( $unreplied_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket t WHERE id NOT IN (SELECT ticket FROM ticket_change WHERE ticket = t.id AND t.reporter <> author AND field = 'comment' AND newvalue <> '') AND status <> 'closed' AND component = %s", $component ) ) ) {
+			$count = count( $unreplied_tickets );
+			echo '<h3>' . sprintf( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ), $count ) . '</h3>';
+			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
+			$this->render_tickets( $unreplied_tickets );
+		}
+
+		$next_milestone = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone, value as focuses FROM ticket t
+			LEFT JOIN ticket_custom c ON c.ticket = t.id AND c.name = 'focuses' WHERE component = %s AND status <> 'closed' AND milestone LIKE '_._'", $component ) );
+		if ( $next_milestone ) {
+			$count = count( $next_milestone );
+			echo '<h3>' . sprintf( _n( '%s ticket slated for ' . $next_milestone[0]->milestone, '%s tickets slated for ' . $next_milestone[0]->milestone, $count ), $count ) . '</h3>';
+			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone[0]->milestone ) );
+			$this->render_tickets( $next_milestone );
+		}
+
+		return; // Ditch the rest for now.
+
+		$tickets_by_type = $this->trac->get_results( $this->trac->prepare( "SELECT type, COUNT(*) as count FROM ticket WHERE component = %s AND status <> 'closed' GROUP BY type", $component ), OBJECT_K );
+		foreach ( $tickets_by_type as &$object ) {
+			$object = $object->count;
+		}
+		unset( $object );
+
+		$count = array_sum( $tickets_by_type );
+		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . '</h3>';
+		echo "\n" . '<strong>Open bugs: ' . $tickets_by_type['defect (bug)'] . '</strong>. ';
+		echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'defect (bug)' ) );
+		echo "\n\n";
+
+		if ( $enhancements = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'enhancement' ) ) ) {
+			printf( '<h3>Open enhancements (%d)</h3>', count( $enhancements ) );
+			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'enhancement' ) );
+			$this->render_tickets( $enhancements );
+		}
+
+		if ( $tasks = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'task (blessed)' ) ) ) {
+			printf( '<h3>Open tasks (%d)</h3>', count( $tasks ) );
+			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'task (blessed)' ) );
+			$this->render_tickets( $tasks );
+		}
+
+		if ( $feature_requests = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'feature request' ) ) ) {
+			printf( '<h3>Open feature requests (%d)</h3>', count( $feature_requests ) );
+			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'feature request' ) );
+			$this->render_tickets( $feature_requests );
+		}
+	}
+
+	function trac_query_link( $text, $args ) {
+		return '<a href="' . $this->trac_query( $args ) . '">' . $text . '</a>';
+	}
+
+	function trac_query( $args ) {
+		$args = array_map( 'urlencode', $args );
+		if ( ! isset( $args['status'] ) ) {
+			$args['status'] = '!closed';
+		}
+		return add_query_arg( $args, 'https://core.trac.wordpress.org/query' );
+	}
+
+	function render_tickets( $tickets ) {
+		echo '<ul class="ticket-list">';
+		foreach ( $tickets as $ticket ) {
+			echo '<li><a href="https://core.trac.wordpress.org/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
+			if ( ! empty( $ticket->focuses ) ) {
+				echo ' <span class="focus">' . esc_html( implode( '</span> <span class="focus">', explode( ', ', $ticket->focuses ) ) ) . '</span>';
+			}
+			echo "</li>\n";
+		}
+		echo '</ul>';
+	}
+
+	function get_component_history( $component, $days = 30 ) {
+		$days_ago = ( time() - ( DAY_IN_SECONDS * $days ) ) * 1000000;
+		$closed_reopened = $this->trac->get_results( $this->trac->prepare( "SELECT newvalue, COUNT(DISTINCT ticket) as count
+			FROM ticket_change tc INNER JOIN ticket t ON tc.ticket = t.id
+			WHERE field = 'status' AND (newvalue = 'closed' OR newvalue = 'reopened')
+			AND tc.time >= %s AND t.component = %s GROUP BY newvalue", $days_ago, $component ), OBJECT_K );
+		$reopened = isset( $closed_reopened['reopened'] ) ? $closed_reopened['reopened']->count : 0;
+		$closed = isset( $closed_reopened['closed'] ) ? $closed_reopened['closed']->count : 0;
+		$opened = $this->trac->get_var( $this->trac->prepare( "SELECT COUNT(DISTINCT id) FROM ticket WHERE time >= %s AND component = %s", $days_ago, $component ) );
+		$assigned_unassigned = $this->trac->get_results( $this->trac->prepare( "SELECT IF(newvalue = %s, 'assigned', 'unassigned') as direction,
+			COUNT(*) as count FROM ticket_change WHERE field = 'component' AND ( oldvalue = %s OR newvalue = %s ) AND time >= %s GROUP BY direction",
+			$component, $component, $component, $days_ago ), OBJECT_K );
+		$assigned = isset( $assigned_unassigned['assigned'] ) ? $assigned_unassigned['assigned']->count : 0;
+		$unassigned = isset( $assigned_unassigned['unassigned'] ) ? $assigned_unassigned['unassigned']->count : 0;
+
+		$change = $opened + $reopened + $assigned - $closed - $unassigned;
+		return compact( 'change', 'opened', 'reopened', 'closed', 'assigned', 'unassigned' );
+	}
+
+}
+new Make_Core_Trac_Components;
+

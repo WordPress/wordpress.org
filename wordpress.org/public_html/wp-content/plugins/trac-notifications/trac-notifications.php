@@ -1,6 +1,6 @@
 <?php
 /* Plugin Name: Trac Notifications
- * Description: Adds notifications endpoints for Trac, as well as notification management.
+ * Description: Adds notifications endpoints for Trac, as well as notification and component management.
  * Author: Nacin
  * Version: 1.1
  */
@@ -25,6 +25,9 @@ class wporg_trac_notifications {
 		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
 		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );
 		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
+		if ( 'core' === $trac ) {
+			require __DIR__ . '/trac-components.php';
+		}
 	}
 
 	function set_trac( $trac ) {
