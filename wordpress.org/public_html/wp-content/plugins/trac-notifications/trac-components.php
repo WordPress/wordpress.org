@@ -5,7 +5,7 @@ class Make_Core_Trac_Components {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'the_content', array( $this, 'the_content' ), 5 );
-		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
 		$this->trac = $GLOBALS['wpdb'];
 	}
 
@@ -51,25 +51,55 @@ class Make_Core_Trac_Components {
 		) );
 	}
 
+	function page_is_component( $post ) {
+		$post = get_post( $post );
+		if ( $post->post_type != 'component' ) {
+			return false;
+		}
+		if ( $post->post_parent == 0 ) {
+			return true;
+		}
+		if ( get_post_meta( $post->ID, '_page_is_subcomponent', true ) ) {
+			return true;
+		}
+		return false;
+	}
+
 	function register_meta_box_cb( $post ) {
-		if ( $post->post_parent == 0 && $post->post_status !== 'auto-draft' ) {
+		if ( $post->post_status !== 'auto-draft' ) {
 			add_meta_box( 'component-settings', 'Settings', array( $this, 'meta_box_cb' ) );
 		}
 	}
 
 	function meta_box_cb( $post ) {
+		wp_nonce_field( 'component-settings_' . $post->ID, 'component-settings-nonce', false );
+		if ( $post->post_parent != 0 ) {
+			$checked = checked( (bool) get_post_meta( $post->ID, '_page_is_subcomponent', true ), true, false );
+			echo '<p><label for="page-is-subcomponent"><input type="checkbox"' . $checked . ' name="page-is-subcomponent" id="page-is-subcomponent" /> This page is a subcomponent</label></p>';
+		}
+		if ( ! $this->page_is_component( $post ) ) {
+			return;
+		}
 		$value = get_post_meta( $post->ID, '_active_maintainers', true );
 		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $value ) . '" />';
 	}
 
 	function save_post( $post_id, $post ) {
-		if ( $post->post_type !== 'component' || $post->post_parent != 0 ) {
+		if ( ! isset( $_POST['component-settings-nonce'] ) ) {
 			return;
 		}
-		if ( ! isset( $_POST['active-maintainers'] ) ) {
+
+		if ( ! wp_verify_nonce( $_POST['component-settings-nonce'], 'component-settings_' . $post->ID ) ) {
 			return;
 		}
-		update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
+
+		if ( $post->post_parent != 0 ) {
+			update_post_meta( $post->ID, '_page_is_subcomponent', isset( $_POST['page-is-subcomponent'] ) );
+		}
+
+		if ( isset( $_POST['active-maintainers'] ) ) {
+			update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
+		}
 	}
 
 	function admin_menu() {
@@ -78,10 +108,14 @@ class Make_Core_Trac_Components {
 
 	function the_content( $content ) {
 		$post = get_post();
-		if ( $post->post_type !== 'component' || $post->post_parent != 0 ) {
+		if ( ! $this->page_is_component( $post ) ) {
 			return $content;
-		}
+		}	
 
+		if ( $post->post_parent ) {
+			$top_level = '<h4>This is a subcomponent of the <a href="' . get_permalink( $post->post_parent ) . '">' . get_post( $post->post_parent )->post_title . '</a> component.</h4>';
+			$content = $top_level . "\n\n" . $content;
+		}
 		ob_start();
 ?>
 <style>
@@ -122,7 +156,27 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			wp_reset_postdata();
 		}
 
-		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false ) );
+		$subcomponents_query = new WP_Query( array(
+			'post_type' => 'component',
+			'post_status' => 'publish',
+			'post_parent' => $post->ID,
+			'update_post_term_cache' => false,
+			'update_post_meta_cache' => false,
+			'meta_key' => '_page_is_subcomponent',
+			'meta_value' => '1',
+		) );
+
+		if ( $subcomponents_query->have_posts() ) {
+			echo '<h4>Subcomponents: ';
+			$subcomponents = array();
+			foreach ( $subcomponents_query->posts as $subcomponent ) {
+				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
+			}
+			echo implode( ', ', $subcomponents ) . '</h4>';
+		}
+
+
+		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
 			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
 			echo "<ul>$sub_pages</ul>";
