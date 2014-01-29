@@ -10,8 +10,8 @@
 	<div id="main" class="postcontent compact-components">
 		<h2>WordPress core components</h2>
 
-	<?php
-	if ( false && $cached = get_transient( 'trac_components_page' ) ) {
+<?php
+	if ( $cached = get_transient( 'trac_components_page' ) ) {
 		echo $cached;
 	} else {
 		ob_start();
