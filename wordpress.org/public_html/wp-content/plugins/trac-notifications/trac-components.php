@@ -178,23 +178,6 @@ jQuery( document ).ready( function( $ ) {
 			$content = $top_level . "\n\n" . $content;
 		}
 
-		$recent_posts = new WP_Query( array(
-			'post_type' => 'post',
-			'post_status' => 'publish',
-			'posts_per_page' => 5,
-			'tag_slug__in' => $post->post_name
-		) );
-		if ( $recent_posts->have_posts() ) {
-			echo "<h3>Recent posts on the blog</h3>\n<ul>";
-			while ( $recent_posts->have_posts() ) {
-				$recent_posts->the_post();
-				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
-			}
-			echo '</ul>';
-			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
-			wp_reset_postdata();
-		}
-
 		$subcomponents_query = new WP_Query( array(
 			'post_type' => 'component',
 			'post_status' => 'publish',
@@ -213,6 +196,22 @@ jQuery( document ).ready( function( $ ) {
 			echo wp_sprintf( "<h4>Subcomponents: %l.</h4>", $subcomponents );
 		}
 
+		$recent_posts = new WP_Query( array(
+			'post_type' => 'post',
+			'post_status' => 'publish',
+			'posts_per_page' => 5,
+			'tag_slug__in' => $post->post_name
+		) );
+		if ( $recent_posts->have_posts() ) {
+			echo "<h3>Recent posts on the blog</h3>\n<ul>";
+			while ( $recent_posts->have_posts() ) {
+				$recent_posts->the_post();
+				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+			}
+			echo '</ul>';
+			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			wp_reset_postdata();
+		}
 
 		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
