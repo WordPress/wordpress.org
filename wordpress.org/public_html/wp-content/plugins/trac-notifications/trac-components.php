@@ -1,11 +1,15 @@
 <?php
 
 class Make_Core_Trac_Components {
+	const last_x_days = 7;
+
 	function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'the_content', array( $this, 'the_content' ), 5 );
 		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
+		add_action( 'wp_head', array( $this, 'wp_head' ) );
 		$this->trac = $GLOBALS['wpdb'];
 	}
 
@@ -49,6 +53,14 @@ class Make_Core_Trac_Components {
 			),
 			'delete_with_user' => false,
 		) );
+	}
+
+	function pre_get_posts( $query ) {
+		if ( $query->is_main_query() && $query->is_post_type_archive( 'component' ) ) {
+			$query->set( 'posts_per_page', -1 );
+			$query->set( 'orderby', 'title' );
+			$query->set( 'order', 'asc' );
+		}
 	}
 
 	function page_is_component( $post ) {
@@ -106,25 +118,26 @@ class Make_Core_Trac_Components {
 		remove_submenu_page( 'edit.php?post_type=component', 'post-new.php?post_type=component' );
 	}
 
-	function the_content( $content ) {
-		$post = get_post();
-		if ( ! $this->page_is_component( $post ) ) {
-			return $content;
-		}	
-
-		if ( $post->post_parent ) {
-			$top_level = '<h4>This is a subcomponent of the <a href="' . get_permalink( $post->post_parent ) . '">' . get_post( $post->post_parent )->post_title . '</a> component.</h4>';
-			$content = $top_level . "\n\n" . $content;
+	function wp_head() {
+		if ( ! is_singular( 'component' ) && ! is_post_type_archive( 'component' ) ) {
+			return;
 		}
-		ob_start();
 ?>
 <style>
+#toggle-compact-components { text-align: right }
+.component-info .compact { display: none }
+.compact-components .component-info { width: 49%; float: left; margin-right: 1% }
+.compact-components .compact { display: inline }
+.compact-components .trac-summary { display: none }
 .postcontent { padding-left: 0; }
-.component .meta .actions { display: none }
-.component h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
+.component-info .meta .actions { display: none }
+.component-info h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
+.compact-components .component-info h3 { margin: 10px 0; }
 .trac-summary th, .trac-summary td { padding: 4px 8px; }
 .trac-summary th { font-weight: bold; text-align: right }
+.trac-summary th.title { font-weight: normal; text-align: left; font-size: 14px }
 .trac-summary th a { font-weight: bold }
+.trac-summary th.title a { color: #000; }
 .trac-summary .count { text-align: right; min-width: 3em }
 .trac-summary .zero { color: #ddd }
 #main ul.maintainers { list-style: none; padding: 0; margin: 0 }
@@ -137,7 +150,33 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
 </style>
+<script>
+jQuery( document ).ready( function( $ ) {
+	$( '#toggle-compact-components input' ).on( 'change', function() {
+		$( '#main' ).toggleClass( 'compact-components' );
+	});
+});
+</script>
 <?php
+	}
+
+	function the_content( $content ) {
+		$post = get_post();
+		if ( ! $this->page_is_component( $post ) ) {
+			return $content;
+		}	
+
+		ob_start();
+
+		if ( ! is_singular() ) {
+			$this->ticket_table( $post->post_title );
+			return ob_get_clean();
+		}
+
+		if ( $post->post_parent ) {
+			$top_level = '<h4>This is a subcomponent of the <a href="' . get_permalink( $post->post_parent ) . '">' . get_post( $post->post_parent )->post_title . '</a> component.</h4>';
+			$content = $top_level . "\n\n" . $content;
+		}
 
 		$recent_posts = new WP_Query( array(
 			'post_type' => 'post',
@@ -211,16 +250,19 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			}
 		}
 
-		$content .= "\n\n" . ob_get_clean();
+		$content .= "\n\n" . '<div class="component-info">' . ob_get_clean() . '</div>';
 		return $content;
 	}
 
 	function ticket_table( $component ) {
 		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
 
-		// This query is designed to be persistently cached for a few minutes for *all* components. For now, just query directly with a WHERE.
-		$rows = $this->trac->get_results( $this->trac->prepare( "SELECT component, type, milestone, count(*) as count FROM ticket
-			WHERE status <> 'closed' AND component = %s GROUP BY component, type, milestone ORDER BY component, type, milestone", $component ) );
+		$rows = wp_cache_get( 'trac_tickets_by_component_type_milestone' );
+		if ( ! $rows ) {
+			$rows = $this->trac->get_results( "SELECT component, type, milestone, count(*) as count FROM ticket
+				WHERE status <> 'closed' GROUP BY component, type, milestone ORDER BY component, type, milestone" );
+			wp_cache_add( 'trac_tickets_by_component_type_milestone', $rows, '', 300 );
+		}
 
 		$component_type_milestone = array();
 		foreach ( $rows as $row ) {
@@ -235,11 +277,17 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			$component_milestone_type[ $row->component ][ $row->milestone ][ $row->type ] += $row->count;
 		}
 
-		if ( ! $count = array_sum( $component_type[ $component ] ) ) {
-			echo '<h3>No open tickets!</h3>';
+		if ( ! $component_count = array_sum( $component_type[ $component ] ) ) {
+			if ( is_singular() ) {
+				echo '<h3>No open tickets!</h3>';
+			}
 			return;
 		}
-		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . ' in the ' . $component . ' component</h3>';
+
+		if ( is_singular() ) {
+			echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count ) . ' in the ' . $component . ' component</h3>';
+		}
+
 		$history = $this->get_component_history( $component );
 		$direction = '';
 		if ( $history['change'] > 0 ) {
@@ -255,8 +303,17 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			$history_line[] = $count . ' ' . $action;
 		}
 
+		$num_open_tickets_string = sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count );
+
+		$last_x = "<strong class='compact'>" . $num_open_tickets_string . ".</strong> Last " . self::last_x_days . " days: <span title='" . wp_sprintf( '%l', $history_line ) . "'>";
+		$last_x .= sprintf( "%+d", $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) );
+		$last_x .= '<span class="history ' . $direction . '"></span></span>' . "\n\n";
+
+		if ( ! is_singular() ) {
+			echo $last_x;
+		}
 		echo '<table class="trac-summary">';
-		echo '<tr><th></th>';
+		echo '<tr><th class="title">' . $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) . '</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
 				echo '<th>' . $this->trac_query_link( $type, array( 'component' => $component, 'type' => $type, 'group' => 'milestone' ) ) . '</th>';
@@ -276,10 +333,10 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 			}
 			echo '</tr>';
 		}
-		echo '</table>';
-		echo "\n\nLast 30 days: <span title='" . wp_sprintf( '%l', $history_line ) . "'>";
-		echo sprintf( "%+d", $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) );
-		echo '<span class="history ' . $direction . '"></span></span>' . "\n\n";
+		echo "</table>\n\n";
+		if ( is_singular() ) {
+			echo $last_x;
+		}
 	}
 
 	function trac_content( $component ) {
@@ -356,8 +413,8 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 		echo '</ul>';
 	}
 
-	function get_component_history( $component, $days = 30 ) {
-		$days_ago = ( time() - ( DAY_IN_SECONDS * $days ) ) * 1000000;
+	function get_component_history( $component ) {
+		$days_ago = ( time() - ( DAY_IN_SECONDS * self::last_x_days ) ) * 1000000;
 		$closed_reopened = $this->trac->get_results( $this->trac->prepare( "SELECT newvalue, COUNT(DISTINCT ticket) as count
 			FROM ticket_change tc INNER JOIN ticket t ON tc.ticket = t.id
 			WHERE field = 'status' AND (newvalue = 'closed' OR newvalue = 'reopened')
