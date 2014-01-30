@@ -135,7 +135,7 @@ class Make_Core_Trac_Components {
 .postcontent { padding-left: 0; }
 .component-info .meta .actions { display: none }
 .component-info h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
-.compact-components .component-info h3 { margin: 10px 0; }
+.compact-components .component-info h3 { margin: 15px 0 10px; }
 .trac-summary th, .trac-summary td { padding: 4px 8px; }
 .trac-summary th { font-weight: bold; text-align: right }
 .trac-summary th.title { font-weight: normal; text-align: left; font-size: 14px }
