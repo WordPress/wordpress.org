@@ -47,6 +47,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
 				if ( $(document.body).hasClass( 'core' ) ) {
+					wpTrac.reports();
 					wpTrac.focuses.init();
 				}
 			}
@@ -294,6 +295,42 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						$(this).remove();
 				});
 			}
+		},
+
+		reports: function() {
+			var popup = $( '#report-popup' ), failed = false;
+			$( '.ticket-reports' ).on( 'change', '.tickets-by-topic', function() {
+				var topic = $(this).val();
+				if ( ! topic ) {
+					return;
+				}
+				window.location.href = $(this).data( 'location' ) + topic;
+				return false;
+			});
+			popup.appendTo( '#main' );
+			$( '.open-ticket-report' ).click( function( event ) {
+				if ( popup.children().length === 0 ) {
+					var jqxhr = $.ajax({
+						url: 'https://make.wordpress.org/core/reports/?from-trac',
+						xhrFields: { withCredentials: true }
+					}).done( function( data ) {
+						$( data ).find( '.ticket-reports' ).appendTo( popup );
+						$(document.body).addClass( 'ticket-reports-open' );
+					}).fail( function() {
+						failed = true;
+					});
+				} else {
+					$(document.body).toggleClass( 'ticket-reports-open' );
+					event.preventDefault();
+				}
+				if ( ! failed ) {
+					event.preventDefault();
+				}
+			});
+			$( '#report-popup' ).on( 'click', '.close', function() {
+				$(document.body).removeClass( 'ticket-reports-open' );
+				return false;
+			});
 		},
 
 		coreToMeta: function() {
