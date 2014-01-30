@@ -14,6 +14,9 @@ class Make_Core_Trac_Components {
 	}
 
 	function init() {
+		add_shortcode( 'trac-select', array( $this, 'shortcode_select' ) );
+		add_shortcode( 'logged-in', array( $this, 'shortcode_logged_in' ) );
+
 		$labels = array(
 			'name' => 'Component Pages',
 			'menu_name' => 'Components',
@@ -431,6 +434,46 @@ jQuery( document ).ready( function( $ ) {
 		return compact( 'change', 'opened', 'reopened', 'closed', 'assigned', 'unassigned' );
 	}
 
+	function shortcode_logged_in( $attr, $content ) {
+		if ( is_user_logged_in() ) {
+			return $content;
+		}
+		return '';
+	}
+
+	function shortcode_select( $attr ) {
+		ob_start();
+
+		$topics = explode( ' ', $attr[0] );
+		$both = in_array( 'focus', $topics ) && in_array( 'component', $topics );
+
+		echo '<select class="tickets-by-topic" data-location="https://core.trac.wordpress.org/">';
+		if ( $both ) {
+			$default = 'Select a focus or component';
+		} elseif ( in_array( 'focus', $topics ) ) {
+			$default = 'Select a focus';
+		} else {
+			$default = 'Select a component';
+		}
+		echo '<option value="" selected="selected">' . $default . '</option>';
+		if ( in_array( 'focus', $topics ) ) {
+			$focuses = array( 'ui', 'accessibility', 'javascript', 'docs', 'multisite', 'performance', 'rtl' );
+			foreach ( $focuses as $focus ) {
+				echo '<option value="focus/' . $focus . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
+			}
+		}
+		if ( $both ) {
+			echo '<option></option>';
+		}
+		if ( in_array( 'component', $topics ) ) {
+			$components = $this->trac->get_col( "SELECT name FROM component" );
+			foreach ( $components as $component ) {
+				echo '<option value="component/' . esc_attr( urlencode( $component ) ) . '">' . esc_html( $component ) . "</option>";
+			}
+		}
+		echo '</select>';
+		return ob_get_clean();
+	}
 }
 new Make_Core_Trac_Components;
 
