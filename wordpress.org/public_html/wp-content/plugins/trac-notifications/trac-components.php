@@ -152,6 +152,7 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 .history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: top }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
+.component-info .create-new-ticket { float: right; margin-top: 25px; }
 </style>
 <script>
 jQuery( document ).ready( function( $ ) {
@@ -278,6 +279,8 @@ jQuery( document ).ready( function( $ ) {
 			}
 			$component_milestone_type[ $row->component ][ $row->milestone ][ $row->type ] += $row->count;
 		}
+
+		echo '<div><a class="create-new-ticket button button-large button-primary" href="https://wordpress.org/support/bb-login.php?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '">Create a new ticket</a></div>';
 
 		if ( ! $component_count = array_sum( $component_type[ $component ] ) ) {
 			if ( is_singular() ) {
