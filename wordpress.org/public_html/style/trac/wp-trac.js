@@ -251,6 +251,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					uitab.find('a').text('Help Links');
 				}
 			}
+
+			if ( $(document.body).hasClass( 'core' ) && content.hasClass( 'search' ) ) {
+				// Remove 'Wiki' and 'Milestone' from search.
+				$( '#fullsearch #milestone' ).next().remove().end().remove();
+				$( '#fullsearch #wiki' ).next().remove().end().remove();
+			}
 		},
 
 		// If we're not dealing with a trusted bug gardener:
