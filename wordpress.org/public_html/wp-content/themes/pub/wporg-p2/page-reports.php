@@ -18,6 +18,9 @@
 .report-group h3 {
 	font-weight: bold;
 }
+#main .report-group h4 {
+	font-size: 1.2em;
+}
 #main .report-group h4 a {
 	font-weight: normal;
 }
@@ -27,11 +30,12 @@
 	width: 220px;
 	margin-right: 15px;
 }
-.wide .report {
+.wide .report, .report.wide {
 	width: 335px;
 }
-.compact .report {
-	min-height: auto;
+.narrow .report, .report.narrow {
+	width: 130px;
+	margin-right: 10px;
 }
 .report h4 {
 	margin-bottom: 8px;
