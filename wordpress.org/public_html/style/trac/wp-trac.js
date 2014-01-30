@@ -299,7 +299,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		reports: function() {
 			var popup = $( '#report-popup' ), failed = false;
-			$( '.ticket-reports' ).on( 'change', '.tickets-by-topic', function() {
+			$( '#report-popup' ).on( 'change', '.tickets-by-topic', function() {
 				var topic = $(this).val();
 				if ( ! topic ) {
 					return;
