@@ -2,10 +2,21 @@
 /**
  * For the /reports/ page
  */
+
+if ( isset( $_GET['from-trac'] ) ) {
+	send_origin_headers();
+	while ( have_posts() ) {
+		the_post();
+		p2_load_entry();
+	}
+	return;
+}
 ?>
+
 <?php get_header(); ?>
 
 <style>
+/* changes to P2 */
 #main ul#postlist li {
 	border: 0;
 }
@@ -15,47 +26,53 @@
 #main .postcontent h4 {
 	display: block;
 }
-.report-group h3 {
+#main .postcontent .trac-only {
+	display: none;
+}
+.ticket-reports .report-group h3 {
 	font-weight: bold;
 }
-#main .report-group h4 {
+#main .report-group h4,
+.ticket-reports .report-group h4 {
 	font-size: 1.2em;
 }
-#main .report-group h4 a {
+#main .report-group h4 a,
+.ticket-reports .report-group h4 a {
 	font-weight: normal;
 }
-.report {
+.ticket-reports .report {
 	float: left;
 	display: inline-block;
 	width: 220px;
 	margin-right: 15px;
 }
-.wide .report, .report.wide {
+.ticket-reports .wide .report,
+.ticket-reports .report.wide {
 	width: 335px;
 }
-.narrow .report, .report.narrow {
+.ticket-reports .narrow .report,
+.ticket-reports .report.narrow {
 	width: 130px;
 	margin-right: 10px;
 }
-.report h4 {
+.ticket-reports .report h4 {
 	margin-bottom: 8px;
 }
-.report p {
+.ticket-reports .report p {
 	margin-top: 0;
 }
-.report p a {
+.ticket-reports .report p a {
 	border: 0;
 }
-.report-group {
+.ticket-reports .report-group {
 	clear: both;
 	overflow: auto;
 	margin-bottom: 30px;
 }
-.reports h3 {
+.ticket-reports .reports h3 {
 	margin: 0 0 10px;
 }
 </style>
-<script src="https://core.trac.wordpress.org/chrome/common/js/jquery.js"></script>
 <script>
 $(document).on( 'ready', function() {
 	$( '.tickets-by-topic' ).on( 'change', function() {
