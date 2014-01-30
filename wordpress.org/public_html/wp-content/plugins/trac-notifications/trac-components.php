@@ -437,6 +437,8 @@ jQuery( document ).ready( function( $ ) {
 	function shortcode_logged_in( $attr, $content ) {
 		if ( is_user_logged_in() ) {
 			return $content;
+		} elseif ( isset( $attr['else'] ) ) {
+			return wp_kses_data( $attr['else'], array( 'p' => true, 'a' => array( 'href' => true ) ) );
 		}
 		return '';
 	}
