@@ -50,10 +50,15 @@ if ( isset( $_GET['from-trac'] ) ) {
 .ticket-reports .report.wide {
 	width: 335px;
 }
-.ticket-reports .narrow .report,
-.ticket-reports .report.narrow {
+.ticket-reports .very-narrow .report,
+.ticket-reports .report.very-narrow {
 	width: 130px;
 	margin-right: 10px;
+}
+.ticket-reports .narrow .report,
+.ticket-reports .report.narrow {
+	width: 170px;
+	margin-right: 15px;
 }
 .ticket-reports .report h4 {
 	margin-bottom: 8px;
