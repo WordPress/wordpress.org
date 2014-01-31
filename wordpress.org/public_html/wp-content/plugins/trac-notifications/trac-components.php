@@ -10,6 +10,7 @@ class Make_Core_Trac_Components {
 		add_action( 'the_content', array( $this, 'the_content' ), 5 );
 		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 		$this->trac = $GLOBALS['wpdb'];
 	}
 
@@ -120,6 +121,10 @@ class Make_Core_Trac_Components {
 
 	function admin_menu() {
 		remove_submenu_page( 'edit.php?post_type=component', 'post-new.php?post_type=component' );
+	}
+
+	function wp_enqueue_scripts() {
+		wp_enqueue_style( 'make-core-trac', plugins_url( '/make-core.css', __FILE__ ), array(), '1' );
 	}
 
 	function wp_head() {

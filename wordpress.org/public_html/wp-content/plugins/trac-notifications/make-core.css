@@ -1,0 +1,22 @@
+#headline li.icon + li.icon {
+    padding-left: 6px;
+}
+#headline li.icon a:before {
+    font: 20px/1 'dashicons';
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+    vertical-align: top;
+}
+#headline li.icon a {
+    font-size: 0;
+}
+#headline li.newticket a:before {
+    content: "\f119";
+}
+#headline li.timeline a:before {
+    content: "\f321";
+}
+#headline li.browser a:before {
+    content: "\f475";
+}
+
