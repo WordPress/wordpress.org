@@ -16,6 +16,7 @@ class Make_Core_Trac_Components {
 	function init() {
 		add_shortcode( 'trac-select', array( $this, 'shortcode_select' ) );
 		add_shortcode( 'logged-in', array( $this, 'shortcode_logged_in' ) );
+		add_shortcode( 'logged-out', array( $this, 'shortcode_logged_in' ) );
 
 		$labels = array(
 			'name' => 'Component Pages',
@@ -439,11 +440,9 @@ jQuery( document ).ready( function( $ ) {
 		return compact( 'change', 'opened', 'reopened', 'closed', 'assigned', 'unassigned' );
 	}
 
-	function shortcode_logged_in( $attr, $content ) {
-		if ( is_user_logged_in() ) {
+	function shortcode_logged_in( $attr, $content, $tag ) {
+		if ( is_user_logged_in() == ( $tag == 'logged-in' ) ) {
 			return $content;
-		} elseif ( isset( $attr['else'] ) ) {
-			return wp_kses_data( $attr['else'], array( 'p' => true, 'a' => array( 'href' => true ) ) );
 		}
 		return '';
 	}
