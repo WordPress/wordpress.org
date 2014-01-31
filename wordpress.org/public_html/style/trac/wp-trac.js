@@ -27,12 +27,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'accessibility' : 'Accessibility focus.',
 		'javascript' : 'Heavy JavaScript focus.',
 		// 'unit tests' : 'PHP or JS unit tests.',
-		// 'administration' : 'Dashboard related, but assigned a more specifc component.',
-		// 'template' : 'Relating to theme template functions, but assigned a more specific component.',
 		'docs' : 'Inline documentation focus.',
+		'rtl' : 'Right-to-left languages.',
+		'administration' : 'Administration related, but assigned a more specifc component.',
+		'template' : 'Relating to theme templating, but assigned a more specific component.',
 		'multisite' : 'Relating to multisite, but assigned a more specific component.',
-		'performance' : 'Performance or caching (but not the Cache API component).',
-		'rtl' : 'Right-to-left languages.'
+		'performance' : 'Performance or caching (but not the Cache API component).'
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug' ];
@@ -610,7 +610,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						'data-focus' : focus,
 						title: description,
 						class: classes
-					} ).html( '<a href="#">' + focus + '</a>' ) );
+					} ).html( '<a href="#">' + ( focus === 'administration' ? 'admin' : focus ) + '</a>' ) );
 				});
 				ul.appendTo( container );
 

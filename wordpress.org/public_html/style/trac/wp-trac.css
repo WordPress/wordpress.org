@@ -1137,7 +1137,7 @@ body.core #reportfilters {
 	display: none;
 }
 #properties table td#focuses {
-	padding: .6em 0 .3em 100px;
+	padding: .6em 0 .3em 60px;
 	height: 66px;
 }
 #focuses span {
@@ -1145,7 +1145,7 @@ body.core #reportfilters {
 }
 #focuses ul {
 	float: left;
-	width: 256px;
+	width: 296px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
