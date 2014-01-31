@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '34'
+	scripts_version = '36'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 
@@ -66,7 +66,7 @@
 	<xi:include href="wporg-head.html" />
 
 	<meta name="viewport" content="width=device-width" />
-	<link rel='stylesheet' href='//wordpress.org/wp-includes/css/dashicons.min.css?ver=3.9-alpha-20140112' type='text/css' />
+	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20140130' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="//wordpress.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link rel="stylesheet" type="text/css" href="//openatd.svn.wordpress.org/atd-jquery/css/atd.css" media="screen" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
@@ -214,6 +214,14 @@
 	<h2 class="report-result" py:if="not paginator.has_more_pages">Results <span class="numresults">(${paginator.num_items})</span></h2>
 </py:match>
 
+<!-- Show a create ticket button on search -->
+<div py:match="div[@id='content' and @class='search']/h1">
+	<h1 py:attrs="select('@*')">${select('*|comment()|text()')}</h1>
+	<span class="create-new-ticket button button-large button-primary">
+		<a href="https://wordpress.org/support/bb-login.php?redirect_to=https://core.trac.wordpress.org/newticket">Create a new ticket</a>
+	</span>
+</div>
+
 <!--! Demote the nav "Preferences" link to the footer. To hide from header (trac.ini): [metanav] prefs = disabled -->
 <div py:match="div[@id='altlinks']" py:attrs="select('@*')">
     <a class="preferences-link" href="${href.prefs()}">Trac UI Preferences</a>
@@ -234,7 +242,7 @@
 	</py:match>
 </py:if>
 
-<body py:match="body" id="wordpress-org" class="${project_slug} trac" py:attrs="select('@*')">
+<body py:match="body" id="wordpress-org" class="${project_slug} trac wporg-make make-${project_slug}" py:attrs="select('@*')">
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-header.html" />
 
