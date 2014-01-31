@@ -1176,6 +1176,8 @@ body.core #reportfilters {
 /**
  * Dashicons
  */
+table.listing th.asc a:after,
+table.listing th.desc a:after,
 table.dirlist tr span.expander:before,
 table.dirlist td.rev a.chgset:before,
 table.dirlist td.name a.file:before,
@@ -1259,6 +1261,8 @@ dt.wiki:before {
 #content.timeline dt :link, #content.timeline dt :visited {
 	padding-left: 0;
 }
+table.listing th.asc a,
+table.listing th.desc a,
 table.dirlist tr.expanded span.expander,
 table.dirlist tr span.expander,
 table.dirlist td.rev a.chgset,
@@ -1442,7 +1446,18 @@ table.dirlist tr.expanded span.expander:before {
 	content: "\f140"; /* dashicons-arrow-down */
 	width: 15px;
 }
-
+table.listing th.asc a:after,
+table.listing th.desc a:after {
+	font-size: 15px;
+	height: 15px;
+	width: 15px;
+}
+table.listing th.asc a:after {
+	content: "\f142"; /* dashicons-arrow-up */
+}
+table.listing th.desc a:after {
+	content: "\f140"; /* dashicons-arrow-down */
+}
 /* =Reports page */
 
 /* =Report screens */
