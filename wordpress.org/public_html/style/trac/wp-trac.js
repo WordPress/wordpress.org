@@ -174,7 +174,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( $.isFunction( $.fn.addProofreader ) ) {
 				$('textarea').addProofreader();
 				$('.AtD_proofread_button').each(function() {
-					$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') );
+					$(this).parent().appendTo( $(this).parents('fieldset').find('.wikitoolbar') ).attr( 'title', 'Check spelling and grammar' );
 				});
 			}
 
