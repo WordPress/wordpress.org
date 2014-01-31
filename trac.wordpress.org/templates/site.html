@@ -225,7 +225,7 @@
 	<h2 class="report-result" py:if="not paginator.has_more_pages">Results <span class="numresults">(${paginator.num_items})</span></h2>
 </py:match>
 
-<!-- Show a create ticket button on search -->
+<!--! Show a create ticket button on search -->
 <div py:match="div[@id='content' and @class='search']/h1">
 	<h1 py:attrs="select('@*')">${select('*|comment()|text()')}</h1>
 	<span class="create-new-ticket button button-large button-primary">
@@ -285,7 +285,7 @@
 	<!--! New ticket possibly related tickets for Core Trac -->
 	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="//wordpress.org/style/trac/trac-search.js?${scripts_version}"></script>
 
-	<!-- After the Deadline -->
+	<!--! After the Deadline -->
 	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
 	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
 
