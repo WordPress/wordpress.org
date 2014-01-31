@@ -1172,6 +1172,9 @@ body.core #reportfilters {
 /**
  * Dashicons
  */
+a.mail-link:before,
+a.ext-link:before,
+a.trac-rawlink:before, a.trac-ziplink:before,
 span.AtD_proofread_button:before,
 .wikitoolbar a:before,
 #altlinks li a.rss:before,
@@ -1245,6 +1248,7 @@ dt.wiki:before {
 #content.timeline dt :link, #content.timeline dt :visited {
 	padding-left: 0;
 }
+a.trac-rawlink, a.trac-ziplink,
 dt.wiki, dt.wiki a,
 dt.milestone, dt.milestone a,
 dt.reopenedticket, dt.reopenedticket a,
@@ -1255,6 +1259,10 @@ dt.newticket, dt.newticket a,
 dt.batchmodify, dt.batchmodify a,
 dt.attachment, dt.attachment a {
 	background-image: none !important;
+}
+a.mail-link .icon,
+a.ext-link .icon {
+	display: none;
 }
 #altlinks li a.rss {
 	background: none;
@@ -1332,6 +1340,47 @@ span.AtD_proofread_button:before {
 #field-description-help,
 label[for=comment] {
 	line-height: 28px;
+}
+a.trac-rawlink:before, a.trac-ziplink:before,
+a.ext-link:before,
+a.mail-link:before {
+	color: #21759b;
+}
+a.trac-rawlink:hover:before, a.trac-ziplink:hover:before,
+a.ext-link:hover:before,
+a.mail-link:hover::before {
+	color: #555;
+}
+#content.timeline a.trac-rawlink:before, a.trac-ziplink:before {
+	color: #000; /* Reset color for timeline */
+}
+a.trac-rawlink, a.trac-ziplink {
+	padding-right: 0;
+}
+a.trac-rawlink:before, a.trac-ziplink:before,
+a.ext-link:before,
+a.mail-link:before {
+	font-size: 15px;
+	height: 15px;
+	width: 15px;
+	vertical-align: middle;
+	padding-right: 3px;
+}
+a.trac-rawlink:before, a.trac-ziplink:before {
+	content: "\f316"; /* dashicons-download */
+}
+a.ext-link:before {
+	content: "\f316"; /* dashicons-download */
+	-webkit-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
+	transform: rotate(-90deg);
+	margin-top: -5px
+}
+a.mail-link {
+	white-space: nowrap;
+}
+a.mail-link:before {
+	content: "\f466"; /* dashicons-email-alt */
 }
 
 /* =Reports page */
