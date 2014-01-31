@@ -1172,6 +1172,10 @@ body.core #reportfilters {
 /**
  * Dashicons
  */
+table.dirlist tr span.expander:before,
+table.dirlist td.rev a.chgset:before,
+table.dirlist td.name a.file:before,
+table.dirlist td.name a.dir:before,
 a.mail-link:before,
 a.ext-link:before,
 a.trac-rawlink:before, a.trac-ziplink:before,
@@ -1204,6 +1208,9 @@ dt.attachment:before {
 	text-align: center;
 	color: #777;
 }
+table.dirlist tr span.expander:hover:before,
+table.dirlist td.name a.file:hover:before,
+table.dirlist td.name a.dir:hover:before,
 dt.wiki:hover:before,
 dt.milestone:hover:before,
 dt.reopenedticket:hover:before,
@@ -1248,6 +1255,11 @@ dt.wiki:before {
 #content.timeline dt :link, #content.timeline dt :visited {
 	padding-left: 0;
 }
+table.dirlist tr.expanded span.expander,
+table.dirlist tr span.expander,
+table.dirlist td.rev a.chgset,
+table.dirlist td.name a.file,
+table.dirlist td.name a.dir,
 a.trac-rawlink, a.trac-ziplink,
 dt.wiki, dt.wiki a,
 dt.milestone, dt.milestone a,
@@ -1293,10 +1305,12 @@ span.AtD_proofread_button:hover,
 	border: none;
 	background-color: #eee;
 }
+table.dirlist td.rev a.chgset:before,
 span.AtD_proofread_button:before,
 .wikitoolbar a:before {
 	color: #666;
 }
+table.dirlist td.rev a.chgset:hover:before,
 span.AtD_proofread_button:hover:before,
 .wikitoolbar a:hover:before {
 	color: #444;
@@ -1341,11 +1355,13 @@ span.AtD_proofread_button:before {
 label[for=comment] {
 	line-height: 28px;
 }
+table.dirlist td.rev a.chgset:before,
 a.trac-rawlink:before, a.trac-ziplink:before,
 a.ext-link:before,
 a.mail-link:before {
 	color: #21759b;
 }
+table.dirlist td.rev a.chgset:hover:before,
 a.trac-rawlink:hover:before, a.trac-ziplink:hover:before,
 a.ext-link:hover:before,
 a.mail-link:hover::before {
@@ -1356,6 +1372,7 @@ a.mail-link:hover::before {
 }
 a.trac-rawlink, a.trac-ziplink {
 	padding-right: 0;
+	margin-left: 2px;
 }
 a.trac-rawlink:before, a.trac-ziplink:before,
 a.ext-link:before,
@@ -1364,23 +1381,59 @@ a.mail-link:before {
 	height: 15px;
 	width: 15px;
 	vertical-align: middle;
-	padding-right: 3px;
 }
 a.trac-rawlink:before, a.trac-ziplink:before {
 	content: "\f316"; /* dashicons-download */
+	padding-left: 3px;
 }
 a.ext-link:before {
 	content: "\f316"; /* dashicons-download */
 	-webkit-transform: rotate(-90deg);
 	-ms-transform: rotate(-90deg);
 	transform: rotate(-90deg);
-	margin-top: -5px
+	margin-top: -5px;
+	padding-right: 3px;
 }
 a.mail-link {
 	white-space: nowrap;
 }
 a.mail-link:before {
 	content: "\f466"; /* dashicons-email-alt */
+	padding-right: 3px;
+}
+table.dirlist td.name a.dir {
+	padding-left: 0;
+}
+table.dirlist td.name a.dir:before {
+	content: "\f318"; /* dashicons-category */
+	margin-right: 2px;
+}
+table.dirlist td.name a.file:before {
+	content: "\f105"; /*  dashicons-admin-page */
+	color: #999;
+}
+table.dirlist td.rev a.chgset {
+	padding: 0;
+	margin: 0;
+}
+table.dirlist td.rev a.chgset:before {
+	content: "\f111"; /* dashicons-admin-generic */
+	font-size: 15px;
+	height: 15px;
+	width: 15px;
+}
+table.dirlist tr.expanded span.expander,
+table.dirlist tr span.expander {
+	padding: 0;
+	margin: 0;
+}
+table.dirlist tr span.expander:before {
+	content: "\f139"; /* dashicons-arrow-right */
+	width: 15px;
+}
+table.dirlist tr.expanded span.expander:before {
+	content: "\f140"; /* dashicons-arrow-down */
+	width: 15px;
 }
 
 /* =Reports page */
