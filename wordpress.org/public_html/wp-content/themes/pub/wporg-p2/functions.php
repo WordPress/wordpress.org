@@ -59,6 +59,7 @@ function wporg_p2_get_cats_with_count( $post, $format = 'list', $before = '', $s
 add_filter( 'body_class', 'wporg_add_site_slug_to_body_class' ); 
 function wporg_add_site_slug_to_body_class( $classes ) { 
 	global $current_blog;
+	$classes[] = 'wporg-make';
 	$classes[] = 'make-' . trim( $current_blog->path, '/' ); 
 	return $classes; 
 }
