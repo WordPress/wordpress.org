@@ -78,6 +78,17 @@
 
 <!--! Notices and instructions when creating a new ticket -->
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
+
+	<!--! Prevent Trac from focusing #field-summary on load, as this can scroll past the instructions -->
+	<py:match path="head/script[contains(@src,'jquery.js')]">
+		<script py:attrs="select('@*')"></script>
+		<script>
+		jQuery( document ).ready( function( $ ) {
+			$("#field-summary").one( 'focus', function( event ) { return false; });
+		});
+		</script>
+	</py:match>
+
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice">
 			<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
