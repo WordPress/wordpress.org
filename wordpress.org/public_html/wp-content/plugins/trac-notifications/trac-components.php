@@ -468,7 +468,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 		echo '<option value="" selected="selected">' . $default . '</option>';
 		if ( in_array( 'focus', $topics ) ) {
-			$focuses = array( 'ui', 'accessibility', 'javascript', 'docs', 'multisite', 'performance', 'rtl' );
+			$focuses = array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rtl', 'template', 'ui' );
 			foreach ( $focuses as $focus ) {
 				echo '<option value="focus/' . $focus . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
