@@ -29,53 +29,14 @@ if ( isset( $_GET['from-trac'] ) ) {
 #main .postcontent .trac-only {
 	display: none;
 }
-.ticket-reports .report-group h3 {
-	font-weight: bold;
-}
-#main .report-group h4,
-.ticket-reports .report-group h4 {
-	font-size: 1.2em;
-}
-#main .report-group h4 a,
-.ticket-reports .report-group h4 a {
-	font-weight: normal;
-}
-.ticket-reports .report {
-	float: left;
-	display: inline-block;
-	width: 220px;
+#main .ticket-reports .report {
 	margin-right: 15px;
 }
-.ticket-reports .wide .report,
-.ticket-reports .report.wide {
-	width: 335px;
+.ticket-reports .very-narrow {
+	margin-right: -10px;
 }
-.ticket-reports .very-narrow .report,
-.ticket-reports .report.very-narrow {
-	width: 130px;
-	margin-right: 10px;
-}
-.ticket-reports .narrow .report,
-.ticket-reports .report.narrow {
-	width: 160px;
-	margin-right: 15px;
-}
-.ticket-reports .report h4 {
-	margin-bottom: 8px;
-}
-.ticket-reports .report p {
-	margin-top: 0;
-}
-.ticket-reports .report p a {
-	border: 0;
-}
-.ticket-reports .report-group {
-	clear: both;
-	overflow: auto;
-	margin-bottom: 30px;
-}
-.ticket-reports .reports h3 {
-	margin: 0 0 10px;
+#main .ticket-reports .narrow .report {
+	margin-right: 40px;
 }
 </style>
 <script>
