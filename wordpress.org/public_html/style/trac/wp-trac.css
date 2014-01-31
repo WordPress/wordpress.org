@@ -762,24 +762,6 @@ h3.change .profile-link {
 .wp-caution li {
 	margin-bottom: 0.5em;
 }
-/* Move the AtD  button into the Trac toolbar */
-.wikitoolbar {
-	width: 258px;
-}
-.AtD_proofread_button,
-.AtD_edit_button {
-	float: left;
-	width: 22px;
-	height: 16px;
-	border: 1px solid #fff;
-	border-left-color: #d7d7d7;
-	background-repeat: no-repeat;
-	background-position: center center;
-}
-.AtD_proofread_button:hover,
-.AtD_edit_button:hover {
-	border-color: #fb2;
-}
 /* Remove nowrap from long titles */
 .tickets tbody td.summary,
 .reports tbody td.summary {
@@ -1190,6 +1172,8 @@ body.core #reportfilters {
 /**
  * Dashicons
  */
+span.AtD_proofread_button:before,
+.wikitoolbar a:before,
 #altlinks li a.rss:before,
 dt.wiki:before,
 dt.milestone:before,
@@ -1280,6 +1264,74 @@ dt.attachment, dt.attachment a {
 	content: "\f303"; /* dashicons-rss */
 	color: #ff6600;
 	padding-right: 5px
+}
+.wikitoolbar {
+	border: none;
+	width: auto;
+	margin-bottom: 10px;
+}
+span.AtD_proofread_button,
+.wikitoolbar :link, .wikitoolbar :visited {
+	float: left;
+	background: none;
+	border: none;
+	width: 20px;
+	height: 20px;
+	padding: 2px 4px;
+	cursor: pointer;
+}
+span.AtD_proofread_button:hover,
+.wikitoolbar :link:hover, .wikitoolbar :visited:hover {
+	border: none;
+	background-color: #eee;
+}
+span.AtD_proofread_button:before,
+.wikitoolbar a:before {
+	color: #666;
+}
+span.AtD_proofread_button:hover:before,
+.wikitoolbar a:hover:before {
+	color: #444;
+}
+.wikitoolbar a#strong:before {
+	content: "\f200"; /* dashicons-editor-bold */
+}
+.wikitoolbar a#em:before {
+	content: "\f201"; /* dashicons-editor-italic */
+}
+.wikitoolbar a#heading:before {
+	content: "\f215"; /* dashicons-editor-textcolor */
+	font-weight: 700;
+	font-size: 26px;
+	margin-left: -3px;
+	margin-top: -1px
+}
+.wikitoolbar a#link:before {
+	content: "\f103"; /* dashicons-admin-links */
+}
+.wikitoolbar a#code:before {
+	content: "\f475"; /* dashicons-editor-code */
+}
+.wikitoolbar a#hr:before {
+	content: "\f460"; /* dashicons-minus */
+	font-size: 22px;
+	margin-left: -1px;
+}
+.wikitoolbar a#br:before {
+	content: "\f474"; /* dashicons-editor-break */
+}
+.wikitoolbar a#np:before {
+	content: "\f476"; /* dashicons-editor-paragraph */
+}
+.wikitoolbar a#img:before {
+	content: "\f128"; /* dashicons-format-image */
+}
+span.AtD_proofread_button:before {
+	content: "\f210"; /* dashicons-editor-spellcheck */
+}
+#field-description-help,
+label[for=comment] {
+	line-height: 28px;
 }
 
 /* =Reports page */
