@@ -161,7 +161,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						}
 					} else if ( ! $( '#comment' ).val() ) {
 						return;
-					
+
 					}
 					return 'The changes you made will be lost if you navigate away from this page.';
 				};
@@ -220,7 +220,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 
 			// Add a 'Show only commits/attachments' view option to tickets
-			$('label[for="trac-comments-only-toggle"]').text('Show only comment text'); 
+			$('label[for="trac-comments-only-toggle"]').text('Show only comment text');
 			$('form#prefs')
 				.has('#trac-comments-order')
 					.append('<div><input type="checkbox" id="wp-trac-commits-only" /> <label for="wp-trac-commits-only">Show only commits/attachments</label></div>');
@@ -360,7 +360,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					'<a href="//meta.trac.wordpress.org/">meta.trac.wordpress.org</a>.</p><p>Would you mind opening this ticket over there instead? ' +
 					'<a href="//meta.trac.wordpress.org/newticket" id="new-meta-ticket">Click here</a> to copy your summary and description over.</p></div>' );
 			});
-	
+
 			$('#propertyform').on( 'click', '#new-meta-ticket', function() {
 				var url, href = $(this).attr( 'href' );
 				url = href + '?' + $.param({ summary: $('#field-summary').val(), description: $('#field-description').val() });
@@ -479,7 +479,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[0] !== '' ) {
 						$.each( keywords, function( k, v ) {
-							var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a href="#" />');
+							var html = $('<span />').text(v).attr('data-keyword', v).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
 							if ( v in coreKeywordList )
 								html.attr('title', coreKeywordList[v]);
 							html.appendTo( elements.bin );
@@ -656,7 +656,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					if ( -1 !== $.inArray( focus, focuses ) ) {
 						orderedFocuses.push( focus );
 					}
-				});	
+				});
 				field.val( orderedFocuses.join( ', ' ) );
 			}
 
@@ -828,7 +828,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				stars.each( function() {
 					var ticket,
 						star = $(this);
-					
+
 					ticket = parseInt( star.parent().siblings('td.ticket').find('a').text().replace('#', ''), 10 );
 					tickets.push( ticket );
 					star.data( 'ticket', ticket );
