@@ -1069,6 +1069,25 @@ input.text {
 	float: left;
 }
 
+body.wporg-make #headline h2 a:before {
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font: normal 28px/1 'dashicons';
+	vertical-align: top;
+	width: 36px;
+}
+body.make-core #headline h2 a:before { content: '\f107'; }
+body.make-ui #headline h2 a:before { content: '\f100'; }
+body.make-mobile #headline h2 a:before { content: '\f166'; }
+body.make-accessibility #headline h2 a:before { content: '\f115'; }
+body.make-polyglots #headline h2 a:before { content: '\f326'; }
+body.make-support #headline h2 a:before { content: '\f110'; }
+body.make-themes #headline h2 a:before { content: '\f105'; }
+body.make-plugins #headline h2 a:before { content: '\f106'; }
+body.make-documentation #headline h2 a:before { content: '\f123'; }
+body.make-community #headline h2 a:before { content: '\f125'; }
+body.make-meta #headline h2 a:before { content: '\f325'; }
+
 #headline .login {
 	font-size: 12px;
 	position: relative;
