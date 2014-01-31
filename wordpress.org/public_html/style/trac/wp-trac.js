@@ -524,7 +524,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a href="#" />');
+					html = $('<span />').text(keyword).attr('data-keyword', keyword).prepend('<a class="dashicons dashicons-dismiss" href="#" />');
 					if ( title )
 						html.attr('title', title);
 					html.appendTo( elements.bin );
