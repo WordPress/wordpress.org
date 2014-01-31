@@ -1,3 +1,7 @@
+/* This CSS file is used on both make.wordpress.org/core and core.trac.wordpress.org */
+
+/* Navigation */
+
 #headline li.icon + li.icon {
     padding-left: 6px;
 }
@@ -18,5 +22,99 @@
 }
 #headline li.browser a:before {
     content: "\f475";
+}
+
+/* Reports page */
+#report-popup {
+	display: none;
+}
+body.ticket-reports-open #content {
+	display: none;
+}
+body.ticket-reports-open #report-popup {
+	display: block;
+    position: absolute;
+    top: 140px;
+    background: white;
+    width: 100%;
+}
+@media screen and (min-width: 768px) {
+	body.ticket-reports-open #report-popup {
+		top: 184px;
+	}
+}
+#report-popup .ticket-reports {
+    max-width: 940px;
+    margin: 30px auto;
+    position: relative;
+}
+.ticket-reports .report-group h3 {
+	font-weight: bold;
+}
+#main .ticket-reports h4 {
+	font-size: 1.2em;
+}
+#main .ticket-reports h4 a {
+	font-weight: normal;
+}
+.ticket-reports .report {
+	float: left;
+	display: inline-block;
+	width: 220px;
+	margin-right: 20px;
+}
+.ticket-reports .wide .report,
+.ticket-reports .report.wide {
+	width: 335px;
+}
+.ticket-reports .very-narrow .report,
+.ticket-reports .report.very-narrow {
+	width: auto;
+	margin-right: 25px;
+}
+.ticket-reports .narrow .report,
+.ticket-reports .report.narrow {
+	width: auto;
+	margin-right: 40px;
+}
+.ticket-reports .report h4 {
+	margin-bottom: 8px;
+}
+.ticket-reports .report p {
+	margin-top: 0;
+}
+.ticket-reports .report p a {
+	border: 0;
+}
+.ticket-reports .report-group {
+	clear: both;
+	overflow: auto;
+	margin-bottom: 30px;
+}
+.ticket-reports .reports h3 {
+	margin: 0 0 10px;
+}
+#report-popup h4, #report-popup a {
+    border: 0;
+    background: none;
+}
+#report-popup .ticket-reports .close {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+#report-popup .ticket-reports h3 {
+    font-size: 21px;
+}
+#report-popup .ticket-reports a {
+    color: #21759b;
+}
+#report-popup .ticket-reports a:hover {
+    color: #d54e21;
+}
+#report-popup .ticket-reports h2 {
+    margin-bottom: 30px;
+	background: none;
+	border: none;
 }
 
