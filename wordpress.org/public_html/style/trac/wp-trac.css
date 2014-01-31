@@ -1351,7 +1351,7 @@ a.ext-link:hover:before,
 a.mail-link:hover::before {
 	color: #555;
 }
-#content.timeline a.trac-rawlink:before, a.trac-ziplink:before {
+#content.timeline a.trac-rawlink:before, #content.timeline a.trac-ziplink:before {
 	color: #000; /* Reset color for timeline */
 }
 a.trac-rawlink, a.trac-ziplink {
