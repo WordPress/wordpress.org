@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '37'
+	scripts_version = '38'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 
@@ -59,6 +59,8 @@
 			fields_map[ fields[i]['name'] ] = i
 ?>
 
+<script type="text/javascript" charset="utf-8" src="/chrome/common/js/jquery.js"></script>
+
 <!--! styles and such -->
 <head py:match="head" py:attrs="select('@*')">
 	${select('*|comment()|text()')}
@@ -90,32 +92,50 @@
 	</py:match>
 
 	<py:match path="div[@id='content' and @class='ticket']/form">
-		<div class="wp-notice">
+		<div class="wp-notice newticket-not-here">
 			<p><strong>ARE YOU IN THE RIGHT PLACE?</strong></p>
 
 			<py:choose test="">
-				<p py:when="project_slug == 'plugins' and ticket.component and ticket.component != 'not-listed'"><strong>This is not for support.</strong> Please try this plugin's <a class="ext-link" href="${support_link}plugin/${ticket.component}"><span class="icon">&nbsp;</span>support forum</a>.</p>
-				<p py:otherwise=""><strong>This is not for support.</strong> Please try the <a class="ext-link" href="${support_link}"><span class="icon">&nbsp;</span>support forums</a>.</p>
+				<p py:when="project_slug == 'plugins' and ticket.component and ticket.component != 'not-listed'" class="support">
+					<span class="dashicons dashicons-editor-help"></span>
+					<strong>This is not for support.</strong><br />
+					Please try this plugin's <a href="${support_link}plugin/${ticket.component}">support forum</a>.
+				</p>
+				<p py:otherwise="" class="support">
+					<span class="dashicons dashicons-editor-help"></span>
+					<strong>This is not for support.</strong><br />
+					Please try the <a href="${support_link}">support forums</a>.</p>
 			</py:choose>
 
 			<py:choose test="project_slug">
-				<p py:when="'plugins'"><strong>Do not report potential security vulnerabilities here.</strong> Please email <a class="mail-link" href="mailto:plugins@wordpress.org"><span class="icon">&nbsp;</span>plugins@wordpress.org</a>.</p>
-				<p py:otherwise=""><strong>Do not report potential security vulnerabilities here.</strong> Read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
-			</py:choose>
+				<p py:when="'plugins'" class="security">
+					<span class="dashicons dashicons-lock"></span>
+					<strong>Do not report potential security vulnerabilities here.</strong><br />
+					Please email <a class="mail-link" href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>.
+				</p>
 
-			<py:if test="project_slug == 'core'">
-			<hr />
-			<p><strong>REPORTING BUGS</strong></p>
-			<p><strong>This form is for reporting bugs to WordPress core.</strong> After <a href="/search">searching</a> for existing tickets and referencing the Codex article on <a class="ext-link" href="//codex.wordpress.org/Reporting_Bugs"><span class="icon">&nbsp;</span>Reporting Bugs</a>, please review these notes:</p>
+				<p py:otherwise="" class="security">
+					<span class="dashicons dashicons-lock"></span>
+					<strong>Do not report potential security vulnerabilities here.</strong><br />
+
+					See the <a href="//make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">Security FAQ</a> and contact <a class="mail-link" href="mailto:security@wordpress.org">security@wordpress.org</a>.
+				</p>
+			</py:choose>
+		</div>
+		<py:if test="project_slug == 'core'">
+		<div class="newticket-instructions">
+			<p><strong>This form is for reporting bugs in WordPress.</strong> Here are some questions and tips to help you write a great bug report:</p>
 			<ul>
-				<li>Are you using the latest and greatest version of WordPress, or the latest development/trunk version? If neither, please stop here and update first.</li>
-				<li>What steps should be taken to <strong>consistently</strong> reproduce the problem?</li>
-				<li>In case it's relevant to the ticket, what is the expected output? What did you see instead?</li>
+				<li>Are you using either the latest version of WordPress, or the latest development version? If not, please update first.</li>
+				<li>What steps should be taken to consistently reproduce the problem?</li>
 				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
+				<li>In case it's relevant to the ticket, what is the expected output or result? What did you see instead?</li>
 				<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
 			</ul>
-			</py:if>
+			<p>You can search for existing tickets <a href="/search">here</a>. For more help, please see the <a href="//make.wordpress.org/core/handbook/reporting-bugs/">contributor handbook</a>.</p>
+
 		</div>
+		</py:if>
 		<form py:attrs="select('@*')">
 			${select('*|comment()|text()')}
 		</form>
