@@ -249,7 +249,7 @@
 <div py:match="div[@id='content' and @class='search']/h1">
 	<h1 py:attrs="select('@*')">${select('*|comment()|text()')}</h1>
 	<span class="create-new-ticket button button-large button-primary">
-		<a href="https://wordpress.org/support/bb-login.php?redirect_to=https://core.trac.wordpress.org/newticket">Create a new ticket</a>
+		<a href="https://wordpress.org/support/bb-login.php?redirect_to=https://${project_slug}.trac.wordpress.org/newticket">Create a new ticket</a>
 	</span>
 </div>
 
