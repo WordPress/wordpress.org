@@ -270,12 +270,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				remove = true;
 
 			// If we're on /newticket (based on the field-owner check), declutter.
-			if ( $('#field-owner').length ) {
+			if ( $('#field-owner').length && $(document.body).hasClass( 'core' ) ) {
 				$('#field-priority, #field-severity, #field-milestone, #field-cc, #field-keywords').parents('td').hide().prev().hide();
 				if ( $('#field-focuses').length ) {
 					$('#field-focuses').closest('td').attr( 'colspan', 3 );
 					$('#field-component').parent().add( $('#field-component').parent().prev() ).wrapAll( '<tr />' ).insertBefore( $( '#field-focuses' ).parents( 'tr' ) );
 				}
+				$('label[for="field-focuses"]').html( 'Contributor<br/>Focuses:' );
+				$('#field-version').after( "<br/><em>If you're filing a bug against trunk, choose <a href='#' class='set-trunk'>'trunk'</a>. Otherwise, choose the earliest affected version you tested.</em>" );
+				$('.set-trunk').on( 'click', function() {
+					$('#field-version').val('trunk');
+					return false;
+				});
 			}
 
 			elements.type = $('#field-type');
@@ -447,7 +453,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						.parents('table').css('table-layout', 'fixed');
 
 					// If the owner field exists, then we're on /newticket. Remove it.
-					$('#field-owner').parents('tr').remove();
+					$('#field-owner').parents('tr').hide();
 
 					html = '<div><label id="keyword-label" for="keyword-add" style="width:' + labelWidth + 'px">Workflow Keywords:</label>';
 					html += '<select id="keyword-add"><option value=""> - Add - </option></select> <a id="edit-keywords">manual</a></div>';
@@ -582,7 +588,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				if ( field.length === 0 ) {
 					return;
 				}
-				$('label[for="field-focuses"]').parent().remove();
+				if ( $( '#field-owner' ).length === 0 ) {
+					$('label[for="field-focuses"]').parent().remove();
+				}
 				if ( field.parent().attr( 'colspan' ) == 3 ) {
 					field.parent().attr( 'id', 'focuses' );
 				} else {

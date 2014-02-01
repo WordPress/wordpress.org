@@ -762,6 +762,57 @@ h3.change .profile-link {
 .wp-caution li {
 	margin-bottom: 0.5em;
 }
+/* Warnings when creating a new ticket */
+.newticket-not-here {
+	padding: 6px 1.2em;
+	overflow: auto;
+}
+.newticket-not-here .dashicons {
+	font-size: 40px;
+	height: 40px;
+	width: 40px;
+	float: left;
+	padding-right: 13px;
+}
+#main .newticket-not-here .security {
+	margin-top: 1.5em;
+}
+#main .newticket-not-here .support {
+	float: left;
+	margin-top: .5em;
+	min-width: 36%;
+}
+body.plugins #main .newticket-not-here .support {
+	min-width: 43%;
+}
+.newticket-instructions {
+	margin: 1em 0;
+}
+.newticket-instructions li {
+	padding: 4px 0;
+}
+
+#propertyform[action*="/newticket"] #properties legend {
+	display: none;
+}
+#propertyform[action*="/newticket"] fieldset {
+	padding: 0;
+	border: none;
+	background: none;
+}
+#propertyform[action*="/newticket"] #properties .fullrow input {
+	width: 99.4%;
+}
+#propertyform[action*="/newticket"] #focuses span {
+	display: none;
+}
+#propertyform[action*="/newticket"] #properties table td#focuses {
+	padding-left: 0;
+}
+.set-trunk, .set-trunk:hover {
+	border: none;
+	background: none;
+}
 /* Remove nowrap from long titles */
 .tickets tbody td.summary,
 .reports tbody td.summary {
