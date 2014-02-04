@@ -1,6 +1,6 @@
 Index: trac-1.0.1/trac/ticket/notification.py
 ===================================================================
---- trac-1.0.1/trac/ticket/notification.py	(revision 12333)
+--- trac-1.0.1/trac/ticket/notification.py	(revision 12423)
 +++ trac-1.0.1/trac/ticket/notification.py	(working copy)
 @@ -29,6 +29,7 @@
  from trac.util.datefmt import to_utimestamp
@@ -10,7 +10,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
  
  
  class TicketNotificationSystem(Component):
-@@ -94,6 +95,43 @@
+@@ -94,6 +95,57 @@
                  torecipients.append(row[2])
              break
  
@@ -22,6 +22,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
 +            old_component = component
 +            milestone = ticket['milestone']
 +            old_milestone = milestone
++            focuses = ticket['focuses']
 +
 +            # Retrieve the old milestone/component if it just changed
 +            changes = ticket.get_changelog()
@@ -36,6 +37,19 @@ Index: trac-1.0.1/trac/ticket/notification.py
 +                        old_component = change[3]
 +                    if change[2] == 'milestone':
 +                        old_milestone = change[3]
++                    if change[2] == 'focuses' :
++                        focuses += ', ' + change[3]
++            else:
++                # Add new ticket subscribers
++                for row in db("SELECT username FROM _notifications WHERE type = 'newticket' AND value = '1'"):
++                    torecipients.append(row[0])
++
++            # Add focus subscribers
++            focuses = focuses.split(', ')
++            focuses = list(set(focuses)) # de-dupe
++            for row in db("""SELECT username FROM _notifications
++                WHERE type = 'focus' AND value IN ( %s )""" % ','.join(['%s']*len(focuses)), focuses):
++                torecipients.append(row[0])
 +
 +            # Add component subscribers
 +            for row in db("""SELECT username FROM _notifications
@@ -54,7 +68,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
          # Harvest email addresses from the author field of ticket_change(s)
          if notify_updater:
              for author, ticket in db("""
-@@ -126,6 +164,12 @@
+@@ -126,6 +178,12 @@
          elif updater:
              torecipients.append(updater)
  
