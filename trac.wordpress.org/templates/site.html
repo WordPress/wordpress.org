@@ -7,6 +7,7 @@
 	scripts_version = '38'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
+	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
 
 	if project_slug == 'core':
 		notifications_enabled = 1
@@ -58,8 +59,6 @@
  		for i in xrange(0, len(fields)):
 			fields_map[ fields[i]['name'] ] = i
 ?>
-
-<script type="text/javascript" charset="utf-8" src="/chrome/common/js/jquery.js"></script>
 
 <!--! styles and such -->
 <head py:match="head" py:attrs="select('@*')">
@@ -165,7 +164,7 @@
 	</py:if>
 
 	<!--! force non-gardeners to preview before posting -->
-	<py:if test="not ( 'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource) ) and not 'preview' in req.args">
+	<py:if test="not is_bug_gardener and not 'preview' in req.args">
 		<py:match path="form[@id='propertyform']/div[@class='buttons']" once="true">
 			<div py:attrs="select('@*')">
 				<input type="submit" name="preview" value="Continue to Preview" />
@@ -203,7 +202,7 @@
 </py:if>
 
 <!--! Remove 'Replace existing attachment of the same name' checkbox for non-gardeners -->
-<py:if test="not ( 'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource) )">
+<py:if test="not is_bug_gardener">
 	<py:match path="form[@id='attachment']//div[@class='options']" py:strip="" />
 </py:if>
 
@@ -292,7 +291,7 @@
 	<!--! WP.org Global Footer -->
 	<xi:include href="wporg-footer.html" />
 
-	<script py:if="'TICKET_ADMIN' in perm(resource) or 'Bug Gardener' in perm(resource)">
+	<script py:if="is_bug_gardener">
 	var wpBugGardener = true;
 	</script>
 
