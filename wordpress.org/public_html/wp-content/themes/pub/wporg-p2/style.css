@@ -216,17 +216,22 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	font-size: 14px;
 	color #333;
 	line-height: 1.45;
+	background: #e4f2fd;
+	border: 1px solid #d9e1e7;
+	margin-bottom: 10px;
 }
 .make-welcome h4 {
 	font-weight: normal;
 	font-size: 18px;
+	font-family: "Open Sans", serif;
 }
 .make-welcome h4, .make-welcome p {
 	margin-bottom: 14px;
 }
 .make-welcome .welcome p:first-child {
-	font-size: 23px;
-	margin-bottom: 26px;
+	font-size: 22px;
+	margin: 12px 0 23px;
+	font-family: "Open Sans", serif;
 }
 .make-welcome .column {
 	vertical-align: top;
