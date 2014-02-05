@@ -9,7 +9,7 @@ add_action( 'wp_enqueue_scripts', 'wporg_p2_enqueue_scripts', 11 );
 function wporg_p2_enqueue_scripts() {
 	wp_deregister_style( 'p2' );
 	wp_register_style( 'p2', get_template_directory_uri() . '/style.css' );
-	wp_enqueue_style( 'wporg-p2', get_stylesheet_uri(), array( 'p2' ), '2014-02-05a' );
+	wp_enqueue_style( 'wporg-p2', get_stylesheet_uri(), array( 'p2' ), '2014-02-05b' );
 }
 
 add_filter( 'get_comment_author_url', 'wporg_p2_comment_profile_urls' );
@@ -64,4 +64,17 @@ function wporg_add_site_slug_to_body_class( $classes ) {
 	return $classes; 
 }
 
- 
+function wporg_p2_iphone_style_override() {
+    if ( p2_is_iphone() ) {
+		wp_deregister_style( 'p2-iphone-style' );
+	}
+	wp_enqueue_style(
+		'p2-iphone-style',
+		get_template_directory_uri() . '/style-iphone.css',
+		array(),
+		'20120402',
+		'(max-width: 320px)'
+    );
+}
+add_action( 'wp_enqueue_scripts', 'wporg_p2_iphone_style_override', 1001 );
+

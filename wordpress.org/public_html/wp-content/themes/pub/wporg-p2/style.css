@@ -237,6 +237,7 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	vertical-align: top;
 	display: inline-block;
 	width: 30%;
+	min-width: 290px;
 	padding: 1.5%;
 }
 .make-welcome .welcome {
