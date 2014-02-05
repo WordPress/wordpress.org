@@ -947,6 +947,15 @@ dl.attachments dt {
 #notifications.subscribed p.receiving-notifications {
 	display: block;
 }
+#notifications fieldset {
+	position: relative;
+}
+#notifications .preferences {
+	position: absolute;
+	top: 22px;
+	right: 14px;
+	font-size: 12px;
+}
 td.Stars {
 	white-space: nowrap;
 }
