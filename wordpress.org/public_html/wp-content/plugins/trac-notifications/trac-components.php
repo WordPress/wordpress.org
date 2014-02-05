@@ -246,8 +246,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 
 		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
-		// echo "<strong>Want to help? Start following this component!</strong> <a href='/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
-		echo "Want to help? Feel free to dig into any ticket.\n\n";
+		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
 		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
 		if ( $followers ) {
