@@ -211,3 +211,30 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	margin: 10px auto -10px;
 	display: block;
 }
+
+.make-welcome {
+	font-size: 14px;
+	color #333;
+	line-height: 1.45;
+}
+.make-welcome h4 {
+	font-weight: normal;
+	font-size: 18px;
+}
+.make-welcome h4, .make-welcome p {
+	margin-bottom: 14px;
+}
+.make-welcome .welcome p:first-child {
+	font-size: 23px;
+	margin-bottom: 26px;
+}
+.make-welcome .column {
+	vertical-align: top;
+	display: inline-block;
+	width: 30%;
+	padding: 1.5%;
+}
+.make-welcome .welcome {
+	padding-top: 1%;
+}
+

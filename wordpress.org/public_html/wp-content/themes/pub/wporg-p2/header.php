@@ -28,4 +28,6 @@ require WPORGPATH . 'header.php';
 
 <div id="wrapper">
 
+	<?php is_home() && ! is_paged() && get_template_part( 'make-intro' ); ?>
+
 	<?php get_sidebar( get_post_type() ); ?>
