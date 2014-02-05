@@ -33,7 +33,7 @@ class wporg_trac_notifications {
 	function set_trac( $trac ) {
 		$this->trac_subdomain = $trac;
 		if ( function_exists( 'add_db_table' ) ) {
-			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone' );
+			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
 			foreach ( $tables as $table ) {
 				add_db_table( 'trac_' . $trac, $table );
 			}
@@ -79,6 +79,10 @@ class wporg_trac_notifications {
 		return $this->trac->get_row( $this->trac->prepare( "SELECT * FROM ticket WHERE id = %d", $ticket_id ) );
 	}
 
+	function get_trac_ticket_focuses( $ticket_id ) {
+		return $this->trac->get_var( $this->trac->prepare( "SELECT value FROM ticket_custom WHERE ticket = %d AND name = 'focuses'", $ticket_id ) );
+	}
+
 	function get_trac_ticket_participants( $ticket_id ) {
 		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE ticket = %d", $ticket_id ) );
 	}
@@ -87,8 +91,40 @@ class wporg_trac_notifications {
 		return $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 1", $ticket_id ) );
 	}
 
+	function get_trac_focuses() {
+		return array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rtl', 'template', 'ui' );
+	}
+
+	function make_components_tree( $components ) {
+		$tree = array();
+		$subcomponents = array(
+			'Comments' => array( 'Pings/Trackbacks' ),
+			'Editor' => array( 'Autosave', 'Press This', 'Quick/Bulk Edit', 'TinyMCE' ),
+			'Formatting' => array( 'Charset', 'Shortcodes' ),
+			'Media' => array( 'Embeds', 'Gallery', 'Upload' ),
+			'Permalinks' => array( 'Canonical', 'Rewrite Rules' ),
+			'Posts, Post Types' => array( 'Post Formats', 'Post Thumbnails', 'Revisions' ),
+			'Themes' => array( 'Appearance', 'Widgets', 'Menus' ),
+			'Users' => array( 'Role/Capability', 'Login and Registration' )
+		);
+		foreach ( $components as $component ) {
+			if ( false === $tree[ $component ] ) {
+				continue;
+			} elseif ( isset( $subcomponents[ $component ] ) ) {
+				$tree[ $component ] = $subcomponents[ $component ];
+				foreach ( $subcomponents[ $component ] as $subcomponent ) {
+					$tree[ $subcomponent ] = false;
+				}
+			} else {
+				$tree[ $component ] = true;
+			}
+		}
+		$tree = array_filter( $tree );
+		return $tree;
+	}
+
 	function get_trac_components() {
-		return $this->trac->get_col( "SELECT name FROM component ORDER BY name ASC" );
+		return $this->trac->get_col( "SELECT name FROM component WHERE name <> 'WordPress.org site' ORDER BY name ASC" );
 	}
 
 	function get_trac_milestones() {
@@ -100,11 +136,13 @@ class wporg_trac_notifications {
 
 	function get_trac_notifications_for_user( $username ) {
 		$rows = $this->trac->get_results( $this->trac->prepare( "SELECT type, value FROM _notifications WHERE username = %s ORDER BY type ASC, value ASC", $username ) );
-		$notifications = array( 'component' => array(), 'milestone' => array() );
+		$notifications = array( 'component' => array(), 'milestone' => array(), 'focus' => array(), 'newticket' => array() );
 
 		foreach ( $rows as $row ) {
 			$notifications[ $row->type ][ $row->value ] = true;
 		}
+		$notifications['newticket'] = ! empty( $notifications['newticket']['1'] );
+
 		return $notifications;
 	}
 
@@ -205,6 +243,8 @@ class wporg_trac_notifications {
 			exit;
 		}
 
+		$focuses = explode( ', ', $this->get_trac_ticket_focuses( $ticket_id ) );
+
 		$notifications = $this->get_trac_notifications_for_user( $username );
 
 		$ticket_sub = $this->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
@@ -225,6 +265,21 @@ class wporg_trac_notifications {
 		if ( in_array( $username, $participants ) ) {
 			$reasons['participant'] = 'you have commented';
 		}
+
+		$intersected_focuses = array();
+		foreach ( $focuses as $focus ) {
+			if ( ! empty( $notifications['focus'][ $focus ] ) ) {
+				$intersected_focuses[] = $focus;
+			}
+		}
+		if ( $intersected_focuses ) {
+			if ( count( $intersected_focuses ) === 1 ) {
+				$reasons['focus'] = sprintf( 'you subscribe to the %s focus', $intersected_focuses[0] );
+			} else {
+				$reasons['focus'] = 'you subscribe to the ' . wp_sprintf( '%l focuses', $intersected_focuses );
+			}
+		}
+
 		if ( ! empty( $notifications['component'][ $ticket->component ] ) ) {
 			$reasons['component'] = sprintf( 'you subscribe to the %s component', $ticket->component );
 		}
@@ -333,12 +388,13 @@ class wporg_trac_notifications {
 
 	function notification_settings_page() {
 		if ( ! is_user_logged_in() ) {
-			return 'Please log in to save your notification preferences.';
+			return 'Please <a href="//wordpress.org/support/bb-login.php">log in</a> to save your notification preferences.';
 		}
 
 		ob_start();
 		$components = $this->get_trac_components();
 		$milestones = $this->get_trac_milestones();
+		$focuses = $this->get_trac_focuses();
 
 		$username = wp_get_current_user()->user_login;
 		$notifications = $this->get_trac_notifications_for_user( $username );
@@ -346,8 +402,8 @@ class wporg_trac_notifications {
 		if ( $_POST && isset( $_POST['trac-nonce'] ) ) {
 			check_admin_referer( 'save-trac-notifications', 'trac-nonce' );
 
-			foreach ( array( 'milestone', 'component' ) as $type ) {
-				foreach ( $_POST[ $type ] as $value => $on ) {
+			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
+				foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
 					if ( empty( $notifications[ $type ][ $value ] ) ) {
 						$this->trac->insert( '_notifications', compact( 'username', 'type', 'value' ) );
 						$notifications[ $type ][ $value ] = true;
@@ -355,24 +411,44 @@ class wporg_trac_notifications {
 				}
 
 				foreach ( $notifications[ $type ] as $value => $on ) {
-					if ( empty( $_POST[ $type ][ $value ] ) ) {
+					if ( empty( $_POST['notifications'][ $type ][ $value ] ) ) {
 						$this->trac->delete( '_notifications', compact( 'username', 'type', 'value' ) );
 						unset( $notifications[ $type ][ $value ] );
 					}
 				}
 			}
+			if ( empty( $_POST['notifications']['newticket'] ) && ! empty( $notifications['newticket'] ) ) {
+					$this->trac->delete( '_notifications', array( 'username' => $username, 'type' => 'newticket' ) );
+			} elseif ( ! empty( $_POST['notifications']['newticket'] ) && empty( $notifications['newticket'] ) ) {
+				$this->trac->insert( '_notifications', array( 'username' => $username, 'type' => 'newticket', 'value' => '1' ) );
+			}
 		}
 		?>
 
 		<style>
-		#components, #milestones, p.save-changes {
+		#focuses, #components, #milestones, p.save-changes {
 			clear: both;
 		}
 		#milestones, p.save-changes {
 			padding-top: 1em;
 		}
-		#components li,
-		#milestones li {
+		#focuses li {
+			display: inline-block !important;
+			list-style: none;
+			min-width: 15%;
+			margin-right: 30px;
+		}
+		#components > ul {
+			float: left;
+			width: 24%;
+			margin: 0 0 0 1% !important;
+			margin: 0;
+			padding: 0;
+		}
+		#components > ul > li {
+			list-style: none;
+		}
+		#milestones > ul > li {
 			float: left;
 			width: 25%;
 			list-style: none;
@@ -401,13 +477,40 @@ class wporg_trac_notifications {
 		<?php
 		echo '<form method="post" action="">';
 		wp_nonce_field( 'save-trac-notifications', 'trac-nonce', false );
+		echo '<h3>New Tickets</h3>';
+		$checked = checked( $notifications['newticket'], true, false );
+		echo '<ul><li style="list-style:none"><label><input type="checkbox" ' . $checked . 'name="notifications[newticket]" /> Receive all new ticket notifications.</label><br /><em>To receive comments to a ticket, you will need to star it, unless it matches one of your other preferences below.</em></li></ul>';
+		echo '<div id="focuses">';
+		echo '<h3>Focuses</h3>';
+		echo '<ul>';
+		foreach ( $focuses as $focus ) {
+			$checked = checked( ! empty( $notifications['focus'][ $focus ] ), true, false );
+			echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[focus][' . esc_attr( $focus ) . ']" /> ' . $focus . '</label></li>';
+		}
+		echo '</ul>';
+		echo '</div>';
 		echo '<div id="components">';
 		echo '<h3>Components</h3>';
 		echo '<p class="select-all"><a href="#" data-action="select-all">select all</a> &bull; <a href="#" data-action="clear-all">clear all</a></p>';
-		echo '<ul>';
-		foreach ( $components as $component ) {
+		echo "<ul>\n";
+		$components_tree = $this->make_components_tree( $components );
+		$breakpoints = array( 'Export', 'Media', 'Script Loader' );
+		foreach ( $components_tree as $component => $subcomponents ) {
+			if ( in_array( $component, $breakpoints ) ) {
+				echo '</ul><ul>';
+			}
 			$checked = checked( ! empty( $notifications['component'][ $component ] ), true, false );
-			echo '<li><label><input type="checkbox" ' . $checked . 'name="component[' . esc_attr( $component ) . ']" /> ' . $component . '</label></li>';
+			echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $component ) . ']" /> ' . $component . "</label>\n";
+			if ( is_array( $subcomponents ) ) {
+				echo "<ul>\n";
+				foreach ( $subcomponents as $subcomponent ) {
+					$i++;
+					$checked = checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false );
+					echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . $subcomponent . "</label></li>\n";
+				}
+				echo "</ul>\n";
+			}
+			echo "</li>\n";
 		}
 		echo '</ul>';
 		echo '</div>';
@@ -424,7 +527,7 @@ class wporg_trac_notifications {
 				}
 				$class = ' class="' . $class . '"';
 			}
-			echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="milestone[' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
+			echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
 		}
 		echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
 		echo '</ul>';
