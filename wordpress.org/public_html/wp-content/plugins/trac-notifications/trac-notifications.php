@@ -336,6 +336,7 @@ class wporg_trac_notifications {
 				<p class="receiving-notifications-because">You are receiving notifications because <?php echo current( $reasons ); ?>. <a href="#" class="button button-small block-notifications">Block notifications</a></p>
 			<?php endif ?>
 				<p class="not-receiving-notifications">You do not receive notifications because you have blocked this ticket. <a href="#" class="button button-small unblock-notifications">Unblock</a></p>
+				<a class="preferences" href="<?php echo home_url( 'notifications/' ); ?>">Preferences</a>
 		</fieldset>
 	</div>
 	<?php
