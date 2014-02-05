@@ -418,7 +418,7 @@ jQuery( document ).ready( function( $ ) {
 		foreach ( $tickets as $ticket ) {
 			echo '<li><a href="https://core.trac.wordpress.org/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
 			if ( ! empty( $ticket->focuses ) ) {
-				echo ' <span class="focus">' . esc_html( implode( '</span> <span class="focus">', explode( ', ', $ticket->focuses ) ) ) . '</span>';
+				echo ' <span class="focus">' . implode( '</span> <span class="focus">', explode( ', ', esc_html( $ticket->focuses ) ) ) . '</span>';
 			}
 			echo "</li>\n";
 		}
