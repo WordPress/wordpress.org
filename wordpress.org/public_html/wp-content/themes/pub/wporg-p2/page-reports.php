@@ -40,7 +40,7 @@ if ( isset( $_GET['from-trac'] ) ) {
 }
 </style>
 <script>
-jQuery(document).on( 'ready', function($) {
+jQuery(document).ready( function($) {
 	$( '.tickets-by-topic' ).on( 'change', function() {
 		var topic = $(this).val();
 		if ( ! topic ) {
