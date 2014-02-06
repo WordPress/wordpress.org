@@ -8,11 +8,12 @@ class WCCSP_Settings {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_menu',            array( $this, 'register_settings_pages' ) );
-		add_action( 'init',                  array( $this, 'init' ) );
-		add_action( 'admin_init',            array( $this, 'register_settings' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_action( 'admin_notices',         array( $this, 'render_admin_notices' ) );
+		add_action( 'admin_menu',                   array( $this, 'register_settings_pages' ) );
+		add_action( 'init',                         array( $this, 'init' ) );
+		add_action( 'admin_init',                   array( $this, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts',        array( $this, 'enqueue_scripts' ) );
+		add_action( 'admin_notices',                array( $this, 'render_admin_notices' ) );
+		add_action( 'update_option_wccsp_settings', array( $this, 'clear_static_page_cache' ) );
 	}
 
 	/**
@@ -199,6 +200,16 @@ class WCCSP_Settings {
 		$new_settings['image_id'] = absint( $new_settings['image_id'] );
 		
 		return $new_settings;
+	}
+
+	/**
+	 * Clear the static page cache
+	 * Changing the settings will change the how the page looks, so the cache needs to be refreshed.
+	 */
+	public function clear_static_page_cache() {
+		if ( function_exists( 'wp_cache_clear_cache' ) ) {
+			wp_cache_clear_cache();
+		}
 	}
 
 	/**

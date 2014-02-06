@@ -3,8 +3,10 @@ High priority:
 		make responsive & mobile-first
 		make contact box align w/ right edge of intro text
 		make work consistently with any theme
+		center subscribe buttons
 	display dates
 	add color pickers
+	confirmation that contact form was sent
 	
 Medium priority:
 	update image preview after they pick new but before they save/refresh
