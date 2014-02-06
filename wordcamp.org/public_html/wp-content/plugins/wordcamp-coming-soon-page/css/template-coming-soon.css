@@ -1,0 +1,82 @@
+h1, h2 {
+	margin-top: 0;
+	margin-bottom: 1em;
+	text-align: center;
+}
+
+#wccsp-container {
+	max-width: 700px;
+	margin: 50px auto;
+	padding: 40px;
+	overflow: auto;
+
+	border: 1px solid black; /* todo box shadow */
+}
+	
+	#wccsp-logo {
+		display: block;
+		margin: 0 auto 40px auto;
+	}
+	
+	#wccsp-introduction {
+		margin-bottom: 0;
+	}
+	
+	.wccsp-box {
+		width: 46%;		/* todo temp workaround */
+		min-height: 150px;
+		float: left;
+		overflow: auto;
+		margin: 40px 40px 0 0;
+		padding: 15px;
+	
+		border: 1px solid black; 	/* todo box shadow */
+	}
+	
+		#wccsp-container .wccsp-box:last-child {
+			margin-right: 0;
+		}
+	
+		.wccsp-box h2 {
+			margin-top: 0;
+		}
+		
+		.wccsp-box p:last-child {
+			margin-bottom: 0;
+		}
+		
+		.wccsp-box input[type="text"],
+		.wccsp-box textarea {
+			width: 100%;
+			margin-bottom: 1em;
+			padding: 2px 3px;
+			
+			/* todo not working */
+		}
+		
+		.wccsp-box input[type="text"]:last-child {
+			margin-bottom: 0;
+		}
+		
+		.wccsp-box input[type="submit"] {
+			margin: 0 auto;				/*todo not working */
+			text-align: center;
+		}
+		
+		.wccsp-box textarea {
+			height: 8em;
+		}
+	
+		.jetpack_subscription_widget {
+			background-color: inherit;	/* todo some of this unnecessary if leave jetpack dequeued */
+			margin-bottom: 0;
+			padding: 0;
+		}
+		
+		.grunion-field-label span {
+			padding-left: 5px;			/* todo some of this unnecessary if leave jetpack dequeued */
+		}
+		
+		p.contact-submit {
+			margin-top: 1em;			/* todo some of this unnecessary if leave jetpack dequeued */
+		}

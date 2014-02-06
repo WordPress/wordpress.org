@@ -1,0 +1,18 @@
+High priority:
+	finish styles
+		make responsive & mobile-first
+		make contact box align w/ right edge of intro text
+		make work consistently with any theme
+	display dates
+	add color pickers
+	
+Medium priority:
+	update image preview after they pick new but before they save/refresh
+	customize image size in template
+	contact form shortcode - lookup email from wordcamp cpt instead of admin email?
+	internationalize
+	any other TODOs in code
+	
+			
+Low priority:
+	contact form submitted to latest post url instead of current page (if on home page)
