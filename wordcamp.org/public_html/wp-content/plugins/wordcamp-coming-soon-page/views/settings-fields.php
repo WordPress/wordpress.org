@@ -29,9 +29,9 @@
 	</p>
 	
 	<?php if( $image ) : ?>
-		<p>
+		<p id="wccsp_image_preview">
 			Current image preview:<br />
-			<img id="wccsp-image-preview" src="<?php echo esc_attr( $image[0] ); ?>" alt="Image Preview" />
+			<img src="<?php echo esc_attr( $image[0] ); ?>" alt="Image Preview" />
 		</p>
 	<?php endif; ?>
 <?php endif; ?>
