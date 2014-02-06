@@ -15,7 +15,7 @@
 		<h1><?php echo esc_attr( get_bloginfo( 'name' ) ); ?></h1>
 		
 		<?php if ( $image_url ) : ?>
-			<img id="wccsp-logo" src="<?php echo esc_attr( $image_url ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" />
+			<img id="wccsp-image" src="<?php echo esc_attr( $image_url ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" />
 		<?php endif; ?>
 
 		<?php if ( $dates ) : ?>

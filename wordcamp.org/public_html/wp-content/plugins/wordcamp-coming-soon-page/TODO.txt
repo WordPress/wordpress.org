@@ -1,14 +1,14 @@
 High priority:
-	finish styles
-		make responsive & mobile-first
-		make contact box align w/ right edge of intro text
-		make work consistently with any theme
-		center subscribe buttons
+	wccsp_image_id
+	contact form bug
+	 	confirmation that contact form was sent
 	display dates
-	add color pickers
-	confirmation that contact form was sent
+	make work consistently with any theme
+	warn user that image preview won't update until they save settings 
+	
 	
 Medium priority:
+	add color pickers
 	update image preview after they pick new but before they save/refresh
 	customize image size in template
 	contact form shortcode - lookup email from wordcamp cpt instead of admin email?
@@ -17,4 +17,8 @@ Medium priority:
 	
 			
 Low priority:
+	styles
+		make responsive & mobile-first
+		make contact box align w/ right edge of intro text properly instead of workaround
 	contact form submitted to latest post url instead of current page (if on home page)
+	make dashes/underscores consistent in html element ids/names

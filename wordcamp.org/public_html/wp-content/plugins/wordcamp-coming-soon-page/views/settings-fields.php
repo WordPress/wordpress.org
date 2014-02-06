@@ -31,7 +31,7 @@
 	<?php if( $image ) : ?>
 		<p>
 			Current image preview:<br />
-			<img id="wccsp-logo-preview" src="<?php echo esc_attr( $image[0] ); ?>" alt="Image Preview" />
+			<img id="wccsp-image-preview" src="<?php echo esc_attr( $image[0] ); ?>" alt="Image Preview" />
 		</p>
 	<?php endif; ?>
 <?php endif; ?>
