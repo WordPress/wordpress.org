@@ -23,7 +23,7 @@
 		<?php endif; ?>
 		
 		<p id="wccsp-introduction">
-			<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> is in the early planing stages. In the mean time, you can subscribe to be notified when the site goes live, or contact the organizers to get involved.
+			<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> is in the early planing stages. In the meantime, you can subscribe to be notified when the site goes live, or contact the organizers to get involved.
 		</p>
 
 		<?php if ( in_array( 'subscriptions', $active_modules ) ) : ?>
