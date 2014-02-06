@@ -36,7 +36,7 @@
 			<div class="wccsp-box">
 				<h2>Contact the Organizers</h2>
 				
-				<?php echo do_shortcode( $contact_form_shortcode ); ?>	
+				<?php echo $contact_form_shortcode; ?>
 			</div>
 		<?php endif; ?>
 		

@@ -136,21 +136,45 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Generate the contact form shortcode string 
-	 * 
-	 * @return string
+	 * Retrieve the contact form shortcode string
+	 *
+	 * We can't just create an arbitrary shortcode because of https://github.com/Automattic/jetpack/issues/102. Instead we have to use a form that's tied to a page.
+	 * This is somewhat fragile, though. It should work in most cases because the first $page that contains [contact-form] will be the one we automatically create
+	 * when the site is created, but if the organizers delete that and then add multiple forms, the wrong form could be displayed. The alternative approaches also
+	 * have problems, though, and #102 should be fixed relatively soon, so hopefully this will be good enough until it can be refactored. 
+	 * todo Refactor this once #102-jetpack is fixed.
+	 *       
+	 * @return string|false
 	 */
 	public function get_contact_form_shortcode() {
-		$shortcode = sprintf(
-			"[contact-form to='%s' subject='%s contact request']
-				[contact-field label='Name' type='name' required='1' /]
-				[contact-field label='Email' type='email' required='1' /]
-				[contact-field label='Comment' type='textarea' required='1' /]
-			[/contact-form]",
-			get_bloginfo( 'name' ),
-			get_option( 'admin_email' )
-		);
+		$contact_form_shortcode = false;
+		$shortcode_regex        = get_shortcode_regex();
 		
-		return $shortcode;
+		$all_pages = get_posts( array(
+			'post_type'      => 'page',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+		) );
+		
+		foreach ( $all_pages as $page ) {
+			preg_match_all( '/' . $shortcode_regex . '/s', $page->post_content, $matches, PREG_SET_ORDER );
+
+			foreach ( $matches as $shortcode ) {
+				if ( 'contact-form' === $shortcode[2] ) {
+					global $post;
+					$post = $page;
+					setup_postdata( $post );
+					
+					ob_start();
+					echo do_shortcode( $shortcode[0] );
+					$contact_form_shortcode = ob_get_clean();
+					
+					wp_reset_postdata();
+					break;
+				}
+			}
+		}
+		
+		return $contact_form_shortcode;
 	}
 } // end WordCamp_Coming_Soon_Page

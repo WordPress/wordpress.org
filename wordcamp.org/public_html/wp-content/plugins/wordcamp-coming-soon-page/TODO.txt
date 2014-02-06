@@ -1,24 +1,26 @@
 High priority:
-	wccsp_image_id
 	contact form bug
 	 	confirmation that contact form was sent
 	display dates
 	make work consistently with any theme
 	warn user that image preview won't update until they save settings 
+	refactor get_contact_form_shortcode() once https://github.com/Automattic/jetpack/issues/102 is fixed
 	
 	
 Medium priority:
 	add color pickers
 	update image preview after they pick new but before they save/refresh
-	customize image size in template
+	add admin notice if missing page w/ contact form or it's not published
 	contact form shortcode - lookup email from wordcamp cpt instead of admin email?
 	internationalize
 	any other TODOs in code
+	customize image size in template
 	
-			
+	
 Low priority:
 	styles
 		make responsive & mobile-first
 		make contact box align w/ right edge of intro text properly instead of workaround
 	contact form submitted to latest post url instead of current page (if on home page)
 	make dashes/underscores consistent in html element ids/names
+	
