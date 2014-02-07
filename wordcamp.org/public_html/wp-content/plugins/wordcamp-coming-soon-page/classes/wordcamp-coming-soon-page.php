@@ -178,7 +178,6 @@ class WordCamp_Coming_Soon_Page {
 		
 		$all_pages = get_posts( array(
 			'post_type'      => 'page',
-			'post_status'    => 'any',
 			'posts_per_page' => -1,
 		) );
 		
