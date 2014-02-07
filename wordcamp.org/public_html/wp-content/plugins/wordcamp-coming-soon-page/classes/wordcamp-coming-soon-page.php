@@ -27,6 +27,10 @@ class WordCamp_Coming_Soon_Page {
 	 * Dequeue irrelevant stylesheets and use TwentyThirteen as the base style
 	 */
 	public function manage_plugin_theme_stylesheets() {
+		if ( ! $this->override_theme_template ) {
+			return;
+		}
+		
 		// todo maybe need to exempt jetpack styles also - $exempt_stylesheets = array(  );
 		if ( $this->override_theme_template ) {
 			foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) {
