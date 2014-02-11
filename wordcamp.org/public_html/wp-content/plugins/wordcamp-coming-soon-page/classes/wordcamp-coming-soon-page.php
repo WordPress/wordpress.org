@@ -81,16 +81,19 @@ class WordCamp_Coming_Soon_Page {
 		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
 		?>
 		
+		<!-- BEGIN wordcamp-coming-soon-page -->
 		<style type="text/css">
 			html, body {
 				background-color: <?php echo esc_html( $settings['body_background_color'] ); ?>;
 				color: <?php echo esc_html( $settings['text_color'] ); ?>;
 			}
-
-			#wccsp-container {
+			
+			#wccsp-container,
+			.widget  {
 				background-color: <?php echo esc_html( $settings['container_background_color'] ); ?>;
 			}
 		</style>
+		<!-- END wordcamp-coming-soon-page -->
 
 		<?php
 	}

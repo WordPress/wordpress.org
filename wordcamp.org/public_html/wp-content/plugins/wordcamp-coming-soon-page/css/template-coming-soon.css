@@ -36,6 +36,11 @@ h1, h2 {
 		#wccsp-container .wccsp-box:last-child {
 			margin-right: 0;
 		}
+		
+		.wccsp-box .widget {
+			margin: 0;
+			padding: 0;
+		}
 	
 		.wccsp-box h2 {
 			margin-top: 0;
@@ -65,18 +70,4 @@ h1, h2 {
 		
 		.wccsp-box textarea {
 			height: 8em;
-		}
-	
-		.jetpack_subscription_widget {
-			background-color: inherit;	/* todo some of this unnecessary if leave jetpack dequeued */
-			margin-bottom: 0;
-			padding: 0;
-		}
-		
-		.grunion-field-label span {
-			padding-left: 5px;			/* todo some of this unnecessary if leave jetpack dequeued */
-		}
-		
-		p.contact-submit {
-			margin-top: 1em;			/* todo some of this unnecessary if leave jetpack dequeued */
 		}
