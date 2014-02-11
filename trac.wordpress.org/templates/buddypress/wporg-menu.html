@@ -3,13 +3,13 @@
 	  xmlns:py="http://genshi.edgewall.org/"
 	  py:strip="">
 
-	<!--! Pull #metanav out of div#banner and put it into bbpress.org's #subnav -->
-	<py:match path="div[@id='banner']" buffer="true">
+	<!--! Pull #metanav out of div#banner and put it into buddypress.org's #subnav -->
+	<py:match path="div[@id='banner']" buffer="true" once="true">
 		<div id="subnav">
 			<div id="subnav-inner">
-					<ul id="nav-user" class="menu">
-						${select("div[@id='metanav']/ul/li")}
-					</ul>
+				<ul id="nav-user" class="menu">
+					${select("div[@id='metanav']/ul/li")}
+				</ul>
 			</div>
 		</div>
 		<!--! Leave form#search in #banner -->
