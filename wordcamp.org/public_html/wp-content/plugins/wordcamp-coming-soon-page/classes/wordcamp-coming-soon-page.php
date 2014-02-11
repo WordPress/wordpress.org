@@ -19,7 +19,7 @@ class WordCamp_Coming_Soon_Page {
 	 */
 	public function init() {
 		$settings                      = $GLOBALS['WCCSP_Settings']->get_settings();
-		$this->override_theme_template = 'on' == $settings['enabled'] && ! is_user_logged_in();
+		$this->override_theme_template = 'on' == $settings['enabled'] && ! current_user_can( 'edit_posts' );
 	}
 
 	/**
