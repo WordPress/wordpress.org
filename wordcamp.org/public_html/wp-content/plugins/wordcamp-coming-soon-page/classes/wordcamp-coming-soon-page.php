@@ -31,31 +31,43 @@ class WordCamp_Coming_Soon_Page {
 			return;
 		}
 		
-		// todo maybe need to exempt jetpack styles also - $exempt_stylesheets = array(  );
-		if ( $this->override_theme_template ) {
-			foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) {
-				// todo removing fonts that we want - wp_dequeue_style( $stylesheet );
-			}
-		}
+		$this->dequeue_all_stylesheets();
+		$this->register_twentythirteen_styles();
 
-		$twenty_thirteen_stylesheet = '/twentythirteen/style.css';
-		foreach( $GLOBALS['wp_theme_directories'] as $directory ) {
-			if ( is_file( $directory . $twenty_thirteen_stylesheet ) ) {
-				wp_register_style( 'twentythirteen-style-css', $directory . $twenty_thirteen_stylesheet );
-				wp_register_style( 'twentythirteen-fonts-css', '//fonts.googleapis.com/css?family=Source+Sans+Pro%3A300%2C400%2C700%2C300italic%2C400italic%2C700italic%7CBitter%3A400%2C700&#038;subset=latin%2Clatin-ext' );
-				
-				// todo still isn't consistent between local and remote sandboxes
-			}
-		}
-		
-		wp_register_style(
+		wp_enqueue_style(
 			'wccsp-template',
 			plugins_url( '/css/template-coming-soon.css', __DIR__ ),
-			array( 'twentythirteen-style-css', 'twentythirteen-fonts-css' ),
+			array( 'twentythirteen-fonts', 'genericons', 'twentythirteen-style' ),
 			self::VERSION
 		);
+	}
+
+	/**
+	 * Dequeue all enqueued stylesheets
+	 */
+	protected function dequeue_all_stylesheets() {
+		foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) { 
+			wp_dequeue_style( $stylesheet );
+		}
+	}
+
+	/**
+	 * Register TwentyThirteen's base styles
+	 */
+	protected function register_twentythirteen_styles() {
+		$twentythirteen_uri = get_theme_root_uri( 'twentythirteen' ) . '/twentythirteen'; 
 		
-		wp_enqueue_style( 'wccsp-template' );
+		if ( ! wp_style_is( 'twentythirteen-fonts', 'registered' ) ) {
+			wp_register_style( 'twentythirteen-fonts', '//fonts.googleapis.com/css?family=Source+Sans+Pro%3A300%2C400%2C700%2C300italic%2C400italic%2C700italic%7CBitter%3A400%2C700&#038;subset=latin%2Clatin-ext', array(), null );
+		}
+
+		if ( ! wp_style_is( 'genericons', 'registered' ) ) {
+			wp_register_style( 'genericons', $twentythirteen_uri . '/fonts/genericons.css' );
+		}
+
+		if ( ! wp_style_is( 'twentythirteen-style', 'registered' ) ) {
+			wp_register_style( 'twentythirteen-style', $twentythirteen_uri . '/style.css' );
+		}
 	}
 
 	/**

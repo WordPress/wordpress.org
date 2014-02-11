@@ -1,5 +1,4 @@
 High priority:
-	make work consistently with any theme
 	refactor get_contact_form_shortcode() once https://github.com/Automattic/jetpack/issues/102 is fixed
 		if doesn't happen soon, then add admin notice if missing page w/ contact form or it's not published
 	
