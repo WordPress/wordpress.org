@@ -37,7 +37,7 @@ class WordCamp_Coming_Soon_Page {
 		wp_enqueue_style(
 			'wccsp-template',
 			plugins_url( '/css/template-coming-soon.css', __DIR__ ),
-			array( 'twentythirteen-fonts', 'genericons', 'twentythirteen-style' ),
+			array( 'twentythirteen-fonts', 'genericons', 'twentythirteen-style', 'admin-bar' ),
 			self::VERSION
 		);
 	}
