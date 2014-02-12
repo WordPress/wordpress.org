@@ -71,3 +71,7 @@ h1, h2 {
 		.wccsp-box textarea {
 			height: 8em;
 		}
+
+		.grunion-field-label span {
+			padding-left: 5px;
+		}
