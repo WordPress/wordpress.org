@@ -1,6 +1,6 @@
 <?php
 
-$sites = array( 'core' );
+$sites = array( 'core', 'community' );
 $site = trim( home_url( '', 'relative' ), '/' );
 if ( ! in_array( $site, $sites ) ) {
 	return;
