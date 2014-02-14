@@ -9,7 +9,8 @@ Medium priority:
 	contact form shortcode - lookup email from wordcamp cpt instead of admin email?
 	internationalize
 	any other TODOs in code
-	customize image size in template
+	select image size from dropdown of available sizes
+		maybe add more custom sizes too
 	make the date lookup less fragile? maybe store blog id in wordcamp post type meta so don't have to rely on url, or just parse_url() to make matching easier
 	
 	

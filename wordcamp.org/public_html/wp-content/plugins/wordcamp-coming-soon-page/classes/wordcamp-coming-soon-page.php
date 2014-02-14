@@ -12,6 +12,8 @@ class WordCamp_Coming_Soon_Page {
 		add_action( 'wp_enqueue_scripts', array( $this, 'manage_plugin_theme_stylesheets' ), 99 );    // (hopefully) after all plugins/themes have enqueued their styles
 		add_action( 'wp_head',            array( $this, 'render_dynamic_styles' ) );
 		add_filter( 'template_include',   array( $this, 'override_theme_template' ) );
+
+		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
 	}
 
 	/**
@@ -135,8 +137,10 @@ class WordCamp_Coming_Soon_Page {
 	 * @return string|false
 	 */
 	public function get_image_url() {
-		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
-		$image    = wp_get_attachment_image_src( $settings['image_id'], 'full' );
+		$settings   = $GLOBALS['WCCSP_Settings']->get_settings();
+		$image_meta = wp_get_attachment_metadata( $settings['image_id'] );
+		$size       = isset( $image_meta['sizes']['wccsp_image_medium_rectangle'] ) ? 'wccsp_image_medium_rectangle' : 'full'; 
+		$image      = wp_get_attachment_image_src( $settings['image_id'], $size );
 		
 		return $image ? $image[0] : false;
 	}
