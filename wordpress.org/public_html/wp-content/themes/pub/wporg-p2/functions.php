@@ -78,3 +78,9 @@ function wporg_p2_iphone_style_override() {
 }
 add_action( 'wp_enqueue_scripts', 'wporg_p2_iphone_style_override', 1001 );
 
+// disable the P2 Mentions on the /core/handbook site
+if ( 'make.wordpress.org' === DOMAIN_CURRENT_SITE && 0 === strpos( $_SERVER['REQUEST_URI'], '/core/handbook' ) ) {
+	add_action( 'p2_found_mentions', '__return_empty_array' );
+}
+
+
