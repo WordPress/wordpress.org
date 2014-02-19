@@ -214,7 +214,7 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 
 .make-welcome {
 	font-size: 14px;
-	color #333;
+	color: #333;
 	line-height: 1.45;
 	background: #e4f2fd;
 	border: 1px solid #d9e1e7;
