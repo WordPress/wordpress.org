@@ -256,9 +256,7 @@ class WordCamp_Participation_Notifier {
 					implode( ', ', $response->get_error_messages() ),
 					print_r( $body, true )
 				);
-			} elseif ( 200 != $response['response']['code'] || strlen( $response['body'] ) > 0 ) {
-				// The handler will will not output anything if the request was successful. It might not output anything if it failed,
-				// but in some cases a failure will result in an error message.
+			} elseif ( 200 != $response['response']['code'] || 1 != (int) $response['body'] ) {
 				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
 				
 				$error = sprintf(
