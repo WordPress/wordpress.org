@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name:        WordCamp Participation Notifier
-Description:        Updates a user's WordPress.org profile when they participate in a WordCamp.
-Author:             WordCamp Central
-Author URI:         http://wordcamp.org
-Version:            0.1
-License:            GPLv2 or later
+Plugin Name: WordCamp Participation Notifier
+Description: Updates a user's WordPress.org profile when they participate in a WordCamp.
+Author:      WordCamp Central
+Author URI:  http://wordcamp.org
+Version:     0.1
+License:     GPLv2 or later
 */
 
 class WordCamp_Participation_Notifier {
