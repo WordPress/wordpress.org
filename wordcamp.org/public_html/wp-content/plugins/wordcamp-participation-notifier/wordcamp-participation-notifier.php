@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name:        WordCamp Participation Notifier
-Plugin Description: Updates a user's WordPress.org profile when they participate in a WordCamp.
+Description:        Updates a user's WordPress.org profile when they participate in a WordCamp.
 Author:             WordCamp Central
 Author URI:         http://wordcamp.org
 Version:            0.1
