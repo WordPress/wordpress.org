@@ -84,7 +84,11 @@ class wporg_trac_notifications {
 	}
 
 	function get_trac_ticket_participants( $ticket_id ) {
-		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE ticket = %d", $ticket_id ) );
+		// Make sure we suppress CC-only comments that still exist in the database.
+		// Do this by suppressing any 'cc' changes and also any empty comments (used by Trac for comment numbering).
+		// Empty comments are also used for other property changes made without comment, but those changes will still be returned by this query.
+		$ignore_cc = "field <> 'cc' AND NOT (field = 'comment' AND newvalue = '') AND";
+		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE $ignore_cc ticket = %d", $ticket_id ) );
 	}
 
 	function get_trac_ticket_stars( $ticket_id ) {
