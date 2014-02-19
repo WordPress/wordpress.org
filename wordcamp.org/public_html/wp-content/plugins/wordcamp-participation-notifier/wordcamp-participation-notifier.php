@@ -268,7 +268,7 @@ class WordCamp_Participation_Notifier {
 			}
 			
 			if ( $error ) {
-				trigger_error( sprintf( '%s error: %s', __METHOD__, sanitize_text_field( $error ) ), E_USER_WARNING );
+				trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
 			}
 		}
 		
