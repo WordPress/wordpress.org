@@ -136,6 +136,7 @@ class WordCamp_Participation_Notifier {
 	protected function get_post_activity_payload( $post ) {
 		$activity = false;
 		$user_id  = $this->get_wporg_user_id( $post );
+		$wordcamp = get_wordcamp_post(); 
 		
 		if ( $user_id ) {
 			$activity = array(
@@ -143,6 +144,7 @@ class WordCamp_Participation_Notifier {
 				'source'        => 'wordcamp',
 				'user_id'       => $user_id,
 				'wordcamp_name' => get_wordcamp_name(),
+				'wordcamp_date' => empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'F jS', $wordcamp->meta['Start Date (YYYY-mm-dd)' ][0] ), 
 				'url'           => site_url(),
 			);
 	
