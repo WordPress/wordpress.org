@@ -179,6 +179,11 @@
 	${select('*|comment()|text()')}
 </div>
 
+<!--! Hack to remove 'arguments are missing' from reports with variables (which can be written as optional) -->
+<py:if test="report and report.id and not 'REPORT_MODIFY' in perm(resource)">
+	<div py:match="div[@id='warning' and @class='system-message']" py:strip=""></div>
+</py:if>
+
 <!--! reporter-feedback notice. deliberately shows for closed tickets other than 'fixed' -->
 <py:match path="div[@id='content' and @class='ticket']//div[@id='ticketchange']" once="true">
 	<div py:attrs="select('@*')">
