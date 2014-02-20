@@ -143,6 +143,7 @@ class WordCamp_Participation_Notifier {
 				'action'        => 'wporg_handle_activity',
 				'source'        => 'wordcamp',
 				'user_id'       => $user_id,
+				'wordcamp_id'   => get_current_blog_id(),
 				'wordcamp_name' => get_wordcamp_name(),
 				'wordcamp_date' => empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'F jS', $wordcamp->meta['Start Date (YYYY-mm-dd)' ][0] ), 
 				'url'           => site_url(),
@@ -187,6 +188,7 @@ class WordCamp_Participation_Notifier {
 				'source'        => 'wordcamp',
 				'command'       => $command,
 				'user_id'       => $user_id,
+				'wordcamp_id'   => get_current_blog_id(),
 				'wordcamp_name' => get_wordcamp_name(),
 				'url'           => site_url(),
 			);
