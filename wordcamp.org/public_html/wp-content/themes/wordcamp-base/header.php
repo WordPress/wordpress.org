@@ -22,6 +22,9 @@
 	if ( is_singular() && get_option( 'thread_comments' ) )
 		wp_enqueue_script( 'comment-reply' );
 
+	// Adds JavaScript for handling the navigation menu hide-and-show behavior to allow responsive menus.
+	wp_enqueue_script( 'wordcamp-base-navigation', get_template_directory_uri() . '/lib/navigation/navigation.js', array(), '1.0', true );
+
 	/* Always have wp_head() just before the closing </head>
 	 * tag of your theme, or you will break many plugins, which
 	 * generally use this hook to add elements to <head> such

@@ -375,6 +375,9 @@ a:hover {
 	margin: 0 auto;
 	width: 940px;
 }
+#access .menu-toggle {
+	display: none;
+}
 #access .menu-header,
 div.menu {
 	font-size: 13px;
