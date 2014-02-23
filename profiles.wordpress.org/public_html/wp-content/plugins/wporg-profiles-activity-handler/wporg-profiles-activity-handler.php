@@ -35,7 +35,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
-			add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+			add_filter( 'bp_activity_global_tables', array( $this, 'change_table_names' ) );
+			add_filter( 'bp_active_components',      array( $this, 'activate_activity_component' ) );
+			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
 		}
 
 		/**
@@ -43,8 +45,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 */
 		public function plugins_loaded() {
 			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'handle_activity' ) );
-			add_filter( 'bp_activity_global_tables',            array( $this, 'change_table_names' ) );
-			add_filter( 'bp_active_components',                 array( $this, 'activate_activity_component' ) );
 
 			// Disable default BP activity features
 			add_filter( 'bp_activity_can_comment',              '__return_false' );
