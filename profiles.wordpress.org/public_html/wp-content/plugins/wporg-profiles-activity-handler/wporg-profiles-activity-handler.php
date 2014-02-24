@@ -373,7 +373,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					);
 				}
 			} elseif ( isset( $_POST['organizer_id'] ) && ! empty( $_POST['organizer_id'] ) ) {
-				$type              = 'wordcamp_organizer_add';
+				$type    = 'wordcamp_organizer_add';
 				$item_id = $_POST['organizer_id'];
 
 				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
@@ -408,7 +408,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'hide_sitewide'     => false
 			);
 
-			return bp_activity_add( $args );
+			$ret = bp_activity_add( $args );
+			if ( ! $ret ) {
+				$ret = '-1 Unable to save activity: ' . json_encode( $args );
+			}
+			return $ret;
 		}
 
 		/**
