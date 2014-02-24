@@ -47,8 +47,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'handle_activity' ) );
 
 			// Disable default BP activity features
-			add_filter( 'bp_activity_can_comment',              '__return_false' );
-			add_filter( 'bp_activity_do_mentions',              '__return_false' );
+			add_filter( 'bp_activity_can_comment',    '__return_false' );
+			add_filter( 'bp_activity_do_mentions',    '__return_false' );
+
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2, 1 );
+			remove_action( 'bp_activity_before_save', array( $bp->activity->akismet, 'check_activity' ), 4, 1 );
 		}
 
 		/**
