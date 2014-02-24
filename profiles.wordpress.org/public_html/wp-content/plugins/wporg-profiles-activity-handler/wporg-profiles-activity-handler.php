@@ -113,6 +113,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
 			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2, 1 );
 
+			// Disable requirement that user have a display_name set
+			remove_filter( 'bp_activity_before_save', 'bporg_activity_requires_display_name' );
+
 			switch ( $source ) {
 				case 'forum':
 					$activity_id = $this->handle_forum_activity();
