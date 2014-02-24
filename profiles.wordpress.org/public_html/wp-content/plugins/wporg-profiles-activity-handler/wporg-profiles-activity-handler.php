@@ -410,7 +410,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			$ret = bp_activity_add( $args );
 			if ( ! $ret ) {
-				$ret = '-1 Unable to save activity: ' . json_encode( $args );
+				$ret = "-1 Unable to save activity: \n";
+				foreach ( $args as $k => $v ) {
+					$ret .= "\t$k => $v\n";
+				}
 			}
 			return $ret;
 		}
