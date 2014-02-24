@@ -133,10 +133,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( false === $activity_id ) {
-				$error = '-1 Unable to save activity.';
+				$activity_id = '-1 Unable to save activity.';
 			}
 
-			$success = intval( $activity_id ) > 0 ? '1' : $error;
+			$success = intval( $activity_id ) > 0 ? '1' : $activity_id;
 			die( $success );
 		}
 
