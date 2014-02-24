@@ -393,7 +393,6 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( empty( $type ) ) {
-				return false;
 				return "-1 Unrecognized WordCamp activity.";
 			}
 
@@ -405,7 +404,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'component'         => 'wordcamp',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
-				'secondary_item_id' => false,
+				'secondary_item_id' => intval( $_POST['wordcamp_id'] ),
 				'hide_sitewide'     => false
 			);
 
