@@ -38,23 +38,18 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			add_filter( 'bp_activity_global_tables', array( $this, 'change_table_names' ) );
 			add_filter( 'bp_active_components',      array( $this, 'activate_activity_component' ) );
 			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
+
+			// Disable default BP activity features
+			add_filter( 'bp_activity_can_comment',    '__return_false' );
+			add_filter( 'bp_activity_do_mentions',    '__return_false' );
+			add_filter( 'bp_activity_use_akismet',    '__return_false' );
 		}
 
 		/**
 		 * Actions to run on the 'plugins_loaded' filter.
 		 */
 		public function plugins_loaded() {
-			global $bp;
-
 			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'handle_activity' ) );
-
-			// Disable default BP activity features
-			add_filter( 'bp_activity_can_comment',    '__return_false' );
-			add_filter( 'bp_activity_do_mentions',    '__return_false' );
-
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
-			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2, 1 );
-			remove_action( 'bp_activity_before_save', array( $bp->activity->akismet, 'check_activity' ), 4, 1 );
 		}
 
 		/**
@@ -113,6 +108,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			$source = $_POST['source'];
+
+			// Disable default BP moderation
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_moderation_keys', 2, 1 );
+			remove_action( 'bp_activity_before_save', 'bp_activity_check_blacklist_keys',  2, 1 );
 
 			switch ( $source ) {
 				case 'forum':
