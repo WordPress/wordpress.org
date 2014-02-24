@@ -44,6 +44,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Actions to run on the 'plugins_loaded' filter.
 		 */
 		public function plugins_loaded() {
+			global $bp;
+
 			add_action( 'wp_ajax_nopriv_wporg_handle_activity', array( $this, 'handle_activity' ) );
 
 			// Disable default BP activity features
