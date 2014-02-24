@@ -150,7 +150,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				return false;
 			}
 
-			if ( $_POST['newTopic'] ) {
+			if ( '1' == $_POST['newTopic'] ) {
 				$action = sprintf(
 					__( 'Created a topic, <a href="%s">%s</a>, on the site <a href="%s">%s</a>', 'wporg' ),
 					esc_url( $_POST['url'] ),
@@ -177,7 +177,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'primary_link'      => $_POST['url'],
 				'component'         => 'forums',
 				'type'              => $type,
-				'item_id'           => intval( $_POST['topic_id'] ),
+				'item_id'           => 'forum_topic_create' ? intval( $_POST['topic_id'] ) : intval( $_POST['post_id'] ),
 				'secondary_item_id' => intval( $_POST['forum_id'] ),
 				'hide_sitewide'     => false,
 			);
