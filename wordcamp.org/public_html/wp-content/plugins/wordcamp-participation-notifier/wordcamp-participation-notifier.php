@@ -88,19 +88,19 @@ class WordCamp_Participation_Notifier {
 		// A new username was added, so add the activity and association.
 		if ( $new_user_id && ! $previous_user_id ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
 		}
 		
 		// The username was removed, so remove the association.
 		if ( ! $new_user_id && $previous_user_id ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
 		}
 
 		// The username changed, so remove the association from the previous user and add both the activity and association to the new user.
 		if ( $new_user_id && $previous_user_id ) {
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
 		}
 	}
 
@@ -117,13 +117,13 @@ class WordCamp_Participation_Notifier {
 	public function post_published_or_unpublished( $new_status, $old_status, $post ) {
 		if ( 'publish' == $new_status ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
 		} elseif( 'publish' == $old_status ) {
 			// Get the $user_id from post meta instead of $_POST in case it changed during the unpublish update.
 			// This makes sure that the association is removed from the same user that it was originally added to.
 			
 			$user_id = $this->get_wporg_user_id( $post, false );
-			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $user_id ) );
+			//$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $user_id ) );
 		}
 	}
 
