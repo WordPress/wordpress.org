@@ -98,12 +98,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		public function handle_activity() {
 			// Return error if not a valid activity request.
 			if ( true !== apply_filters( 'wporg_is_valid_activity_request', false ) ) {
-				die( '-1' );
+				die( '-1 Not a valid activity request.' );
 			}
 
 			// Return error if activities are not enabled.
 			if ( ! bp_is_active( 'activity' ) ) {
-				die( '-1' );
+				die( '-1 Activity component not activated.' );
 			}
 
 			$source = $_POST['source'];
@@ -128,11 +128,15 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$activity_id = $this->handle_wordpress_activity();
 					break;
 				default:
-					$activity_id = false;
+					$activity_id = '-1 Unrecognized activity source.';
 					break;
 			}
 
-			$success = $activity_id ? '1' : '-1';
+			if ( false === $activity_id ) {
+				$error = '-1 Unable to save activity.';
+			}
+
+			$success = intval( $activity_id ) > 0 ? '1' : $error;
 			die( $success );
 		}
 
@@ -147,7 +151,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = get_user_by( 'login', $_POST['user'] );
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user']}).";
 			}
 
 			if ( '1' == $_POST['newTopic'] ) {
@@ -195,7 +199,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = get_user_by( 'login', $_POST['user'] );
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user']}).";
 			}
 
 			$args = array(
@@ -227,7 +231,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = get_user_by( 'login', $_POST['user'] );
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user']}).";
 			}
 
 			$args = array(
@@ -264,7 +268,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = get_user_by( 'login', $_POST['user'] );
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user']}).";
 			}
 
 			if ( ! empty( $_POST['description'] ) ) {
@@ -347,7 +351,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$type = '';
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user_id']}).";
 			}
 
 			if ( isset( $_POST['speaker_id'] ) && ! empty( $_POST['speaker_id'] ) ) {
@@ -390,6 +394,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			if ( empty( $type ) ) {
 				return false;
+				return "-1 Unrecognized WordCamp activity.";
 			}
 
 			$args = array(
@@ -414,7 +419,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = get_user_by( 'login', $_POST['user'] );
 
 			if ( ! $user ) {
-				return false;
+				return "-1 Activity reported for unrecognized user ({$_POST['user']}).";
 			}
 
 			if ( isset( $_POST['comment_id'] ) && ! empty( $_POST['comment_id'] ) ) {
