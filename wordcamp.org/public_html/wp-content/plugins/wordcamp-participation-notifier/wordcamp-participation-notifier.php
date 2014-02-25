@@ -195,11 +195,11 @@ class WordCamp_Participation_Notifier {
 			
 			switch( $post->post_type ) {
 				case 'wcb_speaker':
-					$association['association'] = 'wordcamp_speaker';
+					$association['association'] = 'wordcamp-speaker';
 				break;
 	
 				case 'wcb_organizer':
-					$association['association'] = 'wordcamp_organizer';
+					$association['association'] = 'wordcamp-organizer';
 				break;
 	
 				default:
