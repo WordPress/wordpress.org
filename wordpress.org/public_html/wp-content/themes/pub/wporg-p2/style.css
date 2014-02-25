@@ -244,3 +244,88 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	padding-top: 1%;
 }
 
+
+/* Styles for docs issue tracker */
+table#issuelist, #issuelist th, #issuelist td {
+	width: 950px;
+	border: 2px solid;
+	border-color: #f1f1f1;
+	border-collapse:collapse;
+	margin:0;
+	padding:4px;
+	border-spacing:0;
+	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size:14px;
+}
+
+#issuelist th {
+	font-weight:bold;
+}
+
+.issue-report, .issue-link, .issue-assignee {
+	color: blue;
+}
+
+.issue-type {
+	color: red;
+}
+
+.issue-status {
+	color: green;
+}
+
+.issue-resolved {
+	background-color: #f1f1f1;
+}
+
+.issueinputarea div, .issueinputarea textarea {
+	width:100%;
+	margin-top:12px;
+}
+
+.issueinputarea .thanks {
+	background: #f1f1f1;	
+	font-weight:bold;
+	padding: 5px 0px 0px 5px;
+	margin:0;
+}
+
+.issueinputarea .issuelink input {
+	width:98%;
+	margin:6px 0;
+	padding:0;
+}
+
+.issueinputarea .issuelink .right{
+	float:right;
+	font-style:italic;
+}
+
+.issueinputarea .issuetype, .issueinputarea .recommended {
+	clear:both;
+}
+
+.issueinputarea .issuetype select {
+	float:right;
+}
+
+.issue-pagenav {
+	float:right;
+	clear:both;
+	font-size:14px;
+}
+
+.issue-pagenav .page-numbers{
+	display:inline-block;
+	border:1px solid #f7f7f7;
+	background-color:#f7f7f7;
+	margin:1px;
+	padding:3px;
+	color:black;
+}
+
+
+.issue-pagenav .page-numbers.current{
+	background-color:#0274A2;
+	color:white;
+}
