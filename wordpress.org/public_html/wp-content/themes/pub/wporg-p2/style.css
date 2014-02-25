@@ -263,15 +263,15 @@ table#issuelist, #issuelist th, #issuelist td {
 }
 
 .issue-report, .issue-link, .issue-assignee {
-	color: blue;
+	color: #1374A2;
 }
 
 .issue-type {
-	color: red;
+	color: #C52617;
 }
 
 .issue-status {
-	color: green;
+	color: #6EB015;
 }
 
 .issue-resolved {
