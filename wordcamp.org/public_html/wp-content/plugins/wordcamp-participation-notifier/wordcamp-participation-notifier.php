@@ -142,6 +142,7 @@ class WordCamp_Participation_Notifier {
 			$activity = array(
 				'action'        => 'wporg_handle_activity',
 				'source'        => 'wordcamp',
+				'timestamp'     => strtotime( $post->post_modified_gmt ),
 				'user_id'       => $user_id,
 				'wordcamp_id'   => get_current_blog_id(),
 				'wordcamp_name' => get_wordcamp_name(),
