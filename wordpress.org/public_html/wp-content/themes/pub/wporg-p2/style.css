@@ -260,6 +260,7 @@ table#issuelist, #issuelist th, #issuelist td {
 
 #issuelist th {
 	font-weight:bold;
+	color: #000;
 }
 
 .issue-report, .issue-link, .issue-assignee {
