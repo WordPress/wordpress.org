@@ -139,6 +139,11 @@ html h4 {
 	padding: 0 !important;
 }
 
+/* To align subnav (including hover) with the rest of the header */
+ul#menu-wp-org-headline-nav.menu {
+	margin-left: 20px;
+}
+
 /* To account for modifications to the "Post it" button on open access P2s */
 #postbox input#tags {
 	width: 70%;
