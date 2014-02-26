@@ -25,12 +25,7 @@ em, cite {
 
 #wporg-header h2.rosetta a {
 	float: right;
-}
-
-#wporg-header ul {
-	margin-left: 14px;
-	margin-right: 0;
-	float: left;
+	padding-right: 10px;
 }
 
 #wporg-header ul li {
