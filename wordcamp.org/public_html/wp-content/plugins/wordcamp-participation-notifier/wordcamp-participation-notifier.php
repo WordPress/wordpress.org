@@ -15,13 +15,6 @@ class WordCamp_Participation_Notifier {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! in_array( get_current_blog_id(), apply_filters( 'wpn_enabled_blog_ids', array( 206 ) ) ) ) {	// testing.wordcamp.org
-			return;
-			
-			// todo reverse this when going live so that testing cpts on testing.wcorg doesn't affect real profiles.
-				// or maybe just put admin_notice on those pages to let admins know if they use real usernames, it'll affect their profiles
-		}
-		
 		add_action( 'transition_post_status', array( $this, 'post_updated' ), 5, 3 );
 	}
 
