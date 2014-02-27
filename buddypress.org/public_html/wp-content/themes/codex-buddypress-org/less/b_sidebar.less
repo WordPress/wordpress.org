@@ -1,0 +1,97 @@
+.table-of-contents-widget {
+
+	position:relative;
+	margin-top: 73px;
+	margin-bottom: 20px;
+	.box-sizing(border-box);
+	padding:5px 10px;
+	background: #eee;
+	border: 1px solid #ddd;
+	.rounded(3px);
+
+	a {
+		color: #666;
+	}
+
+	ul {
+		padding: 0;
+		margin: 0;
+	}
+
+	li {
+
+		list-style: none;
+		border-top: 1px solid #ddd;
+		padding: 7px 0;
+
+		&:first-child {
+			border-top: 0;
+		}
+
+	}
+
+	&:before {
+		position: absolute;
+		content:'';
+		top:0;
+		left:-11px;
+		width: 0; 
+		height: 0; 
+		border-top: 22px solid transparent;
+		border-bottom: 22px solid transparent;
+		border-right:10px solid @c-pri; 
+	}
+
+}
+
+.user-widget {
+
+	margin: 20px 0;
+	.box-sizing(border-box);
+	padding: 5px 10px;
+	background: #fff;
+	border: 1px solid fadeout(@c-pri,70%);
+	.rounded(3px);
+
+	a {
+
+		color: @c-pri;
+
+	}
+
+	ul {
+		padding: 0;
+		margin: 0;
+	}
+
+	li {
+
+		list-style: none;
+		border-top: 1px solid fadeout(@c-pri,70%);
+		padding: 7px 0;
+
+		&:first-child {
+			border-top: 0;
+		}
+
+	}
+
+}
+
+.search-widget {
+
+	margin: 20px 0;
+	.box-sizing(border-box);
+	background: #fff;
+
+	input[type=text] {
+		display: block;
+		// TODO: Positioning needs fixing. background: url('../bb-base/images/search-icon.png') no-repeat 10px 10px;
+		.box-sizing(border-box);
+		width: 100%;
+		padding: 12px 17px;
+		border: 1px solid #ddd;
+		.rounded(3px);
+	}
+
+}

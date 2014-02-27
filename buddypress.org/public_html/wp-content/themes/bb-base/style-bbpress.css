@@ -1,0 +1,202 @@
+/* =Header
+-------------------------------------------------------------- */
+
+#header {
+	background-image: linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
+	background-image: -o-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
+	background-image: -moz-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
+	background-image: -webkit-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77 ) 0% );
+	background-image: -ms-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
+	background-image: -webkit-gradient( linear, left bottom, left top, color-stop( 0.5, rgb( 141, 199, 112 ) ), color-stop( 0.99, rgb( 171, 229, 142 ) ), color-stop( 0, rgb( 106, 164, 77 ) ) );
+}
+
+#header-inner {
+	background: url('../bbpress-2013/images/bee.png') no-repeat 197px -72px;
+}
+#header h1 a {
+	background: url('../bbpress-2013/images/bbpress-logo.png') no-repeat 0 0;
+}
+
+/* =Site Style
+-------------------------------------------------------------- */
+
+#headline {
+	background-color: #005b1b;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(0, 91, 27)), to(rgb(0, 98, 15)));
+	background-image: -webkit-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
+	background-image: -moz-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
+	background-image: -o-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
+	background-image: -ms-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
+	background-image: linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
+	filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#005b1b', EndColorStr='#00620f');
+}
+#showcase {
+	background: #ded;
+}
+div.feature p.book-description {
+	clear: left;
+	margin-top: 20px;
+	font-size: 1.1em;
+}
+
+body.bbp-user-page div.content,
+body.bbp-user-edit div.content {
+	width: auto;
+	float: none;
+}
+
+div.standard {
+	background: #EBF5FA;
+}
+
+/* =Buttons
+-------------------------------------------------------------- */
+
+#nav li a {
+	text-shadow: 0 -1px 0 rgba(0,162,116,0.8);
+}
+
+#nav li.current a,
+#nav li a:hover,
+.button:hover {
+	color: rgba(235,255,235,0.9);
+	text-shadow: 0 -1px 0 rgb(0,162,116);
+
+	border: 1px solid #1d6422;
+
+	background-image: -moz-linear-gradient(top, #00aa66 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: linear-gradient(top, #00aa66 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-webkit-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-o-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-ms-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+}
+
+.button {
+	text-shadow: 0 -1px 2 rgba(0,162,116,1);
+	border: 1px solid #1d6422;
+
+	background-color: #009933;
+	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: linear-gradient(top, #009933 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+}
+
+#nav li.current a,
+#nav li a:active,
+.button:active {
+	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: linear-gradient(top, #009933 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-webkit-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-o-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-ms-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+}
+
+#nav li a:hover,
+.dark-context .button:hover {
+	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-o-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-ms-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+}
+
+.dark-context .button {
+	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+}
+
+.dark-context .button:active {
+	-moz-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+}
+
+#subnav-inner ul li a:hover {
+	color: #8fbb6e;
+}
+
+/* =Headers
+-------------------------------------------------------------- */
+
+h2.graphic {
+	color: rgba(245,255,245,1);
+	text-shadow: 1px -1px 0 rgba(0,99,22,0.9);
+}
+
+/* =Links
+-------------------------------------------------------------- */
+
+a {
+	color: #328C00;
+}
+a:hover {
+	color: #D54E21;
+}
+
+/* =Text
+-------------------------------------------------------------- */
+
+blockquote {
+	background-color: #eee;
+}
+div.action a {
+	color: #009933;
+}
+
+/* =Input
+-------------------------------------------------------------- */
+
+input.submit {
+	background: #3399cc;
+	color: #fff;
+}
+input.submit:hover {
+	background: #009933;
+}
+
+/* =bbPress Default Override
+-------------------------------------------------------------- */
+
+#bbpress-forums li.bbp-body ul:hover {
+	background-color: #efe;
+}
+
+/* =HiDPI Overrides
+-------------------------------------------------------------- */
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	#header-inner {
+		background-image: url('../bbpress-2013/images/bee-2x.png');
+		background-size: 231px 162px;
+	}
+
+	#header h1 a {
+		background-image: url('../bbpress-2013/images/bbpress-logo-2x.png');
+		background-size: 208px 65px;
+	}
+}
