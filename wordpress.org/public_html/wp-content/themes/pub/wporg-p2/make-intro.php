@@ -1,6 +1,6 @@
 <?php
 
-$sites = array( 'core', 'community', 'polyglots' );
+$sites = array( 'core', 'community', 'polyglots', 'docs' );
 $site = trim( home_url( '', 'relative' ), '/' );
 if ( ! in_array( $site, $sites ) ) {
 	return;
