@@ -18,8 +18,6 @@ function make_query_mods( $query ) {
 
 add_filter('post_class','make_home_site_classes', 10, 3);
 function make_home_site_classes($classes, $class, $id) {
-	$title = get_the_title($id);
-	$title = sanitize_title($title);
-	$classes[] = 'make-'.$title;
+	$classes[] = sanitize_html_class( 'make-' . get_post( $id )->post_name );
 	return $classes;
 }

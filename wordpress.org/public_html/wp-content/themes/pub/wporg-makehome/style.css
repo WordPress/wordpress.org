@@ -220,7 +220,7 @@ section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
 section.get-involved article.make-support       h2:before { content: '\f110'; }
 section.get-involved article.make-themes        h2:before { content: '\f105'; }
 section.get-involved article.make-plugins		h2:before { content: '\f106'; }
-section.get-involved article.make-documentation	h2:before { content: '\f123'; }
+section.get-involved article.make-docs			h2:before { content: '\f123'; }
 section.get-involved article.make-community		h2:before { content: '\f125'; }
 section.get-involved article.make-meta			h2:before { content: '\f325'; }
 
