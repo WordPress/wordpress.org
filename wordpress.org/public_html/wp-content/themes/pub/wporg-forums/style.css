@@ -1,0 +1,64 @@
+/*
+Theme Name: WPBBP
+Theme URI: http://wordpress.org/
+Author: The WordPress & bbPress teams
+Author URI: http://wordpress.org/
+Description: A theme for bbPress v2.x Support Forums on wordpress.org sites
+Version: 1.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: WordPress, bbPress, Support, Forums
+Text Domain: wpbbp
+Domain Path: /languages/
+
+This theme, like WordPress, is licensed under the GPL.
+Use it to make something cool, have fun, and share what you've learned with others.
+*/
+
+html,
+body {
+	background: #efefef;
+}
+
+/**
+* 1.0 Dashicons
+*/
+
+body #headline h2 a:before {
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font: normal 28px/1 'dashicons';
+	vertical-align: top;
+	width: 36px;
+}
+body #headline h2 a:before { content: '\f110'; }
+
+/**
+* 2.0 Accesability
+*/
+
+.hidden,
+#accessibility	{
+	height: 0;
+	width: 0;
+	overflow: hidden;
+	position: absolute;
+	background: none;
+	left: -999em;
+}
+
+/**
+* 3.0 Clearfix
+*/
+
+.wrapper:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+.wrapper {
+	display: inline-block;
+}
