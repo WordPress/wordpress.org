@@ -2,7 +2,7 @@
 	<div id="subnav"><div id="subnav-inner">
 		<ul id="nav-secondary" class="menu">
 			<?php if ( is_user_logged_in() && function_exists( 'bbp_forums_url' ) ) : ?>
-				<li><a href="<?php bbp_forums_url( 'new-topic' ); ?>">Create New Topic</a></li>
+				<li><a href="<?php bbp_forums_url( '/new-topic' ); ?>">Create New Topic</a></li>
 			<?php endif; ?>
 		</ul>
 
@@ -18,4 +18,4 @@
 		</ul>
 	</div></div>
 	<hr class="hidden" />
-<?php endif; ?>
+<?php endif;
