@@ -13,8 +13,17 @@ add_filter( 'bbp_show_lead_topic', '__return_true' );
 // Always show admin bar
 show_admin_bar( true );
 
+/**
+ * Are we looking at a codex site
+ *
+ * @return bool
+ */
+function bb_base_is_codex() {
+	return (bool) strstr( $_SERVER['HTTP_HOST'], 'codex' );
+}
+
 // Include in Codex code on codex sites
-if ( strstr( $_SERVER['HTTP_HOST'], 'codex' ) ) {
+if ( bb_base_is_codex() ) {
 	include( get_template_directory() . '/functions-codex.php' );
 }
 
