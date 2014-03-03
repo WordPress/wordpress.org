@@ -1276,6 +1276,10 @@ ul#books, ul#otherbooks {
 	border: 1px solid #dadada;
 }
 
+#books.mobile img {
+	border:none;	
+}
+
 #books li, #otherbooks li {
 	background: #f5f5f5;
 	border: 1px solid #dadada;
