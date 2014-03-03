@@ -1,6 +1,6 @@
 			</div>
 
-			<?php if ( is_bbpress() ) locate_template( array( 'bbpress-sidebar.php' ), true ); ?>
+			<?php if ( function_exists( 'is_bbpress' ) && is_bbpress() ) locate_template( array( 'bbpress-sidebar.php' ), true ); ?>
 
 		</div>
 		<hr class="hidden" />
