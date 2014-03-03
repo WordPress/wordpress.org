@@ -11,10 +11,10 @@
 }
 
 #header-inner {
-	background: url('../bbpress-2013/images/bee.png') no-repeat 197px -72px;
+	background: url('../bbpress-org/images/bee.png') no-repeat 197px -72px;
 }
 #header h1 a {
-	background: url('../bbpress-2013/images/bbpress-logo.png') no-repeat 0 0;
+	background: url('../bbpress-org/images/bbpress-logo.png') no-repeat 0 0;
 }
 
 /* =Site Style
@@ -191,12 +191,12 @@ input.submit:hover {
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 	#header-inner {
-		background-image: url('../bbpress-2013/images/bee-2x.png');
+		background-image: url('../bbpress-org/images/bee-2x.png');
 		background-size: 231px 162px;
 	}
 
 	#header h1 a {
-		background-image: url('../bbpress-2013/images/bbpress-logo-2x.png');
+		background-image: url('../bbpress-org/images/bbpress-logo-2x.png');
 		background-size: 208px 65px;
 	}
 }

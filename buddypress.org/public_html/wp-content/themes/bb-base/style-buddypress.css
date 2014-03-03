@@ -12,7 +12,7 @@
 
 #header h1 a {
 	width: 265px;
-	background: url('../buddypress-2013/images/buddypress-logo.png') no-repeat 0 0;
+	background: url('../buddypress-org/images/buddypress-logo.png') no-repeat 0 0;
 	position: relative;
 }
 
@@ -199,7 +199,7 @@ input.submit:hover {
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 
 	#header h1 a {
-		background-image: url('../buddypress-2013/images/buddypress-logo-2x.png');
+		background-image: url('../buddypress-org/images/buddypress-logo-2x.png');
 		background-size: 269px 65px;
 	}
 }
