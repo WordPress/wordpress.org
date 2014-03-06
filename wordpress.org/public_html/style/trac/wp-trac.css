@@ -955,6 +955,7 @@ dl.attachments dt {
 	font-size: 12px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	white-space: nowrap;
 	display: none;
 }
 #notifications.show-usernames .star-list a .username {
