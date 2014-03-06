@@ -23,7 +23,8 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 }
 
 /* Better styling for handbook sidebars if they use a "Table of Contents" menu */
-.post-type-archive-handbook ul#menu-table-of-contents a[href="#"] {
+.post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
+.single-handbook ul#menu-table-of-contents a[href="#"]{
 	font-weight: normal;
 	color: #555;
 	font-size: 125%;
