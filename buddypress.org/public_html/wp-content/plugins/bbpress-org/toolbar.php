@@ -469,3 +469,70 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 	}
 }
 add_action( 'admin_bar_menu', 'bbporg_admin_bar_my_account_menu', 7 );
+
+/**
+ * Force toolbar styling into looking like sub-navigation
+ *
+ * Note: slightly experimental - kind of a hack
+ *
+ * @author johnjamesjacoby
+ * @since 1.0.3
+ */
+function bbporg_toolbar_css_overrides() {
+?>
+	<style type="text/css">
+		/* Admin Bar */
+		<?php if ( is_main_site() && is_front_page() ) : ?>
+			#wpadminbar { display: none !important; }
+		<?php else : ?>
+			#wpadminbar { color: #555; background: #eee; top: 81px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+			#wpadminbar #wp-toolbar a.ab-item, #wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 5px; }
+			#wpadminbar #wp-toolbar ul.ab-submenu a.ab-item { padding: 0 2em 0 1em; }
+			#wpadminbar #wp-toolbar .ab-top-secondary .menupop .menupop > a.ab-item  { padding: 0 1em 0 2em; }
+			#wpadminbar a.ab-item, #wpadminbar > #wp-toolbar span.ab-label, #wpadminbar > #wp-toolbar span.noticon { color: #555; }
+			#wpadminbar .ab-icon, #wpadminbar .ab-icon:before, #wpadminbar .ab-item:before, #wpadminbar .ab-item:after { color: #d84800; }
+			#wpadminbar .ab-top-menu > li:hover > .ab-item,
+			#wpadminbar .ab-top-menu > li.hover > .ab-item,
+			#wpadminbar .ab-top-menu > li > .ab-item:focus,
+			#wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus,
+			#wpadminbar-nojs .ab-top-menu > li.menupop:hover > .ab-item,
+			#wpadminbar .ab-top-menu > li.menupop.hover > .ab-item { color: #555; background: #eee; }
+			#wpadminbar > #wp-toolbar li:hover span.ab-label, #wpadminbar > #wp-toolbar li.hover span.ab-label, #wpadminbar > #wp-toolbar a:focus span.ab-label { color: #555; }
+			#wpadminbar li:hover .ab-icon:before, #wpadminbar li:hover .ab-item:before, #wpadminbar li:hover .ab-item:after, #wpadminbar li:hover #adminbarsearch:before { color: #999; }
+			#wp-toolbar { width: 960px; margin: 0 auto; }
+
+			/* Admin Bar: submenu */
+			#wpadminbar .menupop .ab-sub-wrapper { background: #eee; }
+			#wpadminbar .quicklinks .menupop .ab-submenu { background: #eee; }
+			#wpadminbar .quicklinks .menupop ul.ab-sub-secondary, #wpadminbar .quicklinks .menupop ul.ab-sub-secondary .ab-submenu { background: #ddd; }
+			#wpadminbar .ab-submenu .ab-item, #wpadminbar .quicklinks .menupop ul li a, #wpadminbar .quicklinks .menupop.hover ul li a, #wpadminbar-nojs .quicklinks .menupop:hover ul li a { color: #555; }
+			#wpadminbar .quicklinks li .blavatar, #wpadminbar .menupop .menupop > .ab-item:before { color: #f1f1f3; }
+			#wpadminbar .quicklinks .menupop ul li a:hover,
+			#wpadminbar .quicklinks .menupop ul li a:focus,
+			#wpadminbar .quicklinks .menupop ul li a:hover strong,
+			#wpadminbar .quicklinks .menupop ul li a:focus strong,
+			#wpadminbar .quicklinks .menupop.hover ul li a:hover,
+			#wpadminbar .quicklinks .menupop.hover ul li a:focus,
+			#wpadminbar.nojs .quicklinks .menupop:hover ul li a:hover,
+			#wpadminbar.nojs .quicklinks .menupop:hover ul li a:focus,
+			#wpadminbar li:hover .ab-icon:before,
+			#wpadminbar li:hover .ab-item:before,
+			#wpadminbar li a:focus .ab-icon:before,
+			#wpadminbar li .ab-item:focus:before,
+			#wpadminbar li.hover .ab-icon:before,
+			wpadminbar li.hover .ab-item:before,
+			#wpadminbar li:hover .ab-item:after,
+			#wpadminbar li.hover .ab-item:after,
+			#wpadminbar li:hover #adminbarsearch:before { color: #d84800; }
+			#wpadminbar .quicklinks li a:hover .blavatar, #wpadminbar .menupop .menupop > .ab-item:hover:before { color: #d84800; }
+
+			/* Admin Bar: my account */
+			#wpadminbar .quicklinks li#wp-admin-bar-my-account.with-avatar > a img { border-color: #eee; background-color: #eee; }
+			#wpadminbar #wp-admin-bar-user-info .display-name { color: #555; }
+			#wpadminbar #wp-admin-bar-user-info a:hover .display-name { color: #d84800; }
+			#wpadminbar #wp-admin-bar-user-info .username { color: #000; }
+		<?php endif; ?>
+	</style>
+<?php
+}
+add_theme_support( 'admin-bar', array( 'callback' => 'bbporg_toolbar_css_overrides' ) );
