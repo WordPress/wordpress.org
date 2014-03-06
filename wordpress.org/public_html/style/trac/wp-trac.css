@@ -951,7 +951,10 @@ dl.attachments dt {
 	vertical-align: top;
 	line-height: 36px;
 	margin: 0 8px 0 4px;
-	min-width: 90px;
+	min-width: 94px;
+	font-size: 12px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	display: none;
 }
 #notifications.show-usernames .star-list a .username {
