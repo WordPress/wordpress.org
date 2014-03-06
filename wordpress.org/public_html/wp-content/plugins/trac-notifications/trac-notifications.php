@@ -91,8 +91,13 @@ class wporg_trac_notifications {
 		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE $ignore_cc ticket = %d", $ticket_id ) );
 	}
 
-	function get_trac_ticket_stars( $ticket_id ) {
-		return $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 1", $ticket_id ) );
+	function get_trac_ticket_subscriptions( $ticket_id ) {
+		$by_status = array( 'blocked' => array(), 'starred' => array() );
+		$subscriptions = $this->trac->get_results( $this->trac->prepare( "SELECT username, status FROM _ticket_subs WHERE ticket = %s", $ticket_id ) );
+		foreach ( $subscriptions as $subscription ) {
+			$by_status[ $subscription->status ? 'starred' : 'blocked' ][] = $subscription->username;
+		}
+		return $by_status;
 	}
 
 	function get_trac_focuses() {
@@ -253,10 +258,15 @@ class wporg_trac_notifications {
 
 		$ticket_sub = $this->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
 
-		$stars = $this->get_trac_ticket_stars( $ticket_id );
+		$ticket_subscriptions = $this->get_trac_ticket_subscriptions( $ticket_id );
+		$stars = $ticket_subscriptions['starred'];
 		$star_count = count( $stars );
 
 		$participants = $this->get_trac_ticket_participants( $ticket_id );
+
+		$unblocked_participants = array_diff( $participants, $ticket_subscriptions['blocked'] );
+		$all_receiving_notifications = array_unique( array_merge( $stars, $unblocked_participants ) );
+		sort( $all_receiving_notifications );
 
 		$reasons = array();
 
@@ -309,6 +319,10 @@ class wporg_trac_notifications {
 		if ( $star_count === 0 || $star_count === 1 ) {
 			$class .= ' count-' . $star_count;
 		}
+		if ( ! empty( $_COOKIE['wp_trac_ngrid'] ) ) {
+			$class .= ' show-usernames';
+		}
+
 		ob_start();
 		?>
 	<div id="notifications" class="<?php echo $class; ?>">
@@ -321,17 +335,21 @@ class wporg_trac_notifications {
 					<div class="star-list">
 				<?php
 					foreach ( $stars as $follower ) :
+					// foreach ( $all_receiving_notifications as $follower ) :
 						if ( $username === $follower ) {
 							continue;
 						}
 						$follower = esc_attr( $follower );
+						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
-						<a title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
+						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
 							<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo $follower; ?>&amp;s=36" />
+							<span class="username"><?php echo $follower; ?></span>
 						</a>
 					<?php endforeach; ?>
 					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
 						<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo esc_attr( $username ); ?>&amp;s=36" />
+						<span class="username"><?php echo $username; ?></span>
 					</a>
 					</div>
 				</p>
@@ -340,7 +358,7 @@ class wporg_trac_notifications {
 				<p class="receiving-notifications-because">You are receiving notifications because <?php echo current( $reasons ); ?>. <a href="#" class="button button-small block-notifications">Block notifications</a></p>
 			<?php endif ?>
 				<p class="not-receiving-notifications">You do not receive notifications because you have blocked this ticket. <a href="#" class="button button-small unblock-notifications">Unblock</a></p>
-				<a class="preferences" href="<?php echo home_url( 'notifications/' ); ?>">Preferences</a>
+				<span class="preferences"><span class="grid-toggle"><a href="#" class="grid dashicons dashicons-screenoptions"></a> <a href="#" class="names dashicons dashicons-exerpt-view dashicons-excerpt-view"></a></span> <a href="<?php echo home_url( 'notifications/' ); ?>">Preferences</a></span>
 		</fieldset>
 	</div>
 	<?php
