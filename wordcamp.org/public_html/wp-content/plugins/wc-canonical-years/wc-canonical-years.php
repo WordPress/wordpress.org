@@ -35,7 +35,17 @@ class WordCamp_Canonical_Years_Plugin {
 		$current_domain = $matches[0];
 		$city_domain = $matches[2];
 
-		$latest_domain = $wpdb->get_var( $wpdb->prepare( "SELECT domain FROM $wpdb->blogs WHERE domain LIKE %s ORDER BY domain DESC LIMIT 1;", "%.{$city_domain}" ) );
+		$latest_domain = $wpdb->get_var( $wpdb->prepare( "
+			SELECT domain
+			FROM $wpdb->blogs
+			WHERE
+				domain LIKE %s AND
+				SUBSTR( domain, 1, 4 ) REGEXP '^-?[0-9]+$' -- exclude secondary language domains like fr.2013.ottawa.wordcamp.org
+			ORDER BY domain
+			DESC LIMIT 1;",
+			"%.{$city_domain}"
+		) );
+
 		if ( $latest_domain != $current_domain && $latest_domain )
 			printf( '<link rel="canonical" href="%s" />' . "\n", trailingslashit( esc_url( $latest_domain ) ) );
 	}
