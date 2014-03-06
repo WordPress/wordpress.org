@@ -266,7 +266,7 @@ class wporg_trac_notifications {
 
 		$unblocked_participants = array_diff( $participants, $ticket_subscriptions['blocked'] );
 		$all_receiving_notifications = array_unique( array_merge( $stars, $unblocked_participants ) );
-		sort( $all_receiving_notifications );
+		natcasesort( $all_receiving_notifications );
 
 		$reasons = array();
 
@@ -334,7 +334,7 @@ class wporg_trac_notifications {
 					<span class="num-stars"><span class="count"><?php echo $star_count; ?></span> <span class="count-1">star</span> <span class="count-many">stars</span></span>
 					<div class="star-list">
 				<?php
-					foreach ( $stars as $follower ) :
+					natcasesort( $stars ); foreach ( $stars as $follower ) :
 					// foreach ( $all_receiving_notifications as $follower ) :
 						if ( $username === $follower ) {
 							continue;
