@@ -49,7 +49,6 @@ body {
 	border-bottom: 1px solid #252;
 	position: fixed;
 	width: 100%;
-	top: 32px;
 	z-index: 99;
 	box-shadow: 0 0 20px #ccc;
 	
@@ -133,10 +132,13 @@ p.plans {
 	padding: 21px 0;
 }
 #main {
-	margin: 0 auto;
+	margin: 120px auto 0;
 	width: 960px;
 	padding: 24px 0;
 	position: relative;
+}
+body.home-page #main {
+	margin-top: 0;
 }
 #footer {
 	width: 960px;
@@ -380,7 +382,7 @@ ul#nav li a.active {
 
 #subnav {
 	background: #eee;
-	border-bottom: #bbb solid 1px;
+	border-bottom: #ddd solid 1px;
 	font-size: 12px;
 	margin-top: 81px;
 }
@@ -523,6 +525,7 @@ a:hover {
 img {
 	height: auto;
 	max-width: 100%;
+	border: 1px solid transparent;
 }
 
 div.wp-caption {
