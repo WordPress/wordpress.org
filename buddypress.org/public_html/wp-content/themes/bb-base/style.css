@@ -51,7 +51,7 @@ body {
 	width: 100%;
 	z-index: 99;
 	box-shadow: 0 0 20px #ccc;
-	
+	top: 0;
 }
 
 @media screen and ( max-width: 782px ) {
