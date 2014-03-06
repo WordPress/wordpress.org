@@ -132,13 +132,10 @@ p.plans {
 	padding: 21px 0;
 }
 #main {
-	margin: 120px auto 0;
+	margin: 0 auto;
 	width: 960px;
 	padding: 24px 0;
 	position: relative;
-}
-body.home-page #main {
-	margin-top: 0;
 }
 #footer {
 	width: 960px;
