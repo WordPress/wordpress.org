@@ -1,0 +1,21 @@
+/* Better RTL for Rosetta WP theme */
+
+#footer { margin-left: 0; }
+
+.section img.shot {
+	float: left; margin: 0 25px 5px 0; }
+
+.main { float: right; padding: 0 0 0 30px; }
+
+.download-button span, .download-tar { direction: ltr; unicode-bidi: embed; }
+
+h4, h6 { float: none; margin-right: 0; }
+
+ul, ol { margin: 0 25px 0 0; }
+#wporg-header ul { margin-right: 0; }
+
+.narrow { float: right; margin: 0 0 0 20px; }
+
+span.author { display: block; }
+
+#footer p { direction: ltr; text-align: left; }

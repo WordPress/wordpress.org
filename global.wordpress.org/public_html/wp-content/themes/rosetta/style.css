@@ -1,0 +1,399 @@
+/*
+Theme Name: Rosetta
+Theme URI: http://wordpress.org
+Version: 1.0
+Description: The default theme for new official foreign-language WordPress sites.
+Author: Matt Thomas
+*/
+
+/* The Reset ---------------------------------- */
+/* -------------------------------------------- */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,
+h6,pre,form,fieldset,input,p,blockquote,table,
+th,td { margin: 0; padding: 0; }
+fieldset,img,abbr { border: 0; }
+address,caption,cite,code,dfn,em,h1,h2,h3,
+h4,h5,h6,th,var { font-style: normal; font-weight: normal; }
+caption,th { text-align: left; }
+q:before,q:after { content: ''; }
+a { text-decoration: none; }
+ul { list-style: none; }
+
+/* STRUCTURE AND PAGEBODY */
+
+body {
+	color: #555;
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	font-family: "Lucida Grande",Verdana,"Bitstream Vera Sans",Arial,sans-serif;
+}
+pre a { font-weight: normal; }
+
+a { color: #2583ad; text-decoration: none; font-weight: bold; }
+
+a:hover, a:active { color: #d54e21; }
+
+h3 {
+	font-size: 25px;
+	color: #555;
+	margin-bottom: 16px;
+	font-family: Georgia,Times,"Times New Roman",serif;
+	font-weight: normal;
+}
+h4 {
+	font-size: 15px;
+	float: left;
+	margin-right: 7px;
+}
+h6 {
+	padding-top: 2px;
+	color: #999;
+	font: 11px/1.8em "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif;
+	float: left;
+	font-style: italic;
+}
+h5 {
+	margin-top: 30px;
+	font-size: 14px;
+	font-weight: bold;
+	padding: 4px 0;
+}
+p {
+	font-size: 13px;
+	line-height: 1.6em;
+	margin-top: 16px;
+	margin-bottom: 16px;
+}
+em {
+	font-style: italic;
+}
+ul {
+	list-style-type: square;
+}
+ul, ol {
+	margin-left: 25px;
+}
+#wporg-header ul {
+	margin-left: 0;
+}
+ul li, ol li {
+	line-height: 1.6em;
+}
+blockquote {
+	margin-left: 40px;
+	font-style: italic;
+	font-family: Georgia,Times,"Times New Roman",serif;
+}
+.wrapper {
+	width: 960px;
+	margin: 0 auto;
+	padding: 0;
+}
+.outer {
+	width: 100%;
+	margin: 0 auto;
+	padding: 0;
+}
+#mid-wrapper {
+	background-color: #f7f7f7;
+	border-bottom: 1px solid #dfdfdf;
+}
+.section {
+	padding-top: 27px;
+	padding-bottom: 17px;
+	clear: both;
+	width: 960px;
+	border-bottom: 1px solid #DADADA;
+}
+#mid-wrapper .section {
+	border-bottom: none;
+}
+.section:after  {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+.section img.shot {
+	float: right;
+	border: 1px solid #ccc;
+	padding: 2px;
+	margin: 0 0 5px 25px;
+}
+img.wp-smiley {
+	border: 0;
+	display: inline;
+	float: none;
+	margin: 0;
+	padding: 0;
+	vertical-align: text-top;
+}
+.main {
+	width: 685px;
+	padding-right: 50px;
+	float: left;
+}
+.sidebar {
+	width: 225px;
+	float: left;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif;
+}
+.sidebar p {
+	font-size: 10px;
+	line-height: 1.6em;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+.sidebar ul {
+	font-size: 12px;
+	margin-left: 15px;
+	margin-top: 10px;
+}
+
+.download-button {
+	white-space: normal;
+	height: auto;
+	display: block;
+	text-align: center;
+	line-height: 1.6em;
+	padding: 8px 10px;
+}
+
+.download-button strong {
+	font-size: 13px;
+}
+.download-button span {
+	font-weight: normal;
+}
+.download-tar {
+	font-size: 10px;
+	text-align: center;
+	margin-bottom: 14px !important;
+}
+
+#footer {
+	clear: both;
+	margin-left: 102px;
+	margin-bottom: 60px;
+	text-align: right;
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+}
+#footer p {
+	margin-top: 7px;
+	font-size: 13px;
+}
+form#commentform {
+	margin-top: 40px;
+	width: 100%;
+}
+h2.fancy, h2.fancy a {
+	font-size: 18px;
+	color: #555;
+}
+#commentheader {
+	margin-top: 40px;
+}
+#commentform input {
+	width: 90%;
+	margin-bottom: 3px;
+}
+#commentform textarea {
+	height: 20em;
+	margin-bottom: 5px;
+	width: 100%;
+}
+#commentform label {
+	padding-bottom: 12px;
+	display: block;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif;
+}
+.narrow {
+	width: 180px;
+	margin-right: 20px;
+	float: left;
+}
+.wide {
+	width: 640px;
+	float: left;
+}
+#commentform .wide {
+	margin-bottom: 40px;
+}
+ol#comments {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+ol#comments p {
+	margin-top: 3px;
+}
+ol#comments .narrow {
+	font: 11px/1.8em "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif;
+	padding-top: 5px;
+}
+#loggedin {
+	font: 11px/1.8em "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif;
+	margin-bottom: 5px;
+}
+ol#comments .narrow .author {
+	font-size: 14px;
+}
+li.comment {
+	clear: both;
+	padding: 10px 0 20px;
+	border-bottom: 1px solid #ccc;
+	height: 100%;
+}
+li.comment:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+input#submit {
+	width: 150px;
+}
+table.releases {
+	clear: left;
+	margin: 5px 5px 24px 5px;
+}
+table.releases td {
+	width: 120px;
+	text-align: center;
+	padding: 8px;
+}
+table.releases tr {
+	background-color: rgb(238, 238, 238);
+	text-align: center;
+}
+table.releases tr.alt {
+	background-color: white;
+}
+table.releases tr.beta-first {
+	font-weight: bold;
+}
+table.releases small, table.releases small a {
+	font-size: 9px;
+}
+table.latest tr {
+	background-color: #d54e21;
+	color: white;
+}
+table.latest a {
+	color: white;
+	font-weight: bold;
+}
+table.latest a:hover {
+	text-decoration: underline;
+}
+div .entry {
+	clear: left;
+}
+.releases h3 {
+	margin-bottom: 8px;
+}
+.section.blog h2 {
+	font-size: 18px;
+	margin-bottom: 8px;
+}
+.navigation {
+	clear: left;
+}
+.nav-previous {
+	float: left;
+}
+.nav-next {
+	float: right;
+}
+
+table.widefat {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+	width: 100%;
+	clear: both;
+	margin-bottom: 11px;
+}
+
+table.widefat a {
+	text-decoration: none;
+}
+
+table.widefat tr.alt {
+	background-color: #f9f9f9;
+}
+
+table.widefat thead {
+	background-color: #464646;
+	color: #d7d7d7;
+}
+
+table.widefat td, table.widefat th {
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #ccc;
+	font-size: 12px;
+	padding: 6px;
+	vertical-align: text-top;
+}
+
+table.widefat th {
+	padding-bottom: 4px;
+	padding-top: 8px;
+	text-align: left;
+}
+
+table.widefat .check-column {
+	text-align: center;
+	vertical-align: text-top;
+	width: 3%;
+}
+form#contactme td {
+	padding: 6px;
+}
+form#contactme input, textarea {
+	padding: 3px;
+}
+form#contactme input {
+	width: 20em;
+}
+form#contactme textarea {
+	width: 30em;
+	height: 10em;
+	line-height: 1.5em;
+}
+tr.error {
+	background-color: #E4F2FD;
+}
+#showcase {
+	text-align: center;
+	margin: 0 -7px 0 0;
+	font-size: 85%;
+}
+#showcase li {
+	float: left;
+	list-style-type: none;
+	display: block;
+	margin-right: 7px;
+	width: 235px;
+}
+#showcase li:last-child {
+	margin-right: 0;
+}
+#showcase a.shot {
+	display: block;
+	margin-bottom: 6px;
+	background-color: rgb(245, 245, 245);
+	border: 1px solid rgb(204, 204, 204);
+	padding: 0;
+}
+#showcase a {
+	font-size: 110%;
+}
+span#showcase-front-slate {
+	font-style: italic;
+	font-weight: bold;
+}
