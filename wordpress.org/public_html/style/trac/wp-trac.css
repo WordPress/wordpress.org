@@ -921,8 +921,65 @@ dl.attachments dt {
 }
 #notifications .star-list a {
 	border-bottom: 0;
+	background: none;
+	margin-right: 7px;
+	margin-bottom: 7px;
+	display: inline-block;
 }
-#notifications .star-you,
+#notifications .star-list a.star:before {
+	color: #fff;
+    display: inline-block;
+	margin: 25px 0 0 26px;
+    width: 14px;
+    height: 14px;
+	position: absolute;
+	color: #fff;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: #333;
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+    line-height: 1;
+    font-family: "dashicons";
+    text-decoration: inherit;
+    font-weight: normal;
+    font-style: normal;
+    vertical-align: top;
+    text-align: center;
+	content: "\f155";
+}
+#notifications .star-list a .username {
+	vertical-align: top;
+	line-height: 36px;
+	margin: 0 8px 0 4px;
+	min-width: 90px;
+	display: none;
+}
+#notifications.show-usernames .star-list a .username {
+	display: inline-block;
+}
+#notifications .grid-toggle a {
+	color: #555;
+	border: none;
+	background: none;
+}
+#notifications .grid-toggle {
+	margin-right: 15px;
+}
+#notifications .grid-toggle a.grid {
+	color: #21759b;
+}
+#notifications .grid-toggle a.names {
+	/* this dashicon is painted larger than the other, so shrink it a bit */
+	height: 15px;
+	font-size: 14px;
+}
+#notifications.show-usernames .grid-toggle a.grid {
+	color: #555;
+}
+#notifications.show-usernames .grid-toggle a.names {
+	color: #21759b;
+}
+#notifications .star-list .star-you,
 #notifications a.watching-ticket,
 #notifications p.receiving-notifications,
 #notifications p.receiving-notifications-because,

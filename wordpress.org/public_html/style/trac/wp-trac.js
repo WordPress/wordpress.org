@@ -767,6 +767,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				star.click( function() {
 					$(this).hasClass('dashicons-star-empty') ? subscribe() : unsubscribe();
 				});
+				$('.grid-toggle').on( 'click', 'a', function() {
+					var names = $(this).hasClass('names');
+					notifications.toggleClass('show-usernames', names );
+					document.cookie="wp_trac_ngrid=" + (names ? 1 : 0) + ";max-age=31557600;domain=.wordpress.org;path=/";
+					return false;
+				});
 			}
 
 			function save( action, ticket ) {
