@@ -41,7 +41,7 @@ class WPorg_Handbook {
 	}
 
 	function grant_handbook_caps( $caps ) {
-		if ( ! is_user_logged_in() )
+		if ( ! is_user_member_of_blog() )
 			return $caps;
 		foreach ( self::caps() as $cap ) {
 			$caps[ $cap ] = true;
