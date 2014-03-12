@@ -497,4 +497,9 @@ function bporg_toolbar_css_overrides() {
 	</style>
 <?php
 }
-add_theme_support( 'admin-bar', array( 'callback' => 'bporg_toolbar_css_overrides' ) );
+
+// These toolbar modifications are for the buddypress.org network only.
+// (Do not override the toolbar for profiles.wordpress.org)
+if ( $_SERVER['HTTP_HOST'] !== 'profiles.wordpress.org' ) {
+	add_theme_support( 'admin-bar', array( 'callback' => 'bporg_toolbar_css_overrides' ) );
+}
