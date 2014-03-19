@@ -71,7 +71,8 @@ class WCOR_Mailer {
 		$body    = html_entity_decode( strip_tags( $body ), ENT_QUOTES, 'UTF-8' );
 		$headers = array(
 			'From: WordCamp Central <support@wordcamp.org>',
-			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] )
+			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] ),
+			'CC: support@wordcamp.org',
 		);
 		
 		return wp_mail( $to, 'WordCamp Central Reminder: ' . $subject, $body, $headers );
