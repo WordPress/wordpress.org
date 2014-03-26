@@ -20,10 +20,14 @@ function bbporg_recount_current_thing() {
 
 	// Refresh topic data
 	if ( bbp_is_single_topic() ) {
-		bbp_update_topic_voice_count();
-		bbp_update_topic_last_reply_id();
-		bbp_update_topic_last_active_id();
-		bbp_update_topic_last_active_time();
+
+		// Get the topic ID
+		$topic_id = bbp_get_topic_id();
+
+		bbp_update_topic_voice_count( $topic_id );
+		bbp_update_topic_last_reply_id( $topic_id );
+		bbp_update_topic_last_active_id( $topic_id );
+		bbp_update_topic_last_active_time( $topic_id );
 
 		// Redirect without _GET
 		wp_safe_redirect( bbp_get_topic_permalink() );
