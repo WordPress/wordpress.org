@@ -44,17 +44,22 @@ get_header(); ?>
 									get_the_date()
 								)
 							);
+
 							if ( wp_attachment_is_image() ) {
-								echo ' <span class="meta-sep">|</span> ';
 								$metadata = wp_get_attachment_metadata();
-								printf( __( 'Full size is %s pixels', 'wordcampbase' ),
-									sprintf( '<a href="%1$s" title="%2$s">%3$s &times; %4$s</a>',
-										wp_get_attachment_url(),
-										esc_attr( __('Link to full-size image', 'wordcampbase' ) ),
-										$metadata['width'],
-										$metadata['height']
-									)
-								);
+								
+								if ( ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) {
+									echo ' <span class="meta-sep">|</span> ';
+
+									printf( __( 'Full size is %s pixels', 'wordcampbase' ),
+										sprintf( '<a href="%1$s" title="%2$s">%3$s &times; %4$s</a>',
+											wp_get_attachment_url(),
+											esc_attr( __('Link to full-size image', 'wordcampbase' ) ),
+											$metadata['width'],
+											$metadata['height']
+										)
+									);
+								}
 							}
 						?>
 						<?php edit_post_link( __( 'Edit', 'wordcampbase' ), '<span class="meta-sep">|</span> <span class="edit-link">', '</span>' ); ?>
