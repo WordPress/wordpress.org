@@ -2,6 +2,7 @@
 
 class WordCamp_API_ICS {
 	public $ttl = 1; // seconds to live
+	const CLRF = "\r\n";
 
 	function __construct() {
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
@@ -46,10 +47,9 @@ class WordCamp_API_ICS {
 		if ( ! defined( 'WPCT_POST_TYPE_ID' ) )
 			define( 'WPCT_POST_TYPE_ID', 'wordcamp' );
 
-		$ical = 'BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//hacksw/handcal//NONSGML v1.0//EN
-';
+		$ical = 'BEGIN:VCALENDAR' . self::CLRF;
+		$ical .= 'VERSION:2.0'  . self::CLRF;
+		$ical .= 'PRODID:-//hacksw/handcal//NONSGML v1.0//EN' . self::CLRF;
 
 		$query = new WP_Query( array(
 			'post_type'		 => WCPT_POST_TYPE_ID,
@@ -78,15 +78,13 @@ PRODID:-//hacksw/handcal//NONSGML v1.0//EN
 			$start = date( 'Ymd', $start );
 			$end = date( 'Ymd', $end );
 
-			$ical .= "BEGIN:VEVENT
-UID:$uid
-DTSTAMP;VALUE=DATE:$start
-DTSTART;VALUE=DATE:$start
-DTEND;VALUE=DATE:$end
-SUMMARY:$title
-END:VEVENT
-";
-
+			$ical .= "BEGIN:VEVENT" . self::CLRF;
+			$ical .= "UID:$uid" . self::CLRF;
+			$ical .= "DTSTAMP;VALUE=DATE:$start" . self::CLRF;
+			$ical .= "DTSTART;VALUE=DATE:$start" . self::CLRF;
+			$ical .= "DTEND;VALUE=DATE:$end" . self::CLRF;
+			$ical .= "SUMMARY:$title" . self::CLRF;
+			$ical .= "END:VEVENT" . self::CLRF;
 		}
 
 		$ical .= 'END:VCALENDAR';
