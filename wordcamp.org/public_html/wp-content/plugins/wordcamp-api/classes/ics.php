@@ -78,9 +78,13 @@ class WordCamp_API_ICS {
 			$start = date( 'Ymd', $start );
 			$end = date( 'Ymd', $end );
 
+			/*
+			 * Specifying the start time as 000000 is a workaround for a bug in Google Calendar
+			 * @see https://productforums.google.com/forum/#!category-topic/calendar/report-an-issue/importing-and-exporting/google-chrome/UQ6P1Im8eY8
+			 */
 			$ical .= "BEGIN:VEVENT" . self::CLRF;
 			$ical .= "UID:$uid" . self::CLRF;
-			$ical .= "DTSTAMP;VALUE=DATE:$start" . self::CLRF;
+			$ical .= "DTSTAMP:$start" . 'T000000Z' . self::CLRF;
 			$ical .= "DTSTART;VALUE=DATE:$start" . self::CLRF;
 			$ical .= "DTEND;VALUE=DATE:$end" . self::CLRF;
 			$ical .= "SUMMARY:$title" . self::CLRF;
