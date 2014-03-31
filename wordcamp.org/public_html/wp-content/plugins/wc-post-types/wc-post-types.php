@@ -504,17 +504,43 @@ class WordCamp_Post_Types_Plugin {
 					break;
 				}
 
+				// Gather relevant data about the session
 				$colspan = 1;
 				$classes = array();
 				$session = get_post( $entry[ $term_id ] );
 				$session_title = apply_filters( 'the_title', $session->post_title );
+				$session_tracks = get_the_terms( $session->ID, 'wcb_track' );
 				$session_type = get_post_meta( $session->ID, '_wcpt_session_type', true );
 
 				if ( ! in_array( $session_type, array( 'session', 'custom' ) ) )
 					$session_type = 'session';
 
-				$classes[] = 'wcpt-session-type-' . $session_type;
+				// Fetch speakers associated with this session.
+				$speakers = array();
+				$speakers_ids = array_map( 'absint', (array) get_post_meta( $session->ID, '_wcpt_speaker_id' ) );
+				if ( ! empty( $speakers_ids ) ) {
+					$speakers = get_posts( array(
+						'post_type'      => 'wcb_speaker',
+						'posts_per_page' => -1,
+						'post__in'       => $speakers_ids,
+					) );
+				}
 
+				// Add CSS classes to help with custom styles
+				foreach ( $speakers as $speaker ) {
+					$classes[] = 'wcb-speaker-' . $speaker->post_name;
+				}
+
+				if ( is_array( $session_tracks ) ) {
+					foreach ( $session_tracks as $session_track ) {
+						$classes[] = 'wcb-track-' . $session_track->slug;
+					}
+				}
+
+				$classes[] = 'wcpt-session-type-' . $session_type;
+				$classes[] = 'wcb-session-' . $session->post_name;
+
+				// Determine the session title
 				if ( 'permalink' == $attr['session_link'] && 'session' == $session_type )
 					$session_title = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( get_permalink( $session->ID ) ), $session_title );
 				elseif ( 'anchor' == $attr['session_link'] && 'session' == $session_type )
@@ -523,17 +549,6 @@ class WordCamp_Post_Types_Plugin {
 					$session_title = sprintf( '<span class="wcpt-session-title">%s</span>', $session_title );
 
 				$content = $session_title;
-
-				// Fetch speakers associated with this session.
-				$speakers = array();
-				$speakers_ids = array_map( 'absint', (array) get_post_meta( $session->ID, '_wcpt_speaker_id' ) );
-				if ( ! empty( $speakers_ids ) ) {
-					$speakers = get_posts( array(
-						'post_type' => 'wcb_speaker',
-						'posts_per_page' => -1,
-						'post__in' => $speakers_ids,
-					) );
-				}
 
 				$speakers_names = array();
 				foreach ( $speakers as $speaker ) {
