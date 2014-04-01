@@ -1367,3 +1367,79 @@ div.plugin-meta img {
 	margin: 0 15px;
 	display: inline-block;
 }
+
+/* =Member Profiles
+-------------------------------------------------------------- */
+
+#menu-bp,
+#menu-bp ul {
+	margin: 0;
+	padding: 0;
+}
+
+#menu-bp ul {
+	display: none;
+}
+
+#menu-bp li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#menu-bp li a {
+	display: block;
+	padding: 5px 3px 5px 8px;
+}
+
+#activity-personal-li:before {
+	content: '\f452';
+}
+
+#xprofile-personal-li:before {
+	content: '\f110';
+}
+
+#blogs-personal-li:before {
+	content: '\f325';
+}
+
+#blogs-personal-li:before {
+	content: '\f325';
+}
+
+#notifications-personal-li:before {
+	content: '\f339';
+}
+
+#forums-personal-li:before {
+	content: '\f451';
+}
+
+#forums-personal-li:before {
+	content: '\f111';
+}
+
+#menu-bp li a:hover {
+	text-decoration: none;
+	background: #fafafa;
+}
+
+#menu-bp li.current-menu-parent a {
+	background: #eee;
+	color: inherit;
+}
+
+#menu-bp li span {
+	float: right;
+	background: #f5f5f5;
+	color: #333;
+	padding: 2px 10px;
+	font-size: 0.8em;
+	font-weight: bold;
+	border: 1px solid #ccc;
+}
+
+#buddypress #subnav {
+	border-bottom: none;
+}
