@@ -39,7 +39,7 @@ html {
 	padding: 0;
 }
 body {
-	font: 14px/24px "Helvetica Neue", helvetica, arial, sans-serif;
+	font: 400 13px/32px "Open Sans", sans-serif;
 	text-align: left;
 	background: #fbfbfb;
 	margin: 0;
@@ -315,7 +315,7 @@ div.single-post table tr.alt td {
 
 #nav li a {
 	color: #fff;
-	font-family: "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", sans-serif;
 	height: auto;
 	line-height: 1;
 	padding: 5px 10px;
@@ -331,11 +331,11 @@ div.single-post table tr.alt td {
 
 .button {
 	color: #fff;
-	font-family: "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", sans-serif;
 	height: auto;
 	line-height: 1;
 	padding: 5px 10px;
-	font-weight: 500;
+	font-weight: 600;
 	border: none;
 
 	-moz-border-radius: 3px;
@@ -386,7 +386,7 @@ ul#nav li a.active {
 #subnav-inner {
 	width: 960px;
 	margin: 0 auto;
-	padding: 9px 0;
+	padding: 5px 0;
 	color: #555;
 }
 #subnav-inner ul {
@@ -565,7 +565,7 @@ blockquote {
 body.blog cite,
 body.archive cite,
 body.single cite {
-	font-family: Helvetica, arial, sans-serif;
+	font-family: "Open Sans", sans-serif;
 	font-size: 12px;
 	font-style: normal;
 	color: #999;
@@ -581,7 +581,7 @@ div.single-post.archive {
 	border: none;
 }
 div.single-post h3 {
-	font-family: Helvetica, Arial, sans-serif !important;
+	font-family: "Open Sans", sans-serif !important;
 	font-style: normal;
 }
 div.single-post p {
@@ -627,7 +627,7 @@ img.left {
 -------------------------------------------------------------- */
 
 input {
-	font: 14px/16px helvetica, arial, sans-serif;
+	font: 14px/16px "Open Sans", sans-serif;
 	padding: 2px;
 	color: #333;
 }
@@ -1249,7 +1249,7 @@ div.single-plugin {
 	clear: both;
 }
 div.single-plugin h3 {
-	font-family: Helvetica, Arial, sans-serif !important;
+	font-family: "Open Sans", sans-serif !important;
 	font-style: normal;
 	float: left;
 }
@@ -1432,4 +1432,26 @@ div.plugin-meta img {
 
 #buddypress #subnav {
 	border-bottom: none;
+}
+
+/* =Activity Streams
+-------------------------------------------------------------- */
+
+#buddypress .activity-list .activity-content .activity-header,
+#buddypress .activity-list .activity-content .comment-header {
+	margin-top: -10px;
+	font-size: 13px;
+	width: 75%;
+}
+
+#buddypress .activity-list .activity-content .activity-header a,
+#buddypress .activity-list .activity-content .comment-header a {
+	font-size: 13px;
+	font-weight: 600;
+}
+
+#buddypress a.activity-time-since {
+	position: absolute;
+	top: 0px;
+	right: 20px;
 }
