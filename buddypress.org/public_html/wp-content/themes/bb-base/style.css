@@ -39,7 +39,7 @@ html {
 	padding: 0;
 }
 body {
-	font: 400 13px/32px "Open Sans", sans-serif;
+	font: 400 13px/24px "Open Sans", sans-serif;
 	text-align: left;
 	background: #fbfbfb;
 	margin: 0;
@@ -313,22 +313,6 @@ div.single-post table tr.alt td {
 /* =Buttons
 -------------------------------------------------------------- */
 
-#nav li a {
-	color: #fff;
-	font-family: "Open Sans", sans-serif;
-	height: auto;
-	line-height: 1;
-	padding: 5px 10px;
-	font-weight: 500;
-	border: none;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	-o-border-radius: 3px;
-	-ms-border-radius: 3px;
-	border-radius: 3px;
-	border: 1px solid transparent;
-}
-
 .button {
 	color: #fff;
 	font-family: "Open Sans", sans-serif;
@@ -345,35 +329,38 @@ div.single-post table tr.alt td {
 	border-radius: 3px;
 }
 
-#nav li.current a,
-#nav li a:active,
-.button:active {
-	font-weight: 500;
-}
-
 /* =Navigation
 -------------------------------------------------------------- */
 
-ul#nav {
+#nav {
 	float: right;
 	margin: 30px 0 0 0;
 	line-height: 20px;
 }
-ul#nav li {
+#nav li {
 	display: inline;
 	float: left;
 	margin: 0 3px 0 3px;
 	list-style: none;
 }
-ul#nav li a {
-	padding: 5px 8px;
-	color: #eee;
+#nav li a {
 	text-decoration: none;
+	color: #fff;
+	height: auto;
+	line-height: 1;
+	padding: 5px 10px;
+	font-weight: 600;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-o-border-radius: 3px;
+	-ms-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid transparent;
 }
-ul#nav li a:hover {
+#nav li a:hover {
 	color: #ddeedd;
 }
-ul#nav li a.active {
+#nav li a.active {
 	color: #fff;
 }
 

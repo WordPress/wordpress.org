@@ -142,7 +142,7 @@ div.free-page div.standard {
 /* =Navigation
 -------------------------------------------------------------- */
 
-ul#nav li a:hover {
+#nav li a:hover {
 	color: #ffeeee;
 }
 
