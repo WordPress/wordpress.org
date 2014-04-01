@@ -1392,31 +1392,31 @@ div.plugin-meta img {
 	padding: 5px 3px 5px 8px;
 }
 
-#activity-personal-li:before {
+#activity-personal-li a:before {
 	content: '\f452';
 }
 
-#xprofile-personal-li:before {
+#xprofile-personal-li a:before {
 	content: '\f110';
 }
 
-#blogs-personal-li:before {
+#blogs-personal-li a:before {
 	content: '\f325';
 }
 
-#blogs-personal-li:before {
+#blogs-personal-li a:before {
 	content: '\f325';
 }
 
-#notifications-personal-li:before {
+#notifications-personal-li a:before {
 	content: '\f339';
 }
 
-#forums-personal-li:before {
+#forums-personal-li a:before {
 	content: '\f451';
 }
 
-#forums-personal-li:before {
+#forums-personal-li a:before {
 	content: '\f111';
 }
 
