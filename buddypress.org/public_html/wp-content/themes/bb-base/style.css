@@ -29,7 +29,7 @@ blockquote, q { quotes: none; }
 ins { text-decoration: none; }
 del { text-decoration: line-through; }
 table { border-collapse: collapse; border-spacing: 0; }
-a img { border: none; }
+a img { border: 1px solid transparent; }
 
 /* =Site Style
 -------------------------------------------------------------- */
@@ -522,7 +522,6 @@ a:hover {
 img {
 	height: auto;
 	max-width: 100%;
-	border: 1px solid transparent;
 }
 
 div.wp-caption {
@@ -1404,10 +1403,6 @@ div.plugin-meta img {
 	content: '\f325';
 }
 
-#blogs-personal-li a:before {
-	content: '\f325';
-}
-
 #notifications-personal-li a:before {
 	content: '\f339';
 }
@@ -1430,14 +1425,9 @@ div.plugin-meta img {
 	color: inherit;
 }
 
+#blogs-personal-li,
 #menu-bp li span {
-	float: right;
-	background: #f5f5f5;
-	color: #333;
-	padding: 2px 10px;
-	font-size: 0.8em;
-	font-weight: bold;
-	border: 1px solid #ccc;
+	display: none;
 }
 
 #buddypress #subnav {
