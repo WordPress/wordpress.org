@@ -104,6 +104,12 @@ function bbporg_make_user_spammer() {
 		}
 	}
 
+	// Delete the users description from their profile
+	$user_description = get_user_meta( $user_id, 'description');
+	if ( !empty( $user_description ) ) {
+		delete_user_meta( $user_id, 'description' );
+	}
+
 	// Block the user
 	bbp_set_user_role( $user_id, bbp_get_blocked_role() );
 
