@@ -542,13 +542,27 @@ p.lead {
 	color: #333;
 }
 blockquote {
-	font-family: "Times New Roman", Times, serif;
-	font-style: normal;
+	font-style: italic;
 	font-size: 15px;
 	border: 1px dotted #ddd;
-	padding: 10px 10px 0 10px;
+	padding: 10px;
 	margin: 0 0 15px 0;
+	quotes: "\201C""\201D""\2018""\2019";
 }
+blockquote:before {
+	color: #ccc;
+	content: open-quote;
+	font-size: 4em;
+	line-height: 0em;
+	margin-right: 15px;
+	vertical-align: -0.5em;
+}
+blockquote p {
+	display: inline;
+	padding: 0;
+	margin: 0;
+}
+
 body.blog cite,
 body.archive cite,
 body.single cite {
