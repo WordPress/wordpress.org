@@ -97,7 +97,7 @@ class Jobs_Dot_WP {
 		// By default, it is 21 days.
 		$this->days_until_pruning = apply_filters( 'jobswp_days_until_pruning', 21 );
 
-		add_filter( 'manage_job_posts_columns',       array( $this, 'posts_columns' ) );
+		add_filter( 'manage_posts_columns',           array( $this, 'posts_columns' ), 8, 2 );
 		add_action( 'manage_job_posts_custom_column', array( $this, 'custom_posts_columns' ), 10, 2 );
 
 		add_filter( 'the_content',                    array( $this, 'add_post_a_job_form' ) );
@@ -164,7 +164,10 @@ class Jobs_Dot_WP {
 	 * @param array $columns Associative array of column names and labels
 	 * @return array Amended associated array of column names and labels
 	 */
-	function posts_columns( $columns ) {
+	function posts_columns( $columns, $post_type ) {
+		if ( 'job' !== $post_type ) {
+			return $columns;
+		}
 		$columns['poster']       = __( 'Poster', 'jobswp' );
 		$columns['poster_email'] = __( 'Poster Email', 'jobswp' );
 		return $columns;
