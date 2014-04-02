@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: JobsWP
-Version: 1.0
+Version: 1.1
 Plugin URI: http://jobs.wordpress.net
 Author: Scott Reilly
 Description: Functionality for jobs.wordpress.net
@@ -537,6 +537,7 @@ class Jobs_Dot_WP {
 				}
 			endif;
 
+			$has_errors = apply_filters( 'jobswb_save_job_errors', $has_errors );
 			if ( $has_errors )
 				$_POST['errors'] = $has_errors;
 			elseif ( ! isset( $_POST['verify'] ) || 1 != $_POST['verify'] )
@@ -667,7 +668,7 @@ class Jobs_Dot_WP {
 				}
 		}
 
-		return strip_tags( $value );
+		return apply_filters( 'jobswp_job_field_validated', strip_tags( $value ), $field, $value, $extra_data );
 	}
 
 	/**
