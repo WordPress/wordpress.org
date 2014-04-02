@@ -7,7 +7,7 @@ Author:      WordPress.org Meta Team
 */
 
 class Official_WordPress_Events {
-	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json.php';
+	const WORDCAMP_API_BASE_URL = 'http://central.wordcamp.org/wp-json.php';
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
 	const POSTS_PER_PAGE        = 50;
@@ -16,9 +16,9 @@ class Official_WordPress_Events {
 	/*
 	 * @todo
 	 *
-	 * Setup `owe_error_email_addresses` callback and MEETUP_API_KEY, etc when deploy to production
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
+	 * Update WORDCAMP_API_BASE_URL to use HTTPS when central.wordcamp.org supports it
 	 */
 
 
@@ -94,7 +94,7 @@ class Official_WordPress_Events {
 					'url'             => $wordcamp->post_meta->URL[0],
 					'start_timestamp' => $wordcamp->post_meta->{'Start Date (YYYY-mm-dd)'}[0],
 					'end_timestamp'   => $wordcamp->post_meta->{'End Date (YYYY-mm-dd)'}[0],
-					'localtion'       => $wordcamp->post_meta->Location[0]
+					'location'        => $wordcamp->post_meta->Location[0],
 				) );
 			}
 		}
