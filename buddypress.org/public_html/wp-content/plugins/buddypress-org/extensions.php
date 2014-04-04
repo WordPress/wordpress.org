@@ -76,24 +76,42 @@ add_filter( 'bp_group_members_count_user_join_filter', 'bporg_group_members_coun
 
 /** Other Functions ***********************************************************/
 
+/**
+ * Function (hooked to 'init') to handle redirect logic from various rearranged
+ * BuddyPress.org root site page locations.
+ *
+ * @author johnjamesjacoby
+ * @return if not BuddyPress.org root site
+ */
 function bporg_redirect() {
+
+	// Explode the request (could use parse_url() here too)
 	$uri_chunks = explode( '/', $_SERVER['REQUEST_URI'] );
 
 	// Redirect /forums/ to /support/
-	if ( $uri_chunks[1] == 'forums' && empty( $uri_chunks[2] ) )
+	if ( $uri_chunks[1] === 'forums' && empty( $uri_chunks[2] ) ) {
 		bp_core_redirect( 'http://buddypress.org/support/' );
+	}
 
 	// Redirect members directory to root to block heavy paginated user queries
-	if ( ( $uri_chunks[1] == 'members' ) || ( $uri_chunks[1] == 'community' && $uri_chunks[2] == 'members' && empty( $uri_chunks[3] ) ) )
+	if ( ( $uri_chunks[1] === 'members' ) && empty( $uri_chunks[2] ) ) {
 		bp_core_redirect( 'http://buddypress.org' );
+	}
 
-	// Redirect members directory to root to block heavy paginated user queries
-	if ( $uri_chunks[1] == 'community' && $uri_chunks[2] == 'groups' ) {
+	// Redirect old members profile pages to
+	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'members' ) && ! empty( $uri_chunks[3] ) ) {
+		bp_core_redirect( 'http://buddypress.org/members/' . $uri_chunks[3] . '/' );
+	}
 
-		if ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] == 'topic' ) ) {
+	// Redirect old plugin groups to deprecated plugin forums
+	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'groups' ) ) {
+
+		// Single group topic redirect
+		if ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] === 'topic' ) ) {
 			bp_core_redirect( 'http://buddypress.org/support/topic/' . $uri_chunks[6] . '/' );
 
-		} elseif ( empty( $uri_chunks[4] ) || ( $uri_chunks[4] == 'forum' ) ) {
+		// Single group forum redirect
+		} elseif ( empty( $uri_chunks[4] ) || ( $uri_chunks[4] === 'forum' ) ) {
 
 			// Use legacy group slug
 			if ( ! in_array( $uri_chunks[3], array( 'gallery', 'how-to-and-troubleshooting' ) ) ) {
@@ -102,7 +120,7 @@ function bporg_redirect() {
 			// Root forums, maybe with new slug
 			} else {
 
-				// New forums locations
+				// New BuddyPress project forums locations
 				switch ( $uri_chunks[3] ) {
 					case 'gallery' :
 						$url = 'http://buddypress.org/support/forum/your-buddypress/';
@@ -132,27 +150,29 @@ function bporg_redirect() {
 	}
 
 	// Redirect /support/topics/ to /support/
-	if ( $uri_chunks[1] == 'support' && ( !empty( $uri_chunks[2] ) && ( 'topics' == $uri_chunks[2] ) ) )
+	if ( $uri_chunks[1] === 'support' && ( !empty( $uri_chunks[2] ) && ( 'topics' === $uri_chunks[2] ) ) ) {
 		bp_core_redirect( 'http://buddypress.org/support/' );
-
-	// Redirect /members/ to /community/members/
-	if ( $uri_chunks[1] == 'members' && !empty( $uri_chunks[2] ) )
-		bp_core_redirect( 'http://buddypress.org/community/members/' . strtolower( $uri_chunks[2] ) . '/' );
+	}
 }
-add_action( 'init', 'bporg_redirect' );
+if ( 'buddypress.org' === $_SERVER['HTTP_HOST'] && ! is_admin() && defined( 'WP_USE_THEMES' ) && WP_USE_THEMES ) {
+	add_action( 'init', 'bporg_redirect', 1 ); // before bp_init
+}
 
 function wporg_profiles_redirect() {
 	$uri_chunks = explode( '/', trim( $_SERVER['REQUEST_URI'], '/' ) );
 	if ( 'users' == $uri_chunks[0] ) {
-		if ( ! empty( $uri_chunks[1] ) )
+		if ( ! empty( $uri_chunks[1] ) ) {
 			wp_redirect( 'http://profiles.wordpress.org/' . $uri_chunks[1] . '/', 301 );
-		else
+		} else {
 			wp_redirect( 'http://wordpress.org/' );
+		}
 		exit;
 	}
 
-	if ( get_user_by( 'slug', $uri_chunks[0] ) )
+	if ( get_user_by( 'slug', $uri_chunks[0] ) ) {
 		return;
+	}
+
 	if ( $user = get_user_by( 'login', urldecode( $uri_chunks[0] ) ) ) {
 		wp_redirect( 'http://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
 		exit;
@@ -166,8 +186,9 @@ function wporg_profiles_redirect() {
 }
 
 function wporg_profiles_maybe_template_redirect() {
-	if ( is_robots() || is_feed() || is_trackback() )
+	if ( is_robots() || is_feed() || is_trackback() ) {
 		return;
+	}
 
 	ob_start();
 	wp_redirect( 'http://wordpress.org/' );
