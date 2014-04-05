@@ -329,7 +329,7 @@ function bb_base_homepage_topics( $args = false ) {
 function bb_base_get_homepage_topics( $args = false ) {
 
 	// Transient settings
-	$expiration    = MINUTE_IN_SECONDS * 5;
+	$expiration    = HOUR_IN_SECONDS;
 	$transient_key = 'bb_base_homepage_topics';
 	$output        = get_transient( $transient_key );
 
