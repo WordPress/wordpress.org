@@ -33,11 +33,6 @@
 #showcase {
 	background: #ded;
 }
-div.feature p.book-description {
-	clear: left;
-	margin-top: 20px;
-	font-size: 1.1em;
-}
 
 body.bbp-user-page div.content,
 body.bbp-user-edit div.content {

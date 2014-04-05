@@ -110,8 +110,8 @@
 	<?php elseif ( is_front_page() || is_404() ) : ?>
 
 		<div class="feature">
-			<h3><?php _e( 'BuddyPress Theme Development', 'bporg' ); ?></h3>
-			<p><a href="http://www.packtpub.com/buddypress-theme-development/book" title="BuddyPress Theme Development"><img width="225" alt="" src="<?php echo get_stylesheet_directory_uri(); ?>/images/buddypress-packt.jpg"/></a></p>
+			<h3><?php _e( 'Theme Development', 'bporg' ); ?></h3>
+			<p><a href="http://www.packtpub.com/buddypress-theme-development/book" title="BuddyPress Theme Development"><img width="225" alt="A book by: Tammie Lister" src="<?php echo get_stylesheet_directory_uri(); ?>/images/buddypress-packt.jpg"/></a></p>
 			<p class="book-description">An in-depth guide to designing, developing, and testing your very own custom BuddyPress theme.</p>
 		</div>
 
