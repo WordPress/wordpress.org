@@ -170,6 +170,11 @@ a img.aligncenter {
 	clear: both;
 }
 
+.wrapper img{
+	max-width: 100%;
+	height: auto;
+}
+
 #wporg-header {
 	position: relative;
 	height: 140px;
