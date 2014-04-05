@@ -306,3 +306,56 @@ function bb_base_get_plugin_rating_html( $rating = false, $num_ratings = 0 ) {
 
 	return $rating_html;
 }
+
+/**
+ * Output front page topics
+ *
+ * @author johnjamesjacoby
+ * @uses bb_base_get_homepage_topics()
+ * @param mixed $args
+ * @return void
+ */
+function bb_base_homepage_topics( $args = false ) {
+	echo bb_base_get_homepage_topics( $args );
+}
+
+/**
+ * Get front page topics output and stash it for 5 minutes
+ *
+ * @author johnjamesjacoby
+ * @param mixed $args
+ * @return HTML
+ */
+function bb_base_get_homepage_topics( $args = false ) {
+
+	// Transient settings
+	$expiration    = MINUTE_IN_SECONDS * 5;
+	$transient_key = 'bb_base_homepage_topics';
+	$output        = get_transient( $transient_key );
+
+	// No transient found, so query for topics again
+	if ( false === $output ) {
+
+		// Setup some default topics query args
+		$r = wp_parse_args( $args, array(
+			's'              => '',
+			'posts_per_page' => 5,
+			'max_num_pages'  => 1,
+			'paged'          => 1,
+			'show_stickies'  => false
+		) );
+
+		// Look for topics
+		if ( bbp_has_topics( $r ) ) {
+			$output = bbp_buffer_template_part( 'loop',     'topics',    false );
+		} else {
+			$output = bbp_buffer_template_part( 'feedback', 'no-topics', false );
+		}
+
+		// Set the transient
+		set_transient( $transient_key, $output, $expiration );
+	}
+
+	// Return the output
+	return $output;
+}
