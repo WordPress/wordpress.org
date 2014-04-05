@@ -21,6 +21,7 @@ class WordCamp_Post_Types_Plugin {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_print_styles', array( $this, 'admin_css' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 
 		add_action( 'save_post', array( $this, 'save_post_speaker' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
@@ -188,6 +189,10 @@ class WordCamp_Post_Types_Plugin {
 
 	function admin_enqueue_scripts() {
 		wp_enqueue_style( 'campicons', plugins_url( 'fonts/campicons.css', __FILE__ ), array(), 1 );
+	}
+	
+	function wp_enqueue_scripts() {
+		wp_enqueue_style( 'wcb_shortcodes', plugins_url( 'css/shortcodes.css', __FILE__ ), array(), 1 );
 	}
 
 	/**
@@ -542,13 +547,13 @@ class WordCamp_Post_Types_Plugin {
 
 				// Determine the session title
 				if ( 'permalink' == $attr['session_link'] && 'session' == $session_type )
-					$session_title = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( get_permalink( $session->ID ) ), $session_title );
+					$session_title_html = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( get_permalink( $session->ID ) ), $session_title );
 				elseif ( 'anchor' == $attr['session_link'] && 'session' == $session_type )
-					$session_title = 'noop';
+					$session_title_html = 'noop';
 				else
-					$session_title = sprintf( '<span class="wcpt-session-title">%s</span>', $session_title );
+					$session_title_html = sprintf( '<span class="wcpt-session-title">%s</span>', $session_title );
 
-				$content = $session_title;
+				$content = $session_title_html;
 
 				$speakers_names = array();
 				foreach ( $speakers as $speaker ) {
@@ -583,7 +588,7 @@ class WordCamp_Post_Types_Plugin {
 					}
 				}
 
-				$columns_html .= sprintf( '<td colspan="%d" class="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $content );
+				$columns_html .= sprintf( '<td colspan="%d" class="%s" data-track-title="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $session_title, $content );
 			}
 
 			$global_session = $colspan == count( $columns ) ? ' global-session' : '';

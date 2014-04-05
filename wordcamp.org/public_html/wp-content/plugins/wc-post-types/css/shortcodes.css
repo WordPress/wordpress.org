@@ -1,0 +1,77 @@
+/*
+ * [schedule]
+ */
+@media screen and ( max-width: 700px ) {
+	.wcpt-schedule {
+		border: none;
+		width: 100%;
+	}
+
+	.wcpt-schedule thead {
+		display: none;
+	}
+
+	.wcpt-schedule tbody,
+	.wcpt-schedule tr,
+	.wcpt-schedule th,
+	.wcpt-schedule td {
+		display: block;
+	}
+
+	.wcpt-schedule tr {
+		border: 1px solid #464646;
+		margin-bottom: 16px;
+	}
+
+	.wcpt-schedule td {
+		border: none;
+	}
+
+	.wcpt-time {
+		background-color: #464646;
+		color: #d54e21;
+		font-size: 22px;
+		padding: 0 16px;
+	}
+
+	.wcpt-session-type-session {
+		line-height: 1.4;
+		margin-bottom: 16px;
+	}
+
+	.wcpt-session-type-session:before {
+		color: #757575;
+		content: attr( data-track-title );
+		border-bottom: 1px dashed #cccccc;
+		border-top: 1px dashed #cccccc;
+		display: block;
+		font-size: 110%;
+		line-height: 1;
+		margin-bottom: 8px;
+		padding: 3px 10px;
+	}
+
+	.global-session .wcpt-session-type-session:before {
+		display: none;
+	}
+
+	.wcpt-session-title {
+		display: block;
+		padding: 10px;
+	}
+
+	span.wcpt-session-speakers {
+		display: block;
+		padding-left: 20px;
+	}
+
+	span.wcpt-session-speakers:before {
+		color: #464646;
+		content: "Speaker: ";
+		font-style: italic;
+	}
+
+	span.wcpt-session-speakers a {
+		color: #21759b;
+	}
+}
