@@ -359,3 +359,17 @@ function bb_base_get_homepage_topics( $args = false ) {
 	// Return the output
 	return $output;
 }
+
+/**
+ * Purge the homepage topics cache when bbPress's post cache is cleaned.
+ *
+ * This allows the homepage topics fragment cache to be updated when new topics
+ * and replies are created in the support forums.
+ *
+ * @author johnjamesjacoby
+ * @return void
+ */
+function bb_base_purge_homepage_topics() {
+	delete_transient( 'bb_base_homepage_topics' );
+}
+add_action( 'bbp_clean_post_cache', 'bb_base_purge_homepage_topics' );
