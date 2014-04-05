@@ -21,11 +21,11 @@
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'Groups', 'bborg' ); ?></h3>
-			<p><a href="//buddypress.org/about/groups/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_groups.gif" alt="" width="78" height="58"></a>Flexible and extensible user groups. Allow your users to create micro-communities.</p>
+			<p><a href="//buddypress.org/about/groups/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_groups.gif" alt="" width="78" height="58"></a>Extensible user groups. Allow your users to create micro-communities.</p>
 		</div>
 		<div class="feature" style="margin:0;">
 			<h3><?php _e( 'Activity Streams', 'bborg' ); ?></h3>
-			<p><a href="//buddypress.org/about/activity/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_activity.gif" alt="" width="78" height="58"></a>Activity streams for members and groups. Sitewide directory and single threads.</p>
+			<p><a href="//buddypress.org/about/activity/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_activity.gif" alt="" width="78" height="58"></a>For members and groups. Sitewide directory and single threads.</p>
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'Notifications', 'bborg' ); ?></h3>
@@ -37,11 +37,11 @@
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'Private Messaging', 'bborg' ); ?></h3>
-			<p><a href="//buddypress.org/about/private-messaging/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_pms.gif" alt="" width="78" height="58"></a>Have private conversations with several other members at one time.</p>
+			<p><a href="//buddypress.org/about/private-messaging/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_pms.gif" alt="" width="78" height="58"></a>Private conversations, with several members at one time.</p>
 		</div>
 		<div class="feature" style="margin:0;">
 			<h3><?php _e( '...and more!', 'bborg' ); ?></h3>
-			<p><a href="//buddypress.org/about/more/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_more.gif" alt="" width="78" height="58"></a>BuddyPress can be extended with hundreds of third party components.</p>
+			<p><a href="//buddypress.org/about/more/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_more.gif" alt="" width="78" height="58"></a>Extend BuddyPress with hundreds of third party components.</p>
 		</div>
 	</div></div>
 
