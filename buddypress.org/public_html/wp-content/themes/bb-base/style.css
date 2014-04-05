@@ -418,9 +418,7 @@ h2.graphic {
 	background-repeat: no-repeat;
 	width: 350px;
 	margin: 0;
-
-	font-family: "calluna-1", "calluna-2", Palatino, Constantia, "Palatino Linotype", "Book Antiqua", serif;
-	font-weight: normal;
+	font-weight: 400;
 	font-size: 3em;
 }
 
