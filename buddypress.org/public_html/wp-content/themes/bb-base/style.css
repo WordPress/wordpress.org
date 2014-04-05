@@ -127,6 +127,9 @@ p.plans {
 #signup a {
 	text-decoration: none;
 }
+#showcase {
+	color: #fff;
+}
 #showcase-inner {
 	margin: 0 auto;
 	width: 960px;
