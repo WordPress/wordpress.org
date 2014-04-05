@@ -33,7 +33,7 @@
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'Friendships', 'bborg' ); ?></h3>
-			<p><a href="//buddypress.org/about/friends/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_friends.gif" alt="" width="78" height="58"></a>Friendship connections.<br /> It's always about.<br /> whe you know!</p>
+			<p><a href="//buddypress.org/about/friends/"><img src="<?php echo get_stylesheet_directory_uri(); ?>/images/feature_friends.gif" alt="" width="78" height="58"></a>Friendship connections.<br /> It's always about<br /> who you know!</p>
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'Private Messaging', 'bborg' ); ?></h3>
