@@ -26,14 +26,6 @@
 	text-indent: 0;
 }
 
-#headline {
-	background-color: #ddd;
-	border-bottom: 1px solid #aaa;
-}
-#headline-inner p {
-	color: #555;
-}
-
 #showcase {
 	background: #ded;
 }
@@ -148,14 +140,6 @@ div.free-page div.standard {
 
 #subnav-inner ul li a:hover {
 	color: #d84800;
-}
-
-/* =Headers
--------------------------------------------------------------- */
-
-h2.graphic {
-	color: #555;
-	text-shadow: 1px -1px 0 #aaa;
 }
 
 /* =Links

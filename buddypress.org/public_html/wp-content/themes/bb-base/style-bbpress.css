@@ -2,12 +2,8 @@
 -------------------------------------------------------------- */
 
 #header {
-	background-image: linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
-	background-image: -o-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
-	background-image: -moz-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
-	background-image: -webkit-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77 ) 0% );
-	background-image: -ms-linear-gradient( bottom, rgb(131,189,102) 50%, rgb(171,229,142) 99%, rgb(106,164,77) 0% );
-	background-image: -webkit-gradient( linear, left bottom, left top, color-stop( 0.5, rgb( 141, 199, 112 ) ), color-stop( 0.99, rgb( 171, 229, 142 ) ), color-stop( 0, rgb( 106, 164, 77 ) ) );
+	background-color: rgb(141,199,112 );
+	border-bottom: 1px solid #696;
 }
 
 #header-inner {
@@ -133,14 +129,6 @@ div.standard {
 
 #subnav-inner ul li a:hover {
 	color: #8fbb6e;
-}
-
-/* =Headers
--------------------------------------------------------------- */
-
-h2.graphic {
-	color: rgba(245,255,245,1);
-	text-shadow: 1px -1px 0 rgba(0,99,22,0.9);
 }
 
 /* =Links
