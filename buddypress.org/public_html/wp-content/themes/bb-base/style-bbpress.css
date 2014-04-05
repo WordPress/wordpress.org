@@ -2,7 +2,7 @@
 -------------------------------------------------------------- */
 
 #header {
-	background-color: rgb(141,199,112 );
+	background-color: rgb(141,199,112);
 	border-bottom: 1px solid #696;
 }
 
@@ -16,18 +16,10 @@
 /* =Site Style
 -------------------------------------------------------------- */
 
-#headline {
-	background-color: #005b1b;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(0, 91, 27)), to(rgb(0, 98, 15)));
-	background-image: -webkit-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
-	background-image: -moz-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
-	background-image: -o-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
-	background-image: -ms-linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
-	background-image: linear-gradient(top, rgb(0, 91, 27), rgb(0, 98, 15));
-	filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#005b1b', EndColorStr='#00620f');
-}
 #showcase {
-	background: #ded;
+	background-color: rgb(141,199,112);
+	border-bottom: 1px solid #696;
+	color: #fff;
 }
 
 body.bbp-user-page div.content,

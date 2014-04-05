@@ -2,12 +2,8 @@
 -------------------------------------------------------------- */
 
 #header {
-	background: #d54e21;
+	background-color: #d54e21;
 	border-bottom: 1px solid #c43d10;
-}
-
-#header-inner {
-	background: transparent;
 }
 
 #header h1 a {
@@ -26,9 +22,14 @@
 	text-indent: 0;
 }
 
+/* =Site Style
+-------------------------------------------------------------- */
+
 #showcase {
-	background: #ded;
+	background-color: #d54e21;
+	border-bottom: 1px solid #c43d10;
 }
+
 a:hover img,
 #main a:hover img {
 	border: #8C3200 solid 1px;
