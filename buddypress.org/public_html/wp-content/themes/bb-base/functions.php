@@ -59,7 +59,7 @@ function bb_base_topic_search_form() {
 			<h3><?php _e( 'Forum Search', 'bbporg'); ?></h3>
 			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'bbporg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php echo esc_attr__( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
 		</div>
 	</form>
 
@@ -74,7 +74,7 @@ function bb_base_reply_search_form() {
 			<h3><?php _e( 'Reply Search', 'bbporg'); ?></h3>
 			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'bbporg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php echo esc_attr__( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
 		</div>
 	</form>
 
@@ -89,7 +89,7 @@ function bb_base_plugin_search_form() {
 			<h3><?php _e( 'Plugin Search', 'bbporg'); ?></h3>
 			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'bbporg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php echo esc_attr__( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
 		</div>
 	</form>
 
@@ -98,36 +98,42 @@ function bb_base_plugin_search_form() {
 
 function bb_base_topic_search_query( $escaped = true ) {
 	
-	if ( empty( $_GET['ts'] ) )
+	if ( empty( $_GET['ts'] ) ) {
 		return false;
+	}
 
 	$query = apply_filters( 'bb_base_topic_search_query', $_GET['ts'] );
-	if ( true === $escaped )
+	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
+	}
 
 	return $query;
 }
 
 function bb_base_reply_search_query( $escaped = true ) {
 	
-	if ( empty( $_GET['rs'] ) )
+	if ( empty( $_GET['rs'] ) ) {
 		return false;
+	}
 
 	$query = apply_filters( 'bb_base_reply_search_query', $_GET['rs'] );
-	if ( true === $escaped )
+	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
+	}
 
 	return $query;
 }
 
 function bb_base_plugin_search_query( $escaped = true ) {
 	
-	if ( empty( $_GET['ps'] ) )
+	if ( empty( $_GET['ps'] ) ) {
 		return false;
+	}
 
 	$query = apply_filters( 'bb_base_plugin_search_query', $_GET['ps'] );
-	if ( true === $escaped )
+	if ( true === $escaped ) {
 		$query = stripslashes( esc_attr( $query ) );
+	}
 
 	return $query;
 }
@@ -229,11 +235,13 @@ function bb_base_get_plugins( $page = 1, $search = false, $tag = 'bbpress' ) {
  */
 function bb_base_plugins_api( $action, $args = null ) {
 
-	if ( is_array($args) )
+	if ( is_array($args) ) {
 		$args = (object)$args;
+	}
 
-	if ( !isset( $args->per_page ) )
+	if ( !isset( $args->per_page ) ) {
 		$args->per_page = 19;
+	}
 
 	$args = apply_filters( 'plugins_api_args', $args, $action        );
 	$res  = apply_filters( 'plugins_api',      false, $action, $args );
@@ -260,8 +268,9 @@ function bb_base_plugins_api( $action, $args = null ) {
 
 function bb_base_get_plugin_rating_html( $rating = false, $num_ratings = 0 ) {
 
-	if ( empty( $rating ) )
+	if ( empty( $rating ) ) {
 		return false;
+	}
 
 	$bb_base_uri = get_template_directory_uri();
 	$rating_html = '
