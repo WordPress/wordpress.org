@@ -177,7 +177,7 @@ div.feature img {
 	float: left;
 	margin: 5px 10px 0 0;
 	border: #fff solid 1px;
-	height: 58; /* not auto */
+	height: 58px; /* not auto */
 }
 div.feature p.book-description {
 	clear: left;
