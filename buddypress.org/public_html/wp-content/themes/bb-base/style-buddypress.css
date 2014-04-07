@@ -32,7 +32,7 @@
 
 a:hover img,
 #main a:hover img {
-	border: #8C3200 solid 1px;
+	border: 1px solid #dd823b;
 }
 
 div.standard {
@@ -47,33 +47,28 @@ div.free-page div.standard {
 /* =Buttons
 -------------------------------------------------------------- */
 
-#nav li.current a,
-#nav li a:hover,
-.button:hover {
-	color: rgba(255,235,235,0.9);
-	background-color: #dd823b;
-}
-
 .button {
 	background-color: #dd823b;
-	border: 1px solid #ad520b;
+	border: 1px solid #9d4200;
 }
 
-#nav li.current a,
-#nav li a:active,
+.button:hover,
 .button:active {
 	background-color: #dd823b;
-}
-
-#nav li a:hover {
-	background-color: #cf4944;
+	color: rgba(255,255,255,0.9);
 }
 
 /* =Navigation
 -------------------------------------------------------------- */
 
 #nav li a:hover {
-	color: #ffeeee;
+	background-color: #cf4944;
+	color: rgba(255,255,255,0.9);
+}
+
+#nav li.current a,
+#nav li a:active {
+	background-color: #dd823b;
 }
 
 #subnav-inner ul li a:hover {
