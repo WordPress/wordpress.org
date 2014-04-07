@@ -307,6 +307,8 @@ function bb_base_get_plugin_rating_html( $rating = false, $num_ratings = 0 ) {
 	return $rating_html;
 }
 
+/** Caching *******************************************************************/
+
 /**
  * Output front page topics
  *
@@ -320,7 +322,7 @@ function bb_base_homepage_topics( $args = false ) {
 }
 
 /**
- * Get front page topics output and stash it for 5 minutes
+ * Get front page topics output and stash it for an hour
  *
  * @author johnjamesjacoby
  * @param mixed $args
@@ -373,3 +375,57 @@ function bb_base_purge_homepage_topics() {
 	delete_transient( 'bb_base_homepage_topics' );
 }
 add_action( 'bbp_clean_post_cache', 'bb_base_purge_homepage_topics' );
+
+/**
+ * Output first page of support topics
+ *
+ * @author johnjamesjacoby
+ * @uses bb_base_get_homepage_topics()
+ * @param mixed $args
+ * @return void
+ */
+function bb_base_support_topics() {
+	echo bb_base_get_support_topics();
+}
+
+/**
+ * Get first page of support topics output and stash it for an our
+ *
+ * @author johnjamesjacoby
+ * @param mixed $args
+ * @return HTML
+ */
+function bb_base_get_support_topics() {
+
+	// Transient settings
+	$expiration    = HOUR_IN_SECONDS;
+	$transient_key = 'bb_base_support_topics';
+	$output        = get_transient( $transient_key );
+
+	// No transient found, so query for topics again
+	if ( false === $output ) {
+
+		// Look for topics
+		$output = bbp_buffer_template_part( 'content', 'archive-topic', false );
+
+		// Set the transient
+		set_transient( $transient_key, $output, $expiration );
+	}
+
+	// Return the output
+	return $output;
+}
+
+/**
+ * Purge first page of topics cache when bbPress's post cache is cleaned.
+ *
+ * This allows the support topics fragment cache to be updated when new topics
+ * and replies are created in the support forums.
+ *
+ * @author johnjamesjacoby
+ * @return void
+ */
+function bb_base_purge_support_topics() {
+	delete_transient( 'bb_base_support_topics' );
+}
+add_action( 'bbp_clean_post_cache', 'bb_base_purge_support_topics' );
