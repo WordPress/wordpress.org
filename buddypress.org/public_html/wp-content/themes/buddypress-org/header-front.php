@@ -2,7 +2,7 @@
 
 	<div id="headline"><div id="headline-inner">
 		<h2 class="graphic home"><?php bloginfo( 'description' ); ?></h2>
-		<p>BuddyPress is a powerful (yet elegant) suite of social networking components, made the WordPress way, to help you build a robust WordPress.org powered community.</p>
+		<p>BuddyPress is a powerful (yet elegant) suite of social networking components, made the WordPress way, to help you build a flexible & robust community.</p>
 		<div>
 			<a href="<?php bloginfo( 'url' ); ?>/download/" id="big-demo-button" class="button">Download BuddyPress &rarr;</a>
 			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=2" alt="Screenshots">
