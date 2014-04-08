@@ -450,7 +450,7 @@ add_action( 'bbp_clean_post_cache', 'bb_base_purge_support_topics' );
 function bb_base_recount_current_thing() {
 
 	// Bail if no refresh
-	if ( empty( $_GET['refresh'] ) || ( 'true' !== $_GET['refresh'] ) ) {
+	if ( empty( $_GET['refresh'] ) || ( 'true' != $_GET['refresh'] ) ) {
 		return;
 	}
 
