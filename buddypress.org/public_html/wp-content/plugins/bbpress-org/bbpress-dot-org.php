@@ -13,19 +13,6 @@ include_once( plugin_dir_path( __FILE__ ) . 'toolbar.php' );
 include_once( plugin_dir_path( __FILE__ ) . 'tools.php'   );
 
 /**
- * Remove the bbPress dashboard widget, since it uses get_users() and causes
- * major slow-down.
- *
- * @author johnjamesjacoby
- * @since 1.0
- * @param type $admin
- */
-function bbporg_remove_dashboard_widget( $admin ) {
-	remove_action( 'wp_dashboard_setup', array( $admin, 'dashboard_widget_right_now' ) );
-}
-add_action( 'bbp_admin_loaded', 'bbporg_remove_dashboard_widget' );
-
-/**
  * A cheap and effective way to keep non-admins out of wp-admin.
  *
  * @author johnjamesjacoby
