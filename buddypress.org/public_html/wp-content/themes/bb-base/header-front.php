@@ -4,7 +4,7 @@
 		<p>This software is really great. Go check it out for yourself and tell us how much you like it in the forums!</p>
 		<div>
 			<a href="<?php bloginfo( 'url' ); ?>/download/" id="big-demo-button" class="button">Download &rarr;</a>
-			<img src="<?php bloginfo( 'template_url' ); ?>/images/screenshots.png?v=2" alt="Screenshots">
+			<img src="<?php bloginfo( 'template_url' ); ?>/images/screenshots.png?v=3" alt="Screenshots">
 		</div>
 	</div></div>
 	<hr class="hidden" />
