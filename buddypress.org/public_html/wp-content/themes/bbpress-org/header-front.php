@@ -4,7 +4,7 @@
 		<p>bbPress is forum software with a twist from the creators of WordPress. Easily setup discussion forums inside your WordPress.org powered site.</p>
 		<div>
 			<a href="//bbpress.org/download/" id="big-demo-button" class="button">Download bbPress &rarr;</a>
-			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=4" alt="Screenshots">
+			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=5" alt="Screenshots">
 		</div>
 	</div></div>
 	<hr class="hidden" />
