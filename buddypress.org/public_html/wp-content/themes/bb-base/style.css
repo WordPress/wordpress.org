@@ -135,6 +135,17 @@ p.plans {
 	width: 960px;
 	padding: 20px 0 0;
 }
+#showcase h3 {
+	color: #f4f4f4;
+	margin: 0 0 10px 0;
+}
+#showcase img {
+	float: left;
+	margin: 5px 10px 0 0;
+	border: #fff solid 1px;
+	height: 58px; /* not auto */
+}
+
 #main {
 	margin: 0 auto;
 	width: 960px;
@@ -169,15 +180,6 @@ div.sidebar div.feature {
 div.feature p {
 	margin: 0;
 	font-size: 11px;
-}
-#showcase h3 {
-	margin: 0 0 10px 0;
-}
-#showcase img {
-	float: left;
-	margin: 5px 10px 0 0;
-	border: #fff solid 1px;
-	height: 58px; /* not auto */
 }
 div.feature p.book-description {
 	clear: left;
