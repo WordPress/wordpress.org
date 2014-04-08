@@ -438,3 +438,64 @@ function bb_base_purge_support_topics() {
 	delete_transient( 'bb_base_support_topics' );
 }
 add_action( 'bbp_clean_post_cache', 'bb_base_purge_support_topics' );
+
+/**
+ * Hack to refresh topic and forum data when bug prevents last active times from
+ * updating (splits/merges/trash/spam/etc...)
+ *
+ * @author johnjamesjacoby
+ * @since 1.0.1
+ * @return If not refreshing
+ */
+function bb_base_recount_current_thing() {
+
+	// Bail if no refresh
+	if ( empty( $_GET['refresh'] ) || ( 'true' !== $_GET['refresh'] ) ) {
+		return;
+	}
+
+	// Refresh topic data
+	if ( bbp_is_single_topic() ) {
+
+		// Bail if not capable
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		// Get the topic ID
+		$topic_id = bbp_get_topic_id();
+
+		bbp_update_topic_voice_count( $topic_id );
+		bbp_update_topic_last_reply_id( $topic_id );
+		bbp_update_topic_last_active_id( $topic_id );
+		bbp_update_topic_last_active_time( $topic_id );
+
+		bb_base_purge_support_topics();
+		bb_base_purge_homepage_topics();
+
+		// Redirect without _GET
+		wp_safe_redirect( bbp_get_topic_permalink() );
+		die;
+
+	// Refresh forum data
+	} elseif ( bbp_is_single_forum() ) {
+
+		// Bail if not capable
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		bbp_update_forum_last_reply_id();
+		bbp_update_forum_last_topic_id();
+		bbp_update_forum_last_active_id();
+		bbp_update_forum_last_active_time();
+
+		bb_base_purge_support_topics();
+		bb_base_purge_homepage_topics();
+
+		// Redirect without _GET
+		wp_safe_redirect( bbp_get_forum_permalink() );
+		die;
+	}
+}
+add_action( 'bbp_template_redirect', 'bb_base_recount_current_thing' );
