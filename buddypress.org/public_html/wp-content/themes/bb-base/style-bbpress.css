@@ -16,11 +16,6 @@
 /* =Site Style
 -------------------------------------------------------------- */
 
-#showcase {
-	background-color: rgb(141,199,112);
-	border-bottom: 1px solid #696;
-}
-
 body.bbp-user-page div.content,
 body.bbp-user-edit div.content {
 	width: auto;

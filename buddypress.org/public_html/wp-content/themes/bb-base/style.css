@@ -100,7 +100,7 @@ body.page-template-page-homepage-php #header {
 	line-height: 1.8em;
 	bottom: 153px;
 	width: 330px;
-	font-weight: 300;
+	font-weight: 400;
 	font-size: 13px;
 	color: #555;
 }
@@ -128,7 +128,9 @@ p.plans {
 	text-decoration: none;
 }
 #showcase {
-	color: #fff;
+	background-color: #eee;
+	border-bottom: 1px solid #ccc;
+	color: #555;
 }
 #showcase-inner {
 	margin: 0 auto;
@@ -136,13 +138,13 @@ p.plans {
 	padding: 20px 0 0;
 }
 #showcase h3 {
-	color: #f4f4f4;
+	color: #333;
 	margin: 0 0 10px 0;
 }
 #showcase img {
 	float: left;
 	margin: 5px 10px 0 0;
-	border: #fff solid 1px;
+	border: 1px solid #aaa;
 	height: 58px; /* not auto */
 }
 

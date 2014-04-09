@@ -25,11 +25,6 @@
 /* =Site Style
 -------------------------------------------------------------- */
 
-#showcase {
-	background-color: #cf4944;
-	border-bottom: 1px solid #af2924;
-}
-
 a:hover img,
 #main a:hover img {
 	border: 1px solid #dd823b;
