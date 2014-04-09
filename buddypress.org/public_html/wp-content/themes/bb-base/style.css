@@ -558,7 +558,7 @@ blockquote {
 	border: 1px dotted #ddd;
 	padding: 10px;
 	margin: 0 0 15px 0;
-	quotes: "\201C""\201D""\2018""\2019";
+	quotes: "\201C""\201D";
 }
 blockquote:before {
 	color: #ccc;
@@ -960,6 +960,16 @@ body.single-forum .bbp-topic-form code,
 body.topic-edit .bbp-topic-form code,
 body.reply-edit .bbp-reply-form code {
 	width: auto;
+}
+
+#bbpress-forums div.reply {
+	width: auto;
+}
+
+#bbpress-forums div.bbp-forum-content,
+#bbpress-forums div.bbp-reply-content,
+#bbpress-forums div.bbp-topic-content {
+	padding: 12px 12px 12px 10px;
 }
 
 #bbpress-forums div.bbp-topic-content code,
