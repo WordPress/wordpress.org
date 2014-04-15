@@ -25,10 +25,10 @@ class WPorg_Handbook_Widget extends WP_Widget {
 
 		$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
 		if ( $watchlist && in_array( get_current_user_id(), $watchlist ) )
-			printf( '<p>You are watching this page. <a href="%s">Unwatch</a></p>',
+			printf( '<p class="handbook-watch">You are watching this page. <a href="%s">Unwatch</a></p>',
 				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ) );
 		else
-			printf( '<p><a href="%s">Watch this page</a></p>',
+			printf( '<p class="handbook-watch"><a href="%s">Watch this page</a></p>',
 				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ) );
 	}
 }
