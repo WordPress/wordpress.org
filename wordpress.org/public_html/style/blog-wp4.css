@@ -25,7 +25,8 @@
 }
 
 .storycontent div.googleplus1_button,
-.storycontent .wp-playlist div {
+.storycontent .wp-playlist div,
+.storycontent .mejs-video div {
 	margin-top: 0;
 	margin-bottom: 0;
 }
