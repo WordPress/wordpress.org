@@ -82,6 +82,7 @@ class WP_38_Credits extends WP_Credits {
 			'adamsilverstein',
 			'admiralthrawn',
 			'ahoereth',
+			'andykeith', // 3.8.2
 			'andypeatling',
 			'ankitgadertcampcom',
 			'apeatling',
@@ -96,6 +97,7 @@ class WP_38_Credits extends WP_Credits {
 			'batmoo', // props missed by committer, r26046
 			'binarymoon',
 			'bpetty',
+			'bramd', // 3.8.2
 			'bradyvercher',
 			'buffler', // 2014 pre-3.8
 			'cainm',
@@ -190,6 +192,7 @@ class WP_38_Credits extends WP_Credits {
 			'markoheijnen',
 			'matt',
 			'mattheu',
+			'mattonomics', // 3.8.2
 			'mattwiebe',
 			'matveb',
 			'mauryaratan',
@@ -226,6 +229,7 @@ class WP_38_Credits extends WP_Credits {
 			'pauldewouters',
 			'pavelevap',
 			'pento',
+			'plocha', // 3.8.2
 			'ptahdunbar',
 			'raamdev',
 			'rachelbaker',
@@ -257,6 +261,7 @@ class WP_38_Credits extends WP_Credits {
 			'stevenkword',
 			'swissspidy',
 			'taupecat', // 2014 pre-3.8
+			'tellyworth', // 3.8.2
 			'thomasguillot',
 			'tierra',
 			'tillkruess',
@@ -265,6 +270,7 @@ class WP_38_Credits extends WP_Credits {
 			'tmtoy',
 			'tobiasbg',
 			'tollmanz',
+			'tomdxw', // 3.8.2
 			'tommcfarlin',
 			'trepmal',
 			'trishasalas', // 2014 pre-3.8
