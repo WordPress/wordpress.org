@@ -23,6 +23,12 @@ function wporg_wordpress_credits_shortcode( $attrs, $content = null ) {
 			$props[ strtolower( $person[2] ) ] = $person[0];
 		}
 	}
+
+	if ( isset( $attrs['exclude'] ) ) {
+		$exclude = explode( ',', strtolower( $attrs['exclude'] ) );
+		$props = array_diff_key( $props, array_flip( $exclude ) );
+	}
+
 	asort( $props, SORT_FLAG_CASE | SORT_STRING );
 	$output = array();
 	foreach ( $props as $username => $name ) {
