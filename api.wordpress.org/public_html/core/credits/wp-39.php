@@ -48,8 +48,10 @@ class WP_39_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => array(
+					'adamsilverstein'    => 'Adam Silverstein',
 					'avryl'              => 'Janneke Van Dorpe',
 					'ehg'                => 'Chris Blower',
+					'EmpireOfLight'      => 'Ben Dunkle',
 					'ethitter'           => 'Erick Hitter',
 					'jeremyfelt'         => 'Jeremy Felt',
 					'jorbin'             => 'Aaron Jorbin',
@@ -62,6 +64,7 @@ class WP_39_Credits extends WP_Credits {
 					'obenland'           => 'Konstantin Obenland',
 					'pento'              => 'Gary Pendergast',
 					'shaunandrews'       => 'Shaun Andrews',
+					'smashcut'           => 'Michael Pick',
 					'westonruter'        => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
 				),
 			),
