@@ -24,7 +24,8 @@
 	margin-bottom: 2em;
 }
 
-.storycontent div.googleplus1_button {
+.storycontent div.googleplus1_button,
+.storycontent .wp-playlist div {
 	margin-top: 0;
 	margin-bottom: 0;
 }
