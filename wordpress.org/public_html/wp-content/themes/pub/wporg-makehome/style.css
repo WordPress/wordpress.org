@@ -178,7 +178,6 @@ section.get-involved article {
 	padding: 20px;
 	width: 420px;
 	width: calc( 100% / 2 - 60px );
-	min-height: 190px;
 	font-size: 1.5em;
 	background: #fff;
 	float: left;

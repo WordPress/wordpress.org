@@ -7,6 +7,7 @@
 <section class="get-involved">
 	<div class="wrapper">
 		<h2 class="section-title"><?php _e( 'There are many different ways for you to get involved with WordPress:', 'make-wporg' ); ?></h2>
+		<div class="js-masonry" data-masonry-options='{ "itemSelector": ".make_site" }'>
 		<?php 
 			$sites_query = new WP_Query( 'post_type=make_site&posts_per_page=-1&order=ASC' );
 			$makesites = make_site_get_network_sites();
@@ -40,7 +41,7 @@
 				<?php endif; /**/ ?>
 			</article>
 		<?php endwhile; ?>
-
+		</div>
 	</div>
 </section>
 
