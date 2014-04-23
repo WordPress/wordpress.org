@@ -6,7 +6,7 @@
  */
 ?>
 <li id="prologue-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<h4>
+	<h6>
 		<span class="meta">
 			<span class="actions">
 				<a href="<?php the_permalink(); ?>" class="thepermalink printer-only" title="<?php esc_attr_e( 'Permalink', 'p2' ); ?>"><?php _e( 'Permalink', 'p2' ); ?></a>
@@ -31,7 +31,7 @@
 				</span>
 			<?php endif; ?>
 		</span>
-	</h4>
+	</h6>
 
 	<?php
 	/*

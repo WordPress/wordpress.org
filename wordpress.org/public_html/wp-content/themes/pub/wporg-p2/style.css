@@ -18,19 +18,96 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 .post-type-archive-handbook #sidebar,
 .single-handbook #sidebar {
 	float: left;
-	margin-left: 0;
-	margin-right: -1px;
+	margin-left: 6px;
 }
 
 /* Better styling for handbook sidebars if they use a "Table of Contents" menu */
 .post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
 .single-handbook ul#menu-table-of-contents a[href="#"]{
-	font-weight: normal;
+	font-weight: bold;
 	color: #555;
-	font-size: 125%;
+	font-size: 115%;
 	padding: 4px 0;
 	display: block;
 	cursor: text;
+}
+
+.post-type-archive-handbook ul#menu-table-of-contents a,
+.single-handbook ul#menu-table-of-contents a {
+	color: #555;
+}
+
+.post-type-archive-handbook h2.widgettitle,
+.single-handbook h2.widgettitle {
+	background: #d6d6d6;
+	margin-bottom: 0!important;
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: 3px;
+	font-size: 0.6em;
+	padding: 5px 0;
+}
+
+.single-handbook a {
+	color: #267db2;
+}
+
+.single-handbook .current-menu-item a {
+	color: #267db2!important;
+	font-weight: bold!important;
+}
+
+.single-handbook .current-menu-item ul li a {
+	color: #555!important;
+	font-weight: normal!important;
+}
+
+.single-handbook a:hover,
+.single-handbook .current-menu-item ul li a:hover {
+	color: #d54e21!important;
+}
+
+.single-handbook div.table-of-contents {
+	float: right;
+	width: 200px;
+	background: #f5f5f5;
+	border: 1px solid #d6d6d6;
+	margin: 0 0 0 10px;
+	z-index: 1;
+	position: relative;
+}
+
+.single-handbook div.table-of-contents h2 {
+	margin: 0;
+	padding-bottom: 8px!important;
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 1em!important;
+	letter-spacing: 3px;
+	background: #d6d6d6;
+}
+
+.single-handbook ul.items {
+	margin-bottom: 8px!important;
+	list-style-type: none!important;
+	padding-right: 10px;
+}
+
+.single-handbook ul.items li {
+	padding-bottom: 6px!important;
+}
+
+.single-handbook ul.items li ul li,
+.single-handbook ul.items li ul li ul li {
+	padding-bottom: 0!important;
+}
+
+.single-handbook ul.items li a {
+	color: #555;
+}
+
+li.type-handbook {
+	padding-top: 0!important;
 }
 
 li.type-handbook code {
@@ -43,8 +120,6 @@ li.type-handbook code {
 
 .handbook-page-title {
 	font-size: 2em;
-	padding-bottom: 4px;
-	color: #777;
 }
 
 li.type-handbook h2 {
@@ -68,7 +143,12 @@ li.type-handbook h4 {
 	color: #555;
 	font-size: 16px;
 	font-weight: bold;
-	margin: 1em 0;
+	margin: 0;
+}
+
+ul#menu-table-of-contents {
+	padding: 12px;
+	background: #f5f5f5;
 }
 
 ul#menu-table-of-contents > li {
@@ -173,8 +253,32 @@ ul#menu-wp-org-headline-nav.menu {
 	position: relative;
 }
 
-#main span.meta span.actions {
-	top: 6px;
+#main h6 {
+	background-color: #f5f5f5;
+	height: 20px;
+	padding: 0;
+	margin: 0 0 20px 0;
+}
+
+#main h6 span.meta span.actions {
+    font-size: 1.5em;
+	font-family: Arial;
+}
+
+#main h6 span.meta span.actions a,
+#main h6 span.meta span.actions a:active,
+#main h6 span.meta span.actions a:visited,
+#main .selected h6 span.meta span.actions a,
+#main .selected h6 span.meta span.actions a:active,
+#main .selected h6 span.meta span.actions a:visited {
+	color: #555;
+	text-decoration: none!important;
+	border-bottom: 0;
+}
+
+#main h6 span.meta span.actions a:hover,
+#main .selected h6 span.meta span.actions a:hover {
+	color: #d54e21;
 }
 
 /* Fix display of empty comments (which can happen on edit) */
