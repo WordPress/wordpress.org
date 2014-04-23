@@ -37,7 +37,7 @@ class WPorg_Handbook_TOC {
 		if ( $items ) {
 			$toc .= $this->styles;
 			$toc .= '<div class="table-of-contents">';
-			$toc .= "<$contents_header>Contents</$contents_header><ul class=\"items\">";
+			$toc .= "<$contents_header>Topics</$contents_header><ul class=\"items\">";
 			$last_item = false;
 			foreach ( $items as $item ) {
 				if ( $last_item ) {
