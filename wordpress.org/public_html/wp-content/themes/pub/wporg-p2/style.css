@@ -44,7 +44,7 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	text-align: center;
 	text-transform: uppercase;
 	letter-spacing: 3px;
-	font-size: 0.6em;
+	font-size: 13px!important;
 	padding: 5px 0;
 }
 
@@ -241,7 +241,7 @@ ul#menu-wp-org-headline-nav.menu {
 }
 
 .jetpack_subscription_widget input[type="submit"] {
-	padding:0 10px !important;
+	padding: 0 10px !important;
 }
 
 /* Fix styling of action links which can clash with the content below it */
