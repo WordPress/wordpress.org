@@ -49,6 +49,7 @@ function init() {
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
+	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 
@@ -82,6 +83,10 @@ function pre_get_posts( $query ) {
 	if ( $query->is_main_query() && $query->is_post_type_archive() ) {
 		$query->set( 'orderby', 'title' );
 		$query->set( 'order', 'ASC' );
+	}
+
+	if ( $query->is_main_query() && $query->is_tax() && $query->get( 'wp-parser-source-file' ) ) {
+		$query->set( 'wp-parser-source-file', str_replace( array( '.php', '/' ), array( '-php', '_' ), $query->query['wp-parser-source-file'] ) );
 	}
 }
 
@@ -120,14 +125,14 @@ function register_post_types() {
 		'public'      => true,
 		'rewrite'     => array(
 			'feeds'      => false,
-			'slug'       => 'reference/function',
+			'slug'       => 'reference/functions',
 			'with_front' => false,
 		),
 		'supports'    => $supports,
 	) );
 
 	// Methods
-	add_rewrite_rule( 'method/([^/]+)/([^/]+)/?$', 'index.php?post_type=wp-parser-function&name=$matches[1]-$matches[2]', 'top' );
+	add_rewrite_rule( 'reference/classes/([^/]+)/([^/]+)/?$', 'index.php?post_type=wp-parser-method&name=$matches[1]-$matches[2]', 'top' );
 
 	// Classes
 	register_post_type( 'wp-parser-class', array(
@@ -151,7 +156,7 @@ function register_post_types() {
 		'public'      => true,
 		'rewrite'     => array(
 			'feeds'      => false,
-			'slug'       => 'reference/class',
+			'slug'       => 'reference/classes',
 			'with_front' => false,
 		),
 		'supports'    => $supports,
@@ -179,7 +184,7 @@ function register_post_types() {
 		'public'      => true,
 		'rewrite'     => array(
 			'feeds'      => false,
-			'slug'       => 'reference/hook',
+			'slug'       => 'reference/hooks',
 			'with_front' => false,
 		),
 		'supports'    => $supports,
@@ -207,7 +212,7 @@ function register_post_types() {
 		'public'      => true,
 		'rewrite'     => array(
 			'feeds'      => false,
-			'slug'       => 'method',
+			'slug'       => 'classes',
 			'with_front' => false,
 		),
 		'supports'    => $supports,
@@ -239,7 +244,8 @@ function register_taxonomies() {
 			'menu_name'                  => __( 'Files', 'wporg' ),
 		),
 		'public'                => true,
-		'rewrite'               => array( 'slug' => 'reference/files' ),
+		'hierarchical'          => true,
+		'rewrite'               => array( 'slug' => 'reference/files', 'hierarchical' => true ),
 		'sort'                  => false,
 		'update_count_callback' => '_update_post_term_count',
 	) );
@@ -266,11 +272,25 @@ function register_taxonomies() {
 }
 
 function method_permalink( $link, $post ) {
-	if ( $post->post_type !== 'wp-parser-function' || $post->post_parent == 0 )
+	if ( $post->post_type !== 'wp-parser-method' )
 		return $link;
 
 	list( $class, $method ) = explode( '-', $post->post_name );
-	$link = home_url( user_trailingslashit( "method/$class/$method" ) );
+	$link = home_url( user_trailingslashit( "reference/classes/$class/$method" ) );
+	return $link;
+}
+
+function taxonomy_permalink( $link, $term, $taxonomy ) {
+	if ( $taxonomy === 'wp-parser-source-file' ) {
+		$slug = $term->slug;
+		if ( substr( $slug, -4 ) === '-php' ) {
+			$slug = substr( $slug, 0, -4 ) . '.php';
+			$slug = str_replace( '_', '/', $slug );
+		}
+		$link = home_url( user_trailingslashit( "reference/files/$slug" ) );
+	} elseif ( $taxonomy === 'wp-parser-since' ) {
+		$link = str_replace( $term->slug, str_replace( '-', '.', $term->slug ), $link );
+	}
 	return $link;
 }
 
