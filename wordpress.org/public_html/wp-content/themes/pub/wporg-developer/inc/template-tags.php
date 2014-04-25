@@ -354,17 +354,19 @@ namespace DevHub {
 
 		// Decorate and return hook arguments.
 		if ( 'wp-parser-hook' === get_post_type( $post_id ) ) {
-			$arg_string = '';
-			if ( ! empty( $types ) ) {
-				foreach ( $types as $arg => $type ) {
-					$arg_string .= ' <span class="arg-type">' . esc_html( $type ) . '</span>';
-					$arg_string .= ' <span class="arg-name">' . esc_html( $arg ) . '</span>';
-					$arg_string .= $arg === end( array_keys( $types ) ) ? ' ' : ',';
-				}
-				if ( ! empty( $arg_string ) ) {
-					$signature .= " ($arg_string)";
-				}
+			$hook_args = array();
+			foreach ( $types as $arg => $type ) {
+				$hook_args[] = ' <nobr><span class="arg-type">' . esc_html( $type ) . '</span> <span class="arg-name">' . esc_html( $arg ) . '</span></nobr>';
 			}
+			$hook_type = get_post_meta( $post_id, '_wp-parser_hook_type', true );
+			$delimiter = false !== strpos( $signature, '$' ) ? '"' : "'";
+			$signature = $delimiter . $signature . $delimiter;
+			$signature = '<span class="hook-func">' . ( $hook_type === 'action' ? 'do_action' : 'apply_filters' ) . '</span> ( ' . $signature;
+			if ( $hook_args ) {
+				$signature .= ', ';
+				$signature .= implode( ', ', $hook_args );
+			}
+			$signature .= ' )';
 			return $signature;
 		}
 

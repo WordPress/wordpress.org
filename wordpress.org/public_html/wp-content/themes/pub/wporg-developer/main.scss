@@ -1094,10 +1094,15 @@ textarea {
 		border-bottom: 1px solid #dfdfdf;
 		h1 {
 			margin: 24px 0;
+			padding-left: 100px;
 			a {
+				margin-left: -100px;
 				color: #24831d;
 				font-family: $code-font;
 				font-size: 20px;
+				.hook-func {
+					color: #888;
+				}
 				.arg-type {
 					color: #cd2f23;
 				}
