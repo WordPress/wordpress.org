@@ -298,7 +298,7 @@ function taxonomy_permalink( $link, $term, $taxonomy ) {
 function theme_scripts_styles() {
 	wp_enqueue_style( 'dashicons' );
 	wp_enqueue_style( 'open-sans', '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600' );
-	wp_enqueue_style( 'wporg-developer-style', get_stylesheet_uri() );
+	wp_enqueue_style( 'wporg-developer-style', get_stylesheet_uri(), array(), '1' );
 	wp_enqueue_style( 'wp-dev-sass-compiled', get_template_directory_uri() . '/main.css', array( 'wporg-developer-style' ), '20140424' );
 	wp_enqueue_script( 'wporg-developer-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	wp_enqueue_script( 'wporg-developer-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
