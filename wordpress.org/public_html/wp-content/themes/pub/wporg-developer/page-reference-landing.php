@@ -72,10 +72,9 @@ get_header(); ?>
 								<li><a href="https://codex.wordpress.org/Rewrite_API">Rewrite</a></li>
 								<li><a href="https://codex.wordpress.org/Rewrite_API">Settings</a></li>
 								<li><a href="https://codex.wordpress.org/Shortcode_API">Shortcode</a></li>
-								<li><a href=""https://codex.wordpress.org/Shortcode_API"https://codex.wordpress.org/Theme_Modification_API">Theme Modification</a></li>
+								<li><a href="https://codex.wordpress.org/Theme_Modification_API">Theme Modification</a></li>
 								<li><a href="https://codex.wordpress.org/Transients_API">Transients</a></li>
 								<li><a href="https://codex.wordpress.org/XML-RPC_WordPress_API">XML-RPC</a></li>
-								
 							</ul>
 						</div>
 					</div>

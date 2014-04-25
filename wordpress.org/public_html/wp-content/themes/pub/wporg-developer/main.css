@@ -528,6 +528,9 @@ textarea {
   margin: 0 auto;
   max-width: 60em;
 }
+.devhub-wrap .page-header {
+	margin-top: 1em;
+}
 .devhub-wrap a {
   color: #21759b;
 }

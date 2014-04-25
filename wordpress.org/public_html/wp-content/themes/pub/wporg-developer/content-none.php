@@ -13,21 +13,16 @@
 		<h1 class="page-title"><?php _e( 'Nothing Found', 'wporg' ); ?></h1>
 	</header><!-- .page-header -->
 
-	<div class="page-content">
-		<?php if ( is_home() && current_user_can( 'publish_posts' ) ) : ?>
-
-			<p><?php printf( __( 'Ready to publish your first post? <a href="%1$s">Get started here</a>.', 'wporg' ), esc_url( admin_url( 'post-new.php' ) ) ); ?></p>
-
-		<?php elseif ( is_search() ) : ?>
-
-			<p><?php _e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'wporg' ); ?></p>
+	<div class="reference-landing">
+		<div class="search-guide section clear">
+			<h4 class="ref-intro">
+			<?php if ( is_search() ) {
+				_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'wporg' );
+			} else {
+				_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'wporg' );
+			} ?>
+			</h4>
 			<?php get_search_form(); ?>
-
-		<?php else : ?>
-
-			<p><?php _e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'wporg' ); ?></p>
-			<?php get_search_form(); ?>
-
-		<?php endif; ?>
-	</div><!-- .page-content -->
+		</div><!-- /search-guide -->
+	</div><!-- .reference-landing -->
 </section><!-- .no-results -->

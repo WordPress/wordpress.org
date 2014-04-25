@@ -534,6 +534,9 @@ textarea {
 		margin: 0 auto;
 		max-width: 60em;
 	}
+	.page-header {
+		margin-top: 1em;
+	}
 
 	a {
 		color: #21759b;
@@ -754,10 +757,8 @@ textarea {
 		}
 
 	}
-	.site-main {
-		.breadcrumb-trail {
-			margin-top: 1em;
-		}
+	.breadcrumb-trail {
+		margin-top: 1em;
 	}
 	h1.entry-title,
 	h1.page-title {
