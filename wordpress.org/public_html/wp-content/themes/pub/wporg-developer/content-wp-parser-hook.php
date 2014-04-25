@@ -7,6 +7,9 @@
 	<section class="description">
 		<?php the_excerpt(); ?>
 	</section>
+
+	<?php if ( is_single() ) : ?>
+
 	<section class="long-description">
 		<?php the_content(); ?>
 	</section>
@@ -31,7 +34,6 @@
 		<section class="meta">Used by TODO | Uses TODO | TODO Examples</section>
 	<?php endif; */ ?>
 
-	<?php if ( is_single() ) : ?>
 		<!--
 		<hr/>
 		<section class="explanation">

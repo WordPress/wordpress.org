@@ -7,6 +7,9 @@
 	<section class="description">
 		<?php the_excerpt(); ?>
 	</section>
+
+<?php if ( is_single() ) : ?>
+
 	<section class="long-description">
 		<?php the_content(); ?>
 	</section>
@@ -31,7 +34,7 @@ if ( ! empty( $since ) ) : ?>
 <?php /* if ( is_archive() ) : ?>
 	<section class="meta">Used by TODO | Uses TODO | TODO Examples</section>
 <?php endif; */ ?>
-<?php if ( is_single() ) : ?>
+
 	<!--
 	<hr/>
 	<section class="explanation">
@@ -85,6 +88,32 @@ if ( ! empty( $since ) ) : ?>
 		<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
 	</section>
 	-->
+
+	<?php if ( 'wp-parser-class' === get_post_type() ) :
+		if ( $children = get_children( array( 'post_parent' => get_the_ID(), 'post_status' => 'publish' ) ) ) :
+			usort( $children, __NAMESPACE__ . '\\compare_objects_by_name' );
+	?>
+		<hr/>
+		<section class="class-methods">
+		<h2><?php _e( 'Methods', 'wporg' ); ?></h2>
+		<ul>
+			<?php foreach ( $children as $child ) : ?>
+				<li><a href="<?php echo get_permalink( $child->ID ); ?>">
+				<?php
+					$title = get_the_title( $child );
+					$pos = ( $i = strpos( $title, ':' ) ) ? $i + 2 : 0;
+					echo substr( $title, $pos );
+				?></a>
+				<?php if ( $excerpt = apply_filters( 'get_the_excerpt', $child->post_excerpt ) ) {
+					echo '&mdash; ' . sanitize_text_field( $excerpt );
+				} ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		</section>
+		<?php endif;
+	endif; ?>
+
 <?php endif; ?>
 
 </article>
