@@ -14,7 +14,7 @@ get_header(); ?>
 
 			<div class="reference-landing">
 				<div class="search-guide section clear">
-					<h4 class="ref-intro"><?php _e( 'Want to know what&#39;s going on inside WordPress? Search the Code Reference for more information about WordPress&#39; functions, classes, methods, hooks, and filters.', 'wporg' ); ?></h4>
+					<h4 class="ref-intro"><?php _e( 'Want to know what&#39;s going on inside WordPress? Search the Code Reference for more information about WordPress&#39; functions, classes, methods, and hooks.', 'wporg' ); ?></h4>
 					<h3 class="search-intro"><?php _e( 'Try it out:', 'wporg' ); ?></h3>
 					<?php get_search_form(); ?>
 				</div><!-- /search-guide -->
