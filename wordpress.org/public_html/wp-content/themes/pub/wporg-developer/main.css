@@ -528,6 +528,9 @@ textarea {
   margin: 0 auto;
   max-width: 60em;
 }
+.devhub-wrap .site-main {
+  padding: 0 10px;
+}
 .devhub-wrap .page-header {
 	margin-top: 1em;
 }
@@ -728,13 +731,14 @@ textarea {
   color: #606060;
 }
 .devhub-wrap .site-branding .breadcrumb {
-  font-size: 14px;
-  font-size: 1.4rem;
+  font-size: 13px;
+  font-size: 1.3rem;
 }
 .devhub-wrap .site-branding .breadcrumb .active {
   font-weight: 600;
 }
 .devhub-wrap .breadcrumb-trail {
+  font-size: 13px;
 	margin-top: 1em;
 }
 .devhub-wrap .site-branding .site-title {

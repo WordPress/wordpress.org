@@ -11,7 +11,7 @@
 get_header(); ?>
 
 <div class="<?php body_class( 'pagebody' ) ?>">
-	<div class="wrapper">
+	<div class="site-main">
 		<header class="page-header">
 			<?php breadcrumb_trail(); ?>
 		</header><!-- .page-header -->

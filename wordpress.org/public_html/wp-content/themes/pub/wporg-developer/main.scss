@@ -534,6 +534,9 @@ textarea {
 		margin: 0 auto;
 		max-width: 60em;
 	}
+  .site-main {
+    padding: 0 10px;
+  }
 	.page-header {
 		margin-top: 1em;
 	}
@@ -740,8 +743,8 @@ textarea {
 				font-weight: 600;
 			}
 
-			font-size: 14px;
-			font-size: 1.4rem;
+			font-size: 13px;
+			font-size: 1.3rem;
 
 		}
 
@@ -758,6 +761,7 @@ textarea {
 
 	}
 	.breadcrumb-trail {
+    font-size: 13px;
 		margin-top: 1em;
 	}
 	h1.entry-title,
@@ -1300,7 +1304,6 @@ textarea {
 		float: left;
 		margin:0 0 1.5em;
 	}
-
 
 }
 
