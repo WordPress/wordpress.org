@@ -31,3 +31,8 @@ body #download-mobile a.download-button {
 	font-size:100%;
 }
 
+/* override for text going outside the widgets on mobile */
+.widget-content ul {
+	overflow:auto;
+}
+
