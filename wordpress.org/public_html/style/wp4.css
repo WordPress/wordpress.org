@@ -275,7 +275,7 @@ a img.aligncenter {
 	-ms-transition: left 0.3s;
 	-o-transition: left 0.3s;
 	transition: left 0.3s;
-	z-index: 1;
+	z-index: 10;
 }
 
 #wporg-header ul#wporg-header-menu.active {
