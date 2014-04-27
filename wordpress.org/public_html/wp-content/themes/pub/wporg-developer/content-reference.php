@@ -101,7 +101,7 @@ if ( ! empty( $since ) ) : ?>
 				<li><a href="<?php echo get_permalink( $child->ID ); ?>">
 				<?php
 					$title = get_the_title( $child );
-					$pos = ( $i = strpos( $title, ':' ) ) ? $i + 2 : 0;
+					$pos = ( $i = strrpos( $title, ':' ) ) ? $i + 1 : 0;
 					echo substr( $title, $pos );
 				?></a>
 				<?php if ( $excerpt = apply_filters( 'get_the_excerpt', $child->post_excerpt ) ) {
