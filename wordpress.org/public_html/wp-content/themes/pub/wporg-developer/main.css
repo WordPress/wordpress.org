@@ -1003,6 +1003,9 @@ textarea {
   width: 8.5rem;
   float: left;
 }
+.devhub-wrap .view-all-new-in {
+  font-style: italic;
+}
 .devhub-wrap .box.transparent {
   background: none;
   color: #fff;
