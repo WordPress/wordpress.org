@@ -560,4 +560,16 @@ namespace DevHub {
 		return empty( $source_file_object ) ? '' : esc_html( $source_file_object[0] );
 	}
 
+	/**
+ 	 * Compare two objects by name for sorting.
+	 *
+	 * @param WP_Post $a Post A
+	 * @param WP_Post $b Post B
+	 *
+	 * @return int
+	 */
+	function compare_objects_by_name( $a, $b ) {
+		return strcmp( $a->post_name, $b->post_name );
+	}
+
 }
