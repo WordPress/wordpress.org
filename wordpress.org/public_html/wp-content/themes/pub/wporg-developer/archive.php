@@ -42,7 +42,7 @@ get_header(); ?>
 		<?php loop_pagination(); ?>
 
 	</div>
-	<!-- /wrapper -->
+	<!-- /site-main -->
 </div><!-- /pagebody -->
 
 <?php get_footer(); ?>

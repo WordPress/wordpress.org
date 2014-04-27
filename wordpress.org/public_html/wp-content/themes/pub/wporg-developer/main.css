@@ -109,7 +109,7 @@ textarea {
 */
 
 #page {
-	padding-bottom: 1.5em;
+  padding-bottom: 1.5em;
 }
 .devhub-wrap {
   /*
@@ -532,7 +532,7 @@ textarea {
   padding: 0 10px;
 }
 .devhub-wrap .page-header {
-	margin-top: 1em;
+  margin-top: 1em;
 }
 .devhub-wrap a {
   color: #21759b;
@@ -739,7 +739,7 @@ textarea {
 }
 .devhub-wrap .breadcrumb-trail {
   font-size: 13px;
-	margin-top: 1em;
+  margin-top: 1em;
 }
 .devhub-wrap .site-branding .site-title {
   color: #555555;

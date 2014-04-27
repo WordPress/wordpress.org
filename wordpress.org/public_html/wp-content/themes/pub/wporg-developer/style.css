@@ -24,15 +24,15 @@ and Blueprint http://www.blueprintcss.org/
 
 /* overrides for mobile header */
 body #download-mobile span.download-ready {
-	font-size:100%;
+	font-size: 100%;
 }
 
 body #download-mobile a.download-button {
-	font-size:100%;
+	font-size: 100%;
 }
 
 /* override for text going outside the widgets on mobile */
 .widget-content ul {
-	overflow:auto;
+	overflow: auto;
 }
 
