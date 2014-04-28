@@ -23,13 +23,18 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 
 /* Better styling for handbook sidebars if they use a "Table of Contents" menu */
 .post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
-.single-handbook ul#menu-table-of-contents a[href="#"]{
+.single-handbook ul#menu-table-of-contents a[href="#"] {
 	font-weight: bold;
 	color: #555;
 	font-size: 115%;
 	padding: 4px 0;
 	display: block;
 	cursor: text;
+}
+
+.post-type-archive-handbook ul#menu-table-of-contents a[href="#"]:hover,
+.single-handbook ul#menu-table-of-contents a[href="#"]:hover {
+	color: #555!important;
 }
 
 .post-type-archive-handbook ul#menu-table-of-contents a,
@@ -63,7 +68,9 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 }
 
 .single-handbook a:hover,
-.single-handbook .current-menu-item ul li a:hover {
+.post-type-archive-handbook a:hover,
+.single-handbook .current-menu-item ul li a:hover,
+.post-type-archive-handbook .current-menu-item ul li a:hover {
 	color: #d54e21!important;
 }
 
