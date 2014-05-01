@@ -588,5 +588,8 @@ table#issuelist, #issuelist th, #issuelist td {
 		width: 100%;
 		float: none;
 	}
+	#main .controls {
+		position: static;
+	}
 }
 
