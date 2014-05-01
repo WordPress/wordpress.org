@@ -167,6 +167,55 @@ ul#menu-table-of-contents li ul a {
 	font-weight: normal;
 }
 
+/* Responsive design for handbooks */
+@media (max-width: 480px) {
+	.post-type-archive-handbook .sleeve_main,
+	.single-handbook .sleeve_main {
+		margin: 0;
+		padding: 0 10px;
+	}
+
+	#main h2 {
+		display: inline !important;
+		font-size: 20px !important;
+		font-weight: normal;
+	}
+
+	#main ul#postlist {
+		margin: 0!important;
+		clear: both;
+	}
+
+	#main #postlist li {
+		margin-top: 5px!important;
+		padding-top: 0!important;
+	}
+
+	#main #postlist li {
+		padding: 0 !important;
+	}
+
+	/* Override P2 iPhone styles */
+	#main ul#postlist li span.actions a.comment-reply-link {
+		background: none!important;
+		-webkit-border-radius: 0!important;
+		-webkit-box-shadow: none!important;
+		color: #555!important;
+		display: block;
+		font-size: 12px !important;
+		font-weight: normal!important;
+		padding: 0 10px 0 0!important;
+		position: relative!important;
+		top: 0!important;
+		right: 0!important;
+	}
+
+	#main ul#postlist li abbr {
+		display: inline!important;
+	}
+}
+
+
 #headline .menu {
 	list-style: none;
 	float: right;
