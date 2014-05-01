@@ -9,18 +9,6 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	padding-left: 0;
 }
 
-.post-type-archive-handbook .sleeve_main,
-.single-handbook .sleeve_main {
-	margin-left: 242px;
-	margin-right: 0;
-}
-
-.post-type-archive-handbook #sidebar,
-.single-handbook #sidebar {
-	float: left;
-	margin-left: 6px;
-}
-
 /* Better styling for handbook sidebars if they use a "Table of Contents" menu */
 .post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
 .single-handbook ul#menu-table-of-contents a[href="#"] {
@@ -566,8 +554,6 @@ table#issuelist, #issuelist th, #issuelist td {
 #postbox textarea#posttext, textarea.posttext {
 	display: block;
 }
-#sidebar {
-}
 .sleeve_main {
 	float: left;
 	margin-right: 0;
@@ -577,8 +563,29 @@ table#issuelist, #issuelist th, #issuelist td {
 	margin-right: -236px;
 }
 
+.post-type-archive-handbook .sleeve_main,
+.single-handbook .sleeve_main {
+	float: right;
+}
+
+.post-type-archive-handbook #wrapper,
+.single-handbook #wrapper {
+	padding-right: 0;
+	padding-left: 236px;
+}
+
+.post-type-archive-handbook #sidebar,
+.single-handbook #sidebar {
+	float: left;
+	margin-right: 0;
+	margin-left: -236px;
+}
+
 @media screen and (max-width: 700px) {
-	#wrapper {
+	#wrapper,
+	.post-type-archive-handbook #wrapper,
+	.simgle-handbook #wrapper {
+		padding-left: 0;
 		padding-right: 0;
 	}
 	#sidebar {
