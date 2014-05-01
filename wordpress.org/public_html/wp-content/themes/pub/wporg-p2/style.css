@@ -571,7 +571,7 @@ table#issuelist, #issuelist th, #issuelist td {
 .sleeve_main {
 	float: left;
 	margin-right: 0;
-	width: 100%;
+	width: 100% !important; /* important overrides p2/style-iphone.css:512 */
 }
 #sidebar {
 	margin-right: -236px;
