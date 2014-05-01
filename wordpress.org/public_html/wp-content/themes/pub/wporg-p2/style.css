@@ -186,15 +186,14 @@ ul#menu-table-of-contents li ul a {
 		clear: both;
 	}
 
-	#main #postlist li {
+/*	#main #postlist li {
 		margin-top: 5px!important;
 		padding-top: 0!important;
 	}
-
 	#main #postlist li {
 		padding: 0 !important;
 	}
-
+*/
 	/* Override P2 iPhone styles */
 	#main ul#postlist li span.actions a.comment-reply-link {
 		background: none!important;
@@ -417,32 +416,52 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	line-height: 1.45;
 	background: #e4f2fd;
 	border: 1px solid #d9e1e7;
-	margin-bottom: 10px;
+	max-width: 978px;
+	margin: 10px auto 0;
+}
+.make-welcome {
+	padding-bottom: 14px;
 }
 .make-welcome h4 {
+	margin: 14px 0;
+}
+.make-welcome p {
+	display: inline;
+}
+.make-welcome h4,
+.make-welcome .welcome p:first-child {
 	font-weight: normal;
 	font-size: 18px;
-	font-family: "Open Sans", serif;
-}
-.make-welcome h4, .make-welcome p {
-	margin-bottom: 14px;
-}
-.make-welcome .welcome p:first-child {
-	font-size: 22px;
-	margin: 12px 0 23px;
 	font-family: "Open Sans", serif;
 }
 .make-welcome .column {
 	vertical-align: top;
 	display: inline-block;
-	width: 30%;
-	min-width: 290px;
-	padding: 1.5%;
+	padding: 0 1.5%;
 }
 .make-welcome .welcome {
 	padding-top: 1%;
 }
 
+@media screen and (min-width: 960px) {
+	.make-welcome {
+		padding-bottom: 0;
+	}
+	.make-welcome p {
+		display: block;
+	}
+	.make-welcome .column {
+		width: 30%;
+		padding: 1.5%;
+	}
+	.make-welcome .welcome p:first-child {
+		font-size: 22px;
+		margin: 12px 0 23px;
+	}
+	.make-welcome h4, .make-welcome p {
+		margin-bottom: 14px;
+	}
+}
 
 /* Styles for docs issue tracker */
 table#issuelist, #issuelist th, #issuelist td {
@@ -529,3 +548,45 @@ table#issuelist, #issuelist th, #issuelist td {
 	background-color:#0274A2;
 	color:white;
 }
+
+/* General responsive overrides */
+#wrapper {
+	width: auto;
+	max-width: 742px; /* 978 - 236 */
+	padding-right: 236px;
+}
+#post-types {
+	width: auto;
+}
+#postbox div.avatar {
+	clear: left;
+}
+#postbox input#posttitle,
+#postbox input#postcitation,
+#postbox textarea#posttext, textarea.posttext {
+	display: block;
+}
+#sidebar {
+}
+.sleeve_main {
+	float: left;
+	margin-right: 0;
+	width: 100%;
+}
+#sidebar {
+	margin-right: -236px;
+}
+
+@media screen and (max-width: 700px) {
+	#wrapper {
+		padding-right: 0;
+	}
+	#sidebar {
+		clear: both;
+		margin: 0;
+		position: static;
+		width: 100%;
+		float: none;
+	}
+}
+

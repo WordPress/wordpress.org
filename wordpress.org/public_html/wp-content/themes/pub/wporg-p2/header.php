@@ -26,8 +26,7 @@ require WPORGPATH . 'header.php';
 	<?php endif; ?>
 </div>
 
+<?php is_home() && ! is_paged() && get_template_part( 'make-intro' ); ?>
+
 <div id="wrapper">
 
-	<?php is_home() && ! is_paged() && get_template_part( 'make-intro' ); ?>
-
-	<?php get_sidebar( get_post_type() ); ?>

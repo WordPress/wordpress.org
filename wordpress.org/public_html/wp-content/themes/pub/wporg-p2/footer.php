@@ -5,6 +5,8 @@
  * @package P2
  */
 ?>
+
+	<?php get_sidebar( get_post_type() ); ?>
 	<div class="clear"></div>
 
 </div> <!-- // wrapper -->
