@@ -163,6 +163,11 @@ ul#menu-table-of-contents li ul a {
 		padding: 0 10px;
 	}
 
+	.post-type-archive-handbook .table-of-contents,
+	.single-handbook .table-of-contents {
+		display: none;
+	}
+
 	#main h2 {
 		display: inline !important;
 		font-size: 20px !important;
@@ -199,6 +204,13 @@ ul#menu-table-of-contents li ul a {
 
 	#main ul#postlist li abbr {
 		display: inline!important;
+	}
+}
+@media (max-width: 700px) {
+	.post-type-archive-handbook #wrapper,
+	.single-handbook #wrapper {
+		margin: 0;
+		padding-left: 0 !important;
 	}
 }
 
