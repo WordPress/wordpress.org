@@ -23,7 +23,7 @@ get_header(); ?>
 
 			<?php endwhile; ?>
 
-			<?php wporg_developer_paging_nav(); ?>
+			<?php loop_pagination(); ?>
 
 		<?php else : ?>
 

@@ -119,7 +119,7 @@ function widgets_init() {
  */
 function pre_get_posts( $query ) {
 
-	if ( $query->is_main_query() && $query->is_post_type_archive() ) {
+	if ( $query->is_main_query() && ( $query->is_post_type_archive() || $query->is_search() ) ) {
 		$query->set( 'orderby', 'title' );
 		$query->set( 'order', 'ASC' );
 	}
