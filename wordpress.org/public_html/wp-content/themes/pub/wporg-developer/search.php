@@ -7,7 +7,7 @@
 
 get_header(); ?>
 
-	<div id="primary" class="content-area">
+	<div id="content-area">
 
 		<header class="page-header">
 			<h1 class="page-title"><?php printf( __( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' ); ?></h1>
@@ -19,7 +19,7 @@ get_header(); ?>
 			<?php /* Start the Loop */ ?>
 			<?php while ( have_posts() ) : the_post(); ?>
 
-				<?php get_template_part( 'content' ); ?>
+				<?php get_template_part( 'content', 'reference' ); ?>
 
 			<?php endwhile; ?>
 
