@@ -302,6 +302,9 @@ input {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+.devhub-wrap #content, .devhub-wrap #content-area {
+  padding: 0 10px;
+}
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
   margin: 0 auto;
@@ -646,13 +649,6 @@ input {
   text-decoration: none;
   color: #606060;
 }
-.devhub-wrap .site-branding .breadcrumb {
-  font-size: 14px;
-  font-size: 1.4rem;
-}
-.devhub-wrap .site-branding .breadcrumb .active {
-  font-weight: 600;
-}
 .devhub-wrap .site-branding .site-title {
   color: #555555;
   float: left;
@@ -662,6 +658,13 @@ input {
   padding-top: 18px;
   text-shadow: 0 1px 0 #FFFFFF;
   font-weight: 300;
+}
+.devhub-wrap .breadcrumbs {
+  font-size: 13px;
+  font-size: 1.3rem;
+}
+.devhub-wrap .breadcrumbs .active {
+  font-weight: 600;
 }
 .devhub-wrap .breadcrumb-trail {
   margin-top: 1em;
@@ -880,6 +883,9 @@ input {
 .devhub-wrap .sidebar .widget_wporg_handbook_pages ul {
   padding: 2em;
 }
+.devhub-wrap .reference-landing .box ul {
+  padding: 0;
+}
 .devhub-wrap .reference-landing .box .widget-title,
 .devhub-wrap .sidebar .box .widget-title,
 .devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-title {
@@ -926,6 +932,9 @@ input {
   padding-left: 0;
   border-left: none;
 }
+.devhub-wrap .view-all-new-in {
+  font-style: italic;
+}
 .devhub-wrap .box.transparent {
   background: none;
   color: #fff;
@@ -962,11 +971,16 @@ input {
 }
 .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
   margin: 24px 0;
+  padding-left: 100px;
 }
 .devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
+  margin-left: -100px;
   color: #24831d;
   font-family: monospace;
   font-size: 20px;
+}
+.devhub-wrap .wp-parser-class h1 a .hook-func, .devhub-wrap .wp-parser-function h1 a .hook-func, .devhub-wrap .wp-parser-hook h1 a .hook-func, .devhub-wrap .wp-parser-method h1 a .hook-func {
+  color: #888888;
 }
 .devhub-wrap .wp-parser-class h1 a .arg-type, .devhub-wrap .wp-parser-function h1 a .arg-type, .devhub-wrap .wp-parser-hook h1 a .arg-type, .devhub-wrap .wp-parser-method h1 a .arg-type {
   color: #cd2f23;
@@ -1100,14 +1114,18 @@ input {
     max-width: 100%;
     width: 100%;
   }
+  .devhub-wrap #content,
   .devhub-wrap #content-area,
   .devhub-wrap .inner-wrap {
     max-width: 100%;
-    padding: 0 1%;
+    padding: 0 13px;
   }
   .devhub-wrap #content-area .has-sidebar,
   .devhub-wrap .inner-wrap .has-sidebar {
     width: 100%;
+  }
+  .devhub-wrap .site-branding .site-title {
+    padding-left: 0;
   }
 }
 @media (max-width: 43em) {
@@ -1152,24 +1170,36 @@ input {
     text-align: left;
   }
 
-  .horizontal-list li {
+  .devhub-wrap .horizontal-list li {
     display: block;
   }
-  .horizontal-list li a {
+  .devhub-wrap .horizontal-list li a {
     border-left: none;
   }
 
-  .horizontal-list li:first-child a {
+  .devhub-wrap .horizontal-list li:first-child a {
     padding: 0 40px;
     padding: 0 4rem;
   }
 
-  .reference-landing .searchform input[type="text"],
-  .reference-landing .searchform input[type="submit"] {
+  .devhub-wrap .reference-landing .searchform {
+    text-alignment: center;
+  }
+  .devhub-wrap .reference-landing .searchform input[type="text"],
+  .devhub-wrap .reference-landing .searchform input[type="submit"] {
     width: 100%;
     margin-right: 0;
     margin-bottom: 1em;
     float: none;
     clear: both;
+  }
+  .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
+    padding-left: 45px;
+  }
+  .devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
+    margin-left: -45px;
+  }
+  .devhub-wrap .two-columns .box {
+    width: 99%;
   }
 }

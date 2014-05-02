@@ -10,6 +10,9 @@
 	  -webkit-box-sizing: border-box;
 	  box-sizing: border-box;
 	}
+	#content, #content-area {
+		padding: 0 10px;
+	}
 	#content-area,
 	.inner-wrap {
 		margin: 0 auto;
@@ -378,16 +381,6 @@
 			text-decoration: none;
 			color: #606060;
 		}
-		.breadcrumb {
-			.active {
-				font-weight: 600;
-			}
-
-			font-size: 14px;
-			font-size: 1.4rem;
-
-		}
-
 		.site-title {
 		    color: #555555;
 		    float: left;
@@ -399,6 +392,13 @@
 		    font-weight: 300;
 		}
 
+	}
+	.breadcrumb {
+		.active {
+			font-weight: 600;
+		}
+		font-size: 13px;
+		font-size: 1.3rem;
 	}
 	.breadcrumb-trail {
 		margin-top: 1em;
@@ -657,6 +657,9 @@
 		}
 
 	}
+	.reference-landing .box ul {
+		padding: 0;
+	}
 
 	.three-columns .box {
 		width: 31%;
@@ -706,6 +709,10 @@
 		}
 	}
 
+	.view-all-new-in {
+		font-style: italic;
+	}
+
 	.box.gray {
 		background: #fff;
 		border: 1px solid #d8d8d8;
@@ -735,10 +742,15 @@
 		border-bottom: 1px solid #dfdfdf;
 		h1 {
 			margin: 24px 0;
+			padding-left: 100px;
 			a {
+				margin-left: -100px;
 				color: #24831d;
 				font-family: $code-font;
 				font-size: 20px;
+				.hook-func {
+					color: #888888;
+				}
 				.arg-type {
 					color: #cd2f23;
 				}
@@ -932,13 +944,17 @@
 		max-width: 100%;
 		width: 100%;
 
+		#content,
 		#content-area,
 		.inner-wrap {
 			max-width: 100%;
-			padding: 0 1%;
+			padding: 0 13px;
 			.has-sidebar {
 				width: 100%;
 			}
+		}
+		.site-branding .site-title {
+			padding-left: 0;
 		}
 	}
 }
@@ -988,25 +1004,39 @@
 		text-align: left;
 	}
 
-	.horizontal-list li {
-		display: block;
-		a {
-			border-left: none;
+	.devhub-wrap {
+		.horizontal-list li {
+			display: block;
+			a {
+				border-left: none;
+			}
 		}
-	}
 
-	.horizontal-list li:first-child a {
-		padding: 0 40px;
-		padding: 0 4rem;
-	}
+		.horizontal-list li:first-child a {
+			padding: 0 40px;
+			padding: 0 4rem;
+		}
 
+		.reference-landing .searchform input[type="text"],
+		.reference-landing .searchform input[type="submit"] {
+			width: 100%;
+			margin-right: 0;
+			margin-bottom: 1em;
+			float: none;
+			clear: both;
+		}
 
-	.reference-landing .searchform input[type="text"],
-	.reference-landing .searchform input[type="submit"] {
-		width: 100%;
-		margin-right: 0;
-		margin-bottom: 1em;
-		float: none;
-		clear: both;
+		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
+			h1 {
+				padding-left: 45px;
+				a {
+					margin-left: -45px;
+				}
+			}
+		}
+
+		.two-columns .box {
+			width: 99%;
+		}
 	}
 }
