@@ -17,7 +17,7 @@ get_header(); ?>
 
 			<?php get_template_part( 'content', 'reference'); ?>
 
-			<?php wporg_developer_post_nav(); ?>
+			<?php //wporg_developer_post_nav(); ?>
 
 			<?php
 				// If comments are open or we have at least one comment, load up the comment template
