@@ -39,7 +39,7 @@ if ( ! isset( $content_width ) ) {
 
 
 add_action( 'init', __NAMESPACE__ . '\\init' );
-
+add_filter( 'handbook_post_types', __NAMESPACE__ . '\\filter_handbook_post_types' );
 
 function init() {
 
@@ -57,6 +57,12 @@ function init() {
 	add_filter( 'comments_open', '__return_false' );
 }
 
+/**
+* handbook post_type filter function
+*/
+function filter_handbook_post_types( $types ) {
+	return array( 'theme', 'plugin' );
+}
 
 /**
  * widgets_init function.
@@ -245,6 +251,7 @@ function register_taxonomies() {
 			'menu_name'                  => __( 'Files', 'wporg' ),
 		),
 		'public'                => true,
+		// Hierarchical x 2 to enable (.+) rather than ([^/]+) for rewrites.
 		'hierarchical'          => true,
 		'rewrite'               => array( 'slug' => 'reference/files', 'hierarchical' => true ),
 		'sort'                  => false,
@@ -299,7 +306,7 @@ function theme_scripts_styles() {
 	wp_enqueue_style( 'dashicons' );
 	wp_enqueue_style( 'open-sans', '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600' );
 	wp_enqueue_style( 'wporg-developer-style', get_stylesheet_uri(), array(), '2' );
-	wp_enqueue_style( 'wp-dev-sass-compiled', get_template_directory_uri() . '/main.css', array( 'wporg-developer-style' ), '20140425' );
+	wp_enqueue_style( 'wp-dev-sass-compiled', get_template_directory_uri() . '/stylesheets/main.css', array( 'wporg-developer-style' ), '20140425' );
 	wp_enqueue_script( 'wporg-developer-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	wp_enqueue_script( 'wporg-developer-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {

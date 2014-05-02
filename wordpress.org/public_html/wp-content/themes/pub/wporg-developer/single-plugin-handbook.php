@@ -1,4 +1,4 @@
-<?php
+<?php namespace DevHub;
 /**
  * The Template for displaying all single posts.
  *
@@ -7,17 +7,17 @@
 
 get_header(); ?>
 
-	<div id="primary" class="content-area has-sidebar">
+	<div id="content-area" class="has-sidebar">
 
-		<header class="page-header">
-			<h1 class="page-title"><?php _e( 'Handbook', 'wporg' ); ?></h1>
-		</header><!-- .page-header -->
+		<?php breadcrumb_trail(); ?>
 
 		<main id="main" class="site-main" role="main">
 
 		<?php while ( have_posts() ) : the_post(); ?>
 
-			<?php get_template_part( 'content', 'single' ); ?>
+			<?php get_template_part( 'content', 'handbook'); ?>
+
+			<?php wporg_developer_post_nav(); ?>
 
 			<?php
 				// If comments are open or we have at least one comment, load up the comment template
@@ -29,6 +29,6 @@ get_header(); ?>
 		<?php endwhile; // end of the loop. ?>
 
 		</main><!-- #main -->
-		<?php get_sidebar(); ?>
+	<?php get_sidebar(); ?>
 	</div><!-- #primary -->
 <?php get_footer(); ?>

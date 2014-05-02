@@ -7,7 +7,6 @@
  * @package wporg-developer
  */
 ?>
-
 	</div><!-- #content -->
 
 </div><!-- #page -->

@@ -19,7 +19,7 @@ get_header(); ?>
 			<?php /* Start the Loop */ ?>
 			<?php while ( have_posts() ) : the_post(); ?>
 
-				<?php get_template_part( 'content', get_template_part_name() ); ?>
+				<?php get_template_part( 'content' ); ?>
 
 			<?php endwhile; ?>
 

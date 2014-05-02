@@ -62,24 +62,19 @@ caption, th, td {
   text-align: left;
 }
 
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: "";
-}
-
 blockquote, q {
   quotes: "" "";
+}
+blockquote:before, blockquote:after, q:before, q:after {
+  content: "";
 }
 
 a:focus {
   outline: thin dotted;
 }
-
-a:hover,
-a:active {
+a:hover, a:active {
   outline: 0;
 }
-
 a img {
   border: 0;
 }
@@ -98,30 +93,179 @@ textarea {
   line-height: 1.5;
 }
 
-/*
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*  =========== Devhub Custom ========== Devhub Custom ========== Devhub Custom =====
-*/
-
-#page {
-  padding-bottom: 1.5em;
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  clear: both;
 }
+
+hr {
+  background-color: #dfdfdf;
+  border: 0;
+  height: 1px;
+  margin: 1.5em 0;
+}
+
+/* Text elements */
+p {
+  margin-bottom: 1.5em;
+}
+
+ul, ol {
+  margin: 0 0 1.5em 3em;
+}
+
+ul {
+  list-style: disc;
+}
+
+ol {
+  list-style: decimal;
+}
+
+li > ul,
+li > ol {
+  margin-bottom: 0;
+  margin-left: 1.5em;
+}
+
+dt {
+  font-weight: bold;
+}
+
+dd {
+  margin: 0 1.5em 1.5em;
+}
+
+b, strong {
+  font-weight: bold;
+}
+
+dfn, cite, em, i {
+  font-style: italic;
+}
+
+blockquote {
+  margin: 0 1.5em;
+}
+
+address {
+  margin: 0 0 1.5em;
+}
+
+pre {
+  background: #eee;
+  font-family: "Courier 10 Pitch", Courier, monospace;
+  font-size: 15px;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1.6em;
+}
+
+code, kbd, tt, var {
+  font: 15px Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+}
+
+abbr, acronym {
+  border-bottom: 1px dotted #666;
+  cursor: help;
+}
+
+mark, ins {
+  background: #fff9c0;
+  text-decoration: none;
+}
+
+sup,
+sub {
+  font-size: 75%;
+  height: 0;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  bottom: 1ex;
+}
+
+sub {
+  top: .5ex;
+}
+
+small {
+  font-size: 75%;
+}
+
+big {
+  font-size: 125%;
+}
+
+figure {
+  margin: 0;
+}
+
+table {
+  margin: 0 0 1.5em;
+  width: 100%;
+}
+
+th {
+  font-weight: bold;
+}
+
+img {
+  height: auto;
+  /* Make sure images are scaled correctly. */
+  max-width: 100%;
+  /* Adhere to container width. */
+}
+
+/* Form Elements */
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  /* Corrects font size not being inherited in all browsers */
+  margin: 0;
+  /* Addresses margins set differently in IE6/7, F3/4, S5, Chrome */
+  vertical-align: baseline;
+  /* Improves appearance and consistency in all browsers */
+  *vertical-align: middle;
+  /* Improves appearance and consistency in all browsers */
+  font-weight: 300;
+}
+
+button,
+input {
+  line-height: normal;
+  /* Addresses FF3/4 setting line-height using !important in the UA stylesheet */
+}
+
+/* Alignment */
+.alignleft {
+  display: inline;
+  float: left;
+  margin-right: 1.5em;
+}
+
+.alignright {
+  display: inline;
+  float: right;
+  margin-left: 1.5em;
+}
+
+.aligncenter {
+  clear: both;
+  display: block;
+  margin: 0 auto;
+}
+
 .devhub-wrap {
-  /*
-  *  =========== Port _s defaults ========== Port _s defaults ========== Port _s defaults =====
-  *  =========== Port _s defaults ========== Port _s defaults ========== Port _s defaults =====
-  *  =========== Port _s defaults ========== Port _s defaults ========== Port _s defaults =====
-  *  =========== Port _s defaults ========== Port _s defaults ========== Port _s defaults =====
-  *  =========== Port _s defaults ========== Port _s defaults ========== Port _s defaults =====
-  */
-  /* Headings */
-  /* Text elements */
-  /* Alignment */
+  padding-bottom: 1.5em;
   /* Text meant only for screen readers */
   /* Clearing */
   /* =Content
@@ -146,121 +290,77 @@ textarea {
    * section styles
    */
   /* Comments */
+  /*
+   * Content
+   *
+   */
 }
-.devhub-wrap h1, .devhub-wrap h2, .devhub-wrap h3, .devhub-wrap h4, .devhub-wrap h5, .devhub-wrap h6 {
-  clear: both;
+.devhub-wrap *,
+.devhub-wrap *:before,
+.devhub-wrap *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
-.devhub-wrap hr {
-  background-color: #dfdfdf;
-  border: 0;
-  height: 1px;
-  margin: 1.5em 0;
+.devhub-wrap #content-area,
+.devhub-wrap .inner-wrap {
+  margin: 0 auto;
+  max-width: 60em;
 }
-.devhub-wrap p {
-  margin-bottom: 1.5em;
+.devhub-wrap .page-header {
+  margin-top: 1em;
 }
-.devhub-wrap ul, .devhub-wrap ol {
-  margin: 0 0 1.5em 3em;
+.devhub-wrap a {
+  color: #21759b;
 }
-.devhub-wrap ul {
-  list-style: disc;
+.devhub-wrap .site-main h2,
+.devhub-wrap .site-main h3,
+.devhub-wrap .site-main h4,
+.devhub-wrap .site-main h5,
+.devhub-wrap .site-main h6 {
+  color: #1e1e1e;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.devhub-wrap ol {
-  list-style: decimal;
+.devhub-wrap h2.widget-title,
+.devhub-wrap h3.widget-title {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.devhub-wrap li > ul,
-.devhub-wrap li > ol {
-  margin-bottom: 0;
-  margin-left: 1.5em;
+.devhub-wrap #headline h2 a {
+  color: #555;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1em;
+  text-shadow: #fff 0px 1px 0px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.devhub-wrap dt {
-  font-weight: bold;
+.devhub-wrap h2 {
+  font-size: 28px;
+  font-size: 2.8rem;
+  line-height: 32px;
+  line-height: 3.2rem;
 }
-.devhub-wrap dd {
-  margin: 0 1.5em 1.5em;
+.devhub-wrap h3 {
+  font-size: 22px;
+  font-size: 2.2rem;
+  line-height: 26px;
+  line-height: 2.6rem;
 }
-.devhub-wrap b, .devhub-wrap strong {
-  font-weight: bold;
+.devhub-wrap h4 {
+  font-size: 18px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  line-height: 2.2rem;
+  border-bottom: none;
 }
-.devhub-wrap dfn, .devhub-wrap cite, .devhub-wrap em, .devhub-wrap i {
-  font-style: italic;
-}
-.devhub-wrap blockquote {
-  margin: 0 1.5em;
-}
-.devhub-wrap address {
-  margin: 0 0 1.5em;
-}
-.devhub-wrap pre {
-  background: #eee;
-  font-family: "Courier 10 Pitch", Courier, monospace;
-  font-size: 15px;
-  font-size: 1.5rem;
-  line-height: 1.6;
-  margin-bottom: 1.6em;
-  max-width: 100%;
-  overflow: auto;
-  padding: 1.6em;
-}
-.devhub-wrap code, .devhub-wrap kbd, .devhub-wrap tt, .devhub-wrap var {
-  font: 15px Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
-}
-.devhub-wrap abbr, .devhub-wrap acronym {
-  border-bottom: 1px dotted #666;
-  cursor: help;
-}
-.devhub-wrap mark, .devhub-wrap ins {
-  background: #fff9c0;
-  text-decoration: none;
-}
-.devhub-wrap sup,
-.devhub-wrap sub {
-  font-size: 75%;
-  height: 0;
-  line-height: 0;
-  position: relative;
-  vertical-align: baseline;
-}
-.devhub-wrap sup {
-  bottom: 1ex;
-}
-.devhub-wrap sub {
-  top: .5ex;
-}
-.devhub-wrap small {
-  font-size: 75%;
-}
-.devhub-wrap big {
-  font-size: 125%;
-}
-.devhub-wrap figure {
-  margin: 0;
-}
-.devhub-wrap table {
-  margin: 0 0 1.5em;
-  width: 100%;
-}
-.devhub-wrap th {
-  font-weight: bold;
-}
-.devhub-wrap img {
-  height: auto;
-  /* Make sure images are scaled correctly. */
-  max-width: 100%;
-  /* Adhere to container width. */
-}
-.devhub-wrap button,
-.devhub-wrap input,
-.devhub-wrap select,
-.devhub-wrap textarea {
-  font-size: 100%;
-  /* Corrects font size not being inherited in all browsers */
-  margin: 0;
-  /* Addresses margins set differently in IE6/7, F3/4, S5, Chrome */
-  vertical-align: baseline;
-  /* Improves appearance and consistency in all browsers */
-  *vertical-align: middle;
-  /* Improves appearance and consistency in all browsers */
+.devhub-wrap h4 .dashicons {
+  font-size: 22px;
+  font-size: 2.2rem;
+  line-height: 22px;
+  line-height: 2.2rem;
+  height: 22px;
+  width: 22px;
+  height: 2.2rem;
+  width: 2.2rem;
 }
 .devhub-wrap a.button,
 .devhub-wrap button,
@@ -286,11 +386,7 @@ textarea {
   float: none;
   height: auto;
   padding: .6em 1.8em;
-}
-.devhub-wrap button,
-.devhub-wrap input[type="button"],
-.devhub-wrap input[type="reset"],
-.devhub-wrap input[type="submit"] {
+  text-decoration: none;
   -webkit-appearance: button;
   /* Corrects inability to style clickable 'input' types in iOS */
 }
@@ -302,20 +398,63 @@ textarea {
   border-color: #ccc #bbb #aaa #bbb;
   background: #f0f0f0;
 }
-.devhub-wrap a.button:focus,
+.devhub-wrap a.button:focus, .devhub-wrap a.button:active,
 .devhub-wrap button:focus,
-.devhub-wrap input[type="button"]:focus,
-.devhub-wrap input[type="reset"]:focus,
-.devhub-wrap input[type="submit"]:focus,
 .devhub-wrap button:active,
+.devhub-wrap input[type="button"]:focus,
 .devhub-wrap input[type="button"]:active,
+.devhub-wrap input[type="reset"]:focus,
 .devhub-wrap input[type="reset"]:active,
+.devhub-wrap input[type="submit"]:focus,
 .devhub-wrap input[type="submit"]:active {
   border-color: #aaa #bbb #bbb #bbb;
   background: #f0f0f0;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+.devhub-wrap a.button.shiny-blue,
+.devhub-wrap button.shiny-blue,
+.devhub-wrap input[type="button"].shiny-blue,
+.devhub-wrap input[type="reset"].shiny-blue,
+.devhub-wrap input[type="submit"].shiny-blue {
+  background-color: #21759b;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#2a95c5), to(#21759b));
+  background-image: -webkit-linear-gradient(top, #2a95c5, #21759b);
+  background-image: -moz-linear-gradient(top, #2a95c5, #21759b);
+  background-image: -ms-linear-gradient(top, #2a95c5, #21759b);
+  background-image: -o-linear-gradient(top, #2a95c5, #21759b);
+  background-image: linear-gradient(to bottom, #2a95c5, #21759b);
+  border-color: #21759b;
+  border-bottom-color: #1e6a8d;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
+  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+  padding: 3px 8px;
+}
+.devhub-wrap a.button.shiny-blue:hover,
+.devhub-wrap button.shiny-blue:hover,
+.devhub-wrap input[type="button"].shiny-blue:hover,
+.devhub-wrap input[type="reset"].shiny-blue:hover,
+.devhub-wrap input[type="submit"].shiny-blue:hover {
+  background-color: #278ab7;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#2e9fd2), to(#21759b));
+  background-image: -webkit-linear-gradient(top, #2e9fd2, #21759b);
+  background-image: -moz-linear-gradient(top, #2e9fd2, #21759b);
+  background-image: -ms-linear-gradient(top, #2e9fd2, #21759b);
+  background-image: -o-linear-gradient(top, #2e9fd2, #21759b);
+  background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
+  border-color: #1b607f;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
+  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
+  color: #fff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 .devhub-wrap input[type="checkbox"],
 .devhub-wrap input[type="radio"] {
+  box-sizing: border-box;
+  /* Addresses box sizing set to content-box in IE8/9 */
   padding: 0;
   /* Addresses excess padding in IE8/9 */
 }
@@ -343,6 +482,7 @@ textarea {
 .devhub-wrap input[type="password"],
 .devhub-wrap input[type="search"],
 .devhub-wrap textarea {
+  padding: 3px;
   color: #666;
   border: 1px solid #ccc;
   border-radius: 3px;
@@ -355,13 +495,6 @@ textarea {
 .devhub-wrap textarea:focus {
   color: #111;
 }
-.devhub-wrap input[type="text"],
-.devhub-wrap input[type="email"],
-.devhub-wrap input[type="url"],
-.devhub-wrap input[type="password"],
-.devhub-wrap input[type="search"] {
-  padding: 3px;
-}
 .devhub-wrap textarea {
   overflow: auto;
   /* Removes default vertical scrollbar in IE6/7/8/9 */
@@ -369,21 +502,6 @@ textarea {
   vertical-align: top;
   /* Improves readability and alignment in all browsers */
   width: 98%;
-}
-.devhub-wrap .alignleft {
-  display: inline;
-  float: left;
-  margin-right: 1.5em;
-}
-.devhub-wrap .alignright {
-  display: inline;
-  float: right;
-  margin-left: 1.5em;
-}
-.devhub-wrap .aligncenter {
-  clear: both;
-  display: block;
-  margin: 0 auto;
 }
 .devhub-wrap .screen-reader-text {
   clip: rect(1px, 1px, 1px, 1px);
@@ -516,208 +634,6 @@ textarea {
 .devhub-wrap .infinity-end.neverending .site-footer {
   display: block;
 }
-.devhub-wrap *,
-.devhub-wrap *:before,
-.devhub-wrap *:after {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-.devhub-wrap .site-main,
-.devhub-wrap .inner-wrap {
-  margin: 0 auto;
-  max-width: 60em;
-}
-.devhub-wrap .site-main {
-  padding: 0 10px;
-}
-.devhub-wrap .page-header {
-  margin-top: 1em;
-}
-.devhub-wrap a {
-  color: #21759b;
-}
-.devhub-wrap .site-main h2,
-.devhub-wrap .site-main h3,
-.devhub-wrap .site-main h4,
-.devhub-wrap .site-main h5,
-.devhub-wrap .site-main h6 {
-  color: #1e1e1e;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.devhub-wrap h2.widget-title,
-.devhub-wrap h3.widget-title {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.devhub-wrap #headline h2 a {
-  color: #555;
-  font-weight: 300;
-  font-size: 28px;
-  line-height: 1em;
-  text-shadow: #fff 0px 1px 0px;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.devhub-wrap h2 {
-  font-size: 28px;
-  font-size: 2.8rem;
-  line-height: 32px;
-  line-height: 3.2rem;
-}
-.devhub-wrap h3 {
-  font-size: 22px;
-  font-size: 2.2rem;
-  line-height: 26px;
-  line-height: 2.6rem;
-}
-.devhub-wrap h4 {
-  font-size: 18px;
-  font-size: 1.8rem;
-  line-height: 22px;
-  line-height: 2.2rem;
-  border-bottom: none;
-}
-.devhub-wrap h4 .dashicons {
-  font-size: 22px;
-  font-size: 2.2rem;
-  line-height: 22px;
-  line-height: 2.2rem;
-  height: 22px;
-  width: 22px;
-  height: 2.2rem;
-  width: 2.2rem;
-}
-.devhub-wrap button,
-.devhub-wrap input,
-.devhub-wrap select,
-.devhub-wrap textarea {
-  font-size: 100%;
-  /* Corrects font size not being inherited in all browsers */
-  margin: 0;
-  /* Addresses margins set differently in IE6/7, F3/4, S5, Chrome */
-  vertical-align: baseline;
-  /* Improves appearance and consistency in all browsers */
-  *vertical-align: middle;
-  /* Improves appearance and consistency in all browsers */
-  font-weight: 300;
-}
-.devhub-wrap button,
-.devhub-wrap input {
-  line-height: normal;
-  /* Addresses FF3/4 setting line-height using !important in the UA stylesheet */
-}
-.devhub-wrap button,
-.devhub-wrap input[type="button"],
-.devhub-wrap input[type="reset"],
-.devhub-wrap input[type="submit"] {
-  text-decoration: none;
-}
-.devhub-wrap button.shiny-blue,
-.devhub-wrap input[type="button"].shiny-blue,
-.devhub-wrap input[type="reset"].shiny-blue,
-.devhub-wrap input[type="submit"].shiny-blue {
-  background-color: #21759b;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#2a95c5), to(#21759b));
-  background-image: -webkit-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -moz-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -ms-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -o-linear-gradient(top, #2a95c5, #21759b);
-  background-image: linear-gradient(to bottom, #2a95c5, #21759b);
-  border-color: #21759b;
-  border-bottom-color: #1e6a8d;
-  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
-  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
-  color: #fff;
-  text-decoration: none;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-  padding: 3px 8px;
-}
-.devhub-wrap button.shiny-blue:hover,
-.devhub-wrap input[type="button"].shiny-blue:hover,
-.devhub-wrap input[type="reset"].shiny-blue:hover,
-.devhub-wrap input[type="submit"].shiny-blue:hover {
-  background-color: #278ab7;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#2e9fd2), to(#21759b));
-  background-image: -webkit-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -moz-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -ms-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -o-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
-  border-color: #1b607f;
-  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
-  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
-  color: #fff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-}
-.devhub-wrap button:focus,
-.devhub-wrap input[type="button"]:focus,
-.devhub-wrap input[type="reset"]:focus,
-.devhub-wrap input[type="submit"]:focus,
-.devhub-wrap button:active,
-.devhub-wrap input[type="button"]:active,
-.devhub-wrap input[type="reset"]:active,
-.devhub-wrap input[type="submit"]:active {
-  border-color: #0e3950;
-  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
-  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
-}
-.devhub-wrap input[type="checkbox"],
-.devhub-wrap input[type="radio"] {
-  box-sizing: border-box;
-  /* Addresses box sizing set to content-box in IE8/9 */
-  padding: 0;
-  /* Addresses excess padding in IE8/9 */
-}
-.devhub-wrap input[type="search"] {
-  -webkit-appearance: textfield;
-  /* Addresses appearance set to searchfield in S5, Chrome */
-  -webkit-box-sizing: content-box;
-  /* Addresses box sizing set to border-box in S5, Chrome (include -moz to future-proof) */
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
-}
-.devhub-wrap input[type="search"]::-webkit-search-decoration {
-  /* Corrects inner padding displayed oddly in S5, Chrome on OSX */
-  -webkit-appearance: none;
-}
-.devhub-wrap button::-moz-focus-inner,
-.devhub-wrap input::-moz-focus-inner {
-  /* Corrects inner padding and border displayed oddly in FF3/4 www.sitepen.com/blog/2008/05/14/the-devils-in-the-details-fixing-dojos-toolbar-buttons/ */
-  border: 0;
-  padding: 0;
-}
-.devhub-wrap input[type="text"],
-.devhub-wrap input[type="email"],
-.devhub-wrap input[type="url"],
-.devhub-wrap input[type="password"],
-.devhub-wrap input[type="search"],
-.devhub-wrap textarea {
-  color: #666;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-}
-.devhub-wrap input[type="text"]:focus,
-.devhub-wrap input[type="email"]:focus,
-.devhub-wrap input[type="url"]:focus,
-.devhub-wrap input[type="password"]:focus,
-.devhub-wrap input[type="search"]:focus,
-.devhub-wrap textarea:focus {
-  color: #111;
-}
-.devhub-wrap input[type="text"],
-.devhub-wrap input[type="email"],
-.devhub-wrap input[type="url"],
-.devhub-wrap input[type="password"],
-.devhub-wrap input[type="search"] {
-  padding: 3px;
-}
-.devhub-wrap textarea {
-  overflow: auto;
-  /* Removes default vertical scrollbar in IE6/7/8/9 */
-  padding-left: 3px;
-  vertical-align: top;
-  /* Improves readability and alignment in all browsers */
-  width: 98%;
-}
 .devhub-wrap .site-header {
   background: none repeat scroll 0 0 #F7F7F7;
   border-bottom: 1px solid #DFDFDF;
@@ -731,15 +647,11 @@ textarea {
   color: #606060;
 }
 .devhub-wrap .site-branding .breadcrumb {
-  font-size: 13px;
-  font-size: 1.3rem;
+  font-size: 14px;
+  font-size: 1.4rem;
 }
 .devhub-wrap .site-branding .breadcrumb .active {
   font-weight: 600;
-}
-.devhub-wrap .breadcrumb-trail {
-  font-size: 13px;
-  margin-top: 1em;
 }
 .devhub-wrap .site-branding .site-title {
   color: #555555;
@@ -750,6 +662,9 @@ textarea {
   padding-top: 18px;
   text-shadow: 0 1px 0 #FFFFFF;
   font-weight: 300;
+}
+.devhub-wrap .breadcrumb-trail {
+  margin-top: 1em;
 }
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
@@ -788,12 +703,6 @@ textarea {
   background: #0F3D57;
   padding: 30px 0;
   padding: 3rem 0;
-}
-.devhub-wrap .reference-landing .section.search-guide {
-  padding-bottom: 0;
-}
-.devhub-wrap .reference-landing .section.topic-guide, .devhub-wrap .reference-landing .section.new-in-guide {
-  padding-top: 0;
 }
 .devhub-wrap .section.blue .box {
   text-align: center;
@@ -880,11 +789,6 @@ textarea {
   margin-left: 65px;
   margin-left: 6.5rem;
 }
-.devhub-wrap .section .home-primary-content {
-  max-width: 600px;
-  max-width: 60rem;
-  margin: 0 auto;
-}
 .devhub-wrap .section.light-gray {
   background: #f2f2f2;
   color: #606060;
@@ -900,16 +804,25 @@ textarea {
   color: #606060;
   text-decoration: none;
 }
+.devhub-wrap .section .home-primary-content {
+  max-width: 600px;
+  max-width: 60rem;
+  margin: 0 auto;
+}
 .devhub-wrap .box {
   padding: 30px;
   padding: 3rem;
   float: left;
   clear: none;
 }
+.devhub-wrap .reference-landing {
+  padding: 1em 0;
+}
 .devhub-wrap .reference-landing .section {
   max-width: 700px;
   max-width: 70rem;
   margin: 0 auto;
+  padding: 1.5em 0;
 }
 .devhub-wrap .reference-landing .section h2,
 .devhub-wrap .reference-landing .section h3,
@@ -922,19 +835,62 @@ textarea {
 .devhub-wrap .reference-landing .section h4.widget-title {
   margin-bottom: 0;
 }
+.devhub-wrap .reference-landing .section.search-guide {
+  padding-bottom: 0;
+}
+.devhub-wrap .reference-landing .section.section.topic-guide, .devhub-wrap .reference-landing .section.section.new-in-guide {
+  padding-top: 0;
+}
+.devhub-wrap .reference-landing .searchform {
+  overflow: hidden;
+  height: auto;
+  margin-bottom: 1em;
+}
+.devhub-wrap .reference-landing .searchform input {
+  height: 50px;
+  height: 5rem;
+  margin-bottom: 1em;
+  width: 100%;
+}
+.devhub-wrap .reference-landing .searchform input[type="submit"] {
+  width: 85px;
+  width: 8.5rem;
+  float: left;
+}
+.devhub-wrap .reference-landing .searchform label {
+  width: 560px;
+  width: 56rem;
+  max-width: 100%;
+  margin-right: 15px;
+  display: inline-block;
+  float: left;
+}
+.devhub-wrap .reference-landing .searchform label .search-field input[type="text"] {
+  width: 100%;
+}
 .devhub-wrap .reference-landing .box,
-.devhub-wrap .sidebar .box {
+.devhub-wrap .sidebar .box,
+.devhub-wrap .sidebar .widget_wporg_handbook_pages {
   padding: 0;
+  border: 2px solid #cccccc;
+  background-color: #eeeeee;
+}
+.devhub-wrap .reference-landing .box ul,
+.devhub-wrap .sidebar .box ul,
+.devhub-wrap .sidebar .widget_wporg_handbook_pages ul {
+  padding: 2em;
 }
 .devhub-wrap .reference-landing .box .widget-title,
-.devhub-wrap .sidebar .box .widget-title {
+.devhub-wrap .sidebar .box .widget-title,
+.devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-title {
   padding: 10px 30px;
   padding: 1rem 30px;
   font-size: 16px;
   font-size: 1.6rem;
 }
 .devhub-wrap .reference-landing .box .widget-content,
-.devhub-wrap .sidebar .box .widget-content {
+.devhub-wrap .sidebar .box .widget-content,
+.devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-content {
   padding: 16px 30px;
   padding: 1.6rem 3rem;
 }
@@ -945,12 +901,6 @@ textarea {
 .devhub-wrap .two-columns .box {
   width: 48%;
   margin: 1%;
-}
-.devhub-wrap .reference-landing {
-  padding: 1em 0;
-}
-.devhub-wrap .reference-landing .section {
-  padding: 1.5em 0;
 }
 .devhub-wrap .no-bullets,
 .devhub-wrap .sidebar .widget ul {
@@ -976,36 +926,6 @@ textarea {
   padding-left: 0;
   border-left: none;
 }
-.devhub-wrap .reference-landing .searchform,
-.devhub-wrap .reference-landing .searchform input {
-  height: 50px;
-  height: 5rem;
-  margin-bottom: 1em;
-  width: 100%;
-}
-.devhub-wrap .reference-landing .searchform label {
-  width: 560px;
-  width: 56rem;
-  max-width: 100%;
-  margin-right: 15px;
-  display: inline-block;
-  float: left;
-}
-.devhub-wrap .reference-landing .searchform label .search-field input[type="text"] {
-  width: 100%;
-}
-.devhub-wrap .reference-landing .searchform {
-  overflow: hidden;
-  height: auto;
-}
-.devhub-wrap .reference-landing .searchform input[type="submit"] {
-  width: 85px;
-  width: 8.5rem;
-  float: left;
-}
-.devhub-wrap .view-all-new-in {
-  font-style: italic;
-}
 .devhub-wrap .box.transparent {
   background: none;
   color: #fff;
@@ -1020,7 +940,7 @@ textarea {
   border: 1px solid #d8d8d8;
 }
 .devhub-wrap .box.gray .widget-title {
-  color: #666;
+  color: #666666;
   background: #d8d8d8;
   text-transform: uppercase;
 }
@@ -1042,19 +962,11 @@ textarea {
 }
 .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
   margin: 24px 0;
-  padding-left: 100px;
 }
 .devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
-  margin-left: -100px;
   color: #24831d;
   font-family: monospace;
   font-size: 20px;
-}
-.devhub-wrap .wp-parser-class h1 a:hover, .devhub-wrap .wp-parser-function h1 a:hover, .devhub-wrap .wp-parser-hook h1 a:hover, .devhub-wrap .wp-parser-method h1 a:hover {
-  border-bottom: 1px dotted #21759b;
-}
-.devhub-wrap .wp-parser-class h1 a .hook-func, .devhub-wrap .wp-parser-function h1 a .hook-func, .devhub-wrap .wp-parser-hook h1 a .hook-func, .devhub-wrap .wp-parser-method h1 a .hook-func {
-  color: #888;
 }
 .devhub-wrap .wp-parser-class h1 a .arg-type, .devhub-wrap .wp-parser-function h1 a .arg-type, .devhub-wrap .wp-parser-hook h1 a .arg-type, .devhub-wrap .wp-parser-method h1 a .arg-type {
   color: #cd2f23;
@@ -1065,6 +977,9 @@ textarea {
 .devhub-wrap .wp-parser-class h1 a .arg-default, .devhub-wrap .wp-parser-function h1 a .arg-default, .devhub-wrap .wp-parser-hook h1 a .arg-default, .devhub-wrap .wp-parser-method h1 a .arg-default {
   color: #000000;
 }
+.devhub-wrap .wp-parser-class h1 a:hover, .devhub-wrap .wp-parser-function h1 a:hover, .devhub-wrap .wp-parser-hook h1 a:hover, .devhub-wrap .wp-parser-method h1 a:hover {
+  border-bottom: 1px dotted #21759b;
+}
 .devhub-wrap .wp-parser-class h2, .devhub-wrap .wp-parser-function h2, .devhub-wrap .wp-parser-hook h2, .devhub-wrap .wp-parser-method h2 {
   font-family: Georgia, ​Times, ​serif;
   margin-bottom: .5em;
@@ -1072,10 +987,7 @@ textarea {
 .devhub-wrap .wp-parser-class .parameters p, .devhub-wrap .wp-parser-function .parameters p, .devhub-wrap .wp-parser-hook .parameters p, .devhub-wrap .wp-parser-method .parameters p {
   margin-bottom: 0;
 }
-.devhub-wrap .wp-parser-class .parameters dd .desc .type, .devhub-wrap .wp-parser-class .parameters dd .desc .required,
-.devhub-wrap .wp-parser-function .parameters dd .desc .type, .devhub-wrap .wp-parser-function .parameters dd .desc .required,
-.devhub-wrap .wp-parser-hook .parameters dd .desc .type, .devhub-wrap .wp-parser-hook .parameters dd .desc .required,
-.devhub-wrap .wp-parser-method .parameters dd .desc .type, .devhub-wrap .wp-parser-method .parameters dd .desc .required {
+.devhub-wrap .wp-parser-class .parameters dd .desc .type, .devhub-wrap .wp-parser-class .parameters dd .desc .required, .devhub-wrap .wp-parser-function .parameters dd .desc .type, .devhub-wrap .wp-parser-function .parameters dd .desc .required, .devhub-wrap .wp-parser-hook .parameters dd .desc .type, .devhub-wrap .wp-parser-hook .parameters dd .desc .required, .devhub-wrap .wp-parser-method .parameters dd .desc .type, .devhub-wrap .wp-parser-method .parameters dd .desc .required {
   font-style: italic;
 }
 .devhub-wrap .wp-parser-class .parameters dd .default, .devhub-wrap .wp-parser-function .parameters dd .default, .devhub-wrap .wp-parser-hook .parameters dd .default, .devhub-wrap .wp-parser-method .parameters dd .default {
@@ -1091,45 +1003,6 @@ textarea {
   text-align: center;
   font-size: 18px;
   margin-bottom: 20px;
-}
-@media (max-width: 43em) {
-  .devhub-wrap .section .box,
-  .devhub-wrap .home-primary-content,
-  .devhub-wrap .reference-landing .section {
-    float: none;
-    width: 100%;
-    padding: 1.5em 10%;
-    clear: both;
-    text-align: center;
-    display: block;
-  }
-  .devhub-wrap .reference-landing .section .box,
-  .devhub-wrap .sidebar .box {
-    padding: 0;
-    margin-bottom: 1.5em;
-  }
-  .devhub-wrap .home-primary-content .entry-content,
-  .devhub-wrap .reference-landing .section {
-    text-align: left;
-  }
-  .devhub-wrap .horizontal-list li {
-    display: block;
-  }
-  .devhub-wrap .horizontal-list li a {
-    border-left: none;
-  }
-  .devhub-wrap .horizontal-list li:first-child a {
-    padding: 0 40px;
-    padding: 0 4rem;
-  }
-  .devhub-wrap .reference-landing .searchform input[type="text"],
-  .devhub-wrap .reference-landing .searchform input[type="submit"] {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 1em;
-    float: none;
-    clear: both;
-  }
 }
 .devhub-wrap .comment-list,
 .devhub-wrap .comment-list ol {
@@ -1197,29 +1070,12 @@ textarea {
   float: left;
   margin: 0 0 1.5em;
 }
-
-@media (max-width: 60em) {
-  .devhub-wrap {
-    max-width: 100%;
-    width: 100%;
-  }
-  .devhub-wrap .site-main,
-  .devhub-wrap .inner-wrap {
-    max-width: 100%;
-    padding: 0 1%;
-  }
-}
-/*
- * Content
- *
- */
-.has-sidebar.content-area {
+.devhub-wrap #content-area.has-sidebar {
   float: none;
   margin: 0 auto;
   width: 60em;
 }
-
-.has-sidebar .site-main {
+.devhub-wrap .has-sidebar main {
   float: right;
   width: 67%;
   margin: 0;
@@ -1227,7 +1083,7 @@ textarea {
   padding: 0 12px;
   padding: 0 1.2rem;
 }
-.has-sidebar .widget-area {
+.devhub-wrap .has-sidebar .widget-area {
   float: left;
   overflow: hidden;
   width: 30%;
@@ -1235,17 +1091,27 @@ textarea {
   margin: 0;
   clear: none;
 }
-.has-sidebar .widget-area .widget {
+.devhub-wrap .has-sidebar .widget-area .widget {
   width: 100%;
 }
 
 @media (max-width: 60em) {
-  .has-sidebar.content-area {
+  .devhub-wrap {
+    max-width: 100%;
+    width: 100%;
+  }
+  .devhub-wrap #content-area,
+  .devhub-wrap .inner-wrap {
+    max-width: 100%;
+    padding: 0 1%;
+  }
+  .devhub-wrap #content-area .has-sidebar,
+  .devhub-wrap .inner-wrap .has-sidebar {
     width: 100%;
   }
 }
 @media (max-width: 43em) {
-  .has-sidebar .site-main {
+  #content-area.has-sidebar main {
     float: right;
     width: 96%;
     margin: 0 auto;
@@ -1253,14 +1119,57 @@ textarea {
     padding: 0 12px;
     padding: 0 1.2rem;
   }
-  .has-sidebar .widget-area {
+  #content-area.has-sidebar .widget-area {
     float: none;
     overflow: hidden;
     width: 80%;
     margin: 0 auto;
     clear: both;
   }
-  .has-sidebar .widget-area .widget {
+  #content-area.has-sidebar .widget-area .widget {
     width: 100%;
+  }
+
+  .section .box,
+  .home-primary-content,
+  .reference-landing .section {
+    float: none;
+    width: 100%;
+    padding: 1.5em 10%;
+    clear: both;
+    text-align: center;
+    display: block;
+  }
+
+  .reference-landing .section .box,
+  .sidebar .box {
+    padding: 0;
+    margin-bottom: 1.5em;
+  }
+
+  .home-primary-content .entry-content,
+  .reference-landing .section {
+    text-align: left;
+  }
+
+  .horizontal-list li {
+    display: block;
+  }
+  .horizontal-list li a {
+    border-left: none;
+  }
+
+  .horizontal-list li:first-child a {
+    padding: 0 40px;
+    padding: 0 4rem;
+  }
+
+  .reference-landing .searchform input[type="text"],
+  .reference-landing .searchform input[type="submit"] {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 1em;
+    float: none;
+    clear: both;
   }
 }

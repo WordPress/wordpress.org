@@ -279,28 +279,13 @@ namespace DevHub {
 		switch ( $parts[1] ) {
 			case 'reference':
 				return 'Code Reference';
+			case 'theme-handbook':
+				return 'Theme Handbook';
+			case 'plugin-handbook':
+				return 'Plugin Handbook';
 			default:
 				return 'Developer Resources';
 		}
-	}
-	/**
-	 * Get template part name
-	 *
-	 * @return string
-	 */
-	function get_template_part_name( $post_type = null ) {
-		if ( empty( $post_type ) ) {
-			$post_type = get_post_type();
-		}
-
-		$reference = array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-method' );
-		if ( in_array( $post_type, $reference ) ) {
-			$part = 'reference';
-		} else {
-			$part = $post_type;
-		}
-
-		return $part;
 	}
 
 	/**
@@ -373,24 +358,24 @@ namespace DevHub {
 		// Decorate and return function/class arguments.
 		if ( $args ) {
 			foreach ( $args as $arg ) {
-				$arg_string = ''; 	
+				$arg_string = '';
 				if ( ! empty( $arg['name'] ) && ! empty( $types[ $arg['name'] ] ) ) {
 					$arg_string .= ' <span class="arg-type">' . $types[ $arg['name'] ] . '</span>';
 				}
-	
+
 				if ( ! empty( $arg['name'] ) ) {
 					$arg_string .= '&nbsp;<span class="arg-name">' . $arg['name'] . '</span>&nbsp;';
 				}
-	
+
 				if ( is_array( $arg ) && array_key_exists( 'default', $arg ) ) {
-	
+
 					if ( is_null( $arg['default'] ) ) {
 						$arg['default'] = 'null';
 					}
-	
+
 					$arg_string .= '=&nbsp;<span class="arg-default">' . $arg['default'] . "</span>";
 				}
-	
+
 				$args_strings[] = $arg_string;
 			}
 		}
@@ -419,7 +404,7 @@ namespace DevHub {
 		$params = '';
 		$args = get_post_meta( $post_id, '_wp-parser_args', true );
 		$tags = get_post_meta( $post_id, '_wp-parser_tags', true );
-		
+
 		if ( $tags ) {
 			foreach ( $tags as $tag ) {
 				if ( 'param' == $tag['name'] ) {
@@ -437,16 +422,16 @@ namespace DevHub {
 				}
 			}
 		}
-		
+
 		if ( $args ) {
 			foreach ( $args as $arg ) {
 				if ( ! empty( $arg['name'] ) && ! empty( $params[ $arg['name'] ] ) ) {
 					$params[ $arg['name'] ]['default'] = $arg['default'];
 				}
-	
+
 			}
 		}
-		
+
 		return $params;
 	}
 
@@ -464,7 +449,7 @@ namespace DevHub {
 		}
 		$arguments = array();
 		$args = get_post_meta( $post_id, '_wp-parser_args', true );
-		
+
 		if ( $args ) {
 			foreach ( $args as $arg ) {
 				if ( ! empty( $arg['type'] ) ) {
@@ -472,7 +457,7 @@ namespace DevHub {
 				}
 			}
 		}
-		
+
 		return $arguments;
 	}
 
@@ -561,7 +546,7 @@ namespace DevHub {
 	}
 
 	/**
- 	 * Compare two objects by name for sorting.
+	 * Compare two objects by name for sorting.
 	 *
 	 * @param WP_Post $a Post A
 	 * @param WP_Post $b Post B
