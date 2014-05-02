@@ -55,6 +55,39 @@ function init() {
 
 	// Temporarily disable comments
 	add_filter( 'comments_open', '__return_false' );
+
+	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
+}
+
+/**
+ * Fix breadcrumb for hooks.
+ *
+ * A hook has a parent (the function containing it), which causes the Breadcrumb
+ * Trail plugin to introduce trail items related to the parent that shouldn't
+ * be shown.
+ *
+ * @param  array $items The breadcrumb trail items
+ * @param  array $args  Original arg
+ * @return array
+ */
+function breadcrumb_trail_items( $items, $args ) {
+	$post_type = 'wp-parser-hook';
+
+	// Bail early when not the single archive for hook
+	if ( ! is_singular() || $post_type !== get_post_type() ) {
+		return $items;
+	}
+
+	$post_type_object = get_post_type_object( $post_type );
+
+	// Replaces 'Functions' archive link with 'Hooks' archive link
+	$items[2] = '<a href="' . get_post_type_archive_link( $post_type ) . '">' . $post_type_object->labels->name . '</a>';
+	// Replace what the plugin thinks is the parent with the hook name
+	$items[3] = $items[4];
+	// Unset the last element since it shifted up in trail hierarchy
+	unset( $items[4] );
+
+	return $items;
 }
 
 /**
