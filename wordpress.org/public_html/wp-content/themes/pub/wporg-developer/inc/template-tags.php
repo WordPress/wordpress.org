@@ -343,10 +343,17 @@ namespace DevHub {
 			foreach ( $types as $arg => $type ) {
 				$hook_args[] = ' <nobr><span class="arg-type">' . esc_html( $type ) . '</span> <span class="arg-name">' . esc_html( $arg ) . '</span></nobr>';
 			}
+
 			$hook_type = get_post_meta( $post_id, '_wp-parser_hook_type', true );
+			if ( false !== strpos( $hook_type, 'action' ) ) {
+				$hook_type = ( 'action_reference' === $hook_type ) ? 'do_action_ref_array' : 'do_action';
+			} else {
+				$hook_type = ( 'filter_reference' === $hook_type ) ? 'apply_filters_ref_array' : 'apply_filters';
+			}
+
 			$delimiter = false !== strpos( $signature, '$' ) ? '"' : "'";
 			$signature = $delimiter . $signature . $delimiter;
-			$signature = '<span class="hook-func">' . ( $hook_type === 'action' ? 'do_action' : 'apply_filters' ) . '</span> ( ' . $signature;
+			$signature = '<span class="hook-func">' . $hook_type . '</span> ( ' . $signature;
 			if ( $hook_args ) {
 				$signature .= ', ';
 				$signature .= implode( ', ', $hook_args );
