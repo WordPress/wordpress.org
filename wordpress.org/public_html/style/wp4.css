@@ -542,6 +542,33 @@ a img.aligncenter {
 
 }
 
+@media screen and (max-width:960px) {
+	#home-welcome {
+		min-width: 0 !important;
+	}
+
+	#home-welcome .wrapper {
+		max-width: 100%;
+		margin: 0;
+	}
+
+	#home-text {
+		width: 100%;
+		float: right;
+		margin: -10px;
+	}
+
+
+	#home-below .wrapper .col-2, #home-below .wrapper .col-4{ 
+		max-width: 100%; 
+	}
+
+	#home-below {
+		max-width: 100%; 
+		width: auto;
+	}
+}
+
 @media screen and (min-width:800px) {
 	#wporg-header ul li#download {
 		display: list-item;
