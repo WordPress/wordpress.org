@@ -1,4 +1,11 @@
-
+<?php
+add_filter('wp_get_attachment_image_attributes', 'wporg_relative_images');
+function wporg_relative_images($attr) {
+	$url = $attr['src'];
+	$attr['src'] = set_url_scheme( $url );
+	return $attr;
+}
+?>
 <header class="masthead">
 	<?php while ( have_posts() ) : the_post(); ?>
 		<hgroup <?php post_class( 'wrap' ); ?>>
