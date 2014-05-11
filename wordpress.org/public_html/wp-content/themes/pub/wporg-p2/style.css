@@ -163,6 +163,61 @@ ul#menu-table-of-contents li ul a {
 		padding: 0 10px;
 	}
 
+	.single-handbook #wrapper {
+		padding: 0 !important;
+	}
+
+	.single-handbook .sleeve_main {
+		padding: 0;
+	}
+
+	.single-handbook #headline h2 {
+		margin-left: 6px;
+	}
+
+	.single-handbook #main h2 {
+		padding-bottom: 10px;
+		display: inline-block !important;
+	}
+
+	.single-handbook #main h6 span.meta span.actions {
+		font-size: 12px !important;
+	}
+
+	.single-handbook #main ul#postlist li span.actions a.comment-reply-link {
+		display: inline-block !important;
+		margin-right: 10px;
+		padding: 0 !important;
+	}
+	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:hover,
+	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:focus,
+	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:active {
+		color: #d54e21 !important;
+	}
+
+	.single-handbook #main ul#postlist li span.actions a.follow-link {
+		font-size: 12px;
+		margin-right: 10px;
+	}
+
+	.single-handbook #main h6 {
+		padding: 5px 0;
+		margin: 0;
+	}
+
+	.single-handbook #main .actions {
+		position: relative;
+		float: right;
+	}
+
+	.single-handbook #sidebar {
+		margin-left: 0;
+	}
+
+	.single-handbook #main #respond {
+		margin-left: 0;
+	}
+
 	.post-type-archive-handbook .table-of-contents,
 	.single-handbook .table-of-contents {
 		display: none;
@@ -238,7 +293,7 @@ ul#menu-table-of-contents li ul a {
 	border-top: 1px solid #d7d7d7;
 	border-bottom: 1px solid #d7d7d7;
 	width: 100%;
-	}	
+	}
 }
 
 @media (max-width: 480px) {
@@ -503,7 +558,7 @@ table#issuelist, #issuelist th, #issuelist td {
 }
 
 .issueinputarea .thanks {
-	background: #f1f1f1;	
+	background: #f1f1f1;
 	font-weight:bold;
 	padding: 5px 0px 0px 5px;
 	margin:0;
@@ -606,6 +661,11 @@ table#issuelist, #issuelist th, #issuelist td {
 		position: static;
 		width: 100%;
 		float: none;
+	}
+	.post-type-archive-handbook #sidebar,
+	.single-handbook #sidebar {
+		margin-left: 0;
+		display: block !important;
 	}
 	#main .controls {
 		position: static;
