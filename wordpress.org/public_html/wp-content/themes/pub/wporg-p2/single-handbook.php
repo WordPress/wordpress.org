@@ -7,6 +7,9 @@
 ?>
 <?php get_header(); ?>
 
+<!-- Also called on in footer but will not display the second time. -->
+<?php get_sidebar( get_post_type() ); ?> 
+
 <div class="sleeve_main">
 
 	<div id="main">

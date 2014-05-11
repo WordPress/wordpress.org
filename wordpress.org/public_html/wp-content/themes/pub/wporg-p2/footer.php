@@ -6,6 +6,7 @@
  */
 ?>
 
+	<!-- On handbook pages, this gets called twice but will not display the second time. -->
 	<?php get_sidebar( get_post_type() ); ?>
 	<div class="clear"></div>
 
