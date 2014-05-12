@@ -249,16 +249,20 @@ namespace DevHub {
 	}
 
 	/**
-	 * Get current (latest) since version
+	 * Get current (latest) since major version (X.Y.0) term object.
 	 *
 	 * @return object
 	 */
 	function get_current_version() {
 
 		$current_version = defined( 'WP_CORE_LATEST_RELEASE' ) ? WP_CORE_LATEST_RELEASE : '3.9';
-		if ( substr_count( $current_version, '.' ) ) {
-			$current_version .= '.0';
+		$version_parts = explode( '.', $current_version, 3 );
+		if ( count( $version_parts ) == 2 ) {
+			$version_parts[] = '0';
+		} else {
+			$version_parts[2] = '0';
 		}
+		$current_version = implode( '.', $version_parts );
 
 		$version = get_terms( 'wp-parser-since', array(
 			'number' => '1',
@@ -565,3 +569,4 @@ namespace DevHub {
 	}
 
 }
+
