@@ -4,12 +4,12 @@ Template: p2
 Description: Child theme of p2, with modifications specifically for make.wordpress.org p2 blogs.
 */
 
+/* Handbook-specific styles */
 .post-type-archive-handbook .postcontent,
 .single-handbook .postcontent {
 	padding-left: 0;
 }
 
-/* Better styling for handbook sidebars if they use a "Table of Contents" menu */
 .post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
 .single-handbook ul#menu-table-of-contents a[href="#"] {
 	font-weight: bold;
@@ -41,27 +41,31 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	padding: 5px 0;
 }
 
-.single-handbook a {
+.post-type-archive-handbook #wrapper a,
+.single-handbook #wrapper a {
 	color: #267db2;
 }
 
+.post-type-archive-handbook .current-menu-item a,
 .single-handbook .current-menu-item a {
 	color: #267db2!important;
 	font-weight: bold!important;
 }
 
+.post-type-archive-handbook .current-menu-item ul li a,
 .single-handbook .current-menu-item ul li a {
 	color: #555!important;
 	font-weight: normal!important;
 }
 
-.single-handbook a:hover,
-.post-type-archive-handbook a:hover,
+.single-handbook #wrapper a:hover,
+.post-type-archive-handbook #wrapper a:hover,
 .single-handbook .current-menu-item ul li a:hover,
 .post-type-archive-handbook .current-menu-item ul li a:hover {
 	color: #d54e21!important;
 }
 
+.post-type-archive-handbook div.table-of-contents,
 .single-handbook div.table-of-contents {
 	float: right;
 	width: 200px;
@@ -72,6 +76,7 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	position: relative;
 }
 
+.post-type-archive-handbook div.table-of-contents h2,
 .single-handbook div.table-of-contents h2 {
 	margin: 0;
 	padding-bottom: 8px!important;
@@ -82,23 +87,28 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	background: #d6d6d6;
 }
 
+.post-type-archive-handbook ul.items,
 .single-handbook ul.items {
 	margin-bottom: 8px!important;
 	list-style-type: none!important;
 	padding-right: 10px;
 }
 
+.post-type-archive-handbook ul.items li,
 .single-handbook ul.items li {
 	padding-bottom: 6px!important;
 }
 
+.post-type-archive-handbook ul.items li ul li,
+.post-type-archive-handbook ul.items li ul li ul li,
 .single-handbook ul.items li ul li,
 .single-handbook ul.items li ul li ul li {
 	padding-bottom: 0!important;
 }
 
+.post-type-archive-handbook ul.items li a,
 .single-handbook ul.items li a {
-	color: #555;
+	color: #555!important;
 }
 
 li.type-handbook {
@@ -141,18 +151,38 @@ li.type-handbook h4 {
 	margin: 0;
 }
 
-ul#menu-table-of-contents {
+.post-type-archive-handbook ul#menu-table-of-contents,
+.single-handbook ul#menu-table-of-contents {
 	padding: 12px;
 	background: #f5f5f5;
 }
 
-ul#menu-table-of-contents > li {
+.post-type-archive-handbook ul#menu-table-of-contents > li,
+.single-handbook ul#menu-table-of-contents > li {
 	list-style: none;
-	margin-bottom: 16px;
 }
 
-ul#menu-table-of-contents li ul a {
+.post-type-archive-handbook ul#menu-table-of-contents li ul a ,
+.single-handbook ul#menu-table-of-contents li ul a {
 	font-weight: normal;
+}
+
+.post-type-archive-handbook .sleeve_main,
+.single-handbook .sleeve_main {
+	float: right;
+}
+
+.post-type-archive-handbook #wrapper,
+.single-handbook #wrapper {
+	padding-right: 0;
+	padding-left: 236px;
+}
+
+.post-type-archive-handbook #sidebar,
+.single-handbook #sidebar {
+	float: left;
+	margin-right: 0;
+	margin-left: -236px;
 }
 
 /* Responsive design for handbooks */
@@ -163,57 +193,58 @@ ul#menu-table-of-contents li ul a {
 		padding: 0 10px;
 	}
 
+	.post-type-archive-handbook #wrapper,
 	.single-handbook #wrapper {
 		padding: 0 !important;
 	}
 
+	.post-type-archive-handbook .sleeve_main,
 	.single-handbook .sleeve_main {
 		padding: 0;
 	}
 
-	.single-handbook #headline h2 {
-		margin-left: 6px;
-	}
-
+	.post-type-archive-handbook #main h2,
 	.single-handbook #main h2 {
-		padding-bottom: 10px;
 		display: inline-block !important;
 	}
 
+	.post-type-archive-handbook #main h6 span.meta span.actions,
 	.single-handbook #main h6 span.meta span.actions {
-		font-size: 12px !important;
+		font-size: 11px !important;
 	}
 
+	.post-type-archive-handbook #main ul#postlist li span.actions a.comment-reply-link,
 	.single-handbook #main ul#postlist li span.actions a.comment-reply-link {
 		display: inline-block !important;
-		margin-right: 10px;
 		padding: 0 !important;
 	}
+
+	.post-type-archive-handbook #main ul#postlist li span.actions a.comment-reply-link:hover,
+	.post-type-archive-handbook #main ul#postlist li span.actions a.comment-reply-link:focus,
+	.post-type-archive-handbook #main ul#postlist li span.actions a.comment-reply-link:active,
 	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:hover,
 	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:focus,
 	.single-handbook #main ul#postlist li span.actions a.comment-reply-link:active {
 		color: #d54e21 !important;
 	}
 
-	.single-handbook #main ul#postlist li span.actions a.follow-link {
-		font-size: 12px;
-		margin-right: 10px;
-	}
-
+	.post-type-archive-handbook #main h6,
 	.single-handbook #main h6 {
-		padding: 5px 0;
-		margin: 0;
+		margin: 0 0 20px 0;
 	}
 
+	.post-type-archive-handbook #main .actions,
 	.single-handbook #main .actions {
 		position: relative;
 		float: right;
 	}
 
+	.post-type-archive-handbook #sidebar,
 	.single-handbook #sidebar {
 		margin-left: 0;
 	}
 
+	.post-type-archive-handbook #main #respond,
 	.single-handbook #main #respond {
 		margin-left: 0;
 	}
@@ -223,25 +254,20 @@ ul#menu-table-of-contents li ul a {
 		display: none;
 	}
 
-	#main h2 {
+	.post-type-archive-handbook	#main h2,
+	.single-handbook #main h2 {
 		display: inline !important;
 		font-size: 20px !important;
+		padding-bottom: 5px!important;
 		font-weight: normal;
 	}
 
-	#main ul#postlist {
+	.post-type-archive-handbook #main ul#postlist,
+	.single-handbook #main ul#postlist {
 		margin: 0!important;
 		clear: both;
 	}
 
-/*	#main #postlist li {
-		margin-top: 5px!important;
-		padding-top: 0!important;
-	}
-	#main #postlist li {
-		padding: 0 !important;
-	}
-*/
 	/* Override P2 iPhone styles */
 	#main ul#postlist li span.actions a.comment-reply-link {
 		background: none!important;
@@ -249,7 +275,6 @@ ul#menu-table-of-contents li ul a {
 		-webkit-box-shadow: none!important;
 		color: #555!important;
 		display: block;
-		font-size: 12px !important;
 		font-weight: normal!important;
 		padding: 0 10px 0 0!important;
 		position: relative!important;
@@ -261,15 +286,23 @@ ul#menu-table-of-contents li ul a {
 		display: inline!important;
 	}
 }
+
 @media (max-width: 700px) {
 	.post-type-archive-handbook #wrapper,
 	.single-handbook #wrapper {
-		margin: 0;
+		margin: 0 13px 0 13px;
 		padding-left: 0 !important;
+		padding-bottom: 0!important;
+	}
+	.post-type-archive-handbook #sidebar,
+	.single-handbook #sidebar {
+		margin: 0;
+		padding: 5px 0 0 0;
+		display: block !important;
 	}
 }
 
-
+/* Secondary header design */
 #headline .menu {
 	list-style: none;
 	float: right;
@@ -284,6 +317,19 @@ ul#menu-table-of-contents li ul a {
 	padding-left: 20px;
 }
 
+/* Responsive design for secondary header */
+@media (max-width: 480px) {
+	#headline h2 {
+		margin-left: 6px;
+		font-size: 20px;
+	}
+
+body.wporg-make #headline h2 a:before {
+		font-size: 20px;
+		width: 24px;
+	}
+}
+
 @media (max-width: 740px) {
 	#headline .menu {
 	float: left;
@@ -296,16 +342,6 @@ ul#menu-table-of-contents li ul a {
 	}
 }
 
-@media (max-width: 480px) {
-	#headline h2 {
-	font-size: 20px;
-	}
-
-body.wporg-make #headline h2 a:before {
-	font-size: 20px;
-	width: 24px;
-	}
-}
 
 html body {
 	line-height: normal;
@@ -388,7 +424,7 @@ ul#menu-wp-org-headline-nav.menu {
 
 #main h6 {
 	background-color: #f5f5f5;
-	height: 20px;
+	height: 18px;
 	padding: 0;
 	margin: 0 0 20px 0;
 }
@@ -630,28 +666,8 @@ table#issuelist, #issuelist th, #issuelist td {
 	margin-right: -236px;
 }
 
-.post-type-archive-handbook .sleeve_main,
-.single-handbook .sleeve_main {
-	float: right;
-}
-
-.post-type-archive-handbook #wrapper,
-.single-handbook #wrapper {
-	padding-right: 0;
-	padding-left: 236px;
-}
-
-.post-type-archive-handbook #sidebar,
-.single-handbook #sidebar {
-	float: left;
-	margin-right: 0;
-	margin-left: -236px;
-}
-
 @media screen and (max-width: 700px) {
-	#wrapper,
-	.post-type-archive-handbook #wrapper,
-	.simgle-handbook #wrapper {
+	#wrapper {
 		padding-left: 0;
 		padding-right: 0;
 	}
@@ -662,13 +678,16 @@ table#issuelist, #issuelist th, #issuelist td {
 		width: 100%;
 		float: none;
 	}
-	.post-type-archive-handbook #sidebar,
-	.single-handbook #sidebar {
-		margin-left: 0;
-		display: block !important;
+	#sidebar ul {
+		margin-bottom: 0;
+	}
+	#sidebar ul li {
+		margin-bottom: 0;
+	}
+	#main {
+		padding: 0 0 10px 0;
 	}
 	#main .controls {
 		position: static;
 	}
 }
-
