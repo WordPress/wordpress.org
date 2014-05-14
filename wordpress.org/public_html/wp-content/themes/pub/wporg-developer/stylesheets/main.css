@@ -885,6 +885,7 @@ input {
 }
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
+  overflow: hidden;
 }
 .devhub-wrap .reference-landing .box .widget-title,
 .devhub-wrap .sidebar .box .widget-title,
