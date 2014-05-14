@@ -74,7 +74,7 @@ function breadcrumb_trail_items( $items, $args ) {
 	$post_type = 'wp-parser-hook';
 
 	// Bail early when not the single archive for hook
-	if ( ! is_singular() || $post_type !== get_post_type() ) {
+	if ( ! is_singular() || $post_type !== get_post_type() || ! isset( $items[4] ) ) {
 		return $items;
 	}
 
