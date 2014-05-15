@@ -192,6 +192,7 @@ li.type-handbook h4 {
 		display: inline !important; /* override P2 iPhone styles */
 	}
 }
+
 @media (max-width: 480px) {
 	.post-type-archive-handbook .sleeve_main,
 	.single-handbook .sleeve_main {
@@ -294,11 +295,38 @@ li.type-handbook h4 {
 		padding-left: 0 !important;
 		padding-bottom: 0!important;
 	}
+
 	.post-type-archive-handbook #sidebar,
 	.single-handbook #sidebar {
 		margin: 0;
 		padding: 5px 0 0 0;
 		display: block !important;
+	}
+
+	.post-type-archive-handbook #sidebar ul li,
+	.single-handbook #sidebar ul li { 
+		padding: 4px 0 10px 0;
+	}
+
+	.post-type-archive-handbook #sidebar ul li ul li,
+	.single-handbook #sidebar ul li ul li { 
+		padding: 4px 0;
+	}
+
+	.post-type-archive-handbook h2.widgettitle,
+	.single-handbook h2.widgettitle {
+		background-color: #267db2; /* #d6d6d6 when collapsed */
+		color: white; /* #666 when collapsed */
+	}
+
+	.post-type-archive-handbook h2.widgettitle:after,
+	.single-handbook h2.widgettitle:after {
+		font-family: "dashicons";
+		font-size: 2em;
+		content: "\f140";
+		position: absolute;
+		right: 2px;
+		top: -2px;
 	}
 }
 
