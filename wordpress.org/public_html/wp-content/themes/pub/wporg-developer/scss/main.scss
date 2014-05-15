@@ -393,7 +393,7 @@
 		}
 
 	}
-	.breadcrumb {
+	.breadcrumbs {
 		.active {
 			font-weight: 600;
 		}
@@ -657,6 +657,7 @@
 		}
 
 	}
+
 	.reference-landing .box ul {
 		padding: 0;
 		overflow: hidden;
@@ -698,6 +699,9 @@
 		border-left: none;
 	}
 
+	.view-all-new-in {
+		font-style: italic;
+	}
 
 	.box.transparent {
 		background: none;
@@ -708,10 +712,6 @@
 		h4 {
 			color: #fff;
 		}
-	}
-
-	.view-all-new-in {
-		font-style: italic;
 	}
 
 	.box.gray {
@@ -950,6 +950,9 @@
 		.inner-wrap {
 			max-width: 100%;
 			padding: 0 13px;
+		}
+		#content-area,
+		.inner-wrap {
 			.has-sidebar {
 				width: 100%;
 			}
@@ -1008,6 +1011,7 @@
 	.devhub-wrap {
 		.horizontal-list li {
 			display: block;
+
 			a {
 				border-left: none;
 			}
@@ -1016,6 +1020,10 @@
 		.horizontal-list li:first-child a {
 			padding: 0 40px;
 			padding: 0 4rem;
+		}
+
+		.reference-landing .searchform {
+			text-alignment: center;
 		}
 
 		.reference-landing .searchform input[type="text"],

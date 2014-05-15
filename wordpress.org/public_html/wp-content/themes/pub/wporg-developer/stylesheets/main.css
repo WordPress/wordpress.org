@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* =Reset
 -------------------------------------------------------------- */
 html, body, div, span, applet, object, iframe,
@@ -883,10 +884,6 @@ input {
 .devhub-wrap .sidebar .widget_wporg_handbook_pages ul {
   padding: 2em;
 }
-.devhub-wrap .reference-landing .box ul {
-  padding: 0;
-  overflow: hidden;
-}
 .devhub-wrap .reference-landing .box .widget-title,
 .devhub-wrap .sidebar .box .widget-title,
 .devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-title {
@@ -900,6 +897,10 @@ input {
 .devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-content {
   padding: 16px 30px;
   padding: 1.6rem 3rem;
+}
+.devhub-wrap .reference-landing .box ul {
+  padding: 0;
+  overflow: hidden;
 }
 .devhub-wrap .three-columns .box {
   width: 31%;
@@ -1177,12 +1178,10 @@ input {
   .devhub-wrap .horizontal-list li a {
     border-left: none;
   }
-
   .devhub-wrap .horizontal-list li:first-child a {
     padding: 0 40px;
     padding: 0 4rem;
   }
-
   .devhub-wrap .reference-landing .searchform {
     text-alignment: center;
   }
