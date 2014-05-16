@@ -40,7 +40,8 @@ font-size: 12px;
 font-weight: normal !important;
 font-family: sans-serif;
 }
-#bodyContent h3 {
+#bodyContent h3,
+#bodyContent div > h3 { /** Don't pad headers inside divs **/
 	padding-bottom: 4px;
 	margin-bottom: 4px;
 }
