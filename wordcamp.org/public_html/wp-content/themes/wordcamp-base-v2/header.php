@@ -84,7 +84,7 @@
 		<?php // Before Content Widget Areas for homepage and all other pages ?>
 		<?php if ( is_front_page () ) { ?>
 			<div id="before-content-widgets" class="widget-area front-page">
-				<?php if ( ! dynamic_sidebar( 'before-content-homapage' ) ) : ?>
+				<?php if ( ! dynamic_sidebar( 'before-content-homepage' ) ) : ?>
 				<?php endif; ?>
 			</div><!-- #before-content-widgets .widget-area .front-page -->
 		<?php } else { ?>
