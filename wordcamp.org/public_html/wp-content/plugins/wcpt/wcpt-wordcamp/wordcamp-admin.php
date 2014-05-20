@@ -58,7 +58,7 @@ class WordCamp_Admin {
 
 		add_meta_box (
 			'wcpt_organizer_info',
-			__( 'Organizer Information', 'wcpt' ),
+			__( 'Organizing Team', 'wcpt' ),
 			'wcpt_organizer_metabox',
 			WCPT_POST_TYPE_ID,
 			'advanced',
@@ -139,6 +139,13 @@ class WordCamp_Admin {
 					'Email Address'          => 'text',
 					'Telephone'              => 'text',
 					'Mailing Address'        => 'textarea',
+					'Sponsor Wrangler Name'           => 'text',
+					'Sponsor Wrangler E-mail Address' => 'text',
+					'Budget Wrangler Name'            => 'text',
+					'Budget Wrangler E-mail Address'  => 'text',
+					'Number of Anticipated Attendees' => 'text',
+					'WordCamp Hashtag'                => 'text',
+					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 				);
 
 				break;
@@ -180,6 +187,13 @@ class WordCamp_Admin {
 					'Email Address'          => 'text',
 					'Telephone'              => 'text',
 					'Mailing Address'        => 'textarea',
+					'Sponsor Wrangler Name'           => 'text',
+					'Sponsor Wrangler E-mail Address' => 'text',
+					'Budget Wrangler Name'            => 'text',
+					'Budget Wrangler E-mail Address'  => 'text',
+					'Number of Anticipated Attendees' => 'text',
+					'WordCamp Hashtag'                => 'text',
+					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 
 					'Venue Name'          => 'text',
 					'Physical Address'    => 'textarea',
