@@ -134,11 +134,11 @@ class WordCamp_Admin {
 		switch ( $meta_group ) {
 			case 'organizer' :
 				$retval = array (
-					'Organizer Name'         => 'text',
-					'WordPress.org Username' => 'text',
-					'Email Address'          => 'text',
-					'Telephone'              => 'text',
-					'Mailing Address'        => 'textarea',
+					'Organizer Name'                  => 'text',
+					'WordPress.org Username'          => 'text',
+					'Email Address'                   => 'text',
+					'Telephone'                       => 'text',
+					'Mailing Address'                 => 'textarea',
 					'Sponsor Wrangler Name'           => 'text',
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
@@ -182,11 +182,11 @@ class WordCamp_Admin {
 					'E-mail Address'          => 'text',
 					'Twitter'                 => 'text',
 
-					'Organizer Name'         => 'text',
-					'WordPress.org Username' => 'text',
-					'Email Address'          => 'text',
-					'Telephone'              => 'text',
-					'Mailing Address'        => 'textarea',
+					'Organizer Name'                  => 'text',
+					'WordPress.org Username'          => 'text',
+					'Email Address'                   => 'text',
+					'Telephone'                       => 'text',
+					'Mailing Address'                 => 'textarea',
 					'Sponsor Wrangler Name'           => 'text',
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
