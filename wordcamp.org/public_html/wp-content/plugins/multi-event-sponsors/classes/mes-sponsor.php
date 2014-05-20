@@ -59,7 +59,7 @@ class MES_Sponsor {
 			'hierarchical'    => false,
 			'capability_type' => 'page',
 			'has_archive'     => true,
-			'rewrite'         => array( 'slug' => 'multi-event-sponsor' ),
+			'rewrite'         => array( 'slug' => 'multi-event-sponsor', 'with_front' => false ),
 			'query_var'       => true,
 			'supports'        => array( 'title', 'editor', 'author', 'revisions', 'thumbnail' ),
 			'taxonomies'      => array( self::REGIONS_SLUG ),
