@@ -14,11 +14,11 @@ class MES_Sponsorship_Level {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',        array( $this, 'create_post_type' ) );
+		add_action( 'init',                                   array( $this, 'create_post_type' ) );
 		add_action( 'add_meta_boxes_' . self::POST_TYPE_SLUG, array( $this, 'remove_meta_boxes' ) );
-		add_action( 'admin_init',  array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post',   array( $this, 'save_post' ), 10, 2 );
-		add_filter( 'the_content', array( $this, 'add_header_footer_text' ) );
+		add_action( 'admin_init',                             array( $this, 'add_meta_boxes' ) );
+		add_action( 'save_post',                              array( $this, 'save_post' ), 10, 2 );
+		add_filter( 'the_content',                            array( $this, 'add_header_footer_text' ) );
 	}
 
 	/**
