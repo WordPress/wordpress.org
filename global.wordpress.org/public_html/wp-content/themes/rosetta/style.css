@@ -397,3 +397,48 @@ span#showcase-front-slate {
 	font-style: italic;
 	font-weight: bold;
 }
+
+@media screen and ( max-width: 960px ) {
+	#wporg-header {
+		height: auto;
+	}
+
+		#mobile-menu-button {
+			display: none;    /* Because the global menu doesn't actually exist */
+		}
+
+		#wporg-header .menu ul li,
+		#wporg-header ul.menu li {
+			float: left;
+		}
+
+			#wporg-header .menu ul li a,
+			#wporg-header ul.menu li a {
+				padding-left: 0;
+				padding-right: 15px;
+			}
+
+	#mid-wrapper.outer,
+	.wrapper,
+	.section,
+	.main {
+		width: auto;
+	}
+
+	#mid-wrapper,
+	.wrapper {
+		margin-left: 40px;
+		margin-right: 40px;
+	}
+
+		form#contactme textarea {
+			width: 100%;
+		}
+}
+
+@media screen and ( max-width: 768px ) {
+	#wporg-header h2.rosetta a {
+		padding-top: 5px;
+		padding-left: 0;
+	}
+}
