@@ -4,6 +4,9 @@
 		'sql', 'trojan', 'rce', 'permissions', 'exploit', 'exploits', 'csrf', 'xss', 'sqli',
 		'scripting', 'vulnerability', 'vulnerabilities', 'capability', 'capabilities', 'intrusion',
 		'intrusions', 'cve', 'disclosure', 'hash', 'security', 'leakage', 'privilege', 'privileges',
+		'escape', 'unescape', 'escaped', 'unescaped', 'escapes', 'escaping', 'unescaping', 'esc_',
+		'sanitize', 'unsanitize', 'sanitizes', 'unsanitizes', 'sanitized', 'unsanitized', 'sanitization',
+		'valid', 'invalid', 'validate', 'validates', 'validation',
 		'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords'
 	];
 
@@ -14,7 +17,8 @@
 	};
 
 	$(document).ready( function() {
-		var submit = $( 'input[type="submit"]' );
+		var propertyform = $( '#propertyform' ),
+	   		submit = propertyform.find( 'input[type="submit"]' );
 		$( '#field-summary, #field-description' ).on( 'keyup', function() {
 			var words, overlap;
 			words = $(this).val().toLowerCase().split( /[^a-z]/ );
@@ -38,9 +42,9 @@
 					' &mdash; <a href="http://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">report security issues to security@wordpress.org</a></p>' );
 			}
 		});
-		$( '#propertyform' ).on( 'change', '#security-question input', function() {
+		propertyform.on( 'change', '#security-question input', function() {
 			submit.prop( 'disabled', ! $(this).is( ':checked' ) );
 		});
 	});
 })(jQuery);
-	
+
