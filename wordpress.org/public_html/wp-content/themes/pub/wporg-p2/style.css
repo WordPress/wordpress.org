@@ -478,6 +478,10 @@ ul#menu-wp-org-headline-nav.menu {
 	color: #d54e21;
 }
 
+#main p, #main ul, #main ol {
+	line-height: 1.4; /* override 1.4em which will compress headlines */
+}
+
 /* Fix display of empty comments (which can happen on edit) */
 #main .commentlist .commentcontent {
 	min-height: 2.4em;
