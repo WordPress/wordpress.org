@@ -635,8 +635,7 @@
 	}
 
 	.reference-landing .box,
-	.sidebar .box,
-	.sidebar .widget_wporg_handbook_pages {
+	.sidebar .box {
 		padding: 0;
 		border: 2px solid #cccccc;
 		background-color: #eeeeee;
@@ -657,6 +656,68 @@
 		}
 
 	}
+	#sidebar {
+		padding: 0;
+		border: 2px solid #cecece;
+		background-color: #f4f3f3;
+		& > ul {
+			padding: 0;
+			margin: 0;
+			list-style-type: none;
+			li {
+				h2.widgettitle {
+				background-color: #cecece;
+				color: #8a8989;
+				text-align: center;
+				text-transform: uppercase;
+				font-size: 14px;
+				letter-spacing: 2px;
+				}
+				ul {
+					list-style-type: none;
+					margin-left: 10px;
+					padding: 15px 0;
+					counter-reset: item;
+					li {
+						&:before {
+							content: counter(item);
+							counter-increment: item;
+							background-color: #cecece;
+							width: 25px;
+							display: inline-block;
+							color: #fff;
+							margin-right: 10px;
+							text-align: center;
+							padding: 3px 0;
+							font-size: 13px;
+							border-radius: 50%;
+						}
+						a {
+							font-size: 14px;
+							color: #4b4b4b;
+							font-weight: bold;
+						}
+						ul {
+							list-style-type: none;
+							padding: 0;
+							margin-left: 44px;
+							li {
+								&:before {
+									content: none;
+								}
+								a {
+									font-weight: normal;
+								}
+								ul {
+									margin-left: 20px;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	.reference-landing .box ul {
 		padding: 0;
@@ -674,6 +735,7 @@
 	}
 
 
+	#sidebar,
 	.no-bullets,
 	.sidebar .widget ul {
 		list-style-type: none;

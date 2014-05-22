@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /* =Reset
 -------------------------------------------------------------- */
 html, body, div, span, applet, object, iframe,
@@ -873,30 +872,82 @@ input {
   width: 100%;
 }
 .devhub-wrap .reference-landing .box,
-.devhub-wrap .sidebar .box,
-.devhub-wrap .sidebar .widget_wporg_handbook_pages {
+.devhub-wrap .sidebar .box {
   padding: 0;
   border: 2px solid #cccccc;
   background-color: #eeeeee;
 }
 .devhub-wrap .reference-landing .box ul,
-.devhub-wrap .sidebar .box ul,
-.devhub-wrap .sidebar .widget_wporg_handbook_pages ul {
+.devhub-wrap .sidebar .box ul {
   padding: 2em;
 }
 .devhub-wrap .reference-landing .box .widget-title,
-.devhub-wrap .sidebar .box .widget-title,
-.devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-title {
+.devhub-wrap .sidebar .box .widget-title {
   padding: 10px 30px;
   padding: 1rem 30px;
   font-size: 16px;
   font-size: 1.6rem;
 }
 .devhub-wrap .reference-landing .box .widget-content,
-.devhub-wrap .sidebar .box .widget-content,
-.devhub-wrap .sidebar .widget_wporg_handbook_pages .widget-content {
+.devhub-wrap .sidebar .box .widget-content {
   padding: 16px 30px;
   padding: 1.6rem 3rem;
+}
+.devhub-wrap #sidebar {
+  padding: 0;
+  border: 2px solid #cecece;
+  background-color: #f4f3f3;
+}
+.devhub-wrap #sidebar > ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+.devhub-wrap #sidebar > ul li h2.widgettitle {
+  background-color: #cecece;
+  color: #8a8989;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+.devhub-wrap #sidebar > ul li ul {
+  list-style-type: none;
+  margin-left: 10px;
+  padding: 15px 0;
+  counter-reset: item;
+}
+.devhub-wrap #sidebar > ul li ul li:before {
+  content: counter(item);
+  counter-increment: item;
+  background-color: #cecece;
+  width: 25px;
+  display: inline-block;
+  color: #fff;
+  margin-right: 10px;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 13px;
+  border-radius: 50%;
+}
+.devhub-wrap #sidebar > ul li ul li a {
+  font-size: 14px;
+  color: #4b4b4b;
+  font-weight: bold;
+}
+.devhub-wrap #sidebar > ul li ul li ul {
+  list-style-type: none;
+  padding: 0;
+  margin-left: 44px;
+}
+.devhub-wrap #sidebar > ul li ul li ul li:before {
+  content: none;
+}
+.devhub-wrap #sidebar > ul li ul li ul li a {
+  font-weight: normal;
+}
+.devhub-wrap #sidebar > ul li ul li ul li ul {
+  margin-left: 20px;
 }
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
@@ -910,6 +961,7 @@ input {
   width: 48%;
   margin: 1% 1% 1% 0;
 }
+.devhub-wrap #sidebar,
 .devhub-wrap .no-bullets,
 .devhub-wrap .sidebar .widget ul {
   list-style-type: none;
