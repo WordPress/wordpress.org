@@ -104,6 +104,7 @@ class WordCamp_Loader {
 			'editor',
 			'thumbnail',
 			'revisions',
+			'author',
 		);
 
 		// Register WordCamp post type
