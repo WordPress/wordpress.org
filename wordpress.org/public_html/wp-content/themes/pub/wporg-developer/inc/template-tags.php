@@ -253,17 +253,33 @@ namespace DevHub {
 	 *
 	 * Prefers the 'wp_parser_imported_wp_version' option value set by more
 	 * recent versions of the parser. Failing that, it checks the
-	 * WP_CORE_LATEST_RELEASE constant (set on wp.org) though this is not
-	 * guaranteed to be the latest parsed version. Failing that, it uses a
-	 * hardcoded value, which isn't guaranteed either.
+	 * WP_CORE_LATEST_RELEASE constant (set on WP.org) though this is not
+	 * guaranteed to be the latest parsed version. Failing that, it uses
+	 * the WP version of the site, unless it isn't a release version, in
+	 * which case a hardcoded value is assumed.
 	 *
 	 * @return string
 	 */
 	function get_current_version() {
+		global $wp_version;
+
+		// Preference for the value saved as an option.
 		$current_version = get_option( 'wp_parser_imported_wp_version' );
 
+		// Otherwise, assume the value stored in a constant (which is set on WP.org), if defined.
+		if ( empty( $current_version ) && defined( 'WP_CORE_LATEST_RELEASE' ) && WP_CORE_LATEST_RELEASE ) {
+			$current_version = WP_CORE_LATEST_RELEASE;
+		}
+
+		// Otherwise, use the version of the running WP instance.
 		if ( empty( $current_version ) ) {
-			$current_version = defined( 'WP_CORE_LATEST_RELEASE' ) ? WP_CORE_LATEST_RELEASE : '3.9.1';
+			$current_version = $wp_version;
+
+			// However, if the running WP instance appears to not be a release
+			// version, assume a hardcoded version that is at least valid.
+			if ( false !== strpos( $current_version, '-' ) ) {
+				$current_version = '3.9.1';
+			}
 		}
 
 		return $current_version;
