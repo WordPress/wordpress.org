@@ -249,20 +249,48 @@ namespace DevHub {
 	}
 
 	/**
-	 * Get current (latest) since major version (X.Y.0) term object.
+	 * Get current version of the parsed WP code.
 	 *
-	 * @return object
+	 * Prefers the 'wp_parser_imported_wp_version' option value set by more
+	 * recent versions of the parser. Failing that, it checks the
+	 * WP_CORE_LATEST_RELEASE constant (set on wp.org) though this is not
+	 * guaranteed to be the latest parsed version. Failing that, it uses a
+	 * hardcoded value, which isn't guaranteed either.
+	 *
+	 * @return string
 	 */
 	function get_current_version() {
+		$current_version = get_option( 'wp_parser_imported_wp_version' );
 
-		$current_version = defined( 'WP_CORE_LATEST_RELEASE' ) ? WP_CORE_LATEST_RELEASE : '3.9';
-		$version_parts = explode( '.', $current_version, 3 );
-		if ( count( $version_parts ) == 2 ) {
-			$version_parts[] = '0';
-		} else {
-			$version_parts[2] = '0';
+		if ( empty( $current_version ) ) {
+			$current_version = defined( 'WP_CORE_LATEST_RELEASE' ) ? WP_CORE_LATEST_RELEASE : '3.9.1';
 		}
-		$current_version = implode( '.', $version_parts );
+
+		return $current_version;
+	}
+
+	/**
+	 * Get current (latest) version of the parsed WP code as a wp-parser-since
+	 * term object.
+	 *
+	 * By default returns the major version (X.Y.0) term object because minor
+	 * releases rarely add enough, if any, new things to feature.
+	 *
+	 * @param  boolean $ignore_minor Use the major release version X.Y.0 instead of the actual version X.Y.Z?
+	 * @return object
+	 */
+	function get_current_version_term( $ignore_minor = true ) {
+		$current_version = get_current_version();
+
+		if ( $ignore_minor ) {
+			$version_parts = explode( '.', $current_version, 3 );
+			if ( count( $version_parts ) == 2 ) {
+				$version_parts[] = '0';
+			} else {
+				$version_parts[2] = '0';
+			}
+			$current_version = implode( '.', $version_parts );
+		}
 
 		$version = get_terms( 'wp-parser-since', array(
 			'number' => '1',
@@ -569,4 +597,3 @@ namespace DevHub {
 	}
 
 }
-

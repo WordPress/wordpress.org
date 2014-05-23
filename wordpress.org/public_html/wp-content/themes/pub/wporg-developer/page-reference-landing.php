@@ -31,7 +31,7 @@ get_header(); ?>
 
 				<div class="new-in-guide section two-columns clear">
 					<div class="widget box gray">
-						<h3 class="widget-title"><?php $version = DevHub\get_current_version(); printf( __( 'New in WordPress %s:', 'wporg' ), $version->name ); ?></h3>
+						<h3 class="widget-title"><?php $version = DevHub\get_current_version_term(); printf( __( 'New in WordPress %s:', 'wporg' ), $version->name ); ?></h3>
 						<div class="widget-content">
 							<ul class="unordered-list no-bullets">
 								<?php
