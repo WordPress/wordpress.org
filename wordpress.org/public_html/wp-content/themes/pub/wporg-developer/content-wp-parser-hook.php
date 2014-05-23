@@ -3,7 +3,6 @@
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 	<h1><a href="<?php the_permalink() ?>"><?php echo get_signature(); ?></a></h1>
-
 	<section class="description">
 		<?php the_excerpt(); ?>
 	</section>
@@ -24,10 +23,12 @@
 
 	<?php
 	$source_file = get_source_file();
-	if ( ! empty( $source_file ) ) : ?>
-	<section class="source">
-		<p><strong><?php _e( 'Source:', 'wporg' ); ?></strong> <a href="<?php echo get_source_file_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a></p>
-	</section>
+	if ( ! empty( $source_file ) ) :
+		?>
+		<section class="source">
+			<p><strong><?php _e( 'Source file:', 'wporg' ); ?> </strong><a href="<?php echo get_source_file_archive_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a></p>
+			<p><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View source&hellip;', 'wporg' ); ?></a></p>
+		</section>
 	<?php endif; ?>
 
 	<?php /* if ( is_archive() ) : ?>

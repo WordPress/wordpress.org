@@ -557,13 +557,13 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve URL to source file archive
+	 * Retrieve URL to source file archive.
 	 *
 	 * @param string $name
 	 *
 	 * @return string
 	 */
-	function get_source_file_link( $name = null ) {
+	function get_source_file_archive_link( $name = null ) {
 
 		$source_file_object = get_term_by( 'name', empty( $name ) ? get_source_file() : $name, 'wp-parser-source-file' );
 
@@ -582,6 +582,32 @@ namespace DevHub {
 		$source_file_object = wp_get_post_terms( empty( $post_id ) ? get_the_ID() : $post_id, 'wp-parser-source-file', array( 'fields' => 'names' ) );
 
 		return empty( $source_file_object ) ? '' : esc_html( $source_file_object[0] );
+	}
+
+	/**
+	 * Retrieve the URL to the actual source file and line.
+	 *
+	 * @param null $post_id     Post ID.
+	 * @param bool $line_number Whether to append the line number to the URL.
+	 *                          Default true.
+	 * @return string Source file URL with or without line number.
+	 */
+	function get_source_file_link( $post_id = null, $line_number = true ) {
+
+		$post_id = empty( $post_id ) ? get_the_ID() : $post_id;
+		$url     = '';
+
+		// Source file.
+		$source_file = get_source_file( $post_id );
+		if ( ! empty( $source_file ) ) {
+			$url = 'https://core.trac.wordpress.org/browser/tags/' . get_current_version() . '/src/' . $source_file;
+			// Line number.
+			if ( $line_number = get_post_meta( get_the_ID(), '_wp-parser_line_num', true ) ) {
+				$url .= "#L{$line_number}";
+			}
+		}
+
+		return esc_url( $url );
 	}
 
 	/**
