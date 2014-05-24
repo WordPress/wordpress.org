@@ -149,9 +149,9 @@ class Make_Core_Trac_Components {
 .trac-summary th.title a { color: #000; }
 .trac-summary .count { text-align: right; min-width: 3em }
 .trac-summary .zero { color: #ddd }
-#main ul.maintainers { list-style: none; padding: 0; margin: 0 }
-ul.maintainers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
-ul.maintainers img { float: left; margin-right: 10px; }
+#main ul.maintainers, #main ul.followers { list-style: none; padding: 0; margin: 0 }
+ul.maintainers li, ul.followers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
+ul.maintainers img, ul.followers img { float: left; margin-right: 10px; }
 #main ul.ticket-list { list-style: none; margin: 0; padding: 0 }
 ul.ticket-list li { margin-bottom: 4px }
 ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #eee; padding: 2px 6px; margin-right: 4px }
@@ -250,12 +250,14 @@ jQuery( document ).ready( function( $ ) {
 
 		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
 		if ( $followers ) {
-			echo "Contributors following this component:\n";
+			echo 'Contributors following this component:';
+      echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
 				$follower = esc_attr( $follower );
-				echo '<a title="' . $follower . '" href="//profiles.wordpress.org/' . $follower . '">';
-				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . $follower . '&amp;s=36" /></a>';
+				echo '<li><a title="' . $follower . '" href="//profiles.wordpress.org/' . $follower . '">';
+				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . $follower . '&amp;s=36" /></a></li>';
 			}
+      echo '</ul>';
 		}
 
 		$content .= "\n\n" . '<div class="component-info">' . ob_get_clean() . '</div>';
