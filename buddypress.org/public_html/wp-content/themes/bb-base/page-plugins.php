@@ -4,7 +4,7 @@
 
 				<?php
 					$current_page = isset( $_GET['ppage'] ) ? absint( $_GET['ppage'] ) : 1;
-					$plugins  = bb_base_get_bbpress_plugins( $current_page, $_GET['ps'] );
+					$plugins  = bb_base_get_plugins( $current_page, $_GET['ps'], 'bbpress' );
 					$from_num = intval( ( (int) $plugins->info['page'] - 1 ) * 10 ) + 1;
 					$to_num   = ( $from_num + 9 > (int) $plugins->info['results'] ) ? $plugins->info['results'] : $from_num + 9;
 				?>
