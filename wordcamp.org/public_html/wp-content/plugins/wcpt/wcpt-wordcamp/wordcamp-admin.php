@@ -37,6 +37,9 @@ class WordCamp_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_print_scripts', array( $this, 'admin_print_scripts' ), 99 );
 		add_action( 'admin_print_styles', array( $this, 'admin_styles' ) );
+
+		// Post status
+		add_action( 'transition_post_status', array( $this, 'add_organizer_to_central' ), 10, 3 );
 	}
 
 	/**
@@ -402,6 +405,49 @@ class WordCamp_Admin {
 			echo implode( ' - ', (array) $wc );
 		}
 		return $actions;
+	}
+
+	/**
+	 * Add the lead organizer to Central when a WordCamp application is accepted.
+	 *
+	 * When an application is submitted, a `wordcamp` post is created with a `draft` status. When it's accepted,
+	 * the status changes to `pending`. Adding the lead organizer to Central allows them to enter all the `wordcamp`
+	 * meta info themselves, and also post updates to the Central blog.
+	 *
+	 * @param string $new_status
+	 * @param string $old_status
+	 * @param WP_Post $post
+	 */
+	public function add_organizer_to_central( $new_status, $old_status, $post ) {
+		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type ) {
+			return;
+		}
+
+		if ( 'draft' != $old_status || 'pending' != $new_status ) {
+			return;
+		}
+
+		$lead_organizer = get_user_by( 'login', get_post_meta( $post->ID, 'WordPress.org Username', true ) );
+
+		if ( $lead_organizer && add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'contributor' ) ) {
+			$message_body = sprintf(
+				"Howdy! Your application for %s has been accepted, and we've granted your WordPress.org account access to central.wordcamp.org. Most of the information that we'll need to collect from you is stored in a custom 'WordCamp' post located at the address below. Please log in and fill out all those empty fields. We can't add you to the official schedule until all of the fields are completed.
+
+				%s
+
+				Please let us know if you have any questions,
+				WordCamp Central",
+				$post->post_title,
+				admin_url( 'post.php?post=' . $post->ID . '&action=edit' )
+			);
+
+			wp_mail(
+				$lead_organizer->user_email,
+				$post->post_title . ' application accepted',
+				str_replace( "\t", '', $message_body ),
+				array( 'Reply-To: support@wordcamp.org' )
+			);
+		}
 	}
 }
 endif; // class_exists check
