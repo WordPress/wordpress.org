@@ -101,6 +101,15 @@ class MES_Sponsor {
 			'normal',
 			'core'
 		);
+
+		add_meta_box(
+			'mes_contact_information',
+			__( 'Contact Information', 'wordcamporg' ),
+			array( $this, 'markup_meta_boxes' ),
+			self::POST_TYPE_SLUG,
+			'normal',
+			'core'
+		);
 	}
 
 	/**
@@ -127,6 +136,13 @@ class MES_Sponsor {
 				$sponsorship_levels    = get_posts( array( 'post_type' => MES_Sponsorship_Level::POST_TYPE_SLUG, 'numberposts' => -1 ) );
 				$regional_sponsorships = $this->populate_default_regional_sponsorships( get_post_meta( $post->ID, 'mes_regional_sponsorships', true ), $regions );
 				$view                  = 'metabox-regional-sponsorships.php';
+				break;
+
+			case 'mes_contact_information':
+				$first_name    = get_post_meta( $post->ID, 'mes_first_name', true );
+				$last_name     = get_post_meta( $post->ID, 'mes_last_name', true );
+				$email_address = get_post_meta( $post->ID, 'mes_email_address', true );
+				$view          = 'metabox-contact-information.php';
 				break;
 		}
 
@@ -190,6 +206,26 @@ class MES_Sponsor {
 			update_post_meta( $post_id, 'mes_regional_sponsorships', $new_values[ 'mes_regional_sponsorships' ] );
 		} else {
 			delete_post_meta( $post_id, 'mes_regional_sponsorships' );
+		}
+
+		if ( isset( $new_values[ 'mes_first_name' ] ) ) {
+			update_post_meta( $post_id, 'mes_first_name', sanitize_text_field( $new_values[ 'mes_first_name' ] ) );
+		} else {
+			delete_post_meta( $post_id, 'mes_first_name' );
+		}
+
+		if ( isset( $new_values[ 'mes_last_name' ] ) ) {
+			update_post_meta( $post_id, 'mes_last_name', sanitize_text_field( $new_values[ 'mes_last_name' ] ) );
+		} else {
+			delete_post_meta( $post_id, 'mes_last_name' );
+		}
+
+		if ( isset( $new_values[ 'mes_email_address' ] ) ) {
+			if ( is_email( $new_values[ 'mes_email_address' ] ) ) {
+				update_post_meta( $post_id, 'mes_email_address', sanitize_text_field( $new_values[ 'mes_email_address' ] ) );
+			}
+		} else {
+			delete_post_meta( $post_id, 'mes_email_address' );
 		}
 	}
 
