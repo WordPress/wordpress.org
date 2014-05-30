@@ -437,7 +437,7 @@ class WordCamp_Admin {
 
 				Please let us know if you have any questions,
 				WordCamp Central",
-				$post->post_title,
+				sanitize_text_field( $post->post_title ),
 				admin_url( 'post.php?post=' . $post->ID . '&action=edit' )
 			);
 
