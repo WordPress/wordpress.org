@@ -153,23 +153,23 @@ class WordCamp_Admin {
 
 			case 'venue' :
 				$retval = array (
-					'Venue Name'          => 'text',
-					'Physical Address'    => 'textarea',
-					'Maximum Capacity'    => 'text',
-					'Available Rooms'     => 'text',
-					'Website URL'         => 'text',
-					'Contact Information' => 'textarea'
+					'Venue Name'                      => 'text',
+					'Physical Address'                => 'textarea',
+					'Maximum Capacity'                => 'text',
+					'Available Rooms'                 => 'text',
+					'Website URL'                     => 'text',
+					'Contact Information'             => 'textarea'
 				);
 				break;
 
 			case 'wordcamp' :
 				$retval = array (
-					'Start Date (YYYY-mm-dd)' => 'date',
-					'End Date (YYYY-mm-dd)'   => 'date',
-					'Location'                => 'text',
-					'URL'                     => 'text',
-					'E-mail Address'          => 'text',
-					'Twitter'                 => 'text',
+					'Start Date (YYYY-mm-dd)'         => 'date',
+					'End Date (YYYY-mm-dd)'           => 'date',
+					'Location'                        => 'text',
+					'URL'                             => 'text',
+					'E-mail Address'                  => 'text',
+					'Twitter'                         => 'text',
 					'WordCamp Hashtag'                => 'text',
 					'Number of Anticipated Attendees' => 'text',
 					'Multi-Event Sponsor Region'      => 'mes-dropdown',
@@ -179,12 +179,12 @@ class WordCamp_Admin {
 			case 'all' :
 			default :
 				$retval = array(
-					'Start Date (YYYY-mm-dd)' => 'date',
-					'End Date (YYYY-mm-dd)'   => 'date',
-					'Location'                => 'text',
-					'URL'                     => 'text',
-					'E-mail Address'          => 'text',
-					'Twitter'                 => 'text',
+					'Start Date (YYYY-mm-dd)'         => 'date',
+					'End Date (YYYY-mm-dd)'           => 'date',
+					'Location'                        => 'text',
+					'URL'                             => 'text',
+					'E-mail Address'                  => 'text',
+					'Twitter'                         => 'text',
 					'WordCamp Hashtag'                => 'text',
 					'Number of Anticipated Attendees' => 'text',
 					'Multi-Event Sponsor Region'      => 'mes-dropdown',
@@ -199,12 +199,12 @@ class WordCamp_Admin {
 					'Budget Wrangler Name'            => 'text',
 					'Budget Wrangler E-mail Address'  => 'text',
 
-					'Venue Name'          => 'text',
-					'Physical Address'    => 'textarea',
-					'Maximum Capacity'    => 'text',
-					'Available Rooms'     => 'text',
-					'Website URL'         => 'text',
-					'Contact Information' => 'textarea'
+					'Venue Name'                      => 'text',
+					'Physical Address'                => 'textarea',
+					'Maximum Capacity'                => 'text',
+					'Available Rooms'                 => 'text',
+					'Website URL'                     => 'text',
+					'Contact Information'             => 'textarea'
 				);
 				break;
 
