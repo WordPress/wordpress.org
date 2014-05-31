@@ -147,9 +147,6 @@ class WordCamp_Admin {
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
 					'Budget Wrangler E-mail Address'  => 'text',
-					'Number of Anticipated Attendees' => 'text',
-					'WordCamp Hashtag'                => 'text',
-					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 				);
 
 				break;
@@ -173,6 +170,9 @@ class WordCamp_Admin {
 					'URL'                     => 'text',
 					'E-mail Address'          => 'text',
 					'Twitter'                 => 'text',
+					'WordCamp Hashtag'                => 'text',
+					'Number of Anticipated Attendees' => 'text',
+					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 				);
 				break;
 
@@ -185,6 +185,9 @@ class WordCamp_Admin {
 					'URL'                     => 'text',
 					'E-mail Address'          => 'text',
 					'Twitter'                 => 'text',
+					'WordCamp Hashtag'                => 'text',
+					'Number of Anticipated Attendees' => 'text',
+					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 
 					'Organizer Name'                  => 'text',
 					'WordPress.org Username'          => 'text',
@@ -195,9 +198,6 @@ class WordCamp_Admin {
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
 					'Budget Wrangler E-mail Address'  => 'text',
-					'Number of Anticipated Attendees' => 'text',
-					'WordCamp Hashtag'                => 'text',
-					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 
 					'Venue Name'          => 'text',
 					'Physical Address'    => 'textarea',
