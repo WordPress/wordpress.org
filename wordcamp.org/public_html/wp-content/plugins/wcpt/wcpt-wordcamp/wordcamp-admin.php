@@ -38,8 +38,9 @@ class WordCamp_Admin {
 		add_action( 'admin_print_scripts', array( $this, 'admin_print_scripts' ), 99 );
 		add_action( 'admin_print_styles', array( $this, 'admin_styles' ) );
 
-		// Post status
+		// Post status transitions
 		add_action( 'transition_post_status', array( $this, 'add_organizer_to_central' ), 10, 3 );
+		add_action( 'transition_post_status', array( $this, 'notify_mes_sponsors_when_wordcamp_scheduled' ), 10, 3 );
 	}
 
 	/**
@@ -446,6 +447,101 @@ class WordCamp_Admin {
 				$post->post_title . ' application accepted',
 				str_replace( "\t", '', $message_body ),
 				array( 'Reply-To: support@wordcamp.org' )
+			);
+		}
+	}
+
+	/**
+	 * Notify Multi Event Sponsors when a new WordCamp in their region is added to the schedule.
+	 *
+	 * This assumes that all of the meta fields we use are filled in, but that should be a safe assumption
+	 * since we require them to be before publishing the post. This will need to be updated if that ever
+	 * changes, though.
+	 *
+	 * @param string  $new_status
+	 * @param string  $old_status
+	 * @param WP_Post $wordcamp
+	 */
+	public function notify_mes_sponsors_when_wordcamp_scheduled( $new_status, $old_status, $wordcamp ) {
+		if ( empty( $wordcamp->post_type ) || WCPT_POST_TYPE_ID != $wordcamp->post_type ) {
+			return;
+		}
+
+		if ( 'pending' != $old_status || 'publish' != $new_status || ! class_exists( 'MES_Sponsor' )) {
+			return;
+		}
+
+		$wordcamp_region                 = (int) get_post_meta( $wordcamp->ID, 'Multi-Event Sponsor Region', true );
+		$wordcamp_sponsor_wrangler_email = get_post_meta( $wordcamp->ID, 'Sponsor Wrangler E-mail Address', true );
+		$wordcamp_lead_organizer_email   = get_post_meta( $wordcamp->ID, 'Email Address', true );
+
+		$mes_sponsors = get_posts( array(
+			'post_type'   => MES_Sponsor::POST_TYPE_SLUG,
+			'numberposts' => -1,
+		) );
+
+		foreach ( $mes_sponsors as $sponsor ) {
+			$sponsor_email_address         = get_post_meta( $sponsor->ID, 'mes_email_address', true );
+			$sponsor_first_name            = get_post_meta( $sponsor->ID, 'mes_first_name', true );
+			$sponsor_regional_sponsorships = get_post_meta( $sponsor->ID, 'mes_regional_sponsorships', true );
+
+			if ( ! $sponsor_email_address || ! is_numeric( $sponsor_regional_sponsorships[ $wordcamp_region ] ) ) {
+				continue;
+			}
+
+			$headers = array(
+				'Reply-To: support@wordcamp.org',
+				'CC: ' . $wordcamp_sponsor_wrangler_email . ', ' . $wordcamp_lead_organizer_email,
+			);
+
+			$message_body = sprintf(
+				"Howdy, %s! This email is to tell you that %s has been added to the schedule and has accepted your sponsorship offer.
+
+				Their site is: %s
+
+				Their date is: %s, and they expect about %d attendees.
+
+				Their venue address is:
+
+				%s
+
+				Their shipping address is:
+
+				%s
+
+				Their Twitter handle is %s and their hashtag is %s
+
+				You can reach them by emailing: %s or %s
+
+				Your company information and logo will be displayed on the WordCamp's site shortly.
+
+				Thanks for your support of %s!
+
+				Best wishes,
+
+				Andrea
+
+				Andrea Middleton
+				WordCamp Central",
+				sanitize_text_field( $sponsor_first_name ),
+				sanitize_text_field( $wordcamp->post_title ),
+				esc_url( get_site_url( absint( get_post_meta( $wordcamp->ID, '_site_id', true ) ) ) ),
+				date( 'l, F jS, Y', absint( get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true ) ) ),
+				absint( get_post_meta( $wordcamp->ID, 'Number of Anticipated Attendees', true ) ),
+				strip_tags( get_post_meta( $wordcamp->ID, 'Physical Address', true ) ),
+				strip_tags( get_post_meta( $wordcamp->ID, 'Mailing Address', true ) ),
+				esc_url( 'https://twitter.com/' . get_post_meta( $wordcamp->ID, 'Twitter', true ) ),
+				esc_url( 'https://twitter.com/hashtag/' . get_post_meta( $wordcamp->ID, 'WordCamp Hashtag', true ) ),
+				sanitize_text_field( get_post_meta( $wordcamp->ID, 'E-mail Address', true ) ),
+				sanitize_text_field( get_post_meta( $wordcamp->ID, 'Sponsor Wrangler E-mail Address', true ) ),
+				sanitize_text_field( $wordcamp->post_title )
+			);
+
+			wp_mail(
+				$sponsor_email_address,
+				$wordcamp->post_title . ' has accepted your sponsorship offer',
+				str_replace( "\t", '', $message_body ),
+				$headers
 			);
 		}
 	}
