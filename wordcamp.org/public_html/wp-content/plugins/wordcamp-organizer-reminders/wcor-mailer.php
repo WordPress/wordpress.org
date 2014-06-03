@@ -16,10 +16,10 @@ class WCOR_Mailer {
 				'name'     => 'WordCamp Added to schedule',
 				'actions'  => array(
 					array(
-						'name'       => 'post_updated',
+						'name'       => 'transition_post_status',
 						'callback'   => 'send_trigger_added_to_schedule',
 						'priority'   => 10,
-						'parameters' => 2,
+						'parameters' => 3,
 					),
 				),
 			),
@@ -283,36 +283,34 @@ class WCOR_Mailer {
 	/**
 	 * Sends e-mails hooked to the wcor_added_to_schedule trigger.
 	 *
-	 * This fires when a WordCamp is added to the schedule (i.e., when they set the start date in their `wordcamp` post).
+	 * This fires when a WordCamp is added to the schedule (i.e., when their `wordcamp` post goes from 'draft' to 'publish').
 	 *
-	 * Since Core doesn't support revisions on post meta, we're not actually checking to see if the start date was added during
-	 * the current post update, but just that it has a start data. By itself, that would lead to the e-mail being sent every time
-	 * the post is updated, but to avoid that we're checking the `wcor_sent_email_id` post meta for the `wordcamp` post to see if
-	 * we've already sent this particular e-mail to this WordCamp in the past.
-	 *
-	 * @param int $post_id
-	 * @param WP_Post $post
+	 * @param string  $new_status
+	 * @param string  $old_status
+	 * @param WP_Post $wordcamp
 	 */
-	public function send_trigger_added_to_schedule( $post_id, $post ) {
-		if ( 'wordcamp' == $post->post_type && 'publish' == $post->post_status ) {
-			$start_date     = get_post_meta( $post_id, 'Start Date (YYYY-mm-dd)', true );
-			$sent_email_ids = (array) get_post_meta( $post_id, 'wcor_sent_email_ids', true );
+	public function send_trigger_added_to_schedule( $new_status, $old_status, $wordcamp ) {
+		if ( empty( $wordcamp->post_type ) || WCPT_POST_TYPE_ID != $wordcamp->post_type ) {
+			return;
+		}
 
-			if ( $start_date ) {
-				$emails = $this->get_triggered_posts( 'wcor_added_to_schedule' );
+		if ( 'pending' != $old_status || 'publish' != $new_status ) {
+			return;
+		}
 
-				foreach( $emails as $email ) {
-					$recipient = $this->get_recipient( $post->ID, $email->ID );
+		$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
+		$emails         = $this->get_triggered_posts( 'wcor_added_to_schedule' );
 
-					if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
-						$subject = $this->replace_placeholders( $post, $email, $email->post_title );
-						$body    = $this->replace_placeholders( $post, $email, $email->post_content );
+		foreach( $emails as $email ) {
+			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 
-						if ( $this->mail( $recipient, $subject, $body ) ) {
-							$sent_email_ids[] = $email->ID;
-							update_post_meta( $post_id, 'wcor_sent_email_ids', $sent_email_ids );
-						}
-					}
+			if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
+				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
+				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
+
+				if ( $this->mail( $recipient, $subject, $body ) ) {
+					$sent_email_ids[] = $email->ID;
+					update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 				}
 			}
 		}

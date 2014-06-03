@@ -148,6 +148,7 @@ class WCOR_Reminder {
 			<li>[organizer_name]</li>
 			<li>[organizer_address]</li>
 			<li>[edit_wordcamp_url]</li>
+			<li>[lead_organizer_username]</li>
 		</ul>
 
 		<?php
