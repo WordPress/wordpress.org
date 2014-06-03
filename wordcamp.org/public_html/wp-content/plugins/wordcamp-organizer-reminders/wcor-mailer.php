@@ -88,8 +88,18 @@ class WCOR_Mailer {
 	 */
 	protected function replace_placeholders( $wordcamp, $email, $content ) {
 		$wordcamp_meta = get_post_custom( $wordcamp->ID );
-		$search        = array( '[wordcamp_name]',     '[organizer_name]',                  '[organizer_address]' );
-		$replace       = array( $wordcamp->post_title, $wordcamp_meta['Organizer Name'][0], $wordcamp_meta['Mailing Address'][0] );
+
+		$search = array(
+			'[wordcamp_name]',
+			'[organizer_name]',
+			'[organizer_address]'
+		);
+
+		$replace = array(
+			$wordcamp->post_title,
+			$wordcamp_meta['Organizer Name'][0],
+			$wordcamp_meta['Mailing Address'][0]
+		);
 		
 		return str_replace( $search, $replace, $content );
 	}
