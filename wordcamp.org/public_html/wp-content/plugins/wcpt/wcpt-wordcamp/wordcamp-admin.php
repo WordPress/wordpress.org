@@ -438,23 +438,7 @@ class WordCamp_Admin {
 		$lead_organizer = get_user_by( 'login', get_post_meta( $post->ID, 'WordPress.org Username', true ) );
 
 		if ( $lead_organizer && add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'contributor' ) ) {
-			$message_body = sprintf(
-				"Howdy! Your application for %s has been accepted, and we've granted your WordPress.org account access to central.wordcamp.org. Most of the information that we'll need to collect from you is stored in a custom 'WordCamp' post located at the address below. Please log in and fill out all those empty fields. We can't add you to the official schedule until all of the fields are completed.
-
-				%s
-
-				Please let us know if you have any questions,
-				WordCamp Central",
-				sanitize_text_field( $post->post_title ),
-				admin_url( 'post.php?post=' . $post->ID . '&action=edit' )
-			);
-
-			wp_mail(
-				$lead_organizer->user_email,
-				$post->post_title . ' application accepted',
-				str_replace( "\t", '', $message_body ),
-				array( 'Reply-To: support@wordcamp.org' )
-			);
+			do_action( 'wcor_organizer_added_to_central', $post );
 		}
 	}
 
