@@ -689,6 +689,20 @@ table#issuelist, #issuelist th, #issuelist td {
 #postbox textarea#posttext, textarea.posttext {
 	display: block;
 }
+#postbox .inputarea {
+	float: left;
+	padding-left: 10px;
+	width: calc(100% - 60px);
+}
+#postbox form#new_post {
+	margin-top: 0;
+}
+#postbox textarea#posttext {
+	clear: left;
+}
+#postbox .clear {
+	clear: both;
+}
 .sleeve_main {
 	float: left;
 	margin-right: 0;
