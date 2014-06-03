@@ -478,7 +478,12 @@ class WordCamp_Admin {
 			return;
 		}
 
-		$wordcamp_region                 = (int) get_post_meta( $wordcamp->ID, 'Multi-Event Sponsor Region', true );
+		$wordcamp_region = (int) get_post_meta( $wordcamp->ID, 'Multi-Event Sponsor Region', true );
+
+		if ( ! $wordcamp_region ) {
+			return;
+		}
+
 		$wordcamp_sponsor_wrangler_email = get_post_meta( $wordcamp->ID, 'Sponsor Wrangler E-mail Address', true );
 		$wordcamp_lead_organizer_email   = get_post_meta( $wordcamp->ID, 'Email Address', true );
 
