@@ -47,7 +47,7 @@ if ( ! empty( $since ) ) : ?>
 	<?php if ( $params = get_params() ) : ?>
 	<hr/>
 	<section class="parameters">
-		<h2><?php _e( 'Parameters', 'wporg-developer' ); ?></h2>
+		<h2><?php _e( 'Parameters', 'wporg' ); ?></h2>
 		<dl>
 			<?php foreach ( $params as $param ) : ?>
 			<?php if ( ! empty( $param['variable'] ) ) : ?>
@@ -66,7 +66,7 @@ if ( ! empty( $since ) ) : ?>
 					<?php endif; ?>
 				</p>
 				<?php if ( ! empty( $param['default'] ) ) : ?>
-				<p class="default"><?php _e( 'Default value:', 'wporg-developer' );?> <?php echo esc_html( $param['default'] ); ?></p>
+				<p class="default"><?php _e( 'Default value:', 'wporg' );?> <?php echo esc_html( $param['default'] ); ?></p>
 				<?php endif; ?>
 			</dd>
 			<?php endforeach; ?>

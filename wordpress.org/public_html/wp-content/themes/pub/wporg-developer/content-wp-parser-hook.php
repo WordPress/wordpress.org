@@ -46,7 +46,7 @@
 
 			<hr/>
 			<section class="parameters">
-				<h2><?php _e( 'Parameters', 'wporg-developer' ); ?></h2>
+				<h2><?php _e( 'Parameters', 'wporg' ); ?></h2>
 				<dl>
 					<?php foreach ( $params as $param ) : ?>
 						<?php if ( ! empty( $param['variable'] ) ) : ?>
