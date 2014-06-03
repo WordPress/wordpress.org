@@ -4,7 +4,7 @@ developer.wordpress.org is the forthcoming resource for developers working with 
 
 There are a number of ways to get involved:
 
-* get set up with the [devhub development environment](https://meta.trac.wordpress.org/wiki/DevHub) to help with development
+* get set up with the [devhub development environment](https://make.wordpress.org/docs/handbook/projects/devhub) to help with development
 * help out with the [inline docs efforts](http://make.wordpress.org/core/tag/inline-docs) 
 * help out with the [plugin](http://make.wordpress.org/docs/plugin-developer-handbook/) and [theme](http://make.wordpress.org/docs/theme-developer-handbook/) developer handbooks
 
