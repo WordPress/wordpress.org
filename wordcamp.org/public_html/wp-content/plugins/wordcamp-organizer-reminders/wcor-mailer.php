@@ -105,6 +105,25 @@ class WCOR_Mailer {
 	}
 
 	/**
+	 * Retrieve the e-mail address that a Reminder should be sent to.
+	 *
+	 * @param int $wordcamp_id
+	 * @param int $email_id
+	 * @return string
+	 */
+	protected function get_recipient( $wordcamp_id, $email_id ) {
+		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
+
+		if ( 'wcor_send_custom' == $send_where ) {
+			$recipient = get_post_meta( $email_id, 'wcor_send_custom_address', true );
+		} else {
+			$recipient = get_post_meta( $wordcamp_id, 'E-mail Address', true );
+		}
+
+		return $recipient;
+	}
+
+	/**
 	 * Send e-mails that are scheduled to go out at a specific time (e.g., 3 days before the camp)
 	 */
 	public function send_timed_emails() {
@@ -136,13 +155,7 @@ class WCOR_Mailer {
 			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
 
 			foreach ( $reminder_emails as $email ) {
-				$send_where = get_post_meta( $email->ID, 'wcor_send_where', true );
-				
-				if ( 'wcor_send_custom' == $send_where ) {
-					$recipient = get_post_meta( $email->ID, 'wcor_send_custom_address', true );
-				} else {
-					$recipient = get_post_meta( $wordcamp->ID, 'E-mail Address', true );
-				}
+				$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 				
 				if ( ! is_email( $recipient ) ) {
 					continue;
@@ -273,13 +286,7 @@ class WCOR_Mailer {
 				$emails = $this->get_triggered_posts( 'wcor_added_to_schedule' );
 
 				foreach( $emails as $email ) {
-					$send_where = get_post_meta( $email->ID, 'wcor_send_where', true );
-
-					if ( 'wcor_send_custom' == $send_where ) {
-						$recipient = get_post_meta( $email->ID, 'wcor_send_custom_address', true );
-					} else {
-						$recipient = get_post_meta( $post_id, 'E-mail Address', true );
-					}
+					$recipient = $this->get_recipient( $post->ID, $email->ID );
 
 					if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
 						$subject = $this->replace_placeholders( $post, $email, $email->post_title );
