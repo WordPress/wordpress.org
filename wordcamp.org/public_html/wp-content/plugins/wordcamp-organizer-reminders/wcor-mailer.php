@@ -87,7 +87,7 @@ class WCOR_Mailer {
 			'CC: support@wordcamp.org',
 		);
 		
-		return wp_mail( $to, 'WordCamp Central Reminder: ' . $subject, $body, $headers );
+		return wp_mail( $to, $subject, $body, $headers );
 	}
 
 	/**
