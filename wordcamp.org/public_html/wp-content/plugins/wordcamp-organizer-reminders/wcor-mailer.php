@@ -13,13 +13,25 @@ class WCOR_Mailer {
 	public function __construct() {
 		$this->triggers = array(
 			'wcor_added_to_schedule' => array(
-				'name'     => 'Added to schedule',
+				'name'     => 'WordCamp Added to schedule',
 				'actions'  => array(
 					array(
 						'name'       => 'post_updated',
 						'callback'   => 'send_trigger_added_to_schedule',
 						'priority'   => 10,
 						'parameters' => 2,
+					),
+				),
+			),
+
+			'wcor_organizer_added_to_central' => array(
+				'name'     => 'Lead Organizer Account added to Central',
+				'actions'  => array(
+					array(
+						'name'       => 'wcor_organizer_added_to_central',
+						'callback'   => 'send_trigger_organizer_added_to_central',
+						'priority'   => 10,
+						'parameters' => 1,
 					),
 				),
 			),
@@ -92,13 +104,17 @@ class WCOR_Mailer {
 		$search = array(
 			'[wordcamp_name]',
 			'[organizer_name]',
-			'[organizer_address]'
+			'[organizer_address]',
+			'[edit_wordcamp_url]',
+			'[lead_organizer_username]',
 		);
 
 		$replace = array(
 			$wordcamp->post_title,
 			$wordcamp_meta['Organizer Name'][0],
-			$wordcamp_meta['Mailing Address'][0]
+			$wordcamp_meta['Mailing Address'][0],
+			admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ),
+			$wordcamp_meta['WordPress.org Username'][0],
 		);
 		
 		return str_replace( $search, $replace, $content );
@@ -297,6 +313,33 @@ class WCOR_Mailer {
 							update_post_meta( $post_id, 'wcor_sent_email_ids', $sent_email_ids );
 						}
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sends e-mails hooked to the wcor_organizer_added_to_central trigger.
+	 *
+	 * This fires when an application is approved and the lead organizer's WordPress.org account
+	 * is added as a Contributor to central.wordcamp.org.
+	 *
+	 * @param WP_Post $wordcamp
+	 */
+	public function send_trigger_organizer_added_to_central( $wordcamp ) {
+		$emails = $this->get_triggered_posts( 'wcor_organizer_added_to_central' );
+		$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
+
+		foreach( $emails as $email ) {
+			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
+
+			if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
+				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
+				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
+
+				if ( $this->mail( $recipient, $subject, $body ) ) {
+					$sent_email_ids[] = $email->ID;
+					update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 				}
 			}
 		}

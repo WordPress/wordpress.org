@@ -91,7 +91,7 @@ class WCOR_Reminder {
 			<tbody>
 				<tr>
 					<th><input id="wcor_send_where" name="wcor_send_where" type="radio" value="wcor_send_organizers" <?php checked( $send_where, 'wcor_send_organizers' ); ?>></th>
-					<td colspan="2"><label for="wcor_send_where">The organizers of the WordCamp</label></td>
+					<td colspan="2"><label for="wcor_send_where">The organizing team</label></td>
 				</tr>
 	
 				<tr>
@@ -147,6 +147,7 @@ class WCOR_Reminder {
 			<li>[wordcamp_name]</li>
 			<li>[organizer_name]</li>
 			<li>[organizer_address]</li>
+			<li>[edit_wordcamp_url]</li>
 		</ul>
 
 		<?php
