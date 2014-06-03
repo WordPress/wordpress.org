@@ -11,6 +11,7 @@ if ( !class_exists( 'WordCamp_Admin' ) ) :
  * @since WordCamp Post Type (0.1)
  */
 class WordCamp_Admin {
+	protected $active_admin_notices;
 
 	/**
 	 * wcpt_admin ()
@@ -18,6 +19,7 @@ class WordCamp_Admin {
 	 * Initialize WCPT Admin
 	 */
 	function WordCamp_Admin () {
+		$this->active_admin_notices = array();
 
 		// Add some general styling to the admin area
 		add_action( 'wcpt_admin_head', array( $this, 'admin_head' ) );
@@ -32,7 +34,7 @@ class WordCamp_Admin {
 		// Topic metabox actions
 		add_action( 'admin_menu', array( $this, 'metabox' ) );
 		add_action( 'save_post', array( $this, 'metabox_save' ) );
-		
+
 		// Scripts and CSS
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_print_scripts', array( $this, 'admin_print_scripts' ), 99 );
@@ -41,6 +43,11 @@ class WordCamp_Admin {
 		// Post status transitions
 		add_action( 'transition_post_status', array( $this, 'add_organizer_to_central' ), 10, 3 );
 		add_action( 'transition_post_status', array( $this, 'notify_mes_sponsors_when_wordcamp_scheduled' ), 10, 3 );
+		add_action( 'wp_insert_post_data',    array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
+
+		// Admin notices
+		add_action( 'admin_notices',          array( $this, 'print_admin_notices' ) );
+		add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
 	}
 
 	/**
@@ -543,6 +550,121 @@ class WordCamp_Admin {
 				str_replace( "\t", '', $message_body ),
 				$headers
 			);
+		}
+	}
+
+	/**
+	 * Prevent WordCamp posts from being published until all the required fields are completed.
+	 *
+	 * @param array $post_data
+	 * @param array $post_data_raw
+	 * @return array
+	 */
+	public function require_complete_meta_to_publish_wordcamp( $post_data, $post_data_raw ) {
+		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
+		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
+
+		$required_fields = array(
+			// WordCamp
+			'Start Date (YYYY-mm-dd)',
+			'Location',
+			'URL',
+			'E-mail Address',
+			'Twitter',
+			'WordCamp Hashtag',
+			'Number of Anticipated Attendees',
+			'Multi-Event Sponsor Region',
+
+			// Organizing Team
+			'Organizer Name',
+			'WordPress.org Username',
+			'Email Address',
+			'Mailing Address',
+			'Sponsor Wrangler Name',
+			'Sponsor Wrangler E-mail Address',
+			'Budget Wrangler Name',
+			'Budget Wrangler E-mail Address',
+
+			// Venue
+			'Venue Name',
+			'Physical Address',
+			'Website URL',
+		);
+
+		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+			foreach( $required_fields as $field ) {
+				if ( empty( $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ] ) ) {
+					$post_data['post_status']     = 'pending';
+					$this->active_admin_notices[] = 1;
+					break;
+				}
+			}
+		}
+
+		return $post_data;
+	}
+
+	/**
+	 * Add our custom admin notice keys to the redirect URL.
+	 *
+	 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
+	 * be shown when the redirect finished. When it does, print_admin_notices() will examine the URL and create
+	 * a notice with the message that corresponds to the key.
+	 *
+	 * @param $location
+	 * @param $post_id
+	 * @return string
+	 */
+	public function add_admin_notices_to_redirect_url( $location, $post_id ) {
+		if ( $this->active_admin_notices ) {
+			$location = add_query_arg( 'wcpt_messages', implode( ',', $this->active_admin_notices ), $location );
+		}
+
+		// Don't show conflicting messages like 'Post submitted.'
+		if ( in_array( 1, $this->active_admin_notices ) && false !== strpos( $location, 'message=8' ) ) {
+			$location = remove_query_arg( 'message', $location );
+		}
+
+		return $location;
+	}
+
+	/**
+	 * Create admin notices for messages that were passed in the URL.
+	 *
+	 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
+	 * be shown when the redirect finished. add_admin_notices_to_redirect_url() adds those keys to the redirect
+	 * url, and this function examines the URL and create a notice with the message that corresponds to the key.
+	 *
+	 * $notices[key]['type'] should equal 'error' or 'updated'.
+	 */
+	public function print_admin_notices() {
+		global $post;
+
+		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type ) {
+			return;
+		}
+
+		$notices = array(
+			1 => array(
+				'type'   => 'error',
+				'notice' => __( 'This WordCamp cannot be published until all of its required metadata is filled in.', 'wordcamporg' ),
+			),
+		);
+
+		if ( ! empty( $_REQUEST['wcpt_messages'] ) ) {
+			$active_notices = explode( ',', $_REQUEST['wcpt_messages'] );
+
+			foreach ( $active_notices as $notice_key ) {
+				if ( isset( $notices[ $notice_key ] ) ) {
+					?>
+
+					<div class="<?php echo esc_attr( $notices[ $notice_key ]['type'] ); ?>">
+						<p><?php echo wp_kses( $notices[ $notice_key ]['notice'], wp_kses_allowed_html( 'post' ) ); ?></p>
+					</div>
+
+					<?php
+				}
+			}
 		}
 	}
 }
