@@ -35,6 +35,18 @@ class WCOR_Mailer {
 					),
 				),
 			),
+
+			'wcor_wordcamp_site_created' => array(
+				'name'     => 'WordCamp website created',
+				'actions'  => array(
+					array(
+						'name'       => 'wcor_wordcamp_site_created',
+						'callback'   => 'send_trigger_wordcamp_site_created',
+						'priority'   => 10,
+						'parameters' => 1,
+					),
+				),
+			),
 		);
 		
 		add_action( 'wcor_send_timed_emails', array( $this, 'send_timed_emails' ) );
@@ -394,6 +406,20 @@ class WCOR_Mailer {
 	 */
 	public function send_trigger_organizer_added_to_central( $wordcamp ) {
 		$this->send_triggered_emails( $wordcamp, 'wcor_organizer_added_to_central' );
+	}
+
+	/**
+	 * Sends e-mails hooked to the wcor_wordcamp_site_created trigger.
+	 *
+	 * This fires when a new WordCamp.org ste is created.
+	 *
+	 * wcor_wordcamp_site_created is only triggered when a new site has successfully been created,
+	 * so we don't need to do any precondition checks like other trigger callbacks.
+	 *
+	 * @param int $wordcamp_id
+	 */
+	public function send_trigger_wordcamp_site_created( $wordcamp_id ) {
+		$this->send_triggered_emails( get_post( $wordcamp_id ), 'wcor_wordcamp_site_created' );
 	}
 
 	/**
