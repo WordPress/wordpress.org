@@ -138,7 +138,7 @@ class WCOR_Mailer {
 			// The WordCamp
 			$wordcamp->post_title,
 			date( 'l, F jS, Y', $wordcamp_meta['Start Date (YYYY-mm-dd)'][0] ),
-			esc_url( $wordcamp_meta['Location'][0] ),
+			$wordcamp_meta['Location'][0],
 			esc_url( $wordcamp_meta['URL'][0] ),
 			esc_url( admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ) ),
 			$wordcamp_meta['E-mail Address'][0],
