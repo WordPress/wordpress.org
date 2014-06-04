@@ -90,10 +90,15 @@ class WCOR_Reminder {
 		<table>
 			<tbody>
 				<tr>
-					<th><input id="wcor_send_where" name="wcor_send_where" type="radio" value="wcor_send_organizers" <?php checked( $send_where, 'wcor_send_organizers' ); ?>></th>
-					<td colspan="2"><label for="wcor_send_where">The organizing team</label></td>
+					<th><input id="wcor_send_organizers" name="wcor_send_where" type="radio" value="wcor_send_organizers" <?php checked( $send_where, 'wcor_send_organizers' ); ?>></th>
+					<td colspan="2"><label for="wcor_send_organizers">The organizing team</label></td>
 				</tr>
-	
+
+				<tr>
+					<th><input id="wcor_send_mes" name="wcor_send_where" type="radio" value="wcor_send_mes" <?php checked( $send_where, 'wcor_send_mes' ); ?>></th>
+					<td colspan="2"><label for="wcor_send_mes">The WordCamp's Multi-Event Sponsors</label></td>
+				</tr>
+
 				<tr>
 					<th><input id="wcor_send_custom" name="wcor_send_where" type="radio" value="wcor_send_custom" <?php checked( $send_where, 'wcor_send_custom' ); ?>></th>
 					<td><label for="wcor_send_custom">A custom address: </label></td>
@@ -186,7 +191,7 @@ class WCOR_Reminder {
 	 */
 	protected function save_post_meta( $post, $new_meta ) {
 		if ( isset( $new_meta['wcor_send_where'] ) ) {
-			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_custom' ) ) ) {
+			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_mes', 'wcor_send_custom' ) ) ) {
 				update_post_meta( $post->ID, 'wcor_send_where', $new_meta['wcor_send_where'] );
 			}
 		}

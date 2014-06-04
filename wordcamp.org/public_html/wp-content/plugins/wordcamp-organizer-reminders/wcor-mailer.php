@@ -132,11 +132,34 @@ class WCOR_Mailer {
 
 		if ( 'wcor_send_custom' == $send_where ) {
 			$recipient = get_post_meta( $email_id, 'wcor_send_custom_address', true );
+		} elseif ( 'wcor_send_mes' == $send_where ) {
+			/** @var $multi_event_sponsors Multi_Event_Sponsors */
+			global $multi_event_sponsors;
+
+			$recipient = $multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) );
 		} else {
 			$recipient = get_post_meta( $wordcamp_id, 'E-mail Address', true );
 		}
 
 		return $recipient;
+	}
+
+	/**
+	 * Validate a given e-mail address or array of e-mail addresses
+	 *
+	 * @param string | array $emails
+	 * @return bool
+	 */
+	protected function validate_email_addresses( $emails ) {
+		$emails = (array) $emails;
+
+		foreach ( $emails as $email ) {
+			if ( ! is_email( $email ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -173,7 +196,7 @@ class WCOR_Mailer {
 			foreach ( $reminder_emails as $email ) {
 				$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 				
-				if ( ! is_email( $recipient ) ) {
+				if ( ! $this->validate_email_addresses( $recipient ) ) {
 					continue;
 				}
 				
@@ -304,7 +327,7 @@ class WCOR_Mailer {
 		foreach( $emails as $email ) {
 			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 
-			if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
+			if ( $this->validate_email_addresses( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
 				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
 				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
 
@@ -331,7 +354,7 @@ class WCOR_Mailer {
 		foreach( $emails as $email ) {
 			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 
-			if ( is_email( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
+			if ( $this->validate_email_addresses( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
 				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
 				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
 
