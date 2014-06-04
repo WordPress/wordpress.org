@@ -378,8 +378,35 @@ class WCOR_Mailer {
 			return;
 		}
 
+		$this->send_triggered_emails( $wordcamp, 'wcor_added_to_schedule' );
+	}
+
+	/**
+	 * Sends e-mails hooked to the wcor_organizer_added_to_central trigger.
+	 *
+	 * This fires when an application is approved and the lead organizer's WordPress.org account
+	 * is added as a Contributor to central.wordcamp.org.
+	 *
+	 * wcor_organizer_added_to_central is only triggered when the organizer has successfully been
+	 * added to Central, so we don't need to do any precondition checks like other trigger callbacks.
+	 *
+	 * @param WP_Post $wordcamp
+	 */
+	public function send_trigger_organizer_added_to_central( $wordcamp ) {
+		$this->send_triggered_emails( $wordcamp, 'wcor_organizer_added_to_central' );
+	}
+
+	/**
+	 * Send emails associated with the given trigger.
+	 *
+	 * This will save a record of which e-mails have already been sent and avoid sending duplicates.
+	 *
+	 * @param WP_Post $wordcamp
+	 * @param string $trigger
+	 */
+	protected function send_triggered_emails( $wordcamp, $trigger ) {
 		$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
-		$emails         = $this->get_triggered_posts( 'wcor_added_to_schedule' );
+		$emails         = $this->get_triggered_posts( $trigger );
 
 		foreach( $emails as $email ) {
 			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
@@ -400,33 +427,6 @@ class WCOR_Mailer {
 						$sent_email_ids[] = $email->ID;
 						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Sends e-mails hooked to the wcor_organizer_added_to_central trigger.
-	 *
-	 * This fires when an application is approved and the lead organizer's WordPress.org account
-	 * is added as a Contributor to central.wordcamp.org.
-	 *
-	 * @param WP_Post $wordcamp
-	 */
-	public function send_trigger_organizer_added_to_central( $wordcamp ) {
-		$emails = $this->get_triggered_posts( 'wcor_organizer_added_to_central' );
-		$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
-
-		foreach( $emails as $email ) {
-			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
-
-			if ( $this->validate_email_addresses( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
-				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
-				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
-
-				if ( $this->mail( $recipient, $subject, $body ) ) {
-					$sent_email_ids[] = $email->ID;
-					update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 				}
 			}
 		}
