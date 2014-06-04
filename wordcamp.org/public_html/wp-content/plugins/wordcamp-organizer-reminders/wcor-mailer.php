@@ -344,6 +344,23 @@ class WCOR_Mailer {
 	}
 
 	/**
+	 * Determine if the given e-mail should be sent individually.
+	 *
+	 * Most e-mails with multiple recipients can be sent as a single message with all recipients in the To field,
+	 * but some should be sent to each recipient individually in order to appear more personalized.
+	 *
+	 * @todo Maybe add a meta field so this can be easily controlled by the e-mail creator.
+	 *
+	 * @param int $email_id
+	 * @return bool
+	 */
+	protected function send_individual_emails( $email_id ) {
+		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
+
+		return 'wcor_send_mes' == $send_where;
+	}
+
+	/**
 	 * Sends e-mails hooked to the wcor_added_to_schedule trigger.
 	 *
 	 * This fires when a WordCamp is added to the schedule (i.e., when their `wordcamp` post goes from 'draft' to 'publish').
@@ -371,9 +388,18 @@ class WCOR_Mailer {
 				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
 				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
 
-				if ( $this->mail( $recipient, $subject, $body ) ) {
+				if ( is_array( $recipient ) && $this->send_individual_emails( $email->ID ) ) {
+					foreach ( $recipient as $individual_recipient ) {
+						$this->mail( $individual_recipient, $subject, $body );
+					}
+
 					$sent_email_ids[] = $email->ID;
 					update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
+				} else {
+					if ( $this->mail( $recipient, $subject, $body ) ) {
+						$sent_email_ids[] = $email->ID;
+						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
+					}
 				}
 			}
 		}
