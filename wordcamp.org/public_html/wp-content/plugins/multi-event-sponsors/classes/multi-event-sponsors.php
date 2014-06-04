@@ -152,4 +152,49 @@ class Multi_Event_Sponsors {
 			return ( $level_a_contribution > $level_b_contribution ) ? -1 : 1;
 		}
 	}
+
+	/**
+	 * Retrieve all of the Multi-Event Sponsors for the given WordCamp.
+	 *
+	 * @param int $wordcamp_id
+	 * @return array
+	 */
+	public function get_wordcamp_me_sponsors( $wordcamp_id ) {
+		$wordcamp_sponsors = array();
+		$wordcamp_region   = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+
+		$all_me_sponsors = get_posts( array(
+			'post_type'   => MES_Sponsor::POST_TYPE_SLUG,
+			'numberposts' => -1
+		) );
+
+		foreach ( $all_me_sponsors as $sponsor ) {
+			$regional_sponsorships = get_post_meta( $sponsor->ID, 'mes_regional_sponsorships', true );
+			if ( is_numeric( $regional_sponsorships[ $wordcamp_region ] ) ) {
+				$wordcamp_sponsors[] = $sponsor;
+			}
+		}
+
+		return $wordcamp_sponsors;
+	}
+
+	/**
+	 * Retrieve all of the e-mail addresses for the given sponsors.
+	 *
+	 * @param array $sponsors
+	 * @return array
+	 */
+	public function get_sponsor_emails( $sponsors ) {
+		$addresses = array();
+
+		foreach ( $sponsors as $sponsor ) {
+			$address = get_post_meta( $sponsor->ID, 'mes_email_address', true );
+
+			if ( $address ) {
+				$addresses[] = $address;
+			}
+		}
+
+		return $addresses;
+	}
 } // end Multi_Event_Sponsors
