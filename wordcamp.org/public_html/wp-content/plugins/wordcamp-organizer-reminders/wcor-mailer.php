@@ -223,11 +223,6 @@ class WCOR_Mailer {
 	 * One exception to that is if a camp is added later than expected (e.g., we start sending e-mails 4 months before the start date, but a camp
 	 * isn't scheduled until 2 months before the start). When that happens, we want to send all the e-mails that they've missed.
 	 *
-	 * An exception to that exception is that we don't want to send e-mails to camps that have already been sent those e-mails manually, before we
-	 * started sending them automatically.
-	 * @todo This exception will no longer be relevant 3 months after the date hardcoded below, because we only query for camps that started 3 months
-	 * before the current date, so it can be removed at that time.
-	 *
 	 * @todo It'd be nice to have some unit tests for this function, since there are a lot of different cases, but it seems like that might be
 	 * hard to do because of having to mock get_post_meta(), current_time(), etc. We could pass that info in, but that doesn't seem very elegant.
 	 *       
@@ -267,11 +262,6 @@ class WCOR_Mailer {
 						$ready = true;
 					}
 				}
-			}
-
-			if ( $send_date <= strtotime( 'November 3rd, 2013' ) ) {
-				// Assume it was already sent manually before this plugin was activated
-				$ready = false;
 			}
 		}
 		
