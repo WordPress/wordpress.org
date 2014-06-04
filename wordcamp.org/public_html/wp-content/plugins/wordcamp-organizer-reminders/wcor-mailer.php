@@ -102,19 +102,69 @@ class WCOR_Mailer {
 		$wordcamp_meta = get_post_custom( $wordcamp->ID );
 
 		$search = array(
+			// The WordCamp
 			'[wordcamp_name]',
-			'[organizer_name]',
-			'[organizer_address]',
+			'[wordcamp_start_date]',
+			'[wordcamp_location]',
+			'[wordcamp_url]',
 			'[edit_wordcamp_url]',
+			'[wordcamp_email]',
+			'[wordcamp_twitter]',
+			'[wordcamp_hashtag]',
+			'[wordcamp_anticipated_attendees]',
+			'[multi_event_sponsor_region]',
+
+			// The organizing team
+			'[organizer_name]',
 			'[lead_organizer_username]',
+			'[lead_organizer_email]',
+			'[lead_organizer_telephone]',
+			'[organizer_address]',
+			'[sponsor_wrangler_name]',
+			'[sponsor_wrangler_email]',
+			'[budget_wrangler_name]',
+			'[budget_wrangler_email]',
+
+			// Venue
+			'[venue_name]',
+			'[venue_address]',
+			'[venue_max_capacity]',
+			'[venue_available_rooms]',
+			'[venue_url]',
+			'[venue_contact_info]',
 		);
 
 		$replace = array(
+			// The WordCamp
 			$wordcamp->post_title,
+			date( 'l, F jS, Y', $wordcamp_meta['Start Date (YYYY-mm-dd)'][0] ),
+			esc_url( $wordcamp_meta['Location'][0] ),
+			esc_url( $wordcamp_meta['URL'][0] ),
+			esc_url( admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ) ),
+			$wordcamp_meta['E-mail Address'][0],
+			esc_url( 'https://twitter.com/' . $wordcamp_meta['Twitter'][0] ),
+			esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
+			absint( $wordcamp_meta['Number of Anticipated Attendees'][0] ),
+			get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
+
+			// The organizing team
 			$wordcamp_meta['Organizer Name'][0],
-			$wordcamp_meta['Mailing Address'][0],
-			admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ),
 			$wordcamp_meta['WordPress.org Username'][0],
+			$wordcamp_meta['Email Address'][0],
+			$wordcamp_meta['Telephone'][0],
+			$wordcamp_meta['Mailing Address'][0],
+			$wordcamp_meta['Sponsor Wrangler Name'][0],
+			$wordcamp_meta['Sponsor Wrangler E-mail Address'][0],
+			$wordcamp_meta['Budget Wrangler Name'][0],
+			$wordcamp_meta['Budget Wrangler E-mail Address'][0],
+
+			// Venue
+			$wordcamp_meta['Venue Name'][0],
+			$wordcamp_meta['Physical Address'][0],
+			$wordcamp_meta['Maximum Capacity'][0],
+			$wordcamp_meta['Available Rooms'][0],
+			$wordcamp_meta['Website URL'][0],
+			$wordcamp_meta['Contact Information'][0],
 		);
 		
 		return str_replace( $search, $replace, $content );

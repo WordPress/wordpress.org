@@ -147,13 +147,43 @@ class WCOR_Reminder {
 		</table>
 
 		<h4>Available Placeholders:</h4>
-		
+
+		<h5>The WordCamp:</h5>
+
 		<ul class="ul-disc">
 			<li>[wordcamp_name]</li>
-			<li>[organizer_name]</li>
-			<li>[organizer_address]</li>
+			<li>[wordcamp_start_date]</li>
+			<li>[wordcamp_location]</li>
+			<li>[wordcamp_url]</li>
 			<li>[edit_wordcamp_url]</li>
+			<li>[wordcamp_email]</li>
+			<li>[wordcamp_twitter]</li>
+			<li>[wordcamp_hashtag]</li>
+			<li>[wordcamp_anticipated_attendees]</li>
+			<li>[multi_event_sponsor_region]</li>
+		</ul>
+
+		<h5>The organizing team:</h5>
+		<ul class="ul-disc">
+			<li>[organizer_name]</li>
 			<li>[lead_organizer_username]</li>
+			<li>[lead_organizer_email]</li>
+			<li>[lead_organizer_telephone]</li>
+			<li>[organizer_address]</li>
+			<li>[sponsor_wrangler_name]</li>
+			<li>[sponsor_wrangler_email]</li>
+			<li>[budget_wrangler_name]</li>
+			<li>[budget_wrangler_email]</li>
+		</ul>
+
+		<h5>Venue</h5>
+		<ul class="ul-disc">
+			<li>[venue_name]</li>
+			<li>[venue_address]</li>
+			<li>[venue_max_capacity]</li>
+			<li>[venue_available_rooms]</li>
+			<li>[venue_url]</li>
+			<li>[venue_contact_info]</li>
 		</ul>
 
 		<?php
