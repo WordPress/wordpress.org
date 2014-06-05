@@ -88,18 +88,39 @@ class WCOR_Mailer {
 	 * @param string $to
 	 * @param string $subject
 	 * @param string $body
+	 * @param array  $headers
+	 * @param WP_Post $email
+	 * @param WP_Post $wordcamp
 	 * @return bool
 	 */
-	protected function mail( $to, $subject, $body ) {
+	protected function mail( $to, $subject, $body, $headers = array(), $email, $wordcamp ) {
+		if ( ! $this->validate_email_addresses( $to ) ) {
+			return false;
+		}
+
+		$status  = true;
+		$subject = $this->replace_placeholders( $wordcamp, $email, $subject );
+		$body    = $this->replace_placeholders( $wordcamp, $email, $body );
 		$subject = html_entity_decode( strip_tags( $subject ), ENT_QUOTES, 'UTF-8' );
 		$body    = html_entity_decode( strip_tags( $body ), ENT_QUOTES, 'UTF-8' );
-		$headers = array(
+
+		$headers = array_merge( $headers, array(
 			'From: WordCamp Central <support@wordcamp.org>',
 			'Sender: wordpress@' . strtolower( $_SERVER['SERVER_NAME'] ),
 			'CC: support@wordcamp.org',
-		);
-		
-		return wp_mail( $to, $subject, $body, $headers );
+		) );
+
+		if ( is_array( $to ) && $this->send_individual_emails( $email->ID ) ) {
+			foreach ( $to as $individual_recipient ) {
+				if ( ! wp_mail( $individual_recipient, $subject, $body, $headers ) ) {
+					$status = false;
+				}
+			}
+		} else {
+			$status = wp_mail( $to, $subject, $body, $headers );
+		}
+
+		return $status;
 	}
 
 	/**
@@ -258,20 +279,11 @@ class WCOR_Mailer {
 			foreach ( $reminder_emails as $email ) {
 				$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 				
-				if ( ! $this->validate_email_addresses( $recipient ) ) {
-					continue;
-				}
-				
 				if ( $this->timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) ) {
-					$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
-					$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
-					
-					if ( $this->mail( $recipient, $subject, $body ) ) {
+					if ( $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp ) ) {
 						$sent_email_ids[] = $email->ID;
 						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
 					}
-					
-					sleep( 1 ); // don't send e-mails too fast, or it might increase the risk of being flagged as spam
 				}
 			}
 		}
@@ -437,22 +449,10 @@ class WCOR_Mailer {
 		foreach( $emails as $email ) {
 			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
 
-			if ( $this->validate_email_addresses( $recipient ) && ! in_array( $email->ID, $sent_email_ids ) ) {
-				$subject = $this->replace_placeholders( $wordcamp, $email, $email->post_title );
-				$body    = $this->replace_placeholders( $wordcamp, $email, $email->post_content );
-
-				if ( is_array( $recipient ) && $this->send_individual_emails( $email->ID ) ) {
-					foreach ( $recipient as $individual_recipient ) {
-						$this->mail( $individual_recipient, $subject, $body );
-					}
-
+			if ( ! in_array( $email->ID, $sent_email_ids ) ) {
+				if ( $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp ) ) {
 					$sent_email_ids[] = $email->ID;
 					update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
-				} else {
-					if ( $this->mail( $recipient, $subject, $body ) ) {
-						$sent_email_ids[] = $email->ID;
-						update_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', $sent_email_ids );
-					}
 				}
 			}
 		}
