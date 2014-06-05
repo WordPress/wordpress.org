@@ -639,33 +639,89 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve source code for a function
+	 * Does the post type have source code?
 	 *
-	 * @param int $post_id
+	 * @param  string  Optional. The post type name. If blank, assumes current post type.
 	 *
-	 * @return string The sourc
+	 * @return boolean
 	 */
-	function get_source_code( $post_id = null ) {
+	function post_type_has_source_code( $post_type = null ) {
+		$post_type                   = $post_type ? $post_type : get_post_type();
+		$post_types_with_source_code = array( 'wp-parser-method', 'wp-parser-function' );
+
+		return in_array( $post_type, $post_types_with_source_code );
+	}
+
+	/**
+	 * Retrieve the root directory of the parsed WP code.
+	 *
+	 * If the option 'wp_parser_root_import_dir' (as set by the parser) is not
+	 * set, then assume ABSPATH.
+	 *
+	 * @return string
+	 */
+	function get_source_code_root_dir() {
+		$root_dir = get_option( 'wp_parser_root_import_dir' );
+
+		return $root_dir ? trailingslashit( $root_dir ) : ABSPATH;
+	}
+
+	/**
+	 * Retrieve source code for a function or method.
+	 *
+	 * @param int  $post_id     Optional. The post ID.
+	 * @param bool $force_parse Optional. Ignore potential value in post meta and reparse source file for source code?
+	 *
+	 * @return string The source code.
+	 */
+	function get_source_code( $post_id = null, $force_parse = false ) {
 
 		if ( empty( $post_id ) ) {
 			$post_id = get_the_ID();
 		}
 
-		// Get the total file sourcecode.
+		// Get the source code stored in post meta.
+		$meta_key = '_wp-parser_source_code';
+		if ( ! $force_parse && $source_code = get_post_meta( $post_id, $meta_key, true ) ) {
+			return $source_code;
+		}
+
+		/* Source code hasn't been stored in post meta, so parse source file to get it. */
+
+		// Get the name of the source file.
 		$source_file = get_source_file( $post_id );
 
-		// Put the total source code in an array.
-		$total_source_code = file_get_contents( ABSPATH . $source_file );
-		$total_source_code = explode( "\n", $total_source_code );
-
 		// Get the start and end lines.
-		$start_line = get_post_meta( $post_id, '_wp-parser_line_num', true ) - 1;
-		$end_line =   get_post_meta( $post_id, '_wp-parser_end_line_num', true );
+		$start_line = intval( get_post_meta( $post_id, '_wp-parser_line_num', true ) ) - 1;
+		$end_line   = intval( get_post_meta( $post_id, '_wp-parser_end_line_num', true ) );
 
-		// Get the correct source code.
-		$source_code = array_slice( $total_source_code, $start_line, $end_line - $start_line );
+		// Sanity check to ensure proper conditions exist for parsing
+		if ( ! $source_file || ! $start_line || ! $end_line || ( $start_line > $end_line ) ) {
+			return '';
+		}
 
-		return implode( "\n", $source_code );
+		// Find just the relevant source code
+		$source_code = '';
+		$handle = @fopen( get_source_code_root_dir() . $source_file, 'r' );
+		if ( $handle ) {
+			$line = -1;
+			while ( ! feof( $handle ) ) {
+				$line++;
+				$source_line = fgets( $handle );
+				if ( $line > $end_line ) {
+					break;
+				}
+				if ( $line < $start_line ) {
+					continue;
+				}
+				$source_code .= $source_line;
+			}
+			fclose( $handle );
+		}
+
+		update_post_meta( $post_id, $meta_key, $source_code );
+
+		return $source_code;
 	}
 
 }

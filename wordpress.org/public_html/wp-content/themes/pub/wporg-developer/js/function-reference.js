@@ -9,7 +9,7 @@
 	function showCompleteSource( e ) {
 		e.preventDefault();
 
-		var heightGoal = $sourceCodeTable.height() + 17;
+		var heightGoal = $sourceCodeTable.height() + 47; // takes into consideration potential x-scrollbar
 
 		$sourceCodeContainer.animate( { height: heightGoal + 'px' } );
 
@@ -27,17 +27,19 @@
 
 		$sourceCodeTable = $sourceContent.find( 'table' );
 
-		if ( 186 < $sourceCodeTable.height() ) {
+		if ( 188 < $sourceCodeTable.height() ) {
 
 			// Do this with javascript so javascript-less can enjoy the total sourcecode
-			// 1em (margin) + 10 * 17px. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 10 ).
-			$sourceCodeContainer.css( { height: '186px' } );
+			// 1em (margin) + 20 * 17px. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 20 ).
+			// Extra 10px added to partially show next line so it's clear there is more.
+			$( '.source-code-container' ).css( { height: '196px' } );
 
 			$showCompleteSource = $( '.show-complete-source' );
 
 			$showCompleteSource.show();
 			$showCompleteSource.on( 'click', showCompleteSource );
 		}
+
 	}
 
 	$( onLoad );

@@ -856,7 +856,9 @@
 	}
 
 	.source-code-container {
-		overflow: hidden;
+		border-right: 1px solid #dfdfdf;
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 
 	.show-complete-source {
