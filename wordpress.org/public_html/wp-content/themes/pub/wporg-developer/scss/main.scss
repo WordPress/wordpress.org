@@ -854,6 +854,15 @@
 			padding: 20px;
 		}
 	}
+
+	.source-code-container {
+		overflow: hidden;
+	}
+
+	.show-complete-source {
+		display: none;
+	}
+
 	.loop-pagination {
 		text-align: center;
 		font-size: 18px;

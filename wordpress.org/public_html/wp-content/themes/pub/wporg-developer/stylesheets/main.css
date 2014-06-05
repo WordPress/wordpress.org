@@ -1067,6 +1067,12 @@ input {
   border-radius: 5px;
   padding: 20px;
 }
+.devhub-wrap .source-code-container {
+  overflow: hidden;
+}
+.devhub-wrap .show-complete-source {
+  display: none;
+}
 .devhub-wrap .loop-pagination {
   text-align: center;
   font-size: 18px;

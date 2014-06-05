@@ -638,4 +638,34 @@ namespace DevHub {
 		return strcmp( $a->post_name, $b->post_name );
 	}
 
+	/**
+	 * Retrieve source code for a function
+	 *
+	 * @param int $post_id
+	 *
+	 * @return string The sourc
+	 */
+	function get_source_code( $post_id = null ) {
+
+		if ( empty( $post_id ) ) {
+			$post_id = get_the_ID();
+		}
+
+		// Get the total file sourcecode.
+		$source_file = get_source_file( $post_id );
+
+		// Put the total source code in an array.
+		$total_source_code = file_get_contents( ABSPATH . $source_file );
+		$total_source_code = explode( "\n", $total_source_code );
+
+		// Get the start and end lines.
+		$start_line = get_post_meta( $post_id, '_wp-parser_line_num', true ) - 1;
+		$end_line =   get_post_meta( $post_id, '_wp-parser_end_line_num', true );
+
+		// Get the correct source code.
+		$source_code = array_slice( $total_source_code, $start_line, $end_line - $start_line );
+
+		return implode( "\n", $source_code );
+	}
+
 }
