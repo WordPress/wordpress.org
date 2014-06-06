@@ -170,7 +170,7 @@ class WCOR_Mailer {
 		$replace = array(
 			// The WordCamp
 			$wordcamp->post_title,
-			date( 'l, F jS, Y', $wordcamp_meta['Start Date (YYYY-mm-dd)'][0] ),
+			empty( $wordcamp_meta['Start Date (YYYY-mm-dd)'][0] ) ? '' : date( 'l, F jS, Y', $wordcamp_meta['Start Date (YYYY-mm-dd)'][0] ),
 			$wordcamp_meta['Location'][0],
 			esc_url( $wordcamp_meta['URL'][0] ),
 			esc_url( admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ) ),
@@ -178,7 +178,7 @@ class WCOR_Mailer {
 			esc_url( 'https://twitter.com/' . $wordcamp_meta['Twitter'][0] ),
 			esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
 			absint( $wordcamp_meta['Number of Anticipated Attendees'][0] ),
-			get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
+			empty( $wordcamp_meta['Multi-Event Sponsor Region'][0] ) ? '' : get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
 
 			// The organizing team
 			$wordcamp_meta['Organizer Name'][0],
@@ -245,6 +245,19 @@ class WCOR_Mailer {
 		return true;
 	}
 
+	/**
+
+	 *
+	 * @param WP_Post $email
+	 * @param WP_Post $wordcamp
+	 * @return bool
+	 */
+	public function send_manual_email( $email, $wordcamp ) {
+		$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
+
+		return $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp );
+	}
+	
 	/**
 	 * Send e-mails that are scheduled to go out at a specific time (e.g., 3 days before the camp)
 	 */

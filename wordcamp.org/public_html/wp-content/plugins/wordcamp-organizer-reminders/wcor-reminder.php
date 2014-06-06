@@ -68,6 +68,14 @@ class WCOR_Reminder {
 			'normal',
 			'high'
 		);
+
+		add_meta_box(
+			'wcor_manually_send',
+			__( 'Manually Send', 'wordcamporg' ),
+			array( $this, 'markup_manually_send' ),
+			self::POST_TYPE_SLUG,
+			'side'
+		);
 	}
 
 	/**
@@ -75,7 +83,7 @@ class WCOR_Reminder {
 	 *
 	 * @param object $post
 	 */
-	public static function markup_reminder_details( $post ) {
+	public function markup_reminder_details( $post ) {
 		$send_where          = get_post_meta( $post->ID, 'wcor_send_where', true );
 		$send_custom_address = get_post_meta( $post->ID, 'wcor_send_custom_address', true );
 		$send_when           = get_post_meta( $post->ID, 'wcor_send_when', true );
@@ -190,6 +198,123 @@ class WCOR_Reminder {
 	}
 
 	/**
+	 * Builds the markup for the Manually Send metabox
+	 *
+	 * @param object $post
+	 */
+	public function markup_manually_send( $post ) {
+		$wordcamps = $this->get_all_wordcamps();
+		?>
+
+		<p><?php _e( 'Check the box below and save the post to manually send this message to the assigned recipient(s), using the data from the selected WordCamp.', 'wordcamporg' ); ?></p>
+
+		<p><?php _e( 'It will be sent immediately, regardless of when it is scheduled to be sent automatically, and regardless of whether or not it has already been sent automatically.', 'wordcamporg' ); ?></p>
+
+		<p>
+			<select name="wcor_manually_send_wordcamp">
+				<option value="instructions"><?php _e( 'Select a WordCamp', 'wordcamporg' ); ?></option>
+				<?php /* translators: label for a spacer <option> at the beginning of a <select> */ ?>
+				<option value="spacer"><?php _e( '- - -', 'wordcamporg' ); ?></option>
+
+				<?php foreach ( $wordcamps as $wordcamp ) : ?>
+					<option value="<?php echo esc_attr( $wordcamp->ID ); ?>">
+						[<?php echo esc_html( $wordcamp->meta['sort_column'] ); ?>]
+						<?php echo esc_html( $wordcamp->post_title ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+
+		<p>
+			<input id="wcor_manually_send_checkbox" name="wcor_manually_send" type="checkbox">
+			<label for="wcor_manually_send_checkbox"><?php _e( 'Manually send this e-mail', 'wordcamporg' ); ?></label>
+		</p>
+
+		<?php
+	}
+
+	/**
+	 * Retrieve all WordCamps and their metadata, sorted by status and year.
+	 *
+	 * @return array
+	 */
+	protected function get_all_wordcamps() {
+		if ( $wordcamps = get_transient( 'wcor_get_all_wordcamps' ) ) {
+			return $wordcamps;
+		}
+
+		$wordcamps = get_posts( array(
+			'post_type'   => WCPT_POST_TYPE_ID,
+			'post_status' => array( 'draft', 'pending', 'publish' ),
+			'numberposts' => -1,
+		) );
+
+		foreach ( $wordcamps as &$wordcamp ) {
+			$wordcamp->meta                = get_post_custom( $wordcamp->ID );
+			$wordcamp->meta['sort_column'] = empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? $wordcamp->post_status : date( 'Y', $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] );
+		}
+
+		usort( $wordcamps, array( $this, 'usort_wordcamps_by_year_and_status' ) );
+
+		set_transient( 'wcor_get_all_wordcamps', $wordcamps, HOUR_IN_SECONDS );
+
+		return $wordcamps;
+	}
+
+	/**
+	 * Sort WordCamps by year and post status.
+	 *
+	 * This is a usort() callback.
+	 *
+	 * WordCamps without a start date should be listed first, followed by WordCamps with a start date.
+	 *
+	 * Within the set that does not have a start date, they should be sorted by status; first drafts, then pending,
+	 * then published. Those with the same status should be sorted alphabetically.
+	 *
+	 * Within the set that does have a start date, they should be sorted by year, descending. Those within the same
+	 * year should be sorted alphabetically.
+	 *
+	 * Example:
+	 *
+	 * 1) draft   missing start date, titled "WordCamp Atlanta"
+	 * 2) draft   missing start date, titled "WordCamp Chicago"
+	 * 3) pending missing start date, titled "WordCamp Seattle"
+	 * 4) publish missing start date, titled "WordCamp Portland"
+	 * 5) publish in year 2014,       titled "WordCamp Dayton"
+	 * 6) publish in year 2014,       titled "WordCamp San Francisco"
+	 * 7) publish in year 2013,       titled "WordCamp Boston"
+	 * 8) publish in year 2013,       titled "WordCamp Columbus"
+	 *
+	 * @param WP_Post $a
+	 * @param WP_Post $b
+	 * @return int
+	 */
+	protected function usort_wordcamps_by_year_and_status( $a, $b ) {
+		$a_year = empty( $a->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'Y', $a->meta['Start Date (YYYY-mm-dd)'][0] );
+		$b_year = empty( $b->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'Y', $b->meta['Start Date (YYYY-mm-dd)'][0] );
+
+		$status_weights = array(
+			'draft'   => 3,
+			'pending' => 2,
+			'publish' => 1,
+		);
+
+		if ( empty( $a_year ) || empty( $b_year ) ) {
+			if ( $a->post_status == $b->post_status ) {
+				return $a->post_title < $b->post_title;
+			} else {
+				return $status_weights[ $a->post_status ] < $status_weights[ $b->post_status ];
+			}
+		} else {
+			if ( date( 'Y', $a->meta['Start Date (YYYY-mm-dd)'][0] ) == date( 'Y', $b->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
+				return $a->post_title > $b->post_title;
+			} else {
+				return $a_year < $b_year;
+			}
+		}
+	}
+
+	/**
 	 * Checks to make sure the conditions for saving post meta are met
 	 * 
 	 * @param int $post_id
@@ -211,6 +336,7 @@ class WCOR_Reminder {
 		}
 		
 		$this->save_post_meta( $post, $_POST );
+		$this->send_manual_email( $post, $_POST );
 	}
 
 	/**
@@ -249,5 +375,29 @@ class WCOR_Reminder {
 				update_post_meta( $post->ID, 'wcor_which_trigger', $new_meta['wcor_which_trigger'] );
 			}
 		}
+	}
+
+	/**
+	 * Sends an e-mail manually.
+	 *
+	 * This provides a way to send e-mails at will, regardless of the time or trigger that the e-mail is normally
+	 * associated with, and regardless of whether or not the e-mail has already been sent to the recipient.
+	 *
+	 * @todo Add admin notices, but it's a pain to make them persist through the post/redirect/get process.
+	 *       Will be easy if #11515 lands in Core.
+	 *
+	 * @param WP_Post $email
+	 * @param array   $form_values
+	 */
+	protected function send_manual_email( $email, $form_values ) {
+		/** @var $WCOR_Mailer WCOR_Mailer */
+		global $WCOR_Mailer;
+
+		if ( empty( $form_values['wcor_manually_send'] ) || 'on' != $form_values['wcor_manually_send'] || in_array( $form_values['wcor_manually_send_wordcamp'], array( 'instructions', 'spacer' ) ) ) {
+			return;
+		}
+
+		$wordcamp = get_post( $form_values['wcor_manually_send_wordcamp'] );
+		$WCOR_Mailer->send_manual_email( $email, $wordcamp );
 	}
 }
