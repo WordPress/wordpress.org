@@ -301,7 +301,7 @@ class WCOR_Reminder {
 
 		if ( empty( $a_year ) || empty( $b_year ) ) {
 			if ( $a->post_status == $b->post_status ) {
-				return $a->post_title < $b->post_title;
+				return $a->post_title > $b->post_title;
 			} else {
 				return $status_weights[ $a->post_status ] < $status_weights[ $b->post_status ];
 			}
