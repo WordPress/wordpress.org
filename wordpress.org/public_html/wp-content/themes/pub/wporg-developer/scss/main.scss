@@ -855,13 +855,35 @@
 		}
 	}
 
+	.single {
+		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
+			border-bottom-style: none;
+		}
+	}
+
+	.source-content {
+		overflow: auto;
+	}
+
+	.source-code-links {
+		margin-left: 2em;
+		margin-top: 1em;
+	}
+
+	.source-code-links span:first-child {
+		display: none;
+		border-right: 1px solid #999;
+		margin-right: 1em;
+		padding-right: 1em;
+	}
+
 	.source-code-container {
 		border-right: 1px solid #dfdfdf;
 		overflow-x: auto;
 		overflow-y: hidden;
 	}
 
-	.show-complete-source {
+	.show-complete-source, .less-complete-source {
 		display: none;
 	}
 

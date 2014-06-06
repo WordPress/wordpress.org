@@ -28,9 +28,10 @@
 		<section class="source">
 			<p>
 				<strong><?php _e( 'Source file:', 'wporg' ); ?></strong>
-				<a href="<?php echo get_source_file_archive_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a><br />
-				<strong><?php _e( 'View source code:', 'wporg' ); ?></strong>
-				<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'on the WP Trac code browser&hellip;', 'wporg' ); ?></a>
+				<a href="<?php echo get_source_file_archive_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a>
+			</p>
+			<p>
+				<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a>
 			</p>
 		</section>
 	<?php endif; ?>

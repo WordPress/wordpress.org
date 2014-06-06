@@ -30,13 +30,17 @@ if ( ! empty( $since ) ) : ?>
 		<section class="source">
 			<p>
 				<strong><?php _e( 'Source file:', 'wporg' ); ?></strong>
-				<a href="<?php echo get_source_file_archive_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a><br />
-				<strong><?php _e( 'View source code:', 'wporg' ); ?></strong>
-				<?php if ( post_type_has_source_code() ) { ?>
-				<a href="#source-code"><?php _e( 'below', 'wporg' ); ?></a> or
-				<?php } ?>
-				<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'on the WP Trac code browser&hellip;', 'wporg' ); ?></a>
+				<a href="<?php echo get_source_file_archive_link( $source_file ); ?>"><?php echo esc_html( $source_file ); ?></a>
 			</p>
+			<?php if ( post_type_has_source_code() ) { ?>
+			<p>
+				<a href="#source-code"><?php _e( 'View source', 'wporg' ); ?></a>
+			</p>
+			<?php } else { ?>
+			<p>
+				<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a>
+			</p>
+			<?php } ?>
 		</section>
 	<?php endif; ?>
 
@@ -130,7 +134,13 @@ if ( ! empty( $since ) ) : ?>
 			<div class="source-code-container">
 				<pre class="brush: php; toolbar: false;"><?php echo esc_html( get_source_code() ); ?></pre>
 			</div>
-			<p><a href="#" class="show-complete-source"><?php _e( 'View full source code&hellip;', 'wporg' ); ?></a></p>
+			<p class="source-code-links">
+				<span>
+					<a href="#" class="show-complete-source"><?php _e( 'Expand full source code', 'wporg' ); ?></a>
+					<a href="#" class="less-complete-source"><?php _e( 'Collapse full source code', 'wporg' ); ?></a>
+				</span>
+				<span><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a></span>
+			</p>
 		</section>
 	<?php endif; ?>
 
