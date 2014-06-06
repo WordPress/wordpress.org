@@ -35,16 +35,15 @@
 		</section>
 	<?php endif; ?>
 
-	<?php /* if ( is_archive() ) : ?>
+		<?php /*
+		<?php if ( is_archive() ) : ?>
 		<section class="meta">Used by TODO | Uses TODO | TODO Examples</section>
-	<?php endif; */ ?>
-
-		<!--
+		<?php endif; ?>
 		<hr/>
 		<section class="explanation">
 			<h2><?php _e( 'Explanation', 'wporg' ); ?></h2>
 		</section>
-		-->
+		*/ ?>
 
 		<?php if ( $params = get_params() ) : ?>
 
@@ -76,8 +75,8 @@
 			</section>
 		<?php endif; ?>
 
+		<?php /*
 		<hr/>
-		<!--
 		<section class="learn-more">
 			<h2><?php _e( 'Learn More', 'wporg' ); ?></h2>
 		</section>
@@ -85,7 +84,7 @@
 		<section class="examples">
 			<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
 		</section>
-		-->
+		*/ ?>
 	<?php endif; ?>
 
 </article>
