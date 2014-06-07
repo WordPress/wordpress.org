@@ -4,15 +4,15 @@
  * Handles all interactivity on the single function page
  */
 ( function( $ ) {
-	var $sourceContent, $sourceCodeContainer, $sourceCodeTable, $showCompleteSource, $lessCompleteSource, $sourceCollapsedHeight;
+	var $sourceContent, $sourceCodeContainer, $sourceCodeTable, $showCompleteSource, $lessCompleteSource, sourceCollapsedHeight;
 
 	function toggleCompleteSource( e ) {
 		e.preventDefault();
 
 		if ( $showCompleteSource.is(':visible') ) {
-			var heightGoal = $sourceCodeTable.height() + 37; // takes into consideration potential x-scrollbar
+			var heightGoal = $sourceCodeTable.height() + 45; // takes into consideration potential x-scrollbar
 		} else {
-			var heightGoal = $sourceCollapsedHeight;
+			var heightGoal = sourceCollapsedHeight;
 		}
 
 		$sourceCodeContainer.animate( { height: heightGoal + 'px' } );
@@ -32,14 +32,14 @@
 
 		$sourceCodeTable = $sourceContent.find( 'table' );
 
-		// 1em (margin) + 20 * 17px. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 20 ).
+		// 1em (margin) + 10 * 17px + 10. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 10 + 10 ).
 		// Extra 10px added to partially show next line so it's clear there is more.
-		$sourceCollapsedHeight = 196;
+		sourceCollapsedHeight = 196;
 
-		if ( ( $sourceCollapsedHeight - 12 ) < $sourceCodeTable.height() ) {
+		if ( ( sourceCollapsedHeight - 12 ) < $sourceCodeTable.height() ) {
 
 			// Do this with javascript so javascript-less can enjoy the total sourcecode
-			$( '.source-code-container' ).css( { height: $sourceCollapsedHeight + 'px' } );
+			$( '.source-code-container' ).css( { height: sourceCollapsedHeight + 'px' } );
 
 			$showCompleteSource = $( '.show-complete-source' );
 			$lessCompleteSource = $( '.less-complete-source' );
