@@ -13,13 +13,13 @@ class WCOR_Mailer {
 	public function __construct() {
 		$this->triggers = array(
 			'wcor_added_to_schedule' => array(
-				'name'     => 'WordCamp Added to schedule',
+				'name'     => 'WordCamp Added to final schedule',
 				'actions'  => array(
 					array(
-						'name'       => 'transition_post_status',
+						'name'       => 'wcpt_added_to_final_schedule',
 						'callback'   => 'send_trigger_added_to_schedule',
 						'priority'   => 10,
-						'parameters' => 3,
+						'parameters' => 1,
 					),
 				),
 			),
@@ -403,21 +403,11 @@ class WCOR_Mailer {
 	/**
 	 * Sends e-mails hooked to the wcor_added_to_schedule trigger.
 	 *
-	 * This fires when a WordCamp is added to the schedule (i.e., when their `wordcamp` post goes from 'draft' to 'publish').
+	 * This fires when a WordCamp is added to the final schedule.
 	 *
-	 * @param string  $new_status
-	 * @param string  $old_status
 	 * @param WP_Post $wordcamp
 	 */
-	public function send_trigger_added_to_schedule( $new_status, $old_status, $wordcamp ) {
-		if ( empty( $wordcamp->post_type ) || WCPT_POST_TYPE_ID != $wordcamp->post_type ) {
-			return;
-		}
-
-		if ( 'pending' != $old_status || 'publish' != $new_status ) {
-			return;
-		}
-
+	public function send_trigger_added_to_schedule( $wordcamp ) {
 		$this->send_triggered_emails( $wordcamp, 'wcor_added_to_schedule' );
 	}
 
