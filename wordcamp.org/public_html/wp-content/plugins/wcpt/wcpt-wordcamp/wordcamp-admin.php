@@ -43,6 +43,7 @@ class WordCamp_Admin {
 		// Post status transitions
 		add_action( 'transition_post_status', array( $this, 'trigger_schedule_actions' ), 10, 3 );
 		add_action( 'wcpt_added_to_planning_schedule', array( $this, 'add_organizer_to_central' ), 10 );
+		add_action( 'wcpt_added_to_planning_schedule', array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
 		add_action( 'wp_insert_post_data',    array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
 
 		// Admin notices
@@ -452,6 +453,18 @@ class WordCamp_Admin {
 		if ( $lead_organizer && add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'contributor' ) ) {
 			do_action( 'wcor_organizer_added_to_central', $post );
 		}
+	}
+
+	/**
+	 * Record when the WordCamp was added to the planning schedule.
+	 *
+	 * This is used by the Organizer Reminders plugin to send automated e-mails at certain points after the camp
+	 * has been added to the planning schedule.
+	 *
+	 * @param WP_Post $wordcamp
+	 */
+	public function mark_date_added_to_planning_schedule( $wordcamp ) {
+		update_post_meta( $wordcamp->ID, '_timestamp_added_to_planning_schedule', time() );
 	}
 
 	/**
