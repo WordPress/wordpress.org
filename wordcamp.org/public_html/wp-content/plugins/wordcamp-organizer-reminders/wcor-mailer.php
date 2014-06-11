@@ -246,7 +246,10 @@ class WCOR_Mailer {
 	}
 
 	/**
-
+	 * Send an e-mail manually.
+	 *
+	 * This just sends the message immediately, regardless of whether or not it is assigned to be sent
+	 * automatically and regardless of whether it's already been sent.
 	 *
 	 * @param WP_Post $email
 	 * @param WP_Post $wordcamp
