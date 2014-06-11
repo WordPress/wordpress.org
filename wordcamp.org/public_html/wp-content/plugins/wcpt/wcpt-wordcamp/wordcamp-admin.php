@@ -41,7 +41,8 @@ class WordCamp_Admin {
 		add_action( 'admin_print_styles', array( $this, 'admin_styles' ) );
 
 		// Post status transitions
-		add_action( 'transition_post_status', array( $this, 'add_organizer_to_central' ), 10, 3 );
+		add_action( 'transition_post_status', array( $this, 'trigger_schedule_actions' ), 10, 3 );
+		add_action( 'wcpt_added_to_planning_schedule', array( $this, 'add_organizer_to_central' ), 10 );
 		add_action( 'wp_insert_post_data',    array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
 
 		// Admin notices
@@ -415,25 +416,37 @@ class WordCamp_Admin {
 	}
 
 	/**
-	 * Add the lead organizer to Central when a WordCamp application is accepted.
+	 * Trigger actions related to WordCamps being scheduled.
 	 *
-	 * When an application is submitted, a `wordcamp` post is created with a `draft` status. When it's accepted,
-	 * the status changes to `pending`. Adding the lead organizer to Central allows them to enter all the `wordcamp`
-	 * meta info themselves, and also post updates to the Central blog.
+	 * When an application is submitted, a `wordcamp` post is created with a `draft` status. When it's accepted
+	 * to the planning schedule the status changes to `pending`, and when it's accepted for the final schedule
+	 * the status changes to 'publish'.
 	 *
 	 * @param string $new_status
 	 * @param string $old_status
 	 * @param WP_Post $post
 	 */
-	public function add_organizer_to_central( $new_status, $old_status, $post ) {
+	public function trigger_schedule_actions( $new_status, $old_status, $post ) {
 		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type ) {
 			return;
 		}
 
-		if ( 'draft' != $old_status || 'pending' != $new_status ) {
-			return;
+		if ( 'draft' == $old_status && 'pending' == $new_status ) {
+			do_action( 'wcpt_added_to_planning_schedule', $post );
+		} elseif ( 'pending' == $old_status && 'publish' == $new_status ) {
+			do_action( 'wcpt_added_to_final_schedule', $post );
 		}
+	}
 
+	/**
+	 * Add the lead organizer to Central when a WordCamp application is accepted.
+	 *
+	 * Adding the lead organizer to Central allows them to enter all the `wordcamp`
+	 * meta info themselves, and also post updates to the Central blog.
+	 *
+	 * @param WP_Post $post
+	 */
+	public function add_organizer_to_central( $post ) {
 		$lead_organizer = get_user_by( 'login', get_post_meta( $post->ID, 'WordPress.org Username', true ) );
 
 		if ( $lead_organizer && add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'contributor' ) ) {
