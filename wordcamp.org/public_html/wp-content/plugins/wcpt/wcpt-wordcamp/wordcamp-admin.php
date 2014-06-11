@@ -22,33 +22,33 @@ class WordCamp_Admin {
 		$this->active_admin_notices = array();
 
 		// Add some general styling to the admin area
-		add_action( 'wcpt_admin_head', array( $this, 'admin_head' ) );
+		add_action( 'wcpt_admin_head',                                array( $this, 'admin_head' ) );
 
 		// Forum column headers.
 		add_filter( 'manage_' . WCPT_POST_TYPE_ID . '_posts_columns', array( $this, 'column_headers' ) );
 
 		// Forum columns (in page row)
-		add_action( 'manage_posts_custom_column', array( $this, 'column_data' ), 10, 2 );
-		add_filter( 'post_row_actions', array( $this, 'post_row_actions' ), 10, 2 );
+		add_action( 'manage_posts_custom_column',                     array( $this, 'column_data' ), 10, 2 );
+		add_filter( 'post_row_actions',                               array( $this, 'post_row_actions' ), 10, 2 );
 
 		// Topic metabox actions
-		add_action( 'admin_menu', array( $this, 'metabox' ) );
-		add_action( 'save_post', array( $this, 'metabox_save' ) );
+		add_action( 'admin_menu',                                     array( $this, 'metabox' ) );
+		add_action( 'save_post',                                      array( $this, 'metabox_save' ) );
 
 		// Scripts and CSS
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_print_scripts', array( $this, 'admin_print_scripts' ), 99 );
-		add_action( 'admin_print_styles', array( $this, 'admin_styles' ) );
+		add_action( 'admin_enqueue_scripts',                          array( $this, 'admin_scripts' ) );
+		add_action( 'admin_print_scripts',                            array( $this, 'admin_print_scripts' ), 99 );
+		add_action( 'admin_print_styles',                             array( $this, 'admin_styles' ) );
 
 		// Post status transitions
-		add_action( 'transition_post_status', array( $this, 'trigger_schedule_actions' ), 10, 3 );
-		add_action( 'wcpt_added_to_planning_schedule', array( $this, 'add_organizer_to_central' ), 10 );
-		add_action( 'wcpt_added_to_planning_schedule', array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
-		add_action( 'wp_insert_post_data',    array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
+		add_action( 'transition_post_status',                         array( $this, 'trigger_schedule_actions' ), 10, 3 );
+		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'add_organizer_to_central' ), 10 );
+		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
+		add_action( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
 
 		// Admin notices
-		add_action( 'admin_notices',          array( $this, 'print_admin_notices' ) );
-		add_filter( 'redirect_post_location', array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
+		add_action( 'admin_notices',                                  array( $this, 'print_admin_notices' ) );
+		add_filter( 'redirect_post_location',                         array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
 	}
 
 	/**
