@@ -11,6 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Access denied.' );
 }
 
+/*
+ * @todo
+ * - Refactor the update_post_meta() loop in each method into a DRY function.
+ */
+
 class WordCamp_Forms_To_Drafts {
 	/**
 	 * Constructor
@@ -18,6 +23,7 @@ class WordCamp_Forms_To_Drafts {
 	public function __construct() {
 		add_action( 'grunion_pre_message_sent', array( $this, 'returning_organizer_application' ), 10, 3 );
 		add_action( 'grunion_pre_message_sent', array( $this, 'new_organizer_application' ), 10, 3 );
+		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_sponsors' ), 10, 3 );
 	}
 
 	/**
@@ -172,6 +178,49 @@ class WordCamp_Forms_To_Drafts {
 		}
 
 		restore_current_blog();
+	}
+
+	/**
+	 * Create a draft Sponsor post from a Call for Sponsors form submission.
+	 *
+	 * @todo
+	 * - Add jetpack form field for Sponsor Level, where options are automatically pulled from wcb_sponsor_level
+	 *   taxonomy and the selected term is applied to the drafted post. Maybe need to send PR to add filter to
+	 *   insert custom fields programmatically.
+	 * - Sideload the logo from submitted URL and set it as the featured image.
+	 *
+	 * @param int   $submission_id
+	 * @param array $all_values
+	 * @param array $extra_values
+	 */
+	public function call_for_sponsors( $submission_id, $all_values, $extra_values ) {
+		if ( 'call-for-sponsors' != $this->get_form_key( $submission_id ) ) {
+			return;
+		}
+
+		$sponsor_to_form_key_map = array(
+			'_wcpt_sponsor_website' => 'Website',
+		);
+
+		$this->simulate_post_type( 'wordcamp' );
+
+		// Create the post
+		$draft_id = wp_insert_post( array(
+			'post_type'    => 'wcb_sponsor',
+			'post_title'   => $all_values['Company name'],
+			'post_content' => $all_values['Company description'],
+			'post_status'  => 'draft',
+			'post_author'  => $this->get_user_id_from_username( 'wordcamp' ),
+		) );
+
+		// Create the post meta
+		if ( $draft_id ) {
+			foreach ( $sponsor_to_form_key_map as $sponsor_key => $form_key ) {
+				if ( ! empty( $all_values[ $form_key ] ) ) {
+					update_post_meta( $draft_id, $sponsor_key, $all_values[ $form_key ] );
+				}
+			}
+		}
 	}
 } // end WordCamp_Forms_To_Drafts
 
