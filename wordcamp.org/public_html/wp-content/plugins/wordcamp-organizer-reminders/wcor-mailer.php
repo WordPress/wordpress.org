@@ -12,8 +12,20 @@ class WCOR_Mailer {
 	 */
 	public function __construct() {
 		$this->triggers = array(
+			'wcor_added_to_pending_schedule' => array(
+				'name'     => 'WordCamp added to pending schedule',
+				'actions'  => array(
+					array(
+						'name'       => 'wcpt_added_to_planning_schedule',
+						'callback'   => 'send_trigger_added_to_pending_schedule',
+						'priority'   => 10,
+						'parameters' => 1,
+					),
+				),
+			),
+
 			'wcor_added_to_schedule' => array(
-				'name'     => 'WordCamp Added to final schedule',
+				'name'     => 'WordCamp added to final schedule',
 				'actions'  => array(
 					array(
 						'name'       => 'wcpt_added_to_final_schedule',
@@ -25,7 +37,7 @@ class WCOR_Mailer {
 			),
 
 			'wcor_organizer_added_to_central' => array(
-				'name'     => 'Lead Organizer Account added to Central',
+				'name'     => 'Lead organizer account added to Central',
 				'actions'  => array(
 					array(
 						'name'       => 'wcor_organizer_added_to_central',
@@ -425,6 +437,17 @@ class WCOR_Mailer {
 		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
 
 		return 'wcor_send_mes' == $send_where;
+	}
+
+	/**
+	 * Sends e-mails hooked to the wcor_added_to_pending_schedule trigger.
+	 *
+	 * This fires when a WordCamp is added to the pending schedule.
+	 *
+	 * @param WP_Post $wordcamp
+	 */
+	public function send_trigger_added_to_pending_schedule( $wordcamp ) {
+		$this->send_triggered_emails( $wordcamp, 'wcor_added_to_pending_schedule' );
 	}
 
 	/**
