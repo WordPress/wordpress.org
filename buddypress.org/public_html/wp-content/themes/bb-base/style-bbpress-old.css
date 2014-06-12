@@ -1,0 +1,171 @@
+/* =Header
+-------------------------------------------------------------- */
+
+#header {
+	background-color: rgb(141,199,112);
+	border-bottom: 1px solid #696;
+}
+
+#header-inner {
+	background: url('../bbpress-org/images/bee.png') no-repeat 197px -72px;
+}
+#header h1 a {
+	background: url('../bbpress-org/images/bbpress-logo.png') no-repeat 0 0;
+}
+
+/* =Site Style
+-------------------------------------------------------------- */
+
+body.bbp-user-page div.content,
+body.bbp-user-edit div.content {
+	width: auto;
+	float: none;
+}
+
+div.standard {
+	background: #EBF5FA;
+}
+
+/* =Buttons
+-------------------------------------------------------------- */
+
+#nav li a {
+	text-shadow: 0 -1px 0 rgba(0,162,116,0.8);
+}
+
+#nav li.current a,
+#nav li a:hover,
+.button:hover {
+	color: rgba(235,255,235,0.9);
+	text-shadow: 0 -1px 0 rgb(0,162,116);
+
+	border: 1px solid #1d6422;
+
+	background-image: -moz-linear-gradient(top, #00aa66 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #00aa66 0%,#008800 100%);
+	background-image: linear-gradient(top, #00aa66 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-webkit-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-o-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	-ms-box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+	box-shadow: inset 0 1px 0 #00aa66, inset 0 2px 0 rgba(120,230,120,0.7);
+}
+
+.button {
+	text-shadow: 0 -1px 2 rgba(0,162,116,1);
+	border: 1px solid #1d6422;
+
+	background-color: #009933;
+	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: linear-gradient(top, #009933 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 0 #009933, inset 0 2px 0 rgba(120,230,120,0.5);
+}
+
+#nav li.current a,
+#nav li a:active,
+.button:active {
+	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);
+	background-image: -webkit-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -o-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: -ms-linear-gradient(top, #009933 0%,#008800 100%);
+	background-image: linear-gradient(top, #009933 0%,#008800 100%);
+
+	-moz-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-webkit-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-o-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	-ms-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+	box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 #009933;
+}
+
+#nav li a:hover,
+.dark-context .button:hover {
+	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-o-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	-ms-box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+	box-shadow: inset 0 1px 0 rgba(120,230,120,0.7);
+}
+
+.dark-context .button {
+	-moz-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 0 rgba(120,230,120,0.5);
+}
+
+.dark-context .button:active {
+	-moz-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-webkit-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-o-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	-ms-box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+	box-shadow: inset 0 1px 5px #328C00, inset 0 -1px 0 rgba(120,230,120,0.5);
+}
+
+#subnav-inner ul li a:hover {
+	color: #8fbb6e;
+}
+
+/* =Links
+-------------------------------------------------------------- */
+
+a {
+	color: #328C00;
+}
+a:hover {
+	color: #D54E21;
+}
+
+/* =Text
+-------------------------------------------------------------- */
+
+blockquote {
+	background-color: #eee;
+}
+div.action a {
+	color: #009933;
+}
+
+/* =Input
+-------------------------------------------------------------- */
+
+input.submit {
+	background: #3399cc;
+	color: #fff;
+}
+input.submit:hover {
+	background: #009933;
+}
+
+/* =bbPress Default Override
+-------------------------------------------------------------- */
+
+#bbpress-forums li.bbp-body ul:hover {
+	background-color: #efe;
+}
+
+/* =HiDPI Overrides
+-------------------------------------------------------------- */
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	#header-inner {
+		background-image: url('../bbpress-org/images/bee-2x.png');
+		background-size: 231px 162px;
+	}
+
+	#header h1 a {
+		background-image: url('../bbpress-org/images/bbpress-logo-2x.png');
+		background-size: 208px 65px;
+	}
+}
