@@ -262,7 +262,9 @@ class MES_Sponsor {
 		}
 
 		$post_key = wcpt_key_to_str( $key, 'wcpt_' );
-		update_post_meta( $post_id, $key, absint( $_POST[ $post_key ] ) );
+		if ( isset( $_POST[ $post_key ] ) ) {
+			update_post_meta( $post_id, $key, absint( $_POST[ $post_key ] ) );
+		}
 	}
 
 	/**
