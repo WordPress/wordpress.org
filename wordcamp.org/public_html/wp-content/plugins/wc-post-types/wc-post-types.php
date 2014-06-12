@@ -1108,7 +1108,7 @@ class WordCamp_Post_Types_Plugin {
 		?>
 		
 		<p>
-			<label for="_wcpt_sponsor_websitee"><?php _e( 'Website:', 'wordcampbase' ); ?></label>
+			<label for="_wcpt_sponsor_website"><?php _e( 'Website:', 'wordcampbase' ); ?></label>
 			<input type="text" class="widefat" id="_wcpt_sponsor_website" name="_wcpt_sponsor_website" value="<?php echo esc_attr( esc_url( $website ) ); ?>" />
 		</p>
 		
