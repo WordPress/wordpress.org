@@ -276,20 +276,28 @@ class WCOR_Mailer {
 				),
 			),
 		) );
-		
+
+		$pending_wordcamps = get_posts( array(
+			'posts_per_page'  => -1,
+			'post_type'       => WCPT_POST_TYPE_ID,
+			'post_status'     => 'pending',
+		) );
+
+		$wordcamps = array_merge( $recent_or_upcoming_wordcamps, $pending_wordcamps );
+
 		$reminder_emails = get_posts( array(
 			'posts_per_page' => -1,
 			'post_type'      => WCOR_Reminder::POST_TYPE_SLUG,
 			'meta_query'     => array(
 				array(
 					'key'     => 'wcor_send_when',
-					'value'   => array( 'wcor_send_before', 'wcor_send_after' ),
+					'value'   => array( 'wcor_send_before', 'wcor_send_after', 'wcor_send_after_pending' ),
 					'compare' => 'IN'
 				),
 			),
 		) );
 		
-		foreach ( $recent_or_upcoming_wordcamps as $wordcamp ) {
+		foreach ( $wordcamps as $wordcamp ) {
 			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
 
 			foreach ( $reminder_emails as $email ) {
@@ -326,7 +334,7 @@ class WCOR_Mailer {
 		$send_when  = get_post_meta( $email->ID, 'wcor_send_when', true );
 		$start_date = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
 		$end_date   = get_post_meta( $wordcamp->ID, 'End Date (YYYY-mm-dd)', true );
-		
+
 		if ( ! $end_date ) {
 			$end_date = $start_date;
 		}
@@ -335,7 +343,7 @@ class WCOR_Mailer {
 			if ( 'wcor_send_before' == $send_when ) {
 				$days_before = absint( get_post_meta( $email->ID, 'wcor_send_days_before', true ) );
 				
-				if ( $days_before ) {
+				if ( $start_date && $days_before ) {
 					$send_date = $start_date - ( $days_before * DAY_IN_SECONDS );
 					
 					if ( $send_date <= current_time( 'timestamp' ) ) {
@@ -345,10 +353,21 @@ class WCOR_Mailer {
 			} elseif ( 'wcor_send_after' == $send_when ) {
 				$days_after = absint( get_post_meta( $email->ID, 'wcor_send_days_after', true ) );
 
-				if ( $days_after ) {
+				if ( $end_date && $days_after ) {
 					$send_date = $end_date + ( $days_after * DAY_IN_SECONDS );
 					
 					if ( $send_date <= current_time( 'timestamp' ) ) {
+						$ready = true;
+					}
+				}
+			} elseif ( 'wcor_send_after_pending' == $send_when ) {
+				$days_after_pending                  = absint( get_post_meta( $email->ID, 'wcor_send_days_after_pending', true ) );
+				$timestamp_added_to_pending_schedule = absint( get_post_meta( $wordcamp->ID, '_timestamp_added_to_planning_schedule', true ) );
+
+				if ( $days_after_pending && $timestamp_added_to_pending_schedule ) {
+					$execution_timestamp = $timestamp_added_to_pending_schedule + ( $days_after_pending * DAY_IN_SECONDS );
+
+					if ( $execution_timestamp <= current_time( 'timestamp' ) ) {
 						$ready = true;
 					}
 				}

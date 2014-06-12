@@ -89,6 +89,7 @@ class WCOR_Reminder {
 		$send_when           = get_post_meta( $post->ID, 'wcor_send_when', true );
 		$send_days_before    = get_post_meta( $post->ID, 'wcor_send_days_before', true );
 		$send_days_after     = get_post_meta( $post->ID, 'wcor_send_days_after', true );
+		$send_days_after_pending = get_post_meta( $post->ID, 'wcor_send_days_after_pending', true );
 		$which_trigger       = get_post_meta( $post->ID, 'wcor_which_trigger', true );
 		
 		?>
@@ -135,6 +136,15 @@ class WCOR_Reminder {
 					<td>
 						<input id="wcor_send_days_after" name="wcor_send_days_after" type="text" class="small-text" value="<?php echo esc_attr( $send_days_after ); ?>" />
 						<label for="wcor_send_days_after">days</label>
+					</td>
+				</tr>
+
+				<tr>
+					<th><input id="wcor_send_after_pending" name="wcor_send_when" type="radio" value="wcor_send_after_pending" <?php checked( $send_when, 'wcor_send_after_pending' ); ?>></th>
+					<td><label for="wcor_send_after_pending">after added to pending schedule: </label></td>
+					<td>
+						<input id="wcor_send_days_after_pending" name="wcor_send_days_after_pending" type="text" class="small-text" value="<?php echo esc_attr( $send_days_after_pending ); ?>" />
+						<label for="wcor_send_days_after_pending">days</label>
 					</td>
 				</tr>
 
@@ -357,7 +367,7 @@ class WCOR_Reminder {
 		}		
 		
 		if ( isset( $new_meta['wcor_send_when'] ) ) {
-			if ( in_array( $new_meta['wcor_send_when'], array( 'wcor_send_before', 'wcor_send_after', 'wcor_send_trigger' ) ) ) {
+			if ( in_array( $new_meta['wcor_send_when'], array( 'wcor_send_before', 'wcor_send_after', 'wcor_send_after_pending', 'wcor_send_trigger' ) ) ) {
 				update_post_meta( $post->ID, 'wcor_send_when', $new_meta['wcor_send_when'] );
 			}
 		}
@@ -368,6 +378,10 @@ class WCOR_Reminder {
 
 		if ( isset( $new_meta['wcor_send_days_after'] ) ) {
 			update_post_meta( $post->ID, 'wcor_send_days_after', absint( $new_meta['wcor_send_days_after'] ) );
+		}
+
+		if ( isset( $new_meta['wcor_send_days_after_pending'] ) ) {
+			update_post_meta( $post->ID, 'wcor_send_days_after_pending', absint( $new_meta['wcor_send_days_after_pending'] ) );
 		}
 
 		if ( isset( $new_meta['wcor_which_trigger'] ) ) {
