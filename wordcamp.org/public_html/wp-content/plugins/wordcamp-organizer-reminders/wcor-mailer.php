@@ -321,6 +321,9 @@ class WCOR_Mailer {
 	 * One exception to that is if a camp is added later than expected (e.g., we start sending e-mails 4 months before the start date, but a camp
 	 * isn't scheduled until 2 months before the start). When that happens, we want to send all the e-mails that they've missed.
 	 *
+	 * We don't want newly created messages to be retroactively sent to all WordCamps that occurred before the e-mail was created though, so we
+	 * only send messages to camps that were created after the e-mail was created.
+	 *
 	 * @todo It'd be nice to have some unit tests for this function, since there are a lot of different cases, but it seems like that might be
 	 * hard to do because of having to mock get_post_meta(), current_time(), etc. We could pass that info in, but that doesn't seem very elegant.
 	 *       
@@ -330,7 +333,12 @@ class WCOR_Mailer {
 	 * @return bool
 	 */
 	protected function timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) {
-		$ready      = false;
+		$ready = false;
+
+		if ( strtotime( $wordcamp->post_date ) < strtotime( $email->post_date ) ) {
+			return $ready;
+		}
+
 		$send_when  = get_post_meta( $email->ID, 'wcor_send_when', true );
 		$start_date = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
 		$end_date   = get_post_meta( $wordcamp->ID, 'End Date (YYYY-mm-dd)', true );
@@ -338,7 +346,7 @@ class WCOR_Mailer {
 		if ( ! $end_date ) {
 			$end_date = $start_date;
 		}
-		
+
 		if ( ! in_array( $email->ID, $sent_email_ids ) ) {
 			if ( 'wcor_send_before' == $send_when ) {
 				$days_before = absint( get_post_meta( $email->ID, 'wcor_send_days_before', true ) );
