@@ -1,9 +1,9 @@
-/* =Header
+/* =Site Style
 -------------------------------------------------------------- */
 
 #header {
-	background-color: #663399;
-	border-bottom: 1px solid #333;
+	background-color: #be3631;
+	border-bottom: 1px solid #9e1611;
 }
 
 #header h1 a {
@@ -13,57 +13,71 @@
 }
 
 #header h1 a:after {
-        font: normal 22px/1 'dashicons';
-        position: absolute;
-        color: #fff;
-        content: '\f456';
-        left: 251px;
-        top: 6px;
-        text-indent: 0;
+	font: normal 22px/1 'dashicons';
+	position: absolute;
+	color: #fff;
+	content: '\f456';
+	left: 251px;
+	top: 6px;
+	text-indent: 0;
 }
 
 /* =Site Style
 -------------------------------------------------------------- */
 
-body.bbp-user-page div.content,
-body.bbp-user-edit div.content {
-	width: auto;
-	float: none;
+a:hover img,
+#main a:hover img {
+	border: 1px solid #dd823b;
 }
 
 div.standard {
+	border: #990000 solid 2px;
 	background: #EBF5FA;
+}
+
+div.free-page div.standard {
+	border: #990000 solid 2px;
 }
 
 /* =Buttons
 -------------------------------------------------------------- */
 
 .button {
-	background-color: #663399;
-	color: #fff;
+	background-color: #dd823b;
+	border: 1px solid #9d4200;
+}
+
+.button:hover,
+.button:active {
+	background-color: #dd823b;
+	color: rgba(255,255,255,0.9);
+}
+
+/* =Navigation
+-------------------------------------------------------------- */
+
+#nav li a:hover {
+	background-color: #cf4944;
+	color: rgba(255,255,255,0.9);
 }
 
 #nav li.current a,
-#nav li a:active,
-#nav li a:hover,
-.button:active,
-.button:hover  {
-	background: #6becca;
-	color: #663399;
+#nav li a:active {
+	background-color: #dd823b;
 }
 
 #subnav-inner ul li a:hover {
-	color: #663399;
+	color: #d84800;
 }
 
 /* =Links
 -------------------------------------------------------------- */
 
 a {
-	color: #663399;
+	color: #be3631;
 }
 a:hover {
-	color: #6becca;
+	color: #dd823b;
 }
 
 /* =Text
@@ -73,25 +87,25 @@ blockquote {
 	background-color: #eee;
 }
 div.action a {
-	color: #663399;
+	color: #990000;
 }
 
 /* =Input
 -------------------------------------------------------------- */
 
 input.submit {
-	background: #663399;
+	background: #3399cc;
 	color: #fff;
 }
 input.submit:hover {
-	background: #6becca;
-	color: #663399;
+	background: #990000;
 }
 
 /* =HiDPI Overrides
 -------------------------------------------------------------- */
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+
 	#header h1 a {
 		background-image: url('../buddypress-org/images/buddypress-logo-2x.png');
 		background-size: 269px 65px;

@@ -1,0 +1,95 @@
+/* =Header
+-------------------------------------------------------------- */
+
+#header {
+	background-color: #663399;
+	border-bottom: 1px solid #333;
+}
+
+#header-inner {
+	background: url('../bbpress-org/images/bee.png') no-repeat 197px -72px;
+}
+#header h1 a {
+	background: url('../bbpress-org/images/bbpress-logo-white.png') no-repeat 0 0;
+}
+
+/* =Site Style
+-------------------------------------------------------------- */
+
+body.bbp-user-page div.content,
+body.bbp-user-edit div.content {
+	width: auto;
+	float: none;
+}
+
+div.standard {
+	background: #EBF5FA;
+}
+
+/* =Buttons
+-------------------------------------------------------------- */
+
+.button {
+	background-color: #663399;
+	color: #fff;
+}
+
+#nav li.current a,
+#nav li a:active,
+#nav li a:hover,
+.button:active,
+.button:hover  {
+	background: #6becca;
+	color: #663399;
+}
+
+#subnav-inner ul li a:hover {
+	color: #663399;
+}
+
+/* =Links
+-------------------------------------------------------------- */
+
+a {
+	color: #663399;
+}
+a:hover {
+	color: #6becca;
+}
+
+/* =Text
+-------------------------------------------------------------- */
+
+blockquote {
+	background-color: #eee;
+}
+div.action a {
+	color: #663399;
+}
+
+/* =Input
+-------------------------------------------------------------- */
+
+input.submit {
+	background: #663399;
+	color: #fff;
+}
+input.submit:hover {
+	background: #6becca;
+	color: #663399;
+}
+
+/* =HiDPI Overrides
+-------------------------------------------------------------- */
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	#header-inner {
+		background-image: url('../bbpress-org/images/bee-2x.png');
+		background-size: 231px 162px;
+	}
+
+	#header h1 a {
+		background-image: url('../bbpress-org/images/bbpress-logo-white-2x.png');
+		background-size: 208px 65px;
+	}
+}
