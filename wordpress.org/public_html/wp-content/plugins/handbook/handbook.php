@@ -9,10 +9,39 @@ require_once dirname( __FILE__ ) . '/inc/glossary.php';
 require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
 require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
 
-WPorg_Handbook_Glossary::init();
-new WPorg_Handbook_TOC;
+//WPorg_Handbook_Glossary::init();
+
+/**
+ * Initialize our handbooks
+ *
+ */
+class WPorg_Handbook_Init {
+
+	static function init() {
+
+		$post_types = 'handbook';
+
+		$post_types = apply_filters( 'handbook_post_types', $post_types );
+
+		if ( ! is_array( $post_types ) ) {
+			$post_types = (array) $post_types;
+		}
+
+		new WPorg_Handbook_TOC( $post_types );
+
+		foreach ( $post_types as $type ) {
+			new WPorg_Handbook( $type );
+
+		}
+	}
+}
+add_action( 'after_setup_theme', array( 'WPorg_Handbook_Init', 'init' ) );
 
 class WPorg_Handbook {
+
+	public $post_type = '';
+
+	protected $label = '';
 
 	static function caps() {
 		return array(
@@ -30,7 +59,11 @@ class WPorg_Handbook {
 		);
 	}
 
-	function __construct() {
+	function __construct( $type ) {
+		if ( 'handbook' != $type )
+			$this->post_type = $type . '-handbook';
+
+		$this->label = ucwords( str_replace( array( '-', '_' ), ' ', $this->post_type ) );
 		add_filter( 'user_has_cap', array( $this, 'grant_handbook_caps' ) );
 		add_filter( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'admin_page_access_denied', array( $this, 'admin_page_access_denied' ) );
@@ -55,11 +88,17 @@ class WPorg_Handbook {
 	}
 
 	function register_post_type() {
-		register_post_type( 'handbook', array(
+		if ( 'handbook' != $this->post_type ) {
+			$slug = 'handbook/' . substr( $this->post_type, 0, -9 );
+		} else {
+			$slug = 'handbook';
+		}
+		register_post_type( $this->post_type, array(
 			'labels' => array(
-				'name' => 'Handbook Pages',
-				'singular_name' => 'Handbook Page',
-				'menu_name' => 'Handbook',
+				'name' => "{$this->label} Pages",
+				'singular_name' => "{$this->label} Page",
+				'menu_name' => "{$this->label}",
+				'all_items' => "{$this->label} Pages",
 			),
 			'public' => true,
 			'show_ui' => true,
@@ -68,7 +107,11 @@ class WPorg_Handbook {
 			'has_archive' => true,
 			'hierarchical' => true,
 			'menu_position' => 11,
-			'rewrite' => true,
+			'rewrite'     => array(
+				'feeds'      => false,
+				'slug'       => $slug,
+				'with_front' => false,
+			),
 			'delete_with_user' => false,
 			'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'page-attributes', 'custom-fields', 'comments', 'revisions' ),
 		) );
@@ -76,38 +119,32 @@ class WPorg_Handbook {
 
 	function admin_page_access_denied() {
 		if ( ! current_user_can( 'read' ) ) {
-			wp_redirect( admin_url( 'edit.php?post_type=handbook' ) );
+			wp_redirect( admin_url( "edit.php?post_type={$this->post_type}" ) );
 			exit;
 		}
 	}
 
 	function post_type_link( $link, $post ) {
-		if ( $post->post_type === 'handbook' && $post->post_name === 'handbook' )
-			return get_post_type_archive_link( 'handbook' );
+		if ( $post->post_type === $this->post_type && $post->post_name === $this->post_type )
+			return get_post_type_archive_link( $this->post_type );
 		return $link;
 	}
 
 	function pre_get_posts( $query ) {
-		if ( $query->is_main_query() && ! $query->is_admin && $query->is_post_type_archive( 'handbook' ) ) {
-			$query->set( 'handbook', 'handbook' );
+		if ( $query->is_main_query() && ! $query->is_admin && $query->is_post_type_archive( $this->post_type ) ) {
+			$query->set( 'handbook', $this->post_type );
 		}
 	}
 
 	function handbook_sidebar() {
-		if ( ! class_exists( 'P2' ) )
-			return;
-
-		register_sidebar( array( 'id' => 'handbook', 'name' => 'Handbook', 'description' => 'Used on handbook pages' ) );
-
+		register_sidebar( array( 'id' => $this->post_type, 'name' => $this->label, 'description' => "Used on {$this->label} pages" ) );
 		require_once dirname( __FILE__ ) . '/inc/widgets.php';
 		register_widget( 'WPorg_Handbook_Pages_Widget' );
 	}
 
 	function wporg_email_changes_for_post_types( $post_types ) {
-		if ( ! in_array( 'handbook', $post_types ) )
-			$post_types[] = 'handbook';
+		if ( ! in_array( $this->post_type, $post_types ) )
+			$post_types[] = $this->post_type;
 		return $post_types;
 	}
 }
-
-new WPorg_Handbook;

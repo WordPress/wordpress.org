@@ -5,17 +5,27 @@
  * @author Automattic, modifed by Nacin
  */
 class WPorg_Handbook_TOC {
-	protected $post_type = 'handbook';
+	protected $post_types = array();
 
 	protected $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
 
-	function __construct() {
+	function __construct( $post_types ) {
+		$this->post_types = $post_types;
 		add_action( 'template_redirect', array( $this, 'load_filters' ) );
 	}
 
 	function load_filters() {
-		if ( is_singular( $this->post_type ) )
+		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
+
+		if ( is_singular( $this->post_types ) )
 			add_filter( 'the_content', array( $this, 'add_toc' ) );
+	}
+
+	function append_suffix( $t ) {
+		if ( 'handbook' == $t )
+			return $t;
+
+		return $t . '-handbook';
 	}
 
 	function add_toc( $content ) {
@@ -31,13 +41,13 @@ class WPorg_Handbook_TOC {
 		else
 			$pages_header = 'h3';
 
-		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => $this->post_type ) ) ) 
-            $toc .= "<$pages_header>Pages</$pages_header><ul class=\"items\">$pages</ul>"; 
+		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => $this->post_type ) ) )
+			$toc .= "<$pages_header>Pages</$pages_header><ul class=\"items\">$pages</ul>";
 
 		if ( $items ) {
 			$toc .= $this->styles;
 			$toc .= '<div class="table-of-contents">';
-			$toc .= "<$contents_header>Topics</$contents_header><ul class=\"items\">";
+			$toc .= "<$contents_header>Contents</$contents_header><ul class=\"items\">";
 			$last_item = false;
 			foreach ( $items as $item ) {
 				if ( $last_item ) {

@@ -14,8 +14,6 @@ class WPorg_Handbook_Email_Post_Changes {
 	}
 
 	function handbook_sidebar() {
-		if ( ! class_exists( 'P2' ) || ! class_exists( 'Email_Post_Changes' ) )
-			return;
 
 		require_once dirname( __FILE__ ) . '/widgets.php';
 		register_widget( 'WPorg_Handbook_Widget' );

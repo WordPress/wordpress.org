@@ -1,39 +1,48 @@
 <?php
 
 class WPorg_Handbook_Widget extends WP_Widget {
-	protected $post_type = 'handbook';
+
+	protected $post_types = 'handbook';
 
 	function __construct() {
+		$this->post_types = apply_filters( 'handbook_post_types', $this->post_types );
+		if ( ! is_array( $this->post_types ) ) {
+			$this->post_types = (array) $this->post_types;
+		}
+		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
 		parent::__construct( 'handbook', 'Handbook Tools', array( 'classname' => 'widget_wporg_handbook', 'description' => 'Shows watch/unwatch links for handbook pages.' ) );
 	}
 
 	function widget() {
 		if ( ! is_user_logged_in() )
 			return;
-		$post = get_post();
 
-		switch ( $this->post_type ) {
-			case 'page' :
-				if ( $post->post_type !== 'page' )
-					return;
-				break;
-			default :
-				if ( $post->post_type !== $this->post_type && ! is_post_type_archive( $this->post_type ) )
-					return;
-				break;
+		$post = get_post();
+		if ( $post->post_type == 'page' || ( in_array( $post->post_type, $this->post_types ) && ! is_post_type_archive( $this->post_types ) ) ) {
+			$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
+			if ( $watchlist && in_array( get_current_user_id(), $watchlist ) ) {
+				printf( '<p>You are watching this page. <a href="%s">Unwatch</a></p>',
+				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ) );
+			} else {
+				printf( '<p><a href="%s">Watch this page</a></p>',
+				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ) );
+			}
+		} else {
+			return;
 		}
 
-		$watchlist = get_post_meta( $post->ID, '_wporg_watchlist', true );
-		if ( $watchlist && in_array( get_current_user_id(), $watchlist ) )
-			printf( '<p class="handbook-watch">You are watching this page. <a href="%s">Unwatch</a></p>',
-				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&post_id=' . $post->ID ), 'unwatch-' . $post->ID ) );
-		else
-			printf( '<p class="handbook-watch"><a href="%s">Watch this page</a></p>',
-				wp_nonce_url( admin_url( 'admin-post.php?action=wporg_watchlist&watch=1&post_id=' . $post->ID ), 'watch-' . $post->ID ) );
+	}
+
+	function append_suffix( $t ) {
+		if ( 'handbook' == $t )
+			return $t;
+
+		return $t . '-handbook';
 	}
 }
 
 class WPorg_Handbook_Widget_for_Pages extends WPorg_Handbook_Widget {
+
 	protected $post_type = 'page';
 
 	function __construct() {
@@ -42,7 +51,8 @@ class WPorg_Handbook_Widget_for_Pages extends WPorg_Handbook_Widget {
 }
 
 class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
-	protected $post_type = 'handbook';
+
+	protected $post_types = 'handbook';
 
 	function __construct() {
 		$widget_ops = array('classname' => 'widget_wporg_handbook_pages', 'description' => __( 'Your site&#8217;s Handbook Pages') );
@@ -56,8 +66,24 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 	}
 
 	function handbook_post_type( $args ) {
-		$args['post_type'] = $this->post_type;
+		$post = get_post();
+
+		$this->post_types = apply_filters( 'handbook_post_types', $this->post_types );
+		if ( ! is_array( $this->post_types ) ) {
+			$this->post_types = (array) $this->post_types;
+		}
+		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
+
+		if ( in_array( $post->post_type, $this->post_types ) ) {
+			$args['post_type'] = $post->post_type;
+		}
 		return $args;
 	}
-}
 
+	function append_suffix( $t ) {
+		if ( 'handbook' == $t )
+			return $t;
+
+		return $t . '-handbook';
+	}
+}
