@@ -25,6 +25,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
+		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
 		extract( $args );
@@ -124,6 +125,7 @@ class WCPT_Widget_Speakers extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
+		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
 		$transient_key = 'wcpt-' . md5( $args['widget_id'] );
@@ -229,6 +231,7 @@ class WCPT_Widget_Sessions extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
+		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
 		$transient_key = 'wcpt-' . md5( $args['widget_id'] );
@@ -338,6 +341,7 @@ class WCPT_Widget_Organizers extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
+		/** @var $wcpt_plugin WordCamp_Post_Types_Plugin */
 		global $wcpt_plugin;
 
 		$transient_key = 'wcpt-' . md5( $args['widget_id'] );

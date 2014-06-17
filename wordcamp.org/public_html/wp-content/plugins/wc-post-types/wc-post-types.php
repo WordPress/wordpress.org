@@ -158,6 +158,8 @@ class WordCamp_Post_Types_Plugin {
 
 	/**
 	 * Runs during pre_get_posts in admin.
+	 *
+	 * @param WP_Query $query
 	 */
 	function admin_pre_get_posts( $query ) {
 		if ( ! is_admin() || ! $query->is_main_query() )
