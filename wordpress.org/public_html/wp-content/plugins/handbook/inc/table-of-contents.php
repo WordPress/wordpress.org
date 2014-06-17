@@ -72,8 +72,10 @@ class WPorg_Handbook_TOC {
 	protected function add_ids_and_jumpto_links( $tag, $content ) {
 		$items = $this->get_tags( $tag, $content );
 		$first = true;
+		$matches = array();
+		$replacements = array();
 
-		foreach ($items as $item) {
+		foreach ( $items as $item ) {
 			$replacement = '';
 			$matches[] = $item[0];
 			$id = sanitize_title_with_dashes($item[2]);
@@ -88,7 +90,9 @@ class WPorg_Handbook_TOC {
 			$replacements[] = $replacement;
 		}
 
-		$content = str_replace( $matches, $replacements, $content );
+		if ( $replacements ) {
+			$content = str_replace( $matches, $replacements, $content );
+		}
 
 		return $content;
 	}
