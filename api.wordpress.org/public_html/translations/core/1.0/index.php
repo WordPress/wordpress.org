@@ -13,6 +13,6 @@ $translations = find_all_translations_for_core( $version );
 
 call_headers( 'application/json' );
 
-echo json_encode( $translations );
+echo json_encode( array( 'languages' => $translations ) );
 exit;
 
