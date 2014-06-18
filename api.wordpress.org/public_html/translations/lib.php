@@ -73,7 +73,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		$_translations[ $iso ] = $translation;
 		$_translations[ $iso ]->english_name = $locale->english_name;
 		$_translations[ $iso ]->native_name = $locale->native_name;
-		$_translations[ $iso ]->download_url = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
+		$_translations[ $iso ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
 	}
 	ksort( $_translations );
 	$translations = array_values( $_translations );
