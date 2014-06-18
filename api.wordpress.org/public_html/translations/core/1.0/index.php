@@ -7,7 +7,7 @@ require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
 require( $base_dir . '/includes/object-cache.php' );
 wp_cache_init();
 
-$version = isset( $_GET['version'] ) ? $_GET['version'] : WP_CORE_LATEST_RELEASE;
+$version = isset( $_REQUEST['version'] ) ? $_REQUEST['version'] : WP_CORE_LATEST_RELEASE;
 
 $translations = find_all_translations_for_core( $version );
 
