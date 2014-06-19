@@ -164,19 +164,17 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			if ( '1' == $_POST['newTopic'] ) {
 				$action = sprintf(
-					__( 'Created a topic, <a href="%s">%s</a>, on the site <a href="%s">%s</a>', 'wporg' ),
+					__( 'Created a topic, <a href="%s">%s</a>, on the site %s', 'wporg' ),
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
-					esc_url( $_POST['site_url'] ),
 					$_POST['site']
 				);
 				$type = 'forum_topic_create';
 			} else {
 				$action = sprintf(
-					__( 'Posted a <a href="%s">reply</a> to %s, on the site <a href="%s">%s</a>', 'wporg' ),
+					__( 'Posted a <a href="%s">reply</a> to %s, on the site %s', 'wporg' ),
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
-					esc_url( $_POST['site_url'] ),
 					$_POST['site']
 				);
 				$type = 'forum_reply_create';
@@ -440,20 +438,18 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'blog_comment_create';
 				$item_id = $_POST['comment_id'];
 				$action  = sprintf(
-					__( 'Wrote a <a href="%s">comment</a> on the post %s, on the site <a href="%s">%s</a>', 'wporg' ),
+					__( 'Wrote a <a href="%s">comment</a> on the post %s, on the site %s', 'wporg' ),
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
-					esc_url( $_POST['blog_url'] ),
 					$_POST['blog']
 				);
 			} else {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
 				$action  = sprintf(
-					__( 'Wrote a new post, <a href="%s">%s</a>, on the site <a href="%s">%s</a>', 'wporg' ),
+					__( 'Wrote a new post, <a href="%s">%s</a>, on the site %s', 'wporg' ),
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
-					esc_url( $_POST['blog_url'] ),
 					$_POST['blog']
 				);
 			}
