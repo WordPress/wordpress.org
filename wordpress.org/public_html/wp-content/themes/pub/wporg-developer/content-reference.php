@@ -132,7 +132,7 @@ if ( ! empty( $since ) ) : ?>
 		<section class="source-content">
 			<h2><?php _e( 'Source', 'wporg' ); ?></h2>
 			<div class="source-code-container">
-				<pre class="brush: php; toolbar: false;"><?php echo esc_html( get_source_code() ); ?></pre>
+				<pre class="brush: php; toolbar: false;"><?php echo htmlentities( get_source_code() ); ?></pre>
 			</div>
 			<p class="source-code-links">
 				<span>
