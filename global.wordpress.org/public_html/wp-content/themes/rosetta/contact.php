@@ -164,9 +164,10 @@ remove_action('phpmailer_init', 'rosetta_set_sender');
 
 <h3><?php _e('Contact', 'rosetta'); ?></h3>
 
-<?php if ( "The contents of this page are filled automatically, you don't need to spend time here. Just change the title." == get_the_content() ) : ?>
+<?php if ( false !== strpos( get_the_content(), 'The contents of this page are filled automatically' ) ) : ?>
 	<p><?php _e('You can contact translators and this site administrators via this form:', 'rosetta'); ?></p>
-	<p><?php /* translators: feel free to add links to places, where one can get support in your language. */ _e('<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta');?></p>
+	<?php /* translators: feel free to add links to places, where one can get support in your language. */ ?>
+	<p><?php _e('<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta'); ?></p>
 <?php else: ?>
 	<?php the_content(); ?>
 <?php endif; ?>
