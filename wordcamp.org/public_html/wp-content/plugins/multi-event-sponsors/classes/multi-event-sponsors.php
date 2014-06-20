@@ -206,4 +206,42 @@ class Multi_Event_Sponsors {
 
 		return $addresses;
 	}
+
+	/**
+	 * Retrieve the names of the given sponsors in a sentence format.
+	 *
+	 * @param array $sponsors
+	 * @return string
+	 */
+	public function get_sponsor_names( $sponsors ) {
+		$names = wp_list_pluck( $sponsors, 'post_title' );
+		$count = count( $names );
+
+		if ( 0 === $count ) {
+			$names = '';
+		} else if ( 1 === $count ) {
+			$names = $names[0];
+		} else {
+			$names = implode( ', ', array_slice( $names, 0, $count - 1 ) ) . ' and ' . $names[ $count - 1 ];
+		}
+
+		return $names;
+	}
+
+
+	/**
+	 * Get the excerpts for the given sponsors in HTML paragraphs.
+	 *
+	 * @param array $sponsors
+	 * @return string
+	 */
+	public function get_sponsor_excerpts( $sponsors ) {
+		$excerpts = wp_list_pluck( $sponsors, 'post_excerpt' );
+
+		foreach ( $excerpts as & $excerpt ) {
+			$excerpt = '<p>' . $excerpt . '</p>';
+		}
+
+		return implode( ' ', $excerpts );
+	}
 } // end Multi_Event_Sponsors
