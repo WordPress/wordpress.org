@@ -157,9 +157,12 @@ class Multi_Event_Sponsors {
 	 * Retrieve all of the Multi-Event Sponsors for the given WordCamp.
 	 *
 	 * @param int $wordcamp_id
+	 * @param string $grouped_by
+	 *     'ungrouped' will return a one-dimensional array;
+	 *     'sponsor_level' will return an associative array with sponsors grouped by their level and indexed by level ID
 	 * @return array
 	 */
-	public function get_wordcamp_me_sponsors( $wordcamp_id ) {
+	public function get_wordcamp_me_sponsors( $wordcamp_id, $grouped_by = 'ungrouped' ) {
 		$wordcamp_sponsors = array();
 		$wordcamp_region   = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
 
@@ -170,8 +173,14 @@ class Multi_Event_Sponsors {
 
 		foreach ( $all_me_sponsors as $sponsor ) {
 			$regional_sponsorships = get_post_meta( $sponsor->ID, 'mes_regional_sponsorships', true );
+
 			if ( is_numeric( $regional_sponsorships[ $wordcamp_region ] ) ) {
-				$wordcamp_sponsors[] = $sponsor;
+				if ( 'sponsor_level' == $grouped_by ) {
+					$sponsorship_level = get_post( $regional_sponsorships[ $wordcamp_region ] );
+					$wordcamp_sponsors[ $sponsorship_level->ID ][] = $sponsor;
+				} else {
+					$wordcamp_sponsors[] = $sponsor;
+				}
 			}
 		}
 
