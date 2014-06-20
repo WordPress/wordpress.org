@@ -56,7 +56,7 @@ class MES_Sponsorship_Level {
 			'has_archive'     => true,
 			'rewrite'         => array( 'slug' => 'sponsorship-level', 'with_front' => false ),
 			'query_var'       => true,
-			'supports'        => array( 'title', 'editor', 'author', 'revisions' ),
+			'supports'        => array( 'title', 'editor', 'author', 'excerpt', 'revisions' ),
 			'taxonomies'      => array( MES_Sponsor::REGIONS_SLUG ),
 		);
 
