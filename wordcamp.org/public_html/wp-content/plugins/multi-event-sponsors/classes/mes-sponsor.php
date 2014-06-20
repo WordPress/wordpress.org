@@ -63,7 +63,7 @@ class MES_Sponsor {
 			'has_archive'     => true,
 			'rewrite'         => array( 'slug' => 'multi-event-sponsor', 'with_front' => false ),
 			'query_var'       => true,
-			'supports'        => array( 'title', 'editor', 'author', 'revisions', 'thumbnail' ),
+			'supports'        => array( 'title', 'editor', 'author', 'excerpt', 'revisions', 'thumbnail' ),
 			'taxonomies'      => array( self::REGIONS_SLUG ),
 		);
 
@@ -99,7 +99,7 @@ class MES_Sponsor {
 			array( $this, 'markup_meta_boxes' ),
 			self::POST_TYPE_SLUG,
 			'normal',
-			'core'
+			'default'
 		);
 
 		add_meta_box(
@@ -108,7 +108,7 @@ class MES_Sponsor {
 			array( $this, 'markup_meta_boxes' ),
 			self::POST_TYPE_SLUG,
 			'normal',
-			'core'
+			'default'
 		);
 	}
 
