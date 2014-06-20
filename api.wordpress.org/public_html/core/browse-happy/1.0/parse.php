@@ -18,7 +18,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
     if ( preg_match('/^.+?(?P<platform>Android|iPhone|iPad|Windows|Linux|Macintosh|Windows Phone OS|RIM Tablet OS|PlayBook)(?: NT)*(?: [ix]?[0-9._]+)*(;|\))/im', $user_agent, $regs ) )
         $data['platform'] = $regs['platform'];
 
-    preg_match_all( '%(?P<name>Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Opera|Version)(?:[/ ])(?P<version>[0-9.]+)%im', $user_agent, $result, PREG_PATTERN_ORDER );
+    preg_match_all( '%(?P<name>Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Opera|Version)(?:[/ ])(?P<version>[0-9.]+)%im', $user_agent, $result, PREG_PATTERN_ORDER );
     
     // If Version/x.x.x was specified in UA string store it and ignore it
     if ( $key = array_search( 'Version', $result['name'] ) ) {
@@ -57,7 +57,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
             $key = 0;
         }
         $data['version'] = $result['version'][ $key ];
-    } else {
+    } elseif ( 'Trident' == $result['name'][0] ) { 
+    	// IE 11 and beyond have switched to Trident
+    	// http://msdn.microsoft.com/en-us/library/ie/hh869301%28v=vs.85%29.aspx
+    	$data['name'] = 'Internet Explorer';
+    	if( '7.0' == $result['version'][0] ) {
+			$data['version'] = '11';
+		}
+	} else {
         $data['name'] = $result['name'][0];
         $data['version'] = $result['version'][0];
     }
