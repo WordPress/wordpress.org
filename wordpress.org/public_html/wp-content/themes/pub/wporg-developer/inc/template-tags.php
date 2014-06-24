@@ -719,7 +719,7 @@ namespace DevHub {
 			fclose( $handle );
 		}
 
-		update_post_meta( $post_id, $meta_key, $source_code );
+		update_post_meta( $post_id, $meta_key, addslashes( $source_code ) );
 
 		return $source_code;
 	}
