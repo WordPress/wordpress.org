@@ -236,11 +236,14 @@ jQuery( document ).ready( function( $ ) {
 
 		echo '<h3>Help maintain this component</h3>';
 
-		if ( $maintainers = get_post_meta( $post->ID, '_active_maintainers', true ) ) {
+		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
+		if ( $maintainers ) {
+			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
 			echo 'Component maintainers: ';
 			echo '<ul class="maintainers">';
-			foreach ( array_map( 'trim', explode( ',', $maintainers ) ) as $maintainer ) {
-				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '"><img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $maintainer ) . '&amp;s=36" /></a> ' . $maintainer . '</li>';
+			foreach ( $maintainers as $maintainer ) {
+				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '">';
+				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $maintainer ) . '&amp;s=36" /></a> ' . $maintainer . '</li>';
 			}
 			echo "</ul>\n\n";
 		}
@@ -250,14 +253,14 @@ jQuery( document ).ready( function( $ ) {
 
 		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
 		if ( $followers ) {
-			echo 'Contributors following this component:';
-      echo '<ul class="followers">';
+			echo 'Contributors following this component: ';
+			echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
 				$follower = esc_attr( $follower );
 				echo '<li><a title="' . $follower . '" href="//profiles.wordpress.org/' . $follower . '">';
 				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . $follower . '&amp;s=36" /></a></li>';
 			}
-      echo '</ul>';
+			echo '</ul>';
 		}
 
 		$content .= "\n\n" . '<div class="component-info">' . ob_get_clean() . '</div>';
