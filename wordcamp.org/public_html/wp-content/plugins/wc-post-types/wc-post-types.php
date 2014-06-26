@@ -1215,7 +1215,15 @@ class WordCamp_Post_Types_Plugin {
 			if ( empty( $speaker_name ) )
 				continue;
 
-			// Look for speakers by their names.
+			/*
+			 * Look for speakers by their names.
+			 *
+			 * @todo - This is very fragile, it fails if the speaker name has a tab character instead of a space
+			 * separating the first from last name, or an extra space at the end, etc. Those situations often arise
+			 * from copy/pasting the speaker data from spreadsheets. Moving to automated speaker submissions and
+			 * tighter integration with WordPress.org usernames should avoid this, but if not we should do something
+			 * here to make it more forgiving.
+			 */
 			$speaker = get_page_by_title( $speaker_name, OBJECT, 'wcb_speaker' );
 			if ( $speaker )
 				$speaker_ids[] = $speaker->ID;
