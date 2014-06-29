@@ -22,16 +22,7 @@ if ( post_password_required() ) {
 
 <div id="comments" class="comments-area">
 
-	<?php // You can start editing here -- including this comment! ?>
-
 	<?php if ( have_comments() ) : ?>
-		<h2 class="comments-title">
-			<?php
-				printf( _nx( 'One thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'wporg' ),
-					number_format_i18n( get_comments_number() ), '<span>' . get_the_title() . '</span>' );
-			?>
-		</h2>
-
 		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // are there comments to navigate through ?>
 		<nav id="comment-nav-above" class="comment-navigation" role="navigation">
 			<h1 class="screen-reader-text"><?php _e( 'Comment navigation', 'wporg' ); ?></h1>
@@ -62,13 +53,18 @@ if ( post_password_required() ) {
 
 	<?php endif; // have_comments() ?>
 
-	<?php
-		// If comments are closed and there are comments, let's leave a little note, shall we?
-		if ( ! comments_open() && '0' != get_comments_number() && post_type_supports( get_post_type(), 'comments' ) ) :
-	?>
-		<p class="no-comments"><?php _e( 'Comments are closed.', 'wporg' ); ?></p>
-	<?php endif; ?>
+	<p id="add-example" style="display:none;"><a href=""><?php _e( 'Have an example to add?', 'wporg' ); ?></a></p>
 
-	<?php comment_form(); ?>
+	<?php comment_form( array(
+		'comment_field'       => '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Example', 'noun', 'wporg' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>',
+		'comment_notes_after' => '<p class="examples-are-gpl">' .
+			sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
+			'</p><p>' .
+			__( 'The entirety of your submission is considered a code example. Any included non-code text should be formatted as code comments.', 'wporg' ) .
+			'</p>',
+		'label_submit'        => __( 'Add Example', 'wporg' ),
+		'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to submit an example.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
+		'title_reply'         =>  '', //'Add Example'
+	) ); ?>
 
 </div><!-- #comments -->

@@ -54,9 +54,11 @@ function init() {
 	add_theme_support( 'post-thumbnails' );
 
 	// Temporarily disable comments
-	add_filter( 'comments_open', '__return_false' );
+	//add_filter( 'comments_open', '__return_false' );
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
+
+	treat_comments_as_examples();
 }
 
 /**
@@ -349,7 +351,65 @@ function theme_scripts_styles() {
 		wp_enqueue_style( 'syntaxhighlighter-theme-default' );
 	}
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
+	if ( is_singular() && comments_open() ) {
+		wp_enqueue_script( 'wporg-developer-code-examples', get_template_directory_uri() . '/js/code-example.js', array(), '20140423', true );
+		if ( get_option( 'thread_comments' ) ) {
+			wp_enqueue_script( 'comment-reply' );
+		}
 	}
+}
+
+/**
+ * Handles adding/removing hooks to enable comments as examples.
+ *
+ * Mostly gives users greater permissions in terms of comment content.
+ *
+ * In order to submit code examples, users must be able to post with less restrictions.
+ */
+function treat_comments_as_examples() {
+	// Restricts commenting to logged in users.
+	add_filter( 'comments_open', __NAMESPACE__ . '\\prevent_invalid_comment_submissions', 10, 2 );
+
+	if ( ! current_user_can( 'unfiltered_html' ) ) {
+		remove_filter( 'pre_comment_content', 'wp_filter_kses'      );
+		add_filter(    'pre_comment_content', 'wp_filter_post_kses' );
+	}
+
+	// Force comment registration to be true
+	add_filter( 'pre_option_comment_registration', '__return_true' );
+
+	// Force comment moderation to be true
+	add_filter( 'pre_option_comment_moderation',   '__return_true' );
+
+	// Remove reply to link
+	add_filter( 'comment_reply_link',              '__return_empty_string' );
+
+/*	foreach ( array( 'comment_save_pre', 'pre_comment_content' ) as $filter ) {
+		add_filter( $filter, 'balanceTags', 50 );
+	}*/
+
+	remove_filter( 'comment_text',        'capital_P_dangit',   31 );
+
+	remove_filter( 'comment_text',        'wptexturize'            );
+	remove_filter( 'comment_text',        'convert_chars'          );
+	remove_filter( 'comment_text',        'make_clickable',      9 );
+	remove_filter( 'comment_text',        'force_balance_tags', 25 );
+	remove_filter( 'comment_text',        'convert_smilies',    20 );
+	remove_filter( 'comment_text',        'wpautop',            30 );
+
+	remove_filter( 'pre_comment_content', 'wp_rel_nofollow',    15 );
+}
+
+/**
+ * Disables commenting to invalid or non-users.
+ *
+ * @param bool  $status Default commenting status for post.
+ * @return bool False if commenter isn't a user, otherwise the passed in status.
+ */
+function prevent_invalid_comment_submissions( $status, $post_id ) {
+	if ( $_POST && ( ! is_user_logged_in() || ! is_user_member_of_blog() ) ) {
+		return false;
+	}
+
+	return $status;
 }

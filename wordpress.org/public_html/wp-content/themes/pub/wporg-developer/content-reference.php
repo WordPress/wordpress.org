@@ -95,10 +95,6 @@ if ( ! empty( $since ) ) : ?>
 	<section class="learn-more">
 		<h2><?php _e( 'Learn More', 'wporg' ); ?></h2>
 	</section>
-	<hr/>
-	<section class="examples">
-		<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
-	</section>
 	*/ ?>
 
 	<?php if ( 'wp-parser-class' === get_post_type() ) :
@@ -142,6 +138,14 @@ if ( ! empty( $since ) ) : ?>
 				<span><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a></span>
 			</p>
 		</section>
+	<?php endif; ?>
+
+	<?php if ( have_comments() || ( comments_open() && is_user_member_of_blog() ) ) : ?>
+	<hr/>
+	<section class="examples">
+		<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
+		<?php get_template_part( 'code-example' ); ?>
+	</section>
 	<?php endif; ?>
 
 <?php endif; ?>

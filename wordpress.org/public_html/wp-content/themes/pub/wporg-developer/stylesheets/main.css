@@ -1100,23 +1100,28 @@ input {
 .devhub-wrap .comment-list ol {
   list-style: none;
   margin: 0 0 1.5em 0;
-  border-top: 1px solid #eee;
   padding: 0;
 }
 .devhub-wrap .comment-list li {
   padding: 24px 24px 0 24px;
   padding: 1.5rem 1.5rem 0 1.5rem;
-  border: 1px solid #eee;
-  border-top: none;
+  border: 0 solid #eee;
+  border-bottom-width: 1px;
   background: #fff;
+}
+.devhub-wrap .comment-list li {
+  padding-top: 0;
 }
 .devhub-wrap .comment-list .avatar {
   float: left;
   width: 2.5em;
   height: 2.5em;
-  margin: 0 1em 0.5em 0;
+  margin: -0.5em 1em 0.5em 0;
   padding: 0.125em;
   border: 1px solid #eee;
+}
+.devhub-wrap .comment-author-attribution {
+  font-weight: bold;
 }
 .devhub-wrap .comment-meta {
   margin: 0 0 1.5em 0;

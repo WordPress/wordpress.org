@@ -81,11 +81,16 @@
 		<section class="learn-more">
 			<h2><?php _e( 'Learn More', 'wporg' ); ?></h2>
 		</section>
+		*/ ?>
+
+		<?php if ( have_comments() || ( comments_open() && is_user_member_of_blog() ) ) : ?>
 		<hr/>
 		<section class="examples">
 			<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
+			<?php get_template_part( 'code-example' ); ?>
 		</section>
-		*/ ?>
+		<?php endif; ?>
+
 	<?php endif; ?>
 
 </article>
