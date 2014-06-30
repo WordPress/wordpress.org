@@ -414,7 +414,7 @@ form.postform input[type='text'] {
 }
 
 @media screen and ( max-width: 960px ) {
-	.col-6, .col-7, .col-10, .col-12 {
+	.col-6, .col-7, .col-8, .col-10, .col-12 {
 		width: 100%;
 		padding: 0 14px;
 		margin: 0;
