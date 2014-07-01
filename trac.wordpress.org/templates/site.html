@@ -60,17 +60,26 @@
 			fields_map[ fields[i]['name'] ] = i
 ?>
 
-<!--! styles and such -->
-<head py:match="head" py:attrs="select('@*')">
-	${select('*|comment()|text()')}
+<!--! Styles and such. Load before first JS file (jquery.js) -->
+<py:match path="head/script[contains(@src,'jquery.js')]">
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-head.html" />
-
 	<meta name="viewport" content="width=device-width" />
 	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20140130' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="//s.w.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
-</head>
+		
+	<script py:attrs="select('@*')"></script>
+
+	<py:if test="req.environ['PATH_INFO'] == '/newticket'">
+		<!--! Prevent Trac from focusing #field-summary on load, as this can scroll past the instructions -->
+		<script>
+		jQuery( document ).ready( function( $ ) {
+			$("#field-summary").one( 'focus', function( event ) { return false; });
+		});
+		</script>
+	</py:if>
+</py:match>
 
 <!--! Remove Trac logo and footer -->
 <div py:match="div[@id='header']" py:strip=""></div>
@@ -78,16 +87,6 @@
 
 <!--! Notices and instructions when creating a new ticket -->
 <py:if test="req.environ['PATH_INFO'] == '/newticket'">
-
-	<!--! Prevent Trac from focusing #field-summary on load, as this can scroll past the instructions -->
-	<py:match path="head/script[contains(@src,'jquery.js')]">
-		<script py:attrs="select('@*')"></script>
-		<script>
-		jQuery( document ).ready( function( $ ) {
-			$("#field-summary").one( 'focus', function( event ) { return false; });
-		});
-		</script>
-	</py:match>
 
 	<py:match path="div[@id='content' and @class='ticket']/form">
 		<div class="wp-notice newticket-not-here">
