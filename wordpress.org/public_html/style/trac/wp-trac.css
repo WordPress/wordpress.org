@@ -683,7 +683,7 @@ span.avatar img {
 	margin: 0 .8em 0 -2px;
 	border: 0; /* override for bb's */
 }
-img.avatar {
+table.properties img.avatar {
 	float: left;
 	margin: 0 6px 0 -42px;
 }
