@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '38d'
+	scripts_version = '38e'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -68,8 +68,7 @@
 
 	<meta name="viewport" content="width=device-width" />
 	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20140130' type='text/css' />
-	<link rel="stylesheet" type="text/css" href="//wordpress.org/style/trac/wp-trac.css?${scripts_version}" />
-	<link rel="stylesheet" type="text/css" href="//openatd.svn.wordpress.org/atd-jquery/css/atd.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="//s.w.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
 </head>
 
@@ -301,17 +300,13 @@
 	</script>
 
 	<!--! JavaScript -->
-	<script src="//wordpress.org/style/trac/wp-trac.js?${scripts_version}"></script>
+	<script src="//s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
 
 	<!--! Check for security buzzwords on new tickets -->
-	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="//wordpress.org/style/trac/trac-security.js?${scripts_version}"></script>
+	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="//s.w.org/style/trac/trac-security.js?${scripts_version}"></script>
 
 	<!--! New ticket possibly related tickets for Core Trac -->
-	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="//wordpress.org/style/trac/trac-search.js?${scripts_version}"></script>
-
-	<!--! After the Deadline -->
-	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/jquery.atd.textarea.js"></script>
-	<script src="//openatd.svn.wordpress.org/atd-jquery/scripts/csshttprequest.js"></script>
+	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="//s.w.org/style/trac/trac-search.js?${scripts_version}"></script>
 
 	<!--! Analytics for Core Trac -->
 	<py:if test="project_slug == 'core'">
