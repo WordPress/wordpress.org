@@ -271,7 +271,10 @@
 <py:if test="req.environ['PATH_INFO'] == '/prefs' and req.session['email'] and req.session['authenticated']">
 	<py:match path="div[@id='content' and @class='prefs']/div[@id='tabcontent']" once="true">
 		<div id="tabcontent">
-			Notifications <!--can be configured <a href="//${wporg_endpoint}notifications/">here</a>. They--> are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
+			Notifications are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
+			<py:if test="notifications_enabled">
+				Notification preferences can be configured <a href="//${wporg_endpoint}notifications/">here</a>.
+			</py:if>
 		</div>
 	</py:match>
 </py:if>
