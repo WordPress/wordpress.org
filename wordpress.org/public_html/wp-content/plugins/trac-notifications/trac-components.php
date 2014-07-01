@@ -171,6 +171,8 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function the_content( $content ) {
+		global $wpdb;
+
 		$post = get_post();
 		if ( ! $this->page_is_component( $post ) ) {
 			return $content;
@@ -241,9 +243,8 @@ jQuery( document ).ready( function( $ ) {
 			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
 			echo 'Component maintainers: ';
 			echo '<ul class="maintainers">';
-			foreach ( $maintainers as $maintainer ) {
-				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '">';
-				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $maintainer ) . '&amp;s=36" /></a> ' . $maintainer . '</li>';
+			foreach ( array_map( 'trim', explode( ',', $maintainers ) ) as $maintainer ) {
+				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 36 ) . "</a> $maintainer</li>";
 			}
 			echo "</ul>\n\n";
 		}
@@ -252,13 +253,14 @@ jQuery( document ).ready( function( $ ) {
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
 		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
+		$followers = "'" . implode( "', '", esc_sql( $followers ) ) . "'";
+		$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
 		if ( $followers ) {
-			echo 'Contributors following this component: ';
+			echo 'Contributors following this component:';
 			echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
-				$follower = esc_attr( $follower );
-				echo '<li><a title="' . $follower . '" href="//profiles.wordpress.org/' . $follower . '">';
-				echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . $follower . '&amp;s=36" /></a></li>';
+				echo '<li><a title="' . esc_attr( $follower->user_login ) . '" href="//profiles.wordpress.org/' . esc_attr( $follower->user_nicename ) . '">';
+				echo get_avatar( $follower->user_email, 36 ) . '</a></li>';
 			}
 			echo '</ul>';
 		}

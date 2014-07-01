@@ -343,12 +343,12 @@ class wporg_trac_notifications {
 						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
 						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
-							<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo $follower; ?>&amp;s=36" />
+							<?php echo get_avatar( get_user_by( 'login', $follower )->user_email, 36 ); ?>
 							<span class="username"><?php echo $follower; ?></span>
 						</a>
 					<?php endforeach; ?>
 					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
-						<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=<?php echo esc_attr( $username ); ?>&amp;s=36" />
+						<?php echo get_avatar( wp_get_current_user()->user_email, 36 ); ?>
 						<span class="username"><?php echo $username; ?></span>
 					</a>
 					</div>
