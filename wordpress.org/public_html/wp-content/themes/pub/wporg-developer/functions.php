@@ -53,6 +53,8 @@ function init() {
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 
+	add_filter( 'the_excerpt', __NAMESPACE__ . '\\lowercase_P_dangit_just_once' );
+
 	// Temporarily disable comments
 	//add_filter( 'comments_open', '__return_false' );
 
@@ -412,4 +414,22 @@ function prevent_invalid_comment_submissions( $status, $post_id ) {
 	}
 
 	return $status;
+}
+
+/**
+ * Allows for "Wordpress" just for the excerpt value of the capital_P_dangit function.
+ *
+ * WP.org has a global output buffer that runs capital_P_dangit() over displayed
+ * content. For this one field of this one post, circumvent that function to
+ * to show the lowercase P.
+ *
+ * @param  string $excerpt The post excerpt.
+ * @return string
+ */
+function lowercase_P_dangit_just_once( $excerpt ) {
+	if ( 'wp-parser-function' == get_post_type() && 'capital_P_dangit' == get_the_title() ) {
+		$excerpt = str_replace( 'Wordpress', 'Word&#112;ress', $excerpt );
+	}
+
+	return $excerpt;
 }
