@@ -480,9 +480,9 @@ namespace DevHub {
 						$types[ $i ] = "<span class=\"{$v}\">{$v}</span>";
 					}
 					$params[ $tag['variable'] ]['types'] = implode( '|', $types );
-					if ( strtolower( substr( $tag['content'], 0, 8 ) ) == "optional." ) {
+					if ( strtolower( substr( $tag['content'], 0, 9 ) ) == "optional." ) {
 						$params[ $tag['variable'] ]['required'] = 'Optional';
-						$params[ $tag['variable'] ]['content'] = substr( $tag['content'], 9 );
+						$params[ $tag['variable'] ]['content'] = substr( $tag['content'], 10 );
 					} else {
 						$params[ $tag['variable'] ]['required'] = 'Required';
 					}
