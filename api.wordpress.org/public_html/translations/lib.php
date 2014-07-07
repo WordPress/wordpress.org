@@ -59,21 +59,27 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	foreach ( $translations as $translation ) {
 		$locale = GP_Locales::by_field( 'wp_locale', $translation->language );
 
+		$isos = array();
 		// We'll use ISO codes for sorting.
+		if ( $locale->lang_code_iso_639_1 ) {
+			$iso = $isos[1] = $locale->lang_code_iso_639_1;
+		}
+		if ( $locale->lang_code_iso_639_2 ) {
+			$iso = $isos[2] = $locale->lang_code_iso_639_2;
+		}
 		if ( $locale->lang_code_iso_639_3 ) {
-			$iso = $locale->lang_code_iso_639_3;
-		} elseif ( $locale->lang_code_iso_639_2 ) {
-			$iso = $locale->lang_code_iso_639_2;
-		} elseif ( $locale->lang_code_iso_639_1 ) {
-			$iso = $locale->lang_code_iso_639_1;
-		} else {
-			continue; // uhhh
+			$iso = $isos[3] = $locale->lang_code_iso_639_3;
+		}
+
+		if ( array() === $isos ) {
+			continue; // uhhhh
 		}
 
 		$_translations[ $iso ] = $translation;
 		$_translations[ $iso ]->english_name = $locale->english_name;
 		$_translations[ $iso ]->native_name = $locale->native_name;
 		$_translations[ $iso ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
+		$_translations[ $iso ]->iso = (object) $isos;
 	}
 	ksort( $_translations );
 	$translations = array_values( $_translations );
