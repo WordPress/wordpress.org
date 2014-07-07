@@ -13,6 +13,11 @@ $translations = find_all_translations_for_core( $version );
 
 call_headers( 'application/json' );
 
-echo json_encode( array( 'languages' => $translations ) );
+if ( version_compare( $version, '4.0-alpha-29017-src', '>=' ) ) {
+	echo json_encode( array( 'translations' => $translations ) );
+} else {
+	echo json_encode( array( 'languages' => $translations ) );
+}
+
 exit;
 
