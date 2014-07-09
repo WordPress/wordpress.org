@@ -41,6 +41,23 @@
 		</label>
 		<input type="submit" class="shiny-blue search-submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'wporg' ); ?>">
 		</div>
+
+		<div class="search-post-type">
+			<span><?php _e( 'Filter by type:', 'wporg' ); ?></span>
+			<?php
+				$search_post_types = array(
+					'wp-parser-function' => __( 'Functions', 'wporg' ),
+					'wp-parser-hook'     => __( 'Hooks',     'wporg' ),
+					'wp-parser-class'    => __( 'Classes',   'wporg' ),
+					'wp-parser-method'   => __( 'Methods',   'wporg' ),
+				);
+				foreach ( $search_post_types as $post_type => $label ) {
+					$qv_post_type = (array) get_query_var( 'post_type' );
+				?>
+					<label><input type="checkbox" name="post_type[]" value="<?php echo esc_attr( $post_type ); ?>"
+					<?php checked( ! is_search() || in_array( 'any', $qv_post_type ) || in_array( $post_type, $qv_post_type ) ); ?> /> <?php echo $label; ?></label>
+				<?php } ?>
+		</div>
 	</form>
 
 </div><!-- /search-guide -->

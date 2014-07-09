@@ -854,6 +854,21 @@ input {
 .devhub-wrap .searchform div {
   overflow: auto;
 }
+.devhub-wrap .searchform .search-post-type label {
+  border-right: 1px solid #ccc;
+  float: none;
+  width: inherit;
+  margin-left: 1em;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 1.3em;
+}
+.devhub-wrap .searchform .search-post-type label input {
+  padding-left: 0.5em;
+}
+.devhub-wrap .searchform .search-post-type label:last-child {
+  border-right-width: 0;
+}
 .devhub-wrap .search-results-summary {
   font-style: italic;
   margin-bottom: 1em;
