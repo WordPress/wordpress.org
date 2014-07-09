@@ -854,6 +854,10 @@ input {
 .devhub-wrap .searchform div {
   overflow: auto;
 }
+.devhub-wrap .search-results-summary {
+  font-style: italic;
+  margin-bottom: 1em;
+}
 .devhub-wrap .reference-landing {
   padding: 1em 0;
 }

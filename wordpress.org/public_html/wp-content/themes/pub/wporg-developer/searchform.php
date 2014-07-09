@@ -7,6 +7,32 @@
 ?>
 <div class="search-section section clear">
 
+<?php if ( is_search() ) { ?>
+
+	<div class="search-results-summary"><?php
+	$count = (int) $GLOBALS['wp_query']->found_posts;
+
+	if ( $count ) {
+		if ( is_paged() ) {
+			$start = get_query_var( 'posts_per_page' ) * ( get_query_var( 'paged' ) - 1 );
+		} else {
+			$start = 0;
+		}
+		$end = min( $count, $start + get_query_var( 'posts_per_page' ) );
+		printf(
+			_n( '<strong>%d</strong> result found for "<strong>%s</strong>".', '<strong>%d</strong> results found for "<strong>%s</strong>". Showing results %d to %d.', $count, 'wporg' ),
+			$count,
+			esc_html( get_search_query() ),
+			$start + 1,
+			$end
+		);
+	} else {
+		printf( __( '<strong>%d</strong> results found for "<strong>%s</strong>".', 'wporg' ), $count, esc_html( get_search_query() ) );
+	}
+	?></div>
+
+<?php } ?>
+
 	<form role="search" method="get" class="searchform" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 		<div>
 		<label>
