@@ -724,12 +724,23 @@ namespace DevHub {
 			while ( ! feof( $handle ) ) {
 				$line++;
 				$source_line = fgets( $handle );
+
+				// Stop reading file once end_line is reached.
 				if ( $line > $end_line ) {
 					break;
 				}
+
+				// Skip lines until start_line is reached.
 				if ( $line < $start_line ) {
 					continue;
 				}
+
+				// Skip the last line if it is "endif;"; the parser includes the
+				// endif of a if/endif wrapping typical of pluggable functions.
+				if ( $line === $end_line && 'endif;' === trim( $source_line ) ) {
+					continue;
+				}
+
 				$source_code .= $source_line;
 			}
 			fclose( $handle );
