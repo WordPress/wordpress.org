@@ -9,9 +9,13 @@ get_header(); ?>
 
 	<div id="content-area">
 
-		<header class="page-header">
-			<h1 class="page-title"><?php printf( __( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' ); ?></h1>
-		</header><!-- .page-header -->
+		<div class="breadcrumb-trail breadcrumbs" itemprop="breadcrumb">
+			<span class="trail-browse"><span class="trail-begin"><?php _e( 'Search Results', 'wporg' ); ?></span></span>
+			<span class="sep">/</span> <span class="trail-end"><?php echo esc_html( get_search_query() ); ?></span>
+		</div>
+
+		<?php get_search_form(); ?>
+
 		<main id="main" class="site-main" role="main">
 
 		<?php if ( have_posts() ) : ?>

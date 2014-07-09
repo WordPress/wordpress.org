@@ -818,10 +818,46 @@ input {
   float: left;
   clear: none;
 }
+.devhub-wrap .section.search-section {
+  padding-bottom: 0;
+}
+.devhub-wrap .reference-landing .section.search-section {
+  padding-top: 0;
+}
+.devhub-wrap .searchform {
+  overflow: hidden;
+  height: auto;
+  margin-bottom: 1em;
+}
+.devhub-wrap .searchform input[type="text"], .devhub-wrap .searchform input[type="submit"] {
+  height: 50px;
+  height: 5rem;
+  margin-bottom: 1em;
+  width: 100%;
+}
+.devhub-wrap .searchform input[type="submit"] {
+  width: 85px;
+  width: 8.5rem;
+  float: left;
+}
+.devhub-wrap .searchform label {
+  width: 560px;
+  width: 56rem;
+  max-width: 100%;
+  margin-right: 15px;
+  display: inline-block;
+  float: left;
+}
+.devhub-wrap .searchform label .search-field input[type="text"] {
+  width: 100%;
+}
+.devhub-wrap .searchform div {
+  overflow: auto;
+}
 .devhub-wrap .reference-landing {
   padding: 1em 0;
 }
-.devhub-wrap .reference-landing .section {
+.devhub-wrap .reference-landing .section, .devhub-wrap .search-section {
   max-width: 700px;
   max-width: 70rem;
   margin: 0 auto;
@@ -843,33 +879,6 @@ input {
 }
 .devhub-wrap .reference-landing .section.section.topic-guide, .devhub-wrap .reference-landing .section.section.new-in-guide {
   padding-top: 0;
-}
-.devhub-wrap .reference-landing .searchform {
-  overflow: hidden;
-  height: auto;
-  margin-bottom: 1em;
-}
-.devhub-wrap .reference-landing .searchform input {
-  height: 50px;
-  height: 5rem;
-  margin-bottom: 1em;
-  width: 100%;
-}
-.devhub-wrap .reference-landing .searchform input[type="submit"] {
-  width: 85px;
-  width: 8.5rem;
-  float: left;
-}
-.devhub-wrap .reference-landing .searchform label {
-  width: 560px;
-  width: 56rem;
-  max-width: 100%;
-  margin-right: 15px;
-  display: inline-block;
-  float: left;
-}
-.devhub-wrap .reference-landing .searchform label .search-field input[type="text"] {
-  width: 100%;
 }
 .devhub-wrap .reference-landing .box,
 .devhub-wrap .sidebar .box {

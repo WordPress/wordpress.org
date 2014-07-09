@@ -577,6 +577,41 @@
 		clear: none;
 	}
 
+	.section.search-section {
+		padding-bottom: 0;
+	}
+
+	.searchform {
+		overflow: hidden;
+		height: auto;
+		margin-bottom: 1em;
+		input[type="text"], input[type="submit"] {
+			height: 50px;
+			height: 5rem;
+			margin-bottom: 1em;
+			width: 100%;
+		}
+		input[type="submit"] {
+			width: 85px;
+			width: 8.5rem;
+			float: left;
+		}
+		label {
+			width: 560px;
+			width: 56rem;
+			max-width: 100%;
+			margin-right: 15px;
+			display: inline-block;
+			float: left;
+			.search-field input[type="text"] {
+				width: 100%;
+			}
+		}
+		div {
+			overflow: auto;
+		}
+	}
+
 	.reference-landing {
 		padding: 1em 0;
 		.section {
@@ -602,34 +637,6 @@
 			}
 			&.section.topic-guide, &.section.new-in-guide  {
 				padding-top: 0;
-			}
-		}
-		.searchform {
-			overflow: hidden;
-			height: auto;
-			margin-bottom: 1em;
-			input {
-				height: 50px;
-				height: 5rem;
-				margin-bottom: 1em;
-				width: 100%;
-			}
-			input[type="submit"] {
-				width: 85px;
-				width: 8.5rem;
-				float: left;
-			}
-			label {
-				width: 560px;
-				width: 56rem;
-				max-width: 100%;
-				margin-right: 15px;
-				display: inline-block;
-				float: left;
-				.search-field input[type="text"] {
-					width: 100%;
-				}
-
 			}
 		}
 	}

@@ -22,7 +22,6 @@
 				_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'wporg' );
 			} ?>
 			</h4>
-			<?php get_search_form(); ?>
 		</div><!-- /search-guide -->
 	</div><!-- .reference-landing -->
 </section><!-- .no-results -->
