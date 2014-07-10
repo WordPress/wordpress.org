@@ -164,7 +164,12 @@ class Multi_Event_Sponsors {
 	 */
 	public function get_wordcamp_me_sponsors( $wordcamp_id, $grouped_by = 'ungrouped' ) {
 		$wordcamp_sponsors = array();
-		$wordcamp_region   = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+
+		if ( ! empty( $_POST[ wcpt_key_to_str( 'Multi-Event Sponsor Region', 'wcpt_' ) ] ) ) {
+			$wordcamp_region = absint( $_POST[ wcpt_key_to_str( 'Multi-Event Sponsor Region', 'wcpt_' ) ] );
+		} else {
+			$wordcamp_region = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+		}
 
 		$all_me_sponsors = get_posts( array(
 			'post_type'   => MES_Sponsor::POST_TYPE_SLUG,
