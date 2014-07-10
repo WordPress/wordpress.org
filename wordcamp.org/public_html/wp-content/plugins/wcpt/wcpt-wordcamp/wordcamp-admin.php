@@ -507,7 +507,9 @@ class WordCamp_Admin {
 
 		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
 			foreach( $required_fields as $field ) {
-				if ( empty( $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ] ) ) {
+				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
+
+				if ( empty( $value ) || 'null' == $value ) {
 					$post_data['post_status']     = 'pending';
 					$this->active_admin_notices[] = 1;
 					break;
