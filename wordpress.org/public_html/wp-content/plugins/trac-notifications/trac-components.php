@@ -243,7 +243,7 @@ jQuery( document ).ready( function( $ ) {
 			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
 			echo 'Component maintainers: ';
 			echo '<ul class="maintainers">';
-			foreach ( array_map( 'trim', explode( ',', $maintainers ) ) as $maintainer ) {
+			foreach ( $maintainers as $maintainer ) {
 				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 36 ) . "</a> $maintainer</li>";
 			}
 			echo "</ul>\n\n";
