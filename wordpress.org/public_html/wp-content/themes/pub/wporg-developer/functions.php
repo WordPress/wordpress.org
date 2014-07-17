@@ -55,6 +55,7 @@ function init() {
 	add_theme_support( 'post-thumbnails' );
 
 	add_filter( 'the_excerpt', __NAMESPACE__ . '\\lowercase_P_dangit_just_once' );
+	add_filter( 'the_content', __NAMESPACE__ . '\\make_doclink_clickable', 10, 5 );
 
 	// Temporarily disable comments
 	//add_filter( 'comments_open', '__return_false' );
@@ -445,3 +446,86 @@ function redirect_single_search_match() {
 	}
 }
 
+/**
+ * Makes phpDoc @link references clickable.
+ *
+ * Handles these five different types of links:
+ *
+ * - {@link http://en.wikipedia.org/wiki/ISO_8601}
+ * - {@link WP_Rewrite::$index}
+ * - {@link WP_Query::query()}
+ * - {@link esc_attr()}
+ * - {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
+ *
+ * @param  string $content The content.
+ * @return string
+ */
+function make_doclink_clickable( $content ) {
+
+	if ( false === strpos( $content, '{@link ' ) ) {
+		return $content;
+	}
+
+	return preg_replace_callback(
+		'/\{@link ([^\}]+)\}/',
+		function ( $matches ) {
+
+			$link = $matches[1];
+
+			// Fix URLs made clickable during initial parsing
+			if ( 0 === strpos( $link, '<a ' ) ) {
+
+				if ( preg_match( '/^<a .*href=[\'\"]([^\'\"]+)[\'\"]>(.*)<\/a>$/', $link, $parts ) ) {
+					$link = '<a href="' . $parts[1] . '">' . esc_html( trim( $parts[2] ) ) . '</a>';
+				}
+
+			}
+
+			// Link to an external resource.
+			elseif ( 0 === strpos( $link, 'http' ) ) {
+
+				$parts = explode( ' ', $link, 2 );
+
+				// Link without linked text: {@link http://en.wikipedia.org/wiki/ISO_8601}
+				if ( 1 === count( $parts ) ) {
+					$link = '<a href="' . esc_url( $link ) . '">' . esc_html( $link ) . '</a>';
+				}
+
+				// Link with linked text: {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
+				else {
+					$link = '<a href="' . esc_url( $parts[0] ) . '">' . esc_html( $parts[1] ) . '</a>';
+				}
+
+			}
+
+			// Link to an internal resource.
+			else {
+
+				// Link to class variable: {@link WP_Rewrite::$index}
+				if ( false !== strpos( $link, '::$' ) ) {
+					// Nothing to link to currently.
+				}
+
+				// Link to class method: {@link WP_Query::query()}
+				elseif ( false !== strpos( $link, '::' ) ) {
+					$link = '<a href="' .
+						get_post_type_archive_link( 'wp-parser-class' ) .
+						str_replace( array( '::', '()' ), array( '/', '' ), $link ) .
+						'">' . esc_html( $link ) . '</a>';
+				}
+
+				// Link to function: {@link esc_attr()}
+				else {
+					$link = '<a href="' .
+						get_post_type_archive_link( 'wp-parser-function' ) .
+						str_replace( '()', '', $link ) .
+						'">' . esc_html( $link ) . '</a>';
+				}
+
+			}
+
+			return $link;
+		},
+		$content
+	);
+}
