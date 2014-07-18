@@ -64,6 +64,9 @@ class WordCamp_Loader {
 		// Quick admin check and load if needed
 		if ( is_admin() )
 			require_once ( WCPT_DIR . '/wcpt-wordcamp/wordcamp-admin.php' );
+
+		require_once( WCPT_DIR . '/wcpt-wordcamp/wordcamp-new-site.php' );
+		$GLOBALS['wordcamp_new_site'] = new WordCamp_New_Site();
 	}
 
 	/**
