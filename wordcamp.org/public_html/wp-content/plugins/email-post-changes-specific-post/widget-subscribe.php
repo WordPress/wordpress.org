@@ -14,11 +14,11 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 	function __construct() {
 		$widget_options  = array(
 			'classname'   => 'epcsp_subscribe',
-			'description' => __( 'Allow visitors to subscribe to email notifications for a specific post or page' )
+			'description' => __( 'Allow visitors to subscribe to email notifications for a specific post or page', 'wordcamporg' ),
 		);
 		$control_options = array( 'width' => 300 );
 		
-		parent::__construct( 'epcsp_subscribe', __( 'Subscribe to Specific Post' ), $widget_options, $control_options );
+		parent::__construct( 'epcsp_subscribe', __( 'Subscribe to Specific Post', 'wordcamporg' ), $widget_options, $control_options );
 
 		add_action( 'wp_head', array( $this, 'output_css' ) );
 	}
@@ -46,7 +46,7 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 					$message .= '<p>' . $error . '</p>';
 				}
 			} else {
-				$message = 'You have been subscribed to this post.';
+				$message = __( 'You have been subscribed to this post.', 'wordcamporg' );
 			}
 		}
 		
@@ -91,7 +91,7 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 		?>
 
 		<form id="epcsp_subscribe" name="epcsp_subscribe" action="" method="POST">
-			<label for="epcsp_subscribe_address">Email Address:</label>
+			<label for="epcsp_subscribe_address"><?php _e( 'Email Address:', 'wordcamporg' ); ?></label>
 			<input id="epcsp_subscribe_address" name="epcsp_subscribe_address" type="text" />
 			<input name="epcsp_subscribe_submit" type="submit" value="Subscribe" />
 		</form>
@@ -136,7 +136,7 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 			$subscribed_addresses = get_option( 'epcsp_subscribed_addresses', array() );
 			
 			if ( isset( $subscribed_addresses[ $post_id ] ) && in_array( $email, $subscribed_addresses[ $post_id ] ) ) {
-				$errors[] = 'You are already subscribed to this post.';
+				$errors[] = __( 'You are already subscribed to this post.', 'wordcamporg' );
 			} else {
 				$subscribed_addresses[ $post_id ][] = sanitize_email( $email );
 				$subscribed_addresses[ $post_id ] = array_unique( $subscribed_addresses[ $post_id ] );
@@ -144,7 +144,7 @@ class EPCSP_SubscribeWidget extends WP_Widget {
 				update_option( 'epcsp_subscribed_addresses', $subscribed_addresses );
 			}
 		} else {
-			$errors[] = 'The email address you entered was not valid.';
+			$errors[] = __( 'The email address you entered was not valid.', 'wordcamporg' );
 		}
 		
 		return $errors;
