@@ -7,7 +7,6 @@
 require( 'inc/back-compat.php' );
 
 class WordCamp_Post_Types_Plugin {
-	public $textdomain = 'wordcampbase';
 
 	/**
 	 * Fired when plugin file is loaded.
@@ -63,7 +62,7 @@ class WordCamp_Post_Types_Plugin {
 	 * Runs during admin_menu
 	 */
 	function admin_menu() {
-		$page = add_submenu_page( 'edit.php?post_type=wcb_sponsor', __( 'Order Sponsor Levels', $this->textdomain ), __( 'Order Sponsor Levels', $this->textdomain ), 'edit_posts', 'sponsor_levels', array( $this, 'render_order_sponsor_levels' ) );
+		$page = add_submenu_page( 'edit.php?post_type=wcb_sponsor', __( 'Order Sponsor Levels', 'wordcamporg' ), __( 'Order Sponsor Levels', 'wordcamporg' ), 'edit_posts', 'sponsor_levels', array( $this, 'render_order_sponsor_levels' ) );
 
 		add_action( "admin_print_scripts-$page", array( $this, 'enqueue_order_sponsor_levels_scripts' ) );
 	}
@@ -87,16 +86,16 @@ class WordCamp_Post_Types_Plugin {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h2><?php _e( 'Order Sponsor Levels', $this->textdomain ); ?></h2>
+			<h2><?php _e( 'Order Sponsor Levels', 'wordcamporg' ); ?></h2>
 
 			<?php if ( false !== $_REQUEST['updated'] ) : ?>
-				<div class="updated fade"><p><strong><?php _e( 'Options saved', $this->textdomain ); ?></strong></p></div>
+				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcamporg' ); ?></strong></p></div>
 			<?php endif; ?>
 
 			<form method="post" action="options.php">
 				<?php settings_fields( 'wcb_sponsor_options' ); ?>
 				<div class="description sponsor-order-instructions">
-					<?php _e( 'Change the order of sponsor levels are displayed in the sponsors page template.', $this->textdomain ); ?>
+					<?php _e( 'Change the order of sponsor levels are displayed in the sponsors page template.', 'wordcamporg' ); ?>
 				</div>
 				<ul class="sponsor-order">
 				<?php foreach( $levels as $term ): ?>
@@ -107,7 +106,7 @@ class WordCamp_Post_Types_Plugin {
 				<?php endforeach; ?>
 				</ul>
 				<p class="submit">
-					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', $this->textdomain ); ?>" />
+					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'wordcamporg' ); ?>" />
 				</p>
 			</form>
 		</div>
@@ -852,11 +851,11 @@ class WordCamp_Post_Types_Plugin {
 
 						// Add speakers and tracks to session meta.
 						if ( ! empty( $speakers_names ) && ! empty( $tracks_names ) )
-							$session_meta .= sprintf( __( 'Presented by %1$s in %2$s.', $this->textdomain ), implode( ', ', $speakers_names ), implode( ', ', $tracks_names ) );
+							$session_meta .= sprintf( __( 'Presented by %1$s in %2$s.', 'wordcamporg' ), implode( ', ', $speakers_names ), implode( ', ', $tracks_names ) );
 						elseif ( ! empty( $speakers_names ) )
-							$session_meta .= sprintf( __( 'Presented by %s.', $this->textdomain ), implode( ', ', $speakers_names ) );
+							$session_meta .= sprintf( __( 'Presented by %s.', 'wordcamporg' ), implode( ', ', $speakers_names ) );
 						elseif ( ! empty( $tracks_names ) )
-							$session_meta .= sprintf( __( 'Presented in %s.', $this->textdomain ), implode( ', ', $tracks_names ) );
+							$session_meta .= sprintf( __( 'Presented in %s.', 'wordcamporg' ), implode( ', ', $tracks_names ) );
 
 						if ( ! empty( $session_meta ) )
 							$session_meta = sprintf( '<p class="wcpt-session-meta">%s</p>', $session_meta );
@@ -956,10 +955,10 @@ class WordCamp_Post_Types_Plugin {
 	 * Fired during add_meta_boxes, adds extra meta boxes to our custom post types.
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'speaker-info', __( 'Speaker Info', $this->textdomain ), array( $this, 'metabox_speaker_info' ), 'wcb_speaker', 'side' );
-		add_meta_box( 'organizer-info', __( 'Organizer Info', $this->textdomain ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
-		add_meta_box( 'speakers-list', __( 'Speakers', $this->textdomain ), array( $this, 'metabox_speakers_list' ), 'wcb_session', 'side' );
-		add_meta_box( 'session-info', __( 'Session Info', $this->textdomain ), array( $this, 'metabox_session_info' ), 'wcb_session', 'side' );
+		add_meta_box( 'speaker-info', __( 'Speaker Info', 'wordcamporg' ), array( $this, 'metabox_speaker_info' ), 'wcb_speaker', 'side' );
+		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg' ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
+		add_meta_box( 'speakers-list', __( 'Speakers', 'wordcamporg' ), array( $this, 'metabox_speakers_list' ), 'wcb_session', 'side' );
+		add_meta_box( 'session-info', __( 'Session Info', 'wordcamporg' ), array( $this, 'metabox_session_info' ), 'wcb_session', 'side' );
 		add_meta_box( 'sponsor-info', __( 'Sponsor Info', 'wordcampbase' ), array( $this, 'metabox_sponsor_info' ), 'wcb_sponsor', 'side' );
 	}
 
@@ -978,12 +977,12 @@ class WordCamp_Post_Types_Plugin {
 		?>
 		<?php wp_nonce_field( 'edit-speaker-info', 'wcpt-meta-speaker-info' ); ?>
 		<p>
-			<label for="wcpt-gravatar-email"><?php _e( 'Gravatar Email:', $this->textdomain ); ?></label>
+			<label for="wcpt-gravatar-email"><?php _e( 'Gravatar Email:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-gravatar-email" name="wcpt-gravatar-email" value="<?php echo esc_attr( $email ); ?>" />
 		</p>
 
 		<p>
-			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', $this->textdomain ); ?></label>
+			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-wporg-username" name="wcpt-wporg-username" value="<?php echo esc_attr( $wporg_username ); ?>" />
 		</p>
 		<?php
@@ -1003,7 +1002,7 @@ class WordCamp_Post_Types_Plugin {
 		?>
 		<?php wp_nonce_field( 'edit-organizer-info', 'wcpt-meta-organizer-info' ); ?>
 		<p>
-			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', $this->textdomain ); ?></label>
+			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-wporg-username" name="wcpt-wporg-username" value="<?php echo esc_attr( $wporg_username ); ?>" />
 		</p>
 		<?php
@@ -1032,7 +1031,7 @@ class WordCamp_Post_Types_Plugin {
 		<?php wp_nonce_field( 'edit-speakers-list', 'wcpt-meta-speakers-list-nonce' ); ?>
 		<!--<input type="text" class="text" id="wcpt-speakers-list" name="wcpt-speakers-list" value="<?php echo esc_attr( $speakers ); ?>" />-->
 		<textarea class="large-text" placeholder="Start typing a name" id="wcpt-speakers-list" name="wcpt-speakers-list"><?php echo esc_textarea( $speakers ); ?></textarea>
-		<p class="description"><?php _e( 'A speaker entry must exist first. Separate multiple speakers with commas.', $this->textdomain ); ?></p>
+		<p class="description"><?php _e( 'A speaker entry must exist first. Separate multiple speakers with commas.', 'wordcamporg' ); ?></p>
 		<script>
 		jQuery(document).ready( function($) {
 			var availableSpeakers = [ <?php
@@ -1086,15 +1085,15 @@ class WordCamp_Post_Types_Plugin {
 		?>
 		<?php wp_nonce_field( 'edit-session-info', 'wcpt-meta-session-info' ); ?>
 		<p>
-			<label for="wcpt-session-time"><?php _e( 'When:', $this->textdomain ); ?></label>
+			<label for="wcpt-session-time"><?php _e( 'When:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-session-time" name="wcpt-session-time" value="<?php echo esc_attr( $session_time ); ?>" />
 			<span style="display: block; margin-top: 4px;" class="description">For example: <?php echo date( 'Y-m-d H:i:s' ); ?></span>
 		</p>
 		<p>
-			<label for="wcpt-session-type"><?php _e( 'Type:', $this->textdomain ); ?></label>
+			<label for="wcpt-session-type"><?php _e( 'Type:', 'wordcamporg' ); ?></label>
 			<select id="wcpt-session-type" name="wcpt-session-type">
-				<option value="session" <?php selected( $session_type, 'session' ); ?>><?php _e( 'Regular Session', $this->textdomain ); ?></option>
-				<option value="custom" <?php selected( $session_type, 'custom' ); ?>><?php _e( 'Break, Lunch, etc.', $this->textdomain ); ?></option>
+				<option value="session" <?php selected( $session_type, 'session' ); ?>><?php _e( 'Regular Session', 'wordcamporg' ); ?></option>
+				<option value="custom" <?php selected( $session_type, 'custom' ); ?>><?php _e( 'Break, Lunch, etc.', 'wordcamporg' ); ?></option>
 			</select>
 		</p>
 		<?php
@@ -1281,19 +1280,19 @@ class WordCamp_Post_Types_Plugin {
 	function register_post_types() {
 		// Speaker post type labels.
 		$labels = array(
-			'name'                  => __( 'Speakers', $this->textdomain ),
-			'singular_name'         => __( 'Speaker', $this->textdomain ),
-			'add_new'               => __( 'Add New', $this->textdomain ),
-			'add_new_item'          => __( 'Create New Speaker', $this->textdomain ),
-			'edit'                  => __( 'Edit', $this->textdomain ),
-			'edit_item'             => __( 'Edit Speaker', $this->textdomain ),
-			'new_item'              => __( 'New Speaker', $this->textdomain ),
-			'view'                  => __( 'View Speaker', $this->textdomain ),
-			'view_item'             => __( 'View Speaker', $this->textdomain ),
-			'search_items'          => __( 'Search Speakers', $this->textdomain ),
-			'not_found'             => __( 'No speakers found', $this->textdomain ),
-			'not_found_in_trash'    => __( 'No speakers found in Trash', $this->textdomain ),
-			'parent_item_colon'     => __( 'Parent Speaker:', $this->textdomain ),
+			'name'                  => __( 'Speakers', 'wordcamporg' ),
+			'singular_name'         => __( 'Speaker', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Speaker', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Speaker', 'wordcamporg' ),
+			'new_item'              => __( 'New Speaker', 'wordcamporg' ),
+			'view'                  => __( 'View Speaker', 'wordcamporg' ),
+			'view_item'             => __( 'View Speaker', 'wordcamporg' ),
+			'search_items'          => __( 'Search Speakers', 'wordcamporg' ),
+			'not_found'             => __( 'No speakers found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No speakers found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Speaker:', 'wordcamporg' ),
 		);
 
 		// Register speaker post type.
@@ -1313,19 +1312,19 @@ class WordCamp_Post_Types_Plugin {
 
 		// Session post type labels.
 		$labels = array(
-			'name'                  => __( 'Sessions', $this->textdomain ),
-			'singular_name'         => __( 'Session', $this->textdomain ),
-			'add_new'               => __( 'Add New', $this->textdomain ),
-			'add_new_item'          => __( 'Create New Session', $this->textdomain ),
-			'edit'                  => __( 'Edit', $this->textdomain ),
-			'edit_item'             => __( 'Edit Session', $this->textdomain ),
-			'new_item'              => __( 'New Session', $this->textdomain ),
-			'view'                  => __( 'View Session', $this->textdomain ),
-			'view_item'             => __( 'View Session', $this->textdomain ),
-			'search_items'          => __( 'Search Sessions', $this->textdomain ),
-			'not_found'             => __( 'No sessions found', $this->textdomain ),
-			'not_found_in_trash'    => __( 'No sessions found in Trash', $this->textdomain ),
-			'parent_item_colon'     => __( 'Parent Session:', $this->textdomain ),
+			'name'                  => __( 'Sessions', 'wordcamporg' ),
+			'singular_name'         => __( 'Session', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Session', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Session', 'wordcamporg' ),
+			'new_item'              => __( 'New Session', 'wordcamporg' ),
+			'view'                  => __( 'View Session', 'wordcamporg' ),
+			'view_item'             => __( 'View Session', 'wordcamporg' ),
+			'search_items'          => __( 'Search Sessions', 'wordcamporg' ),
+			'not_found'             => __( 'No sessions found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No sessions found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Session:', 'wordcamporg' ),
 		);
 
 		// Register session post type.
@@ -1345,19 +1344,19 @@ class WordCamp_Post_Types_Plugin {
 
 		// Sponsor post type labels.
 		$labels = array(
-			'name'                  => __( 'Sponsors', $this->textdomain ),
-			'singular_name'         => __( 'Sponsor', $this->textdomain ),
-			'add_new'               => __( 'Add New', $this->textdomain ),
-			'add_new_item'          => __( 'Create New Sponsor', $this->textdomain ),
-			'edit'                  => __( 'Edit', $this->textdomain ),
-			'edit_item'             => __( 'Edit Sponsor', $this->textdomain ),
-			'new_item'              => __( 'New Sponsor', $this->textdomain ),
-			'view'                  => __( 'View Sponsor', $this->textdomain ),
-			'view_item'             => __( 'View Sponsor', $this->textdomain ),
-			'search_items'          => __( 'Search Sponsors', $this->textdomain ),
-			'not_found'             => __( 'No sponsors found', $this->textdomain ),
-			'not_found_in_trash'    => __( 'No sponsors found in Trash', $this->textdomain ),
-			'parent_item_colon'     => __( 'Parent Sponsor:', $this->textdomain ),
+			'name'                  => __( 'Sponsors', 'wordcamporg' ),
+			'singular_name'         => __( 'Sponsor', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Sponsor', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Sponsor', 'wordcamporg' ),
+			'new_item'              => __( 'New Sponsor', 'wordcamporg' ),
+			'view'                  => __( 'View Sponsor', 'wordcamporg' ),
+			'view_item'             => __( 'View Sponsor', 'wordcamporg' ),
+			'search_items'          => __( 'Search Sponsors', 'wordcamporg' ),
+			'not_found'             => __( 'No sponsors found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No sponsors found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Sponsor:', 'wordcamporg' ),
 		);
 
 		// Register sponsor post type.
@@ -1377,19 +1376,19 @@ class WordCamp_Post_Types_Plugin {
 
 		// Organizer post type labels.
 		$labels = array(
-			'name'                  => __( 'Organizers', $this->textdomain ),
-			'singular_name'         => __( 'Organizer', $this->textdomain ),
-			'add_new'               => __( 'Add New', $this->textdomain ),
-			'add_new_item'          => __( 'Create New Organizer', $this->textdomain ),
-			'edit'                  => __( 'Edit', $this->textdomain ),
-			'edit_item'             => __( 'Edit Organizer', $this->textdomain ),
-			'new_item'              => __( 'New Organizer', $this->textdomain ),
-			'view'                  => __( 'View Organizer', $this->textdomain ),
-			'view_item'             => __( 'View Organizer', $this->textdomain ),
-			'search_items'          => __( 'Search Organizers', $this->textdomain ),
-			'not_found'             => __( 'No organizers found', $this->textdomain ),
-			'not_found_in_trash'    => __( 'No organizers found in Trash', $this->textdomain ),
-			'parent_item_colon'     => __( 'Parent Organizer:', $this->textdomain ),
+			'name'                  => __( 'Organizers', 'wordcamporg' ),
+			'singular_name'         => __( 'Organizer', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Organizer', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Organizer', 'wordcamporg' ),
+			'new_item'              => __( 'New Organizer', 'wordcamporg' ),
+			'view'                  => __( 'View Organizer', 'wordcamporg' ),
+			'view_item'             => __( 'View Organizer', 'wordcamporg' ),
+			'search_items'          => __( 'Search Organizers', 'wordcamporg' ),
+			'not_found'             => __( 'No organizers found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No organizers found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Organizer:', 'wordcamporg' ),
 		);
 
 		// Register organizer post type.
@@ -1414,15 +1413,15 @@ class WordCamp_Post_Types_Plugin {
 	function register_taxonomies() {
 		// Labels for tracks.
 		$labels = array(
-			'name'              => __( 'Tracks', $this->textdomain ),
-			'singular_name'     => __( 'Track', $this->textdomain ),
-			'search_items'      => __( 'Search Tracks', $this->textdomain ),
-			'popular_items'     => __( 'Popular Tracks',$this->textdomain ),
-			'all_items'         => __( 'All Tracks', $this->textdomain ),
-			'edit_item'         => __( 'Edit Track', $this->textdomain ),
-			'update_item'       => __( 'Update Track', $this->textdomain ),
-			'add_new_item'      => __( 'Add Track', $this->textdomain ),
-			'new_item_name'     => __( 'New Track', $this->textdomain ),
+			'name'              => __( 'Tracks', 'wordcamporg' ),
+			'singular_name'     => __( 'Track', 'wordcamporg' ),
+			'search_items'      => __( 'Search Tracks', 'wordcamporg' ),
+			'popular_items'     => __( 'Popular Tracks','wordcamporg' ),
+			'all_items'         => __( 'All Tracks', 'wordcamporg' ),
+			'edit_item'         => __( 'Edit Track', 'wordcamporg' ),
+			'update_item'       => __( 'Update Track', 'wordcamporg' ),
+			'add_new_item'      => __( 'Add Track', 'wordcamporg' ),
+			'new_item_name'     => __( 'New Track', 'wordcamporg' ),
 		);
 
 		// Register the Tracks taxonomy.
@@ -1437,15 +1436,15 @@ class WordCamp_Post_Types_Plugin {
 
 		// Labels for sponsor levels.
 		$labels = array(
-			'name'              => __( 'Sponsor Levels', $this->textdomain ),
-			'singular_name'     => __( 'Sponsor Level', $this->textdomain ),
-			'search_items'      => __( 'Search Sponsor Levels', $this->textdomain ),
-			'popular_items'     => __( 'Popular Sponsor Levels', $this->textdomain ),
-			'all_items'         => __( 'All Sponsor Levels', $this->textdomain ),
-			'edit_item'         => __( 'Edit Sponsor Level', $this->textdomain ),
-			'update_item'       => __( 'Update Sponsor Level', $this->textdomain ),
-			'add_new_item'      => __( 'Add Sponsor Level', $this->textdomain ),
-			'new_item_name'     => __( 'New Sponsor Level', $this->textdomain ),
+			'name'              => __( 'Sponsor Levels', 'wordcamporg' ),
+			'singular_name'     => __( 'Sponsor Level', 'wordcamporg' ),
+			'search_items'      => __( 'Search Sponsor Levels', 'wordcamporg' ),
+			'popular_items'     => __( 'Popular Sponsor Levels', 'wordcamporg' ),
+			'all_items'         => __( 'All Sponsor Levels', 'wordcamporg' ),
+			'edit_item'         => __( 'Edit Sponsor Level', 'wordcamporg' ),
+			'update_item'       => __( 'Update Sponsor Level', 'wordcamporg' ),
+			'add_new_item'      => __( 'Add Sponsor Level', 'wordcamporg' ),
+			'new_item_name'     => __( 'New Sponsor Level', 'wordcamporg' ),
 		);
 
 		// Register sponsor level taxonomy
@@ -1472,14 +1471,14 @@ class WordCamp_Post_Types_Plugin {
 		switch ( $current_filter ) {
 			case 'manage_wcb_organizer_posts_columns':
 				// Insert at offset 1, that's right after the checkbox.
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_organizer_avatar' => __( 'Avatar', $this->textdomain ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_organizer_avatar' => __( 'Avatar', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
 				break;
 			case 'manage_wcb_speaker_posts_columns':
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_speaker_avatar' => __( 'Avatar', $this->textdomain ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_speaker_avatar' => __( 'Avatar', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
 				break;
 			case 'manage_wcb_session_posts_columns':
-				$columns = array_slice( $columns, 0, 2, true ) + array( 'wcb_session_speakers' => __( 'Speakers', $this->textdomain ) ) + array_slice( $columns, 2, null, true );
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_session_time' => __( 'Time', $this->textdomain ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 2, true ) + array( 'wcb_session_speakers' => __( 'Speakers', 'wordcamporg' ) ) + array_slice( $columns, 2, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_session_time' => __( 'Time', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
 				break;
 			default:
 		}
@@ -1555,9 +1554,9 @@ class WordCamp_Post_Types_Plugin {
 			$session_type = 'session';
 
 		if ( 'session' == $session_type )
-			$states['wcpt-session-type'] = __( 'Session', $this->textdomain );
+			$states['wcpt-session-type'] = __( 'Session', 'wordcamporg' );
 		elseif ( 'custom' == $session_type )
-			$states['wcpt-session-type'] = __( 'Custom', $this->textdomain );
+			$states['wcpt-session-type'] = __( 'Custom', 'wordcamporg' );
 
 		return $states;
 	}
@@ -1577,3 +1576,39 @@ class WordCamp_Post_Types_Plugin {
 
 // Load the plugin class.
 $GLOBALS['wcpt_plugin'] = new WordCamp_Post_Types_Plugin;
+
+
+/*
+$track_slugs   = 'talks,workshops';
+$transient_key = 'wcpt_track_speaker_ids_' . substr( md5( $track_slugs ), 0, 22 ); // discard trailing hash characters to stay within transient limit
+
+if ( ! $speaker_ids = get_transient( $transient_key ) ) {
+	$speaker_ids    = array();
+	$track_sessions = get_posts( array(
+		'post_type'   => 'wcb_session',
+		'numberposts' => -1,
+		'tax_query'   => array(
+			array(
+				'taxonomy' => 'wcb_track',
+				'field'    => 'slug',
+				'terms'    => explode( ',', $track_slugs ),
+			),
+		),
+	) );
+
+	foreach ( $track_sessions as $session ) {
+		$session_speaker_ids = get_post_meta( $session->ID, '_wcpt_speaker_id' );
+		$speaker_ids         = array_merge( $speaker_ids, $session_speaker_ids );
+	}
+
+	//set_transient( $transient_key, $speaker_ids, HOUR_IN_SECONDS );
+}
+
+$speakers = get_posts( array(
+	'post_type'   => 'wcb_speaker',
+	'numberposts' => -1,
+	'post__in'    => $speaker_ids,
+) );
+
+var_dump( $track_slugs, $transient_key, $track_sessions, $speaker_ids, $speakers ); wp_die('');
+*/

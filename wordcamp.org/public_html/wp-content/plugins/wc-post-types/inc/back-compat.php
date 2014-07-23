@@ -6,7 +6,6 @@
  * and hooking its owr callbacks.
  */
 class WordCamp_Post_Types_Plugin_Back_Compat {
-	protected $textdomain = '';
 	protected $stylesheet = '';
 
 	function __construct() {
@@ -38,8 +37,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 	function wcpt_back_compat_init() {
 		global $wcpt_plugin;
 
-		// Keep the textdomain and keep a link to the main plugin object.
-		$this->textdomain = $wcpt_plugin->textdomain;
+		// Keep a link to the main plugin object.
 		$this->wcpt =& $wcpt_plugin;
 
 		add_filter( 'wcb_entry_meta', array( $this, 'wcb_session_entry_meta' ) );
@@ -177,10 +175,10 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 						}
 
 						if ( ! empty( $speakers ) )
-							$meta['speakers'] = sprintf( __( 'Presented by %s', $this->textdomain ), esc_html( $speakers ) );
+							$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( $speakers ) );
 
 						if ( ! empty( $track ) )
-							$meta['track'] = sprintf( __( '%s Track', $this->textdomain ), esc_html( $track ) );
+							$meta['track'] = sprintf( __( '%s Track', 'wordcamporg' ), esc_html( $track ) );
 
 						$track_url = get_term_link( $track, 'wcb_track' );
 						if ( ! is_wp_error( $track_url ) )
@@ -318,10 +316,10 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		}
 
 		if ( ! empty( $speakers ) )
-			$meta['speakers'] = sprintf( __( 'Presented by %s', $this->textdomain ), esc_html( $speakers ) );
+			$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( $speakers ) );
 
 		if ( ! empty( $track ) )
-			$meta['track'] = sprintf( __( '%s Track', $this->textdomain ), esc_html( $track ) );
+			$meta['track'] = sprintf( __( '%s Track', 'wordcamporg' ), esc_html( $track ) );
 
 		$track_url = get_term_link( $track, 'wcb_track' );
 		if ( ! is_wp_error( $track_url ) )
