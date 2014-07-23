@@ -44,6 +44,7 @@ class WordCamp_Admin {
 		add_action( 'transition_post_status',                         array( $this, 'trigger_schedule_actions' ), 10, 3 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'add_organizer_to_central' ), 10 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
+		add_action( 'wp_insert_post_data',                            array( $this, 'enforce_post_status_progression' ), 10, 2 );
 		add_action( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
 
 		// Admin notices
@@ -468,6 +469,38 @@ class WordCamp_Admin {
 	}
 
 	/**
+	 * Force WordCamp posts to go through the expected status progression.
+	 *
+	 * They should start as drafts, then move to pending, and then be published. This is necessary because
+	 * many automated processes (e.g., Organizer Reminder emails) are triggered when the post moves from
+	 * one status to another, and deviations from the expected progression can cause bugs.
+	 *
+	 * Posts should still be allowed to move backwards in the progression, though.
+	 *
+	 * @param array $post_data
+	 * @param array $post_data_raw
+	 * @return array
+	 */
+	public function enforce_post_status_progression( $post_data, $post_data_raw ) {
+		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && ! empty( $_POST ) ) {
+			$previous_post_status = get_post( absint( $_POST['post_ID'] ) );
+			$previous_post_status = $previous_post_status->post_status;
+
+			if ( 'pending' == $post_data['post_status'] && ! in_array( $previous_post_status, array( 'draft', 'publish' ) ) ) {
+				$this->active_admin_notices[] = 2;
+				$post_data['post_status'] = $previous_post_status;
+			}
+
+			if ( 'publish' == $post_data['post_status'] && 'pending' != $previous_post_status ) {
+				$this->active_admin_notices[] = 2;
+				$post_data['post_status'] = $previous_post_status;
+			}
+		}
+
+		return $post_data;
+	}
+
+	/**
 	 * Prevent WordCamp posts from being published until all the required fields are completed.
 	 *
 	 * @param array $post_data
@@ -564,6 +597,17 @@ class WordCamp_Admin {
 			1 => array(
 				'type'   => 'error',
 				'notice' => __( 'This WordCamp cannot be published until all of its required metadata is filled in.', 'wordcamporg' ),
+			),
+
+			2 => array(
+				'type'   => 'error',
+				'notice' => sprintf(
+					__(
+						'WordCamps must start as drafts, then be set as pending, and then be published. The post status has been reset to <strong>%s</strong>.',    // todo improve language
+						'wordcamporg'
+					),
+					$post->post_status
+				)
 			),
 		);
 
