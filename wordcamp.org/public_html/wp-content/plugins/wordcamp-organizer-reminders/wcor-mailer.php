@@ -223,6 +223,7 @@ class WCOR_Mailer {
 	 * @return string
 	 */
 	protected function get_recipient( $wordcamp_id, $email_id ) {
+		$recipient  = false;
 		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
 
 		if ( 'wcor_send_custom' == $send_where ) {
@@ -233,7 +234,11 @@ class WCOR_Mailer {
 
 			$recipient = $multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) );
 		} else {
-			$recipient = get_post_meta( $wordcamp_id, 'E-mail Address', true );
+			$email_address_key = wcpt_key_to_str( 'E-mail Address', 'wcpt_' );
+
+			if ( ! empty( $_POST[ $email_address_key ] ) ) {
+				$recipient = sanitize_email( $_POST[ $email_address_key ] );
+			}
 		}
 
 		return $recipient;
