@@ -501,7 +501,7 @@ class WordCamp_Admin {
 	}
 
 	/**
-	 * Prevent WordCamp posts from being published until all the required fields are completed.
+	 * Prevent WordCamp posts from being set to pending or published until all the required fields are completed.
 	 *
 	 * @param array $post_data
 	 * @param array $post_data_raw
@@ -511,7 +511,9 @@ class WordCamp_Admin {
 		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
-		$required_fields = array(
+		$required_pending_fields = array( 'E-mail Address' );
+
+		$required_publish_fields = array(
 			// WordCamp
 			'Start Date (YYYY-mm-dd)',
 			'Location',
@@ -538,8 +540,22 @@ class WordCamp_Admin {
 			'Website URL',
 		);
 
+		// Check pending posts
+		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+			foreach( $required_pending_fields as $field ) {
+				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
+
+				if ( empty( $value ) || 'null' == $value ) {
+					$post_data['post_status']     = 'draft';
+					$this->active_admin_notices[] = 3;
+					break;
+				}
+			}
+		}
+
+		// Check published posts
 		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
-			foreach( $required_fields as $field ) {
+			foreach( $required_publish_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
 				if ( empty( $value ) || 'null' == $value ) {
@@ -608,6 +624,11 @@ class WordCamp_Admin {
 					),
 					$post->post_status
 				)
+			),
+
+			3 => array(
+				'type'   => 'error',
+				'notice' => __( 'This WordCamp cannot be set to pending until all of its required metadata is filled in.', 'wordcamporg' ),
 			),
 		);
 
