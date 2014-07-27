@@ -9,7 +9,7 @@ $GLOBALS['wporg_global_header_options'] = array(
 	'menu' => wp_nav_menu( array( 'theme_location' => 'rosetta_main', 'container' => false, 'echo' => false ) ),
 );
 
-wp_enqueue_style( 'rosetta', get_bloginfo( 'stylesheet_url' ), array(), 15, 'screen' );
+wp_enqueue_style( 'rosetta', get_bloginfo( 'stylesheet_url' ), array(), 16, 'screen' );
 if ( is_locale_css() ) {
 	wp_enqueue_style( 'rosetta-locale', get_locale_css_url(), array(), 1 );
 }
