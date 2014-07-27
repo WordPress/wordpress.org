@@ -365,6 +365,30 @@ form#contactme textarea {
 	height: 10em;
 	line-height: 1.5em;
 }
+
+.submit input,
+input[type=button],
+input[type=submit],
+.button,
+.button-primary,
+.download-button,
+.button-secondary {
+	line-height: 1;
+}
+
+form#contactme .submit input,
+form#contactme input[type=button],
+form#contactme input[type=submit],
+form#contactme .button,
+.button-primary,
+form#contactme .download-button,
+form#contactme .button-secondary {
+	padding: 11px 0;
+	font-size: 13px;
+	height: auto;
+	max-width: 230px;
+}
+
 tr.error {
 	background-color: #E4F2FD;
 }
