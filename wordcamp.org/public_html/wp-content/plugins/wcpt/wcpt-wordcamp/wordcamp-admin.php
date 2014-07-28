@@ -519,8 +519,6 @@ class WordCamp_Admin {
 			'Location',
 			'URL',
 			'E-mail Address',
-			'Twitter',
-			'WordCamp Hashtag',
 			'Number of Anticipated Attendees',
 			'Multi-Event Sponsor Region',
 
@@ -533,11 +531,6 @@ class WordCamp_Admin {
 			'Sponsor Wrangler E-mail Address',
 			'Budget Wrangler Name',
 			'Budget Wrangler E-mail Address',
-
-			// Venue
-			'Venue Name',
-			'Physical Address',
-			'Website URL',
 		);
 
 		// Check pending posts
