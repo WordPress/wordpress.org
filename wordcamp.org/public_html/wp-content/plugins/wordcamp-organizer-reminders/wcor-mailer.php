@@ -136,7 +136,10 @@ class WCOR_Mailer {
 	}
 
 	/**
-	 * Replaces placeholders with a dynamic string
+	 * Replaces placeholders with a dynamic string.
+	 *
+	 * Some of these fields are guaranteed to have values by WordCamp_Admin::require_complete_meta_to_publish_wordcamp(),
+	 * but those that aren't are filled with 'N/A/'.
 	 *
 	 * @param  WP_Post $wordcamp
 	 * @param  WP_Post $email
@@ -187,8 +190,8 @@ class WCOR_Mailer {
 			esc_url( $wordcamp_meta['URL'][0] ),
 			esc_url( admin_url( 'post.php?post=' . $wordcamp->ID . '&action=edit' ) ),
 			$wordcamp_meta['E-mail Address'][0],
-			esc_url( 'https://twitter.com/' . $wordcamp_meta['Twitter'][0] ),
-			esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
+			empty( $wordcamp_meta['Twitter'][0] ) ? 'N/A' : esc_url( 'https://twitter.com/' . $wordcamp_meta['Twitter'][0] ),
+			empty( $wordcamp_meta['WordCamp Hashtag'][0] ) ? 'N/A' : esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
 			absint( $wordcamp_meta['Number of Anticipated Attendees'][0] ),
 			empty( $wordcamp_meta['Multi-Event Sponsor Region'][0] ) ? '' : get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
 
@@ -204,12 +207,12 @@ class WCOR_Mailer {
 			$wordcamp_meta['Budget Wrangler E-mail Address'][0],
 
 			// Venue
-			$wordcamp_meta['Venue Name'][0],
-			$wordcamp_meta['Physical Address'][0],
-			$wordcamp_meta['Maximum Capacity'][0],
-			$wordcamp_meta['Available Rooms'][0],
-			$wordcamp_meta['Website URL'][0],
-			$wordcamp_meta['Contact Information'][0],
+			empty( $wordcamp_meta['Venue Name'][0] )          ? 'N/A' : $wordcamp_meta['Venue Name'][0],
+			empty( $wordcamp_meta['Physical Address'][0] )    ? 'N/A' : $wordcamp_meta['Physical Address'][0],
+			empty( $wordcamp_meta['Maximum Capacity'][0] )    ? 'N/A' : $wordcamp_meta['Maximum Capacity'][0],
+			empty( $wordcamp_meta['Available Rooms'][0] )     ? 'N/A' : $wordcamp_meta['Available Rooms'][0],
+			empty( $wordcamp_meta['Website URL'][0] )         ? 'N/A' : $wordcamp_meta['Website URL'][0],
+			empty( $wordcamp_meta['Contact Information'][0] ) ? 'N/A' : $wordcamp_meta['Contact Information'][0],
 		);
 		
 		return str_replace( $search, $replace, $content );
