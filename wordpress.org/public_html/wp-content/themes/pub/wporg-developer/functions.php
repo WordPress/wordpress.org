@@ -56,6 +56,7 @@ function init() {
 
 	add_filter( 'the_excerpt', __NAMESPACE__ . '\\lowercase_P_dangit_just_once' );
 	add_filter( 'the_content', __NAMESPACE__ . '\\make_doclink_clickable', 10, 5 );
+	add_filter( 'comments_open', __NAMESPACE__ . '\\can_user_post_example', 10, 2 );
 
 	// Temporarily disable comments
 	//add_filter( 'comments_open', '__return_false' );
@@ -349,7 +350,7 @@ function theme_scripts_styles() {
 	wp_enqueue_script( 'wporg-developer-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	wp_enqueue_script( 'wporg-developer-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
 
-	if ( is_singular() && comments_open() ) {
+	if ( is_singular() && ( '0' != get_comments_number() || post_type_has_source_code() ) ) {
 		wp_enqueue_script( 'wporg-developer-function-reference', get_template_directory_uri() . '/js/function-reference.js', array( 'jquery', 'syntaxhighlighter-core', 'syntaxhighlighter-brush-php' ), '20140515', true );
 		wp_enqueue_style( 'syntaxhighlighter-core' );
 		wp_enqueue_style( 'syntaxhighlighter-theme-default' );

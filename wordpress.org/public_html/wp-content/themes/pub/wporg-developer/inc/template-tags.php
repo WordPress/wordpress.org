@@ -72,13 +72,13 @@ namespace {
 		}
 	endif;
 
-	if ( ! function_exists( 'wporg_developer_comment' ) ) :
+	if ( ! function_exists( 'wporg_developer_example' ) ) :
 		/**
-		 * Template for comments and pingbacks.
+		 * Template for examples.
 		 *
-		 * Used as a callback by wp_list_comments() for displaying the comments.
+		 * Used as a callback by wp_list_comments() for displaying the examples.
 		 */
-		function wporg_developer_comment( $comment, $args, $depth ) {
+		function wporg_developer_example( $comment, $args, $depth ) {
 			$GLOBALS['comment'] = $comment;
 
 			if ( 'pingback' == $comment->comment_type || 'trackback' == $comment->comment_type ) : ?>
@@ -750,6 +750,41 @@ namespace DevHub {
 		update_post_meta( $post_id, $meta_key, addslashes( $source_code ) );
 
 		return $source_code;
+	}
+
+	/**
+	 * Indicates if the current user can post an example.
+	 *
+	 * This only affects post types wp-parser-* as they are the only things
+	 * that can have examples.
+	 *
+	 * A custom check can be performed by hooking the filter
+	 * 'wporg_devhub-can_user_post_example' and returning a
+	 * value other than null.
+	 *
+	 * By default, the ability to post examples is restricted to members of the
+	 * blog.
+	 *
+	 * @param  int  $post_id The post ID.
+	 *
+	 * @return bool True if the user can post an example.
+	 */
+	function can_user_post_example( $open, $post_id ) {
+
+		// Only proceed if the post type is one that has examples.
+		if ( 0 !== strpos( get_post_type( (int) $post_id ), 'wp-parser-' ) ) {
+			// Temporarily disable commenting that isn't for an example since various
+			// changes need to take place to enable regular commenting.
+			return false; //$open;
+		}
+
+		// Permit default logic to be overridden via filter that returns value other than null.
+		if ( null !== ( $can = apply_filters( 'wporg_devhub-can_user_post_example', null, $post_id ) ) ) {
+			return $can;
+		}
+
+		// Default to limiting ability to post examples to members of the blog.
+		return is_user_member_of_blog();
 	}
 
 }

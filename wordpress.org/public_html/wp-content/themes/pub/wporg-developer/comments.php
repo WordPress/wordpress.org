@@ -39,7 +39,7 @@ if ( post_password_required() ) {
 				 * define wporg_developer_comment() and that will be used instead.
 				 * See wporg_developer_comment() in inc/template-tags.php for more.
 				 */
-				wp_list_comments( array( 'callback' => 'wporg_developer_comment' ) );
+				wp_list_comments( array( 'callback' => 'wporg_developer_example' ) );
 			?>
 		</ol><!-- .comment-list -->
 
@@ -52,6 +52,8 @@ if ( post_password_required() ) {
 		<?php endif; // check for comment navigation ?>
 
 	<?php endif; // have_comments() ?>
+
+	<?php if ( DevHub\can_user_post_example( false, get_the_ID() ) ) : ?>
 
 	<p id="add-example" style="display:none;"><a href=""><?php _e( 'Have an example to add?', 'wporg' ); ?></a></p>
 
@@ -66,5 +68,7 @@ if ( post_password_required() ) {
 		'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to submit an example.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
 		'title_reply'         =>  '', //'Add Example'
 	) ); ?>
+
+	<?php endif; ?>
 
 </div><!-- #comments -->
