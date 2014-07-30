@@ -59,6 +59,11 @@ function init() {
 	add_filter( 'the_content', __NAMESPACE__ . '\\make_doclink_clickable', 10, 5 );
 	add_filter( 'comments_open', __NAMESPACE__ . '\\can_user_post_example', 10, 2 );
 
+	// Add the handbook's 'Watch' action link.
+	if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
+		add_action( 'wporg_action_links', array( 'WPorg_Handbook_Watchlist', 'display_action_link' ) );
+	}
+
 	// Temporarily disable comments
 	//add_filter( 'comments_open', '__return_false' );
 
