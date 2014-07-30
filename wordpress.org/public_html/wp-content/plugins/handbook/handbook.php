@@ -72,6 +72,7 @@ class WPorg_Handbook {
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
+		add_action( 'p2_action_links',                    array( $this, 'disable_p2_resolved_posts_action_links' ) );
 	}
 
 	function grant_handbook_caps( $caps ) {
@@ -165,4 +166,15 @@ class WPorg_Handbook {
 
 		return $post_types;
 	}
+
+	/**
+	 * Disable the P2 Resolved Posts plugin's action links (e.g. "Flag Unresolved"),
+	 * if that plugin is active.
+	 */
+	function disable_p2_resolved_posts_action_links() {
+		if ( ( $this->post_type == get_post_type() ) && class_exists( 'P2_Resolved_Posts' ) && is_object( P2_Resolved_Posts::$instance ) ) {
+			remove_filter( 'p2_action_links', array( P2_Resolved_Posts::$instance, 'p2_action_links' ), 100 );
+		}
+	}
+
 }
