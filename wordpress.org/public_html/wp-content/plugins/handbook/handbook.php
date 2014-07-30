@@ -26,6 +26,7 @@ class WPorg_Handbook_Init {
 		foreach ( $post_types as $type ) {
 			new WPorg_Handbook( $type );
 		}
+
 	}
 
 }
@@ -99,7 +100,7 @@ class WPorg_Handbook {
 
 		register_post_type( $this->post_type, array(
 			'labels' => array(
-				'name'          => sprintf( __( '%s Pages', 'wporg' ), $this->label ),
+				'name'          => $this->label,
 				'singular_name' => sprintf( __( '%s Page', 'wporg' ), $this->label ),
 				'menu_name'     => $this->label,
 				'all_items'     => sprintf( __( '%s Pages', 'wporg' ), $this->label ),
