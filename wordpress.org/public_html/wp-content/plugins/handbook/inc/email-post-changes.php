@@ -7,15 +7,9 @@
 class WPorg_Handbook_Email_Post_Changes {
 
 	public static function init() {
-		add_action( 'widgets_init', array( __CLASS__, 'handbook_sidebar' ), 11 ); // After P2
 		add_filter( 'email_post_changes_emails', array( __CLASS__, 'email_post_changes_emails' ), 10, 3 );
 		add_action( 'admin_post_wporg_watchlist', array( __CLASS__, 'update_watchlist' ) );
 		add_action( 'option_email_post_changes', array( __CLASS__, 'option_email_post_changes' ) );
-	}
-
-	public static function handbook_sidebar() {
-		require_once dirname( __FILE__ ) . '/widgets.php';
-		register_widget( 'WPorg_Handbook_Widget' );
 	}
 
 	public static function option_email_post_changes( $values ) {
