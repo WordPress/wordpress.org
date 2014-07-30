@@ -48,6 +48,7 @@ function init() {
 	add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_single_search_match' );
+	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_handbook' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
@@ -62,6 +63,7 @@ function init() {
 	//add_filter( 'comments_open', '__return_false' );
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
+	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_remove_handbook', 10, 2 );
 
 	treat_comments_as_examples();
 }
@@ -93,6 +95,23 @@ function breadcrumb_trail_items( $items, $args ) {
 	$items[3] = $items[4];
 	// Unset the last element since it shifted up in trail hierarchy
 	unset( $items[4] );
+
+	return $items;
+}
+
+/**
+ * Removes the 'Handbook' segment of the breakcrumb, when present.
+ *
+ * There is no handbook page or listing at present.
+ *
+ * @param  array $items The breadcrumb trail items
+ * @param  array $args  Original arg
+ * @return array
+ */
+function breadcrumb_trail_remove_handbook( $items, $args ) {
+	if ( false !== strpos( $items[1], '>Handbook</a>' ) ) {
+		array_splice( $items, 1, 1 );
+	}
 
 	return $items;
 }
@@ -468,6 +487,16 @@ function lowercase_P_dangit_just_once( $excerpt ) {
 function redirect_single_search_match() {
 	if ( is_search() && 1 == $GLOBALS['wp_query']->found_posts ) {
 		wp_redirect( get_permalink( get_post() ) );
+		exit();
+	}
+}
+
+/**
+ * Redirects a naked handbook request to home.
+ */
+function redirect_handbook() {
+	if ( 'handbook' == get_query_var( 'name' ) && ! get_query_var( 'post_type ' ) ) {
+		wp_redirect( home_url() );
 		exit();
 	}
 }

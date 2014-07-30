@@ -335,16 +335,20 @@ namespace DevHub {
 	 * @return string
 	 */
 	function get_site_section_title() {
+		if ( is_post_type_archive( array( 'plugin-handbook' ) ) ) {
+			return __( 'Plugin Handbook', 'wporg' );
+		}
+
+		if ( is_post_type_archive( array ( 'theme-handbook' ) ) ) {
+			return __( 'Theme Handbook', 'wporg' );
+		}
+
 		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
 		switch ( $parts[1] ) {
 			case 'reference':
-				return 'Code Reference';
-			case 'theme-handbook':
-				return 'Theme Handbook';
-			case 'plugin-handbook':
-				return 'Plugin Handbook';
+				return __( 'Code Reference', 'wporg' );
 			default:
-				return 'Developer Resources';
+				return __( 'Developer Resources', 'wporg' );
 		}
 	}
 

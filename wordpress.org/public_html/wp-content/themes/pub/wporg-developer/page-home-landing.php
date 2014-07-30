@@ -8,8 +8,10 @@
  */
 
 // Temporarily redirect to reference until other section become live, justifying a main landing page.
-wp_redirect( get_permalink( get_page_by_path( 'reference' ) ) );
-exit();
+if ( ! is_user_member_of_blog() ) {
+	wp_redirect( get_permalink( get_page_by_path( 'reference' ) ) );
+	exit();
+}
 
 get_header(); ?>
 
@@ -22,12 +24,12 @@ get_header(); ?>
 					<div class="widget box box-left transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-welcome-widgets-menus"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
 						<p class="widget-description"><?php _e( 'Want to know all there is to know about theming and WordPress?', 'wporg' ); ?></p>
-						<a href="#" class="themes-go get-started go button"><?php _e( 'Develop Themes ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
+						<a href="<?php esc_attr_e( get_post_type_archive_link( 'theme-handbook' ) ); ?>" class="themes-go get-started go button"><?php _e( 'Develop Themes ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 					<div class="widget box box-right transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-admin-plugins"></div><?php _e( 'Plugins', 'wporg' ); ?></h3>
 						<p class="widget-description"><?php _e( 'Ready to dive deep into the world of plugin authoring?', 'wporg' ); ?></p>
-						<a href="#" class="plugins-go get-started go button"><?php _e( 'Develop Plugins ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
+						<a href="<?php esc_attr_e( get_post_type_archive_link( 'plugin-handbook' ) ); ?>" class="plugins-go get-started go button"><?php _e( 'Develop Plugins ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 				</div>
 			</div><!-- /topic-guide -->
@@ -46,7 +48,7 @@ get_header(); ?>
 				</div>
 			</div><!-- /new-in-guide -->
 
-
+<?php /*
 			<main id="main" class="site-main section" role="main">
 
 					<?php while ( have_posts() ) : the_post(); ?>
@@ -71,7 +73,7 @@ get_header(); ?>
 					<?php endwhile; // end of the loop. ?>
 
 			</main><!-- #main -->
-
+*/ ?>
 
 			<div class="search-guide section light-gray clear">
 				<div class="inner-wrap three-columns">
