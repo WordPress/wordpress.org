@@ -401,6 +401,33 @@ function treat_comments_as_examples() {
 	remove_filter( 'comment_text',        'wpautop',            30 );
 
 	remove_filter( 'pre_comment_content', 'wp_rel_nofollow',    15 );
+
+	// Be more permissive with content of examples.
+	// Note: the content gets fully escaped via 'get_comment_text'.
+	if ( post_type_supports_examples() ) {
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			remove_filter( 'pre_comment_content', 'wp_filter_post_kses' );
+		} else {
+			remove_filter( 'pre_comment_content', 'wp_filter_kses' );
+		}
+	}
+
+	add_filter( 'get_comment_text',  __NAMESPACE__ . '\\escape_example_content' );
+}
+
+/**
+ * Escapes the entirety of the content for examples.
+ *
+ * @param  string $text The comment/example content.
+ * @return string
+ */
+function escape_example_content( $text ) {
+	// Only proceed if the post type is one that has examples.
+	if ( ! post_type_supports_examples() ) {
+		return $text;
+	}
+
+	return htmlentities( $text );
 }
 
 /**

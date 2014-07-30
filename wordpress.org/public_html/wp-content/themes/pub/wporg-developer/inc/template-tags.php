@@ -93,7 +93,7 @@ namespace {
 				<li id="comment-<?php comment_ID(); ?>" <?php comment_class( empty( $args['has_children'] ) ? '' : 'parent' ); ?>>
 				<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 					<div class="comment-content code-example-container">
-						<pre class="brush: php; toolbar: false;"><?php echo htmlentities( get_comment_text() ); ?></pre>
+						<pre class="brush: php; toolbar: false;"><?php comment_text(); /* Fully escaped via filter */ ?></pre>
 					</div>
 					<!-- .comment-content -->
 
@@ -667,6 +667,19 @@ namespace DevHub {
 		$post_types_with_source_code = array( 'wp-parser-method', 'wp-parser-function' );
 
 		return in_array( $post_type, $post_types_with_source_code );
+	}
+
+	/**
+	 * Does the post type support having examples?
+	 *
+	 * @param  string  Optional. The post type name. If blank, assumes current post type.
+	 *
+	 * @return boolean
+	 */
+	function post_type_supports_examples( $post_type = null ) {
+		$post_type = $post_type ? $post_type : get_post_type();
+
+		return ( 0 === strpos( $post_type, 'wp-parser-' ) );
 	}
 
 	/**
