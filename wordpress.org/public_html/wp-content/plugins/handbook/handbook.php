@@ -95,7 +95,7 @@ class WPorg_Handbook {
 
 	function register_post_type() {
 		if ( 'handbook' != $this->post_type ) {
-			$slug = 'handbook/' . substr( $this->post_type, 0, -9 );
+			$slug = substr( $this->post_type, 0, -9 );
 		} else {
 			$slug = 'handbook';
 		}
