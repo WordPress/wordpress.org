@@ -68,7 +68,6 @@ function init() {
 	//add_filter( 'comments_open', '__return_false' );
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
-	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_remove_handbook', 10, 2 );
 
 	treat_comments_as_examples();
 }
@@ -100,23 +99,6 @@ function breadcrumb_trail_items( $items, $args ) {
 	$items[3] = $items[4];
 	// Unset the last element since it shifted up in trail hierarchy
 	unset( $items[4] );
-
-	return $items;
-}
-
-/**
- * Removes the 'Handbook' segment of the breakcrumb, when present.
- *
- * There is no handbook page or listing at present.
- *
- * @param  array $items The breadcrumb trail items
- * @param  array $args  Original arg
- * @return array
- */
-function breadcrumb_trail_remove_handbook( $items, $args ) {
-	if ( false !== strpos( $items[1], '>Handbook</a>' ) ) {
-		array_splice( $items, 1, 1 );
-	}
 
 	return $items;
 }
