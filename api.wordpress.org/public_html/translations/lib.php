@@ -56,6 +56,23 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$base_url .= ( $type == 'core' ) ? 'core' : "$type/$domain";
 
 	$_translations = array();
+	if ( 'core' === $type ) {
+		$continue_translations = wp_cache_get( 'continue-strings', $cache_group );
+		if ( ! $continue_translations ) {
+			// Magic numbers: 78 is wp/dev/admin. 326 is 'Continue'.
+			$continue_translations = $wpdb->get_results(
+				"SELECT locale as gp_locale, translation_0 as translation
+				FROM translate_translation_sets ts
+				INNER JOIN translate_translations t
+				ON ts.id = t.translation_set_id
+				WHERE project_id = 78
+				AND slug = 'default'
+				AND original_id = 326", OBJECT_K
+			);
+			wp_cache_add( 'continue-strings', $continue_translations, $cache_group, $cache_time );
+		}
+	}
+
 	foreach ( $translations as $translation ) {
 		$locale = GP_Locales::by_field( 'wp_locale', $translation->language );
 
@@ -80,6 +97,11 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		$_translations[ $iso ]->native_name = $locale->native_name;
 		$_translations[ $iso ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
 		$_translations[ $iso ]->iso = (object) $isos;
+
+		if ( 'core' === $type ) {
+			$continue = isset( $continue_translations[ $locale->slug ] ) ? $continue_translations[ $locale->slug ]->translation : '';
+			$_translations[ $iso ]->strings = (object) array( 'continue' => $continue );
+		}
 	}
 	ksort( $_translations );
 	$translations = array_values( $_translations );
