@@ -249,28 +249,85 @@ class WordCamp_Post_Types_Plugin {
 	function shortcode_speakers( $attr, $content ) {
 		global $post;
 
+		// Prepare the shortcode arguments
 		$attr = shortcode_atts( array(
 			'show_avatars' => true,
 			'avatar_size' => 100,
 			'posts_per_page' => -1,
 			'orderby' => 'date',
 			'order' => 'desc',
+			'track' => 'all',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 		$attr['order'] = ( in_array( $attr['order'], array( 'asc', 'desc') ) ) ? $attr['order'] : 'desc';
 
-		$speakers = new WP_Query( array(
+		/*
+		 * Only allow 2014.capetown to use the new track attribute
+		 * @todo Remove this and update docs after stakeholder review
+		 */
+		if ( ! in_array( get_current_blog_id(), apply_filters( 'wcpt_filter_speakers_by_track_allowed_sites', array( 423 ) ) ) ) {
+			$attr['track'] = 'all';
+		}
+
+		// Fetch all the relevant sessions
+		$session_args = array(
+			'post_type'      => 'wcb_session',
+			'posts_per_page' => -1,
+		);
+
+		if ( 'all' != $attr['track'] ) {
+			$session_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'wcb_track',
+					'field'    => 'slug',
+					'terms'    => explode( ',', $attr['track'] ),
+				),
+			);
+		}
+
+		$sessions = get_posts( $session_args );
+
+		// Parse the sessions
+		$speaker_ids = $speakers_tracks = array();
+		foreach ( $sessions as $session ) {
+			// Get the speaker IDs for all the sessions in the requested tracks
+			$session_speaker_ids = get_post_meta( $session->ID, '_wcpt_speaker_id' );
+			$speaker_ids = array_merge( $speaker_ids, $session_speaker_ids );
+
+			// Map speaker IDs to their corresponding tracks
+			$session_terms = wp_get_object_terms( $session->ID, 'wcb_track' );
+			foreach ( $session_speaker_ids as $speaker_id ) {
+				if ( isset ( $speakers_tracks[ $speaker_id ] ) ) {
+					$speakers_tracks[ $speaker_id ] = array_merge( $speakers_tracks[ $speaker_id ], wp_list_pluck( $session_terms, 'slug' ) );
+				} else {
+					$speakers_tracks[ $speaker_id ] = wp_list_pluck( $session_terms, 'slug' );
+				}
+			}
+		}
+
+		// Remove duplicate entries
+		$speaker_ids = array_unique( $speaker_ids );
+		foreach ( $speakers_tracks as $speaker_id => $tracks ) {
+			$speakers_tracks[ $speaker_id ] = array_unique( $tracks );
+		}
+
+		// Fetch all specified speakers
+		$speaker_args = array(
 			'post_type' => 'wcb_speaker',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
+			'post__in' => $speaker_ids,
 			'orderby' => $attr['orderby'],
 			'order' => $attr['order'],
-		) );
+		);
+
+		$speakers = new WP_Query( $speaker_args );
 
 		if ( ! $speakers->have_posts() )
 			return '';
 
+		// Render the HTML for the shortcode
 		ob_start();
 		?>
 
@@ -278,23 +335,30 @@ class WordCamp_Post_Types_Plugin {
 
 			<?php while ( $speakers->have_posts() ) : $speakers->the_post(); ?>
 
-				<div id="wcorg-speaker-<?php echo sanitize_html_class( $post->post_name ); ?>" class="wcorg-speaker">
+				<?php
+					$speaker_classes = array( 'wcorg-speaker', 'wcorg-speaker-' . sanitize_html_class( $post->post_name ) );
+					foreach ( $speakers_tracks[ get_the_ID() ] as $track ) {
+						$speaker_classes[] = sanitize_html_class( 'wcorg-track-' . $track );
+					}
+				?>
+
+				<!-- Organizers note: The id attribute is deprecated and only remains for backwards compatibility, please use the corresponding class to target individual speakers -->
+				<div id="wcorg-speaker-<?php echo sanitize_html_class( $post->post_name ); ?>" class="<?php echo implode( ' ', $speaker_classes ); ?>">
 					<h2><?php the_title(); ?></h2>
 					<div class="wcorg-speaker-description">
 						<?php echo ( $attr['show_avatars'] ) ? get_avatar( get_post_meta( get_the_ID(), '_wcb_speaker_email', true ), absint( $attr['avatar_size'] ) ) : ''; ?>
 						<?php the_content(); ?>
 					</div>
-				</div>
+				</div><!-- .wcorg-speaker -->
 
 			<?php endwhile; ?>
 
 		</div><!-- .wcorg-speakers -->
+
 		<?php
 
 		wp_reset_postdata();
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
+		return ob_get_clean();
 	}
 
 	/**
