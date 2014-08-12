@@ -49,8 +49,24 @@ function wporg_developer_wp_title( $title, $sep ) {
 		return $title;
 	}
 
-	// Add the blog name
-	$title .= get_bloginfo( 'name' );
+	$post_type = get_query_var( 'post_type' );
+
+	// Add post type to title if it's a parsed item.
+	if ( 0 === strpos( $post_type, 'wp-parser-' ) ) {
+		if ( $post_type_object = get_post_type_object( $post_type ) ) {
+			$title .= get_post_type_object( $post_type )->labels->singular_name . " $sep ";
+		}
+	}
+	// Add handbook name to title if relevent
+	elseif ( false !== strpos( $post_type, 'handbook' ) ) {
+		if ( $post_type_object = get_post_type_object( $post_type ) ) {
+			$label = get_post_type_object( $post_type )->labels->name . " $sep ";
+			// Don't add the label for a page of the same name as post type name.
+			if ( $title != $label ) {
+				$title .= $label;
+			}
+		}
+	}
 
 	// Add the blog description for the home/front page.
 	$site_description = get_bloginfo( 'description', 'display' );
@@ -62,6 +78,9 @@ function wporg_developer_wp_title( $title, $sep ) {
 	if ( $paged >= 2 || $page >= 2 ) {
 		$title .= " $sep " . sprintf( __( 'Page %s', 'wporg' ), max( $paged, $page ) );
 	}
+
+	// Add the blog name
+	$title .= get_bloginfo( 'name' );
 
 	return $title;
 }
@@ -75,7 +94,7 @@ add_filter( 'wp_title', 'wporg_developer_wp_title', 10, 2 );
  */
 function wporg_filter_archive_excerpt( $excerpt ) {
 	if ( ! is_single() ) {
-		$excerpt = '<b>' . get_post_type_labels( get_post_type_object( get_post_type( get_the_ID() ) ) )->singular_name . ': </b>' . $excerpt;
+		$excerpt = '<b>' . get_post_type_object( get_post_type( get_the_ID() ) )->labels->singular_name . ': </b>' . $excerpt;
 	}
 
 	return $excerpt;
@@ -89,10 +108,11 @@ add_filter( 'get_the_excerpt', 'wporg_filter_archive_excerpt' );
  * @return string
  */
 function wporg_filter_archive_title( $title ) {
-	if ( ! is_single() && in_array( get_post_type(), array( 'wp-parser-function', 'wp-parser-method' ) ) ) {
+	if ( ( ! is_single() || doing_filter( 'single_post_title' ) ) && in_array( get_post_type(), array( 'wp-parser-function', 'wp-parser-method' ) ) ) {
 		$title .= '()';
 	}
 
 	return $title;
 }
 add_filter( 'the_title', 'wporg_filter_archive_title' );
+add_filter( 'single_post_title', 'wporg_filter_archive_title' );

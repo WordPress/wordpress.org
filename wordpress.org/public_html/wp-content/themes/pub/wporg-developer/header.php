@@ -6,6 +6,9 @@
  *
  * @package wporg-developer
  */
+
+$GLOBALS['pagetitle'] = wp_title( '|', false, 'right' );
+
 require WPORGPATH . 'header.php';
 ?>
 
