@@ -17,11 +17,10 @@ require WPORGPATH . 'header.php';
 	<header id="masthead" class="site-header" role="banner">
 		<div class="inner-wrap">
 			<div class="site-branding">
-				<?php if ( ! is_front_page() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/reference/' ) ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a></h1>
-				<?php else : ?>
-					<span class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a></span>
-				<?php endif; ?>
+				<?php $tag = is_front_page() ? 'span' : 'h1'; ?>
+				<<?php echo $tag; ?> class="site-title">
+					<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
+				</<?php echo $tag; ?>>
 			</div>
 		</div><!-- .inner-wrap -->
 	</header><!-- #masthead -->

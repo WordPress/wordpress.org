@@ -330,23 +330,36 @@ namespace DevHub {
 	}
 
 	/**
-	 * Get site section from url path
+	 * Get site section root URL based on URL path.
+	 *
+	 * @return string
+	 */
+	function get_site_section_url() {
+		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
+		switch ( $parts[1] ) {
+			case 'reference':
+			case 'plugin':
+			case 'theme':
+				return home_url( '/' . $parts[1] . '/' );
+			default:
+				return home_url( '/' );
+		}
+	}
+
+	/**
+	 * Get site section title based on URL path.
 	 *
 	 * @return string
 	 */
 	function get_site_section_title() {
-		if ( is_post_type_archive( array( 'plugin-handbook' ) ) ) {
-			return __( 'Plugin Handbook', 'wporg' );
-		}
-
-		if ( is_post_type_archive( array ( 'theme-handbook' ) ) ) {
-			return __( 'Theme Handbook', 'wporg' );
-		}
-
 		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
 		switch ( $parts[1] ) {
 			case 'reference':
 				return __( 'Code Reference', 'wporg' );
+			case 'plugin':
+				return __( 'Plugin Handbook', 'wporg' );
+			case 'theme':
+				return __( 'Theme Handbook', 'wporg' );
 			default:
 				return __( 'Developer Resources', 'wporg' );
 		}
