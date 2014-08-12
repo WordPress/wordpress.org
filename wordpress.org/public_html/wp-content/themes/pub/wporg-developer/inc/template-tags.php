@@ -622,6 +622,22 @@ namespace DevHub {
 	}
 
 	/**
+	 * Retrieve either the starting or ending line number.
+	 *
+	 * @param  int    $post_id Optional. The post ID.
+	 * @param  string $type    Optional. Either 'start' for starting line number, or 'end' for ending line number.
+	 *
+	 * @return int
+	 */
+	function get_line_number( $post_id = null, $type = 'start' ) {
+
+		$post_id  = empty( $post_id ) ? get_the_ID() : $post_id;
+		$meta_key = ( 'end' == $type ) ? '_wp-parser_end_line_num' : '_wp-parser_line_num';
+
+		return (int) get_post_meta( $post_id, $meta_key, true );
+	}
+
+	/**
 	 * Retrieve the URL to the actual source file and line.
 	 *
 	 * @param null $post_id     Post ID.

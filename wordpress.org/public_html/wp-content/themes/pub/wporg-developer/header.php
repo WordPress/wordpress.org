@@ -9,7 +9,7 @@
 require WPORGPATH . 'header.php';
 ?>
 
-<div id="page" class="hfeed site devhub-wrap">
+<div id="page" <?php body_class( 'hfeed site devhub-wrap' ); ?>>
 	<?php do_action( 'before' ); ?>
 	<header id="masthead" class="site-header" role="banner">
 		<div class="inner-wrap">

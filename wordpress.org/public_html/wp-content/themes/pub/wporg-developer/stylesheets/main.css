@@ -1093,6 +1093,15 @@ input {
   border-radius: 5px;
   padding: 20px;
 }
+.devhub-wrap.archive .wp-parser-class h1 a, .devhub-wrap.archive .wp-parser-function h1 a, .devhub-wrap.archive .wp-parser-hook h1 a, .devhub-wrap.archive .wp-parser-method h1 a, .devhub-wrap.search .wp-parser-class h1 a, .devhub-wrap.search .wp-parser-function h1 a, .devhub-wrap.search .wp-parser-hook h1 a, .devhub-wrap.search .wp-parser-method h1 a {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #21759b;
+  font-weight: normal;
+}
+.devhub-wrap.archive .wp-parser-class div.sourcefile, .devhub-wrap.archive .wp-parser-function div.sourcefile, .devhub-wrap.archive .wp-parser-hook div.sourcefile, .devhub-wrap.archive .wp-parser-method div.sourcefile, .devhub-wrap.search .wp-parser-class div.sourcefile, .devhub-wrap.search .wp-parser-function div.sourcefile, .devhub-wrap.search .wp-parser-hook div.sourcefile, .devhub-wrap.search .wp-parser-method div.sourcefile {
+  color: #999999;
+  font-style: italic;
+}
 .devhub-wrap .single .wp-parser-class, .devhub-wrap .single .wp-parser-function, .devhub-wrap .single .wp-parser-hook, .devhub-wrap .single .wp-parser-method {
   border-bottom-style: none;
 }

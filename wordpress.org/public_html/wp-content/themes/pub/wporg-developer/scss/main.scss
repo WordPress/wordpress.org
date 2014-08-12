@@ -882,6 +882,24 @@
 		}
 	}
 
+	&.archive, &.search {
+		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
+			h1 {
+				a {
+					font-family: $body-font;
+					color: #21759b;
+					font-weight: normal;
+				}
+			}
+			div {
+				&.sourcefile {
+					color: #999999;
+					font-style: italic;
+				}
+			}
+		}
+	}
+
 	.single {
 		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 			border-bottom-style: none;

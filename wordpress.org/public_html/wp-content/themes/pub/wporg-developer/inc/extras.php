@@ -66,3 +66,33 @@ function wporg_developer_wp_title( $title, $sep ) {
 	return $title;
 }
 add_filter( 'wp_title', 'wporg_developer_wp_title', 10, 2 );
+
+/**
+ * Prefixes excerpts for archive view with content type label.
+ *
+ * @param  string $excerpt The excerpt.
+ * @return string
+ */
+function wporg_filter_archive_excerpt( $excerpt ) {
+	if ( ! is_single() ) {
+		$excerpt = '<b>' . get_post_type_labels( get_post_type_object( get_post_type( get_the_ID() ) ) )->singular_name . ': </b>' . $excerpt;
+	}
+
+	return $excerpt;
+}
+add_filter( 'get_the_excerpt', 'wporg_filter_archive_excerpt' );
+
+/**
+ * Appends parentheses to titles in archive view for functions and methods.
+ *
+ * @param  string $title The title.
+ * @return string
+ */
+function wporg_filter_archive_title( $title ) {
+	if ( ! is_single() && in_array( get_post_type(), array( 'wp-parser-function', 'wp-parser-method' ) ) ) {
+		$title .= '()';
+	}
+
+	return $title;
+}
+add_filter( 'the_title', 'wporg_filter_archive_title' );
