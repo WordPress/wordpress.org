@@ -33,14 +33,8 @@
 		h5,
 		h6 {
 			color: #1e1e1e;
-			font-family: $header-font;
 		}
 
-	}
-
-	h2.widget-title,
-	h3.widget-title {
-		font-family: $header-font;
 	}
 
 	#headline h2 a {
@@ -52,17 +46,23 @@
 		font-family: $header-font;
 	}
 
-	h2 {
+	h1 {
 		font-size: 28px;
 		font-size: 2.8rem;
 		line-height: 32px;
 		line-height: 3.2rem;
 	}
-	h3 {
+	h2 {
 		font-size: 22px;
 		font-size: 2.2rem;
 		line-height: 26px;
 		line-height: 2.6rem;
+	}
+	h3 {
+		font-size: 20px;
+		font-size: 2rem;
+		line-height: 24px;
+		line-height: 2.4rem;
 	}
 	h4 {
 		font-size: 18px;
@@ -371,9 +371,10 @@
 	 */
 
 	.site-header {
-	    background: none repeat scroll 0 0 #F7F7F7;
-    	border-bottom: 1px solid #DFDFDF;
-   		height: 62px;
+		background: none repeat scroll 0 0 #F7F7F7;
+		border-bottom: 1px solid #DFDFDF;
+		height: 62px;
+		margin-bottom: 1em;
 	}
 	.site-branding {
 		width: 100%;
@@ -399,9 +400,6 @@
 		}
 		font-size: 13px;
 		font-size: 1.3rem;
-	}
-	.breadcrumb-trail {
-		margin-top: 1em;
 	}
 	h1.entry-title,
 	h1.page-title {
@@ -1067,6 +1065,17 @@
 			}
 		}
 
+	}
+
+	nav.post-navigation .nav-links a {
+		width: 49%;
+		display: inline-block;
+		&[rel="prev"] {
+			text-align: left;
+		}
+		&[rel="next"] {
+			text-align: right;
+		}
 	}
 }
 

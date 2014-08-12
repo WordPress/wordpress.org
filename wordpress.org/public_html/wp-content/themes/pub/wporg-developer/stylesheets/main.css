@@ -322,11 +322,6 @@ input {
 .devhub-wrap .site-main h5,
 .devhub-wrap .site-main h6 {
   color: #1e1e1e;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.devhub-wrap h2.widget-title,
-.devhub-wrap h3.widget-title {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .devhub-wrap #headline h2 a {
   color: #555;
@@ -334,19 +329,24 @@ input {
   font-size: 28px;
   line-height: 1em;
   text-shadow: #fff 0px 1px 0px;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.devhub-wrap h2 {
+.devhub-wrap h1 {
   font-size: 28px;
   font-size: 2.8rem;
   line-height: 32px;
   line-height: 3.2rem;
 }
-.devhub-wrap h3 {
+.devhub-wrap h2 {
   font-size: 22px;
   font-size: 2.2rem;
   line-height: 26px;
   line-height: 2.6rem;
+}
+.devhub-wrap h3 {
+  font-size: 20px;
+  font-size: 2rem;
+  line-height: 24px;
+  line-height: 2.4rem;
 }
 .devhub-wrap h4 {
   font-size: 18px;
@@ -641,6 +641,7 @@ input {
   background: none repeat scroll 0 0 #F7F7F7;
   border-bottom: 1px solid #DFDFDF;
   height: 62px;
+  margin-bottom: 1em;
 }
 .devhub-wrap .site-branding {
   width: 100%;
@@ -665,9 +666,6 @@ input {
 }
 .devhub-wrap .breadcrumbs .active {
   font-weight: 600;
-}
-.devhub-wrap .breadcrumb-trail {
-  margin-top: 1em;
 }
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
@@ -1218,6 +1216,16 @@ input {
 }
 .devhub-wrap .has-sidebar .widget-area .widget {
   width: 100%;
+}
+.devhub-wrap nav.post-navigation .nav-links a {
+  width: 49%;
+  display: inline-block;
+}
+.devhub-wrap nav.post-navigation .nav-links a[rel="prev"] {
+  text-align: left;
+}
+.devhub-wrap nav.post-navigation .nav-links a[rel="next"] {
+  text-align: right;
 }
 
 @media (max-width: 60em) {
