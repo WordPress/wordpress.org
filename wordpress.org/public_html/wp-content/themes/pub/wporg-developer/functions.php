@@ -482,7 +482,12 @@ function redirect_single_search_match() {
  * Redirects a naked handbook request to home.
  */
 function redirect_handbook() {
-	if ( 'handbook' == get_query_var( 'name' ) && ! get_query_var( 'post_type ' ) ) {
+	if (
+		// Naked /handbook/ request
+		( 'handbook' == get_query_var( 'name' ) && ! get_query_var( 'post_type ' ) ) ||
+		// Temporary: Disable access to handbooks unless a member of the site
+		( ! is_user_member_of_blog() && is_post_type_archive( array( 'plugin-handbook', 'theme-handbook' ) ) )
+	) {
 		wp_redirect( home_url() );
 		exit();
 	}
