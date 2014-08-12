@@ -667,6 +667,9 @@ input {
 .devhub-wrap .breadcrumbs .active {
   font-weight: 600;
 }
+.devhub-wrap .breadcrumb-trail {
+  margin-bottom: 1em;
+}
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
   font-weight: 300;
