@@ -803,7 +803,7 @@ class WordCamp_Post_Types_Plugin {
 			'show_avatars' => false,
 			'avatar_size' => 100,
 			'track' => 'all',
-			'speaker_link' => 'wporg', // anchor|wporg|none
+			'speaker_link' => 'wporg', // anchor|wporg|permalink|none
 			'posts_per_page' => -1,
 			'orderby' => 'date',
 		), $attr );
@@ -816,7 +816,7 @@ class WordCamp_Post_Types_Plugin {
 		// Clean up other attributes.
 		$attr['avatar_size'] = absint( $attr['avatar_size'] );
 
-		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'none' ) ) )
+		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
 			$attr['speaker_link'] = 'anchor';
 
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
@@ -901,6 +901,8 @@ class WordCamp_Post_Types_Plugin {
 								$speaker_permalink = $this->get_speaker_anchor_permalink( $speaker->ID );
 							elseif ( 'wporg' == $attr['speaker_link'] ) // profiles.wordpress.org/user
 								$speaker_permalink = $this->get_speaker_wporg_permalink( $speaker->ID );
+							elseif ( 'permalink' == $attr['speaker_link'] ) // year.city.wordcamp.org/speakers/slug
+								$speaker_permalink = get_permalink( $speaker->ID );
 
 							if ( ! empty( $speaker_permalink ) )
 								$speaker_name = sprintf( '<a href="%s">%s</a>', esc_url( $speaker_permalink ), esc_html( $speaker_name ) );
