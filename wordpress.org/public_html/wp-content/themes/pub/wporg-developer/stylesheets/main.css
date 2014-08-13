@@ -926,9 +926,9 @@ input {
   padding: 1.6rem 3rem;
 }
 .devhub-wrap #sidebar {
-  padding: 0;
-  border: 2px solid #cecece;
-  background-color: #f4f3f3;
+  border: 1px solid #d0d0d0;
+  box-shadow: 0px 0px 5px #d0d0d0;
+  background-color: #f0f0f0;
 }
 .devhub-wrap #sidebar > ul {
   padding: 0;
@@ -936,7 +936,7 @@ input {
   list-style-type: none;
 }
 .devhub-wrap #sidebar > ul li h2.widgettitle {
-  background-color: #cecece;
+  background-color: #d0d0d0;
   color: #8a8989;
   text-align: center;
   text-transform: uppercase;
@@ -952,7 +952,7 @@ input {
 .devhub-wrap #sidebar > ul li ul li:before {
   content: counter(item);
   counter-increment: item;
-  background-color: #cecece;
+  background-color: #d0d0d0;
   width: 25px;
   display: inline-block;
   color: #fff;
