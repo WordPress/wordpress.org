@@ -305,6 +305,9 @@ input {
 .devhub-wrap #content, .devhub-wrap #content-area {
   padding: 0 10px;
 }
+.home .devhub-wrap #content {
+  padding: 0;
+}
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
   margin: 0 auto;
@@ -642,6 +645,9 @@ input {
   border-bottom: 1px solid #DFDFDF;
   height: 62px;
   margin-bottom: 1em;
+}
+.home .devhub-wrap .site-header {
+  margin-bottom: 0;
 }
 .devhub-wrap .site-branding {
   width: 100%;
