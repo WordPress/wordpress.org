@@ -335,21 +335,25 @@ input {
 }
 .devhub-wrap h1 {
   font-size: 28px;
-  font-size: 2.8rem;
+  font-size: 3rem;
   line-height: 32px;
   line-height: 3.2rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
 }
 .devhub-wrap h2 {
   font-size: 22px;
   font-size: 2.2rem;
   line-height: 26px;
   line-height: 2.6rem;
+  font-weight: 300;
 }
 .devhub-wrap h3 {
   font-size: 20px;
   font-size: 2rem;
   line-height: 24px;
   line-height: 2.4rem;
+  font-weight: 300;
 }
 .devhub-wrap h4 {
   font-size: 18px;
@@ -357,6 +361,7 @@ input {
   line-height: 22px;
   line-height: 2.2rem;
   border-bottom: none;
+  font-weight: 300;
 }
 .devhub-wrap h4 .dashicons {
   font-size: 22px;
@@ -367,6 +372,9 @@ input {
   width: 22px;
   height: 2.2rem;
   width: 2.2rem;
+}
+.devhub-wrap main {
+  font-size: 1.5rem;
 }
 .devhub-wrap a.button,
 .devhub-wrap button,
@@ -963,23 +971,28 @@ input {
   border-radius: 50%;
 }
 .devhub-wrap #sidebar > ul li ul li a {
-  font-size: 14px;
+  font-size: 16px;
   color: #4b4b4b;
   font-weight: bold;
 }
 .devhub-wrap #sidebar > ul li ul li ul {
   list-style-type: none;
   padding: 0;
-	margin: 0 0 0 35px;
+  margin: 0 0 0 35px;
 }
 .devhub-wrap #sidebar > ul li ul li ul li:before {
   content: none;
 }
 .devhub-wrap #sidebar > ul li ul li ul li a {
   font-weight: normal;
+  font-size: 14px;
 }
 .devhub-wrap #sidebar > ul li ul li ul li ul {
   margin-left: 20px;
+}
+.devhub-wrap #sidebar .current-menu-item a {
+  font-weight: bold!important;
+  color: #246998;
 }
 .devhub-wrap .menu-item-has-children {
   padding-bottom: 15px;
@@ -1244,6 +1257,51 @@ input {
 }
 .devhub-wrap nav.post-navigation .nav-links a[rel="next"] {
   text-align: right;
+}
+
+.devhub-wrap .table-of-contents {
+	float: right;
+	width: 200px;
+	background: #f5f5f5;
+	border: 1px solid #d6d6d6;
+	margin: 0 0 0 10px;
+	z-index: 1;
+	position: relative;
+}
+
+.devhub-wrap .table-of-contents h2 {
+	margin: 0;
+	padding-bottom: 3px;
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 1em;
+	letter-spacing: 3px;
+	background: #d0d0d0;
+	color: #8a8989;
+}
+
+.devhub-wrap .table-of-contents ul,
+.devhub-wrap .table-of-contents ol {
+  margin: 10px 20px;
+}
+
+.devhub-wrap ul.items {
+	margin-bottom: 8px!important;
+	list-style-type: none!important;
+	padding-right: 10px;
+}
+
+.devhub-wrap ul.items li {
+	padding-bottom: 6px!important;
+}
+
+.devhub-wrap ul.items li ul li,
+.devhub-wrap ul.items li ul li ul li {
+	padding-bottom: 0!important;
+}
+
+.devhub-wrap ul.items li a {
+	color: #555!important;
 }
 
 @media (max-width: 60em) {
