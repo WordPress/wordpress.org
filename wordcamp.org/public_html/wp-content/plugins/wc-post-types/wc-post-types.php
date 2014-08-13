@@ -317,10 +317,13 @@ class WordCamp_Post_Types_Plugin {
 		$speaker_args = array(
 			'post_type' => 'wcb_speaker',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
-			'post__in' => $speaker_ids,
 			'orderby' => $attr['orderby'],
 			'order' => $attr['order'],
 		);
+
+		if ( 'all' != $attr['track'] ) {
+			$speaker_args['post__in'] = $speaker_ids;
+		}
 
 		$speakers = new WP_Query( $speaker_args );
 
@@ -337,8 +340,11 @@ class WordCamp_Post_Types_Plugin {
 
 				<?php
 					$speaker_classes = array( 'wcorg-speaker', 'wcorg-speaker-' . sanitize_html_class( $post->post_name ) );
-					foreach ( $speakers_tracks[ get_the_ID() ] as $track ) {
-						$speaker_classes[] = sanitize_html_class( 'wcorg-track-' . $track );
+
+					if ( isset( $speakers_tracks[ get_the_ID() ] ) ) {
+						foreach ( $speakers_tracks[ get_the_ID() ] as $track ) {
+							$speaker_classes[] = sanitize_html_class( 'wcorg-track-' . $track );
+						}
 					}
 				?>
 
