@@ -623,9 +623,6 @@ input {
 .devhub-wrap .bypostauthor {
   background: #eee;
 }
-.devhub-wrap .widget {
-  margin: 0 0 1.5em;
-}
 .devhub-wrap .widget select {
   max-width: 100%;
 }
@@ -948,7 +945,7 @@ input {
 }
 .devhub-wrap #sidebar > ul li ul {
   list-style-type: none;
-  margin-left: 10px;
+  margin: 0 10px;
   padding: 15px 0;
   counter-reset: item;
 }
@@ -973,7 +970,7 @@ input {
 .devhub-wrap #sidebar > ul li ul li ul {
   list-style-type: none;
   padding: 0;
-  margin-left: 44px;
+	margin: 0 0 0 35px;
 }
 .devhub-wrap #sidebar > ul li ul li ul li:before {
   content: none;
@@ -983,6 +980,9 @@ input {
 }
 .devhub-wrap #sidebar > ul li ul li ul li ul {
   margin-left: 20px;
+}
+.devhub-wrap .menu-item-has-children {
+  padding-bottom: 15px;
 }
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
