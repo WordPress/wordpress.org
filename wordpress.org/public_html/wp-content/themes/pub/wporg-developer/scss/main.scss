@@ -1,6 +1,15 @@
 @import "reset";
 @import "global";
 
+.home .devhub-wrap {
+	#content {
+		padding: 0;
+	}
+	.site-header {
+		margin-bottom: 0;
+	}
+}
+
 .devhub-wrap {
 	padding-bottom: 1.5em;
 	*,
@@ -48,21 +57,25 @@
 
 	h1 {
 		font-size: 28px;
-		font-size: 2.8rem;
+		font-size: 3rem;
 		line-height: 32px;
 		line-height: 3.2rem;
+		font-weight: 300;
+		margin-bottom: 1.5rem;
 	}
 	h2 {
 		font-size: 22px;
 		font-size: 2.2rem;
 		line-height: 26px;
 		line-height: 2.6rem;
+		font-weight: 300;
 	}
 	h3 {
 		font-size: 20px;
 		font-size: 2rem;
 		line-height: 24px;
 		line-height: 2.4rem;
+		font-weight: 300;
 	}
 	h4 {
 		font-size: 18px;
@@ -70,6 +83,7 @@
 		line-height: 22px;
 		line-height: 2.2rem;
 		border-bottom: none;
+		font-weight: 300;
 
 		.dashicons {
 			font-size: 22px;
@@ -81,6 +95,10 @@
 			height: 2.2rem;
 			width: 2.2rem;
 		}
+	}
+
+	main {
+		font-size: 1.5rem;
 	}
 
 	a.button,
@@ -334,10 +352,6 @@
 
 	/* =Widgets
 	----------------------------------------------- */
-
-	.widget {
-		margin: 0 0 1.5em;
-	}
 
 	/* Make sure select elements fit in widgets */
 	.widget select {
@@ -637,6 +651,7 @@
 
 	.reference-landing {
 		padding: 1em 0;
+
 		.section {
 			max-width: 700px;
 			max-width: 70rem;
@@ -687,16 +702,16 @@
 
 	}
 	#sidebar {
-		padding: 0;
-		border: 2px solid #cecece;
-		background-color: #f4f3f3;
+		border: 1px solid #d0d0d0;
+		box-shadow: 0px 0px 5px #d0d0d0;
+		background-color: #f0f0f0;
 		& > ul {
 			padding: 0;
 			margin: 0;
 			list-style-type: none;
 			li {
 				h2.widgettitle {
-				background-color: #cecece;
+				background-color: #d0d0d0;
 				color: #8a8989;
 				text-align: center;
 				text-transform: uppercase;
@@ -705,14 +720,14 @@
 				}
 				ul {
 					list-style-type: none;
-					margin-left: 10px;
+					margin: 0 10px;
 					padding: 15px 0;
 					counter-reset: item;
 					li {
 						&:before {
 							content: counter(item);
 							counter-increment: item;
-							background-color: #cecece;
+							background-color: #d0d0d0;
 							width: 25px;
 							display: inline-block;
 							color: #fff;
@@ -723,20 +738,21 @@
 							border-radius: 50%;
 						}
 						a {
-							font-size: 14px;
+							font-size: 16px;
 							color: #4b4b4b;
 							font-weight: bold;
 						}
 						ul {
 							list-style-type: none;
 							padding: 0;
-							margin-left: 44px;
+							margin: 0 0 0 35px;
 							li {
 								&:before {
 									content: none;
 								}
 								a {
 									font-weight: normal;
+									font-size: 14px;
 								}
 								ul {
 									margin-left: 20px;
@@ -747,6 +763,14 @@
 				}
 			}
 		}
+		.current-menu-item a {
+			font-weight: bold !important;
+			color: #246998;
+		}
+	}
+
+	.menu-item-has-children {
+		padding-bottom: 15px;
 	}
 
 	.reference-landing .box ul {
@@ -1096,6 +1120,51 @@
 		}
 		&[rel="next"] {
 			text-align: right;
+		}
+	}
+
+	.table-of-contents {
+		float: right;
+		width: 200px;
+		background: #f5f5f5;
+		border: 1px solid #d6d6d6;
+		margin: 0 0 0 10px;
+		z-index: 1;
+		position: relative;
+
+		h2 {
+			margin: 0;
+			padding-bottom: 3px;
+			text-align: center;
+			text-transform: uppercase;
+			font-size: 1em;
+			letter-spacing: 3px;
+			background: #d0d0d0;
+			color: #8a8989;
+		}
+
+		ul,
+		ol {
+			margin: 10px 20px;
+		}
+	}
+
+	ul.items {
+		margin-bottom: 8px !important;
+		list-style-type: none !important;
+		padding-right: 10px;
+
+		li {
+			padding-bottom: 6px !important;
+
+			ul li,
+			ul li ul li {
+				padding-bottom: 0 !important;
+			}
+
+			a {
+				color: #555 !important;
+			}
 		}
 	}
 }
