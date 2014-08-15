@@ -811,7 +811,8 @@ class WordCamp_Post_Types_Plugin {
 			'track' => 'all',
 			'speaker_link' => 'wporg', // anchor|wporg|permalink|none
 			'posts_per_page' => -1,
-			'orderby' => 'date',
+			'orderby' => 'date', // date|title|rand
+			'order'   => 'desc', // asc|desc
 		), $attr );
 
 		// Convert bools to real booleans.
@@ -827,11 +828,16 @@ class WordCamp_Post_Types_Plugin {
 
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 
+		if ( 'asc' != $attr['order'] ) {
+			$attr['order'] = 'desc';
+		}
+
 		$args = array(
 			'post_type' => 'wcb_session',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
 			'tax_query' => array(),
 			'orderby' => $attr['orderby'],
+			'order'   => $attr['order'],
 
 			// Only ones marked "session" or where the meta key does
 			// not exist, for backwards compatibility.
