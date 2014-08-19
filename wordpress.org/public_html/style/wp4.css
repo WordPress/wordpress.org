@@ -1129,6 +1129,8 @@ body.make-plugins #headline h2 a:before { content: '\f106'; }
 body.make-docs #headline h2 a:before { content: '\f123'; }
 body.make-community #headline h2 a:before { content: '\f125'; }
 body.make-meta #headline h2 a:before { content: '\f325'; }
+body.make-training #headline h2 a:before { content: '\f118'; }
+body.make-flow #headline h2 a:before { content: '\f115'; }
 
 #headline .login {
 	font-size: 12px;
