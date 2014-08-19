@@ -185,6 +185,37 @@ li.type-handbook h4 {
 	margin-left: -236px;
 }
 
+.handbook-name {
+	text-align: center;
+	color: #aaa;
+	margin-left: -225px;
+	margin-right: 14px;
+	overflow-x: hidden;
+	letter-spacing: 2px;
+	font-size: 1.5em;
+	text-transform: uppercase;
+}
+.handbook-name span {
+	display: inline-block;
+	position: relative;
+}
+.handbook-name span:before,
+.handbook-name span:after {
+	content: "";
+	position: absolute;
+	border-top: 1px solid #ccc;
+	top: 49%;
+	width: 600px;
+}
+.handbook-name span:before {
+	right: 100%;
+	margin-right: 10px;
+}
+.handbook-name span:after {
+	left: 100%;
+	margin-left: 10px;
+}
+
 /* Responsive design for handbooks */
 @media (max-width: 320px) {
 	.post-type-archive-handbook	#main h2,
@@ -328,6 +359,9 @@ li.type-handbook h4 {
 		right: 2px;
 		top: -2px;
 	}
+	.handbook-name {
+		margin: 1em 0 0;
+	}
 }
 
 /* Secondary header design */
@@ -367,6 +401,9 @@ body.wporg-make #headline h2 a:before {
 	border-top: 1px solid #d7d7d7;
 	border-bottom: 1px solid #d7d7d7;
 	width: 100%;
+	}
+	.handbook-name {
+		margin-top: 1em;
 	}
 }
 

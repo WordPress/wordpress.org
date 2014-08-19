@@ -7,6 +7,8 @@
 ?>
 <?php get_header(); ?>
 
+<div class="handbook-name"><span><?php esc_html_e( WPorg_Handbook::get_name() ); ?></span></div>
+
 <!-- Also called on in footer but will not display the second time. -->
 <?php get_sidebar( get_post_type() ); ?> 
 
