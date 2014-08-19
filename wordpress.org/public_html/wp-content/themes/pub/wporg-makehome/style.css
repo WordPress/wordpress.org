@@ -222,6 +222,8 @@ section.get-involved article.make-plugins		h2:before { content: '\f106'; }
 section.get-involved article.make-docs			h2:before { content: '\f123'; }
 section.get-involved article.make-community		h2:before { content: '\f125'; }
 section.get-involved article.make-meta			h2:before { content: '\f325'; }
+section.get-involved article.make-training      h2:before { content: '\f118'; }
+section.get-involved article.make-flow			h2:before { content: '\f115'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
