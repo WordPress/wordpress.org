@@ -37,6 +37,7 @@ add_action( 'after_setup_theme', array( 'WPorg_Handbook_Init', 'init' ) );
 class WPorg_Handbook {
 
 	public $post_type = '';
+	public $setting_name = '';
 
 	protected $label = '';
 
@@ -56,6 +57,38 @@ class WPorg_Handbook {
 		);
 	}
 
+	/**
+	 * Returns the handbook name.
+	 *
+	 * If one isn't set via settings, one is generated.
+	 *
+	 * @param  string $post_type Optional. Handbook post type.
+	 * @param  bool   $raw       Optional. Return only explicitly set name without attempting to generate default name?
+	 * @return string
+	 */
+	static function get_name( $post_type = 'handbook', $raw = false ) {
+		// Prefer explicitly configured handbook name.
+		$name = get_option( $post_type . '_name' );
+
+		// If handbook name isn't set, try root relative site path.
+		if ( ! $raw && empty( $name ) ) {
+			if ( is_multisite() ) {
+				$name = trim( get_blog_details()->path, '/' );
+			} else {
+				$name = trim( parse_url( get_option( 'home' ), PHP_URL_PATH ), '/' );
+			}
+
+			// If no name defined yet, try handbook post type if not standard.
+			if ( empty( $name ) && ( 'handbook' != $post_type ) ) {
+				$name = ucfirst( substr( $post_type, 0, -9 ) );
+			}
+
+			$name .= ' Handbook';
+		}
+
+		return trim( $name );
+	}
+
 	function __construct( $type ) {
 		if ( 'handbook' != $type ) {
 			$this->post_type = $type . '-handbook';
@@ -65,6 +98,8 @@ class WPorg_Handbook {
 
 		$this->label = ucwords( str_replace( array( '-', '_' ), ' ', $this->post_type ) );
 
+		$this->setting_name = $this->post_type . '_name';
+
 		add_filter( 'user_has_cap',                       array( $this, 'grant_handbook_caps' ) );
 		add_filter( 'init',                               array( $this, 'register_post_type' ) );
 		add_action( 'admin_page_access_denied',           array( $this, 'admin_page_access_denied' ) );
@@ -73,6 +108,27 @@ class WPorg_Handbook {
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
 		add_action( 'p2_action_links',                    array( $this, 'disable_p2_resolved_posts_action_links' ) );
+		add_action( 'admin_init',                         array( $this, 'add_name_setting' ) );
+	}
+
+	function add_name_setting() {
+		register_setting( 'general', $this->setting_name, 'esc_attr' );
+
+		$label = ( 'handbook' == $this->post_type ) ?
+			__( 'Handbook name', 'wporg' ) :
+			sprintf( __( 'Handbook name (%s)', 'wporg' ), substr( $this->post_type, 0, -9 ) );
+
+		add_settings_field(
+			$this->setting_name,
+			'<label for="' . esc_attr( $this->setting_name ) . '">' . $label . '</label>',
+			array( $this, 'name_setting_html' ),
+			'general'
+		);
+	}
+
+	function name_setting_html() {
+		$value = get_option( $this->setting_name, '' );
+		echo '<input type="text" id="' . esc_attr( $this->setting_name ) . '" name="' . esc_attr( $this->setting_name ) . '" value="' . esc_attr( $value ) . '" class="regular-text ltr" />';
 	}
 
 	function grant_handbook_caps( $caps ) {
