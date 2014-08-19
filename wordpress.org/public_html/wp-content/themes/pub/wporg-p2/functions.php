@@ -15,10 +15,10 @@ function wporg_p2_enqueue_scripts() {
 add_filter( 'get_comment_author_url', 'wporg_p2_comment_profile_urls' );
 function wporg_p2_comment_profile_urls( $url ) {
 	$comment = $GLOBALS['comment'];
-	if ( $comment->user_id != 0 ) {
+	if ( is_object( $comment ) && $comment->user_id != 0 ) {
 		$user = new WP_User( $comment->user_id );
 		$nicename = $user->user_nicename;
-		$url = "http://profiles.wordpress.org/{$nicename}/";
+		$url = "//profiles.wordpress.org/{$nicename}/";
 	}
 	return $url;
 }
