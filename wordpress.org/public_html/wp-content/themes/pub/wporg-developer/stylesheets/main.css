@@ -889,9 +889,6 @@ input {
   font-style: italic;
   margin-bottom: 1em;
 }
-.devhub-wrap .reference-landing {
-  padding: 1em 0;
-}
 .devhub-wrap .reference-landing .section, .devhub-wrap .search-section {
   max-width: 700px;
   max-width: 70rem;
@@ -1307,6 +1304,65 @@ input {
 .devhub-wrap ul.items li a {
   color: #555 !important;
 }
+
+.devhub-wrap .handbook-name {
+  text-align: center;
+  margin-bottom: 1em;
+  margin-right: 1.2rem;
+  overflow-x: hidden;
+  letter-spacing: 2px;
+  padding-top: 8px;
+}
+
+.devhub-wrap .handbook-name div {
+  font-weight: 100;
+  margin: 0.5rem 0 0;
+  font-size: 36px;
+}
+
+.devhub-wrap .handbook-name span {
+  display: inline-block;
+  position: relative;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.devhub-wrap .handbook-name span:before,
+.devhub-wrap .handbook-name span:after {
+  content: "";
+  position: absolute;
+  border-top: 1px solid #ccc;
+  top: 49%;
+  width: 600px;
+}
+
+.devhub-wrap .handbook-name span:before {
+  right: 100%;
+  margin-right: 10px;
+}
+.devhub-wrap .handbook-name span:after {
+  left: 100%;
+  margin-left: 10px;
+}
+
+.devhub-wrap .handbook-name span.wpicon div {
+  margin: -0.7rem 2rem 0 -1.8rem;
+  font-size: 2.5em;
+  padding: 0 2rem;
+}
+.devhub-wrap .handbook-name span.wpicon div:before {
+  content: "\f324";
+}
+
+.devhub-wrap .handbook-name span.wpicon:before,
+.devhub-wrap .handbook-name span.wpicon:after {
+  border-top-width: 3px;
+}
+
+.devhub-wrap .handbook-name span .dashicons {
+  font-size: 2.5em;
+}
+
 
 @media (max-width: 60em) {
   .devhub-wrap {

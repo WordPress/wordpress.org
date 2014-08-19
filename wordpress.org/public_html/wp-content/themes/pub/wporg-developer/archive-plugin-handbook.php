@@ -14,10 +14,15 @@ get_header(); ?>
 
 		<?php breadcrumb_trail(); ?>
 
+		<div class="handbook-name">
+			<span class="wpicon"><div class="dashicons"></div></span>
+			<div><?php esc_html_e( \WPorg_Handbook::get_name( 'plugin-handbook' ) ); ?></div>
+			<span><?php _e( 'Handbook', 'wporg' ); ?></span>
+		</div>
+
 		<main id="main" class="site-main" role="main">
 
 			<?php if ( have_posts() ) : ?>
-
 
 				<?php /* Start the Loop */ ?>
 				<?php while ( have_posts() ) : the_post(); ?>

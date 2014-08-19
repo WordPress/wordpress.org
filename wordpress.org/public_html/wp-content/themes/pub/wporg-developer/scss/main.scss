@@ -650,8 +650,6 @@
 	}
 
 	.reference-landing {
-		padding: 1em 0;
-
 		.section {
 			max-width: 700px;
 			max-width: 70rem;
@@ -1164,6 +1162,66 @@
 
 			a {
 				color: #555 !important;
+			}
+		}
+	}
+
+	.handbook-name {
+		text-align: center;
+		margin-bottom: 1em;
+		margin-right: 1.2rem;
+		overflow-x: hidden;
+		letter-spacing: 2px;
+		padding-top: 8px;
+
+		div {
+			font-weight: 100;
+			margin: 0.5rem 0 0;
+			font-size: 36px;
+		}
+
+		span {
+			display: inline-block;
+			position: relative;
+			color: #aaa;
+			text-transform: uppercase;
+
+			&:before,
+			&:after {
+				content: "";
+				position: absolute;
+				border-top: 1px solid #ccc;
+				top: 49%;
+				width: 600px;
+			}
+
+			&:before {
+				right: 100%;
+				margin-right: 10px;
+			}
+
+			&:after {
+				left: 100%;
+				margin-left: 10px;
+			}
+
+			&.wpicon div {
+				margin: -0.7rem 2rem 0 -1.8rem;
+				font-size: 2.5em;
+				padding: 0 2rem;
+
+				&:before {
+					content: "\f324";
+				}
+
+				&:before,
+				&:after {
+					border-top-width: 3px;
+				}
+			}
+
+			.dashicons {
+				font-size: 2.5em;
 			}
 		}
 	}
