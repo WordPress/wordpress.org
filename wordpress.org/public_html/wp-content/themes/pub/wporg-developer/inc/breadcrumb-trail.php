@@ -15,7 +15,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @package   BreadcrumbTrail
- * @version   0.6.1
+ * @version   0.6.1.modified
  * @author    Justin Tadlock <justin@justintadlock.com>
  * @copyright Copyright (c) 2008 - 2013, Justin Tadlock
  * @link      http://themehybrid.com/plugins/breadcrumb-trail
@@ -81,6 +81,7 @@ class Breadcrumb_Trail {
 
 		$defaults = array(
 			'container'       => 'div',
+			'item_container'  => 'span',
 			'separator'       => '&#47;',
 			'before'          => '',
 			'after'           => '',
@@ -130,27 +131,37 @@ class Breadcrumb_Trail {
 			$breadcrumb = "\n\t\t" . '<' . tag_escape( $this->args['container'] ) . ' class="breadcrumb-trail breadcrumbs" itemprop="breadcrumb">';
 
 			/* If $before was set, wrap it in a container. */
-			$breadcrumb .= ( !empty( $this->args['before'] ) ? "\n\t\t\t" . '<span class="trail-before">' . $this->args['before'] . '</span> ' . "\n\t\t\t" : '' );
+			$breadcrumb .= ( !empty( $this->args['before'] ) ? "\n\t\t\t" . '<' . tag_escape( $this->args['item_container'] ) . ' class="trail-before">' . $this->args['before'] . '</' . tag_escape( $this->args['item_container'] ) . '> ' . "\n\t\t\t" : '' );
 
 			/* Add 'browse' label if it should be shown. */
 			if ( true === $this->args['show_browse'] )
-				$breadcrumb .= "\n\t\t\t" . '<span class="trail-browse">' . $this->args['labels']['browse'] . '</span> ';
-
-			/* Adds the 'trail-begin' class around first item if there's more than one item. */
-			if ( 1 < count( $this->items ) )
-				array_unshift( $this->items, '<span class="trail-begin">' . array_shift( $this->items ) . '</span>' );
-
-			/* Adds the 'trail-end' class around last item. */
-			array_push( $this->items, '<span class="trail-end">' . array_pop( $this->items ) . '</span>' );
+				$breadcrumb .= "\n\t\t\t" . '<' . tag_escape( $this->args['item_container'] ) . ' class="trail-browse">' . $this->args['labels']['browse'] . '</' . tag_escape( $this->args['item_container'] ) . '> ';
 
 			/* Format the separator. */
-			$separator = ( !empty( $this->args['separator'] ) ? '<span class="sep">' . $this->args['separator'] . '</span>' : '<span class="sep">/</span>' );
+			$separator = false === $this->args['separator'] ?
+				'' :
+				' <' . tag_escape( $this->args['item_container'] ) . ' class="sep">' . ( ! empty( $this->args['separator'] ) ?  $this->args['separator'] : '/' ) . '</' . tag_escape( $this->args['item_container'] ) . '> ';
 
-			/* Join the individual trail items into a single string. */
-			$breadcrumb .= join( "\n\t\t\t {$separator} ", $this->items );
+			/* Adds the 'trail-begin' class around first item if there's more than one item. */
+			if ( 1 < count( $this->items ) ) {
+				$breadcrumb .= "\n\t\t\t" . '<' . tag_escape( $this->args['item_container'] ) . ' class="trail-begin">' . array_shift( $this->items ) . '</' . tag_escape( $this->args['item_container'] ) . '>';
+				$breadcrumb .= $separator;
+			}
+
+			/* Adds the 'trail-end' class around last item. */
+			$last = '<' . tag_escape( $this->args['item_container'] ) . ' class="trail-end">' . array_pop( $this->items ) . '</' . tag_escape( $this->args['item_container'] ) . '>';
+
+			/* Join the individual trail items. */
+			foreach ( $this->items as $item ) {
+				$breadcrumb .= "\n\t\t\t" . '<' . tag_escape( $this->args['item_container'] ) . ' class="trail-inner">' . $item . '</' . tag_escape( $this->args['item_container'] ) . '>';
+				$breadcrumb .= $separator;
+			}
+
+			/* Append the last item. */
+			$breadcrumb .= $last;
 
 			/* If $after was set, wrap it in a container. */
-			$breadcrumb .= ( !empty( $this->args['after'] ) ? "\n\t\t\t" . ' <span class="trail-after">' . $this->args['after'] . '</span>' : '' );
+			$breadcrumb .= ( !empty( $this->args['after'] ) ? "\n\t\t\t" . ' <' . tag_escape( $this->args['item_container'] ) . ' class="trail-after">' . $this->args['after'] . '</' . tag_escape( $this->args['item_container'] ) . '>' : '' );
 
 			/* Close the breadcrumb trail containers. */
 			$breadcrumb .= "\n\t\t" . '</' . tag_escape( $this->args['container'] ) . '>';
