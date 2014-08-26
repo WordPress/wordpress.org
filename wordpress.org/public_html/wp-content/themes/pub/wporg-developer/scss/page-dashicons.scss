@@ -1,0 +1,149 @@
+/**
+ * Dashicons Page
+ *
+ * CSS for Dashicons page
+ */
+$spacing: 25px;
+
+.dashicons-page {
+	padding: 0 !important;
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.details {
+		position: relative;
+	}
+
+	.icon-filter {
+		position: absolute;
+		left: 0;
+		bottom: $spacing * 2;
+		padding: 0 2.5em;
+		width: 30em;
+
+		#search {
+			width: 100%;
+			border: 1px solid #ccc;
+			border-radius: 2px;
+			font: 11pt sans-serif;
+			padding: 10px;
+			background: rgba(255,255,255,.8);
+			&:focus {
+				background: #fff;
+				outline: none;
+			}
+		}
+	}
+
+	.entry-content {
+		float:left;
+		margin-top: 0 !important;
+		padding: 1.5em $spacing;
+		width: 30em;
+	}
+
+	#glyph {
+		float:left;
+		padding: 1.5em $spacing;
+		width: 30em;
+
+		.dashicons {
+			font-size: 240px;
+			width: 240px;
+			height: 240px;
+			overflow: visible;
+		}
+
+		.info {
+			float:right;
+			margin-top: $spacing*2;
+			width: 10em;
+		}
+
+		span {
+			display: block;
+			margin-bottom: 1em;
+
+			a {
+				text-decoration: underline;
+			}
+		}
+
+		.name {
+			font-size: .9em;
+		}
+	}
+
+	h4 {
+		margin: 1.5em 0;
+		padding-top: $spacing;
+		border-top: 1px solid lightgrey;
+
+		&:first-of-type {
+			margin-top: 0;
+			padding-top: 0;
+			border-top: none;
+		}
+
+		.searching & {
+			display: none;
+		}
+	}
+
+	#iconlist {
+		$size: 40px;
+		margin-top: 1.5em;
+
+		.dashicons {
+			position: relative;
+			box-sizing: content-box;
+			padding: 10px;
+			width: $size;
+			height: $size;
+			overflow: hidden;
+			white-space: nowrap;
+			font-size: $size;
+			line-height: 1;
+			cursor: pointer;
+
+			&:before {
+				margin-right: $size;
+			}
+
+			&:after {
+				content: attr(alt);
+				display: block;
+				font-size: 9px;
+				color: #999;
+				text-align: center;
+			}
+
+			&:hover {
+				color: #d54e21;
+			}
+		}
+	}
+
+	#instructions {
+		margin-top: 1.5em;
+		border-top: 1px solid lightgrey;
+
+		h3 {
+			margin: 1.5em 0 0.75em;
+		}
+	}
+
+	.code {
+		display: block;
+		font: 14px/1.5 monospace;
+		width: 600px;
+		white-space: pre;
+		border: 1px solid #ccc;
+		padding: 10px;
+		overflow: auto;
+		min-height: 180px;
+	}
+
+}

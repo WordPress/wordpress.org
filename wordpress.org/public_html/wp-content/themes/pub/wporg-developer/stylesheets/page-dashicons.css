@@ -1,0 +1,123 @@
+/**
+ * Dashicons Page
+ *
+ * CSS for Dashicons page
+ */
+.dashicons-page {
+  padding: 0 !important;
+}
+.dashicons-page * {
+  box-sizing: border-box;
+}
+.dashicons-page .details {
+  position: relative;
+}
+.dashicons-page .icon-filter {
+  position: absolute;
+  left: 0;
+  bottom: 50px;
+  padding: 0 2.5em;
+  width: 30em;
+}
+.dashicons-page .icon-filter #search {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font: 11pt sans-serif;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
+}
+.dashicons-page .icon-filter #search:focus {
+  background: #fff;
+  outline: none;
+}
+.dashicons-page .entry-content {
+  float: left;
+  margin-top: 0 !important;
+  padding: 1.5em 25px;
+  width: 30em;
+}
+.dashicons-page #glyph {
+  float: left;
+  padding: 1.5em 25px;
+  width: 30em;
+}
+.dashicons-page #glyph .dashicons {
+  font-size: 240px;
+  width: 240px;
+  height: 240px;
+  overflow: visible;
+}
+.dashicons-page #glyph .info {
+  float: right;
+  margin-top: 50px;
+  width: 10em;
+}
+.dashicons-page #glyph span {
+  display: block;
+  margin-bottom: 1em;
+}
+.dashicons-page #glyph span a {
+  text-decoration: underline;
+}
+.dashicons-page #glyph .name {
+  font-size: .9em;
+}
+.dashicons-page h4 {
+  margin: 1.5em 0;
+  padding-top: 25px;
+  border-top: 1px solid lightgrey;
+}
+.dashicons-page h4:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.searching .dashicons-page h4 {
+  display: none;
+}
+.dashicons-page #iconlist {
+  margin-top: 1.5em;
+}
+.dashicons-page #iconlist .dashicons {
+  position: relative;
+  box-sizing: content-box;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 40px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dashicons-page #iconlist .dashicons:before {
+  margin-right: 40px;
+}
+.dashicons-page #iconlist .dashicons:after {
+  content: attr(alt);
+  display: block;
+  font-size: 9px;
+  color: #999;
+  text-align: center;
+}
+.dashicons-page #iconlist .dashicons:hover {
+  color: #d54e21;
+}
+.dashicons-page #instructions {
+  margin-top: 1.5em;
+  border-top: 1px solid lightgrey;
+}
+.dashicons-page #instructions h3 {
+  margin: 1.5em 0 0.75em;
+}
+.dashicons-page .code {
+  display: block;
+  font: 14px/1.5 monospace;
+  width: 600px;
+  white-space: pre;
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow: auto;
+  min-height: 180px;
+}

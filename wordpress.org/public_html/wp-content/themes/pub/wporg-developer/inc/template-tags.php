@@ -354,6 +354,8 @@ namespace DevHub {
 	function get_site_section_title() {
 		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
 		switch ( $parts[1] ) {
+			case 'resources':
+				return sprintf( __( 'Developer Resources: %s', 'wporg' ), get_the_title() );
 			case 'reference':
 				return __( 'Code Reference', 'wporg' );
 			case 'plugin':

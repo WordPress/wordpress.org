@@ -54,6 +54,7 @@ function init() {
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_single_search_match' );
 	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_handbook' );
+	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_resources' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
@@ -396,6 +397,18 @@ function redirect_handbook() {
 		( ! is_user_member_of_blog() && is_post_type_archive( array( 'plugin-handbook', 'theme-handbook' ) ) )
 	) {
 		wp_redirect( home_url() );
+		exit();
+	}
+}
+
+/**
+ * Redirects a naked /resources/ request to dashicons page.
+ *
+ * Temporary until a resource page other than dashicons is created.
+ */
+function redirect_resources() {
+	if ( is_page( 'resources' ) ) {
+		wp_redirect( get_permalink( get_page_by_title( 'dashicons' ) ) );
 		exit();
 	}
 }
