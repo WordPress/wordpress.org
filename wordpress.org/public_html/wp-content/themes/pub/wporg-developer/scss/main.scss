@@ -596,6 +596,10 @@
 		padding-bottom: 0;
 	}
 
+	.reference-landing .section.search-section {
+		padding-top: 0;
+	}
+
 	.searchform {
 		overflow: hidden;
 		height: auto;
@@ -649,13 +653,15 @@
 		margin-bottom: 1em;
 	}
 
+	.reference-landing .section, .search-section {
+		max-width: 700px;
+		max-width: 70rem;
+		margin: 0 auto;
+		padding: 1.5em 0;
+	}
+
 	.reference-landing {
 		.section {
-			max-width: 700px;
-			max-width: 70rem;
-			margin: 0 auto;
-			padding: 1.5em 0;
-
 			h2,
 			h3,
 			h4 {
@@ -1204,13 +1210,15 @@
 				margin-left: 10px;
 			}
 
-			&.wpicon div {
-				margin: -0.7rem 2rem 0 -1.8rem;
-				font-size: 2.5em;
-				padding: 0 2rem;
+			&.wpicon {
+				div {
+					margin: -0.7rem 2rem 0 -1.8rem;
+					font-size: 2.5em;
+					padding: 0 2rem;
 
-				&:before {
-					content: "\f324";
+					&:before {
+						content: "\f324";
+					}
 				}
 
 				&:before,
