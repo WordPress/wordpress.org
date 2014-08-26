@@ -13,7 +13,7 @@ class DevHub_User_Submitted_Content {
 	/**
 	 * Initializer
 	 */
-	public function init() {
+	public static function init() {
 		add_action( 'init', array( __CLASS__, 'do_init' ) );
 	}
 
@@ -24,7 +24,7 @@ class DevHub_User_Submitted_Content {
 	 *
 	 * In order to submit code examples, users must be able to post with less restrictions.
 	 */
-	function do_init() {
+	public static function do_init() {
 
 		// Restricts commenting to logged in users.
 		add_filter( 'comments_open',                    array( __CLASS__, 'prevent_invalid_comment_submissions' ), 10, 2 );
@@ -64,7 +64,7 @@ class DevHub_User_Submitted_Content {
 	/**
 	 * Enqueues scripts and styles.
 	 */
-	public function scripts_and_styles() {
+	public static function scripts_and_styles() {
 		if ( is_singular() && ( '0' != get_comments_number() || \DevHub\post_type_has_source_code() ) ) {
 			wp_enqueue_script( 'wporg-developer-function-reference', get_template_directory_uri() . '/js/function-reference.js', array( 'jquery', 'syntaxhighlighter-core', 'syntaxhighlighter-brush-php' ), '20140515', true );
 			wp_enqueue_style( 'syntaxhighlighter-core' );
