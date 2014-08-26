@@ -73,34 +73,40 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		}
 	}
 
+	$i = 0;
 	foreach ( $translations as $translation ) {
 		$locale = GP_Locales::by_field( 'wp_locale', $translation->language );
 
 		$isos = array();
 		// We'll use ISO codes for sorting.
 		if ( $locale->lang_code_iso_639_1 ) {
-			$iso = $isos[1] = $locale->lang_code_iso_639_1;
+			$key = $isos[1] = $locale->lang_code_iso_639_1;
 		}
 		if ( $locale->lang_code_iso_639_2 ) {
-			$iso = $isos[2] = $locale->lang_code_iso_639_2;
+			$key = $isos[2] = $locale->lang_code_iso_639_2;
 		}
 		if ( $locale->lang_code_iso_639_3 ) {
-			$iso = $isos[3] = $locale->lang_code_iso_639_3;
+			$key = $isos[3] = $locale->lang_code_iso_639_3;
 		}
 
 		if ( array() === $isos ) {
 			continue; // uhhhh
 		}
 
-		$_translations[ $iso ] = $translation;
-		$_translations[ $iso ]->english_name = $locale->english_name;
-		$_translations[ $iso ]->native_name = $locale->native_name;
-		$_translations[ $iso ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
-		$_translations[ $iso ]->iso = (object) $isos;
+		// ISO codes are being used for sorting. Don't let variants stomp on each other.
+		if ( isset( $_translations[ $key ] ) ) {
+			$key .= ++$i;
+		}
+	
+		$_translations[ $key ] = $translation;
+		$_translations[ $key ]->english_name = $locale->english_name;
+		$_translations[ $key ]->native_name = $locale->native_name;
+		$_translations[ $key ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
+		$_translations[ $key ]->iso = (object) $isos;
 
 		if ( 'core' === $type ) {
 			$continue = isset( $continue_translations[ $locale->slug ] ) ? $continue_translations[ $locale->slug ]->translation : '';
-			$_translations[ $iso ]->strings = (object) array( 'continue' => $continue );
+			$_translations[ $key ]->strings = (object) array( 'continue' => $continue );
 		}
 	}
 	ksort( $_translations );
