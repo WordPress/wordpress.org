@@ -396,6 +396,19 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$_POST['wordcamp_name']
 					);
 				}
+			} elseif ( isset( $_POST['attendee_id'] ) && ! empty( $_POST['attendee_id'] ) ) {
+				$type    = 'wordcamp_attendee_add';
+				$item_id = $_POST['attendee_id'];
+
+				$action  = sprintf(
+					__( 'Registered to attend <a href="%s">%s</a>', 'wporg' ),
+					esc_url( $_POST['url'] ),
+					$_POST['wordcamp_name']
+				);
+
+				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
+					$action .= ' ' . sprintf( __( 'coming up %s', 'wporg' ), $_POST['wordcamp_date'] );
+				}
 			}
 
 			if ( empty( $type ) ) {
