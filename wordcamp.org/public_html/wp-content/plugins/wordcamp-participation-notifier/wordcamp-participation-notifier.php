@@ -15,7 +15,8 @@ class WordCamp_Participation_Notifier {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'transition_post_status', array( $this, 'post_updated' ), 5, 3 );
+		add_action( 'transition_post_status',                 array( $this, 'post_updated' ), 5, 3 );
+		add_action( 'camptix_require_login_confirm_username', array( $this, 'attendee_registered' ), 10, 2 );
 	}
 
 	/**
@@ -25,20 +26,24 @@ class WordCamp_Participation_Notifier {
 	 *
 	 * This hooks in before the custom post types save their post meta fields, so that we can access the
 	 * WordPress.org username from the previous revision and from the current one.
+	 *
+	 * @todo Maybe refactor this to work more like attendee_registered(), so the speaker/sponsor plugins just fire a
+	 *       hook when they're ready to send the notification, rather than this plugin having to be aware of (and
+	 *       coupled to) the internal logic of those plugins.
 	 * 
 	 * @param string  $new_status
 	 * @param string  $old_status
 	 * @param WP_Post $post
 	 */
-	function post_updated( $new_status, $old_status, $post ) {
+	public function post_updated( $new_status, $old_status, $post ) {
 		if ( ! $this->is_post_notifiable( $post ) ) {
 			return;
 		}
 
 		if ( 'publish' == $new_status && 'publish' == $old_status ) {
-			$this->published_post_updated( $post );
+			$this->published_speaker_post_updated( $post );
 		} elseif ( 'publish' == $new_status || 'publish' == $old_status ) {
-			$this->post_published_or_unpublished( $new_status, $old_status, $post );
+			$this->speaker_post_published_or_unpublished( $new_status, $old_status, $post );
 		}
 	}
 
@@ -63,16 +68,17 @@ class WordCamp_Participation_Notifier {
 	}
 
 	/**
-	 * Updates the activity and associations of a profile when the WordPress.org username on a published post changes.
+	 * Updates the activity and associations of a profile when the WordPress.org username on a published speaker
+	 * or organizer post changes.
 	 * 
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
 	 * 
 	 * @param WP_Post $post
 	 */
-	public function published_post_updated( $post ) {
-		$previous_user_id = $this->get_wporg_user_id( $post, false );
-		$new_user_id      = $this->get_wporg_user_id( $post );
-		
+	protected function published_speaker_post_updated( $post ) {
+		$previous_user_id = $this->get_saved_wporg_user_id( $post );
+		$new_user_id      = $this->get_new_wporg_user_id( $post );
+
 		// There is no username, or it hasn't changed, so we don't need to do anything here.
 		if ( $previous_user_id === $new_user_id ) {
 			return;
@@ -98,8 +104,8 @@ class WordCamp_Participation_Notifier {
 	}
 
 	/**
-	 * Adds new activity and associations to a user's profile when custom posts are published, and removes
-	 * associations when custom posts are unpublished.
+	 * Adds new activity and associations to a user's profile when speaker or organizer posts are published, and
+	 * removes associations, when speaker or organizer posts are unpublished.
 	 *
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
 	 *
@@ -107,7 +113,7 @@ class WordCamp_Participation_Notifier {
 	 * @param string  $old_status
 	 * @param WP_Post $post
 	 */
-	public function post_published_or_unpublished( $new_status, $old_status, $post ) {
+	protected function speaker_post_published_or_unpublished( $new_status, $old_status, $post ) {
 		if ( 'publish' == $new_status ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
@@ -115,22 +121,44 @@ class WordCamp_Participation_Notifier {
 			// Get the $user_id from post meta instead of $_POST in case it changed during the unpublish update.
 			// This makes sure that the association is removed from the same user that it was originally added to.
 			
-			$user_id = $this->get_wporg_user_id( $post, false );
+			$user_id = $this->get_saved_wporg_user_id( $post );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $user_id ) );
 		}
+	}
+
+	/**
+	 * Adds new activity to a user's profile when they register for a ticket.
+	 *
+	 * @todo Handle cases where the user changes, either from the admin editing the back-end post, or a from a
+	 *       different user updating via the edit token?
+	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
+	 *
+	 * @param int $attendee_id
+	 * @param string $username
+	 */
+	public function attendee_registered( $attendee_id, $username ) {
+		$attendee = get_post( $attendee_id );
+		$user_id  = $this->get_saved_wporg_user_id( $attendee );
+
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id ) );
 	}
 
 	/**
 	 * Builds the payload for an activity notification based on a new post
 	 * 
 	 * @param WP_Post $post
+	 * @param int     $user_id
+	 *
 	 * @return array|false
 	 */
-	protected function get_post_activity_payload( $post ) {
+	protected function get_post_activity_payload( $post, $user_id = null ) {
 		$activity = false;
-		$user_id  = $this->get_wporg_user_id( $post );
-		$wordcamp = get_wordcamp_post(); 
-		
+		$wordcamp = get_wordcamp_post();
+
+		if ( ! $user_id ) {
+			$user_id = $this->get_new_wporg_user_id( $post );
+		}
+
 		if ( $user_id ) {
 			$activity = array(
 				'action'        => 'wporg_handle_activity',
@@ -150,6 +178,10 @@ class WordCamp_Participation_Notifier {
 	
 				case 'wcb_organizer':
 					$activity['organizer_id'] = $post->ID;
+				break;
+
+				case 'tix_attendee':
+					$activity['attendee_id']  = $post->ID;
 				break;
 	
 				default:
@@ -173,7 +205,7 @@ class WordCamp_Participation_Notifier {
 		$association = false;
 		
 		if ( ! $user_id ) {
-			$user_id = $this->get_wporg_user_id( $post );
+			$user_id = $this->get_new_wporg_user_id( $post );
 		}
 
 		if ( $user_id ) {
@@ -195,7 +227,8 @@ class WordCamp_Participation_Notifier {
 				case 'wcb_organizer':
 					$association['association'] = 'wordcamp-organizer';
 				break;
-	
+
+				case 'tix_attendee':
 				default:
 					$association = false;
 				break;
@@ -206,28 +239,50 @@ class WordCamp_Participation_Notifier {
 	}
 	
 	/**
-	 * Get the WordPress.org user_id associated with a custom post
+	 * Get the current WordPress.org user_id associated with a custom post
 	 *
-	 * When creating a new post, the user_id may be needed before the post meta is saved,
-	 * so we first check the request for the latest value.
+	 * This is called during the context of a post being updated, so the new username is the one submitted in
+	 * the $_POST request, or the currently logged in user, as opposed to the user_id saved in the database.
 	 * 
 	 * @param WP_Post $post
-	 * @param string $username_field
 	 * @return false|int
 	 */
-	protected function get_wporg_user_id( $post, $username_field = 'wcpt-wporg-username' ) {
+	protected function get_new_wporg_user_id( $post ) {
+		$user_id = $user = false;
+
+		if ( in_array( $post->post_type, array( 'wcb_speaker', 'wcb_organizer' ) ) && isset( $_POST['wcpt-wporg-username'] ) ) {
+			$user = get_user_by( 'login', $_POST['wcpt-wporg-username'] );
+		}
+
+		if ( ! empty( $user->ID ) ) {
+			$user_id = $user->ID;
+		}
+
+		return $user_id;
+	}
+
+	/**
+	 * Get the previous WordPress.org user_id associated with a custom post
+	 *
+	 * This is called during the context of a post being updated, so the saved username is the one saved in
+	 * the database, as opposed to the one in the $_POST request or the currently logged in user.
+	 *
+	 * @param WP_Post $post
+	 * @return false|int
+	 */
+	protected function get_saved_wporg_user_id( $post ) {
 		$user_id = false;
-		
-		if ( $username_field && isset( $_POST[ $username_field ] ) ) {
-			$user = get_user_by( 'login', $_POST[ $username_field ] );
-			
-			if ( ! empty( $user->ID ) ) {
+
+		if ( in_array( $post->post_type, array( 'wcb_speaker', 'wcb_organizer' ) ) ) {
+			$user_id = (int) get_post_meta( $post->ID, '_wcpt_user_id', true );
+		} elseif ( 'tix_attendee' == $post->post_type ) {
+			$user = get_user_by( 'login', get_post_meta( $post->ID, 'tix_username', true ) );
+
+			if ( is_a( $user, 'WP_User' ) ) {
 				$user_id = $user->ID;
 			}
-		} else {
-			$user_id = (int) get_post_meta( $post->ID, '_wcpt_user_id', true );
 		}
-		
+
 		return $user_id;
 	}
 
@@ -243,8 +298,6 @@ class WordCamp_Participation_Notifier {
 	protected function remote_post( $url, $body ) {
 		$response = $error = false;
 
-		// todo verify/update when can see actual responses from server
-		
 		if ( $body ) {
 			$response = wp_remote_post( $url, array( 'body' => $body ) );
 		
