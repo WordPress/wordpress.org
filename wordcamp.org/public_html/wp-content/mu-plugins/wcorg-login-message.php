@@ -85,7 +85,7 @@ function wcorg_login_message( $message, $redirect_to = false ) {
 	 * because $registration_url will end up with two redirect_to parameters nested inside it.
 	 * e.g., https://wordpress.org/support/register.php?redirect_to=https%3A%2F%2Fwordcamp.org%2Fwp-login.php%3Fredirect_to%3Dhttp%253A%252F%252Ftesting.wordcamp.org%252Ftickets%252F
 	 *
-	 * The second redirect_to parameter *should* be double-encoded so that it ended up single-encoded after the
+	 * The second redirect_to parameter is intentionally double-encoded so that it ends up single-encoded after the
 	 * redirection back to wp-login.php.
 	 */
 	$login_url        = urlencode( wp_login_url( $redirect_to ) );
