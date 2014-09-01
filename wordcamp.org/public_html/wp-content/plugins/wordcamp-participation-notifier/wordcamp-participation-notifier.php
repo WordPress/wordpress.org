@@ -15,8 +15,9 @@ class WordCamp_Participation_Notifier {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'transition_post_status',                 array( $this, 'post_updated' ), 5, 3 );
-		add_action( 'camptix_require_login_confirm_username', array( $this, 'attendee_registered' ), 10, 2 );
+		add_action( 'transition_post_status',                  array( $this, 'post_updated' ), 5, 3 );
+		add_action( 'camptix_rl_buyer_completed_registration', array( $this, 'primary_attendee_registered' ), 10, 2 );
+		add_action( 'camptix_rl_registration_confirmed',       array( $this, 'additional_attendee_confirmed_registration' ), 10, 2 );
 	}
 
 	/**
@@ -27,7 +28,7 @@ class WordCamp_Participation_Notifier {
 	 * This hooks in before the custom post types save their post meta fields, so that we can access the
 	 * WordPress.org username from the previous revision and from the current one.
 	 *
-	 * @todo Maybe refactor this to work more like attendee_registered(), so the speaker/sponsor plugins just fire a
+	 * @todo Maybe refactor this to work more like primary_attendee_registered(), so the speaker/sponsor plugins just fire a
 	 *       hook when they're ready to send the notification, rather than this plugin having to be aware of (and
 	 *       coupled to) the internal logic of those plugins.
 	 * 
@@ -54,6 +55,7 @@ class WordCamp_Participation_Notifier {
 	 * because the logic differs based on the payload being generated.
 	 *
 	 * @param WP_Post $post The post
+	 *
 	 * @return boolean true if the post can be notified about; false if it can't
 	 */
 	protected function is_post_notifiable( $post ) {
@@ -127,16 +129,34 @@ class WordCamp_Participation_Notifier {
 	}
 
 	/**
-	 * Adds new activity to a user's profile when they register for a ticket.
+	 * Send a notification when someone successfully registered for a ticket.
 	 *
-	 * @todo Handle cases where the user changes, either from the admin editing the back-end post, or a from a
+	 * If they purchased multiple tickets, this will only send a notification for the one they bought for theirself.
+	 * Notifications for the other attendees will be sent in additional_attendee_confirmed_registration().
+	 *
+	 * @todo Handle cases where the username changes, either from the admin editing the back-end post, or a from a
+	 *       different user updating via the edit token?
+	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
+	 *
+	 * @param WP_Post $attendee
+	 * @param string  $username
+	 */
+	public function primary_attendee_registered( $attendee, $username ) {
+		$user_id = $this->get_saved_wporg_user_id( $attendee );
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id ) );
+	}
+
+	/**
+	 * Send a notification when an attendee whose ticked was bought on their behalf confirms their registration.
+	 *
+	 * @todo Handle cases where the username changes, either from the admin editing the back-end post, or a from a
 	 *       different user updating via the edit token?
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
 	 *
 	 * @param int $attendee_id
 	 * @param string $username
 	 */
-	public function attendee_registered( $attendee_id, $username ) {
+	public function additional_attendee_confirmed_registration( $attendee_id, $username ) {
 		$attendee = get_post( $attendee_id );
 		$user_id  = $this->get_saved_wporg_user_id( $attendee );
 
