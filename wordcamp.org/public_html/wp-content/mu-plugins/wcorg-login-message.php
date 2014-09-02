@@ -95,7 +95,7 @@ function wcorg_login_message( $message, $redirect_to = false ) {
 	?>
 
 	<div class="message">
-		<p><?php echo __( 'Please use your <strong>WordPress.org</strong>* account to login.', 'wordcamporg' ); ?></p>
+		<p><?php echo __( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ); ?></p>
 
 		<p>
 			<?php printf(
