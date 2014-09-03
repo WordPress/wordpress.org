@@ -105,7 +105,7 @@ function wcorg_login_message( $message, $redirect_to = false ) {
 		</p>
 
 		<p id="not-your-personal-site">
-			<?php printf( __( '* This is your account for <a href="%s">the actual WordPress.org website</a>, not your personal WordPress site.', 'wordcamporg' ), wcorg_get_wporg_forums_url( $locale ) ); ?>
+			<?php printf( __( '* This is your account for <a href="%s">the official WordPress.org website</a>, not your personal WordPress site.', 'wordcamporg' ), wcorg_get_wporg_forums_url( $locale ) ); ?>
 		</p>
 	</div>
 
