@@ -7,17 +7,13 @@ require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
 require( $base_dir . '/includes/object-cache.php' );
 wp_cache_init();
 
-$version = isset( $_REQUEST['version'] ) ? $_REQUEST['version'] : WP_CORE_LATEST_RELEASE;
+$version = isset( $_REQUEST['version'] ) ? str_replace( '-src', '', $_REQUEST['version'] ) : WP_CORE_LATEST_RELEASE;
 
 $translations = find_all_translations_for_core( $version );
 
 call_headers( 'application/json' );
 
-if ( version_compare( $version, '4.0-alpha-29017-src', '>=' ) ) {
-	echo json_encode( array( 'translations' => $translations ) );
-} else {
-	echo json_encode( array( 'languages' => $translations ) );
-}
+echo json_encode( array( 'translations' => $translations ) );
 
 exit;
 
