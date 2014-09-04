@@ -45,7 +45,18 @@ class WP_40_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => array(
-
+					'avryl' => 'Janneke Van Dorpe',
+					'ericlewis' => 'Eric Andrew Lewis',
+					'shaunandrews' => 'Shaun Andrews',
+					'gcorne' => 'Gregory Cornelius',
+					'celloexpressions' => 'Nick Halsey',
+					'westonruter' => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
+					'miqrogroove' => array( 'Robert Chapin', '71ef6df2b3fefab1e1ebeab12503f6e9' ),
+					'stephdau' => 'Stephane Daury',
+					'tellyworth' => 'Alex Shiels',
+					'joedolson' => 'Joe Dolson',
+					'kovshenin' => 'Konstantin Kovshenin',
+					'adamsilverstein' => 'Adam Silverstein',
 				),
 			),
 		);
