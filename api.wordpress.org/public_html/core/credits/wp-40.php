@@ -49,7 +49,7 @@ class WP_40_Credits extends WP_Credits {
 					'ericlewis' => 'Eric Andrew Lewis',
 					'shaunandrews' => 'Shaun Andrews',
 					'gcorne' => 'Gregory Cornelius',
-					'celloexpressions' => 'Nick Halsey',
+					'celloexpressions' => array( 'Nick Halsey', '42e659bb8c86851c230e527f8ce1764b' ),
 					'westonruter' => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
 					'miqrogroove' => array( 'Robert Chapin', 'fc6128ee96fa6ea66a9dc9ed244072b5' ),
 					'stephdau' => 'Stephane Daury',
