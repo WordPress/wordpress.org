@@ -110,11 +110,11 @@ add_filter( 'get_the_excerpt', 'wporg_filter_archive_excerpt' );
  * Appends parentheses to titles in archive view for functions and methods.
  *
  * @param  string      $title The title.
- * @param  int|WP_Post $post  The post ID or post object.
+ * @param  int|WP_Post $post  Optional. The post ID or post object.
  * @return string
  */
-function wporg_filter_archive_title( $title, $post ) {
-	if ( ( ! is_single() || doing_filter( 'single_post_title' ) ) && in_array( get_post_type( $post ), array( 'wp-parser-function', 'wp-parser-method' ) ) ) {
+function wporg_filter_archive_title( $title, $post = null ) {
+	if ( ! is_admin() && $post && ( ! is_single() || doing_filter( 'single_post_title' ) ) && in_array( get_post_type( $post ), array( 'wp-parser-function', 'wp-parser-method' ) ) ) {
 		$title .= '()';
 	}
 
