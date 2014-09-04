@@ -10,7 +10,7 @@
 	<?php if ( is_single() ) : ?>
 
 	<section class="long-description">
-		<?php the_content(); ?>
+		<?php echo get_long_description(); ?>
 	</section>
 
 	<?php

@@ -835,4 +835,22 @@ namespace DevHub {
 		return is_user_member_of_blog();
 	}
 
+	/**
+	 * Gets the long description.
+	 *
+	 * The long description is stored in the 'wporg_parsed_content' meta field.
+	 *
+	 * @param  null|WP_Post Optiona. The post.
+	 * @return string
+	 */
+	function get_long_description( $post = null ) {
+		$post = get_post( $post );
+
+		if ( $long_description = get_post_meta( $post->ID, 'wporg_parsed_content', true ) ) {
+			$long_description = apply_filters( 'the_content', $long_description );
+		}
+
+		return $long_description;
+	}
+
 }

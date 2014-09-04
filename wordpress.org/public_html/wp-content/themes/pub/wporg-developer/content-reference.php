@@ -11,7 +11,7 @@
 <?php if ( is_single() ) : ?>
 
 	<section class="long-description">
-		<?php the_content(); ?>
+		<?php echo get_long_description(); ?>
 	</section>
 	<section class="return"><p><strong>Return:</strong> <?php echo get_return(); ?></p></section>
 
