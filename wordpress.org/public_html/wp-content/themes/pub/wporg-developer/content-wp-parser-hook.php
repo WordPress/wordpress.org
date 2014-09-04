@@ -40,11 +40,20 @@
 		<?php if ( is_archive() ) : ?>
 		<section class="meta">Used by TODO | Uses TODO | TODO Examples</section>
 		<?php endif; ?>
-		<hr/>
-		<section class="explanation">
-			<h2><?php _e( 'Explanation', 'wporg' ); ?></h2>
-		</section>
 		*/ ?>
+
+		<?php
+		ob_start();
+		the_content();
+		$explanation = ob_get_clean();
+		if ( $explanation ) :
+			?>
+			<hr/>
+			<section class="explanation">
+				<h2><?php _e( 'Explanation', 'wporg' ); ?></h2>
+				<?php the_content(); ?>
+			</section>
+		<?php endif; ?>
 
 		<?php if ( $params = get_params() ) : ?>
 
