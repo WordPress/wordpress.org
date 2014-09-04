@@ -51,7 +51,7 @@ class WP_40_Credits extends WP_Credits {
 					'gcorne' => 'Gregory Cornelius',
 					'celloexpressions' => 'Nick Halsey',
 					'westonruter' => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
-					'miqrogroove' => array( 'Robert Chapin', '71ef6df2b3fefab1e1ebeab12503f6e9' ),
+					'miqrogroove' => array( 'Robert Chapin', 'fc6128ee96fa6ea66a9dc9ed244072b5' ),
 					'stephdau' => 'Stephane Daury',
 					'tellyworth' => 'Alex Shiels',
 					'joedolson' => 'Joe Dolson',
