@@ -853,4 +853,27 @@ namespace DevHub {
 		return $long_description;
 	}
 
+	/**
+	 * Formats the output of params defined using hash notation.
+	 *
+	 * This is a temporary measure until the parser parses the hash notation
+	 * into component elements that the theme could then handle and style
+	 * properly.
+	 *
+	 * Also, as a stopgap this is going to begin as a barebones hack to simply
+	 * keep the text looking like one big jumble.
+	 *
+	 * @param  string $text The content for the param.
+	 * @return string
+	 */
+	function param_formatting_fixup( $text ) {
+		// Don't do anything if this isn't a hash notation string.
+		if ( '{' != $text[0] ) {
+			return $text;
+		}
+		$text = trim( substr( $text, 1, -1 ) );
+		$text = str_replace( '@type', "<br \>@type", $text );
+		return $text;
+	}
+
 }

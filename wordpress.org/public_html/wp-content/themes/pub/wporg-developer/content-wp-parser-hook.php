@@ -72,7 +72,7 @@
 								<?php endif; ?>
 
 								<?php if ( ! empty( $param['content'] ) ) : ?>
-									<span class="description"><?php echo wp_kses_post( $param['content'] ); ?></span>
+									<span class="description"><?php echo param_formatting_fixup( wp_kses_post( $param['content'] ) ); ?></span>
 								<?php endif; ?>
 							</p>
 
