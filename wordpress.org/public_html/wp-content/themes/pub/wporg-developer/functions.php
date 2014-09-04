@@ -22,6 +22,11 @@ require __DIR__ . '/inc/customizer.php';
  */
 require __DIR__ . '/inc/jetpack.php';
 
+/**
+ * Class for editing parsed content on the Function, Class, Hook, and Method screens.
+ */
+require_once( __DIR__ . '/inc/parsed-content.php' );
+
 if ( ! function_exists( 'loop_pagination' ) ) {
 	require __DIR__ . '/inc/loop-pagination.php';
 }
