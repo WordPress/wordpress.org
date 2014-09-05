@@ -23,3 +23,23 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && 'http://' == substr( $_REQUEST['redi
 	add_filter( 'secure_auth_cookie',      '__return_false' );
 	add_filter( 'secure_logged_in_cookie', '__return_false' );
 }
+
+/**
+ * Use the HTTP URL scheme when linking to sub-sites.
+ *
+ * Within the network admin screens, links to sites are being generated as HTTPS because the root domain
+ * uses HTTPS. Most of the sites aren't covered by a cert yet, though, so the user gets a browser warning
+ * when opening the link.
+ */
+function use_http_url_scheme( $url, $scheme, $original_scheme ) {
+	if ( is_network_admin() ) {
+		$hostname = parse_url( $url, PHP_URL_HOST );
+
+		if ( $hostname != $_SERVER['HTTP_HOST'] ) {
+			$url = str_replace( 'https://', 'http://', $url );
+		}
+	}
+
+	return $url;
+}
+add_filter( 'set_url_scheme', 'use_http_url_scheme', 10, 3 );
