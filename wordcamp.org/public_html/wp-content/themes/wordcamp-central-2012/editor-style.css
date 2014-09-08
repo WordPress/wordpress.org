@@ -1,0 +1,30 @@
+html .mceContentBody {
+	max-width: 640px;
+}
+* {
+	color: #424242;
+	font-family: "Helvetica", "Arial", sans-serif;
+	font-weight: 300;
+	font-size: 15px;
+	outline: none;
+	line-height: 1.5;
+}
+
+p, dl, td, th, ul, ol, blockquote {
+	font-size: 15px;
+}
+
+a, a:link, a:visited {
+	color: #028DB9;
+	font-weight: 600;
+	text-decoration: none;
+	outline: none;
+}
+
+h3 {
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	font-family: "Georgia", serif;
+	color: #6F6F6F;
+}
