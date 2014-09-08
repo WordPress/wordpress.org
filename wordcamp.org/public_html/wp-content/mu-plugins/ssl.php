@@ -31,7 +31,7 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && 'http://' == substr( $_REQUEST['redi
  * uses HTTPS. Most of the sites aren't covered by a cert yet, though, so the user gets a browser warning
  * when opening the link.
  */
-function use_http_url_scheme( $url, $scheme, $original_scheme ) {
+function wcorg_use_http_url_scheme( $url, $scheme, $original_scheme ) {
 	if ( is_network_admin() ) {
 		$hostname = parse_url( $url, PHP_URL_HOST );
 
@@ -42,7 +42,7 @@ function use_http_url_scheme( $url, $scheme, $original_scheme ) {
 
 	return $url;
 }
-add_filter( 'set_url_scheme', 'use_http_url_scheme', 10, 3 );
+add_filter( 'set_url_scheme', 'wcorg_use_http_url_scheme', 10, 3 );
 
 /**
  * Load certain stylesheets from the WordPress.org CDN instead of their local copies.
@@ -56,7 +56,7 @@ add_filter( 'set_url_scheme', 'use_http_url_scheme', 10, 3 );
  *
  * @param WP_Styles $styles
  */
-function load_select_core_styles_from_cdn( $styles ) {
+function wcorg_load_select_core_styles_from_cdn( $styles ) {
 	global $pagenow;
 
 	if ( ! is_network_admin() && 'wp-login.php' != $pagenow ) {
@@ -71,7 +71,7 @@ function load_select_core_styles_from_cdn( $styles ) {
 		}
 	}
 }
-add_action( 'wp_default_styles', 'load_select_core_styles_from_cdn' );
+add_action( 'wp_default_styles', 'wcorg_load_select_core_styles_from_cdn' );
 
 /**
  * Load certain stylesheets from the WordPress.org CDN instead of their local copies.
@@ -80,7 +80,7 @@ add_action( 'wp_default_styles', 'load_select_core_styles_from_cdn' );
  *
  * @param string $hook
  */
-function load_select_plugin_styles_from_cdn( $hook ) {
+function wcorg_load_select_plugin_styles_from_cdn( $hook ) {
 	if ( ! is_network_admin() ) {
 		return;
 	}
@@ -95,4 +95,4 @@ function load_select_plugin_styles_from_cdn( $hook ) {
 	}
 
 }
-add_action( 'admin_enqueue_scripts', 'load_select_plugin_styles_from_cdn' );
+add_action( 'admin_enqueue_scripts', 'wcorg_load_select_plugin_styles_from_cdn' );
