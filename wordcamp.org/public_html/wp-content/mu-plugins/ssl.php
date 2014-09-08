@@ -43,3 +43,56 @@ function use_http_url_scheme( $url, $scheme, $original_scheme ) {
 	return $url;
 }
 add_filter( 'set_url_scheme', 'use_http_url_scheme', 10, 3 );
+
+/**
+ * Load certain stylesheets from the WordPress.org CDN instead of their local copies.
+ *
+ * On the login screen and Network Dashboard, many stylesheets that are loaded from the canonical
+ * WordCamp.org domain get redirected to central.wordcamp.org by an Nginx rule, and then blocked
+ * by the browser because they're loading over HTTP instead of HTTPS.
+ *
+ * Note: s.w.org runs trunk while WordCamp.org runs the latest tag, so be careful to only do this for
+ * stylesheets that are unlikely to have a significant impact if out of sync.
+ *
+ * @param WP_Styles $styles
+ */
+function load_select_core_styles_from_cdn( $styles ) {
+	global $pagenow;
+
+	if ( ! is_network_admin() && 'wp-login.php' != $pagenow ) {
+		return;
+	}
+
+	$targets = array( 'dashicons' );
+
+	foreach ( $targets as $target ) {
+		if ( isset( $styles->registered[ $target ]->src ) ) {
+			$styles->registered[ $target ]->src = 'https://s.w.org' . $styles->registered[ $target ]->src;
+		}
+	}
+}
+add_action( 'wp_default_styles', 'load_select_core_styles_from_cdn' );
+
+/**
+ * Load certain stylesheets from the WordPress.org CDN instead of their local copies.
+ *
+ * See notes in load_select_core_styles_from_cdn() for details.
+ *
+ * @param string $hook
+ */
+function load_select_plugin_styles_from_cdn( $hook ) {
+	if ( ! is_network_admin() ) {
+		return;
+	}
+
+	global $wp_styles;
+	$targets = array( 'debug-bar' );
+
+	foreach ( $targets as $target ) {
+		if ( isset( $wp_styles->registered[ $target ]->src ) ) {
+			$wp_styles->registered[ $target ]->src = str_replace( 'https://' . $_SERVER['HTTP_HOST'], 'https://s.w.org', $wp_styles->registered[ $target ]->src );
+		}
+	}
+
+}
+add_action( 'admin_enqueue_scripts', 'load_select_plugin_styles_from_cdn' );
