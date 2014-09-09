@@ -179,7 +179,7 @@ class Multi_Event_Sponsors {
 		foreach ( $all_me_sponsors as $sponsor ) {
 			$regional_sponsorships = get_post_meta( $sponsor->ID, 'mes_regional_sponsorships', true );
 
-			if ( is_numeric( $regional_sponsorships[ $wordcamp_region ] ) ) {
+			if ( ! empty( $regional_sponsorships[ $wordcamp_region ] ) && is_numeric( $regional_sponsorships[ $wordcamp_region ] ) ) {
 				if ( 'sponsor_level' == $grouped_by ) {
 					$sponsorship_level = get_post( $regional_sponsorships[ $wordcamp_region ] );
 					$wordcamp_sponsors[ $sponsorship_level->ID ][] = $sponsor;
