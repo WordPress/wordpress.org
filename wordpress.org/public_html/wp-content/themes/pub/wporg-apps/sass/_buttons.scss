@@ -1,0 +1,132 @@
+.button,
+button,
+input[type="submit"] {
+	background: $ultra-light-gray;
+	border: none;
+	border-radius: 3px;
+	color: $medium-blue;
+	cursor: pointer;
+	display: inline-block;
+	margin: 0;
+	outline: 0;
+	overflow: hidden;
+	padding: .4em .9em;
+	text-overflow: ellipsis;
+	text-decoration: none;
+	vertical-align: top;
+	white-space: nowrap;
+	@include appearance(none);
+	@include box-shadow(0 -1px 0 rgba(255,255,255,0.8) inset);
+	@include box-sizing(border-box);
+	transition: all 0.05s;
+
+	&:hover,
+	&:focus {
+		color: darken($wordpress-blue, 10%);
+	}
+
+	&:active {
+		color: darken($wordpress-blue, 10%);
+	}
+
+	&.hidden {
+		display: none;
+	}
+
+	&.button-white {
+		background: white;
+	}
+}
+
+/* Primary buttons */
+.button.button-primary {
+	background: $medium-blue;
+	color: white;
+	@include box-shadow(0 -1px 0 rgba(255,255,255,0.15) inset);
+
+	&:hover {
+		background: $link-color;
+	}
+
+	&:focus {
+		border-color: #0e3950;
+		@include box-shadow(inset 0 1px 0 rgba(120, 200, 230, .6), 1px 1px 2px rgba(0, 0, 0, .4));
+	}
+}
+
+.button.button-download {
+	cursor: pointer;
+	padding: .5em 1.5em .5em  1.5em;
+	display: inline-block;
+	color: $medium-blue;
+	letter-spacing: 1px;
+	font-size: .778em;
+	font-weight: 700;
+	vertical-align: middle;
+	outline: none;
+	position: relative;
+	border-radius: 4px;
+	box-shadow: 0 3px $wordpress-blue;
+	
+	&:hover {
+		color: rgba($medium-blue, 0.5);
+	}
+	&:active {
+		box-shadow: 0 0 $wordpress-blue;
+		top: 3px;
+	}
+	
+	&:first-of-type {
+		margin-right: 1em;
+	}
+}
+
+.button-download.ios:before {
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9Ijg2LjI2N3B4IiBoZWlnaHQ9IjEwMHB4IiB2aWV3Qm94PSIwIDAgODYuMjY3IDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgODYuMjY3IDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBhdGggZmlsbD0iIzAwQUFEQyIgZD0iTTgzLjU4OSAzMi44MjFjLTcuNTY5IDUuMzU0LTExLjM1NCAxMS44LTExLjM1NCAxOS4zMzZjMCA5IDQuNyAxNS45IDE0IDIwLjggYy0yLjUxMiA3LjI3Mi02LjE0OCAxMy42MDItMTAuOTA3IDE4Ljk4OUM3MC42IDk3LjMgNjYuMyAxMDAgNjIuMyAxMDBjLTEuODUxIDAtNC4zOC0wLjYxMi03LjU4Ni0xLjgzNGwtMS41MzctMC41OTUgYy0zLjE0LTEuMjIyLTUuOTE3LTEuODM0LTguMzI5LTEuODM0Yy0yLjI4MSAwLTQuNzc3IDAuNDc5LTcuNDg2IDEuNDM4bC0xLjkzNCAwLjY5NGwtMi40MjkgMSBjLTEuOTE3IDAuNzYtMy44NTEgMS4xNC01LjgwMSAxLjE0Yy00LjU5NSAwLTkuNjY4LTMuNzg1LTE1LjIyMS0xMS4zNTNDMy45OTkgNzcuOCAwIDY2IDAgNTMuMiBjMC05LjA4OSAyLjQ5NS0xNi40MTEgNy40ODYtMjEuOTYzYzQuOTktNS41NTMgMTEuNjAxLTguMzI5IDE5LjgzMS04LjMyOWMzLjA3NCAwIDUuOSAwLjYgOC42IDEuNjg2bDEuODM0IDAuNyBsMS45MzQgMC43OTNjMS43MTggMC43IDMuMSAxLjEgNC4yIDEuMDkxYzEuMzU1IDAgMi44NTktMC4zMTQgNC41MTItMC45NDJsMi41MjktMC45OTJsMS44ODQtMC42OTQgYzMuMDA3LTEuMDkxIDYuMzI5LTEuNjM2IDkuOTY1LTEuNjM2QzcxLjM5MyAyMyA3OC4zIDI2LjIgODMuNiAzMi44MjF6IE02My4xNjMgMGMwLjA5OSAxLjIgMC4xIDIgMC4xIDIuNyBjMCA1LjcxOS0yLjA4MiAxMC43MzMtNi4yNDcgMTUuMDQ4Yy00LjE2NSA0LjMxMi05LjAwNyA2LjQ3LTE0LjUyNyA2LjQ3Yy0wLjE2Ni0xLjI4OS0wLjI0OC0yLjIxNC0wLjI0OC0yLjc3NiBjMC00Ljg1OSAxLjkzNC05LjQyIDUuODAxLTEzLjY4NHM4LjM0NS02Ljc1OSAxMy40MzYtNy40ODZDNjEuODkgMC4yIDYyLjQgMC4xIDYzLjIgMHoiLz4KPC9nPgo8L3N2Zz4K);
+}
+.button-download.android:before {
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9Ijg0LjY0N3B4IiBoZWlnaHQ9IjEwMHB4IiB2aWV3Qm94PSIwIDAgODQuNjQ3IDEwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgODQuNjQ3IDEwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBhdGggZmlsbD0iIzAwQUFEQyIgZD0iTTYuMTcxIDMyLjM0NkMyLjc2MyAzMi4zIDAgMzUuMSAwIDM4LjUxN2wwLjAwNSAyNS44NDZjMC4wMDEgMy40IDIuOCA2LjIgNi4yIDYuMiBjMy40MTEgMCA2LjE3My0yLjc1OSA2LjE3LTYuMTczbDAtMjUuODQ5QzEyLjM0NiAzNS4xIDkuNiAzMi4zIDYuMiAzMi4zIE01NS45NDMgOS4xMzZsNC4zMDgtNy44NjcgYzAuMjMtMC40MTEgMC4wNzktMC45MzUtMC4zMzgtMS4xNjdjLTAuNDItMC4yMjItMC45MzktMC4wNzEtMS4xNjEgMC4zNDNsLTQuMzUxIDcuOTQ5Yy0zLjY2Mi0xLjYyOS03Ljc1OS0yLjU0My0xMi4wOTQtMi41MzggYy00LjMyNC0wLjAwNC04LjQxOSAwLjkwNy0xMi4wNjYgMi41MjdsLTQuMzU2LTcuOTI4Yy0wLjIyNy0wLjQxOC0wLjc0OC0wLjU3LTEuMTU5LTAuMzQyYy0wLjQxOSAwLjIyNi0wLjU3MiAwLjc1LTAuMzQgMS4yIGw0LjMxIDcuODYxYy04LjQ2OCA0LjM2Ny0xNC4xODkgMTIuNjgzLTE0LjE4NSAyMi4yMzFsNTUuNTk2LTAuMDA2QzcwLjExIDIxLjggNjQuNCAxMy41IDU1LjkgOS4xIE0yOS42NjIgMjEuMyBjLTEuMjgtMC4wMDMtMi4zMjMtMS4wNDQtMi4zMjQtMi4zMjljMC4wMDEtMS4yODEgMS4wNDEtMi4zMzQgMi4zMjYtMi4zMzNjMS4yODktMC4wMDEgMi4zIDEuMSAyLjMgMi4zIEMzMS45OTggMjAuMiAzMSAyMS4zIDI5LjcgMjEuMyBNNTQuOTc3IDIxLjI4OGMtMS4yODUgMC4wMDEtMi4zMzEtMS4wNDEtMi4zMzEtMi4zMzEgYzAuMDA0LTEuMjc3IDEuMDQ0LTIuMzMxIDIuMzMyLTIuMzM2YzEuMjc4IDAgMi4zIDEuMSAyLjMgMi4zMzdDNTcuMzA3IDIwLjIgNTYuMyAyMS4zIDU1IDIxLjMgTTE0LjczOSAzMy41MTFsMC4wMDkgNDAuMDU0Yy0wLjAwMyAzLjYgMi45IDYuNiA2LjYgNi41ODVsNC40ODQgMC4wMDJsMC4wMDUgMTMuNjc1QzI1LjgyMiA5Ny4yIDI4LjYgMTAwIDMyIDEwMCBjMy40MTEgMCA2LjE3My0yLjc3IDYuMTc0LTYuMTc3TDM4LjE2MSA4MC4xNWw4LjMzMy0wLjAwMmwwLjAwMyAxMy42NzVjLTAuMDAxIDMuNCAyLjggNi4yIDYuMiA2LjIgYzMuNDEgMCA2LjE3NS0yLjc2OCA2LjE3NC02LjE3NWwtMC4wMDQtMTMuNjcxbDQuNS0wLjAwM2MzLjYzMyAwIDYuNTg4LTIuOTQ0IDYuNTg5LTYuNTg3bC0wLjAwNy00MC4wNTVMMTQuNzM5IDMzLjUxMXogTTg0LjY0MiAzOC41MDhjLTAuMDAxLTMuNDA5LTIuNzYzLTYuMTcxLTYuMTcyLTYuMTcxYy0zLjQwOC0wLjAwMy02LjE3MSAyLjc2NS02LjE3IDYuMTc0bDAuMDA0IDI1LjggYzAgMy40IDIuOCA2LjIgNi4yIDYuMTcxYzMuNDA4LTAuMDAxIDYuMTY5LTIuNzU5IDYuMTctNi4xNzRMODQuNjQyIDM4LjUwOHoiLz4KPC9nPgo8L3N2Zz4K);
+}
+
+.button-download.ios:before,
+.button-download.android:before {
+	content: '';
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 75%;
+	display: inline-block;
+	height: 2.5em;
+	width: 2em;
+	text-rendering: optimizeLegibility;
+	vertical-align: middle;
+	margin-right: 1em;
+	position: relative;
+	top: -0.2em;
+}
+
+/* Turn Reset 'buttons' into regular text links */
+input {
+	&[type=reset],
+	&[type=reset]:hover,
+	&[type=reset]:active,
+	&[type=reset]:focus {
+		background: 0 0;
+		border: 0;
+		padding: 0 2px 1px;
+		width: auto;
+		@include box-shadow(none);
+	}
+}
+
+/* Buttons within sentences sit on the text baseline. */
+p .button {
+	vertical-align: baseline
+}
+
+/* Firefox Junk */
+button::-moz-focus-inner,
+input[type=reset]::-moz-focus-inner,
+input[type=button]::-moz-focus-inner,
+input[type=submit]::-moz-focus-inner {
+	padding: 0
+}

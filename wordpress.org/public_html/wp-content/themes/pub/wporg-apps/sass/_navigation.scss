@@ -1,0 +1,25 @@
+/* =Navigation
+----------------------------------------------- */
+
+.post-navigation,
+.paging-navigation {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: $contentwidth;
+}
+
+.post-navigation {
+	margin-bottom: $vspacing;
+}
+
+.site-main [class*="navigation"] {
+	.nav-previous {
+		float: left;
+		width: 50%;
+	}
+	.nav-next {
+		float: right;
+		text-align: right;
+		width: 50%;
+	}
+}

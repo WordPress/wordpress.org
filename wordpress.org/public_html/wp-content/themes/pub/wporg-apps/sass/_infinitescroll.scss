@@ -1,0 +1,23 @@
+/* =Infinite Scroll
+----------------------------------------------- */
+
+#infinite-handle span {
+	background-color: darken($color-medium-gray, 10%);
+	color: #fff;
+	font-size: 1.0625rem;
+	font-weight: 700;
+	padding: 15px;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+/* Globally hidden elements when Infinite Scroll is supported and in use. */
+.infinite-scroll .paging-navigation, /* Older / Newer Posts Navigation (always hidden) */
+.infinite-scroll.neverending .site-footer { /* Theme Footer (when set to scrolling) */
+	display: none;
+}
+
+/* When Infinite Scroll has reached its end we need to re-display elements that were hidden (via .neverending) before */
+.infinity-end.neverending .site-footer {
+	display: block;
+}

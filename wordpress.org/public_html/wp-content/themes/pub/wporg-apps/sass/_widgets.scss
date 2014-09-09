@@ -1,0 +1,49 @@
+/* =Widgets
+----------------------------------------------- */
+.widget-area {
+	padding: 77px 0;
+}
+
+.footer-widgets {
+	font-size: 0.778em;
+	margin: 0 auto;
+	width: $contentwidth;
+}
+
+.footer-widget {
+	float: left;
+	width: 50%;
+
+	.widget-title {
+		font-family: $base-font;
+		font-size: 1rem;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+
+	ul {
+		margin-left: 0;
+	}
+
+	a {
+		color: #fff;
+	}
+}
+
+
+.widget {
+	margin: 0 0 $vspacing;
+
+	/* Make sure select elements fit in widgets */
+	select {
+		max-width: 100%;
+	}
+
+	/* Search widget */
+	.widget-search .search-submit {
+		display: none;
+	}
+
+}
+
+

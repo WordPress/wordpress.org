@@ -1,0 +1,163 @@
+/* =Comments
+----------------------------------------------- */
+
+.comments-area {
+	background: $light-gray;
+	padding: $vspacing 0;
+}
+
+.comments-header {
+	margin: 0 auto;
+	max-width: $contentwidth;
+	text-align: center;
+		
+		p {
+			color: $medium-gray-darker;
+			font-style: italic;
+	}
+}
+
+.comments-title {
+	font: 700 1em $base-font;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin-bottom: ($vspacing / 2);
+}
+
+.comment-navigation {
+	margin: $vspacing auto;
+	max-width: $contentwidth;
+}
+
+.comment-list {
+	margin: 0 auto;
+	max-width: $contentwidth;
+}
+
+.pingback,
+.trackback {
+	display: none;
+}
+
+.comments-area .children li {
+	padding: 0;
+}
+
+.comment {
+	list-style: none;
+	margin-top: $vspacing;
+}
+
+.comment-author {
+//	line-height: 1.4;	
+}
+
+.avatar-wrapper {
+	float: left;
+	margin-right: 1em;
+}
+
+.comment-meta .fn {
+	font-size: 1em;
+	font-style: normal;
+	font-weight: bold;
+}
+
+.comment-metadata {
+	font-size: .778rem;
+	font-weight: 700;
+	line-height: 1.618;
+	text-transform: uppercase;
+	letter-spacing: 1px; 
+	color: $medium-gray-darker;
+}
+
+.comment-metadata a,
+.comment-metadata a:visited {
+	color: $medium-gray-darker;
+}
+
+.comment-metadata a:hover {
+	color: $medium-blue;
+}
+
+.reply a,
+.reply a:visited {
+	color: $dark-blue;
+}
+
+.reply a:hover {
+	color: $medium-blue;
+}
+
+.comment-content {
+	margin-top: $vspacing;
+}
+
+.comment-content a {
+	word-wrap: break-word;
+}
+
+.comment-content pre,
+.comment-content code {
+	background: $white;
+}
+
+.bypostauthor > .comment-body .avatar {
+	border: 5px solid $medium-blue;
+}
+
+#respond,
+.comment-respond {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: $contentwidth;
+	padding-top: $vspacing;
+}
+
+.comment-reply-title {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	max-width: $contentwidth;
+}
+
+.no-comments {
+	margin-top: $vspacing;
+	text-align: center;
+}
+
+/* = Override WordPress.com reply styles == */
+#respond,
+#respond .form-submit input, 
+#respond .form-submit input#comment-submit, 
+#respond .comment-form-fields input[type=submit], 
+#respond p.form-submit input[type=submit], 
+#respond input[type=submit], 
+#commentform #submit {
+	font-family: $base-font !important;
+}
+
+#respond #comment-form-comment textarea, 
+#comment-form-share-text-padder textarea,
+#respond .comment-form-fields p.comment-form-posting-as, 
+#respond .comment-form-fields p.comment-form-log-out,
+#respond .comment-form-service a {
+	color: $dark-gray !important;
+}
+
+#respond {
+	margin-left: auto !important;
+	margin-right: auto !important;
+	padding-top: $vspacing !important;
+}
+
+#comment-form-comment {
+	border-color: $medium-gray !important;
+	box-shadow: none !important;
+}
+
+#respond .comment-form-service {
+	background: white !important;
+	border-color: $medium-gray !important;
+}

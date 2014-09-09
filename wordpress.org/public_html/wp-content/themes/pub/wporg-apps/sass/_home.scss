@@ -1,0 +1,375 @@
+/* =Home Specific Styles
+----------------------------------------------- */
+
+/* = Introduction == */
+.grid-page {
+	background-color: $medium-blue;
+	position: relative;
+	overflow: hidden;
+}
+
+.home .grid-page .entry-content {
+	color: #fff;
+	text-align: center;
+	padding-top: ($vspacing * 3);
+	margin-bottom: ($vspacing * 2);
+	max-width: 35rem;
+	
+	@media screen and (max-width: 620px) {
+		max-width: 26rem;
+	}
+	@media screen and (min-width: $size-increase-1) {
+		max-width: 38rem;
+	}
+	@media screen and (max-height: 670px) {
+		padding-top: ($vspacing * 2);
+	}
+	@media screen and (max-height: 570px) {
+		padding-top: $vspacing;
+		margin-bottom: ($vspacing * 1.5);
+	}
+	@media screen and (min-height: 950px) {
+		padding-top: ($vspacing * 4);
+	}
+	@media screen and (min-height: 1020px) {
+		padding-top: ($vspacing * 5);
+	}
+}
+
+.grid-page .entry-content h3 {
+	margin-bottom: ($vspacing / 2);
+}
+
+.grid-page .entry-content p {
+	margin-bottom: 0;
+}
+
+.intro-image {
+	text-align: center;
+	width: 100%;
+	opacity: 0;
+	
+	-webkit-animation-delay: 0.5s;
+	-moz-animation-delay:    0.5s;
+	animation-delay:         0.5s
+}
+
+.intro-image img {
+	vertical-align: bottom;
+	width: 15em;
+}
+
+.grid-page .intro-image {
+	bottom: 0;
+	position: absolute;
+	
+	@media screen and (max-width: $size-increase-1) and (max-height: 730px) {
+		position: static;
+	}
+	@media screen and (max-width: 620px) and (max-height: 780px) {
+		position: static;
+	}
+	@media screen and (max-width: 405px) and (max-height: 820px) {
+		position: static;
+	}
+	@media screen and (min-width: $size-increase-1) and (max-height: 820px) {
+		position: static;
+	}
+}
+
+/* = Features List == */
+
+/* Global Styles */
+
+body.page .feature-text .entry-header {
+	background-color: transparent;
+	color: $text-color;
+}
+
+.feature-text {
+	display: table;
+}
+
+.feature-text > div {
+	display: table-cell;
+	vertical-align: middle;
+	
+	@media screen and (max-width: $one-column) {
+		display: block;
+		padding: ($vspacing * 2);
+		vertical-align: baseline;
+	}
+	@media screen and (max-width: 620px) {
+		padding: $vspacing;
+	}
+}
+
+.feature-text > div .entry-header,
+.feature-text > div .entry-content {
+	margin: 0 auto;
+	padding: 0;
+	width: 55%;
+	
+	@media screen and (max-width: 1040px) {
+		width: 65%;
+	}
+	@media screen and (max-width: 955px) {
+		width: 70%;
+	}
+}
+
+.feature-text .entry-title {
+	margin-bottom: ($vspacing / 2);
+}
+
+.feature-text p {
+	margin-bottom: 0;
+}
+
+.feature-text a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.feature-text a:hover {
+	color: $dark-gray;
+}
+
+.feature-text,
+.feature-image {
+	height: em(480px);
+	
+	@media screen and (max-width: 955px) {
+		height: em(390px);
+	}
+	@media screen and (max-width: 620px) {
+		height: em(360px);
+	}
+}
+
+.child-pages .hentry {
+	//Consistent phone background image styles	
+	.feature-image {
+		background-size: 19em;
+		overflow: hidden;
+		background-repeat: no-repeat;
+		background-position: center ($vspacing * 3);
+	
+		@media screen and (max-width: 955px) {
+			background-position: center ($vspacing * 2);
+			background-size: 15em;
+		}
+		@media screen and (max-width: 620px) {
+			background-position: center ($vspacing * 1);
+		}
+	}
+	//iPhone backgrounds
+	&:nth-child(1) .feature-image,
+	&:nth-child(3) .feature-image,
+	&:nth-child(4) .feature-image {
+		background-image: url("images/iphone-portrait.svg");
+	}
+	//Android backgrounds
+	&:nth-child(2) .feature-image,
+	&:nth-child(5) .feature-image{
+		background-image: url("images/android-portrait.svg");
+	}
+}
+
+#features-animation-post,
+#features-animation-stats,
+#features-animation-reader {
+	margin: 11.875em auto 0 auto;
+	width: 15.625em;
+	
+	@media screen and (min-width: $size-increase-1) {
+		margin: 11.222222222em auto 0 auto;
+	}
+	@media screen and (max-width: 955px) {
+		margin: 8.625em auto 0 auto;
+		width: 12.25em;
+	}
+	@media screen and (max-width: 620px) {
+		margin: 6.5625em auto 0 auto;
+	}
+}
+
+#features-animation-notification,
+#features-animation-jetpack {
+	opacity: 0;
+	margin: 17em auto 0 auto;
+	
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration:    0.5s;
+	animation-duration:         0.5s;
+	
+	@media screen and (max-width: 955px) {
+		margin: 13em auto 0 auto;
+	}
+	@media screen and (max-width: 620px) {
+		margin: 11em auto 0 auto;
+	}
+}
+
+/* Feature Header */
+.features-header {
+	background: $dark-gray;
+	padding: ($vspacing * 2);
+	text-align: center;
+	
+	@media screen and (max-width: 620px) {
+		padding: $vspacing;
+	}
+}
+
+.features-header h1 {
+	color: #fff;
+	margin-bottom: ($vspacing / 2);
+}
+
+.features-header h3 {
+	color: $medium-gray;
+	margin-bottom: 0;
+}
+
+/* Feature Row Coloring */
+.child-pages .hentry:nth-child(2n+1) .feature-text {
+	background-color: $medium-gray-dark;
+	color: #fff;
+}
+
+.child-pages .hentry:nth-child(2n+1) .feature-image {
+	background-color: $ultra-light-gray;
+	overflow: hidden;
+}
+
+.child-pages .hentry:nth-child(2n) .feature-text {
+	color: $medium-gray-darker;
+}
+
+.child-pages .hentry:nth-child(2n) .feature-image {
+	background-color: $color-medium-blue;
+}
+
+/* Post on the Go */
+#features-animation-post {
+	color: $medium-gray-darkerer;
+	padding: 1.5em;
+}
+
+#features-animation-post h3,
+#features-animation-post p {
+	font-size: .778em;
+	margin-bottom: ($vspacing / 4);
+}
+
+/* WordPress Stats */
+.child-pages .hentry:nth-child(2) .feature-text {
+	float: right;
+}
+
+#features-animation-stats {
+
+}
+
+//Hide animation
+//#stats-animation-an-anim {
+//	margin: 13em auto 0 auto;
+//	-webkit-transform: scale(0.75);
+//	-moz-transform: scale(0.75);
+//	transform: scale(0.75);
+//}
+//
+//#stats-animation-an-anim .stats-animation-an-stage {
+//	left: 70px !important;
+//}
+//
+//#stats-animation-an-scene-0.run .stats-animation-an-stage > div {
+//	-webkit-animation-delay: 3s !important;
+//	-moz-animation-delay:    3s !important;
+//	animation-delay:         3s !important;
+//}
+
+/* Reader */
+#features-animation-reader {
+
+}
+
+/* Push Notifications */
+.child-pages .hentry:nth-child(4) .feature-text {
+	float: right;
+}
+
+#features-animation-notification {
+	background-color: $color-wp-blue;
+	border-radius: 6px;
+	color: #fff;
+	padding: .75em 0 .75em .75em;
+	width: 14em;
+	
+	@media screen and (max-width: 955px) {
+		padding: .5em;
+		width: 11em;
+	}
+}
+
+#features-animation-notification h3,
+#features-animation-notification p {
+	margin-bottom: 0;
+	padding-left: .5em;
+}
+
+
+#features-animation-notification h3 {
+	font-size: .778em;
+	
+	@media screen and (max-width: 955px) {
+		font-size: .618em;
+	}
+}
+
+#features-animation-notification p {
+	font-size: .618em;
+}
+
+#features-animation-notification .wpcom-logo {
+	height: 2.7em;
+	width: 20%;
+	padding: 0;
+	background-position: center;
+	
+	@media screen and (max-width: 955px) {
+		height: 3.5em;
+		background-size: 80%;
+	}	
+} 
+
+.features-animation-notification-text {
+	display: inline-block;
+	width: 80%;
+}
+
+/* Jetpack Integration */
+#features-animation-jetpack {
+	text-align: center;
+}
+
+.jetpack-logo {
+	background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUwMHB4IiBoZWlnaHQ9IjUwMHB4IiB2aWV3Qm94PSIwIDAgNTAwIDUwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgNTAwIDUwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPGc+CgkJPHBhdGggZmlsbD0iIzkwQUVDMiIgZD0iTTI1MCAwQzExMS45IDAgMCAxMTEuOSAwIDI1MHMxMTEuOSAyNTAgMjUwIDI1MHMyNTAtMTExLjkgMjUwLTI1MFMzODguMSAwIDI1MCAweiBNMjQwLjMgMzA4LjRsLTc4LjUtMjAgYy0xOS45LTUuMS0yOS41LTI3LjgtMTkuMi00NS42bDk3LjctMTY5LjNWMzA4LjR6IE0zNjEuMiAyNTcuMmwtOTcuNyAxNjkuM1YxOTEuNmw3OC41IDIwQzM2MS45IDIxNi43IDM3MS41IDIzOS40IDM2MS4yIDI1Ny4yeiIvPgoJPC9nPgo8L2c+Cjwvc3ZnPgo=) center center no-repeat;
+	background-size: 98%;
+	background-position: center;
+	display: inline-block;
+	text-rendering: optimizeLegibility;
+	height: 8em;
+	width: 8em;
+	
+	@media screen and (max-width: 955px) {
+			height: 6em;
+			width: 6em;
+	}	
+}
+
+/* = Hide Jetpack stuff == */
+.home #jp-post-flair {
+	display: none;
+}

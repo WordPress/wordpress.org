@@ -1,0 +1,73 @@
+// Some common variables and mixins to get you started.
+// Variables allow you to re-use colors, sizes, and other values without repeating
+// yourself. This means that changes that should be small, such as tweaking the
+// coloring or the sizing, can be done in one place, not all over the stylesheet.
+
+@import "compass/css3";
+
+$base-font: 'Open Sans Regular', 'Open Sans', sans-serif;
+$header-font: Merriweather, serif;
+$base-font-size: 16px;
+$line-height: 1.618;
+
+//WordPress.com Colors
+
+// Blues
+$wordpress-blue:         #0087be;
+$light-blue:             #78dcfa;
+$medium-blue:            #00aadc;
+$dark-blue:              #005082;
+
+// Oranges
+$fire-orange:            #f0821e;
+$jazzy-orange:           #d54e21;
+
+// Primary Grays
+$ultra-light-gray:       #f4f8fA;
+$light-gray:             #e8f0f5;
+$medium-gray:            #d2dee6;
+$dark-gray:              #324155;
+
+// Secondary Grays
+$white:                  #ffffff;
+$medium-gray-dark:       darken($medium-gray, 10%);
+$medium-gray-darker:     darken($medium-gray, 20%);
+$medium-gray-darkerer:   darken($medium-gray, 30%);
+
+// Alerts
+$alert-yellow:           #ffba00;
+$alert-red:              #dd3d36;
+$alert-green:            #4cb420;
+
+$text-color: $dark-gray;
+$link-color: $medium-blue;
+$link-visited: $medium-blue;
+
+// Depreciated Color Names
+
+//Blues
+$color-wp-blue: $wordpress-blue;
+$color-light-blue: $light-blue;
+$color-medium-blue: $medium-blue;
+$color-darker-blue: darken($wordpress-blue, 10%);
+$color-dark-blue: $dark-blue;
+
+// Grays
+$color-ultralight-gray: $ultra-light-gray;
+$color-light-gray: $light-gray;
+$color-medium-gray: $medium-gray;
+$color-dark-gray: $dark-gray;
+
+// Supported Values for $layout:
+//  null | content-sidebar | sidebar-content
+$layout: null !default;
+
+//$vspacing: 1rem;
+$vspacing: 2.036rem;
+
+// Max width of content
+$contentwidth: 45rem;
+
+//Breakpoints
+$one-column: 765px;
+$size-increase-1: 1220px;

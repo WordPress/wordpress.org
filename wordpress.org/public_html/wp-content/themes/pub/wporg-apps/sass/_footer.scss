@@ -1,0 +1,37 @@
+/* Footer */
+
+.site-footer {
+	background: $dark-gray;
+}
+
+.button-download-container {
+	background: $medium-blue;
+	width: 100%; 
+	padding: ($vspacing * 2) 0;
+	text-align: center;
+
+	h3 {
+		color: white;
+	}
+	
+	h3, p {
+		margin-bottom: ($vspacing / 2);
+	}
+
+}
+
+.site-info {
+	color: $medium-gray-darker;
+	font-size: .875em;
+	padding: ($vspacing * 1) 1.5rem;
+	text-align: center;
+}
+
+.wporg-attribution {
+	margin: 0;
+	float: left;
+}
+
+#wpstats {
+	display: none;
+}

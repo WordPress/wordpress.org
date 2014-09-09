@@ -1,0 +1,28 @@
+%clearfix {
+	&:after,
+	&:before {
+		content: "";
+		display: table;
+	}
+	&:after {
+		clear: both;
+	}
+}
+
+%center {
+	display: table;
+	width: 100%;
+}
+
+%centered {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+}
+
+//Convert pixels to ems 
+//http://web-design-weekly.com/snippets/converts-pixels-to-ems-with-sass/
+
+@function em($pixels, $context: $base-font-size) {
+  @return #{$pixels/$context}em
+}

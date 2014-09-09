@@ -1,0 +1,208 @@
+/* =Typography
+-------------------------------------------------------------- */
+
+body,
+button,
+input,
+select,
+textarea {
+	color: $text-color;
+	font-family: $base-font;
+	font-size: $base-font-size;
+	line-height: $line-height;
+	
+	@media screen and (min-width: $size-increase-1) {
+		font-size: 18px;
+	}
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+	clear: both;
+	margin-bottom: $vspacing;
+	line-height: $line-height;
+}
+
+h1 {
+	font: 700 1.618em $header-font;
+}
+
+h2 {
+	font: 700 1.258em $header-font;
+}
+
+h3 {
+	font-size: 1em;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+h4 {
+	font-size: 1em;
+	font-weight: 700;
+}
+
+h5, h6 {
+	font-size: .778em;
+	font-weight: 700;
+}
+
+h6 {
+	font-style: italic;
+}
+
+hr {
+	background-color: $medium-gray;
+	border: 0;
+	height: 1px;
+	margin-bottom: $vspacing;
+}
+
+/* Text elements */
+p {
+	margin-bottom: $vspacing;
+}
+
+ul, ol {
+	margin: 0 0 $vspacing;
+}
+
+ul {
+	list-style: disc inside;
+}
+
+ol {
+	list-style: decimal inside;
+}
+
+li > ul,
+li > ol {
+//	margin-bottom: 0;
+	margin-left: $vspacing;
+}
+
+dt {
+	font-weight: bold;
+}
+
+dd {
+	margin: 0 $vspacing $vspacing;
+}
+
+b, strong {
+	font-weight: bold;
+}
+
+dfn, cite, em, i {
+	font-style: italic;
+}
+
+blockquote {
+	color: $medium-gray-darker;
+	margin-bottom: $vspacing;
+	border-left: 4px solid $medium-gray-darker;
+	padding-left: 1em;
+}
+
+address {
+	margin: 0 0 $vspacing;
+}
+
+pre {
+	background: $light-gray;
+	font-family: "Courier 10 Pitch", Courier, monospace;
+	margin-bottom: $vspacing;
+	padding: $vspacing;
+	overflow: auto;
+	max-width: 100%;
+	
+	@media screen and (max-width: $one-column) {
+		padding: 1rem;
+	}
+}
+
+code, kbd, tt, var {
+	background: $light-gray;
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+}
+
+abbr, acronym {
+	border-bottom: 1px dotted $dark-gray;
+	cursor: help;
+}
+
+mark, ins {
+	color: $white;
+	background: $medium-blue;
+	text-decoration: none;
+}
+
+sup,
+sub {
+	font-size: 75%;
+	height: 0;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sup {
+	bottom: 1ex;
+}
+
+sub {
+	top: .5ex;
+}
+
+small {
+	font-size: 75%;
+}
+
+big {
+	font-size: 125%;
+}
+
+figure {
+	margin: 0;
+}
+
+table {
+	margin: 0 0 $vspacing;
+	width: 100%;
+}
+
+th {
+	font-weight: bold;
+}
+
+img {
+	height: auto; /* Make sure images are scaled correctly. */
+	max-width: 100%; /* Adhere to container width. */
+}
+
+/* Prevent long strings from breaking out of the container */
+.entry-content a,
+.entry-content code,
+.entry-content pre {
+	word-wrap: break-word;
+}
+
+.entry-content p {
+	-webkit-hyphens: auto;
+	-moz-hyphens:    auto;
+	hyphens:         auto;
+}
+
+/* Links */
+a {
+	color: $link-color;
+	transition: all 0.15s;
+	text-decoration: none;
+}
+a:visited {
+	color: $link-visited;
+}
+a:hover, a:active, a:focus {
+  color: $medium-gray-darker;
+}

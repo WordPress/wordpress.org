@@ -1,0 +1,168 @@
+@charset "UTF-8";
+
+/*!
+Animate.css - http://daneden.me/animate
+Licensed under the MIT license - http://opensource.org/licenses/MIT
+
+Copyright (c) 2013 Daniel Eden
+*/
+
+.animated {
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+.animated.infinite {
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+}
+
+.animated.hinge {
+  -webkit-animation-duration: 2s;
+  animation-duration: 2s;
+}
+
+@-webkit-keyframes bounceIn {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(.3);
+    transform: scale(.3);
+  }
+
+  50% {
+    opacity: 1;
+    -webkit-transform: scale(1.05);
+    transform: scale(1.05);
+  }
+
+  70% {
+    -webkit-transform: scale(.9);
+    transform: scale(.9);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(.3);
+    -ms-transform: scale(.3);
+    transform: scale(.3);
+  }
+
+  50% {
+    opacity: 1;
+    -webkit-transform: scale(1.05);
+    -ms-transform: scale(1.05);
+    transform: scale(1.05);
+  }
+
+  70% {
+    -webkit-transform: scale(.9);
+    -ms-transform: scale(.9);
+    transform: scale(.9);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+  }
+}
+
+.bounceIn {
+  -webkit-animation-name: bounceIn;
+  animation-name: bounceIn;
+}
+
+@-webkit-keyframes bounceInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-2000px);
+    transform: translateY(-2000px);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: translateY(30px);
+    transform: translateY(30px);
+  }
+
+  80% {
+    -webkit-transform: translateY(-10px);
+    transform: translateY(-10px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+}
+
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+.fadeInDown {
+  -webkit-animation-name: fadeInDown;
+  animation-name: fadeInDown;
+}
