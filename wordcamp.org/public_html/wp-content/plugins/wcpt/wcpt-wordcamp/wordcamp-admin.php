@@ -144,6 +144,11 @@ class WordCamp_Admin {
 	 */
 	function meta_keys ( $meta_group = '' ) {
 
+		/*
+		 * Warning: These keys are used for both the input field label and the postmeta key, so if you want to
+		 * modify an existing label then you'll also need to migrate any rows in the database to use the new key.
+		 */
+
 		switch ( $meta_group ) {
 			case 'organizer' :
 				$retval = array (
