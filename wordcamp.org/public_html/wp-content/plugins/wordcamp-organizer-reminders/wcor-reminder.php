@@ -84,13 +84,13 @@ class WCOR_Reminder {
 	 * @param object $post
 	 */
 	public function markup_reminder_details( $post ) {
-		$send_where          = get_post_meta( $post->ID, 'wcor_send_where', true );
-		$send_custom_address = get_post_meta( $post->ID, 'wcor_send_custom_address', true );
-		$send_when           = get_post_meta( $post->ID, 'wcor_send_when', true );
-		$send_days_before    = get_post_meta( $post->ID, 'wcor_send_days_before', true );
-		$send_days_after     = get_post_meta( $post->ID, 'wcor_send_days_after', true );
+		$send_where              = get_post_meta( $post->ID, 'wcor_send_where', true );
+		$send_custom_address     = get_post_meta( $post->ID, 'wcor_send_custom_address', true );
+		$send_when               = get_post_meta( $post->ID, 'wcor_send_when', true );
+		$send_days_before        = get_post_meta( $post->ID, 'wcor_send_days_before', true );
+		$send_days_after         = get_post_meta( $post->ID, 'wcor_send_days_after', true );
 		$send_days_after_pending = get_post_meta( $post->ID, 'wcor_send_days_after_pending', true );
-		$which_trigger       = get_post_meta( $post->ID, 'wcor_which_trigger', true );
+		$which_trigger           = get_post_meta( $post->ID, 'wcor_which_trigger', true );
 		
 		?>
 
