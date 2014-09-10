@@ -2889,6 +2889,15 @@ h3#comments-title {
 		height: 375px;
 	}
 
+	.wc-hero-mailinglist {
+		position: relative;
+		padding-bottom: 11px;
+	}
+
+		.wc-hero-mailinglist-container {
+			padding-left: 0;
+		}
+
 	.blog #content h1.page-title,
 	.archive #content h1.page-title,
 	.search #content h1.page-title {
