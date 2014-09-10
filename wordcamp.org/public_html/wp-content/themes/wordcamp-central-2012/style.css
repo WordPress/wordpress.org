@@ -520,7 +520,7 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	padding: 15px 0 0 0;
 	position: relative;
 	
-	z-index: 10;
+	z-index: 20;
 	
 	box-shadow: 0 1px 3px 0px rgba(1,73,85,0.35);
 	-webkit-box-shadow: 0 1px 3px 0px rgba(1,73,85,0.35);
