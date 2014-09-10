@@ -434,12 +434,13 @@ function redirect_resources() {
  */
 function make_doclink_clickable( $content ) {
 
-	if ( false === strpos( $content, '{@link ' ) ) {
+	// Nothing to change unless a @link or @see reference is in the text.
+	if ( false === strpos( $content, '{@link ' ) && false === strpos( $content, '{@see ' ) ) {
 		return $content;
 	}
 
 	return preg_replace_callback(
-		'/\{@link ([^\}]+)\}/',
+		'/\{@(?:link|see) ([^\}]+)\}/',
 		function ( $matches ) {
 
 			$link = $matches[1];
