@@ -26,8 +26,8 @@
 	
 	</div><!-- #content -->
 	
-	<?php get_sidebar('blog'); ?>
-	
 </div><!-- #container -->
+
+<?php get_sidebar('blog'); ?>
 
 <?php get_footer(); ?>

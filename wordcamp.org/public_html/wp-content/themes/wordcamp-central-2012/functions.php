@@ -34,6 +34,7 @@ class WordCamp_Central_Theme {
 		add_action( 'widgets_init', array( __CLASS__, 'widgets_init' ), 11 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ) );
 		add_action( 'init', array( __CLASS__, 'process_forms' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 
 		add_filter( 'excerpt_more', array( __CLASS__, 'excerpt_more' ), 11 );
 		// add_filter( 'wcpt_register_post_type', array( __CLASS__, 'wcpt_register_post_type' ) ); // set to public in wcpt plugin
@@ -172,6 +173,13 @@ class WordCamp_Central_Theme {
 		}
 
 		return;
+	}
+
+	/**
+	 * Enqueue scripts and styles.
+	 */
+	static function enqueue_scripts() {
+		wp_enqueue_script( 'central-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20140909', true );
 	}
 
 	/**
