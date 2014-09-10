@@ -179,7 +179,20 @@ class WordCamp_Central_Theme {
 	 * Enqueue scripts and styles.
 	 */
 	static function enqueue_scripts() {
+		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 3 );
 		wp_enqueue_script( 'central-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20140909', true );
+
+		/* We add some JavaScript to pages with the comment form
+		 * to support sites with threaded comments (when in use).
+		 */
+		if ( is_singular() && get_option( 'thread_comments' ) ) {
+			wp_enqueue_script( 'comment-reply' );
+		}
+
+		if ( is_front_page() || is_page( 'about' ) ) {
+			wp_enqueue_script( 'jquery-cycle', get_stylesheet_directory_uri() . '/js/jquery.cycle.min.js', array( 'jquery' ) );
+		}
+
 	}
 
 	/**
