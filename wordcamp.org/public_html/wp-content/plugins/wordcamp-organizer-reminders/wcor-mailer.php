@@ -241,6 +241,8 @@ class WCOR_Mailer {
 
 			if ( ! empty( $_POST[ $email_address_key ] ) ) {
 				$recipient = sanitize_email( $_POST[ $email_address_key ] );
+			} else {
+				$recipient = sanitize_email( get_post_meta( $wordcamp_id, 'E-mail Address', true ) );
 			}
 		}
 
