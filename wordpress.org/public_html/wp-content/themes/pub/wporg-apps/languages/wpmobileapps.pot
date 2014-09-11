@@ -1,14 +1,14 @@
-# Copyright (C) 2013 Automattic
-# This file is distributed under the GNU General Public License v2 or later.
+# Copyright (C) 2014 Dave Whitley
+# This file is distributed under the GNU General Public License.
 msgid ""
 msgstr ""
-"Project-Id-Version: _s 1.0-wpcom\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tags/_s\n"
-"POT-Creation-Date: 2013-12-19 02:31:31+00:00\n"
+"Project-Id-Version: wpmobileapps 1.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tags/.\n"
+"POT-Creation-Date: 2014-09-11 03:09:22+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
@@ -31,93 +31,90 @@ msgstr ""
 msgid "Try looking in the monthly archives. %1$s"
 msgstr ""
 
-#: archive.php:31
+#: archive.php:28
 msgid "Author: %s"
 msgstr ""
 
-#: archive.php:39
+#: archive.php:31
 msgid "Day: %s"
 msgstr ""
 
-#: archive.php:42
+#: archive.php:34
 msgid "Month: %s"
 msgstr ""
 
-#: archive.php:42
+#: archive.php:34
 msgctxt "monthly archives date format"
 msgid "F Y"
 msgstr ""
 
-#: archive.php:45
+#: archive.php:37
 msgid "Year: %s"
 msgstr ""
 
-#: archive.php:45
+#: archive.php:37
 msgctxt "yearly archives date format"
 msgid "Y"
 msgstr ""
 
-#: archive.php:48
+#: archive.php:40
 msgid "Asides"
 msgstr ""
 
-#: archive.php:51
+#: archive.php:43
 msgid "Galleries"
 msgstr ""
 
-#: archive.php:54
+#: archive.php:46
 msgid "Images"
 msgstr ""
 
-#: archive.php:57
+#: archive.php:49
 msgid "Videos"
 msgstr ""
 
-#: archive.php:60
+#: archive.php:52
 msgid "Quotes"
 msgstr ""
 
-#: archive.php:63
+#: archive.php:55
 msgid "Links"
 msgstr ""
 
-#: archive.php:66
+#: archive.php:58
 msgid "Statuses"
 msgstr ""
 
-#: archive.php:69
+#: archive.php:61
 msgid "Audios"
 msgstr ""
 
-#: archive.php:72
+#: archive.php:64
 msgid "Chats"
 msgstr ""
 
-#: archive.php:75 sidebar.php:17
+#: archive.php:67
 msgid "Archives"
 msgstr ""
 
-#: comments.php:30
-msgctxt "comments title"
-msgid "One thought on &ldquo;%2$s&rdquo;"
-msgid_plural "%1$s thoughts on &ldquo;%2$s&rdquo;"
-msgstr[0] ""
-msgstr[1] ""
-
-#: comments.php:37 comments.php:57
+#: comments.php:33 comments.php:53
 msgid "Comment navigation"
 msgstr ""
 
-#: comments.php:38 comments.php:58
+#: comments.php:34 comments.php:54
 msgid "&larr; Older Comments"
 msgstr ""
 
-#: comments.php:39 comments.php:59
+#: comments.php:35 comments.php:55
 msgid "Newer Comments &rarr;"
 msgstr ""
 
-#: comments.php:69
+#: comments.php:65
 msgid "Comments are closed."
+msgstr ""
+
+#: content-grid.php:26
+msgid "Permalink to %s"
 msgstr ""
 
 #: content-none.php:13
@@ -141,87 +138,77 @@ msgid ""
 "searching can help."
 msgstr ""
 
-#: content-page.php:18 content-single.php:20 content.php:27
+#: content-page.php:25 content-single.php:22 content.php:39
 msgid "Pages:"
 msgstr ""
 
-#: content-page.php:23 content-single.php:60 content.php:61
-#: inc/template-tags.php:81 inc/template-tags.php:100
+#: content-page.php:30 content-single.php:62 content.php:60
+#: inc/template-tags.php:146 inc/template-tags.php:169
 msgid "Edit"
 msgstr ""
 
 #. translators: used between list items, there is a space after the comma
-#: content-single.php:29 content-single.php:32 content.php:38 content.php:48
+#: content-single.php:31 content-single.php:34 content.php:50
 msgid ", "
 msgstr ""
 
-#: content-single.php:37
-msgid ""
-"This entry was tagged %2$s. Bookmark the <a href=\"%3$s\" rel=\"bookmark"
-"\">permalink</a>."
-msgstr ""
-
-#: content-single.php:39
-msgid "Bookmark the <a href=\"%3$s\" rel=\"bookmark\">permalink</a>."
-msgstr ""
-
-#: content-single.php:45
-msgid ""
-"This entry was posted in %1$s and tagged %2$s. Bookmark the <a href=\"%3$s\" "
-"rel=\"bookmark\">permalink</a>."
+#: content-single.php:39 content-single.php:41
+msgid "This entry was tagged %2$s."
 msgstr ""
 
 #: content-single.php:47
-msgid ""
-"This entry was posted in %1$s. Bookmark the <a href=\"%3$s\" rel=\"bookmark"
-"\">permalink</a>."
+msgid "This entry was posted in %1$s and tagged %2$s."
 msgstr ""
 
-#: content.php:24
-msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+#: content-single.php:49
+msgid "This entry was posted in %1$s."
 msgstr ""
 
-#: content.php:42
+#: content.php:16
+msgid "Latest Post"
+msgstr ""
+
+#: content.php:54
 msgid "Posted in %1$s"
 msgstr ""
 
-#: content.php:52
-msgid "Tagged %1$s"
+#: footer.php:17
+msgid "Download the WordPress app:"
 msgstr ""
 
-#: content.php:58
-msgid "Leave a comment"
-msgstr ""
-
-#: content.php:58
-msgid "1 Comment"
-msgstr ""
-
-#: content.php:58
-msgid "% Comments"
-msgstr ""
-
-#: footer.php:16
-msgid "Proudly powered by %s"
-msgstr ""
-
-#: footer.php:18
-msgid "Theme: %1$s by %2$s."
-msgstr ""
-
-#: functions.php:45
+#: functions.php:45 header.php:29
 msgid "Primary Menu"
 msgstr ""
 
-#: functions.php:65
-msgid "Sidebar"
+#: functions.php:46
+msgid "Social Menu"
 msgstr ""
 
-#: header.php:31
-msgid "Menu"
+#: functions.php:68
+msgid "Footer Widgets 1"
 msgstr ""
 
-#: header.php:32
+#: functions.php:76
+msgid "Footer Widgets 2"
+msgstr ""
+
+#: functions.php:180
+msgid "Continue reading&nbsp;<span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: functions.php:230
+msgid "Custom Meta"
+msgstr ""
+
+#: grid-page.php:20
+msgid "Features"
+msgstr ""
+
+#: grid-page.php:21
+msgid "The power of publishing in your&nbsp;pocket."
+msgstr ""
+
+#: header.php:30
 msgid "Skip to content"
 msgstr ""
 
@@ -255,72 +242,52 @@ msgctxt "Next post link"
 msgid "%title <span class=\"meta-nav\">&rarr;</span>"
 msgstr ""
 
-#: inc/template-tags.php:81
-msgid "Pingback:"
-msgstr ""
-
-#: inc/template-tags.php:91
-msgid "%s <span class=\"says\">says:</span>"
-msgstr ""
-
-#: inc/template-tags.php:97
-msgctxt "1: date, 2: time"
-msgid "%1$s at %2$s"
-msgstr ""
-
-#: inc/template-tags.php:104
-msgid "Your comment is awaiting moderation."
-msgstr ""
-
-#: inc/template-tags.php:145
+#: inc/template-tags.php:85
 msgid ""
 "<span class=\"posted-on\">Posted on %1$s</span><span class=\"byline\"> by "
 "%2$s</span>"
 msgstr ""
 
-#: search.php:16
+#: inc/template-tags.php:146
+msgid "Pingback:"
+msgstr ""
+
+#: inc/template-tags.php:156
+msgid "%s"
+msgstr ""
+
+#: inc/template-tags.php:162
+msgctxt "1: date, 2: time"
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: inc/template-tags.php:173
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#: search.php:17
 msgid "Search Results for: %s"
 msgstr ""
 
-#: searchform.php:10
-msgctxt "label"
-msgid "Search for:"
-msgstr ""
-
-#: searchform.php:11
-msgctxt "placeholder"
-msgid "Search &hellip;"
-msgstr ""
-
-#: searchform.php:13
-msgctxt "submit button"
-msgid "Search"
-msgstr ""
-
-#: sidebar.php:24
-msgid "Meta"
-msgstr ""
-
 #. Theme Name of the plugin/theme
-msgid "_s"
+msgid "wpmobileapps"
 msgstr ""
 
+#. #-#-#-#-#  wpmobileapps.pot (wpmobileapps 1.0)  #-#-#-#-#
 #. Theme URI of the plugin/theme
+#. #-#-#-#-#  wpmobileapps.pot (wpmobileapps 1.0)  #-#-#-#-#
+#. Author URI of the plugin/theme
 msgid "http://underscores.me/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid ""
-"Hi. I'm a starter theme called <code>_s</code>, or <em>underscores</em>, if "
-"you like. I'm a theme meant for hacking so don't use me as a <em>Parent "
-"Theme</em>. Instead try turning me into the next, most awesome, WordPress "
-"theme out there. That's what I'm here for."
+msgid "WordPress Mobile Apps Site"
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Automattic"
+msgid "Dave Whitley"
 msgstr ""
 
-#. Author URI of the plugin/theme
-msgid "http://automattic.com/"
+#. Template Name of the plugin/theme
+msgid "Grid Page"
 msgstr ""
