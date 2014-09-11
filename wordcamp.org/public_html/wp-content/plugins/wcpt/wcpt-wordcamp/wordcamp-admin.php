@@ -491,7 +491,7 @@ class WordCamp_Admin {
 			$previous_post_status = get_post( absint( $_POST['post_ID'] ) );
 			$previous_post_status = $previous_post_status->post_status;
 
-			if ( 'pending' == $post_data['post_status'] && ! in_array( $previous_post_status, array( 'draft', 'publish' ) ) ) {
+			if ( 'pending' == $post_data['post_status'] && ! in_array( $previous_post_status, array( 'draft', 'pending', 'publish' ) ) ) {
 				$this->active_admin_notices[] = 2;
 				$post_data['post_status'] = $previous_post_status;
 			}
