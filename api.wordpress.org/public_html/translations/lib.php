@@ -77,17 +77,20 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	foreach ( $translations as $translation ) {
 		$locale = GP_Locales::by_field( 'wp_locale', $translation->language );
 
-		$isos = array();
+		$isos = array( 1 => false, 2 => false, 3 => false );
 		// We'll use ISO codes for sorting.
-		if ( $locale->lang_code_iso_639_1 ) {
-			$key = $isos[1] = $locale->lang_code_iso_639_1;
+		// Prefer 639-1 over 639-2 over 639-3 for this. All Spanish variants have 639-1 "es",
+		// and we want to sort those together. (639-2 could be "spa".)
+		if ( $locale->lang_code_iso_639_3 ) {
+			$key = $isos[3] = $locale->lang_code_iso_639_3;
 		}
 		if ( $locale->lang_code_iso_639_2 ) {
 			$key = $isos[2] = $locale->lang_code_iso_639_2;
 		}
-		if ( $locale->lang_code_iso_639_3 ) {
-			$key = $isos[3] = $locale->lang_code_iso_639_3;
+		if ( $locale->lang_code_iso_639_1 ) {
+			$key = $isos[1] = $locale->lang_code_iso_639_1;
 		}
+		$isos = array_filter( $isos );
 
 		if ( array() === $isos ) {
 			continue; // uhhhh
