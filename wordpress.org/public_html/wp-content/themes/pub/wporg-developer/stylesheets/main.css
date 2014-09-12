@@ -1110,6 +1110,10 @@ input {
 .devhub-wrap .wp-parser-class .parameters dd .default, .devhub-wrap .wp-parser-function .parameters dd .default, .devhub-wrap .wp-parser-hook .parameters dd .default, .devhub-wrap .wp-parser-method .parameters dd .default {
   font-style: italic;
 }
+.devhub-wrap .wp-parser-class .parameters .param-hash, .devhub-wrap .wp-parser-function .parameters .param-hash, .devhub-wrap .wp-parser-hook .parameters .param-hash, .devhub-wrap .wp-parser-method .parameters .param-hash {
+  margin-left: 1.2em;
+  margin-bottom: 0.5em;
+}
 .devhub-wrap .wp-parser-class .learn-more, .devhub-wrap .wp-parser-function .learn-more, .devhub-wrap .wp-parser-hook .learn-more, .devhub-wrap .wp-parser-method .learn-more {
   background-color: #f1f1f1;
   border: 1px solid #dfdfdf;

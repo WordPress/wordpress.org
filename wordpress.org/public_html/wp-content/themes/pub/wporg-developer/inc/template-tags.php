@@ -881,9 +881,41 @@ namespace DevHub {
 		if ( '{' != $text[0] ) {
 			return $text;
 		}
-		$text = trim( substr( $text, 1, -1 ) );
-		$text = str_replace( '@type', "<br \>@type", $text );
-		return $text;
+
+		$new_text = '';
+		$text     = trim( substr( $text, 1, -1 ) );
+		$text     = str_replace( '@type', "\n@type", $text );
+
+		$in_list = false;
+		$parts = explode( "\n", $text );
+		foreach ( $parts as $part ) {
+			$part = preg_replace( '/\s+/', ' ', $part );
+			list( $wordtype, $type, $name, $description ) = explode( ' ', $part, 4 );
+
+			if ( '@type' != $wordtype ) {
+				if ( $in_list ) {
+					$in_list = false;
+					$new_text .= "</li></ul>\n";
+				}
+
+				$new_text .= $part;
+			} else {
+				if ( $in_list ) {
+					$new_text .= '<li>';
+				} else {
+					$new_text .= '<ul class="param-hash"><li>';
+					$in_list = true;
+				}
+
+				$new_text .= "<b>'" . substr( $name, 1 ) . "'</b><br /><i><span class='type'>({$type})</span></i> {$description}</li>\n";
+			}
+		}
+
+		if ( $in_list ) {
+			$new_text .= "</li></ul>\n";
+		}
+
+		return $new_text;
 	}
 
 }
