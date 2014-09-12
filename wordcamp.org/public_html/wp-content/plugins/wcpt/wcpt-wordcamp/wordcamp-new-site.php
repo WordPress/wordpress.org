@@ -167,7 +167,7 @@ class WordCamp_New_Site {
 
 		update_option( 'admin_email',                  $admin_email );
 		update_option( 'blogname',                     $blog_name );
-		update_option( 'blogdescription',              'Just another WordCamp' );
+		update_option( 'blogdescription',              __( 'Just another WordCamp', 'wordcamporg' ) );
 		update_option( 'close_comments_for_old_posts', 1 );
 		update_option( 'close_comments_days_old',      30 );
 		update_option( 'wccsp_settings',               $coming_soon_settings );
@@ -247,92 +247,144 @@ class WordCamp_New_Site {
 	protected function get_stub_pages( $wordcamp, $meta ) {
 		$pages = array(
 			array(
-				'title'   => 'Schedule',
-				'content' => '<p><em>Organizers note:</em> You can enter content for this page in the Sessions menu item in the sidebar.</p> <h1>Saturday, January 1st</h1> <p>[schedule date="YYYY-MM-DD" tracks="example-track,another-example-track,yet-another-example-track"]</p>',
+				'title'   => __( 'Schedule', 'wordcamporg' ),
+				'content' =>
+					'<p>'  . __( '<em>Organizers note:</em> You can enter content for this page in the Sessions menu item in the sidebar.', 'wordcamporg' ) . '</p> ' .
+					'<h1>' . __( 'Saturday, January 1st', 'wordcamporg' ) . '</h1> ' .
+					'<p>[schedule date="YYYY-MM-DD" tracks="example-track,another-example-track,yet-another-example-track"]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Speakers',
-				'content' => '<p><em>Organizers note:</em> You can enter content for this page in the Speakers menu item in the sidebar.</p> <p>[speakers]</p>',
+				'title'   => __( 'Speakers', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> You can enter content for this page in the Speakers menu item in the sidebar.', 'wordcamporg' ) . '</p> ' .
+					'<p>[speakers]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Sessions',
-				'content' => '<p><em>Organizers note:</em> You can enter content for this page in the Sessions menu item in the sidebar.</p> <p>[sessions]</p>',
+				'title'   => __( 'Sessions', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> You can enter content for this page in the Sessions menu item in the sidebar.', 'wordcamporg' ) . '</p> ' .
+					'<p>[sessions]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Sponsors',
-				'content' => "<p><em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit http://central.wordcamp.org/multi-event-sponsorship-packages/. After that, you should add the sponsors that are specific to your event.</p> <h3>Our Sponsors</h3> <p>Blurb thanking sponsors</p> <p>[sponsors]</p> <h3>Interested in sponsoring WordCamp this year?</h3> <p>Check out our <a href='/call-for-sponsors'>Call for Sponsors</a> post for details on how you can help make this year's WordCamp the best it can be!</p>",
+				'title'   => __( 'Sponsors', 'wordcamporg' ),
+				'content' =>
+					'<p>'  . __( "<em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit http://central.wordcamp.org/multi-event-sponsorship-packages/. After that, you should add the sponsors that are specific to your event. For non-English sites, make sure the URL below matches Call for Sponsors page.", 'wordcamporg' ) . '</p> ' .
+					'<h3>' . __( 'Our Sponsors', 'wordcamporg' ) . '</h3> ' .
+					'<p>'  . __( 'Blurb thanking sponsors', 'wordcamporg' ) . '</p> ' .
+					'<p>[sponsors]</p> ' .
+					'<h3>' . __( 'Interested in sponsoring WordCamp this year?</h3>', 'wordcamporg' ) .
+					'<p>'  . __( 'Check out our <a href="/call-for-sponsors">Call for Sponsors</a> post for details on how you can help make this year\'s WordCamp the best it can be!</p>', 'wordcamporg' ),
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Location',
+				'title'   => __( 'Location', 'wordcamporg' ),
 				'content' => '',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Organizers',
-				'content' => '<p><em>Organizers note:</em> You can enter content for this page in the Organizers menu item in the sidebar.</p> <p>[organizers]</p>',
+				'title'   => __( 'Organizers', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> You can enter content for this page in the Organizers menu item in the sidebar.', 'wordcamporg' ) . '</p> ' .
+					'<p>[organizers]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Tickets',
-				'content' => "<p><em>Organizers note:</em> If you'd like to change the slug for this page, please make sure you do that before opening ticket sales. Changing the page slug after tickets have started selling will break the link that users receive in their receipt e-mail.</p> <p>[camptix]</p>",
+				'title'   => __( 'Tickets', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( "<em>Organizers note:</em> If you'd like to change the slug for this page, please make sure you do that before opening ticket sales. Changing the page slug after tickets have started selling will break the link that users receive in their receipt e-mail.", 'wordcamporg' ) . '</p> ' .
+					'<p>[camptix]</p>',
 				'status'  => 'draft',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Attendees',
+				'title'   => __( 'Attendees', 'wordcamporg' ),
 				'content' => '[camptix_attendees columns="3"]',
 				'status'  => 'draft',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Videos',
-				'content' => '<p><em>Organizers note:</em> After your WordCamp is over and the sessions are published to WordPress.tv, you can embed them here. Just enter the event slug into the shortcode below, and hit the <em>Publish</em> button.</p> <p>[wptv event="enter-event-slug-here"]</p>',
+				'title'   => __( 'Videos', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> After your WordCamp is over and the sessions are published to WordPress.tv, you can embed them here. Just enter the event slug into the shortcode below, and hit the <em>Publish</em> button.', 'wordcamporg' ) . '</p> ' .
+					 '<p>[wptv event="enter-event-slug-here"]</p>',
 				'status'  => 'draft',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Slideshow',
-				'content' => "<p><em>Organizers note:</em> Upload photos to this page and they'll automagically appear in a slideshow!</p> <p>[slideshow]</p>",
+				'title'   => __( 'Slideshow', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( "<em>Organizers note:</em> Upload photos to this page and they'll automagically appear in a slideshow!", 'wordcamporg' ) . '</p> ' .
+				    '<p>[slideshow]</p>',
 				'status'  => 'draft',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Contact',
-				'content' => "<p>[contact-form to='" . get_option( 'admin_email' ) . "' subject='WordCamp Contact Request'][contact-field label='Name' type='name' required='1'/][contact-field label='Email' type='email' required='1'/][contact-field label='Message' type='textarea' required='1'/][/contact-form]</p>",
+				'title'   => __( 'Contact', 'wordcamporg' ),
+				'content' => sprintf(
+					'<p>' .
+						'[contact-form to="%s" subject="%s"]' .
+							'[contact-field label="%s" type="name"     required="1" /]' .
+							'[contact-field label="%s" type="email"    required="1" /]' .
+							'[contact-field label="%s" type="textarea" required="1" /]' .
+						'[/contact-form]' .
+					'</p>',
+					get_option( 'admin_email' ),
+					__( 'WordCamp Contact Request', 'wordcamporg' ),
+					__( 'Name', 'wordcamporg' ),
+					__( 'Email', 'wordcamporg' ),
+					__( 'Message', 'wordcamporg' )
+				),
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Social Media Stream',
-				'content' => '<p><em>Organizers note:</em> The [[tagregator]] shortcode will pull in a stream of social media posts and display them. In order to use it, you\'ll need to follow the setup instructions at http://wordpress.org/plugins/tagregator/installation, and then update "#wcxyz" below with your hashtag.</p> <p>[tagregator hashtag="#wcxzy"]</p>',
+				'title'   => __( 'Social Media Stream', 'wordcamporg' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> The [[tagregator]] shortcode will pull in a stream of social media posts and display them. In order to use it, you\'ll need to follow the setup instructions at http://wordpress.org/plugins/tagregator/installation, and then update "#wcxyz" below with your hashtag.', 'wordcamporg' ) . '</p> ' .
+					'<p>[tagregator hashtag="#wcxzy"]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
 
 			array(
-				'title'   => 'Code of Conduct',
-				'content' => '<p><em>Organizers note:</em> Below is a boilerplate code of conduct that you can customize; another great example is the Ada Initiative <a href="http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Policy">anti-harassment policy.</a></p> <p>We also recommend the organizing team read this article on <a href="http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Responding_to_reports">how to take a harassment report</a>.</p> <p>Please update the portions <span style="color: red; text-decoration: underline;">with red text</span>. You can use the "Remove Formatting" button on the toolbar (the eraser icon on the second line) to remove the color and underline.' . $this->get_code_of_conduct(),
+				'title'   => __( 'Code of Conduct', 'wordcamporg' ),
+				'content' =>
+					'<p>' .
+						sprintf(
+							__( '<em>Organizers note:</em> Below is a boilerplate code of conduct that you can customize; another great example is the Ada Initiative <a href="%s">anti-harassment policy.</a>', 'wordcamporg' ),
+							'http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Policy'
+						) .
+					'</p> ' .
+
+					'<p>' .
+						sprintf(
+							__( 'We also recommend the organizing team read this article on <a href="%s">how to take a harassment report</a>', 'wordcamporg' ),
+							'http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Responding_to_reports'
+						) .
+					'</p> ' .
+
+					'<p>' . __( 'Please update the portions <span style="color: red; text-decoration: underline;">with red text</span>. You can use the "Remove Formatting" button on the toolbar (the eraser icon on the second line) to remove the color and underline.', 'wordcamporg' ) .
+					$this->get_code_of_conduct(),
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
@@ -352,29 +404,94 @@ class WordCamp_New_Site {
 	protected function get_stub_posts( $wordcamp, $meta ) {
 		$posts = array(
 			array(
-				'title'   => 'Welcome to ' . get_option( 'blogname' ),
-				'content' => "<p><em>Organizers note:</em> Please update the portions <span style='color: red; text-decoration: underline;'>with red text</span>.</p> <p>We're happy to announce that <span style='color: red; text-decoration: underline;'>WordCamp YourCityName</span> is officially on the calendar!</p> <p><span style='color: red; text-decoration: underline;'>WordCamp YourCityName</span> will be <span style='color: red; text-decoration: underline;'>DATE(S)</span> at <span style='color: red; text-decoration: underline;'>LOCATION</span>.</p> <p><span style='color: red; text-decoration: underline;'>Subscribe using the form in the sidebar</span> to stay up to date on the most recent news. We’ll be keeping you posted on all the details over the coming months, including speaker submissions, ticket sales and more!</p>",
+				'title'   => __( 'Welcome to ', 'wordcamporg' ) . get_option( 'blogname' ),
+				'content' =>
+					'<p>' . __( '<em>Organizers note:</em> Please update the portions <span style="color: red; text-decoration: underline;">with red text</span>.', 'wordcamporg' ) . '</p> ' .
+					'<p>' . __( 'We\'re happy to announce that <span style="color: red; text-decoration: underline;">WordCamp YourCityName</span> is officially on the calendar!', 'wordcamporg' ) . '</p> ' .
+					'<p>' . __( '<span style="color: red; text-decoration: underline;">WordCamp YourCityName</span> will be <span style="color: red; text-decoration: underline;">DATE(S)</span> at <span style="color: red; text-decoration: underline;">LOCATION</span>.', 'wordcamporg' ) . '</p> ' .
+					'<p>' . __( '<span style="color: red; text-decoration: underline;">Subscribe using the form in the sidebar</span> to stay up to date on the most recent news. We’ll be keeping you posted on all the details over the coming months, including speaker submissions, ticket sales and more!', 'wordcamporg' ) . '</p> ',
 				'status'  => 'publish',
 				'type'    => 'post',
 			),
 
 			array(
-				'title'   => 'Call for Sponsors',
-				'content' => "<p><em>Organizers note:</em> Make sure you update the 'to' address and other fields before publishing this page!</p> <p>Blurb with information for potential sponsors.</p> <p>[contact-form to='enter-your-address-here@example.net' subject='WordCamp Sponsor Request'][contact-field label='Contact Name' type='text' required='1'/][contact-field label='Company Name' type='name' required='1'/][contact-field label='Email' type='email' required='1'/][contact-field label='Phone Number' type='text'/][contact-field label='Sponsorship Level' type='text'/][contact-field label='Why Would you Like to Sponsor WordCamp?' type='textarea' required='1'/][contact-field label='Questions / Comments' type='textarea'/][/contact-form] </p>",
+				'title'   => __( 'Call for Sponsors', 'wordcamporg' ),
+				'content' => 
+					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
+					'<p>' . __( 'Blurb with information for potential sponsors.', 'wordcamporg' ) . '</p> ' .
+					'<p>' .
+						sprintf( '
+							[contact-form to="enter-your-address-here@example.net" subject="%s"]
+							[contact-field label="%s" type="text"     required="1" /]
+							[contact-field label="%s" type="name"     required="1" /]
+							[contact-field label="%s" type="email"    required="1" /]
+							[contact-field label="%s" type="text"                  /]
+							[contact-field label="%s" type="text"                  /]
+							[contact-field label="%s" type="textarea" required="1" /]
+							[contact-field label="%s" type="textarea"              /]
+							[/contact-form]',
+							__( 'WordCamp Sponsor Request', 'wordcamporg' ),
+							__( 'Contact Name', 'wordcamporg' ),
+							__( 'Company Name', 'wordcamporg' ),
+							__( 'Email', 'wordcamporg' ),
+							__( 'Phone Number', 'wordcamporg' ),
+							__( 'Sponsorship Level', 'wordcamporg' ),
+							__( 'Why Would you Like to Sponsor WordCamp?', 'wordcamporg' ),
+							__( 'Questions / Comments', 'wordcamporg' )
+						) .
+					'</p>',
 				'status'  => 'draft',
 				'type'    => 'post',
 			),
 
 			array(
-				'title'   => 'Call for Speakers',
-				'content' => "<p><em>Organizers note:</em> Make sure you update the 'to' address and other fields before publishing this page!</p> <p>Blurb with information for potential speakers.</p> <p>[contact-form to='enter-your-address-here@example.net' subject='WordCamp Speaker Request'][contact-field label='Name' type='text' required='1'/][contact-field label='Email' type='email' required='1'/][contact-field label='Topic(s) You%26#039;d Like to Present On' type='textarea' required='1'/][contact-field label='Intended Audience' type='text' required='1'/][contact-field label='Past Speaking Experience (not necessary to apply)' type='textarea'/][/contact-form]</p>",
+				'title'   => __( 'Call for Speakers', 'wordcamporg' ),
+				'content' => 
+					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .    
+					'<p>' . __( 'Blurb with information for potential speakers.', 'wordcamporg' ) . '</p> ' . 
+					'<p>' .
+						sprintf( '
+							[contact-form to="enter-your-address-here@example.net" subject="%s"]
+								[contact-field label="%s" type="text"     required="1" /]
+								[contact-field label="%s" type="email"    required="1" /]
+								[contact-field label="%s" type="textarea" required="1" /]
+								[contact-field label="%s" type="text"     required="1" /]
+								[contact-field label="%s" type="textarea"              /]
+							[/contact-form]',
+							__( 'WordCamp Speaker Request', 'wordcamporg' ),
+							__( 'Name', 'wordcamporg' ),
+							__( 'Email', 'wordcamporg' ),
+							__( 'Topic(s) You would Like to Present On', 'wordcamporg' ),
+							__( 'Intended Audience', 'wordcamporg' ),
+							__( 'Past Speaking Experience (not necessary to apply)', 'wordcamporg' )
+						) .
+					'</p>',
 				'status'  => 'draft',
 				'type'    => 'post',
 			),
 
 			array(
-				'title'   => 'Call for Volunteers',
-				'content' => "<p><em>Organizers note:</em> Make sure you update the 'to' address and other fields before publishing this page!</p> <p>Blurb with information for potential volunteers.</p> <p>[contact-form to='enter-your-address-here@example.net' subject='WordCamp Speaker Request'][contact-field label='Name' type='text' required='1'/][contact-field label='Email' type='email' required='1'/][contact-field label='Skills / Interests / Experience (not necessary to volunteer)' type='textarea' required='1'/][contact-field label='Number of Hours Available' type='text' required='1'/][contact-field label='Questions / Comments' type='textarea'/][/contact-form]</p>",
+				'title'   => __( 'Call for Volunteers', 'wordcamporg' ),
+				'content' => 
+					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
+					'<p>' . __( 'Blurb with information for potential volunteers.', 'wordcamporg' ) . '</p> ' .
+					'<p>' .
+						sprintf( '
+							[contact-form to="enter-your-address-here@example.net" subject="%s"]
+								[contact-field label="%s" type="text"     required="1" /]
+								[contact-field label="%s" type="email"    required="1" /]
+								[contact-field label="%s" type="textarea" required="1" /]
+								[contact-field label="%s" type="text"     required="1" /]
+								[contact-field label="%s" type="textarea"              /]
+							[/contact-form]',
+							__( 'WordCamp Speaker Request', 'wordcamporg' ),
+							__( 'Name', 'wordcamporg' ),
+							__( 'Email', 'wordcamporg' ),
+							__( 'Skills / Interests / Experience (not necessary to volunteer)', 'wordcamporg' ),
+							__( 'Number of Hours Available', 'wordcamporg' ),
+							__( 'Questions / Comments', 'wordcamporg' )
+						) .
+					'</p>',
 				'status'  => 'draft',
 				'type'    => 'post',
 			),
@@ -473,7 +590,7 @@ class WordCamp_New_Site {
 		foreach ( $sponsorship_levels as $sponsorship_level ) {
 			if ( ! empty( $assigned_me_sponsors[ $sponsorship_level->ID ] ) ) {
 				$pages[] = array(
-					'title'   => sprintf( 'Thank you to our %s sponsors', $sponsorship_level->post_title ),
+					'title'   => sprintf( __( 'Thank you to our %s sponsors', 'wordcamporg' ), $sponsorship_level->post_title ),
 					'content' => sprintf(
 						'%s %s',
 						str_replace(
