@@ -13,7 +13,7 @@
 				global $wp_query;
 
 				if( $wp_query->current_post == 0 ) {
-					echo '<div class="latest-post">' . __( 'Latest Post' ) . '</div>';
+					echo '<div class="latest-post">' . __( 'Latest Post' , 'wpmobileapps') . '</div>';
 				}
 			}
 		?>

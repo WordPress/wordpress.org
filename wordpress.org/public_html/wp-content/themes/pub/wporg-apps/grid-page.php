@@ -17,8 +17,8 @@ get_header(); ?>
 			<?php endwhile; // end of the loop. ?>
 
 			<div class="features-header">
-					<h1><?php _e( 'Features' ); ?></h1>
-					<h3><?php _e( 'The power of publishing in your&nbsp;pocket.' ); ?></h3>
+					<h1><?php _e( 'Features' , 'wpmobileapps'); ?></h1>
+					<h3><?php _e( 'The power of publishing in your&nbsp;pocket.' , 'wpmobileapps'); ?></h3>
 			</div>
 
 			<div class="child-pages grid">
