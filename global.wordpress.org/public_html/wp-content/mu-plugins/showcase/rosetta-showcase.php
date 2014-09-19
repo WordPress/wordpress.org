@@ -120,7 +120,7 @@ function rosetta_showcase_custom_column( $column, $post_id ) {
 		case 'shot' :
 			$url = esc_url( get_post_meta( $post_id, '_rosetta_showcase_url', true ) );
 			if ( $url ) {
-				echo '<a href="' . $url . '" target="_blank"><img width="100" src="http://s.wordpress.com/mshots/v1/' . urlencode( $url ) . '?w=100" /></a>';
+				echo '<a href="' . $url . '" target="_blank"><img width="100" src="https://wordpress.com/mshots/v1/' . urlencode( $url ) . '?w=100" /></a>';
 			}
 			break;
 	}
