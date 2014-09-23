@@ -415,9 +415,6 @@
 		font-size: 13px;
 		font-size: 1.3rem;
 	}
-	.breadcrumb-trail {
-		margin-bottom: 1em;
-	}
 	h1.entry-title,
 	h1.page-title {
 		font-weight: 300;
@@ -1183,12 +1180,6 @@
 		letter-spacing: 2px;
 		padding-top: 8px;
 
-		div {
-			font-weight: 100;
-			margin: 0.5rem 0 0;
-			font-size: 36px;
-		}
-
 		span {
 			display: inline-block;
 			position: relative;
@@ -1212,27 +1203,6 @@
 			&:after {
 				left: 100%;
 				margin-left: 10px;
-			}
-
-			&.wpicon {
-				div {
-					margin: -0.7rem 2rem 0 -1.8rem;
-					font-size: 2.5em;
-					padding: 0 2rem;
-
-					&:before {
-						content: "\f324";
-					}
-				}
-
-				&:before,
-				&:after {
-					border-top-width: 3px;
-				}
-			}
-
-			.dashicons {
-				font-size: 2.5em;
 			}
 		}
 	}

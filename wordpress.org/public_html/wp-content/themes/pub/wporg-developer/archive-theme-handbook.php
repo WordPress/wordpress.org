@@ -14,11 +14,7 @@ get_header(); ?>
 
 		<?php breadcrumb_trail(); ?>
 
-		<div class="handbook-name">
-			<span class="wpicon"><div class="dashicons"></div></span>
-			<div><?php esc_html_e( \WPorg_Handbook::get_name( 'theme-handbook' ) ); ?></div>
-			<span><?php _e( 'Handbook', 'wporg' ); ?></span>
-		</div>
+		<div class="handbook-name"><span><?php esc_html_e( \WPorg_Handbook::get_name( 'theme-handbook' ) ); ?></span></div>
 
 		<main id="main" class="site-main" role="main">
 

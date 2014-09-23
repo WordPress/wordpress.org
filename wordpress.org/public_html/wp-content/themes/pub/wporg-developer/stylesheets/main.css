@@ -682,9 +682,6 @@ input {
 .devhub-wrap .breadcrumbs .active {
   font-weight: 600;
 }
-.devhub-wrap .breadcrumb-trail {
-  margin-bottom: 1em;
-}
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
   font-weight: 300;
@@ -1308,11 +1305,6 @@ input {
   letter-spacing: 2px;
   padding-top: 8px;
 }
-.devhub-wrap .handbook-name div {
-  font-weight: 100;
-  margin: 0.5rem 0 0;
-  font-size: 36px;
-}
 .devhub-wrap .handbook-name span {
   display: inline-block;
   position: relative;
@@ -1333,20 +1325,6 @@ input {
 .devhub-wrap .handbook-name span:after {
   left: 100%;
   margin-left: 10px;
-}
-.devhub-wrap .handbook-name span.wpicon div {
-  margin: -0.7rem 2rem 0 -1.8rem;
-  font-size: 2.5em;
-  padding: 0 2rem;
-}
-.devhub-wrap .handbook-name span.wpicon div:before {
-  content: "\f324";
-}
-.devhub-wrap .handbook-name span.wpicon:before, .devhub-wrap .handbook-name span.wpicon:after {
-  border-top-width: 3px;
-}
-.devhub-wrap .handbook-name span .dashicons {
-  font-size: 2.5em;
 }
 
 @media (max-width: 60em) {
