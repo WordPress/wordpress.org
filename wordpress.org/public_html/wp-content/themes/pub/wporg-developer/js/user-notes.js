@@ -1,13 +1,13 @@
 /**
- * Comments as examples dynamic functionality.
+ * Dynamic functionality for comments as user submitted notes.
  *
  */
 
 ( function( $ ) {
-	$( '#respond, #add-example' ).toggle();
-	$( '#add-example' ).click( function( e ) {
+	$( '#respond, #add-user-note' ).toggle();
+	$( '#add-user-note' ).click( function( e ) {
 		e.preventDefault();
-		$( '#respond, #add-example' ).toggle();
+		$( '#respond, #add-user-note' ).toggle();
 
 		if ( pos = $( '#submit' ).position() ) {
 			if ( pos.top < $(window).scrollTop() ) {

@@ -72,13 +72,13 @@ namespace {
 		}
 	endif;
 
-	if ( ! function_exists( 'wporg_developer_example' ) ) :
+	if ( ! function_exists( 'wporg_developer_user_note' ) ) :
 		/**
-		 * Template for examples.
+		 * Template for user contributed notes.
 		 *
-		 * Used as a callback by wp_list_comments() for displaying the examples.
+		 * Used as a callback by wp_list_comments() for displaying the notes.
 		 */
-		function wporg_developer_example( $comment, $args, $depth ) {
+		function wporg_developer_user_note( $comment, $args, $depth ) {
 			$GLOBALS['comment'] = $comment;
 
 			if ( 'pingback' == $comment->comment_type || 'trackback' == $comment->comment_type ) : ?>
@@ -129,7 +129,7 @@ namespace {
 						<!-- .comment-metadata -->
 
 						<?php if ( '0' == $comment->comment_approved ) : ?>
-							<p class="comment-awaiting-moderation"><?php _e( 'Your example is awaiting moderation.', 'wporg' ); ?></p>
+							<p class="comment-awaiting-moderation"><?php _e( 'Your note is awaiting moderation.', 'wporg' ); ?></p>
 						<?php endif; ?>
 					</footer>
 					<!-- .comment-meta -->
@@ -148,7 +148,7 @@ namespace {
 			<?php
 			endif;
 		}
-	endif; // ends check for wporg_developer_comment()
+	endif; // ends check for wporg_developer_user_note()
 
 	if ( ! function_exists( 'wporg_developer_posted_on' ) ) :
 		/**
@@ -225,11 +225,11 @@ namespace DevHub {
 		<article id="comment-<?php comment_ID(); ?>" class="comment">
 
 			<?php if ( $comment->comment_approved == '0' ) : ?>
-				<em class="comment-awaiting-moderation"><?php _e( 'Your example is awaiting moderation.', 'wporg' ); ?></em>
+				<em class="comment-awaiting-moderation"><?php _e( 'Your note is awaiting moderation.', 'wporg' ); ?></em>
 				<br />
 			<?php endif; ?>
 
-			<pre class="example-content"><?php echo htmlentities( get_comment_text() ); ?></pre>
+			<pre class="user-note-content"><?php echo htmlentities( get_comment_text() ); ?></pre>
 
 			<footer class="comment-meta">
 				<div class="comment-author vcard">
@@ -715,13 +715,13 @@ namespace DevHub {
 	}
 
 	/**
-	 * Does the post type support having examples?
+	 * Does the post type support having user notes?
 	 *
 	 * @param  string  Optional. The post type name. If blank, assumes current post type.
 	 *
 	 * @return boolean
 	 */
-	function post_type_supports_examples( $post_type = null ) {
+	function post_type_supports_user_notes( $post_type = null ) {
 		$post_type = $post_type ? $post_type : get_post_type();
 
 		return ( 0 === strpos( $post_type, 'wp-parser-' ) );
@@ -811,37 +811,37 @@ namespace DevHub {
 	}
 
 	/**
-	 * Indicates if the current user can post an example.
+	 * Indicates if the current user can post a user contibuted note.
 	 *
 	 * This only affects post types wp-parser-* as they are the only things
-	 * that can have examples.
+	 * that can have user contributed notes.
 	 *
 	 * A custom check can be performed by hooking the filter
-	 * 'wporg_devhub-can_user_post_example' and returning a
+	 * 'wporg_devhub-can_user_post_note' and returning a
 	 * value other than null.
 	 *
-	 * By default, the ability to post examples is restricted to members of the
+	 * By default, the ability to post notes is restricted to members of the
 	 * blog.
 	 *
 	 * @param  int  $post_id The post ID.
 	 *
-	 * @return bool True if the user can post an example.
+	 * @return bool True if the user can post a note.
 	 */
-	function can_user_post_example( $open, $post_id ) {
+	function can_user_post_note( $open, $post_id ) {
 
-		// Only proceed if the post type is one that has examples.
+		// Only proceed if the post type is one that has user contributed notes.
 		if ( 0 !== strpos( get_post_type( (int) $post_id ), 'wp-parser-' ) ) {
-			// Temporarily disable commenting that isn't for an example since various
+			// Temporarily disable commenting that isn't for a note since various
 			// changes need to take place to enable regular commenting.
 			return false; //$open;
 		}
 
 		// Permit default logic to be overridden via filter that returns value other than null.
-		if ( null !== ( $can = apply_filters( 'wporg_devhub-can_user_post_example', null, $post_id ) ) ) {
+		if ( null !== ( $can = apply_filters( 'wporg_devhub-can_user_post_note', null, $post_id ) ) ) {
 			return $can;
 		}
 
-		// Default to limiting ability to post examples to members of the blog.
+		// Default to limiting ability to post notes to members of the blog.
 		return is_user_member_of_blog();
 	}
 

@@ -36,7 +36,7 @@ if ( ! function_exists( 'breadcrumb_trail' ) ) {
 }
 
 /**
- * User-submitted content (comments, examples, etc).
+ * User-submitted content (comments, notes, etc).
  */
 require __DIR__ . '/inc/user-content.php';
 

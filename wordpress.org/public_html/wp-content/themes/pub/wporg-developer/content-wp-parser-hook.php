@@ -94,9 +94,9 @@
 
 		<?php if ( comments_open() || '0' != get_comments_number() ) : ?>
 		<hr/>
-		<section class="examples">
-			<h2><?php _e( 'Examples', 'wporg' ); ?></h2>
-			<?php comments_template(); /* TODO: add '/examples.php' */ ?>
+		<section class="user-notes">
+			<h2><?php _e( 'User Contributed Notes', 'wporg' ); ?></h2>
+			<?php comments_template(); /* TODO: add '/user-notes.php' */ ?>
 		</section>
 		<?php endif; ?>
 

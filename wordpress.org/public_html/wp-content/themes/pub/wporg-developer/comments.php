@@ -39,7 +39,7 @@ if ( post_password_required() ) {
 				 * define wporg_developer_comment() and that will be used instead.
 				 * See wporg_developer_comment() in inc/template-tags.php for more.
 				 */
-				wp_list_comments( array( 'callback' => 'wporg_developer_example' ) );
+				wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ) );
 			?>
 		</ol><!-- .comment-list -->
 
@@ -53,19 +53,23 @@ if ( post_password_required() ) {
 
 	<?php endif; // have_comments() ?>
 
-	<?php if ( DevHub\can_user_post_example( false, get_the_ID() ) ) : ?>
+	<?php if ( DevHub\can_user_post_note( false, get_the_ID() ) ) : ?>
 
-	<p id="add-example" style="display:none;"><a href=""><?php _e( 'Have an example to add?', 'wporg' ); ?></a></p>
+	<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
 
 	<?php comment_form( array(
-		'comment_field'       => '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Example', 'noun', 'wporg' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>',
-		'comment_notes_after' => '<p class="examples-are-gpl">' .
-			sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
+		'comment_field'       => '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Note', 'noun', 'wporg' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>',
+		'comment_notes_after' => '<p>' .
+			__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
 			'</p><p>' .
-			__( 'The entirety of your submission is considered a code example. Any included non-code text should be formatted as code comments.', 'wporg' ) .
+			__( 'Do not use this form for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' ) .
+			'</p><p>' .
+			sprintf( __( 'You can enter text and code. Code should be wrapped in the %s shortcode.', 'wporg' ), '[code][/code]' ) .
+			'</p><p class="user-notes-are-gpl">' .
+			sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
 			'</p>',
-		'label_submit'        => __( 'Add Example', 'wporg' ),
-		'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to submit an example.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
+		'label_submit'        => __( 'Add Note', 'wporg' ),
+		'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
 		'title_reply'         =>  '', //'Add Example'
 	) ); ?>
 
