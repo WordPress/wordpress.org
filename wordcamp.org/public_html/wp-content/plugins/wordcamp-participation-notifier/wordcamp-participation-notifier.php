@@ -18,6 +18,7 @@ class WordCamp_Participation_Notifier {
 		add_action( 'transition_post_status',                  array( $this, 'post_updated' ), 5, 3 );
 		add_action( 'camptix_rl_buyer_completed_registration', array( $this, 'primary_attendee_registered' ), 10, 2 );
 		add_action( 'camptix_rl_registration_confirmed',       array( $this, 'additional_attendee_confirmed_registration' ), 10, 2 );
+		add_action( 'added_post_meta',                         array( $this, 'attendee_checked_in' ), 10, 4 );
 	}
 
 	/**
@@ -143,7 +144,7 @@ class WordCamp_Participation_Notifier {
 	 */
 	public function primary_attendee_registered( $attendee, $username ) {
 		$user_id = $this->get_saved_wporg_user_id( $attendee );
-		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id ) );
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id, 'attendee_registered' ) );
 	}
 
 	/**
@@ -160,7 +161,28 @@ class WordCamp_Participation_Notifier {
 		$attendee = get_post( $attendee_id );
 		$user_id  = $this->get_saved_wporg_user_id( $attendee );
 
-		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id ) );
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id, 'attendee_registered' ) );
+	}
+
+	/**
+	 * Send a notification when an attendee is marked as having checked in at the venue.
+	 *
+	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
+	 *
+	 * @param int $meta_id
+	 * @param int $attendee_id
+	 * @param string $meta_key
+	 * @param string $meta_value
+	 */
+	public function attendee_checked_in( $meta_id, $attendee_id, $meta_key, $meta_value ) {
+		if ( 'tix_attended' != $meta_key || true !== $meta_value ) {
+			return;
+		}
+
+		$attendee = get_post( $attendee_id );
+		$user_id  = $this->get_saved_wporg_user_id( $attendee );
+
+		$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $attendee, $user_id, 'attendee_checked_in' ) );
 	}
 
 	/**
@@ -168,10 +190,11 @@ class WordCamp_Participation_Notifier {
 	 * 
 	 * @param WP_Post $post
 	 * @param int     $user_id
+	 * @param string  $activity_type
 	 *
 	 * @return array|false
 	 */
-	protected function get_post_activity_payload( $post, $user_id = null ) {
+	protected function get_post_activity_payload( $post, $user_id = null, $activity_type = null ) {
 		$activity = false;
 		$wordcamp = get_wordcamp_post();
 
@@ -202,6 +225,22 @@ class WordCamp_Participation_Notifier {
 
 				case 'tix_attendee':
 					$activity['attendee_id']  = $post->ID;
+					$activity['activity_type'] = $activity_type;
+
+					if ( 'attendee_checked_in' == $activity_type ) {
+						$checked_in = new WP_Query( array(
+							'post_type'      => 'tix_attendee',
+							'posts_per_page' => 1,
+							'meta_query'     => array(
+								array(
+									'key'   => 'tix_attended',
+									'value' => true
+								)
+							)
+						) );
+
+						$activity['checked_in_count'] = $checked_in->found_posts;
+					}
 				break;
 	
 				default:
