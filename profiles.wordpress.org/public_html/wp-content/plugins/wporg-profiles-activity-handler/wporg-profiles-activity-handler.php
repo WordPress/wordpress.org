@@ -397,17 +397,30 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					);
 				}
 			} elseif ( isset( $_POST['attendee_id'] ) && ! empty( $_POST['attendee_id'] ) ) {
-				$type    = 'wordcamp_attendee_add';
 				$item_id = $_POST['attendee_id'];
 
-				$action  = sprintf(
-					__( 'Registered to attend <a href="%s">%s</a>', 'wporg' ),
-					esc_url( $_POST['url'] ),
-					$_POST['wordcamp_name']
-				);
+				if ( 'attendee_registered' == $_POST['activity_type'] ) {
+					$type = 'wordcamp_attendee_add';
 
-				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
-					$action .= ' ' . sprintf( __( 'coming up %s', 'wporg' ), $_POST['wordcamp_date'] );
+					$action = sprintf(
+						__( 'Registered to attend <a href="%s">%s</a>', 'wporg' ),
+						esc_url( $_POST['url'] ),
+						$_POST['wordcamp_name']
+					);
+
+					if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
+						$action .= ' ' . sprintf( __( 'coming up %s', 'wporg' ), $_POST['wordcamp_date'] );
+					}
+				} elseif ( 'attendee_checked_in' == $_POST['activity_type'] ) {
+					$type = 'wordcamp_attendee_checked_in';
+					$order = absint( $_POST['checked_in_count'] );
+
+					$action = sprintf(
+						__( 'Is the %s person to arrive at <a href="%s">%s</a>', 'wporg' ),
+						$this->append_ordinal_suffix( $order ),
+						esc_url( $_POST['url'] ),
+						$_POST['wordcamp_name']
+					);
 				}
 			}
 
@@ -435,6 +448,27 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				}
 			}
 			return $ret;
+		}
+
+		/*
+		 * Append an ordinal suffix to the given number
+		 *
+		 * Based on https://stackoverflow.com/questions/3109978/php-display-number-with-ordinal-suffix
+		 *
+		 * @param int $number
+		 *
+		 * @return string
+		 */
+		private function append_ordinal_suffix( $number ) {
+			$ends = array( 'th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th' );
+
+			if ( ( $number % 100 ) >= 11 && ( $number % 100 ) <= 13 ) {
+				$suffix = $ends[0];
+			} else {
+				$suffix = $ends[ $number % 10 ];
+			}
+
+			return $number . $suffix;
 		}
 
 		/**
