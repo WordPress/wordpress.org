@@ -682,6 +682,9 @@ input {
 .devhub-wrap .breadcrumbs .active {
   font-weight: 600;
 }
+.devhub-wrap .breadcrumb-trail {
+  margin-bottom: 1em;
+}
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
   font-weight: 300;
@@ -1296,35 +1299,6 @@ input {
 }
 .devhub-wrap ul.items li a {
   color: #555 !important;
-}
-.devhub-wrap .handbook-name {
-  text-align: center;
-  margin-bottom: 1em;
-  margin-right: 1.2rem;
-  overflow-x: hidden;
-  letter-spacing: 2px;
-  padding-top: 8px;
-}
-.devhub-wrap .handbook-name span {
-  display: inline-block;
-  position: relative;
-  color: #aaa;
-  text-transform: uppercase;
-}
-.devhub-wrap .handbook-name span:before, .devhub-wrap .handbook-name span:after {
-  content: "";
-  position: absolute;
-  border-top: 1px solid #ccc;
-  top: 49%;
-  width: 600px;
-}
-.devhub-wrap .handbook-name span:before {
-  right: 100%;
-  margin-right: 10px;
-}
-.devhub-wrap .handbook-name span:after {
-  left: 100%;
-  margin-left: 10px;
 }
 
 @media (max-width: 60em) {

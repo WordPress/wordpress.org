@@ -14,8 +14,6 @@ get_header(); ?>
 
 		<?php breadcrumb_trail(); ?>
 
-		<div class="handbook-name"><span><?php esc_html_e( \WPorg_Handbook::get_name( 'theme-handbook' ) ); ?></span></div>
-
 		<main id="main" class="site-main" role="main">
 
 			<?php if ( have_posts() ) : ?>
