@@ -501,7 +501,7 @@ namespace DevHub {
 					}
 
 					// Normalize spacing at beginning of hash notation params.
-					if ( '{' == $tag['content'][0] ) {
+					if ( $tag['content'] && '{' == $tag['content'][0] ) {
 						$tag['content'] = '{ ' . trim( substr( $tag['content'], 1 ) );
 					}
 
