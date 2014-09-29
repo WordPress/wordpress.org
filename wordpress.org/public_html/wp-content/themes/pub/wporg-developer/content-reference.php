@@ -77,7 +77,7 @@ if ( ! empty( $since ) ) : ?>
 					<?php if ( ! empty( $param['types'] ) ) : ?>
 					<span class="type">(<?php echo wp_kses_post( $param['types'] ); ?>)</span>
 					<?php endif; ?>
-					<?php if ( ! empty( $param['required'] ) ) : ?>
+					<?php if ( ! empty( $param['required'] ) && 'wp-parser-hook' !== get_post_type() ) : ?>
 					<span class="required">(<?php echo esc_html( $param['required'] ); ?>)</span>
 					<?php endif; ?>
 					<?php if ( ! empty( $param['content'] ) ) : ?>
