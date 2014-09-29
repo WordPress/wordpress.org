@@ -1,0 +1,52 @@
+.callout {
+  padding: 15px 40px 15px 46px;
+  margin-bottom: 1.5em;
+  overflow: auto;
+  position: relative;
+}
+.callout .dashicons {
+  position: absolute;
+  font-size: 2em;
+  top: 12px;
+  left: 10px;
+}
+.callout p {
+  margin-bottom: 0;
+}
+.callout-info {
+  background: #c8dffa;
+  border: 1px solid #6ba9f1;
+  border-bottom: 3px solid #2480eb;
+}
+.callout-info .dashicons:before {
+  content: "\f348";
+  color: #2480eb;
+}
+.callout-tip {
+  background: #e0f9d0;
+  border: 1px solid #a4ed76;
+  border-bottom: 3px solid #69e01d;
+}
+.callout-tip .dashicons:before {
+  content: "\f339";
+  color: #69e01d;
+}
+.callout-alert {
+  background: #fff9c7;
+  border: 1px solid #ffe92e;
+  border-bottom: 3px solid #c7b200;
+}
+.callout-alert .dashicons:before {
+  content: "\f109";
+  color: #c7b200;
+}
+.callout-warning {
+  background: #ffd8d8;
+  border: 1px solid #ff7272;
+  border-bottom: 3px solid #ff3f3f;
+}
+.callout-warning .dashicons:before {
+  content: "\f153";
+  color: #ff3f3f;
+}
+

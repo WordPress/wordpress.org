@@ -5,6 +5,7 @@
  * Author: Nacin
  */
 
+require_once dirname( __FILE__ ) . '/inc/callout-boxes.php';
 require_once dirname( __FILE__ ) . '/inc/glossary.php';
 require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
 require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
@@ -28,6 +29,11 @@ class WPorg_Handbook_Init {
 			new WPorg_Handbook( $type );
 		}
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+	}
+
+	static public function enqueue_styles() {
+		wp_enqueue_style( 'wporg-handbook-css', plugins_url( '/stylesheets/callout-boxes.css', __FILE__ ), array(), '20140928' );
 	}
 
 }
