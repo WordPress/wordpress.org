@@ -46,6 +46,11 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	color: #267db2;
 }
 
+.post-type-archive-handbook #wrapper .handbook-name a,
+.single-handbook #wrapper .handbook-name a {
+	color: inherit;
+}
+
 .post-type-archive-handbook .current-menu-item a,
 .single-handbook .current-menu-item a {
 	color: #267db2!important;

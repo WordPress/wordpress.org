@@ -7,7 +7,7 @@
 ?>
 <?php get_header(); ?>
 
-<div class="handbook-name"><span><?php esc_html_e( WPorg_Handbook::get_name() ); ?></span></div>
+<div class="handbook-name"><span><a href="<?php esc_attr_e( get_post_type_archive_link( 'handbook' ) ); ?>"><?php esc_html_e( WPorg_Handbook::get_name() ); ?></a></span></div>
 
 <!-- Also called on in footer but will not display the second time. -->
 <?php get_sidebar( get_post_type() ); ?> 
