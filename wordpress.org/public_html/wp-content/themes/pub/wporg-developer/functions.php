@@ -68,6 +68,7 @@ function init() {
 
 	add_filter( 'the_excerpt', __NAMESPACE__ . '\\lowercase_P_dangit_just_once' );
 	add_filter( 'the_content', __NAMESPACE__ . '\\make_doclink_clickable', 10, 5 );
+	add_filter( 'the_content', __NAMESPACE__ . '\\autolink_credits' );
 
 	// Add the handbook's 'Watch' action link.
 	if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
@@ -501,4 +502,34 @@ function make_doclink_clickable( $content ) {
 		},
 		$content
 	);
+}
+
+/**
+ * For specific credit pages, link @usernames references to their profiles on
+ * profiles.wordpress.org.
+ *
+ * Simplistic matching. Does not verify that the @username is a legitimate
+ * WP.org user.
+ *
+ * @param  string $content Post content
+ * @return string
+ */
+function autolink_credits( $content ) {
+	// Only apply to the 'credits' (themes handbook) and 'credits-2' (plugin
+	// handbook) pages
+	if ( is_single( 'credits' ) || is_single( 'credits-2' ) ) {
+		$content = preg_replace_callback(
+			'/\B@(\w+)/i',
+			function ( $matches ) {
+				return sprintf(
+					'<a href="https://profiles.wordpress.org/%s">@%s</a>',
+					esc_attr( $matches[1] ),
+					esc_html( $matches[1] )
+				);
+			},
+			$content
+		);
+	}
+
+	return $content;
 }
