@@ -76,3 +76,21 @@ function wcorg_show_tagregator_log() {
 	}
 }
 add_action( 'init', 'wcorg_show_tagregator_log' );
+
+/**
+ * Prepend a unique string to contact form subjects.
+ *
+ * Otherwise some e-mail clients and management systems -- *cough* SupportPress *cough* -- will incorrectly group
+ * separate messages into the same thread.
+ *
+ * It'd be better to have the key appended rather than prepended, but SupportPress won't always recognize the
+ * subject as unique if we do that :|
+ *
+ * @param string $subject
+ *
+ * @return string
+ */
+function wcorg_grunion_unique_subject( $subject ) {
+	return sprintf( '[%s] %s', wp_generate_password( 8, false ), $subject );
+}
+add_filter( 'contact_form_subject', 'wcorg_grunion_unique_subject' );
