@@ -96,3 +96,9 @@ function wcorg_load_select_plugin_styles_from_cdn( $hook ) {
 
 }
 add_action( 'admin_enqueue_scripts', 'wcorg_load_select_plugin_styles_from_cdn' );
+
+/* The bbPress login widget POSTs to the HTTPS login page on individual sites, but the SSL certificate is broken on those, so we need it to post to the main site instead */
+add_action( 'bbp_wp_login_action', 'wcorg_bbpress_post_login_to_main_site' );
+function wcorg_bbpress_post_login_to_main_site( $form_action_url ) {
+	return 'https://wordcamp.org/wp-login.php';
+}
