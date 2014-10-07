@@ -57,8 +57,6 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 		unset( $plugins['camptix-network-tools/camptix-network-tools.php'] );
 		unset( $plugins['tagregator/bootstrap.php'] );
 		unset( $plugins['wc-canonical-years/wc-canonical-years.php'] );
-		unset( $plugins['wc-post-types/wc-post-types.php'] );
-		unset( $plugins['wordcamp-coming-soon-page/bootstrap.php'] );
 		unset( $plugins['wordcamp-organizer-nags/wordcamp-organizer-nags.php'] );
 		unset( $plugins['wordcamp-payments/bootstrap.php'] );
 	}
