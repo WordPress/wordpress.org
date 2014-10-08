@@ -1,0 +1,341 @@
+/*
+Theme Name: wporg-themes2
+Theme URI: https://wordpress.org/themes
+Author: wordpressdotorg
+Author URI: https://wordpress.org
+Description: Theme for the WordPress.org themes directory
+Version: 1.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+*/
+
+/* assorted overrides */
+
+#wordpress-org #pagebody p.intro {
+	font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+	font-size: 25px;
+}
+
+.filter-links {
+	margin: 0 !important;
+}
+
+
+/* TODO copy wp-admin/css/themes.css to here */
+
+/* Copied from wp-admin/css/common.css */
+
+/* Filter bar */
+.wp-filter {
+	display: inline-block;
+	position: relative;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 12px 0 25px;
+	padding: 0 20px;
+	width: 100%;
+	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	border: 1px solid #e5e5e5;
+	background: #fff;
+	color: #555;
+	font-size: 13px;
+}
+
+.wp-filter a {
+	text-decoration: none;
+}
+
+.filter-count {
+	display: inline-block;
+	vertical-align: middle;
+	min-width: 4em;
+}
+
+.title-count,
+.filter-count .count {
+	display: inline-block;
+	position: relative;
+	top: -1px;
+	padding: 4px 10px;
+	-webkit-border-radius: 30px;
+	border-radius: 30px;
+	background: #777;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+/* not a part of filter bar, but derived from it, so here for now */
+.title-count {
+	display: inline;
+	top: -3px;
+	margin-left: 5px;
+	margin-right: 20px;
+}
+
+.filter-links {
+	display: inline-block;
+	margin: 0;
+}
+
+.filter-links li {
+	display: inline-block;
+	margin: 0;
+}
+
+.filter-links li > a {
+	display: inline-block;
+	margin: 0 10px;
+	padding: 15px 0;
+	border-bottom: 4px solid #fff;
+	color: #666;
+	cursor: pointer;
+}
+
+.filter-links .current {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border-bottom: 4px solid #666;
+	color: #222;
+}
+
+.filter-links li > a:hover,
+.filter-links li > a:focus,
+.show-filters .filter-links a.current:hover,
+.show-filters .filter-links a.current:focus {
+	color: #2ea2cc;
+}
+
+.wp-filter .search-form {
+	float: right;
+	margin-top: 9px;
+}
+
+.wp-filter .search-form input[type="search"] {
+	margin: 0;
+	padding: 3px 5px;
+	width: 280px;
+	font-size: 16px;
+	font-weight: 300;
+	line-height: 1.5;
+}
+
+.wp-filter .search-form select {
+	height: 33px;
+	vertical-align: top;
+}
+
+.wp-filter .drawer-toggle {
+	display: inline-block;
+	margin: 0 10px;
+	padding: 4px 6px;
+	color: #666;
+	cursor: pointer;
+}
+
+.wp-filter .drawer-toggle:before {
+	display: inline-block;
+	vertical-align: top;
+	content: "\f111";
+	margin: 0 5px 0 0;
+	width: 16px;
+	height: 16px;
+	color: #777;
+	-webkit-transition: color .1s ease-in 0;
+	transition: color .1s ease-in 0;
+	font-family: "dashicons";
+	font-size: 16px;
+	line-height: 1;
+	text-align: center;
+	text-decoration: inherit;
+	font-weight: normal;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wp-filter .drawer-toggle:hover,
+.wp-filter .drawer-toggle:hover:before {
+	color: #2ea2cc;
+}
+
+.wp-filter .drawer-toggle.current:before {
+	color: #fff;
+}
+
+.filter-drawer {
+	display: none;
+	margin: 0 -20px;
+	padding: 20px;
+	border-top: 1px solid #eee;
+	background: #fafafa;
+}
+
+.show-filters .filter-drawer {
+	display: block;
+	overflow: hidden;
+}
+
+.show-filters .wp-filter .drawer-toggle:hover,
+.show-filters .wp-filter .drawer-toggle:focus {
+	background: rgb(46, 162, 204);
+}
+
+.show-filters .filter-links a.current {
+	border-bottom: none;
+}
+
+.show-filters .wp-filter .drawer-toggle {
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	border: none;
+	background: #777;
+	color: #fff;
+}
+
+.show-filters .wp-filter .drawer-toggle:before {
+	color: #fff;
+}
+
+.filter-group {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	float: left;
+	margin: 0 1% 0 0;
+	padding: 10px;
+	width: 19%;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+}
+
+.filter-group.wide {
+	width: 38%;
+}
+
+.filter-group h4 {
+	position: relative;
+	margin: 0;
+}
+
+.filter-drawer ol {
+	margin: 20px 0 0;
+	list-style-type: none;
+	font-size: 12px;
+}
+
+.filter-drawer li {
+	display: inline-block;
+	vertical-align: top;
+	margin: 5px 0;
+	padding-right: 25px;
+	width: 160px;
+	list-style-type: none;
+}
+
+.filter-drawer .buttons {
+	margin-bottom: 20px;
+}
+
+.filter-drawer .buttons .button span {
+	display: inline-block;
+	opacity: 0.8;
+	font-size: 12px;
+	text-indent: 10px;
+}
+
+.wp-filter .button.clear-filters {
+	display: none;
+	margin: 0 0 20px 10px;
+}
+
+.filtered-by {
+	display: none;
+	margin: 0;
+}
+
+.filtered-by > span {
+	font-weight: 600;
+}
+
+.filtered-by a {
+	margin-left: 10px;
+}
+
+.filtered-by .tags {
+	display: inline;
+}
+
+.filtered-by .tag {
+	margin: 0 5px;
+	padding: 4px 8px;
+	border: 1px solid #e5e5e5;
+	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	background: #fff;
+	font-size: 11px;
+}
+
+.filters-applied .filter-group,
+.filters-applied .filter-drawer .buttons,
+.filters-applied .filter-drawer br {
+	display: none !important;
+}
+
+.filters-applied .filtered-by {
+	display: block;
+}
+
+.filters-applied .filter-drawer {
+	padding: 20px;
+}
+
+.show-filters .content-filterable,
+.show-filters.filters-applied.loading-content .content-filterable,
+.loading-content .content-filterable,
+.error .content-filterable {
+	display: none;
+}
+
+.show-filters.filters-applied .content-filterable {
+	display: block;
+}
+
+.loading-content .spinner {
+	display: block;
+	margin: 40px auto 0;
+	float: none;
+}
+
+@media only screen and (max-width: 1120px) {
+	.wp-filter .search-form {
+		float: none;
+		margin: 20px 0;
+	}
+
+	.filter-drawer {
+		border-bottom: 1px solid #eee;
+	}
+
+	.filter-group {
+		margin-bottom: 0;
+		margin-top: 5px;
+		width: 100%;
+	}
+
+	.filter-group li {
+		margin: 10px 0;
+	}
+}
+
+@media only screen and (max-width: 782px) {
+	.filter-group,
+	.filter-group li {
+		width: 100%;
+	}
+
+}
+
