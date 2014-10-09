@@ -26,7 +26,7 @@ class Rosetta_Downloads {
 		echo '<h2>' . __( 'Download Stats', 'rosetta' ) . '</h2>';
 		echo '<table cellpadding=3 cellspacing=2>';
 
-		echo '<p>' . sprintf( __( 'This page shows the <a href="%s">Download Counter</a> number &mdash; total downloads of WordPress %s &mdash; broken down by locale.', 'rosetta' ), 'http://wordpress.org/download/counter/', esc_html( WP_CORE_STABLE_BRANCH ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'This page shows the <a href="%s">Download Counter</a> number &mdash; total downloads of WordPress %s &mdash; broken down by locale.', 'rosetta' ), 'https://wordpress.org/download/counter/', esc_html( WP_CORE_STABLE_BRANCH ) ) . '</p>';
 
 		$rows = array();
 		$total = 0;
