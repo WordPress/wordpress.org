@@ -314,6 +314,9 @@ input {
 .devhub-wrap #content, .devhub-wrap #content-area {
   padding: 0 10px;
 }
+.devhub-wrap #content .toc-heading, .devhub-wrap #content-area .toc-heading {
+  clear: left;
+}
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
   margin: 0 auto;
@@ -331,6 +334,7 @@ input {
 .devhub-wrap .site-main h5,
 .devhub-wrap .site-main h6 {
   color: #1e1e1e;
+  margin-bottom: 1.5em;
 }
 .devhub-wrap #headline h2 a {
   color: #555;
@@ -1284,6 +1288,12 @@ input {
 .devhub-wrap .table-of-contents ul,
 .devhub-wrap .table-of-contents ol {
   margin: 10px 20px;
+}
+.devhub-wrap .table-of-contents ul ul,
+.devhub-wrap .table-of-contents ul ol,
+.devhub-wrap .table-of-contents ol ul,
+.devhub-wrap .table-of-contents ol ol {
+  margin-right: 0;
 }
 .devhub-wrap ul.items {
   margin-bottom: 8px !important;

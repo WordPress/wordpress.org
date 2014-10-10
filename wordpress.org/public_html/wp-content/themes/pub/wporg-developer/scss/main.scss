@@ -15,12 +15,15 @@
 	*,
 	*:before,
 	*:after {
-	  -moz-box-sizing: border-box;
-	  -webkit-box-sizing: border-box;
-	  box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
 	}
 	#content, #content-area {
 		padding: 0 10px;
+		.toc-heading {
+			clear: left;
+		}
 	}
 	#content-area,
 	.inner-wrap {
@@ -42,6 +45,7 @@
 		h5,
 		h6 {
 			color: #1e1e1e;
+			margin-bottom: 1.5em;
 		}
 
 	}
@@ -1153,6 +1157,10 @@
 		ul,
 		ol {
 			margin: 10px 20px;
+			ul,
+			ol {
+				margin-right: 0;
+			}
 		}
 	}
 
