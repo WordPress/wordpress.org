@@ -41,6 +41,11 @@ if ( ! function_exists( 'breadcrumb_trail' ) ) {
 require __DIR__ . '/inc/user-content.php';
 
 /**
+ * Redirects.
+ */
+require __DIR__ . '/inc/redirects.php';
+
+/**
  * Set the content width based on the theme's design and stylesheet.
  */
 if ( ! isset( $content_width ) ) {
@@ -57,9 +62,6 @@ function init() {
 	register_taxonomies();
 	add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
-	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_single_search_match' );
-	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_handbook' );
-	add_action( 'template_redirect', __NAMESPACE__ . '\\redirect_resources' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
@@ -380,43 +382,6 @@ function lowercase_P_dangit_just_once( $excerpt ) {
 	}
 
 	return $excerpt;
-}
-
-/**
- * Redirects a search query with only one result directly to that result.
- */
-function redirect_single_search_match() {
-	if ( is_search() && 1 == $GLOBALS['wp_query']->found_posts ) {
-		wp_redirect( get_permalink( get_post() ) );
-		exit();
-	}
-}
-
-/**
- * Redirects a naked handbook request to home.
- */
-function redirect_handbook() {
-	if (
-		// Naked /handbook/ request
-		( 'handbook' == get_query_var( 'name' ) && ! get_query_var( 'post_type ' ) ) ||
-		// Temporary: Disable access to handbooks unless a member of the site
-		( ! is_user_member_of_blog() && is_post_type_archive( array( 'plugin-handbook', 'theme-handbook' ) ) )
-	) {
-		wp_redirect( home_url() );
-		exit();
-	}
-}
-
-/**
- * Redirects a naked /resources/ request to dashicons page.
- *
- * Temporary until a resource page other than dashicons is created.
- */
-function redirect_resources() {
-	if ( is_page( 'resources' ) ) {
-		wp_redirect( get_permalink( get_page_by_title( 'dashicons' ) ) );
-		exit();
-	}
 }
 
 /**
