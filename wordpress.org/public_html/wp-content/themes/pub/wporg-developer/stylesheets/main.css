@@ -985,11 +985,16 @@ input {
   padding: 3px 0;
   font-size: 13px;
   border-radius: 50%;
+  vertical-align: top;
 }
 .devhub-wrap #sidebar > ul li ul li a {
   font-size: 16px;
   color: #4b4b4b;
   font-weight: bold;
+}
+.devhub-wrap #sidebar > ul li ul li > a {
+  display: inline-block;
+  width: 225px;
 }
 .devhub-wrap #sidebar > ul li ul li ul {
   list-style-type: none;

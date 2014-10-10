@@ -757,11 +757,16 @@
 							padding: 3px 0;
 							font-size: 13px;
 							border-radius: 50%;
+							vertical-align: top;
 						}
 						a {
 							font-size: 16px;
 							color: #4b4b4b;
 							font-weight: bold;
+						}
+						& > a {
+							display: inline-block;
+							width: 225px;
 						}
 						ul {
 							list-style-type: none;
