@@ -995,7 +995,7 @@ input {
 .devhub-wrap #sidebar > ul li ul li ul li ul {
   margin-left: 20px;
 }
-.devhub-wrap #sidebar .current-menu-item a {
+.devhub-wrap #sidebar .current-menu-item > a {
   font-weight: bold !important;
   color: #246998;
 }
