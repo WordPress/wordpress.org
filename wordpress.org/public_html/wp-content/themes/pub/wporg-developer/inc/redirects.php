@@ -24,6 +24,7 @@ class DevHub_Redirects {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_single_search_match' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_handbook' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_resources' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'redirect_pluralized_handbooks' ), 1 );
 	}
 
 	/**
@@ -59,6 +60,28 @@ class DevHub_Redirects {
 	public static function redirect_resources() {
 		if ( is_page( 'resources' ) ) {
 			wp_redirect( get_permalink( get_page_by_title( 'dashicons' ) ) );
+			exit();
+		}
+	}
+
+	/**
+	 * Redirects requests for the pluralized slugs of the handbooks.
+	 *
+	 * Note: this is a convenience redirect of just the naked slugs and not a
+	 * fix for any deployed links.
+	 */
+	public static function redirect_pluralized_handbooks() {
+		$name = get_query_var( 'name' );
+
+		// '/plugins' => '/plugin'
+		if ( 'plugins' == $name ) {
+			wp_redirect( get_post_type_archive_link( 'plugin-handbook' ), 301 );
+			exit();
+		}
+
+		// '/themes' => '/theme'
+		if ( 'themes' == $name ) {
+			wp_redirect( get_post_type_archive_link( 'theme-handbook' ), 301 );
 			exit();
 		}
 	}
