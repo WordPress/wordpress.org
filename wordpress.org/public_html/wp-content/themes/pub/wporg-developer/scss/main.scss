@@ -21,8 +21,21 @@
 	}
 	#content, #content-area {
 		padding: 0 10px;
+
 		.toc-heading {
 			clear: left;
+		}
+
+		table {
+			border: 1px solid #f0f0f0;
+			th {
+				padding: 1em;
+				border-bottom: 1px solid #f0f0f0;
+				background: #f0f0f0;
+			}
+			td {
+				padding: 0.8em 1em;
+			}
 		}
 	}
 	#content-area,
@@ -45,7 +58,7 @@
 		h5,
 		h6 {
 			color: #1e1e1e;
-			margin-bottom: 1.5em;
+			margin-bottom: 1.5rem;
 		}
 
 	}
