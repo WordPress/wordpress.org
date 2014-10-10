@@ -773,12 +773,15 @@
 							padding: 0;
 							margin: 0 0 0 35px;
 							li {
+								padding-left: 20px;
 								&:before {
 									content: none;
 								}
 								a {
 									font-weight: normal;
 									font-size: 14px;
+									display: inline;
+									margin-left: -20px;
 								}
 								ul {
 									margin-left: 20px;

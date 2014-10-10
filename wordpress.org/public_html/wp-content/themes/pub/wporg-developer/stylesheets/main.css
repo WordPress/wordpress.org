@@ -1001,12 +1001,17 @@ input {
   padding: 0;
   margin: 0 0 0 35px;
 }
+.devhub-wrap #sidebar > ul li ul li ul li {
+  padding-left: 20px;
+}
 .devhub-wrap #sidebar > ul li ul li ul li:before {
   content: none;
 }
 .devhub-wrap #sidebar > ul li ul li ul li a {
   font-weight: normal;
   font-size: 14px;
+  display: inline;
+  margin-left: -20px;
 }
 .devhub-wrap #sidebar > ul li ul li ul li ul {
   margin-left: 20px;
