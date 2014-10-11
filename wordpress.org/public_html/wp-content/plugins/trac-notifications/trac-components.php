@@ -11,6 +11,7 @@ class Make_Core_Trac_Components {
 		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
+		add_action( 'component_table_row', array( $this, 'component_table_row' ) );
 		$this->trac = $GLOBALS['wpdb'];
 	}
 
@@ -65,7 +66,31 @@ class Make_Core_Trac_Components {
 			$query->set( 'posts_per_page', -1 );
 			$query->set( 'orderby', 'title' );
 			$query->set( 'order', 'asc' );
+			$query->set( 'order_components', true );
+			add_action( 'the_posts', array( $this, 'order_components_into_tree' ), 10, 2 );
 		}
+	}
+
+	function order_components_into_tree( $posts, $query ) {
+		if ( ! $query->get( 'order_components' ) ) {
+			return $posts;
+		}
+		// Poor man's hierarchy sort
+		$parents = array_filter( wp_list_pluck( $posts, 'post_parent' ) );
+		$new_ordering = array();
+		foreach ( $posts as $post ) {
+			if ( $post->post_parent ) {
+				continue;
+			}
+			$new_ordering[] = $post;
+			if ( in_array( $post->ID, $parents ) ) {
+				foreach ( wp_list_filter( $posts, array( 'post_parent' => $post->ID ) ) as $child ) {
+					$new_ordering[] = $child;
+				}
+			}
+		}
+		return $new_ordering;
+		return $posts;
 	}
 
 	function page_is_component( $post ) {
@@ -155,9 +180,13 @@ ul.maintainers img, ul.followers img { float: left; margin-right: 10px; }
 #main ul.ticket-list { list-style: none; margin: 0; padding: 0 }
 ul.ticket-list li { margin-bottom: 4px }
 ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #eee; padding: 2px 6px; margin-right: 4px }
-.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: top }
+.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: top; line-height: 15px; float: right }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
+td.right { text-align: right; }
+body.post-type-archive-component table td { vertical-align: middle; }
+td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
+td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
 </style>
 <script>
@@ -249,6 +278,7 @@ jQuery( document ).ready( function( $ ) {
 			echo "</ul>\n\n";
 		}
 
+		$this->maintainers_note();
 		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
@@ -269,9 +299,13 @@ jQuery( document ).ready( function( $ ) {
 		return $content;
 	}
 
-	function ticket_table( $component ) {
-		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
 
+	function generate_component_breakdowns() {
+		if ( isset( $this->breakdown_component_type, $this->breakdown_component_milestone_type ) ) {
+			return;
+		}
+
+		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
 		$rows = wp_cache_get( 'trac_tickets_by_component_type_milestone' );
 		if ( ! $rows ) {
 			$rows = $this->trac->get_results( "SELECT component, type, milestone, count(*) as count FROM ticket
@@ -279,7 +313,6 @@ jQuery( document ).ready( function( $ ) {
 			wp_cache_add( 'trac_tickets_by_component_type_milestone', $rows, '', 300 );
 		}
 
-		$component_type_milestone = array();
 		foreach ( $rows as $row ) {
 			if ( empty( $component_type[ $row->component ] ) ) {
 				$component_type[ $row->component ] = $type_filled;
@@ -291,6 +324,15 @@ jQuery( document ).ready( function( $ ) {
 			}
 			$component_milestone_type[ $row->component ][ $row->milestone ][ $row->type ] += $row->count;
 		}
+
+		$this->breakdown_component_type = $component_type;
+		$this->breakdown_component_milestone_type = $component_milestone_type;
+	}
+
+	function ticket_table( $component  ) {
+		$this->generate_component_breakdowns();
+		$component_type = $this->breakdown_component_type;
+		$component_milestone_type = $this->breakdown_component_milestone_type;
 
 		if ( is_singular() ) {
 			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://wordpress.org/support/bb-login.php?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '">Create a new ticket</a></div>';
@@ -485,11 +527,53 @@ jQuery( document ).ready( function( $ ) {
 		if ( in_array( 'component', $topics ) ) {
 			$components = $this->trac->get_col( "SELECT name FROM component" );
 			foreach ( $components as $component ) {
-				echo '<option value="component/' . esc_attr( urlencode( $component ) ) . '">' . esc_html( $component ) . "</option>";
+				echo '<option value="component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . esc_html( $component ) . "</option>";
 			}
 		}
 		echo '</select>';
 		return ob_get_clean();
+	}
+
+	function component_table_row( $post ) {
+		static $once = true;
+		if ( $once ) {
+			$once = false;
+			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th>Maintainers</th></tr></thead>';
+		}
+
+		$component = $post->post_title;
+		$this->generate_component_breakdowns();
+		$history = $this->get_component_history( $component );
+
+		$arrow = '';
+		if ( $history['change'] ) {
+			$direction = $history['change'] > 0 ? 'growing' : 'shrinking';
+			$arrow = '<span class="history ' . $direction . '"></span>';
+		}
+
+		echo '<tr>';
+		if ( $post->post_parent ) {
+			echo '<td>&mdash; <a href="' . get_permalink() . '">' . $post->post_title . '</a></td>';
+		} else {
+			echo '<td><a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a></td>';
+		}
+
+		$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
+		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . $open_tickets . '</a></td>';
+		if ( $history['change'] ) {
+			echo '<td class="right">' . $arrow . ' ' . sprintf( "%+d", $history['change'] ) . '</td>';
+		} else {
+			echo '<td></td>';
+		}
+
+		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
+		$maintainers = array_filter( array_map( 'trim', explode( ',', $maintainers ) ) );
+		echo '<td class="no-grav maintainers">';
+		foreach ( $maintainers as $maintainer ) {
+			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '" title="' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 24 ) . "</a>";
+		}
+		echo '</td>';
+		echo '</tr>';
 	}
 }
 new Make_Core_Trac_Components;
