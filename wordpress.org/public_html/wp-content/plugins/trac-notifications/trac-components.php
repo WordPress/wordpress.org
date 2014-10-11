@@ -431,7 +431,16 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function trac_content( $component ) {
-		if ( $unreplied_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket t WHERE id NOT IN (SELECT ticket FROM ticket_change WHERE ticket = t.id AND t.reporter <> author AND field = 'comment' AND newvalue <> '') AND status <> 'closed' AND component = %s", $component ) ) ) {
+		$unreplied_tickets = $this->trac->get_results( $this->trac->prepare(
+			"SELECT id, summary, status, resolution, milestone, value as focuses
+			FROM ticket t LEFT JOIN ticket_custom c ON c.ticket = t.id AND c.name = 'focuses'
+			WHERE id NOT IN (
+				SELECT ticket FROM ticket_change
+				WHERE ticket = t.id AND t.reporter <> author
+				AND field = 'comment' AND newvalue <> ''
+			) AND status <> 'closed' AND component = %s", $component ) );
+
+		if ( $unreplied_tickets ) {
 			$count = count( $unreplied_tickets );
 			echo '<h3>' . sprintf( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ), $count ) . '</h3>';
 			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
