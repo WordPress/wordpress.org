@@ -598,7 +598,7 @@ jQuery( document ).ready( function( $ ) {
 
 		if ( isset( $this->breakdown_component_unreplied[ $component ] ) ) {
 			$unreplied = $this->breakdown_component_unreplied[ $component ];
-			echo '<td class="right">' . $this->trac_query_link( count( $unreplied ), array( 'component' => $component, 'id' => $unreplied ) );
+			echo '<td class="right">' . $this->trac_query_link( count( $unreplied ), array( 'component' => $component, 'id' => implode( ',', $unreplied ) ) );
 			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';
