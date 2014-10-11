@@ -12,6 +12,8 @@ class Make_Core_Trac_Components {
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 		add_action( 'component_table_row', array( $this, 'component_table_row' ) );
+		add_filter( 'manage_component_posts_columns', array( $this, 'manage_posts_columns' ) );
+		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
 		$this->trac = $GLOBALS['wpdb'];
 	}
 
@@ -148,6 +150,22 @@ class Make_Core_Trac_Components {
 		remove_submenu_page( 'edit.php?post_type=component', 'post-new.php?post_type=component' );
 	}
 
+	function manage_posts_columns( $columns ) {
+		return array_merge(
+			array_slice( $columns, 0, 2 ),
+			array( 'maintainers' => 'Maintainers' ),
+			array_slice( $columns, 2 )
+		);
+	}
+
+	function manage_posts_custom_column( $column_name, $post_id ) {
+		switch ( $column_name ) {
+			case 'maintainers' :
+				echo esc_html( get_post_meta( $post_id, '_active_maintainers', true ) );
+				break;
+		}
+	}
+
 	function wp_enqueue_scripts() {
 		wp_enqueue_style( 'make-core-trac', plugins_url( '/make-core.css', __FILE__ ), array(), '3' );
 	}
@@ -203,7 +221,7 @@ jQuery( document ).ready( function( $ ) {
 		global $wpdb;
 
 		$post = get_post();
-		if ( ! $this->page_is_component( $post ) ) {
+		if ( ! $this->page_is_component( $post ) || doing_action( 'wp_head' ) || ! did_action( 'wp_head' ) ) {
 			return $content;
 		}	
 
@@ -229,8 +247,8 @@ jQuery( document ).ready( function( $ ) {
 			'meta_value' => '1',
 		) );
 
+		$subcomponents = array();
 		if ( $subcomponents_query->have_posts() ) {
-			$subcomponents = array();
 			foreach ( $subcomponents_query->posts as $subcomponent ) {
 				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
 			}
@@ -278,7 +296,6 @@ jQuery( document ).ready( function( $ ) {
 			echo "</ul>\n\n";
 		}
 
-		$this->maintainers_note();
 		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
@@ -301,7 +318,7 @@ jQuery( document ).ready( function( $ ) {
 
 
 	function generate_component_breakdowns() {
-		if ( isset( $this->breakdown_component_type, $this->breakdown_component_milestone_type ) ) {
+		if ( isset( $this->breakdown_component_type, $this->breakdown_component_milestone_type, $this->breakdown_component_unreplied ) ) {
 			return;
 		}
 
@@ -325,8 +342,21 @@ jQuery( document ).ready( function( $ ) {
 			$component_milestone_type[ $row->component ][ $row->milestone ][ $row->type ] += $row->count;
 		}
 
+		$component_unreplied = wp_cache_get( 'trac_tickets_by_component_unreplied' );
+		if ( ! $component_unreplied ) {
+			$rows = $this->trac->get_results( $this->trac->prepare( "SELECT id, component FROM ticket t
+				WHERE id NOT IN (SELECT ticket FROM ticket_change WHERE ticket = t.id AND t.reporter <> author AND field = 'comment' AND newvalue <> '')
+				AND status <> 'closed'" ) );
+			$component_unreplied = array();
+			foreach ( $rows as $row ) {
+				$component_unreplied[ $row->component ][] = $row->id;
+			}
+			wp_cache_add( 'trac_tickets_by_component_unreplied', $component_unreplied, '', 300 );
+		}
+
 		$this->breakdown_component_type = $component_type;
 		$this->breakdown_component_milestone_type = $component_milestone_type;
+		$this->breakdown_component_unreplied = $component_unreplied;
 	}
 
 	function ticket_table( $component  ) {
@@ -538,7 +568,7 @@ jQuery( document ).ready( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th>Maintainers</th></tr></thead>';
+			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th style="width: 50px">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';	
 		}
 
 		$component = $post->post_title;
@@ -562,6 +592,14 @@ jQuery( document ).ready( function( $ ) {
 		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			echo '<td class="right">' . $arrow . ' ' . sprintf( "%+d", $history['change'] ) . '</td>';
+		} else {
+			echo '<td></td>';
+		}
+
+		if ( isset( $this->breakdown_component_unreplied[ $component ] ) ) {
+			$unreplied = $this->breakdown_component_unreplied[ $component ];
+			echo '<td class="right">' . $this->trac_query_link( count( $unreplied ), array( 'component' => $component, 'id' => $unreplied ) );
+			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';
 		}
