@@ -19,24 +19,19 @@
 		setup_postdata( $post );
 
 		the_content();
-		?>
-		<p id="toggle-compact-components"><label><input type="checkbox" /> Expanded view</label></p>
-		<?php if ( have_posts() ) : ?>
+		if ( have_posts() ) :
+			echo '<table>';
+			while ( have_posts() ) : the_post();
+				do_action( 'component_table_row', get_post() );
+			endwhile;
+			echo '</table>';
+		endif;
 
-			<?php while ( have_posts() ) : the_post(); ?>
-				<div class="component-info">
-					<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-					<?php the_content(); ?>
-				</div>
-			<?php endwhile; ?>
-
-		<?php endif; ?>
-	<?php
 		$cache = ob_get_clean();
 		set_transient( 'trac_components_page', $cache, 300 );
 		echo $cache;
 	}
-	?>
+?>
 
 	</div> <!-- main -->
 
