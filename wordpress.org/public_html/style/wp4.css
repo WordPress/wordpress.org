@@ -214,6 +214,8 @@ a img.aligncenter {
 	display: block;
 	height: 52px; /* 88 header height - 36 top padding */
 	color: #dfdfdf;
+	line-height: 22px;
+	border-bottom: none;
 }
 
 #head-search {
