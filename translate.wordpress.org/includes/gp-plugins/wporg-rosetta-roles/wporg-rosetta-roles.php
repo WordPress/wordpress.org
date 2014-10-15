@@ -25,8 +25,8 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
 		$user = new BP_User( $args['user_id'] );
 
-		// 78 = global.wordpress.org. Administrators on this site are considered global admins in GlotPress.
-		if ( ! empty( $user->ros_78_capabilities ) && is_array( $user->ros_78_capabilities ) && ! empty( $user->ros_78_capabilities['administrator'] ) )
+		// 115 = global.wordpress.org. Administrators on this site are considered global admins in GlotPress.
+		if ( ! empty( $user->wporg_115_capabilities ) && is_array( $user->wporg_115_capabilities ) && ! empty( $user->wporg_115_capabilities['administrator'] ) )
 			return true;
 
 		if ( $args['action'] !== 'approve' || ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) )
@@ -75,7 +75,8 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 
 		if ( ! isset( $ros_blogs ) ) {
 			$ros_locale_assoc = $gpdb->get_results( "SELECT locale, subdomain FROM locales", OBJECT_K );
-			$ros_blogs = $gpdb->get_results( "SELECT domain, blog_id FROM ros_blogs", OBJECT_K );
+			// 6 = Rosetta sites
+			$ros_blogs = $gpdb->get_results( "SELECT domain, blog_id FROM wporg_blogs WHERE site_id = 6", OBJECT_K );
 		}
 
 		if ( isset( $ros_locale_assoc[ $wp_locale ] ) )
@@ -84,7 +85,7 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 			return false;
 
 		if ( isset( $ros_blogs[ "$subdomain.wordpress.org" ] ) )
-			return 'ros_' . $ros_blogs[ "$subdomain.wordpress.org" ]->blog_id . '_capabilities';
+			return 'wporg_' . $ros_blogs[ "$subdomain.wordpress.org" ]->blog_id . '_capabilities';
 
 		return false;
 	}
