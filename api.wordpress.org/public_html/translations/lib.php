@@ -181,7 +181,7 @@ function find_latest_translations( $args ) {
 				'language' => $language,
 				'version'  => $result['version'],
 				'updated'  => $result['updated'],
-				'package'  => maybe_ssl_url( "http://global.wordpress.org/builds/$path" ),
+				'package'  => maybe_ssl_url( "http://downloads.wordpress.org/translation/$path" ),
 				'autoupdate' => true,
 			);
 		}
