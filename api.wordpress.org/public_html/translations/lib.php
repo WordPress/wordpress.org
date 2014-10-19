@@ -170,8 +170,10 @@ function find_latest_translations( $args ) {
 
 		if ( 'core' === $type ) {
 			$path = "core/{$result['version']}/$language.zip";
+			$urlpath = $path; // paths are identical for core
 		} else {
-			$path = "{$type}s/$domain/{$result['version']}/$language.zip";
+			$path = "{$type}s/$domain/{$result['version']}/$language.zip"; // rosetta builds dir uses plural plugins/themes path
+			$urlpath = "{$type}/$domain/{$result['version']}/$language.zip"; // url uses singular plugin/theme path
 		}
 
 		if ( $found && $result && file_exists( ROSETTA_BUILDS . $path ) ) {
@@ -181,7 +183,7 @@ function find_latest_translations( $args ) {
 				'language' => $language,
 				'version'  => $result['version'],
 				'updated'  => $result['updated'],
-				'package'  => maybe_ssl_url( "http://downloads.wordpress.org/translation/$path" ),
+				'package'  => maybe_ssl_url( "http://downloads.wordpress.org/translation/$urlpath" ),
 				'autoupdate' => true,
 			);
 		}
