@@ -92,3 +92,21 @@ function wcorg_grunion_unique_subject( $subject ) {
 	return sprintf( '[%s] %s', wp_generate_password( 8, false ), $subject );
 }
 add_filter( 'contact_form_subject', 'wcorg_grunion_unique_subject' );
+
+/**
+ * Modify the space allocation on a per-size basis.
+ *
+ * @param int $size
+ *
+ * @return int
+ */
+function wcorg_modify_default_space_allotment( $size ) {
+	switch ( get_current_blog_id() ) {
+		case '364': // 2014.sf
+			$size = 750;
+			break;
+	}
+
+	return $size;
+}
+add_filter( 'get_space_allowed', 'wcorg_modify_default_space_allotment' );
