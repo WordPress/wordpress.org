@@ -95,7 +95,7 @@ abstract class WP_Credits {
 
 		$cache_key = array(
 			'translators' => 'translators-' . $gp_locale->slug . '-' . $this->version . '-' . $path,
-			'validators'  => 'validators-' . $gp_locale->slug . '-' . $this->version . '-changed-1',
+			'validators'  => 'validators-' . $gp_locale->slug . '-' . $this->version . '-changed-2',
 		);
 
 		$translators = $this->cache_get( $cache_key['translators'] );
@@ -190,7 +190,8 @@ abstract class WP_Credits {
 
 	protected function grab_validators( $gp_locale ) {
 		global $wpdb;
-		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM wporg_blogs INNER JOIN locales ON wporg_blogs.domain = CONCAT(locales.subdomain, '.wordpress.org') WHERE locales.locale = %s", $gp_locale->wp_locale ) );
+		$subdomain = $wpdb->get_var( $wpdb->prepare( "SELECT subdomain FROM locales WHERE locale = %s", $gp_locale->wp_locale ) );
+		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM wporg_blogs WHERE domain = %s AND path = '/'", "$subdomain.wordpress.org" ) );
 		if ( $blog_id ) {
 			$meta_key = 'wporg_' . intval( $blog_id ) . '_capabilities';
 			return $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value NOT LIKE '%subscriber%'" );
