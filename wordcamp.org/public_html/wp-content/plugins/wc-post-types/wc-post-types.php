@@ -653,6 +653,9 @@ class WordCamp_Post_Types_Plugin {
 				// If the next element in the table is the same as the current one, use colspan
 				if ( $key != key( array_slice( $columns, -1, 1, true ) ) ) {
 					while ( $pair = each( $columns_clone ) ) {
+						if ( $pair['key'] == $key )
+							continue;
+
 						if ( ! empty( $entry[ $pair['value'] ] ) && $entry[ $pair['value'] ] == $session->ID ) {
 							$colspan++;
 							$skip_next++;
