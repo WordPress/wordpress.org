@@ -648,9 +648,11 @@ class WordCamp_Post_Types_Plugin {
 				if ( count( $speakers_names ) )
 					$content .= sprintf( ' <span class="wcpt-session-speakers">%s</span>', implode( ', ', $speakers_names ) );
 
+				$columns_clone = $columns;
+
 				// If the next element in the table is the same as the current one, use colspan
 				if ( $key != key( array_slice( $columns, -1, 1, true ) ) ) {
-					while ( $pair = each( $columns ) ) {
+					while ( $pair = each( $columns_clone ) ) {
 						if ( ! empty( $entry[ $pair['value'] ] ) && $entry[ $pair['value'] ] == $session->ID ) {
 							$colspan++;
 							$skip_next++;
