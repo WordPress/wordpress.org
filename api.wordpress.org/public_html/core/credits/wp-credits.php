@@ -95,7 +95,7 @@ abstract class WP_Credits {
 
 		$cache_key = array(
 			'translators' => 'translators-' . $gp_locale->slug . '-' . $this->version . '-' . $path,
-			'validators'  => 'validators-' . $gp_locale->slug . '-' . $this->version,
+			'validators'  => 'validators-' . $gp_locale->slug . '-' . $this->version . '-changed-1',
 		);
 
 		$translators = $this->cache_get( $cache_key['translators'] );
