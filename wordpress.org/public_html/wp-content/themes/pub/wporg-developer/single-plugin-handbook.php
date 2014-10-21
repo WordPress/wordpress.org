@@ -17,7 +17,7 @@ get_header(); ?>
 
 			<?php get_template_part( 'content', 'handbook'); ?>
 
-			<?php wporg_developer_post_nav(); ?>
+			<?php wporg_developer_post_nav_via_menu( 'Plugin Table of Contents' ); ?>
 
 		<?php endwhile; // end of the loop. ?>
 
