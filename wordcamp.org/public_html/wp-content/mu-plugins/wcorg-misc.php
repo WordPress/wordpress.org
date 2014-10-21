@@ -38,6 +38,30 @@ add_filter( 'jetpack_get_default_modules', 'wcorg_default_jetpack_modules' );
 add_filter( 'widget_text', 'do_shortcode' );
 
 /**
+ * Output a menu via a shortcode
+ *
+ * @param array $attributes
+ *
+ * @return string
+ */
+function wcorg_shortcode_menu( $attributes ) {
+	$attributes = shortcode_atts(
+		array(
+			'menu'       => '',
+			'menu_class' => 'menu',
+			'depth'      => 1,
+		),
+		$attributes
+	);
+
+	$attributes['depth'] = absint( $attributes['depth'] );
+	$attributes['echo']  = false;
+
+	return wp_nav_menu( $attributes );
+}
+add_shortcode( 'menu', 'wcorg_shortcode_menu' );
+
+/**
  * Disable certain network-activate plugins on specific sites.
  *
  * @param array $plugins
