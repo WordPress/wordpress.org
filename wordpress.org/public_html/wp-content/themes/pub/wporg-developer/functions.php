@@ -484,7 +484,7 @@ function autolink_credits( $content ) {
 	// handbook) pages
 	if ( is_single( 'credits' ) || is_single( 'credits-2' ) ) {
 		$content = preg_replace_callback(
-			'/\B@(\w+)/i',
+			'/\B@([\w\-]+)/i',
 			function ( $matches ) {
 				return sprintf(
 					'<a href="https://profiles.wordpress.org/%s">@%s</a>',
