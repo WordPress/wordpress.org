@@ -207,7 +207,7 @@ namespace {
 						<!-- .comment-metadata -->
 
 						<?php if ( '0' == $comment->comment_approved ) : ?>
-							<p class="comment-awaiting-moderation"><?php _e( 'Your note is awaiting moderation.', 'wporg' ); ?></p>
+							<p class="comment-awaiting-moderation"> &mdash; <?php _e( 'Your note is awaiting moderation.', 'wporg' ); ?></p>
 						<?php endif; ?>
 					</footer>
 					<!-- .comment-meta -->
