@@ -1331,6 +1331,34 @@ input {
 .devhub-wrap ul.items li a {
   color: #555 !important;
 }
+.devhub-wrap .comment-author {
+  float: left;
+}
+.devhub-wrap .user-note-voting {
+  font-size: 1.5em;
+  clear: left;
+  float: left;
+  margin-top: -5px;
+  margin-right: 10px;
+}
+.devhub-wrap .user-note-voting-up .dashicons, .devhub-wrap .user-note-voting-down .dashicons {
+  font-size: 30px;
+  height: 30px;
+  width: 30px;
+  color: #000;
+}
+.devhub-wrap .user-note-voting-up {
+  margin-left: -9px;
+}
+.devhub-wrap .user-note-voting-count {
+  margin-right: -2px;
+}
+.devhub-wrap .user-voted.user-note-voting-up .dashicons {
+  color: green;
+}
+.devhub-wrap .user-voted.user-note-voting-down .dashicons {
+  color: red;
+}
 
 @media (max-width: 60em) {
   .devhub-wrap {

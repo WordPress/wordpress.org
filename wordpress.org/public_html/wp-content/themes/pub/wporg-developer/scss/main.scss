@@ -1203,6 +1203,35 @@
 			}
 		}
 	}
+
+	.comment-author {
+		float: left;
+	}
+	.user-note-voting {
+		font-size: 1.5em;
+		clear: left;
+		float: left;
+		margin-top: -5px;
+		margin-right: 10px;
+	}
+	.user-note-voting-up .dashicons, .user-note-voting-down .dashicons {
+		font-size: 30px;
+		height: 30px;
+		width: 30px;
+		color: #000;
+	}
+	.user-note-voting-up {
+		margin-left: -9px;
+	}
+	.user-note-voting-count {
+		margin-right: -2px;
+	}
+	.user-voted.user-note-voting-up .dashicons {
+		color: green;
+	}
+	.user-voted.user-note-voting-down .dashicons {
+		color: red;
+	}
 }
 
 @media ( max-width: 59.999999em ) {

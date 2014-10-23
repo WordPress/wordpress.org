@@ -41,6 +41,11 @@ if ( ! function_exists( 'breadcrumb_trail' ) ) {
 require __DIR__ . '/inc/user-content.php';
 
 /**
+ * Voting for user-submitted content.
+ */
+require __DIR__ . '/inc/user-content-voting.php';
+
+/**
  * Redirects.
  */
 require __DIR__ . '/inc/redirects.php';
