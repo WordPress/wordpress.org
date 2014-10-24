@@ -65,6 +65,9 @@ function init() {
 
 	register_post_types();
 	register_taxonomies();
+
+	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
+	add_filter( 'user_has_cap', __NAMESPACE__ . '\\adjust_handbook_editor_caps', 11 );
 	add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
@@ -84,6 +87,65 @@ function init() {
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
 
+}
+
+
+/**
+ * Create the handbook_editor role which can only edit handbooks.
+ *
+ * @access public
+ *
+ */
+function add_roles() {
+	add_role(
+		'handbook_editor',
+		__( 'Handbook Editor', 'wporg' ),
+		array(
+			'moderate_comments'             => true,
+			'upload_files'                  => true,
+			'unfiltered_html'               => true,
+			'read'                          => true,
+			'edit_handbook_pages'           => true,
+			'edit_others_handbook_pages'    => true,
+			'edit_published_handbook_pages' => true,
+			'edit_private_handbook_pages'   => true,
+			'read_private_handbook_pages'   => true,
+		)
+	);
+}
+
+/**
+ * Adjusts handbook capabilities for roles.
+ *
+ * Undoes some capability assignments by the handbook plugin since only
+ * administrators, editors, and handbook_editors can manipulate handbooks.
+ *
+ * @access public
+ *
+ * @param  array $caps Array of user capabilities.
+ * @return array
+ */
+function adjust_handbook_editor_caps( $caps ) {
+	if ( ! is_user_member_of_blog() || ! class_exists( 'WPorg_Handbook' ) ) {
+		return $caps;
+	}
+
+	// Get current user's role.
+	$role = wp_get_current_user()->roles[0];
+
+	// Unset caps set by handbook plugin.
+	// Only administrators, editors, and handbook_editors can manipulate handbooks.
+	if ( ! in_array( $role, array( 'administrator', 'editor', 'handbook_editor' ) ) ) {
+		foreach ( \WPorg_Handbook::caps() as $cap ) {
+			unset( $caps[ $cap ] );
+		}
+
+		foreach ( \WPorg_Handbook::editor_caps() as $cap ) {
+			unset( $caps[ $cap ] );
+		}
+	}
+
+	return $caps;
 }
 
 /**
