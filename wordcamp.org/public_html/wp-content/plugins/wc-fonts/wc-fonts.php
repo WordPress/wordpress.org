@@ -15,6 +15,7 @@ class WordCamp_Fonts_Plugin {
 		
 		add_action( 'wp_head', array( $this, 'wp_head_typekit' ), 102 ); // after safecss_style
 		add_action( 'wp_head', array( $this, 'wp_head_google_web_fonts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_icon_fonts' ) );
 	}
 
 	/**
@@ -140,6 +141,17 @@ class WordCamp_Fonts_Plugin {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Allow sites to use icon fonts on the front-end
+	 */
+	public function enqueue_icon_fonts() {
+		$dashicons_sites = array( 364 ); // 2014.sf
+
+		if ( in_array( get_current_blog_id(), $dashicons_sites ) ) {
+			wp_enqueue_style( 'dashicons' );
+		}
 	}
 }
 
