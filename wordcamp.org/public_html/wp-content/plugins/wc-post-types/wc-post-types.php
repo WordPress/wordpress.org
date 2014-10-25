@@ -44,6 +44,8 @@ class WordCamp_Post_Types_Plugin {
 		add_shortcode( 'sponsors', array( $this, 'shortcode_sponsors' ) );
 		add_shortcode( 'organizers', array( $this, 'shortcode_organizers' ) );
 		add_shortcode( 'schedule', array( $this, 'shortcode_schedule' ) );
+
+		add_filter( 'the_content', array( $this, 'add_avatar_to_speaker_posts' ) );
 	}
 
 	function init() {
@@ -1042,6 +1044,33 @@ class WordCamp_Post_Types_Plugin {
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;
+	}
+
+	/**
+	 * Add the speaker's avatar to their post
+	 *
+	 * We don't enable it for sites that were created before it was committed, because it may need custom CSS
+	 * to look good with their custom design, but we allow older sites to opt-in.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	public function add_avatar_to_speaker_posts( $content ) {
+		global $post;
+		$enabled_site_ids = array( 364 );    // 2014.sf
+
+		if ( 'wcb_speaker' !== $post->post_type ) {
+			return $content;
+		}
+
+		$site_id = get_current_blog_id();
+		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+			return $content;
+		}
+
+		$avatar = get_avatar( get_post_meta( $post->ID, '_wcb_speaker_email', true ) );
+		return '<div class="speaker-avatar">' . $avatar . '</div>' . $content;
 	}
 
 	/**
