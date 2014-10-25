@@ -176,7 +176,7 @@ namespace {
 					<!-- .comment-content -->
 
 					<footer class="comment-meta">
-						<?php DevHub_User_Submitted_Content_Voting::show_voting(); ?>
+						<?php DevHub_User_Contributed_Notes_Voting::show_voting(); ?>
 						<div class="comment-author vcard">
 							<span class="comment-author-attribution">
 							<?php if ( 0 != $args['avatar_size'] ) {
