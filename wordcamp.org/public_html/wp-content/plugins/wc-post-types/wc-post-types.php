@@ -1698,39 +1698,3 @@ class WordCamp_Post_Types_Plugin {
 
 // Load the plugin class.
 $GLOBALS['wcpt_plugin'] = new WordCamp_Post_Types_Plugin;
-
-
-/*
-$track_slugs   = 'talks,workshops';
-$transient_key = 'wcpt_track_speaker_ids_' . substr( md5( $track_slugs ), 0, 22 ); // discard trailing hash characters to stay within transient limit
-
-if ( ! $speaker_ids = get_transient( $transient_key ) ) {
-	$speaker_ids    = array();
-	$track_sessions = get_posts( array(
-		'post_type'   => 'wcb_session',
-		'numberposts' => -1,
-		'tax_query'   => array(
-			array(
-				'taxonomy' => 'wcb_track',
-				'field'    => 'slug',
-				'terms'    => explode( ',', $track_slugs ),
-			),
-		),
-	) );
-
-	foreach ( $track_sessions as $session ) {
-		$session_speaker_ids = get_post_meta( $session->ID, '_wcpt_speaker_id' );
-		$speaker_ids         = array_merge( $speaker_ids, $session_speaker_ids );
-	}
-
-	//set_transient( $transient_key, $speaker_ids, HOUR_IN_SECONDS );
-}
-
-$speakers = get_posts( array(
-	'post_type'   => 'wcb_speaker',
-	'numberposts' => -1,
-	'post__in'    => $speaker_ids,
-) );
-
-var_dump( $track_slugs, $transient_key, $track_sessions, $speaker_ids, $speakers ); wp_die('');
-*/
