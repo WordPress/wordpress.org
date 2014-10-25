@@ -46,6 +46,8 @@ class WordCamp_Post_Types_Plugin {
 		add_shortcode( 'schedule', array( $this, 'shortcode_schedule' ) );
 
 		add_filter( 'the_content', array( $this, 'add_avatar_to_speaker_posts' ) );
+		add_filter( 'the_content', array( $this, 'add_speaker_info_to_session_posts' ) );
+		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 	}
 
 	function init() {
@@ -195,7 +197,7 @@ class WordCamp_Post_Types_Plugin {
 	}
 	
 	function wp_enqueue_scripts() {
-		wp_enqueue_style( 'wcb_shortcodes', plugins_url( 'css/shortcodes.css', __FILE__ ), array(), 1 );
+		wp_enqueue_style( 'wcb_shortcodes', plugins_url( 'css/shortcodes.css', __FILE__ ), array(), 2 );
 	}
 
 	/**
@@ -1071,6 +1073,131 @@ class WordCamp_Post_Types_Plugin {
 
 		$avatar = get_avatar( get_post_meta( $post->ID, '_wcb_speaker_email', true ) );
 		return '<div class="speaker-avatar">' . $avatar . '</div>' . $content;
+	}
+
+	/**
+	 * Add speaker information to Session posts
+	 *
+	 * We don't enable it for sites that were created before it was committed, because some will have already
+	 * crafted the bio to include this content, so duplicating it would look wrong, but we still allow older
+	 * sites to opt-in.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	function add_speaker_info_to_session_posts( $content ) {
+		global $post;
+		$enabled_site_ids = array( 364 );    // 2014.sf
+
+		if ( 'wcb_session' !== $post->post_type ) {
+			return $content;
+		}
+
+		$site_id = get_current_blog_id();
+		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+			return $content;
+		}
+
+		$speaker_ids = (array) get_post_meta( $post->ID, '_wcpt_speaker_id' );
+
+		if ( empty ( $speaker_ids ) ) {
+			return $content;
+		}
+
+		$speaker_args = array(
+			'post_type'      => 'wcb_speaker',
+			'posts_per_page' => -1,
+			'post__in'       => $speaker_ids,
+			'orderby'        => 'title',
+			'order'          => 'asc',
+		);
+
+		$speakers = new WP_Query( $speaker_args );
+
+		if ( ! $speakers->have_posts() ) {
+			return $content;
+		}
+
+		$speakers_html = sprintf(
+			'<h2 class="session-speakers">%s</h2>',
+			_n(
+				__( 'Speaker', 'wordcamporg' ),
+				__( 'Speakers', 'wordcamporg' ),
+				$speakers->post_count
+			)
+		);
+
+		$speakers_html .= '<ul id="session-speaker-names">';
+		while ( $speakers->have_posts() ) {
+			$speakers->the_post();
+			$speakers_html .= sprintf( '<li><a href="%s">%s</a></li>', get_the_permalink(), get_the_title() );
+		}
+		$speakers_html .= '</ul>';
+
+		wp_reset_postdata();
+
+		return $content . $speakers_html;
+	}
+
+	/**
+	 * Add session information to Speaker posts
+	 *
+	 * We don't enable it for sites that were created before it was committed, because some will have already
+	 * crafted the bio to include this content, so duplicating it would look wrong, but we still allow older
+	 * sites to opt-in.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	function add_session_info_to_speaker_posts( $content ) {
+		global $post;
+		$enabled_site_ids = array( 364 );    // 2014.sf
+
+		if ( 'wcb_speaker' !== $post->post_type ) {
+			return $content;
+		}
+
+		$site_id = get_current_blog_id();
+		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+			return $content;
+		}
+
+		$session_args = array(
+			'post_type'      => 'wcb_session',
+			'posts_per_page' => -1,
+			'meta_key'       => '_wcpt_speaker_id',
+			'meta_value'     => $post->ID,
+			'orderby'        => 'title',
+			'order'          => 'asc',
+		);
+
+		$sessions = new WP_Query( $session_args );
+
+		if ( ! $sessions->have_posts() ) {
+			return $content;
+		}
+
+		$sessions_html = sprintf(
+			'<h2 class="speaker-sessions">%s</h2>',
+			_n(
+				__( 'Session', 'wordcamporg' ),
+				__( 'Sessions', 'wordcamporg' ),
+				$sessions->post_count
+			)
+		);
+
+		$sessions_html .= '<ul id="speaker-session-names">';
+		while ( $sessions->have_posts() ) {
+			$sessions->the_post();
+			$sessions_html .= sprintf( '<li><a href="%s">%s</a></li>', get_the_permalink(), get_the_title() );
+		}
+		$sessions_html .= '</ul>';
+
+		wp_reset_postdata();
+
+		return $content . $sessions_html;
 	}
 
 	/**

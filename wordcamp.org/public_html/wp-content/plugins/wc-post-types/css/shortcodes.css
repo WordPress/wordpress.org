@@ -73,3 +73,17 @@
 		color: #21759b;
 	}
 }
+
+/*
+ * [sessions]
+ * [speakers]
+ */
+#session-speaker-names,
+#speaker-session-names {
+	margin-left: 0;
+}
+
+	#session-speaker-names li,
+	#speaker-session-names li {
+		list-style-type: none;
+	}
