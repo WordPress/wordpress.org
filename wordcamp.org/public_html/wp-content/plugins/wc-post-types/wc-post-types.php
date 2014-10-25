@@ -257,11 +257,13 @@ class WordCamp_Post_Types_Plugin {
 			'orderby' => 'date',
 			'order' => 'desc',
 			'track' => 'all',
+			'speaker_link' => '',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 		$attr['order'] = ( in_array( $attr['order'], array( 'asc', 'desc') ) ) ? $attr['order'] : 'desc';
+		$attr['speaker_link'] = ( in_array( $attr['speaker_link'], array( 'permalink' ) ) ) ? $attr['speaker_link'] : '';
 
 		/*
 		 * Only allow 2014.capetown to use the new track attribute
@@ -350,7 +352,15 @@ class WordCamp_Post_Types_Plugin {
 
 				<!-- Organizers note: The id attribute is deprecated and only remains for backwards compatibility, please use the corresponding class to target individual speakers -->
 				<div id="wcorg-speaker-<?php echo sanitize_html_class( $post->post_name ); ?>" class="<?php echo implode( ' ', $speaker_classes ); ?>">
-					<h2><?php the_title(); ?></h2>
+					<h2>
+						<?php if ( 'permalink' === $attr['speaker_link'] ) : ?>
+							<a href="<?php the_permalink(); ?>">
+								<?php the_title(); ?>
+							</a>
+						<?php else : ?>
+							<?php the_title(); ?>
+						<?php endif; ?>
+					</h2>
 					<div class="wcorg-speaker-description">
 						<?php echo ( $attr['show_avatars'] ) ? get_avatar( get_post_meta( get_the_ID(), '_wcb_speaker_email', true ), absint( $attr['avatar_size'] ) ) : ''; ?>
 						<?php the_content(); ?>
