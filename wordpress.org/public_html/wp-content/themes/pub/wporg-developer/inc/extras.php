@@ -52,13 +52,13 @@ function wporg_developer_wp_title( $title, $sep ) {
 	$post_type = get_query_var( 'post_type' );
 
 	// Add post type to title if it's a parsed item.
-	if ( 0 === strpos( $post_type, 'wp-parser-' ) ) {
+	if ( is_singular() && 0 === strpos( $post_type, 'wp-parser-' ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
 			$title .= get_post_type_object( $post_type )->labels->singular_name . " $sep ";
 		}
 	}
 	// Add handbook name to title if relevent
-	elseif ( false !== strpos( $post_type, 'handbook' ) ) {
+	elseif ( is_singular() && false !== strpos( $post_type, 'handbook' ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
 			$handbook_label = get_post_type_object( $post_type )->labels->name . " $sep ";
 			$handbook_name  = \WPorg_Handbook::get_name( $post_type ) . " Handbook $sep ";
