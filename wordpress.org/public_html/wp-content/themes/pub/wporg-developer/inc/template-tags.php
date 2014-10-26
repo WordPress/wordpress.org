@@ -670,31 +670,52 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve URL to since version archive
+	 * Retrieve changelog data for the current post.
 	 *
-	 * @param string $name
+	 * @param null $post_id Post ID, defaults to the ID of the global $post.
 	 *
-	 * @return string
+	 * @return array Associative array of changelog data.
+	 */
+	function get_changelog_data( $post_id = null ) {
+		$post_id = empty( $post_id ) ? get_the_ID() : $post_id;
+
+		// Since terms assigned to the post.
+		$since_terms = wp_get_post_terms( $post_id, 'wp-parser-since' );
+
+		// Since data stored in meta.
+		$since_meta = get_post_meta( $post_id, '_wp-parser_tags', true );
+
+		$data = array();
+
+		// Pair the term data with meta data.
+		foreach ( $since_terms as $since_term ) {
+			foreach ( $since_meta as $meta ) {
+				if ( $since_term->name == $meta['content'] ) {
+					$description = empty( $meta['description'] ) ? '' : '<span class="since-description">' . esc_html( $meta['description'] ) . '</span>';
+
+					$data[ $since_term->name ] = array(
+						'version'     => $since_term->name,
+						'description' => $description,
+						'since_url'   => get_term_link( $since_term )
+					);
+				}
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Retrieve URL to a since version archive.
+	 *
+	 * @param string $name Since version, e.g. 'x.x.x'.
+	 *
+	 * @return string Since term archive URL.
 	 */
 	function get_since_link( $name = null ) {
 
 		$since_object = get_term_by( 'name', empty( $name ) ? get_since() : $name, 'wp-parser-since' );
 
 		return empty( $since_object ) ? '' : esc_url( get_term_link( $since_object ) );
-	}
-
-	/**
-	 * Retrieve name of since version
-	 *
-	 * @param int $post_id
-	 *
-	 * @return string
-	 */
-	function get_since( $post_id = null ) {
-
-		$since_object = wp_get_post_terms( empty( $post_id ) ? get_the_ID() : $post_id, 'wp-parser-since', array( 'fields' => 'names' ) );
-
-		return empty( $since_object ) ? '' : esc_html( $since_object[0] );
 	}
 
 	/**

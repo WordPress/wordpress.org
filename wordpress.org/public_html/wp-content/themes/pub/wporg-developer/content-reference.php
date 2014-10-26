@@ -16,14 +16,6 @@
 	<section class="return"><p><strong>Return:</strong> <?php echo get_return(); ?></p></section>
 
 	<?php
-	$since = get_since();
-if ( ! empty( $since ) ) : ?>
-	<section class="since">
-		<p><strong>Since:</strong> WordPress <a href="<?php echo get_since_link( $since ); ?>"><?php echo esc_html( $since ); ?></a></p>
-	</section>
-<?php endif; ?>
-
-	<?php
 	$source_file = get_source_file();
 	if ( ! empty( $source_file ) ) :
 		?>
@@ -146,6 +138,21 @@ if ( ! empty( $since ) ) : ?>
 				</span>
 				<span><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a></span>
 			</p>
+		</section>
+	<?php endif; ?>
+
+	<?php
+	$changelog_data = get_changelog_data();
+	if ( ! empty( $changelog_data ) ) :
+		?>
+		<hr/>
+		<section class="changelog">
+			<h2><?php _e( 'Changelog', 'wporg' ); ?></h2>
+			<ul>
+				<?php foreach ( $changelog_data as $version => $data ) : ?>
+					<li><?php _e( '<strong>Since:</strong> WordPress', 'wporg' ); ?> <a href="<?php echo esc_url( $data['since_url'] ); ?>"><?php echo esc_html( $version ); ?></a> <?php echo $data['description']; // escaped in get_changelog_data() ?></li>
+				<?php endforeach; ?>
+			</ul>
 		</section>
 	<?php endif; ?>
 
