@@ -37,15 +37,8 @@ class WPorg_Handbook_TOC {
 		for ( $i = 1; $i <= 4; $i++ )
 			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
 
-		if ( $items )
-			$contents_header = $pages_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
-		else
-			$pages_header = 'h3';
-
-		if ( $pages = wp_list_pages( array( 'child_of' => get_the_ID(), 'echo' => false, 'title_li' => false, 'post_type' => get_post_type() ) ) )
-			$toc .= "<$pages_header>Pages</$pages_header><ul class=\"items\">$pages</ul>";
-
 		if ( $items ) {
+			$contents_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
 			$toc .= $this->styles;
 			$toc .= '<div class="table-of-contents">';
 			$toc .= "<$contents_header>" . __( 'Topics', 'wporg' ) . "</$contents_header><ul class=\"items\">";
