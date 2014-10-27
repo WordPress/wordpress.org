@@ -1286,6 +1286,7 @@ input {
 }
 .devhub-wrap nav.post-navigation .nav-links a[rel="next"] {
   text-align: right;
+  float: right;
 }
 .devhub-wrap .table-of-contents {
   float: right;
