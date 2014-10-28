@@ -3,12 +3,11 @@
  */
 
 ( function( $ ) {
-	var parsedContent = $( '.wporg_parsed_content' ),
-		ticketNumber  = $( '#wporg_parsed_ticket' ),
-		attachButton  = $( '#wporg_ticket_attach' ),
-		detachButton  = $( '#wporg_ticket_detach' ),
-		ticketInfo    = $( '#wporg_ticket_info' ),
-		spinner       = $( '#ticket_status .spinner' );
+	var ticketNumber   = $( '#wporg_parsed_ticket' ),
+		attachButton   = $( '#wporg_ticket_attach' ),
+		detachButton   = $( '#wporg_ticket_detach' ),
+		ticketInfo     = $( '#wporg_ticket_info' ),
+		spinner        = $( '#ticket_status .spinner' );
 
 	var handleTicket = function( event ) {
 		event.preventDefault();
@@ -41,8 +40,12 @@
 			// Handle the response.
 			if ( resp.type && 'success' == resp.type ) {
 				// Hide or show the parsed content boxes.
-				parsedContent.each( function() {
-					attachAction ? $(this).slideDown() : $(this).slideUp();
+				$( '.wporg_parsed_content' ).each( function() {
+					attachAction ? $(this).show() : $(this).hide();
+				});
+
+				$( '.wporg_parsed_readonly' ).each( function() {
+					attachAction ? $(this).hide() : $(this).show();
 				});
 
 				var otherButton = attachAction ? detachButton : attachButton;

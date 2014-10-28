@@ -52,9 +52,9 @@ class WPORG_Edit_Parsed_Content {
 	 * @access public
 	 */
 	public function add_meta_boxes() {
-		if ( in_array( $screen = get_current_screen()->id, $this->post_types ) && current_user_can( 'manage_options' ) ) {
+		if ( in_array( $screen = get_current_screen()->id, $this->post_types ) ) {
 			remove_meta_box( 'postexcerpt', $screen, 'normal' );
-			add_meta_box( 'wporg_parsed_content', __( 'Manage Parsed Content', 'wporg' ), array( $this, 'parsed_meta_box_cb' ), $screen, 'normal' );
+			add_meta_box( 'wporg_parsed_content', __( 'Parsed Content', 'wporg' ), array( $this, 'parsed_meta_box_cb' ), $screen, 'normal' );
 		}
 	}
 
@@ -82,49 +82,55 @@ class WPORG_Edit_Parsed_Content {
 		?>
 		<table class="form-table">
 			<tbody>
-			<tr valign="top" id="ticket_controls">
-				<th scope="row">
-					<label for="wporg_parsed_ticket"><?php _e( 'Trac Ticket Number:', 'wporg' ); ?></label>
-				</th>
-				<td>
-					<span class="attachment_controls">
-						<input type="text" name="wporg_parsed_ticket" id="wporg_parsed_ticket" value="<?php echo esc_attr( $ticket ); ?>" />
-						<a href="#attach-ticket" class="button secondary <?php echo $ticket ? 'hidden' : ''; ?>" id="wporg_ticket_attach" name="wporg_ticket_attach" aria-label="<?php esc_attr_e( 'Attach a Core Trac ticket', 'wporg' ); ?>" data-nonce="<?php echo wp_create_nonce( 'wporg-attach-ticket' ); ?>" data-id="<?php the_ID(); ?>">
-							<?php esc_attr_e( 'Attach Ticket', 'wporg' ); ?>
-						</a>
-						<a href="#detach-ticket" class="button secondary <?php echo $ticket ? '' : 'hidden'; ?>" id="wporg_ticket_detach" name="wporg_ticket_detach" aria-label="<?php esc_attr_e( 'Detach the Trac ticket', 'wporg' ); ?>" data-nonce="<?php echo wp_create_nonce( 'wporg-detach-ticket' ); ?>" data-id="<?php the_ID(); ?>">
-							<?php esc_attr_e( 'Detach Ticket', 'wporg' ); ?>
-						</a>
-					</span>
-					<div id="ticket_status">
-						<span class="spinner"></span>
-						<span class="ticket_info_icon <?php echo $ticket ? 'dashicons dashicons-external' : ''; ?>"></span>
-						<span id="wporg_ticket_info"><em><?php echo $ticket_message; ?></em></span>
-					</div>
-				</td>
-			</tr><!-- #ticket_controls -->
-			<tr valign="top" class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>">
+			<tr valign="top">
 				<th scope="row">
 					<label for="excerpt"><?php _e( 'Parsed Description:', 'wporg' ); ?></label>
 				</th>
 				<td>
-					<textarea rows="1" cols="40" name="excerpt" id="excerpt"><?php echo $post->post_excerpt; ?></textarea>
+					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $post->post_excerpt ); ?></div>
+					<textarea rows="1" cols="40" name="excerpt" id="excerpt" class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>"><?php echo $post->post_excerpt; ?></textarea>
 				</td>
 			</tr><!-- .wporg_parsed_content -->
-			<tr valign="top" class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>" data-id="<?php the_id(); ?>">
+			<tr valign="top" data-id="<?php the_id(); ?>">
 				<th scope="row">
 					<label for="wporg_parsed_content"><?php _e( 'Parsed Summary:', 'wporg' ); ?></label>
 				</th>
 				<td>
-					<?php wp_editor( $content, 'wporg_parsed_content_editor', array(
-						'media_buttons' => false,
-						'tinymce'       => false,
-						'quicktags'     => true,
-						'textarea_rows' => 10,
-						'textarea_name' => 'wporg_parsed_content'
-					) ); ?>
+					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $content ); ?></div>
+					<div class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>">
+						<?php wp_editor( $content, 'wporg_parsed_content_editor', array(
+							'media_buttons' => false,
+							'tinymce'       => false,
+							'quicktags'     => true,
+							'textarea_rows' => 10,
+							'textarea_name' => 'wporg_parsed_content',
+						) ); ?>
+					</div>
 				</td>
 			</tr><!-- .wporg_parsed_content -->
+			<?php if ( current_user_can( 'manage_options' ) ) : ?>
+				<tr valign="top" id="ticket_controls">
+					<th scope="row">
+						<label for="wporg_parsed_ticket"><?php _e( 'Trac Ticket Number:', 'wporg' ); ?></label>
+					</th>
+					<td>
+						<span class="attachment_controls">
+							<input type="text" name="wporg_parsed_ticket" id="wporg_parsed_ticket" value="<?php echo esc_attr( $ticket ); ?>" />
+							<a href="#attach-ticket" class="button secondary <?php echo $ticket ? 'hidden' : ''; ?>" id="wporg_ticket_attach" name="wporg_ticket_attach" aria-label="<?php esc_attr_e( 'Attach a Core Trac ticket', 'wporg' ); ?>" data-nonce="<?php echo wp_create_nonce( 'wporg-attach-ticket' ); ?>" data-id="<?php the_ID(); ?>">
+								<?php esc_attr_e( 'Attach Ticket', 'wporg' ); ?>
+							</a>
+							<a href="#detach-ticket" class="button secondary <?php echo $ticket ? '' : 'hidden'; ?>" id="wporg_ticket_detach" name="wporg_ticket_detach" aria-label="<?php esc_attr_e( 'Detach the Trac ticket', 'wporg' ); ?>" data-nonce="<?php echo wp_create_nonce( 'wporg-detach-ticket' ); ?>" data-id="<?php the_ID(); ?>">
+								<?php esc_attr_e( 'Detach Ticket', 'wporg' ); ?>
+							</a>
+						</span>
+						<div id="ticket_status">
+							<span class="spinner"></span>
+							<span class="ticket_info_icon <?php echo $ticket ? 'dashicons dashicons-external' : ''; ?>"></span>
+							<span id="wporg_ticket_info"><em><?php echo $ticket_message; ?></em></span>
+						</div>
+					</td>
+				</tr><!-- #ticket_controls -->
+			<?php endif; // Admin-only controls ?>
 			</tbody>
 		</table>
 		<?php
