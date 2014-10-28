@@ -211,19 +211,19 @@ section.get-involved article h2:before {
 	font-weight:normal;
 }
 
-section.get-involved article.make-core          h2:before { content: '\f107'; }
-section.get-involved article.make-ui            h2:before { content: '\f100'; }
-section.get-involved article.make-mobile        h2:before { content: '\f166'; }
-section.get-involved article.make-accessibility h2:before { content: '\f115'; }
+section.get-involved article.make-core          h2:before { content: "\f475"; }
+section.get-involved article.make-ui            h2:before { content: "\f309"; }
+section.get-involved article.make-mobile        h2:before { content: "\f470"; }
+section.get-involved article.make-accessibility h2:before { content: "\f483"; }
 section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
-section.get-involved article.make-support       h2:before { content: '\f110'; }
-section.get-involved article.make-themes        h2:before { content: '\f105'; }
-section.get-involved article.make-plugins		h2:before { content: '\f106'; }
-section.get-involved article.make-docs			h2:before { content: '\f123'; }
-section.get-involved article.make-community		h2:before { content: '\f125'; }
-section.get-involved article.make-meta			h2:before { content: '\f325'; }
+section.get-involved article.make-support       h2:before { content: "\f125"; }
+section.get-involved article.make-themes        h2:before { content: '\f100'; }
+section.get-involved article.make-plugins       h2:before { content: '\f106'; }
+section.get-involved article.make-docs          h2:before { content: '\f105'; }
+section.get-involved article.make-community     h2:before { content: '\f307'; }
+section.get-involved article.make-meta          h2:before { content: '\f325'; }
 section.get-involved article.make-training      h2:before { content: '\f118'; }
-section.get-involved article.make-flow			h2:before { content: '\f115'; }
+section.get-involved article.make-flow          h2:before { content: '\f115'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
