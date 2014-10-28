@@ -719,6 +719,39 @@ namespace DevHub {
 	}
 
 	/**
+	 * Retrieve deprecated flag
+	 *
+	 * @param int $post_id
+	 *
+	 * @return string
+	 */
+	function get_deprecated( $post_id = null ) {
+		if ( empty( $post_id ) ) {
+			$post_id = get_the_ID();
+		}
+
+		$types          = explode( '-', get_post_type( $post_id ) );
+		$type           = array_pop( $types );
+		$tags           = get_post_meta( $post_id, '_wp-parser_tags', true );
+		$all_deprecated = wp_filter_object_list( $tags, array( 'name' => 'deprecated' ) );
+
+		if ( empty( $all_deprecated ) ) {
+			return '';
+		}
+
+		$deprecated  = array_shift( $all_deprecated );
+		// Multi-@deprecated may have been defined, with the second actually having the deprecation text.
+		if ( empty( $deprecated['content'] ) ) {
+			$deprecated  = array_shift( $all_deprecated );
+		}
+		$description = empty( $deprecated['content'] ) ? '' : esc_html( $deprecated['content'] );
+
+		return "<div class='deprecated'>"
+			. wp_kses_post( sprintf( __( 'Warning: This %s has been deprecated. %s', 'wporg' ), $type, $description ) )
+			. '</div>';
+	}
+
+	/**
 	 * Retrieve URL to source file archive.
 	 *
 	 * @param string $name

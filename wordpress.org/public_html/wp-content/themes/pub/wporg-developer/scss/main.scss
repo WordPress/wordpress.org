@@ -940,6 +940,12 @@
 			border-radius: 5px;
 			padding: 20px;
 		}
+		.deprecated {
+			background-color: #be2423;
+			border: 1px solid #a4322f;
+			padding: 20px;
+			color: #ffffff;
+		}
 	}
 
 	&.archive, &.search {
