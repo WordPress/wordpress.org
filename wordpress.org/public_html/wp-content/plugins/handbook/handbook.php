@@ -11,7 +11,7 @@ require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
 require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
 require_once dirname( __FILE__ ) . '/inc/watchlist.php';
 
-//WPorg_Handbook_Glossary::init();
+WPorg_Handbook_Glossary::init();
 
 /**
  * Initialize our handbooks
