@@ -162,7 +162,7 @@ class WPorg_Handbook {
 			$slug = 'handbook';
 		}
 
-		register_post_type( $this->post_type, array(
+		$default_config = array(
 			'labels' => array(
 				'name'          => $this->label,
 				'singular_name' => sprintf( __( '%s Page', 'wporg' ), $this->label ),
@@ -183,7 +183,11 @@ class WPorg_Handbook {
 			),
 			'delete_with_user'  => false,
 			'supports'          => array( 'title', 'editor', 'author', 'thumbnail', 'page-attributes', 'custom-fields', 'comments', 'revisions' ),
-		) );
+		);
+		// Allow customization of the default post type configuration via filter.
+		$config = apply_filters( 'handbook_post_type_defaults', $default_config, $slug );
+
+		register_post_type( $this->post_type, $config );
 	}
 
 	function admin_page_access_denied() {
