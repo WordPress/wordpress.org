@@ -73,6 +73,7 @@ function init() {
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
+	add_filter( 'the_posts', __NAMESPACE__ . '\\rerun_empty_exact_search', 10, 2 );
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 
@@ -236,6 +237,37 @@ function pre_get_posts( $query ) {
 	if ( $query->is_main_query() && $query->is_tax() && $query->get( 'wp-parser-source-file' ) ) {
 		$query->set( 'wp-parser-source-file', str_replace( array( '.php', '/' ), array( '-php', '_' ), $query->query['wp-parser-source-file'] ) );
 	}
+
+	// If user has '()' at end of a search string, assume they want a specific function/method.
+	if ( $query->is_search() ) {
+		$s = htmlentities( $query->get( 's' ) );
+		if ( '()' === substr( $s, -2 ) ) {
+			// Enable exact search
+			$query->set( 'exact',     true );
+			// Modify the search query to omit the parentheses
+			$query->set( 's',         substr( $s, 0, -2 ) ); // remove '()'
+			// Restrict search to function-like content
+			$query->set( 'post_type', array( 'wp-parser-function', 'wp-parser-method' ) );
+		}
+	}
+}
+
+/**
+ * Rerun an exact search with the same criteria except exactness if no posts
+ * were found.
+ *
+ * @access public
+ *
+ * @param  array    $posts Array of posts after the main query
+ * @param  WP_Query $query WP_Query object
+ * @return array
+ */
+function rerun_empty_exact_search( $posts, $query ) {
+	if ( is_search() && true === $query->get( 'exact' ) && ! $query->found_posts ) {
+		$query->set( 'exact', false );
+		$posts = $query->get_posts();
+	}
+	return $posts;
 }
 
 /**
