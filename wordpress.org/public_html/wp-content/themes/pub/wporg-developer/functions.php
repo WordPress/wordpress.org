@@ -46,6 +46,11 @@ require __DIR__ . '/inc/user-content.php';
 require __DIR__ . '/inc/user-content-voting.php';
 
 /**
+ * Handbooks.
+ */
+require __DIR__ . '/inc/handbooks.php';
+
+/**
  * Redirects.
  */
 require __DIR__ . '/inc/redirects.php';
@@ -59,7 +64,6 @@ if ( ! isset( $content_width ) ) {
 
 
 add_action( 'init', __NAMESPACE__ . '\\init' );
-add_filter( 'handbook_post_types', __NAMESPACE__ . '\\filter_handbook_post_types' );
 add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 
 function init() {
@@ -68,7 +72,6 @@ function init() {
 	register_taxonomies();
 
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
-	add_filter( 'user_has_cap', __NAMESPACE__ . '\\adjust_handbook_editor_caps', 11 );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
@@ -79,7 +82,6 @@ function init() {
 
 	add_filter( 'the_excerpt', __NAMESPACE__ . '\\lowercase_P_dangit_just_once' );
 	add_filter( 'the_content', __NAMESPACE__ . '\\make_doclink_clickable', 10, 5 );
-	add_filter( 'the_content', __NAMESPACE__ . '\\autolink_credits' );
 
 	// Add the handbook's 'Watch' action link.
 	if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
@@ -88,65 +90,6 @@ function init() {
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
 
-}
-
-
-/**
- * Create the handbook_editor role which can only edit handbooks.
- *
- * @access public
- *
- */
-function add_roles() {
-	add_role(
-		'handbook_editor',
-		__( 'Handbook Editor', 'wporg' ),
-		array(
-			'moderate_comments'             => true,
-			'upload_files'                  => true,
-			'unfiltered_html'               => true,
-			'read'                          => true,
-			'edit_handbook_pages'           => true,
-			'edit_others_handbook_pages'    => true,
-			'edit_published_handbook_pages' => true,
-			'edit_private_handbook_pages'   => true,
-			'read_private_handbook_pages'   => true,
-		)
-	);
-}
-
-/**
- * Adjusts handbook capabilities for roles.
- *
- * Undoes some capability assignments by the handbook plugin since only
- * administrators, editors, and handbook_editors can manipulate handbooks.
- *
- * @access public
- *
- * @param  array $caps Array of user capabilities.
- * @return array
- */
-function adjust_handbook_editor_caps( $caps ) {
-	if ( ! is_user_member_of_blog() || ! class_exists( 'WPorg_Handbook' ) ) {
-		return $caps;
-	}
-
-	// Get current user's role.
-	$role = wp_get_current_user()->roles[0];
-
-	// Unset caps set by handbook plugin.
-	// Only administrators, editors, and handbook_editors can manipulate handbooks.
-	if ( ! in_array( $role, array( 'administrator', 'editor', 'handbook_editor' ) ) ) {
-		foreach ( \WPorg_Handbook::caps() as $cap ) {
-			unset( $caps[ $cap ] );
-		}
-
-		foreach ( \WPorg_Handbook::editor_caps() as $cap ) {
-			unset( $caps[ $cap ] );
-		}
-	}
-
-	return $caps;
 }
 
 /**
@@ -178,13 +121,6 @@ function breadcrumb_trail_items( $items, $args ) {
 	unset( $items[4] );
 
 	return $items;
-}
-
-/**
-* handbook post_type filter function
-*/
-function filter_handbook_post_types( $types ) {
-	return array( 'theme', 'plugin' );
 }
 
 /**
@@ -586,34 +522,4 @@ function make_doclink_clickable( $content ) {
 		},
 		$content
 	);
-}
-
-/**
- * For specific credit pages, link @usernames references to their profiles on
- * profiles.wordpress.org.
- *
- * Simplistic matching. Does not verify that the @username is a legitimate
- * WP.org user.
- *
- * @param  string $content Post content
- * @return string
- */
-function autolink_credits( $content ) {
-	// Only apply to the 'credits' (themes handbook) and 'credits-2' (plugin
-	// handbook) pages
-	if ( is_single( 'credits' ) || is_single( 'credits-2' ) ) {
-		$content = preg_replace_callback(
-			'/\B@([\w\-]+)/i',
-			function ( $matches ) {
-				return sprintf(
-					'<a href="https://profiles.wordpress.org/%s">@%s</a>',
-					esc_attr( $matches[1] ),
-					esc_html( $matches[1] )
-				);
-			},
-			$content
-		);
-	}
-
-	return $content;
 }
