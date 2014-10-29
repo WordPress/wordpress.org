@@ -77,27 +77,24 @@ get_header(); ?>
 
 			<div class="search-guide section light-gray clear">
 				<div class="inner-wrap three-columns">
+
+					<?php if ( is_active_sidebar( 'landing-footer-1') ) { ?>
+						<?php dynamic_sidebar( 'landing-footer-1' ); ?>
+					<?php } else { ?>
+						<div class="widget box"></div>
+					<?php } ?>
+
+					<?php if ( is_active_sidebar( 'landing-footer-2') ) { ?>
+						<?php dynamic_sidebar( 'landing-footer-2' ); ?>
+					<?php } else { ?>
+						<div class="widget box"></div>
+					<?php } ?>
+
 					<div class="widget box">
-						<h4 class="widget-title"><?php _e( 'Need Help?', 'devhub' ); ?></h4>
-						<ul class="unordered-list no-bullets">
-							<li><a href="#">WPHackers Mailing List</a></li>
-							<li><a href="#">WordPress Stack Exchange</a></li>
-							<li><a href="#">Core Contributor Handbook</a></li>
-						</ul>
-					</div>
-					<div class="widget box">
-						<h4 class="widget-title"><?php _e( 'More Resources', 'devhub' ); ?></h4>
-						<ul class="unordered-list no-bullets">
-							<li><a href="#">Intro To WordPress Development</a></li>
-							<li><a href="#">Setting Up Your Development Environment</a></li>
-							<li><a href="#">WordPress Coding Standards</a></li>
-						</ul>
-					</div>
-					<div class="widget box">
-						<h4 class="widget-title"><a href="#"><?php _e( 'Help Make WordPress ', 'devhub' ); ?><div class="dashicons dashicons-arrow-right-alt2"></div></a></h4>
+						<h4 class="widget-title"><a href="https://make.wordpress.org/"><?php _e( 'Help Make WordPress ', 'wporg' ); ?><div class="dashicons dashicons-arrow-right-alt2"></div></a></h4>
 					</div>
 				</div>
-			</div><!-- /search-guide -->
+			</div>
 
 		</div><!-- /home-landing -->
 	</div><!-- #primary -->

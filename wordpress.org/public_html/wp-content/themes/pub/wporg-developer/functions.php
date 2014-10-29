@@ -60,6 +60,7 @@ if ( ! isset( $content_width ) ) {
 
 add_action( 'init', __NAMESPACE__ . '\\init' );
 add_filter( 'handbook_post_types', __NAMESPACE__ . '\\filter_handbook_post_types' );
+add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 
 function init() {
 
@@ -68,7 +69,6 @@ function init() {
 
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_filter( 'user_has_cap', __NAMESPACE__ . '\\adjust_handbook_editor_caps', 11 );
-	add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
@@ -200,6 +200,26 @@ function widgets_init() {
 		'after_widget'  => '</div></aside>',
 		'before_title'  => '<h1 class="widget-title">',
 		'after_title'   => '</h1><div class="widget-content">',
+	) );
+
+	register_sidebar( array(
+		'name'          => __( 'Landing Page Footer - Left', 'wporg' ),
+		'id'            => 'landing-footer-1',
+		'description'   => __( 'Appears in footer of the primary landing page', 'wporg' ),
+		'before_widget' => '<div id="%1$s" class="widget box %2$s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h4 class="widget-title">',
+		'after_title'   => '</h4>',
+	) );
+
+	register_sidebar( array(
+		'name'          => __( 'Landing Page Footer - Center', 'wporg' ),
+		'id'            => 'landing-footer-2',
+		'description'   => __( 'Appears in footer of the primary landing page', 'wporg' ),
+		'before_widget' => '<div id="%1$s" class="widget box %2$s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h4 class="widget-title">',
+		'after_title'   => '</h4>',
 	) );
 }
 
