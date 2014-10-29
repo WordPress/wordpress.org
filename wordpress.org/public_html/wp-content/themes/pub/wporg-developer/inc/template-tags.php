@@ -437,9 +437,9 @@ namespace DevHub {
 				return sprintf( __( 'Developer Resources: %s', 'wporg' ), get_the_title() );
 			case 'reference':
 				return __( 'Code Reference', 'wporg' );
-			case 'plugin':
+			case 'plugins':
 				return __( 'Plugin Handbook', 'wporg' );
-			case 'theme':
+			case 'themes':
 				return __( 'Theme Handbook', 'wporg' );
 			default:
 				return __( 'Developer Resources', 'wporg' );

@@ -38,6 +38,8 @@ class Devhub_Handbooks {
 
 		add_filter( 'the_content', array( __CLASS__, 'autolink_credits' ) );
 
+		add_filter( 'handbook_post_type_defaults', array( __CLASS__, 'filter_handbook_post_type_defaults' ), 10, 2 );
+
 		// Add the handbook's 'Watch' action link.
 		if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
 			add_action( 'wporg_action_links', array( 'WPorg_Handbook_Watchlist', 'display_action_link' ) );
@@ -112,6 +114,28 @@ class Devhub_Handbooks {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Overrides default handbook post type configuration.
+	 *
+	 * Specifically, uses a plural slug while retaining pre-existing singular post
+	 * type name.
+	 *
+	 * @access public
+	 *
+	 * @param  array  $defaults  The default post type configuration.
+	 * @param  string $post_type The post type name.
+	 * @return array
+	 */
+	public static function filter_handbook_post_type_defaults( $defaults, $post_type ) {
+		$defaults['rewrite'] = array(
+			'feeds'      => false,
+			'slug'       => $post_type . 's',
+			'with_front' => false,
+		);
+
+		return $defaults;
 	}
 
 	/**
