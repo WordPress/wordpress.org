@@ -152,34 +152,17 @@ class WordCamp_Coming_Soon_Page {
 	 */
 	public function get_dates() {
 		$dates = false;
-		$wordcamp_site_url = site_url();
-		
-		switch_to_blog( BLOG_ID_CURRENT_SITE );
-		
-		$wordcamp_post = get_posts( array(
-			'post_type'   => 'wordcamp',
-			'post_status' => 'any',
-			'meta_query'  => array(
-				array(
-					'key'   => 'URL',
-					'value' => $wordcamp_site_url,
-				),
-			),
-		) );
-		
-		if ( isset( $wordcamp_post[0]->ID ) ) {
-			$wordcamp_post_meta = get_post_custom( $wordcamp_post[0]->ID );
-			
-			if ( isset( $wordcamp_post_meta['Start Date (YYYY-mm-dd)'][0] ) && ! empty( $wordcamp_post_meta['Start Date (YYYY-mm-dd)'][0] ) ) {
-				$dates = date( 'l, F jS Y', $wordcamp_post_meta['Start Date (YYYY-mm-dd)'][0] );
+		$wordcamp_post = get_wordcamp_post();
 
-				if ( isset( $wordcamp_post_meta['End Date (YYYY-mm-dd)'][0] ) && ! empty( $wordcamp_post_meta['End Date (YYYY-mm-dd)'][0] ) ) {
-					$dates .= ' - ' . date( 'l, F jS Y', $wordcamp_post_meta['End Date (YYYY-mm-dd)'][0] );
+		if ( isset( $wordcamp_post->ID ) ) {
+			if ( ! empty( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
+				$dates = date( 'l, F jS Y', $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
+
+				if ( ! empty( $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) ) {
+					$dates .= ' - ' . date( 'l, F jS Y', $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
 				}
 			}
 		}
-		
-		restore_current_blog();
 		
 		return $dates;
 	}
