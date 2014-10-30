@@ -36,7 +36,7 @@ get_header(); ?>
 				<div class="inner-wrap">
 					<div class="widget transparent">
 						<div class="code-ref-left">
-							<h3 class="widget-title"><div class="dashicons dashicons-editor-alignleft"></div><?php _e( ' Code Reference', 'wporg' ); ?></h3>
+							<h3 class="widget-title"><div class="dashicons dashicons-editor-code"></div><?php _e( ' Code Reference', 'wporg' ); ?></h3>
 							<p class="widget-description"><?php _e( 'Search the codebase for documentation', 'wporg' ); ?></p>
 						</div>
 						<div class="code-ref-right">
