@@ -154,10 +154,11 @@ get_header(); ?>
 					<div alt="f138" class="dashicons dashicons-align-none">align none</div>
 					<div alt="f160" class="dashicons dashicons-lock">lock</div>
 					<div alt="f145" class="dashicons dashicons-calendar">calendar</div>
+					<div alt="f508" class="dashicons dashicons-calendar-alt">calendar</div>
 					<div alt="f177" class="dashicons dashicons-visibility">visibility</div>
 					<div alt="f173" class="dashicons dashicons-post-status">post status</div>
-					<div alt="f464" class="dashicons dashicons-edit">edit</div>
-					<div alt="f182" class="dashicons dashicons-trash">trash</div>
+					<div alt="f464" class="dashicons dashicons-edit">edit pencil</div>
+					<div alt="f182" class="dashicons dashicons-trash">trash remove delete</div>
 
 					<h4><?php _e( 'Sorting', 'wporg' ); ?></h4>
 
@@ -177,9 +178,10 @@ get_header(); ?>
 					<div alt="f341" class="dashicons dashicons-arrow-left-alt2">arrow-left</div>
 					<div alt="f156" class="dashicons dashicons-sort">sort</div>
 					<div alt="f229" class="dashicons dashicons-leftright">left right</div>
-					<div alt="f503" class="dashicons dashicons-randomize">randomize</div>
+					<div alt="f503" class="dashicons dashicons-randomize">randomize shuffle</div>
 					<div alt="f163" class="dashicons dashicons-list-view">list view</div>
 					<div alt="f164" class="dashicons dashicons-exerpt-view">exerpt view</div>
+					<div alt="f509" class="dashicons dashicons-grid-view">grid view</div>
 
 					<h4><?php _e( 'Social', 'wporg' ); ?></h4>
 
@@ -187,24 +189,24 @@ get_header(); ?>
 					<div alt="f237" class="dashicons dashicons-share">share</div>
 					<div alt="f240" class="dashicons dashicons-share-alt">share</div>
 					<div alt="f242" class="dashicons dashicons-share-alt2">share</div>
-					<div alt="f301" class="dashicons dashicons-twitter">twitter</div>
+					<div alt="f301" class="dashicons dashicons-twitter">twitter social</div>
 					<div alt="f303" class="dashicons dashicons-rss">rss</div>
 					<div alt="f465" class="dashicons dashicons-email">email</div>
 					<div alt="f466" class="dashicons dashicons-email-alt">email</div>
-					<div alt="f304" class="dashicons dashicons-facebook">facebook</div>
-					<div alt="f305" class="dashicons dashicons-facebook-alt">facebook</div>
-					<div alt="f462" class="dashicons dashicons-googleplus">googleplus</div>
-					<div alt="f325" class="dashicons dashicons-networking">networking</div>
+					<div alt="f304" class="dashicons dashicons-facebook">facebook social</div>
+					<div alt="f305" class="dashicons dashicons-facebook-alt">facebook social</div>
+					<div alt="f462" class="dashicons dashicons-googleplus">googleplus social</div>
+					<div alt="f325" class="dashicons dashicons-networking">networking social</div>
 
 					<h4><?php _e( 'WordPress.org Specific: Jobs, Profiles, WordCamps', 'wporg' ); ?></h4>
 
 					<!-- WPorg specific icons: Jobs, Profiles, WordCamps -->
-					<div alt="f308" class="dashicons dashicons-hammer">hammer</div>
-					<div alt="f309" class="dashicons dashicons-art">art</div>
-					<div alt="f310" class="dashicons dashicons-migrate">migrate</div>
+					<div alt="f308" class="dashicons dashicons-hammer">hammer development</div>
+					<div alt="f309" class="dashicons dashicons-art">art design</div>
+					<div alt="f310" class="dashicons dashicons-migrate">migrate migration</div>
 					<div alt="f311" class="dashicons dashicons-performance">performance</div>
-					<div alt="f483" class="dashicons dashicons-universal-access">universal access</div>
-					<div alt="f507" class="dashicons dashicons-universal-access-alt">universal access (alt)</div>
+					<div alt="f483" class="dashicons dashicons-universal-access">universal access accessibility</div>
+					<div alt="f507" class="dashicons dashicons-universal-access-alt">universal access accessibility</div>
 					<div alt="f486" class="dashicons dashicons-tickets">tickets</div>
 					<div alt="f484" class="dashicons dashicons-nametag">nametag</div>
 					<div alt="f481" class="dashicons dashicons-clipboard">clipboard</div>
@@ -221,10 +223,10 @@ get_header(); ?>
 					<div alt="f463" class="dashicons dashicons-update">update</div>
 					<div alt="f180" class="dashicons dashicons-screenoptions">screenoptions</div>
 					<div alt="f348" class="dashicons dashicons-info">info</div>
-					<div alt="f174" class="dashicons dashicons-cart">cart</div>
-					<div alt="f175" class="dashicons dashicons-feedback">feedback</div>
+					<div alt="f174" class="dashicons dashicons-cart">cart shopping</div>
+					<div alt="f175" class="dashicons dashicons-feedback">feedback form</div>
 					<div alt="f176" class="dashicons dashicons-cloud">cloud</div>
-					<div alt="f326" class="dashicons dashicons-translation">translation</div>
+					<div alt="f326" class="dashicons dashicons-translation">translation language</div>
 
 					<h4><?php _e( 'Taxonomies', 'wporg' ); ?></h4>
 
@@ -242,12 +244,12 @@ get_header(); ?>
 					<h4><?php _e( 'Notifications', 'wporg' ); ?></h4>
 
 					<!-- alerts/notifications/flags -->
-					<div alt="f147" class="dashicons dashicons-yes">yes</div>
-					<div alt="f158" class="dashicons dashicons-no">no</div>
-					<div alt="f335" class="dashicons dashicons-no-alt">no</div>
-					<div alt="f132" class="dashicons dashicons-plus">plus</div>
-					<div alt="f502" class="dashicons dashicons-plus-alt">plus</div>
-					<div alt="f460" class="dashicons dashicons-minus">minus</div>
+					<div alt="f147" class="dashicons dashicons-yes">yes check checkmark</div>
+					<div alt="f158" class="dashicons dashicons-no">no x</div>
+					<div alt="f335" class="dashicons dashicons-no-alt">no x</div>
+					<div alt="f132" class="dashicons dashicons-plus">plus add increase</div>
+					<div alt="f502" class="dashicons dashicons-plus-alt">plus add increase</div>
+					<div alt="f460" class="dashicons dashicons-minus">minus decrease</div>
 					<div alt="f153" class="dashicons dashicons-dismiss">dismiss</div>
 					<div alt="f159" class="dashicons dashicons-marker">marker</div>
 					<div alt="f155" class="dashicons dashicons-star-filled">filled star</div>
@@ -258,12 +260,12 @@ get_header(); ?>
 					<h4><?php _e( 'Misc', 'wporg' ); ?></h4>
 
 					<!-- misc/cpt -->
-					<div alt="f230" class="dashicons dashicons-location">location</div>
+					<div alt="f230" class="dashicons dashicons-location">location pin</div>
 					<div alt="f231" class="dashicons dashicons-location-alt">location</div>
-					<div alt="f178" class="dashicons dashicons-vault">vault</div>
+					<div alt="f178" class="dashicons dashicons-vault">vault safe</div>
 					<div alt="f332" class="dashicons dashicons-shield">shield</div>
 					<div alt="f334" class="dashicons dashicons-shield-alt">shield</div>
-					<div alt="f468" class="dashicons dashicons-sos">sos</div>
+					<div alt="f468" class="dashicons dashicons-sos">sos help</div>
 					<div alt="f179" class="dashicons dashicons-search">search</div>
 					<div alt="f181" class="dashicons dashicons-slides">slides</div>
 					<div alt="f183" class="dashicons dashicons-analytics">analytics</div>
@@ -287,11 +289,13 @@ get_header(); ?>
 					<div alt="f321" class="dashicons dashicons-backup">backup</div>
 					<div alt="f469" class="dashicons dashicons-clock">clock</div>
 					<div alt="f339" class="dashicons dashicons-lightbulb">lightbulb</div>
-					<div alt="f482" class="dashicons dashicons-microphone">microphone</div>
-					<div alt="f472" class="dashicons dashicons-desktop">desktop</div>
-					<div alt="f471" class="dashicons dashicons-tablet">tablet</div>
-					<div alt="f470" class="dashicons dashicons-smartphone">smartphone</div>
-					<div alt="f328" class="dashicons dashicons-smiley">smiley</div>
+					<div alt="f482" class="dashicons dashicons-microphone">microphone mic</div>
+					<div alt="f472" class="dashicons dashicons-desktop">desktop monitor</div>
+					<div alt="f471" class="dashicons dashicons-tablet">tablet ipad</div>
+					<div alt="f470" class="dashicons dashicons-smartphone">smartphone iphone</div>
+					<div alt="f510" class="dashicons dashicons-index-card">index card</div>
+					<div alt="f511" class="dashicons dashicons-carrot">carrot food vendor</div>
+					<div alt="f328" class="dashicons dashicons-smiley">smiley smile</div>
 				</div>
 
 			</div>
