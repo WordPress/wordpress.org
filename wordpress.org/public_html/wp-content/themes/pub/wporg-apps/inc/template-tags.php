@@ -153,7 +153,7 @@ function wpmobileapps_comment( $comment, $args, $depth ) {
 			<footer class="comment-meta">
 				<div class="comment-author vcard">
 					<?php if ( 0 != $args['avatar_size'] ) echo '<div class="avatar-wrapper">' . get_avatar( $comment, $args['avatar_size'] ) . '</div>'; ?>
-					<?php printf( __( '%s', 'wpmobileapps' ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
+					<?php sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ); ?>
 				</div><!-- .comment-author -->
 
 				<div class="comment-metadata">
