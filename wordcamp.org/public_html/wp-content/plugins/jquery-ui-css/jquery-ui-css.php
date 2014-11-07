@@ -28,5 +28,3 @@ function juicss_register_styles( $hook ) {
 	);
 }
 add_action( 'admin_enqueue_scripts', 'juicss_register_styles' );
-
-// todo need to jquery-ui bundle images too? maybe put it in an includes folder in wp-content for all plugins to use, and update payments?
