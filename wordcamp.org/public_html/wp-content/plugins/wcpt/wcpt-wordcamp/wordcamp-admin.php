@@ -233,7 +233,7 @@ class WordCamp_Admin {
 	 */
 	function admin_scripts() {
 		if ( get_post_type() == WCPT_POST_TYPE_ID )
-			wp_enqueue_script( 'jquery-ui-custom', WCPT_URL . '/assets/js/jquery-ui-1.8.18.custom.min.js', array( 'jquery' ) );
+			wp_enqueue_script( 'jquery-ui-datepicker' );
 	}
 	
 	function admin_print_scripts() {
@@ -251,8 +251,10 @@ class WordCamp_Admin {
 	}
 	
 	function admin_styles() {
-		if ( get_post_type() == WCPT_POST_TYPE_ID )
-			wp_enqueue_style( 'jquery-ui-redmond', WCPT_URL . '/assets/css/redmond/jquery-ui-1.8.18.custom.css' );
+		if ( get_post_type() == WCPT_POST_TYPE_ID ) {
+			wp_enqueue_style( 'jquery-ui' );
+			wp_enqueue_style( 'wp-datepicker-skins' );
+		}
 	}
 
 	/**
