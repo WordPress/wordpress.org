@@ -242,7 +242,9 @@ class WordCamp_Admin {
 		<script>
 			jQuery(document).ready(function($) {
 				$('.date-field').datepicker({
-					dateFormat: 'yy-mm-dd'
+					dateFormat: 'yy-mm-dd',
+					changeMonth: true,
+					changeYear:  true
 				});
 			});
 		</script>
