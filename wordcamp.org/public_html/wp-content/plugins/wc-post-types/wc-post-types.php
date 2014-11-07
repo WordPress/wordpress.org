@@ -20,6 +20,7 @@ class WordCamp_Post_Types_Plugin {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_print_styles', array( $this, 'admin_css' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_action( 'admin_print_footer_scripts', array( $this, 'admin_print_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 
 		add_action( 'save_post', array( $this, 'save_post_speaker' ), 10, 2 );
@@ -193,9 +194,41 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	function admin_enqueue_scripts() {
+		global $post_type;
 		wp_enqueue_style( 'campicons', plugins_url( 'fonts/campicons.css', __FILE__ ), array(), 1 );
+
+		// Enqueues scripts and styles for session admin page
+		if ( 'wcb_session' == $post_type ) {
+			wp_enqueue_script( 'jquery-ui-datepicker' );
+			wp_enqueue_style( 'jquery-ui' );
+			wp_enqueue_style( 'wp-datepicker-skins' );
+		}
 	}
-	
+
+	/*
+	 * Print our JavaScript
+	 */
+	function admin_print_scripts() {
+		global $post_type;
+
+		// DatePicker for Session posts
+		if ( 'wcb_session' == $post_type ) :
+			?>
+
+			<script type="text/javascript">
+				jQuery( document ).ready( function( $ ) {
+					$( '#wcpt-session-date' ).datepicker( {
+						dateFormat:  'yy-mm-dd',
+						changeMonth: true,
+						changeYear:  true
+					} );
+				} );
+			</script>
+
+			<?php
+		endif;
+	}
+
 	function wp_enqueue_scripts() {
 		wp_enqueue_style( 'wcb_shortcodes', plugins_url( 'css/shortcodes.css', __FILE__ ), array(), 2 );
 	}
@@ -1016,21 +1049,21 @@ class WordCamp_Post_Types_Plugin {
 
 				<?php while ( $sponsors->have_posts() ) : $sponsors->the_post(); ?>
 				<?php $website = get_post_meta( get_the_ID(), '_wcpt_sponsor_website', true ); ?>
-					
+
 				<div id="wcorg-sponsor-<?php the_ID(); ?>" class="wcorg-sponsor">
 					<?php if ( 'website' == $attr['link'] && $website ) : ?>
 						<h3><a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_title(); ?></a></h3>
 					<?php else : ?>
 						<h3><?php the_title(); ?></h3>
 					<?php endif; ?>
-					
+
 					<div class="wcorg-sponsor-description">
 						<?php if ( 'website' == $attr['link'] && $website ) : ?>
 							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_post_thumbnail(); ?></a>
 						<?php else : ?>
 							<?php the_post_thumbnail(); ?>
 						<?php endif; ?>
-						
+
 						<?php the_content(); ?>
 					</div>
 				</div><!-- #sponsor -->
@@ -1329,15 +1362,40 @@ class WordCamp_Post_Types_Plugin {
 	function metabox_session_info() {
 		$post = get_post();
 		$session_time = absint( get_post_meta( $post->ID, '_wcpt_session_time', true ) );
-		$session_time = ( $session_time ) ? date( 'Y-m-d H:i:s', $session_time ) : '';
+		$session_date     = ( $session_time ) ? date( 'Y-m-d', $session_time ) : date( 'Y-m-d' );
+		$session_hours    = ( $session_time ) ? date( 'g', $session_time )     : date( 'g' );
+		$session_minutes  = ( $session_time ) ? date( 'i', $session_time )     : '00';
+		$session_meridiem = ( $session_time ) ? date( 'a', $session_time )     : 'am';
 		$session_type = get_post_meta( $post->ID, '_wcpt_session_type', true );
 		?>
 		<?php wp_nonce_field( 'edit-session-info', 'wcpt-meta-session-info' ); ?>
 		<p>
-			<label for="wcpt-session-time"><?php _e( 'When:', 'wordcamporg' ); ?></label>
-			<input type="text" class="widefat" id="wcpt-session-time" name="wcpt-session-time" value="<?php echo esc_attr( $session_time ); ?>" />
-			<span style="display: block; margin-top: 4px;" class="description">For example: <?php echo date( 'Y-m-d H:i:s' ); ?></span>
+			<label for="wcpt-session-date"><?php _e( 'Date:', 'wordcamporg' ); ?></label>
+			<input type="text" id="wcpt-session-date" data-date="<?php echo esc_attr( $session_date ); ?>" name="wcpt-session-date" value="<?php echo esc_attr( $session_date ); ?>" /><br />
+			<label><?php _e( 'Time:', 'wordcamporg' ); ?></label>
+
+			<select name="wcpt-session-hour" aria-label="<?php _e( 'Session Start Hour', 'wordcamporg' ); ?>">
+				<?php for ( $i = 1; $i <= 12; $i++ ) : ?>
+					<option value="<?php echo esc_attr( $i ); ?>" <?php selected( $i, $session_hours ) ?>>
+						<?php echo esc_html( $i ); ?>
+					</option>
+				<?php endfor; ?>
+			</select> :
+
+			<select name="wcpt-session-minutes" aria-label="<?php _e( 'Session Start Minutes', 'wordcamporg' ); ?>">
+				<?php for ( $i = '00'; (int) $i <= 55; $i = sprintf( '%02d', (int) $i + 5 ) ) : ?>
+					<option value="<?php echo esc_attr( $i ); ?>" <?php selected( $i, $session_minutes ) ?>>
+						<?php echo esc_html( $i ); ?>
+					</option>
+				<?php endfor; ?>
+			</select>
+
+			<select name="wcpt-session-meridiem" aria-label="<?php _e( 'Session Meridiem', 'wordcamporg' ); ?>">
+				<option value="am" <?php selected( 'am', $session_meridiem ) ?>>am</option>
+				<option value="pm" <?php selected( 'pm', $session_meridiem ) ?>>pm</option>
+			</select>
 		</p>
+
 		<p>
 			<label for="wcpt-session-type"><?php _e( 'Type:', 'wordcamporg' ); ?></label>
 			<select id="wcpt-session-type" name="wcpt-session-type">
@@ -1354,14 +1412,14 @@ class WordCamp_Post_Types_Plugin {
 	function metabox_sponsor_info( $sponsor ) {
 		$website = get_post_meta( $sponsor->ID, '_wcpt_sponsor_website', true );
 		wp_nonce_field( 'edit-sponsor-info', 'wcpt-meta-sponsor-info' );
-		
+
 		?>
-		
+
 		<p>
 			<label for="_wcpt_sponsor_website"><?php _e( 'Website:', 'wordcampbase' ); ?></label>
 			<input type="text" class="widefat" id="_wcpt_sponsor_website" name="_wcpt_sponsor_website" value="<?php echo esc_attr( esc_url( $website ) ); ?>" />
 		</p>
-		
+
 		<?php
 	}
 
@@ -1438,8 +1496,13 @@ class WordCamp_Post_Types_Plugin {
 
 		// Update session time.
 		if ( isset( $_POST['wcpt-meta-session-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-session-info'], 'edit-session-info' ) ) {
-			$session_time = sanitize_text_field( $_POST['wcpt-session-time'] );
-			$session_time = strtotime( $session_time );
+			$session_time = strtotime( sprintf(
+				'%s %d:%02d %s',
+				sanitize_text_field( $_POST['wcpt-session-date'] ),
+				absint( $_POST['wcpt-session-hour'] ),
+				absint( $_POST['wcpt-session-minutes'] ),
+				'am' == $_POST['wcpt-session-meridiem'] ? 'am' : 'pm'
+			) );
 			update_post_meta( $post_id, '_wcpt_session_time', $session_time );
 
 			$session_type = sanitize_text_field( $_POST['wcpt-session-type'] );
@@ -1482,13 +1545,13 @@ class WordCamp_Post_Types_Plugin {
 		delete_post_meta( $post_id, '_wcpt_speaker_id' );
 		foreach ( $speaker_ids as $speaker_id )
 			add_post_meta( $post_id, '_wcpt_speaker_id', $speaker_id );
-		
+
 		// Set the speaker as the author of the session post, so the single
 		// view doesn't confuse users who see "posted by [organizer name]"
 		foreach ( $speaker_ids as $speaker_post ) {
 			$wporg_user_id = get_post_meta( $speaker_post, '_wcpt_user_id', true );
 			$user = get_user_by( 'id', $wporg_user_id );
-			
+
 			if ( $user ) {
 				remove_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );	// avoid infinite recursion
 				wp_update_post( array(
@@ -1496,7 +1559,7 @@ class WordCamp_Post_Types_Plugin {
 					'post_author' => $user->ID
 				) );
 				add_action( 'save_post', array( $this, 'save_post_session' ), 10, 2 );
-				
+
 				break;
 			}
 		}
@@ -1512,7 +1575,7 @@ class WordCamp_Post_Types_Plugin {
 
 		if ( isset( $_POST['wcpt-meta-sponsor-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-sponsor-info'], 'edit-sponsor-info' ) ) {
 			$website = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
-			
+
 			// TODO: maybe only allows links to home page, depending on outcome of http://make.wordpress.org/community/2013/12/31/irs-rules-for-corporate-sponsorship-of-wordcamp/
 
 			if ( $website ) {
