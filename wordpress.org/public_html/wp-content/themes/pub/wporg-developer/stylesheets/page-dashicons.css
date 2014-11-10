@@ -17,7 +17,7 @@
   left: 0;
   bottom: 50px;
   padding: 0 2.5em;
-  width: 30em;
+  width: 50%;
 }
 .dashicons-page .icon-filter #search {
   width: 100%;
@@ -35,12 +35,12 @@
   float: left;
   margin-top: 0 !important;
   padding: 1.5em 25px;
-  width: 30em;
+  width: 50%;
 }
 .dashicons-page #glyph {
   float: left;
   padding: 1.5em 25px;
-  width: 30em;
+  width: 50%;
 }
 .dashicons-page #glyph .dashicons {
   font-size: 240px;
@@ -51,7 +51,7 @@
 .dashicons-page #glyph .info {
   float: right;
   margin-top: 50px;
-  width: 10em;
+  width: 35%;
 }
 .dashicons-page #glyph span {
   display: block;
@@ -114,10 +114,60 @@
 .dashicons-page .code {
   display: block;
   font: 14px/1.5 monospace;
-  width: 600px;
+  max-width: 600px;
   white-space: pre;
   border: 1px solid #ccc;
   padding: 10px;
   overflow: auto;
   min-height: 180px;
+}
+@media (max-width: 900px) {
+  .dashicons-page .icon-filter {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    width: 100%;
+  }
+  .dashicons-page .entry-content {
+    float: none;
+    padding-bottom: 0;
+    width: 100%;
+  }
+  .dashicons-page #glyph {
+    float: none;
+    width: 100%;
+    text-align: center;
+  }
+  .dashicons-page #glyph .dashicons {
+    font-size: 240px;
+    width: 240px;
+    height: 240px;
+    overflow: visible;
+  }
+  .dashicons-page #glyph .info {
+    float: none;
+    margin-top: 0;
+    width: 100%;
+  }
+  .dashicons-page #glyph span.link {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+  }
+  .dashicons-page #glyph span.link:nth-of-type(2) {
+    margin-left: 0;
+  }
+  .dashicons-page #glyph span.link:last-of-type {
+    margin-right: 0;
+  }
+}
+@media (max-width: 400px) {
+  .dashicons-page #glyph, .dashicons-page .entry-content, .dashicons-page .icon-filter {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }

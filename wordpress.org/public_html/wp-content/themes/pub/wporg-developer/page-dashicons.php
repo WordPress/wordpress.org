@@ -334,9 +334,9 @@ get_header(); ?>
 			<div class="dashicons {{data.cssClass}}"></div>
 			<div class="info">
 				<span class="name">← {{data.cssClass}}</span>
-				<span><a href='javascript:dashicons.copy( "content: \"\\{{data.attr}}\";", "css" )'>Copy CSS</a></span>
-				<span><a href="javascript:dashicons.copy( '{{data.html}}', 'html' )">Copy HTML</a></span>
-				<span><a href="javascript:dashicons.copy( '{{data.glyph}}' )">Copy Glyph</a></span>
+				<span class="link"><a href='javascript:dashicons.copy( "content: \"\\{{data.attr}}\";", "css" )'>Copy CSS</a></span>
+				<span class="link"><a href="javascript:dashicons.copy( '{{data.html}}', 'html' )">Copy HTML</a></span>
+				<span class="link"><a href="javascript:dashicons.copy( '{{data.glyph}}' )">Copy Glyph</a></span>
 			</div>
 		</script>
 

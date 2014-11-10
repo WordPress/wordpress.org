@@ -21,7 +21,7 @@ $spacing: 25px;
 		left: 0;
 		bottom: $spacing * 2;
 		padding: 0 2.5em;
-		width: 30em;
+		width: 50%;
 
 		#search {
 			width: 100%;
@@ -41,13 +41,13 @@ $spacing: 25px;
 		float:left;
 		margin-top: 0 !important;
 		padding: 1.5em $spacing;
-		width: 30em;
+		width: 50%;
 	}
 
 	#glyph {
 		float:left;
 		padding: 1.5em $spacing;
-		width: 30em;
+		width: 50%;
 
 		.dashicons {
 			font-size: 240px;
@@ -59,7 +59,7 @@ $spacing: 25px;
 		.info {
 			float:right;
 			margin-top: $spacing*2;
-			width: 10em;
+			width: 35%;
 		}
 
 		span {
@@ -138,12 +138,72 @@ $spacing: 25px;
 	.code {
 		display: block;
 		font: 14px/1.5 monospace;
-		width: 600px;
+		max-width: 600px;
 		white-space: pre;
 		border: 1px solid #ccc;
 		padding: 10px;
 		overflow: auto;
 		min-height: 180px;
+	}
+
+	@media ( max-width: 900px ) {
+		.icon-filter {
+			position: relative;
+			left: auto;
+			bottom: auto;
+			padding-left: $spacing;
+			padding-right: $spacing;
+			padding-bottom: $spacing;
+			width: 100%;
+		}
+
+		.entry-content {
+			float: none;
+			padding-bottom: 0;
+			width: 100%;
+		}
+
+		#glyph {
+			float: none;
+			width: 100%;
+			text-align: center;
+
+			.dashicons {
+				font-size: 240px;
+				width: 240px;
+				height: 240px;
+				overflow: visible;
+			}
+
+			.info {
+				float: none;
+				margin-top: 0;
+				width: 100%;
+			}
+
+			span.link {
+				display: inline-block;
+				margin-right: 10px;
+				margin-bottom: 10px;
+				margin-left: 10px;
+
+				&:nth-of-type(2) {
+					margin-left: 0;
+				}
+				&:last-of-type {
+					margin-right: 0;
+				}
+			}
+		}
+	}
+
+	@media ( max-width: 400px ) {
+		#glyph,
+		.entry-content,
+		.icon-filter {
+			padding-left: 0;
+			padding-right: 0;
+		}
 	}
 
 }

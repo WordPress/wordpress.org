@@ -42,8 +42,6 @@
 				html: htmltext,
 				glyph: glyphtext
 			}) );
-
-			$(window).scrollTop(0);
 		}
 	};
 
@@ -74,6 +72,7 @@
 			cssClass = jQuery( this ).attr( 'class' );
 
 			dashicons.display( attr, cssClass );
+			$(window).scrollTop( $("#glyph").offset().top );
 
 		});
 
