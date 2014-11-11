@@ -54,12 +54,12 @@ class DevHub_Redirects {
 	}
 
 	/**
-	 * Redirects a naked /resources/ request to dashicons page.
+	 * Redirects a naked /resource/ request to dashicons page.
 	 *
 	 * Temporary until a resource page other than dashicons is created.
 	 */
 	public static function redirect_resources() {
-		if ( is_page( 'resources' ) ) {
+		if ( is_page( 'resource' ) ) {
 			wp_redirect( get_permalink( get_page_by_title( 'dashicons' ) ) );
 			exit();
 		}
