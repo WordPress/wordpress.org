@@ -64,7 +64,7 @@ class WordCamp_New_Site {
 		global $switched;
 
 		// No updating if the blog has been switched
-		if ( $switched ) {
+		if ( $switched || 1 !== did_action( 'wcpt_metabox_save' ) ) {
 			return;
 		}
 
