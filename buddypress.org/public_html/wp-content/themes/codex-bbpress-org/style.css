@@ -13,6 +13,20 @@
 --------------------------------------------------------------------*/
 #main .content {width: 680px;}
 
+#main {
+        padding-top: 0;
+}
+
+#subnav {
+        background: transparent;
+        border-bottom: none;
+        margin-top: 135px;
+}
+
+#footer {
+        border-top: none;
+}
+
 /* Typography
 --------------------------------------------------------------------*/
 
