@@ -34,6 +34,7 @@ div.standard {
 }
 
 #nav li.current a,
+#nav li.current-menu-item a,
 #nav li a:hover,
 .button:hover {
 	color: rgba(235,255,235,0.9);
@@ -73,6 +74,7 @@ div.standard {
 }
 
 #nav li.current a,
+#nav li.current-menu-item a,
 #nav li a:active,
 .button:active {
 	background-image: -moz-linear-gradient(top, #009933 0%, #008800 100%);

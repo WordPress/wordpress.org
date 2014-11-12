@@ -61,6 +61,7 @@ div.free-page div.standard {
 	color: rgba(255,255,255,0.9);
 }
 
+#nav li.current-menu-item a,
 #nav li.current a,
 #nav li a:active {
 	background-color: #dd823b;

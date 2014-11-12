@@ -498,3 +498,8 @@ function bb_base_recount_current_thing() {
 	}
 }
 add_action( 'bbp_template_redirect', 'bb_base_recount_current_thing' );
+
+function bb_base_register_menus() {
+	register_nav_menu( 'header-nav-menu', 'Main nav bar' );
+}
+add_action( 'init', 'bb_base_register_menus' );
