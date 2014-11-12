@@ -30,7 +30,7 @@
 
 					<div class="bbp-template-notice">
 						<p><?php _e( 'If asking for help, please include your WordPress version, bbPress version, and a link to your site.',                              'bbporg' ); ?></p>
-						<p><?php _e( 'If you have a problem while using a non-bundled theme, check if it happens with TwentyTen or TwentyEleven.',                        'bbporg' ); ?></p>
+						<p><?php _e( 'If you have a problem while using a non-bundled theme, check if it happens with Twenty Thirteen or Twenty Fourteen.',               'bbporg' ); ?></p>
 						<p><?php _e( 'If you found a bug, please create a <a href="http://bbpress.trac.wordpress.org/">trac ticket</a> with detailed duplication steps.', 'bbporg' ); ?></p>
 					</div>
 
