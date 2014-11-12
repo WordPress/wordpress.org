@@ -108,7 +108,6 @@ class WPorg_Handbook {
 
 		add_filter( 'user_has_cap',                       array( $this, 'grant_handbook_caps' ) );
 		add_filter( 'init',                               array( $this, 'register_post_type' ) );
-		add_action( 'admin_page_access_denied',           array( $this, 'admin_page_access_denied' ) );
 		add_filter( 'post_type_link',                     array( $this, 'post_type_link' ), 10, 2 );
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
@@ -188,13 +187,6 @@ class WPorg_Handbook {
 		$config = apply_filters( 'handbook_post_type_defaults', $default_config, $slug );
 
 		register_post_type( $this->post_type, $config );
-	}
-
-	function admin_page_access_denied() {
-		if ( ! current_user_can( 'read' ) ) {
-			wp_redirect( admin_url( "edit.php?post_type={$this->post_type}" ) );
-			exit;
-		}
 	}
 
 	function post_type_link( $link, $post ) {
