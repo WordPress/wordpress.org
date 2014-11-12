@@ -49,6 +49,7 @@
 											'selected'    => -1,
 											'numberposts' => 100,
 											'orderby'     => 'date',
+											'order'       => 'DESC',
 											'exclude'     => bbp_get_topic_id(),
 											'select_id'   => 'bbp_destination_topic'
 										) );
