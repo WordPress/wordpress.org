@@ -750,9 +750,6 @@ img.centered {
 	margin-left: auto;
 	margin-right: auto;
 }
-.attachment {
-	display: block;
-}
 .alignright {
 	float: right;
 }
