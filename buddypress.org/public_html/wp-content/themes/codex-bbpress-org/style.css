@@ -177,6 +177,35 @@
 	border-left: 10px solid #328C00;
 }
 
+.user-widget {
+	margin: 20px 0;
+	-ms-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 5px 10px;
+	background: #fff;
+	border: 1px solid rgba(50, 140, 0, 0.30000000000000004);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+.user-widget a {
+	color: #328C00;
+}
+.user-widget ul {
+	padding: 0;
+	margin: 0;
+}
+.user-widget li {
+	list-style: none;
+	border-top: 1px solid rgba(50, 140, 0, 0.30000000000000004);
+	padding: 7px 0;
+}
+.user-widget li:first-child {
+	border-top: 0;
+}
+
 .search-widget {
 	margin: 20px 0;
 	-ms-box-sizing: border-box;
