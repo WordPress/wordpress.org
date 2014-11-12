@@ -44,8 +44,8 @@ class WordCamp_Admin {
 		add_action( 'transition_post_status',                         array( $this, 'trigger_schedule_actions' ), 10, 3 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'add_organizer_to_central' ), 10 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
-		add_action( 'wp_insert_post_data',                            array( $this, 'enforce_post_status_progression' ), 10, 2 );
-		add_action( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',                            array( $this, 'enforce_post_status_progression' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
 
 		// Admin notices
 		add_action( 'admin_notices',                                  array( $this, 'print_admin_notices' ) );
