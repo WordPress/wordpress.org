@@ -20,4 +20,10 @@
 			}
 		}
 	} );
+
+	// Add php and js buttons to QuickTags.
+	QTags.addButton( 'php', 'php', '[php]', '[/php]' );
+	QTags.addButton( 'js', 'js', '[js]', '[/js]' );
+	QTags.addButton( 'inline-code', 'inline code', '<code>', '</code>' );
+
 } )( jQuery );

@@ -58,13 +58,13 @@ if ( post_password_required() ) {
 	<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
 
 	<?php comment_form( array(
-		'comment_field'       => '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Note', 'noun', 'wporg' ) . '</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>',
+		'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
 		'comment_notes_after' => '<p>' .
 			__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
 			'</p><p>' .
 			__( 'Do not use this form for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' ) .
 			'</p><p>' .
-			sprintf( __( 'You can enter text and code. Code should be wrapped in the %s shortcode.', 'wporg' ), '[code][/code]' ) .
+			__( 'You can enter text and code. Use the php, js, or inline code buttons to wrap code snippets.', 'wporg' ) .
 			'</p><p class="user-notes-are-gpl">' .
 			sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
 			'</p>',
