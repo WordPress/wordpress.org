@@ -16,6 +16,10 @@ em, cite {
 	font-style: bold;
 }
 
+#wporg-header h1 {
+	float: right;
+}
+
 #wporg-header h1 a {
 	background-position:center right;
 	text-indent: -9999px;
@@ -26,6 +30,12 @@ em, cite {
 #wporg-header h2.rosetta a {
 	float: right;
 	padding-right: 10px;
+}
+
+@media screen and (max-width:767px) {
+	#wporg-header h2.rosetta {
+		clear: both;
+	}
 }
 
 #wporg-header ul li {
