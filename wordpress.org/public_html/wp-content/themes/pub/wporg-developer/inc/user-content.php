@@ -123,7 +123,7 @@ class DevHub_User_Submitted_Content {
 			'textarea_name' => 'comment',
 			'textarea_rows' => 8,
 			'quicktags'     => array(
-				'buttons' => 'strong,em,ul,ol,li,wporg_php,js'
+				'buttons' => 'strong,em,ul,ol,li'
 			),
 			'teeny'         => true,
 			'tinymce'       => false,
@@ -132,15 +132,6 @@ class DevHub_User_Submitted_Content {
 		return ob_get_clean();
 	}
 
-	public static function mce_buttons( $buttons ) {
-		$buttons = array_merge( $buttons, array( 'wporg_php' ) );
-		return $buttons;
-	}
-
-	public static function mce_plugins( $plugins ) {
-		$plugins['wporg_php'] = get_stylesheet_directory_uri() . '/js/user-notes.js';
-		return $plugins;
-	}
 } // DevHub_User_Submitted_Content
 
 DevHub_User_Submitted_Content::init();
