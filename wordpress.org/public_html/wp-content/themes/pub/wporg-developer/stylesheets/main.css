@@ -854,6 +854,42 @@ input {
 .devhub-wrap .reference-landing .section.search-section {
   padding-top: 0;
 }
+.devhub-wrap.single div#inner-search, .devhub-wrap.archive div#inner-search {
+  background-color: #2e6183;
+  margin-top: -1em;
+  margin-bottom: 1em;
+  padding-top: 2px;
+}
+.devhub-wrap.single div#inner-search .section.search-section, .devhub-wrap.archive div#inner-search .section.search-section {
+  color: #ffffff;
+}
+.devhub-wrap.single div#inner-search div#inner-search-icon-container, .devhub-wrap.archive div#inner-search div#inner-search-icon-container {
+  margin: 0 auto;
+  max-width: 60em;
+}
+.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon {
+  background-color: #2e6183;
+  color: #ffffff;
+  text-align: center;
+  margin-right: 10%;
+  float: right;
+  left: 75%;
+  padding: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search {
+  height: auto;
+  width: auto;
+}
+.devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before {
+  font-size: 36px;
+  line-height: 36px;
+}
 .devhub-wrap .searchform {
   overflow: hidden;
   height: auto;

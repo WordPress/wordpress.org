@@ -1051,4 +1051,16 @@ namespace DevHub {
 		return $new_text;
 	}
 
+	/**
+	 * Should the search bar be shown?
+	 *
+	 * @return bool True if search bar should be shown.
+	 */
+	function should_show_search_bar() {
+		$post_types = array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' );
+		$taxonomies = array( 'wp-parser-since', 'wp-parser-package', 'wp-parser-source-file' );
+
+		return ( is_singular( $post_types ) || is_post_type_archive( $post_types ) || is_tax( $taxonomies ) );
+	}
+
 }

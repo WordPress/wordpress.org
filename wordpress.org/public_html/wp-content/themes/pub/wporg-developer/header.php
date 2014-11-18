@@ -24,4 +24,16 @@ require WPORGPATH . 'header.php';
 			</div>
 		</div><!-- .inner-wrap -->
 	</header><!-- #masthead -->
+	<?php
+	if ( DevHub\should_show_search_bar() ) : ?>
+		<div id="inner-search">
+			<?php get_search_form(); ?>
+			<div id="inner-search-icon-container">
+				<div id="inner-search-icon">
+					<div class="dashicons dashicons-search"></div>
+				</div>
+			</div>
+		</div>
+
+	<?php endif; ?>
 	<div id="content" class="site-content">
