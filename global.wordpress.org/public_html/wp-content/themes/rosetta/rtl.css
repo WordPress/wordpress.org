@@ -20,12 +20,12 @@ h3, h4, h5, h6 {
 
 .main {
 	float: right;
-  padding: 0 0 0 30px;
+	padding: 0 0 0 30px;
 }
 
 .download-button span, .download-tar {
 	direction: ltr;
-  unicode-bidi: embed;
+	unicode-bidi: embed;
 }
 
 h4, h6 {
@@ -39,7 +39,7 @@ ul, ol {
 
 .narrow {
 	float: right;
-  margin: 0 0 0 20px;
+	margin: 0 0 0 20px;
 }
 
 span.author {
@@ -54,3 +54,4 @@ span.author {
 	direction: ltr;
 	text-align: left;
 }
+
