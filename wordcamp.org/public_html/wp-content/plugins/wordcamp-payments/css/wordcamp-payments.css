@@ -1,0 +1,28 @@
+/*
+ * Payment Methods
+ */
+.payment_method_fields.active,
+.wcp_no_files_uploaded.active {
+	display: block;
+}
+
+tr#row-payment-method label {
+	margin-right: 20px;
+}
+
+
+/*
+ * Files
+ */
+#wcp_files .description {
+	margin-bottom: 1em;
+}
+
+.wcp_files_list li {
+	list-style-type: disc;
+	margin-left: 15px;
+}
+
+.form-table td p.wcp_no_files_uploaded {
+	margin-bottom: 1em;
+}
