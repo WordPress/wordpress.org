@@ -124,9 +124,6 @@ class WordCamp_Payments_Network_Tools {
 	public static function prepare_for_index( $request ) {
 		$request = get_post( $request );
 
-		$terms = wp_get_object_terms( $request->ID, 'wcp_payment_category' );
-		$category_name = ! empty( $terms ) ? array_shift( $terms )->name : '';
-
 		return array(
 			'blog_id' => get_current_blog_id(),
 			'post_id' => $request->ID,
@@ -134,7 +131,7 @@ class WordCamp_Payments_Network_Tools {
 			'due' => absint( get_post_meta( $request->ID, '_camppayments_due_by', true ) ),
 			'status' => $request->post_status,
 			'method' => get_post_meta( $request->ID, '_camppayments_payment_method', true ),
-			'category' => $category_name,
+			'category' => get_post_meta( $request->ID, '_camppayments_payment_category', true ),
 		);
 	}
 

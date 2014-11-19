@@ -149,11 +149,11 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	 * Note: runs in a switch_to_blog() context.
 	 */
 	public function column_category( $request ) {
-		$terms = wp_get_object_terms( $request->ID, 'wcp_payment_category' );
-		if ( empty( $terms ) )
-			return;
+		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/classes/payment-request.php' );
+		$categories        = WCP_Payment_Request::get_payment_categories();
+		$selected_category = get_post_meta( $request->ID, '_camppayments_payment_category', true );
 
-		return array_shift( $terms )->name;
+		return isset( $categories[ $selected_category ] ) ? $categories[ $selected_category ] : '';
 	}
 
 	/**
