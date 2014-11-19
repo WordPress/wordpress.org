@@ -12,6 +12,8 @@ function rosetta_after_setup_theme() {
 	) );
 
 	register_nav_menu( 'rosetta_main', __( 'Main Menu', 'rosetta' ) );
+
+	remove_action( 'wp_head', 'locale_stylesheet' );
 }
 add_action( 'after_setup_theme', 'rosetta_after_setup_theme' );
 
@@ -69,4 +71,3 @@ function rosetta_orphan_control( $string ) {
 	return substr_replace( $string, '&nbsp;', strrpos( $string, ' ' ), 1 );
 }
 add_filter( 'no_orphans', 'rosetta_orphan_control' );
-
