@@ -87,6 +87,10 @@ class WordCamp_Payments_Network_Tools {
 	public static function aggregate() {
 		global $wpdb;
 
+		// Register the custom payment statuses so that we can filter posts to include only them, in order to exclude trashed posts
+		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/classes/payment-request.php' );
+		WCP_Payment_Request::register_post_statuses();
+
 		// Truncate existing table.
 		$wpdb->query( sprintf( "TRUNCATE TABLE %s;", self::get_table_name() ) );
 
@@ -103,7 +107,7 @@ class WordCamp_Payments_Network_Tools {
 			$paged = 1;
 			while ( $requests = get_posts( array(
 				'paged' => $paged++,
-				'post_status' => 'any',
+				'post_status' => array( 'paid', 'unpaid' ),
 				'post_type' => 'wcp_payment_request',
 				'posts_per_page' => 20,
 			) ) ) {
