@@ -9,7 +9,7 @@ class WCP_Payment_Request {
 	public function __construct() {
 		// Initialization
 		add_action( 'init',                   array( $this, 'register_post_type' ));
-		add_action( 'init',                   array( $this, 'register_post_statuses' ) );
+		add_action( 'init',                   array( __CLASS__, 'register_post_statuses' ) );
 		add_action( 'add_meta_boxes',         array( $this, 'init_meta_boxes' ) );
 
 		// Miscellaneous
@@ -68,7 +68,7 @@ class WCP_Payment_Request {
 	/**
 	 * Register our custom post statuses
 	 */
-	public function register_post_statuses() {
+	public static function register_post_statuses() {
 		register_post_status(
 			'paid',
 			array(
