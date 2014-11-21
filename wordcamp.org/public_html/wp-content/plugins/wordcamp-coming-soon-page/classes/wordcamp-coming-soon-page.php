@@ -86,13 +86,18 @@ class WordCamp_Coming_Soon_Page {
 		<!-- BEGIN wordcamp-coming-soon-page -->
 		<style type="text/css">
 			html, body {
-				background-color: <?php echo esc_html( $settings['body_background_color'] ); ?>;
 				color: <?php echo esc_html( $settings['text_color'] ); ?>;
 			}
 			
 			#wccsp-container,
 			.widget  {
 				background-color: <?php echo esc_html( $settings['container_background_color'] ); ?>;
+			}
+
+			@media all and ( min-width: 800px ) {
+				html, body {
+					background-color: <?php echo esc_html( $settings['body_background_color'] ); ?>;
+				}
 			}
 		</style>
 		<!-- END wordcamp-coming-soon-page -->
