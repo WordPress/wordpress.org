@@ -21,9 +21,8 @@
 <title>WordPress &#8250; Free WordPress Themes</title>
 <link href="//s.w.org/wp-includes/css/dashicons.css?20140409" rel="stylesheet" type="text/css" />
 <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600&subset=latin,cyrillic-ext,greek-ext,greek,vietnamese,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
-<link rel="stylesheet" href="//s.w.org/style/wp4.css?14" />
+
 <link media="only screen and (max-device-width: 480px)" href="//s.w.org/style/iphone.css?1" type="text/css" rel="stylesheet" />
-<link rel="stylesheet" href="http://localhost/repotest/wp-admin/css/themes.css" />
 
 <link rel="shortcut icon" href="//s.w.org/favicon.ico" type="image/x-icon" />
 
@@ -259,14 +258,15 @@ var toggleMenu = function(){
 <body id="wordpress-org" >
 <div id="wporg-header">
 	<div class="wrapper">
-	<a id="mobile-menu-button" class="" href="#" onclick="toggleMenu();"></a>
-	<h1><a href="//wordpress.org">WordPress.org</a></h1>				<div id="head-search">
-		<form action="//wordpress.org/search/do-search.php" method="get">
-			<input class="text" name="search" type="text" value="" maxlength="150" placeholder="Search WordPress.org" /> <input type="submit" class="button" value="" />
-		</form>
+		<a id="mobile-menu-button" class="" href="#" onclick="toggleMenu();"></a>
+		<h1><a href="//wordpress.org">WordPress.org</a></h1>
+		<div id="head-search">
+			<form action="//wordpress.org/search/do-search.php" method="get">
+				<input class="text" name="search" type="text" value="" maxlength="150" placeholder="Search WordPress.org" /> <input type="submit" class="button" value="" />
+			</form>
 		</div>
-				<div style="clear:both"></div>
-		
+		<div style="clear:both"></div>
+
 <ul id="wporg-header-menu">
 <li><a href='//wordpress.org/showcase/' title='See some of the sites built on WordPress.'>Showcase</a></li>
 <li><a href='' title='Find just the right look for your website.' class="current">Themes</a><div class="uparrow"></div></li>
@@ -284,18 +284,17 @@ var toggleMenu = function(){
 </div>
 
 <div id="download-mobile">
-    <div class="wrapper">
-        <span class="download-ready">Ready to get started?</span><a class="button download-button" href="//wordpress.org/download/" title="Get it. Got it? Good.">Download WordPress</a>
-    </div>
+	<div class="wrapper">
+		<span class="download-ready">Ready to get started?</span><a class="button download-button" href="//wordpress.org/download/" title="Get it. Got it? Good.">Download WordPress</a>
+	</div>
 </div>
 
 <div id="headline">
 	<div class="wrapper">
-		<a href="/themes/"><h2>Themes Directory</h2></a>
+		<h2 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h2>
 
 		<p class="login">
 	Welcome, <a href='//profiles.wordpress.org/otto42'>Samuel Wood (Otto)</a>	 | <a href="https://wordpress.org/themes/bb-admin/">Admin</a>	| <a href="https://wordpress.org/themes/bb-login.php?action=logout">Log Out</a></p>
 
 	</div>
 </div>
- 

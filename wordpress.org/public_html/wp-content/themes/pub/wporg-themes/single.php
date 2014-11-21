@@ -14,24 +14,26 @@
 get_header(); ?>
 
 <div id="pagebody">
-        <div class="wrapper">
+	<div class="wrapper">
 		<div class="col-12">
-		<div class="theme-browser">
-		TODO menu bar
-		
-		<div class="themes">
-		<?php if ( have_posts() ) : ?>
+			<div class="theme-browser">
+				TODO menu bar
 
-			<?php while ( have_posts() ) : the_post(); ?>
-				<?php get_template_part( 'content', 'single' ); ?>
-			<?php endwhile; ?>
-		<?php else : ?>
-			<?php get_template_part( 'content', 'none' ); ?>
-		<?php endif; ?>
-		</div>
-		</div>
+				<div class="themes">
+					<?php
+						if ( have_posts() ) :
+							while ( have_posts() ) :
+								the_post();
+
+								get_template_part( 'content', 'single' );
+							endwhile;
+						else :
+							get_template_part( 'content', 'none' );
+						endif;
+					?>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
-
 <?php get_footer(); ?>
