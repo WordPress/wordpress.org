@@ -467,17 +467,20 @@ function make_doclink_clickable( $content ) {
 
 			$link = $matches[1];
 
-			// Fix URLs made clickable during initial parsing
+			// Undo links made clickable during initial parsing
 			if ( 0 === strpos( $link, '<a ' ) ) {
 
-				if ( preg_match( '/^<a .*href=[\'\"]([^\'\"]+)[\'\"]>(.*)<\/a>$/', $link, $parts ) ) {
-					$link = '<a href="' . $parts[1] . '">' . esc_html( trim( $parts[2] ) ) . '</a>';
+				if ( preg_match( '/^<a .*href=[\'\"]([^\'\"]+)[\'\"]>(.*)<\/a>(.*)$/', $link, $parts ) ) {
+					$link = $parts[1];
+					if ( $parts[3] ) {
+						$link .= ' ' . $parts[3];
+					}
 				}
 
 			}
 
 			// Link to an external resource.
-			elseif ( 0 === strpos( $link, 'http' ) ) {
+			if ( 0 === strpos( $link, 'http' ) ) {
 
 				$parts = explode( ' ', $link, 2 );
 
