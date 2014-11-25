@@ -2,9 +2,9 @@
 	<div class="theme-backdrop"></div>
 	<div class="theme-wrap">
 		<div class="theme-header">
+			<button class="close dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Close overlay' ); ?></span></button>
 			<button class="left dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show previous theme' ); ?></span></button>
 			<button class="right dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show next theme' ); ?></span></button>
-			<button class="close dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Close overlay' ); ?></span></button>
 		</div>
 		<div class="theme-about">
 			<div class="theme-screenshots">
@@ -15,13 +15,12 @@
 				<# } #>
 			</div>
 
-			<div class="theme-info">
-				<h3 class="theme-name">
-					{{{ data.name }}}<span class="theme-version"><?php printf( __( 'Version: %s' ), '{{{ data.version }}}' ); ?></span>
-				</h3>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '{{{ data.author }}}' ); ?></h4>
+			<div class="theme-info hentry">
+				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
+				<span class="theme-version"><?php printf( __( 'Version: %s' ), '{{{ data.version }}}' ); ?></span>
+				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<span class="author">{{{ data.author }}}</span>' ); ?></h4>
 
-				<p class="theme-description">{{{ data.description }}}</p>
+				<p class="theme-description entry-summary">{{{ data.description }}}</p>
 
 				<div class="rating rating-{{ Math.round( data.rating / 10 ) * 10 }}">
 					<span class="one"></span>
@@ -34,7 +33,7 @@
 				</div>
 
 				<div class="theme-stats">
-					<div><strong><?php _e( 'Last updated:' ); ?></strong> {{ data.last_updated }}</div>
+					<div><strong><?php _e( 'Last updated:' ); ?></strong> <span class="updated">{{ data.last_updated }}</span></div>
 					<div><strong><?php _e( 'Downloads:' ); ?></strong> {{ data.downloaded }}</div>
 					<div><a href="{{ data.homepage }}"><?php _e( 'Theme Homepage &raquo;' ); ?></a></div>
 				</div>
@@ -43,7 +42,7 @@
 				<p class="theme-tags">
 					<span><?php _e( 'Tags:' ); ?></span>
 					<# _.each( data.tags, function( tag ) { #>
-						{{{ tag }}}
+						<a href="">{{{ tag }}}</a>
 					<# }); #>
 				</p>
 				<# } #>

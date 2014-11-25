@@ -11,11 +11,17 @@
  * @package wporg-themes
  */
 
+$template_part = is_single() ? 'single' : 'index';
 include ABSPATH . 'wp-admin/includes/theme.php';
-$themes = themes_api( 'query_themes', array(
-	'per_page' => 15,
-	'browse'   => get_query_var( 'attachment' ) ? get_query_var( 'attachment' )  : 'search',
-) );
+if ( is_single() ) {
+	$themes = themes_api( 'theme_information', array( 'slug' => get_post()->post_name ) );
+} else {
+	$themes = themes_api( 'query_themes', array(
+		'per_page' => 15,
+		'browse'   => get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured',
+		'fields'   => 'tags',
+	) );
+}
 
 get_header();
 ?>
@@ -41,6 +47,7 @@ get_header();
 				<a class="apply-filters button button-secondary" href="#"><?php _e( 'Apply Filters' ); ?><span></span></a>
 				<a class="clear-filters button button-secondary" href="#"><?php _e( 'Clear' ); ?></a>
 			</div>
+
 			<?php foreach ( get_theme_feature_list() as $feature_name => $features ) : ?>
 			<div class="filter-group">
 				<h4><?php echo esc_html( $feature_name ); ?></h4>
@@ -54,22 +61,27 @@ get_header();
 				</ol>
 			</div>
 			<?php endforeach; ?>
+
 			<div class="filtered-by">
 				<span><?php _e( 'Filtering by:' ); ?></span>
 				<div class="tags"></div>
 				<a href="#"><?php _e( 'Edit' ); ?></a>
 			</div>
 		</div>
-	</div>
+	</div><!-- .wp-filter -->
+
 	<div class="theme-browser content-filterable">
-		<?php
-			if ( ! is_wp_error( $themes ) ) :
-				foreach ( $themes->themes as $theme ) :
-					get_template_part( 'content', 'index' );
-				endforeach;
-			endif;
-		?>
+		<div class="themes">
+			<?php
+				if ( ! is_wp_error( $themes ) ) :
+					foreach ( $themes->themes as $theme ) :
+						get_template_part( 'content', $template_part );
+					endforeach;
+				endif;
+			?>
+		</div>
 	</div>
+	<div class="theme-install-overlay"></div>
 	<div class="theme-overlay"></div>
 
 	<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>

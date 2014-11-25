@@ -4,6 +4,7 @@
 			<a href="#" class="close-full-overlay"><span class="screen-reader-text"><?php _e( 'Close' ); ?></span></a>
 			<a href="#" class="previous-theme"><span class="screen-reader-text"><?php _ex( 'Previous', 'Button label for a theme' ); ?></span></a>
 			<a href="#" class="next-theme"><span class="screen-reader-text"><?php _ex( 'Next', 'Button label for a theme' ); ?></span></a>
+			<a href="#" class="button button-primary theme-install"><?php _e( 'Download' ); ?></a>
 		</div>
 		<div class="wp-full-overlay-sidebar-content">
 			<div class="install-theme-info">

@@ -255,7 +255,7 @@ var toggleMenu = function(){
 <?php wp_head(); ?>
 </head>
 
-<body id="wordpress-org" >
+<body id="wordpress-org" <?php body_class(); ?>>
 <div id="wporg-header">
 	<div class="wrapper">
 		<a id="mobile-menu-button" class="" href="#" onclick="toggleMenu();"></a>
