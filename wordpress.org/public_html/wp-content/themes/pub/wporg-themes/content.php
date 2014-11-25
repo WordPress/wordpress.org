@@ -1,4 +1,4 @@
-<?php global $theme; var_dump($theme);?>
+<?php global $theme; ?>
 <article id="post-<?php echo $theme->slug; ?>" class="theme hentry">
 	<div class="theme-screenshot">
 		<img src="<?php echo esc_url( $theme->screenshot_url ); ?>" alt="">
