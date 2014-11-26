@@ -52,7 +52,7 @@ body.modal-open {
 	padding: 0 10px;
 }
 .theme-overlay .theme-wrap {
-	right: 190px;
+	left: 30px;
 	top: 3%;
 }
 
@@ -68,8 +68,35 @@ body.modal-open {
 	}
 }
 
+.theme-overlay .theme-about > div {
+	margin-bottom: 75px;
+}
+
+.theme-overlay .theme-info {
+	float: right;
+}
 .theme-overlay .theme-name {
 	display: inline-block;
+}
+
+.theme-overlay .theme-screenshots {
+	float: none;
+}
+
+.theme-overlay .theme-downloads,
+.theme-overlay .theme-devs {
+	width: 55%;
+}
+
+.theme-overlay .theme-devs {
+	font-size: 1.4em;
+}
+
+.theme-overlay .theme-devs h5 {
+	margin: 1em 0 0 0;
+}
+.theme-overlay .theme-devs li {
+	line-height: 1.5;
 }
 
 .theme-install-overlay iframe {

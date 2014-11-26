@@ -39,7 +39,7 @@
 				<span><?php _e( 'Tags:' ); ?></span>
 				<?php echo implode( ', ', $theme->tags ); ?>
 			</p>
-		</div>å
+		</div>
 	</div>
 
 	<div class="theme-actions">

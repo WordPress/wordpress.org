@@ -7,14 +7,6 @@
 			<button class="right dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show next theme' ); ?></span></button>
 		</div>
 		<div class="theme-about">
-			<div class="theme-screenshots">
-				<# if ( data.screenshot_url ) { #>
-				<div class="screenshot"><img src="{{ data.screenshot_url }}" alt=""/></div>
-				<# } else { #>
-				<div class="screenshot blank"></div>
-				<# } #>
-			</div>
-
 			<div class="theme-info hentry">
 				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
 				<span class="theme-version"><?php printf( __( 'Version: %s' ), '{{{ data.version }}}' ); ?></span>
@@ -46,6 +38,39 @@
 					<# }); #>
 				</p>
 				<# } #>
+			</div><!-- .theme-info -->
+
+			<div class="theme-screenshots">
+				<# if ( data.screenshot_url ) { #>
+				<div class="screenshot"><img src="{{ data.screenshot_url }}" alt=""/></div>
+				<# } else { #>
+				<div class="screenshot blank"></div>
+				<# } #>
+			</div><!-- .theme-screenshot -->
+
+			<div class="theme-downloads">
+				<h4><?php _e( 'Downloads Per Day' ); ?></h4>
+				<div id="theme-download-stats-{{data.id}}" class="chart"></div>
+			</div>
+
+			<div class="theme-devs">
+				<h4><?php _e( 'Developers', 'wporg-themes' ); ?></h4>
+				<h5><?php _e( 'Subscribe', 'wporg-themes' ); ?></h5>
+				<ul class="unmarked-list">
+					<li>
+						<a href="//themes.trac.wordpress.org/log/{{data.id}}?limit=100&mode=stop_on_copy&format=rss">
+							<img src="//s.w.org/style/images/feedicon.png" style="vertical-align:text-top;" />
+							<?php _e( 'Development Log', 'wporg' ); ?>
+						</a>
+					</li>
+				</ul>
+
+				<h5><?php _e( 'Browse the Code', 'wporg-themes' ); ?></h5>
+				<ul class="unmarked-list">
+					<li><a href='//themes.trac.wordpress.org/log/{{data.id}}/' rel='nofollow'><?php _e( 'Development Log', 'wporg-themes' ); ?></a></li>
+					<li><a href='//themes.svn.wordpress.org/{{data.id}}/' rel='nofollow'><?php _e( 'Subversion Repository', 'wporg-themes' ); ?></a></li>
+					<li><a href='//themes.trac.wordpress.org/browser/{{data.id}}/' rel='nofollow'><?php _e( 'Browse in Trac', 'wporg-themes' ); ?></a></li>
+				</ul>
 			</div>
 		</div>
 

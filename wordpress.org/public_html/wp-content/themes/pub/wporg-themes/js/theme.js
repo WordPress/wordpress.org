@@ -1,4 +1,5 @@
 ( function ( $, wp ) {
+	google.load("visualization", "1", {packages:["corechart"]});
 
 	_.extend( wp.themes.view.Appearance.prototype, {
 		el: '#themes .theme-browser',
@@ -30,6 +31,20 @@
 			'click .button-secondary': 'preview',
 			'keydown .button-secondary': 'preview',
 			'touchend .button-secondary': 'preview'
+		},
+
+		render: function() {
+			var data = this.model.toJSON();
+			this.$el.html( this.html( data ) );
+			// Renders active theme styles
+			this.activeTheme();
+			// Set up navigation events
+			this.navigation();
+			// Checks screenshot size
+			this.screenshotCheck( this.$el );
+			// Contain "tabbing" inside the overlay
+			this.containFocus( this.$el );
+			this.renderDownloadsGraph();
 		},
 
 		preview: function( event ) {
@@ -162,6 +177,60 @@
 			if ( _.isUndefined( this.model.collection.at( this.model.collection.indexOf( current ) + 1 ) ) ) {
 				$themeInstaller.find( '.next-theme' ).addClass( 'disabled' );
 			}
+		},
+
+		screenshotCheck: function( el ) {
+			var image = new Image();
+			image.src = el.find( '.screenshot img' ).attr( 'src' );
+		},
+
+		renderDownloadsGraph: function() {
+			var self = this;
+
+			$.getJSON( 'https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=' + self.model.get( 'id' ) + '&limit=230&callback=?', function( downloads ) {
+				var data = new google.visualization.DataTable(),
+					count = 0,
+					sml;
+
+				data.addColumn('string', _wpThemeSettings.l10n.date);
+				data.addColumn('number', _wpThemeSettings.l10n.downloads);
+
+				$.each(downloads, function (key, value) {
+					data.addRow();
+					data.setValue(count, 0, new Date(key).toLocaleDateString() );
+					data.setValue(count, 1, Number(value));
+					count++;
+				});
+
+				sml = data.getNumberOfRows() < 225;
+
+				new google.visualization.ColumnChart(document.getElementById('theme-download-stats-' + self.model.get( 'id' ) )).draw(data, {
+					colors: ['#253578'],
+					legend: {
+						position: 'none'
+					},
+					titlePosition: 'in',
+					axisTitlesPosition: 'in',
+					chartArea: {
+						height: 280,
+						left: sml ? 30 : 0,
+						width: sml ? '80%' : '100%'
+					},
+					hAxis: {
+						textStyle: {color: 'black', fontSize: 9}
+					},
+					vAxis: {
+						format: '###,###',
+						textPosition: sml ? 'out' : 'in',
+						viewWindowMode: 'explicit',
+						viewWindow: {min: 0}
+					},
+					bar: {
+						groupWidth: ( data.getNumberOfRows() > 100 ) ? "100%" : null
+					},
+					height: 350
+				});
+			});
 		}
 	});
 
