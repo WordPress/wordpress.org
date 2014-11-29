@@ -11,7 +11,7 @@
 /** Functions *****************************************************************/
 
 /**
- * 
+ *
  * @global object $post
  */
 function codex_get_breadcrumb() {
@@ -25,7 +25,7 @@ function codex_get_breadcrumb() {
 
 		if ( !empty( $post->ancestors ) ) {
 			foreach ( $post->ancestors as $post_id ) {
-				$crumb[] = '&rarr; <a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a>';				
+				$crumb[] = '&rarr; <a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a>';
 			}
 		}
 
@@ -41,23 +41,23 @@ function codex_get_breadcrumb() {
 
 /**
  * Codex
- * 
+ *
  * @author jjj
- * @since 
+ * @since
  */
 class Codex_Loader {
 
 	public function __construct() {
 
 		// Register the widget columns
-		register_sidebars( 1, 
-			array( 
+		register_sidebars( 1,
+			array(
 				'name'          => 'codex-sidebar',
 				'before_widget' => '<div id="%1$s" class="widget %2$s">',
 				'after_widget'  => '</div>',
 				'before_title'  => '<h3 class="widgettitle">',
 				'after_title'   => '</h3>'
-			) 
+			)
 		);
 
 		// Actions
@@ -248,7 +248,7 @@ class Codex_Loader {
 
 	public static function create_page_toc() {
 		$toc     = '';
-		$content = get_the_content();		
+		$content = get_the_content();
 		if ( empty( $content  ) ) {
 			return $toc;
 		}
@@ -348,7 +348,7 @@ new Codex_Loader;
 
 /**
  * Codex specific hacks
- * 
+ *
  * @author jjj
  * @since February 6, 2012
  */
@@ -357,7 +357,7 @@ class Codex_Hacks {
 	/**
 	 * Main constructor
 	 *
-	 * Sets variables and adds actions 
+	 * Sets variables and adds actions
 	 *
 	 * @author jjj
 	 * @since February 6, 2012
@@ -393,7 +393,7 @@ class Codex_Hacks {
 	public function autorole() {
 
 		// Should we bail
-		if ( $this->bail() ) {
+		if ( ! is_user_logged_in() || is_super_admin() ) {
 			return;
 		}
 
@@ -430,7 +430,7 @@ class Codex_Hacks {
 		// Add the editor role to the user
 		$current_user->add_role( $default_role );
 	}
-	
+
 	/**
 	 * Codex specific capabilities
 	 *
@@ -532,18 +532,18 @@ class Codex_Hacks {
 	 */
 	private function bail() {
 
-		// Bail if user is not logged in
-		if ( ! is_user_logged_in() ) {
-			return true;
-		}
-
 		// Bail if user is an admin
 		if ( in_array( 'administrator', wp_get_current_user()->roles ) ) {
 			return true;
 		}
 
+		// Bail if user is super admin
+		if ( is_super_admin() ) {
+			return true;
+		}
+
 		return false;
-	}	
+	}
 }
 new Codex_Hacks();
 
