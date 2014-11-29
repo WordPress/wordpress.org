@@ -365,7 +365,6 @@ class Codex_Hacks {
 	public function __construct() {
 
 		// Add some acitons
-		add_action( 'init',       array( $this, 'autorole'    ), 11 );
 		add_action( 'admin_head', array( $this, 'unset_menus' ), 11 );
 
 		// Codex meta caps (to prevent deletion)
@@ -376,15 +375,19 @@ class Codex_Hacks {
 	}
 
 	/**
-	 * WHen loading up a codex site, check the current users' role and make sure
+	 * When loading up a codex site, check the current users' role and make sure
 	 * they are at least an editor.
 	 *
 	 * We run this on 'init' as we want to give all users the ability to edit pages
 	 * and it's possible they may have an old role (or none) and not be given any
 	 * option to edit pages or link to wp-admin at all.
 	 *
+	 * This method is not currently used. Codexes are manually moderated to prevent
+	 * automated spam attacks.
+	 *
 	 * @author jjj
 	 * @since February 6, 2012
+	 * @deprecated November 29, 2014
 	 * @return Bail under certain conditions
 	 */
 	public function autorole() {
@@ -437,8 +440,9 @@ class Codex_Hacks {
 	public function map_meta_caps( $caps = array(), $cap = '', $user_id = 0 ) {
 
 		// Should we bail
-		if ( $this->bail() )
+		if ( $this->bail() ) {
 			return $caps;
+		}
 
 		// What cap are we switching
 		switch ( $cap ) {
@@ -447,18 +451,14 @@ class Codex_Hacks {
 			case 'delete_post'  :
 			case 'delete_page'  :
 			case 'delete_codex_tags' :
-				if ( ! is_super_admin( $user_id ) ) {
-					$caps = array( 'do_not_allow' );
-				}
+				$caps = array( 'do_not_allow' );
 				break;
 
 			// Allow codex tag management
 			case 'edit_codex_tags'   :
 			case 'assign_codex_tags' :
 			case 'manage_codex_tags' :
-				if ( ! is_super_admin( $user_id ) ) {
-					$caps = array( 'editor' );
-				}
+				$caps = array( 'editor' );
 				break;
 		}
 
@@ -479,8 +479,9 @@ class Codex_Hacks {
 	public function unset_menus() {
 
 		// Should we bail
-		if ( $this->bail() )
+		if ( $this->bail() ) {
 			return;
+		}
 
 		global $menu;
 
@@ -529,12 +530,14 @@ class Codex_Hacks {
 	private function bail() {
 
 		// Bail if user is not logged in
-		if ( !is_user_logged_in() )
+		if ( ! is_user_logged_in() ) {
 			return true;
+		}
 
-		// Bail if you are a super admin,
-		if ( is_super_admin() )
+		// Bail if you are an admin,
+		if ( current_user_can( 'manage_options' ) ) {
 			return true;
+		}
 
 		return false;
 	}	
