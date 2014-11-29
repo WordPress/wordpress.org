@@ -393,14 +393,16 @@ class Codex_Hacks {
 	public function autorole() {
 
 		// Should we bail
-		if ( $this->bail() )
+		if ( $this->bail() ) {
 			return;
+		}
 
 		global $current_user, $wp_roles;
 
 		// Sanity check on current_user
-		if ( empty( $current_user ) )
+		if ( empty( $current_user ) ) {
 			return;
+		}
 
 		// Set some defaults
 		$user_role    = '';
@@ -413,8 +415,9 @@ class Codex_Hacks {
 		}
 
 		// Bail if role is already 'editor'
-		if ( $user_role === $default_role )
+		if ( $user_role === $default_role ) {
 			return;
+		}
 
 		// Get editable roles
 		$editable_roles = apply_filters( 'editable_roles', $wp_roles->roles );
@@ -534,8 +537,8 @@ class Codex_Hacks {
 			return true;
 		}
 
-		// Bail if you are an admin,
-		if ( current_user_can( 'manage_options' ) ) {
+		// Bail if user is an admin
+		if ( in_array( 'administrator', wp_get_current_user()->roles ) ) {
 			return true;
 		}
 
@@ -543,3 +546,4 @@ class Codex_Hacks {
 	}	
 }
 new Codex_Hacks();
+
