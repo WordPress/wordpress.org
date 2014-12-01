@@ -449,7 +449,7 @@ class Codex_Hacks {
 			case 'delete_post' :
 			case 'delete_page' :
 				$caps = array( 'do_not_allow' );
-				if ( ! $this->is_user_trusted() ) {
+				if ( $this->is_user_trusted() ) {
 					$caps = array( $cap );
 				}
 				break;
