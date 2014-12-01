@@ -446,15 +446,22 @@ class Codex_Hacks {
 		switch ( $cap ) {
 
 			// Prevent content deletion
-			case 'delete_post'  :
-			case 'delete_page'  :
-			case 'delete_codex_tags' :
+			case 'delete_post' :
+			case 'delete_page' :
+				$caps = array( 'do_not_allow' );
 				if ( ! $this->is_user_trusted() ) {
-					$caps = array( 'do_not_allow' );
+					$caps = array( $cap );
 				}
 				break;
 
-			// Allow codex tag management
+			// Allow codex management
+			case 'delete_codex_tags' :
+				$caps = array( 'do_not_allow' );
+				if ( $this->is_user_trusted() ) {
+					$caps = array( 'manage_categories' );
+				}
+				break;
+
 			case 'edit_codex_tags'   :
 			case 'assign_codex_tags' :
 			case 'manage_codex_tags' :
