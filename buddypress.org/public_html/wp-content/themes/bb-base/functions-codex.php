@@ -442,11 +442,6 @@ class Codex_Hacks {
 	 */
 	public function map_meta_caps( $caps = array(), $cap = '', $user_id = 0 ) {
 
-		// Should we bail
-		if ( $this->bail() ) {
-			return $caps;
-		}
-
 		// What cap are we switching
 		switch ( $cap ) {
 
@@ -454,14 +449,16 @@ class Codex_Hacks {
 			case 'delete_post'  :
 			case 'delete_page'  :
 			case 'delete_codex_tags' :
-				$caps = array( 'do_not_allow' );
+				if ( ! $this->is_user_trusted() ) {
+					$caps = array( 'do_not_allow' );
+				}
 				break;
 
 			// Allow codex tag management
 			case 'edit_codex_tags'   :
 			case 'assign_codex_tags' :
 			case 'manage_codex_tags' :
-				$caps = array( 'editor' );
+				$caps = array( 'manage_categories' );
 				break;
 		}
 
@@ -482,7 +479,7 @@ class Codex_Hacks {
 	public function unset_menus() {
 
 		// Should we bail
-		if ( $this->bail() ) {
+		if ( $this->is_user_trusted() ) {
 			return;
 		}
 
@@ -524,13 +521,13 @@ class Codex_Hacks {
 	/** Private Methods *******************************************************/
 
 	/**
-	 * Checks if no further action needs to be taken
+	 * Checks if user is trusted in the codex
 	 *
 	 * @author jjj
 	 * @since February 6, 2012
 	 * @return boolean True if should bail, false if should proceed
 	 */
-	private function bail() {
+	private function is_user_trusted() {
 
 		// Bail if user is an admin
 		if ( in_array( 'administrator', wp_get_current_user()->roles ) ) {
@@ -546,4 +543,3 @@ class Codex_Hacks {
 	}
 }
 new Codex_Hacks();
-
