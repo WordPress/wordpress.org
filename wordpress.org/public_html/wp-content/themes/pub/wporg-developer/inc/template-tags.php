@@ -417,8 +417,8 @@ namespace DevHub {
 		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
 		switch ( $parts[1] ) {
 			case 'reference':
-			case 'plugin':
-			case 'theme':
+			case 'plugins':
+			case 'themes':
 				return home_url( '/' . $parts[1] . '/' );
 			default:
 				return home_url( '/' );
