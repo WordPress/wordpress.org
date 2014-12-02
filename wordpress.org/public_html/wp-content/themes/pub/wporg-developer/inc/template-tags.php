@@ -609,6 +609,13 @@ namespace DevHub {
 			foreach ( $args as $arg ) {
 				if ( ! empty( $arg['name'] ) && ! empty( $params[ $arg['name'] ] ) ) {
 					$params[ $arg['name'] ]['default'] = $arg['default'];
+					// If a known default is stated in the parameter's description, try to remove it
+					// since the actual default value is displayed immediately following description.
+					if ( $arg['default'] ) {
+						$default = htmlentities( $arg['default'] );
+						$params[ $arg['name'] ]['content'] = str_replace( "default is {$default}.", '', $params[ $arg['name'] ]['content'] );
+						$params[ $arg['name'] ]['content'] = str_replace( "Default {$default}.", '', $params[ $arg['name'] ]['content'] );
+					}
 				}
 
 			}
