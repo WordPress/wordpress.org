@@ -11,17 +11,12 @@
  * @package wporg-themes
  */
 
-$template_part = is_single() ? 'single' : 'index';
 include ABSPATH . 'wp-admin/includes/theme.php';
-if ( is_single() ) {
-	$themes = themes_api( 'theme_information', array( 'slug' => get_post()->post_name ) );
-} else {
-	$themes = themes_api( 'query_themes', array(
-		'per_page' => 15,
-		'browse'   => get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured',
-		'fields'   => 'tags',
-	) );
-}
+$themes = themes_api( 'query_themes', array(
+	'per_page' => 15,
+	'browse'   => get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured',
+	'fields'   => 'tags',
+) );
 
 get_header();
 ?>
@@ -29,7 +24,7 @@ get_header();
 <div id="themes" class="wrap">
 	<div class="wp-filter">
 		<div class="filter-count">
-			<span class="count theme-count"></span>
+			<span class="count theme-count"><?php echo count( $themes->themes ); ?></span>
 		</div>
 
 		<ul class="filter-links">
@@ -75,7 +70,7 @@ get_header();
 			<?php
 				if ( ! is_wp_error( $themes ) ) :
 					foreach ( $themes->themes as $theme ) :
-						get_template_part( 'content', $template_part );
+						get_template_part( 'content', 'index' );
 					endforeach;
 				endif;
 			?>

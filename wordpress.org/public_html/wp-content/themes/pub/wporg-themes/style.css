@@ -17,6 +17,10 @@ body.modal-open {
 	overflow: hidden;
 }
 
+p {
+	margin-bottom: 1.5em;
+}
+
 /* Assistive text */
 .screen-reader-text {
 	clip: rect(1px, 1px, 1px, 1px);
@@ -68,34 +72,44 @@ body.modal-open {
 	}
 }
 
-.theme-overlay .theme-about > div {
+.theme-wrap .theme-about > div:not(.notice) {
 	margin-bottom: 75px;
 }
 
-.theme-overlay .theme-info {
+.theme-wrap .theme-info {
 	float: right;
+	width: 40%;
 }
-.theme-overlay .theme-name {
+.theme-wrap .theme-name {
 	display: inline-block;
 }
 
-.theme-overlay .theme-screenshots {
+.theme-wrap .theme-screenshots {
 	float: none;
 }
 
-.theme-overlay .theme-downloads,
-.theme-overlay .theme-devs {
+.theme-wrap .theme-downloads {
 	width: 55%;
 }
+.theme-wrap .theme-devs,
+.theme-wrap .theme-ratings {
+	display: inline-block;
+	vertical-align: top;
+	width: 26%;
+}
 
-.theme-overlay .theme-devs {
+.theme-wrap .theme-devs {
 	font-size: 1.4em;
 }
 
-.theme-overlay .theme-devs h5 {
+.theme-wrap .theme-ratings {
+	margin-right: 3%;
+}
+
+.theme-wrap .theme-devs h5 {
 	margin: 1em 0 0 0;
 }
-.theme-overlay .theme-devs li {
+.theme-wrap .theme-devs li {
 	line-height: 1.5;
 }
 
@@ -108,6 +122,133 @@ body.modal-open {
 	transition: opacity 0.3s;
 }
 
+.theme-version abbr {
+	border-bottom: 1px dotted #666;
+	cursor: help;
+}
+
+/* Single View */
+.single .theme-wrap {
+	background: #fff;
+	box-shadow: 0 1px 20px 5px rgba(0, 0, 0, 0.1);
+	margin: 3% 0;
+	overflow: hidden;
+	padding: 2% 4%;
+}
+
+
+/**
+ * Theme heading information
+ */
+.single .theme-wrap .current-label {
+	background: #333;
+	color: #fff;
+	font-size: 11px;
+	display: inline-block;
+	padding: 2px 8px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	margin: 0 0 -10px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.single .theme-wrap .theme-name {
+	color: #222;
+	font-size: 32px;
+	font-weight: 100;
+	margin: 10px 0 0;
+	line-height: 1.3;
+}
+
+.single .theme-wrap .theme-version {
+	color: #999;
+	font-size: 13px;
+	font-weight: 400;
+	float: none;
+	display: inline-block;
+	margin-left: 10px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.single .theme-wrap .theme-author {
+	color: #686868;
+	font-size: 16px;
+	font-weight: 400;
+	margin: 15px 0 25px;
+}
+
+.single .theme-wrap .theme-author a {
+	text-decoration: none;
+}
+
+.single .theme-wrap .theme-description {
+	color: #555;
+	font-size: 15px;
+	font-weight: 400;
+	line-height: 1.5;
+	margin: 30px 0 0 0;
+}
+
+.single .theme-wrap .theme-tags {
+	border-top: 3px solid #eee;
+	color: #888;
+	font-size: 13px;
+	font-weight: 400;
+	margin: 30px 0 0 0;
+	padding-top: 20px;
+}
+
+.single .theme-wrap .theme-tags span {
+	color: #444;
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.single .theme-wrap .theme-screenshots {
+	margin: 0 30px 0 0;
+	width: 55%;
+	max-width: 880px;
+	text-align: center;
+}
+.single .theme-wrap .screenshot {
+	border: 1px solid #fff;
+	box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+	box-sizing: border-box;
+	overflow: hidden;
+	position: relative;
+}
+
+.single .theme-wrap .screenshot img {
+	height: auto;
+	vertical-align: middle;
+	width: 100%;
+}
+
+.single .theme-wrap .theme-actions {
+	background: #f3f3f3;
+	border-top: 1px solid #eee;
+	box-sizing: border-box;
+	margin: 0 -4.3% -2.1%;
+	padding: 10px 25px 5px;
+	text-align: center;
+}
+
+.ie8 .single .theme-wrap .theme-actions {
+	border: 1px solid #eee;
+}
+
+.single .theme-wrap .theme-actions a {
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+
+/* Spinner */
 .spinner {
 	background: url(/wp-admin/images/spinner.gif) no-repeat;
 	-webkit-background-size: 20px 20px;
@@ -230,7 +371,7 @@ body.modal-open {
 
 .wp-filter .search-form {
 	float: right;
-	margin-top: 9px;
+	margin: 12px 0;
 }
 
 .wp-filter .search-form input[type="search"] {
@@ -508,4 +649,41 @@ body.modal-open {
 	box-shadow: inset 0 1px 0 rgba( 120, 200, 230, 0.5 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 	color: #fff;
 	text-decoration: none;
+}
+
+/* Theme notices */
+.notice {
+	background: #fff;
+	border: 1px solid #fff;
+	border-left-width: 5px;
+	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
+	font-size: 13px;
+	margin: 5px 15px 2px;
+	padding: 1px 12px;
+}
+
+.notice p {
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.notice-success {
+	border-color: #7ad03a;
+}
+
+.notice-warning {
+	border-color: #ffba00;
+}
+
+.notice-error {
+	border-color: #dd3d36;
+}
+
+.notice-info {
+	background: #f7fcfe;
+	border-color: #2ea2cc;
+}
+
+.wrap .notice {
+	margin: 5px 0 15px;
 }

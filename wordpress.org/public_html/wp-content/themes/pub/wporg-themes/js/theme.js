@@ -34,7 +34,12 @@
 		},
 
 		render: function() {
-			var data = this.model.toJSON();
+			var data = this.model.toJSON(),
+				updated = new Date(data.last_updated);
+
+			// If last updated plus 2 years is in the past, it's outdated.
+			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() > new Date().valueOf();
+
 			this.$el.html( this.html( data ) );
 			// Renders active theme styles
 			this.activeTheme();
@@ -247,7 +252,7 @@
 			return '/' + url;
 		},
 
-		themePath: 'themes/',
+		themePath: '',
 		browsePath: 'browse/',
 		searchPath: 'search.php?q='
 	});
