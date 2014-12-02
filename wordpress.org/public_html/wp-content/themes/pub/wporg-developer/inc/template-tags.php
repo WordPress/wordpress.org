@@ -539,7 +539,7 @@ namespace DevHub {
 						$arg['default'] = 'null';
 					}
 
-					$arg_string .= '=&nbsp;<span class="arg-default">' . $arg['default'] . "</span>";
+					$arg_string .= '=&nbsp;<span class="arg-default">' . htmlentities( $arg['default'] ) . "</span>";
 				}
 
 				$args_strings[] = $arg_string;
