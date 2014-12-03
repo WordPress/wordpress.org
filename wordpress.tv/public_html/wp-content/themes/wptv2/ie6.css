@@ -1,0 +1,35 @@
+.videofeatured h3 {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.videofeatured {
+	height: 175px;
+}
+
+.arrow {
+	background-position: -100px -100px;
+	top: 0;
+	left: 0;
+}
+
+.pagetitle {
+	height: 50px;
+}
+
+.videowrapper .sleeve {
+	padding-bottom: 14px;
+}
+
+.thirds {
+	width: 970px !important;
+}
+
+.blog .videowrapper {
+	display: none;
+}
+
+.blog .title {
+	border-bottom: 1px solid #333;
+}
