@@ -524,22 +524,18 @@ namespace DevHub {
 		// Decorate and return function/class arguments.
 		if ( $args ) {
 			foreach ( $args as $arg ) {
+				$arg = (array) $arg;
 				$arg_string = '';
 				if ( ! empty( $arg['name'] ) && ! empty( $types[ $arg['name'] ] ) ) {
 					$arg_string .= ' <span class="arg-type">' . $types[ $arg['name'] ] . '</span>';
 				}
 
 				if ( ! empty( $arg['name'] ) ) {
-					$arg_string .= '&nbsp;<span class="arg-name">' . $arg['name'] . '</span>&nbsp;';
+					$arg_string .= '&nbsp;<span class="arg-name">' . $arg['name'] . '</span>';
 				}
 
-				if ( is_array( $arg ) && array_key_exists( 'default', $arg ) ) {
-
-					if ( is_null( $arg['default'] ) ) {
-						$arg['default'] = 'null';
-					}
-
-					$arg_string .= '=&nbsp;<span class="arg-default">' . htmlentities( $arg['default'] ) . "</span>";
+				if ( ! empty( $arg['default'] ) ) {
+					$arg_string .= '&nbsp;=&nbsp;<span class="arg-default">' . htmlentities( $arg['default'] ) . "</span>";
 				}
 
 				$args_strings[] = $arg_string;
@@ -609,9 +605,10 @@ namespace DevHub {
 			foreach ( $args as $arg ) {
 				if ( ! empty( $arg['name'] ) && ! empty( $params[ $arg['name'] ] ) ) {
 					$params[ $arg['name'] ]['default'] = $arg['default'];
+
 					// If a known default is stated in the parameter's description, try to remove it
 					// since the actual default value is displayed immediately following description.
-					if ( $arg['default'] ) {
+					if ( ! empty( $arg['default'] ) ) {
 						$default = htmlentities( $arg['default'] );
 						$params[ $arg['name'] ]['content'] = str_replace( "default is {$default}.", '', $params[ $arg['name'] ]['content'] );
 						$params[ $arg['name'] ]['content'] = str_replace( "Default {$default}.", '', $params[ $arg['name'] ]['content'] );
