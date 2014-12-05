@@ -49,6 +49,8 @@ class WordCamp_Post_Types_Plugin {
 		add_filter( 'the_content', array( $this, 'add_avatar_to_speaker_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_speaker_info_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
+
+		add_filter( 'dashboard_glance_items', array( $this, 'glance_items' ) );
 	}
 
 	function init() {
@@ -248,6 +250,7 @@ class WordCamp_Post_Types_Plugin {
 			case 'edit-wcb_speaker':
 			case 'edit-wcb_sponsor':
 			case 'edit-wcb_session':
+			case 'dashboard':
 				wp_enqueue_style( 'wcpt-admin', plugins_url( '/css/admin.css', __FILE__ ), array(), 1 );
 				break;
 			default:
@@ -1883,6 +1886,49 @@ class WordCamp_Post_Types_Plugin {
 		register_widget( 'WCPT_Widget_Speakers' );
 		register_widget( 'WCPT_Widget_Sessions' );
 		register_widget( 'WCPT_Widget_Organizers' );
+	}
+
+	/**
+	 * Add post types to 'At a Glance' dashboard widget
+	 */
+	function glance_items( $items = array() ) {
+		$post_types = array( 'wcb_speaker', 'wcb_session', 'wcb_sponsor' );
+
+		foreach ( $post_types as $post_type ) {
+
+			if ( ! post_type_exists( $post_type ) ) {
+				continue;
+			}
+
+			$num_posts = wp_count_posts( $post_type );
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $num_posts && $num_posts->publish ) {
+
+				switch ( $post_type ) {
+					case 'wcb_speaker':
+						$text = $text = _n( '%s Speaker', '%s Speakers', $num_posts->publish );
+						break;
+					case 'wcb_session':
+						$text = $text = _n( '%s Session', '%s Sessions', $num_posts->publish );
+						break;
+					case 'wcb_sponsor':
+						$text = $text = _n( '%s Sponsor', '%s Sponsors', $num_posts->publish );
+						break;
+					default:
+				}
+
+				$text = sprintf( $text, number_format_i18n( $num_posts->publish ) );
+
+				if ( current_user_can( $post_type_object->cap->edit_posts ) ) {
+					$items[] = sprintf( '<a class="%1$s-count" href="edit.php?post_type=%1$s">%2$s</a>', $post_type, $text ) . "\n";
+				} else {
+					$items[] = sprintf( '<span class="%1$s-count">%2$s</span>', $post_type, $text ) . "\n";
+				}
+			}
+		}
+
+		return $items;
 	}
 }
 

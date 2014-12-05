@@ -5,3 +5,15 @@
 #wcb_session_time {
 	width: 80px;
 }
+#dashboard_right_now a.wcb_speaker-count:before,
+#dashboard_right_now span.wcb_speaker-count:before {
+	content: "\f488";
+}
+#dashboard_right_now a.wcb_session-count:before,
+#dashboard_right_now span.wcb_session-count:before {
+	content: "\f489";
+}
+#dashboard_right_now a.wcb_sponsor-count:before,
+#dashboard_right_now span.wcb_sponsor-count:before {
+	content: "\f487";
+}
