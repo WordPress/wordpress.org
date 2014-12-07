@@ -33,7 +33,7 @@ function bbporg_make_user_spammer() {
 	// Make array of post types to mark as spam
 	$post_types  = array( bbp_get_topic_post_type(), bbp_get_reply_post_type() );
 	$post_types  = "'" . implode( "', '", $post_types ) . "'";
-	$status      = bbp_get_public_status_id();
+	$status      = array( bbp_get_public_status_id(), bbp_get_pending_status_id() );
 
 	// Loop through blogs and remove their posts
 	// Get topics and replies
