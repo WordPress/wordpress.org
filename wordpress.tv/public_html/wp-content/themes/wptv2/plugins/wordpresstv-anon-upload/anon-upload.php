@@ -8,6 +8,8 @@ class WPTV_Anon_Upload {
 	var $success = false;
 
 	function __construct() {
+		$this->drafts_author = apply_filters( 'wptv_drafts_author_id', $this->drafts_author );  // this is filterable in order to support local development
+
 		add_action( 'admin_post_wptv_video_upload', array( &$this, 'init' ) );
 		add_action( 'admin_post_nopriv_wptv_video_upload', array( &$this, 'init' ) );
 		add_action( 'dbx_post_sidebar', array( &$this, 'display' ) );
