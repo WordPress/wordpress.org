@@ -318,7 +318,7 @@ class WCP_Payment_Request {
 	protected function get_field_value( $name, $post ) {
 		switch( $name ) {
 			case 'request_id':
-				$value = $post->ID;
+				$value = get_current_blog_id() . '-' . $post->ID;
 				break;
 
 			case 'requester':
