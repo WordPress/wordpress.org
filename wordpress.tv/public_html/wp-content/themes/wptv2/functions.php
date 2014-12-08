@@ -7,8 +7,11 @@ class WordPressTV_Theme {
 	function __construct() {
 		if ( apply_filters( 'wptv_setup_theme', true ) ) {
 			// Load plugins and setup theme
+			require_once get_template_directory() . '/plugins/rewrite.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-oembed/wordpresstv-oembed.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-unisubs/wordpresstv-unisubs.php';
+			require_once get_template_directory() . '/plugins/wordpresstv-rest/wordpresstv-rest.php';
+			require_once get_template_directory() . '/plugins/wordpresstv-anon-upload/anon-upload.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-upload-subtitles/wordpresstv-upload-subtitles.php';
 
 			add_action( 'after_setup_theme', array( $this, 'setup' ) );
