@@ -410,10 +410,7 @@ class WordPressTV_Theme {
 			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
 			$guid = $m[1];
 
-			$image = '';
-			if ( function_exists( 'video_image_url_by_guid' ) ) {
-				$image = video_image_url_by_guid( $guid, 'fmt_dvd' ); //dvd image has width = 640
-			}
+			$image = video_image_url_by_guid( $guid, 'fmt_dvd' ); //dvd image has width = 640
 			$video = apply_filters( 'the_content', '[wpvideo ' . $guid . ' w=605]' );
 
 			/*
@@ -487,9 +484,7 @@ class WordPressTV_Theme {
 		foreach ( $matches[1] as $key => $code ) {
 			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
 			$guid = $m[1];
-			if ( function_exists( 'video_image_url_by_guid' ) ) {
-				$ret = video_image_url_by_guid( $guid, 'fmt_dvd' );
-			}
+			$ret = video_image_url_by_guid( $guid, 'fmt_dvd' );
 		}
 
 		preg_match_all( '|\[wporg-screencast (.+?)]|ie', $post->post_content, $matches );
