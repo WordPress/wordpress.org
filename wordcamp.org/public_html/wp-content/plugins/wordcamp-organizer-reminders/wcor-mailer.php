@@ -244,6 +244,15 @@ class WCOR_Mailer {
 			global $multi_event_sponsors;
 
 			$recipient = $multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) );
+		} elseif ( 'wcor_send_sponsor_wrangler' == $send_where ) {
+			
+			// If the Sponsor Wrangler email is invalid, use the default email address.
+			if ( is_email( get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true ) ) ) {
+				$recipient = get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true );
+			} else {
+				$recipient = get_post_meta( $wordcamp_id, 'Email Address', true );
+			}
+
 		} else {
 			$email_address_key = wcpt_key_to_str( 'E-mail Address', 'wcpt_' );
 
