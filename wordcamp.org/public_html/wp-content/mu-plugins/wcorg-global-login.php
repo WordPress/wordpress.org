@@ -10,6 +10,17 @@ class WordCamp_Global_Login_Endpoint_Plugin {
 		add_action( 'login_form_login', array( $this, 'login_form_login' ) );
 		add_action( 'login_url', array( $this, 'login_url' ), 99, 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'allowed_redirect_hosts' ) );
+		add_action( 'muplugins_loaded', array( $this, 'muplugins_loaded' ) );
+	}
+
+	/**
+	 * A subdomain install will set the default auth cookie path to /wp-admin but we're
+	 * running a semi-subdomain install because we have subdirectories too. Explicitly
+	 * define the admin cookie path, otherwise it will get set to /wp-admin from the
+	 * wordcamp.org login point.
+	 */
+	public function muplugins_loaded() {
+		define( 'ADMIN_COOKIE_PATH', '/' );
 	}
 
 	/**
