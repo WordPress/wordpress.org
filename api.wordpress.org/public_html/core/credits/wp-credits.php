@@ -32,7 +32,7 @@ abstract class WP_Credits {
 		'3.9' => '2013-12-13 00:00:00',
 		'4.0' => '2014-07-01 00:00:00',
 	);
-	
+
 	final public static function factory( $version, $gp_locale ) {
 		$branch = intval( str_replace( '.', '', self::calculate_branch( $version ) ) );
 		$file = dirname( __FILE__ ) . '/wp-' . $branch . '.php';
@@ -217,7 +217,7 @@ abstract class WP_Credits {
 
 	private function _data() {
 		return array(
-			'profiles' => 'http://profiles.wordpress.org/%s',
+			'profiles' => 'https://profiles.wordpress.org/%s',
 			'version' => $this->branch,
 		);
 	}
