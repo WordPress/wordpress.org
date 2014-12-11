@@ -1161,6 +1161,9 @@ input {
   font-family: Georgia, Times, serif;
   margin-bottom: .5em;
 }
+.devhub-wrap .wp-parser-class .return-type, .devhub-wrap .wp-parser-function .return-type, .devhub-wrap .wp-parser-hook .return-type, .devhub-wrap .wp-parser-method .return-type {
+  font-style: italic;
+}
 .devhub-wrap .wp-parser-class .parameters p, .devhub-wrap .wp-parser-function .parameters p, .devhub-wrap .wp-parser-hook .parameters p, .devhub-wrap .wp-parser-method .parameters p {
   margin-bottom: 0;
 }

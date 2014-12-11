@@ -677,7 +677,7 @@ namespace DevHub {
 			$type        = empty( $return['types'] ) ? '' : esc_html( implode( '|', $return['types'] ) );
 		}
 
-		return "<span class='return-type'>{$type}</span> $description";
+		return "<span class='return-type'>({$type})</span> $description";
 	}
 
 	/**
