@@ -12,76 +12,85 @@
  */
 
 include ABSPATH . 'wp-admin/includes/theme.php';
-$themes = themes_api( 'query_themes', array(
+
+$args = array(
 	'per_page' => 15,
-	'browse'   => get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured',
-	'fields'   => 'tags',
-) );
+	'fields'   => array_merge( $GLOBALS['theme_field_defaults'], array(
+		'parent'   => true,
+	) ),
+);
+
+if ( get_query_var( 'tag' ) ) {
+	$args['tag'][] = get_query_var( 'tag' );
+} else {
+	$args['browse'] = get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured';
+}
+$themes = themes_api( 'query_themes', $args );
 
 get_header();
 ?>
 
-<div id="themes" class="wrap">
-	<div class="wp-filter">
-		<div class="filter-count">
-			<span class="count theme-count"><?php echo count( $themes->themes ); ?></span>
-		</div>
-
-		<ul class="filter-links">
-			<li><a href="#" data-sort="featured"><?php _ex( 'Featured', 'themes' ); ?></a></li>
-			<li><a href="#" data-sort="popular"><?php _ex( 'Popular', 'themes' ); ?></a></li>
-			<li><a href="#" data-sort="new"><?php _ex( 'Latest', 'themes' ); ?></a></li>
-		</ul>
-
-		<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter' ); ?></a>
-
-		<div class="search-form"></div>
-
-		<div class="filter-drawer">
-			<div class="buttons">
-				<a class="apply-filters button button-secondary" href="#"><?php _e( 'Apply Filters' ); ?><span></span></a>
-				<a class="clear-filters button button-secondary" href="#"><?php _e( 'Clear' ); ?></a>
+	<div id="themes" class="wrap">
+		<div class="wp-filter">
+			<div class="filter-count">
+				<span class="count theme-count"><?php echo count( $themes->themes ); ?></span>
 			</div>
 
-			<?php foreach ( get_theme_feature_list() as $feature_name => $features ) : ?>
-			<div class="filter-group">
-				<h4><?php echo esc_html( $feature_name ); ?></h4>
-				<ol class="feature-group">
-					<?php foreach ( $features as $feature => $feature_name ) : ?>
-					<li>
-						<input type="checkbox" id="filter-id-<?php echo esc_attr( $feature ); ?>" value="<?php echo esc_attr( $feature ); ?>" />
-						<label for="filter-id-<?php echo esc_attr( $feature ); ?>"><?php echo esc_html( $feature_name ); ?></label>
-					</li>
-					<?php endforeach; ?>
-				</ol>
-			</div>
-			<?php endforeach; ?>
+			<ul class="filter-links">
+				<li><a href="/browse/featured/" data-sort="featured"><?php _ex( 'Featured', 'themes' ); ?></a></li>
+				<li><a href="/browse/popular/" data-sort="popular"><?php _ex( 'Popular', 'themes' ); ?></a></li>
+				<li><a href="/browse/new/" data-sort="new"><?php _ex( 'Latest', 'themes' ); ?></a></li>
+			</ul>
 
-			<div class="filtered-by">
-				<span><?php _e( 'Filtering by:' ); ?></span>
-				<div class="tags"></div>
-				<a href="#"><?php _e( 'Edit' ); ?></a>
-			</div>
-		</div>
-	</div><!-- .wp-filter -->
+			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter' ); ?></a>
 
-	<div class="theme-browser content-filterable">
-		<div class="themes">
-			<?php
+			<div class="search-form"></div>
+
+			<div class="filter-drawer">
+				<div class="buttons">
+					<a class="apply-filters button button-secondary" href="#"><?php _e( 'Apply Filters' ); ?><span></span></a>
+					<a class="clear-filters button button-secondary" href="#"><?php _e( 'Clear' ); ?></a>
+				</div>
+
+				<div class="filtered-by">
+					<span><?php _e( 'Filtering by:' ); ?></span>
+					<div class="tags"></div>
+					<a href="#"><?php _e( 'Edit' ); ?></a>
+				</div>
+
+				<?php foreach( get_theme_feature_list() as $feature_name => $features ) : ?>
+				<div class="filter-group">
+					<h4><?php echo esc_html( $feature_name ); ?></h4>
+					<ol class="feature-group">
+						<?php foreach ( $features as $feature => $feature_name ) : ?>
+						<li>
+							<input type="checkbox" id="filter-id-<?php echo esc_attr( $feature ); ?>" value="<?php echo esc_attr( $feature ); ?>" />
+							<label for="filter-id-<?php echo esc_attr( $feature ); ?>"><?php echo esc_html( $feature_name ); ?></label>
+						</li>
+						<?php endforeach; ?>
+					</ol>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div><!-- .wp-filter -->
+
+		<div class="theme-browser content-filterable">
+			<div class="themes">
+				<?php
 				if ( ! is_wp_error( $themes ) ) :
 					foreach ( $themes->themes as $theme ) :
 						get_template_part( 'content', 'index' );
 					endforeach;
 				endif;
-			?>
+				?>
+			</div>
 		</div>
-	</div>
-	<div class="theme-install-overlay"></div>
-	<div class="theme-overlay"></div>
+		<div class="theme-install-overlay"></div>
+		<div class="theme-overlay"></div>
 
-	<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>
-	<span class="spinner"></span>
-</div>
+		<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>
+		<span class="spinner"></span>
+	</div>
 
 <?php
 get_footer();

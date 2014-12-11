@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WP.org Themes' functions and definitions.
  *
@@ -14,6 +15,8 @@
  */
 
 function wporg_themes_setup() {
+	global $themes_allowedtags, $theme_field_defaults;
+
 //	load_theme_textdomain( 'wporg-themes', get_template_directory() . '/languages' );
 	add_theme_support( 'automatic-feed-links' );
 
@@ -21,10 +24,46 @@ function wporg_themes_setup() {
 	register_nav_menus( array(
 		'primary' => __( 'Primary Menu', 'wporg-themes' ),
 	) );
-	
+
 	add_theme_support( 'html5', array(
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
+
+	$themes_allowedtags = array(
+		'a'       => array( 'href' => array(), 'title' => array(), 'target' => array() ),
+		'abbr'    => array( 'title' => array() ),
+		'acronym' => array( 'title' => array() ),
+		'code'    => array(),
+		'pre'     => array(),
+		'em'      => array(),
+		'strong'  => array(),
+		'div'     => array(),
+		'p'       => array(),
+		'ul'      => array(),
+		'ol'      => array(),
+		'li'      => array(),
+		'h1'      => array(),
+		'h2'      => array(),
+		'h3'      => array(),
+		'h4'      => array(),
+		'h5'      => array(),
+		'h6'      => array(),
+		'img'     => array( 'src' => array(), 'class' => array(), 'alt' => array() ),
+	);
+
+	$theme_field_defaults = array(
+		'description'  => true,
+		'sections'     => false,
+		'tested'       => true,
+		'requires'     => true,
+		'rating'       => true,
+		'downloaded'   => true,
+		'downloadlink' => true,
+		'last_updated' => true,
+		'homepage'     => true,
+		'tags'         => true,
+		'num_ratings'  => true,
+	);
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
@@ -46,6 +85,7 @@ function wporg_themes_scripts() {
 	wp_localize_script( 'theme', '_wpThemeSettings', array(
 		'themes'   => false,
 		'settings' => array(
+			'isMobile'   => wp_is_mobile(),
 			'isInstall'  => true,
 			'canInstall' => false,
 			'installURI' => null,
@@ -67,6 +107,23 @@ function wporg_themes_scripts() {
 	) );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
+
+/**
+ * @param  object $args
+ * @param  string $action
+ *
+ * @return array
+ */
+function wporg_themes_api_args( $args, $action ) {
+	if ( 'query_themes' == $action ) {
+		$args->per_page = 30;
+		$args->fields['parent'] = true;
+		$args->fields['tags']   = true;
+	}
+
+	return $args;
+}
+add_filter( 'themes_api_args', 'wporg_themes_api_args', 10, 2 );
 
 /**
  * Removes Core's built-in query-themes handler, so we can safely add ours later on.
@@ -111,6 +168,28 @@ function wporg_themes_query_themes() {
 }
 add_action( 'wp_ajax_query-themes',        'wporg_themes_query_themes' );
 add_action( 'wp_ajax_nopriv_query-themes', 'wporg_themes_query_themes' );
+
+function wporg_themes_theme_info() {
+	global $themes_allowedtags;
+
+	$args  = wp_unslash( $_REQUEST );
+	$theme = themes_api( 'theme_information', array( 'slug' => $args['slug'] ) );
+
+	if ( is_wp_error( $theme ) ) {
+		wp_send_json_error();
+	}
+
+	$theme->name        = wp_kses( $theme->name,        $themes_allowedtags );
+	$theme->author      = wp_kses( $theme->author,      $themes_allowedtags );
+	$theme->version     = wp_kses( $theme->version,     $themes_allowedtags );
+	$theme->description = wp_kses( $theme->description, $themes_allowedtags );
+	$theme->num_ratings = number_format_i18n( $theme->num_ratings );
+	$theme->preview_url = set_url_scheme( $theme->preview_url );
+
+	wp_send_json_success( $theme );
+}
+add_action( 'wp_ajax_theme-info',        'wporg_themes_theme_info' );
+add_action( 'wp_ajax_nopriv_theme-info', 'wporg_themes_theme_info' );
 
 /**
  * Include view templates in the footer.

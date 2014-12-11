@@ -4,7 +4,7 @@
 			<a href="#" class="close-full-overlay"><span class="screen-reader-text"><?php _e( 'Close' ); ?></span></a>
 			<a href="#" class="previous-theme"><span class="screen-reader-text"><?php _ex( 'Previous', 'Button label for a theme' ); ?></span></a>
 			<a href="#" class="next-theme"><span class="screen-reader-text"><?php _ex( 'Next', 'Button label for a theme' ); ?></span></a>
-			<a href="#" class="button button-primary theme-install"><?php _e( 'Download' ); ?></a>
+			<a href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip" class="button button-primary theme-install"><?php _e( 'Download' ); ?></a>
 		</div>
 		<div class="wp-full-overlay-sidebar-content">
 			<div class="install-theme-info">
@@ -22,7 +22,7 @@
 						<span class="five"></span>
 
 						<# if ( data.num_ratings ) { #>
-						<small class="ratings">{{ data.num_ratings }}</small>
+						<small class="ratings"><?php printf( __( '(based on %s ratings).', 'wporg-themes' ), '{{ data.num_ratings }}' ); ?></small>
 						<# } else { #>
 						<small class="ratings"><?php _e( 'No ratings.' ); ?></small>
 						<# } #>

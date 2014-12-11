@@ -11,6 +11,6 @@
 	<h3 class="theme-name entry-title">{{ data.name }}</h3>
 
 	<div class="theme-actions">
-		<a class="button button-primary preview install-theme-preview" href="#"><?php esc_html_e( 'Download' ); ?></a>
+		<a class="button button-primary preview install-theme-preview" href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip"><?php esc_html_e( 'Download' ); ?></a>
 	</div>
 </script>

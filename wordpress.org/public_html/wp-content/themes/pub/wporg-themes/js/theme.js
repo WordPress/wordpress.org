@@ -38,7 +38,12 @@
 				updated = new Date(data.last_updated);
 
 			// If last updated plus 2 years is in the past, it's outdated.
-			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() > new Date().valueOf();
+			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() < new Date().valueOf();
+
+			// Make tags clickable and seprated by a comma.
+			data.tags = _.map( data.tags, function( tag ) {
+				return '<a href="/tag/'+tag+'/">'+tag+'</a>';
+			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
 			// Renders active theme styles
@@ -99,7 +104,11 @@
 				preview.$el.removeClass( 'no-navigation' );
 			}
 
-			preview.$el.addClass( 'wp-full-overlay expanded' );
+			if ( wp.themes.data.settings.isMobile ) {
+				preview.$el.addClass( 'wp-full-overlay collapsed' );
+			} else {
+				preview.$el.addClass( 'wp-full-overlay expanded' );
+			}
 
 			// Append preview
 			$( '.theme-install-overlay' ).append( preview.el );
@@ -239,12 +248,93 @@
 		}
 	});
 
+	_.extend( wp.themes.view.Preview.prototype, {
+
+		close: function() {
+			this.$el.fadeOut( 200, function() {
+				$( 'body' ).removeClass( 'theme-installer-active full-overlay-active' );
+
+				// Return focus to the theme div
+				if ( wp.themes.focusedTheme ) {
+					wp.themes.focusedTheme.focus();
+				}
+			});
+
+			this.trigger( 'preview:close' );
+			this.undelegateEvents();
+			this.unbind();
+			return false;
+		},
+
+		keyEvent: function() {
+			// The escape key closes the preview
+			if ( event.keyCode === 27 ) {
+				this.undelegateEvents();
+				this.close();
+			}
+			// The right arrow key, next theme
+			if ( event.keyCode === 39 ) {
+				_.once( this.nextTheme() );
+			}
+
+			// The left arrow key, previous theme
+			if ( event.keyCode === 37 ) {
+				this.previousTheme();
+			}
+
+			// Prevent the underlying modal to advance too.
+			return false;
+		}
+	});
+
+	_.extend( wp.themes.view.InstallerSearch.prototype, {
+		doSearch: _.debounce( function( value ) {
+			var request = {};
+
+			request.search = value;
+
+			// Intercept an [author] search.
+			//
+			// If input value starts with `author:` send a request
+			// for `author` instead of a regular `search`
+			if ( value.substring( 0, 7 ) === 'author:' ) {
+				request.search = '';
+				request.author = value.slice( 7 );
+			}
+
+			// Intercept a [tag] search.
+			//
+			// If input value starts with `tag:` send a request
+			// for `tag` instead of a regular `search`
+			if ( value.substring( 0, 4 ) === 'tag:' ) {
+				request.search = '';
+				request.tag = [ value.slice( 4 ) ];
+			}
+
+			$( '.filter-links li > a.current' ).removeClass( 'current' );
+			$( 'body' ).removeClass( 'show-filters filters-applied' );
+
+			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
+			// or searching the local cache
+			this.collection.query( request );
+
+			// Set route
+			if ( value ) {
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + value ), { replace: true } );
+			} else {
+				wp.themes.router.navigate( wp.themes.router.baseUrl( '' ) );
+			}
+		}, 300 )
+	});
+
 	_.extend( wp.themes.InstallerRouter.prototype, {
 		routes: {
 			'/:slug/': 'preview',
-			'/browse/:sort/': 'sort',
+			'/tag/:tag/': 'onFilter',
 			'/?upload': 'upload',
 			'/search.php?q=:query': 'search',
+			'/browse/:sort/': 'sort',
+			'/': 'sort',
 			'': 'sort'
 		},
 
@@ -255,6 +345,17 @@
 		themePath: '',
 		browsePath: 'browse/',
 		searchPath: 'search.php?q='
+	});
+
+	_.extend( wp.themes.RunInstaller, {
+		extraRoutes: function() {
+			var self = this;
+
+			wp.themes.router.on( 'route:tag', function( tag ) {
+				$( '#filter-id-' + tag).checked( true );
+				self.view.applyFilters();
+			});
+		}
 	});
 
 }( jQuery, wp ) );
