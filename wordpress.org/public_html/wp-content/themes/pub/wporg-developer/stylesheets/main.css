@@ -1147,6 +1147,7 @@ input {
 }
 .devhub-wrap .wp-parser-class h1 a .arg-type, .devhub-wrap .wp-parser-function h1 a .arg-type, .devhub-wrap .wp-parser-hook h1 a .arg-type, .devhub-wrap .wp-parser-method h1 a .arg-type {
   color: #cd2f23;
+  font-style: italic;
 }
 .devhub-wrap .wp-parser-class h1 a .arg-name, .devhub-wrap .wp-parser-function h1 a .arg-name, .devhub-wrap .wp-parser-hook h1 a .arg-name, .devhub-wrap .wp-parser-method h1 a .arg-name {
   color: #0f55c8;
