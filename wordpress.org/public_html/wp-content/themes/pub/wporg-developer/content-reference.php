@@ -7,7 +7,7 @@
 	<h1><a href="<?php the_permalink() ?>"><?php echo get_signature(); ?></a></h1>
 
 	<section class="description">
-		<?php the_excerpt(); ?>
+		<?php echo get_summary(); ?>
 	</section>
 
 <?php if ( is_single() ) : ?>

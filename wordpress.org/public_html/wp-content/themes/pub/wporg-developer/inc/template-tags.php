@@ -990,6 +990,28 @@ namespace DevHub {
 	}
 
 	/**
+	 * Gets the summary.
+	 *
+	 * The summary (aka short description) is stored in the 'post_excerpt' field.
+	 *
+	 * @param  null|WP_Post Optional. The post. Default null.
+	 * @return string
+	 */
+	function get_summary( $post = null ) {
+		$post = get_post( $post );
+
+		$summary = $post->post_excerpt;
+
+		if ( $summary ) {
+			add_filter( 'the_excerpt', 'htmlentities', 9 ); // Run before wpautop
+			$summary = apply_filters( 'the_excerpt', apply_filters( 'get_the_excerpt', $summary ) );
+			remove_filter( 'the_excerpt', 'htmlentities', 9 );
+		}
+
+		return $summary;
+	}
+
+	/**
 	 * Gets the long description.
 	 *
 	 * The long description is stored in the 'wporg_parsed_content' meta field.
