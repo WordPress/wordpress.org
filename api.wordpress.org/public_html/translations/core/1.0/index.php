@@ -12,6 +12,7 @@ $version = isset( $_REQUEST['version'] ) ? str_replace( '-src', '', $_REQUEST['v
 $translations = find_all_translations_for_core( $version );
 
 header( 'Access-Control-Allow-Origin: *' );
+header( 'Access-Control-Expose-Headers: X-Translations-Count' );
 header( 'X-Translations-Count:' . count( $translations ) );
 if ( 'HEAD' === $_SERVER['REQUEST_METHOD'] ) {
 	exit;
