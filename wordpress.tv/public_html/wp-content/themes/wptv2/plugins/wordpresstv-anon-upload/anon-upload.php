@@ -50,6 +50,7 @@ class WPTV_Anon_Upload {
 			'wptv_video_producer',
 			'wptv_speakers',
 			'wptv_event',
+			'wptv_slides_url'
 		);
 
 		// Normal users won't see the honeypot field, so if there's a value in it, then we can assume the submission is spam from a bot
@@ -274,6 +275,7 @@ class WPTV_Anon_Upload {
 		$event          = $this->sanitize_text( $_posted['wptv_event'] );
 		$description    = $this->sanitize_text( $_posted['wptv_video_description'], false );
 		$language       = $this->sanitize_text( $_posted['wptv_language'] );
+		$slides         = $this->sanitize_text( $_posted['wptv_slides_url'] );
 		$ip             = $_SERVER['REMOTE_ADDR'];
 
 		$categories = '';
@@ -297,6 +299,7 @@ class WPTV_Anon_Upload {
 			'language'        => $language,
 			'categories'      => $categories,
 			'description'     => $description,
+			'slides'          => $slides,
 			'ip'              => $ip,
 		);
 
@@ -331,6 +334,11 @@ class WPTV_Anon_Upload {
 		);
 		$embed_args['blog_id'] = get_current_blog_id();
 		$embed_args['post_id'] = $meta['attachment_id'];
+
+		// Add slides index to meta (necessary for posts that were uploaded before the field was added)
+		if ( ! array_key_exists( 'slides', $meta ) ) {
+			$meta['slides'] = '';
+		}
 
 		?>
 		<div class="stuffbox" id="review-video">
@@ -487,6 +495,14 @@ class WPTV_Anon_Upload {
 					</div>
 
 					<div class="row">
+						<p class="label">Slides:</p>
+						<p class="data">
+							<input type="text" value="<?php echo esc_attr( $meta['slides'] ); ?>"/>
+							<a class="button-secondary anon-approve" href="#wptv-slides-url">Approve</a>
+						</p>
+					</div>
+
+					<div class="row">
 						<p class="label">Edit attachment:</p>
 						<p class="data">
 							<a href="<?php echo esc_url( get_edit_post_link( $meta['attachment_id'] ) ); ?>" target="_blank"><?php echo esc_html( $attachment_post->post_title ); ?></a>
@@ -523,7 +539,7 @@ class WPTV_Anon_Upload {
 						if (id.indexOf('#new-tag-') != -1) {
 							el.val(target.siblings('input[type="text"]').val());
 							el.siblings('.tagadd').click();
-						} else if (id == '#title') {
+						} else if ('#title' == id  || '#wptv-slides-url' == id) {
 							el.val(target.siblings('input[type="text"]').val());
 						} else if (id == '#excerpt') {
 							el.val(target.siblings('textarea').val());

@@ -330,6 +330,10 @@ if ( !empty($_REQUEST['error']) ) {
 		<textarea name="wptv_video_description" id="wptv_video_description" rows="8" cols="40"></textarea>
 	</p>
 	<p>
+		<label for="wptv_slides_url"><?php esc_html_e( 'Slides URL' ); ?></label>
+		<input type="text" name="wptv_slides_url" id="wptv_slides_url" value="" />
+	</p>
+	<p>
 		<label for="wptv_file"><?php esc_html_e( 'Video file' ); ?><span class="required"> * </span></label>
 		<input type="file" name="wptv_file" id="wptv_file" />
 	</p>

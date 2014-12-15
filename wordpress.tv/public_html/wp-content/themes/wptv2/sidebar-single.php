@@ -4,7 +4,7 @@
 	<h5>Published</h5>
 			<p class="video-date"><?php echo get_the_date(); ?></p>
 
-			<?php if ( $post->post_excerpt ) : ?>
+			<?php if ( get_the_excerpt() ) : ?>
 				<div class="video-description"><?php the_excerpt(); ?></div>
 			<?php
 				endif;

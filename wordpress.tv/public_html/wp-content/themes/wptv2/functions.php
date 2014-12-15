@@ -27,6 +27,8 @@ class WordPressTV_Theme {
 		add_action( 'pre_get_posts', array( $this, 'posts_per_page' ) );
 		add_action( 'init', array( $this, 'improve_search' ) );
 		add_action( 'publish_post', array( $this, 'publish_post' ), 10, 1 );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+		add_action( 'save_post', array( $this, 'save_meta_box_fields' ), 10, 2);
 		add_action( 'wp_footer', array( $this, 'videopress_flash_params' ) );
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 2 );
 
@@ -149,6 +151,56 @@ class WordPressTV_Theme {
 	}
 
 	/**
+	 * Register meta boxes
+	 */
+	function add_meta_boxes() {
+		add_meta_box( 'video-info', 'Video Info', array( $this, 'render_video_info_metabox' ), 'post', 'normal', 'high' );
+	}
+
+	/**
+	 * Render the Video Info box
+	 */
+	function render_video_info_metabox() {
+		global $post;
+
+		$slides_url = get_post_meta( $post->ID, '_wptv_slides_url', true );
+		wp_nonce_field( 'edit-video-info', 'video_info_metabox_nonce' );
+
+		?>
+
+		<p>
+			<label for="wptv-slides-url">Slides URL</label>
+			<input type="text" class="widefat" id="wptv-slides-url" name="_wptv_slides_url" value="<?php echo esc_url( $slides_url ); ?>" />
+		</p>
+
+		<?php
+	}
+
+	/**
+	 * Save the values of meta box fields
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
+	 */
+	function save_meta_box_fields( $post_id, $post ) {
+		if ( wp_is_post_revision( $post_id ) || defined( 'DOING_AUTOSAVE' ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['video_info_metabox_nonce'] ) || ! wp_verify_nonce( $_POST['video_info_metabox_nonce'], 'edit-video-info' ) ) {
+			return;
+		}
+
+		$slides_url = esc_url_raw( $_POST['_wptv_slides_url'] );
+
+		if ( $slides_url ) {
+			update_post_meta( $post_id, '_wptv_slides_url', $slides_url );
+		} else {
+			delete_post_meta( $post_id, '_wptv_slides_url' );
+		}
+	}
+
+	/**
 	 * Activates the improved search, but not in admin.
 	 */
 	function improve_search() {
@@ -175,7 +227,7 @@ class WordPressTV_Theme {
 	}
 
 	/**
-	 * Improved Serach: posts_search filter
+	 * Improved Search: posts_search filter
 	 *
 	 * Recreates the search SQL by including a taxonomy search.
 	 * Relies on various other filters used once.
@@ -750,3 +802,21 @@ function wptv_wp_title( $title, $sep ) {
 	return $title;
 }
 add_filter( 'wp_title', 'wptv_wp_title', 10, 2 );
+
+/**
+ * Append the slide URL to the excerpt
+ *
+ * @param string $excerpt
+ *
+ * @return string
+ */
+function wptv_excerpt_slides( $excerpt ) {
+	$slides = get_post_meta( get_the_ID(), '_wptv_slides_url', true );
+
+	if ( ! empty( $slides ) ) {
+		$excerpt .= '<p><a href="' . esc_url( $slides ) . '">Presentation Slides &raquo;</a></p>';
+	}
+
+	return $excerpt;
+}
+add_filter( 'get_the_excerpt', 'wptv_excerpt_slides' );
