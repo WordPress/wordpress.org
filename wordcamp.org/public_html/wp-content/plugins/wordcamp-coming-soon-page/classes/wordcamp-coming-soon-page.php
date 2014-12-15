@@ -45,12 +45,14 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Dequeue all enqueued stylesheets
+	 * Dequeue all enqueued stylesheets and Custom CSS
 	 */
 	protected function dequeue_all_stylesheets() {
 		foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) { 
 			wp_dequeue_style( $stylesheet );
 		}
+
+		remove_action( 'wp_head', array( 'Jetpack_Custom_CSS', 'link_tag' ), 101 );
 	}
 
 	/**
