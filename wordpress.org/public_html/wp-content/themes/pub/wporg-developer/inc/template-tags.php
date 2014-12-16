@@ -596,7 +596,7 @@ namespace DevHub {
 						$params[ $tag['variable'] ]['required'] = 'Required';
 					}
 					$params[ $tag['variable'] ]['content'] = htmlentities( $params[ $tag['variable'] ]['content'] );
-					$params[ $tag['variable'] ]['content'] = make_doclink_clickable( $params[ $tag['variable'] ]['content'] );
+					$params[ $tag['variable'] ]['content'] = \DevHub_Formatting::make_doclink_clickable( $params[ $tag['variable'] ]['content'] );
 				}
 			}
 		}
