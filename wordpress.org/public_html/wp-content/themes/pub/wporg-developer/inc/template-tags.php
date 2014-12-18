@@ -383,11 +383,16 @@ namespace DevHub {
 	 * By default returns the major version (X.Y.0) term object because minor
 	 * releases rarely add enough, if any, new things to feature.
 	 *
+	 * For development versions, the development suffix ("-beta1", "-RC1") gets removed.
+	 *
 	 * @param  boolean $ignore_minor Use the major release version X.Y.0 instead of the actual version X.Y.Z?
 	 * @return object
 	 */
 	function get_current_version_term( $ignore_minor = true ) {
 		$current_version = get_current_version();
+
+		// Remove dev version suffix (e.g. 4.1-RC1 => 4.1)
+		list( $current_version, $dev_version ) = explode( '-', $current_version, 2 );
 
 		if ( $ignore_minor ) {
 			$version_parts = explode( '.', $current_version, 3 );
