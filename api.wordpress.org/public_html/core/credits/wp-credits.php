@@ -21,6 +21,7 @@ abstract class WP_Credits {
 
 	private $names_in_groups = array();
 
+	// These are only for the purposes of determining translation contributions, hence they don't always line up.
 	private static $cycle_dates = array(
 		'3.2' => '2011-02-23 00:00:00',
 		'3.3' => '2011-07-05 00:00:00',
@@ -31,6 +32,7 @@ abstract class WP_Credits {
 		'3.8' => '2013-11-01 00:00:00',
 		'3.9' => '2013-12-13 00:00:00',
 		'4.0' => '2014-07-01 00:00:00',
+		'4.1' => '2014-10-01 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
