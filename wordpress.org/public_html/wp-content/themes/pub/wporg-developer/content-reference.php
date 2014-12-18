@@ -45,9 +45,7 @@
 	*/ ?>
 
 	<?php
-	ob_start();
-	the_content();
-	$explanation = ob_get_clean();
+	$explanation = '';
 	if ( $explanation ) :
 		?>
 		<hr/>
