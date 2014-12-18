@@ -30,7 +30,7 @@ class WP_41_Credits extends WP_Credits {
 					'ocean90'        => array( 'Dominik Schilling', 'Core Developer' ),
 					'SergeyBiryukov' => array( 'Sergey Biryukov', 'Core Developer' ),
 					'wonderboymusic' => array( 'Scott Taylor', 'Core Developer', '0e9fc8ea22885ed718ee37d31dcffb8c' ),
-					'lancewillett'   => 'Lance Willett',
+					'boonebgorges'   => 'Boone B. Gorges',
 				),
 			),
 			'contributing-developers' => array(
@@ -38,13 +38,12 @@ class WP_41_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => array(
-					'boonebgorges'   => 'Boone B. Gorges',
+					'lancewillett'   => 'Lance Willett',
 					'pento'          => 'Gary Pendergast',
 					'jorbin'         => 'Aaron Jorbin',
 					'kovshenin'      => 'Konstantin Kovshenin',
 					'jeremyfelt'     => 'Jeremy Felt',
 					'DrewAPicture'   => 'Drew Jaynes',
-					'iandstewart'    => 'Ian Stewart',
 				),
 			),
 			'recent-rockstars' => array(
@@ -52,6 +51,15 @@ class WP_41_Credits extends WP_Credits {
 				'type'    => 'titles',
 				'shuffle' => true,
 				'data'    => array(
+					'iamtakashi'  => 'Takashi Irie',
+					'iandstewart' => 'Ian Stewart',
+					'avryl' => 'Janneke Van Dorpe',
+					'celloexpressions' => array( 'Nick Halsey', '42e659bb8c86851c230e527f8ce1764b' ),
+					'westonruter' => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
+					'stephdau' => 'Stephane Daury',
+					'tellyworth' => 'Alex Shiels',
+					'joedolson' => 'Joe Dolson',
+					'obenland' => 'Konstantin Obenland',
 				),
 			),
 		);
