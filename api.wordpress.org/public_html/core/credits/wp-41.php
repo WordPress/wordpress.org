@@ -29,7 +29,7 @@ class WP_41_Credits extends WP_Credits {
 					'helen'       => array( 'Helen Hou-Sandí',   'Core Developer' ),
 					'ocean90'        => array( 'Dominik Schilling', 'Core Developer' ),
 					'SergeyBiryukov' => array( 'Sergey Biryukov', 'Core Developer' ),
-					'wonderboymusic' => array( 'Scott Taylor', 'Core Developer', '0e9fc8ea22885ed718ee37d31dcffb8c' ),
+					'wonderboymusic' => array( 'Scott Taylor', 'Core Developer' ),
 					'boonebgorges'   => 'Boone B. Gorges',
 				),
 			),
