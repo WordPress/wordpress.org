@@ -1027,11 +1027,13 @@ namespace DevHub {
 	function get_long_description( $post = null ) {
 		$post = get_post( $post );
 
-		if ( $long_description = get_post_meta( $post->ID, 'wporg_parsed_content', true ) ) {
-			$long_description = apply_filters( 'the_content', $long_description );
+		$description = $post->post_content;
+
+		if ( $description ) {
+			$description = apply_filters( 'the_content', apply_filters( 'get_the_content' , $description ) );
 		}
 
-		return $long_description;
+		return $description;
 	}
 
 	/**
