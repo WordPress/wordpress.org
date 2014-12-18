@@ -853,7 +853,7 @@ namespace DevHub {
 	 */
 	function post_type_has_source_code( $post_type = null ) {
 		$post_type                   = $post_type ? $post_type : get_post_type();
-		$post_types_with_source_code = array( 'wp-parser-hook', 'wp-parser-method', 'wp-parser-function' );
+		$post_types_with_source_code = array( 'wp-parser-class', 'wp-parser-method', 'wp-parser-function' );
 
 		return in_array( $post_type, $post_types_with_source_code );
 	}
