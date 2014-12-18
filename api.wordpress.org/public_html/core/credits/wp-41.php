@@ -353,7 +353,7 @@ class WP_41_Credits extends WP_Credits {
 		return array(
 			array( 'Backbone.js', 'http://backbonejs.org/' ),
 			array( 'Class POP3', 'http://squirrelmail.org/' ),
-			array( 'Color Animations', 'http://plugins.jquery.com/project/color' ),
+			array( 'Color Animations', 'http://plugins.jquery.com/color/' ),
 	//		array( 'ColorPicker', 'http://' ),
 			array( 'Horde Text Diff', 'http://pear.horde.org/' ),
 			array( 'hoverIntent', 'http://plugins.jquery.com/project/hoverIntent' ),
@@ -363,7 +363,7 @@ class WP_41_Credits extends WP_Credits {
 			array( 'jQuery UI', 'http://jqueryui.com/' ),
 			array( 'jQuery Hotkeys', 'https://github.com/tzuryby/jquery.hotkeys' ),
 			array( 'jQuery serializeObject', 'http://benalman.com/projects/jquery-misc-plugins/' ),
-			array( 'jQuery.query', 'http://plugins.jquery.com/project/query-object' ),
+			array( 'jQuery.query', 'http://plugins.jquery.com/query-object/' ),
 	//		array( 'jquery.schedule', 'http://' ),
 			array( 'jQuery.suggest', 'http://plugins.jquery.com/project/suggest' ),
 			array( 'jQuery UI Touch Punch', 'http://touchpunch.furf.com/' ),
@@ -377,10 +377,10 @@ class WP_41_Credits extends WP_Credits {
 			array( 'Plupload', 'http://www.plupload.com/' ),
 			array( 'SimplePie', 'http://simplepie.org/' ),
 			array( 'The Incutio XML-RPC Library', 'http://scripts.incutio.com/xmlrpc/' ),
-			array( 'Thickbox', 'http://jquery.com/demo/thickbox/' ),
+			array( 'Thickbox', 'http://codylindley.com/thickbox/' ),
 			array( 'TinyMCE', 'http://www.tinymce.com/' ),
 			array( 'Underscore.js', 'http://underscorejs.org/' ),
-			array( 'zxcvbn', 'https://github.com/lowe/zxcvbn' ),
+			array( 'zxcvbn', 'https://github.com/dropbox/zxcvbn' ),
 		);
 	}
 }
