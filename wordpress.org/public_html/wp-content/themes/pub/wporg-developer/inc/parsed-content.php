@@ -69,7 +69,7 @@ class WPORG_Edit_Parsed_Content {
 		$ticket       = get_post_meta( $post->ID, 'wporg_ticket_number', true );
 		$ticket_label = get_post_meta( $post->ID, 'wporg_ticket_title', true );
 		$ticket_info  = get_post_meta( $post->ID, 'wporg_parsed_ticket_info', true );
-		$content      = get_post_meta( $post->ID, 'wporg_parsed_content', true );
+		$content      = $post->post_content;
 
 		if ( $ticket ) {
 			$src  = "https://core.trac.wordpress.org/ticket/{$ticket}";
@@ -98,12 +98,12 @@ class WPORG_Edit_Parsed_Content {
 				<td>
 					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $content ); ?></div>
 					<div class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>">
-						<?php wp_editor( $content, 'wporg_parsed_content_editor', array(
+						<?php wp_editor( $content, 'content', array(
 							'media_buttons' => false,
 							'tinymce'       => false,
 							'quicktags'     => true,
 							'textarea_rows' => 10,
-							'textarea_name' => 'wporg_parsed_content',
+							'textarea_name' => 'content',
 						) ); ?>
 					</div>
 				</td>
@@ -163,7 +163,7 @@ class WPORG_Edit_Parsed_Content {
 	public function admin_enqueue_scripts() {
 		// Only enqueue 'wporg-parsed-content' script and styles on Code Reference post type screens.
 		if ( in_array( get_current_screen()->id, $this->post_types ) ) {
-			wp_enqueue_style( 'wporg-parsed-content', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20140826' );
+			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20140826' );
 			wp_enqueue_script( 'wporg-parsed-content', get_template_directory_uri() . '/js/parsed-content.js', array( 'jquery', 'utils' ), '20140826', true );
 
 			wp_localize_script( 'wporg-parsed-content', 'wporg', array(

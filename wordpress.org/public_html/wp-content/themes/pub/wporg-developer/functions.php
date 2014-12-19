@@ -46,6 +46,11 @@ require __DIR__ . '/inc/user-content.php';
 require __DIR__ . '/inc/user-content-voting.php';
 
 /**
+ * Explanations for functions. hooks, classes, and methods.
+ */
+require( __DIR__ . '/inc/explanations.php' );
+
+/**
  * Handbooks.
  */
 require __DIR__ . '/inc/handbooks.php';
@@ -79,9 +84,11 @@ function init() {
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
+
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
 	add_filter( 'the_posts', __NAMESPACE__ . '\\rerun_empty_exact_search', 10, 2 );
+
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 

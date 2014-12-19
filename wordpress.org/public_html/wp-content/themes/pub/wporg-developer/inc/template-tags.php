@@ -1103,4 +1103,62 @@ namespace DevHub {
 		return ( is_singular( $post_types ) || is_post_type_archive( $post_types ) || is_tax( $taxonomies ) );
 	}
 
+	/**
+	 * Retrieve an explanation for the given post.
+	 *
+	 * @param int|WP_Post $post      Post ID or WP_Post object.
+	 * @param bool        $published Optional. Whether to only retrieve the explanation if it's published.
+	 *                               Default false.
+	 * @return WP_Post|null WP_Post object for the Explanation, null otherwise.
+	 */
+	function get_explanation( $post, $published = false ) {
+		if ( ! $post = get_post( $post ) ) {
+			return null;
+		}
+
+		$args = array(
+			'post_type'      => 'wporg_explanations',
+			'post_parent'    => $post->ID,
+			'no_found_rows'  => true,
+			'posts_per_page' => 1,
+		);
+
+		if ( true === $published ) {
+			$args['post_status'] = 'publish';
+		}
+
+		$explanation = get_children( $args, OBJECT );
+
+		if ( empty( $explanation ) ) {
+			return null;
+		}
+
+		$explanation = reset( $explanation );
+
+		if ( ! $explanation ) {
+			return null;
+		}
+		return $explanation;
+	}
+
+	/**
+	 * Retrieve data from an explanation post field.
+	 *
+	 * Works only for published explanations.
+	 *
+	 * @see get_post_field()
+	 *
+	 * @param string      $field   Post field name.
+	 * @param int|WP_Post $post    Post ID or object for the function, hook, class, or method post
+	 *                             to retrieve an explanation field for.
+	 * @param string      $context Optional. How to filter the field. Accepts 'raw', 'edit', 'db',
+	 *                             or 'display'. Default 'display'.
+	 * @return string The value of the post field on success, empty string on failure.
+	 */
+	function get_explanation_field( $field, $post, $context = 'display' ) {
+		if ( ! $explanation = get_explanation( $post, $published = true ) ) {
+			return '';
+		}
+		return get_post_field( $field, $explanation, $context );
+	}
 }
