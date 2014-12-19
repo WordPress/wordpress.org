@@ -98,15 +98,15 @@ get_header(); ?>
 					<div alt="f490" class="dashicons dashicons-media-video">video</div>
 					<div alt="f492" class="dashicons dashicons-playlist-audio">audio playlist</div>
 					<div alt="f493" class="dashicons dashicons-playlist-video">video playlist</div>
-					<div alt="f522" class="dashicons dashicons-controls-play">play</div>
-					<div alt="f523" class="dashicons dashicons-controls-pause">pause</div>
-					<div alt="f519" class="dashicons dashicons-controls-forward">forward</div>
-					<div alt="f517" class="dashicons dashicons-controls-skipforward">skip forward</div>
-					<div alt="f518" class="dashicons dashicons-controls-back">back</div>
-					<div alt="f516" class="dashicons dashicons-controls-skipback">skip back</div>
-					<div alt="f515" class="dashicons dashicons-controls-repeat">repeat</div>
-					<div alt="f521" class="dashicons dashicons-controls-volumeon">volume on</div>
-					<div alt="f520" class="dashicons dashicons-controls-volumeoff">volume off</div>
+					<div alt="f522" class="dashicons dashicons-controls-play">play player</div>
+					<div alt="f523" class="dashicons dashicons-controls-pause">player pause</div>
+					<div alt="f519" class="dashicons dashicons-controls-forward">player forward</div>
+					<div alt="f517" class="dashicons dashicons-controls-skipforward">player skip forward</div>
+					<div alt="f518" class="dashicons dashicons-controls-back">player back</div>
+					<div alt="f516" class="dashicons dashicons-controls-skipback">player skip back</div>
+					<div alt="f515" class="dashicons dashicons-controls-repeat">player repeat</div>
+					<div alt="f521" class="dashicons dashicons-controls-volumeon">player volume on</div>
+					<div alt="f520" class="dashicons dashicons-controls-volumeoff">player volume off</div>
 
 					<h4><?php _e( 'Image Editing', 'wporg' ); ?></h4>
 
