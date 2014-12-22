@@ -1,5 +1,19 @@
 <?php get_header(); ?>
 	<div class="outer" id="mid-wrapper">
+<?php
+$latest_release = $rosetta->rosetta->get_latest_public_release();
+if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
+?>
+		<div class="wrapper">
+			<div class="section">
+				<h3>The <?php bloginfo( 'name' ); ?> translation of WordPress is inactive</h3>
+				<p><a href="https://wordpress.org/download/">Download the English version instead</a>.</p>
+				<p>If you&#8217;re interested in translating WordPress to <?php bloginfo( 'name' ); ?>,
+				join <a href="https://make.wordpress.org/polyglots/">the Polyglots team</a> and find out how.</p>
+			</div>
+		</div>
+<?php endif; ?>
+
 		<div class="wrapper">
 			<div class="section">
 <?php
@@ -23,7 +37,7 @@
 		</div>
 	</div>
 <?php
-	$latest_release = $rosetta->rosetta->get_latest_release();
+	$latest_release = $rosetta->rosetta->get_latest_public_release();
 	if (false !== $latest_release):
 ?>
 		<div class="wrapper">
