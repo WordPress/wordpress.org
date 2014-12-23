@@ -1,0 +1,141 @@
+/*
+ * Table of all locales
+ */
+
+.i18n-label.latest {
+	color: #468847;
+}
+.i18n-label.minor-behind {
+	color: #F7D708;
+}
+.i18n-label.major-behind-one {
+	color: #E6A45A;
+}
+.i18n-label.major-behind-many {
+	color: #e38587;
+}
+
+.translators-info tbody tr {
+	display: none;
+}
+.show-all tbody tr,
+.translators-info.show-latest tbody tr.latest,
+.translators-info.show-minor-behind tbody tr.minor-behind,
+.translators-info.show-major-behind-one tbody tr.major-behind-one,
+.translators-info.show-major-behind-many tbody tr.major-behind-many,
+.translators-info.show-no-releases tbody tr.no-releases,
+.translators-info.show-no-site tbody tr.no-site {
+	display: table-row;
+}
+
+.locale-version.latest {
+	background: #d2e7ca;
+}
+.locale-version.minor-behind {
+	background: #fef0c1;
+}
+.locale-version.major-behind-one {
+	background: #E6A45A;
+}
+.locale-version.major-behind-many {
+	background: #e38587;
+}
+td.right {
+	text-align: right;
+}
+td.no-left-border {
+	border-left: 0 !important;
+}
+td.no-right-border {
+	border-right: 0 !important;
+}
+.translators-info th,
+.translators-info td.nowrap {
+	white-space: nowrap;
+}
+
+/*
+ * Details page for an individual locale
+ */
+
+#locale-header {
+	padding: 0 20px 20px 20px;
+	background-color: #F5F5F5;
+	border: 1px solid #E3E3E3;
+	border-radius: 4px;
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05) inset;
+}
+#locale-header ul,
+#main ul#postlist .postcontent #locale-header ul {
+	overflow: auto;
+	margin-left: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
+}
+#locale-header ul li {
+	list-style-type: none;
+}
+#locale-header ul#locale-details {
+	margin-bottom: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
+}
+#locale-download {
+	margin-bottom: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
+}
+#locale-header ul li.download-button,
+#main ul#postlist .postcontent #locale-header ul li.download-button {
+	float: left;
+	height: 34px;
+	margin: 8px 12px 0 0;	/* todo put list spacing on the button itself, so that the ul takes up no space when there are no li's inside it */
+	padding: 6px 12px;
+}
+#locale-header ul li.download-button a {
+	font-size: 1.1em;
+	color: white;
+}
+#locale-details,
+#main ul#locale-details {
+	font-size: 1.2em;
+}
+
+.validators,
+#main ul#postlist .postcontent ul.validators {
+	overflow: auto;
+	margin: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
+	padding: 0;
+}
+.validators li {
+	float: left;
+	width: 280px;		/* todo use flexbox to prog enhance this so that they fill the space. AF is good one to test */
+	padding-bottom: 15px;
+	list-style-type: none;
+}
+.validators .gravatar {
+	position: relative;
+	top: -6px;
+	float: left;
+	margin: 0 10px 10px 0;
+	padding: 2px;
+}
+.validators a {
+	display: block;
+	margin: 6px 0 2px;
+	font-size: 16px;
+	text-decoration: none;
+}
+
+.translators-info table {
+	width: 100%;
+	margin: .7em 0 1.5em;
+	border: 1px solid #ccc;
+	border-width: 1px 1px 1px 0;
+	border-spacing: 0;
+}
+.translators-info th {
+	background: #ccc;
+	border: 1px solid #ccc;
+	border-width: 1px 0 0 1px;
+	padding: 6px 15px;
+}
+.translators-info td {
+	border: 1px solid #ccc;
+	border-width: 1px 0 0 1px;
+	padding: 6px 15px;
+}
