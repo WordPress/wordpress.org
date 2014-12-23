@@ -882,9 +882,9 @@ namespace DevHub {
 	/**
 	 * Does the post type have source code?
 	 *
-	 * @param  string  Optional. The post type name. If blank, assumes current post type.
+	 * @param  null|string $post_type Optional. The post type name. If null, assumes current post type. Default null.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	function post_type_has_source_code( $post_type = null ) {
 		$post_type                   = $post_type ? $post_type : get_post_type();
@@ -1002,21 +1002,22 @@ namespace DevHub {
 	 * By default, the ability to post notes is restricted to members of the
 	 * blog.
 	 *
-	 * @param  int  $post_id The post ID.
+	 * @param  bool    $open If the user can post comments in general. Disregarded.
+	 * @param  WP_Post $post Post ID or post object.
 	 *
 	 * @return bool True if the user can post a note.
 	 */
-	function can_user_post_note( $open, $post_id ) {
+	function can_user_post_note( $open, $post ) {
 
 		// Only proceed if the post type is one that has user contributed notes.
-		if ( 0 !== strpos( get_post_type( (int) $post_id ), 'wp-parser-' ) ) {
+		if ( ! post_type_supports_user_notes( get_post_type( $post ) ) ) {
 			// Temporarily disable commenting that isn't for a note since various
 			// changes need to take place to enable regular commenting.
 			return false; //$open;
 		}
 
 		// Permit default logic to be overridden via filter that returns value other than null.
-		if ( null !== ( $can = apply_filters( 'wporg_devhub-can_user_post_note', null, $post_id ) ) ) {
+		if ( null !== ( $can = apply_filters( 'wporg_devhub-can_user_post_note', null, $post ) ) ) {
 			return $can;
 		}
 
