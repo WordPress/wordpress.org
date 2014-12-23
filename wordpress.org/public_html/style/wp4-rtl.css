@@ -2,43 +2,30 @@
 caption,th { text-align: right; }
 body {
 	font-family: sans-serif;
-	direction:rtl;
-	unicode-bidi:mbed;
+	direction: rtl;
+	unicode-bidi: embed;
 }
 /* -------------------------------------------- */
 
-
-h2 {
+h1, h2, h3, h4, h5, h6 {
 	font-family: sans-serif;
 }
 
 em, cite {
-	font-style: bold;
+	font-style: normal;
+	font-weight: bold;
 }
 
-#wporg-header h1 {
-	float: right;
+code {
+	direction: ltr;
+	unicode-bidi: embed;
 }
 
 #wporg-header h1 a {
-	background-position:center right;
-	text-indent: -9999px;
-	overflow:hidden;
-	float: right;
+	background-position: center right;
 }
 
 #wporg-header h2.rosetta a {
-	float: right;
-	padding-right: 10px;
-}
-
-@media screen and (max-width:767px) {
-	#wporg-header h2.rosetta {
-		clear: both;
-	}
-}
-
-#wporg-header ul li {
 	float: right;
 }
 
@@ -46,9 +33,26 @@ em, cite {
 	font-family: sans-serif;
 }
 
+#wporg-header ul li#download {
+	float: left;
+	margin-right: 0;
+	margin-left: 14px;
+}
 
-#wporg-header ul li#download a {
-	background-position: bottom right;
+@media screen and (min-width:768px) {
+	#wporg-header h1 {
+		float: right;
+		padding-left: 0;
+		padding-right: 10px;
+	}
+
+	#wporg-header ul#wporg-header-menu {
+		float: right;
+	}
+
+	#wporg-header ul li {
+		float: right;
+	}
 }
 
 #home-welcome img.screenshot {
@@ -66,40 +70,6 @@ em, cite {
 	font-family: sans-serif;
 }
 
-/* */
-
-.submit input, .button, .button-primary, .button-secondary, input[type=button], input[type=submit] {
-	font-family: sans-serif;
-}
-
-.submit input, .button, .button-secondary, input[type=button], input[type=submit] {
-	background-position: right top;
-}
-
-.submit input:active, .button:active, .button-secondary:active, input[type=button]:active, input[type=submit]:active {
-	background-position: right bottom;
-}
-
-.button-primary {
-	background-position: right top;
-}
-
-
-.button-primary:active {
-	background-position: right bottom;
-}
-
-/* */
-
-.download-button {
-	background-position: right top;
-}
-
-
-a.download-button:active {
-	background-position: right bottom;
-}
-
 
 /* */
 
@@ -113,9 +83,10 @@ a.download-button:active {
 	margin-left: 0;
 }
 
-.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12  {
+.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
 	float:right;
 }
+
 #home-below ol.steps li {
 	padding-right: 44px;
 	padding-left: 0;
@@ -244,6 +215,7 @@ a.rsslink {background-position: top right; padding-right: 14px; padding-left:0;}
 	border-left-color: #eee;
 	border-right-color: #dadada;
 	float: right;
+}
 
 #books h3 {
 	font-family:sans-serif;
