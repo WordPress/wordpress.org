@@ -658,7 +658,11 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve return type and description if available
+	 * Retrieve return type and description if available.
+	 *
+	 * If there is no explicit return value, or it is explicitly "void", then
+	 * an empty string is returned. This rules out display of return type for
+	 * classes, hooks, and non-returning functions.
 	 *
 	 * @param int $post_id
 	 *
@@ -673,14 +677,14 @@ namespace DevHub {
 		$tags   = get_post_meta( $post_id, '_wp-parser_tags', true );
 		$return = wp_filter_object_list( $tags, array( 'name' => 'return' ) );
 
+		// If there is no explicit or non-"void" return value, don't display one.
 		if ( empty( $return ) ) {
-			$description = '';
-			$type        = 'void';
-		} else {
-			$return      = array_shift( $return );
-			$description = empty( $return['content'] ) ? '' : esc_html( $return['content'] );
-			$type        = empty( $return['types'] ) ? '' : esc_html( implode( '|', $return['types'] ) );
+			return '';
 		}
+
+		$return      = array_shift( $return );
+		$description = empty( $return['content'] ) ? '' : esc_html( $return['content'] );
+		$type        = empty( $return['types'] ) ? '' : esc_html( implode( '|', $return['types'] ) );
 
 		return "<span class='return-type'>({$type})</span> $description";
 	}

@@ -15,7 +15,13 @@
 	<section class="long-description">
 		<?php echo get_long_description(); ?>
 	</section>
-	<section class="return"><p><strong>Return:</strong> <?php echo get_return(); ?></p></section>
+
+	<?php
+	$return = get_return();
+	if ( ! empty( $return ) ) :
+		?>
+		<section class="return"><p><strong><?php _e( 'Return:', 'wporg' ); ?></strong> <?php echo $return; ?></p></section>
+	<?php endif; ?>
 
 	<?php
 	$source_file = get_source_file();
