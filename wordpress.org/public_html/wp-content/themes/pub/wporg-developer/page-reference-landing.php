@@ -10,8 +10,12 @@
 get_header(); ?>
 
 	<div id="primary" class="content-area">
-		<main id="main" class="site-main" role="main">
 
+		<div id="content-area">
+			<?php breadcrumb_trail(); ?>
+		</div>
+
+		<main id="main" class="site-main" role="main">
 			<div class="reference-landing">
 				<div class="search-guide section clear">
 					<h4 class="ref-intro"><?php _e( 'Want to know what&#39;s going on inside WordPress? Search the Code Reference for more information about WordPress&#39; functions, classes, methods, and hooks.', 'wporg' ); ?></h4>
@@ -38,7 +42,7 @@ get_header(); ?>
 
 								$list = new WP_Query( array(
 									'posts_per_page' => 13,
-									'post_type'      => array( 'wp-parser-function', 'wp-parser-hook', 'wp-parser-class', 'wp-parser-method' ),
+									'post_type'      => DevHub\get_parsed_post_types(),
 									'orderby'        => 'title',
 									'order'          => 'ASC',
 									'tax_query'      => array( array(

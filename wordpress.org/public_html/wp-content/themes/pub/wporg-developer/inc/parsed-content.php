@@ -27,7 +27,7 @@ class WPORG_Edit_Parsed_Content {
 	 * @access public
 	 */
 	public function __construct() {
-		$this->post_types = array( 'wp-parser-function', 'wp-parser-class', 'wp-parser-hook', 'wp-parser-method' );
+		$this->post_types = DevHub\get_parsed_post_types();
 
 		// Data.
 		add_action( 'add_meta_boxes',              array( $this, 'add_meta_boxes'        ) );

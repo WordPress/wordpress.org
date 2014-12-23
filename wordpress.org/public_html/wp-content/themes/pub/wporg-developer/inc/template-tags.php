@@ -414,6 +414,32 @@ namespace DevHub {
 	}
 
 	/**
+	 * Get an array of all parsed post types.
+	 *
+	 * @return array
+	 */
+	function get_parsed_post_types() {
+		return array(
+			'wp-parser-class',
+			'wp-parser-function',
+			'wp-parser-hook',
+			'wp-parser-method',
+		);
+	}
+
+	/**
+	 * Checks if given post type is one of the parsed post types.
+	 *
+	 * @param  null|string Optional. The post type. Default null.
+	 * @return bool True if post has a parsed post type
+	 */
+	function is_parsed_post_type( $post_type = null ) {
+		$post_type = $post_type ? $post_type : get_post_type();
+
+		return in_array( $post_type, get_parsed_post_types() );
+	}
+
+	/**
 	 * Get site section root URL based on URL path.
 	 *
 	 * @return string
@@ -870,14 +896,14 @@ namespace DevHub {
 	/**
 	 * Does the post type support having user notes?
 	 *
-	 * @param  string  Optional. The post type name. If blank, assumes current post type.
+	 * Currently all parsed post types support user notes.
 	 *
-	 * @return boolean
+	 * @param  null|string $post_type Optional. The post type name. If null, assumes current post type. Default null.
+	 *
+	 * @return bool
 	 */
 	function post_type_supports_user_notes( $post_type = null ) {
-		$post_type = $post_type ? $post_type : get_post_type();
-
-		return ( 0 === strpos( $post_type, 'wp-parser-' ) );
+		return is_parsed_post_type( $post_type );
 	}
 
 	/**
@@ -966,7 +992,7 @@ namespace DevHub {
 	/**
 	 * Indicates if the current user can post a user contibuted note.
 	 *
-	 * This only affects post types wp-parser-* as they are the only things
+	 * This only affects parsed post types as they are the only things
 	 * that can have user contributed notes.
 	 *
 	 * A custom check can be performed by hooking the filter
@@ -1101,7 +1127,7 @@ namespace DevHub {
 	 * @return bool True if search bar should be shown.
 	 */
 	function should_show_search_bar() {
-		$post_types = array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' );
+		$post_types = get_parsed_post_types();
 		$taxonomies = array( 'wp-parser-since', 'wp-parser-package', 'wp-parser-source-file' );
 
 		return ( is_singular( $post_types ) || is_post_type_archive( $post_types ) || is_tax( $taxonomies ) );

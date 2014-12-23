@@ -350,7 +350,7 @@ function register_post_types() {
  */
 function register_taxonomies() {
 	// Files
-	register_taxonomy( 'wp-parser-source-file', array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-hook', 'wp-parser-method' ), array(
+	register_taxonomy( 'wp-parser-source-file', get_parsed_post_types(), array(
 		'label'                 => __( 'Files', 'wporg' ),
 		'labels'                => array(
 			'name'                       => __( 'Files', 'wporg' ),
@@ -378,7 +378,7 @@ function register_taxonomies() {
 	) );
 
 	// Package
-	register_taxonomy( 'wp-parser-package', array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-hook', 'wp-parser-method' ), array(
+	register_taxonomy( 'wp-parser-package', get_parsed_post_types(), array(
 		'hierarchical'          => true,
 		'label'                 => '@package',
 		'public'                => true,
@@ -388,7 +388,7 @@ function register_taxonomies() {
 	) );
 
 	// @since
-	register_taxonomy( 'wp-parser-since', array( 'wp-parser-class', 'wp-parser-function', 'wp-parser-hook', 'wp-parser-method' ), array(
+	register_taxonomy( 'wp-parser-since', get_parsed_post_types(), array(
 		'hierarchical'          => true,
 		'label'                 => __( '@since', 'wporg' ),
 		'public'                => true,

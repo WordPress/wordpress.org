@@ -33,7 +33,7 @@ class WPORG_Explanations {
 	 * @access public
 	 */
 	public function __construct() {
-		$this->post_types = array( 'wp-parser-function', 'wp-parser-class', 'wp-parser-hook', 'wp-parser-method' );
+		$this->post_types = DevHub\get_parsed_post_types();
 
 		// Setup.
 		add_action( 'init',                    array( $this, 'register_post_type'     ), 0   );
@@ -238,9 +238,9 @@ class WPORG_Explanations {
 	 */
 	public function admin_enqueue_scripts() {
 
-		if ( in_array( get_current_screen()->id, array(
-				'wp-parser-function', 'wp-parser-class', 'wp-parser-hook', 'wp-parser-method',
-				'wporg_explanations', 'edit-wporg_explanations',
+		if ( in_array( get_current_screen()->id, array_merge(
+				DevHub\get_parsed_post_types(),
+				array( 'wporg_explanations', 'edit-wporg_explanations' )
 		) ) ) {
 			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20141218' );
 			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20141218', true );
