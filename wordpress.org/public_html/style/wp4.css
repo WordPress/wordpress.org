@@ -313,7 +313,8 @@ a img.aligncenter {
 	color: #2faadd;
 }
 
-#wporg-header ul li a.current {
+#wporg-header ul li a.current,
+#wporg-header ul li.current-menu-item a {
 	color: #2faadd;
 }
 
@@ -497,6 +498,18 @@ a img.aligncenter {
 		margin: -8px auto 0 auto;
 	}
 
+	#wporg-header ul li.current-menu-item:after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		width: 0;
+		height: 0;
+		border-left: 9px solid transparent;
+		border-right: 9px solid transparent;
+		border-bottom: 9px solid #f7f7f7;
+		margin: -8px 0 0 -9px;
+	}
+
 	#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
 		width: 0;
 		height: 0;
@@ -561,12 +574,12 @@ a img.aligncenter {
 	}
 
 
-	#home-below .wrapper .col-2, #home-below .wrapper .col-4{ 
-		max-width: 100%; 
+	#home-below .wrapper .col-2, #home-below .wrapper .col-4 {
+		max-width: 100%;
 	}
 
 	#home-below {
-		max-width: 100%; 
+		max-width: 100%;
 		width: auto;
 	}
 }
@@ -1323,7 +1336,7 @@ ul#books, ul#otherbooks {
 }
 
 #books.mobile img {
-	border:none;	
+	border:none;
 }
 
 #books li, #otherbooks li {
@@ -1640,8 +1653,8 @@ div.special { margin-top: 22px; }
 }
 
 #lang-guess {
-	width: 93%; 
-	max-width: 932px; 
+	width: 93%;
+	max-width: 932px;
 	margin: 22px auto 0;
 	background: #fffbcc;
 	border: 1px solid #e6db55;
