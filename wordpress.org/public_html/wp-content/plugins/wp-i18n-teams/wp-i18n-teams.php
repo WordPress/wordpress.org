@@ -131,20 +131,20 @@ class WP_I18n_Teams {
 	public function get_extended_locale_data( $locale ) {
 		$locales_data = $this->get_locales_data();
 		$locale_data = $locales_data[ $locale->wp_locale ];
+		$locale_data['localized_core_url'] = $locale_data['language_pack_url'] = false;
 
-		$contributors = self::get_contributors( $locale );
 		$latest_release = $locale_data['latest_release'];
-		list( $x, $y ) = explode( '.', $latest_release );
-		$latest_branch = "$x.$y";
+		if ( $latest_release ) {
+			list( $x, $y ) = explode( '.', $latest_release );
+			$latest_branch = "$x.$y";
+			$locale_data['localized_core_url'] = sprintf( '%s/wordpress-%s-%s.zip', $locale_data['rosetta_site_url'], $latest_release, $locale->wp_locale );
 
-		$locale_data['localized_core_url'] = sprintf( '%s/wordpress-%s-%s.zip', $locale_data['rosetta_site_url'], $latest_release, $locale->wp_locale );
-
-		if ( version_compare( $latest_release, '4.0', '>=' ) ) {
-			$locale_data['language_pack_url'] = sprintf( 'https://downloads.wordpress.org/translation/core/%s/%s.zip', $latest_branch, $locale->wp_locale );
-		} else {
-			$locale_data['language_pack_url'] = false;
+			if ( version_compare( $latest_release, '4.0', '>=' ) ) {
+				$locale_data['language_pack_url'] = sprintf( 'https://downloads.wordpress.org/translation/core/%s/%s.zip', $latest_branch, $locale->wp_locale );
+			}
 		}
 
+		$contributors = self::get_contributors( $locale );
 		$locale_data['validators'] = $contributors['validators'];
 		$locale_data['translators'] = $contributors['translators'];
 
@@ -231,4 +231,3 @@ class WP_I18n_Teams {
 }
 
 $GLOBALS['wp_i18n_teams'] = new WP_I18n_Teams();
-

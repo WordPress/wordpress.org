@@ -10,7 +10,11 @@
 	<ul id="locale-details">
 		<li>
 			<strong><?php _e( 'Locale site:', 'wporg' ); ?></strong>
-			<a href="<?php echo esc_url( $locale_data['rosetta_site_url'] ); ?>"><?php echo parse_url( $locale_data['rosetta_site_url'], PHP_URL_HOST ); ?></a>
+			<?php if ( $locale_data['rosetta_site_url'] ) : ?>
+				<a href="<?php echo esc_url( $locale_data['rosetta_site_url'] ); ?>"><?php echo parse_url( $locale_data['rosetta_site_url'], PHP_URL_HOST ); ?></a>
+			<?php else : ?>
+				&mdash;
+			<?php endif; ?>
 		</li>
 		<li>
 			<strong><?php _e( 'Version:', 'wporg' ); ?></strong>
