@@ -11,7 +11,7 @@
 }
 
 #content {
-	width: 940px; /* The width of the content area is smaller for proper padding. */
+	max-width: 940px; /* The width of the content area is smaller for proper padding. */
 }
 
 #main {
