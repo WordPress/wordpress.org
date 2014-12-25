@@ -43,7 +43,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		init: function() {
 			wpTrac.hacks();
-			wpTrac.nonGardeners();
+			if ( ! wpTrac.gardener ) {
+				wpTrac.nonGardeners();
+			}
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
 				if ( $(document.body).hasClass( 'core' ) ) {
@@ -261,10 +263,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners: function() {
-			if ( wpTrac.gardener ) {
-				return;
-			}
-
 			var version,
 				elements = {},
 				remove = true;
