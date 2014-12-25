@@ -254,6 +254,11 @@ div.code {
 	border-bottom: 1px solid #d7d7d7;
 }
 
+div.attachment #preview .diff .entry h2 a {
+	color: #000 !important;
+	font-weight: bold;
+}
+
 /* =prefs.css */
 #content.prefs #tabs li {
 	border-color: #ccc; /* get rid of the outset look */
