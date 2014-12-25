@@ -105,6 +105,17 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					wpTrac.coreToMeta();
 				}
 
+				// Link username in header
+				(function($) {
+					var el = $('#metanav').find('.first'),
+						username;
+					username = el.text();
+					if ( 0 === username.indexOf( 'logged in as' ) ) {
+						username = username.replace( 'logged in as ', '' );
+						el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username }).text( username ) ).prepend( 'logged in as ');
+					}
+				})(jQuery);
+
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
 				content.on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
