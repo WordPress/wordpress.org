@@ -100,21 +100,22 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
 			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
+			// Link username in header.
+			(function($) {
+				var el = $('#metanav').find('.first'),
+					username;
+				username = el.text();
+				if ( 0 === username.indexOf( 'logged in as' ) ) {
+					username = username.replace( 'logged in as ', '' );
+					el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username }).text( username ) ).prepend( 'logged in as ');
+				}
+			})(jQuery);
+
+			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
 				if ( $(document.body).hasClass( 'core' ) ) {
 					wpTrac.coreToMeta();
 				}
-
-				// Link username in header
-				(function($) {
-					var el = $('#metanav').find('.first'),
-						username;
-					username = el.text();
-					if ( 0 === username.indexOf( 'logged in as' ) ) {
-						username = username.replace( 'logged in as ', '' );
-						el.html( $('<a />', { href: 'https://profiles.wordpress.org/' + username }).text( username ) ).prepend( 'logged in as ');
-					}
-				})(jQuery);
 
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
