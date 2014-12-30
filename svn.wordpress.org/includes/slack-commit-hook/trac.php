@@ -63,7 +63,7 @@ abstract class Trac {
 		}
 
 		foreach ( $this->channel_matcher as $needle => $channels_to_add ) {
-			if ( $match[0] === '#' ) {
+			if ( $needle[0] === '#' ) {
 				// Append PCRE_MULTILINE so ^ and $ refer to individual lines.
 				if ( preg_match( $needle . 'm', $changed_files ) ) {
 					$channels = array_merge( $channels, (array) $channels_to_add );
