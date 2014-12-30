@@ -14,7 +14,8 @@ abstract class Trac {
 	protected $commit_range = array( 1, 5 );
 
 	function __construct() {
-		$this->trac = str_replace( '_trac', '', strtolower( get_class( $this ) ) );
+		// 'SlackCommitHook\Core_Trac' => 'core'
+		$this->trac = strtolower( str_replace( array( __NAMESPACE__, '\\', '_Trac' ), '', get_class( $this ) ) );
 	}
 
 	function get_username() {
