@@ -76,7 +76,7 @@ abstract class Trac {
 	function get_commit_channels( $changed_files = null ) {
 		$channels = (array) $this->commit_channels;
 
-		if ( isset( $this->firehose_channel ) ) {
+		if ( ! empty( $this->firehose_channel ) ) {
 			$channels[] = $this->firehose_channel;
 		}
 
@@ -101,7 +101,7 @@ abstract class Trac {
 	function get_ticket_channels( $ticket = null ) {
 		$channels = (array) $this->ticket_channels;
 
-		if ( isset( $this->firehose_channel ) ) {
+		if ( ! empty( $this->firehose_channel ) ) {
 			$channels[] = $this->firehose_channel;
 		}
 

@@ -45,18 +45,17 @@ if ( $type === 'ticket' ) {
 	require INC . '/comments.php';
 	require INC . '/trac.php';
 	require INC . '/config.php';
-	$args = Dotorg\SlackTracHook\Comments\process_message( $lines );
+	$args = Dotorg\SlackTracHooks\Comments\process_message( $lines );
 	$args['trac']   = $trac;
 	$args['ticket'] = $ticket;
 	$args['ticket_url']  = $ticket_url;
 	$args['comment_url'] = $comment_url;
-	Dotorg\SlackTracHook\Comments\send( SLACK_SENDING_HOOK, $args );
+	Dotorg\SlackTracHooks\Comments\send( SLACK_SENDING_HOOK, $args );
 }
 
 function slack_ticket_hook( $trac, $ticket ) {
 	$payload = array(
-		'token' => SLACK_TICKET_HOOK_API_TOKEN,
-		'trac' => $trac,
+		'trac'   => $trac,
 		'ticket' => $ticket,
 	);
 
