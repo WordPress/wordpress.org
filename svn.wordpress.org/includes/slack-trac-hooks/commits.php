@@ -1,8 +1,8 @@
 <?php
 
-namespace SlackCommitHook;
+namespace Dotorg\SlackTracHooks;
 
-class Sender {
+class Commits {
 	protected $trac;
 	protected $repo;
 	protected $rev;
@@ -28,7 +28,7 @@ class Sender {
 
 	public function run() {
 		$payload = $this->generate_payload();
-		foreach ( $this->trac->get_channels( $this->svnlook( 'changed' ) ) as $channel ) {
+		foreach ( $this->trac->get_commit_channels( $this->svnlook( 'changed' ) ) as $channel ) {
 			$this->send( $channel, $payload );
 		}
 	}
@@ -45,7 +45,7 @@ class Sender {
 		$url = $this->trac->get_commit_template( $this->rev );
 		$revision = 'r' . $this->rev;
 
-		$username = $this->trac->get_username();
+		$username = $this->trac->get_commit_username();
 		$emoji    = $this->trac->get_emoji();
 		$color    = $this->trac->get_color();
 
