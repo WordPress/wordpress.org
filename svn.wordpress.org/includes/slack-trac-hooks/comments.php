@@ -94,8 +94,12 @@ function format_comment( $comment, $ticket_url ) {
 			return "<$comment_url|$text>";
 		}, $comment );
 
-	// Replace {{{ and }}} with ```
-	$comment = str_replace( array( '{{{', '}}}' ), '```', $comment );
+	// Replace {{{ and }}} with ``` or `
+	$comment = trim( str_replace(
+		array( "\n{{{\n", "\n}}}\n", '{{{', '}}}' ),
+		array( "\n```\n", "\n```\n", '`',   '`' ),
+		"\n$comment\n"
+	), "\n" );
 
 	return $comment;
 }
