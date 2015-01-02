@@ -156,7 +156,7 @@ abstract class WP_Credits {
 		$translators = array();
 
 		foreach ( $translator_data as $user ) {
-			if ( $user_nicename == 'nacin' )
+			if ( $user->user_nicename == 'nacin' )
 				continue;
 			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
 				$translators[ $user->user_nicename ] = utf8_encode( remove_accents( $user->display_name ) );
