@@ -200,7 +200,7 @@ class Official_WordPress_Events {
 	 */
 	protected function remote_get( $url, $args = array() ) {
 		$response = $error = false;
-		
+
 		if ( $url ) {
 			$transient_key = 'owe_' . wp_hash( $url . print_r( $args, true ) );
 			
@@ -229,6 +229,7 @@ class Official_WordPress_Events {
 				}
 	
 				if ( $error ) {
+					$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
 					trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
 	
 					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
