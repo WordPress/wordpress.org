@@ -53,7 +53,7 @@
 					</div>
 					<span><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '{{ (data.rating/20).toFixed(1) }}' ); ?></span>
 
-					<# console.log(data); if ( data.ratings ) { #>
+					<# if ( data.ratings ) { #>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=5" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 5 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 5 ); ?></span>
