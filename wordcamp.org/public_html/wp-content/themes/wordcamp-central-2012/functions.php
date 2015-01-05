@@ -180,7 +180,7 @@ class WordCamp_Central_Theme {
 	 */
 	static function enqueue_scripts() {
 		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 3 );
-		wp_enqueue_script( 'central-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20140909', true );
+		wp_enqueue_script( 'wordcamp-central', get_stylesheet_directory_uri() . '/js/central.js', array(), '20140909', true );
 
 		/* We add some JavaScript to pages with the comment form
 		 * to support sites with threaded comments (when in use).
