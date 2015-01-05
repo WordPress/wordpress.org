@@ -53,51 +53,51 @@
 					</div>
 					<span><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '{{ (data.rating/20).toFixed(1) }}' ); ?></span>
 
-					<# if ( data.lvl_ratings ) { #>
+					<# console.log(data); if ( data.ratings ) { #>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=5" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 5 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 5 ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 92 * data.lvl_ratings[5] / data.num_ratings }}px;"></span>
+									<span class="counter-bar" style="width: {{ 92 * data.ratings[5] / data.num_ratings }}px;"></span>
 								</span>
 							</a>
-							<span class="counter-count">{{ data.lvl_ratings[5] }}</span>
+							<span class="counter-count">{{ data.ratings[5] }}</span>
 						</div>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=4" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 4 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 4 ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 92 * data.lvl_ratings[4] / data.num_ratings }}px;"></span>
+									<span class="counter-bar" style="width: {{ 92 * data.ratings[4] / data.num_ratings }}px;"></span>
 								</span>
 							</a>
-							<span class="counter-count">{{ data.lvl_ratings[4] }}</span>
+							<span class="counter-count">{{ data.ratings[4] }}</span>
 						</div>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=3" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 3 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 3 ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 92 * data.lvl_ratings[3] / data.num_ratings }}px;"></span>
+									<span class="counter-bar" style="width: {{ 92 * data.ratings[3] / data.num_ratings }}px;"></span>
 								</span>
 							</a>
-							<span class="counter-count">{{ data.lvl_ratings[3] }}</span>
+							<span class="counter-count">{{ data.ratings[3] }}</span>
 						</div>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=2" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 2 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 2 ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 92 * data.lvl_ratings[2] / data.num_ratings }}px;"></span>
+									<span class="counter-bar" style="width: {{ 92 * data.ratings[2] / data.num_ratings }}px;"></span>
 								</span>
 							</a>
-							<span class="counter-count">{{ data.lvl_ratings[2] }}</span>
+							<span class="counter-count">{{ data.ratings[2] }}</span>
 						</div>
 						<div class="counter-container">
 							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=1" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 1 ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 1 ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 92 * data.lvl_ratings[1] / data.num_ratings }}px;"></span>
+									<span class="counter-bar" style="width: {{ 92 * data.ratings[1] / data.num_ratings }}px;"></span>
 								</span>
 							</a>
-							<span class="counter-count">{{ data.lvl_ratings[1] }}</span>
+							<span class="counter-count">{{ data.ratings[1] }}</span>
 						</div>
 					<# } #>
 				</div><!-- .theme-rating -->

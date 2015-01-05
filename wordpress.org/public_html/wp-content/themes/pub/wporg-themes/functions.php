@@ -73,6 +73,7 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
 function wporg_themes_scripts() {
 
 	wp_enqueue_style( 'global-style', '//s.w.org/style/wp4.css', array(), '14' );
+	wp_enqueue_style( 'ratings', '//wordpress.org/extend/themes-plugins/bb-ratings/bb-ratings.css', array(), '4' );
 	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
 	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri() );
 
@@ -153,8 +154,9 @@ add_filter( 'wp_title', 'wporg_themes_wp_title', 10, 2 );
 function wporg_themes_api_args( $args, $action ) {
 	if ( 'query_themes' == $action ) {
 		$args->per_page = 30;
-		$args->fields['parent'] = true;
-		$args->fields['tags']   = true;
+		$args->fields['parent']  = true;
+		$args->fields['ratings'] = true;
+		$args->fields['tags']    = true;
 	}
 
 	return $args;

@@ -58,8 +58,8 @@ $theme = themes_api( 'theme_information', array( 'slug' => get_post()->post_name
 					<span><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), number_format_i18n( $theme->rating / 20, 1 ) ); ?></span>
 
 					<?php
-						if ( $theme->lvl_ratings ) :
-							foreach ( $theme->lvl_ratings as $key => $rate_count ) :
+						if ( ! empty( $theme->ratings ) ) :
+							foreach ( $theme->ratings as $key => $rate_count ) :
 					?>
 					<div class="counter-container">
 						<a href="//wordpress.org/support/view/theme-reviews/<?php echo esc_attr( $theme->slug ); ?>?filter=<?php echo $key; ?>" title="<?php printf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $key, 'wporg-themes' ), $key ); ?>">
