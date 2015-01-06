@@ -909,19 +909,6 @@ namespace DevHub {
 	}
 
 	/**
-	 * Does the post type support having user notes?
-	 *
-	 * Currently all parsed post types support user notes.
-	 *
-	 * @param  null|string $post_type Optional. The post type name. If null, assumes current post type. Default null.
-	 *
-	 * @return bool
-	 */
-	function post_type_supports_user_notes( $post_type = null ) {
-		return is_parsed_post_type( $post_type );
-	}
-
-	/**
 	 * Retrieve the root directory of the parsed WP code.
 	 *
 	 * If the option 'wp_parser_root_import_dir' (as set by the parser) is not
@@ -1023,9 +1010,8 @@ namespace DevHub {
 	 * @return bool True if the user can post a note.
 	 */
 	function can_user_post_note( $open, $post ) {
-
-		// Only proceed if the post type is one that has user contributed notes.
-		if ( ! post_type_supports_user_notes( get_post_type( $post ) ) ) {
+		// Only proceed if for a parsed post type.
+		if ( ! is_parsed_post_type( get_post_type( $post ) ) ) {
 			// Temporarily disable commenting that isn't for a note since various
 			// changes need to take place to enable regular commenting.
 			return false; //$open;
