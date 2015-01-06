@@ -648,6 +648,21 @@ namespace DevHub {
 						$default = htmlentities( $arg['default'] );
 						$params[ $arg['name'] ]['content'] = str_replace( "default is {$default}.", '', $params[ $arg['name'] ]['content'] );
 						$params[ $arg['name'] ]['content'] = str_replace( "Default {$default}.", '', $params[ $arg['name'] ]['content'] );
+
+						// When the default is '', docs sometimes say "Default empty." or similar.
+						if ( "''" == $arg['default'] ) {
+							$params[ $arg['name'] ]['content'] = str_replace( "Default empty.", '', $params[ $arg['name'] ]['content'] );
+							$params[ $arg['name'] ]['content'] = str_replace( "Default empty string.", '', $params[ $arg['name'] ]['content'] );
+
+							// Only a few cases of this. Remove once core is fixed.
+							$params[ $arg['name'] ]['content'] = str_replace( "default is empty string.", '', $params[ $arg['name'] ]['content'] );
+						}
+						// When the default is array(), docs sometimes say "Default empty array." or similar.
+						elseif (  'array()' == $arg['default'] ) {
+							$params[ $arg['name'] ]['content'] = str_replace( "Default empty array.", '', $params[ $arg['name'] ]['content'] );
+							// Not as common.
+							$params[ $arg['name'] ]['content'] = str_replace( "Default empty.", '', $params[ $arg['name'] ]['content'] );
+						}
 					}
 				}
 
