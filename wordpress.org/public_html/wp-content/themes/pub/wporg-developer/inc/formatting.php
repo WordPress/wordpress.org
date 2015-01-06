@@ -44,15 +44,19 @@ class DevHub_Formatting {
 	}
 
 	/**
-	 * Makes phpDoc @link references clickable.
+	 * Makes phpDoc @see and @link references clickable.
 	 *
-	 * Handles these five different types of links:
+	 * Handles these six different types of links:
 	 *
 	 * - {@link http://en.wikipedia.org/wiki/ISO_8601}
-	 * - {@link WP_Rewrite::$index}
-	 * - {@link WP_Query::query()}
-	 * - {@link esc_attr()}
+	 * - {@see WP_Rewrite::$index}
+	 * - {@see WP_Query::query()}
+	 * - {@see esc_attr()}
+	 * - {@see 'pre_get_search_form'}
 	 * - {@link http://codex.wordpress.org/The_Loop Use new WordPress Loop}
+	 *
+	 * Note: Though @see and @link are semantically different in meaning, that isn't always
+	 * the case with use so this function handles them identically.
 	 *
 	 * @param  string $content The content.
 	 * @return string
@@ -102,12 +106,12 @@ class DevHub_Formatting {
 				// Link to an internal resource.
 				else {
 
-					// Link to class variable: {@link WP_Rewrite::$index}
+					// Link to class variable: {@see WP_Rewrite::$index}
 					if ( false !== strpos( $link, '::$' ) ) {
 						// Nothing to link to currently.
 					}
 
-					// Link to class method: {@link WP_Query::query()}
+					// Link to class method: {@see WP_Query::query()}
 					elseif ( false !== strpos( $link, '::' ) ) {
 						$link = '<a href="' .
 							get_post_type_archive_link( 'wp-parser-class' ) .
@@ -125,7 +129,7 @@ class DevHub_Formatting {
 						}
 					}
 
-					// Link to function: {@link esc_attr()}
+					// Link to function: {@see esc_attr()}
 					else {
 						$link = '<a href="' .
 							get_post_type_archive_link( 'wp-parser-function' ) .
