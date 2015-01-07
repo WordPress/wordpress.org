@@ -1,17 +1,28 @@
-<div id="ofe_events">
-	<ul>
-		<?php foreach ( $events as $event ) : ?>
+<div id="ofe-events">
+	<?php foreach ( $events as $date => $day_events ) : ?>
 
-			<li>
-				<a href="<?php echo esc_attr( esc_url( $event->url ) ); ?>">
-					<?php echo esc_html( $event->title ); ?>
-				</a><br />
+		<h3>
+			<?php echo date( 'F j', strtotime( $date ) ); ?>
+			<span class="owe-day-of-week"><?php echo date( '(l)', strtotime( $date ) ); ?></span>
+		</h3>
 
-				<?php echo esc_html( date( 'l, F jS | g:i a', (int) $event->start_timestamp ) ); ?><br />
+		<ul class="ofe-event-list">
+			<?php foreach ( $day_events as $event ) : ?>
+				<li>
+					<?php if ( $event->location ) : ?>
+						<?php echo esc_html( $event->location ); ?>
+						<span class="owe-separator"></span>
+					<?php endif; ?>
 
-				<?php echo esc_html( $event->location ); ?>
-			</li>
+					<a href="<?php echo esc_attr( esc_url( $event->url ) ); ?>">
+						<?php echo esc_html( $event->title ); ?>
+					</a>
+					<span class="owe-separator"></span>
 
-		<?php endforeach; ?>
-	</ul>
-</div> <!-- end #ofe_events -->
+					<?php echo date( 'g:i a', $event->start_timestamp ); ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+
+	<?php endforeach; ?>
+</div> <!-- end #ofe-events -->

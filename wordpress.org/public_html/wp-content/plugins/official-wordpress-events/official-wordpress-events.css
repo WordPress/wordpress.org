@@ -1,0 +1,29 @@
+#ofe-events h3 {
+	margin-bottom: 1.3em;
+	text-transform: uppercase;
+}
+
+	.owe-day-of-week {
+		color: #a1a1a1;
+	}
+
+ul.ofe-event-list {
+	margin-left: 0;
+	margin-bottom: 3em;
+	padding-bottom: 2em;
+	border-bottom: 1px solid #dfdfdf;
+}
+
+	ul.ofe-event-list li {
+		list-style-type: none;
+		margin-bottom: 1.5em;
+	}
+
+		.owe-separator {
+			padding-left: 4px;
+			padding-right: 4px;
+		}
+
+			.owe-separator::before {
+				content: "\2022";
+			}

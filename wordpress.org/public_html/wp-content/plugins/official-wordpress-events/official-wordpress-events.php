@@ -26,14 +26,29 @@ class Official_WordPress_Events {
 	 * Constructor
 	 */
 	public function __construct() {
+		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts' ) );
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events' ) );
+	}
+
+	/**
+	 * Enqueue scripts and styles
+	 */
+	public function enqueue_scripts() {
+		global $post;
+
+		wp_register_style( 'official-wordpress-events', plugins_url( 'official-wordpress-events.css', __FILE__ ), array(), 1 );
+
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'official_wordpress_events' ) ) {
+			wp_enqueue_style( 'official-wordpress-events' );
+		}
+
 	}
 
 	/**
 	 * Gather the events data and render the events template with it
 	 */
 	public function render_events() {
-		$events = $this->get_all_events();
+		$events = $this->group_events_by_date( $this->get_all_events() );
 		
 		if ( $events ) {
 			require_once( __DIR__ . '/template-events.php' );
@@ -67,6 +82,23 @@ class Official_WordPress_Events {
 		} else {
 			return $a->start_timestamp > $b->start_timestamp ? 1 : -1;
 		}
+	}
+
+	/**
+	 * Group a list of events by the date
+	 *
+	 * @param array $events
+	 *
+	 * @return array
+	 */
+	protected function group_events_by_date( $events ) {
+		$grouped_events = array();
+
+		foreach ( $events as $event ) {
+			$grouped_events[ date( 'Y-m-d', (int) $event->start_timestamp ) ][] = $event;
+		}
+
+		return $grouped_events;
 	}
 
 	/**
@@ -128,20 +160,26 @@ class Official_WordPress_Events {
 		} else {
 			$meetups = array();
 		}
-		
+
 		if ( $meetups ) {
 			foreach ( $meetups as $meetup ) {
 				$location        = array();
 				$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
-				
-				foreach ( array( 'city', 'state', 'country' ) as $part ) {
-					if ( ! empty( $meetup->venue->$part ) ) {
-						if ( in_array( $part, array( 'state', 'country' ) ) ) {
-							$location[] = strtoupper( $meetup->venue->$part );
-						} else {
-							$location[] = $meetup->venue->$part;
+
+				if ( isset( $meetup->venue ) ) {
+					foreach ( array( 'city', 'state', 'country' ) as $part ) {
+						if ( ! empty( $meetup->venue->$part ) ) {
+							if ( in_array( $part, array( 'state', 'country' ) ) ) {
+								$location[] = strtoupper( $meetup->venue->$part );
+							} else {
+								$location[] = $meetup->venue->$part;
+							}
 						}
 					}
+					$location = implode( ', ', $location );
+				} else {
+					$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
+					$location = $this->format_reverse_geocode_address( $location->address_components );
 				}
 				
 				$events[] = new Official_WordPress_Event( array(
@@ -150,7 +188,7 @@ class Official_WordPress_Events {
 					'url'             => $meetup->event_url,
 					'start_timestamp' => $start_timestamp,
 					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),	// convert to seconds
-					'location'        => empty( $location ) ? '' : implode( ' ', $location )
+					'location'        => $location,
 				) );
 			}
 		}
@@ -187,6 +225,52 @@ class Official_WordPress_Events {
 		}
 		
 		return $group_ids;
+	}
+
+	/**
+	 * Reverse-geocodes a set of coordinates
+	 *
+	 * @param string $latitude
+	 * @param string $longitude
+	 *
+	 * @return false | object
+	 */
+	protected function reverse_geocode( $latitude, $longitude ) {
+		$address  = false;
+		$response = $this->remote_get( sprintf( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false', $latitude, $longitude ) );
+
+		if ( ! is_wp_error( $response ) ) {
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( isset( $body->results[0] ) ) {
+				$address = $body->results[0];
+			}
+		}
+
+		return $address;
+	}
+
+	/**
+	 * Formats an address returned from Google's reverse-geocode API
+	 *
+	 * @param array $address_components
+	 *
+	 * @return string
+	 */
+	protected function format_reverse_geocode_address( $address_components ) {
+		$address = array();
+
+		foreach ( $address_components as $component ) {
+			if ( 'locality' == $component->types[0] ) {
+				$address['city'] = $component->short_name;
+			} elseif ( 'administrative_area_level_1' == $component->types[0] ) {
+				$address['state'] = $component->short_name;
+			} elseif ( 'country' == $component->types[0] ) {
+				$address['country'] = $component->short_name;
+			}
+		}
+
+		return implode( ', ', $address );
 	}
 
 	/**
