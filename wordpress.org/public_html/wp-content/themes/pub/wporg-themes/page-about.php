@@ -67,7 +67,7 @@ if ( have_posts() ) :
 				<?php the_content(); ?>
 			</div><!-- .entry-content -->
 
-			<?php edit_post_link( __( 'Edit', '_s' ), '<footer class="entry-footer"><span class="edit-link">', '</span></footer><!-- .entry-footer -->' ); ?>
+			<?php edit_post_link( __( 'Edit', 'wporg-themes' ), '<footer class="entry-footer"><span class="edit-link">', '</span></footer><!-- .entry-footer -->' ); ?>
 		</article><!-- #post-## -->
 
 	<?php
