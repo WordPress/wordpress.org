@@ -163,20 +163,10 @@ class Official_WordPress_Events {
 
 		if ( $meetups ) {
 			foreach ( $meetups as $meetup ) {
-				$location        = array();
 				$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
 
 				if ( isset( $meetup->venue ) ) {
-					foreach ( array( 'city', 'state', 'country' ) as $part ) {
-						if ( ! empty( $meetup->venue->$part ) ) {
-							if ( in_array( $part, array( 'state', 'country' ) ) ) {
-								$location[] = strtoupper( $meetup->venue->$part );
-							} else {
-								$location[] = $meetup->venue->$part;
-							}
-						}
-					}
-					$location = implode( ', ', $location );
+					$location = $this->format_meetup_venue_location( $meetup->venue );
 				} else {
 					$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
 					$location = $this->format_reverse_geocode_address( $location->address_components );
@@ -271,6 +261,29 @@ class Official_WordPress_Events {
 		}
 
 		return implode( ', ', $address );
+	}
+
+	/**
+	 * Format a meetup venue's location
+	 *
+	 * @param object $venue
+	 *
+	 * @return string
+	 */
+	protected function format_meetup_venue_location( $venue ) {
+		$location = array();
+
+		foreach ( array( 'city', 'state', 'country' ) as $part ) {
+			if ( ! empty( $venue->$part ) ) {
+				if ( in_array( $part, array( 'state', 'country' ) ) ) {
+					$location[] = strtoupper( $venue->$part );
+				} else {
+					$location[] = $venue->$part;
+				}
+			}
+		}
+
+		return implode( ', ', $location );
 	}
 
 	/**
