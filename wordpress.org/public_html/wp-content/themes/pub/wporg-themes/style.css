@@ -781,9 +781,13 @@ ul, ol {
 
 /* Commercial Page Template */
 .commercial .theme .more-details {
-	top: 20%;
-	right: 5%;
-	left: 5%;
+	 top: 23%;
+	 right: 5%;
+	 left: 5%;
+}
+
+.commercial .themes {
+	padding: 0;
 }
 
 @media only screen and (min-width: 1640px) {

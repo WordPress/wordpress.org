@@ -80,34 +80,35 @@ function wporg_themes_scripts() {
 
 	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array(), null );
 
-	wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, 1 );
-	wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), false, 1 );
+	if ( ! is_singular( 'page' ) ) {
+		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, 1 );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), false, 1 );
 
-	wp_localize_script( 'theme', '_wpThemeSettings', array(
-		'themes'   => false,
-		'settings' => array(
-			'isMobile'   => wp_is_mobile(),
-			'isInstall'  => true,
-			'canInstall' => false,
-			'installURI' => null,
-			'adminUrl'   => '',
-			'urlBase'    => is_multisite() ? get_blog_details()->path : '/',
+		wp_localize_script( 'theme', '_wpThemeSettings', array(
+			'themes'   => false,
+			'settings' => array(
+				'isMobile'   => wp_is_mobile(),
+				'isInstall'  => true,
+				'canInstall' => false,
+				'installURI' => null,
+				'adminUrl'   => '',
+				'urlBase'    => is_multisite() ? get_blog_details()->path : '/',
+			),
+			'l10n' => array(
+				'addNew'            => __( 'Add New Theme' ),
+				'search'            => __( 'Search Themes' ),
+				'searchPlaceholder' => __( 'Search themes...' ), // placeholder (no ellipsis)
+				'upload'            => __( 'Upload Theme' ),
+				'back'              => __( 'Back' ),
+				'error'             => __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.' ),
 
-		),
-		'l10n' => array(
-			'addNew'            => __( 'Add New Theme' ),
-			'search'            => __( 'Search Themes' ),
-			'searchPlaceholder' => __( 'Search themes...' ), // placeholder (no ellipsis)
-			'upload'            => __( 'Upload Theme' ),
-			'back'              => __( 'Back' ),
-			'error'             => __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.' ),
-
-			// Downloads Graph
-			'date'      => __( 'Date' ),
-			'downloads' => __( 'Downloads' ),
-		),
-		'installedThemes' => array(),
-	) );
+				// Downloads Graph
+				'date'      => __( 'Date' ),
+				'downloads' => __( 'Downloads' ),
+			),
+			'installedThemes' => array(),
+		) );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 
