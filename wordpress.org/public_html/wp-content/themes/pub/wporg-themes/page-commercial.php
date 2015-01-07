@@ -449,7 +449,7 @@ if ( have_posts() ) :
 		the_post();
 		?>
 
-		<article id="post-<?php the_ID(); ?>" <?php post_class( 'wrap' ); ?>>
+		<article id="post-<?php the_ID(); ?>" <?php post_class( array( 'wrap', 'commercial' ) ); ?>>
 			<header class="entry-header">
 				<h2 class="entry-title"><?php _e( 'Commercially Supported GPL Themes', 'wporg-themes' ); ?></h2>
 			</header><!-- .entry-header -->

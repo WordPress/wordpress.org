@@ -779,6 +779,13 @@ ul, ol {
 	margin: 0 0 22px 0;
 }
 
+/* Commercial Page Template */
+.commercial .theme .more-details {
+	top: 20%;
+	right: 5%;
+	left: 5%;
+}
+
 @media only screen and (min-width: 1640px) {
 	.theme-browser .themes .theme {
 		width: 30.6%;
