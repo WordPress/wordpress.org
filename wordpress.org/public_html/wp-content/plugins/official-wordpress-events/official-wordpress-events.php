@@ -155,13 +155,10 @@ class Official_WordPress_Events {
 		) );
 
 		$meetups = json_decode( wp_remote_retrieve_body( $response ) );
+
 		if ( ! empty ( $meetups->results ) ) {
 			$meetups = $meetups->results;
-		} else {
-			$meetups = array();
-		}
 
-		if ( $meetups ) {
 			foreach ( $meetups as $meetup ) {
 				$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
 
