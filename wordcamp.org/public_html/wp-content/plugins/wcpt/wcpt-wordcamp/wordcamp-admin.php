@@ -161,6 +161,8 @@ class WordCamp_Admin {
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
 					'Budget Wrangler E-mail Address'  => 'text',
+					'Mentor Name'                     => 'text',
+					'Mentor E-mail Address'           => 'text',
 				);
 
 				break;
@@ -212,6 +214,8 @@ class WordCamp_Admin {
 					'Sponsor Wrangler E-mail Address' => 'text',
 					'Budget Wrangler Name'            => 'text',
 					'Budget Wrangler E-mail Address'  => 'text',
+					'Mentor Name'                     => 'text',
+					'Mentor E-mail Address'           => 'text',
 
 					'Venue Name'                      => 'text',
 					'Physical Address'                => 'textarea',
