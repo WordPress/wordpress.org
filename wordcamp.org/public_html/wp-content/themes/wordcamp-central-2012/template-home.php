@@ -88,26 +88,51 @@ get_header(); ?>
 
 		</div><!-- .wc-news -->
 
-		<div class="wc-sessions last">
-			<h3>WordCamp <strong>Sessions</strong></h3>
+		<div class="wc-tweets last">
+			<h3><strong>Latest Tweets</strong></h3>
 
-			<?php $sessions = WordCamp_Central_Theme::get_sessions(); ?>
-			<?php if ( ! empty( $sessions ) ) : ?>
-			<ul>
-				<?php foreach( $sessions as $session ) : ?>
+			<div id="wc-tweets-spinner" class="spinner spinner-visible"></div>
+			<ul id="wc-tweets-container" class="transparent"></ul>
+
+			<p id="wc-tweets-error" class="hidden" hidden>
+				Tweets from <a href="https://twitter.com/wordcamp">@WordCamp</a> are currently unavailable.
+			</p>
+
+			<a href="https://twitter.com/wordcamp" class="more">Follow @WordCamp on Twitter &rarr;</a>
+
+			<script id="tmpl-wc-tweet" type="text/html">
 				<li>
-					<?php echo $session['wordcamp_thumb']; ?>
-					<a href="<?php echo esc_url( $session['permalink'] ); ?>" class="wc-session-name"><?php echo esc_html( $session['name'] ); ?></a>
-					<span class="wc-session-speakers">by <?php echo esc_html( $session['speakers'] ); ?></span>
-					<a href="<?php echo esc_url( $session['wordcamp_permalink'] ); ?>" class="wc-session-wordcamp"><?php echo esc_html( $session['wordcamp_title'] ); ?></a>
+					<div class="wc-tweet-content">{{{tweet.text}}}</div>
+
+					<p class="wc-tweet-timestamp">
+						<a href="https://twitter.com/wordcamp/status/{{tweet.id_str}}">{{tweet.time_ago}}</a>
+					</p>
+
+					<ul class="wc-tweet-actions clearfix">
+						<li class="wc-tweet-action-reply">
+							<a href="https://twitter.com/intent/tweet?in_reply_to={{tweet.id_str}}">
+								<span class="wc-tweet-action-icon"></span>
+								Reply
+							</a>
+						</li>
+
+						<li class="wc-tweet-action-retweet">
+							<a href="https://twitter.com/intent/retweet?tweet_id={{tweet.id_str}}">
+								<span class="wc-tweet-action-icon"></span>
+								Retweet
+							</a>
+						</li>
+
+						<li class="wc-tweet-action-favorite">
+							<a href="https://twitter.com/intent/favorite?tweet_id={{tweet.id_str}}">
+								<span class="wc-tweet-action-icon"></span>
+								Favorite
+							</a>
+						</li>
+					</ul>
 				</li>
-				<?php endforeach; ?>
-			</ul>
-			<!--<a href="#" class="more">More Speakers &rarr;</a>-->
-			<?php else : // ! empty( $sessions ) ?>
-			<p>We're sorry, the speakers list is temporarily unavailable.</p>
-			<?php endif; ?>
-		</div>  <!-- .wc-speakers -->
+			</script>
+		</div>  <!-- .wc-tweets -->
 
 	</div> <!-- #wc-content-blocks -->
 	<?php

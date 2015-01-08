@@ -334,6 +334,11 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 * html li { height: 1% }
 *:first-child+html .group,
 *:first-child+html li { min-height: 1px }
+.clearfix:after {
+	content: "";
+	display: table;
+	clear: both;
+}
 
 /* !01d. Buttons */
 /* ------------------------------------- */
@@ -510,6 +515,30 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	-moz-border-radius: 3px;
 	
 	background: #ccc
+}
+
+.spinner {
+	background: url( 'images/spinner.gif' ) no-repeat;
+	background-size: 20px 20px;
+	display: none;
+	float: right;
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+	width: 20px;
+	height: 20px;
+	margin: 2px 5px 0;
+}
+
+.spinner-visible {
+	display: block;
+}
+
+.hidden {
+	display: none;
+}
+
+.transparent {
+	opacity: 0;
 }
 
 /* !01f. Header & Footer */
@@ -1020,6 +1049,11 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	margin-bottom: 9px;
 }
 #wc-content-blocks .wc-news h3 { background-position: 0 -71px }
+#wc-content-blocks .wc-tweets h3 {
+	background-position: 0 -658px;
+	padding-left: 40px;
+	margin-bottom: 9px;
+}
 #wc-content-blocks .wc-sessions h3 {
 	background-position: -7px -150px;
 	padding-left: 25px;
@@ -1118,6 +1152,74 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	padding-bottom: 20px;
 }
 
+
+/* !Latest Tweets */
+#wc-tweets-spinner {
+	float: none;
+	margin: 0 auto;
+}
+
+#wc-tweets-container {
+	transition: all 1.25s ease;
+}
+#wc-tweets-container li {
+	position: relative;
+	border-top: 1px solid #EEEEEE;
+	padding: 1em 0;
+}
+
+.wc-tweet-timestamp {
+	position: absolute;
+	bottom: 1em;	/* matches #wc-tweets-container li margin-bottom */
+	right: 0;
+	margin-bottom: 0;
+}
+
+#wc-tweets-container li .wc-tweet-actions li {
+	float: left;
+	margin-right: 12px;
+	padding-top: 8px;
+	padding-bottom: 0;
+	border-top: none;
+}
+.wc-tweet-actions li a,
+.wc-tweet-timestamp a {
+	font-weight: normal;
+	color: #b2b2b2;
+}
+.wc-tweet-actions li a:hover,
+.wc-tweet-timestamp a:hover {
+	color: #666666;
+}
+.wc-tweet-action-icon {
+	position: relative;
+	top: 3px;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-image: url( 'images/twitter-actions.png' );
+	background-repeat: no-repeat;
+}
+.wc-tweet-action-reply .wc-tweet-action-icon {
+	background-position: 0 0;
+}
+.wc-tweet-action-reply:hover .wc-tweet-action-icon {
+	background-position: -16px 0;
+}
+.wc-tweet-action-retweet .wc-tweet-action-icon {
+	width: 19px;
+	background-position: -80px 0;
+}
+.wc-tweet-action-retweet:hover .wc-tweet-action-icon {
+	background-position: -99px 0;
+}
+.wc-tweet-action-favorite .wc-tweet-action-icon {
+	top: 2px;
+	background-position: -32px 0;
+}
+.wc-tweet-action-favorite:hover .wc-tweet-action-icon {
+	background-position: -48px 0;
+}
 
 /* !WordCamp Sessions */
 
@@ -2650,6 +2752,9 @@ h3#comments-title {
 /* !05. 2x Retina */
 /* ============================================= */
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) {
+	.spinner {
+		background-image: url( 'images/spinner-2x.gif' );
+	}
 	#access .sub-menu, #header {
 		background: #e0f5fa url('images/header-bg-2x.png');
 		background-size: 56px 56px;
@@ -2683,6 +2788,9 @@ h3#comments-title {
 	}
 	#wc-content-blocks .wc-news h3 {
 		background-position: 0 -71px;
+	}
+	#wc-content-blocks .wc-tweets h3 {
+		background-position: 0 -658px;
 	}
 	#wc-content-blocks .wc-sessions h3 {
 		background-position: -7px -150px;
@@ -2902,6 +3010,19 @@ h3#comments-title {
 	.archive #content h1.page-title,
 	.search #content h1.page-title {
 		margin-right: 0;
+	}
+
+	.wc-tweet-timestamp {
+		position: relative;
+		bottom: auto;
+		right: auto;
+		margin-top: 10px;
+	}
+	.wc-tweet-timestamp a::after {
+		content: " ago"
+	}
+	#wc-tweets-container li .wc-tweet-actions li {
+		padding-top: 0;
 	}
 }
 
