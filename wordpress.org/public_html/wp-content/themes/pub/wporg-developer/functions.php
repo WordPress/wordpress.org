@@ -66,11 +66,6 @@ require __DIR__ . '/inc/redirects.php';
 require __DIR__ . '/inc/formatting.php';
 
 /**
- * Comment notifications.
- */
-require __DIR__ . '/inc/comment-notifications.php';
-
-/**
  * Set the content width based on the theme's design and stylesheet.
  */
 if ( ! isset( $content_width ) ) {
