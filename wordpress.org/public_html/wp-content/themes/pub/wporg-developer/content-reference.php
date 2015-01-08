@@ -6,14 +6,14 @@
 
 	<h1><a href="<?php the_permalink() ?>"><?php echo get_signature(); ?></a></h1>
 
-	<section class="description">
+	<section class="summary">
 		<?php echo get_summary(); ?>
 	</section>
 
 <?php if ( is_single() ) : ?>
 
-	<section class="long-description">
-		<?php echo get_long_description(); ?>
+	<section class="description">
+		<?php echo get_description(); ?>
 	</section>
 
 	<?php

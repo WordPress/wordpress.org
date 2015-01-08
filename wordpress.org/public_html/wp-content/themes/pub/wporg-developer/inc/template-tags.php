@@ -1049,14 +1049,14 @@ namespace DevHub {
 	}
 
 	/**
-	 * Gets the long description.
+	 * Gets the description.
 	 *
-	 * The long description is stored in the 'wporg_parsed_content' meta field.
+	 * The (long) description is stored in the 'post_content' get_post_field.
 	 *
 	 * @param  null|WP_Post Optiona. The post.
 	 * @return string
 	 */
-	function get_long_description( $post = null ) {
+	function get_description( $post = null ) {
 		$post = get_post( $post );
 
 		$description = $post->post_content;
