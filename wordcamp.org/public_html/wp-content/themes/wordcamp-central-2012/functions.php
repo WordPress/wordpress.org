@@ -468,7 +468,7 @@ class WordCamp_Central_Theme {
 				 * The Twitter API includes retweets in the `count` parameter, even if include_rts=false is passed,
 				 * so we have to request more tweets than we actually want and then cut it down here.
 				 */
-				if ( $tweets['tweets'] ) {
+				if ( is_array( $tweets['tweets'] ) ) {
 					$tweets['tweets']      = array_slice( $tweets['tweets'], 0, 3 );
 					$tweets['tweets']      = self::sanitize_format_tweets( $tweets['tweets'] );
 					$tweets['last_update'] = time();

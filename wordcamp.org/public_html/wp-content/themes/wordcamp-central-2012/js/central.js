@@ -76,7 +76,7 @@ var WordCampCentral = ( function( $ ) {
 					tweetTemplate   = _.template( $( '#tmpl-wc-tweet' ).html(), null, templateOptions );
 
 				// Check for success
-				if ( response.hasOwnProperty( 'data' ) && response.data.hasOwnProperty( 'tweets' ) ) {
+				if ( response.hasOwnProperty( 'data' ) && response.data.hasOwnProperty( 'tweets' ) && response.data.tweets === Array ) {
 					tweets = response.data.tweets;
 				} else {
 					spinner.addClass(  'hidden' );
