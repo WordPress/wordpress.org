@@ -471,7 +471,7 @@ if ( have_posts() ) :
 							<?php foreach ( $commercial as $theme ) : ?>
 								<article id="post-<?php echo sanitize_title_with_dashes( $theme['name'] ); ?>" class="theme hentry">
 									<div class="theme-screenshot">
-										<img src="<?php echo esc_url( '//s0.wp.com/mshots/v1/' . urlencode( $theme['url'] ) . '?w=286' ); ?>" alt="">
+										<img src="<?php echo esc_url( '//s0.wp.com/mshots/v1/' . urlencode( $theme['url'] ) . '?w=572' ); ?>" alt="">
 									</div>
 									<a class="more-details url" href="<?php echo esc_url( $theme['url'] ); ?>" rel="bookmark"><?php echo nl2br( $theme['description'] ); ?></a>
 									<h3 class="theme-name entry-title"><?php echo $theme['name']; ?></h3>
