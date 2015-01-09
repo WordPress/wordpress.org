@@ -272,17 +272,17 @@ class WPORG_Themes_Upload {
 	 */
 	public function unwrap_package() {
 		$base_name = $this->get_sanitized_zip_name();
-		$tmp_dir   = "{$this->tmp_dir}/{$base_name}.zip";
+		$zip_file  = "{$this->tmp_dir}/{$base_name}.zip";
 
 		// Move the uploaded zip in the temporary directory.
-		move_uploaded_file( $_FILES['zip_file']['tmp_name'], $tmp_dir );
+		move_uploaded_file( $_FILES['zip_file']['tmp_name'], $zip_file );
 
 		$unzip     = escapeshellarg( self::UNZIP );
-		$tmp_dir   = escapeshellarg( $tmp_dir );
-		$theme_dir = escapeshellarg( "{$this->theme_dir}/" );
+		$zip_file  = escapeshellarg( $zip_file );
+		$tmp_dir   = escapeshellarg( $this->tmp_dir );
 
 		// Unzip it into the theme directory.
-		exec( escapeshellcmd( "{$unzip} {$tmp_dir} -d {$theme_dir}" ) );
+		exec( escapeshellcmd( "{$unzip} {$zip_file} -d {$tmp_dir}" ) );
 	}
 
 	/**
