@@ -606,6 +606,25 @@ class WordCamp_Central_Theme {
 			echo $end_day;
 		}
 	}
+
+	/**
+	 * Group an array of WordCamps by year
+	 *
+	 * @param array $wordcamps
+	 *
+	 * @return array
+	 */
+	public static function group_wordcamps_by_year( $wordcamps ) {
+		$grouped_wordcamps = array();
+
+		foreach ( $wordcamps as $wordcamp ) {
+			if ( $year = date( 'Y', get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true ) ) ) {
+				$grouped_wordcamps[ $year ][] = $wordcamp;
+			}
+		}
+
+		return $grouped_wordcamps;
+	}
 }
 
 // Load the theme class, this is where it all starts.

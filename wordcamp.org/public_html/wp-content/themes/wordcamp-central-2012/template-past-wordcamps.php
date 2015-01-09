@@ -34,35 +34,40 @@ get_header(); ?>
 								'value'      => strtotime( '-2 days' ),
 								'compare'    => '<'
 							) )
-						) ) 
+						) )
 					) :
+						global $wcpt_template;
+						$wordcamps = WordCamp_Central_Theme::group_wordcamps_by_year( $wcpt_template->posts );
 					?>
 
-					<ul class="wc-schedule-list">
-					<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
-						
-						<li>
-							<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
-								<?php if ( has_post_thumbnail() ) : ?>
-									<?php the_post_thumbnail( 'wccentral-thumbnail-past', array( 'class' => 'wc-image' ) ); ?>
-								<?php else : ?> 
-									<div class="wc-image wp-post-image past-wordcamp-placeholder-thumb" title="<?php the_title(); ?>"></div>
-								<?php endif; ?>
-								
-								
-								<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
-								<span class="wc-country"><?php wcpt_wordcamp_location(); ?></span>
-								<span class="wc-date">
-								
-								<?php WordCamp_Central_Theme::the_wordcamp_date(); ?>,
-								<?php wcpt_wordcamp_start_date( 0, 'Y' ); ?>
-									
-								</span>
-							</a>
-						</li>
+					<?php foreach ( $wordcamps as $year => $posts ) : ?>
+						<h3 class="wc-schedule-year"><?php echo esc_html( $year ); ?></h3>
 
-					<?php endwhile; // wcpt_wordcamps ?>
-				</ul>
+						<ul class="wc-schedule-list">
+							<?php foreach ( $posts as $post ) : setup_postdata( $post ); ?>
+
+								<li>
+									<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
+										<?php if ( has_post_thumbnail() ) : ?>
+											<?php the_post_thumbnail( 'wccentral-thumbnail-past', array( 'class' => 'wc-image' ) ); ?>
+										<?php else : ?>
+											<div class="wc-image wp-post-image past-wordcamp-placeholder-thumb" title="<?php the_title(); ?>"></div>
+										<?php endif; ?>
+
+										<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
+										<span class="wc-country"><?php wcpt_wordcamp_location(); ?></span>
+
+										<span class="wc-date">
+											<?php WordCamp_Central_Theme::the_wordcamp_date(); ?>,
+											<?php wcpt_wordcamp_start_date( 0, 'Y' ); ?>
+										</span>
+									</a>
+								</li>
+
+							<?php endforeach; ?>
+						</ul>
+					<?php wp_reset_postdata(); endforeach; ?>
+
 				<a href="<?php echo home_url( '/schedule/' ); ?>" class="wc-schedule-more"><span class="arrow">&larr;</span> Upcoming WordCamps</a>
 
 				<?php endif; // wcpt_has_wordcamps ?>
