@@ -42,7 +42,7 @@ get_header(); ?>
 					<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
 						
 						<li>
-							<a href="<?php wcpt_wordcamp_permalink(); ?>">
+							<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
 								<?php if ( has_post_thumbnail() ) : ?>
 									<?php the_post_thumbnail( 'wccentral-thumbnail-past', array( 'class' => 'wc-image' ) ); ?>
 								<?php else : ?> 
