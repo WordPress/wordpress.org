@@ -217,8 +217,7 @@ class WPORG_Themes_Upload {
 		// Talk to Trac and let them know about our new version. Or new theme.
 		$ticket_id = $this->create_or_update_trac_ticket();
 
-		// Temporarily disabled, until we hava a working Trac connection.
-		if ( false /* ! $ticket_id */ ) {
+		if ( ! $ticket_id  ) {
 			$this->remove_files( $this->tmp_dir );
 
 			return sprintf( __( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ), '<a href="mailto:theme-reviewers@lists.wordpress.org">theme-reviewers@lists.wordpress.org</a>' );
@@ -500,14 +499,11 @@ TICKET;
 
 		// If there's a previous version, and the most current version's status is either `new` or `pending`, we update.
 		if ( ! empty( $this->theme_post->max_version ) && in_array( $this->theme_post->_status[ $this->theme_post->max_version ], array( 'new', 'pending' ) ) ) {
-			$ticket_id = (int) $this->theme_post->_tickets[ $this->theme_post->max_version ];
+			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
 			// Make sure the ticket has no resolution and is not approved (3 = ticket attributes).
 			if ( empty( $ticket[3]['resolution'] ) && 'approved' !== $ticket[3]['status'] ) {
-				$this->theme_post->_status[ $this->theme_post->max_version ] = 'old';
-				update_post_meta( $this->theme_post->ID, '_status', $this->theme_post->_status );
-
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
 			}
