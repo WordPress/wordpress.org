@@ -103,8 +103,8 @@
 					'posts_per_page' => 10,
 					'post_parent' => get_the_ID(),
 					'post_mime_type' => 'image',
-					'orderby' => 'menu_order',
-					'order' => 'ASC',
+					'orderby' => 'date',
+					'order' => 'DESC',
 				) );
 			?>
 			
