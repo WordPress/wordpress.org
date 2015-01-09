@@ -126,10 +126,12 @@ function wporg_themes_sync_review_results() {
 	}
 
 	if ( ! class_exists( 'Trac' ) ) {
-		include_once plugin_dir_path( __FILE__ ) . 'class-trac.php';
+		require_once ABSPATH . WPINC . '/class-IXR.php';
+		require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
+		require_once WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
 	}
 
-	$trac         = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'themes.trac.wordpress.org', '/login/xmlrpc', 443, true );
+	$trac         = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 	$last_request = get_option( 'wporg-themes-last-trac-sync', strtotime( '-2 days' ) );
 
 	foreach ( array( 'live', 'not-approved' ) as $resolution ) {

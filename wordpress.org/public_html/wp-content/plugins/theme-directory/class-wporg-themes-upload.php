@@ -490,10 +490,12 @@ TICKET;
 		// Set up a way to communicate with Trac.
 		if ( empty( $this->trac ) ) {
 			if ( ! class_exists( 'Trac' ) ) {
-				include_once plugin_dir_path( __FILE__ ) . 'class-trac.php';
+				require_once ABSPATH . WPINC . '/class-IXR.php';
+				require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
+				require_once WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
 			}
 
-			$this->trac = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'themes.trac.wordpress.org', '/login/xmlrpc', 443, true /* is_ssl() */ );
+			$this->trac = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 		}
 
 		// If there's a previous version, and the most current version's status is either `new` or `pending`, we update.
