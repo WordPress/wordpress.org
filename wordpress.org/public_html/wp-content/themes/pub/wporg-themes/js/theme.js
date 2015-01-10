@@ -339,7 +339,7 @@
 		},
 
 		baseUrl: function( url ) {
-			return wp.themes.data.settings.urlBase + url;
+			return '/' + url;
 		},
 
 		themePath: '',

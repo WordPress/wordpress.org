@@ -91,8 +91,7 @@ function wporg_themes_scripts() {
 				'isInstall'  => true,
 				'canInstall' => false,
 				'installURI' => null,
-				'adminUrl'   => '',
-				'urlBase'    => is_multisite() ? get_blog_details()->path : '/',
+				'adminUrl'   => parse_url( home_url(), PHP_URL_PATH ),
 			),
 			'l10n' => array(
 				'addNew'            => __( 'Add New Theme' ),
