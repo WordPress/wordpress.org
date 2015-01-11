@@ -26,12 +26,12 @@ class GP_Help_Page_Plugin extends GP_Plugin {
 	}
 
 	function is_notice_hidden() {
-		return ( gp_array_get( $_COOKIE, $this->hide_notice ) || ( GP::$user->logged_in() && GP::$user->get_meta( $this->hide_notice ) ) );
+		return ( gp_array_get( $_COOKIE, $this->hide_notice ) || ( GP::$user->logged_in() && GP::$user->current()->get_meta( $this->hide_notice ) ) );
 	}
 
 	function hide_notice() {
 		if ( GP::$user->logged_in() ) {
-			GP::$user->set_meta( $this->hide_notice, true );
+			GP::$user->current()->set_meta( $this->hide_notice, true );
 		}
 		setcookie( $this->hide_notice, '1', time() + 3600*24*30, gp_url( '/' ) ); // a month
 	}
@@ -51,7 +51,7 @@ class GP_Help_Page_Plugin extends GP_Plugin {
 				jQuery('#help-notice').fadeOut(1000);
 				return false;
 			});
-		</script>	
+		</script>
 <?php
 	}
 
