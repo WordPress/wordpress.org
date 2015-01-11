@@ -484,7 +484,7 @@ class WordCamp_New_Site {
 								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="textarea"              /]
 							[/contact-form]',
-							__( 'WordCamp Speaker Request', 'wordcamporg' ),
+							__( 'WordCamp Volunteer Application', 'wordcamporg' ),
 							__( 'Name', 'wordcamporg' ),
 							__( 'Email', 'wordcamporg' ),
 							__( 'Skills / Interests / Experience (not necessary to volunteer)', 'wordcamporg' ),
