@@ -4,7 +4,7 @@ namespace {
 	require dirname( dirname( __DIR__ ) ) . '/includes/hyperdb/bb-10-hyper-db.php';
 	require dirname( dirname( __DIR__ ) ) . '/includes/object-cache.php';
 
-	require dirname( __DIR__ ) . '/slack-config.php';
+	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
 	require WPORGPATH . 'bb-theme/themes/lib/class-IXR.php';
 	require WPORGPATH . 'bb-theme/themes/lib/class-trac.php';

@@ -3,7 +3,7 @@
 namespace Dotorg\Slack\Trac;
 use Dotorg\Slack\Send;
 
-require dirname( __DIR__ ) . '/slack-config.php';
+require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
 if ( 'cli' === PHP_SAPI ) {
 	if ( $argc !== 3 ) {
