@@ -2,7 +2,7 @@
 
 class GP_Help_Page_Plugin extends GP_Plugin {
 	public $id = 'wporg-help';
-	private $hide_notice = 'wporg-help-hide-notice';
+	private $hide_notice = 'wporg_help_hide_notice';
 	const handbook_link = 'https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/';
 
 	function __construct() {
