@@ -20,6 +20,10 @@ html, body {
 p.description {
 	margin: 1em;
 }
+p.actionlist {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
 #gp-footer {
 	background: none;
 }
