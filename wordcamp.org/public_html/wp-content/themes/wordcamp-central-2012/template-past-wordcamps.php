@@ -47,7 +47,7 @@ get_header(); ?>
 							<?php foreach ( $posts as $post ) : setup_postdata( $post ); ?>
 
 								<li>
-									<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
+									<a href="<?php echo esc_url( wcpt_get_wordcamp_url( $post->ID ) ); ?>">
 										<?php if ( has_post_thumbnail() ) : ?>
 											<?php the_post_thumbnail( 'wccentral-thumbnail-past', array( 'class' => 'wc-image' ) ); ?>
 										<?php else : ?>
