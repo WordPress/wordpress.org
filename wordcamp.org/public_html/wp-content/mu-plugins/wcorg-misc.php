@@ -134,3 +134,22 @@ function wcorg_modify_default_space_allotment( $size ) {
 	return $size;
 }
 add_filter( 'get_space_allowed', 'wcorg_modify_default_space_allotment' );
+
+/**
+ * Redirects from /year/month/day/slug/ to /slug/ for new URL formats.
+ */
+function wcorg_subdomactories_redirect() {
+	if ( ! is_404() )
+		return;
+
+	if ( get_option( 'permalink_structure' ) != '/%postname%/' )
+		return;
+
+	// russia.wordcamp.org/2014/2014/11/25/post-name/
+	if ( ! preg_match( '#^/[0-9]{4}/[0-9]{4}/[0-9]{2}/[0-9]{2}/(.+)$#', $_SERVER['REQUEST_URI'], $matches ) )
+		return;
+
+	wp_safe_redirect( esc_url_raw( set_url_scheme( home_url( $matches[1] ) ) ) );
+	die();
+}
+add_action( 'template_redirect', 'wcorg_subdomactories_redirect' );
