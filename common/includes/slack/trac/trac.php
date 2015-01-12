@@ -102,7 +102,7 @@ class Trac implements User {
 			return new $class;
 		}
 		
-		if ( preg_match( '~([a-z]+).trac.wordpress.org~', $url, $match ) ) {
+		if ( preg_match( '~([a-z]+).trac.wordpress.org~', $trac, $match ) ) {
 			$class = $ns . $match[1];
 			if ( class_exists( $class ) ) {
 				return new $class;

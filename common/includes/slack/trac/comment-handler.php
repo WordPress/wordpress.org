@@ -4,7 +4,7 @@ namespace Dotorg\Slack\Trac;
 
 class Comment_Handler {
 
-	function __construct( Dotorg\Slack\Send $send, array $email_message ) {
+	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
 		$this->lines = $email_message;
 	}
@@ -18,7 +18,7 @@ class Comment_Handler {
 		}
 
 		$this->generate_payload();
-		$this->send->send( $trac->get_firehose_channel() );
+		$this->send->send( $this->trac->get_firehose_channel() );
 	}
 
 	function process_message() {
@@ -33,7 +33,7 @@ class Comment_Handler {
 				list( $ticket_url, $comment_id ) = explode( '#comment:', $comment_url );
 				list( $trac_url, $ticket_id ) = explode( '/ticket/', $ticket_url );
 	
-				$trac = Dotorg\Slack\Trac::get( $trac_url );
+				$trac = Trac::get( $trac_url );
 				if ( ! $trac ) {
 					return false;
 				}
@@ -108,7 +108,7 @@ class Comment_Handler {
 		}
 
 		// Everything left is the comment. Remove leading space.
-		$comment = array_map( 'ltrim', $lines );
+		$comment = implode( "\n", array_map( 'ltrim', $lines ) );
 
 		$this->trac    = $trac;
 		$this->title   = $title;
@@ -140,9 +140,9 @@ class Comment_Handler {
 		$this->send->set_username( $this->trac->get_ticket_username() );
 			
 		$comment         = $this->format_comment_for_slack();
-		$main_attachment = $this->changes ? $this->changes : $comment;
-		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
+		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
 		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $this->author, $this->comment_url, $this->ticket_id, $this->title );
+		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
 
 		$attachment = array(
 			'pretext'   => $pretext,

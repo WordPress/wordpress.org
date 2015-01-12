@@ -72,7 +72,7 @@ class Ticket extends Resource {
 	}
 
 	static function get_ticket_fields( $ticket ) {
-		$new = false !== strpos( get_class( $this ), 'New_Ticket' );
+		$new = false !== strpos( get_called_class(), 'New_Ticket' );
 	
 		$ticket_fields = array();
 
