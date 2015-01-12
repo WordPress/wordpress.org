@@ -55,11 +55,11 @@ get_header(); ?>
 										<?php endif; ?>
 
 										<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
-										<span class="wc-country"><?php wcpt_wordcamp_location(); ?></span>
+										<span class="wc-country"><?php wcpt_wordcamp_location( $post->ID ); ?></span>
 
 										<span class="wc-date">
-											<?php WordCamp_Central_Theme::the_wordcamp_date(); ?>,
-											<?php wcpt_wordcamp_start_date( 0, 'Y' ); ?>
+											<?php WordCamp_Central_Theme::the_wordcamp_date( $post->ID ); ?>,
+											<?php wcpt_wordcamp_start_date( $post->ID, 'Y' ); ?>
 										</span>
 									</a>
 								</li>

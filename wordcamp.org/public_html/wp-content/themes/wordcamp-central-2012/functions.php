@@ -591,11 +591,11 @@ class WordCamp_Central_Theme {
 		return $query;
 	}
 
-	public static function the_wordcamp_date() {
-		$start_day = wcpt_get_wordcamp_start_date( 0, 'j' );
-		$start_month = wcpt_get_wordcamp_start_date( 0, 'F' );
-		$end_day = wcpt_get_wordcamp_end_date( 0, 'j' );
-		$end_month = wcpt_get_wordcamp_end_date( 0, 'F' );
+	public static function the_wordcamp_date( $wordcamp_id = 0 ) {
+		$start_day = wcpt_get_wordcamp_start_date( $wordcamp_id, 'j' );
+		$start_month = wcpt_get_wordcamp_start_date( $wordcamp_id, 'F' );
+		$end_day = wcpt_get_wordcamp_end_date( $wordcamp_id, 'j' );
+		$end_month = wcpt_get_wordcamp_end_date( $wordcamp_id, 'F' );
 
 		echo "$start_month $start_day";
 		if ( $end_day ) {
