@@ -67,6 +67,8 @@ class bbPress extends Trac {
 	protected $tickets_channel  = '#bbpress-newtickets';
 	protected $firehose_channel = '#bbpress-firehose';
 
+	protected $primary_channel_ticket_format = 'title';
+
 	protected $color = '#080';
 	protected $icon  = ':bbpress:';
 }
@@ -76,6 +78,8 @@ class BuddyPress extends Trac {
 	protected $commits_channel  = '#buddypress-commits';
 	protected $tickets_channel  = '#buddypress-newtickets';
 	protected $firehose_channel = '#buddypress-firehose';
+
+	protected $primary_channel_ticket_format = 'title';
 
 	protected $color = '#d84800';
 	protected $icon  = ':buddypress:';
