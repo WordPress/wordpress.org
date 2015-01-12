@@ -88,14 +88,16 @@ class BuddyPress extends Trac {
 class Dotorg extends Trac {
 	protected $name = 'Private Dotorg';
 	protected $public = false;
-	protected $primary_channel = 'dotorg';
+	protected $primary_channel  = 'dotorg';
+	protected $firehose_channel = 'dotorg';
 }
 
 class Deploy extends Trac {
 	protected $public = false;
 	protected $tickets = false;
 
-	protected $primary_channel = 'dotorg';
+	protected $primary_channel  = 'dotorg';
+	protected $firehose_channel = 'dotorg';
 }
 
 class GlotPress extends Trac {
