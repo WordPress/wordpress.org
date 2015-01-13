@@ -12,6 +12,7 @@ class Bot {
 		'#glotpress'    => 'glotpress',
 		'#meta'         => 'meta',
 		'#core-restapi' => false, // ideally: GH WP-API/WP-API
+		'#outreach'     => false,
 	);
 
 	protected $parsed = array();
