@@ -23,6 +23,9 @@ class DevHub_Formatting {
 	public static function do_init() {
 		add_filter( 'the_excerpt', array( __CLASS__, 'lowercase_P_dangit_just_once' ) );
 		add_filter( 'the_content', array( __CLASS__, 'make_doclink_clickable' ), 10, 5 );
+
+		add_filter( 'the_excerpt', array( __CLASS__, 'remove_inline_internal' ) );
+		add_filter( 'the_content', array( __CLASS__, 'remove_inline_internal' ) );
 	}
 
 	/**
@@ -41,6 +44,22 @@ class DevHub_Formatting {
 		}
 
 		return $excerpt;
+	}
+
+	/**
+	 * Prevents display of the inline use of {@internal}} as it is not meant to be shown.
+	 *
+	 * @param  string      $content   The post content.
+	 * @param  null|string $post_type Optional. The post type. Default null.
+	 * @return string
+	 */
+	public static function remove_inline_internal( $content, $post_type = null ) {
+		// Only attempt a change for a parsed post type with an @internal reference in the text.
+		if ( DevHub\is_parsed_post_type( $post_type ) && false !== strpos( $content, '{@internal ' ) ) {
+			$content = preg_replace( '/\{@internal (.+)\}\}/', '', $content );
+		}
+
+		return $content;
 	}
 
 	/**
