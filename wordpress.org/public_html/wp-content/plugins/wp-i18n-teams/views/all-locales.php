@@ -61,7 +61,7 @@
 					</td>
 					<td class="right no-right-border">
 						<a href="https://translate.wordpress.org/languages/<?php echo $locale->slug; ?>">
-							<?php echo ! empty( $percentages[ $locale->wp_locale ] ) ? $percentages[ $locale->wp_locale ] . '%' : '&mdash;'; ?>
+							<?php echo ( isset( $percentages[ $locale->wp_locale ] ) ) ? $percentages[ $locale->wp_locale ] . '%' : '&mdash;'; ?>
 						</a>
 					</td>
 					<td class="no-left-border nowrap">
@@ -78,4 +78,3 @@
 		</tbody>
 	</table>
 </div> <!-- /.translators-info -->
-

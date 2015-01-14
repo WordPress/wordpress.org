@@ -173,7 +173,7 @@ class WP_I18n_Teams {
 			}
 		}
 		foreach ( $counts as $locale => $count ) {
-			$percentages[ $locale ] = floor( $count['current'] / $count['total'] * 100 );
+			$percentages[ $locale ] = ( $count['total'] > 0 ) ? floor( $count['current'] / $count['total'] * 100 ) : 0;
 		}
 		set_transient( 'core_translation_data', $percentages, 900 );
 		return $percentages;
