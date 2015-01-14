@@ -618,7 +618,9 @@ class WordCamp_Central_Theme {
 		$grouped_wordcamps = array();
 
 		foreach ( $wordcamps as $wordcamp ) {
-			if ( $year = date( 'Y', (int) get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true ) ) ) {
+			$date = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
+
+			if ( $date && $year = date( 'Y', (int) $date ) ) {
 				$grouped_wordcamps[ $year ][] = $wordcamp;
 			}
 		}
