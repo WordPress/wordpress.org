@@ -627,6 +627,23 @@ class WordCamp_Central_Theme {
 
 		return $grouped_wordcamps;
 	}
+
+	/**
+	 * Returns a WordCamp's website URL if it's available, or their Central page if is isn't.
+	 *
+	 * @param int $post_id
+	 *
+	 * @return string
+	 */
+	public static function get_best_wordcamp_url( $post_id = 0 ) {
+		$url = wcpt_get_wordcamp_url( $post_id );
+
+		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+			$url = wcpt_get_wordcamp_permalink( $post_id );
+		}
+
+		return $url;
+	}
 }
 
 // Load the theme class, this is where it all starts.
