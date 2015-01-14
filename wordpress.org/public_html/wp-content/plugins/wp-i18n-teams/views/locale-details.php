@@ -34,7 +34,7 @@
 		<ul id="locale-download">
 			<li class="button download-button">
 				<a href="<?php echo esc_url( $locale_data['localized_core_url'] ); ?>" role="button">
-					<?php printf( __( 'Download WordPress in %s', 'wporg' ), $locale->native_name ); ?>
+					<?php printf( __( 'Download WordPress in %s', 'wporg' ), $locale->english_name ); ?>
 				</a>
 			</li>
 
@@ -54,7 +54,7 @@
 <h2>Validators</h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
-	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->native_name ); ?></p>
+	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
 <?php else : ?>
 	<ul class="validators">
 		<?php foreach ( $locale_data['validators'] as $validator ) : ?>
@@ -72,7 +72,7 @@
 <h2>Translators</h2>
 
 <?php if ( empty( $locale_data['translators'] ) ) : ?>
-	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->native_name ); ?></p>
+	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>
 <?php else : ?>
 	<ul>
 		<?php foreach ( $locale_data['translators'] as $username => $name ) : ?>
@@ -87,7 +87,6 @@
 
 <p class="alert alert-info" role="alert">
 	<a href="https://translate.wordpress.org/languages/<?php echo esc_attr( $locale->slug ); ?>">
-		<?php printf( __( 'Become a translator yourself, check if %s needs some help!', 'wporg' ), $locale->native_name ); ?>
+		<?php printf( __( 'Become a translator yourself, check if %s needs some help!', 'wporg' ), $locale->english_name ); ?>
 	</a>
 </p>
-
