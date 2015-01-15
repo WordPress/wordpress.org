@@ -17,7 +17,8 @@
 function wporg_themes_setup() {
 	global $themes_allowedtags, $theme_field_defaults;
 
-//	load_theme_textdomain( 'wporg-themes', get_template_directory() . '/languages' );
+	load_theme_textdomain( 'wporg-themes' );
+
 	add_theme_support( 'automatic-feed-links' );
 
 	// This theme uses wp_nav_menu() in one location.
@@ -76,7 +77,6 @@ function wporg_themes_scripts() {
 	wp_enqueue_style( 'ratings', '//wordpress.org/extend/themes-plugins/bb-ratings/bb-ratings.css', array(), '4' );
 	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
 	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri() );
-
 
 	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array(), null );
 
