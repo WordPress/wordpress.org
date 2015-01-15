@@ -108,11 +108,35 @@ function wporg_themes_map_meta_cap( $caps, $cap, $user_id, $args ) {
 				$caps[] = 'do_not_allow';
 			}
 			break;
+
+		case 'delete_categories':
+		case 'edit_categories':
+		case 'manage_categories':
+
+			if ( ! is_super_admin() ) {
+				$caps[] = 'do_not_allow';
+			}
+			break;
 	}
 
 	return $caps;
 }
 add_filter( 'map_meta_cap', 'wporg_themes_map_meta_cap', 10, 4 );
+
+/**
+ * Checks if ther current users is a super admin before allowing terms to be added.
+ *
+ * @param string           $term The term to add or update.
+ * @return string|WP_Error The term to add or update or WP_Error on failure.
+ */
+function wporg_themes_pre_insert_term( $term ) {
+	if ( ! is_super_admin() ) {
+		$term = new WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-themes' ) );
+	}
+
+	return $term;
+}
+add_filter( 'pre_insert_term', 'wporg_themes_pre_insert_term' );
 
 /**
  * Grabs theme review results from Trac and updates theme version number statuses accordingly.
