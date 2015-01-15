@@ -181,7 +181,7 @@ class WordCamp_Central_Theme {
 	 * Enqueue scripts and styles.
 	 */
 	static function enqueue_scripts() {
-		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 3 );
+		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 4 );
 		wp_enqueue_script( 'wordcamp-central', get_stylesheet_directory_uri() . '/js/central.js', array( 'jquery', 'underscore' ), 1, true );
 
 		wp_localize_script( 'wordcamp-central', 'wordcampCentralOptions', array( 'ajaxURL' => admin_url( 'admin-ajax.php' ) ) );
