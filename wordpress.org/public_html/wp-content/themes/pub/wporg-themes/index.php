@@ -75,7 +75,7 @@ get_header();
 		</div><!-- .wp-filter -->
 
 		<div class="theme-browser content-filterable">
-			<div class="themes">
+			<div class="themes" style="display: none;">
 				<?php
 				if ( ! is_wp_error( $themes ) ) :
 					foreach ( $themes->themes as $theme ) :
