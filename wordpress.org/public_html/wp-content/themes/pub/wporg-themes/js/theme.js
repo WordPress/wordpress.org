@@ -351,6 +351,13 @@
 			var self = this,
 			request = {};
 
+			// Open the modal when matching the route for a single themes.
+			wp.themes.router.on( 'route:preview', function( slug ) {
+				this.listenTo( self.view.collection, 'query:success', function() {
+					self.view.view.expand( slug );
+				});
+			});
+
 			wp.themes.router.on( 'route:tag', function( tag ) {
 				$( '#filter-id-' + tag).prop( 'checked', true );
 				self.view.applyFilters();
