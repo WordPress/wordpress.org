@@ -338,6 +338,9 @@
 		},
 
 		baseUrl: function( url ) {
+			if ( 0 !== url.length ) {
+				url += '/';
+			}
 			return '/' + url;
 		},
 
