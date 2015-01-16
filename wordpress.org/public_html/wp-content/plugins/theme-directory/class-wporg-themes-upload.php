@@ -371,10 +371,14 @@ class WPORG_Themes_Upload {
 			$this->theme->get_stylesheet()
 		);
 
-		// Reserve "twenty" names for wordpressdotorg.
 		$reserved_slugs = array(
+			// Reserve "twenty" names for wordpressdotorg.
 			'twentyten', 'twentyeleven', 'twentytwelve','twentythirteen', 'twentyfourteen', 'twentyfifteen',
 			'twentysixteen', 'twentyseventeen','twentyeighteen', 'twentynineteen', 'twentytwenty',
+
+			// Theme Showcase URL parameters.
+			'browse', 'tag', 'search', 'filter', 'upload', 'commercial',
+			'featured', 'popular', 'new', 'updated',
 		);
 
 		return in_array( $slug, $reserved_slugs ) && 'wordpressdotorg' !== $this->author->user_login;
