@@ -13,7 +13,7 @@
  * runs before the init hook. The init hook is too late for some features, such
  * as indicating support for post thumbnails.
  */
-
+define('WPORGPATH', 'https://wordpress.org/');
 function wporg_themes_setup() {
 	global $themes_allowedtags, $theme_field_defaults;
 
@@ -81,8 +81,8 @@ function wporg_themes_scripts() {
 	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array(), null );
 
 	if ( ! is_singular( 'page' ) ) {
-		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ) );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ) );
+		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), false, true );
 
 		wp_localize_script( 'theme', '_wpThemeSettings', array(
 			'themes'   => false,
@@ -91,7 +91,7 @@ function wporg_themes_scripts() {
 				'isInstall'  => true,
 				'canInstall' => false,
 				'installURI' => null,
-				'adminUrl'   => parse_url( home_url(), PHP_URL_PATH ),
+				'adminUrl'   => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
 			),
 			'l10n' => array(
 				'addNew'            => __( 'Add New Theme' ),
@@ -239,4 +239,4 @@ function wporg_themes_view_templates() {
 	get_template_part( 'view-templates/theme-preview' );
 	get_template_part( 'view-templates/theme-single' );
 }
-add_action( 'wp_head', 'wporg_themes_view_templates' );
+add_action( 'wp_footer', 'wporg_themes_view_templates' );

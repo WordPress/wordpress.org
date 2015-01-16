@@ -3,7 +3,7 @@
 	<div class="theme-screenshot">
 		<img src="<?php echo esc_url( $theme->screenshot_url ); ?>" alt="">
 	</div>
-	<a class="more-details url" href="/<?php echo $theme->slug; ?>" rel="bookmark"><?php _ex( 'More Info', 'theme' ); ?></a>
+	<a class="more-details url" href="<?php echo esc_url( home_url( $theme->slug . '/' ) ); ?>" rel="bookmark"><?php _ex( 'More Info', 'theme' ); ?></a>
 	<div class="theme-author"><?php printf( __( 'By %s' ), '<span class="author">' . $theme->author . '</span>' ); ?></div>
 	<h3 class="theme-name entry-title"><?php echo $theme->name; ?></h3>
 
