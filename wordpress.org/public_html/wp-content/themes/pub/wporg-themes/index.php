@@ -37,9 +37,9 @@ get_header();
 			</div>
 
 			<ul class="filter-links">
-				<li><a href="/browse/featured/" data-sort="featured"><?php _ex( 'Featured', 'themes' ); ?></a></li>
-				<li><a href="/browse/popular/" data-sort="popular"><?php _ex( 'Popular', 'themes' ); ?></a></li>
-				<li><a href="/browse/new/" data-sort="new"><?php _ex( 'Latest', 'themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured"><?php _ex( 'Featured', 'themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/popular/' ) ); ?>" data-sort="popular"><?php _ex( 'Popular', 'themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new"><?php _ex( 'Latest', 'themes' ); ?></a></li>
 			</ul>
 
 			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter' ); ?></a>

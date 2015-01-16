@@ -13,7 +13,6 @@
  * runs before the init hook. The init hook is too late for some features, such
  * as indicating support for post thumbnails.
  */
-define('WPORGPATH', 'https://wordpress.org/');
 function wporg_themes_setup() {
 	global $themes_allowedtags, $theme_field_defaults;
 
