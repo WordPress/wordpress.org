@@ -329,12 +329,11 @@
 
 	_.extend( wp.themes.InstallerRouter.prototype, {
 		routes: {
-			'/:slug/': 'preview',
-			'/tag/:tag/': 'onFilter',
-			'/?upload': 'upload',
-			'/search.php?q=:query': 'search',
-			'/browse/:sort/': 'sort',
-			'/': 'sort',
+			'browse/:sort/': 'sort',
+			'tag/:tag/': 'tag',
+			'search/:query/': 'search',
+			'author/:author/': 'author',
+			':slug/': 'preview',
 			'': 'sort'
 		},
 
@@ -344,16 +343,22 @@
 
 		themePath: '',
 		browsePath: 'browse/',
-		searchPath: 'search.php?q='
+		searchPath: 'search/'
 	});
 
 	_.extend( wp.themes.RunInstaller, {
 		extraRoutes: function() {
-			var self = this;
+			var self = this,
+			request = {};
 
 			wp.themes.router.on( 'route:tag', function( tag ) {
-				$( '#filter-id-' + tag).checked( true );
+				$( '#filter-id-' + tag).prop( 'checked', true );
 				self.view.applyFilters();
+			});
+
+			wp.themes.router.on( 'route:author', function( author ) {
+				request.author = author;
+				self.view.collection.query( request );
 			});
 		}
 	});
