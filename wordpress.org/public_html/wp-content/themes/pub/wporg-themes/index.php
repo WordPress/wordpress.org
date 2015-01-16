@@ -16,14 +16,22 @@ include ABSPATH . 'wp-admin/includes/theme.php';
 $args = array(
 	'per_page' => 15,
 	'fields'   => array_merge( $GLOBALS['theme_field_defaults'], array(
-		'parent'   => true,
+		'parent' => true,
 	) ),
 );
 
 if ( get_query_var( 'tag' ) ) {
 	$args['tag'][] = get_query_var( 'tag' );
-} else {
-	$args['browse'] = get_query_var( 'attachment' ) ? get_query_var( 'attachment' ) : 'featured';
+}
+elseif ( get_query_var( 'author_name' ) ) {
+	$args['author'] = get_query_var( 'author_name' );
+}
+else {
+	$args['browse'] = 'featured';
+
+	if ( in_array( get_query_var( 'name' ), array( 'featured', 'popular', 'new' ) ) ) {
+		$args['browse'] = get_query_var( 'name' );
+	}
 }
 $themes = themes_api( 'query_themes', $args );
 
