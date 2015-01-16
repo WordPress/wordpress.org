@@ -11,31 +11,11 @@
  * @package wporg-themes
  */
 
-include ABSPATH . 'wp-admin/includes/theme.php';
 
-$args = array(
-	'per_page' => 15,
-	'fields'   => array_merge( $GLOBALS['theme_field_defaults'], array(
-		'parent' => true,
-	) ),
-);
-
-if ( get_query_var( 'tag' ) ) {
-	$args['tag'][] = get_query_var( 'tag' );
-}
-elseif ( get_query_var( 'author_name' ) ) {
-	$args['author'] = get_query_var( 'author_name' );
-}
-else {
-	$args['browse'] = 'featured';
-
-	if ( in_array( get_query_var( 'name' ), array( 'featured', 'popular', 'new' ) ) ) {
-		$args['browse'] = get_query_var( 'name' );
-	}
-}
-$themes = themes_api( 'query_themes', $args );
 
 get_header();
+
+global $themes;
 ?>
 
 	<div id="themes" class="wrap">
@@ -86,9 +66,14 @@ get_header();
 			<div class="themes" style="display: none;">
 				<?php
 				if ( ! is_wp_error( $themes ) ) :
-					foreach ( $themes->themes as $theme ) :
-						get_template_part( 'content', 'index' );
-					endforeach;
+					if ( is_single() ) :
+						$theme = array_shift( $themes->themes );
+						get_template_part( 'content', 'single' );
+					else :
+						foreach ( $themes->themes as $theme ) :
+							get_template_part( 'content', 'index' );
+						endforeach;
+					endif;
 				endif;
 				?>
 			</div>

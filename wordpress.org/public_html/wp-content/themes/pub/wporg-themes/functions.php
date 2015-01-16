@@ -14,7 +14,7 @@
  * as indicating support for post thumbnails.
  */
 function wporg_themes_setup() {
-	global $themes_allowedtags, $theme_field_defaults;
+	global $themes_allowedtags;
 
 	load_theme_textdomain( 'wporg-themes' );
 
@@ -50,22 +50,66 @@ function wporg_themes_setup() {
 		'h6'      => array(),
 		'img'     => array( 'src' => array(), 'class' => array(), 'alt' => array() ),
 	);
-
-	$theme_field_defaults = array(
-		'description'  => true,
-		'sections'     => false,
-		'tested'       => true,
-		'requires'     => true,
-		'rating'       => true,
-		'downloaded'   => true,
-		'downloadlink' => true,
-		'last_updated' => true,
-		'homepage'     => true,
-		'tags'         => true,
-		'num_ratings'  => true,
-	);
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
+
+/**
+ * Makes an API request to retrieve the right themes for the current query.
+ *
+ * @param WP_Query $query
+ * @return WP_Query
+ */
+function wporg_themes_set_up_query( $query ) {
+	if ( ! is_admin() && ! in_array( $query->query_vars['pagename'], array( 'upload', 'commercial' ) ) ) {
+
+		$query->set( 'post_type', 'repopackage' );
+
+		$args = array(
+			'per_page' => 15,
+			'fields'   => array(
+				'description'  => true,
+				'sections'     => false,
+				'tested'       => true,
+				'requires'     => true,
+				'rating'       => true,
+				'downloaded'   => true,
+				'downloadlink' => true,
+				'last_updated' => true,
+				'homepage'     => true,
+				'tags'         => true,
+				'num_ratings'  => true,
+				'parent'       => true,
+			),
+		);
+
+		if ( $query->query_vars['tag'] ) {
+			$args['tag'][] = $query->query_vars['tag'];
+		}
+		elseif ( $query->query_vars['author_name'] ) {
+			$args['author'] = $query->query_vars['author_name'];
+		}
+		elseif ( $query->query_vars['pagename'] ) {
+			$slugs = explode( '/', $query->query_vars['pagename'] );
+
+			if ( count( $slugs ) > 1 && 'browse' == $slugs[0] ) {
+				$args['browse'] = $slugs[1];
+			} else {
+				$args['theme'] = $slugs[0];
+			}
+		}
+		else {
+			$args['browse'] = 'featured';
+		}
+
+		if ( ! function_exists( 'themes_api' ) ) {
+			include ABSPATH . 'wp-admin/includes/theme.php';
+		}
+		$GLOBALS['themes'] = themes_api( 'query_themes', $args );
+	}
+
+	return $query;
+}
+add_filter( 'pre_get_posts', 'wporg_themes_set_up_query' );
 
 /**
  * Enqueue scripts and styles.
