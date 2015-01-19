@@ -9,9 +9,10 @@ require WPORGPATH . 'header.php';
 	<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
 <div id="headline">
 	<div class="wrapper">
-		<h2><a href="http://make.wordpress.org/polyglots/">Translating WordPress</a></h2>
+		<h2><a href="//make.wordpress.org/polyglots/">Translating WordPress</a></h2>
 		<span id="hello">
 		<a class="menu-link" href="//make.wordpress.org/polyglots/">Blog</a>
+		<a class="menu-link" href="//make.wordpress.org/polyglots/teams/">Teams</a>
 		<a class="menu-link" href="//make.wordpress.org/polyglots/handbook/">Translator Handbook</a>
 		<?php
 		if (GP::$user->logged_in()):
@@ -30,7 +31,7 @@ require WPORGPATH . 'header.php';
 <div class="gp-content">
 
 <div id="gp-js-message"></div>
-	
+
 		<?php if (gp_notice('error')): ?>
 			<div class="error">
 				<?php echo gp_notice( 'error' ); //TODO: run kses on notices ?>
