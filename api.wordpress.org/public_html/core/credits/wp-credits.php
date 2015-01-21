@@ -115,7 +115,9 @@ abstract class WP_Credits {
 
 		$translators = array_diff_key( $translators, $validators );
 
-		natcasesort( $validators );
+		uasort( $validators, function( $a, $b ) {
+			return strnatcasecmp( $a[0], $b[0] ); // Sort by display name.
+		} );
 		natcasesort( $translators );
 
 		$this->validators = $validators;
