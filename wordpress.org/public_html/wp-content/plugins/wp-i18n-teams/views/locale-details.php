@@ -1,3 +1,4 @@
+<p><a href="<?php echo esc_url( get_permalink() ); ?>"><?php _e( '&larr; All locales', 'wporg' ); ?></a></p>
 <div id="locale-header">
 	<h1>
 		<?php echo esc_html( $locale->native_name ); ?>
@@ -51,7 +52,7 @@
 </div>
 
 
-<h2>Validators</h2>
+<h2><?php _e( 'Validators', 'wporg' ); ?></h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
@@ -69,7 +70,7 @@
 <?php endif; ?>
 
 
-<h2>Translators</h2>
+<h2><?php _e( 'Translators', 'wporg' ); ?></h2>
 
 <?php if ( empty( $locale_data['translators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>

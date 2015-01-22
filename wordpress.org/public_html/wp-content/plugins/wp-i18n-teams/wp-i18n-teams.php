@@ -103,28 +103,55 @@ class WP_I18n_Teams {
 	 */
 	public function get_locales_data() {
 		global $wpdb;
+
+		$cache = get_transient( 'wp_i18n_teams_locales_data' );
+		if ( false !== $cache ) {
+			return $cache;
+		}
+
 		$gp_locales = self::get_locales();
+		$translation_data = $this->get_core_translation_data();
 		$locale_data = array();
 
-		$statuses = array( 'no-site' => 0, 'no-releases' => 0, 'latest' => 0, 'minor-behind' => 0, 'major-behind-one' => 0, 'major-behind-many' => 0 );
+		$statuses = array(
+			'no-site'            => 0,
+			'no-releases'        => 0,
+			'latest'             => 0,
+			'minor-behind'       => 0,
+			'major-behind-one'   => 0,
+			'major-behind-many'  => 0,
+			'translated-100'     => 0,
+			'translated-95'      => 0,
+			'translated-90'      => 0,
+			'translated-50'      => 0,
+			'translated-50-less' => 0,
+		);
 
 		$wporg_data = $wpdb->get_results( "SELECT locale, subdomain, latest_release FROM locales ORDER BY locale", OBJECT_K );
 
 		foreach ( $gp_locales as $locale ) {
 			$subdomain = $wporg_data[ $locale->wp_locale ]->subdomain;
 			$latest_release = $wporg_data[ $locale->wp_locale ]->latest_release;
-			$status = self::get_locale_status( $subdomain, $latest_release );
-			$statuses[ $status ]++;
+			$release_status = self::get_locale_release_status( $subdomain, $latest_release );
+			$statuses[ $release_status ]++;
+
+			$translation_status = '';
+			if ( isset ( $translation_data[ $locale->wp_locale ] ) ) {
+				$translation_status = self::get_locale_translation_status( $translation_data[ $locale->wp_locale ] );
+				$statuses[ $translation_status ]++;
+			}
 
 			$locale_data[ $locale->wp_locale ] = array(
-				'status'           => $status,
-				'rosetta_site_url' => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
-				'latest_release'   => $latest_release ? $latest_release : false,
+				'release_status'     => $release_status,
+				'translation_status' => $translation_status,
+				'rosetta_site_url'   => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
+				'latest_release'     => $latest_release ? $latest_release : false,
 			);
 		}
 
 		$locale_data['status_counts'] = $statuses;
-		$locale_data['status_counts']['all'] = array_sum( $statuses );
+		$locale_data['status_counts']['all'] = count( $gp_locales );
+		set_transient( 'wp_i18n_teams_locales_data', $locale_data, 900 );
 		return $locale_data;
 	}
 
@@ -200,14 +227,14 @@ class WP_I18n_Teams {
 	}
 
 	/**
-	 * Determine the status of the given locale
+	 * Determine the release status of the given locale,
 	 *
 	 * @param string $rosetta_site_url
 	 * @param string $latest_release
 	 *
 	 * @return string
 	 */
-	protected static function get_locale_status( $rosetta_site_url, $latest_release ) {
+	protected static function get_locale_release_status( $rosetta_site_url, $latest_release ) {
 		if ( ! $rosetta_site_url ) {
 			return 'no-site';
 		}
@@ -226,6 +253,27 @@ class WP_I18n_Teams {
 			return 'major-behind-one';
 		} else {
 			return 'major-behind-many';
+		}
+	}
+
+	/**
+	 * Determine the translation status of the given locale.
+	 *
+	 * @param int $percent_translated
+	 *
+	 * @return string
+	 */
+	protected static function get_locale_translation_status( $percent_translated ) {
+		if ( $percent_translated == 100 ) {
+			return 'translated-100';
+		} elseif ( $percent_translated >= 95 ) {
+			return 'translated-95';
+		} elseif ( $percent_translated >= 90 ) {
+			return 'translated-90';
+		} elseif ( $percent_translated >= 50 ) {
+			return 'translated-50';
+		} else {
+			return 'translated-50-less';
 		}
 	}
 }

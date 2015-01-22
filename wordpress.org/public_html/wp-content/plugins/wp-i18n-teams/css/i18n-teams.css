@@ -15,16 +15,27 @@
 	color: #e38587;
 }
 
+.i18n-filter.current-filter {
+	color: #555;
+	border-bottom: 1px solid #555;
+}
+
 .translators-info tbody tr {
 	display: none;
 }
+
 .show-all tbody tr,
 .translators-info.show-latest tbody tr.latest,
 .translators-info.show-minor-behind tbody tr.minor-behind,
 .translators-info.show-major-behind-one tbody tr.major-behind-one,
 .translators-info.show-major-behind-many tbody tr.major-behind-many,
 .translators-info.show-no-releases tbody tr.no-releases,
-.translators-info.show-no-site tbody tr.no-site {
+.translators-info.show-no-site tbody tr.no-site,
+.translators-info.show-translated-100 tbody tr.translated-100,
+.translators-info.show-translated-95 tbody tr.translated-95,
+.translators-info.show-translated-90 tbody tr.translated-90,
+.translators-info.show-translated-50-less tbody tr.translated-50-less,
+.translators-info.show-translated-50 tbody tr.translated-50 {
 	display: table-row;
 }
 
