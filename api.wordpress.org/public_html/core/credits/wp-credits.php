@@ -19,6 +19,9 @@ abstract class WP_Credits {
 
 	private $groups;
 
+	private $translators;
+	private $validators;
+
 	private $names_in_groups = array();
 
 	// These are only for the purposes of determining translation contributions, hence they don't always line up.
