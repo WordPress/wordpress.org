@@ -15,7 +15,7 @@ function rosetta_set_sender( &$phpmailer ) {
     <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
 
 <?php
-if ($_POST['submit']) {
+if ( ! empty( $_POST['submit'] ) ) {
 
 // Check values
 $error = $your_name = $blog_name = $your_email = $blog_url = $message = false;
