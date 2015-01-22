@@ -222,6 +222,7 @@ function bb_base_get_plugins( $page = 1, $search = false, $tag = 'bbpress' ) {
 		if ( $plugins->plugins[$plugin_key]->slug == 'mingle' ) {
 			unset( $plugins->plugins[$plugin_key] );
 			$plugins->info['results']--;
+			continue;
 		}
 
 		$plugins->plugins[$plugin_key]->rating_html = bb_base_get_plugin_rating_html( $plugins->plugins[$plugin_key]->rating, $plugins->plugins[$plugin_key]->num_ratings );
