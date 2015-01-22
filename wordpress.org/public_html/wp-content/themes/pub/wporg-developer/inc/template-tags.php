@@ -392,7 +392,9 @@ namespace DevHub {
 		$current_version = get_current_version();
 
 		// Remove dev version suffix (e.g. 4.1-RC1 => 4.1)
-		list( $current_version, $dev_version ) = explode( '-', $current_version, 2 );
+		if ( false !== strpos( $current_version, '-' ) ) {
+			list( $current_version, $dev_version ) = explode( '-', $current_version, 2 );
+		}
 
 		if ( $ignore_minor ) {
 			$version_parts = explode( '.', $current_version, 3 );
