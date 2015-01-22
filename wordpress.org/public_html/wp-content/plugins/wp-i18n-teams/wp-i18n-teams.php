@@ -192,6 +192,9 @@ class WP_I18n_Teams {
 				if ( $set->slug !== 'default' ) {
 					continue;
 				}
+				if ( ! isset( $set->wp_locale ) ) {
+					continue;
+				}
 				if ( ! isset( $counts[ $set->wp_locale ] ) ) {
 					$counts[ $set->wp_locale ] = array( 'current' => 0, 'total' => 0 );
 				}
