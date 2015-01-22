@@ -601,7 +601,7 @@ namespace DevHub {
 		if ( $tags ) {
 			$encountered_optional = false;
 			foreach ( $tags as $tag ) {
-				if ( 'param' == $tag['name'] ) {
+				if ( ! empty( $tag['name'] ) && 'param' == $tag['name'] ) {
 					$params[ $tag['variable'] ] = $tag;
 					foreach ( $tag['types'] as $i => $v ) {
 						$types[ $i ] = "<span class=\"{$v}\">{$v}</span>";
