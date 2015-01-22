@@ -344,9 +344,9 @@ jQuery( document ).ready( function( $ ) {
 
 		$component_unreplied = wp_cache_get( 'trac_tickets_by_component_unreplied' );
 		if ( ! $component_unreplied ) {
-			$rows = $this->trac->get_results( $this->trac->prepare( "SELECT id, component FROM ticket t
+			$rows = $this->trac->get_results( "SELECT id, component FROM ticket t
 				WHERE id NOT IN (SELECT ticket FROM ticket_change WHERE ticket = t.id AND t.reporter <> author AND field = 'comment' AND newvalue <> '')
-				AND status <> 'closed'" ) );
+				AND status <> 'closed'" );
 			$component_unreplied = array();
 			foreach ( $rows as $row ) {
 				$component_unreplied[ $row->component ][] = $row->id;
