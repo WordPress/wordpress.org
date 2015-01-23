@@ -605,6 +605,7 @@ namespace DevHub {
 			foreach ( $tags as $tag ) {
 				if ( ! empty( $tag['name'] ) && 'param' == $tag['name'] ) {
 					$params[ $tag['variable'] ] = $tag;
+					$types = array();
 					foreach ( $tag['types'] as $i => $v ) {
 						$types[ $i ] = "<span class=\"{$v}\">{$v}</span>";
 					}
