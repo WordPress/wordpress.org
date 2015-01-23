@@ -16,19 +16,19 @@ $notif = WPOrg_Notifications::$instance;
 
 $notif->plugins_loaded();
 
-if ( $payload->type === 'comment' ) {
-	$notif->match_notify( array(
-		'author_id'   => get_user_by( 'login', $payload->author )->ID,
-		'object'      => $payload,
-		'search_text' => $payload->comment,
-		'type'        => 'trac_comment',
-	) );
-} else {
-	$notif->match_notify( array(
-		'author_id'   => get_user_by( 'login', $payload->reporter )->ID,
-		'object'      => $payload,
-		'search_text' => $payload->summary . ' ' . $payload->description,
-		'type'        => 'trac_ticket',
-	) );
+$type = $payload->type === 'comment' ? 'comment' : 'ticket';
+$search_text = 'comment' === $type ? $payload->comment : $payload->summary . ' ' . $payload->description;
+$author      = 'comment' === $type ? $payload->author  : $payload->reporter;
+$author_obj  = get_user_by( 'login', $author );
+
+if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT user_login FROM trac_users WHERE user_login = %s", $author ) ) ) {
+	$wpdb->insert( 'trac_users', array( 'user_login' => $author ) );
 }
+
+$notif->match_notify( array(
+	'author_id'   => $author_obj->ID,
+	'object'      => $payload,
+	'search_text' => $search_text,
+	'type'        => "trac_$type",
+) );
 
