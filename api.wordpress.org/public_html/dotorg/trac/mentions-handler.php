@@ -22,9 +22,17 @@ $notif->plugins_loaded();
 
 $type = $payload->type === 'comment' ? 'comment' : 'ticket';
 
-$search_text = 'comment' === $type ? $payload->comment : $payload->summary . ' ' . $payload->description;
-$user_login  = 'comment' === $type ? $payload->author  : $payload->reporter;
-$user        = get_user_by( 'login', $user_login );
+if ( 'comment' === $type ) {
+	$search_text = $payload->comment;
+	// Remove reply (quoted) text.
+	$search_text = preg_replace( "/^>.*\n\n/sm", '', $search_text );
+	$user_login  = $payload->author;
+} else {
+	$search_text = $payload->summary . ' ' . $payload->description;
+	$user_login  = $payload->reporter;
+}
+
+$user = get_user_by( 'login', $user_login );
 
 function wporg_user_has_visited_trac( $user_login ) {
 	global $wpdb;
