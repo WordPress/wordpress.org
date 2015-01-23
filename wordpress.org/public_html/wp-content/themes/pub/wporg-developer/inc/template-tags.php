@@ -754,7 +754,7 @@ namespace DevHub {
 		// Pair the term data with meta data.
 		foreach ( $since_terms as $since_term ) {
 			foreach ( $since_meta as $meta ) {
-				if ( $since_term->name == $meta['content'] ) {
+				if ( is_array( $meta ) && $since_term->name == $meta['content'] ) {
 					$description = empty( $meta['description'] ) ? '' : '<span class="since-description">' . esc_html( $meta['description'] ) . '</span>';
 
 					$data[ $since_term->name ] = array(
