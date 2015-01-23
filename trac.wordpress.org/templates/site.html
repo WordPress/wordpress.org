@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '38e'
+	scripts_version = '38h'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -13,15 +13,13 @@
 		notifications_enabled = 1
 
 	if project_slug == 'bbpress' :
-		profile_link = '//bbpress.org/forums/users/'
 		support_link = '//bbpress.org/forums/'
 	elif project_slug == 'buddypress' :
-		profile_link = '//buddypress.org/community/members/'
 		support_link = '//buddypress.org/support/topics/'
 	else :
 		support_link = '//wordpress.org/support/'
-		profile_link = '//profiles.wordpress.org/'
 
+	profile_link = '//profiles.wordpress.org/'
 	profile_to_edit = '//wordpress.org/support/profile/'
 
 	# Fix https://meta.trac.wordpress.org/ticket/21
