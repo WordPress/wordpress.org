@@ -62,7 +62,7 @@ Index: trac-1.0.1/trac/ticket/notification.py
 +                torecipients.append(row[0])
 +
 +            # Add individual ticket subscribers
-+            for row in db("""SELECT username FROM _ticket_subs WHERE ticket = %s AND status = 1""", (tktid,)):
++            for row in db("""SELECT username FROM _ticket_subs WHERE ticket = %s AND status > 0""", (tktid,)):
 +                torecipients.append(row[0])
 +
          # Harvest email addresses from the author field of ticket_change(s)
