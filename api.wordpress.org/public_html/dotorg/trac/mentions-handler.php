@@ -58,10 +58,11 @@ if ( ! wporg_user_has_visited_trac( $user_login ) ) {
 }
 
 add_filter( 'wporg_notifications_notify_username', function( $notify, $username ) use ( $type, $payload, $wpdb ) {
-	// Core Trac has notifications configured, see if the user has blocked the ticket.
+	// Core Trac has notifications configured.
 	if ( $payload->trac === 'core' ) {
+		// See if the user has blocked the ticket, are watching it already, or have already been mentioned.
 		$status = wporg_get_trac_ticket_subscription_status( $username, $payload->ticket_id );
-		if ( BLOCKED === $status ) {
+		if ( BLOCKED === $status || SUBSCRIBED === $status || MENTIONED === $status ) {
 			return false;
 		}
 	}
