@@ -27,6 +27,7 @@ class Trac implements User {
 	protected $color = '#21759b';
 	protected $icon  = ':wordpress:';
 
+	protected $url_template    = 'https://%s.trac.wordpress.org';
 	protected $ticket_template = 'https://%s.trac.wordpress.org/ticket/%s';
 	protected $commit_template = 'https://%s.trac.wordpress.org/changeset/%s';
 	protected $commit_info_template = 'https://%s.trac.wordpress.org/log/?rev=%s&format=changelog&limit=1&verbose=on';
@@ -134,6 +135,10 @@ class Trac implements User {
 
 	function get_slug() {
 		return $this->trac;
+	}
+
+	function get_url() {
+		return sprintf( $this->url_template, $this->get_slug() );
 	}
 
 	function get_commit_username() {
