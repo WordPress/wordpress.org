@@ -117,7 +117,7 @@ class wporg_trac_notifications {
 			'Users' => array( 'Role/Capability', 'Login and Registration' )
 		);
 		foreach ( $components as $component ) {
-			if ( false === $tree[ $component ] ) {
+			if ( isset( $tree[ $component ] ) && false === $tree[ $component ] ) {
 				continue;
 			} elseif ( isset( $subcomponents[ $component ] ) ) {
 				$tree[ $component ] = $subcomponents[ $component ];
@@ -527,7 +527,6 @@ class wporg_trac_notifications {
 			if ( is_array( $subcomponents ) ) {
 				echo "<ul>\n";
 				foreach ( $subcomponents as $subcomponent ) {
-					$i++;
 					$checked = checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false );
 					echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . $subcomponent . "</label></li>\n";
 				}
