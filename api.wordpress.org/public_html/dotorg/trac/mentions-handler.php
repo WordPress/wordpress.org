@@ -22,9 +22,28 @@ $search_text = 'comment' === $type ? $payload->comment : $payload->summary . ' '
 $user_login  = 'comment' === $type ? $payload->author  : $payload->reporter;
 $user        = get_user_by( 'login', $user_login );
 
-if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT user_login FROM trac_users WHERE user_login = %s", $user_login ) ) ) {
+function wporg_user_has_visited_trac( $user_login ) {
+	global $wpdb;
+	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT user_login FROM trac_users WHERE user_login = %s", $user_login ) );
+}
+
+if ( ! wporg_user_has_visited_trac( $user_login ) ) {
 	$wpdb->insert( 'trac_users', compact( 'user_login' ) );
 }
+
+add_filter( 'wporg_notifications_notify_username', function( $notify, $username ) use ( $type, $payload, $wpdb ) {
+	if ( $type === 'ticket' ) {
+		// Don't need a query to say we can notify the owner and reporter.
+		if ( $username === $payload->owner || $username === $payload->reporter ) {
+			return true;
+		}
+	}
+
+	if ( wporg_user_has_visited_trac( $username ) ) {
+		return true;
+	}
+	return $notify;
+}, 10, 2 );
 
 $notif->match_notify( array(
 	'author_id'   => $user->ID,
