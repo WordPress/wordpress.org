@@ -523,7 +523,7 @@ namespace DevHub {
 
 		if ( $tags ) {
 			foreach ( $tags as $tag ) {
-				if ( 'param' == $tag['name'] ) {
+				if ( is_array( $tag ) && 'param' == $tag['name'] ) {
 					$types[ $tag['variable'] ] = implode( '|', $tag['types'] );
 				}
 			}
