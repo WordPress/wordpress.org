@@ -42,7 +42,7 @@
 
 			// Make tags clickable and seprated by a comma.
 			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="/tag/'+tag+'/">'+tag+'</a>';
+				return '<a href="'+wp.themes.data.settings.adminUrl+'tag/'+tag+'/">'+tag+'</a>';
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );

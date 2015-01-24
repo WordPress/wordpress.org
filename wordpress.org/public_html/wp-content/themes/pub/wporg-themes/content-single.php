@@ -156,7 +156,7 @@
 				<h4><?php _e( 'Tags:' ); ?></h4>
 				<?php
 					foreach( $theme->tags as &$tag ) :
-						$tag = sprintf( '<a href="/tag/%1$s/">%1$s</a>', $tag );
+						$tag = sprintf( '<a href="%1$s">%2$s</a>', esc_url( home_url( "/tag/{$tag}/" ) ), $tag );
 					endforeach;
 					echo implode( ', ', $theme->tags );
 				?>
