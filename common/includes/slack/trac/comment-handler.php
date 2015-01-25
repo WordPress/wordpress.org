@@ -18,7 +18,13 @@ class Comment_Handler {
 		}
 
 		$this->generate_payload();
-		$this->send->send( $this->trac->get_firehose_channel() );
+		$firehose = $this->trac->get_firehose_channel();
+
+		// We still want to process this payload even if no firehose channel
+		// is specified, as we may use it to process mentions and such.
+		if ( $firehose ) {
+			$this->send->send( $firehose );
+		}
 	}
 
 	function process_message() {
