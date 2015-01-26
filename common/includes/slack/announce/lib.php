@@ -39,19 +39,19 @@ function is_user_whitelisted( $user, $channel ) {
 function show_authorization( $user, $channel ) {
 	$channels = get_whitelisted_channels_for_user( $user ) ;
 	if ( $channel === 'privategroup' ) {
-		echo "Any private group members can use @channel in this group.";
-		# return;
+		echo "Any private group members can use /announce in this group.";
+		return;
 	} elseif ( empty( $channels ) ) {
-		echo "You are not allowed to use @channel.";
+		echo "You are not allowed to use /announce.";
 	} elseif ( in_array( $channel, $channels ) ) {
 		$channels = array_filter( $channels, function( $c ) use ( $channel ) { return $c !== $channel; } );
 		if ( $channels ) {
-			printf( "You are allowed to use @channel in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
+			printf( "You are allowed to use /announce in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
 		} else {
-			echo "You are allowed to use @channel in #$channel.";
+			echo "You are allowed to use /announce in #$channel.";
 		}
 	} else {
-		printf( "You are not allowed to use @channel in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
+		printf( "You are not allowed to use /announce in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
 	printf( " If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
