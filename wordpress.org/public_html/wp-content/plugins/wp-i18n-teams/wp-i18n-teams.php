@@ -130,8 +130,11 @@ class WP_I18n_Teams {
 		$wporg_data = $wpdb->get_results( "SELECT locale, subdomain, latest_release FROM locales ORDER BY locale", OBJECT_K );
 
 		foreach ( $gp_locales as $locale ) {
-			$subdomain = $wporg_data[ $locale->wp_locale ]->subdomain;
-			$latest_release = $wporg_data[ $locale->wp_locale ]->latest_release;
+			$subdomain = $latest_release = '';
+			if ( ! empty( $wporg_data[ $locale->wp_locale ] ) ) {
+				$subdomain = $wporg_data[ $locale->wp_locale ]->subdomain;
+				$latest_release = $wporg_data[ $locale->wp_locale ]->latest_release;
+			}
 			$release_status = self::get_locale_release_status( $subdomain, $latest_release );
 			$statuses[ $release_status ]++;
 
