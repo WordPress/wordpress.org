@@ -14,7 +14,7 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	global $wpdb;
 
 	$wp_user_id = $wpdb->get_var( $wpdb->prepare(
-		"SELECT user_id FROM slack_invites WHERE slack_id = %s",
+		"SELECT user_id FROM slack_users WHERE slack_id = %s",
 		$slack_id
 	) );
 
