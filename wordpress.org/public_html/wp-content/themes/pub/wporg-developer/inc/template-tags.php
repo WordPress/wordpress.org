@@ -897,6 +897,96 @@ namespace DevHub {
 		return strcmp( $a->post_name, $b->post_name );
 	}
 
+	function show_usage_info() {
+		$p2p_enabled = function_exists( 'p2p_register_connection_type' );
+
+		return $p2p_enabled && post_type_has_usage_info( get_post_type() );
+	}
+
+	/**
+	 * Does the post type support usage information?
+	 *
+	 * @param string $post_type Optional. The post type name. If blank, assumes current post type.
+	 *
+	 * @return boolean
+	 */
+	function post_type_has_usage_info( $post_type = null ) {
+		$post_type             = $post_type ? $post_type : get_post_type();
+		$post_types_with_usage = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' );
+
+		return in_array( $post_type, $post_types_with_usage );
+	}
+
+	/**
+	 * Does the post type support uses information?
+	 *
+	 * @param string $post_type Optional. The post type name. If blank, assumes current post type.
+	 *
+	 * @return boolean
+	 */
+	function post_type_has_uses_info( $post_type = null ) {
+		$post_type             = $post_type ? $post_type : get_post_type();
+		$post_types_with_uses  = array( 'wp-parser-function', 'wp-parser-method' );
+
+		return in_array( $post_type, $post_types_with_uses );
+	}
+
+	/**
+	 * Retrieve a WP_Query object for the posts that the current post uses
+	 *
+	 * @return WP_Query A WP_Query object for the posts the current post uses
+	 */
+	function get_uses() {
+
+		if ( 'wp-parser-function' === get_post_type() ) {
+			$connection_types = array( 'functions_to_functions', 'functions_to_methods', 'functions_to_hooks' );
+		} else {
+			$connection_types = array( 'methods_to_functions', 'methods_to_methods', 'methods_to_hooks' );
+		}
+
+		$connected = new \WP_Query( array(
+			'post_type'           => array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' ),
+			'connected_type'      => $connection_types,
+			'connected_direction' => array( 'from', 'from', 'from' ),
+			'connected_items'     => get_the_ID(),
+			'nopaging'            => true,
+		) );
+
+		return $connected;
+	}
+
+	function get_used_by( $post_id = null ) {
+
+		if ( empty( $post_id ) ) {
+			$post_id = get_the_ID();
+		}
+
+		switch ( get_post_type() ) {
+
+			case 'wp-parser-function':
+				$connection_types = array( 'functions_to_functions', 'methods_to_functions' );
+				break;
+
+			case 'wp-parser-method':
+				$connection_types = array( 'functions_to_methods', 'methods_to_methods', );
+				break;
+
+			case 'wp-parser-hook':
+				$connection_types = array( 'functions_to_hooks', 'methods_to_hooks' );
+				break;
+		}
+
+		$connected = new \WP_Query( array(
+			'post_type'           => array( 'wp-parser-function', 'wp-parser-method' ),
+			'connected_type'      => $connection_types,
+			'connected_direction' => array( 'to', 'to' ),
+			'connected_items'     => $post_id,
+			'nopaging'            => true,
+		) );
+
+		return $connected;
+	}
+
 	/**
 	 * Does the post type have source code?
 	 *

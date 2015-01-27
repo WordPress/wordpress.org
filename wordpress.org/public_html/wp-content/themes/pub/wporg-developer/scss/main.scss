@@ -466,6 +466,10 @@
 	 * section styles
 	 */
 
+	section {
+		overflow: auto;
+	}
+
 	.home-landing .section {
 		padding: 30px 0%;
 		padding: 3rem 0%;
@@ -922,6 +926,7 @@
 	}
 	.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 		border-bottom: 1px solid #dfdfdf;
+
 		h1 {
 			margin: 24px 0;
 			padding-left: 100px;
@@ -1011,6 +1016,34 @@
 			border-bottom-style: none;
 		}
 	}
+
+	/* = Usage
+	----------------------------------------------- */
+	.usage {
+		article {
+			float: left;
+			width: 50%;
+		}
+
+		.used-by {
+			padding-right: 30px;
+		}
+
+		.uses {
+			padding-left: 30px;
+		}
+
+		ul {
+			line-height: 1.7; /* Slightly increase the line height for more readability */
+			list-style-type: none;
+			margin: 0;
+		}
+
+		.show-more, .hide-more {
+			display: none;
+		}
+	}
+
 
 	.source-content {
 		overflow: auto;
@@ -1302,6 +1335,32 @@
 		.site-branding .site-title {
 			padding-left: 0;
 		}
+
+		&.archive, &.search {
+			.meta {
+				font-size: 100%;
+				margin-bottom: 1.5em;
+
+				a {
+					color: #21759b;
+				}
+			}
+		}
+	}
+
+}
+
+@media ( min-width: 43em ) {
+	.devhub-wrap {
+		&.archive, &.search {
+			.meta {
+				float: right;
+			}
+
+			.sourcefile {
+				float: left;
+			}
+		}
 	}
 }
 
@@ -1388,6 +1447,12 @@
 
 		.two-columns .box {
 			width: 99%;
+		}
+
+		.usage {
+			article {
+				width: 100%;
+			}
 		}
 	}
 }

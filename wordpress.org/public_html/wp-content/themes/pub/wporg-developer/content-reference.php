@@ -44,12 +44,6 @@
 		</section>
 	<?php endif; ?>
 
-	<?php /*
-	<?php if ( is_archive() ) : ?>
-	<section class="meta">Used by TODO | Uses TODO | TODO Examples</section>
-	<?php endif; ?>
-	*/ ?>
-
 	<?php if ( $params = get_params() ) : ?>
 	<hr/>
 	<section class="parameters">
@@ -128,6 +122,50 @@
 		</section>
 		<?php endif;
 	endif; ?>
+
+	<?php if ( show_usage_info() ) : ?>
+		<hr id="usage" />
+		<section class="usage">
+			<article class="used-by">
+				<h2><?php _e( 'Used by', 'wporg' ); ?></h2>
+				<ul>
+					<?php
+						$used_by = get_used_by();
+						while ( $used_by->have_posts() ) : $used_by->the_post();
+							?>
+							<li>
+								<span><?php echo esc_attr( get_source_file() ); ?>:</span>
+								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
+							</li>
+						<?php endwhile; wp_reset_postdata(); ?>
+						<?php if ( $used_by->post_count > 5 ) : ?>
+							<a href="#" class="show-more"><?php printf( _n( 'Show 1 more used by', 'Show %d more used by', $used_by->post_count, 'wporg' ), $used_by->post_count ); ?></a>
+							<a href="#" class="hide-more"><?php _e( 'Hide more used by', 'wporg' ); ?></a>
+						<?php endif; ?>
+				</ul>
+			</article>
+			<?php if ( post_type_has_uses_info() ) : ?>
+				<article class="uses">
+					<h2><?php _e( 'Uses', 'wporg' ); ?></h2>
+					<ul>
+						<?php
+						$uses = get_uses();
+						while ( $uses->have_posts() ) : $uses->the_post()
+							?>
+							<li>
+								<span><?php echo esc_attr( get_source_file() ); ?>:</span>
+								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
+							</li>
+						<?php endwhile; wp_reset_postdata(); ?>
+						<?php if ( $uses->post_count > 5 ) : ?>
+							<a href="#" class="show-more"><?php printf( _n( 'Show 1 more use', 'Show %d more uses', $uses->post_count, 'wporg' ), $uses->post_count ); ?></a>
+							<a href="#" class="hide-more"><?php _e( 'Hide more uses', 'wporg' ); ?></a>
+						<?php endif; ?>
+					</ul>
+				</article>
+			<?php endif; ?>
+		</section>
+	<?php endif; ?>
 
 	<?php if ( post_type_has_source_code() ) : ?>
 		<hr />

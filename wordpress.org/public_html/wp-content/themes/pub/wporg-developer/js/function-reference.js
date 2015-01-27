@@ -4,25 +4,24 @@
  * Handles all interactivity on the single function page
  */
 ( function( $ ) {
+	'use strict';
+
 	var $sourceContent, $sourceCodeContainer, $sourceCodeTable, $showCompleteSource, $lessCompleteSource, sourceCollapsedHeight;
 
-	function toggleCompleteSource( e ) {
-		e.preventDefault();
-
-		if ( $showCompleteSource.is(':visible') ) {
-			var heightGoal = $sourceCodeTable.height() + 45; // takes into consideration potential x-scrollbar
-		} else {
-			var heightGoal = sourceCollapsedHeight;
-		}
-
-		$sourceCodeContainer.animate( { height: heightGoal + 'px' } );
-
-		$showCompleteSource.toggle();
-		$lessCompleteSource.toggle();
-
-	}
+	var $usesList, $usedByList, $showMoreUses, $hideMoreUses, $showMoreUsedBy, $hideMoreUsedBy;
 
 	function onLoad() {
+		sourceCodeHighlightInit();
+
+		toggleUsageListInit();
+	}
+
+	function sourceCodeHighlightInit() {
+
+		// We require the SyntaxHighlighter javascript library
+		if ( undefined === window.SyntaxHighlighter ) {
+			return;
+		}
 
 		// We only expect one source-content per document
 		$sourceContent = $( '.source-content' );
@@ -49,7 +48,61 @@
 			$showCompleteSource.on( 'click', toggleCompleteSource );
 			$lessCompleteSource.on( 'click', toggleCompleteSource );
 		}
+	}
 
+	function toggleCompleteSource( e ) {
+		e.preventDefault();
+
+		if ( $showCompleteSource.is(':visible') ) {
+			var heightGoal = $sourceCodeTable.height() + 45; // takes into consideration potential x-scrollbar
+		} else {
+			var heightGoal = sourceCollapsedHeight;
+		}
+
+		$sourceCodeContainer.animate( { height: heightGoal + 'px' } );
+
+		$showCompleteSource.toggle();
+		$lessCompleteSource.toggle();
+
+	}
+
+	function toggleUsageListInit() {
+
+		// We only expect one used_by and uses per document
+		$usedByList = $( '.used-by' ).find( 'li' );
+		$usesList   = $( '.uses' ).find( 'li' );
+
+		if ( $usedByList.length > 5 ) {
+			$usedByList = $usedByList.slice( 5 ).hide();
+
+			$showMoreUsedBy = $( '.used-by .show-more' ).show().on( 'click', toggleMoreUsedBy );
+			$hideMoreUsedBy = $( '.used-by .hide-more' ).on( 'click', toggleMoreUsedBy );
+		}
+
+		if ( $usesList.length > 5 ) {
+			$usesList = $usesList.slice( 5 ).hide();
+
+			$showMoreUses = $( '.uses .show-more' ).show().on( 'click', toggleMoreUses );
+			$hideMoreUses = $( '.uses .hide-more' ).on( 'click', toggleMoreUses );
+		}
+	}
+
+	function toggleMoreUses( e ) {
+		e.preventDefault();
+
+		$usesList.toggle();
+
+		$showMoreUses.toggle();
+		$hideMoreUses.toggle();
+	}
+
+	function toggleMoreUsedBy( e ) {
+		e.preventDefault();
+
+		$usedByList.toggle();
+
+		$showMoreUsedBy.toggle();
+		$hideMoreUsedBy.toggle();
 	}
 
 	$( onLoad );

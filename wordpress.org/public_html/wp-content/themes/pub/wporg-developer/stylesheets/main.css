@@ -298,6 +298,8 @@ input {
   /*
    * section styles
    */
+  /* = Usage
+  ----------------------------------------------- */
   /* Comments */
   /*
    * Content
@@ -725,6 +727,9 @@ input {
 .devhub-wrap h2.entry-title a {
   text-decoration: none;
   color: #606060;
+}
+.devhub-wrap section {
+  overflow: auto;
 }
 .devhub-wrap .home-landing .section {
   padding: 30px 0%;
@@ -1202,6 +1207,25 @@ input {
 .devhub-wrap .single .wp-parser-class, .devhub-wrap .single .wp-parser-function, .devhub-wrap .single .wp-parser-hook, .devhub-wrap .single .wp-parser-method {
   border-bottom-style: none;
 }
+.devhub-wrap .usage article {
+  float: left;
+  width: 50%;
+}
+.devhub-wrap .usage .used-by {
+  padding-right: 30px;
+}
+.devhub-wrap .usage .uses {
+  padding-left: 30px;
+}
+.devhub-wrap .usage ul {
+  line-height: 1.7;
+  /* Slightly increase the line height for more readability */
+  list-style-type: none;
+  margin: 0;
+}
+.devhub-wrap .usage .show-more, .devhub-wrap .usage .hide-more {
+  display: none;
+}
 .devhub-wrap .source-content {
   overflow: auto;
 }
@@ -1424,6 +1448,21 @@ input {
   .devhub-wrap .site-branding .site-title {
     padding-left: 0;
   }
+  .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
+    font-size: 100%;
+    margin-bottom: 1.5em;
+  }
+  .devhub-wrap.archive .meta a, .devhub-wrap.search .meta a {
+    color: #21759b;
+  }
+}
+@media (min-width: 43em) {
+  .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
+    float: right;
+  }
+  .devhub-wrap.archive .sourcefile, .devhub-wrap.search .sourcefile {
+    float: left;
+  }
 }
 @media (max-width: 43em) {
   #content-area.has-sidebar main {
@@ -1496,5 +1535,8 @@ input {
   }
   .devhub-wrap .two-columns .box {
     width: 99%;
+  }
+  .devhub-wrap .usage article {
+    width: 100%;
   }
 }

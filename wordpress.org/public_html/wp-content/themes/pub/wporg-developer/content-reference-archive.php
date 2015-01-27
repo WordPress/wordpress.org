@@ -17,4 +17,21 @@
 		<p>Source: <?php echo get_source_file(); ?>:<?php echo get_line_number(); ?></p>
 	</div>
 
+	<?php
+		$used_by = get_used_by()->post_count;
+		$uses    = get_uses()->post_count;
+	?>
+	<div class="meta">
+		<?php printf(
+			_n( 'Used by <a href="%s">1 function</a>', 'Used by <a href="%s">%d function</a>', $used_by, 'wporg' ),
+			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
+			$used_by
+		); ?>
+		|
+		<?php printf(
+			_n( 'Uses <a href="%s">1 function</a>', 'Used by <a href="%s">%d function</a>', $uses, 'wporg' ),
+			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
+			$uses
+		); ?>
+	</div>
 </article>
