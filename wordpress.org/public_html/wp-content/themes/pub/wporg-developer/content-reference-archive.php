@@ -23,13 +23,13 @@
 	?>
 	<div class="meta">
 		<?php printf(
-			_n( 'Used by <a href="%s">1 function</a>', 'Used by <a href="%s">%d function</a>', $used_by, 'wporg' ),
+			_n( 'Used by <a href="%s">1 function</a>', 'Used by <a href="%s">%d functions</a>', $used_by, 'wporg' ),
 			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
 			$used_by
 		); ?>
 		|
 		<?php printf(
-			_n( 'Uses <a href="%s">1 function</a>', 'Used by <a href="%s">%d function</a>', $uses, 'wporg' ),
+			_n( 'Uses <a href="%s">1 function</a>', 'Uses <a href="%s">%d functions</a>', $uses, 'wporg' ),
 			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
 			$uses
 		); ?>
