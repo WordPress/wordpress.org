@@ -22,6 +22,9 @@ class DevHub_User_Submitted_Content {
 	 */
 	public static function do_init() {
 
+		// Disable pings.
+		add_filter( 'pings_open',                       '__return_false' );
+
 		// Restricts commenting to logged in users.
 		add_filter( 'comments_open',                    array( __CLASS__, 'prevent_invalid_comment_submissions' ), 10, 2 );
 
