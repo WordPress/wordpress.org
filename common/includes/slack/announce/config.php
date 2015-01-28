@@ -18,6 +18,7 @@ function get_whitelist() {
 		),
 		'core' => array(
 			'johnbillion',
+			'drew',
 		),
 		'polyglots' => array(
 			'petya',
