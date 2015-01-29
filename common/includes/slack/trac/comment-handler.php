@@ -31,7 +31,7 @@ class Comment_Handler {
 		$lines = array_map( 'rtrim', $this->lines );
 		
 		// Trim off headers.
-		while ( '' !== current( $lines ) ) {
+		while ( $lines && '' !== current( $lines ) ) {
 			$line = array_shift( $lines );
 			if ( 0 === strpos( $line, 'X-Trac-Ticket-URL:' ) ) {
 				// X-Trac-Ticket-URL: https://core.trac.wordpress.org/ticket/12345#comment:1
@@ -43,14 +43,20 @@ class Comment_Handler {
 				if ( ! $trac ) {
 					return false;
 				}
+                        } elseif ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
+                                $base64 = true;
 			}
 		}
+
+                if ( ! empty( $base64 ) ) {
+                        $lines = explode( "\n", base64_decode( implode( "\n", $lines ) ) );
+                }
 
 		// Remove empty line between headers and body.
 		array_shift( $lines );
 		
 		$title = '';
-		while ( 0 !== strpos( current( $lines ), '------' ) ) {
+		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			if ( '' !== $title ) {
 				$last = substr( $title, -1 );
 				if ( $last !== '-' && $last !== '_' ) {
@@ -62,13 +68,13 @@ class Comment_Handler {
 		$title = substr( $title, strpos( $title, ': ' ) + 2 );
 
 		// Remove up to top of ticket properties table.
-		while ( 0 !== strpos( current( $lines ), '------' ) ) {
+		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			array_shift( $lines );
 		}
 		// Remove top border of table.
 		array_shift( $lines );
 		// Remove ticket properties table.
-		while ( 0 !== strpos( current( $lines ), '------' ) ) {
+		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			array_shift( $lines );
 		}
 		// Remove bottom border of table.
@@ -80,7 +86,7 @@ class Comment_Handler {
 		}
 		
 		// Remove Trac email footer.
-		while ( end( $lines ) !== '--' ) {
+		while ( $lines && end( $lines ) !== '--' ) {
 			array_pop( $lines );
 		}
 		// Remove -- which starts footer.
@@ -97,13 +103,13 @@ class Comment_Handler {
 		
 		$changes = $comment = array();
 		if ( $has_changes ) {
-			while ( '' !== current( $lines ) ) {
+			while ( $lines && '' !== current( $lines ) ) {
 				$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', array_shift( $lines ) );
 			}
 		}
 		
 		// Remove blank lines (should be two if it had changes).
-		while ( '' === current( $lines ) ) {
+		while ( $lines && '' === current( $lines ) ) {
 			array_shift( $lines );
 		}
 		
