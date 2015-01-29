@@ -1157,6 +1157,15 @@ body.reply-edit #bbpress-forums fieldset legend {
 	text-decoration: none;
 }
 
+#bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
+	color: #eee;
+	background-color: #888;
+	padding: 2px 5px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: bold;
+}
+
 #bbpress-forums div.bbp-template-notice {
 	margin-top: 0;
 }
