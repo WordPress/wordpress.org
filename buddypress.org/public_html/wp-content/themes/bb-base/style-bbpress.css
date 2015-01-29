@@ -171,3 +171,10 @@ input.submit:hover {
 		background-size: 208px 65px;
 	}
 }
+
+/* =Forum Overrides
+-------------------------------------------------------------- */
+
+#bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
+        background-color: #328C00;
+}
