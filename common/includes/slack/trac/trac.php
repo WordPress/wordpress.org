@@ -280,7 +280,7 @@ class Trac implements User {
 		return 'description';
 	}
 
-	function format_for_slack( $text ) {
+	static function format_for_slack( $text ) {
 		$text = str_replace( "\r\n", "\n", $text );
 		$text = trim( str_replace(
 			array( "\n{{{\n", "\n}}}\n", '{{{', '}}}' ),	
