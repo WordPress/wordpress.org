@@ -4,13 +4,13 @@
  */
 
 require dirname( dirname( __DIR__ ) ) . '/init.php';
-require WPORGPATH . '/.config/secrets.php';
 
 class GH2WORG {
 
 	private $whitelisted_repos = array(
 		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
+		'MichaelArestad/Press-This' => 'press-this',
 	);
 
 	function __construct() {
@@ -47,7 +47,7 @@ class GH2WORG {
 
 		list( $algo, $hash ) = explode( '=', $_SERVER['HTTP_X_HUB_SIGNATURE'], 2 );
 
-		// Todo? Doesn't handle standard $_POST
+		// Todo? Doesn't handle standard $_POST, only application/json
 		$hmac = hash_hmac( $algo, file_get_contents('php://input' ), FEATURE_PLUGIN_GH_SYNC_SECRET );
 
 		return $hash === $hmac;
@@ -62,9 +62,7 @@ class GH2WORG {
 		putenv( 'PHP_SVN_USER=' . FEATURE_PLUGIN_GH_SYNC_USER );
 		putenv( 'PHP_SVN_PASSWORD=' . FEATURE_PLUGIN_GH_SYNC_PASS );
 
-		$result = shell_exec( __DIR__ . "/feature-plugins.sh $github_url $svn_directory 2>&1" );
-
-		echo preg_replace( '!/tmp/[^ ]+-([^-/ ]+/?)!i', '~/$1', $result );
+		echo shell_exec( __DIR__ . "/feature-plugins.sh $github_url $svn_directory 2>&1" );
 
 		putenv( 'PHP_SVN_USER' );
 		putenv( 'PHP_SVN_PASSWORD' );
