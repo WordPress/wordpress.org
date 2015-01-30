@@ -18,6 +18,48 @@
 			'keyup': 'addFocus',
 			'touchmove': 'preventExpand'
 		},
+
+		render: function() {
+			var data = this.model.toJSON();
+
+			data.permalink = wp.themes.router.baseUrl( data.slug );
+
+			// Render themes using the html template
+			this.$el.html( this.html( data ) ).attr({
+				tabindex: 0,
+				'aria-describedby' : data.id + '-action ' + data.id + '-name'
+			});
+		},
+
+		// Single theme overlay screen
+		// It's shown when clicking a theme
+		expand: function( event ) {
+			var self = this;
+
+			event = event || window.event;
+
+			// 'enter' and 'space' keys expand the details view when a theme is :focused
+			if ( event.type === 'keydown' && ( event.which !== 13 && event.which !== 32 ) ) {
+				return;
+			}
+
+			// Bail if the user scrolled on a touch device
+			if ( this.touchDrag === true ) {
+				return this.touchDrag = false;
+			}
+
+			// Prevent the modal from showing when the user clicks
+			// one of the direct action buttons
+			if ( $( event.target ).is( '.theme-actions a' ) ) {
+				return;
+			}
+
+			// Set focused theme to current element
+			themes.focusedTheme = this.$el;
+
+			this.trigger( 'theme:expand', self.model.cid );
+			event.preventDefault();
+		}
 	});
 
 //	wp.themes.view.Preview.prototype = wp.themes.view.Details.prototype;
@@ -40,9 +82,9 @@
 			// If last updated plus 2 years is in the past, it's outdated.
 			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() < new Date().valueOf();
 
-			// Make tags clickable and seprated by a comma.
+			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="'+wp.themes.data.settings.adminUrl+'tag/'+tag+'/">'+tag+'</a>';
+				return '<a href="' + wp.themes.router.baseUrl( 'tag/' + tag ) + '">' + tag + '</a>';
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
