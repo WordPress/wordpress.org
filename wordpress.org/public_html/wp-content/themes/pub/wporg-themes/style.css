@@ -68,7 +68,8 @@ p a:hover {
 
 .theme-overlay .theme-wrap {
 	left: 30px;
-	overflow: hidden;
+	-webkit-overflow-scrolling: touch;
+	overflow-y: scroll;
 	top: 3%;
 }
 
