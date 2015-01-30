@@ -8,7 +8,6 @@ namespace {
 namespace Dotorg\Slack\Announce {
 
 require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/lib.php';
-require dirname( dirname( __DIR__ ) ) . '/includes/slack/announce/config.php';
 
 function get_avatar( $username, $slack_id, $team_id ) {
 	global $wpdb;
