@@ -153,7 +153,7 @@ class Comment_Handler {
 			
 		$comment         = $this->format_comment_for_slack();
 		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
-		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $this->author, $this->comment_url, $this->ticket_id, $this->title );
+		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $this->author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
 		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
 
 		$attachment = array(
