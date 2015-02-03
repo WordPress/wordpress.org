@@ -340,12 +340,12 @@ li.type-handbook h4 {
 	}
 
 	.post-type-archive-handbook #sidebar ul li,
-	.single-handbook #sidebar ul li { 
+	.single-handbook #sidebar ul li {
 		padding: 4px 0 10px 0;
 	}
 
 	.post-type-archive-handbook #sidebar ul li ul li,
-	.single-handbook #sidebar ul li ul li { 
+	.single-handbook #sidebar ul li ul li {
 		padding: 4px 0;
 	}
 
@@ -368,8 +368,20 @@ li.type-handbook h4 {
 		margin: 1em 0 0;
 	}
 }
+/* Header design */
+#headline {
+	height: auto;
+	overflow: hidden;
+}
+#headline h2 {
+	margin-bottom: 16px;
+}
 
 /* Secondary header design */
+.menu-makecore-nav-container {
+	overflow: hidden;
+}
+
 #headline .menu {
 	list-style: none;
 	float: right;
@@ -382,6 +394,11 @@ li.type-handbook h4 {
 #headline .menu li {
 	display: inline;
 	padding-left: 20px;
+}
+
+#headline .menu a:hover,
+#headline .menu a:focus {
+	color: #2ea2cc;
 }
 
 /* Responsive design for secondary header */
@@ -398,14 +415,16 @@ body.wporg-make #headline h2 a:before {
 }
 
 @media (max-width: 740px) {
+	#headline h2 {
+		float: none;
+	}
 	#headline .menu {
-	float: left;
-	margin: 16px 0 0 0!important;
-	padding: 8px 0!important;
-	background: #f5f5f5;
-	border-top: 1px solid #d7d7d7;
-	border-bottom: 1px solid #d7d7d7;
-	width: 100%;
+		float: left;
+		margin: 0;
+		padding: 8px 0;
+		background: #f5f5f5;
+		border-top: 1px solid #d7d7d7;
+		width: 100%;
 	}
 	.handbook-name {
 		margin-top: 1em;
