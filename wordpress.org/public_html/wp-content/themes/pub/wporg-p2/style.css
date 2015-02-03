@@ -195,10 +195,11 @@ li.type-handbook h4 {
 	color: #aaa;
 	margin-left: -225px;
 	margin-right: 14px;
-	overflow-x: hidden;
+	overflow: hidden;
 	letter-spacing: 2px;
 	font-size: 1.5em;
 	text-transform: uppercase;
+	border-bottom: 0;
 }
 .handbook-name span {
 	display: inline-block;
