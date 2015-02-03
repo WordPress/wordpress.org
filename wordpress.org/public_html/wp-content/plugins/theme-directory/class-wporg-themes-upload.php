@@ -96,16 +96,12 @@ class WPORG_Themes_Upload {
 
 		// First things first. Do we have something to work with?
 		if ( empty( $theme_files ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( 'The zip file was empty.', 'wporg-themes' );
 		}
 
 		// Do we have a stylesheet? Life is kind of pointless without.
 		$style_css = $this->get_style_css( $theme_files );
 		if ( empty( $style_css ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'The zip file must include a file named %s.', 'wporg-themes' ), '<code>style.css</code>' );
 		}
 
@@ -116,83 +112,59 @@ class WPORG_Themes_Upload {
 
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screen_shot( $theme_files ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ), '<code>screenshot.png</code>', '<code>screenshot.jpg</code>' );
 		}
 
 		// Let's check some theme headers, shall we?
 
 		if ( ! $this->theme->get( 'Name' ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( "The theme has no name. Add it to style.css and upload the theme again. <a href='http://codex.wordpress.org/Theme_Development#Theme_Style_Sheet'>Theme Style Sheets</a>", 'wporg-themes' );
 		}
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'The theme has no description. Add it to <code>style.css</code> and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), 'http://codex.wordpress.org/Theme_Development#Theme_Style_Sheet' );
 		}
 
 		if ( ! $this->theme->get( 'Tags' ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( 'The stylesheet has no tags. Add a Tags: line to your <code>style.css</code> file and upload the zip file again.', 'wporg-themes' );
 		}
 
 		if ( ! $this->theme->get( 'Version' ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( 'The stylesheet has no version. Add a Version: line to your <code>style.css</code> file and upload the zip file again.', 'wporg-themes' );
 		}
 
 		if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in <code>style.css</code> and upload your theme again.', 'wporg-themes' );
 		}
 
 		// Make sure we have version that is higher than any previously uploaded version of this theme.
 		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in <code>style.css</code>, then upload your zip file again.', 'wporg-themes' ), $this->theme->display( 'Name' ), '<code>' . $this->theme->display( 'Version' ) . '</code>' );
 		}
 
 		// Prevent duplicate URLs.
 		if ( ! $this->theme->get( 'ThemeURI' ) && ! $this->theme->get( 'AuthorURI' ) && $this->theme->get( 'ThemeURI' ) == $this->theme->get( 'AuthorURI' ) ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return __( 'Duplicate theme and author URLs. A theme URL is a page/site the provides details about this specific theme. An author URL is a page/site that provides information about the author of the theme. You aren&rsquo;t required to provide both, so pick the one that best applies to your URL.', 'wporg-themes' );
 		}
 
 		// Check for child theme's parent in the directory (non-buddypress only)
 		if ( $this->theme->parent() && ! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) && ! $this->is_parent_available() ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'There is no theme called %s in the directory. For child themes, you must use a parent theme that already exists in the directory.', 'wporg-themes' ), '<code>' . $this->theme->parent() . '</code>' );
 		}
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme->get_stylesheet() . '</code>' );
 		}
 
 		// Is there already a theme with the name name by a different author?
 		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'There is already a theme called %s by a different author. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme->get_stylesheet() . '</code>' );
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
 		if ( ! empty( $this->theme_post ) && 'trash' === $this->theme_post->post_status ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'This theme is suspended from the Theme Repository and it can&rsquo;t be updated. If you have any questions about this please contact %s.', 'wporg-themes' ), '<a href="mailto:theme-reviewers@lists.wordpress.org">theme-reviewers@lists.wordpress.org</a>' );
 		}
 
@@ -202,8 +174,6 @@ class WPORG_Themes_Upload {
 			$result = $this->check_theme( $theme_files );
 
 			if ( ! $result ) {
-				$this->remove_files( $this->tmp_dir );
-
 				return sprintf( __( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please contact %2$s.', 'wporg-themes' ), '//wordpress.org/plugins/theme-check/', '<a href="mailto:theme-reviewers@lists.wordpress.org">theme-reviewers@lists.wordpress.org</a>' );
 			}
 		}
@@ -218,8 +188,6 @@ class WPORG_Themes_Upload {
 		$ticket_id = $this->create_or_update_trac_ticket();
 
 		if ( ! $ticket_id  ) {
-			$this->remove_files( $this->tmp_dir );
-
 			return sprintf( __( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ), '<a href="mailto:theme-reviewers@lists.wordpress.org">theme-reviewers@lists.wordpress.org</a>' );
 		}
 
@@ -231,9 +199,6 @@ class WPORG_Themes_Upload {
 
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification( $ticket_id );
-
-		// Finally remove all temporary files.
-		$this->remove_files( $this->tmp_dir );
 
 		do_action( 'theme_upload', $this->theme );
 
@@ -264,6 +229,9 @@ class WPORG_Themes_Upload {
 		$base_name       = $this->get_sanitized_zip_name();
 		$this->theme_dir = "{$this->tmp_dir}/{$base_name}";
 		mkdir( $this->theme_dir, 0777 );
+
+		// Make sure we clean up after ourselves.
+		add_action( 'shutdown', array( $this, 'remove_files' ) );
 	}
 
 	/**
@@ -693,13 +661,11 @@ TICKET;
 	}
 
 	/**
-	 * Deletes the passed files or directory.
-	 *
-	 * @param string $files
+	 * Deletes the temporary directory.
 	 */
-	public function remove_files( $files ) {
+	public function remove_files() {
 		$rm    = escapeshellarg( self::RM );
-		$files = escapeshellarg( $files );
+		$files = escapeshellarg( $this->tmp_dir );
 
 		exec( escapeshellcmd( "{$rm} -rf {$files}" ) );
 	}
