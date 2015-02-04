@@ -3,11 +3,18 @@
 GITHUB_URL=$1;
 SVN_PLUGIN=$2;
 
+# Expect ENV vars: $PHP_SVN_USER, $PHP_SVN_PASSWORD
+
 # Split by newlines only in bash arrays
 IFS=$'\r\n'
 
-# ENV vars: $PHP_SVN_USER, $PHP_SVN_PASSWORD
+# Ensure that we're running with a UTF8 character set for commits with UTF8 characters
+locale | grep LC_CTYPE | grep -qie 'utf-\?8';
+if [ $? -eq 1 ]; then
+        export LC_ALL=$( locale -a | grep -ie 'utf-\?8' | head -1 );
+fi;
 
+# Validate all Parameters are present
 if [ ! $GITHUB_URL ] || [ ! $SVN_PLUGIN ] || [ ! $PHP_SVN_USER ] || [ ! $PHP_SVN_PASSWORD ]; then
 	echo "Invalid Input, missing parameter"; exit 1
 fi
