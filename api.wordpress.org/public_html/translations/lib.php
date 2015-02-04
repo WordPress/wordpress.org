@@ -129,10 +129,15 @@ function find_latest_translations( $args ) {
 
 	$return = array();
 	foreach ( $languages as $language ) {
+		// Skip if an invalid language was provided to the API.
+		if ( ! is_string( $language ) ) {
+			continue;
+		}
 
 		// Disable LP's for en_US for now, can re-enable later if we have non-en_US native items
-		if ( 'en_US' == $language )
+		if ( 'en_US' == $language ) {
 			continue;
+		}
 
 		$cache_key = "{$type}:{$language}:{$domain}";
 
