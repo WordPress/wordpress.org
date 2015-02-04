@@ -30,11 +30,6 @@ class WPORG_Themes_Repo_Package extends Repo_Package {
 	 * @return int|string
 	 */
 	public function latest_version() {
-		// If we're looking at themes awaiting approval, use the corresponding version.
-		if ( current_user_can( 'approve_themes' ) && isset( $_REQUEST['meta_key'] ) && '_has_pending_version' == $_REQUEST['meta_key'] ) {
-			return get_post_meta( $this->wp_post->ID, '_has_pending_version', true );
-		}
-
 		$status = get_post_meta( $this->wp_post->ID, '_status', true );
 		uksort( $status, 'version_compare' );
 

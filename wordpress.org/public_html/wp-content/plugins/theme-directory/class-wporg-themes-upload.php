@@ -469,8 +469,8 @@ TICKET;
 			$this->trac = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
 		}
 
-		// If there's a previous version, and the most current version's status is either `new` or `pending`, we update.
-		if ( ! empty( $this->theme_post->max_version ) && in_array( $this->theme_post->_status[ $this->theme_post->max_version ], array( 'new', 'pending' ) ) ) {
+		// If there's a previous version and the most current version's status is `new`, we update.
+		if ( ! empty( $this->theme_post->max_version ) && 'new' == $this->theme_post->_status[ $this->theme_post->max_version ] ) {
 			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
