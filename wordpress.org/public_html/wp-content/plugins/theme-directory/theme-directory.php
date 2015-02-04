@@ -20,16 +20,6 @@ include_once plugin_dir_path( __FILE__ ) . 'class-wporg-themes-repo-package.php'
 // Load uploader.
 include_once plugin_dir_path( __FILE__ ) . 'upload.php';
 
-
-/**
- * Things to change on deactivation.
- */
-function wporg_themes_deactivate() {
-	$admin = get_role( 'editor' );
-	$admin->remove_cap( 'approve_themes' );
-}
-register_deactivation_hook( __FILE__, 'wporg_themes_deactivate' );
-
 /**
  * Initialize.
  */
