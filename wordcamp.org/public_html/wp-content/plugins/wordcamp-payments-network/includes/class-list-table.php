@@ -44,8 +44,8 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	 * essentially just filters. Use this method to set the appropriate view.
 	 */
 	public function set_view( $view ) {
-		$this->view = 'overview';
-		if ( in_array( $view, array( 'overview', 'pending', 'overdue' ) ) )
+		$this->view = 'overdue';
+		if ( in_array( $view, array( 'pending', 'overdue', 'paid' ) ) )
 			$this->view = $view;
 	}
 
@@ -86,6 +86,8 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 			$order = 'asc';
 		} elseif ( 'pending' == $this->view ) {
 			$where .= " AND `status` = 'unpaid' ";
+		} elseif ( 'paid' == $this->view ) {
+			$where .= " AND `status` = 'paid' ";
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], array_values( $this->get_sortable_columns() ) ) )

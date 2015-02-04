@@ -199,7 +199,7 @@ class WordCamp_Payments_Network_Tools {
 				<?php self::$list_table->prepare_items(); ?>
 				<form id="posts-filter" action="" method="get">
 					<input type="hidden" name="page" value="wcp-dashboard" />
-					<input type="hidden" name="wcp-section" value="overview" />
+					<input type="hidden" name="wcp-section" value="overdue" />
 					<?php self::$list_table->display(); ?>
 				</form>
 
@@ -224,7 +224,7 @@ class WordCamp_Payments_Network_Tools {
 		if ( isset( $_REQUEST['wcp-section'] ) )
 			return strtolower( $_REQUEST['wcp-section'] );
 
-		return 'overview';
+		return 'overdue';
 	}
 
 	/**
@@ -233,9 +233,9 @@ class WordCamp_Payments_Network_Tools {
 	public static function render_dashboard_tabs() {
 		$current_section = self::get_current_tab();
 		$sections = array(
-			'overview' => 'Overview',
 			'overdue' => 'Overdue',
 			'pending' => 'Pending',
+			'paid'    => 'Paid',
 		);
 
 		foreach ( $sections as $section_key => $section_caption ) {
