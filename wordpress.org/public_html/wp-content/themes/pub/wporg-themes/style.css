@@ -840,6 +840,7 @@ ul, ol {
 
 /* Commercial Page Template */
 .commercial .theme .more-details {
+	font-size: 13px;
 	 top: 23%;
 	 right: 5%;
 	 left: 5%;
