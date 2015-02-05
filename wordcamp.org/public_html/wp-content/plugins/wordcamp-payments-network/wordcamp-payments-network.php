@@ -98,12 +98,6 @@ class WordCamp_Payments_Network_Tools {
 		foreach ( $blogs as $blog_id ) {
 			switch_to_blog( $blog_id );
 
-			// Skip sites where WordCamp Payments is not active.
-			if ( ! in_array( 'wordcamp-payments/bootstrap.php', (array) apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-				restore_current_blog();
-				continue;
-			}
-
 			$paged = 1;
 			while ( $requests = get_posts( array(
 				'paged' => $paged++,
