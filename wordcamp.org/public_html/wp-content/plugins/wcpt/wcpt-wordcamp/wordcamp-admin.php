@@ -1,6 +1,6 @@
 <?php
 
-if ( !class_exists( 'WordCamp_Admin' ) ) :
+if ( ! class_exists( 'WordCamp_Admin' ) ) :
 /**
  * WCPT_Admin
  *
@@ -59,8 +59,8 @@ class WordCamp_Admin {
 	 *
 	 * @uses add_meta_box
 	 */
-	function metabox () {
-		add_meta_box (
+	function metabox() {
+		add_meta_box(
 			'wcpt_information',
 			__( 'WordCamp Information', 'wcpt' ),
 			'wcpt_wordcamp_metabox',
@@ -69,7 +69,7 @@ class WordCamp_Admin {
 			'high'
 		);
 
-		add_meta_box (
+		add_meta_box(
 			'wcpt_organizer_info',
 			__( 'Organizing Team', 'wcpt' ),
 			'wcpt_organizer_metabox',
@@ -78,7 +78,7 @@ class WordCamp_Admin {
 			'high'
 		);
 
-		add_meta_box (
+		add_meta_box(
 			'wcpt_venue_info',
 			__( 'Venue Information', 'wcpt' ),
 			'wcpt_venue_metabox',
@@ -96,7 +96,7 @@ class WordCamp_Admin {
 	 * @param int $post_id
 	 * @return int
 	 */
-	function metabox_save ( $post_id ) {
+	function metabox_save( $post_id ) {
 
 		// Don't add/remove meta on revisions and auto-saves
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) )
@@ -112,14 +112,14 @@ class WordCamp_Admin {
 
 				// Get post value
 				$post_value   = wcpt_key_to_str( $key, 'wcpt_' );
-				$values[$key] = isset( $_POST[$post_value] ) ? esc_attr( $_POST[$post_value] ) : '';
+				$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
 
 				switch ( $value ) {
 					case 'text'     :
 					case 'textarea' :
-						update_post_meta( $post_id, $key, $values[$key] );
+						update_post_meta( $post_id, $key, $values[ $key ] );
 						break;
-					
+
 					case 'checkbox' :
 						if ( ! empty( $values[ $key ] ) && 'on' == $values[ $key ] ) {
 							update_post_meta( $post_id, $key, true );
@@ -129,10 +129,10 @@ class WordCamp_Admin {
 						break;
 
 					case 'date' :
-						if ( !empty( $values[$key] ) )
-							$values[$key] = strtotime( $values[$key] );
+						if ( !empty( $values[ $key ] ) )
+							$values[ $key ] = strtotime( $values[ $key ] );
 
-						update_post_meta( $post_id, $key, $values[$key] );
+						update_post_meta( $post_id, $key, $values[ $key ] );
 						break;
 
 					default:
@@ -150,7 +150,7 @@ class WordCamp_Admin {
 	 *
 	 * @return array
 	 */
-	function meta_keys ( $meta_group = '' ) {
+	function meta_keys( $meta_group = '' ) {
 
 		/*
 		 * Warning: These keys are used for both the input field label and the postmeta key, so if you want to
@@ -158,7 +158,7 @@ class WordCamp_Admin {
 		 */
 
 		switch ( $meta_group ) {
-			case 'organizer' :
+			case 'organizer':
 				$retval = array (
 					'Organizer Name'                  => 'text',
 					'WordPress.org Username'          => 'text',
@@ -175,7 +175,7 @@ class WordCamp_Admin {
 
 				break;
 
-			case 'venue' :
+			case 'venue':
 				$retval = array (
 					'Venue Name'                      => 'text',
 					'Physical Address'                => 'textarea',
@@ -187,7 +187,7 @@ class WordCamp_Admin {
 				);
 				break;
 
-			case 'wordcamp' :
+			case 'wordcamp':
 				$retval = array (
 					'Start Date (YYYY-mm-dd)'         => 'date',
 					'End Date (YYYY-mm-dd)'           => 'date',
@@ -201,8 +201,8 @@ class WordCamp_Admin {
 				);
 				break;
 
-			case 'all' :
-			default :
+			case 'all':
+			default:
 				$retval = array(
 					'Start Date (YYYY-mm-dd)'         => 'date',
 					'End Date (YYYY-mm-dd)'           => 'date',
@@ -253,15 +253,17 @@ class WordCamp_Admin {
 	function admin_print_scripts() {
 		if ( get_post_type() == WCPT_POST_TYPE_ID ) :
 		?>
-		<script>
-			jQuery(document).ready(function($) {
-				$('.date-field').datepicker({
-					dateFormat: 'yy-mm-dd',
-					changeMonth: true,
-					changeYear:  true
-				});
-			});
-		</script>
+
+			<script>
+				jQuery( document ).ready( function( $ ) {
+					$( '.date-field' ).datepicker( {
+						dateFormat: 'yy-mm-dd',
+						changeMonth: true,
+						changeYear:  true
+					} );
+				} );
+			</script>
+
 		<?php
 		endif;
 	}
@@ -278,7 +280,7 @@ class WordCamp_Admin {
 	 *
 	 * Add some general styling to the admin area
 	 */
-	function admin_head () {
+	function admin_head() {
 		if ( !empty( $_GET['post_type'] ) && $_GET['post_type'] == WCPT_POST_TYPE_ID ) : ?>
 
 			.column-title { width: 40%; }
@@ -294,7 +296,7 @@ class WordCamp_Admin {
 	 *
 	 * @todo Everything
 	 */
-	function user_profile_update ( $user_id ) {
+	function user_profile_update( $user_id ) {
 		if ( !wcpt_has_access() )
 			return false;
 
@@ -307,12 +309,13 @@ class WordCamp_Admin {
 	 *
 	 * @todo Everything
 	 */
-	function user_profile_wordcamp ( $profileuser ) {
+	function user_profile_wordcamp( $profileuser ) {
 
 		if ( !wcpt_has_access() )
 			return false;
 
-?>
+		?>
+
 		<h3><?php _e( 'WordCamps', 'wcpt' ); ?></h3>
 		<table class="form-table">
 			<tr valign="top">
@@ -322,7 +325,8 @@ class WordCamp_Admin {
 				</td>
 			</tr>
 		</table>
-<?php
+
+		<?php
 	}
 
 	/**
@@ -333,7 +337,7 @@ class WordCamp_Admin {
 	 * @param array $columns
 	 * @return array $columns
 	 */
-	function column_headers ( $columns ) {
+	function column_headers( $columns ) {
 		$columns = array (
 			'cb'               => '<input type="checkbox" />',
 			'title'            => __( 'Title', 'wcpt' ),
@@ -354,7 +358,7 @@ class WordCamp_Admin {
 	 * @param string $column
 	 * @param int $post_id
 	 */
-	function column_data ( $column, $post_id ) {
+	function column_data( $column, $post_id ) {
 		if ( $_GET['post_type'] !== WCPT_POST_TYPE_ID )
 			return $column;
 
@@ -387,7 +391,6 @@ class WordCamp_Admin {
 
 			case 'wcpt_organizer' :
 				echo wcpt_get_wordcamp_organizer_name() ? wcpt_get_wordcamp_organizer_name() : __( 'No Organizer', 'wcpt' );
-
 				break;
 
 			case 'wcpt_venue' :
@@ -405,7 +408,7 @@ class WordCamp_Admin {
 	 * @param array $post
 	 * @return array $actions
 	 */
-	function post_row_actions ( $actions, $post ) {
+	function post_row_actions( $actions, $post ) {
 		if ( WCPT_POST_TYPE_ID == $post->post_type ) {
 			unset( $actions['inline hide-if-no-js'] );
 
@@ -652,17 +655,17 @@ endif; // class_exists check
 /**
  * Functions for displaying specific meta boxes
  */
-function wcpt_wordcamp_metabox () {
+function wcpt_wordcamp_metabox() {
 	$meta_keys = $GLOBALS['wordcamp_admin']->meta_keys( 'wordcamp' );
 	wcpt_metabox( $meta_keys );
 }
 
-function wcpt_organizer_metabox () {
+function wcpt_organizer_metabox() {
 	$meta_keys = $GLOBALS['wordcamp_admin']->meta_keys( 'organizer' );
 	wcpt_metabox( $meta_keys );
 }
 
-function wcpt_venue_metabox () {
+function wcpt_venue_metabox() {
 	$meta_keys = $GLOBALS['wordcamp_admin']->meta_keys( 'venue' );
 	wcpt_metabox( $meta_keys );
 }
@@ -676,12 +679,13 @@ function wcpt_venue_metabox () {
  * @subpackage Template Tags
  * @since WordCamp Post Type (0.1)
  */
-function wcpt_metabox ( $meta_keys ) {
+function wcpt_metabox( $meta_keys ) {
 	global $post_id;
 
 	foreach ( $meta_keys as $key => $value ) :
 		$object_name = wcpt_key_to_str( $key, 'wcpt_' );
-?>
+
+	?>
 
 		<div class="inside">
 			<?php if ( 'checkbox' == $value ) : ?>
@@ -692,51 +696,47 @@ function wcpt_metabox ( $meta_keys ) {
 				</p>
 
 			<?php else : ?>
-			<?php // todo indent the contents (and do other whitespace cleanup) in the next commit. avoid doing here because of diff noise. ?>
-			<p>
-				<strong><?php echo $key; ?></strong>
-			</p>
-			<p>
-				<label class="screen-reader-text" for="<?php echo $object_name; ?>"><?php echo $key; ?></label>
 
-<?php			switch ( $value ) {
-					case 'text' : ?>
+				<p>
+					<strong><?php echo $key; ?></strong>
+				</p>
 
-						<input type="text" size="36" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>" />
+				<p>
+					<label class="screen-reader-text" for="<?php echo $object_name; ?>"><?php echo $key; ?></label>
 
-<?php					break;
+					<?php switch ( $value ) :
+						case 'text' : ?>
 
-					case 'date' :
+							<input type="text" size="36" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>" />
 
-						// Quick filter on dates
-						if ( $date = get_post_meta( $post_id, $key, true ) ) {
-							$date = date( 'Y-m-d', $date );
-						}
+						<?php break;
+						case 'date' :
 
-						?>
+							// Quick filter on dates
+							if ( $date = get_post_meta( $post_id, $key, true ) ) {
+								$date = date( 'Y-m-d', $date );
+							}
 
-						<input type="text" size="36" class="date-field" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo $date; ?>" />
+							?>
 
-<?php					break;
+							<input type="text" size="36" class="date-field" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo $date; ?>" />
 
-					case 'textarea' : ?>
+						<?php break;
+						case 'textarea' : ?>
 
-						<textarea rows="4" cols="23" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
+							<textarea rows="4" cols="23" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
 
-<?php					break;
+						<?php break;
 
-					default:
-						do_action( 'wcpt_metabox_value', $key, $value, $object_name );
-						break;
-				} ?>
+						default:
+							do_action( 'wcpt_metabox_value', $key, $value, $object_name );
+							break;
 
-			</p>
+					endswitch; ?>
+				</p>
+
+			<?php endif; ?>
 		</div>
-		<?php endif; ?>
 
-<?php
-
-	endforeach;
+	<?php endforeach;
 }
-
-?>
