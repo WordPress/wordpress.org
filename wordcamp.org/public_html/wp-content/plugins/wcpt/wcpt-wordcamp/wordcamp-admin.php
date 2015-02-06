@@ -119,6 +119,14 @@ class WordCamp_Admin {
 					case 'textarea' :
 						update_post_meta( $post_id, $key, $values[$key] );
 						break;
+					
+					case 'checkbox' :
+						if ( ! empty( $values[ $key ] ) && 'on' == $values[ $key ] ) {
+							update_post_meta( $post_id, $key, true );
+						} else {
+							update_post_meta( $post_id, $key, false );
+						}
+						break;
 
 					case 'date' :
 						if ( !empty( $values[$key] ) )
@@ -174,7 +182,8 @@ class WordCamp_Admin {
 					'Maximum Capacity'                => 'text',
 					'Available Rooms'                 => 'text',
 					'Website URL'                     => 'text',
-					'Contact Information'             => 'textarea'
+					'Contact Information'             => 'textarea',
+					'Exhibition Space Available'      => 'checkbox',
 				);
 				break;
 
@@ -222,7 +231,8 @@ class WordCamp_Admin {
 					'Maximum Capacity'                => 'text',
 					'Available Rooms'                 => 'text',
 					'Website URL'                     => 'text',
-					'Contact Information'             => 'textarea'
+					'Contact Information'             => 'textarea',
+					'Exhibition Space Available'      => 'checkbox',
 				);
 				break;
 
@@ -674,6 +684,15 @@ function wcpt_metabox ( $meta_keys ) {
 ?>
 
 		<div class="inside">
+			<?php if ( 'checkbox' == $value ) : ?>
+
+				<p>
+					<strong><?php echo $key; ?></strong>:
+					<input type="checkbox" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" <?php checked( get_post_meta( $post_id, $key, true ) ); ?> />
+				</p>
+
+			<?php else : ?>
+			<?php // todo indent the contents (and do other whitespace cleanup) in the next commit. avoid doing here because of diff noise. ?>
 			<p>
 				<strong><?php echo $key; ?></strong>
 			</p>
@@ -713,6 +732,7 @@ function wcpt_metabox ( $meta_keys ) {
 
 			</p>
 		</div>
+		<?php endif; ?>
 
 <?php
 
