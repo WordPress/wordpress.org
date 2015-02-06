@@ -148,8 +148,9 @@ function wcorg_subdomactories_redirect() {
 	// russia.wordcamp.org/2014/2014/11/25/post-name/
 	// russia.wordcamp.org/2014/11/25/post-name/
 	// russia.wordcamp.org/2014/2014/25/post-name/
+	// russia.wordcamp.org/2015-ru/...
 
-	if ( ! preg_match( '#^/[0-9]{4}/(?:[0-9]{4}/[0-9]{2}|[0-9]{2}|[0-9]{4})/[0-9]{2}/(.+)$#', $_SERVER['REQUEST_URI'], $matches ) )
+	if ( ! preg_match( '#^/[0-9]{4}(?:-[^/]+)?/(?:[0-9]{4}/[0-9]{2}|[0-9]{2}|[0-9]{4})/[0-9]{2}/(.+)$#', $_SERVER['REQUEST_URI'], $matches ) )
 		return;
 
 	wp_safe_redirect( esc_url_raw( set_url_scheme( home_url( $matches[1] ) ) ) );
