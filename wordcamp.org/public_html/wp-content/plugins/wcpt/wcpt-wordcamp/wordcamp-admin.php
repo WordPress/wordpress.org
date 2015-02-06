@@ -97,11 +97,11 @@ class WordCamp_Admin {
 	 * @return int
 	 */
 	function metabox_save ( $post_id ) {
-		
+
 		// Don't add/remove meta on revisions and auto-saves
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) )
 			return;
-		
+
 		// WordCamp post type only
 		if ( WCPT_POST_TYPE_ID == get_post_type() ) {
 			// Post meta keys
@@ -126,7 +126,7 @@ class WordCamp_Admin {
 
 						update_post_meta( $post_id, $key, $values[$key] );
 						break;
-					
+
 					default:
 						do_action( 'wcpt_metabox_save', $key, $value, $post_id );
 						break;
@@ -230,7 +230,7 @@ class WordCamp_Admin {
 
 		return apply_filters( 'wcpt_admin_meta_keys', $retval, $meta_group );
 	}
-	
+
 	/**
 	 * Fired during admin_print_styles
 	 * Adds jQuery UI
@@ -239,7 +239,7 @@ class WordCamp_Admin {
 		if ( get_post_type() == WCPT_POST_TYPE_ID )
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 	}
-	
+
 	function admin_print_scripts() {
 		if ( get_post_type() == WCPT_POST_TYPE_ID ) :
 		?>
@@ -255,7 +255,7 @@ class WordCamp_Admin {
 		<?php
 		endif;
 	}
-	
+
 	function admin_styles() {
 		if ( get_post_type() == WCPT_POST_TYPE_ID ) {
 			wp_enqueue_style( 'jquery-ui' );
@@ -269,25 +269,7 @@ class WordCamp_Admin {
 	 * Add some general styling to the admin area
 	 */
 	function admin_head () {
-		// Icons for top level admin menus
-		$menu_icon_url	= WCPT_IMAGES_URL . '/icon-wordcamp.png';
-
-		// Top level menu classes
-		$class = sanitize_html_class( WCPT_POST_TYPE_ID ); ?>
-
-		#menu-posts-<?php echo $class; ?> .wp-menu-image {
-			background: url(<?php echo $menu_icon_url; ?>) no-repeat 0 -32px;
-		}
-		#menu-posts-<?php echo $class; ?>:hover .wp-menu-image,
-		#menu-posts-<?php echo $class; ?>.wp-has-current-submenu .wp-menu-image {
-			background: url(<?php echo $menu_icon_url; ?>) no-repeat 0 0;
-		}
-
-		<?php if ( !empty( $_GET['post_type'] ) && $_GET['post_type'] == WCPT_POST_TYPE_ID ) : ?>
-
-			#icon-edit, #icon-post {
-				background: url(<?php echo WCPT_IMAGES_URL . '/icon32.png'; ?>) no-repeat 4px 0;
-			}
+		if ( !empty( $_GET['post_type'] ) && $_GET['post_type'] == WCPT_POST_TYPE_ID ) : ?>
 
 			.column-title { width: 40%; }
 			.column-wcpt_location, .column-wcpt_date, column-wcpt_organizer { white-space: nowrap; }

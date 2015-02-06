@@ -126,7 +126,7 @@ class WordCamp_Loader {
 					'hierarchical'      => false,
 					'has_archive'       => true,
 					'query_var'         => true,
-					'menu_icon'         => ''
+					'menu_icon'         => 'dashicons-wordpress',
 				)
 			)
 		);
