@@ -197,7 +197,6 @@ class WordCamp_Post_Types_Plugin {
 
 	function admin_enqueue_scripts() {
 		global $post_type;
-		wp_enqueue_style( 'campicons', plugins_url( 'fonts/campicons.css', __FILE__ ), array(), 1 );
 
 		// Enqueues scripts and styles for session admin page
 		if ( 'wcb_session' == $post_type ) {
@@ -255,32 +254,6 @@ class WordCamp_Post_Types_Plugin {
 				break;
 			default:
 		}
-
-		// Post types menu icons
-		$menu_icons = array(
-			'wcb_speaker' => '\e602',
-			'wcb_session' => '\e603',
-			'wcb_sponsor' => '\e601',
-		);
-
-		?>
-		<style type="text/css">
-		<?php foreach ( $menu_icons as $post_type => $icon_content ): ?>
-			<?php
-				$class    = sanitize_html_class( $post_type );
-			?>
-			#menu-posts-<?php echo $class; ?> .wp-menu-image:before {
-				font-family: 'Campicons' !important;
-				content: '<?php echo $icon_content; ?>' !important;
-			}
-		<?php endforeach; ?>
-
-		#menu-posts-wcb_organizer .wp-menu-image:before {
-			font-family: 'Dashicons';
-			content: "\f338";
-		}
-		</style>
-		<?php
 	}
 
 	/**
@@ -636,7 +609,7 @@ class WordCamp_Post_Types_Plugin {
 				$session = get_post( $entry[ $term_id ] );
 				$session_title = apply_filters( 'the_title', $session->post_title );
 				$session_tracks = get_the_terms( $session->ID, 'wcb_track' );
-				$session_track_titles = implode( ', ', wp_list_pluck( $session_tracks, 'name' ) );
+				$session_track_titles = implode( ', ', wp_list_pluck( $session_tracks, 'name' ) );      // todo implode(): Invalid arguments passed in wc-post-types.php on line 612
 				$session_type = get_post_meta( $session->ID, '_wcpt_session_type', true );
 
 				if ( ! in_array( $session_type, array( 'session', 'custom' ) ) )
@@ -1622,7 +1595,7 @@ class WordCamp_Post_Types_Plugin {
 			'capability_type'   => 'post',
 			'hierarchical'      => false,
 			'query_var'         => true,
-			'menu_icon'         => '', // see $this->menu_icons_css()
+			'menu_icon'         => 'dashicons-megaphone',
 		) );
 
 		// Session post type labels.
@@ -1654,7 +1627,7 @@ class WordCamp_Post_Types_Plugin {
 			'capability_type'   => 'post',
 			'hierarchical'      => false,
 			'query_var'         => true,
-			'menu_icon'         => '', // see $this->menu_icons_css()
+			'menu_icon'         => 'dashicons-schedule',
 		) );
 
 		// Sponsor post type labels.
@@ -1686,7 +1659,7 @@ class WordCamp_Post_Types_Plugin {
 			'capability_type'   => 'post',
 			'hierarchical'      => false,
 			'query_var'         => true,
-			'menu_icon'         => '', // see $this->menu_icon_css()
+			'menu_icon'         => 'dashicons-heart',
 		) );
 
 		// Organizer post type labels.
@@ -1718,7 +1691,7 @@ class WordCamp_Post_Types_Plugin {
 			'capability_type'   => 'post',
 			'hierarchical'      => false,
 			'query_var'         => true,
-			'menu_icon'         => '', // see $this->menu_icon_css()
+			'menu_icon'         => 'dashicons-groups',
 		) );
 	}
 
