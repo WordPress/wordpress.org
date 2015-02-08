@@ -11,6 +11,7 @@ class GH2WORG {
 		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
 		'MichaelArestad/Press-This' => 'press-this',
+		'pento/x1f4a9' => 'x1f4a9',
 	);
 
 	function __construct() {
