@@ -100,7 +100,11 @@ p a:hover {
 }
 
 .theme-browser .themes {
+	padding: 0;
+}
+.theme-browser .themes:not(:empty) {
 	font-size: 0;
+	padding: 0 0 100px;
 }
 .theme-browser .theme {
 	display: inline-block;
@@ -122,6 +126,10 @@ p a:hover {
 .theme-browser .theme:focus .more-details,
 .theme-browser .theme .more-details:focus {
 	opacity: 1;
+}
+
+.theme-browser .no-themes {
+	margin: 100px 0 150px;
 }
 
 .theme-overlay .theme-about {

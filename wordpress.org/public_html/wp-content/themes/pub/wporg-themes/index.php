@@ -77,11 +77,10 @@ global $themes;
 				endif;
 				?>
 			</div>
+			<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>
 		</div>
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>
-
-		<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>
 		<span class="spinner"></span>
 	</div>
 
