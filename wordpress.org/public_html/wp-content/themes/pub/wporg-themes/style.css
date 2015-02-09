@@ -565,7 +565,7 @@ p a:hover {
 }
 
 .filter-group:last-of-type {
-	margin: 0;
+	margin-right: 0;
 }
 
 .filter-group.wide {
@@ -880,6 +880,7 @@ ul, ol {
 	}
 
 	.filter-group {
+		height: auto;
 		margin-bottom: 0;
 		margin-top: 5px;
 		width: 100%;
@@ -909,11 +910,6 @@ ul, ol {
 	.wp-filter .search-form {
 		float: none;
 		margin: 20px 0;
-		width: 100%;
-	}
-
-	.filter-group,
-	.filter-group li {
 		width: 100%;
 	}
 
