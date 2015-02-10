@@ -105,10 +105,9 @@
 
 					function drawThemeDownloadsChart() {
 						jQuery(document).ready(function($){
-							jQuery.getJSON('https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=<?php echo $theme->slug; ?>&limit=267&callback=?', function (downloads) {
+							jQuery.getJSON('https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=<?php echo $theme->slug; ?>&limit=730&callback=?', function (downloads) {
 								var data = new google.visualization.DataTable(),
-									count = 0,
-									sml;
+									count = 0;
 
 								data.addColumn('string', _wpThemeSettings.l10n.date);
 								data.addColumn('number', _wpThemeSettings.l10n.downloads);
@@ -120,8 +119,6 @@
 									count++;
 								});
 
-								sml = data.getNumberOfRows() < 225;
-
 								new google.visualization.ColumnChart(document.getElementById('theme-download-stats-<?php echo esc_attr( $theme->slug ); ?>')).draw(data, {
 									colors: ['#253578'],
 									legend: {
@@ -131,15 +128,15 @@
 									axisTitlesPosition: 'in',
 									chartArea: {
 										height: 280,
-										left: sml ? 30 : 0,
-										width: sml ? '80%' : '100%'
+										left: 35,
+										width: '98%'
 									},
 									hAxis: {
 										textStyle: {color: 'black', fontSize: 9}
 									},
 									vAxis: {
 										format: '###,###',
-										textPosition: sml ? 'out' : 'in',
+										textPosition: 'out',
 										viewWindowMode: 'explicit',
 										viewWindow: {min: 0}
 									},
