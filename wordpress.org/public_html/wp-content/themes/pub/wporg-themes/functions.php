@@ -126,7 +126,7 @@ function wporg_themes_scripts() {
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), false, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), time(), true );
 
 		wp_localize_script( 'theme', '_wpThemeSettings', array(
 			'themes'   => false,
