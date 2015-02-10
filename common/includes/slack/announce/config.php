@@ -20,9 +20,17 @@ function get_whitelist() {
 			'johnbillion',
 			'drew',
 		),
+        'core-flow' => array(
+			'drew',
+			'boren',
+		),
 		'polyglots' => array(
 			'petya',
 		),
+        'training' => array(
+			'courtneydawn',
+			'liljimmi',
+        ),  
 		'wptv' => array(
 			'jerrysarcastic',
 		),
