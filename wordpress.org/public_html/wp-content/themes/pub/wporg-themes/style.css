@@ -190,7 +190,14 @@ p a:hover {
 .theme-wrap .theme-ratings {
 	margin-right: 7%;
 }
-
+.theme-wrap .theme-ratings .counter-container,
+.theme-wrap .theme-ratings .counter-container a {
+	display: inline-block;
+}
+.theme-wrap .theme-ratings .counter-label,
+.theme-wrap .theme-ratings .counter-count {
+	line-height: 1.75;
+}
 .theme-wrap .theme-ratings .counter-label {
 	float: left;
 	margin-right: 5px;
@@ -208,6 +215,7 @@ p a:hover {
 	background-color: #fddb5a;
 }
 .theme-wrap .theme-ratings .counter-count {
+	float: right;
 	margin-left: 5px;
 }
 

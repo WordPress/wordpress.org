@@ -66,8 +66,8 @@
 						<span class="counter-back">
 							<span class="counter-bar" style="width: <?php echo 92 * ( $rate_count / $theme->num_ratings ); ?>px;"></span>
 						</span>
+						<span class="counter-count"><?php echo $rate_count; ?></span>
 					</a>
-					<span class="counter-count"><?php echo $rate_count; ?></span>
 				</div>
 				<?php
 						endforeach;

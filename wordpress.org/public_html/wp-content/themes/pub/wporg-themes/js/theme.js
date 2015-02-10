@@ -356,6 +356,34 @@
 					height: 350
 				});
 			});
+		},
+
+		// Keeps :focus within the theme details elements.
+		containFocus: function( $el ) {
+			var $target;
+
+			// Move focus to the primary action
+			_.delay( function() {
+				$( '.theme-wrap a.button-primary:visible' ).focus();
+			}, 500 );
+
+			$el.on( 'keydown.wp-themes', function( event ) {
+
+				// Tab key
+				if ( event.which === 9 ) {
+					$target = $( event.target );
+
+					// Keep focus within the overlay by making the last link on theme actions
+					// switch focus to button.left on tabbing and vice versa
+					if ( $target.is( 'button.close' ) && event.shiftKey ) {
+						$el.find( '.theme-tags a:last-child' ).focus();
+						event.preventDefault();
+					} else if ( $target.is( '.theme-tags a:last-child' ) ) {
+						$el.find( 'button.close' ).focus();
+						event.preventDefault();
+					}
+				}
+			});
 		}
 	});
 
