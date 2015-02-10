@@ -12,7 +12,7 @@
 		<?php endif; ?>
 
 		<div class="theme-screenshots">
-			<div class="screenshot"><?php echo esc_url( $theme->screenshot_url . '?w=613&strip=all' ); ?></div>
+			<div class="screenshot"><?php echo esc_url( $theme->screenshot_url . '?w=732&strip=all' ); ?></div>
 
 			<div class="theme-actions">
 				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $theme->slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary"><?php _e( 'Download' ); ?></a>
