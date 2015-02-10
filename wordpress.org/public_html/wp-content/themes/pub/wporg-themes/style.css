@@ -626,13 +626,14 @@ p a:hover {
 }
 
 .filtered-by .tag {
-	margin: 0 5px;
-	padding: 4px 8px;
+	background: #fff;
 	border: 1px solid #e5e5e5;
 	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-	background: #fff;
+	display: inline-block;
 	font-size: 11px;
+	margin: 2px 5px;
+	padding: 1px 8px;
 }
 
 .filters-applied .filter-group,
