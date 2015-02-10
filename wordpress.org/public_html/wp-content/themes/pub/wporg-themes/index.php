@@ -63,7 +63,7 @@ global $themes;
 		</div><!-- .wp-filter -->
 
 		<div class="theme-browser content-filterable">
-			<div class="themes" style="display: none;">
+			<div class="themes">
 				<?php
 				if ( ! is_wp_error( $themes ) ) :
 					if ( is_single() ) :

@@ -7,7 +7,54 @@
 	});
 
 	_.extend( wp.themes.view.Installer.prototype, {
-		el: '#themes'
+		el: '#themes',
+
+		// Applying filters triggers a tag request.
+		applyFilters: function( event ) {
+			var name,
+				tags = this.filtersChecked(),
+				request = { tag: tags },
+				filteringBy = $( '.filtered-by .tags' );
+
+			if ( event ) {
+				event.preventDefault();
+			}
+
+			$( 'body' ).addClass( 'filters-applied' );
+			$( '.filter-links li > a.current' ).removeClass( 'current' );
+			filteringBy.empty();
+
+			_.each( tags, function( tag ) {
+				name = $( 'label[for="filter-id-' + tag + '"]' ).text();
+				filteringBy.append( '<span class="tag">' + name + '</span>' );
+			});
+
+			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ), { replace: true } );
+
+			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
+			// or searching the local cache
+			this.collection.query( request );
+		},
+
+		// Toggle the full filters navigation.
+		moreFilters: function( event ) {
+			event.preventDefault();
+
+			if ( $( 'body' ).hasClass( 'filters-applied' ) ) {
+				return this.backToFilters();
+			}
+
+			// If the filters section is opened and filters are checked
+			// run the relevant query collapsing to filtered-by state
+			if ( $( 'body' ).hasClass( 'show-filters' ) && this.filtersChecked() ) {
+				return this.addFilter();
+			}
+
+			this.clearSearch();
+
+			$( 'body' ).toggleClass( 'show-filters' );
+		}
+
 	});
 
 	_.extend( wp.themes.view.Theme.prototype, {
@@ -401,7 +448,10 @@
 			});
 
 			wp.themes.router.on( 'route:tag', function( tag ) {
-				$( '#filter-id-' + tag).prop( 'checked', true );
+				_.each( tag.split( '+' ), function( tag ) {
+					$( '#filter-id-' + tag ).prop( 'checked', true );
+				});
+				$( 'body' ).toggleClass( 'show-filters' );
 				self.view.applyFilters();
 			});
 
