@@ -36,8 +36,8 @@ global $themes;
 
 			<div class="filter-drawer">
 				<div class="buttons">
-					<a class="apply-filters button button-secondary" href="#"><?php _e( 'Apply Filters' ); ?><span></span></a>
-					<a class="clear-filters button button-secondary" href="#"><?php _e( 'Clear' ); ?></a>
+					<button type="button" disabled="disabled" class="apply-filters button button-secondary"><?php _e( 'Apply Filters' ); ?><span></span></button>
+					<button type="button" class="clear-filters button button-secondary"><?php _e( 'Clear' ); ?></button>
 				</div>
 
 				<div class="filtered-by">

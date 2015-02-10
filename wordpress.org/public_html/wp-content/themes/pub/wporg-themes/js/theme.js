@@ -53,7 +53,32 @@
 			this.clearSearch();
 
 			$( 'body' ).toggleClass( 'show-filters' );
-		}
+		},
+
+		// Get the checked filters.
+		// @return {array} of tags or false.
+		filtersChecked: function() {
+			var items  = $( '.filter-group' ).find( ':checkbox' ).filter( ':checked' ),
+				drawer = $( '.filter-drawer' ),
+				tags   = [];
+
+			_.each( items, function( item ) {
+				tags.push( $( item ).prop( 'value' ) );
+			});
+
+			// When no filters are checked, restore initial state and return.
+			if ( 0 === tags.length ) {
+				drawer.find( '.apply-filters' ).prop( 'disabled', true ).find( 'span' ).text( '' );
+				drawer.find( '.clear-filters' ).hide();
+				$( 'body' ).removeClass( 'filters-applied' );
+				return false;
+			}
+
+			drawer.find( '.apply-filters' ).prop( 'disabled', false ).find( 'span' ).text( tags.length );
+			drawer.find( '.clear-filters' ).css( 'display', 'inline-block' );
+
+			return tags;
+		},
 
 	});
 
