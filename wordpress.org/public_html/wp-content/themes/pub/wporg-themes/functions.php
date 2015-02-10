@@ -240,12 +240,13 @@ function wporg_themes_query_themes() {
 	}
 
 	foreach ( $api->themes as &$theme ) {
-		$theme->name        = wp_kses( $theme->name,        $themes_allowedtags );
-		$theme->author      = wp_kses( $theme->author,      $themes_allowedtags );
-		$theme->version     = wp_kses( $theme->version,     $themes_allowedtags );
-		$theme->description = wp_kses( $theme->description, $themes_allowedtags );
-		$theme->num_ratings = number_format_i18n( $theme->num_ratings );
-		$theme->preview_url = set_url_scheme( $theme->preview_url );
+		$theme->name           = wp_kses( $theme->name,        $themes_allowedtags );
+		$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
+		$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
+		$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
+		$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
+		$theme->preview_url    = set_url_scheme( $theme->preview_url );
+		wporg_themes_photon_screen_shot( $theme );
 	}
 
 	wp_send_json_success( $api );
@@ -263,17 +264,35 @@ function wporg_themes_theme_info() {
 		wp_send_json_error();
 	}
 
-	$theme->name        = wp_kses( $theme->name,        $themes_allowedtags );
-	$theme->author      = wp_kses( $theme->author,      $themes_allowedtags );
-	$theme->version     = wp_kses( $theme->version,     $themes_allowedtags );
-	$theme->description = wp_kses( $theme->description, $themes_allowedtags );
-	$theme->num_ratings = number_format_i18n( $theme->num_ratings );
-	$theme->preview_url = set_url_scheme( $theme->preview_url );
+	$theme->name           = wp_kses( $theme->name,        $themes_allowedtags );
+	$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
+	$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
+	$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
+	$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
+	$theme->preview_url    = set_url_scheme( $theme->preview_url );
+	wporg_themes_photon_screen_shot( $theme );
 
 	wp_send_json_success( $theme );
 }
 add_action( 'wp_ajax_theme-info',        'wporg_themes_theme_info' );
 add_action( 'wp_ajax_nopriv_theme-info', 'wporg_themes_theme_info' );
+
+/**
+ * Photon-ifies the screen shot URL.
+ *
+ * @param object $theme
+ * @return object
+ */
+function wporg_themes_photon_screen_shot( $theme ) {
+	if ( preg_match( '/screenshot.(jpg|jpeg|png|gif)/', $theme->screenshot_url, $match ) ) {
+		$theme->screenshot_url = sprintf( 'https://i0.wp.com/themes.svn.wordpress.org/%1$s/%2$s/%3$s',
+			$theme->slug,
+			$theme->version,
+			$match[0]
+		);
+	}
+	return $theme;
+}
 
 /**
  * Include view templates in the footer.

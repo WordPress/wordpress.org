@@ -1,7 +1,7 @@
 <script id="tmpl-theme" type="text/template">
 	<# if ( data.screenshot_url ) { #>
 	<div class="theme-screenshot">
-		<img src="{{ data.screenshot_url }}" alt="" />
+		<img src="{{ data.screenshot_url }}?w=572&strip=all" alt="" />
 	</div>
 	<# } else { #>
 	<div class="theme-screenshot blank"></div>

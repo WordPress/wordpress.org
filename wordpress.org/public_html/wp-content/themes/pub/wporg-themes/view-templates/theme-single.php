@@ -15,7 +15,7 @@
 
 				<div class="theme-screenshots">
 					<# if ( data.screenshot_url ) { #>
-						<div class="screenshot"><img src="{{ data.screenshot_url }}" alt=""/></div>
+						<div class="screenshot"><img src="{{ data.screenshot_url }}?w=732&strip=all" alt=""/></div>
 					<# } else { #>
 						<div class="screenshot blank"></div>
 					<# } #>

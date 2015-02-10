@@ -1,4 +1,7 @@
-<?php global $theme; ?>
+<?php
+	global $theme;
+	$theme = wporg_themes_photon_screen_shot( $theme );
+?>
 <div class="theme-wrap">
 	<div class="theme-about">
 
@@ -9,7 +12,7 @@
 		<?php endif; ?>
 
 		<div class="theme-screenshots">
-			<div class="screenshot"><?php the_post_thumbnail(); ?></div>
+			<div class="screenshot"><?php echo esc_url( $theme->screenshot_url . '?w=613&strip=all' ); ?></div>
 
 			<div class="theme-actions">
 				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $theme->slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary"><?php _e( 'Download' ); ?></a>
