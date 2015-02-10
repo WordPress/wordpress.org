@@ -1007,6 +1007,9 @@ input {
   font-size: 14px;
   letter-spacing: 2px;
 }
+.devhub-wrap #sidebar > ul li .menu > li {
+  padding-bottom: 1em;
+}
 .devhub-wrap #sidebar > ul li ul {
   list-style-type: none;
   margin: 0 10px;
