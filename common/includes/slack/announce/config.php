@@ -13,6 +13,15 @@ namespace Dotorg\Slack\Announce;
  */
 function get_whitelist() {
 	return array(
+		'bbpress' => array( 
+			'jjj', 
+			'netweb', 
+		),
+		'buddypress' => array( 
+			'boone', 
+			'djpaul', 
+			'jjj',
+		),
 		'cli' => array(
 			'danielbachhuber',
 		),
@@ -20,14 +29,14 @@ function get_whitelist() {
 			'johnbillion',
 			'drew',
 		),
-        'core-flow' => array(
+		'core-flow' => array(
 			'drew',
 			'boren',
 		),
 		'polyglots' => array(
 			'petya',
 		),
-        'training' => array(
+		'training' => array(
 			'courtneydawn',
 			'liljimmi',
         ),  
