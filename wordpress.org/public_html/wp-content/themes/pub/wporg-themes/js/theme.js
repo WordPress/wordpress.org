@@ -6,6 +6,50 @@
 		searchContainer: ''
 	});
 
+	_.extend( wp.themes.view.Themes.prototype, {
+
+		// Renders the overlay with the ThemeDetails view.
+		// Uses the current model data.
+		expand: function( id ) {
+			var self = this;
+
+			// Set the current theme model
+			this.model = self.collection.get( id );
+
+			// Trigger a route update for the current model
+			wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.themePath + this.model.id ) );
+
+			// Sets this.view to 'detail'
+			this.setView( 'detail' );
+			$( 'body' ).addClass( 'modal-open' );
+
+			// Set up the theme details view
+			this.overlay = new wp.themes.view.Details({
+				model: self.model
+			});
+
+			this.overlay.render();
+			this.$overlay.html( this.overlay.el );
+
+			// Bind to theme:next and theme:previous
+			// triggered by the arrow keys
+			//
+			// Keep track of the current model so we
+			// can infer an index position
+			this.listenTo( this.overlay, 'theme:next', function() {
+				// Renders the next theme on the overlay
+				self.next( [ self.model.cid ] );
+				$( '.theme-header' ).find( '.right' ).focus();
+
+			})
+			.listenTo( this.overlay, 'theme:previous', function() {
+				// Renders the previous theme on the overlay
+				self.previous( [ self.model.cid ] );
+				$( '.theme-header' ).find( '.left' ).focus();
+			});
+		}
+	});
+
 	_.extend( wp.themes.view.Installer.prototype, {
 		el: '#themes',
 
@@ -127,7 +171,7 @@
 			}
 
 			// Set focused theme to current element
-			themes.focusedTheme = this.$el;
+			wp.themes.focusedTheme = this.$el;
 
 			this.trigger( 'theme:expand', self.model.cid );
 			event.preventDefault();
@@ -362,10 +406,12 @@
 		containFocus: function( $el ) {
 			var $target;
 
-			// Move focus to the primary action
-			_.delay( function() {
-				$( '.theme-wrap a.button-primary:visible' ).focus();
-			}, 500 );
+			// On first load of the modal, move focus to the primary action.
+			if ( 1 === $( window.event.target ).closest( '.theme' ).length ) {
+				_.delay( function() {
+					$( '.theme-wrap a.button-primary:visible' ).focus();
+				}, 500 );
+			}
 
 			$el.on( 'keydown.wp-themes', function( event ) {
 
