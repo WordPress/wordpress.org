@@ -34,7 +34,10 @@ function get_whitelist() {
 			'boren',
 		),
 		'polyglots' => array(
+			'japh',
+			'ocean90',
 			'petya',
+			'shinichin',
 		),
 		'training' => array(
 			'courtneydawn',
