@@ -30,9 +30,6 @@
 				<div class="theme-info">
 				<div class="theme hentry">
 					<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
-					<span class="theme-version">
-						<?php printf( __( 'Version: %s' ), sprintf( '<abbr title="%1$s">%2$s</abbr>', esc_attr( sprintf( __( 'Last updated: %s' ), '{{ new Date(data.last_updated).toLocaleDateString() }}' ) ), '{{{ data.version }}}' ) ); ?>
-					</span>
 					<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.author }}"><span class="author">{{{ data.author }}}</span></a>' ); ?></h4>
 
 					<p class="theme-description entry-summary">{{{ data.description }}}</p>

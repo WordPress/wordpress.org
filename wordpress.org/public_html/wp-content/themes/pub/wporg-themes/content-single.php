@@ -23,16 +23,6 @@
 		<div class="theme-info">
 			<div class="hentry">
 				<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
-				<span class="theme-version">
-					<?php
-						printf( __( 'Version: %s' ),
-							sprintf( '<abbr title="%1$s">%2$s</abbr>',
-								esc_attr( sprintf( __( 'Last updated: %s' ), date_i18n( get_option( 'date_format' ), strtotime( $theme->last_updated ) ) ) ),
-								$theme->version
-							)
-						);
-					?>
-				</span>
 				<h4 class="theme-author"><?php printf( __( 'By %s' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author">%s</span><a/>', $theme->author ) ); ?></h4>
 
 				<div class="theme-description entry-summary"><?php the_content(); ?></div>
