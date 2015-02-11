@@ -33,7 +33,7 @@
 						);
 					?>
 				</span>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<span class="author">' . $theme->author . '</span>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( __( 'By %s' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author">%s</span><a/>', $theme->author ) ); ?></h4>
 
 				<div class="theme-description entry-summary"><?php the_content(); ?></div>
 
