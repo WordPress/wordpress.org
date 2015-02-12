@@ -90,6 +90,8 @@ p a:hover {
 
 .theme-overlay .theme-wrap {
 	left: 30px;
+	margin: 0 auto;
+	max-width: 1290px;
 	-webkit-overflow-scrolling: touch;
 	overflow-y: scroll;
 	top: 3%;
@@ -136,47 +138,50 @@ p a:hover {
 	bottom: 0;
 }
 
-.theme-wrap .theme-info > div {
-	margin-bottom: 75px;
+.theme-wrap .theme-about .theme-info {
+	float: left;
+	width: calc(70% - 30px);
 }
 
-.theme-wrap .theme-info {
+.theme-wrap .theme-about .theme-head,
+.theme-wrap .theme-about .theme-meta {
 	float: right;
-	width: 40%;
+	width: calc(32% - 30px);
 }
+
+.theme-wrap .theme-about .theme-head,
+.theme-wrap .theme-about .theme-info > div:not(:last-of-type),
+.theme-wrap .theme-about .theme-meta > div:not(:last-of-type) {
+	margin-bottom: 50px;
+}
+
 .theme-wrap .theme-name {
 	display: inline-block;
-}
-
-.theme-wrap .theme-screenshots {
-	float: left;
-	margin-bottom: 75px;
-	max-width: 880px;
-	text-align: center;
-	width: 55%;
-}
-
-.theme-wrap .screenshot {
-	overflow: initial;
 }
 
 .theme-wrap .theme-actions {
 	background: none;
 	border: none;
-	padding: 10px 25px 5px;
+	padding: 0;
 	position: relative;
 	text-align: center;
 	z-index: auto;
 }
 
-.theme-wrap .theme-devs,
-.theme-wrap .theme-ratings {
-	display: inline-block;
-	vertical-align: top;
-	width: 46%;
+.theme-wrap .theme-actions a {
+	height: 36px;
+	padding: 4px 10px;
+	width: 45%;
 }
 
-.theme-wrap .theme-devs {
+.theme-overlay .theme-description,
+.theme-overlay .theme-tags {
+	margin: 0;
+	padding: 0;
+}
+
+.theme-wrap .theme-devs,
+.theme-wrap .theme-support {
 	font-size: 1.4em;
 }
 
@@ -186,13 +191,28 @@ p a:hover {
 .theme-wrap .theme-devs li {
 	line-height: 1.5;
 }
-
-.theme-wrap .theme-ratings {
-	margin-right: 7%;
+.theme-wrap .theme-ratings .rating {
+	margin: 0 0 1.5em;
+}
+.theme-wrap .theme-ratings .star-holder,
+.theme-wrap .theme-ratings .description {
+	display: inline-block;
+}
+.theme-wrap .theme-ratings .description {
+	color: #aa9;
+	font-style: italic;
+	margin: 0 5px;
+	vertical-align: text-bottom;
+}
+.theme-wrap .theme-ratings ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
 .theme-wrap .theme-ratings .counter-container,
 .theme-wrap .theme-ratings .counter-container a {
 	display: inline-block;
+	width: 100%;
 }
 .theme-wrap .theme-ratings .counter-label,
 .theme-wrap .theme-ratings .counter-count {
@@ -209,13 +229,15 @@ p a:hover {
 }
 .theme-wrap .theme-ratings .counter-back {
 	background-color: #ececec;
-	width: 92px;
+	width: 70%;
+	width: -webkit-calc(100% - 60px);
+	width: calc(100% - 60px);
 }
 .theme-wrap .theme-ratings .counter-bar {
 	background-color: #fddb5a;
 }
 .theme-wrap .theme-ratings .counter-count {
-	float: right;
+	float: left;
 	margin-left: 5px;
 }
 
@@ -883,12 +905,7 @@ ul, ol {
 }
 
 @media only screen and (max-width: 960px) {
-	/* Keep ratings and dev links stacked until they have enough room. */
-	.theme-wrap .theme-devs,
-	.theme-wrap .theme-ratings {
-		margin: auto;
-		width: 100%;
-	}
+
 }
 
 @media only screen and (max-width: 782px) {
@@ -904,9 +921,15 @@ ul, ol {
 		width: 100%;
 	}
 
-	.theme-wrap .theme-screenshots {
+	.theme-wrap .theme-about .theme-head,
+	.theme-wrap .theme-about .theme-info,
+	.theme-wrap .theme-about .theme-meta {
 		float: none;
-		width: 100%;
+		width: auto;
+	}
+
+	.theme-wrap .theme-about .theme-info {
+		margin-bottom: 50px;
 	}
 
 	.theme-wrap .theme-actions {
@@ -924,9 +947,15 @@ ul, ol {
 		width: 100%;
 	}
 
-	.theme-wrap .theme-info {
-		float: none;
-		width: auto;
+	.theme-wrap .theme-ratings,
+	.theme-wrap .theme-devs {
+		display: inline-block;
+		width: 47%;
+		vertical-align: top;
+	}
+
+	.theme-wrap .theme-devs {
+		margin-left: 5%;
 	}
 
 	.theme-install-overlay .wp-full-overlay-header .theme-install {
@@ -961,8 +990,17 @@ ul, ol {
 		margin-right: 0;
 	}
 
-	.theme-wrap .theme-screenshots,
-	.theme-wrap .theme-info > div {
+	.theme-wrap .theme-about .theme-head,
+	.theme-wrap .theme-about .theme-info,
+	.theme-wrap .theme-about .theme-info > div:not(:last-of-type),
+	.theme-wrap .theme-about .theme-meta > div:not(:last-of-type) {
 		margin-bottom: 30px;
+	}
+
+	/* Keep ratings and dev links stacked until they have enough room. */
+	.theme-wrap .theme-devs,
+	.theme-wrap .theme-ratings {
+		margin: auto;
+		width: 100%;
 	}
 }
