@@ -73,7 +73,7 @@
 				filteringBy.append( '<span class="tag">' + name + '</span>' );
 			});
 
-			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ), { replace: true } );
+			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ) );
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
 			// or searching the local cache
@@ -138,7 +138,7 @@
 		render: function() {
 			var data = this.model.toJSON();
 
-			data.permalink = wp.themes.router.baseUrl( data.slug );
+			data.permalink = wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( data.slug );
 
 			// Render themes using the html template
 			this.$el.html( this.html( data ) ).attr({
@@ -200,7 +200,7 @@
 
 			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="' + wp.themes.router.baseUrl( 'tag/' + tag ) + '">' + tag + '</a>';
+				return '<a href="' + wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( 'tag/' + tag ) + '">' + tag + '</a>';
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
@@ -526,7 +526,7 @@
 			if ( 0 !== url.length ) {
 				url += '/';
 			}
-			return '/' + url;
+			return url;
 		},
 
 		themePath: '',
