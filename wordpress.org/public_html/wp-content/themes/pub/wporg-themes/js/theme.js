@@ -186,9 +186,9 @@
 			'click .delete-theme': 'deleteTheme',
 			'click .left': 'previousTheme',
 			'click .right': 'nextTheme',
-			'click .button-secondary': 'preview',
-			'keydown .button-secondary': 'preview',
-			'touchend .button-secondary': 'preview'
+			'click .theme-actions .button-secondary': 'preview',
+			'keydown .theme-actions .button-secondary': 'preview',
+			'touchend .theme-actions .button-secondary': 'preview'
 		},
 
 		render: function() {
