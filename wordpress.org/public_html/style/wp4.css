@@ -179,7 +179,7 @@ a img.aligncenter {
 	position: relative;
 	height: 140px;
 	width: 100%;
-	background: #222222;
+	background: #23282d;
 	text-align: center;
 }
 
@@ -230,13 +230,13 @@ a img.aligncenter {
 }
 
 #head-search input.text {
-	background: #131313;
+	background: #191e23;
 	border: 0;
 	margin-right: 0;
 	margin-bottom: 0;
 	width: 256px;
 	height: 24px;
-	color: #999999;
+	color: #b4b9be;
 	float: left;
 	font-size: 12px;
 	outline: none;
@@ -254,7 +254,7 @@ a img.aligncenter {
 	border: none;
 	height: 30px;
 	width: 26px;
-	background: #131313;
+	background: #191e23;
 	background-image: url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
 	background-position: 100% 2px;
 	background-repeat: no-repeat;
@@ -269,7 +269,7 @@ a img.aligncenter {
 	padding: 20px 0 0;
 	min-width: 200px;
 	max-width: 75%;
-	background: #222222;
+	background: #23282d;
 	list-style: none;
 	text-align: left;
 	-webkit-transition: left 0.3s;
@@ -297,7 +297,7 @@ a img.aligncenter {
 	padding: 10px 30px;
 	margin: 0 4px;
 	font-size: 13px;
-	color: #ddd;
+	color: #eee;
 	height: 34px;
 }
 
@@ -305,17 +305,10 @@ a img.aligncenter {
 	color: #eee;
 }
 
-#wporg-header ul li a:active {
-	color: #000;
-}
-
-#wporg-header ul li a:hover {
-	color: #2faadd;
-}
-
+#wporg-header ul li a:hover,
 #wporg-header ul li a.current,
 #wporg-header ul li.current-menu-item a {
-	color: #2faadd;
+	color: #45bbe6;
 }
 
 #wporg-header ul li a.subcurrent {
@@ -481,7 +474,7 @@ a img.aligncenter {
 		padding: 0 6px;
 		margin: 0 4px;
 		font-size: 13px;
-		color: #ddd;
+		color: #eee;
 		height: 46px;
 	}
 
@@ -515,16 +508,16 @@ a img.aligncenter {
 		height: 0;
 		border-left: 9px solid transparent;
 		border-right: 9px solid transparent;
-		border-bottom: 9px solid #444;
+		border-bottom: 9px solid #32373c;
 		margin: -10px auto 0 auto;
 	}
 
 	#wporg-header .nav-submenu {
 		display:none!important;/* Prevents #wporg-header ul overwriting this */
 		min-width: 0;
-		background: #444;
+		background: #32373c;
 		margin-top: -1px;
-		border: #444 solid 1px;
+		border: #32373c solid 1px;
 		border-top:0;
 	}
 
@@ -985,7 +978,7 @@ body #ed_toolbar #ed_pre {
 
 h3 {
 	font-size: 14px;
-	color: #333;
+	color: #23282d;
 	font-weight:bold;
 	margin: -1px 0 1px 0;
 }
@@ -995,7 +988,7 @@ h4, h3.head {
 	font-size: 14px;
 	border-bottom: 1px solid #dedede;
 	padding-bottom: 4px;
-	color: #333;
+	color: #23282d;
 	margin-bottom: 18px;
 }
 
@@ -1178,7 +1171,7 @@ body.make-flow #headline h2 a:before { content: '\f115'; }
 }
 
 #pagebody .submenu a#subcurrent, #pagebody #submenu a#subcurrent {
-	color: #333;
+	color: #23282d;
 	cursor: default;
 }
 
