@@ -55,25 +55,6 @@ body {
 	opacity: 0.95;
 }
 
-@media screen and ( max-width: 782px ) {
-	#header {
-		top: 46px;
-		z-index: 0;
-		position: absolute;
-	}
-}
-
-@media only screen 
-	and ( min-device-width : 240px ) 
-	and ( max-device-width : 860px ) {
-	#header-inner {
-		height: 140px;
-		margin: 0 auto;
-		padding: 0;
-		width: 100%;
-	}
-}
-
 body.bbpress #main,
 body.buddypress #main {
 	width: 100%;
@@ -1527,4 +1508,45 @@ div.plugin-meta img {
 	position: absolute;
 	top: 0px;
 	right: 20px;
+}
+
+/* =Responsive Overrides
+-------------------------------------------------------------- */
+
+/* Do not fix #header for non-desktops */
+@media screen and ( max-width: 782px ) {
+	#header {
+		top: 46px;
+		z-index: 0;
+		position: absolute;
+	}
+}
+
+/* Force widths for desktops */
+@media screen and ( max-width: 960px )  {
+	#header-inner {
+		width: 960px;
+	}
+	#headline-inner {
+		width: 960px;
+	}
+	#subnav-inner {
+		width: 960px;
+	}
+	#showcase-inner {
+		width: 960px;
+	}
+	#footer {
+		width: 960px;
+	}
+}
+
+/* Bump #header-inner height on mobile to support stacked elements */
+@media screen and ( max-width: 460px ) {
+	#header-inner {
+		height: 140px;
+		margin: 0 auto;
+		padding: 0;
+		width: 100%;
+	}
 }
