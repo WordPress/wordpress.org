@@ -55,10 +55,6 @@ body {
 	opacity: 0.95;
 }
 
-body.bbpress #main,
-body.buddypress #main {
-	width: 100%;
-}
 body.page-template-page-homepage-php #header {
 	position: relative;
 	box-shadow: none;
@@ -1513,6 +1509,18 @@ div.plugin-meta img {
 /* =Responsive Overrides
 -------------------------------------------------------------- */
 
+/* Force widths for desktops */
+@media screen and ( min-width: 960px )  {
+	#header-inner,
+	#headline-inner,
+	#subnav-inner,
+	#showcase-inner,
+	#main,
+	#footer {
+		width: 960px;
+	}
+}
+
 /* Do not fix #header for non-desktops */
 @media screen and ( max-width: 782px ) {
 	#header {
@@ -1522,25 +1530,6 @@ div.plugin-meta img {
 	}
 	#wpadminbar {
 		position: absolute;
-	}
-}
-
-/* Force widths for desktops */
-@media screen and ( min-width: 960px )  {
-	#header-inner {
-		width: 960px;
-	}
-	#headline-inner {
-		width: 960px;
-	}
-	#subnav-inner {
-		width: 960px;
-	}
-	#showcase-inner {
-		width: 960px;
-	}
-	#footer {
-		width: 960px;
 	}
 }
 

@@ -531,6 +531,16 @@ function bbporg_toolbar_css_overrides() {
 			#wpadminbar #wp-admin-bar-user-info .display-name { color: #555; }
 			#wpadminbar #wp-admin-bar-user-info a:hover .display-name { color: #d84800; }
 			#wpadminbar #wp-admin-bar-user-info .username { color: #000; }
+
+			/* Some responsive'ish tweaks */
+			@media screen and ( max-width: 460px ) {
+				#wpadminbar {
+					top: 140px;
+				}
+				#wp-toolbar {
+					width: 100%;
+				}
+			}
 		<?php endif; ?>
 	</style>
 <?php
