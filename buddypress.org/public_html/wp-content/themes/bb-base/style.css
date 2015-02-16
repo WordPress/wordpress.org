@@ -1516,14 +1516,17 @@ div.plugin-meta img {
 /* Do not fix #header for non-desktops */
 @media screen and ( max-width: 782px ) {
 	#header {
-		top: 46px;
+		top: 0;
 		z-index: 0;
+		position: absolute;
+	}
+	#wpadminbar {
 		position: absolute;
 	}
 }
 
 /* Force widths for desktops */
-@media screen and ( max-width: 960px )  {
+@media screen and ( min-width: 960px )  {
 	#header-inner {
 		width: 960px;
 	}
