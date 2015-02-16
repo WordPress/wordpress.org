@@ -154,6 +154,11 @@
 
 			event = event || window.event;
 
+			// Don't handle click if command/Ctrl are pressed to open the link in a new tab.
+			if ( true === event.metaKey && 'click' === event.type ) {
+				return;
+			}
+
 			// 'enter' and 'space' keys expand the details view when a theme is :focused
 			if ( event.type === 'keydown' && ( event.which !== 13 && event.which !== 32 ) ) {
 				return;
