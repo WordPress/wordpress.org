@@ -63,6 +63,21 @@ body {
 	}
 }
 
+@media only screen 
+	and ( min-device-width : 240px ) 
+	and ( max-device-width : 860px ) {
+	#header-inner {
+		height: 140px;
+		margin: 0 auto;
+		padding: 0;
+		width: 100%;
+	}
+}
+
+body.bbpress #main,
+body.buddypress #main {
+	width: 100%;
+}
 body.page-template-page-homepage-php #header {
 	position: relative;
 	box-shadow: none;
@@ -70,7 +85,7 @@ body.page-template-page-homepage-php #header {
 }
 #header-inner {
 	margin: 0 auto;
-	width: 960px;
+	width: 100%;
 	height: 80px;
 	padding: 0;
 }
@@ -90,7 +105,7 @@ body.page-template-page-homepage-php #header {
 }
 #headline-inner {
 	margin: 0 auto;
-	width: 960px;
+	width: 100%;
 	height: 400px;
 	padding: 0 10px;
 	line-height: 0;
@@ -135,7 +150,7 @@ p.plans {
 }
 #showcase-inner {
 	margin: 0 auto;
-	width: 960px;
+	width: 100%;
 	padding: 20px 0 0;
 }
 #showcase h3 {
@@ -151,12 +166,12 @@ p.plans {
 
 #main {
 	margin: 0 auto;
-	width: 960px;
+	width: 100%;
 	padding: 24px 0;
 	position: relative;
 }
 #footer {
-	width: 960px;
+	width: 100%;
 	padding: 24px 0;
 	font-size: 12px;
 	margin: 0 auto 24px auto;
@@ -233,7 +248,7 @@ body.bbp-user-page div.content {
 
 /* Screenshots */
 div.screenshot {
-	width: 960px;
+	width: 100%;
 	background-position: 0 0;
 	background-repeat: no-repeat;
 	position: relative;
@@ -385,7 +400,7 @@ div.single-post table tr.alt td {
 	margin-top: 81px;
 }
 #subnav-inner {
-	width: 960px;
+	width: 100%;
 	margin: 0 auto;
 	padding: 5px 0;
 	color: #555;
@@ -749,6 +764,9 @@ img.centered {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
+}
+.attachment {
+	display: block;
 }
 .alignright {
 	float: right;
