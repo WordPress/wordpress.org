@@ -502,6 +502,8 @@ function bporg_toolbar_css_overrides() {
 				#wp-toolbar {
 					width: 100%;
 				}
+				#wpadminbar #wp-toolbar a.ab-item,
+				#wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 0; }
 			}
 
 		<?php endif; ?>

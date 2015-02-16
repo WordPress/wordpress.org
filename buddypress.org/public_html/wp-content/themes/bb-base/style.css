@@ -143,7 +143,6 @@ p.plans {
 
 #main {
 	margin: 0 auto;
-	width: 100%;
 	padding: 24px 0;
 	position: relative;
 }
@@ -191,31 +190,21 @@ a:hover img,
 }
 
 div.content {
-	width: 700px;
 	float: right;
 }
 div.leftcol {
-	width: 340px;
 	float: left;
 }
 div.rightcol {
-	width: 340px;
 	float: right;
 }
 div.sidebar {
-	width: 240px;
 	float: left;
 }
 div.group {
 	padding: 20px 20px 1px 20px;
 	background: #eee;
 	margin: 0 0 24px 0;
-}
-div.group div.content {
-	width: 660px;
-}
-div.group div.sidebar {
-	width: 200px;
 }
 
 body.bbp-user-page div.content {
@@ -1519,6 +1508,24 @@ div.plugin-meta img {
 	#footer {
 		width: 960px;
 	}
+	div.content {
+		width: 700px;
+	}
+	div.leftcol {
+		width: 340px;
+	}
+	div.rightcol {
+		width: 340px;
+	}
+	div.sidebar {
+		width: 240px;
+	}
+	div.group div.content {
+		width: 660px;
+	}
+	div.group div.sidebar {
+		width: 200px;
+	}
 }
 
 /* Do not fix #header for non-desktops */
@@ -1539,6 +1546,8 @@ div.plugin-meta img {
 		height: 140px;
 		margin: 0 auto;
 		padding: 0;
-		width: 100%;
+	}
+	#main {
+		margin: 100px 10px 40px 10px;
 	}
 }
