@@ -29,9 +29,10 @@
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
-						<p><?php _e( 'If asking for help, please include your WordPress version, BuddyPress version, and a link to your site.',                              'bporg' ); ?></p>
-						<!-- <p><?php _e( 'If you have a problem while using a non-bundled theme, check if it happens with TwentyTen or TwentyEleven.',                        'bporg' ); ?></p> -->
-						<p><?php _e( 'If you found a bug, please create a <a href="http://buddypress.trac.wordpress.org/">trac ticket</a> with detailed duplication steps.', 'bporg' ); ?></p>
+						<p><?php _e( 'If asking for help, please include your WordPress version, BuddyPress version, and a link to your site.',                               'bporg' ); ?></p>
+						<p><?php _e( 'If you are using a non-bundled theme, confirm your issue still happens with Twenty Twelve, Twenty Thirteen, etc...',                    'bporg' ); ?></p>
+						<p><?php _e( 'If you found a bug, please create a <a href="https://buddypress.trac.wordpress.org/">trac ticket</a> with detailed duplication steps.', 'bporg' ); ?></p>
+						<p><?php _e( 'Posts with 3 or more links will be manually approved by our forum moderators.',                                                         'bporg' ); ?></p>
 					</div>
 
 				<?php endif; ?>
