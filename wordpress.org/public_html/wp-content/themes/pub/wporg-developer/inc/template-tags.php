@@ -783,6 +783,24 @@ namespace DevHub {
 	}
 
 	/**
+	 * Indicates if a post is deprecated.
+	 *
+	 * @param int $post_id
+	 *
+	 * @return bool
+	 */
+	function is_deprecated( $post_id = null ) {
+		if ( empty( $post_id ) ) {
+			$post_id = get_the_ID();
+		}
+
+		$tags           = get_post_meta( $post_id, '_wp-parser_tags', true );
+		$all_deprecated = wp_filter_object_list( $tags, array( 'name' => 'deprecated' ) );
+
+		return !! $all_deprecated;
+	}
+
+	/**
 	 * Retrieve deprecated flag
 	 *
 	 * @param int $post_id

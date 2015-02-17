@@ -994,6 +994,10 @@
 			padding: 20px;
 			color: #ffffff;
 		}
+		.deprecated-method {
+			color: #be2423;
+			font-style: italic;
+		}
 	}
 
 	&.archive, &.search {

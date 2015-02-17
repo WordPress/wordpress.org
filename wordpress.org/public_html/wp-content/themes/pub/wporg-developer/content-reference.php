@@ -116,6 +116,9 @@
 				<?php if ( $excerpt = apply_filters( 'get_the_excerpt', $child->post_excerpt ) ) {
 					echo '&mdash; ' . sanitize_text_field( $excerpt );
 				} ?>
+				<?php if ( is_deprecated( $child->ID ) ) {
+					echo '&mdash; <span class="deprecated-method">' . __( 'deprecated', 'wporg' ) . '</span>';
+				} ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
