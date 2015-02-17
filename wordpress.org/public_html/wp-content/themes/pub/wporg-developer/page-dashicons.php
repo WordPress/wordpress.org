@@ -7,8 +7,8 @@
  * @package wporg-developer
  */
 
-wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20141110' );
-wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20141110' );
+wp_enqueue_style(  'dashicons-page', get_template_directory_uri() . '/stylesheets/page-dashicons.css', array(), '20150217' );
+wp_enqueue_script( 'dashicons-page', get_template_directory_uri() . '/js/page-dashicons.js', array( 'jquery', 'wp-util' ), '20150217' );
 
 get_header(); ?>
 
