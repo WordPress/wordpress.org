@@ -244,7 +244,7 @@ abstract class WP_Credits {
 			foreach ( $group_data['data'] as $k => $person ) {
 				$person = (array) $person;
 				$new_data = array( 'name' => $person[0], 'hash' => '', 'username' => $k, 'title' => '' );
-				$this->names_in_groups[] = $k;
+				$this->names_in_groups[] = strtolower( $k );
 
 				if ( ! empty( $person[2] ) ) {
 					// array( 'Andrew Nacin', 'Lead Developer', 'md5 hash' )
