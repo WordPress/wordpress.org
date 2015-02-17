@@ -116,6 +116,12 @@
 					<# } #>
 				</div><!-- .theme-rating -->
 
+				<div class="theme-support">
+					<h4><?php _e( 'Support', 'wporg-themes' ); ?></h4>
+					<p><?php _e( 'Got something to say? Neeed help?', 'wporg-themes' ); ?></p>
+					<a href="//wordpress.org/support/theme/{{ data.slug }}" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
+				</div><!-- .theme-support -->
+
 				<div class="theme-devs">
 					<h4><?php _e( 'Development', 'wporg-themes' ); ?></h4>
 					<h5><?php _e( 'Subscribe', 'wporg-themes' ); ?></h5>
@@ -135,12 +141,6 @@
 						<li><a href="//themes.trac.wordpress.org/browser/{{data.id}}/" rel="nofollow"><?php _e( 'Browse in Trac', 'wporg-themes' ); ?></a></li>
 					</ul>
 				</div><!-- .theme-devs -->
-
-				<div class="theme-support">
-					<h4><?php _e( 'Support', 'wporg-themes' ); ?></h4>
-					<p><?php _e( 'Got something to say? Neeed help?', 'wporg-themes' ); ?></p>
-					<a href="//wordpress.org/support/theme/{{ data.slug }}" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
-				</div><!-- .theme-support -->
 			</div>
 		</div>
 	</div>
