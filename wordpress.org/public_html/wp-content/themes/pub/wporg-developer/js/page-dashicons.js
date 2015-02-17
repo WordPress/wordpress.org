@@ -37,11 +37,13 @@
 			var tmpl = wp.template( 'glyphs' );
 
 			jQuery( '#glyph' ).html( tmpl({
-				cssClass: cssClass,
+				cssClass: 'dashicons-' + permalink,
 				attr: attr,
 				html: htmltext,
 				glyph: glyphtext
 			}) );
+
+			jQuery( '#wp-class-example' ).text( permalink );
 		}
 	};
 
@@ -50,7 +52,7 @@
 	jQuery(document).ready(function() {
 
 		// pick random icon if no permalink, otherwise go to permalink
-		if ( window.location.hash ) {
+		if ( window.location.hash && '#instructions' !== window.location.hash ) {
 			permalink = "dashicons-" + window.location.hash.split('#')[1];
 
 			// sanitize

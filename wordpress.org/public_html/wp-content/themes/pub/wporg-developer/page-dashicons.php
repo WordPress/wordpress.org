@@ -318,26 +318,79 @@ get_header(); ?>
 
 			<div id="instructions">
 
+				<h3><?php _e( 'WordPress Usage', 'wporg' ); ?></h3>
+
+				<p><?php  printf(
+					__( 'Admin menu items can be added with <code><a href="%s">register_post_type()</a></code> and <code><a href="%s">add_menu_page()</a></code>, which both have an option to set an icon. To show the current icon, you should pass in %s.', 'wporg' ),
+					'https://developer.wordpress.org/reference/functions/register_post_type/',
+					'https://developer.wordpress.org/reference/functions/add_menu_page/',
+					'<code>\'dashicons-<span id="wp-class-example">{icon}</span>\'</code>'
+				); ?></p>
+
+				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
+
+				<p><?php printf(
+					__( 'In <code><a href="">register_post_type()</a></code>, set <code>menu_icon</code> in the arguments array.', 'wporg' ),
+					'https://developer.wordpress.org/reference/functions/register_post_type/'
+				); ?></p>
+
+<pre>&lt;?php
+add_action( 'init', 'create_post_type' );
+//Registers the Product's post type
+function create_post_type() {
+    register_post_type( 'acme_product',
+        array(
+            'labels' => array(
+                'name' => __( 'Products' ),
+                'singular_name' => __( 'Product' )
+            ),
+            'public' => true,
+            'has_archive' => true,
+            'menu_icon' => 'dashicons-products',
+        )
+    );
+}
+</pre>
+
+				<p><?php printf(
+					__( 'The function <code><a href="%s">add_menu_page()</a></code> accepts a parameter after the callback function for an icon URL, which can also accept a dashicons class.', 'wporg' ),
+					'https://developer.wordpress.org/reference/functions/add_menu_page/'
+				); ?></p>
+
+<pre>&lt;?php
+function add_my_custom_menu() {
+    //add an item to the menu
+    add_menu_page (
+        'My Page',
+        'My Title',
+        'manage_options',
+        'my-page',
+        'my_admin_page_function',
+        'dashicons-admin-media',
+    );
+}</pre>
+
+				<h3><?php _e( 'CSS/HTML Usage', 'wporg' ); ?></h3>
+
+				<p><?php _e( "If you want to use dashicons in the admin outside of the menu, there are two helper classes you can use. These are <code>dashicons-before</code> and <code>dashicons</code>, and they can be thought of as setting up dashicons (since you still need your icon's class, too).", 'wporg' ); ?></p>
+
+				<h4><?php _e( 'Examples', 'wporg' ); ?></h4>
+
+				<p><?php _e( 'Adding an icon to a header, with the <code>dashicons-before</code> class. This can be added right to the element with text.', 'wporg' ); ?></p>
+
+<pre>
+&lt;h2 class="dashicons-before dashicons-smiley"&gt;<?php _e( 'A Cheerful Headline', 'wporg' ); ?>&lt;/h2&gt;
+</pre>
+
+				<p><?php _e( 'Adding an icon to a header, with the <code>dashicons</code> class. Note that here, you need extra markup specifically for the icon.', 'wporg' ); ?></p>
+
+<pre>
+&lt;h2&gt;&lt;span class="dashicons dashicons-smiley"&gt;&lt;/span&gt; <?php _e( 'A Cheerful Headline', 'wporg' ); ?>&lt;/h2&gt;
+</pre>
+
 				<h3><?php _e( 'Photoshop Usage', 'wporg' ); ?></h3>
 
 				<p><?php _e( 'Use the .OTF version of the font for Photoshop mockups, the web-font versions won\'t work. For most accurate results, pick the "Sharp" font smoothing.', 'wporg' ); ?></p>
-
-				<h3><?php _e( 'CSS Usage', 'wporg' ); ?></h3>
-
-				<p><?php _e( 'Link the stylesheet:', 'wporg' ); ?></p>
-
-				<pre>&lt;link rel="stylesheet" href="css/dashicons.css"></pre>
-
-				<p><?php printf( __( 'Now add the icons using the %s selector. You can insert the Star icon like this:', 'wporg' ), '<code>:before</code>' ); ?></p>
-
-<textarea class="code" onclick="select();">
-.myicon:before {
-	content: "\f155";
-	display: inline-block;
-	-webkit-font-smoothing: antialiased;
-	font: normal 20px/1 'dashicons';
-	vertical-align: top;
-}</textarea>
 
 			</div><!-- /#instructions -->
 
@@ -349,7 +402,7 @@ get_header(); ?>
 		<script type="text/html" id="tmpl-glyphs">
 			<div class="dashicons {{data.cssClass}}"></div>
 			<div class="info">
-				<span class="name">← {{data.cssClass}}</span>
+				<span class="name"><code>{{data.cssClass}}</code></span>
 				<span class="link"><a href='javascript:dashicons.copy( "content: \"\\{{data.attr}}\";", "css" )'><?php _e( 'Copy CSS', 'wporg' ); ?></a></span>
 				<span class="link"><a href="javascript:dashicons.copy( '{{data.html}}', 'html' )"><?php _e( 'Copy HTML', 'wporg' ); ?></a></span>
 				<span class="link"><a href="javascript:dashicons.copy( '{{data.glyph}}' )"><?php _e( 'Copy Glyph', 'wporg' ); ?></a></span>

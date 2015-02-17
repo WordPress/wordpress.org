@@ -111,6 +111,11 @@
 .dashicons-page #instructions h3 {
   margin: 1.5em 0 0.75em;
 }
+.dashicons-page #instructions h4 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
 .dashicons-page .code {
   display: block;
   font: 14px/1.5 monospace;
