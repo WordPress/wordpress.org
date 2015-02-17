@@ -20,6 +20,9 @@ include_once plugin_dir_path( __FILE__ ) . 'class-wporg-themes-repo-package.php'
 // Load uploader.
 include_once plugin_dir_path( __FILE__ ) . 'upload.php';
 
+register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
+
 /**
  * Initialize.
  */
@@ -56,7 +59,7 @@ function wporg_themes_init() {
 		'has_archive'         => true,
 		'query_var'           => true,
 		'can_export'          => true,
-		'rewrite'             => true,
+		'rewrite'             => array( 'slug' => '/' ),
 		'capability_type'     => 'post',
 	);
 
@@ -64,8 +67,79 @@ function wporg_themes_init() {
 	if ( ! post_type_exists( 'repopackage' ) ) {
 		register_post_type( 'repopackage', $args );
 	}
+
+	add_rewrite_tag( '%browse%', '(featured|popular|new)' );
+
+	// Single themes.
+	add_rewrite_rule( '(.?.+?)(/[0-9]+)?/?$', 'index.php?post_type=repopackage&name=$matches[1]', 'top' );
+
+	// Browse views.
+	add_rewrite_rule( 'browse/(featured|popular|new)/?$', 'index.php?post_type=repopackage&browse=$matches[1]', 'top' );
+
+	// Paginated browse views.
+	add_rewrite_rule( 'browse/(featured|popular|new)/page/?([0-9]{1,})/?$', 'index.php?post_type=repopackage&browse=$matches[1]&paged=$matches[2]', 'top' );
 }
 add_action( 'init', 'wporg_themes_init' );
+
+/**
+ * Adjusts query to account for custom views.
+ *
+ * @param WP_Query $wp_query
+ * @return WP_Query
+ */
+function wporg_themes_set_up_query( $wp_query ) {
+	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial' ) ) || 'nav_menu_item' == $wp_query->get( 'post_type' ) ) {
+		return $wp_query;
+	}
+
+	$wp_query->set( 'post_type', 'repopackage' );
+
+	if ( $wp_query->is_home() ) {
+		$wp_query->set( 'browse', 'featured' );
+	}
+
+	if ( $wp_query->get( 'browse' ) ) {
+		switch ( $wp_query->get( 'browse' ) ) {
+			case 'featured':
+				$wp_query->set( 'paged', 1 );
+				$wp_query->set( 'posts_per_page', 15 );
+				$wp_query->set( 'date_query', array(
+					array(
+						'column' => 'post_modified_gmt',
+						'after'  => '-1 year',
+					),
+				) );
+				$wp_query->set( 'orderby', 'rand' );
+				break;
+
+			case 'popular':
+				//TODO: Sort by popularity.
+				break;
+
+			case 'new':
+				break;
+		}
+	}
+
+	return $wp_query;
+}
+add_filter( 'pre_get_posts', 'wporg_themes_set_up_query' );
+
+/**
+ * Adjusts the amount of found posts when browsing featured themes.
+ *
+ * @param string   $found_posts
+ * @param WP_Query $wp_query
+ * @return string
+ */
+function wporg_themes_found_posts( $found_posts, $wp_query ) {
+	if ( $wp_query->is_main_query() && 'featured' === $wp_query->get( 'browse' ) ) {
+		$found_posts = $wp_query->get( 'posts_per_page' );
+	}
+
+	return $found_posts;
+}
+add_filter( 'found_posts', 'wporg_themes_found_posts', 10, 2 );
 
 /**
  * Capability mapping for custom caps.
@@ -168,17 +242,19 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
  * @param int    $post_id
  * @return string
  */
-function wporg_themes_post_thumbnail_html( $html, $post_id ) {
+function wporg_themes_post_thumbnail_html( $html, $post_id, $post_thumbnail_id, $size ) {
 	$post = get_post( $post_id );
 	if ( 'repopackage' == $post->post_type ) {
 		$theme = new WPORG_Themes_Repo_Package( $post );
-		// no size because we only have one (unknown) image size, so the theme needs to size with css
-		$html = '<img src="' . $theme->screenshot_url() . '"/>';
+		$src   = add_query_arg( array( 'w' => $size, 'strip' => 'all' ), $theme->screen_shot_url() );
+
+		$html = '<img src="' . esc_url( $src ) . '"/>';
 	}
 
 	return $html;
 }
-add_filter( 'post_thumbnail_html', 'wporg_themes_post_thumbnail_html', 10, 2 );
+add_filter( 'post_thumbnail_html', 'wporg_themes_post_thumbnail_html', 10, 5 );
+
 
 /**
  * Prevents repopackages from being deleted.

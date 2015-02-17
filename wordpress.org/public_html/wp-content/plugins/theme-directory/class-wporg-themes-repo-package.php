@@ -9,17 +9,23 @@
 class WPORG_Themes_Repo_Package extends Repo_Package {
 
 	/**
-	 * Returns the screenshot URL for a theme.
+	 * Returns the screen shot URL for a theme.
 	 *
 	 * @return string
 	 */
-	public function screenshot_url() {
-		$screen = $this->wp_post->_screenshot;
-		if ( ! $screen ) {
-			$screen = sprintf( '//ts.w.org/wp-content/themes/%1$s/screenshot.png?ver=%2$s', $this->wp_post->post_name, $this->latest_version() );
+	public function screen_shot_url() {
+		$screen  = 'screenshot.png';
+		$version = $this->latest_version();
+
+		if ( ! empty( $this->wp_post->_screen_shot[ $version ] ) ) {
+			$screen = $this->wp_post->_screen_shot[ $version ];
 		}
 
-		return $screen;
+		return sprintf( 'https://i0.wp.com/themes.svn.wordpress.org/%1$s/%2$s/%3$s',
+			$this->wp_post->post_name,
+			$version,
+			$screen
+		);
 	}
 
 	/**

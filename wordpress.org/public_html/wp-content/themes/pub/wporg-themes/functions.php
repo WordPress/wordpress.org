@@ -54,65 +54,6 @@ function wporg_themes_setup() {
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
 /**
- * Makes an API request to retrieve the right themes for the current query.
- *
- * @param WP_Query $query
- * @return WP_Query
- */
-function wporg_themes_set_up_query( $query ) {
-	if ( is_admin() || in_array( $query->query_vars['pagename'], array( 'upload', 'commercial' ) ) || 'nav_menu_item' == $query->get( 'post_type' ) ) {
-		return $query;
-	}
-
-	$query->set( 'post_type', 'repopackage' );
-
-	$args = array(
-		'per_page' => 15,
-		'fields'   => array(
-			'description'  => true,
-			'sections'     => false,
-			'tested'       => true,
-			'requires'     => true,
-			'rating'       => true,
-			'downloaded'   => true,
-			'downloadlink' => true,
-			'last_updated' => true,
-			'homepage'     => true,
-			'tags'         => true,
-			'num_ratings'  => true,
-			'parent'       => true,
-		),
-	);
-
-	if ( $query->query_vars['tag'] ) {
-		$args['tag'][] = $query->query_vars['tag'];
-	}
-	elseif ( $query->query_vars['author_name'] ) {
-		$args['author'] = $query->query_vars['author_name'];
-	}
-	elseif ( $query->query_vars['pagename'] ) {
-		$slugs = explode( '/', $query->query_vars['pagename'] );
-
-		if ( count( $slugs ) > 1 && 'browse' == $slugs[0] ) {
-			$args['browse'] = $slugs[1];
-		} else {
-			$args['theme'] = $slugs[0];
-		}
-	}
-	else {
-		$args['browse'] = 'featured';
-	}
-
-	if ( ! function_exists( 'themes_api' ) ) {
-		include ABSPATH . 'wp-admin/includes/theme.php';
-	}
-	$GLOBALS['themes'] = themes_api( 'query_themes', $args );
-
-	return $query;
-}
-add_filter( 'pre_get_posts', 'wporg_themes_set_up_query' );
-
-/**
  * Enqueue scripts and styles.
  */
 function wporg_themes_scripts() {
@@ -122,7 +63,7 @@ function wporg_themes_scripts() {
 	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
 	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri() );
 
-	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array(), null );
+	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, true );
@@ -198,7 +139,7 @@ add_filter( 'wp_title', 'wporg_themes_wp_title', 10, 2 );
  * @return array
  */
 function wporg_themes_api_args( $args, $action ) {
-	if ( 'query_themes' == $action ) {
+	if ( in_array( $action, array( 'query_themes', 'theme_information' ) ) ) {
 		$args->per_page = 30;
 		$args->fields['parent']  = true;
 		$args->fields['ratings'] = true;

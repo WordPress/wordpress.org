@@ -11,17 +11,16 @@
  * @package wporg-themes
  */
 
-
-
+if ( ! function_exists( 'get_theme_feature_list' ) ) {
+	include ABSPATH . 'wp-admin/includes/theme.php';
+}
 get_header();
-
-global $themes;
 ?>
 
 	<div id="themes" class="wrap">
 		<div class="wp-filter">
 			<div class="filter-count">
-				<span class="count theme-count"><?php echo count( $themes->themes ); ?></span>
+				<span class="count theme-count"><?php echo $GLOBALS['wp_query']->found_posts; ?></span>
 			</div>
 
 			<ul class="filter-links">
@@ -65,16 +64,15 @@ global $themes;
 		<div class="theme-browser content-filterable">
 			<div class="themes" style="display:none;">
 				<?php
-				if ( ! is_wp_error( $themes ) ) :
-					if ( is_single() ) :
-						$theme = array_shift( $themes->themes );
-						get_template_part( 'content', 'single' );
-					else :
-						foreach ( $themes->themes as $theme ) :
-							get_template_part( 'content', 'index' );
-						endforeach;
-					endif;
-				endif;
+					while ( have_posts() ) :
+						the_post();
+						get_template_part( 'content', is_single() ? 'single' : 'index' );
+					endwhile;
+
+					the_posts_navigation( array(
+						'prev_text' => __( 'Next', 'wporg-themes' ),
+						'next_text' => __( 'Previous', 'wporg-themes' ),
+					) );
 				?>
 			</div>
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>

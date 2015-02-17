@@ -301,10 +301,9 @@ class WPORG_Themes_Upload {
 		$screen_shots = preg_grep( '/screenshot.(jpg|jpeg|png|gif)/', $theme_files );
 		usort( $screen_shots, array( $this, 'sort_by_string_length' ) );
 
-		$screen_shot                  = array_pop( $screen_shots );
-		$this->theme->screen_shot_ext = pathinfo( $screen_shot, PATHINFO_EXTENSION );
+		$this->theme->screen_shot = array_pop( $screen_shots );
 
-		return (bool) $screen_shot;
+		return (bool) $this->theme->screen_shot;
 	}
 
 	/**
@@ -448,7 +447,7 @@ ZIP - https://wordpress.org/themes/download/{$this->theme->get_stylesheet()}.{$t
 History:
 [[TicketQuery(format=table, keywords=~theme-{$this->theme->get_stylesheet()}, col=id|summary|status|resolution|owner)]]
 
-[[Image(https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}/screenshot.{$this->theme->screen_shot_ext}, width=640)]]
+[[Image(https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}/{$this->theme->screen_shot}, width=640)]]
 TICKET;
 	}
 
@@ -531,6 +530,7 @@ TICKET;
 			'_status'      => 'new',
 			'_upload_date' => $upload_date,
 			'_ticket_id'   => $ticket_id,
+			'_screen_shot' => $this->theme->screen_shot,
 		);
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {
