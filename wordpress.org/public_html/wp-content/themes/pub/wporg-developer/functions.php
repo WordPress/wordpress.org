@@ -86,6 +86,7 @@ function init() {
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
+	add_action( 'add_meta_boxes', __NAMESPACE__ . '\\rename_comments_meta_box', 10, 2 );
 
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
@@ -248,4 +249,17 @@ function theme_scripts_styles() {
 	wp_enqueue_script( 'wporg-developer-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20120206', true );
 	wp_enqueue_script( 'wporg-developer-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20130115', true );
 	wp_enqueue_script( 'wporg-developer-search', get_template_directory_uri() . '/js/search.js', array(), '20141029', true );
+}
+
+/**
+ * Rename the 'Comments' meta box to 'User Contributed Notes' for reference-editing screens.
+ *
+ * @param string  $post_type Post type.
+ * @param WP_Post $post      WP_Post object for the current post.
+ */
+function rename_comments_meta_box( $post_type, $post ) {
+	if ( is_parsed_post_type( $post_type ) ) {
+		remove_meta_box( 'commentsdiv', $post_type, 'normal' );
+		add_meta_box( 'commentsdiv', __( 'User Contributed Notes', 'wporg' ), 'post_comment_meta_box', $post_type, 'normal', 'high' );
+	}
 }
