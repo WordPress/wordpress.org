@@ -547,7 +547,7 @@
 
 			// Open the modal when matching the route for a single themes.
 			wp.themes.router.on( 'route:preview', function( slug ) {
-				this.listenTo( self.view.collection, 'query:success', function() {
+				this.listenToOnce( self.view.collection, 'query:success', function() {
 					self.view.view.expand( slug );
 				});
 			});
