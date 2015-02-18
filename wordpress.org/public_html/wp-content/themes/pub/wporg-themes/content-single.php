@@ -92,7 +92,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 						});
 					}
 				</script>
-				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
+				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . $theme->downloaded . '</strong>' ); ?></p>
 			</div><!-- .theme-downloads -->
 		</div><!-- .theme-info -->
 

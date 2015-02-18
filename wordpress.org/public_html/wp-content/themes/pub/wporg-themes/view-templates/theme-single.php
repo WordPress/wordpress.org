@@ -49,7 +49,7 @@
 				<div class="theme-downloads">
 					<h4><?php _e( 'Downloads Per Day' ); ?></h4>
 					<div id="theme-download-stats-{{data.id}}" class="chart"></div>
-					<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>{{ new Number(data.downloaded).toLocaleString() }}</strong>' ); ?></p>
+					<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>{{ data.downloaded }}</strong>' ); ?></p>
 				</div><!-- .theme-downloads -->
 			</div>
 

@@ -185,6 +185,7 @@ function wporg_themes_query_themes() {
 		$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
 		$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
 		$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
+		$theme->downloaded     = number_format_i18n( $theme->downloaded );
 		$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
 		$theme->preview_url    = set_url_scheme( $theme->preview_url );
 		wporg_themes_photon_screen_shot( $theme );
@@ -209,6 +210,7 @@ function wporg_themes_theme_info() {
 	$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
 	$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
 	$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
+	$theme->downloaded     = number_format_i18n( $theme->downloaded );
 	$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
 	$theme->preview_url    = set_url_scheme( $theme->preview_url );
 	wporg_themes_photon_screen_shot( $theme );
