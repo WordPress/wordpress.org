@@ -409,10 +409,11 @@
 
 		// Keeps :focus within the theme details elements.
 		containFocus: function( $el ) {
-			var $target;
+			var ev = window.event,
+				$target;
 
 			// On first load of the modal, move focus to the primary action.
-			if ( 1 === $( window.event.target ).closest( '.theme' ).length ) {
+			if ( typeof ev === 'undefined' || 1 === $( ev.target ).closest( '.theme' ).length ) {
 				_.delay( function() {
 					$( '.theme-wrap a.button-primary:visible' ).focus();
 				}, 500 );
