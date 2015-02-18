@@ -543,6 +543,7 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 .show-filters .filter-drawer {
 	display: block;
 	overflow: hidden;
+	width: 100%;
 }
 
 .show-filters .wp-filter .drawer-toggle:hover,
