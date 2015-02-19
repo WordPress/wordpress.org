@@ -279,6 +279,7 @@
 			// Listen to our preview object
 			// for `theme:next` and `theme:previous` events.
 			this.listenTo( preview, 'theme:next', function() {
+				this.trigger( 'theme:next' );
 
 				// Keep local track of current theme model.
 				current = self.model;
@@ -305,6 +306,7 @@
 				$( '.next-theme' ).focus();
 			})
 				.listenTo( preview, 'theme:previous', function() {
+					this.trigger( 'theme:previous' );
 
 					// Keep track of current theme model.
 					current = self.model;
@@ -441,6 +443,19 @@
 
 	_.extend( wp.themes.view.Preview.prototype, {
 
+		render: function() {
+			var data = this.model.toJSON();
+
+			this.$el.html( this.html( data ) );
+
+			wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.themePath + this.model.get( 'id' ) + '/preview' ) );
+
+			this.$el.fadeIn( 200, function() {
+				$( 'body' ).addClass( 'theme-installer-active full-overlay-active' );
+				$( '.close-full-overlay' ).focus();
+			});
+		},
+
 		close: function() {
 			this.$el.fadeOut( 200, function() {
 				$( 'body' ).removeClass( 'theme-installer-active full-overlay-active' );
@@ -454,6 +469,7 @@
 			this.trigger( 'preview:close' );
 			this.undelegateEvents();
 			this.unbind();
+			wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.themePath + this.model.get( 'id' ) ) );
 			return false;
 		},
 
@@ -520,12 +536,13 @@
 
 	_.extend( wp.themes.InstallerRouter.prototype, {
 		routes: {
-			'browse/:sort/': 'sort',
-			'tag/:tag/': 'tag',
-			'search/:query/': 'search',
+			'browse/:sort/'  : 'sort',
+			'tag/:tag/'      : 'tag',
+			'search/:query/' : 'search',
 			'author/:author/': 'author',
-			':slug/': 'preview',
-			'': 'sort'
+			':slug/preview/' : 'preview',
+			':slug/'         : 'preview',
+			''               : 'sort'
 		},
 
 		baseUrl: function( url ) {
@@ -547,6 +564,7 @@
 
 			// Open the modal when matching the route for a single themes.
 			wp.themes.router.on( 'route:preview', function( slug ) {
+				$( '.close-full-overlay' ).trigger( 'click' );
 				this.listenToOnce( self.view.collection, 'query:success', function() {
 					self.view.view.expand( slug );
 				});
