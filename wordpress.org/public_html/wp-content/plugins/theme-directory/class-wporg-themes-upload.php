@@ -276,11 +276,15 @@ class WPORG_Themes_Upload {
 			'posts_per_page'   => 1,
 			'post_type'        => 'repopackage',
 			'orderby'          => 'ID',
-			'post_status'      => 'any',
+
+			/*
+			 * Specify post stati so this query returns a result for draft themes, even
+			 * if the uploading user doesn't have have the permission to view drafts.
+			 */
+			'post_status'      => array( 'publish', 'pending', 'draft', 'future' ),
 			'suppress_filters' => false,
 		) );
-
-		$theme = array_pop( $themes );
+		$theme = current( $themes );
 
 		if ( ! empty( $theme ) ) {
 			$theme = $this->populate_post_with_meta( $theme );
