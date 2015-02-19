@@ -96,7 +96,6 @@ p a:hover {
 	margin: 0 auto;
 	max-width: 1290px;
 	-webkit-overflow-scrolling: touch;
-	overflow-y: scroll;
 	top: 3%;
 }
 
