@@ -332,8 +332,8 @@ class WordCamp_Forms_To_Drafts {
 		// Create the post
 		$draft_id = wp_insert_post( array(
 			'post_type'    => 'wcb_sponsor',
-			'post_title'   => $all_values['Company name'],
-			'post_content' => $all_values['Company description'],
+			'post_title'   => $all_values['Company Name'],
+			'post_content' => $all_values['Company Description'],
 			'post_status'  => 'draft',
 			'post_author'  => $this->get_user_id_from_username( 'wordcamp' ),
 		) );
