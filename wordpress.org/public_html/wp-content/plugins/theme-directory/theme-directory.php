@@ -103,20 +103,15 @@ function wporg_themes_set_up_query( $wp_query ) {
 			case 'featured':
 				$wp_query->set( 'paged', 1 );
 				$wp_query->set( 'posts_per_page', 15 );
-				$wp_query->set( 'date_query', array(
-					array(
-						'column' => 'post_modified_gmt',
-						'after'  => '-1 year',
-					),
-				) );
-				$wp_query->set( 'orderby', 'rand' );
+				$wp_query->set( 'post__in', (array) wp_cache_get( 'browse-popular', 'theme-info' ) );
 				break;
 
 			case 'popular':
-				//TODO: Sort by popularity.
+				add_filter( 'posts_clauses',  'wporg_themes_popular_posts_clauses' );
 				break;
 
 			case 'new':
+				// Nothing to do here.
 				break;
 		}
 	}
@@ -140,6 +135,25 @@ function wporg_themes_found_posts( $found_posts, $wp_query ) {
 	return $found_posts;
 }
 add_filter( 'found_posts', 'wporg_themes_found_posts', 10, 2 );
+
+/**
+ * Filters SQL clauses, to set up a query for the most popular themes based on downloads.
+ *
+ * @param array $clauses
+ * @return array
+ */
+function wporg_themes_popular_posts_clauses( $clauses ) {
+	global $wpdb;
+
+	$week = gmdate( 'Y-m-d', strtotime( 'last week' ) );
+	$clauses['where']  .= " AND s.stamp >= '{$week}'";
+	$clauses['groupby'] = "{$wpdb->posts}.ID";
+	$clauses['join']    = "JOIN bb_themes_stats AS s ON ( {$wpdb->posts}.post_name = s.slug )";
+	$clauses['orderby'] = 'week_downloads DESC';
+	$clauses['fields'] .= ', SUM(s.downloads) AS week_downloads';
+
+	return $clauses;
+}
 
 /**
  * Capability mapping for custom caps.
