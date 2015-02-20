@@ -209,6 +209,7 @@ class WordCamp_Forms_To_Drafts {
 			return;
 		}
 
+		$all_values               = $this->get_unprefixed_grunion_form_values( $all_values );
 		$wordcamp_to_form_key_map = array(
 			'Location'                        => 'WordCamp City, State, Country',
 			'Organizer Name'                  => 'Lead Organizer Name',
@@ -257,6 +258,7 @@ class WordCamp_Forms_To_Drafts {
 			return;
 		}
 
+		$all_values               = $this->get_unprefixed_grunion_form_values( $all_values );
 		$wordcamp_to_form_key_map = array(
 			'Location'                        => 'Enter the city, state/province, and country where you would like to organize a WordCamp.',
 			'Organizer Name'                  => 'Lead Organizer Name',
@@ -320,6 +322,7 @@ class WordCamp_Forms_To_Drafts {
 			return;
 		}
 
+		$all_values              = $this->get_unprefixed_grunion_form_values( $all_values );
 		$sponsor_to_form_key_map = array(
 			'_wcpt_sponsor_website' => 'Website',
 		);
@@ -327,7 +330,6 @@ class WordCamp_Forms_To_Drafts {
 		$this->simulate_post_type( 'wordcamp' );
 
 		// Create the post
-		// todo need to unprefix $all_values, like call_for_speakers() does? if so, extract into DRY function
 		$draft_id = wp_insert_post( array(
 			'post_type'    => 'wcb_sponsor',
 			'post_title'   => $all_values['Company name'],
