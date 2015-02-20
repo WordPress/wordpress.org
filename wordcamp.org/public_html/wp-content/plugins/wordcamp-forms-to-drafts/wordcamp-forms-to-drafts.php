@@ -75,7 +75,7 @@ class WordCamp_Forms_To_Drafts {
 	public function populate_form_based_on_user() {
 		global $current_user, $post;
 
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() || ! is_a( $post, 'WP_Post' ) ) {
 			return;
 		}
 
