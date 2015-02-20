@@ -8,7 +8,7 @@ class WordCamp_New_Site {
 	 */
 	public function __construct() {
 		$this->new_site_id = false;
-		
+
 		add_action( 'wcpt_metabox_value', array( $this, 'render_site_url_field' ), 10, 3 );
 		add_action( 'wcpt_metabox_save',  array( $this, 'save_site_url_field' ), 10, 3 );
 	}
@@ -209,6 +209,13 @@ class WordCamp_New_Site {
 			) );
 
 			if ( $page_id ) {
+				// Save post meta
+				if ( ! empty( $page['meta'] ) ) {
+					foreach ( $page['meta'] as $key => $value ) {
+						update_post_meta( $page_id, $key, $value );
+					}
+				}
+
 				// Set featured image
 				if ( isset( $page['featured_image'] ) ) {
 					$results = media_sideload_image( $page['featured_image'], $page_id );
@@ -447,27 +454,36 @@ class WordCamp_New_Site {
 			array(
 				'title'   => __( 'Call for Speakers', 'wordcamporg' ),
 				'content' => 
-					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .    
-					'<p>' . __( 'Blurb with information for potential speakers.', 'wordcamporg' ) . '</p> ' . 
+					'<p>' . __( '<em>Organizers note:</em> Submissions to this form will automatically create draft posts for the Speaker and Session post types. Feel free to customize the form, but deleting or renaming the following fields will break the automation: Name, Email, WordPress.org Username, Your Bio, Session Title, Session Description.', 'wordcamporg' ) . '</p>' .
+					'<p>' . __( "If you'd like to propose multiple topics, please submit the form multiple times, once for each topic. [Other speaker instructions/info goes here.]", 'wordcamporg' ) . '</p>' .
 					'<p>' .
 						sprintf( '
-							[contact-form to="enter-your-address-here@example.net" subject="%s"]
-								[contact-field label="%s" type="text"     required="1" /]
+							[contact-form subject="%s"]
+								[contact-field label="%s" type="name"     required="1" /]
 								[contact-field label="%s" type="email"    required="1" /]
+								[contact-field label="%s" type="text"     required="1" /]
+								[contact-field label="%s" type="textarea" required="1" /]
+								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="textarea" required="1" /]
 								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="textarea"              /]
 							[/contact-form]',
 							__( 'WordCamp Speaker Request', 'wordcamporg' ),
 							__( 'Name', 'wordcamporg' ),
-							__( 'Email', 'wordcamporg' ),
-							__( 'Topic(s) You would Like to Present On', 'wordcamporg' ),
+							__( 'Email Address', 'wordcamporg' ),
+							__( 'WordPress.org Username', 'wordcamporg' ),
+							__( 'Your Bio', 'wordcamporg' ),
+							__( 'Topic Title', 'wordcamporg' ),
+							__( 'Topic Description', 'wordcamporg' ),
 							__( 'Intended Audience', 'wordcamporg' ),
 							__( 'Past Speaking Experience (not necessary to apply)', 'wordcamporg' )
 						) .
 					'</p>',
 				'status'  => 'draft',
 				'type'    => 'post',
+				'meta'    => array(
+					'wcfd-key' => 'call-for-speakers',
+				),
 			),
 
 			array(
