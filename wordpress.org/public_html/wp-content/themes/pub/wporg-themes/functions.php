@@ -182,6 +182,12 @@ function wporg_themes_query_themes() {
 
 	foreach ( $api->themes as &$theme ) {
 		$theme->name           = wp_kses( $theme->name,        $themes_allowedtags );
+
+		// add in the nicename for the url, and the displayname for the display
+		$user = get_user_by('login', $theme->author);
+		$theme->authorurl	   = $user->user_nicename;
+		$theme->authordispname = wp_kses( $user->display_name, $themes_allowedtags );
+		
 		$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
 		$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
 		$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
