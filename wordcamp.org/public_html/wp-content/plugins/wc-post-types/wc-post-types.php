@@ -1069,14 +1069,14 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	public function add_avatar_to_speaker_posts( $content ) {
 		global $post;
-		$enabled_site_ids = array( 364 );    // 2014.sf
+		$enabled_site_ids = apply_filters( 'wcpt_speaker_post_avatar_enabled_site_ids', array( 364 ) );    // 2014.sf
 
 		if ( 'wcb_speaker' !== $post->post_type ) {
 			return $content;
 		}
 
 		$site_id = get_current_blog_id();
-		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+		if ( $site_id <= apply_filters( 'wcpt_speaker_post_avatar_min_site_id', 463 ) && ! in_array( $site_id, $enabled_site_ids ) ) {
 			return $content;
 		}
 
@@ -1097,14 +1097,14 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function add_speaker_info_to_session_posts( $content ) {
 		global $post;
-		$enabled_site_ids = array( 364 );    // 2014.sf
+		$enabled_site_ids = apply_filters( 'wcpt_session_post_speaker_info_enabled_site_ids', array( 364 ) );    // 2014.sf
 
 		if ( 'wcb_session' !== $post->post_type ) {
 			return $content;
 		}
 
 		$site_id = get_current_blog_id();
-		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+		if ( $site_id <= apply_filters( 'wcpt_session_post_speaker_info_min_site_id', 463 ) && ! in_array( $site_id, $enabled_site_ids ) ) {
 			return $content;
 		}
 
@@ -1162,14 +1162,14 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function add_session_info_to_speaker_posts( $content ) {
 		global $post;
-		$enabled_site_ids = array( 364 );    // 2014.sf
+		$enabled_site_ids = apply_filters( 'wcpt_speaker_post_session_info_enabled_site_ids', array( 364 ) );    // 2014.sf
 
 		if ( 'wcb_speaker' !== $post->post_type ) {
 			return $content;
 		}
 
 		$site_id = get_current_blog_id();
-		if ( $site_id <= 463 && ! in_array( $site_id, $enabled_site_ids ) ) {
+		if ( $site_id <= apply_filters( 'wcpt_speaker_post_session_info_min_site_id', 463 ) && ! in_array( $site_id, $enabled_site_ids ) ) {
 			return $content;
 		}
 
