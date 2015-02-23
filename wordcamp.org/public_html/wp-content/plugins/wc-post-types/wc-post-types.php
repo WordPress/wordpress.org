@@ -1058,6 +1058,23 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Determine if the current loop is just a single page, or a loop of posts within a page
+	 *
+	 * For example, this helps to target a single wcb_speaker post vs a page containing the [speakers] shortcode,
+	 * which loops through wcb_speaker posts. Using functions like is_single() don't work, because they reference
+	 * the main query instead of the $speakers query.
+	 *
+	 * @param string $post_type
+	 *
+	 * @return bool
+	 */
+	protected function is_single_cpt_post( $post_type ) {
+		global $wp_query;
+
+		return isset( $wp_query->query[ $post_type ] ) && $post_type == $wp_query->query['post_type'];
+	}
+
+	/**
 	 * Add the speaker's avatar to their post
 	 *
 	 * We don't enable it for sites that were created before it was committed, because it may need custom CSS
@@ -1071,7 +1088,7 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 		$enabled_site_ids = apply_filters( 'wcpt_speaker_post_avatar_enabled_site_ids', array( 364 ) );    // 2014.sf
 
-		if ( 'wcb_speaker' !== $post->post_type ) {
+		if ( ! $this->is_single_cpt_post( 'wcb_speaker') ) {
 			return $content;
 		}
 
@@ -1099,7 +1116,7 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 		$enabled_site_ids = apply_filters( 'wcpt_session_post_speaker_info_enabled_site_ids', array( 364 ) );    // 2014.sf
 
-		if ( 'wcb_session' !== $post->post_type ) {
+		if ( ! $this->is_single_cpt_post( 'wcb_session') ) {
 			return $content;
 		}
 
@@ -1164,7 +1181,7 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 		$enabled_site_ids = apply_filters( 'wcpt_speaker_post_session_info_enabled_site_ids', array( 364 ) );    // 2014.sf
 
-		if ( 'wcb_speaker' !== $post->post_type ) {
+		if ( ! $this->is_single_cpt_post( 'wcb_speaker') ) {
 			return $content;
 		}
 
