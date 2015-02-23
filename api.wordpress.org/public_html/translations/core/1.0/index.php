@@ -20,6 +20,16 @@ if ( 'HEAD' === $_SERVER['REQUEST_METHOD'] ) {
 
 call_headers( 'application/json' );
 
+// Remove the following crud after 4.2 is released
+// https://core.trac.wordpress.org/ticket/31319
+if ( version_compare( $version, '4.2', '<' ) ) {
+	foreach ( $translations as $t ) {
+		if ( 'haz' == $t->language ) {
+			$t->iso = (object)array( 1 => 'haz', 2 => 'haz' );
+		}
+	}
+}
+
 echo json_encode( array( 'translations' => $translations ) );
 
 exit;
