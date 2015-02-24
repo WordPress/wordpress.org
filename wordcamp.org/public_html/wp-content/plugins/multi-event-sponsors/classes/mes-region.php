@@ -15,9 +15,15 @@ class MES_Region {
 	 */
 	public function __construct() {
 		add_action( 'init',               array( $this, 'create_taxonomy' ) );
+		add_action( self::TAXONOMY_SLUG . '_add_form_fields',  array( $this, 'markup_meta_fields' ) );
+		add_action( self::TAXONOMY_SLUG . '_edit_form_fields', array( $this, 'markup_meta_fields' ) );
+		add_action( 'create_' . self::TAXONOMY_SLUG,           array( $this, 'save_meta_fields' ) );
+		add_action( 'edited_' . self::TAXONOMY_SLUG,           array( $this, 'save_meta_fields' ) );
 		add_action( 'add_meta_boxes' ,    array( $this, 'remove_meta_box' ),             10, 2 );
 		add_action( 'wcpt_metabox_value', array( $this, 'wcpt_region_dropdown_render' ), 10, 3 );
 		add_action( 'wcpt_metabox_save',  array( $this, 'wcpt_region_dropdown_save' ),   10, 3 );
+
+		// todo readjust whitespace after this commit
 	}
 
 	/**
@@ -36,6 +42,55 @@ class MES_Region {
 
 		if ( ! taxonomy_exists( self::TAXONOMY_SLUG ) ) {
 			register_taxonomy( self::TAXONOMY_SLUG, MES_Sponsor::POST_TYPE_SLUG, $region_params );
+		}
+	}
+
+	/**
+	 * Markup the UI for adding and editing meta fields
+	 */
+	public function markup_meta_fields() {
+		$camera_wranglers      = get_option( 'mes_region_camera_wranglers', array() );
+		$camera_wrangler_email = '';
+		$region_id             = empty( $_GET['tag_ID'] ) ? false : absint( $_GET['tag_ID'] );
+
+		if ( $region_id && ! empty( $camera_wranglers[ $region_id ] ) ) {
+			$camera_wrangler_email = $camera_wranglers[ $_GET['tag_ID'] ];
+		}
+
+		require_once( dirname( __DIR__ ) . '/views/taxonomy-meta-region.php' );
+	}
+
+	/**
+	 * Save meta fields when Region terms are added and edited
+	 *
+	 * @todo Currently there's no way to alert the user if data validation failed and their changes weren't saved,
+	 *       but #10142 might introduce one.
+	 *
+	 * @param int $term_id
+	 */
+	public function save_meta_fields( $term_id ) {
+		global $wp_list_table;
+		$taxonomy = get_taxonomy( self::TAXONOMY_SLUG );
+
+		if ( is_a( $wp_list_table, 'WP_Terms_List_Table' ) && 'editedtag' == $wp_list_table->current_action() ) {
+			$nonce_value  = $_POST['mes_edit_region_meta_nonce'];
+			$nonce_action = "mes_edit_region_{$term_id}_meta";
+		} else {
+			$nonce_value  = $_POST['mes_add_region_meta_nonce'];
+			$nonce_action = 'mes_add_region_meta';
+		}
+
+		if ( ! current_user_can( $taxonomy->cap->edit_terms ) || ! wp_verify_nonce( $nonce_value, $nonce_action ) ) {
+			return;
+		}
+
+		$camera_wrangler_email = $_POST['camera-wrangler-email'];
+
+		if ( is_email( $camera_wrangler_email ) ) {
+			$camera_wranglers             = get_option( 'mes_region_camera_wranglers', array() );
+			$camera_wranglers[ $term_id ] = $camera_wrangler_email;
+
+			update_option( 'mes_region_camera_wranglers', $camera_wranglers );
 		}
 	}
 
