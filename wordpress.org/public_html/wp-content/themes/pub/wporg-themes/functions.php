@@ -72,6 +72,7 @@ function wporg_themes_scripts() {
 		wp_localize_script( 'theme', '_wpThemeSettings', array(
 			'themes'   => false,
 			'settings' => array(
+				'title'      => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
 				'isMobile'   => wp_is_mobile(),
 				'isInstall'  => true,
 				'canInstall' => false,
@@ -187,7 +188,7 @@ function wporg_themes_query_themes() {
 		$user = get_user_by('login', $theme->author);
 		$theme->authorurl	   = $user->user_nicename;
 		$theme->authordispname = wp_kses( $user->display_name, $themes_allowedtags );
-		
+
 		$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
 		$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
 		$theme->description    = wp_kses( $theme->description, $themes_allowedtags );

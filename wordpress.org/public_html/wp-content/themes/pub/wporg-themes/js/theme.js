@@ -1,6 +1,14 @@
 ( function ( $, wp ) {
 	google.load("visualization", "1", {packages:["corechart"]});
 
+	wp.themes.utils = {
+		title: function ( item ) {
+			var title = $( 'title' );
+
+			title.html( wp.themes.data.settings.title.replace( '%s', item ) );
+		}
+	};
+
 	_.extend( wp.themes.view.Appearance.prototype, {
 		el: '#themes .theme-browser',
 		searchContainer: ''
@@ -18,6 +26,7 @@
 
 			// Trigger a route update for the current model
 			wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.themePath + this.model.id ) );
+			wp.themes.utils.title( this.model.attributes.name );
 
 			// Sets this.view to 'detail'
 			this.setView( 'detail' );
@@ -53,9 +62,21 @@
 	_.extend( wp.themes.view.Installer.prototype, {
 		el: '#themes',
 
+		sort: function( sort ) {
+			var sorter = $( '.filter-links [data-sort="' + sort + '"]' );
+			this.clearSearch();
+
+			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
+			sorter.addClass( this.activeClass );
+			wp.themes.utils.title( sorter.text() );
+
+			this.browse( sort );
+		},
+
 		// Applying filters triggers a tag request.
 		applyFilters: function( event ) {
-			var name,
+			var names = [],
+				name,
 				tags = this.filtersChecked(),
 				request = { tag: tags },
 				filteringBy = $( '.filtered-by .tags' );
@@ -70,10 +91,12 @@
 
 			_.each( tags, function( tag ) {
 				name = $( 'label[for="filter-id-' + tag + '"]' ).text();
+				names.push( name );
 				filteringBy.append( '<span class="tag">' + name + '</span>' );
 			});
 
 			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ) );
+			wp.themes.utils.title( names.join( ', ' ) );
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
 			// or searching the local cache
@@ -438,6 +461,54 @@
 					}
 				}
 			});
+		},
+
+		// Single theme overlay screen
+		// It's shown when clicking a theme
+		collapse: function( event ) {
+			var self = this,
+				scroll, sorter;
+
+			event = event || window.event;
+
+			// Prevent collapsing detailed view when there is only one theme available
+			if ( wp.themes.data.themes.length === 1 ) {
+				return;
+			}
+
+			// Detect if the click is inside the overlay
+			// and don't close it unless the target was
+			// the div.back button
+			if ( $( event.target ).is( '.theme-backdrop' ) || $( event.target ).is( '.close' ) || event.keyCode === 27 ) {
+
+				// Add a temporary closing class while overlay fades out
+				$( 'body' ).addClass( 'closing-overlay' );
+
+				// With a quick fade out animation
+				this.$el.fadeOut( 130, function() {
+					// Clicking outside the modal box closes the overlay
+					$( 'body' ).removeClass( 'closing-overlay' );
+					// Handle event cleanup
+					self.closeOverlay();
+
+					// Get scroll position to avoid jumping to the top
+					scroll = document.body.scrollTop;
+
+					sorter = $( '.filter-links .current' );
+
+					// Clean the url structure
+					wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ) );
+					wp.themes.utils.title( sorter.text() );
+
+					// Restore scroll position
+					document.body.scrollTop = scroll;
+
+					// Return focus to the theme div
+					if ( wp.themes.focusedTheme ) {
+						wp.themes.focusedTheme.focus();
+					}
+				});
+			}
 		}
 	});
 
@@ -496,7 +567,8 @@
 
 	_.extend( wp.themes.view.InstallerSearch.prototype, {
 		doSearch: _.debounce( function( value ) {
-			var request = {};
+			var request = {},
+				sort = 'featured';
 
 			request.search = value;
 
@@ -527,9 +599,11 @@
 
 			// Set route
 			if ( value ) {
+				wp.themes.utils.title( value );
 				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + value ), { replace: true } );
 			} else {
-				wp.themes.router.navigate( wp.themes.router.baseUrl( '' ) );
+				wp.themes.router.navigate( wp.themes.router.baseUrl( themes.router.browsePath + sort ) );
+				this.parent.sort( sort );
 			}
 		}, 300 )
 	});
@@ -581,6 +655,7 @@
 			wp.themes.router.on( 'route:author', function( author ) {
 				request.author = author;
 				self.view.collection.query( request );
+				wp.themes.utils.title( author );
 			});
 		}
 	});
