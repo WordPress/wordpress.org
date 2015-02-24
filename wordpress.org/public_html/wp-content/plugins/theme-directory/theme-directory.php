@@ -88,7 +88,7 @@ add_action( 'init', 'wporg_themes_init' );
  * @return WP_Query
  */
 function wporg_themes_set_up_query( $wp_query ) {
-	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial' ) ) || 'nav_menu_item' == $wp_query->get( 'post_type' ) ) {
+	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial', 'getting-started' ) ) || 'nav_menu_item' == $wp_query->get( 'post_type' ) ) {
 		return $wp_query;
 	}
 
