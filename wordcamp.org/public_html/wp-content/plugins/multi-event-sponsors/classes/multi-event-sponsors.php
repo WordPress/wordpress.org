@@ -35,7 +35,8 @@ class Multi_Event_Sponsors {
 	/**
 	 * Render the multi_event_sponsors shortcode output
 	 *
-	 * @param $parameters
+	 * @param array $parameters
+	 *
 	 * @return string
 	 */
 	public function shortcode_multi_event_sponsors( $parameters ) {
@@ -55,6 +56,7 @@ class Multi_Event_Sponsors {
 	 * This makes for efficient direct access when the ID is known.
 	 *
 	 * @param array $old_array
+	 *
 	 * @return array
 	 */
 	protected function reindex_array_by_object_id( $old_array ) {
@@ -87,6 +89,7 @@ class Multi_Event_Sponsors {
 	 *
 	 * @param array $sponsors
 	 * @param array $regions
+	 *
 	 * @return array
 	 */
 	protected function group_sponsors_by_region_and_level( $sponsors ) {
@@ -120,6 +123,7 @@ class Multi_Event_Sponsors {
 	 *
 	 * @param int $region_a_id
 	 * @param int $region_b_id
+	 *
 	 * @return int
 	 */
 	protected function uksort_regions( $region_a_id, $region_b_id ) {
@@ -140,6 +144,7 @@ class Multi_Event_Sponsors {
 	 *
 	 * @param int $level_a_id
 	 * @param int $level_b_id
+	 *
 	 * @return int
 	 */
 	protected function uksort_sponsorship_levels( $level_a_id, $level_b_id ) {
@@ -160,6 +165,7 @@ class Multi_Event_Sponsors {
 	 * @param string $grouped_by
 	 *     'ungrouped' will return a one-dimensional array;
 	 *     'sponsor_level' will return an associative array with sponsors grouped by their level and indexed by level ID
+	 *
 	 * @return array
 	 */
 	public function get_wordcamp_me_sponsors( $wordcamp_id, $grouped_by = 'ungrouped' ) {
@@ -196,6 +202,7 @@ class Multi_Event_Sponsors {
 	 * Retrieve all of the e-mail addresses for the given sponsors.
 	 *
 	 * @param array $sponsors
+	 *
 	 * @return array
 	 */
 	public function get_sponsor_emails( $sponsors ) {
@@ -216,6 +223,7 @@ class Multi_Event_Sponsors {
 	 * Retrieve the names of the given sponsors in a sentence format.
 	 *
 	 * @param array $sponsors
+	 *
 	 * @return string
 	 */
 	public function get_sponsor_names( $sponsors ) {
@@ -238,6 +246,7 @@ class Multi_Event_Sponsors {
 	 * Get the excerpts for the given sponsors in HTML paragraphs.
 	 *
 	 * @param array $sponsors
+	 *
 	 * @return string
 	 */
 	public function get_sponsor_excerpts( $sponsors ) {

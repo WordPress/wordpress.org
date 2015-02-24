@@ -14,12 +14,10 @@ class MES_Sponsorship_Level {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',                                   array( $this, 'create_post_type' ) );
-		add_action( 'admin_init',                             array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post',                              array( $this, 'save_post' ), 10, 2 );
-		add_filter( 'the_content',                            array( $this, 'add_header_footer_text' ) );
-
-		// todo readjust whitepsace after this commit
+		add_action( 'init',        array( $this, 'create_post_type' ) );
+		add_action( 'admin_init',  array( $this, 'add_meta_boxes' ) );
+		add_action( 'save_post',   array( $this, 'save_post' ), 10, 2 );
+		add_filter( 'the_content', array( $this, 'add_header_footer_text' ) );
 	}
 
 	/**
@@ -139,6 +137,7 @@ class MES_Sponsorship_Level {
 	 * Add the header and footer copy to the sponsorship level content
 	 *
 	 * @param string $content
+	 *
 	 * @return string
 	 */
 	public function add_header_footer_text( $content ) {

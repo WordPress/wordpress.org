@@ -12,18 +12,16 @@
  */
 
 class MES_Sponsor {
-	const POST_TYPE_SLUG     = 'mes';
+	const POST_TYPE_SLUG = 'mes';
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',                                   array( $this, 'create_post_type' ) );
-		add_action( 'admin_init',                             array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post',                              array( $this, 'save_post' ), 10, 2 );
-		add_filter( 'the_content',                            array( $this, 'add_header_footer_text' ) );
-
-		// todo readjust whitespace after this commit
+		add_action( 'init',        array( $this, 'create_post_type' ) );
+		add_action( 'admin_init',  array( $this, 'add_meta_boxes' ) );
+		add_action( 'save_post',   array( $this, 'save_post' ), 10, 2 );
+		add_filter( 'the_content', array( $this, 'add_header_footer_text' ) );
 	}
 
 	/**
@@ -125,6 +123,7 @@ class MES_Sponsor {
 	 *
 	 * @param array $regional_sponsorships
 	 * @param array $regions
+	 *
 	 * @return array
 	 */
 	protected function populate_default_regional_sponsorships( $regional_sponsorships, $regions ) {
@@ -202,6 +201,7 @@ class MES_Sponsor {
 	 * Add the header and footer copy to the sponsorship level content
 	 *
 	 * @param string $content
+	 *
 	 * @return string
 	 */
 	public function add_header_footer_text( $content ) {
