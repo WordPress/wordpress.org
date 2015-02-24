@@ -16,6 +16,9 @@
 
 	_.extend( wp.themes.view.Themes.prototype, {
 
+		// The theme count element
+		count: $( '.wp-filter .theme-count' ),
+
 		// Renders the overlay with the ThemeDetails view.
 		// Uses the current model data.
 		expand: function( id ) {
