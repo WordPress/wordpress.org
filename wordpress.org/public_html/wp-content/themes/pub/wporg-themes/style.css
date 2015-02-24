@@ -1063,6 +1063,14 @@ ul, ol {
 		margin-left: 10px;
 	}
 
+	.wp-filter {
+		padding: 0 10px;
+	}
+
+	.wp-filter .filter-links {
+		padding: 0;
+	}
+
 	/* Hide Feature Filter on mobile. */
 	.wp-filter .drawer-toggle {
 		display: none;
