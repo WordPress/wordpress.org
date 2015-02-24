@@ -335,21 +335,25 @@ get_header(); ?>
 				); ?></p>
 
 <pre>&lt;?php
-add_action( 'init', 'create_post_type' );
-//Registers the Product's post type
-function create_post_type() {
+/**
+ * Register the Product post type with a Dashicon.
+ *
+ * @see register_post_type()
+ */
+function wpdocs_create_post_type() {
     register_post_type( 'acme_product',
         array(
             'labels' => array(
-                'name' => __( 'Products' ),
-                'singular_name' => __( 'Product' )
+                'name'          => __( 'Products', 'textdomain' ),
+                'singular_name' => __( 'Product', 'textdomain' )
             ),
-            'public' => true,
+            'public'      => true,
             'has_archive' => true,
-            'menu_icon' => 'dashicons-products',
+            'menu_icon'   => 'dashicons-products',
         )
     );
 }
+add_action( 'init', 'wpdocs_create_post_type', 0 );
 </pre>
 
 				<p><?php printf(
@@ -358,11 +362,16 @@ function create_post_type() {
 				); ?></p>
 
 <pre>&lt;?php
-function add_my_custom_menu() {
-    //add an item to the menu
+/**
+ * Register a menu page with a Dashicon.
+ *
+ * @see add_menu_page()
+ */
+function wpdocs_add_my_custom_menu() {
+    // Add an item to the menu.
     add_menu_page (
-        'My Page',
-        'My Title',
+        __( 'My Page', 'textdomain' ),
+        __( 'My Title', 'textdomain' ),
         'manage_options',
         'my-page',
         'my_admin_page_function',
