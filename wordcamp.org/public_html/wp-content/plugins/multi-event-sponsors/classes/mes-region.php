@@ -82,14 +82,16 @@ class MES_Region {
 			return;
 		}
 
+		$camera_wranglers      = get_option( 'mes_region_camera_wranglers', array() );
 		$camera_wrangler_email = $_POST['camera-wrangler-email'];
 
 		if ( is_email( $camera_wrangler_email ) ) {
-			$camera_wranglers             = get_option( 'mes_region_camera_wranglers', array() );
 			$camera_wranglers[ $term_id ] = $camera_wrangler_email;
-
-			update_option( 'mes_region_camera_wranglers', $camera_wranglers );
+		} elseif ( empty( $camera_wrangler_email ) ) {
+			unset( $camera_wranglers[ $term_id ] );
 		}
+
+		update_option( 'mes_region_camera_wranglers', $camera_wranglers );
 	}
 
 	/**
