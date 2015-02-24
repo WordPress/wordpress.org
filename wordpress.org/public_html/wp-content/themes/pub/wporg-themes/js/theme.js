@@ -467,7 +467,7 @@
 		// It's shown when clicking a theme
 		collapse: function( event ) {
 			var self = this,
-				scroll, sorter;
+				scroll, search, tags, sorter;
 
 			event = event || window.event;
 
@@ -494,11 +494,21 @@
 					// Get scroll position to avoid jumping to the top
 					scroll = document.body.scrollTop;
 
-					sorter = $( '.filter-links .current' );
-
 					// Clean the url structure
-					wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ) );
-					wp.themes.utils.title( sorter.text() );
+					if ( search = $( '#wp-filter-search-input' ).val() ) {
+						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + search ) );
+						wp.themes.utils.title( search );
+					}
+					else if ( tags = wp.themes.view.Installer.prototype.filtersChecked() ) {
+						wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ) );
+						wp.themes.utils.title( _.each( tags, function( tag, i ) {
+							tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
+						}).join( ', ' ) );
+					}
+					else if ( sorter = $( '.filter-links .current' ) ) {
+						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ) );
+						wp.themes.utils.title( sorter.text() );
+					}
 
 					// Restore scroll position
 					document.body.scrollTop = scroll;
@@ -602,7 +612,7 @@
 				wp.themes.utils.title( value );
 				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + value ), { replace: true } );
 			} else {
-				wp.themes.router.navigate( wp.themes.router.baseUrl( themes.router.browsePath + sort ) );
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sort ) );
 				this.parent.sort( sort );
 			}
 		}, 300 )
