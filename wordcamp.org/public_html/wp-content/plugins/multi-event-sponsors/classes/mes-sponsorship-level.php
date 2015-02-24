@@ -15,10 +15,11 @@ class MES_Sponsorship_Level {
 	 */
 	public function __construct() {
 		add_action( 'init',                                   array( $this, 'create_post_type' ) );
-		add_action( 'add_meta_boxes_' . self::POST_TYPE_SLUG, array( $this, 'remove_meta_boxes' ) );
 		add_action( 'admin_init',                             array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post',                              array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'the_content',                            array( $this, 'add_header_footer_text' ) );
+
+		// todo readjust whitepsace after this commit
 	}
 
 	/**
@@ -57,19 +58,10 @@ class MES_Sponsorship_Level {
 			'rewrite'         => array( 'slug' => 'sponsorship-level', 'with_front' => false ),
 			'query_var'       => true,
 			'supports'        => array( 'title', 'editor', 'author', 'excerpt', 'revisions' ),
-			'taxonomies'      => array( MES_Sponsor::REGIONS_SLUG ),
+			'taxonomies'      => array( MES_Region::TAXONOMY_SLUG ),
 		);
 
 		register_post_type( self::POST_TYPE_SLUG, $post_type_params );
-	}
-
-	/**
-	 * Remove the taxonomy meta boxes, since we don't assign them directly.
-	 *
-	 * @param WP_Post $post
-	 */
-	public function remove_meta_boxes( $post ) {
-		remove_meta_box( 'mes-regionsdiv', null, 'side' );
 	}
 
 	/**

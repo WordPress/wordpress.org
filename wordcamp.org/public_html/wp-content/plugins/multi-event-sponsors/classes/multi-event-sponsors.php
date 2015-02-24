@@ -40,7 +40,7 @@ class Multi_Event_Sponsors {
 	 */
 	public function shortcode_multi_event_sponsors( $parameters ) {
 		$sponsors           = $this->reindex_array_by_object_id( get_posts( array( 'post_type' => MES_Sponsor::POST_TYPE_SLUG, 'numberposts' => -1 ) ) );
-		$regions            = $this->reindex_array_by_object_id( get_terms( MES_Sponsor::REGIONS_SLUG, array( 'hide_empty' => false ) ) );
+		$regions            = $this->reindex_array_by_object_id( get_terms( MES_Region::TAXONOMY_SLUG, array( 'hide_empty' => false ) ) );
 		$sponsorship_levels = $this->reindex_array_by_object_id( get_posts( array( 'post_type' => MES_Sponsorship_Level::POST_TYPE_SLUG, 'numberposts' => -1 ) ) );
 		$grouped_sponsors   = $this->group_sponsors_by_region_and_level( $sponsors );
 
@@ -54,8 +54,8 @@ class Multi_Event_Sponsors {
 	 *
 	 * This makes for efficient direct access when the ID is known.
 	 *
-	 * @param $array
-	 * @return mixed
+	 * @param array $old_array
+	 * @return array
 	 */
 	protected function reindex_array_by_object_id( $old_array ) {
 		$new_array = array();
@@ -123,8 +123,8 @@ class Multi_Event_Sponsors {
 	 * @return int
 	 */
 	protected function uksort_regions( $region_a_id, $region_b_id ) {
-		$region_a = get_term( $region_a_id, MES_Sponsor::REGIONS_SLUG );
-		$region_b = get_term( $region_b_id, MES_Sponsor::REGIONS_SLUG );
+		$region_a = get_term( $region_a_id, MES_Region::TAXONOMY_SLUG );
+		$region_b = get_term( $region_b_id, MES_Region::TAXONOMY_SLUG );
 
 		if ( $region_a->name == $region_b->name ) {
 			return 0;

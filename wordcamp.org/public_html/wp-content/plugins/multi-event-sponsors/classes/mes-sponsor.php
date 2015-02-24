@@ -13,20 +13,17 @@
 
 class MES_Sponsor {
 	const POST_TYPE_SLUG     = 'mes';
-	const REGIONS_SLUG       = 'mes-regions';
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		add_action( 'init',                                   array( $this, 'create_post_type' ) );
-		add_action( 'init',                                   array( $this, 'create_taxonomies' ) );
-		add_action( 'add_meta_boxes_' . self::POST_TYPE_SLUG, array( $this, 'remove_meta_boxes' ) );
 		add_action( 'admin_init',                             array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post',                              array( $this, 'save_post' ), 10, 2 );
-		add_action( 'wcpt_metabox_value',                     array( $this, 'wcpt_region_dropdown_render' ), 10, 3 );
-		add_action( 'wcpt_metabox_save',                      array( $this, 'wcpt_region_dropdown_save' ), 10, 3 );
 		add_filter( 'the_content',                            array( $this, 'add_header_footer_text' ) );
+
+		// todo readjust whitespace after this commit
 	}
 
 	/**
@@ -64,29 +61,10 @@ class MES_Sponsor {
 			'rewrite'         => array( 'slug' => 'multi-event-sponsor', 'with_front' => false ),
 			'query_var'       => true,
 			'supports'        => array( 'title', 'editor', 'author', 'excerpt', 'revisions', 'thumbnail' ),
-			'taxonomies'      => array( self::REGIONS_SLUG ),
+			'taxonomies'      => array( MES_Region::TAXONOMY_SLUG ),
 		);
 
 		register_post_type( self::POST_TYPE_SLUG, $post_type_params );
-	}
-
-	/**
-	 * Registers the category taxonomy
-	 */
-	public function create_taxonomies() {
-		$region_params = array(
-			'label'                 => __( 'Region', 'wordcamporg' ),
-			'labels'                => array(
-				'name'          => __( 'Regions', 'wordcamporg' ),
-				'singular_name' => __( 'Region', 'wordcamporg' )
-			),
-			'hierarchical'          => true,
-			'rewrite'               => array( 'slug' => self::REGIONS_SLUG ),
-		);
-
-		if ( ! taxonomy_exists( self::REGIONS_SLUG ) ) {
-			register_taxonomy( self::REGIONS_SLUG, self::POST_TYPE_SLUG, $region_params );
-		}
 	}
 
 	/**
@@ -97,7 +75,7 @@ class MES_Sponsor {
 			'mes_regional_sponsorships',
 			__( 'Regional Sponsorships', 'wordcamporg' ),
 			array( $this, 'markup_meta_boxes' ),
-			self::POST_TYPE_SLUG,
+			MES_Sponsor::POST_TYPE_SLUG,
 			'normal',
 			'default'
 		);
@@ -106,19 +84,10 @@ class MES_Sponsor {
 			'mes_contact_information',
 			__( 'Contact Information', 'wordcamporg' ),
 			array( $this, 'markup_meta_boxes' ),
-			self::POST_TYPE_SLUG,
+			MES_Sponsor::POST_TYPE_SLUG,
 			'normal',
 			'default'
 		);
-	}
-
-	/**
-	 * Remove the taxonomy meta boxes, since we don't assign them directly.
-	 *
-	 * @param WP_Post $post
-	 */
-	public function remove_meta_boxes( $post ) {
-		remove_meta_box( 'mes-regionsdiv', null, 'side' );
 	}
 
 	/**
@@ -132,7 +101,7 @@ class MES_Sponsor {
 
 		switch ( $box['id'] ) {
 			case 'mes_regional_sponsorships':
-				$regions               = get_terms( self::REGIONS_SLUG, array( 'hide_empty' => false ) );
+				$regions               = get_terms( MES_Region::TAXONOMY_SLUG, array( 'hide_empty' => false ) );
 				$sponsorship_levels    = get_posts( array( 'post_type' => MES_Sponsorship_Level::POST_TYPE_SLUG, 'numberposts' => -1 ) );
 				$regional_sponsorships = $this->populate_default_regional_sponsorships( get_post_meta( $post->ID, 'mes_regional_sponsorships', true ), $regions );
 				$view                  = 'metabox-regional-sponsorships.php';
@@ -226,44 +195,6 @@ class MES_Sponsor {
 			}
 		} else {
 			delete_post_meta( $post_id, 'mes_email_address' );
-		}
-	}
-
-	/**
-	 * Render the dropdown element with regions for the WordCamp Post Type plugin
-	 *
-	 * @param string $key
-	 * @param string $value
-	 * @param string $field_name
-	 */
-	public function wcpt_region_dropdown_render( $key, $value, $field_name ) {
-		if ( 'Multi-Event Sponsor Region' != $key ) {
-			return;
-		}
-
-		global $post;
-
-		$regions         = get_terms( self::REGIONS_SLUG, array( 'hide_empty' => false ) );
-		$selected_region = get_post_meta( $post->ID, $key, true );
-
-		require( dirname( __DIR__ ) . '/views/template-region-dropdown.php' );
-	}
-
-	/**
-	 * Save the dropdown element with regions for the WordCamp Post Type plugin
-	 *
-	 * @param string $key
-	 * @param string $value
-	 * @param int    $post_id
-	 */
-	public function wcpt_region_dropdown_save( $key, $value, $post_id ) {
-		if ( 'Multi-Event Sponsor Region' != $key ) {
-			return;
-		}
-
-		$post_key = wcpt_key_to_str( $key, 'wcpt_' );
-		if ( isset( $_POST[ $post_key ] ) ) {
-			update_post_meta( $post_id, $key, absint( $_POST[ $post_key ] ) );
 		}
 	}
 
