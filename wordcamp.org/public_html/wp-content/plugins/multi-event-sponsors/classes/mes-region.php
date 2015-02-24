@@ -14,16 +14,14 @@ class MES_Region {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',               array( $this, 'create_taxonomy' ) );
+		add_action( 'init',                                    array( $this, 'create_taxonomy' ) );
 		add_action( self::TAXONOMY_SLUG . '_add_form_fields',  array( $this, 'markup_meta_fields' ) );
 		add_action( self::TAXONOMY_SLUG . '_edit_form_fields', array( $this, 'markup_meta_fields' ) );
 		add_action( 'create_' . self::TAXONOMY_SLUG,           array( $this, 'save_meta_fields' ) );
 		add_action( 'edited_' . self::TAXONOMY_SLUG,           array( $this, 'save_meta_fields' ) );
-		add_action( 'add_meta_boxes' ,    array( $this, 'remove_meta_box' ),             10, 2 );
-		add_action( 'wcpt_metabox_value', array( $this, 'wcpt_region_dropdown_render' ), 10, 3 );
-		add_action( 'wcpt_metabox_save',  array( $this, 'wcpt_region_dropdown_save' ),   10, 3 );
-
-		// todo readjust whitespace after this commit
+		add_action( 'add_meta_boxes' ,                         array( $this, 'remove_meta_box' ),             10, 2 );
+		add_action( 'wcpt_metabox_value',                      array( $this, 'wcpt_region_dropdown_render' ), 10, 3 );
+		add_action( 'wcpt_metabox_save',                       array( $this, 'wcpt_region_dropdown_save' ),   10, 3 );
 	}
 
 	/**
