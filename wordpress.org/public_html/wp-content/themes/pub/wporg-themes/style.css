@@ -1082,8 +1082,12 @@ ul, ol {
 		width: 100%;
 	}
 
+	.theme-overlay .theme-wrap,
 	.admin-bar .theme-overlay .theme-wrap {
-		top: 3%;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		top: 0;
 	}
 
 	.theme-browser .themes .theme {
