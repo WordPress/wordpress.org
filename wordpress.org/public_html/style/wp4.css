@@ -1127,7 +1127,7 @@ body.wporg-make #headline h2 a:before {
 	width: 36px;
 }
 body.make-core #headline h2 a:before { content: '\f107'; }
-body.make-ui #headline h2 a:before { content: '\f100'; }
+body.make-design #headline h2 a:before { content: '\f100'; }
 body.make-mobile #headline h2 a:before { content: '\f166'; }
 body.make-accessibility #headline h2 a:before { content: '\f115'; }
 body.make-polyglots #headline h2 a:before { content: '\f326'; }
