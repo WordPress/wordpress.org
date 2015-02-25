@@ -644,7 +644,7 @@ class WordCamp_Post_Types_Plugin {
 				if ( 'permalink' == $attr['session_link'] && 'session' == $session_type )
 					$session_title_html = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( get_permalink( $session->ID ) ), $session_title );
 				elseif ( 'anchor' == $attr['session_link'] && 'session' == $session_type )
-					$session_title_html = 'noop';
+					$session_title_html = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( $this->get_wcpt_anchor_permalink( $session->ID ) ), $session_title );
 				else
 					$session_title_html = sprintf( '<span class="wcpt-session-title">%s</span>', $session_title );
 
@@ -655,7 +655,7 @@ class WordCamp_Post_Types_Plugin {
 					$speaker_name = apply_filters( 'the_title', $speaker->post_title );
 
 					if ( 'anchor' == $attr['speaker_link'] ) // speakers/#wcorg-speaker-slug
-						$speaker_permalink = $this->get_speaker_anchor_permalink( $speaker->ID );
+						$speaker_permalink = $this->get_wcpt_anchor_permalink( $speaker->ID );
 					elseif ( 'wporg' == $attr['speaker_link'] ) // profiles.wordpress.org/user
 						$speaker_permalink = $this->get_speaker_wporg_permalink( $speaker->ID );
 					elseif ( 'permalink' == $attr['speaker_link'] ) // year.city.wordcamp.org/speakers/slug
@@ -728,24 +728,49 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
-	 * Returns a speaker's anchor permalink
+	 * Returns an anchor permalink for a Speaker or Session
 	 *
 	 * If the speakers page is rendered with the [speakers] shortcode, it will
 	 * contain IDs that can be used as anchors. This function will attempt to find
 	 * a speakers page and link to the appropriate anchor.
 	 *
-	 * @param $speaker_id int The speaker's post id.
+	 * @param $post_id int The speaker/session's post ID.
+	 *
+	 * @return string
 	 */
-	function get_speaker_anchor_permalink( $speaker_id ) {
-		$post = get_post( $speaker_id );
-		if ( $post->post_type != 'wcb_speaker' || $post->post_status != 'publish' )
-			return;
+	function get_wcpt_anchor_permalink( $post_id ) {
+		$post = get_post( $post_id );
 
-		$speakers_permalink = $this->get_speakers_permalink();
-		if ( ! $speakers_permalink )
-			return;
+		if ( 'publish' != $post->post_status ) {
+			return '';
+		}
 
-		return $speakers_permalink . '#wcorg-speaker-' . sanitize_html_class( $post->post_name );
+		switch( $post->post_type ) {
+			case 'wcb_speaker':
+				$permalink = $this->get_speakers_permalink();
+				$anchor_id = $post->post_name;
+				break;
+
+			case 'wcb_session':
+				$permalink = $this->get_sessions_permalink();
+				$anchor_id = $post->ID;
+				break;
+
+			default:
+				$permalink = $anchor_id = false;
+				break;
+		}
+
+		if ( ! $permalink ) {
+			return '';
+		}
+
+		return sprintf(
+			'%s#wcorg-%s-%s',
+			$permalink,
+			str_replace( 'wcb_', '', $post->post_type ),
+			sanitize_html_class( $anchor_id )
+		);
 	}
 
 	/**
@@ -755,6 +780,8 @@ class WordCamp_Post_Types_Plugin {
 	 * returns the permalink of whichever comes first.
 	 */
 	function get_speakers_permalink() {
+		// todo combine this, get_sessions_permalink, and get_organizers_permalink into a DRY function
+		
 		if ( isset( $this->speakers_permalink ) )
 			return $this->speakers_permalink;
 
@@ -938,7 +965,7 @@ class WordCamp_Post_Types_Plugin {
 							$speaker_name = apply_filters( 'the_title', $speaker->post_title );
 
 							if ( 'anchor' == $attr['speaker_link'] ) // speakers/#wcorg-speaker-slug
-								$speaker_permalink = $this->get_speaker_anchor_permalink( $speaker->ID );
+								$speaker_permalink = $this->get_wcpt_anchor_permalink( $speaker->ID );
 							elseif ( 'wporg' == $attr['speaker_link'] ) // profiles.wordpress.org/user
 								$speaker_permalink = $this->get_speaker_wporg_permalink( $speaker->ID );
 							elseif ( 'permalink' == $attr['speaker_link'] ) // year.city.wordcamp.org/speakers/slug
