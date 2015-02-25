@@ -374,18 +374,6 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 	font-size: 25px;
 }
 
-.filter-links {
-	margin: 0 !important;
-}
-.theme-overlay .theme-header .close {
-	border-left: 0;
-	border-right: 1px solid #ddd;
-	float: left;
-}
-.theme-overlay .theme-header .right {
-	float: left !important;
-}
-
 
 /* TODO copy wp-admin/css/themes.css to here */
 
