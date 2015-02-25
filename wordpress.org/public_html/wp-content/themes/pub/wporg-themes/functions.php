@@ -148,7 +148,7 @@ function wporg_themes_query_themes() {
 		'fields'   => $theme_field_defaults,
 	) );
 
-	include_once '/home/api/public_html/themes/info/1.0/class-themes-api.php';
+	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
 	$api = new Themes_API( 'query_themes', $args );
 	$api = $api->response;
 
@@ -168,7 +168,7 @@ add_action( 'wp_ajax_nopriv_query-themes', 'wporg_themes_query_themes' );
 function wporg_themes_theme_info() {
 	$args  = wp_unslash( $_REQUEST );
 
-	include_once '/home/api/public_html/themes/info/1.0/class-themes-api.php';
+	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
 	$api = new Themes_API( 'query_themes', array( 'slug' => $args['slug'] ) );
 	$api = $api->response;
 
