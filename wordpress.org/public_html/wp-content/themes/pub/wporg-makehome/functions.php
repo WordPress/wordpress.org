@@ -2,7 +2,7 @@
 
 add_action( 'wp_enqueue_scripts', 'make_enqueue_scripts' );
 function make_enqueue_scripts() {
-	wp_enqueue_style( 'make-style', get_stylesheet_uri(), array(), '20141028' );
+	wp_enqueue_style( 'make-style', get_stylesheet_uri(), array(), '20150224' );
 	wp_enqueue_script( 'masonry' );
 }
 
