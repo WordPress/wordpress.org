@@ -202,6 +202,7 @@ class WCOR_Mailer {
 			empty( $wordcamp_meta['WordCamp Hashtag'][0] ) ? 'N/A' : esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
 			absint( $wordcamp_meta['Number of Anticipated Attendees'][0] ),
 			empty( $wordcamp_meta['Multi-Event Sponsor Region'][0] ) ? '' : get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
+			// todo update MES_Sponsor::REGIONS_SLUG in light of r1302
 
 			// The organizing team
 			$wordcamp_meta['Organizer Name'][0],
@@ -245,7 +246,7 @@ class WCOR_Mailer {
 
 			$recipient = $multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) );
 		} elseif ( 'wcor_send_sponsor_wrangler' == $send_where ) {
-			
+
 			// If the Sponsor Wrangler email is invalid, use the default email address.
 			if ( is_email( get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true ) ) ) {
 				$recipient = get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true );
@@ -253,6 +254,9 @@ class WCOR_Mailer {
 				$recipient = get_post_meta( $wordcamp_id, 'Email Address', true );
 			}
 
+		} elseif ( 'wcor_send_camera_wrangler' == $send_where ) {
+			$region_id = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+			$recipient = MES_Region::get_camera_wranger_from_region( $region_id );
 		} else {
 			$email_address_key = wcpt_key_to_str( 'E-mail Address', 'wcpt_' );
 

@@ -91,7 +91,7 @@ class WCOR_Reminder {
 		$send_days_after         = get_post_meta( $post->ID, 'wcor_send_days_after', true );
 		$send_days_after_pending = get_post_meta( $post->ID, 'wcor_send_days_after_pending', true );
 		$which_trigger           = get_post_meta( $post->ID, 'wcor_which_trigger', true );
-		
+
 		?>
 
 		<h4>Who should this e-mail be sent to?</h4>
@@ -111,6 +111,11 @@ class WCOR_Reminder {
 				<tr>
 					<th><input id="wcor_send_mes" name="wcor_send_where" type="radio" value="wcor_send_mes" <?php checked( $send_where, 'wcor_send_mes' ); ?>></th>
 					<td colspan="2"><label for="wcor_send_mes">The WordCamp's Multi-Event Sponsors</label></td>
+				</tr>
+
+				<tr>
+					<th><input id="wcor_send_camera_wrangler" name="wcor_send_where" type="radio" value="wcor_send_camera_wrangler" <?php checked( $send_where, 'wcor_send_camera_wrangler' ); ?>></th>
+					<td colspan="2"><label for="wcor_send_camera_wrangler">The Region's Camera Kit Wrangler</label></td>
 				</tr>
 
 				<tr>
@@ -362,7 +367,7 @@ class WCOR_Reminder {
 	 */
 	protected function save_post_meta( $post, $new_meta ) {
 		if ( isset( $new_meta['wcor_send_where'] ) ) {
-			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_mes', 'wcor_send_custom' ) ) ) {
+			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_mes', 'wcor_send_camera_wrangler', 'wcor_send_custom' ) ) ) {
 				update_post_meta( $post->ID, 'wcor_send_where', $new_meta['wcor_send_where'] );
 			}
 		}
