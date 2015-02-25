@@ -115,6 +115,19 @@ class MES_Region {
 	}
 
 	/**
+	 * Fetch the address of a camera kit wrangler for the given region.
+	 *
+	 * @param int $region_id
+	 *
+	 * @return bool
+	 */
+	public static function get_camera_wranger_from_region( $region_id ) {
+		$camera_wranglers = get_option( 'mes_region_camera_wranglers', array() );
+
+		return empty( $camera_wranglers[ $region_id ] ) ? false : $camera_wranglers[ $region_id ];
+	}
+
+	/**
 	 * Render the dropdown element with regions for the WordCamp Post Type plugin
 	 *
 	 * @param string $key
