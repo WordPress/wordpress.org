@@ -871,6 +871,7 @@ input {
 .devhub-wrap.single div#inner-search div#inner-search-icon-container, .devhub-wrap.archive div#inner-search div#inner-search-icon-container {
   margin: 0 auto;
   max-width: 60em;
+  cursor: pointer;
 }
 .devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon {
   background-color: #2e6183;
