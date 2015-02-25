@@ -28,28 +28,6 @@ function wporg_themes_setup() {
 	add_theme_support( 'html5', array(
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
-
-	$themes_allowedtags = array(
-		'a'       => array( 'href' => array(), 'title' => array(), 'target' => array() ),
-		'abbr'    => array( 'title' => array() ),
-		'acronym' => array( 'title' => array() ),
-		'code'    => array(),
-		'pre'     => array(),
-		'em'      => array(),
-		'strong'  => array(),
-		'div'     => array(),
-		'p'       => array(),
-		'ul'      => array(),
-		'ol'      => array(),
-		'li'      => array(),
-		'h1'      => array(),
-		'h2'      => array(),
-		'h3'      => array(),
-		'h4'      => array(),
-		'h5'      => array(),
-		'h6'      => array(),
-		'img'     => array( 'src' => array(), 'class' => array(), 'alt' => array() ),
-	);
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
@@ -163,39 +141,23 @@ add_action( 'wp_ajax_query-themes', 'wporg_themes_remove_ajax_action', -1 );
  * A recreation of Core's implementation without capability check, since there is nothing to install.
  */
 function wporg_themes_query_themes() {
-	global $themes_allowedtags, $theme_field_defaults;
+	global $theme_field_defaults, $themes_allowedtags;
 
 	$args = wp_parse_args( wp_unslash( $_REQUEST['request'] ), array(
 		'per_page' => 20,
 		'fields'   => $theme_field_defaults,
 	) );
 
-	$old_filter = isset( $args['browse'] ) ? $args['browse'] : 'search';
-
-	/** This filter is documented in wp-admin/includes/class-wp-theme-install-list-table.php */
-	$args = apply_filters( 'install_themes_table_api_args_' . $old_filter, $args );
-
-	$api = themes_api( 'query_themes', $args );
+	include_once '/home/api/public_html/themes/info/1.0/class-themes-api.php';
+	$api = new Themes_API( 'query_themes', $args );
+	$api = $api->response;
 
 	if ( is_wp_error( $api ) ) {
 		wp_send_json_error();
 	}
 
-	foreach ( $api->themes as &$theme ) {
-		$theme->name           = wp_kses( $theme->name,        $themes_allowedtags );
-
-		// add in the nicename for the url, and the displayname for the display
-		$user = get_user_by('login', $theme->author);
-		$theme->authorurl	   = $user->user_nicename;
-		$theme->authordispname = wp_kses( $user->display_name, $themes_allowedtags );
-
-		$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
-		$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
-		$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
-		$theme->downloaded     = number_format_i18n( $theme->downloaded );
-		$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
-		$theme->preview_url    = set_url_scheme( $theme->preview_url );
-		wporg_themes_photon_screen_shot( $theme );
+	foreach ( $api->themes as $key => $theme ) {
+		$api->themes[ $key ] = wporg_themes_ajax_prepare_theme( $theme );
 	}
 
 	wp_send_json_success( $api );
@@ -204,36 +166,63 @@ add_action( 'wp_ajax_query-themes',        'wporg_themes_query_themes' );
 add_action( 'wp_ajax_nopriv_query-themes', 'wporg_themes_query_themes' );
 
 function wporg_themes_theme_info() {
-	global $themes_allowedtags;
-
 	$args  = wp_unslash( $_REQUEST );
-	$theme = themes_api( 'theme_information', array( 'slug' => $args['slug'] ) );
 
-	if ( is_wp_error( $theme ) ) {
+	include_once '/home/api/public_html/themes/info/1.0/class-themes-api.php';
+	$api = new Themes_API( 'query_themes', array( 'slug' => $args['slug'] ) );
+	$api = $api->response;
+
+	if ( is_wp_error( $api ) ) {
 		wp_send_json_error();
 	}
 
-	$theme->name           = wp_kses( $theme->name,        $themes_allowedtags );
-	$theme->author         = wp_kses( $theme->author,      $themes_allowedtags );
-	$theme->version        = wp_kses( $theme->version,     $themes_allowedtags );
-	$theme->description    = wp_kses( $theme->description, $themes_allowedtags );
-	$theme->downloaded     = number_format_i18n( $theme->downloaded );
-	$theme->num_ratings    = number_format_i18n( $theme->num_ratings );
-	$theme->preview_url    = set_url_scheme( $theme->preview_url );
-	wporg_themes_photon_screen_shot( $theme );
+	$api = wporg_themes_ajax_prepare_theme( $api );
 
-	wp_send_json_success( $theme );
+	wp_send_json_success( $api );
 }
 add_action( 'wp_ajax_theme-info',        'wporg_themes_theme_info' );
 add_action( 'wp_ajax_nopriv_theme-info', 'wporg_themes_theme_info' );
 
-/**
- * Photon-ifies the screen shot URL.
- *
- * @param object $theme
- * @return object
- */
-function wporg_themes_photon_screen_shot( $theme ) {
+function wporg_themes_ajax_prepare_theme( $theme ) {
+	global $themes_allowedtags;
+
+	if ( empty( $themes_allowedtags ) ) {
+		$themes_allowedtags = array(
+			'a'       => array( 'href' => array(), 'title' => array(), 'target' => array() ),
+			'abbr'    => array( 'title' => array() ),
+			'acronym' => array( 'title' => array() ),
+			'code'    => array(),
+			'pre'     => array(),
+			'em'      => array(),
+			'strong'  => array(),
+			'div'     => array(),
+			'p'       => array(),
+			'ul'      => array(),
+			'ol'      => array(),
+			'li'      => array(),
+			'h1'      => array(),
+			'h2'      => array(),
+			'h3'      => array(),
+			'h4'      => array(),
+			'h5'      => array(),
+			'h6'      => array(),
+			'img'     => array( 'src' => array(), 'class' => array(), 'alt' => array() ),
+		);
+	}
+
+	$author        = get_user_by( 'login', $theme->author );
+	$theme->author = new StdClass;
+	foreach ( array( 'user_nicename', 'display_name' ) as $property ) {
+		$theme->author->$property = $author->$property;
+	}
+
+	$theme->name        = wp_kses( $theme->name, $themes_allowedtags );
+	$theme->version     = wp_kses( $theme->version, $themes_allowedtags );
+	$theme->description = wp_kses( $theme->description, $themes_allowedtags );
+	$theme->downloaded  = number_format_i18n( $theme->downloaded );
+	$theme->num_ratings = number_format_i18n( $theme->num_ratings );
+	$theme->preview_url = set_url_scheme( $theme->preview_url );
+
 	if ( preg_match( '/screenshot.(jpg|jpeg|png|gif)/', $theme->screenshot_url, $match ) ) {
 		$theme->screenshot_url = sprintf( 'https://i0.wp.com/themes.svn.wordpress.org/%1$s/%2$s/%3$s',
 			$theme->slug,
@@ -241,6 +230,7 @@ function wporg_themes_photon_screen_shot( $theme ) {
 			$match[0]
 		);
 	}
+
 	return $theme;
 }
 

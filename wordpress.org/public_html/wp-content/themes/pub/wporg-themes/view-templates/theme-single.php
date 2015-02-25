@@ -16,7 +16,7 @@
 
 			<div class="theme-head">
 				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.authorurl }}"><span class="author">{{{ data.authordispname }}}</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.author.user_nicename }}"><span class="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
 
 				<div class="theme-actions">
 					<a href="{{{ data.preview_url }}}" class="button button-secondary"><?php _e( 'Preview' ); ?></a>
