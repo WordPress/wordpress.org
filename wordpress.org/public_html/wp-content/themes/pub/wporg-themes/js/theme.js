@@ -470,6 +470,7 @@
 		// It's shown when clicking a theme
 		collapse: function( event ) {
 			var self = this,
+				args = {},
 				scroll, search, tags, sorter;
 
 			event = event || window.event;
@@ -509,7 +510,11 @@
 						}).join( ', ' ) );
 					}
 					else if ( sorter = $( '.filter-links .current' ) ) {
-						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ) );
+						if ( ! sorter.length ) {
+							sorter = $( '.filter-links [data-sort="featured"]' );
+							args   = { trigger: true };
+						}
+						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ), args );
 						wp.themes.utils.title( sorter.text() );
 					}
 
