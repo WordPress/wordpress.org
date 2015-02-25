@@ -98,7 +98,7 @@
 				filteringBy.append( '<span class="tag">' + name + '</span>' );
 			});
 
-			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ) );
+			wp.themes.router.navigate( wp.themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
 			wp.themes.utils.title( names.join( ', ' ) );
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
@@ -231,7 +231,7 @@
 
 			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="' + wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( 'tag/' + tag ) + '">' + tag + '</a>';
+				return '<a href="' + wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( 'tags/' + tag ) + '">' + tag + '</a>';
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
@@ -504,7 +504,7 @@
 						wp.themes.utils.title( search );
 					}
 					else if ( tags = wp.themes.view.Installer.prototype.filtersChecked() ) {
-						wp.themes.router.navigate( wp.themes.router.baseUrl( 'tag/' + tags.join( '+' ) ) );
+						wp.themes.router.navigate( wp.themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
 						wp.themes.utils.title( _.each( tags, function( tag, i ) {
 							tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
 						}).join( ', ' ) );
@@ -632,7 +632,7 @@
 	_.extend( wp.themes.InstallerRouter.prototype, {
 		routes: {
 			'browse/:sort/'  : 'sort',
-			'tag/:tag/'      : 'tag',
+			'tags/:tag/'      : 'tag',
 			'search/:query/' : 'search',
 			'author/:author/': 'author',
 			':slug/preview/' : 'preview',
