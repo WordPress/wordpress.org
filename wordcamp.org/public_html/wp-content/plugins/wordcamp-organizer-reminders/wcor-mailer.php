@@ -201,8 +201,7 @@ class WCOR_Mailer {
 			empty( $wordcamp_meta['Twitter'][0] ) ? 'N/A' : esc_url( 'https://twitter.com/' . $wordcamp_meta['Twitter'][0] ),
 			empty( $wordcamp_meta['WordCamp Hashtag'][0] ) ? 'N/A' : esc_url( 'https://twitter.com/hashtag/' . $wordcamp_meta['WordCamp Hashtag'][0] ),
 			absint( $wordcamp_meta['Number of Anticipated Attendees'][0] ),
-			empty( $wordcamp_meta['Multi-Event Sponsor Region'][0] ) ? '' : get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Sponsor::REGIONS_SLUG )->name,
-			// todo update MES_Sponsor::REGIONS_SLUG in light of r1302
+			empty( $wordcamp_meta['Multi-Event Sponsor Region'][0] ) ? '' : get_term( $wordcamp_meta['Multi-Event Sponsor Region'][0], MES_Region::TAXONOMY_SLUG )->name,
 
 			// The organizing team
 			$wordcamp_meta['Organizer Name'][0],
