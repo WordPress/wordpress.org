@@ -111,7 +111,7 @@ class WPORG_Themes_Upload {
 		$this->author     = wp_get_current_user();
 
 		// We need a screen shot. People love screen shots.
-		if ( ! $this->has_screen_shot( $theme_files ) ) {
+		if ( ! $this->has_screenshot( $theme_files ) ) {
 			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ), '<code>screenshot.png</code>', '<code>screenshot.jpg</code>' );
 		}
 
@@ -301,13 +301,13 @@ class WPORG_Themes_Upload {
 	 * @param array $theme_files
 	 * @return bool
 	 */
-	public function has_screen_shot( $theme_files ) {
-		$screen_shots = preg_grep( '/screenshot.(jpg|jpeg|png|gif)/', $theme_files );
-		usort( $screen_shots, array( $this, 'sort_by_string_length' ) );
+	public function has_screenshot( $theme_files ) {
+		$screenshots = preg_grep( '/screenshot.(jpg|jpeg|png|gif)/', $theme_files );
+		usort( $screenshots, array( $this, 'sort_by_string_length' ) );
 
-		$this->theme->screen_shot = array_pop( $screen_shots );
+		$this->theme->screenshot = array_pop( $screenshots );
 
-		return (bool) $this->theme->screen_shot;
+		return (bool) $this->theme->screenshot;
 	}
 
 	/**
@@ -451,7 +451,7 @@ ZIP - https://wordpress.org/themes/download/{$this->theme->get_stylesheet()}.{$t
 History:
 [[TicketQuery(format=table, keywords=~theme-{$this->theme->get_stylesheet()}, col=id|summary|status|resolution|owner)]]
 
-[[Image(https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}/{$this->theme->screen_shot}, width=640)]]
+[[Image(https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}, width=640)]]
 TICKET;
 	}
 
@@ -534,7 +534,7 @@ TICKET;
 			'_status'      => 'new',
 			'_upload_date' => $upload_date,
 			'_ticket_id'   => $ticket_id,
-			'_screen_shot' => $this->theme->screen_shot,
+			'_screenshot'  => $this->theme->screenshot,
 		);
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {

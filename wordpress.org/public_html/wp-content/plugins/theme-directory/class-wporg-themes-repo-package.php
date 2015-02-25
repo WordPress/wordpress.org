@@ -13,12 +13,12 @@ class WPORG_Themes_Repo_Package extends Repo_Package {
 	 *
 	 * @return string
 	 */
-	public function screen_shot_url() {
+	public function screenshot_url() {
 		$screen  = 'screenshot.png';
 		$version = $this->latest_version();
 
-		if ( ! empty( $this->wp_post->_screen_shot[ $version ] ) ) {
-			$screen = $this->wp_post->_screen_shot[ $version ];
+		if ( ! empty( $this->wp_post->_screenshot[ $version ] ) ) {
+			$screen = $this->wp_post->_screenshot[ $version ];
 		}
 
 		return sprintf( 'https://i0.wp.com/themes.svn.wordpress.org/%1$s/%2$s/%3$s',
