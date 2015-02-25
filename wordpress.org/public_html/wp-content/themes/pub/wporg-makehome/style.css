@@ -212,7 +212,7 @@ section.get-involved article h2:before {
 }
 
 section.get-involved article.make-core          h2:before { content: "\f475"; }
-section.get-involved article.make-ui            h2:before { content: "\f309"; }
+section.get-involved article.make-design		h2:before { content: "\f309"; }
 section.get-involved article.make-mobile        h2:before { content: "\f470"; }
 section.get-involved article.make-accessibility h2:before { content: "\f483"; }
 section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
