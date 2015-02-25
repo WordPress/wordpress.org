@@ -59,7 +59,7 @@ function wporg_themes_init() {
 		'has_archive'         => true,
 		'query_var'           => true,
 		'can_export'          => true,
-		'rewrite'             => array( 'slug' => '/' ),
+		'rewrite'             => false,
 		'capability_type'     => 'post',
 	);
 
@@ -68,16 +68,10 @@ function wporg_themes_init() {
 		register_post_type( 'repopackage', $args );
 	}
 
+	// Add the browse/* views
 	add_rewrite_tag( '%browse%', '(featured|popular|new)' );
+	add_permastruct( 'browse', 'browse/%browse%' );
 
-	// Single themes.
-	add_rewrite_rule( '(.?.+?)(/[0-9]+)?/?$', 'index.php?post_type=repopackage&name=$matches[1]', 'top' );
-
-	// Browse views.
-	add_rewrite_rule( 'browse/(featured|popular|new)/?$', 'index.php?post_type=repopackage&browse=$matches[1]', 'top' );
-
-	// Paginated browse views.
-	add_rewrite_rule( 'browse/(featured|popular|new)/page/?([0-9]{1,})/?$', 'index.php?post_type=repopackage&browse=$matches[1]&paged=$matches[2]', 'top' );
 }
 add_action( 'init', 'wporg_themes_init' );
 
@@ -94,7 +88,7 @@ function wporg_themes_set_up_query( $wp_query ) {
 
 	$wp_query->set( 'post_type', 'repopackage' );
 
-	if ( $wp_query->is_home() ) {
+	if ( $wp_query->is_home() && ! $wp_query->get( 'browse' ) ) {
 		$wp_query->set( 'browse', 'featured' );
 	}
 
@@ -103,7 +97,7 @@ function wporg_themes_set_up_query( $wp_query ) {
 			case 'featured':
 				$wp_query->set( 'paged', 1 );
 				$wp_query->set( 'posts_per_page', 15 );
-				$wp_query->set( 'post__in', (array) wp_cache_get( 'browse-popular', 'theme-info' ) );
+				$wp_query->set( 'post__in', (array) wp_cache_get( 'browse-featured', 'theme-info' ) );
 				break;
 
 			case 'popular':
