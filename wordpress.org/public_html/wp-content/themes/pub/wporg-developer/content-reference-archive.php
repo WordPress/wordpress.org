@@ -17,7 +17,10 @@
 		<p>Source: <?php echo get_source_file(); ?>:<?php echo get_line_number(); ?></p>
 	</div>
 
+
 	<?php
+	if ( 'wp-parser-class' != get_post_type() ) :
+
 		$used_by = get_used_by()->post_count;
 		$uses    = get_uses()->post_count;
 	?>
@@ -34,4 +37,7 @@
 			$uses
 		); ?>
 	</div>
+
+	<?php endif;?>
+
 </article>

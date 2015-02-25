@@ -992,6 +992,10 @@ namespace DevHub {
 			case 'wp-parser-hook':
 				$connection_types = array( 'functions_to_hooks', 'methods_to_hooks' );
 				break;
+
+			default:
+				return;
+
 		}
 
 		$connected = new \WP_Query( array(
