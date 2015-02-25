@@ -5,25 +5,11 @@
  * @package wporg-themes
  */
 
-
-/**
- * Filter to get an array of data for theme shops to be listed.
- *
- * Expected structure for each element in the commercial theme shops array:
- *
- * array(
- *    'name'        => '', // Theme shop name.
- *    'url'         => '', // Company URL.
- *    'description' => "", // Haiku.
- *    'user_id'     => '', // User ID of the WordPress.org user associated with the theme shop.
- *    'image'       => '', // Theme shop site screenshot URL. Optional; only if overriding default, automatic image retrieval.
- * )
- *
- * @param array $commercial Array of commercial theme shops data array. Default empty array.
- */
-$commercial = (array) apply_filters( 'wporg_themes_commercial', array() );
-
-shuffle( $commercial );
+$theme_shops = new WP_Query( array(
+	'post_type'      => 'theme_shop',
+	'posts_per_page' => -1,
+	'orderby'        => 'rand',
+) );
 
 get_header();
 
@@ -51,15 +37,21 @@ if ( have_posts() ) :
 				<div id="themes">
 					<div class="theme-browser content-filterable">
 						<div class="themes">
-							<?php foreach ( $commercial as $theme ) : ?>
-								<article id="post-<?php echo sanitize_title_with_dashes( $theme['name'] ); ?>" class="theme hentry">
-									<div class="theme-screenshot">
-										<img src="<?php echo esc_url( '//s0.wp.com/mshots/v1/' . urlencode( $theme['url'] ) . '?w=572' ); ?>" alt="">
-									</div>
-									<a class="more-details url" href="<?php echo esc_url( $theme['url'] ); ?>" rel="bookmark"><?php echo nl2br( $theme['description'] ); ?></a>
-									<h3 class="theme-name entry-title"><?php echo $theme['name']; ?></h3>
-								</article>
-							<?php endforeach; ?>
+							<?php
+								while ( $theme_shops->have_posts() ) :
+									$theme_shops->the_post();
+							?>
+							<article id="post-<?php the_ID(); ?>" <?php post_class( array( 'theme', 'hentry' ) ); ?>>
+								<div class="theme-screenshot">
+									<img src="<?php echo esc_url( '//s0.wp.com/mshots/v1/' . urlencode( post_custom( 'url' ) ) . '?w=572' ); ?>" alt="">
+								</div>
+								<a class="more-details url" href="<?php echo esc_url( post_custom( 'url' ) ); ?>" rel="bookmark"><?php the_content(); ?></a>
+								<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
+							</article>
+							<?php
+								endwhile;
+								wp_reset_postdata();
+							?>
 						</div>
 					</div>
 				</div>

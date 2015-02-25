@@ -814,9 +814,13 @@ ul, ol {
 /* Commercial Page Template */
 .commercial .theme .more-details {
 	font-size: 13px;
-	 top: 23%;
-	 right: 5%;
-	 left: 5%;
+	top: 23%;
+	right: 5%;
+	left: 5%;
+}
+
+.commercial .theme .more-details p {
+	margin: 0;
 }
 
 .commercial .themes {

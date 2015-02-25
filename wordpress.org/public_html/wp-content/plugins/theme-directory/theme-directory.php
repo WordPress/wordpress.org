@@ -68,6 +68,30 @@ function wporg_themes_init() {
 		register_post_type( 'repopackage', $args );
 	}
 
+	if ( ! post_type_exists( 'theme_shop' ) ) {
+		register_post_type( 'theme_shop', array(
+			'labels'              => array(
+				'name'               => __( 'Theme Shops', 'wporg-themes' ),
+				'singular_name'      => __( 'Theme Shop', 'wporg-themes' ),
+				'add_new'            => __( 'Add New', 'wporg-themes' ),
+				'add_new_item'       => __( 'Add New Theme Shop', 'wporg-themes' ),
+				'edit_item'          => __( 'Edit Theme Shop', 'wporg-themes' ),
+				'new_item'           => __( 'New Theme Shop', 'wporg-themes' ),
+				'view_item'          => __( 'View Theme Shop', 'wporg-themes' ),
+				'search_items'       => __( 'Search Theme Shops', 'wporg-themes' ),
+				'not_found'          => __( 'No Theme Shops found', 'wporg-themes' ),
+				'not_found_in_trash' => __( 'No Theme Shops found in Trash', 'wporg-themes' ),
+				'parent_item_colon'  => __( 'Parent Theme Shop:', 'wporg-themes' ),
+				'menu_name'          => __( 'Theme Shops', 'wporg-themes' ),
+			),
+			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'public'              => true,
+			'show_in_nav_menus'   => false,
+			'exclude_from_search' => true,
+			'menu_icon'           => 'dashicons-businessman',
+		) );
+	}
+
 	// Add the browse/* views
 	add_rewrite_tag( '%browse%', '(featured|popular|new)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
@@ -82,7 +106,7 @@ add_action( 'init', 'wporg_themes_init' );
  * @return WP_Query
  */
 function wporg_themes_set_up_query( $wp_query ) {
-	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial', 'getting-started' ) ) || 'nav_menu_item' == $wp_query->get( 'post_type' ) ) {
+	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial', 'getting-started' ) ) || in_array( $wp_query->get( 'post_type' ), array( 'nav_menu_item', 'theme_shop' ) ) ) {
 		return $wp_query;
 	}
 
