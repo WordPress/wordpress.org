@@ -579,9 +579,13 @@
 	});
 
 	_.extend( wp.themes.view.InstallerSearch.prototype, {
+		events: {
+			'keyup':  'search',
+			'search': 'search',
+		},
+
 		doSearch: _.debounce( function( value ) {
-			var request = {},
-				sort = 'featured';
+			var request = {};
 
 			request.search = value;
 
@@ -606,17 +610,16 @@
 			$( '.filter-links li > a.current' ).removeClass( 'current' );
 			$( 'body' ).removeClass( 'show-filters filters-applied' );
 
-			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
-			// or searching the local cache
-			this.collection.query( request );
-
-			// Set route
 			if ( value ) {
+				// Get the themes by sending Ajax POST request to api.wordpress.org/themes
+				// or searching the local cache
+				this.collection.query( request );
+
+				// Set route
 				wp.themes.utils.title( value );
 				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + value ), { replace: true } );
 			} else {
-				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sort ) );
-				this.parent.sort( sort );
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + 'featured' ), { trigger: true } );
 			}
 		}, 300 )
 	});
