@@ -29,43 +29,32 @@ register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 function wporg_themes_init() {
 	load_plugin_textdomain( 'wporg-themes' );
 
-	$labels = array(
-		'name'               => __( 'Packages', 'wporg-themes' ),
-		'singular_name'      => __( 'Package', 'wporg-themes' ),
-		'add_new'            => __( 'Add New', 'wporg-themes' ),
-		'add_new_item'       => __( 'Add New Package', 'wporg-themes' ),
-		'edit_item'          => __( 'Edit Package', 'wporg-themes' ),
-		'new_item'           => __( 'New Package', 'wporg-themes' ),
-		'view_item'          => __( 'View Package', 'wporg-themes' ),
-		'search_items'       => __( 'Search Packages', 'wporg-themes' ),
-		'not_found'          => __( 'No packages found', 'wporg-themes' ),
-		'not_found_in_trash' => __( 'No packages found in Trash', 'wporg-themes' ),
-		'parent_item_colon'  => __( 'Parent Package:', 'wporg-themes' ),
-		'menu_name'          => __( 'Packages', 'wporg-themes' ),
-	);
-
-	$args = array(
-		'labels'              => $labels,
-		'hierarchical'        => false,
-		'description'         => __( 'A package', 'wporg-themes' ),
-		'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
-		'taxonomies'          => array( 'category', 'post_tag', 'type' ),
-		'public'              => true,
-		'show_ui'             => true,
-		'show_in_menu'        => true,
-		'show_in_nav_menus'   => false,
-		'publicly_queryable'  => true,
-		'exclude_from_search' => false,
-		'has_archive'         => true,
-		'query_var'           => true,
-		'can_export'          => true,
-		'rewrite'             => false,
-		'capability_type'     => 'post',
-	);
-
 	// This is the base generic type for repo plugins.
 	if ( ! post_type_exists( 'repopackage' ) ) {
-		register_post_type( 'repopackage', $args );
+		register_post_type( 'repopackage', array(
+			'labels'              => array(
+				'name'               => __( 'Packages', 'wporg-themes' ),
+				'singular_name'      => __( 'Package', 'wporg-themes' ),
+				'add_new'            => __( 'Add New', 'wporg-themes' ),
+				'add_new_item'       => __( 'Add New Package', 'wporg-themes' ),
+				'edit_item'          => __( 'Edit Package', 'wporg-themes' ),
+				'new_item'           => __( 'New Package', 'wporg-themes' ),
+				'view_item'          => __( 'View Package', 'wporg-themes' ),
+				'search_items'       => __( 'Search Packages', 'wporg-themes' ),
+				'not_found'          => __( 'No packages found', 'wporg-themes' ),
+				'not_found_in_trash' => __( 'No packages found in Trash', 'wporg-themes' ),
+				'parent_item_colon'  => __( 'Parent Package:', 'wporg-themes' ),
+				'menu_name'          => __( 'Packages', 'wporg-themes' ),
+			),
+			'description'         => __( 'A package', 'wporg-themes' ),
+			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
+			'taxonomies'          => array( 'category', 'post_tag', 'type' ),
+			'public'              => true,
+			'show_in_nav_menus'   => false,
+			'has_archive'         => true,
+			'rewrite'             => false,
+			'menu_icon'           => 'dashicons-art',
+		) );
 	}
 
 	if ( ! post_type_exists( 'theme_shop' ) ) {
