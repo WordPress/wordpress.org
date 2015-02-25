@@ -115,6 +115,22 @@ function wporg_themes_set_up_query( $wp_query ) {
 add_filter( 'pre_get_posts', 'wporg_themes_set_up_query' );
 
 /**
+ * Filter the permalink for the Packages to be /post_name/
+ *
+ * @param string $link The generated permalink
+ * @param string $post The package object
+ * @return string
+ */
+function wporg_themes_package_link( $link, $post ) {
+	if ( 'repopackage' != $post->post_type ) {
+		return $link;
+	}
+
+	return trailingslashit( home_url( $post->post_name ) );
+}
+add_filter( 'post_type_link', 'wporg_themes_package_link', 10, 2 );
+
+/**
  * Adjusts the amount of found posts when browsing featured themes.
  *
  * @param string   $found_posts
