@@ -9,7 +9,7 @@
 		<div class="wp-full-overlay-sidebar-content">
 			<div class="install-theme-info">
 				<h3 class="theme-name">{{ data.name }}</h3>
-				<span class="theme-by"><?php printf( __( 'By %s' ), '{{ data.author }}' ); ?></span>
+				<span class="theme-by"><?php printf( __( 'By %s' ), '{{ data.author.display_name }}' ); ?></span>
 
 				<img class="theme-screenshot" src="{{ data.screenshot_url }}" alt="" />
 
