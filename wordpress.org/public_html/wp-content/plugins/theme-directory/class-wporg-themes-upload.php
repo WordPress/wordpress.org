@@ -324,6 +324,7 @@ class WPORG_Themes_Upload {
 			'orderby'          => 'ID',
 			'suppress_filters' => false,
 		) );
+		$this->theme->post_parent = current( $parent );
 
 		return ! empty( $parent );
 	}
@@ -509,6 +510,7 @@ TICKET;
 			'post_title'     => $this->theme->get( 'Name' ),
 			'post_name'      => $this->theme->get_stylesheet(),
 			'post_content'   => $this->theme->get( 'Description' ),
+			'post_parent'    => $this->theme->post_parent,
 			'post_date'      => $upload_date,
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
