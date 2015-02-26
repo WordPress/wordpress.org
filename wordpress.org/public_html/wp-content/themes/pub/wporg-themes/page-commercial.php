@@ -40,10 +40,14 @@ if ( have_posts() ) :
 							<?php
 								while ( $theme_shops->have_posts() ) :
 									$theme_shops->the_post();
+
+									if ( ! $image_url = post_custom( 'image_url' ) ) :
+										$image_url = sprintf( '//s0.wp.com/mshots/v1/%s?w=572', urlencode( post_custom( 'url' ) ) );
+									endif;
 							?>
 							<article id="post-<?php the_ID(); ?>" <?php post_class( array( 'theme', 'hentry' ) ); ?>>
 								<div class="theme-screenshot">
-									<img src="<?php echo esc_url( '//s0.wp.com/mshots/v1/' . urlencode( post_custom( 'url' ) ) . '?w=572' ); ?>" alt="">
+									<img src="<?php echo esc_url( $image_url ); ?>" alt="">
 								</div>
 								<a class="more-details url" href="<?php echo esc_url( post_custom( 'url' ) ); ?>" rel="bookmark"><?php the_content(); ?></a>
 								<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
