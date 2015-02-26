@@ -22,9 +22,12 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary"><?php _e( 'Download' ); ?></a>
 			</div>
 
-			<?php if ( ! empty( get_post()->parent ) ) : ?>
+			<?php
+				if ( ! empty( get_post()->post_parent ) ) :
+					$parent = get_post( get_post()->post_parent );
+			?>
 			<div class="theme-notice notice notice-info">
-				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/%1$s">%2$s</a>', $theme->parent->slug, $theme->parent->name ) ); ?></p>
+				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
 			</div>
 			<?php endif; ?>
 		</div><!-- .theme-head -->

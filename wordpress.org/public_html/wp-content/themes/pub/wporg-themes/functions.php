@@ -141,21 +141,24 @@ add_action( 'wp_ajax_query-themes', 'wporg_themes_remove_ajax_action', -1 );
  * A recreation of Core's implementation without capability check, since there is nothing to install.
  */
 function wporg_themes_query_themes() {
-	$args = wp_parse_args( wp_unslash( $_REQUEST['request'] ), array(
+	$request = wp_unslash( $_REQUEST['request'] );
+	$request['fields'] = wp_parse_args( $request['fields'], array(
+		'description'  => true,
+		'sections'     => false,
+		'tested'       => true,
+		'requires'     => true,
+		'rating'       => true,
+		'ratings'      => true,
+		'downloaded'   => true,
+		'downloadlink' => true,
+		'last_updated' => true,
+		'homepage'     => true,
+		'tags'         => true,
+		'num_ratings'  => true,
+		'parent'       => true,
+	) );
+	$args = wp_parse_args( $request, array(
 		'per_page' => 20,
-		'fields'   => array(
-			'description'  => true,
-			'sections'     => false,
-			'tested'       => true,
-			'requires'     => true,
-			'rating'       => true,
-			'downloaded'   => true,
-			'downloadlink' => true,
-			'last_updated' => true,
-			'homepage'     => true,
-			'tags'         => true,
-			'num_ratings'  => true,
-		),
 	) );
 
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
@@ -176,13 +179,28 @@ add_action( 'wp_ajax_query-themes',        'wporg_themes_query_themes' );
 add_action( 'wp_ajax_nopriv_query-themes', 'wporg_themes_query_themes' );
 
 function wporg_themes_theme_info() {
-	$args  = wp_unslash( $_REQUEST );
+	$request = wp_unslash( $_REQUEST['request'] );
+	$request['fields'] = wp_parse_args( $request['fields'], array(
+		'description'  => true,
+		'sections'     => false,
+		'tested'       => true,
+		'requires'     => true,
+		'rating'       => true,
+		'ratings'      => true,
+		'downloaded'   => true,
+		'downloadlink' => true,
+		'last_updated' => true,
+		'homepage'     => true,
+		'tags'         => true,
+		'num_ratings'  => true,
+		'parent'       => true,
+	) );
 
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
-	$api = new Themes_API( 'query_themes', array( 'slug' => $args['slug'] ) );
+	$api = new Themes_API( 'theme_information', $request );
 	$api = $api->response;
 
-	if ( is_wp_error( $api ) ) {
+	if ( empty( $api ) ) {
 		wp_send_json_error();
 	}
 
