@@ -115,6 +115,9 @@ class WPORG_Themes_Upload {
 			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ), '<code>screenshot.png</code>', '<code>screenshot.jpg</code>' );
 		}
 
+		// reset the theme directory to be where the stylesheet is
+		$this->theme_dir = dirname( $style_css );
+		
 		// Let's check some theme headers, shall we?
 
 		if ( ! $this->theme->get( 'Name' ) ) {
