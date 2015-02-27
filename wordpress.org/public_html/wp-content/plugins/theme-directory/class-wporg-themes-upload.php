@@ -152,7 +152,9 @@ class WPORG_Themes_Upload {
 		}
 
 		// Prevent duplicate URLs.
-		if ( ! $this->theme->get( 'ThemeURI' ) && ! $this->theme->get( 'AuthorURI' ) && $this->theme->get( 'ThemeURI' ) == $this->theme->get( 'AuthorURI' ) ) {
+		$themeuri = $this->theme->get( 'ThemeURI' );
+		$authoruri = $this->theme->get( 'AuthorURI' );
+		if ( !empty( $themeuri ) && !empty( $authoruri ) && $themeuri == $authoruri ) {
 			return __( 'Duplicate theme and author URLs. A theme URL is a page/site the provides details about this specific theme. An author URL is a page/site that provides information about the author of the theme. You aren&rsquo;t required to provide both, so pick the one that best applies to your URL.', 'wporg-themes' );
 		}
 
