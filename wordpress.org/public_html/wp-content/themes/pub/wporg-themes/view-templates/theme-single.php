@@ -25,7 +25,7 @@
 
 				<# if ( data.parent ) { #>
 				<div class="theme-notice notice notice-info">
-					<p class="parent"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/%1$s">%2$s</a>', '{{{ data.parent.slug }}}', '{{{ data.parent.name }}}' ) ); ?></p>
+					<p class="parent"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/themes/%1$s/">%2$s</a>', '{{{ data.parent.slug }}}', '{{{ data.parent.name }}}' ) ); ?></p>
 				</div>
 				<# } #>
 			</div><!-- .theme-head -->
