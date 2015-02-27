@@ -231,7 +231,7 @@
 
 			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="' + wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( 'tags/' + tag ) + '">' + tag + '</a>';
+				return '<a href="' + wp.themes.data.settings.adminUrl + wp.themes.router.baseUrl( 'tags/' + tag.toLowerCase().replace( ' ', '-' ) ) + '">' + tag + '</a>';
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
