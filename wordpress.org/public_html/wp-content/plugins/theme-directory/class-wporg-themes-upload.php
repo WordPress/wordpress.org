@@ -107,8 +107,6 @@ class WPORG_Themes_Upload {
 
 		// We have a stylesheet, let's set up the theme, theme post, and author.
 		$this->theme      = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
-		$this->theme_post = $this->get_theme_post();
-		$this->author     = wp_get_current_user();
 
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
@@ -120,9 +118,16 @@ class WPORG_Themes_Upload {
 		
 		// Let's check some theme headers, shall we?
 
-		if ( ! $this->theme->get( 'Name' ) ) {
+		if ( ! $this->theme_name = $this->theme->get( 'Name' ) ) {
 			return __( "The theme has no name. Add it to style.css and upload the theme again. <a href='https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet'>Theme Style Sheets</a>", 'wporg-themes' );
 		}
+
+		// determine the theme slug based on the name of the theme in the stylesheet
+		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
+
+		// populate the theme post and author
+		$this->theme_post = $this->get_theme_post();
+		$this->author     = wp_get_current_user();
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
@@ -143,7 +148,7 @@ class WPORG_Themes_Upload {
 
 		// Make sure we have version that is higher than any previously uploaded version of this theme.
 		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
-			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in <code>style.css</code>, then upload your zip file again.', 'wporg-themes' ), $this->theme->display( 'Name' ), '<code>' . $this->theme->display( 'Version' ) . '</code>' );
+			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in <code>style.css</code>, then upload your zip file again.', 'wporg-themes' ), $this->theme->display( 'Name' ), '<code>' . $this->theme_post->max_version . '</code>' );
 		}
 
 		// Prevent duplicate URLs.
@@ -158,12 +163,12 @@ class WPORG_Themes_Upload {
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
-			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme->get_stylesheet() . '</code>' );
+			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
 		}
 
 		// Is there already a theme with the name name by a different author?
 		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
-			return sprintf( __( 'There is already a theme called %s by a different author. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme->get_stylesheet() . '</code>' );
+			return sprintf( __( 'There is already a theme called %s by a different author. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
@@ -275,7 +280,7 @@ class WPORG_Themes_Upload {
 	 */
 	public function get_theme_post() {
 		$themes = get_posts( array(
-			'name'             => $this->theme->get_stylesheet(),
+			'name'             => $this->theme_slug,
 			'posts_per_page'   => 1,
 			'post_type'        => 'repopackage',
 			'orderby'          => 'ID',
@@ -344,7 +349,7 @@ class WPORG_Themes_Upload {
 		$slug = str_replace(
 			array( 'twenty-ten', 'twenty-eleven', 'twenty-twelve', 'twenty-thirteen', 'twenty-fourteen', 'twenty-fifteen', 'twenty-sixteen', 'twenty-seventeen', 'twenty-eighteen', 'twenty-nineteen', 'twenty-twenty' ),
 			array( 'twentyten',  'twentyeleven',  'twentytwelve',  'twentythirteen',  'twentyfourteen',  'twentyfifteen',  'twentysixteen',  'twentyseventeen',  'twentyeighteen',  'twentynineteen',  'twentytwenty'  ),
-			$this->theme->get_stylesheet()
+			$this->theme_slug
 		);
 
 		$reserved_slugs = array(
@@ -402,7 +407,7 @@ class WPORG_Themes_Upload {
 
 		// Keywords
 		$this->trac_ticket->keywords = array(
-			'theme-' . $this->theme->get_stylesheet(),
+			'theme-' . $this->theme_slug,
 		);
 
 		$this->trac_ticket->parent_link = '';
@@ -437,7 +442,7 @@ class WPORG_Themes_Upload {
 		// Diff line.
 		$this->trac_ticket->diff_line = '';
 		if ( ! empty( $this->theme_post->max_version ) ) {
-			$this->trac_ticket->diff_line = "\n" . sprintf( __( 'Diff with previous version: %s', 'wporg-themes' ), "https://themes.trac.wordpress.org/changeset?old_path={$this->theme->get_stylesheet()}/{$this->theme_post->max_version}&new_path={$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}\n" );
+			$this->trac_ticket->diff_line = "\n" . sprintf( __( 'Diff with previous version: %s', 'wporg-themes' ), "https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n" );
 		}
 
 		// Hacky way to prevent a problem with xml-rpc.
@@ -449,14 +454,14 @@ class WPORG_Themes_Upload {
 Theme URL - {$this->theme->display( 'ThemeURI' )}
 Author URL - {$this->theme->display( 'AuthorURI' )}
 
-SVN - https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}
-ZIP - https://wordpress.org/themes/download/{$this->theme->get_stylesheet()}.{$this->theme->display( 'Version' )}.zip?nostats=1
+SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
+ZIP - https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1
 {$this->trac_ticket->parent_link}
 {$this->trac_ticket->diff_line}
 History:
-[[TicketQuery(format=table, keywords=~theme-{$this->theme->get_stylesheet()}, col=id|summary|status|resolution|owner)]]
+[[TicketQuery(format=table, keywords=~theme-{$this->theme_slug}, col=id|summary|status|resolution|owner)]]
 
-[[Image(https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}, width=640)]]
+[[Image(https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}, width=640)]]
 TICKET;
 	}
 
@@ -512,7 +517,7 @@ TICKET;
 		$post_args   = array(
 			'post_author'    => $this->author->ID,
 			'post_title'     => $this->theme->get( 'Name' ),
-			'post_name'      => $this->theme->get_stylesheet(),
+			'post_name'      => $this->theme_slug,
 			'post_content'   => $this->theme->get( 'Description' ),
 			'post_parent'    => $this->theme->post_parent,
 			'post_date'      => $upload_date,
@@ -562,7 +567,7 @@ TICKET;
 	public function add_to_svn() {
 		$import_msg = empty( $this->theme_post ) ?  __( 'New theme: %1$s - %2$s', 'wporg-themes' ) : __( 'New version of %1$s - %2$s', 'wporg-themes' );
 		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) ) );
-		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme->get_stylesheet()}/{$this->theme->display( 'Version' )}" );
+		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}" );
 		$theme_path = escapeshellarg( $this->theme_dir );
 		$svn        = escapeshellarg( self::SVN );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
