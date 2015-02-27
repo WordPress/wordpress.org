@@ -860,6 +860,7 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 
 		$attr = shortcode_atts( array(
+			'date' => null,
 			'show_meta' => false,
 			'show_avatars' => false,
 			'avatar_size' => 100,
@@ -897,19 +898,37 @@ class WordCamp_Post_Types_Plugin {
 			// Only ones marked "session" or where the meta key does
 			// not exist, for backwards compatibility.
 			'meta_query' => array(
-				'relation' => 'OR',
+				'relation' => 'AND',
+
 				array(
-					'key' => '_wcpt_session_type',
-					'value' => 'session',
-					'compare' => '=',
-				),
-				array(
-					'key' => '_wcpt_session_type',
-					'value' => '',
-					'compare' => 'NOT EXISTS',
-				),
+					'relation' => 'OR',
+
+					array(
+						'key'     => '_wcpt_session_type',
+						'value'   => 'session',
+						'compare' => '=',
+					),
+
+					array(
+						'key'     => '_wcpt_session_type',
+						'value'   => '',
+						'compare' => 'NOT EXISTS',
+					),
+				)
 			),
 		);
+
+		if ( $attr['date'] && strtotime( $attr['date'] ) ) {
+			$args['meta_query'][] = array(
+				'key'     => '_wcpt_session_time',
+				'value'   => array(
+					strtotime( $attr['date'] ),
+					strtotime( $attr['date'] . ' +1 day' ),
+				),
+				'compare' => 'BETWEEN',
+				'type'    => 'NUMERIC',
+			);
+		}
 
 		if ( 'all' != $attr['track'] ) {
 			$args['tax_query'][] = array(
