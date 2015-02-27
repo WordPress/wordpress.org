@@ -493,6 +493,14 @@ TICKET;
 			if ( empty( $ticket[3]['resolution'] ) && 'approved' !== $ticket[3]['status'] ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
+			} else {
+				$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
+					'type'      => 'theme',
+					'keywords'  => implode( ', ', $this->trac_ticket->keywords ),
+					'reporter'  => $this->author->user_login,
+					'cc'        => $this->author->user_email,
+					'priority'  => $this->trac_ticket->priority,
+				) );
 			}
 
 			// In all other cases we create a new ticket.
