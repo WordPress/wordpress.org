@@ -20,7 +20,7 @@ function wporg_themes_render_upload_shortcode() {
 	if ( is_user_logged_in() ) :
 
 		if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) && 'upload' === $_POST['action'] ) {
-			$message = wporg_themes_process_upload();
+			$message = 'Upload is disabled during Beta/RC.'; // wporg_themes_process_upload(); 
 
 			if ( ! empty( $message ) ) {
 				echo "<div class='notice notice-warning'><p>{$message}</p></div>\n";
