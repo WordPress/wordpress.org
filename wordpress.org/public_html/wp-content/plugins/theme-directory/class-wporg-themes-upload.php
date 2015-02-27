@@ -304,8 +304,9 @@ class WPORG_Themes_Upload {
 	public function has_screenshot( $theme_files ) {
 		$screenshots = preg_grep( '/screenshot.(jpg|jpeg|png|gif)/', $theme_files );
 		usort( $screenshots, array( $this, 'sort_by_string_length' ) );
+		$screenshot = array_pop( $screenshots );
 
-		$this->theme->screenshot = array_pop( $screenshots );
+		$this->theme->screenshot = basename( $screenshot );
 
 		return (bool) $this->theme->screenshot;
 	}
