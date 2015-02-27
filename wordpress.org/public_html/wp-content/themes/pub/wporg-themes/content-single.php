@@ -138,7 +138,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 
 			<div class="theme-support">
 				<h4><?php _e( 'Support', 'wporg-themes' ); ?></h4>
-				<p><?php _e( 'Got something to say? Neeed help?', 'wporg-themes' ); ?></p>
+				<p><?php _e( 'Got something to say? Need help?', 'wporg-themes' ); ?></p>
 				<a href="//wordpress.org/support/theme/<?php echo esc_attr( $slug ); ?>" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 			</div><!-- .theme-support -->
 
