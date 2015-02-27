@@ -249,7 +249,7 @@ class WPORG_Themes_Upload {
 		$tmp_dir   = escapeshellarg( $this->tmp_dir );
 
 		// Unzip it into the theme directory.
-		exec( escapeshellcmd( "{$unzip} {$zip_file} -d {$tmp_dir}" ) );
+		exec( escapeshellcmd( "{$unzip} {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
 	}
 
 	/**
