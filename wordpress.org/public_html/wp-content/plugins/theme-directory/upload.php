@@ -70,7 +70,7 @@ function wporg_themes_get_max_allowed_file_size() {
  */
 function wporg_themes_process_upload( ) {
 	if ( ! is_user_logged_in() ) {
-		return __( 'You must logged in to upload a new theme.', 'wporg-themes' );
+		return __( 'You must be logged in to upload a new theme.', 'wporg-themes' );
 	}
 
 	if ( 0 !== $_FILES['zip_file']['error'] ) {
