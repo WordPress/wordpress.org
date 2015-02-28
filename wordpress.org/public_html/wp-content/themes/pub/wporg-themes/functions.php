@@ -36,7 +36,6 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
  */
 function wporg_themes_scripts() {
 
-	wp_enqueue_style( 'global-style', '//s.w.org/style/wp4.css', array(), '14' );
 	wp_enqueue_style( 'ratings', '//wordpress.org/extend/themes-plugins/bb-ratings/bb-ratings.css', array(), '4' );
 	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
 	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri() );
