@@ -471,7 +471,7 @@
 		collapse: function( event ) {
 			var self = this,
 				args = {},
-				scroll, search, tags, sorter;
+				scroll, author, search, tags, sorter;
 
 			event = event || window.event;
 
@@ -499,7 +499,11 @@
 					scroll = document.body.scrollTop;
 
 					// Clean the url structure
-					if ( search = $( '#wp-filter-search-input' ).val() ) {
+					if ( author = wp.themes.Collection.prototype.currentQuery.request.author ) {
+						wp.themes.router.navigate( wp.themes.router.baseUrl( 'author/' + author ) );
+						wp.themes.utils.title( author );
+					}
+					else if ( search = wp.themes.Collection.prototype.currentQuery.request.search ) {
 						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + search ) );
 						wp.themes.utils.title( search );
 					}
