@@ -157,7 +157,6 @@ function wporg_themes_query_themes() {
 		'num_ratings'  => true,
 		'parent'       => true,
 	) );
-//	$request['cache_buster'] =1;
 	$args = wp_parse_args( $request, array(
 		'per_page' => 20,
 	) );
