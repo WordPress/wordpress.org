@@ -27,7 +27,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 					$parent = get_post( get_post()->post_parent );
 			?>
 			<div class="theme-notice notice notice-info">
-				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/themes/%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
+				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
 			</div>
 			<?php endif; ?>
 		</div><!-- .theme-head -->
