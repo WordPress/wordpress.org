@@ -157,6 +157,7 @@ function wporg_themes_query_themes() {
 		'num_ratings'  => true,
 		'parent'       => true,
 	) );
+//	$request['cache_buster'] =1;
 	$args = wp_parse_args( $request, array(
 		'per_page' => 20,
 	) );
@@ -213,7 +214,6 @@ add_action( 'wp_ajax_nopriv_theme-info', 'wporg_themes_theme_info' );
 
 function wporg_themes_ajax_prepare_theme( $theme ) {
 	global $themes_allowedtags;
-
 	if ( empty( $themes_allowedtags ) ) {
 		$themes_allowedtags = array(
 			'a'       => array( 'href' => array(), 'title' => array(), 'target' => array() ),
