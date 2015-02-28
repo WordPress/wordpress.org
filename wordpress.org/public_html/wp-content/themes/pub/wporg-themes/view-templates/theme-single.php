@@ -7,7 +7,7 @@
 			<button class="right dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show next theme' ); ?></span></button>
 		</div>
 
-		<div class="theme-about hentry">
+		<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
 			<# if ( data.is_outdated ) { #>
 			<div class="theme-notice notice notice-warning">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
@@ -15,8 +15,8 @@
 			<# } #>
 
 			<div class="theme-head">
-				<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.author.user_nicename }}"><span class="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
+				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.author.user_nicename }}"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
 
 				<div class="theme-actions">
 					<a href="{{{ data.preview_url }}}" class="button button-secondary"><?php _e( 'Preview' ); ?></a>
@@ -37,7 +37,7 @@
 				<div class="screenshot blank"></div>
 				<# } #>
 
-				<div class="theme-description entry-summary"><p>{{{ data.description }}}</p></div>
+				<div class="theme-description entry-summary" itemprop="description"><p>{{{ data.description }}}</p></div>
 
 				<# if ( data.tags ) { #>
 				<div class="theme-tags">

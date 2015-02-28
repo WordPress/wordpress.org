@@ -3,7 +3,7 @@ $slug  = get_post()->post_name;
 $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 ?>
 <div class="theme-wrap">
-	<div class="theme-about hentry">
+	<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
 
 		<?php if ( strtotime( '-2 years' ) > get_post_modified_time() ) : ?>
 		<div class="theme-notice notice notice-warning">
@@ -12,9 +12,9 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		<?php endif; ?>
 
 		<div class="theme-head">
-			<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
+			<h3 class="theme-name entry-title" itemprop="name"><?php the_title(); ?></h3>
 			<h4 class="theme-author">
-				<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author">%s</span></a>', get_the_author_meta( 'login' ), esc_html( get_the_author() ) ) ); ?>
+				<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'login' ), esc_html( get_the_author() ) ) ); ?>
 			</h4>
 
 			<div class="theme-actions">
@@ -35,7 +35,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		<div class="theme-info">
 			<div class="screenshot"><?php the_post_thumbnail( '798' ); ?></div>
 
-			<div class="theme-description entry-summary"><?php the_content(); ?></div>
+			<div class="theme-description entry-summary" itemprop="description"><?php the_content(); ?></div>
 
 			<div class="theme-tags">
 				<?php the_tags( '<h4>' . __( 'Tags:' ) . '</h4>' ); ?>
@@ -101,7 +101,6 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 
 		<div class="theme-meta">
 			<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-				<meta itemprop="itemReviewed" content="<?php echo esc_attr( $theme->name ); ?>" />
 				<meta itemprop="ratingValue" content="<?php echo esc_attr( number_format_i18n( $theme->rating / 20, 1 ) ); ?>"/>
 				<meta itemprop="ratingCount" content="<?php echo esc_attr( $theme->num_ratings ); ?>"/>
 				<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
