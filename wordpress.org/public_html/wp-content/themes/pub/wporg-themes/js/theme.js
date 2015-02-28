@@ -615,17 +615,21 @@
 			$( '.filter-links li > a.current' ).removeClass( 'current' );
 			$( 'body' ).removeClass( 'show-filters filters-applied' );
 
+			// Set route
 			if ( value ) {
-				// Get the themes by sending Ajax POST request to api.wordpress.org/themes
-				// or searching the local cache
-				this.collection.query( request );
-
-				// Set route
 				wp.themes.utils.title( value );
 				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + value ), { replace: true } );
 			} else {
-				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + 'featured' ), { trigger: true } );
+				delete request.search;
+				request.browse = 'featured';
+
+				wp.themes.utils.title( $( '.filter-links [data-sort="featured"]' ).text() );
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + 'featured' ), { replace: true } );
 			}
+
+			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
+			// or searching the local cache
+			this.collection.query( request );
 		}, 300 )
 	});
 
