@@ -14,7 +14,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		<div class="theme-head">
 			<h3 class="theme-name entry-title" itemprop="name"><?php the_title(); ?></h3>
 			<h4 class="theme-author">
-				<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'login' ), esc_html( get_the_author() ) ) ); ?>
+				<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'nicename' ), esc_html( get_the_author() ) ) ); ?>
 			</h4>
 
 			<div class="theme-actions">
@@ -27,7 +27,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 					$parent = get_post( get_post()->post_parent );
 			?>
 			<div class="theme-notice notice notice-info">
-				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
+				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/themes/%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
 			</div>
 			<?php endif; ?>
 		</div><!-- .theme-head -->
