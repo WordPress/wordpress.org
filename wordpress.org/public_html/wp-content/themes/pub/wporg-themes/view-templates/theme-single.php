@@ -55,6 +55,7 @@
 
 			<div class="theme-meta">
 				<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+					<meta itemprop="itemReviewed" content="{{ data.name }}" />
 					<meta itemprop="ratingValue" content="{{ (data.rating/20).toFixed(1) }}"/>
 					<meta itemprop="ratingCount" content="{{ data.num_ratings }}"/>
 					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>

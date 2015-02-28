@@ -101,6 +101,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 
 		<div class="theme-meta">
 			<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+				<meta itemprop="itemReviewed" content="<?php echo esc_attr( $theme->name ); ?>" />
 				<meta itemprop="ratingValue" content="<?php echo esc_attr( number_format_i18n( $theme->rating / 20, 1 ) ); ?>"/>
 				<meta itemprop="ratingCount" content="<?php echo esc_attr( $theme->num_ratings ); ?>"/>
 				<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
