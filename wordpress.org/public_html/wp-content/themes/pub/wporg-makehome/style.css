@@ -209,6 +209,9 @@ section.get-involved article h2:before {
 	margin-right: 0.4em;
 	vertical-align: -3px;
 	font-weight:normal;
+	font-size: 20px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 section.get-involved article.make-core          h2:before { content: "\f475"; }
