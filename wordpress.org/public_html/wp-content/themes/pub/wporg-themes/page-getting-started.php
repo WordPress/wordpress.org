@@ -51,6 +51,7 @@ if ( have_posts() ) :
 					<?php printf( __( 'For questions about theme development please use the <a href="%s">Themes and Templates forum</a>.', 'wporg-themes' ),
 						'//wordpress.org/support/forum/themes-and-templates'
 					); ?>
+				</p>
 
 				<?php the_content(); ?>
 			</div><!-- .entry-content -->
