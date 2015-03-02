@@ -18,39 +18,39 @@ if ( have_posts() ) :
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
-				<p><?php printf( __( 'Now that your theme is ready for prime time, give it plenty of attention by <a href="%s">uploading</a> it to the WordPress.org Theme Directory. By hosting it here you&rsquo;ll get:', 'wporg-themes' ), '/themes/upload/' ); ?></p>
+				<p><?php _e( 'The WordPress theme directory is used by millions of WordPress users all over the world. Themes in the directory are available for download from WordPress.org, and WordPress users can also install them directly from their administration screens.', 'wporg-themes' ); ?></p>
+				<p><?php _e( 'By hosting your theme on WordPress.org, you&rsquo;ll get:', 'wporg-themes' ); ?></p>
 				<ul>
 					<li><?php _e( 'Stats on how many times your theme has been downloaded', 'wporg-themes' ); ?></li>
-					<li><?php _e( 'User feed back in the forums', 'wporg-themes' ); ?></li>
-					<li><?php _e( 'Ratings, to see how your theme is doing compared to others', 'wporg-themes' ); ?></li>
+					<li><?php _e( 'User feedback in the forums', 'wporg-themes' ); ?></li>
+					<li><?php _e( 'Ratings, to see what users think of your theme', 'wporg-themes' ); ?></li>
 				</ul>
 				<p>
-					<?php _e( 'The goal of our themes directory isn&rsquo;t to have every theme in the world, it&rsquo;s to have the best.', 'wporg-themes' ); ?>
-					<?php _e( 'WordPress is Open Source, and all the themes we host here are Open Source.', 'wporg-themes' ); ?>
-					<?php _e( 'If you want your theme to be proprietary or promote things that violate WordPress&rsquo; license on your site, the directory probably isn&rsquo;t the best home for your work.', 'wporg-themes' ); ?>
+					<?php _e( 'The goal of the theme directory isn&rsquo;t to host every theme in the world, it&rsquo;s to host the best open source WordPress themes around.', 'wporg-themes' ); ?>
+					<?php _e( 'Themes hosted on WordPress.org pass on the same user freedoms as WordPress itself; this means that they are 100% GPL or compatible.', 'wporg-themes' ); ?>
 				</p>
 
-				<h2 name="requirements"><?php _e( 'Guidelines', 'wporg-themes' ); ?></h2>
+				<h2 name="requirements"><?php _e( 'Guidelines &amp; Resources', 'wporg-themes' ); ?></h2>
 				<p>
-					<?php printf( __( 'Resources for theme authors are available in the Codex on the <a href="%s">Theme Development</a>, <a href="%s">Theme Review</a>, and <a href="%s">Theme Unit Test</a> pages.', 'wporg-themes' ),
-						'http://codex.wordpress.org/Theme_Development',
-						'http://codex.wordpress.org/Theme_Review',
-						'http://codex.wordpress.org/Theme_Unit_Test'
+					<?php printf( __( 'To ensure that WordPress users are guaranteed a good experience, every theme in the directory is reviewed by the theme review team. Please <a href="%s">review the guidelines before uploading your theme</a>.', 'wporg-themes' ),
+					'//make.wordpress.org/themes/handbook/review/'
 					); ?>
-					<?php printf(
-						__( 'For questions about Theme development please use the <a href="%s">Themes and Templates forum</a>.', 'wporg-themes' ),
-						'//wordpress.org/support/forum/5'
+				</p>
+				<p><?php _e( 'Themes from sites that support non-GPL (or compatible) themes or that don&rsquo;t meet with the theme review guidelines will not be approved.', 'wporg-themes' ); ?></p>
+				<p>
+					<?php printf( __( 'Your theme will be reviewed using the <a href="%s">Theme Unit Test data</a>. Before uploading your theme please test it with this sample export data.', 'wporg-themes' ),
+						'//codex.wordpress.org/Theme_Unit_Test'
 					); ?>
-					<?php _e( 'Please make sure to review the guidelines before uploading your Theme file.', 'wporg-themes' ); ?>
 				</p>
 				<p>
-					<?php _e( 'All themes are subject to review. Themes from sites that support non-GPL (or compatible) themes or violate the WordPress community guidelines themes will not be approved.', 'wporg-themes' ); ?>
-					<?php printf(
-						__( 'We will be reviewing your Theme using the sample data available in the WordPress export file available at <a href="%s">Theme Unit Test</a>.', 'wporg-themes' ),
-						'http://codex.wordpress.org/Theme_Unit_Test'
+					<?php printf( __( 'Further resources for theme developers can be found in the Codex on the <a href="%s">Theme Development page</a>.', 'wporg-themes' ),
+						'//codex.wordpress.org/Theme_Development'
 					); ?>
-					<?php _e( 'Before uploading your Theme file please test it with this sample export data.', 'wporg-themes' ); ?>
 				</p>
+				<p>
+					<?php printf( __( 'For questions about theme development please use the <a href="%s">Themes and Templates forum</a>.', 'wporg-themes' ),
+						'//wordpress.org/support/forum/themes-and-templates'
+					); ?>
 
 				<?php the_content(); ?>
 			</div><!-- .entry-content -->
