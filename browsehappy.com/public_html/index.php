@@ -87,7 +87,7 @@ $facebook_pieces = array(
 				</nav>
 			</section><!-- #share -->
 			<div id="byline">
-				<a href="<?php echo esc_url( __( 'http://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), 'WordPress' ); ?></a>
+				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), 'WordPress' ); ?></a>
 			</div><!-- #byline -->
 		</div>
 	</footer>
