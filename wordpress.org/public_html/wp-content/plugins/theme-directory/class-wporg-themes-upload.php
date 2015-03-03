@@ -115,7 +115,7 @@ class WPORG_Themes_Upload {
 
 		// reset the theme directory to be where the stylesheet is
 		$this->theme_dir = dirname( $style_css );
-		
+
 		// Let's check some theme headers, shall we?
 
 		if ( ! $this->theme_name = $this->theme->get( 'Name' ) ) {
@@ -291,7 +291,7 @@ class WPORG_Themes_Upload {
 			 * Specify post stati so this query returns a result for draft themes, even
 			 * if the uploading user doesn't have have the permission to view drafts.
 			 */
-			'post_status'      => array( 'publish', 'pending', 'draft', 'future' ),
+			'post_status'      => array( 'publish', 'pending', 'draft', 'future', 'trash' ),
 			'suppress_filters' => false,
 		) );
 		$theme = current( $themes );
