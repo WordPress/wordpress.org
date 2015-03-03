@@ -26,11 +26,11 @@ if ( have_posts() ) :
 			<div class="entry-content">
 				<p>
 					<?php _e( 'While our directory is full of fantastic themes, sometimes people want to use something that they know has support behind it, and don&rsquo;t mind paying for that.', 'wporg-themes' ); ?>
-					<?php _e( 'Contrary to popular belief, GPL doesn&rsquo;t say that everything must be zero-cost, just that when you receive the software or theme that it not restrict your freedoms in how you use it.', 'wporg-themes' ); ?>
+					<?php _e( 'The GPL doesn&rsquo;t say that everything must be zero-cost, just that when you receive the software it must not restrict your freedoms in how you use it.', 'wporg-themes' ); ?>
 				</p>
 				<p>
 					<?php _e( 'With that in mind, here are a collection of folks who provide GPL themes with extra paid services available around them.', 'wporg-themes' ); ?>
-					<?php _e( 'Some of them you may pay for access, some of them are membership sites, some may give you the theme for zero-cost and just charge for support.', 'wporg-themes' ); ?>
+					<?php _e( 'Some of them you may pay to access, some of them are membership sites, some may give you the theme for zero-cost and just charge for support.', 'wporg-themes' ); ?>
 					<?php _e( 'What they all have in common is people behind them who support open source, WordPress, and its GPL license.', 'wporg-themes' ); ?>
 				</p>
 
