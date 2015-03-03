@@ -7,11 +7,14 @@
 require( 'inc/back-compat.php' );
 
 class WordCamp_Post_Types_Plugin {
+	protected $wcpt_permalinks;
 
 	/**
 	 * Fired when plugin file is loaded.
 	 */
 	function __construct() {
+		$this->wcpt_permalinks = array();
+
 		add_action( 'init', array( $this, 'register_post_types' ) );
 		add_action( 'init', array( $this, 'register_taxonomies' ) );
 		add_action( 'init', array( $this, 'init' ) );
@@ -747,12 +750,12 @@ class WordCamp_Post_Types_Plugin {
 
 		switch( $post->post_type ) {
 			case 'wcb_speaker':
-				$permalink = $this->get_speakers_permalink();
+				$permalink = $this->get_wcpt_permalink( 'speakers' );
 				$anchor_id = $post->post_name;
 				break;
 
 			case 'wcb_session':
-				$permalink = $this->get_sessions_permalink();
+				$permalink = $this->get_wcpt_permalink( 'sessions' );
 				$anchor_id = $post->ID;
 				break;
 
@@ -774,74 +777,42 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
-	 * Returns the speakers page permalink
+	 * Returns the page permalink for speakers, sessions or organizers
 	 *
-	 * Fetches for a post or page with the [speakers] shortcode and
+	 * Fetches for a post or page with the [speakers | sessions | organizers] shortcode and
 	 * returns the permalink of whichever comes first.
+	 *
+	 * @param string $type
+	 *
+	 * @return false | string
 	 */
-	function get_speakers_permalink() {
-		// todo combine this, get_sessions_permalink, and get_organizers_permalink into a DRY function
-		
-		if ( isset( $this->speakers_permalink ) )
-			return $this->speakers_permalink;
+	function get_wcpt_permalink( $type ) {
+		if ( ! in_array( $type, array( 'speakers', 'sessions', 'organizers' ) ) ) {
+			return false;
+		}
 
-		$this->speakers_permalink = false;
+		/*
+		 * The [schedule] shortcode can call this for each session and speaker, so cache the result to avoid
+		 * dozens of SQL queries.
+		 */
+		if ( isset( $this->wcpt_permalinks[ $type ] ) ) {
+			return $this->wcpt_permalinks[ $type ];
+		}
 
-		$speakers_post = get_posts( array(
-			'post_type' => array( 'post', 'page' ),
-			'post_status' => 'publish',
-			's' => '[speakers',
+		$this->wcpt_permalinks[ $type ] = false;
+
+		$wcpt_post = get_posts( array(
+			'post_type'      => array( 'post', 'page' ),
+			'post_status'    => 'publish',
+			's'              => '[' . $type,
 			'posts_per_page' => 1,
 		) );
 
-		if ( ! empty( $speakers_post ) )
-			$this->speakers_permalink = get_permalink( $speakers_post[0] );
+		if ( ! empty( $wcpt_post ) ) {
+			$this->wcpt_permalinks[ $type ] = get_permalink( $wcpt_post[0] );
+		}
 
-		return $this->speakers_permalink;
-	}
-
-	/**
-	 * Returns the sessions page permalink
-	 */
-	function get_sessions_permalink() {
-		if ( isset( $this->sessions_permalink ) )
-			return $this->sessions_permalink;
-
-		$this->sessions_permalink = false;
-
-		$sessions_post = get_posts( array(
-			'post_type' => array( 'post', 'page' ),
-			'post_status' => 'publish',
-			's' => '[sessions',
-			'posts_per_page' => 1,
-		) );
-
-		if ( ! empty( $sessions_post ) )
-			$this->sessions_permalink = get_permalink( $sessions_post[0] );
-
-		return $this->sessions_permalink;
-	}
-
-	/**
-	 * Returns the organizers page permalink
-	 */
-	function get_organizers_permalink() {
-		if ( isset( $this->organizers_permalink ) )
-			return $this->organizers_permalink;
-
-		$this->organizers_permalink = false;
-
-		$organizers_post = get_posts( array(
-			'post_type' => array( 'post', 'page' ),
-			'post_status' => 'publish',
-			's' => '[organizers',
-			'posts_per_page' => 1,
-		) );
-
-		if ( ! empty( $organizers_post ) )
-			$this->organizers_permalink = get_permalink( $organizers_post[0] );
-
-		return $this->organizers_permalink;
+		return $this->wcpt_permalinks[ $type ];
 	}
 
 	/**

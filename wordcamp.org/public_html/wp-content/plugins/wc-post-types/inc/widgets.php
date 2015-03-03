@@ -148,7 +148,7 @@ class WCPT_Widget_Speakers extends WP_Widget {
 
 		echo $widget_content;
 
-		$speakers_permalink = $wcpt_plugin->get_speakers_permalink();
+		$speakers_permalink = $wcpt_plugin->get_wcpt_permalink( 'speakers' );
 		if ( ! empty( $speakers_permalink ) )
 			printf( '<a class="wcpt-speakers-link" href="%s">%s</a>', esc_url( $speakers_permalink ), esc_html( __( 'View all speakers &rarr;', 'wordcamporg' ) ) );
 
@@ -254,7 +254,7 @@ class WCPT_Widget_Sessions extends WP_Widget {
 
 		echo $widget_content;
 
-		$sessions_permalink = $wcpt_plugin->get_sessions_permalink();
+		$sessions_permalink = $wcpt_plugin->get_wcpt_permalink( 'sessions' );
 		if ( ! empty( $sessions_permalink ) )
 			printf( '<a class="wcpt-sessions-link" href="%s">%s</a>', esc_url( $sessions_permalink ), esc_html( __( 'View all sessions &rarr;', 'wordcamporg' ) ) );
 
@@ -355,7 +355,7 @@ class WCPT_Widget_Organizers extends WP_Widget {
 
 		echo $widget_content;
 
-		$organizers_permalink = $wcpt_plugin->get_organizers_permalink();
+		$organizers_permalink = $wcpt_plugin->get_wcpt_permalink( 'organizers' );
 		if ( ! empty( $organizers_permalink ) )
 			printf( '<a class="wcpt-organizers-link" href="%s">%s</a>', esc_url( $organizers_permalink ), esc_html( __( 'Organizing team &rarr;', 'wordcamporg' ) ) );
 
