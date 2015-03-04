@@ -68,6 +68,7 @@
 		sort: function( sort ) {
 			var sorter = $( '.filter-links [data-sort="' + sort + '"]' );
 			this.clearSearch();
+			this.clearFilters( new Event( 'click' ) );
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 			sorter.addClass( this.activeClass );
@@ -595,6 +596,8 @@
 
 		doSearch: _.debounce( function( value ) {
 			var request = {};
+
+			wp.themes.view.Installer.prototype.clearFilters( new Event( 'click' ) );
 
 			request.search = value;
 
