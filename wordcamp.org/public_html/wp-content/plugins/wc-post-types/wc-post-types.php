@@ -733,30 +733,32 @@ class WordCamp_Post_Types_Plugin {
 	/**
 	 * Returns an anchor permalink for a Speaker or Session
 	 *
-	 * If the speakers page is rendered with the [speakers] shortcode, it will
-	 * contain IDs that can be used as anchors. This function will attempt to find
-	 * a speakers page and link to the appropriate anchor.
+	 * Any page with the [speakers | sessions] shortcode will contain IDs that can be used as anchors.
 	 *
-	 * @param $post_id int The speaker/session's post ID.
+	 * If the current page contains the corresponding shortcode, we'll assume the user wants to link there.
+	 * Otherwise, we'll attempt to find another page that contains the shortcode.
+	 *
+	 * @param $target_id int The speaker/session's post ID.
 	 *
 	 * @return string
 	 */
-	function get_wcpt_anchor_permalink( $post_id ) {
-		$post = get_post( $post_id );
+	function get_wcpt_anchor_permalink( $target_id ) {
+		global $post;
+		$anchor_target = get_post( $target_id );
 
-		if ( 'publish' != $post->post_status ) {
+		if ( 'publish' != $anchor_target->post_status ) {
 			return '';
 		}
 
-		switch( $post->post_type ) {
+		switch( $anchor_target->post_type ) {
 			case 'wcb_speaker':
-				$permalink = $this->get_wcpt_permalink( 'speakers' );
-				$anchor_id = $post->post_name;
+				$permalink = has_shortcode( $post->post_content, 'speakers' ) ? get_permalink( $post->id ) : $this->get_wcpt_permalink( 'speakers' );
+				$anchor_id = $anchor_target->post_name;
 				break;
 
 			case 'wcb_session':
-				$permalink = $this->get_wcpt_permalink( 'sessions' );
-				$anchor_id = $post->ID;
+				$permalink = has_shortcode( $post->post_content, 'sessions' ) ? get_permalink( $post->id ) : $this->get_wcpt_permalink( 'sessions' );
+				$anchor_id = $anchor_target->ID;
 				break;
 
 			default:
@@ -771,7 +773,7 @@ class WordCamp_Post_Types_Plugin {
 		return sprintf(
 			'%s#wcorg-%s-%s',
 			$permalink,
-			str_replace( 'wcb_', '', $post->post_type ),
+			str_replace( 'wcb_', '', $anchor_target->post_type ),
 			sanitize_html_class( $anchor_id )
 		);
 	}
@@ -851,7 +853,7 @@ class WordCamp_Post_Types_Plugin {
 		$attr['avatar_size'] = absint( $attr['avatar_size'] );
 
 		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
-			$attr['speaker_link'] = 'anchor';
+			$attr['speaker_link'] = 'anchor';   // todo this is inconsistent with the values passed to shortcode_atts, and probably not needed if the default above is changed to 'anchor'
 
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 
