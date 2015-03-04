@@ -246,6 +246,7 @@ function wporg_themes_ajax_prepare_theme( $theme ) {
 	$theme->version     = wp_kses( $theme->version, $themes_allowedtags );
 	$theme->description = wp_kses( $theme->description, $themes_allowedtags );
 	$theme->downloaded  = number_format_i18n( $theme->downloaded );
+	$theme->rating_text = sprintf( _n( '(based on %s rating)', '(based on %s ratings)', $theme->num_ratings ), number_format_i18n( $theme->num_ratings ) );
 	$theme->num_ratings = number_format_i18n( $theme->num_ratings );
 	$theme->preview_url = set_url_scheme( $theme->preview_url );
 

@@ -21,8 +21,8 @@
 						<span class="four"></span>
 						<span class="five"></span>
 
-						<# if ( data.num_ratings ) { #>
-						<small class="ratings"><?php printf( __( '(based on %s ratings).', 'wporg-themes' ), '{{ data.num_ratings }}' ); ?></small>
+						<# if ( data.num_ratings > 0 ) { #>
+						<small class="ratings">{{ data.rating_text }}</small>
 						<# } else { #>
 						<small class="ratings"><?php _e( 'No ratings.' ); ?></small>
 						<# } #>
