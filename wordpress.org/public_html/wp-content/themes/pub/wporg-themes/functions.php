@@ -48,6 +48,7 @@ function wporg_themes_scripts() {
 
 		wp_localize_script( 'theme', '_wpThemeSettings', array(
 			'themes'   => false,
+			'query'    => wporg_themes_prepare_themes_for_js(),
 			'settings' => array(
 				'title'      => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
 				'isMobile'   => wp_is_mobile(),
@@ -109,6 +110,58 @@ function wporg_themes_wp_title( $title, $sep ) {
 	return $title;
 }
 add_filter( 'wp_title', 'wporg_themes_wp_title', 10, 2 );
+
+/**
+ * Bootstraps found themes for the frontend JS handler.
+ *
+ * @return array
+ */
+function wporg_themes_prepare_themes_for_js() {
+	global $wp_query;
+
+	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
+	$api = new Themes_API( 'get_result' );
+	$api->fields = array_merge( $api->fields, array(
+		'description'  => true,
+		'sections'     => false,
+		'tested'       => true,
+		'requires'     => true,
+		'rating'       => true,
+		'ratings'      => true,
+		'downloaded'   => true,
+		'downloadlink' => true,
+		'last_updated' => true,
+		'homepage'     => true,
+		'tags'         => true,
+		'num_ratings'  => true,
+		'parent'       => true,
+	) );
+
+	$themes = array_map( array( $api, 'fill_theme' ), $wp_query->posts );
+	$themes = array_map( 'wporg_themes_ajax_prepare_theme', $themes );
+
+	$request = array();
+	if ( get_query_var( 'browse' ) ) {
+		$request['browse'] = get_query_var( 'browse' );
+	} else if ( $wp_query->is_tag() ) {
+		$request['tag'] = (array) explode( '+', get_query_var( 'tag' ) );
+	}
+	else if ( $wp_query->is_search() ) {
+		$request['search'] = get_query_var( 's' );
+	}
+	else if ( $wp_query->is_author() ) {
+		$request['author'] = get_user_by( 'id', get_query_var( 'author' ) )->user_nicename;
+	}
+	else if ( $wp_query->is_singular( 'repopackage' ) ) {
+		$request['theme'] = get_query_var( 'name' );
+	}
+
+	return array(
+		'themes'  => $themes,
+		'request' => $request,
+		'total'   => $wp_query->found_posts,
+	);
+ }
 
 /**
  * @param  object $args

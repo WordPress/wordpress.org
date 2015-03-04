@@ -62,7 +62,7 @@ get_header();
 		</div><!-- .wp-filter -->
 
 		<div class="theme-browser content-filterable">
-			<div class="themes" style="display:none;">
+			<div class="themes">
 				<?php
 					while ( have_posts() ) :
 						the_post();

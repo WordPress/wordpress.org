@@ -643,7 +643,7 @@
 	_.extend( wp.themes.InstallerRouter.prototype, {
 		routes: {
 			'browse/:sort/'  : 'sort',
-			'tags/:tag/'      : 'tag',
+			'tags/:tag/'     : 'tag',
 			'search/:query/' : 'search',
 			'author/:author/': 'author',
 			':slug/preview/' : 'preview',
@@ -664,19 +664,49 @@
 	});
 
 	_.extend( wp.themes.RunInstaller, {
-		extraRoutes: function() {
+		routes: function() {
 			var self = this,
-			request = {};
+				request = {};
 
-			// Open the modal when matching the route for a single themes.
+			// Bind to our global `wp.themes` object
+			// so that the router is available to sub-views
+			wp.themes.router = new wp.themes.InstallerRouter();
+
+			// Handles `theme` route event
+			// Queries the API for the passed theme slug
 			wp.themes.router.on( 'route:preview', function( slug ) {
+				self.view.collection.queries.push( wp.themes.data.query );
+
+				request.theme = slug;
+				self.view.collection.query( request );
+
 				$( '.close-full-overlay' ).trigger( 'click' );
-				this.listenToOnce( self.view.collection, 'query:success', function() {
-					self.view.view.expand( slug );
-				});
+				self.view.view.expand( slug );
+			});
+
+			// Handles sorting / browsing routes
+			// Also handles the root URL triggering a sort request
+			// for `featured`, the default view
+			wp.themes.router.on( 'route:sort', function( sort ) {
+				self.view.collection.queries.push( wp.themes.data.query );
+
+				if ( ! sort ) {
+					sort = 'featured';
+				}
+				self.view.sort( sort );
+				self.view.trigger( 'theme:close' );
+			});
+
+			// The `search` route event. The router populates the input field.
+			wp.themes.router.on( 'route:search', function() {
+				self.view.collection.queries.push( wp.themes.data.query );
+
+				$( '.wp-filter-search' ).focus().trigger( 'keyup' );
 			});
 
 			wp.themes.router.on( 'route:tag', function( tag ) {
+				self.view.collection.queries.push( wp.themes.data.query );
+
 				_.each( tag.split( '+' ), function( tag ) {
 					$( '#filter-id-' + tag ).prop( 'checked', true );
 				});
@@ -685,10 +715,14 @@
 			});
 
 			wp.themes.router.on( 'route:author', function( author ) {
+				self.view.collection.queries.push( wp.themes.data.query );
+
 				request.author = author;
 				self.view.collection.query( request );
 				wp.themes.utils.title( author );
 			});
+
+			this.extraRoutes();
 		}
 	});
 

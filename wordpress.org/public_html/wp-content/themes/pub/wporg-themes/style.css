@@ -270,6 +270,9 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 /**
  * Theme heading information
  */
+.single.single-repopackage .themes .theme-wrap {
+	visibility: hidden;
+}
 .single .theme-wrap .current-label {
 	background: #333;
 	color: #fff;
