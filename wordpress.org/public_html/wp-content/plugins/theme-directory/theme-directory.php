@@ -114,13 +114,23 @@ function wporg_themes_set_up_query( $wp_query ) {
 				break;
 
 			case 'popular':
-				add_filter( 'posts_clauses',  'wporg_themes_popular_posts_clauses' );
+				add_filter( 'posts_clauses', 'wporg_themes_popular_posts_clauses' );
 				break;
 
 			case 'new':
 				// Nothing to do here.
 				break;
+
 		}
+
+		// Only return themes that were updated in the last two years for all 'browse' requests.
+		$wp_query->set( 'date_query', array(
+			array(
+				'column' => 'post_modified_gmt',
+				'after'  => '-2 years',
+			),
+		) );
+
 	}
 
 	return $wp_query;
