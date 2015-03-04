@@ -115,6 +115,8 @@
 						</li>
 					</ul>
 					<# } #>
+
+					<a class="button button-secondary" href="https://wordpress.org/support/view/theme-reviews/{{ data.id }}#postform"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">

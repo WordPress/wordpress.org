@@ -208,7 +208,7 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 }
 .theme-wrap .theme-ratings ul {
 	list-style-type: none;
-	margin: 0;
+	margin: 0 0 1.5em;
 	padding: 0;
 }
 .theme-wrap .theme-ratings .counter-container,
