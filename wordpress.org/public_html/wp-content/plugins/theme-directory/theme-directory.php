@@ -229,6 +229,30 @@ function wporg_themes_pre_insert_term( $term ) {
 add_filter( 'pre_insert_term', 'wporg_themes_pre_insert_term' );
 
 /**
+ * Returns the specified meta value for a version of a theme.
+ *
+ * @param int          $post_id Post ID.
+ * @param string       $meta_key Post meta key.
+ * @param string       $version Optional. The theme version to get the meta value for. Default: 'latest'.
+ * @return bool|string The version-specific meta value or False on failure.
+ */
+function wporg_themes_get_version_meta( $post_id, $meta_key, $version = 'latest' ) {
+	$value = false;
+	$meta  = (array) get_post_meta( $post_id, $meta_key, true );
+
+	if ( 'latest' == $version ) {
+		$package = new WPORG_Themes_Repo_Package( $post_id );
+		$version = $package->latest_version();
+	}
+
+	if ( ! empty( $meta[ $version ] ) ) {
+		$value = $meta[ $version ];
+	}
+
+	return $value;
+}
+
+/**
  * Returns the status of a theme's version.
  *
  * @param int          $post_id Post ID.
@@ -236,15 +260,10 @@ add_filter( 'pre_insert_term', 'wporg_themes_pre_insert_term' );
  * @return bool|string The version-specific meta value or False on failure.
  */
 function wporg_themes_get_version_status( $post_id, $version ) {
-	$status = false;
-	$meta   = (array) get_post_meta( $post_id, '_status', true );
-
-	if ( ! empty( $meta[ $version ] ) ) {
-		$status = $meta[ $version ];
-	}
-
-	return $status;
+	return wporg_themes_get_version_meta( $post_id, '_status', $version );
 }
+
+/* UPDATING THEME VERSIONS */
 
 /**
  * Handles updating the status of theme versions.
@@ -279,8 +298,142 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 			break;
 	}
 
+	/**
+	 * @param int    $post_id         Post ID.
+	 * @param string $current_version The theme version that was updated.
+	 * @param string $new_status      The new status for that theme version.
+	 */
+	do_action( 'wporg_themes_update_version_status', $post_id, $current_version, $new_status );
+
+	/**
+	 * The dynamic portion of the hook name, `$new_status`, refers to the new
+	 * status of that theme version.
+	 *
+	 * @param int    $post_id         Post ID.
+	 * @param string $current_version The theme version that was updated.
+	 */
+	do_action( "wporg_themes_update_version_{$new_status}", $post_id, $current_version );
+
 	return update_post_meta( $post_id, '_status', $meta );
 }
+
+/**
+ * Approves a theme.
+ *
+ * Sets theme version to live, publishes a theme if initially approved, and notifies the theme author.
+ *
+ * @param int    $post_id
+ * @param string $version
+ */
+function wporg_themes_approve_version( $post_id, $version ) {
+	$post      = get_post( $post_id );
+	$ticket_id = wporg_themes_get_version_meta( $post_id, '_ticket_id', $version );
+	$subject = $content = '';
+
+	// TODO: Set locale to theme author language.
+
+	// Congratulate theme author!
+	if ( 'publish' == $post->post_status ) {
+		$subject = sprintf( __( '[WordPress Themes] %1$s %2$s is now live', 'wporg-themes' ), $post->post_title, $version );
+		$content = sprintf( __( 'Version %1$s of %2$s is now live at https://wordpress.org/themes/%3$s.', 'wporg-themes' ), $version, $post->post_title, $post->post_name ) . "\n\n";
+
+	} else {
+		$subject = sprintf( __( '[WordPress Themes] %s has been approved!', 'wporg-themes' ), $post->post_title );
+		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at https://wordpress.org/themes/%2$s.', 'wporg-themes' ), $post->post_title, $post->post_name ) . "\n\n";
+
+		// First time approval: Publish the theme.
+		wp_publish_post( $post_id );
+	}
+
+	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";
+	$content .= __( 'The WordPress.org Themes Team', 'wporg-themes' ) . "\n";
+	$content .= 'https://make.wordpress.org/themes';
+
+	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: themes@wordpress.org' );
+
+	wporg_themes_update_wpthemescom( $post->post_name, $version );
+}
+add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 2 );
+
+/**
+ * Closes a theme.
+ *
+ * Sets theme version to old and notifies the theme author.
+ *
+ * @param int    $post_id
+ * @param string $version
+ */
+function wporg_themes_close_version( $post_id, $version ) {
+	$post      = get_post( $post_id );
+	$ticket_id = wporg_themes_get_version_meta( $post_id, '_ticket_id', $version );
+
+	// TODO: Set locale to theme author language.
+
+	// Notify theme author.
+	$subject  = sprintf( __( '[WordPress Themes] %s - feedback', 'wporg-themes' ), $post->post_title );
+	$content  = sprintf( __( 'Feedback for the %1$s theme is at https://themes.trac.wordpress.org/ticket/%2$s', 'wporg' ) . "\n\n--\n", $post->post_title, $ticket_id );
+	$content .= __( 'The WordPress.org Themes Team', 'wporg-themes' ) . "\n";
+	$content .= 'https://make.wordpress.org/themes';
+
+	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: themes@wordpress.org' );
+}
+add_action( 'wporg_themes_update_version_old', 'wporg_themes_close_version', 10, 2 );
+
+/**
+ * Updates wp-themes.com with the latest version of a theme.
+ *
+ * @param string $theme_slug
+ * @param string $theme_version
+ */
+function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
+	global $wporg_webs;
+	if ( ! $wporg_webs ) {
+		return;
+	}
+
+	foreach ( $wporg_webs as $server ) {
+		wp_remote_post( "http://$server/", array(
+			'body'    => array(
+				'theme_update'        => $theme_slug,
+				'theme_version'       => $theme_version,
+				'theme_action'        => 'update',
+				'theme_update_secret' => THEME_PREVIEWS_SYNC_SECRET,
+			),
+			'headers' => array(
+				'Host' => 'wp-themes.com',
+			),
+		) );
+	}
+}
+
+/**
+ * Completely removes a theme from wp-themes.com.
+ *
+ * This method is currently not in use.
+ *
+ * @param string $theme_slug
+ */
+function wporg_themes_remove_wpthemescom( $theme_slug ) {
+	global $wporg_webs;
+	if ( ! $wporg_webs ) {
+		return;
+	}
+
+	foreach ( $wporg_webs as $server ) {
+		wp_remote_post( "http://$server/", array(
+			'body'    => array(
+				'theme_update'        => $theme_slug,
+				'theme_action'        => 'remove',
+				'theme_update_secret' => THEME_PREVIEWS_SYNC_SECRET,
+			),
+			'headers' => array(
+				'Host' => 'wp-themes.com',
+			),
+		) );
+	}
+}
+
+/* REPOPACKAGE EDITOR ENHANCEMENTS */
 
 /**
  * Use theme screen shot for post thumbnails.
@@ -301,7 +454,6 @@ function wporg_themes_post_thumbnail_html( $html, $post_id, $post_thumbnail_id, 
 	return $html;
 }
 add_filter( 'post_thumbnail_html', 'wporg_themes_post_thumbnail_html', 10, 5 );
-
 
 /**
  * Prevents repopackages from being deleted.
