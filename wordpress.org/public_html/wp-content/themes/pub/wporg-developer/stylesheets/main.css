@@ -1437,6 +1437,11 @@ input {
 .devhub-wrap .user-voted.user-note-voting-down .dashicons {
   color: red;
 }
+.devhub-wrap .syntaxhighlighter {
+  /* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
+  max-width: 100% !important;
+  width: inherit !important;
+}
 
 @media (max-width: 60em) {
   .devhub-wrap {

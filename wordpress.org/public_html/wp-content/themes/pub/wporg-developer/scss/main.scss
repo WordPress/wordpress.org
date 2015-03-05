@@ -1320,6 +1320,12 @@
 	.user-voted.user-note-voting-down .dashicons {
 		color: red;
 	}
+
+	.syntaxhighlighter {
+		/* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
+		max-width: 100% !important;
+		width: inherit !important;
+	}
 }
 
 @media ( max-width: 59.999999em ) {
