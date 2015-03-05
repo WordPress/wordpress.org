@@ -335,11 +335,13 @@ function wporg_themes_approve_version( $post_id, $version ) {
 	// Congratulate theme author!
 	if ( 'publish' == $post->post_status ) {
 		$subject = sprintf( __( '[WordPress Themes] %1$s %2$s is now live', 'wporg-themes' ), $post->post_title, $version );
-		$content = sprintf( __( 'Version %1$s of %2$s is now live at https://wordpress.org/themes/%3$s.', 'wporg-themes' ), $version, $post->post_title, $post->post_name ) . "\n\n";
+		// Translators: 1: Theme version number; 2: Theme name; 3: Theme URL.
+		$content = sprintf( __( 'Version %1$s of %2$s is now live at %3$s.', 'wporg-themes' ), $version, $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
 
 	} else {
 		$subject = sprintf( __( '[WordPress Themes] %s has been approved!', 'wporg-themes' ), $post->post_title );
-		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at https://wordpress.org/themes/%2$s.', 'wporg-themes' ), $post->post_title, $post->post_name ) . "\n\n";
+		// Translators: 1: Theme name; 2: Theme URL.
+		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
 
 		// First time approval: Publish the theme.
 		wp_publish_post( $post_id );
@@ -371,7 +373,8 @@ function wporg_themes_close_version( $post_id, $version ) {
 
 	// Notify theme author.
 	$subject  = sprintf( __( '[WordPress Themes] %s - feedback', 'wporg-themes' ), $post->post_title );
-	$content  = sprintf( __( 'Feedback for the %1$s theme is at https://themes.trac.wordpress.org/ticket/%2$s', 'wporg' ) . "\n\n--\n", $post->post_title, $ticket_id );
+	// Translators: 1: Theme name; 2: Ticket URL.
+	$content  = sprintf( __( 'Feedback for the %1$s theme is at %2$s', 'wporg' ) . "\n\n--\n", $post->post_title, "https://themes.trac.wordpress.org/ticket/{$ticket_id}" );
 	$content .= __( 'The WordPress.org Themes Team', 'wporg-themes' ) . "\n";
 	$content .= 'https://make.wordpress.org/themes';
 
