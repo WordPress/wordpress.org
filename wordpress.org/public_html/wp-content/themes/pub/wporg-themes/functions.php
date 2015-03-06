@@ -293,7 +293,7 @@ function wporg_themes_ajax_prepare_theme( $theme ) {
 		);
 	}
 
-	$author        = get_user_by( 'login', $theme->author );
+	$author        = get_user_by( 'slug', $theme->author );
 	$theme->author = new StdClass;
 	foreach ( array( 'user_nicename', 'display_name' ) as $property ) {
 		$theme->author->$property = get_the_author_meta( $property, $author->ID );
