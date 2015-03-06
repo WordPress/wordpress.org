@@ -28,6 +28,13 @@
 					<p class="parent"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="/themes/%1$s/">%2$s</a>', '{{{ data.parent.slug }}}', '{{{ data.parent.name }}}' ) ); ?></p>
 				</div>
 				<# } #>
+
+				<div class="theme-meta-info">
+					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>{{ new Date( data.last_updated ).toLocaleDateString() }}</strong>' ); ?></p>
+					<# if ( data.theme_url ) { #>
+					<a href="{{ data.theme_url }}"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
+					<# } #>
+				</div>
 			</div><!-- .theme-head -->
 
 			<div class="theme-info">

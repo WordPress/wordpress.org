@@ -176,6 +176,19 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 	width: 45%;
 }
 
+.theme-wrap .theme-meta-info {
+	margin: 1.5em 0 0;
+}
+
+.theme-wrap .theme-meta-info .updated {
+	margin: 0 0 0.5em;
+}
+
+.theme-wrap .theme-meta-info a:after {
+	content: '\2192';
+	margin-left: 5px;
+}
+
 .theme-overlay .theme-description,
 .theme-overlay .theme-tags {
 	margin: 0;
@@ -183,7 +196,8 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 }
 
 .theme-wrap .theme-devs,
-.theme-wrap .theme-support {
+.theme-wrap .theme-support,
+.theme-wrap .theme-meta-info {
 	font-size: 1.4em;
 }
 

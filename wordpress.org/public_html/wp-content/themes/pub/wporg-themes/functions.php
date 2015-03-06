@@ -38,7 +38,7 @@ function wporg_themes_scripts() {
 
 	wp_enqueue_style( 'ratings', '//wordpress.org/extend/themes-plugins/bb-ratings/bb-ratings.css', array(), '4' );
 	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
-	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri() );
+	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri(), array(), filemtime( __DIR__ . '/style.css' ) );
 
 	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null );
 
@@ -135,6 +135,7 @@ function wporg_themes_prepare_themes_for_js() {
 		'tags'         => true,
 		'num_ratings'  => true,
 		'parent'       => true,
+		'theme_url'    => true,
 	) );
 
 	$themes = array_map( array( $api, 'fill_theme' ), $wp_query->posts );
@@ -172,9 +173,10 @@ function wporg_themes_prepare_themes_for_js() {
 function wporg_themes_api_args( $args, $action ) {
 	if ( in_array( $action, array( 'query_themes', 'theme_information' ) ) ) {
 		$args->per_page = 30;
-		$args->fields['parent']  = true;
-		$args->fields['ratings'] = true;
-		$args->fields['tags']    = true;
+		$args->fields['parent']    = true;
+		$args->fields['ratings']   = true;
+		$args->fields['tags']      = true;
+		$args->fields['theme_url'] = true;
 	}
 
 	return $args;
@@ -208,6 +210,7 @@ function wporg_themes_query_themes() {
 		'tags'         => true,
 		'num_ratings'  => true,
 		'parent'       => true,
+		'theme_url'    => true,
 	) );
 	$args = wp_parse_args( $request, array(
 		'per_page' => 20,
@@ -246,6 +249,7 @@ function wporg_themes_theme_info() {
 		'tags'         => true,
 		'num_ratings'  => true,
 		'parent'       => true,
+		'theme_url'    => true,
 	) );
 
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';

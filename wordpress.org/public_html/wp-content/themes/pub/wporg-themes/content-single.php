@@ -30,6 +30,16 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
 			</div>
 			<?php endif; ?>
+
+			<div class="theme-meta-info">
+				<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>' . date_i18n( get_option( 'date_format' ), strtotime( $theme->last_updated ) ) . '</strong>' ); ?></p>
+				<?php
+					$theme_url = wporg_themes_get_version_meta( get_the_ID(), '_theme_url', $theme->version );
+					if ( ! empty( $theme_url ) ) :
+				?>
+				<a href="<?php echo esc_url( $theme_url ); ?>"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
+				<?php endif; ?>
+			</div>
 		</div><!-- .theme-head -->
 
 		<div class="theme-info">
