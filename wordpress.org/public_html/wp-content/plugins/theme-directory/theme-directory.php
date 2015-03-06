@@ -275,7 +275,13 @@ function wporg_themes_get_version_status( $post_id, $version ) {
  *                  false on failure.
  */
 function wporg_themes_update_version_status( $post_id, $current_version, $new_status ) {
-	$meta = get_post_meta( $post_id, '_status', true );
+	$meta       = get_post_meta( $post_id, '_status', true );
+	$old_status = $meta[ $current_version ];
+
+	// Don't do anything when the status hasn't changed.
+	if ( $new_status == $old_status ) {
+		return;
+	}
 
 	switch ( $new_status ) {
 		// There can only be one version with these statuses:
@@ -302,8 +308,9 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 	 * @param int    $post_id         Post ID.
 	 * @param string $current_version The theme version that was updated.
 	 * @param string $new_status      The new status for that theme version.
+	 * @param string $old_status      The old status for that theme version.
 	 */
-	do_action( 'wporg_themes_update_version_status', $post_id, $current_version, $new_status );
+	do_action( 'wporg_themes_update_version_status', $post_id, $current_version, $new_status, $old_status );
 
 	/**
 	 * The dynamic portion of the hook name, `$new_status`, refers to the new
@@ -311,8 +318,9 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 	 *
 	 * @param int    $post_id         Post ID.
 	 * @param string $current_version The theme version that was updated.
+	 * @param string $old_status      The old status for that theme version.
 	 */
-	do_action( "wporg_themes_update_version_{$new_status}", $post_id, $current_version );
+	do_action( "wporg_themes_update_version_{$new_status}", $post_id, $current_version, $old_status );
 
 	return update_post_meta( $post_id, '_status', $meta );
 }
@@ -324,9 +332,21 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
  *
  * @param int    $post_id
  * @param string $version
+ * @param string $old_status
  */
-function wporg_themes_approve_version( $post_id, $version ) {
-	$post      = get_post( $post_id );
+function wporg_themes_approve_version( $post_id, $version, $old_status ) {
+	$post = get_post( $post_id );
+
+	wporg_themes_update_wpthemescom( $post->post_name, $version );
+
+	/*
+	 * Bail if we're activating an old version, the author does not need to be
+	 * notified about that.
+	 */
+	if ( 'old' == $old_status ) {
+		return;
+	}
+
 	$ticket_id = wporg_themes_get_version_meta( $post_id, '_ticket_id', $version );
 	$subject = $content = '';
 
@@ -352,10 +372,8 @@ function wporg_themes_approve_version( $post_id, $version ) {
 	$content .= 'https://make.wordpress.org/themes';
 
 	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: themes@wordpress.org' );
-
-	wporg_themes_update_wpthemescom( $post->post_name, $version );
 }
-add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 2 );
+add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
 
 /**
  * Closes a theme.
@@ -381,6 +399,52 @@ function wporg_themes_close_version( $post_id, $version ) {
 	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: themes@wordpress.org' );
 }
 add_action( 'wporg_themes_update_version_old', 'wporg_themes_close_version', 10, 2 );
+
+/**
+ * Rolls back a live theme version.
+ *
+ * If the rolledback version was live, it finds the previous live version and
+ * sets it live again.
+ *
+ * @param int    $post_id
+ * @param string $version
+ * @param string $old_status
+ */
+function wporg_themes_rollback_version( $post_id, $current_version, $old_status ) {
+	// If the version wasn't live, there's nothing for us to do.
+	if ( 'live' != $old_status ) {
+		return;
+	}
+
+	if ( ! class_exists( 'Trac' ) ) {
+		require_once ABSPATH . WPINC . '/class-IXR.php';
+		require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
+		require_once WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
+	}
+
+	// Check for tickets that were set to live previously.
+	$trac    = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
+	$tickets = (array) $trac->ticket_query( add_query_arg( array(
+		'status'     => 'closed',
+		'resolution' => 'live',
+		'keywords'   => '~theme-' . get_post( $post_id )->post_name,
+		'order'      => 'changetime',
+		'desc'       => 1,
+	) ) );
+	$ticket = next( $tickets );
+
+	// Bail if there is no prior live versions.
+	if ( ! $ticket ) {
+		return;
+	}
+
+	// Find the version number associated with the approved ticket.
+	$ticket_ids   = get_post_meta( $post_id, '_ticket_id', true );
+	$prev_version = array_search( $ticket, $ticket_ids );
+
+	wporg_themes_update_version_status( $post_id, $prev_version, 'live' );
+}
+add_action( 'wporg_themes_update_version_new', 'wporg_themes_rollback_version', 10, 3 );
 
 /**
  * Updates wp-themes.com with the latest version of a theme.
