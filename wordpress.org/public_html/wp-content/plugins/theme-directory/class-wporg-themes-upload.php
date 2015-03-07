@@ -552,7 +552,6 @@ TICKET;
 		$post_meta   = array(
 			'_theme_url'   => $this->theme->get( 'ThemeURI' ),
 			'_author_url'  => $this->theme->get( 'AuthorURI' ),
-			'_status'      => 'new',
 			'_upload_date' => $upload_date,
 			'_ticket_id'   => $ticket_id,
 			'_screenshot'  => $this->theme->screenshot,
