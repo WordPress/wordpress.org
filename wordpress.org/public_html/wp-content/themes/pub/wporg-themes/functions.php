@@ -28,6 +28,8 @@ function wporg_themes_setup() {
 	add_theme_support( 'html5', array(
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
+
+	add_filter('redirect_canonical','__return_false');
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
