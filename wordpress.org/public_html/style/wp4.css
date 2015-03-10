@@ -330,7 +330,6 @@ a img.aligncenter {
 }
 
 #wporg-header ul li#download {
-	display: none;
 	height: 34px;
 	padding: 0 0 34px;
 	float: right;
@@ -345,6 +344,25 @@ a img.aligncenter {
 
 #wporg-header ul li#download a:hover {
 	color: #eee;
+}
+
+@media screen and (max-width:800px) {
+	#wporg-header ul li#download {
+		display: none;
+	}
+}
+
+@media screen and (max-width:768px) {
+	#wporg-header ul li#download {
+		display: block;
+		float: none;
+		margin: 10px 20px 20px;
+		padding-bottom: 0;
+		height: auto;
+	}
+	#wporg-header ul li#download a {
+		padding: 4px 10px;
+	}
 }
 
 #mobile-menu-button {
@@ -427,7 +445,7 @@ a img.aligncenter {
   }
 }
 
-@media screen and (min-width:768px) {
+@media screen and (min-width:769px) {
 
 	#wporg-header {
 		height: 120px;
@@ -578,10 +596,6 @@ a img.aligncenter {
 }
 
 @media screen and (min-width:800px) {
-	#wporg-header ul li#download {
-		display: list-item;
-	}
-
 	#download-mobile {
 		display: none;
 	}
