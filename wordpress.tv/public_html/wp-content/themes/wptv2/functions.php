@@ -213,9 +213,21 @@ class WordPressTV_Theme {
 	}
 
 	/**
+	 * Sort the search results by the number of views each post has
+	 *
 	 * @param WP_Query $query
 	 */
 	function search_pre_get_posts( $query ) {
+		/*
+		 * @todo Optimize this before re-enabling
+		 *
+		 * This method was disabled because it caused 504 errors on large result sets
+		 * (e.g., http://wordpress.tv/?s=keynote). Sorting by a meta value is not performant.
+		 *
+		 * Maybe look at ways to do the sorting in PHP, or just use Elasticsearch instead.
+		 */
+		return;
+
 		if ( ! $query->is_main_query() || ! $query->is_search ) {
 			return;
 		}
