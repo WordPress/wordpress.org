@@ -46,7 +46,7 @@ class WordCamp_New_Site {
 						Create site in network
 					</label>
 
-					<span class="description">(e.g., http://<?php echo esc_html( date( 'Y' ) ); ?>.city.wordcamp.org)</span>
+					<span class="description">(e.g., http://city.wordcamp.org/<?php echo esc_html( date( 'Y' ) ); ?>)</span>
 				<?php endif; // domain_exists ?>
 			<?php endif; // current_user_can ?>
 
