@@ -42,9 +42,10 @@ function get_whitelist() {
 		'training' => array(
 			'courtneydawn',
 			'liljimmi',
-        ),  
+		),  
 		'wptv' => array(
 			'jerrysarcastic',
+			'roseapplemedia',
 		),
 	);
 }
