@@ -69,7 +69,12 @@
 			var sorter = $( '.filter-links [data-sort="' + sort + '"]'),
 				self = this;
 			self.clearSearch();
-			self.clearFilters( new Event( 'click' ) );
+
+			// Clear filters.
+			_.each( $( '.filter-group' ).find( ':checkbox' ).filter( ':checked' ), function( item ) {
+				$( item ).prop( 'checked', false );
+				return self.filtersChecked();
+			});
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 			sorter.addClass( this.activeClass );
