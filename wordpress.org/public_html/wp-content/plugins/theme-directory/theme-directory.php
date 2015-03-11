@@ -20,6 +20,9 @@ include_once plugin_dir_path( __FILE__ ) . 'class-wporg-themes-repo-package.php'
 // Load uploader.
 include_once plugin_dir_path( __FILE__ ) . 'upload.php';
 
+// Load Themes API adjustments.
+include_once plugin_dir_path( __FILE__ ) . 'themes-api.php';
+
 register_activation_hook( __FILE__, 'flush_rewrite_rules' );
 register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
