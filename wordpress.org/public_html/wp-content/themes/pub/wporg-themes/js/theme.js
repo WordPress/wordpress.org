@@ -66,9 +66,10 @@
 		el: '#themes',
 
 		sort: function( sort ) {
-			var sorter = $( '.filter-links [data-sort="' + sort + '"]' );
-			this.clearSearch();
-			this.clearFilters( new Event( 'click' ) );
+			var sorter = $( '.filter-links [data-sort="' + sort + '"]'),
+				self = this;
+			self.clearSearch();
+			self.clearFilters( new Event( 'click' ) );
 
 			$( '.filter-links li > a, .theme-filter' ).removeClass( this.activeClass );
 			sorter.addClass( this.activeClass );
