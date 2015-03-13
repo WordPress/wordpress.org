@@ -42,6 +42,8 @@ class WordCamp_Central_Theme {
 		// add_filter( 'wcpt_register_post_type', array( __CLASS__, 'wcpt_register_post_type' ) ); // set to public in wcpt plugin
 		add_filter( 'nav_menu_css_class', array( __CLASS__, 'nav_menu_css_class' ), 10, 3 );
 		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_rss_links_to_footer_menu' ), 10, 2 );
+
+		add_shortcode( 'wcc_about_stats', array( __CLASS__, 'shortcode_about_stats' ) );
 	}
 
 	/**
@@ -643,6 +645,63 @@ class WordCamp_Central_Theme {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Render the [wcc_about_stats] shortcode
+	 *
+	 * @param array $attributes
+	 *
+	 * @return string
+	 */
+	public static function shortcode_about_stats( $attributes ) {
+		$map_stats = self::get_map_stats();
+
+		ob_start();
+		require( __DIR__ . '/shortcode-about-stats.php' );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gather the stats for the [wcc_about_stats] shortcode
+	 *
+	 * There isn't an easy way to collect the country stats programmatically, but it just takes a minute to
+	 * manually count the number countries on the map that have pins.
+	 *
+	 * @return array
+	 */
+	protected static function get_map_stats() {
+		$transient_key = 'wcc_about_map_stats';
+
+		if ( ! $map_stats = get_transient( $transient_key ) ) {
+			$cities    = array();
+			$wordcamps = new WP_Query( array(
+				'post_type'      => 'wordcamp',
+				'posts_per_page' => -1,
+			) );
+
+			// Count the number of cities
+			foreach ( $wordcamps->posts as $wordcamp ) {
+				$url = get_post_meta( $wordcamp->ID, 'URL', true );
+
+				if ( $hostname = parse_url( $url, PHP_URL_HOST ) ) {
+					$city = explode( '.', $hostname );
+					$cities[ $city[0] ] = true;
+				}
+			}
+
+			// Compile the results
+			$map_stats = array(
+				'wordcamps'  => $wordcamps->found_posts,
+				'cities'     => count( $cities ),
+				'countries'  => 48,
+				'continents' => 6,
+			);
+
+			// todo set_transient( $transient_key, $map_stats, 2 * WEEK_IN_DAYS );
+		}
+
+		return $map_stats;
 	}
 }
 
