@@ -524,28 +524,26 @@ TICKET;
 	 */
 	public function create_or_update_theme_post( $ticket_id ) {
 		$upload_date = current_time( 'mysql' );
-		$post_args   = array(
-			'post_author'    => $this->author->ID,
-			'post_title'     => $this->theme->get( 'Name' ),
-			'post_name'      => $this->theme_slug,
-			'post_content'   => $this->theme->get( 'Description' ),
-			'post_parent'    => $this->theme->post_parent,
-			'post_date'      => $upload_date,
-			'comment_status' => 'closed',
-			'ping_status'    => 'closed',
-			'post_type'      => 'repopackage',
-			'tags_input'     => $this->theme->get( 'Tags' ),
-		);
 
-		// If we already have a post, update it.
+		// If we already have a post, get its ID.
 		if ( ! empty( $this->theme_post ) ) {
-			$post_args['ID'] = $this->theme_post->ID;
+			$post_id = $this->theme_post->ID;
 
-			$post_id = wp_update_post( $post_args );
-
-			// Otherwise create it for this new theme.
+		// Otherwise create it for this new theme.
 		} else {
-			$post_id = wp_insert_post( $post_args );
+			$post_id = wp_insert_post( array(
+				'post_author'    => $this->author->ID,
+				'post_title'     => $this->theme->get( 'Name' ),
+				'post_name'      => $this->theme_slug,
+				'post_content'   => $this->theme->get( 'Description' ),
+				'post_parent'    => $this->theme->post_parent,
+				'post_date'      => $upload_date,
+				'post_date_gmt'  => $upload_date,
+				'comment_status' => 'closed',
+				'ping_status'    => 'closed',
+				'post_type'      => 'repopackage',
+				'tags_input'     => $this->theme->get( 'Tags' ),
+			) );
 		}
 
 		// Finally, add post meta.

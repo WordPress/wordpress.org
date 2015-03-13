@@ -338,6 +338,14 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 
 	wporg_themes_update_wpthemescom( $post->post_name, $version );
 
+	// Update the post with this version's description and tags.
+	$theme_data = wporg_themes_get_header_data( sprintf( 'https://themes.svn.wordpress.org/%1$s/%2$s/style.css', $post->post_name, $version ) );
+	wp_update_post( array(
+		'ID'           => $post_id,
+		'post_content' => $theme_data['Description'],
+		'tags_input'   => $theme_data['Tags'],
+	) );
+
 	/*
 	 * Bail if we're activating an old version, the author does not need to be
 	 * notified about that.
@@ -497,4 +505,87 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 			),
 		) );
 	}
+}
+
+/**
+ * Custom version of core's deprecated `get_theme_data()` function.
+ *
+ * @param string $theme_file Path to the file.
+ * @return array File headers.
+ */
+function wporg_themes_get_header_data( $theme_file ) {
+	$themes_allowed_tags = array(
+		'a'       => array(
+			'href'  => array(),
+			'title' => array(),
+		),
+		'abbr'    => array(
+			'title' => array(),
+		),
+		'acronym' => array(
+			'title' => array(),
+		),
+		'code'    => array(),
+		'em'      => array(),
+		'strong'  => array(),
+	);
+
+	$theme_data = implode( '', file( $theme_file ) );
+	$theme_data = str_replace( '\r', '\n', $theme_data );
+	preg_match( '|^[ \t\/*#@]*Theme Name:(.*)$|mi', $theme_data, $theme_name );
+	preg_match( '|^[ \t\/*#@]*Theme URI:(.*)$|mi', $theme_data, $theme_uri );
+	preg_match( '|^[ \t\/*#@]*Description:(.*)$|mi', $theme_data, $description );
+
+	if ( preg_match( '|^[ \t\/*#@]*Author URI:(.*)$|mi', $theme_data, $author_uri ) ) {
+		$author_uri = esc_url( trim( $author_uri[1] ) );
+	} else {
+		$author_uri = '';
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Template:(.*)$|mi', $theme_data, $template ) ) {
+		$template = wp_kses( trim( $template[1] ), $themes_allowed_tags );
+	} else {
+		$template = '';
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Version:(.*)$|mi', $theme_data, $version ) ) {
+		$version = wp_kses( trim( $version[1] ), $themes_allowed_tags );
+	} else {
+		$version = '';
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Status:(.*)$|mi', $theme_data, $status ) ) {
+		$status = wp_kses( trim( $status[1] ), $themes_allowed_tags );
+	} else {
+		$status = 'publish';
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Tags:(.*)$|mi', $theme_data, $tags ) ) {
+		$tags = array_map( 'trim', explode( ',', wp_kses( trim( $tags[1] ), array() ) ) );
+	} else {
+		$tags = array();
+	}
+
+	if ( preg_match( '|^[ \t\/*#@]*Author:(.*)$|mi', $theme_data, $author_name ) ) {
+		$author = wp_kses( trim( $author_name[1] ), $themes_allowed_tags );
+	} else {
+		$author = 'Anonymous';
+	}
+
+	$name        = $theme = wp_kses( trim( $theme_name[1] ), $themes_allowed_tags );
+	$theme_uri   = esc_url( trim( $theme_uri[1] ) );
+	$description = wp_kses( trim( $description[1] ), $themes_allowed_tags );
+
+	return array(
+		'Name'        => $name,
+		'Title'       => $theme,
+		'URI'         => $theme_uri,
+		'Description' => $description,
+		'Author'      => $author,
+		'Author_URI'  => $author_uri,
+		'Version'     => $version,
+		'Template'    => $template,
+		'Status'      => $status,
+		'Tags'        => $tags,
+	);
 }

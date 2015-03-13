@@ -391,6 +391,9 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 		return;
 	}
 
+	// Only run once.
+	remove_action( 'save_post', __FUNCTION__ );
+
 	$new_status = array();
 	foreach ( $_POST['wporg_themes_status'] as $version => $status ) {
 		// We could check of the passed status is valid, but wporg_themes_update_version_status() handles that beautifully.
