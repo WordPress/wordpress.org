@@ -227,46 +227,60 @@ class WCOR_Mailer {
 	}
 
 	/**
-	 * Retrieve the e-mail address that a Reminder should be sent to.
+	 * Retrieve the e-mail address(es) that a Reminder should be sent to.
 	 *
 	 * @param int $wordcamp_id
 	 * @param int $email_id
-	 * @return string
+	 *
+	 * @return array
 	 */
-	protected function get_recipient( $wordcamp_id, $email_id ) {
-		$recipient  = false;
-		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
+	protected function get_recipients( $wordcamp_id, $email_id ) {
+		$recipients = array();
+		$send_where = get_post_meta( $email_id, 'wcor_send_where' );
 
-		if ( 'wcor_send_custom' == $send_where ) {
-			$recipient = get_post_meta( $email_id, 'wcor_send_custom_address', true );
-		} elseif ( 'wcor_send_mes' == $send_where ) {
+		if ( in_array( 'wcor_send_custom', $send_where ) ) {
+			$recipients[] = get_post_meta( $email_id, 'wcor_send_custom_address', true );
+		}
+
+		if ( in_array( 'wcor_send_mes', $send_where ) ) {
 			/** @var $multi_event_sponsors Multi_Event_Sponsors */
 			global $multi_event_sponsors;
 
-			$recipient = $multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) );
-		} elseif ( 'wcor_send_sponsor_wrangler' == $send_where ) {
+			$recipients = array_merge(
+				$recipients,
+				$multi_event_sponsors->get_sponsor_emails( $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id ) )
+			);
+		}
 
+		if ( in_array( 'wcor_send_sponsor_wrangler', $send_where ) ) {
 			// If the Sponsor Wrangler email is invalid, use the default email address.
 			if ( is_email( get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true ) ) ) {
-				$recipient = get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true );
+				$recipients[] = get_post_meta( $wordcamp_id, 'Sponsor Wrangler E-mail Address', true );
 			} else {
-				$recipient = get_post_meta( $wordcamp_id, 'Email Address', true );
-			}
-
-		} elseif ( 'wcor_send_camera_wrangler' == $send_where ) {
-			$region_id = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
-			$recipient = MES_Region::get_camera_wranger_from_region( $region_id );
-		} else {
-			$email_address_key = wcpt_key_to_str( 'E-mail Address', 'wcpt_' );
-
-			if ( ! empty( $_POST[ $email_address_key ] ) ) {
-				$recipient = sanitize_email( $_POST[ $email_address_key ] );
-			} else {
-				$recipient = sanitize_email( get_post_meta( $wordcamp_id, 'E-mail Address', true ) );
+				$recipients[] = get_post_meta( $wordcamp_id, 'Email Address', true );
 			}
 		}
 
-		return $recipient;
+		if ( in_array( 'wcor_send_camera_wrangler', $send_where ) ) {
+			$region_id = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+			$recipients[] = MES_Region::get_camera_wranger_from_region( $region_id );
+		}
+
+		if ( in_array( 'wcor_send_organizers', $send_where ) ) {
+			$email_address_key = wcpt_key_to_str( 'E-mail Address', 'wcpt_' );
+
+			/*
+			 * If a WordCamp post type is being updated, use the new address in the request, rather than the old
+			 * one stored in the database
+			 */
+			if ( ! empty( $_POST[ $email_address_key ] ) ) {
+				$recipients[] = sanitize_email( $_POST[ $email_address_key ] );
+			} else {
+				$recipients[] = sanitize_email( get_post_meta( $wordcamp_id, 'E-mail Address', true ) );
+			}
+		}
+
+		return $recipients;
 	}
 
 	/**
@@ -298,7 +312,7 @@ class WCOR_Mailer {
 	 * @return bool
 	 */
 	public function send_manual_email( $email, $wordcamp ) {
-		$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
+		$recipient = $this->get_recipients( $wordcamp->ID, $email->ID );
 
 		return $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp );
 	}
@@ -343,7 +357,7 @@ class WCOR_Mailer {
 			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
 
 			foreach ( $reminder_emails as $email ) {
-				$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
+				$recipient = $this->get_recipients( $wordcamp->ID, $email->ID );
 				
 				if ( $this->timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) ) {
 					if ( $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp ) ) {
@@ -464,9 +478,9 @@ class WCOR_Mailer {
 	 * @return bool
 	 */
 	protected function send_individual_emails( $email_id ) {
-		$send_where = get_post_meta( $email_id, 'wcor_send_where', true );
+		$send_where = get_post_meta( $email_id, 'wcor_send_where' );
 
-		return 'wcor_send_mes' == $send_where;
+		return in_array( 'wcor_send_mes', $send_where );
 	}
 
 	/**
@@ -533,7 +547,7 @@ class WCOR_Mailer {
 		$emails         = $this->get_triggered_posts( $trigger );
 
 		foreach( $emails as $email ) {
-			$recipient = $this->get_recipient( $wordcamp->ID, $email->ID );
+			$recipient = $this->get_recipients( $wordcamp->ID, $email->ID );
 
 			if ( ! in_array( $email->ID, $sent_email_ids ) ) {
 				if ( $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp ) ) {

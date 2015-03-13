@@ -84,7 +84,7 @@ class WCOR_Reminder {
 	 * @param object $post
 	 */
 	public function markup_reminder_details( $post ) {
-		$send_where              = get_post_meta( $post->ID, 'wcor_send_where', true );
+		$send_where              = get_post_meta( $post->ID, 'wcor_send_where' );
 		$send_custom_address     = get_post_meta( $post->ID, 'wcor_send_custom_address', true );
 		$send_when               = get_post_meta( $post->ID, 'wcor_send_when', true );
 		$send_days_before        = get_post_meta( $post->ID, 'wcor_send_days_before', true );
@@ -99,27 +99,27 @@ class WCOR_Reminder {
 		<table>
 			<tbody>
 				<tr>
-					<th><input id="wcor_send_organizers" name="wcor_send_where" type="radio" value="wcor_send_organizers" <?php checked( $send_where, 'wcor_send_organizers' ); ?>></th>
+					<th><input id="wcor_send_organizers" name="wcor_send_where[]" type="checkbox" value="wcor_send_organizers" <?php checked( in_array( 'wcor_send_organizers', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_organizers">The organizing team</label></td>
 				</tr>
 
 				<tr>
-					<th><input id="wcor_send_sponsor_wrangler" name="wcor_send_where" type="radio" value="wcor_send_sponsor_wrangler" <?php checked( $send_where, 'wcor_send_sponsor_wrangler' ); ?>></th>
+					<th><input id="wcor_send_sponsor_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_sponsor_wrangler" <?php checked( in_array( 'wcor_send_sponsor_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_sponsor_wrangler">The Sponsor Wrangler</label></td>
 				</tr>
 
 				<tr>
-					<th><input id="wcor_send_mes" name="wcor_send_where" type="radio" value="wcor_send_mes" <?php checked( $send_where, 'wcor_send_mes' ); ?>></th>
+					<th><input id="wcor_send_mes" name="wcor_send_where[]" type="checkbox" value="wcor_send_mes" <?php checked( in_array( 'wcor_send_mes', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_mes">The WordCamp's Multi-Event Sponsors</label></td>
 				</tr>
 
 				<tr>
-					<th><input id="wcor_send_camera_wrangler" name="wcor_send_where" type="radio" value="wcor_send_camera_wrangler" <?php checked( $send_where, 'wcor_send_camera_wrangler' ); ?>></th>
+					<th><input id="wcor_send_camera_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_camera_wrangler" <?php checked( in_array( 'wcor_send_camera_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_camera_wrangler">The Region's Camera Kit Wrangler</label></td>
 				</tr>
 
 				<tr>
-					<th><input id="wcor_send_custom" name="wcor_send_where" type="radio" value="wcor_send_custom" <?php checked( $send_where, 'wcor_send_custom' ); ?>></th>
+					<th><input id="wcor_send_custom" name="wcor_send_where[]" type="checkbox" value="wcor_send_custom" <?php checked( in_array( 'wcor_send_custom', $send_where ) ); ?>></th>
 					<td><label for="wcor_send_custom">A custom address: </label></td>
 					<td><input id="wcor_send_custom_address" name="wcor_send_custom_address" type="text" class="regular-text" value="<?php echo esc_attr( $send_custom_address ); ?>" /></td>
 				</tr>
@@ -366,9 +366,14 @@ class WCOR_Reminder {
 	 * @param array $new_meta
 	 */
 	protected function save_post_meta( $post, $new_meta ) {
+		$send_where_whitelist = array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_mes', 'wcor_send_camera_wrangler', 'wcor_send_custom' );
+
+		delete_post_meta( $post->ID, 'wcor_send_where' );
 		if ( isset( $new_meta['wcor_send_where'] ) ) {
-			if ( in_array( $new_meta['wcor_send_where'], array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_mes', 'wcor_send_camera_wrangler', 'wcor_send_custom' ) ) ) {
-				update_post_meta( $post->ID, 'wcor_send_where', $new_meta['wcor_send_where'] );
+			foreach( $new_meta['wcor_send_where'] as $send_where ) {
+				if ( in_array( $send_where, $send_where_whitelist ) ) {
+					add_post_meta( $post->ID, 'wcor_send_where', $send_where );
+				}
 			}
 		}
 
