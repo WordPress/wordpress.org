@@ -370,8 +370,15 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		// Translators: 1: Theme name; 2: Theme URL.
 		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
 
-		// First time approval: Publish the theme.
-		wp_publish_post( $post_id );
+		/*
+		 * First time approval: Publish the theme.
+		 *
+		 * Uses `wp_update_post()` to also update post_time.
+		 */
+		wp_update_post( array(
+			'ID'          => $post_id,
+			'post_status' => 'publish',
+		) );
 	}
 
 	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";
