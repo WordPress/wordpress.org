@@ -698,7 +698,7 @@ class WordCamp_Central_Theme {
 				'continents' => 6,
 			);
 
-			// todo set_transient( $transient_key, $map_stats, 2 * WEEK_IN_DAYS );
+			set_transient( $transient_key, $map_stats, 2 * WEEK_IN_SECONDS );
 		}
 
 		return $map_stats;
