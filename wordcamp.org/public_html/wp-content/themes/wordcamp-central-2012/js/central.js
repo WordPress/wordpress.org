@@ -1,7 +1,7 @@
 var WordCampCentral = ( function( $ ) {
 
 	// templateOptions is copied from Core in order to avoid an extra HTTP request just to get wp.template
-	var ajaxURL,
+	var options,
 		templateOptions = {
 			evaluate:    /<#([\s\S]+?)#>/g,
 			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
@@ -11,8 +11,8 @@ var WordCampCentral = ( function( $ ) {
 	/**
 	 * Initialization that runs as soon as this file has loaded
 	 */
-	function immediateInit( options ) {
-		ajaxURL = options.ajaxURL;
+	function immediateInit( initOptions ) {
+		options = initOptions;
 
 		toggleNavigation();
 		populateLatestTweets();
@@ -66,7 +66,7 @@ var WordCampCentral = ( function( $ ) {
 	 */
 	function populateLatestTweets() {
 		$.getJSON(
-			ajaxURL,
+			options.ajaxURL,
 			{ action: 'get_latest_wordcamp_tweets' },
 			function( response ) {
 				var index, tweets,
