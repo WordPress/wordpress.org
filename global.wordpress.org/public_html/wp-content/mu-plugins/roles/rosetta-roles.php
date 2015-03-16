@@ -23,7 +23,7 @@ function ros_editable_roles( $roles ) {
 	unset( $roles['subscriber'] );
 	reset( $roles );
 	$roles['subscriber'] = $subscriber;
-	if ( ! is_super_admin() ) {
+	if ( ! is_super_admin() && ! is_main_site() ) {
 		unset( $roles['administrator'] );
 	}
 	return $roles;
