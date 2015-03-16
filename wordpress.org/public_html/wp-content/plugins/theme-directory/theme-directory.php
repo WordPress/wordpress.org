@@ -375,9 +375,12 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		 *
 		 * Uses `wp_update_post()` to also update post_time.
 		 */
+		$post_date = current_time( 'mysql' );
 		wp_update_post( array(
-			'ID'          => $post_id,
-			'post_status' => 'publish',
+			'ID'            => $post_id,
+			'post_status'   => 'publish',
+			'post_date'     => $post_date,
+			'post_date_gmt' => $post_date,
 		) );
 	}
 
