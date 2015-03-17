@@ -139,6 +139,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				case 'wordcamp':
 					$association_id = $this->handle_wordcamp_association();
 					break;
+				case 'polyglots':
+					$association_id = $this->handle_polyglots_association();
+					break;
 				default:
 					$association_id = '-1 Unrecognized association source.';
 					break;
@@ -170,6 +173,45 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			$association = sanitize_key( $_POST['association'] );
 
 			$associated_associations = array( 'wordcamp-organizer', 'wordcamp-speaker' );
+
+			if ( ! in_array( $association, $associated_associations ) ) {
+				return '-1 Unrecognized association type';
+			}
+
+			if ( ! $group_id = BP_Groups_Group::group_exists( $association ) ) {
+				return '-1 Association does not exist: ' . $association;
+			}
+
+			if ( 'add' == $_POST['command'] ) {
+				groups_join_group( $group_id, $user->ID );
+				groups_accept_invite( $user->ID, $group_id );
+			} elseif ( 'remove' == $_POST['command'] ) {
+				groups_leave_group( $group_id, $user->ID );
+			} else {
+				return '-1 Unknown association command';
+			}
+
+			return 1;
+		}
+
+		/**
+		 * Handles incoming associations for Polyglots/translate.wordpress.org.
+		 *
+		 * Payload: (beyond 'action' and 'source')
+		 *  user_id:     User ID
+		 *  association: Slug for group/association
+		 *  command:     Either 'add' or 'remove'
+		 */
+		private function handle_polyglots_association() {
+			$user = get_user_by( 'id', $_POST['user_id'] );
+
+			if ( ! $user ) {
+				return '-1 Association reported for unrecognized user: ' . sanitize_text_field( $_POST['user_id'] );
+			}
+
+			$association = sanitize_key( $_POST['association'] );
+
+			$associated_associations = array( 'translation-editor', 'translation-contributor' );
 
 			if ( ! in_array( $association, $associated_associations ) ) {
 				return '-1 Unrecognized association type';
