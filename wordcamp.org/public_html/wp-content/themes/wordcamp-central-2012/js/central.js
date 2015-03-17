@@ -65,6 +65,12 @@ var WordCampCentral = ( function( $ ) {
 	 * Fetch the latest tweets and inject them into the DOM
 	 */
 	function populateLatestTweets() {
+		var tweetsContainer = $( '#wc-tweets-container' );
+
+		if ( ! tweetsContainer.length ) {
+			return;
+		}
+
 		$.getJSON(
 			options.ajaxURL,
 			{ action: 'get_latest_wordcamp_tweets' },
@@ -72,7 +78,6 @@ var WordCampCentral = ( function( $ ) {
 				var index, tweets,
 					spinner         = $( '#wc-tweets-spinner' ),
 					error           = $( '#wc-tweets-error' ),
-					tweetsContainer = $( '#wc-tweets-container' ),
 					tweetTemplate   = _.template( $( '#tmpl-wc-tweet' ).html(), null, templateOptions );
 
 				// Check for success
