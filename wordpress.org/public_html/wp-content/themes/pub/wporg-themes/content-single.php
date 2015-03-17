@@ -2,6 +2,13 @@
 $slug  = get_post()->post_name;
 $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 ?>
+<div class="theme-navigation">
+	<a class="close" rel="home" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
+	<?php the_post_navigation( array(
+		'prev_text' => '<span class="screen-reader-text">' . __( 'Next', 'wporg-themes' ) . '</span>',
+		'next_text' => '<span class="screen-reader-text">' . __( 'Previous', 'wporg-themes' ) . '</span>',
+	) ); ?>
+</div>
 <div class="theme-wrap">
 	<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
 
@@ -11,15 +18,17 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		</div><!-- .theme-info -->
 		<?php endif; ?>
 
-		<div class="theme-head">
+		<div>
 			<h3 class="theme-name entry-title" itemprop="name"><?php the_title(); ?></h3>
 			<h4 class="theme-author">
-				<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://profiles.wordpress.org/%s"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'nicename' ), esc_html( get_the_author() ) ) ); ?>
+				<?php printf( _x( 'by %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://wordpress.org/themes/author/%s/"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'nicename' ), esc_html( get_the_author() ) ) ); ?>
 			</h4>
+		</div>
 
-			<div class="theme-actions">
-				<a href="<?php echo esc_url( '//wp-themes.com/' . $slug ); ?>" class="button button-secondary"><?php _e( 'Preview' ); ?></a>
-				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary"><?php _e( 'Download' ); ?></a>
+		<div class="theme-head">
+			<div class="theme-actions clear">
+				<a href="<?php echo esc_url( '//wp-themes.com/' . $slug ); ?>" class="button button-secondary alignleft"><?php _e( 'Preview' ); ?></a>
+				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary alignright"><?php _e( 'Download' ); ?></a>
 			</div>
 
 			<?php
@@ -43,7 +52,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		</div><!-- .theme-head -->
 
 		<div class="theme-info">
-			<div class="screenshot"><?php the_post_thumbnail( '798' ); ?></div>
+			<div class="screenshot"><?php the_post_thumbnail( '571' ); ?></div>
 
 			<div class="theme-description entry-summary" itemprop="description"><?php the_content(); ?></div>
 
@@ -105,45 +114,51 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 						});
 					}
 				</script>
-				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . $theme->downloaded . '</strong>' ); ?></p>
+				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
 			</div><!-- .theme-downloads -->
 		</div><!-- .theme-info -->
 
 		<div class="theme-meta">
 			<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-				<meta itemprop="ratingValue" content="<?php echo esc_attr( number_format_i18n( $theme->rating / 20, 1 ) ); ?>"/>
 				<meta itemprop="ratingCount" content="<?php echo esc_attr( $theme->num_ratings ); ?>"/>
 				<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
 
-				<div class="rating">
-					<div class="star-holder">
-						<div class="star-rating" style="width: <?php echo esc_attr( number_format_i18n( $theme->rating, 1 ) ); ?>%">
-							<?php printf( __( '%d stars', 'wporg-themes' ), number_format_i18n( $theme->rating / 20 ) ); ?>
-						</div>
+				<?php if ( ! empty( $theme->ratings ) ) : ?>
+					<div class="rating rating-<?php echo esc_attr( number_format( $theme->rating ) ); ?>">
+						<span class="one"></span>
+						<span class="two"></span>
+						<span class="three"></span>
+						<span class="four"></span>
+						<span class="five"></span>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">' . number_format_i18n( $theme->rating / 20, 1 )  . '</span>' ); ?></p>
 					</div>
-					<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), number_format_i18n( $theme->rating / 20, 1 ) ); ?></p>
-				</div>
+				<?php else : ?>
+					<div class="rating">
+						<div class="ratings"><?php _e( 'This theme has not been rated yet.', 'wporg-themes' ); ?></div>
+					</div>
+				<?php endif; ?>
 
 				<?php if ( ! empty( $theme->ratings ) && ! empty( $theme->num_ratings ) ) : ?>
 				<ul>
 					<?php
 						foreach ( $theme->ratings as $key => $rate_count ) :
 							// Hack to have descending key/value pairs.
-							$key        = 6 - $key;
-							$rate_count = $theme->ratings[ $key ];
+							$key = 6 - $key;
 					?>
 					<li class="counter-container">
-						<a href="//wordpress.org/support/view/theme-reviews/<?php echo esc_attr( $slug ); ?>?filter=<?php echo $key; ?>" title="<?php printf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $key, 'wporg-themes' ), $key ); ?>">
-							<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), $key ); ?></span>
+						<a href="//wordpress.org/support/view/theme-reviews/<?php echo esc_attr( $slug ); ?>?filter=<?php echo $key; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $key, 'wporg-themes' ), $key ) ); ?>">
+							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $key, 'wporg-themes' ), $key ); ?></span>
 							<span class="counter-back">
-								<span class="counter-bar" style="width: <?php echo 100 * ( $rate_count / $theme->num_ratings ); ?>px;"></span>
+								<span class="counter-bar" style="width: <?php echo 100 * ( $theme->ratings[ $key ] / $theme->num_ratings ); ?>%;"></span>
 							</span>
-							<span class="counter-count"><?php echo $rate_count; ?></span>
+							<span class="counter-count"><?php echo $theme->ratings[ $key ]; ?></span>
 						</a>
 					</li>
 					<?php endforeach; ?>
 				</ul>
 				<?php endif; ?>
+
+				<a class="button button-secondary" href="https://wordpress.org/support/view/theme-reviews/<?php echo esc_attr( $slug ); ?>#postform"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
 			</div><!-- .theme-rating -->
 
 			<div class="theme-support">
@@ -172,12 +187,5 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 				</ul>
 			</div><!-- .theme-devs -->
 		</div><!-- .theme-meta -->
-	</div>
-	<div class="theme-footer">
-		<a class="index-link" rel="home" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
-		<?php the_post_navigation( array(
-			'prev_text' => '<span class="screen-reader-text">' . __( 'Next', 'wporg-themes' ) . '</span>',
-			'next_text' => '<span class="screen-reader-text">' . __( 'Previous', 'wporg-themes' ) . '</span>',
-		) ); ?>
 	</div>
 </div>

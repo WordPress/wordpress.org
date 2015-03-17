@@ -1,12 +1,12 @@
 <script id="tmpl-theme-single" type="text/template">
-	<div class="theme-backdrop"></div>
-	<div class="theme-wrap">
-		<div class="theme-header">
-			<button class="close dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Close overlay' ); ?></span></button>
+	<div class="theme-navigation">
+		<button class="close"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></button>
+		<div class="navigation post-navigation">
 			<button class="left dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show previous theme' ); ?></span></button>
 			<button class="right dashicons dashicons-no"><span class="screen-reader-text"><?php _e( 'Show next theme' ); ?></span></button>
 		</div>
-
+	</div>
+	<div class="theme-wrap">
 		<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
 			<# if ( data.is_outdated ) { #>
 			<div class="theme-notice notice notice-warning">
@@ -14,13 +14,15 @@
 			</div><!-- .theme-notice -->
 			<# } #>
 
-			<div class="theme-head">
+			<div>
 				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '<a href="https://profiles.wordpress.org/{{ data.author.user_nicename }}"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( __( 'by %s' ), '<a href="https://wordpress.org/themes/author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+			</div>
 
-				<div class="theme-actions">
-					<a href="{{{ data.preview_url }}}" class="button button-secondary"><?php _e( 'Preview' ); ?></a>
-					<a href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip" class="button button-primary"><?php _e( 'Download' ); ?></a>
+			<div class="theme-head">
+				<div class="theme-actions clear">
+					<a href="{{{ data.preview_url }}}" class="button button-secondary alignleft"><?php _e( 'Preview' ); ?></a>
+					<a href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip" class="button button-primary alignright"><?php _e( 'Download' ); ?></a>
 				</div>
 
 				<# if ( data.parent ) { #>
@@ -39,7 +41,7 @@
 
 			<div class="theme-info">
 				<# if ( data.screenshot_url ) { #>
-				<div class="screenshot"><img src="{{ data.screenshot_url }}?w=798&strip=all" alt=""/></div>
+				<div class="screenshot"><img src="{{ data.screenshot_url }}?w=571&strip=all" alt=""/></div>
 				<# } else { #>
 				<div class="screenshot blank"></div>
 				<# } #>
@@ -62,21 +64,28 @@
 
 			<div class="theme-meta">
 				<div class="theme-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-					<meta itemprop="itemReviewed" content="{{ data.name }}" />
-					<meta itemprop="ratingValue" content="{{ (data.rating/20).toFixed(1) }}"/>
 					<meta itemprop="ratingCount" content="{{ data.num_ratings }}"/>
 					<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
-					<div class="rating">
-						<div class="star-holder">
-							<div class="star-rating" style="width: {{ (data.rating).toFixed(1) }}%"><?php printf( __( '%d stars', 'wporg-themes' ), '{{ Math.round( data.rating ) }}' ); ?></div>
-						</div>
-						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '{{ (data.rating/20).toFixed(1) }}' ); ?></p>
+
+					<# if ( data.rating ) { #>
+					<div class="rating rating-{{ Math.round( data.rating / 10 ) * 10 }}">
+						<span class="one"></span>
+						<span class="two"></span>
+						<span class="three"></span>
+						<span class="four"></span>
+						<span class="five"></span>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">{{ ( data.rating / 20 ).toFixed( 1 ) }}</span>' ); ?></p>
 					</div>
+					<# } else { #>
+					<div class="rating">
+						<div class="ratings"><?php _e( 'This theme has not been rated yet.', 'wporg-themes' ); ?></div>
+					</div>
+					<# } #>
 
 					<# if ( data.ratings ) { #>
 					<ul>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=5" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 5 ); ?>">
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=5" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 5 ) ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 5 ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[5] / data.num_ratings }}%;"></span>
@@ -85,7 +94,7 @@
 							</a>
 						</li>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=4" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 4 ); ?>">
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=4" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 4 ) ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 4 ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[4] / data.num_ratings }}%;"></span>
@@ -94,7 +103,7 @@
 							</a>
 						</li>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=3" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 3 ); ?>">
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=3" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 3 ) ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 3 ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[3] / data.num_ratings }}%;"></span>
@@ -103,7 +112,7 @@
 							</a>
 						</li>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=2" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 2 ); ?>">
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=2" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 2 ) ); ?>">
 								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 2 ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[2] / data.num_ratings }}%;"></span>
@@ -112,8 +121,8 @@
 							</a>
 						</li>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=1" title="<?php printf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 1 ); ?>">
-								<span class="counter-label"><?php printf( __( '%d stars', 'wporg-themes' ), 1 ); ?></span>
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=1" title="<?php esc_attr_e( 'Click to see reviews that provided a rating of 1 star', 'wporg-themes' ); ?>">
+								<span class="counter-label"><?php _e( '1 star', 'wporg-themes' ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[1] / data.num_ratings }}%;"></span>
 								</span>

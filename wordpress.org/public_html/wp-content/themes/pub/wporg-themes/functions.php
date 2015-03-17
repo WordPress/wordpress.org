@@ -37,14 +37,11 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
  * Enqueue scripts and styles.
  */
 function wporg_themes_scripts() {
-
-	wp_enqueue_style( 'ratings', '//wordpress.org/extend/themes-plugins/bb-ratings/bb-ratings.css', array(), '4' );
-	wp_enqueue_style( 'themes-style', self_admin_url( 'css/themes.css' ) );
-	wp_enqueue_style( 'wporg-themes-style', get_stylesheet_uri(), array(), filemtime( __DIR__ . '/style.css' ) );
-
-	wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null );
+	wp_enqueue_style( 'wporg-themes', get_stylesheet_uri(), array(), filemtime( __DIR__ . '/style.css' ) );
 
 	if ( ! is_singular( 'page' ) ) {
+		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null );
+
 		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, true );
 		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), filemtime( __DIR__ . '/js/theme.js' ), true );
 
@@ -76,6 +73,23 @@ function wporg_themes_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
+
+/**
+ * Extend the default WordPress body classes.
+ *
+ * Adds body classes to denote singular themes.
+ *
+ * @param array $classes A list of existing body class values.
+ * @return array The filtered body class list.
+ */
+function wporg_themes_body_class( $classes ) {
+	if ( is_singular( 'repopackage' ) ) {
+		$classes[] = 'modal-open';
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', 'wporg_themes_body_class' );
 
 /**
  * Create a nicely formatted and more specific title element text for output

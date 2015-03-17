@@ -477,8 +477,7 @@
 		// It's shown when clicking a theme
 		collapse: function( event ) {
 			var self = this,
-				args = {},
-				scroll, author, search, tags, sorter;
+				scroll;
 
 			event = event || window.event;
 
@@ -490,13 +489,13 @@
 			// Detect if the click is inside the overlay
 			// and don't close it unless the target was
 			// the div.back button
-			if ( $( event.target ).is( '.theme-backdrop' ) || $( event.target ).is( '.close' ) || event.keyCode === 27 ) {
+			if ( $( event.target ).is( '.close' ) || event.keyCode === 27 ) {
 
 				// Add a temporary closing class while overlay fades out
 				$( 'body' ).addClass( 'closing-overlay' );
 
 				// With a quick fade out animation
-				this.$el.fadeOut( 130, function() {
+				this.$el.fadeOut( 1, function() {
 					// Clicking outside the modal box closes the overlay
 					$( 'body' ).removeClass( 'closing-overlay' );
 					// Handle event cleanup
@@ -504,30 +503,6 @@
 
 					// Get scroll position to avoid jumping to the top
 					scroll = document.body.scrollTop;
-
-					// Clean the url structure
-					if ( author = wp.themes.Collection.prototype.currentQuery.request.author ) {
-						wp.themes.router.navigate( wp.themes.router.baseUrl( 'author/' + author ) );
-						wp.themes.utils.title( author );
-					}
-					else if ( search = wp.themes.Collection.prototype.currentQuery.request.search ) {
-						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + search ) );
-						wp.themes.utils.title( search );
-					}
-					else if ( tags = wp.themes.view.Installer.prototype.filtersChecked() ) {
-						wp.themes.router.navigate( wp.themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
-						wp.themes.utils.title( _.each( tags, function( tag, i ) {
-							tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
-						}).join( ', ' ) );
-					}
-					else if ( sorter = $( '.filter-links .current' ) ) {
-						if ( ! sorter.length ) {
-							sorter = $( '.filter-links [data-sort="featured"]' );
-							args   = { trigger: true };
-						}
-						wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ), args );
-						wp.themes.utils.title( sorter.text() );
-					}
 
 					// Restore scroll position
 					document.body.scrollTop = scroll;
@@ -537,6 +512,42 @@
 						wp.themes.focusedTheme.focus();
 					}
 				});
+			}
+		},
+
+		// Performs the actions to effectively close
+		// the theme details overlay
+		closeOverlay: function() {
+			var args = {},
+				author, search, tags, sorter;
+
+			$( 'body' ).removeClass( 'modal-open' );
+			this.remove();
+			this.unbind();
+			this.trigger( 'theme:collapse' );
+
+			// Clean the url structure
+			if ( author = wp.themes.Collection.prototype.currentQuery.request.author ) {
+				wp.themes.router.navigate( wp.themes.router.baseUrl( 'author/' + author ) );
+				wp.themes.utils.title( author );
+			}
+			else if ( search = wp.themes.Collection.prototype.currentQuery.request.search ) {
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.searchPath + search ) );
+				wp.themes.utils.title( search );
+			}
+			else if ( tags = wp.themes.view.Installer.prototype.filtersChecked() ) {
+				wp.themes.router.navigate( wp.themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
+				wp.themes.utils.title( _.each( tags, function( tag, i ) {
+					tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
+				}).join( ', ' ) );
+			}
+			else if ( sorter = $( '.filter-links .current' ) ) {
+				if ( ! sorter.length ) {
+					sorter = $( '.filter-links [data-sort="featured"]' );
+					args   = { trigger: true };
+				}
+				wp.themes.router.navigate( wp.themes.router.baseUrl( wp.themes.router.browsePath + sorter.data( 'sort' ) ), args );
+				wp.themes.utils.title( sorter.text() );
 			}
 		}
 	});
