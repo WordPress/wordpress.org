@@ -319,6 +319,7 @@ body.author .theme-browser .theme .theme-author  {
 	display: inline-block;
 	font-size: 14px;
 	font-weight: 700;
+	margin: 0;
 	padding: 19px 15px;
 	-webkit-transition: color .1s ease-in-out;
 	transition:         color .1s ease-in-out;
