@@ -71,10 +71,6 @@ p a:hover {
 }
 
 /* assorted overrides */
-#headline {
-	height: auto;
-}
-
 #headline h2 {
 	margin-bottom: 16px;
 }
@@ -403,7 +399,7 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	margin: 12px 0 25px;
+	margin: 20px 0 25px;
 	padding: 0 20px;
 	width: 100%;
 	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
@@ -762,13 +758,17 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 }
 
 /* Secondary header design */
+.main-navigation {
+	background: #dfdfdf;
+}
+
 .main-navigation .menu {
-	float: right;
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: bold;
 	list-style: none;
-	margin-right: 15px;
-	padding-top: 22px;
+	margin: 0 auto;
+	padding: 10px 0;
+	width: 960px;
 }
 
 .main-navigation .menu li {
@@ -777,6 +777,10 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 }
 .main-navigation .menu li:first-of-type {
 	 padding-left: 10px;
+}
+
+#site-navigation.main-navigation a {
+	color: #636363;
 }
 
 #site-navigation.main-navigation a:hover,
@@ -790,8 +794,6 @@ body:not(.single) .theme-browser .themes:not(:empty) {
 		float: none;
 	}
 	.main-navigation .menu {
-		background: #f5f5f5;
-		border-top: 1px solid #d7d7d7;
 		margin: 0;
 		padding: 8px 0;
 		width: 100%;
