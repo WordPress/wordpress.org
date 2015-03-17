@@ -104,6 +104,16 @@ class WordCamp_Admin {
 
 		// WordCamp post type only
 		if ( WCPT_POST_TYPE_ID == get_post_type() ) {
+			// If the venue address was changed, update it's coordinates
+			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
+			if ( $new_address != get_post_meta( $post_id, 'Physical Address', true ) ) {
+				if ( $coordinates = $this->geocode_address( $new_address ) ) {
+					update_post_meta( $post_id, '_venue_coordinates', $coordinates );
+				} else {
+					delete_post_meta( $post_id, '_venue_coordinates' );
+				}
+			}
+
 			// Post meta keys
 			$wcpt_meta_keys = WordCamp_Admin::meta_keys();
 
@@ -141,6 +151,34 @@ class WordCamp_Admin {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Geocode the given address into a latitude and longitude pair.
+	 *
+	 * @param string $address
+	 *
+	 * @return mixed
+	 *      false if the geocode request failed
+	 *      array with latitude and longitude indexes if the request succeeded
+	 */
+	function geocode_address( $address ) {
+		if ( ! $address ) {
+			return false;
+		}
+
+		$coordinates      = false;
+		$request_url      = add_query_arg( 'address', urlencode( $address ), 'https://maps.googleapis.com/maps/api/geocode/json' );
+		$geocode_response = json_decode( wp_remote_retrieve_body( wp_remote_get( $request_url ) ) );
+
+		if ( ! empty( $geocode_response->results[0]->geometry->location->lat ) ) {
+			$coordinates = array(
+				'latitude'  => $geocode_response->results[0]->geometry->location->lat,
+				'longitude' => $geocode_response->results[0]->geometry->location->lng
+			);
+		}
+
+		return $coordinates;
 	}
 
 	/**
