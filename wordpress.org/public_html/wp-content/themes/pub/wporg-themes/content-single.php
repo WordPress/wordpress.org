@@ -52,7 +52,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 		</div><!-- .theme-head -->
 
 		<div class="theme-info">
-			<div class="screenshot"><?php the_post_thumbnail( '571' ); ?></div>
+			<div class="screenshot"><?php the_post_thumbnail( '1142' ); ?></div>
 
 			<div class="theme-description entry-summary" itemprop="description"><?php the_content(); ?></div>
 

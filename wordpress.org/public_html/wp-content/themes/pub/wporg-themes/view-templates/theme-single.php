@@ -41,7 +41,7 @@
 
 			<div class="theme-info">
 				<# if ( data.screenshot_url ) { #>
-				<div class="screenshot"><img src="{{ data.screenshot_url }}?w=571&strip=all" alt=""/></div>
+				<div class="screenshot"><img src="{{ data.screenshot_url }}?w=1142&strip=all" alt=""/></div>
 				<# } else { #>
 				<div class="screenshot blank"></div>
 				<# } #>

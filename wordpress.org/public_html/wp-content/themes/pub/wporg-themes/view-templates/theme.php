@@ -2,7 +2,7 @@
 	<a class="url" href="{{{ data.permalink }}}" rel="bookmark" tabindex="-1">
 		<# if ( data.screenshot_url ) { #>
 		<div class="theme-screenshot">
-			<img src="{{ data.screenshot_url }}?w=286&strip=all" alt="" />
+			<img src="{{ data.screenshot_url }}?w=572&strip=all" alt="" />
 		</div>
 		<# } else { #>
 		<div class="theme-screenshot blank"></div>
