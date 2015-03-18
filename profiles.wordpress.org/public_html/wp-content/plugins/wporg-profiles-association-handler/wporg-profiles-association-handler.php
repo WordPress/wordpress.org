@@ -18,7 +18,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
-			add_filter( 'bp_groups_global_tables', array( $this, 'change_table_names' ) );
+			add_filter( 'bp_groups_global_tables', array( $this, 'change_global_table_names' ) );
+			add_filter( 'bp_groups_meta_tables',   array( $this, 'change_meta_table_names' ) );
 			add_filter( 'bp_active_components',    array( $this, 'activate_groups_component' ) );
 			add_action( 'plugins_loaded',          array( $this, 'plugins_loaded' ) );
 		}
@@ -47,7 +48,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * @param  array $tables The default tables.
 		 * @return array
 		 */
-		public function change_table_names( $tables ) {
+		public function change_global_table_names( $tables ) {
 			global $bp;
 
 			return array(
@@ -55,6 +56,21 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				'table_name_members'   => $bp->table_prefix . 'wporg_groups_members',
 				'table_name_groupmeta' => $bp->table_prefix . 'wporg_groups_groupmeta',
 			);
+		}
+
+		/**
+		 * Changes the meta table name to use custom wporg groups meta tables rather
+		 * than the ones for BuddyPress.org.
+		 *
+		 * @param  array $tables The default meta table.
+		 * @return array
+		 */
+		public function change_meta_table_names( $tables ) {
+			global $bp;
+
+			$tables['group'] = $bp->table_prefix . 'wporg_groups_groupmeta';
+
+			return $tables;
 		}
 
 		/**
