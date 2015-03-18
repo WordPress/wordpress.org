@@ -231,6 +231,7 @@ ul, ol {
 	left: 0;
 	position: absolute;
 	top: 0;
+	-webkit-transform: translateZ( 0 );
 	-webkit-transition: opacity 0.2s ease-in-out;
 	transition:         opacity 0.2s ease-in-out;
 	width: 100%;
