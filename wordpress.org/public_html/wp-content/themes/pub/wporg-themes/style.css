@@ -136,9 +136,7 @@ ul, ol {
 	display: inline-block;
 	margin: 0 4% 4% 0;
 	position: relative;
-	width: 30.4%;
-	width: -webkit-calc(92% / 3);
-	width:         calc(92% / 3);
+	width: 30.6%;
 }
 
 .ie8 .theme-browser .theme {
