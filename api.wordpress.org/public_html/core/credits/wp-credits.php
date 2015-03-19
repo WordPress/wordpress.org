@@ -201,7 +201,7 @@ abstract class WP_Credits {
 		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM wporg_blogs WHERE domain = %s AND path = '/'", "$subdomain.wordpress.org" ) );
 		if ( $blog_id ) {
 			$meta_key = 'wporg_' . intval( $blog_id ) . '_capabilities';
-			return $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value NOT LIKE '%subscriber%'" );
+			return $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value LIKE '%translation_editor%'" );
 		}
 		return array();
 	}
