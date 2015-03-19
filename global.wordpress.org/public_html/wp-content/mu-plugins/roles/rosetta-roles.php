@@ -92,10 +92,10 @@ class Rosetta_Roles {
 		}
 
 		// Remove deprecated validator role.
-		/*$validator_role = get_role( 'validator' );
+		$validator_role = get_role( 'validator' );
 		if ( $validator_role ) {
 			remove_role( 'validator' );
-		}*/
+		}
 	}
 
 	/**
