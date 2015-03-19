@@ -6,7 +6,7 @@
 ( function( $ ) {
 	'use strict';
 
-	var $sourceContent, $sourceCodeContainer, $sourceCodeTable, $showCompleteSource, $lessCompleteSource, sourceCollapsedHeight;
+	var $sourceCollapsedHeight;
 
 	var $usesList, $usedByList, $showMoreUses, $hideMoreUses, $showMoreUsedBy, $hideMoreUsedBy;
 
@@ -23,47 +23,42 @@
 			return;
 		}
 
-		// We only expect one source-content per document
-		$sourceContent = $( '.source-content' );
-		$sourceCodeContainer = $( '.source-code-container' );
-
 		SyntaxHighlighter.highlight();
-
-		$sourceCodeTable = $sourceContent.find( 'table' );
 
 		// 1em (margin) + 10 * 17px + 10. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 10 + 10 ).
 		// Extra 10px added to partially show next line so it's clear there is more.
-		sourceCollapsedHeight = 196;
+		$sourceCollapsedHeight = 196;
 
-		if ( ( sourceCollapsedHeight - 12 ) < $sourceCodeTable.height() ) {
+		$( '.source-content' ).find( 'table' ).each( function( t ) {
+			if ( ( $sourceCollapsedHeight - 12 ) < $( this ).height() ) {
 
-			// Do this with javascript so javascript-less can enjoy the total sourcecode
-			$( '.source-code-container' ).css( { height: sourceCollapsedHeight + 'px' } );
+				var sourceContent = $( this ).closest( '.source-content' );
 
-			$showCompleteSource = $( '.show-complete-source' );
-			$lessCompleteSource = $( '.less-complete-source' );
+				// Do this with javascript so javascript-less can enjoy the total sourcecode
+				sourceContent.find( '.source-code-container' ).css( { height: $sourceCollapsedHeight + 'px' } );
 
-			$( '.source-code-links span:first' ).show();
-			$showCompleteSource.show();
-			$showCompleteSource.on( 'click', toggleCompleteSource );
-			$lessCompleteSource.on( 'click', toggleCompleteSource );
-		}
+				sourceContent.find( '.source-code-links').find('span:first' ).show();
+				sourceContent.find( '.show-complete-source' ).show();
+				sourceContent.find( '.show-complete-source' ).on( 'click', toggleCompleteSource );
+				sourceContent.find( '.less-complete-source' ).on( 'click', toggleCompleteSource );
+			}
+		} );
 	}
 
 	function toggleCompleteSource( e ) {
 		e.preventDefault();
 
-		if ( $showCompleteSource.is(':visible') ) {
-			var heightGoal = $sourceCodeTable.height() + 45; // takes into consideration potential x-scrollbar
+		var sourceContent = $( this ).closest( '.source-content' );
+
+		if ( $( this ).parent().find( '.show-complete-source' ).is( ':visible' ) ) {
+			var heightGoal = sourceContent.find( 'table' ).height() + 45; // takes into consideration potential x-scrollbar
 		} else {
-			var heightGoal = sourceCollapsedHeight;
+			var heightGoal = $sourceCollapsedHeight;
 		}
 
-		$sourceCodeContainer.animate( { height: heightGoal + 'px' } );
+		sourceContent.find( '.source-code-container:first' ).animate( { height: heightGoal + 'px' } );
 
-		$showCompleteSource.toggle();
-		$lessCompleteSource.toggle();
-
+		$( this ).parent().find( 'a' ).toggle();
 	}
 
 	function toggleUsageListInit() {

@@ -44,6 +44,60 @@ class Devhub_Handbooks {
 		if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
 			add_action( 'wporg_action_links', array( 'WPorg_Handbook_Watchlist', 'display_action_link' ) );
 		}
+
+		// Modify SyntaxHighlighter Evolved code output to facilitate code collapse/expand.
+		add_filter( 'syntaxhighlighter_htmlresult', array( __CLASS__, 'syntaxhighlighter_htmlresult' ) );
+	}
+
+	/**
+	 * Is the current (or specified) post_type one of the DevHub handbook post types?
+	 *
+	 * TOOD: The handbook plugin should probably have this.
+	 *
+	 * @param string $post_type Optional. The post_type to check for being a handbook post type. Default '' (the current post type).
+	 * @return bool
+	 */
+	public static function is_handbook_post_type( $post_type = '' ) {
+		if ( ! $post_type ) {
+			$post_type = get_post_type();
+		}
+
+		return in_array( str_replace( '-handbook', '', $post_type ), self::$post_types );
+	}
+
+	/**
+	 * If a syntax highlighted code block exceeds a given number of lines, wrap the
+	 * markup with other markup to trigger the code expansion/collapse JS handling
+	 * already implemented for the code reference.
+	 *
+	 * @param string  $text The pending result of the syntax highlighting.
+	 * @return string
+	 */
+	public static function syntaxhighlighter_htmlresult( $text ) {
+		$new_text      = '';
+		// Collapse is handled for >10 lines. But just go ahead and show the full
+		// code if that is just barely being exceeded (no one wants to expand to
+		// see one or two more lines).
+		$lines_to_show = 12;
+		$do_collapse   = ( substr_count( $text, "\n" ) - 1 ) > $lines_to_show;
+
+		if ( $do_collapse )  {
+			$new_text .= '<section class="source-content">';
+			$new_text .= '<div class="source-code-container">';
+		}
+
+		$new_text .= $text;
+
+		if ( $do_collapse ) {
+			$new_text .= '</div>';
+			$new_text .= '<p class="source-code-links"><span>';
+			$new_text .= '<a href="#" class="show-complete-source">' . __( 'Expand full source code', 'wporg' ) . '</a>';
+			$new_text .= '<a href="#" class="less-complete-source">' . __( 'Collapse full source code', 'wporg' ) . '</a>';
+			$new_text .= '</span></p>';
+			$new_text .= '</section>';
+		}
+
+		return $new_text;
 	}
 
 	/**

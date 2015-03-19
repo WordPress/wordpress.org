@@ -1241,11 +1241,16 @@ input {
   margin-left: 2em;
   margin-top: 1em;
 }
+.devhub-wrap .source-code-links span {
+  border-left: 1px solid #999;
+  margin-left: 1em;
+  padding-left: 1em;
+}
 .devhub-wrap .source-code-links span:first-child {
   display: none;
-  border-right: 1px solid #999;
-  margin-right: 1em;
-  padding-right: 1em;
+  border-left: 0;
+  margin-left: 1em;
+  padding-left: 0;
 }
 .devhub-wrap .source-code-container {
   border-right: 1px solid #dfdfdf;
