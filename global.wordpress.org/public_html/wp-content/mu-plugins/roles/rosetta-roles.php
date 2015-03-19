@@ -252,7 +252,7 @@ class Rosetta_Roles {
 						exit;
 					}
 
-					if ( user_can( $user_details, $this->translation_editor_role ) ) {
+					if ( $user_details->has_cap( $this->translation_editor_role ) ) {
 						wp_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
 						exit;
 					}
