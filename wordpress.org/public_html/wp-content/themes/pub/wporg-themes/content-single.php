@@ -70,7 +70,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 
 					function drawThemeDownloadsChart() {
 						jQuery(document).ready(function($){
-							$.getJSON('https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=<?php echo $slug; ?>&limit=365&callback=?', function (downloads) {
+							$.getJSON('https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=<?php echo $slug; ?>&limit=260&callback=?', function (downloads) {
 								var data = new google.visualization.DataTable(),
 									count = 0;
 

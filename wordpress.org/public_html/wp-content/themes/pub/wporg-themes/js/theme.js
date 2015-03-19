@@ -399,7 +399,7 @@
 		renderDownloadsGraph: function() {
 			var self = this;
 
-			$.getJSON( 'https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=' + self.model.get( 'id' ) + '&limit=365&callback=?', function( downloads ) {
+			$.getJSON( 'https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=' + self.model.get( 'id' ) + '&limit=260&callback=?', function( downloads ) {
 				var data = new google.visualization.DataTable(),
 					count = 0;
 
