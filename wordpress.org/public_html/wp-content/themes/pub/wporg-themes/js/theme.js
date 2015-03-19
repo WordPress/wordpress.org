@@ -312,8 +312,6 @@
 			// Listen to our preview object
 			// for `theme:next` and `theme:previous` events.
 			this.listenTo( preview, 'theme:next', function() {
-				this.trigger( 'theme:next' );
-
 				// Keep local track of current theme model.
 				current = self.model;
 
@@ -339,8 +337,6 @@
 				$( '.next-theme' ).focus();
 			})
 				.listenTo( preview, 'theme:previous', function() {
-					this.trigger( 'theme:previous' );
-
 					// Keep track of current theme model.
 					current = self.model;
 
