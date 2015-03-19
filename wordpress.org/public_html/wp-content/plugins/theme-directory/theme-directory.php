@@ -686,9 +686,9 @@ function wporg_themes_query_themes() {
 		'parent'       => true,
 		'theme_url'    => true,
 	) );
-	$args = wp_parse_args( $request, array(
-		'per_page' => 20,
-	) );
+	$args = wp_parse_args( array(
+		'per_page' => 15,
+	), $request);
 
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
 	$api = new Themes_API( 'query_themes', $args );
