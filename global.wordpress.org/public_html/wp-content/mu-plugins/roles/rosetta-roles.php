@@ -44,7 +44,6 @@ class Rosetta_Roles {
 		add_action( 'admin_init', array( $this, 'role_modifications' ) );
 		add_action( 'set_user_role', array( $this, 'restore_translation_editor_role' ), 10, 3 );
 		add_filter( 'gettext_with_context', array( $this, 'rename_user_roles' ), 10, 4 );
-		add_action( 'user_row_actions', array( $this, 'user_row_action_role_editor' ), 10, 2 );
 		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
 		add_filter( 'user_row_actions', array( $this, 'promote_user_to_translation_editor' ), 10, 2 );
 	}
