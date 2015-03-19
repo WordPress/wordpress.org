@@ -46,6 +46,34 @@ class Rosetta_Roles {
 		add_filter( 'gettext_with_context', array( $this, 'rename_user_roles' ), 10, 4 );
 		add_action( 'user_row_actions', array( $this, 'user_row_action_role_editor' ), 10, 2 );
 		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
+		add_filter( 'user_row_actions', array( $this, 'promote_user_to_translation_editor' ), 10, 2 );
+	}
+
+	/**
+	 * Adds an action link to promote an user to a translation editor.
+	 *
+	 * @param array   $actions     An array of action links to be displayed.
+	 * @param WP_User $user_object WP_User object for the currently-listed user.
+	 * @return array $actions An array of action links to be displayed.
+	 */
+	public function promote_user_to_translation_editor( $actions, $user ) {
+		if ( in_array( $this->translation_editor_role, $user->roles ) || ! current_user_can( 'promote_users' ) ) {
+			return $actions;
+		}
+
+		$url = menu_page_url( 'translation-editors', false );
+		$url = add_query_arg( array(
+			'action' => 'add-translation-editor',
+			'user'   => $user->ID,
+		), $url );
+		$url = wp_nonce_url( $url, 'add-translation-editor', '_nonce_add-translation-editor' );
+		$actions['translation-editor'] = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( $url ),
+			__( 'Promote to Translation Editor', 'rosetta' )
+		);
+
+		return $actions;
 	}
 
 	/**
@@ -236,8 +264,10 @@ class Rosetta_Roles {
 
 					$user_details = null;
 					$user = wp_unslash( $_REQUEST['user'] );
-					if ( false !== strpos( $user_email, '@' ) ) {
+					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
+					} elseif ( is_numeric( $user ) ) {
+						$user_details = get_user_by( 'id', $user );
 					} else {
 						$user_details = get_user_by( 'login', $user );
 					}
