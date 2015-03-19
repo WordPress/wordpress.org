@@ -26,6 +26,7 @@ class WPorg_Handbook_Callout_Boxes {
 			'info'    => __( 'Note:',    'wporg' ),
 			'tip'     => __( 'Tip:',     'wporg' ),
 			'alert'   => __( 'Alert:',   'wporg' ),
+			'tutorial' => __( 'Tutorial:', 'wporg' ),
 			'warning' => __( 'Warning:', 'wporg' )
 		);
 
@@ -83,6 +84,19 @@ class WPorg_Handbook_Callout_Boxes {
 	}
 
 	/**
+	 * Output callback for the `[tutorial]` shortcode.
+	 *
+	 * @access public
+	 *
+	 * @param array  $atts    Shortcode attributes.
+	 * @param string $content Shortcode content.
+	 * @return string Shortcode output as HTML markup.
+	 */
+	public function tutorial_shortcode( $atts, $content = '' ) {
+		return $this->build_callout_output( $content, 'tutorial' );
+	}
+
+	/**
 	 * Output callback for the `[warning]` shortcode.
 	 *
 	 * @access public
@@ -132,4 +146,3 @@ class WPorg_Handbook_Callout_Boxes {
 }
 
 $callouts = new WPorg_Handbook_Callout_Boxes();
-

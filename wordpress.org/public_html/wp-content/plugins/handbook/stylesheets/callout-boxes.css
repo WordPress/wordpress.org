@@ -40,6 +40,15 @@
   content: "\f109";
   color: #c7b200;
 }
+.callout-tutorial {
+  background: #EDE7F3;
+  border: 1px solid #936FB7;
+  border-bottom: 3px solid #663399;
+}
+.callout-tutorial .dashicons:before {
+  content: "\f308";
+  color: #663399;
+}
 .callout-warning {
   background: #ffd8d8;
   border: 1px solid #ff7272;
@@ -49,4 +58,3 @@
   content: "\f153";
   color: #ff3f3f;
 }
-
