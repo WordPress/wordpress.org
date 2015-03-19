@@ -33,7 +33,7 @@ class WPorg_Handbook_Init {
 	}
 
 	static public function enqueue_styles() {
-		wp_enqueue_style( 'wporg-handbook-css', plugins_url( '/stylesheets/callout-boxes.css', __FILE__ ), array(), '20140928' );
+		wp_enqueue_style( 'wporg-handbook-css', plugins_url( '/stylesheets/callout-boxes.css', __FILE__ ), array(), '20150319' );
 	}
 
 }
