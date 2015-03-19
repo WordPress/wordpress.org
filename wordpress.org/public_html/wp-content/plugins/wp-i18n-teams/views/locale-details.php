@@ -52,7 +52,7 @@
 </div>
 
 
-<h2><?php _e( 'Validators', 'wporg' ); ?></h2>
+<h2><?php _e( 'Translation Editors', 'wporg' ); ?></h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
@@ -70,7 +70,7 @@
 <?php endif; ?>
 
 
-<h2><?php _e( 'Translators', 'wporg' ); ?></h2>
+<h2><?php _e( 'Translation Contributors', 'wporg' ); ?></h2>
 
 <?php if ( empty( $locale_data['translators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>
