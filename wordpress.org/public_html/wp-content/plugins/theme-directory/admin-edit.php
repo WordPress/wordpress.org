@@ -262,7 +262,7 @@ function wporg_themes_post_thumbnail_html( $html, $post_id, $post_thumbnail_id, 
 		$theme = new WPORG_Themes_Repo_Package( $post );
 		$src   = add_query_arg( array( 'w' => $size, 'strip' => 'all' ), $theme->screenshot_url() );
 
-		$html = '<img src="' . esc_url( $src ) . '"/>';
+		$html = '<img src="' . esc_url( $src ) . '" alt="" />';
 	}
 
 	return $html;
