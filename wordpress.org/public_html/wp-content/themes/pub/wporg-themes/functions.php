@@ -76,7 +76,9 @@ add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 /**
  * Extend the default WordPress body classes.
  *
- * Adds body classes to denote singular themes.
+ * Adds body classes to
+ * 1. denote singular themes.
+ * 2. Identify IE8.
  *
  * @param array $classes A list of existing body class values.
  * @return array The filtered body class list.
@@ -84,6 +86,10 @@ add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 function wporg_themes_body_class( $classes ) {
 	if ( is_singular( 'repopackage' ) ) {
 		$classes[] = 'modal-open';
+	}
+
+	if ( $GLOBALS['is_IE'] && false !== strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE 8' ) ) {
+		$classes[] = 'ie8';
 	}
 
 	return $classes;
