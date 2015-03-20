@@ -890,8 +890,8 @@ body.full-overlay-active {
 	left: 0;
 	z-index: 50;
 	display: block;
-	width: 19px;
-	height: 19px;
+	width: 29px;
+	height: 25px;
 	margin-left: 15px;
 	padding: 0;
 	-webkit-border-radius: 50%;
@@ -905,8 +905,9 @@ body.full-overlay-active {
 }
 
 .wp-full-overlay.collapsed .collapse-sidebar {
-	position: absolute;
+	height: 27px;
 	left: 100%;
+	position: absolute;
 }
 
 .wp-full-overlay .collapse-sidebar-arrow {
@@ -925,7 +926,7 @@ body.full-overlay-active {
 	float: left;
 	content: "\f148";
 	background: #eee;
-	font: normal 20px/1 'dashicons';
+	font: normal 30px/1 'dashicons';
 	speak: none;
 	display: block;
 	padding: 0;
@@ -955,10 +956,11 @@ body.full-overlay-active {
 }
 
 .wp-full-overlay .collapse-sidebar-label {
-	position: absolute;
+	font-size: 16px;
 	left: 100%;
-	line-height: 20px;
+	line-height: 1.8;
 	margin-left: 10px;
+	position: absolute;
 }
 
 .wp-full-overlay.collapsed .collapse-sidebar-label {
