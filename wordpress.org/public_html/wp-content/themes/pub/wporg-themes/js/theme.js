@@ -572,8 +572,8 @@ window.wp = window.wp || {};
 		}
 	});
 
-// Theme Details view
-// Set ups a modal overlay with the expanded theme data
+	// Theme Details view
+	// Set ups a modal overlay with the expanded theme data
 	themes.view.Details = wp.Backbone.View.extend({
 		// Wrap theme data on a div.theme element
 		className: 'theme-overlay',
@@ -1297,11 +1297,8 @@ window.wp = window.wp || {};
 		},
 
 		events: {
-			'input':  'search',
 			'keyup':  'search',
-			'change': 'search',
-			'search': 'search',
-			'blur':   'pushState'
+			'search': 'search'
 		},
 
 		initialize: function( options ) {
@@ -1312,93 +1309,6 @@ window.wp = window.wp || {};
 				this.searching = false;
 			} );
 
-		},
-
-		// Runs a search on the theme collection.
-		search: function( event ) {
-			var options = {};
-
-			// Clear on escape.
-			if ( event.type === 'keyup' && event.which === 27 ) {
-				event.target.value = '';
-			}
-
-			// Lose input focus when pressing enter
-			if ( event.which === 13 ) {
-				this.$el.trigger( 'blur' );
-			}
-
-			this.collection.doSearch( event.target.value );
-
-			// if search is initiated and key is not return
-			if ( this.searching && event.which !== 13 ) {
-				options.replace = true;
-			} else {
-				this.searching = true;
-			}
-
-			// Update the URL hash
-			if ( event.target.value ) {
-				themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + event.target.value ), options );
-			} else {
-				themes.router.navigate( themes.router.baseUrl( '' ) );
-			}
-		},
-
-		pushState: function( event ) {
-			var url = themes.router.baseUrl( '' );
-
-			if ( event.target.value ) {
-				url = themes.router.baseUrl( themes.router.searchPath + event.target.value );
-			}
-
-			this.searching = false;
-			themes.router.navigate( url );
-
-		}
-	});
-
-	// Sets up the routes events for relevant url queries
-	// Listens to [theme] and [search] params
-	themes.Router = Backbone.Router.extend({
-
-		routes: {
-			'themes.php?theme=:slug': 'theme',
-			'themes.php?search=:query': 'search',
-			'themes.php?s=:query': 'search',
-			'themes.php': 'themes',
-			'': 'themes'
-		},
-
-		baseUrl: function( url ) {
-			return 'themes.php' + url;
-		},
-
-		themePath: '?theme=',
-		searchPath: '?search=',
-
-		search: function( query ) {
-			$( '.wp-filter-search' ).val( query );
-		},
-
-		themes: function() {
-			$( '.wp-filter-search' ).val( '' );
-		},
-
-		navigate: function() {
-			if ( Backbone.history._hasPushState ) {
-				Backbone.Router.prototype.navigate.apply( this, arguments );
-			}
-		}
-
-	});
-
-	// Extend the main Search view
-	themes.view.InstallerSearch =  themes.view.Search.extend({
-
-		events: {
-			'keyup':  'search',
-			'search': 'search'
 		},
 
 		// Handles Ajax request for searching through themes in public repo
@@ -1719,7 +1629,7 @@ window.wp = window.wp || {};
 		}
 	});
 
-	themes.InstallerRouter = Backbone.Router.extend({
+	themes.Router = Backbone.Router.extend({
 		routes: {
 			'browse/:sort/'  : 'sort',
 			'tags/:tag/'     : 'tag',
@@ -1752,13 +1662,13 @@ window.wp = window.wp || {};
 		}
 	});
 
-	themes.RunInstaller = {
+	themes.Run = {
 		init: function() {
 			// Set up the view
 			// Passes the default 'section' as an option
 			this.view = new themes.view.Installer({
 				section: 'featured',
-				SearchView: themes.view.InstallerSearch
+				SearchView: themes.view.Search
 			});
 
 			// Render results
@@ -1784,7 +1694,7 @@ window.wp = window.wp || {};
 
 			// Bind to our global `themes` object
 			// so that the router is available to sub-views
-			themes.router = new themes.InstallerRouter();
+			themes.router = new themes.Router();
 
 			// Handles `theme` route event
 			// Queries the API for the passed theme slug
@@ -1840,7 +1750,7 @@ window.wp = window.wp || {};
 
 	// Ready...
 	$( function() {
-		themes.RunInstaller.init();
+		themes.Run.init();
 	});
 
 })( jQuery );
