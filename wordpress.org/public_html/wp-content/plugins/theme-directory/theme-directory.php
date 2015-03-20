@@ -652,7 +652,7 @@ function wporg_themes_prepare_themes_for_js() {
 	return array(
 		'themes'  => $themes,
 		'request' => $request,
-		'total'   => $wp_query->found_posts,
+		'total'   => (int) $wp_query->found_posts,
 	);
  }
 
