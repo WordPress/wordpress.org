@@ -1659,6 +1659,10 @@ window.wp = window.wp || {};
 			if ( Backbone.history._hasPushState ) {
 				Backbone.Router.prototype.navigate.apply( this, arguments );
 			}
+
+			if ( 'object' === typeof _gaq ) {
+				_gaq.push([ '_trackPageview', themes.data.settings.path + arguments[0] ]);
+			}
 		}
 	});
 
