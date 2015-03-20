@@ -64,56 +64,6 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 				<h4><?php _e( 'Downloads', 'wporg-themes' ); ?></h4>
 
 				<div id="theme-download-stats-<?php echo esc_attr( $slug ); ?>" class="chart"></div>
-				<script type="text/javascript">
-					google.load("visualization", "1", {packages:["corechart"]});
-					google.setOnLoadCallback(drawThemeDownloadsChart);
-
-					function drawThemeDownloadsChart() {
-						jQuery(document).ready(function($){
-							$.getJSON('https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=<?php echo $slug; ?>&limit=260&callback=?', function (downloads) {
-								var data = new google.visualization.DataTable(),
-									count = 0;
-
-								data.addColumn('string', _wpThemeSettings.l10n.date);
-								data.addColumn('number', _wpThemeSettings.l10n.downloads);
-
-								$.each(downloads, function (key, value) {
-									data.addRow();
-									data.setValue(count, 0, new Date(key).toLocaleDateString() );
-									data.setValue(count, 1, Number(value));
-									count++;
-								});
-
-								new google.visualization.ColumnChart(document.getElementById('theme-download-stats-<?php echo esc_attr( $slug ); ?>')).draw(data, {
-									colors: ['#253578'],
-									legend: {
-										position: 'none'
-									},
-									titlePosition: 'in',
-									axisTitlesPosition: 'in',
-									chartArea: {
-										height: 280,
-										left: 35,
-										width: '98%'
-									},
-									hAxis: {
-										textStyle: {color: 'black', fontSize: 9}
-									},
-									vAxis: {
-										format: '###,###',
-										textPosition: 'out',
-										viewWindowMode: 'explicit',
-										viewWindow: {min: 0}
-									},
-									bar: {
-										groupWidth: ( data.getNumberOfRows() > 100 ) ? "100%" : null
-									},
-									height: 350
-								});
-							});
-						});
-					}
-				</script>
 				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
 			</div><!-- .theme-downloads -->
 		</div><!-- .theme-info -->
