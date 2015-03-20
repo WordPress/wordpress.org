@@ -1332,7 +1332,7 @@ window.wp = window.wp || {};
 		doSearch: _.debounce( function( value ) {
 			var request = {};
 
-			themes.view.Installer.prototype.clearFilters( new Event( 'click' ) );
+			themes.view.Installer.prototype.clearFilters( jQuery.Event( 'click' ) );
 
 			request.search = value;
 
