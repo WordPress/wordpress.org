@@ -40,37 +40,36 @@ function wporg_themes_scripts() {
 	wp_enqueue_style( 'wporg-themes', get_stylesheet_uri(), array(), filemtime( __DIR__ . '/style.css' ) );
 
 	if ( ! is_singular( 'page' ) ) {
-		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null );
+		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'wp-backbone' ), filemtime( __DIR__ . '/js/theme.js' ), true );
 
-		wp_enqueue_script( 'theme', self_admin_url( 'js/theme.js' ), array( 'wp-backbone' ), false, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'theme' ), filemtime( __DIR__ . '/js/theme.js' ), true );
-
-		wp_localize_script( 'theme', '_wpThemeSettings', array(
+		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
 			'query'    => wporg_themes_prepare_themes_for_js(),
 			'settings' => array(
-				'title'      => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
-				'isMobile'   => wp_is_mobile(),
-				'isInstall'  => true,
-				'canInstall' => false,
-				'installURI' => null,
-				'adminUrl'   => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
+				'title'        => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
+				'isMobile'     => wp_is_mobile(),
+				'postsPerPage' => get_option( 'posts_per_page', 15 ),
+				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
 			),
 			'l10n' => array(
-				'addNew'            => __( 'Add New Theme' ),
-				'search'            => __( 'Search Themes' ),
-				'searchPlaceholder' => __( 'Search themes...' ), // placeholder (no ellipsis)
-				'upload'            => __( 'Upload Theme' ),
-				'back'              => __( 'Back' ),
+				'search'            => __( 'Search Themes', 'wporg-themes' ),
+				'searchPlaceholder' => __( 'Search themes...', 'wporg-themes' ), // placeholder (no ellipsis)
 				'error'             => __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.' ),
 
 				// Downloads Graph
-				'date'      => __( 'Date' ),
-				'downloads' => __( 'Downloads' ),
+				'date'      => __( 'Date', 'wporg-themes' ),
+				'downloads' => __( 'Downloads', 'wporg-themes' ),
 			),
-			'installedThemes' => array(),
 		) );
 	}
+
+	// No emoji support needed.
+	remove_action( 'wp_print_styles','print_emoji_styles' );
+	wp_dequeue_script( 'emoji' );
+
+	// No Jetpack styles needed.
+	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 
