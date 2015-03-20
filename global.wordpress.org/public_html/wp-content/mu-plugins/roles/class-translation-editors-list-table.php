@@ -210,7 +210,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current user.
 	 */
 	public function column_projects( $user ) {
-		$project_access_list = $user->get( $this->project_access_meta_key );
+		$project_access_list = get_user_meta( $user->ID, $this->project_access_meta_key, true );
 
 		if ( empty( $project_access_list ) ) {
 			_e( 'No projects', 'rosetta' );
