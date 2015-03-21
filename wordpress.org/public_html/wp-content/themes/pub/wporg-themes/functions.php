@@ -141,3 +141,16 @@ function wporg_themes_view_templates() {
 	get_template_part( 'view-templates/theme-single' );
 }
 add_action( 'wp_footer', 'wporg_themes_view_templates' );
+
+add_action('wp_enqueue_scripts','wporg_themes_disable_dashicons');
+function wporg_themes_disable_dashicons() {
+    // Remove it only if the global header is used. (not e.g. chat.wordpress.org)
+    if ( ! function_exists( 'global_wp_menu' ) ) {
+        return;
+    }
+
+    // remove it, then reregister it as empty to maintain the dependencies but not load it a second time
+    wp_deregister_style('dashicons');
+    wp_register_style('dashicons','');
+}
+
