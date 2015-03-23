@@ -1730,6 +1730,7 @@ window.wp = window.wp || {};
 				self.view.collection.queries.push( themes.data.query );
 
 				$( '.wp-filter-search' ).focus().trigger( 'keyup' );
+				self.view.trigger( 'theme:close' );
 			});
 
 			themes.router.on( 'route:tag', function( tag ) {
@@ -1738,8 +1739,9 @@ window.wp = window.wp || {};
 				_.each( tag.split( '+' ), function( tag ) {
 					$( '#filter-id-' + tag ).prop( 'checked', true );
 				});
-				$( 'body' ).toggleClass( 'show-filters' );
+				$( 'body' ).removeClass( 'show-filters' ).addClass( 'show-filters' );
 				self.view.applyFilters();
+				self.view.trigger( 'theme:close' );
 			});
 
 			themes.router.on( 'route:author', function( author ) {
@@ -1748,6 +1750,7 @@ window.wp = window.wp || {};
 				request.author = author;
 				self.view.collection.query( request );
 				themes.utils.title( author );
+				self.view.trigger( 'theme:close' );
 			});
 		}
 	};
