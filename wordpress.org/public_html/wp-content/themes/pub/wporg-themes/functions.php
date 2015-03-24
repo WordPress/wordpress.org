@@ -153,15 +153,3 @@ function wporg_themes_disable_dashicons() {
     wp_deregister_style('dashicons');
     wp_register_style('dashicons','');
 }
-
-/**
- * Initialize HTML5 elements in older browsers.
- */
-function wporg_themes_html5shiv() {
-	?>
-	<!--[if lt IE 9]>
-	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-	<?php
-}
-add_action( 'wp_head', 'wporg_themes_html5shiv' );
