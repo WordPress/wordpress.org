@@ -17,9 +17,7 @@ window.wp = window.wp || {};
 
 	themes.utils = {
 		title: function ( item ) {
-			var title = $( 'title' );
-
-			title.html( themes.data.settings.title.replace( '%s', item ) );
+			document.title = $( '<div/>' ).html( themes.data.settings.title.replace( '%s', item ) ).text();
 		}
 	};
 
