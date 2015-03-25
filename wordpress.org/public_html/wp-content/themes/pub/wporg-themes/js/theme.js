@@ -788,14 +788,15 @@ window.wp = window.wp || {};
 		// It's shown when clicking a theme
 		collapse: function( event ) {
 			var self = this,
-				scroll;
-
-			event = event || window.event;
+				args = {},
+				scroll, author, search, tags, sorter;
 
 			// Prevent collapsing detailed view when there is only one theme available
 			if ( themes.data.themes.length === 1 ) {
 				return;
 			}
+
+			event = event || window.event;
 
 			// Detect if the click is inside the overlay
 			// and don't close it unless the target was
@@ -814,6 +815,30 @@ window.wp = window.wp || {};
 
 					// Get scroll position to avoid jumping to the top
 					scroll = document.body.scrollTop;
+
+					// Clean the url structure
+					if ( author = themes.Collection.prototype.currentQuery.request.author ) {
+						themes.router.navigate( themes.router.baseUrl( 'author/' + author ) );
+						themes.utils.title( author );
+					}
+					else if ( search = themes.Collection.prototype.currentQuery.request.search ) {
+						themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + search ) );
+						themes.utils.title( search );
+					}
+					else if ( tags = themes.view.Installer.prototype.filtersChecked() ) {
+						themes.router.navigate( themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
+						themes.utils.title( _.each( tags, function( tag, i ) {
+							tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
+						}).join( ', ' ) );
+					}
+					else if ( sorter = $( '.filter-links .current' ) ) {
+						if ( ! sorter.length ) {
+							sorter = $( '.filter-links [data-sort="featured"]' );
+							args   = { trigger: true };
+						}
+						themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
+						themes.utils.title( sorter.text() );
+					}
 
 					// Restore scroll position
 					document.body.scrollTop = scroll;
@@ -887,37 +912,10 @@ window.wp = window.wp || {};
 		// Performs the actions to effectively close
 		// the theme details overlay
 		closeOverlay: function() {
-			var args = {},
-				author, search, tags, sorter;
-
 			$( 'body' ).removeClass( 'modal-open' );
 			this.remove();
 			this.unbind();
 			this.trigger( 'theme:collapse' );
-
-			// Clean the url structure
-			if ( author = themes.Collection.prototype.currentQuery.request.author ) {
-				themes.router.navigate( themes.router.baseUrl( 'author/' + author ) );
-				themes.utils.title( author );
-			}
-			else if ( search = themes.Collection.prototype.currentQuery.request.search ) {
-				themes.router.navigate( themes.router.baseUrl( themes.router.searchPath + search ) );
-				themes.utils.title( search );
-			}
-			else if ( tags = themes.view.Installer.prototype.filtersChecked() ) {
-				themes.router.navigate( themes.router.baseUrl( 'tags/' + tags.join( '+' ) ) );
-				themes.utils.title( _.each( tags, function( tag, i ) {
-					tags[ i ] = $( 'label[for="filter-id-' + tag + '"]' ).text();
-				}).join( ', ' ) );
-			}
-			else if ( sorter = $( '.filter-links .current' ) ) {
-				if ( ! sorter.length ) {
-					sorter = $( '.filter-links [data-sort="featured"]' );
-					args   = { trigger: true };
-				}
-				themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sorter.data( 'sort' ) ), args );
-				themes.utils.title( sorter.text() );
-			}
 		},
 
 		// Confirmation dialog for deleting a theme
