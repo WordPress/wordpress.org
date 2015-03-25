@@ -119,7 +119,7 @@ window.wp = window.wp || {};
 	});
 
 	// Set up the Collection for our theme data
-	// @has 'id' 'name' 'screenshot' 'author' 'authorURI' 'version' 'active' ...
+	// @has 'id' 'name' 'screenshot' 'author' 'authorURI' 'version' ...
 	themes.Collection = Backbone.Collection.extend({
 		model: themes.Model,
 
@@ -384,14 +384,6 @@ window.wp = window.wp || {};
 			});
 		},
 
-		// Adds a class to the currently active theme
-		// and to the overlay in detailed view mode
-		activeTheme: function() {
-			if ( this.model.get( 'active' ) ) {
-				this.$el.addClass( 'active' );
-			}
-		},
-
 		// Add class of focus to the theme we are focused on.
 		addFocus: function() {
 			var $themeToFocus = ( $( ':focus' ).hasClass( 'theme' ) ) ? $( ':focus' ) : $(':focus').parents('.theme');
@@ -437,136 +429,6 @@ window.wp = window.wp || {};
 
 		preventExpand: function() {
 			this.touchDrag = true;
-		},
-
-		preview: function( event ) {
-			var self = this,
-				current, preview;
-
-			// Bail if the user scrolled on a touch device
-			if ( this.touchDrag === true ) {
-				return this.touchDrag = false;
-			}
-
-			// Allow direct link path to installing a theme.
-			if ( $( event.target ).hasClass( 'button-primary' ) ) {
-				return;
-			}
-
-			// 'enter' and 'space' keys expand the details view when a theme is :focused
-			if ( event.type === 'keydown' && ( event.which !== 13 && event.which !== 32 ) ) {
-				return;
-			}
-
-			// pressing enter while focused on the buttons shouldn't open the preview
-			if ( event.type === 'keydown' && event.which !== 13 && $( ':focus' ).hasClass( 'button' ) ) {
-				return;
-			}
-
-			event.preventDefault();
-
-			event = event || window.event;
-
-			// Set focus to current theme.
-			themes.focusedTheme = this.$el;
-
-			// Construct a new Preview view.
-			preview = new themes.view.Preview({
-				model: this.model
-			});
-
-			// Render the view and append it.
-			preview.render();
-			this.setNavButtonsState();
-
-			// Hide previous/next navigation if there is only one theme
-			if ( this.model.collection.length === 1 ) {
-				preview.$el.addClass( 'no-navigation' );
-			} else {
-				preview.$el.removeClass( 'no-navigation' );
-			}
-
-			// Append preview
-			$( 'div.wrap' ).append( preview.el );
-
-			// Listen to our preview object
-			// for `theme:next` and `theme:previous` events.
-			this.listenTo( preview, 'theme:next', function() {
-
-				// Keep local track of current theme model.
-				current = self.model;
-
-				// If we have ventured away from current model update the current model position.
-				if ( ! _.isUndefined( self.current ) ) {
-					current = self.current;
-				}
-
-				// Get next theme model.
-				self.current = self.model.collection.at( self.model.collection.indexOf( current ) + 1 );
-
-				// If we have no more themes, bail.
-				if ( _.isUndefined( self.current ) ) {
-					self.options.parent.parent.trigger( 'theme:end' );
-					return self.current = current;
-				}
-
-				preview.model = self.current;
-
-				// Render and append.
-				preview.render();
-				this.setNavButtonsState();
-				$( '.next-theme' ).focus();
-			})
-				.listenTo( preview, 'theme:previous', function() {
-
-					// Keep track of current theme model.
-					current = self.model;
-
-					// Bail early if we are at the beginning of the collection
-					if ( self.model.collection.indexOf( self.current ) === 0 ) {
-						return;
-					}
-
-					// If we have ventured away from current model update the current model position.
-					if ( ! _.isUndefined( self.current ) ) {
-						current = self.current;
-					}
-
-					// Get previous theme model.
-					self.current = self.model.collection.at( self.model.collection.indexOf( current ) - 1 );
-
-					// If we have no more themes, bail.
-					if ( _.isUndefined( self.current ) ) {
-						return;
-					}
-
-					preview.model = self.current;
-
-					// Render and append.
-					preview.render();
-					this.setNavButtonsState();
-					$( '.previous-theme' ).focus();
-				});
-
-			this.listenTo( preview, 'preview:close', function() {
-				self.current = self.model;
-			});
-		},
-
-		// Handles .disabled classes for previous/next buttons in theme installer preview
-		setNavButtonsState: function() {
-			var $themeInstaller = $( '.theme-install-overlay' ),
-				current = _.isUndefined( this.current ) ? this.model : this.current;
-
-			// Disable previous at the zero position
-			if ( 0 === this.model.collection.indexOf( current ) ) {
-				$themeInstaller.find( '.previous-theme' ).addClass( 'disabled' );
-			}
-
-			// Disable next if the next model is undefined
-			if ( _.isUndefined( this.model.collection.at( this.model.collection.indexOf( current ) + 1 ) ) ) {
-				$themeInstaller.find( '.next-theme' ).addClass( 'disabled' );
-			}
 		}
 	});
 
@@ -578,7 +440,6 @@ window.wp = window.wp || {};
 
 		events: {
 			'click': 'collapse',
-			'click .delete-theme': 'deleteTheme',
 			'click .left': 'previousTheme',
 			'click .right': 'nextTheme',
 			'click .theme-actions .button-secondary': 'preview',
@@ -602,8 +463,6 @@ window.wp = window.wp || {};
 			}).join( ', ' );
 
 			this.$el.html( this.html( data ) );
-			// Renders active theme styles
-			this.activeTheme();
 			// Set up navigation events
 			this.navigation();
 			// Checks screenshot size
@@ -744,13 +603,6 @@ window.wp = window.wp || {};
 			if ( _.isUndefined( this.model.collection.at( this.model.collection.indexOf( current ) + 1 ) ) ) {
 				$themeInstaller.find( '.next-theme' ).addClass( 'disabled' );
 			}
-		},
-
-		// Adds a class to the currently active theme
-		// and to the overlay in detailed view mode
-		activeTheme: function() {
-			// Check the model has the active property
-			this.$el.toggleClass( 'active', this.model.get( 'active' ) );
 		},
 
 		// Keeps :focus within the theme details elements.
@@ -918,11 +770,6 @@ window.wp = window.wp || {};
 			this.trigger( 'theme:collapse' );
 		},
 
-		// Confirmation dialog for deleting a theme
-		deleteTheme: function() {
-			return confirm( themes.data.settings.confirmDelete );
-		},
-
 		nextTheme: function() {
 			var self = this;
 			self.trigger( 'theme:next', self.model.cid );
@@ -1040,13 +887,9 @@ window.wp = window.wp || {};
 			// Set current view to [grid]
 			this.setView( 'grid' );
 
-			// Move the active theme to the beginning of the collection
-			self.currentTheme();
-
 			// When the collection is updated by user input...
 			this.listenTo( self.collection, 'update', function() {
 				self.parent.page = 0;
-				self.currentTheme();
 				self.render( this );
 			});
 
@@ -1166,20 +1009,6 @@ window.wp = window.wp || {};
 			});
 
 			this.parent.page++;
-		},
-
-		// Grabs current theme and puts it at the beginning of the collection
-		currentTheme: function() {
-			var self = this,
-				current;
-
-			current = self.collection.findWhere({ active: true });
-
-			// Move the active theme to the beginning of the collection
-			if ( current ) {
-				self.collection.remove( current );
-				self.collection.add( current, { at:0 } );
-			}
 		},
 
 		// Sets current view
@@ -1703,8 +1532,6 @@ window.wp = window.wp || {};
 
 				request.theme = slug;
 				self.view.collection.query( request );
-
-				$( '.close-full-overlay' ).trigger( 'click' );
 				self.view.view.expand( slug );
 			});
 
