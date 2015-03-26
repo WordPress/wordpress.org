@@ -100,6 +100,7 @@ function wporg_themes_init() {
 			),
 			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
 			'public'              => false,
+			'show_ui'             => true,
 			'show_in_nav_menus'   => false,
 			'exclude_from_search' => true,
 			'rewrite'             => false,
