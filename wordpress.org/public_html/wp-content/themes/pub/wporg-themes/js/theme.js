@@ -511,13 +511,6 @@ window.wp = window.wp || {};
 			preview.render();
 			this.setNavButtonsState();
 
-			// Hide previous/next navigation if there is only one theme
-			if ( this.model.collection.length === 1 ) {
-				preview.$el.addClass( 'no-navigation' );
-			} else {
-				preview.$el.removeClass( 'no-navigation' );
-			}
-
 			if ( themes.data.settings.isMobile ) {
 				preview.$el.addClass( 'wp-full-overlay collapsed' );
 			} else {
@@ -530,6 +523,8 @@ window.wp = window.wp || {};
 			// Listen to our preview object
 			// for `theme:next` and `theme:previous` events.
 			this.listenTo( preview, 'theme:next', function() {
+				this.trigger( 'theme:next' );
+
 				// Keep local track of current theme model.
 				current = self.model;
 
@@ -555,6 +550,8 @@ window.wp = window.wp || {};
 				$( '.next-theme' ).focus();
 			})
 			.listenTo( preview, 'theme:previous', function() {
+				this.trigger( 'theme:previous' );
+
 				// Keep track of current theme model.
 				current = self.model;
 
@@ -812,7 +809,7 @@ window.wp = window.wp || {};
 
 			this.$el.html( this.html( data ) );
 
-			themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.get( 'id' ) + '/preview' ) );
+			themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.get( 'id' ) ) );
 
 			this.$el.fadeIn( 200, function() {
 				$( 'body' ).addClass( 'theme-installer-active full-overlay-active' );
@@ -1072,14 +1069,8 @@ window.wp = window.wp || {};
 
 			// Sanity check which also serves as a boundary test
 			if ( nextModel !== undefined ) {
-
-				// We have a new theme...
-				// Close the overlay
-				this.overlay.closeOverlay();
-
 				// Trigger a route update for the current model
 				self.theme.trigger( 'theme:expand', nextModel.cid );
-
 			}
 		},
 
@@ -1096,14 +1087,8 @@ window.wp = window.wp || {};
 			previousModel = self.collection.at( self.collection.indexOf( model ) - 1 );
 
 			if ( previousModel !== undefined ) {
-
-				// We have a new theme...
-				// Close the overlay
-				this.overlay.closeOverlay();
-
 				// Trigger a route update for the current model
 				self.theme.trigger( 'theme:expand', previousModel.cid );
-
 			}
 		}
 	});
@@ -1460,7 +1445,6 @@ window.wp = window.wp || {};
 			'tags/:tag/'     : 'tag',
 			'search/:query/' : 'search',
 			'author/:author/': 'author',
-			':slug/preview/' : 'preview',
 			':slug/'         : 'preview',
 			''               : 'sort'
 		},

@@ -11,7 +11,7 @@
 				<h3 class="theme-name">{{ data.name }}</h3>
 				<span class="theme-by"><?php printf( __( 'By %s' ), '{{ data.author.display_name }}' ); ?></span>
 
-				<img class="theme-screenshot" src="{{ data.screenshot_url }}" alt="" />
+				<img class="theme-screenshot" src="{{ data.screenshot_url }}?w=520&strip=all" alt="" />
 
 				<div class="theme-details">
 					<div class="rating rating-{{ Math.round( data.rating / 10 ) * 10 }}">
