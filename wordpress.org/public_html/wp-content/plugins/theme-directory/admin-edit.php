@@ -328,6 +328,32 @@ function wporg_themes_repopackage_custom_columns( $column, $post_id ) {
 add_action( 'manage_repopackage_posts_custom_column', 'wporg_themes_repopackage_custom_columns', 10, 2 );
 
 /**
+ * Better styles for our custom columns.
+ */
+function wporg_themes_custom_columns_style() {
+	if ( 'repopackage' !== $GLOBALS['post_type'] ) {
+		return;
+	}
+
+	wp_add_inline_style( 'wp-admin', '
+		.fixed .column-version,
+		.fixed .column-ticket {
+			width: 10%;
+		}
+
+		@media screen and ( max-width: 782px ) {
+			.fixed .column-version,
+			.fixed .column-theme-url,
+			.fixed .column-author-url,
+			.fixed .column-ticket {
+				display: none;
+			}
+		}
+	' );
+}
+add_action( 'admin_print_styles-edit.php', 'wporg_themes_custom_columns_style' );
+
+/**
  * Meta box to choose which version is live.
  */
 function wporg_themes_add_meta_box() {
