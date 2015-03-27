@@ -35,7 +35,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
-			add_filter( 'bp_activity_global_tables', array( $this, 'change_table_names' ) );
+			add_filter( 'bp_activity_global_tables', array( $this, 'change_global_table_names' ) );
+			add_filter( 'bp_activity_meta_tables',   array( $this, 'change_meta_table_names' ) );
 			add_filter( 'bp_active_components',      array( $this, 'activate_activity_component' ) );
 			add_action( 'plugins_loaded',            array( $this, 'plugins_loaded' ) );
 
@@ -59,13 +60,28 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * @param  array $tables The default tables.
 		 * @return array
 		 */
-		public function change_table_names( $tables ) {
+		public function change_global_table_names( $tables ) {
 			global $bp;
 
-			return array(
-				'table_name'      => $bp->table_prefix . 'wporg_activity',
-				'table_name_meta' => $bp->table_prefix . 'wporg_activity_meta',
-			);
+			$tables['table_name']      = $bp->table_prefix . 'wporg_activity';
+			$tables['table_name_meta'] = $bp->table_prefix . 'wporg_activity_meta';
+
+			return $tables;
+		}
+
+		/**
+		 * Changes the meta table name to use custom wporg activity meta tables rather
+		 * than the ones for BuddyPress.org.
+		 *
+		 * @param  array $tables The default meta table.
+		 * @return array
+		 */
+		public function change_meta_table_names( $tables ) {
+			global $bp;
+
+			$tables['activity'] = $bp->table_prefix . 'wporg_activity_meta';
+
+			return $tables;
 		}
 
 		/**
