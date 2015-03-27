@@ -51,11 +51,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		public function change_global_table_names( $tables ) {
 			global $bp;
 
-			return array(
-				'table_name'           => $bp->table_prefix . 'wporg_groups',
-				'table_name_members'   => $bp->table_prefix . 'wporg_groups_members',
-				'table_name_groupmeta' => $bp->table_prefix . 'wporg_groups_groupmeta',
-			);
+			$tables['table_name']           = $bp->table_prefix . 'wporg_groups';
+			$tables['table_name_members']   = $bp->table_prefix . 'wporg_groups_members';
+			$tables['table_name_groupmeta'] = $bp->table_prefix . 'wporg_groups_groupmeta';
+
+			return $tables;
 		}
 
 		/**
