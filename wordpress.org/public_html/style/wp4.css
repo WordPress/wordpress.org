@@ -1804,16 +1804,15 @@ img#wpstats {
 	text-align: center;
 }
 .wporg-page-mobile ul#books {
-	display: -webkit-box;
 	display: -moz-box;
 	display: -ms-flexbox;
-	display: -webkit-flex;
 	display: flex;
 	flex-wrap: wrap;
 }
 .wporg-page-mobile #books li {
 	width: 49%;
 	margin-left: 1%;
+	clear: none;
 }
 .wporg-page-mobile #books li:first-child {
 	margin-left: 0;
@@ -1847,10 +1846,8 @@ img#wpstats {
 
 @media screen and (max-width: 974px) { 
 	body.wporg-responsive #pagebody .wrapper {
-		display: -webkit-box;
 		display: -moz-box;
 		display: -ms-flexbox;
-		display: -webkit-flex;
 		display: flex;
 		flex-wrap: wrap;
 	}
@@ -1870,7 +1867,8 @@ img#wpstats {
 
 	body.wporg-responsive.wporg-page-parent-download .col-8 {
 		margin-left: 14px;
-		width: 100%;
+		margin-right: 14px;
+		width: inherit;
 	}
 
 	.wporg-responsive.wporg-page-mobile #books li {
@@ -1900,7 +1898,8 @@ img#wpstats {
 	}
 	.wporg-responsive.wporg-page-download .col-7 {
 		margin-left: 14px;
-		width: 100%;
+		margin-right: 14px;
+		width: inherit;
 		margin-bottom: 3em;
 		padding-bottom: 2em;
 		border-bottom: 1px solid #ccc;
@@ -1912,15 +1911,16 @@ img#wpstats {
 		border-bottom: 0;
 	}
 	.wporg-responsive.wporg-page-download #sidebar, .wporg-responsive.wporg-page-download .col-7 {
-		width: 90%;
 		float: none;
-		margin: 0 auto;
+	}
+	.wporg-responsive.wporg-page-download #sidebar {
+		width: 100%;
 	}
 	.wporg-responsive.wporg-page-download .col-3 {
 		margin-top: 2em;
 		border-top: 1px solid #ccc;
 		padding-top: 3em;
-		width: 90%;
+		width: inherit;
 		float: none;
 		margin: 2em auto;
 	}
