@@ -294,6 +294,8 @@ class Codex_Loader {
 		}
 
 		$items = self::get_h2s( $content );
+		$matches = array();
+		$replacements = array();
 
 		foreach ( $items as $item ) {
 			$matches[]      = $item[0];
@@ -313,6 +315,8 @@ class Codex_Loader {
 		}
 
 		$items = self::get_h3s( $content );
+		$matches = array();
+		$replacements = array();
 
 		foreach ( $items as $item ) {
 			$matches[]      = $item[0];
@@ -332,6 +336,8 @@ class Codex_Loader {
 		}
 
 		$items = self::get_h4s( $content );
+		$matches = array();
+		$replacements = array();
 
 		foreach ( $items as $item ) {
 			$matches[]      = $item[0];
