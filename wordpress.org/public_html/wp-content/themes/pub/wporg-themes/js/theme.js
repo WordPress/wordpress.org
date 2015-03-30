@@ -474,7 +474,17 @@ window.wp = window.wp || {};
 
 		render: function() {
 			var data = this.model.toJSON(),
-				updated = new Date(data.last_updated);
+				updated = new Date();
+
+			// format 2012-12-25 into the date object in a cross-browser compatible way.
+			updated.setUTCFullYear(
+				data.last_updated.substring( 0, 4 ),
+				data.last_updated.substring( 5, 7 ) - 1, // 0 indexed
+				data.last_updated.substring( 8, 10 )
+			);
+
+			// Format the Last Updated date, prefering 
+			data.last_updated = updated.toLocaleDateString( false, {day:"numeric", month:"long", year:"numeric"} );
 
 			// If last updated plus 2 years is in the past, it's outdated.
 			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() < new Date().valueOf();

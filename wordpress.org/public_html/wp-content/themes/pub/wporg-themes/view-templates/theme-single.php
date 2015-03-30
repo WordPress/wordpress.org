@@ -32,7 +32,7 @@
 				<# } #>
 
 				<div class="theme-meta-info">
-					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>{{ new Date( data.last_updated ).toLocaleDateString() }}</strong>' ); ?></p>
+					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>{{ data.last_updated }}</strong>' ); ?></p>
 					<# if ( data.theme_url ) { #>
 					<a href="{{ data.theme_url }}"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
 					<# } #>
