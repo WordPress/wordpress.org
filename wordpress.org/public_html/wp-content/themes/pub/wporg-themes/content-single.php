@@ -1,6 +1,6 @@
 <?php
 $slug  = get_post()->post_name;
-$theme = themes_api('theme_information', array( 'slug' => $slug ) );
+$theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => array( 'ratings' => true ) ) );
 ?>
 <div class="theme-navigation">
 	<a class="close" rel="home" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
@@ -74,7 +74,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug ) );
 				<h4><?php _e( 'Ratings', 'wporg-themes' ); ?></h4>
 
 				<?php if ( ! empty( $theme->ratings ) ) : ?>
-					<div class="rating rating-<?php echo esc_attr( number_format( $theme->rating ) ); ?>">
+					<div class="rating rating-<?php echo esc_attr( round( $theme->rating / 10, 0) * 10 ); ?>">
 						<span class="one"></span>
 						<span class="two"></span>
 						<span class="three"></span>
