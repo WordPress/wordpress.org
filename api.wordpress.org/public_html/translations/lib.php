@@ -22,7 +22,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$cache_group = 'translations-query';
 	$cache_time = 900; // 15 min
 	$cache_key = "$type:$domain:$version";
-	
+
 	$translations = wp_cache_get( $cache_key, $cache_group );
 	if ( '_empty_' === $translations ) {
 		return array();
@@ -100,7 +100,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		if ( isset( $_translations[ $key ] ) ) {
 			$key .= ++$i;
 		}
-	
+
 		$_translations[ $key ] = $translation;
 		$_translations[ $key ]->english_name = $locale->english_name;
 		$_translations[ $key ]->native_name = $locale->native_name;
@@ -149,7 +149,7 @@ function find_latest_translations( $args ) {
 
 		if ( ! $results ) {
 			$query = $wpdb->prepare(
-				"SELECT `version`, `updated` FROM `language_packs` WHERE `type` = %s AND `domain` = %s AND `language` = %s",
+				"SELECT `version`, `updated` FROM `language_packs` WHERE `type` = %s AND `domain` = %s AND `language` = %s AND `active` = 1",
 				$type, $domain, $language );
 			$results = $wpdb->get_results( $query, ARRAY_A );
 
@@ -161,7 +161,7 @@ function find_latest_translations( $args ) {
 
 		usort( $results, 'version_compare_version_key_desc' );
 		if ( $version ) {
-			$found = false;		    
+			$found = false;
 			foreach ( $results as $result ) {
 				if ( version_compare( $result['version'], $version, '<=' ) ) {
 					$found = true;
