@@ -319,21 +319,32 @@ window.wp = window.wp || {};
 
 		// Send request to api.wordpress.org/themes
 		apiCall: function( request, paginated ) {
-			return wp.ajax.send( 'query-themes', {
+
+			var options = {
+				type: 'POST',
+				url: 'https://api.wordpress.org/themes/info/1.1/',
 				data: {
+					action: 'query_themes',
 					// Request data
 					request: _.extend({
 						per_page: themes.data.settings.postsPerPage,
 						fields: {
 							description: true,
+							sections: false,
 							tested: true,
 							requires: true,
-							rating: true,
 							downloaded: true,
 							downloadLink: true,
 							last_updated: true,
 							homepage: true,
-							num_ratings: true
+							theme_url: true,
+							parent: true,
+							tags: true,
+							rating: true,
+							ratings: true,
+							num_ratings: true,
+							extended_author: true,
+							photon_screenshots: true
 						}
 					}, request)
 				},
@@ -344,7 +355,16 @@ window.wp = window.wp || {};
 						$( 'body' ).addClass( 'loading-content' ).removeClass( 'no-results' );
 					}
 				}
-			});
+			};
+
+			return $.Deferred( function( deferred ) {
+				$.ajax( options ).done( function( response ) {
+					deferred['resolveWith']( this, [ response ] );
+				}).fail( function() {
+					deferred.rejectWith( this, arguments );
+				});
+			}).promise();
+
 		}
 	});
 
