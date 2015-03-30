@@ -323,6 +323,8 @@ window.wp = window.wp || {};
 			var options = {
 				type: 'POST',
 				url: 'https://api.wordpress.org/themes/info/1.1/',
+				jsonp: "callback",
+				dataType: "jsonp",
 				data: {
 					action: 'query_themes',
 					// Request data
