@@ -37,11 +37,19 @@ add_action( 'after_setup_theme', 'wporg_themes_setup' );
  * Enqueue scripts and styles.
  */
 function wporg_themes_scripts() {
-	wp_enqueue_style( 'wporg-themes', get_stylesheet_uri(), array(), filemtime( __DIR__ . '/style.css' ) );
+	$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+	$suffix       = $script_debug ? '' : '.min';
+
+	// Concatenates core scripts when possible.
+	if ( ! $script_debug ) {
+		$GLOBALS['concatenate_scripts'] = true;
+	}
+
+	wp_enqueue_style( 'wporg-themes', get_stylesheet_uri(), array(), '1' );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . '/js/theme.js', array( 'wp-backbone' ), filemtime( __DIR__ . '/js/theme.js' ), true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '1', true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
@@ -65,8 +73,8 @@ function wporg_themes_scripts() {
 	}
 
 	// No emoji support needed.
-	remove_action( 'wp_print_styles','print_emoji_styles' );
-	wp_dequeue_script( 'emoji' );
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 	// No Jetpack styles needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
