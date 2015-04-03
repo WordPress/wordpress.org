@@ -268,7 +268,7 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 		return;
 
 	// bbPress Codex
-	} elseif ( 'codex.bbpress.org' == $_SERVER['HTTP_HOST'] ) {
+	} elseif ( bb_base_is_bbpress() ) {
 		$wp_admin_bar->add_menu( array(
 			'id'    => 'bp-site-name',
 			'title' => __( 'bbPress.org' ),

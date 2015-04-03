@@ -1,4 +1,4 @@
-<?php if ( 'buddypress.org' === parse_url( get_home_url(), PHP_URL_HOST ) && is_front_page() ) : ?>
+<?php if ( bb_base_is_buddypress() && is_front_page() ) : ?>
 
 	<div id="headline"><div id="headline-inner">
 		<h2 class="graphic home"><?php bloginfo( 'description' ); ?></h2>

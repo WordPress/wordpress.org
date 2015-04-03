@@ -28,7 +28,7 @@ function bbporg_admin_redirect() {
 		)
 		return;
 
-	wp_safe_redirect( 'http://bbpress.org' );
+	wp_safe_redirect( home_url( '/' ) );
 	die;
 }
 add_action( 'bbp_admin_init', 'bbporg_admin_redirect' );

@@ -90,17 +90,17 @@ function bporg_redirect() {
 
 	// Redirect /forums/ to /support/
 	if ( $uri_chunks[1] === 'forums' && empty( $uri_chunks[2] ) ) {
-		bp_core_redirect( 'http://buddypress.org/support/' );
+		bp_core_redirect( home_url( '/support/' ) );
 	}
 
 	// Redirect members directory to root to block heavy paginated user queries
 	if ( ( $uri_chunks[1] === 'members' ) && empty( $uri_chunks[2] ) ) {
-		bp_core_redirect( 'http://buddypress.org' );
+		bp_core_redirect( home_url( '/' ) );
 	}
 
 	// Redirect old members profile pages to
 	if ( ( $uri_chunks[1] === 'community' ) && ( $uri_chunks[2] === 'members' ) && ! empty( $uri_chunks[3] ) ) {
-		bp_core_redirect( 'http://buddypress.org/members/' . $uri_chunks[3] . '/' );
+		bp_core_redirect( home_url( '/members/' . $uri_chunks[3] . '/' ) );
 	}
 
 	// Redirect old plugin groups to deprecated plugin forums
@@ -108,14 +108,14 @@ function bporg_redirect() {
 
 		// Single group topic redirect
 		if ( !empty( $uri_chunks[5] ) && ( $uri_chunks[5] === 'topic' ) ) {
-			bp_core_redirect( 'http://buddypress.org/support/topic/' . $uri_chunks[6] . '/' );
+			bp_core_redirect( home_url( '/support/topic/' . $uri_chunks[6] . '/' ) );
 
 		// Single group forum redirect
 		} elseif ( empty( $uri_chunks[4] ) || ( $uri_chunks[4] === 'forum' ) ) {
 
 			// Use legacy group slug
 			if ( ! in_array( $uri_chunks[3], array( 'gallery', 'how-to-and-troubleshooting' ) ) ) {
-				bp_core_redirect( 'http://buddypress.org/support/forum/plugin-forums/' . $uri_chunks[3] . '/' );
+				bp_core_redirect( home_url( '/support/forum/plugin-forums/' . $uri_chunks[3] . '/' ) );
 
 			// Root forums, maybe with new slug
 			} else {
@@ -123,38 +123,38 @@ function bporg_redirect() {
 				// New BuddyPress project forums locations
 				switch ( $uri_chunks[3] ) {
 					case 'gallery' :
-						$url = 'http://buddypress.org/support/forum/your-buddypress/';
+						$url = '/support/forum/your-buddypress/';
 						break;
 					case 'how-to-and-troubleshooting' :
-						$url = 'http://buddypress.org/support/forum/how-to/';
+						$url = '/support/forum/how-to/';
 						break;
 					case 'creating-and-extending' :
-						$url = 'http://buddypress.org/support/forum/extending/';
+						$url = '/support/forum/extending/';
 						break;
 					case 'requests-and-feedback' :
-						$url = 'http://buddypress.org/support/forum/feedback/';
+						$url = '/support/forum/feedback/';
 						break;
 					case 'buddypress' :
-						$url = 'http://buddypress.org/support/forum/installing/';
+						$url = '/support/forum/installing/';
 						break;
 					case 'third-party-plugins' :
-						$url = 'http://buddypress.org/support/forum/plugins/';
+						$url = '/support/forum/plugins/';
 						break;
 					default:
 						$url = trailingslashit( 'http://buddypress.org/support/forum/' . $uri_chunks[3] );
 						break;
 				}
-				bp_core_redirect( $url );
+				bp_core_redirect( home_url( $url ) );
 			}
 		}
 	}
 
 	// Redirect /support/topics/ to /support/
 	if ( $uri_chunks[1] === 'support' && ( !empty( $uri_chunks[2] ) && ( 'topics' === $uri_chunks[2] ) ) ) {
-		bp_core_redirect( 'http://buddypress.org/support/' );
+		bp_core_redirect( home_url( '/support/' ) );
 	}
 }
-if ( 'buddypress.org' === $_SERVER['HTTP_HOST'] && ! is_admin() && defined( 'WP_USE_THEMES' ) && WP_USE_THEMES ) {
+if ( (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' ) && ! is_admin() && defined( 'WP_USE_THEMES' ) && WP_USE_THEMES ) {
 	add_action( 'init', 'bporg_redirect', 1 ); // before bp_init
 }
 

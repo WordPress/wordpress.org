@@ -22,6 +22,27 @@ function bb_base_is_codex() {
 	return (bool) strstr( $_SERVER['HTTP_HOST'], 'codex' );
 }
 
+/**
+ * Are we looking at a buddypress.org site?
+ *
+ * @return bool
+ */
+function bb_base_is_buddypress() {
+	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' );
+	return (bool) apply_filters( 'bb_base_is_buddypress', $retval );
+}
+
+/**
+ * Are we looking at a bbpress.org site?
+ *
+ * @return bool
+ */
+function bb_base_is_bbpress() {
+	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'bbpress' );
+	return (bool) apply_filters( 'bb_base_is_bbpress', $retval );
+}
+
+
 // Include in Codex code on codex sites
 if ( bb_base_is_codex() ) {
 	include( get_template_directory() . '/functions-codex.php' );
@@ -39,9 +60,9 @@ function bb_base_register_stylesheets() {
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
 
 	// Handle root styling for buddypress/bbpress
-	if ( strstr( $_SERVER['HTTP_HOST'], 'bbpress.org' ) ) {
+	if ( bb_base_is_bbpress() ) {
 		$root =	'style-bbpress.css';
-	} elseif ( strstr( $_SERVER['HTTP_HOST'], 'buddypress.org' ) ) {
+	} elseif ( bb_base_is_buddypress() ) {
 		$root =	'style-buddypress.css';
 	}
 	wp_enqueue_style( 'bb-root',   get_template_directory_uri()   . '/' . $root,  array( 'bb-base' ),            $version, 'screen' );
