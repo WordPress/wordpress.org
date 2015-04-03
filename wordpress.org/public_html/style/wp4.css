@@ -1372,6 +1372,7 @@ ul#books, ul#otherbooks {
 
 #books p, #otherbooks p {
 	padding-right: 22px;
+	padding-left: 22px;
 	margin-bottom: 7px;
 	line-height: 1.4em;
 }
@@ -1405,7 +1406,7 @@ ul#books, ul#otherbooks {
 	padding: 11px 11px 16px;
 	margin: 32px 0;
 	overflow: auto;
-	width: 670px;
+	/*width: 670px;*/
 }
 
 .partner {
@@ -1837,13 +1838,45 @@ img#wpstats {
 	margin-top: 0;
 }
 
-.wporg-responsive.wporg-page-download .col-7, body.wporg-responsive.wporg-page-parent-download .col-8 {
-	margin-left: 160px;
+.wporg-responsive .col-7,
+body.wporg-responsive .col-8,
+body.wporg-responsive .col-10 {
+	margin-left: 174px;
 }
-.wporg-responsive.wporg-page-download .col-2, body.wporg-responsive.wporg-page-parent-download .col-2 {
+body.wporg-responsive .col-2 {
 	position: absolute;
 }
 
+.wporg-responsive .col-10 .col-5 {
+	width: 50%;
+	box-sizing: border-box;
+	padding-right: 14px;
+}
+.wporg-responsive .col-10 .col-5:last-child {
+	padding-right: 0;
+	padding-left: 14px;
+}
+.wporg-responsive.wporg-page-parent-about .col-7,
+.wporg-responsive.wporg-page-parent-about .col-8,
+.wporg-responsive.wporg-page-parent-about .col-10 {
+	min-height: 550px;
+}
+
+.wporg-responsive.wporg-page-about-logos h3.graphics img {
+	float: right;
+	margin-top: -40px;
+	margin-left: 40px;
+}
+.wporg-responsive.wporg-page-about-logos .all-logos ul.logo li {
+	min-height: 39px;
+}
+.wporg-responsive.wporg-page-about-logos .all-logos ul.logo li.img {
+	min-height: 150px;
+}
+.wporg-responsive.wporg-page-about-logos ul.logo li.img {
+	line-height: 0;
+	text-align: center;
+}
 @media screen and (max-width: 974px) { 
 	body.wporg-responsive #pagebody .wrapper {
 		display: -moz-box;
@@ -1854,21 +1887,31 @@ img#wpstats {
 	body.wporg-responsive .col-2,
 	body.wporg-responsive .col-3,
 	body.wporg-responsive .col-7,
+	body.wporg-responsive .col-8,
+	body.wporg-responsive .col-9,
 	body.wporg-responsive .col-10,
 	body.wporg-responsive .col-12 {
 		width: inherit;
 		float: none;
+		word-wrap: break-word;
 	}
 
-	body.wporg-responsive.wporg-page-parent-download .col-2 {
+	body.wporg-responsive .col-2 {
 		position: inherit;
 		width: 100%;
 	}
 
-	body.wporg-responsive.wporg-page-parent-download .col-8 {
+	body.wporg-responsive .col-8,
+	body.wporg-responsive .col-9,
+	body.wporg-responsive .col-10 {
 		margin-left: 14px;
 		margin-right: 14px;
-		width: inherit;
+	}
+
+	.wporg-responsive.wporg-page-parent-about .col-7,
+	.wporg-responsive.wporg-page-parent-about .col-8,
+	.wporg-responsive.wporg-page-parent-about .col-10 {
+		min-height: inherit;
 	}
 
 	.wporg-responsive.wporg-page-mobile #books li {
@@ -1881,7 +1924,7 @@ img#wpstats {
 	 * /download
 	 */
 
-	.wporg-responsive.wporg-page-download .col-2 {
+	.wporg-responsive .col-7 ~.col-2 {
 		position: inherit;
 		float: left;
 		width: 50%;
@@ -1889,14 +1932,14 @@ img#wpstats {
 		box-sizing: border-box;
 		padding: 0 14px;
 	}
-	.wporg-responsive.wporg-page-download .col-3 {
+	.wporg-responsive .col-7 ~ .col-3 {
 		float: right;
 		width: 50%;
 		margin: 0;
 		box-sizing: border-box;
 		padding: 0 14px;
 	}
-	.wporg-responsive.wporg-page-download .col-7 {
+	.wporg-responsive .col-7 {
 		margin-left: 14px;
 		margin-right: 14px;
 		width: inherit;
@@ -1905,18 +1948,38 @@ img#wpstats {
 		border-bottom: 1px solid #ccc;
 	}
 
+	.wporg-responsive .storycontent {
+		padding-right: 0;
+	}
+
+}
+@media screen and (max-width: 700px) {
+	.wporg-responsive.wporg-page-about-logos h3.graphics {
+		padding-top: 0;
+	}
+	.wporg-responsive.wporg-page-about-logos h3.graphics img {
+		display: block;
+		float: none;
+		margin: 0 auto 14px;
+	}
 }
 @media screen and (max-width: 480px) {
-	.wporg-responsive.wporg-page-download .col-7 {
+	.wporg-responsive .col-7 {
 		border-bottom: 0;
 	}
-	.wporg-responsive.wporg-page-download #sidebar, .wporg-responsive.wporg-page-download .col-7 {
+	.wporg-responsive #sidebar, .wporg-responsive .col-7 {
 		float: none;
 	}
-	.wporg-responsive.wporg-page-download #sidebar {
+	.wporg-responsive #sidebar {
 		width: 100%;
 	}
-	.wporg-responsive.wporg-page-download .col-3 {
+
+	.wporg-responsive .col-10 .col-5, .wporg-responsive .col-10 .col-5:last-child {
+		width: 100%;
+		padding: 0;
+	}
+
+	.wporg-responsive .col-7 ~ .col-3 {
 		margin-top: 2em;
 		border-top: 1px solid #ccc;
 		padding-top: 3em;
@@ -1933,5 +1996,23 @@ img#wpstats {
 	}
 	.wporg-page-download .mobile-notice-inner {
 		display: none;
+	}
+
+	.wporg-page-about-books #books li {
+		padding: 0 18px 18px;
+		box-sizing: border-box;
+	}
+	.wporg-page-about-books #books .image {
+		border-right: 0;
+		float: none;
+		width: inherit;
+	}
+	.wporg-page-about-books #books p {
+		padding-right: 0;
+		padding-left: 0;
+	}
+
+	.wporg-responsive.wporg-page-about-logos ul.logo {
+		width: 100%;
 	}
 }
