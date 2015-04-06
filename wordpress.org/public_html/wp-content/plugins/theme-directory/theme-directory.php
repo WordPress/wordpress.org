@@ -26,7 +26,6 @@ include_once plugin_dir_path( __FILE__ ) . 'themes-api.php';
 // Load adjustments to the edit.php screen for repopackage posts.
 include_once plugin_dir_path( __FILE__ ) . 'admin-edit.php';
 
-
 /**
  * Things to change on activation.
  */
@@ -496,8 +495,6 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 /**
  * Completely removes a theme from wp-themes.com.
  *
- * This method is currently not in use.
- *
  * @param string $theme_slug
  */
 function wporg_themes_remove_wpthemescom( $theme_slug ) {
@@ -602,7 +599,6 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'Tags'        => $tags,
 	);
 }
-
 
 /**
  * Bootstraps found themes for the frontend JS handler.
