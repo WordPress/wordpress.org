@@ -10,7 +10,6 @@ class GH2WORG {
 	private $whitelisted_repos = array(
 		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
-		'MichaelArestad/Press-This' => 'press-this',
 	);
 
 	function __construct() {
