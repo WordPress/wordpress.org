@@ -372,18 +372,23 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		// Translators: 1: Theme name; 2: Theme URL.
 		$content = sprintf( __( 'Congratulations, your new theme %1$s is now available to the public at %2$s.', 'wporg-themes' ), $post->post_title, "https://wordpress.org/themes/{$post->post_name}" ) . "\n\n";
 
-		/*
-		 * First time approval: Publish the theme.
-		 *
-		 * Uses `wp_update_post()` to also update post_time.
-		 */
-		$post_date = current_time( 'mysql' );
-		wp_update_post( array(
-			'ID'            => $post_id,
-			'post_status'   => 'publish',
-			'post_date'     => $post_date,
-			'post_date_gmt' => $post_date,
-		) );
+		// First time approval: Publish the theme.
+		$post_args = array(
+			'ID'          => $post_id,
+			'post_status' => 'publish',
+		);
+
+		// Update post_time if it wasn't suspended before.
+		if ( get_post_meta( $post_id, '_wporg_themes_reinstated', true ) ) {
+			delete_post_meta( $post_id, '_wporg_themes_reinstated' );
+		} else {
+			$post_date = current_time( 'mysql' );
+
+			$post_args['post_date']     = $post_date;
+			$post_args['post_date_gmt'] = $post_date;
+		}
+
+		wp_update_post( $post_args );
 	}
 
 	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";

@@ -223,6 +223,12 @@ function wporg_themes_reinstate_theme() {
 		'post_status' => 'draft',
 	) );
 
+	/*
+	 * Mark it as reinstated, so the post date doesn't get overwritten when it's
+	 * published again.
+	 */
+	add_post_meta( $post_id, '_wporg_themes_reinstated', true );
+
 	wp_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended' ), wp_get_referer() ) ) );
 	exit();
 }
