@@ -52,7 +52,7 @@ function wporg_developer_wp_title( $title, $sep ) {
 	$post_type = get_query_var( 'post_type' );
 
 	// Add post type to title if it's a parsed item.
-	if ( is_singular() && 0 === strpos( $post_type, 'wp-parser-' ) ) {
+	if ( is_singular() && \DevHub\is_parsed_post_type( $post_type ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
 			$title .= get_post_type_object( $post_type )->labels->singular_name . " $sep ";
 		}
@@ -73,15 +73,9 @@ function wporg_developer_wp_title( $title, $sep ) {
 		}
 	}
 
-	// Add the blog description for the home/front page.
-	$site_description = get_bloginfo( 'description', 'display' );
-	if ( $site_description && ( is_home() || is_front_page() ) ) {
-		$title .= " $sep $site_description";
-	}
-
 	// Add a page number if necessary:
 	if ( $paged >= 2 || $page >= 2 ) {
-		$title .= " $sep " . sprintf( __( 'Page %s', 'wporg' ), max( $paged, $page ) );
+		$title .= sprintf( __( 'Page %s', 'wporg' ), max( $paged, $page ) ) . " $sep ";
 	}
 
 	// Add the blog name
