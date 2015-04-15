@@ -1,6 +1,5 @@
 <?php
 
-
 function rosetta_after_setup_theme() {
 	add_theme_support( 'automatic-feed-links' );
 
