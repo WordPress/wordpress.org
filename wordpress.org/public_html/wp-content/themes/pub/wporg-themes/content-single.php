@@ -80,7 +80,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => arr
 						<span class="three"></span>
 						<span class="four"></span>
 						<span class="five"></span>
-						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">' . number_format_i18n( $theme->rating / 20, 1 )  . '</span>' ); ?></p>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">' . number_format_i18n( round($theme->rating / 20 / 0.5)*0.5, 1 )  . '</span>' ); ?></p>
 					</div>
 				<?php else : ?>
 					<div class="rating">

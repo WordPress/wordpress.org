@@ -74,7 +74,7 @@
 						<span class="three"></span>
 						<span class="four"></span>
 						<span class="five"></span>
-						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">{{ ( data.rating / 20 ).toFixed( 1 ) }}</span>' ); ?></p>
+						<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-themes' ), '<span itemprop="ratingValue">{{ Math.round( data.rating / 20 / 0.5 )*0.5 }}</span>' ); ?></p>
 					</div>
 					<# } else { #>
 					<div class="rating">
@@ -84,51 +84,17 @@
 
 					<# if ( data.ratings ) { #>
 					<ul>
+						<?php foreach ( range( 5, 1 ) as $stars ) : ?>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=5" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 5 ) ); ?>">
-								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', 5, 'wporg-themes' ), 5 ); ?></span>
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), $stars ) ); ?>">
+								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-themes' ), $stars ); ?></span>
 								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 100 * data.ratings[5] / data.num_ratings }}%;"></span>
+									<span class="counter-bar" style="width: {{ 100 * data.ratings[<?php echo $stars; ?>] / data.num_ratings }}%;"></span>
 								</span>
-								<span class="counter-count">{{ data.ratings[5] }}</span>
+								<span class="counter-count">{{ data.ratings[<?php echo $stars; ?>] }}</span>
 							</a>
 						</li>
-						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=4" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 4 ) ); ?>">
-								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', 4, 'wporg-themes' ), 4 ); ?></span>
-								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 100 * data.ratings[4] / data.num_ratings }}%;"></span>
-								</span>
-								<span class="counter-count">{{ data.ratings[4] }}</span>
-							</a>
-						</li>
-						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=3" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 3 ) ); ?>">
-								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', 3, 'wporg-themes' ), 3 ); ?></span>
-								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 100 * data.ratings[3] / data.num_ratings }}%;"></span>
-								</span>
-								<span class="counter-count">{{ data.ratings[3] }}</span>
-							</a>
-						</li>
-						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=2" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), 2 ) ); ?>">
-								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', 2, 'wporg-themes' ), 2 ); ?></span>
-								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 100 * data.ratings[2] / data.num_ratings }}%;"></span>
-								</span>
-								<span class="counter-count">{{ data.ratings[2] }}</span>
-							</a>
-						</li>
-						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=1" title="<?php esc_attr_e( 'Click to see reviews that provided a rating of 1 star', 'wporg-themes' ); ?>">
-								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', 1, 'wporg-themes' ), 1 ); ?></span>
-								<span class="counter-back">
-									<span class="counter-bar" style="width: {{ 100 * data.ratings[1] / data.num_ratings }}%;"></span>
-								</span>
-								<span class="counter-count">{{ data.ratings[1] }}</span>
-							</a>
-						</li>
+						<?php endforeach; ?>
 					</ul>
 					<# } #>
 
