@@ -54,7 +54,7 @@ if ( have_posts() ) :
 				</p>
 
 				<p>
-					<a class="button button-primary" href="<?php echo home_url('/upload/'); ?>"><?php _e( 'Upload your theme', 'wporg-themes' ); ?></a>
+					<a class="button button-primary" href="<?php echo home_url('/upload/'); ?>"><?php _e( 'Upload Your Theme', 'wporg-themes' ); ?></a>
 				</p>
 			</div><!-- .entry-content -->
 
