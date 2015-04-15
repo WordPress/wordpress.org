@@ -24,25 +24,25 @@ get_header();
 			</div>
 
 			<ul class="filter-links">
-				<li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured"><?php _ex( 'Featured', 'themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'browse/popular/' ) ); ?>" data-sort="popular"><?php _ex( 'Popular', 'themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new"><?php _ex( 'Latest', 'themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured"><?php _ex( 'Featured', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/popular/' ) ); ?>" data-sort="popular"><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new"><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
 			</ul>
 
-			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter' ); ?></a>
+			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></a>
 
 			<div class="search-form"></div>
 
 			<div class="filter-drawer">
 				<div class="buttons">
-					<button type="button" disabled="disabled" class="apply-filters button button-secondary"><?php _e( 'Apply Filters' ); ?><span></span></button>
-					<button type="button" class="clear-filters button button-secondary"><?php _e( 'Clear' ); ?></button>
+					<button type="button" disabled="disabled" class="apply-filters button button-secondary"><?php _e( 'Apply Filters', 'wporg-themes' ); ?><span></span></button>
+					<button type="button" class="clear-filters button button-secondary"><?php _e( 'Clear', 'wporg-themes' ); ?></button>
 				</div>
 
 				<div class="filtered-by">
-					<span><?php _e( 'Filtering by:' ); ?></span>
+					<span><?php _e( 'Filtering by:', 'wporg-themes' ); ?></span>
 					<div class="tags"></div>
-					<a href="#"><?php _e( 'Edit' ); ?></a>
+					<a href="#"><?php _e( 'Edit', 'wporg-themes' ); ?></a>
 				</div>
 
 				<?php foreach( get_theme_feature_list() as $feature_name => $features ) : ?>
@@ -75,7 +75,7 @@ get_header();
 					) );
 				?>
 			</div>
-			<p class="no-themes"><?php _e( 'No themes found. Try a different search.' ); ?></p>
+			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-install-overlay"></div>
 		<div class="theme-overlay"></div>

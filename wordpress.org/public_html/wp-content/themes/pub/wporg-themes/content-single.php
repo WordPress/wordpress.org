@@ -27,8 +27,8 @@ $theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => arr
 
 		<div class="theme-head">
 			<div class="theme-actions clear">
-				<a href="<?php echo esc_url( '//wp-themes.com/' . $slug ); ?>" class="button button-secondary alignleft"><?php _e( 'Preview' ); ?></a>
-				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary alignright"><?php _e( 'Download' ); ?></a>
+				<a href="<?php echo esc_url( '//wp-themes.com/' . $slug ); ?>" class="button button-secondary alignleft"><?php _e( 'Preview', 'wporg-themes' ); ?></a>
+				<a href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $slug . '.' . $theme->version . '.zip' ); ?>" class="button button-primary alignright"><?php _e( 'Download', 'wporg-themes' ); ?></a>
 			</div>
 
 			<?php
@@ -36,7 +36,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => arr
 					$parent = get_post( get_post()->post_parent );
 			?>
 			<div class="theme-notice notice notice-info">
-				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
+				<p class="parent-theme"><?php printf( __( 'This is a child theme of %s.', 'wporg-themes' ), sprintf( '<a href="%1$s">%2$s</a>', get_permalink( $parent->ID ), $parent->post_title ) ); ?></p>
 			</div>
 			<?php endif; ?>
 
@@ -57,14 +57,14 @@ $theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => arr
 			<div class="theme-description entry-summary" itemprop="description"><?php the_content(); ?></div>
 
 			<div class="theme-tags">
-				<?php the_tags( '<h4>' . __( 'Tags:' ) . '</h4>' ); ?>
+				<?php the_tags( '<h4>' . __( 'Tags:', 'wporg-themes' ) . '</h4>' ); ?>
 			</div><!-- .theme-tags -->
 
 			<div class="theme-downloads">
 				<h4><?php _e( 'Downloads', 'wporg-themes' ); ?></h4>
 
 				<div id="theme-download-stats-<?php echo esc_attr( $slug ); ?>" class="chart"></div>
-				<p class="total-downloads"><?php printf( __( 'Total downloads: %s' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
+				<p class="total-downloads"><?php printf( __( 'Total downloads: %s', 'wporg-themes' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
 			</div><!-- .theme-downloads -->
 		</div><!-- .theme-info -->
 
@@ -124,7 +124,7 @@ $theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => arr
 					<li>
 						<a href="//themes.trac.wordpress.org/log/<?php echo esc_attr( $slug ); ?>?limit=100&mode=stop_on_copy&format=rss">
 							<img src="//s.w.org/style/images/feedicon.png" />
-							<?php _e( 'Development Log', 'wporg' ); ?>
+							<?php _e( 'Development Log', 'wporg-themes' ); ?>
 						</a>
 					</li>
 				</ul>

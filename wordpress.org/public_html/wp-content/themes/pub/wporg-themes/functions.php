@@ -20,11 +20,6 @@ function wporg_themes_setup() {
 
 	add_theme_support( 'automatic-feed-links' );
 
-	// This theme uses wp_nav_menu() in one location.
-	register_nav_menus( array(
-		'primary' => __( 'Primary Menu', 'wporg-themes' ),
-	) );
-
 	add_theme_support( 'html5', array(
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
@@ -63,7 +58,7 @@ function wporg_themes_scripts() {
 			'l10n' => array(
 				'search'            => __( 'Search Themes', 'wporg-themes' ),
 				'searchPlaceholder' => __( 'Search themes...', 'wporg-themes' ), // placeholder (no ellipsis)
-				'error'             => __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.' ),
+				'error'             => __( 'An unexpected error occurred.', 'wporg-themes' ),
 
 				// Downloads Graph
 				'date'      => __( 'Date', 'wporg-themes' ),

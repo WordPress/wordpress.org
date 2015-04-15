@@ -53,10 +53,11 @@ if ( have_posts() ) :
 					); ?>
 				</p>
 
-				<?php the_content(); ?>
+				<p>
+					<a class="button button-primary" href="<?php echo home_url('/upload/'); ?>"><?php _e( 'Upload your theme', 'wporg-themes' ); ?></a>
+				</p>
 			</div><!-- .entry-content -->
 
-			<?php edit_post_link( __( 'Edit', 'wporg-themes' ), '<footer class="entry-footer"><span class="edit-link">', '</span></footer><!-- .entry-footer -->' ); ?>
 		</article><!-- #post-## -->
 
 	<?php

@@ -14,6 +14,6 @@ $theme = new WPORG_Themes_Repo_Package( $post );
 		<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
 	</a>
 	<div class="theme-actions">
-		<a class="button button-primary preview install-theme-preview" href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $post->post_name . '.' . $theme->latest_version() . '.zip' ); ?>"><?php esc_html_e( 'Download' ); ?></a>
+		<a class="button button-primary preview install-theme-preview" href="<?php echo esc_url( '//downloads.wordpress.org/theme/' . $post->post_name . '.' . $theme->latest_version() . '.zip' ); ?>"><?php _e( 'Download', 'wporg-themes' ); ?></a>
 	</div>
 </article>

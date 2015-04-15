@@ -416,7 +416,7 @@ function wporg_themes_close_version( $post_id, $version ) {
 	// Notify theme author.
 	$subject  = sprintf( __( '[WordPress Themes] %s - feedback', 'wporg-themes' ), $post->post_title );
 	// Translators: 1: Theme name; 2: Ticket URL.
-	$content  = sprintf( __( 'Feedback for the %1$s theme is at %2$s', 'wporg' ) . "\n\n--\n", $post->post_title, "https://themes.trac.wordpress.org/ticket/{$ticket_id}" );
+	$content  = sprintf( __( 'Feedback for the %1$s theme is at %2$s', 'wporg-themes' ) . "\n\n--\n", $post->post_title, "https://themes.trac.wordpress.org/ticket/{$ticket_id}" );
 	$content .= __( 'The WordPress.org Themes Team', 'wporg-themes' ) . "\n";
 	$content .= 'https://make.wordpress.org/themes';
 

@@ -18,10 +18,9 @@ if ( have_posts() ) :
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
-				<?php the_content(); ?>
+				<?php do_shortcode( '[wporg-themes-upload]' ); ?>
 			</div><!-- .entry-content -->
 
-			<?php edit_post_link( __( 'Edit', 'wporg-themes' ), '<footer class="entry-footer"><span class="edit-link">', '</span></footer><!-- .entry-footer -->' ); ?>
 		</article><!-- #post-## -->
 
 	<?php

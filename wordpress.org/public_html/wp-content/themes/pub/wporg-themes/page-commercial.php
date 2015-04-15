@@ -71,10 +71,8 @@ if ( have_posts() ) :
 					<li><?php printf( __( 'Provide a <a href="%s">haiku</a> (5-7-5) about yourself to be included.', 'wporg-themes' ), 'http://en.wikipedia.org/wiki/Haiku_in_English' ); ?></li>
 				</ul>
 
-				<?php the_content(); ?>
 			</div><!-- .entry-content -->
 
-			<?php edit_post_link( __( 'Edit', 'wporg-themes' ), '<footer class="entry-footer"><span class="edit-link">', '</span></footer><!-- .entry-footer -->' ); ?>
 		</article><!-- #post-## -->
 
 	<?php

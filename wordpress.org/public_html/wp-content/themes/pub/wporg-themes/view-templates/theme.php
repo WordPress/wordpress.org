@@ -7,11 +7,11 @@
 		<# } else { #>
 		<div class="theme-screenshot blank"></div>
 		<# } #>
-		<span class="more-details"><?php _ex( 'More Info', 'theme' ); ?></span>
-		<div class="theme-author"><?php printf( __( 'By %s' ), '<span class="author">{{ data.author.display_name }}</span>' ); ?></div>
+		<span class="more-details"><?php _ex( 'More Info', 'theme', 'wporg-themes' ); ?></span>
+		<div class="theme-author"><?php printf( __( 'By %s', 'wporg-themes' ), '<span class="author">{{ data.author.display_name }}</span>' ); ?></div>
 		<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
 	</a>
 	<div class="theme-actions">
-		<a class="button button-primary preview install-theme-preview" href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip"><?php esc_html_e( 'Download' ); ?></a>
+		<a class="button button-primary preview install-theme-preview" href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip"><?php esc_html_e( 'Download', 'wporg-themes' ); ?></a>
 	</div>
 </script>
