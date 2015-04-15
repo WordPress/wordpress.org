@@ -1,6 +1,6 @@
 <?php
 $slug  = get_post()->post_name;
-$theme = themes_api('theme_information', array( 'slug' => $slug, 'fields' => array( 'ratings' => true ) ) );
+$theme = wporg_themes_query_api( 'theme_information', array( 'slug' => $slug, 'fields' => array( 'ratings' => true ) ) );
 ?>
 <div class="theme-navigation">
 	<a class="close" rel="home" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>

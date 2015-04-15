@@ -657,4 +657,18 @@ function wporg_themes_prepare_themes_for_js() {
 		'request' => $request,
 		'total'   => (int) $wp_query->found_posts,
 	);
- }
+}
+
+/**
+ * Makes a query against api.wordpress.org/themes/info/1.0/ without making a HTTP call
+ * Switches to the appropriate blog for the query.
+ */
+function wporg_themes_query_api( $method, $args = array() ) {
+	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
+
+	switch_to_blog( 35 );
+	$api = new Themes_API( $method, $args );
+	restore_current_blog();
+
+	return $api->response;
+}

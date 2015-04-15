@@ -5,11 +5,7 @@
  * @package wporg-themes
  */
 
-$theme_shops = new WP_Query( array(
-	'post_type'      => 'theme_shop',
-	'posts_per_page' => -1,
-	'orderby'        => 'rand',
-) );
+$theme_shops = wporg_themes_query_api( 'get_commercial_shops' )->shops;
 
 get_header();
 
@@ -37,25 +33,15 @@ if ( have_posts() ) :
 				<div id="themes">
 					<div class="theme-browser content-filterable">
 						<div class="themes">
-							<?php
-								while ( $theme_shops->have_posts() ) :
-									$theme_shops->the_post();
-
-									if ( ! $image_url = post_custom( 'image_url' ) ) :
-										$image_url = sprintf( '//s0.wp.com/mshots/v1/%s?w=572', urlencode( post_custom( 'url' ) ) );
-									endif;
-							?>
-							<article id="post-<?php the_ID(); ?>" <?php post_class( array( 'theme', 'hentry' ) ); ?>>
+							<?php foreach ( $theme_shops as $shop ) : ?>
+							<article id="post-<?php echo esc_attr( $shop->slug ); ?>" class="theme hentry">
 								<div class="theme-screenshot">
-									<img src="<?php echo esc_url( $image_url ); ?>" alt="">
+									<img src="<?php echo esc_url( $shop->image ); ?>" alt="">
 								</div>
-								<a class="more-details url" href="<?php echo esc_url( post_custom( 'url' ) ); ?>" rel="bookmark"><?php the_content(); ?></a>
-								<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
+								<a class="more-details url" href="<?php echo esc_url( $shop->url ); ?>" rel="bookmark"><?php echo apply_filters( 'the_content', $shop->haiku ); ?></a>
+								<h3 class="theme-name entry-title"><?php echo apply_filters( 'the_title', $shop->shop ); ?></h3>
 							</article>
-							<?php
-								endwhile;
-								wp_reset_postdata();
-							?>
+							<?php endforeach; ?>
 						</div>
 					</div>
 				</div>
