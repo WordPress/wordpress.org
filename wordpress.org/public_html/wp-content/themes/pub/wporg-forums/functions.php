@@ -16,7 +16,7 @@ function wporg_support_scripts() {
 //	wp_enqueue_style( 'wp4-style',           get_template_directory_uri() . '/css/wp4.css'       );
 //	wp_enqueue_style( 'wp4-rtl-style',       get_template_directory_uri() . '/css/wp4-rtl.css'       );
 //	wp_enqueue_style( 'iphone-style',        get_template_directory_uri() . '/css/iphone.css'        );
-	wp_enqueue_style( 'forum-wp4-style',     get_template_directory_uri() . '/css/forum-wp4.css'     );
+//	wp_enqueue_style( 'forum-wp4-style',     get_template_directory_uri() . '/css/forum-wp4.css'     );
 //	wp_enqueue_style( 'forum-wp4-rtl-style', get_template_directory_uri() . '/css/forum-wp4-rtl.css' );
 //	wp_enqueue_style( 'forum-ie7-style',     get_template_directory_uri() . '/css/forum-ie7.css'     );
 //	wp_enqueue_style( 'ie-style',            get_template_directory_uri() . '/css/ie.css'            );
@@ -136,7 +136,7 @@ function bb_base_reply_search_form() {
 
 function bb_base_plugin_search_form() {
 ?>
-	
+
 	<form role="search" method="get" id="searchform" action="">
 		<div>
 			<h3><?php _e( 'Plugin Search', 'bbporg'); ?></h3>
@@ -150,7 +150,7 @@ function bb_base_plugin_search_form() {
 }
 
 function bb_base_topic_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['ts'] ) ) {
 		return false;
 	}
@@ -164,7 +164,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 }
 
 function bb_base_reply_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['rs'] ) ) {
 		return false;
 	}
@@ -178,7 +178,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 }
 
 function bb_base_plugin_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['ps'] ) ) {
 		return false;
 	}
