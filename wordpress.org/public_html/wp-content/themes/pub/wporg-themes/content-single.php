@@ -4,10 +4,10 @@ $theme = wporg_themes_query_api( 'theme_information', array( 'slug' => $slug, 'f
 ?>
 <div class="theme-navigation">
 	<a class="close" rel="home" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
-	<?php the_post_navigation( array(
-		'prev_text' => '<span class="screen-reader-text">' . __( 'Next', 'wporg-themes' ) . '</span>',
-		'next_text' => '<span class="screen-reader-text">' . __( 'Previous', 'wporg-themes' ) . '</span>',
-	) ); ?>
+	<div class="navigation post-navigation">
+		<button class="left dashicons dashicons-no disabled"><span class="screen-reader-text"><?php _e( 'Show previous theme', 'wporg-themes' ); ?></span></button>
+		<button class="right dashicons dashicons-no disabled"><span class="screen-reader-text"><?php _e( 'Show next theme', 'wporg-themes' ); ?></span></button>
+	</div>
 </div>
 <div class="theme-wrap">
 	<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
