@@ -21,7 +21,7 @@ $theme = wporg_themes_query_api( 'theme_information', array( 'slug' => $slug, 'f
 		<div>
 			<h3 class="theme-name entry-title" itemprop="name"><?php the_title(); ?></h3>
 			<h4 class="theme-author">
-				<?php printf( _x( 'by %s', 'post author', 'wporg-themes' ), sprintf( '<a href="https://wordpress.org/themes/author/%s/"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'nicename' ), esc_html( get_the_author() ) ) ); ?>
+				<?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), sprintf( '<a href="https://wordpress.org/themes/author/%s/"><span class="author" itemprop="author">%s</span></a>', get_the_author_meta( 'nicename' ), esc_html( get_the_author() ) ) ); ?>
 			</h4>
 		</div>
 

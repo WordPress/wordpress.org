@@ -16,7 +16,7 @@
 
 			<div>
 				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
-				<h4 class="theme-author"><?php printf( __( 'by %s', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
 			</div>
 
 			<div class="theme-head">
@@ -86,7 +86,7 @@
 					<ul>
 						<?php foreach ( range( 5, 1 ) as $stars ) : ?>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( __( 'Click to see reviews that provided a rating of %d stars', 'wporg-themes' ), $stars ) ); ?>">
+							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-themes' ), $stars ) ); ?>">
 								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-themes' ), $stars ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[<?php echo $stars; ?>] / data.num_ratings }}%;"></span>

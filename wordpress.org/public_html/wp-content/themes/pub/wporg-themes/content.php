@@ -9,7 +9,7 @@ $theme = new WPORG_Themes_Repo_Package( $post );
 		</div>
 		<span class="more-details"><?php _ex( 'More Info', 'theme' ); ?></span>
 		<div class="theme-author">
-			<?php printf( _x( 'By %s', 'post author', 'wporg-themes' ), '<span class="author vcard">' . esc_html( get_the_author() ) . '</span>' ); ?>
+			<?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<span class="author vcard">' . esc_html( get_the_author() ) . '</span>' ); ?>
 		</div>
 		<h3 class="theme-name entry-title"><?php the_title(); ?></h3>
 	</a>
