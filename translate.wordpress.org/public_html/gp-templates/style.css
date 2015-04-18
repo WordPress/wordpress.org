@@ -2,8 +2,8 @@ html, body {
 	margin: 0;
 }
 .gp-content {
-	margin: 3px auto 10px;
-	width: 960px;
+	margin: 10px auto;
+	width: 940px;
 }
 .gp-content span.breadcrumb {
 	margin: .5em 0;
@@ -44,5 +44,10 @@ p.actionlist {
 .gp-content #submit {
 	font-size: 1em;
 	margin: 0.4em 0.1em 0 0;
+}
+.notice {
+	background: #99d9ed;
+	border-left: 3px solid #00a0d2;
+	margin-bottom: 10px;
 }
 
