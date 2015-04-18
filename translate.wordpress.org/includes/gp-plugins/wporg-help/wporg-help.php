@@ -41,8 +41,8 @@ class GP_Help_Page_Plugin extends GP_Plugin {
 		$hide_url = gp_url( '/getting-started/hide-notice' );
 ?>
 		<div class="notice" id="help-notice">
-			New to <em>translate.wordpress.org</em>?
-			Have a look at the <a href="<?php echo self::handbook_link; ?>" target="_blank">Getting Started guide.</a>
+			New to Translating WordPress?
+			Read through our <a href="<?php echo self::handbook_link; ?>" target="_blank">Translator Handbook</a> to get started.
 			<a id="hide-help-notice" class="secondary" style="float: right;" href="<?php echo esc_url( $hide_url ); ?>">Hide</a>
 		</div>
 		<script type="text/javascript">
