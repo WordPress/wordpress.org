@@ -104,7 +104,7 @@ class WordCamp_Admin {
 
 		// WordCamp post type only
 		if ( WCPT_POST_TYPE_ID == get_post_type() ) {
-			// If the venue address was changed, update it's coordinates
+			// If the venue address was changed, update its coordinates
 			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
 			if ( $new_address != get_post_meta( $post_id, 'Physical Address', true ) ) {
 				if ( $coordinates = $this->geocode_address( $new_address ) ) {
@@ -193,6 +193,12 @@ class WordCamp_Admin {
 		/*
 		 * Warning: These keys are used for both the input field label and the postmeta key, so if you want to
 		 * modify an existing label then you'll also need to migrate any rows in the database to use the new key.
+		 *
+		 * Some of them are also exposed via the JSON API, so you'd need to build in a back-compat layer for that
+		 * as well.
+		 *
+		 * When adding new keys, updating the wcorg-json-api plugin to either whitelist it, or test that it's not
+		 * being exposed.
 		 */
 
 		switch ( $meta_group ) {
@@ -200,7 +206,7 @@ class WordCamp_Admin {
 				$retval = array (
 					'Organizer Name'                  => 'text',
 					'WordPress.org Username'          => 'text',
-					'Email Address'                   => 'text',
+					'Email Address'                   => 'text',    // Note: This is the lead organizer's e-mail address, which is different than the "E-mail Address" field
 					'Telephone'                       => 'text',
 					'Mailing Address'                 => 'textarea',
 					'Sponsor Wrangler Name'           => 'text',
@@ -231,7 +237,7 @@ class WordCamp_Admin {
 					'End Date (YYYY-mm-dd)'           => 'date',
 					'Location'                        => 'text',
 					'URL'                             => 'wc-url',
-					'E-mail Address'                  => 'text',
+					'E-mail Address'                  => 'text',    // Note: This is the address for the entire organizing team, which is different than the "Email Address" field
 					'Twitter'                         => 'text',
 					'WordCamp Hashtag'                => 'text',
 					'Number of Anticipated Attendees' => 'text',
