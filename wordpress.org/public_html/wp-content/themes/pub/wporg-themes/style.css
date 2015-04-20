@@ -1552,30 +1552,12 @@ body.full-overlay-active {
 .posts-navigation {
 	font-size: 18px;
 	overflow: hidden;
-}
-
-.posts-navigation .nav-previous {
-	float: right;
-}
-
-.posts-navigation .nav-next {
-	float: left;
+	text-align: center;
 }
 
 .posts-navigation .nav-links a {
 	padding: 8px 10px;
 	display: inline-block;
-}
-
-.posts-navigation .nav-previous a:after {
-	content: '\2192';
-	margin: 0 -10px 0 5px;
-}
-
-.posts-navigation .nav-next a:before {
-	content: '\2190';
-	margin: 0 5px 0 -10px;
-	vertical-align: middle;
 }
 
 /* Theme notices */

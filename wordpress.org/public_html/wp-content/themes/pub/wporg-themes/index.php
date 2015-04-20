@@ -11,22 +11,23 @@
  * @package wporg-themes
  */
 
+$themes = wporg_themes_get_themes_for_query();
+
 if ( ! function_exists( 'get_theme_feature_list' ) ) {
 	include ABSPATH . 'wp-admin/includes/theme.php';
 }
 get_header();
 ?>
-
 	<div id="themes" class="wrap">
 		<div class="wp-filter">
 			<div class="filter-count">
-				<span class="count theme-count"><?php echo $GLOBALS['wp_query']->found_posts; ?></span>
+				<span class="count theme-count"><?php echo number_format_i18n( $themes['total'] ); ?></span>
 			</div>
 
 			<ul class="filter-links">
-				<li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured"><?php _ex( 'Featured', 'themes', 'wporg-themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'browse/popular/' ) ); ?>" data-sort="popular"><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
-				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new"><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/featured/' ) ); ?>" data-sort="featured" <?php if ( (is_front_page() && !get_query_var('browse') ) || 'featured' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Featured', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/popular/' ) ); ?>" data-sort="popular" <?php if ( 'popular' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Popular', 'themes', 'wporg-themes' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( 'browse/new/' ) ); ?>" data-sort="new" <?php if ( 'new' == get_query_var('browse') ) { echo 'class="current"'; } ?>><?php _ex( 'Latest', 'themes', 'wporg-themes' ); ?></a></li>
 			</ul>
 
 			<a class="drawer-toggle" href="#"><?php _e( 'Feature Filter', 'wporg-themes' ); ?></a>
@@ -45,7 +46,7 @@ get_header();
 					<a href="#"><?php _e( 'Edit', 'wporg-themes' ); ?></a>
 				</div>
 
-				<?php foreach( get_theme_feature_list() as $feature_name => $features ) : ?>
+				<?php foreach ( get_theme_feature_list() as $feature_name => $features ) : ?>
 				<div class="filter-group">
 					<h4><?php echo esc_html( $feature_name ); ?></h4>
 					<ol class="feature-group">
@@ -61,20 +62,30 @@ get_header();
 			</div>
 		</div><!-- .wp-filter -->
 
-		<div class="theme-browser content-filterable">
+		<div class="theme-browser content-filterable <?php if ( ! $themes['themes'] ) { echo 'no-results'; } ?>">
 			<div class="themes">
 				<?php
-					while ( have_posts() ) :
-						the_post();
-						get_template_part( 'content', is_single() ? 'single' : 'index' );
-					endwhile;
+				if ( get_query_var('name') && !is_404() ) {
+					$theme = reset( $themes['themes'] );
+					include __DIR__ . '/theme-single.php';
+				} else {
+					foreach ( $themes['themes'] as $theme ) {
+						include __DIR__ . '/theme.php';
+					}
 
-					the_posts_navigation( array(
-						'prev_text' => __( 'Next', 'wporg-themes' ),
-						'next_text' => __( 'Previous', 'wporg-themes' ),
-					) );
+					// Add the navigation between pages
+					if ( $themes['pages'] > 1 ) {
+						echo '<nav class="posts-navigation">';
+						echo paginate_links( array(
+							'total' => $themes['pages'],
+							'mid_size' => 3,
+						) );
+						echo '</nav>';
+					}
+				}
 				?>
 			</div>
+			
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-install-overlay"></div>

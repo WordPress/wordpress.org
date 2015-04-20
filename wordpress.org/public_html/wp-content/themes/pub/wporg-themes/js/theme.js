@@ -17,7 +17,7 @@ window.wp = window.wp || {};
 
 	themes.utils = {
 		title: function ( item ) {
-			document.title = $( '<div/>' ).html( themes.data.settings.title.replace( '%s', item ) ).text();
+			document.title = $( '<div/>' ).html( themes.data.settings.title.replace( '%s', $( '<div/>' ).text(item).html() ) ).text();
 		}
 	};
 
@@ -215,7 +215,7 @@ window.wp = window.wp || {};
 			var collection = this;
 			instance = instance || 0;
 
-			// Themes per instance are set at 15
+			// Themes per instance are set at 24
 			collection = _( collection.rest( themes.data.settings.postsPerPage * instance ) );
 			collection = _( collection.first( themes.data.settings.postsPerPage ) );
 
@@ -336,7 +336,7 @@ window.wp = window.wp || {};
 							tested: true,
 							requires: true,
 							downloaded: true,
-							downloadLink: true,
+							downloadlink: true,
 							last_updated: true,
 							homepage: true,
 							theme_url: true,
@@ -398,6 +398,7 @@ window.wp = window.wp || {};
 			var data = this.model.toJSON();
 
 			data.permalink = themes.data.settings.path + themes.router.baseUrl( data.slug );
+			data.path = themes.data.settings.path;
 
 			// Render themes using the html template
 			this.$el.html( this.html( data ) ).attr({
@@ -490,9 +491,11 @@ window.wp = window.wp || {};
 			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() < new Date().valueOf();
 
 			// Make tags click-able and separated by a comma.
-			data.tags = _.map( data.tags, function( tag ) {
-				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + tag.toLowerCase().replace( ' ', '-' ) ) + '">' + tag + '</a>';
+			data.tags = _.map( data.tags, function( tag, slug ) {
+				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + slug ) + '">' + tag + '</a>';
 			}).join( ', ' );
+
+			data.path = themes.data.settings.path;
 
 			this.$el.html( this.html( data ) );
 			// Set up navigation events
@@ -1473,12 +1476,12 @@ window.wp = window.wp || {};
 
 	themes.Router = Backbone.Router.extend({
 		routes: {
-			'browse/:sort/'  : 'sort',
-			'tags/:tag/'     : 'tag',
-			'search/:query/' : 'search',
-			'author/:author/': 'author',
-			':slug/'         : 'preview',
-			''               : 'sort'
+			'browse/:sort(/)'  : 'sort',
+			'tags/:tag(/)'     : 'tag',
+			'search/:query(/)' : 'search',
+			'author/:author(/)': 'author',
+			':slug(/)'         : 'preview',
+			''                 : 'sort'
 		},
 
 		baseUrl: function( url ) {

@@ -18,13 +18,13 @@ function wporg_themes_setup() {
 
 	load_theme_textdomain( 'wporg-themes' );
 
-	add_theme_support( 'automatic-feed-links' );
-
 	add_theme_support( 'html5', array(
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
 
-	add_filter('redirect_canonical','__return_false');
+	// No need for canonical lookups
+	remove_action( 'template_redirect', 'redirect_canonical' );
+	remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
@@ -44,15 +44,15 @@ function wporg_themes_scripts() {
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '1', true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), '2', true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
-			'query'    => wporg_themes_prepare_themes_for_js(),
+			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
 				'title'        => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
 				'isMobile'     => wp_is_mobile(),
-				'postsPerPage' => get_option( 'posts_per_page', 15 ),
+				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
 			),
 			'l10n' => array(
@@ -73,6 +73,10 @@ function wporg_themes_scripts() {
 
 	// No Jetpack styles needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
+
+	// No dashicons needed.
+	wp_deregister_style( 'dashicons' );
+	wp_register_style( 'dashicons', '' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 
@@ -87,7 +91,8 @@ add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
  * @return array The filtered body class list.
  */
 function wporg_themes_body_class( $classes ) {
-	if ( is_singular( 'repopackage' ) ) {
+
+	if ( ! is_page() && get_query_var( 'name' ) && ! is_404() ) {
 		$classes[] = 'modal-open';
 	}
 
@@ -100,40 +105,45 @@ function wporg_themes_body_class( $classes ) {
 add_filter( 'body_class', 'wporg_themes_body_class' );
 
 /**
- * Create a nicely formatted and more specific title element text for output
- * in head of document, based on current view.
- *
- * @global int $paged WordPress archive pagination page count.
- * @global int $page  WordPress paginated post page count.
- *
- * @param string $title Default title text for current view.
- * @param string $sep Optional separator.
- * @return string The filtered title.
+ * Prevent the default posts queries running, allowing pages to bypass
+ * We do this as the themes are pulled from an API.
  */
-function wporg_themes_wp_title( $title, $sep ) {
-	global $paged, $page;
-
-	if ( is_feed() ) {
-		return $title;
+function wporg_themes_prevent_posts_query( $query, $wp_query ) {
+	if ( is_admin() || ! $wp_query->is_main_query() || $wp_query->get( 'pagename' ) ) {
+		return $query;
 	}
-
-	// Add the site name.
-	$title .= get_bloginfo( 'name', 'display' );
-
-	// Add the site description for the home/front page.
-	$site_description = get_bloginfo( 'description', 'display' );
-	if ( $site_description && ( is_home() || is_front_page() ) ) {
-		$title = "$title $sep $site_description";
-	}
-
-	// Add a page number if necessary.
-	if ( ( $paged >= 2 || $page >= 2 ) && ! is_404() ) {
-		$title = "$title $sep " . sprintf( __( 'Page %s', 'wporg-themes' ), max( $paged, $page ) );
-	}
-
-	return $title;
+	$wp_query->set( 'no_found_rows', true );
+	return ''; // Don't make a query
 }
-add_filter( 'wp_title', 'wporg_themes_wp_title', 10, 2 );
+add_filter( 'posts_request', 'wporg_themes_prevent_posts_query', 10, 2 );
+
+/**
+ * Prevent 404 responses when we've got a theme via the API.
+ */
+function wporg_themes_prevent_404() {
+	global $wp_query;
+	if ( ! is_404() ) {
+		return;
+	}
+	$themes = wporg_themes_get_themes_for_query();
+	if ( $themes['total'] ) {
+		$wp_query->is_404 = false;
+		status_header( 200 );
+	}
+}
+add_filter( 'template_redirect', 'wporg_themes_prevent_404' );
+
+/**
+ * Overrides feeds to use a custom RSS2 feed which contains the current requests themes.
+ */
+function wporg_themes_custom_feed() {
+	if ( ! is_feed() ) {
+		return;
+	}
+	include __DIR__ . '/rss.php';
+	die();
+}
+add_filter( 'template_redirect', 'wporg_themes_custom_feed' );
 
 /**
  * Include view templates in the footer.
@@ -144,15 +154,3 @@ function wporg_themes_view_templates() {
 	get_template_part( 'view-templates/theme-single' );
 }
 add_action( 'wp_footer', 'wporg_themes_view_templates' );
-
-add_action('wp_enqueue_scripts','wporg_themes_disable_dashicons');
-function wporg_themes_disable_dashicons() {
-    // Remove it only if the global header is used. (not e.g. chat.wordpress.org)
-    if ( ! function_exists( 'global_wp_menu' ) ) {
-        return;
-    }
-
-    // remove it, then reregister it as empty to maintain the dependencies but not load it a second time
-    wp_deregister_style('dashicons');
-    wp_register_style('dashicons','');
-}

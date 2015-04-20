@@ -16,18 +16,18 @@
 
 			<div>
 				<h3 class="theme-name entry-title" itemprop="name">{{{ data.name }}}</h3>
-				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
+				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="{{{ data.path }}}author/{{ data.author.user_nicename }}/"><span class="author" itemprop="author">{{{ data.author.display_name }}}</span></a>' ); ?></h4>
 			</div>
 
 			<div class="theme-head">
 				<div class="theme-actions clear">
 					<a href="{{{ data.preview_url }}}" class="button button-secondary alignleft"><?php _e( 'Preview', 'wporg-themes' ); ?></a>
-					<a href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip" class="button button-primary alignright"><?php _e( 'Download', 'wporg-themes' ); ?></a>
+					<a href="{{ data.download_link }}" class="button button-primary alignright"><?php _e( 'Download', 'wporg-themes' ); ?></a>
 				</div>
 
 				<# if ( data.parent ) { #>
 				<div class="theme-notice notice notice-info">
-					<p class="parent"><?php printf( __( 'This is a child theme of %s.', 'wporg-themes' ), sprintf( '<a href="/themes/%1$s/">%2$s</a>', '{{{ data.parent.slug }}}', '{{{ data.parent.name }}}' ) ); ?></p>
+					<p class="parent"><?php printf( __( 'This is a child theme of %s.', 'wporg-themes' ), sprintf( '<a href="%1$s">%2$s</a>', '{{{ data.path }}}{{{ data.parent.slug }}}/', '{{{ data.parent.name }}}' ) ); ?></p>
 				</div>
 				<# } #>
 

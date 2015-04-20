@@ -73,7 +73,7 @@ function wporg_themes_init() {
 			'description'         => __( 'A package', 'wporg-themes' ),
 			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
 			'taxonomies'          => array( 'category', 'post_tag', 'type' ),
-			'public'              => true,
+			'public'              => false,
 			'show_in_nav_menus'   => false,
 			'has_archive'         => true,
 			'rewrite'             => false,
@@ -115,55 +115,6 @@ function wporg_themes_init() {
 add_action( 'init', 'wporg_themes_init' );
 
 /**
- * Adjusts query to account for custom views.
- *
- * @param WP_Query $wp_query
- * @return WP_Query
- */
-function wporg_themes_set_up_query( $wp_query ) {
-	if ( is_admin() || in_array( $wp_query->get( 'pagename' ), array( 'upload', 'commercial', 'getting-started' ) ) || in_array( $wp_query->get( 'post_type' ), array( 'nav_menu_item', 'theme_shop' ) ) ) {
-		return $wp_query;
-	}
-
-	$wp_query->set( 'post_type', 'repopackage' );
-
-	if ( $wp_query->is_home() && ! $wp_query->get( 'browse' ) ) {
-		$wp_query->set( 'browse', 'featured' );
-	}
-
-	if ( $wp_query->get( 'browse' ) ) {
-		switch ( $wp_query->get( 'browse' ) ) {
-			case 'featured':
-				$wp_query->set( 'paged', 1 );
-				$wp_query->set( 'posts_per_page', 15 );
-				$wp_query->set( 'post__in', (array) wp_cache_get( 'browse-featured', 'theme-info' ) );
-				break;
-
-			case 'popular':
-				add_filter( 'posts_clauses', 'wporg_themes_popular_posts_clauses' );
-				break;
-
-			case 'new':
-				// Nothing to do here.
-				break;
-
-		}
-
-		// Only return themes that were updated in the last two years for all 'browse' requests.
-		$wp_query->set( 'date_query', array(
-			array(
-				'column' => 'post_modified_gmt',
-				'after'  => '-2 years',
-			),
-		) );
-
-	}
-
-	return $wp_query;
-}
-add_filter( 'pre_get_posts', 'wporg_themes_set_up_query' );
-
-/**
  * Filter the permalink for the Packages to be /post_name/
  *
  * @param string $link The generated permalink
@@ -178,41 +129,6 @@ function wporg_themes_package_link( $link, $post ) {
 	return trailingslashit( home_url( $post->post_name ) );
 }
 add_filter( 'post_type_link', 'wporg_themes_package_link', 10, 2 );
-
-/**
- * Adjusts the amount of found posts when browsing featured themes.
- *
- * @param string   $found_posts
- * @param WP_Query $wp_query
- * @return string
- */
-function wporg_themes_found_posts( $found_posts, $wp_query ) {
-	if ( $wp_query->is_main_query() && 'featured' === $wp_query->get( 'browse' ) ) {
-		$found_posts = $wp_query->get( 'posts_per_page' );
-	}
-
-	return $found_posts;
-}
-add_filter( 'found_posts', 'wporg_themes_found_posts', 10, 2 );
-
-/**
- * Filters SQL clauses, to set up a query for the most popular themes based on downloads.
- *
- * @param array $clauses
- * @return array
- */
-function wporg_themes_popular_posts_clauses( $clauses ) {
-	global $wpdb;
-
-	$week = gmdate( 'Y-m-d', strtotime( 'last week' ) );
-	$clauses['where']  .= " AND s.stamp >= '{$week}'";
-	$clauses['groupby'] = "{$wpdb->posts}.ID";
-	$clauses['join']    = "JOIN bb_themes_stats AS s ON ( {$wpdb->posts}.post_name = s.slug )";
-	$clauses['orderby'] = 'week_downloads DESC';
-	$clauses['fields'] .= ', SUM(s.downloads) AS week_downloads';
-
-	return $clauses;
-}
 
 /**
  * Checks if ther current users is a super admin before allowing terms to be added.
@@ -610,53 +526,69 @@ function wporg_themes_get_header_data( $theme_file ) {
  *
  * @return array
  */
-function wporg_themes_prepare_themes_for_js() {
-	global $wp_query;
-
-	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
-	$api = new Themes_API( 'get_result' );
-	$api->fields = array_merge( $api->fields, array(
-		'description'        => true,
-		'sections'           => false,
-		'tested'             => true,
-		'requires'           => true,
-		'rating'             => true,
-		'ratings'            => true,
-		'downloaded'         => true,
-		'downloadlink'       => true,
-		'last_updated'       => true,
-		'homepage'           => true,
-		'tags'               => true,
-		'num_ratings'        => true,
-		'parent'             => true,
-		'theme_url'          => true,
-		'extended_author'    => true,
-		'photon_screenshots' => true,
-	) );
-
-	$themes = array_map( array( $api, 'fill_theme' ), $wp_query->posts );
+function wporg_themes_get_themes_for_query() {
+	static $result = null;
+	if ( $result ) {
+		return $result;
+	}
 
 	$request = array();
 	if ( get_query_var( 'browse' ) ) {
 		$request['browse'] = get_query_var( 'browse' );
-	} else if ( $wp_query->is_tag() ) {
+
+	} else if ( get_query_var( 'tag' ) ) {
 		$request['tag'] = (array) explode( '+', get_query_var( 'tag' ) );
-	}
-	else if ( $wp_query->is_search() ) {
+
+	} else if ( get_query_var( 's' ) ) {
 		$request['search'] = get_query_var( 's' );
-	}
-	else if ( $wp_query->is_author() ) {
+
+	} else if ( get_query_var( 'author' ) ) {
 		$request['author'] = get_user_by( 'id', get_query_var( 'author' ) )->user_nicename;
-	}
-	else if ( $wp_query->is_singular( 'repopackage' ) ) {
-		$request['theme'] = get_query_var( 'name' );
+
+	} else if ( get_query_var( 'name' ) || get_query_var( 'pagename' ) ) {
+		$request['theme'] = basename( get_query_var( 'name' ) ?: get_query_var( 'pagename' ) );
 	}
 
-	return array(
-		'themes'  => $themes,
-		'request' => $request,
-		'total'   => (int) $wp_query->found_posts,
+	if ( get_query_var( 'paged' ) ) {
+		$request['page'] = (int)get_query_var( 'paged' );
+	}
+
+	if ( empty( $request ) ) {
+		$request['browse'] = 'featured';
+	}
+
+	$request['fields'] = array(
+		'description' => true,
+		'sections' => false,
+		'tested' => true,
+		'requires' => true,
+		'downloaded' => true,
+		'downloadlink' => true,
+		'last_updated' => true,
+		'homepage' => true,
+		'theme_url' => true,
+		'parent' => true,
+		'tags' => true,
+		'rating' => true,
+		'ratings' => true,
+		'num_ratings' => true,
+		'extended_author' => true,
+		'photon_screenshots' => true,
 	);
+
+	$api_result = wporg_themes_query_api( 'query_themes', $request );
+
+	unset( $request['fields'] );
+
+	return $result = array(
+		'themes'  => $api_result->themes,
+		'request' => $request,
+		'total'   => (int) $api_result->info['results'],
+		'pages'   => (int) $api_result->info['pages'],
+	);
+}
+function wporg_themes_prepare_themes_for_js() {
+	return wporg_themes_get_themes_for_query();
 }
 
 /**

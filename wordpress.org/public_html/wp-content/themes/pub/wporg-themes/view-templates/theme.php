@@ -12,6 +12,6 @@
 		<h3 class="theme-name entry-title">{{{ data.name }}}</h3>
 	</a>
 	<div class="theme-actions">
-		<a class="button button-primary preview install-theme-preview" href="//downloads.wordpress.org/theme/{{ data.slug }}.{{ data.version }}.zip"><?php esc_html_e( 'Download', 'wporg-themes' ); ?></a>
+		<a class="button button-primary preview install-theme-preview" href="{{ data.download_link }}"><?php esc_html_e( 'Download', 'wporg-themes' ); ?></a>
 	</div>
 </script>

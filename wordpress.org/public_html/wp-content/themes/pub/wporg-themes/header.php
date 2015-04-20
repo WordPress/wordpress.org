@@ -12,7 +12,7 @@ require WPORGPATH . 'header.php';
 
 <div id="headline">
 	<div class="wrapper">
-		<h2 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _e( 'Theme Directory', 'wporg-themes' ) ?></a></h2>
+		<h2 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _e( 'Theme Directory', 'wporg-themes' ); ?></a></h2>
 	</div>
 </div>
 <nav id="site-navigation" class="main-navigation" role="navigation">
