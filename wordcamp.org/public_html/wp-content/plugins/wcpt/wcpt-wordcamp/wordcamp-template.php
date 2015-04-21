@@ -55,7 +55,7 @@ function wcpt_has_wordcamps ( $args = '' ) {
 
 		// Pagination settings with filter
 		$wcpt_pagination = apply_filters( 'wcpt_pagination', array (
-			'base'      => add_query_arg( 'wcpage', '%#%' ),
+			'base'      => esc_url_raw( add_query_arg( 'wcpage', '%#%' ) ),
 			'format'    => '',
 			'total'     => ceil( (int)$wcpt_template->found_posts / (int)$posts_per_page ),
 			'current'   => (int)$wcpt_template->paged,
