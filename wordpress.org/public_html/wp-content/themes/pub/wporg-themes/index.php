@@ -11,7 +11,7 @@
  * @package wporg-themes
  */
 
-$themes = wporg_themes_get_themes_for_query();
+global $themes;
 
 if ( ! function_exists( 'get_theme_feature_list' ) ) {
 	include ABSPATH . 'wp-admin/includes/theme.php';
@@ -62,7 +62,7 @@ get_header();
 			</div>
 		</div><!-- .wp-filter -->
 
-		<div class="theme-browser content-filterable <?php if ( ! $themes['themes'] ) { echo 'no-results'; } ?>">
+		<div class="theme-browser content-filterable">
 			<div class="themes">
 				<?php
 				if ( get_query_var('name') && !is_404() ) {
@@ -85,7 +85,7 @@ get_header();
 				}
 				?>
 			</div>
-			
+
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-install-overlay"></div>
