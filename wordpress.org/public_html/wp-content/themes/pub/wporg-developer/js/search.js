@@ -5,7 +5,7 @@
 		var search_input = $( '#inner-search .search-section .search-field' );
 
 		// Toggle display.
-		$( '#inner-search .search-section' ).toggle();
+		$( '#inner-search .search-section' ).slideToggle();
 
 		// Give input field focus if it is now visible, remove focus otherwise.
 		if ( search_input.is(':visible') ) {
