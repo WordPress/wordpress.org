@@ -174,7 +174,7 @@ class WPORG_Themes_Upload {
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
-		if ( ! empty( $this->theme_post ) && 'trash' === $this->theme_post->post_status ) {
+		if ( ! empty( $this->theme_post ) && 'suspend' === $this->theme_post->post_status ) {
 			return sprintf( __( 'This theme is suspended from the Theme Repository and it can&rsquo;t be updated. If you have any questions about this please contact %s.', 'wporg-themes' ), '<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>' );
 		}
 
