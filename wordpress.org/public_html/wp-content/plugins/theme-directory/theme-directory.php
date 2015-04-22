@@ -56,7 +56,7 @@ function wporg_themes_init() {
 	// This is the base generic type for repo plugins.
 	if ( ! post_type_exists( 'repopackage' ) ) {
 		register_post_type( 'repopackage', array(
-			'labels'              => array(
+			'labels'      => array(
 				'name'               => __( 'Packages', 'wporg-themes' ),
 				'singular_name'      => __( 'Package', 'wporg-themes' ),
 				'add_new'            => __( 'Add New', 'wporg-themes' ),
@@ -70,14 +70,14 @@ function wporg_themes_init() {
 				'parent_item_colon'  => __( 'Parent Package:', 'wporg-themes' ),
 				'menu_name'          => __( 'Packages', 'wporg-themes' ),
 			),
-			'description'         => __( 'A package', 'wporg-themes' ),
-			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
-			'taxonomies'          => array( 'category', 'post_tag', 'type' ),
-			'public'              => false,
-			'show_in_nav_menus'   => false,
-			'has_archive'         => true,
-			'rewrite'             => false,
-			'menu_icon'           => 'dashicons-art',
+			'description' => __( 'A package', 'wporg-themes' ),
+			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
+			'taxonomies'  => array( 'category', 'post_tag', 'type' ),
+			'public'      => false,
+			'show_ui'     => true,
+			'has_archive' => true,
+			'rewrite'     => false,
+			'menu_icon'   => 'dashicons-art',
 		) );
 	}
 
@@ -100,7 +100,6 @@ function wporg_themes_init() {
 			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
 			'public'              => false,
 			'show_ui'             => true,
-			'show_in_nav_menus'   => false,
 			'exclude_from_search' => true,
 			'rewrite'             => false,
 			'menu_icon'           => 'dashicons-businessman',
