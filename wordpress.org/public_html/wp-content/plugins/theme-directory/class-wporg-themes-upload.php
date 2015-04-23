@@ -364,6 +364,11 @@ class WPORG_Themes_Upload {
 			'featured', 'popular', 'new', 'updated',
 		);
 
+		// force the slug to be correct for the twenty-x themes
+		if ( in_array( $slug, $reserved_slugs ) && 'wordpressdotorg' == $this->author->user_login ) {
+			$this->theme_slug = $slug;
+		}
+
 		return in_array( $slug, $reserved_slugs ) && 'wordpressdotorg' !== $this->author->user_login;
 	}
 
