@@ -102,6 +102,8 @@ function init() {
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
 
+	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' ); 
+
 }
 
 /**
