@@ -125,14 +125,15 @@ class WPORG_Themes_Upload {
 		// determine the theme slug based on the name of the theme in the stylesheet
 		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
 
-        // Make sure it doesn't use a slug deemed not to be used by the public.
-        if ( $this->has_reserved_slug() ) {
-            return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</ code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
-        }
+		$this->author     = wp_get_current_user();
+
+		// Make sure it doesn't use a slug deemed not to be used by the public.
+		if ( $this->has_reserved_slug() ) {
+			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
+		}
 	
 		// populate the theme post and author
 		$this->theme_post = $this->get_theme_post();
-		$this->author     = wp_get_current_user();
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
