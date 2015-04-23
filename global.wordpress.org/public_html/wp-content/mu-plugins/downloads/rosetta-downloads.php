@@ -155,7 +155,7 @@ class Rosetta_Downloads {
 					<tr>
 						<th scope="col" style="width:80px"><?php _e( 'Locale', 'rosetta' ); ?></th>
 						<th scope="col" style="text-align:right"><?php _e( 'Release Package', 'rosetta' ); ?></th>
-						<th scope="col" style="text-align:right"><?php _e( 'Language Pack', 'rosetta' ); ?>></th>
+						<th scope="col" style="text-align:right"><?php _e( 'Language Pack', 'rosetta' ); ?></th>
 					</tr>
 				</thead>
 
