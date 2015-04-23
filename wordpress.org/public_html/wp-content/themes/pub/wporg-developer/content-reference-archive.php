@@ -19,7 +19,7 @@
 
 
 	<?php
-	if ( 'wp-parser-class' != get_post_type() ) :
+	if ( show_usage_info() ) :
 
 		$used_by = get_used_by()->post_count;
 		$uses    = get_uses()->post_count;
