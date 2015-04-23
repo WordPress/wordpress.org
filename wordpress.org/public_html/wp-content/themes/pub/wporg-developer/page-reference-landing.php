@@ -35,7 +35,7 @@ get_header(); ?>
 
 				<div class="new-in-guide section two-columns clear">
 					<div class="widget box gray">
-						<h3 class="widget-title"><?php $version = DevHub\get_current_version_term(); printf( __( 'New in WordPress %s:', 'wporg' ), substr( $version->name, 0, -2 ) ); ?></h3>
+						<h3 class="widget-title"><?php $version = DevHub\get_current_version_term(); printf( __( 'New &amp; Updated in WordPress %s:', 'wporg' ), substr( $version->name, 0, -2 ) ); ?></h3>
 						<div class="widget-content">
 							<ul class="unordered-list no-bullets">
 								<?php

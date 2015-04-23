@@ -1079,6 +1079,12 @@ input {
   width: 48%;
   margin: 1% 1% 1% 0;
 }
+.devhub-wrap .new-in-guide.two-columns .box {
+  width: 43%;
+}
+.devhub-wrap .new-in-guide.two-columns .box:first-child {
+  width: 53%;
+}
 .devhub-wrap #sidebar,
 .devhub-wrap .no-bullets,
 .devhub-wrap .sidebar .widget ul {

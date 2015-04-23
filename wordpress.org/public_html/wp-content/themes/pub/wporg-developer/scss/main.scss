@@ -861,6 +861,12 @@
 		margin: 1% 1% 1% 0;
 	}
 
+	.new-in-guide.two-columns .box {
+		width: 43%;
+	}
+	.new-in-guide.two-columns .box:first-child {
+		width: 53%;
+	}
 
 	#sidebar,
 	.no-bullets,
