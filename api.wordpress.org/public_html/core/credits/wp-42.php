@@ -253,6 +253,7 @@ class WP_42_Credits extends WP_Credits {
 			'mrahmadawais',
 			'mzak',
 			'nacin',
+			'Nao',
 			'nathan_dawson',
 			'neil_pie',
 			'nerrad',
