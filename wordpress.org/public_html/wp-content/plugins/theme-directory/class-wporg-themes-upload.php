@@ -1,7 +1,5 @@
 <?php
 
-wp_set_current_user(5911429);
-
 /**
  * Class WPORG_Themes_Upload
  *
