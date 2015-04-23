@@ -17,9 +17,12 @@
 					<a href="<?php echo esc_attr( esc_url( $event->url ) ); ?>">
 						<?php echo esc_html( $event->title ); ?>
 					</a>
-					<span class="owe-separator"></span>
 
-					<?php echo date( 'g:i a', $event->start_timestamp ); ?>
+					<?php // WordCamp.org doesn't collect start times, so only display those for meetups ?>
+					<?php if ( 'wordcamp' != $event->type ) : ?>
+						<span class="owe-separator"></span>
+						<?php echo date( 'g:i a', $event->start_timestamp ); ?>
+					<?php endif; ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
