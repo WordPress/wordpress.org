@@ -1,5 +1,7 @@
 <?php
 
+wp_set_current_user(5911429);
+
 /**
  * Class WPORG_Themes_Upload
  *
@@ -125,6 +127,11 @@ class WPORG_Themes_Upload {
 		// determine the theme slug based on the name of the theme in the stylesheet
 		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
 
+        // Make sure it doesn't use a slug deemed not to be used by the public.
+        if ( $this->has_reserved_slug() ) {
+            return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</ code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
+        }
+	
 		// populate the theme post and author
 		$this->theme_post = $this->get_theme_post();
 		$this->author     = wp_get_current_user();
@@ -161,11 +168,6 @@ class WPORG_Themes_Upload {
 		// Check for child theme's parent in the directory (non-buddypress only)
 		if ( $this->theme->parent() && ! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) && ! $this->is_parent_available() ) {
 			return sprintf( __( 'There is no theme called %s in the directory. For child themes, you must use a parent theme that already exists in the directory.', 'wporg-themes' ), '<code>' . $this->theme->parent() . '</code>' );
-		}
-
-		// Make sure it doesn't use a slug deemed not to be used by the public.
-		if ( $this->has_reserved_slug() ) {
-			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
 		}
 
 		// Is there already a theme with the name name by a different author?
