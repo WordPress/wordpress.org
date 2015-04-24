@@ -111,8 +111,16 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function get_wordcamp_events() {
-		$events    = array();
-		$response  = $this->remote_get( self::WORDCAMP_API_BASE_URL . 'posts?type=wordcamp' );
+		$events         = array();
+		$request_params = array(
+			'type'   => 'wordcamp',
+			'filter' => array(
+				'posts_per_page' => self::POSTS_PER_PAGE * .5,  // WordCamps happen much less frequently than meetups
+				// todo request camps that are in the next few months, ordered by start date ASC. requires https://github.com/WP-API/WP-API/issues/479 or customization on the wordcamp.org side
+			),
+		);
+
+		$response  = $this->remote_get( esc_url_raw( add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' ) ) );
 		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
 		
 		if ( $wordcamps ) {
