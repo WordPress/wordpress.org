@@ -157,3 +157,96 @@ function wcorg_subdomactories_redirect() {
 	die();
 }
 add_action( 'template_redirect', 'wcorg_subdomactories_redirect' );
+
+/*
+ * Flush the rewrite rules on the current site.
+ *
+ * See WordCamp_Miscellaneous_Commands::flush_rewrite_rules_everywhere() for an explanation.
+ *
+ * Requires authentication because flush_rewrite_rules() is expensive and could be used as a DoS vector.
+ */
+function wcorg_flush_rewrite_rules() {
+	if ( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'flush-rewrite-rules-everywhere-' . get_current_blog_id() ) ) {
+		flush_rewrite_rules();
+		wp_send_json_success( 'Rewrite rules have been flushed.' );
+	} else {
+		wp_send_json_error( 'You are not authorized to flush the rewrite rules.' );
+	}
+}
+add_action( 'wp_ajax_wcorg_flush_rewrite_rules_everywhere',        'wcorg_flush_rewrite_rules' ); // This isn't used by the wp-cli command, but is useful for manual testing
+add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_rewrite_rules' );
+
+
+/*
+ * WP-CLI Commands
+ */
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * WordCamp.org Miscellaneous Commands
+	 */
+	class WordCamp_Miscellaneous_Commands extends WP_CLI_Command {
+		/**
+		 * Flush rewrite rules on all sites.
+		 *
+		 * Periodically they break for various reasons and need to be reset on all sites. If we
+		 * just called flush_rewrite_rules() inside a switch_to_blog() loop then each site's
+		 * plugins wouldn't be loaded and the rewrite rules wouldn't be correct.
+		 *
+		 * So instead, this issues an HTTP request to wcorg_flush_rewrite_rules() on each site so
+		 * that flush_rewrite_rules() will run in the context of the loaded site.
+		 *
+		 * @subcommand flush-rewrite-rules-everywhere
+		 */
+		public function flush_rewrite_rules_everywhere() {
+			$start_timestamp = microtime( true );
+			$error           = '';
+			$sites           = wp_get_sites( array( 'limit' => false ) );
+
+			WP_CLI::line();
+
+			foreach ( $sites as $site ) {
+				$ajax_url    = sprintf( 'http://%s%swp-admin/admin-ajax.php', $site['domain'], $site['path'] );
+				$display_url = $site['domain'] . rtrim( $site['path'], '/' );
+				$nonce       = wp_create_nonce( 'flush-rewrite-rules-everywhere-' . $site['blog_id'] );
+
+				$response = wp_remote_get( esc_url_raw( add_query_arg(
+					array(
+						'action' => 'wcorg_flush_rewrite_rules_everywhere',
+						'nonce'  => $nonce,
+					),
+					$ajax_url
+				) ) );
+
+				if ( is_wp_error( $response ) ) {
+					$success = false;
+					$error   = $response->get_error_message();
+				} else {
+					$response = json_decode( wp_remote_retrieve_body( $response ) );
+
+					if ( isset( $response->success ) && $response->success ) {
+						$success = true;
+					} else {
+						$success = false;
+						$error   = isset( $response->data ) ? $response->data : 'Unknown error';
+					}
+				}
+
+				if ( $success ) {
+					WP_CLI::line( sprintf( '%s: Flushed', $display_url ) );
+				} else {
+					WP_CLI::warning( sprintf( '%s: Failed with error: %s', $display_url, $error	) );
+				}
+			}
+			$execution_time = microtime( true ) - $start_timestamp;
+
+			WP_CLI::line();
+			WP_CLI::line( sprintf(
+				'Flushed all rewrite rules in %d minute(s) and %d second(s).',
+				floor( $execution_time / 60 ),
+				$execution_time % 60
+			) );
+		}
+	}
+
+	WP_CLI::add_command( 'wcorg-misc', 'WordCamp_Miscellaneous_Commands' );
+}
