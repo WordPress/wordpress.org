@@ -122,24 +122,44 @@ class Official_WordPress_Events {
 
 		$response  = $this->remote_get( esc_url_raw( add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' ) ) );
 		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
-		
+
 		if ( $wordcamps ) {
 			foreach ( $wordcamps as $wordcamp ) {
-				if ( isset( $wordcamp->post_meta->{'Start Date (YYYY-mm-dd)'}[0] ) && $wordcamp->post_meta->{'Start Date (YYYY-mm-dd)'}[0] < time() ) {
+				if ( empty( $wordcamp->post_meta ) ) {
 					continue;
-					
-					// todo if https://github.com/WP-API/WP-API/pull/118 is merged, then finish register_json_query_vars() in WordCamp_Loader and filter this via the url
-					// restrict it to just the upcoming month?
 				}
-					
-				$events[] = new Official_WordPress_Event( array(
-					'type'            => 'wordcamp',
-					'title'           => $wordcamp->title,
-					'url'             => $wordcamp->post_meta->URL[0],
-					'start_timestamp' => $wordcamp->post_meta->{'Start Date (YYYY-mm-dd)'}[0],
-					'end_timestamp'   => $wordcamp->post_meta->{'End Date (YYYY-mm-dd)'}[0],
-					'location'        => $wordcamp->post_meta->Location[0],
-				) );
+
+				$event = array(
+					'type'  => 'wordcamp',
+					'title' => $wordcamp->title,
+				);
+
+				foreach ( $wordcamp->post_meta as $meta_item ) {
+					switch ( $meta_item->key ) {
+						case 'Start Date (YYYY-mm-dd)':
+							if ( empty( $meta_item->value ) || $meta_item->value < time() ) {
+								// todo this can be removed when we're able to filter the request by post meta (see above)
+
+								continue 3;
+							} else {
+								$event['start_timestamp'] = $meta_item->value;
+							}
+							break;
+
+						case 'End Date (YYYY-mm-dd)':
+							$event['end_timestamp'] = $meta_item->value;
+							break;
+
+						case 'URL':
+						case 'Location':
+							$event[ strtolower( $meta_item->key ) ] = $meta_item->value;
+							break;
+					}
+				}
+
+				if ( ! empty( $event['url'] ) ) {
+					$events[] = new Official_WordPress_Event( $event );
+				}
 			}
 		}
 		
