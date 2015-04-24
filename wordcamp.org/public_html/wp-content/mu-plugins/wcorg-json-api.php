@@ -78,6 +78,8 @@ function wcorg_json_expose_whitelisted_meta_data( $prepared_post, $raw_post, $co
 		),
 
 		'wcb_session' => array( '_wcpt_session_time', '_wcpt_session_type' ),
+
+		'wcb_sponsor' => array( '_wcpt_sponsor_website' ),
 	);
 	$targeted_post_types = array_keys( $whitelisted_post_meta );
 
