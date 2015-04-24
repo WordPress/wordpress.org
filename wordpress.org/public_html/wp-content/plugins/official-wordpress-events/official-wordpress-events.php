@@ -7,7 +7,7 @@ Author:      WordPress.org Meta Team
 */
 
 class Official_WordPress_Events {
-	const WORDCAMP_API_BASE_URL = 'http://central.wordcamp.org/wp-json.php';
+	const WORDCAMP_API_BASE_URL = 'http://central.wordcamp.org/wp-json/';
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
 	const POSTS_PER_PAGE        = 50;
@@ -112,7 +112,7 @@ class Official_WordPress_Events {
 	 */
 	protected function get_wordcamp_events() {
 		$events    = array();
-		$response  = $this->remote_get( self::WORDCAMP_API_BASE_URL . '/posts/?type=wordcamp' );
+		$response  = $this->remote_get( self::WORDCAMP_API_BASE_URL . 'posts?type=wordcamp' );
 		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
 		
 		if ( $wordcamps ) {
