@@ -63,6 +63,8 @@ class Official_WordPress_Events {
 	protected function get_all_events() {
 		$events = array_merge( $this->get_wordcamp_events(), $this->get_meetup_events() );
 		usort( $events, array( $this, 'sort_events' ) );
+
+		// todo Cache results here too, to avoid processing the raw data on each request? If so, then no longer need to cache API call results?
 		
 		return $events;
 	}
@@ -97,6 +99,8 @@ class Official_WordPress_Events {
 		foreach ( $events as $event ) {
 			$grouped_events[ date( 'Y-m-d', (int) $event->start_timestamp ) ][] = $event;
 		}
+
+		// todo if event spans multiple days then it should appear on all dates
 
 		return $grouped_events;
 	}
@@ -286,10 +290,14 @@ class Official_WordPress_Events {
 	/**
 	 * Wrapper for wp_remote_get()
 	 *
-	 * This adds caching and error logging/notification
+	 * This adds caching and error logging/notification.
+	 *
+	 * @todo It'd be better to always display cached data, but trigger an asynchronous refresh when you detect it's
+	 *       changed, so that the user is never waiting on it to refresh.
 	 *
 	 * @param string $url
 	 * @param array  $args
+	 *
 	 * @return false|array|WP_Error False if a valid $url was not passed; otherwise the results from wp_remote_get()
 	 */
 	protected function remote_get( $url, $args = array() ) {
@@ -297,10 +305,10 @@ class Official_WordPress_Events {
 
 		if ( $url ) {
 			$transient_key = 'owe_' . wp_hash( $url . print_r( $args, true ) );
-			
+
 			if ( ! $response = get_transient( $transient_key ) ) {
 				$response = wp_remote_get( $url, $args );
-	
+
 				if ( is_wp_error( $response ) ) {
 					$error = sprintf(
 						'Recieved WP_Error message: %s; Request was to %s; Arguments were: %s',
