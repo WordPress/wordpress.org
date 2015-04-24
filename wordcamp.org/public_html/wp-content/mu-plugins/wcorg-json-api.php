@@ -76,6 +76,8 @@ function wcorg_json_expose_whitelisted_meta_data( $prepared_post, $raw_post, $co
 			'Physical Address', 'Maximum Capacity', 'Available Rooms', 'Website URL', 'Exhibition Space Available',
 			// todo add Multi-Event Sponsor Region, but convert from ID to name so it will be meaningful without having to do extra lookup? Or convert to whitelisted object?
 		),
+
+		'wcb_session' => array( '_wcpt_session_time', '_wcpt_session_type' ),
 	);
 	$targeted_post_types = array_keys( $whitelisted_post_meta );
 
