@@ -61,59 +61,58 @@ if ( ! in_array( $_POST['user_id'], $group['members'], true ) ) {
 list( $command, $subcommand ) = explode( ' ', $_POST['text'] );
 
 switch ( $command ) {
-case 'create':
-	if ( 0 !== strpos( $subcommand, $group['name'] . '-' ) ) {
-		die( "Must create a group that starts with `{$group['name']}-`." );
-	}
-
-	$new_group = api_call( 'groups.create', array( 'name' => $subcommand ) );
-	if ( empty( $new_group['ok'] ) ) {
-		die( "Group creation failed. Does it already exist?" );
-	}
-
-	$new_group = array( 'name' => 'security-genericons', 'id' => 'G04JL700R' );
-	foreach ( $group['members'] as $member ) {
-		api_call( 'groups.invite', array( 'channel' => $new_group['id'], 'user' => $member ) );
-	}
-
-	api_call( 'chat.postMessage', array(
-		'channel' => $group['id'],
-		'text'    => sprintf( 'Group %s created by <@%s>.', $new_group['name'], $_POST['user_id'] ),
-		'as_user' => true,
-	) );
-
-	die;
-
-case 'invite':
-case 'join':
-	foreach ( $groups as $group ) {
-		if ( $group['name'] === $subcommand ) {
-			api_call( 'groups.invite', array( 'channel' => $group['id'], 'user' => $_POST['user_id'] ) );
-			die( "Invited to {$group['name']}." );
+	case 'create':
+		if ( 0 !== strpos( $subcommand, $group['name'] . '-' ) ) {
+			die( "Must create a group that starts with `{$group['name']}-`." );
 		}
-	}
-
-	die( "$subcommand group not found." );
-
-case 'list':
-default:
-	$groups_to_add = array();
-
-	$parent_group = $group;
-	foreach ( $groups as $group ) {
-		if ( strpos( $group['name'], $parent_group['name'] . '-' ) === 0 ) {
-			if ( ! in_array( $_POST['user_id'], $group['members'], true ) ) {
-				$groups_to_add[] = $group['name'];
+	
+		$new_group = api_call( 'groups.create', array( 'name' => $subcommand ) );
+		if ( empty( $new_group['ok'] ) ) {
+			die( "Group creation failed. Does it already exist?" );
+		}
+	
+		foreach ( $group['members'] as $member ) {
+			api_call( 'groups.invite', array( 'channel' => $new_group['id'], 'user' => $member ) );
+		}
+	
+		api_call( 'chat.postMessage', array(
+			'channel' => $group['id'],
+			'text'    => sprintf( 'Group %s created by <@%s>.', $new_group['name'], $_POST['user_id'] ),
+			'as_user' => true,
+		) );
+	
+		die;
+	
+	case 'invite':
+	case 'join':
+		foreach ( $groups as $group ) {
+			if ( $group['name'] === $subcommand ) {
+				api_call( 'groups.invite', array( 'channel' => $group['id'], 'user' => $_POST['user_id'] ) );
+				die( "Invited to {$group['name']}." );
 			}
 		}
-	}
-
-	if ( $groups_to_add ) {
-		echo "You may join any of these groups:\n -- `" . implode( "`\n -- `", $groups_to_add ) . "`\n\n\n";
-	} else {
-		echo "You are in all {$parent_group['name']} subgroups that the @wordpressdotorg user knows about.\n\n";
-	}
-
-	die( "*Help:*\n`/subgroup list` - display this message\n`/subgroup join {name}` - join a subgroup\n`/subgroup create {name}` - create a subgroup" );
+	
+		die( "$subcommand group not found." );
+	
+	case 'list':
+	default:
+		$groups_to_add = array();
+	
+		$parent_group = $group;
+		foreach ( $groups as $group ) {
+			if ( strpos( $group['name'], $parent_group['name'] . '-' ) === 0 ) {
+				if ( ! in_array( $_POST['user_id'], $group['members'], true ) ) {
+					$groups_to_add[] = $group['name'];
+				}
+			}
+		}
+	
+		if ( $groups_to_add ) {
+			echo "You may join any of these groups:\n -- `" . implode( "`\n -- `", $groups_to_add ) . "`\n\n\n";
+		} else {
+			echo "You are in all {$parent_group['name']} subgroups that the @wordpressdotorg user knows about.\n\n";
+		}
+	
+		die( "*Help:*\n`/subgroup list` - display this message\n`/subgroup join {name}` - join a subgroup\n`/subgroup create {name}` - create a subgroup" );
 }
-
+	
