@@ -13,9 +13,6 @@
 
 global $themes;
 
-if ( ! function_exists( 'get_theme_feature_list' ) ) {
-	include ABSPATH . 'wp-admin/includes/theme.php';
-}
 get_header();
 ?>
 	<div id="themes" class="wrap">
@@ -46,7 +43,7 @@ get_header();
 					<a href="#"><?php _e( 'Edit', 'wporg-themes' ); ?></a>
 				</div>
 
-				<?php foreach ( get_theme_feature_list() as $feature_name => $features ) : ?>
+				<?php foreach ( wporg_themes_get_feature_list() as $feature_name => $features ) : ?>
 				<div class="filter-group">
 					<h4><?php echo esc_html( $feature_name ); ?></h4>
 					<ol class="feature-group">
