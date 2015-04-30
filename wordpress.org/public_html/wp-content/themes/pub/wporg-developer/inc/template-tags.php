@@ -755,7 +755,7 @@ namespace DevHub {
 		foreach ( $since_terms as $since_term ) {
 			foreach ( $since_meta as $meta ) {
 				if ( is_array( $meta ) && $since_term->name == $meta['content'] ) {
-					$description = empty( $meta['description'] ) ? '' : '<span class="since-description">' . esc_html( $meta['description'] ) . '</span>';
+					$description = empty( $meta['description'] ) ? '' : '<span class="since-description">' . esc_html( strip_tags( $meta['description'] ) ) . '</span>';
 
 					$data[ $since_term->name ] = array(
 						'version'     => $since_term->name,
