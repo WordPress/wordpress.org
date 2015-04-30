@@ -62,6 +62,8 @@ add_filter( 'json_endpoints', 'wcorg_json_whitelist_endpoints', 999 );
 /**
  * Expose a whitelisted set of meta data to unauthenticated JSON API requests
  *
+ * Note: Some additional fields are added in `wcorg_json_expose_additional_post_data()`
+ *
  * @param array  $prepared_post
  * @param array  $raw_post
  * @param string $context
@@ -109,7 +111,59 @@ function wcorg_json_expose_whitelisted_meta_data( $prepared_post, $raw_post, $co
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 999, 3 );
+add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 998, 3 );
+
+/**
+ * Expose additional data on post responses.
+ *
+ * Some fields can't be exposed directly for privacy or other reasons, but we can still provide interesting data
+ * that is derived from those fields. For example, we can't expose a Speaker's e-mail address, but can we go ahead
+ * and derive their Gravatar URL and expose that instead.
+ *
+ * In other cases, some data wouldn't be particularly useful or meaningful on its own, like the `_wcpt_speaker_id`
+ * attached to a `wcb_session` post. Instead of providing that raw to the API, we can instead expand it into a
+ * a full `wcb_speaker` object, so that clients don't have to make additional requests to fetch the data they
+ * actually want.
+ *
+ * @param array  $prepared_post
+ * @param array  $raw_post
+ * @param string $context
+ *
+ * @return array
+ */
+function wcorg_json_expose_additional_post_data( $prepared_post, $raw_post, $context ) {
+	if ( is_wp_error( $prepared_post ) || empty ( $prepared_post['type'] ) ) {
+		return $prepared_post;
+	}
+
+	switch( $prepared_post['type'] ) {
+		case 'wcb_speaker':
+			$prepared_post['avatar'] = wcorg_json_get_speaker_avatar( $prepared_post['ID'] );
+			break;
+	}
+
+	return $prepared_post;
+}
+add_filter( 'json_prepare_post', 'wcorg_json_expose_additional_post_data', 999, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
+
+/**
+ * Get the avatar URL for the given speaker
+ *
+ * @param int $speaker_post_id
+ *
+ * @return string
+ */
+function wcorg_json_get_speaker_avatar( $speaker_post_id ) {
+	$avatar = '';
+
+	if ( $speaker_email = get_post_meta( $speaker_post_id, '_wcb_speaker_email', true ) ) {
+		$avatar = json_get_avatar_url( $speaker_email );
+	} elseif ( $speaker_user_id = get_post_meta( $speaker_post_id, '_wcpt_user_id', true ) ) {
+		$avatar = json_get_avatar_url( $speaker_user_id );
+	}
+
+	return $avatar;
+}
 
 /**
  * Avoid nested callback conflicts by de-registering WP_JSON_Media::add_thumbnail_data().
@@ -136,7 +190,7 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 
 	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10, 3 );
 }
-add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11 );    // after `json_api_default_filters()`
+add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11 );    // after the default endpoints are added in `json_api_default_filters()`
 
 /*
  * WP-CLI Commands
