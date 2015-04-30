@@ -102,3 +102,13 @@ add_action( 'bbp_wp_login_action', 'wcorg_bbpress_post_login_to_main_site' );
 function wcorg_bbpress_post_login_to_main_site( $form_action_url ) {
 	return 'https://wordcamp.org/wp-login.php';
 }
+
+/**
+ * WP Super Cache puts http and https requests in the same bucket which
+ * generates mixed content warnings and generat breakage all around. The
+ * following makes sure only HTTPS requests are cached.
+ */
+add_action( 'init', function() {
+        if ( ! is_ssl() )
+                define( 'DONOTCACHEPAGE', true );
+});
