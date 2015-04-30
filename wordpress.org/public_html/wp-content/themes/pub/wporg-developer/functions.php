@@ -86,6 +86,7 @@ function init() {
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
+	add_action( 'wp_head', __NAMESPACE__ . '\\header_js' );
 	add_action( 'add_meta_boxes', __NAMESPACE__ . '\\rename_comments_meta_box', 10, 2 );
 
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
@@ -102,7 +103,7 @@ function init() {
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
 
-	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' ); 
+	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' );
 
 }
 
@@ -241,6 +242,14 @@ function taxonomy_permalink( $link, $term, $taxonomy ) {
 		$link = str_replace( $term->slug, str_replace( '-', '.', $term->slug ), $link );
 	}
 	return $link;
+}
+
+/**
+ * Outputs JavaScript intended to appear in the head of the page.
+ */
+function header_js() {
+	// Output CSS to hide markup with the class 'hide-if-js'. Ensures the markup is visible if JS is not present.
+	echo "<script type=\"text/javascript\">jQuery( '<style>.hide-if-js { display: none; }</style>' ).appendTo( 'head' );</script>\n";
 }
 
 function theme_scripts_styles() {

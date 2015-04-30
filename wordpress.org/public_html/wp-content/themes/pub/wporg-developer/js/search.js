@@ -15,9 +15,6 @@
 		}
 	}
 
-	// Toggle search bar on page load (it's shown by default).
-	toggle_search_bar();
-
 	// Toggle search bar when icon is clicked.
 	$( '#inner-search #inner-search-icon' ).on( 'click', function() {
 		toggle_search_bar();
