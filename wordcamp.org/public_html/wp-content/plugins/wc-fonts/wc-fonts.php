@@ -32,7 +32,7 @@ class WordCamp_Fonts_Plugin {
 		if ( ! isset( $this->options['typekit-id'] ) || empty( $this->options['typekit-id'] ) )
 			return;
 			
-		printf( '<script type="text/javascript" src="http://use.typekit.com/%s.js"></script>' . "\n", $this->options['typekit-id'] );
+		printf( '<script type="text/javascript" src="//use.typekit.com/%s.js"></script>' . "\n", $this->options['typekit-id'] );
 		printf( '<script type="text/javascript">try{Typekit.load();}catch(e){}</script>' );
 	}
 	
@@ -133,7 +133,7 @@ class WordCamp_Fonts_Plugin {
 				if ( ! preg_match( '/^family=(.+)/i', $url['query'] ) )
 					continue;
 
-				$url = $url['scheme'] . '://' . $url['host'] . $url['path'] . '?' . $url['query'];
+				$url = '//' . $url['host'] . $url['path'] . '?' . $url['query'];
 				$import = "@import url('" . esc_url_raw( $url ) . "');";
 				$fonts[] = $import;
 			}
