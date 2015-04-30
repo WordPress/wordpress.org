@@ -785,6 +785,7 @@ input {
   float: left;
   width: 60%;
   clear: none;
+  text-align: center;
 }
 .devhub-wrap .section.gray .inner-wrap .code-ref-right {
   float: left;
@@ -798,9 +799,12 @@ input {
   .devhub-wrap .section.gray .inner-wrap .code-ref-right {
     float: none;
     width: 100%;
-    padding: 1.5em 10%;
+    padding: 0 4px;
     clear: both;
     text-align: center;
+  }
+  .devhub-wrap .section.gray .inner-wrap .code-ref-left .widget-description {
+    margin-left: 0;
   }
   .devhub-wrap .section.gray .inner-wrap .go {
     float: none;
@@ -1508,9 +1512,10 @@ input {
     width: 100%;
   }
 
-  .section .box,
-  .home-primary-content,
-  .reference-landing .section {
+  .devhub-wrap .three-columns .box,
+  .devhub-wrap .section .box,
+  .devhub-wrap .home-primary-content,
+  .devhub-wrap .reference-landing .section {
     float: none;
     width: 100%;
     padding: 1.5em 10%;
@@ -1518,18 +1523,15 @@ input {
     text-align: center;
     display: block;
   }
-
-  .reference-landing .section .box,
-  .sidebar .box {
+  .devhub-wrap .reference-landing .section .box,
+  .devhub-wrap .sidebar .box {
     padding: 0;
     margin-bottom: 1.5em;
   }
-
-  .home-primary-content .entry-content,
-  .reference-landing .section {
+  .devhub-wrap .home-primary-content .entry-content,
+  .devhub-wrap .reference-landing .section {
     text-align: left;
   }
-
   .devhub-wrap .horizontal-list li {
     display: block;
   }
