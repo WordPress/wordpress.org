@@ -111,7 +111,7 @@ function wcorg_json_expose_whitelisted_meta_data( $prepared_post, $raw_post, $co
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 998, 3 );
+add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 997, 3 );
 
 /**
  * Expose additional data on post responses.
@@ -119,11 +119,6 @@ add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 998,
  * Some fields can't be exposed directly for privacy or other reasons, but we can still provide interesting data
  * that is derived from those fields. For example, we can't expose a Speaker's e-mail address, but can we go ahead
  * and derive their Gravatar URL and expose that instead.
- *
- * In other cases, some data wouldn't be particularly useful or meaningful on its own, like the `_wcpt_speaker_id`
- * attached to a `wcb_session` post. Instead of providing that raw to the API, we can instead expand it into a
- * a full `wcb_speaker` object, so that clients don't have to make additional requests to fetch the data they
- * actually want.
  *
  * @param array  $prepared_post
  * @param array  $raw_post
@@ -144,7 +139,7 @@ function wcorg_json_expose_additional_post_data( $prepared_post, $raw_post, $con
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_expose_additional_post_data', 999, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
+add_filter( 'json_prepare_post', 'wcorg_json_expose_additional_post_data', 998, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
 
 /**
  * Get the avatar URL for the given speaker
@@ -163,6 +158,95 @@ function wcorg_json_get_speaker_avatar( $speaker_post_id ) {
 	}
 
 	return $avatar;
+}
+
+/**
+ * Embed related posts within a post
+ *
+ * Some post data wouldn't be particularly useful or meaningful on its own, like the `_wcpt_speaker_id` attached
+ * to a `wcb_session` post. Instead of providing that raw to the API, we can expand it into a full `wcb_speaker`
+ * object, so that clients don't have to make additional requests to fetch the data they actually want.
+ *
+ * @param array  $prepared_post
+ * @param array  $raw_post
+ * @param string $context
+ *
+ * @return array
+ */
+function wcorg_json_embed_related_posts( $prepared_post, $raw_post, $context ) {
+	/** @var $wp_json_posts WP_JSON_Posts */
+	global $wp_json_posts;
+
+	if ( is_wp_error( $prepared_post ) || empty ( $prepared_post['type'] ) ) {
+		return $prepared_post;
+	}
+
+	// Unhook this callback before making any other WP_JSON_Posts::get_posts() calls, to avoid infinite recursion
+	remove_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999, 3 );
+
+	switch( $prepared_post['type'] ) {
+		case 'wcb_speaker':
+			$prepared_post['sessions'] = wcorg_json_get_speaker_sessions( $prepared_post['ID'] );
+			break;
+
+		case 'wcb_session':
+			$speaker_id               = get_post_meta( $prepared_post['ID'], '_wcpt_speaker_id', true );
+			$speaker                  = $wp_json_posts->get_post( $speaker_id );
+			$prepared_post['speaker'] = is_a( $speaker, 'WP_JSON_Response' ) ? $speaker : null;
+			break;
+	}
+
+	add_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999, 3 );
+
+	return $prepared_post;
+}
+add_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999, 3 );   // after `wcorg_json_expose_additional_post_data()`
+
+/**
+ * Get the sessions for a given speaker.
+ *
+ * @param int $speaker_post_id
+ *
+ * @return array
+ */
+function wcorg_json_get_speaker_sessions( $speaker_post_id ) {
+	/** @var $wp_json_posts WP_JSON_Posts */
+	global $wp_json_posts;
+
+	$sessions      = array();
+	$transient_key = "wcorg_json_speaker_{$speaker_post_id}_session_ids";
+
+	/*
+	 * Get the IDs of the related posts from WP_Query, because WP_JSON_Posts doesn't support meta queries yet.
+	 *
+	 * This can be removed when https://github.com/WP-API/WP-API/issues/479 is resolved.
+	 */
+	if ( ! $session_ids = get_transient( $transient_key ) ) {
+		$session_ids = get_posts( array(
+			'posts_per_page' => -1,
+			'post_type'      => 'wcb_session',
+			'meta_key'       => '_wcpt_speaker_id',
+			'meta_value'     => $speaker_post_id,
+		) );
+
+		$session_ids = wp_list_pluck( $session_ids, 'ID' );
+		set_transient( $transient_key, $session_ids, 2 * HOUR_IN_SECONDS );
+	}
+
+	if ( $session_ids ) {
+		$sessions = $wp_json_posts->get_posts(
+			array(
+				'posts_per_page' => -1,
+				'post__in'       => $session_ids,
+				'orderby'        => 'title',
+				'order'          => 'asc',
+			),
+			'view',
+			'wcb_session'
+		);
+	}
+
+	return $sessions;
 }
 
 /**
