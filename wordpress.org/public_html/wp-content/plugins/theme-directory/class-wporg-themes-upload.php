@@ -292,7 +292,7 @@ class WPORG_Themes_Upload {
 			 * Specify post stati so this query returns a result for draft themes, even
 			 * if the uploading user doesn't have have the permission to view drafts.
 			 */
-			'post_status'      => array( 'publish', 'pending', 'draft', 'future', 'trash' ),
+			'post_status'      => array( 'publish', 'pending', 'draft', 'future', 'trash', 'suspend' ),
 			'suppress_filters' => false,
 		) );
 		$theme = current( $themes );
