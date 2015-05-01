@@ -1,0 +1,77 @@
+<?php
+gp_title( __('Locales &lt; GlotPress') );
+wp_enqueue_script('common');
+gp_tmpl_header();
+?>
+
+	<p class="intro"><?php _e('Contribute to WordPress core, themes, and plugins by translating them into your language. Select your locale below to get started.'); ?></p>
+	<p class="intro">If your locale isn’t below, follow the steps in the <a href="https://make.wordpress.org/polyglots/handbook/translating/requesting-a-new-locale/">Translator Handbook</a> to contribute a new locale.</p>
+
+	<div class="filter-header">
+		<ul class="filter-header-links">
+			<li><?php _e( 'Find your locale' ); ?></li>
+		</ul>
+		<div class="search-form">
+			<label class="screen-reader-text" for="locales-filter"><?php esc_attr_e( 'Search locales...' ); ?></label>
+			<input placeholder="<?php esc_attr_e( 'Search locales...' ); ?>" type="search" id="locales-filter" class="wp-filter-search">
+		</div>
+	</div>
+
+	<div id="locales" class="locales">
+		<?php foreach ( $locales as $locale ) :
+			$percent_complete = 0;
+			if ( isset( $translation_status[ $locale->slug ] ) ) {
+				$status = $translation_status[ $locale->slug ];
+				$percent_complete = floor( $status->current_count / $status->all_count * 100 );
+			}
+			?>
+			<div class="locale <?php echo 'percent-' . $percent_complete; ?>">
+				<ul class="name">
+					<li class="english"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->english_name ) ?></li>
+					<li class="native"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->native_name ) ?></li>
+					<li class="code"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->slug ) ?></li>
+				</ul>
+				<div class="contributors">
+					<span class="dashicons dashicons-admin-users"></span><br />
+					<?php
+					$contributors = isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0;
+					echo $contributors;
+					?>
+				</div>
+				<div class="percent">
+					<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
+				</div>
+				<div class="locale-button">
+					<div class="button">
+						<?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), "Contribute Translation" ) ?>
+					</div>
+				</div>
+			</div>
+		<?php endforeach; ?>
+	</div>
+
+	<script>
+		jQuery( document ).ready( function( $ ) {
+			$rows = $( '#locales' ).find( '.locale' );
+			$( '#locales-filter' ).bind( 'change keyup input',function() {
+				var words = this.value.toLowerCase().split(' ');
+
+				if ( '' === this.value.trim() ) {
+					$rows.show();
+				} else {
+					$rows.hide();
+					$rows.filter( function( i, v ) {
+						var $t = $(this);
+						for ( var d = 0; d < words.length; ++d ) {
+							if ( $t.text().toLowerCase().indexOf( words[d] ) != -1 ) {
+								return true;
+							}
+						}
+						return false;
+					}).show();
+				}
+			});
+		});
+	</script>
+
+<?php gp_tmpl_footer();
