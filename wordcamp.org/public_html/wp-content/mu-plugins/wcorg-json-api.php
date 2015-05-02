@@ -234,6 +234,7 @@ function wcorg_json_get_speaker_sessions( $speaker_post_id ) {
 	}
 
 	if ( $session_ids ) {
+		add_filter( 'json_query_vars', 'wcorg_json_allow_post_in' );
 		$sessions = $wp_json_posts->get_posts(
 			array(
 				'posts_per_page' => -1,
@@ -244,9 +245,23 @@ function wcorg_json_get_speaker_sessions( $speaker_post_id ) {
 			'view',
 			'wcb_session'
 		);
+		remove_filter( 'json_query_vars', 'wcorg_json_allow_post_in' );
 	}
 
 	return $sessions;
+}
+
+/**
+ * Allow the `post_in` query var in `WP_JSON_Posts::get_post()` queries, even if the user is unauthenticated.
+ *
+ * @param array $query_vars
+ *
+ * @return array
+ */
+function wcorg_json_allow_post_in( $query_vars ) {
+	$query_vars[] = 'post__in';
+
+	return $query_vars;
 }
 
 /**
