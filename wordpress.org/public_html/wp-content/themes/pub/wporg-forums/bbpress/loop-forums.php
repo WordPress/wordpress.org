@@ -5,9 +5,9 @@
 	<li class="bbp-header">
 
 		<ul class="forum-titles">
-			<li class="bbp-forum-info"><?php _e( 'Forum', 'bbpress' ); ?></li>
-			<li class="bbp-forum-topic-count"><?php _e( 'Topics', 'bbpress' ); ?></li>
-			<li class="bbp-forum-reply-count"><?php _e( 'Posts', 'bbpress' ); ?></li>
+			<li class="bbp-forum-info"><?php _e( 'Forum', 'wporg-forums' ); ?></li>
+			<li class="bbp-forum-topic-count"><?php _e( 'Topics', 'wporg-forums' ); ?></li>
+			<li class="bbp-forum-reply-count"><?php _e( 'Posts', 'wporg-forums' ); ?></li>
 		</ul>
 
 	</li><!-- .bbp-header -->
