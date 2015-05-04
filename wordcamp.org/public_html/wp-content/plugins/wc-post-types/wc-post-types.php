@@ -276,6 +276,10 @@ class WordCamp_Post_Types_Plugin {
 			'speaker_link'   => '',
 		), $attr );
 
+		foreach ( array( 'orderby', 'order', 'track', 'speaker_link' ) as $key_for_case_sensitive_value ) {
+			$attr[ $key_for_case_sensitive_value ] = strtolower( $attr[ $key_for_case_sensitive_value ] );
+		}
+
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby']      = in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ? $attr['orderby']      : 'date';
 		$attr['order']        = in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ? $attr['order']        : 'desc';
@@ -405,6 +409,7 @@ class WordCamp_Post_Types_Plugin {
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
+		$attr['orderby'] = strtolower( $attr['orderby'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 
 		$organizers = new WP_Query( array(
@@ -456,6 +461,10 @@ class WordCamp_Post_Types_Plugin {
 			'speaker_link' => 'anchor', // anchor|wporg|permalink|none
 			'session_link' => 'permalink', // permalink|anchor|none
 		), $attr );
+
+		foreach ( array( 'tracks', 'speaker_link', 'session_link' ) as $key_for_case_sensitive_value ) {
+			$attr[ $key_for_case_sensitive_value ] = strtolower( $attr[ $key_for_case_sensitive_value ] );
+		}
 
 		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
 			$attr['speaker_link'] = 'anchor';
@@ -818,11 +827,15 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
-	 * Converts 'true'/'yes'/true to true, the rest are false.
+	 * Convert a string representation of a boolean to an actual boolean
 	 */
 	function str_to_bool( $value ) {
-		if ( $value == 'yes' || $value == 'true' || $value === true )
+		$value = strtolower( trim( $value ) );
+
+		if ( true === $value || in_array( $value, array( 'yes', 'true', '1' ) ) ) {
 			return true;
+		}
+
 		return false;
 	}
 
@@ -850,6 +863,10 @@ class WordCamp_Post_Types_Plugin {
 			$attr[ $key ] = $this->str_to_bool( $attr[ $key ] );
 
 		// Clean up other attributes.
+		foreach ( array( 'track', 'speaker_link', 'orderby', 'order' ) as $key_for_case_sensitive_value ) {
+			$attr[ $key_for_case_sensitive_value ] = strtolower( $attr[ $key_for_case_sensitive_value ] );
+		}
+
 		$attr['avatar_size'] = absint( $attr['avatar_size'] );
 
 		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
@@ -1019,6 +1036,7 @@ class WordCamp_Post_Types_Plugin {
 			'link' => 'none'
 		), $attr );
 
+		$attr['link'] = strtolower( $attr['link'] );
 		$terms = $this->get_sponsor_levels();
 
 		ob_start();
