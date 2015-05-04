@@ -828,11 +828,17 @@ class WordCamp_Post_Types_Plugin {
 
 	/**
 	 * Convert a string representation of a boolean to an actual boolean
+	 *
+	 * @param string|bool
+	 *
+	 * @return bool
 	 */
 	function str_to_bool( $value ) {
-		$value = strtolower( trim( $value ) );
+		if ( true === $value ) {
+			return true;
+		}
 
-		if ( true === $value || in_array( $value, array( 'yes', 'true', '1' ) ) ) {
+		if ( in_array( strtolower( trim( $value ) ), array( 'yes', 'true', '1' ) ) ) {
 			return true;
 		}
 
