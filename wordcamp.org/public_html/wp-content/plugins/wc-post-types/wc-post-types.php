@@ -183,13 +183,13 @@ class WordCamp_Post_Types_Plugin {
 			$query->set( 'meta_query', array(
 				'relation' => 'OR',
 				array(
-					'key' => '_wcpt_session_time',
-					'value' => '',
+					'key'     => '_wcpt_session_time',
+					'value'   => '',
 					'compare' => 'EXISTS',
 				),
 				array(
-					'key' => '_wcpt_session_time',
-					'value' => '',
+					'key'     => '_wcpt_session_time',
+					'value'   => '',
 					'compare' => 'NOT EXISTS',
 				),
 			) );
@@ -267,19 +267,19 @@ class WordCamp_Post_Types_Plugin {
 
 		// Prepare the shortcode arguments
 		$attr = shortcode_atts( array(
-			'show_avatars' => true,
-			'avatar_size' => 100,
+			'show_avatars'   => true,
+			'avatar_size'    => 100,
 			'posts_per_page' => -1,
-			'orderby' => 'date',
-			'order' => 'desc',
-			'track' => 'all',
-			'speaker_link' => '',
+			'orderby'        => 'date',
+			'order'          => 'desc',
+			'track'          => 'all',
+			'speaker_link'   => '',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
-		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
-		$attr['order'] = ( in_array( $attr['order'], array( 'asc', 'desc') ) ) ? $attr['order'] : 'desc';
-		$attr['speaker_link'] = ( in_array( $attr['speaker_link'], array( 'permalink' ) ) ) ? $attr['speaker_link'] : '';
+		$attr['orderby']      = ( in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby']      : 'date';
+		$attr['order']        = ( in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ) ? $attr['order']        : 'desc';
+		$attr['speaker_link'] = ( in_array( $attr['speaker_link'], array( 'permalink'             ) ) ) ? $attr['speaker_link'] : '';
 
 		/*
 		 * Only allow 2014.capetown to use the new track attribute
@@ -333,10 +333,10 @@ class WordCamp_Post_Types_Plugin {
 
 		// Fetch all specified speakers
 		$speaker_args = array(
-			'post_type' => 'wcb_speaker',
+			'post_type'      => 'wcb_speaker',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
-			'orderby' => $attr['orderby'],
-			'order' => $attr['order'],
+			'orderby'        => $attr['orderby'],
+			'order'          => $attr['order'],
 		);
 
 		if ( 'all' != $attr['track'] ) {
@@ -398,10 +398,10 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function shortcode_organizers( $attr, $content ) {
 		$attr = shortcode_atts( array(
-			'show_avatars' => true,
-			'avatar_size' => 100,
+			'show_avatars'   => true,
+			'avatar_size'    => 100,
 			'posts_per_page' => -1,
-			'orderby' => 'date',
+			'orderby'        => 'date',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
@@ -451,8 +451,8 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function shortcode_schedule( $attr, $content ) {
 		$attr = shortcode_atts( array(
-			'date' => null,
-			'tracks' => 'all',
+			'date'         => null,
+			'tracks'       => 'all',
 			'speaker_link' => 'anchor', // anchor|wporg|permalink|none
 			'session_link' => 'permalink', // permalink|anchor|none
 		), $attr );
@@ -467,12 +467,12 @@ class WordCamp_Post_Types_Plugin {
 		$tracks = array();
 
 		$query_args = array(
-			'post_type' => 'wcb_session',
+			'post_type'      => 'wcb_session',
 			'posts_per_page' => -1,
-			'meta_query' => array(
-				'relation' => 'AND',
+			'meta_query'     => array(
+				'relation'   => 'AND',
 				array(
-					'key' => '_wcpt_session_time',
+					'key'     => '_wcpt_session_time',
 					'compare' => 'EXISTS',
 				),
 			),
@@ -494,21 +494,21 @@ class WordCamp_Post_Types_Plugin {
 			if ( ! empty( $tracks ) ) {
 				$query_args['tax_query'][] = array(
 					'taxonomy' => 'wcb_track',
-					'field' => 'id',
-					'terms' => array_values( wp_list_pluck( $tracks, 'term_id' ) ),
+					'field'    => 'id',
+					'terms'    => array_values( wp_list_pluck( $tracks, 'term_id' ) ),
 				);
 			}
 		}
 
 		if ( $attr['date'] && strtotime( $attr['date'] ) ) {
 			$query_args['meta_query'][] = array(
-				'key' => '_wcpt_session_time',
+				'key'   => '_wcpt_session_time',
 				'value' => array(
 					strtotime( $attr['date'] ),
 					strtotime( $attr['date'] . ' +1 day' ),
 				),
 				'compare' => 'BETWEEN',
-				'type' => 'NUMERIC',
+				'type'    => 'NUMERIC',
 			);
 		}
 
@@ -607,13 +607,13 @@ class WordCamp_Post_Types_Plugin {
 				}
 
 				// Gather relevant data about the session
-				$colspan = 1;
-				$classes = array();
-				$session = get_post( $entry[ $term_id ] );
-				$session_title = apply_filters( 'the_title', $session->post_title );
-				$session_tracks = get_the_terms( $session->ID, 'wcb_track' );
+				$colspan              = 1;
+				$classes              = array();
+				$session              = get_post( $entry[ $term_id ] );
+				$session_title        = apply_filters( 'the_title', $session->post_title );
+				$session_tracks       = get_the_terms( $session->ID, 'wcb_track' );
 				$session_track_titles = implode( ', ', wp_list_pluck( $session_tracks, 'name' ) );      // todo implode(): Invalid arguments passed in wc-post-types.php on line 612
-				$session_type = get_post_meta( $session->ID, '_wcpt_session_type', true );
+				$session_type         = get_post_meta( $session->ID, '_wcpt_session_type', true );
 
 				if ( ! in_array( $session_type, array( 'session', 'custom' ) ) )
 					$session_type = 'session';
@@ -694,7 +694,7 @@ class WordCamp_Post_Types_Plugin {
 				$columns_html .= sprintf( '<td colspan="%d" class="%s" data-track-title="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $session_track_titles, $content );
 			}
 
-			$global_session = $colspan == count( $columns ) ? ' global-session' : '';
+			$global_session      = $colspan == count( $columns ) ? ' global-session' : '';
 			$global_session_slug = $global_session ? ' ' . sanitize_html_class( sanitize_title_with_dashes( $session->post_title ) ) : '';
 
 			$html .= sprintf( '<tr class="%s">', sanitize_html_class( 'wcpt-time-' . date( $time_format, $time ) ) . $global_session . $global_session_slug );
@@ -833,15 +833,15 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 
 		$attr = shortcode_atts( array(
-			'date' => null,
-			'show_meta' => false,
-			'show_avatars' => false,
-			'avatar_size' => 100,
-			'track' => 'all',
-			'speaker_link' => 'wporg', // anchor|wporg|permalink|none
+			'date'           => null,
+			'show_meta'      => false,
+			'show_avatars'   => false,
+			'avatar_size'    => 100,
+			'track'          => 'all',
+			'speaker_link'   => 'wporg', // anchor|wporg|permalink|none
 			'posts_per_page' => -1,
-			'orderby' => 'date', // date|title|rand
-			'order'   => 'desc', // asc|desc
+			'orderby'        => 'date', // date|title|rand
+			'order'          => 'desc', // asc|desc
 		), $attr );
 
 		// Convert bools to real booleans.
@@ -862,11 +862,11 @@ class WordCamp_Post_Types_Plugin {
 		}
 
 		$args = array(
-			'post_type' => 'wcb_session',
+			'post_type'      => 'wcb_session',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
-			'tax_query' => array(),
-			'orderby' => $attr['orderby'],
-			'order'   => $attr['order'],
+			'tax_query'      => array(),
+			'orderby'        => $attr['orderby'],
+			'order'          => $attr['order'],
 
 			// Only ones marked "session" or where the meta key does
 			// not exist, for backwards compatibility.
@@ -906,8 +906,8 @@ class WordCamp_Post_Types_Plugin {
 		if ( 'all' != $attr['track'] ) {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'wcb_track',
-				'field' => 'slug',
-				'terms' => $attr['track'],
+				'field'    => 'slug',
+				'terms'    => $attr['track'],
 			);
 		}
 
@@ -934,9 +934,9 @@ class WordCamp_Post_Types_Plugin {
 					$speakers_ids = array_map( 'absint', (array) get_post_meta( get_the_ID(), '_wcpt_speaker_id' ) );
 					if ( ! empty( $speakers_ids ) ) {
 						$speakers = get_posts( array(
-							'post_type' => 'wcb_speaker',
+							'post_type'      => 'wcb_speaker',
 							'posts_per_page' => -1,
-							'post__in' => $speakers_ids,
+							'post__in'       => $speakers_ids,
 						) );
 					}
 
@@ -1028,11 +1028,11 @@ class WordCamp_Post_Types_Plugin {
 		<?php foreach ( $terms as $term ) : ?>
 			<?php
 				$sponsors = new WP_Query( array(
-					'post_type' => 'wcb_sponsor',
-					'order' => 'ASC',
+					'post_type'      => 'wcb_sponsor',
+					'order'          => 'ASC',
 					'posts_per_page' => -1,
-					'taxonomy' => $term->taxonomy,
-					'term' => $term->slug,
+					'taxonomy'       => $term->taxonomy,
+					'term'           => $term->slug,
 				) );
 
 				if ( ! $sponsors->have_posts() )
@@ -1249,11 +1249,11 @@ class WordCamp_Post_Types_Plugin {
 	 * Fired during add_meta_boxes, adds extra meta boxes to our custom post types.
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'speaker-info', __( 'Speaker Info', 'wordcamporg' ), array( $this, 'metabox_speaker_info' ), 'wcb_speaker', 'side' );
-		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg' ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
-		add_meta_box( 'speakers-list', __( 'Speakers', 'wordcamporg' ), array( $this, 'metabox_speakers_list' ), 'wcb_session', 'side' );
-		add_meta_box( 'session-info', __( 'Session Info', 'wordcamporg' ), array( $this, 'metabox_session_info' ), 'wcb_session', 'side' );
-		add_meta_box( 'sponsor-info', __( 'Sponsor Info', 'wordcampbase' ), array( $this, 'metabox_sponsor_info' ), 'wcb_sponsor', 'side' );
+		add_meta_box( 'speaker-info',   __( 'Speaker Info',   'wordcamporg'  ), array( $this, 'metabox_speaker_info'   ), 'wcb_speaker',   'side' );
+		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
+		add_meta_box( 'speakers-list',  __( 'Speakers',       'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
+		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'side' );
+		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcampbase' ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'side' );
 	}
 
 	/**
@@ -1264,12 +1264,15 @@ class WordCamp_Post_Types_Plugin {
 		$email = get_post_meta( $post->ID, '_wcb_speaker_email', true );
 
 		$wporg_username = '';
-		$user_id = get_post_meta( $post->ID, '_wcpt_user_id', true );
-		$wporg_user = get_user_by( 'id', $user_id );
+		$user_id        = get_post_meta( $post->ID, '_wcpt_user_id', true );
+		$wporg_user     = get_user_by( 'id', $user_id );
+
 		if ( $wporg_user )
 			$wporg_username = $wporg_user->user_nicename;
 		?>
+
 		<?php wp_nonce_field( 'edit-speaker-info', 'wcpt-meta-speaker-info' ); ?>
+
 		<p>
 			<label for="wcpt-gravatar-email"><?php _e( 'Gravatar Email:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-gravatar-email" name="wcpt-gravatar-email" value="<?php echo esc_attr( $email ); ?>" />
@@ -1279,6 +1282,7 @@ class WordCamp_Post_Types_Plugin {
 			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-wporg-username" name="wcpt-wporg-username" value="<?php echo esc_attr( $wporg_username ); ?>" />
 		</p>
+
 		<?php
 	}
 
@@ -1289,16 +1293,20 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 
 		$wporg_username = '';
-		$user_id = get_post_meta( $post->ID, '_wcpt_user_id', true );
-		$wporg_user = get_user_by( 'id', $user_id );
+		$user_id        = get_post_meta( $post->ID, '_wcpt_user_id', true );
+		$wporg_user     = get_user_by( 'id', $user_id );
+
 		if ( $wporg_user )
 			$wporg_username = $wporg_user->user_nicename;
 		?>
+
 		<?php wp_nonce_field( 'edit-organizer-info', 'wcpt-meta-organizer-info' ); ?>
+
 		<p>
 			<label for="wcpt-wporg-username"><?php _e( 'WordPress.org Username:', 'wordcamporg' ); ?></label>
 			<input type="text" class="widefat" id="wcpt-wporg-username" name="wcpt-wporg-username" value="<?php echo esc_attr( $wporg_username ); ?>" />
 		</p>
+
 		<?php
 	}
 
@@ -1310,10 +1318,10 @@ class WordCamp_Post_Types_Plugin {
 		$speakers = get_post_meta( $post->ID, '_wcb_session_speakers', true );
 		wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-		$speakers_names = array();
+		$speakers_names   = array();
 		$speakers_objects = get_posts( array(
-			'post_type' => 'wcb_speaker',
-			'post_status' => 'publish',
+			'post_type'      => 'wcb_speaker',
+			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 		) );
 
@@ -1322,10 +1330,12 @@ class WordCamp_Post_Types_Plugin {
 			$speakers_names[] = $speaker_object->post_title;
 		$speakers_names_first = array_pop( $speakers_names );
 		?>
+
 		<?php wp_nonce_field( 'edit-speakers-list', 'wcpt-meta-speakers-list-nonce' ); ?>
 		<!--<input type="text" class="text" id="wcpt-speakers-list" name="wcpt-speakers-list" value="<?php echo esc_attr( $speakers ); ?>" />-->
 		<textarea class="large-text" placeholder="Start typing a name" id="wcpt-speakers-list" name="wcpt-speakers-list"><?php echo esc_textarea( $speakers ); ?></textarea>
 		<p class="description"><?php _e( 'A speaker entry must exist first. Separate multiple speakers with commas.', 'wordcamporg' ); ?></p>
+
 		<script>
 		jQuery(document).ready( function($) {
 			var availableSpeakers = [ <?php
@@ -1368,19 +1378,22 @@ class WordCamp_Post_Types_Plugin {
 				});
 		});
 		</script>
+
 		<?php
 	}
 
 	function metabox_session_info() {
-		$post = get_post();
-		$session_time = absint( get_post_meta( $post->ID, '_wcpt_session_time', true ) );
+		$post             = get_post();
+		$session_time     = absint( get_post_meta( $post->ID, '_wcpt_session_time', true ) );
 		$session_date     = ( $session_time ) ? date( 'Y-m-d', $session_time ) : date( 'Y-m-d' );
 		$session_hours    = ( $session_time ) ? date( 'g', $session_time )     : date( 'g' );
 		$session_minutes  = ( $session_time ) ? date( 'i', $session_time )     : '00';
 		$session_meridiem = ( $session_time ) ? date( 'a', $session_time )     : 'am';
-		$session_type = get_post_meta( $post->ID, '_wcpt_session_type', true );
+		$session_type     = get_post_meta( $post->ID, '_wcpt_session_type', true );
 		?>
+
 		<?php wp_nonce_field( 'edit-session-info', 'wcpt-meta-session-info' ); ?>
+
 		<p>
 			<label for="wcpt-session-date"><?php _e( 'Date:', 'wordcamporg' ); ?></label>
 			<input type="text" id="wcpt-session-date" data-date="<?php echo esc_attr( $session_date ); ?>" name="wcpt-session-date" value="<?php echo esc_attr( $session_date ); ?>" /><br />
@@ -1415,6 +1428,7 @@ class WordCamp_Post_Types_Plugin {
 				<option value="custom" <?php selected( $session_type, 'custom' ); ?>><?php _e( 'Break, Lunch, etc.', 'wordcamporg' ); ?></option>
 			</select>
 		</p>
+
 		<?php
 	}
 
@@ -1443,9 +1457,9 @@ class WordCamp_Post_Types_Plugin {
 			return;
 
 		if ( isset( $_POST['wcpt-meta-speaker-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-speaker-info'], 'edit-speaker-info' ) ) {
-			$email = sanitize_text_field( $_POST['wcpt-gravatar-email'] );
+			$email          = sanitize_text_field( $_POST['wcpt-gravatar-email'] );
 			$wporg_username = sanitize_text_field( $_POST['wcpt-wporg-username'] );
-			$wporg_user = $this->get_wporg_user( $wporg_username );
+			$wporg_user     = $this->get_wporg_user( $wporg_username );
 
 			if ( empty( $email ) )
 				delete_post_meta( $post_id, '_wcb_speaker_email' );
@@ -1533,7 +1547,8 @@ class WordCamp_Post_Types_Plugin {
 			$speakers_list = array();
 
 		$speaker_ids = array();
-		$speakers = array_unique( array_map( 'trim', $speakers_list ) );
+		$speakers    = array_unique( array_map( 'trim', $speakers_list ) );
+
 		foreach ( $speakers as $speaker_name ) {
 			if ( empty( $speaker_name ) )
 				continue;
@@ -1722,6 +1737,7 @@ class WordCamp_Post_Types_Plugin {
 			'supports'          => array( 'title', 'editor', 'revisions' ),
 			'menu_position'     => 22,
 			'public'            => false,
+				// todo public or publicly_queryable = true, so consistent with others? at the very least set show_in_json = true
 			'show_ui'           => true,
 			'can_export'        => true,
 			'capability_type'   => 'post',
@@ -1795,14 +1811,14 @@ class WordCamp_Post_Types_Plugin {
 		switch ( $current_filter ) {
 			case 'manage_wcb_organizer_posts_columns':
 				// Insert at offset 1, that's right after the checkbox.
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_organizer_avatar' => __( 'Avatar', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_organizer_avatar' => __( 'Avatar', 'wordcamporg' ) )   + array_slice( $columns, 1, null, true );
 				break;
 			case 'manage_wcb_speaker_posts_columns':
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_speaker_avatar' => __( 'Avatar', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_speaker_avatar'   => __( 'Avatar', 'wordcamporg' ) )   + array_slice( $columns, 1, null, true );
 				break;
 			case 'manage_wcb_session_posts_columns':
 				$columns = array_slice( $columns, 0, 2, true ) + array( 'wcb_session_speakers' => __( 'Speakers', 'wordcamporg' ) ) + array_slice( $columns, 2, null, true );
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_session_time' => __( 'Time', 'wordcamporg' ) ) + array_slice( $columns, 1, null, true );
+				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_session_time'     => __( 'Time', 'wordcamporg' ) )     + array_slice( $columns, 1, null, true );
 				break;
 			default:
 		}
@@ -1822,9 +1838,11 @@ class WordCamp_Post_Types_Plugin {
 			case 'wcb_organizer_avatar':
 				edit_post_link( get_avatar( absint( get_post_meta( get_the_ID(), '_wcpt_user_id', true ) ), 32 ) );
 				break;
+
 			case 'wcb_speaker_avatar':
 				edit_post_link( get_avatar( get_post_meta( get_the_ID(), '_wcb_speaker_email', true ), 32 ) );
 				break;
+
 			case 'wcb_session_speakers':
 				$speakers = array();
 				$speakers_ids = array_map( 'absint', (array) get_post_meta( $post_id, '_wcpt_speaker_id' ) );
@@ -1843,11 +1861,13 @@ class WordCamp_Post_Types_Plugin {
 				echo implode( ', ', $output );
 
 				break;
+
 			case 'wcb_session_time':
 				$session_time = absint( get_post_meta( get_the_ID(), '_wcpt_session_time', true ) );
 				$session_time = ( $session_time ) ? date( get_option( 'time_format' ), $session_time ) : '&mdash;';
 				echo esc_html( $session_time );
 				break;
+
 			default:
 		}
 	}
@@ -1891,9 +1911,9 @@ class WordCamp_Post_Types_Plugin {
 	function register_widgets() {
 		require_once( 'inc/widgets.php' );
 
-		register_widget( 'WCB_Widget_Sponsors' );
-		register_widget( 'WCPT_Widget_Speakers' );
-		register_widget( 'WCPT_Widget_Sessions' );
+		register_widget( 'WCB_Widget_Sponsors'    );
+		register_widget( 'WCPT_Widget_Speakers'   );
+		register_widget( 'WCPT_Widget_Sessions'   );
 		register_widget( 'WCPT_Widget_Organizers' );
 	}
 
@@ -1909,7 +1929,7 @@ class WordCamp_Post_Types_Plugin {
 				continue;
 			}
 
-			$num_posts = wp_count_posts( $post_type );
+			$num_posts        = wp_count_posts( $post_type );
 			$post_type_object = get_post_type_object( $post_type );
 
 			if ( $num_posts && $num_posts->publish ) {
