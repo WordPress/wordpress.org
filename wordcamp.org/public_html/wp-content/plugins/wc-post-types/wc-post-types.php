@@ -277,9 +277,9 @@ class WordCamp_Post_Types_Plugin {
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
-		$attr['orderby']      = ( in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby']      : 'date';
-		$attr['order']        = ( in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ) ? $attr['order']        : 'desc';
-		$attr['speaker_link'] = ( in_array( $attr['speaker_link'], array( 'permalink'             ) ) ) ? $attr['speaker_link'] : '';
+		$attr['orderby']      = in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ? $attr['orderby']      : 'date';
+		$attr['order']        = in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ? $attr['order']        : 'desc';
+		$attr['speaker_link'] = in_array( $attr['speaker_link'], array( 'permalink'             ) ) ? $attr['speaker_link'] : '';
 
 		/*
 		 * Only allow 2014.capetown to use the new track attribute
