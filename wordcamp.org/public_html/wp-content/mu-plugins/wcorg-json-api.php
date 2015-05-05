@@ -22,40 +22,23 @@
  * @return array
  */
 function wcorg_json_whitelist_endpoints( $endpoints ) {
+	global $wp_json_server, $wp_json_posts;
+
 	$whitelisted_endpoints = array(
-		'/posts'             => array( 'get_posts' ),
-		'/posts/(?P<id>\d+)' => array( 'get_post'  ),
+		'/' => array( array( $wp_json_server, 'get_index' ),  WP_JSON_Server::READABLE ),
+
+		// Posts
+		'/posts' => array(
+			array( array( $wp_json_posts, 'get_posts' ),      WP_JSON_Server::READABLE ),
+		),
+		'/posts/(?P<id>\d+)' => array(
+			array( array( $wp_json_posts, 'get_post' ),       WP_JSON_Server::READABLE ),
+		),
+
 		// todo Add /posts/types too, because it's useful for debugging and there's no harm. It has a different array structure than the current ones, though, so this will need some work.
 	);
 
-	foreach ( $endpoints as $endpoint => $endpoint_data ) {
-		/*
-		 * Don't attempt to scan '/' because it has a different array structure than normal endpoints and is
-		 * unlikely to expose anything sensitive.
-		 */
-		if ( '/' == $endpoint ) {
-			continue;
-		}
-
-		if ( array_key_exists( $endpoint, $whitelisted_endpoints ) ) {
-			// Allow the endpoint, but remove any of its callbacks that aren't whitelisted and read-only
-
-			foreach ( $endpoint_data as $callback_index => $callback ) {
-				$callback_name        = $callback[0][1];
-				$callback_permissions = $callback[1];
-
-				if ( ! in_array( $callback_name, $whitelisted_endpoints[ $endpoint ] ) || WP_JSON_Server::READABLE != $callback_permissions ) {
-					unset( $endpoints[ $endpoint ][ $callback_index ] );
-				}
-			}
-		} else {
-			// Remove endpoints that aren't whitelisted
-
-			unset( $endpoints[ $endpoint ] );
-		}
-	}
-
-	return $endpoints;
+	return $whitelisted_endpoints;
 }
 add_filter( 'json_endpoints', 'wcorg_json_whitelist_endpoints', 999 );
 
