@@ -556,6 +556,8 @@ function wporg_themes_get_themes_for_query() {
 		$request['browse'] = 'featured';
 	}
 
+	$request['locale'] = get_locale();
+
 	$request['fields'] = array(
 		'description' => true,
 		'sections' => false,
@@ -577,7 +579,7 @@ function wporg_themes_get_themes_for_query() {
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );
 
-	unset( $request['fields'] );
+	unset( $request['fields'], $request['locale'] );
 
 	return $result = array(
 		'themes'  => $api_result->themes,

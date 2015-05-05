@@ -54,6 +54,7 @@ function wporg_themes_scripts() {
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
+				'locale'       => get_locale()
 			),
 			'l10n' => array(
 				'search'            => __( 'Search Themes', 'wporg-themes' ),

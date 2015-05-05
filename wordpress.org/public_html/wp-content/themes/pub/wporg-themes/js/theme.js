@@ -330,6 +330,7 @@ window.wp = window.wp || {};
 					// Request data
 					request: _.extend({
 						per_page: themes.data.settings.postsPerPage,
+						locale: themes.data.settings.locale,
 						fields: {
 							description: true,
 							sections: false,
