@@ -72,7 +72,6 @@ p a:hover {
 /* Regular Content. */
 h2 {
 	font-size: 28px;
-	margin-bottom: 10px;
 }
 
 ul, ol {
@@ -1313,7 +1312,7 @@ body.full-overlay-active {
 	border: 1px solid #e5e5e5;
 	box-sizing: border-box;
 	float: left;
-	height: 710px;
+	min-height: 710px;
 	margin: 0 1% 0 0;
 	padding: 10px;
 	width: calc(100% / 4 - 7px);

@@ -1443,6 +1443,20 @@ window.wp = window.wp || {};
 				return this.addFilter();
 			}
 
+			// If the translations of the filters pushes the group height
+			// over the min-height (710px), increase them all.
+			setTimeout( function() {
+				var filterGroupHeight = 0;
+
+				filterGroupHeight = _.reduce( $( '.filter-group' ), function( max, item ) {
+					return Math.max( max, $( item ).outerHeight() );
+				}, filterGroupHeight );
+
+				if ( filterGroupHeight > 710 ) {
+					$( '.filter-group' ).outerHeight( filterGroupHeight );
+				}
+			}, 0 );
+
 			this.clearSearch();
 
 			$( 'body' ).toggleClass( 'show-filters' );
