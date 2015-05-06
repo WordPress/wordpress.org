@@ -2863,10 +2863,10 @@ h3#comments-title {
 		background: url('images/schedule-hover-arrow-2x.png') no-repeat 615px 20px;
 		background-size: 35px 26px;
 	}
-	.wordcamp-placeholder-thumb {
+	/*.wordcamp-placeholder-thumb {
 		background: url('images/wordcamp-placeholder-thumb-2x.png') 3px 3px no-repeat;
 		background-size: 82px 37px;
-	}
+	}*/
 }
 
 /* !06. Responsive */

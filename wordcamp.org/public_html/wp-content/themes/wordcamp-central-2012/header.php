@@ -50,7 +50,7 @@
 	wp_head();
 ?>
 
-<script type="text/javascript" src="http://use.typekit.com/yqt7hkl.js"></script>
+<script type="text/javascript" src="//use.typekit.com/yqt7hkl.js"></script>
 <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 <?php if ( is_front_page() || is_page('about') ) : ?>
 <script type="text/javascript">jQuery(document).ready(function($) { $('.cycle-me').cycle(); });</script>
