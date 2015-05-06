@@ -112,3 +112,20 @@ add_action( 'init', function() {
         if ( ! is_ssl() )
                 define( 'DONOTCACHEPAGE', true );
 });
+
+/**
+ * Force HTTPS on all WordCamp.org sites that support it.
+ */
+function wcorg_force_ssl() {
+	if ( php_sapi_name() == 'cli' || is_ssl() )
+		return;
+
+	// Our SSL certificate covers only *.wordcamp.org but year.city.wordcamp.org rediercts should still work.
+	if ( ! preg_match( '#^(?:[^.]+\.)?wordcamp\.org$#i', $_SERVER['HTTP_HOST'] ) )
+		return;
+
+	header( 'Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301 );
+	exit;
+}
+
+add_action( 'muplugins_loaded', 'wcorg_force_ssl' );
