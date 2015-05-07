@@ -24,18 +24,20 @@ gp_tmpl_header();
 				$status = $translation_status[ $locale->slug ];
 				$percent_complete = floor( $status->current_count / $status->all_count * 100 );
 			}
+
+			$wp_locale = ( isset( $locale->wp_locale ) ) ? $locale->wp_locale : $locale->slug;
 			?>
 			<div class="locale <?php echo 'percent-' . $percent_complete; ?>">
 				<ul class="name">
 					<li class="english"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->english_name ) ?></li>
 					<li class="native"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->native_name ) ?></li>
-					<li class="code"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->slug ) ?></li>
+					<li class="code"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $wp_locale ) ?></li>
 				</ul>
 				<div class="contributors">
 					<span class="dashicons dashicons-admin-users"></span><br />
 					<?php
 					$contributors = isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0;
-					echo $contributors;
+					echo gp_link_get( 'https://make.wordpress.org/polyglots/teams/?locale=' . $wp_locale, $contributors );
 					?>
 				</div>
 				<div class="percent">
@@ -61,7 +63,7 @@ gp_tmpl_header();
 				} else {
 					$rows.hide();
 					$rows.filter( function( i, v ) {
-						var $t = $(this);
+						$t = $(this).find( '.name' );
 						for ( var d = 0; d < words.length; ++d ) {
 							if ( $t.text().toLowerCase().indexOf( words[d] ) != -1 ) {
 								return true;
