@@ -22,7 +22,7 @@
  * @return array
  */
 function wcorg_json_whitelist_endpoints( $endpoints ) {
-	global $wp_json_server, $wp_json_posts;
+	global $wp_json_server, $wp_json_posts, $wp_json_taxonomies;
 
 	$whitelisted_endpoints = array(
 		'/' => array( array( $wp_json_server, 'get_index' ),  WP_JSON_Server::READABLE ),
@@ -39,6 +39,32 @@ function wcorg_json_whitelist_endpoints( $endpoints ) {
 		),
 		'/posts/types/(?P<type>\w+)' => array(
 			array( array( $wp_json_posts, 'get_post_type' ),  WP_JSON_Server::READABLE ),
+		),
+
+		// Taxonomies
+		'/posts/types/(?P<type>[\w-]+)/taxonomies' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomies_for_type' ), WP_JSON_Server::READABLE | WP_JSON_Server::HIDDEN_ENDPOINT ),
+		),
+		'/posts/types/(?P<type>[\w-]+)/taxonomies/(?P<taxonomy>[\w-]+)' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomy' ),            WP_JSON_Server::READABLE | WP_JSON_Server::HIDDEN_ENDPOINT ),
+		),
+		'/posts/types/(?P<type>[\w-]+)/taxonomies/(?P<taxonomy>[\w-]+)/terms' => array(
+			array( array( $wp_json_taxonomies, 'get_terms' ),               WP_JSON_Server::READABLE | WP_JSON_Server::HIDDEN_ENDPOINT ),
+		),
+		'/posts/types/(?P<type>[\w-]+)/taxonomies/(?P<taxonomy>[\w-]+)/terms/(?P<term>[\w-]+)' => array(
+			array( array( $wp_json_taxonomies, 'get_term' ),                WP_JSON_Server::READABLE | WP_JSON_Server::HIDDEN_ENDPOINT ),
+		),
+		'/taxonomies' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomies' ),          WP_JSON_Server::READABLE ),
+		),
+		'/taxonomies/(?P<taxonomy>[\w-]+)' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomy_object' ),     WP_JSON_Server::READABLE ),
+		),
+		'/taxonomies/(?P<taxonomy>[\w-]+)/terms' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomy_terms' ),      WP_JSON_Server::READABLE ),
+		),
+		'/taxonomies/(?P<taxonomy>[\w-]+)/terms/(?P<term>[\w-]+)' => array(
+			array( array( $wp_json_taxonomies, 'get_taxonomy_term' ),       WP_JSON_Server::READABLE ),
 		),
 	);
 
