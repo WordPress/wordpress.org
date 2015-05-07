@@ -14,7 +14,7 @@
   margin-bottom: 0;
 }
 .callout-info {
-  background: #99d9ed;
+  background: #e5f5fa;
   border: 1px solid #00a0d2;
   border-bottom: 3px solid #00a0d2;
 }
@@ -23,7 +23,7 @@
   color: #00a0d2 ;
 }
 .callout-tip {
-  background: #c1e1B9;
+  background: #eff7ed;
   border: 1px solid #64b450;
   border-bottom: 3px solid #64b450;
 }
@@ -32,7 +32,7 @@
   color: #64b450;
 }
 .callout-alert {
-  background: #ffe399;
+  background: #fff8e5;
   border: 1px solid #ffb900;
   border-bottom: 3px solid #ffb900;
 }
@@ -41,7 +41,7 @@
   color: #ffb900;
 }
 .callout-tutorial {
-  background: #cdc5e1;
+  background: #f2f0f7;
   border: 1px solid #826eb4;
   border-bottom: 3px solid #826eb4;
 }
@@ -50,7 +50,7 @@
   color: #826eb4;
 }
 .callout-warning {
-  background: #f1adad;
+  background: #fbeaea;
   border: 1px solid #dc3232;
   border-bottom: 3px solid #dc3232;
 }
