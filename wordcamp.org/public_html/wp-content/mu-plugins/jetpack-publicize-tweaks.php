@@ -13,7 +13,7 @@
  * Provides a default image for sharing WordCamp home/pages to Facebook/Twitter/Google other than the Jetpack "blank" image.
  */
 function wc_default_og_image() {
-	return 'https://s.w.org/about/images/logos/wordpress-logo-notext-rgb.png';
+	return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue.png';
 }
 add_filter( 'jetpack_open_graph_image_default', 'wc_default_og_image' );
 
