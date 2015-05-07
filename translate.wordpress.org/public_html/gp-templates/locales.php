@@ -63,7 +63,7 @@ gp_tmpl_header();
 				} else {
 					$rows.hide();
 					$rows.filter( function( i, v ) {
-						$t = $(this).find( '.name' );
+						var $t = $(this).find( '.name' );
 						for ( var d = 0; d < words.length; ++d ) {
 							if ( $t.text().toLowerCase().indexOf( words[d] ) != -1 ) {
 								return true;
