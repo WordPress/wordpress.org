@@ -34,8 +34,12 @@ function wcorg_json_whitelist_endpoints( $endpoints ) {
 		'/posts/(?P<id>\d+)' => array(
 			array( array( $wp_json_posts, 'get_post' ),       WP_JSON_Server::READABLE ),
 		),
-
-		// todo Add /posts/types too, because it's useful for debugging and there's no harm. It has a different array structure than the current ones, though, so this will need some work.
+		'/posts/types' => array(
+			array( array( $wp_json_posts, 'get_post_types' ), WP_JSON_Server::READABLE ),
+		),
+		'/posts/types/(?P<type>\w+)' => array(
+			array( array( $wp_json_posts, 'get_post_type' ),  WP_JSON_Server::READABLE ),
+		),
 	);
 
 	return $whitelisted_endpoints;
@@ -175,7 +179,7 @@ function wcorg_json_embed_related_posts( $prepared_post, $raw_post, $context ) {
 		case 'wcb_session':
 			$speaker_id               = get_post_meta( $prepared_post['ID'], '_wcpt_speaker_id', true );
 			$speaker                  = $wp_json_posts->get_post( $speaker_id );
-			$prepared_post['speaker'] = is_a( $speaker, 'WP_JSON_Response' ) ? $speaker : null;
+			$prepared_post['speaker'] = is_a( $speaker, 'WP_JSON_Response' ) ? $speaker : null; // todo Add multiple speakers when upgrade to v2 of the API bug, see #1020-meta
 			break;
 	}
 
@@ -274,6 +278,7 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 }
 add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11 );    // after the default endpoints are added in `json_api_default_filters()`
 
+
 /*
  * WP-CLI Commands
  */
@@ -292,6 +297,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$start_timestamp = microtime( true );
 
 			// These calls are not formatted in a more compact way because we don't want to short-circuit any of them if one fails
+			if ( $this->post_types_exposed() ) {
+				$errors = true;
+			}
+
 			if ( $this->post_meta_exposed() ) {
 				$errors = true;
 			}
@@ -304,6 +313,53 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			} else {
 				WP_CLI::success( 'All of the tests passed. If the tests are comprehensive and working properly, then all sensitive data has been properly scrubbed.' );
 			}
+		}
+
+		/**
+		 * Check if any sensitive post types are being exposed.
+		 *
+		 * See note in post_meta_exposed() about test data.
+		 *
+		 * @return bool
+		 */
+		protected function post_types_exposed() {
+			$errors = false;
+
+			WP_CLI::line();
+			WP_CLI::line( 'Checking post types.' );
+
+			// Check Central and a normal site, because they can have different types loaded
+			$post_types_endpoints = array(
+				'http://central.wordcamp.org/wp-json/posts/types',
+				'http://europe.wordcamp.org/2014/wp-json/posts/types',
+			);
+
+			$whitelisted_post_types = array(
+				'post', 'page', 'attachment', 'revision', 'wcb_speaker', 'wcb_session', 'wcb_sponsor', 'mes',
+				'mes-sponsor-level', 'wordcamp'
+			);
+
+			foreach ( $post_types_endpoints as $request_url ) {
+				$request_url = apply_filters( 'wcorg_json_api_verify_data_scrubbed_url', $request_url );    // Use this filter to override the URLs with corresponding endpoints on your sandbox
+				$response    = json_decode( wp_remote_retrieve_body( wp_remote_get( $request_url ) ) );
+
+				if ( empty( $response->post->slug ) ) {
+					$errors = true;
+					WP_CLI::warning( "Unable to retrieve post types from $request_url", false );
+					continue;
+				}
+
+				foreach ( $response as $post_type ) {
+					if ( in_array( $post_type->slug, $whitelisted_post_types ) ) {
+						WP_CLI::line( "{$post_type->slug} is whitelisted." );
+					} else {
+						$errors = true;
+						WP_CLI::warning( "{$post_type->slug} is being exposed at $request_url" );
+					}
+				}
+			}
+
+			return $errors;
 		}
 
 		/**
