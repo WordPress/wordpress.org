@@ -377,7 +377,7 @@ class wporg_trac_notifications {
 
 		if ( count( $previous_tickets ) >= 5 ) {
 			return;
-		}	
+		}
 
 		if ( 1 == count( $previous_tickets ) ) {
 			$previous_comments = $this->trac->get_var( $this->trac->prepare( "SELECT ticket FROM ticket_change
@@ -441,9 +441,11 @@ class wporg_trac_notifications {
 				}
 			}
 			if ( empty( $_POST['notifications']['newticket'] ) && ! empty( $notifications['newticket'] ) ) {
-					$this->trac->delete( '_notifications', array( 'username' => $username, 'type' => 'newticket' ) );
+				$this->trac->delete( '_notifications', array( 'username' => $username, 'type' => 'newticket' ) );
+				$notifications[ 'newticket' ] = false;
 			} elseif ( ! empty( $_POST['notifications']['newticket'] ) && empty( $notifications['newticket'] ) ) {
 				$this->trac->insert( '_notifications', array( 'username' => $username, 'type' => 'newticket', 'value' => '1' ) );
+				$notifications[ 'newticket' ] = true;
 			}
 		}
 		?>
@@ -475,7 +477,7 @@ class wporg_trac_notifications {
 			float: left;
 			width: 25%;
 			list-style: none;
-		}	
+		}
 		.completed-milestone {
 			display: none !important;
 		}
