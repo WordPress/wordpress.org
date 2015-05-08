@@ -1413,11 +1413,6 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	padding: 15px 7px;
 }
 
-.miro {
-	text-align: right;
-	margin-bottom: -46px;
-}
-
 .secondary_content h3 {
 	font-family: Georgia, Times, "Times New Roman", serif;
 	font-size: 20px;
@@ -1804,19 +1799,6 @@ a {
 	float: right;
 	width: 170px;
 	margin: 0 0 50px 0;
-}
-
-.miro {
-	background: url('i/miro.png') no-repeat;
-
-	display: block;
-
-	width: 160px;
-	height: 46px;
-	margin: -40px 0 0 6px;
-
-	text-align: left;
-	text-indent: -9999px;
 }
 
 .tag-count {
