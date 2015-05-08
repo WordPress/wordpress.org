@@ -772,9 +772,6 @@ function wptv_enqueue_scripts() {
 	wp_enqueue_style( 'wptv-ie', get_template_directory_uri() . '/ie6.css', array( 'wptv-style' ) );
 	wp_style_add_data( 'wptv-ie', 'conditional', 'IE 6' );
 
-	wp_register_script( 'wptv-dropdowns', get_template_directory_uri() . '/js/dropdowns.js' );
-	wp_enqueue_script( 'wptv-dropdowns', array( 'jquery' ) );
-
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}

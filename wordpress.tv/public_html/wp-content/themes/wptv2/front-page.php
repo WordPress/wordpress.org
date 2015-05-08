@@ -24,7 +24,7 @@ get_header(); ?>
 			<h3>
 				<a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" class="video-title"><?php the_title(); ?></a>
 				<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
-		</h3>
+			</h3>
 		</div><!-- .main-video -->
 		<?php endwhile; // $featured->have_posts ?>
 
