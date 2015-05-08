@@ -268,7 +268,7 @@ class WordPressTV_Theme {
 			$n      = empty( $query->query_vars['exact'] ) ? '%' : '';
 
 			foreach ( (array) $query->query_vars['search_terms'] as $term ) {
-				$term = esc_sql( like_escape( $term ) );
+				$term = esc_sql( $wpdb->esc_like( $term ) );
 				$search .= "{$searchand}(($wpdb->posts.post_title LIKE '{$n}{$term}{$n}') OR ($wpdb->posts.post_content LIKE '{$n}{$term}{$n}'))";
 				$searchand = ' AND ';
 			}

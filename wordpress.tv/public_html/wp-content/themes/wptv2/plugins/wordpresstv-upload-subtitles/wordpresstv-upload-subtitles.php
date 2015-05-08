@@ -29,7 +29,7 @@ class WordPressTV_Subtitles_Upload {
 	 * @uses wp_handle_upload
 	 */
 	function handle_upload() {
-		// allow only video mimes
+		// allow only subtitle mimes
 		$overrides = array(
 			'test_form' => false,
 			'mimes'     => array(
