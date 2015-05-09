@@ -5,9 +5,11 @@ function rosetta_after_setup_theme() {
 
 	add_theme_support( 'custom-header', array(
 		'default-image' => false,
-		'header-text' => false,
-		'width' => 466,
-		'height' => 303,
+		'header-text'   => false,
+		'width'         => 466,
+		'height'        => 303,
+		'flex-height'   => true,
+		'flex-width'    => true,
 	) );
 
 	register_nav_menu( 'rosetta_main', __( 'Main Menu', 'rosetta' ) );

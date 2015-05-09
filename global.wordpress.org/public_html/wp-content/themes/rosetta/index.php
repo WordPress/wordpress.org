@@ -23,15 +23,18 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 ?>
 				<h3><?php the_title(); ?></h3>
 
-<?php
-	$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
-	if ( ! $header_image = get_header_image() ) {
-		$header_image = content_url( '/languages/shots/shot-' . $rosetta->locale . '.png' );
-		$hw = '';
-	}
-?>
-				<img class="shot" <?php echo $hw; ?>src="<?php echo esc_url( $header_image ); ?>" alt="Localized version screenshot" />
-					<?php the_content(); ?>
+				<?php
+				if ( $header_image = get_header_image() ) {
+					$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
+					printf(
+						'<img class="shot" %ssrc="%s" alt="" />',
+						$hw,
+						esc_url( $header_image )
+					);
+				}
+
+				the_content();
+				?>
 <?php endwhile; ?>
 			</div>
 		</div>
