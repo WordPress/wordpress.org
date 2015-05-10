@@ -4,7 +4,7 @@
 	<?php foreach ($comments as $comment) : ?>
 		<li id="comment-<?php comment_ID() ?>" class="comment">
 			<div class="narrow">
-				<span class="author"><?php echo preg_replace('%href=([\"|\'])(?!http://)%i', "href=$1http://", get_comment_author_link());	?></span>
+				<span class="author"><?php comment_author_link(); ?></span>
 				<span class="date"><?php comment_date(__('F j, Y', 'rosetta')) ?>,&nbsp;<?php comment_time(__('g:i a', 'rosetta')) ?></span>
 				<span class="permlink"><a href="#comment-<?php comment_ID() ?>" title="<?php esc_attr_e('Permanent link to this comment', 'rosetta'); ?>">#</a></span>
 				<?php edit_comment_link(__("Edit&nbsp;This", 'rosetta'), ''); ?>
