@@ -21,7 +21,13 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 
 		// Initialize only if theme requires.
 		if ( in_array( $this->stylesheet, $compat_themes ) || in_array( $this->template, $compat_themes ) ) {
-			add_action( 'wcpt_back_compat_init', array( $this, 'wcpt_back_compat_init' ) );
+			$old_site_id       = get_current_blog_id() <= apply_filters( 'wcb_back_compat_max_site_id', 528 );
+			$old_site_excepted = in_array( get_current_blog_id(), apply_filters( 'wcb_back_compat_site_id_exceptions', array( 465 ) ) ); // denver.wordcamp.org/2015
+
+			// Substitute back-compat shortcodes on older sites, but let new sites use the real ones
+			if ( $old_site_id && ! $old_site_excepted ) {
+				add_action( 'wcpt_back_compat_init', array( $this, 'wcpt_back_compat_init' ) );
+			}
 
 			// Base theme should not load the following modules.
 			add_filter( 'wcb_load_component_speakers', '__return_false' );
