@@ -191,7 +191,7 @@ class WordCamp_New_Site {
 			$this->get_stub_me_sponsor_thank_yous( $wordcamp, $meta )
 		);
 
-		// Create sponsorship levels
+		// Create sponsorship levels -- @todo pull these from Central instead of hardcoding
 		$sponsor_level_ids['champion']   = wp_create_term( 'WordCamp Champion',   'wcb_sponsor_level' );
 		$sponsor_level_ids['accomplice'] = wp_create_term( 'WordCamp Accomplice', 'wcb_sponsor_level' );
 		$sponsor_level_ids['pillar']     = wp_create_term( 'WordCamp Pillar',     'wcb_sponsor_level' );

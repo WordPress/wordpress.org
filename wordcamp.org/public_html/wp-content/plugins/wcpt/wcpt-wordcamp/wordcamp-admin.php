@@ -578,6 +578,7 @@ class WordCamp_Admin {
 			'Organizer Name',
 			'WordPress.org Username',
 			'Email Address',
+			'Telephone',
 			'Mailing Address',
 			'Sponsor Wrangler Name',
 			'Sponsor Wrangler E-mail Address',
