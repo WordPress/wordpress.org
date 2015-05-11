@@ -727,6 +727,12 @@ function wcpt_venue_metabox() {
 function wcpt_metabox( $meta_keys ) {
 	global $post_id;
 
+	// @todo When you refactor meta_keys() to support changing labels -- see note in meta_keys() -- also make it support these notes
+	$messages = array(
+		'Telephone'       => 'Required for shipping.',
+		'Mailing Address' => 'Shipping address.',
+	);
+
 	foreach ( $meta_keys as $key => $value ) :
 		$object_name = wcpt_key_to_str( $key, 'wcpt_' );
 
@@ -778,6 +784,12 @@ function wcpt_metabox( $meta_keys ) {
 							break;
 
 					endswitch; ?>
+
+					<?php if ( ! empty( $messages[ $key ] ) ) : ?>
+						<?php if ( 'textarea' == $value ) { echo '<br />'; } ?>
+						
+						<span class="description"><?php echo esc_html( $messages[ $key ] ); ?></span>
+					<?php endif; ?>
 				</p>
 
 			<?php endif; ?>
