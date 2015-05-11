@@ -175,7 +175,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 						}
 
 						if ( ! empty( $speakers ) )
-							$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( $speakers ) );
+							$meta['speakers'] = sprintf( __( 'Presented by %s', 'wordcamporg' ), esc_html( rtrim( $speakers, ',' ) ) );
 
 						if ( ! empty( $track ) )
 							$meta['track'] = sprintf( __( '%s Track', 'wordcamporg' ), esc_html( $track ) );
