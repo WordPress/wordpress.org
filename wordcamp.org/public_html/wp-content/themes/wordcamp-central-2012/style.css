@@ -1965,14 +1965,6 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 	margin: 12px;
 }
 
-.about-page .about-map {
-	float: left;
-	margin: -4px 20px 40px 0;
-	padding: 12px;
-	box-shadow: 0 1px 3px 1px rgba(0,0,0,.3);
-	-webkit-box-shadow: 0 1px 3px 1px rgba(0,0,0,.3);
-}
-
 #content .about-stats {
 	margin: 0;
 	background-color: #f1f6f9;
@@ -2039,6 +2031,31 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 #content .about-page .wc-primary-button {
 	display: inline-block;
 	margin-top: 5px;
+}
+
+/* !03f. Maps */
+/* ------------------------------------- */
+
+.wcc-map {
+	position: relative;
+	height: 325px;
+	background-color: #E5E3DF;
+}
+
+#wcc-map-spinner {
+	position: absolute;
+	float: none;
+	top: 50%;
+	left: 50%;
+	margin: -10px 0 0 0;	/* take half the height of the spinner off the top, so that it's perfectly centered */
+}
+
+.wcc-map-marker ul {
+	margin-left: 0;
+}
+
+.wcc-map-marker ul li {
+	list-style-type: none;
 }
 
 /* !04. Posts */

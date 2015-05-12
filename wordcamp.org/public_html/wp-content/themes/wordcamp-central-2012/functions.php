@@ -43,6 +43,7 @@ class WordCamp_Central_Theme {
 		add_filter( 'nav_menu_css_class', array( __CLASS__, 'nav_menu_css_class' ), 10, 3 );
 		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_rss_links_to_footer_menu' ), 10, 2 );
 
+		add_shortcode( 'wcc_map',         array( __CLASS__, 'shortcode_map'         ) );
 		add_shortcode( 'wcc_about_stats', array( __CLASS__, 'shortcode_about_stats' ) );
 	}
 
@@ -183,10 +184,10 @@ class WordCamp_Central_Theme {
 	 * Enqueue scripts and styles.
 	 */
 	static function enqueue_scripts() {
-		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 5 );
-		wp_enqueue_script( 'wordcamp-central', get_stylesheet_directory_uri() . '/js/central.js', array( 'jquery', 'underscore' ), 1, true );
+		wp_enqueue_style( 'central', get_stylesheet_uri(), array(), 6 );
+		wp_enqueue_script( 'wordcamp-central', get_stylesheet_directory_uri() . '/js/central.js', array( 'jquery', 'underscore' ), 2, true );
 
-		wp_localize_script( 'wordcamp-central', 'wordcampCentralOptions', array( 'ajaxURL' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( 'wordcamp-central', 'wordcampCentralOptions', self::get_javascript_options() );
 
 		/* We add some JavaScript to pages with the comment form
 		 * to support sites with threaded comments (when in use).
@@ -199,6 +200,127 @@ class WordCamp_Central_Theme {
 			wp_enqueue_script( 'jquery-cycle', get_stylesheet_directory_uri() . '/js/jquery.cycle.min.js', array( 'jquery' ) );
 		}
 
+		if ( is_page( 'about' ) || is_page( 'schedule' ) ) {
+			wp_enqueue_script( 'google-maps', 'https://maps.googleapis.com/maps/api/js', array(), false, true );
+		}
+	}
+
+	/**
+	 * Build the array of options to pass to the client side
+	 *
+	 * @return array
+	 */
+	protected static function get_javascript_options() {
+		global $post;
+
+		$options = array( 'ajaxURL' => admin_url( 'admin-ajax.php' ) );
+
+		if ( $map_id = self::get_map_id( $post->post_content ) ) {
+			$options['mapContainer']            = "wcc-map-$map_id";
+			$options['markerIconBaseURL']       = get_stylesheet_directory_uri() . '/images/';
+			$options['markerClusterIcon']       = 'icon-marker-clustered.png';
+			$options['markerIconAnchorXOffset'] = 24;
+			$options['markerIconHeight']        = 94;
+			$options['markerIconWidth']         = 122;
+
+			if ( $map_markers = self::get_map_markers( $map_id ) ) {
+				$options['mapMarkers'] = $map_markers;
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get the ID of the map called in the given page
+	 *
+	 * @param string $post_content
+	 *
+	 * @return mixed A string of the map name on success, or false on failure
+	 */
+	protected static function get_map_id( $post_content ) {
+		$map_id = false;
+
+		if ( has_shortcode( $post_content, 'wcc_map' ) ) {
+			preg_match_all( '/' . get_shortcode_regex() . '/s', $post_content, $shortcodes, PREG_SET_ORDER );
+
+			foreach ( $shortcodes as $shortcode ) {
+				if ( 'wcc_map' == $shortcode[2] ) {
+					$attributes = shortcode_parse_atts( $shortcode[3] );
+					$map_id     = sanitize_text_field( $attributes['id'] );
+					break;
+				}
+			}
+		}
+
+		return $map_id;
+	}
+
+	/**
+	 * Get the markers assigned to the given map
+	 *
+	 * @param string $map_id
+	 *
+	 * @return array
+	 */
+	protected static function get_map_markers( $map_id ) {
+		$transient_key = "wcc_map_markers_$map_id";
+
+		if ( $markers = get_transient( $transient_key ) ) {
+			return $markers;
+		} else {
+			$markers = array();
+		}
+
+		// Get the raw marker posts for the given map
+		$parameters = array(
+			'post_type'      => 'wordcamp',
+			'posts_per_page' => -1,
+		);
+
+		switch( $map_id ) {
+			case 'schedule':
+				$parameters['post_status'][] = array( 'publish', 'pending' );
+				$parameters['meta_query'][] = array(
+					'key'     => 'Start Date (YYYY-mm-dd)',
+					'value'   => strtotime( '-2 days' ),
+					'compare' => '>',
+				);
+				break;
+		}
+
+		$raw_markers = get_posts( $parameters );
+
+		// Convert the raw markers into prepared objects that are ready to be used on the JavaScript side
+		foreach ( $raw_markers as $marker ) {
+			if ( 'schedule' == $map_id ) {
+				$marker_type = 'upcoming';
+			} else {
+				$marker_type = get_post_meta( $marker->ID, 'Start Date (YYYY-mm-dd)', true ) > strtotime( '-2 days' ) ? 'upcoming' : 'past';
+			}
+
+			if ( ! $coordinates = get_post_meta( $marker->ID, '_venue_coordinates', true ) ) {
+				continue;
+			}
+
+			$markers[ $marker->ID ] = array(
+				'id'          => $marker->ID,
+				'name'        => wcpt_get_wordcamp_title( $marker->ID ),
+				'dates'       => wcpt_get_wordcamp_start_date( $marker->ID ),
+				'location'    => get_post_meta( $marker->ID, 'Location', true ),
+				'venueName'   => get_post_meta( $marker->ID, 'Venue Name', true ),
+				'url'         => self::get_best_wordcamp_url( $marker->ID ),
+				'latitude'    => $coordinates['latitude'],
+				'longitude'   => $coordinates['longitude'],
+				'iconURL'     => "icon-marker-{$marker_type}-2x.png",
+			);
+		}
+
+		$markers = apply_filters( 'wcc_get_map_markers', $markers );
+
+		set_transient( $transient_key, $markers, WEEK_IN_SECONDS );
+
+		return $markers;
 	}
 
 	/**
@@ -645,6 +767,21 @@ class WordCamp_Central_Theme {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Render the [wcc_map] shortcode
+	 *
+	 * @param array $attributes
+	 *
+	 * @return string
+	 */
+	public static function shortcode_map( $attributes ) {
+		$attributes = shortcode_atts( array( 'id' => '' ), $attributes );
+
+		ob_start();
+		require( __DIR__ . '/shortcode-about-map.php' );
+		return ob_get_clean();
 	}
 
 	/**
