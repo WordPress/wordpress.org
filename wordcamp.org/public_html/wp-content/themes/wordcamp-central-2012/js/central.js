@@ -50,6 +50,7 @@ var WordCampCentral = ( function( $ ) {
 	 */
 	function immediateInit( initOptions ) {
 		options = initOptions;
+		initOptions = null;
 
 		try {
 			toggleNavigation();
