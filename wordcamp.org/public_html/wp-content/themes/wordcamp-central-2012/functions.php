@@ -172,7 +172,7 @@ class WordCamp_Central_Theme {
 					$redirect = add_query_arg( 'subscribe', 'success' );
 				}
 
-				wp_safe_redirect( $redirect );
+				wp_safe_redirect( esc_url_raw( $redirect ) );
 				exit;
 				break;
 		}
