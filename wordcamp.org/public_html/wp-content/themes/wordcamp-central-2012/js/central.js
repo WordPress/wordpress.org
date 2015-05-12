@@ -51,8 +51,12 @@ var WordCampCentral = ( function( $ ) {
 	function immediateInit( initOptions ) {
 		options = initOptions;
 
-		toggleNavigation();
-		populateLatestTweets();
+		try {
+			toggleNavigation();
+			populateLatestTweets();
+		} catch ( exception ) {
+			log( exception );
+		}
 	}
 
 	/**
