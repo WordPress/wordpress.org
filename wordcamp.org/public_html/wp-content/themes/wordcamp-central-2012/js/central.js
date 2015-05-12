@@ -377,8 +377,8 @@ var WordCampCentral = ( function( $ ) {
 		}
 
 		clusterOptions = {
-			maxZoom:  13,
-			gridSize: 40,
+			maxZoom:  11,
+			gridSize: 30,
 			styles:   [
 				{
 					url:       options.markerIconBaseURL + options.markerClusterIcon,
