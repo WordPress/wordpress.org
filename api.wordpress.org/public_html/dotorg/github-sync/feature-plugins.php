@@ -10,6 +10,7 @@ class GH2WORG {
 	private $whitelisted_repos = array(
 		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
+		'voldemortensen/menu-customizer' => 'menu-customizer',
 	);
 
 	function __construct() {
