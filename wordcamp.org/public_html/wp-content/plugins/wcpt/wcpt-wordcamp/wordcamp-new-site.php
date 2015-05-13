@@ -252,6 +252,8 @@ class WordCamp_New_Site {
 	 * @return array
 	 */
 	protected function get_stub_pages( $wordcamp, $meta ) {
+		// todo remove the to field from all contact forms and notes, just let it default to the admin email
+
 		$pages = array(
 			array(
 				'title'   => __( 'Schedule', 'wordcamporg' ),
@@ -580,6 +582,31 @@ class WordCamp_New_Site {
 	}
 
 	/**
+	 * Get the assigned Multi-Event Sponsors and their sponsorship levels for the given WordCamp
+	 *
+	 * @param int $wordcamp_id
+	 *
+	 * @return array
+	 */
+	protected function get_assigned_sponsor_data( $wordcamp_id ) {
+		/** @var $multi_event_sponsors Multi_Event_Sponsors */
+		global $multi_event_sponsors;
+		$data = array();
+
+		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
+
+		$data['assigned_sponsors']  = $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id, 'sponsor_level' );
+		$data['sponsorship_levels'] = get_posts( array(
+			'post_type'   => MES_Sponsorship_Level::POST_TYPE_SLUG,
+			'numberposts' => -1
+		) );
+
+		restore_current_blog();
+
+		return $data;
+	}
+
+	/**
 	 * Generate stub posts for thanking Multi-Event Sponsors
 	 *
 	 * The MES_Sponsorship_Level post excerpts contain the intro text for these messages, and the MES_Sponsor
@@ -595,26 +622,20 @@ class WordCamp_New_Site {
 		global $multi_event_sponsors;
 		$pages = array();
 
-		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
-		$assigned_me_sponsors = $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp->ID, 'sponsor_level' );
-		$sponsorship_levels   = get_posts( array(
-			'post_type'   => MES_Sponsorship_Level::POST_TYPE_SLUG,
-			'numberposts' => -1
-		) );
-		restore_current_blog();
+		$assigned_sponsor_data = $this->get_assigned_sponsor_data( $wordcamp->ID );
 
-		foreach ( $sponsorship_levels as $sponsorship_level ) {
-			if ( ! empty( $assigned_me_sponsors[ $sponsorship_level->ID ] ) ) {
+		foreach ( $assigned_sponsor_data['sponsorship_levels'] as $sponsorship_level ) {
+			if ( ! empty( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] ) ) {
 				$pages[] = array(
 					'title'   => sprintf( __( 'Thank you to our %s sponsors', 'wordcamporg' ), $sponsorship_level->post_title ),
 					'content' => sprintf(
 						'%s %s',
 						str_replace(
 							'[sponsor_names]',
-							$multi_event_sponsors->get_sponsor_names( $assigned_me_sponsors[ $sponsorship_level->ID ] ),
+							$multi_event_sponsors->get_sponsor_names( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] ),
 							$sponsorship_level->post_excerpt
 						),
-						$multi_event_sponsors->get_sponsor_excerpts( $assigned_me_sponsors[ $sponsorship_level->ID ] )
+						$multi_event_sponsors->get_sponsor_excerpts( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] )
 					),
 					'status'  => 'draft',
 					'type'    => 'post',
