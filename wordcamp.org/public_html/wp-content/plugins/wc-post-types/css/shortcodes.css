@@ -87,3 +87,23 @@
 	#speaker-session-names li {
 		list-style-type: none;
 	}
+
+/*
+ * [sessions]
+ */
+.wcorg-session-links {
+	margin-left: 0;
+}
+
+.wcorg-session-links li {
+	display: inline;
+	list-style-type: none;
+}
+
+.wcorg-session-links li::after {
+	content: '|';
+}
+
+.wcorg-session-links li:last-child::after {
+	content: '';
+}

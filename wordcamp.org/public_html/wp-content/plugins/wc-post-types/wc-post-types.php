@@ -951,6 +951,7 @@ class WordCamp_Post_Types_Plugin {
 					// Things to be output, or not.
 					$session_meta = '';
 					$speakers_avatars = '';
+					$links            = array();
 
 					// Fetch speakers associated with this session.
 					$speakers = array();
@@ -1008,6 +1009,22 @@ class WordCamp_Post_Types_Plugin {
 						if ( ! empty( $session_meta ) )
 							$session_meta = sprintf( '<p class="wcpt-session-meta">%s</p>', $session_meta );
 					}
+
+					// Gather data for list of links
+					if ( $url = get_post_meta( $post->ID, '_wcpt_session_slides', true ) ) {
+						$links['slides'] = array(
+							'url'   => $url,
+							'label' => __( 'Slides', 'wordcamporg' ),
+						);
+					}
+
+					if ( $url = get_post_meta( $post->ID, '_wcpt_session_video', true ) ) {
+						$links['video'] = array(
+							'url'   => $url,
+							'label' => __( 'Video', 'wordcamporg' ),
+						);
+					}
+
 				?>
 
 				<div id="wcorg-session-<?php the_ID(); ?>" class="wcorg-session" >
@@ -1017,6 +1034,18 @@ class WordCamp_Post_Types_Plugin {
 						<?php echo $session_meta; ?>
 						<?php echo $speakers_avatars; ?>
 						<?php the_content(); ?>
+
+						<?php if ( $links ) : ?>
+							<ul class="wcorg-session-links">
+								<?php foreach( $links as $link ) : ?>
+									<li>
+										<a href="<?php echo esc_url( $link['url'] ); ?>">
+											<?php echo esc_html( $link['label'] ); ?>
+										</a>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
 					</div>
 				</div>
 
@@ -1276,7 +1305,7 @@ class WordCamp_Post_Types_Plugin {
 		add_meta_box( 'speaker-info',   __( 'Speaker Info',   'wordcamporg'  ), array( $this, 'metabox_speaker_info'   ), 'wcb_speaker',   'side' );
 		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
 		add_meta_box( 'speakers-list',  __( 'Speakers',       'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
-		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'side' );
+		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
 		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcampbase' ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'side' );
 	}
 
@@ -1414,6 +1443,8 @@ class WordCamp_Post_Types_Plugin {
 		$session_minutes  = ( $session_time ) ? date( 'i', $session_time )     : '00';
 		$session_meridiem = ( $session_time ) ? date( 'a', $session_time )     : 'am';
 		$session_type     = get_post_meta( $post->ID, '_wcpt_session_type', true );
+		$session_slides   = get_post_meta( $post->ID, '_wcpt_session_slides', true );
+		$session_video    = get_post_meta( $post->ID, '_wcpt_session_video',  true );
 		?>
 
 		<?php wp_nonce_field( 'edit-session-info', 'wcpt-meta-session-info' ); ?>
@@ -1451,6 +1482,16 @@ class WordCamp_Post_Types_Plugin {
 				<option value="session" <?php selected( $session_type, 'session' ); ?>><?php _e( 'Regular Session', 'wordcamporg' ); ?></option>
 				<option value="custom" <?php selected( $session_type, 'custom' ); ?>><?php _e( 'Break, Lunch, etc.', 'wordcamporg' ); ?></option>
 			</select>
+		</p>
+
+		<p>
+			<label for="wcpt-session-slides"><?php _e( 'Slides URL:', 'wordcamporg' ); ?></label>
+			<input type="text" class="widefat" id="wcpt-session-slides" name="wcpt-session-slides" value="<?php echo esc_url( $session_slides ); ?>" />
+		</p>
+
+		<p>
+			<label for="wcpt-session-video"><?php _e( 'WordPress.TV URL:', 'wordcamporg' ); ?></label>
+			<input type="text" class="widefat" id="wcpt-session-video" name="wcpt-session-video" value="<?php echo esc_url( $session_video ); ?>" />
 		</p>
 
 		<?php
@@ -1544,8 +1585,8 @@ class WordCamp_Post_Types_Plugin {
 			update_post_meta( $post_id, '_wcb_session_speakers', $speakers );
 		}
 
-		// Update session time.
 		if ( isset( $_POST['wcpt-meta-session-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-session-info'], 'edit-session-info' ) ) {
+			// Update session time
 			$session_time = strtotime( sprintf(
 				'%s %d:%02d %s',
 				sanitize_text_field( $_POST['wcpt-session-date'] ),
@@ -1555,11 +1596,20 @@ class WordCamp_Post_Types_Plugin {
 			) );
 			update_post_meta( $post_id, '_wcpt_session_time', $session_time );
 
+			// Update session type
 			$session_type = sanitize_text_field( $_POST['wcpt-session-type'] );
 			if ( ! in_array( $session_type, array( 'session', 'custom' ) ) )
 				$session_type = 'session';
 
 			update_post_meta( $post_id, '_wcpt_session_type', $session_type );
+
+			// Update session slides link
+			update_post_meta( $post_id, '_wcpt_session_slides', esc_url_raw( $_POST['wcpt-session-slides'] ) );
+
+			// Update session video link
+			if ( 'wordpress.tv' == str_replace( 'www.', '', strtolower( parse_url( $_POST['wcpt-session-video'], PHP_URL_HOST ) ) ) ) {
+				update_post_meta( $post_id, '_wcpt_session_video', esc_url_raw( $_POST['wcpt-session-video'] ) );
+			}
 		}
 
 		// Allowed outside of $_POST. If anything updates a session, make sure
