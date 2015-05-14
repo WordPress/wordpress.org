@@ -81,7 +81,12 @@ function wporg_themes_process_upload( ) {
 		include_once plugin_dir_path( __FILE__ ) . 'class-wporg-themes-upload.php';
 	}
 
-	$upload = new WPORG_Themes_Upload;
+	switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
 
-	return $upload->process_upload();
+	$upload = new WPORG_Themes_Upload;
+	$message = $upload->process_upload();
+
+	restore_current_blog();
+
+	return $message;
 }

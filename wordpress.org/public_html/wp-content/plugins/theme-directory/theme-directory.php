@@ -30,7 +30,47 @@ include_once plugin_dir_path( __FILE__ ) . 'admin-edit.php';
  * Things to change on activation.
  */
 function wporg_themes_activate() {
+	global $wp_rewrite;
+
+	// Setup the environment
 	wporg_themes_init();
+
+	// %postname% is required
+	$wp_rewrite->set_permalink_structure( '/%postname%/' );
+
+	// /tags/%slug% is required for tags
+	$wp_rewrite->set_tag_base( '/tags' );
+
+	/*
+	 * Create the `commercial`, `getting-started` and `upload` pages
+	 * These titles are not translated, as they're not displayed anywhere.
+	 * The theme has specific templates for these slugs.
+	 */
+	foreach ( array( 'commercial', 'getting-started', 'upload' ) as $page_slug ) {
+		if ( get_page_by_path( $page_slug ) ) {
+			continue;
+		}
+		wp_insert_post( array(
+			'post_type'   => 'page',
+			'post_title'  => $page_slug,
+			'post_name'   => $page_slug,
+			'post_status' => 'publish'
+		) );
+	}
+
+	// We require the WordPress.org Ratings plugin also be active
+	if ( ! is_plugin_active( 'wporg-ratings/wporg-ratings.php' ) ) {
+		activate_plugin( 'wporg-ratings/wporg-ratings.php' );
+	}
+
+	// Enable the WordPress.org Theme Repo Theme
+	foreach ( wp_get_themes() as $theme ) {
+		if ( $theme->get( 'Name' ) === 'WP.org Themes' ) {
+			switch_theme( $theme->get_stylesheet() );
+			break;
+		}
+	}
+
 	flush_rewrite_rules();
 
 	do_action( 'wporg_themes_activation' );
@@ -110,6 +150,9 @@ function wporg_themes_init() {
 	add_rewrite_tag( '%browse%', '(featured|popular|new)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
 
+	if ( ! defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
+		define( 'WPORG_THEME_DIRECTORY_BLOGID', get_current_blog_id() );
+	}
 }
 add_action( 'init', 'wporg_themes_init' );
 
@@ -599,7 +642,7 @@ function wporg_themes_prepare_themes_for_js() {
 function wporg_themes_query_api( $method, $args = array() ) {
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
 
-	switch_to_blog( 35 );
+	switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
 	$api = new Themes_API( $method, $args );
 	restore_current_blog();
 
