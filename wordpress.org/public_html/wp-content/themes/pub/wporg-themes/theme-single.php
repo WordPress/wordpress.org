@@ -57,7 +57,7 @@
 						$tag_links[] = sprintf(
 							"<a href='%s'>%s</a>",
 							esc_url( home_url( "/tags/$slug/" ) ),
-							esc_html( $tagname )
+							esc_html( translate( $tagname, 'wporg-themes' ) )
 						);
 					}
 					echo implode( ', ', $tag_links );						

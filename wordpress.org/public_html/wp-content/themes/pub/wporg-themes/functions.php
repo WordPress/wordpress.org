@@ -64,6 +64,9 @@ function wporg_themes_scripts() {
 				// Downloads Graph
 				'date'      => __( 'Date', 'wporg-themes' ),
 				'downloads' => __( 'Downloads', 'wporg-themes' ),
+
+				// Tags
+				'tags' => wporg_themes_get_tag_translations()
 			),
 		) );
 	}
@@ -222,4 +225,15 @@ function wporg_themes_get_feature_list() {
 			'seasonal'      => __( 'Seasonal',      'wporg-themes' ),
 		)
 	);
+}
+
+/**
+ * Returns an array of [ tag_slug => translated_tag_name] tags for translation within JS
+ */
+function wporg_themes_get_tag_translations() {
+	$translations = array();
+	foreach ( wporg_themes_get_feature_list() as $group => $tags ) {
+		$translations = array_merge( $translations, $tags );
+	}
+	return $translations;
 }

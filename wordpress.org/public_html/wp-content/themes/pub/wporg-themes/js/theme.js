@@ -493,7 +493,8 @@ window.wp = window.wp || {};
 
 			// Make tags click-able and separated by a comma.
 			data.tags = _.map( data.tags, function( tag, slug ) {
-				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + slug ) + '">' + tag + '</a>';
+				translated_tag = l10n.tags[ slug ] || tag;
+				return '<a href="' + themes.data.settings.path + themes.router.baseUrl( 'tags/' + slug ) + '">' + translated_tag + '</a>';
 			}).join( ', ' );
 
 			data.path = themes.data.settings.path;
