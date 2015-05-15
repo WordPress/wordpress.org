@@ -15,9 +15,7 @@ class WordCampOrganizerNags {
 	 */
 	public function __construct() {
 		add_action( 'admin_print_styles-index.php', array( $this, 'print_styles' ) );
-		add_action( 'wp_dashboard_setup', array( $this, 'create_dashboard_widgets' ) );
-
-		// todo align
+		add_action( 'wp_dashboard_setup',           array( $this, 'create_dashboard_widgets' ) );
 	}
 
 	/**
