@@ -26,6 +26,8 @@ class WordCampOrganizerNags {
 	 * Create dashboard widgets
 	 */
 	public function create_dashboard_widgets() {
+		global $wp_meta_boxes;
+
 		// The survey expires 2015-05-23 at 11:45pm EST
 		if ( time() < 1432350000 ) {
 			wp_add_dashboard_widget(
@@ -33,6 +35,13 @@ class WordCampOrganizerNags {
 				'WordCamp Organizer Survey',
 				array( $this, 'improving_tools_survey' )
 			);
+
+			// Move it to the top of the side column, so it'll be seen better
+			$wp_meta_boxes['dashboard']['side']['core'] = array_merge(
+				array( 'improving_tools_survey' => $wp_meta_boxes['dashboard']['normal']['core']['improving_tools_survey'] ),
+				$wp_meta_boxes['dashboard']['side']['core']
+			);
+			unset( $wp_meta_boxes['dashboard']['normal']['core']['improving_tools_survey'] );
 		}
 	}
 
