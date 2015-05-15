@@ -19,6 +19,7 @@ function get_wordcamp_post() {
 
 	$wordcamp = get_posts( array(
 		'post_type'  => 'wordcamp',
+		'post_status' => 'any',
 		'meta_query' => array(
 			'relation'  => 'OR',
 
