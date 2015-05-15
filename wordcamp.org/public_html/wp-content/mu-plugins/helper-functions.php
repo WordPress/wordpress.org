@@ -18,8 +18,9 @@ function get_wordcamp_post() {
 	switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
 
 	$wordcamp = get_posts( array(
-		'post_type'  => 'wordcamp',
+		'post_type'   => 'wordcamp',
 		'post_status' => 'any',
+
 		'meta_query' => array(
 			'relation'  => 'OR',
 
