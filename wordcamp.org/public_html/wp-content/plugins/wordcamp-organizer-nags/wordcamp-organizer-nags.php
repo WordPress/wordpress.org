@@ -53,7 +53,7 @@ class WordCampOrganizerNags {
 			wp_add_dashboard_widget(
 				'improving_tools_survey',
 				'WordCamp Organizer Survey',
-				array( $this, 'improving_tools_survey' )
+				array( $this, 'render_tools_survey' )
 			);
 		}
 
@@ -210,8 +210,7 @@ class WordCampOrganizerNags {
 	/**
 	 * Render the content for the WordCamp Organizer Survey dashboard widget
 	 */
-	public function improving_tools_survey() {
-		// todo rename to render_tools_survey() for consistency
+	public function render_tools_survey() {
 		?>
 
 		<p>We need feedback from WordCamp organizers to drive some decisions about improving WordCamp.org tools.</p>
