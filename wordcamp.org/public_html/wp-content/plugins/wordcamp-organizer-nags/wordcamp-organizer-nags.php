@@ -17,9 +17,9 @@ class WordCampOrganizerNags {
 		$this->notices = array( 'updated' => array(), 'error' => array() );
 
 		add_action( 'wp_dashboard_setup', array( $this, 'create_dashboard_widgets' ) );
-		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
-		add_action( 'admin_init',    array( $this, 'central_about_info' ) );
-		add_action( 'admin_init',    array( $this, 'published_attendees_schedule_pages' ) );
+		add_action( 'admin_notices',      array( $this, 'print_admin_notices' ) );
+		add_action( 'admin_init',         array( $this, 'central_about_info' ) );
+		add_action( 'admin_init',         array( $this, 'published_attendees_schedule_pages' ) );
 	}
 
 	/**
