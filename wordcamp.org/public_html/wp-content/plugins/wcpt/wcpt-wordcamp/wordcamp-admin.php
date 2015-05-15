@@ -108,53 +108,54 @@ class WordCamp_Admin {
 		}
 
 		// WordCamp post type only
-		// todo return early if not type instead of indenting
-		if ( WCPT_POST_TYPE_ID == get_post_type() ) {
-			// If the venue address was changed, update its coordinates
-			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
-			if ( $new_address != get_post_meta( $post_id, 'Physical Address', true ) ) {
-				if ( $coordinates = $this->geocode_address( $new_address ) ) {
-					update_post_meta( $post_id, '_venue_coordinates', $coordinates );
-				} else {
-					delete_post_meta( $post_id, '_venue_coordinates' );
-				}
+		if ( WCPT_POST_TYPE_ID != get_post_type() ) {
+			return;
+		}
+
+		// If the venue address was changed, update its coordinates
+		$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
+		if ( $new_address != get_post_meta( $post_id, 'Physical Address', true ) ) {
+			if ( $coordinates = $this->geocode_address( $new_address ) ) {
+				update_post_meta( $post_id, '_venue_coordinates', $coordinates );
+			} else {
+				delete_post_meta( $post_id, '_venue_coordinates' );
 			}
+		}
 
-			// Post meta keys
-			$wcpt_meta_keys = WordCamp_Admin::meta_keys();
+		// Post meta keys
+		$wcpt_meta_keys = WordCamp_Admin::meta_keys();
 
-			// Loop through meta keys and update
-			foreach ( $wcpt_meta_keys as $key => $value ) {
+		// Loop through meta keys and update
+		foreach ( $wcpt_meta_keys as $key => $value ) {
 
-				// Get post value
-				$post_value   = wcpt_key_to_str( $key, 'wcpt_' );
-				$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
+			// Get post value
+			$post_value   = wcpt_key_to_str( $key, 'wcpt_' );
+			$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
 
-				switch ( $value ) {
-					case 'text'     :
-					case 'textarea' :
-						update_post_meta( $post_id, $key, $values[ $key ] );
-						break;
+			switch ( $value ) {
+				case 'text'     :
+				case 'textarea' :
+					update_post_meta( $post_id, $key, $values[ $key ] );
+					break;
 
-					case 'checkbox' :
-						if ( ! empty( $values[ $key ] ) && 'on' == $values[ $key ] ) {
-							update_post_meta( $post_id, $key, true );
-						} else {
-							update_post_meta( $post_id, $key, false );
-						}
-						break;
+				case 'checkbox' :
+					if ( ! empty( $values[ $key ] ) && 'on' == $values[ $key ] ) {
+						update_post_meta( $post_id, $key, true );
+					} else {
+						update_post_meta( $post_id, $key, false );
+					}
+					break;
 
-					case 'date' :
-						if ( !empty( $values[ $key ] ) )
-							$values[ $key ] = strtotime( $values[ $key ] );
+				case 'date' :
+					if ( !empty( $values[ $key ] ) )
+						$values[ $key ] = strtotime( $values[ $key ] );
 
-						update_post_meta( $post_id, $key, $values[ $key ] );
-						break;
+					update_post_meta( $post_id, $key, $values[ $key ] );
+					break;
 
-					default:
-						do_action( 'wcpt_metabox_save', $key, $value, $post_id );
-						break;
-				}
+				default:
+					do_action( 'wcpt_metabox_save', $key, $value, $post_id );
+					break;
 			}
 		}
 	}
