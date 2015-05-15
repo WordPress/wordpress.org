@@ -15,10 +15,41 @@ class WordCampOrganizerNags {
 	 */
 	public function __construct() {
 		$this->notices = array( 'updated' => array(), 'error' => array() );
-		
+
+		add_action( 'wp_dashboard_setup', array( $this, 'create_dashboard_widgets' ) );
 		add_action( 'admin_notices', array( $this, 'print_admin_notices' ) );
 		add_action( 'admin_init',    array( $this, 'central_about_info' ) );
 		add_action( 'admin_init',    array( $this, 'published_attendees_schedule_pages' ) );
+	}
+
+	/**
+	 * Create dashboard widgets
+	 */
+	public function create_dashboard_widgets() {
+		// The survey expires 2015-05-23 at 11:45pm EST
+		if ( time() < 1432350000 ) {
+			wp_add_dashboard_widget(
+				'improving_tools_survey',
+				'WordCamp Organizer Survey',
+				array( $this, 'improving_tools_survey' )
+			);
+		}
+	}
+
+	/**
+	 * Render the content for the WordCamp Organizer Survey dashboard widget
+	 */
+	public function improving_tools_survey() {
+		?>
+
+		<p>We need feedback from WordCamp organizers to drive some decisions about improving WordCamp.org tools.</p>
+
+		<p>
+			Please <a href="https://make.wordpress.org/community/2015/05/05/wordcamp-organizer-survey/">take the survey</a>
+			so we can learn from your experiences.
+		</p>
+
+		<?php
 	}
 
 	/**
