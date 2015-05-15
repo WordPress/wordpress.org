@@ -1,0 +1,185 @@
+<?php
+/**
+ * Locale Route Class.
+ *
+ * Provides the route for translate.wordpress.org/languages.
+ */
+class GP_WPorg_Route_Locale extends GP_Route {
+
+	/**
+	 * Prints all exisiting locales as cards.
+	 *
+	 */
+	public function get_locales() {
+		$locales = array();
+		$existing_locales = GP::$translation_set->existing_locales();
+		foreach ( $existing_locales as $locale ) {
+			$locales[] = GP_Locales::by_slug( $locale );
+		}
+		usort( $locales, array( $this, 'sort_locales') );
+		unset( $existing_locales );
+
+		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
+		if ( false === $contributors_count ) {
+			$contributors_count = array();
+		}
+
+		$translation_status = wp_cache_get( 'translation-status', 'wporg-translate' );
+		if ( false === $translation_status ) {
+			$translation_status = array();
+		}
+
+		$this->tmpl( 'locales', get_defined_vars() );
+	}
+
+	/**
+	 * Prints translation sets of a top level project.
+	 *
+	 * @param string $locale_slug      Slug of the locale.
+	 * @param string $current_set_slug Slug of the translation set.
+	 * @param string $project_path     Path of a project
+	 */
+	public function get_locale_projects( $locale_slug, $current_set_slug = 'default', $project_path = 'wp' ) {
+		$locale = GP_Locales::by_slug( $locale_slug );
+		$sets = GP::$translation_set->by_locale( $locale_slug );
+		usort( $sets, array( $this, 'sort_sets_by_project_id' ) );
+
+		/*if ( $project_path ) {
+			$project = GP::$project->by_path( $project_path );
+
+			if ( ! $project ) {
+				return $this->die_with_404();
+			}
+		}*/
+
+		$locale_projects = $projects_data = $projects = $parents = $set_slugs = $set_list = array();
+
+		//TODO: switch to wp_list_pluck
+		foreach ( $sets as $key => $value ) {
+			$locale_projects[ $key ] = $value->project_id;
+		}
+
+		foreach ( $sets as $set ) {
+			$set_slugs[ $set->slug ] = $set;
+
+			if ( $current_set_slug != $set->slug ) {
+				continue;
+			}
+
+			// Store project data for later use
+			if ( isset( $projects[ $set->project_id ] ) ) {
+				$set_project = $projects[$set->project_id];
+			} else {
+				$set_project = GP::$project->get( $set->project_id );
+				$projects[$set->project_id] = $set_project;
+			}
+
+			// We only want to list active projects
+			if ( ! isset( $set_project->active ) || $set_project->active == false ) {
+				continue;
+			}
+
+			$parent_id = is_null( $set_project->parent_project_id ) ? $set_project->id : $set_project->parent_project_id;
+
+			// Store parent project data for later use
+			if ( isset( $projects[$parent_id] ) ) {
+				$parent_project = $projects[$parent_id];
+			} else {
+				$parent_project = GP::$project->get( $parent_id );
+				$projects[$parent_id] = $parent_project;
+			}
+
+			// Store parent id for
+			$parents[$set_project->id] = $parent_id;
+
+			if ( ! in_array( $set_project->parent_project_id, $locale_projects ) ) {
+				$projects_data[$parent_id][$set_project->id]['project'] = $set_project;
+				$projects_data[$parent_id][$set_project->id]['sets'][$set->id] = $this->set_data( $set, $set_project );
+				$projects_data[$parent_id][$set_project->id]['totals'] = $this->set_data( $set, $set_project );
+
+				if ( ! isset( $projects_data[$parent_id][$set_project->id]['project'] ) ) {
+					$projects_data[$parent_id][$set_project->id]['project'] = $set_project;
+				}
+			} else {
+				while ( ! in_array( $parent_id, array_keys( $projects_data ) ) && isset( $parents[$parent_id] ) ) {
+					$previous_parent = $parent_id;
+					$parent_id = $parents[$parent_id];
+				}
+
+				//Orphan project - a sub project is set to active, while it's parent isn't
+				if ( ! isset( $projects_data[$parent_id] ) ) {
+					continue;
+				}
+
+				//For when root project has sets, and sub projects.
+				if ( ! isset( $previous_parent ) || ! isset( $projects_data[$parent_id][$previous_parent] ) ) {
+					$previous_parent = $parent_id;
+				}
+
+				$set_data = $projects_data[$parent_id][$previous_parent]['totals'];
+				$projects_data[$parent_id][$previous_parent]['sets'][$set->id] = $this->set_data( $set, $set_project  );
+				$projects_data[$parent_id][$previous_parent]['totals'] = $this->set_data( $set, $set_project, $set_data );
+			}
+		}
+
+		if ( $set_slugs ) {
+			// Make default the first item.
+			if ( ! empty( $set_slugs[ 'default' ] ) ) {
+				$default = $set_slugs[ 'default' ];
+				unset( $set_slugs[ 'default' ] );
+				array_unshift( $set_slugs, $default );
+			}
+
+			foreach ( $set_slugs as $set ) {
+				if ( 'default' == $set->slug ) {
+					if ( 'default' != $current_set_slug ) {
+						$set_list[ $set->slug ] = gp_link_get( gp_url_join( '/languages', $locale->slug ), __( 'Default' ) );
+					} else {
+						$set_list[ $set->slug ] = __( 'Default' );
+					}
+				} else {
+					if ( $set->slug != $current_set_slug ) {
+						$set_list[ $set->slug ] = gp_link_get( gp_url_join('/languages', $locale->slug, $set->slug ), esc_html( $set->name ) );
+					} else {
+						$set_list[ $set->slug ] = esc_html( $set->name );
+					}
+				}
+			}
+		}
+
+		$this->tmpl( 'locale', get_defined_vars() );
+	}
+
+	private function set_data( $set, $project, $set_data = null ) {
+		if ( ! $set_data ) {
+			$set_data = new stdClass;
+
+			$set_data->slug = $set->slug;
+			$set_data->project_path = $project->path;
+			$set_data->waiting_count = $set->waiting_count();
+			$set_data->current_count = $set->current_count();
+			$set_data->fuzzy_count   = $set->fuzzy_count();
+			$set_data->all_count     = $set->all_count();
+		}
+		else {
+			$set_data->waiting_count += $set->waiting_count();
+			$set_data->current_count += $set->current_count();
+			$set_data->fuzzy_count   += $set->fuzzy_count();
+			$set_data->all_count     += $set->all_count();
+		}
+
+		if ( ! isset( $set_data->name ) ) {
+			$set_data->name = $project->name;
+		}
+
+		return $set_data;
+	}
+
+	private function sort_locales( $a, $b ) {
+		return $a->english_name > $b->english_name;
+	}
+
+	private function sort_sets_by_project_id( $a, $b ) {
+		return $a->project_id > $b->project_id;
+	}
+}

@@ -4,6 +4,10 @@
  *
  * @author ocean90
  */
+
+require_once __DIR__ . '/routes/index.php';
+require_once __DIR__ . '/routes/locale.php';
+
 class GP_WPorg_Routes extends GP_Plugin {
 	public $id = 'wporg-routes';
 
@@ -13,51 +17,23 @@ class GP_WPorg_Routes extends GP_Plugin {
 	}
 
 	public function init() {
+		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
+		$set_slug = '(' . implode( '|', GP::$translation_set->existing_slugs() ) . ')';
+
 		/*
 		 * Unset default routes.
 		 * The `routes` filter can't be used, see https://glotpress.trac.wordpress.org/ticket/249.
 		 */
 		unset( GP::$router->urls['/'] );
+		unset( GP::$router->urls["get:/languages/$locale/$set_slug"] );
+		unset( GP::$router->urls["get:/languages/$locale"] );
 		unset( GP::$router->urls['get:/languages'] );
 
-		GP::$router->add( '/', array( 'GP_WPorg_Route_Index', 'index' ) );
-		GP::$router->add( '/languages', array( 'GP_WPorg_Route_Locale', 'locales_get' ) );
-	}
-}
-
-class GP_WPorg_Route_Locale extends GP_Route {
-
-	public function locales_get() {
-		$locales = array();
-		$existing_locales = GP::$translation_set->existing_locales();
-		foreach ( $existing_locales as $locale ) {
-			$locales[] = GP_Locales::by_slug( $locale );
-		}
-		usort( $locales, array( $this, 'sort_locales') );
-		unset( $existing_locales );
-
-		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
-		if ( false === $contributors_count ) {
-			$contributors_count = array();
-		}
-
-		$translation_status = wp_cache_get( 'translation-status', 'wporg-translate' );
-		if ( false === $translation_status ) {
-			$translation_status = array();
-		}
-
-		$this->tmpl( 'locales', get_defined_vars() );
-	}
-
-	private function sort_locales( $a, $b ) {
-		return $a->english_name > $b->english_name;
-	}
-}
-
-class GP_WPorg_Route_Index extends GP_Route {
-
-	public function index() {
-		$this->redirect( gp_url( '/languages' ) );
+		GP::$router->add( '/', array( 'GP_WPorg_Route_Index', 'get_index' ) );
+		GP::$router->add( '/languages', array( 'GP_WPorg_Route_Locale', 'get_locales' ) );
+		GP::$router->add( "/languages/$locale/$set_slug/(.+?)", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->add( "/languages/$locale/$set_slug", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->add( "/languages/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
 	}
 }
 
