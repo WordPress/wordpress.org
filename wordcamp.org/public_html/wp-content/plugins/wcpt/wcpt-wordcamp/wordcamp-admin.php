@@ -102,7 +102,13 @@ class WordCamp_Admin {
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) )
 			return;
 
+		// Don't add/remove meta on trash, untrash, restore, etc
+		if ( empty( $_POST['action'] ) || 'editpost' != $_POST['action'] ) {
+			return;
+		}
+
 		// WordCamp post type only
+		// todo return early if not type instead of indenting
 		if ( WCPT_POST_TYPE_ID == get_post_type() ) {
 			// If the venue address was changed, update its coordinates
 			$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
@@ -587,6 +593,7 @@ class WordCamp_Admin {
 		);
 
 		// Check pending posts
+		// todo return early if not wordcamp post type instead of checking in both of these conditions
 		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
 			foreach( $required_pending_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
@@ -600,7 +607,7 @@ class WordCamp_Admin {
 		}
 
 		// Check published posts
-		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && isset( $_POST['post_ID'] ) && absint( $_POST['post_ID'] ) > $min_site_id ) {
 			foreach( $required_publish_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
