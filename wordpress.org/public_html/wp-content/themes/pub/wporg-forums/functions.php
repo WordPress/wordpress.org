@@ -20,19 +20,8 @@ add_action( 'after_setup_theme', 'wporg_support_setup' );
  * @link http://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
  */
 function wporg_support_scripts() {
-//	wp_enqueue_style( 'wporg-support',       get_stylesheet_uri() );
-//	wp_enqueue_style( 'wp4-style',           get_template_directory_uri() . '/css/wp4.css'       );
-//	wp_enqueue_style( 'wp4-rtl-style',       get_template_directory_uri() . '/css/wp4-rtl.css'       );
-//	wp_enqueue_style( 'iphone-style',        get_template_directory_uri() . '/css/iphone.css'        );
-//	wp_enqueue_style( 'forum-wp4-style',     get_template_directory_uri() . '/css/forum-wp4.css'     );
-//	wp_enqueue_style( 'forum-wp4-rtl-style', get_template_directory_uri() . '/css/forum-wp4-rtl.css' );
-//	wp_enqueue_style( 'forum-ie7-style',     get_template_directory_uri() . '/css/forum-ie7.css'     );
-//	wp_enqueue_style( 'ie-style',            get_template_directory_uri() . '/css/ie.css'            );
-//	wp_enqueue_style( 'bbpress-style',       get_template_directory_uri() . '/css/bbpress.css'            );
-//	wp_enqueue_style( 'bbpress-rtl-style',   get_template_directory_uri() . '/css/bbpress-rtl.css'            );
-//	wp_enqueue_style( 'bbpress-wpbbp-style', get_template_directory_uri() . '/css/bbpress-wpbbp.css'            );
-//	wp_enqueue_style( 'dashicons',           get_template_directory_uri() . '/css/dashicons.css' );
-//	wp_enqueue_style( 'open-sans',           '//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600' );
+	wp_enqueue_style( 'forum-wp4-style', get_template_directory_uri() . '/css/forum-wp4.css' );
+	wp_enqueue_style( 'bb-base', '//bbpress.org/wp-content/themes/bb-base/style.css?ver=20150216d' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 
