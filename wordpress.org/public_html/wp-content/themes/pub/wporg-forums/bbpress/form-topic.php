@@ -29,8 +29,8 @@
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
-						<p><?php _e( 'If asking for help, please include your WordPress version, and a link to your site.',                              'wporg-forums' ); ?></p>
-						<p><?php _e( 'If you found a bug, please create a <a href="http://bbpress.trac.wordpress.org/">trac ticket</a> with detailed duplication steps.', 'wporg-forums' ); ?></p>
+						<p><?php _e( 'Before posting a new topic, be sure to <a href="/search/">search</a> to see if one has been started already.',                              'wporg-forums' ); ?></p>
+						<p><?php _e( 'Having a problem? Asking a question? Make sure to read the <a href="http://codex.wordpress.org/Forum_Welcome">Forum Welcome</a> to find out how to maximize your odds of getting help!', 'wporg-forums' ); ?></p>
 					</div>
 
 				<?php endif; ?>
