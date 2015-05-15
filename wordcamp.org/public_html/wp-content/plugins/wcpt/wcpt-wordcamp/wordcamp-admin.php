@@ -566,6 +566,10 @@ class WordCamp_Admin {
 	 * @return array
 	 */
 	public function require_complete_meta_to_publish_wordcamp( $post_data, $post_data_raw ) {
+		if ( WCPT_POST_TYPE_ID != $post_data['post_type'] ) {
+			return $post_data;
+		}
+
 		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
@@ -593,8 +597,7 @@ class WordCamp_Admin {
 		);
 
 		// Check pending posts
-		// todo return early if not wordcamp post type instead of checking in both of these conditions
-		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+		if ( 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
 			foreach( $required_pending_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
@@ -607,7 +610,7 @@ class WordCamp_Admin {
 		}
 
 		// Check published posts
-		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && 'publish' == $post_data['post_status'] && isset( $_POST['post_ID'] ) && absint( $_POST['post_ID'] ) > $min_site_id ) {
+		if ( 'publish' == $post_data['post_status'] && isset( $_POST['post_ID'] ) && absint( $_POST['post_ID'] ) > $min_site_id ) {
 			foreach( $required_publish_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
