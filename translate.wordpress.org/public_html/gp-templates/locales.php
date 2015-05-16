@@ -9,11 +9,11 @@ gp_tmpl_header();
 
 	<div class="filter-header">
 		<ul class="filter-header-links">
-			<li><?php _e( 'Find your locale' ); ?></li>
+			<li><span class="current"><?php _e( 'Find your locale' ); ?></span></li>
 		</ul>
 		<div class="search-form">
 			<label class="screen-reader-text" for="locales-filter"><?php esc_attr_e( 'Search locales...' ); ?></label>
-			<input placeholder="<?php esc_attr_e( 'Search locales...' ); ?>" type="search" id="locales-filter" class="wp-filter-search">
+			<input placeholder="<?php esc_attr_e( 'Search locales...' ); ?>" type="search" id="locales-filter" class="filter-search">
 		</div>
 	</div>
 
