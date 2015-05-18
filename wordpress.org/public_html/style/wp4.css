@@ -38,6 +38,10 @@ a,
 	font-weight: normal;
 }
 
+strong a {
+	font-weight: bold;
+}
+
 a:visited,
 #wporg-footer ul li a:visited {
 	color: #4ca6cf;
@@ -47,7 +51,7 @@ p a { border-bottom: 1px solid #dfdfdf; }
 
 h3 a { font-weight: bold; }
 
-.button a, .button a:hover, #headline a:not(.button), #headline a:not(.button):hover, #sidebar a, #sidebar a:hover, .frontpageheatmap a, .frontpageheatmap a:hover, .col-3 a, .col-3 a:hover { border: none !important; }
+.button a, .button a:hover, #headline a:not(.button), #headline a:not(.button):hover, #sidebar a:not(.button), #sidebar a:not(.button):hover, .frontpageheatmap a, .frontpageheatmap a:hover, .col-3 a, .col-3 a:hover { border: none !important; }
 
 #headline a.button { display: inline-block; }
 

@@ -348,14 +348,15 @@ table.progress {
 #changelog h3, #ticketchange h3 {
 	line-height: 1.1;
 }
-#properties .fullrow input {
-	width: 97.5%;
+#properties {
+	white-space: normal;
 }
-#properties .col1 input {
-	width: 87.5%;
+#properties table td {
+	width: 50%;
 }
-#properties .col2 input {
-	width: 92.5%;
+#properties input {
+	width: 100%;
+	box-sizing: border-box;
 }
 #properties table th.col2 {
 	border: none;
@@ -743,6 +744,7 @@ h3.change .profile-link {
 #changelog .comment,
 #ticketchange .comment {
 	margin-left: 0;
+	word-wrap: break-word;
 }
 #changelog .trac-lastedit {
 	margin: 0.8em 0;
@@ -797,6 +799,11 @@ body.plugins #main .newticket-not-here .support {
 	padding: 4px 0;
 }
 
+/* Possibly related ticket list */
+.related-tickets li {
+	margin-bottom: 5px;
+}
+
 #propertyform[action*="/newticket"] #properties legend {
 	display: none;
 }
@@ -805,14 +812,15 @@ body.plugins #main .newticket-not-here .support {
 	border: none;
 	background: none;
 }
-#propertyform[action*="/newticket"] #properties .fullrow input {
-	width: 99.4%;
-}
 #propertyform[action*="/newticket"] #focuses span {
 	display: none;
 }
 #propertyform[action*="/newticket"] #properties table td#focuses {
 	padding-left: 0;
+}
+#propertyform > p,
+#propertyform > .buttons {
+	margin-left: 10px;
 }
 .set-trunk, .set-trunk:hover {
 	border: none;
@@ -1626,6 +1634,43 @@ body.core #ctxtnav a[href="/report"] {
 
 /* =Responsive / Mobile
 ----------------------------------------------- */
+@media (max-width: 770px) {
+	#headline {
+		height: auto;
+	}
+	#headline .menu {
+		clear: both;
+		float: none;
+		text-align: center;
+		font-size: 16px;
+	}
+	#headline .menu li {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	#banner {
+		position: relative;
+		top: -85px;
+		margin-bottom: -45px;
+	}
+	form#search {
+		float: none;
+		margin-top: 0;
+	}
+	#metanav {
+		position: static;
+		top: 0;
+		right: 0;
+	}
+	.newticket-instructions {
+		margin-left: 1em;
+		margin-right: 1em;
+	}
+	#main .newticket-not-here .support {
+		float: none;
+		min-width: 100%;
+	}
+}
 
 @media (max-width: 640px) {
 	body {
@@ -1637,6 +1682,14 @@ body.core #ctxtnav a[href="/report"] {
 	}
 	hr {
 		margin: 1em 0; /* less breathing room */
+	}
+	#banner {
+		position: static;
+		margin-bottom: 0;
+	}
+	#banner #search {
+		margin: 10px 0;
+		text-align: left;
 	}
 	.nav ul {
 		text-align: left; /* move these to the left */
@@ -1658,9 +1711,6 @@ body.core #ctxtnav a[href="/report"] {
 		max-width: 50%; /* prevent the logo and search from colliding (to a point) */
 		height: auto;
 	}
-	#search {
-		margin-bottom: 2em; /* more space below when logo is smaller */
-	}
 	#content.ticket, .milestone .info .progress, .milestone .info dl, #content.timeline dl, #stats {
 		margin-left: 0; /* use all the available space */
 	}
@@ -1681,19 +1731,25 @@ body.core #ctxtnav a[href="/report"] {
 		min-width: 115px !important;
 		text-align: left;
 	}
-	#properties table tr, #properties table th {
-		display: block; /* one col, labels on top */
+	#properties table th,
+	#properties table td {
+		/* one col, labels on top */
+		display: block;
+		padding: 0 !important;
+		width: 100% !important;
 	}
 	#properties table th {
 		padding: 0;
+		margin: 10px 0 5px;
 		text-align: left;
 	}
 	#properties table th.col2 {
 		border-left: none; /* no columns, no divider */
 	}
-	#properties table td.fullrow { /* Webkit fix for overflowing inputs */
-		display: block;
-		width: 95%;
+	#field-description {
+		margin: 0;
+		width: 100%;
+		box-sizing: border-box;
 	}
 	.milestone .info .progress {
 		max-width: 85%; /* override former max-width */
@@ -1719,6 +1775,77 @@ body.core #ctxtnav a[href="/report"] {
 	}
 	#footer p.left {
 		display: none;
+	}
+}
+@media (max-width: 550px) {
+	.create-new-ticket.button {
+		float: none;
+		margin: 20px 0 0 !important; /* Override inline styles */
+		padding: 0 20px;
+	}
+	.create-new-ticket a {
+		padding: 0;
+	}
+	#ticket .date {
+		position: static;
+		float: none;
+		margin-bottom: 10px;
+	}
+	#trac-ticket-title {
+		margin-top: 10px;
+	}
+	#ticket table.properties th,
+	#ticket table.properties td {
+		display: block;
+		float: left;
+		width: 60%;
+		box-sizing: border-box;
+	}
+	#ticket table.properties th {
+		width: 40%;
+		clear: left;
+	}
+	#ticket table.properties img.avatar {
+		float: left;
+	}
+	#attachments > div.attachments > p {
+		float: none;
+	}
+	#prefs {
+		position: static !important;
+		float: none;
+		margin-top: 10px;
+	}
+	#overview dt.property {
+		position: static;
+		float: none;
+		margin: 10px 0;
+		padding: 0;
+		text-align: left;
+	}
+	#overview dd,
+	#overview dd.message {
+		margin-left: 0;
+		padding: 0;
+	}
+	#help {
+		text-align: left;
+	}
+	#altlinks .preferences-link {
+		float: none;
+	}
+	#main #altlinks h3 {
+		margin-top: 5px;
+	}
+	#changelog .comment ul,
+	#changelog .comment ol,
+	#ticketchange .comment ul,
+	#ticketchange .comment ol {
+		padding-left: 18px;
+	}
+	pre.wiki,
+	pre.literal-block {
+		word-wrap: normal;
 	}
 }
 @media (max-width: 360px) {
