@@ -38,12 +38,10 @@ function wporg_themes_post_status() {
 
 	// Themes can be "suspended" to hide them.
 	register_post_status( 'suspend', array(
-		'label'                     => __( 'Suspended', 'wporg-themes' ),
-		'public'                    => false,
-		'exclude_from_search'       => true,
-		'show_in_admin_all_list'    => true,
-		'show_in_admin_status_list' => true,
-		'label_count'               => _n_noop( 'Suspended <span class="count">(%s)</span>', 'Suspended <span class="count">(%s)</span>', 'wporg-themes' ),
+		'label'               => __( 'Suspended', 'wporg-themes' ),
+		'protected'           => true,
+		'exclude_from_search' => true,
+		'label_count'         => _n_noop( 'Suspended <span class="count">(%s)</span>', 'Suspended <span class="count">(%s)</span>', 'wporg-themes' ),
 	) );
 }
 add_action( 'init', 'wporg_themes_post_status' );
