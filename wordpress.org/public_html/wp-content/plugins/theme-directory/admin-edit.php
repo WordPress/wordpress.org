@@ -49,6 +49,39 @@ function wporg_themes_post_status() {
 add_action( 'init', 'wporg_themes_post_status' );
 
 /**
+ * Extends repopackage searches in wp-admin to include theme slugs.
+ *
+ * @param string   $search   Search SQL for WHERE clause.
+ * @param WP_Query $wp_query The current WP_Query object.
+ * @return string
+ */
+function wporg_themes_search_slug( $search, $wp_query ) {
+	if ( ! is_admin() || 'repopackage' !== $wp_query->query_vars['post_type'] ) {
+		return $search;
+	}
+
+	global $wpdb;
+	$n = empty( $wp_query->query_vars['exact'] ) ? '%' : '';
+	$search = $searchand = '';
+
+	foreach ( $wp_query->query_vars['search_terms'] as $term ) {
+		$like    = $n . $wpdb->esc_like( $term ) . $n;
+		$search .= $wpdb->prepare( "{$searchand}(($wpdb->posts.post_title LIKE %s) OR ($wpdb->posts.post_name LIKE %s) OR ($wpdb->posts.post_content LIKE %s))", $like, $like, $like );
+		$searchand = ' AND ';
+	}
+
+	if ( ! empty( $search ) ) {
+		$search = " AND ({$search}) ";
+		if ( ! is_user_logged_in() ) {
+			$search .= " AND ($wpdb->posts.post_password = '') ";
+		}
+	}
+
+	return $search;
+}
+add_filter( 'posts_search', 'wporg_themes_search_slug', 10, 2 );
+
+/**
  * Capability mapping for custom caps.
  *
  * @param array  $caps Returns the user's actual capabilities.
