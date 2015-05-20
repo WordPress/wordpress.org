@@ -98,7 +98,7 @@
 
 	<div class="clear"></div>
 
-	<div class="">
+	<div class="grid_9 alpha omega">
 
 		<div class="post-job-input">
 			<label for="job_title"><?php _e( 'Job Description', 'jobswp' ); ?>*</label>

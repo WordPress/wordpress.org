@@ -1011,13 +1011,16 @@ li > ul {
 	margin-top: 2em;
 	padding-top: 2em;
 	border-top: 1px solid #EEE;
-	width: 681px;
+	width: 100%;
 }
 .container .grid_5.post-job-contact-info {
 	border-right: 1px solid #EEE;
 	width: 369px;
 	margin-right: 1.5em;
 	padding-right: 0.8em;
+}
+.container .post-job-job-info .grid_9 {
+	padding-right: 25px;
 }
 #FSContact1 div:last-child {
 	overflow: auto;
@@ -1270,6 +1273,7 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	.container .jobs-group .grid_2,
 	.container .jobs-group .grid_4,
 	.container .jobs-group .grid_7,
+	.container .post-job-job-info .grid_9,
 	.post-job-job-info,
 	.container .no-job.grid_9 {
 		width: 100%;
@@ -1295,6 +1299,9 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	}
 	.container .grid_5.post-job-contact-info {
 		border: none;
+	}
+	.container .post-job-job-info .grid_9 {
+		padding-right: 10px;
 	}
 	.container .hentry {
 		word-wrap: break-word;
