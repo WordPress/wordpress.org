@@ -499,6 +499,8 @@ window.wp = window.wp || {};
 
 			data.path = themes.data.settings.path;
 
+			data.downloaded = data.downloaded.toLocaleString();
+
 			this.$el.html( this.html( data ) );
 			// Set up navigation events
 			this.navigation();
@@ -930,9 +932,9 @@ window.wp = window.wp || {};
 			// Update theme count to full result set when available.
 			this.listenTo( self.collection, 'query:success', function( count ) {
 				if ( _.isNumber( count ) ) {
-					self.count.text( count );
+					self.count.text( count.toLocaleString() );
 				} else {
-					self.count.text( self.collection.length );
+					self.count.text( self.collection.length.toLocaleString() );
 				}
 			});
 
