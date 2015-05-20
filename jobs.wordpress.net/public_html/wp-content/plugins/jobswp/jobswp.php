@@ -69,7 +69,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	protected function __construct() {
 		if ( class_exists( 'Walker_Jobs_Category' ) )
 			self::$walker = new Walker_Jobs_Category;
 
@@ -82,7 +82,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Invokes registration of custom post type, taxonomy, and statuses.
 	 */
-	function registrations() {
+	public function registrations() {
 		$this->register_post_type();
 		$this->register_post_status();
 		$this->register_taxonomy();
@@ -92,7 +92,7 @@ class Jobs_Dot_WP {
 	 * Initializations. Mostly registering hooks for actions and filters, as well
 	 * as any processing that needs to happen directly on 'init'.
 	 */
-	function init() {
+	public function init() {
 		// Allow customization of the number of days until a job gets pruned.
 		// By default, it is 21 days.
 		$this->days_until_pruning = apply_filters( 'jobswp_days_until_pruning', 21 );
@@ -128,7 +128,7 @@ class Jobs_Dot_WP {
 	 * @param string $content     The content
 	 * @return array The amended list of allowed tags
 	 */
-	function wp_kses_allowed_html( $allowedtags, $content ) {
+	public function wp_kses_allowed_html( $allowedtags, $content ) {
 		// Add permissable tags
 		$allowedtags['ol'] = array();
 		$allowedtags['ul'] = array();
@@ -150,7 +150,7 @@ class Jobs_Dot_WP {
 	 * @param array $classes Classes to be added to 'body' tag
 	 * @return array The amended list of classes to be added to 'body' tag
 	 */
-	function body_class( $classes ) {
+	public function body_class( $classes ) {
 		$classes[] = 'jobswp';
 		return $classes;
 	}
@@ -164,7 +164,7 @@ class Jobs_Dot_WP {
 	 * @param array $columns Associative array of column names and labels
 	 * @return array Amended associated array of column names and labels
 	 */
-	function posts_columns( $columns, $post_type ) {
+	public function posts_columns( $columns, $post_type ) {
 		if ( 'job' !== $post_type ) {
 			return $columns;
 		}
@@ -179,7 +179,7 @@ class Jobs_Dot_WP {
 	 * @param string $column_name The column name
 	 * @param int $post_id The post ID
 	 */
-	function custom_posts_columns( $column_name, $post_id ) {
+	public function custom_posts_columns( $column_name, $post_id ) {
 		switch ( $column_name ) {
 			case 'poster':
 				$first_name = get_post_meta( $post_id, 'first_name', true );
@@ -199,7 +199,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Registers the custom post type.
 	 */
-	function register_post_type() {
+	protected function register_post_type() {
 		$labels = array(
 			'name'                => _x( 'Jobs', 'Post Type General Name', 'jobswp' ),
 			'singular_name'       => _x( 'Job', 'Post Type Singular Name', 'jobswp' ),
@@ -241,7 +241,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Registers the custom post statuses.
 	 */
-	function register_post_status() {
+	protected function register_post_status() {
 		// Status of 'closed' indicates a job that was unpublished from the site.
 		register_post_status( 'closed', array(
 			'label'                     => __( 'Closed', 'jobswp' ),
@@ -267,7 +267,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Registers the custom taxonomy.
 	 */
-	function register_taxonomy()  {
+	protected function register_taxonomy()  {
 		$labels = array(
 			'name'                       => _x( 'Job Categories', 'Taxonomy General Name', 'jobswp' ),
 			'singular_name'              => _x( 'Job Category', 'Taxonomy Singular Name', 'jobswp' ),
@@ -300,7 +300,7 @@ class Jobs_Dot_WP {
 	 * Outputs admin notice on job post type listing admin page if the jobposter
 	 * user account does not exist.
 	 */
-	function alert_if_no_jobposter() {
+	public function alert_if_no_jobposter() {
 		global $pagenow;
 
 		if ( 'edit.php' != $pagenow || ! isset( $_GET['post_type'] ) || 'job' != $_GET['post_type'] )
@@ -318,7 +318,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Outputs button to close a job on the post edit page.
 	 */
-	function post_submitbox_start() {
+	public function post_submitbox_start() {
 		global $post;
 
 		// Only show the close button if viewing an existing job post and
@@ -364,7 +364,7 @@ class Jobs_Dot_WP {
 	 * @param WP_Post The post.
 	 * @return boolean True == the job can be closed
 	 */
-	function can_job_be_closed( $post ) {
+	protected function can_job_be_closed( $post ) {
 		// The post must exist
 		if ( ! $post )
 			return false;
@@ -467,7 +467,7 @@ class Jobs_Dot_WP {
 	 * @param WP_Post The post
 	 * @return array
 	 */
-	function post_row_actions( $actions, $post ) {
+	public function post_row_actions( $actions, $post ) {
 		if ( $this->can_job_be_closed( $post ) )
 			$actions['close'] = $this->_get_close_link( $post );
 
@@ -482,7 +482,7 @@ class Jobs_Dot_WP {
 	 * @param string $text Text to process for malformed "WordPress" usage
 	 * @return string The fixed text
 	 */
-	function WordPress_dangit( $text ) {
+	public function WordPress_dangit( $text ) {
 		return str_replace(
 			array( 'Wordpress', 'wordpress', 'wordPress', 'word press', 'Word press', 'word Press', 'Word Press' ),
 			'WordPress',
@@ -497,7 +497,7 @@ class Jobs_Dot_WP {
 	 * @param string $content Existing page content.
 	 * @return string The content appended with the post-a-job form
 	 */
-	function add_post_a_job_form( $content ) {
+	public function add_post_a_job_form( $content ) {
 		if ( ! $this->skip_content && is_page( 'post-a-job' ) ) {
 			$this->skip_content = true;
 			if ( $this->success ) {
@@ -516,7 +516,7 @@ class Jobs_Dot_WP {
 	 * Saves a job posting submission, which is coming from the front-end by an
 	 * unverified visitor.
 	 */
-	function save_job() {
+	public function save_job() {
 		if ( isset( $_POST['postjob'] ) && 1 == $_POST['postjob'] ) {
 			check_admin_referer( 'jobswppostjob' );
 			$has_errors = false;
@@ -550,9 +550,7 @@ class Jobs_Dot_WP {
 
 			// If everything checks out, create the job
 			if ( $this->success ) {
-
 				$job_id = $this->create_job();
-
 				if ( is_wp_error( $job_id ) ) {
 					$_POST['errors'] = $job_id->get_error_message();
 					$this->success = false;
@@ -605,7 +603,7 @@ class Jobs_Dot_WP {
 					continue;
 
 				// Massage and sanitize the field value depending on field
-				$val = $this->validate_job_field( $field, $_POST[ $field ], $_POST );
+				$val = self::validate_job_field( $field, $_POST[ $field ], $_POST );
 
 				add_post_meta( $job_id, $field, $val );
 			}
@@ -626,7 +624,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Prunes old jobs.
 	 */
-	function scheduled_job_pruning() {
+	public function scheduled_job_pruning() {
 		global $wpdb;
 
 		$wpdb->query( $wpdb->prepare(
@@ -640,7 +638,7 @@ class Jobs_Dot_WP {
 	/**
 	 * Unschedules job pruning cron.
 	 */
-	static function unschedule_job_pruning() {
+	public static function unschedule_job_pruning() {
 		wp_clear_scheduled_hook( 'jobswp_scheduled_job_pruning' );
 	}
 
@@ -657,7 +655,7 @@ class Jobs_Dot_WP {
 	 * @param array $extra_data Associated data to provide context for a field
 	 * @return string
 	 */
-	function validate_job_field( $field, $value, $extra_data = array() ) {
+	public static function validate_job_field( $field, $value, $extra_data = array() ) {
 		switch ( $field ) {
 			case 'email':
 				$value = sanitize_email( $value );
