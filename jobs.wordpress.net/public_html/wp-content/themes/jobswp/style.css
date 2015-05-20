@@ -1100,6 +1100,12 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 .post-job .howtoapply-inputs input {
 	width: 50%;
 }
+.job-help-text {
+	margin-top: -1em;
+	margin-bottom: 1.6em;
+	color: #999;
+	font-style: italic;
+}
 .notice {
 	font-size: 0.8em;
 	border-width: 1px;

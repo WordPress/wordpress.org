@@ -30,7 +30,7 @@
 
 	<?php jobswp_text_field( 'last_name', __( 'Last Name', 'jobswp' ), true ); ?>
 
-	<?php jobswp_text_field( 'email', __( 'Email Address', 'jobswp' ), true, 'email' ); ?>
+	<?php jobswp_text_field( 'email', __( 'Email Address', 'jobswp' ), true, 'email', __( 'This is the email address you would use in contacting us and for us to contact you.', 'jobswp' ) ); ?>
 
 	<?php jobswp_text_field( 'phone', __( 'Phone Number', 'jobswp' ), true, 'tel' ); ?>
 
@@ -43,7 +43,7 @@
 
 	<?php jobswp_text_field( 'company', __( 'Company Name', 'jobswp' ), true ); ?>
 
-	<?php jobswp_text_field( 'location', __( 'Location', 'jobswp' ) ); ?>
+	<?php jobswp_text_field( 'location', __( 'Location', 'jobswp' ), false, 'text',  __( 'The desired location for any applicants and not necessarily your business location. Use \'N/A\' or leave blank if allowing a remote worker from anywhere.', 'jobswp' ) ); ?>
 
 	<div class="post-job-input">
 		<label for="howtoapply"><?php _e( 'How to Apply', 'jobswp' ); ?>* <span><?php _e( '(also specify)', 'jobswp' ); ?></span></label>
@@ -55,6 +55,10 @@
 				<option value="web" <?php echo jobswp_field_value( 'howtoapply_method', 'web' ); ?>><?php _e( 'Online Form', 'jobswp' ); ?></option>
 			</select> :
 			<input type="text" name="howtoapply" class="<?php echo jobswp_required_field_classes( 'howtoapply' ); ?>" <?php echo jobswp_field_value( 'howtoapply' ); ?> />
+		</div>
+
+		<div class="job-help-text">
+			<?php _e( 'If choosing "Email Address", use an email address you are comfortable exposing to any visitor of the site. It need not match the private email address asked for in the Contact Information section.', 'jobswp' ); ?>
 		</div>
 	</div>
 
