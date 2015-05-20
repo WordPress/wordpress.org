@@ -3,7 +3,7 @@ Theme Name: jobswp
 Theme URI: http://underscores.me/
 Author: melchoyce, coffee2code
 Description: Theme for jobs.wordpress.net
-Version: 1.0
+Version: 1.0.1
 License: GNU General Public License
 License URI: license.txt
 Tags:
@@ -1099,7 +1099,8 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	margin-right: 1.5em;
 }
 .notice h2 {
-	margin: 0;
+	margin: 0 0 1em;
+	font-weight: bold;
 }
 .notice p:last-child {
 	margin-bottom: 0;
