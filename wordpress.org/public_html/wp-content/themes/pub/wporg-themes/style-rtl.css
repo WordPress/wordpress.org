@@ -677,7 +677,7 @@ body.author .theme-browser .theme .theme-author  {
 .theme-ratings .counter-label {
 	float: right;
 	margin-left: 5px;
-	min-width: 32px;
+	min-width: 40px;
 }
 .theme-ratings .counter-back,
 .theme-ratings .counter-bar {
@@ -688,7 +688,7 @@ body.author .theme-browser .theme .theme-author  {
 	background-color: #ececec;
 	width: 70%;
 	width: -webkit-calc(100% - 60px);
-	width: calc(100% - 60px);
+	width: calc(100% - 70px);
 }
 .theme-ratings .counter-bar {
 	background-color: #fddb5a;
