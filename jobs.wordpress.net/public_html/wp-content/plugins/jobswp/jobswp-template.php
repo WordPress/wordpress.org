@@ -111,13 +111,14 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 /**
  * Outputs the text field input and surrounding markup.
  *
- * @param string $field_name The field name/key
- * @param string $field_label The label text
- * @param boolean $required Is the field a required input?
- * @param string $type The HTML5 input type. Default is 'text'.
+ * @param string $field_name  The field name/key.
+ * @param string $field_label The label text.
+ * @param bool   $required    Is the field a required input? Default false.
+ * @param string $type        The HTML5 input type. Default 'text'.
+ * @param string $help_text   Help text for the input. Default ''.
  * @return string
  */
-function jobswp_text_field( $field_name, $field_label, $required = false, $type = 'text' ) {
+function jobswp_text_field( $field_name, $field_label, $required = false, $type = 'text', $help_text = '' ) {
 	$field_name  = esc_attr( $field_name );
 	$field_label = esc_html( $field_label );
 
@@ -135,6 +136,11 @@ function jobswp_text_field( $field_name, $field_label, $required = false, $type 
 		jobswp_field_value( $field_name ) .
 		( $required ? ' required' : '' ) .
 		" />\n";
+
+	if ( $help_text ) {
+		echo '<div class="job-help-text">' . $help_text . "</div>\n";
+	}
+
 	echo "</div>\n";
 }
 
