@@ -105,6 +105,8 @@
 			<textarea name="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
 			<p><?php echo sprintf( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ), jobswp_allowed_tags() ); ?></p>
 			<p><?php _e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>
+
+			<p><?php _e( 'Please review your job posting for accuracy. Once submitted, you will not be able to make any changes unless you do so by submitting a contact form request which can take 24 hours or longer to fulfull.', 'jobswp' ); ?></p>
 		</div>
 
 	</div>
