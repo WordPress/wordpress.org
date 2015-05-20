@@ -80,13 +80,13 @@
 			<select name="category" class="<?php echo jobswp_required_field_classes( 'category' ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $cat ) : ?>
-					<option value="<?php esc_attr_e( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo $cat->name; ?></option>
+					<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo $cat->name; ?></option>
 				<?php endforeach; ?>
 			</select>
 		</div>
 
 		<div class="post-job-input">
-			<label for="jobtype"><?php _e( 'Job Type' ); ?>*</label>
+			<label for="jobtype"><?php _e( 'Job Type', 'jobswp' ); ?>*</label>
 			<select name="jobtype" class="<?php echo jobswp_required_field_classes( 'jobtype' ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<option value="ft" <?php echo jobswp_field_value( 'jobtype', 'ft' ); ?>><?php _e( 'Full Time', 'jobswp' ); ?></option>
@@ -101,10 +101,10 @@
 	<div class="">
 
 		<div class="post-job-input">
-			<label for="job_title"><?php _e( 'Job Description' ); ?>*</label>
+			<label for="job_title"><?php _e( 'Job Description', 'jobswp' ); ?>*</label>
 			<textarea name="job_description" rows="10" class="<?php echo jobswp_required_field_classes( 'job_description' ); ?>"><?php echo jobswp_field_value( 'job_description' ); ?></textarea>
 			<p><?php echo sprintf( __( 'Line and paragraph breaks are automatic. <acronym title="Hypertext Markup Language">HTML</acronym> allowed: <code>%s</code>', 'jobswp' ), jobswp_allowed_tags() ); ?></p>
-			<p><?php _e( 'All job postings are moderated prior to appearing on the site.' ); ?></p>
+			<p><?php _e( 'All job postings are moderated prior to appearing on the site.', 'jobswp' ); ?></p>
 		</div>
 
 	</div>
