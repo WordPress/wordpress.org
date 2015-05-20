@@ -869,6 +869,13 @@ li > ul {
 .job-location {
 	padding-right: 1em;
 }
+.job-categories {
+	color: #999;
+	line-height: 1.3em;
+	border-left: 1px solid #ccc;
+	margin-left: 10px;
+	padding-left: 10px
+}
 .all-job-categories, #all-job-categories {
 	margin-bottom: 3em;
 	margin-top: 0.8em;

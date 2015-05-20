@@ -12,6 +12,13 @@
 
 		<div class="entry-meta">
 			<?php jobswp_posted_on(); ?>
+
+			<span class="job-categories">
+				<?php echo get_the_category_list(); ?>
+				<?php foreach ( get_the_terms( get_the_ID(), 'job_category' ) as $job_cat ) : ?>
+					<span class="job-cat-item job-cat-item-<?php echo esc_attr( $job_cat->slug ); ?>"><?php echo esc_html( $job_cat->name ); ?></span>
+				<?php endforeach; ?>
+			</span>
 		</div><!-- .entry-meta -->
 	</header><!-- .entry-header -->
 
