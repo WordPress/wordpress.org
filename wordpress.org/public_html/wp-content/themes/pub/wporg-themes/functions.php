@@ -40,7 +40,11 @@ function wporg_themes_scripts() {
 		$GLOBALS['concatenate_scripts'] = true;
 	}
 
-	wp_enqueue_style( 'wporg-themes', get_stylesheet_uri(), array(), '1' );
+	$stylesheet = get_stylesheet_uri();
+	if ( is_rtl() ) {
+		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet );
+	}
+	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), '1' );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
