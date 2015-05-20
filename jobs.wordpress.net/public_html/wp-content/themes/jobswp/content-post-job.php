@@ -8,12 +8,14 @@
 		else
 			_e( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' );
 		?>
+		<?php do_action( 'jobswp_notice', 'error' ); ?>
 	</div>
 
 <?php elseif ( isset( $_POST['verify'] ) ) : ?>
 
 	<div class="notice notice-info">
 		<span>!</span><span><?php _e( 'Please review the data you submitted for accuracy. Make any necessary corrections, then re-submit this form.', 'jobswp' ); ?></span>
+		<?php do_action( 'jobswp_notice', 'verify' ); ?>
 	</div>
 
 <?php endif; ?>
@@ -111,6 +113,9 @@
 
 	<input type="hidden" name="postjob" value="1" />
 	<?php wp_nonce_field( 'jobswppostjob' ); ?>
+
+	<?php do_action( 'jobswp_post_job_form' ); ?>
+
 	<?php if ( isset( $_POST['verify'] ) ) {
 		$button_label = __( 'Verify Job', 'jobswp' );
 	?>
