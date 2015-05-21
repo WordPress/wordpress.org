@@ -12,10 +12,9 @@ function wporg_p2_enqueue_scripts() {
 	wp_enqueue_style( 'wporg-p2', get_stylesheet_uri(), array( 'p2' ), '20150203' );
 }
 
-add_filter( 'get_comment_author_url', 'wporg_p2_comment_profile_urls' );
-function wporg_p2_comment_profile_urls( $url ) {
-	$comment = $GLOBALS['comment'];
-	if ( is_object( $comment ) && $comment->user_id != 0 ) {
+add_filter( 'get_comment_author_url', 'wporg_p2_comment_profile_urls', 10, 3 );
+function wporg_p2_comment_profile_urls( $url, $comment_ID, $comment ) {
+	if ( $comment->user_id != 0 ) {
 		$user = new WP_User( $comment->user_id );
 		$nicename = $user->user_nicename;
 		$url = "//profiles.wordpress.org/{$nicename}/";
