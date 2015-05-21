@@ -173,18 +173,6 @@ img.wp-smiley {
 	margin-bottom: 14px !important;
 }
 
-#footer {
-	clear: both;
-	margin-left: 102px;
-	margin-bottom: 60px;
-	text-align: right;
-	letter-spacing: 0.3em;
-	text-transform: uppercase;
-}
-#footer p {
-	margin-top: 7px;
-	font-size: 13px;
-}
 form#commentform {
 	margin-top: 40px;
 	width: 100%;
