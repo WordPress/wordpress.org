@@ -45,13 +45,3 @@ ul, ol {
 span.author {
 	display: block;
 }
-
-#footer {
-	margin-left: 0;
-}
-
-#footer p {
-	direction: ltr;
-	text-align: left;
-}
-
