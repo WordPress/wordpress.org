@@ -210,11 +210,11 @@ a img.aligncenter {
 	font-size: 30px;
 	color: #dfdfdf;
 	font-family: Georgia, "Times New Roman", serif;
+	margin: 0;
 }
 
 #wporg-header h2.rosetta a {
-	padding: 36px 27px 0;
-	float: left;
+	padding: 0;
 	display: block;
 	height: 52px; /* 88 header height - 36 top padding */
 	color: #dfdfdf;
@@ -570,6 +570,10 @@ a img.aligncenter {
 		display: none;
 	}
 
+	#wporg-header h2.rosetta {
+		padding: 36px 27px 0;
+		float: left;
+	}
 }
 
 @media screen and (max-width:960px) {
@@ -1891,7 +1895,7 @@ body.wporg-responsive .col-2 {
 	line-height: 0;
 	text-align: center;
 }
-@media screen and (max-width: 974px) { 
+@media screen and (max-width: 974px) {
 	body.wporg-responsive #pagebody .wrapper {
 		display: -moz-box;
 		display: -ms-flexbox;
