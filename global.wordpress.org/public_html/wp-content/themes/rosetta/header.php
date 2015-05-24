@@ -1,6 +1,6 @@
 <?php
 
-wp_enqueue_style( 'rosetta', get_stylesheet_uri(), array(), 16, 'screen' ); 
+wp_enqueue_style( 'rosetta', get_stylesheet_uri(), array(), 17, 'screen' );
 
 if ( is_rtl() ) {
 	wp_enqueue_style( 'rosetta-rtl', get_locale_stylesheet_uri(), array( 'rosetta' ), 2, 'screen' );
