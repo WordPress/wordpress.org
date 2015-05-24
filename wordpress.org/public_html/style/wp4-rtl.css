@@ -25,10 +25,6 @@ code {
 	background-position: center right;
 }
 
-#wporg-header h2.rosetta a {
-	float: right;
-}
-
 #wporg-header ul li a {
 	font-family: sans-serif;
 }
@@ -39,7 +35,7 @@ code {
 	margin-left: 14px;
 }
 
-@media screen and (min-width:768px) {
+@media screen and (min-width:769px) {
 	#wporg-header h1 {
 		float: right;
 		padding-left: 0;
@@ -51,6 +47,10 @@ code {
 	}
 
 	#wporg-header ul li {
+		float: right;
+	}
+
+	#wporg-header h2.rosetta {
 		float: right;
 	}
 }
