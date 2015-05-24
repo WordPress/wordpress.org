@@ -131,7 +131,7 @@ class WPORG_Themes_Upload {
 		if ( $this->has_reserved_slug() ) {
 			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
 		}
-	
+
 		// populate the theme post and author
 		$this->theme_post = $this->get_theme_post();
 
@@ -453,11 +453,14 @@ class WPORG_Themes_Upload {
 			$this->trac_ticket->diff_line = "\n" . sprintf( __( 'Diff with previous version: %s', 'wporg-themes' ), "https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n" );
 		}
 
+		// Description
+		$theme_description = $this->strip_non_utf8( (string) $this->theme->display( 'Description' ) );
+
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
 {$this->theme->display( 'Name' )} - {$this->theme->display( 'Version' )}
 
-{$this->theme->display( 'Description' )}
+{$theme_description}
 
 Theme URL - {$this->theme->display( 'ThemeURI' )}
 Author URL - {$this->theme->display( 'AuthorURI' )}
