@@ -1,7 +1,21 @@
 <?php
 
+/**
+ * Set the content width based on the theme's design and stylesheet.
+ */
+if ( ! isset( $content_width ) ) {
+	$content_width = 692;
+}
+
+/**
+ * Sets up theme defaults and registers support for various WordPress features.
+ */
 function rosetta_after_setup_theme() {
 	add_theme_support( 'automatic-feed-links' );
+
+	add_theme_support( 'html5', array(
+		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
+	) );
 
 	add_theme_support( 'custom-header', array(
 		'default-image' => false,
@@ -29,33 +43,12 @@ function rosetta_admin_footer_nav_menus() {
 }
 add_action( 'admin_footer-nav-menus.php', 'rosetta_admin_footer_nav_menus' );
 
-function release_row( $release, $alt_class=false, $first_of_branch_class=false, $reset = false) {
-	static $even = true;
-	static $last_branch='';
-
-	if ($reset) {
-		$even = true;
-		$last_branch = '';
-		return;
-	}
-	$classes = array();
-	if (!$even && $alt_class) {
-		$classes[] = $alt_class;
-	}
-	$even = !$even;
-	if ($release['branch'] != $last_branch && $first_of_branch_class) {
-		$classes[] = $first_of_branch_class;
-	}
-	$last_branch = $release['branch'];
-	$classes_str = implode(' ', $classes);
-	print "<tr class='$classes_str'>";
-	print "\t<td>".$release['version']."</td>";
-	print "\t<td>".date_i18n(__('Y-M-d', 'rosetta'), $release['builton'])."</td>";
-	print "\t<td><a href='".$release['zip_url']."'>zip</a> <small>(<a href='".$release['zip_url'].".md5'>md5</a>)</small></td>";
-	print "\t<td><a href='".$release['targz_url']."'>tar.gz</a> <small>(<a href='".$release['targz_url'].".md5'>md5</a>)</small></td>";
-	print "</tr>";
-
+function rosetta_body_class( $classes ) {
+	$classes[] = 'wporg-responsive';
+	$classes[] = 'wporg-international';
+	return $classes;
 }
+add_filter( 'body_class', 'rosetta_body_class' );
 
 function is_locale_css() {
 	global $rosetta;
@@ -72,3 +65,8 @@ function rosetta_orphan_control( $string ) {
 	return substr_replace( $string, '&nbsp;', strrpos( $string, ' ' ), 1 );
 }
 add_filter( 'no_orphans', 'rosetta_orphan_control' );
+
+/**
+ * Custom template tags for this theme.
+ */
+require get_template_directory() . '/inc/template-tags.php';
