@@ -311,7 +311,8 @@ a img.aligncenter {
 
 #wporg-header ul li a:hover,
 #wporg-header ul li a.current,
-#wporg-header ul li.current-menu-item a {
+#wporg-header ul li.current-menu-item a,
+#wporg-header ul li.current_page_parent a {
 	color: #45bbe6;
 }
 
@@ -513,7 +514,8 @@ a img.aligncenter {
 		margin: -8px auto 0 auto;
 	}
 
-	#wporg-header ul li.current-menu-item:after {
+	#wporg-header ul li.current-menu-item:after,
+	#wporg-header ul li.current_page_parent:after {
 		content: '';
 		position: absolute;
 		left: 50%;
