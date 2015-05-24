@@ -19,8 +19,9 @@ switch ( $_POST['channel_name'] ) {
 	default:
 		$committers = array(
 			'westi', 'azaozz', 'nb', 'josephscott', 'dd32', 'nacin', 'koop', 'duck_',
-			'helen', 'sergeybiryukov', 'ocean90', 'wonderboymusic', 'drew', 'mark',
-			'johnbillion', 'kovshenin', 'jorbin', 'boone', 'jeremyfelt', 'pento',
+			'helen', 'sergey', 'ocean90', 'wonderboymusic', 'drew', 'mark', 'johnbillion',
+			'kovshenin', 'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
+			'westonruter',
 		);
 		break;
 }
