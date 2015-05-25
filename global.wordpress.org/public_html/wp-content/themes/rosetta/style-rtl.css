@@ -10,10 +10,6 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
-.nextprev {
-	margin-bottom: 2em;
-}
-
 .blog-categories ul li ul {
 	margin-bottom: 0 !important;
 }
@@ -99,6 +95,11 @@ hr {
 
 h2.fancy:nth-of-type(1) {
 	margin-top: 0;
+}
+
+.posts-navigation {
+	text-align: center;
+	margin: 2em 0;
 }
 
 #pagebody ul {
@@ -348,9 +349,56 @@ textarea {
 }
 
 /**
+ * Posts Navigation
+ */
+.nav-links {
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto;
+	border-top: 1px solid #eaeaea;
+	word-wrap: break-word;
+}
+
+.post-navigation {
+	margin: 5em auto;
+	padding: 0;
+}
+
+.post-navigation a {
+	border-bottom: 1px solid #eaeaea;
+	padding: 11px 0 12px;
+	width: 100%;
+}
+
+.post-navigation .meta-nav {
+	color: #777;
+	display: block;
+	font-size: 13px;
+	line-height: 2;
+	text-transform: uppercase;
+}
+
+.post-navigation a {
+	color: #444;
+	display: block;
+	font-weight: 600;
+	text-transform: none;
+}
+
+.post-navigation a:hover {
+	color: #21759b;
+}
+
+.post-navigation .nav-next {
+	text-align: left;
+}
+
+/**
  * Comments
  */
 .comments-area {
+	margin-top: 5em;
 	border-top: 1px solid #eaeaea;
 }
 
@@ -547,7 +595,6 @@ textarea {
 @viewport {
 	width: device-width;
 }
-
 
 @media screen and (min-width: 620px) {
 	.comments-area {

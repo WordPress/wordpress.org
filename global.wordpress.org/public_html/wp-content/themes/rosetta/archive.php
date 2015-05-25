@@ -1,36 +1,48 @@
 <?php get_header(); ?>
-	<div class="outer" id="mid-wrapper">
+
+	<div id="pagebody">
 		<div class="wrapper">
-			<div class="section blog">
-				<h3><?php _e('Blog', 'rosetta');?></h3>
+			<div class="col-9">
+				<?php the_archive_title( '<h2 class="fancy">', '</h2>' ); ?>
+
+				<?php
+				$blog_url = home_url( '/#blog' );
+				if ( 'page' === get_option( 'show_on_front' ) ) {
+					$blog_url = get_permalink( get_option('page_for_posts' ) );
+				}
+				?>
+				<p><a href="<?php echo esc_url( $blog_url ); ?>"><?php _e( '&laquo; Back to blog', 'rosetta' ); ?></a></p>
+
+				<table class="widefat" >
+					<?php
+					$i = 0;
+					if ( have_posts() ) :
+						while ( have_posts() ) : the_post();
+							$i++;
+							?>
+							<tr <?php if ( $i % 2 ) echo ' class="alt" '; ?>>
+								<th>
+									<?php the_date( '','<span class="date">', '</span>' ); ?>
+								</th>
+								<td>
+									<a href="<?php the_permalink() ?>"><?php the_title(); ?></a>
+								</td>
+							</tr>
+							<?php
+						endwhile;
+					else :
+						?>
+						<p><?php _e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
+						<?php
+					endif;
+					?>
+				</table>
+
+				<nav class="posts-navigation">
+					<?php posts_nav_link( ' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>
+				</nav>
 			</div>
 		</div>
 	</div>
-	<?php if (have_posts()) : ?>
-		<div class="wrapper">
-			<div class="section">
-				<h2 class="fancy"><?php printf(__('Archives for %s', 'rosetta'), get_the_time(__('F, Y', 'rosetta')));?></h2>
-				<a href="/#blog"><?php _e('&laquo; Back to blog', 'rosetta');?></a>
-			</div>
-		</div>
-		<?php while (have_posts()) : the_post(); ?>
-		<div class="wrapper">
-		<div class="section blog">
-				<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
 
-				<p><small><em><?php the_time(__('F j, Y', 'rosetta')); ?>, <?php the_author_link(); ?></em></small></p>
-
-				<?php the_content(__('Read the rest of this entry &raquo;', 'rosetta')); ?>
-
-				<?php comments_popup_link(); ?>
-			<div class="navigation">
-				<div class="nav-previous"><?php previous_posts_link(__('&larr; Older Posts', 'rosetta')) ?></div>
-				<div class="nav-next"><?php next_posts_link(__('Newer Posts &rarr;', 'rosetta')) ?></div>
-			</div>
-
-		</div>
-		</div>
-
-		<?php endwhile; ?>
-	<?php endif; ?>
-<?php get_footer(); ?>
+<?php get_footer();

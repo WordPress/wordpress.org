@@ -13,7 +13,7 @@
 					</div>
 
 					<div class="storycontent">
-						<?php the_content('Read on for more &raquo;'); ?>
+						<?php the_content( __( 'Read on for more &raquo;', 'rosetta' ) ); ?>
 					</div>
 
 					<div class="feedback">
@@ -26,7 +26,9 @@
 				<p><?php _e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
 			<?php endif; ?>
 
-			<?php posts_nav_link(' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>
+			<nav class="posts-navigation">
+				<?php posts_nav_link( ' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>
+			</nav>
 		</div>
 		<div class="col-3">
 			<div class="blog-categories">
