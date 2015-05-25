@@ -199,7 +199,7 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 		$headers[] = 'Return-Path: '. $message_data['email'];
 
 		add_action( 'phpmailer_init', 'rosetta_set_sender' );
-		wp_mail( 'dominikschilling@gmail.com' /*get_option( 'admin_email' )*/, '[wordpress.org] ' . $message_data['subject'], $message, implode("\r\n", $headers ) );
+		wp_mail( get_option( 'admin_email' ), '[wordpress.org] ' . $message_data['subject'], $message, implode( "\r\n", $headers ) );
 		remove_action( 'phpmailer_init', 'rosetta_set_sender' );
 		?>
 		<div id="return">
