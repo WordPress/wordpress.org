@@ -25,6 +25,22 @@ code {
 	background-position: center right;
 }
 
+#wporg-header ul#wporg-header-menu {
+	left: auto;
+	right: -75%;
+	text-align: right;
+	-webkit-transition: right 0.3s;
+	-moz-transition: right 0.3s;
+	-ms-transition: right 0.3s;
+	-o-transition: right 0.3s;
+	transition: right 0.3s;
+}
+
+#wporg-header ul#wporg-header-menu.active {
+	left: auto;
+	right: 0;
+}
+
 #wporg-header ul li a {
 	font-family: sans-serif;
 }
@@ -33,6 +49,12 @@ code {
 	float: left;
 	margin-right: 0;
 	margin-left: 14px;
+}
+
+#mobile-menu-button {
+	left: auto;
+	right: 10px;
+	float: right;
 }
 
 @media screen and (min-width:769px) {
