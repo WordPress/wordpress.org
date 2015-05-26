@@ -1968,10 +1968,13 @@ body.wporg-responsive .col-2 {
 		border-bottom: 1px solid #ccc;
 	}
 
+	/*
+	 * /news and /showcase
+	 */
+
 	.wporg-responsive .storycontent {
 		padding-right: 0;
 	}
-
 }
 @media screen and (max-width: 700px) {
 	.wporg-responsive.wporg-page-about-logos h3.graphics {

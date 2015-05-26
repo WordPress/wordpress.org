@@ -298,3 +298,9 @@ ul.colors li img {
 	margin-right: -60px;
 	margin-left: 0;
 }
+
+@media screen and (max-width: 974px) {
+	.wporg-responsive .storycontent {
+		padding-left: 0;
+	}
+}
