@@ -32,6 +32,15 @@ function rosetta_after_setup_theme() {
 }
 add_action( 'after_setup_theme', 'rosetta_after_setup_theme' );
 
+function rosetta_comment_form_support_hint() {
+	printf(
+		'<p>%s</p>',
+		/* translators: feel free to add links to places, where one can get support in your language. */
+		__( '<strong>Please, do not post support requests here!</strong> They will probably be ignored.', 'rosetta' )
+	);
+}
+add_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
+
 function rosetta_wp_page_menu_args( $args ) {
 	$args['show_home'] = true;
 	return $args;
