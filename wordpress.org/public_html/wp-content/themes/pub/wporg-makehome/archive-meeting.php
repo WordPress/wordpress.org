@@ -1,13 +1,18 @@
 <?php get_header(); ?>
 
-<table class="wrapper">
-	<tr>
-		<th>Team</th>
-		<th>Name</th>
-		<th>Next Meeting Date</th>
-		<th>Time</th>
-		<th>Location</th>
-	</tr>
+<div class="wrapper">
+	<h2 class="title">Upcoming WordPress Meetings</h2>
+<table class="schedule">
+	<thead>
+		<tr>
+			<th>Team</th>
+			<th>Name</th>
+			<th>Next Meeting Date</th>
+			<th>Time</th>
+			<th>Location</th>
+		</tr>
+	</thead>
+	<tbody>
 	<?php while( have_posts() ): the_post(); ?>
 		<tr id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<td><?php echo $post->team; ?></td>
@@ -16,8 +21,9 @@
 			<td><?php echo $post->time; ?></td>
 			<td><?php echo $post->location; ?></td>
 		</tr>
-
 	<?php endwhile; ?>
-</table><!-- /wrapper -->
+	</tbody>
+</table>
+</div><!-- /wrapper -->
 
 <?php get_footer(); ?>
