@@ -65,7 +65,7 @@ global $wp_query, $post, $wptv;
 						<?php
 							$excerpt = get_the_time( get_option( 'date_format' ) );
 							if ( has_excerpt() ) {
-								$excerpt .= ' &#8212 ' . get_the_excerpt();
+								$excerpt .= ' &#8212; ' . get_the_excerpt();
 							}
 							echo apply_filters( 'the_excerpt', $excerpt );
 						?>
