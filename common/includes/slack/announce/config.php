@@ -28,6 +28,12 @@ function get_whitelist() {
 		'core' => array(
 			'johnbillion',
 			'drew',
+			'obenland',
+		),
+		'core-customize' => array(
+			'celloexpressions',
+			'ocean90',
+			'westonruter',
 		),
 		'core-flow' => array(
 			'drew',
