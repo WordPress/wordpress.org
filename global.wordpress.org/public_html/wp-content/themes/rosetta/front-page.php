@@ -61,9 +61,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 <?php endwhile; ?>
 				</div>
 				<div class="col-3">
-<?php
-	get_template_part( 'download-sidebar' );
-?>
+					<?php get_sidebar( 'page' ); ?>
 				</div>
 			</div>
 		</div>
@@ -124,6 +122,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		</div>
 	</div>
 <?php endwhile; ?>
+<?php if ( 'posts' === get_option( 'show_on_front' ) ) : ?>
 		<div class="wrapper">
 			<div id="blog" class="section">
 				<div class="col-9">
@@ -142,12 +141,10 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 				</div>
 
 				<div class="col-3">
-					<h5><?php _e( 'Blog Archives', 'rosetta' ); ?></h5>
-					<ul>
-						<?php wp_get_archives('type=monthly&limit=12'); ?>
-					</ul>
+					<?php get_sidebar( 'blog' ); ?>
 				</div>
 			</div>
 		</div>
+<?php endif; ?>
 </div>
 <?php get_footer();

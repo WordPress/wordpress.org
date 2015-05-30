@@ -14,7 +14,7 @@ the_post();
 				<?php the_content(); ?>
 			</div>
 			<div class="col-3">
-				<?php get_template_part( 'download-sidebar' ); ?>
+				<?php get_sidebar( 'page' ); ?>
 			</div>
 		</div>
 	</div>

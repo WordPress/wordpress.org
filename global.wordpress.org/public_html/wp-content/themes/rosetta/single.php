@@ -40,12 +40,7 @@
 			<?php posts_nav_link(' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>
 		</div>
 		<div class="col-3">
-			<div class="blog-categories">
-				<h4><?php _e( 'Categories', 'rosetta' ); ?></h4>
-				<ul>
-					<?php wp_list_categories( 'title_li=&show_count=1&orderby=count&order=DESC&number=10' ); ?>
-				</ul>
-			</div>
+			<?php get_sidebar( 'blog' ); ?>
 		</div>
 	</div>
 </div>
