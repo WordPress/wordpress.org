@@ -141,7 +141,7 @@ function bporg_redirect() {
 						$url = '/support/forum/plugins/';
 						break;
 					default:
-						$url = trailingslashit( 'http://buddypress.org/support/forum/' . $uri_chunks[3] );
+						$url = trailingslashit( 'https://buddypress.org/support/forum/' . $uri_chunks[3] );
 						break;
 				}
 				bp_core_redirect( home_url( $url ) );
@@ -162,9 +162,9 @@ function wporg_profiles_redirect() {
 	$uri_chunks = explode( '/', trim( $_SERVER['REQUEST_URI'], '/' ) );
 	if ( 'users' == $uri_chunks[0] ) {
 		if ( ! empty( $uri_chunks[1] ) ) {
-			wp_redirect( 'http://profiles.wordpress.org/' . $uri_chunks[1] . '/', 301 );
+			wp_redirect( 'https://profiles.wordpress.org/' . $uri_chunks[1] . '/', 301 );
 		} else {
-			wp_redirect( 'http://wordpress.org/' );
+			wp_redirect( 'https://wordpress.org/' );
 		}
 		exit;
 	}
@@ -174,10 +174,10 @@ function wporg_profiles_redirect() {
 	}
 
 	if ( $user = get_user_by( 'login', urldecode( $uri_chunks[0] ) ) ) {
-		wp_redirect( 'http://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
+		wp_redirect( 'https://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
 		exit;
 	} elseif ( $user = get_user_by( 'login', str_replace( ' ', '', urldecode( $uri_chunks[0] ) ) ) ) {
-		wp_redirect( 'http://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
+		wp_redirect( 'https://profiles.wordpress.org/' . $user->user_nicename . '/', 301 );
 		exit;
 	}
 
@@ -191,7 +191,7 @@ function wporg_profiles_maybe_template_redirect() {
 	}
 
 	ob_start();
-	wp_redirect( 'http://wordpress.org/' );
+	wp_redirect( 'https://wordpress.org/' );
 	exit;
 }
 

@@ -2,9 +2,9 @@
 <div class="sidebar">
 
 	<?php if ( function_exists( 'is_buddypress' ) && is_buddypress() ) : ?>
-	
+
 		<?php if ( bp_is_user() ) : ?>
-	
+
 			<div id="item-header-avatar">
 				<a href="<?php bp_displayed_user_link(); ?>">
 
@@ -14,11 +14,11 @@
 			</div><!-- #item-header-avatar -->
 
 			<?php bp_nav_menu(); ?>
-	
+
 		<?php endif; ?>
 
 	<?php elseif ( ( function_exists( 'is_bbpress' ) && is_bbpress() ) || is_page( 'new-topic' ) ) : ?>
-	
+
 		<?php if ( bbp_is_single_forum() || bb_base_topic_search_query( false ) ) : ?>
 
 			<div>
@@ -111,7 +111,7 @@
 
 		<div class="feature">
 			<h3><?php _e( 'Theme Development', 'bporg' ); ?></h3>
-			<p><a href="http://www.packtpub.com/buddypress-theme-development/book" title="BuddyPress Theme Development"><img width="225" alt="A book by: Tammie Lister" src="<?php echo get_stylesheet_directory_uri(); ?>/images/buddypress-packt.jpg"/></a></p>
+			<p><a href="https://www.packtpub.com/web-development/buddypress-theme-development" title="BuddyPress Theme Development"><img width="225" alt="A book by: Tammie Lister" src="<?php echo get_stylesheet_directory_uri(); ?>/images/buddypress-packt.jpg"/></a></p>
 			<p class="book-description">An in-depth guide to designing, developing, and testing your very own custom BuddyPress theme.</p>
 		</div>
 
@@ -122,7 +122,7 @@
 		<div>
 			<h3><?php _e( 'Legacy', 'bporg'); ?></h3>
 			<ul>
-				<li><a href="http://buddypress.org/support/forum/plugin-forums/" title="Plugin Forums">Legacy Plugin Forums</a></li>
+				<li><a href="https://buddypress.org/support/forum/plugin-forums/" title="Plugin Forums">Legacy Plugin Forums</a></li>
 			</ul>
 		</div>
 

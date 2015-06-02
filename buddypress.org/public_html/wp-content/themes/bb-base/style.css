@@ -1,6 +1,6 @@
 /**
  * Theme Name: BB's Parent
- * Theme URL: http://buddypress.org
+ * Theme URL: https://buddypress.org
  * Description: Parent theme for BuddyPress.org and bbPress.org
  * Author: John James Jacoby
  * Author URI: http://jaco.by
@@ -1317,12 +1317,12 @@ div.plugin-meta img {
 }
 
 #bbpress-forums .bbp-the-content-wrapper a.switch-html {
-	
+
 }
 
 #bbpress-forums .bbp-the-content-wrapper a.switch-tmce {
-	
-} 
+
+}
 
 #bbpress-forums .bbp-topic-form fieldset.bbp-form button {
 	float: right;

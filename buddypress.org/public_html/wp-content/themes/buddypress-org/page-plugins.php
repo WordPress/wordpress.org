@@ -47,7 +47,7 @@
 				?>
 
 				<div class="single-plugin">
-					<h3 class="plugin-title"><a href="<?php echo esc_url( 'http://wordpress.org/extend/plugins/' . $plugin->slug ); ?>/" title="Plugin Information"><?php echo esc_html( $plugin->name ); ?></a></h3>
+					<h3 class="plugin-title"><a href="<?php echo esc_url( 'https://wordpress.org/extend/plugins/' . $plugin->slug ); ?>/" title="Plugin Information"><?php echo esc_html( $plugin->name ); ?></a></h3>
 
 					<div class="plugin-meta">
 						<?php if ( !empty( $plugin->version  ) ) : ?><div>Version: <?php echo esc_html( $plugin->version ); ?></div><?php if ( !empty( $plugin->requires ) ) : ?><?php endif; ?><?php endif; ?>

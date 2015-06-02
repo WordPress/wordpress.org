@@ -5,7 +5,7 @@
  */
 function bb_theme_login_redirect() {
 	if ( is_user_logged_in() && is_page( 'login' ) ) {
-		wp_safe_redirect( 'http://bbpress.org/forums/' );
+		wp_safe_redirect( 'https://bbpress.org/forums/' );
 		exit();
 	}
 }

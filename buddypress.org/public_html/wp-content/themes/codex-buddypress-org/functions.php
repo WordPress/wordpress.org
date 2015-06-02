@@ -5,7 +5,7 @@
  */
 function bpcodex_register_stylesheet() {
 	wp_enqueue_style( 'bp-codex-screen', get_stylesheet_directory_uri() . '/screen.css', false, '2.0.9', 'screen' );
-	wp_enqueue_style( 'google-font-source', 'http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700', false, '1.0', 'all' );
+	wp_enqueue_style( 'google-font-source', 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700', false, '1.0', 'all' );
 }
 add_action( 'wp_enqueue_scripts', 'bpcodex_register_stylesheet' );
 

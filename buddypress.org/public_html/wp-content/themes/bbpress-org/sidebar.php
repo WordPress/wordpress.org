@@ -2,7 +2,7 @@
 <div class="sidebar">
 
 	<?php if ( is_bbpress() || is_page( 'new-topic' ) ) : ?>
-	
+
 		<?php if ( bbp_is_single_forum() || bb_base_topic_search_query( false ) ) : ?>
 
 			<div>
@@ -95,7 +95,7 @@
 
 		<div class="feature">
 			<h3><?php _e('bbPress Complete', 'bbporg'); ?></h3>
-			<p><a href="http://www.packtpub.com/bbpress-complete-comprehensive-guide/book" title="bbPress Complete"><img width="225" alt="" src="<?php echo get_stylesheet_directory_uri(); ?>/images/bbpress-packt.jpg"/></a></p>
+			<p><a href="https://www.packtpub.com/web-development/bbpress-complete" title="bbPress Complete"><img width="225" alt="" src="<?php echo get_stylesheet_directory_uri(); ?>/images/bbpress-packt.jpg"/></a></p>
 			<p class="book-description">A step-by-step guide to creating, managing, and growing a community around your WordPress website.</p>
 		</div>
 

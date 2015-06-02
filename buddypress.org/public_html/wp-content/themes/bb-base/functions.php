@@ -104,7 +104,7 @@ function bb_base_reply_search_form() {
 
 function bb_base_plugin_search_form() {
 ?>
-	
+
 	<form role="search" method="get" id="searchform" action="">
 		<div>
 			<h3><?php _e( 'Plugin Search', 'bbporg'); ?></h3>
@@ -118,7 +118,7 @@ function bb_base_plugin_search_form() {
 }
 
 function bb_base_topic_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['ts'] ) ) {
 		return false;
 	}
@@ -132,7 +132,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 }
 
 function bb_base_reply_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['rs'] ) ) {
 		return false;
 	}
@@ -146,7 +146,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 }
 
 function bb_base_plugin_search_query( $escaped = true ) {
-	
+
 	if ( empty( $_GET['ps'] ) ) {
 		return false;
 	}
@@ -271,7 +271,7 @@ function bb_base_plugins_api( $action, $args = null ) {
 	// Cache individual plugin requests and query requests
 
 	if ( empty( $res ) ) {
-		$request = wp_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => array( 'action' => $action, 'request' => serialize( $args ) ) ) );
+		$request = wp_remote_post( 'https://api.wordpress.org/plugins/info/1.0/', array( 'body' => array( 'action' => $action, 'request' => serialize( $args ) ) ) );
 
 		if ( is_wp_error( $request ) ) {
 			$res = new WP_Error( 'plugins_api_failed', __( 'An Unexpected HTTP Error occurred during the API request.</p> <p><a href="?" onclick="document.location.reload(); return false;">Try again</a>' ), $request->get_error_message() );

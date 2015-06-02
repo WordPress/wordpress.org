@@ -20,7 +20,7 @@
 						echo '<h2>Components</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'http://codex.bbpress.org/component/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
+							echo '<li><a href="' . esc_url( 'https://codex.bbpress.org/component/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 						}
 						echo '</ul>';
 						echo '</div>';
@@ -38,7 +38,7 @@
 						echo '<h2>Versions</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'http://codex.bbpress.org/version/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
+							echo '<li><a href="' . esc_url( 'https://codex.bbpress.org/version/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 						}
 						echo '</ul>';
 						echo '</div>';
@@ -56,7 +56,7 @@
 						echo '<h2>Types</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'http://codex.bbpress.org/type/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
+							echo '<li><a href="' . esc_url( 'https://codex.bbpress.org/type/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 						}
 						echo '</ul>';
 						echo '</div>';
@@ -74,7 +74,7 @@
 						echo '<h2>Contexts</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
-							echo '<li><a href="' . esc_url( 'http://codex.bbpress.org/context/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
+							echo '<li><a href="' . esc_url( 'https://codex.bbpress.org/context/' . $term->slug ) . '" title="' . esc_attr( sprintf( __( 'View all pages for: %s' ), $term->name ) ) . '">' . esc_html( $term->name ) . '</a></li>';
 						}
 						echo '</ul>';
 						echo '</div>';
@@ -92,7 +92,7 @@
 			global $post;
 
 			$args         = array( 'order' => 'ASC', );
-			$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );	
+			$revisions    = wp_get_post_revisions( get_queried_object_id(), $args );
 			$post_authors = array( $post->post_author => 1 );
 			foreach( (array)$revisions as $revision ) {
 				$post_authors[$revision->post_author] += 1;
