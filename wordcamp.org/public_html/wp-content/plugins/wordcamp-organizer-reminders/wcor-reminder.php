@@ -214,6 +214,11 @@ class WCOR_Reminder {
 			<li>[venue_contact_info]</li>
 		</ul>
 
+		<h5>Miscellaneous</h5>
+		<ul class="ul-disc">
+			<li>[multi_event_sponsor_info]</li>
+		</ul>
+
 		<?php
 	}
 

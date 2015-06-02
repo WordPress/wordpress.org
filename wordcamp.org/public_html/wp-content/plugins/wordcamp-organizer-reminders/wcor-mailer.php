@@ -141,9 +141,15 @@ class WCOR_Mailer {
 	 * Some of these fields are guaranteed to have values by WordCamp_Admin::require_complete_meta_to_publish_wordcamp(),
 	 * but those that aren't are filled with 'N/A/'.
 	 *
+	 * This is performant right now, but if we add more function calls in $replace then it could start to slow down,
+	 * because everything in $replace is called every time the function is called, even if its corresponding $search
+	 * value isn't present in $content. If it does, then refactor it so only replace placeholders that are actually
+	 * found.
+	 *
 	 * @param  WP_Post $wordcamp
 	 * @param  WP_Post $email
 	 * @param  string  $content
+	 *
 	 * @return string
 	 */
 	protected function replace_placeholders( $wordcamp, $email, $content ) {
@@ -188,6 +194,9 @@ class WCOR_Mailer {
 			'[venue_available_rooms]',
 			'[venue_url]',
 			'[venue_contact_info]',
+
+			// Miscellaneous
+			'[multi_event_sponsor_info]',
 		);
 
 		$replace = array(
@@ -221,9 +230,55 @@ class WCOR_Mailer {
 			empty( $wordcamp_meta['Available Rooms'][0] )     ? 'N/A' : $wordcamp_meta['Available Rooms'][0],
 			empty( $wordcamp_meta['Website URL'][0] )         ? 'N/A' : $wordcamp_meta['Website URL'][0],
 			empty( $wordcamp_meta['Contact Information'][0] ) ? 'N/A' : $wordcamp_meta['Contact Information'][0],
+
+			// Miscellaneous
+			$this->get_mes_info( $wordcamp->ID ),
 		);
 		
 		return str_replace( $search, $replace, $content );
+	}
+
+	/**
+	 * Get formatted general info for all of the given WordCamp's ME sponsors
+	 *
+	 * @param int $wordcamp_id
+	 *
+	 * @return string
+	 */
+	protected function get_mes_info( $wordcamp_id ) {
+		/** @var $multi_event_sponsors Multi_Event_Sponsors */
+		global $multi_event_sponsors;
+
+		$sponsors     = $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id );
+		$sponsor_info = $multi_event_sponsors->get_sponsor_info( $sponsors );
+		$region_id    = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+
+		if ( ! $sponsors || ! $sponsor_info ) {
+			return '';
+		}
+
+		ob_start();
+
+		foreach ( $sponsor_info as $sponsor ) {
+			$sponsorship_level = get_post( $sponsor['sponsorship_levels'][ $region_id ] ); // we can assume this exists because otherwise the sponsor wouldn't be in $sponsors / $sponsor_info
+
+			?>
+
+			Company: <?php echo esc_html( $sponsor['company_name'] ); ?>
+
+			Sponsorship Level: <?php echo esc_html( $sponsorship_level->post_title ); ?>
+
+			Contact: <?php echo sprintf(
+				'%s %s, %s',
+				esc_html( $sponsor['contact_first_name'] ),
+				esc_html( $sponsor['contact_last_name'] ),
+				esc_html( $sponsor['contact_email'] )
+			); ?>
+
+			<?php
+		}
+
+		return trim( str_replace( "\t", '', ob_get_clean() ) );
 	}
 
 	/**
