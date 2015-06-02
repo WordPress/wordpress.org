@@ -241,6 +241,26 @@ class Multi_Event_Sponsors {
 		return $names;
 	}
 
+	/**
+	 * Retrieve general info for the given sponsors.
+	 *
+	 * @param array $sponsors
+	 *
+	 * @return array
+	 */
+	public function get_sponsor_info( $sponsors ) {
+		$info = array();
+
+		foreach ( $sponsors as $sponsor ) {
+			$info[ $sponsor->ID ]['company_name']       = $sponsor->post_title;
+			$info[ $sponsor->ID ]['sponsorship_levels'] = get_post_meta( $sponsor->ID, 'mes_regional_sponsorships', true );
+			$info[ $sponsor->ID ]['contact_first_name'] = get_post_meta( $sponsor->ID, 'mes_first_name',            true );
+			$info[ $sponsor->ID ]['contact_last_name']  = get_post_meta( $sponsor->ID, 'mes_last_name',             true );
+			$info[ $sponsor->ID ]['contact_email']      = get_post_meta( $sponsor->ID, 'mes_email_address',         true );
+		}
+
+		return $info;
+	}
 
 	/**
 	 * Get the excerpts for the given sponsors in HTML paragraphs.
