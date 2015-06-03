@@ -30,12 +30,12 @@
 
 	<?php if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) : ?>
 
-		<p>You must be <a href="<?php echo get_option('siteurl'); ?>/wp-login.php?redirect_to=<?php echo urlencode(get_permalink()); ?>">logged in</a> to post a comment.</p>
+		<p>You must be <a href="<?php echo site_url( '/wp-login.php' ); ?>?redirect_to=<?php echo urlencode( get_permalink() ); ?>">logged in</a> to post a comment.</p>
 
 	<?php else : ?>
 
 		<div id="respond">
-			<form action="<?php echo get_option('siteurl'); ?>/wp-comments-post.php" method="post" id="commentform">
+			<form action="<?php echo site_url( '/wp-comments-post.php' ); ?>" method="post" id="commentform">
 				<fieldset>
 					<legend><?php comment_form_title( 'Leave a Reply', 'Leave a Reply to %s' ); ?></legend>
 					<p class="cancel-reply"><?php cancel_comment_reply_link("Cancel Comment Reply"); ?></p>
