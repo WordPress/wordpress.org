@@ -185,24 +185,13 @@ class WPTV_Anon_Upload {
 		$name_parts = pathinfo( $_FILES['wptv_file']['name'] );
 
 		if ( ! empty( $name_parts['extension'] ) ) {
-			if ( ! in_array( strtolower( $name_parts['extension'] ), array(
-					'avi',
-					'mov',
-					'qt',
-					'mpeg',
-					'mpg',
-					'mpe',
-					'mp4',
-					'm4v',
-					'asf',
-					'asx',
-					'wax',
-					'wmv',
-					'wmx',
-					'ogv',
-					'3gp',
-					'3g2',
-				), true )
+			// Changes to this must be synced with the anonymous JavaScript function in anon-upload-template.php
+			$valid_extensions = array(
+				'avi', 'mov', 'qt', 'mpeg', 'mpg', 'mpe', 'mp4', 'm4v', 'asf', 'asx', 'wax', 'wmv', 'wmx', 'ogv',
+				'3gp', '3g2',
+			);
+
+			if ( ! in_array( strtolower( $name_parts['extension'] ), $valid_extensions, true )
 			) {
 				return $this->error( 2 );
 			}

@@ -385,6 +385,7 @@ jQuery( function($) {
 			}
 		}
 
+		// Changes to this list must be synced with WPTV_Anon_Upload::save()
 		if ( ! file.val() || !/\.(avi|mov|qt|mpeg|mpg|mpe|mp4|m4v|asf|asx|wax|wmv|wmx|ogv|3gp|3g2)$/.test( file.val() ) ) {
 			invalid(file, e);
 		}
