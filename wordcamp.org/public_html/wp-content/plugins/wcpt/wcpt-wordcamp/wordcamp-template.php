@@ -463,7 +463,7 @@ function wcpt_wordcamp_url ( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
-		return apply_filters( 'wcpt_get_wordcamp_url', get_post_meta( $wordcamp_id, 'URL', true ) );
+		return apply_filters( 'wcpt_get_wordcamp_url', set_url_scheme( get_post_meta( $wordcamp_id, 'URL', true ), 'https' ) );
 	}
 
 /**
