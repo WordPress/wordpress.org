@@ -46,7 +46,7 @@ class WordCamp_New_Site {
 						Create site in network
 					</label>
 
-					<span class="description">(e.g., http://city.wordcamp.org/<?php echo esc_html( date( 'Y' ) ); ?>)</span>
+					<span class="description">(e.g., https://city.wordcamp.org/<?php echo esc_html( date( 'Y' ) ); ?>)</span>
 				<?php endif; // domain_exists ?>
 			<?php endif; // current_user_can ?>
 
@@ -72,6 +72,7 @@ class WordCamp_New_Site {
 
 		if ( 'URL' == $key && 'wc-url' == $field_type && isset( $_POST[ $field_name ] ) ) {
 			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
+			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
 			update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
 
 			if ( isset( $_POST[ wcpt_key_to_str( 'create-site-in-network', 'wcpt_' ) ] ) && ! empty( $url ) ) {
@@ -171,6 +172,10 @@ class WordCamp_New_Site {
 		update_option( 'close_comments_for_old_posts', 1 );
 		update_option( 'close_comments_days_old',      30 );
 		update_option( 'wccsp_settings',               $coming_soon_settings );
+
+		// Make sure the new blog is https.
+		update_option( 'siteurl', set_url_scheme( get_option( 'siteurl' ), 'https' ) );
+		update_option( 'home', set_url_scheme( get_option( 'home' ), 'https' ) );
 	}
 
 	/**
