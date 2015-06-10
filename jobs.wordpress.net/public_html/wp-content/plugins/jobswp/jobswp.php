@@ -118,6 +118,8 @@ class Jobs_Dot_WP {
 		foreach ( array( 'the_content', 'the_title', 'single_post_title' ) as $filter )
 			add_filter( $filter,                      array( $this, 'WordPress_dangit' ) );
 
+		add_action( 'save_post_job',                  array( $this, 'email_job_poster' ), 10, 3 );
+		add_action( 'wp',                             array( $this, 'maybe_remove_job' ) );
 		$this->save_job();
 		$this->schedule_job_pruning();
 
@@ -518,6 +520,129 @@ class Jobs_Dot_WP {
 	}
 
 	/**
+	 * Generates a random token.
+	 *
+	 * Incorporates the job id to further ensure uniqueness and to facilitate
+	 * later use.
+	 *
+	 * @param int     $job_id The job post ID.
+	 * @return string The token.
+	 */
+	protected function generate_job_token( $job_id ) {
+		return $job_id . '|' . bin2hex( openssl_random_pseudo_bytes( 20 ) );
+	}
+
+	/**
+	 * Gets the published job with the given token.
+	 *
+	 * @param string         $token  The token.
+	 * @return WP_Post|false The job, or false if no matching job found.
+	 */
+	public function get_job_by_token( $token ) {
+		$job = false;
+
+		$parts = explode( '|', trim( $token ), 2 );
+
+		if ( count( $parts ) > 1 ) {
+			list( $job_id, $job_token ) = $parts;
+
+			$stored_job_token = get_post_meta( (int) $job_id, 'job_token', true );
+
+			if ( $token === $stored_job_token ) {
+				$job = get_post( (int) $job_id );
+			}
+		}
+
+		return $job;
+	}
+
+	/**
+	 * Handles front-end submission of a job removal request.
+	 */
+	public function maybe_remove_job() {
+		if ( isset( $_POST['removejob'] ) && 1 == $_POST['removejob'] ) {
+			check_admin_referer( 'jobswpremovejob' );
+			$has_errors    = false;
+			$this->success = false;
+
+			// Verify job token is provided.
+			if ( ! isset( $_POST['job_token'] ) || empty( $_POST['job_token'] ) ) {
+				$has_errors = true;
+			}
+
+			$has_errors = apply_filters( 'jobswp_remove_job_errors', $has_errors );
+
+			// Only query for job if no errors thus far.
+			if ( ! $has_errors ) {
+				$job = $this->get_job_by_token( $_POST['job_token'] );
+				if ( ! $job ) {
+					$has_errors = __( 'The provided job token does not match an open or pending job posting.', 'jobswp' );
+				}
+			}
+
+			if ( $has_errors ) {
+				$_POST['errors'] = $has_errors;
+			} else {
+				$this->success = true;
+			}
+
+			// If everything checks out, try to remove the job.
+			if ( $this->success ) {
+				$updated = $this->close_job( $job );
+
+				if ( is_wp_error( $updated ) || ! $updated ) {
+					$this->success = false;
+					$_POST['errors'] = __( 'Unable to remove job. Please try again or contact us for assistance.', 'jobswp' );
+				} else {
+					wp_safe_redirect( '/remove-a-job/?removedjob=1' );
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Emails the job poster after submission of their job posting.
+	 *
+	 * @param int     $post_ID Post ID.
+	 * @param WP_Post $post    Post object.
+	 * @param bool    $update  Whether this is an existing post being updated or not.
+	*/
+	public function email_job_poster( $post_id, $post, $update ) {
+		if ( ! $update ) {
+			$to      = get_post_meta( $post_id, 'email', true );
+			$title   = get_the_title( $post );
+			$subject = sprintf( 'Job submitted: %s', $title );
+			$token   = get_post_meta( $post_id, 'job_token', true );
+			$body    = <<<EMAIL
+Hi,
+
+Your job "%1\$s" has been successfully submitted to %2\$s. Please be patient as it may take our team of volunteer moderators 24-48 hours to review and publish it to the site.
+
+Take note of this special job token: %3\$s
+
+Your job will automatically be removed from the site after 21 days. If you wish to remove the job sooner than that, you can do so by using the job removal form at %4\$s and providing the job token provided above.
+
+Cheers.
+
+- The jobs.wordpress.net team.
+
+EMAIL;
+
+			$headers = '';
+			$headers['From'] = 'jobs.wordpress.net <jobs@wordpress.net>';
+
+			$body = sprintf( $body, $title, 'http://jobs.wordpress.net/', $token, 'http://jobs.wordpress.net/remove-a-job/' );
+
+			if ( $to ) {
+				wp_mail( $to, $subject, $body, $headers );
+			}
+		}
+
+		return $post_id;
+	}
+
+	/**
 	 * Saves a job posting submission, which is coming from the front-end by an
 	 * unverified visitor.
 	 */
@@ -556,6 +681,13 @@ class Jobs_Dot_WP {
 			// If everything checks out, create the job
 			if ( $this->success ) {
 				$job_id = $this->create_job();
+
+				// Generate and store a unique token for the job, primarily to be used by
+				// job posters to close their jobs themselves despite the site's lack of
+				// users.
+				$_POST['job_token'] = $this->generate_job_token( $job_id );
+				add_post_meta( $job_id, 'job_token', $_POST['job_token'], true );
+
 				if ( is_wp_error( $job_id ) ) {
 					$_POST['errors'] = $job_id->get_error_message();
 					$this->success = false;
