@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: JobsWP
-Version: 1.1
+Version: 1.2
 Plugin URI: http://jobs.wordpress.net
 Author: Scott Reilly
 Description: Functionality for jobs.wordpress.net
@@ -109,6 +109,11 @@ class Jobs_Dot_WP {
 		add_action( 'post_submitbox_start',           array( $this, 'post_submitbox_start' ) );
 		add_action( 'admin_action_close-job',         array( $this, 'handle_close_job' ) );
 		add_action( 'post_row_actions',               array( $this, 'post_row_actions' ), 10, 2 );
+
+		// For enabling admin job post type searches to also search custom fields.
+		add_filter( 'posts_join',                     array( $this, 'admin_search_job_posts_join' ), 10, 2 );
+		add_filter( 'posts_search',                   array( $this, 'admin_search_job_posts_search' ), 10, 2 );
+		add_filter( 'posts_request',                  array( $this, 'admin_search_job_posts_request' ), 10, 2 );
 
 		foreach ( array( 'the_content', 'the_title', 'single_post_title' ) as $filter )
 			add_filter( $filter,                      array( $this, 'WordPress_dangit' ) );
@@ -609,6 +614,112 @@ class Jobs_Dot_WP {
 			}
 			return $job_id;
 		}
+	}
+
+	/**
+	 * Indicates if the query is an admin search against the job post type.
+	 *
+	 * @param object $query The query object.
+	 * @return bool  True if the query is an admin search against the job post type, false otherwise.
+	 */
+	protected function is_admin_job_search( $query ) {
+		return is_admin() && 'edit.php' === $GLOBALS['pagenow'] && $query->is_search() && 'job' === $query->query['post_type'] && '' !== $query->query_vars['s'];
+	}
+
+	/**
+	 * Returns the SQL clauses to append to a query in order to query for
+	 * job-specific meta query.
+	 *
+	 * @param WP_Query $query The WP_Query instance.
+	 * @return array   Associative array of `JOIN` and `WHERE` SQL.
+	 */
+	protected function get_admin_search_job_meta_sql( $query ) {
+		global $wpdb;
+		$fields_to_search = array( 'first_name', 'last_name', 'email', 'company' );
+
+		$meta_query = array( 'relation' => 'OR' );
+
+		foreach( $fields_to_search as $field ) {
+			array_push( $meta_query, array(
+				'compare' => 'LIKE',
+				'key'     => $field,
+				'value'   => $query->query_vars['s'],
+			) );
+		}
+
+		return get_meta_sql( $meta_query, 'post', $wpdb->posts, 'ID', $query );
+	}
+
+
+	/**
+	 * Modifies the JOIN clause of the query for searches in the admin for the job
+	 * post type to include the postmeta table.
+	 *
+	 * @param string   $join  JOIN clause of the query.
+	 * @param WP_Query $query The WP_Query instance.
+	 * @return string
+	 */
+	public function admin_search_job_posts_join( $join, $query ) {
+		// Don't change anything if not an admin job search.
+		if ( ! $this->is_admin_job_search( $query ) ) {
+			return $join;
+		}
+
+		// Get the necessary JOIN clause needed for a meta search.
+		$meta_sql = $this->get_admin_search_job_meta_sql( $query );
+
+		return $join . $meta_sql['join'];
+	}
+
+	/**
+	 * Modifies the search SQL for searches in the admin for the job post type to
+	 * also search certain custom fields.
+	 *
+	 * @param string   $search Search SQL for WHERE clause
+	 * @param WP_Query $query  The WP_Query instance.
+	 * @return string
+	 */
+	public function admin_search_job_posts_search( $search, $query ) {
+		// Don't change anything if not an admin job search.
+		if ( ! $this->is_admin_job_search( $query ) ) {
+			return $search;
+		}
+
+		// Get the necessary WHERE clause for the meta fields to be searched.
+		$meta_sql = $this->get_admin_search_job_meta_sql( $query );
+		$where = $meta_sql['where'];
+
+		// Change the default AND to an OR.
+		if ( 0 === strpos( $where, ' AND ' ) ) {
+			$where = ' OR ' . substr( $where, 5 );
+		}
+
+		// Insert the meta query into the search SQL.
+		$search = substr( $search, 0, -3 ) . $where . '))';
+
+		return $search;
+	}
+
+	/**
+	 * Modifies the completed SQL for searches in the admin for the job post type
+	 * to ensure only distinct results are returned.
+	 *
+	 * @param string   $request The complete SQL query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return string
+	 */
+	public function admin_search_job_posts_request( $request, $query ) {
+		// Don't change anything if not an admin job search.
+		if ( ! $this->is_admin_job_search( $query ) ) {
+			return $request;
+		}
+
+		// Make the query distinct, unless it already is.
+		if ( 0 !== strpos( $request, 'SELECT DISTINCT' ) ) {
+			$request = 'SELECT DISTINCT' . substr( $request, 6 );
+		}
+
+		return $request;
 	}
 
 	/**
