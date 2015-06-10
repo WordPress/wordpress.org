@@ -1326,11 +1326,11 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	#logo {
 		text-align: center;
 	}
-	.container .main-navigation.grid_6 {
+	.container .main-navigation.grid_8 {
 		float: left;
 	}
 	.container .main-navigation a {
-		padding: 6px 16px;
+		padding: 0 6px;
 	}
 	#subhead {
 		padding: 10px 0;

@@ -23,11 +23,11 @@
 	<?php do_action( 'before' ); ?>
 	<header id="masthead" class="site-header" role="banner">
 	<div class="container">
-		<div class="site-branding grid_6">
+		<div class="site-branding grid_4">
 			<div id="logo"><a href="/"><strong>jobs</strong>.wordpress.net</a></div>
 		</div>
 
-		<nav id="site-navigation" class="main-navigation grid_6" role="navigation">
+		<nav id="site-navigation" class="main-navigation grid_8" role="navigation">
 			<h1 class="menu-toggle"><?php _e( 'Menu', 'jobswp' ); ?></h1>
 			<div class="screen-reader-text skip-link"><a href="#content" title="<?php esc_attr_e( 'Skip to content', 'jobswp' ); ?>"><?php _e( 'Skip to content', 'jobswp' ); ?></a></div>
 
