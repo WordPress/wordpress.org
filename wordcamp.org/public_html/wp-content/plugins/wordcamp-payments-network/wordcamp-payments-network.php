@@ -208,17 +208,19 @@ class WordCamp_Payments_Network_Tools {
 		require_once( __DIR__ . '/includes/class-list-table.php' );
 
 		self::$list_table = new WordCamp_Payments_Network_List_Table;
-		self::$list_table->set_view( self::get_current_tab() );
 	}
 
 	/**
 	 * Returns the current active tab in the UI.
 	 */
 	public static function get_current_tab() {
-		if ( isset( $_REQUEST['wcp-section'] ) )
-			return strtolower( $_REQUEST['wcp-section'] );
+		$tab = 'overdue';
 
-		return 'overdue';
+		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], array( 'pending', 'overdue', 'paid' ) ) ) {
+			$tab = $_REQUEST['wcp-section'];
+		}
+
+		return $tab;
 	}
 
 	/**

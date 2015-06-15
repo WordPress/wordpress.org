@@ -40,16 +40,6 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * This list table can display multiple views which are
-	 * essentially just filters. Use this method to set the appropriate view.
-	 */
-	public function set_view( $view ) {
-		$this->view = 'overdue';
-		if ( in_array( $view, array( 'pending', 'overdue', 'paid' ) ) )
-			$this->view = $view;
-	}
-
-	/**
 	 * Outputs inline CSS to be used with the list table.
 	 */
 	public function print_inline_css() {
@@ -73,6 +63,7 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		global $wpdb;
 
 		$sql = sprintf( "SELECT SQL_CALC_FOUND_ROWS blog_id, post_id FROM `%s` WHERE 1=1 ", WordCamp_Payments_Network_Tools::get_table_name() );
+		$view = WordCamp_Payments_Network_Tools::get_current_tab();
 		$where = '';
 		$orderby = '';
 		$limit = '';
@@ -80,13 +71,13 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		$orderby = 'created';
 		$order = 'desc';
 
-		if ( 'overdue' == $this->view ) {
+		if ( 'overdue' == $view ) {
 			$where .= $wpdb->prepare( " AND `status` = 'unpaid' AND `due` > 0 AND `due` <= %d ", time() );
 			$orderby = 'due';
 			$order = 'asc';
-		} elseif ( 'pending' == $this->view ) {
+		} elseif ( 'pending' == $view ) {
 			$where .= " AND `status` = 'unpaid' ";
-		} elseif ( 'paid' == $this->view ) {
+		} elseif ( 'paid' == $view ) {
 			$where .= " AND `status` = 'paid' ";
 		}
 
