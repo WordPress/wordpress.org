@@ -46,11 +46,11 @@ class WordCampOrganizerNags {
 			);
 		}
 
-		// The survey expires 2015-05-23 at 11:45pm EST
-		if ( time() < 1432350000 ) {
+		// The survey expires 2015-06-21 at 11:45pm UTC
+		if ( time() < 1434930300 ) {
 			wp_add_dashboard_widget(
 				'improving_tools_survey',
-				'WordCamp Organizer Survey',
+				'WordCamp Organizer Follow-Up Survey',
 				array( $this, 'render_tools_survey' )
 			);
 		}
@@ -211,12 +211,7 @@ class WordCampOrganizerNags {
 	public function render_tools_survey() {
 		?>
 
-		<p>We need feedback from WordCamp organizers to drive some decisions about improving WordCamp.org tools.</p>
-
-		<p>
-			Please <a href="https://make.wordpress.org/community/2015/05/05/wordcamp-organizer-survey/">take the survey</a>
-			so we can learn from your experiences.
-		</p>
+		<p>Please <a href="http://wordcampcentral.polldaddy.com/s/improving-wordcamp-org-tools-clarification">take this 1-question survey</a> to help clarify the results of the previous survey.
 
 		<?php
 	}
