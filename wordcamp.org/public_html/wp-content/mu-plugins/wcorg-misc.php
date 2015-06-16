@@ -22,17 +22,6 @@ function wcorg_close_comments_for_post_types( $post_types ) {
 add_filter( 'close_comments_for_post_types', 'wcorg_close_comments_for_post_types' );
 
 /*
- * Determine which Jetpack modules should be automatically activated when new sites are created
- */
-function wcorg_default_jetpack_modules( $modules ) {
-	$modules = array_diff( $modules, array( 'widget-visibility' ) );
-	array_push( $modules, 'contact-form', 'shortcodes', 'custom-css', 'subscriptions' );
-
-	return $modules;
-}
-add_filter( 'jetpack_get_default_modules', 'wcorg_default_jetpack_modules' );
-
-/*
  * We want to let organizers use shortcodes inside Text widgets
  */
 add_filter( 'widget_text', 'do_shortcode' );

@@ -1,11 +1,4 @@
 <?php
-/*
- * Plugin Name: Jetpack Publicize Tweaks
- * Description: Tweak the way that posts shared on social media services will be displayed
- * Version:     0.1
- * Author:      Brandon Kraft
- */
-
 
 /*
  * Open Graph Default Image.
@@ -46,3 +39,14 @@ function wc_twitter_sitetag( $site_tag ) {
 	return $site_tag;
 }
 add_filter( 'jetpack_twitter_cards_site_tag', 'wc_twitter_sitetag' );
+
+/*
+ * Determine which Jetpack modules should be automatically activated when new sites are created
+ */
+function wcorg_default_jetpack_modules( $modules ) {
+	$modules = array_diff( $modules, array( 'widget-visibility' ) );
+	array_push( $modules, 'contact-form', 'shortcodes', 'custom-css', 'subscriptions' );
+
+	return $modules;
+}
+add_filter( 'jetpack_get_default_modules', 'wcorg_default_jetpack_modules' );
