@@ -50,3 +50,8 @@ function wcorg_default_jetpack_modules( $modules ) {
 	return $modules;
 }
 add_filter( 'jetpack_get_default_modules', 'wcorg_default_jetpack_modules' );
+
+/*
+ * Enable Photon support for HTTPS URLs
+ */
+add_filter( 'jetpack_photon_reject_https', '__return_false' );
