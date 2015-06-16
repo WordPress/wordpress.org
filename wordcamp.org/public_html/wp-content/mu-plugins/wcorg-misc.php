@@ -147,6 +147,32 @@ function wcorg_subdomactories_redirect() {
 }
 add_action( 'template_redirect', 'wcorg_subdomactories_redirect' );
 
+/**
+ * Allow trusted WordCamp deputies to create new sites
+ *
+ * @param array  $required_capabilities The primitive capabilities that are required to perform the requested meta capability
+ * @param string $requested_capability  The requested meta capability
+ * @param int    $user_id               The user ID.
+ * @param array  $args                  Adds the context to the cap. Typically the object ID.
+ *
+ * @return array
+ */
+function wcorg_let_deputies_create_sites( $required_capabilities, $requested_capability, $user_id, $args ) {
+	if ( 'manage_sites' != $requested_capability ) {
+		return $required_capabilities;
+	}
+
+	$user = get_user_by( 'id', $user_id );
+	$trusted_deputies = array( 'brandondove', 'kcristiano' );
+
+	if ( is_a( $user, 'WP_User' ) && in_array( $user->user_login, $trusted_deputies ) ) {
+		$required_capabilities = array();
+	}
+
+	return $required_capabilities;
+}
+add_filter( 'map_meta_cap', 'wcorg_let_deputies_create_sites', 10, 4 );
+
 /*
  * Flush the rewrite rules on the current site.
  *
