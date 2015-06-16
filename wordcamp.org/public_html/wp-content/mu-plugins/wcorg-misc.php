@@ -166,7 +166,7 @@ function wcorg_let_deputies_create_sites( $required_capabilities, $requested_cap
 	$trusted_deputies = array(
 		'brandondove',
 		'kcristiano',
-		'trustedduputy',
+		'trusteddeputy',
 	);
 
 	if ( is_a( $user, 'WP_User' ) && in_array( $user->user_login, $trusted_deputies ) ) {
