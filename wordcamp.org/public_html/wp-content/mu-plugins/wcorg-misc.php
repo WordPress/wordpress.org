@@ -163,7 +163,11 @@ function wcorg_let_deputies_create_sites( $required_capabilities, $requested_cap
 	}
 
 	$user = get_user_by( 'id', $user_id );
-	$trusted_deputies = array( 'brandondove', 'kcristiano' );
+	$trusted_deputies = array(
+		'brandondove',
+		'kcristiano',
+		'trustedduputy',
+	);
 
 	if ( is_a( $user, 'WP_User' ) && in_array( $user->user_login, $trusted_deputies ) ) {
 		$required_capabilities = array();
