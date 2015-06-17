@@ -48,6 +48,8 @@ function get_whitelist() {
 		'training' => array(
 			'courtneydawn',
 			'liljimmi',
+			'bethsoderberg',
+			'courtneyengle',
 		),  
 		'wptv' => array(
 			'jerrysarcastic',
