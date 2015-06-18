@@ -83,6 +83,8 @@ add_action( 'widgets_init', __NAMESPACE__ . '\\widgets_init' );
 
 function init() {
 
+	register_nav_menus();
+
 	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
@@ -219,6 +221,13 @@ function rerun_empty_exact_search( $posts, $query ) {
 		$posts = $query->get_posts();
 	}
 	return $posts;
+}
+
+function register_nav_menus() {
+
+	\register_nav_menus( array(
+		'devhub-menu' => __( 'Developer Resources Menu', 'wporg' ),
+	) );
 }
 
 function method_permalink( $link, $post ) {

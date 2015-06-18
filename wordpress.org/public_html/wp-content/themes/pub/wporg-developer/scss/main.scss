@@ -47,6 +47,25 @@
 		margin-top: 1em;
 	}
 
+	.devhub-menu .menu {
+		list-style: none;
+		float: right;
+		font-size: 14px;
+		font-weight: bold;
+		padding-top: 22px;
+		margin-right: 15px;
+
+		li {
+			display: inline;
+			padding-left: 20px;
+		}
+
+		a {
+			color: #555;
+			font-weight: 400;
+		}
+	}
+
 	a {
 		color: #21759b;
 	}
@@ -354,16 +373,6 @@
 	iframe,
 	object {
 		max-width: 100%;
-	}
-
-	/* =Comments
-	----------------------------------------------- */
-
-	.comment-content a {
-		word-wrap: break-word;
-	}
-	.bypostauthor {
-		background: #eee;
 	}
 
 
@@ -1102,114 +1111,167 @@
 	}
 
 	/* Comments */
-	.comment-list,
-	.comment-list ol {
-		list-style: none;
-		margin: 0 0 1.5em 0;
-		padding: 0;
+	.comment-content a {
+		word-wrap: break-word;
 	}
 
-	.comment-list li {
-		padding: 2rem 1.5rem 1rem;
-		border: 0 solid #eee;
-		border-bottom-width: 1px;
-		background: #fff;
+	// User contributed notes
+	&.single-wp-parser-function, &.single-wp-parser-method, &.single-wp-parser-hook {
+		.comment-list,
+		.comment-list ol {
+			list-style: none;
+			margin: 0 0 1.5em 0;
+			padding: 0;
+		}
 
-		&:first-child {
-			padding-top: 1rem;
+		.comment-list li {
+			padding: 2rem 1.5rem 1rem;
+			border: 0 solid #eee;
+			border-bottom-width: 1px;
+			background: #fff;
+
+			&:first-child {
+				padding-top: 1rem;
+			}
+		}
+
+		.comment-list .avatar {
+			float: left;
+			width: 2.5em;
+			height: 2.5em;
+			margin: -0.5em 1em 0.5em 0;
+			padding: 0.125em;
+			border: 1px solid #eee;
+		}
+
+		.comment-author-attribution {
+			font-weight: bold;
+		}
+
+		.comment-meta {
+			margin: 0 0 1.5em 0;
+			font-size: 0.75em;
+		}
+
+		.comment-meta .comment-author cite,
+		.comment-meta .comment-author cite a {
+		}
+		.comment-meta a {
+		}
+
+		.comment-meta a:hover {
+		}
+
+		.comment-content {
+			margin-left: 60px;
+			margin-left: 3.75rem;
+			margin-left: 0;
+			clear: both;
+		}
+
+		.comment-content ol {
+			list-style: decimal inside;
+			margin: 0 0 1.5em 0;
+			border-top: none;
+			margin: 0 0 1.5em 1.5em;
+			padding: 0;
+		}
+
+		.comment-content ul {
+			list-style: square inside;
+			margin: 0 0 1.5em 0;
+			border-top: none;
+			margin: 0 0 1.5em 1.5em;
+			padding: 0;
+		}
+
+		.comment-content li {
+			border: none;
+			padding: 0;
+		}
+
+		.comment-text {
+		}
+
+		#respond {
+			overflow: hidden;
+		}
+
+		#respond .log-in-out {
+
+		}
+
+		#respond .log-in-out a {
+			font-style: italic;
+		}
+
+		#reply-title small a {
+			font-style: italic;
+		}
+
+		#respond label {
+		}
+
+		#respond p.req label {
+		}
+
+		#respond span.required {
+		}
+
+		#respond #submit {
+			float: left;
+			margin: 0 0 1.5em;
+		}
+
+		.comment-author {
+			float: left;
 		}
 	}
 
-	.comment-list .avatar {
-		float: left;
-		width: 2.5em;
-		height: 2.5em;
-		margin: -0.5em 1em 0.5em 0;
-		padding: 0.125em;
-		border: 1px solid #eee;
-	}
+	&.single-post {
+		.comment-list,
+		.comment-list ol {
+			list-style: none;
+			margin: 1.5em 0;
+			padding: 0;
+		}
 
-	.comment-author-attribution {
-		font-weight: bold;
-	}
+		.comment-list {
+			li {
+				margin: 1.5em 0;
+				padding: 1em 0 0 0;
+				border-top: 1px solid #ddd;
+			}
 
-	.comment-meta {
-		margin: 0 0 1.5em 0;
-		font-size: 0.75em;
-	}
+			p {
+				margin: 0 0 0 42px;
+			}
 
-	.comment-meta .comment-author cite,
-	.comment-meta .comment-author cite a {
-	}
-	.comment-meta a {
-	}
+			.alt {
+				background: inherit;
+			}
+		}
 
-	.comment-meta a:hover {
-	}
+		.comment-meta {
+			font-size: 0.65em;
+			color: #888;
+			float: right;
+			margin-top: -15px;
 
-	.comment-content {
-		margin-left: 60px;
-		margin-left: 3.75rem;
-		margin-left: 0;
-		clear: both;
-	}
+			a {
+			}
+		}
 
-	.comment-content ol {
-		list-style: decimal inside;
-		margin: 0 0 1.5em 0;
-		border-top: none;
-		margin: 0 0 1.5em 1.5em;
-		padding: 0;
-	}
+		.comment-author {
+			img {
+				float: left;
+				margin: 0 10px 0 0;
+			}
+		}
 
-	.comment-content ul {
-		list-style: square inside;
-		margin: 0 0 1.5em 0;
-		border-top: none;
-		margin: 0 0 1.5em 1.5em;
-		padding: 0;
-	}
-
-	.comment-content li {
-		border: none;
-		padding: 0;
-	}
-
-	.comment-text {
-	}
-
-	#respond {
-		overflow: hidden;
-	}
-
-	.comment-list #respond {
-		margin: 1.5em 0 0;
-	}
-
-	#respond .log-in-out {
-
-	}
-
-	#respond .log-in-out a {
-		font-style: italic;
-	}
-
-	#reply-title small a {
-		font-style: italic;
-	}
-
-	#respond label {
-	}
-
-	#respond p.req label {
-	}
-
-	#respond span.required {
-	}
-
-	#respond #submit {
-		float: left;
-		margin:0 0 1.5em;
+		.comments-area {
+			margin: 1.5em 0 0 0;
+		}
 	}
 
 	/*
@@ -1308,9 +1370,6 @@
 		}
 	}
 
-	.comment-author {
-		float: left;
-	}
 	.user-note-voting {
 		font-size: 1.5em;
 		clear: left;
@@ -1341,6 +1400,13 @@
 		/* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
 		max-width: 100% !important;
 		width: inherit !important;
+	}
+
+	&.archive, &.blog {
+		.hentry {
+			padding: 0 0 1.5em 0;
+			border-bottom: 1px solid #ddd;
+		}
 	}
 }
 

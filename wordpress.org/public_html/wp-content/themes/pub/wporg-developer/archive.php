@@ -22,7 +22,7 @@ get_header(); ?>
 				<?php /* Start the Loop */ ?>
 				<?php while ( have_posts() ) : the_post(); ?>
 
-					<?php get_template_part( 'content', ( is_parsed_post_type() ? 'reference-archive' : '' ) ); ?>
+					<?php get_template_part( 'content', ( is_parsed_post_type() ? 'reference-archive' : get_post_type() ) ); ?>
 
 				<?php endwhile; ?>
 

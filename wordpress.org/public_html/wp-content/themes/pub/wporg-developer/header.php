@@ -22,6 +22,12 @@ require WPORGPATH . 'header.php';
 					<a href="<?php echo esc_url( DevHub\get_site_section_url() ); ?>" rel="home"><?php echo DevHub\get_site_section_title(); ?></a>
 				</<?php echo $tag; ?>>
 			</div>
+			<div class="devhub-menu">
+				<?php wp_nav_menu( array(
+					'theme_location'  => 'devhub-menu',
+					'container_class' => 'menu-container',
+				) ); ?>
+			</div>
 		</div><!-- .inner-wrap -->
 	</header><!-- #masthead -->
 	<?php

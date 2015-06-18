@@ -39,7 +39,11 @@ if ( post_password_required() ) {
 				 * define wporg_developer_comment() and that will be used instead.
 				 * See wporg_developer_comment() in inc/template-tags.php for more.
 				 */
-				wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ) );
+				if ( is_singular( 'post' ) ) {
+					wp_list_comments();
+				} else {
+					wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ) );
+				}
 			?>
 		</ol><!-- .comment-list -->
 
@@ -53,26 +57,32 @@ if ( post_password_required() ) {
 
 	<?php endif; // have_comments() ?>
 
-	<?php if ( DevHub\can_user_post_note( false, get_the_ID() ) ) : ?>
+	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( false, get_the_ID() ) ) : ?>
 
-	<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
+		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
 
-	<?php comment_form( array(
-		'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
-		'comment_notes_after' => '<p>' .
-			__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
-			'</p><p>' .
-			__( 'Do not use this form for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' ) .
-			'</p><p>' .
-			__( 'You can enter text and code. Use the php, js, or inline code buttons to wrap code snippets.', 'wporg' ) .
-			'</p><p class="user-notes-are-gpl">' .
-			sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
-			'</p>',
-		'label_submit'        => __( 'Add Note', 'wporg' ),
-		'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
-		'title_reply'         =>  '', //'Add Example'
-	) ); ?>
+		<?php comment_form( array(
+			'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
+			'comment_notes_after' => '<p>' .
+				__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
+				'</p><p>' .
+				__( 'Do not use this form for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' ) .
+				'</p><p>' .
+				__( 'You can enter text and code. Use the php, js, or inline code buttons to wrap code snippets.', 'wporg' ) .
+				'</p><p class="user-notes-are-gpl">' .
+				sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
+				'</p>',
+			'label_submit'        => __( 'Add Note', 'wporg' ),
+			'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
+			'title_reply'         =>  '', //'Add Example'
+		) ); ?>
 
+	<?php endif; ?>
+
+	<?php if ( ! \DevHub\is_parsed_post_type() && comments_open() ) : ?>
+		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Leave a reply', 'wporg' ); ?></a></p>
+
+		<?php comment_form(); ?>
 	<?php endif; ?>
 
 </div><!-- #comments -->

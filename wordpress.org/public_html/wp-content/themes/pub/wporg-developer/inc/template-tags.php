@@ -1127,9 +1127,7 @@ namespace DevHub {
 	function can_user_post_note( $open, $post ) {
 		// Only proceed if for a parsed post type.
 		if ( ! is_parsed_post_type( get_post_type( $post ) ) ) {
-			// Temporarily disable commenting that isn't for a note since various
-			// changes need to take place to enable regular commenting.
-			return false; //$open;
+			return $open;
 		}
 
 		// Permit default logic to be overridden via filter that returns value other than null.

@@ -15,7 +15,7 @@ get_header(); ?>
 
 		<?php while ( have_posts() ) : the_post(); ?>
 
-			<?php get_template_part( 'content', ( is_parsed_post_type() ? 'reference' : '' ) ); ?>
+			<?php get_template_part( 'content', ( is_parsed_post_type() ? 'reference' : get_post_type() ) ); ?>
 
 			<?php //wporg_developer_post_nav(); ?>
 

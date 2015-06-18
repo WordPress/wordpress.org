@@ -4,9 +4,8 @@
  */
 
 ( function( $ ) {
-	$( '#respond, #add-user-note' ).toggle();
-	$( '#add-user-note' ).click( function( e ) {
-		e.preventDefault();
+
+	function showCommentForm() {
 		$( '#respond, #add-user-note' ).toggle();
 
 		if ( pos = $( '#submit' ).position() ) {
@@ -19,7 +18,18 @@
 				$( 'html,body' ).animate( {scrollTop:pos.top - (window.innerHeight || document.documentElement.clientHeight) + $( '#submit' ).height() + 30}, 1000 );
 			}
 		}
+	}
+
+	$( '#respond, #add-user-note' ).toggle();
+	$( '#add-user-note' ).click( function( e ) {
+		e.preventDefault();
+
+		showCommentForm();
 	} );
+
+	if ( '#respond' === document.location.hash ) {
+		showCommentForm();
+	}
 
 	// Add php and js buttons to QuickTags.
 	QTags.addButton( 'php', 'php', '[php]', '[/php]' );
