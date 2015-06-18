@@ -188,7 +188,7 @@ class DevHub_Registrations {
 			'public'                => true,
 			// Hierarchical x 2 to enable (.+) rather than ([^/]+) for rewrites.
 			'hierarchical'          => true,
-			'rewrite'               => array( 'slug' => 'reference/files', 'hierarchical' => true ),
+			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/files', 'hierarchical' => true ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
 		) );
@@ -198,7 +198,7 @@ class DevHub_Registrations {
 			'hierarchical'          => true,
 			'label'                 => '@package',
 			'public'                => true,
-			'rewrite'               => array( 'slug' => 'reference/package' ),
+			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/package' ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
 		) );
@@ -208,7 +208,7 @@ class DevHub_Registrations {
 			'hierarchical'          => true,
 			'label'                 => __( '@since', 'wporg' ),
 			'public'                => true,
-			'rewrite'               => array( 'slug' => 'reference/since' ),
+			'rewrite'               => array( 'with_front' => false, 'slug' => 'reference/since' ),
 			'sort'                  => false,
 			'update_count_callback' => '_update_post_term_count',
 		) );
