@@ -60,11 +60,7 @@ function user_is_trusted_deputy( $user_id ) {
 		499931,   // karenalma
 	);
 
-	if ( in_array( $user_id, $trusted_deputies ) ) {
-		return true;
-	} else {
-		return false;
-	}
+	return in_array( $user_id, $trusted_deputies );
 }
 
 /**
@@ -90,11 +86,7 @@ function is_allowed_capability( $capability, $dependent_capabilities ) {
 		}
 	}
 
-	if ( $allowed ) {
-		return true;
-	} else {
-		return false;
-	}
+	return $allowed;
 }
 
 /**
