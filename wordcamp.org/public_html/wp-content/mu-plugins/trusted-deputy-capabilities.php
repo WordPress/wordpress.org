@@ -27,9 +27,10 @@ namespace WordCamp\Trusted_Deputy_Capabilities;
  * @return array
  */
 function allow_trusted_deputy_capabilities( $required_capabilities, $requested_capability, $user_id, $args ) {
+	global $trusted_deputies;
 	$allow_capability = true;
 
-	if ( ! user_is_trusted_deputy( $user_id ) ) {
+	if ( ! in_array( $user_id, $trusted_deputies ) ) {
 		$allow_capability = false;
 	} else if ( in_array( 'do_not_allow', $required_capabilities ) ) {
 		$allow_capability = false;
@@ -44,24 +45,6 @@ function allow_trusted_deputy_capabilities( $required_capabilities, $requested_c
 	return $required_capabilities;
 }
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_trusted_deputy_capabilities', 10, 4 );
-
-/**
- * Determine if the given user is a trusted Deputy
- *
- * @param int $user_id
- *
- * @return bool
- */
-function user_is_trusted_deputy( $user_id ) {
-	$trusted_deputies = array(
-		642041,   // brandondove
-		385876,   // kcristiano
-		14470969, // trusteddeputy
-		499931,   // karenalma
-	);
-
-	return in_array( $user_id, $trusted_deputies );
-}
 
 /**
  * Determine if the given capability should be allowed for trusted Deputies
