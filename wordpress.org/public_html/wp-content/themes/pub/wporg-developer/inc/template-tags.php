@@ -603,6 +603,9 @@ namespace DevHub {
 		if ( $tags ) {
 			$encountered_optional = false;
 			foreach ( $tags as $tag ) {
+				// Fix unintended markup introduced by parser.
+				$tag = str_replace( array( '<strong>', '</strong>' ), '__', $tag );
+
 				if ( ! empty( $tag['name'] ) && 'param' == $tag['name'] ) {
 					$params[ $tag['variable'] ] = $tag;
 					$types = array();
