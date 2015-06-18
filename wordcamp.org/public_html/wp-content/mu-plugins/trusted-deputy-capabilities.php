@@ -57,6 +57,7 @@ function user_is_trusted_deputy( $user_id ) {
 		642041,   // brandondove
 		385876,   // kcristiano
 		14470969, // trusteddeputy
+		499931,   // karenalma
 	);
 
 	if ( in_array( $user_id, $trusted_deputies ) ) {
