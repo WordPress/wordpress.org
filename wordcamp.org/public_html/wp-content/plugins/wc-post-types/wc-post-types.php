@@ -54,6 +54,8 @@ class WordCamp_Post_Types_Plugin {
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 
 		add_filter( 'dashboard_glance_items', array( $this, 'glance_items' ) );
+		add_filter( 'option_default_comment_status', array( $this, 'default_comment_ping_status' ) );
+		add_filter( 'option_default_ping_status', array( $this, 'default_comment_ping_status' ) );
 	}
 
 	function init() {
@@ -1712,7 +1714,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_speaker', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'speaker', 'with_front' => true ),
-			'supports'          => array( 'title', 'editor', 'revisions' ),
+			'supports'          => array( 'title', 'editor', 'revisions', 'comments' ),
 			'menu_position'     => 20,
 			'public'            => true,
 			'show_ui'           => true,
@@ -2032,6 +2034,20 @@ class WordCamp_Post_Types_Plugin {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Comments and pings on speakers closed by default.
+	 *
+	 * @param string $status Default comment status.
+	 * @return string Resulting status.
+	 */
+	public function default_comment_ping_status( $status ) {
+		$screen = get_current_screen();
+		if ( ! empty( $screen->post_type ) && $screen->post_type == 'wcb_speaker' )
+			$status = 'closed';
+
+		return $status;
 	}
 }
 

@@ -22,7 +22,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 		// Initialize only if theme requires.
 		if ( in_array( $this->stylesheet, $compat_themes ) || in_array( $this->template, $compat_themes ) ) {
 			$old_site_id         = get_current_blog_id() <= apply_filters( 'wcb_back_compat_max_site_id', 528 );
-			$old_site_exceptions = array( 465, 496, 514, 518 ); // denver.wordcamp.org/2015, seattle.wordcamp.org/2015-experienced, montreal.wordcamp.org/2015, montreal.wordcamp.org/2015-fr
+			$old_site_exceptions = array( 465, 496, 514, 518, 504 ); // denver.wordcamp.org/2015, seattle.wordcamp.org/2015-experienced, montreal.wordcamp.org/2015, montreal.wordcamp.org/2015-fr, europe.wordcamp.org/2015
 			$old_site_excepted   = in_array( get_current_blog_id(), apply_filters( 'wcb_back_compat_site_id_exceptions', $old_site_exceptions ) );
 
 			// Substitute back-compat shortcodes on older sites, but let new sites use the real ones
