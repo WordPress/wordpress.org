@@ -1,5 +1,7 @@
 <?php
 
+namespace WordCamp\Jetpack_Tweaks;
+
 /*
  * Open Graph Default Image.
  *
@@ -55,3 +57,23 @@ add_filter( 'jetpack_get_default_modules', 'wcorg_default_jetpack_modules' );
  * Enable Photon support for HTTPS URLs
  */
 add_filter( 'jetpack_photon_reject_https', '__return_false' );
+
+/**
+ * Always automatically connect new sites to WordPress.com
+ *
+ * The UI for the auto-connect option is currently commented out in Jetpack. You can enable the setting manually,
+ * but it will get overridden if you save the settings from the UI, because the form field is missing.
+ *
+ * @todo Remove this when the UI for the setting is launched.
+ *
+ * @param array $new_value
+ * @param array $old_value
+ *
+ * @return array
+ */
+function auto_connect_new_sites( $new_value, $old_value ) {
+	$new_value['auto-connect'] = 1;
+
+	return $new_value;
+}
+add_filter( 'pre_update_site_option_jetpack-network-settings', __NAMESPACE__ . '\auto_connect_new_sites', 10, 2 );
