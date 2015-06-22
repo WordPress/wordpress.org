@@ -99,7 +99,20 @@ class WordCamp_New_Site {
 		}
 		$path = isset( $url['path'] ) ? $url['path'] : '';
 
-		$this->new_site_id = create_empty_blog( $url['host'], $path, 'WordCamp Event', 1 );
+		$current_blog_id_before_new_blog = get_current_blog_id();
+
+		$wordcamp_meta     = get_post_custom( $wordcamp_id );
+		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
+		$this->new_site_id = wpmu_create_blog( $url['host'], $path, 'WordCamp Event', $lead_organizer->ID );
+
+		/*
+		 * Work around for https://github.com/Automattic/jetpack/issues/2280
+		 * @todo - remove this after that is fixed
+		 */
+		if ( get_current_blog_id() != $current_blog_id_before_new_blog ) {
+			restore_current_blog();
+		}
+
 		if ( is_int( $this->new_site_id ) ) {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
 			do_action( 'wcor_wordcamp_site_created', $wordcamp_id );
@@ -107,6 +120,23 @@ class WordCamp_New_Site {
 			// Configure the new site at priority 11, after all the custom fields on the `wordcamp` post have been saved, so that we don't use outdated values
 			add_action( 'save_post', array( $this, 'configure_new_site' ), 11, 2 );
 		}
+	}
+
+	/**
+	 * Get the requested user, but fall back to the current user
+	 *
+	 * @param string $username
+	 *
+	 * @return WP_User
+	 */
+	protected function get_user_or_current_user( $username ) {
+		$lead_organizer = get_user_by( 'login', $username );
+
+		if ( ! $lead_organizer ) {
+			$lead_organizer = wp_get_current_user();
+		}
+
+		return $lead_organizer;
 	}
 
 	/**
@@ -128,11 +158,7 @@ class WordCamp_New_Site {
 
 		switch_to_blog( $this->new_site_id );
 
-		$lead_organizer = get_user_by( 'login', $meta['WordPress.org Username'][0] );
-		if ( ! $lead_organizer ) {
-			$lead_organizer = wp_get_current_user();
-		}
-		add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'administrator' );
+		$lead_organizer = $this->get_user_or_current_user( $meta['WordPress.org Username'][0] );
 
 		activate_plugins( array(
 			'camptix/camptix.php',
