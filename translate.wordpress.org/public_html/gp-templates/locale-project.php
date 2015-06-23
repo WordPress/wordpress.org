@@ -4,7 +4,7 @@ gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/languages', __( 'Locales' ) );
 $breadcrumb[] = gp_link_get( gp_url_join( '/languages', $locale_slug, $set_slug), esc_html( $locale->english_name ) );
-$breadcrumb[] = $sub_project->name . '' . $project->name;
+$breadcrumb[] = $sub_project->name;
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
 ?>
