@@ -34,18 +34,20 @@ gp_tmpl_header();
 					<li class="code"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $wp_locale ) ?></li>
 				</ul>
 				<div class="contributors">
-					<span class="dashicons dashicons-admin-users"></span><br />
 					<?php
-					$contributors = isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0;
-					echo gp_link_get( 'https://make.wordpress.org/polyglots/teams/?locale=' . $wp_locale, $contributors );
+					$contributors = sprintf(
+						'<span class="dashicons dashicons-admin-users"></span><br />%s',
+						isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
+					);
+					echo gp_link_get( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale, $contributors );
 					?>
 				</div>
 				<div class="percent">
 					<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
 				</div>
 				<div class="locale-button">
-					<div class="button">
-						<?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), "Contribute Translation" ) ?>
+					<div class="button contribute-button">
+						<?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), 'Contribute Translation' ) ?>
 					</div>
 				</div>
 			</div>
@@ -55,8 +57,8 @@ gp_tmpl_header();
 	<script>
 		jQuery( document ).ready( function( $ ) {
 			$rows = $( '#locales' ).find( '.locale' );
-			$( '#locales-filter' ).bind( 'change keyup input',function() {
-				var words = this.value.toLowerCase().split(' ');
+			$( '#locales-filter' ).on( 'input keyup',function() {
+				var words = this.value.toLowerCase().split( ' ' );
 
 				if ( '' === this.value.trim() ) {
 					$rows.show();

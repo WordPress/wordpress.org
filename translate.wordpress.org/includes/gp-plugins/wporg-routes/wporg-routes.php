@@ -30,10 +30,11 @@ class GP_WPorg_Routes extends GP_Plugin {
 		unset( GP::$router->urls['get:/languages'] );
 
 		GP::$router->add( '/', array( 'GP_WPorg_Route_Index', 'get_index' ) );
-		GP::$router->add( '/languages', array( 'GP_WPorg_Route_Locale', 'get_locales' ) );
+		GP::$router->add( "/languages/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
 		GP::$router->add( "/languages/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
 		GP::$router->add( "/languages/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
 		GP::$router->add( "/languages/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->add( '/languages', array( 'GP_WPorg_Route_Locale', 'get_locales' ) );
 	}
 }
 
