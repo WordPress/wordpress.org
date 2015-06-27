@@ -59,7 +59,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		$project_status = $project_icons = array();
 		foreach ( $sub_projects as $key => $sub_project ) {
 			$status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
-			if ( ! $status->sub_projects_count ) {
+			if ( ! $status->all_count ) {
 				unset( $sub_projects[ $key ] );
 			}
 
