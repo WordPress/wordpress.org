@@ -25,9 +25,6 @@ class DevHub_User_Submitted_Content {
 		// Disable pings.
 		add_filter( 'pings_open',                       '__return_false' );
 
-		// Restricts commenting to logged in users.
-		add_filter( 'comments_open',                    array( __CLASS__, 'prevent_invalid_comment_submissions' ), 10, 2 );
-
 		// Sets whether submitting notes is open for the user
 		add_filter( 'comments_open',                    '\DevHub\\can_user_post_note', 10, 2 );
 
@@ -76,20 +73,6 @@ class DevHub_User_Submitted_Content {
 				wp_enqueue_script( 'comment-reply' );
 			}
 		}
-	}
-
-	/**
-	 * Disables commenting to invalid or non-users.
-	 *
-	 * @param bool  $status Default commenting status for post.
-	 * @return bool False if commenter isn't a user, otherwise the passed in status.
-	 */
-	public static function prevent_invalid_comment_submissions( $status, $post_id ) {
-		if ( $_POST && ( ! is_user_logged_in() || ! is_user_member_of_blog() ) ) {
-			return false;
-		}
-
-		return $status;
 	}
 
 	/**
