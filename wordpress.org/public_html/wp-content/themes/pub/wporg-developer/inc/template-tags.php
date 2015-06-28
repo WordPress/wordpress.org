@@ -1122,7 +1122,7 @@ namespace DevHub {
 	 * By default, the ability to post notes is restricted to members of the
 	 * blog.
 	 *
-	 * @param  bool    $open If the user can post comments in general. Disregarded.
+	 * @param  bool    $open If the user can post comments in general.
 	 * @param  WP_Post $post Post ID or post object.
 	 *
 	 * @return bool True if the user can post a note.
@@ -1138,8 +1138,7 @@ namespace DevHub {
 			return $can;
 		}
 
-		// Default to limiting ability to post notes to members of the blog.
-		return is_user_member_of_blog();
+		return $open;
 	}
 
 	/**

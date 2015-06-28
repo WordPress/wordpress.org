@@ -57,7 +57,7 @@ if ( post_password_required() ) {
 
 	<?php endif; // have_comments() ?>
 
-	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( false, get_the_ID() ) ) : ?>
+	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( true, get_the_ID() ) ) : ?>
 
 		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
 
@@ -73,7 +73,10 @@ if ( post_password_required() ) {
 				sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
 				'</p>',
 			'label_submit'        => __( 'Add Note', 'wporg' ),
-			'must_log_in'         => '<p>' . sprintf( __( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ), 'https://wordpress.org/support/bb-login.php' ) . '</p>',
+			'must_log_in'         => '<p>' . sprintf(
+				__( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ),
+				'https://wordpress.org/support/bb-login.php?redirect_to=' . urlencode( get_comments_link() )
+			) . '</p>',
 			'title_reply'         =>  '', //'Add Example'
 		) ); ?>
 
