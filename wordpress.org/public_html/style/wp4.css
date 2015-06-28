@@ -19,6 +19,11 @@ body {
 
 code, pre { font-family: Consolas, Monaco, "Courier New", Courier, monospace; color: #000; }
 
+a code,
+a pre {
+	color: inherit;
+}
+
 pre {
 	background: #f3f3f7;
 	border: 1px solid #dedee3;
