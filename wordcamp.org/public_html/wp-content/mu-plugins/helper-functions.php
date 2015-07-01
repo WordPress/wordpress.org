@@ -49,6 +49,31 @@ function get_wordcamp_post() {
 }
 
 /**
+ * Find the site that corresponds to the given `wordcamp` post
+ *
+ * @param WP_Post $wordcamp_post
+ *
+ * @return mixed An integer if successful, or boolean false if failed
+ */
+function get_wordcamp_site_id( $wordcamp_post ) {
+	switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
+
+	if ( ! $site_id = get_post_meta( $wordcamp_post->ID, '_site_id', true ) ) {
+		$url = parse_url( get_post_meta( $wordcamp_post->ID, 'URL', true ) );
+
+		if ( isset( $url['host'] ) && isset( $url['path'] ) ) {
+			if ( $site = get_site_by_path( $url['host'], $url['path'] ) ) {
+				$site_id = $site->blog_id;
+			}
+		}
+	}
+
+	restore_current_blog();
+
+	return $site_id;
+}
+
+/**
  * Get a consistent WordCamp name in the 'WordCamp [Location] [Year]' format.
  *
  * The results of bloginfo( 'name' ) don't always contain the year, but the title of the site's corresponding
