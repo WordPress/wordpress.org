@@ -18,7 +18,6 @@ class WCP_Payment_Request {
 		// Saving posts
 		add_filter( 'wp_insert_post_data',    array( $this, 'update_request_status' ), 10, 2 );
 		add_action( 'save_post',              array( $this, 'save_payment' ), 10, 2 );
-		add_action( 'transition_post_status', array( $this, 'notify_central_of_new_requests' ), 10, 3 );
 		add_filter( 'map_meta_cap',           array( $this, 'modify_capabilities' ), 10, 4 );
 
 		// Columns
@@ -706,51 +705,6 @@ class WCP_Payment_Request {
 				delete_post_meta( $post_id, '_camppayments_' . $field );
 			}
 		}
-	}
-
-	/**
-	 * Notify WordCamp Central that a new request has been made.
-	 *
-	 * @param string $new_status
-	 * @param string $old_status
-	 * @param WP_Post $post
-	 */
-	public function notify_central_of_new_requests( $new_status, $old_status, $post ) {
-		/** @var WP_User $requester */
-
-		if ( ! $this->post_edit_is_actionable( $post ) ) {
-			return;
-		}
-
-		if ( 'unpaid' != $new_status || 'unpaid' == $old_status ) {
-			return;
-		}
-
-		$requester = get_user_by( 'id', $post->post_author );
-
-		$message = sprintf(
-			"A new payment request has been made.
-
-			WordCamp: %s
-			Item: %s
-			Due Date: %s
-			Requester: %s
-
-			View details: %s",
-
-			get_bloginfo( 'name' ),
-			$post->post_title,
-			$_POST['due_by'],
-			$requester->get( 'display_name' ),
-			admin_url( 'post.php?post='. $post->ID .'&action=edit' )
-		);
-		$message = str_replace( "\t", '', $message );
-
-		$headers = array(
-			'Reply-To: ' . $requester->get( 'user_email' ),
-		);
-
-		wp_mail( 'support@wordcamp.org', 'New Payment Request: ' . $post->post_title, $message, $headers );
 	}
 
 	/**
