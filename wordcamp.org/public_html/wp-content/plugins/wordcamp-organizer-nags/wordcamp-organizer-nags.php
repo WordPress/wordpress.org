@@ -14,7 +14,7 @@ class WordCampOrganizerNags {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'wp_dashboard_setup',           array( $this, 'create_dashboard_widgets' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'create_dashboard_widgets' ) );
 	}
 
 	/**
