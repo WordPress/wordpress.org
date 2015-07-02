@@ -16,7 +16,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 			'classname' => 'wcb_widget_sponsors',
 			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcb_sponsors', __( 'Sponsors', 'wordcamporg' ), $widget_ops );
+		WP_Widget::__construct( 'wcb_sponsors', __( 'Sponsors', 'wordcamporg' ), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -112,7 +112,7 @@ class WCPT_Widget_Speakers extends WP_Widget {
 			'classname' => 'wcpt_widget_speakers',
 			'description' => __( 'Your WordCamp&#8217;s Speakers', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcpt_speakers', __( 'Speakers', 'wordcamporg' ), $widget_ops );
+		WP_Widget::__construct( 'wcpt_speakers', __( 'Speakers', 'wordcamporg' ), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -214,7 +214,7 @@ class WCPT_Widget_Sessions extends WP_Widget {
 			'classname' => 'wcpt_widget_sessions',
 			'description' => __( 'Show off your WordCamp sessions', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcpt_sessions', __( 'Sessions', 'wordcamporg' ), $widget_ops );
+		WP_Widget::__construct( 'wcpt_sessions', __( 'Sessions', 'wordcamporg' ), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -319,7 +319,7 @@ class WCPT_Widget_Organizers extends WP_Widget {
 			'classname' => 'wcpt_widget_organizers',
 			'description' => __( 'Display your organizing team in the sidebar', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcpt_organizers', __( 'Organizers', 'wordcamporg' ), $widget_ops );
+		WP_Widget::__construct( 'wcpt_organizers', __( 'Organizers', 'wordcamporg' ), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
