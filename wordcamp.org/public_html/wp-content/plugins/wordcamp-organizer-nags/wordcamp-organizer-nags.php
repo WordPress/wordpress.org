@@ -46,14 +46,11 @@ class WordCampOrganizerNags {
 			);
 		}
 
-		// The survey expires 2015-06-21 at 11:45pm UTC
-		if ( time() < 1434930300 ) {
-			wp_add_dashboard_widget(
-				'improving_tools_survey',
-				'WordCamp Organizer Follow-Up Survey',
-				array( $this, 'render_tools_survey' )
-			);
-		}
+		wp_add_dashboard_widget(
+			'removing_pain_points',
+			'Removing WordCamp.org Pain Points',
+			array( $this, 'render_removing_pain_points' )
+		);
 
 		$this->prioritize_wordcamp_widgets();
 	}
@@ -206,12 +203,19 @@ class WordCampOrganizerNags {
 	}
 
 	/**
-	 * Render the content for the WordCamp Organizer Survey dashboard widget
+	 * Render the content for the Removing WordCamp.org Pain Points dashboard widget
 	 */
-	public function render_tools_survey() {
+	public function render_removing_pain_points() {
 		?>
 
-		<p>Please <a href="http://wordcampcentral.polldaddy.com/s/improving-wordcamp-org-tools-clarification">take this 1-question survey</a> to help clarify the results of the previous survey.
+		<p>There are several projects underway to eliminate the worst pain points that WordCamp organizers have reported. Check them out if you'd like to get involved!</p>
+
+		<ul class="ul-disc">
+			<li><a href="https://make.wordpress.org/community/2015/06/10/wordcamp-org-tools-survey-results/">Quickly clone another WordCamp site</a> instead of building yours from scratch.</li>
+			<li><a href="https://make.wordpress.org/community/2015/06/16/editing-wordcamp-css-locally-with-git/">Edit CSS in your local environment</a> and manage it in a Git(Hub) repository.</li>
+			<li><a href="https://make.wordpress.org/community/2015/07/02/results-from-the-wordcamp-org-tools-follow-up-survey/">Build a new theme</a> for WordCamp sites.</li>
+			<li><a href="https://make.wordpress.org/community/2015/06/10/wordcamp-org-tools-survey-results/">Improve documentation</a>.</li>
+		</ul>
 
 		<?php
 	}
