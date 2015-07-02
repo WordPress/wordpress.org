@@ -14,24 +14,7 @@ class WordCampOrganizerNags {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_print_styles-index.php', array( $this, 'print_styles' ) );
 		add_action( 'wp_dashboard_setup',           array( $this, 'create_dashboard_widgets' ) );
-	}
-
-	/**
-	 * Print wp-admin styles
-	 */
-	public function print_styles() {
-		?>
-
-		<style type="text/css">
-			#wordcamp_reminders ul {
-				margin-left: 12px;
-				list-style-type: disc;
-			}
-		</style>
-
-		<?php
 	}
 
 	/**
@@ -185,7 +168,7 @@ class WordCampOrganizerNags {
 	public function render_wordcamp_reminders() {
 		?>
 
-		<ul>
+		<ul class="ul-disc">
 			<?php if ( $this->need_central_about_info ) : ?>
 				<li>Please send us <a href="http://plan.wordcamp.org/first-steps/web-presence/your-page-on-central-wordcamp-org/">the "about" text and banner image</a> for your central.wordcamp.org page.</a></li>
 			<?php endif; ?>
