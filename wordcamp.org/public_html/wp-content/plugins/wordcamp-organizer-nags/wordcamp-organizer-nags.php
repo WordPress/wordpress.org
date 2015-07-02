@@ -152,13 +152,13 @@ class WordCampOrganizerNags {
 		}
 
 		// Move WordCamp Organizer Survey to the top of the side column
-		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['improving_tools_survey'] ) ) {
+		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] ) ) {
 			$wp_meta_boxes['dashboard']['side']['core'] = array_merge(
-				array( 'improving_tools_survey' => $wp_meta_boxes['dashboard']['normal']['core']['improving_tools_survey'] ),
+				array( 'removing_pain_points' => $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] ),
 				$wp_meta_boxes['dashboard']['side']['core']
 			);
 
-			unset( $wp_meta_boxes['dashboard']['normal']['core']['improving_tools_survey'] );
+			unset( $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] );
 		}
 	}
 
