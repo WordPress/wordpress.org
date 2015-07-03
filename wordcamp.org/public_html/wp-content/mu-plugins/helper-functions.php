@@ -80,10 +80,14 @@ function get_wordcamp_site_id( $wordcamp_post ) {
  * `wordcamp` post is usually named 'WordCamp [Location]', so we can get a consistent name most of the time
  * by using that and adding the year (if available).
  *
+ * @param int $site_id Optionally, get the name for a site other than the current one.
+ *
  * @return string
  */
-function get_wordcamp_name() {
+function get_wordcamp_name( $site_id = 0 ) {
 	$name = false;
+
+	switch_to_blog( $site_id );
 
 	if ( $wordcamp = get_wordcamp_post() ) {
 		if ( ! empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
@@ -94,6 +98,8 @@ function get_wordcamp_name() {
 	if ( ! $name ) {
 		$name = get_bloginfo( 'name' );
 	}
+
+	restore_current_blog();
 
 	return $name;
 }
