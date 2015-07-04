@@ -20,8 +20,22 @@ add_action( 'after_setup_theme', 'wporg_support_setup' );
  * @link http://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
  */
 function wporg_support_scripts() {
-	wp_enqueue_style( 'forum-wp4-style', get_template_directory_uri() . '/css/forum-wp4.css' );
-	wp_enqueue_style( 'bb-base', '//bbpress.org/wp-content/themes/bb-base/style.css?ver=20150216d' );
+
+	wp_register_style(
+		'bb-base',
+		'//bbpress.org/wp-content/themes/bb-base/style.css',
+		array(),
+		'20150216d'
+	);
+
+	wp_register_style(
+		'forum-wp4-style',
+		get_template_directory_uri() . '/style.css',
+		array( 'bb-base' ),
+		'20150704'
+	);
+
+	wp_enqueue_style( 'forum-wp4-style' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 

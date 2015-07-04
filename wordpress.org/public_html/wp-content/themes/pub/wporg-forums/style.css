@@ -17,6 +17,10 @@
  * Use it to make something cool, have fun, and share what you've learned with others.
  */
 
+/**
+ * 1.0 General
+ */
+
 html,
 body {
 	background: #fff;
@@ -24,27 +28,19 @@ body {
 
 #headline {
 	background: #f7f7f7;
-	border-bottom: 1px solid #dfdfdf;	
+	border-bottom: 1px solid #dfdfdf;
 }
 
-/**
-* 1.0 Dashicons
-*/
-body #headline h2 a:before {
-	-webkit-font-smoothing: antialiased;
-	display: inline-block;
-	font: normal 28px/1 'dashicons';
-	vertical-align: top;
-	width: 36px;
+a:hover {
+	text-decoration: none;
 }
-body #headline h2 a:before { content: '\f110'; }
 
 /**
 * 2.0 Accesability
 */
 
 .hidden,
-#accessibility	{
+#accessibility {
 	height: 0;
 	width: 0;
 	overflow: hidden;
@@ -100,4 +96,29 @@ body #headline h2 a:before { content: '\f110'; }
 #pagebody ul a.feed {
 	background: none;
 	padding-left: 0;
+}
+
+.sidebar > div {
+	margin-bottom: 22px;
+}
+
+ul#views {
+	margin: 2px 0 20px;
+	font-size: 12px;
+}
+
+#views li {
+	list-style: none;
+	display: inline;
+}
+
+@media screen and ( min-width: 960px )  {
+
+	div.content {
+		width: 692px;
+	}
+
+	div.sidebar {
+		width: 212px;
+	}
 }

@@ -11,7 +11,9 @@
 				</ul>
 			</div>
 
-			<?php bb_base_topic_search_form(); ?>
+			<div>
+				<?php bb_base_topic_search_form(); ?>
+			</div>
 
 			<div>
 				<h3><?php _e( 'Forum Feeds', 'wporg-forums' ); ?></h3>
@@ -38,7 +40,9 @@
 				) ); ?>
 			</div>
 
-			<?php bb_base_reply_search_form(); ?>
+			<div>
+				<?php bb_base_reply_search_form(); ?>
+			</div>
 
 			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
 
