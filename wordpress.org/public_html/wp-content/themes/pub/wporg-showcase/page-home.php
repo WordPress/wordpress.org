@@ -17,7 +17,7 @@ get_header();
 					<div class="wpsc-hero-slide">
 						<div class="wpsc-hero-slide-content">	
 							<a href="<?php the_permalink(); ?>" class="wpsc-hero-slide-img">
-								<img src="<?php site_screenshot_src( 487 ); ?>" alt="<?php the_title_attribute(); ?>" width="487" height="365" />
+								<?php site_screenshot_tag( 457 ); ?>
 							</a>
 							<h3><a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 							
@@ -62,7 +62,7 @@ get_header();
 							
 					<li>					
 						<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
-							<img src="<?php site_screenshot_src( 215 ); ?>" width="215" height="161" alt="<?php the_title_attribute(); ?>" class="screenshot" />
+							<?php site_screenshot_tag( 215 ); ?>
 						</a>
 						<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
 						<?php
@@ -85,7 +85,7 @@ get_header();
 
 				<li>					
 					<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
-						<img src="<?php site_screenshot_src( 215 ); ?>" width="215" height="155" alt="<?php the_title_attribute(); ?>" class="screenshot" />
+						<?php site_screenshot_tag( 215 ); ?>
 					</a>
 					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
 					<?php 

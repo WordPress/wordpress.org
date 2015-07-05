@@ -17,8 +17,9 @@ query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' 
 			<?php while ( have_posts() ) : the_post(); ?>
 
 				<div class="story-excerpt">
-					<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><img src="<?php site_screenshot_src(145); ?>" class="alignleft" width="145" height="110" alt="<?php the_title_attribute(); ?>" /></a>
-
+					<a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>">
+						<?php site_screenshot_tag( 145, 'screenshot alignleft' ); ?>
+					</a>
 					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
 					<div class="excerpt"><?php the_content_limit(200); ?></div>
 					<div class="meta"><?php tags_with_count( 'flat', '<strong>Tags:</strong> ', ', ', '<br />'); ?><?php edit_post_link( 'Edit this entry' ); ?></div>

@@ -11,7 +11,7 @@
 						<div class="storycontent">
 								<?php breadcrumb(); ?>
 								<a href=' http://<?php get_site_domain( false ); ?>'>
-									<img src="<?php site_screenshot_src( 340 ); ?>"  class='site-screenshot' title='<?php the_title(); ?>' width='340' height='255' />
+									<?php site_screenshot_tag( 340, 'screenshot site-screenshot'); ?>
 								</a>
 								<?php the_content(); ?>
 

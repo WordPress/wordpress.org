@@ -30,10 +30,6 @@ function site_screenshot_src( $width = '', $echo = true ) {
 		$screenshot = $prefix.'wordpress.com/mshots/v1/http%3A%2F%2F' . get_site_domain( true, false );
 	}
 
-	if ( !empty( $_COOKIE['devicePixelRatio'] ) && $_COOKIE['devicePixelRatio'] >= 1.5 ) {
-		$width = $width * 2;
-	}
-
 	if ( '' != $width ) {
 		$screenshot .= '?w=' . $width;
 	}
@@ -45,6 +41,29 @@ function site_screenshot_src( $width = '', $echo = true ) {
 	} else {
 		return $screenshot;
 	}
+}
+
+// build the whole img tag properly for the screenshot, with srcset support
+function site_screenshot_tag( $width = '', $classes='screenshot' ) {
+	global $post;
+
+	$screenshot = get_post_meta($post->ID, 'screenshot', true);
+	if ( empty( $screenshot ) ) {
+		$screenshot = 'https://wordpress.com/mshots/v1/http%3A%2F%2F' . get_site_domain( true, false );
+		$srcset = $screenshot;
+	}
+
+	if ( '' != $width ) {
+		$screenshot .= '?w=' . $width;
+		$srcset .= '?w=' . $width*2;
+	}
+
+	// mshot images have a 4/3 ratio
+	$height = (int)( $width * (3/4) );
+
+	$img = "<img src='{$screenshot}' srcset='$srcset 2x' width='{$width}' height='{$height}' alt='". the_title_attribute(array('echo'=>false)) . "' class='{$classes}' />";
+
+	echo $img;
 }
 
 function wp_flavors() {
