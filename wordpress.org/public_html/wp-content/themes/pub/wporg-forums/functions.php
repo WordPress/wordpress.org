@@ -113,6 +113,16 @@ function wporg_get_global_header() {
 	require WPORGPATH . 'header.php';
 }
 
+/**
+ * Link user profiles to their global profiles.
+ */
+function wporg_support_profile_url( $user_id ) {
+	$user = get_userdata( $user_id );
+
+	return esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename );
+}
+add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
+
 /** bb Base *******************************************************************/
 
 function bb_base_topic_search_form() {
