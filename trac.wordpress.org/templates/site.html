@@ -66,7 +66,7 @@
 	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20140130' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="//s.w.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
-		
+
 	<script py:attrs="select('@*')"></script>
 
 	<py:if test="req.environ['PATH_INFO'] == '/newticket'">
@@ -224,7 +224,7 @@
 <!--! Gravatars for the ticket reporter -->
 <td py:match="td[@headers='h_reporter']" py:attrs="select('@*')">
 	<a href="${profile_link + ticket.reporter}">
-		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=36" height="36" width="36" />
+		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=36" srcset="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=72 2x" height="36" width="36" />
 	</a>
     ${select('*|comment()|text()')}
 </td>
@@ -232,7 +232,7 @@
 <!--! Gravatars for the ticket owner -->
 <td py:match="td[@headers='h_owner']" py:attrs="select('@*')">
 	<a href="${profile_link + ticket.owner}" py:if="ticket.owner">
-		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=36" height="36" width="36" />
+		<img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=36" srcset="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=72 2x" height="36" width="36" />
 	</a>
     ${select('*|comment()|text()')}
 </td>
