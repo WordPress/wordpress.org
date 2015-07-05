@@ -196,7 +196,7 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	}
 
 	/**
-	 * Returns a specifc branch of a hierarchy tree.
+	 * Returns a specific branch of a hierarchy tree.
 	 *
 	 * @param int   $project_id Project ID.
 	 * @param array $projects   Hierarchy tree of projects.

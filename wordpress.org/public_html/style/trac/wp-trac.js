@@ -29,7 +29,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		// 'unit tests' : 'PHP or JS unit tests.',
 		'docs' : 'Inline documentation focus.',
 		'rtl' : 'Right-to-left languages.',
-		'administration' : 'Administration related, but assigned a more specifc component.',
+		'administration' : 'Administration related, but assigned a more specific component.',
 		'template' : 'Relating to theme templating, but assigned a more specific component.',
 		'multisite' : 'Relating to multisite, but assigned a more specific component.',
 		'performance' : 'Performance or caching (but not the Cache API component).'
