@@ -50,8 +50,8 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 	$screenshot = get_post_meta($post->ID, 'screenshot', true);
 	if ( empty( $screenshot ) ) {
 		$screenshot = 'https://wordpress.com/mshots/v1/http%3A%2F%2F' . get_site_domain( true, false );
-		$srcset = $screenshot;
 	}
+	$srcset = $screenshot;
 
 	if ( '' != $width ) {
 		$screenshot .= '?w=' . $width;
