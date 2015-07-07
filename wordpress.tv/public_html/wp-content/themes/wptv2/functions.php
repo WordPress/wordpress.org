@@ -468,32 +468,18 @@ class WordPressTV_Theme {
 
 		remove_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
 
-		preg_match_all( '/\[wpvideo +([a-zA-Z0-9,\#,\&,\/,;,",=, ]*?)\]/i', $post->post_content, $matches );
-		foreach ( $matches[1] as $key => $code ) {
-
-			preg_match( '/([0-9A-Za-z]+)/i', $code, $m );
-			$guid = $m[1];
-
-			$image = video_image_url_by_guid( $guid, 'fmt_dvd' ); //dvd image has width = 640
-			$video = apply_filters( 'the_content', '[wpvideo ' . $guid . ' w=605]' );
-
-			/*
-			// Comment out the $video= line above and uncomment the following code to enable Unisubs
-			$permalink = get_permalink( $post->ID );
-			$video = <<<HTML
-			<script type="text/javascript" src="http://unisubs.example.com:8000/site_media/embed.js">
-			({
-				"video_url": "$permalink",
-				"video_config": {
-					"width": 648,
-					"height": 425
-				}
-			})
-			</script>
-	HTML;
-			$video .= apply_filters( 'the_content', '' );*/
+		// VideoPress
+		preg_match_all( '/' . get_shortcode_regex() . '/s', $post->post_content, $shortcodes, PREG_SET_ORDER );
+		foreach ( $shortcodes as $shortcode ) {
+			if ( 'wpvideo' == $shortcode[2] ) {
+				$attributes = shortcode_parse_atts( $shortcode[0] );
+				$image      = video_image_url_by_guid( rtrim( $attributes[1], ']' ), 'fmt_dvd' ); // dvd image has width = 640
+				$video      = sprintf( '[%s %s w="605"]', $shortcode[2], trim( $shortcode[3] ) );
+				$video      = apply_filters( 'the_content', $video );
+			}
 		}
 
+		// SlideShare
 		preg_match_all( '|\[slideshare (.+?)]|ie', $post->post_content, $matches );
 		foreach ( $matches[1] as $key => $code ) {
 			$code = '[slideshare ' . $code . ']';
@@ -510,6 +496,7 @@ class WordPressTV_Theme {
 			}
 		}
 
+		// VodPod
 		preg_match_all( '|\[vodpod (.+?)]|ie', $post->post_content, $matches );
 		foreach ( $matches[1] as $key => $code ) {
 			$code   = '[vodpod ' . $code . ']';
@@ -520,6 +507,7 @@ class WordPressTV_Theme {
 			$video = $vodpod;
 		}
 
+		// Output results
 		if ( $thumb ) {
 			if ( ! $no_html ) {
 				$image = '<img width="650" src="' . esc_url( $image ) . '" alt="' . esc_attr( $post->post_title ) . '" />';
@@ -528,6 +516,7 @@ class WordPressTV_Theme {
 		} else {
 			echo $video;
 		}
+
 		add_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
 	}
 
