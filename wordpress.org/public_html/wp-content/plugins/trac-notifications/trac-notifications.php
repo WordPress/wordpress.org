@@ -403,8 +403,10 @@ class wporg_trac_notifications {
 				$output .= '.';
 		}
 
+		$gravatar_url = '//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter );
+
 		echo '<p class="ticket-note note-new-reporter">';
-		echo '<img width="36" height="36" src="//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter ) . '&amp;s=36" /> ';
+		echo '<img width="36" height="36" src="'. $gravatar_url . '&amp;s=36" srcset="'. $gravatar_url . '&amp;s=72 2x" /> ';
 		echo '<span class="note">' . $output . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
