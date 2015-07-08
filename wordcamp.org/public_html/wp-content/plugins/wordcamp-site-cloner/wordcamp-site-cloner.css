@@ -1,0 +1,43 @@
+.control-section-wcsc-sites {
+	padding: 0 8px;
+}
+
+	#wcsc-sites {
+		overflow: auto;
+	}
+
+		.wcscSite {
+			position: relative;
+			cursor: pointer;
+			border: 1px solid #DEDEDE;
+			box-shadow: 0 1px 1px -1px rgba( 0, 0, 0, 0.1 );
+		}
+
+			.wcsc-site-screenshot {
+				transition: opacity 0.2s ease-in-out 0s;
+			}
+
+				.wcscSite:hover .wcsc-site-screenshot {
+					opacity: 0.4;
+				}
+
+			.wcsc-live-preview-label {
+				opacity: 0;
+				position: absolute;
+				top: 35%;
+				right: 25%;
+				left: 25%;
+				background: rgba( 0, 0, 0, 0.7 ) none repeat scroll 0 0;
+				color: #FFF;
+				font-size: 15px;
+				text-shadow: 0 1px 0 rgba( 0, 0, 0, 0.6 );
+				font-weight: 600;
+				padding: 15px 12px;
+				text-align: center;
+				border-radius: 3px;
+				transition: opacity 0.1s ease-in-out 0s;
+			}
+
+				.wcscSite:hover .wcsc-live-preview-label {
+					opacity: 1;
+				}
