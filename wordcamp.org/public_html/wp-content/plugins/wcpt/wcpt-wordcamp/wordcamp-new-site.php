@@ -558,12 +558,15 @@ class WordCamp_New_Site {
 	 */
 	protected function create_sponsorship_levels( $assigned_sponsors ) {
 		foreach( $assigned_sponsors as $sponsorship_level_id ) {
-			foreach ( $sponsorship_level_id as $sponsor ) {
-				wp_create_term(
-					$sponsor->sponsorship_level->post_title,
-					'wcb_sponsor_level'
-				);
-			}
+			$sponsorship_level = $sponsorship_level_id[0]->sponsorship_level;
+
+			wp_insert_term(
+				$sponsorship_level->post_title,
+				'wcb_sponsor_level',
+				array(
+					'slug' => $sponsorship_level->post_name
+				)
+			);
 		}
 	}
 
