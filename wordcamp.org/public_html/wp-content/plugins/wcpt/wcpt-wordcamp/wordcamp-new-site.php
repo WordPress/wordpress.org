@@ -226,7 +226,7 @@ class WordCamp_New_Site {
 			$this->get_stub_posts( $wordcamp, $meta ),
 			$this->get_stub_pages( $wordcamp, $meta ),
 			$this->get_stub_me_sponsors( $assigned_sponsor_data ),
-			$this->get_stub_me_sponsor_thank_yous( $assigned_sponsor_data )
+			$this->get_stub_me_sponsor_thank_yous( $assigned_sponsor_data['assigned_sponsors'] )
 		);
 
 		// Create actual posts from stubs
@@ -611,11 +611,6 @@ class WordCamp_New_Site {
 
 		$data['featured_images']    = array();
 		$data['assigned_sponsors']  = $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id, 'sponsor_level' );
-		$data['sponsorship_levels'] = get_posts( array(
-			'post_type'   => MES_Sponsorship_Level::POST_TYPE_SLUG,
-			'numberposts' => -1
-		) );
-		// todo remove sponsorship levels item and refactor thank you stubs to use new posts in data['assigned_sponsors'][sponsor][sponsorship_level]
 
 		foreach( $data['assigned_sponsors'] as $sponsorship_level_id => $sponsors ) {
 			foreach( $sponsors as $sponsor ) {
@@ -651,23 +646,23 @@ class WordCamp_New_Site {
 		global $multi_event_sponsors;
 		$pages = array();
 
-		foreach ( $assigned_sponsor_data['sponsorship_levels'] as $sponsorship_level ) {
-			if ( ! empty( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] ) ) {
-				$pages[] = array(
-					'title'   => sprintf( __( 'Thank you to our %s sponsors', 'wordcamporg' ), $sponsorship_level->post_title ),
-					'content' => sprintf(
-						'%s %s',
-						str_replace(
-							'[sponsor_names]',
-							$multi_event_sponsors->get_sponsor_names( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] ),
-							$sponsorship_level->post_excerpt
-						),
-						$multi_event_sponsors->get_sponsor_excerpts( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] )
+		foreach ( $assigned_sponsor_data as $sponsorship_level_id ) {
+			$sponsorship_level = $sponsorship_level_id[0]->sponsorship_level;
+
+			$pages[] = array(
+				'title'   => sprintf( __( 'Thank you to our %s sponsors', 'wordcamporg' ), $sponsorship_level->post_title ),
+				'content' => sprintf(
+					'%s %s',
+					str_replace(
+						'[sponsor_names]',
+						$multi_event_sponsors->get_sponsor_names( $sponsorship_level_id ),
+						$sponsorship_level->post_excerpt
 					),
-					'status'  => 'draft',
-					'type'    => 'post',
-				);
-			}
+					$multi_event_sponsors->get_sponsor_excerpts( $sponsorship_level_id )
+				),
+				'status'  => 'draft',
+				'type'    => 'post',
+			);
 		}
 
 		return $pages;
