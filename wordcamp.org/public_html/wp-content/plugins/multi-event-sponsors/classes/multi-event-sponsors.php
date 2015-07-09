@@ -188,6 +188,7 @@ class Multi_Event_Sponsors {
 			if ( ! empty( $regional_sponsorships[ $wordcamp_region ] ) && is_numeric( $regional_sponsorships[ $wordcamp_region ] ) ) {
 				if ( 'sponsor_level' == $grouped_by ) {
 					$sponsorship_level = get_post( $regional_sponsorships[ $wordcamp_region ] );
+					$sponsor->sponsorship_level = $sponsorship_level;
 					$wordcamp_sponsors[ $sponsorship_level->ID ][] = $sponsor;
 				} else {
 					$wordcamp_sponsors[] = $sponsor;
