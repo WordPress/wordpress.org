@@ -71,6 +71,7 @@ class WordCamp_New_Site {
 		$field_name = wcpt_key_to_str( $key, 'wcpt_' );
 
 		if ( 'URL' == $key && 'wc-url' == $field_type && isset( $_POST[ $field_name ] ) ) {
+			// todo use https instead of http
 			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
 			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
 			update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
@@ -90,6 +91,11 @@ class WordCamp_New_Site {
 	 */
 	protected function create_new_site( $wordcamp_id, $url ) {
 		if ( ! current_user_can( 'manage_sites' ) ) {
+			return;
+		}
+
+		// The sponsor region is required so we can import the relevant sponsors and levels
+		if ( ! get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true ) ) {
 			return;
 		}
 
@@ -207,25 +213,21 @@ class WordCamp_New_Site {
 	/**
 	 * Create stubs for commonly-used posts
 	 *
-	 * @todo Create sponsorship levels based on new mes-sponsor-level taxonomy instead of hardcoding
-	 *
 	 * @param WP_Post $wordcamp
 	 * @param array   $meta
 	 * @param WP_User $lead_organizer
 	 */
 	protected function create_post_stubs( $wordcamp, $meta, $lead_organizer ) {
+		$assigned_sponsor_data = $this->get_assigned_sponsor_data( $wordcamp->ID );
+		$this->create_sponsorship_levels( $assigned_sponsor_data['assigned_sponsors'] );
+
 		// Get stub content
 		$stubs = array_merge(
 			$this->get_stub_posts( $wordcamp, $meta ),
 			$this->get_stub_pages( $wordcamp, $meta ),
-			$this->get_stub_me_sponsors( $wordcamp, $meta ),
-			$this->get_stub_me_sponsor_thank_yous( $wordcamp, $meta )
+			$this->get_stub_me_sponsors( $assigned_sponsor_data ),
+			$this->get_stub_me_sponsor_thank_yous( $assigned_sponsor_data )
 		);
-
-		// Create sponsorship levels -- @todo pull these from Central instead of hardcoding
-		$sponsor_level_ids['champion']   = wp_create_term( 'WordCamp Champion',   'wcb_sponsor_level' );
-		$sponsor_level_ids['accomplice'] = wp_create_term( 'WordCamp Accomplice', 'wcb_sponsor_level' );
-		$sponsor_level_ids['pillar']     = wp_create_term( 'WordCamp Pillar',     'wcb_sponsor_level' );
 
 		// Create actual posts from stubs
 		remove_action( 'save_post', array( $GLOBALS['wordcamp_admin'], 'metabox_save' ) ); // prevent this callback from adding all the meta fields from the corresponding wordcamp post to new posts we create
@@ -265,8 +267,8 @@ class WordCamp_New_Site {
 				}
 
 				// Assign sponsorship level
-				if ( isset( $page['term'] ) ) {
-					wp_set_post_terms( $page_id, $sponsor_level_ids[ $page['term'] ], 'wcb_sponsor_level', true );
+				if ( 'wcb_sponsor' == $page['type'] && isset( $page['term'] ) ) {
+					wp_set_object_terms( $page_id, $page['term'], 'wcb_sponsor_level', true );
 				}
 			}
 		}
@@ -550,64 +552,45 @@ class WordCamp_New_Site {
 	}
 
 	/**
+	 * Create the sponsorship levels for the assigned Multi-Event Sponsors
+	 *
+	 * @param array $assigned_sponsors
+	 */
+	protected function create_sponsorship_levels( $assigned_sponsors ) {
+		foreach( $assigned_sponsors as $sponsorship_level_id ) {
+			foreach ( $sponsorship_level_id as $sponsor ) {
+				wp_create_term(
+					$sponsor->sponsorship_level->post_title,
+					'wcb_sponsor_level'
+				);
+			}
+		}
+	}
+
+	/**
 	 * Get the content for sponsor stubs
 	 *
 	 * These are just the multi-event sponsors. Each camp will also have local sponsors, but they'll add those manually.
 	 *
-	 * @todo - load these from the new Multi_Event_Sponsors post type instead of hardcoding.
-	 *
-	 * @param WP_Post $wordcamp
-	 * @param array   $meta
+	 * @param array   $assigned_sponsor_data
 	 *
 	 * @return array
 	 */
-	protected function get_stub_me_sponsors( $wordcamp, $meta ) {
-		$me_sponsors = array(
-			array(
-				'title'          => 'Code Poet',
-				'content'        => "<p>If you use WordPress to build things for other people, Code Poet wants to make your life easier. No matter whether you freelance on a solo basis, lead a small web shop, make plugins in a dark closet, or crack the whip at a large design firm, Code Poet’s aim is to become your go-to source of information and resources to help you expand your WordPress skills and know-how. To make you better at what you do. To make it easier to make your living and look great doing it.</p> <p>You’re part of a tribe of WordPress designers and developers over 10,000 strong, spanning the entire globe. <a href='http://codepoet.com'>codepoet.com</a> aims to bring the working knowledge and real world strategies of those people into one place, for you to tap into.</p>",
-				'status'         => 'publish',
-				'type'           => 'wcb_sponsor',
-				'featured_image' => 'http://central.wordcamp.org/files/2013/09/Code-Poet-2.png',
-				'term'           => 'champion'
-			),
+	protected function get_stub_me_sponsors( $assigned_sponsor_data ) {
+		$me_sponsors = array();
 
-			array(
-				'title'          => 'WPML',
-				'content'        => "<p>WPML turns WordPress websites multilingual. It works with caching, SEO and E-Commerce plugins, and allows the building of complete multilingual sites. WPML powers simple blogs as well as corporate and enterprise sites.</p> <p>WPML allows users to translate everything in the site, including content, menus, widgets and even theme and plugin texts. WPML powers over 400,000 commercial websites from all over the world.</p> <p>More information about going multilingual can be found at <a href='http://wpml.org'>WPML.org</a></p>",
-				'status'         => 'publish',
-				'type'           => 'wcb_sponsor',
-				'featured_image' => 'http://central.wordcamp.org/files/2013/09/wpml-web.png',
-				'term'           => 'accomplice'
-			),
-
-			array(
-				'title'          => 'Bluehost',
-				'content'        => "<p><a href='http://bluehost.com'>Bluehost</a> has been a WordPress partner since 2005 and powers over one million WordPress sites. Their goal is to provide outstanding hosting services and customer support for the best possible price. Bluehost is also constantly innovating and upgrading their services and infrastructure at no additional cost to their customers. Join the millions of other website owners that have already chosen Bluehost and see how they can help you with your site.</p>",
-				'status'         => 'publish',
-				'type'           => 'wcb_sponsor',
-				'featured_image' => 'http://central.wordcamp.org/files/2013/09/bluehost-logo13.png',
-				'term'           => 'pillar'
-			),
-
-			array(
-				'title'          => 'DreamHost',
-				'content'        => "<p>DreamHost is a global Web hosting and cloud services provider with over 350,000 customers and 1.2 million blogs, websites and apps hosted. The company offers a wide spectrum of Web hosting and cloud services including Shared Hosting, Virtual Private Servers (VPS), Dedicated Server Hosting, Domain Name Registration, the cloud storage service, DreamObjects, and the cloud computing service DreamCompute. More information can be found at <a href='http://dreamhost.com'>http://dreamhost.com</a>.</p>",
-				'status'         => 'publish',
-				'type'           => 'wcb_sponsor',
-				'featured_image' => 'http://central.wordcamp.org/files/2013/09/dreamhost_logo-cmyk-no_tag-2012.jpg',
-				'term'           => 'accomplice'
-			),
-
-			array(
-				'title'          => 'Media Temple',
-				'content'        => "<p>From its inception in 1998, (mt) Media Temple has been on a mission to help people and businesses succeed online.</p> <p>Over 125,000 customers in 100 countries now rely on Media Temple’s tools for domain registration, web hosting, business applications, virtual servers, and other cloud services to power more than 1.5 million websites. With 200 dedicated, U.S.-based employees, Media Temple takes pride in our 24/7 customer support. Our customers range from everyday people to top bloggers, creative professionals, and small businesses, as well as large enterprises like Starbucks, Adidas, Samsung, and Toyota.</p> <p>More information can be found anytime on the web at <a href='http://mediatemple.com'>http://mediatemple.com</a> or on Twitter <a href='https://twitter.com/mediatemple'>@MediaTemple</a>.</p>",
-				'status'         => 'publish',
-				'type'           => 'wcb_sponsor',
-				'featured_image' => 'http://central.wordcamp.org/files/2013/12/mt-250x140-dk.png',
-				'term'           => 'pillar'
-			),
-		);
+		foreach ( $assigned_sponsor_data['assigned_sponsors'] as $sponsorship_level_id => $assigned_sponsors ) {
+			foreach ( $assigned_sponsors as $assigned_sponsor ) {
+				$me_sponsors[] = array(
+					'title'          => $assigned_sponsor->post_title,
+					'content'        => $assigned_sponsor->post_content,
+					'status'         => 'publish',
+					'type'           => 'wcb_sponsor',
+					'term'           => $assigned_sponsor->sponsorship_level->post_name,
+					'featured_image' => isset( $assigned_sponsor_data['featured_images'][ $assigned_sponsor->ID ] ) ? $assigned_sponsor_data['featured_images'][ $assigned_sponsor->ID ] : '',
+				);
+			}
+		}
 
 		return $me_sponsors;
 	}
@@ -626,11 +609,27 @@ class WordCamp_New_Site {
 
 		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
 
+		$data['featured_images']    = array();
 		$data['assigned_sponsors']  = $multi_event_sponsors->get_wordcamp_me_sponsors( $wordcamp_id, 'sponsor_level' );
 		$data['sponsorship_levels'] = get_posts( array(
 			'post_type'   => MES_Sponsorship_Level::POST_TYPE_SLUG,
 			'numberposts' => -1
 		) );
+		// todo remove sponsorship levels item and refactor thank you stubs to use new posts in data['assigned_sponsors'][sponsor][sponsorship_level]
+
+		foreach( $data['assigned_sponsors'] as $sponsorship_level_id => $sponsors ) {
+			foreach( $sponsors as $sponsor ) {
+				if ( ! $attachment_id = get_post_thumbnail_id( $sponsor->ID ) ) {
+					continue;
+				}
+
+				if ( ! $attachment = wp_get_attachment_image_src( $attachment_id, 'full' ) ) {
+					continue;
+				}
+
+				$data['featured_images'][ $sponsor->ID ] = $attachment[0];
+			}
+		}
 
 		restore_current_blog();
 
@@ -643,17 +642,14 @@ class WordCamp_New_Site {
 	 * The MES_Sponsorship_Level post excerpts contain the intro text for these messages, and the MES_Sponsor
 	 * post excerpts contain the blurb for each sponsor.
 	 *
-	 * @param WP_Post $wordcamp
-	 * @param array   $meta
+	 * @param array   $assigned_sponsor_data
 	 *
 	 * @return array
 	 */
-	protected function get_stub_me_sponsor_thank_yous( $wordcamp, $meta ) {
+	protected function get_stub_me_sponsor_thank_yous( $assigned_sponsor_data ) {
 		/** @var $multi_event_sponsors Multi_Event_Sponsors */
 		global $multi_event_sponsors;
 		$pages = array();
-
-		$assigned_sponsor_data = $this->get_assigned_sponsor_data( $wordcamp->ID );
 
 		foreach ( $assigned_sponsor_data['sponsorship_levels'] as $sponsorship_level ) {
 			if ( ! empty( $assigned_sponsor_data['assigned_sponsors'][ $sponsorship_level->ID ] ) ) {
