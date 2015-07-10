@@ -27,6 +27,13 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		if ( in_array( $post->post_type, $this->post_types ) ) {
 			$args['post_type'] = $post->post_type;
 		}
+
+		// Exclude root handbook page from the table of contents.
+		$page = get_page_by_path( $this->append_suffix( $post->post_type ), OBJECT, $post->post_type );
+		if ( $page ) {
+			$args['exclude'] = $page->ID;
+		}
+
 		return $args;
 	}
 
