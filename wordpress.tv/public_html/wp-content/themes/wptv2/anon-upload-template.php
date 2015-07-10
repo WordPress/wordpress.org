@@ -205,7 +205,7 @@ if ( !empty($_REQUEST['error']) ) {
 	}
 	$message = '<div class="error"><p>' . $message . '</p></div>';
 } elseif ( !empty($_REQUEST['success']) ) {
-	$message = '<h3>Thank you for submitting a video; it was uploaded successfully.</h3><p>Submit another?</p>';
+	$message = '<div class="success"> <p>Thank you for submitting a video; it was uploaded successfully.</p> <p>Submit another?</p> </div>';
 }
 
 ?>
