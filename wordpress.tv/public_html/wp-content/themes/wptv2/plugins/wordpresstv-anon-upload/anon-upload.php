@@ -47,7 +47,7 @@ class WPTV_Anon_Upload {
 	function validate() {
 		$text_fields = array(
 			'wptv_video_title',
-			'wptv_video_producer',
+			'wptv_producer_username',
 			'wptv_speakers',
 			'wptv_event',
 			'wptv_slides_url'
@@ -60,6 +60,10 @@ class WPTV_Anon_Upload {
 			}
 
 			return $this->error( 13 );
+		}
+
+		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( $_POST['wptv_producer_username'] ) ) {
+			return $this->error( 14 );
 		}
 
 		if ( ! is_user_logged_in() ) {
@@ -259,13 +263,14 @@ class WPTV_Anon_Upload {
 		}
 
 		$video_title    = $this->sanitize_text( $_posted['wptv_video_title'] );
-		$video_producer = $this->sanitize_text( $_posted['wptv_video_producer'] );
+		$producer_username = $this->sanitize_text( $_posted['wptv_producer_username'] );
 		$speakers       = $this->sanitize_text( $_posted['wptv_speakers'] );
 		$event          = $this->sanitize_text( $_posted['wptv_event'] );
 		$description    = $this->sanitize_text( $_posted['wptv_video_description'], false );
 		$language       = $this->sanitize_text( $_posted['wptv_language'] );
 		$slides         = $this->sanitize_text( $_posted['wptv_slides_url'] );
 		$ip             = $_SERVER['REMOTE_ADDR'];
+		// todo realign in separate commit
 
 		$categories = '';
 		if ( ! empty( $_posted['post_category'] ) && is_array( $_posted['post_category'] ) ) {
@@ -282,7 +287,7 @@ class WPTV_Anon_Upload {
 			'submitted_by'    => $anon_author,
 			'submitted_email' => $anon_author_email,
 			'title'           => $video_title,
-			'producer'        => $video_producer,
+			'producer_username' => $producer_username,
 			'speakers'        => $speakers,
 			'event'           => $event,
 			'language'        => $language,
@@ -290,6 +295,7 @@ class WPTV_Anon_Upload {
 			'description'     => $description,
 			'slides'          => $slides,
 			'ip'              => $ip,
+			// todo realign in separate commit
 		);
 
 		$post_meta['video_guid'] = $video_data->guid;
@@ -324,9 +330,12 @@ class WPTV_Anon_Upload {
 		$embed_args['blog_id'] = get_current_blog_id();
 		$embed_args['post_id'] = $meta['attachment_id'];
 
-		// Add slides index to meta (necessary for posts that were uploaded before the field was added)
-		if ( ! array_key_exists( 'slides', $meta ) ) {
-			$meta['slides'] = '';
+		// Add missing indexes to $meta (necessary for posts that were uploaded before the fields were added)
+		$new_fields = array( 'slides', 'producer_username' );
+		foreach ( $new_fields as $field ) {
+			if ( ! array_key_exists( $field, $meta ) ) {
+				$meta[ $field ] = '';
+			}
 		}
 
 		?>
@@ -460,10 +469,11 @@ class WPTV_Anon_Upload {
 					</div>
 
 					<div class="row">
-						<p class="label">Producer:</p>
+						<p class="label">Producer WordPress.org Username:</p>
+
 						<p class="data">
-							<input type="text" value="<?php echo esc_attr( $meta['producer'] ); ?>"/>
-							<a class="button-secondary anon-approve" href="#new-tag-producer">Approve</a>
+							<input type="text" value="<?php echo esc_attr( $meta['producer_username'] ); ?>"/>
+							<a class="button-secondary anon-approve" href="#new-tag-producer-username">Approve</a>
 						</p>
 					</div>
 

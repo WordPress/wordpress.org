@@ -81,5 +81,38 @@
 						printf( '<a href="%s">Subtitle this video &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'subtitle/' ) ) ) );
 					}
 				}
+
+			/*
+			 * Credit video producer with link to their WordPress.org profile
+			 *
+			 * In most cases we'll either have the producer name, or the username, but not both.
+			 */
+			$producer_name     = get_the_terms( get_the_ID(), 'producer' );
+			$producer_username = get_the_terms( get_the_ID(), 'producer-username' );
 			?>
+
+			<?php if ( $producer_name || $producer_username ) : ?>
+				<h5>Producer</h5>
+
+				<div class="video-producer">
+					<?php if ( $producer_username ) : ?>
+
+						<a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . rawurlencode( $producer_username[0]->name ) ); ?>">
+							<?php if ( $producer_name ) : ?>
+								<?php echo esc_html( $producer_name[0]->name ); ?>
+							<?php else : ?>
+								<?php echo esc_html( $producer_username[0]->name ); ?>
+							<?php endif; ?>
+						</a>
+
+					<?php else : ?>
+
+						<a href="<?php echo esc_url( get_term_link( $producer_name[0] ) ); ?>">
+							<?php echo esc_html( $producer_name[0]->name ); ?>
+						</a>
+
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
 </div><!-- .secondary-content -->

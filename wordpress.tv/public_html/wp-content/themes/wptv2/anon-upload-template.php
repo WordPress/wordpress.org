@@ -61,6 +61,7 @@ function anon_upload_css() {
 
 	.video-upload p {
 		margin: 16px 0;
+		overflow: auto;
 	}
 
 	.video-upload h3 {
@@ -173,6 +174,7 @@ if ( !empty($_REQUEST['error']) ) {
 	switch ( $message ) {
 		case 1:
 			$message = 'Error: pleas select a video file.';
+			// todo fix all the 'pleas' typos
 			break;
 		case 2:
 			$message = 'Error: invalid file type.';
@@ -201,6 +203,9 @@ if ( !empty($_REQUEST['error']) ) {
 			break;
 		case 13:
 			$message = "Error: please leave the first field empty. (It helps us know you're not a spammer.)";
+			break;
+		case 14:
+			$message = "Error: please enter a valid WordPress.org username for the producer, or leave the field empty.";
 			break;
 	}
 	$message = '<div class="error"><p>' . $message . '</p></div>';
@@ -302,8 +307,8 @@ if ( !empty($_REQUEST['error']) ) {
 	</div>
 
 	<p>
-		<label for="wptv_video_producer"><?php esc_html_e( 'Video producer' ); ?></label>
-		<input type="text" id="wptv_video_producer" name="wptv_video_producer" value="" />
+		<label for="wptv_producer_username"><?php esc_html_e( 'Producer WordPress.org Username' ); ?></label>
+		<input type="text" id="wptv_producer_username" name="wptv_producer_username" value="" />
 	</p>
 	<p>
 		<label for="wptv_speakers"><?php esc_html_e( 'Speakers' ); ?></label>

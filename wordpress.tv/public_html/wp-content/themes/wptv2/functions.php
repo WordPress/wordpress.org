@@ -78,6 +78,15 @@ class WordPressTV_Theme {
 			'rewrite'  => array( 'slug' => 'producer' ),
 		) );
 
+		register_taxonomy( 'producer-username', array( 'post' ), array(
+			'label'    => __( 'Producer Username', 'wptv' ),
+			'template' => __( 'Producer: %l.', 'wptv' ),
+			'helps'    => __( 'Separate producer usernames with commas.', 'wptv' ),
+			'sort'     => true,
+			'args'     => array( 'orderby' => 'term_order' ),
+			'rewrite'  => array( 'slug' => 'producer-username' ),
+		) );
+
 		register_taxonomy( 'speakers', array( 'post' ), array(
 			'label'    => __( 'Speakers', 'wptv' ),
 			'template' => __( 'Speakers: %l.', 'wptv' ),
@@ -818,3 +827,27 @@ function wptv_excerpt_slides( $excerpt ) {
 	return $excerpt;
 }
 add_filter( 'get_the_excerpt', 'wptv_excerpt_slides' );
+
+/**
+ * Checks if the given username exists on WordPress.org
+ *
+ * grav-redirect.php will redirect to a Gravatar image URL. If the WordPress.org username exists, the `d` parameter
+ * will be 'retro', and if it doesn't it'll be 'mm'.
+ *
+ * @param string $username
+ *
+ * @return bool
+ */
+function wporg_username_exists( $username ) {
+	$username_exists = false;
+	$validator_url   = add_query_arg( 'user', $username, 'https://wordpress.org/grav-redirect.php' );
+	$response        = wp_remote_retrieve_headers( wp_remote_get( $validator_url, array( 'redirection' => 0 ) ) );
+
+	if ( array_key_exists( 'location', $response ) ) {
+		if ( false === strpos( $response['location'], 'd=mm' ) ) {
+			$username_exists = true;
+		}
+	}
+
+	return $username_exists;
+}
