@@ -173,8 +173,7 @@ if ( !empty($_REQUEST['error']) ) {
 
 	switch ( $message ) {
 		case 1:
-			$message = 'Error: pleas select a video file.';
-			// todo fix all the 'pleas' typos
+			$message = 'Error: please select a video file.';
 			break;
 		case 2:
 			$message = 'Error: invalid file type.';
@@ -193,13 +192,13 @@ if ( !empty($_REQUEST['error']) ) {
 			break;
 		// these shouldn't show, JS form validation should catch them
 		case 10:
-			$message = 'Error: pleas enter your name.';
+			$message = 'Error: please enter your name.';
 			break;
 		case 11:
-			$message = 'Error: pleas enter your email address.';
+			$message = 'Error: please enter your email address.';
 			break;
 		case 12:
-			$message = 'Error: pleas enter a valid email address.';
+			$message = 'Error: please enter a valid email address.';
 			break;
 		case 13:
 			$message = "Error: please leave the first field empty. (It helps us know you're not a spammer.)";
