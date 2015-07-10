@@ -13,8 +13,10 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		$args['after_title'] = '</h2>' . "\n" . '<div class="menu-table-of-contents-container">' . "\n";
 		$args['after_widget'] = '</div>';
 
-		add_filter( 'widget_pages_args', array( $this, 'handbook_post_type' ) );
+		add_filter( 'widget_pages_args',    array( $this, 'handbook_post_type' ) );
+		add_filter( 'page_css_class',       array( $this, 'amend_page_css_class' ) );
 		parent::widget( $args, $instance );
+		remove_filter( 'page_css_class',    array( $this, 'amend_page_css_class' ) );
 		remove_filter( 'widget_pages_args', array( $this, 'handbook_post_type' ) );
 	}
 
@@ -44,4 +46,31 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 
 		return $t . '-handbook';
 	}
+
+	/**
+	 * Adds menu-related CSS tags that correspond to present page-related tags so
+	 * styling is consistent for both without having to duplicate all CSS rules.
+	 *
+	 * @param array $css_class The CSS classes being applied to a given list item.
+	 *
+	 * @return array
+	 */
+	function amend_page_css_class( $css_class ) {
+		$class_name_map = array(
+			'current_page_ancestor'  => 'current-menu-ancestor',
+			'current_page_item'      => 'current-menu-item',
+			'current_page_parent'    => 'current-menu-parent',
+			'page_item'              => 'menu-item',
+			'page_item_has_children' => 'menu-item-has-children',
+		);
+
+		foreach ( $class_name_map as $page_class => $menu_class ) {
+			if ( in_array( $page_class, $css_class ) ) {
+				$css_class[] = $menu_class;
+			}
+		}
+
+		return $css_class;
+	}
+
 }
