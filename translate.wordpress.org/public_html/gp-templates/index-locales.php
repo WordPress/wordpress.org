@@ -29,9 +29,9 @@ gp_tmpl_header();
 			?>
 			<div class="locale <?php echo 'percent-' . $percent_complete; ?>">
 				<ul class="name">
-					<li class="english"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->english_name ) ?></li>
-					<li class="native"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $locale->native_name ) ?></li>
-					<li class="code"><?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), $wp_locale ) ?></li>
+					<li class="english"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $locale->english_name ) ?></li>
+					<li class="native"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $locale->native_name ) ?></li>
+					<li class="code"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $wp_locale ) ?></li>
 				</ul>
 				<div class="contributors">
 					<?php
@@ -47,7 +47,7 @@ gp_tmpl_header();
 				</div>
 				<div class="locale-button">
 					<div class="button contribute-button">
-						<?php echo gp_link_get( gp_url_join( gp_url_current(), $locale->slug ), 'Contribute Translation' ) ?>
+						<?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), 'Contribute Translation' ) ?>
 					</div>
 				</div>
 			</div>

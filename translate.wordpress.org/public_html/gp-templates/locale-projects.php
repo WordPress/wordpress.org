@@ -2,7 +2,7 @@
 gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( $locale->english_name ) ) );
 
 $breadcrumb   = array();
-$breadcrumb[] = gp_link_get( '/languages', __( 'Locales' ) );
+$breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
 $breadcrumb[] = esc_html( $locale->english_name );
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
@@ -28,7 +28,7 @@ gp_tmpl_header();
 							printf(
 								'<option name="%s" data-project-url="%s"%s>%s</option>',
 								$variant,
-								esc_url( gp_url_join( '/languages', $locale_slug, $variant, $project->slug ) ),
+								esc_url( gp_url_join( '/locale', $locale_slug, $variant, $project->slug ) ),
 								( $set_slug == $variant ) ? ' selected="selected"' : '',
 								ucfirst( $variant )
 							);
@@ -58,7 +58,7 @@ gp_tmpl_header();
 		foreach ( $top_level_projects as $top_level_project ) {
 			printf(
 				'<li><a href="%s"%s>%s</a></li>',
-				gp_url_join( '/languages', $locale_slug, $set_slug, $top_level_project->slug ),
+				gp_url_join( '/locale', $locale_slug, $set_slug, $top_level_project->slug ),
 				( $top_level_project->path == $project_path ) ? ' class="current"' : '',
 				$top_level_project->name
 			);
@@ -82,7 +82,7 @@ gp_tmpl_header();
 			$sub_projects_count = $status->sub_projects_count;
 		}
 
-		$project_url = gp_url_join( '/languages', $locale_slug, $set_slug, $sub_project->path );
+		$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
 
 		$project_icon = '';
 		if ( isset( $project_icons[ $sub_project->id ] ) ) {

@@ -2,8 +2,8 @@
 gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( $locale->english_name ) ) );
 
 $breadcrumb   = array();
-$breadcrumb[] = gp_link_get( '/languages', __( 'Locales' ) );
-$breadcrumb[] = gp_link_get( gp_url_join( '/languages', $locale_slug, $set_slug), esc_html( $locale->english_name ) );
+$breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug), esc_html( $locale->english_name ) );
 $breadcrumb[] = $sub_project->name;
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
@@ -35,7 +35,7 @@ gp_tmpl_header();
 								printf(
 									'<option name="%s" data-project-url="%s"%s>%s</option>',
 									$variant,
-									esc_url( gp_url_join( '/languages', $locale_slug, $variant, $sub_project->path ) ),
+									esc_url( gp_url_join( '/locale', $locale_slug, $variant, $sub_project->path ) ),
 									( $set_slug == $variant ) ? ' selected="selected"' : '',
 									ucfirst( $variant )
 								);

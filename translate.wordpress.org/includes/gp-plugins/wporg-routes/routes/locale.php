@@ -2,34 +2,9 @@
 /**
  * Locale Route Class.
  *
- * Provides the route for translate.wordpress.org/languages.
+ * Provides the route for translate.wordpress.org/locale/$locale.
  */
 class GP_WPorg_Route_Locale extends GP_Route {
-
-	/**
-	 * Prints all exisiting locales as cards.
-	 */
-	public function get_locales() {
-		$locales = array();
-		$existing_locales = GP::$translation_set->existing_locales();
-		foreach ( $existing_locales as $locale ) {
-			$locales[] = GP_Locales::by_slug( $locale );
-		}
-		usort( $locales, array( $this, '_sort_english_name_callback') );
-		unset( $existing_locales );
-
-		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
-		if ( false === $contributors_count ) {
-			$contributors_count = array();
-		}
-
-		$translation_status = wp_cache_get( 'translation-status', 'wporg-translate' );
-		if ( false === $translation_status ) {
-			$translation_status = array();
-		}
-
-		$this->tmpl( 'locales', get_defined_vars() );
-	}
 
 	/**
 	 * Prints projects/translation sets of a top level project.
@@ -77,7 +52,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 		$variants = $this->get_locale_variants( $locale_slug, array_keys( $project_status ) );
 
-		$this->tmpl( 'locale', get_defined_vars() );
+		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
 
 	/**
@@ -283,9 +258,5 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 	private function _sort_name_callback( $a, $b ) {
 		return strcasecmp( $a->name, $b->name );
-	}
-
-	private function _sort_english_name_callback( $a, $b ) {
-		return $a->english_name > $b->english_name;
 	}
 }
