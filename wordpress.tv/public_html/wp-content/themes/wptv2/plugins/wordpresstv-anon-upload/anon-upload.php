@@ -262,15 +262,14 @@ class WPTV_Anon_Upload {
 			$anon_author_email = $this->sanitize_text( $_posted['wptv_email'] );
 		}
 
-		$video_title    = $this->sanitize_text( $_posted['wptv_video_title'] );
+		$video_title       = $this->sanitize_text( $_posted['wptv_video_title'] );
 		$producer_username = $this->sanitize_text( $_posted['wptv_producer_username'] );
-		$speakers       = $this->sanitize_text( $_posted['wptv_speakers'] );
-		$event          = $this->sanitize_text( $_posted['wptv_event'] );
-		$description    = $this->sanitize_text( $_posted['wptv_video_description'], false );
-		$language       = $this->sanitize_text( $_posted['wptv_language'] );
-		$slides         = $this->sanitize_text( $_posted['wptv_slides_url'] );
-		$ip             = $_SERVER['REMOTE_ADDR'];
-		// todo realign in separate commit
+		$speakers          = $this->sanitize_text( $_posted['wptv_speakers'] );
+		$event             = $this->sanitize_text( $_posted['wptv_event'] );
+		$description       = $this->sanitize_text( $_posted['wptv_video_description'], false );
+		$language          = $this->sanitize_text( $_posted['wptv_language'] );
+		$slides            = $this->sanitize_text( $_posted['wptv_slides_url'] );
+		$ip                = $_SERVER['REMOTE_ADDR'];
 
 		$categories = '';
 		if ( ! empty( $_posted['post_category'] ) && is_array( $_posted['post_category'] ) ) {
@@ -283,19 +282,18 @@ class WPTV_Anon_Upload {
 		}
 
 		$post_meta = array(
-			'attachment_id'   => $attachment_id,
-			'submitted_by'    => $anon_author,
-			'submitted_email' => $anon_author_email,
-			'title'           => $video_title,
+			'attachment_id'     => $attachment_id,
+			'submitted_by'      => $anon_author,
+			'submitted_email'   => $anon_author_email,
+			'title'             => $video_title,
 			'producer_username' => $producer_username,
-			'speakers'        => $speakers,
-			'event'           => $event,
-			'language'        => $language,
-			'categories'      => $categories,
-			'description'     => $description,
-			'slides'          => $slides,
-			'ip'              => $ip,
-			// todo realign in separate commit
+			'speakers'          => $speakers,
+			'event'             => $event,
+			'language'          => $language,
+  			'categories'        => $categories,
+			'description'       => $description,
+			'slides'            => $slides,
+			'ip'                => $ip,
 		);
 
 		$post_meta['video_guid'] = $video_data->guid;
