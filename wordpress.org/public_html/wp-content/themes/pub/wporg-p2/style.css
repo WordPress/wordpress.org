@@ -10,23 +10,17 @@ Description: Child theme of p2, with modifications specifically for make.wordpre
 	padding-left: 0;
 }
 
-.post-type-archive-handbook ul#menu-table-of-contents a[href="#"],
-.single-handbook ul#menu-table-of-contents a[href="#"] {
+.post-type-archive-handbook #wrapper .menu-table-of-contents-container > ul:first-child > li > a,
+.single-handbook #wrapper .menu-table-of-contents-container > ul:first-child > li > a {
 	font-weight: bold;
 	color: #555;
 	font-size: 115%;
 	padding: 4px 0;
 	display: block;
-	cursor: text;
 }
 
-.post-type-archive-handbook ul#menu-table-of-contents a[href="#"]:hover,
-.single-handbook ul#menu-table-of-contents a[href="#"]:hover {
-	color: #555!important;
-}
-
-.post-type-archive-handbook ul#menu-table-of-contents a,
-.single-handbook ul#menu-table-of-contents a {
+.post-type-archive-handbook #wrapper .menu-table-of-contents-container a,
+.single-handbook #wrapper .menu-table-of-contents-container a {
 	color: #555;
 }
 
@@ -156,19 +150,19 @@ li.type-handbook h4 {
 	margin: 0;
 }
 
-.post-type-archive-handbook ul#menu-table-of-contents,
-.single-handbook ul#menu-table-of-contents {
+.post-type-archive-handbook #wrapper .menu-table-of-contents-container > ul,
+.single-handbook #wrapper .menu-table-of-contents-container > ul {
 	padding: 12px;
 	background: #f5f5f5;
 }
 
-.post-type-archive-handbook ul#menu-table-of-contents > li,
-.single-handbook ul#menu-table-of-contents > li {
+.post-type-archive-handbook #wrapper .menu-table-of-contents-container > ul > li,
+.single-handbook #wrapper .menu-table-of-contents-container > ul > li {
 	list-style: none;
 }
 
-.post-type-archive-handbook ul#menu-table-of-contents li ul a ,
-.single-handbook ul#menu-table-of-contents li ul a {
+.post-type-archive-handbook #wrapper .menu-table-of-contents-container > ul li ul a ,
+.single-handbook #wrapper .menu-table-of-contents-container > ul li ul a {
 	font-weight: normal;
 }
 
