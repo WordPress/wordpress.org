@@ -321,12 +321,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'requester':
-				$requester = get_user_by( 'id', $post->post_author );
-				if ( is_a( $requester, 'WP_User' ) ) {
-					$value = sprintf( '%s <%s>', $requester->get( 'display_name' ), $requester->get( 'user_email' ) );
-				} else {
-					$value = '';
-				}
+				$value = $this->get_requester_formatted_email( $post->post_author );
 				break;
 
 			case 'date_vendor_paid':
@@ -350,6 +345,24 @@ class WCP_Payment_Request {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Get the e-mail address of the requester in `Name <address>` format
+	 *
+	 * @param int $post_author_id
+	 *
+	 * @return false|string
+	 */
+	protected function get_requester_formatted_email( $post_author_id ) {
+		$address   = false;
+		$requester = get_user_by( 'id', $post_author_id );
+
+		if ( is_a( $requester, 'WP_User' ) ) {
+			$address = sprintf( '%s <%s>', $requester->get( 'display_name' ), $requester->get( 'user_email' ) );
+		}
+
+		return $address;
 	}
 
 	/**
@@ -581,10 +594,45 @@ class WCP_Payment_Request {
 	 */
 	public function update_request_status( $post_data, $post_data_raw ) {
 		if ( $this->post_edit_is_actionable( $post_data ) ) {
+			$previous_status          = $post_data['post_status'];
 			$post_data['post_status'] = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) ) ? 'paid' : 'unpaid';
+
+			if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
+				$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
+			}
 		}
 
 		return $post_data;
+	}
+
+	/**
+	 * Notify the payment requester that it has been marked as paid.
+	 *
+	 * @param int   $request_id
+	 * @param array $post_data
+	 */
+	protected function notify_requester_payment_made( $request_id, $post_data ) {
+		if ( ! $to = $this->get_requester_formatted_email( $post_data['post_author'] ) ) {
+			return;
+		}
+
+		$subject = sprintf( '`%s` has been paid', $post_data['post_title'] );
+		$headers = array( 'Reply-To: support@wordcamp.org' );
+
+		$message = sprintf(
+			"The request for `%s` has been marked as paid by WordCamp Central.
+
+			You can view the request at:
+
+			%s
+
+			If you have any questions, please reply to let us know.",
+			$post_data['post_title'],
+			admin_url( sprintf( 'post.php?post=%s&action=edit', $request_id ) )
+		);
+		$message = str_replace( "\t", '', $message );
+
+		wp_mail( $to, $subject, $message, $headers );
 	}
 
 	/**
