@@ -50,25 +50,6 @@ function subtitles_upload_css() {
 		font-size: 22px;
 	}
 
-	.video-upload div.error,
-	.video-upload div.success {
-		border: 1px solid #c00;
-		border-radius: 3px;
-		background-color: #ffebe8;
-		padding: 0 10px;
-		margin: 10px 0;
-	}
-
-	.video-upload div.success {
-		background-color: #edfcd5;
-		border-color: #d4ebaf;
-	}
-
-	.video-upload div.error p,
-	.video-upload div.success p {
-		margin: 0.5em 0;
-	}
-
 	.video-upload table tr th,
 	.video-upload table tr td {
 		padding: 7px 0;

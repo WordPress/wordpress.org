@@ -67,18 +67,6 @@ function anon_upload_css() {
 		font-size: 22px;
 	}
 
-	.video-upload div.error {
-		border: 1px solid #c00;
-		border-radius: 3px;
-		background-color: #ffebe8;
-		padding: 0 10px;
-		margin: 10px 0;
-	}
-
-	.video-upload div.error p {
-		margin: 0.5em 0;
-	}
-
 	.video-upload-left p > label,
 	.video-upload-left div > label {
 		padding: 4px 0 0;

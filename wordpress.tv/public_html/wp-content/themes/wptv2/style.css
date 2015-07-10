@@ -168,6 +168,29 @@ form, fieldset, address {
 	text-indent: -1000em;
 }
 
+div.error,
+div.success {
+	border: 1px solid #c00;
+	border-radius: 3px;
+	padding: 0 10px;
+	margin: 10px 0;
+}
+
+div.success {
+	background-color: #edfcd5;
+	border-color: #d4ebaf;
+}
+
+div.error {
+	border-color: #c00;
+	background-color: #ffebe8;
+}
+
+div.error p,
+div.success p {
+	margin: 0.5em 0;
+}
+
 /* Alignment */
 .alignleft, .alignright, .align-left, .align-right {
 }
