@@ -51,6 +51,15 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	}
 
 	require_once WPORGPATH . 'translate/glotpress/locales/locales.php';
+	// Temporary: Add language variants to the list of GlotPress locales.
+	$GLOBALS['gp_locales'] = new GP_Locales;
+	$de_formal = clone GP_Locales::by_field( 'wp_locale', 'de_DE' );
+	$de_formal->english_name = 'German (Formal)';
+	$de_formal->native_name = 'Deutsch (Sie)';
+	$de_formal->slug = 'de/formal';
+	$de_formal->wp_locale = 'de_DE_formal';
+	$GLOBALS['gp_locales']->locales['de/formal'] = $de_formal;
+
 	$base_url = is_ssl() ? 'https' : 'http';
 	$base_url .= '://downloads.wordpress.org/translation/';
 	$base_url .= ( $type == 'core' ) ? 'core' : "$type/$domain";
@@ -61,12 +70,13 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		if ( ! $continue_translations ) {
 			// Magic numbers: 78 is wp/dev/admin. 326 is 'Continue'.
 			$continue_translations = $wpdb->get_results(
-				"SELECT locale as gp_locale, translation_0 as translation
+				"SELECT
+					IF(ts.slug <> 'default', CONCAT(ts.locale, '/', ts.slug), ts.locale) as slug,
+					translation_0 as translation
 				FROM translate_translation_sets ts
 				INNER JOIN translate_translations t
 				ON ts.id = t.translation_set_id
 				WHERE project_id = 78
-				AND slug = 'default'
 				AND original_id = 326", OBJECT_K
 			);
 			wp_cache_add( 'continue-strings', $continue_translations, $cache_group, $cache_time );
@@ -246,4 +256,3 @@ function check_for_translations_of_installed_items( $args ) {
 
 	return $translations;
 }
-
