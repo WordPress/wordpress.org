@@ -3,7 +3,8 @@ gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( 
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
-$breadcrumb[] = esc_html( $locale->english_name );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug ), esc_html( $locale->english_name ) );
+$breadcrumb[] = esc_html( $project->name );
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
 ?>
@@ -77,7 +78,7 @@ gp_tmpl_header();
 		$percent_complete = $waiting = $sub_projects_count = 0;
 		if ( isset( $project_status[ $sub_project->id ] ) ) {
 			$status = $project_status[ $sub_project->id ];
-			$percent_complete = floor( $status->current_count / $status->all_count * 100 );
+			$percent_complete = $status->percent_complete;
 			$waiting = $status->waiting_count;
 			$sub_projects_count = $status->sub_projects_count;
 		}

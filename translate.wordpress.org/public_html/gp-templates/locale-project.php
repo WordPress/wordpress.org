@@ -3,7 +3,8 @@ gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( 
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
-$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug), esc_html( $locale->english_name ) );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug ), esc_html( $locale->english_name ) );
+$breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug, $project->path ), esc_html( $project->name ) );
 $breadcrumb[] = $sub_project->name;
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
@@ -12,7 +13,7 @@ gp_tmpl_header();
 <div class="project-header">
 	<p class="project-description"><?php echo $sub_project->description; ?></p>
 
-	<div class="project-box">
+	<div class="project-box percent-<?php echo $sub_project_status->percent_complete; ?>">
 		<div class="project-box-header">
 			<div class="project-icon">
 				<?php echo $project_icon; ?>
@@ -49,18 +50,43 @@ gp_tmpl_header();
 			</ul>
 
 			<div class="project-status">
-				<?php
-				$percent_complete = floor( $project_status->current_count / $project_status->all_count * 100 );
-				echo $percent_complete . '%';
-				?>
+				<?php echo $sub_project_status->percent_complete . '%'; ?>
 			</div>
 		</div>
 
 		<div class="project-status-progress percent">
-			<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
+			<div class="percent-complete" style="width:<?php echo $sub_project_status->percent_complete; ?>%;"></div>
 		</div>
 
 		<div class="project-box-footer">
+			<ul class="projects-dropdown">
+				<li><span>All Sub-Projects</span>
+					<ul>
+						<?php
+						// Show the current project if it has strings.
+						if ( $sub_project_status->all_count ) {
+							printf(
+								'<li><a href="%s">%s <span>%s</span></a>',
+								gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ),
+								$sub_project->name,
+								$sub_project_status->percent_complete . '%'
+							);
+						}
+
+						foreach ( $sub_projects as $_sub_project ) {
+							$status = $sub_project_statuses[ $_sub_project->id ];
+
+							printf(
+								'<li><a href="%s">%s <span>%s</span></a>',
+								gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ),
+								$_sub_project->name,
+								$status->percent_complete . '%'
+							);
+						}
+						?>
+					</ul>
+				</li>
+			</ul>
 		</div>
 	</div>
 </div>
@@ -84,10 +110,9 @@ gp_tmpl_header();
 				<tr>
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
-						<?php if ( $sub_project_status->current_count && $sub_project_status->current_count >= $sub_project_status->all_count * 0.9 ):
-							$percent = floor( $sub_project_status->current_count / $sub_project_status->all_count * 100 );
+						<?php if ( $sub_project_status->percent_complete > 90 ):
 							?>
-							<span class="bubble morethan90"><?php echo $percent; ?>%</span>
+							<span class="bubble morethan90"><?php echo $sub_project_status->percent_complete; ?>%</span>
 						<?php endif;?>
 					</td>
 					<td class="stats translated">
@@ -115,10 +140,9 @@ gp_tmpl_header();
 				<tr>
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
-						<?php if ( $status->current_count && $status->current_count >= $status->all_count * 0.9 ):
-							$percent = floor( $status->current_count / $status->all_count * 100 );
+						<?php if ( $status->percent_complete > 90 ):
 							?>
-							<span class="bubble morethan90"><?php echo $percent; ?>%</span>
+							<span class="bubble morethan90"><?php echo $status->percent_complete; ?>%</span>
 						<?php endif;?>
 					</td>
 					<td class="stats translated">
@@ -153,6 +177,10 @@ gp_tmpl_header();
 			if ( projectUrl.length ) {
 				window.location = projectUrl;
 			}
+		});
+
+		$( '.projects-dropdown > li' ).on( 'click', function() {
+			$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 		});
 	});
 </script>

@@ -93,10 +93,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		if ( $sub_projects ) {
 			$sub_project_statuses = array();
 			foreach ( $sub_projects as $key => $_sub_project ) {
-				$status = $this->get_project_status( $_sub_project, $locale_slug, $set_slug );
-				if ( ! $status->all_count ) {
-					unset( $sub_projects[ $key ] );
-				}
+				$status = $this->get_project_status( $_sub_project, $locale_slug, $set_slug, null, false );
 
 				$sub_project_statuses[ $_sub_project->id ] = $status;
 			}
@@ -180,6 +177,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$status->current_count      = 0;
 			$status->fuzzy_count        = 0;
 			$status->all_count          = 0;
+			$status->percent_complete   = 0;
 		}
 
 		$set = GP::$translation_set->by_project_id_slug_and_locale(
@@ -194,13 +192,17 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$status->current_count      += (int) $set->current_count();
 			$status->fuzzy_count        += (int) $set->fuzzy_count();
 			$status->all_count          += (int) $set->all_count();
+
+			if ( $status->all_count ) {
+				$status->percent_complete = floor( $status->current_count / $status->all_count * 100 );
+			}
 		}
 
 		if ( $calc_sub_projects ) {
 			$sub_projects = $this->get_active_sub_projects( $project, true );
 			if ( $sub_projects ) {
 				foreach ( $sub_projects as $sub_project ) {
-					$this->get_project_status( $sub_project, $locale, $set_slug, $status );
+					$this->get_project_status( $sub_project, $locale, $set_slug, $status, false );
 				}
 			}
 		}

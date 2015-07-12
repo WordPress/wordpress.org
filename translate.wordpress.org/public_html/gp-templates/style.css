@@ -14,6 +14,13 @@ html, body {
 	margin: 2px 0 .6em;
 }
 
+
+.gp-content h3 {
+	background: none;
+	padding: 0;
+	margin: 2px 0 .6em;
+}
+
 .gp-content span.breadcrumb {
 	margin: .5em 0;
 	display: block;
@@ -51,6 +58,146 @@ p.description {
 p.actionlist {
 	margin-top: 1em;
 	margin-bottom: 1em;
+}
+
+/* Change some colors (http://codepen.io/hugobaeta/full/RNOzoV/) */
+span.morethan90 {
+	background: none;
+	font-size: 90%;
+	color: #509040;
+}
+
+span.context {
+	font-size: 90%;
+	background-color: #a0a5aa;
+}
+
+table.translations td.translation li {
+	border-bottom: 1px dotted #eee;
+}
+
+table.translations thead th,
+table.translations tfoot th,
+table.translation-sets thead th,
+table.translations tfoot th,
+table.glossary thead th,
+table.locale-sub-projects thead th,
+table.locales thead th {
+	background-color: #72777c;
+	color: #fff;
+}
+
+table.translations,
+table.translation-sets,
+table.glossary,
+table.locale-sub-projects {
+	border-spacing: 0;
+}
+
+table.translations td,
+table.translations th,
+table.translation-sets td,
+table.translation-sets th,
+table.locales td,
+table.locales th,
+table.glossary th,
+table.glossary td,
+table.locale-sub-projects th,
+table.locale-sub-projects td {
+	border: 0;
+	border-bottom: 1px solid #eee;
+	border-right: 1px solid #eee;
+}
+
+table.translations td:first-child,
+table.translations th:first-child,
+table.translation-sets td:first-child,
+table.translation-sets th:first-child,
+table.locales td:first-child,
+table.locales th:first-child,
+table.glossary th:first-child,
+table.glossary td:first-child,
+table.locale-sub-projects th:first-child,
+table.locale-sub-projects td:first-child {
+	border-left: 1px solid #eee;
+}
+
+table.translations tr.even,
+.translation-sets tr,
+.locales tr {
+	background-color: #f9f9f9;
+}
+
+.translation-sets tr.odd:hover,
+.locales tr.odd:hover,
+.translation-sets tr:hover,
+.locales tr:hover,
+.locale-sub-projects tr:hover td {
+	background-color: #e5f5fa;
+}
+
+table.translations tr.preview.status-current,
+#legend .status-current {
+	background-color: #c1e1b9;
+}
+
+table.translations tr.preview.status-waiting,
+#legend .status-waiting {
+	background-color: #ffe399;
+}
+
+table.translations tr.preview.status-fuzzy, #legend .status-fuzzy {
+	background-color: #fbc5a9;
+}
+
+table.translations tr.preview.has-warnings td.original,
+div#legend div.has-warnings {
+	border-left: 3px solid #dc3232;
+}
+
+table.translations tr.preview.status-rejected,
+#legend .status-rejected {
+	background-color: #f1adad;
+}
+
+table.translations tr.preview.status-old,
+#legend .status-old {
+	background-color: #cdc5e1;
+}
+
+table.translations tr.editor {
+	background-color: #eff7ed;
+}
+
+.gp-content .meta {
+	color: #333;
+}
+
+.gp-content .meta a {
+	color: #0074a2;
+	border-bottom: 0;
+}
+
+.gp-content .meta a:hover {
+	color: #2ea2cc;
+	border-bottom: 0;
+}
+
+.editor .original {
+	margin-bottom: 1em;
+	word-break: break-all;
+}
+
+.editor .textareas textarea {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.editor .meta {
+	margin: 0;
+	padding-left: 2em;
+	width: 40%;
+	box-sizing: border-box;
 }
 
 #gp-footer {
@@ -296,6 +443,7 @@ ul.filter-header-links {
 }
 
 .locale .percent,
+.project-box .percent,
 .project .percent {
 	width: 100%;
 	height: 4px;
@@ -303,6 +451,7 @@ ul.filter-header-links {
 }
 
 .locale .percent-complete,
+.project-box .percent-complete,
 .project .percent-complete {
 	height: 4px;
 	background-color: #509040;
@@ -472,6 +621,7 @@ ul.filter-header-links {
 	float: left;
 	width: 100%;
 	max-width: 520px;
+	margin-top: 20px;
 }
 
 .project-header .project-box {
@@ -486,7 +636,12 @@ ul.filter-header-links {
 	box-sizing: border-box;
 }
 
+.project-box.percent-100 {
+	border-color: #509040;
+}
+
 .project-box .project-box-header {
+	position: relative;
 	padding: 15px;
 }
 
@@ -554,20 +709,97 @@ ul.filter-header-links {
 	border-left: 1px solid #eee;
 }
 
+.project-box .project-box-footer {
+	background: #f9f9f9;
+}
+
+ul.projects-dropdown,
+ul.projects-dropdown ul {
+	padding: 0;
+}
+
+.projects-dropdown li {
+	list-style: none;
+}
+
+.projects-dropdown a,
+.projects-dropdown a:hover,
+.projects-dropdown a:focus {
+	color: #333;
+}
+
+.projects-dropdown a:hover,
+.projects-dropdown a:focus {
+	background: #ddd;
+}
+
+ul.projects-dropdown ul {
+	position: absolute;
+	left: -1px;
+	width: 100%;
+	background: #f9f9f9;
+	border: 1px solid #ccc;
+	border-top: 0;
+	-webkit-box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.04);
+	box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.04);
+	display: none;
+}
+
+ul.projects-dropdown.open ul {
+	display: block;
+}
+
+ul.projects-dropdown li > span,
+ul.projects-dropdown li > a  {
+	position: relative;
+	display: block;
+	padding: 10px 50px 10px 15px;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Dropdown arrow */
+ul.projects-dropdown > li > span:after {
+	position: absolute;
+	top: 5px;
+	right: 15px;
+	content: "\f140";
+	width: 20px;
+	height: 20px;
+	font: 20px/1 "dashicons";
+	border-left: 1px solid #eee;
+	padding: 5px 0 5px 12px;
+	box-shadow: inset 1px 0 0 #fff;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+ul.projects-dropdown.open > li > span:after {
+	content: "\f142";
+}
+
+/* Percentage */
+ul.projects-dropdown li > a > span {
+	position: absolute;
+	right: 15px;
+}
+
 /* Responsive styles */
 @media (max-width: 700px) {
+	#hello {
+		margin: 25px 10px 15px;
+	}
+
+	#hello a {
+		white-space: nowrap;
+	}
+
 	.intro {
 		width: 100%;
 	}
-}
 
-@media only screen and (max-width: 1120px) {
-	.locales .locale {
-		width: 47.917%;
-	}
-}
-
-@media only screen and (max-width: 700px) {
 	.locales,
 	.projects {
 		margin-left: 0;
@@ -577,5 +809,31 @@ ul.filter-header-links {
 	.projects .project {
 		width: 100%;
 		margin-left: 0;
+	}
+
+	.locale-intro {
+		float: none;
+	}
+
+	.locale-box {
+		float: none;
+		width: 100%;
+		margin-top: 20px;
+	}
+
+	.project-header .project-description {
+		float: none;
+	}
+
+	.project-header .project-box {
+		float: none;
+		width: 100%;
+		margin-top: 20px;
+	}
+}
+
+@media only screen and (max-width: 1120px) {
+	.locales .locale {
+		width: 47.917%;
 	}
 }
