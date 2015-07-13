@@ -13,7 +13,7 @@ gp_tmpl_header();
 <div class="project-header">
 	<p class="project-description"><?php echo $sub_project->description; ?></p>
 
-	<div class="project-box percent-<?php echo $sub_project_status->percent_complete; ?>">
+	<div class="project-box percent-<?php echo $project_status->percent_complete; ?>">
 		<div class="project-box-header">
 			<div class="project-icon">
 				<?php echo $project_icon; ?>
@@ -50,7 +50,7 @@ gp_tmpl_header();
 			</ul>
 
 			<div class="project-status">
-				<?php echo $sub_project_status->percent_complete . '%'; ?>
+				<?php echo $project_status->percent_complete . '%'; ?>
 			</div>
 		</div>
 
