@@ -39,19 +39,19 @@ function is_user_whitelisted( $user, $channel ) {
 function show_authorization( $user, $channel ) {
 	$channels = get_whitelisted_channels_for_user( $user ) ;
 	if ( $channel === 'privategroup' ) {
-		echo "Any private group members can use /announce in this group.";
+		echo "Any private group members can use /announce and /here in this group.";
 		return;
 	} elseif ( empty( $channels ) ) {
-		echo "You are not allowed to use /announce.";
+		echo "You are not allowed to use /announce or /here.";
 	} elseif ( in_array( $channel, $channels ) ) {
 		$channels = array_filter( $channels, function( $c ) use ( $channel ) { return $c !== $channel; } );
 		if ( $channels ) {
-			printf( "You are allowed to use /announce in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
+			printf( "You are allowed to use /announce and /here in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
 		} else {
-			echo "You are allowed to use /announce in #$channel.";
+			echo "You are allowed to use /announce and /here in #$channel.";
 		}
 	} else {
-		printf( "You are not allowed to use /announce in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
+		printf( "You are not allowed to use /announce or /here in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
 	printf( " If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
@@ -72,7 +72,16 @@ function run( $data ) {
 
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
 	$send->set_username( $user );
-	$send->set_text( sprintf( "<!channel> %s", $data['text'] ) );
+
+	$command = 'channel';
+	if ( $data['command'] === '/here' ) {
+		$command = 'here';
+	} elseif ( $channel === 'privategroup' ) {
+		// @channel and @group are interchangeable, but still.
+		$command = 'group';
+	}
+
+	$send->set_text( sprintf( "<!%s> %s", $command, $data['text'] ) );
 
 	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
 	if ( function_exists( $get_avatar ) ) {
