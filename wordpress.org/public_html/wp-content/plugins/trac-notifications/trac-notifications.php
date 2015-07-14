@@ -428,10 +428,12 @@ class wporg_trac_notifications {
 			check_admin_referer( 'save-trac-notifications', 'trac-nonce' );
 
 			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
-				foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
-					if ( empty( $notifications[ $type ][ $value ] ) ) {
-						$this->trac->insert( '_notifications', compact( 'username', 'type', 'value' ) );
-						$notifications[ $type ][ $value ] = true;
+				if ( ! empty( $_POST['notifications'][ $type ] ) ) {
+					foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
+						if ( empty( $notifications[ $type ][ $value ] ) ) {
+							$this->trac->insert( '_notifications', compact( 'username', 'type', 'value' ) );
+							$notifications[ $type ][ $value ] = true;
+						}
 					}
 				}
 
