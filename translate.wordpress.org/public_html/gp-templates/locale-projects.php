@@ -67,8 +67,11 @@ gp_tmpl_header();
 		?>
 	</ul>
 	<div class="search-form">
-		<label class="screen-reader-text" for="projects-filter"><?php esc_attr_e( 'Search projects...' ); ?></label>
-		<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" class="filter-search">
+		<form>
+			<label class="screen-reader-text" for="projects-filter"><?php esc_attr_e( 'Search projects...' ); ?></label>
+			<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" name="s" value="<?php if ( !empty( $search ) ) { echo esc_attr( $search ); } ?>" class="filter-search">
+			<input type="submit" value="<?php esc_attr_e( 'Search' ); ?>" class="screen-reader-text" />
+		</form>
 	</div>
 </div>
 
@@ -139,11 +142,23 @@ gp_tmpl_header();
 	}
 	?>
 </div>
+<?php
+	if ( isset( $pages ) && $pages['pages'] > 1 ) {
+		echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+	}
+?>
 
 <script>
 	jQuery( document ).ready( function( $ ) {
+		// Don't filter if there's an existing search term, or if we're paginated
+		// Fall back to a full page reload for those cases.
+		var live_filtering_enabled = ( ! $( '#projects-filter' ).val() && ! $( '.paging' ).length );
 		$rows = $( '#projects' ).find( '.project' );
 		$( '#projects-filter' ).on( 'input keyup', function() {
+			if ( ! live_filtering_enabled ) {
+				return;
+			}
+
 			var words = this.value.toLowerCase().split( ' ' );
 
 			if ( '' === this.value.trim() ) {

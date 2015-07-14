@@ -14,6 +14,12 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @param string $project_path     Path of a project.
 	 */
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = 'wp' ) {
+		global $gpdb;
+
+		$per_page = 20;
+		$page = (int) gp_get( 'page', 1 );
+		$search = gp_get( 's', '' );
+
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
 			return $this->die_with_404();
@@ -24,23 +30,38 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		$sub_projects = $this->get_active_sub_projects( $project );
-		if ( ! $sub_projects ) {
+		$paged_sub_projects = $this->get_paged_active_sub_projects(
+			$project,
+			array(
+				'page' => $page,
+				'per_page' => $per_page,
+				'orderby' => 'name',
+				'search' => $search,
+				'set_slug' => $set_slug,
+				'locale' => $locale_slug,
+			)
+		);
+
+		if ( ! $paged_sub_projects ) {
 			return $this->die_with_404();
 		}
 
-		usort( $sub_projects, array( $this, '_sort_name_callback' ) );
+		$sub_projects   = $paged_sub_projects['projects'];
+		$pages          = $paged_sub_projects['pages'];
+		unset( $paged_sub_projects );
 
 		$project_status = $project_icons = array();
 		foreach ( $sub_projects as $key => $sub_project ) {
-			$status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
-			if ( ! $status->all_count ) {
-				unset( $sub_projects[ $key ] );
-			}
-
-			$project_status[ $sub_project->id ] = $status;
+			$project_status[ $sub_project->id ] = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
 			$project_icons[ $sub_project->id ] = $this->get_project_icon( $project, $sub_project );
 		}
+
+		$project_ids = array_keys( $project_status );
+		$project_ids[] = $project->id;
+		$project_ids = array_merge(
+			$project_ids,
+			$gpdb->get_col( "SELECT id FROM {$gpdb->projects} WHERE parent_project_id IN(" . implode(', ', $project_ids  ) . ")" )
+		);
 
 		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
 		if ( false === $contributors_count ) {
@@ -50,7 +71,11 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		$top_level_projects = GP::$project->top_level();
 		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
 
-		$variants = $this->get_locale_variants( $locale_slug, array_keys( $project_status ) );
+		$variants = $this->get_locale_variants( $locale_slug, $project_ids );
+		// If there were no results for the current variant in the current project branch, it should still show it.
+		if ( ! in_array( $set_slug, $variants, true ) ) {
+			$variants[] = $set_slug;
+		}
 
 		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
@@ -118,6 +143,13 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		switch( $project->slug ) {
 			case 'wp':
 				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
+			case 'wp-themes':
+				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
+				if ( $screenshot ) {
+					return '<div class="theme icon"><img src="https://i0.wp.com/' . $screenshot . '?w=' . $size . '&amp;strip=all"></div>';
+				} else {
+					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
+				}
 			case 'bbpress':
 			case 'buddypress':
 				require_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
@@ -252,6 +284,91 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		unset( $_projects );
 
 		return $projects;
+	}
+
+	/**
+	 * Retrieves active sub projects with paging.
+	 *
+	 * This method is horribly inefficient when there exists many sub-projects, as it can't use SQL.
+	 *
+	 * @param GP_Project $project           The parent project
+	 * @param array $args {
+	 *	@type int    $per_page Number of items per page. Default 20
+	 *	@type int    $page     The page of results to view. Default 1.
+	 *	@type string $orderby  The field to order by, id or name. Default id.
+	 *	@type string $order    The sorting order, ASC or DESC. Default ASC.
+	 *	@type string $search   The search string
+	 *	@type string $set_slug The translation set to view.
+	 *	@type string $locale   The locale of the translation set to view.
+	 * }
+	 * @return array List of sub projects.
+	 */
+	private function get_paged_active_sub_projects( $project, $args = array() ) {
+		global $gpdb;
+
+		$defaults = array(
+			'per_page' => 20,
+			'page'     => 1,
+			'orderby'  => 'id',
+			'order'    => 'ASC',
+			'search'   => false,
+			'set_slug' => '',
+			'locale'   => '',
+		);
+		$r = wp_parse_args( $args, $defaults );
+		extract( $r, EXTR_SKIP );
+
+		$order = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+		$orderby = ( in_array( $orderby, array( 'id', 'name' ) ) ? $orderby : 'id' );
+
+		$limit_sql = '';
+		if ( $per_page ) {
+			$limit_sql = $gpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
+		}
+		$search_sql = '';
+		if ( $search ) {
+			$esc_search = '%%' . like_escape( $search ) . '%%';
+			$search_sql = $gpdb->prepare( 'AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
+		}
+
+		/*
+		 * Find all child projects with translation sets that match the current locale/slug.
+		 *
+		 * 1. We need to fetch all sub-projects of the current project (so, if we're at wp-plugins, we want akismet, debug bar, importers, etc)
+		 * 2. Next, we fetch the sub-projects of those sub-projects, that gets us things like Development, Readme, etc.
+		 * 3. Next, we fetch the translation sets of both the sub-projects(1), and any sub-sub-projects(2).
+		 * Once we have the sets in 3, we can then check to see if there exists any translation sets for the current (locale, slug) (ie. en-au/default)
+		 * If not, we can simply filter them out, so that paging only has items returned that actually exist.
+		 */
+		$translation_sets_table = GP::$translation_set->table;
+		$_projects = $project->many( "
+			SELECT SQL_CALC_FOUND_ROWS tp.*
+				FROM {$project->table} tp
+				LEFT JOIN {$project->table} tp_sub ON tp.id = tp_sub.parent_project_id AND tp_sub.active = 1
+				LEFT JOIN {$translation_sets_table} sets ON sets.project_id = tp.id AND sets.locale = %s AND sets.slug = %s
+				LEFT JOIN {$translation_sets_table} sets_sub ON sets_sub.project_id = tp_sub.id AND sets_sub.locale = %s AND sets_sub.slug = %s
+			WHERE
+				tp.parent_project_id = %d
+				AND tp.active = 1
+				AND ( sets.id IS NOT NULL OR sets_sub.id IS NOT NULL )
+				$search_sql
+			GROUP BY tp.id
+			ORDER BY tp.$orderby $order
+			$limit_sql
+		", $locale, $set_slug, $locale, $set_slug, $project->id  );
+
+		$results = (int) $project->found_rows();
+		$pages = (int)ceil( $results / $per_page );
+
+		$projects = array();
+		foreach ( $_projects as $project ) {
+			$projects[ $project->id ] = $project;
+		}
+
+		return array(
+			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
+			'projects' => $projects,
+		);
 	}
 
 	private function _sort_reverse_name_callback( $a, $b ) {
