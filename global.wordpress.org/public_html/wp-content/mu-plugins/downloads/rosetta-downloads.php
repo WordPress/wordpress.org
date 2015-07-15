@@ -186,5 +186,3 @@ class Rosetta_Downloads {
 		<?php
 	}
 }
-
-new Rosetta_Downloads;

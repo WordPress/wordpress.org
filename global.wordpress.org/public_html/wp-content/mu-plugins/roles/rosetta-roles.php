@@ -38,10 +38,6 @@ class Rosetta_Roles {
 	 * Attaches hooks once plugins are loaded.
 	 */
 	public function plugins_loaded() {
-		if ( '/' !== get_blog_details( null, false )->path ) {
-			return;
-		}
-
 		add_filter( 'editable_roles', array( $this, 'editable_roles' ) );
 		add_filter( 'manage_users_columns',  array( $this, 'add_roles_column' ) );
 		add_filter( 'manage_users_custom_column',  array( $this, 'display_user_roles' ), 10, 3 );
@@ -567,5 +563,3 @@ class Rosetta_Roles {
 		return $projects;
 	}
 }
-
-$GLOBALS['rosetta_roles'] = new Rosetta_Roles();
