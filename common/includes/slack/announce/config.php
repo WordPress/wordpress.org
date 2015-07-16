@@ -26,8 +26,9 @@ function get_whitelist() {
 			'danielbachhuber',
 		),
 		'core' => array(
-			'johnbillion',
 			'drew',
+			'helen',
+			'johnbillion',
 			'obenland',
 		),
 		'core-customize' => array(
@@ -35,9 +36,25 @@ function get_whitelist() {
 			'ocean90',
 			'westonruter',
 		),
+		'core-editor' => array(
+			'azaozz',
+			'iseulde',
+		),
 		'core-flow' => array(
 			'drew',
-			'boren',
+		),
+		'design' => array(
+			'helen',
+			'melchoyce',
+		),
+		'forums' => array(
+			'clorith',
+			'ipstenu',
+			'jan_dembowski',
+			'macmanx',
+		),
+		'meta-i18n' => array(
+			'ocean90',
 		),
 		'polyglots' => array(
 			'japh',
@@ -45,6 +62,15 @@ function get_whitelist() {
 			'petya',
 			'shinichin',
 		),
+		'themereview' => array(
+			'cais',
+			'chipbennett',
+			'emiluzelac',
+			'grapplerulrich',
+			'greenshady',
+			'jcastaneda',
+			'karmatosed',
+		),  
 		'training' => array(
 			'courtneydawn',
 			'liljimmi',
