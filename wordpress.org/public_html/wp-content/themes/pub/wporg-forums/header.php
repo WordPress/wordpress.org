@@ -14,7 +14,8 @@
 					<a href="<?php bbp_logout_url(); ?>"><?php _e( 'Sign Out', 'wporg-forums' ); ?></a>
 				)</small><br>
 			<?php else : ?>
-
+				<?php $current_url = esc_url_raw( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); ?>
+				<a href="https://wordpress.org/support/bb-login.php?redirect_to="<?php echo urldecode( $current_url ); ?>><?php _e( 'Login', 'wporg-forums' ); ?></a>
 			<?php endif; ?>
 		</p>
 	</div>
