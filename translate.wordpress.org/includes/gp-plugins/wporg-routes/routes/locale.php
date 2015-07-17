@@ -143,6 +143,21 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		switch( $project->slug ) {
 			case 'wp':
 				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
+			case 'meta':
+				switch( $sub_project->slug ) {
+					case 'forums':
+						return '<div class="default-icon"><span class="dashicons dashicons-format-chat"></span></div>';
+					case 'rosetta':
+						return '<div class="default-icon"><span class="dashicons dashicons-admin-site"></span></div>';
+					case 'plugins':
+						return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
+					case 'themes':
+						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
+					case 'browsehappy':
+						return '<div class="icon"><img src="/gp-templates/images/browsehappy.png" width="' . $size . '" height="' . $size . '"></div>';
+					default:
+						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
+				}
 			case 'wp-themes':
 				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
 				if ( $screenshot ) {
@@ -161,6 +176,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 					return wporg_get_plugin_icon( $sub_project->slug, $size );
 				}
+			case 'glotpress':
+				return '<div class="icon"><img src="/gp-templates/images/glotpress.png" width="' . $size . '" height="' . $size . '"></div>';
 			default:
 				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
 		}
