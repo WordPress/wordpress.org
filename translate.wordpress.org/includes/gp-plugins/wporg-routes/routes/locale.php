@@ -161,7 +161,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			case 'wp-themes':
 				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
 				if ( $screenshot ) {
-					return '<div class="theme icon"><img src="https://i0.wp.com/' . $screenshot . '?w=' . $size . '&amp;strip=all"></div>';
+					return '<div class="theme icon"><img src="https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&amp;strip=all" width="' . $size . '" height="' . $size . '"></div>';
 				} else {
 					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
 				}
@@ -170,11 +170,15 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				require_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 					return wporg_get_plugin_icon( $project->slug, $size );
+				} else {
+					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 				}
 			case 'wp-plugins':
 				require_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 					return wporg_get_plugin_icon( $sub_project->slug, $size );
+				} else {
+					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 				}
 			case 'glotpress':
 				return '<div class="icon"><img src="/gp-templates/images/glotpress.png" width="' . $size . '" height="' . $size . '"></div>';
