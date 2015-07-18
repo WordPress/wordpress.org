@@ -122,14 +122,15 @@ table.locale-sub-projects td:first-child {
 	border-left: 1px solid #eee;
 }
 
-table.translations tr.even,
+table.translations tr:nth-child(4n+3),
 .translation-sets tr,
 .locales tr {
 	background-color: #f9f9f9;
 }
 
-.translation-sets tr.odd:hover,
-.locales tr.odd:hover,
+.translations tr.preview:hover,
+.translation-sets tr:nth-child(odd):hover,
+.locales tr:nth-child(odd):hover,
 .translation-sets tr:hover,
 .locales tr:hover,
 .locale-sub-projects tr:hover td {
@@ -571,6 +572,11 @@ ul.filter-header-links {
 	color: #fff;
 }
 
+.projects .project-icon .icon img {
+	width: 128px;
+	height: auto;
+}
+
 .projects .project-status {
 	font-size: 13px;
 }
@@ -678,6 +684,11 @@ ul.filter-header-links {
 
 .project-box .project-icon .wordpress-icon span {
 	color: #fff;
+}
+
+.projects .project-icon .icon img {
+	width: 64px;
+	height: auto;
 }
 
 .project-box .project-meta {
