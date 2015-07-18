@@ -27,22 +27,20 @@ class GP_WPorg_Routes extends GP_Plugin {
 		$path = '(.+?)';
 		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
 
-		// Unset default routes.
-		unset( GP::$router->urls['/'] );
-		unset( GP::$router->urls["get:/languages/$locale/$path"] );
-		unset( GP::$router->urls["get:/languages/$locale"] );
-		unset( GP::$router->urls['get:/languages'] );
+		// Delete default routes.
+		GP::$router->remove("/languages/$locale");
+		GP::$router->remove("/languages/$locale/$path");
 
 		// Redirect routes.
-		GP::$router->add( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
-		GP::$router->add( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+		GP::$router->prepend( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+		GP::$router->prepend( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
 
 		// Register custom routes.
-		GP::$router->add( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );
-		GP::$router->add( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
-		GP::$router->add( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-		GP::$router->add( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-		GP::$router->add( "/locale/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->prepend( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );
+		GP::$router->prepend( "/locale/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->prepend( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->prepend( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+		GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
 	}
 }
 
