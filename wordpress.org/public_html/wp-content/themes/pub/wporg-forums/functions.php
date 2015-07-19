@@ -114,6 +114,15 @@ function wporg_get_global_header() {
 }
 
 /**
+ * The Footer for our theme.
+ *
+ * @package WPBBP
+ */
+function wporg_get_global_footer() {
+	require WPORGPATH . 'footer.php';
+}
+
+/**
  * Link user profiles to their global profiles.
  */
 function wporg_support_profile_url( $user_id ) {

@@ -94,7 +94,7 @@
 
 		<?php endif; ?>
 
-	<?php elseif ( is_front_page() || is_404() ) : ?>
+	<?php elseif ( is_front_page() ) : ?>
 
 		<div class="feature">
 			<h3><?php _e( 'WordPress', 'wporg-forums' ); ?></h3>
