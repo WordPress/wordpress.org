@@ -98,10 +98,11 @@ add_action( 'bbp_register_views', 'wporg_support_custom_views' );
  * @uses get_body_class() To add the `wporg-support` class
  */
 function wporg_support_body_class($classes) {
+	$classes[] = 'wporg-responsive';
 	$classes[] = 'wporg-support';
 	return $classes;
 }
-add_filter( 'get_body_class','wporg_support_body_class' );
+add_filter( 'body_class', 'wporg_support_body_class' );
 
 /**
  * The Header for our theme.

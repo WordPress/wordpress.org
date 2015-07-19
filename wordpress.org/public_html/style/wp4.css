@@ -1168,7 +1168,7 @@ body.make-community #headline h2 a:before { content: '\f125'; }
 body.make-meta #headline h2 a:before { content: '\f325'; }
 body.make-training #headline h2 a:before { content: '\f118'; }
 body.make-flow #headline h2 a:before { content: '\f115'; }
-body.make-tv #headline h2 a:before { content: '\f235'; } 
+body.make-tv #headline h2 a:before { content: '\f235'; }
 
 #headline .login {
 	font-size: 12px;
@@ -1912,6 +1912,7 @@ body.wporg-responsive .col-2 {
 	}
 	body.wporg-responsive .col-2,
 	body.wporg-responsive .col-3,
+	body.wporg-responsive .col-6,
 	body.wporg-responsive .col-7,
 	body.wporg-responsive .col-8,
 	body.wporg-responsive .col-9,
