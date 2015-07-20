@@ -26,27 +26,21 @@ class GP_WPorg_Specifics extends GP_Plugin {
 		GP::$router->remove( '/profile/(.+?)' );
 	}
 
+	/**
+	 * Natural sorting for sub projects.
+	 */
 	function projects( $sub_projects, $parent_id ) {
-		if ( 1 != $parent_id && 13 != $parent_id ) { // 1 = WordPress, 13 = BuddyPress
-			return $sub_projects;
+		if ( in_array( $parent_id, array( 1, 13, 58 ) ) ) { // 1 = WordPress, 13 = BuddyPress, 58 = bbPress
+			usort( $sub_projects, function( $a, $b ) {
+				return - strcasecmp( $a->name, $b->name );
+			} );
 		}
 
-		/*
-		 * Natural sorting for sub projects.
-		 *
-		 * 3.0.x
-		 * 4.0.x
-		 * 3.1.x
-		 * 4.1.x
-		 *  =>
-		 * 4.1.x
-		 * 4.0.x
-		 * 3.1.x
-		 * 3.0.x
-		 */
-		usort( $sub_projects, function( $a, $b ) {
-			return - strcasecmp( $a->name, $b->name );
-		});
+		if ( in_array( $parent_id, array( 17, 523 ) ) ) { // 17 = Plugins, 523 = Themes
+			usort( $sub_projects, function( $a, $b ) {
+				return strcasecmp( $a->name, $b->name );
+			} );
+		}
 
 		return $sub_projects;
 	}
