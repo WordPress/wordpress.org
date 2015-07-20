@@ -1164,7 +1164,7 @@ body.make-support #headline h2 a:before { content: '\f125'; }
 body.make-themes #headline h2 a:before { content: '\f105'; }
 body.make-plugins #headline h2 a:before { content: '\f106'; }
 body.make-docs #headline h2 a:before { content: '\f123'; }
-body.make-community #headline h2 a:before { content: '\307'; }
+body.make-community #headline h2 a:before { content: '\f307'; }
 body.make-meta #headline h2 a:before { content: '\f325'; }
 body.make-training #headline h2 a:before { content: '\f118'; }
 body.make-flow #headline h2 a:before { content: '\f115'; }
