@@ -55,7 +55,7 @@ gp_tmpl_header();
 		</div>
 
 		<div class="project-status-progress percent">
-			<div class="percent-complete" style="width:<?php echo $sub_project_status->percent_complete; ?>%;"></div>
+			<div class="percent-complete" style="width:<?php echo $project_status->percent_complete; ?>%;"></div>
 		</div>
 
 		<div class="project-box-footer">
