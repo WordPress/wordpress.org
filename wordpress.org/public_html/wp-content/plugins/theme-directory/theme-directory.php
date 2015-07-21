@@ -222,6 +222,39 @@ function wporg_themes_get_version_status( $post_id, $version ) {
 	return wporg_themes_get_version_meta( $post_id, '_status', $version );
 }
 
+
+add_action( 'add_meta_boxes', 'wporg_themes_author_metabox_override', 10, 2 );
+function wporg_themes_author_metabox_override( $post_type, $post ) {
+	if ( $post_type != 'repopackage' ) {
+		return;
+	}
+	if ( post_type_supports($post_type, 'author') ) {
+		if ( is_super_admin() || current_user_can( $post_type_object->cap->edit_others_posts ) ) {
+			remove_meta_box( 'authordiv', null, 'normal' );
+			add_meta_box('authordiv', __('Author'), 'wporg_themes_post_author_meta_box', null, 'normal');
+		}
+	}
+}
+
+// Replacement for the core function post_author_meta_box
+function wporg_themes_post_author_meta_box( $post ) {
+	global $user_ID;
+?>
+<label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
+<?php
+/*
+	wp_dropdown_users( array(
+		'who' => 'authors',
+		'name' => 'post_author_override',
+		'selected' => empty($post->ID) ? $user_ID : $post->post_author,
+		'include_selected' => true
+	) );
+*/
+	$value = empty($post->ID) ? $user_ID : $post->post_author;
+	echo "<input type='text' name='post_author_override' value='{$value}' />";
+}
+
+
 /* UPDATING THEME VERSIONS */
 
 /**
