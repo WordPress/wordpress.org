@@ -54,7 +54,7 @@ add_action( 'init', 'wporg_themes_post_status' );
  * @return string
  */
 function wporg_themes_search_slug( $search, $wp_query ) {
-	if ( ! is_admin() || 'repopackage' !== $wp_query->query_vars['post_type'] ) {
+	if ( empty( $search ) || ! is_admin() || 'repopackage' !== $wp_query->query_vars['post_type'] || ! $wp_query->is_search() ) {
 		return $search;
 	}
 
