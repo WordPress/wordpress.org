@@ -1161,7 +1161,7 @@ body.make-mobile #headline h2 a:before { content: '\f166'; }
 body.make-accessibility #headline h2 a:before { content: '\f115'; }
 body.make-polyglots #headline h2 a:before { content: '\f326'; }
 body.make-support #headline h2 a:before { content: '\f125'; }
-body.make-themes #headline h2 a:before { content: '\f105'; }
+body.make-themes #headline h2 a:before { content: '\f100'; }
 body.make-plugins #headline h2 a:before { content: '\f106'; }
 body.make-docs #headline h2 a:before { content: '\f123'; }
 body.make-community #headline h2 a:before { content: '\f307'; }
