@@ -47,6 +47,9 @@ function get_whitelist() {
 			'helen',
 			'melchoyce',
 		),
+		'feature-oembed' => array(
+			'swissspidy',
+		),
 		'forums' => array(
 			'clorith',
 			'ipstenu',
