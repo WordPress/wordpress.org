@@ -65,7 +65,7 @@ function wporg_themes_activate() {
 
 	// Enable the WordPress.org Theme Repo Theme
 	foreach ( wp_get_themes() as $theme ) {
-		if ( $theme->get( 'Name' ) === 'WP.org Themes' ) {
+		if ( $theme->get( 'Name' ) === 'WordPress.org Themes' ) {
 			switch_theme( $theme->get_stylesheet() );
 			break;
 		}
