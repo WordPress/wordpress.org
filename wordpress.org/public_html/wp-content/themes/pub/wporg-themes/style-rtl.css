@@ -1,5 +1,5 @@
 /*
-Theme Name: WP.org Themes
+Theme Name: WordPress.org Themes
 Theme URI: https://wordpress.org/themes
 Author: wordpressdotorg
 Author URI: https://wordpress.org
@@ -331,7 +331,6 @@ body.author .theme-browser .theme .theme-author  {
 	content: '\2190';
 	margin-left: 5px;
 }
-
 .rtl .theme-navigation .close:before {
 	content: '\2192';
 }
@@ -1607,6 +1606,26 @@ body.full-overlay-active {
 	margin: 5px 0 15px;
 }
 
+/* = Favorites
+----------------*/
+span.favorite {
+	color: #cccccc;
+	float: left;
+}
+
+span.favorite.dashicons,
+span.favorite.dashicons:before {
+	font-size: 40px;
+	width: 40px;
+	line-height: 1.5;
+}
+
+span.favorite:hover,
+span.favorite.favorited {
+	color: #e02020;
+}
+
+
 /* =Media Queries
 -------------------------------------------------------------- */
 
@@ -1806,5 +1825,3 @@ body.full-overlay-active {
 		margin-top: 40px;
 	}
 }
-
-

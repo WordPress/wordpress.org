@@ -58,7 +58,12 @@ function wporg_themes_scripts() {
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
-				'locale'       => get_locale()
+				'locale'       => get_locale(),
+				'favorites'    => array(
+					'themes' => wporg_themes_get_user_favorites(),
+					'user'   => wp_get_current_user()->user_login,
+					'nonce'  => is_user_logged_in() ? wp_create_nonce( 'modify-theme-favorite' ) : false,
+				),
 			),
 			'l10n' => array(
 				'search'            => __( 'Search Themes', 'wporg-themes' ),

@@ -147,7 +147,7 @@ function wporg_themes_init() {
 	}
 
 	// Add the browse/* views
-	add_rewrite_tag( '%browse%', '(featured|popular|new)' );
+	add_rewrite_tag( '%browse%', '(featured|popular|new|favorites)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
 
 	if ( ! defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
@@ -611,6 +611,10 @@ function wporg_themes_get_themes_for_query() {
 	if ( get_query_var( 'browse' ) ) {
 		$request['browse'] = get_query_var( 'browse' );
 
+		if ( 'favorites' === $request['browse'] ) {
+			$request['user'] = wp_get_current_user()->user_login;
+		}
+
 	} else if ( get_query_var( 'tag' ) ) {
 		$request['tag'] = (array) explode( '+', get_query_var( 'tag' ) );
 
@@ -680,4 +684,91 @@ function wporg_themes_query_api( $method, $args = array() ) {
 	restore_current_blog();
 
 	return $api->response;
+}
+
+
+/**
+ * Returns if the current theme is favourited by the current user.
+ */
+function wporg_themes_is_favourited( $theme_slug ) {
+	return in_array( $theme_slug, wporg_themes_get_user_favorites() );
+}
+
+/**
+ * Returns the current themes favorited by the user.
+ *
+ * @param int $user_id The user to get the favorites of. Default: current user
+ *
+ * @return array
+ */
+function wporg_themes_get_user_favorites( $user_id = 0 ) {
+	if ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+	if ( ! $user_id ) {
+		return array();
+	}
+
+	$favorites = get_user_meta( $user_id, 'theme_favorites', true );
+
+	return $favorites ? array_values( $favorites ) : array();
+}
+
+/**
+ * Sets current themes favorited by the user.
+ *
+ * @param array $favorites An array of theme slugs to mark as favorited.
+ * @param int   $user_id   The user to get the favorites of. Default: current user
+ *
+ * @return bool
+ */
+function wporg_themes_set_user_favorites( $favorites, $user_id = 0 ) {
+	if ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	return update_user_meta( $user_id, 'theme_favorites', (array) $favorites );
+}
+
+/**
+ * Favorite a theme for the current user
+ *
+ * @param int $theme_slug The theme to favorite.
+ *
+ * @return bool|WP_Error
+ */
+function wporg_themes_add_favorite( $theme_slug ) {
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error( 'not_logged_in' );
+	}
+
+	$favorites = wporg_themes_get_user_favorites();
+	if ( ! in_array( $theme_slug, $favorites ) ) {
+		$favorites[] = $theme_slug;
+		return wporg_themes_set_user_favorites( $favorites );
+	}
+	return true;
+}
+
+/**
+ * Remove a favorited theme for the current user
+ *
+ * @param int $theme_slug The theme to favorite.
+ *
+ * @return bool|WP_Error
+ */
+function wporg_themes_remove_favorite( $theme_slug ) {
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error( 'not_logged_in' );
+	}
+
+	$favorites = wporg_themes_get_user_favorites();
+	if ( in_array( $theme_slug, $favorites ) ) {
+		unset( $favorites[ array_search( $theme_slug, $favorites, true ) ] );
+		return wporg_themes_set_user_favorites( $favorites );
+	}
+	return true;
 }

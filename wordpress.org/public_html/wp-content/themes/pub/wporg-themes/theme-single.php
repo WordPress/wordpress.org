@@ -17,6 +17,11 @@
 			<div>
 				<h3 class="theme-name entry-title" itemprop="name"><?php echo esc_html( $theme->name ); ?></h3>
 				<h4 class="theme-author"><?php printf( _x( 'By %s', 'theme author', 'wporg-themes' ), '<a href="https://wordpress.org/themes/author/' . $theme->author->user_nicename . '/"><span class="author" itemprop="author">' . esc_html( $theme->author->display_name ) . '</span></a>' ); ?></h4>
+				<?php if ( is_user_logged_in() && wporg_themes_is_favourited( $theme->slug ) ) { ?>
+					<span class="dashicons dashicons-heart favorite favorited"></span>
+				<?php } elseif ( is_user_logged_in() ) { ?>
+					<span class="dashicons dashicons-heart favorite"></span>
+				<?php } ?>
 			</div>
 
 			<div class="theme-head">

@@ -468,7 +468,8 @@ window.wp = window.wp || {};
 			'click .right': 'nextTheme',
 			'click .theme-actions .button-secondary': 'preview',
 			'keydown .theme-actions .button-secondary': 'preview',
-			'touchend .theme-actions .button-secondary': 'preview'
+			'touchend .theme-actions .button-secondary': 'preview',
+			'click .favorite': 'favourite_toggle'
 		},
 
 		// The HTML template for the theme overlay
@@ -501,6 +502,9 @@ window.wp = window.wp || {};
 
 			data.downloaded = data.downloaded.toLocaleString();
 
+			data.show_favorites = !! themes.data.settings.favorites.user;
+			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) != -1 );
+
 			this.$el.html( this.html( data ) );
 			// Set up navigation events
 			this.navigation();
@@ -509,6 +513,46 @@ window.wp = window.wp || {};
 			// Contain "tabbing" inside the overlay
 			this.containFocus( this.$el );
 			this.renderDownloadsGraph();
+		},
+
+		favourite_toggle: function( event ) {
+			var $heart = this.$el.find( '.favorite' ),
+				favorited = ! $heart.hasClass( 'favorited' ),
+				slug = this.model.get("slug"),
+				pos;
+
+			$heart.toggleClass( 'favorited' );	
+
+			// Update it in the current settings
+			if ( ! favorited ) {
+				pos = themes.data.settings.favorites.themes.indexOf( slug );
+				if ( pos > -1 ) {
+					delete themes.data.settings.favorites.themes[ pos ];
+				}
+			} else {
+				themes.data.settings.favorites.themes.push( slug );
+			}
+
+			// Update the server with the changed data
+			var options = {
+				type: 'GET',
+				url: 'https://api.wordpress.org/themes/theme-directory/1.0/',
+				jsonp: "callback",
+				dataType: "jsonp",
+				data: {
+					action: favorited ? 'add-favorite' : 'remove-favorite',
+					theme: this.model.get("slug"),
+					_wpnonce: themes.data.settings.favorites.nonce
+				},
+			};
+
+			$.ajax( options ).done( function( result ) {
+				// If the user is no longer logged in, stop showing the favorite heart
+				if ( 'undefined' != typeof result.error && 'not_logged_in' == result.error ) {
+					themes.data.settings.favorites.themes = [];
+					themes.data.settings.favorites.user = '';
+				}
+			} );
 		},
 
 		preview: function( event ) {
@@ -1303,7 +1347,14 @@ window.wp = window.wp || {};
 		browse: function( section ) {
 			// Create a new collection with the proper theme data
 			// for each section
-			this.collection.query( { browse: section } );
+			if ( 'favorites' == section ) {
+				this.collection.query( {
+					browse: section,
+					user: themes.data.settings.favorites.user
+				} );
+			} else {
+				this.collection.query( { browse: section } );
+			}
 		},
 
 		// Sorting navigation

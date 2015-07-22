@@ -1,5 +1,5 @@
 /*
-Theme Name: WP.org Themes
+Theme Name: WordPress.org Themes
 Theme URI: https://wordpress.org/themes
 Author: wordpressdotorg
 Author URI: https://wordpress.org
@@ -1605,6 +1605,26 @@ body.full-overlay-active {
 .wrap .notice {
 	margin: 5px 0 15px;
 }
+
+/* = Favorites
+----------------*/
+span.favorite {
+	color: #cccccc;
+	float: right;
+}
+
+span.favorite.dashicons,
+span.favorite.dashicons:before {
+	font-size: 40px;
+	width: 40px;
+	line-height: 1.5;
+}
+
+span.favorite:hover,
+span.favorite.favorited {
+	color: #e02020;
+}
+
 
 /* =Media Queries
 -------------------------------------------------------------- */
