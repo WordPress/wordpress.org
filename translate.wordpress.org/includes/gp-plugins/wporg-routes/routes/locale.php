@@ -247,7 +247,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$status->all_count          += (int) $set->all_count();
 
 			if ( $status->all_count ) {
-				$status->percent_complete = floor( $status->current_count / $status->all_count * 100 );
+				$status->percent_complete = ceil( $status->current_count / $status->all_count * 100 );
 			}
 		}
 
