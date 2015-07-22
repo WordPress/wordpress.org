@@ -52,6 +52,12 @@ p a:hover {
 	z-index: 100000; /* Above WP toolbar */
 }
 
+/* Dowload Chart RTL horizontal scrolling fix */
+.chart > div > div > div > div {
+	left: -10000px !important;
+	right: auto !important;
+}
+
 /* Clearing */
 .clear:before,
 .clear:after,
@@ -1591,6 +1597,7 @@ body.full-overlay-active {
 span.favorite {
 	color: #cccccc;
 	float: right;
+	cursor: pointer;
 }
 
 span.favorite.dashicons,
