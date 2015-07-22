@@ -110,10 +110,11 @@ gp_tmpl_header();
 				<tr>
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
-						<?php if ( $sub_project_status->percent_complete > 90 ):
-							?>
-							<span class="bubble morethan90"><?php echo $sub_project_status->percent_complete; ?>%</span>
-						<?php endif;?>
+						<?php if ( $sub_project_status->percent_complete > 90 ) : ?>
+							<span class="sub-project-status percent-90"><?php echo $sub_project_status->percent_complete; ?>%</span>
+						<?php else : ?>
+							<span class="sub-project-status"><?php echo $sub_project_status->percent_complete; ?>%</span>
+						<?php endif; ?>
 					</td>
 					<td class="stats translated">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), absint( $sub_project_status->current_count ) ); ?>
@@ -140,10 +141,11 @@ gp_tmpl_header();
 				<tr>
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
-						<?php if ( $status->percent_complete > 90 ):
-							?>
-							<span class="bubble morethan90"><?php echo $status->percent_complete; ?>%</span>
-						<?php endif;?>
+						<?php if ( $status->percent_complete > 90 ) : ?>
+							<span class="sub-project-status percent-90"><?php echo $status->percent_complete; ?>%</span>
+						<?php else : ?>
+							<span class="sub-project-status"><?php echo $status->percent_complete; ?>%</span>
+						<?php endif; ?>
 					</td>
 					<td class="stats translated">
 						<?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), absint( $status->current_count ) ); ?>

@@ -247,7 +247,12 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$status->all_count          += (int) $set->all_count();
 
 			if ( $status->all_count ) {
-				$status->percent_complete = ceil( $status->current_count / $status->all_count * 100 );
+				/*
+				 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
+				 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
+				 */
+				$percent_complete = ( $status->current_count / $status->all_count * 100 );
+				$status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
 			}
 		}
 

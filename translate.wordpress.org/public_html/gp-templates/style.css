@@ -797,6 +797,16 @@ ul.projects-dropdown li > a > span {
 	right: 15px;
 }
 
+.locale-sub-projects .sub-project-status {
+	font-size: 90%;
+	color: #a0a5aa;
+	padding-left: .5em;
+}
+
+.locale-sub-projects .sub-project-status.percent-90 {
+	color: #509040;
+}
+
 /* Responsive styles */
 @media (max-width: 700px) {
 	#hello {
