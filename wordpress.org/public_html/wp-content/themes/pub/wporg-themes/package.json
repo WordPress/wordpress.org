@@ -1,0 +1,18 @@
+{
+  "name": "WordPress.org-Themes",
+  "version": "1.0.0",
+  "description": "Theme for the WordPress.org themes directory.",
+  "repository": {
+    "type": "svn",
+    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-themes"
+  },
+  "author": "The WordPress.org Team",
+  "license": "GPL-2.0+",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-uglify": "~0.9.1",
+    "grunt-rtlcss": "~1.6.0",
+    "matchdep": "~0.3.0"
+  }
+}
+

@@ -2,8 +2,8 @@
 	<div class="theme-navigation">
 		<a class="close" href="<?php echo home_url('/'); ?>"><?php _e( 'Return to Themes List', 'wporg-themes' ); ?></a>
 		<div class="navigation post-navigation">
-			<button class="left dashicons dashicons-no disabled"><span class="screen-reader-text"><?php _e( 'Show previous theme', 'wporg-themes' ); ?></span></button>
-			<button class="right dashicons dashicons-no disabled"><span class="screen-reader-text"><?php _e( 'Show next theme', 'wporg-themes' ); ?></span></button>
+			<button class="left dashicons dashicons-arrow-left-alt2 disabled"><span class="screen-reader-text"><?php _e( 'Show previous theme', 'wporg-themes' ); ?></span></button>
+			<button class="right dashicons dashicons-arrow-right-alt2 disabled"><span class="screen-reader-text"><?php _e( 'Show next theme', 'wporg-themes' ); ?></span></button>
 		</div>
 	</div>
 	<div class="theme-wrap">

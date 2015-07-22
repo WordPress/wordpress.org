@@ -328,11 +328,8 @@ body.author .theme-browser .theme .theme-author  {
 }
 
 .theme-navigation .close:before {
-	content: '\2190';
+	content: "\2190";
 	margin-right: 5px;
-}
-.rtl .theme-navigation .close:before {
-	content: '\2192';
 }
 
 .theme-navigation .close:hover,
@@ -361,7 +358,6 @@ body.author .theme-browser .theme .theme-author  {
 .theme-navigation .nav-links a:before,
 .theme-navigation .right:before,
 .theme-navigation .left:before {
-	font: 400 20px/2.6 dashicons !important;
 	text-decoration: inherit;
 	-webkit-font-smoothing: antialiased;
 }
@@ -384,16 +380,12 @@ body.author .theme-browser .theme .theme-author  {
 	outline: none;
 }
 
-.theme-navigation .nav-previous a:before,
-.theme-navigation .left:before,
-.rtl .theme-navigation .right:before {
-	content: '\f341';
+/* These dashicons are in-line to allow the rtl processor to flip them */
+.theme-navigation .dashicons-arrow-left-alt2:before {
+	content: "\f341";
 }
-
-.theme-navigation .nav-next a:before,
-.theme-navigation .right:before,
-.rtl .theme-navigation .left:before {
-	content: '\f345';
+.theme-navigation .dashicons-arrow-right-alt2:before {
+	content: "\f345";
 }
 
 .theme-navigation .left.disabled,
@@ -452,12 +444,8 @@ body.author .theme-browser .theme .theme-author  {
 }
 
 .theme-wrap .theme-meta-info a:after {
-	content: '\2192';
+	content: "\2192";
 	margin-left: 5px;
-}
-
-.rtl .theme-wrap .theme-meta-info a:after {
-	content: '\2190';
 }
 
 /**
@@ -879,14 +867,6 @@ body.full-overlay-active {
 	background: #eee;
 	cursor: default;
 	pointer-events: none;
-}
-
-.rtl .theme-install-overlay .previous-theme:before {
-	content: "\f345";
-}
-
-.rtl .theme-install-overlay .next-theme:before {
-	content: "\f341";
 }
 
 /* Collapse Button */
