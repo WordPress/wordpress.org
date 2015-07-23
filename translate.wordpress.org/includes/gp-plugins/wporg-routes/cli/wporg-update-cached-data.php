@@ -8,7 +8,11 @@ class WPorg_Update_Cached_Data extends GP_CLI {
 
 	public $cache_group = 'wporg-translate';
 
+	private $locales = array();
+
 	public function run() {
+		$this->locales = GP::$translation_set->existing_locales();
+
 		$this->update_contributors_count();
 		$this->update_translation_status();
 	}
@@ -19,22 +23,24 @@ class WPorg_Update_Cached_Data extends GP_CLI {
 	private function update_contributors_count() {
 		global $gpdb;
 
-		$results = $gpdb->get_results( "
-			SELECT ts.locale, COUNT( DISTINCT( t.user_id ) ) AS count
-			FROM $gpdb->translations t
-				INNER JOIN $gpdb->translation_sets AS ts
-					ON ts.id = t.translation_set_id
-			WHERE
-				( t.status = 'current' || t.status = 'old' )
-				AND t.user_id IS NOT NULL
-				AND t.user_id <> '0'
-			GROUP BY ts.locale
-		" );
-
 		$counts = array();
-		if ( $results ) {
-			foreach ( $results as $result ) {
-				$counts[ $result->locale ] = $result->count;
+		foreach ( $this->locales as $locale ) {
+			$result = $gpdb->get_var( $gpdb->prepare( "
+				SELECT COUNT( DISTINCT( t.user_id ) ) AS count
+				FROM {$gpdb->translations} t
+					INNER JOIN {$gpdb->translation_sets} AS ts
+						ON ts.id = t.translation_set_id
+				WHERE
+					( t.status = 'current' || t.status = 'old' )
+					AND t.user_id IS NOT NULL
+					AND t.user_id <> '0'
+					AND ts.locale = %s
+			",  $locale ) );
+
+			if ( $result ) {
+				$counts[ $locale ] = $result;
+			} else {
+				$counts[ $locale ] = 0;
 			}
 		}
 
@@ -47,17 +53,16 @@ class WPorg_Update_Cached_Data extends GP_CLI {
 	private function update_translation_status() {
 		global $gpdb;
 
-		$locales = GP::$translation_set->existing_locales();
 		$projects = GP::$project->many( "
 			SELECT *
-			FROM $gpdb->projects
+			FROM {$gpdb->projects}
 			WHERE
 				path LIKE 'wp/dev%'
 				AND active = '1'
 		" );
 		$translation_status = array();
 		foreach ( $projects as $project ) {
-			foreach ( $locales as $locale ) {
+			foreach ( $this->locales as $locale ) {
 				$set = GP::$translation_set->by_project_id_slug_and_locale(
 					$project->id,
 					'default',
