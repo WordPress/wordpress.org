@@ -68,7 +68,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$contributors_count = array();
 		}
 
-		$top_level_projects = GP::$project->top_level();
+		$top_level_projects = $this->get_active_top_level_projects();
 		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
 
 		$variants = $this->get_locale_variants( $locale_slug, $project_ids );
@@ -198,11 +198,10 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	private function get_locale_variants( $locale, $project_ids ) {
 		global $gpdb;
 
-		$table = GP::$translation_set->table;
 		$project_ids = implode( ',', $project_ids );
 		$slugs = $gpdb->get_col( $gpdb->prepare( "
 			SELECT DISTINCT(slug), name
-			FROM $table
+			FROM {$gpdb->translation_sets}
 			WHERE
 				project_id IN( $project_ids )
 				AND locale = %s
@@ -277,9 +276,11 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @return array List of sub projects.
 	 */
 	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
+		global $gpdb;
+
 		$_projects = $project->many( "
 			SELECT *
-			FROM $project->table
+			FROM {$gpdb->projects}
 			WHERE
 				parent_project_id = %d AND
 				active = 1
@@ -294,7 +295,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				// e.g. wp/dev/admin/network
 				$sub_projects = $project->many( "
 					SELECT *
-					FROM $project->table
+					FROM {$gpdb->projects}
 					WHERE
 						parent_project_id = %d AND
 						active = 1
@@ -366,13 +367,12 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		 * Once we have the sets in 3, we can then check to see if there exists any translation sets for the current (locale, slug) (ie. en-au/default)
 		 * If not, we can simply filter them out, so that paging only has items returned that actually exist.
 		 */
-		$translation_sets_table = GP::$translation_set->table;
 		$_projects = $project->many( "
 			SELECT SQL_CALC_FOUND_ROWS tp.*
-				FROM {$project->table} tp
-				LEFT JOIN {$project->table} tp_sub ON tp.id = tp_sub.parent_project_id AND tp_sub.active = 1
-				LEFT JOIN {$translation_sets_table} sets ON sets.project_id = tp.id AND sets.locale = %s AND sets.slug = %s
-				LEFT JOIN {$translation_sets_table} sets_sub ON sets_sub.project_id = tp_sub.id AND sets_sub.locale = %s AND sets_sub.slug = %s
+				FROM {$gpdb->projects} tp
+				LEFT JOIN {$gpdb->projects} tp_sub ON tp.id = tp_sub.parent_project_id AND tp_sub.active = 1
+				LEFT JOIN {$gpdb->translation_sets} sets ON sets.project_id = tp.id AND sets.locale = %s AND sets.slug = %s
+				LEFT JOIN {$gpdb->translation_sets} sets_sub ON sets_sub.project_id = tp_sub.id AND sets_sub.locale = %s AND sets_sub.slug = %s
 			WHERE
 				tp.parent_project_id = %d
 				AND tp.active = 1
@@ -384,7 +384,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		", $locale, $set_slug, $locale, $set_slug, $project->id  );
 
 		$results = (int) $project->found_rows();
-		$pages = (int)ceil( $results / $per_page );
+		$pages = (int) ceil( $results / $per_page );
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
@@ -395,6 +395,24 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
 			'projects' => $projects,
 		);
+	}
+
+	/**
+	 * Retrieves active top level projects.
+	 *
+	 * @return array List of top level projects.
+	 */
+	public function get_active_top_level_projects() {
+		global $gpdb;
+
+		return GP::$project->many( "
+			SELECT *
+			FROM {$gpdb->projects}
+			WHERE
+				parent_project_id IS NULL
+				AND active = 1
+			ORDER BY name ASC
+		" );
 	}
 
 	private function _sort_reverse_name_callback( $a, $b ) {
