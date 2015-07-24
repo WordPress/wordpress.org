@@ -19,7 +19,7 @@ body {
 	margin-bottom: 2em;
 }
 
-.storycontent div.googleplus1_button,
+.storycontent .sharedaddy .sd-content,
 .storycontent .wp-playlist div,
 .storycontent .mejs-video div {
 	margin-top: 0;
@@ -399,7 +399,6 @@ textarea {
  */
 .comments-area {
 	margin-top: 5em;
-	border-top: 1px solid #eaeaea;
 }
 
 .comments-area > :last-child {
@@ -597,10 +596,6 @@ textarea {
 }
 
 @media screen and (min-width: 620px) {
-	.comments-area {
-		border-top: 0;
-	}
-
 	.comment-content ul,
 	.comment-content ol {
 		margin-right: 0;
