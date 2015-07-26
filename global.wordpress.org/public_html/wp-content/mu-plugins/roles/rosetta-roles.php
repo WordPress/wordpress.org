@@ -210,13 +210,49 @@ class Rosetta_Roles {
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
 		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( $this, 'enqueue_scripts' ) );
+		add_action( 'admin_footer-' . $this->translation_editors_page, array( $this, 'print_js_templates' ) );
+		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
 	 * Enqueues scripts.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery' ), '1', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '2', true );
+	}
+
+	/**
+	 * Enqueues styles.
+	 */
+	public function enqueue_styles() {
+		wp_enqueue_style( 'rosetta-roles', plugins_url( '/css/rosetta-roles.css', __FILE__ ), array(), '2' );
+	}
+
+	/**
+	 * Prints JavaScript templates.
+	 */
+	public function print_js_templates() {
+		?>
+		<script id="tmpl-project-checkbox" type="text/html">
+			<# if ( ! data.checkedSubProjects ) {
+				#>
+				<label>
+					<input type="checkbox" class="input-checkbox" name="projects[]" value="{{data.id}}"
+					<#
+					if ( data.checked ) {
+						#> checked="checked"<#
+					}
+					#>
+					/>
+					{{data.name}}
+				</label>
+			<# } else { #>
+				<label>
+					<input type="radio" class="input-radio" checked="checked" /> {{data.name}}
+				</label>
+			<# } #>
+		</script>
+		<?php
 	}
 
 	/**
@@ -289,14 +325,16 @@ class Rosetta_Roles {
 					$user_details->add_role( $this->translation_editor_role );
 					$this->notify_translation_editor_update( $user_details->ID, 'add' );
 
+					$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
+
 					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
 					if ( 'custom' === $projects ) {
+						update_user_meta( $user_details->ID, $meta_key, array() );
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
 						wp_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
 					}
 
-					$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
 					update_user_meta( $user_details->ID, $meta_key, array( 'all' ) );
 
 					wp_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
@@ -392,7 +430,7 @@ class Rosetta_Roles {
 
 				$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
 
-				$all_projects = $this->get_translate_top_level_projects();
+				$all_projects = $this->get_translate_projects();
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
@@ -430,13 +468,32 @@ class Rosetta_Roles {
 	private function render_edit_translation_editor( $user_id ) {
 		global $wpdb;
 
-		$projects = $this->get_translate_top_level_projects();
+		$projects = $this->get_translate_projects();
+		$project_tree = $this->get_project_tree( $projects, 0, 1 );
+
+		// Sort the tree and remove array keys.
+		usort( $project_tree, array( $this, '_sort_name_callback' ) );
+		foreach ( $project_tree as $key => $project ) {
+			if ( $project->sub_projects ) {
+				usort( $project->sub_projects, array( $this, '_sort_name_callback' ) );
+			}
+			$project->sub_projects = array_values( $project->sub_projects );
+		}
+		$project_tree = array_values( $project_tree );
 
 		$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
 		$project_access_list = get_user_meta( $user_id, $meta_key, true );
 		if ( ! $project_access_list ) {
 			$project_access_list = array();
 		}
+
+		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
+			'l10n' => array(
+				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' )
+			),
+			'data' => $project_tree,
+			'accessList' => $project_access_list
+		) );
 
 		$feedback_message = $this->get_feedback_message();
 
@@ -503,9 +560,13 @@ class Rosetta_Roles {
 			return $list_table;
 		}
 
+		$projects = $this->get_translate_projects();
+		$project_tree = $this->get_project_tree( $projects, 0, 1 );
+
 		$args = array(
 			'user_role'               => $this->translation_editor_role,
-			'projects'                => $this->get_translate_top_level_projects(),
+			'projects'                => $projects,
+			'project_tree'            => $project_tree,
 			'project_access_meta_key' => $wpdb->get_blog_prefix() . $this->project_access_meta_key,
 		);
 		$list_table = new Rosetta_Translation_Editors_List_Table( $args );
@@ -534,23 +595,22 @@ class Rosetta_Roles {
 	}
 
 	/**
-	 * Fetches all top level projects from translate.wordpress.org.
+	 * Fetches all projects from translate.wordpress.org.
 	 *
 	 * @return array List of projects.
 	 */
-	private function get_translate_top_level_projects() {
+	private function get_translate_projects() {
 		global $wpdb;
+		static $projects = null;
 
-		$cache = get_site_transient( 'translate-top-level-projects' );
-		if ( false !== $cache ) {
-			return $cache;
+		if ( null !== $projects ) {
+			return $projects;
 		}
 
 		$_projects = $wpdb->get_results( "
-			SELECT id, name
+			SELECT id, name, parent_project_id
 			FROM translate_projects
-			WHERE parent_project_id IS NULL
-			ORDER BY name ASC
+			ORDER BY id ASC
 		" );
 
 		$projects = array();
@@ -558,8 +618,37 @@ class Rosetta_Roles {
 			$projects[ $project->id ] = $project;
 		}
 
-		set_site_transient( 'translate-top-level-projects', $projects, DAY_IN_SECONDS );
-
 		return $projects;
+	}
+
+	/**
+	 * Transforms a flat array to a hierarchy tree.
+	 *
+	 * @param array $projects  The projects.
+	 * @param int   $parent_id Optional. Parent ID. Default 0.
+	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
+	 * @return array The project tree.
+	 */
+	public function get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
+		if ( $max_depth < 0 ) { // Avoid an endless recursion.
+			return;
+		}
+
+		$tree = array();
+		foreach ( $projects as $project ) {
+			if ( $project->parent_project_id == $parent_id ) {
+				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
+				if ( $sub_projects ) {
+					$project->sub_projects = $sub_projects;
+				}
+
+				$tree[ $project->id ] = $project;
+			}
+		}
+		return $tree;
+	}
+
+	private function _sort_name_callback( $a, $b ) {
+		return strnatcasecmp( $a->name, $b->name );
 	}
 }

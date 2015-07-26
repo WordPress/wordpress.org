@@ -35,6 +35,13 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public $projects;
 
 	/**
+	 * Holds the list of a project tree.
+	 *
+	 * @var array
+	 */
+	public $project_tree;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $args An associative array of arguments.
@@ -51,6 +58,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$this->user_role = $args['user_role'];
 		$this->project_access_meta_key = $args['project_access_meta_key'];
 		$this->projects = $args['projects'];
+		$this->project_tree = $args['project_tree'];
 		$this->user_can_promote = current_user_can( 'promote_users' );
 	}
 
@@ -225,10 +233,47 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$projects = array();
 		foreach ( $project_access_list as $project_id ) {
 			if ( $this->projects[ $project_id ] ) {
-				$projects[] = esc_html( $this->projects[ $project_id ]->name );
+				$parent = $this->get_parent_project( $this->project_tree, $project_id );
+				if ( $parent->id != $project_id ) {
+					$name = sprintf(
+						'%s &rarr; %s',
+						esc_html( $parent->name ),
+						esc_html( $this->projects[ $project_id ]->name )
+					);
+				} else {
+					$name = esc_html( $this->projects[ $project_id ]->name );
+				}
+				$projects[] = $name;
 			}
 		}
 
 		echo implode( '<br>', $projects );
+	}
+
+	/**
+	 * Returns the parent project for a sub project.
+	 *
+	 * @param array $tree The project tree.
+	 * @param int $child_id The project tree.
+	 * @return object The parent project.
+	 */
+	private function get_parent_project( $tree, $child_id ) {
+		$parent = null;
+		foreach ( $tree as $project ) {
+			if ( $project->id == $child_id ) {
+				$parent = $project;
+				break;
+			}
+
+			if ( isset( $project->sub_projects ) ) {
+				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
+				if ( $parent ) {
+					$parent = $project;
+					break;
+				}
+			}
+		}
+
+		return $parent;
 	}
 }

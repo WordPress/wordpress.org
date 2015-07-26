@@ -9,31 +9,23 @@
 				<tr>
 					<th scope="row">
 						<?php _e( 'Add editor access for:', 'rosetta' ); ?><br>
-						<small style="font-weight:normal"><a href="#clear-all" id="clear-all"><?php _ex( 'Clear All', 'Deselects all checkboxes', 'rosetta' ); ?></a></small>
 					</th>
 					<td>
-						<fieldset>
+						<fieldset id="projects">
 							<legend class="screen-reader-text"><span><?php _e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
-							<p>
-								<label for="project-all">
-									<input name="projects[]" id="project-all" value="all" type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects &ndash; If selected, translation editor will have validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
-								</label>
-							</p>
-							<?php
-							foreach ( $projects as $project ) {
-								$project_id = esc_attr( $project->id );
-								printf(
-									'<p><label for="project-%d"><input name="projects[]" id="project-%d" class="project" value="%d" type="checkbox"%s> %s</label></p>',
-									$project_id,
-									$project_id,
-									$project_id,
-									checked( in_array( $project->id, $project_access_list ), true, false ),
-									esc_html( $project->name )
-								);
-							}
-							?>
-							<p class="description"><?php _e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
+
+							<ul id="projects-list" class="projects-list">
+								<li id="project-all" class="active">
+									<label>
+										<input name="projects[]"value="all" type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
+									</label>
+									<div class="sub-projects-wrapper">
+										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
+									</div>
+								</li>
+							</ul>
 						</fieldset>
+						<p class="description"><?php _e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
 					</td>
 				</tr>
 			</tbody>
