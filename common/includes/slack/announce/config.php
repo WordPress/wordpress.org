@@ -86,3 +86,13 @@ function get_whitelist() {
 		),
 	);
 }
+
+function get_committers() {
+	return array(
+		'dd32', 'nacin', 'mark', 'helen', 'azaozz', 'westi',
+		'nb', 'sergey', 'ocean90', 'wonderboymusic', 'drew', 'johnbillion',
+		'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
+		'westonruter',
+	);
+}
+

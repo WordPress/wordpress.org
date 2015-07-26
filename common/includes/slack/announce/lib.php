@@ -66,22 +66,32 @@ function run( $data ) {
 		return;
 	}
 
-	if ( ! is_user_whitelisted( $user, $channel ) ) {
-		return;
+	if ( $data['command'] === '/committers' ) {
+		$committers = get_committers();
+		if ( ! in_array( $user, $committers, true ) ) {
+			return;
+		}
+
+		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
+	} else {
+		if ( ! is_user_whitelisted( $user, $channel ) ) {
+			return;
+		}
+
+		$command = 'channel';
+		if ( $data['command'] === '/here' ) {
+			$command = 'here';
+		} elseif ( $channel === 'privategroup' ) {
+			// @channel and @group are interchangeable, but still.
+			$command = 'group';
+		}
+
+		$text = sprintf( "<!%s> %s", $command, $data['text'] );
 	}
 
 	$send = new Send( \Dotorg\Slack\Send\WEBHOOK );
 	$send->set_username( $user );
-
-	$command = 'channel';
-	if ( $data['command'] === '/here' ) {
-		$command = 'here';
-	} elseif ( $channel === 'privategroup' ) {
-		// @channel and @group are interchangeable, but still.
-		$command = 'group';
-	}
-
-	$send->set_text( sprintf( "<!%s> %s", $command, $data['text'] ) );
+	$send->set_text( $text );
 
 	$get_avatar = __NAMESPACE__ . '\\' . 'get_avatar';
 	if ( function_exists( $get_avatar ) ) {

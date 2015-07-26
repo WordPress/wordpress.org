@@ -76,6 +76,7 @@ class Send {
 			$icon_type    => $icon,
 			'username'    => $this->get_username(),
 			'attachments' => $this->get_attachments(),
+			'link_names'  => 1,
 		);
 
 		if ( $text = $this->get_text() ) {
