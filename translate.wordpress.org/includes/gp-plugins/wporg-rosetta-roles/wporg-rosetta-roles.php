@@ -5,6 +5,14 @@
  * @author Nacin, ocean90
  */
 class GP_WPorg_Rosetta_Roles extends GP_Plugin {
+
+	/**
+	 * Cache group.
+	 *
+	 * @var string
+	 */
+	public $cache_group = 'wporg-translate';
+
 	/**
 	 * Holds the plugin ID.
 	 *
@@ -105,12 +113,10 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 			return true;
 		}
 
-		// An user is allowed to approve potential sub projects as well.
-		$projects = $this->get_all_projects(); // Flat array
-		$project_tree = $this->get_project_tree( $projects );
+		// A user is allowed to approve sub projects as well.
 		$allowed_sub_project_ids = array();
 		foreach ( $project_access_list as $project_id ) {
-			$sub_project_ids = $this->get_sub_project_ids( $project_id, $project_tree );
+			$sub_project_ids = $this->get_sub_project_ids( $project_id );
 			if ( $sub_project_ids ) {
 				$allowed_sub_project_ids = array_merge( $allowed_sub_project_ids, $sub_project_ids );
 			}
@@ -131,18 +137,16 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 */
 	public function get_all_projects() {
 		global $gpdb;
-		static $projects;
+		static $projects = null;
 
-		if ( isset( $projects ) ) {
+		if ( null !== $projects ) {
 			return $projects;
 		}
-
-		$table = GP::$project->table;
 
 		$_projects = $gpdb->get_results( "
 			SELECT
 				id, parent_project_id
-			FROM $table
+			FROM {$gpdb->projects}
 			ORDER BY id
 		" );
 
@@ -155,6 +159,24 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	}
 
 	/**
+	 * Returns projects as a hierarchy tree.
+	 *
+	 * @return array The project tree.
+	 */
+	public function get_project_tree() {
+		static $project_tree = null;
+
+		if ( null !== $project_tree ) {
+			return $project_tree;
+		}
+
+		$projects = $this->get_all_projects();
+		$project_tree = $this->_get_project_tree( $projects );
+
+		return $project_tree;
+	}
+
+	/**
 	 * Transforms a flat array to a hierarchy tree.
 	 *
 	 * @param array $projects  The projects
@@ -162,7 +184,7 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
 	 * @return array The project tree.
 	 */
-	public function get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
+	private function _get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
 		if ( $max_depth < 0 ) { // Avoid an endless recursion.
 			return;
 		}
@@ -170,13 +192,12 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		$tree = array();
 		foreach ( $projects as $project ) {
 			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
+				$sub_projects = $this->_get_project_tree( $projects, $project->id, $max_depth - 1 );
 				if ( $sub_projects ) {
 					$project->sub_projects = $sub_projects;
 				}
 
 				$tree[ $project->id ] = $project;
-				unset( $projects[ $project->id ] );
 			}
 		}
 		return $tree;
@@ -185,13 +206,26 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	/**
 	 * Returns all sub project IDs of a parent ID.
 	 *
-	 * @param int   $project_id Parent ID.
-	 * @param array $projects   Hierarchy tree of projects.
+	 * @param int $project_id Parent ID.
 	 * @return array IDs of the sub projects.
 	 */
-	public function get_sub_project_ids( $project_id, $projects ) {
-		$project_branch = $this->get_project_branch( $project_id, $projects );
-		$project_ids = self::array_keys_multi( $project_branch->sub_projects, 'sub_projects' );
+	public function get_sub_project_ids( $project_id ) {
+		$cache_key = 'project:' . $project_id . ':childs';
+		$cache = wp_cache_get( $cache_key, $this->cache_group );
+		if ( false !== $cache ) {
+			return $cache;
+		}
+
+		$project_tree = $this->get_project_tree();
+		$project_branch = $this->get_project_branch( $project_id, $project_tree );
+
+		$project_ids = array();
+		if ( isset( $project_branch->sub_projects ) ) {
+			$project_ids = self::array_keys_multi( $project_branch->sub_projects, 'sub_projects' );
+		}
+
+		wp_cache_set( $cache_key, $project_ids, $this->cache_group );
+
 		return $project_ids;
 	}
 
@@ -212,9 +246,11 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 				return $project;
 			}
 
-			$sub = $this->get_project_branch( $project_id, $project->sub_projects );
-			if ( $sub ) {
-				return $sub;
+			if ( isset( $project->sub_projects ) ) {
+				$sub = $this->get_project_branch( $project_id, $project->sub_projects );
+				if ( $sub ) {
+					return $sub;
+				}
 			}
 		}
 
@@ -290,7 +326,7 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		foreach ( $array as $key => $value ) {
 			$keys[] = $key;
 
-			if ( is_array( $value->$childs_key ) ) {
+			if ( isset( $value->$childs_key ) && is_array( $value->$childs_key ) ) {
 				$keys = array_merge( $keys, self::array_keys_multi( $value->$childs_key ) );
 			}
 		}
