@@ -75,6 +75,7 @@ function run( $data ) {
 		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
 	} else {
 		if ( ! is_user_whitelisted( $user, $channel ) ) {
+			show_authorization( $user, $channel );
 			return;
 		}
 
