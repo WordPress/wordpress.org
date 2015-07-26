@@ -10,24 +10,10 @@ if ( $_POST['token'] !== WEBHOOK_TOKEN ) {
 	return;
 }
 
-// These should be Slack usernames.
-switch ( $_POST['channel_name'] ) {
-	case 'bbpress' :
-	case 'buddypress' :
-	case 'glotpress' :
-		return;
-	default:
-		$committers = array(
-			'westi', 'azaozz', 'nb', 'josephscott', 'dd32', 'nacin', 'koop', 'duck_',
-			'helen', 'sergey', 'ocean90', 'wonderboymusic', 'drew', 'mark', 'johnbillion',
-			'kovshenin', 'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
-			'westonruter',
-		);
-		break;
-}
+echo json_encode( array(
+	'username'   => 'wordpressdotorg',
+	'link_names' => 1,
+	'text'       => sprintf( '@%s: Use the `/committers` command.', $_POST['user_name'] ),
+) );
 
-if ( in_array( $_POST['user_name'], $committers, true ) ) {
-	$notify = array_diff( $committers, array( $_POST['user_name'] ) );
-	$notify = '(cc: @' . implode( ' @', $notify ) . ')';
-	echo json_encode( array( 'text' => $notify, 'username' => $_POST['user_name'], 'link_names' => 1 ) );
-}
+exit;

@@ -26,10 +26,13 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G', $hash );
 }
 
-if ( $_POST['token'] !== WEBHOOK_TOKEN && $_POST['token'] !== WEBHOOK_TOKEN_ALT ) {
-	return;
+$i = 0;
+// WEBHOOK_TOKEN_1, WEBHOOK_TOKEN_2, etc.
+while ( defined( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . ++$i ) ) {
+	if ( constant( __NAMESPACE__ . '\\WEBHOOK_TOKEN_' . $i ) === $_POST['token'] ) {
+		run( $_POST );
+	}
 }
 
-run( $_POST );
-
 }
+
