@@ -236,7 +236,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 				$parent = $this->get_parent_project( $this->project_tree, $project_id );
 				if ( $parent->id != $project_id ) {
 					$name = sprintf(
-						'%s &rarr; %s',
+						/* translators: 1: Parent project name, 2: Child project name */
+						__( '%1$s &rarr;  %2$s', 'rosetta' ),
 						esc_html( $parent->name ),
 						esc_html( $this->projects[ $project_id ]->name )
 					);

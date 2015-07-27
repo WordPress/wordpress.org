@@ -225,7 +225,8 @@ class Rosetta_Roles {
 	 * Enqueues styles.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( 'rosetta-roles', plugins_url( '/css/rosetta-roles.css', __FILE__ ), array(), '2' );
+		$suffix = is_rtl() ? '-rtl' : '';
+		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '2' );
 	}
 
 	/**

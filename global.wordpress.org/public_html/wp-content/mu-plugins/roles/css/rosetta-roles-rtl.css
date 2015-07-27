@@ -1,0 +1,83 @@
+.projects-list {
+	position: relative;
+	display: inline-block;
+	background: #f5f5f5;
+	border: 1px solid #dfdfdf;
+	border-left: 0;
+	min-height: 100px;
+	margin: 0 0 15px;
+}
+
+.projects-list > li {
+	width: 200px;
+	margin: 0;
+	padding: 15px;
+	box-sizing: border-box;
+	border-left: 1px solid #dfdfdf;
+	border-bottom: 1px solid #dfdfdf;
+	cursor: pointer;
+}
+
+.projects-list > li:last-child {
+	border-bottom: 0;
+}
+
+#projects-list label {
+	margin: 0 !important;
+}
+
+.sub-projects-wrapper {
+	position: absolute;
+	top: -1px;
+	bottom: -1px;
+	right: 200px;
+	width: 300px;
+	padding: 10px;
+	border: 1px solid #dfdfdf;
+	border-right: 0;
+	background: #fff;
+	display: none;
+	overflow: scroll;
+	box-sizing: border-box;
+	cursor: default;
+}
+
+.projects-list > li:hover {
+	background: #fff;
+}
+
+.projects-list > li.active {
+	background: #fff;
+	border-left: 1px solid #fff;
+}
+
+.projects-list > li.active .sub-projects-wrapper {
+	display: block;
+}
+
+.sub-projects-search {
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+.sub-projects-list {
+	margin: 0 2px 0 0;
+}
+
+@media screen and (max-width: 782px) {
+	.projects-list {
+		display: block;
+	}
+
+	.projects-list > li {
+		width: 100%;
+	}
+
+	.sub-projects-wrapper {
+		position: static;
+		border: 1px solid #dfdfdf;
+		width: 100%;
+		margin-top: 10px;
+		max-height: 350px;
+	}
+}
