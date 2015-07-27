@@ -87,12 +87,12 @@
 						?>
 					</td>
 					<td class="right no-right-border">
-						<a href="https://translate.wordpress.org/languages/<?php echo $locale->slug; ?>">
+						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
 							<?php echo ( isset( $percentages[ $locale->wp_locale ] ) ) ? $percentages[ $locale->wp_locale ] . '%' : '&mdash;'; ?>
 						</a>
 					</td>
 					<td class="no-left-border nowrap">
-						<a href="https://translate.wordpress.org/languages/<?php echo $locale->slug; ?>">
+						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
 							<?php echo $locale->slug; ?>
 						</a>
 					<td>

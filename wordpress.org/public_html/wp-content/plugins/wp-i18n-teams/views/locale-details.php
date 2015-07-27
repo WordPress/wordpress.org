@@ -87,7 +87,7 @@
 <?php endif; ?>
 
 <p class="alert alert-info" role="alert">
-	<a href="https://translate.wordpress.org/languages/<?php echo esc_attr( $locale->slug ); ?>">
+	<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">
 		<?php printf( __( 'Become a translator yourself, check if %s needs some help!', 'wporg' ), $locale->english_name ); ?>
 	</a>
 </p>
