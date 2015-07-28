@@ -1,4 +1,6 @@
-a:visited { color: #4ca6cf; }
+a:visited {
+	color: #4ca6cf;
+}
 
 p.login span.mod-login {
 	position: relative;
@@ -8,27 +10,43 @@ p.login span.mod-login {
 
 .frontpageheatmap a {
 	font-family: Georgia, Times, "Times New Roman", serif;
-	font-weight:normal;
-	line-height:28px;
-	padding-bottom:10px
+	font-weight: normal;
+	line-height: 28px;
+	padding-bottom: 10px
 }
 
-.alt{background:#fff}
+.alt{
+	background: #fff;
+}
 
-.sticky{background:#f695a9}
+.sticky{
+	background: #f695a9;
+}
 
-.deleted{background:#ff9999}
+.deleted{
+	background: #ff9999;
+}
 
-.post-undelete-link, .deleted .post-delete-link { display: none; }
-.deleted .post-undelete-link { display: inline; }
+.post-undelete-link,
+.deleted .post-delete-link {
+	display: none;
+}
 
-.bozo{background:#ffff99}
+.deleted .post-undelete-link {
+	display: inline;
+}
+
+.bozo {
+	background: #ffff99
+}
 
 .new-topic {
 	margin-left: 3px;
 }
 
-.topicnav { font-size: 10px;}
+.topicnav {
+	font-size: 10px;
+}
 
 #forumlist {
 	font-size: 12px;
@@ -94,7 +112,11 @@ h2.post-form {
 	margin-left: 255px;
 }
 
-#thread{list-style:none;margin: 20px 0 0 0 !important;padding:0;}
+#thread {
+	list-style: none;
+	margin: 20px 0 0 0 !important;
+	padding: 0;
+}
 
 #thread li.postitem {
 	float: left;
@@ -107,7 +129,9 @@ h2.post-form {
 	overflow-x: hidden;
 }
 
-.topicmeta { padding-top: 19px; }
+.topicmeta {
+	padding-top: 19px;
+}
 
 h4 {
 	font-weight: bold;
@@ -119,7 +143,10 @@ h4 {
 	margin-bottom: 10px;
 }
 
-.topicmeta ul { margin: 0 0 22px 0 !important; font-size: 12px;}
+.topicmeta ul {
+	margin: 0 0 22px 0 !important;
+	font-size: 12px;
+}
 
 .topicmeta ul li {
 	list-style: none;
@@ -127,33 +154,75 @@ h4 {
 	line-height: 1.5em;
 }
 
-.topicmeta .tags ul, .topicmeta .tags p { margin-bottom: 0 !important;}
+.topicmeta .tags ul,
+.topicmeta .tags p {
+	margin-bottom: 0 !important;
+}
 
-input#tag { padding-left: 0; padding-right:	0; width: 80px;}
+input#tag {
+	padding-left: 0;
+	padding-right: 0;
+	width: 80px;
+}
 
-.postform {font-size: 12px;}
+.postform {
+	font-size: 12px;
+}
 
-.postform label{display:block; float:left; clear: left;}
+.postform label {
+	display: block;
+	float: left;
+	clear: left;
+}
 
-.postform textarea{height:20em; width: 97%;font-size: 12px;color: #333;}
+.postform textarea {
+	height: 20em;
+	width: 97%;
+	font-size: 12px;
+	color: #333;
+}
 
-.postform p { margin: 0 0 6px !important; }
+.postform p {
+	margin: 0 0 6px !important;
+}
 
-#content a:visited{font-weight:normal}
+#content a:visited {
+	font-weight: normal
+}
 
-.poststuff { font-size: 12px; color: #777; }
+.poststuff {
+	font-size: 12px;
+	color: #777;
+}
 
-.threadauthor { line-height: 1.4em; padding-top: 3px;}
+.threadauthor {
+	line-height: 1.4em;
+	padding-top: 3px;
+}
 
-.threadauthor strong { font-size: 12px; color: #333;}
+.threadauthor strong {
+	font-size: 12px;
+	color: #333;
+}
 
-.threadauthor small{font-size:12px }
+.threadauthor small {
+	font-size: 12px;
+}
 
-.threadauthor .avatar {float: left; margin-right: 12px;}
+.threadauthor .avatar {
+	float: left;
+	margin-right: 12px;
+}
 
-tr.sticky td{background:#fdf4cd}
+tr.sticky td {
+	background: #fdf4cd;
+}
 
-#hottags{margin: 0; padding: 0;clear:both;}
+#hottags{
+	margin: 0;
+	padding: 0;
+	clear:both;
+}
 
 .post {
 	margin-left: 14px;
@@ -169,19 +238,21 @@ tr.sticky td{background:#fdf4cd}
 	font-style: italic;
 }
 
-#thread .post p, #thread .post pre, #thread .post blockquote {
+#thread .post p,
+#thread .post pre,
+#thread .post blockquote {
 	margin-bottom: 11px;
 }
 
 #thread .post pre {
-	max-height:40.4em;
+	max-height: 40.4em;
 }
 
 .post blockquote {
 	padding: 10px 10px 0 10px;
 	border-color: #dadada;
-	background:none;
-	border-style:solid;
+	background: none;
+	border-style: solid;
 	border-width: 1px 1px 1px 3px;
 }
 
@@ -189,6 +260,7 @@ tr.sticky td{background:#fdf4cd}
 	float: left;
 	margin-bottom: 22px;
 }
+
 #forum-welcome p {
 	margin-bottom: 0;
 	padding-right: 10px;
@@ -204,7 +276,11 @@ tr.sticky td{background:#fdf4cd}
 	padding: 3px;
 }
 
-.clear { display: block; height: 1px; clear: both;}
+.clear {
+	display: block;
+	height: 1px;
+	clear: both;
+}
 
 .page-numbers {
 	font-size: 10px;
@@ -217,7 +293,7 @@ tr.sticky td{background:#fdf4cd}
 }
 
 .dots {
-	background-color: none;
+	background: none;
 	border: none;
 }
 
@@ -234,14 +310,16 @@ a.page-numbers:hover {
 	border-color: #999;
 }
 
-.next, .prev {
+.next,
+.prev {
 	padding: 0;
 	border: none;
 	background-color: #fff;
 	color: #2583ad;
 }
 
-.next:hover, .prev:hover {
+.next:hover,
+.prev:hover {
 	color: #d54e21;
 }
 
@@ -254,19 +332,16 @@ a.page-numbers:hover {
 	border: 1px solid #fff;
 }
 
-#pagebody #userlogin, #userlogin {
+#pagebody #userlogin,
+#userlogin {
 	font-size: 18px;
 	background: #666;
 	padding: 10px;
 	color: #fff;
 	font-weight: normal;
 	font-family: Georgia, Times, "Times New Roman", serif;
-	-moz-border-radius-topleft: 6px;
-	-khtml-border-top-left-radius: 6px;
 	-webkit-border-top-left-radius: 6px;
 	border-top-left-radius: 6px;
-	-moz-border-radius-topright: 6px;
-	-khtml-border-top-right-radius: 6px;
 	-webkit-border-top-right-radius: 6px;
 	border-top-right-radius: 6px;
 }
@@ -290,7 +365,7 @@ dl#userinfo dt {
 }
 
 #useractivity {
-	clear:both;
+	clear: both;
 	margin-bottom: 22px;
 }
 
@@ -299,12 +374,6 @@ dl#userinfo dt {
 	float: left;
 	width: 99%;
 	margin-bottom: 22px;
-	-moz-border-radius: 6px;
-	-khtml-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	border-radius: 6px;
-	-moz-border-radius: 6px;
-	-khtml-border-radius: 6px;
 	-webkit-border-radius: 6px;
 	border-radius: 6px;
 }
@@ -429,6 +498,4 @@ form.postform input[type='text'] {
 	.form-table textarea {
 		width: 100% !important;
 	}
-
-	 
 }
