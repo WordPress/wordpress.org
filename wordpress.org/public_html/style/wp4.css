@@ -87,6 +87,18 @@ sup {
 	font-size: 80%;
 }
 
+/* Hide visually but not from screen readers */
+.screen-reader-text {
+	position: absolute;
+	margin: -1px;
+	padding: 0;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	border: 0;
+	word-wrap: normal !important;
+}
 
 /* =WordPress Core
 -------------------------------------------------------------- */
