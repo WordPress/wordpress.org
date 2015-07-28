@@ -15,15 +15,15 @@ p.login span.mod-login {
 	padding-bottom: 10px
 }
 
-.alt{
+.alt {
 	background: #fff;
 }
 
-.sticky{
+.sticky {
 	background: #f695a9;
 }
 
-.deleted{
+.deleted {
 	background: #ff9999;
 }
 
@@ -283,13 +283,16 @@ tr.sticky td {
 }
 
 .page-numbers {
-	font-size: 10px;
-	padding: 2px 4px;
+	font-size: 11px;
+	line-height: 1;
+	padding: 4px 6px;
 	margin-right: 3px;
 	border-width: 1px;
 	border-style: solid;
 	background-color: #fff;
 	border-color: #ccc;
+	display: inline-block;
+	text-align: center;
 }
 
 .dots {
