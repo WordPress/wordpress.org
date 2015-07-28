@@ -132,10 +132,10 @@ class GlotPress_Translate_Bridge {
 
 		$translation = $wpdb->get_row(
 			"SELECT t.translation_0, t.translation_1, t.translation_2, t.translation_3, t.translation_4, t.translation_5
-				FROM translate_projects p
-				LEFT JOIN translate_originals o ON p.id = o.project_id
-				LEFT JOIN translate_translation_sets s ON p.id = s.project_id
-				LEFT JOIN translate_translations t ON t.original_id = o.id AND t.translation_set_id = s.id
+				FROM {$this->gp_prefix}projects p
+				LEFT JOIN {$this->gp_prefix}originals o ON p.id = o.project_id
+				LEFT JOIN {$this->gp_prefix}translation_sets s ON p.id = s.project_id
+				LEFT JOIN {$this->gp_prefix}translations t ON t.original_id = o.id AND t.translation_set_id = s.id
 
 			WHERE 
 				$sql_project AND $sql_singular AND $sql_plural AND $sql_context AND $sql_locale
