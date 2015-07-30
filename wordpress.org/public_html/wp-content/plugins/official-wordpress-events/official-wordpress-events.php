@@ -338,12 +338,16 @@ class Official_WordPress_Events {
 				$response = wp_remote_get( $url, $args );
 
 				if ( is_wp_error( $response ) ) {
-					$error = sprintf(
-						'Recieved WP_Error message: %s; Request was to %s; Arguments were: %s',
-						implode( ', ', $response->get_error_messages() ),
-						$url,
-						print_r( $args, true )
-					);
+					$error_messages = implode( ', ', $response->get_error_messages() );
+
+					if ( false === strpos( $error_messages, 'Operation timed out' ) ) {
+						$error = sprintf(
+							'Recieved WP_Error message: %s; Request was to %s; Arguments were: %s',
+							$error_messages,
+							$url,
+							print_r( $args, true )
+						);
+					}
 				} elseif ( 200 != $response['response']['code'] ) {
 					// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
 	
