@@ -362,7 +362,7 @@ class WordCamp_Participation_Notifier {
 		
 			if ( is_wp_error( $response ) ) {
 				$error = sprintf(
-					'Recieved WP_Error message: %s Request was: %s',
+					'Received WP_Error message: %s Request was: %s',
 					implode( ', ', $response->get_error_messages() ),
 					print_r( $body, true )
 				);
@@ -370,7 +370,7 @@ class WordCamp_Participation_Notifier {
 				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
 				
 				$error = sprintf(
-					'Recieved HTTP code: %s and body: %s. Request was: %s',
+					'Received HTTP code: %s and body: %s. Request was: %s',
 					$response['response']['code'],
 					substr( sanitize_text_field( $response['body'] ), 0, 500 ),
 					print_r( $body, true )
