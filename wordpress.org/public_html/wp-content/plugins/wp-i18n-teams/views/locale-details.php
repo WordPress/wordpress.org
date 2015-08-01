@@ -42,8 +42,10 @@
 			<?php if ( $locale_data['language_pack_url'] ) : ?>
 				<li class="button download-button">
 					<a href="<?php echo esc_url( $locale_data['language_pack_url'] ); ?>" role="button">
-						<?php // translators: %s is the latest version ?>
-						<?php printf( __( 'Download language pack (%s)', 'wporg' ), $locale_data['latest_release'] ); ?>
+						<?php
+						// translators: %s is the latest version
+						printf( __( 'Download language pack (%s)', 'wporg' ), $locale_data['language_pack_version'] );
+						?>
 					</a>
 				</li>
 			<?php endif; ?>

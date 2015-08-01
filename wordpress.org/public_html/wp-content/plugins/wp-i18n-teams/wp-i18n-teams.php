@@ -158,6 +158,29 @@ class WP_I18n_Teams {
 		return $locale_data;
 	}
 
+	public function get_language_packs_data() {
+		global $wpdb;
+
+		$cache = get_transient( 'wp_i18n_teams_language_packs_data' );
+		if ( false !== $cache ) {
+			return $cache;
+		}
+
+		$language_packs = $wpdb->get_results( "SELECT language AS locale, version FROM `language_packs` WHERE `type` = 'core' AND `active` = 1 AND `version` NOT LIKE '%-%'" );
+
+		$language_packs_data = array();
+		foreach ( $language_packs as $pack ) {
+			if ( ! isset( $language_packs_data[ $pack->locale ] ) ) {
+				$language_packs_data[ $pack->locale ] = array();
+			}
+
+			$language_packs_data[ $pack->locale ][] = $pack->version;
+		}
+
+		set_transient( 'wp_i18n_teams_language_packs_data', $language_packs_data, 900 );
+		return $language_packs_data;
+	}
+
 	public function get_extended_locale_data( $locale ) {
 		$locales_data = $this->get_locales_data();
 		$locale_data = $locales_data[ $locale->wp_locale ];
@@ -165,12 +188,24 @@ class WP_I18n_Teams {
 
 		$latest_release = $locale_data['latest_release'];
 		if ( $latest_release ) {
-			list( $x, $y ) = explode( '.', $latest_release );
-			$latest_branch = "$x.$y";
 			$locale_data['localized_core_url'] = sprintf( '%s/wordpress-%s-%s.zip', $locale_data['rosetta_site_url'], $latest_release, $locale->wp_locale );
+			$language_packs_data = $this->get_language_packs_data();
 
-			if ( version_compare( $latest_release, '4.0', '>=' ) ) {
-				$locale_data['language_pack_url'] = sprintf( 'https://downloads.wordpress.org/translation/core/%s/%s.zip', $latest_branch, $locale->wp_locale );
+			if ( version_compare( $latest_release, '4.0', '>=' ) && ! empty( $language_packs_data[ $locale->wp_locale ] ) ) {
+				list( $x, $y ) = explode( '.', $latest_release );
+				$latest_branch = "$x.$y";
+
+				$pack_version = null;
+				if ( in_array( $latest_release, $language_packs_data[ $locale->wp_locale ] ) ) {
+					$pack_version = $latest_release;
+				} elseif ( in_array( $latest_branch, $language_packs_data[ $locale->wp_locale ] ) ) {
+					$pack_version = $latest_branch;
+				}
+
+				if ( $pack_version ) {
+					$locale_data['language_pack_version'] = $pack_version;
+					$locale_data['language_pack_url'] = sprintf( 'https://downloads.wordpress.org/translation/core/%s/%s.zip', $pack_version, $locale->wp_locale );
+				}
 			}
 		}
 
