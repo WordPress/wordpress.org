@@ -19,10 +19,10 @@ class Core extends Trac {
 	protected $commit_path_filters = array(
 		'wp-content/themes'       => array( '#core-themes' => true, '#core' => false ),
 		'customize'               => '#core-customize',
-		'editor-expand.js'        => '#feature-focus',
-		'wp-admin/css/edit.css'   => '#feature-focus',
-		'wp-admin/css/editor.css' => '#feature-focus',
-		'press-this.php'          => '#feature-pressthis',
+		'editor-expand.js'        => '#core-editor',
+		'wp-admin/css/edit.css'   => '#core-editor',
+		'wp-admin/css/editor.css' => '#core-editor',
+		'press-this.php'          => '#core-pressthis',
 	);
 
 	/**
@@ -31,7 +31,7 @@ class Core extends Trac {
 	protected $ticket_component_filters = array(
 		'Bundled Theme' => array( '#core-themes' => true, '#core' => false ),
 		'Customize'     => '#core-customize',
-		'Press This'    => '#feature-pressthis',
+		'Press This'    => '#core-pressthis',
 	);
 }
 
