@@ -186,7 +186,7 @@ table.translations tr.editor {
 
 .editor .original {
 	margin-bottom: 1em;
-	word-break: break-all;
+	word-wrap: break-word;
 }
 
 .editor .textareas textarea {
