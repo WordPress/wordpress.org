@@ -27,6 +27,10 @@ if ( 'comment' === $type ) {
 	// Remove reply (quoted) text.
 	$search_text = preg_replace( "/^>.*\n\n/sm", '', $search_text );
 	$user_login  = $payload->author;
+} elseif ( $payload->trac === 'security' ) {
+	// Security Trac only handles comments.
+	// Ticket data is found via a HTTP request, comments are from parsing the email.
+	exit;
 } else {
 	$search_text = $payload->summary . ' ' . $payload->description;
 	$user_login  = $payload->reporter;
@@ -53,8 +57,25 @@ function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
 	return false;
 }
 
+function wporg_mentions_limit_to_security_team( $usernames, $data ) {
+	require_once dirname( __DIR__ ) . '/slack/security-team.php';
+	$team = \Dotorg\Slack\Security_Team\get_security_team();
+
+	if ( ! empty( $data['object']->cc ) ) {
+		// Add single ticket access users.
+		$ccs = explode( ", ", $data['object']->cc );
+		$team = array_merge( $team, $ccs );
+	}
+
+	return $team;
+}
+
 if ( ! wporg_user_has_visited_trac( $user_login ) ) {
 	$wpdb->insert( 'trac_users', compact( 'user_login' ) );
+}
+
+if ( $payload->trac === 'security' ) {
+	add_filter( 'wporg_notifications_notifiable_usernames', 'wporg_mentions_limit_to_security_team', 10, 2 );
 }
 
 add_filter( 'wporg_notifications_notify_username', function( $notify, $username ) use ( $type, $payload, $wpdb ) {
