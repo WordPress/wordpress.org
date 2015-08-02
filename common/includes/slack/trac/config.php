@@ -69,6 +69,10 @@ class bbPress extends Trac {
 
 	protected $primary_channel_ticket_format = 'title';
 
+	protected $commit_path_filters = array(
+		'branches/1.' => '#meta',
+	);
+
 	protected $color = '#080';
 	protected $icon  = ':bbpress:';
 }
@@ -102,6 +106,7 @@ class Deploy extends Trac {
 
 class GlotPress extends Trac {
 	protected $primary_channel = '#glotpress';
+	protected $firehose_channel = '#glotpress-firehose';
 }
 
 class Build extends Trac {
@@ -110,6 +115,7 @@ class Build extends Trac {
 }
 
 class BackPress extends Trac {
+	protected $commits_channel = '#meta';
 }
 
 class SupportPress extends Trac {

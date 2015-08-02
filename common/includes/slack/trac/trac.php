@@ -8,7 +8,7 @@ class Trac implements User {
 	protected $commits = true;
 	protected $tickets = true;
 
-	protected $primary_channel  = '#test';
+	protected $primary_channel  = false;
 	protected $tickets_channel  = false;
 	protected $commits_channel  = false;
 	protected $firehose_channel = false;
