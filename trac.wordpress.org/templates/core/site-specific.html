@@ -1,0 +1,61 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:py="http://genshi.edgewall.org/"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     py:strip="">
+
+<head py:match="head" py:attrs="select('@*')">
+${select('*|comment()|text()')}
+<link rel="stylesheet" href="//s.w.org/wp-content/plugins/trac-notifications/make-core.css?ver=3" />
+</head>
+
+<body py:match="body" py:attrs="select('@*')">
+${select('*|comment()|text()')}
+
+<div id="report-popup"></div>
+<script>
+(function($){
+var titles = {
+	matt: 'Project Lead',
+	markjaquith: 'Lead Developer',
+	nacin: 'Lead Developer',
+	azaozz: 'Lead Developer',
+	dd32: 'Lead Developer',
+	helen: 'Lead Developer',
+
+	wonderboymusic: 'Core Committer',
+	ocean90: 'Core Committer',
+	sergeybiryukov: 'Core Committer',
+	johnbillion: 'Core Committer',
+	pento: 'Core Committer',
+	boonebgorges: 'Core Committer',
+
+	jeremyfelt: 'Core Committer',
+	jorbin: 'Core Committer',
+	kovshenin: 'Core Committer',
+	westonruter: 'Core Committer',
+	iseulde: 'Core Committer',
+
+	obenland: '4.3 Release Lead',
+		
+	iammattthomas: 'Core Committer',
+	lancewillett: 'Themes Committer',
+	iandstewart: 'Themes Committer',
+	drewapicture: 'Docs Committer',
+	
+	ryan: 'Lead Developer',
+	westi: 'Lead Developer',
+	koop: 'Core Committer',
+	duck_: 'Core Committer'
+};
+
+$('h3.change .profile-link').each( function() {
+	var el = $(this);
+	user = el.attr('href').split('/').pop().toLowerCase();
+	if ( user in titles ) {
+		el.after( ' <span class="contributor-label">(' + titles[ user ] + ')</span>' );
+	}
+});
+})(jQuery);
+</script>
+</body>
+</html>
