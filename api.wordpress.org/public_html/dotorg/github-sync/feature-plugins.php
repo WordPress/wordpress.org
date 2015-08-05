@@ -12,6 +12,7 @@ class GH2WORG {
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
 		'voldemortensen/menu-customizer' => 'menu-customizer',
 		'swissspidy/oEmbed-API' => 'oembed-api',
+		'georgestephanis/two-factor' => 'two-factor',
 	);
 
 	function __construct() {
