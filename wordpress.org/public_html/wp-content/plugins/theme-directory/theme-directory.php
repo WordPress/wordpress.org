@@ -772,3 +772,45 @@ function wporg_themes_remove_favorite( $theme_slug ) {
 	}
 	return true;
 }
+
+/**
+ * Import theme strings to GlotPress on upload for previously-live themes.
+ *
+ * @param object  $theme      The WP_Theme instance of the uploaded theme.
+ * @param WP_post $theme_post The WP_Post representing the theme.
+ */
+function wporg_themes_glotpress_import_on_update( $theme, $theme_post ) {
+	$status = (array) get_post_meta( $theme_post->ID, '_status', true );
+	if ( array_search( 'live', $status ) ) {
+		// Previously live, import updated strings immediately.
+		$version = $theme->get( 'Version' );
+		wporg_themes_glotpress_import( $theme_post, $version );
+	}
+}
+add_action( 'theme_upload', 'wporg_themes_glotpress_theme_update_uploaded', 100, 2 );
+
+/**
+ * Import theme strings to GlotPress on approval.
+ *
+ * @param WP_Post|int $theme_post The WP_Post (or post_id) representing the theme.
+ * @param string      $version    The version of the theme to import.
+ */
+function wporg_themes_glotpress_import( $theme_post, $version ) {
+	$theme_post = get_post( $theme_post );
+
+	if ( ! $theme_post || ! $version ) {
+		return;
+	}
+
+	$cmd = '/usr/local/bin/php ' . WPORGPATH . 'translate/bin/projects/add-wp-themes-project.php ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
+
+	$output = shell_exec( $cmd );
+
+	// Temporary Debug.	
+	if ( function_exists( 'slack_dm' ) ) {
+		$backtrace = wp_debug_backtrace_summary();
+		slack_dm( print_r( compact( 'cmd', 'theme_post', 'version', 'output', 'backtrace' ), true ), 'dd32' );
+	}
+}
+add_action( 'wporg_themes_update_version_live', 'wporg_themes_glotpress_import', 100, 2 );
+

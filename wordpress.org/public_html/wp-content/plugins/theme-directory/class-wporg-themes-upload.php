@@ -211,7 +211,7 @@ class WPORG_Themes_Upload {
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification( $ticket_id );
 
-		do_action( 'theme_upload', $this->theme );
+		do_action( 'theme_upload', $this->theme, $this->theme_post );
 
 		// Success!
 		return sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ), $this->theme->display( 'Name' ), esc_url( 'https://themes.trac.wordpress.org/ticket/' . $ticket_id ) );
