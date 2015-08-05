@@ -787,7 +787,7 @@ function wporg_themes_glotpress_import_on_update( $theme, $theme_post ) {
 		wporg_themes_glotpress_import( $theme_post, $version );
 	}
 }
-add_action( 'theme_upload', 'wporg_themes_glotpress_theme_update_uploaded', 100, 2 );
+add_action( 'theme_upload', 'wporg_themes_glotpress_import_on_update', 100, 2 );
 
 /**
  * Import theme strings to GlotPress on approval.
