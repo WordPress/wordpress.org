@@ -17,6 +17,7 @@ jQuery( document ).ready( function( $ ) {
 			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( $.wordcampPayments.togglePaymentMethodFields );
 			$( '#payment_category' ).change( $.wordcampPayments.toggleOtherCategoryDescription );
 			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( $.wordcampPayments.showUploadModal );
+			$( '#wcp_mark_incomplete_checkbox' ).click( $.wordcampPayments.requireNotes );
 		},
 
 		/**
@@ -107,6 +108,19 @@ jQuery( document ).ready( function( $ ) {
 					changeMonth: true,
 					changeYear : true
 				} );
+			}
+		},
+
+		/**
+		 * Require notes when the request is being marked as incomplete
+		 */
+		requireNotes : function() {
+			var notes = $( '#wcp_mark_incomplete_notes' );
+
+			if ( 'checked' === $( '#wcp_mark_incomplete_checkbox' ).attr( 'checked' ) ) {
+				notes.attr( 'required', true );
+			} else {
+				notes.attr( 'required', false );
 			}
 		}
 	};

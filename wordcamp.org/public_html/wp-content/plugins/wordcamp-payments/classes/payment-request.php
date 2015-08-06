@@ -87,9 +87,25 @@ class WCP_Payment_Request {
 				'publicly_queryable' => false,
 			)
 		);
+
+		register_post_status(
+			'incomplete',
+			array(
+				'label'              => _x( 'Incomplete', 'post', 'wordcamporg' ),
+				'label_count'        => _nx_noop( 'Incomplete<span class="count">(%s)</span>', 'Incomplete <span class="count">(%s)</span>', 'wordcamporg' ),
+				'public'             => true,
+				'publicly_queryable' => false,
+			)
+		);
 	}
 
+	/**
+	 * Register meta boxes
+	 */
 	public function init_meta_boxes() {
+		/** @var $post WP_Post */
+		global $post;
+
 		// We're build our own Publish box, thankyouverymuch
 		remove_meta_box( 'submitdiv', self::POST_TYPE, 'side' );
 
@@ -101,6 +117,17 @@ class WCP_Payment_Request {
 			'side',
 			'high'
 		);
+
+		if ( 'incomplete' != $post->post_status && current_user_can( 'manage_network' ) ) {
+			add_meta_box(
+				'wcp_mark_incomplete',
+				__( 'Mark as Incomplete', 'wordcamporg' ),
+				array( $this, 'render_mark_incomplete_metabox' ),
+				self::POST_TYPE,
+				'side',
+				'high'
+			);
+		}
 
 		add_meta_box(
 			'wcp_general_info',
@@ -152,6 +179,17 @@ class WCP_Payment_Request {
 		$current_user_can_edit_request = in_array( $post->post_status, array( 'auto-draft', 'unpaid' ) ) || current_user_can( 'manage_network' );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-status.php' );
+	}
+
+	/**
+	 * Render the Mark as Incomplete metabox
+	 *
+	 * @param WP_Post $post
+	 */
+	public function render_mark_incomplete_metabox( $post ) {
+		wp_nonce_field( 'mark_incomplete', 'mark_incomplete_nonce' );
+
+		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-mark-incomplete.php' );
 	}
 
 	/**
@@ -538,6 +576,10 @@ class WCP_Payment_Request {
 			$states['unpaid'] = __( 'Unpaid', 'camptix' );
 		}
 
+		if ( 'incomplete' == $post->post_status && 'incomplete' != get_query_var( 'post_status' ) ) {
+			$states['incomplete'] = __( 'Incomplete', 'wordcamporg' );
+		}
+
 		return $states;
 	}
 
@@ -594,11 +636,17 @@ class WCP_Payment_Request {
 	 */
 	public function update_request_status( $post_data, $post_data_raw ) {
 		if ( $this->post_edit_is_actionable( $post_data ) ) {
-			$previous_status          = $post_data['post_status'];
-			$post_data['post_status'] = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) ) ? 'paid' : 'unpaid';
 
-			if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
-				$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
+			if ( 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
+				$post_data['post_status'] = 'incomplete';
+				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
+			} else {
+				$previous_status          = $post_data['post_status'];
+				$post_data['post_status'] = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) ) ? 'paid' : 'unpaid';
+
+				if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
+					$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
+				}
 			}
 		}
 
@@ -636,6 +684,40 @@ class WCP_Payment_Request {
 	}
 
 	/**
+	 * Notify the payment requester that it has been marked as paid.
+	 *
+	 * @param int   $request_id
+	 * @param array $post_data
+	 * @param array $post_data_raw
+	 */
+	protected function notify_requester_request_incomplete( $request_id, $post_data, $post_data_raw ) {
+		if ( ! $to = $this->get_requester_formatted_email( $post_data['post_author'] ) ) {
+			return;
+		}
+
+		$subject = sprintf( '`%s` is incomplete', $post_data['post_title'] );
+		$headers = array( 'Reply-To: support@wordcamp.org' );
+
+		$message = sprintf(
+			"The request for `%s` has been marked as incomplete by WordCamp Central.
+
+			The reason for this is: %s
+
+			You can complete the request at:
+
+			%s
+
+			If you have any questions, please reply to let us know.",
+			$post_data['post_title'],
+			sanitize_text_field( $post_data_raw['wcp_mark_incomplete_notes'] ),
+			admin_url( sprintf( 'post.php?post=%s&action=edit', $request_id ) )
+		);
+		$message = str_replace( "\t", '', $message );
+
+		wp_mail( $to, $subject, $message, $headers );
+	}
+
+	/**
 	 * Save the post's data
 	 *
 	 * @param int     $post_id
@@ -647,7 +729,7 @@ class WCP_Payment_Request {
 		}
 
 		// Verify nonces
-		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
+		$nonces = array( 'status_nonce', 'mark_incomplete_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
 
 		foreach ( $nonces as $nonce ) {
 			if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {

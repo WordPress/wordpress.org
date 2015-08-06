@@ -5,7 +5,9 @@
 				<label for="post_status"><?php _e( 'Status:' ) ?></label>
 
 				<span id="post-status-display">
-					<?php if ( 'paid' == $post->post_status ) : ?>
+					<?php if ( 'incomplete' == $post->post_status ) : ?>
+						<?php _e( 'Incomplete', 'wordcamporg' ); ?>
+					<?php elseif ( 'paid' == $post->post_status ) : ?>
 						<?php _e( 'Paid' ); ?>
 					<?php else : ?>
 						<?php _e( 'Not Paid' ); ?>
