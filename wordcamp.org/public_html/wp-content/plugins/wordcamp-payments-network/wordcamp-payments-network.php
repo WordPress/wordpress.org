@@ -101,7 +101,7 @@ class WordCamp_Payments_Network_Tools {
 			$paged = 1;
 			while ( $requests = get_posts( array(
 				'paged' => $paged++,
-				'post_status' => array( 'paid', 'unpaid' ),
+				'post_status' => array( 'paid', 'unpaid', 'incomplete' ),
 				'post_type' => 'wcp_payment_request',
 				'posts_per_page' => 20,
 			) ) ) {
@@ -216,7 +216,7 @@ class WordCamp_Payments_Network_Tools {
 	public static function get_current_tab() {
 		$tab = 'overdue';
 
-		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], array( 'pending', 'overdue', 'paid' ) ) ) {
+		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], array( 'pending', 'overdue', 'paid', 'incomplete' ) ) ) {
 			$tab = $_REQUEST['wcp-section'];
 		}
 
@@ -232,6 +232,7 @@ class WordCamp_Payments_Network_Tools {
 			'overdue' => 'Overdue',
 			'pending' => 'Pending',
 			'paid'    => 'Paid',
+			'incomplete' => __( 'Incomplete', 'wordcamporg' ),
 		);
 
 		foreach ( $sections as $section_key => $section_caption ) {

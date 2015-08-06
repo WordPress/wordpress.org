@@ -79,6 +79,8 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 			$where .= " AND `status` = 'paid' ";
 			$orderby = 'created';
 			$order = 'desc';
+		} elseif( 'incomplete' == $view ) {
+			$where .= " AND `status` = 'incomplete' ";
 		}
 
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], array_values( $this->get_sortable_columns() ) ) )
