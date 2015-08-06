@@ -508,7 +508,7 @@ class WordCamp_Admin {
 	 * @param WP_Post $post
 	 */
 	public function add_organizer_to_central( $post ) {
-		$lead_organizer = get_user_by( 'login', get_post_meta( $post->ID, 'WordPress.org Username', true ) );
+		$lead_organizer = get_user_by( 'login', $_POST['wcpt_wordpress_org_username'] );
 
 		if ( $lead_organizer && add_user_to_blog( get_current_blog_id(), $lead_organizer->ID, 'contributor' ) ) {
 			do_action( 'wcor_organizer_added_to_central', $post );
