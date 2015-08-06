@@ -27,7 +27,7 @@ class GP_WPorg_Specifics extends GP_Plugin {
 	}
 
 	/**
-	 * Natural sorting for sub projects.
+	 * Natural sorting for sub projects, and attach whitelisted meta
 	 */
 	function projects( $sub_projects, $parent_id ) {
 		if ( in_array( $parent_id, array( 1, 13, 58 ) ) ) { // 1 = WordPress, 13 = BuddyPress, 58 = bbPress
@@ -40,6 +40,15 @@ class GP_WPorg_Specifics extends GP_Plugin {
 			usort( $sub_projects, function( $a, $b ) {
 				return strcasecmp( $a->name, $b->name );
 			} );
+		}
+
+		// Attach wp-themes meta keys
+		if ( 523 == $parent_id ) {
+			foreach ( $sub_projects as $project ) {
+				$project->non_db_field_names = array_merge( $project->non_db_field_names, array( 'version', 'screenshot' ) );
+				$project->version = gp_get_meta( 'wp-themes', $project->id, 'version' );
+				$project->screenshot = esc_url( gp_get_meta( 'wp-themes', $project->id, 'screenshot' ) );
+			}
 		}
 
 		return $sub_projects;
