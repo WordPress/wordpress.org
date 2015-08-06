@@ -1,6 +1,6 @@
 <div class="wrap">
 	<div id="icon-options-general" class="icon32"><br /></div>
-	<h2>Coming Soon</h2>
+	<h1>Coming Soon</h1>
 
 	<form method="post" action="options.php">
 		<?php settings_fields( 'wccsp_settings' ); ?>

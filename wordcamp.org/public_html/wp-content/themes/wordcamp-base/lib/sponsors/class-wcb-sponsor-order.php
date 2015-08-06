@@ -56,7 +56,7 @@ class WCB_Sponsor_Order extends WCB_Loader {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h2><?php _e( 'Order Sponsor Levels', 'wordcampbase' ); ?></h2>
+			<h1><?php _e( 'Order Sponsor Levels', 'wordcampbase' ); ?></h1>
 
 			<?php if ( false !== $_REQUEST['updated'] ) : ?>
 				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcampbase' ); ?></strong></p></div>

@@ -70,7 +70,8 @@ class WordCamp_Fonts_Plugin {
 	function render_admin_page() {
 		?>
 		<div class="wrap">
-			<?php screen_icon(); ?><h2>Fonts</h2>
+			<?php screen_icon(); ?>
+			<h1>Fonts</h1>
 			<?php settings_errors(); ?>
 			<form method="post" action="options.php" enctype="multipart/form-data">
 				<?php

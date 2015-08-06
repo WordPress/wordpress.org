@@ -183,7 +183,7 @@ class WordCamp_Payments_Network_Tools {
 		?>
 		<div class="wrap">
 			<?php screen_icon( 'tools' ); ?>
-			<h2>WordCamp Payments Dashboard</h2>
+			<h1>WordCamp Payments Dashboard</h1>
 			<?php settings_errors(); ?>
 			<h3 class="nav-tab-wrapper"><?php self::render_dashboard_tabs(); ?></h3>
 
