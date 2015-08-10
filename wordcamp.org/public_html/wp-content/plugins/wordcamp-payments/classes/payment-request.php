@@ -636,8 +636,7 @@ class WCP_Payment_Request {
 	 */
 	public function update_request_status( $post_data, $post_data_raw ) {
 		if ( $this->post_edit_is_actionable( $post_data ) ) {
-
-			if ( isset( $_POST['wcp_mark_incomplete_checkbox'] ) && 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
+			if ( $this->should_mark_request_incomplete() ) {
 				$post_data['post_status'] = 'incomplete';
 				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
 			} else {
@@ -651,6 +650,25 @@ class WCP_Payment_Request {
 		}
 
 		return $post_data;
+	}
+
+	/**
+	 * Determine if the user wants to mark a payment request as incomplete, and if that is valid
+	 *
+	 * @return bool
+	 */
+	protected function should_mark_request_incomplete() {
+		$mark_incomplete = false;
+
+		if ( isset( $_POST['wcp_mark_incomplete_checkbox'] ) && 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
+			if ( isset( $_POST['mark_incomplete_nonce'] ) && wp_verify_nonce( $_POST['mark_incomplete_nonce'], 'mark_incomplete' ) ) {
+				if ( current_user_can( 'manage_network' ) ) {
+					$mark_incomplete = true;
+				}
+			}
+		}
+
+		return $mark_incomplete;
 	}
 
 	/**
@@ -729,7 +747,7 @@ class WCP_Payment_Request {
 		}
 
 		// Verify nonces
-		$nonces = array( 'status_nonce', 'mark_incomplete_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
+		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
 
 		foreach ( $nonces as $nonce ) {
 			if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {
