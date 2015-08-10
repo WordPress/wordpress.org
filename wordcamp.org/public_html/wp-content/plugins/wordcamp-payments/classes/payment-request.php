@@ -637,7 +637,7 @@ class WCP_Payment_Request {
 	public function update_request_status( $post_data, $post_data_raw ) {
 		if ( $this->post_edit_is_actionable( $post_data ) ) {
 
-			if ( 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
+			if ( isset( $_POST['wcp_mark_incomplete_checkbox'] ) && 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
 				$post_data['post_status'] = 'incomplete';
 				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
 			} else {
