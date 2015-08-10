@@ -176,7 +176,7 @@ class WCP_Payment_Request {
 
 		$delete_text                   = EMPTY_TRASH_DAYS ? __( 'Move to Trash' ) : __( 'Delete Permanently' );
 		$submit_text                   = 'auto-draft' == $post->post_status ? __( 'Submit Request', 'wordcamporg' ) : __( 'Update Request', 'wordcamporg' );
-		$current_user_can_edit_request = in_array( $post->post_status, array( 'auto-draft', 'unpaid' ) ) || current_user_can( 'manage_network' );
+		$current_user_can_edit_request = 'paid' != $post->post_status || current_user_can( 'manage_network' );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-status.php' );
 	}
