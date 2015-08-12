@@ -34,6 +34,8 @@ class Devhub_Handbooks {
 	 * @access public
 	 */
 	public static function do_init() {
+		add_action( 'after_switch_theme', array( __CLASS__, 'add_roles' ) );
+
 		add_filter( 'user_has_cap', array( __CLASS__, 'adjust_handbook_editor_caps' ), 11 );
 
 		add_filter( 'the_content', array( __CLASS__, 'autolink_credits' ) );

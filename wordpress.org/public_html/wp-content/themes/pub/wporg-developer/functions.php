@@ -85,7 +85,6 @@ function init() {
 
 	register_nav_menus();
 
-	add_action( 'after_switch_theme', __NAMESPACE__ . '\\add_roles' );
 	add_action( 'pre_get_posts', __NAMESPACE__ . '\\pre_get_posts' );
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\theme_scripts_styles' );
 	add_action( 'wp_head', __NAMESPACE__ . '\\header_js' );
@@ -97,11 +96,6 @@ function init() {
 
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
-
-	// Add the handbook's 'Watch' action link.
-	if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
-		add_action( 'wporg_action_links', array( 'WPorg_Handbook_Watchlist', 'display_action_link' ) );
-	}
 
 	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
 
