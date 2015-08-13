@@ -48,7 +48,9 @@ class Devhub_Handbooks {
 		}
 
 		// Modify SyntaxHighlighter Evolved code output to facilitate code collapse/expand.
-		add_filter( 'syntaxhighlighter_htmlresult', array( __CLASS__, 'syntaxhighlighter_htmlresult' ) );
+		if ( ! is_admin() ) {
+			add_filter( 'syntaxhighlighter_htmlresult', array( __CLASS__, 'syntaxhighlighter_htmlresult' ) );
+		}
 	}
 
 	/**
