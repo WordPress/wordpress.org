@@ -103,3 +103,10 @@ form#profile-delete-form {
 	margin-left: -162px;
 	margin-right: 0;
 }
+
+#pagebody .postform .submit {
+	clear: right;
+	float: left;
+	padding-left: 23px;
+	padding-right: 0;
+}
