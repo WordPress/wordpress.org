@@ -24,22 +24,14 @@ class WPorg_Update_Cached_Data extends GP_CLI {
 		global $gpdb;
 
 		$counts = array();
-		foreach ( $this->locales as $locale ) {
-			$result = $gpdb->get_var( $gpdb->prepare( "
-				SELECT COUNT( DISTINCT( t.user_id ) ) AS count
-				FROM {$gpdb->translations} t
-					INNER JOIN {$gpdb->translation_sets} AS ts
-						ON ts.id = t.translation_set_id
-				WHERE
-					( t.status = 'current' || t.status = 'old' )
-					AND t.user_id IS NOT NULL
-					AND t.user_id <> '0'
-					AND ts.locale = %s
-			",  $locale ) );
 
-			if ( $result ) {
-				$counts[ $locale ] = $result;
-			} else {
+		$db_counts = $gpdb->get_results( "SELECT locale, COUNT( distinct user_id ) as count FROM translate_user_translations_count WHERE accepted > 0 GROUP BY locale" );
+		foreach ( $db_counts as $row ) {
+			$counts[ $row->locale ] = $row->count;
+		}
+
+		foreach ( $this->locales as $locale ) {
+			if ( ! isset( $counts[ $locale ] ) ) {
 				$counts[ $locale ] = 0;
 			}
 		}
