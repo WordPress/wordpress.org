@@ -409,7 +409,7 @@ namespace DevHub {
 		$version = get_terms( 'wp-parser-since', array(
 			'number' => '1',
 			'order'  => 'DESC',
-			'slug'   => $current_version,
+			'name'   => $current_version,
 		) );
 
 		return $version[0];
