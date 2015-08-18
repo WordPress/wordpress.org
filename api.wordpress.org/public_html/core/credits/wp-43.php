@@ -272,6 +272,7 @@ class WP_43_Credits extends WP_Credits {
 			'stephdau',
 			'stevegrunwell',
 			'stevenkword',
+			'stuartshields',
 			'sudar',
 			'sunnyratilal',
 			'swissspidy',
