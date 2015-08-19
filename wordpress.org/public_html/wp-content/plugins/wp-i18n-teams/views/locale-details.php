@@ -60,12 +60,20 @@
 	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
 <?php else : ?>
 	<ul class="validators">
-		<?php foreach ( $locale_data['validators'] as $validator ) : ?>
+		<?php foreach ( $locale_data['validators'] as $validator ) :
+			?>
 			<li>
-				<a href="https://profiles.wordpress.org/<?php echo esc_attr( $validator[2] ); ?>">
-					<img src="https://secure.gravatar.com/avatar/<?php echo esc_attr( $validator[1] ); ?>?size=60" class="gravatar" alt="<?php echo esc_attr( $validator[0] ); ?>" />
-					<?php echo esc_html( $validator[0] ); ?>
-				</a>
+				<a class="user-avatar" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo get_avatar( $validator['email'], 60 );
+				?></a>
+				<a class="user-name" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo esc_html( $validator['display_name'] );
+				?></a>
+				<?php
+				if ( $validator['slack'] ) {
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $validator['slack'], 'https://make.wordpress.org/chat/' );
+				}
+				?>
 			</li>
 		<?php endforeach; ?>
 	</ul>
@@ -76,16 +84,20 @@
 
 <?php if ( empty( $locale_data['translators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>
-<?php else : ?>
-	<ul>
-		<?php foreach ( $locale_data['translators'] as $username => $name ) : ?>
-			<li>
-				<a href="https://profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
-					<?php echo esc_html( $name ); ?>
-				</a>
-			</li>
-		<?php endforeach; ?>
-	</ul>
+<?php else :?>
+	<p>
+		<?php
+		$translators = array();
+		foreach ( $locale_data['translators'] as $translator ) {
+			$translators[] = sprintf(
+				'<a href="https://profiles.wordpress.org/%s">%s</a>',
+				esc_attr( $translator['nice_name'] ),
+				esc_html( $translator['display_name'] )
+			);
+		}
+		echo wp_sprintf( '%l.', $translators );
+		?>
+	</p>
 <?php endif; ?>
 
 <p class="alert alert-info" role="alert">

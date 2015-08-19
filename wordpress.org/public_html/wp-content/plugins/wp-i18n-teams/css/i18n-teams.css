@@ -115,7 +115,7 @@ td.no-right-border {
 .validators li {
 	float: left;
 	width: 280px;		/* todo use flexbox to prog enhance this so that they fill the space. AF is good one to test */
-	padding-bottom: 15px;
+	margin-bottom: 15px;
 	list-style-type: none;
 }
 .validators .gravatar {
@@ -126,10 +126,14 @@ td.no-right-border {
 	padding: 2px;
 }
 .validators a {
-	display: block;
-	margin: 6px 0 2px;
-	font-size: 16px;
 	text-decoration: none;
+}
+.validators .user-name {
+	font-size: 16px;
+}
+.validators .user-slack {
+	display: block;
+	margin-top: .2em;
 }
 
 .translators-info table {

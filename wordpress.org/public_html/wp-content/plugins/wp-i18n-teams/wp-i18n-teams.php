@@ -209,11 +209,32 @@ class WP_I18n_Teams {
 			}
 		}
 
-		$contributors = self::get_contributors( $locale );
+		$contributors = $this->get_contributors( $locale );
 		$locale_data['validators'] = $contributors['validators'];
 		$locale_data['translators'] = $contributors['translators'];
 
 		return $locale_data;
+	}
+
+	/**
+	 * Get the translators and validators for the given locale.
+	 *
+	 * @param GP_Locale $locale
+	 * @return array
+	 */
+	public function get_contributors( $locale ) {
+		$cache = wp_cache_get( 'contributors-data:' . $locale->wp_locale, 'wp-i18n-teams' );
+		if ( false !== $cache ) {
+			return $cache;
+		}
+
+		$contributors = array();
+		$contributors['validators'] = $this->get_translation_editors( $locale );
+		$contributors['translators'] = $this->get_translation_contributors( $locale );
+
+		wp_cache_set( 'contributors-data:' . $locale->wp_locale, $contributors, 'wp-i18n-teams', 2 * HOUR_IN_SECONDS );
+
+		return $contributors;
 	}
 
 	public function get_core_translation_data() {
@@ -248,21 +269,92 @@ class WP_I18n_Teams {
 	}
 
 	/**
-	 * Get the translators and validators for the given locale.
+	 * Get the translation editors for the given locale.
 	 *
 	 * @param GP_Locale $locale
 	 * @return array
 	 */
-	public static function get_contributors( $locale ) {
-		require_once( API_WPORGPATH . 'core/credits/wp-credits.php' );
+	private function get_translation_editors( $locale ) {
+		global $wpdb;
 
-		$credits = WP_Credits::factory( WP_CORE_LATEST_RELEASE, $locale );
-		$results = $credits->get_results();
+		$editors = array();
 
-		$contributors = array(
-			'validators'  => ! empty( $results['groups']['validators']['data'] )  ? $results['groups']['validators']['data']  : array(),
-			'translators' => ! empty( $results['groups']['translators']['data'] ) ? $results['groups']['translators']['data'] : array(),
-		);
+		$subdomain = $wpdb->get_var( $wpdb->prepare( "SELECT subdomain FROM locales WHERE locale = %s", $locale->wp_locale ) );
+		if ( ! $subdomain ) {
+			return $editors;
+		}
+
+		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = '/'", "$subdomain.wordpress.org" ) );
+		if ( ! $blog_id ) {
+			return $editors;
+		}
+
+		$meta_key = $wpdb->base_prefix . intval( $blog_id ) . '_capabilities';
+		$users = $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value LIKE '%translation_editor%'" );
+		if ( ! $users ) {
+			return $editors;
+		}
+
+		$user_data = $wpdb->get_results( "SELECT ID, user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
+		foreach ( $user_data as $user ) {
+			if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
+				$editors[ $user->user_nicename ] = array(
+					'display_name' => $user->display_name,
+					'email'        => $user->user_email,
+					'nice_name'    => $user->user_nicename,
+					'slack'        => self::get_slack_username( $user->ID ),
+				);
+			} else {
+				$editors[ $user->user_nicename ] = array(
+					'display_name' => $user->user_nicename,
+					'email'        => $user->user_email,
+					'nice_name'    => $user->user_nicename,
+					'slack'        => self::get_slack_username( $user->ID ),
+				);
+			}
+		}
+
+		uasort( $editors, array( $this, '_sort_display_name_callback' ) );
+
+		return $editors;
+	}
+
+	/**
+	 * Get the translation contributors for the given locale.
+	 *
+	 * @param GP_Locale $locale
+	 * @return array
+	 */
+	private function get_translation_contributors( $locale ) {
+		global $wpdb;
+
+		$contributors = array();
+
+		$users = $wpdb->get_col( $wpdb->prepare(
+			"SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s",
+			$locale->slug
+		) );
+
+		if ( ! $users ) {
+			$contributors;
+		}
+
+		$user_data = $wpdb->get_results( "SELECT user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
+		foreach ( $user_data as $user ) {
+			if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
+				$contributors[ $user->user_nicename ] = array(
+					'display_name' => $user->display_name,
+					'nice_name'    => $user->user_nicename,
+				);
+			} else {
+				$contributors[ $user->user_nicename ] = array(
+					'display_name' => $user->user_nicename,
+					'nice_name'    => $user->user_nicename,
+				);
+			}
+		}
+
+		uasort( $contributors, array( $this, '_sort_display_name_callback' ) );
 
 		return $contributors;
 	}
@@ -316,6 +408,28 @@ class WP_I18n_Teams {
 		} else {
 			return 'translated-50-less';
 		}
+	}
+
+	/**
+	 * Get the Slack username for a .org user.
+	 *
+	 * @param int $user_id
+	 *
+	 * @return string
+	 */
+	protected static function get_slack_username( $user_id ) {
+		global $wpdb;
+
+		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+		if ( $data && ( $data = json_decode( $data, true ) ) ) {
+			return $data['name'];
+		}
+
+		return '';
+	}
+
+	public function _sort_display_name_callback( $a, $b ) {
+		return strnatcasecmp( $a['display_name'], $b['display_name'] );
 	}
 }
 
