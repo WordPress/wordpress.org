@@ -13,16 +13,41 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @param string $set_slug         Slug of the translation set.
 	 * @param string $project_path     Path of a project.
 	 */
-	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = 'wp' ) {
+	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = 'waiting' ) {
 		global $gpdb;
 
 		$per_page = 20;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
+		$filter = gp_get( 'filter', 'default' );
 
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
 			return $this->die_with_404();
+		}
+
+		// Grab the top level projects to show in the menu first, so as to be able to handle the default Waiting / WP tab selection
+		$top_level_projects = $this->get_active_top_level_projects();
+		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
+
+		// Filter out the Waiting Tab if the current user cannot validate strings
+		$user = GP::$user->current();
+		if (
+			! $user->id || // Not logged in
+			! isset( GP::$plugins->wporg_rosetta_roles ) || // Rosetta Roles plugin is not enabled
+			! (
+				GP::$plugins->wporg_rosetta_roles->is_global_administrator( $user->id ) || // Not a global admin
+				GP::$plugins->wporg_rosetta_roles->is_approver_for_locale( $user->id, $locale_slug ) // Doesn't have project-level access either
+			) ) { // Add check to see if there are any waiting translations for this locale?
+			foreach ( $top_level_projects as $i => $project ) {
+				if ( 'waiting' == $project->slug ) {
+					unset( $top_level_projects[ $i ] );
+					break;
+				}
+			}
+
+			// Reset to default path of wp if the Waiting tab shouldn't be shown for this user.
+			$project_path = 'wp';
 		}
 
 		$project = GP::$project->by_path( $project_path );
@@ -30,13 +55,14 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
+
 		$paged_sub_projects = $this->get_paged_active_sub_projects(
 			$project,
 			array(
 				'page' => $page,
 				'per_page' => $per_page,
-				'orderby' => 'name',
 				'search' => $search,
+				'filter' => $filter,
 				'set_slug' => $set_slug,
 				'locale' => $locale_slug,
 			)
@@ -46,8 +72,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		$sub_projects   = $paged_sub_projects['projects'];
-		$pages          = $paged_sub_projects['pages'];
+		$sub_projects = $paged_sub_projects['projects'];
+		$pages        = $paged_sub_projects['pages'];
 		unset( $paged_sub_projects );
 
 		$project_status = $project_icons = array();
@@ -67,9 +93,6 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		if ( false === $contributors_count ) {
 			$contributors_count = array();
 		}
-
-		$top_level_projects = $this->get_active_top_level_projects();
-		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
 
 		$variants = $this->get_locale_variants( $locale_slug, $project_ids );
 		// If there were no results for the current variant in the current project branch, it should still show it.
@@ -140,6 +163,17 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @return string HTML markup of an icon.
 	 */
 	private function get_project_icon( $project, $sub_project, $size = 128 ) {
+
+		// The Waiting tab will have $sub_project's which are not sub-projects of $project
+		if ( $sub_project->parent_project_id !== $project->id ) {
+			$project = GP::$project->get( $sub_project->parent_project_id );
+			// In the case of Plugins, we may need to go up another level yet
+			if ( $project->parent_project_id ) {
+				$sub_project = $project;
+				$project = GP::$project->get( $sub_project->parent_project_id );
+			}
+		}
+
 		switch( $project->slug ) {
 			case 'wp':
 				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
@@ -200,7 +234,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 		$project_ids = implode( ',', $project_ids );
 		$slugs = $gpdb->get_col( $gpdb->prepare( "
-			SELECT DISTINCT(slug), name
+			SELECT DISTINCT slug
 			FROM {$gpdb->translation_sets}
 			WHERE
 				project_id IN( $project_ids )
@@ -336,26 +370,118 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		$defaults = array(
 			'per_page' => 20,
 			'page'     => 1,
-			'orderby'  => 'id',
-			'order'    => 'ASC',
 			'search'   => false,
 			'set_slug' => '',
 			'locale'   => '',
+			'filter'     => 'default',
 		);
 		$r = wp_parse_args( $args, $defaults );
 		extract( $r, EXTR_SKIP );
-
-		$order = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
-		$orderby = ( in_array( $orderby, array( 'id', 'name' ) ) ? $orderby : 'id' );
 
 		$limit_sql = '';
 		if ( $per_page ) {
 			$limit_sql = $gpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
+
+		$parent_project_sql = $gpdb->prepare( 'AND tp.parent_project_id = %d', $project->id );
+
 		$search_sql = '';
 		if ( $search ) {
 			$esc_search = '%%' . like_escape( $search ) . '%%';
 			$search_sql = $gpdb->prepare( 'AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
+		}
+
+		// Special Waiting Project Tab
+		// This removes the parent_project_id restriction and replaces it with all-translation-editer-projects
+		if ( 'waiting' == $project->slug && GP::$user->current()->id && isset( GP::$plugins->wporg_rosetta_roles ) ) {
+
+			if ( 'default' === $filter ) {
+				$filter = 'strings-waiting';
+			}
+
+			$user_id = GP::$user->current()->id;
+
+			// Global Admin or Locale-specific admin
+			$can_approve_for_all = GP::$plugins->wporg_rosetta_roles->is_global_administrator( $user_id );
+
+			// Check to see if they have any special approval permissions
+			$allowed_projects = array();
+			if ( ! $can_approve_for_all && GP::$plugins->wporg_rosetta_roles->is_approver_for_locale( $user_id, $locale ) ) {
+				$allowed_projects = GP::$plugins->wporg_rosetta_roles->get_project_id_access_list( $user_id, $locale, true );
+
+				// Check to see if they can approve for all projects in this locale.
+				if ( in_array( 'all', $allowed_projects ) ) {
+					$can_approve_for_all = true;
+					$allowed_projects = array();
+				}
+			}
+
+			$parent_project_sql = '';
+			if ( $can_approve_for_all ) {
+				// The current user can approve for all projects, so just grab all with any waiting strings.
+				$parent_project_sql = 'AND stats.waiting > 0';
+
+			} elseif ( $allowed_projects ) {
+				// The current user can approve for a small set of projects.
+				// We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check
+				$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
+				$parent_project_sql = "AND tp_sub.id IN( $ids ) AND stats.waiting > 0";
+
+			} else {
+				// The current user can't approve for any locale projects, or is logged out.
+				$parent_project_sql = 'AND 0=1';
+
+			}
+
+		}
+
+		$filter_order_by = $filter_where = '';
+		switch ( $filter ) {
+			default:
+			case 'default':
+				// Float favorites to the start, but only if they have untranslated strings
+				$user_fav_projects = array_map( array( $gpdb, 'escape' ), $this->get_user_favorites( $project->slug ) );
+
+				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
+				if ( $user_fav_projects ) {
+					$filter_order_by = 'FIELD( tp.path, "' . implode( '", "', $user_fav_projects ) . '" ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, tp.name ASC';
+				} else {
+					$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
+				}
+				break;
+
+			case 'favorites':
+				// Only list favorites
+				$user_fav_projects = array_map( array( $gpdb, 'escape' ), $this->get_user_favorites( $project->slug ) );
+
+				if ( $user_fav_projects ) {
+					$filter_where = 'AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
+				} else {
+					$filter_where = 'AND 0=1';
+				}
+				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
+
+				break;
+
+			case 'strings-remaining':
+				$filter_where = 'AND stats.untranslated > 0';
+				$filter_order_by = 'stats.untranslated DESC, tp.name ASC';
+				break;
+
+			case 'strings-waiting':
+				$filter_where = 'AND stats.waiting > 0';
+				$filter_order_by = 'stats.waiting DESC, tp.name ASC';
+				break;
+
+			case 'strings-fuzzy-and-warnings':
+				$filter_where = 'AND ( stats.fuzzy > 0 OR stats.warnings > 0 )';
+				$filter_order_by = '(stats.fuzzy+stats.warnings) DESC, tp.name ASC';
+				break;
+
+			case 'percent-completed':
+				$filter_where = 'AND stats.untranslated > 0';
+				$filter_order_by = ' ( stats.current / stats.all ) DESC, tp.name ASC';
+				break;
 		}
 
 		/*
@@ -373,15 +499,17 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				LEFT JOIN {$gpdb->projects} tp_sub ON tp.id = tp_sub.parent_project_id AND tp_sub.active = 1
 				LEFT JOIN {$gpdb->translation_sets} sets ON sets.project_id = tp.id AND sets.locale = %s AND sets.slug = %s
 				LEFT JOIN {$gpdb->translation_sets} sets_sub ON sets_sub.project_id = tp_sub.id AND sets_sub.locale = %s AND sets_sub.slug = %s
+				LEFT JOIN {$gpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.translation_set_id = sets.id
 			WHERE
-				tp.parent_project_id = %d
-				AND tp.active = 1
+				tp.active = 1
 				AND ( sets.id IS NOT NULL OR sets_sub.id IS NOT NULL )
+				$parent_project_sql
 				$search_sql
+				$filter_where
 			GROUP BY tp.id
-			ORDER BY tp.$orderby $order
+			ORDER BY $filter_order_by
 			$limit_sql
-		", $locale, $set_slug, $locale, $set_slug, $project->id  );
+		", $locale, $set_slug, $locale, $set_slug );
 
 		$results = (int) $project->found_rows();
 		$pages = (int) ceil( $results / $per_page );
@@ -395,6 +523,54 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
 			'projects' => $projects,
 		);
+	}
+
+	/**
+	 * Retrieves a list of projects which the current user has favorited.
+	 *
+	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
+	 */
+	function get_user_favorites( $project_slug = false ) {
+		global $gpdb;
+		$user = GP::$user->current();
+
+		if ( ! $user->id ) {
+			return array();
+		}
+
+		switch ( $project_slug ) {
+			default:
+				// Fall through to include both Themes and Plugins
+			case 'wp-themes':
+				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects
+				$theme_favorites = array_map( function( $slug ) {
+					return "wp-themes/$slug";
+				}, (array) $user->get_meta( 'theme_favorites' ) );
+
+				if ( 'wp-themes' === $project_slug ) {
+					return $theme_favorites;
+				}
+
+			case 'wp-plugins':
+				// Plugin favorites are stored as topic ID's
+				$plugin_fav_ids = array_keys( (array)$user->get_meta( PLUGINS_TABLE_PREFIX . 'plugin_favorite' ) );
+				$plugin_fav_slugs = array();
+				if ( $plugin_fav_ids ) {
+					$plugin_fav_ids = implode( ',', array_map( 'intval', $plugin_fav_ids ) );
+					$plugin_fav_slugs = $gpdb->get_col( "SELECT topic_slug FROM " . PLUGINS_TABLE_PREFIX . "topics WHERE topic_id IN( $plugin_fav_ids )" );
+				}
+
+				$plugin_favorites = array_map( function( $slug ) {
+					return "wp-plugins/$slug";
+				}, $plugin_fav_slugs );
+
+				if ( 'wp-plugins' === $project_slug ) {
+					return $plugin_favorites;
+				}
+		}
+
+		// Return all favorites, for uses in things like the Waiting tab
+		return array_merge( $theme_favorites, $plugin_favorites );
 	}
 
 	/**
@@ -416,6 +592,10 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	}
 
 	private function _sort_reverse_name_callback( $a, $b ) {
+		// The Waiting project should always be first.
+		if ( $a->slug == 'waiting' ) {
+			return -1;
+		}
 		return - strcasecmp( $a->name, $b->name );
 	}
 
