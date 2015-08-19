@@ -51,18 +51,8 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 * @return bool True if user has permissions, false if not.
 	 */
 	public function pre_can_user( $verdict, $args ) {
-		if ( ! class_exists( 'BP_Roles' ) ) {
-			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
-		}
-		if ( ! class_exists( 'BP_User' ) ) {
-			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
-		}
-
-		// Current user.
-		$user = new BP_User( $args['user_id'] );
-
-		// 115 = global.wordpress.org. Administrators on this site are considered global admins in GlotPress.
-		if ( ! empty( $user->wporg_115_capabilities ) && is_array( $user->wporg_115_capabilities ) && ! empty( $user->wporg_115_capabilities['administrator'] ) ) {
+		// Administrators on global.wordpress.org are considered global admins in GlotPress.
+		if ( $this->is_global_administrator( $args['user_id'] ) ) {
 			return true;
 		}
 
@@ -79,29 +69,16 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		$locale_slug = $locale_and_project_id->locale;
 		$current_project_id = $locale_and_project_id->project_id;
 
-		// Get blog prefix of the associated Rosetta site.
-		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+		// Simple check to see if they're an approver or not
+		if ( ! $this->is_approver_for_locale( $args['user_id'], $locale_slug ) ) {
 			return false;
 		}
 
-		// Check if current user has the approver role.
-		$user->cap_key = $blog_prefix . 'capabilities';
-		$user->caps = &$user->{$user->cap_key};
-		if ( ! is_array( $user->caps ) ) {
-			$user->caps = array();
-		}
-		$user->get_role_caps();
-		if ( ! $user->has_cap( $this->approver_role ) ) {
+		// Grab the list of Projects (or 'all') that the user can approve
+		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_slug );
+		if ( ! $project_access_list ) {
 			return false;
 		}
-
-		// Get IDs of projects which the user can approve.
-		$meta_key =  $blog_prefix . $this->project_access_meta_key;
-		if ( empty( $user->$meta_key ) || ! is_array( $user->$meta_key ) ) {
-			return false;
-		}
-
-		$project_access_list = $user->$meta_key;
 
 		// Short circuit the check if user can approve all projects.
 		if ( in_array( 'all', $project_access_list ) ) {
@@ -114,20 +91,132 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		}
 
 		// A user is allowed to approve sub projects as well.
+		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_slug, /* $include_children = */ true );
+		if ( in_array( $current_project_id, $project_access_list ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if a given user is a Global Admin.
+	 *
+	 * Users present as an administrator on global.wordpress.org are treated as a
+	 * global administrator in GlotPress.
+	 *
+	 * @param int $user A BackPress User object or user ID for the user to check.
+	 *
+	 * @return bool
+	 */
+	public function is_global_administrator( $user_id ) {
+		if ( ! class_exists( 'BP_Roles' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
+		}
+		if ( ! class_exists( 'BP_User' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
+		}
+
+		$user = new BP_User( $user_id );
+
+		// 115 = global.wordpress.org. Administrators on this site are considered global admins in GlotPress.
+		if ( ! empty( $user->wporg_115_capabilities ) && is_array( $user->wporg_115_capabilities ) && ! empty( $user->wporg_115_capabilities['administrator'] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if a given user is a Translation Approver for a Locale.
+	 *
+	 * @param int $user A BackPress User object or user ID for the user to check.
+	 *
+	 * @return bool
+	 */
+	public function is_approver_for_locale( $user_id, $locale_slug ) {
+		if ( ! class_exists( 'BP_Roles' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
+		}
+		if ( ! class_exists( 'BP_User' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
+		}
+
+		// Get blog prefix of the associated Rosetta site.
+		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+			return false;
+		}
+
+		$user = new BP_User( $user_id );
+
+		// Check if current user has the approver role.
+		$user->cap_key = $blog_prefix . 'capabilities';
+		$user->caps = &$user->{$user->cap_key};
+		if ( ! is_array( $user->caps ) ) {
+			$user->caps = array();
+		}
+		$user->get_role_caps();
+
+		return $user->has_cap( $this->approver_role );
+
+	}
+
+	/**
+	 * Retrieve a list of Project ID's which the current user can approve for.
+	 *
+	 * This is likely to be incorrrect in the event that the user is a Translation Editor or Global Admin.
+	 * The array item 'all' is special, which means to allow access to all projects.
+	 *
+	 * @param int    $user            A BackPress User object or user ID for the user to check.
+	 * @param string $locale_slug     The Locale for which we are checking
+	 * @param int    $include_children Whether to include the children project ID's in the return
+	 *
+	 * @return array A list of the Project ID's for which the current user can approve translations for.
+	 */
+	public function get_project_id_access_list( $user_id, $locale_slug, $include_children = false ) {
+		if ( ! class_exists( 'BP_Roles' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
+		}
+		if ( ! class_exists( 'BP_User' ) ) {
+			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
+		}
+
+		$user = new BP_User( $user_id );
+
+		// Get blog prefix of the associated Rosetta site.
+		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+			return false;
+		}
+
+		// Get IDs of projects which the user can approve.
+		$meta_key = $blog_prefix . $this->project_access_meta_key;
+		if ( empty( $user->$meta_key ) || ! is_array( $user->$meta_key ) ) {
+			return false;
+		}
+
+		$project_access_list = $user->$meta_key;
+
+		// If we don't want the children, or the user has access to all projects.
+		if ( ! $include_children || in_array( 'all', $project_access_list ) ) {
+			return $project_access_list;
+		}
+
+		// A user is allowed to approve sub projects as well.
 		$allowed_sub_project_ids = array();
 		foreach ( $project_access_list as $project_id ) {
+			if ( 'all' === $project_id ) {
+				continue;
+			}
 			$sub_project_ids = $this->get_sub_project_ids( $project_id );
 			if ( $sub_project_ids ) {
 				$allowed_sub_project_ids = array_merge( $allowed_sub_project_ids, $sub_project_ids );
 			}
 		}
-		$allowed_sub_project_ids = array_unique( $allowed_sub_project_ids );
 
-		if ( in_array( $current_project_id, $allowed_sub_project_ids ) ) {
-			return true;
-		}
+		$project_access_list = array_merge( $project_access_list, $allowed_sub_project_ids );
+		$project_access_list = array_unique( $project_access_list );
 
-		return false;
+		return $project_access_list;
 	}
 
 	/**
