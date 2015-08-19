@@ -86,7 +86,12 @@ gp_tmpl_header();
 			$sub_projects_count = $status->sub_projects_count;
 		}
 
-		$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
+		// Link directly to the Waiting strings if we're in the Waiting view, otherwise link to the project overview
+		if ( 'waiting' == $project->slug ) {
+			$project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting';
+		} else {
+			$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
+		}
 
 		$project_icon = '';
 		if ( isset( $project_icons[ $sub_project->id ] ) ) {
@@ -139,6 +144,13 @@ gp_tmpl_header();
 			</div>
 		</div>
 		<?php
+	}
+	if ( ! $sub_projects ) {
+		if ( 'waiting' === $project->slug ) {
+			echo '<div class="no-projects-found">No projects with strings awaiting approval!</div>';
+		} else {
+			echo '<div class="no-projects-found">No projects found.</div>';
+		}
 	}
 	?>
 </div>
