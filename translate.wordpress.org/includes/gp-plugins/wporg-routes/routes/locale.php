@@ -444,9 +444,9 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
 				if ( $user_fav_projects ) {
-					$filter_order_by = 'FIELD( tp.path, "' . implode( '", "', $user_fav_projects ) . '" ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, tp.name ASC';
+					$filter_order_by = 'FIELD( tp.path, "' . implode( '", "', $user_fav_projects ) . '" ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				} else {
-					$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
+					$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				}
 				break;
 
