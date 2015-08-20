@@ -170,9 +170,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @return string HTML markup of an icon.
 	 */
 	private function get_project_icon( $project, $sub_project, $size = 128 ) {
-
 		// The Waiting tab will have $sub_project's which are not sub-projects of $project
-		if ( $sub_project->parent_project_id !== $project->id ) {
+		if ( $sub_project->parent_project_id && $sub_project->parent_project_id !== $project->id ) {
 			$project = GP::$project->get( $sub_project->parent_project_id );
 			// In the case of Plugins, we may need to go up another level yet
 			if ( $project->parent_project_id ) {
