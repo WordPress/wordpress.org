@@ -52,6 +52,9 @@ get_header(); ?>
 					<div alt="f102" class="dashicons dashicons-admin-home">home</div>
 					<div alt="f111" class="dashicons dashicons-admin-generic">generic</div>
 					<div alt="f148" class="dashicons dashicons-admin-collapse">collapse</div>
+					<div alt="f536" class="dashicons dashicons-filter">filter</div>
+					<div alt="f540" class="dashicons dashicons-admin-customizer">customizer</div>
+					<div alt="f541" class="dashicons dashicons-admin-multisite">multisite</div>
 
 					<h4><?php _e( 'Welcome Screen', 'wporg' ); ?></h4>
 
@@ -112,10 +115,12 @@ get_header(); ?>
 
 					<!-- image editing -->
 					<div alt="f165" class="dashicons dashicons-image-crop">crop</div>
+					<div alt="f531" class="dashicons dashicons-image-rotate">rotate</div>
 					<div alt="f166" class="dashicons dashicons-image-rotate-left">rotate left</div>
 					<div alt="f167" class="dashicons dashicons-image-rotate-right">rotate right</div>
 					<div alt="f168" class="dashicons dashicons-image-flip-vertical">flip vertical</div>
 					<div alt="f169" class="dashicons dashicons-image-flip-horizontal">flip horizontal</div>
+					<div alt="f533" class="dashicons dashicons-image-filter">filter</div>
 					<div alt="f171" class="dashicons dashicons-undo">undo</div>
 					<div alt="f172" class="dashicons dashicons-redo">redo</div>
 
@@ -143,7 +148,7 @@ get_header(); ?>
 					<div alt="f217" class="dashicons dashicons-editor-paste-text">paste</div>
 					<div alt="f218" class="dashicons dashicons-editor-removeformatting">remove formatting</div>
 					<div alt="f219" class="dashicons dashicons-editor-video">video</div>
-					<div alt="f220" class="dashicons dashicons-editor-customchar">custom chararcter</div>
+					<div alt="f220" class="dashicons dashicons-editor-customchar">custom character</div>
 					<div alt="f221" class="dashicons dashicons-editor-outdent">outdent</div>
 					<div alt="f222" class="dashicons dashicons-editor-indent">indent</div>
 					<div alt="f223" class="dashicons dashicons-editor-help">help</div>
@@ -153,6 +158,7 @@ get_header(); ?>
 					<div alt="f474" class="dashicons dashicons-editor-break">break</div>
 					<div alt="f475" class="dashicons dashicons-editor-code">code</div>
 					<div alt="f476" class="dashicons dashicons-editor-paragraph">paragraph</div>
+					<div alt="f535" class="dashicons dashicons-editor-table">table</div>
 
 					<h4><?php _e( 'Posts Screen', 'wporg' ); ?></h4>
 
@@ -162,12 +168,15 @@ get_header(); ?>
 					<div alt="f134" class="dashicons dashicons-align-center">align center</div>
 					<div alt="f138" class="dashicons dashicons-align-none">align none</div>
 					<div alt="f160" class="dashicons dashicons-lock">lock</div>
+					<div alt="f528" class="dashicons dashicons-unlock">unlock</div>
 					<div alt="f145" class="dashicons dashicons-calendar">calendar</div>
 					<div alt="f508" class="dashicons dashicons-calendar-alt">calendar</div>
 					<div alt="f177" class="dashicons dashicons-visibility">visibility</div>
+					<div alt="f530" class="dashicons dashicons-hidden">hidden</div>
 					<div alt="f173" class="dashicons dashicons-post-status">post status</div>
 					<div alt="f464" class="dashicons dashicons-edit">edit pencil</div>
 					<div alt="f182" class="dashicons dashicons-trash">trash remove delete</div>
+					<div alt="f537" class="dashicons dashicons-sticky">sticky</div>
 
 					<h4><?php _e( 'Sorting', 'wporg' ); ?></h4>
 
@@ -265,6 +274,7 @@ get_header(); ?>
 					<div alt="f459" class="dashicons dashicons-star-half">half star</div>
 					<div alt="f154" class="dashicons dashicons-star-empty">empty star</div>
 					<div alt="f227" class="dashicons dashicons-flag">flag</div>
+					<div alt="f534" class="dashicons dashicons-warning">warning</div>
 
 					<h4><?php _e( 'Misc', 'wporg' ); ?></h4>
 
@@ -312,6 +322,9 @@ get_header(); ?>
 					<div alt="f524" class="dashicons dashicons-tickets-alt">tickets (alt)</div>
 					<div alt="f526" class="dashicons dashicons-money">money</div>
 					<div alt="f328" class="dashicons dashicons-smiley">smiley smile</div>
+					<div alt="f529" class="dashicons dashicons-thumbs-up">thumbs up</div>
+					<div alt="f542" class="dashicons dashicons-thumbs-down">thumbs down</div>
+					<div alt="f538" class="dashicons dashicons-layout">layout</div>
 				</div>
 
 			</div>
