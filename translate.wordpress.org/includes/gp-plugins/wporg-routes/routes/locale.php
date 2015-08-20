@@ -13,7 +13,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 	 * @param string $set_slug         Slug of the translation set.
 	 * @param string $project_path     Path of a project.
 	 */
-	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = 'waiting' ) {
+	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
 		global $gpdb;
 
 		$per_page = 20;
@@ -30,7 +30,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		$top_level_projects = $this->get_active_top_level_projects();
 		usort( $top_level_projects, array( $this, '_sort_reverse_name_callback' ) );
 
-		// Filter out the Waiting Tab if the current user cannot validate strings
+		// Default to the Waiting or WordPress tabs
+		$default_project_tab = 'waiting';
 		$user = GP::$user->current();
 		if (
 			! $user->id || // Not logged in
@@ -38,17 +39,23 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			! (
 				GP::$plugins->wporg_rosetta_roles->is_global_administrator( $user->id ) || // Not a global admin
 				GP::$plugins->wporg_rosetta_roles->is_approver_for_locale( $user->id, $locale_slug ) // Doesn't have project-level access either
-			) ) { // Add check to see if there are any waiting translations for this locale?
+			)
+			// Add check to see if there are any waiting translations for this locale?
+			) {
+			$default_project_tab = 'wp';
+		}
+
+		// Filter out the Waiting Tab if the current user cannot validate strings
+		if ( 'waiting' != $default_project_tab ) {
 			foreach ( $top_level_projects as $i => $project ) {
 				if ( 'waiting' == $project->slug ) {
 					unset( $top_level_projects[ $i ] );
 					break;
 				}
 			}
-
-			// Reset to default path of wp if the Waiting tab shouldn't be shown for this user.
-			$project_path = 'wp';
 		}
+
+		$project_path = $project_path ?: $default_project_tab;
 
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
