@@ -804,13 +804,7 @@ function wporg_themes_glotpress_import( $theme_post, $version ) {
 
 	$cmd = '/usr/local/bin/php ' . WPORGPATH . 'translate/bin/projects/add-wp-themes-project.php ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
 
-	$output = shell_exec( $cmd );
-
-	// Temporary Debug.	
-	if ( function_exists( 'slack_dm' ) ) {
-		$backtrace = wp_debug_backtrace_summary();
-		slack_dm( print_r( compact( 'cmd', 'theme_post', 'version', 'output', 'backtrace' ), true ), 'dd32' );
-	}
+	shell_exec( $cmd );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_glotpress_import', 100, 2 );
 
