@@ -30,6 +30,7 @@ function get_whitelist() {
 			'helen',
 			'johnbillion',
 			'obenland',
+			'wonderboymusic',
 		),
 		'core-customize' => array(
 			'celloexpressions',
