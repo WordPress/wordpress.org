@@ -800,7 +800,7 @@ function wporg_themes_glotpress_mark_as_inactive_on_suspend( $post_id ) {
 		return;
 	}
 
-	wporg_themes_glotpress_import( $post, 'inactve' );
+	wporg_themes_glotpress_import( $post, 'inactive' );
 }
 add_action( 'suspend_repopackage', 'wporg_themes_glotpress_mark_as_inactive_on_suspend' );
 
