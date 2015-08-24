@@ -122,9 +122,9 @@ class WPORG_Edit_Parsed_Content {
 							<a href="#detach-ticket" class="button secondary <?php echo $ticket ? '' : 'hidden'; ?>" id="wporg_ticket_detach" name="wporg_ticket_detach" aria-label="<?php esc_attr_e( 'Detach the Trac ticket', 'wporg' ); ?>" data-nonce="<?php echo wp_create_nonce( 'wporg-detach-ticket' ); ?>" data-id="<?php the_ID(); ?>">
 								<?php esc_attr_e( 'Detach Ticket', 'wporg' ); ?>
 							</a>
+							<span class="spinner"></span>
 						</span>
 						<div id="ticket_status">
-							<span class="spinner"></span>
 							<span class="ticket_info_icon <?php echo $ticket ? 'dashicons dashicons-external' : ''; ?>"></span>
 							<span id="wporg_ticket_info"><em><?php echo $ticket_message; ?></em></span>
 						</div>
@@ -166,9 +166,10 @@ class WPORG_Edit_Parsed_Content {
 			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20140826' );
 			wp_enqueue_script( 'wporg-parsed-content', get_template_directory_uri() . '/js/parsed-content.js', array( 'jquery', 'utils' ), '20140826', true );
 
-			wp_localize_script( 'wporg-parsed-content', 'wporg', array(
+			wp_localize_script( 'wporg-parsed-content', 'wporgParsedContent', array(
 				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
 				'searchText' => __( 'Searching ...', 'wporg' ),
+				'retryText'  => __( 'Invalid ticket number, please try again.', 'wporg' )
 			) );
 		}
 	}
@@ -215,23 +216,20 @@ class WPORG_Edit_Parsed_Content {
 			$link = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $ticket_url ),  apply_filters( 'the_title', $title ) );
 
 			// Can haz success.
-			$message = array(
-				'type'    => 'success',
-				'message' => $link,
-			);
+			wp_send_json_success( array(
+				'message'   => $link,
+				'new_nonce' => wp_create_nonce( 'wporg-attach-ticket' )
+			) );
 
 		} else {
 			// Ticket number is invalid.
-			$message = array(
-				'type'    => 'invalid',
-				'message' => __( 'Invalid ticket number.', 'wporg' ),
-			);
+			wp_send_json_error( array(
+				'message'   => __( 'Invalid ticket number.', 'wporg' ),
+				'new_nonce' =>  wp_create_nonce( 'wporg-attach-ticket' )
+			) );
 		}
 
-		// Slap on a new nonce for repeat offenders.
-		$message['new_nonce'] = wp_create_nonce( 'wporg-attach-ticket' );
-
-		die( json_encode( $message ) );
+		die( 0 );
 	}
 
 	/**
@@ -248,22 +246,21 @@ class WPORG_Edit_Parsed_Content {
 		if ( delete_post_meta( $post_id, 'wporg_ticket_number' )
 			&& delete_post_meta( $post_id, 'wporg_ticket_title' )
 		) {
-			$message = array(
-				'type'    => 'success',
-				'message' => __( 'Ticket detached.', 'wporg' )
-			);
+			// Success!
+			wp_send_json_success( array(
+				'message'   => __( 'Ticket detached.', 'wporg' ),
+				'new_nonce' => wp_create_nonce( 'wporg-detach-ticket' )
+			) );
+
 		} else {
 			// Still attached.
-			$message = array(
-				'type'    => 'failure',
-				'message' => __( 'Ticket still attached.', 'wporg' )
-			);
+			wp_send_json_error( array(
+				'message'   => __( 'Ticket still attached.', 'wporg' ),
+				'new_nonce' => wp_create_nonce( 'wporg-detach-ticket' )
+			) );
 		}
 
-		// Slap on a new nonce for repeat offenders.
-		$message['new_nonce'] = wp_create_nonce( 'wporg-detach-ticket' );
-
-		die( json_encode( $message ) );
+		die( 0 );
 	}
 
 } // WPORG_Edit_Parsed_Content

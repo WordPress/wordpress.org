@@ -9,8 +9,9 @@
   color: #a00;
 }
 
-#ticket_status .spinner {
+.attachment_controls .spinner {
   position: relative;
+  margin-top: 3px;
   bottom: 4px;
   float: none;
 }
