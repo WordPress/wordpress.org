@@ -790,10 +790,25 @@ function wporg_themes_glotpress_import_on_update( $theme, $theme_post ) {
 add_action( 'theme_upload', 'wporg_themes_glotpress_import_on_update', 100, 2 );
 
 /**
+ * Hooks into the Suspend process to mark a theme as inactive in GlotPress.
+ *
+ * @param int  $post_id The post ID being suspended
+ */
+function wporg_themes_glotpress_mark_as_inactive_on_suspend( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'repopackage' != $post->post_type ) {
+		return;
+	}
+
+	wporg_themes_glotpress_import( $post, 'inactve' );
+}
+add_action( 'suspend_repopackage', 'wporg_themes_glotpress_mark_as_inactive_on_suspend' );
+
+/**
  * Import theme strings to GlotPress on approval.
  *
  * @param WP_Post|int $theme_post The WP_Post (or post_id) representing the theme.
- * @param string      $version    The version of the theme to import.
+ * @param string      $version    The version of the theme to import, or 'inactive' to mark the translation project inactive.
  */
 function wporg_themes_glotpress_import( $theme_post, $version ) {
 	$theme_post = get_post( $theme_post );
@@ -808,3 +823,36 @@ function wporg_themes_glotpress_import( $theme_post, $version ) {
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_glotpress_import', 100, 2 );
 
+/**
+ * A Daily cron task to mark any themes which are now older than 2 years inactive in GlotPress.
+ */
+function wporg_themes_check_for_old_themes() {
+	$too_old = strtotime( '-2 years' );
+
+	$query = new WP_Query( array(
+		'post_type' => 'repopackage',
+		'post_status' => 'publish',
+		'date_query' => array(
+			'column' => 'post_modified',
+			'before' => date( 'Y-m-d 00:00:00', $too_old ),
+			'after' => date( 'Y-m-d 00:00:00', $too_old - DAY_IN_SECONDS ),
+			'inclusive' => true
+		)
+	) );
+	$posts = $query->get_posts();
+
+	foreach ( $posts as $post ) {
+		wporg_themes_glotpress_import( $post, 'inactive' );
+	}	
+}
+add_action( 'wporg_themes_check_for_old_themes', 'wporg_themes_check_for_old_themes' );
+
+/**
+ * Sets up the daily cron tasks for the Themes Directory
+ */
+function wporg_themes_maybe_schedule_daily_job() {
+	if ( ! wp_next_scheduled( 'wporg_themes_check_for_old_themes' ) ) {
+		wp_schedule_event( time(), 'daily', 'wporg_themes_check_for_old_themes' );
+	}
+}
+add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
