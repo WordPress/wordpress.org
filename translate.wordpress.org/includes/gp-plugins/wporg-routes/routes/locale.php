@@ -1,4 +1,10 @@
 <?php
+
+// wporg_get_plugin_icon()
+if ( file_exists( WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php' ) ) {
+	include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
+}
+
 /**
  * Locale Route Class.
  *
@@ -207,14 +213,12 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				}
 			case 'bbpress':
 			case 'buddypress':
-				require_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 					return wporg_get_plugin_icon( $project->slug, $size );
 				} else {
 					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 				}
 			case 'wp-plugins':
-				require_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 					return wporg_get_plugin_icon( $sub_project->slug, $size );
 				} else {
