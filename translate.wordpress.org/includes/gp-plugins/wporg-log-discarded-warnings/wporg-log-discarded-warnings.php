@@ -48,3 +48,19 @@ class GP_WPorg_Log_Discarded_Warnings extends GP_Plugin {
 	}
 }
 GP::$plugins->wporg_log_discared_warnings = new GP_WPorg_Log_Discarded_Warnings;
+
+/*
+Required Table:
+
+CREATE TABLE `gp_dotorg_warnings` (
+  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `project_id` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `translation_set` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `translation` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `warning` varchar(20) NOT NULL DEFAULT '',
+  `user` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `status` varchar(20) NOT NULL DEFAULT '',
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+*/
