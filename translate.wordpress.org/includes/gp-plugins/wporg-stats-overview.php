@@ -95,9 +95,10 @@ class GP_WPorg_Route_Stats extends GP_Route {
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
-			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ) );
+			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
 		}
 		unset( $locale, $sets );
+		
 		// Sort by Percent Complete, secondly by Slug
 		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete ) {
 			if ( $translation_locale_complete[ $a ] < $translation_locale_complete[ $b ] ) {
@@ -108,7 +109,6 @@ class GP_WPorg_Route_Stats extends GP_Route {
 				return -1;
 			}
 		} );
-
 
 		$this->tmpl( 'stats-overview', get_defined_vars() );
 	}
