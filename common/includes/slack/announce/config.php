@@ -13,6 +13,11 @@ namespace Dotorg\Slack\Announce;
  */
 function get_whitelist() {
 	return array(
+		'accessibility' => array( 
+			'afercia', 
+			'joedolson', 
+			'rianrietveld', 
+		),
 		'bbpress' => array( 
 			'jjj', 
 			'netweb', 
@@ -41,8 +46,29 @@ function get_whitelist() {
 			'azaozz',
 			'iseulde',
 		),
+		'core-fields' => array(
+			'helen',
+			'sc0ttkclark',
+		),
 		'core-flow' => array(
 			'drew',
+		),
+		'core-multisite' => array(
+			'jeremyfelt',
+		),
+		'core-passwords' => array(
+			'georgestefanis',
+			'valendesigns',
+		),
+		'core-restapi' => array(
+			'danielbachhuber',
+			'joehoyle',
+			'rachelbaker',
+			'rmccue',
+		),
+		'core-themes' => array(
+			'karmatosed',
+			'iamtakashi',
 		),
 		'design' => array(
 			'helen',
@@ -50,6 +76,10 @@ function get_whitelist() {
 		),
 		'feature-oembed' => array(
 			'swissspidy',
+		),
+		'feature-respimg' => array(
+			'joemcgill',
+			'mike',
 		),
 		'forums' => array(
 			'clorith',
