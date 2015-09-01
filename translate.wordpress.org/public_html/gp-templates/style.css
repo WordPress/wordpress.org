@@ -394,7 +394,7 @@ ul.filter-header-links {
 .locale-box .name {
 	display: inline-block;
 	margin: 0;
-	padding: 20px;
+	padding: 20px 10px 20px 20px;
 }
 
 .locale .name li,
