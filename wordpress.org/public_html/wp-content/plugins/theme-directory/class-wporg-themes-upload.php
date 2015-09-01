@@ -32,49 +32,49 @@ class WPORG_Themes_Upload {
 	 *
 	 * @var string
 	 */
-	private $tmp_dir;
+	protected $tmp_dir;
 
 	/**
 	 * Path to temporary theme folder.
 	 *
 	 * @var string
 	 */
-	private $theme_dir;
+	protected $theme_dir;
 
 	/**
 	 * The uploaded theme.
 	 *
 	 * @var WP_Theme
 	 */
-	private $theme;
+	protected $theme;
 
 	/**
 	 * The theme post if it already exists in the repository.
 	 *
 	 * @var WP_Post
 	 */
-	private $theme_post;
+	protected $theme_post;
 
 	/**
 	 * The theme author (current user).
 	 *
 	 * @var WP_User
 	 */
-	private $author;
+	protected $author;
 
 	/**
 	 * Trac ticket information.
 	 *
 	 * @var object
 	 */
-	private $trac_ticket;
+	protected $trac_ticket;
 
 	/**
 	 * A Trac instance to communicate with theme.trac.
 	 *
 	 * @var Trac
 	 */
-	private $trac;
+	protected $trac;
 
 	/**
 	 * Get set up to run tests on the uploaded theme.
@@ -709,7 +709,7 @@ TICKET;
 	 * @param string $string The string to be converted.
 	 * @return string The converted string.
 	 */
-	private function strip_non_utf8( $string ) {
+	protected function strip_non_utf8( $string ) {
 		ini_set( 'mbstring.substitute_character', 'none' );
 
 		return mb_convert_encoding( $string, 'UTF-8', 'UTF-8' );
@@ -722,7 +722,7 @@ TICKET;
 	 * @param string $b
 	 * @return int
 	 */
-	private function sort_by_string_length( $a, $b ) {
+	protected function sort_by_string_length( $a, $b ) {
 		return strlen( $b ) - strlen( $a );
 	}
 }
