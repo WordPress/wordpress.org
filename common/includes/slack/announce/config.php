@@ -57,7 +57,7 @@ function get_whitelist() {
 			'jeremyfelt',
 		),
 		'core-passwords' => array(
-			'georgestefanis',
+			'georgestephanis',
 			'valendesigns',
 		),
 		'core-restapi' => array(
