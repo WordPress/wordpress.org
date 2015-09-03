@@ -52,7 +52,9 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			$project_ids[] = $project->id;
 
 			foreach ( $project->inclusive_sub_projects() as $sub ) {
-				$project_ids[] = $sub->id;
+				if ( $sub->active ) {
+					$project_ids[] = $sub->id;
+				}
 			}
 			unset( $sub );
 
