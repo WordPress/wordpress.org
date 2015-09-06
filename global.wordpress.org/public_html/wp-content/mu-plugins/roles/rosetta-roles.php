@@ -475,10 +475,10 @@ class Rosetta_Roles {
 		// Sort the tree and remove array keys.
 		usort( $project_tree, array( $this, '_sort_name_callback' ) );
 		foreach ( $project_tree as $key => $project ) {
-			if ( $project->sub_projects ) {
+			if ( isset( $project->sub_projects ) ) {
 				usort( $project->sub_projects, array( $this, '_sort_name_callback' ) );
+				$project->sub_projects = array_values( $project->sub_projects );
 			}
-			$project->sub_projects = array_values( $project->sub_projects );
 		}
 		$project_tree = array_values( $project_tree );
 
