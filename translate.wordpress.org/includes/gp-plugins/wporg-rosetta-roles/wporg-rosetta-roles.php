@@ -40,6 +40,8 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	public function __construct() {
 		parent::__construct();
 		$this->add_filter( 'pre_can_user', array( 'args' => 2, 'priority' => 9 ) );
+		$this->add_action( 'project_created' );
+		$this->add_action( 'project_saved' );
 	}
 
 	/**
@@ -97,6 +99,20 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Callback for when a project is created.
+	 */
+	public function project_created() {
+		$this->clear_project_cache();
+	}
+
+	/**
+	 * Callback for when a project is saved.
+	 */
+	public function project_saved() {
+		$this->clear_project_cache();
 	}
 
 	/**
@@ -344,6 +360,18 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Removes all of the project ids from the cache.
+	 */
+	public function clear_project_cache() {
+		$projects = $this->get_all_projects();
+
+		foreach ( $projects as $project ) {
+			$cache_key = 'project:' . $project->id . ':childs';
+			wp_cache_delete( $cache_key, $this->cache_group );
+		}
 	}
 
 	/**
