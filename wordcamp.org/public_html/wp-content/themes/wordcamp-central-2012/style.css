@@ -2622,7 +2622,7 @@ h3#comments-title {
 
 #respond .form-submit {
 	float: right;
-	margin: -73px 0 0 0;
+	/*margin: -73px 0 0 0;*/
 }
 
 #content #respond #submit {
