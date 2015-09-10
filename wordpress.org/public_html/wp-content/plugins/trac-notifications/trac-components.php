@@ -223,7 +223,7 @@ jQuery( document ).ready( function( $ ) {
 		$post = get_post();
 		if ( ! $this->page_is_component( $post ) || doing_action( 'wp_head' ) || ! did_action( 'wp_head' ) ) {
 			return $content;
-		}	
+		}
 
 		ob_start();
 
@@ -262,7 +262,7 @@ jQuery( document ).ready( function( $ ) {
 			'tag_slug__in' => $post->post_name
 		) );
 		if ( $recent_posts->have_posts() ) {
-			echo "<h3>Recent posts on the blog</h3>\n<ul>";
+			echo "<h3>Recent posts on the make/core blog</h3>\n<ul>";
 			while ( $recent_posts->have_posts() ) {
 				$recent_posts->the_post();
 				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
@@ -271,6 +271,25 @@ jQuery( document ).ready( function( $ ) {
 			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
 			wp_reset_postdata();
 		}
+
+		switch_to_blog( 34 ); // Blog ID of make/flow
+		$flow_posts = new WP_Query( array(
+			'post_type' => 'post',
+			'post_status' => 'publish',
+			'posts_per_page' => 5,
+			'tag_slug__in' => $post->post_name
+		) );
+		if ( $flow_posts->have_posts() ) {
+			echo "<h3>Recent posts on the make/flow blog</h3>\n<ul>";
+			while ( $flow_posts->have_posts() ) {
+				$flow_posts->the_post();
+				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+			}
+			echo '</ul>';
+			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			wp_reset_postdata();
+		}
+		restore_current_blog();
 
 		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
@@ -577,7 +596,7 @@ jQuery( document ).ready( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th style="width: 50px">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';	
+			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th style="width: 50px">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
 		}
 
 		$component = $post->post_title;
@@ -624,4 +643,3 @@ jQuery( document ).ready( function( $ ) {
 	}
 }
 new Make_Core_Trac_Components;
-
