@@ -88,7 +88,7 @@ gp_tmpl_header();
 
 		// Link directly to the Waiting strings if we're in the Waiting view, otherwise link to the project overview
 		if ( 'waiting' == $project->slug ) {
-			$project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting&filters[status]=fuzzy';
+			$project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting_or_fuzzy';
 
 			$project_name = $sub_project->name;
 			$parent_project_id = $sub_project->parent_project_id;
