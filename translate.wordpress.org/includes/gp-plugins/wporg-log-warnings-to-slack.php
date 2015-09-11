@@ -90,11 +90,13 @@ class GP_WPorg_Log_Warnings_to_Slack extends GP_Plugin {
 		$set = GP::$translation_set->get( $translation->translation_set_id );
 		$project = GP::$project->get( $original->project_id );
 
-		$project_name = $project->name;
-		do {
-			$parent_project = GP::$project->get( $project->parent_project_id );
-			$project_name = $parent_project->name . ' - ' . $project_name;
-		} while ( $parent_project && $parent_project->parent_project_id );
+		$project_name = $sub_project->name;
+		$parent_project_id = $project->parent_project_id;
+		while ( $parent_project_id ) {
+			$parent_project = GP::$project->get( $parent_project_id );
+			$parent_project_id = $parent_project->parent_project_id;
+			$project_name = "{$parent_project->name} - {$project_name}";
+		}
 
 		$project_url = gp_url_join( gp_url_public_root(), 'projects', $project->path, $set->locale, '/', $set->slug ) . '?filters[warnings]=yes&sort[by]=translation_date_added';
 		$translation_url = gp_url_join( gp_url_public_root(), 'projects', $project->path, $set->locale, '/', $set->slug ) . '?filters[status]=either&filters[original_id]=' . $original->id . '&filters[translation_id]=' . $translation->id;

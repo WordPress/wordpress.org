@@ -89,8 +89,18 @@ gp_tmpl_header();
 		// Link directly to the Waiting strings if we're in the Waiting view, otherwise link to the project overview
 		if ( 'waiting' == $project->slug ) {
 			$project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting&filters[status]=fuzzy';
+
+			$project_name = $sub_project->name;
+			$parent_project_id = $sub_project->parent_project_id;
+			while ( $parent_project_id ) {
+				$parent_project = GP::$project->get( $parent_project_id );
+				$parent_project_id = $parent_project->parent_project_id;
+				$project_name = "{$parent_project->name} - {$project_name}";
+			}
+
 		} else {
 			$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
+			$project_name = $sub_project->name;
 		}
 
 		$project_icon = '';
@@ -110,7 +120,7 @@ gp_tmpl_header();
 
 				<div class="project-name">
 					<h4>
-						<?php echo gp_link_get( $project_url, $sub_project->name ) ?>
+						<?php echo gp_link_get( $project_url, $project_name ) ?>
 					</h4>
 				</div>
 				<div class="project-description">
