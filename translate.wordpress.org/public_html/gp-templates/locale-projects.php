@@ -78,11 +78,12 @@ gp_tmpl_header();
 <div id="projects" class="projects">
 	<?php
 	foreach ( $sub_projects as $sub_project ) {
-		$percent_complete = $waiting = $sub_projects_count = 0;
+		$percent_complete = $waiting = $sub_projects_count = $fuzzy = 0;
 		if ( isset( $project_status[ $sub_project->id ] ) ) {
 			$status = $project_status[ $sub_project->id ];
 			$percent_complete = $status->percent_complete;
 			$waiting = $status->waiting_count;
+			$fuzzy = $status->fuzzy_count;
 			$sub_projects_count = $status->sub_projects_count;
 		}
 
@@ -134,8 +135,8 @@ gp_tmpl_header();
 					<span class="project-status-value"><?php echo $sub_projects_count; ?></span>
 				</div>
 				<div class="project-status-waiting">
-					<span class="project-status-title">Waiting</span>
-					<span class="project-status-value"><?php echo $waiting; ?></span>
+					<span class="project-status-title">Waiting/Fuzzy</span>
+					<span class="project-status-value"><?php echo $waiting + $fuzzy; ?></span>
 				</div>
 				<div class="project-status-progress">
 					<span class="project-status-title">Progress</span>
