@@ -429,7 +429,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			$parent_project_sql = '';
 			if ( $can_approve_for_all ) {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
-				$parent_project_sql = 'AND stats.waiting > 0';
+				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
 
 			} elseif ( $allowed_projects ) {
 				// The current user can approve for a small set of projects.
@@ -479,8 +479,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				break;
 
 			case 'strings-waiting':
-				$filter_where = 'AND stats.waiting > 0';
-				$filter_order_by = 'stats.waiting DESC, tp.name ASC';
+				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 )';
+				$filter_order_by = 'stats.fuzzy DESC, stats.waiting DESC, tp.name ASC';
 				break;
 
 			case 'strings-fuzzy-and-warnings':
