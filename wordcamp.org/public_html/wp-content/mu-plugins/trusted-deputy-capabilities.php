@@ -15,80 +15,84 @@ namespace WordCamp\Trusted_Deputy_Capabilities;
  * capability that isn't explicitly granted.
  */
 
-
 /**
- * Give extra capabilities to trusted Deputies
+ * Give extra capabilities to trusted deputies.
  *
- * @param array  $required_capabilities The primitive capabilities that are required to perform the requested meta capability
- * @param string $requested_capability  The requested meta capability
- * @param int    $user_id               The user ID.
- * @param array  $args                  Adds the context to the cap. Typically the object ID.
+ * Uses the user_has_cap filter to add more primitive capabilities to trusted deputies.
  *
- * @return array
+ * @param array  $allcaps   This user's capabilities.
+ * @param string $caps      Requested set of capabilities.
+ * @param array  $args      Adds the context to the cap.
+ * @param int    $user      The WP_User object.
+ *
+ * @return array An array of this user's capabilities.
  */
-function allow_trusted_deputy_capabilities( $required_capabilities, $requested_capability, $user_id, $args ) {
-	global $trusted_deputies;
-	$allow_capability = true;
+function trusted_deputy_has_cap( $allcaps, $caps, $args, $user ) {
+	if ( ! is_deputy( $user->ID ) )
+		return $allcaps;
 
-	if ( ! in_array( $user_id, $trusted_deputies ) ) {
-		$allow_capability = false;
-	} else if ( in_array( 'do_not_allow', $required_capabilities ) ) {
-		$allow_capability = false;
-	} else if ( ! is_allowed_capability( $requested_capability, $required_capabilities ) ) {
-		$allow_capability = false;
-	}
+	$allcaps = array_merge( get_role( 'administrator' )->capabilities, array(
+		'manage_network' => true,
+		'manage_sites'   => true,
 
-	if ( $allow_capability ) {
-		$required_capabilities = array();
-	}
+		'jetpack_network_admin_page' => true,
+		'jetpack_network_sites_page' => true,
+		'jetpack_network_settings_page' => true,
+	) );
 
-	return $required_capabilities;
+	return $allcaps;
 }
-add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_trusted_deputy_capabilities', 10, 4 );
+add_filter( 'user_has_cap', __NAMESPACE__ . '\trusted_deputy_has_cap', 10, 4 );
 
 /**
- * Determine if the given capability should be allowed for trusted Deputies
+ * Filter meta-capabilities.
  *
- * @param string $capability
- * @param array  $dependent_capabilities
+ * Uses the map_meta_cap filter to add some additional logic around meta-caps.
+ * Mainly we just map some custom meta-caps back to primitive ones.
  *
- * @return bool
+ * @param array $required_caps An array of capabilites required to perform $cap.
+ * @param string $cap The requested capability.
+ * @param int $user_id The user ID.
+ *
+ * @return array An array of required capababilities to perform $cap.
  */
-function is_allowed_capability( $capability, $dependent_capabilities ) {
-	$allowed = false;
-	$deputy_capabilities = get_trusted_deputy_capabilities();
-	
-	if ( array_key_exists( $capability, $deputy_capabilities ) ) {
-		$allowed = true;
-	} else {
-		foreach ( $dependent_capabilities as $dependent_capability ) {
-			if ( array_key_exists( $dependent_capability, $deputy_capabilities ) ) {
-				$allowed = true;
-				break;
+function trusted_deputy_meta_caps( $required_caps, $cap, $user_id ) {
+	if ( ! is_deputy( $user_id ) )
+		return $required_caps;
+
+	switch ( $cap ) {
+
+		// With multisite and plugin menus turned off, core requires
+		// the manage_network_plugins cap via a meta cap.
+		case 'activate_plugins':
+			if ( ! is_network_admin() ) {
+				$required_caps = array( 'activate_plugins' );
 			}
-		}
+			break;
+
+		// Map some Jetpack meta caps back to regular caps.
+		// See https://github.com/Automattic/jetpack/commit/bf3f4b9a8eb8b689b33a106d2e9b2fefd9a4c2fb
+		case 'jetpack_network_admin_page':
+		case 'jetpack_network_sites_page':
+		case 'jetpack_network_settings_page':
+			$required_caps = array( $cap );
+			break;
 	}
 
-	return $allowed;
+	return $required_caps;
 }
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\trusted_deputy_meta_caps', 10, 3 );
 
 /**
- * Get the capabilities that trusted Deputies should have
+ * Returns true if $user_id is a deputy.
  *
- * @return array
+ * @param int $user_id A user ID.
+ *
+ * @return bool True if $user_id is a deputy.
  */
-function get_trusted_deputy_capabilities() {
-	$administrator_role = get_role( 'administrator' );
-
-	$capabilities = array_merge(
-		$administrator_role->capabilities,
-		array(
-			'manage_network' => true,
-			'manage_sites'   => true,
-		)
-	);
-
-	return $capabilities;
+function is_deputy( $user_id = null ) {
+	global $trusted_deputies;
+	return in_array( $user_id, (array) $trusted_deputies );
 }
 
 /**
@@ -108,6 +112,11 @@ function test_allow_trusted_deputy_capabilities() {
 		'import'             => true,
 		'edit_theme_options' => true,
 
+		// Jetpack-specific caps.
+		'jetpack_network_admin_page' => true,
+		'jetpack_network_sites_page' => true,
+		'jetpack_network_settings_page' => true,
+
 		'manage_network_users'   => false,
 		'manage_network_plugins' => false,
 		'manage_network_themes'  => false,
@@ -124,7 +133,8 @@ function test_allow_trusted_deputy_capabilities() {
 
 	foreach ( $capabilities as $capability => $allowed ) {
 		printf(
-			"<li>%s should be %s and was %s</li>",
+			"<li>%s: %s should be %s and was %s</li>",
+			$allowed == current_user_can( $capability ) ? 'OK' : 'ERROR',
 			$capability,
 			$allowed ? 'granted' : 'denied',
 			current_user_can( $capability ) ? 'granted' : 'denied'
@@ -133,4 +143,4 @@ function test_allow_trusted_deputy_capabilities() {
 
 	wp_die();
 }
-//add_action( 'init', __NAMESPACE__ . '\test_allow_trusted_deputy_capabilities' );
+// add_action( 'init', __NAMESPACE__ . '\test_allow_trusted_deputy_capabilities' );
