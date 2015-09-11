@@ -9,6 +9,9 @@ class GP_WPorg_Log_Warnings_to_Slack extends GP_Plugin {
 
 	var $channel = '#polyglots-warnings';
 
+	// Holds the list of Translation ID's which have been notified about in this process
+	var $warned = array();
+
 	function __construct() {
 		parent::__construct();
 
@@ -57,6 +60,13 @@ class GP_WPorg_Log_Warnings_to_Slack extends GP_Plugin {
 	 * @param  GP_Translation $translatiom The just-created translation.
 	 */
 	function process_translation_warning( $translation ) {
+		// Avoid processing a specific translation twice
+		if ( isset( $this->warned[ $translation->id ] ) ) {
+			return;
+		}
+		$this->warned[ $translation->id ] = true;
+
+
 		$original = GP::$original->get( $translation->original_id );
 		$set = GP::$translation_set->get( $translation->translation_set_id );
 		$project = GP::$project->get( $original->project_id );
