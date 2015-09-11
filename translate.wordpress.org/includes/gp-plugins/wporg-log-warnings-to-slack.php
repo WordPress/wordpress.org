@@ -38,20 +38,39 @@ class GP_WPorg_Log_Warnings_to_Slack extends GP_Plugin {
 	}
 
 	/**
-	 * Logs translation warnings into Slack
+	 * Logs translation warnings into Slack for any newly created translations.
 	 *
 	 * @param  GP_Translation $translatiom The just-created translation.
 	 */
 	function translation_created( $translation ) {
-		if ( $translation->warnings ) {
-			$this->process_translation_warning( $translation );
+		if ( ! $translation->warnings ) {
+			return;
 		}
+
+		// We only want to trigger for strings which are live, or are for consideration.
+		if ( ! in_array( $translation->status, array( 'current', 'waiting' ) ) ) {
+			return;
+		}
+
+		$this->process_translation_warning( $translation );
 	}
 
+	/**
+	 * Logs translation warnings into Slack for any existing translations that are updated.
+	 *
+	 * @param  GP_Translation $translatiom The just-created translation.
+	 */
 	function translation_saved( $translation ) {
-		if ( $translation->warnings ) {
-			$this->process_translation_warning( $translation );
+		if ( ! $translation->warnings ) {
+			return;
 		}
+
+		// We only want to trigger for strings which are live, or are for consideration.
+		if ( ! in_array( $translation->status, array( 'current', 'waiting' ) ) ) {
+			return;
+		}
+
+		$this->process_translation_warning( $translation );
 	}
 
 	/**
