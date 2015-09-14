@@ -166,7 +166,7 @@ abstract class WP_Credits {
 			if ( $user->user_nicename == 'nacin' )
 				continue;
 			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$translators[ $user->user_nicename ] = utf8_encode( remove_accents( $user->display_name ) );
+				$translators[ $user->user_nicename ] = remove_accents( $user->display_name );
 			else
 				$translators[ $user->user_nicename ] = $user->user_nicename;
 		}
@@ -189,7 +189,7 @@ abstract class WP_Credits {
 			if ( $user->user_nicename == 'nacin' ) // I stopped taking Spanish in 11th grade, don't show me as a validator when I'm testing things.
 				continue;
 			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$validators[ $user->user_nicename ] = array( utf8_encode( remove_accents( $user->display_name ) ), md5( $user->user_email ), $user->user_nicename );
+				$validators[ $user->user_nicename ] = array( remove_accents( $user->display_name ), md5( $user->user_email ), $user->user_nicename );
 			else
 				$validators[ $user->user_nicename ] = array( $user->user_nicename, md5( $user->user_email ), $user->user_nicename );
 		}
@@ -318,7 +318,7 @@ abstract class WP_Credits {
 
 		foreach ( $user_data as $user ) {
 			if ( $user->display_name && $user->display_name != $user->user_nicename && false === strpos( $user->display_name , '?') )
-				$props[ $user->user_nicename ] = utf8_encode( remove_accents( $user->display_name ) );
+				$props[ $user->user_nicename ] = remove_accents( $user->display_name );
 			else
 				$props[ $user->user_nicename ] = $user->user_nicename;
 		}
