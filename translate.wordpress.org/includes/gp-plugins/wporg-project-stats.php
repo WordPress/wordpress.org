@@ -106,6 +106,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 			}
 		}
 		$this->projects_to_update += $projects;
+		unset( $projects );
 
 		foreach ( $this->projects_to_update as $project_id => $locale_sets ) {
 			$locale_sets = array_keys( $locale_sets );
@@ -134,6 +135,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 				$values = array();
 			}
 		}
+		$this->projects_to_update = array();
 
 		if ( $values ) {
 			$gpdb->query( "INSERT INTO {$gpdb->project_translation_status} (`project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`)" );
