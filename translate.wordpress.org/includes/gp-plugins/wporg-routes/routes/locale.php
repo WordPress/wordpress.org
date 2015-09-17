@@ -435,7 +435,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 				// The current user can approve for a small set of projects.
 				// We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check
 				$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
-				$parent_project_sql = "AND tp_sub.id IN( $ids ) AND stats.waiting > 0";
+				$parent_project_sql = "AND tp.id IN( $ids ) AND stats.waiting > 0";
 
 			} else {
 				// The current user can't approve for any locale projects, or is logged out.
@@ -505,21 +505,17 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		 */
 		$_projects = $project->many( "
 			SELECT SQL_CALC_FOUND_ROWS tp.*
-				FROM {$gpdb->projects} tp
-				LEFT JOIN {$gpdb->projects} tp_sub ON tp.id = tp_sub.parent_project_id AND tp_sub.active = 1
-				LEFT JOIN {$gpdb->translation_sets} sets ON sets.project_id = tp.id AND sets.locale = %s AND sets.slug = %s
-				LEFT JOIN {$gpdb->translation_sets} sets_sub ON sets_sub.project_id = tp_sub.id AND sets_sub.locale = %s AND sets_sub.slug = %s
-				LEFT JOIN {$gpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.translation_set_id = sets.id
+			FROM {$gpdb->projects} tp
+				LEFT JOIN {$gpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
 			WHERE
 				tp.active = 1
-				AND ( sets.id IS NOT NULL OR sets_sub.id IS NOT NULL )
 				$parent_project_sql
 				$search_sql
 				$filter_where
 			GROUP BY tp.id
 			ORDER BY $filter_order_by
 			$limit_sql
-		", $locale, $set_slug, $locale, $set_slug );
+		", $locale, $set_slug );
 
 		$results = (int) $project->found_rows();
 		$pages = (int) ceil( $results / $per_page );
