@@ -7,13 +7,15 @@
  * a new translation is submitted, or new originals are imported.
  * The datbase update is delayed until shutdown to bulk-update the database during imports.
  *
+ * NOTE: The counts includes all sub-projects in the count, as that's more useful for querying (top-level projects excluded)
+ * for example, wp-plugins won't exist, but wp-plugins/akismet will include wp-plugins/akismet/stable wp-plugins/akismet/stable-readme
+ *
  * @author dd32
  */
 class GP_WPorg_Project_Stats extends GP_Plugin {
 	var $id = 'wporg-project-stats';
 
-	private $projects_to_update = array();
-	private $translation_sets_to_update = array();
+	public $projects_to_update = array();
 
 	function __construct() {
 		global $gpdb;
@@ -29,59 +31,112 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 	}
 
 	function translation_created( $translation ) {
-		$this->translation_sets_to_update[ $translation->translation_set_id ] = true;
+		$set = GP::$translation_set->get( $translation->translation_set_id );
+		$this->projects_to_update[ $set->project_id ][ $set->locale . '/' . $set->slug ] = true;
 	}
 
 	function translation_saved( $translation ) {
-		$this->translation_sets_to_update[ $translation->translation_set_id ] = true;
+		$set = GP::$translation_set->get( $translation->translation_set_id );
+		$this->projects_to_update[ $set->project_id ][ $set->locale . '/' . $set->slug ] = true;
 	}
 
 	function originals_imported( $project_id ) {
 		$this->projects_to_update[ $project_id ] = true;
 	}
 
+	// Counts up all the 
+	function get_project_translation_counts( $project_id, $locale, $locale_slug, &$counts = array() ) {
+		if ( ! $counts ) {
+			$counts = array( 'all' => 0, 'current' => 0, 'waiting' => 0, 'fuzzy' => 0, 'warning' => 0, 'untranslated' => 0 );
+		}
+
+		// Not all projects have translation sets
+		$set = GP::$translation_set->by_project_id_slug_and_locale( $project_id, $locale_slug, $locale );
+		if ( $set ) {
+			// Force a refresh of the translation set counts
+			wp_cache_delete( $set->id, 'translation_set_status_breakdown' );
+
+			$counts['all'] += $set->all_count();
+			$counts['current'] += $set->current_count();
+			$counts['waiting'] += $set->waiting_count();
+			$counts['fuzzy'] += $set->fuzzy_count();
+			$counts['warnings'] += $set->warnings_count();
+			$counts['untranslated'] += $set->untranslated_count();
+		}
+
+		// Fetch the strings from the sub projects too
+		foreach ( GP::$project->get( $project_id )->sub_projects() as $project ) {
+			if ( ! $project->active ) {
+				continue;
+			}
+			$this->get_project_translation_counts( $project->id, $locale, $locale_slug, $counts );
+		}
+
+		return $counts;
+	}
+
 	function shutdown() {
 		global $gpdb;
 		$values = array();
 
-		// Convert projects to a list of sets
-		foreach ( $this->projects_to_update as $project_id => $dummy ) {
-			foreach ( GP::$translation_set->by_project_id( $project_id ) as $set ) {
-				$this->translation_sets_to_update[ $set->id ] = true;
+		// If a project is `true` then we need to fetch all translation sets for it.
+		foreach ( $this->projects_to_update as $project_id => $set_data ) {
+			if ( true === $set_data ) {
+				$this->projects_to_update[ $project_id ] = array();
+				foreach ( GP::$translation_set->by_project_id( $project_id ) as $set ) {
+					$this->projects_to_update[ $project_id ][ $set->locale . '/' . $set->slug ] = true;
+				}
 			}
-			unset( $this->projects_to_update[ $project_id ] );
+	
 		}
 
-		foreach ( $this->translation_sets_to_update as $set_id => $dummy ) {
-			$set = GP::$translation_set->get( $set_id );
+		// Update all parent projects as well.
+		// This does NOT update a root parent (ie. ! $parent_project_id) as we use those as grouping categories.
+		$projects = $this->projects_to_update;
+		foreach ( $projects as $project_id => $data ) {
+			// Do all parents
+			$project = GP::$project->get( $project_id );
+			while ( $project ) {
+				$project = GP::$project->get( $project->parent_project_id );
+				if ( $project->parent_project_id ) {
+					$projects[ $project->id ] = $data;
+				} else {
+					break;
+				}
+			}
+		}
+		$this->projects_to_update += $projects;
 
-			unset( $this->translation_sets_to_update[ $set_id ] );
+		foreach ( $this->projects_to_update as $project_id => $locale_sets ) {
+			$locale_sets = array_keys( $locale_sets );
+			$locale_sets = array_map( function( $set ) { return explode( '/', $set ); }, $locale_sets );
 
-			if ( ! $set ) {
-				continue;
+			foreach ( $locale_sets as $locale_set ) {
+				list( $locale, $locale_slug ) = $locale_set;
+				$counts = $this->get_project_translation_counts( $project_id, $locale, $locale_slug );
+	
+				$values[] = $gpdb->prepare( '(%d, %s, %s, %d, %d, %d, %d, %d, %d)',
+					$project_id,
+					$locale,
+					$locale_slug,
+					$counts['all'],
+					$counts['current'],
+					$counts['waiting'],
+					$counts['fuzzy'],
+					$counts['warning'],
+					$counts['untranslated']
+				);
 			}
 
-			$values[] = $gpdb->prepare( '(%d, %d, %d, %d, %d, %d, %d, %d)',
-				$set->project_id,
-				$set->id,
-				$set->all_count(),
-				$set->current_count(),
-				$set->waiting_count(),
-				$set->fuzzy_count(),
-				$set->warnings_count(),
-				// Untranslated is ( all - current ), we really want ( all - current - waiting - fuzzy ) which is (untranslated - waiting - fuzzy )
-				$set->untranslated_count() - $set->waiting_count() - $set->fuzzy_count()
-			);
-
+			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits
 			if ( count( $values ) > 50 ) {
-				// If we're processing a large batch, add them as we go to avoid query lengths & memoryl imits
-				$gpdb->query( "INSERT INTO {$gpdb->project_translation_status} (`project_id`, `translation_set_id`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VAlUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`)" );
+				$gpdb->query( "INSERT INTO {$gpdb->project_translation_status} (`project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VAlUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`)" );
 				$values = array();
 			}
 		}
 
 		if ( $values ) {
-			$gpdb->query( "INSERT INTO {$gpdb->project_translation_status} (`project_id`, `translation_set_id`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`)" );
+			$gpdb->query( "INSERT INTO {$gpdb->project_translation_status} (`project_id`, `locale`, `locale_slug`, `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated` ) VALUES " . implode( ', ', $values ) . " ON DUPLICATE KEY UPDATE `all`=VALUES(`all`), `current`=VALUES(`current`), `waiting`=VALUES(`waiting`), `fuzzy`=VALUES(`fuzzy`), `warnings`=VALUES(`warnings`), `untranslated`=VALUES(`untranslated`)" );
 		}
 	}
 
@@ -94,7 +149,8 @@ Table:
 CREATE TABLE `gp_project_translation_status` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` int(10) unsigned NOT NULL,
-  `translation_set_id` int(10) unsigned NOT NULL,
+  `locale` varchar(10) NOT NULL,
+  `locale_slug` varchar(255) NOT NULL,
   `all` int(10) unsigned NOT NULL DEFAULT '0',
   `current` int(10) unsigned NOT NULL DEFAULT '0',
   `waiting` int(10) unsigned NOT NULL DEFAULT '0',
@@ -102,7 +158,7 @@ CREATE TABLE `gp_project_translation_status` (
   `warnings` int(10) unsigned NOT NULL DEFAULT '0',
   `untranslated` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `project_translation_set` (`project_id`,`translation_set_id`),
+  UNIQUE KEY `project_locale` (`project_id`,`locale`,`locale_slug`),
   KEY `all` (`all`),
   KEY `current` (`current`),
   KEY `waiting` (`waiting`),
@@ -112,3 +168,4 @@ CREATE TABLE `gp_project_translation_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 */
+

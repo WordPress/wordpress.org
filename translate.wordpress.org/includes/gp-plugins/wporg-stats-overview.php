@@ -43,43 +43,21 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			$projects = array_merge( array( $wp_sub_project->path => $wp_sub_project ), $projects );
 		}
 
-		$all_project_ids = $sql_cases = array();
-		foreach ( $projects as $slug => &$project ) {
-			$project_ids = array();
+		// Load the projects for each display item
+		array_walk( $projects, function( &$project, $project_slug ) {
 			if ( ! $project ) {
-				$project = GP::$project->by_path( $slug );
+				$project = GP::$project->by_path( $project_slug );
 			}
-			$project_ids[] = $project->id;
+		} );
 
-			foreach ( $project->inclusive_sub_projects() as $sub ) {
-				if ( $sub->active ) {
-					$project_ids[] = $sub->id;
-				}
-			}
-			unset( $sub );
-
-			$project_id_list = implode( ', ', array_map( 'intval', $project_ids ) );
-			$sql_cases[] = $gpdb->prepare( "WHEN ts.project_id IN( $project_id_list ) THEN %s", $slug );
-
-			$all_project_ids = array_merge( $all_project_ids, $project_ids );
-		}
-		unset( $slug, $project_ids, $subs, $project );
-
-		$sql_cases = implode( "\n", $sql_cases );
-		$all_project_ids = implode( ', ', array_map( 'intval', $all_project_ids ) );
-
+		$all_project_paths_sql = '"' . implode( '", "', array_keys( $projects ) ) . '"';
 		$sql = "SELECT
-				CASE
-					$sql_cases
-				END as project_slug,
-				s.locale as locale,
-				s.slug as locale_slug,
-				(100 * SUM(ts.current)/SUM(ts.all)) as percent_complete
-			FROM translate_project_translation_status ts
-				LEFT JOIN translate_translation_sets s ON ts.project_id = s.project_id AND ts.translation_set_id = s.id
+				path, locale, locale_slug,
+				(100 * stats.current/stats.all) as percent_complete
+			FROM {$gpdb->prefix}project_translation_status stats
+				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
 			WHERE
-				ts.project_id IN ( $all_project_ids )
-			GROUP BY project_slug, s.locale, s.slug";
+				p.path IN ( $all_project_paths_sql )";
 
 		$rows = $gpdb->get_results( $sql );
 
@@ -90,7 +68,7 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			if ( 'default' != $set->locale_slug ) {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
-			$translation_locale_statuses[ $locale_key ][ $set->project_slug ] = floor( (float) $set->percent_complete );
+			$translation_locale_statuses[ $locale_key ][ $set->path ] = floor( (float) $set->percent_complete );
 		}
 		unset( $rows, $locale_key, $set );
 
