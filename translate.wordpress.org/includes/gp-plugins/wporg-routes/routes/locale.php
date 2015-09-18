@@ -443,6 +443,9 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 			}
 
+			// Limit to only showing base-level projects
+			$parent_project_sql .= " AND tp.parent_project_id IN( (SELECT id FROM {$gpdb->projects} WHERE parent_project_id IS NULL AND active = 1) )";
+
 		}
 
 		$filter_order_by = $filter_where = '';
@@ -480,7 +483,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 			case 'strings-waiting':
 				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 )';
-				$filter_order_by = 'stats.fuzzy DESC, stats.waiting DESC, tp.name ASC';
+				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) DESC, tp.name ASC";
 				break;
 
 			case 'strings-fuzzy-and-warnings':
