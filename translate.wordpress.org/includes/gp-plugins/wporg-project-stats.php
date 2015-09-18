@@ -124,7 +124,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 					$counts['current'],
 					$counts['waiting'],
 					$counts['fuzzy'],
-					$counts['warning'],
+					$counts['warnings'],
 					$counts['untranslated']
 				);
 			}
