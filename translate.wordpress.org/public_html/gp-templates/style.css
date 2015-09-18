@@ -952,3 +952,18 @@ ul.projects-dropdown li > a > span {
 .stats-table tbody tr td {
 	vertical-align: middle;
 }
+
+.stats-table th.headerSortUp:after,
+.stats-table th.headerSortDown:after {
+	font-family: "dashicons";
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.stats-table th.headerSortUp:after {
+	content: "\f140";
+}
+
+.stats-table th.headerSortDown:after {
+	content: "\f142";
+}
