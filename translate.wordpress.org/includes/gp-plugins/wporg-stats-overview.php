@@ -31,8 +31,10 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			'meta/browsehappy' => false,
 			'meta/themes' => false,
 			'meta/plugins' => false,
+			'meta/forums' => false,
 			'apps/android' => false,
-			'apps/ios' => false
+			'apps/ios' => false,
+			'waiting' => false,
 		);
 
 		// I'm sure there's somewhere to fetch these from statically defined
@@ -53,7 +55,8 @@ class GP_WPorg_Route_Stats extends GP_Route {
 		$all_project_paths_sql = '"' . implode( '", "', array_keys( $projects ) ) . '"';
 		$sql = "SELECT
 				path, locale, locale_slug,
-				(100 * stats.current/stats.all) as percent_complete
+				(100 * stats.current/stats.all) as percent_complete,
+				stats.waiting+stats.fuzzy as waiting_strings
 			FROM {$gpdb->prefix}project_translation_status stats
 				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
 			WHERE
@@ -69,12 +72,14 @@ class GP_WPorg_Route_Stats extends GP_Route {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
 			$translation_locale_statuses[ $locale_key ][ $set->path ] = floor( (float) $set->percent_complete );
+			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
 		}
 		unset( $rows, $locale_key, $set );
 
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
+			unset( $sets['waiting'] );
 			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
 		}
 		unset( $locale, $sets );

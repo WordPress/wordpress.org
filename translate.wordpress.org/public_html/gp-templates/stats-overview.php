@@ -50,8 +50,12 @@ gp_tmpl_header();
 						if ( isset( $translation_locale_statuses[ $locale_slug ][ $project->path ] ) ) {
 							$percent = $translation_locale_statuses[ $locale_slug ][ $project->path ];
 
-							$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
-							echo '<td class="' . $percent_class .'"><a href="' . $projecturl . '">' . $percent . '%</a></td>';
+							if ( 'waiting' === $project->path  ) {
+								echo '<td><a href="' . $projecturl . '">' . number_format( $percent ) . '</a></td>';
+							} else {
+								$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
+								echo '<td class="' . $percent_class .'"><a href="' . $projecturl . '">' . $percent . '%</a></td>';
+							}
 
 						} else {
 							echo '<td class="none">&mdash;</td>';
