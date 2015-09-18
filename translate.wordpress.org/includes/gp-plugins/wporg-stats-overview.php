@@ -71,7 +71,11 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			if ( 'default' != $set->locale_slug ) {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
+
 			$translation_locale_statuses[ $locale_key ][ $set->path ] = floor( (float) $set->percent_complete );
+			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
+				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
+			}
 			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
 		}
 		unset( $rows, $locale_key, $set );
