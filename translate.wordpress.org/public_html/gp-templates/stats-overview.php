@@ -50,8 +50,15 @@ gp_tmpl_header();
 						if ( isset( $translation_locale_statuses[ $locale_slug ][ $project->path ] ) ) {
 							$percent = $translation_locale_statuses[ $locale_slug ][ $project->path ];
 
-							if ( 'waiting' === $project->path  ) {
-								echo '<td><a href="' . $projecturl . '">' . number_format( $percent ) . '</a></td>';
+							if ( 'waiting' === $project->path ) {
+								// Color code it on -0~500 waiting strings
+								$percent_class = 100-min( (int) ( $percent / 50 ) * 10, 100 );
+								// It's only 100 if it has 0 strings.
+								if ( 100 == $percent_class && $percent ) {
+									$percent_class = 90;
+								}
+								$percent_class = 'percent' . $percent_class;
+								echo '<td class="' . $percent_class .'"><a href="' . $projecturl . '">' . number_format( $percent ) . '</a></td>';
 							} else {
 								$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
 								echo '<td class="' . $percent_class .'"><a href="' . $projecturl . '">' . $percent . '%</a></td>';
