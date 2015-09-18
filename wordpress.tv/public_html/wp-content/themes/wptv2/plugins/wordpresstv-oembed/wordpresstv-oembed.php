@@ -106,7 +106,11 @@ class WordCampTV_oEmbed {
 			$data['title']  = $info->title;
 			$data['width']  = $width;
 			$data['height'] = $height;
-			$data['html']   = '<embed src="//v.wordpress.com/' . $info->guid . '" type="application/x-shockwave-flash" width="' . $width . '" height="' . $height . '" allowscriptaccess="always" allowfullscreen="true" wmode="transparent"></embed>';
+			$data['html']   = videopress_2015_player_get_html( array(
+				'guid'   => $info->guid,
+				'width'  => $width,
+				'height' => $height,
+			) );
 		} // Other video types aren't supported quite yet
 		else {
 			status_header( 501 );
