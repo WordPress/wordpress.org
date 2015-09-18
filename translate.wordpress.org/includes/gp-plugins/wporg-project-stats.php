@@ -3,7 +3,7 @@
 /**
  * This plugin stores the Translation Count Status into a DB table for querying purposes.
  *
- * The data is pulled from GP_Translation_Set stat functions and updated in the DB whenever 
+ * The data is pulled from GP_Translation_Set stat functions and updated in the DB whenever
  * a new translation is submitted, or new originals are imported.
  * The datbase update is delayed until shutdown to bulk-update the database during imports.
  *
@@ -44,10 +44,10 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 		$this->projects_to_update[ $project_id ] = true;
 	}
 
-	// Counts up all the 
+	// Counts up all the
 	function get_project_translation_counts( $project_id, $locale, $locale_slug, &$counts = array() ) {
 		if ( ! $counts ) {
-			$counts = array( 'all' => 0, 'current' => 0, 'waiting' => 0, 'fuzzy' => 0, 'warning' => 0, 'untranslated' => 0 );
+			$counts = array( 'all' => 0, 'current' => 0, 'waiting' => 0, 'fuzzy' => 0, 'warnings' => 0, 'untranslated' => 0 );
 		}
 
 		// Not all projects have translation sets
@@ -87,7 +87,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 					$this->projects_to_update[ $project_id ][ $set->locale . '/' . $set->slug ] = true;
 				}
 			}
-	
+
 		}
 
 		// Update all parent projects as well.
@@ -115,7 +115,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 			foreach ( $locale_sets as $locale_set ) {
 				list( $locale, $locale_slug ) = $locale_set;
 				$counts = $this->get_project_translation_counts( $project_id, $locale, $locale_slug );
-	
+
 				$values[] = $gpdb->prepare( '(%d, %s, %s, %d, %d, %d, %d, %d, %d)',
 					$project_id,
 					$locale,
