@@ -13,6 +13,7 @@ class WordPressTV_Theme {
 			require_once get_template_directory() . '/plugins/wordpresstv-rest/wordpresstv-rest.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-anon-upload/anon-upload.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-upload-subtitles/wordpresstv-upload-subtitles.php';
+			require_once get_template_directory() . '/plugins/wordpresstv-twitter-cards/wordpresstv-twitter-cards.php';
 
 			add_action( 'after_setup_theme', array( $this, 'setup' ) );
 		}
