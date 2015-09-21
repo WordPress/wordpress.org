@@ -199,6 +199,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 					case 'themes':
 						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
+					case 'wordcamp':
+						return '<div class="default-icon"><span class="dashicons dashicons-tickets"></span></div>';
 					case 'browsehappy':
 						return '<div class="icon"><img src="/gp-templates/images/browsehappy.png" width="' . $size . '" height="' . $size . '"></div>';
 					default:
