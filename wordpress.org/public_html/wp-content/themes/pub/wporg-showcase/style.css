@@ -623,35 +623,36 @@ a.wpsc-hero-learnmore {
 	padding: 6px 0;
 }
 
-.secondary .cat-item-5 a,
-.secondary .cat-item-186 a,
-.secondary .cat-item-187 a,
-.secondary .cat-item-188 a {
-	background: url(images/wp-logo-16.png) no-repeat;
-	padding: 0 0 0 22px;
+.secondary .cat-item-5 a:before,
+.secondary .cat-item-186 a:before,
+.secondary .cat-item-187 a:before,
+.secondary .cat-item-188 a:before {
+	content: "\f120";
+	font-family: dashicons;
+	font-size: 16px;
+	padding: 0 6px 0 0;
+    position: relative;
+    top: 2px;
 }
 
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-	.secondary .cat-item-5 a,
-	.secondary .cat-item-186 a,
-	.secondary .cat-item-187 a,
-	.secondary .cat-item-188 a {
-		background: url(images/wp-logo-16-2x.png) no-repeat;
-		background-size: 16px 16px;
-	}
+.secondary .cat-item-3 a:before {
+	content: "\f448";
+	font-family: dashicons;
+	font-size: 16px;
+	padding: 0 6px 0 0;
+    position: relative;
+	top: 2px;
 }
 
-.secondary .cat-item-3 a {
-	background: url(images/bp-logo-16.png) no-repeat;
-	padding: 0 0 0 22px;
+.secondary .cat-item-218 a:before {
+	content: "\f477";
+	font-family: dashicons;
+	font-size: 16px;
+	padding: 0 6px 0 0;
+	position: relative;
+	top: 2px;
 }
 
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-	.secondary .cat-item-3 a {
-		background: url(images/bp-logo-16-2x.png) no-repeat;
-		background-size: 16px 16px;
-	}
-}
 
 /* Main Content Area */
 
@@ -740,10 +741,9 @@ a.wpsc-hero-learnmore {
 .wpsc-recent>li .post-ratings {
 	position: absolute;
 	bottom: 0;
-	
+	height:auto;	
 	border-top: 1px #EFEFEF solid;
 	padding: 5px 0 0 0;
-	
 	text-align: right;
 }
 
