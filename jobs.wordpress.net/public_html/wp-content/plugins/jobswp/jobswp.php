@@ -195,10 +195,21 @@ class Jobs_Dot_WP {
 				// If no name was obtained via either of the name components, then fall back to old-school meta field
 				if ( empty( $name ) )
 					$name = get_post_meta( $post_id, 'post_name', true );
-				echo esc_attr( $name );
+				echo esc_html( $name );
 				break;
 			case 'poster_email':
-				echo esc_attr( get_post_meta( $post_id, 'email', true ) );
+				$email = get_post_meta( $post_id, 'email', true );
+
+				echo esc_html( $email );
+
+				// Also show the public howtoapply email address.
+				if ( 'email' === get_post_meta( $post_id, 'howtoapply_method', true ) ) {
+					$contact_email = get_post_meta( $post_id, 'howtoapply', true );
+					if ( strtolower( $contact_email ) !== strtolower( $email ) ) {
+						echo '<br />';
+						echo esc_html( $contact_email );
+					}
+				}
 				break;
 		}
 	}
