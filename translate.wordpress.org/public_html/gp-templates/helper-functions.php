@@ -1,6 +1,6 @@
 <?php
 
-wp_enqueue_style( 'wporg', gp_url_ssl( gp_url_public_root() ) . 'gp-templates/style.css', array( 'base' ), '20150919' );
+wp_enqueue_style( 'wporg', gp_url_ssl( gp_url_public_root() ) . 'gp-templates/style.css', array( 'base' ), '20150922' );
 
 add_action( 'tmpl_load_locations', function( $locations, $template, $args, $template_path ) {
 	$core_templates = GP_PATH . 'gp-templates/';
