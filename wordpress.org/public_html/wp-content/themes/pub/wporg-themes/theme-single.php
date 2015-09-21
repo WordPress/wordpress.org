@@ -65,7 +65,7 @@
 							esc_html( translate( $tagname, 'wporg-themes' ) )
 						);
 					}
-					echo implode( ', ', $tag_links );						
+					echo implode( ', ', $tag_links );
 					?>
 				</div><!-- .theme-tags -->
 				<?php } ?>
@@ -121,6 +121,15 @@
 					<p><?php _e( 'Got something to say? Need help?', 'wporg-themes' ); ?></p>
 					<a href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
+
+				<div class="theme-translations">
+					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>
+					<p>
+						<a href="<?php echo esc_url( "https://translate.wordpress.org/projects/wp-themes/{$theme->slug}" ); ?>">
+							<?php printf( __( 'Translate %s', 'wporg-themes' ), $theme->name ); ?>
+						</a>
+					</p>
+				</div><!-- .theme-translations -->
 
 				<div class="theme-devs">
 					<h4><?php _e( 'Development', 'wporg-themes' ); ?></h4>

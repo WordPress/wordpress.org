@@ -112,6 +112,15 @@
 					<a href="//wordpress.org/support/theme/{{ data.slug }}" class="button button-secondary"><?php _e( 'View support forum', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-support -->
 
+				<div class="theme-translations">
+					<h4><?php _e( 'Translations', 'wporg-themes' ); ?></h4>
+					<p>
+						<a href="https://translate.wordpress.org/projects/wp-themes/{{ data.slug }}">
+							<?php printf( __( 'Translate %s', 'wporg-themes' ), '{{ data.name }}' ); ?>
+						</a>
+					</p>
+				</div><!-- .theme-translations -->
+
 				<div class="theme-devs">
 					<h4><?php _e( 'Development', 'wporg-themes' ); ?></h4>
 					<h5><?php _e( 'Subscribe', 'wporg-themes' ); ?></h5>
