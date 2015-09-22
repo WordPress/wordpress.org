@@ -74,6 +74,11 @@ function get_whitelist() {
 			'helen',
 			'melchoyce',
 		),
+		'docs' => array(
+			'drew',
+			'hlashbrooke',
+			'lizkaraffa',
+		),
 		'feature-oembed' => array(
 			'swissspidy',
 		),
