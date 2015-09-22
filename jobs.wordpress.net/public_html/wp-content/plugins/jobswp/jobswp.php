@@ -110,6 +110,8 @@ class Jobs_Dot_WP {
 		add_action( 'admin_action_close-job',         array( $this, 'handle_close_job' ) );
 		add_action( 'post_row_actions',               array( $this, 'post_row_actions' ), 10, 2 );
 
+		add_action( 'pre_get_posts',                  array( $this, 'add_jobs_to_feed' ) );
+
 		// For enabling admin job post type searches to also search custom fields.
 		add_filter( 'posts_join',                     array( $this, 'admin_search_job_posts_join' ), 10, 2 );
 		add_filter( 'posts_search',                   array( $this, 'admin_search_job_posts_search' ), 10, 2 );
@@ -507,6 +509,17 @@ class Jobs_Dot_WP {
 			$text
 		);
 		return $text;
+	}
+
+	/**
+	 * Adds job postings to the feed.
+	 *
+	 * @param WP_Query $query The query object.
+	 */
+	public function add_jobs_to_feed( $query ) {
+		if ( $query->is_feed() ) {
+			$query->set( 'post_type', array( 'post', 'job' ) );
+		}
 	}
 
 	/**
