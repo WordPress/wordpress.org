@@ -119,7 +119,7 @@ class WPORG_Themes_Upload {
 		// Let's check some theme headers, shall we?
 
 		if ( ! $this->theme_name = $this->theme->get( 'Name' ) ) {
-			return __( "The theme has no name. Add it to style.css and upload the theme again. <a href='https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet'>Theme Style Sheets</a>", 'wporg-themes' );
+			return sprintf( __( 'The theme has no name. Add it to style.css and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), __( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' ) );
 		}
 
 		// determine the theme slug based on the name of the theme in the stylesheet
@@ -137,7 +137,7 @@ class WPORG_Themes_Upload {
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
-			return sprintf( __( 'The theme has no description. Add it to <code>style.css</code> and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet' );
+			return sprintf( __( 'The theme has no description. Add it to <code>style.css</code> and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), __( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' ) );
 		}
 
 		if ( ! $this->theme->get( 'Tags' ) ) {
