@@ -18,7 +18,7 @@
 			<?php endif; ?>
 		</li>
 		<li>
-			<strong><?php _e( 'Version:', 'wporg' ); ?></strong>
+			<strong><?php _e( 'Latest release:', 'wporg' ); ?></strong>
 			<?php echo $locale_data['latest_release'] ? $locale_data['latest_release'] : '&mdash;'; ?>
 		</li>
 		<li>

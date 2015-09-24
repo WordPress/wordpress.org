@@ -97,7 +97,7 @@
 						</a>
 					<td>
 						<a href="<?php echo esc_url( add_query_arg( 'locale', $locale->wp_locale ) ); ?>">
-							<?php _e( 'Details', 'wporg' ); ?>
+							<?php _e( 'Team', 'wporg' ); ?>
 						</a>
 					</td>
 				</tr>
