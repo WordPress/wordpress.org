@@ -102,15 +102,22 @@ class WPORG_Themes_Upload {
 		// Do we have a stylesheet? Life is kind of pointless without.
 		$style_css = $this->get_style_css( $theme_files );
 		if ( empty( $style_css ) ) {
-			return sprintf( __( 'The zip file must include a file named %s.', 'wporg-themes' ), '<code>style.css</code>' );
+			/* translators: %s: style.css */
+			return sprintf( __( 'The zip file must include a file named %s.', 'wporg-themes' ),
+				'<code>style.css</code>'
+			);
 		}
 
 		// We have a stylesheet, let's set up the theme, theme post, and author.
-		$this->theme      = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
+		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
 
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
-			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ), '<code>screenshot.png</code>', '<code>screenshot.jpg</code>' );
+			/* translators: 1: screenshot.png, 2: screenshot.jpg */
+			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-themes' ),
+				'<code>screenshot.png</code>',
+				'<code>screenshot.jpg</code>'
+			);
 		}
 
 		// reset the theme directory to be where the stylesheet is
@@ -119,7 +126,16 @@ class WPORG_Themes_Upload {
 		// Let's check some theme headers, shall we?
 
 		if ( ! $this->theme_name = $this->theme->get( 'Name' ) ) {
-			return sprintf( __( 'The theme has no name. Add it to style.css and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), __( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' ) );
+			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
+
+			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Theme Name:</code>',
+				'<code>style.css</code>',
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+			);
+
+			return $error;
 		}
 
 		// determine the theme slug based on the name of the theme in the stylesheet
@@ -129,7 +145,11 @@ class WPORG_Themes_Upload {
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
-			return sprintf( __( 'Sorry, the theme name %s is reserved for use by WordPress Core. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
+			/* translators: 1: theme slug, 2: style.css */
+			return sprintf( __( 'Sorry, the theme name %1$s is reserved for use by WordPress Core. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+				'<code>' . $this->theme_slug . '</code>',
+				'<code>style.css</code>'
+			);
 		}
 
 		// populate the theme post and author
@@ -137,24 +157,59 @@ class WPORG_Themes_Upload {
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
 		if ( empty( $theme_description ) ) {
-			return sprintf( __( 'The theme has no description. Add it to <code>style.css</code> and upload the theme again. <a href="%s">Theme Style Sheets</a>', 'wporg-themes' ), __( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' ) );
+			$error = __( 'The theme has no description.', 'wporg-themes' ) . ' ';
+
+			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Description:</code>',
+				'<code>style.css</code>',
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+			);
+
+			return $error;
 		}
 
 		if ( ! $this->theme->get( 'Tags' ) ) {
-			return __( 'The stylesheet has no tags. Add a Tags: line to your <code>style.css</code> file and upload the zip file again.', 'wporg-themes' );
+			$error = __( 'The theme has no tags.', 'wporg-themes' ) . ' ';
+
+			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Tags:</code>',
+				'<code>style.css</code>',
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+			);
+
+			return $error;
 		}
 
 		if ( ! $this->theme->get( 'Version' ) ) {
-			return __( 'The stylesheet has no version. Add a Version: line to your <code>style.css</code> file and upload the zip file again.', 'wporg-themes' );
+			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
+
+			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
+			$error .= sprintf( __( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Version:</code>',
+				'<code>style.css</code>',
+				__( 'https://codex.wordpress.org/Theme_Development#Theme_Style_Sheet', 'wporg-themes' )
+			);
+
+			return $error;
 		}
 
 		if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
-			return __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in <code>style.css</code> and upload your theme again.', 'wporg-themes' );
+			/* translators: %s: style.css */
+			return sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+				'<code>style.css</code>'
+			);
 		}
 
 		// Make sure we have version that is higher than any previously uploaded version of this theme.
 		if ( ! empty( $this->theme_post ) && ! version_compare( $this->theme->get( 'Version' ), $this->theme_post->max_version, '>' ) ) {
-			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in <code>style.css</code>, then upload your zip file again.', 'wporg-themes' ), $this->theme->display( 'Name' ), '<code>' . $this->theme_post->max_version . '</code>' );
+			/* translators: 1: theme name, 2: theme version, 3: style.css */
+			return sprintf( __( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in %3$s, then upload your zip file again.', 'wporg-themes' ),
+				$this->theme->display( 'Name' ),
+				'<code>' . $this->theme_post->max_version . '</code>',
+				'<code>style.css</code>'
+			);
 		}
 
 		// Prevent duplicate URLs.
@@ -166,17 +221,27 @@ class WPORG_Themes_Upload {
 
 		// Check for child theme's parent in the directory (non-buddypress only)
 		if ( $this->theme->parent() && ! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) && ! $this->is_parent_available() ) {
-			return sprintf( __( 'There is no theme called %s in the directory. For child themes, you must use a parent theme that already exists in the directory.', 'wporg-themes' ), '<code>' . $this->theme->parent() . '</code>' );
+			/* translators: %s: parent theme */
+			return sprintf( __( 'There is no theme called %s in the directory. For child themes, you must use a parent theme that already exists in the directory.', 'wporg-themes' ),
+				'<code>' . $this->theme->parent() . '</code>'
+			);
 		}
 
 		// Is there already a theme with the name name by a different author?
 		if ( ! empty( $this->theme_post ) && $this->theme_post->post_author != $this->author->ID ) {
-			return sprintf( __( 'There is already a theme called %s by a different author. Please change the name of your theme in <code>style.css</code> and upload it again.', 'wporg-themes' ), '<code>' . $this->theme_slug . '</code>' );
+			/* translators: 1: theme slug, 2: style.css */
+			return sprintf( __( 'There is already a theme called %1$s by a different author. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+				'<code>' . $this->theme_slug . '</code>',
+				'<code>style.css</code>'
+			);
 		}
 
 		// We know it's the correct author, now we can check if it's suspended.
 		if ( ! empty( $this->theme_post ) && 'suspend' === $this->theme_post->post_status ) {
-			return sprintf( __( 'This theme is suspended from the Theme Repository and it can&rsquo;t be updated. If you have any questions about this please contact %s.', 'wporg-themes' ), '<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>' );
+			/* translators: %s: mailto link */
+			return sprintf( __( 'This theme is suspended from the Theme Repository and it can&rsquo;t be updated. If you have any questions about this please contact %s.', 'wporg-themes' ),
+				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+			);
 		}
 
 		// Don't send special themes through Theme Check.
@@ -185,7 +250,11 @@ class WPORG_Themes_Upload {
 			$result = $this->check_theme( $theme_files );
 
 			if ( ! $result ) {
-				return sprintf( __( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ), '//wordpress.org/plugins/theme-check/', '<a href="https://make.wordpress.org/themes">https://make.wordpress.org/themes</a>' );
+				/* translators: 1: Theme Check Plugin URL, 2: make.wordpress.org/themes */
+				return sprintf( __( 'Your theme has failed the theme check. Please correct the problems with it and upload it again. You can also use the <a href="%1$s">Theme Check Plugin</a> to test your theme before uploading. If you have any questions about this please post them to %2$s.', 'wporg-themes' ),
+					'//wordpress.org/plugins/theme-check/',
+					'<a href="https://make.wordpress.org/themes">https://make.wordpress.org/themes</a>'
+				);
 			}
 		}
 
@@ -199,7 +268,10 @@ class WPORG_Themes_Upload {
 		$ticket_id = $this->create_or_update_trac_ticket();
 
 		if ( ! $ticket_id  ) {
-			return sprintf( __( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ), '<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>' );
+			/* translators: %s: mailto link */
+			return sprintf( __( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+			);
 		}
 
 		// Add a or update the Theme Directory entry for this theme.
@@ -214,7 +286,11 @@ class WPORG_Themes_Upload {
 		do_action( 'theme_upload', $this->theme, $this->theme_post );
 
 		// Success!
-		return sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ), $this->theme->display( 'Name' ), esc_url( 'https://themes.trac.wordpress.org/ticket/' . $ticket_id ) );
+		/* translators: 1: theme name, 2: Trac ticket URL */
+		return sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ),
+			$this->theme->display( 'Name' ),
+			esc_url( 'https://themes.trac.wordpress.org/ticket/' . $ticket_id )
+		);
 	}
 
 	/**
@@ -598,11 +674,41 @@ TICKET;
 	 */
 	public function send_email_notification( $ticket_id ) {
 		if ( ! empty( $this->theme_post ) ) {
-			$email_subject = sprintf( __( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ), $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) );
-			$email_content = sprintf( __( "Thank you for uploading version %s of %s.\n\nFeedback will be provided at %s\n\n--\nThe WordPress.org Themes Team\nhttps://make.wordpress.org/themes", 'wporg-themes' ), $this->theme->display( 'Version' ), $this->theme->display( 'Name' ), 'https://themes.trac.wordpress.org/ticket/' . $ticket_id );
+			/* translators: 1: theme name, 2: theme version */
+			$email_subject = sprintf( __( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ),
+				$this->theme->display( 'Name' ),
+				$this->theme->display( 'Version' )
+			);
+
+			/* translators: 1: theme version, 2: theme name, 3: Trac ticket URL */
+			$email_content = sprintf( __( 'Thank you for uploading version %1$s of %2$s.
+
+Feedback will be provided at %3$s
+
+--
+The WordPress.org Themes Team
+https://make.wordpress.org/themes', 'wporg-themes' ),
+				$this->theme->display( 'Version' ),
+				$this->theme->display( 'Name' ),
+				'https://themes.trac.wordpress.org/ticket/' . $ticket_id
+			);
 		} else {
-			$email_subject = sprintf( __( '[WordPress Themes] New Theme - %s', 'wporg-themes' ), $this->theme->display( 'Name' ) );
-			$email_content = sprintf( __( "Thank you for uploading %s to the WordPress Theme Directory. If your theme is selected to be part of the directory we'll send a follow up email.\n\nFeedback will be provided at %s\n\n--\nThe WordPress.org Themes Team\nhttps://make.wordpress.org/themes", 'wporg-themes' ), $this->theme->display( 'Name' ), 'https://themes.trac.wordpress.org/ticket/' . $ticket_id );
+			/* translators: %s: theme name */
+			$email_subject = sprintf( __( '[WordPress Themes] New Theme - %s', 'wporg-themes' ),
+				$this->theme->display( 'Name' )
+			);
+
+			/* translators: 1: theme name, 2: Trac ticket URL */
+			$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. If your theme is selected to be part of the directory we\'ll send a follow up email.
+
+Feedback will be provided at %2$s
+
+--
+The WordPress.org Themes Team
+https://make.wordpress.org/themes', 'wporg-themes' ),
+				$this->theme->display( 'Name' ),
+				'https://themes.trac.wordpress.org/ticket/' . $ticket_id
+			);
 		}
 
 		wp_mail( $this->author->user_email, $email_subject, $email_content, 'From: themes@wordpress.org' );
