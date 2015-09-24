@@ -84,16 +84,16 @@ class WPORG_Edit_Parsed_Content {
 			<tbody>
 			<tr valign="top">
 				<th scope="row">
-					<label for="excerpt"><?php _e( 'Parsed Description:', 'wporg' ); ?></label>
+					<label for="excerpt"><?php _e( 'Parsed Summary:', 'wporg' ); ?></label>
 				</th>
 				<td>
 					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $post->post_excerpt ); ?></div>
-					<textarea rows="1" cols="40" name="excerpt" id="excerpt" class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>"><?php echo $post->post_excerpt; ?></textarea>
+					<textarea rows="2" cols="40" name="excerpt" class="wporg_parsed_content <?php echo $ticket ? '' : 'hidden'; ?>"><?php echo $post->post_excerpt; ?></textarea>
 				</td>
 			</tr><!-- .wporg_parsed_content -->
 			<tr valign="top" data-id="<?php the_id(); ?>">
 				<th scope="row">
-					<label for="wporg_parsed_content"><?php _e( 'Parsed Summary:', 'wporg' ); ?></label>
+					<label for="wporg_parsed_content"><?php _e( 'Parsed Description:', 'wporg' ); ?></label>
 				</th>
 				<td>
 					<div class="wporg_parsed_readonly <?php echo $ticket ? 'hidden' : ''; ?>"><?php echo apply_filters( 'the_content', $content ); ?></div>

@@ -70,3 +70,8 @@
 .post-type-wp-parser-hook .form-table td p {
   margin-top: 0;
 }
+
+/* Parsed Content Meta Box */
+.wporg_parsed_content {
+  width: 100%;
+}
