@@ -35,6 +35,8 @@ function get_whitelist() {
 			'helen',
 			'johnbillion',
 			'obenland',
+			'ocean90',
+			'sergey',
 			'wonderboymusic',
 		),
 		'core-customize' => array(
@@ -52,6 +54,10 @@ function get_whitelist() {
 		),
 		'core-flow' => array(
 			'drew',
+		),
+		'core-http' => array(
+			'eric',
+			'tollmanz',
 		),
 		'core-multisite' => array(
 			'jeremyfelt',
