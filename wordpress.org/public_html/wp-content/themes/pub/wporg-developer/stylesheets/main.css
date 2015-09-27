@@ -327,6 +327,7 @@ input {
 }
 .devhub-wrap #content table td, .devhub-wrap #content-area table td {
   padding: 0.8em 1em;
+  border: 1px solid #f0f0f0;
 }
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
