@@ -178,7 +178,10 @@ class DevHub_Formatting {
 	 */
 	public static function fix_unintended_markdown( $content, $post_type = null ) {
 		// Only apply to parsed content that have the em tag.
-		if ( DevHub\is_parsed_post_type( $post_type ) && false !== strpos( $content, '<em>' ) ) {
+		if ( DevHub\is_parsed_post_type( $post_type )
+			&& false !== strpos( $content, '<em>' )
+			&& false === strpos( $content, '<p>' )
+		) {
 			$content = preg_replace_callback(
 				'/([^\s])<em>(.+)<\/em>/',
 				function ( $matches ) {
