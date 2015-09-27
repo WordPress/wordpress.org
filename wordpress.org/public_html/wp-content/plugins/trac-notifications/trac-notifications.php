@@ -288,17 +288,17 @@ class wporg_trac_notifications {
 		}
 		if ( $intersected_focuses ) {
 			if ( count( $intersected_focuses ) === 1 ) {
-				$reasons['focus'] = sprintf( 'you subscribe to the %s focus', $intersected_focuses[0] );
+				$reasons['focus'] = sprintf( 'you have subscribed to the %s focus', $intersected_focuses[0] );
 			} else {
-				$reasons['focus'] = 'you subscribe to the ' . wp_sprintf( '%l focuses', $intersected_focuses );
+				$reasons['focus'] = 'you have subscribed to the ' . wp_sprintf( '%l focuses', $intersected_focuses );
 			}
 		}
 
 		if ( ! empty( $notifications['component'][ $ticket->component ] ) ) {
-			$reasons['component'] = sprintf( 'you subscribe to the %s component', $ticket->component );
+			$reasons['component'] = sprintf( 'you have subscribed to the %s component', $ticket->component );
 		}
 		if ( ! empty( $notifiations['milestone'][ $ticket->milestone ] ) ) {
-			$reasons['milestone'] = sprintf( 'you subscribe to the %s milestone', $ticket->milestone );
+			$reasons['milestone'] = sprintf( 'you have subscribed to the %s milestone', $ticket->milestone );
 		}
 
 		if ( 1 === $ticket_sub ) {
