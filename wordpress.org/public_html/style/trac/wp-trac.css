@@ -1330,6 +1330,8 @@ dt.changeset:before,
 dt.editedticket:before,
 dt.newticket:before,
 dt.batchmodify:before,
+.foldable :link:before,
+.foldable :visited:before,
 dt.attachment:before {
 	display: inline-block;
 	width: 20px;
@@ -1392,8 +1394,13 @@ dt.milestone:before {
 dt.wiki:before {
 	content: "\f330"; /* dashicons-book */
 }
-#content.timeline dt :link, #content.timeline dt :visited {
-	padding-left: 0;
+.foldable :link:before,
+.foldable :visited:before {
+	content: "\f140"; /* dashicons-arrow-down */
+}
+.collapsed > .foldable :link:before,
+.collapsed > .foldable :visited:before {
+	content: "\f142"; /* dashicons-arrow-up */
 }
 table.listing th.asc a,
 table.listing th.desc a,
@@ -1411,8 +1418,16 @@ dt.changeset, dt.changeset a,
 dt.editedticket, dt.editedticket a,
 dt.newticket, dt.newticket a,
 dt.batchmodify, dt.batchmodify a,
-dt.attachment, dt.attachment a {
+dt.attachment, dt.attachment a,
+.foldable :link,
+.foldable :visited {
 	background-image: none !important;
+}
+#content.timeline dt :link,
+#content.timeline dt :visited,
+.foldable :link,
+.foldable :visited {
+	padding-left: 0;
 }
 a.mail-link .icon,
 a.ext-link .icon {
