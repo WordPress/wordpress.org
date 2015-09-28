@@ -1270,10 +1270,14 @@ p.person {
 	list-style: square;
 }
 
-a.rsslink {background:url(//s.w.org/style/images/feedicon10.png) top left no-repeat; padding-left: 14px;}
+a.rsslink {
+	background:url(//s.w.org/style/images/feedicon10.png) top left no-repeat;
+	padding-left: 14px;
+}
+
 #pagebody ol {
 	margin-left: 22px;
-	list-style: roman;
+	list-style: none;
 }
 
 #pagebody p.intro {
