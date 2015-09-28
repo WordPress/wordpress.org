@@ -171,6 +171,7 @@ input.text {
 }
 
 #pagebody ul {
+	margin-left: 0;
 	margin-right: 16px;
 }
 
