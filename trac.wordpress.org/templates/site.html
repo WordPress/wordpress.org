@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '39'
+	scripts_version = '40'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/core/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -63,7 +63,7 @@
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-head.html" />
 	<meta name="viewport" content="width=device-width" />
-	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20140130' type='text/css' />
+	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20150710' type='text/css' />
 	<link rel="stylesheet" type="text/css" href="//s.w.org/style/trac/wp-trac.css?${scripts_version}" />
 	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
 
