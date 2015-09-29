@@ -768,6 +768,14 @@ table#issuelist, #issuelist th, #issuelist td {
 	margin-right: -236px;
 }
 
+embed,
+iframe,
+object,
+video {
+	max-width: 100%;
+	vertical-align: middle;
+}
+
 @media screen and (max-width: 700px) {
 	#wrapper {
 		padding-left: 0;
@@ -791,5 +799,9 @@ table#issuelist, #issuelist th, #issuelist td {
 	}
 	#main .controls {
 		position: static;
+	}
+
+	.postcontent {
+		padding: 0 10px;
 	}
 }
