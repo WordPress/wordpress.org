@@ -1277,6 +1277,9 @@ a.rsslink {
 
 #pagebody ol {
 	margin-left: 22px;
+}
+
+#pagebody ol.screenshots {
 	list-style: none;
 }
 
