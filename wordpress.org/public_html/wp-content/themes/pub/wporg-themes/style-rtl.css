@@ -1700,15 +1700,10 @@ span.favorite.favorited {
 		margin-bottom: 50px;
 	}
 
-	.theme-wrap .theme-actions .button-primary {
-		display: none;
-	}
-
+	.theme-wrap .theme-actions .button-primary,
 	.theme-wrap .theme-actions .button-secondary {
 		font-size: 18px;
 		height: auto;
-		padding: 0.5em 0;
-		width: 100%;
 	}
 
 	.theme-wrap .screenshot {
@@ -1776,6 +1771,12 @@ span.favorite.favorited {
 
 	.theme-browser .themes .theme {
 		margin-left: 0;
+	}
+
+	.theme-wrap .theme-actions .button-primary,
+	.theme-wrap .theme-actions .button-secondary {
+		width: 100%;
+		margin: 5px 0;
 	}
 
 	.theme-wrap .theme-name {
