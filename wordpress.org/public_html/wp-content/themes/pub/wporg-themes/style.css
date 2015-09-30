@@ -1716,17 +1716,6 @@ span.favorite.favorited {
 		max-width: 571px;
 		width: 100%;
 	}
-
-	.theme-wrap .theme-support,
-	.theme-wrap .theme-devs {
-		display: inline-block;
-		width: 47%;
-		vertical-align: top;
-	}
-
-	.theme-wrap .theme-devs {
-		margin-left: 5%;
-	}
 }
 
 @media only screen and (max-width: 650px) {

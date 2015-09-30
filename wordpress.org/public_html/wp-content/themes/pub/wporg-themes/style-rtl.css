@@ -546,6 +546,7 @@ body.author .theme-browser .theme .theme-author  {
 
 .theme-wrap .theme-devs,
 .theme-wrap .theme-support,
+.theme-wrap .theme-translations,
 .theme-wrap .theme-meta-info {
 	font-size: 1.4em;
 }
@@ -1714,17 +1715,6 @@ span.favorite.favorited {
 		margin: 0 auto;
 		max-width: 571px;
 		width: 100%;
-	}
-
-	.theme-wrap .theme-support,
-	.theme-wrap .theme-devs {
-		display: inline-block;
-		width: 47%;
-		vertical-align: top;
-	}
-
-	.theme-wrap .theme-devs {
-		margin-right: 5%;
 	}
 }
 
