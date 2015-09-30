@@ -137,7 +137,7 @@ class GlotPress_Translate_Bridge {
 				LEFT JOIN {$this->gp_prefix}translation_sets s ON p.id = s.project_id
 				LEFT JOIN {$this->gp_prefix}translations t ON t.original_id = o.id AND t.translation_set_id = s.id
 
-			WHERE 
+			WHERE
 				$sql_project AND $sql_singular AND $sql_plural AND $sql_context AND $sql_locale
 				AND o.status = '+active'
 				AND t.status = 'current'
@@ -160,27 +160,39 @@ class GlotPress_Translate_Bridge {
 	/**
 	 * Determines the GlotPress Locale for a given WordPress Locale
 	 *
-	 * This makes assumptions about the format of a GlotPress slug, which may not reflect real-world use-cases.
+	 * Uses `GP_Locales` if 'GLOTPRESS_LOCALES_PATH' is defined. Otherwise it makes assumptions about the format of a GlotPress slug,
+	 * which may not reflect real-world use-cases.
 	 *
 	 * @access private
 	 *
 	 * @return array|false False if the current loale is English (US), an array of the Locale and slug of the GlotPress translation set otherwise.
 	 */
 	private function glotpress_locale() {
-		$gp_locale = strtolower( get_locale() );
+		$wp_locale = get_locale();
 
-		if ( 'en_us' === $gp_locale ) {
+		if ( 'en_US' === $wp_locale ) {
 			return false;
 		}
 
-		preg_match( '!^([a-z]{2,3})(_([a-z]{2}))?(_([a-z0-9]+))?$!', $gp_locale, $matches );
+		preg_match( '!^([a-z]{2,3})(_([A-Z]{2}))?(_([a-z0-9]+))?$!', $wp_locale, $matches );
 
+		$wp_locale = $matches[1] . $matches[2];
 		$locale = $matches[1];
 		$country = isset( $matches[3] ) ? $matches[3] : $matches[1];
 		$variant = isset( $matches[5] ) ? $matches[5] : false;
-	
-		if ( $locale !== $country ) {
-			$locale .= '-' . $country;
+
+		if ( defined( 'GLOTPRESS_LOCALES_PATH' ) ) {
+			require_once( GLOTPRESS_LOCALES_PATH );
+
+			$gp_locale = GP_Locales::by_field( 'wp_locale', $wp_locale );
+			if ( $gp_locale ) {
+				$locale = $gp_locale->slug;
+			}
+		} else {
+			$country = strtolower( $country );
+			if ( $locale !== $country ) {
+				$locale .= '-' . $country;
+			}
 		}
 
 		$slug = $variant ?: 'default';
