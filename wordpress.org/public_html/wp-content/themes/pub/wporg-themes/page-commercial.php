@@ -50,11 +50,11 @@ if ( have_posts() ) :
 
 				<ul>
 					<li><?php _e( 'Distribute 100% GPL themes, including artwork and CSS.', 'wporg-themes' ); ?></li>
-					<li><?php printf( __( 'Have at least one theme in the WordPress.org <a href="%s">Theme Directory</a> that is actively maintained (i.e. updated within the last year).', 'wporg-themes' ), '//wordpress.org/themes/' ); ?></li>
+					<li><?php printf( __( 'Have at least one theme in the WordPress.org <a href="%s">Theme Directory</a> that is actively maintained (i.e. updated within the last year).', 'wporg-themes' ), home_url( '/' ) ); ?></li>
 					<li><?php _e( 'Have professional support options, and optionally customization.', 'wporg-themes' ); ?></li>
 					<li><?php _e( 'Your site should be complete, well-designed, up to date, and professional looking.', 'wporg-themes' ); ?></li>
 					<li><?php _e( 'Provide and keep us up-to-date with a contact email address in the event we need to reach you.', 'wporg-themes' ); ?></li>
-					<li><?php printf( __( 'Provide a <a href="%s">haiku</a> (5-7-5) about yourself to be included.', 'wporg-themes' ), 'http://en.wikipedia.org/wiki/Haiku_in_English' ); ?></li>
+					<li><?php printf( __( 'Provide a <a href="%s">haiku</a> (5-7-5) about yourself to be included.', 'wporg-themes' ), __( 'https://en.wikipedia.org/wiki/Haiku_in_English', 'wporg-themes' ) ); ?></li>
 				</ul>
 
 			</div><!-- .entry-content -->

@@ -33,28 +33,28 @@ if ( have_posts() ) :
 				<h2 name="requirements"><?php _e( 'Guidelines &amp; Resources', 'wporg-themes' ); ?></h2>
 				<p>
 					<?php printf( __( 'To ensure that WordPress users are guaranteed a good experience, every theme in the directory is reviewed by the theme review team. Please <a href="%s">review the guidelines before uploading your theme</a>.', 'wporg-themes' ),
-					'//make.wordpress.org/themes/handbook/review/'
+					'https://make.wordpress.org/themes/handbook/review/'
 					); ?>
 				</p>
 				<p><?php _e( 'Themes from sites that support non-GPL (or compatible) themes or that don&rsquo;t meet with the theme review guidelines will not be approved.', 'wporg-themes' ); ?></p>
 				<p>
 					<?php printf( __( 'Your theme will be reviewed using the <a href="%s">Theme Unit Test data</a>. Before uploading your theme please test it with this sample export data.', 'wporg-themes' ),
-						'//codex.wordpress.org/Theme_Unit_Test'
+						__( 'https://codex.wordpress.org/Theme_Unit_Test', 'wporg-themes' )
 					); ?>
 				</p>
 				<p>
 					<?php printf( __( 'Further resources for theme developers can be found in the Codex on the <a href="%s">Theme Development page</a>.', 'wporg-themes' ),
-						'//codex.wordpress.org/Theme_Development'
+						__( 'https://codex.wordpress.org/Theme_Development', 'wporg-themes' )
 					); ?>
 				</p>
 				<p>
 					<?php printf( __( 'For questions about theme development please use the <a href="%s">Themes and Templates forum</a>.', 'wporg-themes' ),
-						'//wordpress.org/support/forum/themes-and-templates'
+						__( 'https://wordpress.org/support/forum/themes-and-templates', 'wporg-themes' )
 					); ?>
 				</p>
 
 				<p>
-					<a class="button button-primary" href="<?php echo home_url('/upload/'); ?>"><?php _e( 'Upload Your Theme', 'wporg-themes' ); ?></a>
+					<a class="button button-primary" href="<?php echo home_url( '/upload/' ); ?>"><?php _e( 'Upload Your Theme', 'wporg-themes' ); ?></a>
 				</p>
 			</div><!-- .entry-content -->
 
