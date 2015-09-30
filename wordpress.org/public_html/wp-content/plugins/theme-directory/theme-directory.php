@@ -339,6 +339,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		'tags_input'   => $theme_data['Tags'],
 	) );
 
+	// Update current version. Used to prioritize localized themes.
+	update_post_meta( $post_id, '_live_version', $version );
+
 	/*
 	 * Bail if we're activating an old version, the author does not need to be
 	 * notified about that.
@@ -875,7 +878,7 @@ function wporg_themes_check_for_old_themes() {
 
 	foreach ( $posts as $post ) {
 		wporg_themes_glotpress_import( $post, 'inactive' );
-	}	
+	}
 }
 add_action( 'wporg_themes_check_for_old_themes', 'wporg_themes_check_for_old_themes' );
 
