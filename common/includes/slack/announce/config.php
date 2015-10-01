@@ -98,6 +98,9 @@ function get_whitelist() {
 			'jan_dembowski',
 			'macmanx',
 		),
+		'glotpress' => array(
+			'ocean90',
+		),
 		'meta-i18n' => array(
 			'ocean90',
 		),
