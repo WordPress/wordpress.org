@@ -852,6 +852,15 @@ ul.projects-dropdown li > a > span {
 		margin-top: 20px;
 	}
 
+	.filter-header .search-form {
+		float: none;
+		width: 100%;
+	}
+
+	.filter-header .filter-search {
+		width: 100%;
+	}
+
 	.project-header .project-description {
 		float: none;
 	}
