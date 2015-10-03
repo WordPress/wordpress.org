@@ -21,10 +21,14 @@ html, body {
 	margin: 2px 0 .6em;
 }
 
-.gp-content span.breadcrumb {
-	margin: .5em 0;
-	display: block;
-	float: none;
+.gp-content .breadcrumb {
+	background: none;
+	border: 0;
+	padding: 0;
+}
+
+.gp-content .breadcrumb li {
+	text-shadow: none;
 }
 
 .actionlist a,
@@ -47,6 +51,11 @@ dt a.edit:hover {
 }
 
 #hello {
+	color: #333;
+	font-weight: normal;
+	float: right;
+	letter-spacing: 0;
+	margin-right: 1em;
 	margin-top: 22px;
 	font-size: 1em;
 }
@@ -957,8 +966,8 @@ ul.projects-dropdown li > a > span {
 
 .stats-table tbody tr:hover {
 	opacity: 0.8;
-    outline: 1px solid #191E23;
-    outline-offset: 0;
+	outline: 1px solid #191E23;
+	outline-offset: 0;
 }
 
 .stats-table tbody tr th a:link,
