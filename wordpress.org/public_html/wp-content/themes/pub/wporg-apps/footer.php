@@ -15,8 +15,8 @@
 
         <div class="button-download-container">
                 <h3><?php _e( 'Download the WordPress app:', 'wpmobileapps' ); ?></h3>
-	            <?php echo do_shortcode( '[wpmobileapps_download_button platform="ios" link="http://itunes.apple.com/us/app/wordpress/id335703880?mt=8"]iOS[/wpmobileapps_download_button]' ); ?>
-	            <?php echo do_shortcode( '[wpmobileapps_download_button platform="android" link="http://play.google.com/store/apps/details?id=org.wordpress.android"]ANDROID[/wpmobileapps_download_button]' ); ?>
+                <?php echo do_shortcode( '[wpmobileapps_download_button platform="ios" link="https://itunes.apple.com/us/app/wordpress/id335703880?mt=8"]iOS[/wpmobileapps_download_button]' ); ?>
+                <?php echo do_shortcode( '[wpmobileapps_download_button platform="android" link="https://play.google.com/store/apps/details?id=org.wordpress.android"]ANDROID[/wpmobileapps_download_button]' ); ?>
         </div>
 
 		<div class="footer-area">
