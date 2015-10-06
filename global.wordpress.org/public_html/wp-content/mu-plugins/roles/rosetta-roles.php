@@ -615,9 +615,14 @@ class Rosetta_Roles {
 			return $projects;
 		}
 
+		$ignore_project_ids = array(
+			2804, // Waiting
+		);
+
 		$_projects = $wpdb->get_results( "
 			SELECT id, name, parent_project_id
 			FROM translate_projects
+			WHERE id NOT IN( " . implode( ',', $project_ids ) . " )
 			ORDER BY id ASC
 		" );
 
