@@ -86,13 +86,11 @@ jQuery( document ).ready( function( $ ) {
 
 			$.each( attachments, function( index, attachment ) {
 				var newFile = new $.wordcampPayments.AttachedFile( {
-					'ID':       attachment.id,
+					'ID':          attachment.id,
 					'post_parent': attachment.uploadedTo,
-					'filename': attachment.filename,
-					'url':      attachment.url
+					'filename':    attachment.filename,
+					'url':         attachment.url
 				} );
-
-				// todo realign
 
 				$.wordcampPayments.attachedFilesView.collection.add( newFile );
 			} );

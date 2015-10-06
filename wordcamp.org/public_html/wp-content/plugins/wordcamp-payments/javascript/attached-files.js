@@ -5,13 +5,11 @@ jQuery( document ).ready( function( $ ) {
 	 */
 	$.wordcampPayments.AttachedFile = Backbone.Model.extend( {
 		defaults: {
-			'ID':       0,
+			'ID':          0,
 			'post_parent': 0,
-			'filename': '',
-			'url':      ''
+			'filename':    '',
+			'url':         ''
 		}
-
-		// todo realign
 	} );
 
 	/*
@@ -97,8 +95,7 @@ jQuery( document ).ready( function( $ ) {
 				existingFilesToAttach.val( JSON.stringify( fileIDsToAttach ) );
 			}
 		}
-	} )
-	// todo add semicolon
+	} );
 
 	$.wordcampPayments.attachedFilesView = new $.wordcampPayments.AttachedFilesView();
 
