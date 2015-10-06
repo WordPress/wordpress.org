@@ -84,12 +84,15 @@ jQuery( document ).ready( function( $ ) {
 		addSelectedFilesToCollection : function() {
 			var attachments = $.wordcampPayments.fileUploadFrame.state().get( 'selection' ).toJSON();
 
-			$.each( attachments, function( index, attachment ) {												// todo if selected an existing file, it isn't attached, so after post is saved it wont be in the list
+			$.each( attachments, function( index, attachment ) {
 				var newFile = new $.wordcampPayments.AttachedFile( {
 					'ID':       attachment.id,
+					'post_parent': attachment.uploadedTo,
 					'filename': attachment.filename,
 					'url':      attachment.url
 				} );
+
+				// todo realign
 
 				$.wordcampPayments.attachedFilesView.collection.add( newFile );
 			} );

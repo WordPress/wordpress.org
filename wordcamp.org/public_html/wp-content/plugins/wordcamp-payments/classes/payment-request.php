@@ -747,7 +747,7 @@ class WCP_Payment_Request {
 		}
 
 		// Verify nonces
-		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
+		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce', 'wcp_files_nonce' );    // todo add prefix to all of these
 
 		foreach ( $nonces as $nonce ) {
 			if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {
@@ -853,6 +853,39 @@ class WCP_Payment_Request {
 				delete_post_meta( $post_id, '_camppayments_' . $field );
 			}
 		}
+
+		// Attach existing files
+		$this->attach_existing_files( $post_id, $_POST );
+	}
+
+	/**
+	 * Attach unattached files to the payment request post
+	 *
+	 * Sometimes users will upload the files manually to the Media Library, instead of using the Add Files button,
+	 * and we need to attach them to the request so that they show up in the metabox.
+	 *
+	 * @param int   $post_id
+	 * @param array $request
+	 */
+	protected function attach_existing_files( $post_id, $request ) {
+		if ( empty( $request['wcp_existing_files_to_attach'] ) ) {
+			return;
+		}
+
+		if ( ! $files = json_decode( $request['wcp_existing_files_to_attach'] ) ) {
+			return;
+		}
+
+		remove_action( 'save_post', array( $this, 'save_payment' ), 10, 2 ); // avoid infinite recursion
+
+		foreach( $files as $file_id ) {
+			wp_update_post( array(
+				'ID'          => $file_id,
+				'post_parent' => $post_id,
+			) );
+		}
+
+		add_action( 'save_post', array( $this, 'save_payment' ), 10, 2 );
 	}
 
 	/**

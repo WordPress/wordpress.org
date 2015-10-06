@@ -6,9 +6,12 @@ jQuery( document ).ready( function( $ ) {
 	$.wordcampPayments.AttachedFile = Backbone.Model.extend( {
 		defaults: {
 			'ID':       0,
+			'post_parent': 0,
 			'filename': '',
 			'url':      ''
 		}
+
+		// todo realign
 	} );
 
 	/*
@@ -65,8 +68,37 @@ jQuery( document ).ready( function( $ ) {
 			$( '.wcp_files_list' ).append( attachedFileView.render().el );
 			noFilesUploaded.removeClass( 'active' );
 			noFilesUploaded.addClass( 'hidden' );
+
+			this.attachExistingFile( file );
+		},
+
+		/**
+		 * Keep track of existing files that should be attached to the request
+		 *
+		 * Sometimes users add existing files to the request, rather than uploading new ones. We need to keep track
+		 * of those so that they can be attached to the request when the form is submitted.
+		 *
+		 * Files that are already attached to other posts are ignored.
+		 *
+		 * @param {wordcampPayments.AttachedFile} file
+		 */
+		attachExistingFile: function( file ) {
+			var fileIDsToAttach,
+				existingFilesToAttach = $( '#wcp_existing_files_to_attach' );
+
+			try {
+				fileIDsToAttach = JSON.parse( existingFilesToAttach.val() );
+			} catch ( exception ) {
+				fileIDsToAttach = [];
+			}
+
+			if ( 0 === file.get( 'post_parent' ) && -1 === $.inArray( file.get( 'ID' ), fileIDsToAttach ) ) {
+				fileIDsToAttach.push( file.get( 'ID' ) );
+				existingFilesToAttach.val( JSON.stringify( fileIDsToAttach ) );
+			}
 		}
 	} )
+	// todo add semicolon
 
 	$.wordcampPayments.attachedFilesView = new $.wordcampPayments.AttachedFilesView();
 
