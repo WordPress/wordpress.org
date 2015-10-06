@@ -25,6 +25,7 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 			$old_site_exceptions = array(
 				450, // switzerland.wordcamp.org/2015
 				465, // denver.wordcamp.org/2015
+				484, // la.wordcamp.org/2015
 				496, // seattle.wordcamp.org/2015-experienced
 				514, // montreal.wordcamp.org/2015
 				518, // montreal.wordcamp.org/2015-fr
