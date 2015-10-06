@@ -18,14 +18,13 @@ class WPORG_Translation_Warnings {
 	 */
 	function warning_mismatching_urls( $original, $translation ) {
 		// Any http/https/schemeless URLs which are not encased in quotation marks nor contain whitespace
-		$urls_regex = '@(?<![\'"])((https?://|(?<!:)//)[^\s]+)(?![\'"])@';
+		$urls_regex = '@(?<![\'"])((https?://|(?<![:\w])//)[^\s]+)(?![\'"])@i';
 
-		if ( preg_match_all( $urls_regex, $original, $original_urls ) ) {
-			$original_urls = array_unique( $original_urls[0] );
-		}
-		if ( preg_match_all( $urls_regex, $translation, $translation_urls ) ) {
-			$translation_urls = array_unique( $translation_urls[0] );
-		}
+		preg_match_all( $urls_regex, $original, $original_urls );
+		$original_urls = array_unique( $original_urls[0] );
+		
+		preg_match_all( $urls_regex, $translation, $translation_urls );
+		$translation_urls = array_unique( $translation_urls[0] );
 
 		$missing_urls = array_diff( $original_urls, $translation_urls );
 		$added_urls = array_diff( $translation_urls, $original_urls );
