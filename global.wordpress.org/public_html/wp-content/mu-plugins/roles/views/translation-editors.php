@@ -22,7 +22,7 @@
 
 	<?php if ( current_user_can( 'promote_users' ) ) : ?>
 		<h3><?php _e( 'Add Translation Editor', 'rosetta' ); ?></h3>
-		<p><?php _e( 'Enter the email address or username of an existing user on this site.', 'rosetta' ); ?></p>
+		<p><?php _e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">
 			<table class="form-table">
 				<tr>

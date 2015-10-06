@@ -314,8 +314,14 @@ class Rosetta_Roles {
 					}
 
 					if ( ! is_user_member_of_blog( $user_details->ID ) ) {
-						wp_redirect( add_query_arg( array( 'error' => 'not-a-member' ), $redirect ) );
-						exit;
+						$added = add_existing_user_to_blog( array( 'user_id' => $user_details->ID, 'role' => 'subscriber' ) );
+						if ( ! $added || is_wp_error( $added ) ) {
+							wp_redirect( add_query_arg( array( 'error' => 'not-added-to-site' ), $redirect ) );
+							exit;
+						}
+
+						// Refresh user data
+						$user_details = get_user_by( 'id', $user_details->ID );
 					}
 
 					if ( in_array( $this->translation_editor_role, $user_details->roles ) ) {
@@ -524,10 +530,11 @@ class Rosetta_Roles {
 			),
 
 			'error' => array(
-				'no-user-found' => __( 'The user couldn&#8217;t be found.', 'rosetta' ),
-				'not-a-member'  => __( 'The user is not a member of this site.', 'rosetta' ),
-				'user-cannot'   => __( 'The user is not a translation editor.', 'rosetta' ),
-				'user-exists'   => __( 'The user is already a translation editor.', 'rosetta' ),
+				'no-user-found'     => __( 'The user couldn&#8217;t be found.', 'rosetta' ),
+				'not-a-member'      => __( 'The user is not a member of this site.', 'rosetta' ),
+				'not-added-to-site' => __( 'The user couldn&#8217;t be added to this site.', 'rosetta' ),
+				'user-cannot'       => __( 'The user is not a translation editor.', 'rosetta' ),
+				'user-exists'       => __( 'The user is already a translation editor.', 'rosetta' ),
 			),
 		);
 
