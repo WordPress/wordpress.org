@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( is_admin() ) {
 	require_once( __DIR__ . '/classes/wordcamp-payments.php' );
 	require_once( __DIR__ . '/classes/payment-request.php' );
+	require_once( __DIR__ . '/classes/encryption.php' );
 
 	$GLOBALS['wordcamp_payments']   = new WordCamp_Payments();
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();

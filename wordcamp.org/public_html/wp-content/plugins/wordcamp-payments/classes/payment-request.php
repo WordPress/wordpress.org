@@ -382,6 +382,24 @@ class WCP_Payment_Request {
 				break;
 		}
 
+		$encrypted_fields = array(
+			'payable_to',
+			'beneficiary_name',
+			'beneficiary_account_number',
+			'beneficiary_street_address',
+			'beneficiary_city',
+			'beneficiary_state',
+			'beneficiary_zip_code',
+			'beneficiary_country',
+		);
+
+		if ( in_array( $name, $encrypted_fields ) ) {
+			$decrypted = WCP_Encryption::maybe_decrypt( $value );
+			if ( ! is_wp_error( $decrypted ) )
+				$value = $decrypted;
+		}
+
+
 		return $value;
 	}
 
@@ -767,6 +785,8 @@ class WCP_Payment_Request {
 	 */
 	protected function sanitize_save_normal_fields( $post_id ) {
 		foreach ( $_POST as $key => $unsafe_value ) {
+			$unsafe_value = wp_unslash( $unsafe_value );
+
 			switch ( $key ) {
 				case 'description':
 				case 'general_notes':
@@ -827,6 +847,23 @@ class WCP_Payment_Request {
 			}
 
 			if ( ! is_null( $safe_value ) ) {
+				$encrypted_fields = array(
+					'payable_to',
+					'beneficiary_name',
+					'beneficiary_account_number',
+					'beneficiary_street_address',
+					'beneficiary_city',
+					'beneficiary_state',
+					'beneficiary_zip_code',
+					'beneficiary_country',
+				);
+
+				if ( in_array( $key, $encrypted_fields ) ) {
+					$encrypted_value = WCP_Encryption::encrypt( $safe_value );
+					if ( ! is_wp_error( $encrypted_value ) )
+						$safe_value = $encrypted_value;
+				}
+
 				update_post_meta( $post_id, '_camppayments_' . $key, $safe_value );
 			}
 		}
