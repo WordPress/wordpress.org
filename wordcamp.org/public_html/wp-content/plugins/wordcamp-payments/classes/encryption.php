@@ -78,7 +78,7 @@ class WCP_Encryption {
 		list( $null, $data, $iv, $hmac ) = $data;
 
 		// Verify hmac.
-		if ( $hmac !== hash_hmac( 'sha256', $data, self::$hmac_key, true ) )
+		if ( ! hash_equals( hash_hmac( 'sha256', $data, self::$hmac_key, true ), $hmac ) )
 			return new WP_Error( 'encryption-error', 'HMAC mismatch.' );
 
 		$data = openssl_decrypt( $data, 'aes-256-ctr', self::$key, true, $iv );
