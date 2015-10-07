@@ -105,10 +105,9 @@ function get_whitelist() {
 			'ocean90',
 		),
 		'polyglots' => array(
-			'japh',
+			'deconf',
 			'ocean90',
 			'petya',
-			'shinichin',
 		),
 		'themereview' => array(
 			'cais',
