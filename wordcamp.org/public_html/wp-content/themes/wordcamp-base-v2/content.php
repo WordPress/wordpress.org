@@ -22,7 +22,11 @@
 	</div><!-- .entry-summary -->
 	<?php else : ?>
 	<div class="entry-content">
-		<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wcbs' ) ); ?>
+		<?php the_content( sprintf(
+			// translators: The title of the post to continue reading
+			__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'wcbs' ),
+			the_title( '<span class="assistive-text">', '</span> ', false )
+		) ); ?>
 		<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'wcbs' ), 'after' => '</div>' ) ); ?>
 	</div><!-- .entry-content -->
 	<?php endif; ?>

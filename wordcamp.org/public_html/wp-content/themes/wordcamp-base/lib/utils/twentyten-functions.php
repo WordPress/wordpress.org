@@ -233,7 +233,17 @@ add_filter( 'excerpt_length', 'twentyten_excerpt_length' );
  * @return string "Continue Reading" link
  */
 function twentyten_continue_reading_link() {
-	return ' <a href="'. get_permalink() . '">' . __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wordcampbase' ) . '</a>';
+	$link = sprintf(
+		' <a href="%s">%s</a>',
+		esc_url( get_permalink() ),
+		sprintf(
+			// translators: The title of the post to continue reading
+			__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'wordcampbase' ),
+			sprintf( '<span class="screen-reader-text">%s</span> ', get_the_title() )
+		)
+	);
+
+	return $link;
 }
 
 /**

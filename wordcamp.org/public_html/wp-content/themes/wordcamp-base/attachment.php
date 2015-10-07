@@ -102,7 +102,11 @@ get_header(); ?>
 						</div><!-- .entry-attachment -->
 						<div class="entry-caption"><?php if ( !empty( $post->post_excerpt ) ) the_excerpt(); ?></div>
 
-<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wordcampbase' ) ); ?>
+<?php the_content( sprintf(
+	// translators: The title of the post to continue reading
+	__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'wordcampbase' ),
+	the_title( '<span class="screen-reader-text">', '</span> ', false )
+) ); ?>
 <?php wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'wordcampbase' ), 'after' => '</div>' ) ); ?>
 
 					</div><!-- .entry-content -->
