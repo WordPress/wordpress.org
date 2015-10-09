@@ -13,9 +13,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'needs-testing' : 'Patch has a particular need for testing.',
 		'ui-feedback' : 'Feedback is needed from the user interface perspective, generally from the UI team.',
 		'ux-feedback' : 'Feedback is needed from the user experience perspective, generally from a UX lead.',
+		'has-unit-tests' : 'Proposed solution has unit test coverage.',
 		'needs-unit-tests' : 'Ticket has a particular need for unit tests.',
 		'needs-docs' : 'Inline documentation is needed.',
 		'needs-codex' : 'The Codex needs to be updated or expanded.',
+		'has-screenshots' : 'Visual changes are documented with screenshots.',
+		'needs-screenshots' : 'Screenshots are needed as a visual change log.',
 		'commit' : 'Patch is a suggested commit candidate.',
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
@@ -537,6 +540,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						wpTrac.workflow.removeKeyword( 'needs-patch' );
 					} else if ( 'needs-patch' === keyword ) {
 						wpTrac.workflow.removeKeyword( 'has-patch' );
+					}
+
+					if ( 'has-unit-tests' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-unit-tests' );
+					} else if ( 'needs-unit-tests' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-unit-tests' );
+					}
+
+					if ( 'has-screenshots' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'needs-screenshots' );
+					} else if ( 'needs-screenshots' === keyword ) {
+						wpTrac.workflow.removeKeyword( 'has-screenshots' );
 					}
 
 					// Add it to the bin, and refresh the hidden input.
