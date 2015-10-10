@@ -50,6 +50,14 @@ var wpTracContributorLabels = {
 	duck_: 'Core Committer'
 };
 
+var wpTracAutoCompleteUsers = {
+	include: $.map( wpTracContributorLabels, function( v, k ) { return k } ),
+	exclude: [
+		'slackbot',
+		'ircbot',
+	]
+};
+
 </script>
 </body>
 </html>

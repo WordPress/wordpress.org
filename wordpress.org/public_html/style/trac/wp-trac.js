@@ -43,6 +43,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 	wpTrac = {
 
 		gardener: typeof wpBugGardener !== 'undefined',
+		currentUser: wpTracCurrentUser,
 
 		init: function() {
 			wpTrac.hacks();
@@ -53,6 +54,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( 'undefined' !== typeof wpTracContributorLabels ) {
 				wpTrac.showContributorLabels( wpTracContributorLabels );
 			}
+
+			wpTrac.autocomplete.init();
 
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -73,6 +76,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}
 			});
 		},
+
 		// These ticket hacks need to be re-run after ticket previews.
 		postPreviewHacks: function() {
 			// Automatically preview images.
@@ -410,6 +414,89 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				return false;
 			});
 		},
+
+		autocomplete: (function() {
+			var users,
+				attachments,
+				settings = {};
+
+			return {
+				init: function() {
+					if ( ! $( '#comment' ).length ) {
+						return;
+					}
+
+					if ( 'undefined' !== typeof wpTracAutoCompleteUsers ) {
+						settings = wpTracAutoCompleteUsers;
+					}
+
+					users = this.getUsers();
+					attachments  = this.getAttachments();
+
+					$( '#comment' ).atwho({
+						at:  '@',
+						data: users
+					}).atwho({
+						at: '[att',
+						insertTpl: '${atwho-at}achment:${name}]',
+						displayTpl: '<li>${display}</li>',
+						data: attachments
+					});
+				},
+
+				getUsers: function() {
+					var users  = [], exclude = [];
+
+					if ( 'undefined' !== settings.exclude ) {
+						exclude = settings.exclude;
+					}
+
+					// Most recent should show up first.
+					$( $( '.change .username' ).get().reverse() ).each( function() {
+						var username = $(this).data( 'username' );
+						if (
+							typeof username !== 'undefined' &&
+							-1 === $.inArray( username, users ) &&
+							-1 === $.inArray( username, exclude )
+						) {
+							users.push( $(this).data( 'username' ) );
+						}
+					});
+
+					// Add additional users.
+					if ( 'undefined' !== typeof settings.include ) {
+						$.each( settings.include, function( k, username ) {
+							if ( -1 === $.inArray( username, users ) ) {
+								users.push( username );
+							}
+						});
+					}
+
+					// Exclude current user.
+					if ( 'undefined' !== wpTrac.currentUser ) {
+						users = $.grep( users, function( user ) {
+							return user != wpTrac.currentUser;
+						});
+					}
+
+					return users;
+				},
+
+				getAttachments: function() {
+					var attachments = [];
+
+					// Most recent should show up first.
+					$ ($( 'dl.attachments dt' ).get().reverse() ).each( function() {
+						attachments.push({
+							display: $( this ).text(),
+							name: $( this ).find( 'a[title="View attachment"]' ).text()
+						});
+					});
+
+					return attachments;
+				}
+			};
+		}()),
 
 		workflow: (function() {
 			var keywords = {},

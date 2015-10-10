@@ -299,7 +299,13 @@
 	var wpBugGardener = true;
 	</script>
 
+	<script py:if="req.authname">
+	var wpTracCurrentUser = "${req.authname}";
+	</script>
+
 	<!--! JavaScript -->
+	<script src="//s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
+	<script src="//s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
 	<script src="//s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
 
 	<!--! Check for security buzzwords on new tickets -->
