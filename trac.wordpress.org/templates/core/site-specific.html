@@ -13,8 +13,7 @@ ${select('*|comment()|text()')}
 
 <div id="report-popup"></div>
 <script>
-(function($){
-var titles = {
+var wpTracContributorLabels = {
 	matt: 'Project Lead',
 	markjaquith: 'Lead Developer',
 	nacin: 'Lead Developer',
@@ -23,7 +22,7 @@ var titles = {
 	helen: 'Lead Developer',
 
 	ocean90: 'Core Committer',
-	sergeybiryukov: 'Core Committer',
+	SergeyBiryukov: 'Core Committer',
 	johnbillion: 'Core Committer',
 	pento: 'Core Committer',
 	boonebgorges: 'Core Committer',
@@ -43,7 +42,7 @@ var titles = {
 	lancewillett: 'Themes Committer',
 	iandstewart: 'Themes Committer',
 	karmatosed: 'Themes Committer',
-	drewapicture: 'Docs Committer',
+	DrewAPicture: 'Docs Committer',
 
 	ryan: 'Lead Developer',
 	westi: 'Lead Developer',
@@ -51,14 +50,6 @@ var titles = {
 	duck_: 'Core Committer'
 };
 
-$('h3.change .profile-link').each( function() {
-	var el = $(this);
-	user = el.attr('href').split('/').pop().toLowerCase();
-	if ( user in titles ) {
-		el.after( ' <span class="contributor-label">(' + titles[ user ] + ')</span>' );
-	}
-});
-})(jQuery);
 </script>
 </body>
 </html>

@@ -49,6 +49,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			if ( ! wpTrac.gardener ) {
 				wpTrac.nonGardeners();
 			}
+
+			if ( 'undefined' !== typeof wpTracContributorLabels ) {
+				wpTrac.showContributorLabels( wpTracContributorLabels );
+			}
+
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
 				if ( $(document.body).hasClass( 'core' ) ) {
@@ -58,6 +63,16 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 		},
 
+		showContributorLabels: function( labels ) {
+			$( 'h3.change .username' ).each( function() {
+				var $el = $( this ),
+					username = $el.data( 'username' );
+
+				if ( username in labels ) {
+					$el.parent( 'a.profile-link' ).after( ' <span class="contributor-label">(' + labels[ username ] + ')</span>' );
+				}
+			});
+		},
 		// These ticket hacks need to be re-run after ticket previews.
 		postPreviewHacks: function() {
 			// Automatically preview images.
@@ -73,7 +88,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					return;
 				}
 				appendTo = li.parent().parent(); // div.change
-				image = new Image;
+				image = new Image();
 				image.src = href;
 				image.onload = function() {
 					$('<img />')
