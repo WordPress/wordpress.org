@@ -30,6 +30,21 @@ Arguments:
   <py:def function="commentref(prefix, cnum, cls=None)">
     <a href="#comment:$cnum" class="$cls">$prefix$cnum</a>
   </py:def>
+
+<py:choose>
+<py:when test="'author' in change and ('slackbot' == change.author or 'ircbot' == change.author)">
+  <h3 class="change chat-bot">
+    <span class="avatar" py:if="change">
+      <span class="username-line">
+        <img src="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=48" srcset="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=96 2x" height="48" width="48" />
+        ${wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
+      </span>
+      <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
+    </span>
+  </h3>
+</py:when>
+<py:otherwise>
+
   <h3 class="change">
     <span class="threading"
           py:with="change_replies = replies.get(str(cnum), []) if 'cnum' in change else []">
@@ -165,4 +180,6 @@ ${edited_comment if edited_comment is not None else change.comment}</textarea>
                               version=comment_version)}">diff</a>)
     </py:if>
   </div>
+</py:otherwise>
+</py:choose>
 </html>
