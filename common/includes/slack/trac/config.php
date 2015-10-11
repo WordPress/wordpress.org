@@ -46,11 +46,14 @@ class Meta extends Trac {
 	protected $bypass_primary_channel_for_ticket_filter_matches = true;
 
 	protected $commit_path_filters = array(
-		'translate.wordpress.org/' => '#meta-i18n',
-		'global.wordpress.org/'    => '#meta-i18n',
-		'translations'             => '#meta-i18n',
-		'developer-reference/'     => '#meta-devhub',
-		'wporg-developer/'         => '#meta-devhub',
+		'translate.wordpress.org/'              => '#meta-i18n',
+		'global.wordpress.org/'                 => '#meta-i18n',
+		'translations'                          => '#meta-i18n',
+		'developer-reference/'                  => '#meta-devhub',
+		'wporg-developer/'                      => '#meta-devhub',
+		'trac.wordpress.org/'                   => '#meta-tracdev',
+		'svn.wordpress.org/'                    => '#meta-tracdev',
+		'wordpress.org/public_html/style/trac/' => '#meta-tracdev',
 	);
 
 	protected $ticket_component_filters = array(
@@ -58,6 +61,7 @@ class Meta extends Trac {
 		'International Sites (Rosetta)' => '#meta-i18n',
 		'translate.wordpress.org'       => '#meta-i18n',
 		'developer.wordpress.org'       => '#meta-devhub',
+		'Trac'                          => '#meta-tracdev',
 	);
 }
 
