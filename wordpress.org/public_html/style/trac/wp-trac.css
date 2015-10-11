@@ -683,13 +683,14 @@ span.avatar img {
 }
 span.contributor-label {
 	font-size: 0.9em;
-	background: #ddd;
-	color: #222;
+	background: #f1f1f1;
+	color: #333;
 	padding: 3px 4px;
 	margin: 0 2px 0 3px;
 }
 span.contributor-label[title]:hover {
 	cursor: help;
+	color: #333; /* seems to fix Chrome issue where the cursor rule isn't immediately picked up */
 }
 #changelog span:target {
 	background-clip: content-box;
