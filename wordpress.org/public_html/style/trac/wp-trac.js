@@ -68,11 +68,17 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		showContributorLabels: function( labels ) {
 			$( 'h3.change .username' ).each( function() {
-				var $el = $( this ),
+				var html,
+					$el = $( this ),
 					username = $el.data( 'username' );
 
 				if ( username in labels ) {
-					$el.parent( 'a.profile-link' ).after( ' <span class="contributor-label">(' + labels[ username ] + ')</span>' );
+					if ( typeof labels[ username ] === 'object' ) {
+						html = $( '<span />', {'class': 'contributor-label', 'title': labels[ username ].title }).text( labels[ username ].text );
+					} else {
+						html = $( '<span />', {'class': 'contributor-label'}).text( labels[ username ]);
+					}
+					$el.parent( 'a.profile-link' ).after( '&ensp;' + html.prop('outerHTML') );
 				}
 			});
 		},
@@ -881,13 +887,27 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					xhrFields: { withCredentials: true }
 				}).success( function( data ) {
 					if ( data.success ) {
-						$( render( data ) );
+						render( data.data['notifications-box'] );
+						if ( data.data.maintainers ) {
+							maintainerLabels( data.data.maintainers );
+						}
 					}
-				});
+  				});
+			}
+
+			function maintainerLabels( maintainers ) {
+				var i, len, labels = {};
+  				for ( i = 0, len = maintainers.length; i < len; i++ ) {
+    				labels[ maintainers[i] ] = {
+						text:  'Component Maintainer',
+						title: '@' + maintainers[i] + ' maintains the ' + $.trim( $('td[headers="h_component"]').text() ) + ' component'
+					};
+				}
+  				wpTrac.showContributorLabels( labels );
 			}
 
 			function render( data ) {
-				$( '#propertyform' ).before( data.data['notifications-box'] );
+				$( '#propertyform' ).before( data );
 				notifications = $('#notifications');
 				notifications.on( 'click', '.watch-this-ticket', subscribe )
 					.on( 'click', '.watching-ticket', unsubscribe )

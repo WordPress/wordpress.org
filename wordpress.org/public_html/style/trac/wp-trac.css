@@ -280,12 +280,12 @@ h2.report-result {
 }
 /* =roadmap.css */
 table.progress td.closed {
-    background-color: #83B4D8;
-    background-image: linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-    background-image: -o-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-    background-image: -moz-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-    background-image: -webkit-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-    background-image: -ms-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+	background-color: #83B4D8;
+	background-image: linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
 }
 table.progress {
 	box-shadow: none;
@@ -681,6 +681,13 @@ span.avatar img {
 	float: left;
 	margin: 0 8px 0 -4px;
 }
+span.contributor-label {
+	font-size: 0.9em;
+	background: #ddd;
+	color: #222;
+	padding: 3px 4px;
+	margin: 0 2px 0 3px;
+}
 #changelog span:target {
 	background-clip: content-box;
 	padding-top: 24px;
@@ -942,23 +949,23 @@ dl.attachments dt {
 }
 #notifications .star-list a.star:before {
 	color: #fff;
-    display: inline-block;
+	display: inline-block;
 	margin: 25px 0 0 26px;
-    width: 14px;
-    height: 14px;
+	width: 14px;
+	height: 14px;
 	position: absolute;
 	color: #fff;
 	-webkit-text-stroke-width: 1px;
 	-webkit-text-stroke-color: #333;
-    -webkit-font-smoothing: antialiased;
-    font-size: 14px;
-    line-height: 1;
-    font-family: "dashicons";
-    text-decoration: inherit;
-    font-weight: normal;
-    font-style: normal;
-    vertical-align: top;
-    text-align: center;
+	-webkit-font-smoothing: antialiased;
+	font-size: 14px;
+	line-height: 1;
+	font-family: "dashicons";
+	text-decoration: inherit;
+	font-weight: normal;
+	font-style: normal;
+	vertical-align: top;
+	text-align: center;
 	content: "\f155";
 }
 #notifications .star-list a .username {
@@ -1628,28 +1635,28 @@ table.listing th.desc a:after {
 
 /* =Report screens */
 .create-new-ticket.button {
-    margin: 10px 10px 0;
-    float: right;
-    clear: right;
-    font-size: 15px;
-    min-height: 40px;
-    padding: 0;
+	margin: 10px 10px 0;
+	float: right;
+	clear: right;
+	font-size: 15px;
+	min-height: 40px;
+	padding: 0;
 }
 .create-new-ticket a {
-    line-height: 38px;
-    color: #fff !important;
-    background: none !important;
-    border: none !important;
-    display: block;
-    height: 100%;
-    width: 100%;
-    padding: 0 12px 2px;
+	line-height: 38px;
+	color: #fff !important;
+	background: none !important;
+	border: none !important;
+	display: block;
+	height: 100%;
+	width: 100%;
+	padding: 0 12px 2px;
 }
 .create-new-ticket .ext-link .icon {
-    display: none;
+	display: none;
 }
 .create-new-ticket a:active {
-    color: rgba(255,255,255,0.95) !important;
+	color: rgba(255,255,255,0.95) !important;
 }
 #content.report #prefs {
 	margin: -20px 0 2px 10px;
@@ -1658,7 +1665,7 @@ table.listing th.desc a:after {
 	border: none;
 }
 #content.report #prefs div {
-    display: inline;
+	display: inline;
 }
 body.core #ctxtnav a[href="/report"] {
 	display: none;
@@ -1966,7 +1973,7 @@ body.core #ctxtnav a[href="/report"] {
 		float: none;
 	}
 	.milestone .info .progress {
-	    width: 85%;
+		width: 85%;
 	}
 	#content.timeline dl {
 		width: 85%; /* prevent right overflow */
