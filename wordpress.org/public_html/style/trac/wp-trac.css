@@ -710,9 +710,12 @@ span.contributor-label[title]:hover {
 }
 #changelog h3.change,
 #ticketchange h3.change {
-	margin: 0.75em 0 0.5em;
+	margin: 1em 0 2em;
 	min-height: 40px;
 	border-bottom: none;
+}
+#changelog h3.change.chat-bot {
+	margin: 0.5em 0;
 }
 #changelog h3.change:after,
 #ticketchange h3.change:after {
@@ -725,6 +728,19 @@ span.contributor-label[title]:hover {
 	float: left;
 	line-height: 18px;
 	min-width: 200px;
+}
+#changelog h3.change.chat-bot span.avatar {
+	line-height: 24px;
+}
+#changelog h3.chat-bot p {
+	margin: 0;
+	display: inline;
+}
+#changelog h3.chat-bot p br {
+	display: none;
+}
+#changelog h3.chat-bot a.ext-link:before {
+	content: none;
 }
 span.time-ago {
 	font-size: 0.85em;
