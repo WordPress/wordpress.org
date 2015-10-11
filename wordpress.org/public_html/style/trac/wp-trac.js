@@ -56,6 +56,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			}
 
 			wpTrac.autocomplete.init();
+			wpTrac.linkMentions();
 
 			if ( ! $(document.body).hasClass( 'plugins' ) ) {
 				wpTrac.workflow.init();
@@ -79,6 +80,22 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						html = $( '<span />', {'class': 'contributor-label'}).text( labels[ username ]);
 					}
 					$el.parent( 'a.profile-link' ).after( '&ensp;' + html.prop('outerHTML') );
+				}
+			});
+		},
+
+		linkMentions: function() {
+			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
+			var mentionsRegEx = /(?:^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_.]{1,15})(?:\b(?!@|＠)|$)/g;
+
+			$( 'div.change .comment, #ticket .description' ).each( function() {
+				$comment = $( this ).html();
+				if ( mentionsRegEx.test( $comment ) ) {
+					$comment = $comment.replace( mentionsRegEx, function( match, username ) {
+						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
+						return ' <a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
+					} );
+					$( this ).html( $comment );
 				}
 			});
 		},

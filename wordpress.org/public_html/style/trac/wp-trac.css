@@ -1740,6 +1740,12 @@ body.core #ctxtnav a[href="/report"] {
 	font-weight: normal;
 }
 
+a.mention.me {
+	font-weight: bold;
+	background: #ffe399;
+	color: #23282d;
+	box-shadow: 1px 0 0 0 #ffe399, -1px 0 0 0 #ffe399;
+}
 
 /* =Responsive / Mobile
 ----------------------------------------------- */
