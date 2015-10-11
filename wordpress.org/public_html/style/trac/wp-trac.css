@@ -677,9 +677,16 @@ div.trac-content {
 }
 
 /* Gravatars and Comments */
-span.avatar img {
+span.avatar img,
+table.properties img.avatar {
 	float: left;
+	border-radius: 3px;
+}
+span.avatar img {
 	margin: 0 8px 0 -4px;
+}
+table.properties img.avatar {
+	margin: 0 6px 0 -60px;
 }
 span.contributor-label {
 	font-size: 0.9em;
@@ -701,10 +708,6 @@ span.contributor-label[title]:hover {
 	margin: 0 .8em 0 -2px;
 	border: 0; /* override for bb's */
 }
-table.properties img.avatar {
-	float: left;
-	margin: 0 6px 0 -42px;
-}
 #changelog h3.change,
 #ticketchange h3.change {
 	margin: 0.75em 0 0.5em;
@@ -720,7 +723,14 @@ table.properties img.avatar {
 #changelog h3.change span.avatar,
 #ticketchange h3.change span.avatar {
 	float: left;
-	line-height: 36px;
+	line-height: 18px;
+	min-width: 200px;
+}
+span.time-ago {
+	font-size: 0.85em;
+}
+span.time-ago a.timeline {
+	border: none;
 }
 h3 .trac-ticket-buttons:before {
 	content: ".";

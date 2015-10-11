@@ -79,7 +79,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					} else {
 						html = $( '<span />', {'class': 'contributor-label'}).text( labels[ username ]);
 					}
-					$el.parent( 'a.profile-link' ).after( '&ensp;' + html.prop('outerHTML') );
+					$el.closest( '.username-line' ).append( '&ensp;' + html.prop('outerHTML') );
 				}
 			});
 		},
