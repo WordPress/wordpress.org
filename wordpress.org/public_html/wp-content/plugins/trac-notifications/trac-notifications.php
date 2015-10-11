@@ -8,6 +8,7 @@
 class wporg_trac_notifications {
 
 	protected $trac_subdomain;
+	protected $components;
 
 	protected $tracs_supported = array( 'core', 'meta', 'themes', 'plugins' );
 	protected $tracs_supported_extra = array( 'bbpress', 'buddypress', 'gsoc', 'glotpress' );
@@ -27,6 +28,7 @@ class wporg_trac_notifications {
 		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
 		if ( 'core' === $trac ) {
 			require __DIR__ . '/trac-components.php';
+			$this->components = new Make_Core_Trac_Components;
 		}
 	}
 
@@ -363,7 +365,11 @@ class wporg_trac_notifications {
 	</div>
 	<?php
 		$this->ticket_notes( $ticket, $username );
-		wp_send_json_success( array( 'notifications-box' => ob_get_clean() ) );
+		$send = array( 'notifications-box' => ob_get_clean() );
+		if ( isset( $this->components ) ) {
+			$send['maintainers'] = $this->components->get_maintainers_by_component( $ticket->component );
+		}
+		wp_send_json_success( $send );
 		exit;
 	}
 

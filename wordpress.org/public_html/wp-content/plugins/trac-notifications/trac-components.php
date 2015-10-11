@@ -632,8 +632,7 @@ jQuery( document ).ready( function( $ ) {
 			echo '<td></td>';
 		}
 
-		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
-		$maintainers = array_filter( array_map( 'trim', explode( ',', $maintainers ) ) );
+		$maintainers = $this->get_maintainers_by_post( $post->ID );
 		echo '<td class="no-grav maintainers">';
 		foreach ( $maintainers as $maintainer ) {
 			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '" title="' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 24 ) . "</a>";
@@ -641,5 +640,12 @@ jQuery( document ).ready( function( $ ) {
 		echo '</td>';
 		echo '</tr>';
 	}
+
+	function get_maintainers_by_post( $post_id ) {
+		return array_filter( array_map( 'trim', explode( ',', get_post_meta( $post_id, '_active_maintainers', true ) ) ) );
+	}
+
+	function get_maintainers_by_component( $component ) {
+		return $this->get_maintainers_by_post( get_page_by_title( $component, OBJECT, 'component' )->ID );
+	}
 }
-new Make_Core_Trac_Components;
