@@ -688,6 +688,9 @@ span.contributor-label {
 	padding: 3px 4px;
 	margin: 0 2px 0 3px;
 }
+span.contributor-label[title]:hover {
+	cursor: help;
+}
 #changelog span:target {
 	background-clip: content-box;
 	padding-top: 24px;
