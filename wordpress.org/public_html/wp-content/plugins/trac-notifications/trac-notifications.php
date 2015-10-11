@@ -392,9 +392,9 @@ class wporg_trac_notifications {
 			$output = '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome.</strong><br/>';
 
 			if ( $previous_comments ) {
-				$output .= 'They&#8217;ve commented before, but it&#8127;s their first bug report!';
+				$output .= 'They&#8217;ve commented before, but it&#8127;s their first ticket!';
 			} else {
-				$output .= 'It&#8127;s their first bug report!';
+				$output .= 'It&#8127;s their first ticket!';
 			}
 		} else {
 			$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
