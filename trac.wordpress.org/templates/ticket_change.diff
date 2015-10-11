@@ -1,7 +1,16 @@
 Index: 1.0-stable/trac/ticket/templates/ticket_change.html
 ===================================================================
---- 1.0-stable/trac/ticket/templates/ticket_change.html	(revision 12333)
+--- 1.0-stable/trac/ticket/templates/ticket_change.html	(revision 14348)
 +++ 1.0-stable/trac/ticket/templates/ticket_change.html	(working copy)
+@@ -33,7 +33,7 @@
+   <h3 class="change">
+     <span class="threading"
+           py:with="change_replies = replies.get(str(cnum), []) if 'cnum' in change else []">
+-      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('comment:', cnum)}</span>
++      <span py:if="'cnum' in change" id="comment:$cnum" class="cnum">${commentref('#', cnum)}</span>
+       <py:if test="'replyto' in change">
+         in reply to: ${commentref('&uarr;&nbsp;', change.replyto)}
+         <py:if test="change_replies">; </py:if>
 @@ -49,6 +49,15 @@
        </py:if>
      </span>
