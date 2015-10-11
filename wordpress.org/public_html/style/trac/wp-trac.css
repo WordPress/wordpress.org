@@ -777,7 +777,18 @@ h3.change .profile-link {
 }
 #changelog div.change:last-child {
 	border-bottom: none;
-	padding-bottom: 0;
+}
+#changelog {
+	padding: 0 1em;
+}
+#content.ticket #prefs div {
+	display: inline;
+}
+#content.ticket #prefs {
+	margin-right: 0;
+	background: 0;
+	border: 0;
+	margin-top: -4px;
 }
 #changelog .comment,
 #ticketchange .comment {
