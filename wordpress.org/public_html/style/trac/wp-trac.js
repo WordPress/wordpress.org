@@ -86,7 +86,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		linkMentions: function() {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			var mentionsRegEx = /(?:^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_.]{1,15})(?:\b(?!@|＠)|$)/g;
+			var mentionsRegEx = /(?:^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_.]{1,20})(?:\b(?!@|＠)|$)/g;
 
 			$( 'div.change .comment, #ticket .description' ).each( function() {
 				$comment = $( this ).html();
