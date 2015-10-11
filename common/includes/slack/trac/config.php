@@ -54,6 +54,7 @@ class Meta extends Trac {
 		'trac.wordpress.org/'                   => '#meta-tracdev',
 		'svn.wordpress.org/'                    => '#meta-tracdev',
 		'wordpress.org/public_html/style/trac/' => '#meta-tracdev',
+		'trac-notifications/'                   => '#meta-tracdev',
 	);
 
 	protected $ticket_component_filters = array(
