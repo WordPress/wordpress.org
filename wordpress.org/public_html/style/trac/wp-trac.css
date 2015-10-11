@@ -1118,6 +1118,14 @@ body.bbpress #mainnav .active :visited {
 	background: #080; /* active nav item */
 }
 
+body.bbpress .atwho-view .cur {
+	background: #080;
+}
+
+body.bbpress .atwho-view strong {
+	color: #080;
+}
+
 /* BuddyPress colors */
 body.buddypress .wp-notice {
 	background: #fff3ec;
@@ -1145,6 +1153,14 @@ body.buddypress dt.attachment:hover:before {
 body.buddypress #mainnav .active :link,
 body.buddypress #mainnav .active :visited {
 	background: #d84800; /* active nav item */
+}
+
+body.buddypress .atwho-view .cur {
+	background: #d84800;
+}
+
+body.buddypress .atwho-view strong {
+	color: #d84800;
 }
 
 /* bbPress/BuddyPress design overrides */
@@ -1653,7 +1669,7 @@ body.core #ctxtnav a[href="/report"] {
  */
 
 .atwho-container {
-	font-size: 1.3em
+	font-size: 13px;
 }
 
 .atwho-view {
@@ -1686,7 +1702,7 @@ body.core #ctxtnav a[href="/report"] {
 }
 
 .atwho-view .cur strong {
-	color: #fff;
+	color: #fff !important;
 	font: bold;
 }
 

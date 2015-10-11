@@ -463,6 +463,12 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						}
 					});
 
+					// Add ticket reporter.
+					var ticketReporter = $.trim( $( '#ticket td[headers="h_reporter"]' ).text() );
+					if ( ticketReporter && -1 === $.inArray( ticketReporter, users ) ) {
+						users.push( ticketReporter );
+					}
+
 					// Add additional users.
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function( k, username ) {
