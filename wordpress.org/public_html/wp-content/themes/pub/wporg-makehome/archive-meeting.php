@@ -52,11 +52,8 @@ function wporg_makehome_time_converter_script() {
             d.setUTCSeconds(+m[6]);
             return d;
         }
-        var format_date = function (d) {
-            var p = function(n) {return ('00'+n).slice(-2); };
-            var tz = -d.getTimezoneOffset()/60;
-            if (tz>=0) { tz = "+"+tz; }
-            return ""+timestrings['months'][d.getMonth()]+" "+p(d.getDate())+", "+d.getFullYear()+" "+p(d.getHours())+":"+p(d.             getMinutes())+" UTC"+tz;
+		var format_date = function (d) {
+			return d.toLocaleTimeString(navigator.language, {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute:'2-digit', timeZoneName: 'short'});
         }
         var nodes = document.getElementsByTagName('abbr');
         for (var i=0; i<nodes.length; ++i) {
