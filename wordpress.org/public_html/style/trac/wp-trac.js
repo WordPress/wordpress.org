@@ -111,7 +111,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}
 				el = li.find('.trac-rawlink');
 				href = el.attr('href');
-				if ( ! href.match(/\.(jpg|jpeg|png|gif)$/i) ) {
+				if ( ! href.match(/\.(jpg|jpeg|png|gif|svg)$/i) ) {
 					return;
 				}
 				appendTo = li.parent().parent(); // div.change
