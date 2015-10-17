@@ -88,7 +88,7 @@ h3.change a {
 
 /* We like the WP button styles, but they need to be a bit smaller sometimes */
 .inlinebuttons input {
-	margin:  0 .2em .2em; /* Trac is 0 .1em .1em  */
+	margin:  0 0 .2em .4em; /* Trac is 0 .1em .1em  */
 }
 #prefs .buttons input[type=button],
 #prefs .buttons input[type=submit],
@@ -305,7 +305,7 @@ table.progress {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
 }
-#content.ticket .ticketdraft, #content.ticket #changelog {
+#content.ticket .ticketdraft {
 	border: 1px solid #ccc;
 }
 #ticket > h2 {
@@ -522,6 +522,15 @@ blockquote.citation {
 	box-shadow: none;
 	font-size: 10px;
 }
+div#content.ticket #prefs {
+	border: 0;
+	background: none;
+	margin-right: 0;
+	position: static !important; /* overrides style="position:absolute" */
+}
+div#content.ticket #prefs div {
+	display: inline;
+}
 #info {
 	background: #f9f9f9;
 }
@@ -690,10 +699,11 @@ table.properties img.avatar {
 }
 span.contributor-label {
 	font-size: 0.9em;
-	background: #f1f1f1;
-	color: #333;
+	background: #fff;
+	color: #666;
 	padding: 3px 4px;
 	margin: 0 2px 0 3px;
+	border: 1px solid #eee;
 }
 span.contributor-label[title]:hover {
 	cursor: help;
@@ -705,17 +715,21 @@ span.contributor-label[title]:hover {
 }
 #changelog h3.change img,
 #ticketchange h3.change img {
-	margin: 0 .8em 0 -2px;
+	margin: 0 0.8em 0 -2px;
 	border: 0; /* override for bb's */
 }
 #changelog h3.change,
 #ticketchange h3.change {
-	margin: 1em 0 2em;
+	padding: .5em 10px;
 	min-height: 40px;
-	border-bottom: none;
+	background: #f9f9f9;
+	margin: 0 -1em;
 }
 #changelog h3.change.chat-bot {
-	margin: 0.5em 0;
+	margin: -1px -1.1em;
+	border: none;
+	background: #fff;
+	padding: 0 11px 0 1em;
 }
 #changelog h3.change:after,
 #ticketchange h3.change:after {
@@ -726,7 +740,7 @@ span.contributor-label[title]:hover {
 #changelog h3.change span.avatar,
 #ticketchange h3.change span.avatar {
 	float: left;
-	line-height: 18px;
+	line-height: 22px;
 	min-width: 200px;
 }
 #changelog h3.change.chat-bot span.avatar {
@@ -753,18 +767,31 @@ h3 .trac-ticket-buttons:before {
 	font-size: 0;
 }
 h3 .trac-ticket-buttons {
-	padding-top: 3px;
+	padding-top: 8px;
+}
+h3.chat-bot .trac-ticket-buttons {
+	padding-top: 0;
 }
 div.change > .trac-ticket-buttons {
 	display: none;
 }
+div.trac-ticket-buttons input[type=submit] {
+	border-radius: 0;
+	background: none;
+	padding: 0 5px;
+	font-size: 12px;
+	color: #888;
+}
 div.change ul.changes {
-	margin-top: 10px;
+	margin-top: 20px;
 	margin-bottom: 20px;
 }
 h3.change .profile-link {
 	border-bottom: none;
 	text-decoration: none; /* override for bb's */
+}
+#changelog {
+	padding: 0 0 1em;
 }
 #changelog h3.change .username,
 #ticketchange h3.change .username {
@@ -772,28 +799,20 @@ h3.change .profile-link {
 	font-size: 15px;
 }
 #changelog div.change {
-	border-bottom: 1px solid #d7d7d7;
+	border: 1px solid #d7d7d7;
 	padding: 5px 0;
-}
-#changelog div.change:last-child {
-	border-bottom: none;
-}
-#changelog {
+	margin: 1.5em 0;
 	padding: 0 1em;
 }
-#content.ticket #prefs div {
-	display: inline;
-}
-#content.ticket #prefs {
-	margin-right: 0;
-	background: 0;
-	border: 0;
-	margin-top: -4px;
+#changelog div.change:last-child {
+	padding-bottom: 0;
 }
 #changelog .comment,
 #ticketchange .comment {
 	margin-left: 0;
 	word-wrap: break-word;
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 #changelog .trac-lastedit {
 	margin: 0.8em 0;
@@ -1366,7 +1385,7 @@ body.core #reportfilters {
 
 /*
  * Workaround for Trac bug.
- * See ​http://trac.edgewall.org/ticket/10751
+ * See http://trac.edgewall.org/ticket/10751
  */
 .timeline img {
 	display: none;
@@ -2029,3 +2048,4 @@ a.mention.me {
 		margin-left: 0;
 	}
 }
+
