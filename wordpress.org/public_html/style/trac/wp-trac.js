@@ -42,7 +42,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 	reservedTerms = [
 		'access', 'deprecated', 'global', 'ignore', 'internal', 'link', 'method',
-		'package', 'return','see', 'since', 'subpackage', 'todo', 'type', 'var'
+		'package', 'return','see', 'since', 'subpackage', 'todo', 'type', 'var',
+		'param'
 	];
 
 	wpTrac = {
