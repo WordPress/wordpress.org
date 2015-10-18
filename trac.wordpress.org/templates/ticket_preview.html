@@ -8,6 +8,7 @@ Render data relevant to automatic ticket preview.
       py:with="can_append = 'TICKET_APPEND' in perm(ticket.resource);
                has_edit_comment = 'TICKET_EDIT_COMMENT' in perm(ticket.resource);"
       py:strip="">
+  <xi:include href="site-ticket.html"/>
   <xi:include href="ticket_box.html"/>
   <div id="changelog">
     <div py:for="change in changes"

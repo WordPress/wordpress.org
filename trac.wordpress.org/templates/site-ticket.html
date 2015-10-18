@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:py="http://genshi.edgewall.org/"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     py:strip="">
+
+<?python
+	profile_link = '//profiles.wordpress.org/'
+
+  field_types = [ 'milestone', 'priority', 'type', 'severity', 'version', 'component', 'keywords', 'focuses', ]
+
+  # Sorting function
+  def sort_nicely(field1, field2):
+    try:
+      idx1 = field_types.index(field1['name'])
+    except ValueError:
+      idx1 = 1000 # no match, push to the end
+
+    try:
+      idx2 = field_types.index(field2['name'])
+    except ValueError:
+      idx2 = 1000 # no match, push to the end
+
+    return cmp(idx1, idx2)
+
+  if ticket and 'fields' in locals():
+    # Sort the fields
+    fields.sort(cmp=sort_nicely)
+
+    # Re-generate fields_map for use within the ticket template
+    fields_map = {}
+    for i in xrange(0, len(fields)):
+      fields_map[ fields[i]['name'] ] = i
+?>
+
+<!--! Gravatars for the ticket reporter -->
+<td py:match="td[@headers='h_reporter']" py:attrs="select('@*')">
+  <a href="${profile_link + ticket.reporter}">
+    <img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=48" srcset="//wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=96 2x" height="48" width="48" />
+  </a>
+    ${select('*|comment()|text()')}
+</td>
+
+<!--! Gravatars for the ticket owner -->
+<td py:match="td[@headers='h_owner']" py:attrs="select('@*')">
+  <a href="${profile_link + ticket.owner}" py:if="ticket.owner">
+    <img class="avatar" src="//wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=48" srcset="//wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=96 2x" height="48" width="48" />
+  </a>
+    ${select('*|comment()|text()')}
+</td>
+</html>
