@@ -32,6 +32,10 @@
 		pass
 ?>
 
+<!--! These are changes for tickets that are also loaded from
+	ticket_preview.html (as site.html isn't) -->
+<xi:include href="site-ticket.html" />
+
 <!--! Styles and such. Load before first JS file (jquery.js) -->
 <py:match path="head/script[contains(@src,'jquery.js')]">
 	<!--! WP.org Global Header -->
@@ -326,6 +330,5 @@
 	</py:if>
 </body>
 
-<xi:include href="site-ticket.html" />
 <xi:include href="site-specific.html"><xi:fallback /></xi:include>
 </html>
