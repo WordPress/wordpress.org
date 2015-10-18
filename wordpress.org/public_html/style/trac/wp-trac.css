@@ -199,17 +199,23 @@ form#search input {
 	border: none;
 }
 #tabs {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #tabs li li.active {
+	-webkit-border-radius: 0;
 	border-radius: 0;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 .plugin {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 .plugin .foldable > :link, .plugin .foldable > :visited {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 /* =browser.css */
@@ -232,6 +238,7 @@ table.code tbody th :link, table.code tbody th :visited {
 	color: #888;
 }
 div.code {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 
@@ -273,27 +280,31 @@ div.attachment #preview .diff .entry h2 a {
 	background: #eee;
 }
 .report div.reports h2 {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 h2.report-result {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 /* =roadmap.css */
-table.progress td.closed {
-	background-color: #83B4D8;
-	background-image: linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-	background-image: -o-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-	background-image: -moz-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-	background-image: -webkit-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-	background-image: -ms-linear-gradient(bottom, rgb(114,167,207) 0%, rgb(144,197,238) 100%);
-}
 table.progress {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
+table.progress td {
+	background: #dfdfdf;
+	background: rgba( 0, 0, 0, 0.1 );
+}
+table.progress td.closed {
+	background: #1e8cbe;
+}
 .milestone .info h2 {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 .trac-groupprogress table.progress {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 /* =ticket.css */
@@ -356,6 +367,8 @@ table.progress {
 }
 #properties input {
 	width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 #properties table th.col2 {
@@ -372,15 +385,19 @@ table.progress {
 	padding: .2em 0; /* breathing room */
 }
 #ticket {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 .ticketdraft {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 ul.children > li.child {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 #changelog h3, #ticketchange h3 {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #comment {
@@ -418,6 +435,7 @@ dl.unread {
 	color: #000;
 }
 h2 {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #content.timeline h2 {
@@ -465,6 +483,7 @@ blockquote.citation {
 	font: normal 10px "Open Sans",sans-serif;
 	background: none;
 	border: 0;
+	-webkit-border-radius: 0;
 	border-radius: 0;
 	line-height: 1;
 	margin-top: 8px;
@@ -473,6 +492,7 @@ blockquote.citation {
 }
 #mainnav .first, #mainnav .first :link,
 #mainnav .last, #mainnav .last :link {
+	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 #mainnav ul {
@@ -519,6 +539,7 @@ blockquote.citation {
 #prefs {
 	background: #f9f9f9;
 	border: 1px solid #ccc;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 	font-size: 10px;
 }
@@ -572,14 +593,18 @@ table.listing tbody tr:hover {
 	border: 1px solid #888;
 }
 span:target {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 input[type=button], input[type=submit], input[type=reset] {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	text-shadow: none;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 	text-shadow: none;
 }
@@ -589,57 +614,75 @@ input[type=button]:active, input[type=submit]:active, input[type=reset]:active {
 	left: auto;
 }
 input[type=text], input.textwidget, textarea {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	font-size: 13px;
 }
 fieldset {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 .inlinebuttons input {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 .inlinebuttons input[type=button]:hover,
 .inlinebuttons input[type=submit]:hover {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 	text-shadow: none;
 }
 #mainnav {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #mainnav :link, #mainnav :visited {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #mainnav :link:hover, #mainnav :visited:hover {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 div.trac-content {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 .foldable :link, .foldable :visited {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 #prefs {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 #prefs fieldset {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 pre.wiki, pre.literal-block {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 tt {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 table.wiki {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 table.listing {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 span.system-message,
 div.system-message {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 #notice.system-message,
@@ -656,15 +699,19 @@ div.system-message {
 	color: #333;
 }
 div.system-message .trac-close-msg {
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 div.system-message .trac-close-msg:hover {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 div.trac-content {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 .foldable :link, .foldable :visited {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 /* =wiki.css */
@@ -682,6 +729,7 @@ div.trac-content {
 	background: #eaf2fa; /* current TOC item */
 }
 .wikipage h2 {
+	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
@@ -689,6 +737,7 @@ div.trac-content {
 span.avatar img,
 table.properties img.avatar {
 	float: left;
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
 span.avatar img {
@@ -710,6 +759,7 @@ span.contributor-label[title]:hover {
 	color: #333; /* seems to fix Chrome issue where the cursor rule isn't immediately picked up */
 }
 #changelog span:target {
+	-webkit-background-clip: content-box;
 	background-clip: content-box;
 	padding-top: 24px;
 }
@@ -776,6 +826,7 @@ div.change > .trac-ticket-buttons {
 	display: none;
 }
 div.trac-ticket-buttons input[type=submit] {
+	-webkit-border-radius: 0;
 	border-radius: 0;
 	background: none;
 	padding: 0 5px;
@@ -1359,6 +1410,7 @@ body.core #reportfilters {
 	display: inline-block;
 	float: left;
 	margin: 0 0 6px 6px;
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	background: #eee;
 	color: #aaa;
@@ -1367,6 +1419,7 @@ body.core #reportfilters {
 	display: inline-block;
 	padding: 4px 7px;
 	color: inherit;
+	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	background: inherit;
 	text-decoration: none;
@@ -1429,7 +1482,6 @@ dt.attachment:before {
 	font-style: normal;
 	vertical-align: top;
 	-webkit-transition: color .1s ease-in 0;
-	-moz-transition: color .1s ease-in 0;
 	transition: color .1s ease-in 0;
 	text-align: center;
 	color: #777;
@@ -1748,6 +1800,7 @@ body.core #ctxtnav a[href="/report"] {
 	background: #fff;
 	color: black;
 	border: 1px solid #ccc;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 	box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 	min-width: 120px;
 	max-height: 200px;
@@ -1801,6 +1854,7 @@ a.mention.me {
 	font-weight: bold;
 	background: #ffe399;
 	color: #23282d;
+	-webkit-box-shadow: 1px 0 0 0 #ffe399, -1px 0 0 0 #ffe399, 0 0 0 2px #ffe399;
 	box-shadow: 1px 0 0 0 #ffe399, -1px 0 0 0 #ffe399, 0 0 0 2px #ffe399;
 }
 
@@ -1921,6 +1975,8 @@ a.mention.me {
 	#field-description {
 		margin: 0;
 		width: 100%;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
 	.milestone .info .progress {
@@ -1971,6 +2027,8 @@ a.mention.me {
 		display: block;
 		float: left;
 		width: 60%;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
 		box-sizing: border-box;
 	}
 	#ticket table.properties th {
@@ -2048,4 +2106,3 @@ a.mention.me {
 		margin-left: 0;
 	}
 }
-
