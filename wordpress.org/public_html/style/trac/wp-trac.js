@@ -40,6 +40,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug' ];
 
+	reservedTerms = [
+		'access', 'deprecated', 'global', 'ignore', 'internal', 'link', 'method',
+		'package', 'return','see', 'since', 'subpackage', 'todo', 'type', 'var'
+	];
+
 	wpTrac = {
 
 		gardener: typeof wpBugGardener !== 'undefined',
@@ -92,6 +97,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				$comment = $( this ).html();
 				if ( mentionsRegEx.test( $comment ) ) {
 					$comment = $comment.replace( mentionsRegEx, function( match, username ) {
+						if ( -1 !== $.inArray( username, reservedTerms ) ) {
+							return match;
+						}
+
 						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
 						return ' <a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
 					} );
