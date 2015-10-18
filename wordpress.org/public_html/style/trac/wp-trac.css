@@ -1644,6 +1644,16 @@ span.AtD_proofread_button:hover:before,
 span.AtD_proofread_button:before {
 	content: "\f210"; /* dashicons-editor-spellcheck */
 }
+
+.wikitoolbar a#code-php:before {
+	content: 'PHP';
+	font-size: 13px;
+	font-weight: bold;
+	position: relative;
+	left: -3px;
+	top: 2px;
+}
+
 #field-description-help,
 label[for=comment] {
 	line-height: 28px;

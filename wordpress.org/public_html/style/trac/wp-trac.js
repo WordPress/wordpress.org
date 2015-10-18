@@ -246,6 +246,66 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
+			// Add custom buttons to the formatting toolbar
+			// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
+			(function($) {
+				function extendWikiFormattingToolbar() {
+					var $textarea = $( this ), textarea = $textarea[0], $wikitoolbar;
+					if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+						return;
+					}
+
+					$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
+
+					// after = ID of an existing button
+					function addButton( id, title, after, fn ) {
+						var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
+						$button.on( 'click', function() {
+							if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
+								try { fn(); } catch (e) { }
+							}
+							return false;
+						});
+						$wikitoolbar.find( after ).after( $button );
+					}
+
+					function encloseSelection( prefix, suffix ) {
+						var start, end, sel, scrollPos, subst;
+						textarea.focus();
+						if ( 'undefined' !== typeof document.selection ) {
+							sel = document.selection.createRange().text;
+						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+							start = textarea.selectionStart;
+							end = textarea.selectionEnd;
+							scrollPos = textarea.scrollTop;
+							sel = textarea.value.substring( start, end );
+						}
+						if ( sel.match( / $/ ) ) { // exclude ending space char, if any
+							sel = sel.substring( 0, sel.length - 1 );
+							suffix = suffix + ' ';
+						}
+						subst = prefix + sel + suffix;
+						if ( 'undefined' !== typeof document.selection) {
+							var range = document.selection.createRange().text = subst;
+							textarea.caretPos -= suffix.length;
+						} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
+							textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
+							if ( sel ) {
+								textarea.setSelectionRange( start + subst.length, start + subst.length );
+							} else {
+								textarea.setSelectionRange( start + prefix.length, start + prefix.length );
+							}
+							textarea.scrollTop = scrollPos;
+						}
+					}
+
+					addButton( 'code-php', 'PHP Code block: {{{#!php example }}}', '#code', function() {
+						encloseSelection( "{{{#!php\n<?php\n", "\n}}}\n" );
+					});
+				}
+				$( 'textarea.wikitext' ).each( extendWikiFormattingToolbar );
+			})(jQuery);
+
 			// Force 'Attachments' and 'Modify Ticket' to be shown
 			$('#attachments').removeClass('collapsed');
 			$("#modify").parent().removeClass('collapsed');
