@@ -439,8 +439,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		},
 
 		autocomplete: (function() {
-			var users,
-				attachments,
+			var ticketParticipants = [],
+				nonTicketParticipants = [],
+				attachments = [],
 				settings = {};
 
 			return {
@@ -453,21 +454,60 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						settings = wpTracAutoCompleteUsers;
 					}
 
-					users = this.getUsers();
-					attachments  = this.getAttachments();
+					this.initTicketParticipants();
+					this.initNonTicketParticipants();
 
 					$( '#comment' ).atwho({
-						at:  '@',
-						data: users
+						at:        '@',
+						callbacks: {
+							filter:       this.filterTicketParticipants,
+							remoteFilter: this.filterNonTicketParticipants
+						}
 					}).atwho({
-						at: '[att',
-						insertTpl: '${atwho-at}achment:${name}]',
+						at:         '[att',
+						insertTpl:  '${atwho-at}achment:${name}]',
 						displayTpl: '<li>${display}</li>',
-						data: attachments
+						data:       this.getAttachments()
 					});
 				},
 
-				getUsers: function() {
+				filterNonTicketParticipants: function( query, callback ) {
+					// Bail out if the query is empty.
+					if ( '' === query ) {
+						return callback();
+					}
+
+					var results = [],
+						regex = new RegExp( '^' + query, 'ig' ); // start of string
+
+					$.each( nonTicketParticipants, function( key, value ) {
+						if ( value.toLowerCase().match( regex ) ) {
+							results.push( { name: value } );
+						}
+					});
+
+					callback( results );
+				},
+
+				filterTicketParticipants: function( query ) {
+					// Bail out if the query is empty.
+					if ( '' === query ) {
+						return ticketParticipants;
+					}
+
+					var results = [],
+						regex = new RegExp( '^' + query, 'ig' ); // start of string
+
+					$.each( ticketParticipants, function( key, value ){
+						if ( value.toLowerCase().match( regex ) ) {
+							results.push( value );
+						}
+					});
+
+					return results;
+				},
+
+				initTicketParticipants: function() {
 					var users  = [], exclude = [];
 
 					if ( 'undefined' !== settings.exclude ) {
@@ -492,10 +532,36 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						users.push( ticketReporter );
 					}
 
-					// Add additional users.
+					// Exclude current user.
+					if ( 'undefined' !== wpTrac.currentUser ) {
+						users = $.grep( users, function( user ) {
+							return user != wpTrac.currentUser;
+						});
+					}
+
+					ticketParticipants = users;
+				},
+
+				getTicketParticipants: function() {
+					return ticketParticipants;
+				},
+
+				addTicketParticipant: function( ticketParticipant ) {
+					if ( -1 === $.inArray( ticketParticipant, ticketParticipants ) ) {
+						$.merge( ticketParticipants, [ ticketParticipant ] );
+					}
+				},
+
+				initNonTicketParticipants: function() {
+					var users  = [], exclude = [];
+
+					if ( 'undefined' !== settings.exclude ) {
+						exclude = settings.exclude;
+					}
+
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function( k, username ) {
-							if ( -1 === $.inArray( username, users ) ) {
+							if ( -1 === $.inArray( username, users ) && -1 === $.inArray( username, ticketParticipants ) ) {
 								users.push( username );
 							}
 						});
@@ -508,14 +574,24 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						});
 					}
 
-					return users;
+					nonTicketParticipants = users;
+				},
+
+				getNonTicketParticipants: function() {
+					return nonTicketParticipants;
+				},
+
+				addNonTicketParticipant: function( nonTicketParticipant ) {
+					if ( -1 === $.inArray( nonTicketParticipant, nonTicketParticipants ) ) {
+						$.merge( nonTicketParticipants, [ nonTicketParticipant ] );
+					}
 				},
 
 				getAttachments: function() {
 					var attachments = [];
 
 					// Most recent should show up first.
-					$ ($( 'dl.attachments dt' ).get().reverse() ).each( function() {
+					$( $( 'dl.attachments dt' ).get().reverse() ).each( function() {
 						attachments.push({
 							display: $( this ).text(),
 							name: $( this ).find( 'a[title="View attachment"]' ).text()
@@ -907,20 +983,21 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						render( data.data['notifications-box'] );
 						if ( data.data.maintainers ) {
 							maintainerLabels( data.data.maintainers );
+						//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
 						}
 					}
-  				});
+				});
 			}
 
 			function maintainerLabels( maintainers ) {
 				var i, len, labels = {};
-  				for ( i = 0, len = maintainers.length; i < len; i++ ) {
-    				labels[ maintainers[i] ] = {
+					for ( i = 0, len = maintainers.length; i < len; i++ ) {
+					labels[ maintainers[i] ] = {
 						text:  'Component Maintainer',
 						title: '@' + maintainers[i] + ' maintains the ' + $.trim( $('td[headers="h_component"]').text() ) + ' component'
 					};
 				}
-  				wpTrac.showContributorLabels( labels );
+				wpTrac.showContributorLabels( labels );
 			}
 
 			function render( data ) {
