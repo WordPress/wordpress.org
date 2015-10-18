@@ -11,14 +11,11 @@
 
 	if project_slug == 'core':
 		notifications_enabled = 1
-		project_name = 'WordPress'
 
 	if project_slug == 'bbpress' :
 		support_link = '//bbpress.org/forums/'
-		project_name = 'bbPress'
 	elif project_slug == 'buddypress' :
 		support_link = '//buddypress.org/support/topics/'
-		project_name = 'BuddyPress'
 	else :
 		support_link = '//wordpress.org/support/'
 
@@ -122,9 +119,9 @@
 		</div>
 		<py:if test="project_slug in ['core', 'bbpress', 'buddypress']">
 		<div class="newticket-instructions">
-			<p><strong>This form is for reporting bugs in ${project_name}.</strong> Here are some questions and tips to help you write a great bug report:</p>
+			<p><strong>This form is for reporting bugs in ${project.name}.</strong> Here are some questions and tips to help you write a great bug report:</p>
 			<ul>
-				<li>Are you using either the latest version of ${project_name}, or the latest development version? If not, please update first.</li>
+				<li>Are you using either the latest version of ${project.name}, or the latest development version? If not, please update first.</li>
 				<li>What steps should be taken to consistently reproduce the problem?</li>
 				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
 				<li>In case it's relevant to the ticket, what is the expected output or result? What did you see instead?</li>
