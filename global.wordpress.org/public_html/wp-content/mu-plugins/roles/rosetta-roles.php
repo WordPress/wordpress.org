@@ -46,6 +46,7 @@ class Rosetta_Roles {
 		add_filter( 'gettext_with_context', array( $this, 'rename_user_roles' ), 10, 4 );
 		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
 		add_filter( 'user_row_actions', array( $this, 'promote_user_to_translation_editor' ), 10, 2 );
+		add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
 	}
 
 	/**
@@ -209,6 +210,7 @@ class Rosetta_Roles {
 		);
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
+		add_action( 'load-' . $this->translation_editors_page, array( $this, 'register_screen_options' ) );
 		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( $this, 'enqueue_scripts' ) );
 		add_action( 'admin_footer-' . $this->translation_editors_page, array( $this, 'print_js_templates' ) );
 		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( $this, 'enqueue_styles' ) );
@@ -254,6 +256,39 @@ class Rosetta_Roles {
 			<# } #>
 		</script>
 		<?php
+	}
+
+	/**
+	 * Registers a 'per_page' screen option for the list table.
+	 */
+	public function register_screen_options() {
+		$option = 'per_page';
+		$args   = array(
+			'default' => 10,
+			'option'  => 'translation_editors_per_page'
+		);
+		add_screen_option( $option, $args );
+	}
+
+	/**
+	 * Adds the 'per_page' screen option to the whitelist so it gets saved.
+	 *
+	 * @param bool|int $new_value Screen option value. Default false to skip.
+	 * @param string   $option    The option name.
+	 * @param int      $value     The number of rows to use.
+	 * @return bool|int New screen option value.
+	 */
+	public function save_custom_screen_options( $new_value, $option, $value ) {
+		if ( 'translation_editors_per_page' !== $option ) {
+			return $new_value;
+		}
+
+		$value = (int) $value;
+		if ( $value < 1 || $value > 999 ) {
+			return $new_value;
+		}
+
+		return $value;
 	}
 
 	/**

@@ -66,9 +66,9 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Prepare the list for display.
 	 */
 	public function prepare_items() {
-		$search = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
-		$per_page = 10;
-		$paged = $this->get_pagenum();
+		$search =   isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		$per_page = $this->get_items_per_page( 'translation_editors_per_page', 10 );
+		$paged =    $this->get_pagenum();
 
 		$args = array(
 			'number' => $per_page,
