@@ -71,6 +71,12 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 		unset( $plugins['tagregator/bootstrap.php'] );
 		unset( $plugins['wc-canonical-years/wc-canonical-years.php'] );
 		unset( $plugins['wordcamp-organizer-nags/wordcamp-organizer-nags.php'] );
+	}
+
+	/*
+	 * plan.wordcamp.org
+	 */
+	if ( 63 === get_current_blog_id() ) {
 		unset( $plugins['wordcamp-payments/bootstrap.php'] );
 	}
 
