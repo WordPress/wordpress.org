@@ -1,0 +1,66 @@
+/**
+ * Adding support for language written in a Right To Left (RTL).
+ *
+ * @link http://codex.wordpress.org/Right_to_Left_Language_Support
+ */
+
+/**
+ * 1.0 General
+ */
+
+html,
+body {
+	direction: rtl;
+	font-family: Tahoma, Arial, sans-serif;
+	text-align: right;
+	unicode-bidi: embed;
+}
+
+.sidebar .forum-info li:before,
+.sidebar .topic-info li:before,
+.sidebar div ul li a:before {
+	float: right;
+	margin-left: 0;
+	margin-left: 5px;
+}
+
+/**
+ * 2.0 Accessibility
+ */
+
+.hidden,
+#accessibility {
+	left: auto;
+	right: -999em;
+}
+
+/**
+ * 3.0 Overrides
+ */
+
+@media only screen and (min-width: 960px) {
+	#bbpress-forums {
+		margin-left: 0;
+		margin-right: 20px;
+	}
+
+	.col-6 #bbpress-forums {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+#pagebody ul.forum-info,
+#pagebody ul.forum-feeds,
+#pagebody ul.topic-info,
+#pagebody ul.topic-tags,
+#pagebody ul.topic-views,
+#pagebody ul.topic-admin-links {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#pagebody ul a.feed {
+	padding-left: 0;
+	padding-right: 0;
+}

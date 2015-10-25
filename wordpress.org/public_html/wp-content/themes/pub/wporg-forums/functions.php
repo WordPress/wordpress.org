@@ -35,7 +35,18 @@ function wporg_support_scripts() {
 		'20150704'
 	);
 
+	wp_register_style(
+		'forum-wp4-style-rtl',
+		get_template_directory_uri() . '/style-rtl.css',
+		array( 'forum-wp4-style' ),
+		'20151025'
+	);
+
 	wp_enqueue_style( 'forum-wp4-style' );
+
+	if ( is_rtl() ) {
+		wp_enqueue_style( 'forum-wp4-style-rtl' );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 
