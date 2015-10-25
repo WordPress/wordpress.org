@@ -281,7 +281,7 @@ class CampTix_Attendance extends CampTix_Addon {
 		$secret_url = ! empty( $this->secret ) ? add_query_arg( 'camptix-attendance', $this->secret, home_url() ) : '';
 		?>
 		<input type="hidden" name="camptix_options[attendance-secret]" value="1" />
-		<textarea class="large-text" rows="4" disabled="disabled"><?php echo esc_textarea( $secret_url ); ?></textarea>
+		<textarea class="large-text" rows="4" readonly><?php echo esc_textarea( $secret_url ); ?></textarea>
 
 		<input id="camptix-attendance-generate" type="checkbox" name="camptix_options[attendance-generate]" value="1" />
 		<label for="camptix-attendance-generate"><?php _e( 'Generate a new secret link (old links will expire)', 'camptix' ); ?></label>
