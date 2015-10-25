@@ -9,9 +9,3 @@ add_action( 'tmpl_load_locations', function( $locations, $template, $args, $temp
 	return $locations;
 }, 50, 4 );
 
-add_filter( 'gp_breadcrumb', function( $breadcrumb ) {
-	$breadcrumb = preg_replace( '#<span class="separator">(.*?)</span>#', '', $breadcrumb, 1 );
-	if ( false !== strpos( $breadcrumb, '<span class="active bubble">' ) )
-		$breadcrumb = str_replace( '</span><span class="active bubble">', ' <span class="active bubble">', $breadcrumb ) . '</span>';
-	return $breadcrumb;
-}, 11 ); // After bubble is added by lamba() in gp-templates/project.php
