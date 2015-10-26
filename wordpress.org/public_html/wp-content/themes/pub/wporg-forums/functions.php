@@ -39,7 +39,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style-rtl',
 		get_template_directory_uri() . '/style-rtl.css',
 		array( 'forum-wp4-style' ),
-		'20151025'
+		'20151026'
 	);
 
 	wp_enqueue_style( 'forum-wp4-style' );

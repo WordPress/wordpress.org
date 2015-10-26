@@ -64,3 +64,11 @@ body {
 	padding-left: 0;
 	padding-right: 0;
 }
+
+#bbpress-forums div.bbp-topic-content code,
+#bbpress-forums div.bbp-reply-content code,
+#bbpress-forums div.bbp-topic-content pre,
+#bbpress-forums div.bbp-reply-content pre {
+	direction: ltr;
+	text-align: left;
+}
