@@ -101,6 +101,16 @@ function init() {
 
 	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' );
 
+	add_filter( 'document_title_separator', __NAMESPACE__ . '\\theme_title_separator', 10, 2 );
+}
+
+/**
+ * Customize the theme title separator.
+ *
+ * @return string
+ */
+function theme_title_separator(){
+	return '|';
 }
 
 /**

@@ -38,30 +38,36 @@ add_filter( 'body_class', 'wporg_developer_body_classes' );
 /**
  * Filters wp_title to print a neat <title> tag based on what is being viewed.
  *
- * @param string $title Default title text for current view.
- * @param string $sep Optional separator.
- * @return string The filtered title.
+ * @param array $parts The document title parts.
+ * @return array The document title parts.
  */
-function wporg_developer_wp_title( $title, $sep ) {
+function wporg_developer_wp_title( $parts ) {
 	global $page, $paged;
 
 	if ( is_feed() ) {
-		return $title;
+		return $parts;
 	}
+
+	$title = $parts['title'];
+	$sep = '|';
 
 	$post_type = get_query_var( 'post_type' );
 
+	// Omit 'Home' from the home page.
+	if ( 'Home' === $title ) {
+		$title = '';
+	}
 	// Add post type to title if it's a parsed item.
-	if ( is_singular() && \DevHub\is_parsed_post_type( $post_type ) ) {
+	elseif ( is_singular() && \DevHub\is_parsed_post_type( $post_type ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
-			$title .= get_post_type_object( $post_type )->labels->singular_name . " $sep ";
+			$title .= " $sep " . get_post_type_object( $post_type )->labels->singular_name;
 		}
 	}
 	// Add handbook name to title if relevent
 	elseif ( is_singular() && false !== strpos( $post_type, 'handbook' ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
-			$handbook_label = get_post_type_object( $post_type )->labels->name . " $sep ";
-			$handbook_name  = \WPorg_Handbook::get_name( $post_type ) . " Handbook $sep ";
+			$handbook_label = " $sep " . get_post_type_object( $post_type )->labels->name;
+			$handbook_name  = " $sep " . \WPorg_Handbook::get_name( $post_type ) . " Handbook";
 
 			// Replace title with handbook name if this is landing page for the handbook
 			if ( $title == $handbook_label ) {
@@ -74,16 +80,14 @@ function wporg_developer_wp_title( $title, $sep ) {
 	}
 
 	// Add a page number if necessary:
-	if ( $paged >= 2 || $page >= 2 ) {
-		$title .= sprintf( __( 'Page %s', 'wporg' ), max( $paged, $page ) ) . " $sep ";
+	if ( isset( $parts['page'] ) && $parts['page'] >= 2 ) {
+		$title .= " $sep " . sprintf( __( 'Page %s', 'wporg' ), $parts['page'] );
 	}
 
-	// Add the blog name
-	$title .= get_bloginfo( 'name' );
-
-	return $title;
+	$parts['title'] = $title;
+	return $parts;
 }
-add_filter( 'wp_title', 'wporg_developer_wp_title', 10, 2 );
+add_filter( 'document_title_parts', 'wporg_developer_wp_title' );
 
 /**
  * Prefixes excerpts for archive view with content type label.
