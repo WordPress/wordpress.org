@@ -56,6 +56,9 @@ function wpmobileapps_setup() {
 		'comment-form',
 		'gallery',
 	) );
+
+	// Enable support for title tag.
+	add_theme_support( 'title-tag' );
 }
 endif; // wpmobileapps_setup
 add_action( 'after_setup_theme', 'wpmobileapps_setup' );
@@ -188,6 +191,31 @@ function wpmobileapps_excerpt_length( $length ) {
 	return 25;
 }
 add_filter( 'excerpt_length', 'wpmobileapps_excerpt_length' );
+
+/**
+ * Return the title separator.
+ *
+ * @return string
+ */
+function wpmobileapps_title_separator(){
+	return '|';
+}
+add_filter( 'document_title_separator', 'wpmobileapps_title_separator' );
+
+/**
+ * Omit page name from front page title.
+ *
+ * @param array $parts The document title parts.
+ * @return array The document title parts.
+ */
+function wpmobileapps_remove_frontpage_name_from_title( $parts ) {
+	if ( is_front_page() ) {
+		$parts['title'] = '';
+	}
+
+	return $parts;	
+}
+add_filter( 'document_title_parts', 'wpmobileapps_remove_frontpage_name_from_title' );
 
 /**
  * Remove Jetpack Likes on the grid page template.
