@@ -1495,6 +1495,13 @@ div.plugin-meta img {
 	right: 20px;
 }
 
+/* =Trac
+-------------------------------------------------------------- */
+
+body.trac .attachment {
+	display: inline;
+}
+
 /* =Responsive Overrides
 -------------------------------------------------------------- */
 
