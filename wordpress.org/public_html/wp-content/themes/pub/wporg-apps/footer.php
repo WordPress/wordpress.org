@@ -34,7 +34,7 @@
 				}
 			?>
 
-			<p class="wporg-attribution"><a href="http://wordpress.org">WordPress.org</a></p>
+			<p class="wporg-attribution"><a href="https://wordpress.org">WordPress.org</a></p>
 
 		</div><!-- .site-info -->
 		</div><!-- .footer-area -->
