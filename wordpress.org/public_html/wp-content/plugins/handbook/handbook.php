@@ -30,10 +30,15 @@ class WPorg_Handbook_Init {
 		}
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 	}
 
 	static public function enqueue_styles() {
 		wp_enqueue_style( 'wporg-handbook-css', plugins_url( '/stylesheets/callout-boxes.css', __FILE__ ), array(), '20150507' );
+	}
+
+	static public function enqueue_scripts() {
+		wp_enqueue_script( 'wporg-handbook', plugins_url( '/scripts/handbook.js', __FILE__ ), array( 'jquery' ), '20150930' );
 	}
 
 }
