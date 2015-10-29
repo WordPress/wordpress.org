@@ -24,8 +24,10 @@ class WordCamp_Payments_Network_Tools {
 			wp_schedule_event( time(), 'hourly', 'wordcamp_payments_aggregate' );
 
 		add_action( 'wordcamp_payments_aggregate', array( __CLASS__, 'aggregate' ) );
+		add_action( 'admin_enqueue_scripts',  array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'network_admin_menu', array( __CLASS__, 'network_admin_menu' ) );
 		add_action( 'init', array( __CLASS__, 'upgrade' ) );
+		add_action( 'init', array( __CLASS__, 'process_export_request' ) );
 
 		// Diff-based updates to the index.
 		add_action( 'save_post', array( __CLASS__, 'save_post' ) );
@@ -126,6 +128,8 @@ class WordCamp_Payments_Network_Tools {
 			'blog_id' => get_current_blog_id(),
 			'post_id' => $request->ID,
 			'created' => get_post_time( 'U', true, $request->ID ),
+				// todo Sometimes this is empty. Core normally catches this (r8636), but misses in our case because we don't use drafts. #1350-meta might have the side-effect of solving this.
+			'paid'    => absint( get_post_meta( $request->ID, '_camppayments_date_vendor_paid', true ) ),
 			'due' => absint( get_post_meta( $request->ID, '_camppayments_due_by', true ) ),
 			'status' => $request->post_status,
 			'method' => get_post_meta( $request->ID, '_camppayments_payment_method', true ),
@@ -177,27 +181,258 @@ class WordCamp_Payments_Network_Tools {
 	}
 
 	/**
+	 * Enqueue scripts and stylesheets
+	 *
+	 * @param string $hook
+	 */
+	public static function enqueue_assets( $hook ) {
+		if ( 'index_page_wcp-dashboard' == $hook && 'export' == self::get_current_tab() ) {
+			wp_enqueue_script( 'jquery-ui-datepicker' );
+			wp_enqueue_style( 'jquery-ui' );
+			wp_enqueue_style( 'wp-datepicker-skins' );
+		}
+	}
+
+	/**
 	 * Renders the Dashboard - Payments screen.
 	 */
 	public static function render_dashboard() {
 		?>
+
 		<div class="wrap">
-			<?php screen_icon( 'tools' ); ?>
 			<h1>WordCamp Payments Dashboard</h1>
+
 			<?php settings_errors(); ?>
+
 			<h3 class="nav-tab-wrapper"><?php self::render_dashboard_tabs(); ?></h3>
 
-			<?php self::$list_table->print_inline_css(); ?>
-			<div id="wcp-list-table">
+			<?php
+				if ( 'export' == self::get_current_tab() ) {
+					self::render_export_tab();
+				} else {
+					self::render_table_tabs();
+				}
+			?>
 
-				<?php self::$list_table->prepare_items(); ?>
-				<form id="posts-filter" action="" method="get">
-					<input type="hidden" name="page" value="wcp-dashboard" />
-					<input type="hidden" name="wcp-section" value="overdue" />
-					<?php self::$list_table->display(); ?>
-				</form>
+		</div> <!-- /wrap -->
 
-			</div>
+		<?php
+	}
+
+	/**
+	 * Render the table tabs, like Overview, Pending, etc
+	 */
+	protected static function render_table_tabs() {
+		?>
+
+		<?php self::$list_table->print_inline_css(); ?>
+
+		<div id="wcp-list-table">
+			<?php self::$list_table->prepare_items(); ?>
+
+			<form id="posts-filter" action="" method="get">
+				<input type="hidden" name="page" value="wcp-dashboard" />
+				<input type="hidden" name="wcp-section" value="overdue" />
+				<?php self::$list_table->display(); ?>
+			</form>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Process export requests
+	 */
+	public static function process_export_request() {
+		if ( empty( $_POST['submit'] ) || 'export' != self::get_current_tab() ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_network' ) || ! check_admin_referer( 'export', 'wcpn_request_export' ) ) {
+			return;
+		}
+
+		$start_date = strtotime( $_POST['wcpn_export_start_date'] . ' 00:00:00' );
+		$end_date   = strtotime( $_POST['wcpn_export_end_date']   . ' 23:59:59' );
+		$filename   = sanitize_file_name( sprintf( 'wordcamp-payments-%s-to-%s.csv', date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ) ) );
+
+		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date );
+
+		if ( is_wp_error( $report ) ) {
+			add_settings_error( 'wcp-dashboard', $report->get_error_code(), $report->get_error_message() );
+		} else {
+			header( 'Content-Type: text/csv' );
+			header( sprintf( 'Content-Disposition: attachment; filename="%s"', $filename ) );
+			header( 'Cache-control: private' );
+			header( 'Pragma: private' );
+			header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
+
+			echo $report;
+			die();
+		}
+	}
+
+	/*
+	 * Generate and return the raw payment report contents
+	 *
+	 * @param string $date_type 'paid' | 'created'
+	 * @param int $start_date
+	 * @param int $end_date
+	 *
+	 * @return string | WP_Error
+	 */
+	protected static function generate_payment_report( $date_type, $start_date, $end_date ) {
+		global $wpdb;
+
+		if ( ! in_array( $date_type, array( 'paid', 'created' ), true ) ) {
+			return new WP_Error( 'wcpn_bad_date_type', 'Invalid date type.' );
+		}
+
+		if ( ! is_int( $start_date ) || ! is_int( $end_date ) ) {
+			return new WP_Error( 'wcpn_bad_dates', 'Invalid start or end date.' );
+		}
+
+		$column_headings = array(
+			'WordCamp', 'ID', 'Title', 'Status', 'Date Vendor was Paid', 'Creation Date', 'Due Date', 'Amount',
+			'Currency', 'Category', 'Payment Method','Vendor Name', 'Vendor Contact Person', 'Vendor Country',
+			'Check Payable To', 'URL', 'Supporting Documentation Notes',
+		);
+
+		$table_name = self::get_table_name();
+
+		$request_indexes = $wpdb->get_results( $wpdb->prepare( "
+			SELECT *
+			FROM   `{$table_name}`
+			WHERE  `{$date_type}` BETWEEN %d AND %d",
+			$start_date,
+			$end_date
+		) );
+		$report = fopen( 'php://output', 'w' );
+
+		fputcsv( $report, $column_headings );
+
+		foreach( $request_indexes as $index ) {
+			fputcsv( $report, self::get_report_row( $index ) );
+		}
+
+		fclose( $report );
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gather all the request details needed for a row in the export file
+	 *
+	 * @param stdClass $index
+	 *
+	 * @return array
+	 */
+	protected static function get_report_row( $index ) {
+		switch_to_blog( $index->blog_id );
+
+		$request          = get_post( $index->post_id );
+		$currency         = get_post_meta( $index->post_id, '_camppayments_currency',         true );
+		$category         = get_post_meta( $index->post_id, '_camppayments_payment_category', true );
+		$date_vendor_paid = get_post_meta( $index->post_id, '_camppayments_date_vendor_paid', true );
+
+		if ( $date_vendor_paid ) {
+			$date_vendor_paid = date( 'Y-m-d', $date_vendor_paid );
+		}
+
+		if ( 'null-select-one' === $currency ) {
+			$currency = '';
+		}
+
+		if ( 'null' === $category ) {
+			$category = '';
+		}
+
+		$row = array(
+			get_wordcamp_name(),
+			sprintf( '%d-%d', $index->blog_id, $index->post_id ),
+			$request->post_title,
+			$index->status,
+			$date_vendor_paid,
+			date( 'Y-m-d', $index->created ),
+			date( 'Y-m-d', $index->due ),
+			get_post_meta( $index->post_id, '_camppayments_payment_amount', true ),
+			$currency,
+			$category,
+			get_post_meta( $index->post_id, '_camppayments_payment_method', true ),
+			get_post_meta( $index->post_id, '_camppayments_vendor_name', true ),
+			get_post_meta( $index->post_id, '_camppayments_vendor_contact_person', true ),
+			get_post_meta( $index->post_id, '_camppayments_vendor_country', true ),
+			get_post_meta( $index->post_id, '_camppayments_payable_to', true ),
+			get_edit_post_link( $index->post_id ),
+			get_post_meta( $index->post_id, '_camppayments_file_notes', true ),
+		);
+
+		restore_current_blog();
+
+		return $row;
+	}
+
+	/**
+	 * Render the Export tab
+	 */
+	protected static function render_export_tab() {
+		$today      = date( 'Y-m-d' );
+		$last_month = date( 'Y-m-d', strtotime( 'now - 1 month' ) );
+		?>
+
+		<script>
+			/**
+			 * Fallback to the jQueryUI datepicker if the browser doesn't support <input type="date">
+			 */
+			jQuery( document ).ready( function( $ ) {
+				var browserTest = document.createElement( 'input' );
+				browserTest.setAttribute( 'type', 'date' );
+
+				if ( 'text' === browserTest.type ) {
+					$( '#wcpn_export' ).find( 'input[type=date]' ).datepicker( {
+						dateFormat : 'yy-mm-dd',
+						changeMonth: true,
+						changeYear : true
+					} );
+				}
+			} );
+		</script>
+
+		<form id="wcpn_export" method="POST">
+			<?php wp_nonce_field( 'export', 'wcpn_request_export' ); ?>
+
+			<p>
+				This form will supply a CSV file with payment requests matching the parameters you select below.
+				For example, all requests that were <code>paid</code> between <code><?php echo esc_html( $last_month ); ?></code> and <code><?php echo esc_html( $today ); ?></code>.
+			</p>
+
+			<p>
+				<label>
+					Date type:
+					<select name="wcpn_date_type">
+						<option value="created">created</option>
+						<option value="paid" selected>paid</option>
+					</select>
+				</label>
+			</p>
+
+			<p>
+				<label>
+					Start date:
+					<input type="date" name="wcpn_export_start_date" class="medium-text" value="<?php echo esc_attr( $last_month ); ?>" />
+				</label>
+			</p>
+
+			<p>
+				<label>
+					End date:
+					<input type="date" name="wcpn_export_end_date" class="medium-text" value="<?php echo esc_attr( $today ); ?>" />
+				</label>
+			</p>
+
+			<?php submit_button( 'Export' ); ?>
+		</form>
+
 		<?php
 	}
 
@@ -216,7 +451,7 @@ class WordCamp_Payments_Network_Tools {
 	public static function get_current_tab() {
 		$tab = 'overdue';
 
-		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], array( 'pending', 'overdue', 'paid', 'incomplete' ) ) ) {
+		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], array( 'pending', 'overdue', 'paid', 'incomplete', 'export' ) ) ) {
 			$tab = $_REQUEST['wcp-section'];
 		}
 
@@ -233,6 +468,7 @@ class WordCamp_Payments_Network_Tools {
 			'pending' => 'Pending',
 			'paid'    => 'Paid',
 			'incomplete' => __( 'Incomplete', 'wordcamporg' ),
+			'export'     => __( 'Export', 'wordcamporg' ),
 		);
 
 		foreach ( $sections as $section_key => $section_caption ) {
