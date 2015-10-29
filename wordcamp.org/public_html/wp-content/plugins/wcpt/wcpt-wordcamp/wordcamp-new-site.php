@@ -413,6 +413,7 @@ class WordCamp_New_Site {
 				'content' =>
 					'<p>' .
 						sprintf(
+							// translators: %s: URL for code of conduct policy
 							__( '<em>Organizers note:</em> Below is a boilerplate code of conduct that you can customize; another great example is the Ada Initiative <a href="%s">anti-harassment policy.</a>', 'wordcamporg' ),
 							'http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Policy'
 						) .
@@ -420,6 +421,7 @@ class WordCamp_New_Site {
 
 					'<p>' .
 						sprintf(
+							// translators: %s: URL for article about harassment reports
 							__( 'We also recommend the organizing team read this article on <a href="%s">how to take a harassment report</a>', 'wordcamporg' ),
 							'http://geekfeminism.wikia.com/wiki/Conference_anti-harassment/Responding_to_reports'
 						) .
@@ -446,7 +448,8 @@ class WordCamp_New_Site {
 	protected function get_stub_posts( $wordcamp, $meta ) {
 		$posts = array(
 			array(
-				'title'   => __( 'Welcome to ', 'wordcamporg' ) . get_option( 'blogname' ),
+				// translators: %s: site title
+				'title'   => sprintf( __( 'Welcome to %s', 'wordcamporg' ), get_option( 'blogname' ) ),
 				'content' =>
 					'<p>' . __( '<em>Organizers note:</em> Please update the portions <span style="color: red; text-decoration: underline;">with red text</span>.', 'wordcamporg' ) . '</p> ' .
 					'<p>' . __( 'We\'re happy to announce that <span style="color: red; text-decoration: underline;">WordCamp YourCityName</span> is officially on the calendar!', 'wordcamporg' ) . '</p> ' .
@@ -653,6 +656,7 @@ class WordCamp_New_Site {
 			$sponsorship_level = $sponsorship_level_id[0]->sponsorship_level;
 
 			$pages[] = array(
+				// translators: %s: sponsorship level
 				'title'   => sprintf( __( 'Thank you to our %s sponsors', 'wordcamporg' ), $sponsorship_level->post_title ),
 				'content' => sprintf(
 					'%s %s',
