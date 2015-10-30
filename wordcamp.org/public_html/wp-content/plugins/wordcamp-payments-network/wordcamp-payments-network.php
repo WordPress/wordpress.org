@@ -307,6 +307,8 @@ class WordCamp_Payments_Network_Tools {
 			$start_date,
 			$end_date
 		) );
+
+		ob_start();
 		$report = fopen( 'php://output', 'w' );
 
 		fputcsv( $report, $column_headings );
@@ -316,7 +318,6 @@ class WordCamp_Payments_Network_Tools {
 		}
 
 		fclose( $report );
-
 		return ob_get_clean();
 	}
 
@@ -484,3 +485,4 @@ class WordCamp_Payments_Network_Tools {
 
 // Initialize the plugin.
 add_action( 'plugins_loaded', array( 'WordCamp_Payments_Network_Tools', 'plugins_loaded' ) );
+
