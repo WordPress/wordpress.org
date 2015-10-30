@@ -362,7 +362,7 @@ class WordCamp_Payments_Network_Tools {
 			get_post_meta( $index->post_id, '_camppayments_vendor_name', true ),
 			get_post_meta( $index->post_id, '_camppayments_vendor_contact_person', true ),
 			get_post_meta( $index->post_id, '_camppayments_vendor_country', true ),
-			get_post_meta( $index->post_id, '_camppayments_payable_to', true ),
+			WCP_Encryption::maybe_decrypt( get_post_meta( $index->post_id, '_camppayments_payable_to', true ) ),
 			get_edit_post_link( $index->post_id ),
 			get_post_meta( $index->post_id, '_camppayments_file_notes', true ),
 		);
