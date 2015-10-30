@@ -22,7 +22,7 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 		parent::__construct();
 		$this->add_action( 'translation_created' );
 		$this->add_action( 'translation_saved' );
-		$this->add_action( 'originals_imported' );
+		$this->add_action( 'originals_imported', array( 'args' => 5 ) );
 
 		// DB Writes are delayed until shutdown to bulk-update the stats during imports
 		$this->add_action( 'shutdown' );
@@ -40,8 +40,10 @@ class GP_WPorg_Project_Stats extends GP_Plugin {
 		$this->projects_to_update[ $set->project_id ][ $set->locale . '/' . $set->slug ] = true;
 	}
 
-	function originals_imported( $project_id ) {
-		$this->projects_to_update[ $project_id ] = true;
+	function originals_imported( $project_id, $originals_added, $originals_existing, $originals_obsoleted, $originals_fuzzied ) {
+		if ( $originals_added || $originals_existing || $originals_obsoleted || $originals_fuzzied ) {
+			$this->projects_to_update[ $project_id ] = true;
+		}
 	}
 
 	// Counts up all the
