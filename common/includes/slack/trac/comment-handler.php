@@ -29,7 +29,7 @@ class Comment_Handler {
 
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
-		
+
 		// Trim off headers.
 		while ( $lines && '' !== current( $lines ) ) {
 			$line = array_shift( $lines );
@@ -38,23 +38,23 @@ class Comment_Handler {
 				list( , $comment_url ) = explode( ': ', $line );
 				list( $ticket_url, $comment_id ) = explode( '#comment:', $comment_url );
 				list( $trac_url, $ticket_id ) = explode( '/ticket/', $ticket_url );
-	
+
 				$trac = Trac::get( $trac_url );
 				if ( ! $trac ) {
 					return false;
 				}
-                        } elseif ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
-                                $base64 = true;
+			} elseif ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
+				$base64 = true;
 			}
 		}
 
-                if ( ! empty( $base64 ) ) {
-                        $lines = explode( "\n", base64_decode( implode( "\n", $lines ) ) );
-                }
+		if ( ! empty( $base64 ) ) {
+			$lines = explode( "\n", base64_decode( implode( "\n", $lines ) ) );
+		}
 
 		// Remove empty line between headers and body.
 		array_shift( $lines );
-		
+
 		$title = '';
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			if ( '' !== $title ) {
@@ -79,12 +79,12 @@ class Comment_Handler {
 		}
 		// Remove bottom border of table.
 		array_shift( $lines );
-		
+
 		// Remove empty line if present. (It is when it's a comment without changes.)
 		if ( current( $lines ) === '' ) {
 			array_shift( $lines );
 		}
-		
+
 		// Remove Trac email footer.
 		while ( $lines && end( $lines ) !== '--' ) {
 			array_pop( $lines );
@@ -93,26 +93,26 @@ class Comment_Handler {
 		array_pop( $lines );
 		// Remove empty line before footer.
 		array_pop( $lines );
-		
+
 		preg_match( '/^(Comment|Changes) \(by (.*)\):$/', array_shift( $lines ), $matches );
 		$has_changes = $matches[1] === 'Changes';
 		$author = $matches[2];
 
 		// Remove blank line after 'Comment|Changes (by author):'
 		array_shift( $lines );
-		
+
 		$changes = $comment = array();
 		if ( $has_changes ) {
 			while ( $lines && '' !== current( $lines ) ) {
 				$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', array_shift( $lines ) );
 			}
 		}
-		
+
 		// Remove blank lines (should be two if it had changes).
 		while ( $lines && '' === current( $lines ) ) {
 			array_shift( $lines );
 		}
-		
+
 		// Next line should start with 'Comment' if there is one.
 		if ( $has_changes && 0 === strpos( current( $lines ), 'Comment' ) ) {
 			array_shift( $lines ); // Remove 'Comment'
@@ -150,7 +150,7 @@ class Comment_Handler {
 	function generate_payload() {
 		$this->send->set_icon( $this->trac->get_icon() );
 		$this->send->set_username( $this->trac->get_ticket_username() );
-			
+
 		$comment         = $this->format_comment_for_slack();
 		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
 		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $this->author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
@@ -163,7 +163,7 @@ class Comment_Handler {
 			'mrkdwn_in' => array( 'pretext', 'fallback', 'text' ),
 		);
 
-		// Ensure the comment uses a darker gray color, even when alone.	
+		// Ensure the comment uses a darker gray color, even when alone.
 		if ( ! $this->changes ) {
 			$attachment['color'] = '#999';
 		}
