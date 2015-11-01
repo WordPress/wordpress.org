@@ -93,6 +93,23 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			LEFT JOIN ticket_custom c ON c.ticket = t.id AND c.name = 'focuses' WHERE component = %s AND status <> 'closed' AND milestone LIKE '_._'", $component ) );
 	}
 
+	function get_trac_notifications_info( $ticket_id, $username ) {
+		$meta = array(
+			'get_trac_ticket'                              => $this->get_trac_ticket( $ticket_id ),
+			'get_trac_ticket_focuses'                      => $this->get_trac_ticket_focuses( $ticket_id ),
+			'get_trac_notifications_for_user'              => $this->get_trac_notifications_for_user( $username ),
+			'get_trac_ticket_subscription_status_for_user' => $this->get_trac_ticket_subscription_status_for_user( $ticket_id, $username ),
+			'get_trac_ticket_subscriptions'                => $this->get_trac_ticket_subscriptions( $ticket_id ),
+			'get_trac_ticket_participants'                 => $this->get_trac_ticket_participants( $ticket_id ),
+		);
+
+		if ( $meta['get_trac_ticket']->reporter !== $username ) {
+			$meta['get_reporter_last_activity'] = $this->get_reporter_past_activity( $meta['get_trac_ticket']->reporter, $ticket_id );
+		}
+
+		return $meta;
+	}
+
 	function get_trac_ticket( $ticket_id ) {
 		return $this->db->get_row( $this->db->prepare( "SELECT * FROM ticket WHERE id = %d", $ticket_id ) );
 	}

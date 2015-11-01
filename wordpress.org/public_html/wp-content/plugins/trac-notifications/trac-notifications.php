@@ -196,22 +196,22 @@ class wporg_trac_notifications {
 		if ( ! $ticket_id ) {
 			exit;
 		}
-		$ticket = $this->api->get_trac_ticket( $ticket_id );
-		if ( ! $ticket ) {
+
+		$meta = $this->api->get_trac_notifications_info( $ticket_id, $username );
+		if ( ! $meta ) {
 			exit;
 		}
 
-		$focuses = explode( ', ', $this->api->get_trac_ticket_focuses( $ticket_id ) );
+		$ticket               = $meta['get_trac_ticket'];
+		$focuses              = $meta['get_trac_ticket_focuses'];
+		$notifications        = $meta['get_trac_ticket_focuses'];
+		$ticket_sub           = $meta['get_trac_ticket_subscription_status_for_user'];
+		$ticket_subscriptions = $meta['get_trac_ticket_subscriptions'];
+		$participants         = $meta['get_trac_ticket_participants'];
 
-		$notifications = $this->api->get_trac_notifications_for_user( $username );
-
-		$ticket_sub = $this->api->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
-
-		$ticket_subscriptions = $this->api->get_trac_ticket_subscriptions( $ticket_id );
+		$focuses = explode( ', ', $focuses );
 		$stars = $ticket_subscriptions['starred'];
 		$star_count = count( $stars );
-
-		$participants = $this->api->get_trac_ticket_participants( $ticket_id );
 
 		$unblocked_participants = array_diff( $participants, $ticket_subscriptions['blocked'] );
 		$all_receiving_notifications = array_unique( array_merge( $stars, $unblocked_participants ) );
@@ -311,7 +311,7 @@ class wporg_trac_notifications {
 		</fieldset>
 	</div>
 	<?php
-		$this->ticket_notes( $ticket, $username );
+		$this->ticket_notes( $ticket, $username, $meta );
 		$send = array( 'notifications-box' => ob_get_clean() );
 		if ( isset( $this->components ) ) {
 			$send['maintainers'] = $this->components->get_component_maintainers( $ticket->component );
@@ -320,12 +320,12 @@ class wporg_trac_notifications {
 		exit;
 	}
 
-	function ticket_notes( $ticket, $username ) {
+	function ticket_notes( $ticket, $username, $meta ) {
 		if ( $username == $ticket->reporter ) {
 			return;
 		}
 
-		$activity = $this->api->get_reporter_past_activity( $ticket->reporter, $ticket->id );
+		$activity = $meta['get_reporter_last_activity'];
 
 		if ( count( $activity['tickets'] ) >= 5 ) {
 			return;
