@@ -1,8 +1,10 @@
 <?php
 /**
  * This class must execute queries valid for both MySQL and SQLite3.
+ * The DB driver must be wpdb or Trac_Notifications_SQLite_Driver.
+ * It must work without any other dependencies, such as WordPress.
  */
-class Trac_Notifications_DB {
+class Trac_Notifications_DB implements Trac_Notifications_API {
 	function __construct( $db ) {
 		$this->db = $db;
 	}
@@ -59,8 +61,8 @@ class Trac_Notifications_DB {
 		return $this->db->get_col( $this->db->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
 	}
 
-	function get_component_history( $component ) {
-		$days_ago = ( time() - ( 86400 * Make_Core_Trac_Components::last_x_days ) ) * 1000000;
+	function get_component_history( $component, $last_x_days = 7 ) {
+		$days_ago = ( time() - ( 86400 * $last_x_days ) ) * 1000000;
 		$closed_reopened = $this->db->get_results( $this->db->prepare( "SELECT newvalue, COUNT(DISTINCT ticket) as count
 			FROM ticket_change tc INNER JOIN ticket t ON tc.ticket = t.id
 			WHERE field = 'status' AND (newvalue = 'closed' OR newvalue = 'reopened')

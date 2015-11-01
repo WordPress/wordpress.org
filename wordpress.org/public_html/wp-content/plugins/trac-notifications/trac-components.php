@@ -391,7 +391,7 @@ jQuery( document ).ready( function( $ ) {
 			echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count ) . ' in the ' . $component . ' component</h3>';
 		}
 
-		$history = $this->api->get_component_history( $component );
+		$history = $this->api->get_component_history( $component, self::last_x_days );
 		$direction = '';
 		if ( $history['change'] > 0 ) {
 			$direction = ' growing';
