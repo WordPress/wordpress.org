@@ -3,7 +3,8 @@
 class Make_Core_Trac_Components {
 	const last_x_days = 7;
 
-	function __construct() {
+	function __construct( $api ) {
+		$this->api = $api;
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -14,7 +15,6 @@ class Make_Core_Trac_Components {
 		add_action( 'component_table_row', array( $this, 'component_table_row' ) );
 		add_filter( 'manage_component_posts_columns', array( $this, 'manage_posts_columns' ) );
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
-		$this->trac = $GLOBALS['wpdb'];
 	}
 
 	function init() {
@@ -318,7 +318,7 @@ jQuery( document ).ready( function( $ ) {
 		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of core are always seeking to mentor others to impart their knowledge.\n\n";
 		echo "<strong>Want to help? Start following this component!</strong> <a href='/core/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
 
-		$followers = $this->trac->get_col( $this->trac->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
+		$followers = $this->api->get_component_followers( $post->post_title );
 		$followers = "'" . implode( "', '", esc_sql( $followers ) ) . "'";
 		$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
 		if ( $followers ) {
@@ -344,8 +344,7 @@ jQuery( document ).ready( function( $ ) {
 		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
 		$rows = wp_cache_get( 'trac_tickets_by_component_type_milestone' );
 		if ( ! $rows ) {
-			$rows = $this->trac->get_results( "SELECT component, type, milestone, count(*) as count FROM ticket
-				WHERE status <> 'closed' GROUP BY component, type, milestone ORDER BY component, type, milestone" );
+			$rows = $this->api->get_tickets_by_component_type_milestone();
 			wp_cache_add( 'trac_tickets_by_component_type_milestone', $rows, '', 300 );
 		}
 
@@ -363,13 +362,7 @@ jQuery( document ).ready( function( $ ) {
 
 		$component_unreplied = wp_cache_get( 'trac_tickets_by_component_unreplied' );
 		if ( ! $component_unreplied ) {
-			$rows = $this->trac->get_results( "SELECT id, component FROM ticket t
-				WHERE id NOT IN (SELECT ticket FROM ticket_change WHERE ticket = t.id AND t.reporter <> author AND field = 'comment' AND newvalue <> '')
-				AND status <> 'closed'" );
-			$component_unreplied = array();
-			foreach ( $rows as $row ) {
-				$component_unreplied[ $row->component ][] = $row->id;
-			}
+			$component_unreplied = $this->api->get_unreplied_ticket_counts_by_component();
 			wp_cache_add( 'trac_tickets_by_component_unreplied', $component_unreplied, '', 300 );
 		}
 
@@ -398,7 +391,7 @@ jQuery( document ).ready( function( $ ) {
 			echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count ) . ' in the ' . $component . ' component</h3>';
 		}
 
-		$history = $this->get_component_history( $component );
+		$history = $this->api->get_component_history( $component );
 		$direction = '';
 		if ( $history['change'] > 0 ) {
 			$direction = ' growing';
@@ -450,14 +443,7 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function trac_content( $component ) {
-		$unreplied_tickets = $this->trac->get_results( $this->trac->prepare(
-			"SELECT id, summary, status, resolution, milestone, value as focuses
-			FROM ticket t LEFT JOIN ticket_custom c ON c.ticket = t.id AND c.name = 'focuses'
-			WHERE id NOT IN (
-				SELECT ticket FROM ticket_change
-				WHERE ticket = t.id AND t.reporter <> author
-				AND field = 'comment' AND newvalue <> ''
-			) AND status <> 'closed' AND component = %s", $component ) );
+		$unreplied_tickets = $this->api->get_unreplied_tickets_by_component( $component );
 
 		if ( $unreplied_tickets ) {
 			$count = count( $unreplied_tickets );
@@ -466,8 +452,8 @@ jQuery( document ).ready( function( $ ) {
 			$this->render_tickets( $unreplied_tickets );
 		}
 
-		$next_milestone = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone, value as focuses FROM ticket t
-			LEFT JOIN ticket_custom c ON c.ticket = t.id AND c.name = 'focuses' WHERE component = %s AND status <> 'closed' AND milestone LIKE '_._'", $component ) );
+		$next_milestone = $this->api->get_tickets_in_next_milestone( $component );
+
 		if ( $next_milestone ) {
 			$count = count( $next_milestone );
 			echo '<h3>' . sprintf( _n( '%s ticket slated for ' . $next_milestone[0]->milestone, '%s tickets slated for ' . $next_milestone[0]->milestone, $count ), $count ) . '</h3>';
@@ -475,13 +461,7 @@ jQuery( document ).ready( function( $ ) {
 			$this->render_tickets( $next_milestone );
 		}
 
-		return; // Ditch the rest for now.
-
-		$tickets_by_type = $this->trac->get_results( $this->trac->prepare( "SELECT type, COUNT(*) as count FROM ticket WHERE component = %s AND status <> 'closed' GROUP BY type", $component ), OBJECT_K );
-		foreach ( $tickets_by_type as &$object ) {
-			$object = $object->count;
-		}
-		unset( $object );
+		$tickets_by_type = $this->api->get_ticket_counts_for_component( $component );
 
 		$count = array_sum( $tickets_by_type );
 		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . '</h3>';
@@ -489,22 +469,21 @@ jQuery( document ).ready( function( $ ) {
 		echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'defect (bug)' ) );
 		echo "\n\n";
 
-		if ( $enhancements = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'enhancement' ) ) ) {
-			printf( '<h3>Open enhancements (%d)</h3>', count( $enhancements ) );
-			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'enhancement' ) );
-			$this->render_tickets( $enhancements );
-		}
+		return;
 
-		if ( $tasks = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'task (blessed)' ) ) ) {
-			printf( '<h3>Open tasks (%d)</h3>', count( $tasks ) );
-			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'task (blessed)' ) );
-			$this->render_tickets( $tasks );
-		}
+		$types = array(
+			'enhancement'     => 'Open enhancements',
+			'task (blessed)'  => 'Open tasks',
+			'feature request' => 'Open feature requests',
+		);
 
-		if ( $feature_requests = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, status, resolution, milestone FROM ticket WHERE component = %s AND status <> 'closed' AND type = %s", $component, 'feature request' ) ) ) {
-			printf( '<h3>Open feature requests (%d)</h3>', count( $feature_requests ) );
-			echo $this->trac_query_link( 'View list on Trac', array( 'component' => $component, 'type' => 'feature request' ) );
-			$this->render_tickets( $feature_requests );
+		foreach ( $types as $type => $title ) {
+			$args = compact( 'component', 'type' );
+			if ( $tickets = $this->api->get_tickets_by( $args ) ) {
+				printf( '<h3>%s (%d)</h3>', $title, count( $tickets ) );
+				echo $this->trac_query_link( 'View list on Trac', $args );
+				$this->render_tickets( $tickets );	
+			}
 		}
 	}
 
@@ -530,25 +509,6 @@ jQuery( document ).ready( function( $ ) {
 			echo "</li>\n";
 		}
 		echo '</ul>';
-	}
-
-	function get_component_history( $component ) {
-		$days_ago = ( time() - ( DAY_IN_SECONDS * self::last_x_days ) ) * 1000000;
-		$closed_reopened = $this->trac->get_results( $this->trac->prepare( "SELECT newvalue, COUNT(DISTINCT ticket) as count
-			FROM ticket_change tc INNER JOIN ticket t ON tc.ticket = t.id
-			WHERE field = 'status' AND (newvalue = 'closed' OR newvalue = 'reopened')
-			AND tc.time >= %s AND t.component = %s GROUP BY newvalue", $days_ago, $component ), OBJECT_K );
-		$reopened = isset( $closed_reopened['reopened'] ) ? $closed_reopened['reopened']->count : 0;
-		$closed = isset( $closed_reopened['closed'] ) ? $closed_reopened['closed']->count : 0;
-		$opened = $this->trac->get_var( $this->trac->prepare( "SELECT COUNT(DISTINCT id) FROM ticket WHERE time >= %s AND component = %s", $days_ago, $component ) );
-		$assigned_unassigned = $this->trac->get_results( $this->trac->prepare( "SELECT IF(newvalue = %s, 'assigned', 'unassigned') as direction,
-			COUNT(*) as count FROM ticket_change WHERE field = 'component' AND ( oldvalue = %s OR newvalue = %s ) AND time >= %s GROUP BY direction",
-			$component, $component, $component, $days_ago ), OBJECT_K );
-		$assigned = isset( $assigned_unassigned['assigned'] ) ? $assigned_unassigned['assigned']->count : 0;
-		$unassigned = isset( $assigned_unassigned['unassigned'] ) ? $assigned_unassigned['unassigned']->count : 0;
-
-		$change = $opened + $reopened + $assigned - $closed - $unassigned;
-		return compact( 'change', 'opened', 'reopened', 'closed', 'assigned', 'unassigned' );
 	}
 
 	function shortcode_logged_in( $attr, $content, $tag ) {
@@ -583,7 +543,7 @@ jQuery( document ).ready( function( $ ) {
 			echo '<option></option>';
 		}
 		if ( in_array( 'component', $topics ) ) {
-			$components = $this->trac->get_col( "SELECT name FROM component" );
+			$components = $this->api->get_components();
 			foreach ( $components as $component ) {
 				echo '<option value="component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . esc_html( $component ) . "</option>";
 			}
@@ -601,7 +561,7 @@ jQuery( document ).ready( function( $ ) {
 
 		$component = $post->post_title;
 		$this->generate_component_breakdowns();
-		$history = $this->get_component_history( $component );
+		$history = $this->api->get_component_history( $component );
 
 		$arrow = '';
 		if ( $history['change'] ) {
@@ -632,7 +592,7 @@ jQuery( document ).ready( function( $ ) {
 			echo '<td></td>';
 		}
 
-		$maintainers = $this->get_maintainers_by_post( $post->ID );
+		$maintainers = $this->get_component_maintainers_by_post( $post->ID );
 		echo '<td class="no-grav maintainers">';
 		foreach ( $maintainers as $maintainer ) {
 			echo '<a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '" title="' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 24 ) . "</a>";
@@ -641,11 +601,11 @@ jQuery( document ).ready( function( $ ) {
 		echo '</tr>';
 	}
 
-	function get_maintainers_by_post( $post_id ) {
+	function get_component_maintainers_by_post( $post_id ) {
 		return array_filter( array_map( 'trim', explode( ',', get_post_meta( $post_id, '_active_maintainers', true ) ) ) );
 	}
 
-	function get_maintainers_by_component( $component ) {
-		return $this->get_maintainers_by_post( get_page_by_title( $component, OBJECT, 'component' )->ID );
+	function get_component_maintainers( $component ) {
+		return $this->get_component_maintainers_by_post( get_page_by_title( $component, OBJECT, 'component' )->ID );
 	}
 }

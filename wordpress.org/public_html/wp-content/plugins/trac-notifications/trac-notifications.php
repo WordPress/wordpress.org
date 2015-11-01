@@ -7,7 +7,7 @@
 
 class wporg_trac_notifications {
 
-	protected $trac_subdomain;
+	protected $trac;
 	protected $components;
 
 	protected $tracs_supported = array( 'core', 'meta', 'themes', 'plugins' );
@@ -22,29 +22,31 @@ class wporg_trac_notifications {
 		if ( 'core' === $trac && isset( $_GET['trac'] ) && in_array( $_GET['trac'], $this->tracs_supported_extra ) ) {
 			$trac = $_GET['trac'];
 		}
-		$this->set_trac( $trac );
-		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
-		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );
-		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
-		if ( 'core' === $trac ) {
-			require __DIR__ . '/trac-components.php';
-			$this->components = new Make_Core_Trac_Components;
-		}
-	}
 
-	function set_trac( $trac ) {
-		$this->trac_subdomain = $trac;
+		require __DIR__ . '/trac-notifications-db.php';
+
 		if ( function_exists( 'add_db_table' ) ) {
 			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
 			foreach ( $tables as $table ) {
 				add_db_table( 'trac_' . $trac, $table );
 			}
-			$this->trac = $GLOBALS['wpdb'];
 		}
+		$this->api = new Trac_Notifications_DB( $GLOBALS['wpdb'] );
+
+		if ( 'core' === $trac ) {
+			require __DIR__ . '/trac-components.php';
+			$this->components = new Make_Core_Trac_Components( $this->api );
+		}
+
+		$this->trac = $trac;
+
+		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
+		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );
+		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
 	}
 
 	function trac_url() {
-		return 'https://' . $this->trac_subdomain . '.trac.wordpress.org';
+		return 'https://' . $this->trac . '.trac.wordpress.org';
 	}
 
 	function filter_allowed_http_origins( $origins ) {
@@ -75,31 +77,6 @@ class wporg_trac_notifications {
 			$this->trac_notifications_box_render();
 			exit;
 		}
-	}
-
-	function get_trac_ticket( $ticket_id ) {
-		return $this->trac->get_row( $this->trac->prepare( "SELECT * FROM ticket WHERE id = %d", $ticket_id ) );
-	}
-
-	function get_trac_ticket_focuses( $ticket_id ) {
-		return $this->trac->get_var( $this->trac->prepare( "SELECT value FROM ticket_custom WHERE ticket = %d AND name = 'focuses'", $ticket_id ) );
-	}
-
-	function get_trac_ticket_participants( $ticket_id ) {
-		// Make sure we suppress CC-only comments that still exist in the database.
-		// Do this by suppressing any 'cc' changes and also any empty comments (used by Trac for comment numbering).
-		// Empty comments are also used for other property changes made without comment, but those changes will still be returned by this query.
-		$ignore_cc = "field <> 'cc' AND NOT (field = 'comment' AND newvalue = '') AND";
-		return $this->trac->get_col( $this->trac->prepare( "SELECT DISTINCT author FROM ticket_change WHERE $ignore_cc ticket = %d", $ticket_id ) );
-	}
-
-	function get_trac_ticket_subscriptions( $ticket_id ) {
-		$by_status = array( 'blocked' => array(), 'starred' => array() );
-		$subscriptions = $this->trac->get_results( $this->trac->prepare( "SELECT username, status FROM _ticket_subs WHERE ticket = %s", $ticket_id ) );
-		foreach ( $subscriptions as $subscription ) {
-			$by_status[ $subscription->status ? 'starred' : 'blocked' ][] = $subscription->username;
-		}
-		return $by_status;
 	}
 
 	function get_trac_focuses() {
@@ -134,41 +111,6 @@ class wporg_trac_notifications {
 		return $tree;
 	}
 
-	function get_trac_components() {
-		return $this->trac->get_col( "SELECT name FROM component WHERE name <> 'WordPress.org site' ORDER BY name ASC" );
-	}
-
-	function get_trac_milestones() {
-		// Only show 3.8+, when this feature was launched.
-		return $this->trac->get_results( "SELECT name, completed FROM milestone
-			WHERE name NOT IN ('WordPress.org', '3.5.3', '3.6.2', '3.7.2') AND (completed = 0 OR completed >= 1386864000000000)
-			ORDER BY (completed = 0) DESC, name DESC", OBJECT_K );
-	}
-
-	function get_trac_notifications_for_user( $username ) {
-		$rows = $this->trac->get_results( $this->trac->prepare( "SELECT type, value FROM _notifications WHERE username = %s ORDER BY type ASC, value ASC", $username ) );
-		$notifications = array( 'component' => array(), 'milestone' => array(), 'focus' => array(), 'newticket' => array() );
-
-		foreach ( $rows as $row ) {
-			$notifications[ $row->type ][ $row->value ] = true;
-		}
-		$notifications['newticket'] = ! empty( $notifications['newticket']['1'] );
-
-		return $notifications;
-	}
-
-	function get_trac_ticket_subscription_status_for_user( $ticket_id, $username ) {
-		$status = $this->trac->get_var( $this->trac->prepare( "SELECT status FROM _ticket_subs WHERE username = %s AND ticket = %s", $username, $ticket_id ) );
-		if ( null !== $status ) {
-			$status = (int) $status;
-		}
-		return $status;
-	}
-
-	function get_trac_ticket_subscriptions_for_user( $username ) {
-		return $this->trac->get_col( $this->trac->prepare( "SELECT ticket FROM _ticket_subs WHERE username = %s AND status = 1", $username ) );
-	}
-
 	function trac_notifications_box_actions() {
 		send_origin_headers();
 
@@ -178,13 +120,12 @@ class wporg_trac_notifications {
 
 		$username = wp_get_current_user()->user_login;
 
-		$ticket_id = absint( $_POST['trac-ticket-sub'] );
-		if ( ! $ticket_id ) {
+		$ticket = absint( $_POST['trac-ticket-sub'] );
+		if ( ! $ticket ) {
 			wp_send_json_error();
 		}
 
-		$ticket = $this->get_trac_ticket( $ticket_id );
-		if ( ! $ticket ) {
+		if ( ! $this->api->get_trac_ticket( $ticket ) ) {
 			wp_send_json_error();
 		}
 
@@ -197,14 +138,13 @@ class wporg_trac_notifications {
 			case 'subscribe' :
 			case 'block' :
 				$status = $action === 'subscribe' ? 1 : 0;
-				$this->trac->delete( '_ticket_subs', array( 'username' => $username, 'ticket' => $ticket_id ) );
-				$result = $this->trac->insert( '_ticket_subs', array( 'username' => $username, 'ticket' => $ticket_id, 'status' => $status ) );
+				$result = $this->api->update_subscription( $username, $ticket, $status );
 				break;
 
 			case 'unsubscribe' :
 			case 'unblock' :
 				$status = $action === 'unsubscribe' ? 1 : 0;
-				$result = $this->trac->delete( '_ticket_subs', array( 'username' => $username, 'ticket' => $ticket_id, 'status' => $status ) );
+				$result = $this->api->delete_subscription( $username, $ticket, $status );
 				break;
 		}
 
@@ -228,7 +168,7 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		$subscribed_tickets = $this->get_trac_ticket_subscriptions_for_user( $username );
+		$subscribed_tickets = $this->api->get_trac_ticket_subscriptions_for_user( $username );
 		if ( ! is_array( $subscribed_tickets ) ) {
 			wp_send_json_error();
 		}
@@ -249,22 +189,22 @@ class wporg_trac_notifications {
 		if ( ! $ticket_id ) {
 			exit;
 		}
-		$ticket = $this->get_trac_ticket( $ticket_id );
+		$ticket = $this->api->get_trac_ticket( $ticket_id );
 		if ( ! $ticket ) {
 			exit;
 		}
 
-		$focuses = explode( ', ', $this->get_trac_ticket_focuses( $ticket_id ) );
+		$focuses = explode( ', ', $this->api->get_trac_ticket_focuses( $ticket_id ) );
 
-		$notifications = $this->get_trac_notifications_for_user( $username );
+		$notifications = $this->api->get_trac_notifications_for_user( $username );
 
-		$ticket_sub = $this->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
+		$ticket_sub = $this->api->get_trac_ticket_subscription_status_for_user( $ticket_id, $username );
 
-		$ticket_subscriptions = $this->get_trac_ticket_subscriptions( $ticket_id );
+		$ticket_subscriptions = $this->api->get_trac_ticket_subscriptions( $ticket_id );
 		$stars = $ticket_subscriptions['starred'];
 		$star_count = count( $stars );
 
-		$participants = $this->get_trac_ticket_participants( $ticket_id );
+		$participants = $this->api->get_trac_ticket_participants( $ticket_id );
 
 		$unblocked_participants = array_diff( $participants, $ticket_subscriptions['blocked'] );
 		$all_receiving_notifications = array_unique( array_merge( $stars, $unblocked_participants ) );
@@ -367,7 +307,7 @@ class wporg_trac_notifications {
 		$this->ticket_notes( $ticket, $username );
 		$send = array( 'notifications-box' => ob_get_clean() );
 		if ( isset( $this->components ) ) {
-			$send['maintainers'] = $this->components->get_maintainers_by_component( $ticket->component );
+			$send['maintainers'] = $this->components->get_component_maintainers( $ticket->component );
 		}
 		wp_send_json_success( $send );
 		exit;
@@ -378,20 +318,16 @@ class wporg_trac_notifications {
 			return;
 		}
 
-		$previous_tickets = $this->trac->get_results( $this->trac->prepare( "SELECT id, summary, type, status, resolution
-			FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $ticket->reporter, $ticket->id ) );
+		$activity = $this->api->get_reporter_past_activity( $ticket->reporter, $ticket->id );
 
-		if ( count( $previous_tickets ) >= 5 ) {
+		if ( count( $activity['tickets'] ) >= 5 ) {
 			return;
 		}
 
-		if ( 1 == count( $previous_tickets ) ) {
-			$previous_comments = $this->trac->get_var( $this->trac->prepare( "SELECT ticket FROM ticket_change
-				WHERE field = 'comment' AND author = %s AND ticket <> %d LIMIT 1", $ticket->reporter, $ticket->id ) );
-
+		if ( 1 == count( $activity['tickets'] ) ) {
 			$output = '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome.</strong><br/>';
 
-			if ( $previous_comments ) {
+			if ( ! empty( $activity['comments'] ) ) {
 				$output .= 'They&#8217;ve commented before, but it&#8127;s their first ticket!';
 			} else {
 				$output .= 'It&#8127;s their first ticket!';
@@ -399,9 +335,9 @@ class wporg_trac_notifications {
 		} else {
 			$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
 
-			$output = '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $previous_tickets ) ] . ' ticket!</strong><br/>Previously:';
+			$output = '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $activity['tickets'] ) ] . ' ticket!</strong><br/>Previously:';
 
-				foreach ( $previous_tickets as $t ) {
+				foreach ( $activity['tickets'] as $t ) {
 					if ( $t->id != $ticket->id ) {
 						$output .= ' ' . $this->ticket_link( $t );
 					}
@@ -423,21 +359,23 @@ class wporg_trac_notifications {
 		}
 
 		ob_start();
-		$components = $this->get_trac_components();
-		$milestones = $this->get_trac_milestones();
+		$components = $this->api->get_components();
+		$milestones = $this->api->get_milestones();
 		$focuses = $this->get_trac_focuses();
 
 		$username = wp_get_current_user()->user_login;
-		$notifications = $this->get_trac_notifications_for_user( $username );
+		$notifications = $this->api->get_trac_notifications_for_user( $username );
 
 		if ( $_POST && isset( $_POST['trac-nonce'] ) ) {
 			check_admin_referer( 'save-trac-notifications', 'trac-nonce' );
+
+			$changes = array();
 
 			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
 				if ( ! empty( $_POST['notifications'][ $type ] ) ) {
 					foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
 						if ( empty( $notifications[ $type ][ $value ] ) ) {
-							$this->trac->insert( '_notifications', compact( 'username', 'type', 'value' ) );
+							$changes['insert'][] = compact( 'username', 'type', 'value' );
 							$notifications[ $type ][ $value ] = true;
 						}
 					}
@@ -445,19 +383,21 @@ class wporg_trac_notifications {
 
 				foreach ( $notifications[ $type ] as $value => $on ) {
 					if ( empty( $_POST['notifications'][ $type ][ $value ] ) ) {
-						$this->trac->delete( '_notifications', compact( 'username', 'type', 'value' ) );
+						$changes['delete'][] = compact( 'username', 'type', 'value' );
 						unset( $notifications[ $type ][ $value ] );
 					}
 				}
 			}
 			if ( empty( $_POST['notifications']['newticket'] ) && ! empty( $notifications['newticket'] ) ) {
-				$this->trac->delete( '_notifications', array( 'username' => $username, 'type' => 'newticket' ) );
+				$changes['delete'][] = array( 'username' => $username, 'type' => 'newticket' );
 				$notifications[ 'newticket' ] = false;
 			} elseif ( ! empty( $_POST['notifications']['newticket'] ) && empty( $notifications['newticket'] ) ) {
-				$this->trac->insert( '_notifications', array( 'username' => $username, 'type' => 'newticket', 'value' => '1' ) );
+				$changes['insert'][] = array( 'username' => $username, 'type' => 'newticket', 'value' => '1' );
 				$notifications[ 'newticket' ] = true;
 			}
+			$this->api->update_notifications( $changes );
 		}
+
 		?>
 
 		<style>
