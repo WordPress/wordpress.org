@@ -188,7 +188,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	function update_notifications( $all_changes ) {
 		foreach ( $all_changes as $method => $changes ) {
 			foreach ( $changes as $where ) {
-				call_user_func( array( $this->db, $method ), '_notifications', $where );
+				call_user_func( array( $this->db, $method ), '_notifications', (array) $where );
 			}
 		}
 	}
