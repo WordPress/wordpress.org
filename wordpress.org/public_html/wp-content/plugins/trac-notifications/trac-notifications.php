@@ -85,7 +85,10 @@ class wporg_trac_notifications {
 	}
 
 	function get_trac_focuses() {
-		return array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rtl', 'template', 'ui' );
+		if ( 'core' === $this->trac ) {
+			return array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rtl', 'template', 'ui' );
+		}
+		return array();
 	}
 
 	function make_components_tree( $components ) {
@@ -419,11 +422,13 @@ class wporg_trac_notifications {
 			margin-right: 30px;
 		}
 		#components > ul {
-			float: left;
-			width: 24%;
 			margin: 0 0 0 1% !important;
 			margin: 0;
 			padding: 0;
+		}
+		.make-core #components > ul {
+			width: 24%;
+			float: left;
 		}
 		#components > ul > li {
 			list-style: none;
@@ -459,58 +464,68 @@ class wporg_trac_notifications {
 		wp_nonce_field( 'save-trac-notifications', 'trac-nonce', false );
 		echo '<h3>New Tickets</h3>';
 		$checked = checked( $notifications['newticket'], true, false );
-		echo '<ul><li style="list-style:none"><label><input type="checkbox" ' . $checked . 'name="notifications[newticket]" /> Receive all new ticket notifications.</label><br /><em>To receive comments to a ticket, you will need to star it, unless it matches one of your other preferences below.</em></li></ul>';
-		echo '<div id="focuses">';
-		echo '<h3>Focuses</h3>';
-		echo '<ul>';
-		foreach ( $focuses as $focus ) {
-			$checked = checked( ! empty( $notifications['focus'][ $focus ] ), true, false );
-			echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[focus][' . esc_attr( $focus ) . ']" /> ' . $focus . '</label></li>';
-		}
-		echo '</ul>';
-		echo '</div>';
-		echo '<div id="components">';
-		echo '<h3>Components</h3>';
-		echo '<p class="select-all"><a href="#" data-action="select-all">select all</a> &bull; <a href="#" data-action="clear-all">clear all</a></p>';
-		echo "<ul>\n";
-		$components_tree = $this->make_components_tree( $components );
-		$breakpoints = array( 'Export', 'Media', 'Script Loader' );
-		foreach ( $components_tree as $component => $subcomponents ) {
-			if ( in_array( $component, $breakpoints ) ) {
-				echo '</ul><ul>';
+		echo '<ul style="margin-left: 1% !important"><li style="list-style:none"><label><input type="checkbox" ' . $checked . 'name="notifications[newticket]" /> Receive a notification when new tickets are created.</label></li></ul>';
+
+		if ( $focuses ) {
+			echo '<div id="focuses">';
+			echo '<h3>Focuses</h3>';
+			echo '<ul>';
+			foreach ( $focuses as $focus ) {
+				$checked = checked( ! empty( $notifications['focus'][ $focus ] ), true, false );
+				echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[focus][' . esc_attr( $focus ) . ']" /> ' . $focus . '</label></li>';
 			}
-			$checked = checked( ! empty( $notifications['component'][ $component ] ), true, false );
-			echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $component ) . ']" /> ' . $component . "</label>\n";
-			if ( is_array( $subcomponents ) ) {
-				echo "<ul>\n";
-				foreach ( $subcomponents as $subcomponent ) {
-					$checked = checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false );
-					echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . $subcomponent . "</label></li>\n";
+			echo '</ul>';
+			echo '</div>';
+		}
+
+		if ( $components ) {
+			echo '<div id="components">';
+			echo '<h3>Components</h3>';
+			echo '<p class="select-all"><a href="#" data-action="select-all">select all</a> &bull; <a href="#" data-action="clear-all">clear all</a></p>';
+			echo "<ul>\n";
+			$components_tree = $this->make_components_tree( $components );
+			$breakpoints = array( 'Export', 'Media', 'Script Loader' );
+			foreach ( $components_tree as $component => $subcomponents ) {
+				if ( in_array( $component, $breakpoints ) ) {
+					echo '</ul><ul>';
 				}
-				echo "</ul>\n";
-			}
-			echo "</li>\n";
-		}
-		echo '</ul>';
-		echo '</div>';
-		echo '<div id="milestones">';
-		echo '<h3>Milestones</h3>';
-		echo '<ul>';
-		foreach ( $milestones as $milestone ) {
-			$checked = checked( ! empty( $notifications['milestone'][ $milestone->name ] ), true, false );
-			$class = '';
-			if ( ! empty( $milestone->completed ) ) {
-				$class = 'completed-milestone';
-				if ( $checked ) {
-					$class .= ' checked';
+				$checked = checked( ! empty( $notifications['component'][ $component ] ), true, false );
+				echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $component ) . ']" /> ' . $component . "</label>\n";
+				if ( is_array( $subcomponents ) ) {
+					echo "<ul>\n";
+					foreach ( $subcomponents as $subcomponent ) {
+						$checked = checked( ! empty( $notifications['component'][ $subcomponent ] ), true, false );
+						echo '<li><label><input type="checkbox" ' . $checked . 'name="notifications[component][' . esc_attr( $subcomponent ) . ']" /> ' . $subcomponent . "</label></li>\n";
+					}
+					echo "</ul>\n";
 				}
-				$class = ' class="' . $class . '"';
+				echo "</li>\n";
 			}
-			echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
+			echo '</ul>';
+			echo '</div>';
 		}
-		echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
-		echo '</ul>';
-		echo '</div>';
+
+		if ( $milestones ) {
+			echo '<div id="milestones">';
+			echo '<h3>Milestones</h3>';
+			echo '<ul>';
+			foreach ( $milestones as $milestone ) {
+				$checked = checked( ! empty( $notifications['milestone'][ $milestone->name ] ), true, false );
+				$class = '';
+				if ( ! empty( $milestone->completed ) ) {
+					$class = 'completed-milestone';
+					if ( $checked ) {
+						$class .= ' checked';
+					}
+					$class = ' class="' . $class . '"';
+				}
+				echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
+			}
+			echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
+			echo '</ul>';
+			echo '</div>';
+		}
+
 		echo '<p class="save-changes"><input type="submit" value="Save Changes" /></p>';
 		echo '</form>';
 		return ob_get_clean();
