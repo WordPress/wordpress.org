@@ -128,7 +128,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 
 	function get_trac_ticket_subscriptions( $ticket_id ) {
 		$by_status = array( 'blocked' => array(), 'starred' => array() );
-		$subscriptions = $this->db->get_results( $this->db->prepare( "SELECT username, status FROM _ticket_subs WHERE ticket = %s", $ticket_id ) );
+		$subscriptions = $this->db->get_results( $this->db->prepare( "SELECT username, status FROM _ticket_subs WHERE ticket = %d", $ticket_id ) );
 		foreach ( $subscriptions as $subscription ) {
 			$by_status[ $subscription->status ? 'starred' : 'blocked' ][] = $subscription->username;
 		}
@@ -136,7 +136,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 	}
 
 	function get_trac_ticket_subscription_status_for_user( $ticket_id, $username ) {
-		$status = $this->db->get_var( $this->db->prepare( "SELECT status FROM _ticket_subs WHERE username = %s AND ticket = %s", $username, $ticket_id ) );
+		$status = $this->db->get_var( $this->db->prepare( "SELECT status FROM _ticket_subs WHERE username = %s AND ticket = %d", $username, $ticket_id ) );
 		if ( null !== $status ) {
 			$status = (int) $status;
 		}

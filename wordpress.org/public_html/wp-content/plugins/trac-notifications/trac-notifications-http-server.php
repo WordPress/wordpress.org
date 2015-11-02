@@ -15,11 +15,11 @@ class Trac_Notifications_HTTP_Server {
 
 	function serve( $method, $secret, $arguments ) {
 		if ( ! method_exists( 'Trac_Notifications_DB', $method ) || $method[0] === '_' ) {
-			exit( 'null' );
+			exit;
 		}
 
 		if ( $secret !== $this->secret ) {
-			exit( 'null' );
+			exit;
 		}
 
 		if ( $arguments ) {
@@ -29,6 +29,6 @@ class Trac_Notifications_HTTP_Server {
 		}
 
 		echo json_encode( $result );
-		die;
+		exit;
 	}
 }
