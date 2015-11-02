@@ -11,13 +11,13 @@ class Trac_Notifications_HTTP_Client implements Trac_Notifications_API {
 			return false;
 		}
 
-		$url = add_query_arg( array(
-			'call'   => $method,
-			'secret' => $this->secret,
-		), $this->target );
+		$url = add_query_arg( 'call', $method, $this->target );
 
 		$args = array(
-			'body' => array( 'arguments' => json_encode( $arguments ) ),
+			'body' => array(
+				'arguments' => json_encode( $arguments ),
+				'secret'    => $this->secret,
+			),
 		);
 
 		$response = wp_remote_post( $url, $args );

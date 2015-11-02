@@ -12,8 +12,8 @@ class wporg_trac_notifications {
 	protected $trac;
 	protected $components;
 
-	protected $tracs_supported = array( 'core', 'meta', 'themes', 'plugins' );
-	protected $tracs_supported_extra = array( 'bbpress', 'buddypress', 'gsoc', 'glotpress' );
+	protected $tracs_supported = array( 'core', 'meta', /* 'themes', 'plugins' */ );
+	protected $tracs_supported_extra = array( /* 'bbpress', 'buddypress', 'gsoc', 'glotpress' */ );
 
 	function __construct() {
 		$make_site = explode( '/', home_url( '' ) );
@@ -25,20 +25,25 @@ class wporg_trac_notifications {
 			$trac = $_GET['trac'];
 		}
 
-		if ( function_exists( 'add_db_table' ) ) {
+		$this->trac = $trac;
+
+		if ( 'core' === $trac && function_exists( 'add_db_table' ) ) {
 			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
 			foreach ( $tables as $table ) {
 				add_db_table( 'trac_' . $trac, $table );
 			}
 		}
-		$this->api = new Trac_Notifications_DB( $GLOBALS['wpdb'] );
+
+		if ( 'core' === $trac ) {
+			$this->api = new Trac_Notifications_DB( $GLOBALS['wpdb'] );
+		} else {
+			$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
+		}
 
 		if ( 'core' === $trac ) {
 			require __DIR__ . '/trac-components.php';
 			$this->components = new Make_Core_Trac_Components( $this->api );
 		}
-
-		$this->trac = $trac;
 
 		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
 		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );

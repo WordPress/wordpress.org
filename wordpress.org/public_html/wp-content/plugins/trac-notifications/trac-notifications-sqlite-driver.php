@@ -36,8 +36,12 @@ class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
 
 	public function get_var( $query ) {
 		if ( $q = $this->db->query( $query ) ) {
-			return $q->fetchColumn();
+			$var = $q->fetchColumn();
+			if ( $var !== false ) {
+				return $var;
+			}
 		}
+		return null;
 	}
 
 	public function get_row( $query, $output = OBJECT ) {
