@@ -6,11 +6,10 @@
 <?python
 	scripts_version = '53'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
-	wporg_endpoint = '//make.wordpress.org/core/'
+	wporg_endpoint = '//make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
 
-	if project_slug == 'core':
-		notifications_enabled = 1
+	notifications_enabled = 1 if project_slug in ['core', 'meta'] else 0
 
 	if project_slug == 'bbpress' :
 		support_link = '//bbpress.org/forums/'
