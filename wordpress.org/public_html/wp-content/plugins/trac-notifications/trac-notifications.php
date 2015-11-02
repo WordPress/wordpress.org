@@ -5,6 +5,8 @@
  * Version: 1.1
  */
 
+require __DIR__ . '/autoload.php';
+
 class wporg_trac_notifications {
 
 	protected $trac;
@@ -22,8 +24,6 @@ class wporg_trac_notifications {
 		if ( 'core' === $trac && isset( $_GET['trac'] ) && in_array( $_GET['trac'], $this->tracs_supported_extra ) ) {
 			$trac = $_GET['trac'];
 		}
-
-		spl_autoload_register( array( $this, 'autoload' ) );
 
 		if ( function_exists( 'add_db_table' ) ) {
 			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
@@ -43,13 +43,6 @@ class wporg_trac_notifications {
 		add_filter( 'allowed_http_origins', array( $this, 'filter_allowed_http_origins' ) );
 		add_action( 'template_redirect', array( $this, 'action_template_redirect' ) );
 		add_shortcode( 'trac-notifications', array( $this, 'notification_settings_page' ) );
-	}
-
-	function autoload( $class ) {
-		$class = strtolower( $class );
-		if ( 0 === strpos( $class, 'trac_notifications_' ) ) {
-			require __DIR__ . '/' . str_replace( '_', '-', $class ) . '.php';
-		}
 	}
 
 	function trac_url() {
