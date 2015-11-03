@@ -20,9 +20,7 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 			'due' => 'Due',
 			'amount' => 'Amount',
 			'method' => 'Method',
-			// 'vendor' => 'Vendor',
 			'attachments' => 'Attachments',
-			'event' => 'Event',
 		);
 	}
 
@@ -97,7 +95,6 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		$limit .= sprintf( " LIMIT %d OFFSET %d ", $per_page, $per_page * ( $paged - 1 ) );
 
 		$sql .= $where . $orderby . $limit;
-		// echo $sql;
 
 		$this->items = $wpdb->get_results( $sql );
 
@@ -192,14 +189,6 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	/**
 	 * Note: runs in a switch_to_blog() context.
 	 */
-	public function column_vendor( $request ) {
-		$vendor = get_post_meta( $request->ID, '_camppayments_vendor_name', true );
-		return $vendor;
-	}
-
-	/**
-	 * Note: runs in a switch_to_blog() context.
-	 */
 	public function column_attachments( $request ) {
 		$attachments = get_children( array( 'post_parent' => $request->ID ) );
 		$attachments = array_map( 'wp_get_attachment_url', wp_list_pluck( $attachments, 'ID' ) );
@@ -211,12 +200,5 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		}
 
 		return implode( '', $output );
-	}
-
-	/**
-	 * Note: runs in a switch_to_blog() context.
-	 */
-	public function column_event( $request ) {
-		return sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( home_url( '/' ) ), esc_html( get_bloginfo( 'name' ) ) );
 	}
 }
