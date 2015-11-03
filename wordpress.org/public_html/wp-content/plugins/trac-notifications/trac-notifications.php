@@ -60,6 +60,7 @@ class wporg_trac_notifications {
 	}
 
 	function ticket_link( $ticket ) {
+		$ticket = (object) $ticket;
 		$status_res = $ticket->status;
 		if ( $ticket->resolution ) {
 			$status_res .= ': ' . $ticket->resolution;
@@ -205,7 +206,7 @@ class wporg_trac_notifications {
 
 		$ticket               = $meta['get_trac_ticket'];
 		$focuses              = $meta['get_trac_ticket_focuses'];
-		$notifications        = $meta['get_trac_ticket_focuses'];
+		$notifications        = $meta['get_trac_notifications_for_user'];
 		$ticket_sub           = $meta['get_trac_ticket_subscription_status_for_user'];
 		$ticket_subscriptions = $meta['get_trac_ticket_subscriptions'];
 		$participants         = $meta['get_trac_ticket_participants'];
@@ -220,10 +221,10 @@ class wporg_trac_notifications {
 
 		$reasons = array();
 
-		if ( $username == $ticket->reporter ) {
+		if ( $username == $ticket['reporter'] ) {
 			$reasons['reporter'] = 'you reported this ticket';
 		}
-		if ( $username == $ticket->owner ) {
+		if ( $username == $ticket['owner'] ) {
 			$reasons['owner'] = 'you own this ticket';
 		}
 		if ( in_array( $username, $participants ) ) {
@@ -244,11 +245,11 @@ class wporg_trac_notifications {
 			}
 		}
 
-		if ( ! empty( $notifications['component'][ $ticket->component ] ) ) {
-			$reasons['component'] = sprintf( 'you have subscribed to the %s component', $ticket->component );
+		if ( ! empty( $notifications['component'][ $ticket['component'] ] ) ) {
+			$reasons['component'] = sprintf( 'you have subscribed to the %s component', $ticket['component'] );
 		}
-		if ( ! empty( $notifiations['milestone'][ $ticket->milestone ] ) ) {
-			$reasons['milestone'] = sprintf( 'you have subscribed to the %s milestone', $ticket->milestone );
+		if ( ! empty( $notifiations['milestone'][ $ticket['milestone'] ] ) ) {
+			$reasons['milestone'] = sprintf( 'you have subscribed to the %s milestone', $ticket['milestone'] );
 		}
 
 		if ( 1 === $ticket_sub ) {
@@ -315,14 +316,14 @@ class wporg_trac_notifications {
 		$this->ticket_notes( $ticket, $username, $meta );
 		$send = array( 'notifications-box' => ob_get_clean() );
 		if ( isset( $this->components ) ) {
-			$send['maintainers'] = $this->components->get_component_maintainers( $ticket->component );
+			$send['maintainers'] = $this->components->get_component_maintainers( $ticket['component'] );
 		}
 		wp_send_json_success( $send );
 		exit;
 	}
 
 	function ticket_notes( $ticket, $username, $meta ) {
-		if ( $username == $ticket->reporter ) {
+		if ( $username == $ticket['reporter'] ) {
 			return;
 		}
 
@@ -333,7 +334,7 @@ class wporg_trac_notifications {
 		}
 
 		if ( 1 == count( $activity['tickets'] ) ) {
-			$output = '<strong>Make sure ' . $ticket->reporter . ' receives a warm welcome.</strong><br/>';
+			$output = sprintf( '<strong>Make sure %s receives a warm welcome.</strong><br/>', $ticket['reporter'] );
 
 			if ( ! empty( $activity['comments'] ) ) {
 				$output .= 'They&#8217;ve commented before, but it&#8127;s their first ticket!';
@@ -343,20 +344,21 @@ class wporg_trac_notifications {
 		} else {
 			$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
 
-			$output = '<strong>This is only ' . $ticket->reporter . '&#8217;s ' . $mapping[ count( $activity['tickets'] ) ] . ' ticket!</strong><br/>Previously:';
+			$output = sprintf( '<strong>This is only %s&#8217;s %s ticket!</strong><br/>Previously:',
+				$ticket['reporter'], $mapping[ count( $activity['tickets'] ) ] );
 
 				foreach ( $activity['tickets'] as $t ) {
-					if ( $t->id != $ticket->id ) {
+					if ( $t['id'] != $ticket['id'] ) {
 						$output .= ' ' . $this->ticket_link( $t );
 					}
 				}
 				$output .= '.';
 		}
 
-		$gravatar_url = '//wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket->reporter );
+		$gravatar_url = 'https://wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket['reporter'] );
 
 		echo '<p class="ticket-note note-new-reporter">';
-		echo '<img width="36" height="36" src="'. $gravatar_url . '&amp;s=36" srcset="'. $gravatar_url . '&amp;s=72 2x" /> ';
+		printf( '<img width="36" height="36" src="%1$s&amp;s=36" srcset="%1$s&amp;s=72 2x" /> ', $gravatar_url );
 		echo '<span class="note">' . $output . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
@@ -398,10 +400,10 @@ class wporg_trac_notifications {
 			}
 			if ( empty( $_POST['notifications']['newticket'] ) && ! empty( $notifications['newticket'] ) ) {
 				$changes['delete'][] = array( 'username' => $username, 'type' => 'newticket' );
-				$notifications[ 'newticket' ] = false;
+				$notifications['newticket'] = false;
 			} elseif ( ! empty( $_POST['notifications']['newticket'] ) && empty( $notifications['newticket'] ) ) {
 				$changes['insert'][] = array( 'username' => $username, 'type' => 'newticket', 'value' => '1' );
-				$notifications[ 'newticket' ] = true;
+				$notifications['newticket'] = true;
 			}
 			$this->api->update_notifications( $changes );
 		}
@@ -510,16 +512,16 @@ class wporg_trac_notifications {
 			echo '<h3>Milestones</h3>';
 			echo '<ul>';
 			foreach ( $milestones as $milestone ) {
-				$checked = checked( ! empty( $notifications['milestone'][ $milestone->name ] ), true, false );
+				$checked = checked( ! empty( $notifications['milestone'][ $milestone['name'] ] ), true, false );
 				$class = '';
-				if ( ! empty( $milestone->completed ) ) {
+				if ( ! empty( $milestone['completed'] ) ) {
 					$class = 'completed-milestone';
 					if ( $checked ) {
 						$class .= ' checked';
 					}
 					$class = ' class="' . $class . '"';
 				}
-				echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone->name ) . ']" /> ' . $milestone->name . '</label></li>';
+				echo  '<li' . $class . '><label><input type="checkbox" ' . $checked . 'name="notifications[milestone][' . esc_attr( $milestone['name'] ) . ']" /> ' . $milestone['name'] . '</label></li>';
 			}
 			echo '<li id="show-completed"><a href="#">Show recently completed&hellip;</a></li>';
 			echo '</ul>';

@@ -85,7 +85,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		// Only show 3.8+, when this feature was launched.
 		return $this->db->get_results( "SELECT name, completed FROM milestone
 			WHERE name <> 'WordPress.org' AND (completed = 0 OR completed >= 1386864000000000)
-			ORDER BY (completed = 0) DESC, name DESC", OBJECT_K );
+			ORDER BY (completed = 0) DESC, name DESC", ARRAY_A );
 	}
 
 	function get_tickets_in_next_milestone( $component ) {
@@ -103,15 +103,15 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			'get_trac_ticket_participants'                 => $this->get_trac_ticket_participants( $ticket_id ),
 		);
 
-		if ( $meta['get_trac_ticket']->reporter !== $username ) {
-			$meta['get_reporter_last_activity'] = $this->get_reporter_past_activity( $meta['get_trac_ticket']->reporter, $ticket_id );
+		if ( $meta['get_trac_ticket']['reporter'] !== $username ) {
+			$meta['get_reporter_last_activity'] = $this->get_reporter_past_activity( $meta['get_trac_ticket']['reporter'], $ticket_id );
 		}
 
 		return $meta;
 	}
 
 	function get_trac_ticket( $ticket_id ) {
-		return $this->db->get_row( $this->db->prepare( "SELECT * FROM ticket WHERE id = %d", $ticket_id ) );
+		return $this->db->get_row( $this->db->prepare( "SELECT * FROM ticket WHERE id = %d", $ticket_id ), ARRAY_A );
 	}
 
 	function get_trac_ticket_focuses( $ticket_id ) {
@@ -163,7 +163,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		$activity = array();
 
 		$activity['tickets'] = $this->db->get_results( $this->db->prepare( "SELECT id, summary, type, status, resolution
-			FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $reporter, $ticket ) );
+			FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $reporter, $ticket ), ARRAY_A );
 
 		if ( count( $previous_tickets ) === 1 ) {
 			$activity['comments'] = (bool) $this->db->get_var( $this->db->prepare(
