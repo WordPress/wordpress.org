@@ -11,7 +11,7 @@
 
 class WordCamp_Payments_Network_Tools {
 	public static $list_table;
-	public static $db_version = 4;
+	public static $db_version = 6;
 
 	/**
 	 * Runs during plugins_loaded, doh.
@@ -42,7 +42,7 @@ class WordCamp_Payments_Network_Tools {
 	 */
 	public static function get_table_name() {
 		global $wpdb;
- 		return $wpdb->get_blog_prefix(0) . 'wordcamp_payments_index';
+		return $wpdb->get_blog_prefix(0) . 'wordcamp_payments_index';
 	}
 
 	/**
@@ -67,10 +67,12 @@ class WordCamp_Payments_Network_Tools {
 			blog_id int(11) unsigned NOT NULL default '0',
 			post_id int(11) unsigned NOT NULL default '0',
 			created int(11) unsigned NOT NULL default '0',
+			paid int(11) unsigned NOT NULL default '0',
 			category varchar(255) NOT NULL default '',
 			method varchar(255) NOT NULL default '',
 			due int(11) unsigned NOT NULL default '0',
 			status varchar(255) NOT NULL default '',
+			keywords text NOT NULL default '',
 			PRIMARY KEY  (id),
 			KEY blog_post_id (blog_id, post_id),
 			KEY due (due),
@@ -123,6 +125,18 @@ class WordCamp_Payments_Network_Tools {
 	 */
 	public static function prepare_for_index( $request ) {
 		$request = get_post( $request );
+		$categories = WCP_Payment_Request::get_payment_categories();
+
+		// All things search.
+		$keywords = array( $request->post_title );
+
+		$category_slug = get_post_meta( $request->ID, '_camppayments_payment_category', true );
+		if ( ! empty( $categories[ $category_slug ] ) )
+			$keywords[] = $categories[ $category_slug ];
+
+		$payment_method = get_post_meta( $request->ID, '_camppayments_payment_method', true );
+		if ( ! empty( $payment_method ) )
+			$keywords[] = $payment_method;
 
 		return array(
 			'blog_id' => get_current_blog_id(),
@@ -132,8 +146,9 @@ class WordCamp_Payments_Network_Tools {
 			'paid'    => absint( get_post_meta( $request->ID, '_camppayments_date_vendor_paid', true ) ),
 			'due' => absint( get_post_meta( $request->ID, '_camppayments_due_by', true ) ),
 			'status' => $request->post_status,
-			'method' => get_post_meta( $request->ID, '_camppayments_payment_method', true ),
-			'category' => get_post_meta( $request->ID, '_camppayments_payment_category', true ),
+			'method' => $payment_method,
+			'category' => $category_slug,
+			'keywords' => json_encode( $keywords ),
 		);
 	}
 
@@ -232,7 +247,8 @@ class WordCamp_Payments_Network_Tools {
 
 			<form id="posts-filter" action="" method="get">
 				<input type="hidden" name="page" value="wcp-dashboard" />
-				<input type="hidden" name="wcp-section" value="overdue" />
+				<input type="hidden" name="wcp-section" value="<?php echo esc_attr( self::get_current_tab() ); ?>" />
+				<?php self::$list_table->search_box( __( 'Search Payments', 'wordcamporg' ), 'wcp' ); ?>
 				<?php self::$list_table->display(); ?>
 			</form>
 		</div>

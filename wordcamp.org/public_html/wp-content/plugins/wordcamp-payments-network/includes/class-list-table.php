@@ -43,6 +43,10 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	public function print_inline_css() {
 		?>
 		<style>
+		#wcp-list-table .search-box {
+			margin-top: 12px;
+		}
+
 		#wcp-list-table .manage-column.column-payment {
 			width: 30%;
 		}
@@ -66,6 +70,7 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		$orderby = '';
 		$limit = '';
 
+		$per_page = 10;
 		$orderby = 'due';
 		$order = 'asc';
 
@@ -81,6 +86,10 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 			$where .= " AND `status` = 'incomplete' ";
 		}
 
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$where .= $wpdb->prepare( " AND `keywords` LIKE %s ", '%' . $wpdb->esc_like( wp_unslash( $_REQUEST['s'] ) ) . '%' );
+		}
+
 		if ( ! empty( $_REQUEST['orderby'] ) && in_array( $_REQUEST['orderby'], array_values( $this->get_sortable_columns() ) ) )
 			$orderby = $_REQUEST['orderby'];
 
@@ -90,7 +99,6 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		$orderby = sprintf( " ORDER BY `%s` %s ", $orderby, $order );
 
 		$paged = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1;
-		$per_page = 10;
 
 		$limit .= sprintf( " LIMIT %d OFFSET %d ", $per_page, $per_page * ( $paged - 1 ) );
 
