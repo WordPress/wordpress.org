@@ -130,7 +130,7 @@
 		// Performs a search within the collection
 		// @uses RegExp
 		search: function( term ) {
-			var match, name;
+			var match;
 
 			// Escape the term string for RegExp meta characters
 			term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
@@ -142,10 +142,14 @@
 
 			// Find results
 			this.each( function( project ) {
-				name = project.get( 'name' );
-				project.set( 'isVisible', match.test( name ) );
+				var haystack = _.union( project.get( 'name' ), project.get( 'slug' ) );
+				project.set( 'isVisible', match.test( haystack ) );
 			});
 		},
+
+		comparator: function( project ) {
+			return - project.get( 'checked' );
+		}
 	});
 
 	/**

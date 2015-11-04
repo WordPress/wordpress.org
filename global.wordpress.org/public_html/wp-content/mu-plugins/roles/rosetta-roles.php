@@ -220,7 +220,7 @@ class Rosetta_Roles {
 	 * Enqueues scripts.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '2', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '3', true );
 	}
 
 	/**
@@ -655,7 +655,7 @@ class Rosetta_Roles {
 		);
 
 		$_projects = $wpdb->get_results( "
-			SELECT id, name, parent_project_id
+			SELECT id, name, parent_project_id, slug
 			FROM translate_projects
 			WHERE id NOT IN( " . implode( ',', $ignore_project_ids ) . " )
 			ORDER BY id ASC
