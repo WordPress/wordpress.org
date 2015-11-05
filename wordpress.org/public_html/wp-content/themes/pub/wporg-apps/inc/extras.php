@@ -36,36 +36,36 @@ function wpmobileapps_body_classes( $classes ) {
 add_filter( 'body_class', 'wpmobileapps_body_classes' );
 
 /**
- * Filters wp_title to print a neat <title> tag based on what is being viewed.
+ * Filters document title to add context based on what is being viewed.
  *
- * @param string $title Default title text for current view.
- * @param string $sep Optional separator.
- * @return string The filtered title.
+ * @param array $parts The document title parts.
+ * @return array The document title parts.
  */
-function wpmobileapps_wp_title( $title, $sep ) {
+function wpmobileapps_document_title( $parts ) {
 	if ( is_feed() ) {
-		return $title;
+		return $parts;
 	}
 
 	global $page, $paged;
 
-	// Add the blog name
-	$title .= get_bloginfo( 'name', 'display' );
+	$title = $parts['title'];
+	$sep = '|';
 
 	// Add the blog description for the home/front page.
 	$site_description = get_bloginfo( 'description', 'display' );
 	if ( $site_description && ( is_home() || is_front_page() ) ) {
-		$title .= " $sep $site_description";
+		$title = $site_description;
 	}
 
 	// Add a page number if necessary:
-	if ( $paged >= 2 || $page >= 2 ) {
-		$title .= " $sep " . sprintf( __( 'Page %s', 'wpmobileapps' ), max( $paged, $page ) );
+	if ( isset( $parts['page'] ) && $parts['page'] >= 2 ) {
+		$title .= " $sep " . sprintf( __( 'Page %s', 'wpmobileapps' ), $parts['page'] );
 	}
 
-	return $title;
+	$parts['title'] = $title;
+	return $parts;
 }
-add_filter( 'wp_title', 'wpmobileapps_wp_title', 10, 2 );
+add_filter( 'document_title_parts', 'wpmobileapps_document_title' );
 
 /**
  * Sets the authordata global when viewing an author archive.
