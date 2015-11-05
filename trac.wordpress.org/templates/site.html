@@ -8,6 +8,7 @@
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = '//make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
+	project_name = project['name'].replace('Trac', '').strip()
 
 	notifications_enabled = 1 if project_slug in ['core', 'meta'] else 0
 
@@ -96,9 +97,9 @@
 		</div>
 		<py:if test="project_slug in ['core', 'bbpress', 'buddypress']">
 		<div class="newticket-instructions">
-			<p><strong>This form is for reporting bugs in ${project.name}.</strong> Here are some questions and tips to help you write a great bug report:</p>
+			<p><strong>This form is for reporting bugs in ${project_name}.</strong> Here are some questions and tips to help you write a great bug report:</p>
 			<ul>
-				<li>Are you using either the latest version of ${project.name}, or the latest development version? If not, please update first.</li>
+				<li>Are you using either the latest version of ${project_name}, or the latest development version? If not, please update first.</li>
 				<li>What steps should be taken to consistently reproduce the problem?</li>
 				<li>Does the problem occur even when you deactivate all plugins and use the default theme?</li>
 				<li>In case it's relevant to the ticket, what is the expected output or result? What did you see instead?</li>
@@ -187,7 +188,7 @@
 <!--! License notes when uploading patches -->
 <py:match path="form[@id='attachment']/div[@class='buttons']" once="true">
 	<div class="wp-caution" id="wp-contributions-caution">
-		<p>By contributing code to ${project.name}, you grant its use under the GNU General Public License v2 (or later).</p>
+		<p>By contributing code to ${project_name}, you grant its use under the GNU General Public License v2 (or later).</p>
 	</div>
 	<div py:attrs="select('@*')">
 		${select('*|comment()|text()')}
@@ -245,7 +246,7 @@
 		<xi:fallback>
 			<div id="headline" class="no-menu">
 				<div class="wrapper">
-					<h2><a href="/">${project.name}</a></h2>
+					<h2><a href="/">${project_name}</a></h2>
 				</div>
 			</div>
 		</xi:fallback>
