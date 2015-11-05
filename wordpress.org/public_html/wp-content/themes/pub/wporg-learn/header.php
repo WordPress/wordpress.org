@@ -1,6 +1,6 @@
 <?php
 global $pagetitle;
-$pagetitle = wp_title( '&laquo;', false, 'right' ) . ' ' . get_bloginfo( 'name' );
+$pagetitle = wp_get_document_title();
 wp_enqueue_style( 'wporg-learn', get_bloginfo( 'stylesheet_url' ), array(), 2, 'screen' );
 wp_enqueue_style( 'wporg-learn-fonts', '//fonts.googleapis.com/css?family=Roboto+Condensed:700', array(), 1, 'screen' );
 wp_enqueue_style( 'buttons' );

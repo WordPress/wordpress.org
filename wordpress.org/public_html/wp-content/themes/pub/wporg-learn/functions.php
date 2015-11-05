@@ -21,4 +21,18 @@ function learn_register_sidebars() {
 	) );
 }
 
+/**
+ * Omit page name from front page title.
+ *
+ * @param array $parts The document title parts.
+ * @return array The document title parts.
+ */
+function learn_remove_frontpage_name_from_title( $parts ) {
+	if ( is_front_page() ) {
+		$parts['title'] = '';
+	}
+
+	return $parts;	
+}
+add_filter( 'document_title_parts', 'learn_remove_frontpage_name_from_title' );
 
