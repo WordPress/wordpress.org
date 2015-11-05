@@ -134,6 +134,7 @@
 				<ul>
 					<?php
 						$used_by = get_used_by();
+						$used_by_to_show = 5;
 						while ( $used_by->have_posts() ) : $used_by->the_post();
 							?>
 							<li>
@@ -141,8 +142,13 @@
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
 							</li>
 						<?php endwhile; wp_reset_postdata(); ?>
-						<?php if ( $used_by->post_count > 5 ) : ?>
-							<a href="#" class="show-more"><?php printf( _n( 'Show 1 more used by', 'Show %d more used by', $used_by->post_count, 'wporg' ), $used_by->post_count ); ?></a>
+						<?php if ( $used_by->post_count > $used_by_to_show ) : ?>
+							<a href="#" class="show-more"><?php
+								/* translators: %d: remaining 'used by' count */
+								printf( _n( 'Show %d more used by', 'Show %d more used by', $used_by->post_count - $used_by_to_show, 'wporg' ),
+									number_format_i18n( $used_by->post_count - $used_by_to_show )
+								);
+							?></a>
 							<a href="#" class="hide-more"><?php _e( 'Hide more used by', 'wporg' ); ?></a>
 						<?php endif; ?>
 				</ul>
@@ -153,6 +159,7 @@
 					<ul>
 						<?php
 						$uses = get_uses();
+						$uses_to_show = 5;
 						while ( $uses->have_posts() ) : $uses->the_post()
 							?>
 							<li>
@@ -160,8 +167,13 @@
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
 							</li>
 						<?php endwhile; wp_reset_postdata(); ?>
-						<?php if ( $uses->post_count > 5 ) : ?>
-							<a href="#" class="show-more"><?php printf( _n( 'Show 1 more use', 'Show %d more uses', $uses->post_count, 'wporg' ), $uses->post_count ); ?></a>
+						<?php if ( $uses->post_count > $uses_to_show ) : ?>
+							<a href="#" class="show-more"><?php
+								/* translators: %d: remaining 'uses' count */
+								printf( _n( 'Show %d more use', 'Show %d more uses', $uses->post_count - $uses_to_show, 'wporg' ),
+									number_format_i18n( $uses->post_count - $uses_to_show )
+								);
+							?></a>
 							<a href="#" class="hide-more"><?php _e( 'Hide more uses', 'wporg' ); ?></a>
 						<?php endif; ?>
 					</ul>
