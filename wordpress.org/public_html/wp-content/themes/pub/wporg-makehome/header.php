@@ -1,5 +1,5 @@
 <?php
-$GLOBALS['pagetitle'] = wp_title( '&laquo;', false, 'right' ) . ' ' . get_bloginfo( 'name' );
+$GLOBALS['pagetitle'] = wp_get_document_title();
 require( WPORGPATH . 'header.php' );
 ?>
 

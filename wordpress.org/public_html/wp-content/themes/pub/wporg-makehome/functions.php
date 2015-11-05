@@ -23,3 +23,19 @@ function make_home_site_classes($classes, $class, $id) {
 	$classes[] = sanitize_html_class( 'make-' . get_post( $id )->post_name );
 	return $classes;
 }
+
+/**
+ * Omit page name from front page title.
+ *
+ * @param array $parts The document title parts.
+ * @return array The document title parts.
+ */
+function make_remove_frontpage_name_from_title( $parts ) {
+	if ( is_front_page() ) {
+		$parts['title'] = '';
+	}
+
+	return $parts;	
+}
+add_filter( 'document_title_parts', 'make_remove_frontpage_name_from_title' );
+
