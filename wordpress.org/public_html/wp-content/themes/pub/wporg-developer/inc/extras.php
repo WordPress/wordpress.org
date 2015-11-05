@@ -36,12 +36,12 @@ function wporg_developer_body_classes( $classes ) {
 add_filter( 'body_class', 'wporg_developer_body_classes' );
 
 /**
- * Filters wp_title to print a neat <title> tag based on what is being viewed.
+ * Filters document title to add context based on what is being viewed.
  *
  * @param array $parts The document title parts.
  * @return array The document title parts.
  */
-function wporg_developer_wp_title( $parts ) {
+function wporg_developer_document_title( $parts ) {
 	global $page, $paged;
 
 	if ( is_feed() ) {
@@ -87,7 +87,7 @@ function wporg_developer_wp_title( $parts ) {
 	$parts['title'] = $title;
 	return $parts;
 }
-add_filter( 'document_title_parts', 'wporg_developer_wp_title' );
+add_filter( 'document_title_parts', 'wporg_developer_document_title' );
 
 /**
  * Prefixes excerpts for archive view with content type label.
