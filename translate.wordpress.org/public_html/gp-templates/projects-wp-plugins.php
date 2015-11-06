@@ -81,7 +81,7 @@ gp_tmpl_header();
 										$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
-										$link_url  = gp_url( gp_url_join( $project->slug, $subproject_slug, $locale_slug, $set_slug ) );
+										$link_url  =  gp_url_project( $project->path, gp_url_join( $subproject_slug, $locale_slug, $set_slug ) );
 										$link_text = "$percent%";
 
 									endif;
