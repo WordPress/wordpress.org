@@ -53,6 +53,10 @@
 	line-height: 1.3;
 }
 
+.storycontent + .fancy {
+	margin-top: 60px;
+}
+
 #pagebody .meta {
 	margin-bottom: 20px;
 	font-size: 12px;
