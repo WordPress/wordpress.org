@@ -57,35 +57,36 @@ gp_tmpl_header();
 				endif;
 			?>
 				<tr>
-					<th title="<?php echo esc_attr( $gp_locale->english_name ); ?>">
-						<a href="<?php echo gp_url_join( 'locale', $gp_locale->slug, $set_slug ); ?>">
+					<th title="<?php echo esc_attr( $gp_locale->wp_locale ); ?>">
+						<a href="<?php echo gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug ) ); ?>">
 							<?php echo esc_html( $gp_locale->english_name ); ?>
 						</a>
 					</th>
 					<?php
 						if ( $set ) :
-							foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $slug ) :
-								if ( isset( $translation_locale_statuses[ $locale_slug ][ $slug ] ) ) :
-									$percent = $translation_locale_statuses[ $locale_slug ][ $slug ];
+							foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $subproject_slug ) :
+								if ( isset( $translation_locale_statuses[ $locale_slug ][ $subproject_slug ] ) ) :
+									$percent = $translation_locale_statuses[ $locale_slug ][ $subproject_slug ];
 
-									if ( 'waiting' === $slug ) :
+									if ( 'waiting' === $subproject_slug ) :
 										// Color code it on -0~500 waiting strings
-										$percent_class = 100-min( (int) ( $percent / 50 ) * 10, 100 );
+										$percent_class = 100 - min( (int) ( $percent / 50 ) * 10, 100 );
 
 										// It's only 100 if it has 0 strings.
 										if ( 100 == $percent_class && $percent ) :
 											$percent_class = 90;
 										endif;
 
-										$percent_class = 'percent' . $percent_class;
-										echo '<td data-sort-value="'. esc_attr( $percent ) . '" class="' . $percent_class .'">' . number_format( $percent ) . '</td>';
+										$link_url  = gp_url( gp_url_join( 'locale', $locale_slug, $set_slug, $project->path ) );
+										$link_text = number_format( $percent );
 									else :
-										$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
+										$percent_class = (int) ( $percent / 10 ) * 10;
+										$link_url  = gp_url_join( $project->slug, $subproject_slug, $locale_slug, $set_slug );
+										$link_text = "$percent%";
 
-										echo '<td data-sort-value="' . esc_attr( $percent ) . '" class="' . $percent_class .'">';
-										gp_link( gp_url_project( $project->path, gp_url_join( $slug, $locale_slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), "$percent%" );
-										echo '</td>';
 									endif;
+
+									echo '<td data-sort-value="' . esc_attr( $percent ) . '" class="percent' . $percent_class .'">'. gp_link_get( $link_url, $link_text ) . '</td>';
 								else :
 									echo '<td class="none" data-sort-value="-1">&mdash;</td>';
 								endif;
