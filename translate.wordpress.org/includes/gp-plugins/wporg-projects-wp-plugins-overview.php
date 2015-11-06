@@ -15,7 +15,8 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 			SELECT
 				path, locale, locale_slug,
 				(100 * stats.current/stats.all) as percent_complete,
-				stats.untranslated as waiting_strings
+				stats.waiting+stats.fuzzy as waiting_strings,
+				stats.untranslated as untranslated
 			FROM {$gpdb->prefix}project_translation_status stats
 				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
 			WHERE
@@ -40,11 +41,16 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 			$percent_complete = (float) $set->percent_complete;
 			$translation_locale_statuses[ $locale_key ][ $sub_project ] = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
 
-			// Increment the amount of waiting strings.
+			// Increment the amount of waiting and untranslated strings.
 			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
 				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
 			}
+			if ( ! isset( $translation_locale_statuses[ $locale_key ]['untranslated'] ) ) {
+				$translation_locale_statuses[ $locale_key ]['untranslated'] = 0;
+			}
 			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
+			$translation_locale_statuses[ $locale_key ]['untranslated'] += (int) $set->untranslated;
+
 
 			ksort( $translation_locale_statuses[ $locale_key ], SORT_NATURAL );
 		}
@@ -52,9 +58,9 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 
 		// Order by waiting strings, ascending.
 		uksort( $translation_locale_statuses, function ( $a, $b ) use ( $translation_locale_statuses ) {
-			if ( $translation_locale_statuses[ $a ]['waiting'] > $translation_locale_statuses[ $b ]['waiting'] ) {
+			if ( $translation_locale_statuses[ $a ]['untranslated'] > $translation_locale_statuses[ $b ]['untranslated'] ) {
 				return 1;
-			} elseif ( $translation_locale_statuses[ $a ]['waiting'] == $translation_locale_statuses[ $b ]['waiting'] ) {
+			} elseif ( $translation_locale_statuses[ $a ]['untranslated'] == $translation_locale_statuses[ $b ]['untranslated'] ) {
 				return strnatcmp( $a, $b );
 			} else {
 				return -1;
