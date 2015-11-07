@@ -80,6 +80,30 @@ class GP_WPorg_Route_Stats extends GP_Route {
 		}
 		unset( $rows, $locale_key, $set );
 
+		// Append the Plugins/Themes waiting strings
+		$parent_project_ids = implode(',', array(
+			GP::$project->by_path( 'wp-plugins' )->id,
+			GP::$project->by_path( 'wp-themes' )->id
+		) );
+		$sql = "SELECT
+				locale, locale_slug,
+				SUM( stats.waiting ) + SUM( stats.fuzzy ) as waiting_strings
+			FROM {$gpdb->prefix}project_translation_status stats
+				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
+			WHERE
+				p.parent_project_id IN ( $parent_project_ids )
+			GROUP BY locale, locale_slug";
+
+		$rows = $gpdb->get_results( $sql );
+		foreach ( $rows as $set ) {
+			$locale_key = $set->locale;
+			if ( 'default' != $set->locale_slug ) {
+				$locale_key = $set->locale . '/' . $set->locale_slug;
+			}
+
+			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
+		}
+
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
