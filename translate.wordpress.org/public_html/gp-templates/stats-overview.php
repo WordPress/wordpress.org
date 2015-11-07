@@ -45,7 +45,7 @@ gp_tmpl_header();
 					</th>
 					<?php
 					foreach ( $projects as $slug => $project ) {
-						$projecturl = gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path );
+						$projecturl = gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) );
 
 						if ( isset( $translation_locale_statuses[ $locale_slug ][ $project->path ] ) ) {
 							$percent = $translation_locale_statuses[ $locale_slug ][ $project->path ];
