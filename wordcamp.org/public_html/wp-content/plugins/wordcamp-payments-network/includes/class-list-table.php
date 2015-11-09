@@ -171,8 +171,19 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 		$currency = get_post_meta( $request->ID, '_camppayments_currency', true );
 		$amount = get_post_meta( $request->ID, '_camppayments_payment_amount', true );
 
+		$amount = preg_replace( '#[^\d.-]+#', '', $amount );
+		$amount = floatval( $amount );
+
 		if ( strpos( $currency, 'null' ) === false && $amount ) {
-			return sprintf( '%s&nbsp;%s', esc_html( $amount ), esc_html( $currency ) );
+			$output = sprintf( '%s&nbsp;%s', esc_html( number_format( $amount, 2 ) ), esc_html( $currency ) );
+
+			if ( $currency != 'USD' ) {
+				$usd_amount = WordCamp_Payments_Network_Tools::convert_currency( $currency, 'usd', $amount );
+				if ( $usd_amount )
+					$output .= sprintf( '<br />~ %s&nbsp;USD', esc_html( number_format( $usd_amount, 2 ) ) );
+			}
+
+			return $output;
 		} elseif ( $amount ) {
 			return esc_html( $amount );
 		}
