@@ -31,11 +31,7 @@ get_header(); ?>
 			</ul>
 			<h3><?php _e( 'Search the Support Forums', 'wporg-forums' ); ?></h3>
 			<p><?php _e( 'Enter a few words that describe the problem you&rsquo;re having.', 'wporg-forums' ); ?></p>
-			<form id="forumsearch" method="get" action="<?php bbp_search_url(); ?>">
-				<input name="search" class="text" id="forumsearchbox" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" type="text">
-				<input id="go" name="go" class="button" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" type="submit">
-				<input value="1" name="forums" type="hidden">
-			</form>
+			<?php bbp_get_template_part( 'form', 'search' ); ?>
 			<h3><?php _e( 'Hot Topics', 'wporg-forums' ); ?></h3>
 			<p class="frontpageheatmap">
 				<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>

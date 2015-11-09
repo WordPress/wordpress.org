@@ -198,7 +198,11 @@ div.bbp-submit-wrapper {
 }
 
 /* Search forms */
-#bbp_search,
+#bbp-search-form {
+	position: relative;
+	margin-top: 0;
+}
+
 .sidebar #ts,
 .sidebar #rs {
 	width: 90%;

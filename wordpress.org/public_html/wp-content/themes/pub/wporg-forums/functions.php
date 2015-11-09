@@ -32,7 +32,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20150704'
+		'20151109'
 	);
 
 	wp_register_style(
