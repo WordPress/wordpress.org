@@ -518,8 +518,8 @@ class WordCamp_Payments_Network_Tools {
 		if ( false === ( $rate = get_transient( $cache_key ) ) ) {
 			$url = 'https://query.yahooapis.com/v1/public/yql';
 			$url = add_query_arg( 'format', 'json', $url );
-			$url = add_query_arg( 'env', 'store://datatables.org/alltableswithkeys', $url );
-			$url = add_query_arg( 'q', $wpdb->prepare( 'select * from yahoo.finance.xchange where pair = %s', $from . $to ), $url );
+			$url = add_query_arg( 'env', rawurlencode( 'store://datatables.org/alltableswithkeys' ), $url );
+			$url = add_query_arg( 'q', rawurlencode( $wpdb->prepare( 'select * from yahoo.finance.xchange where pair = %s', $from . $to ) ), $url );
 
 			$request = wp_remote_get( esc_url_raw( $url ) );
 			$body = json_decode( wp_remote_retrieve_body( $request ), true );
