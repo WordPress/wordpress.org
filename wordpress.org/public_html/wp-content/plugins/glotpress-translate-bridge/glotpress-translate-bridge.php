@@ -70,7 +70,7 @@ class GlotPress_Translate_Bridge {
 	 *
 	 * @return object
 	 */
-	public function instance() {
+	static public function instance() {
 		if ( is_null( self::$instance ) ) {
 			$class = __CLASS__;
 			self::$instance = new $class;
