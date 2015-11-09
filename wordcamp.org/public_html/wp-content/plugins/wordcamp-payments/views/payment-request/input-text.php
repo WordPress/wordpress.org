@@ -17,7 +17,7 @@
 
 		<?php if ( ! empty( $description ) ) : ?>
 			<label for="<?php echo esc_attr( $name ); ?>">
-				<span class="description"><?php echo esc_html( $description ); ?></span>
+				<p class="description"><?php echo esc_html( $description ); ?></p>
 			</label>
 		<?php endif; ?>
 	</td>

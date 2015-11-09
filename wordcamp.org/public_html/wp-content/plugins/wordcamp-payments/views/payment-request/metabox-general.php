@@ -5,7 +5,7 @@
 		$this->render_text_input( $post, 'Date Vendor was Paid', 'date_vendor_paid', '', 'date', array(), $date_vendor_paid_readonly );
 		$this->render_textarea_input( $post, 'Description', 'description' );
 		$this->render_text_input( $post, 'Requested date for payment/due by', 'due_by', '', 'date' );
-		$this->render_text_input( $post, 'Amount', 'payment_amount' );
+		$this->render_text_input( $post, 'Amount', 'payment_amount', 'Ex. 1234.56' );
 		$this->render_select_input( $post, 'Currency', 'currency' );
 		$this->render_textarea_input( $post, 'Notes', 'general_notes', 'Any other details you want to share.' );
 	?>
