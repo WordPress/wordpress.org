@@ -115,11 +115,15 @@ class GP_WPorg_Route_Stats extends GP_Route {
 		unset( $locale, $sets );
 		
 		// Sort by Percent Complete, secondly by Slug
-		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete ) {
+		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete, $translation_locale_statuses ) {
 			if ( $translation_locale_complete[ $a ] < $translation_locale_complete[ $b ] ) {
 				return 1;
 			} elseif ( $translation_locale_complete[ $a ] == $translation_locale_complete[ $b ] ) {
-				return strnatcmp( $a, $b );
+				if ( $translation_locale_statuses[ $a ]['waiting'] != $translation_locale_statuses[ $b ]['waiting'] ) {
+					return strnatcmp( $translation_locale_statuses[ $a ]['waiting'], $translation_locale_statuses[ $b ]['waiting'] );
+				} else {
+					return strnatcmp( $a, $b );
+				}
 			} else {
 				return -1;
 			}
