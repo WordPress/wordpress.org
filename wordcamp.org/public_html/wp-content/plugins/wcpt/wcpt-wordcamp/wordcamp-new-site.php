@@ -323,7 +323,7 @@ class WordCamp_New_Site {
 					'<h3>' . __( 'Our Sponsors', 'wordcamporg' ) . '</h3> ' .
 					'<p>'  . __( 'Blurb thanking sponsors', 'wordcamporg' ) . '</p> ' .
 					'<p>[sponsors]</p> ' .
-					'<h3>' . __( 'Interested in sponsoring WordCamp this year?</h3>', 'wordcamporg' ) .
+					'<h3>' . __( 'Interested in sponsoring WordCamp this year?', 'wordcamporg' ) . '</h3> ' .
 					'<p>'  . __( 'Check out our <a href="/call-for-sponsors">Call for Sponsors</a> post for details on how you can help make this year\'s WordCamp the best it can be!</p>', 'wordcamporg' ),
 				'status'  => 'publish',
 				'type'    => 'page',
