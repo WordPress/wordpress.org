@@ -1,5 +1,13 @@
 <?php
 $edit_link = gp_link_project_edit_get( $project, __( '(edit)' ) );
+$table_headings = array(
+	'locale'        => __( 'Locale' ),
+	'dev'           => __( 'Development' ),
+	'dev-readme'    => __( 'Development Readme' ),
+	'stable'        => __( 'Stable' ),
+	'stable-readme' => __( 'Stable Readme' ),
+	'waiting'       => __( 'Waiting' ),
+);
 
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
 gp_breadcrumb_project( $project );
@@ -30,12 +38,9 @@ gp_tmpl_header();
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>
-				<th class="title"><?php _e( 'Locale' ); ?></th>
-				<th class="title"><?php _e( 'Development' ); ?></th>
-				<th class="title"><?php _e( 'Development Readme' ); ?></th>
-				<th class="title"><?php _e( 'Stable' ); ?></th>
-				<th class="title"><?php _e( 'Stable Readme' ); ?></th>
-				<th class="title"><?php _e( 'Waiting' ); ?></th>
+				<?php foreach ( $table_headings as $heading ) : ?>
+				<th class="title"><?php echo $heading; ?></th>
+				<?php endforeach; ?>
 			</tr>
 		</thead>
 		<tbody>
@@ -86,9 +91,9 @@ gp_tmpl_header();
 
 									endif;
 
-									echo '<td data-sort-value="' . esc_attr( $percent ) . '" class="percent' . $percent_class .'">'. gp_link_get( $link_url, $link_text ) . '</td>';
+									echo '<td data-column-title="' . esc_attr( $table_headings[ $subproject_slug ] ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="percent' . $percent_class .'">'. gp_link_get( $link_url, $link_text ) . '</td>';
 								else :
-									echo '<td class="none" data-sort-value="-1">&mdash;</td>';
+									echo '<td class="none" data-column-title="" data-sort-value="-1">&mdash;</td>';
 								endif;
 							endforeach;
 						else :

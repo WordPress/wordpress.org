@@ -46,6 +46,7 @@ gp_tmpl_header();
 					<?php
 					foreach ( $projects as $slug => $project ) {
 						$projecturl = gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) );
+						$project_name = str_replace( array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory' ), '', $project->name );
 
 						if ( isset( $translation_locale_statuses[ $locale_slug ][ $project->path ] ) ) {
 							$percent = $translation_locale_statuses[ $locale_slug ][ $project->path ];
@@ -58,14 +59,14 @@ gp_tmpl_header();
 									$percent_class = 90;
 								}
 								$percent_class = 'percent' . $percent_class;
-								echo '<td data-sort-value="'. esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . $projecturl . '">' . number_format( $percent ) . '</a></td>';
+								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="'. esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . $projecturl . '">' . number_format( $percent ) . '</a></td>';
 							} else {
 								$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
-								echo '<td data-sort-value="' . esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . $projecturl . '">' . $percent . '%</a></td>';
+								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . $projecturl . '">' . $percent . '%</a></td>';
 							}
 
 						} else {
-							echo '<td class="none" data-sort-value="-1">&mdash;</td>';
+							echo '<td class="none" data-column-title="" data-sort-value="-1">&mdash;</td>';
 						}
 					}
 					?>
