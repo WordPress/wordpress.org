@@ -26,7 +26,9 @@ class WPORG_JS_Translation_Warnings {
 		}
 
 		wp_register_script( 'editor-core', $query->src, $query->deps, $query->ver );
-		wp_localize_script( 'editor-core', $query->extra['l10n'][0], $query->extra['l10n'][1] );
+		if ( isset( $query->extra['l10n'] ) ) {
+			wp_localize_script( 'editor-core', $query->extra['l10n'][0], $query->extra['l10n'][1] );
+		}
 
 		wp_deregister_script( 'editor' );
 		wp_register_script( 'editor', gp_url_public_root() . 'gp-plugins/wporg-js-warnings/wporg-js-warnings.js', array( 'editor-core', 'jquery' ), '2015-11-10' );
