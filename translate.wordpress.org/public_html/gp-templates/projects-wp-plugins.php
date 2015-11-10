@@ -40,7 +40,7 @@ gp_tmpl_header();
 		</thead>
 		<tbody>
 			<?php
-			foreach ( $translation_locale_statuses as $locale_slug => $set ) :
+			foreach ( $translation_locale_complete as $locale_slug => $total_complete ) :
 				$gp_locale = GP_Locales::by_slug( $locale_slug );
 				$set_slug  = 'default';
 
@@ -63,7 +63,7 @@ gp_tmpl_header();
 						</a>
 					</th>
 					<?php
-						if ( $set ) :
+						if ( $translation_locale_statuses[ $locale_slug ] ) :
 							foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $subproject_slug ) :
 								if ( isset( $translation_locale_statuses[ $locale_slug ][ $subproject_slug ] ) ) :
 									$percent = $translation_locale_statuses[ $locale_slug ][ $subproject_slug ];

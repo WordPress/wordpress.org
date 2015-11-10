@@ -56,12 +56,24 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 		}
 		unset( $project_path, $locale_key, $rows, $set, $sub_project );
 
-		// Order by waiting strings, ascending.
-		uksort( $translation_locale_statuses, function ( $a, $b ) use ( $translation_locale_statuses ) {
-			if ( $translation_locale_statuses[ $a ]['untranslated'] > $translation_locale_statuses[ $b ]['untranslated'] ) {
+		// Calculate a list of [Locale] = % subtotals
+		$translation_locale_complete = array();
+		foreach ( $translation_locale_statuses as $locale => $sets ) {
+			unset( $sets['waiting'] );
+			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
+		}
+		unset( $locale, $sets );
+
+		// Sort by Percent Complete, secondly by Slug
+		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete, $translation_locale_statuses ) {
+			if ( $translation_locale_complete[ $a ] > $translation_locale_complete[ $b ] ) {
 				return 1;
-			} elseif ( $translation_locale_statuses[ $a ]['untranslated'] == $translation_locale_statuses[ $b ]['untranslated'] ) {
-				return strnatcmp( $a, $b );
+			} elseif ( $translation_locale_complete[ $a ] == $translation_locale_complete[ $b ] ) {
+				if ( $translation_locale_statuses[ $a ]['waiting'] != $translation_locale_statuses[ $b ]['waiting'] ) {
+					return strnatcmp( $translation_locale_statuses[ $a ]['waiting'], $translation_locale_statuses[ $b ]['waiting'] );
+				} else {
+					return strnatcmp( $a, $b );
+				}
 			} else {
 				return -1;
 			}
