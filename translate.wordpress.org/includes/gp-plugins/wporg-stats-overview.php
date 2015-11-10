@@ -60,7 +60,8 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			FROM {$gpdb->prefix}project_translation_status stats
 				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
 			WHERE
-				p.path IN ( $all_project_paths_sql )";
+				p.path IN ( $all_project_paths_sql )
+				AND p.active = 1";
 
 		$rows = $gpdb->get_results( $sql );
 
@@ -92,6 +93,7 @@ class GP_WPorg_Route_Stats extends GP_Route {
 				LEFT JOIN {$gpdb->prefix}projects p ON stats.project_id = p.id
 			WHERE
 				p.parent_project_id IN ( $parent_project_ids )
+				AND p.active = 1
 			GROUP BY locale, locale_slug";
 
 		$rows = $gpdb->get_results( $sql );
