@@ -113,8 +113,8 @@ class GP_WPorg_Route_Stats extends GP_Route {
 			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
 		}
 		unset( $locale, $sets );
-		
-		// Sort by Percent Complete, secondly by Slug
+
+		// Sort by translation completeness, least number of waiting strings, and locale slug.
 		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete, $translation_locale_statuses ) {
 			if ( $translation_locale_complete[ $a ] < $translation_locale_complete[ $b ] ) {
 				return 1;
