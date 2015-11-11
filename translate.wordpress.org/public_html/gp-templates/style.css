@@ -1023,3 +1023,12 @@ ul.projects-dropdown li > a > span {
 .stats-table th.headerSortDown:after {
 	content: "\f142";
 }
+
+.sort-bar {
+	float: right;
+	margin: -30px 0 5px 5px;
+	background-color: #eee;
+	padding: 5px;
+	border: 1px solid #dfdfdf;
+	border-top: none;
+}

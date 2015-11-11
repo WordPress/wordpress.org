@@ -74,6 +74,37 @@ gp_tmpl_header();
 		</form>
 	</div>
 </div>
+<div class="sort-bar">
+	<select id="sort-filter" disabled="disabled">
+		<?php
+			$sorts = array();
+			if ( GP::$user->current()->id && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+				$sorts['special'] = 'Untranslated Favorites, Remaining Strings (Most first)';
+				$sorts['favorites'] = 'My Favorites';
+			}
+			$sorts['strings-remaining'] = 'Remaining Strings (Most first)';
+			$sorts['strings-remaining-asc'] = 'Remaining Strings (Least first)';
+			$sorts['strings-waiting-and-fuzzy'] = 'Waiting + Fuzzy (Most first)';
+			$sorts['strings-waiting-and-fuzzy-asc'] = 'Waiting + Fuzzy (Least first)';
+			$sorts['percent-completed'] = 'Percent Completed (Most first)';
+			$sorts['percent-completed-asc'] = 'Percent Completed (Least first)';
+
+			foreach ( $sorts as $value => $text ) {
+				printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
+			}
+		?>
+	</select>
+</div>
+<script>
+	jQuery('#sort-filter').change( function() {
+		var current_url = document.location.href.replace(/[?&]filter=[^&$]*/, '' );
+		document.location.replace(
+			current_url +
+			( -1 == current_url.indexOf('?') ? '?filter=' : '&filter=' ) +
+			this.options[ this.options.selectedIndex ].value
+		);
+	} ).prop('disabled', '');
+</script>
 
 <div id="projects" class="projects">
 	<?php

@@ -25,7 +25,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		$per_page = 20;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
-		$filter = gp_get( 'filter', 'default' );
+		$filter = gp_get( 'filter', false );
 
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
@@ -87,6 +87,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 		$sub_projects = $paged_sub_projects['projects'];
 		$pages        = $paged_sub_projects['pages'];
+		$filter       = $paged_sub_projects['filter'];
 		unset( $paged_sub_projects );
 
 		$project_status = $project_icons = array();
@@ -385,7 +386,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 			'search'   => false,
 			'set_slug' => '',
 			'locale'   => '',
-			'filter'     => 'default',
+			'filter'   => false,
 		);
 		$r = wp_parse_args( $args, $defaults );
 		extract( $r, EXTR_SKIP );
@@ -407,8 +408,8 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		// This removes the parent_project_id restriction and replaces it with all-translation-editer-projects
 		if ( 'waiting' == $project->slug && GP::$user->current()->id && isset( GP::$plugins->wporg_rosetta_roles ) ) {
 
-			if ( 'default' === $filter ) {
-				$filter = 'strings-waiting';
+			if ( ! $filter ) {
+				$filter = 'strings-waiting-and-fuzzy';
 			}
 
 			$user_id = GP::$user->current()->id;
@@ -451,9 +452,15 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		}
 
 		$filter_order_by = $filter_where = '';
-		switch ( $filter ) {
+		$sort_order = 'DESC';
+		$filter_name = $filter;
+		if ( $filter && '-asc' == substr( $filter, -4 ) ) {
+			$sort_order = 'ASC';
+			$filter_name = substr( $filter, 0, -4 );
+		}
+		switch ( $filter_name ) {
 			default:
-			case 'default':
+			case 'special':
 				// Float favorites to the start, but only if they have untranslated strings
 				$user_fav_projects = array_map( array( $gpdb, 'escape' ), $this->get_user_favorites( $project->slug ) );
 
@@ -480,22 +487,17 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 			case 'strings-remaining':
 				$filter_where = 'AND stats.untranslated > 0';
-				$filter_order_by = 'stats.untranslated DESC, tp.name ASC';
+				$filter_order_by = "stats.untranslated $sort_order, tp.name ASC";
 				break;
 
-			case 'strings-waiting':
+			case 'strings-waiting-and-fuzzy':
 				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 )';
 				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) DESC, tp.name ASC";
 				break;
 
-			case 'strings-fuzzy-and-warnings':
-				$filter_where = 'AND ( stats.fuzzy > 0 OR stats.warnings > 0 )';
-				$filter_order_by = '(stats.fuzzy+stats.warnings) DESC, tp.name ASC';
-				break;
-
 			case 'percent-completed':
 				$filter_where = 'AND stats.untranslated > 0';
-				$filter_order_by = ' ( stats.current / stats.all ) DESC, tp.name ASC';
+				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
 				break;
 		}
 
@@ -533,6 +535,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 		return array(
 			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
 			'projects' => $projects,
+			'filter' => $filter,
 		);
 	}
 
