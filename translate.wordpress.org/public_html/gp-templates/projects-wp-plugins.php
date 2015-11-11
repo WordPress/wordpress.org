@@ -55,6 +55,7 @@ gp_tmpl_header();
 
 					// Just append it for now..
 					$gp_locale->wp_locale .= '/' . $set_slug;
+					$gp_locale->english_name .=  ' (' . ucfirst( $set_slug ) . ')';
 				endif;
 
 				if ( ! $gp_locale || ! $gp_locale->wp_locale ) :
