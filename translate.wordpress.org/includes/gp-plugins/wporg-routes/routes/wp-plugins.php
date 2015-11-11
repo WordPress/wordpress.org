@@ -59,14 +59,15 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
-			unset( $sets['waiting'] );
+			unset( $sets['waiting'], $sets['untranslated'] );
 			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
 		}
 		unset( $locale, $sets );
 
+
 		// Sort by translation completeness, least number of waiting strings, and locale slug.
 		uksort( $translation_locale_complete, function ( $a, $b ) use ( $translation_locale_complete, $translation_locale_statuses ) {
-			if ( $translation_locale_complete[ $a ] > $translation_locale_complete[ $b ] ) {
+			if ( $translation_locale_complete[ $a ] < $translation_locale_complete[ $b ] ) {
 				return 1;
 			} elseif ( $translation_locale_complete[ $a ] == $translation_locale_complete[ $b ] ) {
 				if ( $translation_locale_statuses[ $a ]['waiting'] != $translation_locale_statuses[ $b ]['waiting'] ) {
