@@ -9,7 +9,9 @@ class WPORG_Translation_Warnings {
 
 	var $allowed_domain_changes = array(
 		// Allow links to WordPress.org to be changed to a subdomain
-		'wordpress.org' => '[^.]+\.wordpress\.org'
+		'wordpress.org' => '[^.]+\.wordpress\.org',
+		// Allow links to Gravatar.org to be changed to a subdomain
+		'en.gravatar.com' => '[^.]+\.gravatar\.com'
 	);
 
 	/**
@@ -22,7 +24,7 @@ class WPORG_Translation_Warnings {
 
 		preg_match_all( $urls_regex, $original, $original_urls );
 		$original_urls = array_unique( $original_urls[0] );
-		
+
 		preg_match_all( $urls_regex, $translation, $translation_urls );
 		$translation_urls = array_unique( $translation_urls[0] );
 
