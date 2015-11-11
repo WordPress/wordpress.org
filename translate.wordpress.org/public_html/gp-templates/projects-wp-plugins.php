@@ -63,7 +63,7 @@ gp_tmpl_header();
 			?>
 				<tr>
 					<th title="<?php echo esc_attr( $gp_locale->wp_locale ); ?>">
-						<a href="<?php echo gp_url( gp_url_join( 'locale', $locale_slug, $set_slug, $project->path ) ); ?>">
+						<a href="<?php echo gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) ); ?>">
 							<?php echo esc_html( $gp_locale->english_name ); ?>
 						</a>
 					</th>
