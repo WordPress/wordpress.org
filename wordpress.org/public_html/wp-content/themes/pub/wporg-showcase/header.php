@@ -1,12 +1,5 @@
 <?php
-global $pagetitle;
-
-if ( is_single() )
-	$pagetitle = 'Showcase &raquo; ' . wp_title( '', false );
-elseif ( is_category() )
-	$pagetitle = 'Showcase &raquo; Flavor &raquo; ' . wp_title( '', false );
-elseif ( is_tag() )
-	$pagetitle = 'Showcase &raquo; Tag &raquo; ' . wp_title( '', false );
+$GLOBALS['pagetitle'] = wp_get_document_title();
 
 $prefix = is_ssl() ? 'https://' : 'http://s.';
 wp_enqueue_style( 'blog-wp4', $prefix.'wordpress.org/style/blog-wp4.css', array(), 4 );

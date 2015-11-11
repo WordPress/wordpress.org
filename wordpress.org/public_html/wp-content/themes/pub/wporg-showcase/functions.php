@@ -151,7 +151,7 @@ function breadcrumb() { ?>
 				&raquo; Tag
 			<?php endif; // is_category ?>
 
-		<?php echo wp_title(); ?>
+			&raquo; <?php echo wp_get_document_title(); ?>
 		<?php endif; // is_search ?>
 
 	</h3>
@@ -230,4 +230,33 @@ function wpsc_postratings_image( $option ) { return 'stars_showcase'; }
 // Use ... in excerpts
 add_filter( 'excerpt_more', create_function( '$more', 'return "...";' ) );
 
+/**
+ * Filters document title to add context based on what is being viewed.
+ *
+ * @param array  $parts The document title parts.
+ * @return array The document title parts.
+ */
+function wporg_showcase_document_title( $parts ) {
+	// wp_get_document_title() is used by the theme in breadcrumb(), whereby it
+	// only really needs the title.
+	if ( did_action( 'wp_head' ) ) {
+		return array( 'title' => $parts['title'] );
+	}
 
+	if ( is_front_page() ) {
+		// Omit page name from the home page.
+		$parts['title'] = '';
+	} elseif ( is_category() ) {
+		// Prepend 'Flavor: ' to category document titles.
+		$parts['title'] = 'Flavor: ' . $parts['title'];
+	} elseif ( is_tag() ) {
+		// Prepend 'Tag: ' to tag document titles.
+		$parts['title'] = 'Tag: ' . $parts['title'];
+	}
+
+	return $parts;
+}
+add_filter( 'document_title_parts', 'wporg_showcase_document_title' );
+
+// Change the document title separator.
+add_filter( 'document_title_separator', create_function( '$separator', 'return "&#8250;";' ) );
