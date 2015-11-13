@@ -153,6 +153,28 @@ function wcorg_subdomactories_redirect() {
 }
 add_action( 'template_redirect', 'wcorg_subdomactories_redirect' );
 
+/**
+ * Add the post's slug to the body tag
+ *
+ * For CSS developers, this is better than relying on the post ID, because that often changes between their local
+ * development environment and production, and manually importing/exporting is inconvenient.
+ *
+ * @param array $body_classes
+ *
+ * @return array
+ */
+function wcorg_content_slugs_to_body_tag( $body_classes ) {
+	global $wp_query;
+	$post = $wp_query->get_queried_object();
+
+	if ( is_a( $post, 'WP_Post' ) ) {
+		$body_classes[] = $post->post_type . '-slug-' . sanitize_html_class( $post->post_name, $post->ID );
+	}
+
+	return $body_classes;
+}
+add_filter( 'body_class', 'wcorg_content_slugs_to_body_tag' );
+
 /*
  * Flush the rewrite rules on the current site.
  *
