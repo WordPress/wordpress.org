@@ -1,0 +1,28 @@
+/*
+ * Theme Name: WordPress.org Login Screen
+ * Theme URI: https://wordpress.org
+ * Description: The theme to power the WordPress login / account management screen.
+ * Version: 0.9
+ * Author: The WordPress.org Team
+ */
+
+#mobile-menu-button,
+.survey-wrapper,
+#wporg-footer {
+	display: none;
+}
+#wporg-header {
+	text-align: center;
+	height: 100px !important;
+}
+#wporg-header h1 {
+	float: none;
+	display: inline-block;
+}
+body {
+	background: #ffffff url("/wp-content/themes/pub/wporg-login/images/background.jpg") no-repeat left top;
+	background-size: cover;
+}
+#login-welcome {
+	text-align: center;
+}
