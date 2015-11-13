@@ -492,7 +492,7 @@ class GP_WPorg_Route_Locale extends GP_Route {
 
 			case 'strings-waiting-and-fuzzy':
 				$filter_where = 'AND (stats.waiting > 0 OR stats.fuzzy > 0 )';
-				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) DESC, tp.name ASC";
+				$filter_order_by = "tp.path LIKE 'wp/%%' AND (stats.fuzzy + stats.waiting) > 0 DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'percent-completed':
