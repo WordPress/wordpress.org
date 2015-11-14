@@ -31,7 +31,7 @@ class WPORG_JS_Translation_Warnings {
 		}
 
 		wp_deregister_script( 'editor' );
-		wp_register_script( 'editor', gp_url_public_root() . 'gp-plugins/wporg-js-warnings/wporg-js-warnings.js', array( 'editor-core', 'jquery' ), '2015-11-10' );
+		wp_register_script( 'editor', gp_url_public_root() . 'gp-plugins/wporg-js-warnings/wporg-js-warnings.js', array( 'editor-core', 'jquery' ), '2015-11-14' );
 
 	}
 

@@ -11,11 +11,15 @@ $gp.wporgjswarnings = {
 		var name = "translation["+editor.original_id+"][]";
 		var entries = jQuery("textarea[name='"+name+"']", editor).map(function( prop, el ) {
 			var $el = jQuery(el);
+
 			return {
 				index: prop,
 				name: name,
 				translation: $el.val(),
-				original: $el.parent('div.textareas').prev('p.original').text() || $el.parent('div.textareas').prev('p').find('span.original').text() // Singular original, or plurals...
+				original: // Singular original, or plural original, or.. the single-original plural view..
+					$el.parent('div.textareas').prev('p.original').text() || 
+					$el.parent('div.textareas').prev('p').find('span.original').text() ||
+					jQuery( $el.parents('div.strings').find('span.original').get(prop) ).text() 
 			}
 		}).get();
 
