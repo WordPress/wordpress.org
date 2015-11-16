@@ -19,6 +19,7 @@ class WCP_Payment_Request {
 		add_filter( 'wp_insert_post_data',    array( $this, 'update_request_status' ), 10, 2 );
 		add_action( 'save_post',              array( $this, 'save_payment' ), 10, 2 );
 		add_filter( 'map_meta_cap',           array( $this, 'modify_capabilities' ), 10, 4 );
+		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 3 );
 
 		// Columns
 		add_filter( 'manage_'.      self::POST_TYPE .'_posts_columns',       array( $this, 'get_columns' ) );
@@ -164,6 +165,9 @@ class WCP_Payment_Request {
 			'normal',
 			'high'
 		);
+
+		add_meta_box( 'wcp_log', __( 'Log', 'wordcamporg' ), array( $this, 'render_log_metabox' ),
+			self::POST_TYPE, 'normal', 'high' );
 	}
 
 	/**
@@ -247,6 +251,29 @@ class WCP_Payment_Request {
 		wp_nonce_field( 'wcp_files', 'wcp_files_nonce' );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-files.php' );
+	}
+
+	/**
+	 * Render the Log metabox
+	 *
+	 * @param WP_Post $post
+	 */
+	public function render_log_metabox( $post ) {
+		$log = get_post_meta( $post->ID, '_wcp_log', true );
+		if ( empty( $log ) )
+			$log = '[]';
+
+		$log = json_decode( $log, true );
+
+		// I wish I had a spaceship.
+		uasort( $log, function( $a, $b ) {
+			if ( $b['timestamp'] == $a )
+				return 0;
+
+			return ( $a['timestamp'] < $b['timestamp'] ) ? -1 : 1;
+		});
+
+		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-log.php' );
 	}
 
 	/**
@@ -657,6 +684,8 @@ class WCP_Payment_Request {
 			if ( $this->should_mark_request_incomplete() ) {
 				$post_data['post_status'] = 'incomplete';
 				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
+
+				update_post_meta( $post_data_raw['ID'], '_wcp_incomplete_notes', sanitize_text_field( $post_data_raw['wcp_mark_incomplete_notes'] ) );
 			} else {
 				$previous_status          = $post_data['post_status'];
 				$post_data['post_status'] = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) ) ? 'paid' : 'unpaid';
@@ -898,6 +927,40 @@ class WCP_Payment_Request {
 
 		// Attach existing files
 		$this->attach_existing_files( $post_id, $_POST );
+	}
+
+	public function transition_post_status( $new, $old, $post ) {
+		if ( $post->post_type != self::POST_TYPE )
+			return;
+
+		$user = get_user_by( 'id', get_current_user_id() );
+		if ( $new == 'auto-draft' )
+			return;
+
+		if ( $new == 'incomplete' && $old != 'incomplete' ) {
+			$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+			$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
+			WordCamp_Payments::log( $post->ID, sprintf( 'Marked as incomplete by %s: %s.', $user->display_name, $incomplete_text ), array(
+				'user_id' => $user->ID,
+				'action' => 'marked-incomplete',
+				'reason' => 'maybe notes',
+			) );
+		} elseif ( $new == 'paid' && $old != 'paid' ) {
+			WordCamp_Payments::log( $post->ID, sprintf( 'Marked as paid by %s.', $user->display_name ), array(
+				'user_id' => $user->ID,
+				'action' => 'marked-paid',
+			) );
+		} elseif ( $old == 'auto-draft' && $new != 'auto-draft' ) {
+			WordCamp_Payments::log( $post->ID, sprintf( 'Request created by %s.', $user->display_name ), array(
+				'user_id' => $user->ID,
+				'action' => 'updated',
+			) );
+		} else {
+			WordCamp_Payments::log( $post->ID, sprintf( 'Request updated by %s.', $user->display_name ), array(
+				'user_id' => $user->ID,
+				'action' => 'updated',
+			) );
+		}
 	}
 
 	/**

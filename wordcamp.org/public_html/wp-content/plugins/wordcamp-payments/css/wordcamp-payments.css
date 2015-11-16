@@ -26,3 +26,21 @@ tr#row-payment-method label {
 .form-table td p.wcp_no_files_uploaded {
 	margin-bottom: 1em;
 }
+
+#wcp_log .inside {
+	margin: 0;
+	padding: 0;
+}
+
+#wcp_log .wcp-request-log {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+#wcp_log .wcp-request-log td {
+	padding: 8px;
+}
+
+#wcp_log td.timestamp {
+	width: 130px;
+}
