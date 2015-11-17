@@ -16,7 +16,7 @@ class WordCamp_Fonts_Plugin {
 		add_action( 'wp_head', array( $this, 'wp_head_typekit' ), 102 ); // after safecss_style
 		add_action( 'wp_head', array( $this, 'wp_head_google_web_fonts' ) );
 		add_action( 'wp_head', array( $this, 'wp_head_font_awesome' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_icon_fonts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_core_fonts' ) );
 	}
 
 	/**
@@ -59,6 +59,15 @@ class WordCamp_Fonts_Plugin {
 	}
 
 	/**
+	 * Allow sites to use Core fonts on the front-end
+	 */
+	public function enqueue_core_fonts() {
+		if ( $this->options['dashicons'] ) {
+			wp_enqueue_style( 'dashicons' );
+		}
+	}
+
+	/**
 	 * Runs during admin init, does Settings API
 	 */
 	function admin_init() {
@@ -68,6 +77,14 @@ class WordCamp_Fonts_Plugin {
 		add_settings_field( 'typekit-id', 'Typekit ID', array( $this, 'field_typekit_id' ), 'wc-fonts-options', 'general' );
 		add_settings_field( 'google-web-fonts', 'Google Web Fonts', array( $this, 'field_google_web_fonts' ), 'wc-fonts-options', 'general' );
 		add_settings_field( 'font-awesome-url', 'Font Awesome',     array( $this, 'field_font_awesome_url' ), 'wc-fonts-options', 'general' );
+
+		add_settings_field(
+			'dashicons',
+			__( 'Dashicons', 'wordcamporg' ),
+			array( $this, 'field_dashicons' ),
+			'wc-fonts-options',
+			'general'
+		);
 	}
 
 	/**
@@ -133,6 +150,21 @@ class WordCamp_Fonts_Plugin {
 	}
 
 	/**
+	 * Settings API field for the Dashicons checkbox
+	 */
+	function field_dashicons() {
+		$value = isset( $this->options['dashicons'] ) ? $this->options['dashicons'] : '';
+		?>
+
+		<label>
+			<input type="checkbox" name="wc-fonts-options[dashicons]" <?php checked( $value ); ?> />
+			<?php _e( 'Enqueue Dashicons', 'wordcamporg' ); ?>
+		</label>
+
+		<?php
+	}
+
+	/**
 	 * Triggered by the Settings API upon settings save.
 	 */
 	function validate_options( $input ) {
@@ -185,18 +217,10 @@ class WordCamp_Fonts_Plugin {
 			}
 		}
 
+		// Dashicons
+		$output['dashicons'] = $input['dashicons'] ? true : false;
+
 		return $output;
-	}
-
-	/**
-	 * Allow sites to use icon fonts on the front-end
-	 */
-	public function enqueue_icon_fonts() {
-		$dashicons_sites = array( 364 ); // 2014.sf
-
-		if ( in_array( get_current_blog_id(), $dashicons_sites ) ) {
-			wp_enqueue_style( 'dashicons' );
-		}
 	}
 }
 
