@@ -15,6 +15,7 @@ class WordCamp_Fonts_Plugin {
 		
 		add_action( 'wp_head', array( $this, 'wp_head_typekit' ), 102 ); // after safecss_style
 		add_action( 'wp_head', array( $this, 'wp_head_google_web_fonts' ) );
+		add_action( 'wp_head', array( $this, 'wp_head_font_awesome' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_icon_fonts' ) );
 	}
 
@@ -35,7 +36,7 @@ class WordCamp_Fonts_Plugin {
 		printf( '<script type="text/javascript" src="//use.typekit.com/%s.js"></script>' . "\n", $this->options['typekit-id'] );
 		printf( '<script type="text/javascript">try{Typekit.load();}catch(e){}</script>' );
 	}
-	
+
 	/**
 	 * Provides the <head> output for Google Web Fonts
 	 */
@@ -47,6 +48,17 @@ class WordCamp_Fonts_Plugin {
 	}
 
 	/**
+	 * Provides the <head> output for Font Awesome
+	 */
+	function wp_head_font_awesome() {
+		if ( empty( $this->options['font-awesome-url'] ) ) {
+			return;
+		}
+
+		printf( "<style>@import url( '%s' );</style>", esc_url( $this->options['font-awesome-url'] ) );
+	}
+
+	/**
 	 * Runs during admin init, does Settings API
 	 */
 	function admin_init() {
@@ -55,6 +67,7 @@ class WordCamp_Fonts_Plugin {
 
 		add_settings_field( 'typekit-id', 'Typekit ID', array( $this, 'field_typekit_id' ), 'wc-fonts-options', 'general' );
 		add_settings_field( 'google-web-fonts', 'Google Web Fonts', array( $this, 'field_google_web_fonts' ), 'wc-fonts-options', 'general' );
+		add_settings_field( 'font-awesome-url', 'Font Awesome',     array( $this, 'field_font_awesome_url' ), 'wc-fonts-options', 'general' );
 	}
 
 	/**
@@ -107,14 +120,29 @@ class WordCamp_Fonts_Plugin {
 	}
 
 	/**
+	 * Settings API field for the Google Web Fonts URLs
+	 */
+	function field_font_awesome_url() {
+		$value = isset( $this->options['font-awesome-url'] ) ? $this->options['font-awesome-url'] : '';
+		?>
+
+		<input type="text" name="wc-fonts-options[font-awesome-url]" value="<?php echo esc_url( $value ); ?>" class="large-text code" />
+		<p class="description">Enter the BootstrapCDN URL for the version you want.</p>
+
+		<?php
+	}
+
+	/**
 	 * Triggered by the Settings API upon settings save.
 	 */
 	function validate_options( $input ) {
 		$output = $this->options;
 
+		// Typekit
 		if ( isset( $input['typekit-id'] ) )
 			$output['typekit-id'] = preg_replace( '/[^0-9a-zA-Z]+/', '', $input['typekit-id'] );
 
+		// Google Web Fonts
 		if ( isset( $input['google-web-fonts'] ) ) {
 			$fonts = array();
 			$lines = explode( "\n", $input['google-web-fonts'] );
@@ -139,6 +167,22 @@ class WordCamp_Fonts_Plugin {
 				$fonts[] = $import;
 			}
 			$output['google-web-fonts'] = implode( "\n", $fonts );
+		}
+
+		// Font Awesome
+		$output['font-awesome-url'] = '';
+
+		if ( isset( $input['font-awesome-url'] ) ) {
+			$url = parse_url( $input['font-awesome-url'] );
+
+			if ( isset( $url['host'] ) && isset( $url['path'] ) ) {
+				$valid_hostname  = 'maxcdn.bootstrapcdn.com' === $url['host'];
+				$valid_extension = '.css' === substr( $url['path'], strlen( $url['path'] ) - 4, 4 );
+
+				if ( $valid_hostname && $valid_extension ) {
+					$output['font-awesome-url'] = esc_url_raw( 'https://' . $url['host'] . $url['path'] );
+				}
+			}
 		}
 
 		return $output;
