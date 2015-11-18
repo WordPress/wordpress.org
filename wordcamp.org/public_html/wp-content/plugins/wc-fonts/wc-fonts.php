@@ -62,7 +62,7 @@ class WordCamp_Fonts_Plugin {
 	 * Allow sites to use Core fonts on the front-end
 	 */
 	public function enqueue_core_fonts() {
-		if ( $this->options['dashicons'] ) {
+		if ( isset( $this->options['dashicons'] ) && $this->options['dashicons'] ) {
 			wp_enqueue_style( 'dashicons' );
 		}
 	}
