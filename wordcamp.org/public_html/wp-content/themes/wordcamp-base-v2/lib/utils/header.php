@@ -92,4 +92,17 @@ function wcb_typekit_scripts() {
 	<?php
 }
 
-?>
+/**
+ * Get the value for the <meta name="viewport"> tag
+ *
+ * @return string
+ */
+function wcb_get_viewport() {
+	$viewport = 'width=device-width';
+
+	if ( ! wcorg_skip_feature( 'wcb_viewport_initial_scale' ) ) {
+		$viewport .= ', initial-scale=1';
+	}
+
+	return $viewport;
+}

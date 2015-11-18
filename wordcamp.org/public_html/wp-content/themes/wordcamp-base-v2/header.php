@@ -11,7 +11,7 @@
 <html <?php language_attributes(); ?>>
 <head>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
-<meta name="viewport" content="width=device-width" />
+<meta name="viewport" content="<?php echo esc_attr( wcb_get_viewport() ); ?>" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <title><?php
 	/*

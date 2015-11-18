@@ -103,3 +103,24 @@ function get_wordcamp_name( $site_id = 0 ) {
 
 	return $name;
 }
+
+/**
+ * Determine if a specific feature should be skipped on the current site
+ *
+ * Often times we want to add new functionality to plugins and themes, but can't let it run on older sites
+ * because that would break backwards compatibility. To get around that, we set a flag on older sites to
+ * indicate that they should not have the new feature, and then setup the feature to run on sites that
+ * don't have the flag, i.e., to run by default.
+ *
+ * Doing it this way means that local development environments like the Meta Environment don't have add any
+ * new filters in order to start using the new functionality.
+ *
+ * @param string $flag
+ *
+ * @return bool
+ */
+function wcorg_skip_feature( $flag ) {
+	$flags = get_option( 'wordcamp_skip_features', array() );
+
+	return isset( $flags[ $flag ] );
+}
