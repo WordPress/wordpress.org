@@ -80,7 +80,11 @@ class GP_WPorg_Route_WP_Plugins extends GP_Route {
 			}
 		} );
 
-		$project->icon = wporg_get_plugin_icon( $project->slug, 64 );
+		if ( function_exists( 'wporg_get_plugin_icon' ) ) {
+			$project->icon = wporg_get_plugin_icon( $project->slug, 64 );
+		} else {
+			$project->icon = '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
+		}
 
 		$this->tmpl( 'projects-wp-plugins', get_defined_vars() );
 	}
