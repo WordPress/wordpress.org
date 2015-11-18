@@ -257,6 +257,7 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
+			$project->sub_projects = array();
 			$projects[ $project->id ] = $project;
 		}
 
@@ -276,36 +277,16 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		}
 
 		$projects = $this->get_all_projects();
-		$project_tree = $this->_get_project_tree( $projects );
 
-		return $project_tree;
-	}
-
-	/**
-	 * Transforms a flat array to a hierarchy tree.
-	 *
-	 * @param array $projects  The projects
-	 * @param int   $parent_id Optional. Parent ID. Default 0.
-	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
-	 * @return array The project tree.
-	 */
-	private function _get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
-		if ( $max_depth < 0 ) { // Avoid an endless recursion.
-			return;
-		}
-
-		$tree = array();
-		foreach ( $projects as $project ) {
-			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->_get_project_tree( $projects, $project->id, $max_depth - 1 );
-				if ( $sub_projects ) {
-					$project->sub_projects = $sub_projects;
-				}
-
-				$tree[ $project->id ] = $project;
+		$project_tree = array();
+		foreach ( $projects as $project_id => $project ) {
+			$projects[ $project->parent_project_id ]->sub_projects[ $project_id ] = &$projects[ $project_id ];
+			if ( ! $project->parent_project_id ) {
+				$project_tree[ $project_id ] = &$projects[ $project_id ];
 			}
 		}
-		return $tree;
+
+		return $project_tree;
 	}
 
 	/**
