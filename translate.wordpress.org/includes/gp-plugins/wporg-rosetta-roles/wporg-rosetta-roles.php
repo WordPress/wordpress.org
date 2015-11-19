@@ -229,8 +229,8 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 			}
 		}
 
+		// $project_access_list contains parent project IDs, merge them with the sub-project IDs.
 		$project_access_list = array_merge( $project_access_list, $allowed_sub_project_ids );
-		$project_access_list = array_unique( $project_access_list );
 
 		return $project_access_list;
 	}
