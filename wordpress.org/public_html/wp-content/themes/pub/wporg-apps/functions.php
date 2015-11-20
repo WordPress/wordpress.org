@@ -91,7 +91,7 @@ add_action( 'widgets_init', 'wpmobileapps_widgets_init' );
  */
 function wpmobileapps_scripts() {
 	// Main stylesheet.
-	wp_enqueue_style( 'wpmobileapps-style', get_stylesheet_uri() );
+	wp_enqueue_style( 'wpmobileapps-style', get_stylesheet_uri(), array(), '20151120' );
 
 	// Animations.
 //	wp_enqueue_style( 'wpmobileapps-animations-1', get_template_directory_uri() . '/animate.css' );
