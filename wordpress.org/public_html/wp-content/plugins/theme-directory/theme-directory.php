@@ -646,7 +646,7 @@ function wporg_themes_get_themes_for_query() {
 		'sections' => false,
 		'tested' => true,
 		'requires' => true,
-		'downloaded' => true,
+		'downloaded' => false,
 		'downloadlink' => true,
 		'last_updated' => true,
 		'homepage' => true,
@@ -658,6 +658,7 @@ function wporg_themes_get_themes_for_query() {
 		'num_ratings' => true,
 		'extended_author' => true,
 		'photon_screenshots' => true,
+		'active_installs' => true,
 	);
 
 	$api_result = wporg_themes_query_api( 'query_themes', $request );

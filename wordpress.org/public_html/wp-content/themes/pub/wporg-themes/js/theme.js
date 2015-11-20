@@ -336,7 +336,7 @@ window.wp = window.wp || {};
 							sections: false,
 							tested: true,
 							requires: true,
-							downloaded: true,
+							downloaded: false,
 							downloadlink: true,
 							last_updated: true,
 							homepage: true,
@@ -347,7 +347,8 @@ window.wp = window.wp || {};
 							ratings: true,
 							num_ratings: true,
 							extended_author: true,
-							photon_screenshots: true
+							photon_screenshots: true,
+							active_installs: true,
 						}
 					}, request)
 				},
@@ -500,7 +501,14 @@ window.wp = window.wp || {};
 
 			data.path = themes.data.settings.path;
 
-			data.downloaded = data.downloaded.toLocaleString();
+			// Active Installs text
+			if ( data.active_installs < 10 ) {
+				data.active_installs = l10n.active_installs_less_than_10;
+			} else if ( data.active_installs >= 1000000 ) {
+				data.active_installs = l10n.active_installs_1_million;
+			} else {
+				data.active_installs = data.active_installs.toLocaleString() + '+';
+			}
 
 			data.show_favorites = !! themes.data.settings.favorites.user;
 			data.is_favorited   = ( themes.data.settings.favorites.themes.indexOf( data.slug ) != -1 );

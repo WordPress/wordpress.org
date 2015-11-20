@@ -445,7 +445,8 @@ body.author .theme-browser .theme .theme-author  {
 	border: 1px solid #eee;
 }
 
-.theme-wrap .theme-meta-info .updated {
+.theme-wrap .theme-meta-info .updated,
+.theme-wrap .theme-meta-info .active_installs {
 	margin: 0 0 0.5em;
 }
 

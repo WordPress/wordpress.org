@@ -38,6 +38,17 @@
 
 				<div class="theme-meta-info">
 					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>' . date_i18n( 'F j, Y', strtotime( $theme->last_updated ) ) . '</strong>' ); ?></p>
+					<?php
+						$active_installs = $theme->active_installs;
+						if ( $active_installs < 10 ) {
+							$active_installs = __( 'Less than 10', 'wporg-themes' );
+						} elseif ( $active_installs >= 1000000 ) {
+							$active_installs = __( '1+ million', 'wporg-themes' );
+						} else {
+							$active_installs = number_format_i18n( $active_installs ) . '+';
+						}
+					?>
+					<p class="active_installs"><?php printf( __( 'Active Installs: %s', 'wporg-themes' ), '<strong>' . $active_installs . '</strong>' ); ?></p>
 					<?php if ( $theme->theme_url ) { ?>
 					<a href="<?php echo esc_url( $theme->theme_url ); ?>"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
 					<?php } ?>
@@ -71,7 +82,6 @@
 				<?php } ?>
 
 				<div class="theme-downloads">
-					<p class="total-downloads"><?php printf( __( 'Total downloads: %s', 'wporg-themes' ), '<strong>' . number_format_i18n( $theme->downloaded ) . '</strong>' ); ?></p>
 				</div><!-- .theme-downloads -->
 			</div>
 

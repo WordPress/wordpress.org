@@ -75,7 +75,11 @@ function wporg_themes_scripts() {
 				'downloads' => __( 'Downloads', 'wporg-themes' ),
 
 				// Tags
-				'tags' => wporg_themes_get_tag_translations()
+				'tags' => wporg_themes_get_tag_translations(),
+
+				// Active Installs
+				'active_installs_less_than_10' => __( 'Less than 10', 'wporg-themes' ),
+				'active_installs_1_million' => __( '1+ million', 'wporg-themes' ),
 			),
 		) );
 	}
