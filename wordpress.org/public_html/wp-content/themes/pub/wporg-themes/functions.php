@@ -44,11 +44,11 @@ function wporg_themes_scripts() {
 	if ( is_rtl() ) {
 		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet );
 	}
-	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 6 );
+	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 7 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
-		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 6, true );
+		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 7, true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(
 			'themes'   => false,
