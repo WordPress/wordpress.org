@@ -179,6 +179,9 @@ a img {
   /* IE6, IE7 */
   clip: rect(1px, 1px, 1px, 1px);
   position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
 }
 
 .screen-reader-text:hover,
