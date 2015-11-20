@@ -23,7 +23,7 @@ function get_avatar( $username, $slack_id, $team_id ) {
 	) );
 
 	$hash = md5( strtolower( trim( $email ) ) );
-	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G', $hash );
+	return sprintf( 'https://secure.gravatar.com/avatar/%s?s=96d=mm&r=G&%s', $hash, time() );
 }
 
 $i = 0;
