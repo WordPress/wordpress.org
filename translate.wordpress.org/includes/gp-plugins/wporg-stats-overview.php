@@ -73,7 +73,14 @@ class GP_WPorg_Route_Stats extends GP_Route {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
 
-			$translation_locale_statuses[ $locale_key ][ $set->path ] = floor( (float) $set->percent_complete );
+			/*
+			 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
+			 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
+			 */
+			$percent_complete = (float) $set->percent_complete;
+			$percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
+			$translation_locale_statuses[ $locale_key ][ $set->path ] = $percent_complete;
+
 			if ( ! isset( $translation_locale_statuses[ $locale_key ]['waiting'] ) ) {
 				$translation_locale_statuses[ $locale_key ]['waiting'] = 0;
 			}
@@ -110,7 +117,12 @@ class GP_WPorg_Route_Stats extends GP_Route {
 		$translation_locale_complete = array();
 		foreach ( $translation_locale_statuses as $locale => $sets ) {
 			unset( $sets['waiting'] );
-			$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / count( $sets ), 3 );
+			$sets_count = count( $sets );
+			if ( $sets_count ) {
+				$translation_locale_complete[ $locale ] = round( array_sum( $sets ) / $sets_count, 3 );
+			} else {
+				$translation_locale_complete[ $locale ] = 0;
+			}
 		}
 		unset( $locale, $sets );
 
