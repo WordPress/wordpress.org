@@ -78,7 +78,7 @@ gp_tmpl_header();
 	<select id="sort-filter" disabled="disabled">
 		<?php
 			$sorts = array();
-			if ( GP::$user->current()->id && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+			if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
 				$sorts['special'] = 'Untranslated Favorites, Remaining Strings (Most first)';
 				$sorts['favorites'] = 'My Favorites';
 			}
