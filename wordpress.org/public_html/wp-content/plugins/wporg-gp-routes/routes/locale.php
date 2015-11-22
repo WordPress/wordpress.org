@@ -38,13 +38,13 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 		// Default to the Waiting or WordPress tabs
 		$default_project_tab = 'waiting';
-		$user = GP::$user->current();
+		$user_id = get_current_user_id();
 		if (
-			! $user->id || // Not logged in
-			! isset( GP::$plugins->wporg_rosetta_roles ) || // Rosetta Roles plugin is not enabled
+			! is_user_logged_in() ||
+			! function_exists( 'wporg_gp_rosetta_roles' ) || // Rosetta Roles plugin is not enabled
 			! (
-				GP::$plugins->wporg_rosetta_roles->is_global_administrator( $user->id ) || // Not a global admin
-				GP::$plugins->wporg_rosetta_roles->is_approver_for_locale( $user->id, $locale_slug ) // Doesn't have project-level access either
+				wporg_gp_rosetta_roles()->is_global_administrator( $user_id ) || // Not a global admin
+				wporg_gp_rosetta_roles()->is_approver_for_locale( $user_id, $locale_slug ) // Doesn't have project-level access either
 			)
 			// Add check to see if there are any waiting translations for this locale?
 			) {
@@ -100,7 +100,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		$project_ids[] = $project->id;
 		$project_ids = array_merge(
 			$project_ids,
-			$wpdb->get_col( "SELECT id FROM {$wpdb->projects} WHERE parent_project_id IN(" . implode(', ', $project_ids  ) . ")" )
+			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN(" . implode(', ', $project_ids  ) . ")" )
 		);
 
 		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
@@ -248,7 +248,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		$project_ids = implode( ',', $project_ids );
 		$slugs = $wpdb->get_col( $wpdb->prepare( "
 			SELECT DISTINCT slug
-			FROM {$wpdb->translation_sets}
+			FROM {$wpdb->gp_translation_sets}
 			WHERE
 				project_id IN( $project_ids )
 				AND locale = %s
@@ -327,7 +327,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 		$_projects = $project->many( "
 			SELECT *
-			FROM {$wpdb->projects}
+			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d AND
 				active = 1
@@ -342,7 +342,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 				// e.g. wp/dev/admin/network
 				$sub_projects = $project->many( "
 					SELECT *
-					FROM {$wpdb->projects}
+					FROM {$wpdb->gp_projects}
 					WHERE
 						parent_project_id = %d AND
 						active = 1
@@ -406,21 +406,21 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 		// Special Waiting Project Tab
 		// This removes the parent_project_id restriction and replaces it with all-translation-editer-projects
-		if ( 'waiting' == $project->slug && GP::$user->current()->id && isset( GP::$plugins->wporg_rosetta_roles ) ) {
+		if ( 'waiting' == $project->slug && is_user_logged_in() && function_exists( 'wporg_gp_rosetta_roles' ) ) {
 
 			if ( ! $filter ) {
 				$filter = 'strings-waiting-and-fuzzy';
 			}
 
-			$user_id = GP::$user->current()->id;
+			$user_id = get_current_user_id();
 
 			// Global Admin or Locale-specific admin
-			$can_approve_for_all = GP::$plugins->wporg_rosetta_roles->is_global_administrator( $user_id );
+			$can_approve_for_all = wporg_gp_rosetta_roles()->is_global_administrator( $user_id );
 
 			// Check to see if they have any special approval permissions
 			$allowed_projects = array();
-			if ( ! $can_approve_for_all && GP::$plugins->wporg_rosetta_roles->is_approver_for_locale( $user_id, $locale ) ) {
-				$allowed_projects = GP::$plugins->wporg_rosetta_roles->get_project_id_access_list( $user_id, $locale, true );
+			if ( ! $can_approve_for_all && wporg_gp_rosetta_roles()->is_approver_for_locale( $user_id, $locale ) ) {
+				$allowed_projects = wporg_gp_rosetta_roles()->get_project_id_access_list( $user_id, $locale, true );
 
 				// Check to see if they can approve for all projects in this locale.
 				if ( in_array( 'all', $allowed_projects ) ) {
@@ -447,7 +447,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			}
 
 			// Limit to only showing base-level projects
-			$parent_project_sql .= " AND tp.parent_project_id IN( (SELECT id FROM {$wpdb->projects} WHERE parent_project_id IS NULL AND active = 1) )";
+			$parent_project_sql .= " AND tp.parent_project_id IN( (SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1) )";
 
 		}
 
@@ -462,7 +462,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			default:
 			case 'special':
 				// Float favorites to the start, but only if they have untranslated strings
-				$user_fav_projects = array_map( array( $wpdb, 'escape' ), $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
 				if ( $user_fav_projects ) {
@@ -474,7 +474,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 			case 'favorites':
 				// Only list favorites
-				$user_fav_projects = array_map( array( $wpdb, 'escape' ), $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
 
 				if ( $user_fav_projects ) {
 					$filter_where = 'AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
@@ -512,7 +512,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		 */
 		$_projects = $project->many( "
 			SELECT SQL_CALC_FOUND_ROWS tp.*
-			FROM {$wpdb->projects} tp
+			FROM {$wpdb->gp_projects} tp
 				LEFT JOIN {$wpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
 			WHERE
 				tp.active = 1
@@ -546,11 +546,12 @@ class WPorg_GP_Route_Locale extends GP_Route {
 	 */
 	function get_user_favorites( $project_slug = false ) {
 		global $wpdb;
-		$user = GP::$user->current();
 
-		if ( ! $user->id ) {
+		if ( ! is_user_logged_in() ) {
 			return array();
 		}
+
+		$user_id = get_current_user_id();
 
 		switch ( $project_slug ) {
 			default:
@@ -559,7 +560,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects
 				$theme_favorites = array_map( function( $slug ) {
 					return "wp-themes/$slug";
-				}, (array) $user->get_meta( 'theme_favorites' ) );
+				}, (array) get_user_meta( $user_id, 'theme_favorites', true ) );
 
 				if ( 'wp-themes' === $project_slug ) {
 					return $theme_favorites;
@@ -567,7 +568,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 			case 'wp-plugins':
 				// Plugin favorites are stored as topic ID's
-				$plugin_fav_ids = array_keys( (array)$user->get_meta( PLUGINS_TABLE_PREFIX . 'plugin_favorite' ) );
+				$plugin_fav_ids = array_keys( (array) get_user_meta( $user_id, PLUGINS_TABLE_PREFIX . 'plugin_favorite', true ) );
 				$plugin_fav_slugs = array();
 				if ( $plugin_fav_ids ) {
 					$plugin_fav_ids = implode( ',', array_map( 'intval', $plugin_fav_ids ) );
@@ -597,7 +598,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 		return GP::$project->many( "
 			SELECT *
-			FROM {$wpdb->projects}
+			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id IS NULL
 				AND active = 1
