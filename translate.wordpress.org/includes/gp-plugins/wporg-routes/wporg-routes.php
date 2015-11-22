@@ -2,12 +2,13 @@
 /**
  * Register custom routes for translate.wordpress.org.
  *
- * @author ocean90
+ * @author ocean90, obenland, dd32
  */
 
 require_once __DIR__ . '/routes/redirector.php';
 require_once __DIR__ . '/routes/index.php';
 require_once __DIR__ . '/routes/locale.php';
+require_once __DIR__ . '/routes/stats-overview.php';
 require_once __DIR__ . '/routes/wp-plugins.php';
 
 class GP_WPorg_Routes extends GP_Plugin {
@@ -42,7 +43,7 @@ class GP_WPorg_Routes extends GP_Plugin {
 		GP::$router->prepend( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
 		GP::$router->prepend( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
 		GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
-
+		GP::$router->prepend( '/stats/?', array( 'GP_WPorg_Route_Stats', 'get_stats_overview' ) );
 		$project = '([^/]*)/?';
 		GP::$router->prepend( "/projects/wp-plugins/$project", array( 'GP_WPorg_Route_WP_Plugins', 'get_plugin_projects' ) );
 	}

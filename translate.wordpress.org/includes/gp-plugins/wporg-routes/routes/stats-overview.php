@@ -1,26 +1,9 @@
 <?php
-
 /**
- * This plugin offers up the /stats route which provides a overview of our current translation efforts.
+ * Stats Route Class.
  *
- * @author dd32
+ * Provides the route for translate.wordpress.org/stats.
  */
-class GP_WPorg_Stats_Overview extends GP_Plugin {
-	var $id = 'wporg-stats-overview';
-
-	function __construct() {
-		parent::__construct();
-		$this->add_action( 'init' );
-
-	}
-
-	function init() {
-		GP::$router->prepend( "/stats/?", array( 'GP_WPorg_Route_Stats', 'get_stats_overview' ) );
-	}
-}
-
-GP::$plugins->wporg_stats_overview = new GP_WPorg_Stats_Overview;
-
 class GP_WPorg_Route_Stats extends GP_Route {
 
 	public function get_stats_overview() {
