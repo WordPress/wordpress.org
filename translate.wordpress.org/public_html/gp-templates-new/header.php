@@ -1,7 +1,4 @@
 <?php
-wp_enqueue_style( 'base' );
-wp_enqueue_script( 'jquery' );
-
 global $pagetitle;
 $pagetitle = gp_title();
 require WPORGPATH . 'header.php';
@@ -15,14 +12,14 @@ require WPORGPATH . 'header.php';
 		<a class="menu-link" href="//make.wordpress.org/polyglots/teams/">Teams</a>
 		<a class="menu-link" href="//make.wordpress.org/polyglots/handbook/">Translator Handbook</a>
 		<?php
-		if (GP::$user->logged_in()):
-			$user = GP::$user->current();
+		if ( is_user_logged_in() ):
+			$user = wp_get_current_user();
 
 			printf( __('Hi, %s.'), '<a href="'.gp_url( '/profile' ).'">'.$user->user_login.'</a>' );
 			?>
-			<a href="<?php echo gp_url('/logout')?>"><?php _e('Log out'); ?></a>
+			<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php _e( 'Log out' ); ?></a>
 		<?php else: ?>
-			<strong><a href="<?php echo gp_url_login(); ?>"><?php _e('Log in'); ?></a></strong>
+			<strong><a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a></strong>
 		<?php endif; ?>
 		<?php do_action( 'after_hello' ); ?>
 		</span>
@@ -43,5 +40,5 @@ require WPORGPATH . 'header.php';
 			</div>
 		<?php endif; ?>
 		<?php echo gp_breadcrumb(); ?>
-		<?php do_action( 'after_notices' ); ?>
+		<?php do_action( 'gp_after_notices' ); ?>
 
