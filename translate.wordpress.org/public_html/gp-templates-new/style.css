@@ -826,6 +826,24 @@ ul.projects-dropdown li > a > span {
 	min-height: 5em;
 }
 
+.wporg-notice {
+	background: #fff;
+	border-left: 4px solid #fff;
+	margin: 5px 15px 15px 15px;
+	padding: 1px 12px;
+}
+
+.wporg-notice p {
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.wporg-notice-warning {
+	background: #fff8e5;
+	border-left-color:#ffb900;
+}
+
+
 /* Responsive styles */
 @media (max-width: 700px) {
 	#hello {

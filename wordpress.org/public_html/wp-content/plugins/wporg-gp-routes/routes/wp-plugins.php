@@ -25,6 +25,7 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 
 		// Split out into $[Locale][Project] = %
 		$translation_locale_statuses = array();
+		$sub_projects = array();
 		foreach ( $rows as $set ) {
 
 			// Find unique locale key.
@@ -33,6 +34,7 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
 			$sub_project = str_replace( "$project_path/", '', $set->path );
+			$sub_projects[ $sub_project ] = true;
 
 			/*
 			 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
@@ -54,7 +56,12 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 
 			ksort( $translation_locale_statuses[ $locale_key ], SORT_NATURAL );
 		}
-		unset( $project_path, $locale_key, $rows, $set, $sub_project );
+
+		// If the plugin has only one sub-project something went wrong, likely a missing
+		// text domain which is why no 'code' projects will be created.
+		$has_error = count( $sub_projects ) < 2;
+
+		unset( $project_path, $locale_key, $rows, $set, $sub_project, $sub_projects );
 
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();

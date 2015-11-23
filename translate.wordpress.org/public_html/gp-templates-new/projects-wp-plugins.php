@@ -34,6 +34,12 @@ gp_tmpl_header();
 	</div>
 </div>
 
+<?php if ( $has_error ) : ?>
+<div class="wporg-notice wporg-notice-warning">
+	<p>This plugin is not properly prepared for localization. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $project->slug ); ?>">please contact the author.</a></p>
+</div>
+<?php endif; ?>
+
 <div class="stats-table">
 	<table id="stats-table" class="table">
 		<thead>
