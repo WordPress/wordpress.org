@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/stats/user.php';
 require_once __DIR__ . '/stats/project.php';
+require_once __DIR__ . '/stats/discarded-warning.php';
 
 class WPorg_GP_Custom_Stats {
 
