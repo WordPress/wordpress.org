@@ -48,6 +48,7 @@ class Meta extends Trac {
 	protected $commit_path_filters = array(
 		'translate.wordpress.org/'              => '#meta-i18n',
 		'global.wordpress.org/'                 => '#meta-i18n',
+		'plugins/wporg-gp-'                     => '#meta-i18n',
 		'translations'                          => '#meta-i18n',
 		'developer-reference/'                  => '#meta-devhub',
 		'wporg-developer/'                      => '#meta-devhub',
