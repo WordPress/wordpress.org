@@ -57,9 +57,10 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 			ksort( $translation_locale_statuses[ $locale_key ], SORT_NATURAL );
 		}
 
-		// If the plugin has only one sub-project something went wrong, likely a missing
-		// text domain which is why no 'code' projects will be created.
-		$has_error = count( $sub_projects ) < 2;
+		// Check if the plugin has at least one code project. These won't be created if a plugin
+		// has no text domain defined.
+		$sub_projects = array_keys( $sub_projects );
+		$has_error = ( ! in_array( 'dev', $sub_projects ) && ! in_array( 'stable', $sub_projects ) );
 
 		unset( $project_path, $locale_key, $rows, $set, $sub_project, $sub_projects );
 
