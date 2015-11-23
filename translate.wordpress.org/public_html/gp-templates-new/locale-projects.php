@@ -97,12 +97,20 @@ gp_tmpl_header();
 </div>
 <script>
 	jQuery('#sort-filter').change( function() {
-		var current_url = document.location.href.replace(/[?&]filter=[^&$]*/, '' );
-		document.location.replace(
-			current_url +
-			( -1 == current_url.indexOf('?') ? '?filter=' : '&filter=' ) +
-			this.options[ this.options.selectedIndex ].value
-		);
+		var current_url = document.location.href;
+		var filter = this.options[ this.options.selectedIndex ].value;
+
+		if ( current_url.indexOf( 'filter=' ) > -1 ) {
+			document.location.replace(
+				current_url.replace(/([?&]filter=)([^&$]*)/, '$1' + filter )
+			);
+		} else {
+			document.location.replace(
+				current_url +
+				( -1 == current_url.indexOf('?') ? '?filter=' : '&filter=' ) +
+				filter
+			);
+		}
 	} ).prop('disabled', '');
 </script>
 
