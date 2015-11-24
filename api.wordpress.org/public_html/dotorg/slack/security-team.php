@@ -25,7 +25,13 @@ function slack_api( $method, $content = array() ) {
 	return json_decode( $response, true );
 }
 
-function get_security_team() {
+/**
+ * Returns array of security team members by specified field value.
+ *
+ * @param string $user_field Optional. The user column value to return for each security team member. Defaut 'user_login'.
+ * @return array
+ */
+function get_security_team( $user_field = 'user_login' ) {
 	global $wpdb;
 	$group = slack_api( 'groups.info', array( 'channel' => SECURITY_GROUP_ID ) );
 
@@ -42,7 +48,13 @@ function get_security_team() {
 
 	$user_ids = array_map( 'intval', $user_ids );
 	$user_ids_for_sql = implode( ', ', $user_ids );
-	$user_logins = $wpdb->get_col( "SELECT user_login FROM $wpdb->users WHERE ID IN ($user_ids_for_sql)" );
+
+	// Whitelist user field before using.
+	if ( ! in_array( $user_field, array( 'ID', 'user_email', 'user_login', 'user_nicename', 'display_name' ) ) ) {
+		$user_field = 'user_login';
+	}
+
+	$user_logins = $wpdb->get_col( "SELECT $user_field FROM $wpdb->users WHERE ID IN ($user_ids_for_sql)" );
 	return $user_logins;
 }
 
