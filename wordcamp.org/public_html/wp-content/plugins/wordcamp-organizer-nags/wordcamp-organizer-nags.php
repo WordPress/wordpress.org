@@ -195,7 +195,7 @@ class WordCampOrganizerNags {
 
 		<ul class="ul-disc">
 			<li><a href="https://make.wordpress.org/community/2015/07/09/site-cloner-v1-is-now-available/">Quickly clone another WordCamp site</a> instead of building yours from scratch.</li>
-			<li><a href="https://make.wordpress.org/community/2015/06/16/editing-wordcamp-css-locally-with-git/">Edit CSS in your local environment</a> and manage it in a Git(Hub) repository.</li>
+			<li><a href="https://make.wordpress.org/community/2015/11/24/remote-css-plugin-launched-on-wordcamp-org/">Edit CSS in your local environment</a> and manage it in a GitHub repository.</li>
 			<li><a href="https://make.wordpress.org/community/2015/07/02/results-from-the-wordcamp-org-tools-follow-up-survey/">Build a new theme</a> for WordCamp sites.</li>
 			<li><a href="https://make.wordpress.org/community/2015/07/08/better-wordcamp-org-docs/">Improve documentation</a>.</li>
 		</ul>
