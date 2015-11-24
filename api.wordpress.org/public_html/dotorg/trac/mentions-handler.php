@@ -59,7 +59,7 @@ function wporg_get_trac_ticket_subscription_status( $username, $ticket ) {
 
 function wporg_mentions_limit_to_security_team( $usernames, $data ) {
 	require_once dirname( __DIR__ ) . '/slack/security-team.php';
-	$team = \Dotorg\Slack\Security_Team\get_security_team();
+	$team = \Dotorg\Slack\Security_Team\get_security_team( 'user_nicename' );
 
 	if ( ! empty( $data['object']->cc ) ) {
 		// Add single ticket access users.
@@ -79,6 +79,13 @@ if ( $payload->trac === 'security' ) {
 }
 
 add_filter( 'wporg_notifications_notify_username', function( $notify, $username ) use ( $type, $payload, $wpdb ) {
+	// $username is user_nicename, but this function expects user_login.
+	$user = get_user_by( 'slug', $username );
+	if ( ! $user ) {
+		return false;
+	}
+	$username = $user->user_login;
+
 	// Core Trac has notifications configured.
 	if ( $payload->trac === 'core' ) {
 		// See if the user has blocked the ticket, are watching it already, or have already been mentioned.
