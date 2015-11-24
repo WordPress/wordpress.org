@@ -16,7 +16,7 @@ $_SERVER['HTTP_HOST'] = 'wordpress.org';
 require WPORGPATH . 'wp-load.php';
 
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
-$notif = WPOrg_Notifications::$instance;
+$notif = WPOrg_Notifications::get_instance();
 
 $notif->plugins_loaded();
 
