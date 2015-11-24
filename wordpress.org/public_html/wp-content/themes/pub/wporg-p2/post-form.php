@@ -47,6 +47,8 @@
 				</label>
 				<?php endif; ?>
 
+				<?php do_action( 'wporg_p2_before_postbox' ); ?>
+
 				<div id="postbox-type-post" class="post-input <?php if ( 'post' == $post_format || 'standard' == $post_format ) echo ' selected'; ?>">
 					<input type="text" name="posttitle" id="posttitle" value=""
 						onfocus="this.value=(this.value=='<?php echo esc_js( __( 'Post Title', 'p2' ) ); ?>') ? '' : this.value;"
