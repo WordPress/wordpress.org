@@ -20,32 +20,32 @@ class GP_WPorg_Routes extends GP_Plugin {
 	}
 
 	public function init() {
-		// Bail for API requests.
 		$request_uri = GP::$router->request_uri();
-		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) {
-			return;
-		}
-
 		$path = '(.+?)';
 		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
 
-		// Delete default routes.
-		GP::$router->remove("/languages/$locale");
-		GP::$router->remove("/languages/$locale/$path");
+		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
+			// Delete default routes.
+			GP::$router->remove("/languages/$locale");
+		} else {
+			// Delete default routes.
+			GP::$router->remove("/languages/$locale");
+			GP::$router->remove("/languages/$locale/$path");
 
-		// Redirect routes.
-		GP::$router->prepend( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
-		GP::$router->prepend( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+			// Redirect routes.
+			GP::$router->prepend( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+			GP::$router->prepend( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
 
-		// Register custom routes.
-		GP::$router->prepend( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );
-		GP::$router->prepend( "/locale/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-		GP::$router->prepend( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-		GP::$router->prepend( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-		GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
-		GP::$router->prepend( '/stats/?', array( 'GP_WPorg_Route_Stats', 'get_stats_overview' ) );
-		$project = '([^/]*)/?';
-		GP::$router->prepend( "/projects/wp-plugins/$project", array( 'GP_WPorg_Route_WP_Plugins', 'get_plugin_projects' ) );
+			// Register custom routes.
+			GP::$router->prepend( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );
+			GP::$router->prepend( "/locale/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
+			GP::$router->prepend( '/stats/?', array( 'GP_WPorg_Route_Stats', 'get_stats_overview' ) );
+			$project = '([^/]*)/?';
+			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'GP_WPorg_Route_WP_Plugins', 'get_plugin_projects' ) );
+		}
 	}
 }
 
