@@ -165,7 +165,7 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		$activity['tickets'] = $this->db->get_results( $this->db->prepare( "SELECT id, summary, type, status, resolution
 			FROM ticket WHERE reporter = %s AND id <= %d LIMIT 5", $reporter, $ticket ), ARRAY_A );
 
-		if ( count( $previous_tickets ) === 1 ) {
+		if ( count( $activity['tickets'] ) === 1 ) {
 			$activity['comments'] = (bool) $this->db->get_var( $this->db->prepare(
 				"SELECT ticket FROM ticket_change WHERE field = 'comment'
 				AND author = %s AND ticket <> %d LIMIT 1",
