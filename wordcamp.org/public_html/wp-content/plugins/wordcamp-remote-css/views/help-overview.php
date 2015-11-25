@@ -25,7 +25,7 @@ defined( 'WPINC' ) or die();
 </p>
 
 <p>
-	<?php _e( "This tool works by fetching your CSS file from a remote server (like GitHub.com), sanitizing the CSS,
+	<?php _e( "This tool works by fetching your CSS file from a remote server (like GitHub.com), sanitizing the CSS, minifying it,
 	and then storing a local copy on WordCamp.org. The local copy is then enqueued as a stylesheet, either in addition to your theme's stylesheet,
 	or as a replacement for it. The local copy of the CSS is synchronized with the remote file whenever you press the <strong>Update</strong> button,
 	and you can also setup webhook notifications for automatic synchronization when the remote file changes.", 'wordcamporg' ); ?>
