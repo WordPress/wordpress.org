@@ -24,6 +24,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * Redirect all attempts to get to a WP login or signup to the SSO ones, or to a safe redirect location.
 		 
 		 * @example add_action( 'init', array( &$wporg_sso, 'redirect_all_wp_login_or_signup_to_sso' ) );
+		 * 
+		 * @note Also handles accesses to lost password forms, since wp-login too.
 		 */
 		public function redirect_all_login_or_signup_to_sso() {
 			if ( ! $this->_is_valid_targeted_domain( $this->host ) ) {

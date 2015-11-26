@@ -35,9 +35,17 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 					$this->_safe_redirect( $this->sso_signup_url );
 				}
 			} else if ( preg_match( '/\/bb-login\.php$/', $this->script ) ) {
-				$redirect_to_sso_login = $this->sso_login_url;
+				if ( ! empty( $_POST ) ) {
+					// Let users log in from the header's form, for now.
+					return;
+				} else if ( 'logout' == $_GET['action'] ) {
+					// Let users log out without a trip to the SSO host.
+					return;
+				}
 					
-				// Pass thru the requested action, loggedout, if any
+				$redirect_to_sso_login = $this->sso_login_url;
+				
+				// Pass thru the requested action, logged out, if any
 				if ( ! empty( $_GET ) ) {
 					$redirect_to_sso_login = add_query_arg( $_GET, $redirect_to_sso_login );
 				}
