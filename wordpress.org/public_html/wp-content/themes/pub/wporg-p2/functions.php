@@ -85,3 +85,11 @@ function wporg_p2_disable_mentions_for_handbooks() {
 }
 add_action( 'wp', 'wporg_p2_disable_mentions_for_handbooks' );
 
+function wporg_p2_fix_utf8_user_suggestions( $users ) {
+	// PHP 5.5 fails when text contains non-utf-8 characters. Pre-encoding with JSON_PARTIAL_OUTPUT_ON_ERROR and then decoding it lets us skip those
+	$encoded = json_encode( $users, JSON_PARTIAL_OUTPUT_ON_ERROR );
+	$decoded = json_decode( $encoded );
+	return $decoded;
+}
+add_filter( 'p2_user_suggestion', 'wporg_p2_fix_utf8_user_suggestions', 100 );
+
