@@ -27,7 +27,18 @@ class wporg_trac_notifications {
 
 		$this->trac = $trac;
 
-		$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
+		if ( 'core' === $trac && function_exists( 'add_db_table' ) ) {
+			$tables = array( 'ticket', '_ticket_subs', '_notifications', 'ticket_change', 'component', 'milestone', 'ticket_custom' );
+			foreach ( $tables as $table ) {
+				add_db_table( 'trac_' . $trac, $table );
+			}
+		}
+
+		if ( 'core' === $trac ) {
+			$this->api = new Trac_Notifications_DB( $GLOBALS['wpdb'] );
+		} else {
+			$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
+		}
 
 		if ( 'core' === $trac ) {
 			require __DIR__ . '/trac-components.php';
