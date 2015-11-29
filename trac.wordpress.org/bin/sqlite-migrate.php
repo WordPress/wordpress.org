@@ -72,7 +72,7 @@ foreach ( $tables as $table ) {
 			foreach ( $numbers as $key => $true ) {
 				$row[ $key ] = (int) $row[ $key ];
 			}
-			$query->execute( (array) $item );
+			$query->execute( array_values( $row ) );
 			// var_dump( $row, $query->errorInfo() );
 		} catch ( PDOException $e ) {
 			$errors[] = $e->getCode() . ': ' . $e->getMessage();
