@@ -13,18 +13,18 @@ namespace Dotorg\Slack\Announce;
  */
 function get_whitelist() {
 	return array(
-		'accessibility' => array( 
-			'afercia', 
-			'joedolson', 
-			'rianrietveld', 
+		'accessibility' => array(
+			'afercia',
+			'joedolson',
+			'rianrietveld',
 		),
-		'bbpress' => array( 
-			'jjj', 
-			'netweb', 
+		'bbpress' => array(
+			'jjj',
+			'netweb',
 		),
-		'buddypress' => array( 
-			'boone', 
-			'djpaul', 
+		'buddypress' => array(
+			'boone',
+			'djpaul',
 			'jjj',
 		),
 		'cli' => array(
@@ -117,13 +117,19 @@ function get_whitelist() {
 			'greenshady',
 			'jcastaneda',
 			'karmatosed',
-		),  
+		),
 		'training' => array(
 			'courtneydawn',
 			'liljimmi',
 			'bethsoderberg',
 			'courtneyengle',
-		),  
+		),
+		'wpus' => array(
+			'alx',
+			'ingridmiller',
+			'liljimmi',
+			'liamdempsey',
+		),
 		'wptv' => array(
 			'jerrysarcastic',
 			'roseapplemedia',
