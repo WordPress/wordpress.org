@@ -200,6 +200,11 @@ function validate_remote_css_url( $remote_css_url ) {
 	}
 
 	$remote_css_url = esc_url_raw( $remote_css_url, array( 'http', 'https' ) );
+
+	if ( empty( $remote_css_url ) ) {
+		throw new \Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
+	}
+
 	$parsed_url     = parse_url( $remote_css_url );
 
 	/*
