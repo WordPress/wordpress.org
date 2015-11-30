@@ -34,8 +34,8 @@ function render_options_page() {
 			$notice       = process_options_page();
 			$notice_class = 'notice-success';
 		} catch( \Exception $exception ) {
-			$notice         = $exception->getMessage();
-			$notice_class   = 'notice-error';
+			$notice       = $exception->getMessage();
+			$notice_class = 'notice-error';
 		}
 	}
 
@@ -205,7 +205,7 @@ function validate_remote_css_url( $remote_css_url ) {
 		throw new \Exception( __( 'The URL was invalid.', 'wordcamporg' ) );
 	}
 
-	$parsed_url     = parse_url( $remote_css_url );
+	$parsed_url = parse_url( $remote_css_url );
 
 	/*
 	 * Only allow whitelisted hostnames, to prevent SSRF attacks

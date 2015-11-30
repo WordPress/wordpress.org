@@ -40,7 +40,7 @@ defined( 'WPINC' ) or die();
 	<?php if ( $notice ) : ?>
 		<div id="message" class="notice <?php echo esc_attr( $notice_class ); ?> is-dismissible">
 			<?php
-			    /*
+				/*
 			     * Typically KSES is discouraged when displaying text because it's expensive, but in this case
 			     * it's appropriate because the underlying layers need to pass HTML-formatted error messages, and
 			     * this only only runs when the options are updated.
