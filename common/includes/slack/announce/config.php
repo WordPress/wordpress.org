@@ -124,7 +124,7 @@ function get_whitelist() {
 			'bethsoderberg',
 			'courtneyengle',
 		),
-		'wpus' => array(
+		'wcus' => array(
 			'alx',
 			'ingridmiller',
 			'liljimmi',
