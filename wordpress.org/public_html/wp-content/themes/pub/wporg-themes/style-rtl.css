@@ -312,7 +312,6 @@ body.author .theme-browser .theme .theme-author  {
 
 .theme-navigation .post-navigation {
 	float: left;
-	width: 120px;
 }
 
 .theme-navigation .close {
@@ -347,7 +346,6 @@ body.author .theme-browser .theme .theme-author  {
 .theme-navigation .nav-links a,
 .theme-navigation .right,
 .theme-navigation .left {
-	border: 0;
 	background-color: transparent;
 	border: 0;
 	border-right: 1px solid #ddd;
@@ -1790,6 +1788,15 @@ span.favorite.favorited {
 	.theme-wrap .theme-about .theme-info > div:not(:last-of-type),
 	.theme-wrap .theme-about .theme-meta > div:not(:last-of-type) {
 		margin-bottom: 30px;
+	}
+
+	.theme-navigation .close {
+		padding: 19px 12px;
+	}
+
+	.theme-navigation .close:before {
+		content: "";
+		margin: 0;
 	}
 
 	/* Keep support and dev links stacked until they have enough room. */
