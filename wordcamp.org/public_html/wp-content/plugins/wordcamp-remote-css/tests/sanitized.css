@@ -1,0 +1,68 @@
+/*
+ * Malicious
+ */
+/* Charset */
+/* Imports */
+/* Javascript */
+body {
+	background: url('alert('1')');
+}
+
+header {
+	background-image: url('http://example.com/foo.jpg?alert(2)');
+}
+
+article {
+	background-image: url('http://example.com/foo.jpg?alert(3)');
+}
+
+footer {
+	width: ;
+}
+
+div {
+	background-image: url('alert(5);');
+}
+
+p {
+	background: url('alert(6);');
+}
+
+span {
+	list-style-image: url('alert(7)');
+}
+
+* {
+	background: url('alert(8);');
+}
+
+/* Bindings */
+body {
+}
+
+h2 {
+}
+
+h3 {
+}
+
+div {
+}
+
+/* Misc */
+a {
+}
+
+a {
+}
+
+/*
+ * Safe
+ */
+.sidebar {
+	background-color: #99CBC7;
+}
+
+.hentry {
+	background-color: #7AB7F3;
+}
