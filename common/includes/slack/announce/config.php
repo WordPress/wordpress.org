@@ -124,10 +124,14 @@ function get_whitelist() {
 			'bethsoderberg',
 			'courtneyengle',
 		),
-		'wcus' => array(
+		'wcus-speakers' => array(
 			'alx',
-			'ingridmiller',
+		),
+		'wcus-summit' => array(
 			'liljimmi',
+		),
+		'wcus-volunteers' => array(
+			'ingridmiller',
 			'liamdempsey',
 		),
 		'wptv' => array(
