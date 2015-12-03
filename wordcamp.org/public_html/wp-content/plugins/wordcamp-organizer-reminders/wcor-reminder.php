@@ -107,6 +107,76 @@ class WCOR_Reminder {
 					<th><input id="wcor_send_sponsor_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_sponsor_wrangler" <?php checked( in_array( 'wcor_send_sponsor_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_sponsor_wrangler">The Sponsor Wrangler</label></td>
 				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_budget_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_budget_wrangler" <?php checked( in_array( 'wcor_send_budget_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_budget_wrangler">The Budget Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_venue_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_venue_wrangler" <?php checked( in_array( 'wcor_send_venue_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_venue_wrangler">The Venue Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_speaker_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_speaker_wrangler" <?php checked( in_array( 'wcor_send_speaker_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_speaker_wrangler">The Speaker Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_food_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_food_wrangler" <?php checked( in_array( 'wcor_send_food_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_food_wrangler">The Food/Beverage Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_swag_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_swag_wrangler" <?php checked( in_array( 'wcor_send_swag_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_swag_wrangler">The Swag Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_volunteer_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_volunteer_wrangler" <?php checked( in_array( 'wcor_send_volunteer_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_volunteer_wrangler">The Volunteer Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_printing_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_printing_wrangler" <?php checked( in_array( 'wcor_send_printing_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_printing_wrangler">The Printing Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_design_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_design_wrangler" <?php checked( in_array( 'wcor_send_design_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_design_wrangler">The Design Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_website_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_website_wrangler" <?php checked( in_array( 'wcor_send_website_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_website_wrangler">The Website Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_social_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_social_wrangler" <?php checked( in_array( 'wcor_send_social_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_social_wrangler">The Social Media/Publicity Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_a_v_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_a_v_wrangler" <?php checked( in_array( 'wcor_send_a_v_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_a_v_wrangler">The A/V Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_party_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_party_wrangler" <?php checked( in_array( 'wcor_send_party_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_party_wrangler">The Party Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_travel_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_travel_wrangler" <?php checked( in_array( 'wcor_send_travel_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_travel_wrangler">The Travel Wrangler</label></td>
+				</tr>
+				
+				<tr>
+					<th><input id="wcor_send_safety_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_safety_wrangler" <?php checked( in_array( 'wcor_send_safety_wrangler', $send_where ) ); ?>></th>
+					<td colspan="2"><label for="wcor_send_safety_wrangler">The Safety Wrangler</label></td>
+				</tr>
 
 				<tr>
 					<th><input id="wcor_send_mes" name="wcor_send_where[]" type="checkbox" value="wcor_send_mes" <?php checked( in_array( 'wcor_send_mes', $send_where ) ); ?>></th>
@@ -202,6 +272,32 @@ class WCOR_Reminder {
 			<li>[sponsor_wrangler_email]</li>
 			<li>[budget_wrangler_name]</li>
 			<li>[budget_wrangler_email]</li>
+			<li>[venue_wrangler_name]</li>
+			<li>[venue_wrangler_email]</li>
+			<li>[speaker_wrangler_name]</li>
+			<li>[speaker_wrangler_email]</li>
+			<li>[food_wrangler_name]</li>
+			<li>[food_wrangler_email]</li>
+			<li>[swag_wrangler_name]</li>
+			<li>[swag_wrangler_email]</li>
+			<li>[volunteer_wrangler_name]</li>
+			<li>[volunteer_wrangler_email]</li>
+			<li>[printing_wrangler_name]</li>
+			<li>[printing_wrangler_email]</li>
+			<li>[design_wrangler_name]</li>
+			<li>[design_wrangler_email]</li>
+			<li>[website_wrangler_name]</li>
+			<li>[website_wrangler_email]</li>
+			<li>[social_wrangler_name]</li>
+			<li>[social_wrangler_email]</li>
+			<li>[a_v_wrangler_name]</li>
+			<li>[a_v_wrangler_email]</li>
+			<li>[party_wrangler_name]</li>
+			<li>[party_wrangler_email]</li>
+			<li>[travel_wrangler_name]</li>
+			<li>[travel_wrangler_email]</li>
+			<li>[safety_wrangler_name]</li>
+			<li>[safety_wrangler_email]</li>
 		</ul>
 
 		<h5>Venue</h5>
@@ -371,7 +467,7 @@ class WCOR_Reminder {
 	 * @param array $new_meta
 	 */
 	protected function save_post_meta( $post, $new_meta ) {
-		$send_where_whitelist = array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_mes', 'wcor_send_camera_wrangler', 'wcor_send_custom' );
+		$send_where_whitelist = array( 'wcor_send_organizers', 'wcor_send_sponsor_wrangler', 'wcor_send_budget_wrangler', 'wcor_send_venue_wrangler', 'wcor_send_speaker_wrangler', 'wcor_send_food_wrangler', 'wcor_send_swag_wrangler', 'wcor_send_volunteer_wrangler', 'wcor_send_printing_wrangler', 'wcor_send_design_wrangler', 'wcor_send_website_wrangler', 'wcor_send_social_wrangler', 'wcor_send_a_v_wrangler', 'wcor_send_party_wrangler', 'wcor_send_travel_wrangler', 'wcor_send_safety_wrangler', 'wcor_send_mes', 'wcor_send_camera_wrangler', 'wcor_send_custom' );
 
 		delete_post_meta( $post->ID, 'wcor_send_where' );
 		if ( isset( $new_meta['wcor_send_where'] ) ) {
