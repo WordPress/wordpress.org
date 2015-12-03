@@ -17,7 +17,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		public function __construct() {
 			parent::__construct();
 
-			add_action( 'init', array( &$this, 'redirect_all_login_or_signup_to_sso' ) );
+			if ( $this->has_host() ) {
+				add_action( 'init', array( &$this, 'redirect_all_login_or_signup_to_sso' ) );
+			}
 		}
 	
 		/**

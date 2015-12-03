@@ -11,12 +11,16 @@ if ( class_exists( 'GP_Plugin' ) && ! class_exists( 'GP_WPOrg_SSO' ) ) {
 		
 		function __construct() {
 			parent::__construct();
+			
 			// Load SSO lib
 			$this->instantiate_sso();
-			// Actions
-			$this->add_action( 'init' );
-			// Filters
-			$this->add_filter( 'gp_url', array( 'args' => 3 ) );
+			
+			if ( $this->sso_obj->has_host() ) {
+				// Actions
+				$this->add_action( 'init' );
+				// Filters
+				$this->add_filter( 'gp_url', array( 'args' => 3 ) );
+			}
 		}
 		
 		/**

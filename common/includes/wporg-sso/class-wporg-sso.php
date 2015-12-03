@@ -23,8 +23,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			$this->sso_login_url  = $this->sso_host_url . '/wp-login.php';
 			$this->sso_signup_url = 'https://wordpress.org/support/register.php'; // For now
 			
-			$this->host   = $_SERVER['HTTP_HOST'];
-			$this->script = $_SERVER['SCRIPT_NAME'];
+			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
+				$this->host   = $_SERVER['HTTP_HOST'];
+				$this->script = $_SERVER['SCRIPT_NAME'];
+			}
 		}
 		
 		/**
@@ -77,6 +79,16 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			
 		}
 		
+		
+		/**
+		 * Tests if the current process has $_SERVER['HTTP_HOST'] or not (EG: cron'd processes do not).
+		 * 
+		 * @return boolean
+		 */
+		public function has_host() {
+			return ( ! empty( $this->host ) );
+		}
+		
 		/**
 		 * Get a safe redirect URL (ie: a wordpress.org-based one) from $_REQUEST['redirect_to'] or a safe alternative.
 		 * 
@@ -92,7 +104,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				if ( $this->_is_valid_targeted_domain( $redirect_to_requested ) ) {
 					$redirect_to = $redirect_to_requested;
 				}
-			} else {
+			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
+				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
+				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) ) {
+					$redirect_to = $redirect_to_referrer;
+				}
+			} else{
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
 				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
