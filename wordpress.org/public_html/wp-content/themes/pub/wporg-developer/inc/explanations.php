@@ -47,6 +47,9 @@ class WPORG_Explanations {
 		// AJAX.
 		add_action( 'wp_ajax_new_explanation', array( $this, 'new_explanation'        )      );
 		add_action( 'wp_ajax_un_publish',      array( $this, 'un_publish_explanation' )      );
+
+		// Content tweaks.
+		add_filter( 'syntaxhighlighter_precode', 'html_entity_decode' );
 	}
 
 	/**
