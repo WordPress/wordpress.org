@@ -84,14 +84,18 @@ class WPorg_Handbook_Glossary {
 	static function shortcode() {
 		$glossary = new WP_Query( array( 'post_status' => 'publish', 'post_type' => 'glossary', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC' ) );
 
-		$content = '<style> .glossary-entry { margin-top: -50px; padding-top: 50px; } </style>';
+		$content = "<style> .glossary-entry { margin-top: -50px; padding-top: 50px; } </style>\n";
 		foreach ( $glossary->posts as $post ) {
-			$entry = trim( apply_filters( 'the_content', '<strong>' . apply_filters( 'the_title', $post->post_title ) . ':</strong> ' . $post->post_content ) );
+			$entry = '<strong>' . apply_filters( 'the_title', $post->post_title ) . ':</strong> ' . $post->post_content;
+
 			$edit = get_edit_post_link( $post );
-			if ( $edit )
-					$edit = ' - <a href="' . $edit . '">edit</a>';
-			// if ( '<p>' === substr( $entry, 0, 3 ) && '</p>' === substr( $entry, -4 ) )
-			$entry = '<p class="glossary-entry" id="' . $post->post_name . '">' . substr( substr( $entry, 3 ), 0, -4 ) . ' <a href="' . get_permalink( $post ) . '">#</a>' . $edit . '</p>';
+			if ( $edit ) {
+				$edit = ' - <a href="' . esc_url( $edit ) . '">edit</a>';
+			}
+			$entry .= ' <a href="' . esc_url( get_permalink( $post ) ) . '">#</a>' . $edit;
+
+			$entry = apply_filters( 'the_content', $entry );
+			$entry = '<div class="glossary-entry" id="' . esc_attr( $post->post_name ) . '">' . $entry . '</div>' . "\n";
 
 			$content .= $entry;
 		}
