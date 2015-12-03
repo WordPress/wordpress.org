@@ -4,14 +4,14 @@ namespace Dotorg\Slack\Props;
 use Dotorg\Slack\Send;
 
 function show_error( $user ) {
-	echo 'Please use `/props SLACK_USERNAME MESSAGE` to give props.';
+	echo "Please use `/props SLACK_USERNAME MESSAGE` to give props.\n";
 }
 
 function run( $data, $force_test = false ) {
 	$sender = $data['user_name'];
 
 	if ( $data['command'] !== '/props' ) {
-		echo '???';
+		echo "???\n";
 		return;
 	}
 
