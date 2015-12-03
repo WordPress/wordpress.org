@@ -64,6 +64,7 @@ class Meta extends Trac {
 		'translate.wordpress.org'       => '#meta-i18n',
 		'developer.wordpress.org'       => '#meta-devhub',
 		'Trac'                          => '#meta-tracdev',
+		'WordPress.tv'                  => '#wptv',
 	);
 }
 
