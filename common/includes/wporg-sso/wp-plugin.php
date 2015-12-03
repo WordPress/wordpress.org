@@ -96,7 +96,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function login_network_site_url( $url, $path, $scheme ) {
 			if ( self::SSO_HOST === $this->host && preg_match( '/\/wp-login\.php$/', $this->script ) ) {
-				$url = preg_replace( '/^(https?:\/\/)[^\/]+(\/.+)$/' , '\1login.wordpress.org\2', $url );
+				$url = preg_replace( '/^(https?:\/\/)[^\/]+(\/.+)$/' , '\1'.self::SSO_HOST.'\2', $url );
 			}
 			
 			return $url;
