@@ -64,17 +64,42 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					// Otherwise, filter the login_url to point to the SSO
 					add_action( 'login_url', array( &$this, 'login_url' ), 10, 2 );
 				}
-			} else if ( self::SSO_HOST === $this->host && ! preg_match( '/\/wp-login\.php$/', $this->script ) ) {
-				// If on the SSO host, but not on its login or signup screen.
-				// TODO: Relax rules when we want more  out of our theme then bypassing it altogether with redirects.
-				if ( is_user_logged_in() ) {
-					// Mimic what happens after a login without a specified redirect.
-					$this->_safe_redirect( 'https://wordpress.org/support/profile/' . get_currentuserinfo()->user_login );
+			} else if ( self::SSO_HOST === $this->host ) {
+				// If on the SSO host
+				if ( ! preg_match( '/\/wp-login\.php$/', $this->script ) ) {
+					// ... but not on its login or signup screen.
+					// TODO: Relax rules when we want more  out of our theme then bypassing it altogether with redirects.
+					if ( is_user_logged_in() ) {
+						// Mimic what happens after a login without a specified redirect.
+						$this->_safe_redirect( 'https://wordpress.org/support/profile/' . get_currentuserinfo()->user_login );
+					} else {
+						// Otherwise, redirect to the login screen.
+						$this->_safe_redirect( $this->sso_login_url );
+					}
 				} else {
-					// Otherwise, redirect to the login screen.
-					$this->_safe_redirect( $this->sso_login_url );
+					// if on login screen, filter network_site_url to make sure our forms go to the SSO host, not wordpress.org
+					add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
 				}
 			}
+		}
+		
+		/**
+		 * Modifies the network_site_url on login.wordpress.org's login screen to make sure all forms and links
+		 * go to the SSO host, not wordpress.org
+		 * 
+		 * @param string $url
+		 * @param string $path
+		 * @param string $scheme
+		 * @return string 
+		 * 
+		 * @example add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
+		 */
+		public function login_network_site_url( $url, $path, $scheme ) {
+			if ( self::SSO_HOST === $this->host && preg_match( '/\/wp-login\.php$/', $this->script ) ) {
+				$url = preg_replace( '/^(https?:\/\/)[^\/]+(\/.+)$/' , '\1login.wordpress.org\2', $url );
+			}
+			
+			return $url;
 		}
 	}
 	
