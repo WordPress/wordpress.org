@@ -3,15 +3,7 @@
 namespace Dotorg\Slack\Props;
 use Dotorg\Slack\Send;
 
-require_once __DIR__ . '/config.php';
-
 function show_error( $user ) {
-	if ( ! in_array( $user, get_whitelist() ) ) {
-		echo "You are not allowed to use /props.\n\n";
-		printf( "If you are a team lead and need to be whitelisted, contact an admin in <#%s|%s> for assistance.", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
-		return;
-	}
-
 	echo 'Please use `/props SLACK_USERNAME MESSAGE` to give props.';
 }
 
@@ -24,11 +16,6 @@ function run( $data, $force_test = false ) {
 	}
 
 	if ( empty( $data['text'] ) ) {
-		show_error( $sender );
-		return;
-	}
-
-	if ( ! in_array( $sender, get_whitelist() ) ) {
 		show_error( $sender );
 		return;
 	}
