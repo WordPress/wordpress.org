@@ -47,4 +47,6 @@ function run( $data, $force_test = false ) {
 	}
 
 	$send->send( '#props' );
+
+	printf( "Your props to @%s have been sent.\n", $receiver );
 }
