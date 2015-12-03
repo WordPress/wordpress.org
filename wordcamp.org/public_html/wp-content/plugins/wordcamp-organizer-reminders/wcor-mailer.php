@@ -248,6 +248,32 @@ class WCOR_Mailer {
 			$wordcamp_meta['Sponsor Wrangler E-mail Address'][0],
 			$wordcamp_meta['Budget Wrangler Name'][0],
 			$wordcamp_meta['Budget Wrangler E-mail Address'][0],
+			$wordcamp_meta['Venue Wrangler Name'][0],
+			$wordcamp_meta['Venue Wrangler E-mail Address'][0],
+			$wordcamp_meta['Speaker Wrangler Name'][0],
+			$wordcamp_meta['Speaker Wrangler E-mail Address'][0],
+			$wordcamp_meta['Food/Beverage Wrangler Name'][0],
+			$wordcamp_meta['Food/Beverage Wrangler E-mail Address'][0],
+			$wordcamp_meta['Swag Wrangler Name'][0],
+			$wordcamp_meta['Swag Wrangler E-mail Address'][0],
+			$wordcamp_meta['Volunteer Wrangler Name'][0],
+			$wordcamp_meta['Volunteer Wrangler E-mail Address'][0],
+			$wordcamp_meta['Printing Wrangler Name'][0],
+			$wordcamp_meta['Printing Wrangler E-mail Address'][0],
+			$wordcamp_meta['Design Wrangler Name'][0],
+			$wordcamp_meta['Design Wrangler E-mail Address'][0],
+			$wordcamp_meta['Website Wrangler Name'][0],
+			$wordcamp_meta['Website Wrangler E-mail Address'][0],
+			$wordcamp_meta['Social Media/Publicity Wrangler Name'][0],
+			$wordcamp_meta['Social Media/Publicity Wrangler E-mail Address'][0],
+			$wordcamp_meta['A/V Wrangler Name'][0],
+			$wordcamp_meta['A/V Wrangler E-mail Address'][0],
+			$wordcamp_meta['Party Wrangler Name'][0],
+			$wordcamp_meta['Party Wrangler E-mail Address'][0],
+			$wordcamp_meta['Travel Wrangler Name'][0],
+			$wordcamp_meta['Travel Wrangler E-mail Address'][0],
+			$wordcamp_meta['Safety Wrangler Name'][0],
+			$wordcamp_meta['Safety Wrangler E-mail Address'][0],
 
 			// Venue
 			empty( $wordcamp_meta['Venue Name'][0] )          ? 'N/A' : $wordcamp_meta['Venue Name'][0],
@@ -342,6 +368,35 @@ class WCOR_Mailer {
 			}
 		}
 
+		// A bunch of other wranglers could be recipients.
+		$other_wranglers = array(
+			'wcor_send_budget_wrangler' => 'Budget Wrangler E-mail Address',
+			'wcor_send_venue_wrangler' => 'Venue Wrangler E-mail Address',
+			'wcor_send_speaker_wrangler' => 'Speaker Wrangler E-mail Address',
+			'wcor_send_food_wrangler' => 'Food/Beverage Wrangler E-mail Address',
+			'wcor_send_swag_wrangler' => 'Swag Wrangler E-mail Address',
+			'wcor_send_volunteer_wrangler' => 'Volunteer Wrangler E-mail Address',
+			'wcor_send_printing_wrangler' => 'Printing Wrangler E-mail Address',
+			'wcor_send_design_wrangler' => 'Design Wrangler E-mail Address',
+			'wcor_send_website_wrangler' => 'Website Wrangler E-mail Address',
+			'wcor_send_social_wrangler' => 'Social Media/Publicity Wrangler E-mail Address',
+			'wcor_send_a_v_wrangler' => 'A/V Wrangler E-mail Address',
+			'wcor_send_party_wrangler' => 'Party Wrangler E-mail Address',
+			'wcor_send_travel_wrangler' => 'Travel Wrangler E-mail Address',
+			'wcor_send_safety_wrangler' => 'Safety Wrangler E-mail Address',
+		);
+
+		foreach( array_intersect( array_keys( $other_wranglers ), $send_where ) as $key ) {
+			$dest = get_post_meta( $wordcamp_id, $other_wranglers[ $key ], true );
+
+			// Default to the organizer e-mail.
+			if ( ! is_email( $dest ) ) {
+				$dest = get_post_meta( $wordcamp_id, 'Email Address', true );;
+			}
+
+			$recipients[] = $dest;
+		}
+
 		if ( in_array( 'wcor_send_camera_wrangler', $send_where ) ) {
 			$region_id = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
 			$recipients[] = MES_Region::get_camera_wranger_from_region( $region_id );
@@ -361,6 +416,7 @@ class WCOR_Mailer {
 			}
 		}
 
+		$recipients = array_unique( $recipients );
 		return $recipients;
 	}
 
