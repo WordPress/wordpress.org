@@ -19,6 +19,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			if ( $this->has_host() ) {
 				add_action( 'init', array( &$this, 'redirect_all_login_or_signup_to_sso' ) );
+				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
+				remove_action( 'after_password_reset', 'wp_password_change_notification' );
 			}
 		}
 	
