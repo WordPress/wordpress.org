@@ -124,6 +124,9 @@ function get_whitelist() {
 			'bethsoderberg',
 			'courtneyengle',
 		),
+		'wcus-contributor-day' => array(
+			'drew',
+		),
 		'wcus-speakers' => array(
 			'alx',
 		),
