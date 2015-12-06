@@ -73,7 +73,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			}
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
 				$redirect_to = preg_replace( '/\/wp-(login|signup)\.php\??.*$/', '/', $redirect_to );
-				$login_url = add_query_arg( 'redirect_to', $redirect_to, $login_url );
+				$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
 			}
 			return $login_url;
 			

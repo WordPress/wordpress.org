@@ -53,7 +53,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 				}
 					
 				// Pay extra attention to the post-process redirect_to
-				$redirect_to_sso_login = add_query_arg( 'redirect_to', $this->_get_safer_redirect_to(), $redirect_to_sso_login );
+				$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $this->_get_safer_redirect_to() ), $redirect_to_sso_login );
 				
 				// Redirect to SSO login, trying to pass on a decent redirect_to request.
 				$this->_safe_redirect( $redirect_to_sso_login );

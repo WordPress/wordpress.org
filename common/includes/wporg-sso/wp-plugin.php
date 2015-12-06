@@ -44,7 +44,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			
 			if ( preg_match( '/\/wp-signup\.php$/', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
-				$this->_safe_redirect( add_query_arg( 'redirect_to', $redirect_req, $this->sso_signup_url ) );
+				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ) );
 			
 			} else if ( self::SSO_HOST !== $this->host ) {
 				// If we're not on the SSO host
@@ -58,7 +58,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					}
 					
 					// Pay extra attention to the post-process redirect_to
-					$redirect_to_sso_login = add_query_arg( 'redirect_to', $redirect_req, $redirect_to_sso_login );
+					$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $redirect_req ), $redirect_to_sso_login );
 					
 					// And actually redirect to the SSO login
 					$this->_safe_redirect( $redirect_to_sso_login );
