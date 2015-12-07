@@ -12,6 +12,13 @@ class GP_WPorg_Specifics extends GP_Plugin {
 		$this->add_filter( 'gp_url_profile', array( 'args' => 2 ) );
 		$this->add_action( 'init' );
 		$this->add_filter( 'projects', array( 'args' => 2 ) );
+		$this->add_action( 'before_request', array( 'args' => 2 ) );
+	}
+
+	function before_request( $class_name, $last_method_called ) {
+		if ( 'GP_Route_Translation' === $class_name && 'import_translations_post' === $last_method_called ) {
+			add_filter( 'enable_propagate_translations_across_projects', '__return_false' );
+		}
 	}
 
 	function before_login_form() {
