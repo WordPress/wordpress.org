@@ -19,7 +19,13 @@ require_once( $core_tests_directory . '/includes/functions.php' );
 function manually_load_plugin() {
 	$_SERVER['PHP_SELF'] = admin_url( 'themes.php?page=remote-css' );
 
-	define( 'WP_ADMIN',          true ); // This is so that wordcamp-remote-css/bootstrap.php will load the app/*.php files. It may need to be refactored if we add tests for output-cached-css.php.
+	/*
+	 * Defining WP_ADMIN is so that wordcamp-remote-css/bootstrap.php will load the app/*.php files.
+	 * It may need to be refactored if we add tests for output-cached-css.php.
+	 * We shouldn't really be using PHPUnit for functional tests, though, so it'd be better to switch those tests
+	 * to Codeception or Behat.
+	 */
+ 	define( 'WP_ADMIN',          true );
 	define( 'JETPACK_DEV_DEBUG', true );
 
 	require_once( dirname(                   __DIR__ )     . '/bootstrap.php'                 );

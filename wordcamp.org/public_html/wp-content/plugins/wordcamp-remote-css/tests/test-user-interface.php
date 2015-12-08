@@ -38,7 +38,7 @@ class Test_User_Interface extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that absolute file paths are invalid
+	 * Test that relative file paths are invalid
 	 *
 	 * @covers WordCamp\RemoteCSS\validate_remote_css_url()
 	 */
