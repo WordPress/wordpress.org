@@ -52,7 +52,7 @@ class WP_44_Credits extends WP_Credits {
 				'shuffle' => true,
 				'data'    => array(
 					'chriscct7'       => array( 'Chris Christoff', 'd0931e57862048dabb0bea3a71ce6229' ),
-					'swissspidy'      => 'Pascal Pirchler',
+					'swissspidy'      => 'Pascal Birchler',
 					'danielbachhuber' => 'Daniel Bachhuber',
 					'rachelbaker'     => 'Rachel Baker',
 					'joehoyle'        => 'Joe Hoyle',
