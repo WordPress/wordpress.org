@@ -14,3 +14,4 @@ if ( is_array( $wp_cli_commands ) ) {
 
 WP_CLI::add_command( 'wc-rewrite', 'WordCamp_CLI_Rewrite_Rules' );
 WP_CLI::add_command( 'wc-rest',    'WordCamp_CLI_REST_API'      );
+WP_CLI::add_command( 'wc-users',   'WordCamp_CLI_Users'         );
