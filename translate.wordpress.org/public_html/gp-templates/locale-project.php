@@ -91,6 +91,16 @@ gp_tmpl_header();
 	</div>
 </div>
 
+<?php
+if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) && ! in_array( 'stable', $sub_project_slugs ) ) {
+	?>
+	<div class="wporg-notice wporg-notice-warning">
+		<p>This plugin is not properly prepared for localization. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author.</a></p>
+	</div>
+	<?php
+}
+?>
+
 <div class="locale-project">
 	<table class="locale-sub-projects">
 		<thead>
