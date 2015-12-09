@@ -3,7 +3,7 @@
 defined( 'WP_CLI' ) or die();
 
 /**
- * Manage rewrite rules.
+ * WordCamp.org: Manage rewrite rules.
  */
 class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 	/**

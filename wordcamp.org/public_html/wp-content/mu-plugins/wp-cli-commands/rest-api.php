@@ -3,7 +3,7 @@
 defined( 'WP_CLI' ) or die();
 
 /**
- * Test REST API customizations.
+ * WordCamp.org: Test REST API customizations.
  */
 class WordCamp_CLI_REST_API extends WP_CLI_Command {
 	/**
