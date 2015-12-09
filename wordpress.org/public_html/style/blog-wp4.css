@@ -24,6 +24,13 @@
 	margin-bottom: 2em;
 }
 
+.storycontent .sharedaddy .sd-content,
+.storycontent .wp-playlist div,
+.storycontent .mejs-video div {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 .storycontent div.googleplus1_button,
 .storycontent .wp-playlist div,
 .storycontent .mejs-video div {
@@ -120,4 +127,12 @@ h2.fancy:nth-of-type(1) {
 #pagebody {
 	font-size: 16px;
 	line-height: 1.6;
+}
+
+.storycontent embed,
+.storycontent iframe,
+.storycontent object,
+.storycontent video {
+	max-width: 100%;
+	vertical-align: middle;
 }
