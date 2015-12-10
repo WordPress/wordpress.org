@@ -149,7 +149,8 @@ function get_committers() {
 		'dd32', 'nacin', 'mark', 'helen', 'azaozz', 'westi',
 		'nb', 'sergey', 'ocean90', 'wonderboymusic', 'drew', 'johnbillion',
 		'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
-		'westonruter', 'afercia', 'karmatosed', 'rmccue',
+		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
+		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce', 'eric', 'mike',
 	);
 }
 
