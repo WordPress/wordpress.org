@@ -13,6 +13,7 @@ class GH2WORG {
 		'voldemortensen/menu-customizer' => 'menu-customizer',
 		'swissspidy/oEmbed-API' => 'oembed-api',
 		'georgestephanis/two-factor' => 'two-factor',
+		'obenland/shiny-updates' => 'shiny-updates',
 	);
 
 	function __construct() {
