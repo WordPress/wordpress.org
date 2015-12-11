@@ -190,3 +190,12 @@ function sanitize_urls_in_css_properties( $url, $property ) {
 
 	return "url('" . str_replace( "'", "\\'", $url ) . "')";
 }
+
+/**
+ * Disable Jetpack's Holiday Snow on all WordCamp sites
+ *
+ * That option appears in Settings > General between December 1st and January 4th.
+ * It is off by default.
+ * This filter removes it completely.
+ */
+add_filter( 'jetpack_is_holiday_snow_season', '__return_false' );

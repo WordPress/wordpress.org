@@ -192,6 +192,3 @@ function wcorg_flush_rewrite_rules() {
 }
 add_action( 'wp_ajax_wcorg_flush_rewrite_rules_everywhere',        'wcorg_flush_rewrite_rules' ); // This isn't used by the wp-cli command, but is useful for manual testing
 add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_rewrite_rules' );
-
-// No Jetpack snow.
-add_filter( 'jetpack_is_holiday_snow_season', '__return_false' );
