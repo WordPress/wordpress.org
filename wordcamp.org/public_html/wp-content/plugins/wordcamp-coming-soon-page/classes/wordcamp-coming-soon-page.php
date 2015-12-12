@@ -163,11 +163,13 @@ class WordCamp_Coming_Soon_Page {
 
 		if ( isset( $wordcamp_post->ID ) ) {
 			if ( ! empty( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
-				$dates = date( 'l, F jS Y', $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
+				// translators: date format, see https://php.net/date
+				$dates = date_i18n( __( 'l, F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
 
 				if ( ! empty( $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) ) {
 					if ( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] !== $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) {
-						$dates .= ' - ' . date( 'l, F jS Y', $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
+						// translators: date format, see https://php.net/date
+						$dates .= ' - ' . date_i18n( __( 'l, F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
 					}
 				}
 			}

@@ -1,9 +1,15 @@
 <?php if ( 'wccsp_enabled_true' == $field['label_for'] ) : ?>
 	<input id="wccsp_enabled_true" name="wccsp_settings[enabled]" type="radio" value="on" <?php checked( $this->settings['enabled'], 'on' ); ?> />
-	<span class="example"> On</span><br />
+	<span class="example">
+		<?php // translators: If Coming Soon plugin is enabled ?>
+		<?php _e( 'On', 'wordcamporg' ); ?>
+	</span><br />
 	
 	<input id="wccsp_enabled_false" name="wccsp_settings[enabled]" type="radio" value="off" <?php checked( $this->settings['enabled'], 'off' ); ?> />
-	<span class="example"> Off</span>
+	<span class="example">
+		<?php // translators: If Coming Soon plugin is disabled ?>
+		<?php _e( 'Off', 'wordcamporg' ); ?>
+	</span>
 <?php endif; ?>
 
 
@@ -25,13 +31,15 @@
 <?php if ( 'wccsp_image_id' == $field['label_for'] ) : ?>
 	<p>
 		<input type="hidden" id="wccsp_image_id" name="wccsp_settings[image_id]" value="<?php echo esc_attr( $this->settings['image_id'] ); ?>" />
-		<a href="javascript:;" id="wccsp-select-image" class="button insert-media add_media" title="Select Image">Select Image</a>
+		<a href="javascript:;" id="wccsp-select-image" class="button insert-media add_media" title="<?php _e( 'Select Image', 'wordcamporg' ); ?>">
+			<?php _e( 'Select Image', 'wordcamporg' ); ?>
+		</a>
 	</p>
 	
 	<?php if( $image ) : ?>
 		<p id="wccsp_image_preview">
-			Current image preview:<br />
-			<img src="<?php echo esc_attr( $image[0] ); ?>" alt="Image Preview" />
+			<?php _e( 'Current image preview:', 'wordcamporg' ); ?><br />
+			<img src="<?php echo esc_attr( $image[0] ); ?>" alt="<?php _e( 'Image Preview', 'wordcamporg' ); ?>" />
 		</p>
 	<?php endif; ?>
 <?php endif; ?>

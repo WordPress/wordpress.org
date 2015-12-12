@@ -23,7 +23,11 @@
 		<?php endif; ?>
 		
 		<p id="wccsp-introduction">
-			<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> is in the early planning stages. In the meantime, you can subscribe to be notified when the site goes live, or contact the organizers to get involved.
+			<?php printf(
+				// translators: %s is the name of the blog
+				__( '%s is in the early planning stages. In the meantime, you can subscribe to be notified when the site goes live, or contact the organizers to get involved.', 'wordcamporg' ),
+				esc_html( get_bloginfo( 'name' ) )
+			); ?>
 		</p>
 
 		<?php if ( in_array( 'subscriptions', $active_modules ) ) : ?>
@@ -34,7 +38,7 @@
 
 		<?php if ( in_array( 'contact-form', $active_modules ) && $contact_form_shortcode ) : ?>
 			<div class="wccsp-box">
-				<h2>Contact the Organizers</h2>
+				<h2><?php _e( 'Contact the Organizers' , 'wordcamporg' ); ?></h2>
 				
 				<?php echo $contact_form_shortcode; // intentionally not escaping because it's the output of do_shortcode() ?>
 			</div>

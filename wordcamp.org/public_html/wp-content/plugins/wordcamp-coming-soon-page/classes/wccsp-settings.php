@@ -72,8 +72,8 @@ class WCCSP_Settings {
 	public function register_settings_pages() {
 		add_submenu_page(
 			'options-general.php',
-			'Coming Soon',
-			'Coming Soon',
+			__( 'Coming Soon', 'wordcamporg' ),
+			__( 'Coming Soon', 'wordcamporg' ),
 			self::REQUIRED_CAPABILITY,
 			'wccsp_settings',
 			array( $this, 'markup_settings_page' )
@@ -87,7 +87,7 @@ class WCCSP_Settings {
 		if ( current_user_can( self::REQUIRED_CAPABILITY ) ) {
 			require_once( dirname( __DIR__ ) . '/views/settings-screen.php' );
 		} else {
-			wp_die( 'Access denied.' );
+			wp_die( __( 'Access denied.', 'wordcamporg' ) );
 		}
 	}
 
@@ -105,7 +105,7 @@ class WCCSP_Settings {
 
 		add_settings_field(
 			'wccsp_enabled',
-			'Enabled',
+			__( 'Enabled', 'wordcamporg' ),
 			array( $this, 'markup_fields' ),
 			'wccsp_settings',
 			'wccsp_default',
@@ -114,7 +114,7 @@ class WCCSP_Settings {
 
 		add_settings_field(
 			'wccsp_body_background_color',
-			'Body Background Color',
+			__( 'Body Background Color', 'wordcamporg' ),
 			array( $this, 'markup_fields' ),
 			'wccsp_settings',
 			'wccsp_default',
@@ -123,7 +123,7 @@ class WCCSP_Settings {
 
 		add_settings_field(
 			'wccsp_container_background_color',
-			'Container Background Color',
+			__( 'Container Background Color', 'wordcamporg' ),
 			array( $this, 'markup_fields' ),
 			'wccsp_settings',
 			'wccsp_default',
@@ -132,7 +132,7 @@ class WCCSP_Settings {
 
 		add_settings_field(
 			'wccsp_text_color',
-			'Text Color',
+			__( 'Text Color', 'wordcamporg' ),
 			array( $this, 'markup_fields' ),
 			'wccsp_settings',
 			'wccsp_default',
@@ -141,7 +141,7 @@ class WCCSP_Settings {
 
 		add_settings_field(
 			'wccsp_image_id',
-			'Image',
+			__( 'Image', 'wordcamporg' ),
 			array( $this, 'markup_fields' ),
 			'wccsp_settings',
 			'wccsp_default',
@@ -225,8 +225,8 @@ class WCCSP_Settings {
 		$active_modules            = Jetpack::$instance->get_active_modules();
 		$inactive_required_modules = array();
 		$required_modules          = array(
-			'subscriptions' => 'Subscriptions',
-			'contact-form'  => 'Contact Form',
+			'subscriptions' => __( 'Subscriptions', 'wordcamporg' ),
+			'contact-form'  => __( 'Contact Form',  'wordcamporg' ),
 		);
 		
 		foreach ( $required_modules as $module_id => $module_name ) {

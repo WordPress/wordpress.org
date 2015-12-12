@@ -1,7 +1,10 @@
 <div class="error">
 	<ul>
 		<?php foreach ( $inactive_required_modules as $module ) : ?>
-			<li>Please activate Jetpack's <?php echo esc_html( $module ); ?> module.</li>
+			<li>
+				<?php // translators: %s is the name of the jetpack module ?>
+				<?php printf( __( "Please activate Jetpack's %s module.", 'wordcamporg' ), esc_html( $module ) ); ?>
+			</li>
 		<?php endforeach; ?>
 	</ul>
 </div>
