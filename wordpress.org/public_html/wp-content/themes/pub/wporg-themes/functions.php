@@ -250,3 +250,16 @@ function wporg_themes_get_tag_translations() {
 	}
 	return $translations;
 }
+
+/**
+ * Override the embed template with our own
+ */
+function wporg_themes_embed_template( $template ) {
+	$theme_embed_template = locate_template( 'embed.php' );
+	if ( $theme_embed_template ) {
+		return $theme_embed_template;
+	}
+	return $template;
+}
+add_filter('embed_template', 'wporg_themes_embed_template');
+
