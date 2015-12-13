@@ -892,3 +892,53 @@ function wporg_themes_maybe_schedule_daily_job() {
 	}
 }
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
+
+/**
+ * Fix the query to allow embeds to work on single theme pages
+ */
+function wporg_themes_embed_handler() {
+	global $wp_query;
+
+	$themes = wporg_themes_get_themes_for_query();
+	if ( $themes['total'] == 1 ) {
+		$wp_query = new WP_Query( array(
+			'name' => get_query_var('name'),
+			'post_type' => 'repopackage',
+		));
+		wp_reset_postdata();
+	}
+}
+add_action( 'embed_head', 'wporg_themes_embed_handler' );
+add_action( 'wp_head', 'wporg_themes_embed_handler', 1 );
+
+/**
+ * Fix the singular check to allow embed info to be added to head for single theme pages
+ */
+function wporg_themes_singular_fix() {
+	global $wp_query;
+	if ( get_query_var('name') && !is_404() ) {
+		$wp_query->is_singular = true;
+	}
+}
+add_action( 'template_redirect', 'wporg_themes_singular_fix', 20 );
+
+/**
+ * Fix the oembed post finder to find the theme post id from the url properly
+ */
+function wporg_themes_embed_request_post_id( $post_id, $url ) {
+	if ( preg_match('|https://wordpress\.org/themes/(.*)/|', $url, $matches) ){
+		$name = $matches[1];
+		$query = new WP_Query( array(
+			'name' => $name,
+			'post_type' => 'repopackage',
+			'fields' => 'ids',
+		));
+		if ( $query->posts ) {
+			$post_id = $query->posts[0];
+		}
+	}
+	return $post_id;
+}
+add_filter( 'oembed_request_post_id', 'wporg_themes_embed_request_post_id', 10, 2 );
+
+
