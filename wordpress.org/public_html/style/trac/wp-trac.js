@@ -40,10 +40,15 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug' ];
 
+	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
-		'access', 'deprecated', 'global', 'ignore', 'internal', 'link', 'method',
-		'package', 'return','see', 'since', 'subpackage', 'todo', 'type', 'var',
-		'param'
+		'access', 'author', 'category', 'copyright', 'deprecated', 'example', 'final',
+		'filesource', 'home', 'ignore', 'inheritdoc', 'internal', 'global', 'license',
+		'link', 'media', 'mention', 'mentions', 'method', 'name', 'notification',
+		'notifications', 'package', 'param', 'property', 'return', 'see', 'since',
+		'static', 'staticvar', 'subpackage', 'term', 'terms', 'ticket', 'toc', 'todo',
+		'tutorial', 'type', 'user', 'username', 'uses', 'var', 'version', 'wordpress',
+		'wp',
 	];
 
 	wpTrac = {
