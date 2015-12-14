@@ -35,6 +35,9 @@ function trusted_deputy_has_cap( $allcaps, $caps, $args, $user ) {
 		'manage_network' => true,
 		'manage_sites'   => true,
 
+		'jetpack_connect' => true,
+		'jetpack_reconnect' => true,
+		'jetpack_disconnect' => true,
 		'jetpack_network_admin_page' => true,
 		'jetpack_network_sites_page' => true,
 		'jetpack_network_settings_page' => true,
@@ -72,6 +75,9 @@ function trusted_deputy_meta_caps( $required_caps, $cap, $user_id ) {
 
 		// Map some Jetpack meta caps back to regular caps.
 		// See https://github.com/Automattic/jetpack/commit/bf3f4b9a8eb8b689b33a106d2e9b2fefd9a4c2fb
+		case 'jetpack_connect':
+		case 'jetpack_reconnect':
+		case 'jetpack_disconnect':
 		case 'jetpack_network_admin_page':
 		case 'jetpack_network_sites_page':
 		case 'jetpack_network_settings_page':
@@ -113,6 +119,9 @@ function test_allow_trusted_deputy_capabilities() {
 		'edit_theme_options' => true,
 
 		// Jetpack-specific caps.
+		'jetpack_connect' => true,
+		'jetpack_reconnect' => true,
+		'jetpack_disconnect' => true,
 		'jetpack_network_admin_page' => true,
 		'jetpack_network_sites_page' => true,
 		'jetpack_network_settings_page' => true,
