@@ -123,6 +123,7 @@ function get_whitelist() {
 			'liljimmi',
 			'bethsoderberg',
 			'courtneyengle',
+			'chanthaboune',
 		),
 		'wcus-contributor-day' => array(
 			'drew',
