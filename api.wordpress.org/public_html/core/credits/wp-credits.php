@@ -115,7 +115,7 @@ abstract class WP_Credits {
 		}
 
 		if ( false === $validators ) {
-			$validators = $this->_grab_validators( $gp_locale );
+			$validators = $this->_grab_validators( $gp_locale, $path );
 			$this->cache_set( $cache_key['validators'], $validators );
 		}
 
@@ -175,9 +175,9 @@ abstract class WP_Credits {
 		return $translators;
 	}
 
-	private function _grab_validators( $gp_locale ) {
+	private function _grab_validators( $gp_locale, $path ) {
 		global $wpdb;
-		$users = $this->grab_validators( $gp_locale );
+		$users = $this->grab_validators( $gp_locale, $path );
 
 		if ( ! $users )
 			return array();
@@ -198,15 +198,23 @@ abstract class WP_Credits {
 		return $validators;
 	}
 
-	protected function grab_validators( $gp_locale ) {
+	protected function grab_validators( $gp_locale, $path ) {
 		global $wpdb;
-		$subdomain = $wpdb->get_var( $wpdb->prepare( "SELECT subdomain FROM locales WHERE locale = %s", $gp_locale->wp_locale ) );
-		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM wporg_blogs WHERE domain = %s AND path = '/'", "$subdomain.wordpress.org" ) );
-		if ( $blog_id ) {
-			$meta_key = 'wporg_' . intval( $blog_id ) . '_capabilities';
-			return $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value LIKE '%translation_editor%'" );
+
+		$path = 'wp/' . $path;
+		$path = like_escape( $path ) . '%';
+
+		$project_ids = $wpdb->get_col( "SELECT `id` FROM `translate_projects` WHERE ( `path` LIKE '$path' OR `path` = 'wp' ) AND `active` = 1" ); // Project validators
+		if ( ! $project_ids ) {
+			$project_ids = array();
 		}
-		return array();
+
+		$project_ids[] = '0'; // Global validators
+
+		return $wpdb->get_col( $wpdb->prepare( "
+			SELECT `user_id` FROM `translate_translation_editors`
+			WHERE `project_id` IN (" . implode( ', ', $project_ids ) . ") AND `locale` = %s
+		", $gp_locale->slug ) );
 	}
 
 	final protected function get_start_date() {
