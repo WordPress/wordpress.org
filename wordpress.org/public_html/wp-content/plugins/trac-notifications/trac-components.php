@@ -482,7 +482,7 @@ jQuery( document ).ready( function( $ ) {
 			if ( $tickets = $this->api->get_tickets_by( $args ) ) {
 				printf( '<h3>%s (%d)</h3>', $title, count( $tickets ) );
 				echo $this->trac_query_link( 'View list on Trac', $args );
-				$this->render_tickets( $tickets );	
+				$this->render_tickets( $tickets );
 			}
 		}
 	}
@@ -606,6 +606,11 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function get_component_maintainers( $component ) {
-		return $this->get_component_maintainers_by_post( get_page_by_title( $component, OBJECT, 'component' )->ID );
+		$component_page = get_page_by_title( $component, OBJECT, 'component' );
+		if ( $component_page ) {
+			return $this->get_component_maintainers_by_post( $component_page->ID );
+		} else {
+			return array();
+		}
 	}
 }
