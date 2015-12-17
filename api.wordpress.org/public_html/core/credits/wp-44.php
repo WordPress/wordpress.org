@@ -42,7 +42,7 @@ class WP_44_Credits extends WP_Credits {
 					'iseulde'        => 'Ella Iseulde Van Dorpe',
 					'westonruter'    => array( 'Weston Ruter', '22ed378fbf1d918ef43a45b2a1f34634' ),
 					'afercia'        => 'Andrea Fercia',
-					'rmccue'         => 'Ryan McCue',
+					'rmccue'         => array( 'Ryan McCue', '08818120f223035a0857c2a0ec417f93' ),
 					'karmatosed'     => 'Tammie Lister',
 				),
 			),
