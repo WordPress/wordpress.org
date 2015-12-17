@@ -1884,14 +1884,27 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function manage_post_types_columns( $columns ) {
 		$current_filter = current_filter();
+
 		switch ( $current_filter ) {
 			case 'manage_wcb_organizer_posts_columns':
 				// Insert at offset 1, that's right after the checkbox.
 				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_organizer_avatar' => __( 'Avatar', 'wordcamporg' ) )   + array_slice( $columns, 1, null, true );
 				break;
+
 			case 'manage_wcb_speaker_posts_columns':
-				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_speaker_avatar'   => __( 'Avatar', 'wordcamporg' ) )   + array_slice( $columns, 1, null, true );
+				$original_columns = $columns;
+
+				$columns =  array_slice( $original_columns, 0, 1, true );
+				$columns += array( 'wcb_speaker_avatar' => __( 'Avatar', 'wordcamporg' ) );
+				$columns += array_slice( $original_columns, 1, 1, true );
+				$columns += array(
+					'wcb_speaker_email'          => __( 'Gravatar Email',         'wordcamporg' ),
+					'wcb_speaker_wporg_username' => __( 'WordPress.org Username', 'wordcamporg' ),
+				);
+				$columns += array_slice( $original_columns, 2, null, true );
+
 				break;
+
 			case 'manage_wcb_session_posts_columns':
 				$columns = array_slice( $columns, 0, 2, true ) + array( 'wcb_session_speakers' => __( 'Speakers', 'wordcamporg' ) ) + array_slice( $columns, 2, null, true );
 				$columns = array_slice( $columns, 0, 1, true ) + array( 'wcb_session_time'     => __( 'Time', 'wordcamporg' ) )     + array_slice( $columns, 1, null, true );
@@ -1917,6 +1930,20 @@ class WordCamp_Post_Types_Plugin {
 
 			case 'wcb_speaker_avatar':
 				edit_post_link( get_avatar( get_post_meta( get_the_ID(), '_wcb_speaker_email', true ), 32 ) );
+				break;
+
+			case 'wcb_speaker_email':
+				echo esc_html( get_post_meta( get_the_ID(), '_wcb_speaker_email', true ) );
+				break;
+
+			case 'wcb_speaker_wporg_username':
+				$user_id    = get_post_meta( get_the_ID(), '_wcpt_user_id', true );
+				$wporg_user = get_user_by( 'id', $user_id );
+
+				if ( $wporg_user ) {
+					echo esc_html( $wporg_user->user_nicename );
+				}
+
 				break;
 
 			case 'wcb_session_speakers':
