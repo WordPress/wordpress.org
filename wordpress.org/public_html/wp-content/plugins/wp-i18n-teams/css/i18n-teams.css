@@ -112,25 +112,62 @@ td.no-right-border {
 	margin: 0 !important; /* !important is necessary here to override P2's use of !important in .postcontent ul */
 	padding: 0;
 }
-.validators li {
-	float: left;
-	width: 280px;		/* todo use flexbox to prog enhance this so that they fill the space. AF is good one to test */
-	margin-bottom: 15px;
-	list-style-type: none;
+
+ul.validators {
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-flex-flow: row wrap;
+	-ms-flex-flow: row wrap;
+	flex-flow: row wrap;
 }
-.validators .gravatar {
-	position: relative;
-	top: -6px;
-	float: left;
-	margin: 0 10px 10px 0;
-	padding: 2px;
+
+.validators li {
+	list-style-type: none;
+	margin-bottom: 15px;
+	width: 33%;
+}
+
+.validators.project-validators li {
+	width: 25%;
+	margin-bottom: 5px;
+}
+
+@media only screen and (max-width: 850px) {
+	.validators li {
+		width: 50%;
+	}
+
+	.validators.project-validators li {
+		width: 33%;
+	}
+}
+
+@media only screen and (max-width: 470px) {
+	.validators li {
+		width: 100%;
+	}
+	.validators.project-validators li {
+		width: 50%;
+	}
+}
+
+.validators.project-validators img.avatar {
+	margin-right: 5px !important;
 }
 .validators a {
 	text-decoration: none;
 }
 .validators .user-name {
 	font-size: 16px;
+	position: relative;
+	top: .2em;
 }
+.validators.project-validators .user-name {
+	font-size: 13px;
+}
+
 .validators .user-slack {
 	display: block;
 	margin-top: .2em;

@@ -54,7 +54,7 @@
 </div>
 
 
-<h2><?php _e( 'Translation Editors', 'wporg' ); ?></h2>
+<h2><?php _e( 'General Translation Editors', 'wporg' ); ?></h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
@@ -64,7 +64,7 @@
 			?>
 			<li>
 				<a class="user-avatar" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
-					echo get_avatar( $validator['email'], 60 );
+					echo get_avatar( $validator['email'], 50 );
 				?></a>
 				<a class="user-name" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
 					echo esc_html( $validator['display_name'] );
@@ -74,6 +74,25 @@
 					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $validator['slack'], 'https://make.wordpress.org/chat/' );
 				}
 				?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+<?php endif; ?>
+
+
+<?php if ( ! empty( $locale_data['project_validators'] ) ) : ?>
+	<h2><?php _e( 'Project Translation Editors', 'wporg' ); ?></h2>
+
+	<ul class="validators project-validators">
+		<?php foreach ( $locale_data['project_validators'] as $validator ) :
+			?>
+			<li>
+				<a class="user-avatar" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo get_avatar( $validator['email'], 25 );
+				?></a>
+				<a class="user-name" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo esc_html( $validator['display_name'] );
+				?></a>
 			</li>
 		<?php endforeach; ?>
 	</ul>

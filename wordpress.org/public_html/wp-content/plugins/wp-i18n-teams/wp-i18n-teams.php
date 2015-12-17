@@ -27,7 +27,7 @@ class WP_I18n_Teams {
 	 */
 	public function enqueue_assets() {
 		if ( is_singular() && false !== strpos( get_post()->post_content, '[wp-locales' ) ) {
-			wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', __FILE__ ), array(), 2 );
+			wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', __FILE__ ), array(), 3 );
 			wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', __FILE__ ), array( 'jquery' ), 2 );
 		}
 	}
@@ -211,6 +211,7 @@ class WP_I18n_Teams {
 
 		$contributors = $this->get_contributors( $locale );
 		$locale_data['validators'] = $contributors['validators'];
+		$locale_data['project_validators'] = $contributors['project_validators'];
 		$locale_data['translators'] = $contributors['translators'];
 
 		return $locale_data;
@@ -229,7 +230,8 @@ class WP_I18n_Teams {
 		}
 
 		$contributors = array();
-		$contributors['validators'] = $this->get_translation_editors( $locale );
+		$contributors['validators'] = $this->get_general_translation_editors( $locale );
+		$contributors['project_validators'] = $this->get_project_translation_editors( $locale );
 		$contributors['translators'] = $this->get_translation_contributors( $locale );
 
 		wp_cache_set( 'contributors-data:' . $locale->wp_locale, $contributors, 'wp-i18n-teams', 2 * HOUR_IN_SECONDS );
@@ -269,28 +271,21 @@ class WP_I18n_Teams {
 	}
 
 	/**
-	 * Get the translation editors for the given locale.
+	 * Get the general translation editors for the given locale.
 	 *
 	 * @param GP_Locale $locale
 	 * @return array
 	 */
-	private function get_translation_editors( $locale ) {
+	private function get_general_translation_editors( $locale ) {
 		global $wpdb;
 
 		$editors = array();
 
-		$subdomain = $wpdb->get_var( $wpdb->prepare( "SELECT subdomain FROM locales WHERE locale = %s", $locale->wp_locale ) );
-		if ( ! $subdomain ) {
-			return $editors;
-		}
+		$users = $wpdb->get_col( $wpdb->prepare( "
+			SELECT `user_id` FROM `translate_translation_editors`
+			WHERE `project_id` = '0' AND `locale` = %s
+		", $locale->slug ) );
 
-		$blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = '/'", "$subdomain.wordpress.org" ) );
-		if ( ! $blog_id ) {
-			return $editors;
-		}
-
-		$meta_key = $wpdb->base_prefix . intval( $blog_id ) . '_capabilities';
-		$users = $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$meta_key' AND meta_value LIKE '%translation_editor%'" );
 		if ( ! $users ) {
 			return $editors;
 		}
@@ -310,6 +305,48 @@ class WP_I18n_Teams {
 					'email'        => $user->user_email,
 					'nice_name'    => $user->user_nicename,
 					'slack'        => self::get_slack_username( $user->ID ),
+				);
+			}
+		}
+
+		uasort( $editors, array( $this, '_sort_display_name_callback' ) );
+
+		return $editors;
+	}
+
+	/**
+	 * Get the general translation editors for the given locale.
+	 *
+	 * @param GP_Locale $locale
+	 * @return array
+	 */
+	private function get_project_translation_editors( $locale ) {
+		global $wpdb;
+
+		$editors = array();
+
+		$users = $wpdb->get_col( $wpdb->prepare( "
+			SELECT `user_id` FROM `translate_translation_editors`
+			WHERE `project_id` <> '0' AND `locale` = %s
+		", $locale->slug ) );
+
+		if ( ! $users ) {
+			return $editors;
+		}
+
+		$user_data = $wpdb->get_results( "SELECT ID, user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
+		foreach ( $user_data as $user ) {
+			if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
+				$editors[ $user->user_nicename ] = array(
+					'display_name' => $user->display_name,
+					'email'        => $user->user_email,
+					'nice_name'    => $user->user_nicename,
+				);
+			} else {
+				$editors[ $user->user_nicename ] = array(
+					'display_name' => $user->user_nicename,
+					'email'        => $user->user_email,
+					'nice_name'    => $user->user_nicename,
 				);
 			}
 		}
