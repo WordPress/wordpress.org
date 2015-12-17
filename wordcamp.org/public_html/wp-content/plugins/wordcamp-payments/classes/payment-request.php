@@ -774,7 +774,7 @@ class WCP_Payment_Request {
 
 			If you have any questions, please reply to let us know.",
 			$post_data['post_title'],
-			sanitize_text_field( $post_data_raw['wcp_mark_incomplete_notes'] ),
+			sanitize_text_field( stripslashes( $post_data_raw['wcp_mark_incomplete_notes'] ) ),
 			admin_url( sprintf( 'post.php?post=%s&action=edit', $request_id ) )
 		);
 		$message = str_replace( "\t", '', $message );
