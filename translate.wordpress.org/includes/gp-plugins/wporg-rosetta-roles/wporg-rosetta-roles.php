@@ -21,11 +21,19 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	public $id = 'wporg-rosetta-roles';
 
 	/**
-	 * Holds the role of an approver.
-	 *
-	 * @var string
+	 * Database table for translation editors.
 	 */
-	public $approver_role = 'translation_editor';
+	const TRANSLATION_EDITORS_TABLE = 'translate_translation_editors';
+
+	/**
+	 * Role of a per project translation editor.
+	 */
+	const TRANSLATION_EDITOR_ROLE = 'translation_editor';
+
+	/**
+	 * Role of a general translation editor.
+	 */
+	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
 	 * Holds the meta key of the project access list.
@@ -39,6 +47,9 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 */
 	public function __construct() {
 		parent::__construct();
+
+		$GLOBALS['gpdb']->wporg_translation_editors = self::TRANSLATION_EDITORS_TABLE;
+
 		$this->add_filter( 'pre_can_user', array( 'args' => 2, 'priority' => 9 ) );
 		$this->add_action( 'project_created' );
 		$this->add_action( 'project_saved' );
@@ -151,6 +162,16 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 * @return bool
 	 */
 	public function is_approver_for_locale( $user_id, $locale_slug ) {
+		static $cache = null;
+
+		if ( null === $cache ) {
+			$cache = array();
+		}
+
+		if ( isset( $cache[ $user_id ][ $locale_slug ] ) ) {
+			return $cache[ $user_id ][ $locale_slug ];
+		}
+
 		if ( ! class_exists( 'BP_Roles' ) ) {
 			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
 		}
@@ -173,8 +194,14 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 		}
 		$user->get_role_caps();
 
-		return $user->has_cap( $this->approver_role );
+		$is_approver = $user->has_cap( self::TRANSLATION_EDITOR_ROLE ) || $user->has_cap( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 
+		if ( ! isset( $cache[ $user_id ] ) ) {
+			$cache[ $user_id ] = array();
+		}
+
+		$cache[ $user_id ][ $locale_slug ] = $is_approver;
+		return $is_approver;
 	}
 
 	/**
@@ -190,27 +217,36 @@ class GP_WPorg_Rosetta_Roles extends GP_Plugin {
 	 * @return array A list of the Project ID's for which the current user can approve translations for.
 	 */
 	public function get_project_id_access_list( $user_id, $locale_slug, $include_children = false ) {
-		if ( ! class_exists( 'BP_Roles' ) ) {
-			require_once( BACKPRESS_PATH . 'class.bp-roles.php' );
-		}
-		if ( ! class_exists( 'BP_User' ) ) {
-			require_once( BACKPRESS_PATH . 'class.bp-user.php' );
+		global $gpdb;
+		static $cache = null;
+
+		if ( null === $cache ) {
+			$cache = array();
 		}
 
-		$user = new BP_User( $user_id );
+		if ( isset( $cache[ $user_id ][ $locale_slug ] ) ) {
+			$project_access_list = $cache[ $user_id ][ $locale_slug ];
+		} else {
+			$project_access_list = $gpdb->get_col( $gpdb->prepare( "
+				SELECT project_id FROM
+				{$gpdb->wporg_translation_editors}
+				WHERE user_id = %d AND locale = %s
+			", $user_id, $locale_slug ) );
 
-		// Get blog prefix of the associated Rosetta site.
-		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+			if ( ! isset( $cache[ $user_id ] ) ) {
+				$cache[ $user_id ] = array();
+			}
+
+			$cache[ $user_id ][ $locale_slug ] = $project_access_list;
+		}
+
+		if ( ! $project_access_list ) {
 			return false;
 		}
 
-		// Get IDs of projects which the user can approve.
-		$meta_key = $blog_prefix . $this->project_access_meta_key;
-		if ( empty( $user->$meta_key ) || ! is_array( $user->$meta_key ) ) {
-			return false;
+		if ( in_array( '0', $project_access_list, true ) ) {
+			$project_access_list = array( 'all' );
 		}
-
-		$project_access_list = $user->$meta_key;
 
 		// If we don't want the children, or the user has access to all projects.
 		if ( ! $include_children || in_array( 'all', $project_access_list ) ) {
