@@ -16,11 +16,13 @@
 		<?php $list_table->search_box( __( 'Search Translation Editors', 'rosetta' ), 'rosetta' ); ?>
 	</form>
 
+	<?php $list_table->views(); ?>
+
 	<form method="post">
 		<?php $list_table->display(); ?>
 	</form>
 
-	<?php if ( current_user_can( 'promote_users' ) ) : ?>
+	<?php if ( current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP ) ) : ?>
 		<h3><?php _e( 'Add Translation Editor', 'rosetta' ); ?></h3>
 		<p><?php _e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">

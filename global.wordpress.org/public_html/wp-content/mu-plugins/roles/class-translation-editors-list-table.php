@@ -7,18 +7,18 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 
 	/**
-	 * Holds the role of a translation editor.
+	 * Holds the roles for translation editors.
 	 *
-	 * @var string
+	 * @var arrays
 	 */
-	public $user_role;
+	public $user_roles;
 
 	/**
-	 * Holds the meta key of the project access list.
+	 * Holds the instance of the Rosetta_Roles class.
 	 *
-	 * @var string
+	 * @var Rosetta_Roles
 	 */
-	public $project_access_meta_key;
+	public $rosetta_roles;
 
 	/**
 	 * Whether the current user can promote users.
@@ -55,11 +55,11 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			'screen'   => isset( $args['screen'] ) ? $args['screen'] : null,
 		) );
 
-		$this->user_role = $args['user_role'];
-		$this->project_access_meta_key = $args['project_access_meta_key'];
-		$this->projects = $args['projects'];
-		$this->project_tree = $args['project_tree'];
-		$this->user_can_promote = current_user_can( 'promote_users' );
+		$this->user_roles       = $args['user_roles'];
+		$this->projects         = $args['projects'];
+		$this->project_tree     = $args['project_tree'];
+		$this->rosetta_roles    = $args['rosetta_roles'];
+		$this->user_can_promote = current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP );
 	}
 
 	/**
@@ -70,12 +70,17 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$per_page = $this->get_items_per_page( 'translation_editors_per_page', 10 );
 		$paged =    $this->get_pagenum();
 
+		$role__in = $this->user_roles;
+		if ( isset( $_REQUEST['role'] ) ) {
+			$role__in = $_REQUEST['role'];
+		}
+
 		$args = array(
-			'number' => $per_page,
-			'offset' => ( $paged - 1 ) * $per_page,
-			'role'   => $this->user_role,
-			'search' => $search,
-			'fields' => 'all_with_meta'
+			'number'   => $per_page,
+			'offset'   => ( $paged - 1 ) * $per_page,
+			'role__in' => $role__in,
+			'search'   => $search,
+			'fields'   => 'all_with_meta'
 		);
 
 		if ( '' !== $args['search'] ) {
@@ -136,13 +141,112 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Provides a list of roles and user count for that role for easy
+	 * filtering of the table.
+	 *
+	 * @return array An array of HTML links, one for each view.
+	 */
+	protected function get_views() {
+		$class = '';
+		$view_links = array();
+
+		$users_of_blog = count_users();
+
+		$count_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] : 0 ;
+		$count_general_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] : 0 ;
+		$total_translation_editors = $count_translation_editors + $count_general_translation_editors;
+
+		$all_inner_html = sprintf(
+			_nx(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				$total_translation_editors,
+				'translation editors'
+			),
+			number_format_i18n( $total_translation_editors )
+		);
+
+		if ( ! isset( $_REQUEST['role'] ) ) {
+			$class = 'current';
+		}
+
+		$view_links['all'] = $this->get_view_link( array(), $all_inner_html, $class );
+
+		if ( $count_translation_editors ) {
+			$class = '';
+			$translation_editors_inner_html = sprintf(
+				_n(
+					'Translation Editor <span class="count">(%s)</span>',
+					'Translation Editor <span class="count">(%s)</span>',
+					$count_translation_editors
+				),
+				number_format_i18n( $count_translation_editors )
+			);
+
+			if ( isset( $_REQUEST['role'] ) && Rosetta_Roles::TRANSLATION_EDITOR_ROLE === $_REQUEST['role'] ) {
+				$class = 'current';
+			}
+
+			$view_links[ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] = $this->get_view_link( array( 'role' => Rosetta_Roles::TRANSLATION_EDITOR_ROLE ), $translation_editors_inner_html, $class );
+		}
+
+		if ( $count_translation_editors ) {
+			$class = '';
+			$general_translation_editors_inner_html = sprintf(
+				_n(
+					'General Translation Editor <span class="count">(%s)</span>',
+					'General Translation Editor <span class="count">(%s)</span>',
+					$count_general_translation_editors
+				),
+				number_format_i18n( $count_general_translation_editors )
+			);
+
+			if ( isset( $_REQUEST['role'] ) && Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE === $_REQUEST['role'] ) {
+				$class = 'current';
+			}
+
+			$view_links[ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] = $this->get_view_link( array( 'role' => Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ), $general_translation_editors_inner_html, $class );
+		}
+
+		return $view_links;
+	}
+
+	/**
+	 * Helper to create view links with params.
+	 *
+	 * @param array  $args  URL parameters for the link.
+	 * @param string $label Link text.
+	 * @param string $class Optional. Class attribute. Default empty string.
+	 * @return string The formatted link string.
+	 */
+	protected function get_view_link( $args, $label, $class = '' ) {
+		$page_url = menu_page_url( 'translation-editors', false );
+		$url = add_query_arg( $args, $page_url );
+
+		$class_html = '';
+		if ( ! empty( $class ) ) {
+			 $class_html = sprintf(
+				' class="%s"',
+				esc_attr( $class )
+			);
+		}
+
+		return sprintf(
+			'<a href="%s"%s>%s</a>',
+			esc_url( $url ),
+			$class_html,
+			$label
+		);
+	}
+
+	/**
 	 * Return a list of bulk actions available on this table.
 	 *
 	 * @return array Array of bulk actions.
 	 */
 	protected function get_bulk_actions() {
 		return array(
-			'remove' => _x( 'Remove', 'translation editor', 'rosetta' ),
+			'remove-translation-editors' => _x( 'Remove', 'translation editor', 'rosetta' ),
 		);
 	}
 
@@ -209,7 +313,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current user.
 	 */
 	public function column_email( $user ) {
-		echo "<a href='mailto:$user->user_email'>$user->user_email</a>";
+		echo "<a href='" . esc_url( "mailto:$user->user_email" ) . "'>$user->user_email</a>";
 	}
 
 	/**
@@ -218,14 +322,14 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current user.
 	 */
 	public function column_projects( $user ) {
-		$project_access_list = get_user_meta( $user->ID, $this->project_access_meta_key, true );
+		$project_access_list = $this->rosetta_roles->get_users_projects( $user->ID );
 
 		if ( empty( $project_access_list ) ) {
 			_e( 'No projects', 'rosetta' );
 			return;
 		}
 
-		if ( in_array( 'all', $project_access_list ) ) {
+		if ( in_array( 'all', $project_access_list, true ) ) {
 			_e( 'All projects', 'rosetta' );
 			return;
 		}

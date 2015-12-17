@@ -88,7 +88,7 @@
 		},
 
 		initialize: function() {
-			this.set( 'checked', _.contains( projects.settings.accessList, parseInt( this.get( 'id' ), 10 ) ) );
+			this.set( 'checked', _.contains( projects.settings.accessList, this.get( 'id' ) ) );
 		}
 	});
 

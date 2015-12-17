@@ -4,8 +4,12 @@
  * Plugin URI: https://wordpress.org/
  * Description: WordPress interface for managing roles.
  * Author: ocean90
- * Version: 1.0
+ * Version: 1.1
  */
+
+if ( ! class_exists( 'GP_Locales' ) ) {
+	require_once GLOTPRESS_LOCALES_PATH;
+}
 
 class Rosetta_Roles {
 	/**
@@ -14,74 +18,76 @@ class Rosetta_Roles {
 	const PROFILES_HANDLER_URL = 'https://profiles.wordpress.org/wp-admin/admin-ajax.php';
 
 	/**
-	 * Holds the role of a translation editor.
-	 *
-	 * @var string
+	 * Database table for translation editors.
 	 */
-	public $translation_editor_role = 'translation_editor';
+	const TRANSLATION_EDITORS_TABLE = 'translate_translation_editors';
 
 	/**
-	 * Holds the meta key of the project access list.
-	 *
-	 * @var string
+	 * Role of a per project translation editor.
 	 */
-	public $project_access_meta_key = 'translation_editor_project_access_list';
+	const TRANSLATION_EDITOR_ROLE = 'translation_editor';
+
+	/**
+	 * Role of a general translation editor.
+	 */
+	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
+
+	/**
+	 * Capabaility to promote translation editor.
+	 */
+	const MANAGE_TRANSLATION_EDITORS_CAP = 'manage_translation_editors';
+
+	/**
+	 * Holds the GlotPress locale of current site.
+	 *
+	 * @var GP_Locale
+	 */
+	private $gp_locale = null;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		global $wpdb;
+
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+
+		$wpdb->wporg_translation_editors = self::TRANSLATION_EDITORS_TABLE;
 	}
 
 	/**
 	 * Attaches hooks once plugins are loaded.
 	 */
 	public function plugins_loaded() {
+		$locale = get_locale();
+		$gp_locale = GP_Locales::by_field( 'wp_locale', $locale );
+		if ( ! $gp_locale ) {
+			return;
+		}
+
+		$this->gp_locale = $gp_locale;
+
 		add_filter( 'editable_roles', array( $this, 'editable_roles' ) );
-		add_filter( 'manage_users_columns',  array( $this, 'add_roles_column' ) );
-		add_filter( 'manage_users_custom_column',  array( $this, 'display_user_roles' ), 10, 3 );
 		add_action( 'admin_init', array( $this, 'role_modifications' ) );
 		add_action( 'set_user_role', array( $this, 'restore_translation_editor_role' ), 10, 3 );
 		add_filter( 'gettext_with_context', array( $this, 'rename_user_roles' ), 10, 4 );
 		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
-		add_filter( 'user_row_actions', array( $this, 'promote_user_to_translation_editor' ), 10, 2 );
 		add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
+
+		add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
+		add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
 	}
 
 	/**
-	 * Adds an action link to promote an user to a translation editor.
-	 *
-	 * @param array   $actions     An array of action links to be displayed.
-	 * @param WP_User $user_object WP_User object for the currently-listed user.
-	 * @return array $actions An array of action links to be displayed.
-	 */
-	public function promote_user_to_translation_editor( $actions, $user ) {
-		if ( in_array( $this->translation_editor_role, $user->roles ) || ! current_user_can( 'promote_users' ) ) {
-			return $actions;
-		}
-
-		$url = menu_page_url( 'translation-editors', false );
-		$url = add_query_arg( array(
-			'action' => 'add-translation-editor',
-			'user'   => $user->ID,
-		), $url );
-		$url = wp_nonce_url( $url, 'add-translation-editor', '_nonce_add-translation-editor' );
-		$actions['translation-editor'] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( $url ),
-			__( 'Promote to Translation Editor', 'rosetta' )
-		);
-
-		return $actions;
-	}
-
-	/**
-	 * Registers "Translation Editor" role and modifies editor role.
+	 * Registers "(General) Translation Editor" role and modifies editor role.
 	 */
 	public function role_modifications() {
-		if ( ! get_role( $this->translation_editor_role ) ) {
-			add_role( $this->translation_editor_role, __( 'Translation Editor', 'rosetta' ), array( 'read' => true, 'level_0' => true ) );
+		if ( ! get_role( self::TRANSLATION_EDITOR_ROLE ) ) {
+			add_role( self::TRANSLATION_EDITOR_ROLE, __( 'Translation Editor', 'rosetta' ), array( 'read' => true, 'level_0' => true ) );
+		}
+
+		if ( ! get_role( self::GENERAL_TRANSLATION_EDITOR_ROLE ) ) {
+			add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE, __( 'General Translation Editor', 'rosetta' ), array( 'read' => true, 'level_0' => true, self::MANAGE_TRANSLATION_EDITORS_CAP => true ) );
 		}
 
 		$editor_role = get_role( 'editor' );
@@ -91,28 +97,25 @@ class Rosetta_Roles {
 			$editor_role->add_cap( 'promote_users' );
 			$editor_role->add_cap( 'remove_users' );
 		}
-
-		// Remove deprecated validator role.
-		$validator_role = get_role( 'validator' );
-		if ( $validator_role ) {
-			remove_role( 'validator' );
-		}
 	}
 
 	/**
-	 * Restores the "Translation Editor" role if an user is promoted.
+	 * Restores the "(General) Translation Editor" role if an user is promoted.
 	 *
 	 * @param int    $user_id   The user ID.
 	 * @param string $role      The new role.
 	 * @param array  $old_roles An array of the user's previous roles.
 	 */
 	public function restore_translation_editor_role( $user_id, $role, $old_roles ) {
-		if ( ! in_array( $this->translation_editor_role, $old_roles ) ) {
-			return;
+		if ( self::GENERAL_TRANSLATION_EDITOR_ROLE !== $role && in_array( self::TRANSLATION_EDITOR_ROLE, $old_roles ) ) {
+			$user = new WP_User( $user_id );
+			$user->add_role( self::TRANSLATION_EDITOR_ROLE );
 		}
 
-		$user = new WP_User( $user_id );
-		$user->add_role( $this->translation_editor_role );
+		if ( self::TRANSLATION_EDITOR_ROLE !== $role && in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $old_roles ) ) {
+			$user = new WP_User( $user_id );
+			$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+		}
 	}
 
 	/**
@@ -125,7 +128,7 @@ class Rosetta_Roles {
 	 * @return array Filtered list of editable roles.
 	 */
 	public function editable_roles( $roles ) {
-		unset( $roles[ $this->translation_editor_role ] );
+		unset( $roles[ self::TRANSLATION_EDITOR_ROLE ], $roles[ self::GENERAL_TRANSLATION_EDITOR_ROLE ] );
 
 		if ( ! is_super_admin() && ! is_main_site() ) {
 			unset( $roles['administrator'] );
@@ -150,63 +153,25 @@ class Rosetta_Roles {
 
 		if ( 'Translation Editor' === $text ) {
 			return __( 'Translation Editor', 'rosetta' );
+		} elseif ( 'General Translation Editor' === $text ) {
+			return __( 'General Translation Editor', 'rosetta' );
 		}
 
 		return $translation;
 	}
 
 	/**
-	 * Replaces the "Role" column with a "Roles" column.
-	 *
-	 * @param array $columns An array of column headers.
-	 * @return array An array of column headers.
-	 */
-	public function add_roles_column( $columns ) {
-		$posts = $columns['posts'];
-		unset( $columns['role'], $columns['posts'] );
-		reset( $columns );
-		$columns['roles'] = __( 'Roles', 'rosetta' );
-		$columns['posts'] = $posts;
-
-		return $columns;
-	}
-
-	/**
-	 * Displays a comma separated list of user's roles.
-	 *
-	 * @param string $output      Custom column output.
-	 * @param string $column_name Column name.
-	 * @param int    $user_id     ID of the currently-listed user.
-	 * @return string Comma separated list of user's roles.
-	 */
-	public function display_user_roles( $output, $column_name, $user_id ) {
-		global $wp_roles;
-
-		if ( 'roles' == $column_name ) {
-			$user_roles = array();
-			$user = new WP_User( $user_id );
-			foreach ( $user->roles as $role ) {
-				$role_name = $wp_roles->role_names[ $role ];
-				$role_name = translate_user_role( $role_name );
-				$user_roles[] = $role_name;
-			}
-
-			return implode( ', ', $user_roles );
-		}
-
-		return $output;
-	}
-
-	/**
 	 * Registers page for managing translation editors.
 	 */
 	public function register_translation_editors_page() {
-		$this->translation_editors_page = add_users_page(
+		$this->translation_editors_page = add_menu_page(
 			__( 'Translation Editors', 'rosetta' ),
 			__( 'Translation Editors', 'rosetta' ),
-			'list_users',
+			self::MANAGE_TRANSLATION_EDITORS_CAP,
 			'translation-editors',
-			array( $this, 'render_translation_editors_page' )
+			array( $this, 'render_translation_editors_page' ),
+			'dashicons-translation',
+			71 // After Users
 		);
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
@@ -220,7 +185,7 @@ class Rosetta_Roles {
 	 * Enqueues scripts.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '3', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '4', true );
 	}
 
 	/**
@@ -328,7 +293,7 @@ class Rosetta_Roles {
 				case 'add-translation-editor':
 					check_admin_referer( 'add-translation-editor', '_nonce_add-translation-editor' );
 
-					if ( ! current_user_can( 'promote_users' ) ) {
+					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
 						wp_redirect( $redirect );
 						exit;
 					}
@@ -359,32 +324,28 @@ class Rosetta_Roles {
 						$user_details = get_user_by( 'id', $user_details->ID );
 					}
 
-					if ( in_array( $this->translation_editor_role, $user_details->roles ) ) {
+					if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
 						wp_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
 						exit;
 					}
 
-					$user_details->add_role( $this->translation_editor_role );
-					$this->notify_translation_editor_update( $user_details->ID, 'add' );
-
-					$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
-
 					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
 					if ( 'custom' === $projects ) {
-						update_user_meta( $user_details->ID, $meta_key, array() );
+						$this->update_translation_editor( $user_details );
+
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
 						wp_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
+					} else {
+						$this->update_translation_editor( $user_details, array( 'all' ) );
+
+						wp_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
+						exit;
 					}
-
-					update_user_meta( $user_details->ID, $meta_key, array( 'all' ) );
-
-					wp_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
-					exit;
 				case 'remove-translation-editors':
 					check_admin_referer( 'bulk-translation-editors' );
 
-					if ( ! current_user_can( 'promote_users' ) ) {
+					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
 						wp_redirect( $redirect );
 						exit;
 					}
@@ -395,13 +356,9 @@ class Rosetta_Roles {
 					}
 
 					$count = 0;
-					$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
 					$user_ids = array_map( 'intval', (array) $_REQUEST['translation-editors'] );
 					foreach ( $user_ids as $user_id ) {
-						$user = get_user_by( 'id', $user_id );
-						$user->remove_role( $this->translation_editor_role );
-						delete_user_meta( $user_id, $meta_key );
-						$this->notify_translation_editor_update( $user_id, 'remove' );
+						$this->remove_translation_editor( $user_id );
 						$count++;
 					}
 
@@ -410,7 +367,7 @@ class Rosetta_Roles {
 				case 'remove-translation-editor':
 					check_admin_referer( 'remove-translation-editor' );
 
-					if ( ! current_user_can( 'promote_users' ) ) {
+					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
 						wp_redirect( $redirect );
 						exit;
 					}
@@ -421,11 +378,7 @@ class Rosetta_Roles {
 					}
 
 					$user_id = (int) $_REQUEST['translation-editor'];
-					$user = get_user_by( 'id', $user_id );
-					$user->remove_role( $this->translation_editor_role );
-					$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
-					delete_user_meta( $user_id, $meta_key );
-					$this->notify_translation_editor_update( $user_id, 'remove' );
+					$this->remove_translation_editor( $user_id );
 
 					wp_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
 					exit;
@@ -443,7 +396,7 @@ class Rosetta_Roles {
 
 		$redirect = menu_page_url( 'translation-editors', false );
 
-		if ( ! current_user_can( 'promote_users' ) ) {
+		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
 			wp_redirect( $redirect );
 			exit;
 		}
@@ -460,7 +413,7 @@ class Rosetta_Roles {
 			exit;
 		}
 
-		if ( ! user_can( $user_details, $this->translation_editor_role ) ) {
+		if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) && ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
 			wp_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
 			exit;
 		}
@@ -477,19 +430,178 @@ class Rosetta_Roles {
 				$all_projects = array_map( 'intval', $all_projects );
 
 				$projects = (array) $_REQUEST['projects'];
-				if ( in_array( 'all', $projects ) ) {
-					$projects = array( 'all' );
+				if ( in_array( 'all', $projects, true ) ) {
+					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
 					$projects = array_map( 'intval', $projects );
 					$projects = array_values( array_intersect( $all_projects, $projects ) );
+					$this->update_translation_editor( $user_details, $projects );
 				}
-
-				$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
-				update_user_meta( $user_details->ID, $meta_key, $projects );
 
 				wp_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
 				exit;
 		}
+	}
+
+	/**
+	 * Removes a translation editor.
+	 *
+	 * @param int|WP_User $user User ID or object.
+	 * @return bool True on success, false on failure.
+	 */
+	private function remove_translation_editor( $user ) {
+		global $wpdb;
+
+		if ( ! $user instanceof WP_User ) {
+			$user = get_user_by( 'id', $user );
+		}
+
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+			$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+		}
+
+		if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+		}
+
+		$wpdb->query( $wpdb->prepare( "
+			DELETE FROM {$wpdb->wporg_translation_editors}
+			WHERE `user_id` = %d AND `locale` = %s
+		", $user->ID, $this->gp_locale->slug ) );
+
+		do_action( 'translation_editor_removed', $user->ID );
+
+		return true;
+	}
+
+	/**
+	 * Creates or updates a translation editor.
+	 *
+	 * @param int|WP_User $user     User ID or object.
+	 * @param array       $projects The projects to which the user should get assigned.
+	 *                              Pass `array( 'all' )` to make their a general translation
+	 *                              editor.
+	 * @return bool True on success, false on failure.
+	 */
+	private function update_translation_editor( $user, $projects = array() ) {
+		global $wpdb;
+
+		if ( ! $user instanceof WP_User ) {
+			$user = get_user_by( 'id', $user );
+		}
+
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$update = in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles );
+
+		$projects = array_map( 'strval', $projects );
+		$current_projects = $this->get_users_projects( $user->ID );
+		$projects_to_add = $projects_to_remove = array();
+
+		if ( in_array( 'all', $projects, true ) ) {
+			$projects_to_remove = array_diff( $current_projects, array( '0' ) );
+			if ( ! in_array( '0', $current_projects, true ) ) {
+				$projects_to_add[] = '0';
+			}
+
+			if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+				$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+			}
+
+			if ( ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+				$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+			}
+		} else {
+			$projects_to_remove = array_diff( $current_projects, $projects );
+			$projects_to_add = array_diff( $projects, $current_projects );
+
+			if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+				$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+			}
+
+			if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+				$user->add_role( self::TRANSLATION_EDITOR_ROLE );
+			}
+		}
+
+		$values_to_add = array();
+		foreach ( $projects_to_add as $project_id ) {
+			$values_to_add[] = $wpdb->prepare( '(%d, %d, %s, %s)',
+				$user->ID,
+				$project_id,
+				$this->gp_locale->slug,
+				'default'
+			);
+		}
+
+		if ( $values_to_add ) {
+			$wpdb->query( "
+				INSERT INTO {$wpdb->wporg_translation_editors}
+				(`user_id`,`project_id`, `locale`, `locale_slug`)
+				VALUES " . implode( ', ', $values_to_add ) . "
+			" );
+		}
+
+		$values_to_remove = array_map( 'intval', $projects_to_remove );
+		if ( $values_to_remove ) {
+			$wpdb->query( $wpdb->prepare( "
+				DELETE FROM {$wpdb->wporg_translation_editors}
+				WHERE `user_id` = %d AND `locale` = %s
+				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
+			", $user->ID, $this->gp_locale->slug ) );
+		}
+
+		if ( $update ) {
+			do_action( 'translation_editor_updated', $user->ID );
+		} else {
+			do_action( 'translation_editor_added', $user->ID );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handles the update of the translation editor badges on
+	 * profiles.wordpress.org.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	public function update_wporg_profile_badge( $user_id ) {
+		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
+
+		$this->notify_profiles_wporg_translation_editor_update( $user_id, $action );
+	}
+
+	/**
+	 * Retrieves the assigned projects of a user
+	 *
+	 * @param int $user_id User ID.
+	 * @return array List of project IDs.
+	 */
+	public function get_users_projects( $user_id ) {
+		global $wpdb;
+
+		$projects = $wpdb->get_col( $wpdb->prepare( "
+			SELECT project_id FROM
+			{$wpdb->wporg_translation_editors}
+			WHERE user_id = %d AND locale = %s
+		", $user_id, $this->gp_locale->slug ) );
+
+		if ( ! $projects ) {
+			return array();
+		}
+
+		if ( in_array( '0', $projects, true ) ) {
+			return array( 'all' );
+		}
+
+		return $projects;
 	}
 
 	/**
@@ -523,11 +635,7 @@ class Rosetta_Roles {
 		}
 		$project_tree = array_values( $project_tree );
 
-		$meta_key = $wpdb->get_blog_prefix() . $this->project_access_meta_key;
-		$project_access_list = get_user_meta( $user_id, $meta_key, true );
-		if ( ! $project_access_list ) {
-			$project_access_list = array();
-		}
+		$project_access_list = $this->get_users_projects( $user_id );
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
@@ -607,10 +715,10 @@ class Rosetta_Roles {
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		$args = array(
-			'user_role'               => $this->translation_editor_role,
-			'projects'                => $projects,
-			'project_tree'            => $project_tree,
-			'project_access_meta_key' => $wpdb->get_blog_prefix() . $this->project_access_meta_key,
+			'user_roles'    => array( self::TRANSLATION_EDITOR_ROLE, self::GENERAL_TRANSLATION_EDITOR_ROLE ),
+			'projects'      => $projects,
+			'project_tree'  => $project_tree,
+			'rosetta_roles' => $this,
 		);
 		$list_table = new Rosetta_Translation_Editors_List_Table( $args );
 
@@ -623,7 +731,7 @@ class Rosetta_Roles {
 	 * @param  int    $user_id User ID.
 	 * @param  string $action  Can be 'add' or 'remove'.
 	 */
-	private function notify_translation_editor_update( $user_id, $action ) {
+	private function notify_profiles_wporg_translation_editor_update( $user_id, $action ) {
 		$args = array(
 			'body' => array(
 				'action'      => 'wporg_handle_association',
