@@ -165,8 +165,10 @@ add_action( 'browsehappy_like_button', 'browsehappy_like_button' );
 
 function browsehappy_like_button( $browser ) {
 	$facebook_page = browsehappy_get_browser_data( $browser )->facebook;
-	if ( false === $facebook_page )
+	if ( false === $facebook_page ) {
+		echo '<p class="likebutton"></p>';
 		return;
+	}
 
 ?>
 <p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2F<?php echo $facebook_page; ?>&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
