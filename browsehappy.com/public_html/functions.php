@@ -105,10 +105,13 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 		$data = trim( $data, '| ' );
 		if ( false !== strpos( $data, 'Android' ) || false !== strpos( $data, 'iOS' ) )
 			continue;
+		if ( false !== strpos( $data, 'Linux' ) && false === strpos( $data, 'Mac OS X' ) && false === strpos( $data, 'Windows' ) )
+			continue;
 		if ( ( false !== $pos = strpos( $data, 'latest_release_version' ) ) || ( false !== $pos = strpos( $data, 'latest release version' ) ) ) {
 			if ( $pos )
 				$data = substr( $data, $pos );
 			$version = trim( str_replace( array( 'latest_release_version', 'latest release version', '=' ), '', $data ), '| ' ) . " ";
+			$version = str_replace( "'''Mac OS X''' and '''Microsoft Windows'''<br />", '', $version );
 			$version = substr( $version, 0, strpos( $version, ' ' ) );
 			break;
 		}
