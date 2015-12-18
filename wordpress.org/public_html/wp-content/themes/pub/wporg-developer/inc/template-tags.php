@@ -1211,6 +1211,17 @@ namespace DevHub {
 		foreach ( $parts as $part ) {
 			$part = preg_replace( '/\s+/', ' ', $part );
 			list( $wordtype, $type, $name, $description ) = explode( ' ', $part, 4 );
+			$description = trim( $description );
+
+			$skip_closing_li = false;
+
+			// Handle nested hashes.
+			if ( '{' === $description[0] ) {
+				$description = substr( $description, 1 ) . '<ul class="param-hash">';
+				$skip_closing_li = true;
+			} elseif ( '}' === substr( $description, -1 ) ) {
+				$description = substr( $description, 0, -1 ) . "</li></ul>\n";
+			}
 
 			if ( '@type' != $wordtype ) {
 				if ( $in_list ) {
@@ -1227,7 +1238,11 @@ namespace DevHub {
 					$in_list = true;
 				}
 
-				$new_text .= "<b>'" . substr( $name, 1 ) . "'</b><br /><i><span class='type'>({$type})</span></i> {$description}</li>\n";
+				$new_text .= "<b>'" . substr( $name, 1 ) . "'</b><br /><i><span class='type'>({$type})</span></i> {$description}";
+				if ( ! $skip_closing_li ) {
+					$new_text .= '</li>';
+				}
+				$new_text .= "\n";
 			}
 		}
 
