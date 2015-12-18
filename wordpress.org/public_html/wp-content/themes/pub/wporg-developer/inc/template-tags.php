@@ -632,8 +632,7 @@ namespace DevHub {
 					} else {
 						$params[ $tag['variable'] ]['required'] = 'Required';
 					}
-					$params[ $tag['variable'] ]['content'] = htmlentities( $params[ $tag['variable'] ]['content'] );
-					$params[ $tag['variable'] ]['content'] = \DevHub_Formatting::make_doclink_clickable( $params[ $tag['variable'] ]['content'] );
+					$params[ $tag['variable'] ]['content'] = \DevHub_Formatting::format_param_description( $params[ $tag['variable'] ]['content'] );
 				}
 			}
 		}

@@ -194,6 +194,30 @@ class DevHub_Formatting {
 		return $content;
 	}
 
+	/**
+	 * Handles formatting of the parameter description.
+	 *
+	 * @param  string $text The parameter description.
+	 * @return string
+	 */
+	public static function format_param_description( $text ) {
+		// Encode all htmlentities.
+		$text = htmlentities( $text );
+
+		// Simple allowable tags that should get unencoded.
+		// Note: This precludes them from being able to be used in an encoded fashion
+		// within a parameter description.
+		$allowable_tags = array( 'code' );
+		foreach ( $allowable_tags as $tag ) {
+			$text = str_replace( array( "&lt;{$tag}&gt;", "&lt;/{$tag}&gt;" ), array( "<{$tag}>", "</{$tag}>" ), $text );
+		}
+
+		// Convert any @link or @see to actual link.
+		$text = self::make_doclink_clickable( $text );
+
+		return $text;
+	}
+
 } // DevHub_Formatting
 
 DevHub_Formatting::init();
