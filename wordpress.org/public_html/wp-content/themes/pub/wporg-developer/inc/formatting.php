@@ -95,6 +95,12 @@ class DevHub_Formatting {
 
 				$link = $matches[1];
 
+				// We may have encoded a link, so unencode if so.
+				// (This would never occur natually.)
+				if ( 0 === strpos( $link, '&lt;a ' ) ) {
+					$link = html_entity_decode( $link );
+				}
+
 				// Undo links made clickable during initial parsing
 				if ( 0 === strpos( $link, '<a ' ) ) {
 
