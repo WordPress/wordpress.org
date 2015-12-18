@@ -100,6 +100,8 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 	$version = false;
 	foreach( $raw_data as $data ) {
 		$data = trim( $data, '| ' );
+		if ( false !== strpos( $data, 'Android' ) || false !== strpos( $data, 'iOS' ) )
+			continue;
 		if ( ( false !== $pos = strpos( $data, 'latest_release_version' ) ) || ( false !== $pos = strpos( $data, 'latest release version' ) ) ) {
 			if ( $pos )
 				$data = substr( $data, $pos );
