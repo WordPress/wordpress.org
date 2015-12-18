@@ -1,5 +1,8 @@
 <?php
 
+// Locale detection.
+require dirname( __FILE__ ) . '/inc/locale.php';
+
 function browsehappy_get_browser_data( $browser = false ) {
 
 	$data = array(
