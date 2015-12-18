@@ -248,4 +248,3 @@ function browsehappy_locale_notice() {
 	</div>
 	<?php
 }
-

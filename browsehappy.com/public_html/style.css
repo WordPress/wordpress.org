@@ -1,10 +1,10 @@
-/*
- * Theme Name: Browse Happy
- * Theme URI: http://browsehappy.com/
+/**
+ * Theme Name:  Browse Happy
+ * Theme URI:   http://browsehappy.com/
  * Description: The 2011 design for Browse Happy, proudly powered by WordPress.
- * Author: WordPress
- * Author URI: http://wordpress.org/
- * License: GPLv2 or later
+ * Author:      WordPress
+ * Author URI:  https://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 /* Reset */
@@ -70,7 +70,6 @@ body {
 	*font-size: small;
 	background: #2b4141;
 	color: #3F4B4B;
-	min-width: 960px;
 }
 
 #body-wrap {
@@ -79,7 +78,6 @@ body {
 
 header, #main, footer {
 	width: 100%;
-	min-width: 960px;
 }
 
 .wrap:before, .wrap:after {
@@ -95,7 +93,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	width: 960px;
+	max-width: 960px;
 	margin: 0 auto;
 }
 
@@ -119,7 +117,6 @@ a:hover, a:active {
 }
 
 #i18n-alert p {
-	width: 960px;
 	margin: 0 auto;
 	display: block;
 	color: #efefef;
@@ -152,7 +149,7 @@ header h1 {
 }
 
 .wf-leaguegothic1leaguegothic2-n4-active header h1 {
-	font-size: 1491%;
+	font-size: 1400%;
 	font-family: "league-gothic-1","league-gothic-2";
 }
 
@@ -277,7 +274,7 @@ header h2 em {
 #browserlist li .icon {
 	width: 125px;
 	height: 135px;
-	margin: 0 auto 20px;
+	margin: 20px auto;
 	background: url(imgs/browsehappy-sprite.png) no-repeat;
 }
 
@@ -356,7 +353,7 @@ header h2 em {
 
 #browserlist li a:link, #browserlist li a:visited {
 	color: #324B4B;
-	padding: 30px 10px 10px;
+	padding: 10px;
 	display: block;
 	overflow: hidden;
 	-webkit-border-radius: 3px;
@@ -433,7 +430,8 @@ header h2 em {
 
 #browserlist p.likebutton {
 	text-align: center;
-	margin: 15px 5px 0
+	margin: 15px 5px 0;
+	min-height: 25px;
 }
 
 /* Footer */
@@ -465,36 +463,23 @@ footer h2 {
 }
 
 #about {
-	width: 600px;
+	width: 60%;
 	float: left;
 	margin-left: 15px;
 }
 
 #share {
-	width: 300px;
+	width: 30%;
 	float: right;
 	margin-right: 15px;
 	position: relative;
-}
-
-#share h2 {
-	margin-right: 84px;
-}
-
-#share nav {
-	width: 84px;
-	height: 32px;
-	overflow: hidden;
-	position: absolute;
-	top: 3px;
-	right: 0;
 }
 
 #share nav li {
 	width: 32px;
 	height: 32px;
 	float: left;
-	margin-left: 9px;
+	margin-right: 9px;
 }
 
 #share nav li a {
@@ -527,16 +512,15 @@ footer h2 {
 }
 
 #byline {
-	position: absolute;
-	bottom: 0;
-	right: 15px;
-	width: 300px;
-	height: 20px;
+	clear: both;
+	margin: 0 auto;
+	padding-top: 10px;
 }
 
 #byline a {
 	width: 300px;
 	height: 20px;
+	margin: 0 auto;
 	display: block;
 	background: url(imgs/browsehappy-sprite.png) no-repeat 0 -135px;
 	text-indent: -9999px;
@@ -553,4 +537,23 @@ footer h2 {
 	-moz-opacity: 1;
 	-khtml-opacity: 1;
 	opacity: 1;
+}
+
+@media (max-width: 430px) {
+	header {
+		padding-top: 35px;
+	}
+	header h1 {
+		font-size: 800%;
+	}
+	.wf-leaguegothic1leaguegothic2-n4-active header h1 {
+		font-size: 1000%;
+	}
+}
+@media (max-width: 383px) {
+	#browserlist li {
+		display: block;
+		float: none;
+		margin: 0 auto;
+	}
 }

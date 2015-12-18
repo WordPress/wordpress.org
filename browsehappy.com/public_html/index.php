@@ -11,6 +11,7 @@
 	<title><?php _e( 'Browse Happy', 'browsehappy' ); ?></title>
 	<meta name="description" content="<?php esc_attr_e( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ); ?>" />
 	<meta name="author" content="WordPress" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 	<link rel="shortcut icon" href="<?php echo esc_url( home_url( 'favicon.ico' ) ); ?>" />
 	<link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-57x57.png" />
@@ -18,7 +19,7 @@
 	<link rel="apple-touch-icon" sizes="114x114" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-114x114.png" />
 
 	<!--[if (gt IE 6)|!(IE)]><!-->
-		<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?3" />
+		<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?4" />
 		<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
 		<script src="http://use.typekit.com/lsw6yis.js"></script>
 		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
