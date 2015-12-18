@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Browse Happy \n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/.\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/.\n"
 "POT-Creation-Date: 2015-12-18 22:40:20+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -153,5 +153,5 @@ msgid "WordPress"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "http://wordpress.org/"
+msgid "https://wordpress.org/"
 msgstr ""
