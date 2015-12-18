@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Browse Happy \n"
-"Report-Msgid-Bugs-To: http://wordpress.org/support/theme/.\n"
-"POT-Creation-Date: 2015-03-02 17:50:12+00:00\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/.\n"
+"POT-Creation-Date: 2015-12-18 22:40:20+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -40,39 +40,39 @@ msgid ""
 "confidence. Free from&nbsp;Microsoft.&#8221;"
 msgstr ""
 
-#: functions.php:209 functions.php:216
+#: functions.php:211 functions.php:218
 msgid "It looks like you&#8217;re using an insecure version of %s."
 msgstr ""
 
-#: functions.php:210 functions.php:217
+#: functions.php:212 functions.php:219
 msgid "Using an outdated browser makes your computer unsafe."
 msgstr ""
 
-#: functions.php:212
+#: functions.php:214
 msgid "It looks like you&#8217;re using an old version of Internet Explorer."
 msgstr ""
 
-#: functions.php:214
+#: functions.php:216
 msgid ""
 "On Windows XP, you are unable to update to the latest version. For the best "
 "experience on the web, we suggest you try a new browser."
 msgstr ""
 
-#: functions.php:218 functions.php:222
+#: functions.php:220 functions.php:224
 msgid "For the best experience on the web, please update your browser."
 msgstr ""
 
-#: functions.php:219 functions.php:223
+#: functions.php:221 functions.php:225
 msgid "Upgrade now!"
 msgstr ""
 
-#: functions.php:221
+#: functions.php:223
 msgid ""
 "Your browser is out of date! It looks like you&#8217;re using an old version "
 "of %s."
 msgstr ""
 
-#: functions.php:237
+#: functions.php:239
 msgid ""
 "Browse Happy is also available in English. <a href=\"%s\">Click here to "
 "change the language to English</a>."
