@@ -62,22 +62,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					
 					// And actually redirect to the SSO login
 					$this->_safe_redirect( $redirect_to_sso_login );
+				
 				} else {
 					// Otherwise, filter the login_url to point to the SSO
 					add_action( 'login_url', array( &$this, 'login_url' ), 10, 2 );
 				}
+			
 			} else if ( self::SSO_HOST === $this->host ) {
 				// If on the SSO host
 				if ( ! preg_match( '/\/wp-login\.php$/', $this->script ) ) {
-					// ... but not on its login or signup screen.
-					// TODO: Relax rules when we want more  out of our theme then bypassing it altogether with redirects.
-					if ( is_user_logged_in() ) {
-						// Mimic what happens after a login without a specified redirect.
+					// ... but not on its login screen.
+					if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+						// Let the theme render for oauth paths (/oauth, /oauth/, /oauth/*, but not /notoauth or /oauthnot)
+						return;
+					} else  if ( is_user_logged_in() ) {
+						// Or mimic what happens after a login without a specified redirect (send to profile).
 						$this->_safe_redirect( 'https://wordpress.org/support/profile/' . get_currentuserinfo()->user_login );
 					} else {
 						// Otherwise, redirect to the login screen.
 						$this->_safe_redirect( $this->sso_login_url );
 					}
+				
 				} else {
 					// if on login screen, filter network_site_url to make sure our forms go to the SSO host, not wordpress.org
 					add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
