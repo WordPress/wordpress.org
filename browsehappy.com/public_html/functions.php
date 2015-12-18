@@ -31,7 +31,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => false,
 			'url' => 'http://www.apple.com/safari/',
-			'info' => __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ),
+			'info' => str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) ),
 		),
 		'opera' => (object) array(
 			'name' => 'Opera',
