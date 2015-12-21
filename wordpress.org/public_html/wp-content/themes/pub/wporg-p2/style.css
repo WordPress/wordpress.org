@@ -363,10 +363,36 @@ li.type-handbook h4 {
 		margin: 1em 0 0;
 	}
 }
+
+.skip-link {
+	background-color: #f1f1f1;
+	box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.2);
+	color: #21759b;
+	display: block;
+	font-size: 14px;
+	font-weight: 700;
+	left: -9999em;
+	outline: none;
+	padding: 15px 23px 14px;
+	text-decoration: none;
+	text-transform: none;
+	top: -9999em;
+}
+
+.skip-link:focus {
+	clip: auto;
+	height: auto;
+	left: 6px;
+	top: 7px;
+	width: auto;
+	z-index: 100000;
+}
+
 /* Header design */
 #headline {
 	height: auto;
 	overflow: hidden;
+	position: relative;
 }
 #headline h2 {
 	margin-bottom: 16px;
