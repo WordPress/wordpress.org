@@ -45,7 +45,7 @@ class WPorg_Handbook_Glossary {
 			'show_ui' => true,
 			'hierarchical' => false,
 			# 'has_archive' => true,
-			# 'rewrite' => array( 'slug' => 'handbook/glossary' ),
+			'rewrite' => array( 'slug' => 'handbook/glossary' ),
 			'supports' => array( 'title', 'editor', 'revisions' ),
 			'capability_type' => self::capability_type,
 			'map_meta_cap' => true,
