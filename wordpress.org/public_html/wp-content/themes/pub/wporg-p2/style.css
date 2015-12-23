@@ -505,10 +505,6 @@ html h4 {
 	border: 0;
 }
 
-#searchsubmit {
-	padding: 0 !important;
-}
-
 /* To align subnav (including hover) with the rest of the header */
 ul#menu-wp-org-headline-nav.menu {
 	margin-left: 20px;
