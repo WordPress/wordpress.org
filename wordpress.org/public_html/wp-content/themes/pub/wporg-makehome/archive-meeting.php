@@ -1,14 +1,14 @@
 <?php get_header(); ?>
 
 <div class="wrapper">
-	<h2 class="title"><?php _e('Upcoming WordPress Meetings','wporg'); ?></h2>
+	<h2 class="title"><?php _e( 'Upcoming WordPress Meetings', 'make-wporg' ); ?></h2>
 <table class="schedule">
 	<thead>
 		<tr>
-		<th><?php _e('Team','wporg'); ?></th>
-		<th><?php _e('Name','wporg'); ?></th>
-		<th><?php _e('Next Meeting','wporg'); ?></th>
-		<th><?php _e('Location','wporg'); ?></th>
+		<th><?php _e( 'Team', 'make-wporg' ); ?></th>
+		<th><?php _e( 'Name', 'make-wporg' ); ?></th>
+		<th><?php _e( 'Next Meeting', 'make-wporg' ); ?></th>
+		<th><?php _e( 'Location', 'make-wporg' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -34,7 +34,20 @@
 // convert the displayed date time to a local one to the viewing browser, if possible
 function wporg_makehome_time_converter_script() {
     $timestrings = array(
-        'months' => array(__('January'), __('February'), __('March'),__('April'),__('May'),__('June'),__('July'),__('August'),__('September'),__('October'),__('November'),     __('December')),
+        'months' => array(
+			__( 'January',   'make-wporg' ),
+			__( 'February',  'make-wporg' ),
+			__( 'March',     'make-wporg' ),
+			__( 'April',     'make-wporg' ),
+			__( 'May',       'make-wporg' ),
+			__( 'June',      'make-wporg' ),
+			__( 'July',      'make-wporg' ),
+			__( 'August',    'make-wporg' ),
+			__( 'September', 'make-wporg' ),
+			__( 'October',   'make-wporg' ),
+			__( 'November',  'make-wporg' ),
+			__( 'December',  'make-wporg' )
+		),
     );
 ?>
     <script type="text/javascript">

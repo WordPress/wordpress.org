@@ -29,7 +29,7 @@
 				<div class="team-description">
 					<?php the_content(); ?>
 					<?php if ( $url ) : ?>
-						<p><a href="<?php echo esc_url( $url ); ?>">Learn more about <?php the_title(); ?> &raquo;</a></p>
+						<p><a href="<?php echo esc_url( $url ); ?>"><?php printf( __( 'Learn more about %s &raquo;', 'make-wporg' ), get_the_title() ); ?></a></p>
 					<?php endif; ?>
 				</div>
 				
