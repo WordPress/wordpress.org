@@ -1215,8 +1215,8 @@ namespace DevHub {
 			$skip_closing_li = false;
 
 			// Handle nested hashes.
-			if ( '{' === $description[0] ) {
-				$description = substr( $description, 1 ) . '<ul class="param-hash">';
+			if ( '{' === $description[0] || '{' === $name ) {
+				$description = ltrim( $description, '{' ) . '<ul class="param-hash">';
 				$skip_closing_li = true;
 			} elseif ( '}' === substr( $description, -1 ) ) {
 				$description = substr( $description, 0, -1 ) . "</li></ul>\n";
@@ -1237,7 +1237,18 @@ namespace DevHub {
 					$in_list = true;
 				}
 
-				$new_text .= "<b>'" . substr( $name, 1 ) . "'</b><br /><i><span class='type'>({$type})</span></i> {$description}";
+				// Normalize argument name.
+				if ( $name === '{' ) {
+					// No name is specified, generally indicating an array of arrays.
+					$name = '';
+				} else {
+					// The name is defined as a variable, so remove the leading '$'.
+					$name = ltrim( $name, '$' );
+				}
+				if ( $name ) {
+					$new_text .= "<b>'{$name}'</b><br />";
+				}
+				$new_text .= "<i><span class='type'>({$type})</span></i> {$description}";
 				if ( ! $skip_closing_li ) {
 					$new_text .= '</li>';
 				}
