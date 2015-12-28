@@ -60,7 +60,7 @@
 				$classes .= $locale_data[ $locale->wp_locale ]['release_status'] . ' ' . $locale_data[ $locale->wp_locale ]['translation_status'];
 				?>
 				<tr class="<?php echo trim( $classes ); ?>">
-					<td class="no-right-border">
+					<td data-column-title="<?php esc_attr_e( 'Locale', 'wporg' ); ?>" class="no-right-border">
 						<?php if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) : ?>
 							<a href="<?php echo esc_url( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ); ?>">
 								<?php echo esc_html( $locale->english_name ); ?>
@@ -71,9 +71,9 @@
 					</td>
 					<td class="no-left-border"><?php echo esc_html( $locale->native_name ); ?></td>
 
-					<td><?php echo esc_html( $locale->wp_locale ); ?></td>
+					<td data-column-title="<?php esc_attr_e( 'WP Locale', 'wporg' ); ?>"><?php echo esc_html( $locale->wp_locale ); ?></td>
 
-					<td>
+					<td data-column-title="<?php esc_attr_e( 'Version', 'wporg' ); ?>">
 						<?php
 							if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) {
 								if ( $locale_data[ $locale->wp_locale ]['latest_release'] ) {
@@ -86,7 +86,7 @@
 							}
 						?>
 					</td>
-					<td class="right no-right-border">
+					<td data-column-title="<?php esc_attr_e( 'GlotPress', 'wporg' ); ?>" class="right no-right-border">
 						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
 							<?php echo ( isset( $percentages[ $locale->wp_locale ] ) ) ? $percentages[ $locale->wp_locale ] . '%' : '&mdash;'; ?>
 						</a>
