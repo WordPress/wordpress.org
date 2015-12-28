@@ -191,7 +191,7 @@
 		},
 
 		prepare: function() {
-			return _.pick( this.model.toJSON(), 'id', 'name', 'checked', 'checkedSubProjects' );
+			return _.pick( this.model.toJSON(), 'id', 'name', 'slug', 'checked', 'checkedSubProjects' );
 		},
 
 		updateChecked: function() {

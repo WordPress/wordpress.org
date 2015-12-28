@@ -22,7 +22,7 @@
 	border-bottom: 0;
 }
 
-#projects-list label {
+#projects-list > li label {
 	margin: 0 !important;
 }
 
@@ -55,6 +55,18 @@
 	display: block;
 }
 
+#projects-list .sub-projects-wrapper label {
+	display: block;
+	margin-left: 24px !important;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+.sub-projects-wrapper label > input {
+	margin-right: 4px;
+	margin-left: -24px;
+}
+
 .sub-projects-search {
 	width: 100%;
 	margin-bottom: 10px;
@@ -62,6 +74,16 @@
 
 .sub-projects-list {
 	margin: 0 0 0 2px;
+}
+
+.project-checkbox .project-slug {
+	display: none;
+	color: #666;
+	font-size: 13px;
+}
+
+.sub-projects-wrapper .project-checkbox .project-slug {
+	display: inline;
 }
 
 @media screen and (max-width: 782px) {

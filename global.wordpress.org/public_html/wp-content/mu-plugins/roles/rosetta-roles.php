@@ -193,7 +193,7 @@ class Rosetta_Roles {
 	 */
 	public function enqueue_styles() {
 		$suffix = is_rtl() ? '-rtl' : '';
-		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '2' );
+		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '3' );
 	}
 
 	/**
@@ -213,10 +213,12 @@ class Rosetta_Roles {
 					#>
 					/>
 					{{data.name}}
+					<span class="project-slug">({{data.slug}})</span>
 				</label>
 			<# } else { #>
 				<label>
 					<input type="radio" class="input-radio" checked="checked" /> {{data.name}}
+					<span class="project-slug">({{data.slug}})</span>
 				</label>
 			<# } #>
 		</script>
@@ -771,6 +773,7 @@ class Rosetta_Roles {
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
+			$project->name = html_entity_decode( $project->name, ENT_QUOTES, 'UTF-8' );
 			$projects[ $project->id ] = $project;
 		}
 
