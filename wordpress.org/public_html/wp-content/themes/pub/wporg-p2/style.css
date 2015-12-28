@@ -823,7 +823,8 @@ video {
 		position: static;
 	}
 
-	.postcontent {
+	.postcontent,
+	.page .postcontent {
 		padding: 0 10px;
 	}
 }
