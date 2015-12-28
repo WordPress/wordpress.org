@@ -9,7 +9,7 @@ add_action( 'wp_enqueue_scripts', 'wporg_p2_enqueue_scripts', 11 );
 function wporg_p2_enqueue_scripts() {
 	wp_deregister_style( 'p2' );
 	wp_register_style( 'p2', get_template_directory_uri() . '/style.css' );
-	wp_enqueue_style( 'wporg-p2', get_stylesheet_uri(), array( 'p2' ), '20151221' );
+	wp_enqueue_style( 'wporg-p2', get_stylesheet_uri(), array( 'p2' ), '20151228' );
 }
 
 add_filter( 'get_comment_author_url', 'wporg_p2_comment_profile_urls', 10, 3 );
@@ -54,13 +54,13 @@ function wporg_p2_get_cats_with_count( $post, $format = 'list', $before = '', $s
 	return apply_filters( 'cats_with_count', $before . join( $sep, $cat_links ) . $after, $post );
 }
 
-// Add each site's slug to the body class, so that CSS rules can target specific sites. 
-add_filter( 'body_class', 'wporg_add_site_slug_to_body_class' ); 
-function wporg_add_site_slug_to_body_class( $classes ) { 
+// Add each site's slug to the body class, so that CSS rules can target specific sites.
+add_filter( 'body_class', 'wporg_add_site_slug_to_body_class' );
+function wporg_add_site_slug_to_body_class( $classes ) {
 	global $current_blog;
 	$classes[] = 'wporg-make';
-	$classes[] = 'make-' . trim( $current_blog->path, '/' ); 
-	return $classes; 
+	$classes[] = 'make-' . trim( $current_blog->path, '/' );
+	return $classes;
 }
 
 function wporg_p2_iphone_style_override() {
