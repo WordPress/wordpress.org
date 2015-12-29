@@ -39,3 +39,13 @@ function wporg_login_init() {
 	show_admin_bar( false );
 }
 add_action( 'init', 'wporg_login_init' );
+
+
+/**
+ * Replace cores login CSS with our own.
+ */
+function wporg_login_replace_css() {
+	wp_deregister_style( 'login' );
+	wp_register_style( 'login', get_stylesheet_directory_uri() . '/login.css', array( 'buttons', 'dashicons', 'open-sans' ), filemtime( __DIR__ . '/login.css' ) );
+}
+add_action( 'login_init', 'wporg_login_replace_css' );
