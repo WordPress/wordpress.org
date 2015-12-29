@@ -750,6 +750,22 @@ table#issuelist, #issuelist th, #issuelist td {
 	color:white;
 }
 
+/* Prevent sidebar input fields from overflowing */
+#wrapper form input[type="text"],
+#wrapper form input[type="url"],
+#wrapper form input[type="email"],
+#wrapper form input[type="number"],
+#wrapper form input[type="search"],
+#wrapper form input[type="password"],
+.inlineediting input[type="text"],
+.inlineediting input[type="url"],
+.inlineediting input[type="email"],
+.inlineediting input[type="number"],
+.inlineediting input[type="search"],
+.inlineediting input[type="password"] {
+	box-sizing: border-box;
+}
+
 /* General responsive overrides */
 #wrapper {
 	width: auto;
