@@ -243,7 +243,7 @@
 
 		updateIsActive: function() {
 			this.model.set( 'isActive', true );
-		},
+		}
 	});
 
 	projects.view.SubProjects = wp.Backbone.View.extend({
@@ -262,7 +262,7 @@
 			this.views.add( new projects.view.SubProjectsList({
 				collection: collection
 			}) );
-		},
+		}
 	});
 
 	projects.view.SubProjectsList = wp.Backbone.View.extend({
@@ -305,13 +305,13 @@
 
 		attributes: {
 			placeholder: l10n.searchPlaceholder,
-			type: 'search',
+			type: 'search'
 		},
 
 		events: {
 			'input': 'search',
 			'keyup': 'search',
-			'keydown': 'search',
+			'keydown': 'search'
 		},
 
 		search: function( event ) {

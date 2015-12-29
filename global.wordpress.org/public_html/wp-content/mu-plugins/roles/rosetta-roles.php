@@ -124,7 +124,7 @@ class Rosetta_Roles {
 	 *
 	 * The list used in wp_dropdown_roles() on users list table.
 	 *
-	 * @param array $all_roles List of roles.
+	 * @param array $roles List of roles.
 	 * @return array Filtered list of editable roles.
 	 */
 	public function editable_roles( $roles ) {
@@ -232,7 +232,7 @@ class Rosetta_Roles {
 		$option = 'per_page';
 		$args   = array(
 			'default' => 10,
-			'option'  => 'translation_editors_per_page'
+			'option'  => 'translation_editors_per_page',
 		);
 		add_screen_option( $option, $args );
 	}
@@ -284,8 +284,6 @@ class Rosetta_Roles {
 	 * Handler for overview page.
 	 */
 	private function load_translation_editors() {
-		global $wpdb;
-
 		$list_table = $this->get_translation_editors_list_table();
 		$action = $list_table->current_action();
 		$redirect = menu_page_url( 'translation-editors', false );
@@ -394,8 +392,6 @@ class Rosetta_Roles {
 	 * @param  int $user_id User ID of a translation editor.
 	 */
 	private function load_edit_translation_editor( $user_id ) {
-		global $wpdb;
-
 		$redirect = menu_page_url( 'translation-editors', false );
 
 		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
@@ -622,8 +618,6 @@ class Rosetta_Roles {
 	 * Renders the edit page.
 	 */
 	private function render_edit_translation_editor( $user_id ) {
-		global $wpdb;
-
 		$projects = $this->get_translate_projects();
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
@@ -641,10 +635,10 @@ class Rosetta_Roles {
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
-				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' )
+				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
 			),
 			'data' => $project_tree,
-			'accessList' => $project_access_list
+			'accessList' => $project_access_list,
 		) );
 
 		$feedback_message = $this->get_feedback_message();
@@ -688,7 +682,7 @@ class Rosetta_Roles {
 				'<div class="notice notice-error"><p>%s</p></div>',
 				$messages['error'][ $_REQUEST['error'] ]
 			);
-		} elseif( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
+		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
 				$messages['update'][ $_REQUEST['update'] ]
@@ -704,7 +698,6 @@ class Rosetta_Roles {
 	 * @return Rosetta_Translation_Editors_List_Table The list table.
 	 */
 	private function get_translation_editors_list_table() {
-		global $wpdb;
 		static $list_table;
 
 		require_once __DIR__ . '/class-translation-editors-list-table.php';
@@ -741,7 +734,7 @@ class Rosetta_Roles {
 				'command'     => $action,
 				'user_id'     => $user_id,
 				'association' => 'translation-editor',
-			)
+			),
 		);
 
 		wp_remote_post( self::PROFILES_HANDLER_URL, $args );

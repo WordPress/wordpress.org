@@ -17,7 +17,7 @@
 							<ul id="projects-list" class="projects-list">
 								<li id="project-all" class="active">
 									<label>
-										<input name="projects[]"value="all" type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
+										<input name="projects[]" value="all" type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
 										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>

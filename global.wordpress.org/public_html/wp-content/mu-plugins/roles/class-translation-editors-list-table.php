@@ -47,8 +47,6 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param array $args An associative array of arguments.
 	 */
 	public function __construct( $args = array() ) {
-		global $wpdb;
-
 		parent::__construct( array(
 			'singular' => 'translation-editor',
 			'plural'   => 'translation-editors',
@@ -66,9 +64,9 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Prepare the list for display.
 	 */
 	public function prepare_items() {
-		$search =   isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		$search   = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
 		$per_page = $this->get_items_per_page( 'translation_editors_per_page', 10 );
-		$paged =    $this->get_pagenum();
+		$paged    = $this->get_pagenum();
 
 		$role__in = $this->user_roles;
 		if ( isset( $_REQUEST['role'] ) ) {
@@ -80,7 +78,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			'offset'   => ( $paged - 1 ) * $per_page,
 			'role__in' => $role__in,
 			'search'   => $search,
-			'fields'   => 'all_with_meta'
+			'fields'   => 'all_with_meta',
 		);
 
 		if ( '' !== $args['search'] ) {
@@ -225,7 +223,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 
 		$class_html = '';
 		if ( ! empty( $class ) ) {
-			 $class_html = sprintf(
+			$class_html = sprintf(
 				' class="%s"',
 				esc_attr( $class )
 			);
