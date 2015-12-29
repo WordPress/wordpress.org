@@ -93,6 +93,11 @@ function get_whitelist() {
 			'joemcgill',
 			'mike',
 		),
+		'feature-shinyupdates' => array(
+			'obenland',
+			'adamsilverstein',
+			'michaelarestad',
+		),
 		'forums' => array(
 			'clorith',
 			'ipstenu',
