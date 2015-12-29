@@ -192,3 +192,11 @@ function wcorg_flush_rewrite_rules() {
 }
 add_action( 'wp_ajax_wcorg_flush_rewrite_rules_everywhere',        'wcorg_flush_rewrite_rules' ); // This isn't used by the wp-cli command, but is useful for manual testing
 add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_rewrite_rules' );
+
+/*
+ * Load the `wordcamporg` text domain.
+ *
+ * `wordcamporg` is used by all the custom plugins and themes, so that translators only have to deal with a single
+ * GlotPress project, and we only have to install/update a single mofile per locale.
+ */
+load_textdomain( 'wordcamporg', sprintf( '%s/languages/wordcamporg-%s.mo', WP_CONTENT_DIR, get_locale() ) );
