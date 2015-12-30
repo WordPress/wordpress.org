@@ -303,3 +303,32 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10, 3 );
 }
 add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11 );    // after the default endpoints are added in `json_api_default_filters()`
+
+/**
+ * Tell WP Super Cache to cache API endpoints
+ *
+ * @param string $eof_pattern
+ *
+ * @return string
+ */
+function wcorg_json_cache_requests( $eof_pattern ) {
+	global $wp_super_cache_comments;
+
+	if ( defined( 'JSON_REQUEST' ) && JSON_REQUEST ) {
+		// Accept a JSON-formatted string as an end-of-file marker, so that the page will be cached
+		$json_object_pattern     = '^[{].*[}]$';
+		$json_collection_pattern = '^[\[].*[\]]$';
+
+		$eof_pattern = str_replace(
+			'<\?xml',
+			sprintf( '<\?xml|%s|%s', $json_object_pattern, $json_collection_pattern ),
+			$eof_pattern
+		);
+
+		// Don't append HTML comments to the JSON output, because that would invalidate it
+		$wp_super_cache_comments = false;
+	}
+
+	return $eof_pattern;
+}
+add_filter( 'wp_cache_eof_tags', 'wcorg_json_cache_requests' );

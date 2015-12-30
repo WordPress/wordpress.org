@@ -15,6 +15,9 @@ class WordCamp_CLI_REST_API extends WP_CLI_Command {
 		$errors          = false;
 		$start_timestamp = microtime( true );
 
+		WP_CLI::line();
+		WP_CLI::warning( "Make sure you clear WP Super Cache on the test sites before running this, to avoid testing old data." );
+
 		// These calls are not formatted in a more compact way because we don't want to short-circuit any of them if one fails
 		if ( $this->post_types_exposed() ) {
 			$errors = true;
