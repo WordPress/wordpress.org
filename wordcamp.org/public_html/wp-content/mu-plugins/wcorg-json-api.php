@@ -13,6 +13,12 @@
  * You may also need to add new tests when making changes to this or other plugins, and/or update existing tests.
  */
 
+add_filter( 'json_endpoints',              'wcorg_json_whitelist_endpoints',             999    );
+add_filter( 'json_prepare_post',           'wcorg_json_expose_whitelisted_meta_data',    997, 3 );
+add_filter( 'json_prepare_post',           'wcorg_json_expose_additional_post_data',     998, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
+add_filter( 'json_prepare_post',           'wcorg_json_embed_related_posts',             999, 3 );   // after `wcorg_json_expose_additional_post_data()`
+add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11     );    // after the default endpoints are added in `json_api_default_filters()`
+add_filter( 'wp_cache_eof_tags',           'wcorg_json_cache_requests'                          );
 
 /**
  * Unhook any endpoints that aren't whitelisted
@@ -70,7 +76,6 @@ function wcorg_json_whitelist_endpoints( $endpoints ) {
 
 	return $whitelisted_endpoints;
 }
-add_filter( 'json_endpoints', 'wcorg_json_whitelist_endpoints', 999 );
 
 /**
  * Expose a whitelisted set of meta data to unauthenticated JSON API requests
@@ -124,7 +129,6 @@ function wcorg_json_expose_whitelisted_meta_data( $prepared_post, $raw_post, $co
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_expose_whitelisted_meta_data', 997, 3 );
 
 /**
  * Expose additional data on post responses.
@@ -152,7 +156,6 @@ function wcorg_json_expose_additional_post_data( $prepared_post, $raw_post, $con
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_expose_additional_post_data', 998, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
 
 /**
  * Get the avatar URL for the given speaker
@@ -213,7 +216,6 @@ function wcorg_json_embed_related_posts( $prepared_post, $raw_post, $context ) {
 
 	return $prepared_post;
 }
-add_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999, 3 );   // after `wcorg_json_expose_additional_post_data()`
 
 /**
  * Get the sessions for a given speaker.
@@ -302,7 +304,6 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 
 	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10, 3 );
 }
-add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11 );    // after the default endpoints are added in `json_api_default_filters()`
 
 /**
  * Tell WP Super Cache to cache API endpoints
@@ -331,4 +332,3 @@ function wcorg_json_cache_requests( $eof_pattern ) {
 
 	return $eof_pattern;
 }
-add_filter( 'wp_cache_eof_tags', 'wcorg_json_cache_requests' );
