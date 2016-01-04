@@ -198,7 +198,7 @@ function wcorg_json_embed_related_posts( $prepared_post, $raw_post, $context ) {
 	}
 
 	// Unhook this callback before making any other WP_JSON_Posts::get_posts() calls, to avoid infinite recursion
-	remove_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999, 3 );
+	remove_filter( 'json_prepare_post', 'wcorg_json_embed_related_posts', 999 );
 
 	switch( $prepared_post['type'] ) {
 		case 'wcb_speaker':
@@ -302,7 +302,7 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 	/** @var $wp_json_media WP_JSON_Media */
 	global $wp_json_media;
 
-	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10, 3 );
+	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10 );
 }
 
 /**
