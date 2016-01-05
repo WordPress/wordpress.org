@@ -465,10 +465,17 @@ input[type=text]:focus, input.textwidget:focus, textarea:focus {
 legend {
 	color: #666;
 }
+blockquote {
+	margin-bottom: 1em;
+	padding: 1em 1em 0;
+}
 blockquote.citation {
 	margin: -0.3em 0;
 	padding: 0 0 0 0.75em;
 	background: none;
+}
+#main blockquote p {
+	margin: 0 0 1em 0;
 }
 .nav ul {
 	padding: 0;
