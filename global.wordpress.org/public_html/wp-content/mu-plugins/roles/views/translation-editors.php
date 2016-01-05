@@ -41,7 +41,7 @@
 							</label>
 							<br>
 							<label for="custom-projects">
-								<input type="radio" name="projects" value="custom" id="custom-projects"> <?php _e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'projects', 'rosetta' ); ?>
+								<input type="radio" name="projects" value="custom" id="custom-projects"> <?php _e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'rosetta' ); ?>
 							</label>
 						</fieldset>
 					</td>
