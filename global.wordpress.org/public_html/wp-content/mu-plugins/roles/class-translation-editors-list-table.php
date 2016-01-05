@@ -159,7 +159,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 				'All <span class="count">(%s)</span>',
 				'All <span class="count">(%s)</span>',
 				$total_translation_editors,
-				'translation editors'
+				'translation editors',
+				'rosetta'
 			),
 			number_format_i18n( $total_translation_editors )
 		);
@@ -176,7 +177,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 				_n(
 					'Translation Editor <span class="count">(%s)</span>',
 					'Translation Editor <span class="count">(%s)</span>',
-					$count_translation_editors
+					$count_translation_editors,
+					'rosetta'
 				),
 				number_format_i18n( $count_translation_editors )
 			);
@@ -194,7 +196,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 				_n(
 					'General Translation Editor <span class="count">(%s)</span>',
 					'General Translation Editor <span class="count">(%s)</span>',
-					$count_general_translation_editors
+					$count_general_translation_editors,
+					'rosetta'
 				),
 				number_format_i18n( $count_general_translation_editors )
 			);
