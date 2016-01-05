@@ -23,13 +23,6 @@ if ( false !== $latest_release ) :
 			$latest_release['tar_size_mb'] );
 		?></a>
 	</p>
-
-	<h3><?php _e( 'More download options', 'rosetta' ); ?></h3>
-	<ul>
-		<li><a href="/releases/#latest"><?php _e( 'Other file formats', 'rosetta' ); ?></a></li>
-		<li><a href="/releases/#older"><?php _e( 'Older versions', 'rosetta' ); ?></a></li>
-		<li><a href="/releases/#beta"><?php _e( 'Beta &amp; RC versions', 'rosetta' ); ?></a></li>
-	</ul>
 	<?php
 endif;
 ?>
