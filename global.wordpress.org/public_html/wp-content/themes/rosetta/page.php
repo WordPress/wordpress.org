@@ -10,10 +10,10 @@ the_post();
 	</div>
 	<div id="pagebody">
 		<div class="wrapper">
-			<div class="col-9">
+			<div class="col-9" role="main">
 				<?php the_content(); ?>
 			</div>
-			<div class="col-3">
+			<div class="col-3" role="complementary">
 				<?php get_sidebar( 'page' ); ?>
 			</div>
 		</div>

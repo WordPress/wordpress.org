@@ -7,7 +7,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 ?>
 		<div class="wrapper">
 			<div class="section">
-				<div class="col-12">
+				<div class="col-12" role="main">
 					<h3>The <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?> translation of WordPress is inactive</h3>
 					<p><a href="https://wordpress.org/download/">Download the English version instead</a>.</p>
 					<p>If you&#8217;re interested in translating WordPress to <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?>,
@@ -19,7 +19,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 
 		<div class="wrapper">
 			<div class="section">
-				<div class="col-12">
+				<div class="col-12" role="main">
 <?php
 	query_posts('pagename=txt-welcome');
 	while(have_posts()):
@@ -60,7 +60,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 					<?php the_content(); ?>
 <?php endwhile; ?>
 				</div>
-				<div class="col-3">
+				<div class="col-3" role="complementary">
 					<?php get_sidebar( 'page' ); ?>
 				</div>
 			</div>
@@ -140,7 +140,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 <?php endwhile; ?>
 				</div>
 
-				<div class="col-3">
+				<div class="col-3" role="complementary">
 					<?php get_sidebar( 'blog' ); ?>
 				</div>
 			</div>

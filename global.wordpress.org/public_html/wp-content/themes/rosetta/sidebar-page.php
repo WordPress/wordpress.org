@@ -4,7 +4,7 @@ $latest_release = $rosetta->rosetta->get_latest_release();
 if ( false !== $latest_release ) :
 	?>
 	<p class="download-meta">
-		<a class="button download-button button-large button-large" href="<?php echo $latest_release['zip_url']; ?>">
+		<a class="button download-button button-large button-large" href="<?php echo $latest_release['zip_url']; ?>" role="button">
 			<strong><?php
 				echo apply_filters( 'no_orphans',
 					sprintf(

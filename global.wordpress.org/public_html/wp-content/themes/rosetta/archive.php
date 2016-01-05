@@ -2,7 +2,7 @@
 
 	<div id="pagebody">
 		<div class="wrapper">
-			<div class="col-9">
+			<div class="col-9" role="main">
 				<?php the_archive_title( '<h2 class="fancy">', '</h2>' ); ?>
 
 				<?php

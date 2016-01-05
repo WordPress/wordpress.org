@@ -18,7 +18,7 @@ the_post();
 
 	<div id="pagebody">
 		<div class="wrapper">
-			<div class="col-9">
+			<div class="col-9" role="main">
 
 <?php
 if ( ! empty( $_POST['submit'] ) ) {

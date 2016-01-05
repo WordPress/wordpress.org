@@ -2,7 +2,7 @@
 
 <div id="pagebody">
 	<div class="wrapper">
-		<div class="col-9">
+		<div class="col-9" role="main">
 			<?php
 			if ( have_posts()) :
 				while (have_posts() ) : the_post(); ?>
@@ -30,7 +30,7 @@
 				<?php posts_nav_link( ' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>
 			</nav>
 		</div>
-		<div class="col-3">
+		<div class="col-3" role="complementary">
 			<?php get_sidebar( 'blog' ); ?>
 		</div>
 	</div>
