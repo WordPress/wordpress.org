@@ -644,6 +644,12 @@ body.bbPress #main #bbpress-forums div.bbp-reply-author a.bbp-author-name {
 	padding-top: 1%;
 }
 
+.make-welcome .make-welcome-edit {
+	display: block;
+	text-align: right;
+	margin: 0 5px 5px 0;
+}
+
 @media screen and (min-width: 960px) {
 	.make-welcome {
 		padding-bottom: 0;
