@@ -1,15 +1,6 @@
 <?php
-/*
-* Plugin Name: WordCamp Payments Network Dashboard
-* Plugin URI: http://wordcamp.org
-* Version: 1.0
-* Author: Automattic
-* Author URI: http://wordcamp.org
-* License: GPLv2 or later
-* Network: true
-*/
 
-class WordCamp_Payments_Network_Tools {
+class Payment_Requests_Dashboard {
 	public static $list_table;
 	public static $db_version = 6;
 
@@ -191,7 +182,7 @@ class WordCamp_Payments_Network_Tools {
 	 * Create a network admin menu item entry.
 	 */
 	public static function network_admin_menu() {
-		$dashboard = add_dashboard_page( 'WordCamp Payments Dashboard', 'Payments', 'manage_network', 'wcp-dashboard', array( __CLASS__, 'render_dashboard' ) );
+		$dashboard = add_dashboard_page( 'WordCamp Payments Requests', 'Payments Requests', 'manage_network', 'wcp-dashboard', array( __CLASS__, 'render_dashboard' ) );
 		add_action( 'load-' . $dashboard, array( __CLASS__, 'pre_render_dashboard' ) );
 	}
 
@@ -215,7 +206,7 @@ class WordCamp_Payments_Network_Tools {
 		?>
 
 		<div class="wrap">
-			<h1>WordCamp Payments Dashboard</h1>
+			<h1>Payment Requests</h1>
 
 			<?php settings_errors(); ?>
 
@@ -457,9 +448,9 @@ class WordCamp_Payments_Network_Tools {
 	 * Loads and initializes the list table object.
 	 */
 	public static function pre_render_dashboard() {
-		require_once( __DIR__ . '/includes/class-list-table.php' );
+		require_once( __DIR__ . '/payment-requests-list-table.php' );
 
-		self::$list_table = new WordCamp_Payments_Network_List_Table;
+		self::$list_table = new Payment_Requests_List_Table();
 	}
 
 	/**
@@ -537,6 +528,3 @@ class WordCamp_Payments_Network_Tools {
 		return $amount * $rate;
 	}
 }
-
-// Initialize the plugin.
-add_action( 'plugins_loaded', array( 'WordCamp_Payments_Network_Tools', 'plugins_loaded' ) );

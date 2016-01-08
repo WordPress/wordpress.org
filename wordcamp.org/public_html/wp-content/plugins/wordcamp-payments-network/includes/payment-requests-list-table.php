@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This list table class handles the output of data
  * in the Payment Network Dashboard. Use the set_view() method
@@ -6,7 +7,7 @@
  *
  * Note: Uses switch_to_blog() excessively.
  */
-class WordCamp_Payments_Network_List_Table extends WP_List_Table {
+class Payment_Requests_List_Table extends WP_List_Table {
 
 	/**
 	 * Used by the parent class, returns an array of
@@ -64,8 +65,8 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$sql = sprintf( "SELECT SQL_CALC_FOUND_ROWS blog_id, post_id FROM `%s` WHERE 1=1 ", WordCamp_Payments_Network_Tools::get_table_name() );
-		$view = WordCamp_Payments_Network_Tools::get_current_tab();
+		$sql = sprintf( "SELECT SQL_CALC_FOUND_ROWS blog_id, post_id FROM `%s` WHERE 1=1 ", Payment_Requests_Dashboard::get_table_name() );
+		$view = Payment_Requests_Dashboard::get_current_tab();
 		$where = '';
 		$orderby = '';
 		$limit = '';
@@ -178,7 +179,7 @@ class WordCamp_Payments_Network_List_Table extends WP_List_Table {
 			$output = sprintf( '%s&nbsp;%s', esc_html( number_format( $amount, 2 ) ), esc_html( $currency ) );
 
 			if ( $currency != 'USD' ) {
-				$usd_amount = WordCamp_Payments_Network_Tools::convert_currency( $currency, 'usd', $amount );
+				$usd_amount = Payment_Requests_Dashboard::convert_currency( $currency, 'usd', $amount );
 				if ( $usd_amount )
 					$output .= sprintf( '<br />~&nbsp;%s&nbsp;USD', esc_html( number_format( $usd_amount, 2 ) ) );
 			}
