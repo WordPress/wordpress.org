@@ -254,6 +254,7 @@ class WordCamp_Post_Types_Plugin {
 			case 'edit-wcb_speaker':
 			case 'edit-wcb_sponsor':
 			case 'edit-wcb_session':
+			case 'wcb_sponsor':
 			case 'dashboard':
 				wp_enqueue_style( 'wcpt-admin', plugins_url( '/css/admin.css', __FILE__ ), array(), 1 );
 				break;
@@ -1308,7 +1309,7 @@ class WordCamp_Post_Types_Plugin {
 		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
 		add_meta_box( 'speakers-list',  __( 'Speakers',       'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
 		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
-		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcampbase' ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'side' );
+		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcamporg'  ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'normal' );
 	}
 
 	/**
@@ -1501,19 +1502,43 @@ class WordCamp_Post_Types_Plugin {
 
 	/**
 	 * Render the Sponsor Info metabox view
+	 *
+	 * @param WP_Post $sponsor
 	 */
 	function metabox_sponsor_info( $sponsor ) {
-		$website = get_post_meta( $sponsor->ID, '_wcpt_sponsor_website', true );
+		$company_name      = get_post_meta( $sponsor->ID, '_wcpt_sponsor_company_name',      true );
+		$website           = get_post_meta( $sponsor->ID, '_wcpt_sponsor_website',           true );
+		$first_name        = get_post_meta( $sponsor->ID, '_wcpt_sponsor_first_name',        true );
+		$last_name         = get_post_meta( $sponsor->ID, '_wcpt_sponsor_last_name',         true );
+		$email_address     = get_post_meta( $sponsor->ID, '_wcpt_sponsor_email_address',     true );
+		$phone_number      = get_post_meta( $sponsor->ID, '_wcpt_sponsor_phone_number',      true );
+		$tax_resale_number = get_post_meta( $sponsor->ID, '_wcpt_sponsor_tax_resale_number', true );
+
+		$street_address1 = get_post_meta( $sponsor->ID, '_wcpt_sponsor_street_address1',   true );
+		$street_address2 = get_post_meta( $sponsor->ID, '_wcpt_sponsor_street_address2',   true );
+		$city            = get_post_meta( $sponsor->ID, '_wcpt_sponsor_city',              true );
+		$state           = get_post_meta( $sponsor->ID, '_wcpt_sponsor_state',             true );
+		$zip_code        = get_post_meta( $sponsor->ID, '_wcpt_sponsor_zip_code',          true );
+		$country         = get_post_meta( $sponsor->ID, '_wcpt_sponsor_country',           true );
+
+		$available_countries = array( 'Abkhazia', 'Afghanistan', 'Aland', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Ascension', 'Ashmore and Cartier Islands', 'Australia', 'Australian Antarctic Territory', 'Austria', 'Azerbaijan', 'Bahamas, The', 'Bahrain', 'Baker Island', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Antarctic Territory', 'British Indian Ocean Territory', 'British Sovereign Base Areas', 'British Virgin Islands', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', "China, People's Republic of", 'China, Republic of (Taiwan)', 'Christmas Island', 'Clipperton Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo, (Congo  Brazzaville)', 'Congo, (Congo  Kinshasa)', 'Cook Islands', 'Coral Sea Islands', 'Costa Rica', "Cote d'Ivoire (Ivory Coast)", 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Islas Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern and Antarctic Lands', 'Gabon', 'Gambia, The', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Honduras', 'Hong Kong', 'Howland Island', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jarvis Island', 'Jersey', 'Johnston Atoll', 'Jordan', 'Kazakhstan', 'Kenya', 'Kingman Reef', 'Kiribati', 'Korea, North', 'Korea, South', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macau', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia', 'Midway Islands', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar (Burma)', 'Nagorno-Karabakh', 'Namibia', 'Nauru', 'Navassa Island', 'Nepal', 'Netherlands', 'Netherlands Antilles', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Cyprus', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palmyra Atoll', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Peter I Island', 'Philippines', 'Pitcairn Islands', 'Poland', 'Portugal', 'Pridnestrovie (Transnistria)', 'Puerto Rico', 'Qatar', 'Queen Maud Land', 'Reunion', 'Romania', 'Ross Dependency', 'Russia', 'Rwanda', 'Saint Barthelemy', 'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'Somaliland', 'South Africa', 'South Georgia & South Sandwich Islands', 'South Ossetia', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Svalbard', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste (East Timor)', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tristan da Cunha', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'U.S. Virgin Islands', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Wake Island', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe' );
+
+		/*
+		 * In most cases, the company name will be the same as the post title, but sometimes companies sponsor
+		 * under specific brands (e.g., Automattic as Jetpack), so we want to pre-populate the field to avoid
+		 * making the user do unnecessary work.
+		 */
+		if ( empty( $company_name ) ) {
+			$company_name = $sponsor->post_title;
+		}
+
+		if ( empty( $country ) ) {
+			$country = 'United States';
+		}
+
 		wp_nonce_field( 'edit-sponsor-info', 'wcpt-meta-sponsor-info' );
 
-		?>
-
-		<p>
-			<label for="_wcpt_sponsor_website"><?php _e( 'Website:', 'wordcampbase' ); ?></label>
-			<input type="text" class="widefat" id="_wcpt_sponsor_website" name="_wcpt_sponsor_website" value="<?php echo esc_attr( esc_url( $website ) ); ?>" />
-		</p>
-
-		<?php
+		require_once( __DIR__ . '/views/sponsors/metabox-sponsor-info.php' );
 	}
 
 	/**
@@ -1677,14 +1702,24 @@ class WordCamp_Post_Types_Plugin {
 		}
 
 		if ( isset( $_POST['wcpt-meta-sponsor-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-sponsor-info'], 'edit-sponsor-info' ) ) {
-			$website = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
+			$text_values = array(
+				'company_name',	'first_name', 'last_name', 'email_address', 'phone_number', 'tax_resale_number',
+				'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
+			);
 
+			foreach ( $text_values as $id ) {
+				$values[ $id ] = sanitize_text_field( $_POST["_wcpt_sponsor_$id"] );
+			}
+
+			$values['website'] = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
 			// TODO: maybe only allows links to home page, depending on outcome of http://make.wordpress.org/community/2013/12/31/irs-rules-for-corporate-sponsorship-of-wordcamp/
 
-			if ( $website ) {
-				update_post_meta( $post_id, '_wcpt_sponsor_website', $website );
-			} else {
-				delete_post_meta( $post_id, '_wcpt_sponsor_website' );
+			foreach( $values as $id => $value ) {
+				if ( empty( $value ) ) {
+					delete_post_meta( $post_id, "_wcpt_sponsor_$id" );
+				} else {
+					update_post_meta( $post_id, "_wcpt_sponsor_$id", $value );
+				}
 			}
 		}
 	}

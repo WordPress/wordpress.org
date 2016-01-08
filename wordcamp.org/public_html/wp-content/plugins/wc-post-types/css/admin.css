@@ -17,3 +17,26 @@
 #dashboard_right_now span.wcb_sponsor-count:before {
 	content: "\f487";
 }
+
+.wcpt-form {
+	display: table;
+}
+
+	.wcpt-form li {
+		display: table-row;
+	}
+
+		.wcpt-form li label {
+			display: table-cell;
+		}
+
+		.wcpt-form li input,
+		.wcpt-form li select {
+			display: table-cell;
+			margin-left: 1em;
+		}
+
+		li.wcpt-form-header {
+			display: table-caption;
+			font-weight: bold;
+		}
