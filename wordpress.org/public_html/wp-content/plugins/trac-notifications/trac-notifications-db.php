@@ -57,8 +57,8 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 		return $this->db->get_col( "SELECT name FROM component WHERE name <> 'WordPress.org site' ORDER BY name ASC" );
 	}
 
-	function get_component_followers() {
-		return $this->db->get_col( $this->db->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $post->post_title ) );
+	function get_component_followers( $component ) {
+		return $this->db->get_col( $this->db->prepare( "SELECT username FROM _notifications WHERE type = 'component' AND value = %s", $component ) );
 	}
 
 	function get_component_history( $component, $last_x_days = 7 ) {
