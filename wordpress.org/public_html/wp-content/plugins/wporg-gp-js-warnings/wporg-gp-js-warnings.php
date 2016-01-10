@@ -13,33 +13,33 @@
  * @TODO:
  * - Translate the warning strings
  * - Match warning error strings between GlotPress & this plugin?
- *
- * @author dd32
  */
 class WPorg_GP_JS_Translation_Warnings {
 
 	function __construct() {
-		add_action( 'wp_print_scripts', array( $this, 'replace_editor_with_our_own' ), 100 );
+		add_action( 'wp_default_scripts', array( $this, 'replace_editor_with_our_own' ), 11 );
 	}
 
 	/**
 	 * Replace the GlotPress editor script with our own which depends on the wporg-gp-editor GlotPress variant.
 	 *
 	 * This allows us to be output whenever `gp-editor` is.
+	 *
+	 * @param WP_Scripts $scripts WP_Scripts object.
 	 */
-	function replace_editor_with_our_own() {
-		$query = wp_scripts()->query( 'gp-editor', 'registered' );
+	function replace_editor_with_our_own( $scripts ) {
+		$query = $scripts->query( 'gp-editor', 'registered' );
 		if ( ! $query ) {
 			return;
 		}
 
-		wp_register_script( 'wporg-gp-editor', $query->src, $query->deps, $query->ver );
+		$scripts->add( 'wporg-gp-editor', $query->src, $query->deps, $query->ver );
 		if ( isset( $query->extra['l10n'] ) ) {
-			wp_localize_script( 'wporg-gp-editor', $query->extra['l10n'][0], $query->extra['l10n'][1] );
+			$scripts->localize( 'wporg-gp-editor', $query->extra['l10n'][0], $query->extra['l10n'][1] );
 		}
 
-		wp_deregister_script( 'gp-editor' );
-		wp_register_script( 'gp-editor', plugins_url( '/wporg-gp-js-warnings.js', __FILE__ ), array( 'wporg-gp-editor', 'jquery' ), '2015-11-14' );
+		$scripts->remove( 'gp-editor' );
+		$scripts->add( 'gp-editor', plugins_url( '/wporg-gp-js-warnings.js', __FILE__ ), array( 'wporg-gp-editor', 'jquery' ), '2015-11-14' );
 	}
 
 }
