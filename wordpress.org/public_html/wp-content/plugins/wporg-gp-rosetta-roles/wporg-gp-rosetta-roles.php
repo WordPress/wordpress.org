@@ -28,16 +28,26 @@ class WPorg_GP_Rosetta_Roles {
 	public $approver_role = 'translation_editor';
 
 	/**
-	 * Holds the meta key of the project access list.
-	 *
-	 * @var string
+	 * Database table for translation editors.
 	 */
-	public $project_access_meta_key = 'translation_editor_project_access_list';
+	const TRANSLATION_EDITORS_TABLE = 'translate_translation_editors';
+
+	/**
+	 * Role of a per project translation editor.
+	 */
+	const TRANSLATION_EDITOR_ROLE = 'translation_editor';
+
+	/**
+	 * Role of a general translation editor.
+	 */
+	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
 	 * Contructor.
 	 */
 	public function __construct() {
+		$GLOBALS['wpdb']->wporg_translation_editors = self::TRANSLATION_EDITORS_TABLE;
+
 		add_filter( 'gp_pre_can_user', array( $this, 'pre_can_user' ), 9 , 2 );
 		add_action( 'gp_project_created', array( $this, 'project_created' ) );
 		add_action( 'gp_project_saved', array( $this, 'project_saved' ) );
@@ -143,22 +153,38 @@ class WPorg_GP_Rosetta_Roles {
 	 * @return bool
 	 */
 	public function is_approver_for_locale( $user_id, $locale_slug ) {
+		static $cache = null;
+
+		if ( null === $cache ) {
+			$cache = array();
+		}
+
+		if ( isset( $cache[ $user_id ][ $locale_slug ] ) ) {
+			return $cache[ $user_id ][ $locale_slug ];
+		}
+
+		if ( ! isset( $cache[ $user_id ] ) ) {
+			$cache[ $user_id ] = array();
+		}
+
 		// Get blog prefix of the associated Rosetta site.
 		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+			$cache[ $user_id ][ $locale_slug ] = false;
 			return false;
 		}
 
 		$user = get_user_by( 'id', $user_id );
 
-		// Check if current user has the approver role.
-		$user->cap_key = $blog_prefix . 'capabilities';
-		$user->caps = &$user->{$user->cap_key};
-		if ( ! is_array( $user->caps ) ) {
-			$user->caps = array();
+		$cap_key = $blog_prefix . 'capabilities';
+		if ( ! isset( $user->{$cap_key} ) ) {
+			$cache[ $user_id ][ $locale_slug ] = false;
+			return false;
 		}
-		$user->get_role_caps();
 
-		return $user->has_cap( $this->approver_role );
+		$is_approver = in_array( self::TRANSLATION_EDITOR_ROLE, $user->$cap_key ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->$cap_key );
+		$cache[ $user_id ][ $locale_slug ] = $is_approver;
+
+		return $is_approver;
 	}
 
 	/**
@@ -174,20 +200,36 @@ class WPorg_GP_Rosetta_Roles {
 	 * @return array A list of the Project ID's for which the current user can approve translations for.
 	 */
 	public function get_project_id_access_list( $user_id, $locale_slug, $include_children = false ) {
-		$user = get_user_by( 'id', $user_id );
+		global $wpdb;
+		static $cache = null;
 
-		// Get blog prefix of the associated Rosetta site.
-		if ( ! $blog_prefix = $this->get_blog_prefix( $locale_slug ) ) {
+		if ( null === $cache ) {
+			$cache = array();
+		}
+
+		if ( isset( $cache[ $user_id ][ $locale_slug ] ) ) {
+			$project_access_list = $cache[ $user_id ][ $locale_slug ];
+		} else {
+			$project_access_list = $wpdb->get_col( $wpdb->prepare( "
+				SELECT project_id FROM
+				{$wpdb->wporg_translation_editors}
+				WHERE user_id = %d AND locale = %s
+			", $user_id, $locale_slug ) );
+
+			if ( ! isset( $cache[ $user_id ] ) ) {
+				$cache[ $user_id ] = array();
+			}
+
+			$cache[ $user_id ][ $locale_slug ] = $project_access_list;
+		}
+
+		if ( ! $project_access_list ) {
 			return false;
 		}
 
-		// Get IDs of projects which the user can approve.
-		$meta_key = $blog_prefix . $this->project_access_meta_key;
-		if ( empty( $user->$meta_key ) || ! is_array( $user->$meta_key ) ) {
-			return false;
+		if ( in_array( '0', $project_access_list, true ) ) {
+			$project_access_list = array( 'all' );
 		}
-
-		$project_access_list = $user->$meta_key;
 
 		// If we don't want the children, or the user has access to all projects.
 		if ( ! $include_children || in_array( 'all', $project_access_list ) ) {
