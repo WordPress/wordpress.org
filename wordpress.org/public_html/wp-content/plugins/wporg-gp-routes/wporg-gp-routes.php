@@ -13,7 +13,7 @@ require_once __DIR__ . '/routes/wp-plugins.php';
 class WPorg_GP_Routes {
 
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_routes' ) );
+		add_action( 'template_redirect', array( $this, 'register_routes' ), 5 );
 	}
 
 	public function register_routes() {
