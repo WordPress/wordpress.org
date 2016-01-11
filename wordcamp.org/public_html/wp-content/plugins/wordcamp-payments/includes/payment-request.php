@@ -614,11 +614,11 @@ class WCP_Payment_Request {
 		global $post;
 
 		if ( 'paid' == $post->post_status && 'paid' != get_query_var( 'post_status' ) ) {
-			$states['paid'] = __( 'Paid', 'camptix' );
+			$states['paid'] = __( 'Paid', 'wordcamporg' );
 		}
 
 		if ( 'unpaid' == $post->post_status && 'unpaid' != get_query_var( 'post_status' ) ) {
-			$states['unpaid'] = __( 'Unpaid', 'camptix' );
+			$states['unpaid'] = __( 'Unpaid', 'wordcamporg' );
 		}
 
 		if ( 'incomplete' == $post->post_status && 'incomplete' != get_query_var( 'post_status' ) ) {
