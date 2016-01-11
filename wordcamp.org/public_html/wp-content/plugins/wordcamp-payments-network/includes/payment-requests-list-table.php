@@ -158,7 +158,7 @@ class Payment_Requests_List_Table extends WP_List_Table {
 	 * Note: runs in a switch_to_blog() context.
 	 */
 	public function column_category( $request ) {
-		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/classes/payment-request.php' );
+		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/payment-request.php' );
 		$categories        = WCP_Payment_Request::get_payment_categories();
 		$selected_category = get_post_meta( $request->ID, '_camppayments_payment_category', true );
 

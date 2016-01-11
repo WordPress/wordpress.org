@@ -83,7 +83,7 @@ class Payment_Requests_Dashboard {
 		global $wpdb;
 
 		// Register the custom payment statuses so that we can filter posts to include only them, in order to exclude trashed posts
-		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/classes/payment-request.php' );
+		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/payment-request.php' );
 		WCP_Payment_Request::register_post_statuses();
 
 		// Truncate existing table.
