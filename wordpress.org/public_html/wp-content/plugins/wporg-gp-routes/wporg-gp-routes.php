@@ -30,18 +30,18 @@ class WPorg_GP_Routes {
 			GP::$router->remove("/languages/$locale/$path");
 
 			// Redirect routes.
-			GP::$router->prepend( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
-			GP::$router->prepend( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+			GP::$router->prepend( '/languages', array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
+			GP::$router->prepend( "/languages/$path", array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
 
 			// Register custom routes.
-			GP::$router->prepend( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );
-			GP::$router->prepend( "/locale/$locale", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_projects' ) );
-			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'GP_WPorg_Route_Locale', 'get_locale_project' ) );
-			GP::$router->prepend( '/stats/?', array( 'GP_WPorg_Route_Stats', 'get_stats_overview' ) );
+			GP::$router->prepend( '/', array( 'WPorg_GP_Route_Index', 'get_locales' ) );
+			GP::$router->prepend( "/locale/$locale", array( 'WPorg_GP_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path", array( 'WPorg_GP_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path/$path", array( 'WPorg_GP_Route_Locale', 'get_locale_projects' ) );
+			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( 'WPorg_GP_Route_Locale', 'get_locale_project' ) );
+			GP::$router->prepend( '/stats/?', array( 'WPorg_GP_Route_Stats', 'get_stats_overview' ) );
 			$project = '([^/]*)/?';
-			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'GP_WPorg_Route_WP_Plugins', 'get_plugin_projects' ) );
+			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_projects' ) );
 		}
 	}
 }
