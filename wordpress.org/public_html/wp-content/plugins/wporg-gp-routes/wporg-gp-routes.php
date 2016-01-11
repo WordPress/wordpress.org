@@ -23,11 +23,12 @@ class WPorg_GP_Routes {
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
-			GP::$router->remove("/languages/$locale");
+			GP::$router->remove( "/languages/$locale" );
 		} else {
 			// Delete default routes.
-			GP::$router->remove("/languages/$locale");
-			GP::$router->remove("/languages/$locale/$path");
+			GP::$router->remove( "/languages/$locale" );
+			GP::$router->remove( "/languages/$locale/$path" );
+			GP::$router->remove( '/profile/(.+?)' );
 
 			// Redirect routes.
 			GP::$router->prepend( '/languages', array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
