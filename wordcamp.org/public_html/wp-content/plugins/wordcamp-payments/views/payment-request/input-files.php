@@ -26,6 +26,6 @@
 			<a href="{{ data.url }}">{{ data.filename }}</a>
 		</script>
 
-		<?php wp_localize_script( 'wcp-attached-files', 'wcpAttachedFiles', $files ); // todo merge into wordcampPayments var ?>
+		<?php wp_localize_script( 'wcp-attached-files', 'wcpAttachedFiles', $files ); // todo merge into wordcampBudgets var ?>
 	</td>
 </tr>

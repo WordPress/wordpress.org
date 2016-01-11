@@ -1,23 +1,23 @@
 jQuery( document ).ready( function( $ ) {
 
-	$.wordcampPayments = {
+	$.wordcampBudgets = {
 
 		/**
 		 * Main entry point
 		 */
 		init: function () {
-			$.wordcampPayments.registerEventHandlers();
-			$.wordcampPayments.setupDatePicker();
+			$.wordcampBudgets.registerEventHandlers();
+			$.wordcampBudgets.setupDatePicker();
 		},
 
 		/**
 		 * Registers event handlers
 		 */
 		registerEventHandlers : function() {
-			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( $.wordcampPayments.togglePaymentMethodFields );
-			$( '#payment_category' ).change( $.wordcampPayments.toggleOtherCategoryDescription );
-			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( $.wordcampPayments.showUploadModal );
-			$( '#wcp_mark_incomplete_checkbox' ).click( $.wordcampPayments.requireNotes );
+			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( $.wordcampBudgets.togglePaymentMethodFields );
+			$( '#payment_category' ).change( $.wordcampBudgets.toggleOtherCategoryDescription );
+			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( $.wordcampBudgets.showUploadModal );
+			$( '#wcp_mark_incomplete_checkbox' ).click( $.wordcampBudgets.requireNotes );
 		},
 
 		/**
@@ -60,9 +60,9 @@ jQuery( document ).ready( function( $ ) {
 		 * @param {object} event
 		 */
 		showUploadModal : function( event ) {
-			if ( 'undefined' == typeof $.wordcampPayments.fileUploadFrame ) {
+			if ( 'undefined' == typeof $.wordcampBudgets.fileUploadFrame ) {
 				// Create the frame
-				$.wordcampPayments.fileUploadFrame = wp.media( {
+				$.wordcampBudgets.fileUploadFrame = wp.media( {
 					title: wcpLocalizedStrings.uploadModalTitle,
 					multiple: true,
 					button: {
@@ -71,10 +71,10 @@ jQuery( document ).ready( function( $ ) {
 				} );
 
 				// Add models to the collection for each selected attachment
-				$.wordcampPayments.fileUploadFrame.on( 'select', $.wordcampPayments.addSelectedFilesToCollection );
+				$.wordcampBudgets.fileUploadFrame.on( 'select', $.wordcampBudgets.addSelectedFilesToCollection );
 			}
 
-			$.wordcampPayments.fileUploadFrame.open();
+			$.wordcampBudgets.fileUploadFrame.open();
 			return false;
 		},
 
@@ -82,17 +82,17 @@ jQuery( document ).ready( function( $ ) {
 		 * Add files selected from the Media Picker to the current collection of files
 		 */
 		addSelectedFilesToCollection : function() {
-			var attachments = $.wordcampPayments.fileUploadFrame.state().get( 'selection' ).toJSON();
+			var attachments = $.wordcampBudgets.fileUploadFrame.state().get( 'selection' ).toJSON();
 
 			$.each( attachments, function( index, attachment ) {
-				var newFile = new $.wordcampPayments.AttachedFile( {
+				var newFile = new $.wordcampBudgets.AttachedFile( {
 					'ID':          attachment.id,
 					'post_parent': attachment.uploadedTo,
 					'filename':    attachment.filename,
 					'url':         attachment.url
 				} );
 
-				$.wordcampPayments.attachedFilesView.collection.add( newFile );
+				$.wordcampBudgets.attachedFilesView.collection.add( newFile );
 			} );
 		},
 
@@ -126,5 +126,5 @@ jQuery( document ).ready( function( $ ) {
 		}
 	};
 
-	$.wordcampPayments.init();
+	$.wordcampBudgets.init();
 } );

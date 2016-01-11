@@ -3,7 +3,7 @@
 /*
  * Main class to provide functionality common to all other classes
  */
-class WordCamp_Payments {
+class WordCamp_Budgets {
 	const VERSION = '0.1.1';
 
 	/**
@@ -23,8 +23,8 @@ class WordCamp_Payments {
 
 		// Register our assets
 		wp_register_script(
-			'wordcamp-payments',
-			plugins_url( 'javascript/wordcamp-payments.js', __DIR__ ),
+			'wordcamp-budgets',
+			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
 			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
 			self::VERSION,
 			true
@@ -33,7 +33,7 @@ class WordCamp_Payments {
 		wp_register_script(
 			'wcp-attached-files',
 			plugins_url( 'javascript/attached-files.js', __DIR__ ),
-			array( 'wordcamp-payments', 'backbone', 'wp-util' ),
+			array( 'wordcamp-budgets', 'backbone', 'wp-util' ),
 			self::VERSION,
 			true
 		);
@@ -45,8 +45,8 @@ class WordCamp_Payments {
 				unset( $soft_deps[ $key ] );
 
 		wp_register_style(
-			'wordcamp-payments',
-			plugins_url( 'css/wordcamp-payments.css', __DIR__ ),
+			'wordcamp-budgets',
+			plugins_url( 'css/wordcamp-budgets.css', __DIR__ ),
 			$soft_deps,
 			self::VERSION
 		);
@@ -55,8 +55,8 @@ class WordCamp_Payments {
 		$current_screen = get_current_screen();
 
 		if ( in_array( $current_screen->id, array( 'edit-wcp_payment_request', 'wcp_payment_request' ) ) ) {
-			wp_enqueue_script( 'wordcamp-payments' );
-			wp_enqueue_style( 'wordcamp-payments' );
+			wp_enqueue_script( 'wordcamp-budgets' );
+			wp_enqueue_style( 'wordcamp-budgets' );
 
 			if ( in_array( $current_screen->id, array( 'wcp_payment_request' ) ) && isset( $post->ID ) ) {
 				wp_enqueue_media( array( 'post' => $post->ID ) );
@@ -64,8 +64,8 @@ class WordCamp_Payments {
 			}
 
 			wp_localize_script(
-				'wordcamp-payments',
-				'wcpLocalizedStrings',		// todo merge into wordcampPayments var
+				'wordcamp-budgets',
+				'wcpLocalizedStrings',		// todo merge into wordcampBudgets var
 				array(
 					'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
 					'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
@@ -75,11 +75,11 @@ class WordCamp_Payments {
 	}
 
 	/**
-	 * Log something with a payment request.
+	 * Insert an entry into a log for one of the custom post types
 	 *
-	 * @param int $post_id The payment requset ID.
+	 * @param int    $post_id The post ID.
 	 * @param string $message A log message.
-	 * @param array $data Optional data.
+	 * @param array  $data    Optional data.
 	 */
 	public static function log( $post_id, $message, $data = array() ) {
 		global $wpdb;

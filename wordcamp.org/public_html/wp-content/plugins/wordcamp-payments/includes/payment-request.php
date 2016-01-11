@@ -940,23 +940,23 @@ class WCP_Payment_Request {
 		if ( $new == 'incomplete' && $old != 'incomplete' ) {
 			$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
 			$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
-			WordCamp_Payments::log( $post->ID, sprintf( 'Marked as incomplete by %s: %s.', $user->display_name, $incomplete_text ), array(
+			WordCamp_Budgets::log( $post->ID, sprintf( 'Marked as incomplete by %s: %s.', $user->display_name, $incomplete_text ), array(
 				'user_id' => $user->ID,
 				'action' => 'marked-incomplete',
 				'reason' => 'maybe notes',
 			) );
 		} elseif ( $new == 'paid' && $old != 'paid' ) {
-			WordCamp_Payments::log( $post->ID, sprintf( 'Marked as paid by %s.', $user->display_name ), array(
+			WordCamp_Budgets::log( $post->ID, sprintf( 'Marked as paid by %s.', $user->display_name ), array(
 				'user_id' => $user->ID,
 				'action' => 'marked-paid',
 			) );
 		} elseif ( $old == 'auto-draft' && $new != 'auto-draft' ) {
-			WordCamp_Payments::log( $post->ID, sprintf( 'Request created by %s.', $user->display_name ), array(
+			WordCamp_Budgets::log( $post->ID, sprintf( 'Request created by %s.', $user->display_name ), array(
 				'user_id' => $user->ID,
 				'action' => 'updated',
 			) );
 		} else {
-			WordCamp_Payments::log( $post->ID, sprintf( 'Request updated by %s.', $user->display_name ), array(
+			WordCamp_Budgets::log( $post->ID, sprintf( 'Request updated by %s.', $user->display_name ), array(
 				'user_id' => $user->ID,
 				'action' => 'updated',
 			) );
@@ -981,7 +981,7 @@ class WCP_Payment_Request {
 			return;
 		}
 
-		remove_action( 'save_post', array( $this, 'save_payment' ), 10, 2 ); // avoid infinite recursion
+		remove_action( 'save_post', array( $this, 'save_payment' ), 10 ); // avoid infinite recursion
 
 		foreach( $files as $file_id ) {
 			wp_update_post( array(

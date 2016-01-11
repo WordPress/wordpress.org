@@ -1,9 +1,10 @@
 <?php
 /*
-Plugin Name: WordCamp Payments
+Plugin Name: WordCamp Budgets
 Plugin URI:  http://wordcamp.org/
-Description: Provides tools for collecting and processing payment requests from WordCamp organizers.
-Author:      tellyworth, iandunn
+Description: Provides tools for managing WordCamp budgets, sponsor invoices, and payment requests.
+Author:      WordCamp.org
+Author URI:  https://wordcamp.org
 Version:     0.1
 */
 
@@ -12,10 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( is_admin() ) {
-	require_once( __DIR__ . '/classes/wordcamp-payments.php' );
-	require_once( __DIR__ . '/classes/payment-request.php' );
-	require_once( __DIR__ . '/classes/encryption.php' );
+	require_once( __DIR__ . '/includes/wordcamp-budgets.php' );
+	require_once( __DIR__ . '/includes/payment-request.php' );
+	require_once( __DIR__ . '/includes/encryption.php' );
 
-	$GLOBALS['wordcamp_payments']   = new WordCamp_Payments();
+	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();
 }

@@ -3,7 +3,7 @@ jQuery( document ).ready( function( $ ) {
 	/*
 	 * Model for an attached file
 	 */
-	$.wordcampPayments.AttachedFile = Backbone.Model.extend( {
+	$.wordcampBudgets.AttachedFile = Backbone.Model.extend( {
 		defaults: {
 			'ID':          0,
 			'post_parent': 0,
@@ -15,14 +15,14 @@ jQuery( document ).ready( function( $ ) {
 	/*
 	 * Collection of attached files
 	 */
-	$.wordcampPayments.AttachedFiles = Backbone.Collection.extend( {
-		model: $.wordcampPayments.AttachedFile
+	$.wordcampBudgets.AttachedFiles = Backbone.Collection.extend( {
+		model: $.wordcampBudgets.AttachedFile
 	} );
 
 	/*
 	 * View for a single attached file
 	 */
-	$.wordcampPayments.AttachedFileView = Backbone.View.extend( {
+	$.wordcampBudgets.AttachedFileView = Backbone.View.extend( {
 		tagName: 'li',
 		template: wp.template( 'wcp-attached-file' ),
 
@@ -39,13 +39,13 @@ jQuery( document ).ready( function( $ ) {
 	/*
 	 * View for a collection of attached files
 	 */
-	$.wordcampPayments.AttachedFilesView = Backbone.View.extend( {
+	$.wordcampBudgets.AttachedFilesView = Backbone.View.extend( {
 		el: $( '#wcp_files' ),
 
 		initialize: function() {
 			_.bindAll( this, 'render', 'appendFile' );
 
-			this.collection = new $.wordcampPayments.AttachedFiles( wcpAttachedFiles );
+			this.collection = new $.wordcampBudgets.AttachedFiles( wcpAttachedFiles );
 			this.collection.bind( 'add', this.appendFile );
 
 			this.render();
@@ -61,7 +61,7 @@ jQuery( document ).ready( function( $ ) {
 
 		appendFile: function( file ) {
 			var noFilesUploaded  = $( '.wcp_no_files_uploaded' );
-			var attachedFileView = new $.wordcampPayments.AttachedFileView( { model: file } );
+			var attachedFileView = new $.wordcampBudgets.AttachedFileView( { model: file } );
 
 			$( '.wcp_files_list' ).append( attachedFileView.render().el );
 			noFilesUploaded.removeClass( 'active' );
@@ -78,7 +78,7 @@ jQuery( document ).ready( function( $ ) {
 		 *
 		 * Files that are already attached to other posts are ignored.
 		 *
-		 * @param {wordcampPayments.AttachedFile} file
+		 * @param {wordcampBudgets.AttachedFile} file
 		 */
 		attachExistingFile: function( file ) {
 			var fileIDsToAttach,
@@ -97,6 +97,6 @@ jQuery( document ).ready( function( $ ) {
 		}
 	} );
 
-	$.wordcampPayments.attachedFilesView = new $.wordcampPayments.AttachedFilesView();
+	$.wordcampBudgets.attachedFilesView = new $.wordcampBudgets.AttachedFilesView();
 
 } );
