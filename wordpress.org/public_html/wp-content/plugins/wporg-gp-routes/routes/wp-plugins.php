@@ -17,8 +17,8 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 				(100 * stats.current/stats.all) as percent_complete,
 				stats.waiting+stats.fuzzy as waiting_strings,
 				stats.untranslated as untranslated
-			FROM {$wpdb->prefix}project_translation_status stats
-				LEFT JOIN {$wpdb->prefix}projects p ON stats.project_id = p.id
+			FROM {$wpdb->project_translation_status} stats
+				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
 			WHERE
 				p.parent_project_id = '{$project->id}'
 		" );

@@ -40,8 +40,8 @@ class WPorg_GP_Route_Stats extends GP_Route {
 				path, locale, locale_slug,
 				(100 * stats.current/stats.all) as percent_complete,
 				stats.waiting+stats.fuzzy as waiting_strings
-			FROM {$wpdb->prefix}project_translation_status stats
-				LEFT JOIN {$wpdb->prefix}projects p ON stats.project_id = p.id
+			FROM {$wpdb->project_translation_status} stats
+				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
 			WHERE
 				p.path IN ( $all_project_paths_sql )
 				AND p.active = 1";
@@ -79,8 +79,8 @@ class WPorg_GP_Route_Stats extends GP_Route {
 		$sql = "SELECT
 				locale, locale_slug,
 				SUM( stats.waiting ) + SUM( stats.fuzzy ) as waiting_strings
-			FROM {$wpdb->prefix}project_translation_status stats
-				LEFT JOIN {$wpdb->prefix}projects p ON stats.project_id = p.id
+			FROM {$wpdb->project_translation_status} stats
+				LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
 			WHERE
 				p.parent_project_id IN ( $parent_project_ids )
 				AND p.active = 1
