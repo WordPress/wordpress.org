@@ -1,6 +1,11 @@
 <?php
 /**
  * Plugin name: GlotPress: Help Page
+ * Description: Provides a dismissable help notice for new translators on translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 class WPorg_GP_Help_Page {

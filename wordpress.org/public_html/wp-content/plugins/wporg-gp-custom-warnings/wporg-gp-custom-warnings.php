@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Custom translation warnings for translate.wordpress.org.
- * Plugin author: dd32
+ * Plugin name: GlotPress: Custom Translation Warnings
+ * Description: Provides custom translation warnings like mismatching URLs for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 class WPorg_GP_Custom_Translation_Warnings {

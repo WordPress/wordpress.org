@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Tie roles on Rosetta sites directly into translate.wordpress.org.
- * Plugin author: nacin, ocean90
+ * Plugin name: GlotPress: Rosetta Roles
+ * Description: Ties roles on Rosetta sites directly into translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 class WPorg_GP_Rosetta_Roles {
@@ -19,13 +23,6 @@ class WPorg_GP_Rosetta_Roles {
 	 * @var string
 	 */
 	public $id = 'wporg-rosetta-roles';
-
-	/**
-	 * Holds the role of an approver.
-	 *
-	 * @var string
-	 */
-	public $approver_role = 'translation_editor';
 
 	/**
 	 * Database table for translation editors.

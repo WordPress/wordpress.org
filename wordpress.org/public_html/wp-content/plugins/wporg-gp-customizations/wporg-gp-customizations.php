@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Customizations for translate.wordpress.org.
- * Plugin author: Nikolay
+ * Plugin name: GlotPress: WordPress.org Customizations
+ * Description: Provides general customizations for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 class WPorg_GP_Customizations {

@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Register custom routes for translate.wordpress.org.
- * Plugin author: ocean90, obenland, dd32
+ * Plugin name: GlotPress: Custom Routes
+ * Description: Provides custom routes like <code>/locale</code> or <code>/stats</code> for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 require_once __DIR__ . '/routes/redirector.php';

@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Slack integrations for translate.wordpress.org.
- * Plugin author: dd32, ocean90
+ * Plugin name: GlotPress: Slack Integrations
+ * Description: Provides Slack integrations like logging translation warnings for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 require_once __DIR__ . '/integrations/log-warnings.php';

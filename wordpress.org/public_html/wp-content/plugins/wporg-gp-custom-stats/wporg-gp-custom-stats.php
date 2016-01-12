@@ -1,7 +1,11 @@
 <?php
 /**
- * Plugin name: GlotPress: Custom stats for translate.wordpress.org.
- * Plugin author: dd32
+ * Plugin name: GlotPress: Custom Stats
+ * Description: Provides custom stats for users, projects, and discared warnings for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 require_once __DIR__ . '/stats/user.php';

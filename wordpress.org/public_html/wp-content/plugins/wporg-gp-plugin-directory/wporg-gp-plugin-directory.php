@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin name: GlotPress: Plugin Directory bridge for translate.wordpress.org.
- * Plugin author: stephdau
+ * Plugin name: GlotPress: Plugin Directory Bridge
+ * Description: Clears the content translation cache for plugins (readme/code) hosted on wordpress.org based on actions taken withing translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
-/**
- * This plugin clears the content translation cache for plugins (readme/code) hosted on wp.org based on actions taken withing GlotPress.
- *
- */
 class WPorg_GP_Plugin_Directory {
 	public $master_project   = 'wp-plugins';
 	public $i18n_cache_group = 'plugins-i18n';

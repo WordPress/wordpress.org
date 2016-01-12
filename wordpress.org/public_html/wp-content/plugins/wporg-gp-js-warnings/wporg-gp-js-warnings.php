@@ -1,11 +1,14 @@
 <?php
 /**
- * Plugin name: GlotPress: Client-side JS translation validation
- * Plugin author: dd32
+ * Plugin name: GlotPress: Client-side Translation Validation
+ * Description: Provides client-side JavaScript translation validation warning warnings for translate.wordpress.org.
+ * Version:     1.0
+ * Author:      WordPress.org
+ * Author URI:  http://wordpress.org/
+ * License:     GPLv2 or later
  */
 
 /**
- * Adds client-side JS translation validation warning warnings.
  *
  * Not all of the warnings match exactly what is in GlotPress core, some are more specific or vague.
  * Some of the GlotPress warnings are not duplicated into JS (rarely hit, or harder to reproduce).
