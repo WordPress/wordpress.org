@@ -25,7 +25,8 @@ class WordCamp_Budgets {
 			if ( ! wp_style_is( $handle, 'registered' ) )
 				unset( $soft_deps[ $key ] );
 
-		wp_register_style(
+		// Enqueue it on every screen, because it styles the menu icon
+		wp_enqueue_style(
 			'wordcamp-budgets',
 			plugins_url( 'css/wordcamp-budgets.css', __DIR__ ),
 			$soft_deps,

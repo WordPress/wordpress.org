@@ -202,7 +202,6 @@ class WCP_Payment_Request {
 		}
 
 		wp_enqueue_script( 'payment-requests' );
-		wp_enqueue_style(  'wordcamp-budgets' );
 
 		if ( isset( $post->ID ) ) {
 			wp_enqueue_media( array( 'post' => $post->ID ) );
