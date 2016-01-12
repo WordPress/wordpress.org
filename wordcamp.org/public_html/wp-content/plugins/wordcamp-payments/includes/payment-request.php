@@ -11,6 +11,7 @@ class WCP_Payment_Request {
 		add_action( 'init',                   array( $this, 'register_post_type' ));
 		add_action( 'init',                   array( __CLASS__, 'register_post_statuses' ) );
 		add_action( 'add_meta_boxes',         array( $this, 'init_meta_boxes' ) );
+		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_assets' ), 11 );
 
 		// Miscellaneous
 		add_filter( 'display_post_states',    array( $this, 'display_post_states' ) );
@@ -168,6 +169,54 @@ class WCP_Payment_Request {
 
 		add_meta_box( 'wcp_log', __( 'Log', 'wordcamporg' ), array( $this, 'render_log_metabox' ),
 			self::POST_TYPE, 'normal', 'high' );
+	}
+
+	/**
+	 * Enqueue scripts and stylesheets
+	 */
+	public function enqueue_assets() {
+		global $post;
+
+		// Register our assets
+		wp_register_script(
+			'payment-requests',
+			plugins_url( 'javascript/payment-requests.js', __DIR__ ),
+			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
+			WordCamp_Budgets::VERSION,
+			true
+		);
+
+		wp_register_script(
+			'wcp-attached-files',
+			plugins_url( 'javascript/attached-files.js', __DIR__ ),
+			array( 'payment-requests', 'backbone', 'wp-util' ),
+			WordCamp_Budgets::VERSION,
+			true
+		);
+
+		// Enqueue our assets if they're needed on the current screen
+		$current_screen = get_current_screen();
+
+		if ( 'wcp_payment_request' !== $current_screen->id ) {
+			return;
+		}
+
+		wp_enqueue_script( 'payment-requests' );
+		wp_enqueue_style(  'wordcamp-budgets' );
+
+		if ( isset( $post->ID ) ) {
+			wp_enqueue_media( array( 'post' => $post->ID ) );
+			wp_enqueue_script( 'wcp-attached-files' );
+		}
+
+		wp_localize_script(
+			'payment-requests',
+			'wcpLocalizedStrings',		// todo merge into paymentRequests var
+			array(
+				'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
+				'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
+			)
+		);
 	}
 
 	/**
