@@ -23,8 +23,8 @@ class WordCamp_Budgets {
 
 		// Register our assets
 		wp_register_script(
-			'wordcamp-budgets',
-			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
+			'payment-requests',
+			plugins_url( 'javascript/payment-requests.js', __DIR__ ),
 			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
 			self::VERSION,
 			true
@@ -33,7 +33,7 @@ class WordCamp_Budgets {
 		wp_register_script(
 			'wcp-attached-files',
 			plugins_url( 'javascript/attached-files.js', __DIR__ ),
-			array( 'wordcamp-budgets', 'backbone', 'wp-util' ),
+			array( 'payment-requests', 'backbone', 'wp-util' ),
 			self::VERSION,
 			true
 		);
@@ -55,7 +55,7 @@ class WordCamp_Budgets {
 		$current_screen = get_current_screen();
 
 		if ( in_array( $current_screen->id, array( 'edit-wcp_payment_request', 'wcp_payment_request' ) ) ) {
-			wp_enqueue_script( 'wordcamp-budgets' );
+			wp_enqueue_script( 'payment-requests' );
 			wp_enqueue_style( 'wordcamp-budgets' );
 
 			if ( in_array( $current_screen->id, array( 'wcp_payment_request' ) ) && isset( $post->ID ) ) {
@@ -64,7 +64,7 @@ class WordCamp_Budgets {
 			}
 
 			wp_localize_script(
-				'wordcamp-budgets',
+				'payment-requests',
 				'wcpLocalizedStrings',		// todo merge into wordcampBudgets var
 				array(
 					'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
