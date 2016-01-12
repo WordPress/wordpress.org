@@ -10,6 +10,7 @@ class WPorg_GP_CLI_Update_Caches extends WP_CLI_Command {
 	public function all() {
 		$this->contributors_count();
 		$this->translation_status();
+		$this->existing_locales();
 	}
 
 	/**
@@ -66,5 +67,17 @@ class WPorg_GP_CLI_Update_Caches extends WP_CLI_Command {
 
 		wp_cache_set( 'translation-status', $translation_status, $this->cache_group );
 		WP_CLI::success( 'Translation status was updated.' );
+	}
+
+	/**
+	 * Update cache for existing locales.
+	 *
+	 * @subcommand existing-locales
+	 */
+	public function existing_locales() {
+		$existing_locales = GP::$translation_set->existing_locales();
+
+		wp_cache_set( 'existing-locales', $existing_locales, $this->cache_group );
+		WP_CLI::success( 'Existing locales were updated.' );
 	}
 }
