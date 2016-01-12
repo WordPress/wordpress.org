@@ -1,6 +1,6 @@
 <?php
 gp_title( __('Locales &lt; GlotPress') );
-wp_enqueue_script('common');
+gp_enqueue_script('common');
 gp_tmpl_header();
 ?>
 

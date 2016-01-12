@@ -12,8 +12,8 @@ $table_headings = array(
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
 gp_breadcrumb_project( $project );
 
-wp_enqueue_script( 'common' );
-wp_enqueue_script( 'tablesorter' );
+gp_enqueue_script( 'common' );
+gp_enqueue_script( 'tablesorter' );
 
 gp_tmpl_header();
 ?>

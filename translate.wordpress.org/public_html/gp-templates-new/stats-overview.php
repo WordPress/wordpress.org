@@ -1,6 +1,6 @@
 <?php
 gp_title( __( 'Translation status overview &lt; GlotPress' ) );
-wp_enqueue_script( 'tablesorter' );
+gp_enqueue_script( 'tablesorter' );
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
