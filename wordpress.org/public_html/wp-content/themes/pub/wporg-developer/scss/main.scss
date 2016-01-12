@@ -1127,12 +1127,17 @@
 
 		.comment-list li {
 			padding: 2rem 1.5rem 1rem;
-			border: 0 solid #eee;
-			border-bottom-width: 1px;
 			background: #fff;
+			overflow: auto;
 
 			&:first-child {
 				padding-top: 1rem;
+			}
+
+			article {
+				border-bottom: 1px solid #dfdfdf;
+				padding-bottom: 1em;
+				overflow: auto;
 			}
 		}
 
