@@ -50,7 +50,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		$translations = array_values( $_translations );
 	}
 
-	require_once WPORGPATH . 'translate/glotpress/locales/locales.php';
+	require_once GLOTPRESS_LOCALES_PATH;
 	// Temporary: Add language variants to the list of GlotPress locales.
 	$GLOBALS['gp_locales'] = new GP_Locales;
 	$de_formal = clone GP_Locales::by_field( 'wp_locale', 'de_DE' );

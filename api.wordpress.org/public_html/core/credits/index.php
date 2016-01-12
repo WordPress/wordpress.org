@@ -42,7 +42,7 @@ if ( ! empty( $_GET['version'] ) ) {
 $locale = false;
 // Convert a locale from a WP locale to a GP locale.
 if ( ( isset( $_GET['locale'] ) && 'en_US' != $_GET['locale'] ) || ( 'cli' == php_sapi_name() && isset( $argv[2] ) ) ) {
-	require WPORGPATH . 'translate/glotpress/locales/locales.php';
+	require GLOTPRESS_LOCALES_PATH;
 	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : $_GET['locale'] );
 	if ( $gp_locale ) {
 		$locale = $gp_locale;
