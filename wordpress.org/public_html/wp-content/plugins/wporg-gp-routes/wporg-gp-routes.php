@@ -18,8 +18,31 @@ class WPorg_GP_Routes {
 
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'register_routes' ), 5 );
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			$this->register_cli_commands();
+		}
 	}
 
+	/**
+	 * Registers custom routes and removes default routes.
+	 *
+	 * Removes:
+	 *  - API: /languages/$locale
+	 *  - /languages/$locale
+	 *  - /languages/$locale
+	 *  - /languages/$locale/$path
+	 *  - /profile/$path
+	 *
+	 * Adds:
+	 *  - /
+	 *  - /locale/$locale
+	 *  - /locale/$locale/$path
+	 *  - /locale/$locale/$path/$path
+	 *  - /locale/$locale/$path/$path/$path
+	 *  - /stats/?
+	 *  - /projects/wp-plugins/$project
+	 */
 	public function register_routes() {
 		$request_uri = GP::$router->request_uri();
 		$path = '(.+?)';
@@ -32,7 +55,7 @@ class WPorg_GP_Routes {
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
 			GP::$router->remove( "/languages/$locale/$path" );
-			GP::$router->remove( '/profile/(.+?)' );
+			GP::$router->remove( "/profile/$path" );
 
 			// Redirect routes.
 			GP::$router->prepend( '/languages', array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
@@ -48,6 +71,15 @@ class WPorg_GP_Routes {
 			$project = '([^/]*)/?';
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_projects' ) );
 		}
+	}
+
+	/**
+	 * Registers CLI commands if WP-CLI is loaded.
+	 */
+	function register_cli_commands() {
+		require_once __DIR__ . '/cli/update-caches.php';
+
+		WP_CLI::add_command( 'wporg-translate update-cache', 'WPorg_GP_CLI_Update_Caches' );
 	}
 }
 
