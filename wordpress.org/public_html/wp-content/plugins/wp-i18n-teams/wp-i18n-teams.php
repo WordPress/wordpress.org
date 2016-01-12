@@ -83,7 +83,7 @@ class WP_I18n_Teams {
 			$percentages = $this->get_core_translation_data();
 			require( __DIR__ . '/views/all-locales.php' );
 		} else {
-			require_once( WPORGPATH . 'translate/glotpress/locales/locales.php' );
+			require_once GLOTPRESS_LOCALES_PATH;
 			$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
 			$locale_data = $this->get_extended_locale_data( $locale );
 			require( __DIR__ . '/views/locale-details.php' );
@@ -98,7 +98,7 @@ class WP_I18n_Teams {
 	 * @return array
 	 */
 	protected static function get_locales() {
-		require_once( WPORGPATH . 'translate/glotpress/locales/locales.php' );
+		require_once GLOTPRESS_LOCALES_PATH;
 
 		$locales = GP_Locales::locales();
 		$locales = array_filter( $locales, array( __CLASS__, 'filter_locale_for_wp' ) );
