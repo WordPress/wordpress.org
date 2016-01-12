@@ -442,6 +442,22 @@ namespace DevHub {
 	}
 
 	/**
+	 * Get the specific type of hook.
+	 *
+	 * @param int|WP_Post|null $post Optional. Post ID or post object. Default is global $post.
+	 * @return string          Either 'action', 'filter', or an empty string if not a hook post type.
+	 */
+	function get_hook_type( $post = null ) {
+		$hook = '';
+
+		if ( 'wp-parser-hook' === get_post_type( $post ) ) {
+			$hook = get_post_meta( get_post_field( 'ID', $post ), '_wp-parser_hook_type', true );
+		}
+
+		return $hook;
+	}
+
+	/**
 	 * Get site section root URL based on URL path.
 	 *
 	 * @return string

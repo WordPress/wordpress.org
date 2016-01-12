@@ -92,12 +92,30 @@ add_filter( 'document_title_parts', 'wporg_developer_document_title' );
 /**
  * Prefixes excerpts for archive view with content type label.
  *
- * @param  string $excerpt The excerpt.
+ * @param string  $excerpt The excerpt.
  * @return string
  */
 function wporg_filter_archive_excerpt( $excerpt ) {
 	if ( ! is_single() ) {
-		$excerpt = '<b>' . get_post_type_object( get_post_type( get_the_ID() ) )->labels->singular_name . ': </b>' . $excerpt;
+
+		$post_id = get_the_ID();
+		$type    = get_post_type_object( get_post_type( $post_id ) )->labels->singular_name;
+
+		if ( 'hook' === strtolower( $type ) ) {
+			$hook_type = \DevHub\get_hook_type( $post_id );
+
+			if ( isset( $hook_type ) ) {
+				switch ( $hook_type ) {
+					case 'action':
+						$type = __( 'Action Hook', 'wporg' );
+						break;
+					case 'filter':
+						$type = __( 'Filter Hook', 'wporg' );
+						break;
+				}
+			}
+		}
+		$excerpt = '<b>' . $type . ': </b>' . $excerpt;
 	}
 
 	return $excerpt;
