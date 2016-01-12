@@ -5,7 +5,7 @@
  * @package wporg-developer
  */
 ?>
-<div class="search-section section clear <?php if ( ! is_page( 'reference' ) ) { echo 'hide-if-js'; } ?>">
+<div class="search-section section clear <?php if ( ! ( is_page( 'reference' ) || is_search() ) ) { echo 'hide-if-js'; } ?>">
 
 <?php if ( is_search() ) { ?>
 
