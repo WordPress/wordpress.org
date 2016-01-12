@@ -1564,3 +1564,43 @@
 		}
 	}
 }
+
+@media (max-width: 22em) {
+	ul, ol {
+		margin-left: 1.2em;
+	}
+	.devhub-wrap {
+		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
+			h1 {
+				padding-left: 20px;
+				line-height: 2rem;
+
+				a {
+					margin-left: -20px;
+					font-size: 16px;
+				}
+			}
+		}
+
+		&.single-wp-parser-function, &.single-wp-parser-method, &.single-wp-parser-hook {
+			.comment-list {
+				li {
+					padding-left: 0;
+					padding-right: 0;
+				}
+
+				.avatar {
+					margin: 0 1em 0 0;
+				}
+			}
+		}
+
+		.source-code-links {
+			margin-left: 0;
+
+			span:first-child {
+				margin-left: 0;
+			}
+		}
+	}
+}
