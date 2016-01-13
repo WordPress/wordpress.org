@@ -203,21 +203,6 @@ function wpmobileapps_title_separator(){
 add_filter( 'document_title_separator', 'wpmobileapps_title_separator' );
 
 /**
- * Omit page name from front page title.
- *
- * @param array $parts The document title parts.
- * @return array The document title parts.
- */
-function wpmobileapps_remove_frontpage_name_from_title( $parts ) {
-	if ( is_front_page() ) {
-		$parts['title'] = '';
-	}
-
-	return $parts;	
-}
-add_filter( 'document_title_parts', 'wpmobileapps_remove_frontpage_name_from_title' );
-
-/**
  * Remove Jetpack Likes on the grid page template.
  */
 function wpmobileapps_remove_likes() {
