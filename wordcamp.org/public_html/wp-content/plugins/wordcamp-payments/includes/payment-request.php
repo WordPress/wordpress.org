@@ -546,50 +546,6 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Determines whether we want to perform actions on the given post based on the current context.
-	 *
-	 * Examples of actions we might perform are saving the meta fields during the `save_post` hook, or send out an
-	 * e-mail notification during the `transition_post_status` hook.
-	 *
-	 * This function is called by several other functions, each of which may require additional checks that are
-	 * specific to their circumstances. This function only covers checks that are common to all of its callers.
-	 *
-	 * @param WP_Post | array $post
-	 *
-	 * @return bool
-	 */
-	protected function post_edit_is_actionable( $post ) {
-		if ( is_array( $post ) ) {
-			$post = (object) $post;
-		}
-
-		$is_actionable   = true;
-		$ignored_actions = array( 'trash', 'untrash', 'restore', 'bulk_edit' ); // todo ignore bulk deletion too
-
-		// Don't take action on other post types
-		if ( ! $post || $post->post_type != self::POST_TYPE ) {
-			$is_actionable = false;
-		}
-
-		// Don't take action if the user isn't allowed. The ID will be missing from new posts during `wp_insert_post_data`, though, so skip it then.
-		if ( $is_actionable && isset( $post->ID ) && ! current_user_can( 'edit_post', $post->ID ) ) {
-			$is_actionable = false;
-		}
-
-		// Don't take action while trashing the post, etc
-		if ( $is_actionable && isset( $_GET['action'] ) && in_array( $_GET['action'], $ignored_actions ) ) {
-			$is_actionable = false;
-		}
-
-		// Don't take action during autosaves
-		if ( $is_actionable && ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || $post->post_status == 'auto-draft' ) ) {
-			$is_actionable = false;
-		}
-
-		return $is_actionable;
-	}
-
-	/**
 	 * Set the request's status based on whether the vendor has been paid.
 	 *
 	 * @param array $post_data
@@ -597,7 +553,7 @@ class WCP_Payment_Request {
 	 * @return array
 	 */
 	public function update_request_status( $post_data, $post_data_raw ) {
-		if ( $this->post_edit_is_actionable( $post_data ) ) {
+		if ( WordCamp_Budgets::post_edit_is_actionable( $post_data, self::POST_TYPE ) ) {
 			if ( $this->should_mark_request_incomplete() ) {
 				$post_data['post_status'] = 'incomplete';
 				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
@@ -706,7 +662,7 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 */
 	public function save_payment( $post_id, $post ) {
-		if ( ! $this->post_edit_is_actionable( $post ) ) {
+		if ( ! WordCamp_Budgets::post_edit_is_actionable( $post, self::POST_TYPE ) ) {
 			return;
 		}
 
