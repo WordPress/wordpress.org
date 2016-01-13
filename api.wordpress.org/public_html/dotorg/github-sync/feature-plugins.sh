@@ -51,7 +51,8 @@ mkdir $WORKING_DIR/_temp-github/
 cd $WORKING_DIR/_temp-github/
 
 # Create a temporary Github clone to work from
-git clone -q --recursive $GITHUB_URL $WORKING_DIR/_temp-github/
+# We don't specify --recursive as submodules are usually huge external libs used for development
+git clone -q $GITHUB_URL $WORKING_DIR/_temp-github/
 
 # Get the latest Git rev
 LATEST_GIT_REV=$(git rev-parse HEAD)
