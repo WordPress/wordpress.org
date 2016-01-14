@@ -434,7 +434,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'requester':
-				$value = $this->get_requester_formatted_email( $post->post_author );
+				$value = WordCamp_Budgets::get_requester_formatted_email( $post->post_author );
 				break;
 
 			case 'date_vendor_paid':
@@ -476,24 +476,6 @@ class WCP_Payment_Request {
 
 
 		return $value;
-	}
-
-	/**
-	 * Get the e-mail address of the requester in `Name <address>` format
-	 *
-	 * @param int $post_author_id
-	 *
-	 * @return false|string
-	 */
-	protected function get_requester_formatted_email( $post_author_id ) {
-		$address   = false;
-		$requester = get_user_by( 'id', $post_author_id );
-
-		if ( is_a( $requester, 'WP_User' ) ) {
-			$address = sprintf( '%s <%s>', $requester->get( 'display_name' ), $requester->get( 'user_email' ) );
-		}
-
-		return $address;
 	}
 
 	/**
@@ -598,7 +580,7 @@ class WCP_Payment_Request {
 	 * @param array $post_data
 	 */
 	protected function notify_requester_payment_made( $request_id, $post_data ) {
-		if ( ! $to = $this->get_requester_formatted_email( $post_data['post_author'] ) ) {
+		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post_data['post_author'] ) ) {
 			return;
 		}
 
@@ -629,7 +611,7 @@ class WCP_Payment_Request {
 	 * @param array $post_data_raw
 	 */
 	protected function notify_requester_request_incomplete( $request_id, $post_data, $post_data_raw ) {
-		if ( ! $to = $this->get_requester_formatted_email( $post_data['post_author'] ) ) {
+		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post_data['post_author'] ) ) {
 			return;
 		}
 

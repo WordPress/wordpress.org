@@ -211,6 +211,24 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get the e-mail address of the requester in `Name <address>` format
+	 *
+	 * @param int $post_author_id
+	 *
+	 * @return false|string
+	 */
+	public static function get_requester_formatted_email( $post_author_id ) {
+		$address   = false;
+		$requester = get_user_by( 'id', $post_author_id );
+
+		if ( is_a( $requester, 'WP_User' ) ) {
+			$address = sprintf( '%s <%s>', $requester->get( 'display_name' ), $requester->get( 'user_email' ) );
+		}
+
+		return $address;
+	}
+
+	/**
 	 * Insert an entry into a log for one of the custom post types
 	 *
 	 * @param int    $post_id The post ID.
