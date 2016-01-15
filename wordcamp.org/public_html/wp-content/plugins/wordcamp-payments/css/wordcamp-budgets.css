@@ -5,9 +5,12 @@
 	margin-left: 9px;
 }
 
+
 /*
- * Payment Methods
+ * Payment Requests
  */
+
+/* Payment methods */
 .payment_method_fields.active,
 .wcp_no_files_uploaded.active {
 	display: block;
@@ -18,9 +21,7 @@ tr#row-payment-method label {
 }
 
 
-/*
- * Files
- */
+/* Files  */
 #wcp_files .description {
 	margin-bottom: 1em;
 }
@@ -34,10 +35,7 @@ tr#row-payment-method label {
 	margin-bottom: 1em;
 }
 
-
-/*
- * Log
- */
+/* Log */
 #wcp_log .inside {
 	margin: 0;
 	padding: 0;
