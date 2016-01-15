@@ -488,43 +488,4 @@ class Payment_Requests_Dashboard {
 			echo '<a class="nav-tab ' . $active . '" href="' . esc_url( $url ) . '">' . esc_html( $section_caption ) . '</a>';
 		}
 	}
-
-	/**
-	 * Currency Conversion
-	 *
-	 * @param string $from What currency are we selling.
-	 * @param string $to What currency are we buying.
-	 * @param float $amount How much we're selling.
-	 *
-	 * @return float Converted amount.
-	 */
-	public static function convert_currency( $from, $to, $amount ) {
-		global $wpdb;
-
-		$from = strtolower( $from );
-		$to = strtolower( $to );
-		$cache_key = md5( sprintf( 'wcp-exchange-rate-%s:%s', $from, $to ) );
-
-		$rate = 0;
-		if ( false === ( $rate = get_transient( $cache_key ) ) ) {
-			$url = 'https://query.yahooapis.com/v1/public/yql';
-			$url = add_query_arg( 'format', 'json', $url );
-			$url = add_query_arg( 'env', rawurlencode( 'store://datatables.org/alltableswithkeys' ), $url );
-			$url = add_query_arg( 'q', rawurlencode( $wpdb->prepare( 'select * from yahoo.finance.xchange where pair = %s', $from . $to ) ), $url );
-
-			$request = wp_remote_get( esc_url_raw( $url ) );
-			$body = json_decode( wp_remote_retrieve_body( $request ), true );
-
-			if ( ! empty( $body['query']['results']['rate']['Ask'] ) ) {
-				$rate = floatval( $body['query']['results']['rate']['Ask'] );
-			}
-
-			set_transient( $cache_key, $rate, 24 * HOUR_IN_SECONDS );
-		}
-
-		if ( $rate < 0.0000000001 )
-			return 0;
-
-		return $amount * $rate;
-	}
 }
