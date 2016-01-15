@@ -1,4 +1,11 @@
 /*
+ * Common
+ */
+.menu-icon-wcp_payment_request .wp-menu-image img {
+	margin-left: 9px;
+}
+
+/*
  * Payment Methods
  */
 .payment_method_fields.active,

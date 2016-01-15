@@ -59,6 +59,7 @@ class WCP_Payment_Request {
 			'show_ui'           => true,
 			'show_in_nav_menus' => true,
 			'menu_position'     => 25,
+			'menu_icon'         => plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
 			'supports'          => array( 'title' ),
 			'has_archive'       => true,
 		);
