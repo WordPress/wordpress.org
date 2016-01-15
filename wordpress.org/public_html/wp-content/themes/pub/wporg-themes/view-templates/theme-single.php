@@ -38,7 +38,7 @@
 
 				<div class="theme-meta-info">
 					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>{{ data.last_updated }}</strong>' ); ?></p>
-					<p class="active_installs"><?php printf( __( 'Active Installs: %s', 'wporg-themes' ), '<strong>{{ data.active_installs }}</p>' ); ?></p>
+					<p class="active_installs"><?php printf( __( 'Active Installs: %s', 'wporg-themes' ), '<strong>{{ data.active_installs }}</strong>' ); ?></p>
 					<# if ( data.theme_url ) { #>
 					<a href="{{ data.theme_url }}"><?php _e( 'Theme Homepage', 'wporg-themes' ); ?></a>
 					<# } #>
