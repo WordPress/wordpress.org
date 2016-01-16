@@ -63,7 +63,7 @@ function render_submenu_page() {
 
 	$list_table->prepare_items();
 
-	switch ( $_GET['section'] ) {
+	switch ( get_current_section() ) {
 		case 'submitted':
 			$section_explanation = 'These invoices have been completed by the organizer, but need to be approved by a deputy before being sent to the sponsor.';
 			break;
@@ -81,6 +81,22 @@ function render_submenu_page() {
 }
 
 /**
+ * Get the current section
+ *
+ * @return string
+ */
+function get_current_section() {
+	$sections        = array( 'submitted', 'approved', 'paid' );
+	$current_section = 'submitted';
+
+	if ( isset( $_GET['section'] ) && in_array( $_GET['section'], $sections, true ) ) {
+		$current_section = $_GET['section'];
+	}
+
+	return $current_section;
+}
+
+/**
  * Get all the data needed to render the section tabs
  *
  * @return array
@@ -88,7 +104,7 @@ function render_submenu_page() {
 function get_submenu_page_sections() {
 	$statuses        = \WordCamp\Budgets\Sponsor_Invoices\get_custom_statuses();
 	$sections        = array();
-	$current_section = sanitize_text_field( $_GET['section'] );
+	$current_section = get_current_section();
 
 	foreach ( $statuses as $status_slug => $status_name ) {
 		$status_slug = str_replace( 'wcbsi_', '', $status_slug );    // make the URL easier to read

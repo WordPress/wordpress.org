@@ -18,7 +18,7 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 			'amount'        => 'Amount',
 		);
 
-		if ( 'submitted' === $_GET['section'] ) {
+		if ( 'submitted' === get_current_section() ) {
 			$columns['approve_invoice'] = 'Approve';
 		}
 
@@ -48,7 +48,7 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 		);
 
 		$table_name = get_index_table_name();
-		$status     = 'wcbsi_' . $_GET['section'];
+		$status     = 'wcbsi_' . get_current_section();
 		$paged      = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1;
 		$limit      = 30;
 		$offset     = $limit * ( $paged - 1 );
