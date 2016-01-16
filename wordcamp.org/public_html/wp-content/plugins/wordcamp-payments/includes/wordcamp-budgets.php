@@ -4,7 +4,7 @@
  * Main class to provide functionality common to all other classes
  */
 class WordCamp_Budgets {
-	const VERSION = '0.1.1';
+	const VERSION = '0.1.2';
 
 	/**
 	 * Constructor

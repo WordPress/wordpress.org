@@ -39,10 +39,9 @@ jQuery( document ).ready( function( $ ) {
 
 				if ( $.isEmptyObject( info ) ) {
 					infoContainer.html( '' );
+					sendInvoiceButton.prop( 'disabled', true );
 					return;
-				}
-
-				if ( info.requiredFieldsComplete ) {
+				} else if ( info.requiredFieldsComplete ) {
 					infoTemplate = wp.template( 'wcbsi-sponsor-information' );
 					sendInvoiceButton.prop( 'disabled', false );
 				} else {
