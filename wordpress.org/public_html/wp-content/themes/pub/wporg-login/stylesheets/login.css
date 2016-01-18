@@ -1,0 +1,409 @@
+@import url(../stylesheets/l10n.css);
+@import url(../stylesheets/dashicons.css);
+/* line 5, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+/* line 22, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+html {
+  line-height: 1;
+}
+
+/* line 24, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 26, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 28, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+/* line 30, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+q, blockquote {
+  quotes: none;
+}
+/* line 103, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+/* line 32, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+a img {
+  border: none;
+}
+
+/* line 116, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
+  display: block;
+}
+
+/* line 5, ../sass/oauth.scss */
+html, body {
+  height: 100%;
+}
+
+/* line 6, ../sass/oauth.scss */
+html {
+  background: #23282D;
+}
+
+/* line 7, ../sass/oauth.scss */
+body {
+  color: #F5F5F5;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+/* line 8, ../sass/oauth.scss */
+* {
+  box-sizing: border-box;
+}
+
+/* line 10, ../sass/oauth.scss */
+a {
+  color: #009FD4;
+  text-decoration: none;
+  font-weight: normal;
+  -webkit-transition-property: border, background, color;
+  transition-property: border, background, color;
+  -webkit-transition-duration: .05s;
+  transition-duration: .05s;
+  -webkit-transition-timing-function: ease-in-out;
+  transition-timing-function: ease-in-out;
+  outline: 0;
+}
+/* line 22, ../sass/oauth.scss */
+a:hover, a:active {
+  text-decoration: underline;
+}
+
+/* line 25, ../sass/oauth.scss */
+h2 {
+  font-size: 1.5em;
+}
+
+/* line 26, ../sass/oauth.scss */
+p {
+  line-height: 1.5;
+  margin-bottom: 1em;
+}
+
+/* line 27, ../sass/oauth.scss */
+strong {
+  font-weight: bolder;
+}
+
+/* line 28, ../sass/oauth.scss */
+.subtle {
+  color: #B4B9BE;
+  font-size: .8em;
+  font-weight: normal;
+}
+
+/* line 29, ../sass/oauth.scss */
+.small {
+  font-size: .8em;
+  font-weight: normal;
+}
+
+/* line 31, ../sass/oauth.scss */
+.btn {
+  width: 100%;
+  height: 40px;
+  background: #B4B9BE;
+  border: none;
+  color: #32373C;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  outline: none;
+  position: relative;
+}
+/* line 32, ../sass/oauth.scss */
+.btn:hover {
+  background: #99a0a6;
+  transition: background .2s ease;
+}
+/* line 33, ../sass/oauth.scss */
+.btn:focus {
+  top: 1px;
+}
+/* line 35, ../sass/oauth.scss */
+.btn.btn-primary {
+  background: #00A0D2;
+  color: #FFF;
+}
+/* line 36, ../sass/oauth.scss */
+.btn.btn-primary:hover {
+  background: #008db9;
+}
+
+/* line 40, ../sass/oauth.scss */
+.button-primary {
+  width: 100%;
+  height: 40px;
+  background: #00A0D2;
+  color: #FFF;
+  border: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  outline: none;
+  position: relative;
+}
+/* line 43, ../sass/oauth.scss */
+.button-primary:hover {
+  background: #008db9;
+  transition: background .2s ease;
+}
+/* line 44, ../sass/oauth.scss */
+.button-primary:focus {
+  top: 1px;
+}
+
+/* line 48, ../sass/oauth.scss */
+.side-by-side .btn {
+  display: inline-block;
+  max-width: 144px;
+  margin-right: 11px;
+}
+/* line 49, ../sass/oauth.scss */
+.side-by-side .btn:last-child {
+  margin-right: 0;
+}
+
+/* line 54, ../sass/oauth.scss */
+.login, .container {
+  width: 304px;
+  padding: 0;
+  margin: auto;
+}
+/* line 55, ../sass/oauth.scss */
+.login h1, .container h1 {
+  text-align: center;
+  margin-bottom: 56px;
+}
+/* line 56, ../sass/oauth.scss */
+.login h1 a, .container h1 a {
+  background-image: url(../images/wporg-logotype-standard.png);
+  background-image: none, url(../images/wporg-logotype-standard.svg);
+  -webkit-background-size: 253px;
+  background-size: 253px;
+  background-position: center top;
+  background-repeat: no-repeat;
+  color: #999;
+  height: 52px;
+  margin: 0 auto;
+  padding: 0;
+  width: auto;
+  text-indent: -9999px;
+  outline: none;
+  overflow: hidden;
+  display: block;
+}
+/* line 75, ../sass/oauth.scss */
+.login .message,
+.login #login_error, .container .message,
+.container #login_error {
+  border-left: 4px solid #00a0d2;
+  padding: 12px;
+  margin-left: 0;
+  background-color: #fff;
+  -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+  color: #000 !important;
+}
+/* line 81, ../sass/oauth.scss */
+.login #login_error, .container #login_error {
+  border-left-color: #dc3232;
+}
+/* line 83, ../sass/oauth.scss */
+.login .nav, .container .nav {
+  font-size: .8em;
+  padding: 0;
+  margin: 24px 0;
+  text-align: center;
+}
+
+/* line 85, ../sass/oauth.scss */
+.container {
+  padding: 0 0 64px;
+  margin-top: 24px;
+}
+
+/* line 87, ../sass/oauth.scss */
+form {
+  margin-top: 24px;
+}
+/* line 88, ../sass/oauth.scss */
+form p {
+  margin-bottom: 0;
+}
+/* line 89, ../sass/oauth.scss */
+form .forgetmenot {
+  font-weight: normal;
+  margin-bottom: 16px;
+}
+/* line 90, ../sass/oauth.scss */
+form .forgetmenot label {
+  font-size: .8em;
+  line-height: 1;
+  cursor: pointer;
+}
+/* line 92, ../sass/oauth.scss */
+form .submit {
+  margin: 8px 0 0 0;
+  padding: 0;
+}
+/* line 94, ../sass/oauth.scss */
+form input[type="text"],
+form input[type="password"] {
+  width: 100%;
+  padding: 3px 10px;
+  margin: 2px 6px 16px 0;
+  height: 40px;
+  outline: none;
+  color: #23282D;
+}
+/* line 97, ../sass/oauth.scss */
+form input[type="text"],
+form input[type="password"],
+form input[type="checkbox"],
+form input[type="radio"] {
+  background: #fbfbfb;
+  border: none;
+}
+/* line 102, ../sass/oauth.scss */
+form input[type="checkbox"], form input[type="radio"] {
+  cursor: pointer;
+  display: inline-block;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  margin: -4px 4px 0 0;
+  outline: 0;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-appearance: none;
+}
+/* line 115, ../sass/oauth.scss */
+form input[type="checkbox"]:checked:before, form input[type="checkbox"]:checked:before, form input[type="radio"]:checked:before, form input[type="radio"]:checked:before {
+  float: left;
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  font: normal 21px/1 dashicons;
+  speak: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/* line 127, ../sass/oauth.scss */
+form input[type="checkbox"]:checked:before {
+  content: "\f147";
+  margin: -3px 0 0 -4px;
+  color: #1e8cbe;
+}
+/* line 129, ../sass/oauth.scss */
+form#authorize {
+  margin-bottom: 24px;
+}
+
+/* line 132, ../sass/oauth.scss */
+label {
+  color: #A0A5AA;
+}
+
+/* line 135, ../sass/oauth.scss */
+#loginform p.submit,
+.login-action-lostpassword p.submit {
+  border: none;
+}
+
+/* line 140, ../sass/oauth.scss */
+.login #pass-strength-result {
+  font-weight: 600;
+  margin: -1px 5px 16px 0;
+  padding: 6px 5px;
+  text-align: center;
+  width: 100%;
+}
+
+/* line 148, ../sass/oauth.scss */
+.wrapper {
+  padding: 8% 0 80px;
+  min-height: 100%;
+  position: relative;
+}
+
+/* line 149, ../sass/oauth.scss */
+.loginfooter {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 48px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: .8em;
+}
+
+@media (max-height: 499px) {
+  /* line 151, ../sass/oauth.scss */
+  .loginfooter {
+    position: relative;
+    bottom: inherit;
+  }
+}
+/* line 158, ../sass/oauth.scss */
+.oauth {
+  width: 100%;
+  background: #32373C;
+  height: auto;
+  overflow: hidden;
+  margin-top: -24px;
+  -webkit-transition: all .3s ease;
+  -moz-transition: all .3s ease;
+  transition: all .3s ease;
+}
+/* line 159, ../sass/oauth.scss */
+.oauth > div {
+  text-align: center;
+  margin: 0 auto;
+  padding: 48px 16px;
+  max-width: 1024px;
+}
+/* line 160, ../sass/oauth.scss */
+.oauth > div .partner-logo {
+  margin-bottom: 24px;
+}

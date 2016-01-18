@@ -1,0 +1,169 @@
+@import "compass/reset";
+@import url(../stylesheets/l10n.css);
+@import url(../stylesheets/dashicons.css);
+
+html, body { height:100%; }
+html { background:#23282D; }
+body { color:#F5F5F5; font-family:"Open Sans", sans-serif; font-size:16px; font-weight:300; line-height:1.4; }
+* { box-sizing:border-box; }
+
+a {
+	color: #009FD4;
+	text-decoration:none;
+	font-weight:normal;
+	-webkit-transition-property: border, background, color;
+	transition-property: border, background, color;
+	-webkit-transition-duration: .05s;
+	transition-duration: .05s;
+	-webkit-transition-timing-function: ease-in-out;
+	transition-timing-function: ease-in-out;
+	outline:0;
+
+	&:hover, &:active { text-decoration:underline; }
+}
+
+h2 { font-size:1.5em; }
+p { line-height:1.5; margin-bottom:1em; }
+strong { font-weight:bolder; }
+.subtle { color:#B4B9BE; font-size:.8em; font-weight:normal; }
+.small { font-size:.8em; font-weight:normal; }
+
+.btn { width:100%; height:40px; background:#B4B9BE; border:none; color:#32373C; -webkit-border-radius:2px; -moz-border-radius:2px; border-radius:2px; outline:none; position:relative;
+	&:hover { background:darken(#B4B9BE, 10%); transition:background .2s ease; }
+	&:focus { top:1px; }
+
+	&.btn-primary { background:#00A0D2; color:#FFF; 
+		&:hover { background:darken(#00A0D2, 5%); }
+	}
+}
+
+.button-primary {
+	width:100%; height:40px; background:#00A0D2; color:#FFF; border:none; -webkit-border-radius:2px; -moz-border-radius:2px; border-radius:2px; outline:none; position:relative;
+
+	&:hover { background:darken(#00A0D2, 5%); transition:background .2s ease; }
+	&:focus { top:1px; }
+}
+
+.side-by-side { 
+	.btn { display:inline-block; max-width:144px; margin-right:11px; 
+		&:last-child { margin-right:0; }
+	}
+}
+
+
+.login, .container { width:304px; padding:0; margin:auto;
+	h1 { text-align:center; margin-bottom:56px;
+		a {
+			background-image: url(../images/wporg-logotype-standard.png);
+			background-image: none, url(../images/wporg-logotype-standard.svg);
+			-webkit-background-size: 253px;
+			background-size: 253px;
+			background-position: center top;
+			background-repeat: no-repeat;
+			color: #999;
+			height: 52px;
+			margin: 0 auto;
+			padding: 0;
+			width: auto;
+			text-indent: -9999px;
+			outline: none;
+			overflow: hidden;
+			display: block;
+		}
+	}
+
+	.message,
+	#login_error { border-left:4px solid #00a0d2; padding:12px; margin-left:0; background-color:#fff;
+		-webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,0.1);
+		box-shadow: 0 1px 1px 0 rgba(0,0,0,0.1);
+		color: #000 !important
+	}
+
+	#login_error { border-left-color:#dc3232; }
+
+	.nav { font-size:.8em; padding:0; margin:24px 0; text-align:center; }
+}
+.container { padding:0 0 64px; margin-top:24px; }
+
+form { margin-top:24px;
+	p { margin-bottom:0; }
+	.forgetmenot { font-weight:normal; margin-bottom:16px; 
+		label { font-size:.8em; line-height:1; cursor:pointer; }
+	}
+	.submit { margin:8px 0 0 0; padding:0; }
+
+	input[type="text"], 
+	input[type="password"] { width:100%; padding:3px 10px; margin:2px 6px 16px 0; height:40px; outline:none; color:#23282D; }
+
+	input[type="text"],
+	input[type="password"],
+	input[type="checkbox"],
+	input[type="radio"] { background:#fbfbfb; border:none; }
+
+	input[type="checkbox"], input[type="radio"] {
+	    cursor:pointer;
+	    display:inline-block;
+	    width:16px;
+	    min-width:16px;
+	    height:16px;
+	    margin:-4px 4px 0 0;
+	    outline:0;
+	    padding:0;
+	    text-align:center;
+	    vertical-align:middle;
+	    -webkit-appearance: none;
+
+	    &:checked:before, &:checked:before {
+		    float: left;
+		    display: inline-block;
+		    vertical-align: middle;
+		    width: 16px;
+		    font: normal 21px/1 dashicons;
+		    speak: none;
+		    -webkit-font-smoothing: antialiased;
+		    -moz-osx-font-smoothing: grayscale;
+		}
+	}
+
+	input[type="checkbox"]:checked:before { content:"\f147"; margin:-3px 0 0 -4px; color:#1e8cbe; }
+
+	&#authorize { margin-bottom:24px; }
+}
+
+label { color:#A0A5AA; }
+
+
+#loginform p.submit,
+.login-action-lostpassword p.submit {
+	border: none;
+}
+
+.login #pass-strength-result {
+	font-weight: 600;
+	margin: -1px 5px 16px 0;
+	padding: 6px 5px;
+	text-align: center;
+	width: 100%;
+}
+
+.wrapper { padding:8% 0 80px; min-height:100%; position:relative; }
+.loginfooter { position:absolute; bottom:0; width:100%; height:48px; text-align:center; text-transform:uppercase; letter-spacing:1px; font-size:.8em; }
+@media (max-height:499px) {
+	.loginfooter {
+		position:relative;
+		bottom:inherit;
+	}
+}
+
+
+.oauth { width:100%; background:#32373C; height:auto; overflow:hidden; margin-top:-24px; -webkit-transition: all .3s ease; -moz-transition: all .3s ease; transition: all .3s ease;
+	> div { text-align:center; margin:0 auto; padding:48px 16px; max-width:1024px; 
+		.partner-logo { margin-bottom:24px; }
+	}
+}
+
+
+
+
+
+
