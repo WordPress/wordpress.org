@@ -4,5 +4,12 @@
  *
  * @package wporg-login
  */
+?>
+	</div>
+	<div class="loginfooter">wordpress.org &nbsp; • &nbsp; code is poetry</div>
+</div>
 
-require WPORGPATH . 'footer.php';
+<?php wp_footer(); ?>
+
+</body>
+</html>

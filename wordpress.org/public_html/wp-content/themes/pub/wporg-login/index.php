@@ -6,21 +6,19 @@
  */
 
 get_header();
-?>
 
-<div id="pagebody">
-	<div id="login-welcome" class="wrapper">
-		<h1><?php _e( 'Welcome!', 'wporg-login' ); ?></h1>
-		<ul>
-			<?php if ( is_user_logged_in() ) : ?>
-				<li class="button"><a href="<?php echo wp_logout_url(); ?>"><?php _e( 'Log Out', 'wporg-login' ); ?></a></li>
-			<?php else : ?>
-				<li class="button"><a href="<?php echo wp_login_url(); ?>"><?php _e( 'Log In', 'wporg-login' ); ?></a></li>
-				<li class="button"><a href="https://wordpress.org/support/register.php"><?php _e( 'Register', 'wporg-login' ); ?></a></li>
-			<?php endif; ?>
-		</ul>
-		<?php /* Could display wp_login_form(); */ ?>
-	</div>
-</div>
+if ( ! empty( $_GET['screen'] ) ) {
+	$screen = preg_replace( '/[^a-z0-9-]/', '', $_GET['screen'] );
+} else if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+	$screen = 'oauth';
+} else {
+	$screen = 'login';
+}
 
-<?php get_footer(); ?>
+$partial = __DIR__ . '/partials/' . $screen . '.php';
+
+if ( file_exists( $partial ) ) {
+	require_once( $partial );
+}
+
+get_footer();
