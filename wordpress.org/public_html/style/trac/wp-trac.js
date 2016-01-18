@@ -332,14 +332,25 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				return false;
 			});
 
-			// Allow action text inputs to be clicked directly.
+			// Allow action text inputs and select fields to be clicked directly.
 			$('#action')
-				.find('input[type=text]').enable().focus( function() {
+				.find('input[type=text], select').enable().focus( function() {
 					$(this).siblings('input[type=radio]').click();
 				}).end()
 				.find('input[name=action]').unbind('click').end()
 				.find('div').has('select').find('input[type=radio]').change( function() {
 					$(this).siblings('select').enable();
+				});
+
+			// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
+			$('#action')
+				.find('input[type=text], select').each( function() {
+					$(this).attr('tabindex', '-1');
+				}).end()
+				.find('input').blur( function() {
+					$(this).parent().find('input[type=text], select').attr('tabindex', '-1');
+				}).focus( function() {
+					$(this).parent().find('input[type=text], select').removeAttr('tabindex');
 				});
 
 			// Clear the milestone on wontfix, duplicate, worksforme, invalid
