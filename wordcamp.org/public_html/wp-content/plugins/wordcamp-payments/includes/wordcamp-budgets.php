@@ -4,13 +4,33 @@
  * Main class to provide functionality common to all other classes
  */
 class WordCamp_Budgets {
-	const VERSION = '0.1.2';
+	const VERSION = '0.1.3';
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+		add_action( 'admin_menu',             array( $this, 'register_budgets_menu' )     );
 		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_common_assets' ), 11 );
+	}
+
+	/**
+	 * Register the Budgets menu
+	 *
+	 * This is just an empty page so that a top-level menu can be created to hold the various post types and pages.
+	 *
+	 * @todo This may no longer be needed once the Budgets post type and Overview pages are added
+	 */
+	public function register_budgets_menu() {
+		add_menu_page(
+			__( 'WordCamp Budget', 'wordcamporg' ),
+			__( 'Budget',          'wordcamporg' ),
+			'manage_options',
+			'wordcamp-budget',
+			'__return_empty_string',
+			plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
+			30
+		);
 	}
 
 	/**

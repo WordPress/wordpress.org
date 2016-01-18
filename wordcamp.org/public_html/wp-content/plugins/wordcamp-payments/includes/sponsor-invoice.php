@@ -43,7 +43,7 @@ function register_post_type() {
 		'new_item'           => __( 'New Invoice',                'wordcamporg' ),
 		'edit_item'          => __( 'Edit Invoice',               'wordcamporg' ),
 		'view_item'          => __( 'View Invoice',               'wordcamporg' ),
-		'all_items'          => __( 'Invoices',                   'wordcamporg' ),
+		'all_items'          => __( 'Sponsor Invoices',           'wordcamporg' ),
 		'search_items'       => __( 'Search Invoices',            'wordcamporg' ),
 		'not_found'          => __( 'No invoice found.',          'wordcamporg' ),
 		'not_found_in_trash' => __( 'No invoice found in Trash.', 'wordcamporg' ),
@@ -54,8 +54,8 @@ function register_post_type() {
 		'description'       => 'WordCamp Sponsor Invoices',
 		'public'            => false,
 		'show_ui'           => true,
+		'show_in_menu'      => 'wordcamp-budget',
 		'show_in_nav_menus' => true,
-		'menu_icon'         => plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
 		'supports'          => array( 'title' ),
 		'has_archive'       => true,
 	);

@@ -1,8 +1,7 @@
 /*
  * Common
  */
-.menu-icon-wcp_payment_request .wp-menu-image img,
-.menu-icon-wcb_sponsor_invoice .wp-menu-image img {
+.toplevel_page_wordcamp-budget .wp-menu-image img {
 	margin-left: 9px;
 }
 
