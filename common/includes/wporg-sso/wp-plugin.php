@@ -72,12 +72,38 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If on the SSO host
 				if ( ! preg_match( '/\/wp-login\.php$/', $this->script ) ) {
 					// ... but not on its login screen.
-					if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
-						// Let the theme render for oauth paths (/oauth, /oauth/, /oauth/*, but not /notoauth or /oauthnot)
+					if ( preg_match( '/^\/(\?.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+						// If at host root (/)
+						if ( ! empty( $_GET['action'] ) ) {
+							// If there's an action, it's really meant for wp-login.php, redirect
+							$get = $_GET;
+							if ( in_array( $get['action'], array( 'logout', 'loggedout' ) ) ) {
+								// But make sure to show our custom screen when needed
+								$get['redirect_to'] = '/?screen=loggedout';
+							}
+							$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ) );
+							return;
+						} else {
+							// Else let the theme render, or redirect if logged in
+							if ( is_user_logged_in() ) {
+								$this->_redirect_to_profile();
+							} else {
+								if ( empty( $_GET['screen'] ) ) {
+									add_filter( 'login_form_defaults', array( &$this, 'login_form_defaults' ) );
+								}
+							}
+							return;
+						} 
+					} else if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+						// Let the theme render for oauth paths (/oauth, /oauth/, /oauth/*, but
+						// not /notoauth or /oauthnot), or redirect if logged in
+						if ( is_user_logged_in() ) {
+							$this->_redirect_to_profile();
+						}
 						return;
 					} else  if ( is_user_logged_in() ) {
-						// Or mimic what happens after a login without a specified redirect (send to profile).
-						$this->_safe_redirect( 'https://wordpress.org/support/profile/' . get_currentuserinfo()->user_login );
+						// Logged in catch all, before last fallback
+						$this->_redirect_to_profile();
 					} else {
 						// Otherwise, redirect to the login screen.
 						$this->_safe_redirect( $this->sso_login_url );
@@ -107,6 +133,32 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 			
 			return $url;
+		}
+
+		
+		/**
+		 * Filters the defaults captions and options for the login form
+		 * 
+		 * @param array $defaults
+		 * @return array
+		 */
+		public function login_form_defaults( $defaults ) {
+			$defaults['label_remember'] = __( 'Remember me', 'wporg-sso' );
+			$defaults['label_log_in']   = __( 'Log in', 'wporg-sso' );
+			if ( ! empty( $_GET['redirect_to'] ) ) {
+				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
+			}
+			return $defaults;
+		}
+		
+		/**
+		 * Redirects the user to her/his (support) profile.
+		 */
+		protected function _redirect_to_profile() {
+			if ( ! is_user_logged_in() ) {
+				return;
+			}
+			$this->_safe_redirect( 'https://wordpress.org/support/profile/' . get_currentuserinfo()->user_login );
 		}
 	}
 	

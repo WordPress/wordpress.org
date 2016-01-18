@@ -20,7 +20,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 */
 		public function __construct() {
 			$this->sso_host_url   = 'https://' . self::SSO_HOST;
-			$this->sso_login_url  = $this->sso_host_url . '/wp-login.php';
+			$this->sso_login_url  = $this->sso_host_url . '/';
 			$this->sso_signup_url = 'https://wordpress.org/support/register.php'; // For now
 			
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
