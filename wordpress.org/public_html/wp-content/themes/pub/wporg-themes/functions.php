@@ -118,7 +118,7 @@ function wporg_themes_body_class( $classes ) {
 		$classes[] = 'ie8';
 	}
 
-	if ( ! $GLOBALS['themes']['themes'] ) {
+	if ( empty( $GLOBALS['themes']['themes'] ) ) {
 		$classes[] = 'no-results';
 	}
 
