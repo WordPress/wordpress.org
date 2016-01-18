@@ -17,6 +17,21 @@ class WPorg_GP_Plugin_Directory {
 		add_action( 'originals_imported', array( $this, 'originals_imported' ) );
 		add_action( 'translation_created', array( $this, 'translation_created' ) );
 		add_action( 'translation_saved', array( $this, 'translation_saved' ) );
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			$this->register_cli_commands();
+		}
+	}
+
+	/**
+	 * Registers CLI commands if WP-CLI is loaded.
+	 */
+	function register_cli_commands() {
+		require_once __DIR__ . '/cli/import-plugin-translations.php';
+	#	require_once __DIR__ . '/cli/add-plugin-project.php';
+
+		WP_CLI::add_command( 'wporg-translate import-plugin-translations', 'WPorg_GP_CLI_Import_Plugin_Translations' );
+	#	WP_CLI::add_command( 'wporg-translate add-plugin-project', 'WPorg_GP_CLI_Set_Plugin_Project' );
 	}
 
 	/**
