@@ -60,6 +60,13 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$de_formal->wp_locale = 'de_DE_formal';
 	$GLOBALS['gp_locales']->locales['de/formal'] = $de_formal;
 
+	$nl_formal = clone GP_Locales::by_field( 'wp_locale', 'nl_NL' );
+	$nl_formal->english_name = 'Dutch (Formal)';
+	$nl_formal->native_name = 'Nederlands (Formeel)';
+	$nl_formal->slug = 'nl/formal';
+	$nl_formal->wp_locale = 'nl_NL_formal';
+	$GLOBALS['gp_locales']->locales['nl/formal'] = $nl_formal;
+
 	$base_url = is_ssl() ? 'https' : 'http';
 	$base_url .= '://downloads.wordpress.org/translation/';
 	$base_url .= ( $type == 'core' ) ? 'core' : "$type/$domain";
