@@ -22,11 +22,11 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		registerEventHandlers : function() {
 			var paymentCategory = $( '#payment_category' );
-			
+
 			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
 			paymentCategory.change( app.toggleOtherCategoryDescription );
 			paymentCategory.trigger( 'change' );   // Set the initial state
-			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( { title : wcpLocalizedStrings.uploadModalTitle }, wcb.showUploadModal );
+			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( wcb.showUploadModal );
 			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
 		},
 

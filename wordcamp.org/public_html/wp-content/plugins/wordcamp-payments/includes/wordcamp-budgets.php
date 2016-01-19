@@ -59,6 +59,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			'wcbLocalizedStrings',		// todo merge into WordCampBudgets var
 			array(
+				'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
 				'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
 			)
 		);

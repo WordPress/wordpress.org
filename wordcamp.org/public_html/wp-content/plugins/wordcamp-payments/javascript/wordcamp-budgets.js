@@ -29,7 +29,7 @@ jQuery( document ).ready( function( $ ) {
 			if ( 'undefined' == typeof app.fileUploadFrame ) {
 				// Create the frame
 				app.fileUploadFrame = wp.media( {
-					title: event.data.title,
+					title: wcbLocalizedStrings.uploadModalTitle,
 					multiple: true,
 					button: {
 						text: wcbLocalizedStrings.uploadModalButton

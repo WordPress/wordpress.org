@@ -199,14 +199,6 @@ class WCP_Payment_Request {
 			wp_enqueue_media( array( 'post' => $post->ID ) );
 			wp_enqueue_script( 'wcb-attached-files' );
 		}
-
-		wp_localize_script(
-			'payment-requests',
-			'wcpLocalizedStrings',		// todo merge into WordCampBudgets var
-			array(
-				'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
-			)
-		);
 	}
 
 	/**
