@@ -45,7 +45,8 @@ add_action( 'init', 'wporg_login_init' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
+	$css_file = '/stylesheets/login.css'; 
 	wp_deregister_style( 'login' );
-	wp_register_style( 'login', get_stylesheet_directory_uri() . '/stylesheets/login.css', array( 'buttons', 'dashicons', 'open-sans' ), '20160119' );
+	wp_register_style( 'login', get_stylesheet_directory_uri() . $css_file, array( 'buttons', 'dashicons', 'open-sans' ), filemtime( __DIR__ . $css_file ) );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
