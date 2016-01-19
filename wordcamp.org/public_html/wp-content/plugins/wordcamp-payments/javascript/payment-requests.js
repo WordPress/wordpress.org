@@ -1,5 +1,5 @@
 jQuery( document ).ready( function( $ ) {
-
+	'use strict';
 	// todo add try/catch and log
 
 	var wcb = window.WordCampBudgets;

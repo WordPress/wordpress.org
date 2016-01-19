@@ -1,5 +1,5 @@
 jQuery( document ).ready( function( $ ) {
-	// todo strict mode
+	'use strict';
 
 	var app = window.WordCampBudgets;
 
