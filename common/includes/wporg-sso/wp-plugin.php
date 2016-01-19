@@ -42,13 +42,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Add our host to the list of allowed ones.
 			add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
 			
-			if ( preg_match( '/\/wp-signup\.php$/', $this->script ) ) {
+			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
 				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ) );
 			
-			} else if ( self::SSO_HOST !== $this->host ) {
+			} elseif ( self::SSO_HOST !== $this->host ) {
 				// If we're not on the SSO host
-				if ( preg_match( '/\/wp-login\.php$/', $this->script ) ) {
+				if ( preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// If on a WP login screen...
 					$redirect_to_sso_login = $this->sso_login_url;
 					
@@ -70,9 +70,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			
 			} else if ( self::SSO_HOST === $this->host ) {
 				// If on the SSO host
-				if ( ! preg_match( '/\/wp-login\.php$/', $this->script ) ) {
+				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
-					if ( preg_match( '/^\/(\?.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+					if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
 						// If at host root (/)
 						if ( ! empty( $_GET['action'] ) ) {
 							// If there's an action, it's really meant for wp-login.php, redirect
@@ -93,15 +93,15 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								}
 							}
 							return;
-						} 
-					} else if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
+						}
+					} elseif ( preg_match( '!^/oauth([/?]{1}.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
 						// Let the theme render for oauth paths (/oauth, /oauth/, /oauth/*, but
 						// not /notoauth or /oauthnot), or redirect if logged in
 						if ( is_user_logged_in() ) {
 							$this->_redirect_to_profile();
 						}
 						return;
-					} else  if ( is_user_logged_in() ) {
+					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
 						$this->_redirect_to_profile();
 					} else {
@@ -128,8 +128,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @example add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
 		 */
 		public function login_network_site_url( $url, $path, $scheme ) {
-			if ( self::SSO_HOST === $this->host && preg_match( '/\/wp-login\.php$/', $this->script ) ) {
-				$url = preg_replace( '/^(https?:\/\/)[^\/]+(\/.+)$/' , '\1'.self::SSO_HOST.'\2', $url );
+			if ( self::SSO_HOST === $this->host && preg_match( '!/wp-login\.php$!', $this->script ) ) {
+				$url = preg_replace( '!^(https?://)[^/]+(/.+)$!' , '\1'.self::SSO_HOST.'\2', $url );
 			}
 			
 			return $url;
