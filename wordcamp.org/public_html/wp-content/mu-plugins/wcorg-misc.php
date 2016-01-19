@@ -200,3 +200,40 @@ add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_
  * GlotPress project, and we only have to install/update a single mofile per locale.
  */
 load_textdomain( 'wordcamporg', sprintf( '%s/languages/wordcamporg/wordcamporg-%s.mo', WP_CONTENT_DIR, get_locale() ) );
+
+// WordCamp.org QBO Integration
+add_filter( 'wordcamp_qbo_options', function( $options ) {
+	if ( ! defined( 'WORDCAMP_QBO_CONSUMER_KEY' ) )
+		return $options;
+
+    // Secrets.
+    $options['app_token'] = WORDCAMP_QBO_APP_TOKEN;
+    $options['consumer_key'] = WORDCAMP_QBO_CONSUMER_KEY;
+    $options['consumer_secret'] = WORDCAMP_QBO_CONSUMER_SECRET;
+    $options['hmac_key'] = WORDCAMP_QBO_HMAC_KEY;
+
+    // WordCamp Payments to QBO categories mapping.
+    $options['categories_map'] = array(
+        'after-party'     => array( 'value' => 72, 'name' => 'After Party' ),
+        'audio-visual'    => array( 'value' => 79, 'name' => 'Audio-Visual' ),
+        'food-beverages'  => array( 'value' => 64, 'name' => 'Food & Beverage-WordCamps' ),
+        'office-supplies' => array( 'value' => 70, 'name' => 'Office Expense' ),
+        'signage-badges'  => array( 'value' => 73, 'name' => 'Printing/Signage/Badges' ),
+        'speaker-event'   => array( 'value' => 76, 'name' => 'Speaker Events' ),
+        'swag'            => array( 'value' => 74, 'name' => 'Swag' ),
+        'venue'           => array( 'value' => 78, 'name' => 'Venue Rental' ),
+        'other'           => array( 'value' => 71, 'name' => 'Other Miscellaneous Expense' ),
+    );
+
+    return $options;
+});
+
+add_filter( 'wordcamp_qbo_client_options', function( $options ) {
+	if ( ! defined( 'WORDCAMP_QBO_HMAC_KEY' ) )
+		return $options;
+
+    $options['hmac_key'] = WORDCAMP_QBO_HMAC_KEY;
+    $options['api_base'] = 'https://central.wordcamp.org/wp-json/wordcamp-qbo/v1';
+
+    return $options;
+});
