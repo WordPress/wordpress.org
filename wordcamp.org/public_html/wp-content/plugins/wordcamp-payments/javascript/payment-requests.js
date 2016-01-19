@@ -21,9 +21,11 @@ jQuery( document ).ready( function( $ ) {
 		 * Registers event handlers
 		 */
 		registerEventHandlers : function() {
+			var paymentCategory = $( '#payment_category' );
+			
 			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
-			$( '#payment_category' ).change( app.toggleOtherCategoryDescription );
-				// todo this needs to fire onLoad too, otherwise the field is hidden
+			paymentCategory.change( app.toggleOtherCategoryDescription );
+			paymentCategory.trigger( 'change' );   // Set the initial state
 			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( { title : wcpLocalizedStrings.uploadModalTitle }, wcb.showUploadModal );
 			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
 		},
