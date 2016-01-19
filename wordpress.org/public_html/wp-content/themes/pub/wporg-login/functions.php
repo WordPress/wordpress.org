@@ -46,6 +46,6 @@ add_action( 'init', 'wporg_login_init' );
  */
 function wporg_login_replace_css() {
 	wp_deregister_style( 'login' );
-	wp_register_style( 'login', get_stylesheet_directory_uri() . '/stylesheets/login.css', array( 'buttons', 'dashicons', 'open-sans' ), filemtime( __DIR__ . '/login.css' ) );
+	wp_register_style( 'login', get_stylesheet_directory_uri() . '/stylesheets/login.css', array( 'buttons', 'dashicons', 'open-sans' ), '20160119' );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );

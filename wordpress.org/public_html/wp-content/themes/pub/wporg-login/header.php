@@ -8,8 +8,8 @@
 //global $pagetitle, $wporg_global_header_options;
 //$pagetitle = wp_title( '', false );
 
-wp_enqueue_style( 'normalize', get_template_directory_uri() . '/stylesheets/normalize.css', array(), filemtime( __DIR__ . '/style.css' ) );
-wp_enqueue_style( 'custom-login', get_template_directory_uri() . '/stylesheets/login.css', array(), filemtime( __DIR__ . '/style.css' ) );
+wp_enqueue_style( 'normalize', get_template_directory_uri() . '/stylesheets/normalize.css', array(), '20160119' );
+wp_enqueue_style( 'custom-login', get_template_directory_uri() . '/stylesheets/login.css', array(), '20160119' );
 ?>
 <!doctype html>
 <html class="no-js" lang="">
