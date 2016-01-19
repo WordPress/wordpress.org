@@ -158,7 +158,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			if ( ! is_user_logged_in() ) {
 				return;
 			}
-			$this->_safe_redirect( 'https://wordpress.org/support/profile/' . wp_get_current_user()->user_nicename );
+
+			if ( !empty( $_GET['redirect_to'] ) ) {
+				$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
+			} else {
+				$this->_safe_redirect( 'https://wordpress.org/support/profile/' . wp_get_current_user()->user_nicename );
+			}
 		}
 	}
 	
