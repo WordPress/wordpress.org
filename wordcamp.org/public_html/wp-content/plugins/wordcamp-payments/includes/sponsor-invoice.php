@@ -146,7 +146,7 @@ function enqueue_assets() {
 	wp_register_script(
 		'sponsor-invoices',
 		plugins_url( 'javascript/sponsor-invoices.js', __DIR__ ),
-		array( 'jquery', 'jquery-ui-datepicker', 'underscore', 'wp-util' ),
+		array( 'wordcamp-budgets', 'jquery', 'underscore', 'wp-util' ),
 		\WordCamp_Budgets::VERSION,
 		true
 	);

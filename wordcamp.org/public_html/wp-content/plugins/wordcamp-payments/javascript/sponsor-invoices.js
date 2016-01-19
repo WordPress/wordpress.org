@@ -1,18 +1,19 @@
 jQuery( document ).ready( function( $ ) {
 	'use strict';
 
-	$.sponsorInvoices = {
+	var wcb = window.WordCampBudgets;
+	var app = wcb.SponsorInvoices = {
 
 		/**
 		 * Main entry point
 		 */
 		init: function() {
 			try {
-				$.sponsorInvoices.registerEventHandlers();
+				app.registerEventHandlers();
 				$( '#_wcbsi_sponsor_id' ).trigger( 'change' );  // Populate the initial sponsor information
-				$.sponsorInvoices.setupDatePicker();
+				wcb.setupDatePicker( '#wcbsi_sponsor_invoice' );
 			} catch ( exception ) {
-				$.sponsorInvoices.log( exception );
+				wcb.log( exception );
 			}
 		},
 
@@ -20,9 +21,7 @@ jQuery( document ).ready( function( $ ) {
 		 * Registers event handlers
 		 */
 		registerEventHandlers : function() {
-			$( '#_wcbsi_sponsor_id' ).change( $.sponsorInvoices.populateSponsorInformation );
-
-			// todo detect when invoice fields incomplete, disable submit button (but not draft), and show notice
+			$( '#_wcbsi_sponsor_id' ).change( app.populateSponsorInformation );
 		},
 
 		/**
@@ -41,9 +40,12 @@ jQuery( document ).ready( function( $ ) {
 					infoContainer.html( '' );
 					sendInvoiceButton.prop( 'disabled', true );
 					return;
+
 				} else if ( info.requiredFieldsComplete ) {
+					// todo add info.hasOwnProperty() check
 					infoTemplate = wp.template( 'wcbsi-sponsor-information' );
 					sendInvoiceButton.prop( 'disabled', false );
+
 				} else {
 					infoTemplate = wp.template( 'wcbsi-required-fields-incomplete' );
 					sendInvoiceButton.prop( 'disabled', true );
@@ -51,47 +53,10 @@ jQuery( document ).ready( function( $ ) {
 
 				infoContainer.html( infoTemplate( info ) );
 			} catch ( exception ) {
-				$.sponsorInvoices.log( exception );
-			}
-		},
-
-		/**
-		 * Fallback to the jQueryUI datepicker if the browser doesn't support <input type="date">
-		 *
-		 * todo this is mostly duplicate of same function in payment-requests.js. should make DRY
-		 */
-		setupDatePicker : function() {
-			var browserTest = document.createElement( 'input' );
-			browserTest.setAttribute( 'type', 'date' );
-
-			if ( 'text' === browserTest.type ) {
-				$( '#wcbsi_sponsor_invoice' ).find( 'input[type=date]' ).not( '[readonly="readonly"]' ).datepicker( {
-					dateFormat : 'yy-mm-dd',
-					changeMonth: true,
-					changeYear : true
-				} );
-			}
-		},
-
-		/**
-		 * Log a message to the console
-		 *
-		 * @todo centralize this for all modules to use
-		 *
-		 * @param {*} error
-		 */
-		log : function( error ) {
-			if ( ! window.console ) {
-				return;
-			}
-
-			if ( 'string' === typeof error ) {
-				console.log( 'WordCamp Sponsor Invoices: ' + error );
-			} else {
-				console.log( 'WordCamp Sponsor Invoices: ', error );
+				wcb.log( exception );
 			}
 		}
 	};
 
-	$.sponsorInvoices.init();
+	app.init();
 } );

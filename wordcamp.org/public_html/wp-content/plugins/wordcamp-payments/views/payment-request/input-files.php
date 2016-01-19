@@ -8,6 +8,7 @@
 			</p>
 		<?php endif; ?>
 
+		<?php // todo move to centralized view file ?>
 		<p>
 			<a class="button wcp-insert-media" role="button">
 				<?php _e( 'Add files', 'wordcamporg' ); ?>
@@ -26,6 +27,6 @@
 			<a href="{{ data.url }}">{{ data.filename }}</a>
 		</script>
 
-		<?php wp_localize_script( 'wcp-attached-files', 'wcpAttachedFiles', $files ); // todo merge into wordcampBudgets var ?>
+		<?php wp_localize_script( 'wcb-attached-files', 'wcbAttachedFiles', $files ); // todo merge into wordcampBudgets var ?>
 	</td>
 </tr>

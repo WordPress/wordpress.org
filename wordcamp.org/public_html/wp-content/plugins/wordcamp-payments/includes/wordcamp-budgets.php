@@ -37,7 +37,31 @@ class WordCamp_Budgets {
 	 * Enqueue scripts and stylesheets common to all modules
 	 */
 	public function enqueue_common_assets() {
-		// todo setup grunt to concat/minify js and css?
+		// todo setup grunt to concat/minify js
+
+		wp_enqueue_script(
+			'wordcamp-budgets',
+			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
+			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
+			self::VERSION,
+			true
+		);
+
+		wp_register_script(
+			'wcb-attached-files',
+			plugins_url( 'javascript/attached-files.js', __DIR__ ),
+			array( 'wordcamp-budgets', 'backbone', 'wp-util' ),
+			WordCamp_Budgets::VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'wordcamp-budgets',
+			'wcbLocalizedStrings',		// todo merge into WordCampBudgets var
+			array(
+				'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
+			)
+		);
 
 		// Let's still include our .css file even if these are unavailable.
 		$soft_deps = array( 'jquery-ui', 'wp-datepicker-skins' );

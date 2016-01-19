@@ -181,15 +181,7 @@ class WCP_Payment_Request {
 		wp_register_script(
 			'payment-requests',
 			plugins_url( 'javascript/payment-requests.js', __DIR__ ),
-			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
-			WordCamp_Budgets::VERSION,
-			true
-		);
-
-		wp_register_script(
-			'wcp-attached-files',
-			plugins_url( 'javascript/attached-files.js', __DIR__ ),
-			array( 'payment-requests', 'backbone', 'wp-util' ),
+			array( 'wordcamp-budgets', 'wcb-attached-files', 'jquery' ),
 			WordCamp_Budgets::VERSION,
 			true
 		);
@@ -205,15 +197,14 @@ class WCP_Payment_Request {
 
 		if ( isset( $post->ID ) ) {
 			wp_enqueue_media( array( 'post' => $post->ID ) );
-			wp_enqueue_script( 'wcp-attached-files' );
+			wp_enqueue_script( 'wcb-attached-files' );
 		}
 
 		wp_localize_script(
 			'payment-requests',
-			'wcpLocalizedStrings',		// todo merge into paymentRequests var
+			'wcpLocalizedStrings',		// todo merge into WordCampBudgets var
 			array(
 				'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
-				'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
 			)
 		);
 	}
