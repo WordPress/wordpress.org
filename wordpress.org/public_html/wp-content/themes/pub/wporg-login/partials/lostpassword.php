@@ -5,7 +5,7 @@
 		<label for="user_login"><?php _e( 'Username or Email', 'wporg-login' ); ?>
 		<input type="text" name="user_login" id="user_login" value="" size="20"></label>
 	</p>
-	<input type="hidden" name="redirect_to" value="/?screen=checkemail">
+	<input type="hidden" name="redirect_to" value="/checkemail/">
 	<p class="submit">
 		<input type="submit" name="wp-submit" id="wp-submit" class="button-primary" value="<?php esc_attr_e( 'Get new password', 'wporg-login' ); ?>">
 	</p>

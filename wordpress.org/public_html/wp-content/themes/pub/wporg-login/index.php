@@ -7,18 +7,27 @@
 
 get_header();
 
-if ( ! empty( $_GET['screen'] ) ) {
-	$screen = preg_replace( '/[^a-z0-9-]/', '', $_GET['screen'] );
-} else if ( preg_match( '/^\/oauth([\/\?]{1}.*)?$/', $_SERVER['REQUEST_URI'] ) ) {
-	$screen = 'oauth';
+/**
+ * Test if the path we're on is one that we use, depending on if it
+ * has a partial or not, or load the 404 partial as fallback.
+ * 
+ * Note that the path is first validated in WP_WPOrg_SSO::redirect_all_login_or_signup_to_sso().
+ * @see https://meta.trac.wordpress.org/browser/sites/trunk/common/includes/wporg-sso/wp-plugin.php
+ */
+
+if ( apply_filters( 'is_valid_wporg_sso_path', false ) && preg_match( '!^(/[^/\?]*)([/\?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'], $matches ) ) {
+	$screen = '/' === $matches[1] ? 'login' : preg_replace( '/[^a-z0-9-]/', '', $matches[1] );
 } else {
-	$screen = 'login';
+	$screen = '404';
 }
 
-$partial = __DIR__ . '/partials/' . $screen . '.php';
+$partials_dir = __DIR__ . '/partials/';
+$partial      = $partials_dir . $screen . '.php';
 
 if ( file_exists( $partial ) ) {
 	require_once( $partial );
+} else {
+	require_once( $partials_dir . '404.php');
 }
 
 get_footer();
