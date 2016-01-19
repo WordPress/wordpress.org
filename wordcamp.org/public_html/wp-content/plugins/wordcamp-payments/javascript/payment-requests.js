@@ -1,6 +1,5 @@
 jQuery( document ).ready( function( $ ) {
 	'use strict';
-	// todo add try/catch and log
 
 	var wcb = window.WordCampBudgets;
 	var app = wcb.PaymentRequests = {
@@ -9,9 +8,13 @@ jQuery( document ).ready( function( $ ) {
 		 * Main entry point
 		 */
 		init: function () {
-			app.registerEventHandlers();
-			wcb.attachedFilesView = new wcb.AttachedFilesView();
-			wcb.setupDatePicker( '#wcp_general_info' );
+			try {
+				app.registerEventHandlers();
+				wcb.attachedFilesView = new wcb.AttachedFilesView();
+				wcb.setupDatePicker( '#wcp_general_info' );
+			} catch ( exception ) {
+				wcb.log( exception );
+			}
 		},
 
 		/**
@@ -31,27 +34,37 @@ jQuery( document ).ready( function( $ ) {
 		 * @param {object} event
 		 */
 		toggleOtherCategoryDescription : function( event ) {
-			var otherCategoryDescription = $( '#row-other-category-explanation' );
+			try {
+				var otherCategoryDescription = $( '#row-other-category-explanation' );
 
-			if ( 'other' == $( this ).find( 'option:selected' ).val() ) {
-				$( otherCategoryDescription ).removeClass( 'hidden' );
-			} else {
-				$( otherCategoryDescription ).addClass( 'hidden' );
+				if ( 'other' == $( this ).find( 'option:selected' ).val() ) {
+					$( otherCategoryDescription ).removeClass( 'hidden' );
+				} else {
+					$( otherCategoryDescription ).addClass( 'hidden' );
+				}
+
+				// todo make the transition smoother
+			} catch ( exception ) {
+				wcb.log( exception );
 			}
-
-			// todo make the transition smoother
 		},
 
 		/**
 		 * Require notes when the request is being marked as incomplete
+		 *
+		 * @param {object} event
 		 */
-		requireNotes : function() {
-			var notes = $( '#wcp_mark_incomplete_notes' );
+		requireNotes : function( event ) {
+			try {
+				var notes = $( '#wcp_mark_incomplete_notes' );
 
-			if ( 'checked' === $( '#wcp_mark_incomplete_checkbox' ).attr( 'checked' ) ) {
-				notes.attr( 'required', true );
-			} else {
-				notes.attr( 'required', false );
+				if ( 'checked' === $( '#wcp_mark_incomplete_checkbox' ).attr( 'checked' ) ) {
+					notes.attr( 'required', true );
+				} else {
+					notes.attr( 'required', false );
+				}
+			} catch ( exception ) {
+				wcb.log( exception );
 			}
 		}
 	};
