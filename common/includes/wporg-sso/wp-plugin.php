@@ -12,6 +12,18 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 	class WP_WPOrg_SSO extends WPOrg_SSO {
 		/**
+		 * List of valid paths on login.wordpress.org
+		 * @var array
+		 */
+		public $valid_sso_paths = array(
+			'/',
+			'/checkemail',
+			'/loggedout',
+			'/lostpassword',
+			'/oauth',
+		);
+		
+		/**
 		 * Constructor: add our action(s)/filter(s)
 		 */
 		public function __construct() {
@@ -72,35 +84,38 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
-					if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
-						// If at host root (/)
-						if ( ! empty( $_GET['action'] ) ) {
-							// If there's an action, it's really meant for wp-login.php, redirect
-							$get = $_GET;
-							if ( in_array( $get['action'], array( 'logout', 'loggedout' ) ) ) {
-								// But make sure to show our custom screen when needed
-								$get['redirect_to'] = '/?screen=loggedout';
-							}
-							$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ) );
-							return;
-						} else {
-							// Else let the theme render, or redirect if logged in
-							if ( is_user_logged_in() ) {
-								$this->_redirect_to_profile();
-							} else {
-								if ( empty( $_GET['screen'] ) ) {
-									add_filter( 'login_form_defaults', array( &$this, 'login_form_defaults' ) );
+					if ( preg_match( '!^(' . implode( '|', $this->valid_sso_paths ) . ')([/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
+						// If we're on the path of interest
+						
+						// Add a custom filter others can apply (theme, etc).
+						add_filter( 'is_valid_wporg_sso_path' , '__return_true' );
+						
+						if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
+							// If at host root (/)
+							if ( ! empty( $_GET['action'] ) ) {
+								// If there's an action, it's really meant for wp-login.php, redirect
+								$get = $_GET;
+								if ( in_array( $get['action'], array( 'logout', 'loggedout' ) ) ) {
+									// But make sure to show our custom screen when needed
+									$get['redirect_to'] = '/loggedout/';
 								}
+								$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ) );
+								return;
+							} else {
+								// Else let the theme render, or redirect if logged in
+								if ( is_user_logged_in() ) {
+									$this->_redirect_to_profile();
+								} else {
+									if ( empty( $_GET['screen'] ) ) {
+										add_filter( 'login_form_defaults', array( &$this, 'login_form_defaults' ) );
+									}
+								}
+								return;
 							}
-							return;
-						}
-					} elseif ( preg_match( '!^/oauth([/?]{1}.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
-						// Let the theme render for oauth paths (/oauth, /oauth/, /oauth/*, but
-						// not /notoauth or /oauthnot), or redirect if logged in
-						if ( is_user_logged_in() ) {
+						} else if ( is_user_logged_in() ) {
+							// Otherwise, redirect to the login screen.
 							$this->_redirect_to_profile();
 						}
-						return;
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
 						$this->_redirect_to_profile();
@@ -108,7 +123,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						// Otherwise, redirect to the login screen.
 						$this->_safe_redirect( $this->sso_login_url );
 					}
-				
 				} else {
 					// if on login screen, filter network_site_url to make sure our forms go to the SSO host, not wordpress.org
 					add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
@@ -159,7 +173,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
-			if ( !empty( $_GET['redirect_to'] ) ) {
+			if ( ! empty( $_GET['redirect_to'] ) ) {
 				$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
 			} else {
 				$this->_safe_redirect( 'https://wordpress.org/support/profile/' . wp_get_current_user()->user_nicename );
