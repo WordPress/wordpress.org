@@ -1150,7 +1150,7 @@ body.full-overlay-active {
 .filter-count {
 	display: inline-block;
 	vertical-align: middle;
-	min-width: 4em;
+	min-width: 4.3em;
 }
 
 .title-count,
@@ -1178,6 +1178,7 @@ body.full-overlay-active {
 .filter-links {
 	display: inline-block;
 	margin: 0;
+	padding: 0;
 }
 
 .filter-links li {
@@ -1217,7 +1218,7 @@ body.full-overlay-active {
 .wp-filter .wp-filter-search {
 	margin: 0;
 	padding: 3px 5px;
-	width: 280px;
+	width: 270px;
 	font-size: 16px;
 	font-weight: 300;
 	line-height: 1.5;
