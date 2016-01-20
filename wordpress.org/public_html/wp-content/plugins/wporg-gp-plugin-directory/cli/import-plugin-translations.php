@@ -34,9 +34,9 @@ class WPorg_GP_CLI_Import_Plugin_Translations extends WP_CLI_Command {
 			WP_CLI::error( "Project not found! [$file]" );
 		}
 
-		$locale = GP_Locales::by_field( 'wp_locale', $args[0] );
+		$locale = GP_Locales::by_field( 'wp_locale', $args[1] );
 		if ( ! $locale ) {
-			$locale = GP_Locales::by_field( 'slug', $args[0] );
+			$locale = GP_Locales::by_field( 'slug', $args[1] );
 		}
 
 		if ( ! $locale ) {
