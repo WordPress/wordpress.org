@@ -2,7 +2,7 @@
 
 	<div id="headline"><div id="headline-inner">
 		<h2 class="graphic home"><?php bloginfo( 'description' ); ?></h2>
-		<p>BuddyPress helps you run any kind of social network on your WordPress, with member profiles, activity streams, user groups, messaging, and more.</p>
+		<p>BuddyPress helps you build any type of community website using WordPress, with member profiles, activity streams, user groups, messaging, and more.</p>
 		<div>
 			<a href="<?php bloginfo( 'url' ); ?>/download/" id="big-demo-button" class="button">Download BuddyPress &rarr;</a>
 			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=5" alt="Screenshots">
