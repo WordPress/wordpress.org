@@ -24,7 +24,7 @@ global $wptv;
 			<div class="main-video">
 				<?php $wptv->the_video(); ?>
 				<h3>
-					<a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" class="video-title"><?php the_title(); ?></a>
+					<a href="<?php the_permalink() ?>" rel="bookmark" class="video-title"><?php the_title(); ?></a>
 					<?php $wptv->the_event( '<strong class="video-event">', '</strong>' ); ?>
 				</h3>
 			</div><!-- .main-video -->
@@ -35,7 +35,7 @@ global $wptv;
 
 				<?php while ( $featured->have_posts() ) : $featured->the_post(); ?>
 				<li class="group">
-					<a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" >
+					<a href="<?php the_permalink() ?>" rel="bookmark">
 						<span class="video-thumbnail">
 							<img src="<?php $wptv->the_video( true, true ); ?>" />
 						</span>
