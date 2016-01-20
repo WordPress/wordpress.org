@@ -123,6 +123,16 @@ body {
 	clear: both;
 }
 
+.screen-reader-text {
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	overflow: hidden;
+	position: absolute !important;
+	width: 1px;
+	/* many screen reader and browser combinations announce broken words as they would appear visually */
+	word-wrap: normal !important;
+}
+
 a, a:link, a:visited {
 	color: #21759b;
 	text-decoration: none;
@@ -301,8 +311,15 @@ div.success p {
 	width: 130px;
 }
 
-#searchform #searchbox {
+#searchform #searchbox,
+#searchform input[type=submit] {
 	margin-top: 15px;
+}
+
+#searchform #searchbox:focus {
+	border-color: #5b9dd9;
+	-webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 }
 
 input[type=submit], button, .button {
