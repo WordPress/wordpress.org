@@ -29,9 +29,11 @@ class WPorg_GP_Plugin_Directory {
 	function register_cli_commands() {
 		require_once __DIR__ . '/cli/import-plugin-translations.php';
 		require_once __DIR__ . '/cli/set-plugin-project.php';
+		require_once __DIR__ . '/cli/delete-plugin-project.php';
 
 		WP_CLI::add_command( 'wporg-translate import-plugin-translations', 'WPorg_GP_CLI_Import_Plugin_Translations' );
 		WP_CLI::add_command( 'wporg-translate set-plugin-project', 'WPorg_GP_CLI_Set_Plugin_Project' );
+		WP_CLI::add_command( 'wporg-translate delete-plugin-project', 'WPorg_GP_CLI_Delete_Plugin_Project' );
 	}
 
 	/**
