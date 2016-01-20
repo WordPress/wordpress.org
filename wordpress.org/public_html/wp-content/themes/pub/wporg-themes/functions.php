@@ -44,7 +44,7 @@ function wporg_themes_scripts() {
 	if ( is_rtl() ) {
 		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet );
 	}
-	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 7 );
+	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 8 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
