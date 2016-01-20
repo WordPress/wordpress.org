@@ -274,6 +274,59 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get the files attached to a post
+	 *
+	 * @param WP_Post $post
+	 *
+	 * @return array
+	 */
+	public static function get_attached_files( $post ) {
+		$files = get_posts( array(
+			'post_parent'    => $post->ID,
+			'post_type'      => 'attachment',
+			'posts_per_page' => 100,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		) );
+
+		foreach ( $files as &$file ) {
+			$file->filename = wp_basename( $file->guid );
+			$file->url      = wp_get_attachment_url( $file->ID );
+		}
+
+		return $files;
+	}
+
+	/**
+	 * Attach unattached files to the payment request post
+	 *
+	 * Sometimes users will upload the files manually to the Media Library, instead of using the Add Files button,
+	 * and we need to attach them to the request so that they show up in the metabox.
+	 *
+	 * NOTE: The calling function must remove any of its save_post callbacks before calling this, in order to
+	 * avoid infinite recursion
+	 *
+	 * @param int   $post_id
+	 * @param array $request
+	 */
+	public static function attach_existing_files( $post_id, $request ) {
+		if ( empty( $request['wcb_existing_files_to_attach'] ) ) {
+			return;
+		}
+
+		if ( ! $files = json_decode( $request['wcb_existing_files_to_attach'] ) ) {
+			return;
+		}
+
+		foreach( $files as $file_id ) {
+			wp_update_post( array(
+				'ID'          => $file_id,
+				'post_parent' => $post_id,
+			) );
+		}
+	}
+
+	/**
 	 * Insert an entry into a log for one of the custom post types
 	 *
 	 * @param int    $post_id The post ID.

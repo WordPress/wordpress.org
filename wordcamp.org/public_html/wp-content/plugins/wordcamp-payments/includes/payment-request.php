@@ -386,18 +386,9 @@ class WCP_Payment_Request {
 	 * @param string $description
 	 */
 	protected function render_files_input( $post, $label, $name, $description = '' ) {
-		$files = get_posts( array(
-			'post_parent'    => $post->ID,
-			'post_type'      => 'attachment',
-			'posts_per_page' => -1,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		) );
+		$files = WordCamp_Budgets::get_attached_files( $post );
 
-		foreach ( $files as &$file ) {
-			$file->filename = wp_basename( $file->guid );
-			$file->url      = wp_get_attachment_url( $file->ID );
-		}
+		wp_localize_script( 'wcb-attached-files', 'wcbAttachedFiles', $files ); // todo merge into wordcampBudgets var
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-files.php' );
 	}
@@ -764,9 +755,18 @@ class WCP_Payment_Request {
 		}
 
 		// Attach existing files
-		$this->attach_existing_files( $post_id, $_POST );
+		remove_action( 'save_post', array( $this, 'save_payment' ), 10 ); // avoid infinite recursion
+		WordCamp_Budgets::attach_existing_files( $post_id, $_POST );
+		add_action( 'save_post', array( $this, 'save_payment' ), 10, 2 );
 	}
 
+	/**
+	 * Add log entries when the post status changes
+	 *
+	 * @param string  $new
+	 * @param string  $old
+	 * @param WP_Post $post
+	 */
 	public function transition_post_status( $new, $old, $post ) {
 		if ( $post->post_type != self::POST_TYPE )
 			return;
@@ -799,36 +799,6 @@ class WCP_Payment_Request {
 				'action' => 'updated',
 			) );
 		}
-	}
-
-	/**
-	 * Attach unattached files to the payment request post
-	 *
-	 * Sometimes users will upload the files manually to the Media Library, instead of using the Add Files button,
-	 * and we need to attach them to the request so that they show up in the metabox.
-	 *
-	 * @param int   $post_id
-	 * @param array $request
-	 */
-	protected function attach_existing_files( $post_id, $request ) {
-		if ( empty( $request['wcp_existing_files_to_attach'] ) ) {
-			return;
-		}
-
-		if ( ! $files = json_decode( $request['wcp_existing_files_to_attach'] ) ) {
-			return;
-		}
-
-		remove_action( 'save_post', array( $this, 'save_payment' ), 10 ); // avoid infinite recursion
-
-		foreach( $files as $file_id ) {
-			wp_update_post( array(
-				'ID'          => $file_id,
-				'post_parent' => $post_id,
-			) );
-		}
-
-		add_action( 'save_post', array( $this, 'save_payment' ), 10, 2 );
 	}
 
 	/**

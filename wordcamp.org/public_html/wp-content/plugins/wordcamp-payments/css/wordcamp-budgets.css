@@ -14,7 +14,7 @@
 	display: table-row;
 }
 
-.wcb-form li label {
+.wcb-form li > label {
 	display: table-cell;
 	margin-bottom: 1em;
 	vertical-align: top;
@@ -36,33 +36,36 @@
 	padding-bottom: 1em;
 }
 
+/* Files */
+.wcb_no_files_uploaded.active {
+	display: block;
+}
+
+#wcb_files .description {
+	margin-bottom: 1em;
+}
+
+.wcb_files_list li {
+	list-style-type: disc;
+	margin-left: 15px;
+}
+
+.form-table td p.wcb_no_files_uploaded {
+	margin-bottom: 1em;
+}
+
 
 /*
  * Payment Requests
  */
 
 /* Payment methods */
-.payment_method_fields.active,
-.wcp_no_files_uploaded.active {
+.payment_method_fields.active {
 	display: block;
 }
 
 tr#row-payment-method label {
 	margin-right: 20px;
-}
-
-/* Files */
-#wcp_files .description {
-	margin-bottom: 1em;
-}
-
-.wcp_files_list li {
-	list-style-type: disc;
-	margin-left: 15px;
-}
-
-.form-table td p.wcp_no_files_uploaded {
-	margin-bottom: 1em;
 }
 
 /* Log */

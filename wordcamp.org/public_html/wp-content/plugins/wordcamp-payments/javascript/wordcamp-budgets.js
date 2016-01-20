@@ -48,8 +48,6 @@ jQuery( document ).ready( function( $ ) {
 		 * Add files selected from the Media Picker to the current collection of files
 		 */
 		addSelectedFilesToCollection : function() {
-			// app var needs to point to caller?
-
 			var attachments = app.fileUploadFrame.state().get( 'selection' ).toJSON();
 
 			$.each( attachments, function( index, attachment ) {

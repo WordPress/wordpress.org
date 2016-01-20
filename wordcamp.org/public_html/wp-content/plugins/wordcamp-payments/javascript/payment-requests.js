@@ -10,7 +10,7 @@ jQuery( document ).ready( function( $ ) {
 		init: function () {
 			try {
 				app.registerEventHandlers();
-				wcb.attachedFilesView = new wcb.AttachedFilesView();
+				wcb.attachedFilesView = new wcb.AttachedFilesView( { el: $( '#wcp_files' ) } );
 				wcb.setupDatePicker( '#wcp_general_info' );
 			} catch ( exception ) {
 				wcb.log( exception );
@@ -26,7 +26,7 @@ jQuery( document ).ready( function( $ ) {
 			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
 			paymentCategory.change( app.toggleOtherCategoryDescription );
 			paymentCategory.trigger( 'change' );   // Set the initial state
-			$( '#wcp_files' ).find( 'a.wcp-insert-media' ).click( wcb.showUploadModal );
+			$( '#wcp_files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
 			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
 		},
 

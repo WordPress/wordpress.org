@@ -27,7 +27,7 @@ jQuery( document ).ready( function( $ ) {
 	 */
 	app.AttachedFileView = Backbone.View.extend( {
 		tagName: 'li',
-		template: wp.template( 'wcp-attached-file' ),
+		template: wp.template( 'wcb-attached-file' ),
 
 		initialize: function() {
 			_.bindAll( this, 'render' );
@@ -43,8 +43,6 @@ jQuery( document ).ready( function( $ ) {
 	 * View for a collection of attached files
 	 */
 	app.AttachedFilesView = Backbone.View.extend( {
-		el: $( '#wcp_files' ),
-
 		initialize: function() {
 			_.bindAll( this, 'render', 'appendFile' );
 
@@ -63,10 +61,10 @@ jQuery( document ).ready( function( $ ) {
 		},
 
 		appendFile: function( file ) {
-			var noFilesUploaded  = $( '.wcp_no_files_uploaded' );
+			var noFilesUploaded  = $( '.wcb_no_files_uploaded' );
 			var attachedFileView = new app.AttachedFileView( { model: file } );
 
-			$( '.wcp_files_list' ).append( attachedFileView.render().el );
+			$( '.wcb_files_list' ).append( attachedFileView.render().el );
 			noFilesUploaded.removeClass( 'active' );
 			noFilesUploaded.addClass( 'hidden' );
 
@@ -85,7 +83,7 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		attachExistingFile: function( file ) {
 			var fileIDsToAttach,
-				existingFilesToAttach = $( '#wcp_existing_files_to_attach' );
+				existingFilesToAttach = $( '#wcb_existing_files_to_attach' );
 
 			try {
 				fileIDsToAttach = JSON.parse( existingFilesToAttach.val() );
