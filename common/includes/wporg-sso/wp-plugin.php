@@ -97,7 +97,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								$get = $_GET;
 								if ( in_array( $get['action'], array( 'logout', 'loggedout' ) ) ) {
 									// But make sure to show our custom screen when needed
-									$get['redirect_to'] = '/loggedout/';
+									$get['redirect_to'] = $this->_get_safer_redirect_to();
 								}
 								$this->_safe_redirect( add_query_arg( $get, $this->sso_login_url . '/wp-login.php' ) );
 								return;
@@ -174,7 +174,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			if ( ! empty( $_GET['redirect_to'] ) ) {
-				$this->_safe_redirect( wp_unslash( $_GET['redirect_to'] ) );
+				$this->_safe_redirect( $this->_get_safer_redirect_to() );
 			} else {
 				$this->_safe_redirect( 'https://wordpress.org/support/profile/' . wp_get_current_user()->user_nicename );
 			}

@@ -95,8 +95,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 * @return string Safe redirect URL from $_REQUEST['redirect_to']
 		 */
 		protected function _get_safer_redirect_to() {
-			// Setup a default redirect to URL, with a safe version toonly change if validation succeeds below.
-			$redirect_to  = 'https://wordpress.org/';
+			// Setup a default redirect to URL, with a safe version to only change if validation succeeds below.
+			$redirect_to = in_array( $_GET['action'], array( 'logout', 'loggedout' ) ) ? '/loggedout/' : 'https://wordpress.org/';
 			
 			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
 				// User is requesting a further redirect afterward, let's make sure it's a legit target.
