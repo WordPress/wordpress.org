@@ -15,7 +15,7 @@ class WPorg_GP_Discarded_Warning_Stats {
 	private $table_name = 'translate_dotorg_warnings';
 
 	public function __construct() {
-		add_action( 'warning_discarded', array( $this, 'log_discarded_warning' ), 10, 5 );
+		add_action( 'gp_warning_discarded', array( $this, 'log_discarded_warning' ), 10, 5 );
 	}
 
 	/**

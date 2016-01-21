@@ -26,9 +26,9 @@ class WPorg_GP_Slack_Log_Warnings {
 			return;
 		}
 
-		add_action( 'warning_discarded', array( $this, 'warning_discarded' ), 10, 5 );
-		add_action( 'translation_created', array( $this, 'translation_created' ) );
-		add_action( 'translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_warning_discarded', array( $this, 'warning_discarded' ), 10, 5 );
+		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
+		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
 	}
 
 	/**
