@@ -192,6 +192,8 @@ html {
 	background: #23282d;
 	margin: 0;
 	padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -271,6 +273,11 @@ strong {
 	transition: background 0.2s ease;
 }
 
+.btn:focus {
+  -webkit-box-shadow:0 0 0 2px #00A0D2;
+  box-shadow:0 0 0 2px #00A0D2;
+}
+
 .btn:active {
 	top: 1px;
 }
@@ -296,10 +303,15 @@ strong {
 	position: relative;
 }
 
-.button-primary:hover {
+.button-primary:hover, .button-primary:focus {
 	background: #008db9;
 	-webkit-transition: background 0.2s ease;
 	transition: background 0.2s ease;
+}
+
+.button-primary:focus {
+  -webkit-box-shadow:0 0 0 2px #00A0D2;
+  box-shadow:0 0 0 2px #00A0D2;
 }
 
 .button-primary:active {
@@ -409,6 +421,7 @@ form input[type="password"] {
 	outline: none;
 	color: #23282d;
 	font-weight: 400;
+  font-weight:400;
 }
 
 form input[type="text"],
@@ -417,6 +430,16 @@ form input[type="checkbox"],
 form input[type="radio"] {
 	background: #fbfbfb;
 	border: none;
+  -webkit-transition: all 0.1s ease;
+  transition: all 0.1s ease;
+}
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="checkbox"]:focus,
+form input[type="radio"]:focus {
+  background: #fff;
+  -webkit-box-shadow:0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
+  box-shadow:0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
 }
 
 form input[type="checkbox"], form input[type="radio"] {
@@ -458,7 +481,7 @@ form#authorize {
 }
 
 label {
-	color: #a0a5aa;
+	color: #B4B9BE;
 }
 
 #loginform p.submit,
