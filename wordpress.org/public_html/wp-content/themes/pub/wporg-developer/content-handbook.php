@@ -16,4 +16,6 @@
 
 <?php the_content( __( '(More ...)' , 'wporg' ) ); ?>
 
+<?php edit_post_link( __( 'Edit', 'wporg' ), '<span class="edit-link">', '</span>' ); ?>
+
 <div class="bottom-of-entry">&nbsp;</div>
