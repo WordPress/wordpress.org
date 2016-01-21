@@ -11,6 +11,7 @@ jQuery( document ).ready( function( $ ) {
 			try {
 				app.registerEventHandlers();
 				$( '#_wcbsi_sponsor_id' ).trigger( 'change' );  // Populate the initial sponsor information
+				$( '#wcbsi-sponsor-information' ).removeClass( 'loading-content' );
 				wcb.setupDatePicker( '#wcbsi_sponsor_invoice' );
 			} catch ( exception ) {
 				wcb.log( exception );

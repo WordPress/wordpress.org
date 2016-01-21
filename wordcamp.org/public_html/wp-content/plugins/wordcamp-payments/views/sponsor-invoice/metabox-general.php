@@ -33,7 +33,9 @@ defined( 'WPINC' ) or die();
 				<?php endforeach; ?>
 			</select>
 
-			<div id="wcbsi-sponsor-information"></div> <?php // This will be populated dynamically ?>
+			<div id="wcbsi-sponsor-information" class="loading-content">
+				<span class="spinner is-active"></span>
+			</div>
 
 			<?php require( __DIR__ . '/template-sponsor-information.php'        ); ?>
 			<?php require( __DIR__ . '/template-required-fields-incomplete.php' ); ?>

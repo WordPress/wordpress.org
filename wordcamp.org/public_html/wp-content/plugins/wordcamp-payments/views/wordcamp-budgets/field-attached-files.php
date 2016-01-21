@@ -14,7 +14,11 @@
 	<?php _e( 'Attached files:', 'wordcamporg' ); ?>
 </h4>
 
-<ul class="wcb_files_list"></ul>    <?php // Populated dynamically ?>
+<ul class="wcb_files_list loading-content">
+	<li>
+		<span class="spinner is-active"></span>
+	</li>
+</ul>
 
 <p class="wcb_no_files_uploaded <?php echo esc_attr( $files ? 'hidden' : 'active' ); ?>">
 	<?php _e( "You haven't uploaded any files yet.", 'wordcamporg' ); ?>

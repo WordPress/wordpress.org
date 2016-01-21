@@ -44,10 +44,15 @@ jQuery( document ).ready( function( $ ) {
 	 */
 	app.AttachedFilesView = Backbone.View.extend( {
 		initialize: function() {
+			var filesList = $( '.wcb_files_list' );
+
 			_.bindAll( this, 'render', 'appendFile' );
 
 			this.collection = new app.AttachedFiles( wcbAttachedFiles );
 			this.collection.bind( 'add', this.appendFile );
+
+			filesList.html( '' );  // remove the loading spinner
+			filesList.removeClass( 'loading-content' );
 
 			this.render();
 		},
