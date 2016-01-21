@@ -375,8 +375,7 @@ function save_invoice( $post_id, $post ) {
 		}
 
 		if ( 'amount' == $field ) {
-			$value = preg_replace( '#[^\d.-]+#', '', $value );
-			$value = round( floatval( $value ), 2 );
+			$value = \WordCamp_Budgets::validate_amount( $value );
 		}
 
 		if ( empty( $value ) ) {

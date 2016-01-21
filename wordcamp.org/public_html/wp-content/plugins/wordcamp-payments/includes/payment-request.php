@@ -653,9 +653,7 @@ class WCP_Payment_Request {
 					break;
 
 				case 'payment_amount':
-					$safe_value = sanitize_text_field( $unsafe_value );
-					$safe_value = preg_replace( '#[^\d.-]+#', '', $safe_value );
-					$safe_value = round( floatval( $safe_value ), 2 );
+					$safe_value = WordCamp_Budgets::validate_amount( $unsafe_value );
 					break;
 
 				case 'currency':

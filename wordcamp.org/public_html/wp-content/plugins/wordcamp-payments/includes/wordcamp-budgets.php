@@ -80,6 +80,21 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Validate an amount value
+	 *
+	 * @param string $amount
+	 *
+	 * @return float
+	 */
+	public static function validate_amount( $amount ) {
+		$amount = sanitize_text_field( $amount );
+		$amount = preg_replace( '#[^\d.-]+#', '', $amount );
+		$amount = round( floatval( $amount ), 2 );
+		
+		return $amount;
+	}
+
+	/**
 	 * Get a list of all world currencies, with the most frequently used at the top.
 	 *
 	 * @return array

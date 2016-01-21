@@ -18,8 +18,7 @@ defined( 'WPINC' ) or die();
  */
 function format_amount( $amount, $currency ) {
 	$formatted_amount = '';
-	$amount           = preg_replace( '#[^\d.-]+#', '', $amount );
-	$amount           = floatval( $amount );
+	$amount           = \WordCamp_Budgets::validate_amount( $amount );
 
 	if ( false === strpos( $currency, 'null' ) && $amount ) {
 		$formatted_amount = sprintf( '%s&nbsp;%s', number_format( $amount, 2 ), $currency );
