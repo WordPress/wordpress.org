@@ -41,7 +41,8 @@ function schedule_cron_events() {
  * Register the admin page
  */
 function register_submenu_page() {
-	$hook_suffix = add_dashboard_page(
+	$hook_suffix = add_submenu_page(
+		'wordcamp-budgets-dashboard',
 		'WordCamp Sponsor Invoices',
 		'Sponsor Invoices',
 		'manage_network',
@@ -119,7 +120,7 @@ function get_submenu_page_sections() {
 				'page'    => 'sponsor-invoices-dashboard',
 				'section' => $status_slug,
 			),
-			network_admin_url( 'index.php' )
+			network_admin_url( 'admin.php' )
 		);
 
 		$sections[ $status_slug ] = array(

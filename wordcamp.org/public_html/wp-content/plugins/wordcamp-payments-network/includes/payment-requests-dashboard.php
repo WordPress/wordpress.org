@@ -182,7 +182,15 @@ class Payment_Requests_Dashboard {
 	 * Create a network admin menu item entry.
 	 */
 	public static function network_admin_menu() {
-		$dashboard = add_dashboard_page( 'WordCamp Payments Requests', 'Payments Requests', 'manage_network', 'wcp-dashboard', array( __CLASS__, 'render_dashboard' ) );
+		$dashboard = add_submenu_page(
+			'wordcamp-budgets-dashboard',
+			'WordCamp Payments Requests',
+			'Payments Requests',
+			'manage_network',
+			'wcp-dashboard',
+			array( __CLASS__, 'render_dashboard' )
+		);
+
 		add_action( 'load-' . $dashboard, array( __CLASS__, 'pre_render_dashboard' ) );
 	}
 
@@ -484,7 +492,7 @@ class Payment_Requests_Dashboard {
 			$url = add_query_arg( array(
 				'wcp-section' => $section_key,
 				'page' => 'wcp-dashboard',
-			), network_admin_url( 'index.php' ) );
+			), network_admin_url( 'admin.php' ) );
 			echo '<a class="nav-tab ' . $active . '" href="' . esc_url( $url ) . '">' . esc_html( $section_caption ) . '</a>';
 		}
 	}

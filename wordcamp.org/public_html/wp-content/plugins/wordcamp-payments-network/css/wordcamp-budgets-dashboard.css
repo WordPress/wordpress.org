@@ -1,6 +1,10 @@
 /*
  * Common
  */
+.toplevel_page_wordcamp-budgets-dashboard .wp-menu-image img {
+	margin-left: 9px;
+}
+
 .wcbd-inline-notice {
 	margin-bottom: 5px;
 	box-shadow:    none;

@@ -7,7 +7,37 @@ defined( 'WPINC' ) or die();
  * Core functionality and helper functions shared between modules
  */
 
+add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_budgets_menu' );
+add_action( 'network_admin_menu',    __NAMESPACE__ . '\remove_budgets_submenu', 11 ); // after other modules have registered their submenu pages
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
+
+/**
+ * Register the Budgets Dashboard menu
+ *
+ * This is just an empty page so that a top-level menu can be created to hold the various pages.
+ *
+ * @todo This may no longer be needed once the Budgets post type and Overview pages are added
+ */
+function register_budgets_menu() {
+	add_menu_page(
+		'WordCamp Budgets Dashboard',
+		'Budgets',
+		'manage_network',
+		'wordcamp-budgets-dashboard',
+		'__return_empty_string',
+		plugins_url( '/wordcamp-payments/images/dollar-sign-icon.svg' ),
+		3
+	);
+}
+
+/**
+ * Remove the empty Budgets submenu item
+ *
+ * @todo This may no longer be needed once the Budgets post type and Overview pages are added
+ */
+function remove_budgets_submenu() {
+	remove_submenu_page( 'wordcamp-budgets-dashboard', 'wordcamp-budgets-dashboard'	);
+}
 
 /**
  * Enqueue scripts and styles
