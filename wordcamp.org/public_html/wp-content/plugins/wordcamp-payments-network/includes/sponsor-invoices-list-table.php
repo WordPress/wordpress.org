@@ -152,7 +152,7 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 			Approve
 		</button>
 
-		<div class="wcbdsi-inline-notice hidden"><div> <?php // Populated dynamically ?>
+		<div class="wcbd-inline-notice hidden"><div> <?php // Populated dynamically ?>
 
 		<?php
 	}

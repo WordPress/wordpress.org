@@ -143,13 +143,6 @@ function enqueue_scripts() {
 		1,
 		true
 	);
-
-	wp_enqueue_style(
-		'wcbd-sponsor-invoices',
-		plugins_url( 'css/sponsor-invoices.css', __DIR__ ),
-		array(),
-		1
-	);
 }
 
 /**

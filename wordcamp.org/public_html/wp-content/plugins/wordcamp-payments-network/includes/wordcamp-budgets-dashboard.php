@@ -7,6 +7,19 @@ defined( 'WPINC' ) or die();
  * Core functionality and helper functions shared between modules
  */
 
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
+
+/**
+ * Enqueue scripts and styles
+ */
+function enqueue_scripts() {
+	wp_enqueue_style(
+		'wordcamp-budgets-dashboard',
+		plugins_url( 'css/wordcamp-budgets-dashboard.css', __DIR__ ),
+		array(),
+		1
+	);
+}
 
 /**
  * Format an amount for display

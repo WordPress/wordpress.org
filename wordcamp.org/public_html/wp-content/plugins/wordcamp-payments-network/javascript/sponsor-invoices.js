@@ -22,7 +22,7 @@
 		 */
 		approveInvoice : function( event ) {
 			var approvalButton = $( this ),
-			    statusMessage  = $( this ).parent().find( '.wcbdsi-inline-notice' ),
+			    statusMessage  = $( this ).parent().find( '.wcbd-inline-notice' ),
 			    siteID         = approvalButton.data( 'site-id'    ),
 				invoiceID      = approvalButton.data( 'invoice-id' ),
 				nonce          = approvalButton.data( 'nonce'      );
