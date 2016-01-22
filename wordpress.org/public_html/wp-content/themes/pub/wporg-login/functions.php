@@ -1,6 +1,6 @@
 <?php
 /**
- * WP.org login' functions and definitions.
+ * W.org login functions and definitions.
  *
  * @package wporg-login
  */
