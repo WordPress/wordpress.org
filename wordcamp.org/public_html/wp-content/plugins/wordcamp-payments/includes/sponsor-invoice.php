@@ -187,6 +187,7 @@ function prepare_sponsor_data( $sponsor_id = null ) {
 		$sponsors = get_posts( array(
 			'post_type'      => 'wcb_sponsor',
 			'posts_per_page' => 100,
+			'post_status'    => array( 'draft', 'pending', 'publish' ),
 		) );
 	}
 
