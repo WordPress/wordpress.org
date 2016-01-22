@@ -192,8 +192,6 @@ html {
 	background: #23282d;
 	margin: 0;
 	padding: 0;
-  margin: 0;
-  padding: 0;
 }
 
 body {
@@ -274,8 +272,8 @@ strong {
 }
 
 .btn:focus {
-  -webkit-box-shadow:0 0 0 2px #00A0D2;
-  box-shadow:0 0 0 2px #00A0D2;
+	-webkit-box-shadow: 0 0 0 2px #00A0D2;
+	box-shadow: 0 0 0 2px #00A0D2;
 }
 
 .btn:active {
@@ -310,8 +308,8 @@ strong {
 }
 
 .button-primary:focus {
-  -webkit-box-shadow:0 0 0 2px #00A0D2;
-  box-shadow:0 0 0 2px #00A0D2;
+	-webkit-box-shadow: 0 0 0 2px #00A0D2;
+	box-shadow: 0 0 0 2px #00A0D2;
 }
 
 .button-primary:active {
@@ -421,7 +419,6 @@ form input[type="password"] {
 	outline: none;
 	color: #23282d;
 	font-weight: 400;
-  font-weight:400;
 }
 
 form input[type="text"],
@@ -430,16 +427,16 @@ form input[type="checkbox"],
 form input[type="radio"] {
 	background: #fbfbfb;
 	border: none;
-  -webkit-transition: all 0.1s ease;
-  transition: all 0.1s ease;
+	-webkit-transition: all 0.1s ease;
+	transition: all 0.1s ease;
 }
 form input[type="text"]:focus,
 form input[type="password"]:focus,
 form input[type="checkbox"]:focus,
 form input[type="radio"]:focus {
-  background: #fff;
-  -webkit-box-shadow:0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
-  box-shadow:0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
+	background: #fff;
+	-webkit-box-shadow: 0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
+	box-shadow: 0 0 0 2px #00A0D2, inset 0 1px 2px rgba(0,0,0,.5);
 }
 
 form input[type="checkbox"], form input[type="radio"] {
