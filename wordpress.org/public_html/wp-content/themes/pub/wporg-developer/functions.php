@@ -71,6 +71,11 @@ require __DIR__ . '/inc/redirects.php';
 require __DIR__ . '/inc/formatting.php';
 
 /**
+ * Autocomplete.
+ */
+require __DIR__ . '/inc/autocomplete.php';
+
+/**
  * Set the content width based on the theme's design and stylesheet.
  */
 if ( ! isset( $content_width ) ) {
