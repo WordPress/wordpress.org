@@ -20,6 +20,9 @@ add_filter( 'json_prepare_post',           'wcorg_json_embed_related_posts',    
 add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11     );    // after the default endpoints are added in `json_api_default_filters()`
 add_filter( 'wp_cache_eof_tags',           'wcorg_json_cache_requests'                          );
 
+// Allow some routes to skip the JSON REST API v1 plugin.
+add_action( 'parse_request', 'wcorg_json_v2_compat', 9 );
+
 /**
  * Unhook any endpoints that aren't whitelisted
  *
@@ -331,4 +334,40 @@ function wcorg_json_cache_requests( $eof_pattern ) {
 	}
 
 	return $eof_pattern;
+}
+
+/**
+ * JSON REST API v1 and Core/v2 compatibility.
+ *
+ * All routes in $v2_routes are routed to the core handler.
+ *
+ * @param WP $request
+ */
+function wcorg_json_v2_compat( $request ) {
+	$v2_routes = array(
+		'/wp-json/wordcamp-qbo',
+		'/wp-json/wordcamp-letsencrypt',
+	);
+
+	if ( strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) !== 0 ) {
+		return;
+	}
+
+	$is_route_v2 = false;
+	foreach ( $v2_routes as $route ) {
+		if ( strpos( $_SERVER['REQUEST_URI'], $route ) === 0 ) {
+			$is_route_v2 = true;
+			break;
+		}
+	}
+
+	if ( ! $is_route_v2 ) {
+		return;
+	}
+
+	$request->query_vars['rest_route'] = $request->query_vars['json_route'];
+	unset( $request->query_vars['json_route'] );
+	$request->matched_query = preg_replace( '#^json_route=(.+)$#', 'rest_route=$1', $request->matched_query );
+
+	return;
 }
