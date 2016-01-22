@@ -246,7 +246,6 @@ function send_invoice_to_quickbooks( $site_id, $invoice_id ) {
 		$sponsor_meta['_wcpt_sponsor_last_name'][0],
 		$sponsor_meta['_wcpt_sponsor_email_address'][0],
 		$sponsor_meta['_wcpt_sponsor_phone_number'][0],
-		$sponsor_meta['_wcpt_sponsor_tax_resale_number'][0],
 
 		$sponsor_meta['_wcpt_sponsor_street_address1'][0],
 		$sponsor_meta['_wcpt_sponsor_street_address2'][0],

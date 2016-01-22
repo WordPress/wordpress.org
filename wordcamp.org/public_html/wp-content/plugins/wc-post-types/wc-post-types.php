@@ -1512,7 +1512,6 @@ class WordCamp_Post_Types_Plugin {
 		$last_name         = get_post_meta( $sponsor->ID, '_wcpt_sponsor_last_name',         true );
 		$email_address     = get_post_meta( $sponsor->ID, '_wcpt_sponsor_email_address',     true );
 		$phone_number      = get_post_meta( $sponsor->ID, '_wcpt_sponsor_phone_number',      true );
-		$tax_resale_number = get_post_meta( $sponsor->ID, '_wcpt_sponsor_tax_resale_number', true );
 
 		$street_address1 = get_post_meta( $sponsor->ID, '_wcpt_sponsor_street_address1',   true );
 		$street_address2 = get_post_meta( $sponsor->ID, '_wcpt_sponsor_street_address2',   true );
@@ -1703,7 +1702,7 @@ class WordCamp_Post_Types_Plugin {
 
 		if ( isset( $_POST['wcpt-meta-sponsor-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-sponsor-info'], 'edit-sponsor-info' ) ) {
 			$text_values = array(
-				'company_name',	'first_name', 'last_name', 'email_address', 'phone_number', 'tax_resale_number',
+				'company_name',	'first_name', 'last_name', 'email_address', 'phone_number',
 				'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
 			);
 

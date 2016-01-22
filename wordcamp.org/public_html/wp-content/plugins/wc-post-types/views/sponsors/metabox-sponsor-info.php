@@ -86,20 +86,6 @@
 			value="<?php echo esc_attr( $phone_number ); ?>"
 		/>
 	</li>
-
-	<li>
-		<label for="_wcpt_sponsor_tax_resale_number">
-			<?php _e( 'Tax Resale Number:', 'wordcamporg' ); ?>
-		</label>
-
-		<input
-			type="text"
-			class="regular-text"
-			id="_wcpt_sponsor_tax_resale_number"
-			name="_wcpt_sponsor_tax_resale_number"
-			value="<?php echo esc_attr( $tax_resale_number ); ?>"
-		/>
-	</li>
 </ul>
 
 <ul class="wcpt-form">

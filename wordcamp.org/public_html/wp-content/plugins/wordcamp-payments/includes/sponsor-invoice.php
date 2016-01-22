@@ -171,13 +171,13 @@ function prepare_sponsor_data( $sponsor_id = null ) {
 	$data = array();
 
 	$field_names = array(
-		'company_name',	'first_name', 'last_name', 'email_address', 'phone_number', 'tax_resale_number',
+		'company_name',	'first_name', 'last_name', 'email_address', 'phone_number',
 		'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
 	);
 
 	// These use dashes instead of underscores because the loop below converts to dashes
 	$required_fields = array(
-		'company-name',	'first-name', 'last-name', 'email-address', 'phone-number', 'tax-resale-number',
+		'company-name',	'first-name', 'last-name', 'email-address', 'phone-number',
 		'street-address1', 'city', 'state', 'zip-code', 'country'
 	);
 

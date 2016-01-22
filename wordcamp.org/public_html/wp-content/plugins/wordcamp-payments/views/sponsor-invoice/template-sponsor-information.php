@@ -17,10 +17,6 @@ defined( 'WPINC' ) or die();
 				{{data.emailAddress}}<br />
 				{{data.phoneNumber}}
 			</p>
-
-			<p>
-				<?php _e( 'Tax Resale Number:', 'wordcamporg' ); ?> {{data.taxResaleNumber}}
-			</p>
 		</div>
 
 		<div id="wcbsi-billing-address">
