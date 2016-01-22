@@ -16,7 +16,7 @@ wp_enqueue_style( 'custom-login', get_template_directory_uri() . $login_css, arr
 <head>
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title><?php _e( 'WordPress.org Login' ); ?></title>
+<title><?php _e( 'WordPress.org Login', 'wporg-login' ); ?></title>
 <meta name="description" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -26,4 +26,4 @@ wp_enqueue_style( 'custom-login', get_template_directory_uri() . $login_css, arr
 
 <div class="wrapper">
 	<div class="login">
-		<h1><a href="https://wordpress.org/" title="WordPress.org" tabindex="-1"><?php _e( 'WordPress.org Login' ); ?></a></h1>
+		<h1><a href="https://wordpress.org/" title="WordPress.org" tabindex="-1"><?php _e( 'WordPress.org Login', 'wporg-login' ); ?></a></h1>
