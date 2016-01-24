@@ -230,13 +230,14 @@ class WPorg_GP_CLI_Set_Plugin_Project extends WP_CLI_Command {
 			return;
 		}
 
-		foreach ( $translation_sets as $ts ) {
-			if ( empty( $ts ) || empty( $ts->name ) ) {
-				continue;
-			}
+		$existing_sets = array();
+		foreach ( GP::$translation_set->by_project_id( $project->id ) as $set ) {
+			$existing_sets[ $set->locale . ':' . $set->slug ] = true;
+		}
 
-			$existing = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $ts->slug, $ts->locale );
-			if ( ! empty( $existing ) ) {
+		foreach ( $translation_sets as $ts ) {
+			if ( isset( $existing_sets[ $ts->locale . ':' . $ts->slug ] ) ) {
+				// This translation set already exists.
 				continue;
 			}
 
