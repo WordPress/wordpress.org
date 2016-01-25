@@ -4,6 +4,8 @@
  * Create the Payment Request post type and associated functionality
  */
 class WCP_Payment_Request {
+	var $meta_key_prefix = 'camppayments'; // Dirty hack so that Payment Method metabox rendering can be reused by other modules
+
 	const POST_TYPE = 'wcp_payment_request';
 
 	public function __construct() {
@@ -146,7 +148,8 @@ class WCP_Payment_Request {
 			array( $this, 'render_payment_metabox' ),
 			self::POST_TYPE,
 			'normal',
-			'high'
+			'high',
+			array( 'meta_key_prefix' => 'camppayments' )
 		);
 
 		add_meta_box(
@@ -265,10 +268,15 @@ class WCP_Payment_Request {
 	 * Render the Payment Details
 	 *
 	 * @param $post
+	 * @param array $box
 	 */
-	public function render_payment_metabox( $post ) {
+	public function render_payment_metabox( $post, $box ) {
+		// todo centralize this, since it's also used by the reimbursements module
+
 		wp_nonce_field( 'payment_details', 'payment_details_nonce' );
-		$selected_payment_method = get_post_meta( $post->ID, '_camppayments_payment_method', true );
+
+		$this->meta_key_prefix   = $box['args']['meta_key_prefix'];
+		$selected_payment_method = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_payment_method", true );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-payment.php' );
 	}
@@ -343,7 +351,7 @@ class WCP_Payment_Request {
 	 * @param string $name
 	 */
 	protected function render_radio_input( $post, $label, $name ) {
-		$selected = get_post_meta( $post->ID, '_camppayments_' . $name, true );
+		$selected = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true );
 		$options  = $this->get_field_value( $name, $post );
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-radio.php' );
@@ -413,7 +421,7 @@ class WCP_Payment_Request {
 
 			case 'date_vendor_paid':
 			case 'due_by':
-				if ( $value = get_post_meta( $post->ID, '_camppayments_' . $name, true ) ) {
+				if ( $value = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true ) ) {
 					$value = date( 'Y-m-d', $value );
 				}
 				break;
@@ -427,27 +435,15 @@ class WCP_Payment_Request {
 				break;
 
 			default:
-				$value = get_post_meta( $post->ID, '_camppayments_' . $name, true );
+				$value = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true );
 				break;
 		}
 
-		$encrypted_fields = array(
-			'payable_to',
-			'beneficiary_name',
-			'beneficiary_account_number',
-			'beneficiary_street_address',
-			'beneficiary_city',
-			'beneficiary_state',
-			'beneficiary_zip_code',
-			'beneficiary_country',
-		);
-
-		if ( in_array( $name, $encrypted_fields ) ) {
+		if ( in_array( $name, WordCamp_Budgets::get_encrypted_fields() ) ) {
 			$decrypted = WCP_Encryption::maybe_decrypt( $value );
 			if ( ! is_wp_error( $decrypted ) )
 				$value = $decrypted;
 		}
-
 
 		return $value;
 	}
@@ -633,6 +629,7 @@ class WCP_Payment_Request {
 
 		// Sanitize and save the field values
 		$this->sanitize_save_normal_fields( $post_id );
+		WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'camppayments' );
 		$this->sanitize_save_misc_fields(   $post_id );
 	}
 
@@ -666,32 +663,9 @@ class WCP_Payment_Request {
 				case 'vendor_state':
 				case 'vendor_zip_code':
 				case 'vendor_country':
-				case 'bank_name':
-				case 'bank_street_address':
-				case 'bank_city':
-				case 'bank_state':
-				case 'bank_zip_code':
-				case 'bank_country':
-				case 'bank_bic':
-				case 'beneficiary_account_number':
-				case 'beneficiary_name':
-				case 'beneficiary_street_address':
-				case 'beneficiary_city':
-				case 'beneficiary_state':
-				case 'beneficiary_zip_code':
-				case 'beneficiary_country':
-				case 'payable_to':
 				case 'vendor_contact_person':
 				case 'other_category_explanation':
 					$safe_value = sanitize_text_field( $unsafe_value );
-					break;
-
-				case 'payment_method':
-					if ( in_array( $unsafe_value, $this->get_field_value( 'payment_method', null ) ) ) {
-						$safe_value = $unsafe_value;
-					} else {
-						$safe_value = false;
-					}
 					break;
 
 				case 'due_by':
@@ -708,23 +682,6 @@ class WCP_Payment_Request {
 			}
 
 			if ( ! is_null( $safe_value ) ) {
-				$encrypted_fields = array(
-					'payable_to',
-					'beneficiary_name',
-					'beneficiary_account_number',
-					'beneficiary_street_address',
-					'beneficiary_city',
-					'beneficiary_state',
-					'beneficiary_zip_code',
-					'beneficiary_country',
-				);
-
-				if ( in_array( $key, $encrypted_fields ) ) {
-					$encrypted_value = WCP_Encryption::encrypt( $safe_value );
-					if ( ! is_wp_error( $encrypted_value ) )
-						$safe_value = $encrypted_value;
-				}
-
 				update_post_meta( $post_id, '_camppayments_' . $key, $safe_value );
 			}
 		}
@@ -740,16 +697,6 @@ class WCP_Payment_Request {
 		if ( current_user_can( 'manage_network' ) ) {
 			$safe_value = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) );
 			update_post_meta( $post_id, '_camppayments_date_vendor_paid', $safe_value );
-		}
-
-		// Checkboxes
-		$checkbox_fields = array( 'requesting_reimbursement' );
-		foreach( $checkbox_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) ) {
-				update_post_meta( $post_id, '_camppayments_' . $field, $_POST[ $field ] );
-			} else {
-				delete_post_meta( $post_id, '_camppayments_' . $field );
-			}
 		}
 
 		// Attach existing files

@@ -95,6 +95,87 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Validate and save payment method fields
+	 *
+	 * @param int $post_id
+	 */
+	public static function validate_save_payment_method_fields( $post_id, $meta_key_prefix ) {
+		foreach ( $_POST as $key => $unsafe_value ) {
+			$unsafe_value = wp_unslash( $unsafe_value );
+
+			switch ( $key ) {
+				case 'bank_name':
+				case 'bank_street_address':
+				case 'bank_city':
+				case 'bank_state':
+				case 'bank_zip_code':
+				case 'bank_country':
+				case 'bank_bic':
+				case 'beneficiary_account_number':
+				case 'beneficiary_name':
+				case 'beneficiary_street_address':
+				case 'beneficiary_city':
+				case 'beneficiary_state':
+				case 'beneficiary_zip_code':
+				case 'beneficiary_country':
+				case 'payable_to':
+					$safe_value = sanitize_text_field( $unsafe_value );
+					break;
+
+				case 'payment_method':
+					if ( in_array( $unsafe_value, array( 'Check', 'Credit Card', 'Wire' ), true ) ) {
+						$safe_value = $unsafe_value;
+					} else {
+						$safe_value = false;
+					}
+					break;
+
+				default:
+					$safe_value = null;
+					break;
+			}
+
+			if ( is_null( $safe_value ) ) {
+				continue;
+			}
+
+			if ( in_array( $key, self::get_encrypted_fields() ) ) {
+				$encrypted_value = WCP_Encryption::encrypt( $safe_value );
+
+				if ( ! is_wp_error( $encrypted_value ) ) {
+					$safe_value = $encrypted_value;
+				}
+			}
+
+			update_post_meta( $post_id, "_{$meta_key_prefix}_" . $key, $safe_value );
+		}
+
+		if ( isset( $_POST['requesting_reimbursement'] ) ) {
+			update_post_meta( $post_id, "_{$meta_key_prefix}_requesting_reimbursement", 'requesting_reimbursement' );
+		} else {
+			delete_post_meta( $post_id, "_{$meta_key_prefix}_requesting_reimbursement" );
+		}
+	}
+
+	/**
+	 * Get the names of all the fields that should be encrypted
+	 * 
+	 * @return array
+	 */
+	public static function get_encrypted_fields() {
+		return array(
+			'payable_to',
+			'beneficiary_name',
+			'beneficiary_account_number',
+			'beneficiary_street_address',
+			'beneficiary_city',
+			'beneficiary_state',
+			'beneficiary_zip_code',
+			'beneficiary_country',
+		);
+	}
+
+	/**
 	 * Get a list of all world currencies, with the most frequently used at the top.
 	 *
 	 * @return array
