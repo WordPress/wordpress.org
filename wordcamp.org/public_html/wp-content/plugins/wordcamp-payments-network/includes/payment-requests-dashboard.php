@@ -116,7 +116,7 @@ class Payment_Requests_Dashboard {
 	 */
 	public static function prepare_for_index( $request ) {
 		$request = get_post( $request );
-		$categories = WCP_Payment_Request::get_payment_categories();
+		$categories = WordCamp_Budgets::get_payment_categories();
 
 		// All things search.
 		$keywords = array( $request->post_title );

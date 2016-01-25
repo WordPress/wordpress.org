@@ -159,7 +159,7 @@ class WordCamp_Budgets {
 
 	/**
 	 * Get the names of all the fields that should be encrypted
-	 * 
+	 *
 	 * @return array
 	 */
 	public static function get_encrypted_fields() {
@@ -304,6 +304,28 @@ class WordCamp_Budgets {
 		);
 
 		return $currencies;
+	}
+
+	/**
+	 * Define the payment categories
+	 *
+	 * The slugs are explicitly registered in English so they will match across sites that use different locales,
+	 * which facilitates aggregating the data into reports.
+	 *
+	 * @return array
+	 */
+	public static function get_payment_categories() {
+		return array(
+			'after-party'     => __( 'After Party',                    'wordcamporg' ),
+			'audio-visual'    => __( 'Audio Visual',                   'wordcamporg' ),
+			'food-beverages'  => __( 'Food & Beverage',                'wordcamporg' ),
+			'office-supplies' => __( 'Office Supplies',                'wordcamporg' ),
+			'signage-badges'  => __( 'Signage & Badges',               'wordcamporg' ),
+			'speaker-event'   => __( 'Speaker Event',                  'wordcamporg' ),
+			'swag'            => __( 'Swag (t-shirts, stickers, etc)', 'wordcamporg' ),
+			'venue'           => __( 'Venue',                          'wordcamporg' ),
+			'other'           => __( 'Other',                          'wordcamporg' ), // This one is intentionally last, regardless of alphabetical order
+		);
 	}
 
 	/**

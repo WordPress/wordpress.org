@@ -238,7 +238,7 @@ class WCP_Payment_Request {
 	public function render_general_metabox( $post ) {
 		wp_nonce_field( 'general_info', 'general_info_nonce' );
 
-		$categories        = self::get_payment_categories();
+		$categories        = WordCamp_Budgets::get_payment_categories();
 		$assigned_category = get_post_meta( $post->ID, '_camppayments_payment_category', true );
 
 		$date_vendor_paid = get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true );
@@ -446,30 +446,6 @@ class WCP_Payment_Request {
 		}
 
 		return $value;
-	}
-
-	/**
-	 * Define the payment categories
-	 *
-	 * The slugs are explicitly registered in English so they will match across sites that use different locales,
-	 * which facilitates aggregating the data into reports.
-	 *
-	 * This is public so that WordCamp Payments Network Dashboard can access it, in order to aggregate posts by their slug.
-	 *
-	 * @return array
-	 */
-	public static function get_payment_categories() {
-		return array(
-			'after-party'     => __( 'After Party',                    'wordcamporg' ),
-			'audio-visual'    => __( 'Audio Visual',                   'wordcamporg' ),
-			'food-beverages'  => __( 'Food & Beverage',                'wordcamporg' ),
-			'office-supplies' => __( 'Office Supplies',                'wordcamporg' ),
-			'signage-badges'  => __( 'Signage & Badges',               'wordcamporg' ),
-			'speaker-event'   => __( 'Speaker Event',                  'wordcamporg' ),
-			'swag'            => __( 'Swag (t-shirts, stickers, etc)', 'wordcamporg' ),
-			'venue'           => __( 'Venue',                          'wordcamporg' ),
-			'other'           => __( 'Other',                          'wordcamporg' ), // This one is intentionally last, regardless of alphabetical order
-		);
 	}
 
 	/**
