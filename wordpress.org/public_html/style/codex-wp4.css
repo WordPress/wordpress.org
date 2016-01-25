@@ -187,18 +187,15 @@ label {
 table.diff { background:white; }
 td.diff-otitle { background:#ffffff; }
 td.diff-ntitle { background:#ffffff; }
-td.diff-addedline {
-    background:#ccffcc;
-    font-size: smaller;
-}
-td.diff-deletedline {
-    background:#ffffaa;
-    font-size: smaller;
-}
+td.diff-addedline,
+td.diff-deletedline,
 td.diff-context {
-    background:#eeeeee;
-    font-size: smaller;
+	white-space: pre-wrap; 
+	font-size: smaller;
 }
+td.diff-addedline { background:#ccffcc; }
+td.diff-deletedline { background:#ffffaa; }
+td.diff-context { background:#eeeeee; }
 span.diffchange { color: red; font-weight: bold; }
 
 /* image css */
