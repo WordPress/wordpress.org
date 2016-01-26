@@ -693,6 +693,7 @@ a.wpsc-hero-learnmore {
 
 #pagebody.home .wpsc-recent {
 	margin: 0;
+	overflow: auto;
 }
 
 .home .wpsc-recent>li {
