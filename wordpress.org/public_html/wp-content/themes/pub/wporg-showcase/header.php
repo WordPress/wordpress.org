@@ -8,6 +8,6 @@ require WPORGPATH . 'header.php';
 ?>
 <div id="headline">
 	<div class="wrapper">
-		<h2>Showcase</h2>
+		<h2><?php _e( 'Showcase', 'wporg-showcase' ); ?></h2>
 	</div>
 </div>

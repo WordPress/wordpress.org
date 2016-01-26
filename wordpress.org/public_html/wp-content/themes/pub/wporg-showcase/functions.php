@@ -69,8 +69,8 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 function wp_flavors() {
 	global $post;
 
-	echo '<h4>Flavor</h4>
-		<ul id="flavors">';
+	echo '<h4>' . __( 'Flavor', 'wporg-showcase' ). '</h4>';
+	echo '<ul id="flavors">';
 
 	$flavors = array( 'WordPress.org', 'WordPress.com', 'WordPress.com VIP', 'WordPress MS' );
 
@@ -83,9 +83,9 @@ function wp_flavors() {
 	}
 
 	if ( in_category( 'BuddyPress' ) ) {
-		echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor-bp.png" /> BuddyPress</li>';
+		echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor-bp.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
 	} else {
-		echo '<li><img src="' . get_template_directory_uri() . '/images/flavor-bp2.png" /> BuddyPress</li>';
+		echo '<li><img src="' . get_template_directory_uri() . '/images/flavor-bp2.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
 	}
 
 	echo '</ul>';
@@ -93,7 +93,7 @@ function wp_flavors() {
 
 function blockquote_style( $content ) {
 	if ( is_single() )
-		$content = str_replace( '</blockquote>', '<cite>Source: <a href="http://' . get_site_domain( false, false ) . '">' . get_site_domain( false, false, true ) . '</a></cite><div class="clear"></div></blockquote>', $content );
+		$content = str_replace( '</blockquote>', '<cite>' . __( 'Source:', 'wporg-showcase' ). ' <a href="http://' . get_site_domain( false, false ) . '">' . get_site_domain( false, false, true ) . '</a></cite><div class="clear"></div></blockquote>', $content );
 
 	return $content;
 }
@@ -119,7 +119,7 @@ function popular_tags ($number = 10) {
 	$args = array('number' => $number, 'orderby' => 'count', 'order' => 'DESC');
 	$tags = get_terms( 'post_tag', $args );
 
-	$out = '<h4>Browse Popular Tags</h4>';
+	$out = '<h4>' . __( 'Browse Popular Tags', 'wporg-showcase' ). '</h4>';
 	$out .= '<ul class="submenu wpsc-popular-tags">';
 
 	foreach ($tags as $tag) {
@@ -138,20 +138,20 @@ function popular_tags ($number = 10) {
 
 function breadcrumb() { ?>
 
-	<h3><a href="<?php echo home_url( '/' ); ?>" title="Showcase">Showcase</a>
+	<h3><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
-			&raquo; Search for: <?php the_search_query(); ?>
+			<?php printf( __( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() ); ?>
 		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
-			&raquo; Archives
+			<?php _e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
 			<?php if ( is_category() ) : ?>
-				&raquo; Flavor
+				<?php _e( '&raquo; Flavor', 'wporg-showcase' ); ?>
 			<?php elseif ( is_tag() ) : ?>
-				&raquo; Tag
+				<?php _e( '&raquo; Tag', 'wporg-showcase' ); ?>
 			<?php endif; // is_category ?>
 
-			&raquo; <?php echo wp_get_document_title(); ?>
+			<?php printf( __( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() ); ?>
 		<?php endif; // is_search ?>
 
 	</h3>
@@ -160,7 +160,7 @@ function breadcrumb() { ?>
 
 function sc_feed_author( $author ) {
 	if ( is_feed() )
-		$author = 'WordPress Showcase';
+		$author = _x( 'WordPress Showcase', 'Feed Author', 'wporg-showcase' );
 
 	return $author;
 }
@@ -174,7 +174,7 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 	if ( $posttags ) {
 		foreach ( $posttags as $tag ) {
 			if ( $tag->count > 1 && !is_tag($tag->slug) ) {
-				$tag_link = '<a href="' . get_term_link($tag, 'post_tag') . '" rel="tag">' . $tag->name . ' (' . $tag->count . ')</a>';
+				$tag_link = '<a href="' . get_term_link($tag, 'post_tag') . '" rel="tag">' . sprintf( _x( '%1$s (%2$s)', 'Tag name (tag count)', 'wporg-showcase' ), $tag->name, $tag->count ) . '</a>';
 			} else {
 				$tag_link = $tag->name;
 			}
@@ -248,10 +248,10 @@ function wporg_showcase_document_title( $parts ) {
 		$parts['title'] = '';
 	} elseif ( is_category() ) {
 		// Prepend 'Flavor: ' to category document titles.
-		$parts['title'] = 'Flavor: ' . $parts['title'];
+		$parts['title'] = sprintf( __( 'Flavor: %s', 'wporg-showcase' ) . $parts['title'] );
 	} elseif ( is_tag() ) {
 		// Prepend 'Tag: ' to tag document titles.
-		$parts['title'] = 'Tag: ' . $parts['title'];
+		$parts['title'] = sprintf( __( 'Tag: %s', 'wporg-showcase' ) . $parts['title'] );
 	}
 
 	return $parts;

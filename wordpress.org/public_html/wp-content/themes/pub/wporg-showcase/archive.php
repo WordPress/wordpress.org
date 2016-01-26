@@ -22,7 +22,7 @@ query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' 
 					</a>
 					<h5><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h5>
 					<div class="excerpt"><?php the_content_limit(200); ?></div>
-					<div class="meta"><?php tags_with_count( 'flat', '<strong>Tags:</strong> ', ', ', '<br />'); ?><?php edit_post_link( 'Edit this entry' ); ?></div>
+					<div class="meta"><?php tags_with_count( 'flat', '<strong>' . __( 'Tags:', 'wporg-showcase' ) . '</strong> ', ', ', '<br />'); ?><?php edit_post_link( __( 'Edit this entry', 'wporg-showcase' ) ); ?></div>
 					<div style="clear:both;"></div>
 				</div>
 
@@ -32,7 +32,7 @@ query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' 
 		
 		<?php else : // have_posts ?>
 
-			<p><?php _e('Sorry, no sites in the Showcase matched your criteria.'); ?></p>
+			<p><?php _e( 'Sorry, no sites in the Showcase matched your criteria.', 'wporg-showcase' ); ?></p>
 
 		<?php endif; ?>
 

@@ -25,7 +25,7 @@ get_header();
 							<?php if ( $wpsc_url ) : // make sure the URL is valid (esc_url will return an empty string if not) ?>
 							<a href="<?php echo $wpsc_url; ?>" class="wpsc-linkout">
 								<?php echo str_replace( parse_url( $wpsc_url, PHP_URL_SCHEME ) . '://', '', untrailingslashit( $wpsc_url ) ); ?> 
-								<span class="linkout-symbol">&#10162;</span>
+								<span class="linkout-symbol"><?php _ex( '&#10162;', 'linkout symbol', 'wporg-showcase' ); ?></span>
 							</a>
 							<?php endif; // $wpsc_url ?>
 							
@@ -34,7 +34,7 @@ get_header();
 								the_excerpt();
 							?>
 							<a class="wpsc-hero-learnmore" href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
-								Learn More &rarr;
+								<?php _e( 'Learn More &rarr;', 'wporg-showcase' ); ?>
 							</a>
 						</div><!-- .wpsc-hero-slide-content -->
 					</div><!-- .wpsc-hero-slide -->
@@ -55,7 +55,7 @@ get_header();
 
 			<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 3, 'tag' => 'business', 'orderby' => 'rand' ) ); ?>
 			<?php if ( have_posts() ) : ?>
-			<h3>Featured Business Sites</h3>
+			<h3><?php _e( 'Featured Business Sites', 'wporg-showcase' ); ?></h3>
 			<ul class="wpsc-recent">
 				
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -78,7 +78,7 @@ get_header();
 			<?php query_posts( array( 'posts_per_page' => 9 ) ); ?>
 			<?php if ( have_posts() ) : ?>
 
-			<h3>Recently Added Sites</h3>
+			<h3><?php _e( 'Recently Added Sites', 'wporg-showcase' ); ?></h3>
 			<ul class="wpsc-recent">
 
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -96,7 +96,7 @@ get_header();
 				
 				<?php endwhile; // have_posts ?>
 			</ul>
-			<a href="<?php echo home_url( '/archives/' ); ?>" class="wpsc-view-all">View All Showcase Sites &rarr;</a>
+			<a href="<?php echo home_url( '/archives/' ); ?>" class="wpsc-view-all"><?php _e( 'View All Showcase Sites &rarr;', 'wporg-showcase' ); ?></a>
 			
 			<?php endif; // have_posts ?>
 		

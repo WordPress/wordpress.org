@@ -25,8 +25,8 @@ if ( !empty( $_POST ) ) {
 
 <?php if ( $_POST && ! $error ) : ?>
 	<div id="return">
-	<h3>Submitted!</h3>
-	<p>Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you'd like to submit another site, head back to the <a href="http://wordpress.org/showcase/submit-a-wordpress-site/">submission form</a>.</p>
+	<h3><?php _e( 'Submitted!', 'wporg-showcase' ); ?></h3>
+	<p><?php printf( __( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you\'d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ), 'https://wordpress.org/showcase/submit-a-wordpress-site/' ); ?></p>
 	</div>
 <?php endif; // $_POST && ! $error ?>
 
@@ -47,25 +47,21 @@ if ( empty( $_POST ) || $error ) {
 	endif; // have_posts
 ?>
 
-	<?php if ( $error ) : ?>		
-		<h3 id="return">Whoops!</h3>
+	<?php if ( $error ) : ?>
+		<h3 id="return"><?php _e( 'Whoops!', 'wporg-showcase' ); ?></h3>
 		
 		<?php if ( strstr( $url, 'blogspot.com' ) || strstr( $url, 'blogger.com' ) ) : ?>
-			<p>Please submit a WordPress blog URL. Blogspot/Blogger blogs are not accepted.</p>
+			<p><?php _e( 'Please submit a WordPress blog URL. Blogspot/Blogger blogs are not accepted.', 'wporg-showcase' ); ?></p>
 	
 		<?php elseif ( $site_detected == "NO" ) : ?>
-			<p>We didn't detect WordPress at the given URL. Please submit the URL of a site running WordPress.</p>
+			<p><?php _e( 'We didn\'t detect WordPress at the given URL. Please submit the URL of a site running WordPress.', 'wporg-showcase' ); ?></p>
 		
 		<?php elseif ( $site_detected == "YES" && version_compare($site_version, $latest_release, '<' ) ) : ?>
-			<p>We were unable to detect the latest version of WordPress at the given URL. 
-			We'd prefer submissions to the showcase to be running up-to-date versions of WordPress.</p>
-			<p>If you're sure the site is running the latest version of WordPress, then please 
-			check the URL to make sure it's accurate, and that the URL you submit points directly 
-			to the location where WordPress is running.</p>
+			<p><?php _e( 'We were unable to detect the latest version of WordPress at the given URL. We\'d prefer submissions to the showcase to be running up-to-date versions of WordPress.', 'wporg-showcase' ); ?></p>
+			<p><?php _e( 'If you\'re sure the site is running the latest version of WordPress, then please check the URL to make sure it\'s accurate, and that the URL you submit points directly to the location where WordPress is running.', 'wporg-showcase' ); ?></p>
 		
 		<?php else : ?>
-			<p>There seems to have been a problem with the information you entered. Please make sure 
-			all fields have data and resubmit.</p>
+			<p><?php _e( 'There seems to have been a problem with the information you entered. Please make sure all fields have data and resubmit.', 'wporg-showcase' ); ?></p>
 	
 		<?php endif; ?>
 	
@@ -74,28 +70,28 @@ if ( empty( $_POST ) || $error ) {
 <form action="/showcase/submit-a-wordpress-site/#return" method="post" id="submitform">
 	<input type="hidden" name="comment_post_ID" value="<?php echo $post->ID; ?>" />
 
-	<p><label for="submitname"><?php _e('Your Name'); ?></label><br />
+	<p><label for="submitname"><?php _e( 'Your Name', 'wporg-showcase' ); ?></label><br />
 	<input type="text" name="submitname" id="submitname" class="text" value="<?php echo esc_attr( $submitname ); ?>" size="28" tabindex="1" /></p>
 
-	<p><label for="email"><?php _e('Your E-mail'); ?></label><br />
+	<p><label for="email"><?php _e( 'Your E-mail', 'wporg-showcase'); ?></label><br />
 	<input type="text" name="email" id="email" value="<?php echo esc_attr( $email ); ?>" size="28" tabindex="2" class="text" /></p>
 
-	<p><label for="url"><?php _e('Site URL'); ?></label><br />
+	<p><label for="url"><?php _e( 'Site URL', 'wporg-showcase' ); ?></label><br />
 	<input type="text" name="url" id="url" value="<?php echo esc_url( $url ); ?>" size="28" tabindex="3" class="text" /></p>
 
-	<p><label for="owner"><?php _e("Do you own this site? (It's okay if you don't - we just want to know for contact purposes.)"); ?></label><br />
+	<p><label for="owner"><?php _e( "Do you own this site? (It's okay if you don't - we just want to know for contact purposes.)", 'wporg-showcase' ); ?></label><br />
 	<select name="owner" id="owner">
-		<option value="yes" <?php selected( $owner, 'yes' ); ?> ><?php _e( 'Yes' ); ?></option>
-		<option value="no" <?php selected( $owner, 'no' ); ?> ><?php _e( 'No' ); ?></option>
+		<option value="yes" <?php selected( $owner, 'yes' ); ?> ><?php _e( 'Yes', 'wporg-showcase' ); ?></option>
+		<option value="no" <?php selected( $owner, 'no' ); ?> ><?php _e( 'No', 'wporg-showcase' ); ?></option>
 	</select>
 
-	<p><label for="description"><?php _e( 'Please describe the site and, if applicable, the person or organization it represents.' ); ?></label><br />
+	<p><label for="description"><?php _e( 'Please describe the site and, if applicable, the person or organization it represents.', 'wporg-showcase' ); ?></label><br />
 	<textarea name="description" id="description" cols="60" rows="4" tabindex="4" class="text"><?php echo esc_textarea( $description ); ?></textarea></p>
 
-	<p><label for="why"><?php _e( 'What justifies this site being added to the WordPress Showcase? What makes it unique or interesting?' ); ?></label><br />
+	<p><label for="why"><?php _e( 'What justifies this site being added to the WordPress Showcase? What makes it unique or interesting?', 'wporg-showcase' ); ?></label><br />
 	<textarea name="why" id="why" cols="60" rows="4" tabindex="5" class="text"><?php echo esc_textarea( $why ); ?></textarea></p>
 
-	<p class="required">* All fields are required.</p>
+	<p class="required"><?php _e( '* All fields are required.', 'wporg-showcase' ); ?></p>
 
 	<?php
 	if ($use_recaptcha) {
@@ -113,7 +109,7 @@ if ( empty( $_POST ) || $error ) {
 	} // $use_recaptcha
 	?>
 	
-	<p><input id="submit" type="submit" tabindex="6" value="<?php _e('Submit Site'); ?>" class="button" /></p>
+	<p><input id="submit" type="submit" tabindex="6" value="<?php esc_attr_e( 'Submit Site', 'wporg-showcase' ); ?>" class="button" /></p>
 	<?php do_action( 'comment_form', $post->ID ); ?>
 </form>
 <?php } // empty( $_POST ) || $error ?>
