@@ -388,8 +388,16 @@ blockquote cite {
 .group:after {clear:both;}
 .group {zoom:1;}
 
+#pagebody {
+	font-size: 13px;
+}
+
 #pagebody.home {
 	margin: 0
+}
+
+#pagebody .main-content, #pagebody .storycontent {
+	font-size: 16px;
 }
 
 a {outline: none}
