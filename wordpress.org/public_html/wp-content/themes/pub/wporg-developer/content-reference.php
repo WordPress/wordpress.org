@@ -80,7 +80,7 @@
 		?>
 		<hr/>
 		<section class="explanation">
-			<h2><?php _e( 'Explanation', 'wporg' ); ?></h2>
+			<h2><?php _e( 'More Information', 'wporg' ); ?></h2>
 			<?php echo apply_filters( 'the_content', apply_filters( 'get_the_content', $explanation ) ); ?>
 		</section>
 	<?php endif; ?>
