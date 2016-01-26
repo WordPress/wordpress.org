@@ -276,6 +276,11 @@ class WCP_Payment_Request {
 		wp_nonce_field( 'payment_details', 'payment_details_nonce' );
 
 		$this->meta_key_prefix   = $box['args']['meta_key_prefix'];
+
+		if ( ! isset( $box['args']['fields_enabled'] ) ) {
+			$box['args']['fields_enabled'] = true;
+		}
+
 		$selected_payment_method = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_payment_method", true );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-payment.php' );

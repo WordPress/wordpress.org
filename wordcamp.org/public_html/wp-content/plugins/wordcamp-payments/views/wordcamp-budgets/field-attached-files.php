@@ -8,6 +8,8 @@
 	<a class="button wcb-insert-media" role="button">
 		<?php _e( 'Add files', 'wordcamporg' ); ?>
 	</a>
+
+	<?php // todo: change from link to button, b/c more semantic and will respect fieldset:disabled ?>
 </p>
 
 <h4>
