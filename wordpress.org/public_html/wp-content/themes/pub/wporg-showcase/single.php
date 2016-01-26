@@ -3,10 +3,10 @@
 <div id="pagebody" class="post">
 	<div class="wrapper">
 		<?php get_sidebar( 'left' ); ?>
-			
+
 			<?php if ( have_posts() ) : ?>
 				<?php while ( have_posts() ) : the_post(); ?>
-					
+
 					<div class="col-5">
 						<div class="storycontent">
 								<?php breadcrumb(); ?>
@@ -38,7 +38,7 @@
 												</dt>";
 											$output .= "</dl>";
 											if ( $key > 0 && $key+1 % 2 == 0 )
-												$output .= "<br style='clear: both' />"; 
+												$output .= "<br style='clear: both' />";
 										}
 
 										$output .= "

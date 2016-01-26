@@ -1,7 +1,7 @@
 <?php
 /**
  * Special Showcase RSS2 Feed Template
- * 
+ *
  * Adds fields for the site screenshot and URL
  * <sc:screenshotURL>
  * <sc:domain>

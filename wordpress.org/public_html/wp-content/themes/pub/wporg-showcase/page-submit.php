@@ -49,22 +49,22 @@ if ( empty( $_POST ) || $error ) {
 
 	<?php if ( $error ) : ?>
 		<h3 id="return"><?php _e( 'Whoops!', 'wporg-showcase' ); ?></h3>
-		
+
 		<?php if ( strstr( $url, 'blogspot.com' ) || strstr( $url, 'blogger.com' ) ) : ?>
 			<p><?php _e( 'Please submit a WordPress blog URL. Blogspot/Blogger blogs are not accepted.', 'wporg-showcase' ); ?></p>
-	
+
 		<?php elseif ( $site_detected == "NO" ) : ?>
 			<p><?php _e( 'We didn\'t detect WordPress at the given URL. Please submit the URL of a site running WordPress.', 'wporg-showcase' ); ?></p>
-		
+
 		<?php elseif ( $site_detected == "YES" && version_compare($site_version, $latest_release, '<' ) ) : ?>
 			<p><?php _e( 'We were unable to detect the latest version of WordPress at the given URL. We\'d prefer submissions to the showcase to be running up-to-date versions of WordPress.', 'wporg-showcase' ); ?></p>
 			<p><?php _e( 'If you\'re sure the site is running the latest version of WordPress, then please check the URL to make sure it\'s accurate, and that the URL you submit points directly to the location where WordPress is running.', 'wporg-showcase' ); ?></p>
-		
+
 		<?php else : ?>
 			<p><?php _e( 'There seems to have been a problem with the information you entered. Please make sure all fields have data and resubmit.', 'wporg-showcase' ); ?></p>
-	
+
 		<?php endif; ?>
-	
+
 	<?php endif; // $error ?>
 
 <form action="/showcase/submit-a-wordpress-site/#return" method="post" id="submitform">
@@ -96,7 +96,7 @@ if ( empty( $_POST ) || $error ) {
 	<?php
 	if ($use_recaptcha) {
 		$recaptcha_url = 'http://www.google.com/recaptcha/api/challenge?k=' . $recaptcha_pubkey;
-		if ( !empty( $recaptcha_error ) ) 
+		if ( !empty( $recaptcha_error ) )
 			$recaptcha_url .= '&error=' . $recaptcha_error;
 	?>
 	<script type="text/javascript" src="<?php echo $recaptcha_url; ?>"></script>
@@ -105,10 +105,10 @@ if ( empty( $_POST ) || $error ) {
 	<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
 	<input type="hidden" name="recaptcha_response_field" value="manual_challenge">
 	</noscript>
-	<?php 
+	<?php
 	} // $use_recaptcha
 	?>
-	
+
 	<p><input id="submit" type="submit" tabindex="6" value="<?php esc_attr_e( 'Submit Site', 'wporg-showcase' ); ?>" class="button" /></p>
 	<?php do_action( 'comment_form', $post->ID ); ?>
 </form>
