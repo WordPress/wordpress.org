@@ -40,6 +40,7 @@ class WPORG_Explanations {
 		add_action( 'init',                    array( $this, 'remove_editor_support'  ), 100 );
 		add_action( 'edit_form_after_title',   array( $this, 'post_to_expl_controls'  )      );
 		add_action( 'edit_form_top',           array( $this, 'expl_to_post_controls'  )      );
+		add_action( 'admin_bar_menu',          array( $this, 'toolbar_edit_link'      ), 100 );
 
 		// Script and styles.
 		add_action( 'admin_enqueue_scripts',   array( $this, 'admin_enqueue_scripts'  )      );
@@ -167,6 +168,36 @@ class WPORG_Explanations {
 			</div>
 		<?php
 		endif;
+	}
+
+	/**
+	 * Adds an 'Edit Explanation' link to the Toolbar on parsed post type single pages.
+	 *
+	 * @access public
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance.
+	 */
+	public function toolbar_edit_link( $wp_admin_bar ) {
+		global $wp_the_query;
+
+		$screen = $wp_the_query->get_queried_object();
+
+		if ( is_admin() || empty( $screen->post_type ) || ! is_singular( $this->post_types ) ) {
+			return;
+		}
+
+		if ( ! empty( $screen->post_type ) ) {
+			// Proceed only if there's an explanation for the current reference post type.
+			if ( $explanation = \DevHub\get_explanation( $screen ) ) {
+				$post_type = get_post_type_object( $this->exp_post_type );
+
+				$wp_admin_bar->add_menu( array(
+					'id'    => 'edit-explanation',
+					'title' => $post_type->labels->edit_item,
+					'href'  => get_edit_post_link( $explanation )
+				) );
+			}
+		}
 	}
 
 	/**
