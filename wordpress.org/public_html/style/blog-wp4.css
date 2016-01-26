@@ -1,3 +1,7 @@
+#wporg-header ul li a.current ~ .uparrow {
+	border-bottom-color: #ffffff;
+}
+
 .feedback {
 	text-align: right;
 	font-size: 10px;
