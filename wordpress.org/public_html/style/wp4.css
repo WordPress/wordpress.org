@@ -1320,13 +1320,51 @@ a.rsslink {
 	overflow: auto;
 	width: 135px;
 	margin-left: 24px;
-	margin-bottom: 15px; /* for narrow screens */
+	margin-bottom: 20px; /* for narrow screens */
 	padding-left: 0; /* override other generic styles */
 }
 
 @media screen and (min-width:960px) {
 	#wporg-footer ul:first-child {
 		margin-left: 0;
+	}
+}
+
+@media screen and (min-width:561px) and (max-width:959px) {
+	#wporg-footer .wrapper {
+		max-width: 600px;
+	}
+
+	#wporg-footer ul:nth-child(3n+1) {
+		margin-left: 0;
+	}
+
+	#wporg-footer ul:nth-child(4n) {
+		clear: both;
+	}
+
+	#wporg-footer ul {
+		margin-left: 2%;
+		width: 32%;
+	}
+}
+
+@media screen and (max-width:560px) {
+	#wporg-footer .wrapper {
+		max-width: 360px;
+	}
+
+	#wporg-footer ul:nth-child(2n+1) {
+		margin-left: 0;
+	}
+
+	#wporg-footer ul:nth-child(odd) {
+		clear: both;
+	}
+
+	#wporg-footer ul {
+		margin-left: 4%;
+		width: 48%;
 	}
 }
 
