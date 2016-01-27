@@ -17,7 +17,6 @@ if ( defined( 'DOING_AJAX' ) ) {
 } elseif ( is_network_admin() ) {
 	add_action( 'plugins_loaded',        __NAMESPACE__ . '\schedule_cron_events'  );
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
-	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'       );
 	add_action( 'init',                  __NAMESPACE__ . '\upgrade_database'      );
 
 } elseif ( is_admin() ) {
