@@ -67,7 +67,7 @@
 		</label>
 
 		<input
-			type="text"
+			type="email"
 			class="regular-text"
 			id="_wcpt_sponsor_email_address"
 			name="_wcpt_sponsor_email_address"
