@@ -14,7 +14,8 @@
 	<li id="comment-<?php comment_ID() ?>" <?php if ($i % 2) echo "class='altc'"; ?>>
 	<?php comment_text() ?>
 	<p><cite><?php printf(
-		_x( '%1$s from %2$s on %3$s', '{comment type} from {comment author link} on {comment date}', 'wporg-showcase' ),
+		/* translators: 1: comment type, 2: comment author link, 3: comment date */
+		__( '%1$s from %2$s on %3$s', 'wporg-showcase' ),
 		comment_type( __( 'Comment', 'wporg-showcase' ), __( 'Trackback', 'wporg-showcase' ), __( 'Pingback', 'wporg-showcase' ) ),
 		comment_author_link(),
 		comment_date()

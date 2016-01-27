@@ -141,7 +141,10 @@ function breadcrumb() { ?>
 	<h3><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
-			<?php printf( __( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() ); ?>
+			<?php
+				/* translators: %s: search query */
+				printf( __( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
+			?>
 		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
 			<?php _e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
@@ -151,7 +154,10 @@ function breadcrumb() { ?>
 				<?php _e( '&raquo; Tag', 'wporg-showcase' ); ?>
 			<?php endif; // is_category ?>
 
-			<?php printf( __( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() ); ?>
+			<?php
+				/* translators: %s: document title */
+				printf( __( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() );
+			?>
 		<?php endif; // is_search ?>
 
 	</h3>
@@ -174,7 +180,11 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 	if ( $posttags ) {
 		foreach ( $posttags as $tag ) {
 			if ( $tag->count > 1 && !is_tag($tag->slug) ) {
-				$tag_link = '<a href="' . get_term_link($tag, 'post_tag') . '" rel="tag">' . sprintf( _x( '%1$s (%2$s)', 'Tag name (tag count)', 'wporg-showcase' ), $tag->name, $tag->count ) . '</a>';
+				$tag_link = sprintf( '<a href="%s" rel="tag">%s</a>',
+					get_term_link( $tag, 'post_tag' ),
+					/* translators: 1: tag name, 2: tag count */
+					sprintf( __( '%1$s (%2$s)', 'wporg-showcase' ), $tag->name, $tag->count )
+				);
 			} else {
 				$tag_link = $tag->name;
 			}
@@ -248,9 +258,11 @@ function wporg_showcase_document_title( $parts ) {
 		$parts['title'] = '';
 	} elseif ( is_category() ) {
 		// Prepend 'Flavor: ' to category document titles.
+		/* translators: %s: category name */
 		$parts['title'] = sprintf( __( 'Flavor: %s', 'wporg-showcase' ) . $parts['title'] );
 	} elseif ( is_tag() ) {
 		// Prepend 'Tag: ' to tag document titles.
+		/* translators: %s: tag name */
 		$parts['title'] = sprintf( __( 'Tag: %s', 'wporg-showcase' ) . $parts['title'] );
 	}
 

@@ -26,7 +26,11 @@ if ( !empty( $_POST ) ) {
 <?php if ( $_POST && ! $error ) : ?>
 	<div id="return">
 	<h3><?php _e( 'Submitted!', 'wporg-showcase' ); ?></h3>
-	<p><?php printf( __( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you\'d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ), 'https://wordpress.org/showcase/submit-a-wordpress-site/' ); ?></p>
+	<p><?php printf(
+		/* translators: %s: URL of the site submission form */
+		__( 'Thanks! You have successfully submitted a site for consideration to be added to the WordPress Showcase. If the site you submitted is added, you will be contacted via email within one week. We appreciate your interest in the WordPress Showcase! If you\'d like to submit another site, head back to the <a href="%s">submission form</a>.', 'wporg-showcase' ),
+		'https://wordpress.org/showcase/submit-a-wordpress-site/'
+	); ?></p>
 	</div>
 <?php endif; // $_POST && ! $error ?>
 
