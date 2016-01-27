@@ -8,6 +8,11 @@ h4,h5,h6,th,var { font-style: normal; font-weight: normal; }
 caption,th { text-align: left; }
 q:before,q:after { content: ''; }
 a { text-decoration: none; }
+
+html {
+	overflow-y: scroll;
+}
+
 body {
 	font-size: 62.5%;
 	background: #fff;
