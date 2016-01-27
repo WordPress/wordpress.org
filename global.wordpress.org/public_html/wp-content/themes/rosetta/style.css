@@ -596,6 +596,14 @@ textarea {
 }
 
 /**
+ * Move this section to wp4.css when en-US updates.
+ */
+#wporg-footer h6 {
+	font-family: Georgia, Times, "Times New Roman", serif;
+	color: #b4b9be;
+}
+
+/**
  * Media Queries
  */
 @-ms-viewport {
