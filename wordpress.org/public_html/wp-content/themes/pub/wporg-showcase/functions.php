@@ -259,11 +259,11 @@ function wporg_showcase_document_title( $parts ) {
 	} elseif ( is_category() ) {
 		// Prepend 'Flavor: ' to category document titles.
 		/* translators: %s: category name */
-		$parts['title'] = sprintf( __( 'Flavor: %s', 'wporg-showcase' ) . $parts['title'] );
+		$parts['title'] = sprintf( __( 'Flavor: %s', 'wporg-showcase' ), $parts['title'] );
 	} elseif ( is_tag() ) {
 		// Prepend 'Tag: ' to tag document titles.
 		/* translators: %s: tag name */
-		$parts['title'] = sprintf( __( 'Tag: %s', 'wporg-showcase' ) . $parts['title'] );
+		$parts['title'] = sprintf( __( 'Tag: %s', 'wporg-showcase' ), $parts['title'] );
 	}
 
 	return $parts;
