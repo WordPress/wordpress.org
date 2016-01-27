@@ -15,7 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/wordcamp-budgets.php' );
 	require_once( __DIR__ . '/includes/payment-request.php' );
-	require_once( __DIR__ . '/includes/sponsor-invoice.php' );
+	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
+		require_once( __DIR__ . '/includes/sponsor-invoice.php' );
+	}
 	require_once( __DIR__ . '/includes/encryption.php' );
 
 	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
