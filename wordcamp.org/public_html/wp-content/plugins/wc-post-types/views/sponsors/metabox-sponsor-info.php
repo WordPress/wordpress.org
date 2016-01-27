@@ -42,6 +42,7 @@
 			id="_wcpt_sponsor_first_name"
 			name="_wcpt_sponsor_first_name"
 			value="<?php echo esc_attr( $first_name ); ?>"
+			required
 		/>
 	</li>
 
@@ -56,6 +57,7 @@
 			id="_wcpt_sponsor_last_name"
 			name="_wcpt_sponsor_last_name"
 			value="<?php echo esc_attr( $last_name ); ?>"
+			required
 		/>
 	</li>
 
@@ -70,6 +72,7 @@
 			id="_wcpt_sponsor_email_address"
 			name="_wcpt_sponsor_email_address"
 			value="<?php echo esc_attr( $email_address ); ?>"
+			required
 		/>
 	</li>
 
