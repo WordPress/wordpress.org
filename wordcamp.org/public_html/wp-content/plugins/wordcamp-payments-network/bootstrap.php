@@ -26,7 +26,9 @@ if ( is_admin() || defined( 'DOING_CRON' ) ) {
 
 	require_once( __DIR__ . '/includes/wordcamp-budgets-dashboard.php' );
 	require_once( __DIR__ . '/includes/payment-requests-dashboard.php' );
-	require_once( __DIR__ . '/includes/sponsor-invoices-dashboard.php' );
+	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
+		require_once( __DIR__ . '/includes/sponsor-invoices-dashboard.php' );
+	}
 
 	$GLOBALS['Payment_Requests_Dashboard'] = new \Payment_Requests_Dashboard();
 
