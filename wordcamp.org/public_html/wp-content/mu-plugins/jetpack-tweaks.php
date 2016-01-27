@@ -123,7 +123,7 @@ function notify_import_rules_stripped() {
 		<p>
 			<?php printf(
 				__( 'WARNING: <code>@import</code> rules were stripped for security reasons.
-				Please use <a href="%s">the Fonts tool</a> to add web fonts, and copy/paste other stylesheets directly into your custom CSS.',
+				Please use <a href="%s">the Fonts tool</a> to add web fonts, and merge other stylesheets directly into your custom CSS.',
 				'wordcamporg' ),
               admin_url( 'themes.php?page=wc-fonts-options' )
             ); ?>
