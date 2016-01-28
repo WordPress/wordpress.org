@@ -312,6 +312,7 @@ class WordCamp_Budgets {
 		return array(
 			'after-party'     => __( 'After Party',                    'wordcamporg' ),
 			'audio-visual'    => __( 'Audio Visual',                   'wordcamporg' ),
+			'camera-shipping' => __( 'Camera Shipping',                'wordcamporg' ),
 			'food-beverages'  => __( 'Food & Beverage',                'wordcamporg' ),
 			'office-supplies' => __( 'Office Supplies',                'wordcamporg' ),
 			'signage-badges'  => __( 'Signage & Badges',               'wordcamporg' ),
