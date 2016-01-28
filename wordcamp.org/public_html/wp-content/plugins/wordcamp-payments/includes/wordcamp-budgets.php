@@ -149,12 +149,6 @@ class WordCamp_Budgets {
 
 			update_post_meta( $post_id, "_{$meta_key_prefix}_" . $key, $safe_value );
 		}
-
-		if ( isset( $_POST['requesting_reimbursement'] ) ) {
-			update_post_meta( $post_id, "_{$meta_key_prefix}_requesting_reimbursement", 'requesting_reimbursement' );
-		} else {
-			delete_post_meta( $post_id, "_{$meta_key_prefix}_requesting_reimbursement" );
-		}
 	}
 
 	/**
