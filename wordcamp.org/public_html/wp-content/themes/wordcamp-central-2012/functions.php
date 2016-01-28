@@ -41,7 +41,7 @@ class WordCamp_Central_Theme {
 		add_filter( 'excerpt_more', array( __CLASS__, 'excerpt_more' ), 11 );
 		// add_filter( 'wcpt_register_post_type', array( __CLASS__, 'wcpt_register_post_type' ) ); // set to public in wcpt plugin
 		add_filter( 'nav_menu_css_class', array( __CLASS__, 'nav_menu_css_class' ), 10, 3 );
-		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_rss_links_to_footer_menu' ), 10, 2 );
+		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_links_to_footer_menu' ), 10, 2 );
 
 		add_shortcode( 'wcc_map',         array( __CLASS__, 'shortcode_map'         ) );
 		add_shortcode( 'wcc_about_stats', array( __CLASS__, 'shortcode_about_stats' ) );
@@ -356,7 +356,7 @@ class WordCamp_Central_Theme {
 		return $classes;
 	}
 
-	public static function add_rss_links_to_footer_menu( $items, $args ) {
+	public static function add_links_to_footer_menu( $items, $args ) {
 		if ( 'menu-footer' == $args->container_class ) {
 			ob_start();
 
@@ -364,6 +364,7 @@ class WordCamp_Central_Theme {
 
 			<li class="menu-item menu-item-type-custom menu-item-object-custom"><a href="<?php echo esc_url( get_feed_link() ); ?>">RSS (posts)</a></li>
 			<li class="menu-item menu-item-type-custom menu-item-object-custom"><a href="<?php echo esc_url( get_post_type_archive_feed_link( 'wordcamp' ) ); ?>">RSS (WordCamps)</a></li>
+			<li class="menu-item menu-item-type-custom menu-item-object-custom"><a href="https://wordpress.org/about/privacy/">Privacy Policy</a></li>
 
 			<?php
 			$items .= ob_get_clean();
