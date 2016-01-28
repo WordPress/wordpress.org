@@ -626,28 +626,8 @@ class WordCamp_Admin {
 		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
-		$required_pending_fields = array( 'E-mail Address' );
-
-		$required_publish_fields = array(
-			// WordCamp
-			'Start Date (YYYY-mm-dd)',
-			'Location',
-			'URL',
-			'E-mail Address',
-			'Number of Anticipated Attendees',
-			'Multi-Event Sponsor Region',
-
-			// Organizing Team
-			'Organizer Name',
-			'WordPress.org Username',
-			'Email Address',
-			'Telephone',
-			'Mailing Address',
-			'Sponsor Wrangler Name',
-			'Sponsor Wrangler E-mail Address',
-			'Budget Wrangler Name',
-			'Budget Wrangler E-mail Address',
-		);
+		$required_pending_fields = $this->get_required_fields( 'pending' );
+		$required_publish_fields = $this->get_required_fields( 'publish' );
 
 		// Check pending posts
 		if ( 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
@@ -676,6 +656,55 @@ class WordCamp_Admin {
 		}
 
 		return $post_data;
+	}
+
+	/**
+	 * Get a list of fields required to move to a certain post status
+	 *
+	 * @param string $status 'pending' | 'publish' | 'any'
+	 *
+	 * @return array
+	 */
+	public static function get_required_fields( $status ) {
+		$pending = array( 'E-mail Address' );
+
+		$publish = array(
+			// WordCamp
+			'Start Date (YYYY-mm-dd)',
+			'Location',
+			'URL',
+			'E-mail Address',
+			'Number of Anticipated Attendees',
+			'Multi-Event Sponsor Region',
+
+			// Organizing Team
+			'Organizer Name',
+			'WordPress.org Username',
+			'Email Address',
+			'Telephone',
+			'Mailing Address',
+			'Sponsor Wrangler Name',
+			'Sponsor Wrangler E-mail Address',
+			'Budget Wrangler Name',
+			'Budget Wrangler E-mail Address',
+		);
+
+		switch ( $status ) {
+			case 'pending':
+				$required_fields = $pending;
+				break;
+
+			case 'publish':
+				$required_fields = $publish;
+				break;
+
+			case 'any':
+			default:
+				$required_fields = array_merge( $pending, $publish );
+				break;
+		}
+
+		return $required_fields;
 	}
 
 	/**
@@ -790,6 +819,8 @@ function wcpt_venue_metabox() {
 function wcpt_metabox( $meta_keys ) {
 	global $post_id;
 
+	$required_fields = WordCamp_Admin::get_required_fields( 'any' );
+
 	// @todo When you refactor meta_keys() to support changing labels -- see note in meta_keys() -- also make it support these notes
 	$messages = array(
 		'Telephone'       => 'Required for shipping.',
@@ -798,7 +829,6 @@ function wcpt_metabox( $meta_keys ) {
 
 	foreach ( $meta_keys as $key => $value ) :
 		$object_name = wcpt_key_to_str( $key, 'wcpt_' );
-
 	?>
 
 		<div class="inside">
@@ -813,6 +843,9 @@ function wcpt_metabox( $meta_keys ) {
 
 				<p>
 					<strong><?php echo $key; ?></strong>
+					<?php if ( in_array( $key, $required_fields, true ) ) : ?>
+						<span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
+					<?php endif; ?>
 				</p>
 
 				<p>
