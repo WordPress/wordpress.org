@@ -147,7 +147,7 @@ function enqueue_assets() {
 		'sponsor-invoices',
 		plugins_url( 'javascript/sponsor-invoices.js', __DIR__ ),
 		array( 'wordcamp-budgets', 'jquery', 'underscore', 'wp-util' ),
-		\WordCamp_Budgets::VERSION,
+		1,
 		true
 	);
 

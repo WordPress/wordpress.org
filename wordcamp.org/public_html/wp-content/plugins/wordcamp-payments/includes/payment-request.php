@@ -186,7 +186,7 @@ class WCP_Payment_Request {
 			'payment-requests',
 			plugins_url( 'javascript/payment-requests.js', __DIR__ ),
 			array( 'wordcamp-budgets', 'wcb-attached-files', 'jquery' ),
-			WordCamp_Budgets::VERSION,
+			1,
 			true
 		);
 

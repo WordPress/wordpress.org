@@ -43,7 +43,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
 			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
-			self::VERSION,
+			1,
 			true
 		);
 
@@ -51,7 +51,7 @@ class WordCamp_Budgets {
 			'wcb-attached-files',
 			plugins_url( 'javascript/attached-files.js', __DIR__ ),
 			array( 'wordcamp-budgets', 'backbone', 'wp-util' ),
-			WordCamp_Budgets::VERSION,
+			1,
 			true
 		);
 
@@ -75,7 +75,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'css/wordcamp-budgets.css', __DIR__ ),
 			$soft_deps,
-			self::VERSION
+			1
 		);
 	}
 
