@@ -5,6 +5,11 @@
 			<td class="timestamp">
 				<?php echo gmdate( 'Y-m-d H:i:s', absint( $entry['timestamp'] ) ); ?>
 			</td>
+
+			<td>
+				<?php echo esc_html( WordCamp_Budgets::get_requester_name( $entry['data']['user_id'] ) ); ?>
+			</td>
+
 			<td>
 				<?php echo esc_html( $entry['message'] ); ?>
 			</td>

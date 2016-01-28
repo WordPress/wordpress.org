@@ -708,24 +708,20 @@ class WCP_Payment_Request {
 		if ( $new == 'incomplete' && $old != 'incomplete' ) {
 			$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
 			$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
-			WordCamp_Budgets::log( $post->ID, sprintf( 'Marked as incomplete by %s: %s.', $user->display_name, $incomplete_text ), array(
-				'user_id' => $user->ID,
+			WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
 				'action' => 'marked-incomplete',
 				'reason' => 'maybe notes',
 			) );
 		} elseif ( $new == 'paid' && $old != 'paid' ) {
-			WordCamp_Budgets::log( $post->ID, sprintf( 'Marked as paid by %s.', $user->display_name ), array(
-				'user_id' => $user->ID,
+			WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
 				'action' => 'marked-paid',
 			) );
 		} elseif ( $old == 'auto-draft' && $new != 'auto-draft' ) {
-			WordCamp_Budgets::log( $post->ID, sprintf( 'Request created by %s.', $user->display_name ), array(
-				'user_id' => $user->ID,
+			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
 				'action' => 'updated',
 			) );
 		} else {
-			WordCamp_Budgets::log( $post->ID, sprintf( 'Request updated by %s.', $user->display_name ), array(
-				'user_id' => $user->ID,
+			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
 				'action' => 'updated',
 			) );
 		}

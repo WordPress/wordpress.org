@@ -474,8 +474,10 @@ class WordCamp_Budgets {
 	 * @param string $message A log message.
 	 * @param array  $data    Optional data.
 	 */
-	public static function log( $post_id, $message, $data = array() ) {
+	public static function log( $post_id, $user_id, $message, $data = array() ) {
 		global $wpdb;
+
+		$data['user_id'] = $user_id; // for backwards-compatibility
 
 		$entry = array(
 			'timestamp' => time(),
