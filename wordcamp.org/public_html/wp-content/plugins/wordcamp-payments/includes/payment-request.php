@@ -315,7 +315,7 @@ class WCP_Payment_Request {
 			if ( $b['timestamp'] == $a )
 				return 0;
 
-			return ( $a['timestamp'] < $b['timestamp'] ) ? -1 : 1;
+			return ( $a['timestamp'] > $b['timestamp'] ) ? -1 : 1;
 		});
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-log.php' );
