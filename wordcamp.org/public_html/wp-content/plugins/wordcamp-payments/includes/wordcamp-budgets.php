@@ -95,6 +95,15 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get a list of valid payment methods
+	 *
+	 * @return array
+	 */
+	public static function get_valid_payment_methods() {
+		return array( 'Direct Deposit', 'Check', 'Credit Card', 'Wire' );
+	}
+
+	/**
 	 * Validate and save payment method fields
 	 *
 	 * @param int $post_id
@@ -123,7 +132,7 @@ class WordCamp_Budgets {
 					break;
 
 				case 'payment_method':
-					if ( in_array( $unsafe_value, array( 'Check', 'Credit Card', 'Wire' ), true ) ) {
+					if ( in_array( $unsafe_value, self::get_valid_payment_methods(), true ) ) {
 						$safe_value = $unsafe_value;
 					} else {
 						$safe_value = false;

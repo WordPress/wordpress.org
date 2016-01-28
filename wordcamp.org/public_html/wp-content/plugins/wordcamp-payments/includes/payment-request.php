@@ -437,7 +437,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'payment_method':
-				$value = array( 'Check', 'Credit Card', 'Wire' );
+				$value = WordCamp_Budgets::get_valid_payment_methods();
 				break;
 
 			default:
