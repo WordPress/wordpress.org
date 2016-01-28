@@ -58,6 +58,7 @@ class Meta extends Trac {
 		'svn.wordpress.org/'                    => '#meta-tracdev',
 		'wordpress.org/public_html/style/trac/' => '#meta-tracdev',
 		'trac-notifications/'                   => '#meta-tracdev',
+		'wordcamp.org/'                         => '#meta-wordcamp',
 	);
 
 	protected $ticket_component_filters = array(
@@ -67,6 +68,7 @@ class Meta extends Trac {
 		'developer.wordpress.org'       => '#meta-devhub',
 		'Trac'                          => '#meta-tracdev',
 		'WordPress.tv'                  => '#wptv',
+		'wordcamp.org'                  => '#meta-wordcamp',
 	);
 }
 
