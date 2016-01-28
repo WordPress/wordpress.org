@@ -14,6 +14,10 @@
 	display: table-row;
 }
 
+	.wcb-form li.hidden {
+		display: none;
+	}
+
 .wcb-form li > label {
 	display: table-cell;
 	margin-bottom: 1em;
@@ -119,3 +123,25 @@ tr#row-payment-method label {
 	border-right:  1px solid rgba( 0, 0, 0, 0.1 );
 	border-bottom: 1px solid rgba( 0, 0, 0, 0.1 );
 }
+
+
+/*
+ * Reimbursement Requests
+ */
+
+#normal-sortables #wcbrr_expenses.postbox .submit {
+	float: none;
+}
+
+#submitpost.wcbrr .misc-pub-section span {
+	font-weight: bold;
+}
+
+.wcbrr-note {
+	margin-bottom: 1em;
+}
+
+	.wcbrr-note-meta {
+		font-weight: bold;
+	}
+

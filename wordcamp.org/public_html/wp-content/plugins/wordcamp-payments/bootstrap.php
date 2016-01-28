@@ -18,6 +18,7 @@ if ( is_admin() ) {
 	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
 		require_once( __DIR__ . '/includes/sponsor-invoice.php' );
 	}
+	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
 
 	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
