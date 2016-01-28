@@ -4,7 +4,6 @@
 		$this->render_text_input( $post, 'Requested date for payment/due by', 'due_by', '', 'date' );
 		$this->render_text_input( $post, 'Amount', 'payment_amount', 'No commas, thousands separators or currency symbols. Ex. 1234.56' );
 		$this->render_select_input( $post, 'Currency', 'currency' );
-		$this->render_textarea_input( $post, 'Notes', 'general_notes', 'Any other details you want to share.' );
 	?>
 
 	<tr>
@@ -30,4 +29,6 @@
 			isset( $assigned_category->name ) && 'Other' == $assigned_category->name ? array() : array( 'hidden')    // todo i18n, see notes in insert_default_terms()
 		);
 	?>
+
+	<?php $this->render_textarea_input( $post, 'Notes', 'general_notes', 'Any other details you want to share.' ); ?>
 </table>
