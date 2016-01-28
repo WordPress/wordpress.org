@@ -628,6 +628,7 @@ class WCP_Payment_Request {
 				case 'description':
 				case 'general_notes':
 				case 'file_notes':
+				case 'vendor_requested_payment_method':
 					$safe_value = wp_kses( $unsafe_value, wp_kses_allowed_html( 'strip' ) );
 					break;
 
