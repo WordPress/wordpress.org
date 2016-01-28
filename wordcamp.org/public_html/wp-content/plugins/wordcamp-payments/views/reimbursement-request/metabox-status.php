@@ -5,7 +5,7 @@ defined( 'WPINC' ) or die();
 
 ?>
 
-<div id="submitpost" class="wcbrr submitbox">
+<div id="submitpost" class="wcb submitbox">
 	<div id="minor-publishing">
 		<?php if ( $show_draft_button ) : ?>
 			<div id="minor-publishing-actions">

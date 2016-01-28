@@ -1,6 +1,25 @@
-<div id="submitpost" class="submitbox">
+<div id="submitpost" class="wcb submitbox">
 	<div id="minor-publishing">
 		<div id="misc-publishing-actions">
+
+			<div class="misc-pub-section">
+				<?php _e( 'ID:', 'wordcamporg' ); ?>
+				<span>
+					<?php echo esc_html( $this->get_field_value( 'request_id', $post ) ); ?>
+				</span>
+			</div>
+
+			<div class="misc-pub-section">
+				<?php _e( 'Requested By:', 'wordcamporg' ); ?>
+				<span>
+					<?php echo esc_html( $this->get_field_value( 'requester', $post ) ); ?>
+				</span>
+			</div>
+
+			<div class="misc-pub-section">
+				<?php $this->render_text_input( $post, 'Date Vendor was Paid', 'date_vendor_paid', '', 'date', array(), $date_vendor_paid_readonly ); ?>
+			</div>
+
 			<div class="misc-pub-section misc-pub-post-status">
 				<label for="post_status"><?php _e( 'Status:' ) ?></label>
 

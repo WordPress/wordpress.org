@@ -1,8 +1,5 @@
 <table class="form-table">
 	<?php
-		$this->render_text_input( $post, 'Request ID', 'request_id', '', 'text', array(), true );
-		$this->render_text_input( $post, 'Requester', 'requester', '', 'text', array(), true );
-		$this->render_text_input( $post, 'Date Vendor was Paid', 'date_vendor_paid', '', 'date', array(), $date_vendor_paid_readonly );
 		$this->render_textarea_input( $post, 'Description', 'description' );
 		$this->render_text_input( $post, 'Requested date for payment/due by', 'due_by', '', 'date' );
 		$this->render_text_input( $post, 'Amount', 'payment_amount', 'No commas, thousands separators or currency symbols. Ex. 1234.56' );

@@ -5,6 +5,14 @@
 	margin-left: 9px;
 }
 
+#submitpost.wcb .misc-pub-section span {
+	font-weight: bold;
+}
+
+#submitpost.wcb .misc-pub-section input.hasDatepicker {
+	width: 7em;
+}
+
 /* Forms */
 .wcb-form {
 	display: table;
@@ -131,10 +139,6 @@ tr#row-payment-method label {
 
 #normal-sortables #wcbrr_expenses.postbox .submit {
 	float: none;
-}
-
-#submitpost.wcbrr .misc-pub-section span {
-	font-weight: bold;
 }
 
 .wcbrr-note {

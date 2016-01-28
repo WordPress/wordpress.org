@@ -217,6 +217,13 @@ class WCP_Payment_Request {
 		$submit_text                   = 'auto-draft' == $post->post_status ? __( 'Submit Request', 'wordcamporg' ) : __( 'Update Request', 'wordcamporg' );
 		$current_user_can_edit_request = 'paid' != $post->post_status || current_user_can( 'manage_network' );
 
+		$date_vendor_paid = get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true );
+		if ( current_user_can( 'manage_network' ) ) {
+			$date_vendor_paid_readonly = false;
+		} else {
+			$date_vendor_paid_readonly = true;
+		}
+
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-status.php' );
 	}
 
@@ -241,13 +248,6 @@ class WCP_Payment_Request {
 
 		$categories        = WordCamp_Budgets::get_payment_categories();
 		$assigned_category = get_post_meta( $post->ID, '_camppayments_payment_category', true );
-
-		$date_vendor_paid = get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true );
-		if ( current_user_can( 'manage_network' ) ) {
-			$date_vendor_paid_readonly = false;
-		} else {
-			$date_vendor_paid_readonly = true;
-		}
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-general.php' );
 
@@ -422,7 +422,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'requester':
-				$value = WordCamp_Budgets::get_requester_formatted_email( $post->post_author );
+				$value = WordCamp_Budgets::get_requester_name( $post->post_author );
 				break;
 
 			case 'date_vendor_paid':

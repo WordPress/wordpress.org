@@ -12,6 +12,7 @@ jQuery( document ).ready( function( $ ) {
 				app.registerEventHandlers();
 				wcb.attachedFilesView = new wcb.AttachedFilesView( { el: $( '#wcp_files' ) } );
 				wcb.setupDatePicker( '#wcp_general_info' );
+				wcb.setupDatePicker( '#submitpost.wcb'   );
 			} catch ( exception ) {
 				wcb.log( exception );
 			}
