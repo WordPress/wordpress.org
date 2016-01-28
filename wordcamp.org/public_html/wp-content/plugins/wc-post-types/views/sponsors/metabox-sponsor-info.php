@@ -44,6 +44,8 @@
 			value="<?php echo esc_attr( $first_name ); ?>"
 			required
 		/>
+
+		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
 	</li>
 
 	<li>
@@ -59,6 +61,8 @@
 			value="<?php echo esc_attr( $last_name ); ?>"
 			required
 		/>
+
+		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
 	</li>
 
 	<li>
@@ -74,6 +78,8 @@
 			value="<?php echo esc_attr( $email_address ); ?>"
 			required
 		/>
+
+		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
 	</li>
 
 	<li>
