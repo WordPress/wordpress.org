@@ -15,7 +15,7 @@ defined( 'WPINC' ) or die();
 		<div class="wcbrr-note">
 			<span class="wcbrr-note-meta">
 				<?php echo esc_html( date( 'Y-m-d', $note['timestamp'] ) ); ?>
-				<?php echo esc_html( get_requester_name( $note['author_id'] ) ); ?>:
+				<?php echo esc_html( \WordCamp_Budgets::get_requester_name( $note['author_id'] ) ); ?>:
 			</span>
 
 			<?php echo esc_html( $note['message'] ); ?>

@@ -368,6 +368,25 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get the name of the requester
+	 *
+	 * @param int $post_author_id
+	 *
+	 * @return string
+	 */
+	public static function get_requester_name( $post_author_id ) {
+		$requester_name = '';
+
+		$author = get_user_by( 'id', $post_author_id );
+
+		if ( is_a( $author, 'WP_User' ) ) {
+			$requester_name = $author->get( 'display_name' );
+		}
+
+		return $requester_name;
+	}
+
+	/**
 	 * Get the e-mail address of the requester in `Name <address>` format
 	 *
 	 * @param int $post_author_id

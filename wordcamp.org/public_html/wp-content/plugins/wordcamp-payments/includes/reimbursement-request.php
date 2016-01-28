@@ -222,25 +222,6 @@ function enqueue_assets() {
 }
 
 /**
- * Get the name of the requester
- *
- * @param int $post_author_id
- *
- * @return string
- */
-function get_requester_name( $post_author_id ) {
-	$requester_name = '';
-
-	$author = get_user_by( 'id', $post_author_id );
-
-	if ( is_a( $author, 'WP_User' ) ) {
-		$requester_name = $author->get( 'display_name' );
-	}
-
-	return $requester_name;
-}
-
-/**
  * Determine if the current user can submit changes to the given Reimbursement Request
  *
  * This is used instead of current_user_can( 'edit_post', N ), because Core uses 'edit_post' both for accessing
@@ -270,7 +251,7 @@ function render_status_metabox( $post ) {
 	$available_statuses = array_merge( array( 'draft' => __( 'Draft' ) ), get_custom_statuses() );
 	$status_name        = get_status_name( $post->post_status );
 	$request_id         = get_current_blog_id() . '-' . $post->ID;
-	$requested_by       = get_requester_name( $post->post_author );
+	$requested_by       = \WordCamp_Budgets::get_requester_name( $post->post_author );
 	$delete_text        = EMPTY_TRASH_DAYS ? __( 'Move to Trash' ) : __( 'Delete Permanently' );
 	$update_text        = current_user_can( 'manage_network' ) ? __( 'Update Request', 'wordcamporg' ) : __( 'Send Request', 'wordcamporg' );
 
@@ -337,7 +318,7 @@ function render_general_information_metabox( $post ) {
 	$other_reason      = get_post_meta( $post->ID, '_wcbrr_reason_other',   true );
 
 	if ( empty ( $name_of_payer ) ) {
-		$name_of_payer = get_requester_name( $post->post_author );
+		$name_of_payer = \WordCamp_Budgets::get_requester_name( $post->post_author );
 	}
 
 	wp_localize_script( 'wcb-attached-files', 'wcbAttachedFiles', $files );
@@ -601,7 +582,7 @@ function notify_parties_of_new_note( $request, $note ) {
 	}
 
 	$subject          = 'New note on ' . sanitize_text_field( $request->post_title );
-	$note_author_name = get_requester_name( $note['author_id'] );
+	$note_author_name = \WordCamp_Budgets::get_requester_name( $note['author_id'] );
 	$request_url      = admin_url( sprintf( 'post.php?post=%s&action=edit', $request->ID ) );
 	$headers          = array( 'Reply-To: support@wordcamp.org' );
 
