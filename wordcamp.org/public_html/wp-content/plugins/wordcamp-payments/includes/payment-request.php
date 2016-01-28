@@ -426,6 +426,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'date_vendor_paid':
+			case 'invoice_date':
 			case 'due_by':
 				if ( $value = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true ) ) {
 					$value = date( 'Y-m-d', $value );
@@ -651,6 +652,7 @@ class WCP_Payment_Request {
 					$safe_value = sanitize_text_field( $unsafe_value );
 					break;
 
+				case 'invoice_date':
 				case 'due_by':
 					if ( empty( $_POST[ $key ] ) ) {
 						$safe_value = '';
