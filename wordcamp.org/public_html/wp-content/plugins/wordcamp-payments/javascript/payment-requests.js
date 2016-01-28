@@ -22,11 +22,14 @@ jQuery( document ).ready( function( $ ) {
 		 * Registers event handlers
 		 */
 		registerEventHandlers : function() {
+			var currency        = $( '#currency' );
 			var paymentCategory = $( '#payment_category' );
 
 			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
 			paymentCategory.change( app.toggleOtherCategoryDescription );
 			paymentCategory.trigger( 'change' );   // Set the initial state
+			currency.change( wcb.setDefaultPaymentMethod );
+			currency.trigger( 'change' );   // Set the initial state
 			$( '#wcp_files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
 			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
 		},

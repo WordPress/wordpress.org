@@ -29,16 +29,20 @@ jQuery( document ).ready( function( $ ) {
 		 * Registers event handlers
 		 */
 		registerEventHandlers : function() {
-			var reason = $( '#_wcbrr_reason' );
+			var reason   = $( '#_wcbrr_reason'   ),
+				currency = $( '#_wcbrr_currency' );
 
 			reason.change( app.toggleOtherReasonDescription );
 			reason.trigger( 'change' );   // Set the initial state
+
+			currency.change( wcb.setDefaultPaymentMethod );
+			currency.trigger( 'change' );   // Set the initial state
 
 			$( '#row-payment-method' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
 			$( '#wcbrr_general_information' ).find( 'a.wcb-insert-media' ).click(   wcb.showUploadModal           );
 			$( '#wcbrr-add-another-expense' ).click(                                app.addNewExpense             );
 
-			$( '#_wcbrr_currency' ).change( function() {
+			currency.change( function() {
 				app.expenses.trigger( 'updateTotal' );
 			} );
 		},
