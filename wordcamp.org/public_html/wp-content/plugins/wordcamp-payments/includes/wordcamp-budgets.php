@@ -410,7 +410,7 @@ class WordCamp_Budgets {
 	}
 
 	/**
-	 * Attach unattached files to the payment request post
+	 * Attach unattached files to the Vendor Payment post
 	 *
 	 * Sometimes users will upload the files manually to the Media Library, instead of using the Add Files button,
 	 * and we need to attach them to the request so that they show up in the metabox.

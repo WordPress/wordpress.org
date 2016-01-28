@@ -285,7 +285,7 @@ function render_sponsor_invoice_metabox( $post ) {
 }
 
 /**
- * Display the status of a post after its title on the Payment Requests page
+ * Display the status of a post after its title on the Vendor Payments page
  *
  * @param array $states
  *
@@ -388,7 +388,7 @@ function save_invoice( $post_id, $post ) {
 }
 
 /**
- * Define columns for the Payment Requests screen.
+ * Define columns for the Vendor Payments screen.
  *
  * @param array $_columns
  * @return array
@@ -408,7 +408,7 @@ function get_columns( $_columns ) {
 }
 
 /**
- * Render custom columns on the Payment Requests screen.
+ * Render custom columns on the Vendor Payments screen.
  *
  * @param string $column
  * @param int $post_id

@@ -2,7 +2,7 @@
 
 /*
 * Plugin Name: WordCamp Budgets Dashboard
-* Description: Provides an overview of WordCamp budgets, payment requests, and sponsor invoices across the network.
+* Description: Provides an overview of WordCamp budgets, sponsor invoices, vendor payments, and reimbursement requests across the network.
 * Version:     0.1
 * Author:      WordCamp.org
 * Author URI:  http://wordcamp.org

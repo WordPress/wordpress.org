@@ -184,8 +184,8 @@ class Payment_Requests_Dashboard {
 	public static function network_admin_menu() {
 		$dashboard = add_submenu_page(
 			'wordcamp-budgets-dashboard',
-			'WordCamp Payments Requests',
-			'Payments Requests',
+			'WordCamp Vendor Payments',
+			'Vendor Payments',
 			'manage_network',
 			'wcp-dashboard',
 			array( __CLASS__, 'render_dashboard' )
@@ -214,7 +214,7 @@ class Payment_Requests_Dashboard {
 		?>
 
 		<div class="wrap">
-			<h1>Payment Requests</h1>
+			<h1>Vendor Payments</h1>
 
 			<?php settings_errors(); ?>
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Create the Payment Request post type and associated functionality
+ * Create the Vendor Payments post type and associated functionality
  */
 class WCP_Payment_Request {
 	var $meta_key_prefix = 'camppayments'; // Dirty hack so that Payment Method metabox rendering can be reused by other modules
@@ -38,25 +38,26 @@ class WCP_Payment_Request {
 	 */
 	public function register_post_type() {
 		$labels = array(
-			'name'               => _x( 'Payment Requests', 'post type general name', 'wordcamporg' ),
-			'singular_name'      => _x( 'Payment Request', 'post type singular name', 'wordcamporg' ),
-			'menu_name'          => _x( 'Payment Requests', 'admin menu', 'wordcamporg' ),
-			'name_admin_bar'     => _x( 'Payment Request', 'add new on admin bar', 'wordcamporg' ),
-			'add_new'            => _x( 'Add New', 'payment', 'wordcamporg' ),
-			'add_new_item'       => __( 'Add New Payment Request', 'wordcamporg' ),
-			'new_item'           => __( 'New Payment Request', 'wordcamporg' ),
-			'edit_item'          => __( 'Edit Payment Request', 'wordcamporg' ),
-			'view_item'          => __( 'View Payment Request', 'wordcamporg' ),
-			'all_items'          => __( 'Payment Requests', 'wordcamporg' ),
-			'search_items'       => __( 'Search Payment Requests', 'wordcamporg' ),
-			'parent_item_colon'  => __( 'Parent Payment Requests:', 'wordcamporg' ),
-			'not_found'          => __( 'No payment requests found.', 'wordcamporg' ),
-			'not_found_in_trash' => __( 'No payment requests found in Trash.', 'wordcamporg' )
+			'name'               => _x( 'Vendor Payments', 'post type general name', 'wordcamporg' ),
+			'singular_name'      => _x( 'Vendor Payment', 'post type singular name', 'wordcamporg' ),
+			'menu_name'          => _x( 'Vendor Payments', 'admin menu',             'wordcamporg' ),
+			'name_admin_bar'     => _x( 'Vendor Payment', 'add new on admin bar',    'wordcamporg' ),
+			'add_new'            => _x( 'Add New', 'payment',                        'wordcamporg' ),
+
+			'add_new_item'       => __( 'Add New Vendor Payment',             'wordcamporg' ),
+			'new_item'           => __( 'New Vendor Payment',                 'wordcamporg' ),
+			'edit_item'          => __( 'Edit Vendor Payment',                'wordcamporg' ),
+			'view_item'          => __( 'View Vendor Paymentt',               'wordcamporg' ),
+			'all_items'          => __( 'Vendor Payments',                    'wordcamporg' ),
+			'search_items'       => __( 'Search Vendor Payments',             'wordcamporg' ),
+			'parent_item_colon'  => __( 'Parent Vendor Payments:',            'wordcamporg' ),
+			'not_found'          => __( 'No Vendor Payments found.',          'wordcamporg' ),
+			'not_found_in_trash' => __( 'No Vendor Payments found in Trash.', 'wordcamporg' )
 		);
 
 		$args = array(
 			'labels'            => $labels,
-			'description'       => 'WordCamp Payment Requests',
+			'description'       => 'WordCamp Vendor Payments',
 			'public'            => false,
 			'show_ui'           => true,
 			'show_in_menu'      => 'wordcamp-budget',
@@ -454,7 +455,7 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Display the status of a post after its title on the Payment Requests page
+	 * Display the status of a post after its title on the Vendor Payments page
 	 *
 	 * @param array $states
 	 *
@@ -506,7 +507,7 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Determine if the user wants to mark a payment request as incomplete, and if that is valid
+	 * Determine if the user wants to mark a vendor payment as incomplete, and if that is valid
 	 *
 	 * @return bool
 	 */
@@ -728,7 +729,7 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Define columns for the Payment Requests screen.
+	 * Define columns for the Vendor Payments screen.
 	 *
 	 * @param array $_columns
 	 * @return array
@@ -760,7 +761,7 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Render custom columns on the Payment Requests screen.
+	 * Render custom columns on the Vendor Payments screen.
 	 *
 	 * @param string $column
 	 * @param int $post_id

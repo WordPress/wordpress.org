@@ -2,7 +2,7 @@
 /*
 Plugin Name: WordCamp Budgets
 Plugin URI:  http://wordcamp.org/
-Description: Provides tools for managing WordCamp budgets, sponsor invoices, and payment requests.
+Description: Provides tools for managing WordCamp budgets, sponsor invoices, vendor payments, and reimbursement requests.
 Author:      WordCamp.org
 Author URI:  https://wordcamp.org
 Version:     0.1

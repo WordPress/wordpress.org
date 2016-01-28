@@ -382,7 +382,7 @@ function render_expenses_metabox( $post ) {
 }
 
 /**
- * Display the status of a post after its title on the Payment Requests page
+ * Display the status of a post after its title on the Vendor Payments page
  *
  * @todo centralize this, since it's the same in other modules
  *
