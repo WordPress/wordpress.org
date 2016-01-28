@@ -99,7 +99,7 @@
 					<a href="https://twitter.com/buddypressdev" class="twitter"><?php _e( 'Follow BuddyPress on Twitter', 'bporg'); ?></a> &bull;
 					<a href="https://buddypress.org/about/gpl/"><?php _e('GPL', 'bporg'); ?></a> &bull;
 					<a href="https://buddypress.org/contact/"><?php _e('Contact Us', 'bporg'); ?></a> &bull;
-                                        <a href="https://wordpress.org/about/privacy/"><?php _e('Privacy', 'bbporg'); ?></a>
+					<a href="https://wordpress.org/about/privacy/"><?php _e('Privacy', 'bbporg'); ?></a>
 					<a href="https://buddypress.org/terms/"><?php _e('Terms of Service', 'bporg'); ?></a>
 				</p>
 			</div>

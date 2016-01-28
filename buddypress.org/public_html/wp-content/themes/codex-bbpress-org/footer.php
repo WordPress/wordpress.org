@@ -66,7 +66,7 @@
 					<a href="https://twitter.com/bbpress" class="twitter"><?php _e( 'Follow bbPress on Twitter', 'bbporg'); ?></a> &bull;
 					<a href="https://bbpress.org/about/gpl/"><?php _e('GPL', 'bbporg'); ?></a> &bull;
 					<a href="https://bbpress.org/contact/"><?php _e('Contact Us', 'bbporg'); ?></a> &bull;
-                                        <a href="https://wordpress.org/about/privacy/"><?php _e('Privacy', 'bbporg'); ?></a>
+					<a href="https://wordpress.org/about/privacy/"><?php _e('Privacy', 'bbporg'); ?></a>
 					<a href="https://bbpress.org/terms/"><?php _e('Terms of Service', 'bbporg'); ?></a>
 				</p>
 			</div>
