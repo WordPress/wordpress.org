@@ -6,7 +6,9 @@
 	</th>
 
 	<td>
-		<textarea id="<?php echo esc_attr( $name ); ?>" name="<?php echo esc_attr( $name ); ?>" class="large-text"><?php echo esc_html( $date ); ?></textarea>
+		<textarea id="<?php echo esc_attr( $name ); ?>" name="<?php echo esc_attr( $name ); ?>" class="large-text"><?php
+			echo esc_html( $text );
+		?></textarea>
 
 		<?php if ( ! empty( $description ) ) : ?>
 			<label for="<?php echo esc_attr( $name ); ?>">

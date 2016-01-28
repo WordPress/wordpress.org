@@ -162,15 +162,6 @@ class WCP_Payment_Request {
 			'high'
 		);
 
-		add_meta_box(
-			'wcp_files',
-			__( 'Attach Supporting Documentation', 'wordcamporg' ),
-			array( $this, 'render_files_metabox' ),
-			self::POST_TYPE,
-			'normal',
-			'high'
-		);
-
 		add_meta_box( 'wcp_log', __( 'Log', 'wordcamporg' ), array( $this, 'render_log_metabox' ),
 			self::POST_TYPE, 'normal', 'high' );
 	}
@@ -288,17 +279,6 @@ class WCP_Payment_Request {
 	}
 
 	/**
-	 * Render the Vendor Details metabox
-	 *
-	 * @param WP_Post $post
-	 */
-	public function render_files_metabox( $post ) {
-		wp_nonce_field( 'wcp_files', 'wcp_files_nonce' );
-
-		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-files.php' );
-	}
-
-	/**
 	 * Render the Log metabox
 	 *
 	 * @param WP_Post $post
@@ -330,7 +310,7 @@ class WCP_Payment_Request {
 	 * @param string $description
 	 */
 	protected function render_textarea_input( $post, $label, $name, $description = '' ) {
-		$date = get_post_meta( $post->ID, '_camppayments_' . $name, true );
+		$text = $this->get_field_value( $name, $post );
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-textarea.php' );
 	}
@@ -439,6 +419,20 @@ class WCP_Payment_Request {
 
 			case 'payment_method':
 				$value = WordCamp_Budgets::get_valid_payment_methods();
+				break;
+
+			case 'general_notes':
+				// The files_notes field was removed from the UI, so combine its value with general notes
+				$file_notes    = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . 'file_notes',    true );
+				$general_notes = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . 'general_notes', true );
+
+				if ( $file_notes ) {
+					$general_notes .= ' ' . $file_notes;
+					update_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . 'general_notes', $general_notes );
+					delete_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . 'file_notes' );
+				}
+
+				$value = $general_notes;
 				break;
 
 			default:
@@ -602,7 +596,7 @@ class WCP_Payment_Request {
 		}
 
 		// Verify nonces
-		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce', 'wcp_files_nonce' );    // todo add prefix to all of these
+		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
 
 		foreach ( $nonces as $nonce ) {
 			if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {
@@ -628,7 +622,6 @@ class WCP_Payment_Request {
 			switch ( $key ) {
 				case 'description':
 				case 'general_notes':
-				case 'file_notes':
 				case 'vendor_requested_payment_method':
 					$safe_value = wp_kses( $unsafe_value, wp_kses_allowed_html( 'strip' ) );
 					break;
