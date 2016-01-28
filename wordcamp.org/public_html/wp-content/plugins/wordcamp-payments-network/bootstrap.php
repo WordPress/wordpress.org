@@ -29,6 +29,7 @@ if ( is_admin() || defined( 'DOING_CRON' ) ) {
 	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
 		require_once( __DIR__ . '/includes/sponsor-invoices-dashboard.php' );
 	}
+	require_once( __DIR__ . '/includes/reimbursement-requests-dashboard.php' );
 
 	$GLOBALS['Payment_Requests_Dashboard'] = new \Payment_Requests_Dashboard();
 
