@@ -9,8 +9,8 @@
 	font-weight: bold;
 }
 
-#submitpost.wcb .misc-pub-section input.hasDatepicker {
-	width: 7em;
+#submitpost.wcb .misc-pub-section input {
+	width: 100%;
 }
 
 /* Forms */

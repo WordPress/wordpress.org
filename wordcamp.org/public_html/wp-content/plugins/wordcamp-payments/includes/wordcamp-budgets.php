@@ -75,7 +75,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'css/wordcamp-budgets.css', __DIR__ ),
 			$soft_deps,
-			1
+			2
 		);
 	}
 
