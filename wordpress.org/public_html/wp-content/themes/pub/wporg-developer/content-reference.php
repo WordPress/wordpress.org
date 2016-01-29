@@ -4,6 +4,8 @@
 
 	<?php echo get_deprecated(); ?>
 
+	<?php echo get_private_access_message(); ?>
+
 	<h1><a href="<?php the_permalink() ?>"><?php echo get_signature(); ?></a></h1>
 
 	<section class="summary">

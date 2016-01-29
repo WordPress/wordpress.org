@@ -1222,6 +1222,15 @@ input {
   color: #be2423;
   font-style: italic;
 }
+.devhub-wrap .wp-parser-class .private-access, .devhub-wrap .wp-parser-function .private-access, .devhub-wrap .wp-parser-hook .private-access, .devhub-wrap .wp-parser-method .private-access {
+  margin-top: 30px;
+  padding: 20px 20px 10px;
+  border: 1px solid #ffb900;
+  background-color: #fff8e5;
+}
+.devhub-wrap .wp-parser-class .callout, .devhub-wrap .wp-parser-function .callout, .devhub-wrap .wp-parser-hook .callout, .devhub-wrap .wp-parser-method .callout {
+  margin-top: 30px;
+}
 .devhub-wrap.archive .wp-parser-class h1 a, .devhub-wrap.archive .wp-parser-function h1 a, .devhub-wrap.archive .wp-parser-hook h1 a, .devhub-wrap.archive .wp-parser-method h1 a, .devhub-wrap.search .wp-parser-class h1 a, .devhub-wrap.search .wp-parser-function h1 a, .devhub-wrap.search .wp-parser-hook h1 a, .devhub-wrap.search .wp-parser-method h1 a {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #21759b;

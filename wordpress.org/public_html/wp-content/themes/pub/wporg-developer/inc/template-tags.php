@@ -1349,4 +1349,62 @@ namespace DevHub {
 		}
 		return get_post_field( $field, $explanation, $context );
 	}
+
+	/**
+	 * Generates a private access message for a private element.
+	 *
+	 * @param int|WP_Post $post Optional. Post object or ID. Default global `$post`.
+	 * @return string Private access message if the given reference is considered "private".
+	 */
+	function get_private_access_message( $post = null ) {
+		if ( ! $post = get_post( $post ) ) {
+			return '';
+		}
+
+		// Currently only handling private access messages for functions and hooks.
+		if ( ! in_array( get_post_type( $post ), array( 'wp-parser-function', 'wp-parser-hook' ) ) ) {
+			return '';
+		}
+
+		$tags        = get_post_meta( $post->ID, '_wp-parser_tags', true );
+		$access_tags = wp_filter_object_list( $tags, array(
+			'name'    => 'access',
+			'content' => 'private'
+		) );
+
+		// Bail if it isn't private.
+		if ( empty( $access_tags ) ) {
+			return '';
+		}
+
+		$referral = array_shift( wp_filter_object_list( $tags, array( 'name' => 'see' ) ) );
+
+		if ( ! empty( $referral['refers'] ) ) {
+			$refers = sanitize_text_field( $referral['refers'] );
+
+			if ( ! empty( $refers ) ) {
+				/* translators: 1: Linked internal element name */
+				$alternative_string = sprintf( __( ' Use %s instead.', 'wporg' ), \DevHub_Formatting::link_internal_element( $refers ) );
+			}
+		} else {
+			$alternative_string = '';
+		}
+
+		/* translators: 1: String for alternative function (if one exists) */
+		$contents = sprintf( __( 'This function&#8217;s access is marked private. This means it is not intended for use by plugin or theme developers, only in other core functions. It is listed here for completeness.%s', 'wporg' ),
+				$alternative_string
+		);
+
+		// Use the 'alert' callout box if it's available. Otherwise, fall back to a theme-supported div class.
+		if ( class_exists( 'WPorg_Handbook_Callout_Boxes' ) ) {
+			$callout = new \WPorg_Handbook_Callout_Boxes();
+			$message = $callout->alert_shortcode( array(), $contents );
+		} else {
+			$message  = '<div class="private-access">';
+			$message .= apply_filters( 'the_content', $contents );
+			$message .= '</div>';
+		}
+
+		return $message;
+	}
 }
