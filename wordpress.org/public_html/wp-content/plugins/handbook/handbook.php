@@ -235,8 +235,8 @@ class WPorg_Handbook {
 	 * if that plugin is active.
 	 */
 	function disable_p2_resolved_posts_action_links() {
-		if ( ( $this->post_type == get_post_type() ) && class_exists( 'P2_Resolved_Posts' ) && is_object( P2_Resolved_Posts::$instance ) ) {
-			remove_filter( 'p2_action_links', array( P2_Resolved_Posts::$instance, 'p2_action_links' ), 100 );
+		if ( ( $this->post_type == get_post_type() ) && class_exists( 'P2_Resolved_Posts' ) && isset( $GLOBALS['p2_resolved_posts'] ) && is_object( $GLOBALS['p2_resolved_posts'] ) ) {
+			remove_filter( 'p2_action_links', array( P2_Resolved_Posts::instance(), 'p2_action_links' ), 100 );
 		}
 	}
 
