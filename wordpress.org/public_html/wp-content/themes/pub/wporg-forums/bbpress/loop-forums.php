@@ -6,7 +6,6 @@
 
 		<ul class="forum-titles">
 			<li class="bbp-forum-info"><?php _e( 'Forum', 'wporg-forums' ); ?></li>
-			<li class="bbp-forum-topic-count"><?php _e( 'Topics', 'wporg-forums' ); ?></li>
 			<li class="bbp-forum-reply-count"><?php _e( 'Posts', 'wporg-forums' ); ?></li>
 		</ul>
 

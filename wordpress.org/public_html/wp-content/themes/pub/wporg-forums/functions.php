@@ -92,7 +92,6 @@ function wporg_support_breadcrumb() {
 
 	return $args;
 }
-add_filter('bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
 
 /**
  * Register these bbPress views:
