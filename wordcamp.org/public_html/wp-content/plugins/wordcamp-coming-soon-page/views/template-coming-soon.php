@@ -32,7 +32,10 @@
 
 		<?php if ( in_array( 'subscriptions', $active_modules ) ) : ?>
 			<div class="wccsp-box">
-				<?php echo do_shortcode( '[jetpack_subscription_form title="Subscribe for Updates"]' ); ?>
+				<?php echo do_shortcode( sprintf(
+					'[jetpack_subscription_form title="%s"]',
+					__( 'Subscribe for Updates', 'wordcamporg' )
+				) ); ?>
 			</div>
 		<?php endif; ?>
 
