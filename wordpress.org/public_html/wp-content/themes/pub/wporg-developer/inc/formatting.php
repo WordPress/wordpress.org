@@ -132,44 +132,56 @@ class DevHub_Formatting {
 
 				// Link to an internal resource.
 				else {
-
-					// Link to class variable: {@see WP_Rewrite::$index}
-					if ( false !== strpos( $link, '::$' ) ) {
-						// Nothing to link to currently.
-					}
-
-					// Link to class method: {@see WP_Query::query()}
-					elseif ( false !== strpos( $link, '::' ) ) {
-						$link = '<a href="' .
-							get_post_type_archive_link( 'wp-parser-class' ) .
-							str_replace( array( '::', '()' ), array( '/', '' ), $link ) .
-							'">' . esc_html( $link ) . '</a>';
-					}
-
-					// Link to hook: {@see 'pre_get_search_form'}
-					elseif ( 1 === preg_match( '/^(&#8216;)\w+(&#8217;)$/', $link, $hook ) ) {
-						if ( ! empty( $hook[0] ) ) {
-							$link = '<a href="' .
-								get_post_type_archive_link( 'wp-parser-hook' ) .
-								str_replace( array( '&#8216;', '&#8217;' ), '', $link ) .
-								'">' . esc_html( $link ) . '</a>';
-						}
-					}
-
-					// Link to function: {@see esc_attr()}
-					else {
-						$link = '<a href="' .
-							get_post_type_archive_link( 'wp-parser-function' ) .
-							str_replace( '()', '', $link ) .
-							'">' . esc_html( $link ) . '</a>';
-					}
-
+					$link = self::link_internal_element( $link );
 				}
 
 				return $link;
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Parses and links an internal element if a valid element is found.
+	 *
+	 * @static
+	 * @access public
+	 *
+	 * @param string $link Element string.
+	 * @param string HTML link markup if a valid element was found.
+	 */
+	public static function link_internal_element( $link ) {
+		// Link to class variable: {@see WP_Rewrite::$index}
+		if ( false !== strpos( $link, '::$' ) ) {
+			// Nothing to link to currently.
+		}
+
+		// Link to class method: {@see WP_Query::query()}
+		elseif ( false !== strpos( $link, '::' ) ) {
+			$link = '<a href="' .
+			        get_post_type_archive_link( 'wp-parser-class' ) .
+			        str_replace( array( '::', '()' ), array( '/', '' ), $link ) .
+			        '">' . esc_html( $link ) . '</a>';
+		}
+
+		// Link to hook: {@see 'pre_get_search_form'}
+		elseif ( 1 === preg_match( '/^(&#8216;)\w+(&#8217;)$/', $link, $hook ) ) {
+			if ( ! empty( $hook[0] ) ) {
+				$link = '<a href="' .
+				        get_post_type_archive_link( 'wp-parser-hook' ) .
+				        str_replace( array( '&#8216;', '&#8217;' ), '', $link ) .
+				        '">' . esc_html( $link ) . '</a>';
+			}
+		}
+
+		// Link to function: {@see esc_attr()}
+		else {
+			$link = '<a href="' .
+			        get_post_type_archive_link( 'wp-parser-function' ) .
+			        str_replace( '()', '', $link ) .
+			        '">' . esc_html( $link ) . '</a>';
+		}
+		return $link;
 	}
 
 	/**
