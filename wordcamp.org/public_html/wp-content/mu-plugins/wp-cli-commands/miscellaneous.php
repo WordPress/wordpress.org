@@ -39,6 +39,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 		$max_site_id = empty( $args[1] ) ? false : absint( $args[1] );
 		$dry_run     = isset( $assoc_args[ 'dry-run' ] );
 		$sites       = wp_get_sites( array( 'limit' => false ) );
+		$notify      = new \cli\progress\Bar( 'Applying flag', count( $sites ) );
 		$results     = array();
 
 		WP_CLI::line();
@@ -66,8 +67,12 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 			$results[] = array( $site_domain, 'applied' );
 
 			restore_current_blog();
+			$notify->tick();
 		}
 
+		$notify->finish();
+
+		WP_CLI::line();
 		$table = new \cli\Table();
 		$table->setHeaders( array( 'Site', 'Action' ) );
 		$table->setRows( $results );
