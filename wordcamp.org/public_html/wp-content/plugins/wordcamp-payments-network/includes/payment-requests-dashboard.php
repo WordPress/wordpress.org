@@ -448,8 +448,7 @@ class Payment_Requests_Dashboard {
 						get_post_meta( $post->ID, '_camppayments_bank_state', true ),
 						get_post_meta( $post->ID, '_camppayments_bank_zip_code', true )
 			 		), 0, 35 ),
-				'30-ben-bank-country' => WCP_Encryption::maybe_decrypt(
-					get_post_meta( $post->ID, '_camppayments_beneficiary_country_iso3166', true ) ),
+				'30-ben-bank-country' => get_post_meta( $post->ID, '_camppayments_bank_country_iso3166', true ),
 				'31-supl-id-type' => '',
 				'32-supl-id-value' => '',
 
