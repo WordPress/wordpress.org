@@ -14,6 +14,12 @@ function wporg_support_setup() {
 add_action( 'after_setup_theme', 'wporg_support_setup' );
 
 /**
+ * Use the ‘Lead Topic’ uses the single topic part
+ * allowing styling the lead topic separately from the main reply loop.
+ */
+add_filter( 'bbp_show_lead_topic', '__return_true' );
+
+/**
  * Enqueue scripts and styles.
  *
  * Enqueue existing wordpress.org/support stylesheets
