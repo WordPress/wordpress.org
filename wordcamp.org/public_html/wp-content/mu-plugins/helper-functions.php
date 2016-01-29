@@ -112,8 +112,10 @@ function get_wordcamp_name( $site_id = 0 ) {
  * indicate that they should not have the new feature, and then setup the feature to run on sites that
  * don't have the flag, i.e., to run by default.
  *
- * Doing it this way means that local development environments like the Meta Environment don't have add any
+ * Doing it this way means that local development environments like the Meta Environment don't to have add any
  * new filters in order to start using the new functionality.
+ *
+ * See WordCamp_CLI_Miscellaneous::set_skip_feature_flag() for how to set the flags.
  *
  * @param string $flag
  *
