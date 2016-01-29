@@ -20,8 +20,20 @@
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank State / Province',  'bank_state' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank ZIP / Postal Code', 'bank_zip_code' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Country',           'bank_country' ); ?>
+			<?php $this->render_country_input( $post, 'Beneficiary’s Bank Country ISO 3166', 'bank_country_iso3166' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank SWIFT BIC',         'bank_bic' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Account Number or IBAN', 'beneficiary_account_number' ); ?>
+		</table>
+
+		<table>
+			<?php $this->render_text_input( $post, 'Intermediary Bank Name',              'interm_bank_name' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank Street Address',    'interm_bank_street_address' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank City',              'interm_bank_city' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank State / Province',  'interm_bank_state' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank ZIP / Postal Code', 'interm_bank_zip_code' ); ?>
+			<?php $this->render_country_input( $post, 'Intermediary Bank Country',        'interm_bank_country_iso3166' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank SWIFT BIC',         'interm_bank_swift' ); ?>
+			<?php $this->render_text_input( $post, 'Intermediary Bank Account',           'interm_bank_account' ); ?>
 		</table>
 
 		<table>
@@ -31,6 +43,7 @@
 			<?php $this->render_text_input( $post, 'Beneficiary’s State / Province',  'beneficiary_state' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s ZIP / Postal Code', 'beneficiary_zip_code' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Country',           'beneficiary_country' ); ?>
+			<?php $this->render_country_input( $post, 'Beneficiary’s Country ISO 3166', 'beneficiary_country_iso3166' ); ?>
 		</table>
 	</div>
 </fieldset>

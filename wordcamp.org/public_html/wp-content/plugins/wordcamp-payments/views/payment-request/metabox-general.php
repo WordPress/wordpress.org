@@ -1,6 +1,7 @@
 <table class="form-table">
 	<?php
 		$this->render_textarea_input( $post, 'Description', 'description' );
+		$this->render_text_input( $post, 'Invoice Number', 'invoice_number' );
 		$this->render_text_input( $post, 'Invoice date', 'invoice_date', '', 'date' );
 		$this->render_text_input( $post, 'Requested date for payment/due by', 'due_by', '', 'date' );
 		$this->render_text_input( $post, 'Amount', 'payment_amount', 'No commas, thousands separators or currency symbols. Ex. 1234.56' );

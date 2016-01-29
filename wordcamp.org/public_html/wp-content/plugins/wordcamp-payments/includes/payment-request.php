@@ -329,6 +329,13 @@ class WCP_Payment_Request {
 		require( dirname( __DIR__ ) . '/views/payment-request/input-select.php' );
 	}
 
+	protected function render_country_input( $post, $label, $name ) {
+		$selected = get_post_meta( $post->ID, '_camppayments_' . $name, true );
+		$options = WordCamp_Budgets::get_valid_countries_iso3166();
+
+		require( dirname( __DIR__ ) . '/views/payment-request/input-country.php' );
+	}
+
 	/**
 	 * Render a <input type="radio"> field with the given attributes.
 	 *
@@ -645,6 +652,7 @@ class WCP_Payment_Request {
 					$safe_value = sanitize_text_field( $unsafe_value );
 					break;
 
+				case 'invoice_number':
 				case 'invoice_date':
 				case 'due_by':
 					if ( empty( $_POST[ $key ] ) ) {
