@@ -10,7 +10,7 @@ jQuery( document ).ready( function( $ ) {
 		init: function () {
 			try {
 				app.registerEventHandlers();
-				wcb.attachedFilesView = new wcb.AttachedFilesView( { el: $( '#wcp_files' ) } );
+				wcb.attachedFilesView = new wcb.AttachedFilesView( { el: $( '#row-files' ) } );
 				wcb.setupDatePicker( '#wcp_general_info' );
 				wcb.setupDatePicker( '#submitpost.wcb'   );
 			} catch ( exception ) {
@@ -30,7 +30,7 @@ jQuery( document ).ready( function( $ ) {
 			paymentCategory.trigger( 'change' );   // Set the initial state
 			currency.change( wcb.setDefaultPaymentMethod );
 			currency.trigger( 'change' );   // Set the initial state
-			$( '#wcp_files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
+			$( '#row-files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
 			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
 		},
 
