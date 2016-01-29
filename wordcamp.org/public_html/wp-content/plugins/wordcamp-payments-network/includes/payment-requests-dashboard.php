@@ -401,6 +401,7 @@ class Payment_Requests_Dashboard {
 
 			// If account starts with two letters, it's most likely an IBAN
 			$account = get_post_meta( $post->ID, '_camppayments_beneficiary_account_number', true );
+			$account = WCP_Encryption::maybe_decrypt( $account );
 			$account = preg_replace( '#\s#','', $account );
 			$account_type = preg_match( '#^[a-z]{2}#i', $account ) ? 'IBAN' : 'ACCT';
 
@@ -420,7 +421,7 @@ class Payment_Requests_Dashboard {
 				'13-value-date' => '',
 
 				'14-id-type' => $account_type,
-				'15-id-value' => WCP_Encryption::maybe_decrypt( $account ),
+				'15-id-value' => $account,
 				'16-ben-name' => substr( WCP_Encryption::maybe_decrypt(
 					get_post_meta( $post->ID, '_camppayments_beneficiary_name', true ) ), 0, 35 ),
 				'17-address-1' => substr( WCP_Encryption::maybe_decrypt(
