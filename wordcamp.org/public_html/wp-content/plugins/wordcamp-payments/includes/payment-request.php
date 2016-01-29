@@ -330,7 +330,7 @@ class WCP_Payment_Request {
 	}
 
 	protected function render_country_input( $post, $label, $name ) {
-		$selected = get_post_meta( $post->ID, '_camppayments_' . $name, true );
+		$selected = $this->get_field_value( $name, $post );
 		$options = WordCamp_Budgets::get_valid_countries_iso3166();
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-country.php' );
