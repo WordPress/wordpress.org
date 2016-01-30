@@ -839,7 +839,8 @@ namespace DevHub {
 			return '';
 		}
 
-		$referral = array_shift( wp_filter_object_list( $tags, array( 'name' => 'see' ) ) );
+		$referral = wp_filter_object_list( $tags, array( 'name' => 'see' ) );
+		$referral = array_shift( $referral );
 
 		if ( ! empty( $referral['refers'] ) ) {
 			$refers = sanitize_text_field( $referral['refers'] );
@@ -1398,7 +1399,8 @@ namespace DevHub {
 			return '';
 		}
 
-		$referral = array_shift( wp_filter_object_list( $tags, array( 'name' => 'see' ) ) );
+		$referral = wp_filter_object_list( $tags, array( 'name' => 'see' ) );
+		$referral = array_shift( $referral );
 
 		if ( ! empty( $referral['refers'] ) ) {
 			$refers = sanitize_text_field( $referral['refers'] );
