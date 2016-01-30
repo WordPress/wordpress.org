@@ -1213,10 +1213,9 @@ input {
   padding: 20px;
 }
 .devhub-wrap .wp-parser-class .deprecated, .devhub-wrap .wp-parser-function .deprecated, .devhub-wrap .wp-parser-hook .deprecated, .devhub-wrap .wp-parser-method .deprecated {
-  background-color: #be2423;
-  border: 1px solid #a4322f;
+  background-color: #fbeaea;
+  border: 1px solid #dc3232;
   padding: 20px;
-  color: #ffffff;
 }
 .devhub-wrap .wp-parser-class .deprecated-method, .devhub-wrap .wp-parser-function .deprecated-method, .devhub-wrap .wp-parser-hook .deprecated-method, .devhub-wrap .wp-parser-method .deprecated-method {
   color: #be2423;

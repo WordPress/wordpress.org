@@ -833,22 +833,43 @@ namespace DevHub {
 		$types          = explode( '-', get_post_type( $post_id ) );
 		$type           = array_pop( $types );
 		$tags           = get_post_meta( $post_id, '_wp-parser_tags', true );
-		$all_deprecated = wp_filter_object_list( $tags, array( 'name' => 'deprecated' ) );
+		$deprecated = wp_filter_object_list( $tags, array( 'name' => 'deprecated' ) );
 
-		if ( empty( $all_deprecated ) ) {
+		if ( empty( $deprecated ) ) {
 			return '';
 		}
 
-		$deprecated  = array_shift( $all_deprecated );
-		// Multi-@deprecated may have been defined, with the second actually having the deprecation text.
-		if ( empty( $deprecated['content'] ) ) {
-			$deprecated  = array_shift( $all_deprecated );
-		}
-		$description = empty( $deprecated['content'] ) ? '' : esc_html( $deprecated['content'] );
+		$referral = array_shift( wp_filter_object_list( $tags, array( 'name' => 'see' ) ) );
 
-		return "<div class='deprecated'>"
-			. wp_kses_post( sprintf( __( 'Warning: This %s has been deprecated. %s', 'wporg' ), $type, $description ) )
-			. '</div>';
+		if ( ! empty( $referral['refers'] ) ) {
+			$refers = sanitize_text_field( $referral['refers'] );
+
+			if ( ! empty( $refers ) ) {
+				/* translators: 1: Linked internal element name */
+				$alternative_string = sprintf( __( ' Use %s instead.', 'wporg' ), \DevHub_Formatting::link_internal_element( $refers ) );
+			}
+		} else {
+			$alternative_string = '';
+		}
+
+		/* translators: 1: String for alternative function (if one exists) */
+		$contents = sprintf( __( 'This %1$s has been deprecated.%2$s', 'wporg' ),
+			$type,
+			$alternative_string
+		);
+
+		// Use the 'warning' callout box if it's available. Otherwise, fall back to a theme-supported div class.
+		if ( class_exists( 'WPorg_Handbook_Callout_Boxes' ) ) {
+			$callout = new \WPorg_Handbook_Callout_Boxes();
+			$message = $callout->warning_shortcode( array(), $contents );
+		} else {
+			$message  = '<div class="deprecated">';
+			/** This filter is documented in wp-includes/post-template.php */
+			$message .= apply_filters( 'the_content', $contents );
+			$message .= '</div>';
+		}
+
+		return $message;
 	}
 
 	/**
@@ -1392,7 +1413,7 @@ namespace DevHub {
 
 		/* translators: 1: String for alternative function (if one exists) */
 		$contents = sprintf( __( 'This function&#8217;s access is marked private. This means it is not intended for use by plugin or theme developers, only in other core functions. It is listed here for completeness.%s', 'wporg' ),
-				$alternative_string
+			$alternative_string
 		);
 
 		// Use the 'alert' callout box if it's available. Otherwise, fall back to a theme-supported div class.
@@ -1401,6 +1422,7 @@ namespace DevHub {
 			$message = $callout->alert_shortcode( array(), $contents );
 		} else {
 			$message  = '<div class="private-access">';
+			/** This filter is documented in wp-includes/post-template.php */
 			$message .= apply_filters( 'the_content', $contents );
 			$message .= '</div>';
 		}
