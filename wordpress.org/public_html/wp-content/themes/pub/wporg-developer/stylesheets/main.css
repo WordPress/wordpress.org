@@ -1212,18 +1212,30 @@ input {
   border-radius: 5px;
   padding: 20px;
 }
+.devhub-wrap .wp-parser-class .deprecated,
+.devhub-wrap .wp-parser-class .private-access, .devhub-wrap .wp-parser-function .deprecated,
+.devhub-wrap .wp-parser-function .private-access, .devhub-wrap .wp-parser-hook .deprecated,
+.devhub-wrap .wp-parser-hook .private-access, .devhub-wrap .wp-parser-method .deprecated,
+.devhub-wrap .wp-parser-method .private-access {
+  margin-top: 30px;
+  padding: 20px;
+}
+.devhub-wrap .wp-parser-class .deprecated p,
+.devhub-wrap .wp-parser-class .private-access p, .devhub-wrap .wp-parser-function .deprecated p,
+.devhub-wrap .wp-parser-function .private-access p, .devhub-wrap .wp-parser-hook .deprecated p,
+.devhub-wrap .wp-parser-hook .private-access p, .devhub-wrap .wp-parser-method .deprecated p,
+.devhub-wrap .wp-parser-method .private-access p {
+  margin-bottom: 0px;
+}
 .devhub-wrap .wp-parser-class .deprecated, .devhub-wrap .wp-parser-function .deprecated, .devhub-wrap .wp-parser-hook .deprecated, .devhub-wrap .wp-parser-method .deprecated {
   background-color: #fbeaea;
   border: 1px solid #dc3232;
-  padding: 20px;
 }
 .devhub-wrap .wp-parser-class .deprecated-method, .devhub-wrap .wp-parser-function .deprecated-method, .devhub-wrap .wp-parser-hook .deprecated-method, .devhub-wrap .wp-parser-method .deprecated-method {
   color: #be2423;
   font-style: italic;
 }
 .devhub-wrap .wp-parser-class .private-access, .devhub-wrap .wp-parser-function .private-access, .devhub-wrap .wp-parser-hook .private-access, .devhub-wrap .wp-parser-method .private-access {
-  margin-top: 30px;
-  padding: 20px 20px 10px;
   border: 1px solid #ffb900;
   background-color: #fff8e5;
 }
