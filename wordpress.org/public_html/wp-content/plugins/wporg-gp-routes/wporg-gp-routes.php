@@ -42,6 +42,8 @@ class WPorg_GP_Routes {
 	 *  - /locale/$locale/$path/$path/$path
 	 *  - /stats/?
 	 *  - /projects/wp-plugins/$project
+	 *  - /projects/wp-plugins/$project/contributors
+	 *  - /projects/wp-plugins/$project/language-packs
 	 */
 	public function register_routes() {
 		$request_uri = GP::$router->request_uri();
@@ -70,6 +72,8 @@ class WPorg_GP_Routes {
 			GP::$router->prepend( '/stats/?', array( 'WPorg_GP_Route_Stats', 'get_stats_overview' ) );
 			$project = '([^/]*)/?';
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_projects' ) );
+			GP::$router->prepend( "/projects/wp-plugins/$project/contributors", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_contributors' ) );
+			GP::$router->prepend( "/projects/wp-plugins/$project/language-packs", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_language_packs' ) );
 		}
 	}
 

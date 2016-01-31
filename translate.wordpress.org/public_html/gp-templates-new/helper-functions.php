@@ -2,6 +2,10 @@
 wp_register_style( 'wporg-translate', 'https://wordpress.org/translate/gp-templates-new/style.css', array( 'base' ), '20151123' );
 gp_enqueue_style( 'wporg-translate' );
 
+wp_register_style( 'chartist', 'https://wordpress.org/translate/gp-templates-new/css/chartist.min.css', array(), '0.9.5' );
+wp_register_script( 'chartist', 'https://wordpress.org/translate/gp-templates-new/js/chartist.min.js', array(), '0.9.5' );
+
+
 /**
  * Adds custom classes to the array of body classes.
  *

@@ -31,6 +31,17 @@ gp_tmpl_header();
 				<li class="project-name"><?php echo $project->name; ?> <?php echo $edit_link; ?></li>
 			</ul>
 		</div>
+
+		<div class="project-box-footer">
+			<ul class="projects-dropdown">
+				<li><span>Projects</span>
+					<ul>
+						<li><a href="<?php echo gp_url_join( gp_url_project( $project ), 'contributors' ); ?>">Contributors</a></li>
+						<li><a href="<?php echo gp_url_join( gp_url_project( $project ), 'language-packs' ); ?>">Language Packs</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
 	</div>
 </div>
 
@@ -126,6 +137,10 @@ jQuery( function( $ ) {
 
 			return ( undefined !== sortValue ) ? sortValue : cellValue;
 		}
+	});
+
+	$( '.projects-dropdown > li' ).on( 'click', function() {
+		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 	});
 });
 </script>
