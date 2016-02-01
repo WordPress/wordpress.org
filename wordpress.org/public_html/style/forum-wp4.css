@@ -486,6 +486,33 @@ form.postform input[type='text'] {
 	padding: 4px 2px;
 }
 
+/* New Post Form */
+.callout-tip {
+	position: relative;
+	overflow: auto;
+	background: #eff7ed;
+	border: 1px solid #64b450;
+	border-bottom: 3px solid #64b450;
+	margin-bottom: 1.5em;
+	padding: 15px 40px 15px 46px;
+}
+
+.callout-tip ul {
+	margin-bottom: 5px !important;
+}
+
+.tipicon:before {
+	position: absolute;
+	top: 12px;
+	left: 10px;
+	width: 20px;
+	height: 20px;
+	font-size: 26px;
+	content: "\f339";
+	font-family: "dashicons";
+	color: #64b450;
+}
+
 @media screen and ( max-width: 960px ) {
 	.col-6, .col-7, .col-8, .col-10, .col-12 {
 		width: 100%;

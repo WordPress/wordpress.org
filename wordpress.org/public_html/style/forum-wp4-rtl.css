@@ -110,3 +110,12 @@ form#profile-delete-form {
 	padding-left: 23px;
 	padding-right: 0;
 }
+
+.callout-tip {
+	padding: 15px 46 15px 40px;
+}
+
+.tipicon:before {
+	left: auto;
+	right: 10px;
+}
