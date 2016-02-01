@@ -4,13 +4,10 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 	return;
 }
 
-$wp_cli_commands = glob( __DIR__ . '/wp-cli-commands/*.php' );
-
-if ( is_array( $wp_cli_commands ) ) {
-	foreach ( $wp_cli_commands as $command ) {
-		require_once( $command );
-	}
-}
+require_once( __DIR__ . '/miscellaneous.php' );
+require_once( __DIR__ . '/rest-api.php'      );
+require_once( __DIR__ . '/rewrite-rules.php' );
+require_once( __DIR__ . '/users.php'         );
 
 WP_CLI::add_command( 'wc-misc',    'WordCamp_CLI_Miscellaneous' );
 WP_CLI::add_command( 'wc-rewrite', 'WordCamp_CLI_Rewrite_Rules' );
