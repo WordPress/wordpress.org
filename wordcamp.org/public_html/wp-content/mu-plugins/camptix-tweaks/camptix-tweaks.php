@@ -17,11 +17,10 @@ add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\s
 add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\disable_attendee_edits' );
 
 // Miscellaneous
-add_filter( 'camptix_default_addons',                        __NAMESPACE__ . '\load_addons'            );
-add_filter( 'camptix_capabilities',                          __NAMESPACE__ . '\modify_capabilities'    );
-add_filter( 'camptix_default_options',                       __NAMESPACE__ . '\modify_default_options' );
+add_filter( 'camptix_default_addons',  __NAMESPACE__ . '\load_addons'               );
+add_filter( 'camptix_capabilities',    __NAMESPACE__ . '\modify_capabilities'       );
+add_filter( 'camptix_default_options', __NAMESPACE__ . '\modify_default_options'    );
 
-// todo security audit
 
 /**
  * Warn organizers when CampTix is in sandbox mode
