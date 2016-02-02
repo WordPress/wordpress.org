@@ -12,6 +12,37 @@ function default_og_image() {
 }
 add_filter( 'jetpack_open_graph_image_default', __NAMESPACE__ . '\default_og_image' );
 
+/**
+ * Choose the default Open Graph image for single posts
+ *
+ * @param array $media
+ * @param int   $post_id
+ * @param array $args
+ *
+ * @return array
+ */
+function default_single_og_image( $media, $post_id, $args ) {
+	if ( $media ) {
+		return $media;
+	}
+
+	if ( has_site_icon() ) {
+		$image_url = get_site_icon_url();
+	} else if ( has_header_image() ) {
+		$image_url = get_header_image();
+	} else {
+		$image_url = default_og_image();
+	}
+
+	return array( array(
+		'type' => 'image',
+		'from' => 'custom_fallback',
+		'src'  => esc_url( $image_url ),
+		'href' => get_permalink( $post_id ),
+	) );
+}
+add_filter( 'jetpack_images_get_images', __NAMESPACE__ . '\default_single_og_image', 10, 3 );
+
 /*
  * Add Twitter Card type.
  *
