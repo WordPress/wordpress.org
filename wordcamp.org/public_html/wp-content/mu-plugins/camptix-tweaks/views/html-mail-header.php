@@ -384,10 +384,8 @@
 																		style="width: 100px;height: 100px;margin: 0px;border: 0;outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;">
 																</div>
 
-																<h1 class="null" style="text-align: center;display: block;margin: 5px 0 0 0;padding: 0;color: #202020;font-family: Helvetica;font-size: 26px;font-style: normal;font-weight: bold;line-height: 125%;letter-spacing: normal;">
-																	<span style="font-family:verdana,geneva,sans-serif;font-size:24px">
-																		<?php echo esc_html( get_wordcamp_name() ); ?>
-																	</span>
+																<h1 class="null" style="text-align: center;display: block;margin: 5px 0 0 0;padding: 0;color: #202020;font-family:verdana,geneva,sans-serif;font-size:38px;font-style: normal;font-weight: bold;line-height: 125%;letter-spacing: normal;">
+																	<?php echo esc_html( get_wordcamp_name() ); ?>
 																</h1>
 
 															</td>
