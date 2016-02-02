@@ -20,6 +20,7 @@ add_action( 'camptix_form_edit_attendee_custom_error_flags', __NAMESPACE__ . '\d
 add_filter( 'camptix_default_addons',  __NAMESPACE__ . '\load_addons'               );
 add_filter( 'camptix_capabilities',    __NAMESPACE__ . '\modify_capabilities'       );
 add_filter( 'camptix_default_options', __NAMESPACE__ . '\modify_default_options'    );
+add_filter( 'camptix_html_message',    __NAMESPACE__ . '\render_html_emails', 10, 2 );
 
 
 /**
@@ -348,4 +349,28 @@ function modify_default_options( $options ) {
 	$options['payment_options_paypal'] = array( 'api_predef' => 'wordcamp-sandbox' );
 
 	return $options;
+}
+
+/**
+ * Render an HTML message from the plain-text version
+ *
+ * @param string|false $html_message
+ * @param \PHPMailer   $phpmailer
+ *
+ * @return string
+ */
+function render_html_emails( $html_message, $phpmailer ) {
+	if ( ! is_callable( 'CampTix_Plugin::sanitize_format_html_message' ) ) {
+		return $html_message;
+	}
+
+	$logo_url = plugins_url( '/images/wordpress-logo.png', __FILE__ );
+
+	ob_start();
+	require( __DIR__ . '/views/html-mail-header.php' );
+	echo \CampTix_Plugin::sanitize_format_html_message( $phpmailer->Body );
+	require( __DIR__ . '/views/html-mail-footer.php' );
+	$html_message = ob_get_clean();
+
+	return $html_message;
 }
