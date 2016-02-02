@@ -372,11 +372,11 @@
 												<table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;" class="mcnTextContentContainer">
 													<tbody>
 														<tr>
-															<td valign="top" class="mcnTextContent" style="padding: 9px 18px;color: #0B5F7B; background-color: #d3e7f8; mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;font-family: Helvetica;font-size: 16px;line-height: 150%;text-align: left;">
+															<td valign="top" class="mcnTextContent" style="padding: 9px 18px;color: #0B5F7B; background-color: #d3e7f8; mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;font-family: Helvetica;font-size: 16px;line-height: 150%;text-align: center;">
 
 																<div style="text-align: center;">
 																	<img
-																		align="left"
+																		align="center"
 																		width="100"
 																		height="100"
 																		src="<?php echo esc_url( $logo_url ); ?>"
@@ -384,7 +384,7 @@
 																		style="width: 100px;height: 100px;margin: 0px;border: 0;outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;">
 																</div>
 
-																<h1 class="null" style="text-align: center;display: block;margin: 0;padding: 0;color: #202020;font-family: Helvetica;font-size: 26px;font-style: normal;font-weight: bold;line-height: 125%;letter-spacing: normal;">
+																<h1 class="null" style="text-align: center;display: block;margin: 5px 0 0 0;padding: 0;color: #202020;font-family: Helvetica;font-size: 26px;font-style: normal;font-weight: bold;line-height: 125%;letter-spacing: normal;">
 																	<span style="font-family:verdana,geneva,sans-serif;font-size:24px">
 																		<?php echo esc_html( get_wordcamp_name() ); ?>
 																	</span>
