@@ -54,7 +54,8 @@ function wporg_themes_scripts() {
 			'themes'   => false,
 			'query'    => wporg_themes_get_themes_for_query(),
 			'settings' => array(
-				'title'        => __( 'WordPress &#8250; %s &laquo; Free WordPress Themes', 'wporg-themes' ),
+				/* translators: %s: theme name */
+				'title'        => __( '%s &mdash; Free WordPress Themes', 'wporg-themes' ),
 				'isMobile'     => wp_is_mobile(),
 				'postsPerPage' => 24,
 				'path'         => trailingslashit( parse_url( home_url(), PHP_URL_PATH ) ),
