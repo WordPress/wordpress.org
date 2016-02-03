@@ -267,8 +267,14 @@ function wporg_themes_post_author_meta_box( $post ) {
  *                  false on failure.
  */
 function wporg_themes_update_version_status( $post_id, $current_version, $new_status ) {
-	$meta       = (array) get_post_meta( $post_id, '_status', true );
-	$old_status = isset( $meta[ $current_version ] ) ? $meta[ $current_version ] : false;
+	$meta = get_post_meta( $post_id, '_status', true );
+
+	if ( empty( $meta ) ) {
+		$meta = array();
+		$old_status = false;
+	} else {
+		$old_status = $meta[ $current_version ];
+	}
 
 	// Don't do anything when the status hasn't changed.
 	if ( $new_status == $old_status ) {
