@@ -52,15 +52,31 @@ function wporg_login_replace_css() {
 add_action( 'login_init', 'wporg_login_replace_css' );
 
 /**
+ * Log failed logins to Google Analytics.
+ */
+$wporg_login_failed_username = '';
+function wporg_login_failed( $errors ) {
+	global $wporg_login_failed_username;
+	$wporg_login_failed_username = ( 'incorrect_password' == $errors->get_error_code() || 'empty_password' == $errors->get_error_code() ) ? esc_attr(wp_unslash($_POST['log'])) : '';
+
+	return $errors;
+}
+add_action( 'wp_login_errors', 'wporg_login_failed', 10, 1 );
+
+/**
  * Add Google Analytics tracking to login pages.
  */
 function wporg_login_analytics() {
-?>
+	global $wporg_login_failed_username;
+	?>
 <script type="text/javascript">
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-52447-1']);
 _gaq.push(['_setDomainName', 'wordpress.org']);
 _gaq.push(['_trackPageview']);
+<?php if ( $wporg_login_failed_username ) { ?>
+	_gaq.push(['_trackEvent', 'user', 'login-failed', '<?php echo $wporg_login_failed_username; ?>']);
+<?php } ?>
 (function() {
 	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -71,6 +87,7 @@ function recordOutboundLink(link, category, action) {
 	setTimeout('document.location = "' + link.href + '"', 100);
 }
 </script>
-<?php
+	<?php
 }
-add_action( 'wp_footer', 'wporg_login_analytics' );
+add_action( 'wp_footer',    'wporg_login_analytics' );
+add_action( 'login_footer', 'wporg_login_analytics' );
