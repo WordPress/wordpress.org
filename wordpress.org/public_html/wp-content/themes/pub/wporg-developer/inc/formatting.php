@@ -219,8 +219,8 @@ class DevHub_Formatting {
 	 * @return string
 	 */
 	public static function format_param_description( $text ) {
-		// Encode all htmlentities.
-		$text = htmlentities( $text );
+		// Encode all htmlentities (but don't double-encode).
+		$text = htmlentities( $text, ENT_COMPAT | ENT_HTML401, 'UTF-8', false );
 
 		// Simple allowable tags that should get unencoded.
 		// Note: This precludes them from being able to be used in an encoded fashion
