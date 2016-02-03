@@ -178,6 +178,10 @@
 		</label>
 
 		<select id="_wcpt_sponsor_country" name="_wcpt_sponsor_country">
+			<option value="null" <?php selected( $country, 'null' ); ?>>
+				<?php _e( '-- Select a Country --', 'wordcamporg' ); ?>
+			</option>
+
 			<?php foreach ( $available_countries as $available_country ) : ?>
 				<option value="<?php echo esc_attr( $available_country ); ?>" <?php selected( $available_country, $country ); ?>>
 					<?php echo esc_html( $available_country ); ?>
