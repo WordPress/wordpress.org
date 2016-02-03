@@ -341,7 +341,7 @@ function wporg_themes_custom_columns_style() {
 		return;
 	}
 
-	wp_add_inline_style( 'wp-admin', '
+	wp_add_inline_style( 'common', '
 		.fixed .column-version,
 		.fixed .column-ticket {
 			width: 10%;
