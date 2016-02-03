@@ -425,7 +425,7 @@ window.wp = window.wp || {};
 			event = event || window.event;
 
 			// Don't handle click if command/Ctrl are pressed to open the link in a new tab.
-			if ( true === event.metaKey && 'click' === event.type ) {
+			if ( true === event.metaKey|event.ctrlKey && 'click' === event.type ) {
 				return;
 			}
 
