@@ -106,6 +106,7 @@ function get_whitelist() {
 		),
 		'glotpress' => array(
 			'ocean90',
+			'gregross',
 		),
 		'meta-i18n' => array(
 			'ocean90',
