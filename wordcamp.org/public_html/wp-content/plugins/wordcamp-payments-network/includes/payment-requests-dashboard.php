@@ -267,18 +267,26 @@ class Payment_Requests_Dashboard {
 			return;
 		}
 
+		$type = in_array( $_POST['wcpn_export_type'], array( 'default', 'jpm_wires', 'jpm_ach' ) ) ? $_POST['wcpn_export_type'] : 'default';
+		$mime_type = 'text/csv';
+		$ext = 'csv';
+
+		if ( $type == 'jpm_ach' ) {
+			$mime_type = 'text/plain';
+			$ext = 'ach';
+		}
+
 		$start_date = strtotime( $_POST['wcpn_export_start_date'] . ' 00:00:00' );
 		$end_date   = strtotime( $_POST['wcpn_export_end_date']   . ' 23:59:59' );
-		$filename   = sanitize_file_name( sprintf( 'wordcamp-payments-%s-to-%s.csv', date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ) ) );
-
-		$type = in_array( $_POST['wcpn_export_type'], array( 'default', 'jpm_wires' ) ) ? $_POST['wcpn_export_type'] : 'default';
+		$filename   = sanitize_file_name( sprintf( 'wordcamp-payments-%s-to-%s.%s',
+			date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ), $ext ) );
 
 		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date, $type );
 
 		if ( is_wp_error( $report ) ) {
 			add_settings_error( 'wcp-dashboard', $report->get_error_code(), $report->get_error_message() );
 		} else {
-			header( 'Content-Type: text/csv' );
+			header( sprintf( 'Content-Type: %s', $mime_type ) );
 			header( sprintf( 'Content-Disposition: attachment; filename="%s"', $filename ) );
 			header( 'Cache-control: private' );
 			header( 'Pragma: private' );
@@ -363,6 +371,151 @@ class Payment_Requests_Dashboard {
 		}
 
 		fclose( $report );
+		return ob_get_clean();
+	}
+
+	/**
+	 * NACHA via JP Morgan
+	 *
+	 * @param array $args
+	 *
+	 * @return string
+	 */
+	protected static function _generate_payment_report_jpm_ach( $args ) {
+		$args = wp_parse_args( $args, array(
+			'request_indexes' => array(),
+		) );
+
+		$ach_options = apply_filters( 'wcb_payment_req_ach_options', array(
+			'immediate-origin'    => '', // Immediate Origin (TIN) 10 characters
+			'bank-routing-number' => '', // Immediate Destination (bank routing number)
+			'company-id'          => '', // 1NNNNNNNNN (Federal IRS Number)
+			'financial-inst'      => '', // Originating Financial Institution
+		) );
+
+		ob_start();
+
+		// File Header Record
+
+		echo '1'; // Record Type Code
+		echo '01'; // Priority Code
+		echo ' ' . str_pad( substr( $ach_options['bank-routing-number'], 0, 9 ), 9, '0', STR_PAD_LEFT );
+		echo str_pad( substr( $ach_options['immediate-origin'], 0, 10 ), 10 ); // Immediate Origin (TIN)
+		echo date( 'ymd' ); // Transmission Date
+		echo date( 'Hi' ); // Transmission Time
+		echo '1'; // File ID Modifier
+		echo '094'; // Record Size
+		echo '10'; // Blocking Factor
+		echo '1'; // Format Code
+		echo str_pad( 'BANK ONE', 23 ); // Destination
+		echo str_pad( 'WCEXPORT', 23 ); // Origin
+		echo str_pad( '', 8 ); // Reference Code (optional)
+		echo PHP_EOL;
+
+		// Batch Header Record
+
+		echo '5'; // Record Type Code
+		echo '200'; // Service Type Code
+		echo 'WordCamp Communi'; // Company Name
+		echo str_pad( '', 20 ); // Blanks
+		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company Identification (Federal IRS Number)
+		echo 'PPD'; // Standard Entry Class
+		echo 'Vendor Pay'; // Entry Description
+		echo date( 'ymd' ); // Company Description Date
+		echo date( 'ymd' ); // Effective Entry Date
+		echo str_pad( '', 3 ); // Blanks
+		echo '1'; // Originator Status Code
+		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
+		echo '0000001'; // Batch Number
+		echo PHP_EOL;
+
+		$count = 0;
+		$total = 0;
+		$hash = 0;
+
+		foreach ( $args['request_indexes'] as $index ) {
+			switch_to_blog( $index->blog_id );
+			$post = get_post( $index->post_id );
+
+			if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Direct Deposit' )
+				continue;
+
+			$count++;
+
+			// Entry Detail Record
+
+			echo '6'; // Record Type Code
+			echo 'DDA'; // Transaction Code
+
+			// Transit/Routing Number of Destination Bank + Check digit
+			$routing_number = get_post_meta( $post->ID, '_camppayments_ach_routing_number', true );
+			$routing_number = WCP_Encryption::maybe_decrypt( $routing_number );
+			$routing_number = substr( $routing_number, 0, 8 + 1 );
+			$routing_number = str_pad( $routing_number, 8 + 1 );
+			$hash += absint( substr( $routing_number, 0, 8 ) );
+			echo $routing_number;
+
+			// Bank Account Number
+			$account_number = get_post_meta( $post->ID, '_camppayments_ach_account_number', true );
+			$account_number = WCP_Encryption::maybe_decrypt( $account_number );
+			$account_number = substr( $account_number, 0, 17 );
+			$account_number = str_pad( $account_number, 17 );
+			echo $account_number;
+
+			// Amount
+			$amount = round( floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) ), 2 );
+			$total += $amount;
+			$amount = str_pad( $amount, 10, '0', STR_PAD_LEFT );
+			echo $amount;
+
+			// Individual Identification Number
+			echo str_pad( sprintf( '%d-%d', $index->blog_id, $index->post_id ), 15 );
+
+			// Individual Name
+			$name = get_post_meta( $post->ID, '_camppayments_ach_account_holder_name', true );
+			$name = WCP_Encryption::maybe_decrypt( $name );
+			$name = substr( $name, 0, 22 );
+			$name = str_pad( $name, 22 );
+			echo $name;
+
+			echo '  '; // User Defined Data
+			echo '0'; // Addenda Record Indicator
+
+			// Trace Number
+			echo str_pad( substr( $ach_options['bank-routing-number'], 0, 8 ), 8, '0', STR_PAD_LEFT ); // routing number
+			echo str_pad( $count, 7, '0', STR_PAD_LEFT ); // sequence number
+			echo PHP_EOL;
+		}
+
+		// Batch Trailer Record
+
+		echo '8'; // Record Type Code
+		echo '200'; // Service Class Code
+		echo str_pad( $count, 6, '0', STR_PAD_LEFT ); // Entry/Addenda Count
+		echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
+		echo str_pad( $total, 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
+		echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
+		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company ID
+		echo str_pad( '', 25 ); // Blanks
+		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
+		echo '0000001'; // Batch Number
+		echo PHP_EOL;
+
+
+		// File Trailer Record
+
+		echo '9'; // Record Type Code
+		echo '000001'; // Batch Count
+		echo str_pad( ceil( $count / 10 ), 6, '0', STR_PAD_LEFT ); // Block Count
+		echo str_pad( $count, 8, '0', STR_PAD_LEFT ); // Entry/Addenda Count
+		echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
+		echo str_pad( $total, 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
+		echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
+		echo str_pad( '', 39 ); // Blanks
+		echo PHP_EOL;
+
+		// The file must have a number of lines that is a multiple of 10 (e.g. 10, 20, 30).
+		echo str_repeat( PHP_EOL, 10 - ( ( 4 + $count ) % 10 ) - 1 );
 		return ob_get_clean();
 	}
 
@@ -700,6 +853,7 @@ class Payment_Requests_Dashboard {
 					<select name="wcpn_export_type">
 						<option value="default">Default</option>
 						<option value="jpm_wires">JP Morgan Access - Wire Payments</option>
+						<option value="jpm_ach">JP Morgan - NACHA</option>
 					</select>
 				</label>
 
