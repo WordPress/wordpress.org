@@ -387,9 +387,8 @@ class Payment_Requests_Dashboard {
 		) );
 
 		$ach_options = apply_filters( 'wcb_payment_req_ach_options', array(
-			'immediate-origin'    => '', // Immediate Origin (TIN) 10 characters
 			'bank-routing-number' => '', // Immediate Destination (bank routing number)
-			'company-id'          => '', // 1NNNNNNNNN (Federal IRS Number)
+			'company-id'          => '', // NNNNNNNNN (Federal IRS Number)
 			'financial-inst'      => '', // Originating Financial Institution
 		) );
 
@@ -400,7 +399,7 @@ class Payment_Requests_Dashboard {
 		echo '1'; // Record Type Code
 		echo '01'; // Priority Code
 		echo ' ' . str_pad( substr( $ach_options['bank-routing-number'], 0, 9 ), 9, '0', STR_PAD_LEFT );
-		echo str_pad( substr( $ach_options['immediate-origin'], 0, 10 ), 10 ); // Immediate Origin (TIN)
+		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10, '0', STR_PAD_LEFT ); // Immediate Origin (TIN)
 		echo date( 'ymd' ); // Transmission Date
 		echo date( 'Hi' ); // Transmission Time
 		echo '1'; // File ID Modifier
@@ -418,7 +417,7 @@ class Payment_Requests_Dashboard {
 		echo '200'; // Service Type Code
 		echo 'WordCamp Communi'; // Company Name
 		echo str_pad( '', 20 ); // Blanks
-		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company Identification (Federal IRS Number)
+		echo '1' . str_pad( substr( $ach_options['company-id'], 0, 9 ), 9 ); // Company Identification (Federal IRS Number)
 		echo 'PPD'; // Standard Entry Class
 		echo 'Vendor Pay'; // Entry Description
 		echo date( 'ymd' ); // Company Description Date
@@ -495,7 +494,7 @@ class Payment_Requests_Dashboard {
 		echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
 		echo str_pad( $total, 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
 		echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
-		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company ID
+		echo '1' . str_pad( substr( $ach_options['company-id'], 0, 9 ), 9 ); // Company ID
 		echo str_pad( '', 25 ); // Blanks
 		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
 		echo '0000001'; // Batch Number
