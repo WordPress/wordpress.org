@@ -355,7 +355,7 @@ class WordCamp_QBO {
             }
 
             $body = json_decode( wp_remote_retrieve_body( $response ), true );
-            if ( empty( $body ) ) {
+            if ( empty( $body['CompanyInfo'] ) ) {
                 wp_die( 'Could not obtain company information.' );
             }
             $company_name = $body['CompanyInfo']['CompanyName'];
