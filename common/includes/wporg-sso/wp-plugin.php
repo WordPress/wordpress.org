@@ -16,11 +16,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @var array
 		 */
 		public $valid_sso_paths = array(
-			'/',
-			'/checkemail',
-			'/loggedout',
-			'/lostpassword',
-			'/oauth',
+			'root'         => '/',
+			'checkemail'   => '/checkemail',
+			'loggedout'    => '/loggedout',
+			'lostpassword' => '/lostpassword',
+			'oauth'        => '/oauth',
 		);
 		
 		/**
@@ -53,6 +53,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			
 			// Add our host to the list of allowed ones.
 			add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
+			
+			// Replace the lost password URL by our own
+			add_filter( 'lostpassword_url', array( &$this, 'lostpassword_url' ), 10, 2 );
 			
 			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
@@ -163,6 +166,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
 			}
 			return $defaults;
+		}
+		
+		/**
+		 * Filters the default lost password URL and returns our custom one instead.
+		 * 
+		 * @param string $lostpassword_url
+		 * @param string $redirect
+		 */
+		public function lostpassword_url( $lostpassword_url, $redirect ) {
+			return home_url( $this->valid_sso_paths['lostpassword'] . '/?redirect_to=' . $redirect );
 		}
 		
 		/**
