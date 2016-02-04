@@ -4,6 +4,12 @@
 		<?php $this->render_radio_input( $post, 'Payment Method', 'payment_method' ); ?>
 	</table>
 
+	<table id="payment_method_direct_deposit_fields" class="form-table payment_method_fields <?php echo 'Direct Deposit' == $selected_payment_method ? 'active' : 'hidden'; ?>">
+		<?php $this->render_text_input( $post, 'Routing Number', 'ach_routing_number' ); ?>
+		<?php $this->render_text_input( $post, 'Account Number', 'ach_account_number' ); ?>
+		<?php $this->render_text_input( $post, 'Account Holder Name', 'ach_account_holder_name' ); ?>
+	</table>
+
 	<table id="payment_method_check_fields" class="form-table payment_method_fields <?php echo 'Check' == $selected_payment_method ? 'active' : 'hidden'; ?>">
 		<?php $this->render_text_input( $post, 'Payable To', 'payable_to' ); ?>
 	</table>
