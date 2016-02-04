@@ -11,8 +11,8 @@ class GH2WORG {
 		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
 		'dd32/feature-plugin-testing' => 'test-plugin-3',
 		'voldemortensen/menu-customizer' => 'menu-customizer',
-		'swissspidy/oEmbed-API' => 'oembed-api',
 		'georgestephanis/two-factor' => 'two-factor',
+		'georgestephanis/application-passwords' => 'application-passwords',
 		'obenland/shiny-updates' => 'shiny-updates',
 	);
 
