@@ -71,7 +71,7 @@ function register_post_type() {
 function get_custom_statuses() {
 	return array(
 		'wcbsi_submitted' => __( 'Submitted', 'wordcamporg' ),
-		'wcbsi_approved'  => __( 'Approved',  'wordcamporg' ),
+		'wcbsi_approved'  => __( 'Sent',      'wordcamporg' ),
 		'wcbsi_paid'      => __( 'Paid',      'wordcamporg' ),
 	);
 }
@@ -95,8 +95,8 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbsi_approved',
 		array(
-			'label'              => _x( 'Approved', 'post', 'wordcamporg' ),
-			'label_count'        => _nx_noop( 'Approved <span class="count">(%s)</span>', 'Approved <span class="count">(%s)</span>', 'wordcamporg' ),
+			'label'              => _x( 'Sent', 'post', 'wordcamporg' ),
+			'label_count'        => _nx_noop( 'Sent <span class="count">(%s)</span>', 'Sent <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
 		)

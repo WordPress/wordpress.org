@@ -25,7 +25,7 @@ defined( 'WPINC' ) or die();
 					<?php elseif ( 'wcbsi_submitted' == $post->post_status ) : ?>
 						<?php _e( 'Submitted', 'wordcamporg' ); ?>
 					<?php elseif ( 'wcbsi_approved' == $post->post_status ) : ?>
-						<?php _e( 'Approved', 'wordcamporg' ); ?>
+						<?php _e( 'Sent', 'wordcamporg' ); ?>
 					<?php elseif ( 'wcbsi_paid' == $post->post_status ) : ?>
 						<?php _e( 'Paid', 'wordcamporg' ); ?>
 					<?php endif; ?>
