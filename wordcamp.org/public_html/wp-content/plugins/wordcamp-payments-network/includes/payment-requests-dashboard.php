@@ -129,6 +129,16 @@ class Payment_Requests_Dashboard {
 		if ( ! empty( $payment_method ) )
 			$keywords[] = $payment_method;
 
+		$vendor_name = get_post_meta( $request->ID, '_camppayments_vendor_name', true );
+		if ( ! empty( $vendor_name ) ) {
+			$keywords[] = $vendor_name;
+		}
+
+		$amount = get_post_meta( $request->ID, '_camppayments_payment_amount', true );
+		if ( ! empty( $amount) ) {
+			$keywords[] = $amount;
+		}
+
 		return array(
 			'blog_id' => get_current_blog_id(),
 			'post_id' => $request->ID,
