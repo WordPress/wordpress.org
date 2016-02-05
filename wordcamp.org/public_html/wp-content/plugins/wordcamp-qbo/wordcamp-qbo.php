@@ -156,7 +156,7 @@ class WordCamp_QBO {
 				),
 			) );
 
-			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response != 200 ) )
+			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 )
 				return new WP_Error( 'error', 'Could not find purchase to update.' );
 
 			$body = json_decode( wp_remote_retrieve_body( $response ), true );
