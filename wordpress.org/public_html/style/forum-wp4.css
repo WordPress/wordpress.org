@@ -513,6 +513,19 @@ form.postform input[type='text'] {
 	color: #64b450;
 }
 
+/* Register Form */
+.form-table-register th {
+	vertical-align: top;
+}
+
+.form-table-register td {
+	padding: 10px 0;
+}
+
+.form-table-register .user-login-hint {
+	font-size: 11px;
+}
+
 @media screen and ( max-width: 960px ) {
 	.col-6, .col-7, .col-8, .col-10, .col-12 {
 		width: 100%;
