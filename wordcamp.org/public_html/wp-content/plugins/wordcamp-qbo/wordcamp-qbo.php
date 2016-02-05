@@ -9,6 +9,7 @@ class WordCamp_QBO {
 	private static $consumer_secret;
 	private static $hmac_key;
 
+	private static $account;
 	private static $api_base_url;
 	private static $options;
 	private static $categories_map;
@@ -54,6 +55,11 @@ class WordCamp_QBO {
 			'https://%squickbooks.api.intuit.com',
 			apply_filters( 'wordcamp_qbo_sandbox_mode', false ) ? 'sandbox-' : ''
 		);
+
+		self::$account = apply_filters( 'wordcamp_qbo_account', array(
+			'value' => '61',
+			'name'  => 'Checking-JPM',
+		) );
 
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
@@ -122,10 +128,7 @@ class WordCamp_QBO {
 		);
 
 		$payload = array(
-			'AccountRef' => array(
-				'value' => '61',
-				'name' => 'Checking-JPM',
-			),
+			'AccountRef' => self::$account,
 			'TxnDate' => gmdate( 'Y-m-d', $date ),
 			'PaymentType' => 'Cash',
 			'Line' => array(
