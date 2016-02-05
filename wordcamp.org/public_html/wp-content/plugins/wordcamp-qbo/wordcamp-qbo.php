@@ -9,6 +9,7 @@ class WordCamp_QBO {
 	private static $consumer_secret;
 	private static $hmac_key;
 
+	private static $api_base_url;
 	private static $options;
 	private static $categories_map;
 
@@ -48,6 +49,11 @@ class WordCamp_QBO {
 		// There's no point in doing anything if we don't have the secrets.
 		if ( empty( self::$consumer_key ) )
 			return;
+
+		self::$api_base_url = sprintf(
+			'https://%squickbooks.api.intuit.com',
+			apply_filters( 'wordcamp_qbo_sandbox_mode', false ) ? 'sandbox-' : ''
+		);
 
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
@@ -139,8 +145,9 @@ class WordCamp_QBO {
 		if ( $request->get_param('id') ) {
 			$payload['Id'] = absint( $request->get_param('id') );
 
-			$request_url = esc_url_raw( sprintf( 'https://quickbooks.api.intuit.com/v3/company/%d/purchase/%d',
-				self::$options['auth']['realmId'], $payload['Id'] ) );
+			$request_url = esc_url_raw( sprintf( '%s/v3/company/%d/purchase/%d',
+				self::$api_base_url, self::$options['auth']['realmId'], $payload['Id'] ) );
+
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
 			$response = wp_remote_get( $request_url, array(
 				'headers' => array(
@@ -161,8 +168,8 @@ class WordCamp_QBO {
 		}
 
 		$payload = json_encode( $payload );
-		$request_url = esc_url_raw( sprintf( 'https://quickbooks.api.intuit.com/v3/company/%d/purchase',
-			self::$options['auth']['realmId'] ) );
+		$request_url = esc_url_raw( sprintf( '%s/v3/company/%d/purchase',
+			self::$api_base_url, self::$options['auth']['realmId'] ) );
 
 		$oauth_header = $oauth->get_oauth_header( 'POST', $request_url, $payload );
 		$response = wp_remote_post( $request_url, array(
@@ -221,8 +228,8 @@ class WordCamp_QBO {
 			'minorversion' => 4,
 		);
 
-		$request_url = esc_url_raw( sprintf( 'https://quickbooks.api.intuit.com/v3/company/%d/query',
-			self::$options['auth']['realmId'] ) );
+		$request_url = esc_url_raw( sprintf( '%s/v3/company/%d/query',
+			self::$api_base_url, self::$options['auth']['realmId'] ) );
 
 		$oauth_header = $oauth->get_oauth_header( 'GET', $request_url, $args );
 		$response = wp_remote_get( esc_url_raw( add_query_arg( $args, $request_url ) ), array( 'headers' => array(
@@ -341,8 +348,8 @@ class WordCamp_QBO {
 			self::$options['auth'] = $data;
 
 			$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
-			$request_url = sprintf( 'https://quickbooks.api.intuit.com/v3/company/%d/companyinfo/%d',
-				self::$options['auth']['realmId'], self::$options['auth']['realmId'] );
+			$request_url = sprintf( '%s/v3/company/%d/companyinfo/%d',
+				self::$api_base_url, self::$options['auth']['realmId'], self::$options['auth']['realmId'] );
 
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
 			$response = wp_remote_get( $request_url, array( 'headers' => array(
