@@ -598,13 +598,14 @@ body.author .theme-browser .theme .theme-author  {
 }
 
 .rating span[class]:before {
-	color: #e6b800;
+	color: #ffb900;
 	content: "\f154";
 	display: inline-block;
 	-webkit-font-smoothing: antialiased;
 	font: normal 20px/1 'dashicons';
 	vertical-align: top;
 }
+
 /* Half stars */
 .rating-10 span.one:before,
 .rating-30 span.two:before,
@@ -613,6 +614,17 @@ body.author .theme-browser .theme .theme-author  {
 .rating-90 span.five:before {
 	content: "\f459";
 }
+
+.rtl .rating-10 span.one:before,
+.rtl .rating-30 span.two:before,
+.rtl .rating-50 span.three:before,
+.rtl .rating-70 span.four:before,
+.rtl .rating-90 span.five:before {
+	-webkit-transform: rotateY(180deg);
+	-ms-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+}
+
 /* Full stars */
 .rating-20 span.one:before {
 	content: "\f155";
@@ -678,7 +690,7 @@ body.author .theme-browser .theme .theme-author  {
 .theme-ratings .counter-label {
 	float: right;
 	margin-left: 5px;
-	min-width: 40px;
+	min-width: 58px;
 }
 .theme-ratings .counter-back,
 .theme-ratings .counter-bar {
@@ -687,12 +699,12 @@ body.author .theme-browser .theme .theme-author  {
 }
 .theme-ratings .counter-back {
 	background-color: #ececec;
-	width: 70%;
-	width: -webkit-calc(100% - 60px);
-	width: calc(100% - 70px);
+	width: 64%;
+	width: -webkit-calc(100% - 88px);
+	width: calc(100% - 88px);
 }
 .theme-ratings .counter-bar {
-	background-color: #fddb5a;
+	background-color: #ffc733;
 }
 .theme-ratings .counter-count {
 	float: right;
