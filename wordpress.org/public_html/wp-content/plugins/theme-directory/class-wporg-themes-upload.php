@@ -336,7 +336,11 @@ class WPORG_Themes_Upload {
 		$tmp_dir   = escapeshellarg( $this->tmp_dir );
 
 		// Unzip it into the theme directory.
-		exec( escapeshellcmd( "{$unzip} {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
+		exec( escapeshellcmd( "{$unzip} -DD {$zip_file} -d {$tmp_dir}/{$base_name}" ) );
+
+		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files
+		exec( escapeshellcmd( "chmod -R 755 {$tmp_dir}/{$base_name}" ) );
+		exec( escapeshellcmd( "find {$tmp_dir}/{$base_name} -type f -print0" ) . ' | xargs -I% -0 chmod 644 %' );
 	}
 
 	/**
