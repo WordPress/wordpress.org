@@ -16,7 +16,7 @@
 		foreach ( $release_statuses as $status => $nooped_plural ) {
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#" class="i18n-filter" data-filter="%s">%s</a>', $status, $string );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
 		}
 	?>
 	</p>
@@ -37,7 +37,7 @@
 		foreach ( $translation_statuses as $status => $nooped_plural ) {
 			$string = translate_nooped_plural( $nooped_plural, $locale_data['status_counts'][ $status ] );
 			$string = sprintf( $string, sprintf( '<strong class="i18n-label %s">%s</strong>', $status, $locale_data['status_counts'][ $status ] ) );
-			printf( ' <a href="#" class="i18n-filter" data-filter="%s">%s</a>', $status, $string );
+			printf( ' <a href="#%s" class="i18n-filter" data-filter="%s">%s</a>', $status, $status, $string );
 		}
 	?>
 	</p>
