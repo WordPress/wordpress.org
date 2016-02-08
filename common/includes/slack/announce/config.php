@@ -60,6 +60,10 @@ function get_whitelist() {
 			'eric',
 			'tollmanz',
 		),
+		'core-images' => array(
+			'joemcgill',
+			'mike',
+		),
 		'core-multisite' => array(
 			'jeremyfelt',
 		),
@@ -88,10 +92,6 @@ function get_whitelist() {
 		),
 		'feature-oembed' => array(
 			'swissspidy',
-		),
-		'feature-respimg' => array(
-			'joemcgill',
-			'mike',
 		),
 		'feature-shinyupdates' => array(
 			'obenland',
