@@ -398,7 +398,7 @@ class Payment_Requests_Dashboard {
 
 		$ach_options = apply_filters( 'wcb_payment_req_ach_options', array(
 			'bank-routing-number' => '', // Immediate Destination (bank routing number)
-			'company-id'          => '', // NNNNNNNNN (Federal IRS Number)
+			'company-id'          => '', // Company ID
 			'financial-inst'      => '', // Originating Financial Institution
 		) );
 
@@ -412,11 +412,11 @@ class Payment_Requests_Dashboard {
 		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10, '0', STR_PAD_LEFT ); // Immediate Origin (TIN)
 		echo date( 'ymd' ); // Transmission Date
 		echo date( 'Hi' ); // Transmission Time
-		echo '1'; // File ID Modifier
+		echo 'A'; // File ID Modifier
 		echo '094'; // Record Size
 		echo '10'; // Blocking Factor
 		echo '1'; // Format Code
-		echo str_pad( 'BANK ONE', 23 ); // Destination
+		echo str_pad( 'JPMORGANCHASE', 23 ); // Destination
 		echo str_pad( 'WCEXPORT', 23 ); // Origin
 		echo str_pad( '', 8 ); // Reference Code (optional)
 		echo PHP_EOL;
@@ -427,11 +427,25 @@ class Payment_Requests_Dashboard {
 		echo '200'; // Service Type Code
 		echo 'WordCamp Communi'; // Company Name
 		echo str_pad( '', 20 ); // Blanks
-		echo '1' . str_pad( substr( $ach_options['company-id'], 0, 9 ), 9 ); // Company Identification (Federal IRS Number)
-		echo 'PPD'; // Standard Entry Class
+		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company Identification
+
+		// Get the first one in the set.
+		// @todo Split batches by account type.
+		foreach ( $args['request_indexes'] as $index ) {
+			switch_to_blog( $index->blog_id );
+			$post = get_post( $index->post_id );
+			$account_type = get_post_meta( $post->ID, '_camppayments_ach_account_type', true );
+			restore_current_blog();
+
+			break;
+		}
+
+		$entry_class = $account_type == 'Personal' ? 'PPD' : 'CCD';
+		echo $entry_class; // Standard Entry Class
+
 		echo 'Vendor Pay'; // Entry Description
-		echo date( 'ymd' ); // Company Description Date
-		echo date( 'ymd' ); // Effective Entry Date
+		echo date( 'ymd', strtotime( 'today + 1 weekday' ) ); // Company Description Date
+		echo date( 'ymd', strtotime( 'today + 1 weekday' ) ); // Effective Entry Date
 		echo str_pad( '', 3 ); // Blanks
 		echo '1'; // Originator Status Code
 		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
@@ -454,7 +468,9 @@ class Payment_Requests_Dashboard {
 			// Entry Detail Record
 
 			echo '6'; // Record Type Code
-			echo 'DDA'; // Transaction Code
+
+			$transaction_code = $account_type == 'Personal' ? '27' : '22';
+			echo $transaction_code; // Transaction Code
 
 			// Transit/Routing Number of Destination Bank + Check digit
 			$routing_number = get_post_meta( $post->ID, '_camppayments_ach_routing_number', true );
@@ -474,7 +490,7 @@ class Payment_Requests_Dashboard {
 			// Amount
 			$amount = round( floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) ), 2 );
 			$total += $amount;
-			$amount = str_pad( $amount, 10, '0', STR_PAD_LEFT );
+			$amount = str_pad( number_format( $amount, 2, '', '' ), 10, '0', STR_PAD_LEFT );
 			echo $amount;
 
 			// Individual Identification Number
@@ -502,9 +518,9 @@ class Payment_Requests_Dashboard {
 		echo '200'; // Service Class Code
 		echo str_pad( $count, 6, '0', STR_PAD_LEFT ); // Entry/Addenda Count
 		echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
-		echo str_pad( $total, 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
+		echo str_pad( number_format( $total, 2, '', '' ), 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
 		echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
-		echo '1' . str_pad( substr( $ach_options['company-id'], 0, 9 ), 9 ); // Company ID
+		echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company ID
 		echo str_pad( '', 25 ); // Blanks
 		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
 		echo '0000001'; // Batch Number
@@ -518,7 +534,7 @@ class Payment_Requests_Dashboard {
 		echo str_pad( ceil( $count / 10 ), 6, '0', STR_PAD_LEFT ); // Block Count
 		echo str_pad( $count, 8, '0', STR_PAD_LEFT ); // Entry/Addenda Count
 		echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
-		echo str_pad( $total, 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
+		echo str_pad( number_format( $total, 2, '', '' ), 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
 		echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
 		echo str_pad( '', 39 ); // Blanks
 		echo PHP_EOL;
