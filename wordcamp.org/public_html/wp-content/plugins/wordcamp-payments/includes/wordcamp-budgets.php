@@ -404,6 +404,14 @@ class WordCamp_Budgets {
 					$safe_value = sanitize_text_field( $unsafe_value );
 					break;
 
+				case 'ach_account_type':
+					if ( in_array( $unsafe_value, array( 'Personal', 'Company' ) ) ) {
+						$safe_value = $unsafe_value;
+					} else {
+						$safe_value = false;
+					}
+					break;
+
 				case 'payment_method':
 					if ( in_array( $unsafe_value, self::get_valid_payment_methods(), true ) ) {
 						$safe_value = $unsafe_value;

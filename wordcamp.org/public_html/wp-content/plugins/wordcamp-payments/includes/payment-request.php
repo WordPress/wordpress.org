@@ -442,6 +442,10 @@ class WCP_Payment_Request {
 				$value = $general_notes;
 				break;
 
+			case 'ach_account_type':
+				$value = array( 'Personal', 'Company' );
+				break;
+
 			default:
 				$value = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true );
 				break;
