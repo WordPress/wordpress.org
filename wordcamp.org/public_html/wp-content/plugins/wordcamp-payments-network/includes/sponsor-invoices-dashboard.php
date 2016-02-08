@@ -348,15 +348,17 @@ function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 	$headers      = array( 'Reply-To: support@wordcamp.org' );
 
 	if ( 'approved' === $new_status ) {
-		$status_message = "has been approved by a WordCamp deputy, and sent to $sponsor_name. You will receive another notification when they have paid the invoice";
+		$sponsor_id     = get_post_meta( $invoice_id, '_wcbsi_sponsor_id',            true );
+		$sponsor_email  = get_post_meta( $sponsor_id, '_wcpt_sponsor_email_address',  true );
+		$status_message = "has been sent to $sponsor_name via $sponsor_email. You will receive another notification when they have paid the invoice.";
 	} elseif ( 'paid' === $new_status ) {
-		$status_message = "has been paid by $sponsor_name and is now complete";
+		$status_message = "has been paid by $sponsor_name. Go ahead and publish them to your website!";
 	}
 
 	$message = "
-		The invoice for `{$invoice->post_title}` $status_message.
+		The invoice for `{$invoice->post_title}` $status_message
 
-		You can view the invoice and its status at:
+		You can view the invoice and its status any time at:
 
 		$invoice_url
 
