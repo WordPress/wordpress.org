@@ -5,6 +5,7 @@
 	</table>
 
 	<table id="payment_method_direct_deposit_fields" class="form-table payment_method_fields <?php echo 'Direct Deposit' == $selected_payment_method ? 'active' : 'hidden'; ?>">
+		<?php $this->render_text_input( $post, 'Bank Name', 'ach_bank_name' ); ?>
 		<?php $this->render_radio_input( $post, 'Account Type', 'ach_account_type' ); ?>
 		<?php $this->render_text_input( $post, 'Routing Number', 'ach_routing_number' ); ?>
 		<?php $this->render_text_input( $post, 'Account Number', 'ach_account_number' ); ?>

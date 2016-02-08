@@ -398,6 +398,7 @@ class WordCamp_Budgets {
 				case 'beneficiary_country':
 				case 'payable_to':
 
+				case 'ach_bank_name':
 				case 'ach_routing_number':
 				case 'ach_account_number':
 				case 'ach_account_holder_name':
@@ -465,6 +466,7 @@ class WordCamp_Budgets {
 			'beneficiary_zip_code',
 			'beneficiary_country',
 			'beneficiary_country_iso3166',
+			'ach_bank_name',
 			'ach_routing_number',
 			'ach_account_number',
 			'ach_account_holder_name',
