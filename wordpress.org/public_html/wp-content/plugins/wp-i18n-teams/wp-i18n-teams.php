@@ -149,6 +149,7 @@ class WP_I18n_Teams {
 		$locale_data = array();
 
 		$statuses = array(
+			'no-wp-project'      => 0,
 			'no-site'            => 0,
 			'no-releases'        => 0,
 			'latest'             => 0,
@@ -173,10 +174,12 @@ class WP_I18n_Teams {
 			$release_status = self::get_locale_release_status( $subdomain, $latest_release );
 			$statuses[ $release_status ]++;
 
-			$translation_status = '';
 			if ( isset ( $translation_data[ $locale->wp_locale ] ) ) {
 				$translation_status = self::get_locale_translation_status( $translation_data[ $locale->wp_locale ] );
 				$statuses[ $translation_status ]++;
+			} else {
+				$translation_status = 'no-wp-project';
+				$statuses[ 'no-wp-project' ]++;
 			}
 
 			$locale_data[ $locale->wp_locale ] = array(

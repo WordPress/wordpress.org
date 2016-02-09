@@ -32,6 +32,7 @@
 			'translated-90' => _n_noop( '%s locale has more than 90%%.', '%s locales have more than 90%%.', 'wporg' ),
 			'translated-50' => _n_noop( '%s locale has more than 50%%.', '%s locales have more than 50%%.', 'wporg' ),
 			'translated-50-less' => _n_noop( '%s locale has less than 50%%.', '%s locales have less than 50%%.', 'wporg' ),
+			'no-wp-project' => _n_noop( '%s locale doesn&#8217;t have a WP project.', '%s locales don&#8127;t have a WP project.', 'wporg' ),
 		);
 
 		foreach ( $translation_statuses as $status => $nooped_plural ) {
@@ -87,9 +88,13 @@
 						?>
 					</td>
 					<td data-column-title="<?php esc_attr_e( 'GlotPress', 'wporg' ); ?>" class="right no-right-border">
-						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
-							<?php echo ( isset( $percentages[ $locale->wp_locale ] ) ) ? $percentages[ $locale->wp_locale ] . '%' : '&mdash;'; ?>
-						</a>
+						<?php if ( isset( $percentages[ $locale->wp_locale ] ) ) : ?>
+							<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>/default/wp/dev">
+								<?php echo $percentages[ $locale->wp_locale ] . '%'; ?>
+							</a>
+						<?php else : ?>
+							&mdash;
+						<?php endif; ?>
 					</td>
 					<td class="no-left-border nowrap">
 						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
