@@ -17,14 +17,15 @@ class Core extends Trac {
 	 * Start regex matches with # as your delimiter.
 	 */
 	protected $commit_path_filters = array(
-		'wp-content/themes'         => array( '#core-themes' => true, '#core' => false ),
-		'customize'                 => '#core-customize',
-		'editor-expand.js'          => '#core-editor',
-		'wp-admin/css/edit.css'     => '#core-editor',
-		'wp-admin/css/editor.css'   => '#core-editor',
-		'press-this.php'            => '#core-pressthis',
-		'#wp-(admin|includes)/ms-#' => '#core-multisite',
-		'wp-admin/network'          => '#core-multisite',
+		'wp-content/themes'                => array( '#core-themes' => true, '#core' => false ),
+		'customize'                        => '#core-customize',
+		'editor-expand.js'                 => '#core-editor',
+		'wp-admin/css/edit.css'            => '#core-editor',
+		'wp-admin/css/editor.css'          => '#core-editor',
+		'press-this.php'                   => '#core-pressthis',
+		'#wp-(admin|includes)/ms-#'        => '#core-multisite',
+		'wp-admin/network'                 => '#core-multisite',
+		'#wp-admin/includes/(ms|network)#' => '#core-multisite',
 	);
 
 	/**
