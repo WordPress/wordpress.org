@@ -573,15 +573,17 @@ function notify_parties_of_new_note( $request, $note ) {
 
 	if ( $note_author->has_cap( 'manage_network' ) ) {
 		$to = \WordCamp_Budgets::get_requester_formatted_email( $request->post_author );
+		$subject_prefix = sprintf( '[%s] ', get_wordcamp_name() );
 	} else {
 		$to = 'support@wordcamp.org';
+		$subject_prefix = '';
 	}
 
 	if ( ! $to ) {
 		return;
 	}
 
-	$subject          = 'New note on ' . sanitize_text_field( $request->post_title );
+	$subject          = sprintf( '%sNew note on `%s`', $subject_prefix, sanitize_text_field( $request->post_title ) );
 	$note_author_name = \WordCamp_Budgets::get_requester_name( $note['author_id'] );
 	$request_url      = admin_url( sprintf( 'post.php?post=%s&action=edit', $request->ID ) );
 	$headers          = array( 'Reply-To: support@wordcamp.org' );
