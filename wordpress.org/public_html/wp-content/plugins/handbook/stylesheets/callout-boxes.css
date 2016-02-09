@@ -1,24 +1,33 @@
 .callout {
-  padding: 15px 40px 15px 46px;
+  padding: 1em 3em 1em 3.7em;
   margin-bottom: 1.5em;
   overflow: auto;
   position: relative;
-}
-.callout .dashicons {
-  position: absolute;
-  font-size: 2em;
-  top: 12px;
-  left: 10px;
+  border-width: 1px 1px 3px 1px;
+  border-style: solid;
 }
 .callout p {
   margin-bottom: 0;
 }
+.callout p ~ p {
+  margin-top: 1em;
+}
+.callout:before {
+  content: "";
+  font-family: "dashicons";
+  position: absolute;
+  font-size: 2em;
+  top: 0.14em;
+  left: 0.5em;
+}
+.callout .screen-reader-text + br {
+  display: none;
+}
 .callout-info {
   background: #e5f5fa;
-  border: 1px solid #00a0d2;
-  border-bottom: 3px solid #00a0d2;
+  border-color: #00a0d2;
 }
-.callout-info .dashicons:before {
+.callout-info:before {
   content: "\f348";
   color: #00a0d2 ;
 }
@@ -27,7 +36,7 @@
   border: 1px solid #64b450;
   border-bottom: 3px solid #64b450;
 }
-.callout-tip .dashicons:before {
+.callout-tip:before {
   content: "\f339";
   color: #64b450;
 }
@@ -36,8 +45,8 @@
   border: 1px solid #ffb900;
   border-bottom: 3px solid #ffb900;
 }
-.callout-alert .dashicons:before {
-  content: "\f109";
+.callout-alert:before {
+  content: "\f227";
   color: #ffb900;
 }
 .callout-tutorial {
@@ -45,7 +54,7 @@
   border: 1px solid #826eb4;
   border-bottom: 3px solid #826eb4;
 }
-.callout-tutorial .dashicons:before {
+.callout-tutorial:before {
   content: "\f308";
   color: #826eb4;
 }
@@ -54,7 +63,7 @@
   border: 1px solid #dc3232;
   border-bottom: 3px solid #dc3232;
 }
-.callout-warning .dashicons:before {
+.callout-warning:before {
   content: "\f153";
   color: #dc3232;
 }

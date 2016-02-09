@@ -130,14 +130,13 @@ class WPorg_Handbook_Callout_Boxes {
 			$class = empty( $class ) ? '' : "callout-{$class}";
 
 			// Message prefix.
-			$prefix = '<strong>' . $this->shortcodes[ $shortcode ] . '</strong>';
+			$prefix = '<span class="screen-reader-text">' . $this->shortcodes[ $shortcode ] . '</span>';
 
 			// Content with prefix.
 			$content = "{$prefix} {$content}";
 
 			// Callout box output.
 			$output .= "<div class='callout {$class}'>";
-			$output .= '<div class="dashicons"></div>'; // Icon holder
 			$output .= apply_filters( 'the_content', $content );
 			$output .= '</div>';
 		}
