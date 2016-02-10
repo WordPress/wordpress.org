@@ -1,6 +1,6 @@
 <?php
 /**
- * W.org login functions and definitions.
+ * WP.org login functions and definitions.
  *
  * @package wporg-login
  */
@@ -45,49 +45,35 @@ add_action( 'init', 'wporg_login_init' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	$css_file = '/stylesheets/login.css'; 
-	wp_deregister_style( 'login' );
-	wp_register_style( 'login', get_stylesheet_directory_uri() . $css_file, array( 'buttons', 'dashicons', 'open-sans' ), filemtime( __DIR__ . $css_file ) );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 1 );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
-/**
- * Log failed logins to Google Analytics.
- */
-$wporg_login_failed_username = '';
-function wporg_login_failed( $errors ) {
-	global $wporg_login_failed_username;
-	$wporg_login_failed_username = ( 'incorrect_password' == $errors->get_error_code() || 'empty_password' == $errors->get_error_code() ) ? esc_attr(wp_unslash($_POST['log'])) : '';
-
-	return $errors;
-}
-add_action( 'wp_login_errors', 'wporg_login_failed', 10, 1 );
 
 /**
- * Add Google Analytics tracking to login pages.
+ * Enqueue scripts and styles.
  */
-function wporg_login_analytics() {
-	global $wporg_login_failed_username;
-	?>
-<script type="text/javascript">
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-52447-1']);
-_gaq.push(['_setDomainName', 'wordpress.org']);
-_gaq.push(['_trackPageview']);
-<?php if ( $wporg_login_failed_username ) { ?>
-	_gaq.push(['_trackEvent', 'user', 'login-failed', '<?php echo $wporg_login_failed_username; ?>']);
-<?php } ?>
-(function() {
-	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
-function recordOutboundLink(link, category, action) {
-	_gaq.push(['_trackEvent', category, action])
-	setTimeout('document.location = "' + link.href + '"', 100);
+function wporg_login_scripts() {
+    $script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+    $suffix       = $script_debug ? '' : '.min';
+ 
+    // Concatenates core scripts when possible.
+    if ( ! $script_debug ) {
+        $GLOBALS['concatenate_scripts'] = true;
+    }
+ 
+    wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
+    wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 1 );
+ 
+    // No emoji support needed.
+    remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+    remove_action( 'wp_print_styles', 'print_emoji_styles' );
+ 
+    // No Jetpack styles needed.
+    add_filter( 'jetpack_implode_frontend_css', '__return_false' );
+ 
+    // No embeds needed.
+    remove_action( 'wp_head','wp_oembed_add_discovery_links' );
+    remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 }
-</script>
-	<?php
-}
-add_action( 'wp_footer',    'wporg_login_analytics' );
-add_action( 'login_footer', 'wporg_login_analytics' );
+add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );

@@ -6,8 +6,6 @@
  */
 ?>
 	</div>
-	<div class="loginfooter">wordpress.org &nbsp; • &nbsp; code is poetry</div>
-</div>
 
 <?php wp_footer(); ?>
 
