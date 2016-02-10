@@ -45,7 +45,7 @@ add_action( 'init', 'wporg_login_init' );
  * Replace cores login CSS with our own.
  */
 function wporg_login_replace_css() {
-	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 1 );
+	wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 2 );
 }
 add_action( 'login_init', 'wporg_login_replace_css' );
 
@@ -63,7 +63,7 @@ function wporg_login_scripts() {
     }
  
     wp_enqueue_style( 'wporg-normalize', get_template_directory_uri() . '/stylesheets/normalize.css', 3 );
-    wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 1 );
+    wp_enqueue_style( 'wporg-login', get_template_directory_uri() . '/stylesheets/login.css', array( 'login', 'dashicons', 'l10n' ), 2 );
  
     // No emoji support needed.
     remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
