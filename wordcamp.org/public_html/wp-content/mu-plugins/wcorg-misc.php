@@ -78,6 +78,7 @@ function wcorg_disable_network_activated_plugins_on_sites( $plugins ) {
 	 */
 	if ( 63 === get_current_blog_id() ) {
 		unset( $plugins['wordcamp-payments/bootstrap.php'] );
+		unset( $plugins['wordcamp-payments-network/bootstrap.php'] );
 	}
 
 	return $plugins;
