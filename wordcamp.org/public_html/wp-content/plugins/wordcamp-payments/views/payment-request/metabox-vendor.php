@@ -9,5 +9,6 @@
 		$this->render_text_input( $post, 'State / Province', 'vendor_state' );
 		$this->render_text_input( $post, 'ZIP / Postal Code', 'vendor_zip_code' );
 		$this->render_text_input( $post, 'Country', 'vendor_country' );
+		$this->render_country_input( $post, 'Country ISO3166', 'vendor_country_iso3166' );
 	?>
 </table>

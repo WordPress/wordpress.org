@@ -9,7 +9,7 @@
 			<option value="">(None)</option>
 			<?php foreach ( $options as $value => $option_label ) : ?>
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $selected ); ?>><?php
-					echo esc_html( $option_label );
+					echo esc_html( $option_label['name'] );
 				?></option>
 			<?php endforeach; ?>
 		</select>
