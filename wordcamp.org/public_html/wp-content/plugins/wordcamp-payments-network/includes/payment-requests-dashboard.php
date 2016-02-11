@@ -277,7 +277,7 @@ class Payment_Requests_Dashboard {
 			return;
 		}
 
-		$type = in_array( $_POST['wcpn_export_type'], array( 'default', 'jpm_wires', 'jpm_ach' ) ) ? $_POST['wcpn_export_type'] : 'default';
+		$type = in_array( $_POST['wcpn_export_type'], array( 'default', 'jpm_wires', 'jpm_ach', 'jpm_checks' ) ) ? $_POST['wcpn_export_type'] : 'default';
 		$mime_type = 'text/csv';
 		$ext = 'csv';
 
@@ -379,6 +379,114 @@ class Payment_Requests_Dashboard {
 		foreach( $args['request_indexes'] as $index ) {
 			fputcsv( $report, self::get_report_row( $index ) );
 		}
+
+		fclose( $report );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Quick Checks via JP Morgan
+	 *
+	 * @param array $args
+	 *
+	 * @return string
+	 */
+	protected static function _generate_payment_report_jpm_checks( $args ) {
+		$args = wp_parse_args( $args, array(
+			'request_indexes' => array(),
+		) );
+
+		$options = apply_filters( 'wcb_payment_req_check_options', array(
+			'pws_customer_id' => '',
+			'account_number'  => '',
+			'contact_email'   => '',
+			'contact_phone'   => '',
+		) );
+
+		$report = fopen( 'php://output', 'w' );
+		ob_start();
+
+		// File Header
+		fputcsv( $report, array( 'FILHDR', 'PWS', $options['pws_customer_id'], date( 'm/d/Y' ), date( 'Hi' ) ) );
+
+		$total = 0;
+		$count = 0;
+
+		foreach ( $args['request_indexes'] as $index ) {
+			switch_to_blog( $index->blog_id );
+			$post = get_post( $index->post_id );
+
+			if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Check' )
+				continue;
+
+			$count++;
+			$amount = round( floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) ), 2 );
+			$total += $amount;
+
+			$payable_to = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_payable_to', true ) );
+			$countries = WordCamp_Budgets::get_valid_countries_iso3166();
+			$vendor_country_code = get_post_meta( $post->ID, '_camppayments_vendor_country_iso3166', true );
+			if ( ! empty( $countries[ $vendor_country_code ] ) ) {
+				$vendor_country_code = $countries[ $vendor_country_code ]['alpha3'];
+			}
+
+			$description = sanitize_text_field( get_post_meta( $post->ID, '_camppayments_description', true ) );
+			$invoice_number = get_post_meta( $post->ID, '_camppayments_invoice_number', true );
+			if ( ! empty( $invoice_number ) ) {
+				$description = sprintf( 'Invoice %s. %s', $invoice_number, $description );
+			}
+
+			// Payment Header
+			fputcsv( $report, array(
+				'PMTHDR',
+				'FEDEXOVN',
+				'CHECKS',
+				date( 'm/d/Y' ),
+				number_format( $amount, 2, '.', '' ),
+				$options['account_number'],
+				$count, // must be globally unique?
+				$options['contact_email'],
+				$options['contact_phone'],
+			) );
+
+			// Payee Name Record
+			fputcsv( $report, array(
+				'PAYENM',
+				substr( $payable_to, 0, 35 ),
+				'',
+				$count, // vendor number. should be unique?
+			) );
+
+			// Payee Address Record
+			fputcsv( $report, array(
+				'PYEADD',
+				substr( get_post_meta( $post->ID, '_camppayments_vendor_street_address', true ), 0, 35 ),
+				'',
+			) );
+
+			// Additional Payee Address Record
+			fputcsv( $report, array( 'ADDPYE', '', '' ) );
+
+			// Payee Postal Record
+			fputcsv( $report, array(
+				'PYEPOS',
+				substr( get_post_meta( $post->ID, '_camppayments_vendor_city', true ), 0, 35 ),
+				substr( get_post_meta( $post->ID, '_camppayments_vendor_state', true ), 0, 35 ),
+				substr( get_post_meta( $post->ID, '_camppayments_vendor_zip_code', true ), 0, 10 ),
+				substr( $vendor_country_code, 0, 3 ),
+			) );
+
+			// Payment Description
+			fputcsv( $report, array(
+				'PYTDES',
+				substr( $description, 0, 122 ),
+			) );
+
+			restore_current_blog();
+		}
+
+		// File Trailer
+		fputcsv( $report, array( 'FILTRL', $count * 6 + 2 ) );
 
 		fclose( $report );
 		return ob_get_clean();
@@ -879,6 +987,7 @@ class Payment_Requests_Dashboard {
 						<option value="default">Default</option>
 						<option value="jpm_wires">JP Morgan Access - Wire Payments</option>
 						<option value="jpm_ach">JP Morgan - NACHA</option>
+						<option value="jpm_checks">JP Morgan - Quick Checks</option>
 					</select>
 				</label>
 
