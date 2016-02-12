@@ -440,7 +440,7 @@ class Payment_Requests_Dashboard {
 			fputcsv( $report, array(
 				'PMTHDR',
 				'FEDEXOVN',
-				'CHECKS',
+				'QKCHECKS',
 				date( 'm/d/Y' ),
 				number_format( $amount, 2, '.', '' ),
 				$options['account_number'],
