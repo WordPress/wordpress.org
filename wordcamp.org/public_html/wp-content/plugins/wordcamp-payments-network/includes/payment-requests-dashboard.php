@@ -868,7 +868,9 @@ class Payment_Requests_Dashboard {
 		fputcsv( $report, array( 'TRAILER', $count, $total ) );
 
 		fclose( $report );
-		return ob_get_clean();
+		$results = ob_get_clean();
+		$results = remove_accents( $results ); // Because why not.
+		return $results;
 	}
 
 	/**
