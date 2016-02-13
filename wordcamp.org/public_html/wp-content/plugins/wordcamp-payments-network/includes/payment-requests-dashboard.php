@@ -869,7 +869,9 @@ class Payment_Requests_Dashboard {
 
 		fclose( $report );
 		$results = ob_get_clean();
-		$results = remove_accents( $results ); // Because why not.
+
+		// JPM chokes on accents and non-latin characters.
+		$results = remove_accents( $results );
 		return $results;
 	}
 
