@@ -36,7 +36,7 @@ get_header();
 				<div class="issuelink">
 					<p><?php _e("We think the issue you're reporting is on this page:", 'wporg'); ?></p>
 					<input id="issue_link" name="issue_link" type="text" autocomplete="off"
-						value="<?php esc_attr_e(get_issue_location_url()); ?>" />
+						value="<?php echo esc_url( get_issue_location_url() ); ?>" />
 					<p class="right"><?php _e("If this page isn't the right one, please correct it.", 'wporg'); ?></p>
 				</div>
 				<div class="issuetype">
