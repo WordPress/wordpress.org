@@ -5,7 +5,7 @@ if ( is_front_page() && ( ! get_query_var( 'browse' ) || 'featured' == get_query
 			/* translators: 1: Plugins count 2: Download count */
 			'<p class="intro">' . __( 'Plugins extend and expand the functionality of WordPress. %1$s plugins with %2$s total downloads are at your fingertips.', 'wporg-plugins' ) . '</p>',
 			'<strong>' . number_format_i18n( wp_count_posts( 'plugin' )->publish ) . '</strong>',
-			'<strong>' . number_format_i18n( Plugin_Directory_Template_Helpers::get_total_downloads() ) . '</strong>'
+			'<strong>' . number_format_i18n( WPorg_Plugin_Directory_Template::get_total_downloads() ) . '</strong>'
 	);
 }
 

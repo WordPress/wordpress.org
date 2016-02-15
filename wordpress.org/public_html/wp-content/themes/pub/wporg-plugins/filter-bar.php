@@ -15,8 +15,9 @@
 			</ul>
 
 			<form class="search-form search-plugins" method="get" action="<?php echo home_url('/'); ?>">
-					<label><span class="screen-reader-text"><?php _e( 'Search Plugins', 'wporg-plugins' ); ?></span>
-					<input type="search" name="s" value="<?php echo esc_attr( get_query_var('s') ); ?>" class="wp-filter-search" placeholder="<?php esc_attr_e( 'Search plugins...', 'wporg-plugins' ); ?>">
+				<label>
+					<span class="screen-reader-text"><?php _e( 'Search Plugins', 'wporg-plugins' ); ?></span>
+					<input type="search" name="s" value="<?php echo esc_attr( get_query_var( 's' ) ); ?>" class="wp-filter-search" placeholder="<?php esc_attr_e( 'Search plugins...', 'wporg-plugins' ); ?>">
 				</label>
 				<input type="submit" name="" id="search-submit" class="button screen-reader-text" value="<?php esc_attr_e( 'Search Plugins', 'wporg-plugins' ); ?>">
 			</form>
