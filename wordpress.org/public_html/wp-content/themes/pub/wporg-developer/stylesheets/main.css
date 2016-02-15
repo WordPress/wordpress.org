@@ -1437,14 +1437,14 @@ input {
 .devhub-wrap .has-sidebar .widget-area .widget {
   width: 100%;
 }
-.devhub-wrap nav.post-navigation .nav-links a {
+.devhub-wrap nav.handbook-navigation .nav-links a {
   width: 49%;
   display: inline-block;
 }
-.devhub-wrap nav.post-navigation .nav-links a[rel="prev"] {
+.devhub-wrap nav.handbook-navigation .nav-links a[rel="prev"] {
   text-align: left;
 }
-.devhub-wrap nav.post-navigation .nav-links a[rel="next"] {
+.devhub-wrap nav.handbook-navigation .nav-links a[rel="next"] {
   text-align: right;
   float: right;
 }
