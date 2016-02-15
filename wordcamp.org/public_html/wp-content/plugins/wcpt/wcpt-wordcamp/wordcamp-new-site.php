@@ -105,20 +105,10 @@ class WordCamp_New_Site {
 		}
 		$path = isset( $url['path'] ) ? $url['path'] : '';
 
-		$current_blog_id_before_new_blog = get_current_blog_id();
-
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
 		$site_meta         = array( 'public' => 1 );
 		$this->new_site_id = wpmu_create_blog( $url['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
-
-		/*
-		 * Work around for https://github.com/Automattic/jetpack/issues/2280
-		 * @todo - remove this after that is fixed
-		 */
-		if ( get_current_blog_id() != $current_blog_id_before_new_blog ) {
-			restore_current_blog();
-		}
 
 		if ( is_int( $this->new_site_id ) ) {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
