@@ -251,10 +251,23 @@ function render_status_metabox( $post ) {
 
 	/*
 	 * We can't use current_user_can( 'edit_post', N ) in this case, because the restriction only applies when
-	 * submitting the edit form, not when viewing the post. So, instead, we simulate get the same result in a
-	 * different way.
+	 * submitting the edit form, not when viewing the post. We also want to allow editing by plugins, but not
+	 * always through the UI. So, instead, we simulate get the same result in a different way.
+	 *
+	 * Network admins can edit submitted invoices in order to correct them before they're sent to QuickBooks, but
+	 * not even network admins can edit them once they've been created in QuickBooks, because then our copy of the
+	 * invoice would no longer match QuickBooks.
+	 *
+	 * This intentionally only prevents editing through the UI; we still want plugins to be able to edit the
+	 * invoice, so that the status can be updated to paid, etc.
 	 */
-	$current_user_can_edit_request = in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) || current_user_can( 'manage_network' );
+	$allowed_edit_statuses = array( 'auto-draft', 'draft' );
+
+	if ( current_user_can( 'manage_network' ) ) {
+		$allowed_edit_statuses[] = 'wcbsi_submitted';
+	}
+
+	$current_user_can_edit_request = in_array( $post->post_status, $allowed_edit_statuses, true );
 
 	require_once( dirname( __DIR__ ) . '/views/sponsor-invoice/metabox-status.php' );
 }
