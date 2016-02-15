@@ -1700,6 +1700,9 @@ class WordCamp_Post_Types_Plugin {
 			$values['website'] = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
 			// TODO: maybe only allows links to home page, depending on outcome of http://make.wordpress.org/community/2013/12/31/irs-rules-for-corporate-sponsorship-of-wordcamp/
 
+			$values['first_name'] = ucfirst( $values['first_name'] );
+			$values['last_name' ] = ucfirst( $values['last_name' ] );
+
 			foreach( $values as $id => $value ) {
 				if ( empty( $value ) ) {
 					delete_post_meta( $post_id, "_wcpt_sponsor_$id" );
