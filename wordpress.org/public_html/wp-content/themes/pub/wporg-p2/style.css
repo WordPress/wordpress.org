@@ -236,6 +236,23 @@ li.type-handbook h4 {
 	margin-left: 10px;
 }
 
+nav.handbook-navigation {
+	font-size: 16px;
+	margin: 2em 0;
+}
+nav.handbook-navigation .nav-links a {
+	width: 49%;
+	border: 0;
+	display: inline-block;
+}
+nav-handbook-navigation .nav-links a[rel="prev"] {
+	text-align: left;
+}
+nav.handbook-navigation .nav-links a[rel="next"] {
+	text-align: right;
+	float: right;
+}
+
 /* Responsive design for handbooks */
 @media (max-width: 320px) {
 	.post-type-archive-handbook	#main h2,
