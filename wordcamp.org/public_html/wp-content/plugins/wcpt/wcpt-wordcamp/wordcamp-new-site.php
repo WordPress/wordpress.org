@@ -109,7 +109,8 @@ class WordCamp_New_Site {
 
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
-		$this->new_site_id = wpmu_create_blog( $url['host'], $path, 'WordCamp Event', $lead_organizer->ID );
+		$site_meta         = array( 'public' => 1 );
+		$this->new_site_id = wpmu_create_blog( $url['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
 
 		/*
 		 * Work around for https://github.com/Automattic/jetpack/issues/2280
