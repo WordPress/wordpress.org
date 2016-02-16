@@ -20,6 +20,7 @@ class WCP_Payment_Request {
 
 		// Saving posts
 		add_filter( 'wp_insert_post_data',    array( $this, 'update_request_status' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',    array( $this, 'ensure_post_date_gmt_set' ), 10, 2 );
 		add_action( 'save_post',              array( $this, 'save_payment' ), 10, 2 );
 		add_filter( 'map_meta_cap',           array( $this, 'modify_capabilities' ), 10, 4 );
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 3 );
@@ -513,6 +514,26 @@ class WCP_Payment_Request {
 				if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
 					$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
 				}
+			}
+		}
+
+		return $post_data;
+	}
+
+	/**
+	 * Ensure that new posts have the `post_date_gmt` field populated.
+	 *
+	 * Core only handles this for post types that use the `draft` status (see r8636).
+	 *
+	 * @param array $post_data
+	 * @param array $post_data_raw
+	 *
+	 * @return array
+	 */
+	public function ensure_post_date_gmt_set( $post_data, $post_data_raw ) {
+		if ( 'auto-draft' !== $post_data['post_status'] ) {
+			if ( '0000-00-00 00:00:00' === $post_data['post_date_gmt'] ) {
+				$post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
 			}
 		}
 

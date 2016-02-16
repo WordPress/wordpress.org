@@ -143,7 +143,6 @@ class Payment_Requests_Dashboard {
 			'blog_id' => get_current_blog_id(),
 			'post_id' => $request->ID,
 			'created' => get_post_time( 'U', true, $request->ID ),
-				// todo Sometimes this is empty. Core normally catches this (r8636), but misses in our case because we don't use drafts. #1350-meta might have the side-effect of solving this.
 			'paid'    => absint( get_post_meta( $request->ID, '_camppayments_date_vendor_paid', true ) ),
 			'due' => absint( get_post_meta( $request->ID, '_camppayments_due_by', true ) ),
 			'status' => $request->post_status,
