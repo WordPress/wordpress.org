@@ -21,6 +21,32 @@ function wcorg_close_comments_for_post_types( $post_types ) {
 }
 add_filter( 'close_comments_for_post_types', 'wcorg_close_comments_for_post_types' );
 
+/**
+ * Force the `blog_public` option to be a specific value based on the site
+ *
+ * This ensures that normal camp sites are always indexed by search engines, and also
+ * that they receive SSL certificates, because our Let's Encrypt script only installs
+ * certificates for public sites.
+ *
+ * @param string $value
+ *
+ * @return string
+ */
+function wcorg_enforce_public_blog_option( $value ) {
+	$private_sites = array(
+		206,     // testing.wordcamp.org
+	);
+
+	if ( in_array( get_current_blog_id(), $private_sites, true ) ) {
+		$value = '0';
+	} else {
+		$value = '1';
+	}
+
+	return $value;
+}
+add_filter( 'pre_update_option_blog_public', 'wcorg_enforce_public_blog_option' );
+
 /*
  * We want to let organizers use shortcodes inside Text widgets
  */
