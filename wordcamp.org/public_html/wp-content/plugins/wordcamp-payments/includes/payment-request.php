@@ -501,8 +501,15 @@ class WCP_Payment_Request {
 				update_post_meta( $post_data_raw['ID'], '_wcp_incomplete_notes', sanitize_text_field( $post_data_raw['wcp_mark_incomplete_notes'] ) );
 			} else {
 				$previous_status          = $post_data['post_status'];
-				$post_data['post_status'] = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) ) ? 'paid' : 'unpaid';
+				$valid_paid_date          = false !== strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) );
+				// todo realign
 
+				if ( current_user_can( 'manage_network' ) && $valid_paid_date ) {
+					$post_data['post_status'] = 'paid';
+				} else {
+					$post_data['post_status'] = 'unpaid';
+				}
+				
 				if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
 					$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
 				}
