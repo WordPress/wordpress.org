@@ -9,6 +9,7 @@ class WordCamp_QBO {
 	private static $consumer_secret;
 	private static $hmac_key;
 
+	private static $sandbox_mode;
 	private static $account;
 	private static $api_base_url;
 	private static $options;
@@ -34,6 +35,7 @@ class WordCamp_QBO {
 	 * Runs during plugins_loaded.
 	 */
 	public static function plugins_loaded() {
+		self::$sandbox_mode = apply_filters( 'wordcamp_qbo_sandbox_mode', false );
 
 		$init_options = wp_parse_args( apply_filters( 'wordcamp_qbo_options', array() ), array(
 			'app_token' => '',
@@ -53,7 +55,7 @@ class WordCamp_QBO {
 
 		self::$api_base_url = sprintf(
 			'https://%squickbooks.api.intuit.com',
-			apply_filters( 'wordcamp_qbo_sandbox_mode', false ) ? 'sandbox-' : ''
+			 self::$sandbox_mode ? 'sandbox-' : ''
 		);
 
 		self::$account = apply_filters( 'wordcamp_qbo_account', array(
