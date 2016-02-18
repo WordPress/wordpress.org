@@ -83,7 +83,7 @@ class WordCamp_QBO_Client {
 	 *
 	 * @return array Class IDs as keys, names as values.
 	 */
-	private static function _get_classes() {
+	public static function get_classes() {
 		$cache_key = md5( 'wordcamp-qbo-client:classes' );
 		$cache = get_transient( $cache_key );
 
@@ -114,7 +114,7 @@ class WordCamp_QBO_Client {
 		self::load_options();
 
 		$post = get_post();
-		$classes = self::_get_classes();
+		$classes = self::get_classes();
 		$data = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
 
 		$selected_class = self::$options['default-class'];
@@ -152,7 +152,7 @@ class WordCamp_QBO_Client {
 			<label>QuickBooks Class:</label>
 			<select name="wordcamp-qbo-client-class">
 				<option value="">Not Set</option>
-				<?php foreach ( self::_get_classes() as $id => $class ) : ?>
+				<?php foreach ( self::get_classes() as $id => $class ) : ?>
 					<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $id, $selected_class ); ?>><?php echo esc_html( $class ); ?></option>
 				<?php endforeach; ?>
 			</select>
@@ -191,7 +191,7 @@ class WordCamp_QBO_Client {
 			wp_die( 'You need to set a QuickBooks class before you can sync this payment request.' );
 
 		$class = $_POST['wordcamp-qbo-client-class'];
-		if ( ! array_key_exists( $class, self::_get_classes() ) )
+		if ( ! array_key_exists( $class, self::get_classes() ) )
 			wp_die( 'The class you have picked does not exist.' );
 
 		$data = get_post_meta( $post->ID, '_wordcamp-qbo-client-data', true );
