@@ -49,7 +49,7 @@
 						try {
 							if ( response.hasOwnProperty( 'success' ) && true === response.success ) {
 								statusMessage.addClass( 'notice notice-success' );
-								statusMessage.html( _.escape( response.data.message ) );
+								statusMessage.html( _.escape( response.data.success ) );
 							} else {
 								statusMessage.addClass( 'notice notice-error' );
 								statusMessage.html( _.escape( 'ERROR: ' + response.data.error ) );

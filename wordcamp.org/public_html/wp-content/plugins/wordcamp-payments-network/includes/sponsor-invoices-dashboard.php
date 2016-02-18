@@ -4,7 +4,7 @@ namespace WordCamp\Budgets_Dashboard\Sponsor_Invoices;
 
 defined( 'WPINC' ) or die();
 
-const LATEST_DATABASE_VERSION = 1;
+const LATEST_DATABASE_VERSION = 2;
 
 if ( defined( 'DOING_AJAX' ) ) {
 	add_action( 'wp_ajax_wcbdsi_approve_invoice', __NAMESPACE__ . '\handle_approve_invoice_request'       );
@@ -164,6 +164,7 @@ function upgrade_database() {
 		CREATE TABLE $table_name (
 			blog_id       int( 11 )        unsigned NOT NULL default '0',
 			invoice_id    int( 11 )        unsigned NOT NULL default '0',
+			qbo_invoice_id int( 11 )        unsigned NOT NULL default '0',
 			invoice_title varchar( 75 )             NOT NULL default '',
 			status        varchar( 30 )             NOT NULL default '',
 			wordcamp_name varchar( 75 )             NOT NULL default '',
@@ -213,14 +214,26 @@ function handle_approve_invoice_request() {
 		wp_send_json_error( array( 'error' => 'Permission denied.' ) );
 	}
 
+	switch_to_blog( $site_id );
+
 	$quickbooks_result = send_invoice_to_quickbooks( $site_id, $invoice_id );
 
-	if ( 'sent' === $quickbooks_result ) {
+	if ( is_int( $quickbooks_result ) ) {
+		update_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', absint( $quickbooks_result ) );
 		update_invoice_status(           $site_id, $invoice_id, 'approved' );
 		notify_organizer_status_changed( $site_id, $invoice_id, 'approved' );
-		wp_send_json_success( array( 'message' => 'The invoice has been approved.' ) );
+
+		$result = array( 'success' => 'The invoice has been approved and e-mailed to the sponsor.' );
 	} else {
-		wp_send_json_error( array( 'error' => $quickbooks_result ) );
+		$result = array( 'error' => $quickbooks_result );
+	}
+
+	restore_current_blog();
+
+	if ( isset( $result['success'] ) ) {
+		wp_send_json_success( $result );
+	} else {
+		wp_send_json_error( $result );
 	}
 }
 
@@ -230,7 +243,7 @@ function handle_approve_invoice_request() {
  * @param int $site_id
  * @param int $invoice_id
  *
- * @return string
+ * @return int|string
  */
 function send_invoice_to_quickbooks( $site_id, $invoice_id ) {
 	switch_to_blog( $site_id );
@@ -261,7 +274,7 @@ function send_invoice_to_quickbooks( $site_id, $invoice_id ) {
 	*/
 
 	$sent = 'QuickBooks integration is not complete yet.';
-	// todo return 'sent' (string) on success, or an error message string on failure
+	// todo return QBO invoice ID on success, or an error message string on failure
 
 	restore_current_blog();
 
@@ -419,6 +432,7 @@ function update_index_row( $invoice_id, $invoice ) {
 	$index_row = array(
 		'blog_id'       => get_current_blog_id(),
 		'invoice_id'    => $invoice_id,
+		'qbo_invoice_id' => get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', true ),
 		'invoice_title' => $invoice->post_title,
 		'status'        => $invoice->post_status,
 		'wordcamp_name' => get_wordcamp_name(),
@@ -429,7 +443,7 @@ function update_index_row( $invoice_id, $invoice ) {
 		'amount'        => get_post_meta( $invoice_id, '_wcbsi_amount',      true ),
 	);
 
-	$formats = array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%f' );
+	$formats = array( '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%f' );
 
 	$wpdb->replace( get_index_table_name(), $index_row, $formats );
 }
