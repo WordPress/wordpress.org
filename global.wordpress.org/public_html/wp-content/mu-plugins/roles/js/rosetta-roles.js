@@ -142,7 +142,7 @@
 
 			// Find results
 			this.each( function( project ) {
-				var haystack = _.union( project.get( 'name' ), project.get( 'slug' ) );
+				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
 				project.set( 'isVisible', match.test( haystack ) );
 			});
 		},
