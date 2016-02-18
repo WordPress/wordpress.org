@@ -753,6 +753,8 @@ function wporg_themes_get_user_favorites( $user_id = 0 ) {
 
 	$favorites = get_user_meta( $user_id, 'theme_favorites', true );
 
+	sort( $favorites );
+
 	return $favorites ? array_values( $favorites ) : array();
 }
 
