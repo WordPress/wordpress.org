@@ -181,7 +181,7 @@ function prepare_sponsor_data( $sponsor_id = null ) {
 		'street-address1', 'city', 'state', 'zip-code', 'country'
 	);
 
-	if ( $sponsor_id ) {
+	if ( is_numeric( $sponsor_id ) ) {
 		$sponsors = array( get_post( $sponsor_id ) );
 	} else {
 		$sponsors = get_posts( array(
