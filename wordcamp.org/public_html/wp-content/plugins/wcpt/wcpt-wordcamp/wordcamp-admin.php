@@ -825,6 +825,7 @@ function wcpt_metabox( $meta_keys ) {
 	$messages = array(
 		'Telephone'       => 'Required for shipping.',
 		'Mailing Address' => 'Shipping address.',
+		'Physical Address' => 'Please include the city, state/province and country.', // So it can be geocoded correctly for the map
 	);
 
 	foreach ( $meta_keys as $key => $value ) :
