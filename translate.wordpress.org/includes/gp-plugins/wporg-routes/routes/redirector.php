@@ -13,4 +13,8 @@ class GP_WPorg_Route_Redirector extends GP_Route {
 			$this->redirect( "/locale/$path" );
 		}
 	}
+
+	function redirect_index() {
+		$this->redirect( '/' );
+	}
 }

@@ -253,7 +253,7 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 		$status = array( 'current', 'waiting', 'rejected' );
 		$data = [];
 		foreach ( $days as $day ) {
-			$data[ $day ] = array( 'current' => 0, 'waiting' => 0, 'rejected' => 0 );
+			$data[ $day ] = array_fill_keys( $status, 0 );
 			foreach ( $counts as $count ) {
 				if ( $count->day !== $day || ! in_array( $count->status, $status ) ) {
 					continue;

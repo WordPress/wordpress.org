@@ -26,15 +26,17 @@ class GP_WPorg_Routes extends GP_Plugin {
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
-			GP::$router->remove("/languages/$locale");
+			GP::$router->remove( "/languages/$locale" );
 		} else {
 			// Delete default routes.
-			GP::$router->remove("/languages/$locale");
-			GP::$router->remove("/languages/$locale/$path");
+			GP::$router->remove( "/languages/$locale" );
+			GP::$router->remove( "/languages/$locale/$path" );
 
 			// Redirect routes.
 			GP::$router->prepend( '/languages', array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
 			GP::$router->prepend( "/languages/$path", array( 'GP_WPorg_Route_Redirector', 'redirect_languages' ) );
+			GP::$router->prepend( '/projects/wp-plugins', array( 'GP_WPorg_Route_Redirector', 'redirect_index' ) );
+			GP::$router->prepend( '/projects/wp-themes', array( 'GP_WPorg_Route_Redirector', 'redirect_index' ) );
 
 			// Register custom routes.
 			GP::$router->prepend( '/', array( 'GP_WPorg_Route_Index', 'get_locales' ) );

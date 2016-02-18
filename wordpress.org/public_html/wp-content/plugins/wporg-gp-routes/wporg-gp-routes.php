@@ -62,6 +62,8 @@ class WPorg_GP_Routes {
 			// Redirect routes.
 			GP::$router->prepend( '/languages', array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
 			GP::$router->prepend( "/languages/$path", array( 'WPorg_GP_Route_Redirector', 'redirect_languages' ) );
+			GP::$router->prepend( '/projects/wp-plugins', array( 'GP_WPorg_Route_Redirector', 'redirect_index' ) );
+			GP::$router->prepend( '/projects/wp-themes', array( 'GP_WPorg_Route_Redirector', 'redirect_index' ) );
 
 			// Register custom routes.
 			GP::$router->prepend( '/', array( 'WPorg_GP_Route_Index', 'get_locales' ) );
