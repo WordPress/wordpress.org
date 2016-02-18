@@ -365,6 +365,8 @@ function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 		$status_message = "has been sent to $sponsor_name via $sponsor_email. You will receive another notification when they have paid the invoice.";
 	} elseif ( 'paid' === $new_status ) {
 		$status_message = "has been paid by $sponsor_name. Go ahead and publish them to your website!";
+	} else {
+		return;
 	}
 
 	$message = "
