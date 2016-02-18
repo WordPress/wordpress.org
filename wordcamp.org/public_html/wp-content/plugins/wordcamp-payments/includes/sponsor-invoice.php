@@ -282,8 +282,10 @@ function render_sponsor_invoice_metabox( $post ) {
 	wp_nonce_field( 'sponsor_invoice', 'sponsor_invoice_nonce' );
 
 	$available_sponsors   = prepare_sponsor_data();
+	$available_classes    = \WordCamp_QBO_Client::get_classes();
 	$available_currencies = \WordCamp_Budgets::get_currencies();
 	$selected_sponsor_id  = get_post_meta( $post->ID, '_wcbsi_sponsor_id',      true );
+	$selected_class_id    = get_post_meta( $post->ID, '_wcbsi_qbo_class_id',    true );
 	$selected_currency    = get_post_meta( $post->ID, '_wcbsi_currency',        true );
 	$due_date             = get_post_meta( $post->ID, '_wcbsi_due_date',        true );
 	$description          = get_post_meta( $post->ID, '_wcbsi_description',     true );
@@ -336,6 +338,7 @@ function set_invoice_status( $post_data, $post_data_raw ) {
 
 	$required_invoice_fields = array(
 		'_wcbsi_sponsor_id', '_wcbsi_due_date', '_wcbsi_description', '_wcbsi_currency', '_wcbsi_amount',
+		'_wcbsi_qbo_class_id',
 	);
 	$invoice_fields_complete = required_fields_complete( $post_data_raw, $required_invoice_fields );
 
@@ -376,7 +379,7 @@ function save_invoice( $post_id, $post ) {
 	}
 
 	// Sanitize and save the field values
-	$fields = array( 'sponsor_id', 'currency', 'due_date', 'description', 'amount' );
+	$fields = array( 'sponsor_id', 'qbo_class_id', 'currency', 'due_date', 'description', 'amount' );
 
 	foreach( $fields as $field ) {
 		$meta_key = "_wcbsi_$field";

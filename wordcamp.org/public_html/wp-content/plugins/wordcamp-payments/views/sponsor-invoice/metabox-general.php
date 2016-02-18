@@ -43,6 +43,31 @@ defined( 'WPINC' ) or die();
 	</li>
 
 	<li>
+		<label for="_wcbsi_qbo_class_id">
+			<?php _e( 'Community:', 'wordcamporg' ) ?>
+		</label>
+
+		<div class="wcb-form-input-wrapper">
+			<select id="_wcbsi_qbo_class_id" name="_wcbsi_qbo_class_id">
+				<option value="null-select-one">
+					<?php _e( '-- Select a Community --', 'wordcamporg' ); ?>
+				</option>
+
+				<option value="null-separator1"></option>
+
+				<?php foreach ( $available_classes as $class_id => $class ) : ?>
+					<option
+						value="<?php echo esc_attr( $class_id ); ?>"
+						<?php selected( $class_id, $selected_class_id ); ?>
+					>
+						<?php echo esc_html( $class ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+	</li>
+	
+	<li>
 		<label for="_wcbsi_due_date">
 			<?php _e( 'Due Date:', 'wordcamporg' ); ?>
 		</label>
