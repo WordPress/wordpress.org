@@ -185,7 +185,7 @@ class Rosetta_Roles {
 	 * Enqueues scripts.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '4', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '5', true );
 	}
 
 	/**
