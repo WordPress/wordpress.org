@@ -369,16 +369,15 @@ function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 		return;
 	}
 
-	$message = "
+	$message = str_replace( "\t", '', "
 		The invoice for `{$invoice->post_title}` $status_message
 
 		You can view the invoice and its status any time at:
 
 		$invoice_url
 
-		If you have any questions, please reply to let us know.
-	";
-	$message = str_replace( "\t", '', $message );
+		If you have any questions, please reply to let us know."
+	);
 
 	wp_mail( $to, $subject, $message, $headers );
 
