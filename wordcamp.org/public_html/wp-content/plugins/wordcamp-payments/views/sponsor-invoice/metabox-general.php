@@ -109,14 +109,4 @@ defined( 'WPINC' ) or die();
 		</div>
 	</li>
 
-	<li>
-		<label for="_wcbsi_invoice_message">
-			<?php _e( 'Message displayed on invoice:', 'wordcamporg' ); ?>
-		</label>
-
-		<textarea rows="2" cols="38" id="_wcbsi_invoice_message" name="_wcbsi_invoice_message" maxlength="75"><?php
-			echo esc_html( $invoice_message );
-		?></textarea>
-	</li>
-
 </ul>

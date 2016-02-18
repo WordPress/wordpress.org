@@ -257,7 +257,6 @@ function send_invoice_to_quickbooks( $site_id, $invoice_id ) {
 		$invoice_meta['_wcbsi_description'][0],
 		$invoice_meta['_wcbsi_currency'][0],
 		$invoice_meta['_wcbsi_amount'][0],
-		$invoice_meta['_wcbsi_invoice_message'][0],
 	) );
 	*/
 

@@ -288,7 +288,6 @@ function render_sponsor_invoice_metabox( $post ) {
 	$due_date             = get_post_meta( $post->ID, '_wcbsi_due_date',        true );
 	$description          = get_post_meta( $post->ID, '_wcbsi_description',     true );
 	$amount               = get_post_meta( $post->ID, '_wcbsi_amount',          true );
-	$invoice_message      = get_post_meta( $post->ID, '_wcbsi_invoice_message', true );
 
 	if ( $due_date ) {
 		$due_date = date( 'Y-m-d', $due_date );
@@ -337,7 +336,6 @@ function set_invoice_status( $post_data, $post_data_raw ) {
 
 	$required_invoice_fields = array(
 		'_wcbsi_sponsor_id', '_wcbsi_due_date', '_wcbsi_description', '_wcbsi_currency', '_wcbsi_amount',
-		'_wcbsi_invoice_message'
 	);
 	$invoice_fields_complete = required_fields_complete( $post_data_raw, $required_invoice_fields );
 
@@ -378,7 +376,7 @@ function save_invoice( $post_id, $post ) {
 	}
 
 	// Sanitize and save the field values
-	$fields = array( 'sponsor_id', 'currency', 'due_date', 'description', 'amount', 'invoice_message' );
+	$fields = array( 'sponsor_id', 'currency', 'due_date', 'description', 'amount' );
 
 	foreach( $fields as $field ) {
 		$meta_key = "_wcbsi_$field";
