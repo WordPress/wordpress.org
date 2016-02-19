@@ -25,8 +25,14 @@ $partials_dir = __DIR__ . '/partials/';
 $partial      = $partials_dir . $screen . '.php';
 
 if ( file_exists( $partial ) ) {
+	if ( ! headers_sent() ) {
+		status_header( 200 );
+	}
 	require_once( $partial );
 } else {
+	if ( ! headers_sent() ) {
+		status_header( 404 );
+	}
 	require_once( $partials_dir . '404.php');
 }
 
