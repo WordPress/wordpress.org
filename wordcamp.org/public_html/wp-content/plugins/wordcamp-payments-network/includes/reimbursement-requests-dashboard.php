@@ -14,6 +14,7 @@ if ( is_network_admin() ) {
 	add_action( 'save_post',    __NAMESPACE__ . '\update_index_row', 11, 2 );   // See note in callback about priority
 	add_action( 'trashed_post', __NAMESPACE__ . '\delete_index_row'        );
 	add_action( 'delete_post',  __NAMESPACE__ . '\delete_index_row'        );
+	add_action( 'draft_wcb_reimbursement', __NAMESPACE__ . '\delete_index_row' );
 }
 
 /**
