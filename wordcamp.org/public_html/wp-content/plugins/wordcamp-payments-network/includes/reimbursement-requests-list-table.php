@@ -79,6 +79,8 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 	 * @param object $index_row
 	 */
 	protected function column_request_title( $index_row ) {
+		$title = empty( $index_row->request_title ) ? '(no title)' : $index_row->request_title;
+
 		$edit_url = get_admin_url(
 			$index_row->blog_id,
 			sprintf( 'post.php?post=%s&action=edit', $index_row->request_id )
@@ -88,7 +90,7 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 		?>
 
 		<a href="<?php echo esc_url( $edit_url ); ?>">
-			<?php echo esc_html( $index_row->request_title ); ?>
+			<?php echo esc_html( $title ); ?>
 		</a>
 
 		<?php

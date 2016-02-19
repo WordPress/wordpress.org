@@ -135,6 +135,7 @@ class Payment_Requests_List_Table extends WP_List_Table {
 	 * Note: runs in a switch_to_blog() context.
 	 */
 	public function column_payment( $request ) {
+		$title          = empty( $request->post_title ) ? '(no title)' : $request->post_title;
 		$edit_post_link = add_query_arg( array( 'post' => $request->ID, 'action' => 'edit' ), admin_url( 'post.php' ) );
 		$actions = array(
 			'view-all' => sprintf( '<a href="%s" target="_blank">View All</a>', esc_url( admin_url( 'edit.php?post_type=wcp_payment_request' ) ) ),
@@ -142,7 +143,7 @@ class Payment_Requests_List_Table extends WP_List_Table {
 
 		return sprintf( '<a href="%s" class="row-title" target="_blank">%s</a>%s',
 			esc_url( $edit_post_link ),
-			esc_html( $request->post_title ),
+			esc_html( $title ),
 			$this->row_actions( $actions )
 		);
 	}
