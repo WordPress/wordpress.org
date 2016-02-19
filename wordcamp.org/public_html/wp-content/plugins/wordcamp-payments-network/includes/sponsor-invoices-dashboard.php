@@ -216,7 +216,7 @@ function handle_approve_invoice_request() {
 
 	switch_to_blog( $site_id );
 
-	$quickbooks_result = send_invoice_to_quickbooks( $site_id, $invoice_id );
+	$quickbooks_result = \WordCamp_QBO_Client::send_invoice_to_quickbooks( $invoice_id );
 
 	if ( is_int( $quickbooks_result ) ) {
 		update_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', absint( $quickbooks_result ) );
@@ -235,50 +235,6 @@ function handle_approve_invoice_request() {
 	} else {
 		wp_send_json_error( $result );
 	}
-}
-
-/**
- * Send an invoice to the sponsor through QuickBooks Online's API
- *
- * @param int $site_id
- * @param int $invoice_id
- *
- * @return int|string
- */
-function send_invoice_to_quickbooks( $site_id, $invoice_id ) {
-	switch_to_blog( $site_id );
-
-	$invoice_meta = get_post_custom( $invoice_id );
-	$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
-
-	/* these are the values needed for the API call. they're guaranteed to exist.
-	wp_send_json_error( array(
-		$sponsor_meta['_wcpt_sponsor_company_name'][0],
-		$sponsor_meta['_wcpt_sponsor_first_name'][0],
-		$sponsor_meta['_wcpt_sponsor_last_name'][0],
-		$sponsor_meta['_wcpt_sponsor_email_address'][0],
-		$sponsor_meta['_wcpt_sponsor_phone_number'][0],
-
-		$sponsor_meta['_wcpt_sponsor_street_address1'][0],
-		$sponsor_meta['_wcpt_sponsor_street_address2'][0],
-		$sponsor_meta['_wcpt_sponsor_city'][0],
-		$sponsor_meta['_wcpt_sponsor_state'][0],
-		$sponsor_meta['_wcpt_sponsor_zip_code'][0],
-		$sponsor_meta['_wcpt_sponsor_country'][0],
-
-		$invoice_meta['_wcbsi_due_date'][0],
-		$invoice_meta['_wcbsi_description'][0],
-		$invoice_meta['_wcbsi_currency'][0],
-		$invoice_meta['_wcbsi_amount'][0],
-	) );
-	*/
-
-	$sent = 'QuickBooks integration is not complete yet.';
-	// todo return QBO invoice ID on success, or an error message string on failure
-
-	restore_current_blog();
-
-	return $sent;
 }
 
 /**

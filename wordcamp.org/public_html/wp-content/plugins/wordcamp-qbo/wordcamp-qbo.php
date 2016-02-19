@@ -83,6 +83,11 @@ class WordCamp_QBO {
 			'methods' => 'GET',
 			'callback' => array( __CLASS__, 'rest_callback_classes' ),
 		) );
+
+		register_rest_route( 'wordcamp-qbo/v1', '/invoice', array(
+			'methods' => 'GET, POST',
+			'callback' => array( __CLASS__, 'rest_callback_invoice' ),
+		) );
 	}
 
 	/**
@@ -260,6 +265,571 @@ class WordCamp_QBO {
 
 		set_transient( $cache_key, $classes, 12 * HOUR_IN_SECONDS );
 		return $classes;
+	}
+
+	/**
+	 * REST: /invoice
+	 *
+	 * Creates a new Invoice in QuickBooks and sends it to the Customer
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return int|WP_Error The invoice ID on success, or a WP_Error on failure
+	 */
+	public static function rest_callback_invoice( $request ) {
+		if ( ! self::_is_valid_request( $request ) ) {
+			return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
+		}
+
+		$invoice_id = self::create_invoice(
+			$request->get_param( 'sponsor'         ),
+			$request->get_param( 'currency_code'   ),
+			$request->get_param( 'qbo_class_id'    ),
+			$request->get_param( 'invoice_title'   ),
+			$request->get_param( 'amount'          ),
+			$request->get_param( 'description'     ),
+			$request->get_param( 'due_date'        ),
+			$request->get_param( 'statement_memo'  )
+		);
+
+		if ( is_wp_error( $invoice_id ) ) {
+			return $invoice_id;
+		}
+
+		/*
+		 * @todo Sending invoices automatically is initially disabled so we can manually review them for accuracy
+		$invoice_sent = self::send_invoice( $invoice_id );
+
+		if ( is_wp_error( $invoice_sent ) ) {
+			self::notify_invoice_failed_to_send( $invoice_id, $invoice_sent );
+		}
+		*/
+
+		return $invoice_id;
+	}
+
+	/**
+	 * Creates an Invoice in QuickBooks
+	 *
+	 * @param array  $sponsor
+	 * @param string $currency_code
+	 * @param int    $class_id
+	 * @param string $invoice_title
+	 * @param float  $amount
+	 * @param string $description
+	 * @param string $due_date
+	 * @param string $statement_memo
+	 *
+	 * @return int|WP_Error Invoice ID on success; error on failure
+	 */
+	protected static function create_invoice( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $due_date, $statement_memo ) {
+		$qbo_request = self::build_qbo_create_invoice_request(
+			$sponsor,
+			$currency_code,
+			$class_id,
+			$invoice_title,
+			$amount,
+			$description,
+			$due_date,
+			$sponsor['email-address'],
+			$statement_memo
+		);
+
+		if ( is_wp_error( $qbo_request ) ) {
+			return $qbo_request;
+		}
+
+		$response = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( isset( $body['Invoice']['Id'] ) ) {
+				$result = absint( $body['Invoice']['Id'] );
+			} else {
+				$result = new WP_Error( 'empty_body', 'Could not decode invoice result.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build the requset to create an invoice in QuickBooks
+	 *
+	 * @param array  $sponsor
+	 * @param string $currency_code
+	 * @param int    $class_id
+	 * @param string $invoice_title
+	 * @param float  $amount
+	 * @param string $description
+	 * @param string $due_date
+	 * @param string $customer_email
+	 * @param string $statement_memo
+	 *
+	 * @return array|WP_Error
+	 */
+	protected static function build_qbo_create_invoice_request( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $due_date, $customer_email, $statement_memo ) {
+		$customer_id = self::probably_get_customer_id( $sponsor, $currency_code );
+
+		if ( is_wp_error( $customer_id ) ) {
+			return $customer_id;
+		}
+
+		$class_id        = sanitize_text_field( $class_id        );
+		$invoice_title   = sanitize_text_field( $invoice_title   );
+		$amount          = floatval(            $amount          );
+		$description     = sanitize_text_field( $description     );
+		$due_date        = sanitize_text_field( $due_date        );
+		$statement_memo  = sanitize_text_field( $statement_memo  );
+
+		/*
+		 * The currency code only needs to be sanitized, not validated, because QBO will reject the invoice if
+		 * an invalid code is passed. We don't have to worry about an invoice being assigned the the home currency
+		 * by accident.
+		 */
+		$currency_code = sanitize_text_field( $currency_code );
+
+		/*
+		 * QBO sandboxes will send invoices to whatever e-mail address you assign them, rather than sending them
+		 * to the sandbox owner. So to avoid sending sandbox e-mails to real sponsor addresses, we use a fake
+		 * address instead.
+		 */
+		if ( self::$sandbox_mode ) {
+			$customer_email = 'jane.doe@example.org';
+		} else {
+			$customer_email = is_email( $customer_email );
+		}
+
+		foreach ( array( 'amount', 'due_date', 'customer_id', 'customer_email' ) as $field ) {
+			if ( empty( $$field ) ) {
+				return new WP_Error( 'required_field_empty', "$field cannot be empty." );
+			}
+		}
+
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$payment_instructions = str_replace( "\t", '', "
+			Please remit checks to: WordPress Community Support, PBC, 3426 SE Kathryn Ct, Milwaukie, OR 97222
+
+			For payments via ACH or international wire transfers:
+
+			Bank Name: JPMorgan Chase Bank, N.A.
+			Bank Address: 4 New York Plaza, Floor 15, New York, NY 10004, USA
+			SWIFT/BIC: CHASUS33
+			Bank Routing & Transit Number: 021000021
+			Account Number: 791828879
+
+			To pay via credit card: Please send the payment via PayPal to sponsor@wordcamp.org. An additional 3% on the payment to cover PayPal fees is highly appreciated."
+		);
+
+		$payload = array(
+			'PrivateNote' => $statement_memo,
+
+			'Line' => array(
+				array(
+					'Amount'      => $amount,
+					'Description' => $invoice_title,
+					'DetailType'  => 'SalesItemLineDetail',
+
+					'SalesItemLineDetail' => array(
+						'ItemRef' => array(
+							'value' => '20', // Sponsorship
+						),
+
+						'ClassRef' => array(
+							'value' => $class_id,
+						),
+
+						'UnitPrice' => $amount,
+						'Qty'       => 1,
+					)
+				)
+			),
+
+			'CustomerRef' => array(
+				'value' => $customer_id,
+			),
+
+			// Note: the limit for this is 1,000 characters
+			'CustomerMemo' => array(
+				'value' => sprintf( "%s\n%s", $description, $payment_instructions ),
+			),
+
+			'SalesTermRef' => array(
+				'value' => 1, // Due on receipt
+			),
+
+			'DueDate' => $due_date,
+
+			'BillEmail' => array(
+				'Address' => $customer_email,
+			),
+		);
+
+		/*
+		 * QuickBooks doesn't have a CustomerCurrency row for the home currency, so a CurrencyRef is only used
+		 * for foreign currencies.
+		 *
+		 * QBO will automatically activate a valid currency for our Company when we create an invoice using it
+		 * for the first time, so we don't need any code to automatically activate them.
+		 */
+		if ( 'USD' != $currency_code ) {
+			$payload['CurrencyRef'] = array(
+				'value' => $currency_code,
+			);
+		}
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/invoice',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] )
+		);
+
+		$payload = wp_json_encode( $payload );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url, $payload ),
+				'Accept'        => 'application/json',
+				'Content-Type'  => 'application/json',
+			),
+			'body' => $payload,
+		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args
+		);
+	}
+
+	/**
+	 * Email a QuickBooks invoice to the Customer
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return bool|WP_Error true on success; WP_Error on failure
+	 */
+	protected static function send_invoice( $invoice_id ) {
+		$qbo_request = self::build_qbo_send_invoice_request( $invoice_id );
+		$response    = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( isset( $body['Invoice']['EmailStatus'] ) && 'EmailSent' === $body['Invoice']['EmailStatus'] ) {
+				$result = true;
+			} else {
+				$result = new WP_Error( 'empty_body', 'Could not decode invoice result.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build a request to send an Invoice via QuickBook's API
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return array
+	 */
+	protected static function build_qbo_send_invoice_request( $invoice_id ) {
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/invoice/%s/send',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] ),
+			rawurlencode( absint( $invoice_id ) )
+		);
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url ),
+				'Accept'        => 'application/json',
+				'Content-Type'  => 'application/octet-stream',
+			),
+			'body' => '',
+		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
+	 * Notify Central that an invoice was created but couldn't be sent to the sponsor
+	 *
+	 * @param int      $invoice_id
+	 * @param WP_Error $error
+	 *
+	 * @return bool
+	 */
+	protected static function notify_invoice_failed_to_send( $invoice_id, $error ) {
+		$message = sprintf( "
+			QuickBooks invoice $invoice_id was created, but an error occurred while trying to send it to the sponsor.
+
+			This may be an indication of a bug on WordCamp.org, so please ask your friendly neighborhood developers to investigate.
+
+			The invoice will probably need to be sent manually in QuickBooks, but let the developers investigate first, and then go from there.
+
+			Debugging information for the developers:
+
+			%s",
+			print_r( $error, true )
+		);
+		$message = str_replace( "\t", '', $message );
+
+		return wp_mail( 'support@wordcamp.org', "QuickBooks invoice $invoice_id failed to send", $message );
+	}
+
+	/**
+	 * Get a Customer ID, either by finding an existing one, or creating a new one
+	 *
+	 * @param string $sponsor
+	 * @param string $currency_code
+	 *
+	 * @return int|WP_Error The customer ID if success; a WP_Error if failure
+	 */
+	protected static function probably_get_customer_id( $sponsor, $currency_code ) {
+		$customer_id = self::get_customer( $sponsor['company-name'], $currency_code );
+
+		if ( is_wp_error( $customer_id ) || ! $customer_id ) {
+			$customer_id = self::create_customer( $sponsor, $currency_code );
+		}
+
+		return $customer_id;
+	}
+
+	/**
+	 * Fetch a Customer record from QBO
+	 *
+	 * @param string $customer_name
+	 * @param string $currency_code
+	 *
+	 * @return int|false|WP_Error A customer ID as integer, if one was found; false if no match was found; a WP_Error if an error occurred.
+	 */
+	protected static function get_customer( $customer_name, $currency_code ) {
+		$qbo_request = self::build_qbo_get_customer_request( $customer_name );
+
+		if ( is_wp_error( $qbo_request ) ) {
+			return $qbo_request;
+		}
+
+		$response = wp_remote_get( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( isset( $body['QueryResponse']['Customer'][0]['Id'] ) ) {
+				$result = self::pluck_customer_id_by_currency( $body['QueryResponse']['Customer'], $currency_code );
+			} elseif ( isset( $body['QueryResponse'] ) && 0 === count( $body['QueryResponse'] ) ) {
+				$result = false;
+			} else {
+				$result = new WP_Error( 'invalid_response_body', 'Could not extract information from response.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build a request to fetch a Customer from QuickBook's API
+	 *
+	 * @param string $customer_name
+	 *
+	 * @return array|WP_Error
+	 */
+	protected static function build_qbo_get_customer_request( $customer_name ) {
+		global $wpdb;
+
+		$customer_name = sanitize_text_field( $customer_name );
+
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/query',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] )
+		);
+
+		$request_url_query = array(
+			'query' => $wpdb->prepare(
+				"SELECT * FROM Customer WHERE CompanyName = '%s'",
+				$customer_name
+			),
+		);
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'GET', $request_url, $request_url_query ),
+				'Accept'        => 'application/json',
+			),
+		);
+
+		$request_url_query = array_map( 'rawurlencode', $request_url_query ); // has to be done after get_oauth_header(), or oauth_signature won't be generated correctly
+		$request_url       = add_query_arg( $request_url_query, $request_url );
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
+	 * Pluck a Customer out of an array based on their currency
+	 *
+	 * QuickBook's API doesn't allow you to filter query results based on a CurrencyRef, so we have to do it
+	 * manually.
+	 *
+	 * @param array  $customers
+	 * @param string $currency_code
+	 *
+	 * @return int|false A customer ID on success, or false on failure
+	 */
+	protected static function pluck_customer_id_by_currency( $customers, $currency_code ) {
+		$customer_id = false;
+
+		foreach ( $customers as $customer ) {
+			if ( $customer['CurrencyRef']['value'] === $currency_code ) {
+				$customer_id = absint( $customer['Id'] );
+				break;
+			}
+		}
+
+		return $customer_id;
+	}
+
+	/**
+	 * Create a customer in QuickBooks for a corresponding Sponsor in WordCamp.org
+	 *
+	 * @param array  $sponsor
+	 * @param string $currency_code
+	 *
+	 * @return int|WP_Error The customer ID if success; a WP_Error if failure
+	 */
+	protected static function create_customer( $sponsor, $currency_code ) {
+		$qbo_request = self::build_qbo_create_customer_request( $sponsor, $currency_code );
+
+		if ( is_wp_error( $qbo_request ) ) {
+			return $qbo_request;
+		}
+
+		$response = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( isset( $body['Customer']['Id'] ) ) {
+				$result = absint( $body['Customer']['Id'] );
+			} else {
+				$result = new WP_Error( 'invalid_response_body', 'Could not extract customer ID from response.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build a request to create a Customer via QuickBook's API
+	 *
+	 * @param array  $sponsor
+	 * @param string $currency_code
+	 *
+	 * @return array|WP_Error
+	 */
+	protected static function build_qbo_create_customer_request( $sponsor, $currency_code ) {
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$sponsor                  = array_map( 'sanitize_text_field', $sponsor );
+		$sponsor['email-address'] = is_email( $sponsor['email-address'] );
+		$currency_code            = sanitize_text_field( $currency_code );
+
+		if ( empty( $sponsor['company-name'] ) || empty( $sponsor['email-address'] ) ) {
+			return new WP_Error( 'required_fields_missing', 'Required fields are missing.', $sponsor );
+		}
+
+		$payload = array(
+			'BillAddr' => array(
+				'Line1'                  => $sponsor['address1'],
+				'City'                   => $sponsor['city'],
+				'Country'                => $sponsor['country'],
+				'CountrySubDivisionCode' => $sponsor['state'],
+				'PostalCode'             => $sponsor['zip-code'],
+			),
+
+			'CurrencyRef' => array(
+				'value' => $currency_code
+			),
+
+			'PreferredDeliveryMethod' =>'Email',
+
+			'GivenName'        => $sponsor['first-name'],
+			'FamilyName'       => $sponsor['last-name'],
+			'CompanyName'      => $sponsor['company-name'],
+			'DisplayName'      => sprintf( '%s - %s', $sponsor['company-name'], $currency_code ),
+			'PrintOnCheckName' => $sponsor['company-name'],
+
+			'PrimaryPhone' => array(
+				'FreeFormNumber' => $sponsor['phone-number'],
+			),
+
+			'PrimaryEmailAddr' => array(
+				'Address' => $sponsor['email-address'],
+			),
+		);
+
+		if ( isset( $sponsor['address2'] ) ) {
+			$payload['BillAddr']['Line2'] = $sponsor['address2'];
+		}
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/customer',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] )
+		);
+
+		$payload = wp_json_encode( $payload );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url, $payload ),
+				'Accept'        => 'application/json',
+				'Content-Type'  => 'application/json',
+			),
+			'body' => $payload,
+		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
 	}
 
 	/**

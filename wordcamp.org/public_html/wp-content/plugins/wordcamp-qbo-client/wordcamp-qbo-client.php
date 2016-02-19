@@ -269,6 +269,101 @@ class WordCamp_QBO_Client {
 	}
 
 	/**
+	 * Send an invoice to the sponsor through QuickBooks Online's API
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return string
+	 */
+	public static function send_invoice_to_quickbooks( $invoice_id ) {
+		$request  = self::build_send_invoice_request( $invoice_id );
+		$response = wp_remote_post( $request['url'], $request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$sent = $response->get_error_message();
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( is_numeric( $body ) ) {
+				$sent = absint( $body );
+			} elseif ( isset( $body->message ) ) {
+				$sent = $body->message;
+			} else {
+				$sent = 'Unknown error.';
+			}
+		}
+
+		return $sent;
+	}
+
+	/**
+	 * Build a request for sending an invoice to QuickBooks
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return array
+	 */
+	protected static function build_send_invoice_request( $invoice_id ) {
+		$invoice      = get_post( $invoice_id );
+		$invoice_meta = get_post_custom( $invoice_id );
+		$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
+
+		$due_date = new \DateTime(
+			date( 'Y-m-d', $invoice_meta['_wcbsi_due_date'][0] ),
+			new \DateTimeZone( get_option('timezone_string') )
+		);
+
+		$payload = array(
+			'invoice_title'   => sanitize_text_field( $invoice->post_title                       ),
+			'currency_code'   => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
+			'qbo_class_id'    => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),
+			'amount'          => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
+			'description'     => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
+			'due_date'        => $due_date->format( 'Y-m-dP' ),
+
+			'statement_memo' => sprintf(
+				'WordCamp.org Invoice: %s',
+				esc_url_raw( admin_url( sprintf( 'post.php?post=%s&action=edit', $invoice_id ) ) )
+			),
+
+			'sponsor' => array(
+				'company-name'  => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_company_name' ][0] ),
+				'first-name'    => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_first_name'   ][0] ),
+				'last-name'     => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_last_name'    ][0] ),
+				'email-address' => is_email(            $sponsor_meta['_wcpt_sponsor_email_address'][0] ),
+				'phone-number'  => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_phone_number' ][0] ),
+
+				'address1' => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_street_address1'][0] ),
+				'city'     => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_city'           ][0] ),
+				'state'    => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_state'          ][0] ),
+				'zip-code' => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_zip_code'       ][0] ),
+				'country'  => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_country'        ][0] ),
+			)
+		);
+
+		if ( isset( $sponsor_meta['_wcpt_sponsor_street_address2'][0] ) ) {
+			$payload['sponsor']['address2'] = sanitize_text_field( $sponsor_meta['_wcpt_sponsor_street_address2'][0] );
+		}
+
+		$request_url  = self::$api_base . '/invoice';
+		$body         = wp_json_encode( $payload );
+		$oauth_header = self::_get_auth_header( 'post', $request_url, $body );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth_header,
+				'Content-Type'  => 'application/json',
+			),
+			'body' => $body,
+		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
 	 * Create an HMAC signature header for a request.
 	 *
 	 * Use with Authorization HTTP header.
