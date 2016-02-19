@@ -162,17 +162,17 @@ function upgrade_database() {
 
 	$schema = "
 		CREATE TABLE $table_name (
-			blog_id       int( 11 )        unsigned NOT NULL default '0',
-			invoice_id    int( 11 )        unsigned NOT NULL default '0',
+			blog_id        int( 11 )        unsigned NOT NULL default '0',
+			invoice_id     int( 11 )        unsigned NOT NULL default '0',
 			qbo_invoice_id int( 11 )        unsigned NOT NULL default '0',
-			invoice_title varchar( 75 )             NOT NULL default '',
-			status        varchar( 30 )             NOT NULL default '',
-			wordcamp_name varchar( 75 )             NOT NULL default '',
-			sponsor_name  varchar( 30 )             NOT NULL default '',
-			description   varchar( 75 )             NOT NULL default '',
-			currency      varchar( 3  )             NOT NULL default '',
-			due_date      int( 11 )        unsigned NOT NULL default '0',
-			amount        numeric( 10, 2 ) unsigned NOT NULL default '0',
+			invoice_title  varchar( 75 )             NOT NULL default '',
+			status         varchar( 30 )             NOT NULL default '',
+			wordcamp_name  varchar( 75 )             NOT NULL default '',
+			sponsor_name   varchar( 30 )             NOT NULL default '',
+			description    varchar( 75 )             NOT NULL default '',
+			currency       varchar( 3  )             NOT NULL default '',
+			due_date       int( 11 )        unsigned NOT NULL default '0',
+			amount         numeric( 10, 2 ) unsigned NOT NULL default '0',
 
 			PRIMARY KEY (blog_id, invoice_id),
 			KEY status (status)
@@ -395,17 +395,17 @@ function update_index_row( $invoice_id, $invoice ) {
 	// todo use post_edit_is_actionable instead?
 
 	$index_row = array(
-		'blog_id'       => get_current_blog_id(),
-		'invoice_id'    => $invoice_id,
+		'blog_id'        => get_current_blog_id(),
+		'invoice_id'     => $invoice_id,
 		'qbo_invoice_id' => get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', true ),
-		'invoice_title' => $invoice->post_title,
-		'status'        => $invoice->post_status,
-		'wordcamp_name' => get_wordcamp_name(),
-		'sponsor_name'  => get_sponsor_name( $invoice_id ),
-		'description'   => get_post_meta( $invoice_id, '_wcbsi_description', true ),
-		'currency'      => get_post_meta( $invoice_id, '_wcbsi_currency',    true ),
-		'due_date'      => get_post_meta( $invoice_id, '_wcbsi_due_date',    true ),
-		'amount'        => get_post_meta( $invoice_id, '_wcbsi_amount',      true ),
+		'invoice_title'  => $invoice->post_title,
+		'status'         => $invoice->post_status,
+		'wordcamp_name'  => get_wordcamp_name(),
+		'sponsor_name'   => get_sponsor_name( $invoice_id ),
+		'description'    => get_post_meta( $invoice_id, '_wcbsi_description', true ),
+		'currency'       => get_post_meta( $invoice_id, '_wcbsi_currency',    true ),
+		'due_date'       => get_post_meta( $invoice_id, '_wcbsi_due_date',    true ),
+		'amount'         => get_post_meta( $invoice_id, '_wcbsi_amount',      true ),
 	);
 
 	$formats = array( '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%f' );
