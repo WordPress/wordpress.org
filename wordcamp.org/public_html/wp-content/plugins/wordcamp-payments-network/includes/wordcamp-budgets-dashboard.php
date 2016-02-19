@@ -81,6 +81,9 @@ function format_amount( $amount, $currency ) {
 /**
  * Currency Conversion
  *
+ * @todo Now that we're pushing invoices and payments to QuickBooks, we can pull the actual value from their API,
+ * instead of these estimates, which quickly become outdated since the conversion rates change daily.
+ *
  * @param string $from   What currency are we selling.
  * @param string $to     What currency are we buying.
  * @param float  $amount How much we're selling.

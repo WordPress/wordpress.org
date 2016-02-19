@@ -198,6 +198,7 @@ function update_index_row( $request_id, $request ) {
 
 	// Drafts, etc aren't displayed in the list table, so there's no reason to index them
 	$ignored_statuses = array( 'auto-draft', 'draft', 'trash' );
+	// todo also `inherit`. should switch to whitelist instead of blacklist
 
 	if ( in_array( $request->post_status, $ignored_statuses, true ) ) {
 		return;

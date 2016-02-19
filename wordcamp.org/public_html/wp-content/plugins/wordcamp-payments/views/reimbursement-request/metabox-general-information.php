@@ -35,6 +35,7 @@ defined( 'WPINC' ) or die();
 				<?php foreach ( $available_currencies as $currency_key => $currency_name ) : ?>
 					<option value="<?php echo esc_attr( $currency_key ); ?>" <?php selected( $currency_key, $selected_currency ); ?> >
 						<?php echo esc_html( $currency_name ); ?>
+						<?php // todo - For better UX, prepend the code to the name (USD - United States Dollar), and sort by the code. Updating the sorting in get_currencies(). Also make this change other places this is used ?>
 					</option>
 				<?php endforeach; ?>
 			</select>

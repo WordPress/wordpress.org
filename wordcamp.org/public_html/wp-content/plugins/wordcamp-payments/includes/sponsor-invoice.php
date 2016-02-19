@@ -346,6 +346,7 @@ function set_invoice_status( $post_data, $post_data_raw ) {
 		// Set to draft if any required info isn't available
 		$post_data['post_status'] = 'draft';
 
+		// todo display message to user letting them know why this is happening
 		// todo this should run after save, b/c sanitization/validation could empty out some fields
 
 	} else if ( in_array( $post_data['post_status'], array( 'auto-draft', 'draft' ), true ) && isset( $_POST['send-invoice'] ) ) {

@@ -478,6 +478,8 @@ class WordCamp_Budgets {
 	/**
 	 * Get a list of all world currencies, with the most frequently used at the top.
 	 *
+	 * @todo Bring this in line with ISO 4217
+	 *
 	 * @return array
 	 */
 	public static function get_currencies() {
