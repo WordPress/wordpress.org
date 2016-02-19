@@ -364,6 +364,61 @@ class WordCamp_QBO_Client {
 	}
 
 	/**
+	 * Get the paid invoices from the given set of sent invoices
+	 *
+	 * @param array $sent_invoices
+	 *
+	 * @return array
+	 */
+	public static function get_paid_invoices( $sent_invoices ) {
+		$paid_invoices = array();
+		$request       = self::build_paid_invoices_request( $sent_invoices );
+		$response      = wp_remote_get( $request['url'], $request['args'] );
+
+		if ( ! is_wp_error( $response ) ) {
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( is_array( $body ) ) {
+				$paid_invoices = array_map( 'absint', $body );
+			}
+		}
+
+		return $paid_invoices;
+	}
+
+	/**
+	 * Build the request to check for paid invoices in QuickBooks
+	 *
+	 * @param array $invoice_ids
+	 *
+	 * @return array
+	 */
+	protected static function build_paid_invoices_request( $invoice_ids ) {
+		$invoice_ids = array_map( 'absint', $invoice_ids );    // validate
+		$invoice_ids = array_map( 'strval', $invoice_ids );    // format the way WordCamp_QBO::_in_valid_request() will expect it
+
+		$params = array(
+			'invoice_ids' => $invoice_ids,
+		);
+
+		$request_url = self::$api_base . '/paid_invoices';
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => self::_get_auth_header( 'get', $request_url, '', $params ),
+				'Content-Type'  => 'application/json',
+			),
+		);
+
+		$request_url = add_query_arg( $params, $request_url );  // has to be done after get_auth_header() is called so that the base url and params can be passed separately
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
 	 * Create an HMAC signature header for a request.
 	 *
 	 * Use with Authorization HTTP header.

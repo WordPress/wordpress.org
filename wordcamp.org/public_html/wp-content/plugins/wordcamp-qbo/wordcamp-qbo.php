@@ -88,6 +88,11 @@ class WordCamp_QBO {
 			'methods' => 'GET, POST',
 			'callback' => array( __CLASS__, 'rest_callback_invoice' ),
 		) );
+
+		register_rest_route( 'wordcamp-qbo/v1', '/paid_invoices', array(
+			'methods' => 'GET',
+			'callback' => array( __CLASS__, 'rest_callback_paid_invoices' ),
+		) );
 	}
 
 	/**
@@ -825,6 +830,104 @@ class WordCamp_QBO {
 			),
 			'body' => $payload,
 		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
+	 * Returns the subset of the given invoices that have been paid
+	 *
+	 * For example, if QBO invoice IDs 15, 18, 29, and 54 are passed, and 15 and 29 are marked as paid in QBO,
+	 * then this endpoint will return 15 and 29.
+	 *
+	 * @param WP_REST_Request $wordcamp_request
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function rest_callback_paid_invoices( $wordcamp_request ) {
+		if ( ! self::_is_valid_request( $wordcamp_request ) ) {
+			return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
+		}
+
+		$qbo_request = self::build_qbo_paid_invoices_request( $wordcamp_request->get_param( 'invoice_ids' ) );
+
+		if ( is_wp_error( $qbo_request ) ) {
+			return $qbo_request;
+		}
+
+		$response = wp_remote_get( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( isset( $body['QueryResponse']['Invoice'][0]['Id'] ) ) {
+				$result = wp_list_pluck( $body['QueryResponse']['Invoice'], 'Id' );
+				$result = array_map( 'absint', $result );
+			} elseif ( isset( $body['QueryResponse'] ) && 0 === count( $body['QueryResponse'] ) ) {
+				$result = array();  // no invoices have been paid
+			} else {
+				$result = new WP_Error( 'invalid_response', 'Could not extract invoice IDs from response.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build a request to check QuickBook's API for paid invoices
+	 *
+	 * @param array $sent_invoice_ids
+	 *
+	 * @return array|WP_Error
+	 */
+	protected static function build_qbo_paid_invoices_request( $sent_invoice_ids ) {
+		global $wpdb;
+
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/query',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] )
+		);
+
+		$sent_invoice_ids = array_map( 'absint', $sent_invoice_ids );    // Invoice IDs are initially cast as integers for validation, and then converted back to strings, because that's what QBO expects.
+
+		if ( empty( $sent_invoice_ids ) ) {
+			return new WP_Error( 'no_ids', 'No Invoice IDs were given.' );
+		}
+
+		$invoice_id_placeholders = implode( ', ', array_fill( 0, count( $sent_invoice_ids ), '%s' ) );
+
+		$request_url_query = array(
+			'query' => $wpdb->prepare( "
+				SELECT Id, Balance
+				FROM Invoice
+				WHERE
+					Id IN ( $invoice_id_placeholders ) AND
+					Balance = '0'", // QBO doesn't have an explicit status parameter, it just considers an invoice paid if the balance is 0.
+				$sent_invoice_ids
+			),
+		);
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'GET', $request_url, $request_url_query ),
+				'Accept'        => 'application/json',
+			),
+		);
+
+		$request_url_query = array_map( 'rawurlencode', $request_url_query );   // The URL query parameters have to be encoded after the OAuth header is generated so that the signature will be generated correctly.
+		$request_url       = add_query_arg( $request_url_query, $request_url );
 
 		return array(
 			'url'  => $request_url,

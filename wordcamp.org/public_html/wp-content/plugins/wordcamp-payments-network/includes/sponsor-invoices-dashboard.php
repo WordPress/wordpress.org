@@ -253,22 +253,30 @@ function check_for_paid_invoices() {
 	 * we'll need to refactor this to update them in batches.
 	 */
 	$sent_invoices = $wpdb->get_results( "
-		SELECT *
+		SELECT blog_id, invoice_id, qbo_invoice_id
 		FROM $table_name
 		WHERE status = 'wcbsi_approved'
 		LIMIT 100
-	"); // todo if QBO's API imposes a limit, then update this to match
+	" );
 
-	// todo fake data for testing. replace w/ API call to QBO
-	$updated_invoices = array(
-		//array( 'blog_id' => 11, 'invoice_id' => 45499, 'status' => 'submitted' ),
-		//array( 'blog_id' => 11, 'invoice_id' => 45506, 'status' => 'paid' ),
+	$paid_invoices = \WordCamp_QBO_Client::get_paid_invoices(
+		wp_list_pluck( $sent_invoices, 'qbo_invoice_id' )
 	);
 
-	foreach ( $updated_invoices as $invoice ) {
-		if ( 'paid' === $invoice['status'] ) {
-			update_invoice_status(           $invoice['blog_id'], $invoice['invoice_id'], 'paid' );
-			notify_organizer_status_changed( $invoice['blog_id'], $invoice['invoice_id'], 'paid' );
+	mark_invoices_as_paid( $sent_invoices, $paid_invoices );
+}
+
+/**
+ * Mark WordCamp.org invoices as paid when they've been paid in QuickBooks
+ *
+ * @param array $sent_invoices
+ * @param array $paid_invoices
+ */
+function mark_invoices_as_paid( $sent_invoices, $paid_invoices ) {
+	foreach ( $sent_invoices as $invoice ) {
+		if ( in_array( (int) $invoice->qbo_invoice_id, $paid_invoices, true ) ) {
+			update_invoice_status(           $invoice->blog_id, $invoice->invoice_id, 'paid' );
+			notify_organizer_status_changed( $invoice->blog_id, $invoice->invoice_id, 'paid' );
 		}
 	}
 }
