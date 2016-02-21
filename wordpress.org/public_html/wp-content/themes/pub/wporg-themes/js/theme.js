@@ -164,8 +164,8 @@ window.wp = window.wp || {};
 				this.reset( themes.data.themes );
 			}
 
-			// Trigger an 'update' event
-			this.trigger( 'update' );
+			// Trigger an 'themes:update' event
+			this.trigger( 'themes:update' );
 		},
 
 		// Performs a search within the collection
@@ -191,7 +191,7 @@ window.wp = window.wp || {};
 				description = data.get( 'description' ).replace( /(<([^>]+)>)/ig, '' );
 				author      = data.get( 'author' ).replace( /(<([^>]+)>)/ig, '' );
 
-				haystack = _.union( name, data.get( 'id' ), description, author, data.get( 'tags' ) );
+				haystack = _.union( [ name, data.get( 'id' ), description, author, data.get( 'tags' ) ] );
 
 				if ( match.test( data.get( 'author' ) ) && term.length > 2 ) {
 					data.set( 'displayAuthor', true );
@@ -268,7 +268,7 @@ window.wp = window.wp || {};
 
 					// Trigger a collection refresh event
 					// and a `query:success` event with a `count` argument.
-					self.trigger( 'update' );
+					self.trigger( 'themes:update' );
 					self.trigger( 'query:success', count );
 
 					if ( data.themes && data.themes.length === 0 ) {
@@ -312,7 +312,7 @@ window.wp = window.wp || {};
 					this.count = this.length;
 				}
 
-				this.trigger( 'update' );
+				this.trigger( 'themes:update' );
 				this.trigger( 'query:success', this.count );
 			}
 		},
@@ -487,7 +487,7 @@ window.wp = window.wp || {};
 				data.last_updated.substring( 8, 10 )
 			);
 
-			// Format the Last Updated date, prefering 
+			// Format the Last Updated date, prefering
 			data.last_updated = updated.toLocaleDateString( false, {day:"numeric", month:"long", year:"numeric"} );
 
 			// If last updated plus 2 years is in the past, it's outdated.
@@ -529,7 +529,7 @@ window.wp = window.wp || {};
 				slug = this.model.get("slug"),
 				pos;
 
-			$heart.toggleClass( 'favorited' );	
+			$heart.toggleClass( 'favorited' );
 
 			// Update it in the current settings
 			if ( ! favorited ) {
@@ -976,7 +976,7 @@ window.wp = window.wp || {};
 			this.setView( 'grid' );
 
 			// When the collection is updated by user input...
-			this.listenTo( self.collection, 'update', function() {
+			this.listenTo( self.collection, 'themes:update', function() {
 				self.parent.page = 0;
 				self.render( this );
 			});
@@ -1423,7 +1423,7 @@ window.wp = window.wp || {};
 
 			// Construct the filter request
 			// using the default values
-			filter = _.union( filter, this.filtersChecked() );
+			filter = _.union( [ filter, this.filtersChecked() ] );
 			request = { tag: [ filter ] };
 
 			// Get the themes by sending Ajax POST request to api.wordpress.org/themes
