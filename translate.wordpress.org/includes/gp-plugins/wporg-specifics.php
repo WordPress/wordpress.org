@@ -13,6 +13,25 @@ class GP_WPorg_Specifics extends GP_Plugin {
 		$this->add_action( 'init' );
 		$this->add_filter( 'projects', array( 'args' => 2 ) );
 		$this->add_action( 'before_request', array( 'args' => 2 ) );
+		$this->add_action( 'project_created' );
+		$this->add_action( 'project_saved' );
+	}
+
+	function project_created() {
+		$this->update_projects_last_updated();
+	}
+
+	function project_saved() {
+		$this->update_projects_last_updated();
+	}
+
+	/**
+	 * Stores the timestamp of the last update for projects.
+	 *
+	 * Used by the Rosetta Roles plugin to invalidate local caches.
+	 */
+	function update_projects_last_updated() {
+		gp_update_option( 'wporg_projects_last_updated', time() );
 	}
 
 	function before_request( $class_name, $last_method_called ) {
