@@ -23,6 +23,9 @@
 										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
 									</div>
 								</li>
+								<li id="project-loading" class="loading">
+									<?php _e( 'Loading&hellip;', 'rosetta' ); ?>
+								</li>
 							</ul>
 						</fieldset>
 						<p class="description"><?php _e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
