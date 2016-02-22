@@ -86,7 +86,8 @@
 		defaults: {
 			id: 0,
 			name: '',
-			checked: false
+			checked: false,
+			matchScore: 0
 		},
 
 		initialize: function() {
@@ -99,6 +100,8 @@
 
 		// Search terms
 		terms: '',
+
+		_sortBy: 'checked',
 
 		initialize: function( models, options ) {
 			this.project = options.project;
@@ -150,14 +153,23 @@
 
 			results = this.filter( function( project ) {
 				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				return match.test( haystack );
+				if ( match.test( haystack ) ) {
+					_.each( haystack, function( word ) {
+						var score = word.score( term );
+						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
+					});
+					return true;
+				}
+				return false;
 			});
 
+			this._sortBy = 'matchScore';
 			this.reset( results );
+			this._sortBy = 'checked';
 		},
 
 		comparator: function( project ) {
-			return - project.get( 'checked' );
+			return - project.get( this._sortBy );
 		}
 	});
 
