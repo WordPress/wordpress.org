@@ -309,6 +309,10 @@ class Rosetta_Roles {
 						$user_details = get_user_by( 'id', $user );
 					} else {
 						$user_details = get_user_by( 'login', $user );
+
+						if ( ! $user_details ) {
+							$user_details = get_user_by( 'slug', $user );
+						}
 					}
 
 					if ( ! $user_details ) {
