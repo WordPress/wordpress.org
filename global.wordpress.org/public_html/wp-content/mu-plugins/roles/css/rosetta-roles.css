@@ -18,6 +18,10 @@
 	cursor: pointer;
 }
 
+.projects-list > li.loading {
+	cursor: default;
+}
+
 .projects-list > li:last-child {
 	border-bottom: 0;
 }
@@ -44,6 +48,10 @@
 
 .projects-list > li:hover {
 	background: #fff;
+}
+
+.projects-list > li.loading:hover {
+	background: #f5f5f5;
 }
 
 .projects-list > li.active {
