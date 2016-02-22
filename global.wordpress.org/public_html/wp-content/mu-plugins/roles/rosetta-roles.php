@@ -76,6 +76,8 @@ class Rosetta_Roles {
 
 		add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
 		add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
+
+		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
 	}
 
 	/**
@@ -618,6 +620,29 @@ class Rosetta_Roles {
 	 * Renders the edit page.
 	 */
 	private function render_edit_translation_editor( $user_id ) {
+		global $wpdb;
+
+		$project_access_list = $this->get_users_projects( $user_id );
+
+		$last_updated = $wpdb->get_var( 'SELECT meta_value FROM translate_meta WHERE object_type = "gp_option" AND meta_key = "wporg_projects_last_updated"' );
+
+		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
+			'l10n' => array(
+				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
+			),
+			'lastUpdated' => $last_updated,
+			'accessList' => $project_access_list,
+		) );
+
+		$feedback_message = $this->get_feedback_message();
+
+		require __DIR__ . '/views/edit-translation-editor.php';
+	}
+
+	/**
+	 * Ajax handler for retrieving projects.
+	 */
+	public function ajax_rosetta_get_projects() {
 		$projects = $this->get_translate_projects();
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
@@ -631,19 +656,8 @@ class Rosetta_Roles {
 		}
 		$project_tree = array_values( $project_tree );
 
-		$project_access_list = $this->get_users_projects( $user_id );
-
-		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
-			'l10n' => array(
-				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
-			),
-			'data' => $project_tree,
-			'accessList' => $project_access_list,
-		) );
-
-		$feedback_message = $this->get_feedback_message();
-
-		require __DIR__ . '/views/edit-translation-editor.php';
+		ob_start( 'ob_gzhandler' ); // Compress JSON.
+		wp_send_json_success( $project_tree );
 	}
 
 	/**

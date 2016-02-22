@@ -21,10 +21,13 @@
 		},
 
 		initialize: function() {
-			var subProjects = this.get( 'sub_projects' );
+			// Store the original sub-projects data, it's used to reset the collection on searches.
+			this._subProjects = this.get( 'sub_projects' );
 			this.unset( 'sub_projects' );
 
-			this.set( 'subProjects', new projects.model.subProjects( subProjects ) );
+			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
+				project: this,
+			} ) );
 			this.set( 'checked', _.contains( projects.settings.accessList, parseInt( this.get( 'id' ), 10 ) ) );
 
 			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
@@ -83,8 +86,7 @@
 		defaults: {
 			id: 0,
 			name: '',
-			checked: false,
-			isVisible: true
+			checked: false
 		},
 
 		initialize: function() {
@@ -98,7 +100,8 @@
 		// Search terms
 		terms: '',
 
-		initialize: function() {
+		initialize: function( models, options ) {
+			this.project = options.project;
 			this.on( 'uncheckall', this.uncheckall );
 		},
 
@@ -120,17 +123,22 @@
 				this.search( this.terms );
 			}
 
-			if ( this.terms === '' ) {
-				this.each( function( project ) {
-					project.set( 'isVisible', true );
-				});
+			// If search is blank, show all projects.
+			if ( '' === this.terms ) {
+				this.reset( this.project._subProjects );
 			}
+
+			// Trigger a 'projects:update' event
+			this.trigger( 'projects:update' );
 		},
 
 		// Performs a search within the collection
 		// @uses RegExp
 		search: function( term ) {
-			var match;
+			var match, results;
+
+			// Start with a full collection
+			this.reset( this.project._subProjects, { silent: true } );
 
 			// Escape the term string for RegExp meta characters
 			term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
@@ -140,11 +148,12 @@
 			term = term.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + term + ').+', 'i' );
 
-			// Find results
-			this.each( function( project ) {
+			results = this.filter( function( project ) {
 				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				project.set( 'isVisible', match.test( haystack ) );
+				return match.test( haystack );
 			});
+
+			this.reset( results );
 		},
 
 		comparator: function( project ) {
@@ -170,6 +179,8 @@
 				projectView.render();
 				view.$el.append( projectView.el );
 			});
+
+			$( '#project-loading' ).remove();
 
 			this.views.ready();
 
@@ -262,19 +273,38 @@
 			this.views.add( new projects.view.SubProjectsList({
 				collection: collection
 			}) );
-		}
+		},
+
 	});
 
 	projects.view.SubProjectsList = wp.Backbone.View.extend({
 		tagName: 'ul',
 		className: 'sub-projects-list',
 
-		initialize: function() {
-			var view = this;
-			this.collection.each( function( project ) {
-				view.views.add( new projects.view.SubProject({
-					model: project
-				}) );
+		// Number of projects which should be rendered.
+		limit: 100,
+
+		initialize: function( options ) {
+			var self = this;
+
+			this.listenTo( self.collection, 'projects:update', function() {
+				self.render( this );
+			} );
+		},
+
+		render: function() {
+			var self = this, subProjects;
+
+			self.$el.empty();
+
+			subProjects = self.collection.first( self.limit );
+			_.each( subProjects, function( model ) {
+				var subProjectView = new projects.view.SubProject({
+					model: model
+				});
+
+				subProjectView.render();
+				self.$el.append( subProjectView.el );
 			});
 		}
 	});
@@ -286,16 +316,6 @@
 			this.views.add( new projects.view.Checkbox({
 				model: this.model
 			}) );
-
-			this.listenTo( this.model, 'change:isVisible', this.changeVisibility );
-		},
-
-		changeVisibility: function() {
-			if ( this.model.get( 'isVisible' ) ) {
-				this.$el.removeClass( 'hidden' );
-			} else {
-				this.$el.addClass( 'hidden' );
-			}
 		}
 	});
 
@@ -332,13 +352,85 @@
 
 		doSearch: _.debounce( function( event ) {
 			this.collection.doSearch( event.target.value );
-		}, 200 )
+		}, 500 )
 	});
 
-	projects.init = function() {
+	/**
+	 * UTILS
+	 */
+
+	projects._hasStorage = null;
+
+	// Check if the browser supports localStorage.
+	projects.hasStorage = function() {
+		if ( null !== projects._hasStorage ) {
+			return projects._hasStorage;
+		}
+
+		var result = false;
+
+		try {
+			window.localStorage.setItem( 'test', 'rosetta' );
+			result = window.localStorage.getItem( 'test' ) === 'rosetta';
+			window.localStorage.removeItem( 'test' );
+		} catch( e ) {}
+
+		projects._hasStorage = result;
+
+		return projects._hasStorage;
+	};
+
+	projects.getRemoteProjects = function() {
+		return wp.ajax.post( 'rosetta-get-projects' );
+	};
+
+	projects.getLocalProjects = function() {
+		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
+		if ( ! lastUpdated ) {
+			return false;
+		}
+
+		if ( lastUpdated < projects.settings.lastUpdated ) {
+			return false;
+		}
+
+		var json = window.localStorage.getItem( 'projects' );
+		if ( ! json ) {
+			return false;
+		}
+
+		return JSON.parse( json );
+	};
+
+	projects.storeLocalProjects = function( data ) {
+		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
+		window.localStorage.setItem( 'projects', JSON.stringify( data ) );
+	};
+
+	projects.initFrame = function( projectData ) {
 		projects.view.frame = new projects.view.Frame({
-			collection: new projects.model.Projects( projects.settings.data )
+			collection: new projects.model.Projects( projectData )
 		}).render();
+	};
+
+	projects.init = function() {
+		var data = null;
+
+		if ( projects.hasStorage() ) {
+			data = projects.getLocalProjects();
+		}
+
+		if ( data && data.length ) {
+			projects.initFrame( data );
+			return;
+		}
+
+		projects.getRemoteProjects().done( function( response ) {
+			projects.initFrame( response );
+			if ( projects.hasStorage() ) {
+				projects.storeLocalProjects( response );
+			}
+		});
 	};
 
 	$( projects.init );
