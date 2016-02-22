@@ -668,7 +668,7 @@ TICKET;
 		$svn        = escapeshellarg( self::SVN );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
-		exec( escapeshellcmd( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" ) );
+		exec( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
 	}
 
 	/**
