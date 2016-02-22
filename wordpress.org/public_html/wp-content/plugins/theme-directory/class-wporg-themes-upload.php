@@ -261,6 +261,15 @@ class WPORG_Themes_Upload {
 		// Passed all tests!
 		// Let's save everything and get things wrapped up.
 
+		// Create a new version in SVN.
+		$result = $this->add_to_svn();
+		if ( ! $result ) {
+			/* translators: %s: mailto link */
+			return sprintf( __( 'There was an error comitting your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
+				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+			);
+		}
+
 		// Get all Trac ticket information set up.
 		$this->prepare_trac_ticket();
 
@@ -276,9 +285,6 @@ class WPORG_Themes_Upload {
 
 		// Add a or update the Theme Directory entry for this theme.
 		$this->create_or_update_theme_post( $ticket_id );
-
-		// Create a new version in SVN.
-		$this->add_to_svn();
 
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification( $ticket_id );
@@ -668,7 +674,9 @@ TICKET;
 		$svn        = escapeshellarg( self::SVN );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
-		exec( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path}" );
+		$result = exec( "{$svn} --non-interactive --username themedropbox --password {$password} --no-auto-props -m {$import_msg} import {$theme_path} {$svn_path} 2>&1" );
+
+		return ( false !== strpos( $result, 'Committed revision' ) );
 	}
 
 	/**
