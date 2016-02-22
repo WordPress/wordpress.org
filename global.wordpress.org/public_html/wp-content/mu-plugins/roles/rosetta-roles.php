@@ -187,7 +187,7 @@ class Rosetta_Roles {
 	 * Enqueues scripts.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '5', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone' ), '6', true );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class Rosetta_Roles {
 	 */
 	public function enqueue_styles() {
 		$suffix = is_rtl() ? '-rtl' : '';
-		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '3' );
+		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '4' );
 	}
 
 	/**
