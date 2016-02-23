@@ -265,6 +265,40 @@ class Payment_Requests_Dashboard {
 	}
 
 	/**
+	 * Get available export options.
+	 *
+	 * @return array
+	 */
+	public static function get_export_types() {
+		return array(
+			'default' => array(
+				'label' => 'Default',
+				'mime_type' => 'text/csv',
+				'ext' => 'csv',
+				'callback' => array( __CLASS__, '_generate_payment_report_default' ),
+			),
+			'jpm_wires' => array(
+				'label' => 'JP Morgan Access - Wire Payments',
+				'mime_type' => 'text/csv',
+				'ext' => 'csv',
+				'callback' => array( __CLASS__, '_generate_payment_report_jpm_wires' ),
+			),
+			'jpm_ach' => array(
+				'label' => 'JP Morgan - NACHA',
+				'mime_type' => 'text/plain',
+				'ext' => 'ach',
+				'callback' => array( __CLASS__, '_generate_payment_report_jpm_ach' ),
+			),
+			'jpm_checks' => array(
+				'label' => 'JP Morgan - Quick Checks',
+				'mime_type' => 'text/csv',
+				'ext' => 'csv',
+				'callback' => array( __CLASS__, '_generate_payment_report_jpm_checks' ),
+			),
+		);
+	}
+
+	/**
 	 * Process export requests
 	 */
 	public static function process_export_request() {
@@ -276,26 +310,25 @@ class Payment_Requests_Dashboard {
 			return;
 		}
 
-		$type = in_array( $_POST['wcpn_export_type'], array( 'default', 'jpm_wires', 'jpm_ach', 'jpm_checks' ) ) ? $_POST['wcpn_export_type'] : 'default';
-		$mime_type = 'text/csv';
-		$ext = 'csv';
+		$export_types = self::get_export_types();
 
-		if ( $type == 'jpm_ach' ) {
-			$mime_type = 'text/plain';
-			$ext = 'ach';
+		if ( array_key_exists( $_POST['wcpn_export_type'], $export_types ) ) {
+			$export_type = $export_types[ $_POST['wcpn_export_type'] ];
+		} else {
+			$export_type = $export_types['default'];
 		}
 
 		$start_date = strtotime( $_POST['wcpn_export_start_date'] . ' 00:00:00' );
 		$end_date   = strtotime( $_POST['wcpn_export_end_date']   . ' 23:59:59' );
 		$filename   = sanitize_file_name( sprintf( 'wordcamp-payments-%s-to-%s.%s',
-			date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ), $ext ) );
+			date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ), $export_type['ext'] ) );
 
-		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date, $type );
+		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date, $export_type );
 
 		if ( is_wp_error( $report ) ) {
 			add_settings_error( 'wcp-dashboard', $report->get_error_code(), $report->get_error_message() );
 		} else {
-			header( sprintf( 'Content-Type: %s', $mime_type ) );
+			header( sprintf( 'Content-Type: %s', $export_type['mime_type'] ) );
 			header( sprintf( 'Content-Disposition: attachment; filename="%s"', $filename ) );
 			header( 'Cache-control: private' );
 			header( 'Pragma: private' );
@@ -316,7 +349,7 @@ class Payment_Requests_Dashboard {
 	 *
 	 * @return string | WP_Error
 	 */
-	protected static function generate_payment_report( $date_type, $start_date, $end_date, $type = 'default' ) {
+	protected static function generate_payment_report( $date_type, $start_date, $end_date, $export_type ) {
 		global $wpdb;
 
 		if ( ! in_array( $date_type, array( 'paid', 'created' ), true ) ) {
@@ -337,8 +370,7 @@ class Payment_Requests_Dashboard {
 			$end_date
 		) );
 
-		$method_name = '_generate_payment_report_' . $type;
-		if ( ! is_callable( array( __CLASS__, $method_name ) ) )
+		if ( ! is_callable( $export_type['callback'] ) )
 			return new WP_Error( 'wcpn_invalid_type', 'The export type is invalid.' );
 
 		$args = array(
@@ -346,10 +378,10 @@ class Payment_Requests_Dashboard {
 			'date_type' => $date_type,
 			'start_date' => $start_date,
 			'end_date' => $end_date,
-			'type' => $type,
+			'export_type' => $export_type,
 		);
 
-		return call_user_func( array( __CLASS__, $method_name ), $args );
+		return call_user_func( $export_type['callback'], $args );
 	}
 
 	/**
@@ -987,10 +1019,9 @@ class Payment_Requests_Dashboard {
 			<p>
 				<label>Export Type:
 					<select name="wcpn_export_type">
-						<option value="default">Default</option>
-						<option value="jpm_wires">JP Morgan Access - Wire Payments</option>
-						<option value="jpm_ach">JP Morgan - NACHA</option>
-						<option value="jpm_checks">JP Morgan - Quick Checks</option>
+						<?php foreach ( self::get_export_types() as $key => $export_type ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $export_type['label'] ); ?></option>
+						<?php endforeach; ?>
 					</select>
 				</label>
 
