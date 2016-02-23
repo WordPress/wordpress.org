@@ -13,9 +13,11 @@
  * @package WPorg_Plugin_Directory
  */
 
-include_once( 'class-wporg-plugin-directory.php' );
-include_once( 'class-wporg-plugin-directory-template.php' );
-include_once( 'class-wporg-plugin-directory-tools.php' );
+include __DIR__ . '/class-wporg-plugin-directory.php';
+include __DIR__ . '/class-wporg-plugin-directory-template.php';
+include __DIR__ . '/class-wporg-plugin-directory-tools.php';
+
+include __DIR__ . '/shortcodes/screenshots.php';
 
 $wporg_plugin_directory = new WPorg_Plugin_Directory();
 register_activation_hook( __FILE__, array( $wporg_plugin_directory, 'activate' ) );

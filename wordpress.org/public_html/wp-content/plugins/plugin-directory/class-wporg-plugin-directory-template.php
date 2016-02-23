@@ -54,15 +54,21 @@ class WPorg_Plugin_Directory_Template {
 	static function get_plugin_sections() {
 		$plugin       = get_post();
 		$plugin_slug  = $plugin->post_name;
-		$raw_sections = get_post_meta( $plugin->ID, 'sections', true );
-		$raw_sections = array_unique( array_merge( $raw_sections, array(
+
+		$default_sections = array(
 			'description',
 			'screenshots',
 			'stats',
 			'support',
 			'reviews',
 			'developers',
-		) ) );
+		);
+		if ( ! get_post_meta( $plugin->ID, 'screenshots', true ) && ! get_post_meta( $plugin->ID, 'assets_screenshots', true ) ) {
+			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
+		}
+
+		$raw_sections = get_post_meta( $plugin->ID, 'sections', true );
+		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
 
 		$sections  = array();
 		$title     = '';
