@@ -138,7 +138,7 @@ class WPorg_Plugin_Directory {
 			add_filter( $filter, function( $url ) {
 				static $localized_url = null;
 				if ( is_null( $localized_url ) ) {
-					$localized_url = 'https://' . preg_replace( '![^a-z.]+!', '', $_SERVER['HTTP_HOST'] );
+					$localized_url = 'https://' . preg_replace( '![^a-z.-]+!', '', $_SERVER['HTTP_HOST'] );
 				}
 
 				return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
