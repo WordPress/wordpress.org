@@ -265,7 +265,7 @@ class WPORG_Themes_Upload {
 		$result = $this->add_to_svn();
 		if ( ! $result ) {
 			/* translators: %s: mailto link */
-			return sprintf( __( 'There was an error comitting your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
+			return sprintf( __( 'There was an error adding your theme to SVN. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
 				'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
 			);
 		}
