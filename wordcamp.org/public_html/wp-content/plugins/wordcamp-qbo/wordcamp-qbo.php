@@ -4,6 +4,8 @@
  */
 
 class WordCamp_QBO {
+	const REMOTE_REQUEST_TIMEOUT = 10; // seconds
+
 	private static $app_token;
 	private static $consumer_key;
 	private static $consumer_secret;
@@ -165,6 +167,7 @@ class WordCamp_QBO {
 
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
 			$response = wp_remote_get( $request_url, array(
+				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 				'headers' => array(
 					'Authorization' => $oauth_header,
 					'Accept' => 'application/json',
@@ -188,6 +191,7 @@ class WordCamp_QBO {
 
 		$oauth_header = $oauth->get_oauth_header( 'POST', $request_url, $payload );
 		$response = wp_remote_post( $request_url, array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth_header,
 				'Accept' => 'application/json',
@@ -247,10 +251,16 @@ class WordCamp_QBO {
 			self::$api_base_url, self::$options['auth']['realmId'] ) );
 
 		$oauth_header = $oauth->get_oauth_header( 'GET', $request_url, $args );
-		$response = wp_remote_get( esc_url_raw( add_query_arg( $args, $request_url ) ), array( 'headers' => array(
-			'Authorization' => $oauth_header,
-			'Accept' => 'application/json',
-		) ) );
+		$response = wp_remote_get(
+			esc_url_raw( add_query_arg( $args, $request_url ) ),
+			array(
+				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
+				'headers' => array(
+					'Authorization' => $oauth_header,
+					'Accept' => 'application/json',
+				)
+			)
+		);
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			return new WP_Error( 'error', 'Could not fetch classes.' );
@@ -500,6 +510,7 @@ class WordCamp_QBO {
 		$payload = wp_json_encode( $payload );
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url, $payload ),
 				'Accept'        => 'application/json',
@@ -562,6 +573,7 @@ class WordCamp_QBO {
 		);
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url ),
 				'Accept'        => 'application/json',
@@ -686,6 +698,7 @@ class WordCamp_QBO {
 		);
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth->get_oauth_header( 'GET', $request_url, $request_url_query ),
 				'Accept'        => 'application/json',
@@ -823,6 +836,7 @@ class WordCamp_QBO {
 		$payload = wp_json_encode( $payload );
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url, $payload ),
 				'Accept'        => 'application/json',
@@ -920,6 +934,7 @@ class WordCamp_QBO {
 		);
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth->get_oauth_header( 'GET', $request_url, $request_url_query ),
 				'Accept'        => 'application/json',
@@ -1030,10 +1045,13 @@ class WordCamp_QBO {
 				self::$api_base_url, self::$options['auth']['realmId'], self::$options['auth']['realmId'] );
 
 			$oauth_header = $oauth->get_oauth_header( 'GET', $request_url );
-			$response = wp_remote_get( $request_url, array( 'headers' => array(
-				'Authorization' => $oauth_header,
-				'Accept' => 'application/json',
-			) ) );
+			$response = wp_remote_get( $request_url, array(
+				'timeout' => self::REMOTE_REQUEST_TIMEOUT,
+				'headers' => array(
+					'Authorization' => $oauth_header,
+					'Accept' => 'application/json',
+				)
+			) );
 
 			if ( is_wp_error( $response ) ) {
 				wp_die( 'Could not obtain company information.' );
