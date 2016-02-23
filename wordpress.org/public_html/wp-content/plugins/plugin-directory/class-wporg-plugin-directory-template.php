@@ -57,46 +57,48 @@ class WPorg_Plugin_Directory_Template {
 		$raw_sections = get_post_meta( $plugin->ID, 'sections', true );
 		$raw_sections = array_unique( array_merge( $raw_sections, array(
 			'description',
+			'screenshots',
 			'stats',
 			'support',
 			'reviews',
 			'developers',
 		) ) );
 
-		$sections = array();
-		$title    = '';
-		$url      = get_permalink();
+		$sections  = array();
+		$title     = '';
+		$permalink = get_permalink();
 
 		foreach ( $raw_sections as $section_slug ) {
 			switch ( $section_slug ) {
 
 				case 'description':
 					$title = _x( 'Description', 'plugin tab title', 'wporg-plugins' );
+					$url   = $permalink;
 					break;
 
 				case 'installation':
 					$title = _x( 'Installation', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'faq':
 					$title = _x( 'FAQ', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'screenshots':
 					$title = _x( 'Screenshots', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'changelog':
 					$title = _x( 'Changelog', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'stats':
 					$title = _x( 'Stats', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . $section_slug . '/';
 					break;
 
 				case 'support':
@@ -111,8 +113,16 @@ class WPorg_Plugin_Directory_Template {
 
 				case 'developers':
 					$title = _x( 'Developers', 'plugin tab title', 'wporg-plugins' );
-					$url   = trailingslashit( $url ) . '/' . $section_slug . '/';
+					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
+
+				case 'other_notes':
+					$title = _x( 'Other Notes', 'plugin tab title', 'wporg-plugins' );
+					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
+					break;
+
+				default:
+					continue;
 			}
 
 			$sections[] = array(
