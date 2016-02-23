@@ -276,6 +276,7 @@ span.btn-l a {
 	font-family: "Helvetica Neue", sans-serif;
 	font-size: 24px;
 	font-weight: bold;
+	margin: 0.5em;
 }
 
 #plugin-title.with-banner h2 {
@@ -286,6 +287,7 @@ span.btn-l a {
 	left: 30px;
 	bottom: 20px;
 	padding: 8px 15px;
+	margin: 0;
 	margin-bottom: 4px;
 
 	color: #fff;
@@ -1073,6 +1075,10 @@ body.plugins-directory #pagebody {
 	margin: 0 20px 20px 0;
 	top: 10px;
 	left: 10px;
+}
+.plugin-icon .plugin-icon {
+	float:left;
+	margin: 3px 6px 6px 0px;
 }
 
 .plugin-icon img {

@@ -1,20 +1,33 @@
-<?php the_post(); ?>
-<?php get_header(); ?>
+<?php
+the_post();
+get_header();
+$plugin_banners = WPorg_Plugin_Directory_Template::get_plugin_banner( $post );
+
+?>
 
 <div class="wrapper">
 
 	<div style="width: 772px; margin: 0 auto;" itemscope itemtype="http://schema.org/SoftwareApplication">
 
-		<div id="plugin-head" class="plugin-head-with-banner">
+		<div id="plugin-head" class="<?php echo $plugin_banners ? 'plugin-head-with-banner' : 'plugin-head-without-banner'; ?>">
 
+		<?php if ( $plugin_banners ): ?>
 			<div id="plugin-title" class="with-banner">
 				<div class="vignette"></div>
 				<style type="text/css">
-				#plugin-title { width:772px; height:250px; background-size:772px 250px;	background-image: url(//ps.w.org/debug-bar/assets/banner-772x250.png?rev=478338); }
+					#plugin-title { width:772px; height:250px; background-size:772px 250px; background-image: url('<?php echo esc_url( $plugin_banners['banner'] ); ?>'); }
+					<?php if ( ! empty( $plugin_banners['banner_2x'] ) ): ?>
+					@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 15/10), only screen and (min-resolution: 144dpi), only screen and (min-resolution: 1.5dppx) {
+						#plugin-title { background-image: url('<?php echo esc_url( $plugin_banners['banner_2x'] ); ?>'); }
+					}
+					<?php endif; ?>
 				</style>
 
 				<h2 itemprop="name"><?php the_title(); ?></h2>
 			</div>
+		<?php else: ?>
+			<div id="plugin-title"><h2 itemprop="name"><?php the_title(); ?></h2></div>
+		<?php endif; ?>
 
 			<div id="plugin-description">
 				<p itemprop="description" class="shortdesc"><?php the_excerpt(); ?></p>

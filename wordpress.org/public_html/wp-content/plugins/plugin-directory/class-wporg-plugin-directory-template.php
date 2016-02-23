@@ -134,4 +134,121 @@ class WPorg_Plugin_Directory_Template {
 
 		return $sections;
 	}
+
+	/**
+	 * Retrieve the Plugin Icon details for a plugin.
+	 *
+	 * @param WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @return mixed
+	 */
+	static function get_plugin_icon( $plugin, $output = 'raw' ) {
+		global $wporg_plugin_directory;
+		$plugin = $wporg_plugin_directory->get_or_create_plugin_post( $plugin );
+		if ( is_wp_error( $plugin ) ) {
+			return false;
+		}
+		$plugin_slug = $plugin->post_name;
+
+		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true );
+
+		$icon = $icon_2x = $vector = $generated = false;
+		foreach ( $raw_icons as $file => $info ) {
+			switch ( $info['resolution'] ) {
+				case '256x256':
+					$icon_2x = self::get_asset_url( $plugin_slug, $info );
+					break;
+				case '128x128':
+					$icon = self::get_asset_url( $plugin_slug, $info );
+					break;
+				case false && 'icon.svg' == $file:
+					$icon = self::get_asset_url( $plugin_slug, $info );
+					$vector = true;
+					break;
+			}
+		}
+
+		if ( ! $icon ) {
+			$generated = true;
+			if ( ! class_exists( 'WPorg_Plugin_Geopattern' ) ) {
+				include __DIR__ . '/class-wporg-plugin-geopattern.php';
+			}
+			$icon = new WPorg_Plugin_Geopattern;
+			$icon->setString( $plugin->post_name );
+
+			// Use the average color of the first known banner as the icon background color
+			if ( $color = get_post_meta( $plugin->ID, 'assets_banners_color', true ) ) {
+				if ( strlen( $color ) == 6 && strspn( $color, 'abcdef0123456789' ) == 6 ) {
+					$icon->setColor( '#' . $color );
+				}
+			}
+
+			$icon = $icon->toDataURI();
+		}
+
+		switch ( $output ) {
+			case 'html':
+				$id = "plugin-icon-{$plugin_slug}";
+				$html = "<style type='text/css'>";
+				$html .= "#{$id} { width:128px; height:128px; background-image: url('{$icon}'); background-size:128px 128px; }";
+				if ( ! empty( $icon_2x ) && ! $generated ) {
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$icon_2x}'); } }";
+				}
+				$html .= "</style>";
+				$html .= "<div class='plugin-icon' id='{$id}'></div>";
+
+				return $html;
+				break;
+			case 'raw':
+			default:
+				return compact( 'icon', 'icon_2x', 'vector', 'generated' );
+		}
+	}
+
+	/**
+	 * Retrieve the Plugin Icon details for a plugin.
+	 *
+	 * @param WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @return mixed
+	 */
+	static function get_plugin_banner( $plugin, $output = 'raw' ) {
+		global $wporg_plugin_directory;
+		$plugin = $wporg_plugin_directory->get_or_create_plugin_post( $plugin );
+		if ( is_wp_error( $plugin ) ) {
+			return false;
+		}
+		$plugin_slug = $plugin->post_name;
+
+		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true );
+
+		$banner = $banner_2x = false;
+		foreach ( $raw_banners as $file => $info ) {
+			switch ( $info['resolution'] ) {
+				case '1544x500':
+					$banner_2x = self::get_asset_url( $plugin_slug, $info );
+					break;
+				case '772x250':
+					$banner = self::get_asset_url( $plugin_slug, $info );
+					break;
+			}
+		}
+
+		if ( ! $banner ) {
+			return false;
+		}
+
+		switch ( $output ) {
+			case 'raw':
+			default:
+				return compact( 'banner', 'banner_2x' );
+		}
+	}
+
+	static function get_asset_url( $plugin, $asset ) {
+		return esc_url( sprintf(
+			'https://ps.w.org/%s/assets/%s?rev=%s',
+			$plugin,
+			$asset['filename'],
+			$asset['revision']
+		) );
+	}
 }

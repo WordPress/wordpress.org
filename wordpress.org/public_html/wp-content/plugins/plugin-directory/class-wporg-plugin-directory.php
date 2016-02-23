@@ -235,8 +235,9 @@ class WPorg_Plugin_Directory {
 	public function split_post_content_into_pages( $content ) {
 		$_pages        = preg_split( "#<!--section=(.+?)-->#", $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
-			'stats'      => '[wporg-plugins-stats]',
-			'developers' => '[wporg-plugins-developer]',
+			'screenshots' => '[wporg-plugins-screenshots]',
+			'stats'       => '[wporg-plugins-stats]',
+			'developers'  => '[wporg-plugins-developer]',
 		);
 
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
@@ -248,5 +249,39 @@ class WPorg_Plugin_Directory {
 		}
 
 		return $content_pages;
+	}
+
+	/**
+ 	 * Retrieve the WP_Post object representing a given plugin.
+ 	 *
+ 	 * @param $plugin_slug string|WP_Post The slug of the plugin to retrieve.
+ 	 * @return WP_Post|WP_Error
+ 	 */
+	public function get_or_create_plugin_post( $plugin_slug ) {
+		if ( $plugin_slug instanceof WP_Post ) {
+			return $plugin_slug;
+		}
+
+		// get_post_by_slug();
+		$posts = get_posts( array( 'post_type' => 'plugin', 'name' => $plugin_slug, 'post_status' => 'any', 'fields' => 'ids' ) );
+
+		if ( $posts ) {
+			$id = reset( $posts );
+		} else {
+			$id = wp_insert_post( array(
+				'post_type' => 'plugin',
+				'post_status' => 'pending',
+				'post_name' => $plugin_slug,
+				'post_title' => $plugin_slug,
+				'post_content' => '',
+			), true );
+
+			if ( is_wp_error( $id ) ) {
+				return $id;
+			}
+		}
+
+		$plugin = get_post( $id );
+		return $plugin;
 	}
 }
