@@ -121,10 +121,54 @@ class WPorg_Plugin_Directory {
 		add_rewrite_endpoint( 'stats',        EP_PERMALINK );
 		add_rewrite_endpoint( 'developers',   EP_PERMALINK );
 		add_rewrite_endpoint( 'other_notes',  EP_PERMALINK );
+
+		// When this plugin is used in the context of a Rosetta site, handle it gracefully
+		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
+			$this->add_rosetta_network_filters();	
+		}
 	}
 
 	/**
-	 * Filter the permalink for the Packages to be /post_name/.
+	 * The Plugin Directory is available at multiple URLs (internationalised domains), this method allows
+	 * for the one blog (a single blog_id) to be presented at multiple URLs yet have correct localised links.
+	 */
+	public function add_rosetta_network_filters() {
+		// Filter the URLs to use the current localised domain name, rather than WordPress.org.
+		foreach ( array( 'option_home', 'option_siteurl' ) as $filter ) {
+			add_filter( $filter, function( $url ) {
+				static $localized_url = null;
+				if ( is_null( $localized_url ) ) {
+					$localized_url = 'https://' . preg_replace( '![^a-z.]+!', '', $_SERVER['HTTP_HOST'] );
+				}
+
+				return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
+			} );
+		}
+
+		/*
+		// This method works in conjuction with a filter in sunrise.php, duplicated here for transparency:
+
+		// Make the Plugin Directory available at /plugins/ on all rosetta sites.
+		function wporg_plugins_on_rosetta_domains( $site, $domain, $path, $segments ) {
+			// All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
+			if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/plugins/' == substr( $path . '/', 0, 9 ) ) {
+				$site = get_blog_details( WPORG_PLUGIN_DIRECTORY_BLOGID );
+				if ( $site ) {
+					$site = clone $site;
+			 		// 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
+					$site->site_id = 6;
+					return $site;
+				}
+			}
+		
+			return $site;
+		}
+		add_filter( 'pre_get_site_by_path', 'wporg_plugins_on_rosetta_domains', 10, 4 );
+		*/
+	}
+
+	/**
+	 * Filter the permalink for the Plugins to be /plugin-name/.
 	 *
 	 * @param string  $link The generated permalink.
 	 * @param WP_Post $post The Plugin post object.
