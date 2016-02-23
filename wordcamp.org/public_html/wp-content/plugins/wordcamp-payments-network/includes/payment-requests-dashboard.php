@@ -470,7 +470,7 @@ class Payment_Requests_Dashboard {
 			// Payment Header
 			fputcsv( $report, array(
 				'PMTHDR',
-				'FEDEXOVN',
+				'USPS',
 				'QKCHECKS',
 				date( 'm/d/Y' ),
 				number_format( $amount, 2, '.', '' ),
