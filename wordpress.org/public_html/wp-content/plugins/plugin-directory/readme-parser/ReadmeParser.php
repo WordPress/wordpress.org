@@ -127,6 +127,9 @@ class Baikonur_ReadmeParser {
 			$data->short_description .= $line . "\n";
 		}
 		$data->short_description = trim( $data->short_description );
+		if ( ! $data->short_description && ! empty( $headers['description'] ) ) {
+			$data->short_description = $headers['description'];
+		}
 
 		$data->is_truncated = call_user_func_array( array(
 			$this_class,
