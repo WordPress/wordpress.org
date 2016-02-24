@@ -1242,6 +1242,9 @@ input {
 .devhub-wrap .wp-parser-class .callout, .devhub-wrap .wp-parser-function .callout, .devhub-wrap .wp-parser-hook .callout, .devhub-wrap .wp-parser-method .callout {
   margin-top: 30px;
 }
+.devhub-wrap .callout:before {
+  top: 0.2em;
+}
 .devhub-wrap.archive .wp-parser-class h1 a, .devhub-wrap.archive .wp-parser-function h1 a, .devhub-wrap.archive .wp-parser-hook h1 a, .devhub-wrap.archive .wp-parser-method h1 a, .devhub-wrap.search .wp-parser-class h1 a, .devhub-wrap.search .wp-parser-function h1 a, .devhub-wrap.search .wp-parser-hook h1 a, .devhub-wrap.search .wp-parser-method h1 a {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #21759b;

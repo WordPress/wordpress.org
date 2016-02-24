@@ -1034,6 +1034,10 @@
 		}
 	}
 
+	.callout:before {
+		top: 0.2em;
+	}
+
 	&.archive, &.search {
 		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 			h1 {
