@@ -12,7 +12,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikipedia' => 'Google_Chrome',
 			'normalized' => 1, // just first number
 			'facebook' => 'googlechrome',
-			'url' => 'http://www.google.com/chrome',
+			'url' => 'https://www.google.com/chrome',
 			'info' => __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' ),
 		),
 		'firefox' => (object) array(
@@ -21,7 +21,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikipedia' => 'Firefox',
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => 'Firefox',
-			'url' => 'http://www.firefox.com/',
+			'url' => 'https://www.firefox.com/',
 			'info' => __( "&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;", 'browsehappy' ),
 		),
 		'safari' => (object) array(
@@ -30,7 +30,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikipedia' => 'Safari',
 			'normalized' => 1.5, // include second number if non-zero
 			'facebook' => false,
-			'url' => 'http://www.apple.com/safari/',
+			'url' => 'https://www.apple.com/safari/',
 			'info' => str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) ),
 		),
 		'opera' => (object) array(
@@ -82,7 +82,7 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 		return $stored_version;
 	}
 
-	$url = 'http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=php&titles=Template:Latest_stable_software_release/';
+	$url = 'https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=php&titles=Template:Latest_stable_software_release/';
 	$url .= $fragment;
 
 	$response = wp_remote_get( $url );
@@ -174,7 +174,7 @@ function browsehappy_like_button( $browser ) {
 	}
 
 ?>
-<p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2F<?php echo $facebook_page; ?>&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+<p class="likebutton"><iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2F<?php echo $facebook_page; ?>&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
 <?php
 }
 

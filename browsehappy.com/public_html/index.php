@@ -21,7 +21,7 @@
 	<!--[if (gt IE 6)|!(IE)]><!-->
 		<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?4" />
 		<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
-		<script src="http://use.typekit.com/lsw6yis.js"></script>
+		<script src="https://use.typekit.com/lsw6yis.js"></script>
 		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<!--<![endif]-->
 
@@ -67,7 +67,7 @@ echo $what; ?></p>
 				<h2><?php _e( 'Share the Happiness', 'browsehappy' ); ?></h2>
 				<nav>
 					<ul>
-						<li class="twitter"><a onclick="window.open(this.href, 'twittershare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=250,width=500'); return false;" href="http://twitter.com/share?url=<?php echo urlencode( home_url( '/' ) ); ?>&amp;text=<?php echo urlencode( __( 'Browse Happy: Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ); ?>" title="<?php esc_attr_e( 'Share on Twitter', 'browsehappy' ); ?>">Twitter</a></li>
+						<li class="twitter"><a onclick="window.open(this.href, 'twittershare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=250,width=500'); return false;" href="https://twitter.com/share?url=<?php echo urlencode( home_url( '/' ) ); ?>&amp;text=<?php echo urlencode( __( 'Browse Happy: Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ); ?>" title="<?php esc_attr_e( 'Share on Twitter', 'browsehappy' ); ?>">Twitter</a></li>
 <?php
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
@@ -83,7 +83,7 @@ $facebook_pieces = array(
 	'redirect_uri=' . $redirect_uri,
 );
 ?>
-						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="http://www.facebook.com/dialog/feed?<?php echo implode( '&', $facebook_pieces ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
+						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="https://www.facebook.com/dialog/feed?<?php echo implode( '&', $facebook_pieces ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
 					</ul>
 				</nav>
 			</section><!-- #share -->
