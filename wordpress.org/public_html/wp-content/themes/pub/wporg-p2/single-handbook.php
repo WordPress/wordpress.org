@@ -24,7 +24,7 @@
 			<?php endwhile; ?>
 			</ul>
 
-			<?php \WPorg_Handbook_Navigation::navigate_via_menu( 'Table of Contents' ); ?>
+			<?php \WPorg_Handbook_Navigation::show_nav_links(); ?>
 
 		<?php endif; ?>
 
