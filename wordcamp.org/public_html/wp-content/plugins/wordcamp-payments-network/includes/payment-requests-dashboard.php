@@ -583,8 +583,8 @@ class Payment_Requests_Dashboard {
 		echo $entry_class; // Standard Entry Class
 
 		echo 'Vendor Pay'; // Entry Description
-		echo date( 'ymd', strtotime( 'today + 1 weekday' ) ); // Company Description Date
-		echo date( 'ymd', strtotime( 'today + 1 weekday' ) ); // Effective Entry Date
+		echo date( 'ymd', self::_next_business_day_timestamp() ); // Company Description Date
+		echo date( 'ymd', self::_next_business_day_timestamp() ); // Effective Entry Date
 		echo str_pad( '', 3 ); // Blanks
 		echo '1'; // Originator Status Code
 		echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
@@ -681,6 +681,45 @@ class Payment_Requests_Dashboard {
 		// The file must have a number of lines that is a multiple of 10 (e.g. 10, 20, 30).
 		echo str_repeat( PHP_EOL, 10 - ( ( 4 + $count ) % 10 ) - 1 );
 		return ob_get_clean();
+	}
+
+	/**
+	 * Exclude weekends and JPM holidays.
+	 *
+	 * Needs to be updated every year.
+	 *
+	 * @return int Timestamp.
+	 */
+	private static function _next_business_day_timestamp() {
+		static $timestamp;
+
+		if ( isset( $timestamp ) )
+			return $timestamp;
+
+		$holidays = array(
+			date( 'Ymd', strtotime( 'Friday, January 1, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, January 18, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, February 15, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, May 30, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, July 4, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, September 5, 2016' ) ),
+			date( 'Ymd', strtotime( 'Friday, November 11, 2016' ) ),
+			date( 'Ymd', strtotime( 'Thursday, November 24, 2016' ) ),
+			date( 'Ymd', strtotime( 'Monday, December 26, 2016' ) ),
+		);
+
+		$timestamp = strtotime( 'today + 1 weekday' );
+		$attempts = 5;
+
+		while ( in_array( date( 'Ymd', $timestamp ), $holidays ) ) {
+			$timestamp = strtotime( '+ 1 weekday', $timestamp );
+			$attempts--;
+
+			if ( ! $attempts )
+				break;
+		}
+
+		return $timestamp;
 	}
 
 	/**
