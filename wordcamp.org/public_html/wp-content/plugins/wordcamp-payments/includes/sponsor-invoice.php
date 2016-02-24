@@ -288,13 +288,8 @@ function render_sponsor_invoice_metabox( $post ) {
 	$selected_sponsor_id  = get_post_meta( $post->ID, '_wcbsi_sponsor_id',      true );
 	$selected_class_id    = get_post_meta( $post->ID, '_wcbsi_qbo_class_id',    true );
 	$selected_currency    = get_post_meta( $post->ID, '_wcbsi_currency',        true );
-	$due_date             = get_post_meta( $post->ID, '_wcbsi_due_date',        true );
 	$description          = get_post_meta( $post->ID, '_wcbsi_description',     true );
 	$amount               = get_post_meta( $post->ID, '_wcbsi_amount',          true );
-
-	if ( $due_date ) {
-		$due_date = date( 'Y-m-d', $due_date );
-	}
 
 	if ( 'add' === $current_screen->action && isset( $_GET['sponsor_id'] ) ) {
 		$selected_sponsor_id = absint( $_GET['sponsor_id'] );
@@ -342,7 +337,7 @@ function set_invoice_status( $post_data, $post_data_raw ) {
 	$sponsor_fields_complete = 'true' === $sponsor['data_attributes']['required-fields-complete'];
 
 	$required_invoice_fields = array(
-		'_wcbsi_sponsor_id', '_wcbsi_due_date', '_wcbsi_description', '_wcbsi_currency', '_wcbsi_amount',
+		'_wcbsi_sponsor_id', '_wcbsi_description', '_wcbsi_currency', '_wcbsi_amount',
 		'_wcbsi_qbo_class_id',
 	);
 	$invoice_fields_complete = required_fields_complete( $post_data_raw, $required_invoice_fields );
@@ -385,15 +380,11 @@ function save_invoice( $post_id, $post ) {
 	}
 
 	// Sanitize and save the field values
-	$fields = array( 'sponsor_id', 'qbo_class_id', 'currency', 'due_date', 'description', 'amount' );
+	$fields = array( 'sponsor_id', 'qbo_class_id', 'currency', 'description', 'amount' );
 
 	foreach( $fields as $field ) {
 		$meta_key = "_wcbsi_$field";
 		$value = sanitize_text_field( wp_unslash( $_POST[ $meta_key ] ) );
-
-		if ( 'due_date' == $field ) {
-			$value = strtotime( $value );
-		}
 
 		if ( 'amount' == $field ) {
 			$value = \WordCamp_Budgets::validate_amount( $value );
@@ -419,7 +410,6 @@ function get_columns( $_columns ) {
 		'author'         => __( 'Author' ),
 		'title'          => $_columns['title'],
 		'date'           => $_columns['date'],
-		'due_date'       => __( 'Due Date', 'wordcamporg' ),
 		'sponsor_name'   => __( 'Sponsor',  'wordcamporg' ),
 		'payment_amount' => __( 'Amount',   'wordcamporg' ),
 	);
@@ -435,12 +425,6 @@ function get_columns( $_columns ) {
  */
 function render_columns( $column, $post_id ) {
 	switch ( $column ) {
-		case 'due_date':
-			if ( $date = get_post_meta( $post_id, '_wcbsi_due_date', true ) ) {
-				echo date( 'Y-m-d', $date );
-			}
-			break;
-
 		case 'sponsor_name':
 			// todo could reuse get_sponsor_name() from dashboard if made some minor modifications
 

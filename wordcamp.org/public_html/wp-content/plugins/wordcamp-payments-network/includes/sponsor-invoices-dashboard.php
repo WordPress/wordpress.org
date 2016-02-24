@@ -404,7 +404,7 @@ function update_index_row( $invoice_id, $invoice ) {
 		'sponsor_name'   => get_sponsor_name( $invoice_id ),
 		'description'    => get_post_meta( $invoice_id, '_wcbsi_description', true ),
 		'currency'       => get_post_meta( $invoice_id, '_wcbsi_currency',    true ),
-		'due_date'       => get_post_meta( $invoice_id, '_wcbsi_due_date',    true ),
+		'due_date'       => 0,  // todo remove this field from index
 		'amount'         => get_post_meta( $invoice_id, '_wcbsi_amount',      true ),
 	);
 

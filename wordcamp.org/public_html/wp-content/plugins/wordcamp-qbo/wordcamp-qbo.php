@@ -303,7 +303,6 @@ class WordCamp_QBO {
 			$request->get_param( 'invoice_title'   ),
 			$request->get_param( 'amount'          ),
 			$request->get_param( 'description'     ),
-			$request->get_param( 'due_date'        ),
 			$request->get_param( 'statement_memo'  )
 		);
 
@@ -332,12 +331,11 @@ class WordCamp_QBO {
 	 * @param string $invoice_title
 	 * @param float  $amount
 	 * @param string $description
-	 * @param string $due_date
 	 * @param string $statement_memo
 	 *
 	 * @return int|WP_Error Invoice ID on success; error on failure
 	 */
-	protected static function create_invoice( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $due_date, $statement_memo ) {
+	protected static function create_invoice( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $statement_memo ) {
 		$qbo_request = self::build_qbo_create_invoice_request(
 			$sponsor,
 			$currency_code,
@@ -345,7 +343,6 @@ class WordCamp_QBO {
 			$invoice_title,
 			$amount,
 			$description,
-			$due_date,
 			$sponsor['email-address'],
 			$statement_memo
 		);
@@ -382,13 +379,12 @@ class WordCamp_QBO {
 	 * @param string $invoice_title
 	 * @param float  $amount
 	 * @param string $description
-	 * @param string $due_date
 	 * @param string $customer_email
 	 * @param string $statement_memo
 	 *
 	 * @return array|WP_Error
 	 */
-	protected static function build_qbo_create_invoice_request( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $due_date, $customer_email, $statement_memo ) {
+	protected static function build_qbo_create_invoice_request( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $customer_email, $statement_memo ) {
 		$customer_id = self::probably_get_customer_id( $sponsor, $currency_code );
 
 		if ( is_wp_error( $customer_id ) ) {
@@ -399,7 +395,6 @@ class WordCamp_QBO {
 		$invoice_title   = sanitize_text_field( $invoice_title   );
 		$amount          = floatval(            $amount          );
 		$description     = sanitize_text_field( $description     );
-		$due_date        = sanitize_text_field( $due_date        );
 		$statement_memo  = sanitize_text_field( $statement_memo  );
 
 		/*
@@ -420,7 +415,7 @@ class WordCamp_QBO {
 			$customer_email = is_email( $customer_email );
 		}
 
-		foreach ( array( 'amount', 'due_date', 'customer_id', 'customer_email' ) as $field ) {
+		foreach ( array( 'amount', 'customer_id', 'customer_email' ) as $field ) {
 			if ( empty( $$field ) ) {
 				return new WP_Error( 'required_field_empty', "$field cannot be empty." );
 			}
@@ -480,8 +475,6 @@ class WordCamp_QBO {
 			'SalesTermRef' => array(
 				'value' => 1, // Due on receipt
 			),
-
-			'DueDate' => $due_date,
 
 			'BillEmail' => array(
 				'Address' => $customer_email,

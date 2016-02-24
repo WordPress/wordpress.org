@@ -70,20 +70,6 @@ defined( 'WPINC' ) or die();
 			</select>
 		</div>
 	</li>
-	
-	<li>
-		<label for="_wcbsi_due_date">
-			<?php _e( 'Due Date:', 'wordcamporg' ); ?>
-		</label>
-
-		<input
-			type="date"
-			class="regular-text"
-			id="_wcbsi_due_date"
-			name="_wcbsi_due_date"
-			value="<?php echo esc_attr( $due_date ); ?>"
-		/>
-	</li>
 
 	<li>
 		<label for="_wcbsi_description">

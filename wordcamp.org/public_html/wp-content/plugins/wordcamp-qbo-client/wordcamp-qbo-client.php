@@ -308,18 +308,12 @@ class WordCamp_QBO_Client {
 		$invoice_meta = get_post_custom( $invoice_id );
 		$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
 
-		$due_date = new \DateTime(
-			date( 'Y-m-d', $invoice_meta['_wcbsi_due_date'][0] ),
-			new \DateTimeZone( get_option('timezone_string') )
-		);
-
 		$payload = array(
 			'invoice_title'   => sanitize_text_field( $invoice->post_title                       ),
 			'currency_code'   => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
 			'qbo_class_id'    => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),
 			'amount'          => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
 			'description'     => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
-			'due_date'        => $due_date->format( 'Y-m-dP' ),
 
 			'statement_memo' => sprintf(
 				'WordCamp.org Invoice: %s',

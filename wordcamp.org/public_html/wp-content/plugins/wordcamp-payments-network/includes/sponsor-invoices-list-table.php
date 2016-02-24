@@ -14,7 +14,6 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 			'wordcamp_name' => 'WordCamp',
 			'sponsor_name'  => 'Sponsor',
 			'description'   => 'Description',
-			'due_date'      => 'Due Date',
 			'amount'        => 'Amount',
 		);
 
@@ -57,7 +56,7 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 			SELECT *
 			FROM $table_name
 			WHERE status = %s
-			ORDER BY due_date ASC
+			ORDER BY blog_id, invoice_id ASC
 			LIMIT %d
 			OFFSET %d",
 			$status,
@@ -112,15 +111,6 @@ class Sponsor_Invoices_List_Table extends \WP_List_Table {
 	 */
 	protected function column_description( $index_row ) {
 		return esc_html( substr( $index_row->description, 0, 75 ) );
-	}
-
-	/**
-	 * Render the value for the Due Date column
-	 *
-	 * @param object $index_row
-	 */
-	protected function column_due_date( $index_row ) {
-		return esc_html( date( 'Y-m-d', $index_row->due_date ) );
 	}
 
 	/**
