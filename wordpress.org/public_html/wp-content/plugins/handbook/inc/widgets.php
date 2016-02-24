@@ -2,11 +2,28 @@
 
 class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 
+	/**
+	 * Base ID for the widget.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected static $widget_id_base = 'handbook_pages';
+
 	protected $post_types = array( 'handbook' );
+
+	/**
+	 * Gets the widget_id_base value.
+	 *
+	 * @return string
+	 */
+	public static function get_widget_id_base() {
+		return self::$widget_id_base;
+	}
 
 	function __construct() {
 		$widget_ops = array('classname' => 'widget_wporg_handbook_pages', 'description' => __( 'Your site&#8217;s Handbook Pages', 'wporg' ) );
-		WP_Widget::__construct( 'handbook_pages', __( 'Handbook Pages', 'wporg' ), $widget_ops );
+		WP_Widget::__construct( self::get_widget_id_base(), __( 'Handbook Pages', 'wporg' ), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
