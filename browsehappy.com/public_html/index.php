@@ -20,7 +20,7 @@
 	<link rel="apple-touch-icon" sizes="114x114" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-114x114.png" />
 
 	<!--[if (gt IE 6)|!(IE)]><!-->
-		<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?4" />
+		<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?5" />
 		<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
 		<script src="https://use.typekit.com/lsw6yis.js"></script>
 		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
