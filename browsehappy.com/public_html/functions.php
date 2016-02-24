@@ -191,12 +191,17 @@ function browsehappy_init() {
 	$wp = new BrowseHappy_WP;
 }
 
-class BrowseHappy_WP extends WP {
-	function query_posts() { }
-	function handle_404() {
-		status_header( 200 );
+// Short-circuit query and 404 handling on the front-end.
+if ( is_admin() ) :
+	class BrowseHappy_WP extends WP {}
+else :
+	class BrowseHappy_WP extends WP {
+		function query_posts() { }
+		function handle_404() {
+			status_header( 200 );
+		}
 	}
-}
+endif;
 
 function browsehappy_load_textdomain() {
 	load_theme_textdomain( 'browsehappy', get_template_directory() . '/languages' );
