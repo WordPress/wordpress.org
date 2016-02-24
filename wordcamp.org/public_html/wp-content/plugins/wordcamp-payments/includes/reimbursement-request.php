@@ -180,6 +180,7 @@ function init_meta_boxes() {
 		array(
 			'meta_key_prefix' => 'wcbrr',
 			'fields_enabled'  => user_can_edit_request( $post ),
+			'show_vendor_requested_payment_method' => false,
 		)
 	);
 

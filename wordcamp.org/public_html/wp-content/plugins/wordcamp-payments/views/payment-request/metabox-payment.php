@@ -1,6 +1,10 @@
 <fieldset <?php disabled( $box['args']['fields_enabled'], false ); ?> >
+
 	<table class="form-table">
-		<?php $this->render_textarea_input( $post, 'Did the vendor request a specific type of payment?', 'vendor_requested_payment_method', 'Add any relevant details' ); ?>
+		<?php if ( $box['args']['show_vendor_requested_payment_method'] ) : ?>
+			<?php $this->render_textarea_input( $post, 'Did the vendor request a specific type of payment?', 'vendor_requested_payment_method', 'Add any relevant details' ); ?>
+		<?php endif;?>
+
 		<?php $this->render_radio_input( $post, 'Payment Method', 'payment_method' ); ?>
 	</table>
 
