@@ -281,6 +281,7 @@ function render_status_metabox( $post ) {
 function render_sponsor_invoice_metabox( $post ) {
 	wp_nonce_field( 'sponsor_invoice', 'sponsor_invoice_nonce' );
 
+	$current_screen       = get_current_screen();
 	$available_sponsors   = prepare_sponsor_data();
 	$available_classes    = \WordCamp_QBO_Client::get_classes();
 	$available_currencies = \WordCamp_Budgets::get_currencies();
@@ -293,6 +294,10 @@ function render_sponsor_invoice_metabox( $post ) {
 
 	if ( $due_date ) {
 		$due_date = date( 'Y-m-d', $due_date );
+	}
+
+	if ( 'add' === $current_screen->action && isset( $_GET['sponsor_id'] ) ) {
+		$selected_sponsor_id = absint( $_GET['sponsor_id'] );
 	}
 
 	require_once( dirname( __DIR__ ) . '/views/sponsor-invoice/metabox-general.php' );

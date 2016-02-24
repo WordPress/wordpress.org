@@ -33,6 +33,10 @@ defined( 'WPINC' ) or die();
 				<?php endforeach; ?>
 			</select>
 
+			[<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=wcb_sponsor') ); ?>"><?php
+				_e( 'Add New Sponsor', 'wordcamporg' );
+			?></a>]
+
 			<div id="wcbsi-sponsor-information" class="loading-content">
 				<span class="spinner is-active"></span>
 			</div>
