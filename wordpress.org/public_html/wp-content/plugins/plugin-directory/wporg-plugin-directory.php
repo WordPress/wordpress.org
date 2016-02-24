@@ -19,6 +19,10 @@ include __DIR__ . '/class-wporg-plugin-directory-tools.php';
 
 include __DIR__ . '/shortcodes/screenshots.php';
 
+if ( is_admin() ) {
+	include __DIR__ . '/admin/class-wporg-plugin-directory-admin-metabox-committers.php';
+}
+
 $wporg_plugin_directory = new WPorg_Plugin_Directory();
 register_activation_hook( __FILE__, array( $wporg_plugin_directory, 'activate' ) );
 register_deactivation_hook( __FILE__, array( $wporg_plugin_directory, 'deactivate' ) );
