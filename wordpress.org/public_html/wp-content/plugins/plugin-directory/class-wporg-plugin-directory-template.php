@@ -149,8 +149,8 @@ class WPorg_Plugin_Directory_Template {
 	 */
 	static function get_plugin_icon( $plugin, $output = 'raw' ) {
 		global $wporg_plugin_directory;
-		$plugin = $wporg_plugin_directory->get_or_create_plugin_post( $plugin );
-		if ( is_wp_error( $plugin ) ) {
+		$plugin = $wporg_plugin_directory->get_plugin_post( $plugin );
+		if ( ! $plugin ) {
 			return false;
 		}
 		$plugin_slug = $plugin->post_name;
@@ -218,8 +218,8 @@ class WPorg_Plugin_Directory_Template {
 	 */
 	static function get_plugin_banner( $plugin, $output = 'raw' ) {
 		global $wporg_plugin_directory;
-		$plugin = $wporg_plugin_directory->get_or_create_plugin_post( $plugin );
-		if ( is_wp_error( $plugin ) ) {
+		$plugin = $wporg_plugin_directory->get_plugin_post( $plugin );
+		if ( ! $plugin ) {
 			return false;
 		}
 		$plugin_slug = $plugin->post_name;

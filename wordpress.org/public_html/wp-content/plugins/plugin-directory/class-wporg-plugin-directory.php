@@ -277,7 +277,7 @@ class WPorg_Plugin_Directory {
 	 * @return array
 	 */
 	public function split_post_content_into_pages( $content ) {
-		$_pages        = preg_split( "#<!--section=(.+?)-->#", $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages = preg_split( "#<!--section=(.+?)-->#", $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'stats'       => '[wporg-plugins-stats]',
@@ -301,28 +301,58 @@ class WPorg_Plugin_Directory {
  	 * @param $plugin_slug string|WP_Post The slug of the plugin to retrieve.
  	 * @return WP_Post|WP_Error
  	 */
-	public function get_or_create_plugin_post( $plugin_slug ) {
+	public function get_plugin_post( $plugin_slug ) {
 		if ( $plugin_slug instanceof WP_Post ) {
 			return $plugin_slug;
 		}
 
 		// get_post_by_slug();
-		$posts = get_posts( array( 'post_type' => 'plugin', 'name' => $plugin_slug, 'post_status' => 'any', 'fields' => 'ids' ) );
+		$posts = get_posts( array(
+			'post_type'   => 'plugin',
+			'name'        => $plugin_slug,
+			'post_status' => 'any'
+		) );
+		if ( ! $posts ) {
+			return false;
+		}
 
-		if ( $posts ) {
-			$id = reset( $posts );
-		} else {
-			$id = wp_insert_post( array(
-				'post_type' => 'plugin',
-				'post_status' => 'pending',
-				'post_name' => $plugin_slug,
-				'post_title' => $plugin_slug,
-				'post_content' => '',
-			), true );
+		$plugin = reset( $posts );
+		return $plugin;
+	}
 
-			if ( is_wp_error( $id ) ) {
-				return $id;
-			}
+	/**
+ 	 * Create a new post entry for a given plugin slug.
+ 	 *
+	 * @param array $plugin_info {
+	 *     Array of initial plugin post data, all fields are optional.
+ 	 *
+	 *     @type string $title       The title of the plugin.
+	 *     @type string $slug        The slug of the plugin.
+	 *     @type string $status      The status of the plugin ( 'publish', 'pending', 'disabled', 'closed' ).
+	 *     @type int    $author      The ID of the plugin author.
+	 *     @type string $description The short description of the plugin.
+	 * }
+ 	 * @return WP_Post|WP_Error
+ 	 */
+	public function create_plugin_post( array $plugin_info ) {
+		$title  = !empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
+		$slug   = !empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
+		$status = !empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'pending';
+		$author = !empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
+		$desc   = !empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
+
+		$id = wp_insert_post( array(
+			'post_type'    => 'plugin',
+			'post_status'  => $status,
+			'post_name'    => $slug,
+			'post_title'   => $title ?: $slug,
+			'post_author'  => $author,
+			'post_content' => '',
+			'post_excerpt' => $desc,
+		), true );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
 		}
 
 		$plugin = get_post( $id );
