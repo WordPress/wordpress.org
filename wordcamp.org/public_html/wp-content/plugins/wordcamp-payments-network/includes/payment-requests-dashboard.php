@@ -274,26 +274,26 @@ class Payment_Requests_Dashboard {
 			'default' => array(
 				'label' => 'Default',
 				'mime_type' => 'text/csv',
-				'ext' => 'csv',
 				'callback' => array( __CLASS__, '_generate_payment_report_default' ),
+				'filename' => 'wordcamp-payments-%s-%s-default.csv',
 			),
 			'jpm_wires' => array(
 				'label' => 'JP Morgan Access - Wire Payments',
 				'mime_type' => 'text/csv',
-				'ext' => 'csv',
 				'callback' => array( __CLASS__, '_generate_payment_report_jpm_wires' ),
+				'filename' => 'wordcamp-payments-%s-%s-jpm-wires.csv',
 			),
 			'jpm_ach' => array(
 				'label' => 'JP Morgan - NACHA',
 				'mime_type' => 'text/plain',
-				'ext' => 'ach',
 				'callback' => array( __CLASS__, '_generate_payment_report_jpm_ach' ),
+				'filename' => 'wordcamp-payments-%s-%s-jpm-ach.ach',
 			),
 			'jpm_checks' => array(
 				'label' => 'JP Morgan - Quick Checks',
 				'mime_type' => 'text/csv',
-				'ext' => 'csv',
 				'callback' => array( __CLASS__, '_generate_payment_report_jpm_checks' ),
+				'filename' => 'wordcamp-payments-%s-%s-jpm-checks.csv',
 			),
 		);
 	}
@@ -320,8 +320,8 @@ class Payment_Requests_Dashboard {
 
 		$start_date = strtotime( $_POST['wcpn_export_start_date'] . ' 00:00:00' );
 		$end_date   = strtotime( $_POST['wcpn_export_end_date']   . ' 23:59:59' );
-		$filename   = sanitize_file_name( sprintf( 'wordcamp-payments-%s-to-%s.%s',
-			date( 'Y-m-d', $start_date ), date( 'Y-m-d', $end_date ), $export_type['ext'] ) );
+		$filename = sprintf( $export_type['filename'], date( 'Ymd', $start_date ), date( 'Ymd', $end_date ) );
+		$filename = sanitize_file_name( $filename );
 
 		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date, $export_type );
 
