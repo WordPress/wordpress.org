@@ -98,7 +98,7 @@ class WCP_Payment_Request {
 			'incomplete',
 			array(
 				'label'              => _x( 'Incomplete', 'post', 'wordcamporg' ),
-				'label_count'        => _nx_noop( 'Incomplete<span class="count">(%s)</span>', 'Incomplete <span class="count">(%s)</span>', 'wordcamporg' ),
+				'label_count'        => _nx_noop( 'Incomplete <span class="count">(%s)</span>', 'Incomplete <span class="count">(%s)</span>', 'wordcamporg' ),
 				'public'             => true,
 				'publicly_queryable' => false,
 			)
@@ -510,7 +510,7 @@ class WCP_Payment_Request {
 				} else {
 					$post_data['post_status'] = 'unpaid';
 				}
-				
+
 				if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
 					$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
 				}
