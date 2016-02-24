@@ -275,7 +275,8 @@ header h2 em {
 	width: 125px;
 	height: 135px;
 	margin: 20px auto;
-	background: url(imgs/browsehappy-sprite.png) no-repeat;
+	background-image: url(imgs/browsehappy-sprite.png);
+	background-repeat: no-repeat;
 }
 
 #browserlist li#chrome .icon {
@@ -487,7 +488,8 @@ footer h2 {
 	height: 32px;
 	display: block;
 	text-indent: -9999px;
-	background: url(imgs/browsehappy-sprite.png) no-repeat;
+	background: url(imgs/browsehappy-sprite.png);
+	background-repeat: no-repeat;
 	-moz-opacity: 0.4;
 	-khtml-opacity: 0.4;
 	opacity: 0.4;
@@ -522,7 +524,9 @@ footer h2 {
 	height: 20px;
 	margin: 0 auto;
 	display: block;
-	background: url(imgs/browsehappy-sprite.png) no-repeat 0 -135px;
+	background-image: url(imgs/browsehappy-sprite.png);
+	background-repeat: no-repeat;
+	background-position: 0 -135px;
 	text-indent: -9999px;
 	-moz-opacity: 0.6;
 	-khtml-opacity: 0.6;
@@ -555,5 +559,14 @@ footer h2 {
 		display: block;
 		float: none;
 		margin: 0 auto;
+	}
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min-resolution: 1.5dppx),
+       only screen and (min-resolution: 144dpi) {
+	#browserlist li .icon, #share nav li a, #byline a {
+		background-image: url(imgs/browsehappy-sprite-2x.png);
+		background-repeat: no-repeat;
+		background-size: 625px 170px;
 	}
 }
