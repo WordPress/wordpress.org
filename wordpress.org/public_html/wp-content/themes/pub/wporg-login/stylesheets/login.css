@@ -341,14 +341,14 @@ form#authorize {
 		background:#FFF; 
 	}
 	body.login {
-		/* Using flexbox to control the vertical alignment of the form and white box */
-		display:flex;
+		display:block; /* Overwriting flexbox to remove vertical positioning */
 		align-items:center;
+		margin-top:100px; /* Fix for displaying logo correctly */
 	}
-	#login {
+	#login, .mobile #login {
 		-webkit-box-shadow:none;
 		box-shadow:none;
-		padding:20px 0;
+		padding:24px;
 	}
 	#login #login_error {
 		margin-left:0;
@@ -366,5 +366,8 @@ form#authorize {
 	#login h1 a {
 		-webkit-background-size:100%;
 		background-size:100%;
+	}
+	#login #login_error {
+		width:100%; /* Adjusting width of error to match that of content */
 	}
 }
