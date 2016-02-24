@@ -178,7 +178,7 @@ header h2 em {
 	border: 1px solid #c62d24;
 	margin: 20px auto 0;
 	padding: 20px 30px;
-	width: 870px;
+	width: 90%;
 	color: white;
 	font-size: 120%;
 	font-family: "lemonde-courrier-1","lemonde-courrier-2", Helvetica, Arial, sans-serif;
@@ -586,6 +586,20 @@ footer h2 {
 @media (max-width: 500px) {
 	header h1 {
 		font-size: 900%;
+	}
+	#browser-status {
+		padding: 20px 10px;
+	}
+	.browser-status-text, .browser-status-action {
+		float: none;
+		width: 100%;
+		margin-right: 0;
+	}
+	.browser-status-text {
+		margin-bottom: 1em;
+	}
+	.browser-status-action a {
+		margin: 0;
 	}
 }
 @media (max-width: 430px) {
