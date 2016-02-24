@@ -20,9 +20,13 @@ WPorg_Handbook_Glossary::init();
  */
 class WPorg_Handbook_Init {
 
+	public static function get_post_types() {
+		return (array) apply_filters( 'handbook_post_types', array( 'handbook' ) );
+	}
+
 	static function init() {
 
-		$post_types = (array) apply_filters( 'handbook_post_types', array( 'handbook' ) );
+		$post_types = self::get_post_types();
 
 		new WPorg_Handbook_TOC( $post_types );
 
