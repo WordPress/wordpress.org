@@ -93,7 +93,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	max-width: 960px;
+	max-width: 1152px;
 	margin: 0 auto;
 }
 
@@ -297,6 +297,10 @@ header h2 em {
 
 #browserlist li#ie .icon {
 	background-position: -500px 0;
+}
+
+#browserlist li#edge .icon {
+	background-position: -625px 0;
 }
 
 #browserlist h2 {
@@ -567,6 +571,6 @@ footer h2 {
 	#browserlist li .icon, #share nav li a, #byline a {
 		background-image: url(imgs/browsehappy-sprite-2x.png);
 		background-repeat: no-repeat;
-		background-size: 625px 170px;
+		background-size: 750px 170px;
 	}
 }

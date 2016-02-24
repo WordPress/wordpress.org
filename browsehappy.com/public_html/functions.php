@@ -42,6 +42,15 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'url' => 'http://www.opera.com/',
 			'info' => __( '&#8220;The fastest browser on Earth—secure, powerful and easy to use, with excellent privacy protection. And&nbsp;it&nbsp;is&nbsp;free.&#8221;', 'browsehappy' ),
 		),
+		'edge' => (object) array(
+			'name' => 'Microsoft Edge',
+			'long_name' => 'Microsoft Edge',
+			'wikipedia' => 'Microsoft_Edge',
+			'normalized' => 1, // just first number
+			'facebook' => 'MicrosoftEdge',
+			'url' => 'https://www.microsoft.com/en-us/windows/microsoft-edge',
+			'info' => __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' ),
+		),
 		'ie' => (object) array(
 			'name' => 'Internet Explorer',
 			'long_name' => 'Microsoft Internet Explorer',
@@ -105,13 +114,14 @@ function browsehappy_fetch_version( $browser, $normalize = true ) {
 		$data = trim( $data, '| ' );
 		if ( false !== strpos( $data, 'Android' ) || false !== strpos( $data, 'iOS' ) )
 			continue;
-		if ( false !== strpos( $data, 'Linux' ) && false === strpos( $data, 'Mac OS X' ) && false === strpos( $data, 'Windows' ) )
+		if ( false !== strpos( $data, 'Linux' ) && false === strpos( $data, 'Mac OS X' ) && false === strpos( $data, 'Windows' ) && false === strpos( $data, 'Microsoft' ) )
 			continue;
 		if ( ( false !== $pos = strpos( $data, 'latest_release_version' ) ) || ( false !== $pos = strpos( $data, 'latest release version' ) ) ) {
 			if ( $pos )
 				$data = substr( $data, $pos );
 			$version = trim( str_replace( array( 'latest_release_version', 'latest release version', '=' ), '', $data ), '| ' ) . " ";
 			$version = str_replace( "'''Mac OS X''' and '''Microsoft Windows'''<br />", '', $version );
+			$version = str_replace( "'''Windows 10'''<br>", '', $version );
 			$version = substr( $version, 0, strpos( $version, ' ' ) );
 			break;
 		}
