@@ -1310,6 +1310,7 @@ class WordCamp_Post_Types_Plugin {
 		add_meta_box( 'speakers-list',  __( 'Speakers',       'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
 		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
 		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcamporg'  ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'normal' );
+		add_meta_box( 'invoice-sponsor', __( 'Invoice Sponsor', 'wordcamporg' ), array( $this, 'metabox_invoice_sponsor' ), 'wcb_sponsor', 'side'   );
 	}
 
 	/**
@@ -1525,6 +1526,38 @@ class WordCamp_Post_Types_Plugin {
 		wp_nonce_field( 'edit-sponsor-info', 'wcpt-meta-sponsor-info' );
 
 		require_once( __DIR__ . '/views/sponsors/metabox-sponsor-info.php' );
+	}
+
+	/**
+	 * Render the Invoice Sponsor metabox view
+	 *
+	 * @param WP_Post $sponsor
+	 */
+	function metabox_invoice_sponsor( $sponsor ) {
+		$current_screen = get_current_screen();
+
+		$existing_invoices = get_posts( array(
+			'post_type'      => \WordCamp\Budgets\Sponsor_Invoices\POST_TYPE,
+			'post_status'    => 'any',
+			'posts_per_page' => - 1,
+
+			'meta_query' => array(
+				array(
+					'key'   => '_wcbsi_sponsor_id',
+					'value' => $sponsor->ID,
+				),
+			),
+		) );
+
+		$new_invoice_url = add_query_arg(
+			array(
+				'post_type'  => 'wcb_sponsor_invoice',
+				'sponsor_id' => $sponsor->ID,
+			),
+			admin_url( 'post-new.php' )
+		);
+
+		require_once( __DIR__ . '/views/sponsors/metabox-invoice-sponsor.php' );
 	}
 
 	/**
