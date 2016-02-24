@@ -257,6 +257,10 @@ p.intro, #login .message {
     box-shadow: none !important;
 }
 
+.mobile #login {
+	padding:24px;
+}
+
 .container {
 	padding: 0 0 64px;
 	margin-top: 24px;
@@ -336,7 +340,7 @@ form#authorize {
 	margin-bottom: 24px;
 }
 
-@media (max-width:376px) {
+@media (max-width:375px) {
 	body, html { 
 		background:#FFF; 
 	}
@@ -352,10 +356,11 @@ form#authorize {
 	}
 	#login #login_error {
 		margin-left:0;
+		width:100%;
 	}
 }
 
-@media (max-width:352px) {
+@media (max-width:360px) {
 	#login {
 		width:100%;
 		padding:20px 24px;
@@ -366,8 +371,5 @@ form#authorize {
 	#login h1 a {
 		-webkit-background-size:100%;
 		background-size:100%;
-	}
-	#login #login_error {
-		width:100%; /* Adjusting width of error to match that of content */
 	}
 }
