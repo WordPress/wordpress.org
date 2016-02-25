@@ -21,6 +21,8 @@
 		},
 
 		initialize: function() {
+			_.bindAll( this, 'uncheck' );
+
 			// Store the original sub-projects data, it's used to reset the collection on searches.
 			this._subProjects = this.get( 'sub_projects' );
 			this.unset( 'sub_projects' );
@@ -28,11 +30,23 @@
 			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
 				project: this,
 			} ) );
-			this.set( 'checked', _.contains( projects.settings.accessList, parseInt( this.get( 'id' ), 10 ) ) );
+
+			var isChecked = projects.selection.get( this.get( 'id' ) );
+			if ( isChecked ) {
+				this.set( 'checked', true );
+			}
 
 			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
 
+			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
+
+			this.on( 'change:checked', this.updateSelection );
+
 			this.checkForCheckedSubProjects();
+		},
+
+		uncheck: function() {
+			this.set( 'checked', false );
 		},
 
 		updateChecked: function( model ) {
@@ -41,6 +55,15 @@
 			}
 
 			this.checkForCheckedSubProjects();
+		},
+
+		updateSelection: function( model, checked ) {
+			if ( checked ) {
+				projects.selection.add( { id: this.get( 'id' ) } );
+				$window.trigger( 'uncheck-all-projects.rosetta' );
+			} else {
+				projects.selection.remove( { id: this.get( 'id' ) } );
+			}
 		},
 
 		checkForCheckedSubProjects: function() {
@@ -58,21 +81,24 @@
 
 		initialize: function() {
 			_.bindAll( this, 'disableActiveStates' );
+
 			this.on( 'change:isActive', this.toggleActiveStates );
-			$window.on( 'deactivate-all-projects.rosetta', this.disableActiveStates );
+
+			$window.on( 'deactivate-other-projects.rosetta', this.disableActiveStates );
 		},
 
 		toggleActiveStates: function( model ) {
 			if ( ! model.get( 'isActive' ) ) {
 				return;
 			}
+
 			this.each( function( project ) {
 				if ( project.get( 'id' ) != model.get( 'id' ) ) {
 					project.set( 'isActive', false );
 				}
 			});
 
-			$window.trigger( 'deactivate-other-projects.rosetta' );
+			$window.trigger( 'deactivate-all-projects.rosetta' );
 		},
 
 		disableActiveStates: function() {
@@ -91,7 +117,29 @@
 		},
 
 		initialize: function() {
-			this.set( 'checked', _.contains( projects.settings.accessList, this.get( 'id' ) ) );
+			_.bindAll( this, 'uncheck' );
+
+			var isChecked = projects.selection.get( this.get( 'id' ) );
+			if ( isChecked ) {
+				this.set( 'checked', true );
+			}
+
+			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
+
+			this.on( 'change:checked', this.updateSelection );
+		},
+
+		uncheck: function() {
+			this.set( 'checked', false );
+		},
+
+		updateSelection: function( model, checked ) {
+			if ( checked ) {
+				projects.selection.add( { id: this.get( 'id' ) } );
+				$window.trigger( 'uncheck-all-projects.rosetta' );
+			} else {
+				projects.selection.remove( { id: this.get( 'id' ) } );
+			}
 		}
 	});
 
@@ -173,6 +221,18 @@
 		}
 	});
 
+	projects.model.Selection = Backbone.Collection.extend({
+
+		initialize: function() {
+			this.$field = $( '#project-access-list' );
+			this.on( 'add remove reset', this.updateInputField );
+		},
+
+		updateInputField: function() {
+			this.$field.val( _.pluck( this.toJSON(), 'id' ).join() );
+		}
+	});
+
 	/**
 	 * VIEWS
 	 */
@@ -214,7 +274,7 @@
 		},
 
 		prepare: function() {
-			return _.pick( this.model.toJSON(), 'id', 'name', 'slug', 'checked', 'checkedSubProjects' );
+			return _.pick( this.model.toJSON(), 'name', 'slug', 'checked', 'checkedSubProjects' );
 		},
 
 		updateChecked: function() {
@@ -425,7 +485,13 @@
 		}).render();
 	};
 
+	projects.selection = new projects.model.Selection();
+
 	projects.init = function() {
+		_.each( projects.settings.accessList, function( projectID ) {
+			projects.selection.add( { id: projectID } );
+		});
+
 		var data = null;
 
 		if ( projects.hasStorage() ) {
@@ -447,7 +513,9 @@
 
 	$( projects.init );
 
-	$( '#project-all' ).on( 'click', function() {
+	var $projectAll = $( '#project-all' ), $projectAllCheckbox = $projectAll.find( 'input' );
+
+	$projectAll.on( 'click', function() {
 		var $el = $( this );
 
 		if ( $el.hasClass( 'active' ) ) {
@@ -455,10 +523,30 @@
 		}
 
 		$el.addClass( 'active' );
-		$window.trigger( 'deactivate-all-projects.rosetta' );
+		$window.trigger( 'deactivate-other-projects.rosetta' );
 	});
 
-	$window.on( 'deactivate-other-projects.rosetta', function() {
-		$( '#project-all' ).removeClass( 'active' );
+	$projectAll.find( 'input' ).on( 'change', function() {
+		var checked = $( this ).prop( 'checked' );
+
+		if ( checked ) {
+			projects.selection.add( { id: 'all' } );
+			$window.trigger( 'uncheck-other-projects.rosetta' );
+		} else {
+			projects.selection.remove( { id: 'all' } );
+		}
+	});
+
+	$window.on( 'deactivate-all-projects.rosetta', function() {
+		$projectAll.removeClass( 'active' );
+	} );
+
+	$window.on( 'uncheck-all-projects.rosetta', function() {
+		var checked =  $projectAllCheckbox.prop( 'checked' );
+
+		if ( checked ) {
+			projects.selection.remove( { id: 'all' } );
+			$projectAllCheckbox.prop( 'checked', false );
+		}
 	} );
 } )( jQuery );

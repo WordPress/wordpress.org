@@ -4,7 +4,7 @@
  * Plugin URI: https://wordpress.org/
  * Description: WordPress interface for managing roles.
  * Author: ocean90
- * Version: 1.1
+ * Version: 1.2
  */
 
 if ( ! class_exists( 'GP_Locales' ) ) {
@@ -208,7 +208,7 @@ class Rosetta_Roles {
 			<# if ( ! data.checkedSubProjects ) {
 				#>
 				<label>
-					<input type="checkbox" class="input-checkbox" name="projects[]" value="{{data.id}}"
+					<input type="checkbox" class="input-checkbox"
 					<#
 					if ( data.checked ) {
 						#> checked="checked"<#
@@ -434,7 +434,7 @@ class Rosetta_Roles {
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
-				$projects = (array) $_REQUEST['projects'];
+				$projects = explode( ',', $_REQUEST['projects'] );
 				if ( in_array( 'all', $projects, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {

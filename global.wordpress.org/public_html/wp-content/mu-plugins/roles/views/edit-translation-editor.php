@@ -17,7 +17,7 @@
 							<ul id="projects-list" class="projects-list">
 								<li id="project-all" class="active">
 									<label>
-										<input name="projects[]" value="all" type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
+										<input type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
 										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
@@ -34,6 +34,7 @@
 			</tbody>
 		</table>
 
+		<input type="hidden" id="project-access-list" name="projects" value="<?php esc_attr( implode( ',', $project_access_list ) ); ?>">
 		<input type="hidden" name="action" value="update-translation-editor">
 		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 		<?php
