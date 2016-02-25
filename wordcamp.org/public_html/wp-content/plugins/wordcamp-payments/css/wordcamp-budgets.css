@@ -42,6 +42,10 @@
 	margin-bottom: 1em;
 }
 
+.wcb-form-required {
+	color: #dc3232;
+}
+
 /* margins from above selector aren't applied */
 .wcb-form-input-wrapper {
 	padding-left: 1em;

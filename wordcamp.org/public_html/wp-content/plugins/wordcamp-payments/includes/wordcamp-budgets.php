@@ -767,6 +767,13 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Display the indicator that marks a form field as required
+	 */
+	public static function render_form_field_required_indicator() {
+		require( dirname( __DIR__ ) . '/views/wordcamp-budgets/form-field-required-indicator.php' );
+	}
+
+	/**
 	 * Insert an entry into a log for one of the custom post types
 	 *
 	 * @param int    $post_id The post ID.

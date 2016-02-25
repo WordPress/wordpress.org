@@ -12,6 +12,7 @@ defined( 'WPINC' ) or die();
 		</label>
 
 		<div class="wcb-form-input-wrapper">
+			<?php // todo add selected attribute to select and change first option value to empty string. do for other selects too ?>
 			<select id="_wcbsi_sponsor_id" name="_wcbsi_sponsor_id">
 				<option value="null-select-one">
 					<?php _e( '-- Select a Sponsor --', 'wordcamporg' ); ?>
@@ -32,6 +33,8 @@ defined( 'WPINC' ) or die();
 					</option>
 				<?php endforeach; ?>
 			</select>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 
 			[<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=wcb_sponsor') ); ?>"><?php
 				_e( 'Add New Sponsor', 'wordcamporg' );
@@ -68,6 +71,8 @@ defined( 'WPINC' ) or die();
 					</option>
 				<?php endforeach; ?>
 			</select>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</div>
 	</li>
 
@@ -82,7 +87,10 @@ defined( 'WPINC' ) or die();
 			id="_wcbsi_description"
 			name="_wcbsi_description"
 			value="<?php echo esc_attr( $description ); ?>"
+			required
 		/>
+
+		<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -102,6 +110,8 @@ defined( 'WPINC' ) or die();
 				</option>
 			<?php endforeach; ?>
 		</select>
+
+		<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -116,7 +126,10 @@ defined( 'WPINC' ) or die();
 				id="_wcbsi_amount"
 				name="_wcbsi_amount"
 				value="<?php echo esc_attr( $amount ); ?>"
+				required
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 
 			<p class="description">
 				<?php _e( 'No commas, thousands separators or currency symbols. Ex. 1234.56', 'wordcamporg' ); ?>
@@ -125,3 +138,7 @@ defined( 'WPINC' ) or die();
 	</li>
 
 </ul>
+
+<span class="wcb-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</span>
