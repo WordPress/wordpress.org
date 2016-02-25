@@ -20,15 +20,11 @@ if ( is_admin() || defined( 'DOING_CRON' ) ) {
 	 * needs, but this plugin also needs some of them to be active during cron jobs.
 	 */
 	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/wordcamp-budgets.php' );
-	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
-		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/sponsor-invoice.php' );
-	}
+	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/sponsor-invoice.php' );
 
 	require_once( __DIR__ . '/includes/wordcamp-budgets-dashboard.php' );
 	require_once( __DIR__ . '/includes/payment-requests-dashboard.php' );
-	if ( defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST ) {
-		require_once( __DIR__ . '/includes/sponsor-invoices-dashboard.php' );
-	}
+	require_once( __DIR__ . '/includes/sponsor-invoices-dashboard.php' );
 	require_once( __DIR__ . '/includes/reimbursement-requests-dashboard.php' );
 
 	$GLOBALS['Payment_Requests_Dashboard'] = new \Payment_Requests_Dashboard();
