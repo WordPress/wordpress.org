@@ -4,7 +4,7 @@ namespace WordPressdotorg\Plugin_Directory;
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
  *
- * @package WordPressdotorg_Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory
  */
 class Tools {
 
@@ -53,6 +53,7 @@ class Tools {
 		}
 
 		$tonesque = new \Tonesque( $file_location );
+
 		return $tonesque->color();
 	}
 
@@ -71,11 +72,13 @@ class Tools {
 	/**
 	 * Grant a user RW access to a plugin.
 	 *
-	 * @param string         $plugin_slug The plugin slug.
-	 * @param string|WP_User $user        The user to grant access to.
+	 * @param string          $plugin_slug The plugin slug.
+	 * @param string|\WP_User $user        The user to grant access to.
+	 * @return bool
 	 */
 	public static function grant_plugin_committer( $plugin_slug, $user ) {
 		global $wpdb;
+
 		if ( ! $user instanceof \WP_User ) {
 			$user = new \WP_User( $user );
 		}
@@ -90,7 +93,7 @@ class Tools {
 			return true;
 		}
 
-		return (bool)$wpdb->insert(
+		return (bool) $wpdb->insert(
 			PLUGINS_TABLE_PREFIX . 'svn_access',
 			array(
 				'path'   => "/{$plugin_slug}",
@@ -103,11 +106,13 @@ class Tools {
 	/**
 	 * Revoke a users RW access to a plugin.
 	 *
-	 * @param string         $plugin_slug The plugin slug.
-	 * @param string|WP_User $user        The user to revoke access of.
+	 * @param string          $plugin_slug The plugin slug.
+	 * @param string|\WP_User $user        The user to revoke access of.
+	 * @return bool
 	 */
 	public static function revoke_plugin_committer( $plugin_slug, $user ) {
 		global $wpdb;
+
 		if ( ! $user instanceof \WP_User ) {
 			$user = new \WP_User( $user );
 		}
@@ -119,11 +124,9 @@ class Tools {
 		return $wpdb->delete(
 			PLUGINS_TABLE_PREFIX . 'svn_access',
 			array(
-				'path'   => "/{$plugin_slug}",
-				'user'   => $user->user_login
+				'path' => "/{$plugin_slug}",
+				'user' => $user->user_login,
 			)
 		);
 	}
-
-
 }

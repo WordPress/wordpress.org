@@ -4,7 +4,7 @@ namespace WordPressdotorg\Plugin_Directory;
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
  *
- * @package WordPressdotorg_Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory
  */
 class Plugin_Directory {
 
@@ -13,9 +13,13 @@ class Plugin_Directory {
 	 */
 	public static function instance( $plugin_file = null ) {
 		static $instance = null;
+
 		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Directory( $plugin_file );
 	}
 
+	/**
+	 * @param string $plugin_file
+	 */
 	private function __construct( $plugin_file ) {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
@@ -24,8 +28,8 @@ class Plugin_Directory {
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 
-		// Load all Admin-specific items
-		add_action( 'admin_init', array( __NAMESPACE__ . '\\Admin\\Admin_Customizations', 'instance' ) );
+		// Load all Admin-specific items.
+		add_action( 'admin_init', array( __NAMESPACE__ . '\\Admin\\Customizations', 'instance' ) );
 
 		register_activation_hook( $plugin_file, array( $this, 'activate' ) );
 		register_deactivation_hook( $plugin_file, array( $this, 'deactivate' ) );
@@ -94,7 +98,8 @@ class Plugin_Directory {
 
 		// When this plugin is used in the context of a Rosetta site, handle it gracefully
 		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
-			$this->add_rosetta_network_filters();	
+			add_filter( 'option_home',    array( $this, 'rosetta_network_localize_url' ) );
+			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
 		}
 	}
 
@@ -108,7 +113,7 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+	 * @global \WP_Rewrite $wp_rewrite WordPress rewrite component.
 	 */
 	public function activate() {
 		global $wp_rewrite;
@@ -150,49 +155,48 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Filter the URLs to use the current localized domain name, rather than WordPress.org.
+	 *
 	 * The Plugin Directory is available at multiple URLs (internationalised domains), this method allows
 	 * for the one blog (a single blog_id) to be presented at multiple URLs yet have correct localised links.
+	 *
+	 * This method works in conjunction with a filter in sunrise.php, duplicated here for transparency:
+	 *
+	 * // Make the Plugin Directory available at /plugins/ on all rosetta sites.
+	 * function wporg_plugins_on_rosetta_domains( $site, $domain, $path, $segments ) {
+	 *     // All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
+	 *     if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/plugins/' == substr( $path . '/', 0, 9 ) ) {
+	 *          $site = get_blog_details( WPORG_PLUGIN_DIRECTORY_BLOGID );
+	 *          if ( $site ) {
+	 *              $site = clone $site;
+	 *              // 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
+	 *              $site->site_id = 6;
+	 *              return $site;
+	 *          }
+	 *     }
+	 *
+	 *     return $site;
+	 * }
+	 * add_filter( 'pre_get_site_by_path', 'wporg_plugins_on_rosetta_domains', 10, 4 );
+	 *
+	 * @param string $url The URL to be localized.
+	 * @return string
 	 */
-	public function add_rosetta_network_filters() {
-		// Filter the URLs to use the current localised domain name, rather than WordPress.org.
-		foreach ( array( 'option_home', 'option_siteurl' ) as $filter ) {
-			add_filter( $filter, function( $url ) {
-				static $localized_url = null;
-				if ( is_null( $localized_url ) ) {
-					$localized_url = 'https://' . preg_replace( '![^a-z.-]+!', '', $_SERVER['HTTP_HOST'] );
-				}
+	public function rosetta_network_localize_url( $url ) {
+		static $localized_url = null;
 
-				return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
-			} );
+		if ( is_null( $localized_url ) ) {
+			$localized_url = 'https://' . preg_replace( '![^a-z.-]+!', '', $_SERVER['HTTP_HOST'] );
 		}
 
-		/*
-		// This method works in conjuction with a filter in sunrise.php, duplicated here for transparency:
-
-		// Make the Plugin Directory available at /plugins/ on all rosetta sites.
-		function wporg_plugins_on_rosetta_domains( $site, $domain, $path, $segments ) {
-			// All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
-			if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/plugins/' == substr( $path . '/', 0, 9 ) ) {
-				$site = get_blog_details( WPORG_PLUGIN_DIRECTORY_BLOGID );
-				if ( $site ) {
-					$site = clone $site;
-			 		// 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
-					$site->site_id = 6;
-					return $site;
-				}
-			}
-		
-			return $site;
-		}
-		add_filter( 'pre_get_site_by_path', 'wporg_plugins_on_rosetta_domains', 10, 4 );
-		*/
+		return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
 	}
 
 	/**
 	 * Filter the permalink for the Plugins to be /plugin-name/.
 	 *
-	 * @param string  $link The generated permalink.
-	 * @param WP_Post $post The Plugin post object.
+	 * @param string   $link The generated permalink.
+	 * @param \WP_Post $post The Plugin post object.
 	 * @return string
 	 */
 	public function package_link( $link, $post ) {
@@ -207,18 +211,18 @@ class Plugin_Directory {
 	 * Checks if the current users is a super admin before allowing terms to be added.
 	 *
 	 * @param string $term The term to add or update.
-	 * @return string|WP_Error The term to add or update or WP_Error on failure.
+	 * @return string|\WP_Error The term to add or update or WP_Error on failure.
 	 */
 	public function pre_insert_term_prevent( $term ) {
 		if ( ! is_super_admin() ) {
-			$term = new WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-plugins' ) );
+			$term = new \WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-plugins' ) );
 		}
 
 		return $term;
 	}
 
 	/**
-	 * @param WP_Query $wp_query The WordPress Query object.
+	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
 	public function use_plugins_in_query( $wp_query ) {
 		if ( ! $wp_query->is_main_query() ) {
@@ -298,7 +302,7 @@ class Plugin_Directory {
 	 * @return array
 	 */
 	public function split_post_content_into_pages( $content ) {
-		$_pages = preg_split( "#<!--section=(.+?)-->#", $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages        = preg_split( "#<!--section=(.+?)-->#", $content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'stats'       => '[wporg-plugins-stats]',
@@ -317,11 +321,11 @@ class Plugin_Directory {
 	}
 
 	/**
- 	 * Retrieve the WP_Post object representing a given plugin.
- 	 *
- 	 * @param $plugin_slug string|WP_Post The slug of the plugin to retrieve.
- 	 * @return WP_Post|WP_Error
- 	 */
+	 * Retrieve the WP_Post object representing a given plugin.
+	 *
+	 * @param $plugin_slug string|\WP_Post The slug of the plugin to retrieve.
+	 * @return \WP_Post|\WP_Error
+	 */
 	public function get_plugin_post( $plugin_slug ) {
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
@@ -331,30 +335,29 @@ class Plugin_Directory {
 		$posts = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $plugin_slug,
-			'post_status' => 'any'
+			'post_status' => 'any',
 		) );
 		if ( ! $posts ) {
 			return false;
 		}
 
-		$plugin = reset( $posts );
-		return $plugin;
+		return reset( $posts );
 	}
 
 	/**
- 	 * Create a new post entry for a given plugin slug.
- 	 *
+	 * Create a new post entry for a given plugin slug.
+	 *
 	 * @param array $plugin_info {
 	 *     Array of initial plugin post data, all fields are optional.
- 	 *
+	 *
 	 *     @type string $title       The title of the plugin.
 	 *     @type string $slug        The slug of the plugin.
 	 *     @type string $status      The status of the plugin ( 'publish', 'pending', 'disabled', 'closed' ).
 	 *     @type int    $author      The ID of the plugin author.
 	 *     @type string $description The short description of the plugin.
 	 * }
- 	 * @return WP_Post|WP_Error
- 	 */
+	 * @return \WP_Post|\WP_Error
+	 */
 	public function create_plugin_post( array $plugin_info ) {
 		$title  = !empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
 		$slug   = !empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
@@ -376,7 +379,6 @@ class Plugin_Directory {
 			return $id;
 		}
 
-		$plugin = get_post( $id );
-		return $plugin;
+		return get_post( $id );
 	}
 }

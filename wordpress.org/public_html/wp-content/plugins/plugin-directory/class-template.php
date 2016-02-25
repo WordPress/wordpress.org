@@ -4,7 +4,7 @@ namespace WordPressdotorg\Plugin_Directory;
 /**
  * Various helpers to retrieve data not stored within WordPress.
  *
- * @package WordPressdotorg_Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory
  */
 class Template {
 
@@ -52,8 +52,8 @@ class Template {
 	 * @return array
 	 */
 	static function get_plugin_sections() {
-		$plugin       = get_post();
-		$plugin_slug  = $plugin->post_name;
+		$plugin      = get_post();
+		$plugin_slug = $plugin->post_name;
 
 		$default_sections = array(
 			'description',
@@ -70,9 +70,9 @@ class Template {
 		$raw_sections = get_post_meta( $plugin->ID, 'sections', true );
 		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
 
-		$sections  = array();
-		$title     = '';
-		$permalink = get_permalink();
+		$sections     = array();
+		$title = $url = '';
+		$permalink    = get_permalink();
 
 		foreach ( $raw_sections as $section_slug ) {
 			switch ( $section_slug ) {
@@ -144,7 +144,7 @@ class Template {
 	/**
 	 * Retrieve the Plugin Icon details for a plugin.
 	 *
-	 * @param WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
 	 * @return mixed
 	 */
 	static function get_plugin_icon( $plugin, $output = 'raw' ) {
@@ -162,11 +162,13 @@ class Template {
 				case '256x256':
 					$icon_2x = self::get_asset_url( $plugin_slug, $info );
 					break;
+
 				case '128x128':
 					$icon = self::get_asset_url( $plugin_slug, $info );
 					break;
+
 				case false && 'icon.svg' == $file:
-					$icon = self::get_asset_url( $plugin_slug, $info );
+					$icon   = self::get_asset_url( $plugin_slug, $info );
 					$vector = true;
 					break;
 			}
@@ -190,7 +192,7 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id = "plugin-icon-{$plugin_slug}";
+				$id   = "plugin-icon-{$plugin_slug}";
 				$html = "<style type='text/css'>";
 				$html .= "#{$id} { width:128px; height:128px; background-image: url('{$icon}'); background-size:128px 128px; }";
 				if ( ! empty( $icon_2x ) && ! $generated ) {
@@ -201,6 +203,7 @@ class Template {
 
 				return $html;
 				break;
+
 			case 'raw':
 			default:
 				return compact( 'icon', 'icon_2x', 'vector', 'generated' );
@@ -210,7 +213,7 @@ class Template {
 	/**
 	 * Retrieve the Plugin Icon details for a plugin.
 	 *
-	 * @param WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
 	 * @return mixed
 	 */
 	static function get_plugin_banner( $plugin, $output = 'raw' ) {
@@ -228,6 +231,7 @@ class Template {
 				case '1544x500':
 					$banner_2x = self::get_asset_url( $plugin_slug, $info );
 					break;
+
 				case '772x250':
 					$banner = self::get_asset_url( $plugin_slug, $info );
 					break;
@@ -245,6 +249,11 @@ class Template {
 		}
 	}
 
+	/**
+	 * @param $plugin
+	 * @param $asset
+	 * @return string
+	 */
 	static function get_asset_url( $plugin, $asset ) {
 		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
 			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png

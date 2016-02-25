@@ -1,5 +1,4 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory;
 /**
  * Plugin Name: Plugin Directory
  * Plugin URI: http://wordpress.org/plugins/
@@ -13,6 +12,8 @@ namespace WordPressdotorg\Plugin_Directory;
  *
  * @package WordPressdotorg_Plugin_Directory
  */
+
+namespace WordPressdotorg\Plugin_Directory;
 
 // Register an Autoloader for all files
 include __DIR__ . '/class-autoloader.php';

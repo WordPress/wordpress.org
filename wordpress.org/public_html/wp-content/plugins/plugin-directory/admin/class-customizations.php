@@ -4,17 +4,22 @@ namespace WordPressdotorg\Plugin_Directory\Admin;
 /**
  * All functionality related to the Administration interface.
  *
- * @package WordPressdotorg_Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory\Admin
  */
-class Admin_Customizations {
+class Customizations {
+
 	/**
 	 * Fetch the instance of the Plugin_Directory class.
 	 */
 	public static function instance() {
 		static $instance = null;
-		return ! is_null( $instance ) ? $instance : $instance = new Admin_Customizations();
+
+		return ! is_null( $instance ) ? $instance : $instance = new Customizations();
 	}
 
+	/**
+	 *
+	 */
 	private function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ) );
 	}
@@ -30,5 +35,4 @@ class Admin_Customizations {
 			'plugin'
 		);
 	}
-
 }

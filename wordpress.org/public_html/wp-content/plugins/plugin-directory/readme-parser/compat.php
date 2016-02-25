@@ -39,7 +39,7 @@ class WPorg_Readme extends Baikonur_ReadmeParser {
 			return array();
 		}
 
-		$result = parent::parse_readme_contents( $contents );
+		$result           = parent::parse_readme_contents( $contents );
 		$result->sections = array_map( array( 'WPorg_Readme', 'filter_text' ), $result->sections );
 
 		if ( ! empty( $result->upgrade_notice ) ) {
@@ -72,14 +72,14 @@ class WPorg_Readme extends Baikonur_ReadmeParser {
 	/**
 	 * @access protected
 	 *
-	 * @param string $desc
+	 * @param string $description
 	 * @return string
 	 */
-	protected static function trim_short_desc( &$desc ) {
-		$desc = self::sanitize_text( $desc );
-		parent::trim_short_desc( $desc );
+	protected static function trim_short_desc( &$description ) {
+		$description = self::sanitize_text( $description );
+		parent::trim_short_desc( $description );
 
-		return $desc;
+		return $description;
 	}
 
 	/**

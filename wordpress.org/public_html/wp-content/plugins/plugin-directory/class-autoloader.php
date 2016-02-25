@@ -4,7 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\Autoloader;
 /**
  * An Autoloader which respects WordPress's filename standards.
  *
- * @package WordPressdotorg_Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory\Autoloader
  */
 class Autoloader {
 	const NS_SEPARATOR = '\\';
@@ -26,7 +26,7 @@ class Autoloader {
 		// Strip prefix from the start (ala PSR-4)
 		$class = substr( $class, $this->prefix_length + 1 );
 		$class = strtolower( $class );
-		$file = '';
+		$file  = '';
 
 		if ( false !== ( $last_ns_pos = strripos( $class, self::NS_SEPARATOR ) ) ) {
 			$namespace = substr( $class, 0, $last_ns_pos );
@@ -42,7 +42,6 @@ class Autoloader {
 			require $path;
 		}
 	}
-
 }
 
 function register_class_path( $prefix, $path ) {

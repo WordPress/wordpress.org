@@ -342,7 +342,7 @@ class Baikonur_ReadmeParser {
 		$text        = str_replace( '&#38;', '&', $text );
 		$text        = str_replace( '&#39;', "'", $text );
 
-			if ( '<pre><code>' == $matches[1] ) {
+		if ( '<pre><code>' == $matches[1] ) {
 			$text = "\n$text\n";
 		}
 
