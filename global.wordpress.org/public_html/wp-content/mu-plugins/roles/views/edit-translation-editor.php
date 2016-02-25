@@ -3,6 +3,14 @@
 
 	<?php echo $feedback_message; ?>
 
+	<p><?php
+		printf(
+			/* translators: %s: username */
+			__( 'You are currently editing the user %s.', 'rosetta' ),
+			'<em>' . get_user_by( 'id', $user_id )->user_login . '</em>'
+		);
+	?></p>
+
 	<form method="post">
 		<table class="form-table">
 			<tbody>
