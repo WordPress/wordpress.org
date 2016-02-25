@@ -34,7 +34,7 @@ function wporg_plugins_download_link() {
 }
 
 function worg_plugins_template_active_installs( $full = true ) {
-	$count = WPorg_Plugin_Directory_Template::get_active_installs_count( get_post()->post_name );
+	$count = WordPressdotorg\Plugin_Directory\Template::get_active_installs_count( get_post()->post_name );
 
 	if ( ! $count ) {
 		$text = __( 'Less than 10', 'wporg-plugins' );

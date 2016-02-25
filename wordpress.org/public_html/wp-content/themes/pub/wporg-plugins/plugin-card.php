@@ -2,7 +2,7 @@
 	 <div class="plugin-card-top">
 
 		 <a href="<?php the_permalink(); ?>" class="plugin-icon">
-		 	<?php echo WPorg_Plugin_Directory_Template::get_plugin_icon( $post->post_name, 'html' ); ?>
+		 	<?php echo WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $post->post_name, 'html' ); ?>
 		 </a>
 		 <div class="name column-name">
 			 <h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>

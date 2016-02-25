@@ -1,7 +1,7 @@
 <?php
 the_post();
 get_header();
-$plugin_banners = WPorg_Plugin_Directory_Template::get_plugin_banner( $post );
+$plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( $post );
 
 ?>
 
@@ -45,7 +45,7 @@ $plugin_banners = WPorg_Plugin_Directory_Template::get_plugin_banner( $post );
 					<div class="head head-big">
 						<ul id="sections">
 							<?php
-							foreach ( WPorg_Plugin_Directory_Template::get_plugin_sections() as $section ) {
+							foreach ( WordPressdotorg\Plugin_Directory\Template::get_plugin_sections() as $section ) {
 								$current = ( $section['slug'] == get_query_var( 'content_page' ) || ( 'description' == $section['slug'] && ! get_query_var( 'content_page' ) ) );
 								printf(
 									'<li class="%s"><a itemprop="url" href="%s">%s</a></li>',
