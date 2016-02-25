@@ -36,6 +36,10 @@
 			margin-left: 1em;
 		}
 
+			.wcpt-form-required {
+				color: #dc3232;
+			}
+
 		li.wcpt-form-header {
 			display: table-caption;
 			font-weight: bold;

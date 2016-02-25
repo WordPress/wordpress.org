@@ -14,7 +14,10 @@
 			id="_wcpt_sponsor_company_name"
 			name="_wcpt_sponsor_company_name"
 			value="<?php echo esc_attr( $company_name ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -28,7 +31,10 @@
 			id="_wcpt_sponsor_website"
 			name="_wcpt_sponsor_website"
 			value="<?php echo esc_url( $website ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -45,7 +51,7 @@
 			required
 		/>
 
-		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -62,7 +68,7 @@
 			required
 		/>
 
-		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -79,7 +85,7 @@
 			required
 		/>
 
-		&nbsp; <span class="description"><?php _e( '(required)', 'wordcamporg' ); ?></span>
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -93,7 +99,10 @@
 			id="_wcpt_sponsor_phone_number"
 			name="_wcpt_sponsor_phone_number"
 			value="<?php echo esc_attr( $phone_number ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 </ul>
 
@@ -113,7 +122,10 @@
 			id="_wcpt_sponsor_street_address1"
 			name="_wcpt_sponsor_street_address1"
 			value="<?php echo esc_attr( $street_address1 ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -141,7 +153,10 @@
 			id="_wcpt_sponsor_city"
 			name="_wcpt_sponsor_city"
 			value="<?php echo esc_attr( $city ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -155,7 +170,10 @@
 			id="_wcpt_sponsor_state"
 			name="_wcpt_sponsor_state"
 			value="<?php echo esc_attr( $state ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -169,7 +187,10 @@
 			id="_wcpt_sponsor_zip_code"
 			name="_wcpt_sponsor_zip_code"
 			value="<?php echo esc_attr( $zip_code ); ?>"
+		    required
 		/>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 
 	<li>
@@ -177,6 +198,7 @@
 			<?php _e( 'Country:', 'wordcamporg' ) ?>
 		</label>
 
+		<?php // todo add selected attribute to select and change first option value to empty string ?>
 		<select id="_wcpt_sponsor_country" name="_wcpt_sponsor_country">
 			<option value="null" <?php selected( $country, 'null' ); ?>>
 				<?php _e( '-- Select a Country --', 'wordcamporg' ); ?>
@@ -188,5 +210,11 @@
 				</option>
 			<?php endforeach; ?>
 		</select>
+
+		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
 </ul>
+
+<span class="wcpt-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</span>

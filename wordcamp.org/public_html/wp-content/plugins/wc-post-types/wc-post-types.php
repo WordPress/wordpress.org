@@ -1561,6 +1561,13 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Display the indicator that marks a form field as required
+	 */
+	function render_form_field_required_indicator() {
+		require( __DIR__ . '/views/common/form-field-required-indicator.php' );
+	}
+
+	/**
 	 * Fired when a post is saved, makes sure additional metadata is also updated.
 	 */
 	function save_post_speaker( $post_id, $post ) {
