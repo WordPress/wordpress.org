@@ -107,6 +107,7 @@ class Plugin_Directory {
 	 * Register the Shortcodes used within the content.
 	 */
 	public function register_shortcodes() {
+		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\\Shortcodes\\Upload',      'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\\Shortcodes\\Screenshots', 'display' ) );
 	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\\Shortcodes\\Stats',       'display' ) );
 	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\\Shortcodes\\Developer',   'display' ) );

@@ -22,6 +22,7 @@ class Customizations {
 	 */
 	private function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ) );
+		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 	}
 
 	/**
@@ -34,5 +35,25 @@ class Customizations {
 			array( __NAMESPACE__ . '\\Metabox\\Committers', 'display' ),
 			'plugin'
 		);
+	}
+
+	/**
+	 * Displays a link to the plugins zip file.
+	 *
+	 * @param \WP_Post $post
+	 */
+	public function edit_form_after_title( $post ) {
+		$zip_files = get_attached_media( 'application/zip', $post );
+		$zip_file  = current( $zip_files );
+
+		if ( $zip_file ) :
+			?>
+
+			<p style="padding: 0 10px;">
+				<?php printf( __( '<strong>Zip file:</strong> %s' ), sprintf( '<a href="%s">%s</a>', esc_url( $zip_file->guid ), $zip_file->guid ) ); ?>
+			</p>
+
+		<?php
+		endif;
 	}
 }
