@@ -1,12 +1,12 @@
 <?php
-/**
- * @package WPorg_Plugin_Directory
- */
+namespace WordPressdotorg\Plugin_Directory;
 
 /**
  * Various helpers to retrieve data not stored within WordPress.
+ *
+ * @package WordPressdotorg_Plugin_Directory
  */
-class WPorg_Plugin_Directory_Template {
+class Template {
 
 	/**
 	 * @param string $plugin_slug
@@ -148,8 +148,7 @@ class WPorg_Plugin_Directory_Template {
 	 * @return mixed
 	 */
 	static function get_plugin_icon( $plugin, $output = 'raw' ) {
-		global $wporg_plugin_directory;
-		$plugin = $wporg_plugin_directory->get_plugin_post( $plugin );
+		$plugin = Plugin_Directory::instance()->get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return false;
 		}
@@ -175,10 +174,8 @@ class WPorg_Plugin_Directory_Template {
 
 		if ( ! $icon ) {
 			$generated = true;
-			if ( ! class_exists( 'WPorg_Plugin_Geopattern' ) ) {
-				include __DIR__ . '/class-wporg-plugin-geopattern.php';
-			}
-			$icon = new WPorg_Plugin_Geopattern;
+
+			$icon = new Plugin_Geopattern;
 			$icon->setString( $plugin->post_name );
 
 			// Use the average color of the first known banner as the icon background color
@@ -217,8 +214,7 @@ class WPorg_Plugin_Directory_Template {
 	 * @return mixed
 	 */
 	static function get_plugin_banner( $plugin, $output = 'raw' ) {
-		global $wporg_plugin_directory;
-		$plugin = $wporg_plugin_directory->get_plugin_post( $plugin );
+		$plugin = Plugin_Directory::instance()->get_plugin_post( $plugin );
 		if ( ! $plugin ) {
 			return false;
 		}
@@ -250,8 +246,16 @@ class WPorg_Plugin_Directory_Template {
 	}
 
 	static function get_asset_url( $plugin, $asset ) {
+		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
+			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png
+			$format = 'https://s.w.org/plugins/%s/%s?rev=%s';
+		} else {
+			// Images in the assets folder - /plugin-name/assets/screenshot-1.png
+			$format = 'https://ps.w.org/%s/assets/%s?rev=%s';
+		}
+
 		return esc_url( sprintf(
-			'https://ps.w.org/%s/assets/%s?rev=%s',
+			$format,
 			$plugin,
 			$asset['filename'],
 			$asset['revision']

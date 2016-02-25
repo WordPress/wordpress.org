@@ -1,8 +1,14 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory;
 
 require __DIR__ . '/libs/geopattern-1.1.0/geopattern_loader.php';
 
-class WPorg_Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
+/**
+ * Generates Geopattern icons for Plugins.
+ *
+ * @package WordPressdotorg_Plugin_Directory
+ */
+class Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
 
 	var $slug; // Hashed to generate pattern
 	var $text; // Text to be overlaid
@@ -18,7 +24,7 @@ class WPorg_Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
 			$this->textcolor = $options['textcolor'];
 
 		// Replace the base SVG object with our own, so the dimensions are gettable.
-		$this->svg = new WPorg_Plugin_Geopattern_SVG();
+		$this->svg = new Plugin_Geopattern_SVG();
 	}
 
 	function setText( $text ) {
@@ -37,7 +43,7 @@ class WPorg_Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
 	}
 
 	public function toSVG( $width = 128, $height = 128 ) {
-		$this->svg = new WPorg_Plugin_Geopattern_SVG();
+		$this->svg = new Plugin_Geopattern_SVG();
 		$this->generateBackground();
 
 		// Work around a bug in 1.1.0: the hash-based pattern selection doesn't account for the size of the pattern array and can choose a null result.
@@ -68,7 +74,7 @@ class WPorg_Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
 }
 
 // The base SVG class doesn't provide functions for getting dimensions, so..
-class WPorg_Plugin_Geopattern_SVG extends \RedeyeVentures\GeoPattern\SVG {
+class Plugin_Geopattern_SVG extends \RedeyeVentures\GeoPattern\SVG {
 
 	protected $viewbox;
 
@@ -88,7 +94,7 @@ class WPorg_Plugin_Geopattern_SVG extends \RedeyeVentures\GeoPattern\SVG {
     }
 
     public function addText( $text, $x, $y, $text_anchor, $style, $args=array() ) {
-        $element = new WPorg_Plugin_Geopattern_SVGText($text, $x, $y, $text_anchor, $style, $args);
+        $element = new Plugin_Geopattern_SVGText($text, $x, $y, $text_anchor, $style, $args);
         $this->svgString .= $element;
         return $this;
 	}
@@ -105,7 +111,7 @@ class WPorg_Plugin_Geopattern_SVG extends \RedeyeVentures\GeoPattern\SVG {
 }
 
 // Nor does it support text.
-class WPorg_Plugin_Geopattern_SVGText extends \RedeyeVentures\GeoPattern\SVGElements\Base {
+class Plugin_Geopattern_SVGText extends \RedeyeVentures\GeoPattern\SVGElements\Base {
 	protected $tag = 'text';
 	protected $text;
 

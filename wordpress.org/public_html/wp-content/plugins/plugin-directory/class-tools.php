@@ -1,12 +1,12 @@
 <?php
-/**
- * @package WPorg_Plugin_Directory
- */
+namespace WordPressdotorg\Plugin_Directory;
 
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
+ *
+ * @package WordPressdotorg_Plugin_Directory
  */
-class WPorg_Plugin_Directory_Tools {
+class Tools {
 
 	/**
 	 * @param string $readme
@@ -18,7 +18,7 @@ class WPorg_Plugin_Directory_Tools {
 		include_once __DIR__ . '/readme-parser/markdown.php';
 		include_once __DIR__ . '/readme-parser/compat.php';
 
-		$data = (object) WPorg_Readme::parse_readme( $readme );
+		$data = (object) \WPorg_Readme::parse_readme( $readme );
 
 		unset( $data->sections['screenshots'] ); // Useless.
 
@@ -52,7 +52,7 @@ class WPorg_Plugin_Directory_Tools {
 			return false;
 		}
 
-		$tonesque = new Tonesque( $file_location );
+		$tonesque = new \Tonesque( $file_location );
 		return $tonesque->color();
 	}
 
@@ -75,12 +75,12 @@ class WPorg_Plugin_Directory_Tools {
 	 * @param string|WP_User $user        The user to grant access to.
 	 */
 	public static function grant_plugin_committer( $plugin_slug, $user ) {
-		global $wpdb, $wporg_plugin_directory;
-		if ( ! $user instanceof WP_User ) {
-			$user = new WP_User( $user );
+		global $wpdb;
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! $wporg_plugin_directory->get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! Plugin_Directory::instance()->get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 
@@ -107,12 +107,12 @@ class WPorg_Plugin_Directory_Tools {
 	 * @param string|WP_User $user        The user to revoke access of.
 	 */
 	public static function revoke_plugin_committer( $plugin_slug, $user ) {
-		global $wpdb, $wporg_plugin_directory;
-		if ( ! $user instanceof WP_User ) {
-			$user = new WP_User( $user );
+		global $wpdb;
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! $wporg_plugin_directory->get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! Plugin_Directory::instance()->get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 

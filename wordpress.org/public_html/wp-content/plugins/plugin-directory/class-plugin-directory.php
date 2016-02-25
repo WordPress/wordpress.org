@@ -1,64 +1,34 @@
 <?php
-/**
- * @package WPorg_Plugin_Directory
- */
+namespace WordPressdotorg\Plugin_Directory;
 
 /**
- * Class WPorg_Plugin_Directory
+ * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
+ *
+ * @package WordPressdotorg_Plugin_Directory
  */
-class WPorg_Plugin_Directory {
+class Plugin_Directory {
 
 	/**
-	 * Constructor.
+	 * Fetch the instance of the Plugin_Directory class.
 	 */
-	public function __construct() {
+	public static function instance( $plugin_file = null ) {
+		static $instance = null;
+		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Directory( $plugin_file );
+	}
+
+	private function __construct( $plugin_file ) {
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
-	}
 
-	/**
-	 * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
-	 */
-	public function activate() {
-		global $wp_rewrite;
+		// Load all Admin-specific items
+		add_action( 'admin_init', array( __NAMESPACE__ . '\\Admin\\Admin_Customizations', 'instance' ) );
 
-		// Setup the environment.
-		$this->init();
-
-		// %postname% is required.
-		$wp_rewrite->set_permalink_structure( '/%postname%/' );
-
-		// /tags/%slug% is required for tags.
-		$wp_rewrite->set_tag_base( '/tags' );
-
-		// We require the WordPress.org Ratings plugin also be active.
-		if ( ! is_plugin_active( 'wporg-ratings/wporg-ratings.php' ) ) {
-			activate_plugin( 'wporg-ratings/wporg-ratings.php' );
-		}
-
-		// Enable the WordPress.org Plugin Repo Theme.
-		foreach ( wp_get_themes() as $theme ) {
-			if ( $theme->get( 'Name' ) === 'WordPress.org Plugins' ) {
-				switch_theme( $theme->get_stylesheet() );
-				break;
-			}
-		}
-
-		flush_rewrite_rules();
-
-		do_action( 'wporg_plugins_activation' );
-	}
-
-	/**
-	 *
-	 */
-	public function deactivate() {
-		flush_rewrite_rules();
-
-		do_action( 'wporg_plugins_deactivation' );
+		register_activation_hook( $plugin_file, array( $this, 'activate' ) );
+		register_deactivation_hook( $plugin_file, array( $this, 'deactivate' ) );
 	}
 
 	/**
@@ -126,6 +96,57 @@ class WPorg_Plugin_Directory {
 		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 			$this->add_rosetta_network_filters();	
 		}
+	}
+
+	/**
+	 * Register the Shortcodes used within the content.
+	 */
+	public function register_shortcodes() {
+		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\\Shortcodes\\Screenshots', 'display' ) );
+	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\\Shortcodes\\Stats',       'display' ) );
+	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\\Shortcodes\\Developer',   'display' ) );
+	}
+
+	/**
+	 * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+	 */
+	public function activate() {
+		global $wp_rewrite;
+
+		// Setup the environment.
+		$this->init();
+
+		// %postname% is required.
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+
+		// /tags/%slug% is required for tags.
+		$wp_rewrite->set_tag_base( '/tags' );
+
+		// We require the WordPress.org Ratings plugin also be active.
+		if ( ! is_plugin_active( 'wporg-ratings/wporg-ratings.php' ) ) {
+			activate_plugin( 'wporg-ratings/wporg-ratings.php' );
+		}
+
+		// Enable the WordPress.org Plugin Repo Theme.
+		foreach ( wp_get_themes() as $theme ) {
+			if ( $theme->get( 'Name' ) === 'WordPress.org Plugins' ) {
+				switch_theme( $theme->get_stylesheet() );
+				break;
+			}
+		}
+
+		flush_rewrite_rules();
+
+		do_action( 'wporg_plugins_activation' );
+	}
+
+	/**
+	 *
+	 */
+	public function deactivate() {
+		flush_rewrite_rules();
+
+		do_action( 'wporg_plugins_deactivation' );
 	}
 
 	/**
@@ -302,7 +323,7 @@ class WPorg_Plugin_Directory {
  	 * @return WP_Post|WP_Error
  	 */
 	public function get_plugin_post( $plugin_slug ) {
-		if ( $plugin_slug instanceof WP_Post ) {
+		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
 		}
 
