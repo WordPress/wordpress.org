@@ -426,7 +426,7 @@ class WordCamp_QBO {
 		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
 
 		$payment_instructions = str_replace( "\t", '', "
-			Please remit checks to: WordPress Community Support, PBC, 3426 SE Kathryn Ct, Milwaukie, OR 97222
+			Please remit checks to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768
 
 			For payments via ACH or international wire transfers:
 
