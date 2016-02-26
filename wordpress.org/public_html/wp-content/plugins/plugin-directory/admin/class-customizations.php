@@ -45,12 +45,13 @@ class Customizations {
 	public function edit_form_after_title( $post ) {
 		$zip_files = get_attached_media( 'application/zip', $post );
 		$zip_file  = current( $zip_files );
+		$zip_url   = wp_get_attachment_url( $zip_file->ID );
 
-		if ( $zip_file ) :
+		if ( $zip_url ) :
 			?>
 
 			<p style="padding: 0 10px;">
-				<?php printf( __( '<strong>Zip file:</strong> %s' ), sprintf( '<a href="%s">%s</a>', esc_url( $zip_file->guid ), $zip_file->guid ) ); ?>
+				<?php printf( __( '<strong>Zip file:</strong> %s' ), sprintf( '<a href="%s">%s</a>', esc_url( $zip_url ), esc_html( $zip_url ) ) ); ?>
 			</p>
 
 		<?php
