@@ -91,6 +91,8 @@ class Payment_Requests_List_Table extends WP_List_Table {
 			$where .= " AND `status` = 'wcb-incomplete' ";
 		} elseif ( 'cancelled-failed' == $view ) {
 			$where .= " AND `status` IN ( 'wcb-failed', 'wcb-cancelled' ) ";
+		} elseif ( 'drafts' == $view ) {
+			$where .= " AND `status` = 'draft' ";
 		}
 
 		if ( ! empty( $_REQUEST['s'] ) ) {

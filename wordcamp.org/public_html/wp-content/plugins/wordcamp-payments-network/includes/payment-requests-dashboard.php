@@ -1372,6 +1372,7 @@ class Payment_Requests_Dashboard {
 	public static function get_current_tab() {
 		$tab = 'overdue';
 		$tabs = array(
+			'drafts',
 			'overdue',
 
 			'pending-approval',
@@ -1398,6 +1399,7 @@ class Payment_Requests_Dashboard {
 	public static function render_dashboard_tabs() {
 		$current_section = self::get_current_tab();
 		$sections = array(
+			'drafts'           => __( 'Drafts', 'wordcamporg' ),
 			'overdue'          => __( 'Overdue', 'wordcamporg' ), // pending-approval + after due date
 			'pending-approval' => __( 'Pending Approval', 'wordcamporg' ),
 			'approved'         => __( 'Approved', 'wordcamporg' ),
