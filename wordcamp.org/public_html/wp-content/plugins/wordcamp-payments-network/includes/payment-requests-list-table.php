@@ -76,15 +76,21 @@ class Payment_Requests_List_Table extends WP_List_Table {
 		$order = 'asc';
 
 		if ( 'overdue' == $view ) {
-			$where .= $wpdb->prepare( " AND `status` = 'unpaid' AND `due` > 0 AND `due` <= %d ", time() );
-		} elseif ( 'pending' == $view ) {
-			$where .= " AND `status` = 'unpaid' ";
+			$where .= $wpdb->prepare( " AND `status` = 'wcb-pending-approval' AND `due` > 0 AND `due` <= %d ", time() );
+		} elseif ( 'pending-approval' == $view ) {
+			$where .= " AND `status` = 'wcb-pending-approval' ";
+		} elseif ( 'approved' == $view ) {
+			$where .= " AND `status` = 'wcb-approved' ";
+		} elseif ( 'pending-payment' == $view ) {
+			$where .= " AND `status` = 'wcb-pending-payment' ";
 		} elseif ( 'paid' == $view ) {
-			$where .= " AND `status` = 'paid' ";
-			$orderby = 'created';
+			$where .= " AND `status` = 'wcb-paid' ";
+			$orderby = 'updated';
 			$order = 'desc';
-		} elseif( 'incomplete' == $view ) {
-			$where .= " AND `status` = 'incomplete' ";
+		} elseif ( 'incomplete' == $view ) {
+			$where .= " AND `status` = 'wcb-incomplete' ";
+		} elseif ( 'cancelled-failed' == $view ) {
+			$where .= " AND `status` IN ( 'wcb-failed', 'wcb-cancelled' ) ";
 		}
 
 		if ( ! empty( $_REQUEST['s'] ) ) {
@@ -135,11 +141,20 @@ class Payment_Requests_List_Table extends WP_List_Table {
 	 * Note: runs in a switch_to_blog() context.
 	 */
 	public function column_payment( $request ) {
-		$title          = empty( $request->post_title ) ? '(no title)' : $request->post_title;
+		$blog_id = get_current_blog_id();
+		$title = empty( $request->post_title ) ? '(no title)' : $request->post_title;
 		$edit_post_link = add_query_arg( array( 'post' => $request->ID, 'action' => 'edit' ), admin_url( 'post.php' ) );
 		$actions = array(
 			'view-all' => sprintf( '<a href="%s" target="_blank">View All</a>', esc_url( admin_url( 'edit.php?post_type=wcp_payment_request' ) ) ),
 		);
+
+		if ( $request->post_status == 'wcb-pending-approval' ) {
+			$approve_url = wp_nonce_url( add_query_arg( array(
+				'wcb-approve' => sprintf( '%d-%d', $blog_id, $request->ID ),
+			) ), sprintf( 'wcb-approve-%d-%d', $blog_id, $request->ID ) );
+
+			$actions['wcb-approve'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Approve this payment request?\');" href="%s">Approve</a>', esc_url( $approve_url ) );
+		}
 
 		return sprintf( '<a href="%s" class="row-title" target="_blank">%s</a>%s',
 			esc_url( $edit_post_link ),
@@ -152,7 +167,8 @@ class Payment_Requests_List_Table extends WP_List_Table {
 	 * Note: runs in a switch_to_blog() context.
 	 */
 	public function column_status( $request ) {
-		return esc_html( ucwords( $request->post_status ) );
+		$status = get_post_status_object( $request->post_status );
+		return esc_html( $status->label );
 	}
 
 	/**

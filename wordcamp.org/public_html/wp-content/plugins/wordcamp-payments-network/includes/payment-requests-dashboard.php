@@ -2,7 +2,7 @@
 
 class Payment_Requests_Dashboard {
 	public static $list_table;
-	public static $db_version = 6;
+	public static $db_version = 7;
 	public static $import_results = null;
 
 	/**
@@ -19,6 +19,7 @@ class Payment_Requests_Dashboard {
 		add_action( 'admin_enqueue_scripts',  array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'network_admin_menu', array( __CLASS__, 'network_admin_menu' ) );
 		add_action( 'init', array( __CLASS__, 'upgrade' ) );
+		add_action( 'init', array( __CLASS__, 'process_approval' ) );
 		add_action( 'init', array( __CLASS__, 'process_export_request' ) );
 		add_action( 'init', array( __CLASS__, 'process_import_request' ) );
 
@@ -60,6 +61,7 @@ class Payment_Requests_Dashboard {
 			blog_id int(11) unsigned NOT NULL default '0',
 			post_id int(11) unsigned NOT NULL default '0',
 			created int(11) unsigned NOT NULL default '0',
+			updated int(11) unsigned NOT NULL default '0',
 			paid int(11) unsigned NOT NULL default '0',
 			category varchar(255) NOT NULL default '',
 			method varchar(255) NOT NULL default '',
@@ -98,7 +100,7 @@ class Payment_Requests_Dashboard {
 			$paged = 1;
 			while ( $requests = get_posts( array(
 				'paged' => $paged++,
-				'post_status' => array( 'paid', 'unpaid', 'incomplete' ),
+				'post_status' => 'any',
 				'post_type' => 'wcp_payment_request',
 				'posts_per_page' => 20,
 			) ) ) {
@@ -141,10 +143,37 @@ class Payment_Requests_Dashboard {
 			$keywords[] = $amount;
 		}
 
+		$back_compat_statuses = array(
+			'unpaid' => 'draft',
+			'incomplete' => 'wcb-incomplete',
+			'paid' => 'wcb-paid',
+		);
+
+		// Map old statuses to new statuses.
+		if ( array_key_exists( $request->post_status, $back_compat_statuses ) ) {
+			$request->post_status = $back_compat_statuses[ $request->post_status ];
+		}
+
+		// One of these timestamps.
+		while ( true ) {
+			$updated_timestamp = absint( get_post_meta( $request->ID, '_wcb_updated_timestamp', time() ) );
+			if ( $updated_timestamp ) break;
+
+			$updated_timestamp = strtotime( $request->post_modified_gmt );
+			if ( $updated_timestamp ) break;
+
+			$updated_timestamp = strtotime( $request->post_date_gmt );
+			if ( $updated_timestamp ) break;
+
+			$updated_timestamp = strtotime( $request->post_date );
+			break;
+		}
+
 		return array(
 			'blog_id' => get_current_blog_id(),
 			'post_id' => $request->ID,
 			'created' => get_post_time( 'U', true, $request->ID ),
+			'updated' => $updated_timestamp,
 			'paid'    => absint( get_post_meta( $request->ID, '_camppayments_date_vendor_paid', true ) ),
 			'due' => absint( get_post_meta( $request->ID, '_camppayments_due_by', true ) ),
 			'status' => $request->post_status,
@@ -227,6 +256,7 @@ class Payment_Requests_Dashboard {
 		<div class="wrap">
 			<h1>Vendor Payments</h1>
 
+			<?php do_action( 'admin_notices' ); ?>
 			<?php settings_errors(); ?>
 
 			<h3 class="nav-tab-wrapper"><?php self::render_dashboard_tabs(); ?></h3>
@@ -267,6 +297,46 @@ class Payment_Requests_Dashboard {
 		</div>
 
 		<?php
+	}
+
+	/**
+	 * Process Approve button in network admin
+	 */
+	public static function process_approval() {
+		if ( ! current_user_can( 'network_admin' ) )
+			return;
+
+		if ( empty( $_GET['wcb-approve'] ) || empty( $_GET['_wpnonce'] ) )
+			return;
+
+		list( $blog_id, $post_id ) = explode( '-', $_GET['wcb-approve'] );
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], sprintf( 'wcb-approve-%d-%d', $blog_id, $post_id ) ) ) {
+			add_action( 'admin_notices', function() {
+				?><div class="notice notice-error is-dismissible">
+					<p><?php _e( 'Error! Could not verify nonce.', 'wordcamporg' ); ?></p>
+				</div><?php
+			});
+			return;
+		}
+
+		switch_to_blog( $blog_id );
+		$post = get_post( $post_id );
+		if ( $post->post_type == 'wcp_payment_request' ) {
+			$post->post_status = 'wcb-approved';
+			wp_insert_post( $post );
+
+			WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'Request approved via Network Admin', array(
+				'action' => 'approved',
+			) );
+
+			add_action( 'admin_notices', function() {
+				?><div class="notice notice-success is-dismissible">
+					<p><?php _e( 'Success! Request has been marked as approved.', 'wordcamporg' ); ?></p>
+				</div><?php
+			});
+		}
+		restore_current_blog();
 	}
 
 	/**
@@ -323,12 +393,16 @@ class Payment_Requests_Dashboard {
 			$export_type = $export_types['default'];
 		}
 
+		$status = $_POST['wcpn_export_status'];
+		if ( ! in_array( $status, array( 'wcb-approved', 'wcb-paid' ) ) )
+			$status = 'wcb-approved';
+
 		$start_date = strtotime( $_POST['wcpn_export_start_date'] . ' 00:00:00' );
 		$end_date   = strtotime( $_POST['wcpn_export_end_date']   . ' 23:59:59' );
 		$filename = sprintf( $export_type['filename'], date( 'Ymd', $start_date ), date( 'Ymd', $end_date ) );
 		$filename = sanitize_file_name( $filename );
 
-		$report = self::generate_payment_report( $_POST['wcpn_date_type'], $start_date, $end_date, $export_type );
+		$report = self::generate_payment_report( $status, $start_date, $end_date, $export_type );
 
 		if ( is_wp_error( $report ) ) {
 			add_settings_error( 'wcp-dashboard', $report->get_error_code(), $report->get_error_message() );
@@ -354,18 +428,18 @@ class Payment_Requests_Dashboard {
 	 *
 	 * @return string | WP_Error
 	 */
-	protected static function generate_payment_report( $date_type, $start_date, $end_date, $export_type ) {
+	protected static function generate_payment_report( $status, $start_date, $end_date, $export_type ) {
 		global $wpdb;
-
-		if ( ! in_array( $date_type, array( 'paid', 'created' ), true ) ) {
-			return new WP_Error( 'wcpn_bad_date_type', 'Invalid date type.' );
-		}
 
 		if ( ! is_int( $start_date ) || ! is_int( $end_date ) ) {
 			return new WP_Error( 'wcpn_bad_dates', 'Invalid start or end date.' );
 		}
 
 		$table_name = self::get_table_name();
+		$date_type = 'updated';
+
+		if ( $status == 'wcb-paid' )
+			$date_type = 'paid';
 
 		$request_indexes = $wpdb->get_results( $wpdb->prepare( "
 			SELECT *
@@ -380,10 +454,10 @@ class Payment_Requests_Dashboard {
 
 		$args = array(
 			'request_indexes' => $request_indexes,
-			'date_type' => $date_type,
 			'start_date' => $start_date,
 			'end_date' => $end_date,
 			'export_type' => $export_type,
+			'status' => $status,
 		);
 
 		return call_user_func( $export_type['callback'], $args );
@@ -399,6 +473,7 @@ class Payment_Requests_Dashboard {
 	protected static function _generate_payment_report_default( $args ) {
 		$args = wp_parse_args( $args, array(
 			'request_indexes' => array(),
+			'status' => '',
 		) );
 
 		$column_headings = array(
@@ -413,7 +488,10 @@ class Payment_Requests_Dashboard {
 		fputcsv( $report, $column_headings );
 
 		foreach( $args['request_indexes'] as $index ) {
-			fputcsv( $report, self::get_report_row( $index ) );
+			$row = self::get_report_row( $index, $args );
+			if ( ! empty( $row ) ) {
+				fputcsv( $report, $row );
+			}
 		}
 
 		fclose( $report );
@@ -430,6 +508,7 @@ class Payment_Requests_Dashboard {
 	protected static function _generate_payment_report_jpm_checks( $args ) {
 		$args = wp_parse_args( $args, array(
 			'request_indexes' => array(),
+			'status' => '',
 		) );
 
 		$options = apply_filters( 'wcb_payment_req_check_options', array(
@@ -451,6 +530,9 @@ class Payment_Requests_Dashboard {
 		foreach ( $args['request_indexes'] as $index ) {
 			switch_to_blog( $index->blog_id );
 			$post = get_post( $index->post_id );
+
+			if ( $args['status'] && $post->post_status != $args['status'] )
+				continue;
 
 			if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Check' )
 				continue;
@@ -538,6 +620,7 @@ class Payment_Requests_Dashboard {
 	protected static function _generate_payment_report_jpm_ach( $args ) {
 		$args = wp_parse_args( $args, array(
 			'request_indexes' => array(),
+			'status' => '',
 		) );
 
 		$ach_options = apply_filters( 'wcb_payment_req_ach_options', array(
@@ -603,6 +686,9 @@ class Payment_Requests_Dashboard {
 		foreach ( $args['request_indexes'] as $index ) {
 			switch_to_blog( $index->blog_id );
 			$post = get_post( $index->post_id );
+
+			if ( $args['status'] && $post->post_status != $args['status'] )
+				continue;
 
 			if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Direct Deposit' )
 				continue;
@@ -737,6 +823,7 @@ class Payment_Requests_Dashboard {
 	protected static function _generate_payment_report_jpm_wires( $args ) {
 		$args = wp_parse_args( $args, array(
 			'request_indexes' => array(),
+			'status' => '',
 		) );
 
 		ob_start();
@@ -751,6 +838,9 @@ class Payment_Requests_Dashboard {
 		foreach ( $args['request_indexes'] as $index ) {
 			switch_to_blog( $index->blog_id );
 			$post = get_post( $index->post_id );
+
+			if ( $args['status'] && $post->post_status != $args['status'] )
+				continue;
 
 			// Only wires here.
 			if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Wire' )
@@ -954,13 +1044,30 @@ class Payment_Requests_Dashboard {
 	 * Gather all the request details needed for a row in the export file
 	 *
 	 * @param stdClass $index
+	 * @param array $args
 	 *
 	 * @return array
 	 */
-	protected static function get_report_row( $index ) {
+	protected static function get_report_row( $index, $args ) {
 		switch_to_blog( $index->blog_id );
 
-		$request          = get_post( $index->post_id );
+		$request = get_post( $index->post_id );
+
+		$back_compat_statuses = array(
+			'unpaid' => 'draft',
+			'incomplete' => 'wcb-incomplete',
+			'paid' => 'wcb-paid',
+		);
+
+		// Map old statuses to new statuses.
+		if ( array_key_exists( $request->post_status, $back_compat_statuses ) ) {
+			$request->post_status = $back_compat_statuses[ $request->post_status ];
+		}
+
+		if ( $args['status'] && $request->post_status != $args['status'] ) {
+			return null;
+		}
+
 		$currency         = get_post_meta( $index->post_id, '_camppayments_currency',         true );
 		$category         = get_post_meta( $index->post_id, '_camppayments_payment_category', true );
 		$date_vendor_paid = get_post_meta( $index->post_id, '_camppayments_date_vendor_paid', true );
@@ -1031,45 +1138,38 @@ class Payment_Requests_Dashboard {
 		<form id="wcpn_export" method="POST">
 			<?php wp_nonce_field( 'export', 'wcpn_request_export' ); ?>
 
-			<p>
-				This form will supply a CSV file with payment requests matching the parameters you select below.
-				For example, all requests that were <code>paid</code> between <code><?php echo esc_html( $last_month ); ?></code> and <code><?php echo esc_html( $today ); ?></code>.
-			</p>
+			<h2>Export Settings</h2>
 
-			<p>
-				<label>
-					Date type:
-					<select name="wcpn_date_type">
-						<option value="created">created</option>
-						<option value="paid" selected>paid</option>
-					</select>
-				</label>
-			</p>
+			<table class="form-table">
+				<tr>
+					<th><label>Status</label></th>
+					<td>
+						<select name="wcpn_export_status">
+							<option value="wcb-approved"><?php _e( 'Approved', 'wordcamporg' ); ?></option>
+							<option value="wcb-paid"><?php _e( 'Paid', 'wordcamporg' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th><label>Date Range</label></th>
+					<td>
+						<input type="date" name="wcpn_export_start_date" class="medium-text" value="<?php echo esc_attr( $last_month ); ?>" /> to
+						<input type="date" name="wcpn_export_end_date" class="medium-text" value="<?php echo esc_attr( $today ); ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th><label>Format</label></th>
+					<td>
+						<select name="wcpn_export_type">
+							<?php foreach ( self::get_export_types() as $key => $export_type ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $export_type['label'] ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+			</table>
 
-			<p>
-				<label>
-					Start date:
-					<input type="date" name="wcpn_export_start_date" class="medium-text" value="<?php echo esc_attr( $last_month ); ?>" />
-				</label>
-			</p>
-
-			<p>
-				<label>
-					End date:
-					<input type="date" name="wcpn_export_end_date" class="medium-text" value="<?php echo esc_attr( $today ); ?>" />
-				</label>
-			</p>
-
-			<p>
-				<label>Export Type:
-					<select name="wcpn_export_type">
-						<?php foreach ( self::get_export_types() as $key => $export_type ) : ?>
-						<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $export_type['label'] ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-
-			<?php submit_button( 'Export' ); ?>
+			<?php submit_button( 'Download Export' ); ?>
 		</form>
 
 		<?php
@@ -1229,10 +1329,15 @@ class Payment_Requests_Dashboard {
 	public static function get_current_tab() {
 		$tab = 'overdue';
 		$tabs = array(
-			'pending',
 			'overdue',
+
+			'pending-approval',
+			'approved',
+			'pending-payment',
 			'paid',
+			'cancelled-failed',
 			'incomplete',
+
 			'export',
 			'import',
 		);
@@ -1250,12 +1355,15 @@ class Payment_Requests_Dashboard {
 	public static function render_dashboard_tabs() {
 		$current_section = self::get_current_tab();
 		$sections = array(
-			'overdue' => 'Overdue',
-			'pending' => 'Pending',
-			'paid'    => 'Paid',
-			'incomplete' => __( 'Incomplete', 'wordcamporg' ),
-			'export'     => __( 'Export', 'wordcamporg' ),
-			'import'     => __( 'Import', 'wordcamporg' ),
+			'overdue'          => __( 'Overdue', 'wordcamporg' ), // pending-approval + after due date
+			'pending-approval' => __( 'Pending Approval', 'wordcamporg' ),
+			'approved'         => __( 'Approved', 'wordcamporg' ),
+			'pending-payment'  => __( 'Pending Payment', 'wordcamporg' ),
+			'paid'             => __( 'Paid', 'wordcamporg' ),
+			'cancelled-failed' => __( 'Cancelled/Failed', 'wordcamporg' ),
+			'incomplete'       => __( 'Incomplete', 'wordcamporg' ),
+			'export'           => __( 'Export', 'wordcamporg' ),
+			'import'           => __( 'Import', 'wordcamporg' ),
 		);
 
 		foreach ( $sections as $section_key => $section_caption ) {
