@@ -8,6 +8,9 @@ class WCP_Payment_Request {
 
 	const POST_TYPE = 'wcp_payment_request';
 
+	// @see https://core.trac.wordpress.org/ticket/19074
+	public static $transition_post_status = array();
+
 	public function __construct() {
 		// Initialization
 		add_action( 'init',                   array( $this, 'register_post_type' ));
@@ -19,8 +22,7 @@ class WCP_Payment_Request {
 		add_filter( 'display_post_states',    array( $this, 'display_post_states' ) );
 
 		// Saving posts
-		add_filter( 'wp_insert_post_data',    array( $this, 'update_request_status' ), 10, 2 );
-		add_filter( 'wp_insert_post_data',    array( $this, 'ensure_post_date_gmt_set' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',    array( $this, 'wp_insert_post_data' ), 10, 2 );
 		add_action( 'save_post',              array( $this, 'save_payment' ), 10, 2 );
 		add_filter( 'map_meta_cap',           array( $this, 'modify_capabilities' ), 10, 4 );
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 3 );
@@ -74,6 +76,86 @@ class WCP_Payment_Request {
 	 * Register our custom post statuses
 	 */
 	public static function register_post_statuses() {
+		// Uses core's draft status.
+
+		register_post_status( 'wcb-incomplete', array (
+			'label' => _x( 'Incomplete', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Incomplete <span class="count">(%s)</span>',
+				'Incomplete <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-pending-approval', array (
+			'label' => _x( 'Pending Approval', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Pending Approval <span class="count">(%s)</span>',
+				'Pending Approval <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-approved', array (
+			'label' => _x( 'Approved', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Approved <span class="count">(%s)</span>',
+				'Approved <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-pending-payment', array (
+			'label' => _x( 'Pending Payment', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Pending Payment <span class="count">(%s)</span>',
+				'Pending Payment <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-paid', array (
+			'label' => _x( 'Paid', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Paid <span class="count">(%s)</span>',
+				'Paid <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-failed', array (
+			'label' => _x( 'Failed', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Failed <span class="count">(%s)</span>',
+				'Failed <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		register_post_status( 'wcb-cancelled', array (
+			'label' => _x( 'Cancelled', 'payment request', 'wordcamporg' ),
+			'public' => false,
+			'protected' => true,
+			'label_count' => _nx_noop(
+				'Cancelled <span class="count">(%s)</span>',
+				'Cancelled <span class="count">(%s)</span>',
+				'wordcamporg'
+			),
+		) );
+
+		// Legacy statuses
 		register_post_status(
 			'paid',
 			array(
@@ -123,17 +205,6 @@ class WCP_Payment_Request {
 			'side',
 			'high'
 		);
-
-		if ( 'incomplete' != $post->post_status && current_user_can( 'manage_network' ) ) {
-			add_meta_box(
-				'wcp_mark_incomplete',
-				__( 'Mark as Incomplete', 'wordcamporg' ),
-				array( $this, 'render_mark_incomplete_metabox' ),
-				self::POST_TYPE,
-				'side',
-				'high'
-			);
-		}
 
 		add_meta_box(
 			'wcp_general_info',
@@ -205,9 +276,27 @@ class WCP_Payment_Request {
 	public function render_status_metabox( $post ) {
 		wp_nonce_field( 'status', 'status_nonce' );
 
-		$delete_text                   = EMPTY_TRASH_DAYS ? __( 'Move to Trash' ) : __( 'Delete Permanently' );
-		$submit_text                   = 'auto-draft' == $post->post_status ? __( 'Submit Request', 'wordcamporg' ) : __( 'Update Request', 'wordcamporg' );
-		$current_user_can_edit_request = 'paid' != $post->post_status || current_user_can( 'manage_network' );
+		$back_compat_statuses = array(
+			'unpaid' => 'draft',
+			'incomplete' => 'wcb-incomplete',
+			'paid' => 'wcb-paid',
+		);
+
+		// Map old statuses to new statuses.
+		if ( array_key_exists( $post->post_status, $back_compat_statuses ) ) {
+			$post->post_status = $back_compat_statuses[ $post->post_status ];
+		}
+
+		$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
+		$current_user_can_edit_request = false;
+		$submit_text = _x( 'Update', 'payment request', 'wordcamporg' );
+
+		if ( current_user_can( 'manage_network' ) ) {
+			$current_user_can_edit_request = true;
+		} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
+			$submit_text = __( 'Submit for Review', 'wordcamporg' );
+			$current_user_can_edit_request = true;
+		}
 
 		$date_vendor_paid = get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true );
 		if ( current_user_can( 'manage_network' ) ) {
@@ -216,18 +305,23 @@ class WCP_Payment_Request {
 			$date_vendor_paid_readonly = true;
 		}
 
+		$incomplete_notes = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+		$incomplete_readonly = ! current_user_can( 'manage_network' ) ? 'readonly' : '';
+
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-status.php' );
 	}
 
-	/**
-	 * Render the Mark as Incomplete metabox
-	 *
-	 * @param WP_Post $post
-	 */
-	public function render_mark_incomplete_metabox( $post ) {
-		wp_nonce_field( 'mark_incomplete', 'mark_incomplete_nonce' );
-
-		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-mark-incomplete.php' );
+	public static function get_post_statuses() {
+		return array(
+			'draft',
+			'wcb-incomplete',
+			'wcb-pending-approval',
+			'wcb-approved',
+			'wcb-pending-payment',
+			'wcb-paid',
+			'wcb-failed',
+			'wcb-cancelled',
+		);
 	}
 
 	/**
@@ -475,118 +569,88 @@ class WCP_Payment_Request {
 	function display_post_states( $states ) {
 		global $post;
 
-		if ( 'paid' == $post->post_status && 'paid' != get_query_var( 'post_status' ) ) {
-			$states['paid'] = __( 'Paid', 'wordcamporg' );
+		if ( $post->post_type != self::POST_TYPE )
+			return $states;
+
+		// Back-compat
+		$back_compat_statuses = array(
+			'unpaid' => 'draft',
+			'incomplete' => 'wcb-incomplete',
+			'paid' => 'wcb-paid',
+		);
+
+		// Map old statuses to new statuses.
+		if ( array_key_exists( $post->post_status, $back_compat_statuses ) ) {
+			$post->post_status = $back_compat_statuses[ $post->post_status ];
 		}
 
-		if ( 'unpaid' == $post->post_status && 'unpaid' != get_query_var( 'post_status' ) ) {
-			$states['unpaid'] = __( 'Unpaid', 'wordcamporg' );
-		}
-
-		if ( 'incomplete' == $post->post_status && 'incomplete' != get_query_var( 'post_status' ) ) {
-			$states['incomplete'] = __( 'Incomplete', 'wordcamporg' );
+		$status = get_post_status_object( $post->post_status );
+		if ( get_query_var( 'post_status' ) != $post->post_status ) {
+			$states[ $status->name ] = $status->label;
 		}
 
 		return $states;
 	}
 
 	/**
-	 * Set the request's status based on whether the vendor has been paid.
-	 *
-	 * @param array $post_data
-	 * @param array $post_data_raw
-	 * @return array
-	 */
-	public function update_request_status( $post_data, $post_data_raw ) {
-		if ( WordCamp_Budgets::post_edit_is_actionable( $post_data, self::POST_TYPE ) ) {
-			if ( $this->should_mark_request_incomplete() ) {
-				$post_data['post_status'] = 'incomplete';
-				$this->notify_requester_request_incomplete( $post_data_raw['ID'], $post_data, $post_data_raw );
-
-				update_post_meta( $post_data_raw['ID'], '_wcp_incomplete_notes', sanitize_text_field( $post_data_raw['wcp_mark_incomplete_notes'] ) );
-			} else {
-				$previous_status          = $post_data['post_status'];
-				$valid_paid_date          = false !== strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) );
-				// todo realign
-
-				if ( current_user_can( 'manage_network' ) && $valid_paid_date ) {
-					$post_data['post_status'] = 'paid';
-				} else {
-					$post_data['post_status'] = 'unpaid';
-				}
-
-				if ( 'paid' != $previous_status && 'paid' == $post_data['post_status'] ) {
-					$this->notify_requester_payment_made( $post_data_raw['ID'], $post_data );
-				}
-			}
-		}
-
-		return $post_data;
-	}
-
-	/**
-	 * Ensure that new posts have the `post_date_gmt` field populated.
-	 *
-	 * Core only handles this for post types that use the `draft` status (see r8636).
 	 *
 	 * @param array $post_data
 	 * @param array $post_data_raw
 	 *
 	 * @return array
 	 */
-	public function ensure_post_date_gmt_set( $post_data, $post_data_raw ) {
+	public function wp_insert_post_data( $post_data, $post_data_raw ) {
+		if ( $post_data['post_type'] != self::POST_TYPE )
+			return $post_data;
+
+		// Ensure that new posts have the `post_date_gmt` field populated.
 		if ( 'auto-draft' !== $post_data['post_status'] ) {
 			if ( '0000-00-00 00:00:00' === $post_data['post_date_gmt'] ) {
 				$post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
 			}
 		}
 
-		return $post_data;
-	}
+		// Save Draft button was clicked.
+		if ( ! empty( $post_data_raw['wcb-save-draft'] ) ) {
+			$post_data['post_status'] = 'draft';
+		}
 
-	/**
-	 * Determine if the user wants to mark a vendor payment as incomplete, and if that is valid
-	 *
-	 * @return bool
-	 */
-	protected function should_mark_request_incomplete() {
-		$mark_incomplete = false;
-
-		if ( isset( $_POST['wcp_mark_incomplete_checkbox'] ) && 'on' == $_POST['wcp_mark_incomplete_checkbox'] && ! empty( $_POST['wcp_mark_incomplete_notes'] ) ) {
-			if ( isset( $_POST['mark_incomplete_nonce'] ) && wp_verify_nonce( $_POST['mark_incomplete_nonce'], 'mark_incomplete' ) ) {
-				if ( current_user_can( 'manage_network' ) ) {
-					$mark_incomplete = true;
-				}
+		// Submit for Review button was clicked.
+		if ( ! current_user_can( 'manage_network' ) ) {
+			$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
+			if ( ! empty( $post_data_raw['wcb-update'] ) && in_array( $post_data['post_status'], $editable_statuses ) ) {
+				$post_data['post_status'] = 'wcb-pending-approval';
 			}
 		}
 
-		return $mark_incomplete;
+		return $post_data;
 	}
 
 	/**
 	 * Notify the payment requester that it has been marked as paid.
 	 *
-	 * @param int   $request_id
-	 * @param array $post_data
+	 * @param int|WP_Post $post
 	 */
-	protected function notify_requester_payment_made( $request_id, $post_data ) {
-		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post_data['post_author'] ) ) {
+	protected function notify_requester_payment_made( $post ) {
+		$post = get_post( $post );
+
+		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post->post_author ) ) {
 			return;
 		}
 
-		$subject = sprintf( '`%s` has been paid', $post_data['post_title'] );
+		$subject = sprintf( '"%s" has been paid', $post->post_title );
 		$headers = array( 'Reply-To: support@wordcamp.org' );
 
 		$message = sprintf(
-			"The request for `%s` has been marked as paid by WordCamp Central.
+			"The request for \"%s\" has been marked as paid by WordCamp Central.
 
 			You can view the request at:
 
 			%s
 
 			If you have any questions, please reply to let us know.",
-			$post_data['post_title'],
-			admin_url( sprintf( 'post.php?post=%s&action=edit', $request_id ) )
+			$post->post_title,
+			admin_url( sprintf( 'post.php?post=%s&action=edit', $post->ID ) )
 		);
 		$message = str_replace( "\t", '', $message );
 
@@ -596,20 +660,21 @@ class WCP_Payment_Request {
 	/**
 	 * Notify the payment requester that it has been marked as paid.
 	 *
-	 * @param int   $request_id
-	 * @param array $post_data
-	 * @param array $post_data_raw
+	 * @param int|WP_Post $post
 	 */
-	protected function notify_requester_request_incomplete( $request_id, $post_data, $post_data_raw ) {
-		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post_data['post_author'] ) ) {
+	protected function notify_requester_request_incomplete( $post ) {
+		$post = get_post( $post );
+
+		if ( ! $to = WordCamp_Budgets::get_requester_formatted_email( $post->post_author ) ) {
 			return;
 		}
 
-		$subject = sprintf( '`%s` is incomplete', $post_data['post_title'] );
+		$subject = sprintf( '"%s" is incomplete', $post->post_title );
 		$headers = array( 'Reply-To: support@wordcamp.org' );
+		$notes = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
 
 		$message = sprintf(
-			"The request for `%s` has been marked as incomplete by WordCamp Central.
+			"The request for \"%s\" has been marked as incomplete by WordCamp Central.
 
 			The reason for this is: %s
 
@@ -618,9 +683,9 @@ class WCP_Payment_Request {
 			%s
 
 			If you have any questions, please reply to let us know.",
-			$post_data['post_title'],
-			sanitize_text_field( stripslashes( $post_data_raw['wcp_mark_incomplete_notes'] ) ),
-			admin_url( sprintf( 'post.php?post=%s&action=edit', $request_id ) )
+			$post->post_title,
+			esc_html( $notes ),
+			admin_url( sprintf( 'post.php?post=%s&action=edit', $post->ID ) )
 		);
 		$message = str_replace( "\t", '', $message );
 
@@ -634,6 +699,57 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 */
 	public function save_payment( $post_id, $post ) {
+
+		// Update the timestamp and logs either way.
+		if ( $post->post_type == self::POST_TYPE && $post_id ) {
+			update_post_meta( $post_id, '_wcb_updated_timestamp', time() );
+
+			$user = get_user_by( 'id', get_current_user_id() );
+
+			// Look at post status transitions.
+			foreach ( self::$transition_post_status as $data ) {
+				list( $new, $old, $transition_post ) = $data;
+
+				// Transitioning a different post.
+				if ( $transition_post->ID != $post->ID )
+					continue;
+
+				if ( $new == 'incomplete' || $new == 'wcb-incomplete' ) {
+					$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+					$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
+					WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
+						'action' => 'marked-incomplete',
+						'reason' => 'maybe notes',
+					) );
+
+					$this->notify_requester_request_incomplete( $post->ID );
+					WordCamp_Budgets::log( $post->ID, $user->ID, 'Incomplete notification e-mail sent.', array(
+						'action' => 'incomplete-notification-sent',
+					) );
+
+				} elseif ( $new == 'paid' || $new == 'wcb-paid' ) {
+					WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
+						'action' => 'marked-paid',
+					) );
+
+					$this->notify_requester_payment_made( $post->ID );
+					WordCamp_Budgets::log( $post->ID, $user->ID, 'Paid notification e-mail sent.', array(
+						'action' => 'paid-notification-sent',
+					) );
+
+				} elseif ( $old == 'auto-draft' ) {
+					WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
+						'action' => 'updated',
+					) );
+				}
+			}
+
+			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
+				'action' => 'updated',
+			) );
+		}
+
+		// The rest only if triggered by a user submitting a form.
 		if ( ! WordCamp_Budgets::post_edit_is_actionable( $post, self::POST_TYPE ) ) {
 			return;
 		}
@@ -650,7 +766,7 @@ class WCP_Payment_Request {
 		// Sanitize and save the field values
 		$this->sanitize_save_normal_fields( $post_id );
 		WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'camppayments' );
-		$this->sanitize_save_misc_fields(   $post_id );
+		$this->sanitize_save_misc_fields( $post_id );
 	}
 
 	/**
@@ -715,10 +831,21 @@ class WCP_Payment_Request {
 	 * @param int $post_id
 	 */
 	protected function sanitize_save_misc_fields( $post_id ) {
+		$post = get_post( $post_id );
+
 		// Status
 		if ( current_user_can( 'manage_network' ) ) {
 			$safe_value = strtotime( sanitize_text_field( $_POST['date_vendor_paid'] ) );
 			update_post_meta( $post_id, '_camppayments_date_vendor_paid', $safe_value );
+		}
+
+		if ( isset( $_POST['wcp_mark_incomplete_notes'] ) ) {
+			$safe_value = '';
+			if ( $post->post_status == 'wcb-incomplete' ) {
+				$safe_value = wp_kses( $_POST['wcp_mark_incomplete_notes'], wp_kses_allowed_html( 'strip' ) );
+			}
+
+			update_post_meta( $post_id, '_wcp_incomplete_notes', $safe_value );
 		}
 
 		// Attach existing files
@@ -738,30 +865,11 @@ class WCP_Payment_Request {
 		if ( $post->post_type != self::POST_TYPE )
 			return;
 
-		$user = get_user_by( 'id', get_current_user_id() );
-		if ( $new == 'auto-draft' )
+		if ( $new == 'auto-draft' || $new == $old )
 			return;
 
-		if ( $new == 'incomplete' && $old != 'incomplete' ) {
-			$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
-			$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
-			WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
-				'action' => 'marked-incomplete',
-				'reason' => 'maybe notes',
-			) );
-		} elseif ( $new == 'paid' && $old != 'paid' ) {
-			WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
-				'action' => 'marked-paid',
-			) );
-		} elseif ( $old == 'auto-draft' && $new != 'auto-draft' ) {
-			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
-				'action' => 'updated',
-			) );
-		} else {
-			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
-				'action' => 'updated',
-			) );
-		}
+		// Move logging to save_post because transitions are fired before save_post.
+		self::$transition_post_status[] = array( $new, $old, $post );
 	}
 
 	/**

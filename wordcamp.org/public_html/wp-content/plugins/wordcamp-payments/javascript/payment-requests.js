@@ -3,7 +3,7 @@ jQuery( document ).ready( function( $ ) {
 
 	var wcb = window.WordCampBudgets;
 	var app = wcb.PaymentRequests = {
-		
+
 		/**
 		 * Main entry point
 		 */
@@ -31,7 +31,14 @@ jQuery( document ).ready( function( $ ) {
 			currency.change( wcb.setDefaultPaymentMethod );
 			currency.trigger( 'change' );   // Set the initial state
 			$( '#row-files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
-			$( '#wcp_mark_incomplete_checkbox' ).click( app.requireNotes );
+
+			$('[name="post_status"]').on('change', function() {
+				var $notes = $('.wcb-mark-incomplete-notes'),
+					state = $(this).val() == 'wcb-incomplete';
+
+				$notes.toggle(state);
+				$notes.find('textarea').attr('required', state);
+			}).trigger('change');
 		},
 
 		/**
@@ -50,25 +57,6 @@ jQuery( document ).ready( function( $ ) {
 				}
 
 				// todo make the transition smoother
-			} catch ( exception ) {
-				wcb.log( exception );
-			}
-		},
-
-		/**
-		 * Require notes when the request is being marked as incomplete
-		 *
-		 * @param {object} event
-		 */
-		requireNotes : function( event ) {
-			try {
-				var notes = $( '#wcp_mark_incomplete_notes' );
-
-				if ( 'checked' === $( '#wcp_mark_incomplete_checkbox' ).attr( 'checked' ) ) {
-					notes.attr( 'required', true );
-				} else {
-					notes.attr( 'required', false );
-				}
 			} catch ( exception ) {
 				wcb.log( exception );
 			}

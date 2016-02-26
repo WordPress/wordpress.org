@@ -13,6 +13,14 @@
 	width: 100%;
 }
 
+#submitpost.wcb .misc-pub-section select {
+	font-weight: normal;
+}
+
+#wcb-save-draft {
+	float: left;
+}
+
 /* Forms */
 .wcb-form {
 	display: table;
