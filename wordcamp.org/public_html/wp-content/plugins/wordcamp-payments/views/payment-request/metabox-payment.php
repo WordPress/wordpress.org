@@ -26,7 +26,7 @@
 	</table>
 
 	<p id="payment_method_credit_card_fields" class="description payment_method_fields <?php echo 'Credit Card' == $selected_payment_method ? 'active' : 'hidden'; ?>">
-		<?php _e( 'Please make sure that you upload an authorization form below, if one is required by the vendor.', 'wordcamporg' ); ?>
+		<?php _e( 'Please make sure that you upload an authorization form above, if one is required by the vendor.', 'wordcamporg' ); ?>
 	</p>
 
 	<div id="payment_method_wire_fields" class="form-table payment_method_fields <?php echo 'Wire' == $selected_payment_method ? 'active' : 'hidden'; ?>">
