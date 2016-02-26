@@ -149,11 +149,18 @@ class Payment_Requests_List_Table extends WP_List_Table {
 		);
 
 		if ( $request->post_status == 'wcb-pending-approval' ) {
-			$approve_url = wp_nonce_url( add_query_arg( array(
+			$action_url = wp_nonce_url( add_query_arg( array(
 				'wcb-approve' => sprintf( '%d-%d', $blog_id, $request->ID ),
 			) ), sprintf( 'wcb-approve-%d-%d', $blog_id, $request->ID ) );
 
-			$actions['wcb-approve'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Approve this payment request?\');" href="%s">Approve</a>', esc_url( $approve_url ) );
+			$actions['wcb-approve'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Approve this payment request?\');" href="%s">Approve</a>', esc_url( $action_url ) );
+
+		} elseif ( $request->post_status == 'wcb-approved' ) {
+			$action_url = wp_nonce_url( add_query_arg( array(
+				'wcb-set-pending-payment' => sprintf( '%d-%d', $blog_id, $request->ID ),
+			) ), sprintf( 'wcb-set-pending-payment-%d-%d', $blog_id, $request->ID ) );
+
+			$actions['wcb-set-pending-payment'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Set this request as pending payment?\');" href="%s">Set as Pending Payment</a>', esc_url( $action_url ) );
 		}
 
 		return sprintf( '<a href="%s" class="row-title" target="_blank">%s</a>%s',

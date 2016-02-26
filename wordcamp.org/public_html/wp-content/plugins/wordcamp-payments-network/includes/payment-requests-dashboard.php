@@ -19,9 +19,12 @@ class Payment_Requests_Dashboard {
 		add_action( 'admin_enqueue_scripts',  array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'network_admin_menu', array( __CLASS__, 'network_admin_menu' ) );
 		add_action( 'init', array( __CLASS__, 'upgrade' ) );
-		add_action( 'init', array( __CLASS__, 'process_approval' ) );
 		add_action( 'init', array( __CLASS__, 'process_export_request' ) );
 		add_action( 'init', array( __CLASS__, 'process_import_request' ) );
+
+		// Dashboard actions.
+		add_action( 'init', array( __CLASS__, 'process_action_approve' ) );
+		add_action( 'init', array( __CLASS__, 'process_action_set_pending_payment' ) );
 
 		// Diff-based updates to the index.
 		add_action( 'save_post', array( __CLASS__, 'save_post' ) );
@@ -302,8 +305,8 @@ class Payment_Requests_Dashboard {
 	/**
 	 * Process Approve button in network admin
 	 */
-	public static function process_approval() {
-		if ( ! current_user_can( 'network_admin' ) )
+	public static function process_action_approve() {
+		if ( ! current_user_can( 'manage_network' ) )
 			return;
 
 		if ( empty( $_GET['wcb-approve'] ) || empty( $_GET['_wpnonce'] ) )
@@ -333,6 +336,46 @@ class Payment_Requests_Dashboard {
 			add_action( 'admin_notices', function() {
 				?><div class="notice notice-success is-dismissible">
 					<p><?php _e( 'Success! Request has been marked as approved.', 'wordcamporg' ); ?></p>
+				</div><?php
+			});
+		}
+		restore_current_blog();
+	}
+
+	/**
+	 * Process "Set as Pending Payment" dashboard action.
+	 */
+	public static function process_action_set_pending_payment() {
+		if ( ! current_user_can( 'manage_network' ) )
+			return;
+
+		if ( empty( $_GET['wcb-set-pending-payment'] ) || empty( $_GET['_wpnonce'] ) )
+			return;
+
+		list( $blog_id, $post_id ) = explode( '-', $_GET['wcb-set-pending-payment'] );
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], sprintf( 'wcb-set-pending-payment-%d-%d', $blog_id, $post_id ) ) ) {
+			add_action( 'admin_notices', function() {
+				?><div class="notice notice-error is-dismissible">
+					<p><?php _e( 'Error! Could not verify nonce.', 'wordcamporg' ); ?></p>
+				</div><?php
+			});
+			return;
+		}
+
+		switch_to_blog( $blog_id );
+		$post = get_post( $post_id );
+		if ( $post->post_type == 'wcp_payment_request' ) {
+			$post->post_status = 'wcb-pending-payment';
+			wp_insert_post( $post );
+
+			WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'Request set as Pending Payment via Network Admin', array(
+				'action' => 'set-pending-payment',
+			) );
+
+			add_action( 'admin_notices', function() {
+				?><div class="notice notice-success is-dismissible">
+					<p><?php _e( 'Success! Request has been marked as Pending Payment.', 'wordcamporg' ); ?></p>
 				</div><?php
 			});
 		}
