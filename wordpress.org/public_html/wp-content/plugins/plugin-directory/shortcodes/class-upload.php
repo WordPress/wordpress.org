@@ -11,11 +11,8 @@ class Upload {
 
 			if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) && 'upload' === $_POST['action'] ) {
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) {
-					switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 					$uploader = new Upload_Handler;
 					$message  = $uploader->process_upload();
-					restore_current_blog();
-
 				}  else {
 					$message = __( 'Error in file upload.', 'wporg-plugins' );
 				}
@@ -37,7 +34,7 @@ class Upload {
 			</form>
 		<?php else : ?>
 			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( 'https://login.wordpress.org/' ) ); ?>
-			<p>
+			</p>
 		<?php endif;
 	}
 

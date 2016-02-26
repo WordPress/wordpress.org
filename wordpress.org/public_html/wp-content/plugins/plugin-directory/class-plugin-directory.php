@@ -327,7 +327,7 @@ class Plugin_Directory {
 	 * @param $plugin_slug string|\WP_Post The slug of the plugin to retrieve.
 	 * @return \WP_Post|\WP_Error
 	 */
-	public function get_plugin_post( $plugin_slug ) {
+	static public function get_plugin_post( $plugin_slug ) {
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
 		}
@@ -336,7 +336,7 @@ class Plugin_Directory {
 		$posts = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $plugin_slug,
-			'post_status' => 'any',
+			'post_status' => array( 'publish', 'pending', 'disabled', 'closed' ),
 		) );
 		if ( ! $posts ) {
 			return false;
@@ -359,7 +359,7 @@ class Plugin_Directory {
 	 * }
 	 * @return \WP_Post|\WP_Error
 	 */
-	public function create_plugin_post( array $plugin_info ) {
+	static public function create_plugin_post( array $plugin_info ) {
 		$title  = !empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
 		$slug   = !empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
 		$status = !empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'pending';
