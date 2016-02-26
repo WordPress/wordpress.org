@@ -299,11 +299,13 @@ class WCP_Payment_Request {
 		$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
 		$current_user_can_edit_request = false;
 		$submit_text = _x( 'Update', 'payment request', 'wordcamporg' );
+		$submit_note = '';
 
 		if ( current_user_can( 'manage_network' ) ) {
 			$current_user_can_edit_request = true;
 		} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
 			$submit_text = __( 'Submit for Review', 'wordcamporg' );
+			$submit_note = __( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
 			$current_user_can_edit_request = true;
 		}
 

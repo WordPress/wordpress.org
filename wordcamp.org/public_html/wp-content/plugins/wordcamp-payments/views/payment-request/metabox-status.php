@@ -75,6 +75,11 @@
 	<div id="major-publishing-actions">
 		<?php if ( $current_user_can_edit_request ) : ?>
 
+			<?php if ( !empty( $submit_note ) ) : ?>
+				<div><?php echo $submit_note; ?></div>
+			<?php endif; ?>
+
+
 			<div id="delete-action">
 				<?php if ( current_user_can( 'delete_post', $post->ID ) ) : ?>
 					<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>">
