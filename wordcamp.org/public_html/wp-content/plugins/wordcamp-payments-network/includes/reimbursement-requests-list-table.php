@@ -41,7 +41,7 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 		);
 
 		$table_name = get_index_table_name();
-		$status     = 'wcbrr_' . get_current_section();
+		$status     = get_current_section();
 		$paged      = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1;
 		$limit      = 30;
 		$offset     = $limit * ( $paged - 1 );

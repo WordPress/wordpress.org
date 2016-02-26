@@ -41,25 +41,30 @@ function render_submenu_page() {
 	$sections   = get_submenu_page_sections();
 
 	$list_table->prepare_items();
+	$section_explanation = '';
 
 	switch ( get_current_section() ) {
-		case 'submitted':
+		case 'wcb-pending-approval':
 			$section_explanation = 'These requests have been completed by the organizer, and need to be reviewed by a deputy.';
 			break;
 
-		case 'info_requested':
+		case 'wcb-incomplete':
 			$section_explanation = 'These requests have been reviewed by a deputy, and sent back to the organizer because they lacked some required information.';
 			break;
 
-		case 'rejected':
-			$section_explanation = 'These requests have been reviewed by a deputy and rejected.';
+		case 'wcb-cancelled':
+			$section_explanation = 'These requests have been reviewed by a deputy and cancelled/rejected.';
 			break;
 
-		case 'in_process':
-			$section_explanation = "These requests have been reviewed by a deputy and payment is pending.";
+		case 'wcb-approved':
+			$section_explanation = "These requests have been reviewed and approved by a deputy and payment is pending.";
 			break;
 
-		case 'paid':
+		case 'wcb-pending-payment':
+			$section_explanation = 'These requests have been exported to our banking software, pending release.';
+			break;
+
+		case 'wcb-paid':
 			$section_explanation = 'These requests have been paid and closed.';
 			break;
 	}
@@ -89,13 +94,7 @@ function get_current_section() {
  * @return array
  */
 function get_section_slugs() {
-	$slugs = array_keys( \WordCamp\Budgets\Reimbursement_Requests\get_custom_statuses() );
-
-	foreach( $slugs as & $slug ) {
-		$slug = str_replace( 'wcbrr_', '', $slug );
-	}
-
-	return $slugs;
+	return \WordCamp\Budgets\Reimbursement_Requests\get_post_statuses();
 }
 
 /**
@@ -104,30 +103,30 @@ function get_section_slugs() {
  * @return array
  */
 function get_submenu_page_sections() {
-	$statuses        = \WordCamp\Budgets\Reimbursement_Requests\get_custom_statuses();
+	$statuses        = \WordCamp\Budgets\Reimbursement_Requests\get_post_statuses();
 	$sections        = array();
 	$current_section = get_current_section();
 
-	foreach ( $statuses as $status_slug => $status_name ) {
-		$status_slug = str_replace( 'wcbrr_', '', $status_slug );    // make the URL easier to read
+	foreach ( $statuses as $status ) {
+		$status = get_post_status_object( $status );
 
 		$classes = 'nav-tab';
-		if ( $status_slug === $current_section ) {
+		if ( $status->name === $current_section ) {
 			$classes .= ' nav-tab-active';
 		}
 
 		$href = add_query_arg(
 			array(
 				'page'    => 'reimbursement-requests-dashboard',
-				'section' => $status_slug,
+				'section' => $status->name,
 			),
 			network_admin_url( 'admin.php' )
 		);
 
-		$sections[ $status_slug ] = array(
+		$sections[ $status->name ] = array(
 			'classes' => $classes,
 			'href'    => $href,
-			'text'    => $status_name,
+			'text'    => $status->label,
 		);
 	}
 
@@ -197,8 +196,22 @@ function update_index_row( $request_id, $request ) {
 		return;
 	}
 
+	// Back-compat.
+	$back_compat_statuses = array(
+		'wcbrr_submitted' => 'pending-approval',
+		'wcbrr_info_requested' => 'wcb-incomplete',
+		'wcbrr_rejected' => 'wcb-failed',
+		'wcbrr_in_process' => 'pending-payment',
+		'wcbrr_paid' => 'wcb-paid',
+	);
+
+	// Map old statuses to new statuses.
+	if ( array_key_exists( $request->post_status, $back_compat_statuses ) ) {
+		$request->post_status = $back_compat_statuses[ $request->post_status ];
+	}
+
 	// Drafts, etc aren't displayed in the list table, so there's no reason to index them
-	$ignored_statuses = array( 'auto-draft', 'draft', 'trash' );
+	$ignored_statuses = array( 'auto-draft', 'trash' );
 	// todo also `inherit`. should switch to whitelist instead of blacklist
 
 	if ( in_array( $request->post_status, $ignored_statuses, true ) ) {
