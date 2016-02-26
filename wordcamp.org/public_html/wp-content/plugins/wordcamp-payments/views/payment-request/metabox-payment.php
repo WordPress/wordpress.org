@@ -18,6 +18,11 @@
 
 	<table id="payment_method_check_fields" class="form-table payment_method_fields <?php echo 'Check' == $selected_payment_method ? 'active' : 'hidden'; ?>">
 		<?php $this->render_text_input( $post, 'Payable To', 'payable_to' ); ?>
+		<?php $this->render_text_input(    $post, 'Street Address',    'check_street_address' ); ?>
+		<?php $this->render_text_input(    $post, 'City',              'check_city'           ); ?>
+		<?php $this->render_text_input(    $post, 'State / Province',  'check_state'          ); ?>
+		<?php $this->render_text_input(    $post, 'ZIP / Postal Code', 'check_zip_code'       ); ?>
+		<?php $this->render_country_input( $post, 'Country',           'check_country'        ); ?>
 	</table>
 
 	<p id="payment_method_credit_card_fields" class="description payment_method_fields <?php echo 'Credit Card' == $selected_payment_method ? 'active' : 'hidden'; ?>">

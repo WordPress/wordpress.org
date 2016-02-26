@@ -358,7 +358,7 @@ class WordCamp_Budgets {
 	 * Get a list of valid payment methods
 	 *
 	 * @param $post_type
-	 * 
+	 *
 	 * @return array
 	 */
 	public static function get_valid_payment_methods( $post_type ) {
@@ -405,8 +405,13 @@ class WordCamp_Budgets {
 				case 'beneficiary_state':
 				case 'beneficiary_zip_code':
 				case 'beneficiary_country':
+					
 				case 'payable_to':
-
+				case 'check_street_address':
+				case 'check_city':
+				case 'check_state':
+				case 'check_zip_code':
+		
 				case 'ach_bank_name':
 				case 'ach_routing_number':
 				case 'ach_account_number':
@@ -434,6 +439,7 @@ class WordCamp_Budgets {
 				case 'bank_country_iso3166':
 				case 'interm_bank_country_iso3166':
 				case 'beneficiary_country_iso3166':
+				case 'check_country':
 					if ( array_key_exists( $unsafe_value, self::get_valid_countries_iso3166() ) ) {
 						$safe_value = $unsafe_value;
 					}
