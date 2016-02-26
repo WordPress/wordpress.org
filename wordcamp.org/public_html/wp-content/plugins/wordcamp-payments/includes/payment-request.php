@@ -430,7 +430,7 @@ class WCP_Payment_Request {
 				break;
 
 			case 'payment_method':
-				$value = WordCamp_Budgets::get_valid_payment_methods();
+				$value = WordCamp_Budgets::get_valid_payment_methods( $post->post_type );
 				break;
 
 			case 'general_notes':

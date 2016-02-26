@@ -357,10 +357,18 @@ class WordCamp_Budgets {
 	/**
 	 * Get a list of valid payment methods
 	 *
+	 * @param $post_type
+	 * 
 	 * @return array
 	 */
-	public static function get_valid_payment_methods() {
-		return array( 'Direct Deposit', 'Check', 'Credit Card', 'Wire' );
+	public static function get_valid_payment_methods( $post_type ) {
+		$methods = array( 'Direct Deposit', 'Check', 'Wire' );
+
+		if ( WCP_Payment_Request::POST_TYPE === $post_type ) {
+			$methods[] = 'Credit Card';
+		}
+
+		return $methods;
 	}
 
 	/**
@@ -415,7 +423,7 @@ class WordCamp_Budgets {
 					break;
 
 				case 'payment_method':
-					if ( in_array( $unsafe_value, self::get_valid_payment_methods(), true ) ) {
+					if ( in_array( $unsafe_value, self::get_valid_payment_methods( $_POST['post_type'] ), true ) ) {
 						$safe_value = $unsafe_value;
 					} else {
 						$safe_value = false;
