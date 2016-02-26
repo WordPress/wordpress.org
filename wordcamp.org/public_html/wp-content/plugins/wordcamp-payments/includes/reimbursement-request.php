@@ -58,22 +58,23 @@ function register_post_type() {
 		'supports'          => array( 'title' ),
 		'has_archive'       => true,
 	);
-	
+
 	return \register_post_type( POST_TYPE, $args );
 }
 
 /**
- * Get the slugs and names for our custom post statuses
- *
  * @return array
  */
-function get_custom_statuses() {
+function get_post_statuses() {
 	return array(
-		'wcbrr_submitted'      => __( 'Submitted',             'wordcamporg' ),
-		'wcbrr_info_requested' => __( 'Information Requested', 'wordcamporg' ),
-		'wcbrr_rejected'       => __( 'Rejected',              'wordcamporg' ),
-		'wcbrr_in_process'     => __( 'Payment in Process',    'wordcamporg' ),
-		'wcbrr_paid'           => __( 'Paid',                  'wordcamporg' ),
+		'draft',
+		'wcb-incomplete',
+		'wcb-pending-approval',
+		'wcb-approved',
+		'wcb-pending-payment',
+		'wcb-paid',
+		'wcb-failed',
+		'wcb-cancelled',
 	);
 }
 
@@ -81,7 +82,7 @@ function get_custom_statuses() {
  * Register our custom post statuses
  */
 function register_post_statuses() {
-	// todo use get_custom_statuses() for DRYness, but need to handle label_count
+	// These are legacy statuses. Real statuses in wordcamp-budgets.php.
 
 	register_post_status(
 		'wcbrr_submitted',
@@ -242,7 +243,7 @@ function enqueue_assets() {
  * @return bool
  */
 function user_can_edit_request( $post ) {
-	$editable_status = in_array( $post->post_status, array( 'auto-draft', 'draft', 'wcbrr_info_requested' ), true );
+	$editable_status = in_array( $post->post_status, array( 'auto-draft', 'draft', 'wcb-incomplete' ), true );
 	return current_user_can( 'manage_network' ) || $editable_status;
 }
 
@@ -254,44 +255,40 @@ function user_can_edit_request( $post ) {
 function render_status_metabox( $post ) {
 	wp_nonce_field( 'status', 'status_nonce' );
 
-	$show_draft_button  = current_user_can( 'draft_post', $post->ID ) && ! current_user_can( 'manage_network' ); // Network admins can save as draft via the status dropdown, so the button is unnecessary UI clutter
-	$show_submit_button = user_can_edit_request( $post );
-	$available_statuses = array_merge( array( 'draft' => __( 'Draft' ) ), get_custom_statuses() );
-	$status_name        = get_status_name( $post->post_status );
+	$back_compat_statuses = array(
+		'wcbrr_submitted' => 'pending-approval',
+		'wcbrr_info_requested' => 'wcb-incomplete',
+		'wcbrr_rejected' => 'wcb-failed',
+		'wcbrr_in_process' => 'pending-payment',
+		'wcbrr_paid' => 'wcb-paid',
+	);
+
+	// Map old statuses to new statuses.
+	if ( array_key_exists( $post->post_status, $back_compat_statuses ) ) {
+		$post->post_status = $back_compat_statuses[ $post->post_status ];
+	}
+
+	$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
+	$current_user_can_edit_request = false;
+	$submit_text = _x( 'Update', 'payment request', 'wordcamporg' );
+	$submit_note = '';
+
+	if ( current_user_can( 'manage_network' ) ) {
+		$current_user_can_edit_request = true;
+	} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
+		$submit_text = __( 'Submit for Review', 'wordcamporg' );
+		$submit_note = __( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
+		$current_user_can_edit_request = true;
+	}
+
+	$incomplete_notes = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+	$incomplete_readonly = ! current_user_can( 'manage_network' ) ? 'readonly' : '';
+
 	$request_id         = get_current_blog_id() . '-' . $post->ID;
 	$requested_by       = \WordCamp_Budgets::get_requester_name( $post->post_author );
-	$delete_text        = EMPTY_TRASH_DAYS ? __( 'Move to Trash' ) : __( 'Delete Permanently' );
 	$update_text        = current_user_can( 'manage_network' ) ? __( 'Update Request', 'wordcamporg' ) : __( 'Send Request', 'wordcamporg' );
 
 	require_once( dirname( __DIR__ ) . '/views/reimbursement-request/metabox-status.php' );
-}
-
-/**
- * Get the name for the given status slug
- *
- * @param string $status_slug
- *
- * @return string
- */
-function get_status_name( $status_slug ) {
-	$status_name = '';
-
-	switch ( $status_slug ) {
-		case 'auto-draft':
-		case 'draft':
-			$status_name = __( 'Draft' );
-			break;
-
-		default:
-			$custom_statuses = get_custom_statuses();
-			foreach ( $custom_statuses as $custom_slug => $custom_name ) {
-				if ( $custom_slug === $status_slug ) {
-					$status_name = $custom_name;
-				}
-			}
-	}
-
-	return $status_name;
 }
 
 /**
@@ -382,12 +379,12 @@ function render_expenses_metabox( $post ) {
 function display_post_states( $states ) {
 	global $post;
 
-	$custom_states = get_custom_statuses();
+	if ( $post->post_type != POST_TYPE )
+		return $states;
 
-	foreach ( $custom_states as $slug => $name ) {
-		if ( $slug == $post->post_status && $slug != get_query_var( 'post_status' ) ) {
-			$states[ $slug ] = $name;
-		}
+	$status = get_post_status_object( $post->post_status );
+	if ( get_query_var( 'post_status' ) != $post->post_status ) {
+		$states[ $status->name ] = $status->label;
 	}
 
 	return $states;
@@ -407,18 +404,17 @@ function set_request_status( $post_data, $post_data_raw ) {
 	}
 
 	// Requesting to save draft
-	if ( isset( $post_data_raw['wcbsi-save-draft'] ) ) {
+	if ( isset( $post_data_raw['wcb-save-draft'] ) ) {
 		if ( current_user_can( 'draft_post', $post_data['ID'] ) ) {
 			$post_data['post_status'] = 'draft';
 		}
 	}
 
 	// Requesting to submit/update the post
-	elseif ( isset( $post_data_raw['send-reimbursement-request'] ) ) {
-		if ( current_user_can( 'manage_network' ) ) {
-			$post_data['post_status'] = $_POST['post_status'];
-		} else {
-			$post_data['post_status'] = 'wcbrr_submitted';
+	if ( ! current_user_can( 'manage_network' ) ) {
+		$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
+		if ( ! empty( $post_data_raw['wcb-update'] ) && in_array( $post_data['post_status'], $editable_statuses ) ) {
+			$post_data['post_status'] = 'wcb-pending-approval';
 		}
 	}
 
@@ -550,6 +546,17 @@ function validate_and_save_expenses( $post_id, $expenses ) {
  * @param array    $expenses
  */
 function validate_and_save_notes( $post, $new_note_message ) {
+
+	// Save incomplete message.
+	if ( isset( $_POST['wcp_mark_incomplete_notes'] ) ) {
+		$safe_value = '';
+		if ( $post->post_status == 'wcb-incomplete' ) {
+			$safe_value = wp_kses( $_POST['wcp_mark_incomplete_notes'], wp_kses_allowed_html( 'strip' ) );
+		}
+
+		update_post_meta( $post->ID, '_wcp_incomplete_notes', $safe_value );
+	}
+
 	$new_note_message = sanitize_text_field( wp_unslash( $new_note_message ) );
 
 	if ( empty( $new_note_message ) ) {
@@ -627,14 +634,15 @@ function notify_organizer_request_updated( $new_status, $old_status, $request ) 
 	}
 
 	$to                = \WordCamp_Budgets::get_requester_formatted_email( $request->post_author );
-	$relevant_statuses = array( 'wcbrr_info_requested', 'wcbrr_rejected', 'wcbrr_in_process', 'wcbrr_paid' );
+	$relevant_statuses = get_post_statuses();
 
 	if ( ! $to || ! in_array( $request->post_status, $relevant_statuses, true ) ) {
 		return;
 	}
 
 	$subject     = 'Status update for ' . sanitize_text_field( $request->post_title );
-	$status_name = get_status_name( $request->post_status );
+	$status      = get_post_status_object( $request->post_status );
+	$status_name = $status->label;
 	$request_url = admin_url( sprintf( 'post.php?post=%s&action=edit', $request->ID ) );
 	$headers     = array( 'Reply-To: support@wordcamp.org' );
 
@@ -671,7 +679,7 @@ function modify_capabilities( $required_capabilities, $requested_capability, $us
 	}
 
 	$drafted_status             = in_array( $post->post_status, array( 'auto-draft', 'draft' ), true );
-	$draft_or_incomplete_status = $drafted_status || 'wcbrr_info_requested' === $post->post_status;
+	$draft_or_incomplete_status = $drafted_status || 'wcb-incomplete' === $post->post_status;
 
 	switch( $requested_capability ) {
 		case 'draft_post':

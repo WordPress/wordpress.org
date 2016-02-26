@@ -45,6 +45,14 @@ jQuery( document ).ready( function( $ ) {
 			currency.change( function() {
 				app.expenses.trigger( 'updateTotal' );
 			} );
+
+			$('[name="post_status"]').on('change', function() {
+				var $notes = $('.wcb-mark-incomplete-notes'),
+					state = $(this).val() == 'wcb-incomplete';
+
+				$notes.toggle(state);
+				$notes.find('textarea').attr('required', state);
+			}).trigger('change');
 		},
 
 		/**
