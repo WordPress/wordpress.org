@@ -309,6 +309,7 @@ class WordCamp_QBO_Client {
 		$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
 
 		$payload = array(
+			'wordcamp_name'   => sanitize_text_field( get_wordcamp_name()                        ),
 			'invoice_title'   => sanitize_text_field( $invoice->post_title                       ),
 			'currency_code'   => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
 			'qbo_class_id'    => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),

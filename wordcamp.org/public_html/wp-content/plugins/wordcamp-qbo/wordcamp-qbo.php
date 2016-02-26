@@ -297,6 +297,7 @@ class WordCamp_QBO {
 		}
 
 		$invoice_id = self::create_invoice(
+			$request->get_param( 'wordcamp_name'   ),
 			$request->get_param( 'sponsor'         ),
 			$request->get_param( 'currency_code'   ),
 			$request->get_param( 'qbo_class_id'    ),
@@ -325,6 +326,7 @@ class WordCamp_QBO {
 	/**
 	 * Creates an Invoice in QuickBooks
 	 *
+	 * @param string $wordcamp_name
 	 * @param array  $sponsor
 	 * @param string $currency_code
 	 * @param int    $class_id
@@ -335,8 +337,9 @@ class WordCamp_QBO {
 	 *
 	 * @return int|WP_Error Invoice ID on success; error on failure
 	 */
-	protected static function create_invoice( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $statement_memo ) {
+	protected static function create_invoice( $wordcamp_name, $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $statement_memo ) {
 		$qbo_request = self::build_qbo_create_invoice_request(
+			$wordcamp_name,
 			$sponsor,
 			$currency_code,
 			$class_id,
@@ -373,6 +376,7 @@ class WordCamp_QBO {
 	/**
 	 * Build the requset to create an invoice in QuickBooks
 	 *
+	 * @param string $wordcamp_name
 	 * @param array  $sponsor
 	 * @param string $currency_code
 	 * @param int    $class_id
@@ -384,13 +388,14 @@ class WordCamp_QBO {
 	 *
 	 * @return array|WP_Error
 	 */
-	protected static function build_qbo_create_invoice_request( $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $customer_email, $statement_memo ) {
+	protected static function build_qbo_create_invoice_request( $wordcamp_name, $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $customer_email, $statement_memo ) {
 		$customer_id = self::probably_get_customer_id( $sponsor, $currency_code );
 
 		if ( is_wp_error( $customer_id ) ) {
 			return $customer_id;
 		}
 
+		$wordcamp_name   = sanitize_text_field( $wordcamp_name   );
 		$class_id        = sanitize_text_field( $class_id        );
 		$invoice_title   = sanitize_text_field( $invoice_title   );
 		$amount          = floatval(            $amount          );
@@ -445,7 +450,7 @@ class WordCamp_QBO {
 			'Line' => array(
 				array(
 					'Amount'      => $amount,
-					'Description' => $invoice_title,
+					'Description' => sprintf( '%s - %s', $wordcamp_name, $invoice_title ),
 					'DetailType'  => 'SalesItemLineDetail',
 
 					'SalesItemLineDetail' => array(
