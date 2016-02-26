@@ -687,13 +687,17 @@ class WCP_Payment_Request {
 		$message = sprintf(
 			"The request for \"%s\" has been marked as incomplete by WordCamp Central.
 
-			The reason for this is: %s
+The reason for this is: %s
 
-			You can complete the request at:
+Please provide more information or clarify payment instructions here:
 
-			%s
+%s
 
-			If you have any questions, please reply to let us know.",
+More information about making payment requests can be found here:
+
+https://make.wordpress.org/community/handbook/community-deputy-handbook/wordcamp-program-basics/payment-requests/
+
+Thanks for helping us with these details!",
 			$post->post_title,
 			esc_html( $notes ),
 			admin_url( sprintf( 'post.php?post=%s&action=edit', $post->ID ) )
@@ -710,74 +714,71 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 */
 	public function save_payment( $post_id, $post ) {
+		if ( $post->post_type != self::POST_TYPE )
+			return;
 
-		// Update the timestamp and logs either way.
-		if ( $post->post_type == self::POST_TYPE && $post_id ) {
-			update_post_meta( $post_id, '_wcb_updated_timestamp', time() );
+		if ( WordCamp_Budgets::post_edit_is_actionable( $post, self::POST_TYPE ) ) {
+			// Verify nonces
+			$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
 
-			$user = get_user_by( 'id', get_current_user_id() );
-
-			// Look at post status transitions.
-			foreach ( self::$transition_post_status as $data ) {
-				list( $new, $old, $transition_post ) = $data;
-
-				// Transitioning a different post.
-				if ( $transition_post->ID != $post->ID )
-					continue;
-
-				if ( $new == 'incomplete' || $new == 'wcb-incomplete' ) {
-					$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
-					$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
-					WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
-						'action' => 'marked-incomplete',
-						'reason' => 'maybe notes',
-					) );
-
-					$this->notify_requester_request_incomplete( $post->ID );
-					WordCamp_Budgets::log( $post->ID, $user->ID, 'Incomplete notification e-mail sent.', array(
-						'action' => 'incomplete-notification-sent',
-					) );
-
-				} elseif ( $new == 'paid' || $new == 'wcb-paid' ) {
-					WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
-						'action' => 'marked-paid',
-					) );
-
-					$this->notify_requester_payment_made( $post->ID );
-					WordCamp_Budgets::log( $post->ID, $user->ID, 'Paid notification e-mail sent.', array(
-						'action' => 'paid-notification-sent',
-					) );
-
-				} elseif ( $old == 'auto-draft' ) {
-					WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
-						'action' => 'updated',
-					) );
+			foreach ( $nonces as $nonce ) {
+				if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {
+					return;
 				}
 			}
 
-			WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
-				'action' => 'updated',
-			) );
+			// Sanitize and save the field values
+			$this->sanitize_save_normal_fields( $post_id );
+			WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'camppayments' );
+			$this->sanitize_save_misc_fields( $post_id );
 		}
 
-		// The rest only if triggered by a user submitting a form.
-		if ( ! WordCamp_Budgets::post_edit_is_actionable( $post, self::POST_TYPE ) ) {
-			return;
-		}
+		// Update the timestamp and logs.
+		update_post_meta( $post_id, '_wcb_updated_timestamp', time() );
 
-		// Verify nonces
-		$nonces = array( 'status_nonce', 'general_info_nonce', 'payment_details_nonce', 'vendor_details_nonce' );    // todo add prefix to all of these
+		$user = get_user_by( 'id', get_current_user_id() );
 
-		foreach ( $nonces as $nonce ) {
-			if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( $_POST[ $nonce ], str_replace( '_nonce', '', $nonce ) ) ) {
-				return;
+		// Look at post status transitions.
+		foreach ( self::$transition_post_status as $data ) {
+			list( $new, $old, $transition_post ) = $data;
+
+			// Transitioning a different post.
+			if ( $transition_post->ID != $post->ID )
+				continue;
+
+			if ( $new == 'incomplete' || $new == 'wcb-incomplete' ) {
+				$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+				$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
+				WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
+					'action' => 'marked-incomplete',
+					'reason' => 'maybe notes',
+				) );
+
+				$this->notify_requester_request_incomplete( $post->ID );
+				WordCamp_Budgets::log( $post->ID, $user->ID, 'Incomplete notification e-mail sent.', array(
+					'action' => 'incomplete-notification-sent',
+				) );
+
+			} elseif ( $new == 'paid' || $new == 'wcb-paid' ) {
+				WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
+					'action' => 'marked-paid',
+				) );
+
+				$this->notify_requester_payment_made( $post->ID );
+				WordCamp_Budgets::log( $post->ID, $user->ID, 'Paid notification e-mail sent.', array(
+					'action' => 'paid-notification-sent',
+				) );
+
+			} elseif ( $old == 'auto-draft' ) {
+				WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
+					'action' => 'updated',
+				) );
 			}
 		}
 
-		// Sanitize and save the field values
-		$this->sanitize_save_normal_fields( $post_id );
-		WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'camppayments' );
-		$this->sanitize_save_misc_fields( $post_id );
+		WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
+			'action' => 'updated',
+		) );
 	}
 
 	/**
