@@ -215,6 +215,12 @@ class WCP_Payment_Request {
 			'high'
 		);
 
+		$introduction_message = sprintf(
+			'<p>%s</p> <p>%s</p>',
+			__( 'Direct Deposit or Wire is the fastest way to pay a vendor. Checks and credit card payments can take 3-5 days for us and/or the bank to process.', 'wordcamporg' ),
+			__( 'Each wire transfer costs us processing fees, so please try to avoid multiple wire requests for one vendor.', 'wordcamporg' )
+		);
+
 		add_meta_box(
 			'wcp_payment_details',
 			__( 'Payment Details', 'wordcamporg' ),
@@ -222,7 +228,10 @@ class WCP_Payment_Request {
 			self::POST_TYPE,
 			'normal',
 			'high',
-			array( 'meta_key_prefix' => 'camppayments' )
+			array(
+				'meta_key_prefix'      => 'camppayments',
+				'introduction_message' => $introduction_message,
+			)
 		);
 
 		add_meta_box(

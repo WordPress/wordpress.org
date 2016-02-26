@@ -1,3 +1,9 @@
+<?php if ( ! empty( $box['args']['introduction_message'] ) ) : ?>
+	<p>
+		<?php echo wp_kses( $box['args']['introduction_message'], array( 'p' => array() ) ); ?>
+	</p>
+<?php endif; ?>
+
 <fieldset <?php disabled( $box['args']['fields_enabled'], false ); ?> >
 
 	<table class="form-table">
@@ -16,20 +22,33 @@
 		<?php $this->render_text_input( $post, 'Account Holder Name', 'ach_account_holder_name' ); ?>
 	</table>
 
-	<table id="payment_method_check_fields" class="form-table payment_method_fields <?php echo 'Check' == $selected_payment_method ? 'active' : 'hidden'; ?>">
-		<?php $this->render_text_input( $post, 'Payable To', 'payable_to' ); ?>
-		<?php $this->render_text_input(    $post, 'Street Address',    'check_street_address' ); ?>
-		<?php $this->render_text_input(    $post, 'City',              'check_city'           ); ?>
-		<?php $this->render_text_input(    $post, 'State / Province',  'check_state'          ); ?>
-		<?php $this->render_text_input(    $post, 'ZIP / Postal Code', 'check_zip_code'       ); ?>
-		<?php $this->render_country_input( $post, 'Country',           'check_country'        ); ?>
-	</table>
+	<div id="payment_method_check_fields" class="form-table payment_method_fields <?php echo 'Check' == $selected_payment_method ? 'active' : 'hidden'; ?>">
+		<p>
+			<?php _e( 'Please fill out all the below fields to ensure that the check is sent successfully.', 'wordcamporg' ); ?>
+		</p>
+
+		<table>
+			<?php $this->render_text_input( $post, 'Payable To', 'payable_to' ); ?>
+			<?php $this->render_text_input(    $post, 'Street Address',    'check_street_address' ); ?>
+			<?php $this->render_text_input(    $post, 'City',              'check_city'           ); ?>
+			<?php $this->render_text_input(    $post, 'State / Province',  'check_state'          ); ?>
+			<?php $this->render_text_input(    $post, 'ZIP / Postal Code', 'check_zip_code'       ); ?>
+			<?php $this->render_country_input( $post, 'Country',           'check_country'        ); ?>
+		</table>
+	</div>
 
 	<p id="payment_method_credit_card_fields" class="description payment_method_fields <?php echo 'Credit Card' == $selected_payment_method ? 'active' : 'hidden'; ?>">
 		<?php _e( 'Please make sure that you upload an authorization form above, if one is required by the vendor.', 'wordcamporg' ); ?>
 	</p>
 
 	<div id="payment_method_wire_fields" class="form-table payment_method_fields <?php echo 'Wire' == $selected_payment_method ? 'active' : 'hidden'; ?>">
+		<p>
+			<?php _e(
+				'Please include Bank Name, SWIFT code, Beneficiary Name, and Beneficiary Account Number to ensure that your wire is sent successfully.',
+				'wordcamporg'
+			); ?>
+		</p>
+
 		<table>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Name',              'bank_name' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Street Address',    'bank_street_address' ); ?>

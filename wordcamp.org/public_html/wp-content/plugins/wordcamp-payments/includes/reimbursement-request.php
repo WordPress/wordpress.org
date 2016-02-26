@@ -170,6 +170,12 @@ function init_meta_boxes() {
 		'high'
 	);
 
+	$introduction_message = sprintf(
+		'<p>%s</p> <p>%s</p>',
+		__( 'This is where you can give us information on how we can reimburse you for approved expenses that you paid out-of-pocket.', 'wordcamporg' ),
+		__( 'Each wire transfer and check costs us processing fees, so if you have multiple out-of-pocket expenses, please try to group them into one reimbursement request.', 'wordcamporg' )
+	);
+
 	add_meta_box(
 		'wcbrr_payment_information',
 		__( 'Payment Information', 'wordcamporg' ),
@@ -180,6 +186,7 @@ function init_meta_boxes() {
 		array(
 			'meta_key_prefix' => 'wcbrr',
 			'fields_enabled'  => user_can_edit_request( $post ),
+			'introduction_message' => $introduction_message,
 			'show_vendor_requested_payment_method' => false,
 		)
 	);
