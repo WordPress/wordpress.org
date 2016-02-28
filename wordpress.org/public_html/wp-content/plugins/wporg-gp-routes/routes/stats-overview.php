@@ -22,7 +22,7 @@ class WPorg_GP_Route_Stats extends GP_Route {
 
 		// I'm sure there's somewhere to fetch these from statically defined
 		$wp_project = GP::$project->by_path('wp');
-		foreach ( GP::$project->find_many( array( 'parent_project_id' => $wp_project->id, 'active' => 1 ) ) as $wp_sub_project ) {
+		foreach ( GP::$project->find_many( array( 'parent_project_id' => $wp_project->id, 'active' => 1 ), 'name ASC' ) as $wp_sub_project ) {
 			// Prefix the WordPress projects...
 			$wp_sub_project->name = $wp_project->name . ' ' . $wp_sub_project->name;
 			$projects = array_merge( array( $wp_sub_project->path => $wp_sub_project ), $projects );
