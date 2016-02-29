@@ -458,7 +458,7 @@
 
 	projects.getLocalProjects = function() {
 		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
-		if ( ! lastUpdated ) {
+		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
 			return false;
 		}
 
