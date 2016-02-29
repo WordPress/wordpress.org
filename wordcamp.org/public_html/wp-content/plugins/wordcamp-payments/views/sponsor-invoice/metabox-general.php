@@ -87,6 +87,7 @@ defined( 'WPINC' ) or die();
 			id="_wcbsi_description"
 			name="_wcbsi_description"
 			value="<?php echo esc_attr( $description ); ?>"
+			maxlength="75"
 			required
 		/>
 
