@@ -343,6 +343,8 @@ ul.filter-header-links {
 .project-box-header:after,
 .project-status:before,
 .project-status:after,
+.locale-project-contributors:before,
+.locale-project-contributors:after,
 .locales:before,
 .locales:after {
 	content: "";
@@ -354,6 +356,7 @@ ul.filter-header-links {
 .projects:after,
 .project-box-header:after,
 .project-status:after,
+.locale-project-contributors:after,
 .locales:after {
 	clear: both;
 }
@@ -1277,4 +1280,24 @@ ul.ct-legend {
 .contributors-list[data-current-filter="has-editors"] .no-editors,
 .contributors-list[data-current-filter="no-editors"] .has-editors {
 	display: none !important;
+}
+
+.locale-project-contributors-group {
+	width: 50%;
+	float: left;
+}
+
+.locale-project-contributors-group ul {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.locale-project-contributors-group li {
+	margin: 0 0 10px;
+}
+
+.locale-project-contributors-group li img {
+	vertical-align: middle;
+	margin-right: 10px;
 }

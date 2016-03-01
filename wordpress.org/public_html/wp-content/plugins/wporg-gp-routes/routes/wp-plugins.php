@@ -263,7 +263,6 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 			}
 		}
 
-
 		$labels = array_keys( $data );
 		array_pop( $labels );
 		$labels[] = ''; // Don't show a label for today
@@ -310,7 +309,6 @@ class WPorg_GP_Route_WP_Plugins extends GP_Route {
 		) );
 		$json = file_get_contents( "https://api.wordpress.org/translations/plugins/1.0/?slug={$project_slug}", null, $http_context );
 		$language_packs = $json && '{' == $json[0] ? json_decode( $json ) : null;
-
 
 		$this->tmpl( 'projects-wp-plugins-language-packs', get_defined_vars() );
 	}

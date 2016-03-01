@@ -167,6 +167,8 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			$variants = $this->get_locale_variants( $locale_slug, array( $sub_project->id ) );
 		}
 
+		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
+
 		$this->tmpl( 'locale-project', get_defined_vars() );
 	}
 
@@ -257,6 +259,126 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		", $locale ) );
 
 		return $slugs;
+	}
+
+	/**
+	 * Retrieves contributors of a project.
+	 *
+	 * @param GP_Project $project     A GlotPress project.
+	 * @param string     $locale_slug Slug of the locale.
+	 * @param string     $set_slug    Slug of the translation set.
+	 * @return array Contributors.
+	 */
+	private function get_locale_contributors( $project, $locale_slug, $set_slug ) {
+		global $wpdb;
+
+		$locale_contributors = array(
+			'editors'      => array(),
+			'contributors' => array(),
+		);
+
+		// Get the translation editors of the project.
+		$editors = $wpdb->get_col( $wpdb->prepare( "
+			SELECT
+				`user_id`
+			FROM {$wpdb->wporg_translation_editors}
+			WHERE
+				`project_id` = %d
+				AND `locale` = %s
+		", $project->id, $locale_slug ) );
+
+		// Get the names of the translation editors.
+		foreach ( $editors as $editor_id ) {
+			$user = get_user_by( 'id', $editor_id );
+			if ( ! $user ) {
+				continue;
+			}
+
+			$locale_contributors['editors'][ $editor_id ] = (object) array(
+				'nicename'     => $user->user_nicename,
+				'display_name' => $this->_encode( $user->display_name ),
+				'email'        => $user->user_email,
+			);
+		}
+		unset( $editors );
+
+		// Get the contributors of the project.
+		$contributors = array();
+
+		// In case the project has a translation set, like /wp-themes/twentysixteen.
+		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $set_slug, $locale_slug );
+		if ( $translation_set ) {
+			$contributors = array_merge(
+				$contributors,
+				$this->get_locale_contributors_by_translation_set( $translation_set )
+			);
+		}
+
+		// Check if the project has sub-projects, like /wp-plugins/wordpress-importer.
+		$sub_projects = $wpdb->get_col( $wpdb->prepare( "
+			SELECT id
+			FROM {$wpdb->gp_projects}
+			WHERE parent_project_id = %d
+		", $project->id ) );
+
+		foreach ( $sub_projects as $sub_project ) {
+			$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $sub_project, $set_slug, $locale_slug );
+			if ( ! $translation_set ) {
+				continue;
+			}
+
+			$contributors = array_merge(
+				$contributors,
+				$this->get_locale_contributors_by_translation_set( $translation_set )
+			);
+		}
+
+		// Get the names of the contributors.
+		foreach ( $contributors as $contributor_id ) {
+			if ( isset( $locale_contributors['editors'][ $contributor_id ] ) ) {
+				continue;
+			}
+
+			if ( isset( $locale_contributors['contributors'][ $contributor_id ] ) ) {
+				continue;
+			}
+
+			$user = get_user_by( 'id', $contributor_id );
+			if ( ! $user ) {
+				continue;
+			}
+
+			$locale_contributors['contributors'][ $contributor_id ] = (object) array(
+				'nicename'     => $user->user_nicename,
+				'display_name' => $this->_encode( $user->display_name ),
+				'email'        => $user->user_email,
+			);
+		}
+		unset( $contributors );
+
+		return $locale_contributors;
+	}
+
+	/**
+	 * Retrieves contributors of a translation set.
+	 *
+	 * @param GP_Translation_Set $translation_set A translation set.
+	 * @return array List of user IDs.
+	 */
+	private function get_locale_contributors_by_translation_set( $translation_set ) {
+		global $wpdb;
+
+		$user_ids = $wpdb->get_col( $wpdb->prepare( "
+			SELECT DISTINCT( `user_id` )
+			FROM `{$wpdb->gp_translations}`
+			WHERE
+				`translation_set_id` = %d
+				AND `user_id` IS NOT NULL AND `user_id` != 0
+				AND `status` <> 'rejected'
+				AND `date_modified` > %s
+		", $translation_set->id, date( 'Y-m-d', time() - YEAR_IN_SECONDS ) ) );
+
+		return $user_ids;
 	}
 
 	/**
@@ -618,5 +740,10 @@ class WPorg_GP_Route_Locale extends GP_Route {
 
 	private function _sort_name_callback( $a, $b ) {
 		return strcasecmp( $a->name, $b->name );
+	}
+
+	private function _encode( $raw ) {
+		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
+		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }

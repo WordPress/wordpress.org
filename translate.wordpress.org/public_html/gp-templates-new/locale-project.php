@@ -178,6 +178,47 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 	</table>
 </div>
 
+<div class="locale-project-contributors">
+	<div class="locale-project-contributors-group locale-project-contributors-contributors">
+		<h3>Translation Contributors</h3>
+		<?php if ( $locale_contributors['contributors'] ) : ?>
+		<ul>
+			<?php
+			foreach ( $locale_contributors['contributors'] as $contributor ) {
+				printf(
+					'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+					$contributor->nicename,
+					get_avatar( $contributor->email, 30 ),
+					$contributor->display_name ? $contributor->display_name : $contributor->nicename
+				);
+			}
+			?>
+		</ul>
+		<?php else : ?>
+			<p>None, be the first?</p>
+		<?php endif; ?>
+	</div>
+	<div class="locale-project-contributors-group locale-project-contributors-editors">
+		<h3>Translation Editors</h3>
+		<?php if ( $locale_contributors['editors'] ) : ?>
+		<ul>
+			<?php
+			foreach ( $locale_contributors['editors'] as $editor ) {
+				printf(
+					'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+					$editor->nicename,
+					get_avatar( $editor->email, 40 ),
+					$editor->display_name ? $editor->display_name : $editor->nicename
+				);
+			}
+			?>
+		</ul>
+		<?php else : ?>
+			<p>None, be the first?</p>
+		<?php endif; ?>
+	</div>
+</div>
+
 <script>
 	jQuery( document ).ready( function( $ ) {
 		$( '#variant-selector' ).on( 'change', function( event ) {
