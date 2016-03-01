@@ -2,68 +2,97 @@
  * JS for the Plugin Admin screens.
  */
 
-jQuery(document).ready( function($) {
+( function( $, wp ) {
 
-	var updateText,
-		$testedWithSelect = $('#tested-with-select'),
-		$pluginStatusSelect = $('#plugin-status-select');
+	var PluginEdit = {
+		$notesBox: {},
+		$testedWith: {},
+		$pluginStatus: {},
 
-	// submitdiv
-	if ( $('#submitdiv').length ) {
+		ready: function() {
+			PluginEdit.$notesBox     = $( '#plugin-notes' );
+			PluginEdit.$testedWith   = $( '#tested-with-select' );
+			PluginEdit.$pluginStatus = $( '#plugin-status-select' );
 
-		updateText = function() {
-			$('#plugin-status-display').html( $('option:selected', $pluginStatusSelect).text() );
-			$('#tested-with-display').html( $('option:selected', $testedWithSelect).text() );
-			return true;
-		};
+			$( '#submitdiv' )
+				.on( 'click', '.edit-tested-with',     PluginEdit.editTestedWith )
+				.on( 'click', '.edit-plugin-status',   PluginEdit.editPluginStatus )
+				.on( 'click', '.save-tested-with',     PluginEdit.updateTestedWith )
+				.on( 'click', '.save-plugin-status',   PluginEdit.updatePluginStatus )
+				.on( 'click', '.cancel-tested-with',   PluginEdit.cancelTestedWith )
+				.on( 'click', '.cancel-plugin-status', PluginEdit.cancelPluginStatus );
 
-		// Plugin Status / post_status
-		$pluginStatusSelect.siblings('a.edit-plugin-status').click( function( event ) {
-			if ( $pluginStatusSelect.is( ':hidden' ) ) {
-				$pluginStatusSelect.slideDown( 'fast', function() {
-					$pluginStatusSelect.find('select').focus();
+			PluginEdit.$notesBox
+				.on( 'click', '.cancel-note', PluginEdit.showNote )
+				.on( 'click', '.view-note',   PluginEdit.editNote )
+				.on( 'click', '.save-note',   PluginEdit.saveNote );
+		},
+
+		editTestedWith: function() {
+			if ( PluginEdit.$testedWith.is( ':hidden' ) ) {
+				PluginEdit.$testedWith.slideDown( 'fast', function() {
+					$( 'select', PluginEdit.$testedWith ).focus();
 				} );
-				$(this).hide();
+				$( this ).hide();
 			}
-			event.preventDefault();
-		});
+		},
 
-		$pluginStatusSelect.find('.save-plugin-status').click( function( event ) {
-			$pluginStatusSelect.slideUp( 'fast' ).siblings( 'a.edit-plugin-status' ).show().focus();
-			updateText();
-			event.preventDefault();
-		});
-
-		$pluginStatusSelect.find('.cancel-plugin-status').click( function( event ) {
-			$pluginStatusSelect.slideUp( 'fast' ).siblings( 'a.edit-plugin-status' ).show().focus();
-			$('#post_status').val( $('#hidden_post_status').val() );
-			updateText();
-			event.preventDefault();
-		});
-
-		// Tested With
-		$testedWithSelect.siblings('a.edit-tested-with').click( function( event ) {
-			if ( $testedWithSelect.is( ':hidden' ) ) {
-				$testedWithSelect.slideDown( 'fast', function() {
-					$testedWithSelect.find('select').focus();
+		editPluginStatus: function() {
+			if ( PluginEdit.$pluginStatus.is( ':hidden' ) ) {
+				PluginEdit.$pluginStatus.slideDown( 'fast', function() {
+					$( 'select', PluginEdit.$pluginStatus ).focus();
 				} );
-				$(this).hide();
+				$( this ).hide();
 			}
-			event.preventDefault();
-		});
+		},
 
-		$testedWithSelect.find('.save-tested-with').click( function( event ) {
-			$testedWithSelect.slideUp( 'fast' ).siblings( 'a.edit-tested-with' ).show().focus();
-			updateText();
-			event.preventDefault();
-		});
+		updateTestedWith: function() {
+			PluginEdit.$testedWith.slideUp( 'fast' ).siblings( 'button.edit-tested-with' ).show().focus();
+			$( '#tested-with-display' ).text( $( 'option:selected', PluginEdit.$testedWith ).text() );
+		},
 
-		$testedWithSelect.find('.cancel-tested-with').click( function( event ) {
-			$testedWithSelect.slideUp( 'fast' ).siblings( 'a.edit-tested-with' ).show().focus();
-			$('#tested_with').val( $('#hidden_tested_with').val() );
-			updateText();
-			event.preventDefault();
-		});
-	} // end submitdiv
+		updatePluginStatus: function() {
+			PluginEdit.$pluginStatus.slideUp( 'fast' ).siblings( 'button.edit-plugin-status' ).show().focus();
+			$( '#plugin-status-display' ).text( $( 'option:selected', PluginEdit.$pluginStatus ).text() );
+		},
 
-} );
+		cancelTestedWith: function() {
+			$( '#tested-with' ).val( $( '#hidden-tested-with' ).val() );
+			PluginEdit.updateTestedWith();
+		},
+
+		cancelPluginStatus: function() {
+			$( '#post-status' ).val( $( '#hidden-post-status' ).val() );
+			PluginEdit.updatePluginStatus( event );
+		},
+
+		showNote: function() {
+			$( '.view-note', PluginEdit.$notesBox ).show();
+			$( '.edit-note', PluginEdit.$notesBox ).hide();
+		},
+
+		editNote: function() {
+			var $textarea = $( '.note-content', PluginEdit.$notesBox );
+
+			$( '.view-note', PluginEdit.$notesBox ).hide();
+			$( '.edit-note', PluginEdit.$notesBox ).show();
+			$textarea.text( $textarea.val() ).focus();
+		},
+
+		saveNote: function() {
+			wp.ajax.post( 'save-note', {
+				id: $( '#post_ID' ).val(),
+				note: $( '.note-content', PluginEdit.$notesBox ).val(),
+				notce: $( '#notce' ).val()
+			} )
+				.done( function( response ) {
+					var note = response.note ? response.note : 'Add note';
+
+					$( '.view-note', PluginEdit.$notesBox ).html( note );
+					PluginEdit.showNote();
+				} );
+		}
+	};
+
+	$( PluginEdit.ready );
+} )( window.jQuery, window.wp );

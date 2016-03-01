@@ -26,6 +26,7 @@ class Customizations {
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'wp_ajax_save-note', array( $this, 'save_note' ) );
 	}
 
 	/**
@@ -54,7 +55,7 @@ class Customizations {
 
 		if ( 'post.php' == $hook_suffix && 'plugin' == $post_type ) {
 			wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 1 );
-			wp_enqueue_script( 'plugin-admin-edit-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array(), 1 );
+			wp_enqueue_script( 'plugin-admin-edit-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util' ), 1 );
 		}
 	}
 
@@ -74,6 +75,13 @@ class Customizations {
 			__( 'Plugin Committers', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
 			'plugin', 'side'
+		);
+
+		add_meta_box(
+			'plugin-notes',
+			__( 'Internal Notes', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Notes', 'display' ),
+			'plugin', 'normal', 'high'
 		);
 
 		add_meta_box(
@@ -117,4 +125,26 @@ class Customizations {
 		}
 	}
 
+	/**
+	 * Saves a plugin note.
+	 */
+	public function save_note() {
+		check_admin_referer( 'save-note', 'notce' );
+
+		if ( empty( $_POST['id'] ) ) {
+			wp_send_json_error( array( 'errorCode' => 'no_post_specified' ) );
+		}
+
+		if ( ! current_user_can( 'review_plugin', absint( $_POST['id'] ) ) ) {
+			wp_send_json_error( array(
+				'error' => __( 'You do not have sufficient permissions to edit notes on this site.' ),
+			) );
+		}
+
+		update_post_meta( absint( $_POST['id'] ), 'note', wp_kses_post( $_POST['note'] ) );
+
+		wp_send_json_success( array(
+			'note' => wpautop( wp_kses_post( $_POST['note'] ) ),
+		) );
+	}
 }

@@ -21,7 +21,7 @@ class Controls {
 					self::display_tested_up_to();
 				}
 			echo '</div>';
-	
+
 			echo '<div id="major-publishing-actions"><div id="publishing-action">';
 				echo '<span class="spinner"></span>';
 				printf( '<input type="submit" name="save_changes" id="publish" class="button button-primary button-large" value="%s">', __( 'Save Changes', 'wporg-plugins' ) );
@@ -40,29 +40,31 @@ class Controls {
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
-			<span id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></span>
-			<a href="#plugin_status" class="edit-plugin-status hide-if-no-js"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Edit status</span></a>
-		
-			<div id="plugin-status-select" class="hide-if-js">
-				<input type="hidden" name="hidden_post_status" id="hidden_post_status" value="<?php echo esc_attr( $post->post_status ); ?>">
-				<select name="post_status" id="plugin_status">
+			<strong id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong>
+			<button type="button" class="button-link edit-plugin-status hide-if-no-js">
+				<span aria-hidden="true"><?php _e( 'Edit', 'wporg-plugins' ); ?></span>
+				<span class="screen-reader-text"><?php _e( 'Edit plugin status', 'wporg-plugins' ); ?></span>
+			</button>
+
+			<div id="plugin-status-select" class="plugin-control-select hide-if-js">
+				<input type="hidden" name="hidden_post_status" id="hidden-post-status" value="<?php echo esc_attr( $post->post_status ); ?>">
+				<select name="post_status" id="plugin-status">
 					<?php
 					foreach ( $statuses as $statii ) {
 						$status_object = get_post_status_object( $statii );
-						$selected = selected( $post->post_status, $statii, false );
 						printf(
 							'<option value="%s" %s>%s</option>',
 							esc_attr( $statii ),
-							$selected,
+							selected( $post->post_status, $statii, false ),
 							esc_html( $status_object->label )
 						);
 					}
 					?>
 				</select>
-				<a href="#plugin_status" class="save-plugin-status hide-if-no-js button">OK</a>
-				<a href="#plugin_status" class="cancel-plugin-status hide-if-no-js button-cancel">Cancel</a>
+				<button type="button" class="save-plugin-status hide-if-no-js button"><?php _e( 'OK', 'wporg-plugins' ); ?></button>
+				<button type="button" class="cancel-plugin-status hide-if-no-js button-link"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
 			</div>
-		
+
 		</div><!-- .misc-pub-section --><?php
 	}
 
@@ -70,20 +72,23 @@ class Controls {
 	 * Displays the Tested Up To control in the Publish metabox.
 	 */
 	protected static function display_tested_up_to() {
-		$post = get_post();
-		$tested_up_to = (string) get_post_meta( $post->ID, 'tested', true );
-		$versions = self::get_tested_up_to_versions( $tested_up_to );
-		$tested_up_to = $versions['tested_up_to'];
+		$post           = get_post();
+		$tested_up_to   = (string) get_post_meta( $post->ID, 'tested', true );
+		$versions       = self::get_tested_up_to_versions( $tested_up_to );
+		$tested_up_to   = $versions['tested_up_to'];
 		$unknown_string = _x( 'Unknown', 'unknown version', 'wporg-plugins' );
 		?>
 		<div class="misc-pub-section misc-pub-tested">
 			<label for="tested_with"><?php _e( 'Tested With:', 'wporg-plugins' ); ?></label>
-			<span id="tested-with-display"><?php echo ( $tested_up_to ? sprintf( 'WordPress %s', $tested_up_to ) : $unknown_string ); ?></span>
-			<a href="#tested_with" class="edit-tested-with hide-if-no-js"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Edit status</span></a>
-		
-			<div id="tested-with-select" class="hide-if-js">
-				<input type="hidden" name="hidden_tested_with" id="hidden_tested_with" value="<?php echo esc_attr( $tested_up_to ); ?>">
-				<select name="tested_with" id="tested_with">
+			<strong id="tested-with-display"><?php echo ( $tested_up_to ? sprintf( 'WordPress %s', $tested_up_to ) : $unknown_string ); ?></strong>
+			<button type="button" class="button-link edit-tested-with hide-if-no-js">
+				<span aria-hidden="true"><?php _e( 'Edit', 'wporg-plugins' ); ?></span>
+				<span class="screen-reader-text"><?php _e( 'Edit tested with version', 'wporg-plugins' ); ?></span>
+			</button>
+
+			<div id="tested-with-select" class="plugin-control-select hide-if-js">
+				<input type="hidden" name="hidden_tested_with" id="hidden-tested-with" value="<?php echo esc_attr( $tested_up_to ); ?>">
+				<select name="tested_with" id="tested-with">
 					<?php
 					foreach ( $versions['versions'] as $ver ) {
 						printf(
@@ -95,10 +100,10 @@ class Controls {
 					}
 					?>
 				</select>
-				<a href="#tested_with" class="save-tested-with hide-if-no-js button">OK</a>
-				<a href="#tested_with" class="cancel-tested-with hide-if-no-js button-cancel">Cancel</a>
+				<button type="button" class="save-tested-with hide-if-no-js button"><?php _e( 'OK', 'wporg-plugins' ); ?></button>
+				<button type="button" class="cancel-tested-with hide-if-no-js button-link"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
 			</div>
-		
+
 		</div><!-- .misc-pub-section --><?php
 	}
 
