@@ -12,8 +12,8 @@ class WPorg_GP_User_Stats {
 	function __construct() {
 		global $wpdb, $gp_table_prefix;
 
-		add_action( 'translation_created', array( $this, 'translation_created' ) );
-		add_action( 'translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
+		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
 
 		$wpdb->user_translations_count = $gp_table_prefix . 'user_translations_count';
 	}
