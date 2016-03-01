@@ -53,7 +53,7 @@ function register_post_type() {
 		'labels'            => $labels,
 		'description'       => 'WordCamp Sponsor Invoices',
 		'public'            => false,
-		'show_ui'           => defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST, // todo set to `true` during launch
+		'show_ui'           => true,
 		'show_in_menu'      => 'wordcamp-budget',
 		'show_in_nav_menus' => true,
 		'supports'          => array( 'title' ),
