@@ -100,11 +100,11 @@ gp_tmpl_header();
 											$percent_class = 90;
 										}
 
-										$link_url  = gp_url( gp_url_join( 'locale', $locale_slug, $project->path ) );
+										$link_url  = gp_url( gp_url_join( 'locale', $gp_locale->slug, $set_slug, $project->path ) );
 										$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
-										$link_url  = gp_url_project( $project->path, gp_url_join( $subproject_slug, $locale_slug ) );
+										$link_url  = gp_url_project( $project->path, gp_url_join( $subproject_slug, $gp_locale->slug, $set_slug ) );
 										$link_text = "$percent%";
 
 									endif;
