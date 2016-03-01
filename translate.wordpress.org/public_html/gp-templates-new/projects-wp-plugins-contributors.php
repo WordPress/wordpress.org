@@ -43,7 +43,7 @@ gp_tmpl_header();
 <div class="project-sub-page">
 
 	<h3>Activity</h3>
-	<p>The graph shows the recent activity of your contributors. It's updated once per day.</p>
+	<p>The graph shows the recent activity of your contributors. It&#8217;s updated once per day.</p>
 
 	<div class="ct-chart ct-chart-contributors"></div>
 
@@ -51,10 +51,19 @@ gp_tmpl_header();
 	<p>For each locale a plugin can have translation editors and contributors. If a locale has no editor yet then you should probably <a href="https://make.wordpress.org/polyglots/handbook/rosetta/theme-plugin-directories/#translating-themes-plugins">make a request</a>.</p>
 	<?php
 	if ( $contributors_by_locale ) {
-		echo '<div class="contributors-list-search"><input type="search" placeholder="Filter teams&hellip;" id="contributors-list-search"></div>';
+		?>
+		<div class="contributors-list-filter">
+			<button type="button" class="button-link filter active" data-filter="all">All</button> |
+			<button type="button" class="button-link filter" data-filter="has-editors">With Editors</button> |
+			<button type="button" class="button-link filter" data-filter="no-editors">Without Editors</button>
+
+			<input type="search" class="search" placeholder="Filter teams&hellip;" id="contributors-list-search">
+		</div>
+		<?php
 		echo '<div id="contributors-list" class="contributors-list">';
 		foreach ( $contributors_by_locale as $locale_slug => $data ) {
 			$locale = GP_Locales::by_slug( $locale_slug );
+			$has_editors = ! empty ( $data['editors'] );
 
 			$editors_list = array();
 			foreach ( $data['editors'] as $editor ) {
@@ -83,11 +92,12 @@ gp_tmpl_header();
 			}
 
 			printf(
-				'<div class="contributors-list-box">
+				'<div class="contributors-list-box%s">
 					<h4><span class="locale-name">%s<span> <span class="contributors-count">%s</span> <span class="locale-code">#%s</span></h4>
 					<p><strong>Editors:</strong> %s</p>
 					<p><strong>Contributors:</strong> %s</p>
 				</div>',
+				$has_editors ? ' has-editors' : ' no-editors',
 				$locale->english_name,
 				sprintf( _n( '%s person', '%s persons', $data['count'] ), number_format_i18n( $data['count'] ) ),
 				$locale->wp_locale,
@@ -126,6 +136,14 @@ jQuery( function( $ ) {
 				return false;
 			}).show();
 		}
+	});
+
+	$( '.contributors-list-filter .filter' ).on( 'click', function() {
+		var $el = $( this ), filter = $el.data( 'filter' );
+
+		$el.siblings( '.active' ).removeClass( 'active' );
+		$el.addClass( 'active' );
+		$( '#contributors-list' ).attr( 'data-current-filter', filter );
 	});
 });
 

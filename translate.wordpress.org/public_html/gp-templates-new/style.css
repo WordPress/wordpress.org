@@ -1087,6 +1087,11 @@ ul.language-packs-list {
 	margin-left: -30px;
 }
 
+.language-packs-list li strong .locale-code {
+	font-size: 11px;
+	color: #555d66;
+}
+
 .ct-chart-contributors {
 	position: relative;
 }
@@ -1211,13 +1216,13 @@ ul.ct-legend {
 	margin-bottom: 0;
 }
 
-.contributors-list-search {
+.contributors-list-filter {
 	margin: 15px 0 10px;
 	text-align: right;
 }
 
-.contributors-list-search input {
-	margin: 0;
+.contributors-list-filter .search {
+	margin: 0 0 0 10px;
 	padding: 2px 4px;
 	width: 280px;
 	font-size: 13px;
@@ -1233,3 +1238,43 @@ ul.ct-legend {
 	-webkit-appearance: textfield;
 }
 
+@media (max-width: 600px) {
+	.contributors-list-filter {
+		text-align: center;
+	}
+
+	.contributors-list-filter .search {
+		display: block;
+		width: 100%;
+		margin: 10px 0;
+	}
+}
+
+/* Buttons that look like links, for a cross of good semantics with the visual */
+.button-link {
+	margin: 0;
+	padding: 0;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border: 0;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+	background: none;
+	outline: none;
+	cursor: pointer;
+	font: inherit;
+	color: #0074a2;
+}
+
+.button-link:hover {
+	color: #2ea2cc;
+}
+
+.contributors-list-filter .filter.active {
+	border-bottom: 1px solid #dfdfdf;
+}
+
+.contributors-list[data-current-filter="has-editors"] .no-editors,
+.contributors-list[data-current-filter="no-editors"] .has-editors {
+	display: none !important;
+}
