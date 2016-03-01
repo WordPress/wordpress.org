@@ -863,6 +863,8 @@ function wporg_themes_glotpress_import( $theme_post, $version ) {
 		return;
 	}
 
+	// See https://meta.trac.wordpress.org/ticket/1352
+	// $cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
 	$cmd = '/usr/local/bin/php ' . WPORGPATH . 'translate/bin/projects/add-wp-themes-project.php ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
 
 	shell_exec( $cmd );
