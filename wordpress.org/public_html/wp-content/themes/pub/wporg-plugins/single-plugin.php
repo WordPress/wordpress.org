@@ -33,7 +33,7 @@ $plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( 
 				<p itemprop="description" class="shortdesc"><?php the_excerpt(); ?></p>
 				<div class="description-right">
 					<p class="button">
-						<a itemprop='downloadUrl' href='<?php echo esc_url( wporg_plugins_download_link() ); ?>'><?php printf( __( 'Download Version %s', 'wporg-plugins' ), wporg_plugins_the_version() ); ?></a>
+						<a itemprop='downloadUrl' href='<?php echo esc_url( wporg_plugins_download_link() ); ?>'><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 					</p>
 					<meta itemprop="softwareVersion" content="<?php echo esc_attr( wporg_plugins_the_version() ); ?>" />
 					<meta itemprop="fileFormat" content="application/zip" />
@@ -66,10 +66,11 @@ $plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( 
 
 			<div class="" style="width: 212px; float: right;">
 				<p>
-					<strong>Requires:</strong> <?php printf( __('%s or higher', 'wporg-plugins' ), wporg_plugins_template_requires() ); ?><br />
-					<strong>Compatible up to:</strong> <?php echo wporg_plugins_template_compatible_up_to(); ?><br />
-					<strong>Last Updated: </strong> <?php echo wporg_plugins_template_last_updated(); ?><br />
-					<strong>Active Installs:</strong> <?php echo worg_plugins_template_active_installs( false ); ?><br />
+					<strong>Version:</strong> <?php echo wporg_plugins_the_version(); ?><br>
+					<strong>Requires:</strong> <?php printf( __('%s or higher', 'wporg-plugins' ), wporg_plugins_template_requires() ); ?><br>
+					<strong>Compatible up to:</strong> <?php echo wporg_plugins_template_compatible_up_to(); ?><br>
+					<strong>Last Updated: </strong> <?php echo wporg_plugins_template_last_updated(); ?><br>
+					<strong>Active Installs:</strong> <?php echo worg_plugins_template_active_installs( false ); ?><br>
 					<meta itemprop="dateModified" content="<?php the_time('Y-m-d'); ?>" />
 				</p>
 			</div>
