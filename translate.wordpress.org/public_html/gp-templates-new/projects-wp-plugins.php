@@ -96,15 +96,15 @@ gp_tmpl_header();
 										$percent_class = 100 - min( (int) ( $percent / 50 ) * 10, 100 );
 
 										// It's only 100 if it has 0 strings.
-										if ( 100 == $percent_class && $percent ) :
+										if ( 100 == $percent_class && $percent ) {
 											$percent_class = 90;
-										endif;
+										}
 
-										$link_url  = gp_url( gp_url_join( 'locale', $locale_slug, $set_slug, $project->path ) );
+										$link_url  = gp_url( gp_url_join( 'locale', $locale_slug, $project->path ) );
 										$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
-										$link_url  =  gp_url_project( $project->path, gp_url_join( $subproject_slug, $locale_slug, $set_slug ) );
+										$link_url  = gp_url_project( $project->path, gp_url_join( $subproject_slug, $locale_slug ) );
 										$link_text = "$percent%";
 
 									endif;
