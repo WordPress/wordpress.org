@@ -11,16 +11,13 @@ class Plugin_Directory {
 	/**
 	 * Fetch the instance of the Plugin_Directory class.
 	 */
-	public static function instance( $plugin_file = null ) {
+	public static function instance() {
 		static $instance = null;
 
-		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Directory( $plugin_file );
+		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Directory();
 	}
 
-	/**
-	 * @param string $plugin_file
-	 */
-	private function __construct( $plugin_file ) {
+	private function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
@@ -29,10 +26,10 @@ class Plugin_Directory {
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 
 		// Load all Admin-specific items.
-		add_action( 'admin_init', array( __NAMESPACE__ . '\\Admin\\Customizations', 'instance' ) );
+		add_action( 'admin_init', array( __NAMESPACE__ . '\Admin\Customizations', 'instance' ) );
 
-		register_activation_hook( $plugin_file, array( $this, 'activate' ) );
-		register_deactivation_hook( $plugin_file, array( $this, 'deactivate' ) );
+		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
+		register_deactivation_hook( PLUGIN_FILE, array( $this, 'deactivate' ) );
 	}
 
 	/**
@@ -42,27 +39,69 @@ class Plugin_Directory {
 		load_plugin_textdomain( 'wporg-plugins' );
 
 		register_post_type( 'plugin', array(
-			'labels'      => array(
-				'name'               => __( 'Plugins',          'wporg-plugins' ),
-				'singular_name'      => __( 'Plugin',           'wporg-plugins' ),
-				'menu_name'          => __( 'My Plugins',       'wporg-plugins' ),
-				'add_new'            => __( 'Add New',          'wporg-plugins' ),
-				'add_new_item'       => __( 'Add New Plugin',   'wporg-plugins' ),
-				'edit_item'          => __( 'Edit Plugin',      'wporg-plugins' ),
-				'new_item'           => __( 'New Plugin',       'wporg-plugins' ),
-				'view_item'          => __( 'View Plugin',      'wporg-plugins' ),
-				'search_items'       => __( 'Search Plugins',   'wporg-plugins' ),
-				'not_found'          => __( 'No plugins found', 'wporg-plugins' ),
+			'labels'          => array(
+				'name'               => __( 'Plugins',                   'wporg-plugins' ),
+				'singular_name'      => __( 'Plugin',                    'wporg-plugins' ),
+				'menu_name'          => __( 'My Plugins',                'wporg-plugins' ),
+				'add_new'            => __( 'Add New',                   'wporg-plugins' ),
+				'add_new_item'       => __( 'Add New Plugin',            'wporg-plugins' ),
+				'edit_item'          => __( 'Editing Plugin: %s',        'wporg-plugins' ),
+				'new_item'           => __( 'New Plugin',                'wporg-plugins' ),
+				'view_item'          => __( 'View Plugin',               'wporg-plugins' ),
+				'search_items'       => __( 'Search Plugins',            'wporg-plugins' ),
+				'not_found'          => __( 'No plugins found',          'wporg-plugins' ),
 				'not_found_in_trash' => __( 'No plugins found in Trash', 'wporg-plugins' ),
 			),
-			'description' => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'    => array( 'title', 'editor', 'excerpt', 'custom-fields' ),
-			'taxonomies'  => array( 'post_tag', 'category' ),
-			'public'      => true,
-			'show_ui'     => true,
-			'has_archive' => true,
-			'rewrite'     => false,
-			'menu_icon'   => 'dashicons-admin-plugins',
+			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
+			'supports'        => false,
+			'public'          => true,
+			'show_ui'         => true,
+			'has_archive'     => true,
+			'rewrite'         => false,
+			'menu_icon'       => 'dashicons-admin-plugins',
+			'capability_type' => array( 'post', 'posts' ), // TODO roles & capabilities
+			'map_meta_cap'    => true,
+			'capabilities'    => array(
+				'create_posts' => 'do_not_allow'
+			)
+		) );
+
+		register_taxonomy( 'plugin_category', 'plugin', array(
+			'hierarchical'      => true,
+			'query_var'         => 'plugin_category',
+			'rewrite'           => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'meta_box_cb'       => 'post_categories_meta_box',
+			'capabilities'      => array(
+				'assign_terms' => 'manage_categories',
+			)
+		) );
+
+		register_taxonomy( 'plugin_tag', 'plugin', array(
+			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+			'query_var'         => 'plugin_tag',
+			'rewrite'           => array(
+				'hierarchical' => false,
+				'slug'         => 'tags',
+				'with_front'   => false,
+				'ep_mask'      => EP_TAGS,
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Tags',  'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Tag',   'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Tag',     'wporg-plugins' ),
+				'update_item'   => __( 'Update Tag',   'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Tag',  'wporg-plugins' ),
+				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Tags',  'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Tags', 'display' ),
+			'capabilities'      => array()
 		) );
 
 		register_post_status( 'pending', array(
@@ -82,6 +121,12 @@ class Plugin_Directory {
 			'public'                    => false,
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'Closed <span class="count">(%s)</span>', 'Closed <span class="count">(%s)</span>', 'wporg-plugins' ),
+		) );
+		register_post_status( 'rejected', array(
+			'label'                     => _x( 'Rejected', 'plugin status', 'wporg-plugins' ),
+			'public'                    => false,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
 		// Add the browse/* views.
@@ -107,13 +152,19 @@ class Plugin_Directory {
 	 * Register the Shortcodes used within the content.
 	 */
 	public function register_shortcodes() {
-		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\\Shortcodes\\Upload',      'display' ) );
-		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\\Shortcodes\\Screenshots', 'display' ) );
-	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\\Shortcodes\\Stats',       'display' ) );
-	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\\Shortcodes\\Developer',   'display' ) );
+		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\Shortcodes\Upload',      'display' ) );
+		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
+	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\Shortcodes\Stats',       'display' ) );
+	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\Shortcodes\Developer',   'display' ) );
 	}
 
 	/**
+	 * Upon plugin activation, set up the current site for acting
+	 * as the plugin directory.
+	 *
+	 * Setting up the site requires setting up the theme and proper
+	 * rewrite permastructs.
+	 *
 	 * @global \WP_Rewrite $wp_rewrite WordPress rewrite component.
 	 */
 	public function activate() {
@@ -147,7 +198,7 @@ class Plugin_Directory {
 	}
 
 	/**
-	 *
+	 * Clean up options & rewrite rules after plugin deactivation.
 	 */
 	public function deactivate() {
 		flush_rewrite_rules();
@@ -240,11 +291,11 @@ class Plugin_Directory {
 
 		switch ( get_query_var( 'browse' ) ) {
 			case 'beta':
-				$wp_query->query_vars['category_name'] = 'beta';
+				$wp_query->query_vars['plugin_category'] = 'beta';
 				break;
 
 			case 'featured':
-				$wp_query->query_vars['category_name'] = 'featured';
+				$wp_query->query_vars['plugin_category'] = 'featured';
 				break;
 
 			case 'favorites':
@@ -325,11 +376,16 @@ class Plugin_Directory {
 	 * Retrieve the WP_Post object representing a given plugin.
 	 *
 	 * @param $plugin_slug string|\WP_Post The slug of the plugin to retrieve.
-	 * @return \WP_Post|\WP_Error
+	 * @return \WP_Post|bool
 	 */
 	static public function get_plugin_post( $plugin_slug ) {
+		global $post;
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
+		}
+		// Use the global $post object when it matches to avoid hitting the database.
+		if ( !empty( $post ) && 'plugin' == $post->post_type && $plugin_slug == $post->post_name ) {
+			return $post;
 		}
 
 		// get_post_by_slug();

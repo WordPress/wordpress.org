@@ -1,0 +1,44 @@
+/*
+ * CSS Rules for the Plugin Admin screen
+ */
+#misc-publishing-actions label::before {
+	font: normal 20px/1 dashicons;
+	speak: none;
+	display: inline-block;
+	padding: 0 2px 0 0;
+	top: 0;
+	left: -1px;
+	position: relative;
+	vertical-align: top;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-decoration: none !important;
+	color: #82878c;
+}
+
+#misc-publishing-actions label[for="post_status"]::before {
+	content: "\f173";
+}
+#misc-publishing-actions label[for="tested_with"]::before {
+	content: "\f177";
+}
+
+#misc-publishing-actions span#plugin-status-display,
+#misc-publishing-actions span#tested-with-display {
+	font-weight: bold;
+}
+
+.inside-submitbox #plugin-status,
+.inside-submitbox #tested-with {
+	margin: 2px 0 2px -2px;
+}
+
+#plugin-status-select,
+#tested-with-select {
+	margin-top: 3px;
+}
+
+/* We don't output the Title or Editor instance, so this div is indentionally empty, hide it to remove the margin. */
+.wp-admin.post-type-plugin #post-body-content {
+	display: none;
+}

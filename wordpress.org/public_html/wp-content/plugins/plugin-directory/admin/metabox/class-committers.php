@@ -1,6 +1,5 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
-
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -9,10 +8,6 @@ use WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Admin\Metabox
  */
 class Committers {
-
-	/**
-	 *
-	 */
 	static function display() {
 		$plugin_slug         = get_post()->post_name;
 		$existing_committers = Tools::get_plugin_committers( $plugin_slug );

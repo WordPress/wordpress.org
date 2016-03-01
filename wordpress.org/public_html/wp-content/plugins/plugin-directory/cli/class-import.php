@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\CLI;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme_Parser;
+use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
@@ -87,10 +88,14 @@ class Import {
 		wp_update_post( $plugin );
 
 		foreach ( $this->readme_fields as $readme_field ) {
-			update_post_meta( $plugin->ID, $readme_field, $readme->$readme_field );
+			// Don't change the tested version if a newer version was specified through wp-admin
+			if ( 'tested' == $readme_field && version_compare( get_post_meta( $plugin->ID, 'tested', true ), $readme->$readme_field, '>' ) ) {
+				continue;
+			}
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
 		}
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
-			update_post_meta( $plugin->ID, $meta_field, $headers->$plugin_header );
+			update_post_meta( $plugin->ID, $meta_field, wp_slash( $headers->$plugin_header ) );
 		}
 
 		update_post_meta( $plugin->ID, 'sections', array_keys( $readme->sections ) );

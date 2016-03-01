@@ -15,10 +15,15 @@
 
 namespace WordPressdotorg\Plugin_Directory;
 
+/**
+ * Store the root plugin file for usage with functions which use the plugin basename.
+ */
+define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
+
 // Register an Autoloader for all files
 include __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
 
-// Create the instance of the plugin, passing __FILE__ for actions that need it.
+// Instantiate the Plugin Directory
 include __DIR__ . '/class-plugin-directory.php';
-Plugin_Directory::instance( __FILE__ );
+Plugin_Directory::instance();
