@@ -108,6 +108,9 @@ function get_whitelist() {
 			'ocean90',
 			'gregross',
 		),
+		'meta' => array(
+			'obenland',
+		),
 		'meta-i18n' => array(
 			'ocean90',
 		),
