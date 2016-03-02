@@ -264,7 +264,6 @@ class WCP_Payment_Request {
 	public function render_general_metabox( $post ) {
 		wp_nonce_field( 'general_info', 'general_info_nonce' );
 
-		$categories        = WordCamp_Budgets::get_payment_categories();
 		$assigned_category = get_post_meta( $post->ID, '_camppayments_payment_category', true );
 
 		require_once( dirname( __DIR__ ) . '/views/payment-request/metabox-general.php' );
@@ -453,6 +452,10 @@ class WCP_Payment_Request {
 
 			case 'currency':
 				$value = WordCamp_Budgets::get_currencies();
+				break;
+
+			case 'payment_category':
+				$value = WordCamp_Budgets::get_payment_categories();
 				break;
 
 			case 'payment_method':
@@ -772,6 +775,7 @@ Thanks for helping us with these details!",
 			update_post_meta( $post_id, '_camppayments_date_vendor_paid', $safe_value );
 		}
 
+		// Incomplete Notes
 		if ( isset( $_POST['wcp_mark_incomplete_notes'] ) ) {
 			$safe_value = '';
 			if ( $post->post_status == 'wcb-incomplete' ) {

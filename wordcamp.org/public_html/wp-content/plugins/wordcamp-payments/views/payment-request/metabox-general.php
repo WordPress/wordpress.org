@@ -6,20 +6,8 @@
 		$this->render_text_input( $post, 'Requested date for payment/due by', 'due_by', '', 'date' );
 		$this->render_text_input( $post, 'Amount', 'payment_amount', 'No commas, thousands separators or currency symbols. Ex. 1234.56' );
 		$this->render_select_input( $post, 'Currency', 'currency' );
+		$this->render_select_input( $post, 'Category', 'payment_category' );
 	?>
-
-	<tr>
-		<th><label for="payment_category">Category</label></th>
-		<td>
-			<select name="payment_category" id="payment_category" class="postform">
-				<option value="null">-- Select a Category --</option>
-
-				<?php foreach( $categories as $key => $name ) : ?>
-					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $assigned_category, $key ); ?>><?php echo esc_html( $name ); ?></option>
-				<?php endforeach; ?>
-			</select>
-		</td>
-	</tr>
 
 	<?php
 		$this->render_text_input(
