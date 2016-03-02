@@ -622,13 +622,17 @@ function notify_parties_of_new_note( $request, $note ) {
 }
 
 /**
- * Notify the organizer when the status of their invoice changes or when notes are added
+ * Notify the organizer when the status of their reimbursement changes or when notes are added
  *
  * @param string   $new_status
  * @param string   $old_status
  * @param \WP_Post $request
  */
 function notify_organizer_request_updated( $new_status, $old_status, $request ) {
+	if ( $request->post_type !== POST_TYPE ) {
+		return;
+	}
+
 	if ( $new_status === $old_status ) {
 		return;
 	}
