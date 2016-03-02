@@ -638,7 +638,7 @@ function notify_organizer_request_updated( $new_status, $old_status, $request ) 
 	}
 
 	$to                = \WordCamp_Budgets::get_requester_formatted_email( $request->post_author );
-	$relevant_statuses = get_post_statuses();
+	$relevant_statuses = array( 'wcb-incomplete', 'wcb-approved', 'wcb-pending-payment', 'wcb-paid', 'wcb-failed', 'wcb-cancelled' );
 
 	if ( ! $to || ! in_array( $request->post_status, $relevant_statuses, true ) ) {
 		return;
