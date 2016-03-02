@@ -565,7 +565,7 @@ class Payment_Requests_Dashboard {
 		ob_start();
 
 		// File Header
-		fputcsv( $report, array( 'FILHDR', 'PWS', $options['pws_customer_id'], date( 'm/d/Y' ), date( 'Hi' ) ) );
+		fputcsv( $report, array( 'FILHDR', 'PWS', $options['pws_customer_id'], date( 'm/d/Y' ), date( 'Hi' ) ), ',', '|' );
 
 		$total = 0;
 		$count = 0;
@@ -608,7 +608,7 @@ class Payment_Requests_Dashboard {
 				$count, // must be globally unique?
 				$options['contact_email'],
 				$options['contact_phone'],
-			) );
+			), ',', '|' );
 
 			// Payee Name Record
 			fputcsv( $report, array(
@@ -616,17 +616,17 @@ class Payment_Requests_Dashboard {
 				substr( $payable_to, 0, 35 ),
 				'',
 				$count, // vendor number. should be unique?
-			) );
+			), ',', '|' );
 
 			// Payee Address Record
 			fputcsv( $report, array(
 				'PYEADD',
 				substr( get_post_meta( $post->ID, '_camppayments_vendor_street_address', true ), 0, 35 ),
 				'',
-			) );
+			), ',', '|' );
 
 			// Additional Payee Address Record
-			fputcsv( $report, array( 'ADDPYE', '', '' ) );
+			fputcsv( $report, array( 'ADDPYE', '', '' ), ',', '|' );
 
 			// Payee Postal Record
 			fputcsv( $report, array(
@@ -635,19 +635,19 @@ class Payment_Requests_Dashboard {
 				substr( get_post_meta( $post->ID, '_camppayments_vendor_state', true ), 0, 35 ),
 				substr( get_post_meta( $post->ID, '_camppayments_vendor_zip_code', true ), 0, 10 ),
 				substr( $vendor_country_code, 0, 3 ),
-			) );
+			), ',', '|' );
 
 			// Payment Description
 			fputcsv( $report, array(
 				'PYTDES',
 				substr( $description, 0, 122 ),
-			) );
+			), ',', '|' );
 
 			restore_current_blog();
 		}
 
 		// File Trailer
-		fputcsv( $report, array( 'FILTRL', $count * 6 + 2 ) );
+		fputcsv( $report, array( 'FILTRL', $count * 6 + 2 ), ',', '|' );
 
 		fclose( $report );
 		return ob_get_clean();
