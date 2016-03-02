@@ -207,7 +207,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 					case 'wordcamp':
 						return '<div class="default-icon"><span class="dashicons dashicons-tickets"></span></div>';
 					case 'browsehappy':
-						return '<div class="icon"><img src="/gp-templates/images/browsehappy.png" width="' . $size . '" height="' . $size . '"></div>';
+						return '<div class="icon"><img src="https://translate.wordpress.org/translate/gp-templates-new/images/browsehappy.png" width="' . $size . '" height="' . $size . '"></div>';
 					default:
 						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
 				}
@@ -232,7 +232,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 				}
 			case 'glotpress':
-				return '<div class="icon"><img src="/gp-templates/images/glotpress.png" width="' . $size . '" height="' . $size . '"></div>';
+				return '<div class="icon"><img src="https://translate.wordpress.org/translate/gp-templates-new/images/glotpress.png" width="' . $size . '" height="' . $size . '"></div>';
 			default:
 				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
 		}
