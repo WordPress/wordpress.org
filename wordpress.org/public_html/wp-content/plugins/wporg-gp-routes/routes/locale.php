@@ -334,27 +334,45 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		}
 
 		// Get the names of the contributors.
-		foreach ( $contributors as $contributor_id ) {
-			if ( isset( $locale_contributors['editors'][ $contributor_id ] ) ) {
+		foreach ( $contributors as $contributor ) {
+			if ( isset( $locale_contributors['editors'][ $contributor->user_id ] ) ) {
 				continue;
 			}
 
-			if ( isset( $locale_contributors['contributors'][ $contributor_id ] ) ) {
+
+			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
+				// Update last updated and counts per status.
+				$locale_contributors['contributors'][ $contributor->user_id ]->last_update = max(
+					$locale_contributors['contributors'][ $contributor->user_id ]->last_update,
+					$contributor->last_update
+				);
+
+				$locale_contributors['contributors'][ $contributor->user_id ]->total_count   += $contributor->total_count;
+				$locale_contributors['contributors'][ $contributor->user_id ]->current_count += $contributor->current_count;
+				$locale_contributors['contributors'][ $contributor->user_id ]->waiting_count += $contributor->waiting_count;
+				$locale_contributors['contributors'][ $contributor->user_id ]->fuzzy_count   += $contributor->fuzzy_count;
 				continue;
 			}
 
-			$user = get_user_by( 'id', $contributor_id );
+			$user = get_user_by( 'id', $contributor->user_id );
 			if ( ! $user ) {
 				continue;
 			}
 
-			$locale_contributors['contributors'][ $contributor_id ] = (object) array(
-				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
-				'email'        => $user->user_email,
+			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
+				'nicename'      => $user->user_nicename,
+				'display_name'  => $this->_encode( $user->display_name ),
+				'email'         => $user->user_email,
+				'last_update'   => $contributor->last_update,
+				'total_count'   => $contributor->total_count,
+				'current_count' => $contributor->current_count,
+				'waiting_count' => $contributor->waiting_count,
+				'fuzzy_count'   => $contributor->fuzzy_count,
 			);
 		}
 		unset( $contributors );
+
+		uasort( $locale_contributors['contributors'], array( $this, '_sort_contributors_by_total_count_callback' ) );
 
 		return $locale_contributors;
 	}
@@ -368,17 +386,24 @@ class WPorg_GP_Route_Locale extends GP_Route {
 	private function get_locale_contributors_by_translation_set( $translation_set ) {
 		global $wpdb;
 
-		$user_ids = $wpdb->get_col( $wpdb->prepare( "
-			SELECT DISTINCT( `user_id` )
+		$contributors = $wpdb->get_results( $wpdb->prepare( "
+			SELECT
+				`user_id`,
+				MAX( `date_added` ) AS `last_update`,
+				COUNT( * ) as `total_count`,
+				COUNT( CASE WHEN `status` = 'current' THEN `status` END ) AS `current_count`,
+				COUNT( CASE WHEN `status` = 'waiting' THEN `status` END ) AS `waiting_count`,
+				COUNT( CASE WHEN `status` = 'fuzzy' THEN `status` END ) AS `fuzzy_count`
 			FROM `{$wpdb->gp_translations}`
 			WHERE
 				`translation_set_id` = %d
 				AND `user_id` IS NOT NULL AND `user_id` != 0
-				AND `status` <> 'rejected'
+				AND `status` IN( 'current', 'waiting', 'fuzzy' )
 				AND `date_modified` > %s
+			GROUP BY `user_id`
 		", $translation_set->id, date( 'Y-m-d', time() - YEAR_IN_SECONDS ) ) );
 
-		return $user_ids;
+		return $contributors;
 	}
 
 	/**
@@ -728,6 +753,10 @@ class WPorg_GP_Route_Locale extends GP_Route {
 				AND active = 1
 			ORDER BY name ASC
 		" );
+	}
+
+	private function _sort_contributors_by_total_count_callback( $a, $b ) {
+		return $a->total_count < $b->total_count;
 	}
 
 	private function _sort_reverse_name_callback( $a, $b ) {

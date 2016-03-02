@@ -182,41 +182,75 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 	<div class="locale-project-contributors-group locale-project-contributors-contributors">
 		<h3>Translation Contributors</h3>
 		<?php if ( $locale_contributors['contributors'] ) : ?>
-		<ul>
+		<table class="locale-project-contributors-table">
+			<thead>
+				<th class="contributor-name">Contributor</th>
+				<th class="contributor-stats">Translations*</th>
+			</thead>
+			<tbody>
 			<?php
 			foreach ( $locale_contributors['contributors'] as $contributor ) {
 				printf(
-					'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+					'<tr>
+						<td class="contributor-name">
+							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
+							<span>Last Activity: %s ago</span>
+						</td>
+						<td class="contributor-stats">
+							<div class="total">
+								<span>Total</span>
+								<p>%s</p>
+							</div>
+							<div class="current">
+								<span>Translated</span>
+								<p>%s</p>
+							</div>
+							<div class="waiting">
+								<span>Suggested</span>
+								<p>%s</p>
+							</div>
+							<div class="fuzzy">
+								<span>Fuzzy</span>
+								<p>%s</p>
+							</div>
+						<td>
+					</tr>',
 					$contributor->nicename,
-					get_avatar( $contributor->email, 30 ),
-					$contributor->display_name ? $contributor->display_name : $contributor->nicename
+					get_avatar( $contributor->email, 40 ),
+					$contributor->display_name ? $contributor->display_name : $contributor->nicename,
+					human_time_diff( strtotime(  $contributor->last_update ) ),
+					number_format_i18n( $contributor->total_count ),
+					number_format_i18n( $contributor->current_count ),
+					number_format_i18n( $contributor->waiting_count ),
+					number_format_i18n( $contributor->fuzzy_count )
 				);
 			}
 			?>
-		</ul>
+			</tbody>
+		</table>
+		<p class="stats-hint">* Data for the last 356 days.</p>
 		<?php else : ?>
 			<p>None, be the first?</p>
 		<?php endif; ?>
 	</div>
-	<div class="locale-project-contributors-group locale-project-contributors-editors">
-		<h3>Translation Editors</h3>
-		<?php if ( $locale_contributors['editors'] ) : ?>
-		<ul>
-			<?php
-			foreach ( $locale_contributors['editors'] as $editor ) {
-				printf(
-					'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
-					$editor->nicename,
-					get_avatar( $editor->email, 40 ),
-					$editor->display_name ? $editor->display_name : $editor->nicename
-				);
-			}
-			?>
-		</ul>
-		<?php else : ?>
-			<p>None, be the first?</p>
-		<?php endif; ?>
-	</div>
+
+	<?php if ( $locale_contributors['editors'] ) : ?>
+		<div class="locale-project-contributors-group locale-project-contributors-editors">
+			<h3>Translation Editors</h3>
+			<ul>
+				<?php
+				foreach ( $locale_contributors['editors'] as $editor ) {
+					printf(
+						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
+						$editor->nicename,
+						get_avatar( $editor->email, 50 ),
+						$editor->display_name ? $editor->display_name : $editor->nicename
+					);
+				}
+				?>
+			</ul>
+		</div>
+	<?php endif; ?>
 </div>
 
 <script>

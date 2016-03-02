@@ -1282,9 +1282,19 @@ ul.ct-legend {
 	display: none !important;
 }
 
-.locale-project-contributors-group {
-	width: 50%;
-	float: left;
+@media (min-width: 600px) {
+	.locale-project-contributors-group {
+		float: left;
+	}
+
+	.locale-project-contributors-contributors {
+		width: 65%;
+		margin-right: 5%;
+	}
+
+	.locale-project-contributors-editors {
+		width: 30%;
+	}
 }
 
 .locale-project-contributors-group ul {
@@ -1297,7 +1307,97 @@ ul.ct-legend {
 	margin: 0 0 10px;
 }
 
-.locale-project-contributors-group li img {
+.locale-project-contributors-group .avatar {
 	vertical-align: middle;
 	margin-right: 10px;
+}
+
+.locale-project-contributors-table {
+	width: 100%;
+}
+
+.locale-project-contributors-table .contributor-name {
+	width: 40%;
+}
+
+.locale-project-contributors-table .contributor-name span {
+	font-size: 11px;
+	display: block;
+}
+
+.locale-project-contributors-table tr {
+	vertical-align: top;
+}
+
+.locale-project-contributors-table th {
+	font-weight: bold;
+	border-bottom: 1px solid #eee;
+}
+
+.locale-project-contributors-table th.contributor-stats {
+	text-align: center;
+}
+
+.locale-project-contributors-table td.contributor-stats div {
+	text-align: center;
+	width: 25%;
+	float: left;
+}
+
+.locale-project-contributors-table td.contributor-stats div span {
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.locale-project-contributors-table td.contributor-stats div.current span {
+	color: #6bc373;
+}
+
+.locale-project-contributors-table td.contributor-stats div.waiting span {
+	color: #ffc733;
+}
+
+.locale-project-contributors-table td.contributor-stats div.fuzzy span {
+	color: #f78b53;
+}
+
+.locale-project-contributors-table tbody td {
+	padding: 10px 0;
+	border-bottom: 1px solid #eee;
+}
+
+.locale-project-contributors-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.locale-project-contributors-contributors .stats-hint {
+	text-align: right;
+	font-size: 10px;
+}
+
+@media (max-width: 500px) {
+	.locale-project-contributors-table thead {
+		display: none;
+	}
+
+	.locale-project-contributors-table tbody td {
+		width: 100%;
+		display: block;
+	}
+
+	.locale-project-contributors-table .contributor-name,
+	.locale-project-contributors-table .contributor-stats {
+		width: 100%;
+		border-bottom: 0;
+	}
+
+	.locale-project-contributors-table .contributor-stats:before,
+	.locale-project-contributors-table .contributor-stats:after {
+		content: "";
+		display: table;
+	}
+
+	.locale-project-contributors-table .contributor-stats:after {
+		clear: both;
+	}
 }
