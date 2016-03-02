@@ -449,7 +449,7 @@ function save_request( $post_id, $post ) {
 	$original_post = new \WP_Post( (object) array( 'post_status' => $_POST['original_post_status'] ) );
 
 	if ( user_can_edit_request( $original_post ) ) {
-		$text_fields = array( 'name_of_payer', 'currency', 'reason' );
+		$text_fields = array( 'name_of_payer', 'currency', 'reason', 'reason_other' );
 		validate_and_save_text_fields( $post_id, $text_fields, $_POST );
 
 		\WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'wcbrr' );
