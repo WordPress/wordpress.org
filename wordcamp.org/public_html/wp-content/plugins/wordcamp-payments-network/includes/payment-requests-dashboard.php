@@ -585,6 +585,7 @@ class Payment_Requests_Dashboard {
 			$total += $amount;
 
 			$payable_to = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_payable_to', true ) );
+			$payable_to = html_entity_decode( $payable_to ); // J&amp;J to J&J
 			$countries = WordCamp_Budgets::get_valid_countries_iso3166();
 			$vendor_country_code = get_post_meta( $post->ID, '_camppayments_vendor_country_iso3166', true );
 			if ( ! empty( $countries[ $vendor_country_code ] ) ) {
@@ -592,6 +593,7 @@ class Payment_Requests_Dashboard {
 			}
 
 			$description = sanitize_text_field( get_post_meta( $post->ID, '_camppayments_description', true ) );
+			$description = html_entity_decode( $description );
 			$invoice_number = get_post_meta( $post->ID, '_camppayments_invoice_number', true );
 			if ( ! empty( $invoice_number ) ) {
 				$description = sprintf( 'Invoice %s. %s', $invoice_number, $description );
