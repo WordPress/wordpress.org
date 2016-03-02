@@ -570,6 +570,14 @@ class Payment_Requests_Dashboard {
 		$total = 0;
 		$count = 0;
 
+		if ( false !== get_site_transient( '_wcb_jpm_checks_counter_lock' ) ) {
+			wp_die( 'JPM Checks Export is locked. Please try again later or contact support.' );
+		}
+
+		// Avoid at least *some* race conditions.
+		set_site_transient( '_wcb_jpm_checks_counter_lock', 1, 30 );
+		$start = absint( get_site_option( '_wcb_jpm_checks_counter', 0 ) );
+
 		foreach ( $args['request_indexes'] as $index ) {
 			switch_to_blog( $index->blog_id );
 			$post = get_post( $index->post_id );
@@ -607,7 +615,7 @@ class Payment_Requests_Dashboard {
 				date( 'm/d/Y' ),
 				number_format( $amount, 2, '.', '' ),
 				$options['account_number'],
-				$count, // must be globally unique?
+				$start + $count, // must be globally unique?
 				$options['contact_email'],
 				$options['contact_phone'],
 			), ',', '|' );
@@ -617,7 +625,7 @@ class Payment_Requests_Dashboard {
 				'PAYENM',
 				substr( $payable_to, 0, 35 ),
 				'',
-				$count, // vendor number. should be unique?
+				sprintf( '%d-%d', $index->blog_id, $index->post_id ),
 			), ',', '|' );
 
 			// Payee Address Record
@@ -650,6 +658,11 @@ class Payment_Requests_Dashboard {
 
 		// File Trailer
 		fputcsv( $report, array( 'FILTRL', $count * 6 + 2 ), ',', '|' );
+
+		// Update counter and unlock
+		$start = absint( get_site_option( '_wcb_jpm_checks_counter', 0 ) );
+		update_site_option( '_wcb_jpm_checks_counter', $start + $count );
+		delete_site_transient( '_wcb_jpm_checks_counter_lock' );
 
 		fclose( $report );
 		return ob_get_clean();
