@@ -49,6 +49,10 @@
 			); ?>
 		</p>
 
+		<h3>
+			<?php _e( "Beneficiary's Bank", 'wordcamporg' ); ?>
+		</h3>
+
 		<table>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Name',              'bank_name' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Street Address',    'bank_street_address' ); ?>
@@ -61,6 +65,11 @@
 			<?php $this->render_text_input( $post, 'Beneficiary’s Account Number or IBAN', 'beneficiary_account_number' ); ?>
 		</table>
 
+		<hr />
+		<h3>
+			<?php _e( "Intermediary Bank", 'wordcamporg' ); ?>
+		</h3>
+
 		<table>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Name',              'interm_bank_name' ); ?>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Street Address',    'interm_bank_street_address' ); ?>
@@ -71,6 +80,11 @@
 			<?php $this->render_text_input( $post, 'Intermediary Bank SWIFT BIC',         'interm_bank_swift' ); ?>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Account',           'interm_bank_account' ); ?>
 		</table>
+
+		<hr />
+		<h3>
+			<?php _e( "Beneficiary", 'wordcamporg' ); ?>
+		</h3>
 
 		<table>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Name',              'beneficiary_name' ); ?>
