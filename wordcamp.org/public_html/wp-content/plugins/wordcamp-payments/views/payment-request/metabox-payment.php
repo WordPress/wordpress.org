@@ -23,10 +23,6 @@
 	</table>
 
 	<div id="payment_method_check_fields" class="form-table payment_method_fields <?php echo 'Check' == $selected_payment_method ? 'active' : 'hidden'; ?>">
-		<p>
-			<?php _e( 'Please fill out all the below fields to ensure that the check is sent successfully.', 'wordcamporg' ); ?>
-		</p>
-
 		<table>
 			<?php $this->render_text_input( $post, 'Payable To', 'payable_to' ); ?>
 			<?php $this->render_text_input(    $post, 'Street Address',    'check_street_address' ); ?>
@@ -42,13 +38,6 @@
 	</p>
 
 	<div id="payment_method_wire_fields" class="form-table payment_method_fields <?php echo 'Wire' == $selected_payment_method ? 'active' : 'hidden'; ?>">
-		<p>
-			<?php _e(
-				'Please include Bank Name, SWIFT code, Beneficiary Name, and Beneficiary Account Number to ensure that your wire is sent successfully.',
-				'wordcamporg'
-			); ?>
-		</p>
-
 		<h3>
 			<?php _e( "Beneficiary's Bank", 'wordcamporg' ); ?>
 		</h3>
