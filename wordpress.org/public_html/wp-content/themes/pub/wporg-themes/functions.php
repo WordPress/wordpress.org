@@ -119,7 +119,7 @@ function wporg_themes_body_class( $classes ) {
 		$classes[] = 'ie8';
 	}
 
-	if ( empty( $GLOBALS['themes']['themes'] ) ) {
+	if ( empty( $GLOBALS['themes']['themes'] ) && ! is_singular( 'page' ) ) {
 		$classes[] = 'no-results';
 	}
 
@@ -159,9 +159,11 @@ add_filter( 'template_redirect', 'wporg_themes_custom_feed' );
  * Include view templates in the footer.
  */
 function wporg_themes_view_templates() {
-	get_template_part( 'view-templates/theme' );
-	get_template_part( 'view-templates/theme-preview' );
-	get_template_part( 'view-templates/theme-single' );
+	if ( ! is_singular( 'page' ) ) {
+		get_template_part( 'view-templates/theme' );
+		get_template_part( 'view-templates/theme-preview' );
+		get_template_part( 'view-templates/theme-single' );
+	}
 }
 add_action( 'wp_footer', 'wporg_themes_view_templates' );
 
