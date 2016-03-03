@@ -17,6 +17,7 @@ add_action( 'add_meta_boxes',        __NAMESPACE__ . '\init_meta_boxes'         
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets',        11 );
 
 // Admin UI
+add_action( 'edit_form_top',                              __NAMESPACE__ . '\print_introduction_text'   );
 add_filter( 'display_post_states',                        __NAMESPACE__ . '\display_post_states'       );
 add_filter( 'manage_'. POST_TYPE .'_posts_columns',       __NAMESPACE__ . '\get_columns'               );
 add_action( 'manage_'. POST_TYPE .'_posts_custom_column', __NAMESPACE__ . '\render_columns',     10, 2 );
@@ -296,6 +297,28 @@ function render_sponsor_invoice_metabox( $post ) {
 	}
 
 	require_once( dirname( __DIR__ ) . '/views/sponsor-invoice/metabox-general.php' );
+}
+
+/**
+ * Print introduction text at the top of the Edit Invoice screen.
+ *
+ * @param \WP_Post $post
+ */
+function print_introduction_text( $post ) {
+	if ( POST_TYPE !== $post->post_type ) {
+		return;
+	}
+
+	?>
+
+	<p>
+		<?php _e(
+			'Invoices typically arrive 1-2 business days after the invoice request has been reviewed and approved.',
+			'wordcamporg'
+		); ?>
+	</p>
+
+	<?php
 }
 
 /**
