@@ -14,7 +14,7 @@ class WPorg_GP_Plugin_Directory {
 
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_global_cache_group' ) );
-		add_action( 'originals_imported', array( $this, 'originals_imported' ) );
+		add_action( 'gp_originals_imported', array( $this, 'originals_imported' ) );
 		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
 		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
 
