@@ -549,6 +549,15 @@ class WordCamp_Budgets {
 
 			update_post_meta( $post_id, "_{$meta_key_prefix}_" . $key, $safe_value );
 		}
+
+		// Checkboxes
+		foreach ( array( 'needs_intermediary_bank' ) as $key ) {
+			if ( isset( $_POST[ $key ] ) ) {
+				update_post_meta( $post_id, "_{$meta_key_prefix}_" . $key, sanitize_text_field( $_POST[ $key ] ) );
+			} else {
+				delete_post_meta( $post_id, "_{$meta_key_prefix}_" . $key );
+			}
+		}
 	}
 
 	/**

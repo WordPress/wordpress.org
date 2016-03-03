@@ -70,6 +70,12 @@
 			<?php _e( "Intermediary Bank", 'wordcamporg' ); ?>
 		</h3>
 
+		<?php $this->render_checkbox_input(
+			$post,
+			__( 'Send this payment through an intermediary bank', 'wordcamporg' ),
+			'needs_intermediary_bank'
+		); ?>
+
 		<table>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Name',              'interm_bank_name' ); ?>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Street Address',    'interm_bank_street_address' ); ?>

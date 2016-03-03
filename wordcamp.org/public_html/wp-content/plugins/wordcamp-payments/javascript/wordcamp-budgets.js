@@ -2,6 +2,26 @@ jQuery( document ).ready( function( $ ) {
 	'use strict';
 
 	var app = window.WordCampBudgets = {
+		/**
+		 * Main entry point
+		 */
+		init : function () {
+			try {
+				app.registerEventHandlers();
+			} catch ( exception ) {
+				app.log( exception );
+			}
+		},
+
+		/**
+		 * Registers event handlers
+		 */
+		registerEventHandlers : function() {
+			var needsIntermediaryBank = $( '#needs_intermediary_bank' );
+
+			needsIntermediaryBank.change( app.toggleIntermediaryBankFields );
+			needsIntermediaryBank.trigger( 'change' ); // Set the initial state
+		},
 
 		/**
 		 * Toggle the payment method fields based on which method is selected
@@ -18,6 +38,29 @@ jQuery( document ).ready( function( $ ) {
 			$( active_fields_container ).addClass( 'active' );
 
 			// todo make the transition smoother
+		},
+
+		/**
+		 * Toggle the fields for a wire payment intermediary bank
+		 *
+		 * @param {object} event
+		 */
+		toggleIntermediaryBankFields : function( event ) {
+			try {
+				var isWirePayment             = $( '#payment_method_wire'      ).prop( 'checked' ),
+					needsIntermediaryBank     = $( '#needs_intermediary_bank'  ).prop( 'checked' ),
+					intermediaryBankFieldRows = $( '#intermediary_bank_fields' ).find( 'tr' );
+
+				$( intermediaryBankFieldRows ).each( function( index, row ) {
+					if ( isWirePayment && needsIntermediaryBank ) {
+						$( row ).removeClass( 'hidden' );
+					} else {
+						$( row ).addClass( 'hidden' );
+					}
+				} );
+			} catch( exception ) {
+				app.log( exception );
+			}
 		},
 
 		/**
@@ -123,4 +166,6 @@ jQuery( document ).ready( function( $ ) {
 			}
 		}
 	};
+
+	app.init();
 } );
