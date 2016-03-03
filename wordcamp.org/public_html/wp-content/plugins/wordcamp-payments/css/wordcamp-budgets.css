@@ -17,9 +17,13 @@
 	font-weight: normal;
 }
 
-#wcb-save-draft {
-	float: left;
+#save-action {
+	overflow: auto;	/* Without this the element collapses on Invoices because all of it's children are floated */
 }
+
+	#wcb-save-draft {
+		float: left;
+	}
 
 /* Forms */
 .wcb-form {

@@ -10,7 +10,7 @@ defined( 'WPINC' ) or die();
 		<?php if ( in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) : ?>
 			<div id="minor-publishing-actions">
 				<div id="save-action">
-					<?php submit_button( __( 'Save Draft' ), 'secondary', 'wcbsi-save-draft', false ); ?>
+					<?php submit_button( __( 'Save Draft' ), 'secondary', 'wcb-save-draft', false ); ?>
 				</div>
 			</div>
 		<?php endif; ?>
