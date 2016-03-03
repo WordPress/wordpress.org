@@ -140,6 +140,6 @@ defined( 'WPINC' ) or die();
 
 </ul>
 
-<span class="wcb-form-required">
+<p class="wcb-form-required">
 	<?php _e( '* required', 'wordcamporg' ); ?>
-</span>
+</p>
