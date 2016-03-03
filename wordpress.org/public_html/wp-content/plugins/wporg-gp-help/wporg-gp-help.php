@@ -38,7 +38,7 @@ class WPorg_GP_Help_Page {
 		if ( is_user_logged_in() ) {
 			update_user_meta( get_current_user_id(), $this->hide_notice, true );
 		}
-		setcookie( $this->hide_notice, '1', time() + 3600*24*30, gp_url( '/' ) ); // a month
+		setcookie( $this->hide_notice, '1', time() + 3600*24*30, SITECOOKIEPATH, COOKIE_DOMAIN ); // a month
 	}
 
 	function after_notices() {
@@ -71,9 +71,9 @@ class WPorg_GP_Help_Page_Route extends GP_Route {
 	}
 
 	function getting_started() {
-		wporg_gp_help_page()->remove_action( 'after_notices' );
+		remove_action( 'gp_after_notices', array( wporg_gp_help_page(), 'after_notices' ) );
 
-		wp_redirect( GP_Help_Page_Plugin::handbook_link, 301 );
+		wp_redirect( WPorg_GP_Help_Page::handbook_link, 301 );
 		exit;
 	}
 
