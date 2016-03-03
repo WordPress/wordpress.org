@@ -904,33 +904,14 @@ function wporg_themes_maybe_schedule_daily_job() {
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
 
 /**
- * Fix the query to allow embeds to work on single theme pages
+ * Correct the post type for theme queries to be "repopackage"
  */
-function wporg_themes_embed_handler() {
-	global $wp_query;
-
-	$themes = wporg_themes_get_themes_for_query();
-	if ( $themes['total'] == 1 ) {
-		$wp_query = new WP_Query( array(
-			'name' => get_query_var('name'),
-			'post_type' => 'repopackage',
-		));
-		wp_reset_postdata();
-	}
-}
-add_action( 'embed_head', 'wporg_themes_embed_handler' );
-add_action( 'wp_head', 'wporg_themes_embed_handler', 1 );
-
-/**
- * Fix the singular check to allow embed info to be added to head for single theme pages
- */
-function wporg_themes_singular_fix() {
-	global $wp_query;
+function wporg_themes_adjust_main_query( $query ) {
 	if ( get_query_var('name') && !is_404() ) {
-		$wp_query->is_singular = true;
+		$query->query_vars['post_type'] = 'repopackage';
 	}
 }
-add_action( 'template_redirect', 'wporg_themes_singular_fix', 20 );
+add_action( 'pre_get_posts', 'wporg_themes_adjust_main_query');
 
 /**
  * Fix the oembed post finder to find the theme post id from the url properly
