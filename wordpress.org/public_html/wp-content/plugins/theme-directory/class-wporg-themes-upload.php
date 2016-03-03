@@ -596,6 +596,9 @@ TICKET;
 					'cc'        => $this->author->user_email,
 					'priority'  => $this->trac_ticket->priority,
 				) );
+
+				// temporary debugging - email Otto when this specific branch occurs TODO remove this after testing
+				wp_mail( 'otto@wordpress.org', 'Theme ticket creation '. $ticket_id, 'https://themes.trac.wordpress.org/ticket/' . $ticket_id, 'From:       themes@wordpress.org' );
 			}
 
 			// In all other cases we create a new ticket.
@@ -607,6 +610,16 @@ TICKET;
 				'cc'        => $this->author->user_email,
 				'priority'  => $this->trac_ticket->priority,
 			) );
+
+			// Theme review team auto-approves theme-updates, so mark the theme as live immediately, without sending additional email
+			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets
+			if ( $this->trac_ticket->priority == 'theme update' ) {
+				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'approve_and_live' ), false );
+				// temporary debugging - email otto about it TODO remove this after testing
+				wp_mail( 'otto@wordpress.org', 'Theme update auto approval '. $ticket_id, 'https://themes.trac.wordpress.org/ticket/' . $ticket_id, 'From: themes@wordpress.org' );
+
+			}
+
 		}
 
 		return $ticket_id;
