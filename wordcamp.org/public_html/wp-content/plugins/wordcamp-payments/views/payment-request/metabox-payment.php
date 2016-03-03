@@ -8,7 +8,7 @@
 
 	<table class="form-table">
 		<?php if ( $box['args']['show_vendor_requested_payment_method'] ) : ?>
-			<?php $this->render_textarea_input( $post, 'Did the vendor request a specific type of payment?', 'vendor_requested_payment_method', 'Add any relevant details' ); ?>
+			<?php $this->render_textarea_input( $post, 'Did the vendor request a specific type of payment?', 'vendor_requested_payment_method', 'Add any relevant details', false ); ?>
 		<?php endif;?>
 
 		<?php $this->render_radio_input( $post, 'Payment Method', 'payment_method' ); ?>
@@ -76,7 +76,7 @@
 			'needs_intermediary_bank'
 		); ?>
 
-		<table>
+		<table id="intermediary_bank_fields">
 			<?php $this->render_text_input( $post, 'Intermediary Bank Name',              'interm_bank_name' ); ?>
 			<?php $this->render_text_input( $post, 'Intermediary Bank Street Address',    'interm_bank_street_address' ); ?>
 			<?php $this->render_text_input( $post, 'Intermediary Bank City',              'interm_bank_city' ); ?>
@@ -103,3 +103,7 @@
 		</table>
 	</div>
 </fieldset>
+
+<p class="wcb-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</p>

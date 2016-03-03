@@ -12,3 +12,7 @@
 		$this->render_country_input( $post, 'Country ISO3166', 'vendor_country_iso3166' );
 	?>
 </table>
+
+<p class="wcb-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</p>

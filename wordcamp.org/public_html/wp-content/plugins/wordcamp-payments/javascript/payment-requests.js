@@ -23,13 +23,18 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		registerEventHandlers : function() {
 			var currency        = $( '#currency' );
-			var paymentCategory = $( '#payment_category' );
+			var paymentCategory = $( '#payment_category' ),
+				paymentDetails  = $( '#wcp_payment_details' );
 
-			$( '#wcp_payment_details' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
+			paymentDetails.find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
+			paymentDetails.find( 'input[name=payment_method]:checked' ).trigger( 'change' ); // Set the initial state
+
 			paymentCategory.change( app.toggleOtherCategoryDescription );
 			paymentCategory.trigger( 'change' );   // Set the initial state
+
 			currency.change( wcb.setDefaultPaymentMethod );
 			currency.trigger( 'change' );   // Set the initial state
+
 			$( '#row-files' ).find( 'a.wcb-insert-media' ).click( wcb.showUploadModal );
 
 			$('[name="post_status"]').on('change', function() {
@@ -52,8 +57,10 @@ jQuery( document ).ready( function( $ ) {
 
 				if ( 'other' == $( this ).find( 'option:selected' ).val() ) {
 					$( otherCategoryDescription ).removeClass( 'hidden' );
+					$( otherCategoryDescription ).find( ':input' ).prop( 'required', true );
 				} else {
 					$( otherCategoryDescription ).addClass( 'hidden' );
+					$( otherCategoryDescription ).find( ':input' ).prop( 'required', false );
 				}
 
 				// todo make the transition smoother

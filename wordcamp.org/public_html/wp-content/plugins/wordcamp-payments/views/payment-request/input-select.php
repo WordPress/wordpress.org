@@ -6,7 +6,11 @@
 	</th>
 
 	<td>
-		<select id="<?php echo esc_attr( $name ); ?>" name="<?php echo esc_attr( $name ); ?>">
+		<select
+			id="<?php echo esc_attr( $name ); ?>"
+			name="<?php echo esc_attr( $name ); ?>"
+		    <?php __checked_selected_helper( $required, true, true, 'required' ); ?>
+		>
 			<option value="null-select-one">
 				<?php printf( __( '-- Select a %s --', 'wordcamporg' ), $label ); ?>
 			</option>
@@ -18,5 +22,11 @@
 				</option>
 			<?php endforeach; ?>
 		</select>
+
+		<?php
+			if ( $required ) {
+				WordCamp_Budgets::render_form_field_required_indicator();
+			}
+		?>
 	</td>
 </tr>

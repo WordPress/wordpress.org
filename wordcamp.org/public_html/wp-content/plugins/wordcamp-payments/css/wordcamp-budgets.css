@@ -54,6 +54,22 @@
 	color: #dc3232;
 }
 
+/* Make room for the required field indicator (*) */
+body.post-type-wcp_payment_request input.large-text,
+body.post-type-wcp_payment_request input.regular-text,
+body.post-type-wcp_payment_request textarea.large-text,
+body.post-type-wcp_payment_request .meta-box-sortables select {
+	width: 95%;
+}
+
+@media screen and ( max-width: 782px ) {
+	body.post-type-wcp_payment_request .form-table td textarea {
+		display: inline;
+		width: 95%;
+	}
+}
+
+
 /* margins from above selector aren't applied */
 .wcb-form-input-wrapper {
 	padding-left: 1em;

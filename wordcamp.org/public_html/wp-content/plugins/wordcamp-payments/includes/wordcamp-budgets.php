@@ -128,7 +128,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'javascript/wordcamp-budgets.js', __DIR__ ),
 			array( 'jquery', 'jquery-ui-datepicker', 'media-upload', 'media-views' ),
-			1,
+			2,
 			true
 		);
 
@@ -160,7 +160,7 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			plugins_url( 'css/wordcamp-budgets.css', __DIR__ ),
 			$soft_deps,
-			2
+			3
 		);
 	}
 

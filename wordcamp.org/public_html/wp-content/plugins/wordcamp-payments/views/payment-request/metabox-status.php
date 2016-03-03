@@ -28,7 +28,7 @@
 
 			<?php if ( $post->post_status != 'auto-draft' ) : ?>
 			<div class="misc-pub-section">
-				<?php $this->render_text_input( $post, 'Date Vendor was Paid', 'date_vendor_paid', '', 'date', array(), $date_vendor_paid_readonly ); ?>
+				<?php $this->render_text_input( $post, 'Date Vendor was Paid', 'date_vendor_paid', '', 'date', array(), $date_vendor_paid_readonly, false ); ?>
 			</div>
 
 			<div class="misc-pub-section misc-pub-post-status">

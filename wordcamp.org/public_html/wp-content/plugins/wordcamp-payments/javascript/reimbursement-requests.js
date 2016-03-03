@@ -30,7 +30,8 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		registerEventHandlers : function() {
 			var reason   = $( '#_wcbrr_reason'   ),
-				currency = $( '#_wcbrr_currency' );
+				currency = $( '#_wcbrr_currency' ),
+				paymentMethod = $( '#row-payment-method' );
 
 			reason.change( app.toggleOtherReasonDescription );
 			reason.trigger( 'change' );   // Set the initial state
@@ -38,7 +39,9 @@ jQuery( document ).ready( function( $ ) {
 			currency.change( wcb.setDefaultPaymentMethod );
 			currency.trigger( 'change' );   // Set the initial state
 
-			$( '#row-payment-method' ).find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
+			paymentMethod.find( 'input[name=payment_method]' ).change( wcb.togglePaymentMethodFields );
+			paymentMethod.find( 'input[name=payment_method]:checked' ).trigger( 'change' ); // Set the initial state
+
 			$( '#wcbrr_general_information' ).find( 'a.wcb-insert-media' ).click(   wcb.showUploadModal           );
 			$( '#wcbrr-add-another-expense' ).click(                                app.addNewExpense             );
 

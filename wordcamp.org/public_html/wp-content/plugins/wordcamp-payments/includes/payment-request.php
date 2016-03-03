@@ -179,7 +179,7 @@ class WCP_Payment_Request {
 			'payment-requests',
 			plugins_url( 'javascript/payment-requests.js', __DIR__ ),
 			array( 'wordcamp-budgets', 'wcb-attached-files', 'jquery' ),
-			2,
+			3,
 			true
 		);
 
@@ -338,8 +338,9 @@ class WCP_Payment_Request {
 	 * @param string $label
 	 * @param string $name
 	 * @param string $description
+	 * @param bool   $required
 	 */
-	protected function render_textarea_input( $post, $label, $name, $description = '' ) {
+	protected function render_textarea_input( $post, $label, $name, $description = '', $required = true ) {
 		$text = $this->get_field_value( $name, $post );
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-textarea.php' );
@@ -351,15 +352,24 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 * @param string $label
 	 * @param string $name
+	 * @param bool   $required
 	 */
-	protected function render_select_input( $post, $label, $name ) {
+	protected function render_select_input( $post, $label, $name, $required = true ) {
 		$selected = get_post_meta( $post->ID, '_camppayments_' . $name, true );
 		$options  = $this->get_field_value( $name, $post );
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-select.php' );
 	}
 
-	protected function render_country_input( $post, $label, $name ) {
+	/**
+	 * Render a select dropdown for countries
+	 *
+	 * @param WP_Post $post
+	 * @param string  $label
+	 * @param string  $name
+	 * @param bool    $required
+	 */
+	protected function render_country_input( $post, $label, $name, $required = true ) {
 		$selected = $this->get_field_value( $name, $post );
 		$options = WordCamp_Budgets::get_valid_countries_iso3166();
 
@@ -372,8 +382,9 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 * @param string $label
 	 * @param string $name
+	 * @param bool   $required
 	 */
-	protected function render_radio_input( $post, $label, $name ) {
+	protected function render_radio_input( $post, $label, $name, $required = true ) {
 		$selected = get_post_meta( $post->ID, "_{$this->meta_key_prefix}_" . $name, true );
 		$options  = $this->get_field_value( $name, $post );
 
@@ -386,8 +397,9 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 * @param string $label
 	 * @param string $name
+	 * @param bool   $required
 	 */
-	protected function render_checkbox_input( $post, $label, $name, $description = '' ) {
+	protected function render_checkbox_input( $post, $label, $name, $description = '', $required = true ) {
 		$value = $this->get_field_value( $name, $post );
 
 		require( dirname( __DIR__ ) . '/views/payment-request/input-checkbox.php' );
@@ -399,8 +411,13 @@ class WCP_Payment_Request {
 	 * @param WP_Post $post
 	 * @param string $label
 	 * @param string $name
+	 * @param string $description
+	 * @param string $variant
+	 * @param array  $row_classes
+	 * @param bool   $readonly
+	 * @param bool   $required
 	 */
-	protected function render_text_input( $post, $label, $name, $description = '', $variant = 'text', $row_classes = array(), $readonly = false ) {
+	protected function render_text_input( $post, $label, $name, $description = '', $variant = 'text', $row_classes = array(), $readonly = false, $required = true ) {
 		$value = $this->get_field_value( $name, $post );
 		array_walk( $row_classes, 'sanitize_html_class' );
 		$row_classes = implode( ' ', $row_classes );

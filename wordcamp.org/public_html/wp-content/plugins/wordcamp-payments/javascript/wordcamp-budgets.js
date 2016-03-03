@@ -30,12 +30,34 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		togglePaymentMethodFields : function( event ) {
 			var active_fields_container = '#' + $( this ).attr( 'id' ) + '_fields';
-			var payment_method_fields   = '.payment_method_fields';
+			var payment_method_fields   = '.payment_method_fields',
+				optionalFields          = [ 'needs_intermediary_bank' ];
 
 			$( payment_method_fields   ).removeClass( 'active' );
 			$( payment_method_fields   ).addClass( 'hidden' );
+
+			$( payment_method_fields ).each( function( containerIndex, fieldContainer ) {
+				$( fieldContainer ).find( ':input' ).each( function( fieldIndex, inputField ) {
+					$( inputField ).prop( 'required', false );
+				} );
+			} );
+
 			$( active_fields_container ).removeClass( 'hidden' );
 			$( active_fields_container ).addClass( 'active' );
+
+			$( active_fields_container ).find( ':input' ).each( function( index, field ) {
+				if ( $.inArray( $( field ).prop( 'id' ), optionalFields ) > -1 ) {
+					return;
+				}
+
+				$( field ).prop( 'required', true );
+			} );
+
+			/*
+			 * Also toggle intermediary bank fields, because otherwise switching to Wire from another method
+			 * wouldn't remove `required` attributes.
+			 */
+			app.toggleIntermediaryBankFields( event );
 
 			// todo make the transition smoother
 		},
@@ -54,8 +76,10 @@ jQuery( document ).ready( function( $ ) {
 				$( intermediaryBankFieldRows ).each( function( index, row ) {
 					if ( isWirePayment && needsIntermediaryBank ) {
 						$( row ).removeClass( 'hidden' );
+						$( row ).find( ':input' ).prop( 'required', true );
 					} else {
 						$( row ).addClass( 'hidden' );
+						$( row ).find( ':input' ).prop( 'required', false );
 					}
 				} );
 			} catch( exception ) {
