@@ -228,7 +228,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 			?>
 			</tbody>
 		</table>
-		<p class="stats-hint">* Data for the last 356 days.</p>
+		<p class="stats-hint">* Data for the last 365 days.</p>
 		<?php else : ?>
 			<p>None, be the first?</p>
 		<?php endif; ?>
