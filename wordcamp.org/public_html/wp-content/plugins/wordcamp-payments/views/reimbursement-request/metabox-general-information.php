@@ -18,7 +18,10 @@ defined( 'WPINC' ) or die();
 				id="_wcbrr_name_of_payer"
 				name="_wcbrr_name_of_payer"
 				value="<?php echo esc_attr( $name_of_payer ); ?>"
+			    required
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -39,6 +42,8 @@ defined( 'WPINC' ) or die();
 					</option>
 				<?php endforeach; ?>
 			</select>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -58,6 +63,8 @@ defined( 'WPINC' ) or die();
 					</option>
 				<?php endforeach; ?>
 			</select>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li id="_wcbrr_reason_other_container">
@@ -72,6 +79,8 @@ defined( 'WPINC' ) or die();
 				name="_wcbrr_reason_other"
 				value="<?php echo esc_attr( $other_reason ); ?>"
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -86,3 +95,7 @@ defined( 'WPINC' ) or die();
 
 	</ul>
 </fieldset>
+
+<p class="wcb-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</p>

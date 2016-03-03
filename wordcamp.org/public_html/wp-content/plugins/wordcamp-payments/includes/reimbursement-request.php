@@ -212,7 +212,7 @@ function enqueue_assets() {
 		'wordcamp-reimbursement-requests',
 		plugins_url( 'javascript/reimbursement-requests.js', __DIR__ ),
 		array( 'wordcamp-budgets', 'wcb-attached-files', 'jquery', 'underscore', 'wp-util' ),
-		1,
+		2,
 		true
 	);
 

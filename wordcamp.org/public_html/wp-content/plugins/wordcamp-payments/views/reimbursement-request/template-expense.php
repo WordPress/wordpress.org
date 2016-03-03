@@ -30,6 +30,8 @@ defined( 'WPINC' ) or die();
 					</option>
 				<# } );	#>
 			</select>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<# var otherCategoryClasses = 'other' === data._wcbrr_category ? '' : 'hidden'; #>
@@ -45,6 +47,8 @@ defined( 'WPINC' ) or die();
 				name="_wcbrr_category_other_{{data.id}}"
 				value="{{data._wcbrr_category_other}}"
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -58,7 +62,10 @@ defined( 'WPINC' ) or die();
 				id="_wcbrr_vendor_name_{{data.id}}"
 				name="_wcbrr_vendor_name_{{data.id}}"
 				value="{{data._wcbrr_vendor_name}}"
+			    required
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -72,7 +79,10 @@ defined( 'WPINC' ) or die();
 				id="_wcbrr_description_{{data.id}}"
 				name="_wcbrr_description_{{data.id}}"
 				maxlength="75"
+			    required
 			>{{data._wcbrr_description}}</textarea>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -86,7 +96,10 @@ defined( 'WPINC' ) or die();
 				id="_wcbrr_date_{{data.id}}"
 				name="_wcbrr_date_{{data.id}}"
 				value="{{data._wcbrr_date}}"
+			    required
 			/>
+
+			<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 		</li>
 
 		<li>
@@ -101,7 +114,10 @@ defined( 'WPINC' ) or die();
 					id="_wcbrr_amount_{{data.id}}"
 					name="_wcbrr_amount_{{data.id}}"
 					value="{{data._wcbrr_amount}}"
+				    required
 				/>
+
+				<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 
 				<p class="description">
 					<?php _e( 'No commas, thousands separators or currency symbols. Ex. 1234.56', 'wordcamporg' ); ?>
@@ -122,6 +138,7 @@ defined( 'WPINC' ) or die();
 						id="_wcbrr_vendor_location_local_{{data.id}}"
 						name="_wcbrr_vendor_location_{{data.id}}"
 						value="local"
+						required
 					    {{checked}}
 					/>
 			       <?php _e( 'Local', 'wordcamporg' ); ?>
@@ -136,10 +153,13 @@ defined( 'WPINC' ) or die();
 						id="_wcbrr_vendor_location_online_{{data.id}}"
 						name="_wcbrr_vendor_location_{{data.id}}"
 						value="online"
+						required
 					    {{checked}}
 					/>
 					<?php _e( 'Not Local / Online', 'wordcamporg' ); ?>
 				</label>
+
+				<?php \WordCamp_Budgets::render_form_field_required_indicator(); ?>
 			</div>
 		</li>
 	</ul>

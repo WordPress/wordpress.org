@@ -65,12 +65,14 @@ jQuery( document ).ready( function( $ ) {
 		 */
 		toggleOtherReasonDescription : function( event ) {
 			try {
-				var otherCategoryDescription = $( '#_wcbrr_reason_other_container' );
+				var otherReasonContainer = $( '#_wcbrr_reason_other_container' );
 
 				if ( 'other' == $( this ).find( 'option:selected' ).val() ) {
-					$( otherCategoryDescription ).removeClass( 'hidden' );
+					$( otherReasonContainer ).removeClass( 'hidden' );
+					$( otherReasonContainer ).find( 'input' ).prop( 'required', true );
 				} else {
-					$( otherCategoryDescription ).addClass( 'hidden' );
+					$( otherReasonContainer ).addClass( 'hidden' );
+					$( otherReasonContainer ).find( 'input' ).prop( 'required', false );
 				}
 
 				// todo make the transition smoother
@@ -245,10 +247,14 @@ jQuery( document ).ready( function( $ ) {
 		 * @param category
 		 */
 		toggleOtherCategoryInput : function( category ) {
+			var otherCategoryContainer = this.$( '#_wcbrr_category_other_container' );
+
 			if ( 'other' === category ) {
-				this.$( '#_wcbrr_category_other_container' ).removeClass( 'hidden' );
+				otherCategoryContainer.removeClass( 'hidden' );
+				otherCategoryContainer.find( 'input' ).prop( 'required', true );
 			} else {
-				this.$( '#_wcbrr_category_other_container' ).addClass( 'hidden' );
+				otherCategoryContainer.addClass( 'hidden' );
+				otherCategoryContainer.find( 'input' ).prop( 'required', false );
 			}
 		},
 

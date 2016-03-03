@@ -19,3 +19,7 @@ defined( 'WPINC' ) or die();
 
 	<?php submit_button( __( 'Add Another Expense', 'wordcamporg' ), 'secondary', 'wcbrr-add-another-expense' ); ?>
 </fieldset>
+
+<p class="wcb-form-required">
+	<?php _e( '* required', 'wordcamporg' ); ?>
+</p>
