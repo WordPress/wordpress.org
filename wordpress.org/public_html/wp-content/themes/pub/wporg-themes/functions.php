@@ -128,19 +128,6 @@ function wporg_themes_body_class( $classes ) {
 add_filter( 'body_class', 'wporg_themes_body_class' );
 
 /**
- * Prevent the default posts queries running, allowing pages to bypass
- * We do this as the themes are pulled from an API.
- */
-function wporg_themes_prevent_posts_query( $query, $wp_query ) {
-	if ( is_admin() || ! $wp_query->is_main_query() || $wp_query->get( 'pagename' ) ) {
-		return $query;
-	}
-	$wp_query->set( 'no_found_rows', true );
-	return ''; // Don't make a query
-}
-add_filter( 'posts_request', 'wporg_themes_prevent_posts_query', 10, 2 );
-
-/**
  * Prevent 404 responses when we've got a theme via the API.
  */
 function wporg_themes_prevent_404() {
