@@ -21,6 +21,21 @@ jQuery( document ).ready( function( $ ) {
 
 			needsIntermediaryBank.change( app.toggleIntermediaryBankFields );
 			needsIntermediaryBank.trigger( 'change' ); // Set the initial state
+
+			$( '#wcb-save-draft' ).click( app.makeFieldsOptionalForDrafts );
+		},
+
+		/**
+		 * Make all required input field optional when saving a draft.
+		 *
+		 * Otherwise the user would have to potentially fill out dozens of fields when they're not ready to.
+		 *
+		 * @param {object} event
+		 */
+		makeFieldsOptionalForDrafts : function( event ) {
+			$( '#poststuff' ).find( ':input[required]' ).each( function( fieldIndex, inputField ) {
+				$( inputField ).prop( 'required', false );
+			} );
 		},
 
 		/**
