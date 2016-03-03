@@ -15,8 +15,8 @@ class WPorg_GP_Plugin_Directory {
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_global_cache_group' ) );
 		add_action( 'originals_imported', array( $this, 'originals_imported' ) );
-		add_action( 'translation_created', array( $this, 'translation_created' ) );
-		add_action( 'translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
+		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
