@@ -616,9 +616,6 @@ TICKET;
 			if ( $this->trac_ticket->priority == 'theme update' ) {
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically reviewed', array( 'action' => 'review' ), false );
 				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'approve_and_live' ), false );
-				// temporary debugging - email otto about it TODO remove this after testing
-				wp_mail( 'otto@wordpress.org', 'Theme update auto approval '. $ticket_id, 'https://themes.trac.wordpress.org/ticket/' . $ticket_id, 'From: themes@wordpress.org' );
-
 			}
 
 		}
