@@ -904,10 +904,10 @@ function wporg_themes_maybe_schedule_daily_job() {
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
 
 /**
- * Correct the post type for theme queries to be "repopackage"
+ * Correct the post type for theme queries to be "repopackage".
  */
 function wporg_themes_adjust_main_query( $query ) {
-	if ( get_query_var('name') && !is_404() ) {
+	if ( $query->is_main_query() && $query->get( 'name' ) && ! $query->is_404() ) {
 		$query->query_vars['post_type'] = 'repopackage';
 	}
 }
