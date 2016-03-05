@@ -628,8 +628,7 @@ class Rosetta_Roles {
 		global $wpdb;
 
 		$project_access_list = $this->get_users_projects( $user_id );
-
-		$last_updated = $wpdb->get_var( 'SELECT meta_value FROM translate_meta WHERE object_type = "gp_option" AND meta_key = "wporg_projects_last_updated"' );
+		$last_updated = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
