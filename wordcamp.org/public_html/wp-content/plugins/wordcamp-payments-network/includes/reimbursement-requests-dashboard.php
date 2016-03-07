@@ -79,7 +79,7 @@ function render_submenu_page() {
  */
 function get_current_section() {
 	$sections        = get_section_slugs();
-	$current_section = 'submitted';
+	$current_section = 'wcb-pending-approval';
 
 	if ( isset( $_GET['section'] ) && in_array( $_GET['section'], $sections, true ) ) {
 		$current_section = $_GET['section'];
