@@ -363,6 +363,10 @@ function _generate_payment_report_default( $args ) {
 			$category = '';
 		}
 
+		$country_name = \WordCamp_Budgets::get_country_name(
+			get_post_meta( $index->post_id, '_camppayments_vendor_country_iso3166', true )
+		);
+
 		$row = array(
 			get_wordcamp_name(),
 			sprintf( '%d-%d', $index->blog_id, $index->post_id ),
@@ -377,7 +381,7 @@ function _generate_payment_report_default( $args ) {
 			get_post_meta( $index->post_id, '_camppayments_payment_method', true ),
 			get_post_meta( $index->post_id, '_camppayments_vendor_name', true ),
 			get_post_meta( $index->post_id, '_camppayments_vendor_contact_person', true ),
-			get_post_meta( $index->post_id, '_camppayments_vendor_country', true ),
+			$country_name,
 			\WCP_Encryption::maybe_decrypt( get_post_meta( $index->post_id, '_camppayments_payable_to', true ) ),
 			get_edit_post_link( $index->post_id ),
 			get_post_meta( $index->post_id, '_camppayments_file_notes', true ),

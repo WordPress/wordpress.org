@@ -440,6 +440,26 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get a country name from an alpha-2 or alpha-3 code
+	 *
+	 * @param string $country_code
+	 *
+	 * @return string
+	 */
+	public static function get_country_name( $country_code ) {
+		$countries = self::get_valid_countries_iso3166();
+		$name      = '';
+
+		foreach ( $countries as $country ) {
+			if ( $country_code === $country['alpha2'] || $country_code === $country['alpha3'] ) {
+				$name = $country['name'];
+			}
+		}
+
+		return $name;
+	}
+
+	/**
 	 * Get a list of valid payment methods
 	 *
 	 * @param $post_type
@@ -472,7 +492,6 @@ class WordCamp_Budgets {
 				case 'bank_city':
 				case 'bank_state':
 				case 'bank_zip_code':
-				case 'bank_country':
 				case 'bank_bic':
 
 				case 'interm_bank_name':
@@ -489,7 +508,6 @@ class WordCamp_Budgets {
 				case 'beneficiary_city':
 				case 'beneficiary_state':
 				case 'beneficiary_zip_code':
-				case 'beneficiary_country':
 
 				case 'payable_to':
 				case 'check_street_address':
@@ -574,7 +592,6 @@ class WordCamp_Budgets {
 			'beneficiary_city',
 			'beneficiary_state',
 			'beneficiary_zip_code',
-			'beneficiary_country',
 			'beneficiary_country_iso3166',
 			'ach_bank_name',
 			'ach_routing_number',

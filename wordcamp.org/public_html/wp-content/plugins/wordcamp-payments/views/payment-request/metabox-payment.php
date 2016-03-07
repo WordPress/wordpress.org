@@ -48,8 +48,7 @@
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank City',              'bank_city' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank State / Province',  'bank_state' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank ZIP / Postal Code', 'bank_zip_code' ); ?>
-			<?php $this->render_text_input( $post, 'Beneficiary’s Bank Country',           'bank_country' ); ?>
-			<?php $this->render_country_input( $post, 'Beneficiary’s Bank Country ISO 3166', 'bank_country_iso3166' ); ?>
+			<?php $this->render_country_input( $post, 'Beneficiary’s Bank Country',        'bank_country_iso3166' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Bank SWIFT BIC',         'bank_bic' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s Account Number or IBAN', 'beneficiary_account_number' ); ?>
 		</table>
@@ -87,8 +86,7 @@
 			<?php $this->render_text_input( $post, 'Beneficiary’s City',              'beneficiary_city' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s State / Province',  'beneficiary_state' ); ?>
 			<?php $this->render_text_input( $post, 'Beneficiary’s ZIP / Postal Code', 'beneficiary_zip_code' ); ?>
-			<?php $this->render_text_input( $post, 'Beneficiary’s Country',           'beneficiary_country' ); ?>
-			<?php $this->render_country_input( $post, 'Beneficiary’s Country ISO 3166', 'beneficiary_country_iso3166' ); ?>
+			<?php $this->render_country_input( $post, 'Beneficiary’s Country',        'beneficiary_country_iso3166' ); ?>
 		</table>
 	</div>
 </fieldset>

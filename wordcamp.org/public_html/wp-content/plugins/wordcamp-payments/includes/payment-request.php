@@ -751,7 +751,6 @@ Thanks for helping us with these details!",
 				case 'vendor_city':
 				case 'vendor_state':
 				case 'vendor_zip_code':
-				case 'vendor_country':
 				case 'vendor_contact_person':
 				case 'other_category_explanation':
 					$safe_value = sanitize_text_field( $unsafe_value );
