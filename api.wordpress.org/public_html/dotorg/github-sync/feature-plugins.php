@@ -14,6 +14,7 @@ class GH2WORG {
 		'georgestephanis/two-factor' => 'two-factor',
 		'georgestephanis/application-passwords' => 'application-passwords',
 		'obenland/shiny-updates' => 'shiny-updates',
+		'pento/react' => 'react',
 	);
 
 	function __construct() {
