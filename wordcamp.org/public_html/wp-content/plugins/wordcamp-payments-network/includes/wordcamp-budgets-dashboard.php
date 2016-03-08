@@ -366,163 +366,16 @@ function _generate_payment_report_jpm_checks( $args ) {
  */
 function _generate_payment_report_jpm_ach( $args ) {
 	$args = wp_parse_args( $args, array(
-		'request_indexes' => array(),
+		'data' => array(),
 		'status' => '',
+		'post_type' => '',
 	) );
 
-	$ach_options = apply_filters( 'wcb_payment_req_ach_options', array(
-		'bank-routing-number' => '', // Immediate Destination (bank routing number)
-		'company-id'          => '', // Company ID
-		'financial-inst'      => '', // Originating Financial Institution
-	) );
-
-	ob_start();
-
-	// File Header Record
-
-	echo '1'; // Record Type Code
-	echo '01'; // Priority Code
-	echo ' ' . str_pad( substr( $ach_options['bank-routing-number'], 0, 9 ), 9, '0', STR_PAD_LEFT );
-	echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10, '0', STR_PAD_LEFT ); // Immediate Origin (TIN)
-	echo date( 'ymd' ); // Transmission Date
-	echo date( 'Hi' ); // Transmission Time
-	echo 'A'; // File ID Modifier
-	echo '094'; // Record Size
-	echo '10'; // Blocking Factor
-	echo '1'; // Format Code
-	echo str_pad( 'JPMORGANCHASE', 23 ); // Destination
-	echo str_pad( 'WCEXPORT', 23 ); // Origin
-	echo str_pad( '', 8 ); // Reference Code (optional)
-	echo PHP_EOL;
-
-	// Batch Header Record
-
-	echo '5'; // Record Type Code
-	echo '200'; // Service Type Code
-	echo 'WordCamp Communi'; // Company Name
-	echo str_pad( '', 20 ); // Blanks
-	echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company Identification
-
-	// Get the first one in the set.
-	// @todo Split batches by account type.
-	foreach ( $args['request_indexes'] as $index ) {
-		switch_to_blog( $index->blog_id );
-		$post = get_post( $index->post_id );
-		$account_type = get_post_meta( $post->ID, '_camppayments_ach_account_type', true );
-		restore_current_blog();
-
-		break;
+	if ( $args['post_type'] == 'wcp_payment_request' ) {
+		return \WCP_Payment_Request::_generate_payment_report_jpm_ach( $args );
+	} elseif ( $args['post_type'] == 'wcb_reimbursement' ) {
+		return \WordCamp\Budgets\Reimbursement_Requests\_generate_payment_report_jpm_ach( $args );
 	}
-
-	$entry_class = $account_type == 'Personal' ? 'PPD' : 'CCD';
-	echo $entry_class; // Standard Entry Class
-
-	echo 'Vendor Pay'; // Entry Description
-	echo date( 'ymd', _next_business_day_timestamp() ); // Company Description Date
-	echo date( 'ymd', _next_business_day_timestamp() ); // Effective Entry Date
-	echo str_pad( '', 3 ); // Blanks
-	echo '1'; // Originator Status Code
-	echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
-	echo '0000001'; // Batch Number
-	echo PHP_EOL;
-
-	$count = 0;
-	$total = 0;
-	$hash = 0;
-
-	foreach ( $args['request_indexes'] as $index ) {
-		switch_to_blog( $index->blog_id );
-		$post = get_post( $index->post_id );
-
-		if ( $args['status'] && $post->post_status != $args['status'] ) {
-			restore_current_blog();
-			continue;
-		}
-
-		if ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Direct Deposit' ) {
-			restore_current_blog();
-			continue;
-		}
-
-		$count++;
-
-		// Entry Detail Record
-
-		echo '6'; // Record Type Code
-
-		$transaction_code = $account_type == 'Personal' ? '27' : '22';
-		echo $transaction_code; // Transaction Code
-
-		// Transit/Routing Number of Destination Bank + Check digit
-		$routing_number = get_post_meta( $post->ID, '_camppayments_ach_routing_number', true );
-		$routing_number = \WCP_Encryption::maybe_decrypt( $routing_number );
-		$routing_number = substr( $routing_number, 0, 8 + 1 );
-		$routing_number = str_pad( $routing_number, 8 + 1 );
-		$hash += absint( substr( $routing_number, 0, 8 ) );
-		echo $routing_number;
-
-		// Bank Account Number
-		$account_number = get_post_meta( $post->ID, '_camppayments_ach_account_number', true );
-		$account_number = \WCP_Encryption::maybe_decrypt( $account_number );
-		$account_number = substr( $account_number, 0, 17 );
-		$account_number = str_pad( $account_number, 17 );
-		echo $account_number;
-
-		// Amount
-		$amount = round( floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) ), 2 );
-		$total += $amount;
-		$amount = str_pad( number_format( $amount, 2, '', '' ), 10, '0', STR_PAD_LEFT );
-		echo $amount;
-
-		// Individual Identification Number
-		echo str_pad( sprintf( '%d-%d', $index->blog_id, $index->post_id ), 15 );
-
-		// Individual Name
-		$name = get_post_meta( $post->ID, '_camppayments_ach_account_holder_name', true );
-		$name = \WCP_Encryption::maybe_decrypt( $name );
-		$name = substr( $name, 0, 22 );
-		$name = str_pad( $name, 22 );
-		echo $name;
-
-		echo '  '; // User Defined Data
-		echo '0'; // Addenda Record Indicator
-
-		// Trace Number
-		echo str_pad( substr( $ach_options['bank-routing-number'], 0, 8 ), 8, '0', STR_PAD_LEFT ); // routing number
-		echo str_pad( $count, 7, '0', STR_PAD_LEFT ); // sequence number
-		echo PHP_EOL;
-	}
-
-	// Batch Trailer Record
-
-	echo '8'; // Record Type Code
-	echo '200'; // Service Class Code
-	echo str_pad( $count, 6, '0', STR_PAD_LEFT ); // Entry/Addenda Count
-	echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
-	echo str_pad( number_format( $total, 2, '', '' ), 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
-	echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
-	echo str_pad( substr( $ach_options['company-id'], 0, 10 ), 10 ); // Company ID
-	echo str_pad( '', 25 ); // Blanks
-	echo str_pad( substr( $ach_options['financial-inst'], 0, 8 ), 8 ); // Originating Financial Institution
-	echo '0000001'; // Batch Number
-	echo PHP_EOL;
-
-
-	// File Trailer Record
-
-	echo '9'; // Record Type Code
-	echo '000001'; // Batch Count
-	echo str_pad( ceil( $count / 10 ), 6, '0', STR_PAD_LEFT ); // Block Count
-	echo str_pad( $count, 8, '0', STR_PAD_LEFT ); // Entry/Addenda Count
-	echo str_pad( substr( $hash, -10 ), 10, '0', STR_PAD_LEFT ); // Entry Hash
-	echo str_pad( number_format( $total, 2, '', '' ), 12, '0', STR_PAD_LEFT ); // Total Debit Entry Dollar Amount
-	echo str_pad( 0, 12, '0', STR_PAD_LEFT ); // Total Credit Entry Dollar Amount
-	echo str_pad( '', 39 ); // Blanks
-	echo PHP_EOL;
-
-	// The file must have a number of lines that is a multiple of 10 (e.g. 10, 20, 30).
-	echo str_repeat( PHP_EOL, 10 - ( ( 4 + $count ) % 10 ) - 1 );
-	return ob_get_clean();
 }
 
 /**
