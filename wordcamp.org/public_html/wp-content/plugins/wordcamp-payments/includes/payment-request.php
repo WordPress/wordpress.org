@@ -1341,4 +1341,236 @@ Thanks for helping us with these details!",
 		echo str_repeat( PHP_EOL, 10 - ( ( 4 + $count ) % 10 ) - 1 );
 		return ob_get_clean();
 	}
+
+	/**
+	 * Wires via JP Morgan
+	 *
+	 * @param array $args
+	 *
+	 * @return string
+	 */
+	public static function _generate_payment_report_jpm_wires( $args ) {
+		$args = wp_parse_args( $args, array(
+			'data' => array(),
+			'status' => '',
+			'post_type' => '',
+		) );
+
+		ob_start();
+		$report = fopen( 'php://output', 'w' );
+
+		// JPM Header
+		fputcsv( $report, array( 'HEADER', gmdate( 'YmdHis' ), '1' ) );
+
+		$total = 0;
+		$count = 0;
+
+		foreach ( $args['data'] as $entry ) {
+			switch_to_blog( $entry->blog_id );
+			$post = get_post( $entry->post_id );
+
+			if ( $args['status'] && $post->post_status != $args['status'] ) {
+				restore_current_blog();
+				continue;
+			} elseif ( $post->post_type != self::POST_TYPE ) {
+				restore_current_blog();
+				continue;
+			} elseif ( get_post_meta( $post->ID, '_camppayments_payment_method', true ) != 'Wire' ) {
+				restore_current_blog();
+				continue;
+			}
+
+			$amount = round( floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) ), 2);
+			$total += $amount;
+			$count += 1;
+
+			// If account starts with two letters, it's most likely an IBAN
+			$account = get_post_meta( $post->ID, '_camppayments_beneficiary_account_number', true );
+			$account = WCP_Encryption::maybe_decrypt( $account );
+			$account = preg_replace( '#\s#','', $account );
+			$account_type = preg_match( '#^[a-z]{2}#i', $account ) ? 'IBAN' : 'ACCT';
+
+			$row = array(
+				'1-input-type' => 'P',
+				'2-payment-method' => 'WIRES',
+				'3-debit-bank-id' => apply_filters( 'wcb_payment_req_bank_id', '' ), // external file
+				'4-account-number' => apply_filters( 'wcb_payment_req_bank_number', '' ), // external file
+				'5-bank-to-bank' => 'N',
+				'6-txn-currency' => get_post_meta( $post->ID, '_camppayments_currency', true ),
+				'7-txn-amount' => number_format( $amount, 2, '.', '' ),
+				'8-equiv-amount' => '',
+				'9-clearing' => '',
+				'10-ben-residence' => '',
+				'11-rate-type' => '',
+				'12-blank' => '',
+				'13-value-date' => '',
+
+				'14-id-type' => $account_type,
+				'15-id-value' => $account,
+				'16-ben-name' => substr( WCP_Encryption::maybe_decrypt(
+					get_post_meta( $post->ID, '_camppayments_beneficiary_name', true ) ), 0, 35 ),
+				'17-address-1' => substr( WCP_Encryption::maybe_decrypt(
+					get_post_meta( $post->ID, '_camppayments_beneficiary_street_address', true ) ), 0, 35 ),
+				'18-address-2' => '',
+				'19-city-state-zip' => substr( sprintf( '%s %s %s',
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_beneficiary_city', true ) ),
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_beneficiary_state', true ) ),
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_beneficiary_zip_code', true ) )
+					), 0, 32 ),
+				'20-blank' => '',
+				'21-country' => WCP_Encryption::maybe_decrypt(
+					get_post_meta( $post->ID, '_camppayments_beneficiary_country_iso3166', true ) ),
+				'22-blank' => '',
+				'23-blank' => '',
+
+				'24-id-type' => 'SWIFT',
+				'25-id-value' => get_post_meta( $post->ID, '_camppayments_bank_bic', true ),
+				'26-ben-bank-name' => substr( get_post_meta( $post->ID, '_camppayments_bank_name', true ), 0, 35 ),
+				'27-ben-bank-address-1' => substr( get_post_meta( $post->ID, '_camppayments_bank_street_address', true ), 0, 35 ),
+				'28-ben-bank-address-2' => '',
+				'29-ben-bank-address-3' => substr( sprintf( '%s %s %s',
+						get_post_meta( $post->ID, '_camppayments_bank_city', true ),
+						get_post_meta( $post->ID, '_camppayments_bank_state', true ),
+						get_post_meta( $post->ID, '_camppayments_bank_zip_code', true )
+					 ), 0, 35 ),
+				'30-ben-bank-country' => get_post_meta( $post->ID, '_camppayments_bank_country_iso3166', true ),
+				'31-supl-id-type' => '',
+				'32-supl-id-value' => '',
+
+				'33-blank' => '',
+				'34-blank' => '',
+				'35-blank' => '',
+				'36-blank' => '',
+				'37-blank' => '',
+				'38-blank' => '',
+				'39-blank' => '',
+
+				// Filled out later if not empty.
+				'40-id-type' => '',
+				'41-id-value' => '',
+				'42-interm-bank-name' => '',
+				'43-interm-bank-address-1' => '',
+				'44-interm-bank-address-2' => '',
+				'45-interm-bank-address-3' => '',
+				'46-interm-bank-country' => '',
+				'47-supl-id-type' => '',
+				'48-supl-id-value' => '',
+
+				'49-id-type' => '',
+				'50-id-value' => '',
+				'51-party-name' => '',
+				'52-party-address-1' => '',
+				'53-party-address-2' => '',
+				'54-party-address-3' => '',
+				'55-party-country' => '',
+
+				'56-blank' => '',
+				'57-blank' => '',
+				'58-blank' => '',
+				'59-blank' => '',
+				'60-blank' => '',
+				'61-blank' => '',
+				'62-blank' => '',
+				'63-blank' => '',
+				'64-blank' => '',
+				'65-blank' => '',
+				'66-blank' => '',
+				'67-blank' => '',
+				'68-blank' => '',
+				'69-blank' => '',
+				'70-blank' => '',
+				'71-blank' => '',
+				'72-blank' => '',
+				'73-blank' => '',
+
+				'74-ref-text' => substr( get_post_meta( $post->ID, '_camppayments_invoice_number', true ), 0, 16 ),
+				'75-internal-ref' => '',
+				'76-on-behalf-of' => '',
+
+				'77-detial-1' => '',
+				'78-detial-2' => '',
+				'79-detial-3' => '',
+				'80-detail-4' => '',
+
+				'81-blank' => '',
+				'82-blank' => '',
+				'83-blank' => '',
+				'84-blank' => '',
+				'85-blank' => '',
+				'86-blank' => '',
+				'87-blank' => '',
+				'88-blank' => '',
+
+				'89-reporting-code' => '',
+				'90-country' => '',
+				'91-inst-1' => '',
+				'92-inst-2' => '',
+				'93-inst-3' => '',
+				'94-inst-code-1' => '',
+				'95-inst-text-1' => '',
+				'96-inst-code-2' => '',
+				'97-inst-text-2' => '',
+				'98-inst-code-3' => '',
+				'99-inst-text-3' => '',
+
+				'100-stor-code-1' => '',
+				'101-stor-line-2' => '', // Hmm?
+				'102-stor-code-2' => '',
+				'103-stor-line-2' => '',
+				'104-stor-code-3' => '',
+				'105-stor-line-3' => '',
+				'106-stor-code-4' => '',
+				'107-stor-line-4' => '',
+				'108-stor-code-5' => '',
+				'109-stor-line-5' => '',
+				'110-stor-code-6' => '',
+				'111-stor-line-6' => '',
+
+				'112-priority' => '',
+				'113-blank' => '',
+				'114-charges' => '',
+				'115-blank' => '',
+				'116-details' => '',
+				'117-note' => substr( sprintf( 'wcb-%d-%d', $entry->blog_id, $entry->post_id ), 0, 70 ),
+			);
+
+			// If an intermediary bank is given.
+			$interm_swift = get_post_meta( $post->ID, '_camppayments_interm_bank_swift', true );
+			if ( ! empty( $iterm_swift ) ) {
+				$row['40-id-type'] = 'SWIFT';
+				$row['41-id-value'] = $interm_swift;
+
+				$row['42-interm-bank-name'] = substr( get_post_meta( $post->ID, '_camppayments_interm_bank_name', true ), 0, 35 );
+				$row['43-interm-bank-address-1'] = substr( get_post_meta( $post->ID, '_camppayments_interm_bank_street_address', true ), 0, 35 );
+
+				$row['44-interm-bank-address-2'] = '';
+				$row['45-interm-bank-address-3'] = substr( sprintf( '%s %s %s',
+					get_post_meta( $post->ID, '_camppayments_interm_bank_city', true ),
+					get_post_meta( $post->ID, '_camppayments_interm_bank_state', true ),
+					get_post_meta( $post->ID, '_camppayments_interm_bank_zip_code', true )
+				), 0, 32 );
+
+				$row['46-interm-bank-country'] = get_post_meta( $post->ID, '_camppayments_interm_bank_country_iso3166', true );
+
+				$row['47-supl-id-type'] = 'ACCT';
+				$row['48-supl-id-value'] = get_post_meta( $post->ID, '_camppayments_interm_bank_account', true );
+			}
+
+			// Use for debugging.
+			// print_r( $row );
+
+			fputcsv( $report, array_values( $row ) );
+			restore_current_blog();
+		}
+
+		// JPM Trailer
+		fputcsv( $report, array( 'TRAILER', $count, $total ) );
+
+		fclose( $report );
+		$results = ob_get_clean();
+
+		// JPM chokes on accents and non-latin characters.
+		$results = remove_accents( $results );
+		return $results;
+	}
 }
