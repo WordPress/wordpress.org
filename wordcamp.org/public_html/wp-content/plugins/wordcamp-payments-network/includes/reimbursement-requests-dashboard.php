@@ -4,7 +4,7 @@ namespace WordCamp\Budgets_Dashboard\Reimbursement_Requests;
 
 defined( 'WPINC' ) or die();
 
-const LATEST_DATABASE_VERSION = 1;
+const LATEST_DATABASE_VERSION = 2;
 
 if ( is_network_admin() ) {
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
@@ -153,13 +153,14 @@ function upgrade_database() {
 			blog_id        int( 11 )        unsigned NOT NULL default '0',
 			request_id     int( 11 )        unsigned NOT NULL default '0',
 			date_requested int( 11 )        unsigned NOT NULL default '0',
+			date_paid      int( 11 )        unsigned NOT NULL default '0',
 			request_title  varchar( 75 )             NOT NULL default '',
 			status         varchar( 30 )             NOT NULL default '',
 			wordcamp_name  varchar( 75 )             NOT NULL default '',
 			currency       varchar( 3  )             NOT NULL default '',
 			amount         numeric( 10, 2 ) unsigned NOT NULL default '0',
 
-			PRIMARY KEY (blog_id, request_id),
+			PRIMARY KEY  (blog_id, request_id),
 			KEY status (status)
 		)
 		DEFAULT CHARACTER SET {$wpdb->charset}
@@ -222,6 +223,7 @@ function update_index_row( $request_id, $request ) {
 		'blog_id'        => get_current_blog_id(),
 		'request_id'     => $request_id,
 		'date_requested' => strtotime( $request->post_date_gmt ),
+		'date_paid'      => get_post_meta( $request_id, '_wcbrr_date_paid', true ),
 		'request_title'  => $request->post_title,
 		'status'         => $request->post_status,
 		'wordcamp_name'  => get_wordcamp_name(),

@@ -60,7 +60,6 @@ function render_import_export() {
 		<div class="wrap">
 			<h1>Import/Export</h1>
 
-			<?php do_action( 'admin_notices' ); ?>
 			<?php settings_errors(); ?>
 
 			<h3 class="nav-tab-wrapper">
