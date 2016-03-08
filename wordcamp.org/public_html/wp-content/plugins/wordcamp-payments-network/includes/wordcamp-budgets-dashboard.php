@@ -163,10 +163,10 @@ function render_export_tab() {
 				<tr>
 					<th>Types</th>
 					<td>
-						<label><input type="checkbox" name="wcb-export-types-vendor-payments"
-							value="1" checked disabled /> Vendor Payments</label><br />
-						<label><input type="checkbox" name="wcb-export-types-reimbursements"
-							value="1" disabled /> Reimbursements</label>
+						<select name="wcb-export-post-type">
+							<option value="wcp_payment_request">Vendor Payments</option>
+							<option value="wcb_reimbursement">Reimbursements</option>
+						</select>
 					</td>
 				<tr>
 					<th>Status</th>
@@ -216,6 +216,9 @@ function process_export_request() {
 	if ( empty( $_POST['wcb-request-export'] ) )
 		return;
 
+	if ( empty( $_POST['wcb-export-post-type'] ) )
+		return;
+
 	if ( ! current_user_can( 'manage_network' ) || ! check_admin_referer( 'export', 'wcb-request-export' ) )
 		return;
 
@@ -236,11 +239,18 @@ function process_export_request() {
 	$filename = sprintf( $export_type['filename'], date( 'Ymd', $start_date ), date( 'Ymd', $end_date ) );
 	$filename = sanitize_file_name( $filename );
 
+	$post_type = $_POST['wcb-export-post-type'];
+	if ( ! in_array( $post_type, array( 'wcp_payment_request', 'wcb_reimbursement' ) ) ) {
+		add_settings_error( 'wcb-dashboard', 'bad_post_type', 'Invalid post type selected.' );
+		return;
+	}
+
 	$report = generate_payment_report( array(
 		'status' => $status,
 		'start_date' => $start_date,
 		'end_date' => $end_date,
 		'export_type' => $export_type,
+		'post_type' => $post_type,
 	) );
 
 	if ( is_wp_error( $report ) ) {
@@ -272,18 +282,22 @@ function generate_payment_report( $args ) {
 		'start_date'  => '',
 		'end_date'    => '',
 		'export_type' => '',
+		'post_type'   => '',
 	) );
 
 	if ( ! is_int( $args['start_date'] ) || ! is_int( $args['end_date'] ) ) {
 		return new WP_Error( 'wcb-bad-dates', 'Invalid start or end date.' );
 	}
 
-	// todo: support other index tables.
-	$table_name = $wpdb->get_blog_prefix(0) . 'wordcamp_payments_index';
-	$date_type = 'updated';
-
-	if ( $args['status'] == 'wcb-paid' )
-		$date_type = 'paid';
+	if ( $args['post_type'] == 'wcp_payment_request' ) {
+		$table_name = $wpdb->get_blog_prefix(0) . 'wordcamp_payments_index';
+		$date_type = $args['status'] == 'wcb-paid' ? 'paid' : 'updated';
+	} elseif ( $args['post_type'] == 'wcb_reimbursement' ) {
+		$table_name = $wpdb->get_blog_prefix(0) . 'wcbd_reimbursement_requests_index';
+		$date_type = $args['status'] == 'wcb-paid' ? 'date_paid' : 'date_requested'; // todo date_updated
+	} else {
+		return new \WP_Error( 'wcb-invalid-post-type', 'Invalid post type.' );
+	}
 
 	$request_indexes = $wpdb->get_results( $wpdb->prepare( "
 		SELECT *
@@ -296,7 +310,7 @@ function generate_payment_report( $args ) {
 	if ( ! is_callable( $args['export_type']['callback'] ) )
 		return new \WP_Error( 'wcb-invalid-type', 'The export type is invalid.' );
 
-	$args['request_indexes'] = $request_indexes;
+	$args['data'] = $request_indexes;
 
 	return call_user_func( $args['export_type']['callback'], $args );
 }
@@ -310,91 +324,16 @@ function generate_payment_report( $args ) {
  */
 function _generate_payment_report_default( $args ) {
 	$args = wp_parse_args( $args, array(
-		'request_indexes' => array(),
+		'data' => array(),
 		'status' => '',
+		'post_type' => '',
 	) );
 
-	$column_headings = array(
-		'WordCamp', 'ID', 'Title', 'Status', 'Date Vendor was Paid', 'Creation Date', 'Due Date', 'Amount',
-		'Currency', 'Category', 'Payment Method','Vendor Name', 'Vendor Contact Person', 'Vendor Country',
-		'Check Payable To', 'URL', 'Supporting Documentation Notes',
-	);
-
-	ob_start();
-	$report = fopen( 'php://output', 'w' );
-
-	fputcsv( $report, $column_headings );
-
-	foreach( $args['request_indexes'] as $index ) {
-		switch_to_blog( $index->blog_id );
-
-		$request = get_post( $index->post_id );
-
-		$back_compat_statuses = array(
-			'unpaid' => 'draft',
-			'incomplete' => 'wcb-incomplete',
-			'paid' => 'wcb-paid',
-		);
-
-		// Map old statuses to new statuses.
-		if ( array_key_exists( $request->post_status, $back_compat_statuses ) ) {
-			$request->post_status = $back_compat_statuses[ $request->post_status ];
-		}
-
-		if ( $args['status'] && $request->post_status != $args['status'] ) {
-			restore_current_blog();
-			continue;
-		}
-
-		$currency = get_post_meta( $index->post_id, '_camppayments_currency', true );
-		$category = get_post_meta( $index->post_id, '_camppayments_payment_category', true );
-		$date_vendor_paid = get_post_meta( $index->post_id, '_camppayments_date_vendor_paid', true );
-
-		if ( $date_vendor_paid ) {
-			$date_vendor_paid = date( 'Y-m-d', $date_vendor_paid );
-		}
-
-		if ( 'null-select-one' === $currency ) {
-			$currency = '';
-		}
-
-		if ( 'null' === $category ) {
-			$category = '';
-		}
-
-		$country_name = \WordCamp_Budgets::get_country_name(
-			get_post_meta( $index->post_id, '_camppayments_vendor_country_iso3166', true )
-		);
-
-		$row = array(
-			get_wordcamp_name(),
-			sprintf( '%d-%d', $index->blog_id, $index->post_id ),
-			html_entity_decode( $request->post_title ),
-			$index->status,
-			$date_vendor_paid,
-			date( 'Y-m-d', $index->created ),
-			date( 'Y-m-d', $index->due ),
-			get_post_meta( $index->post_id, '_camppayments_payment_amount', true ),
-			$currency,
-			$category,
-			get_post_meta( $index->post_id, '_camppayments_payment_method', true ),
-			get_post_meta( $index->post_id, '_camppayments_vendor_name', true ),
-			get_post_meta( $index->post_id, '_camppayments_vendor_contact_person', true ),
-			$country_name,
-			\WCP_Encryption::maybe_decrypt( get_post_meta( $index->post_id, '_camppayments_payable_to', true ) ),
-			get_edit_post_link( $index->post_id ),
-			get_post_meta( $index->post_id, '_camppayments_file_notes', true ),
-		);
-
-		restore_current_blog();
-
-		if ( ! empty( $row ) ) {
-			fputcsv( $report, $row );
-		}
+	if ( $args['post_type'] == 'wcp_payment_request' ) {
+		return \WCP_Payment_Request::_generate_payment_report_default( $args );
+	} elseif ( $args['post_type'] == 'wcb_reimbursement' ) {
+		return \WordCamp\Budgets\Reimbursement_Requests\_generate_payment_report_default( $args );
 	}
-
-	fclose( $report );
-	return ob_get_clean();
 }
 
 /**
