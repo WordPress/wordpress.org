@@ -321,6 +321,7 @@ function render_general_information_metabox( $post ) {
 	$selected_currency = get_post_meta( $post->ID, '_wcbrr_currency',       true );
 	$selected_reason   = get_post_meta( $post->ID, '_wcbrr_reason',         true );
 	$other_reason      = get_post_meta( $post->ID, '_wcbrr_reason_other',   true );
+	$date_paid         = get_post_meta( $post->ID, '_wcbrr_date_paid',      true );
 
 	if ( empty ( $name_of_payer ) ) {
 		$name_of_payer = \WordCamp_Budgets::get_requester_name( $post->post_author );
@@ -451,6 +452,13 @@ function save_request( $post_id, $post ) {
 	if ( user_can_edit_request( $original_post ) ) {
 		$text_fields = array( 'name_of_payer', 'currency', 'reason', 'reason_other' );
 		validate_and_save_text_fields( $post_id, $text_fields, $_POST );
+
+		// Save payment date
+		if ( isset( $_POST['_wcbrr_date_paid'] ) && current_user_can( 'manage_network' ) ) {
+			$date_paid = sanitize_text_field( $_POST['_wcbrr_date_paid'] );
+			$date_paid = absint( strtotime( $date_paid ) );
+			update_post_meta( $post->ID, '_wcbrr_date_paid', $date_paid );
+		}
 
 		\WordCamp_Budgets::validate_save_payment_method_fields( $post_id, 'wcbrr' );
 

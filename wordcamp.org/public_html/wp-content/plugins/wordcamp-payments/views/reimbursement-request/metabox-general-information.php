@@ -84,6 +84,16 @@ defined( 'WPINC' ) or die();
 		</li>
 
 		<li>
+			<label for="_wcbrr_date_paid">
+				<?php _e( 'Payment Release Date:', 'wordcamporg' ); ?>
+			</label>
+
+			<?php if ( $date_paid ) $date_paid = date( 'Y-m-d', $date_paid ); ?>
+			<input type="date" class="regular-text" id="_wcbrr_date_paid" name="_wcbrr_date_paid"
+				<?php if ( ! current_user_can( 'manage_network' ) ) : ?>readonly<?php endif; ?>
+				value="<?php echo esc_attr( $date_paid ); ?>" />
+
+		<li>
 			<label for="_wcbrr_files">
 				<?php _e( 'Files:', 'wordcamporg' ); ?>
 			</label>
