@@ -938,4 +938,93 @@ Thanks for helping us with these details!",
 
 		return $required_capabilities;
 	}
+
+	public static function _generate_payment_report_default( $args ) {
+		$column_headings = array(
+			'WordCamp', 'ID', 'Title', 'Status', 'Date Vendor was Paid', 'Creation Date', 'Due Date', 'Amount',
+			'Currency', 'Category', 'Payment Method','Vendor Name', 'Vendor Contact Person', 'Vendor Country',
+			'Check Payable To', 'URL', 'Supporting Documentation Notes',
+		);
+
+		ob_start();
+		$report = fopen( 'php://output', 'w' );
+
+		fputcsv( $report, $column_headings );
+
+		foreach( $args['data'] as $entry ) {
+			switch_to_blog( $entry->blog_id );
+
+			$post = get_post( $entry->post_id );
+
+			$back_compat_statuses = array(
+				'unpaid' => 'draft',
+				'incomplete' => 'wcb-incomplete',
+				'paid' => 'wcb-paid',
+			);
+
+			// Map old statuses to new statuses.
+			if ( array_key_exists( $post->post_status, $back_compat_statuses ) ) {
+				$post->post_status = $back_compat_statuses[ $post->post_status ];
+			}
+
+			if ( $args['status'] && $post->post_status != $args['status'] ) {
+				restore_current_blog();
+				continue;
+			} elseif ( $post->post_type != self::POST_TYPE ) {
+				restore_current_blog();
+				continue;
+			}
+
+			$currency = get_post_meta( $post->ID, '_camppayments_currency', true );
+			$category = get_post_meta( $post->ID, '_camppayments_payment_category', true );
+			$date_vendor_paid = get_post_meta( $post->ID, '_camppayments_date_vendor_paid', true );
+
+			if ( $date_vendor_paid ) {
+				$date_vendor_paid = date( 'Y-m-d', $date_vendor_paid );
+			}
+
+			if ( 'null-select-one' === $currency ) {
+				$currency = '';
+			}
+
+			if ( 'null' === $category ) {
+				$category = '';
+			}
+
+			$country_name = WordCamp_Budgets::get_country_name(
+				get_post_meta( $post->ID, '_camppayments_vendor_country_iso3166', true )
+			);
+
+			$status = get_post_status_object( $post->post_status );
+
+			$row = array(
+				get_wordcamp_name(),
+				sprintf( '%d-%d', $entry->blog_id, $entry->post_id ),
+				html_entity_decode( $post->post_title ),
+				$status->label,
+				$date_vendor_paid,
+				date( 'Y-m-d', get_post_time( 'U', true, $post->ID ) ),
+				date( 'Y-m-d', absint( get_post_meta( $post->ID, '_camppayments_due_by', true ) ) ),
+				get_post_meta( $post->ID, '_camppayments_payment_amount', true ),
+				$currency,
+				$category,
+				get_post_meta( $post->ID, '_camppayments_payment_method', true ),
+				get_post_meta( $post->ID, '_camppayments_vendor_name', true ),
+				get_post_meta( $post->ID, '_camppayments_vendor_contact_person', true ),
+				$country_name,
+				WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_payable_to', true ) ),
+				get_edit_post_link( $post->ID ),
+				get_post_meta( $post->ID, '_camppayments_file_notes', true ),
+			);
+
+			restore_current_blog();
+
+			if ( ! empty( $row ) ) {
+				fputcsv( $report, $row );
+			}
+		}
+
+		fclose( $report );
+		return ob_get_clean();
+	}
 }

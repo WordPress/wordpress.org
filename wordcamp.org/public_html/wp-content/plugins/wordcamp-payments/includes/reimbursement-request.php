@@ -256,11 +256,11 @@ function render_status_metabox( $post ) {
 	wp_nonce_field( 'status', 'status_nonce' );
 
 	$back_compat_statuses = array(
-		'wcbrr_submitted' => 'pending-approval',
+		'wcbrr_submitted'      => 'wcb-pending-approval',
 		'wcbrr_info_requested' => 'wcb-incomplete',
-		'wcbrr_rejected' => 'wcb-failed',
-		'wcbrr_in_process' => 'pending-payment',
-		'wcbrr_paid' => 'wcb-paid',
+		'wcbrr_rejected'       => 'wcb-failed',
+		'wcbrr_in_process'     => 'wcb-pending-payment',
+		'wcbrr_paid'           => 'wcb-paid',
 	);
 
 	// Map old statuses to new statuses.
@@ -710,4 +710,97 @@ function modify_capabilities( $required_capabilities, $requested_capability, $us
 	}
 
 	return $required_capabilities;
+}
+
+function _generate_payment_report_default( $args ) {
+	$column_headings = array(
+		'WordCamp', 'ID', 'Title', 'Status', 'Paid', 'Requested', 'Amount',
+		'Reason', 'Categories', 'Payment Method', 'Name',
+		'Check Payable To', 'URL',
+	);
+
+	ob_start();
+	$report = fopen( 'php://output', 'w' );
+
+	fputcsv( $report, $column_headings );
+
+	foreach( $args['data'] as $entry ) {
+		switch_to_blog( $entry->blog_id );
+
+		$post = get_post( $entry->request_id );
+
+		$back_compat_statuses = array(
+			'wcbrr_submitted'      => 'wcb-pending-approval',
+			'wcbrr_info_requested' => 'wcb-incomplete',
+			'wcbrr_rejected'       => 'wcb-failed',
+			'wcbrr_in_process'     => 'wcb-pending-payment',
+			'wcbrr_paid'           => 'wcb-paid',
+		);
+
+		// Map old statuses to new statuses.
+		if ( array_key_exists( $post->post_status, $back_compat_statuses ) ) {
+			$post->post_status = $back_compat_statuses[ $post->post_status ];
+		}
+
+		if ( $args['status'] && $post->post_status != $args['status'] ) {
+			restore_current_blog();
+			continue;
+		} elseif ( $post->post_type != POST_TYPE ) {
+			restore_current_blog();
+			continue;
+		}
+
+		$currency = get_post_meta( $post->ID, '_wcbrr_currency', true );
+		$reason = get_post_meta( $post->ID, '_wcbrr_reason', true );
+		$expenses = get_post_meta( $post->ID, '_wcbrr_expenses', true );
+
+		$amount = 0;
+		$categories = array();
+
+		if ( strpos( $currency, 'null' ) === 0 ) {
+			$currency = '';
+		}
+
+		if ( strpos( $reason, 'null' ) === 0 ) {
+			$reason = '';
+		}
+
+		foreach ( $expenses as $expense ) {
+			if ( ! empty( $expense['_wcbrr_amount'] ) ) {
+				$amount += floatval( $expense['_wcbrr_amount'] );
+			}
+
+			if ( ! empty( $expense['_wcbrr_category'] ) ) {
+				$categories[] = $expense['_wcbrr_category'];
+			}
+		}
+
+		$amount = number_format( $amount, 2, '.', '' );
+		$status = get_post_status_object( $post->post_status );
+
+		$row = array(
+			get_wordcamp_name(),
+			sprintf( '%d-%d', $entry->blog_id, $entry->request_id ),
+			html_entity_decode( $post->post_title ),
+			$status->label,
+			date( 'Y-m-d', absint( get_post_meta( $post->ID, '_wcbrr_date_paid', true ) ) ),
+			date( 'Y-m-d', strtotime( $post->post_date_gmt ) ),
+			$amount,
+			$currency,
+			implode( ',', $categories ),
+			get_post_meta( $post->ID, '_wcbrr_payment_method', true ),
+			get_post_meta( $post->ID, '_wcbrr_name_of_payer', true ),
+			\WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_payable_to', true ) ),
+			get_edit_post_link( $post->ID ),
+		);
+
+		restore_current_blog();
+
+		if ( ! empty( $row ) ) {
+			fputcsv( $report, $row );
+		}
+	}
+
+	fclose( $report );
+	return ob_get_clean();
 }
