@@ -154,6 +154,7 @@ jQuery( document ).ready( function( $ ) {
 					total += value;
 				}
 			} );
+			total = total.toFixed( 2 );
 
 			if ( 'null' === currency.substr( 0, 4 ) ) {
 				currency = '';
