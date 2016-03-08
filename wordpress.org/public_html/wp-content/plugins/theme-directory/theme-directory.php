@@ -113,7 +113,7 @@ function wporg_themes_init() {
 			'description' => __( 'A package', 'wporg-themes' ),
 			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
 			'taxonomies'  => array( 'category', 'post_tag', 'type' ),
-			'public'      => false,
+			'public'      => true,
 			'show_ui'     => true,
 			'has_archive' => true,
 			'rewrite'     => false,
@@ -904,7 +904,7 @@ function wporg_themes_maybe_schedule_daily_job() {
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
 
 /**
- * Correct the post type for theme queries to be "repopackage".
+ * Correct the post type for theme queries to be "repopackage". This fixes the post type for embeds.
  */
 function wporg_themes_adjust_main_query( $query ) {
 	if ( $query->is_main_query() && $query->get( 'name' ) && ! $query->is_404() ) {
@@ -912,24 +912,5 @@ function wporg_themes_adjust_main_query( $query ) {
 	}
 }
 add_action( 'pre_get_posts', 'wporg_themes_adjust_main_query');
-
-/**
- * Fix the oembed post finder to find the theme post id from the url properly
- */
-function wporg_themes_embed_request_post_id( $post_id, $url ) {
-	if ( preg_match('|https://wordpress\.org/themes/(.*)/|', $url, $matches) ){
-		$name = $matches[1];
-		$query = new WP_Query( array(
-			'name' => $name,
-			'post_type' => 'repopackage',
-			'fields' => 'ids',
-		));
-		if ( $query->posts ) {
-			$post_id = $query->posts[0];
-		}
-	}
-	return $post_id;
-}
-add_filter( 'oembed_request_post_id', 'wporg_themes_embed_request_post_id', 10, 2 );
 
 
