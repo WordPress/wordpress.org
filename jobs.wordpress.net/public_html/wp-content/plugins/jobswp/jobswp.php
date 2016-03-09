@@ -15,13 +15,6 @@ require_once( dirname( __FILE__ ) . '/jobswp-walker.php' );
 class Jobs_Dot_WP {
 
 	/**
-	 * @var int $days_until_pruning The number of days a job is listed on the site before it gets pruned.
-	 *
-	 * Customize via the 'jobswp_days_until_pruning' filter.
-	 */
-	private $days_until_pruning;
-
-	/**
 	 * Fields that must have a value when submitted by job poster.
 	 */
 	private $required_fields = array(
@@ -67,6 +60,17 @@ class Jobs_Dot_WP {
 	}
 
 	/**
+	 * Returns the number of days a job is left open before automatic pruning.
+	 *
+	 * By default it is 21 days.
+	 *
+	 * @return int
+	 */
+	public static function get_days_until_pruning() {
+		return apply_filters( 'jobswp_days_until_pruning', 21 );
+	}
+
+	/**
 	 * Constructor
 	 */
 	protected function __construct() {
@@ -93,10 +97,6 @@ class Jobs_Dot_WP {
 	 * as any processing that needs to happen directly on 'init'.
 	 */
 	public function init() {
-		// Allow customization of the number of days until a job gets pruned.
-		// By default, it is 21 days.
-		$this->days_until_pruning = apply_filters( 'jobswp_days_until_pruning', 21 );
-
 		add_filter( 'manage_posts_columns',           array( $this, 'posts_columns' ), 8, 2 );
 		add_action( 'manage_job_posts_custom_column', array( $this, 'custom_posts_columns' ), 10, 2 );
 
@@ -641,11 +641,11 @@ class Jobs_Dot_WP {
 			$body    = <<<EMAIL
 Hi,
 
-Your job "%1\$s" has been successfully submitted to %2\$s. Please be patient as it may take our team of volunteer moderators 24-48 hours to review and publish it to the site.
+Your job "%s" has been successfully submitted to %s. Please be patient as it may take our team of volunteer moderators 24-48 hours to review and publish it to the site.
 
-Take note of this special job token: %3\$s
+Take note of this special job token: %s
 
-Your job will automatically be removed from the site after 21 days. If you wish to remove the job sooner than that, you can do so by using the job removal form at %4\$s and providing the job token provided above.
+Your job will automatically be removed from the site after %s days. If you wish to remove the job sooner than that, you can do so by using the job removal form at %s and providing the job token provided above.
 
 Cheers.
 
@@ -656,7 +656,7 @@ EMAIL;
 			$headers = '';
 			$headers['From'] = 'jobs.wordpress.net <jobs@wordpress.net>';
 
-			$body = sprintf( $body, $title, 'http://jobs.wordpress.net/', $token, 'http://jobs.wordpress.net/remove-a-job/' );
+			$body = sprintf( $body, $title, 'http://jobs.wordpress.net/', $token, self::get_days_until_pruning(), 'http://jobs.wordpress.net/remove-a-job/' );
 
 			if ( $to ) {
 				wp_mail( $to, $subject, $body, $headers );
@@ -905,7 +905,7 @@ EMAIL;
 			"UPDATE {$wpdb->prefix}posts
 			 SET post_status = 'pruned'
 			 WHERE DateDiff(NOW(), post_date) > %d AND post_type = 'job' AND post_status = 'publish'",
-			$this->days_until_pruning
+			self::get_days_until_pruning()
 		) );
 	}
 
