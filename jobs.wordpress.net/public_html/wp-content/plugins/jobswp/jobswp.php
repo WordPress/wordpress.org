@@ -9,6 +9,7 @@ Description: Functionality for jobs.wordpress.net
 
 defined( 'ABSPATH' ) or die();
 
+require_once( dirname( __FILE__ ) . '/jobswp-captcha.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-template.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-walker.php' );
 
