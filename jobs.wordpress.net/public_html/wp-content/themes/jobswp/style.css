@@ -1150,6 +1150,22 @@ input[type="button"].submit-job:hover, input[type="submit"].submit-job:hover,
 	background-color: #9F6000;
 }
 
+.accept {
+	font-size: 1.1em;
+	margin-right: 0.4em;
+	margin-top: 1em;
+}
+.accept ul {
+	margin-left: 1.4em;
+}
+.accept p:last-child {
+	text-align: right;
+}
+.post-job .accept label {
+	display: inline-block;
+	margin-left: 0.5em;
+}
+
 /* FAQ page */
 .page-id-47 .entry-content {
 	margin-top: inherit;
