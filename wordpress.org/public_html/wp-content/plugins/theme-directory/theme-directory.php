@@ -865,8 +865,7 @@ function wporg_themes_glotpress_import( $theme_post, $version ) {
 
 	$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
 
-	$output = shell_exec( $cmd );
-	slack_dm( $output, '@ocean90' );
+	shell_exec( $cmd );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_glotpress_import', 100, 2 );
 
