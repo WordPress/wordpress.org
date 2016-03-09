@@ -1061,9 +1061,7 @@ function _generate_payment_report_jpm_ach( $args ) {
 		// Entry Detail Record
 
 		echo '6'; // Record Type Code
-
-		$transaction_code = $account_type == 'Personal' ? '27' : '22';
-		echo $transaction_code; // Transaction Code
+		echo '22'; // Transaction code for Automated Deposit
 
 		// Transit/Routing Number of Destination Bank + Check digit
 		$routing_number = get_post_meta( $post->ID, '_wcbrr_ach_routing_number', true );

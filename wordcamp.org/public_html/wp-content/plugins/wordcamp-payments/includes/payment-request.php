@@ -1266,9 +1266,7 @@ Thanks for helping us with these details!",
 			// Entry Detail Record
 
 			echo '6'; // Record Type Code
-
-			$transaction_code = $account_type == 'Personal' ? '27' : '22';
-			echo $transaction_code; // Transaction Code
+			echo '22'; // Transaction code for Automated Deposit
 
 			// Transit/Routing Number of Destination Bank + Check digit
 			$routing_number = get_post_meta( $post->ID, '_camppayments_ach_routing_number', true );
