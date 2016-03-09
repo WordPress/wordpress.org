@@ -676,6 +676,8 @@ EMAIL;
 			$has_errors = false;
 			$this->success = false;
 
+			$needs_to_verify = ( ! isset( $_POST['verify'] ) || 1 != $_POST['verify'] );
+
 			// Verify all required fields have values.
 			foreach ( $this->required_fields as $field ) {
 				if ( ! isset( $_POST[ $field ] ) || empty( $_POST[ $field ] ) ) {
@@ -694,10 +696,15 @@ EMAIL;
 				}
 			endif;
 
+			// Validate acceptance of terms during review step.
+			if ( ! $has_errors && ! $needs_to_verify && ( ! isset( $_POST['accept'] ) || 1 != $_POST['accept'] ) ) {
+				$has_errors = __( 'You must also mark the checkbox indicating that you agree to the terms listed below the form.', 'jobswp' );
+			}
+
 			$has_errors = apply_filters( 'jobswb_save_job_errors', $has_errors );
 			if ( $has_errors )
 				$_POST['errors'] = $has_errors;
-			elseif ( ! isset( $_POST['verify'] ) || 1 != $_POST['verify'] )
+			elseif ( $needs_to_verify )
 				$_POST['verify'] = true;
 			else
 				$this->success = true;
