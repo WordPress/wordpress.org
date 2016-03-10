@@ -176,24 +176,20 @@ class MES_Sponsor {
 			delete_post_meta( $post_id, 'mes_regional_sponsorships' );
 		}
 
-		if ( isset( $new_values[ 'mes_first_name' ] ) ) {
-			update_post_meta( $post_id, 'mes_first_name', sanitize_text_field( $new_values[ 'mes_first_name' ] ) );
-		} else {
-			delete_post_meta( $post_id, 'mes_first_name' );
+		if ( isset( $new_values["mes_email_address"] ) ) {
+			$new_values['mes_email_address'] = is_email( $new_values['mes_email_address'] );
 		}
 
-		if ( isset( $new_values[ 'mes_last_name' ] ) ) {
-			update_post_meta( $post_id, 'mes_last_name', sanitize_text_field( $new_values[ 'mes_last_name' ] ) );
-		} else {
-			delete_post_meta( $post_id, 'mes_last_name' );
-		}
+		$text_fields = array(
+			'first_name', 'last_name', 'email_address',
+		);
 
-		if ( isset( $new_values[ 'mes_email_address' ] ) ) {
-			if ( is_email( $new_values[ 'mes_email_address' ] ) ) {
-				update_post_meta( $post_id, 'mes_email_address', sanitize_text_field( $new_values[ 'mes_email_address' ] ) );
+		foreach ( $text_fields as $field ) {
+			if ( isset( $new_values["mes_$field"] ) ) {
+				update_post_meta( $post_id, "mes_$field", sanitize_text_field( $new_values["mes_$field"] ) );
+			} else {
+				delete_post_meta( $post_id, "mes_$field" );
 			}
-		} else {
-			delete_post_meta( $post_id, 'mes_email_address' );
 		}
 	}
 
