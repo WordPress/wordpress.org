@@ -9,20 +9,21 @@
  */
 class WPorg_GP_User_Stats {
 
-	function __construct() {
+	private $user_stats = array();
+
+	public function __construct() {
 		global $wpdb, $gp_table_prefix;
 
-		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
-		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_translation_created', array( $this, 'translation_updated' ) );
+		add_action( 'gp_translation_saved', array( $this, 'translation_updated' ) );
+
+		// DB Writes are delayed until shutdown to bulk-update the stats during imports.
+		add_action( 'shutdown', array( $this, 'write_stats_to_database' ) );
 
 		$wpdb->user_translations_count = $gp_table_prefix . 'user_translations_count';
 	}
 
-	function translation_created( $translation ) {
-		return $this->translation_saved( $translation, 'created' );
-	}
-
-	function translation_saved( $translation, $action = 'saved' ) {
+	public function translation_updated( $translation ) {
 		if ( ! $translation->user_id ) {
 			return;
 		}
@@ -33,7 +34,7 @@ class WPorg_GP_User_Stats {
 			// New translation suggested
 			$this->bump_user_stat( $translation->user_id, $translation_set->locale, $translation_set->slug, 1, 0 );
 
-		} elseif ( 'current' === $translation->status && 'created' === $action ) {
+		} elseif ( 'current' === $translation->status && 'gp_translation_created' === current_filter() ) {
 			// New translation suggested & approved
 			$this->bump_user_stat( $translation->user_id, $translation_set->locale, $translation_set->slug, 1, 1 );
 
@@ -44,15 +45,55 @@ class WPorg_GP_User_Stats {
 		}
 	}
 
-	function bump_user_stat( $user_id, $locale, $locale_slug, $suggested = 0, $accepted = 0 ) {
-		global $wpdb;
-		$wpdb->query( $wpdb->prepare(
-			"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`) VALUES (%d, %s, %s, %d, %d)
-			ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)",
-			$user_id, $locale, $locale_slug, $suggested, $accepted
-		) );
+	private function bump_user_stat( $user_id, $locale, $locale_slug, $suggested = 0, $accepted = 0 ) {
+		$key = "$user_id,$locale,$locale_slug";
+
+		if ( isset( $this->user_stats[ $key ] ) ) {
+			$this->user_stats[ $key ]->suggested += $suggested;
+			$this->user_stats[ $key ]->accepted  += $accepted;
+		} else {
+			$this->user_stats[ $key ] = (object) array(
+				'suggested' => $suggested,
+				'accepted'  => $accepted,
+			);
+		}
 	}
 
+	public function write_stats_to_database() {
+		global $wpdb;
+
+		$values = array();
+		foreach ( $this->user_stats as $key => $stats ) {
+			list( $user_id, $locale, $locale_slug ) = explode( ',', $key );
+
+			$values[] = $wpdb->prepare( '(%d, %s, %s, %d, %d)',
+				$user_id,
+				$locale,
+				$locale_slug,
+				$stats->suggested,
+				$stats->accepted
+			);
+
+			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
+			if ( count( $values ) > 50 ) {
+				$r = $wpdb->query(
+					"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
+					VALUES " . implode( ', ', $values ) . "
+					ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
+				);
+				error_log( print_r($r,true));
+				$values = array();
+			}
+		}
+
+		if ( $values ) {
+			$r = $wpdb->query(
+				"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
+				VALUES " . implode( ', ', $values ) . "
+				ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
+			);
+		}
+	}
 }
 
 /*
