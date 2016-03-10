@@ -14,11 +14,6 @@
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="shortcut icon" href="<?php echo esc_url( home_url( 'favicon.ico' ) ); ?>" />
-	<link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-57x57.png" />
-	<link rel="apple-touch-icon" sizes="72x72" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-72x72.png" />
-	<link rel="apple-touch-icon" sizes="114x114" href="<?php echo get_template_directory_uri(); ?>/imgs/apple-touch-icon-114x114.png" />
-
 	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?5" />
 	<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
 	<script src="https://use.typekit.com/lsw6yis.js"></script>
