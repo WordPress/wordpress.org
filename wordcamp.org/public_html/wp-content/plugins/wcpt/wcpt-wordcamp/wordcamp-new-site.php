@@ -585,11 +585,37 @@ class WordCamp_New_Site {
 					'type'           => 'wcb_sponsor',
 					'term'           => $assigned_sponsor->sponsorship_level->post_name,
 					'featured_image' => isset( $assigned_sponsor_data['featured_images'][ $assigned_sponsor->ID ] ) ? $assigned_sponsor_data['featured_images'][ $assigned_sponsor->ID ] : '',
+					'meta'           => $this->get_stub_me_sponsors_meta( $assigned_sponsor ),
 				);
 			}
 		}
 
 		return $me_sponsors;
+	}
+
+	/**
+	 * Get the meta data for a `mes` post and prepare it for importing into a `wcb_sponsor` post
+	 *
+	 * @param WP_Post $assigned_sponsor
+	 *
+	 * @return array
+	 */
+	protected function get_stub_me_sponsors_meta( $assigned_sponsor ) {
+		$sponsor_meta    = array();
+		$meta_field_keys = array(
+			'company_name', 'website', 'first_name', 'last_name', 'email_address', 'phone_number',
+			'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
+		);
+
+		switch_to_blog( BLOG_ID_CURRENT_SITE );
+
+		foreach ( $meta_field_keys as $key ) {
+			$sponsor_meta["_wcpt_sponsor_$key"] = get_post_meta( $assigned_sponsor->ID, "mes_$key", true );
+		}
+
+		restore_current_blog();
+
+		return $sponsor_meta;
 	}
 
 	/**
