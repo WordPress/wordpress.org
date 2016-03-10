@@ -200,12 +200,24 @@ header h2 em {
 	width: 80%;
 }
 
+html[dir="rtl"] .browser-status-text {
+	float: right;
+}
+
 .browser-status-action {
 	float: right;
 	width: 18%;
 	text-align: right;
 	margin-right: -10px;
 }
+
+html[dir="rtl"] .browser-status-action {
+	float: left;
+	text-align: left;
+	margin-right: 0;
+	margin-left: -10px;
+}
+
 .browser-status-action a {
 	display: block;
 	background: #333;
@@ -269,6 +281,10 @@ header h2 em {
 	width: 192px;
 	float: left;
 	margin: 12px 0 0;
+}
+
+html[dir="rtl"] #browserlist li {
+	float: right;
 }
 
 #browserlist li .icon {
@@ -459,6 +475,10 @@ header h2 em {
 	min-height: 25px;
 }
 
+html[dir="rtl"] #browserlist p.likebutton iframe html {
+	float: right;
+}
+
 /* Footer */
 
 footer {
@@ -504,6 +524,15 @@ footer h2 {
 	position: relative;
 }
 
+html[dir="rtl"] #about, html[dir="rtl"] #share {
+	float: right;
+	margin-left: 15px;
+	margin-right: 0;
+}
+html[dir="rtl"] #share {
+	float: left;
+}
+
 .ie6 #share {
 	display: inline; /* Fix for double margin float bug */
 }
@@ -513,6 +542,12 @@ footer h2 {
 	height: 32px;
 	float: left;
 	margin-right: 9px;
+}
+
+html[dir="rtl"] #share nav li {
+	float: right;
+	margin-right: 0;
+	margin-left: 9px;
 }
 
 .ie6 #share nav li {
