@@ -35,7 +35,7 @@ class WPorg_GP_Customizations {
 	 */
 	public function disable_translation_propagation_on_import( $class_name, $last_method_called ) {
 		if ( 'GP_Route_Translation' === $class_name && 'import_translations_post' === $last_method_called ) {
-			add_filter( 'enable_propagate_translations_across_projects', '__return_false' );
+			add_filter( 'gp_enable_propagate_translations_across_projects', '__return_false' );
 		}
 	}
 
