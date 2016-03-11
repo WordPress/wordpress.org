@@ -367,7 +367,7 @@ class WordCamp_Participation_Notifier {
 					print_r( $body, true )
 				);
 			} elseif ( 200 != $response['response']['code'] || 1 != (int) $response['body'] ) {
-				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
+				// error_log() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
 				
 				$error = sprintf(
 					'Received HTTP code: %s and body: %s. Request was: %s',
@@ -378,7 +378,7 @@ class WordCamp_Participation_Notifier {
 			}
 			
 			if ( $error ) {
-				trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
+				error_log( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
 				
 				if ( $to = apply_filters( 'wpn_error_email_addresses', array() ) ) {
 					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
