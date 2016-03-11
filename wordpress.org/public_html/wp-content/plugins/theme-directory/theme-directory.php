@@ -222,12 +222,16 @@ function wporg_themes_get_version_status( $post_id, $version ) {
 	return wporg_themes_get_version_meta( $post_id, '_status', $version );
 }
 
-
+/**
+ * Replacement for the Author meta box on theme pages
+ */
 add_action( 'add_meta_boxes', 'wporg_themes_author_metabox_override', 10, 2 );
 function wporg_themes_author_metabox_override( $post_type, $post ) {
 	if ( $post_type != 'repopackage' ) {
 		return;
 	}
+
+	$post_type_object = get_post_type_object($post_type);
 	if ( post_type_supports($post_type, 'author') ) {
 		if ( is_super_admin() || current_user_can( $post_type_object->cap->edit_others_posts ) ) {
 			remove_meta_box( 'authordiv', null, 'normal' );
@@ -236,23 +240,80 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
 	}
 }
 
-// Replacement for the core function post_author_meta_box
+/**
+ * Replacement for the core function post_author_meta_box on theme edit pages
+ *
+ * Uses javascript for username autocompletion and to adjust the hidden id field
+ */
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
 ?>
 <label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
 <?php
-/*
-	wp_dropdown_users( array(
-		'who' => 'authors',
-		'name' => 'post_author_override',
-		'selected' => empty($post->ID) ? $user_ID : $post->post_author,
-		'include_selected' => true
-	) );
-*/
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
-	echo "<input type='text' name='post_author_override' value='{$value}' />";
+
+	$user = new WP_User($value);
+
+	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
+	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
+?>
+	<script>
+	jQuery( document ).ready( function( $ ) {
+		$( "#post_author_username" ).autocomplete( {
+			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo wp_create_nonce( 'wporg_themes_author_lookup' ); ?>',
+			minLength: 2,
+			delay: 700,
+			autoFocus: true,
+			select: function( event, ui ) {
+				$( "#post_author_override" ).val( ui.item.value );
+				$( "#post_author_username" ).val( ui.item.label );
+				return false;
+			}
+		}).keydown( function( event ) {
+			if( event.keyCode == 13 ) {
+				event.preventDefault();
+				return false;
+			}
+		});
+	});
+	</script>
+<?php
 }
+
+/**
+ * Admin ajax function to lookup a username for author autocompletion on theme edit pages
+ *
+ * Note: nonce protected, only available to logged in users
+ * 
+ * While this user search is a bit heavy because of the SQL to search the whole users table, 
+ * it's not one that we will actually run a lot. This only occurs when a theme directory admin
+ * is changing the "author" of a theme. This is fairly rare. If the query causes too many issues, 
+ * then we can refine it to limit it more.
+ */
+function wporg_themes_author_lookup() {
+	check_ajax_referer( 'wporg_themes_author_lookup' );
+	$term = $_REQUEST['term'];
+	$args = array(
+		'search' => $term.'*',
+		'search_columns' => array( 'user_login', 'user_nicename' ),
+		'fields' => array( 'ID', 'user_login' ),
+		'number' => 8,
+		'blog_id' => 0, // ID zero here allows it to search all users, not just those with roles in the theme directory
+	);
+	$user_query = new WP_User_Query( $args );
+	
+	if ( $user_query->results ) {
+		$resp = array();
+		foreach ( $user_query->results as $result ) {
+			$user['label'] = $result->user_login;
+			$user['value'] = $result->ID;
+			$resp[] = $user;
+		}
+		echo json_encode($resp);
+	}
+	exit;	
+}
+add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
 
 
 /* UPDATING THEME VERSIONS */
