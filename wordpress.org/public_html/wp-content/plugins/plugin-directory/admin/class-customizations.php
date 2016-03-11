@@ -32,6 +32,7 @@ class Customizations {
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 
 		add_filter( 'postbox_classes_plugin_internal-notes', array( $this, 'postbox_classes' ) );
+		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
 	}
 
 	/**
@@ -104,7 +105,7 @@ class Customizations {
 			'plugin', 'normal', 'low'
 		);
 
-		// Replace the publish box
+		// Replace the publish box.
 		add_meta_box(
 			'submitdiv',
 			__( 'Plugin Controls', 'wporg-plugins' ),
@@ -143,6 +144,34 @@ class Customizations {
 		$classes[] = 'comments-meta-box';
 
 		return array_filter( $classes );
+	}
+
+	/**
+	 * Filter the action links displayed for each comment.
+	 *
+	 * Actions for internal notes can be limited to replying for plugin reviewers.
+	 * Plugin Admins can additionally trash, untrash, and quickedit a note.
+	 *
+	 * @param array       $actions An array of comment actions. Default actions include:
+	 *                             'Approve', 'Unapprove', 'Edit', 'Reply', 'Spam',
+	 *                             'Delete', and 'Trash'.
+	 * @param \WP_Comment $comment The comment object.
+	 * @return array Array of comment actions.
+	 */
+	public function custom_comment_row_actions( $actions, $comment ) {
+		if ( 'internal-note' === $comment->comment_type ) {
+			$allowed_actions = array( 'reply' => true );
+
+			if ( current_user_can( 'manage_comments' ) ) {
+				$allowed_actions['trash']     = true;
+				$allowed_actions['untrash']   = true;
+				$allowed_actions['quickedit'] = true;
+			}
+
+			$actions = array_intersect_key( $actions, $allowed_actions );
+		}
+
+		return $actions;
 	}
 
 	/**
