@@ -378,7 +378,7 @@ class WordCamp_Participation_Notifier {
 			}
 			
 			if ( $error ) {
-				error_log( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
+				error_log( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ) );
 				
 				if ( $to = apply_filters( 'wpn_error_email_addresses', array() ) ) {
 					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
