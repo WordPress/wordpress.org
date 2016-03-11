@@ -310,7 +310,7 @@ class WordCamp_Participation_Notifier {
 		$user_id = $user = false;
 
 		if ( in_array( $post->post_type, array( 'wcb_speaker', 'wcb_organizer' ) ) && isset( $_POST['wcpt-wporg-username'] ) ) {
-			$user = get_user_by( 'login', $_POST['wcpt-wporg-username'] );
+			$user = wcorg_get_user_by_canonical_names( $_POST['wcpt-wporg-username'] );
 		}
 
 		if ( ! empty( $user->ID ) ) {

@@ -126,3 +126,21 @@ function wcorg_skip_feature( $flag ) {
 
 	return isset( $flags[ $flag ] );
 }
+
+/**
+ * Get a user by the username or nicename
+ *
+ * Note: This intentionally doesn't lookup users by the display name or nickname, because those can be set by the
+ * user, which could result in false-positive matches.
+ *
+ * @param string $name
+ *
+ * @return false|WP_User
+ */
+function wcorg_get_user_by_canonical_names( $name ) {
+	if ( ! $user = get_user_by( 'login', $name ) ) {    // user_login
+		$user = get_user_by( 'slug', $name );           // user_nicename
+	}
+
+	return $user;
+}
