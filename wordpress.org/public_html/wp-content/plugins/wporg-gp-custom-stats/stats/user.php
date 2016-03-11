@@ -76,18 +76,17 @@ class WPorg_GP_User_Stats {
 
 			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
 			if ( count( $values ) > 50 ) {
-				$r = $wpdb->query(
+				$wpdb->query(
 					"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
 					VALUES " . implode( ', ', $values ) . "
 					ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
 				);
-				error_log( print_r($r,true));
 				$values = array();
 			}
 		}
 
 		if ( $values ) {
-			$r = $wpdb->query(
+			$wpdb->query(
 				"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
 				VALUES " . implode( ', ', $values ) . "
 				ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
