@@ -112,8 +112,10 @@ class Customizations {
 			'plugin', 'side', 'high'
 		);
 
-		// Remove the Slug metabox
-		add_meta_box( 'slugdiv', false, false, false );
+		// Remove unnecessary metaboxes.
+		remove_meta_box( 'slugdiv',          'plugin', 'normal' );
+		remove_meta_box( 'commentsdiv',      'plugin', 'normal' );
+		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
 	}
 
 	/**
