@@ -53,7 +53,7 @@ class Plugin_Directory {
 				'not_found_in_trash' => __( 'No plugins found in Trash', 'wporg-plugins' ),
 			),
 			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'        => false,
+			'supports'        => array( 'comments' ),
 			'public'          => true,
 			'show_ui'         => true,
 			'has_archive'     => true,

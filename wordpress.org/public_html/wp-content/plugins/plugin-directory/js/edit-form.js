@@ -3,14 +3,11 @@
  */
 
 ( function( $, wp ) {
-
 	var PluginEdit = {
-		$notesBox: {},
 		$testedWith: {},
 		$pluginStatus: {},
 
 		ready: function() {
-			PluginEdit.$notesBox     = $( '#plugin-notes' );
 			PluginEdit.$testedWith   = $( '#tested-with-select' );
 			PluginEdit.$pluginStatus = $( '#plugin-status-select' );
 
@@ -22,10 +19,19 @@
 				.on( 'click', '.cancel-tested-with',   PluginEdit.cancelTestedWith )
 				.on( 'click', '.cancel-plugin-status', PluginEdit.cancelPluginStatus );
 
-			PluginEdit.$notesBox
-				.on( 'click', '.cancel-note', PluginEdit.showNote )
-				.on( 'click', '.view-note',   PluginEdit.editNote )
-				.on( 'click', '.save-note',   PluginEdit.saveNote );
+			_.each( $( '#post-body' ).find( '.comments-box' ), PluginEdit.loadComments );
+
+			$( '#add-new-comment' ).on( 'click', 'a.button', function( event ) {
+				event.preventDefault();
+
+				window.commentReply && commentReply.addcomment( $( '#post_ID' ).val() );
+
+				$( '#replyrow' ).find( '.comment-reply' ).append( $( '<input/>' ).attr({
+					type: 'hidden',
+					name: 'comment_type',
+					value: $( '.comments-box' ).data( 'comment-type' )
+				}) );
+			} );
 		},
 
 		editTestedWith: function() {
@@ -66,31 +72,26 @@
 			PluginEdit.updatePluginStatus( event );
 		},
 
-		showNote: function() {
-			$( '.view-note', PluginEdit.$notesBox ).show();
-			$( '.edit-note', PluginEdit.$notesBox ).hide();
-		},
+		loadComments: function ( element ) {
+			var $commentsList = $( element ),
+				data = {
+					_ajax_nonce:  $( '#add_comment_nonce' ).val(),
+					p:            $( '#post_ID' ).val(),
+					mode:         'single',
+					start:        0,
+					number:       20,
+					comment_type: $commentsList.data( 'comment-type' )
+				};
 
-		editNote: function() {
-			var $textarea = $( '.note-content', PluginEdit.$notesBox );
+			wp.ajax.post( 'get-comments', data ).always( function( response ) {
+				response = wpAjax.parseAjaxResponse( response );
 
-			$( '.view-note', PluginEdit.$notesBox ).hide();
-			$( '.edit-note', PluginEdit.$notesBox ).show();
-			$textarea.text( $textarea.val() ).focus();
-		},
+				if ( 'object' == typeof response && response.responses[0] ) {
+					$commentsList.append( response.responses[0].data ).show();
 
-		saveNote: function() {
-			wp.ajax.post( 'save-note', {
-				id: $( '#post_ID' ).val(),
-				note: $( '.note-content', PluginEdit.$notesBox ).val(),
-				notce: $( '#notce' ).val()
-			} )
-				.done( function( response ) {
-					var note = response.note ? response.note : 'Add note';
-
-					$( '.view-note', PluginEdit.$notesBox ).html( note );
-					PluginEdit.showNote();
-				} );
+					$( 'a[className*=\':\']' ).unbind();
+				}
+			} );
 		}
 	};
 
