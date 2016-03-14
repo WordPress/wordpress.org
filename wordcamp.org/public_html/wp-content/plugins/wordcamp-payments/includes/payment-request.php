@@ -674,9 +674,6 @@ Thanks for helping us with these details!",
 			$this->sanitize_save_misc_fields( $post_id );
 		}
 
-		// Update the timestamp and logs.
-		update_post_meta( $post_id, '_wcb_updated_timestamp', time() );
-
 		$user = get_user_by( 'id', get_current_user_id() );
 
 		// Look at post status transitions.
