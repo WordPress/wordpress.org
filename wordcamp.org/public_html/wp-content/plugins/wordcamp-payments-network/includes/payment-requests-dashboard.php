@@ -190,6 +190,9 @@ class Payment_Requests_Dashboard {
 		if ( 'wcp_payment_request' != $request->post_type )
 			return;
 
+		// Update the timestamp and logs.
+		update_post_meta( $post_id, '_wcb_updated_timestamp', time() );
+
 		$table_name = self::get_table_name();
 		$entry_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE `blog_id` = %d AND `post_id` = %d LIMIT 1;", get_current_blog_id(), $request->ID ) );
 

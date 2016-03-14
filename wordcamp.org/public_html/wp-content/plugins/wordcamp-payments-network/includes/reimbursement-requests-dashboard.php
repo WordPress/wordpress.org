@@ -196,6 +196,9 @@ function update_index_row( $request_id, $request ) {
 		return;
 	}
 
+	// Update the timestamp and logs.
+	update_post_meta( $request_id, '_wcb_updated_timestamp', time() );
+
 	// Back-compat.
 	$back_compat_statuses = array(
 		'wcbrr_submitted' => 'pending-approval',
