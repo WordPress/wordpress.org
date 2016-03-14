@@ -13,6 +13,8 @@ add_action( 'network_admin_menu', __NAMESPACE__ . '\import_export_admin_menu', 1
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts', 10, 1 );
 
 add_action( 'admin_init', __NAMESPACE__ . '\process_export_request' );
+add_action( 'admin_init', __NAMESPACE__ . '\process_action_approve', 11 );
+add_action( 'admin_init', __NAMESPACE__ . '\process_action_set_pending_payment', 11 );
 
 /**
  * Register the Budgets Dashboard menu
@@ -534,4 +536,79 @@ function convert_currency( $from, $to, $amount ) {
 	}
 
 	return $amount * $rate;
+}
+
+
+/**
+ * Approve a payment or reimbursement request.
+ */
+function process_action_approve() {
+	if ( ! current_user_can( 'manage_network' ) )
+		return;
+
+	if ( empty( $_GET['wcb-approve'] ) || empty( $_GET['_wpnonce'] ) )
+		return;
+
+	list( $blog_id, $post_id ) = explode( '-', $_GET['wcb-approve'] );
+
+	if ( ! wp_verify_nonce( $_GET['_wpnonce'], sprintf( 'wcb-approve-%d-%d', $blog_id, $post_id ) ) ) {
+		add_settings_error( 'wcb-dashboard', 'nonce_error', 'Could not verify nonce.', 'error' );
+		return;
+	}
+
+	switch_to_blog( $blog_id );
+	$post = get_post( $post_id );
+
+	if ( ! in_array( $post->post_type, array( 'wcp_payment_request', 'wcb_reimbursement' ) ) ) {
+		add_settings_error( 'wcb-dashboard', 'type_error', 'Invalid post type.', 'error' );
+		restore_current_blog();
+		return;
+	}
+
+	$post->post_status = 'wcb-approved';
+	wp_insert_post( $post );
+
+	\WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'Request approved via Network Admin', array(
+		'action' => 'approved',
+	) );
+
+	restore_current_blog();
+	add_settings_error( 'wcb-dashboard', 'success', 'Success! Request has been marked as Approved.', 'updated' );
+}
+
+/**
+ * Process "Set as Pending Payment" dashboard action.
+ */
+function process_action_set_pending_payment() {
+	if ( ! current_user_can( 'manage_network' ) )
+		return;
+
+	if ( empty( $_GET['wcb-set-pending-payment'] ) || empty( $_GET['_wpnonce'] ) )
+		return;
+
+	list( $blog_id, $post_id ) = explode( '-', $_GET['wcb-set-pending-payment'] );
+
+	if ( ! wp_verify_nonce( $_GET['_wpnonce'], sprintf( 'wcb-set-pending-payment-%d-%d', $blog_id, $post_id ) ) ) {
+		add_settings_error( 'wcb-dashboard', 'nonce_error', 'Could not verify nonce.', 'error' );
+		return;
+	}
+
+	switch_to_blog( $blog_id );
+	$post = get_post( $post_id );
+
+	if ( ! in_array( $post->post_type, array( 'wcp_payment_request', 'wcb_reimbursement' ) ) ) {
+		add_settings_error( 'wcb-dashboard', 'type_error', 'Invalid post type.', 'error' );
+		restore_current_blog();
+		return;
+	}
+
+	$post->post_status = 'wcb-pending-payment';
+	wp_insert_post( $post );
+
+	\WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'Request set as Pending Payment via Network Admin', array(
+		'action' => 'set-pending-payment',
+	) );
+
+	restore_current_blog();
+	add_settings_error( 'wcb-dashboard', 'success', 'Success! Request has been marked as Pending Payment.', 'updated' );
 }

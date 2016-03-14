@@ -79,23 +79,44 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 	 * @param object $index_row
 	 */
 	protected function column_request_title( $index_row ) {
-		$title = empty( $index_row->request_title ) ? '(no title)' : $index_row->request_title;
-
-		$edit_url = get_admin_url(
-			$index_row->blog_id,
-			sprintf( 'post.php?post=%s&action=edit', $index_row->request_id )
+		$blog_id = $index_row->blog_id;
+		switch_to_blog( $blog_id );
+		$post = get_post( $index_row->request_id );
+		$title = get_the_title( $post );
+		$title = empty( $title ) ? '(no title)' : $title;
+		$edit_post_link = add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), admin_url( 'post.php' ) );
+		$actions = array(
+			'view-all' => sprintf( '<a href="%s" target="_blank">View All</a>', esc_url( admin_url( 'edit.php?post_type=wcb_reimbursement' ) ) ),
 		);
+
+		if ( $post->post_status == 'wcb-pending-approval' ) {
+			$action_url = wp_nonce_url( add_query_arg( array(
+				'wcb-approve' => sprintf( '%d-%d', $blog_id, $post->ID ),
+			) ), sprintf( 'wcb-approve-%d-%d', $blog_id, $post->ID ) );
+
+			$actions['wcb-approve'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Approve this reimbursement request?\');" href="%s">Approve</a>', esc_url( $action_url ) );
+
+		} elseif ( $post->post_status == 'wcb-approved' ) {
+			$action_url = wp_nonce_url( add_query_arg( array(
+				'wcb-set-pending-payment' => sprintf( '%d-%d', $blog_id, $post->ID ),
+			) ), sprintf( 'wcb-set-pending-payment-%d-%d', $blog_id, $post->ID ) );
+
+			$actions['wcb-set-pending-payment'] = sprintf( '<a style="color: green;" onclick="return confirm(\'Set this request as pending payment?\');" href="%s">Set as Pending Payment</a>', esc_url( $action_url ) );
+		}
 
 		ob_start();
 		?>
 
-		<a href="<?php echo esc_url( $edit_url ); ?>">
+		<a href="<?php echo esc_url( $edit_post_link ); ?>" class="row-title" target="_blank">
 			<?php echo esc_html( $title ); ?>
+			<?php echo $this->row_actions( $actions ); ?>
 		</a>
 
 		<?php
 
-		return ob_get_clean();
+		$output = ob_get_clean();
+		restore_current_blog();
+		return $output;
 	}
 
 	/**
