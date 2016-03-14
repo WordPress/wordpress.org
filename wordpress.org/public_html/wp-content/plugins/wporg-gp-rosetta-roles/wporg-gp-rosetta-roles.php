@@ -178,7 +178,8 @@ class WPorg_GP_Rosetta_Roles {
 			return false;
 		}
 
-		$is_approver = in_array( self::TRANSLATION_EDITOR_ROLE, $user->$cap_key ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->$cap_key );
+		$capabilities = $user->{$cap_key};
+		$is_approver = ! empty( $capabilities[ self::TRANSLATION_EDITOR_ROLE ] ) || ! empty( $capabilities[ self::GENERAL_TRANSLATION_EDITOR_ROLE ] );
 		$cache[ $user_id ][ $locale_slug ] = $is_approver;
 
 		return $is_approver;
