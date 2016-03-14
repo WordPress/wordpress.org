@@ -433,6 +433,10 @@ function save_request( $post_id, $post ) {
 		return;
 	}
 
+	if ( empty( $_POST ) ) {
+		return;
+	}
+
 	verify_metabox_nonces();
 	validate_and_save_notes( $post, $_POST['wcbrr_new_note'] );
 
