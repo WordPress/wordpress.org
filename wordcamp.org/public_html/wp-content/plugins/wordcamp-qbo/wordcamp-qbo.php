@@ -243,7 +243,7 @@ class WordCamp_QBO {
 		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
 
 		$args = array(
-			'query' => 'SELECT * FROM Class',
+			'query' => 'SELECT * FROM Class MAXRESULTS 300',
 			'minorversion' => 4,
 		);
 
