@@ -36,12 +36,12 @@
 					<td>
 						<fieldset>
 							<legend class="screen-reader-text"><?php _e( 'Add editor access for:', 'rosetta' ); ?></legend>
-							<label for="all-projects" >
-								<input type="radio" name="projects" value="all" id="all-projects" checked="checked"> <?php _e( 'All projects &ndash; If selected, translation editor will have validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
+							<label for="custom-projects">
+								<input type="radio" name="projects" value="custom" id="custom-projects" checked> <?php _e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'rosetta' ); ?>
 							</label>
 							<br>
-							<label for="custom-projects">
-								<input type="radio" name="projects" value="custom" id="custom-projects"> <?php _e( 'Custom &ndash; After the user is added you will be redirected to set the projects.', 'rosetta' ); ?>
+							<label for="all-projects" >
+								<input type="radio" name="projects" value="all" id="all-projects"> <?php _e( 'All projects &ndash; If selected, translation editor will have validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
 							</label>
 						</fieldset>
 					</td>
