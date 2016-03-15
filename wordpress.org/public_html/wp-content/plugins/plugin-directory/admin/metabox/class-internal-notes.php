@@ -10,9 +10,21 @@ use WordPressdotorg\Plugin_Directory\Admin\Plugin_Comments_List_Table;
 class Internal_Notes {
 
 	/**
+	 * Filters the postbox classes for custom comment meta boxes.
+	 *
+	 * @param array $classes An array of postbox classes.
+	 * @return array
+	 */
+	public static function postbox_classes( $classes ) {
+		$classes[] = 'comments-meta-box';
+
+		return array_filter( $classes );
+	}
+
+	/**
 	 * Displays comment box for internal notes.
 	 */
-	static function display() {
+	public static function display() {
 		$wp_list_table = new Plugin_Comments_List_Table( array(
 			'comment_type' => 'internal-note',
 		) );

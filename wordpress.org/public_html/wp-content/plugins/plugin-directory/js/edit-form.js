@@ -2,7 +2,7 @@
  * JS for the Plugin Admin screens.
  */
 
-( function( $, wp ) {
+( function( $, wp, pluginDirectory ) {
 	var PluginEdit = {
 		$testedWith: {},
 		$pluginStatus: {},
@@ -21,16 +21,20 @@
 
 			_.each( $( '#post-body' ).find( '.comments-box' ), PluginEdit.loadComments );
 
-			$( '#add-new-comment' ).on( 'click', 'a.button', function( event ) {
-				event.preventDefault();
+			$( '#add-new-comment' ).on( 'click', 'a.button', PluginEdit.prepareCommentForm );
 
-				window.commentReply && commentReply.addcomment( $( '#post_ID' ).val() );
+			$( '#add-committer-toggle' ).on( 'click', PluginEdit.toggleCommitterForm );
 
-				$( '#replyrow' ).find( '.comment-reply' ).append( $( '<input/>' ).attr({
-					type: 'hidden',
-					name: 'comment_type',
-					value: $( '.comments-box' ).data( 'comment-type' )
-				}) );
+			$( '#the-committer-list' ).wpList({
+				alt: false,
+				confirm: function( element, settings, action ) {
+					if ( 'committer' === settings.what && 'delete' === action ) {
+						return confirm( pluginDirectory.removeCommitterAYS );
+					}
+					return true;
+				}
+			}).on( 'wpListAddEnd', function() {
+				$( 'input[name="add_committer"]', '#add-committer' ).val( '' ).focus();
 			} );
 		},
 
@@ -92,8 +96,36 @@
 					$( 'a[className*=\':\']' ).unbind();
 				}
 			} );
+		},
+
+		prepareCommentForm: function( event ) {
+			event.preventDefault();
+
+			window.commentReply && commentReply.addcomment( $( '#post_ID' ).val() );
+
+			// Add a field with the custom comment type.
+			$( '#replyrow' ).find( '.comment-reply' ).append( $( '<input/>' ).attr({
+				type: 'hidden',
+				name: 'comment_type',
+				value: $( '.comments-box' ).data( 'comment-type' )
+			}) );
+		},
+
+		toggleCommitterForm: function( event ) {
+			var $form = $( '#add-committer' );
+
+			// Show/hide form.
+			$form.toggleClass( 'wp-hidden-children' );
+
+			// Focus on the input field, and on enter add the committer, don't save post.
+			$( 'input[name="add_committer"]', $form ).focus().on( 'keydown', function( event ) {
+				if ( 13 === event.which ) {
+					event.preventDefault();
+					$( '#add-committer-submit', $form ).click();
+				}
+			} );
 		}
 	};
 
 	$( PluginEdit.ready );
-} )( window.jQuery, window.wp );
+} )( window.jQuery, window.wp, window.pluginDirectory );

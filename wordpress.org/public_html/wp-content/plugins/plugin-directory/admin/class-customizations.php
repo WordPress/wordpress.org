@@ -29,10 +29,14 @@ class Customizations {
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 
-		add_filter( 'postbox_classes_plugin_internal-notes', array( $this, 'postbox_classes' ) );
+		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
+
+		add_filter( 'postbox_classes_plugin_internal-notes',    array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
+		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
+		add_filter( 'wp_ajax_add-committer',    array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
+		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
 	}
 
 	/**
@@ -60,9 +64,12 @@ class Customizations {
 	public function enqueue_assets( $hook_suffix ) {
 		global $post_type;
 
-		if ( 'post.php' == $hook_suffix && 'plugin' == $post_type ) {
+		if ( 'post.php' === $hook_suffix && 'plugin' === $post_type ) {
 			wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 1 );
-			wp_enqueue_script( 'plugin-admin-edit-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util' ), 1 );
+			wp_enqueue_script( 'plugin-admin-edit-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 1 );
+			wp_localize_script( 'plugin-admin-edit-js', 'pluginDirectory', array(
+				'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+			) );
 		}
 	}
 
@@ -135,18 +142,6 @@ class Customizations {
 	}
 
 	/**
-	 * Filters the postbox classes for custom comment meta boxes.
-	 *
-	 * @param array $classes An array of postbox classes.
-	 * @return array
-	 */
-	public function postbox_classes( $classes ) {
-		$classes[] = 'comments-meta-box';
-
-		return array_filter( $classes );
-	}
-
-	/**
 	 * Filter the action links displayed for each comment.
 	 *
 	 * Actions for internal notes can be limited to replying for plugin reviewers.
@@ -159,7 +154,7 @@ class Customizations {
 	 * @return array Array of comment actions.
 	 */
 	public function custom_comment_row_actions( $actions, $comment ) {
-		if ( 'internal-note' === $comment->comment_type ) {
+		if ( 'internal-note' === $comment->comment_type && isset( $_REQUEST['mode'] ) && 'single' === $_REQUEST['mode'] ) {
 			$allowed_actions = array( 'reply' => true );
 
 			if ( current_user_can( 'manage_comments' ) ) {

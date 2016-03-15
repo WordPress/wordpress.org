@@ -19,6 +19,7 @@
 .misc-pub-section label[for="post_status"]::before {
 	content: "\f173";
 }
+
 .misc-pub-section label[for="tested_with"]::before {
 	content: "\f177";
 }
@@ -32,7 +33,7 @@
 	display: none;
 }
 
-.misc-pub-section .button-link {
+.button-link:not(.handlediv) {
 	color: #0073aa;
 	-webkit-transition-property: border, background, color;
 	transition-property: border, background, color;
@@ -40,11 +41,11 @@
 	transition-duration: .05s;
 	-webkit-transition-timing-function: ease-in-out;
 	transition-timing-function: ease-in-out;
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
-.misc-pub-section .button-link:hover,
-.misc-pub-section .button-link:active {
+.button-link:not(.handlediv):hover,
+.button-link:not(.handlediv):active {
 	color: #00a0d2;
 }
 
@@ -66,14 +67,20 @@
 	text-align: center;
 }
 
-.comments-meta-box.postbox .inside,
+#poststuff .comments-meta-box.postbox .inside,
+#poststuff .committers-meta-box.postbox .inside,
 .comments-meta-box .column-comment p {
 	margin: 0;
 	padding: 0;
+	border: 0;
 }
 
 .comments-meta-box .inside .row-actions {
 	line-height:18px;
+}
+
+.comments-meta-box .inside .column-author {
+	width: 20%;
 }
 
 .comments-meta-box .inside .column-author *:not(strong) {
@@ -89,7 +96,8 @@
 	margin: 0;
 }
 
-.comments-meta-box .comments-box {
+.comments-meta-box .comments-box,
+.committers-meta-box .wp-list-table {
 	border: 0 none;
 }
 
@@ -122,4 +130,21 @@
 	.comments-meta-box #edithead .inside input {
 		width: 100%;
 	}
+}
+
+/* Committers meta box */
+.add-committer {
+	padding: 0 12px 12px;
+}
+
+.add-committer .button-link {
+	font-weight: 600;
+	margin: 10px 0;
+}
+
+.add-committer input[type="text"] {
+	margin: 0 0 1em;
+	max-width: 260px;
+	vertical-align: baseline;
+	width: 100%;
 }
