@@ -148,3 +148,8 @@
 	vertical-align: baseline;
 	width: 100%;
 }
+
+.add-committer .notice {
+	display: block;
+    padding: 0.5em 0 0.5em 1em;
+}

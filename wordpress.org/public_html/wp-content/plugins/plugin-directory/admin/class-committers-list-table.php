@@ -121,6 +121,7 @@ class Committers_List_Table extends \WP_List_Table {
 				<button type="button" id="add-committer-toggle" class="button-link"><?php _e( '+ Add New Committer', 'wporg-plugins' ); ?></button>
 				<p class="wp-hidden-child">
 					<?php wp_nonce_field( 'add-committer', '_ajax_nonce', false ); ?>
+					<span id="committer-error" class="notice notice-alt notice-error" style="display:none;"></span>
 					<input type="text" name="add_committer" class="form-required" value="" aria-required="true">
 					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Committer', 'wporg-plugins' ); ?>">
 				</p>

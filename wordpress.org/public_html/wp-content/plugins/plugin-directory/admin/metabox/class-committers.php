@@ -21,40 +21,50 @@ class Committers {
 		return array_filter( $classes );
 	}
 
+	/**
+	 * Displays a list of committers for the current plugin.
+	 */
 	public static function display() {
 		$list = new Committers_List_Table();
 		$list->prepare_items();
 		$list->display();
 	}
 
+	/**
+	 * Ajax handler for adding a new committer.
+	 */
 	public static function add_committer() {
 		check_ajax_referer( 'add-committer' );
 
-		$login   = isset( $_POST['add_committer'] ) ? sanitize_user( $_POST['add_committer'] ) : '';
-		$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+		$login    = isset( $_POST['add_committer'] ) ? sanitize_user( $_POST['add_committer'] ) : '';
+		$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+		$response = new \WP_Ajax_Response();
 
 		if ( ! $committer = get_user_by( 'login', $login ) ) {
-			wp_die( time() );
+			$response->add( array(
+				'what' => 'committer',
+				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s does not exist.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
+			) );
+			$response->send();
 		}
 
-		if ( ! current_user_can( 'manage_committers', $post_id ) ) {
-		//	wp_die( -1 );
+		// @todo: Capabilities.
+		if ( ! current_user_can( 'add_committers', $post_id ) ) {
+			//	wp_die( -1 );
 		}
 		global $post, $wpdb;
 
-		$response = new \WP_Ajax_Response();
-		$post     = get_post( $post_id );
-
+		$post   = get_post( $post_id );
 		$result = $wpdb->insert( PLUGINS_TABLE_PREFIX . 'svn_access', array(
 			'path'   => "/{$post->post_name}",
 			'user'   => $login,
 			'access' => 'rw',
 		) );
-
 		if ( ! $result ) {
-			$message = __( 'An error has occurred. Please reload the page and try again.' );
-			if ( is_wp_error( $result ) && $result->get_error_message() ) {
-				$message = $result->get_error_message();
+			if ( 'Duplicate entry' === substr( $wpdb->last_error, 0, 15 ) ) {
+				$message = __( 'Duplicate committer detected.', 'wporg-plugins' );
+			} else {
+				$message = __( 'An error has occurred. Please reload the page and try again.', 'wporg-plugins' );
 			}
 
 			$response->add( array(
@@ -75,25 +85,35 @@ class Committers {
 		$response->send();
 	}
 
+	/**
+	 * Ajax handler for removing a committer.
+	 */
 	public static function remove_committer() {
 		$id      = isset( $_POST['id'] )      ? (int) $_POST['id']      : 0;
 		$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( "remove-committer-$id" );
 
+		$response = new \WP_Ajax_Response();
+
 		if ( ! $committer = get_user_by( 'id', $id ) ) {
-			wp_die( time() );
+			$response->add( array(
+				'what' => 'committer',
+				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s does not exist.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
+			) );
+			$response->send();
 		}
 
-		if ( ! current_user_can( 'manage_committers', $post_id ) ) {
-		//	wp_die( -1 );
+		// @todo: Capabilities.
+		if ( ! current_user_can( 'remove_committers', $post_id ) ) {
+			//	wp_die( -1 );
 		}
 
 		$plugin_slug = get_post( $post_id )->post_name;
 
 		$result = $GLOBALS['wpdb']->delete( PLUGINS_TABLE_PREFIX . 'svn_access', array(
-			'path'   => "/{$plugin_slug}",
-			'user'   => $committer->user_login,
+			'path' => "/{$plugin_slug}",
+			'user' => $committer->user_login,
 		) );
 
 		wp_die( $result );

@@ -32,7 +32,9 @@
 						return confirm( pluginDirectory.removeCommitterAYS );
 					}
 					return true;
-				}
+				},
+				addAfter: PluginEdit.committerRequestAfter,
+				delAfter: PluginEdit.committerRequestAfter
 			}).on( 'wpListAddEnd', function() {
 				$( 'input[name="add_committer"]', '#add-committer' ).val( '' ).focus();
 			} );
@@ -124,6 +126,14 @@
 					$( '#add-committer-submit', $form ).click();
 				}
 			} );
+		},
+
+		committerRequestAfter: function( response, data ) {
+			if ( data.parsed.errors ) {
+				$( '#committer-error' ).text( data.parsed.responses[0].errors[0].message ).show();
+			} else {
+				$( '#committer-error' ).empty().hide();
+			}
 		}
 	};
 
