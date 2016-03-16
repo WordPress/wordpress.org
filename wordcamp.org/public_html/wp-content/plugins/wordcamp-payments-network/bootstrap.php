@@ -21,6 +21,7 @@ if ( is_admin() || defined( 'DOING_CRON' ) ) {
 	 */
 	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/wordcamp-budgets.php' );
 	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/sponsor-invoice.php' );
+	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/reimbursement-request.php' );
 
 	require_once( __DIR__ . '/includes/wordcamp-budgets-dashboard.php' );
 	require_once( __DIR__ . '/includes/payment-requests-dashboard.php' );
