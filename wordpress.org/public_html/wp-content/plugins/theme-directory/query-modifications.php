@@ -51,13 +51,27 @@ function wporg_themes_pre_get_posts( $query ) {
 				$query->query_vars['post__in'] = array( 0 );
 			}
 
-			$query->query_vars['orderby'] = 'RAND(' . date( 'Ymd' ) . ')';
 			$query->query_vars['posts_per_page'] = $query->found_posts = 15;
 			// Featured themes require it to have been updated within the last year, not the default 2.
 			$query->query_vars['date_query']['recent_themes_only'] = array(
 				'column' => 'post_modified',
 				'after'  => date( 'Y-m-d', strtotime( '-1 year' ) )
 			);
+
+			// Allow some themes to always be featured by setting a postmeta key.
+			// By searching for themes with both EXISTS and NOT EXISTS we can query for the existence (and then sort) or the non-existence.
+			$query->query_vars['meta_query'] = array(
+				array(
+					'key' => '_featured',
+					'meta_compare' => 'EXISTS'
+				),
+				array(
+					'key' => '_featured',
+					'compare' => 'NOT EXISTS'
+				),
+				'relation' => 'OR'
+			);
+			$query->query_vars['orderby'] = 'meta_value_num DESC, RAND(' . date( 'Ymd' ) . ')';
 			$query->query_vars['no_found_rows'] = true;
 			break;
 
