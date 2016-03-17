@@ -47,7 +47,7 @@ gp_tmpl_header();
 
 <?php if ( $has_error ) : ?>
 <div class="wporg-notice wporg-notice-warning">
-	<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a>. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $project->slug ); ?>">please contact the author.</a></p>
+	<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a>. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $project->slug ); ?>">please contact the author</a>.</p>
 </div>
 <?php endif; ?>
 
