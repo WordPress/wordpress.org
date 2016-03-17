@@ -134,6 +134,10 @@ function wporg_themes_custom_feed() {
 	if ( ! is_feed() ) {
 		return;
 	}
+	if ( 'repopackage' != get_query_var( 'post_type' ) ) {
+		return;
+	}
+
 	include __DIR__ . '/rss.php';
 	die();
 }
