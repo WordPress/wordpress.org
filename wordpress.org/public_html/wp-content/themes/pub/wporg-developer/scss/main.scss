@@ -954,24 +954,22 @@
 		h1 {
 			margin: 24px 0;
 			padding-left: 100px;
-			a {
-				margin-left: -100px;
-				color: #24831d;
-				font-family: $code-font;
-				font-size: 20px;
-				.hook-func {
-					color: #888888;
-				}
-				.arg-type {
-					color: #cd2f23;
-					font-style: italic;
-				}
-				.arg-name {
-					color: #0f55c8;
-				}
-				.arg-default {
-					color: #000000;
-				}
+			text-indent: -100px;
+			color: #24831d;
+			font-family: $code-font;
+			font-size: 20px;
+			.hook-func {
+				color: #888888;
+			}
+			.arg-type {
+				color: #cd2f23;
+				font-style: italic;
+			}
+			.arg-name {
+				color: #0f55c8;
+			}
+			.arg-default {
+				color: #000000;
 			}
 			a:hover {
 				border-bottom: 1px dotted #21759b;
@@ -1041,11 +1039,9 @@
 	&.archive, &.search {
 		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 			h1 {
-				a {
-					font-family: $body-font;
-					color: #21759b;
-					font-weight: normal;
-				}
+				font-family: $body-font;
+				color: #21759b;
+				font-weight: normal;
 			}
 			div {
 				&.sourcefile {
@@ -1559,9 +1555,7 @@
 		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 			h1 {
 				padding-left: 45px;
-				a {
-					margin-left: -45px;
-				}
+				text-indent: -45px;
 			}
 		}
 
@@ -1591,11 +1585,8 @@
 			h1 {
 				padding-left: 20px;
 				line-height: 2rem;
-
-				a {
-					margin-left: -20px;
-					font-size: 16px;
-				}
+				text-indent: -20px;
+				font-size: 16px;
 			}
 		}
 

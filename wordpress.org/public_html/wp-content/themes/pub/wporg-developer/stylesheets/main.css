@@ -1163,24 +1163,22 @@ input {
 .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
   margin: 24px 0;
   padding-left: 100px;
-}
-.devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
-  margin-left: -100px;
+  text-indent: -100px;
   color: #24831d;
   font-family: monospace;
   font-size: 20px;
 }
-.devhub-wrap .wp-parser-class h1 a .hook-func, .devhub-wrap .wp-parser-function h1 a .hook-func, .devhub-wrap .wp-parser-hook h1 a .hook-func, .devhub-wrap .wp-parser-method h1 a .hook-func {
+.devhub-wrap .wp-parser-class h1 .hook-func, .devhub-wrap .wp-parser-function h1 .hook-func, .devhub-wrap .wp-parser-hook h1 .hook-func, .devhub-wrap .wp-parser-method h1 .hook-func {
   color: #888888;
 }
-.devhub-wrap .wp-parser-class h1 a .arg-type, .devhub-wrap .wp-parser-function h1 a .arg-type, .devhub-wrap .wp-parser-hook h1 a .arg-type, .devhub-wrap .wp-parser-method h1 a .arg-type {
+.devhub-wrap .wp-parser-class h1 .arg-type, .devhub-wrap .wp-parser-function h1 .arg-type, .devhub-wrap .wp-parser-hook h1 .arg-type, .devhub-wrap .wp-parser-method h1 .arg-type {
   color: #cd2f23;
   font-style: italic;
 }
-.devhub-wrap .wp-parser-class h1 a .arg-name, .devhub-wrap .wp-parser-function h1 a .arg-name, .devhub-wrap .wp-parser-hook h1 a .arg-name, .devhub-wrap .wp-parser-method h1 a .arg-name {
+.devhub-wrap .wp-parser-class h1 .arg-name, .devhub-wrap .wp-parser-function h1 .arg-name, .devhub-wrap .wp-parser-hook h1 .arg-name, .devhub-wrap .wp-parser-method h1 .arg-name {
   color: #0f55c8;
 }
-.devhub-wrap .wp-parser-class h1 a .arg-default, .devhub-wrap .wp-parser-function h1 a .arg-default, .devhub-wrap .wp-parser-hook h1 a .arg-default, .devhub-wrap .wp-parser-method h1 a .arg-default {
+.devhub-wrap .wp-parser-class h1 .arg-default, .devhub-wrap .wp-parser-function h1 .arg-default, .devhub-wrap .wp-parser-hook h1 .arg-default, .devhub-wrap .wp-parser-method h1 .arg-default {
   color: #000000;
 }
 .devhub-wrap .wp-parser-class h1 a:hover, .devhub-wrap .wp-parser-function h1 a:hover, .devhub-wrap .wp-parser-hook h1 a:hover, .devhub-wrap .wp-parser-method h1 a:hover {
@@ -1245,7 +1243,7 @@ input {
 .devhub-wrap .callout:before {
   top: 0.2em;
 }
-.devhub-wrap.archive .wp-parser-class h1 a, .devhub-wrap.archive .wp-parser-function h1 a, .devhub-wrap.archive .wp-parser-hook h1 a, .devhub-wrap.archive .wp-parser-method h1 a, .devhub-wrap.search .wp-parser-class h1 a, .devhub-wrap.search .wp-parser-function h1 a, .devhub-wrap.search .wp-parser-hook h1 a, .devhub-wrap.search .wp-parser-method h1 a {
+.devhub-wrap.archive .wp-parser-class h1, .devhub-wrap.archive .wp-parser-function h1, .devhub-wrap.archive .wp-parser-hook h1, .devhub-wrap.archive .wp-parser-method h1, .devhub-wrap.search .wp-parser-class h1, .devhub-wrap.search .wp-parser-function h1, .devhub-wrap.search .wp-parser-hook h1, .devhub-wrap.search .wp-parser-method h1 {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #21759b;
   font-weight: normal;
@@ -1627,9 +1625,7 @@ input {
   }
   .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
     padding-left: 45px;
-  }
-  .devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
-    margin-left: -45px;
+    text-indent: -45px;
   }
   .devhub-wrap .two-columns .box {
     width: 99%;
@@ -1650,9 +1646,7 @@ input {
   .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
     padding-left: 20px;
     line-height: 2rem;
-  }
-  .devhub-wrap .wp-parser-class h1 a, .devhub-wrap .wp-parser-function h1 a, .devhub-wrap .wp-parser-hook h1 a, .devhub-wrap .wp-parser-method h1 a {
-    margin-left: -20px;
+    text-indent: -20px;
     font-size: 16px;
   }
   .devhub-wrap.single-wp-parser-function .comment-list li, .devhub-wrap.single-wp-parser-method .comment-list li, .devhub-wrap.single-wp-parser-hook .comment-list li {

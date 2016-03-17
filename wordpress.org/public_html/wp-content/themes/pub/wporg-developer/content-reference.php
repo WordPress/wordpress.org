@@ -6,7 +6,7 @@
 
 	<?php echo get_private_access_message(); ?>
 
-	<h1><a href="<?php the_permalink() ?>"><?php echo get_signature(); ?></a></h1>
+	<h1><?php echo get_signature(); ?></h1>
 
 	<section class="summary">
 		<?php echo get_summary(); ?>
