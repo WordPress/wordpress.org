@@ -515,7 +515,7 @@ namespace DevHub {
 
 		$signature .= ' (';
 		if ( $args = implode( ', ', $args_strings ) ) {
-			$signature .= $args . ' ';
+			$signature .= $args . '&nbsp;';
 		}
 		$signature .= ')';
 
