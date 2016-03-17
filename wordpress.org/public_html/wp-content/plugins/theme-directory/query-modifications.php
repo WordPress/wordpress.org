@@ -35,7 +35,7 @@ function wporg_themes_pre_get_posts( $query ) {
 
 	switch ( $query->query_vars['browse'] ) {
 		case 'new':
-			$query->query_vars['orderby'] = 'ID';
+			$query->query_vars['orderby'] = 'post_date';
 			$query->query_vars['order'] = 'DESC';
 			break;
 
