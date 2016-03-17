@@ -7,7 +7,7 @@ _get_list_table( 'WP_List_Table' );
 /**
  * Comments list table for comments meta box.
  *
- * @package WordPressdotorg\Plugin_Directory\Admin
+ * @package WordPressdotorg\Plugin_Directory\Admin\List_Table
  */
 class Committers extends \WP_List_Table {
 
