@@ -1,5 +1,5 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Admin;
+namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 
 _get_list_table( 'WP_Post_Comments_List_Table' );
 
@@ -8,7 +8,7 @@ _get_list_table( 'WP_Post_Comments_List_Table' );
  *
  * @package WordPressdotorg\Plugin_Directory\Admin
  */
-class Plugin_Comments_List_Table extends \WP_Post_Comments_List_Table {
+class Plugin_Comments extends \WP_Post_Comments_List_Table {
 	/**
 	 * Comment type.
 	 *

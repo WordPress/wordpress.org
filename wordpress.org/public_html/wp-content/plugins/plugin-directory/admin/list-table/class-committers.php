@@ -1,5 +1,5 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Admin;
+namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 _get_list_table( 'WP_List_Table' );
@@ -9,7 +9,7 @@ _get_list_table( 'WP_List_Table' );
  *
  * @package WordPressdotorg\Plugin_Directory\Admin
  */
-class Committers_List_Table extends \WP_List_Table {
+class Committers extends \WP_List_Table {
 
 	/**
 	 * Constructor.

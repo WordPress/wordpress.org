@@ -1,6 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
-use WordPressdotorg\Plugin_Directory\Admin\Plugin_Comments_List_Table;
+use WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Comments;
 
 /**
  * The Internal Notes admin metabox.
@@ -25,7 +25,7 @@ class Internal_Notes {
 	 * Displays comment box for internal notes.
 	 */
 	public static function display() {
-		$wp_list_table = new Plugin_Comments_List_Table( array(
+		$wp_list_table = new Plugin_Comments( array(
 			'comment_type' => 'internal-note',
 		) );
 		wp_nonce_field( 'get-comments', 'add_comment_nonce', false );

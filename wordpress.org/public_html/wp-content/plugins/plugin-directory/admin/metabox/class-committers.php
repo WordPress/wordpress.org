@@ -1,6 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
-use WordPressdotorg\Plugin_Directory\Admin\Committers_List_Table;
+use WordPressdotorg\Plugin_Directory\Admin\List_Table;
 
 /**
  * The Plugin Committers admin metabox.
@@ -25,7 +25,7 @@ class Committers {
 	 * Displays a list of committers for the current plugin.
 	 */
 	public static function display() {
-		$list = new Committers_List_Table();
+		$list = new List_Table\Committers();
 		$list->prepare_items();
 		$list->display();
 	}
@@ -74,7 +74,7 @@ class Committers {
 			$response->send();
 		}
 
-		$wp_list_table = new Committers_List_Table();
+		$wp_list_table = new List_Table\Committers();
 
 		$response->add( array(
 			'what'     => 'committer',
