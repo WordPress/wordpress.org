@@ -28,13 +28,9 @@ if ( ! headers_sent() ) {
 <?php
 if ( have_posts() ) :
 	while ( have_posts() ) : the_post();
-
-	// setup the theme variable
-
-	$themes = wporg_themes_get_themes_for_query();
-	$theme = $themes['themes'][0];
-
-	// note, $theme contains things like active installs and other data to be added eventually
+		// setup the theme variable
+		// note, $theme contains things like active installs and other data to be added eventually
+		$theme = wporg_themes_theme_information( $post->post_name );
 
 	?>
 		<div <?php post_class( 'wp-embed' ); ?>>
@@ -46,11 +42,11 @@ if ( have_posts() ) :
 
 			<p class="wp-embed-heading">
 				<a href="<?php the_permalink(); ?>" target="_top">
-					<?php the_title(); ?>
+					<?php echo esc_html( $theme->name ); ?>
 				</a>
 			</p>
 
-			<div class="wp-embed-excerpt"><?php the_excerpt_embed(); ?></div>
+			<div class="wp-embed-excerpt"><?php echo wp_trim_words( $theme->description, 55 ); ?></div>
 
 			<?php
 			/**

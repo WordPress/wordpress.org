@@ -1,30 +1,33 @@
 <?php
 /*
-Plugin Name: Theme Repository
-Plugin URI:
-Description: Transforms a WordPress site in The Official Theme Directory.
-Version: 0.1
-Author: wordpressdotorg
-Author URI: http://wordpress.org/
-Text Domain: wporg-themes
-License: GPLv2
-License URI: http://opensource.org/licenses/gpl-2.0.php
-*/
+ * Plugin Name: Theme Repository
+ * Plugin URI: https://wordpress.org/themes/
+ * Description: Transforms a WordPress site in The Official Theme Directory.
+ * Version: 1.0
+ * Author: wordpressdotorg
+ * Author URI: http://wordpress.org/
+ * Text Domain: wporg-themes
+ * License: GPLv2
+ * License URI: http://opensource.org/licenses/gpl-2.0.php
+ */
 
 // Load base repo package.
-include_once plugin_dir_path( __FILE__ ) . 'class-repo-package.php';
+include __DIR__ . '/class-repo-package.php';
 
 // Load theme repo package.
-include_once plugin_dir_path( __FILE__ ) . 'class-wporg-themes-repo-package.php';
+include __DIR__ . '/class-wporg-themes-repo-package.php';
 
 // Load uploader.
-include_once plugin_dir_path( __FILE__ ) . 'upload.php';
+include __DIR__ . '/upload.php';
 
 // Load Themes API adjustments.
-include_once plugin_dir_path( __FILE__ ) . 'themes-api.php';
+include __DIR__ . '/themes-api.php';
 
 // Load adjustments to the edit.php screen for repopackage posts.
-include_once plugin_dir_path( __FILE__ ) . 'admin-edit.php';
+include __DIR__ . '/admin-edit.php';
+
+// Load the query modifications needed for the directory.
+include __DIR__ . '/query-modifications.php';
 
 /**
  * Things to change on activation.
@@ -147,8 +150,10 @@ function wporg_themes_init() {
 	}
 
 	// Add the browse/* views
-	add_rewrite_tag( '%browse%', '(featured|popular|new|favorites)' );
+	add_rewrite_tag( '%browse%', '(featured|popular|new|updated|favorites)' );
 	add_permastruct( 'browse', 'browse/%browse%' );
+	add_rewrite_tag( '%favorites_user%', '([^/]+)' );
+	//add_permastruct( 'favorites_user', 'browse/favorites/%favorites_user%' ); // TODO: Implment in JS before enabling
 
 	if ( ! defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
 		define( 'WPORG_THEME_DIRECTORY_BLOGID', get_current_blog_id() );
@@ -743,6 +748,31 @@ function wporg_themes_prepare_themes_for_js() {
 	return wporg_themes_get_themes_for_query();
 }
 
+function wporg_themes_theme_information( $slug ) {
+	return wporg_themes_query_api( 'theme_information', array(
+		'slug' => $slug,
+		'fields' => array(
+			'description' => true,
+			'sections' => false,
+			'tested' => true,
+			'requires' => true,
+			'downloaded' => false,
+			'downloadlink' => true,
+			'last_updated' => true,
+			'homepage' => true,
+			'theme_url' => true,
+			'parent' => true,
+			'tags' => true,
+			'rating' => true,
+			'ratings' => true,
+			'num_ratings' => true,
+			'extended_author' => true,
+			'photon_screenshots' => true,
+			'active_installs' => true,
+		)
+	) );
+}
+
 /**
  * Makes a query against api.wordpress.org/themes/info/1.0/ without making a HTTP call
  * Switches to the appropriate blog for the query.
@@ -750,9 +780,7 @@ function wporg_themes_prepare_themes_for_js() {
 function wporg_themes_query_api( $method, $args = array() ) {
 	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
 
-	switch_to_blog( WPORG_THEME_DIRECTORY_BLOGID );
 	$api = new Themes_API( $method, $args );
-	restore_current_blog();
 
 	return $api->response;
 }
@@ -965,13 +993,47 @@ function wporg_themes_maybe_schedule_daily_job() {
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
 
 /**
- * Correct the post type for theme queries to be "repopackage". This fixes the post type for embeds.
+ * Filter the URLs to use the current localized domain name, rather than WordPress.org.
+ *
+ * The Theme Directory is available at multiple URLs (internationalised domains), this method allows
+ * for the one blog (a single blog_id) to be presented at multiple URLs yet have correct localised links.
+ *
+ * This method works in conjunction with a filter in sunrise.php, duplicated here for transparency:
+ *
+ * // Make the Plugin Directory available at /plugins/ on all rosetta sites.
+ * function wporg_themes_on_rosetta_domains( $site, $domain, $path, $segments ) {
+ *     // All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
+ *     if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/themes/' == substr( $path . '/', 0, 8 ) ) {
+ *          $site = get_blog_details( WPORG_THEME_DIRECTORY_BLOGID );
+ *          if ( $site ) {
+ *              $site = clone $site;
+ *              // 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
+ *              $site->site_id = 6;
+ *              return $site;
+ *          }
+ *     }
+ *
+ *     return $site;
+ * }
+ * add_filter( 'pre_get_site_by_path', 'wporg_themes_on_rosetta_domains', 10, 4 );
+ *
+ * @param string $url The URL to be localized.
+ * @return string
  */
-function wporg_themes_adjust_main_query( $query ) {
-	if ( $query->is_main_query() && $query->get( 'name' ) && ! $query->is_404() ) {
-		$query->query_vars['post_type'] = 'repopackage';
+function wporg_themes_rosetta_network_localize_url( $url ) {
+	static $localized_url = null;
+
+	if ( get_current_blog_id() != WPORG_THEME_DIRECTORY_BLOGID ) {
+		return $url;
 	}
+
+	if ( is_null( $localized_url ) ) {
+		$localized_url = 'https://' . preg_replace( '![^a-z.-]+!', '', $_SERVER['HTTP_HOST'] );
+	}
+
+	return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
 }
-add_action( 'pre_get_posts', 'wporg_themes_adjust_main_query');
-
-
+if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_THEME_DIRECTORY_BLOGID' ) ) {
+	add_filter( 'option_home',    'wporg_themes_rosetta_network_localize_url' );
+	add_filter( 'option_siteurl', 'wporg_themes_rosetta_network_localize_url' );
+}

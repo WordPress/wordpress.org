@@ -11,14 +11,12 @@
  * @package wporg-themes
  */
 
-global $themes;
-
 get_header();
 ?>
 	<div id="themes" class="wrap">
 		<div class="wp-filter">
 			<div class="filter-count">
-				<span class="count theme-count"><?php echo number_format_i18n( $themes['total'] ); ?></span>
+				<span class="count theme-count"><?php echo number_format_i18n( $wp_query->found_posts ); ?></span>
 			</div>
 
 			<ul class="filter-links">
@@ -66,26 +64,29 @@ get_header();
 			<div class="themes">
 				<?php
 				if ( get_query_var('name') && !is_404() ) {
-					$theme = reset( $themes['themes'] );
-					include __DIR__ . '/theme-single.php';
+					while ( have_posts() ) {
+						the_post();
+						$theme = wporg_themes_theme_information( $post->post_name );
+						include __DIR__ . '/theme-single.php';
+					}
 				} else {
-					foreach ( $themes['themes'] as $theme ) {
+					while ( have_posts() ) {
+						the_post();
+						$theme = wporg_themes_theme_information( $post->post_name );
 						include __DIR__ . '/theme.php';
 					}
 
 					// Add the navigation between pages
-					if ( $themes['pages'] > 1 ) {
-						echo '<nav class="posts-navigation">';
-						echo paginate_links( array(
-							'total' => $themes['pages'],
-							'mid_size' => 3,
-						) );
-						echo '</nav>';
-					}
+					echo '<nav class="posts-navigation">';
+					echo paginate_links( array(
+						'mid_size' => 3,
+					) );
+					echo '</nav>';
 				}
 				?>
 			</div>
 
+			<?php /* TODO: Don't display this for no-js queries where $wp_query->post_count > 0, but JS needs it too. */ ?>
 			<p class="no-themes"><?php _e( 'No themes found. Try a different search.', 'wporg-themes' ); ?></p>
 		</div>
 		<div class="theme-install-overlay"></div>

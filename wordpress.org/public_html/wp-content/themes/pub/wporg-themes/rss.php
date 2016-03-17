@@ -20,8 +20,9 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 	<sy:updateFrequency>1</sy:updateFrequency>
 	<?php
 
-	$themes = wporg_themes_get_themes_for_query();
-	foreach ( $themes['themes'] as $theme ) :
+	while ( have_posts() ) :
+		the_post();
+		$theme = wporg_themes_theme_information( $post->post_name );
 	?>
 	<item>
 		<title><?php echo esc_html( $theme->name ); ?></title>
@@ -35,6 +36,6 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 		<description><![CDATA[<?php echo esc_html( $theme->description ); ?>]]></description>
 		<content:encoded><![CDATA[<?php echo esc_html( $theme->description ); ?>]]></content:encoded>
 	</item>
-	<?php endforeach; ?>
+	<?php endwhile; ?>
 </channel>
 </rss>

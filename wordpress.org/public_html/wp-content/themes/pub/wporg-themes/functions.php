@@ -128,22 +128,6 @@ function wporg_themes_body_class( $classes ) {
 add_filter( 'body_class', 'wporg_themes_body_class' );
 
 /**
- * Prevent 404 responses when we've got a theme via the API.
- */
-function wporg_themes_prevent_404() {
-	global $wp_query;
-	if ( ! is_404() ) {
-		return;
-	}
-	$themes = wporg_themes_get_themes_for_query();
-	if ( $themes['total'] ) {
-		$wp_query->is_404 = false;
-		status_header( 200 );
-	}
-}
-add_filter( 'template_redirect', 'wporg_themes_prevent_404' );
-
-/**
  * Overrides feeds to use a custom RSS2 feed which contains the current requests themes.
  */
 function wporg_themes_custom_feed() {
@@ -251,5 +235,5 @@ function wporg_themes_embed_template( $template ) {
 	}
 	return $template;
 }
-add_filter('embed_template', 'wporg_themes_embed_template');
+add_filter( 'embed_template', 'wporg_themes_embed_template' );
 
