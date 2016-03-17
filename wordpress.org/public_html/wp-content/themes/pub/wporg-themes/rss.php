@@ -22,6 +22,7 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
 
 	while ( have_posts() ) :
 		the_post();
+		global $post;
 		$theme = wporg_themes_theme_information( $post->post_name );
 	?>
 	<item>
