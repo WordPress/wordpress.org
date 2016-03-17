@@ -55,7 +55,7 @@ function wporg_themes_pre_get_posts( $query ) {
 			$query->query_vars['posts_per_page'] = $query->found_posts = 15;
 			// Featured themes require it to have been updated within the last year, not the default 2.
 			$query->query_vars['date_query']['recent_themes_only'] = array(
-				'column' => 'post_modified_gmt',
+				'column' => 'post_modified',
 				'after'  => date( 'Y-m-d', strtotime( '-1 year' ) )
 			);
 			$query->query_vars['no_found_rows'] = true;
@@ -89,7 +89,7 @@ function wporg_themes_pre_get_posts( $query ) {
 			// Only include themes that have existed for at least 2 weeks into the popular listing
 			// This avoids cases where a new theme skews our popularity algorithms.
 			$query->query_vars['date_query']['existing_themes_only'] = array(
-				'column' => 'post_date_gmt',
+				'column' => 'post_date',
 				'before'  => date( 'Y-m-d', strtotime( '-2 weeks' ) )
 			);
 
@@ -103,7 +103,7 @@ function wporg_themes_pre_get_posts( $query ) {
 	// Unless a specific theme, or author is being requested, limit results to the last 2 years.
 	if ( empty( $query->query_vars['name'] ) && empty( $query->query_vars['author_name'] ) && ! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) ) {
 		$query->query_vars['date_query']['recent_themes_only'] = array(
-			'column' => 'post_modified_gmt',
+			'column' => 'post_modified',
 			'after'  => date( 'Y-m-d', strtotime( '-2 years' ) ),
 		);
 	}
