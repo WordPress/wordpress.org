@@ -109,8 +109,8 @@ function wporg_themes_pre_get_posts( $query ) {
 
 			// Sort by the popularity meta key
 			$query->query_vars['meta_key'] = '_popularity';
-			$query->query_vars['meta_type'] = 'DECIMAL';
-			$query->query_vars['orderby'] = 'meta_value';
+			$query->query_vars['meta_type'] = 'DECIMAL(20,10)';
+			$query->query_vars['orderby'] = 'meta_value DESC';
 			break;
 	}
 
