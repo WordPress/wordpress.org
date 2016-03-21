@@ -433,7 +433,7 @@ function save_request( $post_id, $post ) {
 		return;
 	}
 
-	if ( empty( $_POST ) ) {
+	if ( empty( $_POST ) || ! empty( $_POST['wcpn-request-import'] ) ) {
 		return;
 	}
 
