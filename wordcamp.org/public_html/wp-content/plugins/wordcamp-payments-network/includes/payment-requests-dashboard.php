@@ -3,7 +3,6 @@
 class Payment_Requests_Dashboard {
 	public static $list_table;
 	public static $db_version = 7;
-	public static $import_results = null;
 
 	/**
 	 * Runs during plugins_loaded, doh.
@@ -18,7 +17,6 @@ class Payment_Requests_Dashboard {
 		add_action( 'wordcamp_payments_aggregate', array( __CLASS__, 'aggregate' ) );
 		add_action( 'network_admin_menu', array( __CLASS__, 'network_admin_menu' ) );
 		add_action( 'init', array( __CLASS__, 'upgrade' ) );
-		add_action( 'init', array( __CLASS__, 'process_import_request' ) );
 
 		// Diff-based updates to the index.
 		add_action( 'save_post', array( __CLASS__, 'save_post' ) );
@@ -247,14 +245,7 @@ class Payment_Requests_Dashboard {
 
 			<h3 class="nav-tab-wrapper"><?php self::render_dashboard_tabs(); ?></h3>
 
-			<?php
-				if ( 'import' == self::get_current_tab() ) {
-					self::render_import_tab();
-				}
-				else {
-					self::render_table_tabs();
-				}
-			?>
+			<?php self::render_table_tabs(); ?>
 
 		</div> <!-- /wrap -->
 
@@ -284,145 +275,6 @@ class Payment_Requests_Dashboard {
 	}
 
 	/**
-	 * Renders the import tab.
-	 */
-	public static function render_import_tab() {
-		?>
-		<?php if ( isset( self::$import_results ) ) : ?>
-		<h2>Import Results</h2>
-		<pre><?php echo esc_html( print_r( self::$import_results, true ) ); ?></pre>
-		<?php endif; ?>
-
-		<p>Import payment results from JPM reports CSV.</p>
-		<form method="post" enctype="multipart/form-data">
-			<?php wp_nonce_field( 'import', 'wcpn_request_import' ); ?>
-			<label>Import File:</label>
-			<input type="file" name="wcpn_import_file" />
-			<?php submit_button( 'Import' ); ?>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Process a payments import, runs during init.
-	 */
-	public static function process_import_request() {
-		if ( empty( $_POST['submit'] ) || 'import' != self::get_current_tab() ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'manage_network' ) || ! check_admin_referer( 'import', 'wcpn_request_import' ) ) {
-			return;
-		}
-
-		if ( empty( $_FILES['wcpn_import_file'] ) ) {
-			wp_die( 'Please select a file to import.' );
-		}
-
-		$file = $_FILES['wcpn_import_file'];
-		if ( $file['type'] != 'text/csv' ) {
-			wp_die( 'Please upload a text/csv file.' );
-		}
-
-		if ( $file['size'] < 1 ) {
-			wp_die( 'Please upload a file that is not empty.' );
-		}
-
-		if ( $file['error'] ) {
-			wp_die( 'Some other error has occurred. Sorry.' );
-		}
-
-		$handle = fopen( $file['tmp_name'], 'r' );
-		$count = 0;
-		$header = array();
-		$results = array();
-
-		while ( ( $line = fgetcsv( $handle ) ) !== false ) {
-			// Skip first line.
-			if ( ++$count == 1 ) {
-				continue;
-			}
-
-			$entry = array(
-				'type' => strtolower( $line[11] ),
-				'status' => strtolower( $line[7] ),
-				'amount' => round( floatval( $line[13] ), 2 ),
-				'currency' => strtoupper( $line[14] ),
-				'blog_id' => null,
-				'post_id' => null,
-				'processed' => false,
-				'data' => null,
-			);
-
-			switch ( $entry['type'] ) {
-				case 'wire':
-					if ( ! empty( $line[44] ) && preg_match( '#^wcb-([0-9]+)-([0-9]+)$#', $line[44], $matches ) ) {
-						$entry['blog_id'] = $matches[1];
-						$entry['post_id'] = $matches[2];
-					}
-					break;
-				case 'ach':
-					if ( ! empty( $line[91] ) && preg_match( '#^([0-9]+)-([0-9]+)$#', $line[91], $matches ) ) {
-						$entry['blog_id'] = $matches[1];
-						$entry['post_id'] = $matches[2];
-					}
-					break;
-			}
-
-			if ( empty( $entry['blog_id'] ) || empty( $entry['post_id'] ) ) {
-				$results[] = $entry;
-				continue;
-			}
-
-			// Don't consume memory.
-			wp_suspend_cache_addition( true );
-			switch_to_blog( $entry['blog_id'] );
-
-			$results[] = self::_import_process_entry( $entry );
-
-			restore_current_blog();
-			wp_suspend_cache_addition( false );
-		}
-
-		fclose( $handle );
-		self::$import_results = $results;
-	}
-
-	/**
-	 * Process a single import entry.
-	 *
-	 * Runs in a switch_to_blog() context.
-	 *
-	 * @param $entry Array
-	 * @return Array
-	 */
-	private static function _import_process_entry( $entry ) {
-		$post = get_post( $entry['post_id'] );
-		if ( ! $post || $post->post_type != 'wcp_payment_request' ) {
-			$entry['data'] = 'Post not found or post type mismatch';
-			return $entry;
-		}
-
-		if ( $entry['currency'] != get_post_meta( $post->ID, '_camppayments_currency', true ) ) {
-			$entry['data'] = 'Currency mismatch';
-			return $entry;
-		}
-
-		$amount_orig = floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) );
-		$amount_orig = round( $amount_orig, 2 );
-		if ( (string) $entry['amount'] != (string) $amount_orig ) {
-			$entry['data'] = 'Payment amount mismatch';
-			return $entry;
-		}
-
-		// @todo Do some magic here.
-
-		// All good.
-		$entry['processed'] = true;
-		return $entry;
-	}
-
-	/**
 	 * Loads and initializes the list table object.
 	 */
 	public static function pre_render_dashboard() {
@@ -446,8 +298,6 @@ class Payment_Requests_Dashboard {
 			'paid',
 			'cancelled-failed',
 			'incomplete',
-
-			'import',
 		);
 
 		if ( isset( $_REQUEST['wcp-section'] ) && in_array( $_REQUEST['wcp-section'], $tabs ) ) {
@@ -471,7 +321,6 @@ class Payment_Requests_Dashboard {
 			'paid'             => __( 'Paid', 'wordcamporg' ),
 			'cancelled-failed' => __( 'Cancelled/Failed', 'wordcamporg' ),
 			'incomplete'       => __( 'Incomplete', 'wordcamporg' ),
-			'import'           => __( 'Import', 'wordcamporg' ),
 		);
 
 		foreach ( $sections as $section_key => $section_caption ) {

@@ -4,7 +4,7 @@ namespace WordCamp\Budgets_Dashboard\Reimbursement_Requests;
 
 defined( 'WPINC' ) or die();
 
-const LATEST_DATABASE_VERSION = 2;
+const LATEST_DATABASE_VERSION = 3;
 
 if ( is_network_admin() ) {
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
@@ -153,6 +153,7 @@ function upgrade_database() {
 			request_id     int( 11 )        unsigned NOT NULL default '0',
 			date_requested int( 11 )        unsigned NOT NULL default '0',
 			date_paid      int( 11 )        unsigned NOT NULL default '0',
+			date_updated   int( 11 )        unsigned NOT NULL default '0',
 			request_title  varchar( 75 )             NOT NULL default '',
 			status         varchar( 30 )             NOT NULL default '',
 			wordcamp_name  varchar( 75 )             NOT NULL default '',
@@ -197,7 +198,7 @@ function update_index_row( $request_id, $request ) {
 	}
 
 	// Update the timestamp and logs.
-	update_post_meta( $request_id, '_wcb_updated_timestamp', time() );
+	update_post_meta( $request->ID, '_wcb_updated_timestamp', time() );
 
 	// Back-compat.
 	$back_compat_statuses = array(
@@ -226,6 +227,7 @@ function update_index_row( $request_id, $request ) {
 		'request_id'     => $request_id,
 		'date_requested' => strtotime( $request->post_date_gmt ),
 		'date_paid'      => get_post_meta( $request_id, '_wcbrr_date_paid', true ),
+		'date_updated'   => absint( get_post_meta( $request->ID, '_wcb_updated_timestamp', time() ) ),
 		'request_title'  => $request->post_title,
 		'status'         => $request->post_status,
 		'wordcamp_name'  => get_wordcamp_name(),

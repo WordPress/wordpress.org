@@ -16,6 +16,8 @@ add_action( 'admin_init', __NAMESPACE__ . '\process_export_request' );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_approve', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_set_pending_payment', 11 );
 
+add_action( 'admin_init', __NAMESPACE__ . '\process_import_request', 11 );
+
 /**
  * Register the Budgets Dashboard menu
  *
@@ -128,7 +130,21 @@ function get_export_types() {
  * Render the Import tab
  */
 function render_import_tab() {
-	echo '<p>Move along, nothing to see here.</p>';
+	?>
+	<?php if ( isset( WCB_Import_Results::$data ) ) : ?>
+	<h2>Import Results</h2>
+	<pre><?php echo esc_html( print_r( WCB_Import_Results::$data, true ) ); ?></pre>
+	<?php endif; ?>
+
+	<p>Import payment results from JPM reports CSV.</p>
+	<form method="post" enctype="multipart/form-data">
+		<input type="hidden" name="wcpn-request-import" value="1" />
+		<?php wp_nonce_field( 'import', 'wcpn-request-import' ); ?>
+		<label>Import File:</label>
+		<input type="file" name="wcpn-import-file" />
+		<?php submit_button( 'Import' ); ?>
+	</form>
+	<?php
 }
 
 /**
@@ -611,4 +627,146 @@ function process_action_set_pending_payment() {
 
 	restore_current_blog();
 	add_settings_error( 'wcb-dashboard', 'success', 'Success! Request has been marked as Pending Payment.', 'updated' );
+}
+
+/**
+ * Process a payments import, runs during init.
+ */
+function process_import_request() {
+	if ( empty( $_POST['wcpn-request-import'] ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_network' ) || ! check_admin_referer( 'import', 'wcpn-request-import' ) ) {
+		return;
+	}
+
+	if ( empty( $_FILES['wcpn-import-file'] ) ) {
+		wp_die( 'Please select a file to import.' );
+	}
+
+	$file = $_FILES['wcpn-import-file'];
+	if ( $file['type'] != 'text/csv' ) {
+		wp_die( 'Please upload a text/csv file.' );
+	}
+
+	if ( $file['size'] < 1 ) {
+		wp_die( 'Please upload a file that is not empty.' );
+	}
+
+	if ( $file['error'] ) {
+		wp_die( 'Some other error has occurred. Sorry.' );
+	}
+
+	$handle = fopen( $file['tmp_name'], 'r' );
+	$count = 0;
+	$header = array();
+	$results = array();
+
+	while ( ( $line = fgetcsv( $handle ) ) !== false ) {
+		// Skip first line.
+		if ( ++$count == 1 ) {
+			continue;
+		}
+
+		$entry = array(
+			'type' => strtolower( $line[11] ),
+			'status' => strtolower( $line[7] ),
+			'amount' => round( floatval( $line[13] ), 2 ),
+			'currency' => strtoupper( $line[14] ),
+			'blog_id' => null,
+			'post_id' => null,
+			'processed' => false,
+			'data' => null,
+		);
+
+		switch ( $entry['type'] ) {
+			case 'wire':
+				if ( ! empty( $line[44] ) && preg_match( '#^wcb-([0-9]+)-([0-9]+)$#', $line[44], $matches ) ) {
+					$entry['blog_id'] = $matches[1];
+					$entry['post_id'] = $matches[2];
+				}
+				break;
+			case 'ach':
+				if ( ! empty( $line[91] ) && preg_match( '#^([0-9]+)-([0-9]+)$#', $line[91], $matches ) ) {
+					$entry['blog_id'] = $matches[1];
+					$entry['post_id'] = $matches[2];
+				}
+				break;
+		}
+
+		if ( empty( $entry['blog_id'] ) || empty( $entry['post_id'] ) ) {
+			$results[] = $entry;
+			continue;
+		}
+
+		// Don't consume memory.
+		wp_suspend_cache_addition( true );
+		switch_to_blog( $entry['blog_id'] );
+
+		$results[] = _import_process_entry( $entry );
+
+		restore_current_blog();
+		wp_suspend_cache_addition( false );
+	}
+
+	fclose( $handle );
+
+	WCB_Import_Results::$data = $results;
+}
+
+/**
+ * Process a single import entry.
+ *
+ * Runs in a switch_to_blog() context.
+ *
+ * @param $entry Array
+ * @return Array
+ */
+function _import_process_entry( $entry ) {
+	$post = get_post( $entry['post_id'] );
+	if ( ! $post || ! in_array( $post->post_type, array( 'wcp_payment_request', 'wcb_reimbursement' ) ) ) {
+		$entry['data'] = 'Post not found or post type mismatch';
+		return $entry;
+	}
+
+	$currency = false;
+	$amout = false;
+
+	if ( $post->post_type == 'wcb_reimbursement' ) {
+		$currency = get_post_meta( $post->ID, '_wcbrr_currency', true );
+		$expenses = get_post_meta( $post->ID, '_wcbrr_expenses', true );
+		foreach ( $expenses as $expense ) {
+			if ( ! empty( $expense['_wcbrr_amount'] ) ) {
+				$amount += floatval( $expense['_wcbrr_amount'] );
+			}
+		}
+	} elseif ( $post->post_type == 'wcp_payment_request' ) {
+		$currency = get_post_meta( $post->ID, '_camppayments_currency', true );
+		$amount = floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) );
+	}
+	$amount = round( $amount, 2 );
+
+	if ( empty( $entry['currency'] ) || $entry['currency'] != $currency ) {
+		$entry['data'] = 'Currency mismatch';
+		return $entry;
+	}
+
+	$entry['amount'] = floatval( $entry['amount'] );
+	$entry['amount'] = round( $entry['amount'], 2 );
+
+	if ( $entry['amount'] !== $amount ) {
+		$entry['data'] = 'Payment amount mismatch';
+		return $entry;
+	}
+
+	// @todo Do some magic here.
+
+	// All good.
+	$entry['processed'] = true;
+	return $entry;
+}
+
+class WCB_Import_Results {
+	public static $data;
 }
