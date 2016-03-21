@@ -1,0 +1,11 @@
+.fixed .column-tested,
+.fixed .column-rating,
+.fixed .column-installs,
+.fixed .column-downloads,
+.fixed .column-support {
+	width: 12%;
+}
+
+.column-tested .needs-update {
+	color: #dd3d36;
+}

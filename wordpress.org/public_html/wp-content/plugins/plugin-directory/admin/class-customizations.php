@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin;
 use \WordPressdotorg\Plugin_Directory;
+use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
 /**
  * All functionality related to the Administration interface.
@@ -29,6 +30,7 @@ class Customizations {
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
@@ -64,12 +66,34 @@ class Customizations {
 	public function enqueue_assets( $hook_suffix ) {
 		global $post_type;
 
-		if ( 'post.php' === $hook_suffix && 'plugin' === $post_type ) {
-			wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 1 );
-			wp_enqueue_script( 'plugin-admin-edit-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 1 );
-			wp_localize_script( 'plugin-admin-edit-js', 'pluginDirectory', array(
-				'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
-			) );
+		if ( 'plugin' === $post_type ) {
+			switch ( $hook_suffix ) {
+				case 'post.php':
+					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 1 );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 1 );
+					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
+						'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+					) );
+					break;
+
+				case 'edit.php':
+					wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/plugin-list.css', Plugin_Directory\PLUGIN_FILE ), array(), 1 );
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Replaces the WP_Posts_List_Table object with the extended Plugin_Posts list table object.
+	 *
+	 * @global string               $post_type     The current post type.
+	 * @global \WP_Posts_List_Table $wp_list_table The WP_Posts_List_Table object.
+	 */
+	public function plugin_posts_list_table() {
+		global $post_type, $wp_list_table;
+
+		if ( 'plugin' === $post_type ) {
+			$wp_list_table = new Plugin_Posts();
 		}
 	}
 
