@@ -133,7 +133,52 @@ function render_import_tab() {
 	?>
 	<?php if ( isset( WCB_Import_Results::$data ) ) : ?>
 	<h2>Import Results</h2>
-	<pre><?php echo esc_html( print_r( WCB_Import_Results::$data, true ) ); ?></pre>
+	<table class="wp-list-table widefat">
+		<thead>
+			<tr>
+				<th>Request</th>
+				<th>Amount</th>
+				<th>Blog ID</th>
+				<th>Post ID</th>
+				<th>Message</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( WCB_Import_Results::$data as $entry ) : ?>
+			<tr>
+				<td><?php
+					$labels = array(
+						'wcp_payment_request' => 'Vendor',
+						'wcb_reimbursement' => 'Reimbursement',
+					);
+					$label = ! empty( $labels[ $entry['post_type'] ] ) ? $labels[ $entry['post_type'] ] : 'Unknown';
+					printf( '%s: %s', $label, esc_html( $entry['post_title'] ) );
+				?></td>
+				<td><?php
+					printf( '%s %s', number_format( $entry['amount'], 2 ), esc_html( $entry['currency'] ) );
+				?></td>
+				<td><?php
+					if ( ! empty( $entry['blog_id'] ) ) {
+						printf( '<a href="%s" target="_blank">%d</a>', esc_url( $entry['edit_all_url'] ), $entry['blog_id'] );
+					}
+				?></td>
+				<td><?php
+					if ( ! empty( $entry['post_id'] ) ) {
+						printf( '<a href="%s" target="_blank">%d</a>', esc_url( $entry['edit_post_url'] ), $entry['post_id'] );
+					}
+				?></td>
+				<td class="wcb-import-message">
+					<?php if ( $entry['processed'] ) : ?>
+						<svg class="success" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1472 930v318q0 119-84.5 203.5t-203.5 84.5h-832q-119 0-203.5-84.5t-84.5-203.5v-832q0-119 84.5-203.5t203.5-84.5h832q63 0 117 25 15 7 18 23 3 17-9 29l-49 49q-10 10-23 10-3 0-9-2-23-6-45-6h-832q-66 0-113 47t-47 113v832q0 66 47 113t113 47h832q66 0 113-47t47-113v-254q0-13 9-22l64-64q10-10 23-10 6 0 12 3 20 8 20 29zm231-489l-814 814q-24 24-57 24t-57-24l-430-430q-24-24-24-57t24-57l110-110q24-24 57-24t57 24l263 263 647-647q24-24 57-24t57 24l110 110q24 24 24 57t-24 57z"/></svg>
+					<?php else : ?>
+						<svg class="error" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M896 128q209 0 385.5 103t279.5 279.5 103 385.5-103 385.5-279.5 279.5-385.5 103-385.5-103-279.5-279.5-103-385.5 103-385.5 279.5-279.5 385.5-103zm128 1247v-190q0-14-9-23.5t-22-9.5h-192q-13 0-23 10t-10 23v190q0 13 10 23t23 10h192q13 0 22-9.5t9-23.5zm-2-344l18-621q0-12-10-18-10-8-24-8h-220q-14 0-24 8-10 6-10 18l17 621q0 10 10 17.5t24 7.5h185q14 0 23.5-7.5t10.5-17.5z"/></svg>
+					<?php endif; ?>
+					<span><?php echo esc_html( $entry['message'] ); ?></span>
+				</td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
 	<?php endif; ?>
 
 	<p>Import payment results from JPM reports CSV.</p>
@@ -473,7 +518,7 @@ function enqueue_scripts( $hook ) {
 		'wordcamp-budgets-dashboard',
 		plugins_url( 'css/wordcamp-budgets-dashboard.css', __DIR__ ),
 		array(),
-		1
+		2
 	);
 
 	if ( $hook == 'budgets_page_wcb-import-export' ) {
@@ -671,13 +716,19 @@ function process_import_request() {
 
 		$entry = array(
 			'type' => strtolower( $line[11] ),
-			'status' => strtolower( $line[7] ),
-			'amount' => round( floatval( $line[13] ), 2 ),
-			'currency' => strtoupper( $line[14] ),
+			'title' => null,
+			'post_type' => null,
+			'post_title' => null,
+			'status' => null,
+			'amount' => null,
+			'currency' => null,
 			'blog_id' => null,
 			'post_id' => null,
 			'processed' => false,
-			'data' => null,
+			'message' => null,
+
+			'edit_all_url' => null,
+			'edit_post_url' => null,
 		);
 
 		switch ( $entry['type'] ) {
@@ -685,17 +736,28 @@ function process_import_request() {
 				if ( ! empty( $line[44] ) && preg_match( '#^wcb-([0-9]+)-([0-9]+)$#', $line[44], $matches ) ) {
 					$entry['blog_id'] = $matches[1];
 					$entry['post_id'] = $matches[2];
+					$entry['status'] = strtolower( $line[7] );
+					$entry['amount'] = round( floatval( $line[13] ), 2 );
+					$entry['currency'] = strtoupper( $line[14] );
 				}
 				break;
 			case 'ach':
 				if ( ! empty( $line[91] ) && preg_match( '#^([0-9]+)-([0-9]+)$#', $line[91], $matches ) ) {
 					$entry['blog_id'] = $matches[1];
 					$entry['post_id'] = $matches[2];
+					$entry['status'] = strtolower( $line[7] );
+					$entry['amount'] = round( floatval( $line[13] ), 2 );
+					$entry['currency'] = strtoupper( $line[14] );
 				}
 				break;
+			default:
+				$entry['message'] = 'Unknown payment type.';
+				$results[] = $entry;
+				continue;
 		}
 
 		if ( empty( $entry['blog_id'] ) || empty( $entry['post_id'] ) ) {
+			$entry['message'] = 'Blog ID or post ID is empty.';
 			$results[] = $entry;
 			continue;
 		}
@@ -726,9 +788,14 @@ function process_import_request() {
 function _import_process_entry( $entry ) {
 	$post = get_post( $entry['post_id'] );
 	if ( ! $post || ! in_array( $post->post_type, array( 'wcp_payment_request', 'wcb_reimbursement' ) ) ) {
-		$entry['data'] = 'Post not found or post type mismatch';
+		$entry['message'] = 'Post not found or post type mismatch';
 		return $entry;
 	}
+
+	$entry['title'] = $post->post_title;
+	$entry['post_type'] = $post->post_type;
+	$entry['edit_all_url'] = admin_url( 'edit.php?post_type=' . $post->post_type );
+	$entry['edit_post_url'] = get_edit_post_link( $post->ID );
 
 	$currency = false;
 	$amout = false;
@@ -748,7 +815,7 @@ function _import_process_entry( $entry ) {
 	$amount = round( $amount, 2 );
 
 	if ( empty( $entry['currency'] ) || $entry['currency'] != $currency ) {
-		$entry['data'] = 'Currency mismatch';
+		$entry['message'] = 'Currency mismatch';
 		return $entry;
 	}
 
@@ -756,11 +823,44 @@ function _import_process_entry( $entry ) {
 	$entry['amount'] = round( $entry['amount'], 2 );
 
 	if ( $entry['amount'] !== $amount ) {
-		$entry['data'] = 'Payment amount mismatch';
+		$entry['message'] = 'Payment amount mismatch';
 		return $entry;
 	}
 
-	// @todo Do some magic here.
+	if ( $entry['type'] == 'wire' ) {
+
+		if ( $entry['status'] != 'completed' ) {
+			$entry['message'] = 'Unknown wire status.';
+			return $entry;
+		}
+
+		$post->post_status = 'wcb-paid';
+		wp_insert_post( $post );
+		$entry['message'] = 'Wire request marked as paid.';
+
+		\WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'Wire marked as paid via an import in Network Admin', array(
+			'action' => 'paid-via-import',
+		) );
+
+	} elseif ( $entry['type'] == 'ach' ) {
+
+		if ( $entry['status'] != 'delivered' ) {
+			$entry['message'] = 'Unknown ACH status.';
+			return $entry;
+		}
+
+		$post->post_status = 'wcb-paid';
+		wp_insert_post( $post );
+		$entry['message'] = 'ACH request marked as paid.';
+
+		\WordCamp_Budgets::log( $post->ID, get_current_user_id(), 'ACH marked as paid via an import in Network Admin', array(
+			'action' => 'paid-via-import',
+		) );
+
+	} else {
+		$entry['message'] = 'Unknown payment method.';
+		return $entry;
+	}
 
 	// All good.
 	$entry['processed'] = true;
