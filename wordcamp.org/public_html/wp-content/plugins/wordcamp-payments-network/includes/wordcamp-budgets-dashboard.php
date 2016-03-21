@@ -792,7 +792,7 @@ function _import_process_entry( $entry ) {
 		return $entry;
 	}
 
-	$entry['title'] = $post->post_title;
+	$entry['post_title'] = $post->post_title;
 	$entry['post_type'] = $post->post_type;
 	$entry['edit_all_url'] = admin_url( 'edit.php?post_type=' . $post->post_type );
 	$entry['edit_post_url'] = get_edit_post_link( $post->ID );
