@@ -518,7 +518,7 @@ function enqueue_scripts( $hook ) {
 		'wordcamp-budgets-dashboard',
 		plugins_url( 'css/wordcamp-budgets-dashboard.css', __DIR__ ),
 		array(),
-		2
+		3
 	);
 
 	if ( $hook == 'budgets_page_wcb-import-export' ) {
