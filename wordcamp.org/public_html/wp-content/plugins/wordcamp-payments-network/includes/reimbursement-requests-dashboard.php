@@ -245,7 +245,7 @@ function update_index_row( $request_id, $request ) {
 		}
 	}
 
-	$formats = array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%f' );
+	$formats = array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%f' );
 
 	$wpdb->replace( get_index_table_name(), $index_row, $formats );
 }
