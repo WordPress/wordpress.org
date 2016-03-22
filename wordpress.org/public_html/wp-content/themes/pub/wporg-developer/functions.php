@@ -200,8 +200,13 @@ function pre_get_posts( $query ) {
 		$query->set( 'wp-parser-source-file', str_replace( array( '.php', '/' ), array( '-php', '_' ), $query->query['wp-parser-source-file'] ) );
 	}
 
-	// If user has '()' at end of a search string, assume they want a specific function/method.
 	if ( $query->is_search() ) {
+
+		// Order searches by title first.
+		$query->set( 'orderby', '' );
+		$query->set( 'search_orderby_title', 1 );
+
+		// If user has '()' at end of a search string, assume they want a specific function/method.
 		$s = htmlentities( $query->get( 's' ) );
 		if ( '()' === substr( $s, -2 ) ) {
 			// Enable exact search
