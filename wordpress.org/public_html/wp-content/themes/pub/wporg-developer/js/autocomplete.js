@@ -18,6 +18,7 @@
 
 	var awesome = new Awesomplete( searchfield.get( 0 ), {
 		maxItems: 9999,
+		minChars: 3,
 		filter: function( text, input ) {
 			// Filter autocomplete matches
 
@@ -56,7 +57,7 @@
 			}
 
 			return false;
-		}
+		},
 	} );
 
 	// On input event for the search field.
@@ -65,7 +66,7 @@
 		// Update the autocomlete list: 
 		//     if there are more than 2 characters
 		//     and it's not already processing an Ajax request
-		if ( !processing && $( this ).val().length > 2 ) {
+		if ( !processing && $( this ).val().trim().length > 2 ) {
 			search = $( this ).val();
 			autocomplete_update();
 		}
@@ -92,7 +93,7 @@
 					return false;
 				}
 
-				if ( typeof response.data.posts === 'undefined' ) {
+				if ( typeof response.data === 'undefined' ) {
 					return false;
 				}
 

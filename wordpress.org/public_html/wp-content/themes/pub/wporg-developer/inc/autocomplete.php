@@ -65,25 +65,33 @@ class DevHub_Search_Form_Autocomplete {
 
 		check_ajax_referer( 'autocomplete_nonce', 'nonce' );
 
+		$parser_post_types = DevHub\get_parsed_post_types();
+		$defaults          = array(
+			's'         => '',
+			'post_type' => $parser_post_types,
+			'posts'     => array(),
+		);
+
 		if ( !( isset( $_POST['data'] ) && $_POST['data'] ) ) {
-			wp_send_json_error();
+			wp_send_json_error( $defaults );
 		}
 
 		// Parse the search form fields.
 		wp_parse_str( $_POST['data'], $form_data );
+		$form_data = array_merge( $defaults, $form_data );
 
-		if ( !isset( $form_data['post_type'] ) || !isset( $form_data['s'] ) ) {
-			wp_send_json_error();
+		// No search query.
+		if ( empty( $form_data['s'] ) ) {
+			wp_send_json_error( $defaults );
 		}
 
-		$post_types        = array();
-		$parser_post_types = DevHub\get_parsed_post_types();
-
-		foreach ( $form_data['post_type'] as $post_type ) {
-			if ( in_array( $post_type , $parser_post_types ) ) {
-				$post_types[] = $post_type;
+		foreach ( $form_data['post_type'] as $key => $post_type ) {
+			if ( !in_array( $post_type , $parser_post_types ) ) {
+				unset( $form_data['post_type'][ $key ] );
 			}
 		}
+
+		$post_types = !empty( $form_data['post_type'] ) ? $form_data['post_type'] : $parser_post_types;
 
 		$args = array(
 			'posts_per_page'       => -1,
@@ -96,14 +104,13 @@ class DevHub_Search_Form_Autocomplete {
 
 		$search = get_posts( $args );
 
-		$form_data['posts'] = array();
 		if ( !empty( $search ) ) {
-			$form_data['posts'] = wp_list_pluck( $search, 'post_title' );
+			$titles = wp_list_pluck( $search, 'post_title' );
+			$form_data['posts'] = array_values( array_unique( $titles ) );
 		}
 
 		wp_send_json_success ( $form_data );
 	}
-
 
 }
 
