@@ -25,8 +25,13 @@ class Plugin_Directory {
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 
+		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
+
 		// Load all Admin-specific items.
-		add_action( 'admin_init', array( __NAMESPACE__ . '\Admin\Customizations', 'instance' ) );
+		// Cannot be included on `admin_init` to allow access to menu hooks
+		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
+			Admin\Customizations::instance();
+		}
 
 		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
 		register_deactivation_hook( PLUGIN_FILE, array( $this, 'deactivate' ) );
@@ -59,10 +64,14 @@ class Plugin_Directory {
 			'has_archive'     => true,
 			'rewrite'         => false,
 			'menu_icon'       => 'dashicons-admin-plugins',
-			'capability_type' => array( 'post', 'posts' ), // TODO roles & capabilities
-			'map_meta_cap'    => true,
 			'capabilities'    => array(
-				'create_posts' => 'do_not_allow'
+				'edit_post'          => 'plugin_edit',
+				'read_post'          => 'read',
+				'edit_posts'         => 'plugin_dashboard_access',
+				'edit_others_posts'  => 'plugin_edit_others',
+				'read_private_posts' => 'do_not_allow',
+				'delete_posts'       => 'do_not_allow',
+				'create_posts'       => 'do_not_allow'
 			)
 		) );
 
@@ -70,9 +79,9 @@ class Plugin_Directory {
 			'hierarchical'      => true,
 			'query_var'         => 'plugin_category',
 			'rewrite'           => false,
-			'public'            => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
+			'public'            => false,
+			'show_ui'           => current_user_can( 'plugin_set_category' ),
+			'show_admin_column' => current_user_can( 'plugin_set_category' ),
 			'meta_box_cb'       => 'post_categories_meta_box',
 			'capabilities'      => array(
 				'assign_terms' => 'manage_categories',
@@ -101,31 +110,33 @@ class Plugin_Directory {
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Tags', 'display' ),
-			'capabilities'      => array()
+			'capabilities'      => array(
+				'assign_terms' => 'plugin_set_tags'
+			)
 		) );
 
 		register_post_status( 'pending', array(
 			'label'                     => _x( 'Pending', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
-			'show_in_admin_status_list' => true,
+			'show_in_admin_status_list' => current_user_can( 'plugin_approve' ),
 			'label_count'               => _n_noop( 'Pending <span class="count">(%s)</span>', 'Pending <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 		register_post_status( 'disabled', array(
 			'label'                     => _x( 'Disabled', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
-			'show_in_admin_status_list' => true,
+			'show_in_admin_status_list' => current_user_can( 'plugin_disable' ),
 			'label_count'               => _n_noop( 'Disabled <span class="count">(%s)</span>', 'Disabled <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 		register_post_status( 'closed', array(
 			'label'                     => _x( 'Closed', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
-			'show_in_admin_status_list' => true,
+			'show_in_admin_status_list' => current_user_can( 'plugin_close' ),
 			'label_count'               => _n_noop( 'Closed <span class="count">(%s)</span>', 'Closed <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 		register_post_status( 'rejected', array(
 			'label'                     => _x( 'Rejected', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
-			'show_in_admin_status_list' => true,
+			'show_in_admin_status_list' => current_user_can( 'plugin_reject' ),
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
@@ -140,6 +151,9 @@ class Plugin_Directory {
 		add_rewrite_endpoint( 'stats',        EP_PERMALINK );
 		add_rewrite_endpoint( 'developers',   EP_PERMALINK );
 		add_rewrite_endpoint( 'other_notes',  EP_PERMALINK );
+
+		// If changing capabilities around, uncomment this.
+		//Capabilities::add_roles();
 
 		// When this plugin is used in the context of a Rosetta site, handle it gracefully
 		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
@@ -277,11 +291,11 @@ class Plugin_Directory {
 	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
 	public function use_plugins_in_query( $wp_query ) {
-		if ( ! $wp_query->is_main_query() ) {
+		if ( is_admin() || ! $wp_query->is_main_query() ) {
 			return;
 		}
 
-		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'posts' == $wp_query->query_vars['post_type'] ) ) {
+		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] ) ) {
 			$wp_query->query_vars['post_type'] = array( 'plugin' );
 		}
 

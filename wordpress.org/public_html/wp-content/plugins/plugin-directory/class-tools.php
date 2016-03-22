@@ -40,6 +40,22 @@ class Tools {
 		return $wpdb->get_col( $wpdb->prepare( 'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s', "/{$plugin_slug}" ) );
 	}
 
+	public static function get_users_write_access_plugins( $user ) {
+		global $wpdb;
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
+		}
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
+		$plugins = array_map( function( $plugin ) { return trim( $plugin, '/' ); }, $plugins );
+
+		return $plugins;
+
+	}
+
 	/**
 	 * Grant a user RW access to a plugin.
 	 *
@@ -54,11 +70,11 @@ class Tools {
 			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! Plugin_Directory::instance()->get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 
-		$existing_committers = wp_list_pluck( self::get_plugin_committers( $plugin_slug ), 'user_login' );
+		$existing_committers = self::get_plugin_committers( $plugin_slug );
 		if ( in_array( $user->user_login, $existing_committers, true ) ) {
 			// User already has write access
 			return true;
@@ -88,7 +104,7 @@ class Tools {
 			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! Plugin_Directory::instance()->get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 

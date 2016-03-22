@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 use WordPressdotorg\Plugin_Directory\Admin\List_Table;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * The Plugin Committers admin metabox.
@@ -34,11 +35,13 @@ class Committers {
 	 * Ajax handler for adding a new committer.
 	 */
 	public static function add_committer() {
-		check_ajax_referer( 'add-committer' );
-
 		$login    = isset( $_POST['add_committer'] ) ? sanitize_user( $_POST['add_committer'] ) : '';
 		$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
-		$response = new \WP_Ajax_Response();
+
+		check_ajax_referer( 'add-committer' );
+
+		$response    = new \WP_Ajax_Response();
+		$plugin_slug = get_post( $post_id )->post_name;
 
 		if ( ! $committer = get_user_by( 'login', $login ) ) {
 			$response->add( array(
@@ -48,24 +51,14 @@ class Committers {
 			$response->send();
 		}
 
-		// @todo: Capabilities.
-		if ( ! current_user_can( 'add_committers', $post_id ) ) {
-			//	wp_die( -1 );
+		if ( ! current_user_can( 'plugin_add_committer', $post_id ) ) {
+				wp_die( -1 );
 		}
-		global $post, $wpdb;
 
-		$post   = get_post( $post_id );
-		$result = $wpdb->insert( PLUGINS_TABLE_PREFIX . 'svn_access', array(
-			'path'   => "/{$post->post_name}",
-			'user'   => $login,
-			'access' => 'rw',
-		) );
+		$result = Tools::grant_plugin_committer( $plugin_slug, $committer );
+
 		if ( ! $result ) {
-			if ( 'Duplicate entry' === substr( $wpdb->last_error, 0, 15 ) ) {
-				$message = __( 'Duplicate committer detected.', 'wporg-plugins' );
-			} else {
-				$message = __( 'An error has occurred. Please reload the page and try again.', 'wporg-plugins' );
-			}
+			$message = __( 'An error has occurred. Please reload the page and try again.', 'wporg-plugins' );
 
 			$response->add( array(
 				'what' => 'committer',
@@ -94,7 +87,8 @@ class Committers {
 
 		check_ajax_referer( "remove-committer-$id" );
 
-		$response = new \WP_Ajax_Response();
+		$response    = new \WP_Ajax_Response();
+		$plugin_slug = get_post( $post_id )->post_name;
 
 		if ( ! $committer = get_user_by( 'id', $id ) ) {
 			$response->add( array(
@@ -104,17 +98,11 @@ class Committers {
 			$response->send();
 		}
 
-		// @todo: Capabilities.
-		if ( ! current_user_can( 'remove_committers', $post_id ) ) {
-			//	wp_die( -1 );
+		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) ) {
+				wp_die( -1 );
 		}
 
-		$plugin_slug = get_post( $post_id )->post_name;
-
-		$result = $GLOBALS['wpdb']->delete( PLUGINS_TABLE_PREFIX . 'svn_access', array(
-			'path' => "/{$plugin_slug}",
-			'user' => $committer->user_login,
-		) );
+		$result = Tools::revoke_plugin_committer( $plugin_slug, $committer );
 
 		wp_die( $result );
 	}

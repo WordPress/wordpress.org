@@ -32,7 +32,7 @@ class Committers extends \WP_List_Table {
 	 * @return bool
 	 */
 	public function ajax_user_can() {
-		return current_user_can( 'manage_committers' );
+		return current_user_can( 'plugin_remove_committer' );
 	}
 
 	/**
@@ -149,8 +149,8 @@ class Committers extends \WP_List_Table {
 		$actions = array();
 
 		// Check if the committer for this row is removable.
-		if ( current_user_can( 'list_users' ) ) {
-			$post_id = get_post()->ID;
+		$post_id = get_post()->ID;
+		if ( current_user_can( 'plugin_remove_committer', $post_id ) && $user_object->ID != get_current_user_id() ) {
 			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-committer-list:committer-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;committer=' . $user_object->ID, "remove-committer-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . "</a>";
 		}
 

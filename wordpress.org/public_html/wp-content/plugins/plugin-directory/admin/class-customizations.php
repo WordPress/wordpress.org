@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin;
 use \WordPressdotorg\Plugin_Directory;
+use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
 /**
@@ -27,7 +28,9 @@ class Customizations {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 1 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
+		add_filter( 'views_edit-plugin', array( $this, 'list_table_views' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
@@ -39,6 +42,8 @@ class Customizations {
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
 		add_filter( 'wp_ajax_add-committer',    array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
 		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+
 	}
 
 	/**
@@ -81,6 +86,73 @@ class Customizations {
 					break;
 			}
 		}
+	}
+
+	public function admin_menu() {
+		// WordPress requires that the plugin post_type have at least one submenu accessible *other* than itself.
+		// If it doesn't have at least one submenu then users who cannot also publish posts will not be able to access the post type.
+		add_submenu_page( 'edit.php?post_type=plugin', 'Plugin Handbook', 'Plugin Handbook', 'read', 'handbook', function() {} );
+		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', function() {} );
+
+		remove_menu_page( 'index.php' );
+		remove_menu_page( 'profile.php' );
+	}
+
+	/**
+	 * Filter the query in wp-admin to list only 
+	 */
+	public function pre_get_posts( $query ) {
+		global $wpdb;
+		if ( ! $query->is_main_query() ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_edit_others' ) || ( isset( $query->query['author'] ) && $query->query['author'] == get_current_user_id() ) ) {
+			$query->query_vars['author'] = get_current_user_id();
+			$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
+			if ( $plugins ) {
+				$query->query_vars['post_name__in'] = $plugins;
+				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
+			}
+		}
+	}
+
+	/**
+	 * Custom callback for pre_get_posts to use an OR query between post_name & post_author
+	 *
+	 * @ignore
+	 */
+	public function pre_get_posts_sql_name_or_user( $where ) {
+		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
+
+		// Replace `post_name IN(..) AND post_author IN (..)`
+		// With `( post_name IN() OR post_author IN() )`
+
+		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
+		return $where;
+	}
+
+	public function list_table_views( $views ) {
+		global $wp_query;
+		if ( current_user_can( 'plugin_edit_others' ) ) {
+			return $views;
+		}
+		// The only view the user needs, is their own.
+		return array(
+			sprintf(
+				'<a href="#" class="current">%s</a>',
+				sprintf(
+					_nx(
+						'Mine <span class="count">(%s)</span>',
+						'Mine <span class="count">(%s)</span>',
+						$wp_query->found_posts,
+						'posts',
+						'wporg-posts'
+					),
+					number_format_i18n( $wp_query->found_posts )
+				)
+			)
+		);
 	}
 
 	/**
