@@ -17,7 +17,7 @@ class Controls {
 			echo '<div id="misc-publishing-actions">';
 				self::display_post_status();
 
-				if ( 'publish' == get_post_status() ) {
+				if ( 'publish' === get_post_status() ) {
 					self::display_tested_up_to();
 				}
 			echo '</div>';
@@ -35,8 +35,12 @@ class Controls {
 	protected static function display_post_status() {
 		$post = get_post();
 
+		// Bail if the current user can't review plugins.
+		if ( ! current_user_can( 'plugin_approve', $post ) ) {
+			return;
+		}
+
 		$statuses = array( 'publish', 'pending', 'disabled', 'closed', 'rejected' );
-		// TODO Add capability check here
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>

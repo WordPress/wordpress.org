@@ -99,7 +99,7 @@ class Customizations {
 	}
 
 	/**
-	 * Filter the query in wp-admin to list only 
+	 * Filter the query in wp-admin to list only.
 	 */
 	public function pre_get_posts( $query ) {
 		global $wpdb;
@@ -180,26 +180,22 @@ class Customizations {
 			return;
 		}
 
-		add_meta_box(
-			'plugin-committers',
-			__( 'Plugin Committers', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
-			'plugin', 'side'
-		);
+		// Only plugin reviewers/admins need review-related meta boxes.
+		if ( current_user_can( 'plugin_approve' ) ) {
+			add_meta_box(
+				'internal-notes',
+				__( 'Internal Notes', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'display' ),
+				'plugin', 'normal', 'high'
+			);
 
-		add_meta_box(
-			'internal-notes',
-			__( 'Internal Notes', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'display' ),
-			'plugin', 'normal', 'high'
-		);
-
-		add_meta_box(
-			'plugin-review',
-			__( 'Plugin Review Tools', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
-			'plugin', 'normal', 'high'
-		);
+			add_meta_box(
+				'plugin-review',
+				__( 'Plugin Review Tools', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
+				'plugin', 'normal', 'high'
+			);
+		}
 
 		add_meta_box(
 			'plugin-fields',
@@ -214,6 +210,13 @@ class Customizations {
 			__( 'Plugin Controls', 'wporg-plugins' ),
 			array( __NAMESPACE__ . '\Metabox\Controls', 'display' ),
 			'plugin', 'side', 'high'
+		);
+
+		add_meta_box(
+			'plugin-committers',
+			__( 'Plugin Committers', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
+			'plugin', 'side'
 		);
 
 		// Remove unnecessary metaboxes.
