@@ -39,9 +39,10 @@ class Committers {
 		$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( 'add-committer' );
+		global $post;
 
-		$response    = new \WP_Ajax_Response();
-		$plugin_slug = get_post( $post_id )->post_name;
+		$response = new \WP_Ajax_Response();
+		$post     = get_post( $post_id );
 
 		if ( ! $committer = get_user_by( 'login', $login ) ) {
 			$response->add( array(
@@ -55,7 +56,7 @@ class Committers {
 				wp_die( -1 );
 		}
 
-		$result = Tools::grant_plugin_committer( $plugin_slug, $committer );
+		$result = Tools::grant_plugin_committer( $post->post_name, $committer );
 
 		if ( ! $result ) {
 			$message = __( 'An error has occurred. Please reload the page and try again.', 'wporg-plugins' );
