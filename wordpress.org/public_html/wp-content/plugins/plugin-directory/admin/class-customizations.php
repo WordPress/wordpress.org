@@ -30,7 +30,6 @@ class Customizations {
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
-		add_filter( 'views_edit-plugin', array( $this, 'list_table_views' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
@@ -162,29 +161,6 @@ class Customizations {
 
 		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
 		return $where;
-	}
-
-	public function list_table_views( $views ) {
-		global $wp_query;
-		if ( current_user_can( 'plugin_edit_others' ) ) {
-			return $views;
-		}
-		// The only view the user needs, is their own.
-		return array(
-			sprintf(
-				'<a href="#" class="current">%s</a>',
-				sprintf(
-					_nx(
-						'Mine <span class="count">(%s)</span>',
-						'Mine <span class="count">(%s)</span>',
-						$wp_query->found_posts,
-						'posts',
-						'wporg-posts'
-					),
-					number_format_i18n( $wp_query->found_posts )
-				)
-			)
-		);
 	}
 
 	/**

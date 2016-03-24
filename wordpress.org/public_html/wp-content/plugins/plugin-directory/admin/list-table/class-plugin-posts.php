@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
+use \WordPressdotorg\Plugin_Directory\Tools;
 
 _get_list_table( 'WP_Posts_List_Table' );
 
@@ -263,5 +264,157 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		return $this->row_actions( $actions );
+	}
+
+	/**
+	 * Prepares list view links, including plugins that the current user has commit access to.
+	 *
+	 * @global array $locked_post_status This seems to be deprecated.
+	 * @global array $avail_post_stati
+	 * @return array
+	 */
+	protected function get_views() {
+		global $locked_post_status, $avail_post_stati, $wpdb;
+
+		if ( ! empty( $locked_post_status ) ) {
+			return array();
+		}
+
+		$post_type    = $this->screen->post_type;
+		$status_links = array();
+		$num_posts    = wp_count_posts( $post_type, 'readable' );
+		$total_posts  = array_sum( (array) $num_posts );
+		$class        = '';
+
+		$current_user_id = get_current_user_id();
+		$all_args        = array( 'post_type' => $post_type );
+		$mine            = '';
+
+		$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
+		$plugins = array_map( 'sanitize_title_for_query', $plugins );
+		$exclude_states   = get_post_stati( array(
+			'show_in_admin_all_list' => false,
+		) );
+
+		$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( "
+			SELECT COUNT( 1 )
+			FROM $wpdb->posts
+			WHERE post_type = %s
+			AND post_status NOT IN ( '" . implode( "','", $exclude_states ) . "' )
+			AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )
+		", $post_type, $current_user_id ) ) );
+
+		// Subtract post types that are not included in the admin all list.
+		foreach ( $exclude_states as $state ) {
+			$total_posts -= $num_posts->$state;
+		}
+
+		if ( $user_post_count && $user_post_count !== $total_posts ) {
+			if ( isset( $_GET['author'] ) && ( $_GET['author'] == $current_user_id ) ) {
+				$class = 'current';
+			}
+
+			$mine_args = array(
+				'post_type' => $post_type,
+				'author'    => $current_user_id
+			);
+
+			$mine_inner_html = sprintf(
+				_nx(
+					'Mine <span class="count">(%s)</span>',
+					'Mine <span class="count">(%s)</span>',
+					$user_post_count,
+					'posts',
+					'wporg-posts'
+				),
+				number_format_i18n( $user_post_count )
+			);
+
+			if ( ! current_user_can( 'plugin_edit_others' ) ) {
+				$status_links['mine'] = $this->get_edit_link( $mine_args, $mine_inner_html, 'current' );;
+				return $status_links;
+			} else {
+				$mine = $this->get_edit_link( $mine_args, $mine_inner_html, $class );
+			}
+
+			$all_args['all_posts'] = 1;
+			$class = '';
+		}
+
+		if ( empty( $class ) && ( $this->is_base_request() || isset( $_REQUEST['all_posts'] ) ) ) {
+			$class = 'current';
+		}
+
+		$all_inner_html = sprintf(
+			_nx(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				$total_posts,
+				'posts',
+				'wporg-posts'
+			),
+			number_format_i18n( $total_posts )
+		);
+
+		$status_links['all'] = $this->get_edit_link( $all_args, $all_inner_html, $class );
+		if ( $mine ) {
+			$status_links['mine'] = $mine;
+		}
+
+		foreach ( get_post_stati(array('show_in_admin_status_list' => true), 'objects') as $status ) {
+			$class = '';
+
+			$status_name = $status->name;
+
+			if ( ! in_array( $status_name, $avail_post_stati ) || empty( $num_posts->$status_name ) ) {
+				continue;
+			}
+
+			if ( isset($_REQUEST['post_status']) && $status_name === $_REQUEST['post_status'] ) {
+				$class = 'current';
+			}
+
+			$status_args = array(
+				'post_status' => $status_name,
+				'post_type' => $post_type,
+			);
+
+			$status_label = sprintf(
+				translate_nooped_plural( $status->label_count, $num_posts->$status_name ),
+				number_format_i18n( $num_posts->$status_name )
+			);
+
+			$status_links[ $status_name ] = $this->get_edit_link( $status_args, $status_label, $class );
+		}
+
+		if ( ! empty( $this->sticky_posts_count ) ) {
+			$class = ! empty( $_REQUEST['show_sticky'] ) ? 'current' : '';
+
+			$sticky_args = array(
+				'post_type'	=> $post_type,
+				'show_sticky' => 1
+			);
+
+			$sticky_inner_html = sprintf(
+				_nx(
+					'Sticky <span class="count">(%s)</span>',
+					'Sticky <span class="count">(%s)</span>',
+					$this->sticky_posts_count,
+					'posts',
+					'wporg-posts'
+				),
+				number_format_i18n( $this->sticky_posts_count )
+			);
+
+			$sticky_link = array(
+				'sticky' => $this->get_edit_link( $sticky_args, $sticky_inner_html, $class )
+			);
+
+			// Sticky comes after Publish, or if not listed, after All.
+			$split = 1 + array_search( ( isset( $status_links['publish'] ) ? 'publish' : 'all' ), array_keys( $status_links ) );
+			$status_links = array_merge( array_slice( $status_links, 0, $split ), $sticky_link, array_slice( $status_links, $split ) );
+		}
+
+		return $status_links;
 	}
 }
