@@ -42,8 +42,11 @@ class Customizations {
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
 		add_filter( 'wp_ajax_add-committer',    array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
 		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
+		// Page access within wp-admin.
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'load-index.php',    array( $this, 'disable_admin_page' ) );
+		add_action( 'load-profile.php',  array( $this, 'disable_admin_page' ) );
 	}
 
 	/**
@@ -88,14 +91,40 @@ class Customizations {
 		}
 	}
 
+	/**
+	 * Customizes the admin menu according to the current user's privileges.
+	 */
 	public function admin_menu() {
-		// WordPress requires that the plugin post_type have at least one submenu accessible *other* than itself.
-		// If it doesn't have at least one submenu then users who cannot also publish posts will not be able to access the post type.
+
+		/*
+		 * WordPress requires that the plugin post_type have at least one submenu accessible *other* than itself.
+		 * If it doesn't have at least one submenu then users who cannot also publish posts will not be able to access the post type.
+		 */
 		add_submenu_page( 'edit.php?post_type=plugin', 'Plugin Handbook', 'Plugin Handbook', 'read', 'handbook', function() {} );
 		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', function() {} );
 
-		remove_menu_page( 'index.php' );
-		remove_menu_page( 'profile.php' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			remove_menu_page( 'index.php' );
+			remove_menu_page( 'profile.php' );
+		}
+	}
+
+	/**
+	 * Disables admin pages.
+	 */
+	public function disable_admin_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+
+			// Dashboard is plugin dashboard.
+			if ( 'load-index.php' === current_action() ) {
+				wp_safe_redirect( admin_url( 'edit.php?post_type=plugin' ) );
+				exit;
+			}
+
+			wp_die( __( 'You do not have permission to access this page.', 'wporg-plugins' ), '', array(
+				'back_link' => true,
+			) );
+		}
 	}
 
 	/**
