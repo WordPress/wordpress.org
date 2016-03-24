@@ -224,27 +224,14 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			}
 		}
 
-		if ( is_post_type_viewable( $post_type_object ) ) {
-			if ( in_array( $post->post_status, array( 'pending', 'draft', 'future' ) ) ) {
-				if ( $can_edit_post ) {
-					$preview_link = get_preview_post_link( $post );
-					$actions['view'] = sprintf(
-						'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
-						esc_url( $preview_link ),
-						/* translators: %s: post title */
-						esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
-						__( 'Preview' )
-					);
-				}
-			} elseif ( 'trash' != $post->post_status ) {
-				$actions['view'] = sprintf(
-					'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
-					get_permalink( $post->ID ),
-					/* translators: %s: post title */
-					esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ),
-					__( 'View' )
-				);
-			}
+		if ( is_post_type_viewable( $post_type_object ) && 'publish' === $post->post_status ) {
+			$actions['view'] = sprintf(
+				'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
+				get_permalink( $post->ID ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ),
+				__( 'View' )
+			);
 		}
 
 		if ( is_post_type_hierarchical( $post->post_type ) ) {
