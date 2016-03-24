@@ -23,8 +23,6 @@ class WordCamp_Forms_To_Drafts {
 	public function __construct() {
 		add_filter( 'the_content',              array( $this, 'force_login_to_view_form' ), 9 );
 		add_action( 'template_redirect',        array( $this, 'populate_form_based_on_user' ), 9 );
-		add_action( 'grunion_pre_message_sent', array( $this, 'returning_organizer_application' ), 10, 3 );
-		add_action( 'grunion_pre_message_sent', array( $this, 'new_organizer_application' ), 10, 3 );
 		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_sponsors' ), 10, 3 );
 		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_speakers' ), 10, 3 );
 	}
@@ -195,111 +193,6 @@ class WordCamp_Forms_To_Drafts {
 			$wp_post_types[ $post_type ]       = $wp_post_types['post'];
 			$wp_post_types[ $post_type ]->name = $post_type;
 		}
-	}
-
-	/**
-	 * Create a draft WordCamp post from a Returning Organizer Application submission.
-	 *
-	 * @param int   $submission_id
-	 * @param array $all_values
-	 * @param array $extra_values
-	 */
-	public function returning_organizer_application( $submission_id, $all_values, $extra_values ) {
-		if ( 'returning-organizer-application' != $this->get_form_key( $submission_id ) ) {
-			return;
-		}
-
-		$all_values               = $this->get_unprefixed_grunion_form_values( $all_values );
-		$wordcamp_to_form_key_map = array(
-			'Location'                        => 'WordCamp City, State, Country',
-			'Organizer Name'                  => 'Lead Organizer Name',
-			'WordPress.org Username'          => 'Lead Organizer WordPress.org Username',
-			'Email Address'                   => 'Lead Organizer Email',
-			'Sponsor Wrangler Name'           => 'Sponsor Wrangler Name',
-			'Sponsor Wrangler E-mail Address' => 'Sponsor Wrangler E-mail Address',
-			'Budget Wrangler Name'            => 'Budget Wrangler Name',
-			'Budget Wrangler E-mail Address'  => 'Budget Wrangler E-mail Address',
-			'Number of Anticipated Attendees' => 'Number of Anticipated Attendees',
-		);
-
-		$this->simulate_post_type( 'wordcamp' );
-
-		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
-
-		// Create the post
-		$draft_id = wp_insert_post( array(
-			'post_type'   => 'wordcamp',
-			'post_title'  => 'WordCamp ' . $all_values['WordCamp City, State, Country'],
-			'post_status' => 'draft',
-			'post_author' => $this->get_user_id_from_username( $all_values['Lead Organizer WordPress.org Username'] ),
-		) );
-
-		// Create the post meta
-		if ( $draft_id ) {
-			foreach ( $wordcamp_to_form_key_map as $wordcamp_key => $form_key ) {
-				if ( ! empty( $all_values[ $form_key ] ) ) {
-					update_post_meta( $draft_id, $wordcamp_key, $all_values[ $form_key ] );
-				}
-			}
-		}
-
-		restore_current_blog();
-	}
-
-	/**
-	 * Create a draft WordCamp post from a New Organizer Application submission.
-	 *
-	 * @param int   $submission_id
-	 * @param array $all_values
-	 * @param array $extra_values
-	 */
-	public function new_organizer_application( $submission_id, $all_values, $extra_values ) {
-		if ( 'new-organizer-application' != $this->get_form_key( $submission_id ) ) {
-			return;
-		}
-
-		$all_values               = $this->get_unprefixed_grunion_form_values( $all_values );
-		$wordcamp_to_form_key_map = array(
-			'Location'                        => 'Enter the city, state/province, and country where you would like to organize a WordCamp.',
-			'Organizer Name'                  => 'Lead Organizer Name',
-			'WordPress.org Username'          => "Lead Organizer WordPress.org Username. This is the username you'd use to log in to http://wordpress.org/support/. If you don't have one, you can register on wordpress.org at https://wordpress.org/support/register.php",
-			'Email Address'                   => 'Lead Organizer Email',
-			'Number of Anticipated Attendees' => 'How many people do you think would attend?',
-		);
-
-		$this->simulate_post_type( 'wordcamp' );
-
-		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
-
-		// Create the post
-		$draft_id = wp_insert_post( array(
-			'post_type'   => 'wordcamp',
-			'post_title'  => 'WordCamp ' . $all_values['Enter the city, state/province, and country where you would like to organize a WordCamp.'],
-			'post_status' => 'draft',
-			'post_author' => $this->get_user_id_from_username( $all_values["Lead Organizer WordPress.org Username. This is the username you'd use to log in to http://wordpress.org/support/. If you don't have one, you can register on wordpress.org at https://wordpress.org/support/register.php"] ),
-		) );
-
-		// Create the post meta
-		if ( $draft_id ) {
-			foreach ( $wordcamp_to_form_key_map as $wordcamp_key => $form_key ) {
-				if ( ! empty( $all_values[ $form_key ] ) ) {
-					update_post_meta( $draft_id, $wordcamp_key, $all_values[ $form_key ] );
-				}
-			}
-
-			$mailing_address = sprintf(
-				"%s%s, %s %s\n%s",
-				empty( $all_values['Lead Organizer Street Address'] ) ? '' : $all_values['Lead Organizer Street Address'] . "\n",
-				$all_values['City'],
-				$all_values['State/Province'],
-				empty( $all_values['ZIP/Postal Code'] ) ? '' : $all_values['ZIP/Postal Code'],
-				$all_values['Country']
-			);
-
-			update_post_meta( $draft_id, 'Mailing Address', $mailing_address );
-		}
-
-		restore_current_blog();
 	}
 
 	/**
