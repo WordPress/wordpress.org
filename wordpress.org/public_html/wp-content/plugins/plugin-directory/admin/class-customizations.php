@@ -99,7 +99,7 @@ class Customizations {
 	}
 
 	/**
-	 * Filter the query in wp-admin to list only.
+	 * Filter the query in wp-admin to list only plugins relevant to the current user.
 	 */
 	public function pre_get_posts( $query ) {
 		global $wpdb;
@@ -110,8 +110,11 @@ class Customizations {
 		if ( ! current_user_can( 'plugin_edit_others' ) || ( isset( $query->query['author'] ) && $query->query['author'] == get_current_user_id() ) ) {
 			$query->query_vars['author'] = get_current_user_id();
 			$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
+
 			if ( $plugins ) {
 				$query->query_vars['post_name__in'] = $plugins;
+				$query->query_vars['post_status']   = 'any';
+
 				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
 			}
 		}
