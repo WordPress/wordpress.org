@@ -266,6 +266,9 @@ input {
   margin: 0 auto;
 }
 
+.home .devhub-wrap {
+  padding-bottom: 0;
+}
 .home .devhub-wrap #content {
   padding: 0;
 }
