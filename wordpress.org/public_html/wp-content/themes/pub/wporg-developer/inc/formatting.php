@@ -29,6 +29,7 @@ class DevHub_Formatting {
 
 		add_filter( 'the_excerpt', array( __CLASS__, 'autolink_references' ), 11 );
 		add_filter( 'the_content', array( __CLASS__, 'autolink_references' ), 11 );
+		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
 
 		add_action( 'the_content', array( __CLASS__, 'fix_unintended_markdown' ) );
 	}
@@ -236,7 +237,7 @@ class DevHub_Formatting {
 		// Convert any @link or @see to actual link.
 		$text = self::make_doclink_clickable( $text );
 
-		return $text;
+		return apply_filters( 'devhub-format-description', $text );
 	}
 
 	/**
