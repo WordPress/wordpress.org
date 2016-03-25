@@ -741,14 +741,14 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve deprecated flag
+	 * Retrieve deprecated notice.
 	 *
 	 * @param int $post_id
 	 *
 	 * @return string
 	 */
 	function get_deprecated( $post_id = null ) {
-		if ( empty( $post_id ) ) {
+		if ( ! $post_id ) {
 			$post_id = get_the_ID();
 		}
 
@@ -756,29 +756,47 @@ namespace DevHub {
 		$type           = array_pop( $types );
 		$tags           = get_post_meta( $post_id, '_wp-parser_tags', true );
 		$deprecated = wp_filter_object_list( $tags, array( 'name' => 'deprecated' ) );
+		$deprecated = array_shift( $deprecated );
 
-		if ( empty( $deprecated ) ) {
+		if ( ! $deprecated ) {
 			return '';
 		}
+
+		$deprecation_info = '';
 
 		$referral = wp_filter_object_list( $tags, array( 'name' => 'see' ) );
 		$referral = array_shift( $referral );
 
+		// Construct message pointing visitor to preferred alternative, as provided
+		// via @see, if present.
 		if ( ! empty( $referral['refers'] ) ) {
 			$refers = sanitize_text_field( $referral['refers'] );
 
-			if ( ! empty( $refers ) ) {
-				/* translators: 1: Linked internal element name */
-				$alternative_string = sprintf( __( ' Use %s instead.', 'wporg' ), \DevHub_Formatting::link_internal_element( $refers ) );
+			if ( $refers ) {
+				// For some reason, the parser may have dropped the parentheses, so add them.
+				if ( in_array( $type, array( 'function', 'method' ) ) && false === strpos( $refers, '()' ) ) {
+					$refers .= '()';
+				}
+				/* translators: %s: Linked internal element name */
+				$deprecation_info = ' ' . sprintf( __( 'Use %s instead.', 'wporg' ), \DevHub_Formatting::link_internal_element( $refers ) );
 			}
-		} else {
-			$alternative_string = '';
 		}
 
-		/* translators: 1: String for alternative function (if one exists) */
+		// If no alternative resource was referenced, use the deprecation string, if
+		// present.
+		if ( ! $deprecation_info && ! empty( $deprecated['content'] ) ) {
+			$deprecation_info = ' ' . sanitize_text_field ( $deprecated['content'] );
+			// Many deprecation strings use the syntax "Use function()" instead of the
+			// preferred "Use function() instead." Add it in if missing.
+			if ( false === strpos( $deprecation_info, 'instead' ) ) {
+				$deprecation_info .= ' instead.'; // Not making translatable since rest of string is not translatable.
+			}
+		}
+
+		/* translators: 1: parsed post post, 2: String for alternative function (if one exists) */
 		$contents = sprintf( __( 'This %1$s has been deprecated.%2$s', 'wporg' ),
 			$type,
-			$alternative_string
+			$deprecation_info
 		);
 
 		// Use the 'warning' callout box if it's available. Otherwise, fall back to a theme-supported div class.
