@@ -107,9 +107,11 @@ function wporg_filter_archive_excerpt( $excerpt ) {
 			if ( isset( $hook_type ) ) {
 				switch ( $hook_type ) {
 					case 'action':
+					case 'action_reference':
 						$type = __( 'Action Hook', 'wporg' );
 						break;
 					case 'filter':
+					case 'filter_reference':
 						$type = __( 'Filter Hook', 'wporg' );
 						break;
 				}
