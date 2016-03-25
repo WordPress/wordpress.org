@@ -266,7 +266,7 @@ namespace DevHub {
 	 *
 	 * Prefers the 'wp_parser_imported_wp_version' option value set by more
 	 * recent versions of the parser. Failing that, it checks the
-	 * WP_CORE_LATEST_RELEASE constant (set on WP.org) though this is not
+	 * WP_CORE_LATEST_RELEASE constant (set on WordPress.org) though this is not
 	 * guaranteed to be the latest parsed version. Failing that, it uses
 	 * the WP version of the site, unless it isn't a release version, in
 	 * which case a hardcoded value is assumed.

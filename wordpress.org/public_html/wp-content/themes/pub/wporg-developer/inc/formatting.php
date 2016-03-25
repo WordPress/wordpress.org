@@ -37,7 +37,7 @@ class DevHub_Formatting {
 	/**
 	 * Allows for "Wordpress" just for the excerpt value of the capital_P_dangit function.
 	 *
-	 * WP.org has a global output buffer that runs capital_P_dangit() over displayed
+	 * WordPress.org has a global output buffer that runs capital_P_dangit() over displayed
 	 * content. For this one field of this one post, circumvent that function to
 	 * to show the lowercase P.
 	 *

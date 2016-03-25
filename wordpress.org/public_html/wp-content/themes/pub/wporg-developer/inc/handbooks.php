@@ -201,7 +201,7 @@ class Devhub_Handbooks {
 	 * profiles.wordpress.org.
 	 *
 	 * Simplistic matching. Does not verify that the @username is a legitimate
-	 * WP.org user.
+	 * WordPress.org user.
 	 *
 	 * @param  string $content Post content
 	 * @return string
