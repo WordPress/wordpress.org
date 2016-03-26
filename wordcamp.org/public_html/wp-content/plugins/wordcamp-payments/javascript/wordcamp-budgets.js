@@ -36,6 +36,8 @@ jQuery( document ).ready( function( $ ) {
 			$( '#poststuff' ).find( ':input[required]' ).each( function( fieldIndex, inputField ) {
 				$( inputField ).prop( 'required', false );
 			} );
+
+			app.checkRadioButtons();
 		},
 
 		/**
@@ -75,6 +77,34 @@ jQuery( document ).ready( function( $ ) {
 			app.toggleIntermediaryBankFields( event );
 
 			// todo make the transition smoother
+
+			app.checkRadioButtons();
+		},
+
+		/*
+		 * Make sure all radio buttons have values in Chrome
+		 *
+		 * This is only to work around bug #596138
+		 *
+		 * @see  https://bugs.chromium.org/p/chromium/issues/detail?id=596138
+		 * @todo remove this after Chrome 51 is adopted by most users
+		 */
+		checkRadioButtons : function() {
+			var checkedPaymentMethods = $( 'input[name="payment_method"]:checked' );
+
+			if ( ! window.hasOwnProperty( 'chrome' ) ) {
+				return;
+			}
+
+			if ( 'Direct Deposit' != checkedPaymentMethods.val() ) {
+				if ( 0 === $( 'input[name="ach_account_type"]:checked' ).length ) {
+					$( '#ach_account_type_company' ).prop( 'checked', true );
+				}
+			}
+
+			if ( 0 === checkedPaymentMethods.length ) {
+				$( '#payment_method_direct_deposit' ).prop( 'checked', true );
+			}
 		},
 
 		/**
