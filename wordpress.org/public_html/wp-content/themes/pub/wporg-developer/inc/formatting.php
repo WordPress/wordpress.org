@@ -254,7 +254,7 @@ class DevHub_Formatting {
 	 * @param  string $text The text.
 	 * @return string
 	 */
-	public function autolink_references( $text ) {
+	public static function autolink_references( $text ) {
 		$r = '';
 		$textarr = preg_split( '/(<[^<>]+>)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE ); // split out HTML tags
 		$nested_code_pre = 0; // Keep track of how many levels link is nested inside <pre> or <code>
