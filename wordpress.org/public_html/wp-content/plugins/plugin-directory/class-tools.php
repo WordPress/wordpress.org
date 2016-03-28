@@ -37,9 +37,21 @@ class Tools {
 	public static function get_plugin_committers( $plugin_slug ) {
 		global $wpdb;
 
-		return $wpdb->get_col( $wpdb->prepare( 'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s', "/{$plugin_slug}" ) );
+		if ( false === ( $committers = wp_cache_get( "{$plugin_slug}_committer", 'wporg-plugins' ) ) ) {
+			$committers = $wpdb->get_col( $wpdb->prepare( 'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s', "/{$plugin_slug}" ) );
+
+			wp_cache_set( "{$plugin_slug}_committer", $committers, 'wporg-plugins' );
+		}
+
+		return $committers;
 	}
 
+	/**
+	 * Retrieve a list of plugins a specific user has commit to.
+	 *
+	 * @param int|\WP_User $user The user.
+	 * @return array The list of plugins the user has commit to.
+	 */
 	public static function get_users_write_access_plugins( $user ) {
 		global $wpdb;
 		if ( ! $user instanceof \WP_User ) {
@@ -49,8 +61,12 @@ class Tools {
 			return false;
 		}
 
-		$plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
-		$plugins = array_map( function( $plugin ) { return trim( $plugin, '/' ); }, $plugins );
+		if ( false === ( $plugins = wp_cache_get( "{$user->user_login}_committer", 'wporg-plugins' ) ) ) {
+			$plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
+			$plugins = array_map( function( $plugin ) { return trim( $plugin, '/' ); }, $plugins );
+
+			wp_cache_set( "{$user->user_login}_committer", $plugins, 'wporg-plugins' );
+		}
 
 		return $plugins;
 
@@ -76,16 +92,19 @@ class Tools {
 
 		$existing_committers = self::get_plugin_committers( $plugin_slug );
 		if ( in_array( $user->user_login, $existing_committers, true ) ) {
-			// User already has write access
+			// User already has write access.
 			return true;
 		}
+
+		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
+		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
 
 		return (bool) $wpdb->insert(
 			PLUGINS_TABLE_PREFIX . 'svn_access',
 			array(
 				'path'   => "/{$plugin_slug}",
 				'user'   => $user->user_login,
-				'access' => 'rw'
+				'access' => 'rw',
 			)
 		);
 	}
@@ -107,6 +126,9 @@ class Tools {
 		if ( ! $user->exists() || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
+
+		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
+		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
 
 		return $wpdb->delete(
 			PLUGINS_TABLE_PREFIX . 'svn_access',

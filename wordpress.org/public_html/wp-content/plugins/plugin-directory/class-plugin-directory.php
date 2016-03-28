@@ -43,6 +43,8 @@ class Plugin_Directory {
 	public function init() {
 		load_plugin_textdomain( 'wporg-plugins' );
 
+		wp_cache_add_global_groups( 'wporg-plugins' );
+
 		register_post_type( 'plugin', array(
 			'labels'          => array(
 				'name'               => __( 'Plugins',                   'wporg-plugins' ),
