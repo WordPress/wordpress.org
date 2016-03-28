@@ -163,7 +163,7 @@ class Customizations {
 		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
 
 		// Allow reviewers to also see all pending plugins.
-		if ( current_user_can( 'plugin_edit_pending' ) ) {
+		if ( current_user_can( 'plugin_edit_pending' ) && ! isset( $_GET['author'] ) ) {
 			$where .= " OR {$wpdb->posts}.post_status = 'pending'";
 		}
 
