@@ -330,7 +330,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				number_format_i18n( $user_post_count )
 			);
 
-			if ( ! current_user_can( 'plugin_edit_others' ) ) {
+			if ( ! current_user_can( 'plugin_edit_others' ) && ! current_user_can( 'plugin_edit_pending' ) ) {
 				$status_links['mine'] = $this->get_edit_link( $mine_args, $mine_inner_html, 'current' );;
 				return $status_links;
 			} else {

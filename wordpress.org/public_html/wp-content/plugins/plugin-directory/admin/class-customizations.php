@@ -154,12 +154,19 @@ class Customizations {
 	 * @ignore
 	 */
 	public function pre_get_posts_sql_name_or_user( $where ) {
+		global $wpdb;
+
 		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
 
 		// Replace `post_name IN(..) AND post_author IN (..)`
 		// With `( post_name IN() OR post_author IN() )`
-
 		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
+
+		// Allow reviewers to also see all pending plugins.
+		if ( current_user_can( 'plugin_edit_pending' ) ) {
+			$where .= " OR {$wpdb->posts}.post_status = 'pending'";
+		}
+
 		return $where;
 	}
 
