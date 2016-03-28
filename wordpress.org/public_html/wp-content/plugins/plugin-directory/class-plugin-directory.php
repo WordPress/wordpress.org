@@ -50,12 +50,14 @@ class Plugin_Directory {
 				'menu_name'          => __( 'My Plugins',                'wporg-plugins' ),
 				'add_new'            => __( 'Add New',                   'wporg-plugins' ),
 				'add_new_item'       => __( 'Add New Plugin',            'wporg-plugins' ),
-				'edit_item'          => __( 'Editing Plugin: %s',        'wporg-plugins' ),
 				'new_item'           => __( 'New Plugin',                'wporg-plugins' ),
 				'view_item'          => __( 'View Plugin',               'wporg-plugins' ),
 				'search_items'       => __( 'Search Plugins',            'wporg-plugins' ),
 				'not_found'          => __( 'No plugins found',          'wporg-plugins' ),
 				'not_found_in_trash' => __( 'No plugins found in Trash', 'wporg-plugins' ),
+
+				// Context only available in admin, not in toolbar.
+				'edit_item'          => is_admin() ? __( 'Editing Plugin: %s', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
 			'supports'        => array( 'comments' ),
