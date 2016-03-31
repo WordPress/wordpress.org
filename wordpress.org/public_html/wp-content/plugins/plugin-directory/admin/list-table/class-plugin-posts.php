@@ -149,8 +149,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_support( $post ) {
-		//@todo: Check how many unresolved threads there are.
-		$link_text = __( '0 open', 'wporg-plugins' );
+		$resolutions = get_post_meta( $post->ID, 'support_resolutions', true );
+		$unresolved  = empty( $resolutions ) ? 0 : $resolutions['no'];
+		$link_text   = sprintf( __( '%d unresolved', 'wporg-plugins' ), $unresolved );
 
 		printf( '<a href="%s">%s</a>', esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name ), $link_text );
 	}
