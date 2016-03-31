@@ -123,7 +123,7 @@ class WPorg_GP_Route_WP_Themes extends WPorg_GP_Route_WP_Directory {
 
 		unset( $contributors_by_locale['last_updated'], $chart_data['last_updated'] );
 
-		$this->tmpl( 'projects-wp-plugins-contributors', get_defined_vars() );
+		$this->tmpl( 'projects-wp-themes-contributors', get_defined_vars() );
 	}
 
 	/**
@@ -142,7 +142,7 @@ class WPorg_GP_Route_WP_Themes extends WPorg_GP_Route_WP_Directory {
 
 		$language_packs = $this->get_language_packs( 'theme', $project_slug );
 
-		$this->tmpl( 'projects-wp-plugins-language-packs', get_defined_vars() );
+		$this->tmpl( 'projects-wp-themes-language-packs', get_defined_vars() );
 	}
 
 	/**
