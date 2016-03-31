@@ -172,7 +172,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 		$project_args = array(
 			'name'                => $theme_data['name'],
 			'slug'                => $theme_slug,
-			'description'         => $theme_data['description'],
+			'description'         => $theme_data['description'] . "<br><br><a href='https://wordpress.org/plugins/{$theme_slug}'>WordPress.org Theme Page</a>",
 			'parent_project_id'   => $parent_project->id,
 			'source_url_template' => "https://themes.trac.wordpress.org/browser/$theme_slug/{$theme_data['version']}/%file%#L%line%",
 			'active'              => 1
