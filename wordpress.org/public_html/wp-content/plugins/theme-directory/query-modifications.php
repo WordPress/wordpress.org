@@ -33,6 +33,9 @@ function wporg_themes_pre_get_posts( $query ) {
 		$query->query_vars['browse'] = 'favorites';
 	}
 
+	// eliminate draft posts from showing up in the directory
+	$query->query_vars['post_status'] = 'publish';
+
 	switch ( $query->query_vars['browse'] ) {
 		case 'new':
 			$query->query_vars['orderby'] = 'post_date';
