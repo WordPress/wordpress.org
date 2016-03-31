@@ -221,16 +221,20 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			case 'bbpress':
 			case 'buddypress':
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
-					return wporg_get_plugin_icon( $project->slug, $size );
-				} else {
-					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
+					$screenshot = wporg_get_plugin_icon( $project->slug, $size );
+					if ( $screenshot ) {
+						return $screenshot;
+					}
 				}
+				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 			case 'wp-plugins':
 				if ( function_exists( 'wporg_get_plugin_icon' ) ) {
-					return wporg_get_plugin_icon( $sub_project->slug, $size );
-				} else {
-					return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
+					$screenshot = wporg_get_plugin_icon( $sub_project->slug, $size );
+					if ( $screenshot ) {
+						return $screenshot;
+					}
 				}
+				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 			case 'glotpress':
 				return '<div class="icon"><img src="https://translate.wordpress.org/translate/gp-templates-new/images/glotpress.png" width="' . $size . '" height="' . $size . '"></div>';
 			default:
