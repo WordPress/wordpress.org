@@ -948,6 +948,7 @@ ul.projects-dropdown li > a > span {
 	width: 100%;
 	text-align: center;
 	border-collapse: collapse;
+	table-layout: fixed;
 }
 
 .stats-table table thead {
@@ -961,7 +962,6 @@ ul.projects-dropdown li > a > span {
 	font-weight: bold;
 	text-align: center;
 	vertical-align: bottom;
-	width: 79px;
 	padding: 10px 3px;
 	font-size: .8em;
 	line-height: 1.2;
@@ -973,8 +973,16 @@ ul.projects-dropdown li > a > span {
 	border-right: none;
 }
 
-.stats-table table th.title {
-	width: 140px!important;
+.stats-table table th {
+	word-break: break-word;
+}
+
+.stats-table table th.col-locale-code {
+	width: 110px;
+}
+
+.stats-table table th.col-locale {
+	width: 180px;
 }
 
 .stats-table .none {

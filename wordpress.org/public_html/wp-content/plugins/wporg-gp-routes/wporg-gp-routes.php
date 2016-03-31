@@ -12,7 +12,9 @@ require_once __DIR__ . '/routes/redirector.php';
 require_once __DIR__ . '/routes/index.php';
 require_once __DIR__ . '/routes/locale.php';
 require_once __DIR__ . '/routes/stats-overview.php';
+require_once __DIR__ . '/routes/wp-directory.php';
 require_once __DIR__ . '/routes/wp-plugins.php';
+require_once __DIR__ . '/routes/wp-themes.php';
 
 class WPorg_GP_Routes {
 
@@ -33,6 +35,8 @@ class WPorg_GP_Routes {
 	 *  - /languages/$locale
 	 *  - /languages/$locale/$path
 	 *  - /profile/$path
+	 *  - /projects/wp-plugins/?
+	 *  - /projects/wp-themes/?
 	 *
 	 * Adds:
 	 *  - /
@@ -44,6 +48,9 @@ class WPorg_GP_Routes {
 	 *  - /projects/wp-plugins/$project
 	 *  - /projects/wp-plugins/$project/contributors
 	 *  - /projects/wp-plugins/$project/language-packs
+	 *  - /projects/wp-themes/$project
+	 *  - /projects/wp-themes/$project/contributors
+	 *  - /projects/wp-themes/$project/language-packs
 	 */
 	public function register_routes() {
 		$request_uri = GP::$router->request_uri();
@@ -76,6 +83,9 @@ class WPorg_GP_Routes {
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_projects' ) );
 			GP::$router->prepend( "/projects/wp-plugins/$project/contributors", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_contributors' ) );
 			GP::$router->prepend( "/projects/wp-plugins/$project/language-packs", array( 'WPorg_GP_Route_WP_Plugins', 'get_plugin_language_packs' ) );
+			GP::$router->prepend( "/projects/wp-themes/$project", array( 'WPorg_GP_Route_WP_Themes', 'get_theme_projects' ) );
+			GP::$router->prepend( "/projects/wp-themes/$project/contributors", array( 'WPorg_GP_Route_WP_Themes', 'get_theme_contributors' ) );
+			GP::$router->prepend( "/projects/wp-themes/$project/language-packs", array( 'WPorg_GP_Route_WP_Themes', 'get_theme_language_packs' ) );
 		}
 	}
 

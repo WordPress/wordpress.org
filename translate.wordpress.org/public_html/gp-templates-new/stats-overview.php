@@ -13,7 +13,7 @@ gp_tmpl_header();
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>
-				<th class="title"><?php _e( 'Locale' ); ?></th>
+				<th class="col-locale-code"><?php _e( 'Locale' ); ?></th>
 				<?php foreach ( $projects as $slug => $project ) : ?>
 					<th><?php
 						$namereplace = array( 'WordPress.org ', 'WordPress for ', 'WordPress ', 'ectory' );

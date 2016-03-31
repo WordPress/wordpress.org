@@ -2,10 +2,7 @@
 $edit_link = gp_link_project_edit_get( $project, __( '(edit)' ) );
 $table_headings = array(
 	'locale'        => __( 'Locale' ),
-	'dev'           => __( 'Development' ),
-	'dev-readme'    => __( 'Development Readme' ),
 	'stable'        => __( 'Stable' ),
-	'stable-readme' => __( 'Stable Readme' ),
 	'waiting'       => __( 'Waiting' ),
 );
 
@@ -45,12 +42,6 @@ gp_tmpl_header();
 	</div>
 </div>
 
-<?php if ( $has_error ) : ?>
-<div class="wporg-notice wporg-notice-warning">
-	<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a>. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $project->slug ); ?>">please contact the author</a>.</p>
-</div>
-<?php endif; ?>
-
 <div class="stats-table">
 	<table id="stats-table" class="table">
 		<thead>
@@ -87,7 +78,7 @@ gp_tmpl_header();
 					</th>
 					<?php
 						if ( $translation_locale_statuses[ $locale_slug ] ) :
-							foreach ( array( 'dev', 'dev-readme', 'stable', 'stable-readme', 'waiting' ) as $subproject_slug ) :
+							foreach ( array( 'stable', 'waiting' ) as $subproject_slug ) :
 								if ( isset( $translation_locale_statuses[ $locale_slug ][ $subproject_slug ] ) ) :
 									$percent = $translation_locale_statuses[ $locale_slug ][ $subproject_slug ];
 
@@ -104,7 +95,7 @@ gp_tmpl_header();
 										$link_text = number_format( $percent );
 									else :
 										$percent_class = (int) ( $percent / 10 ) * 10;
-										$link_url  = gp_url_project( $project->path, gp_url_join( $subproject_slug, $gp_locale->slug, $set_slug ) );
+										$link_url  = gp_url_project( $project->path, gp_url_join( $gp_locale->slug, $set_slug ) );
 										$link_text = "$percent%";
 
 									endif;
