@@ -691,8 +691,10 @@ function process_import_request() {
 	}
 
 	$file = $_FILES['wcpn-import-file'];
-	if ( $file['type'] != 'text/csv' ) {
-		wp_die( 'Please upload a text/csv file.' );
+	$ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
+
+	if ( $ext != 'csv' ) {
+		wp_die( 'Please upload a .csv file.' );
 	}
 
 	if ( $file['size'] < 1 ) {
