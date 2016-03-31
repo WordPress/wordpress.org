@@ -166,7 +166,11 @@ gp_tmpl_header();
 					</h4>
 				</div>
 				<div class="project-description">
-					<p><?php echo $sub_project->description; ?></p>
+					<p><?php
+						$description = wp_strip_all_tags( $sub_project->description );
+						$description = str_replace( array( 'WordPress.org Plugin Page', 'WordPress.org Theme Page' ), '', $description );
+						echo wp_trim_words( $description, 30 );
+					?></p>
 				</div>
 			</div>
 
