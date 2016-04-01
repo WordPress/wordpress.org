@@ -17,7 +17,7 @@
 	font-weight: normal;
 }
 
-#save-action {
+body.post-type-wcb_sponsor_invoice #save-action {
 	overflow: auto;	/* Without this the element collapses on Invoices because all of it's children are floated */
 }
 

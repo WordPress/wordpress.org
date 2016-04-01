@@ -83,6 +83,7 @@ jQuery( document ).ready( function( $ ) {
 		 * of those so that they can be attached to the request when the form is submitted.
 		 *
 		 * Files that are already attached to other posts are ignored.
+		 * @todo add an error message if the file is already attached to other posts, see https://wordpress.slack.com/archives/meta-wordcamp/p1459185670000179
 		 *
 		 * @param {app.AttachedFile} file
 		 */
