@@ -2,7 +2,7 @@
 /**
  * Plugin name: GlotPress: Plugin Directory Bridge
  * Description: Clears the content translation cache for plugins (readme/code) hosted on wordpress.org based on actions taken withing translate.wordpress.org.
- * Version:     1.0
+ * Version:     1.1
  * Author:      WordPress.org
  * Author URI:  http://wordpress.org/
  * License:     GPLv2 or later
@@ -12,11 +12,16 @@ class WPorg_GP_Plugin_Directory {
 	public $master_project   = 'wp-plugins';
 	public $i18n_cache_group = 'plugins-i18n';
 
+	private $translation_edits_queue = array();
+
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_global_cache_group' ) );
 		add_action( 'gp_originals_imported', array( $this, 'originals_imported' ) );
-		add_action( 'gp_translation_created', array( $this, 'translation_created' ) );
-		add_action( 'gp_translation_saved', array( $this, 'translation_saved' ) );
+		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_cache_purge' ) );
+		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_cache_purge' ) );
+
+		// Cache purging is delayed until shutdown to prevent multiple purges for the same project.
+		add_action( 'shutdown', array( $this, 'delete_plugin_i18n_cache_on_translation_edits' ) );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
@@ -58,29 +63,50 @@ class WPorg_GP_Plugin_Directory {
 	}
 
 	/**
-	 * Triggers a cache purge when a new translation was created.
+	 * Adds a translation to a cache purge queue when a translation was created
+	 * or updated.
 	 *
-	 * @param GP_Translation $translation Created translation.
+	 * @param GP_Translation $translation Created/updated translation.
 	 */
-	public function translation_created( $translation ) {
+	public function queue_translation_for_cache_purge( $translation ) {
 		if ( ! $this->project_is_plugin( $_SERVER['REQUEST_URI'] ) ) {
 			return;
 		}
 
-		$this->delete_plugin_i18n_cache_on_translation_edit( $translation );
+		$this->translation_edits_queue[ $translation->original_id ][ $translation->translation_set_id ] = true;
 	}
 
 	/**
-	 * Triggers a cache purge when a translation was updated.
+	 * Deletes the cache on a translation edits.
 	 *
-	 * @param GP_Translation $translation Updated translation.
+	 * @param GP_Translation $translation The edited translation.
 	 */
-	public function translation_saved( $translation ) {
-		if ( ! $this->project_is_plugin( $_SERVER['REQUEST_URI'] ) ) {
+	public function delete_plugin_i18n_cache_on_translation_edits() {
+		if ( empty( $this->translation_edits_queue ) ) {
 			return;
 		}
 
-		$this->delete_plugin_i18n_cache_on_translation_edit( $translation );
+		$purged = array();
+		foreach ( $this->translation_edits_queue as $original_id => $set_ids ) {
+			$original = GP::$original->get( $original_id );
+			if ( ! $original ) {
+				return;
+			}
+
+			foreach ( array_keys( $set_ids ) as $set_id ) {
+				if ( in_array( "{$original->project_id}-{$set_id}", $purged ) ) {
+					continue;
+				}
+
+				$translation_set = GP::$translation_set->get( $set_id );
+				if ( ! $translation_set ) {
+					return;
+				}
+
+				$this->delete_plugin_i18n_cache_keys_for_locale( $original->project_id, $translation_set->locale );
+				$purged[] = "{$original->project_id}-{$set_id}";
+			}
+		}
 	}
 
 	/**
@@ -175,25 +201,6 @@ class WPorg_GP_Plugin_Directory {
 		}
 
 		$this->delete_plugin_i18n_cache_keys_for( $prefix, $locale );
-	}
-
-	/**
-	 * Deletes the cache on a translation edit.
-	 *
-	 * @param GP_Translation $translation The edited translation.
-	 */
-	private function delete_plugin_i18n_cache_on_translation_edit( $translation ) {
-		$original = GP::$original->get( $translation->original_id );
-		if ( ! $original ) {
-			return;
-		}
-
-		$translation_set = GP::$translation_set->get( $translation->translation_set_id );
-		if ( ! $translation_set ) {
-			return;
-		}
-
-		$this->delete_plugin_i18n_cache_keys_for_locale( $original->project_id, $translation_set->locale );
 	}
 }
 
