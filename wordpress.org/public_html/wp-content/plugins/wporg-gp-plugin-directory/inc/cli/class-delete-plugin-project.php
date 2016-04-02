@@ -1,6 +1,12 @@
 <?php
 
-class WPorg_GP_CLI_Delete_Plugin_Project extends WP_CLI_Command {
+namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
+
+use GP;
+use WP_CLI;
+use WP_CLI_Command;
+
+class Delete_Plugin_Project extends WP_CLI_Command {
 
 	/**
 	 * Holds the path of the master project.

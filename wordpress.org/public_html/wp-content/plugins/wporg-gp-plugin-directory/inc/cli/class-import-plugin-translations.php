@@ -1,6 +1,13 @@
 <?php
 
-class WPorg_GP_CLI_Import_Plugin_Translations extends WP_CLI_Command {
+namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
+
+use GP;
+use GP_Locales;
+use WP_CLI;
+use WP_CLI_Command;
+
+class Import_Plugin_Translations extends WP_CLI_Command {
 
 	/**
 	 * Import plugin translations.

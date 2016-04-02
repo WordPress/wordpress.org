@@ -1,6 +1,12 @@
 <?php
 
-class WPorg_GP_CLI_Set_Plugin_Project extends WP_CLI_Command {
+namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
+
+use GP;
+use WP_CLI;
+use WP_CLI_Command;
+
+class Set_Plugin_Project extends WP_CLI_Command {
 
 	/**
 	 * Holds the path of the master project.
