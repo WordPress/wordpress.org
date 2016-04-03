@@ -16,6 +16,21 @@ class WPorg_GP_Customizations {
 		add_action( 'gp_before_request', array( $this, 'disable_translation_propagation_on_import' ), 10, 2 );
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
+		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
+	}
+
+	/**
+	 * Short circuits WordPress' status handler to prevent unnecessary headers
+	 * which prevent caching.
+	 *
+	 * @return bool True if a request for GlotPress, false if not.
+	 */
+	public function short_circuit_handle_404() {
+		if ( is_glotpress() ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
