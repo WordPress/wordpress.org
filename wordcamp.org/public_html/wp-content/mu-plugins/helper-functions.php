@@ -144,3 +144,17 @@ function wcorg_get_user_by_canonical_names( $name ) {
 
 	return $user;
 }
+
+/**
+ * Get ISO-3166 country names and codes
+ *
+ * @todo move the real functionality from get_valid_countries_iso3166() to here, then have the Budgets plugin,
+ * QBO, etc call this.
+ *
+ * @return array
+ */
+function wcorg_get_countries() {
+	require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/wordcamp-budgets.php' );
+
+	return WordCamp_Budgets::get_valid_countries_iso3166();
+}
