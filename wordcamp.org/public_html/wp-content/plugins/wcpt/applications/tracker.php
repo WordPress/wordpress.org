@@ -16,8 +16,12 @@ function render_status_shortcode() {
 	$milestones = \WordCamp_Loader::map_statuses_to_milestones();
 	$posts      = get_active_wordcamps( $statuses );
 
+	ob_start();
+
 	require_once( dirname( __DIR__ ) . '/wcpt-wordcamp/wordcamp-admin.php'                             );
 	require(      dirname( __DIR__ ) . '/views/applications/tracker/shortcode-application-tracker.php' );
+
+	return ob_get_clean();
 }
 
 /**
