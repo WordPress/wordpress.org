@@ -23,7 +23,8 @@ defined( 'WPINC' ) or die();
 				<td class="applicant"  ><?php echo esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) ); ?></td>
 				<td class="milestone"  ><?php echo esc_html( $milestones[ $post->post_status ] );                  ?></td>
 				<td class="status"     ><?php echo esc_html( $statuses[ $post->post_status ] );                    ?></td>
-				<td class="last-update"><?php echo esc_html( get_last_status_update_time_diff( $post->ID ) );      ?></td>
+				<td class="last-update"><?php echo esc_html( human_time_diff( time(), $post->last_update_timestamp ) . ' ago' ); ?></td>
+				<!-- todo realign -->
 			</tr>
 		<?php endforeach; ?>
 	</tbody>

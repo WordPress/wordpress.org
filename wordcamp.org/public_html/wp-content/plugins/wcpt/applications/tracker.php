@@ -14,12 +14,27 @@ add_action( 'wp_print_styles', __NAMESPACE__ . '\print_shortcode_styles'  );
 function render_status_shortcode() {
 	$statuses   = \WordCamp_Loader::get_post_statuses();
 	$milestones = \WordCamp_Loader::map_statuses_to_milestones();
+	$posts      = get_active_wordcamps( $statuses );
+
+	require_once( dirname( __DIR__ ) . '/wcpt-wordcamp/wordcamp-admin.php'                             );
+	require(      dirname( __DIR__ ) . '/views/applications/tracker/shortcode-application-tracker.php' );
+}
+
+/**
+ * Get camps that are active enough to be shown on the tracker
+ *
+ * @param array $statuses
+ *
+ * @return array
+ */
+function get_active_wordcamps( $statuses ) {
+	$inactive_timestamp = strtotime( '60 days ago' );
 
 	$shown_statuses = $statuses;
 	unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
 	$shown_statuses = array_keys( $shown_statuses );
 
-	$posts = get_posts( array(
+	$wordcamps = get_posts( array(
 		'post_type'      => WCPT_POST_TYPE_ID,
 		'post_status'    => $shown_statuses,
 		'posts_per_page' => 300,
@@ -27,27 +42,34 @@ function render_status_shortcode() {
 		'orderby'        => 'post_title',
 	) );
 
-	require_once( dirname( __DIR__ ) . '/wcpt-wordcamp/wordcamp-admin.php'                             );
-	require(      dirname( __DIR__ ) . '/views/applications/tracker/shortcode-application-tracker.php' );
+	foreach ( $wordcamps as $key => $wordcamp ) {
+		$wordcamp->last_update_timestamp = get_last_update_timestamp( $wordcamp->ID );
+
+		if ( $wordcamp->last_update_timestamp <= $inactive_timestamp ) {
+			unset( $wordcamps[ $key ] );
+		}
+	}
+
+	return $wordcamps;
 }
 
 /**
- * Get the time difference between now and the last status update.
+ * Get the timestamp of the last time the post status changed
  *
- * @param $post_id
+ * @param int $post_id
  *
- * @return string
+ * @return int
  */
-function get_last_status_update_time_diff( $post_id ) {
-	$time_diff      = '';
-	$status_changes = get_post_meta( $post_id, '_status_change' );
+function get_last_update_timestamp( $post_id ) {
+	$last_update_timestamp = 0;
+	$status_changes        = get_post_meta( $post_id, '_status_change' );
 
 	if ( $status_changes ) {
 		usort( $status_changes, 'wcpt_sort_log_entries' );
-		$time_diff = human_time_diff( time(), $status_changes[0]['timestamp'] ) . ' ago';
+		$last_update_timestamp = $status_changes[0]['timestamp'];
 	}
 
-	return $time_diff;
+	return $last_update_timestamp;
 }
 
 /**
