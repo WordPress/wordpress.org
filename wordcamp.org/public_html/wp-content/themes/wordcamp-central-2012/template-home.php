@@ -16,15 +16,7 @@ get_header(); ?>
 			<?php // Get the upcoming WordCamps
 			if ( function_exists( 'wcpt_has_wordcamps' ) &&
 				wcpt_has_wordcamps( array(
-					'post_status' => array(
-						'wcpt-scheduled',
-						'wcpt-needs-debrief',
-						'wcpt-debrief-schedul',
-						'wcpt-closed',
-
-						// back-compat
-						'publish',
-					),
+					'post_status' => WordCamp_Loader::get_public_post_statuses(),
 					'posts_per_page' => 5,
 					'meta_key'       => 'Start Date (YYYY-mm-dd)',
 					'orderby'        => 'meta_value',

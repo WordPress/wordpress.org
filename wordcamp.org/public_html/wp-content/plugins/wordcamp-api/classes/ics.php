@@ -53,15 +53,7 @@ class WordCamp_API_ICS {
 
 		$query = new WP_Query( array(
 			'post_type'      => WCPT_POST_TYPE_ID,
-			'post_status'    => array(
-				'wcpt-scheduled',
-				'wcpt-needs-debrief',
-				'wcpt-debrief-schedul',
-				'wcpt-closed',
-
-				// back-compat
-				'publish',
-			),
+			'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 			'posts_per_page' => 50,
 			'meta_key'       => 'Start Date (YYYY-mm-dd)',
 			'orderby'        => 'meta_value',
