@@ -386,6 +386,55 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					.show();
 			});
 
+			// List commits between #ticket and #attachments
+			var $commitChanges = $( 'div.change' ).has( '.comment p a.changeset' ).has( '.comment div.message p a.ticket' ),
+				$commits = $( '<ul/>' ), commitCount = 0;
+
+			$commitChanges.each( function( i, el ) {
+				var $el = $( el ), $comment = $el.find( '.comment' ), commitNumber, firstLine,
+					author, date, $commit = $( '<li>' );
+
+				commitNumber = $comment.find( '> p ').html().trim().replace( /^In /, '' ).replace( /:<br>$/, '' );
+				$commit.append( '[' + commitNumber + '] ' );
+
+				firstLine = $comment.find( '.message > p' ).html().trim().replace( /<br>$/, '' );
+				$commit.append( firstLine + '&hellip;' );
+
+				author = $el.find( '.username' ).data( 'username' );
+				$commit.append( ' by <a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
+
+				date = $el.find( '.time-ago' ).html();
+				$commit.append( ' ' + date );
+
+				$commits.append( $commit );
+				commitCount += 1;
+			});
+
+			$( '#ticket' ).after(
+				$( '<div/>', {
+					id: 'commits',
+					class: 'collapsed'
+				})
+				.append(
+					$( '<h3/>', {
+						class: 'foldable'
+					})
+					.html( '<a href="#no0" id="no0">Commits <span class="trac-count">(' + commitCount + ')</span></a>' )
+					.after(
+						$( '<div/>', {
+							class: 'commits'
+						})
+						.append( $commits )
+					)
+				)
+			);
+
+			// See $.fn.enableFolding().
+			$( '#no0' ).on( 'click', function() {
+				var $div = $( this.parentNode.parentNode ).toggleClass( 'collapsed' );
+				return ! $div.hasClass( 'collapsed' );
+			});
+
 			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
 			var uitab = $('#tab_userinterface');
 			if ( uitab.length ) {

@@ -1880,6 +1880,22 @@ a.mention.me {
 	box-shadow: 1px 0 0 0 #ffe399, -1px 0 0 0 #ffe399, 0 0 0 2px #ffe399;
 }
 
+#commits > div.commits {
+	border: 1px solid #ccc;
+	padding-right: 1em;
+}
+
+#commits ul {
+	margin-left: 2em;
+	padding: 0;
+}
+
+#commits li {
+	list-style: square;
+	padding-bottom: 4px;
+	margin-left: 10px
+}
+
 /* =Responsive / Mobile
 ----------------------------------------------- */
 @media (max-width: 770px) {
