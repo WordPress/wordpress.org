@@ -119,7 +119,7 @@ function get_wordcamp_sites() {
 	$sites = array();
 	$wordcamps = get_posts( array(
 		'post_type'      => 'wordcamp',
-		'post_status'    => 'publish',
+		'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 		'posts_per_page' => 125, // todo temporary workaround until able to add filters to make hundreds of sites manageable
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'orderby'        => 'meta_value_num',

@@ -39,7 +39,6 @@ class WordCamp_Central_Theme {
 		add_action( 'wp_ajax_nopriv_get_latest_wordcamp_tweets', array( __CLASS__, 'get_latest_tweets' ) );
 
 		add_filter( 'excerpt_more', array( __CLASS__, 'excerpt_more' ), 11 );
-		// add_filter( 'wcpt_register_post_type', array( __CLASS__, 'wcpt_register_post_type' ) ); // set to public in wcpt plugin
 		add_filter( 'nav_menu_css_class', array( __CLASS__, 'nav_menu_css_class' ), 10, 3 );
 		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_links_to_footer_menu' ), 10, 2 );
 
@@ -276,11 +275,14 @@ class WordCamp_Central_Theme {
 		$parameters = array(
 			'post_type'      => 'wordcamp',
 			'posts_per_page' => -1,
+			'post_status'    => array_merge(
+				WordCamp_Loader::get_public_post_statuses(),
+				WordCamp_Loader::get_pre_planning_post_statuses()
+			),
 		);
 
 		switch( $map_id ) {
 			case 'schedule':
-				$parameters['post_status'][] = array( 'publish', 'pending' );
 				$parameters['meta_query'][] = array(
 					'key'     => 'Start Date (YYYY-mm-dd)',
 					'value'   => strtotime( '-2 days' ),
@@ -328,15 +330,6 @@ class WordCamp_Central_Theme {
 	 */
 	static function excerpt_more( $more ) {
 		return '&nbsp;&hellip;';
-	}
-
-	/**
-	 * Filters wcpt_register_post_type, sets post type to public.
-	 * @todo move to wcpt_register_post_types when ready.
-	 */
-	static function wcpt_register_post_type( $args ) {
-		$args['public'] = true;
-		return $args;
 	}
 
 	/**
@@ -703,6 +696,7 @@ class WordCamp_Central_Theme {
 	public static function get_upcoming_wordcamps_query( $count = 10 ) {
 		$query = new WP_Query( array(
 			'post_type'		 => WCPT_POST_TYPE_ID,
+			'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 			'posts_per_page' => $count,
 			'meta_key'       => 'Start Date (YYYY-mm-dd)',
 			'orderby'        => 'meta_value',
@@ -815,6 +809,7 @@ class WordCamp_Central_Theme {
 			$cities    = array();
 			$wordcamps = new WP_Query( array(
 				'post_type'      => 'wordcamp',
+				'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 				'posts_per_page' => -1,
 			) );
 

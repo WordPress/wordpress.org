@@ -6,7 +6,7 @@
  */
 class WCOR_Mailer {
 	public $triggers;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -60,9 +60,9 @@ class WCOR_Mailer {
 				),
 			),
 		);
-		
+
 		add_action( 'wcor_send_timed_emails', array( $this, 'send_timed_emails' ) );
-		
+
 		foreach ( $this->triggers as $trigger_id => $trigger ) {
 			foreach( $trigger['actions'] as $action ) {
 				add_action( $action['name'], array( $this, $action['callback'] ), $action['priority'], $action['parameters'] );
@@ -71,7 +71,7 @@ class WCOR_Mailer {
 	}
 
 	/**
-	 * Schedule cron job when plugin is activated  
+	 * Schedule cron job when plugin is activated
 	 */
 	public function activate() {
 		if ( wp_next_scheduled( 'wcor_send_timed_emails' ) === false ) {
@@ -82,7 +82,7 @@ class WCOR_Mailer {
 			);
 		}
 	}
-	
+
 	/**
 	 * Clear cron job when plugin is deactivated
 	 */
@@ -93,7 +93,7 @@ class WCOR_Mailer {
 	/**
 	 * Wrapper for wp_mail() that customizes the subject, body and headers
 	 *
-	 * We want to make sure that replies go to support@wordcamp.org, rather than the fake address that WordPress sends from, but 
+	 * We want to make sure that replies go to support@wordcamp.org, rather than the fake address that WordPress sends from, but
 	 * we don't want to be flagged as spam for forging the From header, so we set the Sender header.
 	 * @see http://stackoverflow.com/q/4728393/450127
 	 *
@@ -212,7 +212,7 @@ class WCOR_Mailer {
 			'[travel_wrangler_email]',
 			'[safety_wrangler_name]',
 			'[safety_wrangler_email]',
-			
+
 			// Venue
 			'[venue_name]',
 			'[venue_address]',
@@ -286,7 +286,7 @@ class WCOR_Mailer {
 			// Miscellaneous
 			$this->get_mes_info( $wordcamp->ID ),
 		);
-		
+
 		return str_replace( $search, $replace, $content );
 	}
 
@@ -453,7 +453,7 @@ class WCOR_Mailer {
 
 		return $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp );
 	}
-	
+
 	/**
 	 * Send e-mails that are scheduled to go out at a specific time (e.g., 3 days before the camp)
 	 */
@@ -461,6 +461,7 @@ class WCOR_Mailer {
 		$recent_or_upcoming_wordcamps = get_posts( array(
 			'posts_per_page'  => -1,
 			'post_type'       => 'wordcamp',
+			'post_status'     => WordCamp_Loader::get_public_post_statuses(),
 			'meta_query'      => array(
 				array(
 					'key'     => 'Start Date (YYYY-mm-dd)',
@@ -473,7 +474,7 @@ class WCOR_Mailer {
 		$pending_wordcamps = get_posts( array(
 			'posts_per_page'  => -1,
 			'post_type'       => WCPT_POST_TYPE_ID,
-			'post_status'     => 'pending',
+			'post_status'     => WordCamp_Loader::get_pre_planning_post_statuses(),
 		) );
 
 		$wordcamps = array_merge( $recent_or_upcoming_wordcamps, $pending_wordcamps );
@@ -489,13 +490,13 @@ class WCOR_Mailer {
 				),
 			),
 		) );
-		
+
 		foreach ( $wordcamps as $wordcamp ) {
 			$sent_email_ids = (array) get_post_meta( $wordcamp->ID, 'wcor_sent_email_ids', true );
 
 			foreach ( $reminder_emails as $email ) {
 				$recipient = $this->get_recipients( $wordcamp->ID, $email->ID );
-				
+
 				if ( $this->timed_email_is_ready_to_send( $wordcamp, $email, $sent_email_ids ) ) {
 					if ( $this->mail( $recipient, $email->post_title, $email->post_content, array(), $email, $wordcamp ) ) {
 						$sent_email_ids[] = $email->ID;
@@ -519,7 +520,7 @@ class WCOR_Mailer {
 	 *
 	 * @todo It'd be nice to have some unit tests for this function, since there are a lot of different cases, but it seems like that might be
 	 * hard to do because of having to mock get_post_meta(), current_time(), etc. We could pass that info in, but that doesn't seem very elegant.
-	 *       
+	 *
 	 * @param WP_Post $wordcamp
 	 * @param WP_Post $email
 	 * @param array   $sent_email_ids The IDs of emails that have already been sent to the $wordcamp post
@@ -543,10 +544,10 @@ class WCOR_Mailer {
 		if ( ! in_array( $email->ID, $sent_email_ids ) ) {
 			if ( 'wcor_send_before' == $send_when ) {
 				$days_before = absint( get_post_meta( $email->ID, 'wcor_send_days_before', true ) );
-				
+
 				if ( $start_date && $days_before ) {
 					$send_date = $start_date - ( $days_before * DAY_IN_SECONDS );
-					
+
 					if ( $send_date <= current_time( 'timestamp' ) ) {
 						$ready = true;
 					}
@@ -556,7 +557,7 @@ class WCOR_Mailer {
 
 				if ( $end_date && $days_after ) {
 					$send_date = $end_date + ( $days_after * DAY_IN_SECONDS );
-					
+
 					if ( $send_date <= current_time( 'timestamp' ) ) {
 						$ready = true;
 					}
@@ -574,7 +575,7 @@ class WCOR_Mailer {
 				}
 			}
 		}
-		
+
 		return $ready;
 	}
 

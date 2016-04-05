@@ -80,7 +80,7 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 				$wordcamps = get_posts( array(
 					'posts_per_page' => 30,
 					'post_type' => 'wordcamp',
-					'post_status' => 'any',
+					'post_status' => WordCamp_Loader::get_public_post_statuses(),
 					'orderby' => 'ID',
 					's' => $wordcamp_title,
 				) );
@@ -94,7 +94,7 @@ $wordcamp_title = wcpt_get_wordcamp_title();
 					wcpt_has_wordcamps( array(
 						'posts_per_page' => 30,
 						'order'          => 'ASC',
-						'post_status'    => 'any',
+						'post_status'    => WordCamp_Loader::get_public_post_statuses(),
 						'post__in'       => wp_list_pluck( $wordcamps, 'ID' ),
 					) )
 				) :

@@ -1,0 +1,27 @@
+.notice {
+	background: #fff;
+	border-left: 4px solid #fff;
+	-webkit-box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
+	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
+	margin: 5px 15px 2px;
+	padding: 1px 12px;
+}
+
+.notice p {
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.notice-large {
+	padding: 10px 20px;
+}
+
+.notice-success {
+	border-left-color: #46b450;
+	color: #46b450;
+}
+
+.notice-error {
+	border-left-color: #dc3232;
+	color: #dc3232;
+}

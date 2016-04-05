@@ -13,10 +13,10 @@
  * @param array $args Possible arguments to change returned WordCamps
  * @return object Multidimensional array of WordCamp information
  */
-function wcpt_has_wordcamps ( $args = '' ) {
+function wcpt_has_wordcamps( $args = '' ) {
 	global $wcpt_template;
 
-	$default = array (
+	$default = array(
 		// Narrow query down to WordCamp Post Type
 		'post_type'        => WCPT_POST_TYPE_ID,
 
@@ -83,7 +83,7 @@ function wcpt_has_wordcamps ( $args = '' ) {
  * @global WP_Query $wcpt_template
  * @return object WordCamp information
  */
-function wcpt_wordcamps () {
+function wcpt_wordcamps() {
 	global $wcpt_template;
 	return $wcpt_template->have_posts();
 }
@@ -100,7 +100,7 @@ function wcpt_wordcamps () {
  * @global WP_Query $wcpt_template
  * @return object WordCamp information
  */
-function wcpt_the_wordcamp () {
+function wcpt_the_wordcamp() {
 	global $wcpt_template;
 	return $wcpt_template->the_post();
 }
@@ -116,7 +116,7 @@ function wcpt_the_wordcamp () {
  *
  * @uses wcpt_get_wordcamp_id()
  */
-function wcpt_wordcamp_id () {
+function wcpt_wordcamp_id() {
 	echo wcpt_get_wordcamp_id();
 }
 	/**
@@ -130,7 +130,7 @@ function wcpt_wordcamp_id () {
 	 *
 	 * @return string WordCamp id
 	 */
-	function wcpt_get_wordcamp_id () {
+	function wcpt_get_wordcamp_id() {
 		global $wcpt_template;
 
 		if ( isset( $wcpt_template->post ) )
@@ -153,7 +153,7 @@ function wcpt_wordcamp_id () {
  * @param int $wordcamp_id optional
  * @uses wcpt_get_wordcamp_permalink()
  */
-function wcpt_wordcamp_permalink ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_permalink( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_permalink( $wordcamp_id );
 }
 	/**
@@ -170,7 +170,7 @@ function wcpt_wordcamp_permalink ( $wordcamp_id = 0 ) {
 	 * @uses get_permalink
 	 * @return string Permanent link to WordCamp
 	 */
-	function wcpt_get_wordcamp_permalink ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_permalink( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -189,7 +189,7 @@ function wcpt_wordcamp_permalink ( $wordcamp_id = 0 ) {
  * @param int $wordcamp_id optional
  * @uses wcpt_get_wordcamp_title()
  */
-function wcpt_wordcamp_title ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_title( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_title( $wordcamp_id );
 }
 	/**
@@ -207,7 +207,7 @@ function wcpt_wordcamp_title ( $wordcamp_id = 0 ) {
 	 * @return string Title of WordCamp
 	 *
 	 */
-	function wcpt_get_wordcamp_title ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_title( $wordcamp_id = 0 ) {
 		return apply_filters( 'wcpt_get_wordcamp_title', get_the_title( $wordcamp_id ) );
 	}
 
@@ -223,7 +223,7 @@ function wcpt_wordcamp_title ( $wordcamp_id = 0 ) {
  * @param int $wordcamp_id optional
  * @uses wcpt_get_wordcamp_link()
  */
-function wcpt_wordcamp_link ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_link( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_link( $wordcamp_id );
 }
 	/**
@@ -241,7 +241,7 @@ function wcpt_wordcamp_link ( $wordcamp_id = 0 ) {
 	 * @return string Title of WordCamp
 	 *
 	 */
-	function wcpt_get_wordcamp_link ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_link( $wordcamp_id = 0 ) {
 
 		$title = get_the_title( $wordcamp_id );
 
@@ -268,7 +268,7 @@ function wcpt_wordcamp_link ( $wordcamp_id = 0 ) {
  * @uses wcpt_get_wordcamp_start_date()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_start_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
+function wcpt_wordcamp_start_date( $wordcamp_id = 0, $format = 'F j, Y' ) {
 	echo wcpt_get_wordcamp_start_date( $wordcamp_id, $format );
 }
 	/**
@@ -283,7 +283,7 @@ function wcpt_wordcamp_start_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_start_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
+	function wcpt_get_wordcamp_start_date( $wordcamp_id = 0, $format = 'F j, Y' ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -305,7 +305,7 @@ function wcpt_wordcamp_start_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
  * @uses wcpt_get_wordcamp_end_date()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_end_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
+function wcpt_wordcamp_end_date( $wordcamp_id = 0, $format = 'F j, Y' ) {
 	echo wcpt_get_wordcamp_end_date( $wordcamp_id, $format );
 }
 	/**
@@ -320,7 +320,7 @@ function wcpt_wordcamp_end_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_end_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
+	function wcpt_get_wordcamp_end_date( $wordcamp_id = 0, $format = 'F j, Y' ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -342,7 +342,7 @@ function wcpt_wordcamp_end_date ( $wordcamp_id = 0, $format = 'F j, Y' ) {
  * @uses wcpt_get_wordcamp_location()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_location ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_location( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_location( $wordcamp_id );
 }
 	/**
@@ -357,7 +357,7 @@ function wcpt_wordcamp_location ( $wordcamp_id = 0 ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_location ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_location( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -376,7 +376,7 @@ function wcpt_wordcamp_location ( $wordcamp_id = 0 ) {
  * @uses wcpt_get_wordcamp_organizer_name()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_organizer_name ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_organizer_name( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_organizer_name( $wordcamp_id );
 }
 	/**
@@ -391,7 +391,7 @@ function wcpt_wordcamp_organizer_name ( $wordcamp_id = 0 ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_organizer_name ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_organizer_name( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -410,7 +410,7 @@ function wcpt_wordcamp_organizer_name ( $wordcamp_id = 0 ) {
  * @uses wcpt_get_wordcamp_venue_name()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_venue_name ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_venue_name( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_venue_name( $wordcamp_id );
 }
 	/**
@@ -425,7 +425,7 @@ function wcpt_wordcamp_venue_name ( $wordcamp_id = 0 ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_venue_name ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_venue_name( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -444,7 +444,7 @@ function wcpt_wordcamp_venue_name ( $wordcamp_id = 0 ) {
  * @uses wcpt_get_wordcamp_url()
  * @param int $wordcamp_id optional
  */
-function wcpt_wordcamp_url ( $wordcamp_id = 0 ) {
+function wcpt_wordcamp_url( $wordcamp_id = 0 ) {
 	echo wcpt_get_wordcamp_url( $wordcamp_id );
 }
 	/**
@@ -459,7 +459,7 @@ function wcpt_wordcamp_url ( $wordcamp_id = 0 ) {
 	 * @return string
 	 * @param int $wordcamp_id optional
 	 */
-	function wcpt_get_wordcamp_url ( $wordcamp_id = 0 ) {
+	function wcpt_get_wordcamp_url( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
 
@@ -477,7 +477,7 @@ function wcpt_wordcamp_url ( $wordcamp_id = 0 ) {
  *
  * @global WP_Query $wcpt_template
  */
-function wcpt_wordcamp_pagination_count () {
+function wcpt_wordcamp_pagination_count() {
 	echo wcpt_get_wordcamp_pagination_count();
 }
 	/**
@@ -492,7 +492,7 @@ function wcpt_wordcamp_pagination_count () {
 	 * @global WP_Query $wcpt_template
 	 * @return string
 	 */
-	function wcpt_get_wordcamp_pagination_count () {
+	function wcpt_get_wordcamp_pagination_count() {
 		global $wcpt_template;
 
 		// Set pagination values
@@ -520,7 +520,7 @@ function wcpt_wordcamp_pagination_count () {
  * @subpackage Template Tags
  * @since WordCamp Post Type (0.1)
  */
-function wcpt_wordcamp_pagination_links () {
+function wcpt_wordcamp_pagination_links() {
 	echo wcpt_get_wordcamp_pagination_links();
 }
 	/**
@@ -535,7 +535,7 @@ function wcpt_wordcamp_pagination_links () {
 	 * @global WP_Query $wcpt_template
 	 * @return string
 	 */
-	function wcpt_get_wordcamp_pagination_links () {
+	function wcpt_get_wordcamp_pagination_links() {
 		global $wcpt_template;
 
 		return apply_filters( 'wcpt_get_wordcamp_pagination_links', $wcpt_template->pagination_links );
@@ -546,12 +546,12 @@ function wcpt_wordcamp_pagination_links () {
  * Moved from WordCamp Central functions.php
  */
 if ( ! function_exists( 'wcpt_wordcamp_physical_address' ) ) :
-function wcpt_wordcamp_physical_address( $wordcamp_id = 0 ) {
-	echo wp_filter_kses( nl2br( wcpt_get_wordcamp_physical_address( $wordcamp_id ) ) );
-}
+	function wcpt_wordcamp_physical_address( $wordcamp_id = 0 ) {
+		echo wp_filter_kses( nl2br( wcpt_get_wordcamp_physical_address( $wordcamp_id ) ) );
+	}
 endif;
 
-	if ( ! function_exists( 'wcpt_get_wordcamp_physical_address' ) ) :
+if ( ! function_exists( 'wcpt_get_wordcamp_physical_address' ) ) :
 	function wcpt_get_wordcamp_physical_address( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
@@ -559,15 +559,15 @@ endif;
 		$address = get_post_meta( $wordcamp_id, 'Physical Address', true );
 		return apply_filters( 'wcpt_get_wordcamp_physical_address', $address );
 	}
-	endif;
-
-if ( ! function_exists( 'wcpt_wordcamp_venue_url' ) ) :
-function wcpt_wordcamp_venue_url( $wordcamp_id = 0 ) {
-	echo esc_url( wcpt_get_wordcamp_venue_url( $wordcamp_id ) );
-}
 endif;
 
-	if ( ! function_exists( 'wcpt_get_wordcamp_venue_url' ) ) :
+if ( ! function_exists( 'wcpt_wordcamp_venue_url' ) ) :
+	function wcpt_wordcamp_venue_url( $wordcamp_id = 0 ) {
+		echo esc_url( wcpt_get_wordcamp_venue_url( $wordcamp_id ) );
+	}
+endif;
+
+if ( ! function_exists( 'wcpt_get_wordcamp_venue_url' ) ) :
 	function wcpt_get_wordcamp_venue_url( $wordcamp_id = 0 ) {
 		if ( empty( $wordcamp_id ) )
 			$wordcamp_id = wcpt_get_wordcamp_id();
@@ -575,16 +575,16 @@ endif;
 		$venue_url = get_post_meta( $wordcamp_id, 'Website URL', true );
 		return apply_filters( 'wcpt_get_wordcamp_venue_url', $venue_url );
 	}
-	endif;
+endif;
 
 if ( ! function_exists( 'wcpt_get_wordcamp_twitter_screen_name' ) ) :
-function wcpt_get_wordcamp_twitter_screen_name( $wordcamp_id = 0 ) {
-	if ( empty( $wordcamp_id ) )
-		$wordcamp_id = wcpt_get_wordcamp_id();
-		
-	$screen_name = get_post_meta( $wordcamp_id, 'Twitter', true );
-	return apply_filters( 'wcpt_get_wordcamp_twitter_screen_name', $screen_name );
-}
+	function wcpt_get_wordcamp_twitter_screen_name( $wordcamp_id = 0 ) {
+		if ( empty( $wordcamp_id ) )
+			$wordcamp_id = wcpt_get_wordcamp_id();
+
+		$screen_name = get_post_meta( $wordcamp_id, 'Twitter', true );
+		return apply_filters( 'wcpt_get_wordcamp_twitter_screen_name', $screen_name );
+	}
 endif;
 
 /*
@@ -647,10 +647,10 @@ add_filter( 'the_excerpt_rss',  'wcpt_feed_event_info' );
  * This helps publicize the feed, because it will show up in feed aggregators when users enter the site URL, even if they don't know the feed exists. 
  */
 function add_wordcamp_feed_link_to_head() {
-	if ( ! is_post_type_archive( 'wordcamp' ) ) {
+	if ( ! is_post_type_archive( WCPT_POST_TYPE_ID ) ) {
 		?>
 		
-		<link rel="alternate" type="<?php echo esc_attr( feed_content_type() ); ?>" title="New WordCamp Announcements" href="<?php echo esc_url( get_post_type_archive_feed_link( 'wordcamp' ) ); ?>" />
+		<link rel="alternate" type="<?php echo esc_attr( feed_content_type() ); ?>" title="New WordCamp Announcements" href="<?php echo esc_url( get_post_type_archive_feed_link( WCPT_POST_TYPE_ID ) ); ?>" />
 	
 		<?php
 	}

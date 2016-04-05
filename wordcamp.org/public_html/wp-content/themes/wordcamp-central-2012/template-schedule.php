@@ -10,7 +10,7 @@ get_header(); ?>
 
 		<div id="container" class="wc-schedule">
 			<div id="content" role="main">
-				
+
 				<?php if ( have_posts() ) : the_post(); ?>
 
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -21,10 +21,11 @@ get_header(); ?>
 				</div><!-- #post-## -->
 
 				<?php endif; // end of the loop. ?>
-				
+
 					<?php // Get the upcoming approved (published) WordCamps
 					if ( function_exists( 'wcpt_has_wordcamps' ) &&
 						wcpt_has_wordcamps( array(
+							'post_status' => WordCamp_Loader::get_public_post_statuses(),
 							'posts_per_page' => -1,
 							'meta_key'       => 'Start Date (YYYY-mm-dd)',
 							'orderby'        => 'meta_value',
@@ -34,13 +35,13 @@ get_header(); ?>
 								'value'      => strtotime( '-2 days' ),
 								'compare'    => '>'
 							) )
-						) ) 
+						) )
 					) :
 					?>
 
 					<ul class="wc-schedule-list">
 					<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
-						
+
 						<li>
 							<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
 								<?php if ( has_post_thumbnail() ) : ?>
@@ -48,7 +49,7 @@ get_header(); ?>
 								<?php else : ?>
 									<div class="wc-image wp-post-image wordcamp-placeholder-thumb" title="<?php the_title(); ?>"></div>
 								<?php endif; ?>
-								
+
 								<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
 								<span class="wc-country"><?php wcpt_wordcamp_location(); ?></span>
 								<span class="wc-date">
@@ -76,6 +77,6 @@ get_header(); ?>
 			</div><!-- #content -->
 		</div><!-- #container -->
 
-<?php 
-	get_sidebar( 'schedule' ); 
+<?php
+	get_sidebar( 'schedule' );
 	get_footer();

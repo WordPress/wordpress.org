@@ -10,11 +10,11 @@
 			<?php echo wptexturize( wpautop( "These WordCamps are in the early stages of planning, but don't have a date yet. When their dates are confirmed, they'll be added to the schedule of approved WordCamps." ) );
 			?>
 
-			<?php 
+			<?php
 				// Get the upcoming approved (published) WordCamps *with dates*
 				$args = array(
 					'posts_per_page' => -1,
-					'post_status'    => 'pending',
+					'post_status' => WordCamp_Loader::get_pre_planning_post_statuses(),
 					'meta_key'       => 'Start Date (YYYY-mm-dd)',
 					'orderby'        => 'meta_value',
 					'order'          => 'ASC',

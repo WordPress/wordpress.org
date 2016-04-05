@@ -52,7 +52,7 @@ class WCOR_Reminder {
 			'query_var'           => false,
 			'supports'            => array( 'title', 'editor', 'author', 'revisions' ),
 		);
-		
+
 		register_post_type( self::POST_TYPE_SLUG, $params );
 	}
 
@@ -107,72 +107,72 @@ class WCOR_Reminder {
 					<th><input id="wcor_send_sponsor_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_sponsor_wrangler" <?php checked( in_array( 'wcor_send_sponsor_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_sponsor_wrangler">The Sponsor Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_budget_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_budget_wrangler" <?php checked( in_array( 'wcor_send_budget_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_budget_wrangler">The Budget Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_venue_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_venue_wrangler" <?php checked( in_array( 'wcor_send_venue_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_venue_wrangler">The Venue Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_speaker_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_speaker_wrangler" <?php checked( in_array( 'wcor_send_speaker_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_speaker_wrangler">The Speaker Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_food_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_food_wrangler" <?php checked( in_array( 'wcor_send_food_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_food_wrangler">The Food/Beverage Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_swag_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_swag_wrangler" <?php checked( in_array( 'wcor_send_swag_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_swag_wrangler">The Swag Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_volunteer_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_volunteer_wrangler" <?php checked( in_array( 'wcor_send_volunteer_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_volunteer_wrangler">The Volunteer Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_printing_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_printing_wrangler" <?php checked( in_array( 'wcor_send_printing_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_printing_wrangler">The Printing Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_design_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_design_wrangler" <?php checked( in_array( 'wcor_send_design_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_design_wrangler">The Design Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_website_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_website_wrangler" <?php checked( in_array( 'wcor_send_website_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_website_wrangler">The Website Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_social_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_social_wrangler" <?php checked( in_array( 'wcor_send_social_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_social_wrangler">The Social Media/Publicity Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_a_v_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_a_v_wrangler" <?php checked( in_array( 'wcor_send_a_v_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_a_v_wrangler">The A/V Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_party_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_party_wrangler" <?php checked( in_array( 'wcor_send_party_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_party_wrangler">The Party Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_travel_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_travel_wrangler" <?php checked( in_array( 'wcor_send_travel_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_travel_wrangler">The Travel Wrangler</label></td>
 				</tr>
-				
+
 				<tr>
 					<th><input id="wcor_send_safety_wrangler" name="wcor_send_where[]" type="checkbox" value="wcor_send_safety_wrangler" <?php checked( in_array( 'wcor_send_safety_wrangler', $send_where ) ); ?>></th>
 					<td colspan="2"><label for="wcor_send_safety_wrangler">The Safety Wrangler</label></td>
@@ -195,8 +195,8 @@ class WCOR_Reminder {
 				</tr>
 			</tbody>
 		</table>
-		
-		
+
+
 		<h4>When should this e-mail be sent?</h4>
 
 		<table>
@@ -234,7 +234,7 @@ class WCOR_Reminder {
 					<td>
 						<select name="wcor_which_trigger">
 							<option value="null" <?php selected( $which_trigger, false ); ?>></option>
-							
+
 							<?php foreach ( $GLOBALS['WCOR_Mailer']->triggers as $trigger_id => $trigger ) : ?>
 								<option value="<?php echo esc_attr( $trigger_id ); ?>" <?php selected( $which_trigger, $trigger_id ); ?>><?php echo esc_html( $trigger['name'] ); ?></option>
 							<?php endforeach; ?>
@@ -364,9 +364,12 @@ class WCOR_Reminder {
 			return $wordcamps;
 		}
 
+		$statuses = WordCamp_Loader::get_post_statuses();
+		$statuses = array_merge( array_keys( $statuses ), array( 'draft', 'pending', 'publish' ) );
+
 		$wordcamps = get_posts( array(
 			'post_type'   => WCPT_POST_TYPE_ID,
-			'post_status' => array( 'draft', 'pending', 'publish' ),
+			'post_status' => $statuses,
 			'numberposts' => -1,
 		) );
 
@@ -437,7 +440,7 @@ class WCOR_Reminder {
 
 	/**
 	 * Checks to make sure the conditions for saving post meta are met
-	 * 
+	 *
 	 * @param int $post_id
 	 * @param object $post
 	 */
@@ -455,14 +458,14 @@ class WCOR_Reminder {
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! isset( $post->ID ) || $post->post_status == 'auto-draft' ) {
 			return;
 		}
-		
+
 		$this->save_post_meta( $post, $_POST );
 		$this->send_manual_email( $post, $_POST );
 	}
 
 	/**
 	 * Saves the meta data for the reminder post
-	 * 
+	 *
 	 * @param WP_Post $post
 	 * @param array $new_meta
 	 */
@@ -480,8 +483,8 @@ class WCOR_Reminder {
 
 		if ( isset( $new_meta['wcor_send_custom_address'] ) && is_email( $new_meta['wcor_send_custom_address'] ) ) {
 			update_post_meta( $post->ID, 'wcor_send_custom_address', sanitize_email( $new_meta['wcor_send_custom_address'] ) );
-		}		
-		
+		}
+
 		if ( isset( $new_meta['wcor_send_when'] ) ) {
 			if ( in_array( $new_meta['wcor_send_when'], array( 'wcor_send_before', 'wcor_send_after', 'wcor_send_after_pending', 'wcor_send_trigger' ) ) ) {
 				update_post_meta( $post->ID, 'wcor_send_when', $new_meta['wcor_send_when'] );

@@ -84,17 +84,18 @@ class WCPT_Admin {
 	 * Add some general styling to the admin area
 	 */
 	function admin_head () {
-?>
-		<style type="text/css" media="screen">
-		/*<![CDATA[*/
-<?php
-			// Add extra actions to WordCamp Post Type admin header area
-			do_action( 'wcpt_admin_head' );
-?>
+		?>
 
-		/*]]>*/
+		<style type="text/css" media="screen">
+			/*<![CDATA[*/
+			<?php
+				// Add extra actions to WordCamp Post Type admin header area
+				do_action( 'wcpt_admin_head' );
+			?>
+			/*]]>*/
 		</style>
-<?php
+
+		<?php
 	}
 
 	/**
@@ -124,17 +125,18 @@ class WCPT_Admin {
 		if ( !wcpt_has_access() )
 			return false;
 
-?>
-		<h3><?php _e( 'WordCamps', 'wcpt' ); ?></h3>
-		<table class="form-table">
-			<tr valign="top">
-				<th scope="row"><?php _e( 'WordCamps', 'wcpt' ); ?></th>
-				<td>
+		?>
+			<h3><?php _e( 'WordCamps', 'wcpt' ); ?></h3>
 
-				</td>
-			</tr>
-		</table>
-<?php
+			<table class="form-table">
+				<tr valign="top">
+					<th scope="row"><?php _e( 'WordCamps', 'wcpt' ); ?></th>
+					<td>
+
+					</td>
+				</tr>
+			</table>
+		<?php
 
 		// Add extra actions to WordCamp Post Type profile update
 		do_action( 'wcpt_user_profile_wordcamps' );
@@ -170,7 +172,6 @@ class WCPT_Admin {
 
 		// Loop through menu order and do some rearranging
 		foreach ( $menu_order as $index => $item ) {
-
 			// Current item is our forum CPT, so set our separator here
 			if ( ( ( 'edit.php?post_type=' . WCPT_POST_TYPE_ID ) == $item ) ) {
 				$wcpt_menu_order[] = 'separator-wcpt';
@@ -180,7 +181,6 @@ class WCPT_Admin {
 			// Skip our separator
 			if ( !in_array( $item, array( 'separator-wcpt' ) ) )
 				$wcpt_menu_order[] = $item;
-
 		}
 
 		// Return our custom order

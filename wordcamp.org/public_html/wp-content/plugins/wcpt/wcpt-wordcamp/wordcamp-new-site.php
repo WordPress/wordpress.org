@@ -99,16 +99,16 @@ class WordCamp_New_Site {
 			return;
 		}
 
-		$url = parse_url( $url );
-		if ( ! $url || empty( $url['scheme'] ) || empty( $url['host'] ) ) {
+		$url_components = parse_url( $url );
+		if ( ! $url_components || empty( $url_components['scheme'] ) || empty( $url_components['host'] ) ) {
 			return;
 		}
-		$path = isset( $url['path'] ) ? $url['path'] : '';
+		$path = isset( $url_components['path'] ) ? $url_components['path'] : '';
 
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
 		$site_meta         = array( 'public' => 1 );
-		$this->new_site_id = wpmu_create_blog( $url['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
+		$this->new_site_id = wpmu_create_blog( $url_components['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
 
 		if ( is_int( $this->new_site_id ) ) {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
@@ -116,6 +116,12 @@ class WordCamp_New_Site {
 
 			// Configure the new site at priority 11, after all the custom fields on the `wordcamp` post have been saved, so that we don't use outdated values
 			add_action( 'save_post', array( $this, 'configure_new_site' ), 11, 2 );
+
+			add_post_meta( $wordcamp_id, '_note', array(
+				'timestamp' => time(),
+				'user_id'   => get_current_user_id(),
+				'message'   => sprintf( 'Created site at <a href="%s">%s</a>', $url, $url ),
+			) );
 		}
 	}
 
@@ -198,7 +204,7 @@ class WordCamp_New_Site {
 
 		// Make sure the new blog is https.
 		update_option( 'siteurl', set_url_scheme( get_option( 'siteurl' ), 'https' ) );
-		update_option( 'home', set_url_scheme( get_option( 'home' ), 'https' ) );
+		update_option( 'home',    set_url_scheme( get_option( 'home' ),    'https' ) );
 	}
 
 	/**

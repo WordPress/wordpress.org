@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Customizations to the JSON REST API
  *
@@ -22,6 +21,9 @@ add_filter( 'wp_cache_eof_tags',           'wcorg_json_cache_requests'          
 
 // Allow some routes to skip the JSON REST API v1 plugin.
 add_action( 'parse_request', 'wcorg_json_v2_compat', 9 );
+
+// Allow users to read new post statuses.
+add_filter( 'json_check_post_read_permission', 'wcorg_json_check_post_read_permission', 10, 2 );
 
 /**
  * Unhook any endpoints that aren't whitelisted
@@ -370,4 +372,16 @@ function wcorg_json_v2_compat( $request ) {
 	$request->matched_query = preg_replace( '#^json_route=(.+)$#', 'rest_route=$1', $request->matched_query );
 
 	return;
+}
+
+function wcorg_json_check_post_read_permission( $permission, $post ) {
+	if ( $permission || ! defined( 'WCPT_POST_TYPE_ID' ) ) {
+		return $permission;
+	}
+
+	if ( $post['post_type'] != WCPT_POST_TYPE_ID ) {
+		return $permission;
+	}
+
+	return in_array( $post['post_status'], WordCamp_Loader::get_public_post_statuses() );
 }

@@ -52,7 +52,16 @@ class WordCamp_API_ICS {
 		$ical .= 'PRODID:-//hacksw/handcal//NONSGML v1.0//EN' . self::CLRF;
 
 		$query = new WP_Query( array(
-			'post_type'		 => WCPT_POST_TYPE_ID,
+			'post_type'      => WCPT_POST_TYPE_ID,
+			'post_status'    => array(
+				'wcpt-scheduled',
+				'wcpt-needs-debrief',
+				'wcpt-debrief-schedul',
+				'wcpt-closed',
+
+				// back-compat
+				'publish',
+			),
 			'posts_per_page' => 50,
 			'meta_key'       => 'Start Date (YYYY-mm-dd)',
 			'orderby'        => 'meta_value',

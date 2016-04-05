@@ -1,0 +1,922 @@
+/*
+ * Modified from https://polldaddy.com/css/production/public-survey-general.css?m=1456312636
+ */
+
+.slider-display {
+	margin: 15px 0px 10px 0px;
+	position: relative
+}
+
+.slider a {
+	outline: none
+}
+
+.slider-value {
+	font-size: 1.2em
+}
+
+.slider-display .tick {
+	border-left: 1px solid #aaa;
+	height: 100%;
+	position: absolute
+}
+
+ul.rank input.rank-value {
+	width: 30px
+}
+
+ul.rank {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	position: relative
+}
+
+ul.rank li {
+	padding: 3px 0;
+	width: 100%
+}
+
+.print .PDF_pageOuter {
+	page-break-after: always
+}
+
+body.print {
+	background-color: white !important
+}
+
+.print input[type=text],
+.print .PDF_QT1400 input {
+	background-color: white !important;
+	border: 1px solid #999
+}
+
+.print select {
+	border-radius: 0px !important;
+	-webkit-border-radius: 0px !important;
+	border-top-left-radius: 0px !important;
+	border: 1px solid #999;
+	background-color: white;
+	-khtml-appearance: none;
+	height: 19px
+}
+
+.print .PDF_QT900 select {
+	height: 25px
+}
+
+.error,
+.PDF_QT1200 .alt.error {
+	background-color: #FEE;
+	border: 1px solid #EF7878;
+	clear: both;
+	color: #C00;
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 4px 4px 4px 34px
+}
+
+.branding-logo.branding-align-right {
+	text-align: right
+}
+
+.branding-logo.branding-align-centre {
+	text-align: center
+}
+
+.ui-widget {
+	font-size: 1.1em
+}
+
+.ui-widget .ui-widget {
+	font-size: 1em
+}
+
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+	font-size: 1em
+}
+
+.ui-widget-content {
+	border: 1px solid #aaa;
+	background-color: #fff;
+	color: #222
+}
+
+.ui-widget-content a {
+	color: #222
+}
+
+.ui-widget-header {
+	border: 1px solid #aaa;
+	background-color: #ccc;
+	color: #222;
+	font-weight: bold
+}
+
+.ui-widget-header a {
+	color: #222
+}
+
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+	border: 1px solid #d3d3d3;
+	background-color: #e6e6e6;
+	font-weight: normal;
+	color: #555
+}
+
+.ui-state-default a,
+.ui-state-default a:link,
+.ui-state-default a:visited {
+	color: #555;
+	text-decoration: none
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+	border: 1px solid #999;
+	background-color: #dadada;
+	font-weight: normal;
+	color: #212121
+}
+
+.ui-state-hover a,
+.ui-state-hover a:hover {
+	color: #212121;
+	text-decoration: none
+}
+
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+	border: 1px solid #aaa;
+	background-color: #fff;
+	font-weight: normal;
+	color: #212121
+}
+
+.ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+	color: #212121;
+	text-decoration: none
+}
+
+.ui-widget:active {
+	outline: none
+}
+
+.ui-state-highlight,
+.ui-widget-content .ui-state-highlight,
+.ui-widget-header .ui-state-highlight {
+	border: 1px solid #fcefa1;
+	background-color: #fbf9ee;
+	color: #363636
+}
+
+.ui-state-highlight a,
+.ui-widget-content .ui-state-highlight a,
+.ui-widget-header .ui-state-highlight a {
+	color: #363636
+}
+
+.ui-state-error,
+.ui-widget-content .ui-state-error,
+.ui-widget-header .ui-state-error {
+	border: 1px solid #cd0a0a;
+	background-color: #fef1ec;
+	color: #cd0a0a
+}
+
+.ui-state-error a,
+.ui-widget-content .ui-state-error a,
+.ui-widget-header .ui-state-error a {
+	color: #cd0a0a
+}
+
+.ui-state-error-text,
+.ui-widget-content .ui-state-error-text,
+.ui-widget-header .ui-state-error-text {
+	color: #cd0a0a
+}
+
+.ui-priority-primary,
+.ui-widget-content .ui-priority-primary,
+.ui-widget-header .ui-priority-primary {
+	font-weight: bold
+}
+
+.ui-priority-secondary,
+.ui-widget-content .ui-priority-secondary,
+.ui-widget-header .ui-priority-secondary {
+	opacity: .7;
+	filter: Alpha(Opacity=70);
+	font-weight: normal
+}
+
+.ui-state-disabled,
+.ui-widget-content .ui-state-disabled,
+.ui-widget-header .ui-state-disabled {
+	opacity: .35;
+	filter: Alpha(Opacity=35);
+	background-image: none
+}
+
+.ui-corner-tl {
+	-moz-border-radius-topleft: 4px;
+	-webkit-border-top-left-radius: 4px;
+	border-top-left-radius: 4px
+}
+
+.ui-corner-tr {
+	-moz-border-radius-topright: 4px;
+	-webkit-border-top-right-radius: 4px;
+	border-top-right-radius: 4px
+}
+
+.ui-corner-bl {
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	border-bottom-left-radius: 4px
+}
+
+.ui-corner-br {
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	border-bottom-right-radius: 4px
+}
+
+.ui-corner-top {
+	-moz-border-radius-topleft: 4px;
+	-webkit-border-top-left-radius: 4px;
+	border-top-left-radius: 4px;
+	-moz-border-radius-topright: 4px;
+	-webkit-border-top-right-radius: 4px;
+	border-top-right-radius: 4px
+}
+
+.ui-corner-bottom {
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	border-bottom-right-radius: 4px
+}
+
+.ui-corner-right {
+	-moz-border-radius-topright: 4px;
+	-webkit-border-top-right-radius: 4px;
+	border-top-right-radius: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	border-bottom-right-radius: 4px
+}
+
+.ui-corner-left {
+	-moz-border-radius-topleft: 4px;
+	-webkit-border-top-left-radius: 4px;
+	border-top-left-radius: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	border-bottom-left-radius: 4px
+}
+
+.ui-corner-all {
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px
+}
+
+.ui-helper-hidden {
+	display: none
+}
+
+.ui-helper-hidden-accessible {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px);
+	clip: rect(1px, 1px, 1px, 1px)
+}
+
+.ui-helper-reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	line-height: 1.3;
+	text-decoration: none;
+	font-size: 100%;
+	list-style: none
+}
+
+.ui-helper-clearfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden
+}
+
+.ui-helper-clearfix {
+	display: inline-block
+}
+
+/*\*/
+
+* html .ui-helper-clearfix {
+	height: 1%
+}
+
+.ui-helper-clearfix {
+	display: block
+}
+
+.ui-helper-zfix {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	position: absolute;
+	opacity: 0;
+	filter: Alpha(Opacity=0)
+}
+
+.ui-state-disabled {
+	cursor: default !important
+}
+
+.ui-icon {
+	display: block;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat
+}
+
+.ui-widget-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%
+}
+
+.ui-slider {
+	position: relative;
+	text-align: left
+}
+
+.ui-slider .ui-slider-handle {
+	position: absolute;
+	z-index: 2;
+	width: 1.2em;
+	height: 1.2em;
+	cursor: default
+}
+
+.ui-slider .ui-slider-range {
+	position: absolute;
+	z-index: 1;
+	font-size: .7em;
+	display: block;
+	border: 0;
+	background-position: 0 0
+}
+
+.ui-slider-horizontal {
+	height: .8em
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+	top: -.3em;
+	margin-left: -.6em
+}
+
+.ui-slider-horizontal .ui-slider-range {
+	top: 0;
+	height: 100%
+}
+
+.ui-slider-horizontal .ui-slider-range-min {
+	left: 0
+}
+
+.ui-slider-horizontal .ui-slider-range-max {
+	right: 0
+}
+
+.ui-slider-vertical {
+	width: .8em;
+	height: 100px
+}
+
+.ui-slider-vertical .ui-slider-handle {
+	left: -.3em;
+	margin-left: 0;
+	margin-bottom: -.6em
+}
+
+.ui-slider-vertical .ui-slider-range {
+	left: 0;
+	width: 100%
+}
+
+.ui-slider-vertical .ui-slider-range-min {
+	bottom: 0
+}
+
+.ui-slider-vertical .ui-slider-range-max {
+	top: 0
+}
+
+
+/*
+ * Modified from https://polldaddy.com/css/survey-style/106.css?1458676004
+ */
+
+/* Simple Grey v1.0 */
+
+/*
+body {
+	margin: 0px;
+	color: #333;
+	font-size: 14px;
+	line-height: 18px;
+	background-color: #eee;
+}
+*/
+
+.rank-label {
+	/* background: url(/images/ico-move.png) no-repeat 14px 12px; */
+	padding: 10px 10px 10px 38px;
+	border: 1px #ccc dotted;
+	border-radius: 12px;
+	-moz-border-radius: 12px;
+	-webkit-border-radius: 12px;
+	display: block;
+	-webkit-transition: all 0.25s ease-in-out 0s;
+}
+
+.rank-label:hover {
+	cursor: move;
+	background-color: #EFEFEF;
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.rank-label:active {
+	box-shadow: 0px 0px 10px #2b81c1;
+}
+
+.PDF_pageOuter {
+	margin: 0px;
+	padding: 30px;
+}
+
+.PDF_pageInner {
+	margin: auto;
+	width: 680px;
+	padding: 4px;
+	background-color: #DDD;
+	border: 1px solid #BBB;
+}
+
+.PDF_question, .PDF_questionErr {
+	border: 3px double #ccc;
+	padding: 10px;
+	background-color: #FFF;
+	overflow: auto;
+}
+
+.PDF_questionErr {
+	border: 3px double #EF7878;
+	background-color: #FEE;
+}
+
+.qContent {
+	float: left;
+	width: 600px;
+}
+
+.qNumber {
+	width: 38px;
+	color: #D00;
+	font-weight: bold;
+	float: left;
+}
+
+.qText {
+	font-weight: bold;
+}
+
+.qNote {
+	padding: 5px 0px 0px 0px;
+	font-size: 11px;
+}
+
+.PDF_mand /* Mandatory span */
+{
+	color: #D00;
+}
+
+.PDF_questionDivide {
+	height: 10px;
+}
+
+.sBut {
+	/* background-image: url(/S_But.gif); */
+	width: 154px;
+	height: 33px;
+	text-align: center;
+}
+
+.sBut P {
+	padding-top: 6px;
+	margin: 0px;
+}
+
+.sBut A {
+	font-size: 18px;
+	color: #FFF;
+	text-decoration: none;
+	display: block;
+}
+
+/* ---------------------- all Questions ---------------------------------- */
+.PDF_err, .PDF_errMain {
+	border: 3px double #EF7878;
+	font-size: 12px;
+	color: #C00;
+	padding: 4px 4px 4px 48px;
+	font-weight: bold;
+	/* background: #FEE url(/images/surveys/arrow.gif) no-repeat 20px center; */
+	background-color: #FEE;
+}
+
+.PDF_errMain {
+	/* background: #FEE url(/images/surveys/error.png) no-repeat 20px center; */
+	background-color: #FEE;
+}
+
+.PDF_noteMain {
+	border: 3px double #F4CE66;
+	font-size: 12px;
+	color: #333;
+	padding: 4px 4px 4px 48px;
+	/* background: #FDFFD9 url(/images/surveys/note.gif) no-repeat 20px center; */
+	background-color: #FDFFD9;
+}
+
+.PDF_QT100, .PDF_QT200, .PDF_QT400, .PDF_QT800, .PDF_QT900, .PDF_QT1000, .PDF_QT1200, .PDF_QT1400, .PDF_QT1500 {
+	margin: 10px 0px 0px 0px;
+}
+
+/* ---------------------- Page Header (QT1900) ---------------------------------- */
+.PDF_QT1900 {
+}
+
+.PDF_QT1900 H2 {
+	font-size: 18px;
+	color: #333;
+	font-weight: bold;
+	margin: 0px;
+}
+
+.PDF_QT1900 P {
+
+}
+
+/* ---------------------- QT 100 ---------------------------------- */
+
+.PDF_QT100 .small, .PDF_QT100 .medium, .PDF_QT100 .large {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	font-size: 14px;
+	padding: 4px;
+	width: 150px;
+}
+
+.PDF_QT100 .medium {
+	width: 300px;
+}
+
+.PDF_QT100 .large {
+	width: 450px;
+}
+
+/* ---------------------- QT 200 ---------------------------------- */
+
+.PDF_QT200 .small, .PDF_QT200 .medium, .PDF_QT200 .large {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	font-size: 12px;
+	padding: 4px;
+	width: 450px;
+	height: 50px;
+}
+
+.PDF_QT200 .medium {
+	height: 100px;
+}
+
+.PDF_QT200 .large {
+	height: 200px;
+}
+
+/* ---------------------- QT 400 ---------------------------------- */
+
+.PDF_QT400 UL {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.PDF_QT400 LI {
+	margin: 10px 0px;
+}
+
+.PDF_QT400 INPUT {
+	margin: 0px 10px 0px 0px;
+}
+
+.PDF_QT400 SELECT {
+	font-size: 14px;
+	padding: 2px;
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	min-width: 200px;
+}
+
+.PDF_QT400 SELECT[multiple='true'] {
+	min-height: 100px;
+}
+
+.PDF_QT400 LABEL {
+	font-size: 12px;
+}
+
+.PDF_QT400 .other {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	font-size: 12px;
+	padding: 1px;
+	width: 150px;
+}
+
+/* ---------------------- QT 800 ---------------------------------- */
+
+.PDF_QT800 {
+}
+
+.PDF_QT800 DIV {
+	float: left;
+	padding: 0px 10px 0px 0px;
+}
+
+.PDF_QT800 LABEL {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+.PDF_QT800 .title, .firstName, .lastName, .suffix {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 5px;
+	font-size: 14px;
+}
+
+.PDF_QT800 .title {
+	width: 40px;
+}
+
+.PDF_QT800 .firstName {
+	width: 130px;
+}
+
+.PDF_QT800 .lastName {
+	width: 130px;
+}
+
+.PDF_QT800 .suffix {
+	width: 40px;
+}
+
+/* ---------------------- QT 900 ---------------------------------- */
+
+.PDF_QT900 {
+}
+
+.PDF_QT900 DIV {
+	float: left;
+	padding: 0px 10px 0px 0px;
+}
+
+.PDF_QT900 LABEL {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+.PDF_QT900 .a, .b, .c, .d, .e, SELECT {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 5px;
+	font-size: 14px;
+	/*width: 142px;*/
+}
+
+.PDF_QT900 SELECT {
+	padding: 3px;
+	width: 154px;
+}
+
+.PDF_QT900 .a, .b {
+	width: 306px;
+}
+
+/* ---------------------- QT 950 ---------------------------------- */
+
+.PDF_QT950 label {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+.PDF_QT950 select {
+	font-size: 10px;
+	height: 2.5em;
+	margin-bottom: 5px;
+}
+
+.PDF_QT950 {
+	margin-top: 10px;
+}
+
+.PDF_QT950 input {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 2px;
+	font-size: 14px;
+	width: 200px;
+	padding: 5px;
+}
+
+/* ---------------------- QT 1000 ---------------------------------- */
+
+.PDF_QT1000 {
+}
+
+.PDF_QT1000 DIV {
+	float: left;
+}
+
+.PDF_QT1000 LABEL {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+.PDF_QT1000 .mm, .dd, .yyyy, .h, .mins {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 2px;
+	font-size: 14px;
+	width: 60px;
+}
+
+.PDF_QT1000 .yyyy {
+	margin: 0px 10px 0px 0px;
+	padding: 3px;
+	width: 40px;
+}
+
+.PDF_QT1000 .h, .mins {
+	width: 50px;
+}
+
+.PDF_QT1000 IMG /* calendar icon */
+{
+	padding: 0px 0px 0px 5px;
+}
+
+/* ---------------------- QT 1200 ---------------------------------- */
+
+.PDF_QT1200 TABLE {
+	width: 100%;
+}
+
+.PDF_QT1200 TH {
+	font-Size: 11px;
+	text-align: center;
+}
+
+.PDF_QT1200 TD {
+	font-Size: 11px;
+	text-align: center;
+	padding: 4px;
+}
+
+.PDF_QT1200 .alt {
+	background-color: #EEE;
+}
+
+.PDF_QT1200 .title {
+	text-align: left;
+}
+
+/* ---------------------- QT 1400 ---------------------------------- */
+.PDF_QT1400 {
+}
+
+.PDF_QT1400 INPUT {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 5px;
+	font-size: 14px;
+	width: 300px;
+}
+
+.PDF_QT1400 LABEL {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+/* ---------------------- QT 1500 ---------------------------------- */
+.PDF_QT1500 {
+}
+
+.PDF_QT1500 INPUT {
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	padding: 5px;
+	font-size: 14px;
+	width: 300px;
+}
+
+.PDF_QT1500 LABEL {
+	font-size: 10px;
+	color: #666;
+	line-height: 20px;
+}
+
+/*-----------System Styles --------------------*/
+.cf {
+	margin: 0px;
+	padding: 0px;
+	clear: both;
+}
+
+/*-----------Start Page--------------------*/
+
+.PDF_startPage {
+
+}
+
+.PDF_startPageMsg {
+
+}
+
+.button INPUT {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.PDF_progress {
+	margin: 5px auto;
+	text-align: right;
+	text-transform: uppercase;
+	font-size: 10px;
+	padding-right: 10px;
+	color: #666;
+}
+
+/*=
+SPECIFIC CSS STYLES FOR JANE
+============================================================================== */
+
+#pd-question-7, #pd-divider-7,
+#pd-question-10, #pd-divider-10,
+#pd-question-11, #pd-divider-11,
+#pd-question-12, #pd-divider-12,
+#pd-question-13, #pd-divider-13,
+#pd-question-14, #pd-divider-14,
+#pd-question-16, #pd-divider-16,
+#pd-question-21, #pd-divider-21,
+#pd-question-23, #pd-divider-23,
+#pd-question-28, #pd-divider-28,
+.qNumber {
+	display: none;
+}
+
+#wordcamp-application input,
+#wordcamp-application h2 {
+	margin-bottom: 0;
+}

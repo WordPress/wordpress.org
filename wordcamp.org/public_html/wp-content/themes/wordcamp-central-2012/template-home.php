@@ -16,6 +16,15 @@ get_header(); ?>
 			<?php // Get the upcoming WordCamps
 			if ( function_exists( 'wcpt_has_wordcamps' ) &&
 				wcpt_has_wordcamps( array(
+					'post_status' => array(
+						'wcpt-scheduled',
+						'wcpt-needs-debrief',
+						'wcpt-debrief-schedul',
+						'wcpt-closed',
+
+						// back-compat
+						'publish',
+					),
 					'posts_per_page' => 5,
 					'meta_key'       => 'Start Date (YYYY-mm-dd)',
 					'orderby'        => 'meta_value',
@@ -57,8 +66,8 @@ get_header(); ?>
 				foreach ( (array) $formats as $i => $format )
 					$formats[$i] = 'post-format-' . $format;
 
-				$news = new WP_Query( array( 
-					'posts_per_page' => 1, 
+				$news = new WP_Query( array(
+					'posts_per_page' => 1,
 					'ignore_sticky_posts' => 1,
 					'tax_query' => array(
 						array(
@@ -84,7 +93,7 @@ get_header(); ?>
 				<?php endwhile; ?>
 			<?php endif; ?>
 
-			<a href="<?php echo home_url( '/news/' ); ?>" class="more">More News &rarr;</a>	
+			<a href="<?php echo home_url( '/news/' ); ?>" class="more">More News &rarr;</a>
 
 		</div><!-- .wc-news -->
 

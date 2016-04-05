@@ -10,7 +10,7 @@ get_header(); ?>
 
 		<div id="container" class="wc-schedule">
 			<div id="content" role="main">
-				
+
 				<?php if ( have_posts() ) : the_post(); ?>
 
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -21,10 +21,18 @@ get_header(); ?>
 				</div><!-- #post-## -->
 
 				<?php endif; // end of the loop. ?>
-				
+
 					<?php // Get the upcoming approved (published) WordCamps
 					if ( function_exists( 'wcpt_has_wordcamps' ) &&
 						wcpt_has_wordcamps( array(
+							'post_status' => array(
+								'wcpt-needs-debrief',
+								'wcpt-debrief-schedul',
+								'wcpt-closed',
+
+								// back-compat
+								'publish',
+							),
 							'posts_per_page' => -1,
 							'meta_key'       => 'Start Date (YYYY-mm-dd)',
 							'orderby'        => 'meta_value',
@@ -75,7 +83,7 @@ get_header(); ?>
 			</div><!-- #content -->
 		</div><!-- #container -->
 
-<?php 
+<?php
 	/*get_sidebar( 'schedule' ); */
-	get_footer(); 
+	get_footer();
 ?>

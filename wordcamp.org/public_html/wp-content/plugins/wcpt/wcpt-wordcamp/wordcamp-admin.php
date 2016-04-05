@@ -14,11 +14,9 @@ class WordCamp_Admin {
 	protected $active_admin_notices;
 
 	/**
-	 * wcpt_admin ()
-	 *
 	 * Initialize WCPT Admin
 	 */
-	function WordCamp_Admin () {
+	function __construct() {
 		$this->active_admin_notices = array();
 
 		// Add some general styling to the admin area
@@ -26,14 +24,15 @@ class WordCamp_Admin {
 
 		// Forum column headers.
 		add_filter( 'manage_' . WCPT_POST_TYPE_ID . '_posts_columns', array( $this, 'column_headers' ) );
+		add_filter( 'display_post_states',                            array( $this, 'display_post_states' ) );
 
 		// Forum columns (in page row)
 		add_action( 'manage_posts_custom_column',                     array( $this, 'column_data' ), 10, 2 );
 		add_filter( 'post_row_actions',                               array( $this, 'post_row_actions' ), 10, 2 );
 
 		// Topic metabox actions
-		add_action( 'admin_menu',                                     array( $this, 'metabox' ) );
-		add_action( 'save_post',                                      array( $this, 'metabox_save' ) );
+		add_action( 'add_meta_boxes',                                 array( $this, 'metabox' ) );
+		add_action( 'save_post',                                      array( $this, 'metabox_save' ), 10, 2 );
 
 		// Scripts and CSS
 		add_action( 'admin_enqueue_scripts',                          array( $this, 'admin_scripts' ) );
@@ -42,10 +41,11 @@ class WordCamp_Admin {
 
 		// Post status transitions
 		add_action( 'transition_post_status',                         array( $this, 'trigger_schedule_actions' ), 10, 3 );
+		add_action( 'transition_post_status',                         array( $this, 'log_status_changes'       ), 10, 3 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'add_organizer_to_central' ), 10 );
 		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
-		add_filter( 'wp_insert_post_data',                            array( $this, 'enforce_post_status_progression' ), 10, 2 );
-		add_filter( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',                            array( $this, 'enforce_post_status' ), 10, 2 );
+		add_filter( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 11, 2 ); // after enforce_post_status
 
 		// Admin notices
 		add_action( 'admin_notices',                                  array( $this, 'print_admin_notices' ) );
@@ -86,6 +86,50 @@ class WordCamp_Admin {
 			'advanced',
 			'high'
 		);
+
+		add_meta_box(
+			'wcpt_original_application',
+			'Original Application',
+			array( $this, 'original_application_metabox' ),
+			WCPT_POST_TYPE_ID,
+			'advanced',
+			'low'
+		);
+
+		// Notes are private, so only show them to network admins
+		if ( current_user_can( 'manage_network' ) ) {
+			add_meta_box(
+				'wcpt_notes',
+				__( 'Add a Note', 'wordcamporg' ),
+				'wcpt_add_note_metabox',
+				WCPT_POST_TYPE_ID,
+				'side',
+				'low'
+			);
+
+			add_meta_box(
+				'wcpt_log',
+				'Log',
+				'wcpt_log_metabox',
+				WCPT_POST_TYPE_ID,
+				'advanced',
+				'low'
+			);
+		}
+
+		// Remove core's submitdiv.
+		remove_meta_box( 'submitdiv', WCPT_POST_TYPE_ID, 'side' );
+
+		$statuses = WordCamp_Loader::get_post_statuses();
+
+		add_meta_box(
+			'submitdiv',
+			__( 'Status', 'wordcamporg' ),
+			array( $this, 'metabox_status' ),
+			WCPT_POST_TYPE_ID,
+			'side',
+			'high'
+		);
 	}
 
 	/**
@@ -96,8 +140,7 @@ class WordCamp_Admin {
 	 * @param int $post_id
 	 * @return int
 	 */
-	function metabox_save( $post_id ) {
-
+	function metabox_save( $post_id, $post ) {
 		// Don't add/remove meta on revisions and auto-saves
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) )
 			return;
@@ -109,6 +152,11 @@ class WordCamp_Admin {
 
 		// WordCamp post type only
 		if ( WCPT_POST_TYPE_ID != get_post_type() ) {
+			return;
+		}
+
+		// Make sure the requset came from the edit post screen.
+		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) ) {
 			return;
 		}
 
@@ -127,7 +175,6 @@ class WordCamp_Admin {
 
 		// Loop through meta keys and update
 		foreach ( $wcpt_meta_keys as $key => $value ) {
-
 			// Get post value
 			$post_value   = wcpt_key_to_str( $key, 'wcpt_' );
 			$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
@@ -158,6 +205,29 @@ class WordCamp_Admin {
 					break;
 			}
 		}
+
+		$this->validate_and_add_note( $post_id );
+	}
+
+	/**
+	 * Validate and add a new note
+	 *
+	 * @param int $post_id
+	 */
+	protected function validate_and_add_note( $post_id ) {
+		check_admin_referer( 'wcpt_notes', 'wcpt_notes_nonce' );
+
+		$new_note_message = sanitize_text_field( wp_unslash( $_POST['wcpt_new_note'] ) );
+
+		if ( empty( $new_note_message ) ) {
+			return;
+		}
+
+		add_post_meta( $post_id, '_note', array(
+			'timestamp' => time(),
+			'user_id'   => get_current_user_id(),
+			'message'   => $new_note_message,
+		) );
 	}
 
 	/**
@@ -196,7 +266,6 @@ class WordCamp_Admin {
 	 * @return array
 	 */
 	function meta_keys( $meta_group = '' ) {
-
 		/*
 		 * Warning: These keys are used for both the input field label and the postmeta key, so if you want to
 		 * modify an existing label then you'll also need to migrate any rows in the database to use the new key.
@@ -211,43 +280,43 @@ class WordCamp_Admin {
 		switch ( $meta_group ) {
 			case 'organizer':
 				$retval = array (
-					'Organizer Name'                  => 'text',
-					'WordPress.org Username'          => 'text',
-					'Email Address'                   => 'text',    // Note: This is the lead organizer's e-mail address, which is different than the "E-mail Address" field
-					'Telephone'                       => 'text',
-					'Mailing Address'                 => 'textarea',
-					'Sponsor Wrangler Name'           => 'text',
-					'Sponsor Wrangler E-mail Address' => 'text',
-					'Budget Wrangler Name'            => 'text',
-					'Budget Wrangler E-mail Address'  => 'text',
-					'Venue Wrangler Name'                   => 'text',
-					'Venue Wrangler E-mail Address'         => 'text',
-					'Speaker Wrangler Name'                 => 'text',
-					'Speaker Wrangler E-mail Address'       => 'text',
-					'Food/Beverage Wrangler Name'           => 'text',
-					'Food/Beverage Wrangler E-mail Address' => 'text',
-					'Swag Wrangler Name'                    => 'text',
-					'Swag Wrangler E-mail Address'          => 'text',
-					'Volunteer Wrangler Name'               => 'text',
-					'Volunteer Wrangler E-mail Address'     => 'text',
-					'Printing Wrangler Name'                => 'text',
-					'Printing Wrangler E-mail Address'      => 'text',
-					'Design Wrangler Name'                  => 'text',
-					'Design Wrangler E-mail Address'        => 'text',
-					'Website Wrangler Name'                 => 'text',
-					'Website Wrangler E-mail Address'       => 'text',
-					'Social Media/Publicity Wrangler Name'            => 'text',
-					'Social Media/Publicity Wrangler E-mail Address'  => 'text',
-					'A/V Wrangler Name'                     => 'text',
-					'A/V Wrangler E-mail Address'           => 'text',
-					'Party Wrangler Name'                   => 'text',
-					'Party Wrangler E-mail Address'         => 'text',
-					'Travel Wrangler Name'                  => 'text',
-					'Travel Wrangler E-mail Address'        => 'text',
-					'Safety Wrangler Name'                  => 'text',
-					'Safety Wrangler E-mail Address'        => 'text',
-					'Mentor Name'                     => 'text',
-					'Mentor E-mail Address'           => 'text',
+					'Organizer Name'                                 => 'text',
+					'WordPress.org Username'                         => 'text',
+					'Email Address'                                  => 'text', // Note: This is the lead organizer's e-mail address, which is different than the "E-mail Address" field
+					'Telephone'                                      => 'text',
+					'Mailing Address'                                => 'textarea',
+					'Sponsor Wrangler Name'                          => 'text',
+					'Sponsor Wrangler E-mail Address'                => 'text',
+					'Budget Wrangler Name'                           => 'text',
+					'Budget Wrangler E-mail Address'                 => 'text',
+					'Venue Wrangler Name'                            => 'text',
+					'Venue Wrangler E-mail Address'                  => 'text',
+					'Speaker Wrangler Name'                          => 'text',
+					'Speaker Wrangler E-mail Address'                => 'text',
+					'Food/Beverage Wrangler Name'                    => 'text',
+					'Food/Beverage Wrangler E-mail Address'          => 'text',
+					'Swag Wrangler Name'                             => 'text',
+					'Swag Wrangler E-mail Address'                   => 'text',
+					'Volunteer Wrangler Name'                        => 'text',
+					'Volunteer Wrangler E-mail Address'              => 'text',
+					'Printing Wrangler Name'                         => 'text',
+					'Printing Wrangler E-mail Address'               => 'text',
+					'Design Wrangler Name'                           => 'text',
+					'Design Wrangler E-mail Address'                 => 'text',
+					'Website Wrangler Name'                          => 'text',
+					'Website Wrangler E-mail Address'                => 'text',
+					'Social Media/Publicity Wrangler Name'           => 'text',
+					'Social Media/Publicity Wrangler E-mail Address' => 'text',
+					'A/V Wrangler Name'                              => 'text',
+					'A/V Wrangler E-mail Address'                    => 'text',
+					'Party Wrangler Name'                            => 'text',
+					'Party Wrangler E-mail Address'                  => 'text',
+					'Travel Wrangler Name'                           => 'text',
+					'Travel Wrangler E-mail Address'                 => 'text',
+					'Safety Wrangler Name'                           => 'text',
+					'Safety Wrangler E-mail Address'                 => 'text',
+					'Mentor Name'                                    => 'text',
+					'Mentor E-mail Address'                          => 'text',
 				);
 
 				break;
@@ -291,43 +360,43 @@ class WordCamp_Admin {
 					'Number of Anticipated Attendees' => 'text',
 					'Multi-Event Sponsor Region'      => 'mes-dropdown',
 
-					'Organizer Name'                  => 'text',
-					'WordPress.org Username'          => 'text',
-					'Email Address'                   => 'text',
-					'Telephone'                       => 'text',
-					'Mailing Address'                 => 'textarea',
-					'Sponsor Wrangler Name'           => 'text',
-					'Sponsor Wrangler E-mail Address' => 'text',
-					'Budget Wrangler Name'            => 'text',
-					'Budget Wrangler E-mail Address'  => 'text',
-					'Venue Wrangler Name'                   => 'text',
-					'Venue Wrangler E-mail Address'         => 'text',
-					'Speaker Wrangler Name'                 => 'text',
-					'Speaker Wrangler E-mail Address'       => 'text',
-					'Food/Beverage Wrangler Name'           => 'text',
-					'Food/Beverage Wrangler E-mail Address' => 'text',
-					'Swag Wrangler Name'                    => 'text',
-					'Swag Wrangler E-mail Address'          => 'text',
-					'Volunteer Wrangler Name'               => 'text',
-					'Volunteer Wrangler E-mail Address'     => 'text',
-					'Printing Wrangler Name'                => 'text',
-					'Printing Wrangler E-mail Address'      => 'text',
-					'Design Wrangler Name'                  => 'text',
-					'Design Wrangler E-mail Address'        => 'text',
-					'Website Wrangler Name'                 => 'text',
-					'Website Wrangler E-mail Address'       => 'text',
-					'Social Media/Publicity Wrangler Name'            => 'text',
-					'Social Media/Publicity Wrangler E-mail Address'  => 'text',
-					'A/V Wrangler Name'                     => 'text',
-					'A/V Wrangler E-mail Address'           => 'text',
-					'Party Wrangler Name'                   => 'text',
-					'Party Wrangler E-mail Address'         => 'text',
-					'Travel Wrangler Name'                  => 'text',
-					'Travel Wrangler E-mail Address'        => 'text',
-					'Safety Wrangler Name'                  => 'text',
-					'Safety Wrangler E-mail Address'        => 'text',
-					'Mentor Name'                     => 'text',
-					'Mentor E-mail Address'           => 'text',
+					'Organizer Name'                                 => 'text',
+					'WordPress.org Username'                         => 'text',
+					'Email Address'                                  => 'text',
+					'Telephone'                                      => 'text',
+					'Mailing Address'                                => 'textarea',
+					'Sponsor Wrangler Name'                          => 'text',
+					'Sponsor Wrangler E-mail Address'                => 'text',
+					'Budget Wrangler Name'                           => 'text',
+					'Budget Wrangler E-mail Address'                 => 'text',
+					'Venue Wrangler Name'                            => 'text',
+					'Venue Wrangler E-mail Address'                  => 'text',
+					'Speaker Wrangler Name'                          => 'text',
+					'Speaker Wrangler E-mail Address'                => 'text',
+					'Food/Beverage Wrangler Name'                    => 'text',
+					'Food/Beverage Wrangler E-mail Address'          => 'text',
+					'Swag Wrangler Name'                             => 'text',
+					'Swag Wrangler E-mail Address'                   => 'text',
+					'Volunteer Wrangler Name'                        => 'text',
+					'Volunteer Wrangler E-mail Address'              => 'text',
+					'Printing Wrangler Name'                         => 'text',
+					'Printing Wrangler E-mail Address'               => 'text',
+					'Design Wrangler Name'                           => 'text',
+					'Design Wrangler E-mail Address'                 => 'text',
+					'Website Wrangler Name'                          => 'text',
+					'Website Wrangler E-mail Address'                => 'text',
+					'Social Media/Publicity Wrangler Name'           => 'text',
+					'Social Media/Publicity Wrangler E-mail Address' => 'text',
+					'A/V Wrangler Name'                              => 'text',
+					'A/V Wrangler E-mail Address'                    => 'text',
+					'Party Wrangler Name'                            => 'text',
+					'Party Wrangler E-mail Address'                  => 'text',
+					'Travel Wrangler Name'                           => 'text',
+					'Travel Wrangler E-mail Address'                 => 'text',
+					'Safety Wrangler Name'                           => 'text',
+					'Safety Wrangler E-mail Address'                 => 'text',
+					'Mentor Name'                                    => 'text',
+					'Mentor E-mail Address'                          => 'text',
 
 					'Venue Name'                      => 'text',
 					'Physical Address'                => 'textarea',
@@ -355,6 +424,7 @@ class WordCamp_Admin {
 
 	function admin_print_scripts() {
 		if ( get_post_type() == WCPT_POST_TYPE_ID ) :
+
 		?>
 
 			<script>
@@ -402,7 +472,6 @@ class WordCamp_Admin {
 	function user_profile_update( $user_id ) {
 		if ( !wcpt_has_access() )
 			return false;
-
 	}
 
 	/**
@@ -413,18 +482,17 @@ class WordCamp_Admin {
 	 * @todo Everything
 	 */
 	function user_profile_wordcamp( $profileuser ) {
-
 		if ( !wcpt_has_access() )
 			return false;
-
 		?>
 
 		<h3><?php _e( 'WordCamps', 'wcpt' ); ?></h3>
+
 		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><?php _e( 'WordCamps', 'wcpt' ); ?></th>
-				<td>
 
+				<td>
 				</td>
 			</tr>
 		</table>
@@ -454,6 +522,28 @@ class WordCamp_Admin {
 	}
 
 	/**
+	 * Display the status of a WordCamp post
+	 *
+	 * @param array $states
+	 *
+	 * @return array
+	 */
+	public function display_post_states( $states ) {
+		global $post;
+
+		if ( $post->post_type != WCPT_POST_TYPE_ID ) {
+			return $states;
+		}
+
+		$status = get_post_status_object( $post->post_status );
+		if ( get_query_var( 'post_status' ) != $post->post_status ) {
+			$states[ $status->name ] = $status->label;
+		}
+
+		return $states;
+	}
+
+	/**
 	 * column_data ( $column, $post_id )
 	 *
 	 * Print extra columns
@@ -471,7 +561,6 @@ class WordCamp_Admin {
 				break;
 
 			case 'wcpt_date' :
-
 				// Has a start date
 				if ( $start = wcpt_get_wordcamp_start_date() ) {
 
@@ -525,15 +614,12 @@ class WordCamp_Admin {
 
 			echo implode( ' - ', (array) $wc );
 		}
+
 		return $actions;
 	}
 
 	/**
 	 * Trigger actions related to WordCamps being scheduled.
-	 *
-	 * When an application is submitted, a `wordcamp` post is created with a `draft` status. When it's accepted
-	 * to the planning schedule the status changes to `pending`, and when it's accepted for the final schedule
-	 * the status changes to 'publish'.
 	 *
 	 * @param string $new_status
 	 * @param string $old_status
@@ -544,11 +630,50 @@ class WordCamp_Admin {
 			return;
 		}
 
+		if ( $new_status == $old_status ) {
+			return;
+		}
+
+		if ( $old_status == 'wcpt-pre-planning' && $new_status == 'wcpt-pre-planning' ) {
+			do_action( 'wcpt_added_to_planning_schedule', $post );
+		} elseif ( $old_status == 'wcpt-needs-schedule' && $new_status == 'wcpt-scheduled' ) {
+			do_action( 'wcpt_added_to_final_schedule', $post );
+		}
+
+		// back-compat for old statuses
 		if ( 'draft' == $old_status && 'pending' == $new_status ) {
 			do_action( 'wcpt_added_to_planning_schedule', $post );
 		} elseif ( 'pending' == $old_status && 'publish' == $new_status ) {
 			do_action( 'wcpt_added_to_final_schedule', $post );
 		}
+
+		// todo add new triggers - which ones?
+	}
+
+	/**
+	 * Log when the post status changes
+	 *
+	 * @param string  $new_status
+	 * @param string  $old_status
+	 * @param WP_Post $post
+	 */
+	public function log_status_changes( $new_status, $old_status, $post ) {
+		if ( $new_status === $old_status || $new_status == 'auto-draft' ) {
+			return;
+		}
+
+		if ( empty( $post->post_type ) || WCPT_POST_TYPE_ID != $post->post_type ) {
+			return;
+		}
+
+		$old_status = get_post_status_object( $old_status );
+		$new_status = get_post_status_object( $new_status );
+
+		add_post_meta( $post->ID, '_status_change', array(
+			'timestamp' => time(),
+			'user_id'   => get_current_user_id(),
+			'message'   => sprintf( '%s &rarr; %s', $old_status->label, $new_status->label ),
+		) );
 	}
 
 	/**
@@ -580,31 +705,34 @@ class WordCamp_Admin {
 	}
 
 	/**
-	 * Force WordCamp posts to go through the expected status progression.
-	 *
-	 * They should start as drafts, then move to pending, and then be published. This is necessary because
-	 * many automated processes (e.g., Organizer Reminder emails) are triggered when the post moves from
-	 * one status to another, and deviations from the expected progression can cause bugs.
-	 *
-	 * Posts should still be allowed to move backwards in the progression, though.
+	 * Enforce a valid post status for WordCamps.
 	 *
 	 * @param array $post_data
 	 * @param array $post_data_raw
 	 * @return array
 	 */
-	public function enforce_post_status_progression( $post_data, $post_data_raw ) {
-		if ( WCPT_POST_TYPE_ID == $post_data['post_type'] && ! empty( $_POST ) ) {
-			$previous_post_status = get_post( absint( $_POST['post_ID'] ) );
-			$previous_post_status = $previous_post_status->post_status;
+	public function enforce_post_status( $post_data, $post_data_raw ) {
+		if ( $post_data['post_type'] != WCPT_POST_TYPE_ID || empty( $_POST['post_ID'] ) ) {
+			return $post_data;
+		}
 
-			if ( 'pending' == $post_data['post_status'] && ! in_array( $previous_post_status, array( 'draft', 'pending', 'publish' ) ) ) {
-				$this->active_admin_notices[] = 2;
-				$post_data['post_status'] = $previous_post_status;
+		$post = get_post( $_POST['post_ID'] );
+		if ( ! $post ) {
+			return $post_data;
+		}
+
+		if ( ! empty( $post_data['post_status'] ) ) {
+			// Only network admins can change WordCamp statuses.
+			if ( ! current_user_can( 'network_admin' ) ) {
+				$post_data['post_status'] = $post->post_status;
 			}
 
-			if ( 'publish' == $post_data['post_status'] && ! in_array( $previous_post_status, array( 'pending', 'publish' ) ) ) {
-				$this->active_admin_notices[] = 2;
-				$post_data['post_status'] = $previous_post_status;
+			// Enforce a valid status.
+			$statuses = array_keys( WordCamp_Loader::get_post_statuses() );
+			$statuses = array_merge( $statuses, array( 'trash' ) );
+
+			if ( ! in_array( $post_data['post_status'], $statuses ) ) {
+				$post_data['post_status'] = $statuses[0];
 			}
 		}
 
@@ -626,30 +754,30 @@ class WordCamp_Admin {
 		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
-		$required_pending_fields = $this->get_required_fields( 'pending' );
-		$required_publish_fields = $this->get_required_fields( 'publish' );
+		$required_pre_planning_fields = $this->get_required_fields( 'pre-planning' );
+		$required_scheduled_fields    = $this->get_required_fields( 'scheduled' );
 
 		// Check pending posts
-		if ( 'pending' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
-			foreach( $required_pending_fields as $field ) {
+		if ( 'wcpt-approved-pre-pl' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+			foreach( $required_pre_planning_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
 				if ( empty( $value ) || 'null' == $value ) {
-					$post_data['post_status']     = 'draft';
-					$this->active_admin_notices[] = 3;
+					$post_data['post_status']     = 'wcpt-interview-sched';
+					$this->active_admin_notices[] = 1;
 					break;
 				}
 			}
 		}
 
 		// Check published posts
-		if ( 'publish' == $post_data['post_status'] && isset( $_POST['post_ID'] ) && absint( $_POST['post_ID'] ) > $min_site_id ) {
-			foreach( $required_publish_fields as $field ) {
+		if ( 'wcpt-scheduled' == $post_data['post_status'] && isset( $_POST['post_ID'] ) && absint( $_POST['post_ID'] ) > $min_site_id ) {
+			foreach( $required_scheduled_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
 				if ( empty( $value ) || 'null' == $value ) {
-					$post_data['post_status']     = 'pending';
-					$this->active_admin_notices[] = 1;
+					$post_data['post_status']     = 'wcpt-needs-schedule';
+					$this->active_admin_notices[] = 3;
 					break;
 				}
 			}
@@ -661,14 +789,14 @@ class WordCamp_Admin {
 	/**
 	 * Get a list of fields required to move to a certain post status
 	 *
-	 * @param string $status 'pending' | 'publish' | 'any'
+	 * @param string $status 'pre-planning' | 'scheduled' | 'any'
 	 *
 	 * @return array
 	 */
 	public static function get_required_fields( $status ) {
-		$pending = array( 'E-mail Address' );
+		$pre_planning = array( 'E-mail Address' );
 
-		$publish = array(
+		$scheduled = array(
 			// WordCamp
 			'Start Date (YYYY-mm-dd)',
 			'Location',
@@ -690,17 +818,17 @@ class WordCamp_Admin {
 		);
 
 		switch ( $status ) {
-			case 'pending':
-				$required_fields = $pending;
+			case 'pre-planning':
+				$required_fields = $pre_planning;
 				break;
 
-			case 'publish':
-				$required_fields = $publish;
+			case 'scheduled':
+				$required_fields = $scheduled;
 				break;
 
 			case 'any':
 			default:
-				$required_fields = array_merge( $pending, $publish );
+				$required_fields = array_merge( $pre_planning, $scheduled );
 				break;
 		}
 
@@ -750,23 +878,12 @@ class WordCamp_Admin {
 		$notices = array(
 			1 => array(
 				'type'   => 'error',
-				'notice' => __( 'This WordCamp cannot be published until all of its required metadata is filled in.', 'wordcamporg' ),
-			),
-
-			2 => array(
-				'type'   => 'error',
-				'notice' => sprintf(
-					__(
-						'WordCamps must start as drafts, then be set as pending, and then be published. The post status has been reset to <strong>%s</strong>.',    // todo improve language
-						'wordcamporg'
-					),
-					$post->post_status
-				)
+				'notice' => __( 'This WordCamp cannot be approved for pre-planning until all of its required metadata is filled in.', 'wordcamporg' ),
 			),
 
 			3 => array(
 				'type'   => 'error',
-				'notice' => __( 'This WordCamp cannot be set to pending until all of its required metadata is filled in.', 'wordcamporg' ),
+				'notice' => __( 'This WordCamp cannot be added to the schedule until all of its required metadata is filled in.', 'wordcamporg' ),
 			),
 		);
 
@@ -785,6 +902,21 @@ class WordCamp_Admin {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Render the WordCamp status meta box.
+	 */
+	public function metabox_status( $post ) {
+		require_once( WCPT_DIR . 'views/wordcamp/metabox-status.php' );
+	}
+
+	/**
+	 * Render the WordCamp status meta box.
+	 */
+	public function original_application_metabox( $post ) {
+		$application_data = get_post_meta( $post->ID, '_application_data', true );
+		require_once( WCPT_DIR . 'views/wordcamp/metabox-original-application.php' );
 	}
 }
 endif; // class_exists check
@@ -884,7 +1016,7 @@ function wcpt_metabox( $meta_keys ) {
 
 					<?php if ( ! empty( $messages[ $key ] ) ) : ?>
 						<?php if ( 'textarea' == $value ) { echo '<br />'; } ?>
-						
+
 						<span class="description"><?php echo esc_html( $messages[ $key ] ); ?></span>
 					<?php endif; ?>
 				</p>
