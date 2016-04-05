@@ -377,7 +377,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				$('div.change')
 					.hide()
 						// Best we can do to target a
-						.has('.comment p a.changeset')
+						.has('.comment > p > a.changeset')
 							.has('.comment div.message p a.ticket')
 							.show()
 						.end()
@@ -387,7 +387,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			});
 
 			// List commits between #ticket and #attachments
-			var $commitChanges = $( 'div.change' ).has( '.comment p a.changeset' ).has( '.comment div.message p a.ticket' ),
+			var $commitChanges = $( 'div.change' ).has( '.comment > p > a.changeset' ).has( '.comment div.message p a.ticket' ),
 				$commits = $( '<ul/>' ), commitCount = 0;
 
 			$commitChanges.each( function( i, el ) {
