@@ -1026,6 +1026,80 @@ function wporg_themes_add_meta_tags() {
 add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
 
 /**
+ * Adds hreflang link attributes to theme pages.
+ *
+ * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs
+ * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation
+ */
+function wporg_themes_add_hreflang_link_attributes() {
+	$sites = wp_cache_get( 'local-sites', 'wporg-theme-directory' );
+
+	if ( false === $sites ) {
+		global $wpdb;
+		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+		if ( ! $sites ) {
+			return;
+		}
+
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		foreach ( $sites as $site ) {
+			$gp_locale = GP_Locales::by_field( 'wp_locale', $site->locale );
+			if ( ! $gp_locale ) {
+				unset( $sites[ $site->locale ] );
+				continue;
+			}
+
+			// Note that Google only supports ISO 639-1 codes.
+			if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_1 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_1;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_2 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_2;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_3 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_3;
+			}
+
+			if ( $hreflang ) {
+				$sites[ $site->locale ]->hreflang = strtolower( $hreflang );
+			} else {
+				unset( $sites[ $site->locale ] );
+			}
+		}
+
+		// Add en_US to the list of sites.
+		$sites['en_US'] = (object) array(
+			'locale'    => 'en_US',
+			'hreflang'  => 'en',
+			'subdomain' => ''
+		);
+
+		uasort( $sites, function( $a, $b ) {
+			return strcasecmp( $a->hreflang, $b->hreflang );
+		} );
+
+		wp_cache_set( 'local-sites', $sites, 'wporg-theme-directory', DAY_IN_SECONDS );
+	}
+
+	foreach ( $sites as $site ) {
+		$url = sprintf(
+			'https://%swordpress.org%s',
+			$site->subdomain ? "{$site->subdomain}." : '',
+			$_SERVER[ 'REQUEST_URI' ]
+		);
+
+		printf(
+			'<link rel="alternate" href="%s" hreflang="%s" />',
+			esc_url( $url ),
+			esc_attr( $site->hreflang )
+		);
+	}
+	echo "\n";
+}
+add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
+
+/**
  * Filter the URLs to use the current localized domain name, rather than WordPress.org.
  *
  * The Theme Directory is available at multiple URLs (internationalised domains), this method allows
