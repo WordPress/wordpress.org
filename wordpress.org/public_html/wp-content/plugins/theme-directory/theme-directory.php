@@ -289,10 +289,10 @@ function wporg_themes_post_author_meta_box( $post ) {
  * Admin ajax function to lookup a username for author autocompletion on theme edit pages
  *
  * Note: nonce protected, only available to logged in users
- * 
- * While this user search is a bit heavy because of the SQL to search the whole users table, 
+ *
+ * While this user search is a bit heavy because of the SQL to search the whole users table,
  * it's not one that we will actually run a lot. This only occurs when a theme directory admin
- * is changing the "author" of a theme. This is fairly rare. If the query causes too many issues, 
+ * is changing the "author" of a theme. This is fairly rare. If the query causes too many issues,
  * then we can refine it to limit it more.
  */
 function wporg_themes_author_lookup() {
@@ -306,7 +306,7 @@ function wporg_themes_author_lookup() {
 		'blog_id' => 0, // ID zero here allows it to search all users, not just those with roles in the theme directory
 	);
 	$user_query = new WP_User_Query( $args );
-	
+
 	if ( $user_query->results ) {
 		$resp = array();
 		foreach ( $user_query->results as $result ) {
@@ -316,7 +316,7 @@ function wporg_themes_author_lookup() {
 		}
 		echo json_encode($resp);
 	}
-	exit;	
+	exit;
 }
 add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
 
@@ -991,6 +991,39 @@ function wporg_themes_maybe_schedule_daily_job() {
 	}
 }
 add_action( 'admin_init', 'wporg_themes_maybe_schedule_daily_job' );
+
+/**
+ * Prints Open Graph meta data and meta tags for Twitter cards.
+ */
+function wporg_themes_add_meta_tags() {
+	if ( ! is_single() ) {
+		return;
+	}
+
+	$post = get_post();
+	if ( ! $post ) {
+		return;
+	}
+
+	$theme = wporg_themes_theme_information( $post->post_name );
+	if ( ! $theme ) {
+		return;
+	}
+
+	echo "<meta property='og:title' content='" . esc_attr( $theme->name ) . "' />\n";
+	echo "<meta property='og:description' content='" . esc_attr( $theme->description ) . "' />\n";
+	echo "<meta property='og:site_name' content='WordPress.org' />\n";
+	echo "<meta property='og:type' content='website' />\n";
+	echo "<meta property='og:url' content='" . esc_attr( get_permalink( $post->id ) ) . "' />\n";
+
+	if ( $theme->screenshot_url ) {
+		echo "<meta property='og:image' content='" . esc_attr( $theme->screenshot_url ) . "' />\n";
+		echo "<meta name='twitter:card' content='summary_large_image'>\n";
+		echo "<meta name='twitter:site' content='@WordPress'>\n";
+		echo "<meta name='twitter:image' content='" . esc_attr( $theme->screenshot_url . '?w=560&amp;strip=all' ) . "' />\n";
+	}
+}
+add_action( 'wp_head', 'wporg_themes_add_meta_tags' );
 
 /**
  * Filter the URLs to use the current localized domain name, rather than WordPress.org.
