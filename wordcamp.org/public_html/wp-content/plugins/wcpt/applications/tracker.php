@@ -52,6 +52,8 @@ function get_active_wordcamps( $statuses ) {
 		if ( $wordcamp->last_update_timestamp <= $inactive_timestamp ) {
 			unset( $wordcamps[ $key ] );
 		}
+
+		$wordcamp->url = filter_var( get_post_meta( $wordcamp->ID, 'URL', true ), FILTER_VALIDATE_URL );
 	}
 
 	return $wordcamps;

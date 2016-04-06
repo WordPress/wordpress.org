@@ -19,7 +19,16 @@ defined( 'WPINC' ) or die();
 	<tbody>
 		<?php foreach ( $posts as $post ) : ?>
 			<tr>
-				<td class="city"       ><?php echo esc_html( $post->post_title );                                                ?></td>
+				<td class="city">
+					<?php if ( $post->url ) : ?>
+						<a href="<?php echo esc_url( $post->url ); ?>">
+							<?php echo esc_html( $post->post_title ); ?>
+						</a>
+					<?php else : ?>
+						<?php echo esc_html( $post->post_title ); ?>
+					<?php endif; ?>
+				</td>
+				
 				<td class="applicant"  ><?php echo esc_html( get_post_meta( $post->ID, 'Organizer Name', true ) );               ?></td>
 				<td class="milestone"  ><?php echo esc_html( $milestones[ $post->post_status ] );                                ?></td>
 				<td class="status"     ><?php echo esc_html( $statuses[ $post->post_status ] );                                  ?></td>
