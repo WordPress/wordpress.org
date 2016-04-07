@@ -28,7 +28,7 @@ function wporg_themes_render_upload_shortcode() {
 		}
 	?>
 		<h4><?php _e( 'Select your zipped theme file', 'wporg-themes' ); ?></h4>
-		<form enctype="multipart/form-data" id="upload_form" method="POST" action="">
+		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery('#upload_button').attr('disabled','disabled'); return true;">
 			<?php wp_nonce_field( 'wporg-themes-upload' ); ?>
 			<input type="hidden" name="action" value="upload"/>
 			<input type="file" id="zip_file" name="zip_file" size="25"/>
