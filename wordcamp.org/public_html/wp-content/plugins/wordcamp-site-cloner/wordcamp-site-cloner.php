@@ -13,6 +13,7 @@ Author URI:  http://wordcamp.org
 License:     GPLv2 or later
 */
 
+// todo if Jetpack_Custom_CSS:get_css is callable, register these, otherwise fatal errors
 add_action( 'plugins_loaded',        __NAMESPACE__ . '\get_wordcamp_sites' );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_scripts' );
 add_action( 'customize_register',    __NAMESPACE__ . '\register_customizer_components' );
@@ -103,6 +104,8 @@ function register_customizer_components( $wp_customize ) {
  * @return array
  */
 function get_wordcamp_sites() {
+	require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-loader.php' );
+
 	// plugins_loaded is runs on every screen, but we only need this when loading the Customizer and Previewer
 	if ( 'customize.php' != basename( $_SERVER['SCRIPT_NAME'] ) && empty( $_REQUEST['wp_customize'] ) ) {
 		return array();
@@ -119,7 +122,7 @@ function get_wordcamp_sites() {
 	$sites = array();
 	$wordcamps = get_posts( array(
 		'post_type'      => 'wordcamp',
-		'post_status'    => WordCamp_Loader::get_public_post_statuses(),
+		'post_status'    => \WordCamp_Loader::get_public_post_statuses(),
 		'posts_per_page' => 125, // todo temporary workaround until able to add filters to make hundreds of sites manageable
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'orderby'        => 'meta_value_num',
