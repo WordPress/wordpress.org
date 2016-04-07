@@ -726,7 +726,7 @@ class WordCamp_Admin {
 
 		if ( ! empty( $post_data['post_status'] ) ) {
 			// Only network admins can change WordCamp statuses.
-			if ( ! current_user_can( 'network_admin' ) ) {
+			if ( ! current_user_can( 'manage_network' ) ) {
 				$post_data['post_status'] = $post->post_status;
 			}
 
