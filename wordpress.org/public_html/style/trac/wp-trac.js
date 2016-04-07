@@ -387,47 +387,49 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 			});
 
 			// List commits between #ticket and #attachments
-			var $commitChanges = $( 'div.change' ).has( '.comment > p > a.changeset' ).has( '.comment div.message p a.ticket' ),
-				$commits = $( '<ul/>' ), commitCount = 0;
+			if ( $( '#content.ticket' ).length ) {
+				var $commitChanges = $( 'div.change' ).has( '.comment > p > a.changeset' ).has( '.comment div.message p a.ticket' ),
+					$commits = $( '<ul/>' ), commitCount = 0;
 
-			$commitChanges.each( function( i, el ) {
-				var $el = $( el ), $comment = $el.find( '.comment' ), commitNumber, firstLine,
-					author, date, $commit = $( '<li>' );
+				$commitChanges.each( function( i, el ) {
+					var $el = $( el ), $comment = $el.find( '.comment' ), commitNumber, firstLine,
+						author, date, $commit = $( '<li>' );
 
-				commitNumber = $comment.find( '> p ').html().trim().replace( /^In /, '' ).replace( /:<br>$/, '' );
-				$commit.append( '[' + commitNumber + '] ' );
+					commitNumber = $comment.find( '> p ').html().trim().replace( /^In /, '' ).replace( /:<br>$/, '' );
+					$commit.append( '[' + commitNumber + '] ' );
 
-				firstLine = $comment.find( '.message > p' ).html().trim().replace( /<br>$/, '' );
-				$commit.append( firstLine + '&hellip;' );
+					firstLine = $comment.find( '.message > p' ).html().trim().replace( /<br>$/, '' );
+					$commit.append( firstLine + '&hellip;' );
 
-				author = $el.find( '.username' ).data( 'username' );
-				$commit.append( ' by <a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
+					author = $el.find( '.username' ).data( 'username' );
+					$commit.append( ' by <a href="https://profiles.wordpress.org/' + author + '">@' + author + '</a>' );
 
-				date = $el.find( '.time-ago' ).html();
-				$commit.append( ' ' + date );
+					date = $el.find( '.time-ago' ).html();
+					$commit.append( ' ' + date );
 
-				$commits.append( $commit );
-				commitCount += 1;
-			});
+					$commits.append( $commit );
+					commitCount += 1;
+				});
 
-			$( '#ticket' ).after(
-				$( '<div/>', {
-					id: 'commits',
-					class: 'collapsed'
-				})
-				.append(
-					$( '<h3/>', {
-						class: 'foldable'
+				$( '#ticket' ).after(
+					$( '<div/>', {
+						id: 'commits',
+						class: 'collapsed'
 					})
-					.html( '<a href="#no0" id="no0">Commits <span class="trac-count">(' + commitCount + ')</span></a>' )
-					.after(
-						$( '<div/>', {
-							class: 'commits'
+					.append(
+						$( '<h3/>', {
+							class: 'foldable'
 						})
-						.append( $commits )
+						.html( '<a href="#no0" id="no0">Commits <span class="trac-count">(' + commitCount + ')</span></a>' )
+						.after(
+							$( '<div/>', {
+								class: 'commits'
+							})
+							.append( $commits )
+						)
 					)
-				)
-			);
+				);
+			}
 
 			// See $.fn.enableFolding().
 			$( '#no0' ).on( 'click', function() {
