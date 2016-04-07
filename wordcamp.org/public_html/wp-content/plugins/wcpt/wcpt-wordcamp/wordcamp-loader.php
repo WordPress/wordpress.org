@@ -24,6 +24,9 @@ class WordCamp_Loader {
 		add_action( 'plugins_loaded', array( $this, 'includes'               ) );
 		add_action( 'init',           array( $this, 'register_post_types'    ) );
 		add_action( 'init',           array( $this, 'register_post_statuses' ) );
+		add_filter( 'pre_get_posts',  array( $this, 'query_public_statuses_on_archives' ) );
+
+		// todo re-align
 	}
 
 	/**
@@ -115,6 +118,34 @@ class WordCamp_Loader {
 				),
 			) );
 		}
+	}
+
+	/**
+	 * Only query the public post statuses on WordCamp archives and feeds
+	 *
+	 * By default, any public post statuses are queried when the `post_status` parameter is not explicitly passed
+	 * to WP_Query. This causes central.wordcamp.org/wordcamps/ and central.wordcamp.org/wordcamps/feed/ to display
+	 * camps that are `needs-vetting`, etc, which is not desired.
+	 *
+	 * Another way to fix this would have been to register some of the posts statuses as `private`, but they're not
+	 * consistently used in a public or private way, so that would have had more side effects.
+	 *
+	 * @param WP_Query $query
+	 */
+	public function query_public_statuses_on_archives( $query ) {
+		if ( ! $query->is_post_type_archive( WCPT_POST_TYPE_ID ) ) {
+			return;
+		}
+
+		if ( is_admin() ) {
+			return;
+		}
+
+		if ( ! empty( $query->query_vars['post_status'] ) ) {
+			return;
+		}
+
+		$query->query_vars['post_status'] = self::get_public_post_statuses();
 	}
 
 	/**
