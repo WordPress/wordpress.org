@@ -21,12 +21,10 @@ class WordCamp_Loader {
 	 * The main WordCamp Post Type loader
 	 */
 	function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'includes'               ) );
-		add_action( 'init',           array( $this, 'register_post_types'    ) );
-		add_action( 'init',           array( $this, 'register_post_statuses' ) );
+		add_action( 'plugins_loaded', array( $this, 'includes'                          ) );
+		add_action( 'init',           array( $this, 'register_post_types'               ) );
+		add_action( 'init',           array( $this, 'register_post_statuses'            ) );
 		add_filter( 'pre_get_posts',  array( $this, 'query_public_statuses_on_archives' ) );
-
-		// todo re-align
 	}
 
 	/**
