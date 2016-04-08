@@ -14,8 +14,10 @@ License:     GPLv2 or later
 */
 
 // todo if Jetpack_Custom_CSS:get_css is callable, register these, otherwise fatal errors
+
 add_action( 'plugins_loaded',        __NAMESPACE__ . '\get_wordcamp_sites' );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_scripts' );
+add_action( 'admin_menu',            __NAMESPACE__ . '\add_submenu_page' );
 add_action( 'customize_register',    __NAMESPACE__ . '\register_customizer_components' );
 
 /**
@@ -35,6 +37,22 @@ function register_scripts() {
 		array( 'jquery', 'customize-controls' ),
 		1,
 		true
+	);
+}
+
+/**
+ * Add a submenu page
+ *
+ * This helps organizers to realize that this tool exists, because they otherwise wouldn't see it unless
+ * they opened the Customizer.
+ */
+function add_submenu_page() {
+	\add_submenu_page(
+		'themes.php',
+		__( 'Clone Another WordCamp', 'wordcamporg' ),
+		__( 'Clone Another WordCamp', 'wordcamporg' ),
+		'switch_themes',
+		'customize.php?wordcamp-site-cloner'
 	);
 }
 

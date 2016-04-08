@@ -21,6 +21,10 @@
 		ready : function() {
 			var urlParams = getUrlParams( window.location.href );
 
+			if ( urlParams.hasOwnProperty( 'wordcamp-site-cloner' ) ) {
+				this.expand();
+			}
+
 			if ( urlParams.hasOwnProperty( 'wcsc_source_site_id' ) ) {
 				this.expand();
 				api( 'wcsc_source_site_id' ).set( urlParams.wcsc_source_site_id );
