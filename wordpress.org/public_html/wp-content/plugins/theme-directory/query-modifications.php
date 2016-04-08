@@ -63,20 +63,8 @@ function wporg_themes_pre_get_posts( $query ) {
 				'after'  => date( 'Y-m-d', strtotime( '-1 year' ) )
 			);
 
-			// Allow some themes to always be featured by setting a postmeta key.
-			// By searching for themes with both EXISTS and NOT EXISTS we can query for the existence (and then sort) or the non-existence.
-			$query->query_vars['meta_query'] = array(
-				array(
-					'key' => '_featured',
-					'meta_compare' => 'EXISTS'
-				),
-				array(
-					'key' => '_featured',
-					'compare' => 'NOT EXISTS'
-				),
-				'relation' => 'OR'
-			);
-			$query->query_vars['orderby'] = 'meta_value_num DESC, RAND(' . date( 'Ymd' ) . ')';
+			// Some themes are always featured by ways of the menu_order
+			$query->query_vars['orderby'] = 'menu_order DESC, RAND(' . date( 'Ymd' ) . ')';
 			$query->query_vars['no_found_rows'] = true;
 			break;
 
