@@ -24,6 +24,7 @@ class Plugin_Directory {
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
+		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
@@ -363,6 +364,17 @@ class Plugin_Directory {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Filter for rest_api_allowed_post_types to enable JP syncing of the CPT
+	 *
+	 * @param array $allowed_post_types
+	 * @return array
+	 */
+	public function filter_allowed_post_types( $allowed_post_types ) {
+		$allowed_post_types[] = 'plugin';
+		return $allowed_post_types;
 	}
 
 	/**
