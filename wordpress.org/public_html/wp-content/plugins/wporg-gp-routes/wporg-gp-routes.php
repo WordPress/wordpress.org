@@ -64,6 +64,7 @@ class WPorg_GP_Routes {
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
 			GP::$router->remove( "/languages/$locale/$path" );
+			GP::$router->remove( "/profile" );
 			GP::$router->remove( "/profile/$path" );
 
 			// Redirect routes.
