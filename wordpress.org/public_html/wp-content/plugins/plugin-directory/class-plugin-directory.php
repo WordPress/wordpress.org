@@ -33,6 +33,8 @@ class Plugin_Directory {
 		// Cannot be included on `admin_init` to allow access to menu hooks
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Admin\Customizations::instance();
+
+			add_action( 'transition_post_status', array( 'Admin\Status_Transitions', 'instance' ) );
 		}
 
 		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
@@ -75,9 +77,10 @@ class Plugin_Directory {
 				'read_post'          => 'read',
 				'edit_posts'         => 'plugin_dashboard_access',
 				'edit_others_posts'  => 'plugin_edit_others',
+				'publish_posts'      => 'plugin_approve',
 				'read_private_posts' => 'do_not_allow',
 				'delete_posts'       => 'do_not_allow',
-				'create_posts'       => 'do_not_allow'
+				'create_posts'       => 'do_not_allow',
 			)
 		) );
 
@@ -124,7 +127,7 @@ class Plugin_Directory {
 		register_post_status( 'pending', array(
 			'label'                     => _x( 'Pending', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
-			'show_in_admin_status_list' => current_user_can( 'plugin_approve' ),
+			'show_in_admin_status_list' => current_user_can( 'plugin_review' ),
 			'label_count'               => _n_noop( 'Pending <span class="count">(%s)</span>', 'Pending <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 		register_post_status( 'disabled', array(

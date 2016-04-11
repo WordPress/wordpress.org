@@ -15,6 +15,7 @@ class Capabilities {
 	 * @param string $cap           Capability name.
 	 * @param int    $user_id       The user ID.
 	 * @param array  $context       Adds the context to the cap. Typically the object ID.
+	 * @return array Primitive caps.
 	 */
 	public static function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
 		switch( $cap ) {
@@ -80,13 +81,14 @@ class Capabilities {
 
 		$reviewer = array_merge( $committer, array(
 			'plugin_edit_pending' => true,
-			'plugin_approve' => true,
-			'plugin_reject' => true,
+			'plugin_review' => true,
 		) );
 
 		$admin = array_merge( $reviewer, array(
 			'plugin_add_committer' => true,
 			'plugin_edit_others' => true,
+			'plugin_approve' => true,
+			'plugin_reject' => true,
 			'plugin_disable' => true,
 			'plugin_close' => true,
 			'plugin_set_category' => true, // Special categories

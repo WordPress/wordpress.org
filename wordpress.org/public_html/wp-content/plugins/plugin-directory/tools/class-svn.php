@@ -8,6 +8,10 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
  */
 class SVN {
 
+	public static function add( $dirs, $args = array() ) {
+		return true;
+	}
+
 	/**
 	 * Create an SVN Export of a URL to a local directory.
 	 *
@@ -79,6 +83,10 @@ class SVN {
 		}
 
 		return false;
+	}
+
+	public static function mkdir( $dirs, $args = array() ) {
+		return true;
 	}
 
 	/**
