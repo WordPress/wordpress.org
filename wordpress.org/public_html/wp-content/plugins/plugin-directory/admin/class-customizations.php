@@ -25,7 +25,7 @@ class Customizations {
 	 */
 	private function __construct() {
 		// Admin Metaboxes
-		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 1 );
+		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
@@ -219,10 +219,11 @@ class Customizations {
 	/**
 	 * Register the Admin metaboxes for the plugin management screens.
 	 *
-	 * @param string $post_type The post type of the current screen.
+	 * @param string   $post_type The post type of the current screen.
+	 * @param \WP_Post $post      Post object.
 	 * @return void.
 	 */
-	public function register_admin_metaboxes( $post_type ) {
+	public function register_admin_metaboxes( $post_type, $post ) {
 		if ( 'plugin' != $post_type ) {
 			return;
 		}
@@ -259,12 +260,14 @@ class Customizations {
 			'plugin', 'side', 'high'
 		);
 
-		add_meta_box(
-			'plugin-committers',
-			__( 'Plugin Committers', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
-			'plugin', 'side'
-		);
+		if ( 'publish' === $post->post_status ) {
+			add_meta_box(
+				'plugin-committers',
+				__( 'Plugin Committers', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
+				'plugin', 'side'
+			);
+		}
 
 		// Remove unnecessary metaboxes.
 		remove_meta_box( 'slugdiv',          'plugin', 'normal' );

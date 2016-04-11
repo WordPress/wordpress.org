@@ -39,6 +39,11 @@ class Committers {
 		$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( 'add-committer' );
+
+		if ( ! current_user_can( 'plugin_add_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+			wp_die( -1 );
+		}
+
 		global $post;
 
 		$response = new \WP_Ajax_Response();
@@ -50,10 +55,6 @@ class Committers {
 				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s does not exist.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
 			) );
 			$response->send();
-		}
-
-		if ( ! current_user_can( 'plugin_add_committer', $post_id ) ) {
-				wp_die( -1 );
 		}
 
 		$result = Tools::grant_plugin_committer( $post->post_name, $committer );
@@ -88,6 +89,10 @@ class Committers {
 
 		check_ajax_referer( "remove-committer-$id" );
 
+		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+			wp_die( -1 );
+		}
+
 		$response    = new \WP_Ajax_Response();
 		$plugin_slug = get_post( $post_id )->post_name;
 
@@ -97,10 +102,6 @@ class Committers {
 				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s does not exist.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
 			) );
 			$response->send();
-		}
-
-		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) ) {
-				wp_die( -1 );
 		}
 
 		$result = Tools::revoke_plugin_committer( $plugin_slug, $committer );
