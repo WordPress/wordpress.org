@@ -52,7 +52,7 @@ function add_submenu_page() {
 		__( 'Clone Another WordCamp', 'wordcamporg' ),
 		__( 'Clone Another WordCamp', 'wordcamporg' ),
 		'switch_themes',
-		'customize.php?wordcamp-site-cloner'
+		'customize.php?autofocus[panel]=wordcamp_site_cloner'
 	);
 }
 
