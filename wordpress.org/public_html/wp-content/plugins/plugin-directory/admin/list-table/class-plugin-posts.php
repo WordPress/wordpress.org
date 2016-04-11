@@ -15,6 +15,62 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 	/**
 	 *
+	 * @global array    $avail_post_stati
+	 * @global WP_Query $wp_query
+	 * @global int      $per_page
+	 * @global string   $mode
+	 */
+	public function prepare_items() {
+		global $avail_post_stati, $wp_query, $per_page, $mode;
+
+		$this->set_hierarchical_display( is_post_type_hierarchical( $this->screen->post_type ) && 'menu_order title' === $wp_query->query['orderby'] );
+
+		$post_type = $this->screen->post_type;
+		$per_page = $this->get_items_per_page( 'edit_' . $post_type . '_per_page' );
+
+		/** This filter is documented in wp-admin/includes/post.php */
+ 		$per_page = apply_filters( 'edit_posts_per_page', $per_page, $post_type );
+
+		if ( $this->hierarchical_display ) {
+			$total_items = $wp_query->post_count;
+		} elseif ( $wp_query->found_posts || $this->get_pagenum() === 1 ) {
+			$total_items = $wp_query->found_posts;
+		} else {
+			$post_counts = (array) wp_count_posts( $post_type, 'readable' );
+
+			if ( isset( $_REQUEST['post_status'] ) && in_array( $_REQUEST['post_status'] , $avail_post_stati ) ) {
+				$total_items = $post_counts[ $_REQUEST['post_status'] ];
+			} elseif ( isset( $_REQUEST['show_sticky'] ) && $_REQUEST['show_sticky'] ) {
+				$total_items = $this->sticky_posts_count;
+			} elseif ( isset( $_GET['author'] ) && $_GET['author'] == get_current_user_id() ) {
+				$total_items = $this->user_posts_count;
+			} else {
+				$total_items = array_sum( $post_counts );
+
+				// Subtract post types that are not included in the admin all list.
+				foreach ( get_post_stati( array( 'show_in_admin_all_list' => false ) ) as $state ) {
+					$total_items -= $post_counts[ $state ];
+				}
+			}
+		}
+
+		if ( ! empty( $_REQUEST['mode'] ) ) {
+			$mode = $_REQUEST['mode'] === 'excerpt' ? 'excerpt' : 'list';
+			set_user_setting( 'posts_list_mode', $mode );
+		} else {
+			$mode = get_user_setting( 'posts_list_mode', 'list' );
+		}
+
+		$this->is_trash = isset( $_REQUEST['post_status'] ) && $_REQUEST['post_status'] === 'trash';
+
+		$this->set_pagination_args( array(
+			'total_items' => $total_items,
+			'per_page' => $per_page
+		) );
+	}
+
+	/**
+	 *
 	 * @return array
 	 */
 	public function get_columns() {

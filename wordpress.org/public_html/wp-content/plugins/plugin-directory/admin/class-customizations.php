@@ -136,10 +136,14 @@ class Customizations {
 			return;
 		}
 
+		if ( empty( $query->query['post_status'] ) ) {
+			$query->query_vars['post_status'] = array( 'publish', 'future', 'draft', 'pending', 'disabled', 'closed', 'rejected' );
+		}
+
 		if ( ! current_user_can( 'plugin_edit_others' ) || ( isset( $query->query['author'] ) && $query->query['author'] == get_current_user_id() ) ) {
 			$query->query_vars['author'] = get_current_user_id();
-			$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
 
+			$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
 			if ( $plugins ) {
 				$query->query_vars['post_name__in'] = $plugins;
 				$query->query_vars['post_status']   = 'any';
@@ -164,7 +168,7 @@ class Customizations {
 		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
 
 		// Allow reviewers to also see all pending plugins.
-		if ( current_user_can( 'plugin_edit_pending' ) && ! isset( $_GET['author'] ) ) {
+		if ( current_user_can( 'plugin_edit_pending' ) && ( ! isset( $_GET['author'] ) || ( isset( $_GET['post_status'] ) && 'pending' === $_GET['post_status'] ) ) ) {
 			$where .= " OR {$wpdb->posts}.post_status = 'pending'";
 		}
 
@@ -182,6 +186,7 @@ class Customizations {
 
 		if ( 'plugin' === $post_type ) {
 			$wp_list_table = new Plugin_Posts();
+			$wp_list_table->prepare_items();
 		}
 	}
 
