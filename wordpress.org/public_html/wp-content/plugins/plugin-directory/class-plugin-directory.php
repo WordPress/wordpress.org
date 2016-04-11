@@ -25,6 +25,7 @@ class Plugin_Directory {
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
+		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ), 10, 2 );
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
@@ -375,6 +376,20 @@ class Plugin_Directory {
 	public function filter_allowed_post_types( $allowed_post_types ) {
 		$allowed_post_types[] = 'plugin';
 		return $allowed_post_types;
+	}
+
+	/**
+	 * Filter for pre_update_option_jetpack_options to ensure CPT posts are seen as public and searchable by TP
+	 *
+	 * @param mixed $new_value
+	 * @param mixed $old_value
+	 * @return mixed
+	 */
+	public function filter_jetpack_options( $new_value, $old_value ) {
+		if ( is_array($new_value) && array_key_exists( 'public', $new_value ) )
+			$new_value['public'] = 1;
+
+		return $new_value;
 	}
 
 	/**
