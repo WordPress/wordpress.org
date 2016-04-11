@@ -33,6 +33,7 @@ class Customizations {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
+		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
 
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
@@ -182,6 +183,32 @@ class Customizations {
 		if ( 'plugin' === $post_type ) {
 			$wp_list_table = new Plugin_Posts();
 		}
+	}
+
+	/**
+	 * Filter the default post display states used in the posts list table.
+	 *
+	 * @param array    $post_states An array of post display states.
+	 * @param \WP_Post $post        The current post object.
+	 */
+	public function post_states( $post_states, $post ) {
+		$post_status = '';
+
+		if ( isset( $_REQUEST['post_status'] ) ) {
+			$post_status = $_REQUEST['post_status'];
+		}
+
+		if ( 'disabled' == $post->post_status && 'disabled' != $post_status ) {
+			$post_states['disabled'] = _x( 'Disabled', 'plugin status', 'wporg-plugins' );
+		}
+		if ( 'closed' == $post->post_status && 'closed' != $post_status ) {
+			$post_states['closed'] = _x( 'Closed', 'plugin status', 'wporg-plugins' );
+		}
+		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
+			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
+		}
+
+		return $post_states;
 	}
 
 	/**
