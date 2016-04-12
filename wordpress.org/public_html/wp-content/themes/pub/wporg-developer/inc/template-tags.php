@@ -1132,9 +1132,11 @@ namespace DevHub {
 		$summary = $post->post_excerpt;
 
 		if ( $summary ) {
-			add_filter( 'the_excerpt', 'htmlentities', 9 ); // Run before wpautop
+			// Fix https://developer.wordpress.org/reference/functions/get_extended/
+			// until the 'more' delimiter in summary is backticked.
+			$summary = str_replace( array( '<!--', '-->' ), array( '<code>&lt;!--', '--&gt;</code>' ), $summary );
+
 			$summary = apply_filters( 'the_excerpt', apply_filters( 'get_the_excerpt', $summary ) );
-			remove_filter( 'the_excerpt', 'htmlentities', 9 );
 		}
 
 		return $summary;
