@@ -1146,6 +1146,16 @@ namespace DevHub {
 			// until the 'more' delimiter in summary is backticked.
 			$summary = str_replace( array( '<!--', '-->' ), array( '<code>&lt;!--', '--&gt;</code>' ), $summary );
 
+			// Fix standalone HTML tags that were not backticked.
+			// e.g. https://developer.wordpress.org/reference/hooks/comment_form/
+			if ( false !== strpos( $summary, '<' ) ) {
+				$summary = preg_replace_callback(
+					'/(\s)(<[^ >]+>)(\s)/',
+					function ( $matches ) { return $matches[1] . '<code>' . htmlentities( $matches[2] ) . '</code>' . $matches[3]; },
+					$summary
+				);
+			}
+
 			$summary = apply_filters( 'the_excerpt', apply_filters( 'get_the_excerpt', $summary ) );
 		}
 
