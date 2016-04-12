@@ -97,6 +97,7 @@ function init() {
 
 	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
+	add_filter( 'posts_orderby', __NAMESPACE__ . '\\search_posts_orderby', 10, 2 );
 	add_filter( 'the_posts', __NAMESPACE__ . '\\rerun_empty_exact_search', 10, 2 );
 
 	add_theme_support( 'automatic-feed-links' );
@@ -202,10 +203,6 @@ function pre_get_posts( $query ) {
 
 	if ( $query->is_search() ) {
 
-		// Order searches by title first.
-		$query->set( 'orderby', '' );
-		$query->set( 'search_orderby_title', 1 );
-
 		// If user has '()' at end of a search string, assume they want a specific function/method.
 		$s = htmlentities( $query->get( 's' ) );
 		if ( '()' === substr( $s, -2 ) ) {
@@ -217,6 +214,99 @@ function pre_get_posts( $query ) {
 			$query->set( 'post_type', array( 'wp-parser-function', 'wp-parser-method' ) );
 		}
 	}
+}
+
+/**
+ * Filter the SQL for the ORDER BY clause for search queries.
+ *
+ * Adds ORDER BY condition with spaces replaced with underscores in 'post_title'.
+ * Adds ORDER BY condition to order by title length.
+ *
+ * @param string   $orderby The ORDER BY clause of the query.
+ * @param WP_Query $query   The WP_Query instance (passed by reference).
+ * @return string  Filtered order by clause
+ */
+function search_posts_orderby( $orderby, $query ) {
+	global $wpdb;
+
+	if ( $query->is_main_query() && is_search() && ! $query->get( 'exact' ) ) {
+
+		$search_order_by_title = $query->get( 'search_orderby_title' );
+
+		// Check if search_orderby_title is set by WP_Query::parse_search.
+		if ( is_array( $search_order_by_title ) && $search_order_by_title ) {
+
+			// Get search orderby query.
+			$orderby = parse_search_order( $query->query_vars );
+
+			// Add order by title length.
+			$orderby .= " , CHAR_LENGTH( $wpdb->posts.post_title ) ASC, $wpdb->posts.post_title ASC";
+		}
+	}
+
+	return $orderby;
+}
+
+/**
+ * Generate SQL for the ORDER BY condition based on passed search terms.
+ *
+ * Similar to WP_Query::parse_search_order.
+ * Adds ORDER BY condition with spaces replaced with underscores in 'post_title'.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param array   $q Query variables.
+ * @return string ORDER BY clause.
+ */
+function parse_search_order( $q ) {
+	global $wpdb;
+
+	if ( $q['search_terms_count'] > 1 ) {
+		$num_terms = count( $q['search_orderby_title'] );
+
+		// If the search terms contain negative queries, don't bother ordering by sentence matches.
+		$like = $_like = '';
+		if ( ! preg_match( '/(?:\s|^)\-/', $q['s'] ) ) {
+			$like = '%' . $wpdb->esc_like( $q['s'] ) . '%';
+		}
+
+		$search_orderby = '';
+
+		// Sentence match in 'post_title'.
+		if ( $like ) {
+			$search_orderby .= $wpdb->prepare( "WHEN $wpdb->posts.post_title LIKE %s THEN 1 ", $like );
+			$_like =  str_replace( '-', '_', sanitize_title_with_dashes( $q['s'] ) );
+			$_like = '%' . $wpdb->esc_like( $_like ) . '%';
+			if ( $_like !== $like ) {
+				// Sentence match in 'post_title' with spaces replaced with underscores.
+				$search_orderby .= $wpdb->prepare( "WHEN $wpdb->posts.post_title LIKE %s THEN 2 ", $_like );
+			}
+		}
+
+		// Sanity limit, sort as sentence when more than 6 terms.
+		// (few searches are longer than 6 terms and most titles are not)
+		if ( $num_terms < 7 ) {
+			// all words in title
+			$search_orderby .= 'WHEN ' . implode( ' AND ', $q['search_orderby_title'] ) . ' THEN 3 ';
+			// any word in title, not needed when $num_terms == 1
+			if ( $num_terms > 1 )
+				$search_orderby .= 'WHEN ' . implode( ' OR ', $q['search_orderby_title'] ) . ' THEN 4 ';
+		}
+
+		// Sentence match in 'post_content'.
+		if ( $like ) {
+			$search_orderby .= $wpdb->prepare( "WHEN $wpdb->posts.post_content LIKE %s THEN 5 ", $like );
+		}
+
+		if ( $search_orderby ) {
+			$search_orderby = '(CASE ' . $search_orderby . 'ELSE 6 END)';
+		}
+	} else {
+		// Single word or sentence search.
+		$search_orderby = reset( $q['search_orderby_title'] ) . ' DESC';
+	}
+
+	return $search_orderby;
 }
 
 /**
