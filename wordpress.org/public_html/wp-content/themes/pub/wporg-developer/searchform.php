@@ -51,12 +51,20 @@
 					'wp-parser-class'    => __( 'Classes',   'wporg' ),
 					'wp-parser-method'   => __( 'Methods',   'wporg' ),
 				);
+				
+				$qv_post_type = array_filter( (array) get_query_var( 'post_type' ) );	
+
+				if ( ! is_search() || in_array( 'any', $qv_post_type ) ) {
+					// no filters used
+					$qv_post_type = array();
+				}
+						
 				foreach ( $search_post_types as $post_type => $label ) {
-					$qv_post_type = (array) get_query_var( 'post_type' );
+					$checked = checked( in_array( $post_type, $qv_post_type ), true, false );
 				?>
-					<label><input type="checkbox" name="post_type[]" value="<?php echo esc_attr( $post_type ); ?>"
-					<?php checked( ! is_search() || in_array( 'any', $qv_post_type ) || in_array( $post_type, $qv_post_type ) ); ?> /> <?php echo $label; ?></label>
-				<?php } ?>
+						<label><input type="checkbox" name="post_type[]" value="<?php echo esc_attr( $post_type ); ?>"
+						<?php echo $checked; ?> /> <?php echo $label; ?></label>
+			<?php } ?>
 		</div>
 	</form>
 
