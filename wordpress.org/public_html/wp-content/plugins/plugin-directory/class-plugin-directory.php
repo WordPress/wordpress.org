@@ -169,6 +169,12 @@ class Plugin_Directory {
 			add_filter( 'option_home',    array( $this, 'rosetta_network_localize_url' ) );
 			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
 		}
+
+		// Instantiate our copy of the Jetpack_Search class if 
+		if ( !class_exists( 'Jetpack_Search' ) ) {
+			require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
+			\Jetpack_Search::instance();
+		}
 	}
 
 	/**
