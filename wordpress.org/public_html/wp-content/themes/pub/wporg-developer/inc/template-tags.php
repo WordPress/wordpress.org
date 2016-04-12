@@ -1132,6 +1132,16 @@ namespace DevHub {
 		$summary = $post->post_excerpt;
 
 		if ( $summary ) {
+			// Backticks in excerpts are not automatically wrapped in code tags, so do so.
+			// e.g. https://developer.wordpress.org/reference/functions/convert_chars/
+			if ( false !== strpos( $summary, '`' ) ) {
+				$summary = preg_replace_callback(
+					'/`([^`]*)`/',
+					function ( $matches ) { return '<code>' . htmlentities( $matches[1] ) . '</code>'; },
+					$summary
+				);
+			}
+
 			// Fix https://developer.wordpress.org/reference/functions/get_extended/
 			// until the 'more' delimiter in summary is backticked.
 			$summary = str_replace( array( '<!--', '-->' ), array( '<code>&lt;!--', '--&gt;</code>' ), $summary );
