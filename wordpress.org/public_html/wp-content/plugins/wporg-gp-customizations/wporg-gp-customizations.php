@@ -13,7 +13,6 @@ class WPorg_GP_Customizations {
 	function __construct() {
 		add_filter( 'gp_url_profile', array( $this, 'worg_profile_url' ), 10, 2 );
 		add_filter( 'gp_projects', array( $this, 'natural_sort_projects' ), 10, 2 );
-		add_action( 'gp_before_request', array( $this, 'disable_translation_propagation_on_import' ), 10, 2 );
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
@@ -40,18 +39,6 @@ class WPorg_GP_Customizations {
 	 */
 	public function update_projects_last_updated() {
 		update_option( 'wporg_projects_last_updated', time() );
-	}
-
-	/**
-	 * Disables propagation of translations on translation imports by users.
-	 *
-	 * @param string $class_name         Class name of route handler.
-	 * @param string $last_method_called Method name of route handler.
-	 */
-	public function disable_translation_propagation_on_import( $class_name, $last_method_called ) {
-		if ( 'GP_Route_Translation' === $class_name && 'import_translations_post' === $last_method_called ) {
-			add_filter( 'gp_enable_propagate_translations_across_projects', '__return_false' );
-		}
 	}
 
 	/**
