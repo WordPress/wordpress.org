@@ -90,12 +90,8 @@ add_filter( 'jetpack_get_default_modules', __NAMESPACE__ . '\default_jetpack_mod
 add_filter( 'jetpack_photon_reject_https', '__return_false' );
 
 /**
- * Always automatically connect new sites to WordPress.com
- *
- * The UI for the auto-connect option is currently commented out in Jetpack. You can enable the setting manually,
- * but it will get overridden if you save the settings from the UI, because the form field is missing.
- *
- * @todo Remove this when the UI for the setting is launched.
+ * Never automatically connect new sites to WordPress.com.
+ * We offload this part to wp-cron.php because of https.
  *
  * @param array $new_value
  * @param array $old_value
@@ -103,11 +99,43 @@ add_filter( 'jetpack_photon_reject_https', '__return_false' );
  * @return array
  */
 function auto_connect_new_sites( $new_value, $old_value ) {
-	$new_value['auto-connect'] = 1;
+	$new_value['auto-connect'] = 0;
 
 	return $new_value;
 }
 add_filter( 'pre_update_site_option_jetpack-network-settings', __NAMESPACE__ . '\auto_connect_new_sites', 10, 2 );
+
+/**
+ * Schedule an attempt to connect this site to Jetpack.
+ *
+ * @param int $blog_id The blog id.
+ */
+function schedule_connect_new_site( $blog_id ) {
+	wp_schedule_single_event( time() + 12 * HOUR_IN_SECONDS + 600, 'wcorg_connect_new_site', array( $blog_id, get_current_user_id() ) );
+}
+add_action( 'wpmu_new_blog', __NAMESPACE__ . '\schedule_connect_new_site' );
+
+/**
+ * Connect the new site to Jetpack. Runs during wp-cron.php.
+ *
+ * @param int $blog_id The blog_id to connect.
+ * @param int $user_id The user ID who created the new site.
+ */
+function wcorg_connect_new_site( $blog_id, $user_id ) {
+	if ( ! class_exists( 'Jetpack_Network' ) )
+		return;
+
+	$network = \Jetpack_Network::init();
+	$current_user_id = get_current_user_id();
+	wp_set_current_user( $user_id );
+
+	// Register this site with Jetpack.
+	$network->do_subsiteregister( $blog_id );
+
+	wp_set_current_user( $current_user_id );
+	error_log( sprintf( 'Connecting new site %d for user %d.', $blog_id, $user_id ) );
+}
+add_action( 'wcorg_connect_new_site', __NAMESPACE__ . '\wcorg_connect_new_site', 10, 2 );
 
 /**
  * Sanitize parsed Custom CSS rules
