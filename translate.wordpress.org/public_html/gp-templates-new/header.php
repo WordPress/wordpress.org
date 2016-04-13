@@ -15,7 +15,7 @@ require WPORGPATH . 'header.php';
 		if ( is_user_logged_in() ):
 			$user = wp_get_current_user();
 
-			printf( __('Hi, %s.'), '<a href="'.gp_url( '/profile' ).'">'.$user->user_login.'</a>' );
+			printf( __('Hi, %s.'), '<a href="'.gp_url( '/settings' ).'">'.$user->user_login.'</a>' );
 			?>
 			<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php _e( 'Log out' ); ?></a>
 		<?php else: ?>
