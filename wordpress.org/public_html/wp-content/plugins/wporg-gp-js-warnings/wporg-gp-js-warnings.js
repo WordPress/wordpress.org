@@ -17,9 +17,9 @@ $gp.wporgjswarnings = {
 				name: name,
 				translation: $el.val(),
 				original: // Singular original, or plural original, or.. the single-original plural view..
-					$el.parent('div.textareas').prev('p.original').text() || 
+					$el.parent('div.textareas').prev('p.original').text() ||
 					$el.parent('div.textareas').prev('p').find('span.original').text() ||
-					jQuery( $el.parents('div.strings').find('span.original').get(prop) ).text() 
+					jQuery( $el.parents('div.strings').find('span.original').get(prop) ).text()
 			}
 		}).get();
 
@@ -50,7 +50,8 @@ $gp.wporgjswarnings = {
 		}
 
 		// No warnings, or warnings skipped
-		$gp.editor.hooks.ok( button );
+		$gp.editor.save( button );
+		return false;
 	},
 	check_entry: function( entry ) {
 		var warnings = [];
