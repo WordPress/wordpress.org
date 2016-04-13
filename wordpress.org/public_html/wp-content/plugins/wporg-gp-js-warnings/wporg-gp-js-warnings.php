@@ -42,7 +42,7 @@ class WPorg_GP_JS_Translation_Warnings {
 		}
 
 		$scripts->remove( 'gp-editor' );
-		$scripts->add( 'gp-editor', plugins_url( '/wporg-gp-js-warnings.js', __FILE__ ), array( 'wporg-gp-editor', 'jquery' ), '2015-11-14' );
+		$scripts->add( 'gp-editor', plugins_url( '/wporg-gp-js-warnings.js', __FILE__ ), array( 'wporg-gp-editor', 'jquery' ), '2016-04-13' );
 	}
 
 }
