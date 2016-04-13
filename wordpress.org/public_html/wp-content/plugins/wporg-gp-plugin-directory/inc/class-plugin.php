@@ -43,8 +43,8 @@ class Plugin {
 		$cache_purger = new Cache_Purge\Cache_Purger();
 		$cache_purger->register_events();
 
-	//	$this->translation_sync = new Sync\Translation_Sync();
-	//	$this->translation_sync->register_events();
+		$this->translation_sync = new Sync\Translation_Sync();
+		$this->translation_sync->register_events();
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
