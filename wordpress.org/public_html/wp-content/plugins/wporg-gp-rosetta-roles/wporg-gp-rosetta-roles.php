@@ -59,6 +59,10 @@ class WPorg_GP_Rosetta_Roles {
 	 * @return bool True if user has permissions, false if not.
 	 */
 	public function pre_can_user( $verdict, $args ) {
+		if ( 'delete' === $args['action'] ) {
+			return false;
+		}
+
 		// Administrators on global.wordpress.org are considered global admins in GlotPress.
 		if ( $this->is_global_administrator( $args['user_id'] ) ) {
 			return true;
