@@ -28,9 +28,6 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 	 *
 	 * [--set=<set>]
 	 * : Translation set slug: Default: "default"
-	 *
-	 * [--disable-propagating]
-	 * : If set, propagation will be disabled.
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$file = basename( $args[2] );
@@ -67,12 +64,6 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 			WP_CLI::error( "Couldn't load translations from file! [$file]" );
 		}
 
-		$disable_propagating = isset( $assoc_args['disable-propagating'] );
-
-		if ( $disable_propagating ) {
-			add_filter( 'enable_propagate_translations_across_projects', '__return_false' );
-		}
-
 		add_filter( 'translation_set_import_over_existing', '__return_false' );
 		//add_filter( 'translation_set_import_status', array( $this, '__string_status_waiting' ) );
 
@@ -81,10 +72,6 @@ class Import_Plugin_Translations extends WP_CLI_Command {
 
 		//remove_filter( 'translation_set_import_status', '__string_status_waiting' );
 		remove_filter( 'translation_set_import_over_existing', '__return_false' );
-
-		if ( $disable_propagating ) {
-			remove_filter( 'enable_propagate_translations_across_projects', '__return_false' );
-		}
 
 		WP_CLI::success( "Imported $imported strings for {$locale->english_name} [$file]" );
 	}
