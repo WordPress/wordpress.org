@@ -2,6 +2,10 @@
 
 namespace WordCamp\RemoteCSS;
 
+if ( 'cli' !== php_sapi_name() ) {
+	return;
+}
+
 $core_tests_directory = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $core_tests_directory ) {
