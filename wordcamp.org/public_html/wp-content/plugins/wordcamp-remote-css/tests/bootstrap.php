@@ -28,14 +28,14 @@ function manually_load_plugin() {
  	define( 'WP_ADMIN',          true );
 	define( 'JETPACK_DEV_DEBUG', true );
 
-	require_once( dirname(                   __DIR__ )     . '/bootstrap.php'                 );
-	require_once( dirname( dirname(          __DIR__ ) )   . '/jetpack/jetpack.php'           );
+	require_once( dirname(          __DIR__ )   . '/bootstrap.php'       );
+	require_once( dirname( dirname( __DIR__ ) ) . '/jetpack/jetpack.php' );
 
 	// Some of the sanitization lives here because it runs for both Custom CSS and Remote CSS
 	require_once( dirname( dirname( dirname( __DIR__ ) ) ) . '/mu-plugins/jetpack-tweaks/css-sanitization.php' );
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 
-require $core_tests_directory . '/includes/bootstrap.php';
+require( $core_tests_directory . '/includes/bootstrap.php' );
 
 \Jetpack::activate_module( 'custom-css', false, false );
