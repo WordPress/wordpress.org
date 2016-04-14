@@ -484,8 +484,8 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			SELECT *
 			FROM {$wpdb->gp_projects}
 			WHERE
-				parent_project_id = %d AND
-				active = 1
+				parent_project_id = %d
+				AND active = 1
 			ORDER BY id ASC
 		", $project->id );
 
@@ -499,7 +499,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 					SELECT *
 					FROM {$wpdb->gp_projects}
 					WHERE
-						parent_project_id = %d AND
+						parent_project_id = %d
 						AND active = 1
 					ORDER BY id ASC
 				", $project->id );
