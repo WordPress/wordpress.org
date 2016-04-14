@@ -65,16 +65,33 @@ function wporg_makehome_time_converter_script() {
             d.setUTCSeconds(+m[6]);
             return d;
         }
-		var format_date = function (d) {
+		var format_time = function (d) {
 			return d.toLocaleTimeString(navigator.language, {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute:'2-digit', timeZoneName: 'short'});
         }
+		var format_date = function (d) {
+			return d.toLocaleDateString(navigator.language, {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
+		}
+		/* Not all browsers, particularly Safari, support arguments to .toLocaleTimeString(). */
+		var toLocaleTimeStringSupportsLocales = (function() {
+			try {
+				new Date().toLocaleTimeString('i');
+			} catch (e) {
+				return e.name === 'RangeError';
+			}
+		})();
         var nodes = document.getElementsByTagName('abbr');
         for (var i=0; i<nodes.length; ++i) {
             var node = nodes[i];
             if (node.className === 'date') {
                 var d = parse_date(node.getAttribute('title'));
                 if (d) {
-                    node.textContent = format_date(d);
+					var new_text = '';
+					if ( ! toLocaleTimeStringSupportsLocales ) {
+						new_text += format_date(d);
+						new_text += ' ';
+					}
+					new_text += format_time(d);
+					node.textContent = new_text;
                 }
             }
         }
