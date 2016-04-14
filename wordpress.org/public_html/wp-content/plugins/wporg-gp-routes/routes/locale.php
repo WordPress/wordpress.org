@@ -322,7 +322,9 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		$sub_projects = $wpdb->get_col( $wpdb->prepare( "
 			SELECT id
 			FROM {$wpdb->gp_projects}
-			WHERE parent_project_id = %d
+			WHERE
+				parent_project_id = %d
+				active = 1
 		", $project->id ) );
 
 		foreach ( $sub_projects as $sub_project ) {
@@ -498,7 +500,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 					FROM {$wpdb->gp_projects}
 					WHERE
 						parent_project_id = %d AND
-						active = 1
+						AND active = 1
 					ORDER BY id ASC
 				", $project->id );
 
