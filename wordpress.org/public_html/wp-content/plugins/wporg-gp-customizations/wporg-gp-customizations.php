@@ -16,6 +16,22 @@ class WPorg_GP_Customizations {
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
+		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
+	}
+
+	/**
+	 * Changes the versions of some default scripts for cache bust.
+	 *
+	 * @see https://wordpress.slack.com/archives/meta-i18n/p1460626195000251
+	 *
+	 * @param WP_Scripts &$scripts WP_Scripts instance, passed by reference.
+	 */
+	public function bump_script_versions( &$scripts ) {
+		foreach ( [ 'gp-editor', 'gp-glossary' ] as $handle ) {
+			if ( isset( $scripts->registered[ $handle ] ) && '20160329' === $scripts->registered[ $handle ]->ver ) {
+				$scripts->registered[ $handle ]->ver = '20160329a';
+			}
+		}
 	}
 
 	/**
