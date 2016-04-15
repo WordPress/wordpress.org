@@ -912,6 +912,16 @@ input {
   font-size: 36px;
   line-height: 36px;
 }
+.devhub-wrap .archive-filter-form {
+  margin: 5rem 0;
+  font-size: 1.5rem;
+}
+.devhub-wrap .archive-filter-form input[type="submit"] {
+  margin-left: .5em;
+  padding: 0.2em 0.5em;
+  line-height: 1;
+  font-size: 1.5rem;
+}
 .devhub-wrap .searchform {
   overflow: hidden;
   height: auto;

@@ -340,15 +340,22 @@ namespace DevHub {
 	/**
 	 * Get an array of all parsed post types.
 	 *
+	 * @param string  $labels If set to 'labels' post types with their labels are returned.
 	 * @return array
 	 */
-	function get_parsed_post_types() {
-		return array(
-			'wp-parser-class',
-			'wp-parser-function',
-			'wp-parser-hook',
-			'wp-parser-method',
+	function get_parsed_post_types( $labels = '' ) {
+		$post_types =  array(
+			'wp-parser-class'    => __( 'Classes',   'wporg' ),
+			'wp-parser-function' => __( 'Functions', 'wporg' ),
+			'wp-parser-hook'     => __( 'Hooks',     'wporg' ),
+			'wp-parser-method'   => __( 'Methods',   'wporg' ),
 		);
+
+		if ( 'labels' !== $labels ) {
+			return array_keys( $post_types );
+		}
+
+		return $post_types;
 	}
 
 	/**
@@ -1393,4 +1400,49 @@ namespace DevHub {
 
 		return $message;
 	}
+
+	/**
+	 * Displays a post type filter dropdown on taxonomy pages. 
+	 * 
+	 * @return string HTML filter form.
+	 */
+	function taxonomy_archive_filter() {
+		global $wp_rewrite;
+
+		$taxonomies = array( 'wp-parser-since', 'wp-parser-package', 'wp-parser-source-file' );
+		$taxonomy   = get_query_var( 'taxonomy' );
+		$term       = get_query_var( 'term' );
+
+		if ( ! ( is_tax() && in_array( $taxonomy, $taxonomies ) ) ) {
+			return;
+		}
+
+		$post_types  = get_parsed_post_types( 'labels' );
+		$post_types  = array( 'any' => __( 'Any type', 'wporg' ) ) + $post_types;
+
+		$qv_post_type = array_filter( (array) get_query_var( 'post_type' ) );
+		$qv_post_type = $qv_post_type ? $qv_post_type : array( 'any' );
+
+		$options = '';
+		foreach ( $post_types as $post_type => $label ) {
+			$selected = in_array( $post_type, $qv_post_type ) ? " selected='selected'" : '';
+			$options .= "\n\t<option$selected value='" . esc_attr( $post_type ) . "'>$label</option>";
+		}
+
+		$form = "<form method='get' class='archive-filter-form' action=''>";
+
+		if ( ! $wp_rewrite->using_permalinks() ) {
+			// Add taxonomy and term when not using permalinks.
+			$form .= "<input type='hidden' name='" . esc_attr( $taxonomy ) . "' value='" . esc_attr( $term ) . "'>";
+		}
+		
+		$form .= "<label for='archive-filter'>";
+		$form .= __( 'Filter by type:', 'wporg' ) . ' ';
+		$form .= '<select name="post_type[]" id="archive-filter">';
+		$form .= $options . '</select></label>';
+		$form .= "<input class='shiny-blue' type='submit' value='Filter' /></form>";
+
+		echo $form;
+	}
 }
+

@@ -673,6 +673,17 @@
 		}
 	}
 
+	.archive-filter-form {
+		margin: 5rem 0;
+		font-size: 1.5rem;
+		input[type="submit"] {
+			margin-left: .5em;
+			padding: 0.2em 0.5em;
+			line-height: 1;
+			font-size: 1.5rem;
+		}
+	}
+
 	.searchform {
 		overflow: hidden;
 		height: auto;

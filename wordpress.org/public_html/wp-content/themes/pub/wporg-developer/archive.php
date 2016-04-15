@@ -16,6 +16,8 @@ get_header(); ?>
 
 		<main id="main" class="site-main" role="main">
 
+			<?php taxonomy_archive_filter(); ?>
+
 			<?php if ( have_posts() ) : ?>
 
 
