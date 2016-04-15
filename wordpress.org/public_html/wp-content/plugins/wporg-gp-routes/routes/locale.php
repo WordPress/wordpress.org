@@ -324,7 +324,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d
-				active = 1
+				AND active = 1
 		", $project->id ) );
 
 		foreach ( $sub_projects as $sub_project ) {
