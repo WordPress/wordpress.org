@@ -95,7 +95,7 @@ function init() {
 	add_action( 'wp_head', __NAMESPACE__ . '\\header_js' );
 	add_action( 'add_meta_boxes', __NAMESPACE__ . '\\rename_comments_meta_box', 10, 2 );
 
-	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 10, 2 );
+	add_filter( 'post_type_link', __NAMESPACE__ . '\\method_permalink', 9, 2 );
 	add_filter( 'term_link', __NAMESPACE__ . '\\taxonomy_permalink', 10, 3 );
 	add_filter( 'posts_orderby', __NAMESPACE__ . '\\search_posts_orderby', 10, 2 );
 	add_filter( 'the_posts', __NAMESPACE__ . '\\rerun_empty_exact_search', 10, 2 );
@@ -335,8 +335,11 @@ function register_nav_menus() {
 }
 
 function method_permalink( $link, $post ) {
-	if ( $post->post_type !== 'wp-parser-method' )
+	global $wp_rewrite;
+
+	if ( ! $wp_rewrite->using_permalinks() || ( 'wp-parser-method' !== $post->post_type ) ) {
 		return $link;
+	}
 
 	list( $class, $method ) = explode( '-', $post->post_name );
 	$link = home_url( user_trailingslashit( "reference/classes/$class/$method" ) );
@@ -344,6 +347,12 @@ function method_permalink( $link, $post ) {
 }
 
 function taxonomy_permalink( $link, $term, $taxonomy ) {
+	global $wp_rewrite;
+
+	if ( ! $wp_rewrite->using_permalinks() ) {
+		return $link;
+	}
+
 	if ( $taxonomy === 'wp-parser-source-file' ) {
 		$slug = $term->slug;
 		if ( substr( $slug, -4 ) === '-php' ) {
