@@ -206,6 +206,8 @@ class WordCamp_Admin {
 			}
 		}
 
+		do_action( 'wcpt_metabox_save_done', $post_id );
+
 		$this->validate_and_add_note( $post_id );
 	}
 

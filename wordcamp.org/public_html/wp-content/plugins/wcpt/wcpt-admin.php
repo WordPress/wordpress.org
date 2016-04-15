@@ -61,24 +61,6 @@ class WCPT_Admin {
 	}
 
 	/**
-	 * metabox_save ()
-	 *
-	 * Pass the metabox values before saving
-	 *
-	 * @param int $post_id
-	 * @return int
-	 */
-	function metabox_save ( $post_id ) {
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
-			return $post_id;
-
-		if ( !current_user_can( 'edit_post', $post_id ) )
-			return $post_id;
-
-		do_action( 'wcpt_metabox_save' );
-	}
-
-	/**
 	 * admin_head ()
 	 *
 	 * Add some general styling to the admin area
@@ -188,5 +170,3 @@ class WCPT_Admin {
 	}
 }
 endif; // class_exists check
-
-?>

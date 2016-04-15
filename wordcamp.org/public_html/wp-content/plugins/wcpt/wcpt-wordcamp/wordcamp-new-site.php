@@ -11,6 +11,7 @@ class WordCamp_New_Site {
 
 		add_action( 'wcpt_metabox_value', array( $this, 'render_site_url_field' ), 10, 3 );
 		add_action( 'wcpt_metabox_save',  array( $this, 'save_site_url_field' ), 10, 3 );
+		add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_create_new_site' ), 10, 1 );
 	}
 
 	/**
@@ -71,31 +72,30 @@ class WordCamp_New_Site {
 		$field_name = wcpt_key_to_str( $key, 'wcpt_' );
 
 		if ( 'URL' == $key && 'wc-url' == $field_type && isset( $_POST[ $field_name ] ) ) {
-			// todo use https instead of http
 			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
 			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
 			update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
-
-			if ( isset( $_POST[ wcpt_key_to_str( 'create-site-in-network', 'wcpt_' ) ] ) && ! empty( $url ) ) {
-				$this->create_new_site( $wordcamp_id, $url );
-			}
 		}
 	}
 
 
 	/**
-	 * Create a new site in the network
+	 * Maybe create a new site in the network
 	 *
 	 * @param int    $wordcamp_id
-	 * @param string $url
 	 */
-	protected function create_new_site( $wordcamp_id, $url ) {
+	protected function maybe_create_new_site( $wordcamp_id ) {
 		if ( ! current_user_can( 'manage_sites' ) ) {
 			return;
 		}
 
 		// The sponsor region is required so we can import the relevant sponsors and levels
 		if ( ! get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true ) ) {
+			return;
+		}
+
+		$url = get_post_meta( $wordcamp_id, 'URL', true );
+		if ( ! isset( $_POST[ wcpt_key_to_str( 'create-site-in-network', 'wcpt_' ) ] ) || empty( $url ) ) {
 			return;
 		}
 
@@ -371,7 +371,7 @@ class WordCamp_New_Site {
 				'title'   => __( 'Slideshow', 'wordcamporg' ),
 				'content' =>
 					'<p>' . __( "<em>Organizers note:</em> Upload photos to this page and they'll automagically appear in a slideshow!", 'wordcamporg' ) . '</p> ' .
-				    '<p>[slideshow]</p>',
+					'<p>[slideshow]</p>',
 				'status'  => 'draft',
 				'type'    => 'page',
 			),
@@ -458,7 +458,7 @@ class WordCamp_New_Site {
 
 			array(
 				'title'   => __( 'Call for Sponsors', 'wordcamporg' ),
-				'content' => 
+				'content' =>
 					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
 					'<p>' . __( 'Blurb with information for potential sponsors.', 'wordcamporg' ) . '</p> ' .
 					'<p>' .
@@ -488,7 +488,7 @@ class WordCamp_New_Site {
 
 			array(
 				'title'   => __( 'Call for Speakers', 'wordcamporg' ),
-				'content' => 
+				'content' =>
 					'<p>' . __( '<em>Organizers note:</em> Submissions to this form will automatically create draft posts for the Speaker and Session post types. Feel free to customize the form, but deleting or renaming the following fields will break the automation: Name, Email, WordPress.org Username, Your Bio, Session Title, Session Description.', 'wordcamporg' ) . '</p>' .
 					'<p>' . __( "If you'd like to propose multiple topics, please submit the form multiple times, once for each topic. [Other speaker instructions/info goes here.]", 'wordcamporg' ) . '</p>' .
 					'<p>' .
@@ -523,7 +523,7 @@ class WordCamp_New_Site {
 
 			array(
 				'title'   => __( 'Call for Volunteers', 'wordcamporg' ),
-				'content' => 
+				'content' =>
 					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
 					'<p>' . __( 'Blurb with information for potential volunteers.', 'wordcamporg' ) . '</p> ' .
 					'<p>' .
