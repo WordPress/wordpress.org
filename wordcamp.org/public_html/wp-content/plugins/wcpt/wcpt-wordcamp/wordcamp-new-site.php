@@ -105,6 +105,7 @@ class WordCamp_New_Site {
 		}
 		$path = isset( $url_components['path'] ) ? $url_components['path'] : '';
 
+		$wordcamp          = get_post( $wordcamp_id );
 		$wordcamp_meta     = get_post_custom( $wordcamp_id );
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
 		$site_meta         = array( 'public' => 1 );
@@ -114,14 +115,13 @@ class WordCamp_New_Site {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
 			do_action( 'wcor_wordcamp_site_created', $wordcamp_id );
 
-			// Configure the new site at priority 11, after all the custom fields on the `wordcamp` post have been saved, so that we don't use outdated values
-			add_action( 'save_post', array( $this, 'configure_new_site' ), 11, 2 );
-
 			add_post_meta( $wordcamp_id, '_note', array(
 				'timestamp' => time(),
 				'user_id'   => get_current_user_id(),
 				'message'   => sprintf( 'Created site at <a href="%s">%s</a>', $url, $url ),
 			) );
+
+			$this->configure_new_site( $wordcamp_id, $wordcamp );
 		}
 	}
 
@@ -147,12 +147,10 @@ class WordCamp_New_Site {
 	 *
 	 * @todo Can probably just network-activate plugins instead, but need to test that they work fine in network-activated mode.
 	 *
-	 * @action save_post
-	 *
 	 * @param int     $wordcamp_id
 	 * @param WP_Post $wordcamp
 	 */
-	public function configure_new_site( $wordcamp_id, $wordcamp ) {
+	protected function configure_new_site( $wordcamp_id, $wordcamp ) {
 		if ( ! defined( 'WCPT_POST_TYPE_ID' ) || WCPT_POST_TYPE_ID != $wordcamp->post_type || ! is_numeric( $this->new_site_id ) ) {
 			return;
 		}
