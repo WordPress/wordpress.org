@@ -84,7 +84,7 @@ class WordCamp_New_Site {
 	 *
 	 * @param int    $wordcamp_id
 	 */
-	protected function maybe_create_new_site( $wordcamp_id ) {
+	public function maybe_create_new_site( $wordcamp_id ) {
 		if ( ! current_user_can( 'manage_sites' ) ) {
 			return;
 		}
