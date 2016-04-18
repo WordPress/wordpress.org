@@ -728,6 +728,7 @@ function process_import_request() {
 			'post_id' => null,
 			'processed' => false,
 			'message' => null,
+			'date' => null,
 
 			'edit_all_url' => null,
 			'edit_post_url' => null,
@@ -741,6 +742,9 @@ function process_import_request() {
 					$entry['status'] = strtolower( $line[7] );
 					$entry['amount'] = round( floatval( $line[13] ), 2 );
 					$entry['currency'] = strtoupper( $line[14] );
+
+					$date = date_create_from_format( 'm/d/y', $line[21] );
+					$entry['date'] = strtotime( $date->format( 'Y-m-d 00:00:00' ) );
 				}
 				break;
 			case 'ach':
@@ -750,6 +754,9 @@ function process_import_request() {
 					$entry['status'] = strtolower( $line[7] );
 					$entry['amount'] = round( floatval( $line[13] ), 2 );
 					$entry['currency'] = strtoupper( $line[14] );
+
+					$date = date_create_from_format( 'm/d/y', $line[21] );
+					$entry['date'] = strtotime( $date->format( 'Y-m-d 00:00:00' ) );
 				}
 				break;
 			default:
@@ -800,7 +807,8 @@ function _import_process_entry( $entry ) {
 	$entry['edit_post_url'] = get_edit_post_link( $post->ID );
 
 	$currency = false;
-	$amout = false;
+	$amount = false;
+	$date_key = '_wcbrr_date_paid';
 
 	if ( $post->post_type == 'wcb_reimbursement' ) {
 		$currency = get_post_meta( $post->ID, '_wcbrr_currency', true );
@@ -810,9 +818,14 @@ function _import_process_entry( $entry ) {
 				$amount += floatval( $expense['_wcbrr_amount'] );
 			}
 		}
+
+		$date_key = '_wcbrr_date_paid';
+
 	} elseif ( $post->post_type == 'wcp_payment_request' ) {
 		$currency = get_post_meta( $post->ID, '_camppayments_currency', true );
 		$amount = floatval( get_post_meta( $post->ID, '_camppayments_payment_amount', true ) );
+
+		$date_key = '_camppayments_date_vendor_paid';
 	}
 	$amount = round( $amount, 2 );
 
@@ -836,6 +849,8 @@ function _import_process_entry( $entry ) {
 			return $entry;
 		}
 
+		update_post_meta( $post->ID, $date_key, $entry['date'] );
+
 		$post->post_status = 'wcb-paid';
 		wp_insert_post( $post );
 		$entry['message'] = 'Wire request marked as paid.';
@@ -850,6 +865,8 @@ function _import_process_entry( $entry ) {
 			$entry['message'] = 'Unknown ACH status.';
 			return $entry;
 		}
+
+		update_post_meta( $post->ID, $date_key, $entry['date'] );
 
 		$post->post_status = 'wcb-paid';
 		wp_insert_post( $post );
