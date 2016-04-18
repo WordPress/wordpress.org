@@ -34,7 +34,7 @@ class Plugin_Directory {
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Admin\Customizations::instance();
 
-			add_action( 'transition_post_status', array( __NAMESPACE__ . 'Admin\Status_Transitions', 'instance' ) );
+			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
 		}
 
 		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
