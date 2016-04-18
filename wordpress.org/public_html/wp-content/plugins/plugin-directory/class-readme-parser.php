@@ -40,6 +40,18 @@ class Readme_Parser {
 		'screenshot' => 'screenshots',
 	);
 
+	// These are the valid header mappings for the header
+	private $valid_headers = array(
+			'tested'            => 'tested',
+			'tested up to'      => 'tested',
+			'requires'          => 'requires',
+			'requires at least' => 'requires',
+			'tags'              => 'tags',
+			'contributors'      => 'contributors',
+			'donate_link'       => 'donate_link',
+			'stable_tag'        => 'stable_tag',
+		);
+
 	public function __construct( $file ) {
 		$this->parse_readme( $file );
 	}
@@ -64,7 +76,12 @@ class Readme_Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->name = $this->get_first_nonwhitespace( $contents );
+			$this->name = $line = $this->get_first_nonwhitespace( $contents );
+			// Ensure that the line read wasn't an actual header
+			if ( preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
+				$this->name = false;
+				array_unshift( $contents, $line );
+			}
 		}
 
 		// Parse headers
@@ -74,27 +91,31 @@ class Readme_Parser {
 		do {
 			$key = $value = null;
 			if ( strpos( $line, ':' ) === false ) {
-				break;
+				// Some plugins have line-breaks within the headers.
+				if ( ! empty( $line ) ) {
+					break;
+				} else {
+					continue;
+				}
 			}
-			$bits = explode( ':', $line, 2 );
+
+			$bits = explode( ':', trim( $line ), 2 );
 			list( $key, $value ) = $bits;
-			$key = strtolower( str_replace( ' ', '_', trim( $key, " \t*-" ) ) );
-			$headers[ $key ] = trim( $value );
-		} while ( ( $line = array_shift( $contents ) ) !== null && ( $line = trim( $line ) ) && ! empty( $line ) );
+			$key = strtolower( trim( $key, " \t*-\r\n" ) );
+			if ( isset( $this->valid_headers[ $key ] ) ) {
+				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+			}
+		} while ( ( $line = array_shift( $contents ) ) !== null );
 		array_unshift( $contents, $line );
 
 		if ( ! empty( $headers['tags'] ) ) {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 		}
-		if ( ! empty( $headers['requires_at_least'] ) ) {
-			$this->requires = $headers['requires_at_least'];
-		} elseif ( ! empty( $headers['requires'] ) ) {
+		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $headers['requires'];
 		}
-		if ( ! empty( $headers['tested_up_to'] ) ) {
-			$this->tested = $headers['tested_up_to'];
-		} elseif ( ! empty( $headers['tested'] ) ) {
+		if ( ! empty( $headers['tested'] ) ) {
 			$this->tested = $headers['tested'];
 		}
 		if ( ! empty( $headers['contributors'] ) ) {

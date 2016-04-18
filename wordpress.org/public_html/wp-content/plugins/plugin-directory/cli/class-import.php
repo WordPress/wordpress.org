@@ -76,7 +76,8 @@ class Import {
 			$content .= "\n\n<!--section={$section}-->\n{$section_content}";
 		}
 
-		$plugin->post_title   = trim( $readme->name );
+		// Fallback to the plugin title if the readme didn't contain it.
+		$plugin->post_title   = trim( $readme->name ) ?: strip_tags( $headers->Name );
 		$plugin->post_content = trim( $content );
 		$plugin->post_excerpt = trim( $readme->short_description );
 
@@ -179,7 +180,7 @@ class Import {
 				$filename = $asset['filename'];
 				$revision = $asset['revision'];
 				$location = 'assets';
-				$resolution = $m['resolution'] ?: false;
+				$resolution = isset( $m['resolution'] ) ? $m['resolution'] : false;
 				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location' );
 			}
 		}
