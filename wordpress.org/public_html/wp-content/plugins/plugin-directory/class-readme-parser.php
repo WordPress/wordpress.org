@@ -48,8 +48,8 @@ class Readme_Parser {
 			'requires at least' => 'requires',
 			'tags'              => 'tags',
 			'contributors'      => 'contributors',
-			'donate_link'       => 'donate_link',
-			'stable_tag'        => 'stable_tag',
+			'donate link'       => 'donate_link',
+			'stable tag'        => 'stable_tag',
 		);
 
 	public function __construct( $file ) {
