@@ -62,6 +62,11 @@ class Readme_Parser {
 			array_shift( $contents );
 		}
 
+		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
+		if ( 'plugin name' == strtolower( $this->name ) ) {
+			$this->name = $this->get_first_nonwhitespace( $contents );
+		}
+
 		// Parse headers
 		$headers = array();
 
