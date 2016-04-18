@@ -129,7 +129,7 @@ class Controls {
 			// This function is a global WordPress.org function.
 			$all_versions = wporg_get_version_equivalents();
 		} else {
-			$all_version = array( (string)(float)$wp_version => array( $wp_version ) );
+			$all_versions = array( (string)(float) $wp_version => array( $wp_version ) );
 		}
 
 		$versions = array_slice( array_keys( $all_versions ), 0, 4 );
