@@ -130,7 +130,7 @@
 
 		committerRequestAfter: function( response, data ) {
 			if ( data.parsed.errors ) {
-				$( '#committer-error' ).text( data.parsed.responses[0].errors[0].message ).show();
+				$( '#committer-error' ).html( data.parsed.responses[0].errors[0].message ).show();
 			} else {
 				$( '#committer-error' ).empty().hide();
 			}
