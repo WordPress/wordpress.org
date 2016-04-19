@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Admin;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
 /**
  * All functionality related to Status Transitions.
@@ -49,12 +50,12 @@ class Status_Transitions {
 		) );
 
 		// Read zip and add/commit files to svn.
-		$attachments   = get_attached_media( 'application/zip', $post_id );
-		$attachment_id = $attachments[0]->ID;
-		SVN::add( Filesystem::unzip( get_attached_file( $attachment_id ) ) );
+		$attachments = get_attached_media( 'application/zip', $post_id );
+		$attachment  = current( $attachments );
+		SVN::add( Filesystem::unzip( get_attached_file( $attachment->ID ) ) );
 
 		// Delete zip.
-		wp_delete_attachment( $attachment_id, true );
+		wp_delete_attachment( $attachment->ID, true );
 
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
