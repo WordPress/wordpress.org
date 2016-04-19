@@ -36,11 +36,14 @@ class Controls {
 		$post = get_post();
 
 		// Bail if the current user can't review plugins.
-		if ( ! current_user_can( 'plugin_approve', $post ) ) {
+		if ( ! current_user_can( 'plugin_approve', $post ) && ! current_user_can( 'plugin_review', $post ) ) {
 			return;
 		}
 
-		$statuses = array( 'publish', 'pending', 'disabled', 'closed', 'rejected' );
+		$statuses = array( 'draft', 'pending' );
+		if ( current_user_can( 'plugin_approve', $post ) ) {
+			$statuses = array_merge( $statuses, array( 'publish', 'disabled', 'closed', 'rejected' ) );
+		}
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
