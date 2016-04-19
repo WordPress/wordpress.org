@@ -105,6 +105,10 @@ class Capabilities {
 		foreach( array( 'contributor', 'author', 'editor', 'administrator' ) as $role ) {
 			$wp_role = get_role( $role );
 
+			if ( ! $wp_role ) {
+				continue;
+			}
+
 			foreach ( $committer as $committer_cap ) {
 				$wp_role->add_cap( $committer_cap );
 			}
@@ -115,6 +119,8 @@ class Capabilities {
 				}
 			}
 		}
+
+		update_option( 'default_role', 'plugin_committer' );
 	}
 }
 
