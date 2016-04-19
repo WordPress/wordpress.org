@@ -27,6 +27,7 @@ class Customizations {
 		// Admin Metaboxes
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
+		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
@@ -63,6 +64,33 @@ class Customizations {
 		if ( 'plugin' === $post_type ) {
 			$title = sprintf( $title, get_the_title() ); // esc_html() on output
 		}
+	}
+
+	/**
+	 * Filters the array of extra elements to list in the 'At a Glance'
+	 * dashboard widget.
+	 *
+	 * @param array $items Array of extra 'At a Glance' widget items.
+	 * @return array
+	 */
+	public function plugin_glance_items( $items ) {
+		$post_type = 'plugin';
+		$num_posts = wp_count_posts( $post_type );
+
+		if ( $num_posts && $num_posts->publish ) {
+			$text             = sprintf( _n( '%s Plugin', '%s Plugins', $num_posts->publish ), number_format_i18n( $num_posts->publish ) );
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $post_type_object && current_user_can( $post_type_object->cap->edit_posts ) ) {
+				$item = sprintf( '<a class="plugin-count" href="edit.php?post_type=%1$s">%2$s</a>', $post_type, $text );
+			} else {
+				$item = sprintf( '<span class="plugin-count">%s</span>', $text );
+			}
+
+			$items[] = $item . '<style>#dashboard_right_now .plugin-count:before { content: "\f106"; }</style>';
+		}
+
+		return $items;
 	}
 
 	/**
