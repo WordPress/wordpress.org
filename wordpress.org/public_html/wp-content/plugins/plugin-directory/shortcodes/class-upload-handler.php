@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+use WordPressdotorg\Plugin_Directory\Readme_Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
@@ -121,18 +122,26 @@ class Upload_Handler {
 		}
 
 		if ( preg_match( '|[^\d\.]|', $this->plugin['Version'] ) ) {
-			/* translators: %s: style.css */
+			/* translators: %s: Version header */
 			return sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
 			);
 		}
 
 		// Prevent duplicate URLs.
-		$plugin_uri = $this->plugin['PluginURI'];
-		$author_uri = $this->plugin['AuthorURI'];
-		if ( ! empty( $plugin_uri ) && ! empty( $author_uri ) && $plugin_uri == $author_uri ) {
+		if ( ! empty( $this->plugin['PluginURI'] ) && ! empty( $this->plugin['AuthorURI'] ) && $this->plugin['PluginURI'] == $this->plugin['AuthorURI'] ) {
 			return __( 'Duplicate plugin and author URLs. A plugin URL is a page/site that provides details about this specific plugin. An author URL is a page/site that provides information about the author of the plugin. You aren&rsquo;t required to provide both, so pick the one that best applies to your URL.', 'wporg-plugins' );
 		}
+
+		$readme = $this->find_readme_file();
+		if ( empty( $readme ) ) {
+			/* translators: 1: readme.txt, 2: readme.md */
+			return sprintf( __( 'The zip file must include a file named %1$s or %2$s.', 'wporg-plugins' ),
+				'<code>readme.txt</code>',
+				'<code>readme.md</code>'
+			);
+		}
+		$readme = new Readme_Parser( $readme );
 
 		// Pass it through Plugin Check and see how great this plugin really is.
 		$result = $this->check_plugin();
@@ -148,13 +157,33 @@ class Upload_Handler {
 		// Passed all tests!
 		// Let's save everything and get things wrapped up.
 
+		$content = '';
+		foreach ( $readme->sections as $section => $section_content ) {
+			$content .= "\n\n<!--section={$section}-->\n{$section_content}";
+		}
+
 		// Add a Plugin Directory entry for this plugin.
 		$plugin_post = Plugin_Directory::create_plugin_post( array(
 			'title'       => $this->plugin['Name'],
 			'slug'        => $this->plugin_slug,
-			'status'      => 'pending',
+			'status'      => 'draft',
 			'author'      => get_current_user_id(),
-			'description' => $this->plugin['Description']
+			'content'     => $content,
+			'description' => $this->plugin['Description'],
+			'tags'        => $readme->tags,
+			'meta'        => array(
+				'stable_tag'          => $readme->stable_tag,
+				'tested'              => $readme->tested,
+				'requires'            => $readme->requires,
+				'donate_link'         => $readme->donate_link,
+				'version'             => $this->plugin['Version'],
+				'header_plugin_uri'   => $this->plugin['PluginURI'],
+				'header_author'       => $this->plugin['Author'],
+				'header_author_uri'   => $this->plugin['AuthorURI'],
+				'header_textdomain'   => $this->plugin['TextDomain'],
+				'header_description'  => $this->plugin['Description'],
+				'support_resolutions' => 0,
+			),
 		) );
 		if ( is_wp_error( $plugin_post ) ) {
 			return $plugin_post->get_error_message();
@@ -194,9 +223,32 @@ class Upload_Handler {
 			'popular',
 			'new',
 			'updated',
+			'about',
+			'admin',
+			'wp-admin',
 		);
 
 		return in_array( $this->plugin_slug, $reserved_slugs );
+	}
+
+	/**
+	 * Find the plugin readme file.
+	 *
+	 * Looks for either a readme.txt or readme.md file, prioritizing readme.txt.
+	 *
+	 * @return string The plugin readme.txt or readme.md filename.
+	 */
+	protected function find_readme_file() {
+		$files = Filesystem::list_files( "{$this->plugin_dir}/{$this->plugin_slug}", false /* non-recursive */, '!^readme\.(txt|md)$!i' );
+
+		// Prioritize readme.txt
+		foreach ( $files as $file ) {
+			if ( '.txt' === strtolower( substr( $file, -4 ) ) ) {
+				return $file;
+			}
+		}
+
+		return reset( $files );
 	}
 
 	/**

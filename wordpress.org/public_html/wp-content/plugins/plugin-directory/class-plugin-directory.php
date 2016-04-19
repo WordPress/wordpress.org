@@ -466,15 +466,21 @@ class Plugin_Directory {
 	 *     @type string $status      The status of the plugin ( 'publish', 'pending', 'disabled', 'closed' ).
 	 *     @type int    $author      The ID of the plugin author.
 	 *     @type string $description The short description of the plugin.
+	 *     @type string $content     The long description of the plugin.
+	 *     @type array  $tags        The tags associated with the plugin.
+	 *     @type array  $tags        The meta information of the plugin.
 	 * }
 	 * @return \WP_Post|\WP_Error
 	 */
 	static public function create_plugin_post( array $plugin_info ) {
-		$title  = !empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
-		$slug   = !empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
-		$status = !empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'pending';
-		$author = !empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
-		$desc   = !empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
+		$title   = ! empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
+		$slug    = ! empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
+		$status  = ! empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'pending';
+		$author  = ! empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
+		$desc    = ! empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
+		$content = ! empty( $plugin_info['content'] )     ? $plugin_info['content']     : '';
+		$tags    = ! empty( $plugin_info['tags'] )        ? $plugin_info['tags']        : array();
+		$meta    = ! empty( $plugin_info['meta'] )        ? $plugin_info['meta']        : array();
 
 		$id = wp_insert_post( array(
 			'post_type'    => 'plugin',
@@ -482,8 +488,10 @@ class Plugin_Directory {
 			'post_name'    => $slug,
 			'post_title'   => $title ?: $slug,
 			'post_author'  => $author,
-			'post_content' => '',
+			'post_content' => $content,
 			'post_excerpt' => $desc,
+			'tags_input'   => $tags,
+			'meta_input'   => $meta,
 		), true );
 
 		if ( is_wp_error( $id ) ) {
