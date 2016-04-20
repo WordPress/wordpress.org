@@ -72,15 +72,15 @@ switch ( $command ) {
 		}
 	
 		foreach ( $group['members'] as $member ) {
-			api_call( 'groups.invite', array( 'channel' => $new_group['id'], 'user' => $member ) );
+			api_call( 'groups.invite', array( 'channel' => $new_group['group']['id'], 'user' => $member ) );
 		}
 	
 		api_call( 'chat.postMessage', array(
 			'channel' => $group['id'],
-			'text'    => sprintf( 'Group %s created by <@%s>.', $new_group['name'], $_POST['user_id'] ),
+			'text'    => sprintf( 'Group %s created by <@%s>.', $new_group['group']['name'], $_POST['user_id'] ),
 			'as_user' => true,
 		) );
-	
+
 		die;
 	
 	case 'invite':
