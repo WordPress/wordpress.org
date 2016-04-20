@@ -141,7 +141,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
 		$this->plugin_meta = \plugins_api( 'plugin_information', array(
 			'slug'   => $post->post_name,
-			'fields' => array( 'active_installs' => true ),
 		) );
 		?>
 		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
@@ -183,8 +182,13 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_installs( $post ) {
-		if ( ! empty( $this->plugin_meta->active_installs ) ) {
-			echo number_format_i18n( $this->plugin_meta->active_installs ) . '+';
+		$active_installs = get_post_meta( $post->ID, 'active_installs', true );
+		if ( $active_installs >= 1000000 ) {
+			_e( '1+ million', 'wporg-plugins' );
+		} elseif ( $active_installs <= 10 ) {
+			_e( 'Less than 10', 'wporg-plugins' );
+		} else {
+			printf( "%s+", number_format_i18n( $active_installs ) );
 		}
 	}
 
@@ -205,9 +209,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_support( $post ) {
-		$resolutions = get_post_meta( $post->ID, 'support_resolutions', true );
-		$unresolved  = empty( $resolutions ) ? 0 : $resolutions['no'];
-		$link_text   = sprintf( __( '%d unresolved', 'wporg-plugins' ), $unresolved );
+		$threads    = get_post_meta( $post->ID, 'support_threads', true );
+		$resolved   = get_post_meta( $post->ID, 'support_threads_resolved', true );
+		$unresolved = max( 0, $threads - $resolved );
+		$link_text  = sprintf( __( '%d unresolved', 'wporg-plugins' ), $unresolved );
 
 		printf( '<a href="%s">%s</a>', esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name ), $link_text );
 	}

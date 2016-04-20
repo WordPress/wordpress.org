@@ -9,29 +9,13 @@ namespace WordPressdotorg\Plugin_Directory;
 class Template {
 
 	/**
-	 * @param string $plugin_slug
+	 * @param \WP_Post|int $post Optional.
 	 * @return int
 	 */
-	static function get_active_installs_count( $plugin_slug ) {
-		if ( false === ( $count = wp_cache_get( $plugin_slug, 'plugin_active_installs' ) ) ) {
-			global $wpdb;
+	static function get_active_installs_count( $post = null ) {
+		$post = get_post( $post );
 
-			$count = (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT count FROM rev2_daily_stat_summary WHERE type = 'plugin' AND type_name = %s AND stat = 'active_installs' LIMIT 1",
-				$plugin_slug
-			) );
-			wp_cache_add( $plugin_slug, $count, 'plugin_active_installs', 1200 );
-		}
-
-		if ( $count < 10 ) {
-			return 0;
-		}
-
-		if ( $count >= 1000000 ) {
-			return 1000000;
-		}
-
-		return strval( $count )[0] * pow( 10, floor( log10( $count ) ) );
+		return get_post_meta( $post->ID, 'active_installs', true );
 	}
 
 	/**

@@ -182,7 +182,8 @@ class Upload_Handler {
 				'header_author_uri'   => $this->plugin['AuthorURI'],
 				'header_textdomain'   => $this->plugin['TextDomain'],
 				'header_description'  => $this->plugin['Description'],
-				'support_resolutions' => 0,
+				'support_threads'     => 0,
+				'support_threads_resolved' => 0,
 			),
 		) );
 		if ( is_wp_error( $plugin_post ) ) {
