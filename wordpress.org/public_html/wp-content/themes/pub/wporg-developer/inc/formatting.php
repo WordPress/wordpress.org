@@ -404,7 +404,7 @@ class DevHub_Formatting {
 	 * @param  string $text The content for the param.
 	 * @return string
 	 */
-	function fix_param_hash_formatting( $text ) {
+	public static function fix_param_hash_formatting( $text ) {
 		// Don't do anything if this isn't a hash notation string.
 		if ( '{' != $text[0] ) {
 			return $text;
