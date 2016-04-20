@@ -42,15 +42,15 @@ class Readme_Parser {
 
 	// These are the valid header mappings for the header
 	private $valid_headers = array(
-			'tested'            => 'tested',
-			'tested up to'      => 'tested',
-			'requires'          => 'requires',
-			'requires at least' => 'requires',
-			'tags'              => 'tags',
-			'contributors'      => 'contributors',
-			'donate link'       => 'donate_link',
-			'stable tag'        => 'stable_tag',
-		);
+		'tested'            => 'tested',
+		'tested up to'      => 'tested',
+		'requires'          => 'requires',
+		'requires at least' => 'requires',
+		'tags'              => 'tags',
+		'contributors'      => 'contributors',
+		'donate link'       => 'donate_link',
+		'stable tag'        => 'stable_tag',
+	);
 
 	public function __construct( $file ) {
 		$this->parse_readme( $file );

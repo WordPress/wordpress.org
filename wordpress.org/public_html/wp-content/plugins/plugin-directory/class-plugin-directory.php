@@ -29,6 +29,9 @@ class Plugin_Directory {
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
+		// Load the API routes
+		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
+
 		// Load all Admin-specific items.
 		// Cannot be included on `admin_init` to allow access to menu hooks
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
