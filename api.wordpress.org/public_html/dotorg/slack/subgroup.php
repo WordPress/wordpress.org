@@ -81,8 +81,8 @@ switch ( $command ) {
 			'as_user' => true,
 		) );
 
-		die;
-	
+		die( sprintf( "Group %s created.", $new_group['group']['name'] ) );
+
 	case 'invite':
 	case 'join':
 		foreach ( $groups as $group ) {
