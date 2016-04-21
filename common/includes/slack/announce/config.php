@@ -60,6 +60,10 @@ function get_whitelist() {
 			'eric',
 			'tollmanz',
 		),
+		'core-i18n' => array(
+			'ocean90',
+			'sergey',
+		),
 		'core-images' => array(
 			'joemcgill',
 			'mike',
