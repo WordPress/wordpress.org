@@ -29,6 +29,42 @@ class Status_Transitions {
 	}
 
 	/**
+	 * Checks permissions before allowing a post_status change for plugins.
+	 *
+	 * @param array $data    An array of slashed post data.
+	 * @param array $postarr An array of sanitized, but otherwise unmodified post data.
+	 * @return array
+	 */
+	public static function can_change_post_status( $data, $postarr ) {
+		$old_status = get_post_field( 'post_status', $postarr['ID'] );
+
+		// Keep going if this is not a plugin...
+		if ( 'plugin' !== $postarr['post_type'] ) {
+			return $data;
+		}
+
+		// ...or the status never changed...
+		if ( $old_status === $postarr['post_status'] ) {
+			return $data;
+		}
+
+		// ...or it's a plugin admin...
+		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) ) {
+			return $data;
+		}
+
+		// ...or it's a white-listed status for plugin reviewers.
+		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array( 'draft', 'pending' ) ) ) {
+			return $data;
+		}
+
+		// ...DIE!!!!!
+		wp_die( __( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ), '', array(
+			'back_link' => true,
+		) );
+	}
+
+	/**
 	 * Fires when a post is transitioned to 'publish'.
 	 *
 	 * @param int      $post_id Post ID.

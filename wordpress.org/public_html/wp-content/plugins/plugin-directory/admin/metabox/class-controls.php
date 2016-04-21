@@ -42,7 +42,11 @@ class Controls {
 
 		$statuses = array( 'draft', 'pending' );
 		if ( current_user_can( 'plugin_approve', $post ) ) {
-			$statuses = array_merge( $statuses, array( 'publish', 'disabled', 'closed', 'rejected' ) );
+			if ( in_array( $post->post_status, array( 'draft', 'pending', 'rejected' ) ) ) {
+				$statuses = array_merge( $statuses, array( 'publish', 'rejected' ) );
+			} else {
+				$statuses = array( 'publish', 'disabled', 'closed' );
+			}
 		}
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">

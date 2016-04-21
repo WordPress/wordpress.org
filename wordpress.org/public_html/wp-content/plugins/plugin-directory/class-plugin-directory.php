@@ -41,6 +41,7 @@ class Plugin_Directory {
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
 
+			add_action( 'wp_insert_post_data', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
 		}
 
