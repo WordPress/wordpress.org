@@ -99,7 +99,7 @@ class Committers {
 		if ( ! $committer = get_user_by( 'id', $id ) ) {
 			$response->add( array(
 				'what' => 'committer',
-				'data' => new \WP_Error( 'error', sprintf( __( 'The user %s does not exist.', 'wporg-plugins' ), '<code>' . $login . '</code>' ) ),
+				'data' => new \WP_Error( 'error', __( 'The specified user does not exist.', 'wporg-plugins' ) ),
 			) );
 			$response->send();
 		}

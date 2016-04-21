@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
  * @package WordPressdotorg_Plugin_Directory

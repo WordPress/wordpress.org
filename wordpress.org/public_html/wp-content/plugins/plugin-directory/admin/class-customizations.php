@@ -30,7 +30,7 @@ class Customizations {
 		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ), 10, 2 );
+		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
@@ -157,9 +157,10 @@ class Customizations {
 
 	/**
 	 * Filter the query in wp-admin to list only plugins relevant to the current user.
+	 *
+	 * @param \WP_Query $query
 	 */
 	public function pre_get_posts( $query ) {
-		global $wpdb;
 		if ( ! $query->is_main_query() ) {
 			return;
 		}
@@ -185,6 +186,9 @@ class Customizations {
 	 * Custom callback for pre_get_posts to use an OR query between post_name & post_author
 	 *
 	 * @ignore
+	 *
+	 * @param string $where WHERE clause.
+	 * @return string
 	 */
 	public function pre_get_posts_sql_name_or_user( $where ) {
 		global $wpdb;
@@ -223,6 +227,7 @@ class Customizations {
 	 *
 	 * @param array    $post_states An array of post display states.
 	 * @param \WP_Post $post        The current post object.
+	 * @return array
 	 */
 	public function post_states( $post_states, $post ) {
 		$post_status = '';
@@ -309,9 +314,8 @@ class Customizations {
 	 * Currently saves the tested_with value.
 	 *
 	 * @param int      $post_id The post_id being updated.
-	 * @param \WP_Post $post    The WP_Post object being updated.
 	 */
-	public function save_plugin_post( $post_id, $post ) {
+	public function save_plugin_post( $post_id ) {
 		// Save meta information
 		if ( isset( $_POST['tested_with'] ) && isset( $_POST['hidden_tested_with'] ) && $_POST['tested_with'] != $_POST['hidden_tested_with'] ) {
 			update_post_meta( $post_id, 'tested', wp_slash( wp_unslash( $_POST['tested_with'] ) ) );
@@ -470,7 +474,7 @@ class Customizations {
 			)
 		);
 
-		if ( $comment_auto_approved ) {
+		if ( $comment_auto_approved && isset( $parent ) ) {
 			$response['supplemental']['parent_approved'] = $parent->comment_ID;
 			$response['supplemental']['parent_post_id']  = $parent->comment_post_ID;
 		}

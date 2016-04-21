@@ -42,8 +42,9 @@ class Import {
 	/**
 	 * Process an import for a Plugin into the Plugin Directory.
 	 *
+	 * @throws \Exception
+	 *
 	 * @param string $plugin_slug The slug of the plugin to import.
-	 * @return void.
 	 */
 	public function import( $plugin_slug ) {
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -121,6 +122,8 @@ class Import {
 	 * - Creates a /stable/ export of the stable_tag if specified, falling back to /trunk/.
 	 * - Handles readme.md & readme.txt prefering the latter.
 	 * - Searches for Screenshots in /$stable/ and in /assets/ (listed remotely).
+	 *
+	 * @throws \Exception
 	 *
 	 * @param string $plugin_slug The slug of the plugin to parse.
 	 *
@@ -248,6 +251,4 @@ class Import {
 
 		return false;
 	}
-
 }
-

@@ -39,8 +39,8 @@ class Filesystem {
 	/**
 	 * Extract a ZIP file to a directory.
 	 *
-	 * @param string $zip_file The ZIP file to extract.
-	 * @param string $temp_directory The Directory to extract the ZIP to. Optional. Default: A Temporary directory.
+	 * @param string $zip_file  The ZIP file to extract.
+	 * @param string $directory The Directory to extract the ZIP to. Optional. Default: A Temporary directory.
 	 *
 	 * @return string The directory the ZIP was extracted to.
 	 */
@@ -102,15 +102,13 @@ class Filesystem {
 	 *
 	 * @param string $dir The directory to remove.
 	 *
-	 * @return bool Whether the directory was removed..
+	 * @return bool Whether the directory was removed.
 	 */
 	public static function rmdir( $dir ) {
-		if ( ! trim( $dir, '/' ) ) {
-			return;
+		if ( trim( $dir, '/' ) ) {
+			exec( 'rm -rf ' . escapeshellarg( $dir ) );
 		}
-		exec( 'rm -rf ' . escapeshellarg( $dir ) );
 
 		return is_dir( $dir );
 	}
-
 }

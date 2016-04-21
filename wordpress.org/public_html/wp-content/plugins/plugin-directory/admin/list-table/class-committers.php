@@ -84,7 +84,6 @@ class Committers extends \WP_List_Table {
 				'username' => __( 'Username', 'wporg-plugins' ),
 			),
 			array(),
-			array(),
 			'username',
 		);
 	}
@@ -122,7 +121,10 @@ class Committers extends \WP_List_Table {
 				<p class="wp-hidden-child">
 					<?php wp_nonce_field( 'add-committer', '_ajax_nonce', false ); ?>
 					<span id="committer-error" class="notice notice-alt notice-error" style="display:none;"></span>
-					<input type="text" name="add_committer" class="form-required" value="" aria-required="true">
+					<label>
+						<input type="text" name="add_committer" class="form-required" value="" aria-required="true">
+						<span class="screen-reader-text"><?php _e( 'Add a new committer', 'wporg-plugins' ); ?></span>
+					</label>
 					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Committer', 'wporg-plugins' ); ?>">
 				</p>
 			</td>
@@ -143,7 +145,7 @@ class Committers extends \WP_List_Table {
 			$user_object = get_userdata( (int) $user_object );
 		}
 		$user_object->filter = 'display';
-		list( $columns, $hidden, $sortable, $primary ) = $this->get_column_info();
+		list( $columns, $hidden, $primary ) = $this->get_column_info();
 
 		// Set up the hover actions for this committer.
 		$actions = array();

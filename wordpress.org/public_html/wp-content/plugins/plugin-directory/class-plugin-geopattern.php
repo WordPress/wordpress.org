@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use RedeyeVentures\GeoPattern\GeoPattern;
 
 require __DIR__ . '/libs/geopattern-1.1.0/geopattern_loader.php';
 
@@ -8,7 +9,7 @@ require __DIR__ . '/libs/geopattern-1.1.0/geopattern_loader.php';
  *
  * @package WordPressdotorg\Plugin_Directory
  */
-class Plugin_Geopattern extends \RedeyeVentures\GeoPattern\GeoPattern {
+class Plugin_Geopattern extends GeoPattern {
 
 	/**
 	 * Hashed to generate pattern.

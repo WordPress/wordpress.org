@@ -55,6 +55,7 @@ class Controls {
 
 			<div id="plugin-status-select" class="plugin-control-select hide-if-js">
 				<input type="hidden" name="hidden_post_status" id="hidden-post-status" value="<?php echo esc_attr( $post->post_status ); ?>">
+				<label class="screen-reader-text" for="plugin-status"><?php _e( 'Plugin status', 'wporg-plugins' ); ?></label>
 				<select name="post_status" id="plugin-status">
 					<?php
 					foreach ( $statuses as $statii ) {
@@ -95,6 +96,7 @@ class Controls {
 
 			<div id="tested-with-select" class="plugin-control-select hide-if-js">
 				<input type="hidden" name="hidden_tested_with" id="hidden-tested-with" value="<?php echo esc_attr( $tested_up_to ); ?>">
+				<label class="screen-reader-text" for="tested-with"><?php _e( 'Version of WordPress it was tested with', 'wporg-plugins' ); ?></label>
 				<select name="tested_with" id="tested-with">
 					<?php
 					foreach ( $versions['versions'] as $ver ) {

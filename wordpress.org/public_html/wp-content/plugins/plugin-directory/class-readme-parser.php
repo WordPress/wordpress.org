@@ -1,5 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use Michelf\MarkdownExtra;
+
 /**
  * WordPress.org Plugin Readme Parser.
  *
@@ -90,7 +92,7 @@ class Readme_Parser {
 
 		$line = $this->get_first_nonwhitespace( $contents );
 		do {
-			$key = $value = null;
+			$value = null;
 			if ( strpos( $line, ':' ) === false ) {
 				// Some plugins have line-breaks within the headers.
 				if ( ! empty( $line ) ) {
@@ -257,7 +259,7 @@ class Readme_Parser {
 	protected function get_first_nonwhitespace( &$contents ) {
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
-			if ( ! empty( $line ) ) {
+			if ( ! empty( $trimmed ) ) {
 				break;
 			}
 		}
@@ -342,7 +344,7 @@ class Readme_Parser {
 	}
 
 	/**
-	 * Sanitize proided contributors to valid WordPress users
+	 * Sanitize provided contributors to valid WordPress users
 	 *
 	 * @param array $users Array of user_login's or user_nicename's.
 	 * @return array Array of user_logins.
@@ -369,7 +371,7 @@ class Readme_Parser {
 			include __DIR__ . '/libs/michelf-php-markdown-1.6.0/Michelf/MarkdownExtra.inc.php';
 		}
 		if ( is_null( $markdown ) ) {
-			$markdown = new \Michelf\MarkdownExtra();
+			$markdown = new MarkdownExtra();
 		}
 
 		$text = $this->code_trick( $text );

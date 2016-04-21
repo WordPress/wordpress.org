@@ -15,7 +15,7 @@ class Template {
 	static function get_active_installs_count( $post = null ) {
 		$post = get_post( $post );
 
-		return get_post_meta( $post->ID, 'active_installs', true );
+		return (int) get_post_meta( $post->ID, 'active_installs', true );
 	}
 
 	/**
@@ -148,6 +148,7 @@ class Template {
 	 * Retrieve the Plugin Icon details for a plugin.
 	 *
 	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @param string          $output Output type. 'html' or 'raw'. Default: 'raw'.
 	 * @return mixed
 	 */
 	static function get_plugin_icon( $plugin, $output = 'raw' ) {
@@ -217,6 +218,7 @@ class Template {
 	 * Retrieve the Plugin Icon details for a plugin.
 	 *
 	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
+	 * @param string          $output Output type. Default: 'raw'.
 	 * @return mixed
 	 */
 	static function get_plugin_banner( $plugin, $output = 'raw' ) {

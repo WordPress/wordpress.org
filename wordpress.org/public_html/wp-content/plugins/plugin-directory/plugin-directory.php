@@ -25,5 +25,4 @@ include __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
 
 // Instantiate the Plugin Directory
-include __DIR__ . '/class-plugin-directory.php';
 Plugin_Directory::instance();

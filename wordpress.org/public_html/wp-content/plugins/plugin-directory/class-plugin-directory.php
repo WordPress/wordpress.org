@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -25,7 +26,7 @@ class Plugin_Directory {
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
-		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ), 10, 2 );
+		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
@@ -38,7 +39,7 @@ class Plugin_Directory {
 		// Load all Admin-specific items.
 		// Cannot be included on `admin_init` to allow access to menu hooks
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
-			Admin\Customizations::instance();
+			Customizations::instance();
 
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
 		}
@@ -199,10 +200,12 @@ class Plugin_Directory {
 	 *
 	 * Setting up the site requires setting up the theme and proper
 	 * rewrite permastructs.
-	 *
-	 * @global \WP_Rewrite $wp_rewrite WordPress rewrite component.
 	 */
 	public function activate() {
+
+		/**
+		 * @var \WP_Rewrite $wp_rewrite WordPress rewrite component.
+		 */
 		global $wp_rewrite;
 
 		// Setup the environment.
@@ -219,7 +222,11 @@ class Plugin_Directory {
 			activate_plugin( 'wporg-ratings/wporg-ratings.php' );
 		}
 
-		// Enable the WordPress.org Plugin Repo Theme.
+		/**
+		 * Enable the WordPress.org Plugin Repo Theme.
+		 *
+		 * @var \WP_Theme $theme
+		 */
 		foreach ( wp_get_themes() as $theme ) {
 			if ( $theme->get( 'Name' ) === 'WordPress.org Plugins' ) {
 				switch_theme( $theme->get_stylesheet() );
@@ -397,11 +404,10 @@ class Plugin_Directory {
 	 * Filter for pre_update_option_jetpack_options to ensure CPT posts are seen as public and searchable by TP
 	 *
 	 * @param mixed $new_value
-	 * @param mixed $old_value
 	 * @return mixed
 	 */
-	public function filter_jetpack_options( $new_value, $old_value ) {
-		if ( is_array($new_value) && array_key_exists( 'public', $new_value ) )
+	public function filter_jetpack_options( $new_value ) {
+		if ( is_array( $new_value ) && array_key_exists( 'public', $new_value ) )
 			$new_value['public'] = 1;
 
 		return $new_value;

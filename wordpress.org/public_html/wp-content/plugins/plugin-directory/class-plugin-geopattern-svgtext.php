@@ -1,12 +1,13 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use RedeyeVentures\GeoPattern\SVGElements\Base;
 
 /**
  * Nor does it support text.
  *
  * @package WordPressdotorg\Plugin_Directory
  */
-class Plugin_Geopattern_SVGText extends \RedeyeVentures\GeoPattern\SVGElements\Base {
+class Plugin_Geopattern_SVGText extends Base {
 
 	/**
 	 * @var string

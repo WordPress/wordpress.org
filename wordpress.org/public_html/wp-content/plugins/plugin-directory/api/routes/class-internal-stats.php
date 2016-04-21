@@ -51,7 +51,7 @@ class Internal_Stats extends Base {
 
 			foreach ( $stats as $stat_name => $value ) {
 				if ( 'active_installs' == $stat_name ) {
-					$value = $this->sanitize_active_installs( $value, $plugin );
+					$value = $this->sanitize_active_installs( $value );
 				} elseif ( 'usage' == $stat_name ) {
 					$value = $this->sanitize_usage_numbers( $value, $plugin );
 				} elseif ( 'support_threads' == $stat_name || 'support_threads_resolved' == $stat_name ) {
@@ -100,8 +100,8 @@ class Internal_Stats extends Base {
 	 * Versions which have a usage below 5% will be combined into 'other'
 	 * unless it's the latest branch, or if there's only one branch which is less than 5%.
 	 *
-	 * @param array   $usage  An array of the branch usage numbers.
-	 * @param WP_Post $plugin The plugin's WP_Post instance.
+	 * @param array    $usage  An array of the branch usage numbers.
+	 * @param \WP_Post $plugin The plugin's WP_Post instance.
 	 * @return array An array containing the percentages for the given plugin.
 	 */
 	protected function sanitize_usage_numbers( $usage, $plugin ) {

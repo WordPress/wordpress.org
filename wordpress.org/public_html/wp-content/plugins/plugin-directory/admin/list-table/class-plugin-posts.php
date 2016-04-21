@@ -7,18 +7,11 @@ _get_list_table( 'WP_Posts_List_Table' );
 class Plugin_Posts extends \WP_Posts_List_Table {
 
 	/**
-	 * Plugin API response about the current plugin displayed.
 	 *
-	 * @var object
-	 */
-	 protected $plugin_meta;
-
-	/**
-	 *
-	 * @global array    $avail_post_stati
-	 * @global WP_Query $wp_query
-	 * @global int      $per_page
-	 * @global string   $mode
+	 * @global array     $avail_post_stati
+	 * @global \WP_Query $wp_query
+	 * @global int       $per_page
+	 * @global string    $mode
 	 */
 	public function prepare_items() {
 		global $avail_post_stati, $wp_query, $per_page, $mode;
@@ -136,12 +129,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		} else {
 			$classes[] = 'level-0';
 		}
-
-		//@TODO: Switch to using the API class directly (once rewritten), or even better, post meta.
-		require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
-		$this->plugin_meta = \plugins_api( 'plugin_information', array(
-			'slug'   => $post->post_name,
-		) );
 		?>
 		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
 			<?php $this->single_row_columns( $post ); ?>
@@ -171,8 +158,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_rating( $post ) {
-		if ( ! empty( $this->plugin_meta->rating ) && function_exists( 'wporg_get_dashicons_stars' ) ) {
-			echo wporg_get_dashicons_stars( $this->plugin_meta->rating / 20 );
+		$rating = (string) get_post_meta( $post->ID, 'avg_rating', true );
+		if ( ! empty( $rating ) && function_exists( 'wporg_get_dashicons_stars' ) ) {
+			echo wporg_get_dashicons_stars( $rating / 20 );
 		}
 	}
 
@@ -305,7 +293,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			 * @param array $actions An array of row action links. Defaults are
 			 *                         'Edit', 'Quick Edit', 'Restore, 'Trash',
 			 *                         'Delete Permanently', 'Preview', and 'View'.
-			 * @param WP_Post $post The post object.
+			 * @param \WP_Post $post The post object.
 			 */
 			$actions = apply_filters( 'page_row_actions', $actions, $post );
 		} else {
@@ -318,7 +306,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			 * @param array $actions An array of row action links. Defaults are
 			 *                         'Edit', 'Quick Edit', 'Restore, 'Trash',
 			 *                         'Delete Permanently', 'Preview', and 'View'.
-			 * @param WP_Post $post The post object.
+			 * @param \WP_Post $post The post object.
 			 */
 			$actions = apply_filters( 'post_row_actions', $actions, $post );
 		}

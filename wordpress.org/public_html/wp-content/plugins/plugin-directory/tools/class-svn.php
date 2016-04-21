@@ -81,8 +81,6 @@ class SVN {
 
 			return $files;
 		}
-
-		return false;
 	}
 
 	public static function mkdir( $dirs, $args = array() ) {

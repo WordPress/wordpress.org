@@ -1,12 +1,13 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use RedeyeVentures\GeoPattern\SVG;
 
 /**
  * The base SVG class does not provide functions for getting dimensions, so..
  *
  * @package WordPressdotorg\Plugin_Directory
  */
-class Plugin_Geopattern_SVG extends \RedeyeVentures\GeoPattern\SVG {
+class Plugin_Geopattern_SVG extends SVG {
 
 	/**
 	 * @var string
