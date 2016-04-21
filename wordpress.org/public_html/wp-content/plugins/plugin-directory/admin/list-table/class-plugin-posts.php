@@ -198,9 +198,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_downloads( $post ) {
-		if ( ! empty( $this->plugin_meta->downloaded ) ) {
-			echo number_format_i18n( $this->plugin_meta->downloaded );
-		}
+		echo number_format_i18n( get_post_meta( $post->ID, 'downloads', true ) );
 	}
 
 	/**

@@ -29,6 +29,9 @@ class Plugin_Directory {
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
+		// Shim in postmeta support for data which doesn't yet live in postmeta
+		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 4 );
+
 		// Load the API routes
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
 
@@ -402,6 +405,28 @@ class Plugin_Directory {
 			$new_value['public'] = 1;
 
 		return $new_value;
+	}
+
+
+	/**
+	 * Shim in some postmeta values which get retrieved from other locations temporarily.
+	 *
+	 * @param null|array|string $value     The value get_metadata() should return - a single metadata value,
+	 *                                     or an array of values.
+	 * @param int               $object_id Object ID.
+	 * @param string            $meta_key  Meta key.
+	 * @param bool              $single    Whether to return only the first value of the specified $meta_key.
+	 */
+	public function filter_shim_postmeta( $value, $object_id, $meta_key, $single ) {
+		switch ( $meta_key ) {
+			case 'downloads':
+				$post = get_post( $object_id );
+				$count = Template::get_downloads_count( $post );
+
+				return $single ? $count : array( $count );				
+				break;
+		}
+		return $value;
 	}
 
 	/**

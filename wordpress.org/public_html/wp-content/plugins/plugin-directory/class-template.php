@@ -19,14 +19,33 @@ class Template {
 	}
 
 	/**
+	 * @param \WP_Post|int $post Optional.
+	 * @return int
+	 */
+	static function get_downloads_count( $post = null ) {
+		$post = get_post( $post );
+
+		if ( false === ( $count = wp_cache_get( $post->ID, 'plugin_download_count' ) ) ) {
+			global $wpdb;
+
+			// TODO: While the plugin ZIPs are still being served by bbPress, the download stats are stored there.
+			$count = $wpdb->get_var( $wpdb->prepare( "SELECT downloads FROM `" . PLUGINS_TABLE_PREFIX . "download_counts` WHERE topic_id = (SELECT topic_id FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE topic_slug = %s )", $post->post_name ) );
+
+			wp_cache_set( $post->ID, $count, 'plugin_download_count', HOUR_IN_SECONDS );
+		}
+
+		return (int) $count;
+	}
+
+	/**
 	 * @return int
 	 */
 	static function get_total_downloads() {
 		if ( false === ( $count = wp_cache_get( 'plugin_download_count', 'plugin_download_count' ) ) ) {
 			global $wpdb;
 
-			$count = $wpdb->get_var( "SELECT SUM(downloads) FROM `plugin_2_stats`" );
-			wp_cache_add( 'plugin_download_count', $count, 'plugin_download_count', DAY_IN_SECONDS );
+			$count = $wpdb->get_var( "SELECT SUM(downloads) FROM `" . PLUGINS_TABLE_PREFIX . "stats`" );
+			wp_cache_set( 'plugin_download_count', $count, 'plugin_download_count', DAY_IN_SECONDS );
 		}
 
 		return (int) $count;
