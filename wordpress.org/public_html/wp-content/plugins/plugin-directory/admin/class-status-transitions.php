@@ -35,6 +35,14 @@ class Status_Transitions {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public function publish( $post_id, $post ) {
+		$attachments = get_attached_media( 'application/zip', $post_id );
+
+		// If there is no zip we have nothing to commit. Bail.
+		if ( empty( $attachments ) ) {
+			return;
+		}
+
+		$attachment    = current( $attachments );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
@@ -50,8 +58,6 @@ class Status_Transitions {
 		) );
 
 		// Read zip and add/commit files to svn.
-		$attachments = get_attached_media( 'application/zip', $post_id );
-		$attachment  = current( $attachments );
 		SVN::add( Filesystem::unzip( get_attached_file( $attachment->ID ) ) );
 
 		// Delete zip.
