@@ -643,7 +643,7 @@ li > ul {
 	margin-bottom: 2em;
 }
 #masthead {
-	background-color: #222;
+	background-color: #23282D;
 	overflow: auto;
 }
 #logo {
@@ -659,7 +659,7 @@ li > ul {
 	text-decoration: none;
 }
 #subhead {
-	background-color: #1E8CBE;
+	background-color: #0073AA;
 	overflow: auto;
 	padding: 20px 0;
 }
@@ -709,7 +709,7 @@ li > ul {
 	border: 0;
 	margin-left: 10px;
 	padding: 13px 22px;
-	
+
 }
 .main-navigation ul {
 	float: right;
@@ -783,10 +783,10 @@ li > ul {
 	font-size: 1.2em;
 	line-height: 1.4em;
 	margin-right: 0.5em;
-	color: #D54E21;
+	color: #F56E28;
 }
 .jobs-count .dashicons-rss:hover {
-	color: #A54C21;
+	color: #D54E21;
 }
 .job-cat-item:before, .search-header:before {
 	display: inline-block;
