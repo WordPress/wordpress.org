@@ -70,7 +70,7 @@ class Readme_Parser {
 		}
 
 		$line       = $this->get_first_nonwhitespace( $contents );
-		$this->name = $this->sanitize_text( trim( $line, "#= " ) );
+		$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 
 		// Strip Github style header\n==== underlines
 		if ( '' === trim( $contents[0], '=-' ) ) {
