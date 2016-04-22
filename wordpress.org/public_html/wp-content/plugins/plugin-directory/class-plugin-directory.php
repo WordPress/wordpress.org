@@ -432,6 +432,16 @@ class Plugin_Directory {
 
 				return $single ? $count : array( $count );				
 				break;
+			case 'rating':
+				$post = get_post( $object_id );
+				// The WordPress.org global ratings functions
+				if ( ! function_exists( 'wporg_get_rating_avg' ) ) {
+					break;
+				}
+				$rating = wporg_get_rating_avg( 'plugin', $post->post_name );
+
+				return $single ? $rating : array( $rating );
+				break;
 		}
 		return $value;
 	}

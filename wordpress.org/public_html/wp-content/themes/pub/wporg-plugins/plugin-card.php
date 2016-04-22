@@ -14,9 +14,13 @@
 	</div>
 
 	<div class="plugin-card-bottom">
-		<!-- <div class="vers column-rating">
-			<div class='wporg-ratings' title='4 out of 5 stars' style='color:#ffb900;'><span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-star-empty"></span></div><span class="num-ratings" title="Rating based on 813 reviews">(813)</span>
-		</div> -->
+		<div class="vers column-rating">
+			<?php
+				if ( function_exists( 'wporg_get_dashicons_stars' ) ) {
+					echo wporg_get_dashicons_stars( get_post_meta( $post->ID, 'rating', true ) );
+				}
+			?>
+		</div>
 		<div class="column-updated">
 			<strong><?php _e( 'Last Updated:', 'wporg-plugins' ); ?></strong> <?php echo wporg_plugins_template_last_updated(); ?>
 		</div>

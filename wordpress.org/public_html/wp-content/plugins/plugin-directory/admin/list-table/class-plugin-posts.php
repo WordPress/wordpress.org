@@ -158,9 +158,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_rating( $post ) {
-		$rating = (string) get_post_meta( $post->ID, 'avg_rating', true );
-		if ( ! empty( $rating ) && function_exists( 'wporg_get_dashicons_stars' ) ) {
-			echo wporg_get_dashicons_stars( $rating / 20 );
+		if ( function_exists( 'wporg_get_dashicons_stars' ) ) {
+			echo wporg_get_dashicons_stars( get_post_meta( $post->ID, 'rating', true ) );
 		}
 	}
 
