@@ -32,7 +32,7 @@ class SVN {
 		$esc_url = escapeshellarg( $url );
 		$esc_destination = escapeshellarg( $destination );
 
-		$output = exec( "svn export $esc_options $esc_url $esc_destination 2>&1" );
+		$output = shell_exec( "svn export $esc_options $esc_url $esc_destination 2>&1" );
 		if ( preg_match( '/Exported revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result = true;
@@ -60,7 +60,7 @@ class SVN {
 		}
 		$esc_url = escapeshellarg( $url );
 
-		$output = exec( "svn ls $esc_options $esc_url 2>&1" );
+		$output = shell_exec( "svn ls $esc_options $esc_url 2>&1" );
 
 		$errors = self::parse_svn_errors( $output );
 		if ( $errors ) {
