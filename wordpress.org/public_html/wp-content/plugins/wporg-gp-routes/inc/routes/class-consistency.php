@@ -22,7 +22,7 @@ class Consistency extends GP_Route {
 
 		$search = $set = '';
 		$search_fuzzy = false;
-		$search_case_senstive = true;
+		$search_case_sensitive = true;
 
 		if ( ! empty( $_REQUEST['search'] ) ) {
 			$search = wp_unslash( $_REQUEST['search'] );
@@ -35,8 +35,8 @@ class Consistency extends GP_Route {
 			}
 		}
 
-		if ( ! empty( $_REQUEST ) && empty( $_REQUEST['search_case_senstive'] ) ) {
-			$search_case_senstive = false;
+		if ( ! empty( $_REQUEST ) && empty( $_REQUEST['search_case_sensitive'] ) ) {
+			$search_case_sensitive = false;
 		}
 
 		if ( ! empty( $_REQUEST['search_fuzzy'] ) ) {
@@ -54,10 +54,10 @@ class Consistency extends GP_Route {
 		if ( $search && $set ) {
 			$performed_search = true;
 			$results = $this->query( [
-				'search'        => $search,
-				'set'           => $set,
-				'fuzzy'         => $search_fuzzy,
-				'case_senstive' => $search_case_senstive,
+				'search'         => $search,
+				'set'            => $set,
+				'fuzzy'          => $search_fuzzy,
+				'case_sensitive' => $search_case_sensitive,
 			] );
 
 			$translations = wp_list_pluck( $results, 'translation', 'translation_id' );
@@ -103,7 +103,7 @@ class Consistency extends GP_Route {
 
 		list( $locale, $slug ) = explode( '/', $args['set'] );
 
-		if ( $args['case_senstive'] ) {
+		if ( $args['case_sensitive'] ) {
 			$collation = 'BINARY';
 		} else {
 			$collation = '';

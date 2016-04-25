@@ -24,7 +24,7 @@ gp_tmpl_header();
 
 	<p class="consistency-form-filters">
 		<label>
-			<input type="checkbox" name="search_case_senstive" value="1"<?php checked( $search_case_senstive ); ?>>
+			<input type="checkbox" name="search_case_sensitive" value="1"<?php checked( $search_case_sensitive ); ?>>
 			Case Sensitive
 		</label>
 		<label>
