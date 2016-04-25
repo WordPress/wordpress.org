@@ -112,7 +112,7 @@ class Consistency extends GP_Route {
 		if ( $args['fuzzy'] ) {
 			$search = $wpdb->prepare( "LIKE {$collation} %s", $wpdb->esc_like( $args['search'] ) . '%%' );
 		} else {
-			$search = $wpdb->prepare( "= {$collation} %s",  $args['search'] );
+			$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
 		}
 
 		$results = $wpdb->get_results( $wpdb->prepare( "
