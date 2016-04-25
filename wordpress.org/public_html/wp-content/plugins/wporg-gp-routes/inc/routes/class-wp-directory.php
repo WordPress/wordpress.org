@@ -1,6 +1,13 @@
 <?php
 
-class WPorg_GP_Route_WP_Directory extends GP_Route {
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use DateInterval;
+use DatePeriod;
+use DateTime;
+use GP_Route;
+
+class WP_Directory extends GP_Route {
 
 	/**
 	 * Prints stats about contributors of a specific project.
@@ -45,7 +52,7 @@ class WPorg_GP_Route_WP_Directory extends GP_Route {
 
 		unset( $translation_editors );
 
-		foreach( $this->get_translation_contributors_by_locale( $project->id ) as $row ) {
+		foreach ( $this->get_translation_contributors_by_locale( $project->id ) as $row ) {
 			if ( ! isset( $contributors_by_locale[ $row->locale ] ) ) {
 				$contributors_by_locale[ $row->locale ] = $default_value;
 			}
@@ -78,7 +85,7 @@ class WPorg_GP_Route_WP_Directory extends GP_Route {
 		", $project->id ) );
 
 		foreach ( $sub_projects as $sub_project ) {
-			foreach( $this->get_translation_contributors_by_locale( $sub_project ) as $row ) {
+			foreach ( $this->get_translation_contributors_by_locale( $sub_project ) as $row ) {
 				if ( ! isset( $contributors_by_locale[ $row->locale ] ) ) {
 					$contributors_by_locale[ $row->locale ] = $default_value;
 				}
@@ -111,7 +118,7 @@ class WPorg_GP_Route_WP_Directory extends GP_Route {
 	/**
 	 * Generates the chart data for contributors activity.
 	 *
-	 * @param GP_Project $project_id The project.
+	 * @param \GP_Project $project The project.
 	 * @return array The data to build a chart via Chartist.js.
 	 */
 	protected function get_contributors_chart_data( $project ) {
@@ -125,7 +132,7 @@ class WPorg_GP_Route_WP_Directory extends GP_Route {
 
 		$project_ids = array_merge( array( $project->id ), $sub_projects );
 		$translation_set_ids = $wpdb->get_col( "
-			SELECT `id` FROM {$wpdb->gp_translation_sets} WHERE `project_id` IN (" . implode( ',', $project_ids ) . ")
+			SELECT `id` FROM {$wpdb->gp_translation_sets} WHERE `project_id` IN ( " . implode( ',', $project_ids ) . ")
 		" );
 
 		if ( ! $translation_set_ids ) {
@@ -138,7 +145,7 @@ class WPorg_GP_Route_WP_Directory extends GP_Route {
 		$date_range = new DatePeriod( $date_begin, $date_interval, $date_end );
 
 		$days = array();
-		foreach( $date_range as $date ) {
+		foreach ( $date_range as $date ) {
 			$days[] = $date->format( 'Y-m-d' );
 		}
 		$days[] = $date_end->format( 'Y-m-d' );

@@ -1,6 +1,10 @@
 <?php
 
-class WPorg_GP_Route_WP_Plugins extends WPorg_GP_Route_WP_Directory {
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use GP;
+
+class WP_Plugins extends WP_Directory {
 
 	/**
 	 * Prints stats about sub-project of a specific project.
@@ -104,8 +108,6 @@ class WPorg_GP_Route_WP_Plugins extends WPorg_GP_Route_WP_Directory {
 	 * @param string $project_slug Slug of a project.
 	 */
 	public function get_plugin_contributors( $project_slug ) {
-		global $wpdb;
-
 		$project_path = 'wp-plugins/' . $project_slug;
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
@@ -168,6 +170,7 @@ class WPorg_GP_Route_WP_Plugins extends WPorg_GP_Route_WP_Directory {
 	private function get_plugin_icon( $project, $size = 64 ) {
 		$default = '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
 
+		$icon = '';
 		if ( function_exists( 'wporg_get_plugin_icon' ) ) {
 			$icon = wporg_get_plugin_icon( $project->slug, $size );
 		}

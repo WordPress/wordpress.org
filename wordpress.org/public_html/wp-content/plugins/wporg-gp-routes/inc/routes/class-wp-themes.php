@@ -1,6 +1,10 @@
 <?php
 
-class WPorg_GP_Route_WP_Themes extends WPorg_GP_Route_WP_Directory {
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use GP;
+
+class WP_Themes extends WP_Directory {
 
 	/**
 	 * Prints stats about sub-project of a specific project.

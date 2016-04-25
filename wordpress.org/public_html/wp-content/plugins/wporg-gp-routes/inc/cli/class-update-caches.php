@@ -1,6 +1,12 @@
 <?php
 
-class WPorg_GP_CLI_Update_Caches extends WP_CLI_Command {
+namespace WordPressdotorg\GlotPress\Routes\CLI;
+
+use GP;
+use WP_CLI;
+use WP_CLI_Command;
+
+class Update_Caches extends WP_CLI_Command {
 
 	private $cache_group = 'wporg-translate';
 

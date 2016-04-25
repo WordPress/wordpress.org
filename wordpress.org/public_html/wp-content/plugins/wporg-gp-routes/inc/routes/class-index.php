@@ -1,10 +1,16 @@
 <?php
+
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use GP_Locales;
+use GP_Route;
+
 /**
  * Index Route Class.
  *
  * Provides the route for translate.wordpress.org/.
  */
-class WPorg_GP_Route_Index extends GP_Route {
+class Index extends GP_Route {
 
 	private $cache_group = 'wporg-translate';
 
@@ -23,7 +29,7 @@ class WPorg_GP_Route_Index extends GP_Route {
 		foreach ( $existing_locales as $locale ) {
 			$locales[] = GP_Locales::by_slug( $locale );
 		}
-		usort( $locales, array( $this, '_sort_english_name_callback') );
+		usort( $locales, array( $this, '_sort_english_name_callback' ) );
 		unset( $existing_locales );
 
 		$contributors_count = wp_cache_get( 'contributors-count', $this->cache_group );

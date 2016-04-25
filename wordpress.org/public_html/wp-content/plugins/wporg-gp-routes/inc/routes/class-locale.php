@@ -1,23 +1,26 @@
 <?php
 
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
 // wporg_get_plugin_icon()
-if ( file_exists( WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php' ) ) {
-	include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
-}
+use GP;
+use GP_Locales;
+use GP_Route;
+use stdClass;
 
 /**
  * Locale Route Class.
  *
  * Provides the route for translate.wordpress.org/locale/$locale.
  */
-class WPorg_GP_Route_Locale extends GP_Route {
+class Locale extends GP_Route {
 
 	/**
 	 * Prints projects/translation sets of a top level project.
 	 *
-	 * @param string $locale_slug      Slug of the locale.
-	 * @param string $set_slug         Slug of the translation set.
-	 * @param string $project_path     Path of a project.
+	 * @param string      $locale_slug  Slug of the locale.
+	 * @param string      $set_slug     Slug of the translation set.
+	 * @param bool|string $project_path Path of a project.
 	 */
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
 		global $wpdb;
@@ -100,7 +103,7 @@ class WPorg_GP_Route_Locale extends GP_Route {
 		$project_ids[] = $project->id;
 		$project_ids = array_merge(
 			$project_ids,
-			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN(" . implode(', ', $project_ids  ) . ")" )
+			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN( " . implode( ', ', $project_ids ) . ')' )
 		);
 
 		$contributors_count = wp_cache_get( 'contributors-count', 'wporg-translate' );
@@ -191,11 +194,11 @@ class WPorg_GP_Route_Locale extends GP_Route {
 			}
 		}
 
-		switch( $project->slug ) {
+		switch ( $project->slug ) {
 			case 'wp':
 				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
 			case 'meta':
-				switch( $sub_project->slug ) {
+				switch ( $sub_project->slug ) {
 					case 'forums':
 						return '<div class="default-icon"><span class="dashicons dashicons-format-chat"></span></div>';
 					case 'rosetta':

@@ -1,10 +1,15 @@
 <?php
+
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use GP_Route;
+
 /**
  * Redirector Route Class.
  *
  * Provides redirection routes.
  */
-class WPorg_GP_Route_Redirector extends GP_Route {
+class Redirector extends GP_Route {
 
 	public function redirect_languages( $path = '' ) {
 		if ( empty( $path ) ) {

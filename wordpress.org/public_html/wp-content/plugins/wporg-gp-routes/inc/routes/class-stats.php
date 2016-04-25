@@ -1,10 +1,16 @@
 <?php
+
+namespace WordPressdotorg\GlotPress\Routes\Routes;
+
+use GP;
+use GP_Route;
+
 /**
  * Stats Route Class.
  *
  * Provides the route for translate.wordpress.org/stats.
  */
-class WPorg_GP_Route_Stats extends GP_Route {
+class Stats extends GP_Route {
 
 	public function get_stats_overview() {
 		global $wpdb;
@@ -21,7 +27,7 @@ class WPorg_GP_Route_Stats extends GP_Route {
 		);
 
 		// I'm sure there's somewhere to fetch these from statically defined
-		$wp_project = GP::$project->by_path('wp');
+		$wp_project = GP::$project->by_path( 'wp' );
 		foreach ( GP::$project->find_many( array( 'parent_project_id' => $wp_project->id, 'active' => 1 ), 'name ASC' ) as $wp_sub_project ) {
 			// Prefix the WordPress projects...
 			$wp_sub_project->name = $wp_project->name . ' ' . $wp_sub_project->name;
@@ -74,7 +80,7 @@ class WPorg_GP_Route_Stats extends GP_Route {
 		// Append the Plugins/Themes waiting strings
 		$parent_project_ids = implode(',', array(
 			GP::$project->by_path( 'wp-plugins' )->id,
-			GP::$project->by_path( 'wp-themes' )->id
+			GP::$project->by_path( 'wp-themes' )->id,
 		) );
 		$sql = "SELECT
 				locale, locale_slug,
