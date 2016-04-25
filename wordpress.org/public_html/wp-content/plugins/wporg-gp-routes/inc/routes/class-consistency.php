@@ -115,7 +115,10 @@ class Consistency extends GP_Route {
 			$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
 		}
 
-		$results = $wpdb->get_results( $wpdb->prepare( "
+		$locale = $wpdb->prepare( '%s', $locale );
+		$slug = $wpdb->prepare( '%s', $slug );
+
+		$results = $wpdb->get_results( "
 			SELECT
 				p.name AS project_name,
 				p.id AS project_id,
@@ -139,12 +142,9 @@ class Consistency extends GP_Route {
 				p.active = 1
 				AND t.status = 'current' 
 				AND o.status = '+active' AND o.singular {$search}
-				AND ts.locale = '%s' AND ts.slug = '%s'
+				AND ts.locale = {$locale} AND ts.slug = {$slug}
 			LIMIT 0, 500
-			",
-			$locale,
-			$slug
-		) );
+		" );
 
 		if ( ! $results ) {
 			return [];
