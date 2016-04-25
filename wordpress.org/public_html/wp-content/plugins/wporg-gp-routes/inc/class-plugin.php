@@ -106,7 +106,9 @@ class Plugin {
 			GP::$router->prepend( "/locale/$locale/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
 			GP::$router->prepend( "/locale/$locale/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
 			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_project' ) );
-			GP::$router->prepend( '/stats/?', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
+			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
+			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
+
 			$project = '([^/]*)/?';
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_projects' ) );
 			GP::$router->prepend( "/projects/wp-plugins/$project/contributors", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_contributors' ) );
