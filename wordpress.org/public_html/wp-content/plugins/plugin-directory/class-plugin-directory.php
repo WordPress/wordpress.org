@@ -348,9 +348,12 @@ class Plugin_Directory {
 				break;
 
 			case 'favorites':
+				// TODO: Current stored as bbPress id's
 				break;
 
 			case 'popular':
+				$wp_query->query_vars['orderby'] = 'meta_value_num';
+				$wp_query->query_vars['meta_key'] = 'active_installs';
 				break;
 		}
 
