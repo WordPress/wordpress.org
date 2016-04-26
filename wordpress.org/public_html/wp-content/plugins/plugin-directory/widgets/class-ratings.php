@@ -132,8 +132,7 @@ class Ratings extends \WP_Widget {
 			} );
 			</script>
 			<?php
-			
-			echo '</div>';
+
 		}
 
 		echo $args['after_widget'];
