@@ -1,10 +1,12 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+
 /**
  * The template for displaying the footer.
  *
  * @package wporg-plugins
  */
-?>
-</div>
 
-<?php require WPORGPATH . 'footer.php';
+echo '</div>';
+
+require WPORGPATH . 'footer.php';

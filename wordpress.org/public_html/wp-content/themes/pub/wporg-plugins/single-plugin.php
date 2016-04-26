@@ -1,7 +1,10 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Template;
+
 the_post();
 get_header();
-$plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( $post );
+$plugin_banners = Template::get_plugin_banner( $post );
 
 ?>
 
@@ -45,7 +48,7 @@ $plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( 
 					<div class="head head-big">
 						<ul id="sections">
 							<?php
-							foreach ( WordPressdotorg\Plugin_Directory\Template::get_plugin_sections() as $section ) {
+							foreach ( Template::get_plugin_sections() as $section ) {
 								$current = ( $section['slug'] == get_query_var( 'content_page' ) || ( 'description' == $section['slug'] && ! get_query_var( 'content_page' ) ) );
 								printf(
 									'<li class="%s"><a itemprop="url" href="%s">%s</a></li>',
@@ -65,14 +68,7 @@ $plugin_banners = WordPressdotorg\Plugin_Directory\Template::get_plugin_banner( 
 			</div>
 
 			<div class="" style="width: 212px; float: right;">
-				<p>
-					<strong>Version:</strong> <?php echo wporg_plugins_the_version(); ?><br>
-					<strong>Requires:</strong> <?php printf( __('%s or higher', 'wporg-plugins' ), wporg_plugins_template_requires() ); ?><br>
-					<strong>Compatible up to:</strong> <?php echo wporg_plugins_template_compatible_up_to(); ?><br>
-					<strong>Last Updated: </strong> <?php echo wporg_plugins_template_last_updated(); ?><br>
-					<strong>Active Installs:</strong> <?php echo worg_plugins_template_active_installs( false ); ?><br>
-					<meta itemprop="dateModified" content="<?php the_time('Y-m-d'); ?>" />
-				</p>
+				<?php dynamic_sidebar('single-plugin-sidebar'); ?>
 			</div>
 
 		</div>

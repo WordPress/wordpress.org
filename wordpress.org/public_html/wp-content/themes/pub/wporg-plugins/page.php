@@ -1,4 +1,8 @@
-<?php get_header(); ?>
+<?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+
+get_header();
+?>
 
 <?php the_post(); ?>
 

@@ -9,14 +9,26 @@ namespace WordPressdotorg\Plugin_Directory;
 class Template {
 
 	/**
-	 * @param \WP_Post|int $post Optional.
-	 * @return int
+	 * Returns a string representing the number of active installs for an item.
+	 *
+	 * @param bool $full whether to include "actuve installs" suffix. Default: true.
+	 * @return string "1+ million" or "1+ milllion active installs" depending on $full.
 	 */
-	static function get_active_installs_count( $post = null ) {
+	static function active_installs( $full = true, $post = null ) {
 		$post = get_post( $post );
 
-		return (int) get_post_meta( $post->ID, 'active_installs', true );
+		$count = get_post_meta( $post->ID, 'active_installs', true );
+	
+		if ( $count <= 10 ) {
+			$text = __( 'Less than 10', 'wporg-plugins' );
+		} elseif ( $count >= 1000000 ) {
+			$text = __( '1+ million', 'wporg-plugins' );
+		} else {
+			$text = number_format_i18n( $count ) . '+';
+		}
+		return $full ? sprintf( __( '%s active installs', 'wporg-plugins' ), $text ) : $text;
 	}
+
 
 	/**
 	 * @param \WP_Post|int $post Optional.
@@ -275,4 +287,50 @@ class Template {
 			$asset['revision']
 		) );
 	}
+
+	/**
+	 * A helper method to create dashicon stars.
+	 *
+	 * @type int|array {
+	 *    If numeric arg passed, assumed to be 'rating'.
+	 *
+	 *    @type int    $rating   The rating to display.
+	 *    @type string $template The HTML template to use for each star.
+	 *                           %1$s is the class, %2$s is the rating.
+	 * }
+	 * @return string The Rating HTML.
+	 */
+	static function dashicons_stars( $args = array() ) {
+		$defaults = array(
+			'rating' => 0,
+			'template' => '<span class="%1$s"></span>'
+		);
+		$r = wp_parse_args( ( is_numeric( $args ) ? array( 'rating' => $args ) : $args ), $defaults );
+
+		$rating = round( $r['rating'] / 0.5 ) * 0.5;
+		$template = $r['template'];
+		$title_template = __( '%s out of 5 stars', 'wporg-plugins' );
+		$title = sprintf( $title_template, $rating );
+
+		$output = '<div class="wporg-ratings" title="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
+		$counter = round( $rating * 2 );
+		for  ( $i = 1; $i <= 5; $i++ ) {
+			switch ($counter) {
+			case 0:
+				$output .= sprintf( $template, 'dashicons dashicons-star-empty', $i );
+				break;
+			case 1:
+				$output .= sprintf( $template, 'dashicons dashicons-star-half', $i );
+				$counter--;
+				break;
+			default:
+				$output .= sprintf( $template, 'dashicons dashicons-star-filled', $i );
+				$counter -= 2;
+				break;
+			}
+		}
+		$output .= '</div>';
+		return $output;
+	}
+	
 }

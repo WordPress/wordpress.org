@@ -21,6 +21,7 @@ class Plugin_Directory {
 	private function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
+		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
@@ -31,7 +32,7 @@ class Plugin_Directory {
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
 		// Shim in postmeta support for data which doesn't yet live in postmeta
-		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 4 );
+		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
 
 		// Load the API routes
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
@@ -193,6 +194,11 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\Shortcodes\Stats',       'display' ) );
 	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\Shortcodes\Developer',   'display' ) );
+	}
+
+	public function register_widgets() {
+		register_widget( __NAMESPACE__ . '\Widgets\Metadata' );
+		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 	}
 
 	/**
@@ -422,15 +428,14 @@ class Plugin_Directory {
 	 *                                     or an array of values.
 	 * @param int               $object_id Object ID.
 	 * @param string            $meta_key  Meta key.
-	 * @param bool              $single    Whether to return only the first value of the specified $meta_key.
 	 */
-	public function filter_shim_postmeta( $value, $object_id, $meta_key, $single ) {
+	public function filter_shim_postmeta( $value, $object_id, $meta_key ) {
 		switch ( $meta_key ) {
 			case 'downloads':
 				$post = get_post( $object_id );
 				$count = Template::get_downloads_count( $post );
 
-				return $single ? $count : array( $count );				
+				return array( $count );				
 				break;
 			case 'rating':
 				$post = get_post( $object_id );
@@ -440,7 +445,16 @@ class Plugin_Directory {
 				}
 				$rating = wporg_get_rating_avg( 'plugin', $post->post_name );
 
-				return $single ? $rating : array( $rating );
+				return array( $rating );
+				break;
+			case 'ratings':
+				$post = get_post( $object_id );
+				if ( ! function_exists( 'wporg_get_rating_counts' ) ) {
+					break;
+				}
+				$ratings = wporg_get_rating_counts( 'plugin', $post->post_name );
+
+				return array( $ratings );
 				break;
 		}
 		return $value;

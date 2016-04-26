@@ -1447,3 +1447,69 @@ input[type=search] {
 .dots, .next, .prev {
 	background-color: inherit;
 }
+
+.widget {
+	margin-bottom: 1em;
+
+}
+
+/* Ratings */
+.widget.plugin-ratings {
+	margin: 0 0 1.5em;
+	min-height: 26px;
+}
+
+.rtl .dashicons-star-half:before {
+	-webkit-transform: rotateY(180deg);
+	-ms-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+}
+
+.widget.plugin-ratings a.dashicons {
+	color: inherit;
+}
+
+.widget.plugin-ratings .description {
+	color: #aa9;
+	display: inline-block;
+	font-style: italic;
+	margin: 0 5px;
+	vertical-align: text-bottom;
+}
+.widget.plugin-ratings ul.ratings-list {
+	list-style-type: none;
+	padding: 0;
+	margin: 0 !important;
+}
+.widget.plugin-ratings .counter-container,
+.widget.plugin-ratings .counter-container a {
+	display: inline-block;
+	width: 100%;
+}
+.widget.plugin-ratings .counter-label,
+.widget.plugin-ratings .counter-count {
+	line-height: 1.75;
+}
+.widget.plugin-ratings .counter-label {
+	float: left;
+	margin-right: 5px;
+	min-width: 55px;
+}
+.widget.plugin-ratings .counter-back,
+.widget.plugin-ratings .counter-bar {
+	float: left;
+	height: 17px;
+}
+.widget.plugin-ratings .counter-back {
+	background-color: #ececec;
+	width: 64%;
+	width: -webkit-calc(100% - 88px);
+	width: calc(100% - 88px);
+}
+.widget.plugin-ratings .counter-bar {
+	background-color: #ffc733;
+}
+.widget.plugin-ratings .counter-count {
+	float: left;
+	margin-left: 5px;
+}

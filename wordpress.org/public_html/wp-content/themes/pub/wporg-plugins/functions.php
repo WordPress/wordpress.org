@@ -1,4 +1,5 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
 
 /**
  * WP.org Themes' functions and definitions.
@@ -17,11 +18,17 @@ function wporg_plugins_setup() {
 		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
 	) );
 
+	register_sidebar( array(
+		'name'          => 'Single Plugin View Sidebar',
+		'id'            => 'single-plugin-sidebar',
+		'before_widget' => '<div id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</div>',
+	) );
+
 	// No need for canonical lookups
-	//remove_action( 'template_redirect', 'redirect_canonical' );
-	remove_action( 'template_redirect', 'wp_old_slug_redirect' );
+	remove_action( 'template_redirect', __NAMESPACE__ . '\wp_old_slug_redirect' );
 }
-add_action( 'after_setup_theme', 'wporg_plugins_setup' );
+add_action( 'after_setup_theme', __NAMESPACE__ . '\wporg_plugins_setup' );
 
 /**
  * Enqueue scripts and styles.
@@ -44,10 +51,10 @@ function wporg_plugins_scripts() {
 	// No Jetpack styles needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
 }
-add_action( 'wp_enqueue_scripts', 'wporg_plugins_scripts' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_plugins_scripts' );
 
 function wporg_plugins_body_class( $classes ) {
 	$classes[] = 'plugins-directory';
 	return $classes;
 }
-add_filter( 'body_class', 'wporg_plugins_body_class' );
+add_filter( 'body_class', __NAMESPACE__ . '\wporg_plugins_body_class' );

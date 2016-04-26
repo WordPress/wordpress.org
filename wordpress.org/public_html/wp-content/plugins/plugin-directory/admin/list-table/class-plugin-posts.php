@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Template;
 
 _get_list_table( 'WP_Posts_List_Table' );
 
@@ -158,9 +159,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_rating( $post ) {
-		if ( function_exists( 'wporg_get_dashicons_stars' ) ) {
-			echo wporg_get_dashicons_stars( get_post_meta( $post->ID, 'rating', true ) );
-		}
+		echo Template::dashicons_stars( get_post_meta( $post->ID, 'rating', true ) );
 	}
 
 	/**
@@ -169,14 +168,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @param \WP_Post $post The current WP_Post object.
 	 */
 	public function column_installs( $post ) {
-		$active_installs = get_post_meta( $post->ID, 'active_installs', true );
-		if ( $active_installs >= 1000000 ) {
-			_e( '1+ million', 'wporg-plugins' );
-		} elseif ( $active_installs <= 10 ) {
-			_e( 'Less than 10', 'wporg-plugins' );
-		} else {
-			printf( "%s+", number_format_i18n( $active_installs ) );
-		}
+		echo Template::active_installs( false, $post );
 	}
 
 	/**

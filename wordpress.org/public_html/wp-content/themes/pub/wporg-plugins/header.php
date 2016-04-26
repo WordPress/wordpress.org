@@ -1,4 +1,6 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+
 /**
  * The header for our theme.
  *

@@ -1,11 +1,13 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Template;
 
 if ( is_front_page() && ( ! get_query_var( 'browse' ) || 'featured' == get_query_var( 'browse' ) ) ) {
 		printf(
 			/* translators: 1: Plugins count 2: Download count */
 			'<p class="intro">' . __( 'Plugins extend and expand the functionality of WordPress. %1$s plugins with %2$s total downloads are at your fingertips.', 'wporg-plugins' ) . '</p>',
 			'<strong>' . number_format_i18n( wp_count_posts( 'plugin' )->publish ) . '</strong>',
-			'<strong>' . number_format_i18n( WordPressdotorg\Plugin_Directory\Template::get_total_downloads() ) . '</strong>'
+			'<strong>' . number_format_i18n( Template::get_total_downloads() ) . '</strong>'
 	);
 }
 

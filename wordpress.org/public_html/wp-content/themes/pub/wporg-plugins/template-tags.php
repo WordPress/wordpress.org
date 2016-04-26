@@ -1,4 +1,6 @@
 <?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Template;
 
 // Various Template tags
 
@@ -29,21 +31,7 @@ function wporg_plugins_the_version() {
 }
 
 function wporg_plugins_download_link() {
-	$filename = sprintf( "%s.%s.zip", get_post()->post_name, wporg_plugins_the_version() );
-	return esc_url( "https://downloads.wordpress.org/plugin/{$filename}" );
-}
-
-function worg_plugins_template_active_installs( $full = true ) {
-	$count = WordPressdotorg\Plugin_Directory\Template::get_active_installs_count();
-
-	if ( $count <= 10 ) {
-		$text = __( 'Less than 10', 'wporg-plugins' );
-	} elseif ( $count >= 1000000 ) {
-		$text = __( '1+ million', 'wporg-plugins' );
-	} else {
-		$text = number_format_i18n( $count ) . '+';
-	}
-	return $full ? sprintf( __( '%s active installs', 'wporg-plugins' ), $text ) : $text;
+	return esc_url( sprintf( "https://downloads.wordpress.org/plugin/%s.%s.zip", get_post()->post_name, wporg_plugins_the_version() ) );
 }
 
 function wporg_plugins_template_authors() {

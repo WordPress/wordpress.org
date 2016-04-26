@@ -1,3 +1,7 @@
+<?php
+namespace WordPressdotorg\Plugin_Directory\Theme;
+
+?>
 <div class="wrapper">
 	<div class="col-12 filter-bar">
 		<div class="wp-filter">
