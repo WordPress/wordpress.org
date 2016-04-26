@@ -30,9 +30,9 @@ class WordCampOrganizerNags {
 		}
 
 		wp_add_dashboard_widget(
-			'removing_pain_points',
-			'Removing WordCamp.org Pain Points',
-			array( $this, 'render_removing_pain_points' )
+			'new_wordcamporg_tools',
+			'New WordCamp.org Tools',
+			array( $this, 'render_new_wordcamporg_tools' )
 		);
 
 		$this->prioritize_wordcamp_widgets();
@@ -152,13 +152,13 @@ class WordCampOrganizerNags {
 		}
 
 		// Move WordCamp Organizer Survey to the top of the side column
-		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] ) ) {
+		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['new_wordcamporg_tools'] ) ) {
 			$wp_meta_boxes['dashboard']['side']['core'] = array_merge(
-				array( 'removing_pain_points' => $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] ),
+				array( 'new_wordcamporg_tools' => $wp_meta_boxes['dashboard']['normal']['core']['new_wordcamporg_tools'] ),
 				$wp_meta_boxes['dashboard']['side']['core']
 			);
 
-			unset( $wp_meta_boxes['dashboard']['normal']['core']['removing_pain_points'] );
+			unset( $wp_meta_boxes['dashboard']['normal']['core']['new_wordcamporg_tools'] );
 		}
 	}
 
@@ -188,16 +188,18 @@ class WordCampOrganizerNags {
 	/**
 	 * Render the content for the Removing WordCamp.org Pain Points dashboard widget
 	 */
-	public function render_removing_pain_points() {
+	public function render_new_wordcamporg_tools() {
 		?>
 
-		<p>There are several projects underway to eliminate the worst pain points that WordCamp organizers have reported. Check them out if you'd like to get involved!</p>
+		<p>
+			<?php _e( "Here are some of the tools we've recently launched to help you organize:", 'wordcamporg' ); ?>
+		</p>
 
 		<ul class="ul-disc">
+			<li><a href="https://make.wordpress.org/community/2016/04/26/new-tool-for-creating-personalized-wordcamp-badges/">Create personalized attendee badges</a>.</li>
+			<li><a href="https://make.wordpress.org/community/2016/03/01/new-automated-payments-and-invoicing/">Invoice sponsors, pay vendors, and get reimbursed</a>.</li>
 			<li><a href="https://make.wordpress.org/community/2015/07/09/site-cloner-v1-is-now-available/">Quickly clone another WordCamp site</a> instead of building yours from scratch.</li>
 			<li><a href="https://make.wordpress.org/community/2015/11/24/remote-css-plugin-launched-on-wordcamp-org/">Edit CSS in your local environment</a> and manage it in a GitHub repository.</li>
-			<li><a href="https://make.wordpress.org/community/2015/07/02/results-from-the-wordcamp-org-tools-follow-up-survey/">Build a new theme</a> for WordCamp sites.</li>
-			<li><a href="https://make.wordpress.org/community/2015/07/08/better-wordcamp-org-docs/">Improve documentation</a>.</li>
 		</ul>
 
 		<?php
