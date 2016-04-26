@@ -22,7 +22,42 @@ class Translation_Sync {
 		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_sync' ), 5 );
 		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_sync' ), 5 );
 
+		add_action( 'sync_plugin_translations', array( $this, 'sync_plugin_translations_on_commit' ) );
+
 		add_action( 'shutdown', array( $this, 'sync_translations' ) );
+	}
+
+	/**
+	 * Starts the sync of plugin translations between two projects.
+	 *
+	 * Gets trigged by the cron API and the hook `sync_plugin_translations`.
+	 *
+	 * @param array $args Arguments from the job. Should include the path
+	 *                    of the GP project.
+	 * @return bool False on failure, true on success.
+	 */
+	public function sync_plugin_translations_on_commit( $args ) {
+		$project = GP::$project->by_path( 'wp-plugins/' . $args['gp_project'] );
+		if ( ! $project ) {
+			return false;
+		}
+
+		$translation_sets = GP::$translation_set->by_project_id( $project->id );
+		if ( ! $translation_sets ) {
+			return false;
+		}
+
+		foreach ( $translation_sets as $translation_set ) {
+			if ( 0 == $translation_set->current_count() ) {
+				continue;
+			}
+
+			// Sync translations in a separate process.
+			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug );
+			echo shell_exec( $cmd );
+		}
+
+		return true;
 	}
 
 	/**
