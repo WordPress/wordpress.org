@@ -176,7 +176,7 @@ class Import {
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
 				// screenshot-0.(png|jpg|jpeg|gif)  ||  icon.svg
-				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(-(?P<resolution>[^\s]+)\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
+				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(-(?P<resolution>[\dx]+)\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
 					continue;
 				}
 				$type = $m['type'];
