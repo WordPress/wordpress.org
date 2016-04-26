@@ -97,7 +97,7 @@ class Plugin_Directory {
 			'hierarchical'      => true,
 			'query_var'         => 'plugin_category',
 			'rewrite'           => false,
-			'public'            => false,
+			'public'            => true,
 			'show_ui'           => current_user_can( 'plugin_set_category' ),
 			'show_admin_column' => current_user_can( 'plugin_set_category' ),
 			'meta_box_cb'       => 'post_categories_meta_box',
