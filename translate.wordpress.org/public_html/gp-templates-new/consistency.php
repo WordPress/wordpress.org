@@ -27,10 +27,6 @@ gp_tmpl_header();
 			<input type="checkbox" name="search_case_sensitive" value="1"<?php checked( $search_case_sensitive ); ?>>
 			Case Sensitive
 		</label>
-		<label>
-			<input type="checkbox" name="search_fuzzy" value="1"<?php checked( $search_fuzzy ); ?>>
-			Fuzzy Search (<em>term*</em>)
-		</label>
 	</p>
 
 </form>
@@ -40,23 +36,21 @@ if ( $performed_search && ! $results ) {
 	echo '<p class="notice">No results were found.</p>';
 
 } elseif ( $performed_search && $results ) {
-	if ( ! $search_fuzzy && $translations_unique ) {
-		$translations_unique_count = count( $translations_unique );
-		if ( 1 === $translations_unique_count ) {
-			echo '<p class="notice">All originals have the same translations</p>';
-		} else {
-			echo '<div class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
-			echo '<ul class="translations-unique hidden">';
-			foreach ( $translations_unique as $translation ) {
-				printf(
-					'<li data-id="%s">%s</li>',
-					md5( $translation ),
-					str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) )
-				);
-			}
-			echo '</ul>';
-			echo '</div>';
+	$translations_unique_count = count( $translations_unique );
+	if ( 1 === $translations_unique_count ) {
+		echo '<p class="notice">All originals have the same translations</p>';
+	} else {
+		echo '<div class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
+		echo '<ul class="translations-unique hidden">';
+		foreach ( $translations_unique as $translation ) {
+			printf(
+				'<li data-id="%s">%s</li>',
+				md5( $translation ),
+				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) )
+			);
 		}
+		echo '</ul>';
+		echo '</div>';
 	}
 
 	?>
@@ -84,28 +78,15 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
-				$search_link = '';
-				if ( $search_fuzzy ) {
-					$search_link = sprintf(
-						' | <a href="%s">Search</a>',
-						esc_url( add_query_arg( [
-							'search'               => urlencode( $result->original_singular ),
-							'search_fuzzy'         => 0,
-							'search_case_senstive' => 1,
-						] ) )
-					);
-				}
-
 				printf(
 					'<tr><td>%s</td><td>%s</td></tr>',
 					sprintf(
 						'<div class="string">%s%s</div>
-						<div class="meta">Project: <a href="/projects/%s">%s</a>%s</div>',
+						<div class="meta">Project: <a href="/projects/%s">%s</a></div>',
 						esc_translation( $result->original_singular ),
 						$original_context,
 						$result->project_path,
-						$project_name,
-						$search_link
+						$project_name
 					),
 					sprintf(
 						'<div class="string%s">%s</div>

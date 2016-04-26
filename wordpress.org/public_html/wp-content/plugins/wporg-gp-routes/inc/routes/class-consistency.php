@@ -21,7 +21,6 @@ class Consistency extends GP_Route {
 		$sets = $this->get_translation_sets();
 
 		$search = $set = '';
-		$search_fuzzy = false;
 		$search_case_sensitive = true;
 
 		if ( ! empty( $_REQUEST['search'] ) ) {
@@ -39,10 +38,6 @@ class Consistency extends GP_Route {
 			$search_case_sensitive = false;
 		}
 
-		if ( ! empty( $_REQUEST['search_fuzzy'] ) ) {
-			$search_fuzzy = true;
-		}
-
 		$locale_is_rtl = false;
 		if ( $set ) {
 			list( $locale, $slug ) = explode( '/', $set );
@@ -56,7 +51,6 @@ class Consistency extends GP_Route {
 			$results = $this->query( [
 				'search'         => $search,
 				'set'            => $set,
-				'fuzzy'          => $search_fuzzy,
 				'case_sensitive' => $search_case_sensitive,
 			] );
 
@@ -109,11 +103,7 @@ class Consistency extends GP_Route {
 			$collation = '';
 		}
 
-		if ( $args['fuzzy'] ) {
-			$search = $wpdb->prepare( "LIKE {$collation} %s", $wpdb->esc_like( $args['search'] ) . '%%' );
-		} else {
-			$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
-		}
+		$search = $wpdb->prepare( "= {$collation} %s", $args['search'] );
 
 		$locale = $wpdb->prepare( '%s', $locale );
 		$slug = $wpdb->prepare( '%s', $slug );
@@ -132,15 +122,15 @@ class Consistency extends GP_Route {
 				t.date_added AS translation_added,
 				t.id AS translation_id
 			FROM {$wpdb->gp_originals} AS o
-			JOIN 
+			JOIN
 				{$wpdb->gp_projects} AS p ON p.id = o.project_id
-			JOIN 
+			JOIN
 				{$wpdb->gp_translations} AS t ON o.id = t.original_id
 			JOIN
 				{$wpdb->gp_translation_sets} as ts on ts.id = t.translation_set_id
 			WHERE
 				p.active = 1
-				AND t.status = 'current' 
+				AND t.status = 'current'
 				AND o.status = '+active' AND o.singular {$search}
 				AND ts.locale = {$locale} AND ts.slug = {$slug}
 			LIMIT 0, 500
