@@ -42,6 +42,26 @@ class Jobs_Controller extends Base {
 					],
 				],
 			],
+			[
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => [ $this, 'delete_item' ],
+				'permission_callback' => [ $this, 'permission_check_internal_api_bearer' ],
+				'args'                => [
+					'timestamp'  => [
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => [ $this, 'validate_timestamp' ],
+					],
+					'hook'       => [
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					],
+					'args'       => [
+						'default' => [],
+						'validate_callback' => [ $this, 'validate_args' ],
+					],
+				],
+			],
 		] );
 	}
 
@@ -91,6 +111,21 @@ class Jobs_Controller extends Base {
 			'args'    => $request['args'],
 		];
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Delete one job from the collection.
+	 *
+	 * @param \WP_REST_Request $request Full data about the request.
+	 * @return \WP_Error|bool WP_Error on failure, true on success.
+	 */
+	public function delete_item( $request ) {
+		$result = wp_unschedule_event( $request['timestamp'], $request['hook'], $request['args'] );
+		if ( false === $result ) {
+			return new WP_Error( 'insert_failed' );
+		}
+
+		return true;
 	}
 
 	/**
