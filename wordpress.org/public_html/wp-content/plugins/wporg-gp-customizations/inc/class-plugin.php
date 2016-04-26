@@ -41,6 +41,9 @@ class Plugin {
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
 
+		// Load the API endpoints.
+		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
