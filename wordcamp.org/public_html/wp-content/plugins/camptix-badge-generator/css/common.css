@@ -1,0 +1,9 @@
+#cbg-method-overviews {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 30px;
+}
+
+	#cbg-method-overviews > div {
+		margin: 0 25px;
+	}

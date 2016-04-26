@@ -1,0 +1,71 @@
+html, body {
+	margin: 0;
+	background-color: white;
+}
+
+.attendee {
+	float: left;
+	width: 3.25in;
+	height: 9in;
+	overflow: hidden;
+	font-family: sans-serif;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.attendee:nth-of-type( odd ) {
+	clear: left;
+}
+
+.attendee:nth-of-type( even ) {
+	float: right;
+	page-break-after: always;
+}
+
+/* Cut lines */
+.attendee:nth-of-type( 1 ),
+.attendee:nth-of-type( 2 ) {
+	outline: 1px solid #888888;
+}
+
+.badge {
+	padding: 5em 1em 1em 1em;
+	box-sizing: border-box;
+	height: 50%;
+	position: relative;
+}
+
+.badge-back {
+	transform: rotate( 180deg );
+	border-top: 2px solid #888888;
+}
+
+.holepunch {
+	font-size: 0.7em;
+	text-align: center;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 5%;
+}
+
+.custom-logo {
+	max-width: 25%;
+	height: auto;
+}
+
+.wordcamp-name {
+	margin: 0;
+}
+
+.attendee-avatar {
+	max-width: 70%;
+	height: auto;
+	margin: .5em 0 0 0;
+	border-radius: 50%;
+}
+
+.attendee-name {
+	margin: .5em 0 0 0;
+	font-size: 2.4em;
+}
