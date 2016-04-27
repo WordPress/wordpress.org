@@ -47,8 +47,11 @@ class Translation_Sync {
 			return false;
 		}
 
+		$sub_project = basename( $args['gp_project'] );
+		$sub_project_counterpart = $this->project_mapping[ $sub_project ];
+
 		$time = date( 'r' );
-		$message = "_Time: {$time}_\nTranslation sync from dev to stable in process...\n";
+		$message = "_Time: {$time}_\nTranslation sync from {$sub_project} to {$sub_project_counterpart} in process...\n";
 		foreach ( $translation_sets as $translation_set ) {
 			if ( 0 == $translation_set->current_count() ) {
 				continue;
