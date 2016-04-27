@@ -122,6 +122,9 @@ class Plugin extends Base {
 
 		$result['versions'] = array();
 		if ( $versions = get_post_meta( $post_id, 'tagged_versions', true ) ) {
+			if ( 'trunk' != $result['stable_tag'] ) {
+				array_push( $versions, 'trunk' );
+			}
 			foreach ( $versions as $version ) {	
 				$result['versions'][ $version ] = Template::download_link( $post, $version );
 			}
@@ -131,7 +134,7 @@ class Plugin extends Base {
 
 		$result['banners'] = array();
 		if ( $banners = Template::get_plugin_banner( $post ) ) {
-			if ( isset( $banners['baner'] ) ) {
+			if ( isset( $banners['banner'] ) ) {
 				$result['banners']['low'] = $banners['banner'];
 			}
 			if ( isset( $banners['banner_2x'] ) ) {
