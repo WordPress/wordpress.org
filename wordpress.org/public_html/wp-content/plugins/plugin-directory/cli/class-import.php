@@ -71,6 +71,7 @@ class Import {
 		$readme = $data['readme'];
 		$assets = $data['assets'];
 		$headers = $data['plugin_headers'];
+		$tagged_versions = $data['tagged_versions'];
 
 		$content = '';
 		foreach ( $readme->sections as $section => $section_content ) {
@@ -100,10 +101,11 @@ class Import {
 			update_post_meta( $plugin->ID, $meta_field, wp_slash( $headers->$plugin_header ) );
 		}
 
-		update_post_meta( $plugin->ID, 'sections', array_keys( $readme->sections ) );
-		update_post_meta( $plugin->ID, 'assets_screenshots', $assets['screenshot'] );
-		update_post_meta( $plugin->ID, 'assets_icons',       $assets['icon'] );
-		update_post_meta( $plugin->ID, 'assets_banners',     $assets['banner'] );
+		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
+		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
+		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
+		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
+		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
 
 		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
 		$banner_average_color = '';
@@ -111,7 +113,7 @@ class Import {
 			// The Banners are not stored locally, which is why a URL is used here
 			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin_slug, $first_banner ) );
 		}
-		update_post_meta( $plugin->ID, 'assets_banners_color', $banner_average_color );
+		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
 	}
 
@@ -188,6 +190,11 @@ class Import {
 			}
 		}
 
+		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" );
+		$tagged_versions = array_map( function( $item ) {
+			return rtrim( $item, '/' );
+		}, $tagged_versions );
+
 		// Find screenshots in the stable plugin folder (but don't overwrite /assets/)
 		foreach ( Filesystem::list_files( "$tmp_dir/$stable/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
 			$filename = basename( $plugin_screenshot );
@@ -207,7 +214,7 @@ class Import {
 			);
 		}
 
-		return compact( 'readme', 'trunk_readme', 'tmp_dir', 'plugin_headers', 'assets' );
+		return compact( 'readme', 'trunk_readme', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions' );
 	}
 
 	/**
