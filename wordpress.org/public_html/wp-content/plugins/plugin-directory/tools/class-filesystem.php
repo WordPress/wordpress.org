@@ -58,6 +58,9 @@ class Filesystem {
 		exec( "chmod -R 755 {$esc_directory}" );
 		exec( "find {$esc_directory} -type f -exec chmod 644 {} \;" );
 
+		// Remove Mac resources fork files.
+		exec( "find {$esc_directory} -name '__MACOSX' -exec rm -rf {} \;" );
+
 		return $directory;
 	}
 
