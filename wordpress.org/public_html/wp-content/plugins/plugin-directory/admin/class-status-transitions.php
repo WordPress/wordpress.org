@@ -82,19 +82,24 @@ class Status_Transitions {
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
-		$svn_dirs = array(
-			"{$post->post_name}/",
-			"{$post->post_name}/trunk",
-			"{$post->post_name}/branches",
-			"{$post->post_name}/tags",
-			"{$post->post_name}/assets",
-		);
-		SVN::mkdir( $svn_dirs, array(
-			'message' => sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ),
-		) );
+		$dir = Filesystem::temp_directory( $post->post_name );
+		$dir = Filesystem::unzip( get_attached_file( $attachment->ID ), $dir );
+		foreach ( array( 'assets', 'branches', 'tags', 'trunk' ) as $folder ) {
+			mkdir( "$dir/$folder", 0777 );
+		}
 
-		// Read zip and add/commit files to svn.
-		SVN::add( Filesystem::unzip( get_attached_file( $attachment->ID ) ) );
+		$plugin_root = $this->get_plugin_root( $dir );
+		// If there is no plugin file we have nothing to commit. Bail.
+		if ( empty( $plugin_root ) ) {
+			return;
+		}
+		rename( $plugin_root, "$dir/trunk" );
+
+		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, array(
+			'm'        => sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ),
+			'username' => AUTOMATTIC_SVN_TRACKER__SVN_USER,
+			'password' => AUTOMATTIC_SVN_TRACKER__SVN_PASSWORD,
+		) );
 
 		// Delete zip.
 		wp_delete_attachment( $attachment->ID, true );
@@ -146,5 +151,29 @@ class Status_Transitions {
 		$content .= 'https://make.wordpress.org/plugins';
 
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
+	}
+
+	/**
+	 * Returns the path to a plugins root directory.
+	 *
+	 * @param string $dir Directory to search in.
+	 * @return string
+	 */
+	private function get_plugin_root( $dir ) {
+		$plugin_root  = '';
+		$plugin_files = Filesystem::list_files( $dir, true /* Recursive */, '!\.php$!i' );
+
+		foreach ( $plugin_files as $plugin_file ) {
+
+			// No markup/translation needed.
+			$plugin_data = get_plugin_data( $plugin_file, false, false );
+
+			if ( ! empty( $plugin_data['Name'] ) ) {
+				$plugin_root = dirname( $plugin_file );
+				break;
+			}
+		}
+
+		return $plugin_root;
 	}
 }

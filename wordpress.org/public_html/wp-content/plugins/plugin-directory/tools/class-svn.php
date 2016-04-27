@@ -8,8 +8,36 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
  */
 class SVN {
 
-	public static function add( $dirs, $args = array() ) {
-		return true;
+	/**
+	 * Create an SVN Export of a local directory to a URL.
+	 *
+	 * Note: An exception will be thrown upon SVN error.
+	 *
+	 * @param string $path    The local folder to import into SVN.
+	 * @param string $url     The URL to import to.
+	 * @param array  $options A list of options to pass to SVN. Optional.
+	 *
+	 * @return array {
+	 *   @type bool $result   The result of the operation.
+	 *   @type int  $revision The revision imported.
+	 * }
+	 */
+	public static function import( $path, $url, $options = array() ) {
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_path = escapeshellarg( $path );
+		$esc_url  = escapeshellarg( $url );
+
+		$output = shell_exec( "svn import $esc_options $esc_path $esc_url 2>&1" );
+		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'revision', 'errors' );
 	}
 
 	/**
@@ -39,7 +67,6 @@ class SVN {
 		} else {
 			$result = false;
 			$errors = self::parse_svn_errors( $output );
-			
 		}
 
 		return compact( 'result', 'revision', 'errors' );
@@ -83,10 +110,6 @@ class SVN {
 		}
 	}
 
-	public static function mkdir( $dirs, $args = array() ) {
-		return true;
-	}
-
 	/**
 	 * Parse and escape the provided SVN arguements for usage on the CLI.
 	 *
@@ -108,7 +131,7 @@ class SVN {
 			if ( '-' != substr( $key, 0, 1 ) ) {
 				$key = '-' . ( strlen( $key ) > 2 ? '-' : '' ) . $key;
 			}
-			
+
 			$result[] = escapeshellarg( $key ) . ( $no_parameters ? '' : '=' . escapeshellarg( $value ) );
 		}
 
