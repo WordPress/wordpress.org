@@ -108,7 +108,7 @@ class Plugin extends Base {
 		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
 		$result['description'] = $result['sections']['description'];
 
-		$result['description'] = $post->post_excerpt;
+		$result['short_description'] = $post->post_excerpt;
 		$result['download_link'] = Template::download_link( $post );
 
 		$result['tags'] = array();
