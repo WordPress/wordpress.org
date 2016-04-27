@@ -47,6 +47,8 @@ class Translation_Sync {
 			return false;
 		}
 
+		$time = date( 'r' );
+		$message = "_Time: {$time}_\nTranslation sync from dev to stable in process...\n";
 		foreach ( $translation_sets as $translation_set ) {
 			if ( 0 == $translation_set->current_count() ) {
 				continue;
@@ -54,8 +56,22 @@ class Translation_Sync {
 
 			// Sync translations in a separate process.
 			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug );
-			echo shell_exec( $cmd );
+			$output = shell_exec( $cmd );
+			if ( 'No translations available.' !== $output ) {
+				$message .= "\t" . $output;
+			}
 		}
+		$message .= 'Translation sync was successfully processed.';
+
+		$attachment = [
+			'title'      => "Translation Sync for {$args['plugin']}",
+			'title_link' => "https://translate.wordpress.org/projects/wp-plugins/{$args['plugin']}",
+			'text'       => $message,
+			'fallback'   => "Translations for {$args['plugin']} were synced.",
+			'color'      => '#00a0d2',
+			'mrkdwn_in'  => [ 'text' ],
+		];
+		$this->slack( $attachment );
 
 		return true;
 	}
@@ -239,5 +255,22 @@ class Translation_Sync {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Sends a notifcation to the the Slack channel.
+	 *
+	 * @param array $attachment The attachment of a notification.
+	 */
+	private function slack( $attachment ) {
+		if ( ! defined( 'GLOTPRESS_SLACK_WEBHOOK' ) ) {
+			return;
+		}
+
+		require_once API_WPORGPATH . 'includes/slack-config.php';
+		$send = new \Dotorg\Slack\Send( GLOTPRESS_SLACK_WEBHOOK );
+		$send->add_attachment( $attachment );
+		$send->set_username( 'Plugin Translation Sync' );
+		$send->send( '#meta-language-packs' );
 	}
 }
