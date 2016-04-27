@@ -66,8 +66,8 @@ class Template {
 	/**
 	 * @return array
 	 */
-	static function get_plugin_sections() {
-		$plugin      = get_post();
+	static function get_plugin_sections( $post = null ) {
+		$plugin      = get_post( $post );
 		$plugin_slug = $plugin->post_name;
 
 		$default_sections = array(
@@ -172,7 +172,7 @@ class Template {
 
 		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true );
 
-		$icon = $icon_2x = $vector = $generated = false;
+		$icon = $icon_2x = $svg = $generated = false;
 		foreach ( $raw_icons as $file => $info ) {
 			switch ( $info['resolution'] ) {
 				case '256x256':
@@ -183,11 +183,15 @@ class Template {
 					$icon = self::get_asset_url( $plugin_slug, $info );
 					break;
 
+				/* false = the resolution of the icon, this is NOT disabled */
 				case false && 'icon.svg' == $file:
-					$icon   = self::get_asset_url( $plugin_slug, $info );
-					$vector = true;
+					$svg   = self::get_asset_url( $plugin_slug, $info );
 					break;
 			}
+		}
+
+		if ( ! $icon && $svg ) {
+			$icon = $svg;
 		}
 
 		if ( ! $icon ) {
@@ -222,7 +226,7 @@ class Template {
 
 			case 'raw':
 			default:
-				return compact( 'icon', 'icon_2x', 'vector', 'generated' );
+				return compact( 'svg', 'icon', 'icon_2x', 'generated' );
 		}
 	}
 
@@ -332,5 +336,25 @@ class Template {
 		$output .= '</div>';
 		return $output;
 	}
-	
+
+	/**
+	 * Generate a Download link for a given plugin & version.
+	 *
+	 * @param \WP_Post $post    The Plugin Post.
+	 * @param string   $version The version to link to. Optional. Default: latest.
+	 * @return string The Download URL.
+	 */
+	static function download_link( $post = null, $version = 'latest' ) {
+		$post = get_post( $post );
+
+		if ( 'latest' == $version || 'latest-stable' == $version ) {
+			$version = get_post_meta( $post->ID, 'stable_tag', true );
+		}
+
+		if ( 'trunk' != $version ) {
+			return sprintf( "https://downloads.wordpress.org/plugin/%s.%s.zip", $post->post_name, $version );
+		} else {
+			return sprintf( "https://downloads.wordpress.org/plugin/%s.zip", $post->post_name );
+		}
+	}
 }

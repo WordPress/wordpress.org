@@ -12,6 +12,7 @@ class Base {
 	 */
 	static function load_routes() {
 		new Routes\Internal_Stats();
+		new Routes\Plugin();
 	}
 
 	/**

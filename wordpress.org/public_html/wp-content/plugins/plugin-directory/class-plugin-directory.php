@@ -385,6 +385,9 @@ class Plugin_Directory {
 	 * @return string
 	 */
 	public function filter_post_content_to_correct_page( $content ) {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return $content;
+		}
 		if ( 'plugin' === get_post()->post_type ) {
 			$page = get_query_var( 'content_page' );
 
@@ -503,6 +506,8 @@ class Plugin_Directory {
 		if ( !empty( $post ) && 'plugin' == $post->post_type && $plugin_slug == $post->post_name ) {
 			return $post;
 		}
+
+		// TODO: Add caching here.
 
 		// get_post_by_slug();
 		$posts = get_posts( array(

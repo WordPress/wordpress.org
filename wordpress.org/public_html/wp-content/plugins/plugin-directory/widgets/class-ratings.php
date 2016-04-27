@@ -88,7 +88,7 @@ class Ratings extends \WP_Widget {
 			jQuery(document).ready( function($) {
 				var $rating = $( '.user-rating div' ),
 					$stars = $rating.find( '.dashicons' ),
-					current_rating = $rating.data('rating'),
+					current_rating = $rating.data( 'rating' ),
 					rating_clear_timer = 0;
 
 				$stars.mouseover( function() {
@@ -98,7 +98,8 @@ class Ratings extends \WP_Widget {
 						rating = $prev_items.length + 1;
 
 					if ( rating_clear_timer ) {
-						rating_clear_timer = clearTimeout( rating_clear_timer );
+						clearTimeout( rating_clear_timer );
+						rating_clear_timer = 0;
 					}
 
 					if ( rating == current_rating ) {
@@ -114,7 +115,7 @@ class Ratings extends \WP_Widget {
 				} );
 				$rating.mouseout( function() {
 					var clear_callback = function() {
-						var rating = $rating.data('rating');
+						var rating = $rating.data( 'rating' );
 						if ( rating == current_rating ) {
 							return;
 						}
