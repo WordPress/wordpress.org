@@ -249,7 +249,7 @@ class Upload_Handler {
 	 * @return string The plugin readme.txt or readme.md filename.
 	 */
 	protected function find_readme_file() {
-		$files = Filesystem::list_files( "{$this->plugin_dir}/{$this->plugin_slug}", false /* non-recursive */, '!^readme\.(txt|md)$!i' );
+		$files = Filesystem::list_files( $this->plugin_root, false /* non-recursive */, '!^readme\.(txt|md)$!i' );
 
 		// Prioritize readme.txt
 		foreach ( $files as $file ) {
