@@ -107,6 +107,11 @@ class Status_Transitions {
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
 
+		// Promote author if they don't have access yet.
+		if ( ! user_can( $plugin_author, 'plugin_dashboard_access' ) ) {
+			$plugin_author->add_role( 'plugin_committer' );
+		}
+
 		// Send email.
 		$subject = sprintf( __( '[WordPress Plugins] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
