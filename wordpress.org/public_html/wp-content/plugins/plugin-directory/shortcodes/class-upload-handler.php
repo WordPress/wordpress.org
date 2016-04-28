@@ -298,6 +298,8 @@ class Upload_Handler {
 	 * @return int|\WP_Error Attachment ID or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
+
+		// Upload folders are already year/month based. A second-based prefix should be specific enough.
 		$_FILES['zip_file']['name'] = date( 'd_H-i-s' ) . '_' . $_FILES['zip_file']['name'];
 
 		add_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
