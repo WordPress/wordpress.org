@@ -1,6 +1,5 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
-
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -29,12 +28,12 @@ class Ratings extends \WP_Widget {
 
 		$post = get_post();
 
-		$rating = get_post_meta( $post->ID, 'rating', true );
-		$ratings = get_post_meta( $post->ID, 'ratings', true );
+		$rating      = get_post_meta( $post->ID, 'rating', true );
+		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		$num_ratings = array_sum( $ratings );
 
 		$user_rating = 0;
-		if ( is_user_logged_in() ) {
+		if ( is_user_logged_in() && function_exists( 'wporg_get_user_rating' ) ) {
 			$user_rating = wporg_get_user_rating( 'plugin', $post->post_name, get_current_user_id() );
 			if ( ! $user_rating ) {
 				$user_rating = 0;
@@ -46,21 +45,21 @@ class Ratings extends \WP_Widget {
 		<meta itemprop="ratingCount" content="<?php echo esc_attr( $num_ratings ) ?>"/>
 		<h4><?php _e( 'Ratings', 'wporg-plugins' ); ?></h4>
 
-		<?php if ( $rating ) { ?>
-			<div class="rating">
-				<?php echo Template::dashicons_stars( $rating ); ?>
-				<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-plugins' ), '<span itemprop="ratingValue">' . $rating . '</span>' ); ?></p>
-			</div>
-		<?php } else { ?>
-			<div class="rating">
-				<div class="ratings"><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></div>
-			</div>
-		<?php } ?>
+		<?php if ( $rating ) : ?>
+		<div class="rating">
+			<?php echo Template::dashicons_stars( $rating ); ?>
+			<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-plugins' ), '<span itemprop="ratingValue">' . $rating . '</span>' ); ?></p>
+		</div>
+		<?php else : ?>
+		<div class="rating">
+			<div class="ratings"><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></div>
+		</div>
+		<?php endif; // $rating
 
-		<?php if ( $ratings ) { ?>
+		if ( $ratings ) : ?>
 		<ul class="ratings-list">
 			<?php foreach ( range( 5, 1 ) as $stars ) :
-				$rating_bar_width = $num_ratings ? 100 * $ratings[$stars] / $num_ratings : 0;
+				$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
 			?>
 			<li class="counter-container">
 				<a href="https://wordpress.org/support/view/plugin-reviews/<?php echo $post->post_name; ?>?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-plugins' ), $stars ) ); ?>">
@@ -68,13 +67,13 @@ class Ratings extends \WP_Widget {
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
 					</span>
-					<span class="counter-count"><?php echo $ratings[$stars]; ?></span>
+					<span class="counter-count"><?php echo $ratings[ $stars ]; ?></span>
 				</a>
 			</li>
 			<?php endforeach; ?>
 		</ul>
 		<?php
-		}
+		endif; // $ratings
 
 		if ( is_user_logged_in() ) {
 			echo '<div class="user-rating">';
@@ -133,11 +132,8 @@ class Ratings extends \WP_Widget {
 			} );
 			</script>
 			<?php
-
 		}
 
 		echo $args['after_widget'];
 	}
-
 }
-
