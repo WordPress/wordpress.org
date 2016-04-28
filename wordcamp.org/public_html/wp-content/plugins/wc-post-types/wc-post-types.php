@@ -180,21 +180,6 @@ class WordCamp_Post_Types_Plugin {
 
 		// Order by session time
 		if ( 'edit-wcb_session' == $current_screen->id && $query->get( 'orderby' ) == '_wcpt_session_time' ) {
-
-			// Voodoo because of http://core.trac.wordpress.org/ticket/23268
-			$query->set( 'meta_query', array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_wcpt_session_time',
-					'value'   => '',
-					'compare' => 'EXISTS',
-				),
-				array(
-					'key'     => '_wcpt_session_time',
-					'value'   => '',
-					'compare' => 'NOT EXISTS',
-				),
-			) );
 			$query->set( 'meta_key', '_wcpt_session_time' );
 			$query->set( 'orderby', 'meta_value_num' );
 		}
