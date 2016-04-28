@@ -245,6 +245,9 @@ class Customizations {
 		if ( 'rejected' == $post->post_status && 'rejected' != $post_status ) {
 			$post_states['rejected'] = _x( 'Rejected', 'plugin status', 'wporg-plugins' );
 		}
+		if ( 'approved' == $post->post_status && 'approved' != $post_status ) {
+			$post_states['approved'] = _x( 'Approved', 'plugin status', 'wporg-plugins' );
+		}
 
 		return $post_states;
 	}
