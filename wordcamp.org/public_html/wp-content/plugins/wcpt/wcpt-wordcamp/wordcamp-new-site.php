@@ -12,6 +12,7 @@ class WordCamp_New_Site {
 		add_action( 'wcpt_metabox_value', array( $this, 'render_site_url_field' ), 10, 3 );
 		add_action( 'wcpt_metabox_save',  array( $this, 'save_site_url_field' ), 10, 3 );
 		add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_create_new_site' ), 10, 1 );
+		add_action( 'wcpt_metabox_save_done', array( $this, 'maybe_push_mes' ), 10, 1 );
 	}
 
 	/**
@@ -131,6 +132,94 @@ class WordCamp_New_Site {
 
 			$this->configure_new_site( $wordcamp_id, $wordcamp );
 		}
+	}
+
+	/**
+	 * Maybe push multi-event sponsors out.
+	 *
+	 * @param int $wordcamp_id The WordCamp post id.
+	 */
+	public function maybe_push_mes( $wordcamp_id ) {
+		if ( ! current_user_can( 'manage_sites' ) ) {
+			return;
+		}
+
+		// The sponsor region is required so we can import the relevant sponsors and levels
+		if ( ! get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true ) ) {
+			return;
+		}
+
+		if ( empty( $_POST[ wcpt_key_to_str( 'push-mes-sponsors', 'wcpt_' ) ] ) ) {
+			return;
+		}
+
+		$wordcamp = get_post( $wordcamp_id );
+		$meta = get_post_custom( $wordcamp_id );
+		$blog_id = get_wordcamp_site_id( $wordcamp );
+		$lead_organizer = $this->get_user_or_current_user( $meta['WordPress.org Username'][0] );
+
+		$assigned_sponsor_data = $this->get_assigned_sponsor_data( $wordcamp->ID );
+		$sponsors = $this->get_stub_me_sponsors( $assigned_sponsor_data );
+		$existing_sponsors = array();
+
+		switch_to_blog( $blog_id );
+
+		$sponsors_query = get_posts( array(
+			'fields' => 'ids',
+			'post_type' => 'wcb_sponsor',
+			'post_status' => 'any',
+			'posts_per_page' => -1,
+			'cache_results' => false,
+		) );
+
+		update_meta_cache( 'post', $sponsors_query );
+
+		foreach ( $sponsors_query as $post_id ) {
+			$mes_id = get_post_meta( $post_id, '_mes_id', true );
+			if ( $mes_id ) {
+				$existing_sponsors[] = absint( $mes_id );
+			}
+		}
+
+		foreach ( $sponsors as $sponsor ) {
+			// Skip existing sponsors.
+			if ( in_array( absint( $sponsor['meta']['_mes_id'] ), $existing_sponsors ) ) {
+				continue;
+			}
+
+			$post_id = wp_insert_post( array(
+				'post_type'    => $sponsor['type'],
+				'post_status'  => 'draft',
+				'post_author'  => $lead_organizer->ID,
+				'post_title'   => $sponsor['title'],
+				'post_content' => $sponsor['content'],
+			) );
+
+			if ( $post_id ) {
+				foreach ( $sponsor['meta'] as $key => $value ) {
+					update_post_meta( $post_id, $key, $value );
+				}
+
+				// Set featured image
+				if ( ! empty( $sponsor['featured_image'] ) ) {
+					$results = media_sideload_image( $sponsor['featured_image'], $post_id );
+
+					if ( ! is_wp_error( $results ) ) {
+						$attachment_id = get_posts( array(
+							'posts_per_page' => 1,
+							'post_type'      => 'attachment',
+							'post_parent'    => $post_id,
+						) );
+
+						if ( isset( $attachment_id[0]->ID ) ) {
+							set_post_thumbnail( $post_id, $attachment_id[0]->ID );
+						}
+					}
+				}
+			}
+		}
+
+		restore_current_blog();
 	}
 
 	/**
@@ -613,7 +702,7 @@ class WordCamp_New_Site {
 	 * @return array
 	 */
 	protected function get_stub_me_sponsors_meta( $assigned_sponsor ) {
-		$sponsor_meta    = array();
+		$sponsor_meta    = array( '_mes_id' => $assigned_sponsor->ID );
 		$meta_field_keys = array(
 			'company_name', 'website', 'first_name', 'last_name', 'email_address', 'phone_number',
 			'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
