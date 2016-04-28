@@ -162,6 +162,14 @@ function wporg_themes_init() {
 add_action( 'init', 'wporg_themes_init' );
 
 /**
+ * Loads the Rest API Endpoints.
+ */
+function wporg_themes_rest_apis() {
+	include __DIR__ . '/class-wporg-themes-rest-api-internal-stats.php';
+}
+add_action( 'rest_api_init', 'wporg_themes_rest_apis' );
+
+/**
  * Filter the permalink for the Packages to be /post_name/
  *
  * @param string $link The generated permalink
