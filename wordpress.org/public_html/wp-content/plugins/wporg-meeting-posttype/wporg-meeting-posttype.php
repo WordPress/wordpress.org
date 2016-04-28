@@ -50,7 +50,7 @@ class Meeting_Post_Type {
 	}
 
 	public function meeting_archive_page_query( $query ) {
-		if ( !$query->is_main_query() || !$query->is_post_type_archive( 'meeting' ) ) {
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_post_type_archive( 'meeting' ) ) {
 			return;
 		}
 		// turn off paging on the archive page, to show all meetings in the table
