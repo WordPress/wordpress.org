@@ -143,6 +143,7 @@ class MES_Region {
 
 		$regions         = get_terms( self::TAXONOMY_SLUG, array( 'hide_empty' => false ) );
 		$selected_region = get_post_meta( $post->ID, $key, true );
+		$cb_push_name    = wcpt_key_to_str( 'push-mes-sponsors', 'wcpt_' );
 
 		require( dirname( __DIR__ ) . '/views/template-region-dropdown.php' );
 	}
