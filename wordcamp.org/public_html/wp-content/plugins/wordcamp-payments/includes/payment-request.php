@@ -50,7 +50,7 @@ class WCP_Payment_Request {
 			'add_new_item'       => __( 'Add New Vendor Payment',             'wordcamporg' ),
 			'new_item'           => __( 'New Vendor Payment',                 'wordcamporg' ),
 			'edit_item'          => __( 'Edit Vendor Payment',                'wordcamporg' ),
-			'view_item'          => __( 'View Vendor Paymentt',               'wordcamporg' ),
+			'view_item'          => __( 'View Vendor Payment',                'wordcamporg' ),
 			'all_items'          => __( 'Vendor Payments',                    'wordcamporg' ),
 			'search_items'       => __( 'Search Vendor Payments',             'wordcamporg' ),
 			'parent_item_colon'  => __( 'Parent Vendor Payments:',            'wordcamporg' ),
