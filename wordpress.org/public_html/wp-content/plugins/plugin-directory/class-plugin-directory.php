@@ -513,7 +513,7 @@ class Plugin_Directory {
 		$posts = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $plugin_slug,
-			'post_status' => array( 'publish', 'pending', 'disabled', 'closed' ),
+			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft' ),
 		) );
 		if ( ! $posts ) {
 			return false;

@@ -8,12 +8,11 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
  */
 class Review_Tools {
 	static function display() {
-		$post      = get_post();
-		$zip_files = get_attached_media( 'application/zip', $post );
+		$post = get_post();
 
-		if ( $zip_files ) {
-			$zip_file = current( $zip_files );
-			$zip_url  = wp_get_attachment_url( $zip_file->ID );
+		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
+			$zip_url = wp_get_attachment_url( $zip_file->ID );
+
 			printf( '<p>' . __( '<strong>Zip file:</strong> %s', 'wporg-plugins' ) . '</p>',
 				sprintf( '<a href="%s">%s</a>', esc_url( $zip_url ), esc_html( $zip_url ) )
 			);

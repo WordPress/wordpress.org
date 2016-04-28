@@ -93,8 +93,10 @@ class Upload_Handler {
 			);
 		}
 
-		// Is there already a plugin with the name name?
-		if ( Plugin_Directory::get_plugin_post( $this->plugin_slug ) ) {
+		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
+
+		// Is there already a plugin by a different author?
+		if ( $plugin_post instanceof \WP_Post && $plugin_post->post_author != get_current_user_id() ) {
 			/* translators: 1: plugin slug, 2: style.css */
 			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the name of your plugin and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>'
@@ -157,46 +159,49 @@ class Upload_Handler {
 		// Passed all tests!
 		// Let's save everything and get things wrapped up.
 
-		$content = '';
-		foreach ( $readme->sections as $section => $section_content ) {
-			$content .= "\n\n<!--section={$section}-->\n{$section_content}";
-		}
+		// Create a new post on first-time submissions.
+		if ( ! ( $plugin_post instanceof \WP_Post ) ) {
+			$content = '';
+			foreach ( $readme->sections as $section => $section_content ) {
+				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
+			}
 
-		// Add a Plugin Directory entry for this plugin.
-		$plugin_post = Plugin_Directory::create_plugin_post( array(
-			'title'       => $this->plugin['Name'],
-			'slug'        => $this->plugin_slug,
-			'status'      => 'draft',
-			'author'      => get_current_user_id(),
-			'content'     => $content,
-			'description' => $this->plugin['Description'],
-			'tags'        => $readme->tags,
-			'meta'        => array(
-				'tested'              => $readme->tested,
-				'requires'            => $readme->requires,
-				'stable_tag'          => $readme->stable_tag,
-				'upgrade_notice'      => $readme->upgrade_notice,
-				'contributors'        => $readme->contributors,
-				'screenshots'         => $readme->screenshots,
-				'donate_link'         => $readme->donate_link,
-				'sections'            => array_keys( $readme->sections ),
-				'version'             => $this->plugin['Version'],
-				'header_name'         => $this->plugin['Name'],
-				'header_plugin_uri'   => $this->plugin['PluginURI'],
-				'header_author'       => $this->plugin['Author'],
-				'header_author_uri'   => $this->plugin['AuthorURI'],
-				'header_textdomain'   => $this->plugin['TextDomain'],
-				'header_description'  => $this->plugin['Description'],
-				'assets_screenshots'       => array(),
-				'assets_icons'             => array(),
-				'assets_banners'           => array(),
-				'assets_banners_color'     => false,
-				'support_threads'          => 0,
-				'support_threads_resolved' => 0,
-			),
-		) );
-		if ( is_wp_error( $plugin_post ) ) {
-			return $plugin_post->get_error_message();
+			// Add a Plugin Directory entry for this plugin.
+			$plugin_post = Plugin_Directory::create_plugin_post( array(
+				'title'       => $this->plugin['Name'],
+				'slug'        => $this->plugin_slug,
+				'status'      => 'draft',
+				'author'      => get_current_user_id(),
+				'content'     => $content,
+				'description' => $this->plugin['Description'],
+				'tags'        => $readme->tags,
+				'meta'        => array(
+					'tested'                   => $readme->tested,
+					'requires'                 => $readme->requires,
+					'stable_tag'               => $readme->stable_tag,
+					'upgrade_notice'           => $readme->upgrade_notice,
+					'contributors'             => $readme->contributors,
+					'screenshots'              => $readme->screenshots,
+					'donate_link'              => $readme->donate_link,
+					'sections'                 => array_keys( $readme->sections ),
+					'version'                  => $this->plugin['Version'],
+					'header_name'              => $this->plugin['Name'],
+					'header_plugin_uri'        => $this->plugin['PluginURI'],
+					'header_author'            => $this->plugin['Author'],
+					'header_author_uri'        => $this->plugin['AuthorURI'],
+					'header_textdomain'        => $this->plugin['TextDomain'],
+					'header_description'       => $this->plugin['Description'],
+					'assets_screenshots'       => array(),
+					'assets_icons'             => array(),
+					'assets_banners'           => array(),
+					'assets_banners_color'     => false,
+					'support_threads'          => 0,
+					'support_threads_resolved' => 0,
+				),
+			) );
+			if ( is_wp_error( $plugin_post ) ) {
+				return $plugin_post->get_error_message();
+			}
 		}
 
 		$attachment = $this->save_zip_file( $plugin_post->ID );
@@ -293,7 +298,7 @@ class Upload_Handler {
 	 * @return int|\WP_Error Attachment ID or upload error.
 	 */
 	public function save_zip_file( $post_id ) {
-		$_FILES['zip_file']['name'] = wp_generate_password( 12, false ) . '-' . $_FILES['zip_file']['name'];
+		$_FILES['zip_file']['name'] = date( 'd_H-i-s' ) . '_' . $_FILES['zip_file']['name'];
 
 		add_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		add_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );

@@ -78,7 +78,7 @@ class Status_Transitions {
 			return;
 		}
 
-		$attachment    = current( $attachments );
+		$attachment    = end( $attachments );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
@@ -101,8 +101,10 @@ class Status_Transitions {
 			'password' => AUTOMATTIC_SVN_TRACKER__SVN_PASSWORD,
 		) );
 
-		// Delete zip.
-		wp_delete_attachment( $attachment->ID, true );
+		// Delete zips.
+		foreach ( $attachments as $attachment ) {
+			wp_delete_attachment( $attachment->ID, true );
+		}
 
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
