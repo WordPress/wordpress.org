@@ -24,7 +24,7 @@ class Status_Transitions {
 	 * Constructor.
 	 */
 	private function __construct() {
-		add_action( 'publish_plugin', array( $this, 'publish' ), 10, 2 );
+		add_action( 'approved_plugin', array( $this, 'approved' ), 10, 2 );
 		add_action( 'rejected_plugin', array( $this, 'rejected' ), 10, 2 );
 	}
 
@@ -65,12 +65,12 @@ class Status_Transitions {
 	}
 
 	/**
-	 * Fires when a post is transitioned to 'publish'.
+	 * Fires when a post is transitioned to 'approved'.
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post object.
 	 */
-	public function publish( $post_id, $post ) {
+	public function approved( $post_id, $post ) {
 		$attachments = get_attached_media( 'application/zip', $post_id );
 
 		// If there is no zip we have nothing to commit. Bail.

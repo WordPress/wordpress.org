@@ -43,7 +43,7 @@ class Controls {
 		$statuses = array( 'draft', 'pending' );
 		if ( current_user_can( 'plugin_approve', $post ) ) {
 			if ( in_array( $post->post_status, array( 'draft', 'pending', 'rejected' ) ) ) {
-				$statuses = array_merge( $statuses, array( 'publish', 'rejected' ) );
+				$statuses = array_merge( $statuses, array( 'approved', 'rejected' ) );
 			} else {
 				$statuses = array( 'publish', 'disabled', 'closed' );
 			}

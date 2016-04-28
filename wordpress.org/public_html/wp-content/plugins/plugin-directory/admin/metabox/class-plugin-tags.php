@@ -8,7 +8,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
  */
 class Plugin_Tags {
 	/**
-	 * Displays the Publish metabox for plugins.
+	 * Displays the Tags metabox for plugins.
 	 * The HTML here matches what Core uses.
 	 *
 	 * @param \WP_Post $post

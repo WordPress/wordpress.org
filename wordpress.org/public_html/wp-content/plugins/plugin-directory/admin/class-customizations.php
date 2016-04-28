@@ -166,7 +166,7 @@ class Customizations {
 		}
 
 		if ( empty( $query->query['post_status'] ) ) {
-			$query->query_vars['post_status'] = array( 'publish', 'future', 'draft', 'pending', 'disabled', 'closed', 'rejected' );
+			$query->query_vars['post_status'] = array( 'publish', 'future', 'draft', 'pending', 'disabled', 'closed', 'rejected', 'approved' );
 		}
 
 		if ( ! current_user_can( 'plugin_edit_others' ) || ( isset( $query->query['author'] ) && $query->query['author'] == get_current_user_id() ) ) {

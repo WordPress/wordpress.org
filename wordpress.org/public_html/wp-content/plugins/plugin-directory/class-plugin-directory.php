@@ -145,6 +145,12 @@ class Plugin_Directory {
 			'show_in_admin_status_list' => current_user_can( 'plugin_disable' ),
 			'label_count'               => _n_noop( 'Disabled <span class="count">(%s)</span>', 'Disabled <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
+		register_post_status( 'approved', array(
+			'label'                     => _x( 'Approved', 'plugin status', 'wporg-plugins' ),
+			'public'                    => false,
+			'show_in_admin_status_list' => current_user_can( 'plugin_approve' ),
+			'label_count'               => _n_noop( 'Approved <span class="count">(%s)</span>', 'Approved <span class="count">(%s)</span>', 'wporg-plugins' ),
+		) );
 		register_post_status( 'closed', array(
 			'label'                     => _x( 'Closed', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
@@ -434,6 +440,7 @@ class Plugin_Directory {
 	 *                                     or an array of values.
 	 * @param int               $object_id Object ID.
 	 * @param string            $meta_key  Meta key.
+	 * @return array
 	 */
 	public function filter_shim_postmeta( $value, $object_id, $meta_key ) {
 		switch ( $meta_key ) {
@@ -441,7 +448,7 @@ class Plugin_Directory {
 				$post = get_post( $object_id );
 				$count = Template::get_downloads_count( $post );
 
-				return array( $count );				
+				return array( $count );
 				break;
 			case 'rating':
 				$post = get_post( $object_id );
@@ -513,7 +520,7 @@ class Plugin_Directory {
 		$posts = get_posts( array(
 			'post_type'   => 'plugin',
 			'name'        => $plugin_slug,
-			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft' ),
+			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft', 'approved' ),
 		) );
 		if ( ! $posts ) {
 			return false;
@@ -542,7 +549,7 @@ class Plugin_Directory {
 	static public function create_plugin_post( array $plugin_info ) {
 		$title   = ! empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
 		$slug    = ! empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
-		$status  = ! empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'pending';
+		$status  = ! empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'draft';
 		$author  = ! empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
 		$desc    = ! empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
 		$content = ! empty( $plugin_info['content'] )     ? $plugin_info['content']     : '';
