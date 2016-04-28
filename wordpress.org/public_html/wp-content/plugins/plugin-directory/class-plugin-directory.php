@@ -205,6 +205,7 @@ class Plugin_Directory {
 	public function register_widgets() {
 		register_widget( __NAMESPACE__ . '\Widgets\Metadata' );
 		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
+		register_widget( __NAMESPACE__ . '\Widgets\Support' );
 	}
 
 	/**
