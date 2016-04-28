@@ -11,7 +11,7 @@ Text Domain: wporg
 
 if ( !class_exists('Meeting_Post_Type') ):
 class Meeting_Post_Type {
-	
+
 	protected static $instance = NULL;
 
 	public static function getInstance() {
@@ -34,7 +34,7 @@ class Meeting_Post_Type {
 	}
 
 	public function meeting_add_custom_columns( $columns ) {
-		$columns = array_slice( $columns, 0, 1, true ) 
+		$columns = array_slice( $columns, 0, 1, true )
 			+ array( 'team' => __('Team', 'wporg') )
 			+ array_slice( $columns, 1, null, true );
 		return $columns;
@@ -66,7 +66,7 @@ class Meeting_Post_Type {
 						'key'=>'recurring',
 						'value'=>array('weekly','monthly', '1'),
 						'compare'=>'NOT IN',
-					), 
+					),
 					array(
 						'key'=>'start_date',
 						'type'=>'DATE',
@@ -104,7 +104,7 @@ class Meeting_Post_Type {
 		add_filter( 'get_meta_sql', function ($sql) {
 			return str_replace( "'CURDATE()'", 'CURDATE()', $sql );
 		} );
-	
+
 	}
 
 	public function meeting_set_next_meeting( $posts, $query ) {
@@ -151,7 +151,7 @@ class Meeting_Post_Type {
 		return $posts;
 	}
 
-	
+
 	public function register_meeting_post_type() {
 	    $labels = array(
 	        'name'                => _x( 'Meetings', 'Post Type General Name', 'wporg' ),
@@ -208,7 +208,7 @@ class Meeting_Post_Type {
 			'high'
 		);
 	}
-	
+
 	function render_meta_boxes( $post ) {
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_style( 'jquery-ui-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css', true);
@@ -226,7 +226,7 @@ class Meeting_Post_Type {
 		$location = ! isset( $meta['location'][0] ) ? '' : $meta['location'][0];
 		wp_nonce_field( 'save_meeting_meta_'.$post->ID , 'meeting_nonce' );
 		?>
-		
+
 		<p>
 		<label for="team"><?php _e( 'Team: ', 'wporg' ); ?>
 			<input type="text" id="team" name="team" class="regular-text wide" value="<?php echo esc_attr($team); ?>">
@@ -247,7 +247,7 @@ class Meeting_Post_Type {
 		<label for="recurring"><?php _e( 'Recurring: ', 'wporg' ); ?>
 			<label for="weekly"><?php _e( 'Weekly', 'wporg' ); ?></label>
 			<input type="radio" name="recurring" value="weekly" class="regular-radio" <?php checked( $recurring, 'weekly' ); ?>>
-			<label for="monthly"><?php _e( 'Monthly', 'wporg' ); ?></label>			
+			<label for="monthly"><?php _e( 'Monthly', 'wporg' ); ?></label>
 			<input type="radio" name="recurring" value="monthly" class="regular-radio" <?php checked( $recurring, 'monthly' ); ?>>
 		</label>
 		</p>
@@ -286,7 +286,7 @@ class Meeting_Post_Type {
 	function save_meta_boxes( $post_id ) {
 
 		global $post;
-		
+
 		// Verify nonce
 		if ( !isset( $_POST['meeting_nonce'] ) || !wp_verify_nonce( $_POST['meeting_nonce'], 'save_meeting_meta_'.$post_id ) ) {
 			return $post_id;
@@ -313,7 +313,7 @@ class Meeting_Post_Type {
 		$recurring = ! isset( $meta['recurring'][0] ) ? '' : $meta['recurring'][0];
 		$link = ! isset( $meta['link'][0] ) ? '' : $meta['link'][0];
 		$location = ! isset( $meta['location'][0] ) ? '' : $meta['location'][0];
-		
+
 		$meta['team'] = ( isset( $_POST['team'] ) ? esc_textarea( $_POST['team'] ) : '' );
 		$meta['start_date'] = ( isset( $_POST['start_date'] ) ? esc_textarea( $_POST['start_date'] ) : '' );
 		$meta['end_date'] = ( isset( $_POST['end_date'] ) ? esc_textarea( $_POST['end_date'] ) : '' );
