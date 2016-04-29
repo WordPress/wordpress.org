@@ -227,6 +227,10 @@ class DevHub_Formatting {
 	 * @return string
 	 */
 	public static function format_param_description( $text ) {
+		// Undo parser's Markdown conversion of '*' to `<em>` and `</em>`.
+		// In pretty much all cases, the docs mean literal '*' and never emphasis.
+		$text = str_replace( array( '<em>', '</em>' ), '*', $text );
+
 		// Encode all htmlentities (but don't double-encode).
 		$text = htmlentities( $text, ENT_COMPAT | ENT_HTML401, 'UTF-8', false );
 
@@ -236,6 +240,14 @@ class DevHub_Formatting {
 		$allowable_tags = array( 'code' );
 		foreach ( $allowable_tags as $tag ) {
 			$text = str_replace( array( "&lt;{$tag}&gt;", "&lt;/{$tag}&gt;" ), array( "<{$tag}>", "</{$tag}>" ), $text );
+		}
+
+		// Convert asterisks to a list.
+		// Inline lists in param descriptions aren't handled by parser.
+		// Example: https://developer.wordpress.org/reference/functions/add_menu_page/
+		if ( false !== strpos( $text, ' * ' ) )  {
+			// Display as simple plaintext list.
+			$text = str_replace( ' * ', '<br /> * ', $text );
 		}
 
 		// Convert any @link or @see to actual link.
