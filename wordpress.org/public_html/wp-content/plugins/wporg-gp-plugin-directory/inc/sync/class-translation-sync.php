@@ -52,6 +52,7 @@ class Translation_Sync {
 
 		$time = date( 'r' );
 		$message = "_Time: {$time}_\nTranslation sync from {$sub_project} to {$sub_project_counterpart} in process...\n";
+		$updates = 0;
 		foreach ( $translation_sets as $translation_set ) {
 			if ( 0 == $translation_set->current_count() ) {
 				continue;
@@ -59,11 +60,21 @@ class Translation_Sync {
 
 			// Sync translations in a separate process.
 			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug );
-			$output = shell_exec( $cmd );
-			if ( 'No translations available.' !== $output ) {
-				$message .= "\t" . $output;
+			$output = '';
+			$return_var = 0;
+			exec( $cmd, $output, $return_var );
+			if ( $return_var ) {
+				$message .= "\tFailure: " . implode( "\n\t", $output ) . "\n";
+			} else {
+				$message .= "\t" . implode( "\n\t", $output ) . "\n";
 			}
+			$updates += 1;
 		}
+
+		if ( ! $updates ) {
+			$message .= "\tNo translations are available to sync.\n";
+		}
+
 		$message .= 'Translation sync was successfully processed.';
 
 		$attachment = [
