@@ -676,6 +676,7 @@ namespace DevHub {
 		$return      = array_shift( $return );
 		$description = empty( $return['content'] ) ? '' : \DevHub_Formatting::make_doclink_clickable( $return['content'] );
 		$type        = empty( $return['types'] ) ? '' : esc_html( implode( '|', $return['types'] ) );
+		$type        = apply_filters( 'devhub-function-return-type', $type, $post_id );
 
 		return "<span class='return-type'>({$type})</span> $description";
 	}

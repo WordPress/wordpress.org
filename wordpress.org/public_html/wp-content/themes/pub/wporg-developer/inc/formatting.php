@@ -34,6 +34,8 @@ class DevHub_Formatting {
 
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
 		add_action( 'the_content', array( __CLASS__, 'fix_unintended_markdown' ) );
+
+		add_filter( 'devhub-function-return-type', array( __CLASS__, 'autolink_references' ) );
 	}
 
 	/**
