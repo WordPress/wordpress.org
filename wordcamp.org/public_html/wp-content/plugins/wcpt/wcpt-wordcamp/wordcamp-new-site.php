@@ -181,6 +181,8 @@ class WordCamp_New_Site {
 			}
 		}
 
+		add_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );
+
 		foreach ( $sponsors as $sponsor ) {
 			// Skip existing sponsors.
 			if ( in_array( absint( $sponsor['meta']['_mes_id'] ), $existing_sponsors ) ) {
@@ -219,7 +221,30 @@ class WordCamp_New_Site {
 			}
 		}
 
+		remove_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );
+
 		restore_current_blog();
+	}
+
+	/**
+	 * Fix upload directories when in a switched to blog context.
+	 *
+	 * WordCamp.org runs with WordPress in its own directory (mu) as an external.
+	 * When switching to a subsite, WordPress thinks the upload directory is
+	 * relative to ABSPATH, so we need so trip out the /mu part.
+	 *
+	 * @param array $data Data from wp_upload_dir().
+	 *
+	 * @return array Result.
+	 */
+	public function _fix_wc_upload_dir( $data ) {
+        $data['path'] = str_replace( '/home/wordcamp/public_html/mu/wp-content',
+			'/home/wordcamp/public_html/wp-content', $data['path'] );
+
+        $data['basedir'] = str_replace( '/home/wordcamp/public_html/mu/wp-content',
+			'/home/wordcamp/public_html/wp-content', $data['basedir'] );
+
+        return $data;
 	}
 
 	/**
