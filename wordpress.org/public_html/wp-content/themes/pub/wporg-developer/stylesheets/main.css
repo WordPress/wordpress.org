@@ -1286,6 +1286,7 @@ input {
   /* Slightly increase the line height for more readability */
   list-style-type: none;
   margin: 0;
+  overflow-x: auto;
 }
 .devhub-wrap .usage .show-more, .devhub-wrap .usage .hide-more {
   display: none;
