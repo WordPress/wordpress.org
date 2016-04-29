@@ -30,6 +30,7 @@ class DevHub_Formatting {
 		add_filter( 'the_excerpt', array( __CLASS__, 'autolink_references' ), 11 );
 		add_filter( 'the_content', array( __CLASS__, 'autolink_references' ), 11 );
 		add_filter( 'devhub-format-description', array( __CLASS__, 'autolink_references' ) );
+		add_filter( 'devhub-parameter-type', array( __CLASS__, 'autolink_references' ) );
 
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
 		add_action( 'the_content', array( __CLASS__, 'fix_unintended_markdown' ) );

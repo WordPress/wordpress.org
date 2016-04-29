@@ -555,7 +555,7 @@ namespace DevHub {
 					$params[ $tag['variable'] ] = $tag;
 					$types = array();
 					foreach ( $tag['types'] as $i => $v ) {
-						$types[ $i ] = "<span class=\"{$v}\">{$v}</span>";
+						$types[ $i ] = sprintf( '<span class="%s">%s</span>', $v, apply_filters( 'devhub-parameter-type', $v, $post_id ) );
 					}
 
 					// Normalize spacing at beginning of hash notation params.
