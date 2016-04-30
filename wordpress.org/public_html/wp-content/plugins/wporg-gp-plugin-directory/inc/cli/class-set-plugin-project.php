@@ -51,11 +51,19 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			exit( 2 );
 		}
 
-		// Get plugin details like title and description.
+		// Get plugin details from the API.
 		$plugin_details = $this->get_plugin_details( $plugin_slug );
 		if ( ! $plugin_details ) {
-			WP_CLI::line( "The plugin API couldn't be reached." );
-			exit( 3 );
+			WP_CLI::warning( "The plugin API couldn't be reached." );
+
+			/*
+			 * That's usally the case for the initial commit.
+			 * Provide a mockup which contains the necessary plugin details.
+			 */
+			$plugin_details = new stdClass();
+			$plugin_details->name = $plugin_slug;
+			$plugin_details->short_description = '';
+			$plugin_details->stable_tag = 'trunk';
 		}
 
 		// Get or create the plugin GP project.
