@@ -36,8 +36,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		if ( ! preg_match( '/^[^\/]+$/', $args[0] ) ) {
-			WP_CLI::line( sprintf( "The plugin slug '%s' contains invalid characters.", $args[0] ) );
-			exit( 1 );
+			WP_CLI::error( sprintf( "The plugin slug '%s' contains invalid characters.", $args[0] ), 1 );
 		}
 
 		$plugin_slug         = $args[0];
@@ -47,8 +46,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 		// Get data for master parent project.
 		$master_project = GP::$project->by_path( $this->master_project_path );
 		if ( ! $master_project ) {
-			WP_CLI::line( sprintf( "The master project '%s' couldn't be found.", $this->master_project_path ) );
-			exit( 2 );
+			WP_CLI::error( sprintf( "The master project '%s' couldn't be found.", $this->master_project_path ), 2 );
 		}
 
 		// Get plugin details from the API.
@@ -85,8 +83,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 
 			$plugin_project = GP::$project->create_and_select( $project_args );
 			if ( ! $plugin_project ) {
-				WP_CLI::line( "Couldn't create project for {$plugin_project_path}." );
-				exit( 5 );
+				WP_CLI::error( "Couldn't create project for {$plugin_project_path}.", 5 );
 			}
 		} else {
 			WP_CLI::line( "Updating project for {$plugin_project_path}." );
