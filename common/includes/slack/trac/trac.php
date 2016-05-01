@@ -93,7 +93,7 @@ class Trac implements User {
 
 		$ns = __NAMESPACE__ . '\\Tracs\\';
 
-		$class = $ns . $trac;	
+		$class = $ns . $trac;
 		if ( class_exists( $class ) ) {
 			return new $class;
 		}
@@ -102,7 +102,7 @@ class Trac implements User {
 			$class = $ns . self::$shorthands[ $trac ];
 			return new $class;
 		}
-		
+
 		if ( preg_match( '~([a-z]+).trac.wordpress.org~', $trac, $match ) ) {
 			$class = $ns . $match[1];
 			if ( class_exists( $class ) ) {
@@ -251,13 +251,22 @@ class Trac implements User {
 		}
 
 		if ( isset( $ticket->component ) && isset( $this->ticket_component_filters[ $ticket->component ] ) ) {
-			$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $ticket->component ] );
+			if ( is_string( $this->ticket_component_filters[ $ticket->component ] ) ) {
+				$channels = array_merge( $channels, array( $this->ticket_component_filters[ $ticket->component ] => true ) );
+			} else {
+				$channels = array_merge( $channels, $this->ticket_component_filters[ $ticket->component ] );
+			}
 		}
 
 		if ( isset( $ticket->focuses ) ) {
 			foreach ( explode( ', ', $ticket->focuses ) as $focus ) {
-				if ( isset( $this->ticket_component_filters[ $focus ] ) ) {
-					$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $focus ] );
+				if ( ! isset( $this->ticket_component_filters[ $focus ] ) ) {
+					continue;
+				}
+				if ( is_string( $this->ticket_component_filters[ $focus ] ) ) {
+					$channels = array_merge( $channels, array( $this->ticket_component_filters[ $focus ] => true ) );
+				} else {
+					$channels = array_merge( $channels, $this->ticket_component_filters[ $focus ] );
 				}
 			}
 		}
@@ -276,14 +285,14 @@ class Trac implements User {
 	function get_ticket_format( $channel ) {
 		if ( $channel === $this->primary_channel ) {
 			return $this->primary_channel_ticket_format;
-		}		
+		}
 		return 'description';
 	}
 
 	static function format_for_slack( $text ) {
 		$text = str_replace( "\r\n", "\n", $text );
 		$text = trim( str_replace(
-			array( "\n{{{\n", "\n}}}\n", '{{{', '}}}' ),	
+			array( "\n{{{\n", "\n}}}\n", '{{{', '}}}' ),
 			array( "\n```\n", "\n```\n", '`',   '`' ),
 			"\n$text\n"
 		), "\n" );
