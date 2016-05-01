@@ -1,19 +1,13 @@
-#!/usr/bin/env php
 <?php
 /**
  * This script receives mail directly from Trac and sends tickets and commits to Slack.
- *
- * New tickets are merely identified here. It is then passed off to the API.
- * That will change when the libraries are merged.
- *
- * New comments are processed here and sent to Slack.
  */
 
-define( 'INC', dirname( __DIR__ ) . '/includes/slack-trac-hooks' );
-// This is a shared secret so the Trac server can ping the API server for processing tickets.
-define( 'NEW_TICKET_API', 'https://api.wordpress.org/dotorg/slack/newticket.php?token=...' );
-// Comments are processed and posted directly from here.
-define( 'SLACK_SENDING_HOOK', 'https://hooks.slack.com/services/...' );
+require '/home/svn/bin/includes/slack/autoload.php';
+
+define( 'WEBHOOK', 'https://hooks.slack.com/services/...' );
+define( 'MENTIONS_API_HANDLER', 'https://api.wordpress.org/dotorg/trac/mentions-handler.php' );
+define( 'MENTIONS_API_KEY', '...' );
 
 $lines = array();
 while ( $line = fgets( STDIN ) ) {
@@ -36,37 +30,79 @@ foreach ( $lines as $line ) {
 }
 
 if ( empty( $type ) ) {
-	exit( 1 );
+	return;
 }
 
 if ( $type === 'ticket' ) {
-	slack_ticket_hook( $trac, $ticket );
+	$trac = \Dotorg\Slack\Trac\Trac::get( $trac );
+	if ( ! $trac->is_public() ) {
+		// Comment emails are parsed, but ticket emails are
+		// only used as a trigger for an HTTP request to the
+		// ticket to retrieve a CSV. Bail for non-public tickets.
+		return;
+	}
+
+	$new_ticket = new \Dotorg\Slack\Trac\New_Ticket( $trac, $ticket );
+
+	foreach ( $trac->get_ticket_channels( $new_ticket ) as $channel ) {
+		$send = new \Dotorg\Slack\Send( WEBHOOK );
+		$send->set_user( $new_ticket );
+
+		if ( 'title' === $trac->get_ticket_format( $channel ) ) {
+			$send->set_text( $new_ticket->get_text() );
+		} else {
+			$send->add_attachment( $new_ticket->get_attachment() );
+		}
+
+		$send->send( $channel );
+	}
+	$payload = (array) $new_ticket->fetch();
+	array_shift( $payload );
+	$payload['ticket_id'] = $new_ticket->id;
+	$payload['ticket_url'] = $new_ticket->get_url();
+	$payload['trac'] = $trac->get_slug();
+	maybe_add_ticket_cc_to_payload( $payload );
+	send_mentions_payload( $payload );
 } else {
-	require INC . '/comments.php';
-	require INC . '/trac.php';
-	require INC . '/config.php';
-	$args = Dotorg\SlackTracHooks\Comments\process_message( $lines );
-	$args['trac']   = $trac;
-	$args['ticket'] = $ticket;
-	$args['ticket_url']  = $ticket_url;
-	$args['comment_url'] = $comment_url;
-	Dotorg\SlackTracHooks\Comments\send( SLACK_SENDING_HOOK, $args );
+	$send = new \Dotorg\Slack\Send( WEBHOOK );
+	$handler = new \Dotorg\Slack\Trac\Comment_Handler( $send, $lines );
+	$handler->run();
+
+	if ( false !== strpos( $handler->comment, '#!CommitTicketReference' ) ) {
+		return;
+	}
+
+	$payload = compact( 'type', 'trac' );
+	$properties = array( 'author', 'comment', 'changes', 'ticket_id', 'ticket_url', 'comment_id', 'comment_url' );
+	foreach ( $properties as $property ) {
+		$payload[ $property ] = $handler->$property;
+	}
+	$payload['summary'] = $handler->title;
+	maybe_add_ticket_cc_to_payload( $payload );
+	send_mentions_payload( $payload );
 }
 
-function slack_ticket_hook( $trac, $ticket ) {
-	$payload = array(
-		'trac'   => $trac,
-		'ticket' => $ticket,
-	);
+function send_mentions_payload( $payload ) {
+	$payload = json_encode( $payload );
+	$secret  = MENTIONS_API_KEY;
+	$content = http_build_query( compact( 'payload', 'secret' ) );
 
 	$context = stream_context_create( array(
 		'http' => array(
 			'method'  => 'POST',
 			'header'  => 'Content-Type: application/x-www-form-urlencoded' . PHP_EOL,
-			'content' => http_build_query( $payload ),
+			'content' => $content,
 		),
 	) );
 
-	file_get_contents( NEW_TICKET_API, false, $context );
+	return file_get_contents( MENTIONS_API_HANDLER, false, $context );
 }
 
+function maybe_add_ticket_cc_to_payload( &$payload ) {
+	if ( $payload['trac'] === 'security' && file_exists( __DIR__ . '/security-trac-cc.sh' ) ) {
+		$cc = trim( shell_exec( escapeshellcmd( __DIR__ . '/security-trac-cc.sh ' . escapeshellarg( (int) $payload['ticket_id'] ) ) ) );
+		if ( $cc ) {
+			$payload['cc'] = $cc;
+		}
+	}
+}
