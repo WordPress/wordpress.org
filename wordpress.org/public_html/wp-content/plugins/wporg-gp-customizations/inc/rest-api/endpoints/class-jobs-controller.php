@@ -23,21 +23,27 @@ class Jobs_Controller extends Base {
 				'permission_callback' => [ $this, 'permission_check_internal_api_bearer' ],
 				'args'                => [
 					'timestamp'  => [
+						'description'       => 'Timestamp for when to run the job.',
 						'required'          => true,
 						'sanitize_callback' => 'absint',
 						'validate_callback' => [ $this, 'validate_timestamp' ],
 					],
 					'recurrence' => [
+						'description'       => 'How often the job should rerun.',
 						'required'          => true,
+						'enum'              => array_merge( [ 'once' ], array_keys( wp_get_schedules() ) ),
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => [ $this, 'validate_recurrence' ],
 					],
 					'hook'       => [
+						'description'       => 'Action hook to execute when cron is run. Must be prefixed with `wporg_translate_`.',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => [ $this, 'validate_hook' ],
 					],
 					'args'       => [
-						'default' => [],
+						'description'       => 'Arguments to pass to the hook\'s callback function.',
+						'default'           => [],
 						'validate_callback' => [ $this, 'validate_args' ],
 					],
 				],
@@ -48,16 +54,20 @@ class Jobs_Controller extends Base {
 				'permission_callback' => [ $this, 'permission_check_internal_api_bearer' ],
 				'args'                => [
 					'timestamp'  => [
+						'description'       => 'Timestamp for the next run of the job.',
 						'required'          => true,
 						'sanitize_callback' => 'absint',
 						'validate_callback' => [ $this, 'validate_timestamp' ],
 					],
 					'hook'       => [
+						'description'       => 'Action hook to execute when cron is run. Must be prefixed with `wporg_translate_`.',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => [ $this, 'validate_hook' ],
 					],
 					'args'       => [
-						'default' => [],
+						'description'       => 'Arguments to pass to the hook\'s callback function.',
+						'default'           => [],
 						'validate_callback' => [ $this, 'validate_args' ],
 					],
 				],
@@ -156,6 +166,20 @@ class Jobs_Controller extends Base {
 		$schedules = wp_get_schedules();
 
 		if ( isset( $schedules[ $recurrence ] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Validates an action hook.
+	 *
+	 * @param string $hook The action hook to validate.
+	 * @return bool True if valid, false if not.
+	 */
+	public function validate_hook( $hook ) {
+		if ( 0 === strpos( $hook, 'wporg_translate_' ) ) {
 			return true;
 		}
 
