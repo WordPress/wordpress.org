@@ -43,6 +43,7 @@ if ( $type === 'ticket' ) {
 	}
 
 	$new_ticket = new \Dotorg\Slack\Trac\New_Ticket( $trac, $ticket );
+	$new_ticket->fetch();
 
 	foreach ( $trac->get_ticket_channels( $new_ticket ) as $channel ) {
 		$send = new \Dotorg\Slack\Send( WEBHOOK );
