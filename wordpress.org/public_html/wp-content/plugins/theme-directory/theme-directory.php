@@ -954,15 +954,37 @@ add_action( 'suspend_repopackage', 'wporg_themes_glotpress_mark_as_inactive_on_s
  * @param string      $version    The version of the theme to import, or 'inactive' to mark the translation project inactive.
  */
 function wporg_themes_glotpress_import( $theme_post, $version ) {
+	if ( ! defined( 'TRANSLATE_API_INTERNAL_BEARER_TOKEN' ) ) {
+		return;
+	}
+
 	$theme_post = get_post( $theme_post );
 
 	if ( ! $theme_post || ! $version ) {
 		return;
 	}
 
-	$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $theme_post->post_name ) . ' ' . escapeshellarg( $version );
-
-	shell_exec( $cmd );
+	wp_remote_post( 'https://translate.wordpress.org/wp-json/translate/v1/jobs', array(
+		'body'       => json_encode(
+			array(
+				'timestamp'  => time() + 2 * 60,
+				'recurrence' => 'once',
+				'hook'       => 'wporg_translate_import_or_update_theme',
+				'args'       => array(
+					array(
+						'theme'   => $theme_post->post_name,
+						'version' => $version,
+					),
+				),
+			)
+		),
+		'headers'    => array(
+			'Content-Type'  => 'application/json',
+			'Authorization' => 'Bearer ' . TRANSLATE_API_INTERNAL_BEARER_TOKEN,
+		),
+		'blocking'   => false,
+		'user-agent' => 'WordPress.org Themes Import',
+	) );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_glotpress_import', 100, 2 );
 
