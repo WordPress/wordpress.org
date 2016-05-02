@@ -22,7 +22,7 @@ class Translation_Sync {
 		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_sync' ), 5 );
 		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_sync' ), 5 );
 
-		add_action( 'sync_plugin_translations', array( $this, 'sync_plugin_translations_on_commit' ) );
+		add_action( 'wporg_translate_sync_plugin_translations', array( $this, 'sync_plugin_translations_on_commit' ) );
 
 		add_action( 'shutdown', array( $this, 'sync_translations' ) );
 	}
@@ -30,7 +30,7 @@ class Translation_Sync {
 	/**
 	 * Starts the sync of plugin translations between two projects.
 	 *
-	 * Gets triggered by the cron API and the hook `sync_plugin_translations`.
+	 * Gets triggered by the cron API and the hook `wporg_translate_sync_plugin_translations`.
 	 *
 	 * @param array $args Arguments from the job. Should include the path
 	 *                    of the GP project.
