@@ -251,22 +251,13 @@ class Trac implements User {
 		}
 
 		if ( isset( $ticket->component ) && isset( $this->ticket_component_filters[ $ticket->component ] ) ) {
-			if ( is_string( $this->ticket_component_filters[ $ticket->component ] ) ) {
-				$channels = array_merge( $channels, array( $this->ticket_component_filters[ $ticket->component ] => true ) );
-			} else {
-				$channels = array_merge( $channels, $this->ticket_component_filters[ $ticket->component ] );
-			}
+			$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $ticket->component ] );
 		}
 
 		if ( isset( $ticket->focuses ) ) {
 			foreach ( explode( ', ', $ticket->focuses ) as $focus ) {
-				if ( ! isset( $this->ticket_component_filters[ $focus ] ) ) {
-					continue;
-				}
-				if ( is_string( $this->ticket_component_filters[ $focus ] ) ) {
-					$channels = array_merge( $channels, array( $this->ticket_component_filters[ $focus ] => true ) );
-				} else {
-					$channels = array_merge( $channels, $this->ticket_component_filters[ $focus ] );
+				if ( isset( $this->ticket_component_filters[ $focus ] ) ) {
+					$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $focus ] );
 				}
 			}
 		}
