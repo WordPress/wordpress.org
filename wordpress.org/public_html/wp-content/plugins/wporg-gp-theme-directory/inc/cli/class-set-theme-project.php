@@ -1,6 +1,13 @@
 <?php
 
-class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
+namespace WordPressdotorg\GlotPress\Theme_Directory\CLI;
+
+use GP;
+use MakePOT;
+use WP_CLI;
+use WP_CLI_Command;
+
+class Set_Theme_Project extends WP_CLI_Command {
 
 	/**
 	 * Holds the path of the master project.
@@ -164,6 +171,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 	 *
 	 * @param string $theme_slug The theme slug to generate the project from.
 	 * @param array  $theme_data The theme data (headers + screenshot) from get_theme_data().
+	 * @return \GP_Project|false GP project on success, false on failure.
 	 */
 	private function find_create_update_glotpress_project( $theme_slug, $theme_data ) {
 		$parent_project = GP::$project->by_path( $this->master_project_path );
@@ -175,7 +183,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 			'description'         => $theme_data['description'] . "<br><br><a href='https://wordpress.org/themes/{$theme_slug}'>WordPress.org Theme Page</a>",
 			'parent_project_id'   => $parent_project->id,
 			'source_url_template' => "https://themes.trac.wordpress.org/browser/$theme_slug/{$theme_data['version']}/%file%#L%line%",
-			'active'              => 1
+			'active'              => 1,
 		);
 
 		$project = GP::$project->by_path( $project_path );
@@ -215,7 +223,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 		$project = GP::$project->by_path( "{$this->master_project_path}/{$theme_slug}" );
 		if ( $project ) {
 			$project->save( array(
-				'active' => 0
+				'active' => 0,
 			) );
 		}
 	}
@@ -239,7 +247,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 				continue;
 			}
 
-			WP_CLI::line( sprintf( "Creating translation set %s (%s)", $set->name, $set->locale . ( $set->slug != 'default' ? '/' . $set->slug : '' ) ) );
+			WP_CLI::line( sprintf( 'Creating translation set %s (%s)', $set->name, $set->locale . ( $set->slug != 'default' ? '/' . $set->slug : '' ) ) );
 
 			GP::$translation_set->create( array(
 				'project_id' => $project->id,
@@ -254,7 +262,7 @@ class WPorg_GP_CLI_Set_Theme_Project extends WP_CLI_Command {
 	 * Imports a pot file into GlotPress, also alters the priority for various fields.
 	 *
 	 * @param string     $pot_file The themes pot file to import.
-	 * @param GP_Project $project  The theme project to import into.
+	 * @param \GP_Project $project  The theme project to import into.
 	 */
 	private function import_pot_to_glotpress( $pot_file, $project ) {
 		$format = gp_array_get( GP::$formats, 'po', null );
