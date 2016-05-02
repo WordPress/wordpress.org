@@ -30,7 +30,7 @@ class Translation_Sync {
 	/**
 	 * Starts the sync of plugin translations between two projects.
 	 *
-	 * Gets trigged by the cron API and the hook `sync_plugin_translations`.
+	 * Gets triggered by the cron API and the hook `sync_plugin_translations`.
 	 *
 	 * @param array $args Arguments from the job. Should include the path
 	 *                    of the GP project.
