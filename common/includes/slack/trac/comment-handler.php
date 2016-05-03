@@ -131,7 +131,6 @@ class Comment_Handler {
 		$this->ticket_url  = $ticket_url;
 		$this->comment_id  = $comment_id;
 		$this->comment_url = $comment_url;
-		var_dump($this);exit;
 	}
 
 	function format_comment_for_slack() {
