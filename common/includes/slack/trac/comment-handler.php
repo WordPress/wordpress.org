@@ -94,7 +94,7 @@ class Comment_Handler {
 		// Remove empty line before footer.
 		array_pop( $lines );
 
-		preg_match( '/^(Comment|Changes|Description changed) \(?by (.*)\)?:$/', array_shift( $lines ), $matches );
+		preg_match( '/^(Comment|Changes|Description changed) \(?by (.*[^\)])\)?:$/', array_shift( $lines ), $matches );
 		$has_changes = $matches[1] === 'Changes';
 		$author = $matches[2];
 
@@ -131,6 +131,7 @@ class Comment_Handler {
 		$this->ticket_url  = $ticket_url;
 		$this->comment_id  = $comment_id;
 		$this->comment_url = $comment_url;
+		var_dump($this);exit;
 	}
 
 	function format_comment_for_slack() {
