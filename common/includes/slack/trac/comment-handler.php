@@ -94,11 +94,11 @@ class Comment_Handler {
 		// Remove empty line before footer.
 		array_pop( $lines );
 
-		preg_match( '/^(Comment|Changes) \(by (.*)\):$/', array_shift( $lines ), $matches );
+		preg_match( '/^(Comment|Changes|Description changed) \(?by (.*)\)?:$/', array_shift( $lines ), $matches );
 		$has_changes = $matches[1] === 'Changes';
 		$author = $matches[2];
 
-		// Remove blank line after 'Comment|Changes (by author):'
+		// Remove blank line after 'Comment|Changes (by author):' or 'Description changed by author:'.
 		array_shift( $lines );
 
 		$changes = $comment = array();
