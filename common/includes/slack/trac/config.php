@@ -30,6 +30,7 @@ class Core extends Trac {
 		'#wp-(admin|includes)/ms-#'        => '#core-multisite',
 		'wp-admin/network'                 => '#core-multisite',
 		'#wp-admin/includes/(ms|network)#' => '#core-multisite',
+		'rest-api'                         => '#core-restapi',
 	);
 
 	/**
@@ -41,6 +42,7 @@ class Core extends Trac {
 		'Press This'         => '#core-pressthis',
 		'multisite'          => '#core-multisite',
 		'Networks and Sites' => '#core-multisite',
+		'REST API'           => '#core-restapi',
 	);
 }
 
