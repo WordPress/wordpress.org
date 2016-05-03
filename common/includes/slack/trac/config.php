@@ -36,9 +36,11 @@ class Core extends Trac {
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
-		'Bundled Theme' => array( '#core-themes' => true, '#core' => false ),
-		'Customize'     => '#core-customize',
-		'Press This'    => '#core-pressthis',
+		'Bundled Theme'      => array( '#core-themes' => true, '#core' => false ),
+		'Customize'          => '#core-customize',
+		'Press This'         => '#core-pressthis',
+		'multisite'          => '#core-multisite',
+		'Networks and Sites' => '#core-multisite',
 	);
 }
 
