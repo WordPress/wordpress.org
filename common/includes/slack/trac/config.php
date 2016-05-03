@@ -93,7 +93,7 @@ class bbPress extends Trac {
 		'branches/1.' => '#meta',
 	);
 
-	protected $color = '#080';
+	protected $color = '#2d8e42';
 	protected $icon  = ':bbpress:';
 }
 
