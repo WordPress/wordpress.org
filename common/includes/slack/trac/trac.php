@@ -24,7 +24,7 @@ class Trac implements User {
 	protected $commit_path_filters = array();
 	protected $ticket_component_filters = array();
 
-	protected $color = '#21759b';
+	protected $color = '#0073aa';
 	protected $icon  = ':wordpress:';
 
 	protected $url_template    = 'https://%s.trac.wordpress.org';
