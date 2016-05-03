@@ -29,6 +29,7 @@ class Comment_Handler {
 
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
+		$base64 = false;
 
 		// Trim off headers.
 		while ( $lines && '' !== current( $lines ) ) {
@@ -48,12 +49,14 @@ class Comment_Handler {
 			}
 		}
 
-		if ( ! empty( $base64 ) ) {
+		if ( $base64 ) {
 			$lines = explode( "\n", base64_decode( implode( "\n", $lines ) ) );
 		}
 
-		// Remove empty line between headers and body.
-		array_shift( $lines );
+		// Remove empty line between headers and body if not base64.
+		if ( ! $base64 ) {
+			array_shift( $lines );
+		}
 
 		$title = '';
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
