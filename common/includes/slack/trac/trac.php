@@ -250,6 +250,11 @@ class Trac implements User {
 			$channels[ $this->tickets_channel ] = true;
 		}
 
+		// Component and focuses are needed for the component filters.
+		if ( $ticket instanceof Ticket  ) {
+			$ticket->fetch();
+		}
+
 		if ( isset( $ticket->component ) && isset( $this->ticket_component_filters[ $ticket->component ] ) ) {
 			$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $ticket->component ] );
 		}
