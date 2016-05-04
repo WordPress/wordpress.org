@@ -657,12 +657,24 @@ class Jetpack_Search {
 		return array( 
 			 'function_score' => array(
 				 'query' => $query,
-				 'gauss'=> array(
-					 'date_gmt' => array(
-						 'origin' => $date_origin,
-						 'scale' => $date_scale,
-						 'decay' => $date_decay
-				 ) ),
+				 'functions' => array(
+					 array(
+						 'gauss'=> array(
+							 'date_gmt' => array(
+								 'origin' => $date_origin,
+								 'scale' => $date_scale,
+								 'decay' => $date_decay,
+							 ) ),
+					 ),
+					array(
+						'field_value_factor' => array(
+							'field' => 'comment_count',
+							'factor' => 1.0,
+							'modifier' => 'log1p',
+						),
+					),
+
+				 ),
 				 'boost_mode' => 'multiply'
 		) );
 	}
