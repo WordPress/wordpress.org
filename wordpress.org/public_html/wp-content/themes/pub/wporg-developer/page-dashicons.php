@@ -200,6 +200,7 @@ get_header(); ?>
 					<div alt="f163" class="dashicons dashicons-list-view">list view</div>
 					<div alt="f164" class="dashicons dashicons-exerpt-view">exerpt view</div>
 					<div alt="f509" class="dashicons dashicons-grid-view">grid view</div>
+					<div alt="f545" class="dashicons dashicons-move">move</div>
 
 					<h4><?php _e( 'Social', 'wporg' ); ?></h4>
 
@@ -310,6 +311,7 @@ get_header(); ?>
 					<div alt="f339" class="dashicons dashicons-lightbulb">lightbulb</div>
 					<div alt="f482" class="dashicons dashicons-microphone">microphone mic</div>
 					<div alt="f472" class="dashicons dashicons-desktop">desktop monitor</div>
+					<div alt="f547" class="dashicons dashicons-laptop">laptop</div>
 					<div alt="f471" class="dashicons dashicons-tablet">tablet ipad</div>
 					<div alt="f470" class="dashicons dashicons-smartphone">smartphone iphone</div>
 					<div alt="f525" class="dashicons dashicons-phone">phone</div>
@@ -325,6 +327,7 @@ get_header(); ?>
 					<div alt="f529" class="dashicons dashicons-thumbs-up">thumbs up</div>
 					<div alt="f542" class="dashicons dashicons-thumbs-down">thumbs down</div>
 					<div alt="f538" class="dashicons dashicons-layout">layout</div>
+					<div alt="f546" class="dashicons dashicons-paperclip">paperclip</div>
 				</div>
 
 			</div>
