@@ -129,6 +129,9 @@ class Jetpack_Search {
 		// Hook into the_posts to return posts from the ES results
 		add_filter( 'the_posts', array( $this, 'filter__the_posts' ), 5, 2 );
 
+		// Let ES worry about stopwords
+		add_filter( 'wp_search_stopwords', '__return_empty_array', 5 );
+
 		add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'filter__add_date_filter_to_query' ), 10, 2 );
 	}
 
