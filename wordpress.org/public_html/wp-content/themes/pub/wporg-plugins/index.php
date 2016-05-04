@@ -6,6 +6,8 @@ get_header();
 
 <?php get_template_part( 'filter-bar' ); ?>
 
+<?php get_template_part( 'pagination-bar' ); ?>
+
 <div class="wrapper">
 	<div class="col-12" itemscope itemtype="http://schema.org/SoftwareApplication">
 		<?php get_template_part( 'view-intro' ); ?>
@@ -27,6 +29,8 @@ get_header();
 
 	</div>
 </div>
+
+<?php get_template_part( 'pagination-bar' ); ?>
 
 <br class="clear" />
 <?php

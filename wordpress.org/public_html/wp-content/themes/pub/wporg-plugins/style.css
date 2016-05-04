@@ -1513,3 +1513,47 @@ input[type=search] {
 	float: left;
 	margin-left: 5px;
 }
+
+.page-numbers {
+	font-size: 11px;
+	line-height: 1;
+	padding: 4px 6px;
+	margin-right: 3px;
+	border-width: 1px;
+	border-style: solid;
+	background-color: #fff;
+	border-color: #ccc;
+	display: inline-block;
+	text-align: center;
+}
+
+.dots {
+	background: none;
+	border: none;
+}
+
+.page-numbers.current {
+	font-weight: bold;
+	border-width: 1px;
+	border-style: solid;
+	background-color: #328ab2;
+	border-color: #328ab2;
+	color: #fff;
+}
+
+a.page-numbers:hover {
+	border-color: #999;
+}
+
+.next,
+.prev {
+	padding: 0;
+	border: none;
+	background-color: #fff;
+	color: #2583ad;
+}
+
+.next:hover,
+.prev:hover {
+	color: #d54e21;
+}
