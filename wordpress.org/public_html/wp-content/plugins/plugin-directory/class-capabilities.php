@@ -109,12 +109,12 @@ class Capabilities {
 				continue;
 			}
 
-			foreach ( $committer as $committer_cap ) {
+			foreach ( $committer as $committer_cap => $value ) {
 				$wp_role->add_cap( $committer_cap );
 			}
 
 			if ( in_array( $role, array( 'editor', 'administrator' ) ) ) {
-				foreach ( $admin as $admin_cap ) {
+				foreach ( $admin as $admin_cap => $value ) {
 					$wp_role->add_cap( $admin_cap );
 				}
 			}
