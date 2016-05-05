@@ -91,7 +91,8 @@ class Capabilities {
 			'plugin_reject' => true,
 			'plugin_disable' => true,
 			'plugin_close' => true,
-			'plugin_set_category' => true, // Special categories
+			'plugin_set_category' => true, // Special categories.
+			'manage_categories' => true, // Let them assign these special categories.
 		) );
 
 		// Remove the roles first, incase we've changed the permission set.
