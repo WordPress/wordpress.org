@@ -9,20 +9,24 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
 class SVN {
 
 	/**
-	 * Create an SVN Export of a local directory to a URL.
-	 *
-	 * Note: An exception will be thrown upon SVN error.
+	 * Import a local directory to a SVN path.
 	 *
 	 * @param string $path    The local folder to import into SVN.
 	 * @param string $url     The URL to import to.
-	 * @param array  $options A list of options to pass to SVN. Optional.
+	 * @param string $message The commit message.
 	 *
 	 * @return array {
 	 *   @type bool $result   The result of the operation.
 	 *   @type int  $revision The revision imported.
 	 * }
 	 */
-	public static function import( $path, $url, $options = array() ) {
+	public static function import( $path, $url, $message ) {
+		$options = array(
+			'non-interactive',
+			'm' => $message,
+			'user' => PLUGIN_SVN_MANAGEMENT_USER,
+			'pass' => PLUGIN_SVN_MANAGEMENT_PASS,
+		);
 		$esc_options = self::parse_esc_parameters( $options );
 
 		$esc_path = escapeshellarg( $path );
@@ -43,8 +47,6 @@ class SVN {
 	/**
 	 * Create an SVN Export of a URL to a local directory.
 	 *
-	 * Note: An exception will be thrown upon SVN error.
-	 *
 	 * @param string $url         The URL to export.
 	 * @param string $destination The local folder to export into.
 	 * @param array  $options     A list of options to pass to SVN. Optional.
@@ -55,6 +57,7 @@ class SVN {
 	 * }
 	 */
 	public static function export( $url, $destination, $options = array() ) {
+		$options[] = 'non-interactive';
 		$esc_options = self::parse_esc_parameters( $options );
 
 		$esc_url = escapeshellarg( $url );
@@ -81,10 +84,13 @@ class SVN {
 	 * @return array If non-verbose a list of files, if verbose an array of items containing the filename, date, filesize, author and revision.
 	 */
 	public static function ls( $url, $verbose = false ) {
-		$esc_options = '';
+		$options = array(
+			'non-interactive'
+		);
 		if ( $verbose ) {
-			$esc_options = '-v';
+			$options[] = 'v';
 		}
+		$esc_options = self::parse_esc_parameters( $options );
 		$esc_url = escapeshellarg( $url );
 
 		$output = shell_exec( "svn ls $esc_options $esc_url 2>&1" );
@@ -132,7 +138,7 @@ class SVN {
 				$key = '-' . ( strlen( $key ) > 2 ? '-' : '' ) . $key;
 			}
 
-			$result[] = escapeshellarg( $key ) . ( $no_parameters ? '' : '=' . escapeshellarg( $value ) );
+			$result[] = escapeshellarg( $key ) . ( $no_parameters ? '' : ' ' . escapeshellarg( $value ) );
 		}
 
 		return implode( ' ', $result );

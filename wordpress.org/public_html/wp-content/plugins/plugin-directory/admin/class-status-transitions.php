@@ -95,11 +95,7 @@ class Status_Transitions {
 		}
 		rename( $plugin_root, "$dir/trunk" );
 
-		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, array(
-			'm'        => sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ),
-			'username' => AUTOMATTIC_SVN_TRACKER__SVN_USER,
-			'password' => AUTOMATTIC_SVN_TRACKER__SVN_PASSWORD,
-		) );
+		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
 
 		// Delete zips.
 		foreach ( $attachments as $attachment ) {
