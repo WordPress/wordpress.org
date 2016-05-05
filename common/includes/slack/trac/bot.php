@@ -42,8 +42,8 @@ class Bot {
 	function parse_tickets( $text ) {
 		$digits = Trac::get_digit_capture();
 		$ticket_tracs = '?<trac>' . Trac::get_regex();
-		preg_match_all( "/#(?<id>$digits)(?:\-($ticket_tracs)\b)?/", $text, $tickets, PREG_SET_ORDER );
-		preg_match_all( "/#($ticket_tracs)(?<id>$digits)\b/", $text, $tickets_alt, PREG_SET_ORDER );
+		preg_match_all( "/[^&`]#(?<id>$digits)(?:\-($ticket_tracs)\b)?/", $text, $tickets, PREG_SET_ORDER );
+		preg_match_all( "/[^&`]#($ticket_tracs)(?<id>$digits)\b/", $text, $tickets_alt, PREG_SET_ORDER );
 		preg_match_all( "~https?://($ticket_tracs).trac.wordpress.org/ticket/(?<id>$digits)~", $text, $tickets_url, PREG_SET_ORDER );
 		foreach ( $tickets_url as &$ticket ) {
 			$ticket['url'] = true;
