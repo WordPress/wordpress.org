@@ -98,8 +98,8 @@ class Comment_Handler {
 		array_pop( $lines );
 
 		preg_match( '/^(Comment|Changes|Description changed) \(?by (.*[^\)])\)?:$/', array_shift( $lines ), $matches );
-		$has_changes = $matches[1] === 'Changes';
-		$author = $matches[2];
+		$has_changes = ( isset( $matches[1] ) && 'Changes' === $matches[1] );
+		$author = isset( $matches[2] ) ? $matches[2] : '';
 
 		// Remove blank line after 'Comment|Changes (by author):' or 'Description changed by author:'.
 		array_shift( $lines );
