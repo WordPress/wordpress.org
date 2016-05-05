@@ -65,7 +65,7 @@ class Commit extends Resource {
 
 	static function format_commit_for_slack( Trac $trac, $message ) {
 		// Convert ASCII numbers to an UTF-8 character, like ?\226?\128?\148 => — (m-dash).
-		$message = preg_replace_callback( '/(?:\?\\\\(\d+))/', function( $matches ) {
+		$message = preg_replace_callback( '/(?:\?\\\\(\d{1,3}))/', function( $matches ) {
 			return chr( $matches[1] );
 		}, $message );
 
