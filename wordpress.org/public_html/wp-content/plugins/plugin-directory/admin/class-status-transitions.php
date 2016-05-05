@@ -146,7 +146,11 @@ class Status_Transitions {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public function rejected( $post_id, $post ) {
-		// Delete zip?
+
+		// Delete zips.
+		foreach ( get_attached_media( 'application/zip', $post_id ) as $attachment ) {
+			wp_delete_attachment( $attachment->ID, true );
+		}
 
 		// Send email.
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
