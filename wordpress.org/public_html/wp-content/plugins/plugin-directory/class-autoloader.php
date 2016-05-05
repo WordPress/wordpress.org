@@ -46,7 +46,7 @@ class Autoloader {
 	public function __construct( $prefix, $path ) {
 		$this->prefix        = $prefix;
 		$this->prefix_length = strlen( $prefix );
-		$this->path          = trailingslashit( $path );
+		$this->path          = rtrim( $path . '/' ) . '/';
 	}
 
 	/**
