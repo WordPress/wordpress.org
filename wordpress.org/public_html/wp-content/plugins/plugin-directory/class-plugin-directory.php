@@ -515,19 +515,27 @@ class Plugin_Directory {
 			return $post;
 		}
 
-		// TODO: Add caching here.
+		$plugin_slug = sanitize_title_for_query( $plugin_slug );
 
-		// get_post_by_slug();
-		$posts = get_posts( array(
-			'post_type'   => 'plugin',
-			'name'        => $plugin_slug,
-			'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft', 'approved' ),
-		) );
-		if ( ! $posts ) {
-			return false;
+		if ( false !== ( $post_id = wp_cache_get( $plugin_slug, 'plugin-slugs' ) ) && ( $post = get_post( $post_id ) ) ) {
+			// We have a $post.
+		} else {
+			// get_post_by_slug();
+			$posts = get_posts( array(
+				'post_type'   => 'plugin',
+				'name'        => $plugin_slug,
+				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft', 'approved' ),
+			) );
+			if ( ! $posts ) {
+				$post = false;
+				wp_cache_add( 0, $plugin_slug, 'plugin-slugs' );
+			} else {
+				$post = reset( $posts );
+				wp_cache_add( $post->ID, $plugin_slug, 'plugin-slugs' );
+			}
 		}
 
-		return reset( $posts );
+		return $post;
 	}
 
 	/**
@@ -572,6 +580,8 @@ class Plugin_Directory {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		wp_cache_set( $id, $slug, 'plugin-slugs' );
 
 		return get_post( $id );
 	}
