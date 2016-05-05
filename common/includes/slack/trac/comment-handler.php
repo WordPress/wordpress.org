@@ -30,6 +30,7 @@ class Comment_Handler {
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
 		$base64 = false;
+		$subject = '';
 
 		// Trim off headers.
 		while ( $lines && '' !== current( $lines ) ) {
@@ -46,6 +47,14 @@ class Comment_Handler {
 				}
 			} elseif ( 0 === strpos( $line, 'Content-Transfer-Encoding: base64' ) ) {
 				$base64 = true;
+			} elseif ( 0 === strpos( $line, 'Subject:' ) ) {
+				$subject = str_replace( 'Subject: ', '', $line );
+
+				$subject_lines = $lines;
+				while ( $subject_lines && ! preg_match( '/(^[\x21-\x7E][^:]+):/', current( $subject_lines ) ) ) {
+					$subject .= array_shift( $subject_lines );
+				}
+				unset( $subject_lines );
 			}
 		}
 
@@ -105,6 +114,12 @@ class Comment_Handler {
 		array_shift( $lines );
 
 		$changes = $comment = array();
+
+		// Check if the summary of a ticket was changed.
+		if ( preg_match( '/ \(was: (.*)\)$/', $subject, $matches ) ) {
+			$changes[] = '_*summary:*_ ' . $matches[1] . ' => ' . $title;
+		}
+
 		if ( $has_changes ) {
 			while ( $lines && '' !== current( $lines ) ) {
 				$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', array_shift( $lines ) );
@@ -156,7 +171,8 @@ class Comment_Handler {
 
 		$comment         = $this->format_comment_for_slack();
 		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
-		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $this->author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
+		$author          = $this->author ? $this->author : 'Someone';
+		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
 		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
 
 		$attachment = array(
