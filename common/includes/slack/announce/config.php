@@ -87,6 +87,7 @@ function get_whitelist() {
 		),
 		'design' => array(
 			'helen',
+			'hugobaeta',
 			'melchoyce',
 		),
 		'docs' => array(
