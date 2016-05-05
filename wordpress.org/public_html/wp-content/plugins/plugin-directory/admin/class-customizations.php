@@ -306,9 +306,13 @@ class Customizations {
 		}
 
 		// Remove unnecessary metaboxes.
-		remove_meta_box( 'slugdiv',          'plugin', 'normal' );
 		remove_meta_box( 'commentsdiv',      'plugin', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
+
+		// Remove slug metabox unless the slug is editable for the current user.
+		if ( ! in_array( $post->post_status, array( 'draft', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
+			remove_meta_box( 'slugdiv', 'plugin', 'normal' );
+		}
 	}
 
 	/**
