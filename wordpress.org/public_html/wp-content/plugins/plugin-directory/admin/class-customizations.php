@@ -24,9 +24,6 @@ class Customizations {
 	 * Constructor.
 	 */
 	private function __construct() {
-		// Admin Metaboxes
-		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
@@ -34,10 +31,16 @@ class Customizations {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
+		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
+		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
 
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
+
+		// Admin Metaboxes
+		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
+		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
 		add_filter( 'postbox_classes_plugin_internal-notes',    array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
@@ -220,6 +223,66 @@ class Customizations {
 			$wp_list_table = new Plugin_Posts();
 			$wp_list_table->prepare_items();
 		}
+	}
+
+	/**
+	 * Adds banners to provide a clearer status for a plugin.
+	 *
+	 * This is being displayed in the edit screen for a particular plugin,
+	 * providing more context about the current status of a plugin for both
+	 * Committers and Reviewers/Admins.
+	 */
+	public function add_post_status_notice() {
+		if ( 'post.php' !== $GLOBALS['pagenow'] ) {
+			return;
+		}
+
+		$message  = '';
+		$post     = get_post();
+		$is_admin = current_user_can( 'plugin_approve' );
+
+		switch ( $post->post_status ) {
+			case 'draft':
+			case 'pending':
+				$message = __( 'This plugin is requested and not visible to the public yet.', 'wporg-plugins' );
+				if ( ! $is_admin ) {
+					$message .= ' ' . __( 'Please be patient as your plugin gets reviewed.', 'wporg-plugins' );
+				}
+				break;
+
+			case 'rejected':
+				$message = __( 'This plugin is rejected and is not visible to the public.', 'wporg-plugins' );
+				break;
+
+			case 'approved':
+				$message = __( 'This plugin is approved and awaiting data upload but not visible to the public yet.', 'wporg-plugins' );
+				if ( ! $is_admin ) {
+					$message .= ' ' . __( 'Once you make your first commit, the plugin will become public.', 'wporg-plugins' );
+				}
+				break;
+
+			case 'closed':
+				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+				break;
+
+			case 'disabled':
+				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+				if ( $is_admin ) {
+					$message = __( 'This plugin is disabled (closed, but actively serving updates) and is not visible to the public.', 'wporg-plugins' );
+				}
+				break;
+		}
+
+		if ( $message ) {
+			add_settings_error( 'wporg-plugins', 'status-notice', $message, 'updated' );
+		}
+	}
+
+	/**
+	 * Displays all admin notices registered to `wporg-plugins`.
+	 */
+	public function admin_notices() {
+		settings_errors( 'wporg-plugins' );
 	}
 
 	/**
