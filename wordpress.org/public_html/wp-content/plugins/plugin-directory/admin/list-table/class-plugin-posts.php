@@ -329,17 +329,25 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$all_args        = array( 'post_type' => $post_type );
 		$mine            = '';
 
-		$plugins = Tools::get_users_write_access_plugins( get_current_user_id() );
+		$plugins = Tools::get_users_write_access_plugins( $current_user_id );
 		$plugins = array_map( 'sanitize_title_for_query', $plugins );
 		$exclude_states   = get_post_stati( array(
 			'show_in_admin_all_list' => false,
 		) );
 
+		if ( ! current_user_can( 'plugin_approve' ) ) {
+			$exclude_states = array_merge( $exclude_states, array(
+				'publish'  => 'publish',
+				'closed'   => 'closed',
+				'rejected' => 'rejected',
+				'private'  => 'private',
+			) );
+		}
+
 		$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( "
 			SELECT COUNT( 1 )
 			FROM $wpdb->posts
 			WHERE post_type = %s
-			AND post_status NOT IN ( '" . implode( "','", $exclude_states ) . "' )
 			AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )
 		", $post_type, $current_user_id ) ) );
 
@@ -349,7 +357,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		if ( $user_post_count && $user_post_count !== $total_posts ) {
-			if ( isset( $_GET['author'] ) && ( $_GET['author'] == $current_user_id ) ) {
+			if ( isset( $_GET['author'] ) && $_GET['author'] == $current_user_id ) {
 				$class = 'current';
 			}
 
@@ -369,7 +377,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				number_format_i18n( $user_post_count )
 			);
 
-			if ( ! current_user_can( 'plugin_edit_others' ) && ! current_user_can( 'plugin_edit_pending' ) ) {
+			if ( ! current_user_can( 'plugin_review' ) ) {
 				$status_links['mine'] = $this->get_edit_link( $mine_args, $mine_inner_html, 'current' );;
 				return $status_links;
 			} else {
@@ -406,6 +414,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$status_name = $status->name;
 
 			if ( ! in_array( $status_name, $avail_post_stati ) || empty( $num_posts->$status_name ) ) {
+				continue;
+			}
+
+			if ( ! current_user_can( 'plugin_approve' ) && ! in_array( $status_name, array( 'draft', 'pending' ) ) ) {
 				continue;
 			}
 

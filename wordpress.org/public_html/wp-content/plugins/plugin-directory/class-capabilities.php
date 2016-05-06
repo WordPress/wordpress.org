@@ -37,11 +37,12 @@ class Capabilities {
 					$required_caps[] = 'plugin_edit_own';
 
 				} else {
-					if ( 'pending' == $post->post_status ) {
-						$required_caps[] = 'plugin_edit_pending';
+
+					if ( in_array( $post->post_status, array( 'draft', 'pending' ) ) ) {
+						$required_caps[] = 'plugin_review';
 
 					} else {
-						$required_caps[] = 'plugin_edit_others';
+						$required_caps[] = 'plugin_approve';
 					}
 				}
 				break;
@@ -77,6 +78,7 @@ class Capabilities {
 			'plugin_edit_own' => true,
 			'plugin_set_tags' => true,
 			'plugin_add_committer' => true,
+			'plugin_edit_others' => true,
 		);
 
 		$reviewer = array_merge( $committer, array(
@@ -85,8 +87,6 @@ class Capabilities {
 		) );
 
 		$admin = array_merge( $reviewer, array(
-			'plugin_add_committer' => true,
-			'plugin_edit_others' => true,
 			'plugin_approve' => true,
 			'plugin_reject' => true,
 			'plugin_disable' => true,
