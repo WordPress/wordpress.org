@@ -67,6 +67,7 @@ function get_whitelist() {
 		'core-images' => array(
 			'joemcgill',
 			'mike',
+			'ocean90',
 		),
 		'core-multisite' => array(
 			'jeremyfelt',
