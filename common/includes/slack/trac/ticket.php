@@ -12,7 +12,7 @@ class Ticket extends Resource {
 			return $this->get_url();
 		}
 
-		return sprintf( "<%s|#%s: %s>", $this->get_url(), $this->id, htmlentities( $this->summary, ENT_NOQUOTES ) );
+		return sprintf( "<%s|#%s: %s>", $this->get_url(), $this->id, htmlspecialchars( $this->summary, ENT_NOQUOTES ) );
 	}
 
 	function get_short_attachment() {
@@ -73,7 +73,7 @@ class Ticket extends Resource {
 
 	static function get_ticket_fields( $ticket ) {
 		$new = false !== strpos( get_called_class(), 'New_Ticket' );
-	
+
 		$ticket_fields = array();
 
 		if ( isset( $ticket->type ) && ! $new ) {
