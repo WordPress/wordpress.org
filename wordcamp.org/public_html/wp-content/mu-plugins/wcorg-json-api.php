@@ -320,7 +320,9 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 function wcorg_json_cache_requests( $eof_pattern ) {
 	global $wp_super_cache_comments;
 
-	if ( defined( 'JSON_REQUEST' ) && JSON_REQUEST ) {
+	$api_request = ( defined( 'JSON_REQUEST' ) && JSON_REQUEST ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+
+	if ( $api_request ) {
 		// Accept a JSON-formatted string as an end-of-file marker, so that the page will be cached
 		$json_object_pattern     = '^[{].*[}]$';
 		$json_collection_pattern = '^[\[].*[\]]$';
