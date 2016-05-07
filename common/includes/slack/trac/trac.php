@@ -79,8 +79,8 @@ class Trac implements User {
 			if ( is_string( $channel ) ) {
 				$this->ticket_component_filters[ $component ] = array( $channel => true );
 			}
-            if ( $this->bypass_primary_channel_for_ticket_filter_matches && empty( $this->ticket_component_filters[ $path ][ $this->primary_channel ] ) ) {
-                $this->ticket_component_filters[ $path ][ $this->primary_channel ] = false;
+            if ( $this->bypass_primary_channel_for_ticket_filter_matches && empty( $this->ticket_component_filters[ $component ][ $this->primary_channel ] ) ) {
+                $this->ticket_component_filters[ $component ][ $this->primary_channel ] = false;
             }
 		}
 	}
