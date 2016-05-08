@@ -151,5 +151,167 @@
 
 .add-committer .notice {
 	display: block;
-    padding: 0.5em 0 0.5em 1em;
+	padding: 0.5em 0 0.5em 1em;
+}
+
+/* Author Card metabox */
+#pagebody .pending p {
+	margin: 0 10px 22px;
+}
+
+#pagebody .pending span:first-child {
+	margin-left: 0;
+}
+
+#pagebody .pending p.request-more {
+	margin-bottom: 0;
+}
+
+.profile-links {
+	color: #999;
+	display: block;
+}
+
+.profile > img {
+	float: left;
+	height: 48px;
+	margin-right: 8px;
+	margin-top: 4px;
+	width: 48px;
+}
+
+.profile-join {
+	display: inline-block;
+}
+
+.profile-post-ip {
+	margin-right: 15px;
+}
+
+.profile-sp-link {
+	margin-left: 4px;
+	font-size: 10px;
+}
+
+.profile-plugins > span {
+	white-space: nowrap;
+}
+
+.profile-plugins a.profile-plugin-requested {
+	color: blue;
+}
+
+.profile-plugins a.profile-plugin-rejected {
+	color: red;
+	text-decoration: line-through;
+}
+
+.profile-plugins a.profile-plugin-closed {
+	color: red;
+}
+
+.profile-plugins a.profile-plugin-open-old {
+	color: #666;
+}
+
+a.profile-plugin-open {
+	color: green;
+}
+
+.plugin-owner {
+	font-weight: bold;
+}
+
+.plugin-status {
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.plugin-status span {
+	text-transform: none;
+}
+
+.plugin-status-open {
+	background-color: #e2fde3;
+}
+
+.plugin-status-rejected {
+	background-color: #fde3e3;
+}
+
+.plugin-status-rejected .plugin-status {
+	color: #f00;
+}
+
+.plugin-status-requested {
+	background-color: #e2f7fd;
+}
+
+.plugin-status-requested .plugin-status {
+	color: #00f;
+}
+
+.plugin-status-closed {
+	background-color: #fde3e3;
+}
+
+.plugin-status-disabled {
+	background-color: #fde3e3;
+}
+
+.plugin-committers > div {
+	overflow-x: hidden;
+	white-space: nowrap;
+}
+
+.plugin-committer-email {
+	font-size: smaller;
+}
+
+.plugin-queue-flagged {
+	margin-top: 12px;
+}
+
+.plugin-queue-flagged h4 {
+	margin: 0;
+	padding: 0;
+}
+
+#pagebody .plugin-queue-flagged ul {
+	margin-top: 6px;
+}
+
+.plugin-flagged-critical {
+	color: darkred;
+	font-weight: bold;
+}
+
+.plugin-flagged-high {
+	color: #d80000;
+}
+
+.plugin-flagged-med {
+	color: #f90;
+}
+
+.plugin-flagged-low {
+	color: #beb169;
+}
+
+.plugin-flagged-info {
+	color: blue;
+}
+
+.plugin-flagged-status {
+	float: left;
+	margin-right: 0.5em;
+	padding: 0 1px;
+}
+
+.plugin-queue-unflagged {
+	background-color: green;
+}
+
+.plugin-queue-flagged-critical {
+	background-color: darkred;
 }

@@ -342,6 +342,13 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
 				'plugin', 'normal', 'high'
 			);
+
+			add_meta_box(
+				'plugin-author',
+				__( 'Author Card', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Author_Card', 'display' ),
+				'plugin', 'side'
+			);
 		}
 
 		add_meta_box(
