@@ -348,32 +348,33 @@ function wcorg_json_cache_requests( $eof_pattern ) {
 /**
  * JSON REST API v1 and Core/v2 compatibility.
  *
- * All routes in $v2_routes are routed to the core handler.
+ * All v2 routes are routed to the Core handler, instead of the json-rest-api plugin.
  *
  * @param WP $request
  */
 function wcorg_json_v2_compat( $request ) {
-	$v2_routes = array(
-		'/wp-json/wordcamp-qbo',
-		'/wp-json/wordcamp-letsencrypt',
-	);
+	$rest_prefix = rest_get_url_prefix();
 
-	if ( strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) !== 0 ) {
+	// Skip non-API requests
+	if ( 0 !== strpos( $_SERVER[ 'REQUEST_URI' ], "/$rest_prefix" ) ) {
 		return;
 	}
 
+	// Determine if it's a v2 request
 	$is_route_v2 = false;
-	foreach ( $v2_routes as $route ) {
-		if ( strpos( $_SERVER['REQUEST_URI'], $route ) === 0 ) {
+	foreach ( rest_get_server()->get_namespaces() as $namespace ) {
+		if ( 0 === strpos( $_SERVER[ 'REQUEST_URI' ], "/$rest_prefix/$namespace" ) ) {
 			$is_route_v2 = true;
 			break;
 		}
 	}
 
+	// Skip API v1 requests
 	if ( ! $is_route_v2 ) {
 		return;
 	}
 
+	// Route v2 requests to Core handler
 	$request->query_vars['rest_route'] = $request->query_vars['json_route'];
 	unset( $request->query_vars['json_route'] );
 	$request->matched_query = preg_replace( '#^json_route=(.+)$#', 'rest_route=$1', $request->matched_query );
