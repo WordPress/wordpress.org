@@ -25,6 +25,9 @@ add_action( 'parse_request', 'wcorg_json_v2_compat', 9 );
 // Allow users to read new post statuses.
 add_filter( 'json_check_post_read_permission', 'wcorg_json_check_post_read_permission', 10, 2 );
 
+// Query the public post statuses when querying WordCamps via the JSON API.
+add_action( 'pre_get_posts', 'wcorg_json_pre_get_posts' );
+
 /**
  * Unhook any endpoints that aren't whitelisted
  *
@@ -327,11 +330,13 @@ function wcorg_json_cache_requests( $eof_pattern ) {
 		$json_object_pattern     = '^[{].*[}]$';
 		$json_collection_pattern = '^[\[].*[\]]$';
 
+		/* disabling until can set correct header
 		$eof_pattern = str_replace(
 			'<\?xml',
 			sprintf( '<\?xml|%s|%s', $json_object_pattern, $json_collection_pattern ),
 			$eof_pattern
 		);
+		*/
 
 		// Don't append HTML comments to the JSON output, because that would invalidate it
 		$wp_super_cache_comments = false;
@@ -386,4 +391,21 @@ function wcorg_json_check_post_read_permission( $permission, $post ) {
 	}
 
 	return in_array( $post['post_status'], WordCamp_Loader::get_public_post_statuses() );
+}
+
+/**
+ * Query the public post statuses when querying WordCamps via the JSON API.
+ */
+function wcorg_json_pre_get_posts( $query ) {
+	if ( ! defined( 'JSON_REQUEST' ) || ! JSON_REQUEST )
+		return;
+
+	$post_types = $query->get( 'post_type' );
+	$post_statuses = $query->get( 'post_status' );
+
+	if ( $post_types == 'wordcamp' || in_array( 'wordcamp', (array) $post_types ) ) {
+		if ( empty( $post_statuses ) ) {
+			$query->set( 'post_status', WordCamp_Loader::get_public_post_statuses() );
+		}
+	}
 }
