@@ -51,6 +51,8 @@ class WordCamp_Post_Types_Plugin {
 
 		add_filter( 'the_content', array( $this, 'add_avatar_to_speaker_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_speaker_info_to_session_posts' ) );
+		add_filter( 'the_content', array( $this, 'add_slides_info_to_session_posts' ) );
+		add_filter( 'the_content', array( $this, 'add_video_info_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 
 		add_filter( 'dashboard_glance_items', array( $this, 'glance_items' ) );
@@ -1224,6 +1226,80 @@ class WordCamp_Post_Types_Plugin {
 		wp_reset_postdata();
 
 		return $content . $speakers_html;
+	}
+
+	/**
+	 * Add Slides link to Session posts
+	 *
+	 * We don't enable it for sites that were created before it was committed, because some will have already
+	 * crafted the session to include this content, so duplicating it would look wrong, but we still allow older
+	 * sites to opt-in.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	function add_slides_info_to_session_posts( $content ) {
+		global $post;
+		$enabled_site_ids = apply_filters( 'wcpt_session_post_slides_info_enabled_site_ids', array( 206 ) ); // testing.wordcamp.org
+
+		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
+			return $content;
+		}
+
+		$site_id = get_current_blog_id();
+		if ( $site_id <= apply_filters( 'wcpt_session_post_slides_info_min_site_id', 699 ) && ! in_array( $site_id, $enabled_site_ids ) ) {
+			return $content;
+		}
+
+		$session_slides = get_post_meta( $post->ID, '_wcpt_session_slides', true );
+
+		if ( empty ( $session_slides ) ) {
+			return $content;
+		}
+
+		$session_slides_html  = '<div class="session-video">';
+		$session_slides_html .= sprintf( __( '<a href="%s" target="_blank">View Session Slides</a>', 'wordcamporg' ), esc_url( $session_slides ) );
+		$session_slides_html .= '</div>';
+
+		return $content . $session_slides_html;
+	}
+
+	/**
+	 * Add Video link to Session posts
+	 *
+	 * We don't enable it for sites that were created before it was committed, because some will have already
+	 * crafted the session to include this content, so duplicating it would look wrong, but we still allow older
+	 * sites to opt-in.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	function add_video_info_to_session_posts( $content ) {
+		global $post;
+		$enabled_site_ids = apply_filters( 'wcpt_session_post_video_info_enabled_site_ids', array( 206 ) ); // testing.wordcamp.org
+
+		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
+			return $content;
+		}
+
+		$site_id = get_current_blog_id();
+		if ( $site_id <= apply_filters( 'wcpt_session_post_video_info_min_site_id', 699 ) && ! in_array( $site_id, $enabled_site_ids ) ) {
+			return $content;
+		}
+
+		$session_video = get_post_meta( $post->ID, '_wcpt_session_video', true );
+
+		if ( empty ( $session_video ) ) {
+			return $content;
+		}
+
+		$session_video_html  = '<div class="session-video">';
+		$session_video_html .= sprintf( __( '<a href="%s" target="_blank">View Session Video</a>', 'wordcamporg' ), esc_url( $session_video ) );
+		$session_video_html .= '</div>';
+
+		return $content . $session_video_html;
 	}
 
 	/**
