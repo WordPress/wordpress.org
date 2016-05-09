@@ -40,6 +40,9 @@ function get_whitelist() {
 			'sergey',
 			'wonderboymusic',
 		),
+		'core-comments' => array(
+			'rachelbaker',
+		),
 		'core-customize' => array(
 			'celloexpressions',
 			'ocean90',
