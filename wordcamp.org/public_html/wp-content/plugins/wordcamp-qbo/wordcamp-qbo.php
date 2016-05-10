@@ -311,14 +311,11 @@ class WordCamp_QBO {
 			return $invoice_id;
 		}
 
-		/*
-		 * @todo Sending invoices automatically is initially disabled so we can manually review them for accuracy
 		$invoice_sent = self::send_invoice( $invoice_id );
 
 		if ( is_wp_error( $invoice_sent ) ) {
 			self::notify_invoice_failed_to_send( $invoice_id, $invoice_sent );
 		}
-		*/
 
 		return $invoice_id;
 	}
