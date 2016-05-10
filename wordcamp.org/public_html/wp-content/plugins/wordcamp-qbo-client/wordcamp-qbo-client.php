@@ -304,20 +304,18 @@ class WordCamp_QBO_Client {
 	 * @return array
 	 */
 	protected static function build_send_invoice_request( $invoice_id ) {
-		$invoice      = get_post( $invoice_id );
-		$invoice_meta = get_post_custom( $invoice_id );
-		$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
+		$invoice           = get_post( $invoice_id );
+		$invoice_meta      = get_post_custom( $invoice_id );
+		$sponsor_meta      = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
 		$sponsorship_level = self::get_sponsorship_level( $invoice_meta['_wcbsi_sponsor_id'][0] );
-		// todo realign
 
 		$payload = array(
-			'wordcamp_name'   => sanitize_text_field( get_wordcamp_name()                        ),
-			'sponsorship_level' => sanitize_text_field( $sponsorship_level                       ),
-			'currency_code'   => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
-			'qbo_class_id'    => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),
-			'amount'          => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
-			'description'     => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
-			// todo realign
+			'wordcamp_name'     => sanitize_text_field( get_wordcamp_name()                        ),
+			'sponsorship_level' => sanitize_text_field( $sponsorship_level                         ),
+			'currency_code'     => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
+			'qbo_class_id'      => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),
+			'amount'            => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
+			'description'       => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
 
 			'statement_memo' => sprintf(
 				'WordCamp.org Invoice: %s',

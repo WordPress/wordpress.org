@@ -297,15 +297,14 @@ class WordCamp_QBO {
 		}
 
 		$invoice_id = self::create_invoice(
-			$request->get_param( 'wordcamp_name'   ),
-			$request->get_param( 'sponsor'         ),
-			$request->get_param( 'currency_code'   ),
-			$request->get_param( 'qbo_class_id'    ),
+			$request->get_param( 'wordcamp_name'     ),
+			$request->get_param( 'sponsor'           ),
+			$request->get_param( 'currency_code'     ),
+			$request->get_param( 'qbo_class_id'      ),
 			$request->get_param( 'sponsorship_level' ),
-			$request->get_param( 'amount'          ),
-			$request->get_param( 'description'     ),
-			$request->get_param( 'statement_memo'  )
-			// todo realign
+			$request->get_param( 'amount'            ),
+			$request->get_param( 'description'       ),
+			$request->get_param( 'statement_memo'    )
 		);
 
 		if ( is_wp_error( $invoice_id ) ) {
@@ -396,13 +395,12 @@ class WordCamp_QBO {
 			return $customer_id;
 		}
 
-		$wordcamp_name   = sanitize_text_field( $wordcamp_name   );
-		$class_id        = sanitize_text_field( $class_id        );
+		$wordcamp_name     = sanitize_text_field( $wordcamp_name     );
+		$class_id          = sanitize_text_field( $class_id          );
 		$sponsorship_level = sanitize_text_field( $sponsorship_level );
-		$amount          = floatval(            $amount          );
-		$description     = sanitize_text_field( $description     );
-		$statement_memo  = sanitize_text_field( $statement_memo  );
-		//todo realign
+		$amount            = floatval( $amount                       );
+		$description       = sanitize_text_field( $description       );
+		$statement_memo    = sanitize_text_field( $statement_memo    );
 
 		$line_description = $wordcamp_name;
 		if ( $sponsorship_level ) {
