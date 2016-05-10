@@ -701,7 +701,7 @@ class WordCamp_QBO {
 		$request_url_query = array(
 			'query' => $wpdb->prepare(
 				"SELECT * FROM Customer WHERE CompanyName = '%s'",
-				$customer_name
+				str_replace( ':', '-', $customer_name )
 			),
 		);
 
