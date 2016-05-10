@@ -4,7 +4,7 @@ namespace WordCamp\Budgets_Dashboard\Sponsor_Invoices;
 
 defined( 'WPINC' ) or die();
 
-const LATEST_DATABASE_VERSION = 2;
+const LATEST_DATABASE_VERSION = 3;
 
 if ( defined( 'DOING_AJAX' ) ) {
 	add_action( 'wp_ajax_wcbdsi_approve_invoice', __NAMESPACE__ . '\handle_approve_invoice_request'       );
@@ -168,7 +168,7 @@ function upgrade_database() {
 			invoice_title  varchar( 75 )             NOT NULL default '',
 			status         varchar( 30 )             NOT NULL default '',
 			wordcamp_name  varchar( 75 )             NOT NULL default '',
-			sponsor_name   varchar( 30 )             NOT NULL default '',
+			sponsor_name   varchar( 75 )             NOT NULL default '',
 			description    varchar( 75 )             NOT NULL default '',
 			currency       varchar( 3  )             NOT NULL default '',
 			due_date       int( 11 )        unsigned NOT NULL default '0',
