@@ -14,6 +14,7 @@
 			id="_wcpt_sponsor_company_name"
 			name="_wcpt_sponsor_company_name"
 			value="<?php echo esc_attr( $company_name ); ?>"
+			maxlength="50"
 		    required
 		/>
 
@@ -99,6 +100,7 @@
 			id="_wcpt_sponsor_phone_number"
 			name="_wcpt_sponsor_phone_number"
 			value="<?php echo esc_attr( $phone_number ); ?>"
+			maxlength="21"
 		    required
 		/>
 
@@ -187,6 +189,7 @@
 			id="_wcpt_sponsor_zip_code"
 			name="_wcpt_sponsor_zip_code"
 			value="<?php echo esc_attr( $zip_code ); ?>"
+			maxlength="30"
 		    required
 		/>
 
