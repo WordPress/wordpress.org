@@ -790,6 +790,9 @@ class WordCamp_QBO {
 
 		$sponsor                  = array_map( 'sanitize_text_field', $sponsor );
 		$sponsor['email-address'] = is_email( $sponsor['email-address'] );
+		$sponsor['first-name']    = str_replace( ':', '-', $sponsor['first-name']   );
+		$sponsor['last-name']     = str_replace( ':', '-', $sponsor['last-name']    );
+		$sponsor['company-name']  = str_replace( ':', '-', $sponsor['company-name'] );
 		$currency_code            = sanitize_text_field( $currency_code );
 
 		if ( empty( $sponsor['company-name'] ) || empty( $sponsor['email-address'] ) ) {
