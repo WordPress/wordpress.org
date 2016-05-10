@@ -42,7 +42,7 @@ defined( 'WPINC' ) or die();
 					<span id="post-status-display">
 						<?php if ( current_user_can( 'manage_network' ) ) : ?>
 
-							<select name="post_status">
+							<select id="wcb_status" name="post_status">
 								<?php foreach ( get_post_statuses() as $status ) : ?>
 									<?php $status = get_post_status_object( $status ); ?>
 									<option value="<?php echo esc_attr( $status->name ); ?>" <?php selected( $post->post_status, $status->name ); ?> >

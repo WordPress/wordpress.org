@@ -22,17 +22,34 @@ jQuery( document ).ready( function( $ ) {
 			needsIntermediaryBank.change( app.toggleIntermediaryBankFields );
 			needsIntermediaryBank.trigger( 'change' ); // Set the initial state
 
-			$( '#wcb-save-draft' ).click( app.makeFieldsOptionalForDrafts );
+			$( '#wcb-save-draft' ).click( app.makeFieldsOptional      );
+			$( '#wcb-update'     ).click( app.maybeMakeFieldsOptional );
 		},
 
 		/**
-		 * Make all required input field optional when saving a draft.
+		 * Make all required fields optional under certain circumstances.
+		 */
+		maybeMakeFieldsOptional : function() {
+			var status = $( '#wcb_status' ).val();
+
+			if ( 'draft' === status || 'wcb-incomplete' === status ) {
+				app.makeFieldsOptional();
+
+				if ( 'wcb-incomplete' === status ) {
+					$( '#wcp_mark_incomplete_notes' ).prop( 'required', true );
+				}
+			}
+		},
+
+		/**
+		 * Make all required input field optional.
 		 *
-		 * Otherwise the user would have to potentially fill out dozens of fields when they're not ready to.
+		 * This is used when saving drafts, setting posts to the Incomplete status, etc. Otherwise the user would
+		 * have to potentially fill out dozens of fields when they're not ready to.
 		 *
 		 * @param {object} event
 		 */
-		makeFieldsOptionalForDrafts : function( event ) {
+		makeFieldsOptional : function( event ) {
 			$( '#poststuff' ).find( ':input[required]' ).each( function( fieldIndex, inputField ) {
 				$( inputField ).prop( 'required', false );
 			} );
