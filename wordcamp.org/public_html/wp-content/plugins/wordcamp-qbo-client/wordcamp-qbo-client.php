@@ -307,14 +307,17 @@ class WordCamp_QBO_Client {
 		$invoice      = get_post( $invoice_id );
 		$invoice_meta = get_post_custom( $invoice_id );
 		$sponsor_meta = get_post_custom( $invoice_meta['_wcbsi_sponsor_id'][0] );
+		$sponsorship_level = self::get_sponsorship_level( $invoice_meta['_wcbsi_sponsor_id'][0] );
+		// todo realign
 
 		$payload = array(
 			'wordcamp_name'   => sanitize_text_field( get_wordcamp_name()                        ),
-			'invoice_title'   => sanitize_text_field( $invoice->post_title                       ),
+			'sponsorship_level' => sanitize_text_field( $sponsorship_level                       ),
 			'currency_code'   => sanitize_text_field( $invoice_meta['_wcbsi_currency'       ][0] ),
 			'qbo_class_id'    => sanitize_text_field( $invoice_meta['_wcbsi_qbo_class_id'   ][0] ),
 			'amount'          => floatval(            $invoice_meta['_wcbsi_amount'         ][0] ),
 			'description'     => sanitize_text_field( $invoice_meta['_wcbsi_description'    ][0] ),
+			// todo realign
 
 			'statement_memo' => sprintf(
 				'WordCamp.org Invoice: %s',
@@ -356,6 +359,24 @@ class WordCamp_QBO_Client {
 			'url'  => $request_url,
 			'args' => $args,
 		);
+	}
+
+	/**
+	 * Get the sponsorship level name assigned to a sponsor
+	 * 
+	 * @param int $sponsor_id
+	 *
+	 * @return false|string
+	 */
+	public static function get_sponsorship_level( $sponsor_id ) {
+		$sponsorship_level  = false;
+		$sponsorship_levels = wp_get_object_terms( $sponsor_id, 'wcb_sponsor_level' );
+
+		if ( isset( $sponsorship_levels[0]->name ) ) {
+			$sponsorship_level = $sponsorship_levels[0]->name;
+		}
+
+		return $sponsorship_level;
 	}
 
 	/**

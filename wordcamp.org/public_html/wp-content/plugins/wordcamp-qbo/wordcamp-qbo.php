@@ -301,10 +301,11 @@ class WordCamp_QBO {
 			$request->get_param( 'sponsor'         ),
 			$request->get_param( 'currency_code'   ),
 			$request->get_param( 'qbo_class_id'    ),
-			$request->get_param( 'invoice_title'   ),
+			$request->get_param( 'sponsorship_level' ),
 			$request->get_param( 'amount'          ),
 			$request->get_param( 'description'     ),
 			$request->get_param( 'statement_memo'  )
+			// todo realign
 		);
 
 		if ( is_wp_error( $invoice_id ) ) {
@@ -330,20 +331,20 @@ class WordCamp_QBO {
 	 * @param array  $sponsor
 	 * @param string $currency_code
 	 * @param int    $class_id
-	 * @param string $invoice_title
+	 * @param string $sponsorship_level
 	 * @param float  $amount
 	 * @param string $description
 	 * @param string $statement_memo
 	 *
 	 * @return int|WP_Error Invoice ID on success; error on failure
 	 */
-	protected static function create_invoice( $wordcamp_name, $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $statement_memo ) {
+	protected static function create_invoice( $wordcamp_name, $sponsor, $currency_code, $class_id, $sponsorship_level, $amount, $description, $statement_memo ) {
 		$qbo_request = self::build_qbo_create_invoice_request(
 			$wordcamp_name,
 			$sponsor,
 			$currency_code,
 			$class_id,
-			$invoice_title,
+			$sponsorship_level,
 			$amount,
 			$description,
 			$sponsor['email-address'],
@@ -374,13 +375,13 @@ class WordCamp_QBO {
 	}
 
 	/**
-	 * Build the requset to create an invoice in QuickBooks
+	 * Build the request to create an invoice in QuickBooks
 	 *
 	 * @param string $wordcamp_name
 	 * @param array  $sponsor
 	 * @param string $currency_code
 	 * @param int    $class_id
-	 * @param string $invoice_title
+	 * @param string $sponsorship_level
 	 * @param float  $amount
 	 * @param string $description
 	 * @param string $customer_email
@@ -388,7 +389,7 @@ class WordCamp_QBO {
 	 *
 	 * @return array|WP_Error
 	 */
-	protected static function build_qbo_create_invoice_request( $wordcamp_name, $sponsor, $currency_code, $class_id, $invoice_title, $amount, $description, $customer_email, $statement_memo ) {
+	protected static function build_qbo_create_invoice_request( $wordcamp_name, $sponsor, $currency_code, $class_id, $sponsorship_level, $amount, $description, $customer_email, $statement_memo ) {
 		$customer_id = self::probably_get_customer_id( $sponsor, $currency_code );
 
 		if ( is_wp_error( $customer_id ) ) {
@@ -397,10 +398,16 @@ class WordCamp_QBO {
 
 		$wordcamp_name   = sanitize_text_field( $wordcamp_name   );
 		$class_id        = sanitize_text_field( $class_id        );
-		$invoice_title   = sanitize_text_field( $invoice_title   );
+		$sponsorship_level = sanitize_text_field( $sponsorship_level );
 		$amount          = floatval(            $amount          );
 		$description     = sanitize_text_field( $description     );
 		$statement_memo  = sanitize_text_field( $statement_memo  );
+		//todo realign
+
+		$line_description = $wordcamp_name;
+		if ( $sponsorship_level ) {
+			$line_description .= " - $sponsorship_level";
+		}
 
 		/*
 		 * The currency code only needs to be sanitized, not validated, because QBO will reject the invoice if
@@ -455,7 +462,7 @@ class WordCamp_QBO {
 			'Line' => array(
 				array(
 					'Amount'      => $amount,
-					'Description' => sprintf( '%s - %s', $wordcamp_name, $invoice_title ),
+					'Description' => $line_description,
 					'DetailType'  => 'SalesItemLineDetail',
 
 					'SalesItemLineDetail' => array(
