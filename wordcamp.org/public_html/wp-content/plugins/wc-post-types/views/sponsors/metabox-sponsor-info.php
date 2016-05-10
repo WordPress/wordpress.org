@@ -106,6 +106,22 @@
 
 		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
+
+	<li>
+		<label for="_wcpt_sponsor_vat_number">
+			<?php _e( 'VAT Number:', 'wordcamporg' ); ?>
+		</label>
+
+		<input
+			type="text"
+			class="regular-text"
+			id="_wcpt_sponsor_vat_number"
+			name="_wcpt_sponsor_vat_number"
+			value="<?php echo esc_attr( $vat_number ); ?>"
+		/>
+
+		<span class="description">Only necessary for sponsors invoiced in Euros</span>
+	</li>
 </ul>
 
 <ul class="wcpt-form">
