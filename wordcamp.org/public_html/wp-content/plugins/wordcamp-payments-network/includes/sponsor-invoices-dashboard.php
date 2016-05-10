@@ -398,10 +398,10 @@ function update_index_row( $invoice_id, $invoice ) {
 		'blog_id'        => get_current_blog_id(),
 		'invoice_id'     => $invoice_id,
 		'qbo_invoice_id' => get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', true ),
-		'invoice_title'  => $invoice->post_title,
+		'invoice_title'  => substr( $invoice->post_title, 0, 75 ),
 		'status'         => $invoice->post_status,
 		'wordcamp_name'  => get_wordcamp_name(),
-		'sponsor_name'   => get_sponsor_name( $invoice_id ),
+		'sponsor_name'   => substr( get_sponsor_name( $invoice_id ), 0, 75 ),
 		'description'    => get_post_meta( $invoice_id, '_wcbsi_description', true ),
 		'currency'       => get_post_meta( $invoice_id, '_wcbsi_currency',    true ),
 		'due_date'       => 0,  // todo remove this field from index
