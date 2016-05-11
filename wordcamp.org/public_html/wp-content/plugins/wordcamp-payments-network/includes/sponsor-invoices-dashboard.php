@@ -316,24 +316,22 @@ function update_invoice_status( $site_id, $invoice_id, $new_status ) {
 function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 	switch_to_blog( $site_id );
 
-	$invoice      = get_post( $invoice_id );
-	$to           = \WordCamp_Budgets::get_requester_formatted_email( $invoice->post_author );
-	$subject      = "Invoice for {$invoice->post_title} $new_status";
-	$sponsor_name = get_sponsor_name( $invoice_id );
-	$invoice_url  = admin_url( sprintf( 'post.php?post=%s&action=edit', $invoice_id ) );
-	$headers      = array( 'Reply-To: support@wordcamp.org' );
-	$attachments  = array();
+	$invoice            = get_post( $invoice_id );
+	$to                 = \WordCamp_Budgets::get_requester_formatted_email( $invoice->post_author );
+	$subject            = "Invoice for {$invoice->post_title} $new_status";
+	$sponsor_name       = get_sponsor_name( $invoice_id );
+	$invoice_url        = admin_url( sprintf( 'post.php?post=%s&action=edit', $invoice_id ) );
+	$headers            = array( 'Reply-To: support@wordcamp.org' );
+	$attachments        = array();
 	$attachment_message = '';
-	$invoice_filename = false;
-	// todo realign
+	$invoice_filename   = false;
 
 	if ( 'approved' === $new_status ) {
-		$sponsor_id     = get_post_meta( $invoice_id, '_wcbsi_sponsor_id',            true );
-		$sponsor_email  = get_post_meta( $sponsor_id, '_wcpt_sponsor_email_address',  true );
-		$status_message = "has been sent to $sponsor_name via $sponsor_email. You will receive another notification when they have paid the invoice.";
-		$qbo_invoice_id   = get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', true );
+		$sponsor_id       = get_post_meta( $invoice_id, '_wcbsi_sponsor_id',           true );
+		$sponsor_email    = get_post_meta( $sponsor_id, '_wcpt_sponsor_email_address', true );
+		$qbo_invoice_id   = get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id',       true );
+		$status_message   = "has been sent to $sponsor_name via $sponsor_email. You will receive another notification when they have paid the invoice.";
 		$invoice_filename = \WordCamp_QBO_Client::get_invoice_filename( $qbo_invoice_id );
-		// todo realign
 
 		if ( ! is_wp_error( $invoice_filename ) ) {
 			$attachments[]      = $invoice_filename;
