@@ -12,7 +12,7 @@ gp_tmpl_header();
 
 <form action="" method="get" class="consistency-form">
 	<p>
-		<input type="text" name="search" required value="<?php echo esc_attr( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
+		<input type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
 		<?php
 		$options     = [];
 		$options[''] = 'Select a locale';
