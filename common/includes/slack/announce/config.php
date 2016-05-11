@@ -99,9 +99,6 @@ function get_whitelist() {
 			'hlashbrooke',
 			'lizkaraffa',
 		),
-		'feature-oembed' => array(
-			'swissspidy',
-		),
 		'feature-shinyupdates' => array(
 			'obenland',
 			'adamsilverstein',
