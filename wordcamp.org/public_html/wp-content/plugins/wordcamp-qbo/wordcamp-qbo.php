@@ -91,6 +91,11 @@ class WordCamp_QBO {
 			'callback' => array( __CLASS__, 'rest_callback_invoice' ),
 		) );
 
+		register_rest_route( 'wordcamp-qbo/v1', '/invoice_pdf', array(
+			'methods' => 'GET',
+			'callback' => array( __CLASS__, 'rest_callback_invoice_pdf' ),
+		) );
+
 		register_rest_route( 'wordcamp-qbo/v1', '/paid_invoices', array(
 			'methods' => 'GET',
 			'callback' => array( __CLASS__, 'rest_callback_paid_invoices' ),
@@ -583,6 +588,89 @@ class WordCamp_QBO {
 				'Authorization' => $oauth->get_oauth_header( 'POST', $request_url ),
 				'Accept'        => 'application/json',
 				'Content-Type'  => 'application/octet-stream',
+			),
+			'body' => '',
+		);
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
+	 * REST: /invoice_pdf
+	 *
+	 * Saves a PDF copy of the invoice and returns the filename
+	 *
+	 * Note: The function that eventually ends up using the file should delete it once it's done with it.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return string|WP_Error The filename on success, or a WP_Error on failure
+	 */
+	public static function rest_callback_invoice_pdf( $request ) {
+		if ( ! self::_is_valid_request( $request ) ) {
+			return new WP_Error( 'unauthorized', 'Unauthorized', array( 'status' => 401 ) );
+		}
+
+		$qbo_request = self::build_qbo_get_invoice_pdf_request( $request->get_param( 'invoice_id' ) );
+		$response    = wp_remote_get( $qbo_request['url'], $qbo_request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} elseif ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+			$result = new WP_Error( 'invalid_http_code', 'Invalid HTTP response code', $response );
+		} else {
+			$body             = wp_remote_retrieve_body( $response );
+			$valid_pdf_header = '%PDF-' === substr( $body, 0, 5 );
+			$valid_pdf_footer = '%%EOF' === substr( $body, strlen( $body ) - 7, 5 );
+
+			if ( $valid_pdf_header && $valid_pdf_footer ) {
+				$filename = sprintf(
+					'%sWPCS-invoice-%d.pdf',
+					get_temp_dir(),
+					$request->get_param( 'invoice_id' )
+				);
+
+				if ( file_put_contents( $filename, $body ) ) {
+					$result = array( 'filename' => $filename );
+				} else {
+					$result = new WP_Error( 'write_error', 'Failed writing PDF to disk.', compact( 'filename', 'body' ) );
+				}
+			} else {
+				$result = new WP_Error( 'invalid_body', 'Response body was not a PDF.', $response );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build a request to send an Invoice via QuickBook's API
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return array
+	 */
+	protected static function build_qbo_get_invoice_pdf_request( $invoice_id ) {
+		self::load_options();
+		$oauth = self::_get_oauth();
+		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
+
+		$request_url = sprintf(
+			'%s/v3/company/%d/invoice/%d/pdf',
+			self::$api_base_url,
+			rawurlencode( self::$options['auth']['realmId'] ),
+			rawurlencode( $invoice_id )
+		);
+
+		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
+			'headers' => array(
+				'Authorization' => $oauth->get_oauth_header( 'GET', $request_url ),
+				'Accept'        => 'application/pdf',
+				'Content-Type'  => 'application/pdf',
 			),
 			'body' => '',
 		);

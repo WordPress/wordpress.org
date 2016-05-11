@@ -433,6 +433,61 @@ class WordCamp_QBO_Client {
 	}
 
 	/**
+	 * Get the filename for a PDF copy of an invoice
+	 *
+	 * @param int $invoice_id
+	 *
+	 * @return WP_Error|string
+	 */
+	public static function get_invoice_filename( $invoice_id ) {
+		$request  = self::build_invoice_filename_request( $invoice_id );
+		$response = wp_remote_get( $request['url'], $request['args'] );
+
+		if ( is_wp_error( $response ) ) {
+			$result = $response;
+		} else {
+			$result = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( $result && is_file( $result->filename ) ) {
+				$result = $result->filename;
+			} else {
+				$result = new WP_Error( 'invalid_filename', 'The filename was not valid.', $result );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build the request to get the filename for a PDF copy of an invoice
+	 *
+	 * @param array $invoice_ids
+	 *
+	 * @return array
+	 */
+	protected static function build_invoice_filename_request( $invoice_id ) {
+		$params = array(
+			'invoice_id' => strval( absint( $invoice_id ) ),    // absint() to validate, strval() to convert to type expected by API
+		);
+
+		$request_url = self::$api_base . '/invoice_pdf';
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => self::_get_auth_header( 'get', $request_url, '', $params ),
+				'Content-Type'  => 'application/json',
+			),
+		);
+
+		$request_url = add_query_arg( $params, $request_url );  // has to be done after get_auth_header() is called so that the base url and params can be passed separately
+
+		return array(
+			'url'  => $request_url,
+			'args' => $args,
+		);
+	}
+
+	/**
 	 * Create an HMAC signature header for a request.
 	 *
 	 * Use with Authorization HTTP header.
