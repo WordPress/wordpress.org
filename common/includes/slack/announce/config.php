@@ -127,6 +127,7 @@ function get_whitelist() {
 			'ocean90',
 		),
 		'polyglots' => array(
+			'coachbirgit',
 			'deconf',
 			'ocean90',
 			'petya',
