@@ -50,7 +50,6 @@ class Meta extends Trac {
 	protected $name = 'WordPress.org Meta';
 	protected $primary_channel  = '#meta';
 	protected $commits_channel  = '#meta-commits';
-	protected $tickets_channel  = '$meta-newtickets';
 	protected $firehose_channel = '#meta-firehose';
 
 	protected $bypass_primary_channel_for_commit_filter_matches = true;
