@@ -50,7 +50,7 @@ class WCPT_Loader {
 		require_once ( WCPT_DIR . 'applications/wordcamp.php' );
 
 		// Require admin files.
-		if ( is_admin() ) {
+		if ( is_admin() || DOING_CRON ) {
 			require_once ( WCPT_DIR . 'wcpt-admin.php' );
 			require_once ( WCPT_DIR . 'wcpt-wordcamp/wordcamp-admin.php' );
 		}
@@ -58,8 +58,9 @@ class WCPT_Loader {
 
 	function core_admin() {
 		// Quick admin check
-		if ( !is_admin() )
+		if ( ! is_admin() && ! DOING_CRON ) {
 			return;
+		}
 
 		// Create admin
 		$GLOBALS['wcpt_admin'] = new WCPT_Admin;

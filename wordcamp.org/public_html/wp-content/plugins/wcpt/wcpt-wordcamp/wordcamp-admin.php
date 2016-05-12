@@ -50,6 +50,10 @@ class WordCamp_Admin {
 		// Admin notices
 		add_action( 'admin_notices',                                  array( $this, 'print_admin_notices' ) );
 		add_filter( 'redirect_post_location',                         array( $this, 'add_admin_notices_to_redirect_url' ), 10, 2 );
+
+		// Cron jobs
+		add_action( 'plugins_loaded',                                 array( $this, 'schedule_cron_jobs'          ), 11 );
+		add_action( 'wcpt_close_wordcamps_after_event',               array( $this, 'close_wordcamps_after_event' )     );
 	}
 
 	/**
@@ -922,6 +926,52 @@ class WordCamp_Admin {
 	public function original_application_metabox( $post ) {
 		$application_data = get_post_meta( $post->ID, '_application_data', true );
 		require_once( WCPT_DIR . 'views/wordcamp/metabox-original-application.php' );
+	}
+
+	/**
+	 * Schedule cron jobs
+	 */
+	public function schedule_cron_jobs() {
+		if ( wp_next_scheduled( 'wcpt_close_wordcamps_after_event' ) ) {
+			return;
+		}
+
+		wp_schedule_event( current_time( 'timestamp' ), 'hourly', 'wcpt_close_wordcamps_after_event' );
+	}
+
+	/**
+	 * Set WordCamp posts to the Closed status after the event is over
+	 */
+	public function close_wordcamps_after_event() {
+		$scheduled_wordcamps = get_posts( array(
+			'post_type'      => WCPT_POST_TYPE_ID,
+			'post_status'    => 'wcpt-scheduled',
+			'posts_per_page' => -1
+		) );
+
+		foreach ( $scheduled_wordcamps as $wordcamp ) {
+			$start_date = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
+			$end_date   = get_post_meta( $wordcamp->ID, 'End Date (YYYY-mm-dd)',   true );
+
+			if ( empty( $start_date ) ) {
+				continue;
+			}
+
+			if ( empty( $end_date ) ) {
+				$end_date = $start_date;
+			}
+
+			$end_date_at_midnight = strtotime( '23:59', $end_date );    // $end_date is the date at time 00:00, but the event isn't over until 23:59
+
+			if ( $end_date_at_midnight > time() ) {
+				continue;
+			}
+
+			wp_update_post( array(
+				'ID'          => $wordcamp->ID,
+				'post_status' => 'wcpt-closed',
+			) );
+		}
 	}
 }
 endif; // class_exists check

@@ -111,8 +111,15 @@ function wcpt_get_log_entries( $wordcamp_id ) {
 		foreach ( $raw_entries as $entry ) {
 			$user = get_user_by( 'id', $entry['user_id'] );
 
+			if ( $user ) {
+				$entry['user_display_name'] = $user->display_name;
+			} else {
+				// Assume that the action was performed during a cron job
+				$entry['user_display_name'] = 'WordCamp Bot';
+			}
+
 			$entry['type']              = $entry_type;
-			$entry['user_display_name'] = $user->display_name;
+			// todo realign
 
 			$entries[] = $entry;
 		}
