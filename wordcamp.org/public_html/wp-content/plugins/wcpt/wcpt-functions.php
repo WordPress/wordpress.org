@@ -118,8 +118,7 @@ function wcpt_get_log_entries( $wordcamp_id ) {
 				$entry['user_display_name'] = 'WordCamp Bot';
 			}
 
-			$entry['type']              = $entry_type;
-			// todo realign
+			$entry['type'] = $entry_type;
 
 			$entries[] = $entry;
 		}
