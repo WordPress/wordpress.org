@@ -1507,14 +1507,28 @@ ul#books, ul#otherbooks {
 	clear: both;
 	min-height: 100px;
 	margin-bottom: 20px;
+	margin-right: 10px;
+	padding-left: 120px;
+	position: relative;
 }
 
 .partner img {
-	float: right;
-	margin-top: 4px;
-	margin-right: 4px;
-	margin-left: 12px;
+	margin-left: 10px;
+	position: absolute;
+	top: 0;
+	left: -10px;
 }
+@media (max-width: 359px) {
+	.partner {
+		margin-right: 15px;
+		padding-left: 15px;
+	}
+	.partner img {
+		float: right;
+		position: relative;
+	}
+}
+
 .submit {
 	border-top: 1px solid #ccc;
 	padding: 1.5em 0 0 0;
