@@ -427,23 +427,23 @@ class WordCamp_Admin {
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 	}
 
+	/**
+	 * Print our scripts for the Edit WordCamp screen
+	 *
+	 * If this file grows larger, it'd make sense to switch to using wp_enqueue_script().
+	 */
 	function admin_print_scripts() {
-		if ( get_post_type() == WCPT_POST_TYPE_ID ) :
+		if ( WCPT_POST_TYPE_ID !== get_post_type() ) {
+			return;
+		}
 
 		?>
-
-			<script>
-				jQuery( document ).ready( function( $ ) {
-					$( '.date-field' ).datepicker( {
-						dateFormat: 'yy-mm-dd',
-						changeMonth: true,
-						changeYear:  true
-					} );
-				} );
-			</script>
+		
+		<script>
+			<?php require_once( dirname( __DIR__ ) . '/javascript/wcpt-wordcamp/admin.js' ); ?>
+		</script>
 
 		<?php
-		endif;
 	}
 
 	function admin_styles() {
