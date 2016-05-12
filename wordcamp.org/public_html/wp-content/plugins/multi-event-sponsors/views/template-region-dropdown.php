@@ -4,7 +4,7 @@
 <?php /** @var $cb_push_name    string */ ?>
 
 <select id="<?php echo esc_attr( $field_name ); ?>" name="<?php echo esc_attr( $field_name ); ?>">
-	<option value="null">None</option>
+	<option value="">None</option>
 
 	<?php foreach ( $regions as $region ) : ?>
 

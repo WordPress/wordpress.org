@@ -438,7 +438,7 @@ class WordCamp_Admin {
 		}
 
 		?>
-		
+
 		<script>
 			<?php require_once( dirname( __DIR__ ) . '/javascript/wcpt-wordcamp/admin.js' ); ?>
 		</script>
