@@ -156,7 +156,6 @@ class WordCamp_Loader {
 			'wcpt-needs-vetting'   => _x( 'Needs Vetting',                               'wordcamp status', 'wordcamporg' ),
 			'wcpt-needs-orientati' => _x( 'Needs Orientation/Interview',                 'wordcamp status', 'wordcamporg' ),
 			'wcpt-more-info-reque' => _x( 'More Info Requested',                         'wordcamp status', 'wordcamporg' ),
-			'wcpt-needs-rejection' => _x( 'Needs Rejection E-mail',                      'wordcamp status', 'wordcamporg' ),
 			'wcpt-interview-sched' => _x( 'Interview/Orientation Scheduled',             'wordcamp status', 'wordcamporg' ),
 			'wcpt-rejected'        => _x( 'Declined',                                    'wordcamp status', 'wordcamporg' ),
 			'wcpt-cancelled'       => _x( 'Cancelled',                                   'wordcamp status', 'wordcamporg' ),
@@ -173,8 +172,6 @@ class WordCamp_Loader {
 			'wcpt-needs-fill-list' => _x( 'Needs to Fill Out WordCamp Listing',          'wordcamp status', 'wordcamporg' ),
 			'wcpt-needs-schedule'  => _x( 'Needs to be Added to Official Schedule',      'wordcamp status', 'wordcamporg' ),
 			'wcpt-scheduled'       => _x( 'WordCamp Scheduled',                          'wordcamp status', 'wordcamporg' ),
-			'wcpt-needs-debrief'   => _x( 'Needs Debrief',                               'wordcamp status', 'wordcamporg' ),
-			'wcpt-debrief-schedul' => _x( 'Debrief Scheduled',                           'wordcamp status', 'wordcamporg' ),
 			'wcpt-closed'          => _x( 'WordCamp Closed',                             'wordcamp status', 'wordcamporg' ),
 		);
 	}
@@ -187,8 +184,6 @@ class WordCamp_Loader {
 	public static function get_public_post_statuses() {
 		return array(
 			'wcpt-scheduled',
-			'wcpt-needs-debrief',
-			'wcpt-debrief-schedul',
 			'wcpt-closed',
 
 			// back-compat
@@ -225,7 +220,6 @@ class WordCamp_Loader {
 			'wcpt-needs-vetting'   => 'Application received',
 			'wcpt-needs-orientati' => 'Application vetted',
 			'wcpt-more-info-reque' => 'Application vetted',
-			'wcpt-needs-rejection' => 'Application vetted',
 			'wcpt-interview-sched' => 'Interview scheduled',
 			'wcpt-rejected'        => 'Sent response',
 			'wcpt-cancelled'       => 'WordCamp cancelled',
@@ -242,8 +236,6 @@ class WordCamp_Loader {
 			'wcpt-needs-fill-list' => 'Contract signed',
 			'wcpt-needs-schedule'  => 'WordCamp listing filled out',
 			'wcpt-scheduled'       => 'WordCamp added to official schedule',
-			'wcpt-needs-debrief'   => 'WordCamp held',
-			'wcpt-debrief-schedul' => 'Debrief scheduled',
 			'wcpt-closed'          => 'Debrief held',
 		);
 
@@ -259,12 +251,11 @@ class WordCamp_Loader {
 	 */
 	public static function get_valid_status_transitions( $status ) {
 		$transitions = array(
-			'wcpt-needs-vetting'   => array( 'wcpt-needs-orientati', 'wcpt-more-info-reque', 'wcpt-needs-rejection' ),
+			'wcpt-needs-vetting'   => array( 'wcpt-needs-orientati', 'wcpt-more-info-reque' ),
 			'wcpt-needs-orientati' => array( 'wcpt-needs-vetting', 'wcpt-interview-sched' ),
 			'wcpt-more-info-reque' => array(),  // Allowed from any status, see below
-			'wcpt-needs-rejection' => array( 'wcpt-needs-vetting', 'wcpt-rejected' ),
 			'wcpt-interview-sched' => array( 'wcpt-needs-orientati', 'wcpt-approved-pre-pl' ),
-			'wcpt-rejected'        => array( 'wcpt-needs-rejection' ),
+			'wcpt-rejected'        => array(),
 			'wcpt-cancelled'       => array(),  // Allowed from any status, see below
 			'wcpt-approved-pre-pl' => array( 'wcpt-interview-sched', 'wcpt-needs-email' ),
 			'wcpt-needs-email'     => array( 'wcpt-approved-pre-pl', 'wcpt-needs-site' ),
@@ -278,10 +269,8 @@ class WordCamp_Loader {
 			'wcpt-needs-contract'  => array( 'wcpt-budget-rev-sche', 'wcpt-needs-fill-list' ),
 			'wcpt-needs-fill-list' => array( 'wcpt-needs-contract', 'wcpt-needs-schedule' ),
 			'wcpt-needs-schedule'  => array( 'wcpt-needs-fill-list', 'wcpt-scheduled' ),
-			'wcpt-scheduled'       => array( 'wcpt-needs-schedule', 'wcpt-needs-debrief' ),
-			'wcpt-needs-debrief'   => array( 'wcpt-scheduled', 'wcpt-debrief-schedul' ),
-			'wcpt-debrief-schedul' => array( 'wcpt-needs-debrief', 'wcpt-closed' ),
-			'wcpt-closed'          => array( 'wcpt-debrief-schedul' ),
+			'wcpt-scheduled'       => array( 'wcpt-needs-schedule' ),
+			'wcpt-closed'          => array(),
 		);
 
 		// Cancelled and More Info Requested can be switched to from any status.

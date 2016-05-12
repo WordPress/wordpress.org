@@ -22,12 +22,10 @@ get_header(); ?>
 
 				<?php endif; // end of the loop. ?>
 
-					<?php // Get the upcoming approved (published) WordCamps
+					<?php // Get the closed WordCamps
 					if ( function_exists( 'wcpt_has_wordcamps' ) &&
 						wcpt_has_wordcamps( array(
 							'post_status' => array(
-								'wcpt-needs-debrief',
-								'wcpt-debrief-schedul',
 								'wcpt-closed',
 
 								// back-compat
