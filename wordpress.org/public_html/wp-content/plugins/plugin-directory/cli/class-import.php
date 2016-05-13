@@ -115,6 +115,16 @@ class Import {
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
+		// Give committers a role on this site.
+		foreach ( Tools::get_plugin_committers( $plugin_slug ) as $committer ) {
+			// @todo: Enable.
+			continue;
+			$user = get_user_by( 'slug', $committer );
+
+			if ( ! user_can( $user, 'plugin_dashboard_access' ) ) {
+				$user->add_role( 'plugin_committer' );
+			}
+		}
 	}
 
 	/**
