@@ -339,7 +339,8 @@ class Plugin_Directory {
 		}
 
 		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] ) ) {
-			$wp_query->query_vars['post_type'] = array( 'plugin' );
+			$wp_query->query_vars['post_type']   = array( 'plugin' );
+			$wp_query->query_vars['post_status'] = array( 'publish' );
 		}
 
 		if ( empty( $wp_query->query ) ) {
