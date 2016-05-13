@@ -16,8 +16,9 @@ window.wp = window.wp || {};
 			'intrusions', 'cve', 'disclosure', 'hash', 'security', 'leakage', 'privilege', 'privileges',
 			'escape', 'unescape', 'escaped', 'unescaped', 'escapes', 'escaping', 'unescaping', 'esc_',
 			'sanitize', 'unsanitize', 'sanitizes', 'unsanitizes', 'sanitized', 'unsanitized', 'sanitization',
-			'valid', 'invalid', 'validate', 'validates', 'validation',
-			'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords',
+			'valid', 'invalid', 'validate', 'validates', 'validation','hack', 'vulnerable', 'attack', 
+			'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords', 'cross-site' , 
+			'secure' 
 		],
 
 		intersect : function(a, b) {
@@ -50,7 +51,7 @@ window.wp = window.wp || {};
 	}
 
 	function hide_box() {
-		$( 'input[name="submit"]' ).prop( 'disabled', false );
+		submit.prop( 'disabled', false );
 		$( '#sec_question' ).hide();
 	}
 
