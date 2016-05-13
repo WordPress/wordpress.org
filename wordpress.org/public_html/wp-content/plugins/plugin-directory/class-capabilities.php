@@ -33,7 +33,7 @@ class Capabilities {
 				$user       = new \WP_User( $user_id );
 				$committers = Tools::get_plugin_committers( $post->post_name );
 
-				if ( $post->post_author === $user_id || in_array( $user->user_login, $committers, true ) ) {
+				if ( $post->post_author == $user_id || in_array( $user->user_login, $committers, true ) ) {
 					$required_caps[] = 'plugin_edit_own';
 
 				} else {
