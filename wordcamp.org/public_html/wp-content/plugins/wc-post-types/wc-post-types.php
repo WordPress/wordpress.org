@@ -611,7 +611,7 @@ class WordCamp_Post_Types_Plugin {
 				$session              = get_post( $entry[ $term_id ] );
 				$session_title        = apply_filters( 'the_title', $session->post_title );
 				$session_tracks       = get_the_terms( $session->ID, 'wcb_track' );
-				$session_track_titles = implode( ', ', wp_list_pluck( $session_tracks, 'name' ) );      // todo implode(): Invalid arguments passed in wc-post-types.php on line 612
+				$session_track_titles = is_array( $session_tracks ) ? implode( ', ', wp_list_pluck( $session_tracks, 'name' ) ) : '';
 				$session_type         = get_post_meta( $session->ID, '_wcpt_session_type', true );
 
 				if ( ! in_array( $session_type, array( 'session', 'custom' ) ) )
