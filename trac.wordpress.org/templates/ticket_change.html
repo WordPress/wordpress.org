@@ -36,7 +36,7 @@ Arguments:
   <h3 class="change chat-bot">
     <span class="avatar" py:if="change">
       <span class="username-line">
-        <img src="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=48" srcset="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=96 2x" height="48" width="48" />
+        <img src="https://wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=96 2x" height="48" width="48" />
         ${wiki_to_html(context, change.comment, escape_newlines=preserve_newlines)}
       </span>
       <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
@@ -75,8 +75,8 @@ Arguments:
     <py:choose>
       <py:when test="'author' in change">
         <span class="avatar" py:if="change">
-          <span class="username-line"><a href="//profiles.wordpress.org/${authorinfo(change.author)}" class="profile-link">
-            <img src="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=48" srcset="//wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=96 2x" height="48" width="48" /> @<span class="username" data-username="${change.author}">${authorinfo(change.author)}</span></a></span>
+          <span class="username-line"><a href="https://profiles.wordpress.org/${authorinfo(change.author)}" class="profile-link">
+            <img src="https://wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${authorinfo(change.author)}&amp;s=96 2x" height="48" width="48" /> @<span class="username" data-username="${change.author}">${authorinfo(change.author)}</span></a></span>
           <py:if test="'date' in change">
             <br /><span class="time-ago">${dateinfo(change.date)} ago</span>
           </py:if>

@@ -6,20 +6,20 @@
 <?python
 	scripts_version = '62'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
-	wporg_endpoint = '//make.wordpress.org/' + project_slug + '/'
+	wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
 	project_name = project['name'].replace('Trac', '').strip()
 
 	notifications_enabled = 1 if project_slug in ['core', 'meta'] else 0
 
 	if project_slug == 'bbpress' :
-		support_link = '//bbpress.org/forums/'
+		support_link = 'https://bbpress.org/forums/'
 	elif project_slug == 'buddypress' :
-		support_link = '//buddypress.org/support/topics/'
+		support_link = 'https://buddypress.org/support/topics/'
 	else :
-		support_link = '//wordpress.org/support/'
+		support_link = 'https://wordpress.org/support/'
 
-	profile_to_edit = '//wordpress.org/support/profile/'
+	profile_to_edit = 'https://wordpress.org/support/profile/'
 
 	# Fix https://meta.trac.wordpress.org/ticket/21
 	try:
@@ -41,9 +41,9 @@
 	<!--! WP.org Global Header -->
 	<xi:include href="wporg-head.html" />
 	<meta name="viewport" content="width=device-width" />
-	<link rel='stylesheet' href='//s.w.org/wp-includes/css/dashicons.min.css?20150710' type='text/css' />
-	<link rel="stylesheet" type="text/css" href="//s.w.org/style/trac/wp-trac.css?${scripts_version}" />
-	<link py:if="req.session['authenticated']" rel="stylesheet" href="//s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
+	<link rel='stylesheet' href='https://s.w.org/wp-includes/css/dashicons.min.css?20150710' type='text/css' />
+	<link rel="stylesheet" type="text/css" href="https://s.w.org/style/trac/wp-trac.css?${scripts_version}" />
+	<link py:if="req.session['authenticated']" rel="stylesheet" href="https://s.w.org/wp-includes/css/wp-auth-check.css?ver=3.9-alpha" type="text/css" media="all" />
 
 	<script py:attrs="select('@*')"></script>
 
@@ -91,7 +91,7 @@
 					<span class="dashicons dashicons-lock"></span>
 					<strong>Do not report potential security vulnerabilities here.</strong><br />
 
-					See the <a href="//make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">Security FAQ</a> and contact <a class="mail-link" href="mailto:security@wordpress.org">security@wordpress.org</a>.
+					See the <a href="https://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">Security FAQ</a> and contact <a class="mail-link" href="mailto:security@wordpress.org">security@wordpress.org</a>.
 				</p>
 			</py:choose>
 		</div>
@@ -105,7 +105,7 @@
 				<li>In case it's relevant to the ticket, what is the expected output or result? What did you see instead?</li>
 				<li>Please provide any additional information that you think we'd find useful. (OS and browser for UI defects, server environment for crashes, etc.)</li>
 			</ul>
-			<p>You can search for existing tickets <a href="/search">here</a>. For more help, please see the <a href="//make.wordpress.org/core/handbook/reporting-bugs/">contributor handbook</a>.</p>
+			<p>You can search for existing tickets <a href="/search">here</a>. For more help, please see the <a href="https://make.wordpress.org/core/handbook/reporting-bugs/">contributor handbook</a>.</p>
 
 		</div>
 		</py:if>
@@ -126,7 +126,7 @@
 				<div class="wp-notice" id="wp-security-notice">
 					<p><strong>Caution!</strong> This ticket was assigned to the Security component.</p>
 					<p><strong>If this is a potential security vulnerability, DO NOT REPORT IT HERE.</strong></p>
-					<p>Instead, read the <a class="ext-link" href="//codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+					<p>Instead, read the <a class="ext-link" href="https://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
 				</div>
 			</py:if>
 
@@ -232,7 +232,7 @@
 		<div id="tabcontent">
 			Notifications are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
 			<py:if test="notifications_enabled">
-				Notification preferences can be configured <a href="//${wporg_endpoint}notifications/">here</a>.
+				Notification preferences can be configured <a href="https://${wporg_endpoint}notifications/">here</a>.
 			</py:if>
 		</div>
 	</py:match>
@@ -266,15 +266,15 @@
 	</script>
 
 	<!--! JavaScript -->
-	<script src="//s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
-	<script src="//s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
-	<script src="//s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
+	<script src="https://s.w.org/style/trac/jquery.caret.min.js?ver=2015-02-01"></script>
+	<script src="https://s.w.org/style/trac/jquery.atwho.min.js?ver=1.0.1"></script>
+	<script src="https://s.w.org/style/trac/wp-trac.js?${scripts_version}"></script>
 
 	<!--! Check for security buzzwords on new tickets -->
-	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="//s.w.org/style/trac/trac-security.js?${scripts_version}"></script>
+	<script py:if="req.environ['PATH_INFO'] == '/newticket'" src="https://s.w.org/style/trac/trac-security.js?${scripts_version}"></script>
 
 	<!--! New ticket possibly related tickets for Core Trac -->
-	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="//s.w.org/style/trac/trac-search.js?${scripts_version}"></script>
+	<script py:if="req.environ['PATH_INFO'] == '/newticket' and project_slug == 'core'" src="https://s.w.org/style/trac/trac-search.js?${scripts_version}"></script>
 
 	<!--! Analytics for Core Trac -->
 	<py:if test="project_slug == 'core'">
@@ -296,7 +296,7 @@
 			<div id="wp-auth-check-bg"></div>
 			<div id="wp-auth-check">
 				<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
-				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="//wordpress.org/support/bb-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://wordpress.org/support/bb-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
 				</div>
 			</div>
 		</div>
