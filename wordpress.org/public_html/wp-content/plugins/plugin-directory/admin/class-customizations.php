@@ -175,6 +175,8 @@ class Customizations {
 		$user = wp_get_current_user();
 
 		if ( ! current_user_can( 'plugin_approve' ) && empty( $query->query['post_status']) || ( isset( $query->query['author'] ) && $query->query['author'] == $user->ID ) ) {
+			$query->query_vars['author'] = $user->ID;
+
 			$plugins = Tools::get_users_write_access_plugins( $user );
 			if ( $plugins ) {
 				$query->query_vars['post_name__in'] = $plugins;
