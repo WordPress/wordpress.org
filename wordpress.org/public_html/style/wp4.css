@@ -1503,13 +1503,20 @@ ul#books, ul#otherbooks {
 	/*width: 670px;*/
 }
 
+.wporg-page-hosting #pagebody .partner .forum {
+	margin: 0;
+}
+
 .partner {
 	clear: both;
 	min-height: 100px;
-	margin-bottom: 20px;
-	margin-right: 10px;
+	margin: 40px 10px 40px 0;
 	padding-left: 120px;
 	position: relative;
+}
+
+.partner p {
+	margin-bottom: 10px;
 }
 
 .partner img {
