@@ -211,7 +211,7 @@
 <div py:match="div[@id='content' and @class='search']/h1">
 	<h1 py:attrs="select('@*')">${select('*|comment()|text()')}</h1>
 	<span class="create-new-ticket button button-large button-primary">
-		<a href="https://wordpress.org/support/bb-login.php?redirect_to=https://${project_slug}.trac.wordpress.org/newticket">Create a new ticket</a>
+		<a href="https://login.wordpress.org/?redirect_to=https://${project_slug}.trac.wordpress.org/newticket">Create a new ticket</a>
 	</span>
 </div>
 
@@ -296,7 +296,7 @@
 			<div id="wp-auth-check-bg"></div>
 			<div id="wp-auth-check">
 				<div class="wp-auth-check-close" tabindex="0" title="Close"></div>
-				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://wordpress.org/support/bb-login.php" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
+				<div class="wp-auth-fallback"><p><b class="wp-auth-fallback-expired" tabindex="0">Session expired</b></p><p><a href="https://login.wordpress.org/" target="_blank">Please log in again.</a> The login page will open in a new window. After logging in you can close it and return to this page.</p>
 				</div>
 			</div>
 		</div>
