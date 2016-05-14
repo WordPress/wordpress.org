@@ -232,7 +232,7 @@
 		<div id="tabcontent">
 			Notifications are sent to the email listed in <a href="${profile_to_edit}${req.session['sid']}">your WordPress.org profile</a><py:if test="req.session['email']"> (${req.session['email']})</py:if>.
 			<py:if test="notifications_enabled">
-				Notification preferences can be configured <a href="https://${wporg_endpoint}notifications/">here</a>.
+				Notification preferences can be configured <a href="${wporg_endpoint}notifications/">here</a>.
 			</py:if>
 		</div>
 	</py:match>
