@@ -16,9 +16,9 @@ window.wp = window.wp || {};
 			'intrusions', 'cve', 'disclosure', 'hash', 'security', 'leakage', 'privilege', 'privileges',
 			'escape', 'unescape', 'escaped', 'unescaped', 'escapes', 'escaping', 'unescaping', 'esc_',
 			'sanitize', 'unsanitize', 'sanitizes', 'unsanitizes', 'sanitized', 'unsanitized', 'sanitization',
-			'valid', 'invalid', 'validate', 'validates', 'validation','hack', 'vulnerable', 'attack', 
-			'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords', 'cross-site' , 
-			'secure' 
+			'valid', 'invalid', 'validate', 'validates', 'validation','hack', 'vulnerable', 'attack',
+			'compromise', 'escalation', 'injection', 'forgery', 'password', 'passwords', 'cross-site' ,
+			'secure'
 		],
 
 		intersect : function(a, b) {
@@ -36,8 +36,11 @@ window.wp = window.wp || {};
 	};
 
 	function show_box() {
-		// We have a potential problem here
-		submit.prop( 'disabled', true );
+		// Disable submit only if the box isn't already checked.
+		if ( false === $( '#security-question input' ).is( ':checked' ) ) {
+			submit.prop( 'disabled', true );
+		}
+
 		if ( $( '#security-question' ).length !== 0 ) {
 			// We've already created the checkbox
 			$( '#security-question' ).show();
@@ -57,7 +60,7 @@ window.wp = window.wp || {};
 
 	jQuery( '#field-summary, #field-description, #field-keywords' ).on( 'keyup', function() {
 		var entry = $(this).val();
-		
+
 		if ( wp.trac_security.has_overlap( entry, wp.trac_security.badwords ) ) {
 			show_box();
 		} else {
