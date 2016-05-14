@@ -33,17 +33,17 @@
 ?>
 
 <!--! Gravatars for the ticket reporter -->
-<td py:match="td[@headers='h_reporter']" py:attrs="select('@*')">
-  <a href="${profile_link + ticket.reporter}">
-    <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${ticket.reporter}&amp;s=96 2x" height="48" width="48" />
+<td py:match="td[@headers='h_reporter']" py:attrs="select('@*')" py:with="wporg_user = wporg_sanitize_user_nicename(ticket.reporter)">
+  <a href="${profile_link + wporg_user}">
+    <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" />
   </a>
     ${select('*|comment()|text()')}
 </td>
 
 <!--! Gravatars for the ticket owner -->
 <td py:match="td[@headers='h_owner']" py:attrs="select('@*')">
-  <a href="${profile_link + ticket.owner}" py:if="ticket.owner">
-    <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${ticket.owner}&amp;s=96 2x" height="48" width="48" />
+  <a py:if="ticket.owner" py:with="wporg_user = wporg_sanitize_user_nicename(ticket.owner)" href="${profile_link + wporg_user}">
+    <img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=48" srcset="https://wordpress.org/grav-redirect.php?user=${wporg_user}&amp;s=96 2x" height="48" width="48" />
   </a>
     ${select('*|comment()|text()')}
 </td>
