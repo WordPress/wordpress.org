@@ -30,6 +30,16 @@
     fields_map = {}
     for i in xrange(0, len(fields)):
       fields_map[ fields[i]['name'] ] = i
+
+  import re
+  def wporg_sanitize_user_nicename(str):
+    str = str.lower()
+    str = re.sub(r'[^%a-z0-9\x80-\xff _-]', '', str)
+    str = str.strip()
+    str = re.sub(r'\s+', '-', str)
+    str = re.sub(r'-+', '-', str)
+    str = re.sub(r'_+', '_', str)
+    return str;
 ?>
 
 <!--! Gravatars for the ticket reporter -->
