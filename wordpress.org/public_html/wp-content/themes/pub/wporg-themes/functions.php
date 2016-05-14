@@ -95,6 +95,14 @@ function wporg_themes_scripts() {
 	// No dashicons needed.
 	wp_deregister_style( 'dashicons' );
 	wp_register_style( 'dashicons', '' );
+
+	/*
+	 * No Grofiles needed.
+	 *
+	 * Enqueued so that it's overridden in the global footer.
+	 */
+	wp_register_script( 'grofiles-cards', false );
+	wp_enqueue_script( 'grofiles-cards' );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_themes_scripts' );
 
