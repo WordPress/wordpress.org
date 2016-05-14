@@ -107,6 +107,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 							return match;
 						}
 
+						var matchInAttr = new RegExp( '=".*' + match + '.*"' );
+						if ( matchInAttr.test( $comment ) ) {
+							return match;
+						}
+
 						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
 						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
 					} );
