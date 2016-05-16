@@ -25,7 +25,7 @@ if ( isset( $template ) && __FILE__ == $template ) {
 	<?php
 		if ( empty( $attendees ) ) :
 
-			_e( 'No attendees were found. Please try again tickets have been purchased.', 'wordcamporg' );
+			_e( 'No attendees were found. Please try again once tickets have been purchased.', 'wordcamporg' );
 
 		else :
 
