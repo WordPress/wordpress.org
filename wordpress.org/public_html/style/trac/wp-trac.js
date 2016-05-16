@@ -51,6 +51,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'wp',
 	];
 
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_special_characters
+	function escapeRegExp( string ) {
+		return string.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	}
+
 	wpTrac = {
 
 		gardener: typeof wpBugGardener !== 'undefined',
@@ -107,7 +112,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 							return match;
 						}
 
-						var matchInAttr = new RegExp( '=".*' + match + '.*"' );
+						var matchInAttr = new RegExp( '=".*' + escapeRegExp( match ) + '.*"' );
 						if ( matchInAttr.test( $comment ) ) {
 							return match;
 						}
