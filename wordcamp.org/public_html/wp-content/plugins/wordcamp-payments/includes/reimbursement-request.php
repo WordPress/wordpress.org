@@ -406,7 +406,7 @@ function set_request_status( $post_data, $post_data_raw ) {
 
 	// Requesting to save draft
 	if ( isset( $post_data_raw['wcb-save-draft'] ) ) {
-		if ( current_user_can( 'draft_post', $post_data['ID'] ) ) {
+		if ( current_user_can( 'draft_post', $post_data_raw['ID'] ) ) {
 			$post_data['post_status'] = 'draft';
 		}
 	}
