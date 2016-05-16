@@ -77,7 +77,7 @@ class WordCamp_Forms_To_Drafts {
 			return;
 		}
 
-		get_currentuserinfo();
+		$current_user = wp_get_current_user();
 		$form_id = get_post_meta( $post->ID, 'wcfd-key', true );
 
 		switch ( $form_id ) {
