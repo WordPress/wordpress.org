@@ -764,8 +764,7 @@ class WordCamp_Admin {
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
 		$required_needs_site_fields = $this->get_required_fields( 'needs-site' );
-		$required_scheduled_fields    = $this->get_required_fields( 'scheduled' );
-		// todo realign
+		$required_scheduled_fields  = $this->get_required_fields( 'scheduled' );
 
 		// Check pending posts
 		if ( 'wcpt-needs-site' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
