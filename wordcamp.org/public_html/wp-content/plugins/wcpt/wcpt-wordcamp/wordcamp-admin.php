@@ -763,16 +763,17 @@ class WordCamp_Admin {
 		// The ID of the last site that was created before this rule went into effect, so that we don't apply the rule retroactively.
 		$min_site_id = apply_filters( 'wcpt_require_complete_meta_min_site_id', '2416297' );
 
-		$required_pre_planning_fields = $this->get_required_fields( 'pre-planning' );
+		$required_needs_site_fields = $this->get_required_fields( 'needs-site' );
 		$required_scheduled_fields    = $this->get_required_fields( 'scheduled' );
+		// todo realign
 
 		// Check pending posts
-		if ( 'wcpt-approved-pre-pl' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
-			foreach( $required_pre_planning_fields as $field ) {
+		if ( 'wcpt-needs-site' == $post_data['post_status'] && absint( $_POST['post_ID'] ) > $min_site_id ) {
+			foreach( $required_needs_site_fields as $field ) {
 				$value = $_POST[ wcpt_key_to_str( $field, 'wcpt_' ) ];
 
 				if ( empty( $value ) || 'null' == $value ) {
-					$post_data['post_status']     = 'wcpt-interview-sched';
+					$post_data['post_status']     = 'wcpt-needs-email';
 					$this->active_admin_notices[] = 1;
 					break;
 				}
@@ -798,12 +799,12 @@ class WordCamp_Admin {
 	/**
 	 * Get a list of fields required to move to a certain post status
 	 *
-	 * @param string $status 'pre-planning' | 'scheduled' | 'any'
+	 * @param string $status 'needs-site' | 'scheduled' | 'any'
 	 *
 	 * @return array
 	 */
 	public static function get_required_fields( $status ) {
-		$pre_planning = array( 'E-mail Address' );
+		$needs_site = array( 'E-mail Address' );
 
 		$scheduled = array(
 			// WordCamp
@@ -827,8 +828,8 @@ class WordCamp_Admin {
 		);
 
 		switch ( $status ) {
-			case 'pre-planning':
-				$required_fields = $pre_planning;
+			case 'needs-site':
+				$required_fields = $needs_site;
 				break;
 
 			case 'scheduled':
@@ -837,7 +838,7 @@ class WordCamp_Admin {
 
 			case 'any':
 			default:
-				$required_fields = array_merge( $pre_planning, $scheduled );
+				$required_fields = array_merge( $needs_site, $scheduled );
 				break;
 		}
 
@@ -887,7 +888,7 @@ class WordCamp_Admin {
 		$notices = array(
 			1 => array(
 				'type'   => 'error',
-				'notice' => __( 'This WordCamp cannot be approved for pre-planning until all of its required metadata is filled in.', 'wordcamporg' ),
+				'notice' => __( 'This WordCamp cannot be moved to Needs Site until all of its required metadata is filled in.', 'wordcamporg' ),
 			),
 
 			3 => array(
