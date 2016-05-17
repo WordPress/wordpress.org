@@ -212,6 +212,10 @@ class WordCamp_Central_Theme {
 	protected static function get_javascript_options() {
 		global $post;
 
+		if ( ! is_a( $post, 'WP_Post' ) ) {
+			return array();
+		}
+
 		$options = array( 'ajaxURL' => admin_url( 'admin-ajax.php' ) );
 
 		if ( $map_id = self::get_map_id( $post->post_content ) ) {
