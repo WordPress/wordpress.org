@@ -888,12 +888,18 @@ class WordCamp_Admin {
 		$notices = array(
 			1 => array(
 				'type'   => 'error',
-				'notice' => __( 'This WordCamp cannot be moved to Needs Site until all of its required metadata is filled in.', 'wordcamporg' ),
+				'notice' => sprintf(
+					__( 'This WordCamp cannot be moved to Needs Site until all of its required metadata is filled in: %s.', 'wordcamporg' ),
+					implode( ', ', $this->get_required_fields( 'needs-site' ) )
+				),
 			),
 
 			3 => array(
 				'type'   => 'error',
-				'notice' => __( 'This WordCamp cannot be added to the schedule until all of its required metadata is filled in.', 'wordcamporg' ),
+				'notice' => sprintf(
+					__( 'This WordCamp cannot be added to the schedule until all of its required metadata is filled in: %s.', 'wordcamporg' ),
+					implode( ', ', $this->get_required_fields( 'scheduled' ) )
+				),
 			),
 		);
 
