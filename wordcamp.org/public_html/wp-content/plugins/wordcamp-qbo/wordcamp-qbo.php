@@ -3,6 +3,8 @@
  * Plugin Name: WordCamp.org QBO Integration
  */
 
+use WordCamp\Logger;
+
 class WordCamp_QBO {
 	const REMOTE_REQUEST_TIMEOUT = 10; // seconds
 
@@ -178,6 +180,7 @@ class WordCamp_QBO {
 					'Accept' => 'application/json',
 				),
 			) );
+			Logger\log( 'remote_request_sync_token', compact( 'response' ) );
 
 			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 )
 				return new WP_Error( 'error', 'Could not find purchase to update.' );
@@ -204,6 +207,7 @@ class WordCamp_QBO {
 			),
 			'body' => $payload,
 		) );
+		Logger\log( 'remote_request_create_expense', compact( 'payload', 'response' ) );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 )
 			return new WP_Error( 'error', 'Could not create purchase.' );
@@ -266,6 +270,7 @@ class WordCamp_QBO {
 				)
 			)
 		);
+		Logger\log( 'remote_request', compact( 'args', 'response' ) );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			return new WP_Error( 'error', 'Could not fetch classes.' );
@@ -357,6 +362,7 @@ class WordCamp_QBO {
 		}
 
 		$response = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
@@ -545,6 +551,7 @@ class WordCamp_QBO {
 	protected static function send_invoice( $invoice_id ) {
 		$qbo_request = self::build_qbo_send_invoice_request( $invoice_id );
 		$response    = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
@@ -627,6 +634,8 @@ class WordCamp_QBO {
 			$valid_pdf_footer = '%%EOF' === substr( $body, strlen( $body ) - 7, 5 );
 
 			if ( $valid_pdf_header && $valid_pdf_footer ) {
+				$response['body'] = '[valid pdf body removed]'; // because the binary contents aren't printable
+
 				$filename = sprintf(
 					'%sWPCS-invoice-%d.pdf',
 					get_temp_dir(),
@@ -642,6 +651,8 @@ class WordCamp_QBO {
 				$result = new WP_Error( 'invalid_body', 'Response body was not a PDF.', $response );
 			}
 		}
+
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) ); // call after processing response, because body is removed if pdf is valid
 
 		return $result;
 	}
@@ -741,6 +752,7 @@ class WordCamp_QBO {
 		}
 
 		$response = wp_remote_get( $qbo_request['url'], $qbo_request['args'] );
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
@@ -847,6 +859,7 @@ class WordCamp_QBO {
 		}
 
 		$response = wp_remote_post( $qbo_request['url'], $qbo_request['args'] );
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
@@ -969,6 +982,7 @@ class WordCamp_QBO {
 		}
 
 		$response = wp_remote_get( $qbo_request['url'], $qbo_request['args'] );
+		Logger\log( 'remote_request', compact( 'qbo_request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
@@ -1148,6 +1162,7 @@ class WordCamp_QBO {
 					'Accept' => 'application/json',
 				)
 			) );
+			Logger\log( 'remote_request', compact( 'response' ) );
 
 			if ( is_wp_error( $response ) ) {
 				wp_die( 'Could not obtain company information.' );
