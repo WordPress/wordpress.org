@@ -67,6 +67,37 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 *
 	 * @return array
 	 */
+	protected function get_bulk_actions() {
+		$actions = array();
+		$post_type_obj = get_post_type_object( $this->screen->post_type );
+
+		if ( current_user_can( $post_type_obj->cap->edit_posts ) ) {
+			if ( $this->is_trash ) {
+				$actions['untrash'] = __( 'Restore' );
+			} else {
+				$actions['edit'] = __( 'Edit' );
+			}
+		}
+
+		if ( current_user_can( 'plugin_reject' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'draft', 'pending' ) ) ) ) {
+			$actions['plugin_reject'] = __( 'Reject', 'wporg-plugins' );
+		}
+
+		if ( current_user_can( $post_type_obj->cap->delete_posts ) ) {
+			if ( $this->is_trash || ! EMPTY_TRASH_DAYS ) {
+				$actions['delete'] = __( 'Delete Permanently' );
+			} else {
+				$actions['trash'] = __( 'Move to Trash' );
+			}
+		}
+
+		return $actions;
+	}
+
+	/**
+	 *
+	 * @return array
+	 */
 	public function get_columns() {
 		$post_type     = $this->screen->post_type;
 		$posts_columns = array(

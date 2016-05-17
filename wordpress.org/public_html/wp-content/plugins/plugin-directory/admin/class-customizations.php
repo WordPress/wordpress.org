@@ -29,6 +29,7 @@ class Customizations {
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ) );
 
+		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
@@ -225,6 +226,53 @@ class Customizations {
 			$wp_list_table = new Plugin_Posts();
 			$wp_list_table->prepare_items();
 		}
+	}
+
+	/**
+	 * Rejects plugins in bulk.
+	 */
+	public function bulk_reject_plugins() {
+		if ( empty( $_REQUEST['action'] ) || empty( $_REQUEST['action2'] ) || ! in_array( 'plugin_reject', array( $_REQUEST['action'], $_REQUEST['action2'] ) ) || 'plugin' !== $_REQUEST['post_type'] ) {
+			return;
+		}
+
+		check_admin_referer( 'bulk-posts' );
+
+		$rejected = 0;
+		$plugins  = get_posts( array(
+			'post_type'      => 'plugin',
+			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
+			'post_status'    => array( 'draft', 'pending' ),
+			'posts_per_page' => count( $_REQUEST['post'] ),
+		) );
+
+		foreach ( $plugins as $plugin ) {
+			if ( ! current_user_can( 'plugin_reject', $plugin ) ) {
+				wp_die( __( 'You are not allowed to reject this plugin.', 'wporg-plugins' ), '', array( 'back_link' => true ) );
+			}
+
+			$updated = wp_update_post( array(
+				'ID'          => $plugin->ID,
+				'post_status' => 'rejected',
+			) );
+
+			if ( $updated && ! is_wp_error( $updated ) ) {
+				$rejected++;
+			}
+		}
+
+		if ( $rejected ) {
+			set_transient( 'settings_errors', array( array(
+				'setting' => 'wporg-plugins',
+				'code'    => 'plugins-bulk-rejected',
+				'message' => sprintf( _n( '1 plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
+				'type'    => 'updated',
+			) ) );
+		}
+
+		$send_back = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids', 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), wp_get_referer() );
+		wp_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
+		exit;
 	}
 
 	/**
