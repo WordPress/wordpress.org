@@ -1,6 +1,6 @@
-wp.wcpt = wp.wcpt || {};
+window.wordCampPostType = window.wordCampPostType || {};
 
-wp.wcpt.WcptWordCamp = ( function( $ ) {
+window.wordCampPostType.WcptWordCamp = ( function( $ ) {
 	'use strict';
 
 	var self = {};
