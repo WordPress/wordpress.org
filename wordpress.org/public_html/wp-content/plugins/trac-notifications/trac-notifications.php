@@ -355,10 +355,8 @@ class wporg_trac_notifications {
 				$output .= '.';
 		}
 
-		$gravatar_url = 'https://wordpress.org/grav-redirect.php?user=' . esc_attr( $ticket['reporter'] );
-
 		echo '<p class="ticket-note note-new-reporter">';
-		printf( '<img width="36" height="36" src="%1$s&amp;s=36" srcset="%1$s&amp;s=72 2x" /> ', $gravatar_url );
+		echo get_avatar( get_user_by( 'login', $ticket['reporter'] )->user_email, 36 );
 		echo '<span class="note">' . $output . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
@@ -534,4 +532,3 @@ class wporg_trac_notifications {
 	}
 }
 $wporg_trac_notifications = new wporg_trac_notifications;
-
