@@ -294,12 +294,12 @@ class wporg_trac_notifications {
 						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
 						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
-							<?php echo get_avatar( get_user_by( 'login', $follower )->user_email, 36 ); ?>
+							<?php echo get_avatar( get_user_by( 'login', $follower )->user_email, 36, 'retro' ); ?>
 							<span class="username"><?php echo $follower; ?></span>
 						</a>
 					<?php endforeach; ?>
 					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
-						<?php echo get_avatar( wp_get_current_user()->user_email, 36 ); ?>
+						<?php echo get_avatar( wp_get_current_user()->user_email, 36, 'retro' ); ?>
 						<span class="username"><?php echo $username; ?></span>
 					</a>
 					</div>
@@ -356,7 +356,7 @@ class wporg_trac_notifications {
 		}
 
 		echo '<p class="ticket-note note-new-reporter">';
-		echo get_avatar( get_user_by( 'login', $ticket['reporter'] )->user_email, 36 );
+		echo get_avatar( get_user_by( 'login', $ticket['reporter'] )->user_email, 36, 'retro' );
 		echo '<span class="note">' . $output . '</span>';
 		echo '<span class="dashicons dashicons-welcome-learn-more"></span>';
 	}
