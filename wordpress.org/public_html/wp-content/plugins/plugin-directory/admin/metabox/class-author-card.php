@@ -40,7 +40,7 @@ class Author_Card {
 						'<a href="//make.wordpress.org/pluginrepo/?s=' . urlencode( esc_attr( $author->user_nicename ) ) . '" title="Click to search Pluginrepo P2 for mention of this author">P2</a>',
 						'<a href="https://supportpress.wordpress.org/plugins/?q=' . urlencode( esc_attr( $author->user_nicename ) ) . '&status=&todo=Search+%C2%BB" title="Click to search Pluginrepo SupportPress for mention of this author">SP</a>',
 					);
-					vprintf( '<span class="profile-sp-link">[%s|%s]</span>', $author_links );
+					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
 				?>
 
 				<span class="profile-links">
@@ -49,7 +49,7 @@ class Author_Card {
 				</span>
 				<span class="profile-email">
 					&lt;<?php echo $author->user_email; ?>&gt;
-					<span class="profile-sp-link">[<a href="https://supportpress.wordpress.org/plugins/?sender=<?php echo esc_attr( $author->user_email ); ?>&status=&todo=Search" title="Click to search Pluginrepo SupportPress for emails sent to/from this email address">SP</a>]</span>
+					<span class="profile-sp-link">[ <a href="https://supportpress.wordpress.org/plugins/?sender=<?php echo esc_attr( $author->user_email ); ?>&status=&todo=Search" title="Click to search Pluginrepo SupportPress for emails sent to/from this email address">SP</a> ]</span>
 				</span>
 				<span class="profile-join">
 					Joined <?php echo human_time_diff( strtotime( $author->user_registered ) ); ?> ago (<?php echo date( 'Y-M-d', strtotime( $author->user_registered ) ); ?>)
@@ -167,7 +167,7 @@ class Author_Card {
 						'<a href="//make.wordpress.org/pluginrepo/?s=' . urlencode( esc_attr( $plugin_slug ) ) . '" title="Click to search Pluginrepo P2 for mention of this plugin">P2</a>',
 						'<a href="https://supportpress.wordpress.org/plugins/?q=' . urlencode( esc_attr( $plugin_slug ) ) . '&status=&todo=Search+%C2%BB" title="Click to search Pluginrepo SupportPress for mention of this plugin">SP</a>',
 					);
-					vprintf( '<span class="profile-sp-link">[%s|%s]</span>', $plugin_links );
+					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $plugin_links );
 
 					if ( $extra ) {
 						echo $extra;
