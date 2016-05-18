@@ -111,7 +111,7 @@ class Status_Transitions {
 		}
 
 		// Send email.
-		$subject = sprintf( __( '[WordPress Plugins] %s has been approved!', 'wporg-plugins' ), $post->post_title );
+		$subject = sprintf( __( '[WordPress.org Plugins] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
 		/* Translators: Plugin name. */
 		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %s has been approved.', 'wporg-plugins' ), $post->post_title ). "\n";
@@ -150,7 +150,7 @@ class Status_Transitions {
 
 		// Send email.
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
-		$subject = sprintf( __( '[WordPress Plugins] %s has been rejected', 'wporg-plugins' ), $post->post_title );
+		$subject = sprintf( __( '[WordPress.org Plugins] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* Translators: Plugin name. */
 		$content  = sprintf( __( 'Unfortunately your plugin hosting request for %s has been rejected.', 'wporg-plugins' ), $post->post_title ). "\n\n\n";
