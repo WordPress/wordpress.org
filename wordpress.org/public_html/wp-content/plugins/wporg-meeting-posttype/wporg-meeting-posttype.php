@@ -115,23 +115,33 @@ class Meeting_Post_Type {
 		// for each entry, set a fake meta value to show the next date for recurring meetings
 		array_walk( $posts, function ( &$post ) {
 			if ( $post->recurring == 'weekly' || $post->recurring === '1' ) {
-				// from the start date, advance the week until it's past now
-				$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
-				$now = new DateTime();
-				$interval = $start->diff($now);
-				// add one to days to account for events that happened earlier today
-				$weekdiff = ceil( ($interval->days+1) / 7 );
-				$next = strtotime( "{$post->start_date} + {$weekdiff} weeks" );
-				$post->next_date = date('Y-m-d', $next);
-			} else if ( $post->recurring == 'monthly' ) {
-				// advance the start date 1 month at a time until it's past now
-				$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
-				$next = $start;
-				$now = new DateTime();
-				while ( $now > $next ) {
-					$next->modify('+1 month');
+				try {
+					// from the start date, advance the week until it's past now
+					$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
+					$now = new DateTime();
+					$interval = $start->diff($now);
+					// add one to days to account for events that happened earlier today
+					$weekdiff = ceil( ($interval->days+1) / 7 );
+					$next = strtotime( "{$post->start_date} + {$weekdiff} weeks" );
+					$post->next_date = date('Y-m-d', $next);
+				} catch (Exception $e) {
+					// if the datetime is invalid, then set the post->next_date to the start date instead
+					$post->next_date = $post->start_date;
 				}
-				$post->next_date = $next->format('Y-m-d');
+			} else if ( $post->recurring == 'monthly' ) {
+				try {
+					// advance the start date 1 month at a time until it's past now
+					$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
+					$next = $start;
+					$now = new DateTime();
+					while ( $now > $next ) {
+						$next->modify('+1 month');
+					}
+					$post->next_date = $next->format('Y-m-d');
+				} catch (Exception $e) {
+					// if the datetime is invalid, then set the post->next_date to the start date instead
+					$post->next_date = $post->start_date;
+				}
 			}
 			else {
 				$post->next_date = $post->start_date;
