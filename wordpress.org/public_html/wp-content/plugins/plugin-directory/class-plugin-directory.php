@@ -166,6 +166,7 @@ class Plugin_Directory {
 		) );
 
 		// Add the browse/* views.
+		// TODO: browse/favorites/$user
 		add_rewrite_tag( '%browse%', '(featured|popular|beta|new|favorites)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
@@ -357,7 +358,25 @@ class Plugin_Directory {
 				break;
 
 			case 'favorites':
-				// TODO: Current stored as bbPress id's
+				$favorites_user = get_current_user_id();
+				if ( !empty( $wp_query->query_vars['favorites_user'] ) ) {
+					$favorites_user = $wp_query->query_vars['favorites_user'];
+				} elseif ( !empty( $_GET['favorites_user'] ) ) {
+					$favorites_user = $_GET['favorites_user'];
+				}
+				if ( ! is_numeric( $favorites_user ) ) {
+					$favorites_user = get_user_by( 'slug', $favorites_user );
+					if ( $favorites_user ) {
+						$favorites_user = $favorites_user->ID;
+					}
+				}
+
+				if ( $favorites_user ) {
+					$wp_query->query_vars['post_name__in'] = get_user_meta( $favorites_user, 'plugin_favorites', true );
+				}
+				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
+					$wp_query->query_vars['p'] = -1;
+				}
 				break;
 
 			case 'popular':
