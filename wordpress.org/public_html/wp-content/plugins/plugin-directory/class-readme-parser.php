@@ -55,7 +55,9 @@ class Readme_Parser {
 	);
 
 	public function __construct( $file ) {
-		$this->parse_readme( $file );
+		if ( $file ) {
+			$this->parse_readme( $file );
+		}
 	}
 
 	protected function parse_readme( $file ) {
@@ -80,8 +82,8 @@ class Readme_Parser {
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
 			$this->name = $line = $this->get_first_nonwhitespace( $contents );
-			// Ensure that the line read wasn't an actual header
-			if ( preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
+			// Ensure that the line read wasn't an actual header or description
+			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
 				$this->name = false;
 				array_unshift( $contents, $line );
 			}
@@ -127,7 +129,7 @@ class Readme_Parser {
 			$this->contributors = $this->sanitize_contributors( $this->contributors );
 		}
 		if ( ! empty( $headers['stable_tag'] ) ) {
-			$this->stable_tag = $headers['stable_tag'];
+			$this->stable_tag = $this->sanitize_stable_tag( $headers['stable_tag'] );
 		}
 		if ( ! empty( $headers['donate_link'] ) ) {
 			$this->donate_link = $headers['donate_link'];
@@ -362,6 +364,21 @@ class Readme_Parser {
 			}
 		}
 		return $users;
+	}
+
+	/**
+	 * Sanitize the provided stable tag to something we expect.
+	 *
+	 * @param string $stable_tag the raw Stable Tag line from the readme.
+	 * @return string The sanitized $stable_tag.
+	 */
+	protected function sanitize_stable_tag( $stable_tag ) {
+		$stable_tag = trim( $stable_tag );
+	 	$stable_tag = trim( $stable_tag, '"\'' ); // "trunk"
+		$stable_tag = preg_replace( '!^/?tags/!i', '', $stable_tag ); // "tags/1.2.3"
+		$stable_tag = preg_replace( '![^a-z0-9_.-]!i', '', $stable_tag );
+
+		return $stable_tag;
 	}
 
 	protected function parse_markdown( $text ) {
