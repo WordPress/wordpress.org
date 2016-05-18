@@ -38,6 +38,8 @@
 			}).on( 'wpListAddEnd', function() {
 				$( 'input[name="add_committer"]', '#add-committer' ).val( '' ).focus();
 			} );
+
+			$( '#contact-author' ).appendTo( '#plugin-review .inside' );
 		},
 
 		editTestedWith: function() {
