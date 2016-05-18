@@ -51,11 +51,6 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'wp',
 	];
 
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_special_characters
-	function escapeRegExp( string ) {
-		return string.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-	}
-
 	wpTrac = {
 
 		gardener: typeof wpBugGardener !== 'undefined',
@@ -102,24 +97,38 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 		linkMentions: function() {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			var mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_.]{1,20})(?:\b(?!@|＠)|$)/g;
+			var mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9/_.]{1,20})(?:\b(?!@|＠)|$)/g,
+				mentionsInAttrRegEx = new RegExp( '="[^"]*?' + mentionsRegEx.source + '[\\s\\S]*?"' );
 
 			$( 'div.change .comment, #ticket .description' ).each( function() {
 				$comment = $( this ).html();
 				if ( mentionsRegEx.test( $comment ) ) {
+					var placeholders = [];
+
+					if ( mentionsInAttrRegEx.test( $comment ) ) {
+						// Preserve mentions in HTML attributes.
+						$comment = $comment.replace( mentionsInAttrRegEx, function( match ) {
+							placeholders.push( match );
+							return '__PLACEHOLDER__';
+						} );
+					}
+
 					$comment = $comment.replace( mentionsRegEx, function( match, pre, username ) {
 						if ( -1 !== $.inArray( username, reservedTerms ) ) {
-							return match;
-						}
-
-						var matchInAttr = new RegExp( '=".*' + escapeRegExp( match ) + '.*"' );
-						if ( matchInAttr.test( $comment ) ) {
 							return match;
 						}
 
 						var meClass = ( username === wpTrac.currentUser ) ? ' me' : '';
 						return pre + '<a class="mention' + meClass + '" href="https://profiles.wordpress.org/' + username + '">@' + username + '</a>';
 					} );
+
+					// Restore mentions in HTML attributes.
+					if ( placeholders.length ) {
+						$comment = $comment.replace( '__PLACEHOLDER__', function() {
+							return placeholders.shift();
+						} );
+					}
+
 					$( this ).html( $comment );
 				}
 			});
