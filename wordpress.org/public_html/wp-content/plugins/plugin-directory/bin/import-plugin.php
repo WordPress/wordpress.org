@@ -6,6 +6,8 @@ if ( 'cli' != php_sapi_name() ) {
 	die();
 }
 
+ob_start();
+
 $opts = getopt( '', array( 'url:', 'abspath:', 'plugin:' ) );
 
 // Guess the default parameters:
@@ -49,10 +51,10 @@ $plugin_slug = $opts['plugin'];
 echo "Processing Import for $plugin_slug... ";
 try {
 	$importer = new CLI\Import;
-	$importer->import( $plugin_slug );
+	$importer->import_from_svn( $plugin_slug );
 	echo "OK\n";
 } catch( \Exception $e ) {
 	echo "Failed.\n";
-	fwrite( STDERR, "Plugin Import Failed: " . $e->getMessage() . "\n" );
+	fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 	exit(1);
 }

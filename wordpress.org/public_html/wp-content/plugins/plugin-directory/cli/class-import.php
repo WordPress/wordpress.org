@@ -6,6 +6,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use Exception;
 
 /**
  * The functionality required to process a plugin import into the Directory.
@@ -46,59 +47,107 @@ class Import {
 	 *
 	 * @param string $plugin_slug The slug of the plugin to import.
 	 */
-	public function import( $plugin_slug ) {
+	public function import_from_svn( $plugin_slug ) {
+		global $wpdb;
+
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
-// TODO			throw new \Exception( "Unknown Plugin" );
+// TODO			throw new Exception( "Unknown Plugin" );
 		}
 
 		$data = $this->export_and_parse_plugin( $plugin_slug );
 
-		if ( ! $plugin ) {
-			global $wpdb;
-			// TODO: During development while the bbPress variant is still running, we'll pull details from it and allow importing of any plugin.
-			$author = $wpdb->get_var( $wpdb->prepare( 'SELECT topic_poster FROM ' . PLUGINS_TABLE_PREFIX . 'topics WHERE topic_slug = %s', $plugin_slug ) );
-			if ( ! $author ) {
-				throw new \Exception( "Unknown Plugin" );
-			}
+	// TODO: During development while the bbPress variant is still running, we'll pull details from it and allow importing of any plugin.
+		$topic = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . PLUGINS_TABLE_PREFIX . 'topics WHERE topic_slug = %s', $plugin_slug ) );
+
+		if ( ! $plugin && ! $topic ) {
+			throw new Exception( "Unknown Plugin" );
+		}
+
+		// TODO: During development we're just going to import status from bbPress.
+		$status = 'publish';
+		if ( 2 == $topic->topic_open ) {
+			$status = 'approved';
+		} elseif ( 2 == $topic->forum_id ) {
+			$status = 'pending';
+		} elseif ( 4 == $topic->forum_id || 'rejected-' == substr( $topic->topic_slug, 0, 9 ) ) {
+			$status = 'rejected';
+		} elseif ( 1 == $topic->forum_id && 0 == $topic->topic_open ) {
+			$status = 'closed';
+		} elseif ( 3 == $topic->topic_open ) {
+			$status = 'disabled';
+		}
+
+		if ( ! $plugin ) {			
 			$plugin = Plugin_Directory::create_plugin_post( array(
 				'slug' => $plugin_slug,
-				'status' => 'publish', // If we're importing it on the CLI, and it didn't exist, assume it's published
-				'author' => $author
+				'status' => $status,
+				'author' => $topic->topic_poster,
+				'post_date_gmt' => $topic->topic_start_time,
+				'post_date' => $topic->topic_start_time,
+				'post_modified' => $topic->topic_time,
+				'post_modified_gmt' => $topic->topic_time,
 			) );
 		}
 
 		$readme = $data['readme'];
 		$assets = $data['assets'];
 		$headers = $data['plugin_headers'];
+		$stable_tag = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
 
 		$content = '';
-		foreach ( $readme->sections as $section => $section_content ) {
-			$content .= "\n\n<!--section={$section}-->\n{$section_content}";
+		if ( $readme->sections ) {
+			foreach ( $readme->sections as $section => $section_content ) {
+				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
+			}
+		} elseif ( !empty( $headers->Description ) ) {
+			$content = "<!--section=description-->\n{$headers->Description}";
 		}
 
 		// Fallback to the plugin title if the readme didn't contain it.
-		$plugin->post_title   = trim( $readme->name ) ?: strip_tags( $headers->Name );
-		$plugin->post_content = trim( $content );
-		$plugin->post_excerpt = trim( $readme->short_description );
+		$plugin->post_title   = trim( $readme->name ) ?: strip_tags( $headers->Name ) ?: $plugin->post_title;
+		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
+		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
+
+		$plugin->post_date     = $topic->topic_start_time;
+		$plugin->post_date_gmt = $topic->topic_start_time;
+		$plugin->override_modified_date = true;
+		$plugin->post_modified     = $topic->topic_time;
+		$plugin->post_modified_gmt = $topic->topic_time;
+
+		$plugin->post_status = $status;
+		if ( ! $plugin->post_title ) {
+			$plugin->post_title = $topic->topic_title;
+		}
 
 		// Bump last updated if the version has changed.
-		if ( $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
+		if ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
 			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
 
+		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 		wp_update_post( $plugin );
+		remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
 
 		foreach ( $this->readme_fields as $readme_field ) {
 			// Don't change the tested version if a newer version was specified through wp-admin
 			if ( 'tested' == $readme_field && version_compare( get_post_meta( $plugin->ID, 'tested', true ), $readme->$readme_field, '>' ) ) {
 				continue;
 			}
-			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
+
+			if ( 'stable_tag' == $readme_field ) {
+				// The stable_tag needs to come from the trunk readme at all times.
+				$value = $stable_tag;
+			} else {
+				$value = $readme->$readme_field;
+			}
+
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
 		}
+
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
-			update_post_meta( $plugin->ID, $meta_field, wp_slash( $headers->$plugin_header ) );
+			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
 		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
@@ -140,47 +189,79 @@ class Import {
 	 * @param string $plugin_slug The slug of the plugin to parse.
 	 *
 	 * @return array {
-	 *   'readme', 'trunk_readme', 'tmp_dir', 'plugin_headers', 'assets'
+	 *   'readme', 'stable_tag', 'plugin_headers', 'assets', 'tagged_versions'
 	 * }
 	 */
 	protected function export_and_parse_plugin( $plugin_slug ) {
 		$tmp_dir = Filesystem::temp_directory( "process-{$plugin_slug}" );
 
-		$svn_export = SVN::export( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk", $tmp_dir . '/trunk', array( 'ignore-externals' ) );
-		if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
-			throw new \Exception( "Could not create SVN export." . implode( ' ', reset( $svn_export['errors'] ) ) );
+		// Find the trunk readme file, list remotely to avoid checking out the entire directory.
+		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" );
+		if ( ! $trunk_files ) {
+			throw new Exception( 'Plugin has no files in trunk.' );
 		}
-		$trunk_revision = $svn_export['revision'];
 
-		$trunk_readme = $this->find_readme_file( $tmp_dir . '/trunk' );
-		if ( ! $trunk_readme ) {
-			throw new \Exception( "Could not locate a trunk readme" );
-		}
-		$trunk_readme = new Readme_Parser( $trunk_readme );
+		// A plugin historically doesn't have to have a readme.
+		$trunk_readme_files = preg_grep( '!^readme.(txt|md)$!i', $trunk_files );
+		if ( $trunk_readme_files ) {
+			$trunk_readme_file = reset( $trunk_readme_files );
+			foreach ( $trunk_readme_files as $f ) {
+				if ( '.txt' == strtolower( substr( $f, -4 ) ) ) {
+					$trunk_readme_file = $f;
+					break;
+				}
+			}
 
-		if ( $trunk_readme->stable_tag == 'trunk' || empty( $trunk_readme->stable_tag ) ) {
-			$readme = $trunk_readme;
-			$stable = 'trunk';
-			$stable_revision = $trunk_revision;
+			$trunk_readme_file = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk/{$trunk_readme_file}";
+			$trunk_readme = new Readme_Parser( $trunk_readme_file );
+
+			$stable_tag = $trunk_readme->stable_tag;
 		} else {
-			// There's a chance that the stable_tag will not actually exist, we have to fallback to trunk in those cases and avoid exiting here.
-			$stable_tag = preg_replace( '![^a-z0-9-_.]!i', '', $trunk_readme->stable_tag );
-			$svn_export = SVN::export( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}",  $tmp_dir . '/stable', array( 'ignore-externals' ) );
+			$stable_tag = 'trunk';
+		}
 
-			$stable_readme = $svn_export['result'] ? $this->find_readme_file( $tmp_dir . '/stable' ) : false;
-			if ( $stable_readme ) {
-				$readme = $stable_readme = new Readme_Parser( $stable_readme );
-				$stable = 'stable';
-				$stable_revision = $svn_export['revision'];
+		$exported = false;
+		if ( $stable_tag && 'trunk' != $stable_tag ) {
+			$svn_export = SVN::export(
+				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$stable_tag}",
+				$tmp_dir . '/export',
+				array(
+					'ignore-externals',
+					'depth' => 'files'
+				)
+			);
+			if ( $svn_export['result'] && false !== $this->find_readme_file( $tmp_dir . '/export' ) ) {
+				$exported = true;
 			} else {
-				// Trunk is stable!
-				$readme = $trunk_readme;
-				$stable = 'trunk';
-				$stable_revision = $trunk_revision;
+				// Clear out any files that exist in the export.
+				Filesystem::rmdir( $tmp_dir . '/export' );
+			}
+		}
+		if ( ! $exported ) {
+			$stable_tag = 'trunk';
+			// Either stable_tag = trunk, or the stable_tag tag didn't exist.
+			$svn_export = SVN::export(
+				self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk",
+				$tmp_dir . '/export',
+				array(
+					'ignore-externals',
+					'depth' => 'files' // Only export the root files, we don't need the rest to read the plugin headers/screenshots
+				)
+			);
+			if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
+				throw new Exception( 'Could not create SVN export: ' . implode( ' ', reset( $svn_export['errors'] ) ) );
 			}
 		}
 
-		$plugin_headers = $this->find_plugin_headers( "$tmp_dir/$stable" );
+		// The readme may not actually exist, but that's okay.
+		$readme = $this->find_readme_file( $tmp_dir . '/export' );
+		$readme = new Readme_Parser( $readme );
+
+		// There must be valid plugin headers though.
+		$plugin_headers = $this->find_plugin_headers( "$tmp_dir/export" );
+		if ( ! $plugin_headers ) {
+			throw new Exception( 'Could not find the plugin headers.' );
+		}
 
 		// Now we look in the /assets/ folder for banners, screenshots, and icons.
 		$assets = array( 'screenshot' => array(), 'banner' => array(), 'icon' => array() );
@@ -200,13 +281,13 @@ class Import {
 			}
 		}
 
-		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" );
+		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
 		$tagged_versions = array_map( function( $item ) {
 			return rtrim( $item, '/' );
 		}, $tagged_versions );
 
 		// Find screenshots in the stable plugin folder (but don't overwrite /assets/)
-		foreach ( Filesystem::list_files( "$tmp_dir/$stable/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
+		foreach ( Filesystem::list_files( "$tmp_dir/export/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
 			$filename = basename( $plugin_screenshot );
 			$screenshot_id = substr( $filename, strpos( $filename, '-' ) + 1 );
 			$screenshot_id = substr( $screenshot_id, 0, strpos( $screenshot_id, '.' ) );
@@ -218,13 +299,29 @@ class Import {
 
 			$assets['screenshot'][ $filename ] = array(
 				'filename' => $filename,
-				'revision' => $stable_revision,
+				'revision' => $svn_export['revision'],
 				'resolution' => $screenshot_id,
 				'location' => 'plugin',
 			);
 		}
 
-		return compact( 'readme', 'trunk_readme', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions' );
+		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions' );
+	}
+
+	/**
+	 * Filters `wp_insert_post()` to allow a custom modified date to be specified.
+	 *
+	 * @param array $data    The data to be inserted into the database.
+	 * @param array $postarr The raw data passed to `wp_insert_post()`.
+	 *
+	 * @return array The data to insert into the database.
+	 */
+	public function filter_wp_insert_post_data( $data, $postarr ) {
+		if ( !empty( $postarr['override_modified_date'] ) ) {
+			$data['post_modified']     = $postarr['post_modified'];
+			$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+		}
+		return $data;
 	}
 
 	/**
@@ -259,11 +356,29 @@ class Import {
 	protected function find_plugin_headers( $directory ) {
 		$files = Filesystem::list_files( $directory, false, '!\.php$!i' );
 
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			require ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		/*
+		 * Sometimes plugins have multiple files which we detect as a plugin based on the headers.
+		 * We'll return immediately if the file has a `Plugin Name:` header, otherwise
+		 * simply return the last set of headers we come across.
+		 */
+		$possible_headers = false;
 		foreach ( $files as $file ) {
 			$data = get_plugin_data( $file, false, false );
 			if ( array_filter( $data ) ) {
-				return (object) $data;
+				if ( $data['Name'] ) {
+					return (object) $data;
+				} else {
+					$possible_headers = (object) $data;
+				}
 			}
+		}
+
+		if ( $possible_headers ) {
+			return $possible_headers;
 		}
 
 		return false;
