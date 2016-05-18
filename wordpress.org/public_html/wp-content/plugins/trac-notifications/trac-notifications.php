@@ -293,12 +293,12 @@ class wporg_trac_notifications {
 						$follower = esc_attr( $follower );
 						$class = ''; // in_array( $follower, $stars, true ) ? ' class="star"' : '';
 					?>
-						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="//profiles.wordpress.org/<?php echo $follower; ?>">
+						<a<?php echo $class; ?> title="<?php echo $follower; ?>" href="https://profiles.wordpress.org/<?php echo $follower; ?>">
 							<?php echo get_avatar( get_user_by( 'login', $follower )->user_email, 36, 'retro' ); ?>
 							<span class="username"><?php echo $follower; ?></span>
 						</a>
 					<?php endforeach; ?>
-					<a title="you" class="star-you" href="//profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
+					<a title="you" class="star-you" href="https://profiles.wordpress.org/<?php echo esc_attr( $username ); ?>">
 						<?php echo get_avatar( wp_get_current_user()->user_email, 36, 'retro' ); ?>
 						<span class="username"><?php echo $username; ?></span>
 					</a>
@@ -363,7 +363,8 @@ class wporg_trac_notifications {
 
 	function notification_settings_page() {
 		if ( ! is_user_logged_in() ) {
-			return 'Please <a href="//wordpress.org/support/bb-login.php">log in</a> to save your notification preferences.';
+			$current_url = esc_url_raw( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			return 'Please <a href="' . esc_url( add_query_arg( 'redirect_to', $current_url, 'https://login.wordpress.org/' ) ) . '">log in</a> to save your notification preferences.';
 		}
 
 		ob_start();
