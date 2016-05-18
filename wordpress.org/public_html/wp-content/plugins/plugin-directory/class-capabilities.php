@@ -82,6 +82,7 @@ class Capabilities {
 		);
 
 		$reviewer = array_merge( $committer, array(
+			'moderate_comments' => true,
 			'plugin_edit_pending' => true,
 			'plugin_review' => true,
 		) );
