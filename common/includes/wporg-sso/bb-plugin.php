@@ -1,7 +1,7 @@
 <?php
 /**
  * bbPress-specific WPORG SSO: redirects all BB login and registration screens to our SSO ones.
- * 
+ *
  * @uses WPOrg_SSO (class-wporg-sso.php)
  * @author stephdau
  */
@@ -21,10 +21,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 				add_action( 'bb_init', array( &$this, 'redirect_all_login_or_signup_to_sso' ) );
 			}
 		}
-		
+
 		/**
 		 * Redirect all attempts to get to a BB login or signup to the SSO ones, or to a safe redirect location.
-		 * 
+		 *
 		 * @example add_action( 'bb_init', array( &$wporg_sso, 'redirect_all_bb_login_or_signup_to_sso' ) );
 		 */
 		function redirect_all_login_or_signup_to_sso() {
@@ -44,22 +44,22 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'BB_WPOrg_SSO' ) ) {
 					// Let users log out without a trip to the SSO host.
 					return;
 				}
-					
+
 				$redirect_to_sso_login = $this->sso_login_url;
-				
+
 				// Pass thru the requested action, logged out, if any
 				if ( ! empty( $_GET ) ) {
 					$redirect_to_sso_login = add_query_arg( $_GET, $redirect_to_sso_login );
 				}
-					
+
 				// Pay extra attention to the post-process redirect_to
 				$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $this->_get_safer_redirect_to() ), $redirect_to_sso_login );
-				
+
 				// Redirect to SSO login, trying to pass on a decent redirect_to request.
 				$this->_safe_redirect( $redirect_to_sso_login );
 			}
 		}
 	}
-	
+
 	new BB_WPOrg_SSO();
 }

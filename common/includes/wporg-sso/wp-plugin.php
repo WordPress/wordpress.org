@@ -1,7 +1,7 @@
 <?php
 /**
  * WordPress-specific WPORG SSO: redirects all WP login and registration screens to our SSO ones.
- * 
+ *
  * @uses WPOrg_SSO (class-wporg-sso.php)
  * @author stephdau
  */
@@ -22,7 +22,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			'lostpassword' => '/lostpassword',
 			'oauth'        => '/oauth',
 		);
-		
+
 		/**
 		 * Constructor: add our action(s)/filter(s)
 		 */
@@ -35,12 +35,12 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
 			}
 		}
-	
+
 		/**
 		 * Redirect all attempts to get to a WP login or signup to the SSO ones, or to a safe redirect location.
-		 
+
 		 * @example add_action( 'init', array( &$wporg_sso, 'redirect_all_wp_login_or_signup_to_sso' ) );
-		 * 
+		 *
 		 * @note Also handles accesses to lost password forms, since wp-login too.
 		 */
 		public function redirect_all_login_or_signup_to_sso() {
@@ -48,51 +48,51 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// Not in list of targeted domains, not interested, bail out
 				return;
 			}
-			
+
 			$redirect_req = $this->_get_safer_redirect_to();
-			
+
 			// Add our host to the list of allowed ones.
 			add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
-			
+
 			// Replace the lost password URL by our own
 			add_filter( 'lostpassword_url', array( &$this, 'lostpassword_url' ), 10, 2 );
-			
+
 			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
 				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ) );
-			
+
 			} elseif ( self::SSO_HOST !== $this->host ) {
 				// If we're not on the SSO host
 				if ( preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// If on a WP login screen...
 					$redirect_to_sso_login = $this->sso_login_url;
-					
+
 					// Pass thru the requested action, loggedout, if any
 					if ( ! empty( $_GET ) ) {
 						$redirect_to_sso_login = add_query_arg( $_GET, $redirect_to_sso_login );
 					}
-					
+
 					// Pay extra attention to the post-process redirect_to
 					$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $redirect_req ), $redirect_to_sso_login );
-					
+
 					// And actually redirect to the SSO login
 					$this->_safe_redirect( $redirect_to_sso_login );
-				
+
 				} else {
 					// Otherwise, filter the login_url to point to the SSO
 					add_action( 'login_url', array( &$this, 'login_url' ), 10, 2 );
 				}
-			
+
 			} else if ( self::SSO_HOST === $this->host ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
 					if ( preg_match( '!^(' . implode( '|', $this->valid_sso_paths ) . ')([/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
 						// If we're on the path of interest
-						
+
 						// Add a custom filter others can apply (theme, etc).
 						add_filter( 'is_valid_wporg_sso_path' , '__return_true' );
-						
+
 						if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
 							// If at host root (/)
 							if ( ! empty( $_GET['action'] ) ) {
@@ -132,30 +132,30 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				}
 			}
 		}
-		
+
 		/**
 		 * Modifies the network_site_url on login.wordpress.org's login screen to make sure all forms and links
 		 * go to the SSO host, not wordpress.org
-		 * 
+		 *
 		 * @param string $url
 		 * @param string $path
 		 * @param string $scheme
-		 * @return string 
-		 * 
+		 * @return string
+		 *
 		 * @example add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
 		 */
 		public function login_network_site_url( $url, $path, $scheme ) {
 			if ( self::SSO_HOST === $this->host && preg_match( '!/wp-login\.php$!', $this->script ) ) {
 				$url = preg_replace( '!^(https?://)[^/]+(/.+)$!' , '\1'.self::SSO_HOST.'\2', $url );
 			}
-			
+
 			return $url;
 		}
 
-		
+
 		/**
 		 * Filters the defaults captions and options for the login form
-		 * 
+		 *
 		 * @param array $defaults
 		 * @return array
 		 */
@@ -167,17 +167,17 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 			return $defaults;
 		}
-		
+
 		/**
 		 * Filters the default lost password URL and returns our custom one instead.
-		 * 
+		 *
 		 * @param string $lostpassword_url
 		 * @param string $redirect
 		 */
 		public function lostpassword_url( $lostpassword_url, $redirect ) {
 			return home_url( $this->valid_sso_paths['lostpassword'] . '/?redirect_to=' . $redirect );
 		}
-		
+
 		/**
 		 * Redirects the user to her/his (support) profile.
 		 */
@@ -193,6 +193,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 		}
 	}
-	
+
 	new WP_WPOrg_SSO();
 }
