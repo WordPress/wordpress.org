@@ -31,7 +31,7 @@ class Review_Tools {
 				<input type="hidden" name="to_email" value="<?php echo esc_attr( $author->user_email ); ?>" />
 				<input type="hidden" name="to_name" value="<?php echo esc_attr( $author->display_name ); ?>" />
 				<input type="hidden" name="subject" value="<?php printf( esc_attr__( 'Feedback for %s' ), $post->post_title ); ?>" />
-				<button class="button button-secondary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
+				<button class="button button-primary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
 			</form>
 			<?php
 			return $string;
