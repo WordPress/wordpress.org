@@ -1,13 +1,11 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
-use Michelf\MarkdownExtra;
+use WordPressdotorg\Plugin_Directory\Markdown;
 
 /**
  * WordPress.org Plugin Readme Parser.
  *
  * Based on Baikonur_ReadmeParser from https://github.com/rmccue/WordPress-Readme-Parser
- *
- * Relies on \Michaelf\Markdown_Extra
  *
  * @package WordPressdotorg\Plugin_Directory
  */
@@ -383,52 +381,11 @@ class Readme_Parser {
 
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
-		if ( ! class_exists( '\\Michelf\\MarkdownExtra' ) ) {
-			// TODO: Autoloader?
-			include __DIR__ . '/libs/michelf-php-markdown-1.6.0/Michelf/MarkdownExtra.inc.php';
-		}
 		if ( is_null( $markdown ) ) {
-			$markdown = new MarkdownExtra();
+			$markdown = new Markdown();
 		}
 
-		$text = $this->code_trick( $text );
-		$text = preg_replace( '/^[\s]*=[\s]+(.+?)[\s]+=/m', "\n" . '<h4>$1</h4>' . "\n", $text );
-		$text = $markdown->transform( trim( $text ) );
-
-		return trim( $text );
+		return $markdown->transform( $text );
 	}
 
-	protected function code_trick( $text ) {
-		// If doing markdown, first take any user formatted code blocks and turn them into backticks so that
-		// markdown will preserve things like underscores in code blocks
-		$text = preg_replace_callback( "!(<pre><code>|<code>)(.*?)(</code></pre>|</code>)!s", array( $this, 'code_trick_decodeit_cb' ), $text );
-		$text = str_replace( array( "\r\n", "\r" ), "\n", $text );
-
-		// Markdown can do inline code, we convert bbPress style block level code to Markdown style
-		$text = preg_replace_callback( "!(^|\n)([ \t]*?)`(.*?)`!s", array( $this, 'code_trick_indent_cb' ), $text );
-
-		return $text;
-	}
-
-	protected function code_trick_indent_cb( $matches ) {
-		$text = $matches[3];
-		$text = preg_replace( '|^|m', $matches[2] . '    ', $text );
-
-		return $matches[1] . $text;
-	}
-
-	protected function code_trick_decodeit_cb( $matches ) {
-		$text        = $matches[2];
-		$trans_table = array_flip( get_html_translation_table( HTML_ENTITIES ) );
-		$text        = strtr( $text, $trans_table );
-		$text        = str_replace( '<br />', '', $text );
-		$text        = str_replace( '&#38;', '&', $text );
-		$text        = str_replace( '&#39;', "'", $text );
-
-		if ( '<pre><code>' == $matches[1] ) {
-			$text = "\n$text\n";
-		}
-
-		return "`$text`";
-	}
 }
