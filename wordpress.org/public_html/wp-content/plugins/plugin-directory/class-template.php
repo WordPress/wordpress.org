@@ -64,6 +64,27 @@ class Template {
 	}
 
 	/**
+	 * Displays a plugin's rating with the amount of ratings it has received.
+	 *
+	 * @param \WP_Post|int $post
+	 * @return string
+	 */
+	public static function get_star_rating( $post = 0 ) {
+		$post = get_post( $post );
+
+		$rating      = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+		$num_ratings = array_sum( $ratings );
+
+		return '<div class="plugin-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">' .
+		       '<meta itemprop="ratingCount" content="' . esc_attr( $num_ratings ) . '"/>' .
+		       '<meta itemprop="ratingValue" content="' . esc_attr( $rating ) . '"/>' .
+		       Template::dashicons_stars( $rating ) .
+		       '<span class="rating-count">(' . esc_html( $num_ratings ) . ')</span>' .
+		       '</div>';
+	}
+
+	/**
 	 * @return array
 	 */
 	static function get_plugin_sections( $post = null ) {
