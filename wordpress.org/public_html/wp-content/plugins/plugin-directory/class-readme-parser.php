@@ -316,8 +316,9 @@ class Readme_Parser {
 			'h4'         => true,
 		);
 
-		$text = balanceTags( $text );
-		$text = make_clickable( $text );
+		$text = force_balance_tags( $text );
+		// TODO: make_clickable() will act inside shortcodes.
+		//$text = make_clickable( $text );
 
 		$text = wp_kses( $text, $allowed );
 
