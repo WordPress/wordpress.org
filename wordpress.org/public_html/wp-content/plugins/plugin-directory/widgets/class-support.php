@@ -23,7 +23,9 @@ class Support extends \WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		$post        = get_post();
-		$resolutions = true;
+		$threads     = get_post_meta( $post->ID, 'support_threads', true ) ?: 0;
+		$resolved    = get_post_meta( $post->ID, 'support_threads_resolved', true ) ?: 0;
+		$resolutions = (bool) $threads;
 		$support_url = 'https://wordpress.org/support/plugin/' . $post->post_name;
 
 		/*
@@ -47,10 +49,7 @@ class Support extends \WP_Widget {
 		<p>
 			<?php
 			/* translators: 1: Number of resolved threads; 2: Number of all threads; */
-			printf( __( '%1$s of %2$s support threads in the last two months have been marked resolved.', 'wporg-plugins' ),
-				get_post_meta( $post->ID, 'support_threads', true ),
-				get_post_meta( $post->ID, 'support_threads_resolved', true )
-			);
+			printf( __( '%1$s of %2$s support threads in the last two months have been marked resolved.', 'wporg-plugins' ), $threads, $resolved );
 			?>
 		</p>
 		<?php endif; ?>
