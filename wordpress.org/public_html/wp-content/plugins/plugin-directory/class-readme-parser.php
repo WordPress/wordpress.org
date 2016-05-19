@@ -64,9 +64,16 @@ class Readme_Parser {
 
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
-		// Strip BOM
+		// Strip UTF8 BOM if present
 		if ( strpos( $contents[0], "\xEF\xBB\xBF" ) === 0 ) {
 			$contents[0] = substr( $contents[0], 3 );
+		}
+
+		// Convert UTF-16 files
+		if ( strpos( $contents[0], "\xFF\xFE" ) === 0 ) {
+			foreach ( $contents as $i => $line ) {
+				$contents[$i] = mb_convert_encoding( $line, 'UTF-8', 'UTF-16' );
+			}
 		}
 
 		$line       = $this->get_first_nonwhitespace( $contents );
