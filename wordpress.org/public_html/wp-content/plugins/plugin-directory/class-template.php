@@ -234,7 +234,7 @@ class Template {
 	 * Retrieve the Plugin Icon details for a plugin.
 	 *
 	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
-	 * @param string          $output Output type. Default: 'raw'.
+	 * @param string          $output Output type. 'html' or 'raw'. Default: 'raw'.
 	 * @return mixed
 	 */
 	static function get_plugin_banner( $plugin, $output = 'raw' ) {
@@ -264,6 +264,18 @@ class Template {
 		}
 
 		switch ( $output ) {
+			case 'html':
+				$id   = "plugin-banner-{$plugin_slug}";
+				$html = "<style type='text/css'>";
+				$html .= "#{$id} { background-image: url('{$banner}'); }";
+				if ( ! empty( $icon_2x ) ) {
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$banner_2x}'); } }";
+				}
+				$html .= "</style>";
+				$html .= "<div class='plugin-banner' id='{$id}'></div>";
+
+				return $html;
+				break;
 			case 'raw':
 			default:
 				return compact( 'banner', 'banner_2x' );
