@@ -31,19 +31,27 @@ function wporg_plugins_the_version() {
 }
 
 function wporg_plugins_download_link() {
-	return esc_url( sprintf( "https://downloads.wordpress.org/plugin/%s.%s.zip", get_post()->post_name, wporg_plugins_the_version() ) );
+	return esc_url( Template::download_link( get_the_id() ) );
 }
 
 function wporg_plugins_template_authors() {
-	$authors = get_post_meta( get_the_id(), 'contributors', true );
+	$contributors = get_post_meta( get_the_id(), 'contributors', true );
+
+	$authors = array();
+	foreach ( $contributors as $contributor ) {
+		$user = get_user_by( 'login', $contributor );
+		if ( $user ) {
+			$authors[] = $user;
+		}
+	}
+
+	if ( ! $authors ) {
+		$authors[] = new \WP_User( get_post()->post_author );
+	}
 
 	$author_links = array();
 	$and_more = false;
-	foreach ( $authors as $author ) {
-		$user = get_user_by( 'login', $author );
-		if ( ! $user ) {
-			continue;
-		}
+	foreach ( $authors as $user ) {
 		$author_links[] = sprintf( '<a href="%s">%s</a>', 'https://profiles.wordpress.org/' . $user->user_nicename . '/', $user->display_name );
 		if ( count( $author_links ) > 5 ) {
 			$and_more = true;
