@@ -52,7 +52,7 @@ class Ratings extends \WP_Widget {
 		</div>
 		<?php else : ?>
 		<div class="rating">
-			<div class="ratings"><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></div>
+			<p class="description"><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
 		</div>
 		<?php endif; // $rating
 
