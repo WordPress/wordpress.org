@@ -13,6 +13,11 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 $content = call_user_func( array( Plugin_Directory::instance(), 'split_post_content_into_pages' ), get_the_content() );
 
+$widget_args = array(
+	'before_title' => '<h4 class="widget-title">',
+	'after_title'  => '</h4>',
+);
+
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<?php echo Template::get_plugin_banner( get_post(), 'html' ); ?>
 
@@ -47,18 +52,11 @@ $content = call_user_func( array( Plugin_Directory::instance(), 'split_post_cont
 	</div><!-- .entry-content -->
 
 	<div class="entry-meta">
-		<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
-		<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-			<meta itemprop="price" content="0.00" />
-			<meta itemprop="priceCurrency" content="USD" />
-			<span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
-				<span itemprop="name" content="WordPress.org"></span>
-			</span>
-		</span>
-
-		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings' ); ?>
-		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support' ); ?>
-		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta' ); ?>
+		<?php
+			the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
+			the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support', array(), $widget_args );
+			the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',    array(), $widget_args );
+		?>
 
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->

@@ -15,6 +15,11 @@ $sections = array(
 	'beta'     => __( 'Beta Plugins', 'wporg-plugins' ),
 );
 
+$widget_args = array(
+	'before_title' => '<h4 class="widget-title">',
+	'after_title'  => '</h4>',
+);
+
 get_header();
 ?>
 
@@ -43,11 +48,6 @@ get_header();
 
 	<aside id="secondary" class="widget-area" role="complementary">
 		<?php
-			$widget_args = array(
-				'before_title' => '<h4 class="widget-title">',
-				'after_title'  => '</h4>',
-			);
-
 			the_widget( 'WP_Widget_Text', array(
 				'title' => __( 'Plugin Authors', 'wporg-plugins' ),
 				'text'  => __( 'Now what are the possibilities of warp drive? Cmdr Riker\'s nervous system has been invaded by an unknown microorganism. The organisms fuse to the nerve, intertwining at the molecular level. That\'s why the transporter\'s biofilters couldn\'t extract it.', 'wporg-plugins' ),
