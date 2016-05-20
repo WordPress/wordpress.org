@@ -109,11 +109,25 @@ function content() {
 add_action( 'template_redirect', __NAMESPACE__ . '\content' );
 
 /**
+ * Add postMessage support for site title and description for the Theme Customizer.
+ *
+ * @param \WP_Customize_Manager $wp_customize Theme Customizer object.
+ */
+function customize_register( $wp_customize ) {
+	$wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';
+	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
+}
+add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
+
+/**
+ * Binds JS handlers to make Theme Customizer preview reload changes asynchronously.
+ */
+function customize_preview_js() {
+	wp_enqueue_script( 'wporg_plugins_customizer', get_template_directory_uri() . '/js/customizer.js', array( 'customize-preview' ), '20151215', true );
+}
+add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' );
+
+/**
  * Custom template tags for this theme.
  */
 require get_template_directory() . '/inc/template-tags.php';
-
-/**
- * Customizer additions.
- */
-require get_template_directory() . '/inc/customizer.php';
