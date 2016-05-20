@@ -83,8 +83,6 @@
 		width: 30%;
 
 		.plugin-ratings {
-			margin-bottom: 1rem;
-
 			.description {
 				@include font-size( ms-unitless( ms(-2) ) );
 			}
@@ -98,6 +96,7 @@
 				width: auto;
 			}
 		}
+
 		.stars__small {
 			@extend .plugin-ratings;
 			display: inline-block;

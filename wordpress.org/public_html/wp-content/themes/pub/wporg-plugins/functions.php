@@ -60,35 +60,6 @@ function content_width() {
 add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
 
 /**
- * Register widget area.
- *
- * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
- */
-function widgets_init() {
-
-	register_sidebar( array(
-		'name'          => esc_html__( 'Front Page Sidebar', 'wporg-plugins' ),
-		'id'            => 'sidebar-front-page',
-		'description'   => esc_html__( 'Appears on the bottom of the front page.', 'wporg-plugins' ),
-		'before_widget' => '<div id="%1$s" class="widget %2$s">',
-		'after_widget'  => '</div>',
-		'before_title'  => '<h4 class="widget-title">',
-		'after_title'   => '</h4>',
-	) );
-
-	register_sidebar( array(
-		'name'          => esc_html__( 'Sidebar', 'wporg-plugins' ),
-		'id'            => 'sidebar-1',
-		'description'   => esc_html__( 'Add widgets here.', 'wporg-plugins' ),
-		'before_widget' => '<div id="%1$s" class="widget %2$s">',
-		'after_widget'  => '</div>',
-		'before_title'  => '<h3 class="widget-title">',
-		'after_title'   => '</h3>',
-	) );
-}
-add_action( 'widgets_init', __NAMESPACE__ . '\widgets_init' );
-
-/**
  * Enqueue scripts and styles.
  */
 function scripts() {

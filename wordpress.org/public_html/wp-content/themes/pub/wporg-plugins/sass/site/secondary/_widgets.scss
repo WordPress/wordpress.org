@@ -1,8 +1,33 @@
+@import "../../variables-site/variables-site";
+@import "../../mixins/mixins-master";
+
 .widget {
 	margin: 0 0 1.5em;
+}
 
-	/* Make sure select elements fit in widgets. */
-	select {
-		max-width: 100%;
+.home .widget-area {
+	margin: 0 auto;
+	max-width: $size__site-main;
+	padding: 0 ms(4) ms(10) ms(4);
+
+	@media ( min-width: 67rem ) {
+		padding: 0 0 ms(10) 0;
+	}
+
+	.widget {
+		display: inline-block;
+		@include font-size( ms-unitless( ms(-2) ) );
+		margin-right: 5%;
+		vertical-align: top;
+		width: 30%;
+
+		&:last-child {
+			margin-right: 0;
+		}
+
+		/* Make sure select elements fit in widgets. */
+		select {
+			max-width: 100%;
+		}
 	}
 }

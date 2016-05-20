@@ -1074,10 +1074,35 @@ p .section-toggle:not(.button):hover {
 --------------------------------------------------------------*/
 .widget {
   margin: 0 0 1.5em;
+}
+
+.home .widget-area {
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 0 1.5625rem 3.0517578125rem 1.5625rem;
+}
+
+@media (min-width: 67rem) {
+  .home .widget-area {
+    padding: 0 0 3.0517578125rem 0;
+  }
+}
+
+.home .widget-area .widget {
+  display: inline-block;
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  margin-right: 5%;
+  vertical-align: top;
+  width: 30%;
   /* Make sure select elements fit in widgets. */
 }
 
-.widget select {
+.home .widget-area .widget:last-child {
+  margin-right: 0;
+}
+
+.home .widget-area .widget select {
   max-width: 100%;
 }
 
@@ -1430,10 +1455,6 @@ p .section-toggle:not(.button):hover {
   width: 30%;
 }
 
-.single .type-plugin .entry-meta .plugin-ratings, .single .type-plugin .entry-meta .stars__small {
-  margin-bottom: 1rem;
-}
-
 .single .type-plugin .entry-meta .plugin-ratings .description, .single .type-plugin .entry-meta .stars__small .description {
   font-size: 12.8px;
   font-size: 0.8rem;
@@ -1558,18 +1579,29 @@ p .section-toggle:not(.button):hover {
 /*--------------------------------------------------------------
 ## Widgets
 --------------------------------------------------------------*/
+.widget {
+  margin: 0 0 1.5em;
+}
+
 .home .widget-area {
   margin: 0 auto;
   max-width: 960px;
   padding: 0 1.5625rem 3.0517578125rem 1.5625rem;
 }
 
+@media (min-width: 67rem) {
+  .home .widget-area {
+    padding: 0 0 3.0517578125rem 0;
+  }
+}
+
 .home .widget-area .widget {
   display: inline-block;
-  width: 30%;
-  margin-right: 5%;
   font-size: 12.8px;
   font-size: 0.8rem;
+  margin-right: 5%;
+  vertical-align: top;
+  width: 30%;
   /* Make sure select elements fit in widgets. */
 }
 
