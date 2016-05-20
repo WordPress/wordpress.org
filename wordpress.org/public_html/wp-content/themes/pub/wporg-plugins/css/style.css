@@ -1106,6 +1106,79 @@ p .section-toggle:not(.button):hover {
   max-width: 100%;
 }
 
+.plugin-ratings {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+.plugin-ratings [class*='dashicons-star-'] {
+  color: #FFB900;
+  display: inline-block;
+  font-size: 25px;
+  font-size: 1.5625rem;
+  height: auto;
+  margin: 0;
+  width: auto;
+}
+
+.plugin-ratings .ratings-list {
+  list-style-type: none;
+  margin: 1rem 0;
+  padding: 0;
+}
+
+.plugin-ratings .ratings-list .counter-container,
+.plugin-ratings .ratings-list .counter-container a,
+.plugin-ratings .ratings-list .counter-container .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content
+.plugin-ratings .ratings-list .counter-container .section-toggle {
+  width: 100%;
+}
+
+.plugin-ratings .ratings-list .counter-label {
+  display: inline-block;
+  min-width: 58px;
+}
+
+.plugin-ratings .ratings-list .counter-back,
+.plugin-ratings .ratings-list .counter-bar {
+  display: inline-block;
+  height: 1rem;
+  vertical-align: middle;
+}
+
+.plugin-ratings .ratings-list .counter-back {
+  background-color: #ececec;
+  width: 58%;
+  width: calc(100% - 130px);
+}
+
+.plugin-ratings .ratings-list .counter-bar {
+  background-color: #ffc733;
+  display: block;
+}
+
+.plugin-ratings .ratings-list .counter-count {
+  margin-left: 3px;
+}
+
+.plugin-support {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+.plugin-meta ul {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plugin-meta ul li {
+  padding: 0.5rem 0;
+  border-top: 1px solid #eee;
+}
+
 /*--------------------------------------------------------------
 # Content
 --------------------------------------------------------------*/
@@ -1455,50 +1528,6 @@ p .section-toggle:not(.button):hover {
   width: 30%;
 }
 
-.single .type-plugin .entry-meta .plugin-ratings .description, .single .type-plugin .entry-meta .stars__small .description {
-  font-size: 12.8px;
-  font-size: 0.8rem;
-}
-
-.single .type-plugin .entry-meta .plugin-ratings [class*='dashicons-star-'], .single .type-plugin .entry-meta .stars__small [class*='dashicons-star-'] {
-  color: #FFB900;
-  display: inline-block;
-  font-size: 25px;
-  font-size: 1.5625rem;
-  height: auto;
-  margin: 0;
-  width: auto;
-}
-
-.single .type-plugin .entry-meta .stars__small {
-  display: inline-block;
-  line-height: 1;
-  margin: 0 10px 0 0;
-}
-
-.single .type-plugin .entry-meta .stars__small [class*='dashicons-star-'] {
-  font-size: 16px;
-  font-size: 1rem;
-}
-
-.single .type-plugin .entry-meta .plugin-support {
-  font-size: 12.8px;
-  font-size: 0.8rem;
-}
-
-.single .type-plugin .entry-meta .plugin-meta ul {
-  font-size: 12.8px;
-  font-size: 0.8rem;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-.single .type-plugin .entry-meta .plugin-meta ul li {
-  padding: 0.5rem 0;
-  border-top: 1px solid #eee;
-}
-
 /*--------------------------------------------------------------
 ## Asides
 --------------------------------------------------------------*/
@@ -1574,43 +1603,6 @@ p .section-toggle:not(.button):hover {
   font-family: dashicons;
   position: relative;
   top: 3px;
-}
-
-/*--------------------------------------------------------------
-## Widgets
---------------------------------------------------------------*/
-.widget {
-  margin: 0 0 1.5em;
-}
-
-.home .widget-area {
-  margin: 0 auto;
-  max-width: 960px;
-  padding: 0 1.5625rem 3.0517578125rem 1.5625rem;
-}
-
-@media (min-width: 67rem) {
-  .home .widget-area {
-    padding: 0 0 3.0517578125rem 0;
-  }
-}
-
-.home .widget-area .widget {
-  display: inline-block;
-  font-size: 12.8px;
-  font-size: 0.8rem;
-  margin-right: 5%;
-  vertical-align: top;
-  width: 30%;
-  /* Make sure select elements fit in widgets. */
-}
-
-.home .widget-area .widget:last-child {
-  margin-right: 0;
-}
-
-.home .widget-area .widget select {
-  max-width: 100%;
 }
 
 /*--------------------------------------------------------------

@@ -31,3 +31,70 @@
 		}
 	}
 }
+
+.plugin-ratings {
+	@include font-size( ms-unitless( ms(-2) ) );
+
+	[class*='dashicons-star-'] {
+		color: #FFB900;
+		display: inline-block;
+		@include font-size( ms-unitless( ms(4) ) );
+		height: auto;
+		margin: 0;
+		width: auto;
+	}
+
+	.ratings-list {
+		list-style-type: none;
+		margin: 1rem 0;
+		padding: 0;
+
+		.counter-container,
+		.counter-container a {
+			width: 100%;
+		}
+
+		.counter-label {
+			display: inline-block;
+			min-width: 58px;
+		}
+
+		.counter-back,
+		.counter-bar {
+			display: inline-block;
+			height: 1rem;
+			vertical-align: middle;
+		}
+
+		.counter-back {
+			background-color: #ececec;
+			width: 58%;
+			width: calc(100% - 130px);
+		}
+
+		.counter-bar {
+			background-color: #ffc733;
+			display: block;
+		}
+
+		.counter-count {
+			margin-left: 3px;
+		}
+	}
+}
+
+.plugin-support {
+	@include font-size( ms-unitless( ms(-2) ) );
+}
+
+.plugin-meta ul {
+	@include font-size( ms-unitless( ms(-2) ) );
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		padding: 0.5rem 0;
+		border-top: 1px solid #eee;
+	}
+}

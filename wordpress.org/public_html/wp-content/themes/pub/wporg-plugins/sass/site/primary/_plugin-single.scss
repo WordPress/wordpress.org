@@ -81,47 +81,5 @@
 	.entry-meta {
 		float: right;
 		width: 30%;
-
-		.plugin-ratings {
-			.description {
-				@include font-size( ms-unitless( ms(-2) ) );
-			}
-
-			[class*='dashicons-star-'] {
-				color: #FFB900;
-				display: inline-block;
-				@include font-size( ms-unitless( ms(4) ) );
-				height: auto;
-				margin: 0;
-				width: auto;
-			}
-		}
-
-		.stars__small {
-			@extend .plugin-ratings;
-			display: inline-block;
-			line-height: 1;
-			margin: 0 10px 0 0;
-
-			[class*='dashicons-star-'] {
-				@include font-size( ms-unitless( ms(0) ) );
-			}
-		}
-
-		.plugin-support {
-			@include font-size( ms-unitless( ms(-2) ) );
-		}
-
-		.plugin-meta ul {
-			@include font-size( ms-unitless( ms(-2) ) );
-			list-style-type: none;
-			margin: 0;
-			padding: 0;
-
-			li {
-				padding: 0.5rem 0;
-				border-top: 1px solid #eee;
-			}
-		}
 	}
 }
