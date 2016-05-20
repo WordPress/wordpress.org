@@ -39,34 +39,35 @@ class Ratings extends \WP_Widget {
 		<meta itemprop="ratingCount" content="<?php echo esc_attr( $num_ratings ) ?>"/>
 
 		<?php if ( $rating ) : ?>
-		<div class="rating">
-			<?php echo Template::dashicons_stars( $rating ); ?>
-			<meta itemprop="ratingValue" content="<?php echo esc_attr( $rating ) ?>">
-		</div>
-		<?php else : ?>
-		<div class="rating">
-			<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
-		</div>
-		<?php endif; // $rating
 
-		if ( $ratings ) : ?>
-		<ul class="ratings-list">
-			<?php foreach ( range( 5, 1 ) as $stars ) :
-				$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
-			?>
-			<li class="counter-container">
-				<a href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '?filter=' . $stars ); ?>">
-					<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugin' ), $stars ); ?></span>
+			<div class="rating">
+				<?php echo Template::dashicons_stars( $rating ); ?>
+				<meta itemprop="ratingValue" content="<?php echo esc_attr( $rating ) ?>">
+			</div>
+
+			<ul class="ratings-list">
+				<?php foreach ( range( 5, 1 ) as $stars ) :
+					$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
+					?>
+					<li class="counter-container">
+						<a href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '?filter=' . $stars ); ?>">
+							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugin' ), $stars ); ?></span>
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
 					</span>
-					<span class="counter-count"><?php echo $ratings[ $stars ]; ?></span>
-				</a>
-			</li>
-			<?php endforeach; ?>
-		</ul>
-		<?php
-		endif; // $ratings
+							<span class="counter-count"><?php echo $ratings[ $stars ]; ?></span>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+
+		<?php else : ?>
+			
+			<div class="rating">
+				<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
+			</div>
+
+		<?php endif; // $rating
 
 		if ( is_user_logged_in() ) : ?>
 			<div class="user-rating">
