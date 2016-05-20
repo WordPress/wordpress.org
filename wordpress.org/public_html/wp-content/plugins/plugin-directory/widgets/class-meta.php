@@ -29,6 +29,15 @@ class Meta extends \WP_Widget {
 		echo $args['before_widget'];
 		?>
 
+		<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
+		<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+			<meta itemprop="price" content="0.00" />
+			<meta itemprop="priceCurrency" content="USD" />
+			<span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
+				<span itemprop="name" content="WordPress.org"></span>
+			</span>
+		</span>
+
 		<ul>
 			<li><?php printf( __( 'Last updated: %s ago', 'wporg-plugins' ), '<span itemprop="dateModified" content="' . esc_attr( get_post_modified_time( 'c' ) ) . '">' . human_time_diff( get_post_modified_time() ) . '</span>' ); ?></li>
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), Template::active_installs( false ) ); ?></li>
