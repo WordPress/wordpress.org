@@ -9,12 +9,14 @@ use WordPressdotorg\Plugin_Directory\Template;
  */
 class Ratings extends \WP_Widget {
 
+	/**
+	 * Ratings constructor.
+	 */
 	public function __construct() {
-		$widget_ops = array( 
-			'classname' => 'plugin-ratings',
-			'description' => 'Displays the plugin ratings.',
-		);
-		parent::__construct( 'plugin_ratings', 'Plugin Ratings', $widget_ops );
+		parent::__construct( 'plugin_ratings', __( 'Plugin Ratings', 'wporg-plugins' ), array(
+			'classname'   => 'plugin-ratings',
+			'description' => __( 'Displays the plugin ratings.', 'wporg-plugins' ),
+		) );
 	}
 
 	/**
@@ -24,35 +26,26 @@ class Ratings extends \WP_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget'];
+		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Ratings', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
-		$post = get_post();
-
+		$post        = get_post();
 		$rating      = get_post_meta( $post->ID, 'rating', true );
 		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		$num_ratings = array_sum( $ratings );
 
-		$user_rating = 0;
-		if ( is_user_logged_in() && function_exists( 'wporg_get_user_rating' ) ) {
-			$user_rating = wporg_get_user_rating( 'plugin', $post->post_name, get_current_user_id() );
-			if ( ! $user_rating ) {
-				$user_rating = 0;
-			}
-		}
-
+		echo $args['before_widget'];
+		echo $args['before_title'] . $title . $args['after_title'];
 		?>
-
 		<meta itemprop="ratingCount" content="<?php echo esc_attr( $num_ratings ) ?>"/>
-		<h4><?php _e( 'Ratings', 'wporg-plugins' ); ?></h4>
 
 		<?php if ( $rating ) : ?>
 		<div class="rating">
 			<?php echo Template::dashicons_stars( $rating ); ?>
-			<p class="description"><?php printf( __( '%s out of 5 stars.', 'wporg-plugins' ), '<span itemprop="ratingValue">' . $rating . '</span>' ); ?></p>
+			<meta itemprop="ratingValue" content="<?php echo esc_attr( $rating ) ?>">
 		</div>
 		<?php else : ?>
 		<div class="rating">
-			<p class="description"><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
+			<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
 		</div>
 		<?php endif; // $rating
 
@@ -62,7 +55,7 @@ class Ratings extends \WP_Widget {
 				$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
 			?>
 			<li class="counter-container">
-				<a href="https://wordpress.org/support/view/plugin-reviews/<?php echo $post->post_name; ?>?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-plugins' ), $stars ) ); ?>">
+				<a href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '?filter=' . $stars ); ?>">
 					<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugin' ), $stars ); ?></span>
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
@@ -75,64 +68,12 @@ class Ratings extends \WP_Widget {
 		<?php
 		endif; // $ratings
 
-		if ( is_user_logged_in() ) {
-			echo '<div class="user-rating">';
-			echo Template::dashicons_stars( array(
-				'rating' => $user_rating,
-				'template' => '<a class="%1$s" href="https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '?rate=%2$d#postform"></a>'
-			) );
-			echo '</div>';
-			?>
-			<script>
-			jQuery(document).ready( function($) {
-				var $rating = $( '.user-rating div' ),
-					$stars = $rating.find( '.dashicons' ),
-					current_rating = $rating.data( 'rating' ),
-					rating_clear_timer = 0;
-
-				$stars.mouseover( function() {
-					var $this = $(this),
-						$prev_items = $this.prevAll(),
-						$next_items = $this.nextAll(),
-						rating = $prev_items.length + 1;
-
-					if ( rating_clear_timer ) {
-						clearTimeout( rating_clear_timer );
-						rating_clear_timer = 0;
-					}
-
-					if ( rating == current_rating ) {
-						return;
-					}
-
-					$this.removeClass( 'dashicons-star-empty' ).addClass( 'dashicons-star-filled' );
-					$prev_items.removeClass( 'dashicons-star-empty' ).addClass( 'dashicons-star-filled' );
-					$next_items.removeClass( 'dashicons-star-filled' ).addClass( 'dashicons-star-empty' );
-
-					$rating.prop( 'title', $rating.data( 'title-template' ).replace( '%s', rating ).replace( '%d', rating ) );
-					current_rating = rating;
-				} );
-				$rating.mouseout( function() {
-					var clear_callback = function() {
-						var rating = $rating.data( 'rating' );
-						if ( rating == current_rating ) {
-							return;
-						}
-						if ( rating ) {
-							$( $stars.get( rating-1 ) ).mouseover();
-						} else {
-							$stars.removeClass( 'dashicons-star-filled' ).addClass( 'dashicons-star-empty' );
-						}
-					};
-
-					if ( ! rating_clear_timer ) {
-						rating_clear_timer = setTimeout( clear_callback, 2000 );
-					}
-				} );
-			} );
-			</script>
-			<?php
-		}
+		if ( is_user_logged_in() ) : ?>
+			<div class="user-rating">
+				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '#postform' ); ?>"><?php _e( 'Add your review', 'wporg-plugins' ); ?></a>
+			</div>
+		<?php
+		endif;
 
 		echo $args['after_widget'];
 	}
