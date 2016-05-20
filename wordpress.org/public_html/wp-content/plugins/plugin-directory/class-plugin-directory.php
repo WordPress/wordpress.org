@@ -598,8 +598,12 @@ class Plugin_Directory {
 		$author  = ! empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
 		$desc    = ! empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
 		$content = ! empty( $plugin_info['content'] )     ? $plugin_info['content']     : '';
-		$tags    = ! empty( $plugin_info['tags'] )        ? $plugin_info['tags']        : array();
 		$meta    = ! empty( $plugin_info['meta'] )        ? $plugin_info['meta']        : array();
+
+		$post_date         = ! empty( $plugin_info['post_date'] )         ? $plugin_info['post_date']         : '';
+		$post_date_gmt     = ! empty( $plugin_info['post_date_gmt'] )     ? $plugin_info['post_date_gmt']     : '';
+		$post_modified     = ! empty( $plugin_info['post_modified'] )     ? $plugin_info['post_modified']     : '';
+		$post_modified_gmt = ! empty( $plugin_info['post_modified_gmt'] ) ? $plugin_info['post_modified_gmt'] : '';
 
 		$id = wp_insert_post( array(
 			'post_type'    => 'plugin',
@@ -609,8 +613,11 @@ class Plugin_Directory {
 			'post_author'  => $author,
 			'post_content' => $content,
 			'post_excerpt' => $desc,
-			'tags_input'   => $tags,
 			'meta_input'   => $meta,
+			'post_date'         => $post_date,
+			'post_date_gmt'     => $post_date_gmt,
+			'post_modified'     => $post_modified,
+			'post_modified_gmt' => $post_modified_gmt,
 		), true );
 
 		if ( is_wp_error( $id ) ) {
