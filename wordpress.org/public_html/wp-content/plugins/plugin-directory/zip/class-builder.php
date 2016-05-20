@@ -90,7 +90,7 @@ class Builder {
 		}
 		$build_dir = "{$this->tmp_build_dir}/{$this->slug}/";
 
-		$res = SVN::export( $svn_url, $build_dir );
+		$res = SVN::export( $svn_url, $build_dir, array( 'ignore-externals' ) );
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
 		}
