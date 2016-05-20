@@ -1,41 +1,44 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Theme;
-
 /**
  * The header for our theme.
  *
- * @package wporg-plugins
+ * This is the template that displays all of the <head> section and everything up until <div id="content">
+ *
+ * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
+namespace WordPressdotorg\Plugin_Directory\Theme;
+
 $GLOBALS['pagetitle'] = __( 'Plugin Directory &mdash; Free WordPress Plugins', 'wporg-plugins' );
+$description = get_bloginfo( 'description', 'display' );
 
 require WPORGPATH . 'header.php';
 ?>
+<div id="page" class="site">
+	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-plugins' ); ?></a>
 
-<div id="headline">
-	<div class="wrapper">
-		<h2><a href="<?php echo home_url('/'); ?>"><?php _e( 'Plugin Directory', 'wporg-plugins' ); ?></a></h2>
-		<?php
-		$items = array();
-		if ( is_user_logged_in() ) {
-			$items[] = sprintf(
-				__( 'Welcome, %s', 'wporg-plugins' ),
-				sprintf(
-					'<a href="https://profiles.wordpress.org/%s">%s</a>',
-					wp_get_current_user()->user_nicename,
-					wp_get_current_user()->display_name
-				)
-			);
-			if ( true /* user_has_plugins */ ) {
-				$items[] = '<a href="' . admin_url( 'edit.php?post_type=plugin' ) . '">' . __( 'Manage My Plugins', 'wporg-plugins' ) . '</a>';
-			}
-			$items[] = '<a href="https://login.wordpress.org/logout">' . __( 'Log Out', 'wporg-plugins' ) . '</a>';
-		} else {
-			$items[] = '<a href="https://login.wordpress.org/?redirect_to=' . urlencode( wporg_plugins_self_link() ) . '">' . __( 'Log In', 'wporg-plugins' ) . '</a>';
-		}
-		echo '<p class="login">' . implode( ' | ', $items ) . '</p>';
-		?>
-	</div>
-</div>
+	<header id="masthead" class="site-header" role="banner">
+		<div class="site-branding">
+			<?php if ( is_front_page() && is_home() ) : ?>
+				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+			<?php else : ?>
+				<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
+			<?php endif; ?>
 
-<div id="pagebody">
+			<?php if ( is_home() || is_search() ) :
+				if ( $description || is_customize_preview() ) : ?>
+				<p class="site-description"><?php echo $description; /* WPCS: xss ok. */ ?></p>
+					<?php endif; ?>
+				<?php get_search_form(); ?>
+			<?php else : ?>
+				<nav id="site-navigation" class="main-navigation" role="navigation">
+					<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', '_s' ); ?></button>
+					<?php wp_nav_menu( array( 'theme_location' => 'primary', 'menu_id' => 'primary-menu' ) ); ?>
+				</nav><!-- #site-navigation -->
+			<?php endif; ?>
+		</div><!-- .site-branding -->
+	</header><!-- #masthead -->
+
+	<div id="content" class="site-content">

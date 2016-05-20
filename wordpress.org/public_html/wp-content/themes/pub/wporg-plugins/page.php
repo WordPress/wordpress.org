@@ -1,20 +1,31 @@
 <?php
+/**
+ * The template for displaying all pages.
+ *
+ * This is the template that displays all pages by default.
+ * Please note that this is the WordPress construct of pages
+ * and that other 'pages' on your WordPress site may use a
+ * different template.
+ *
+ * @link https://codex.wordpress.org/Template_Hierarchy
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
+ */
+
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
-get_header();
-?>
+get_header(); ?>
 
-<?php the_post(); ?>
+	<main id="main" class="site-main" role="main">
 
-<?php get_template_part( 'filter-bar' ); ?>
+		<?php
+		while ( have_posts() ) : the_post();
 
-<div class="wrapper">
-	<div class="col-12" itemscope itemtype="http://schema.org/SoftwareApplication">
-		<h2><?php the_title(); ?></h2>
-		<?php the_content(); ?>
-	</div>
-</div>
+			get_template_part( 'template-parts/content', 'page' );
+		endwhile; // End of the loop.
+		?>
 
-<br class="clear" />
+	</main><!-- #main -->
+
 <?php
 get_footer();

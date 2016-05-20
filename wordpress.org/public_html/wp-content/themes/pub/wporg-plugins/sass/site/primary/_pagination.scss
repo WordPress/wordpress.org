@@ -1,0 +1,60 @@
+@import "../../variables-site/variables-site";
+
+.pagination {
+	text-align: center;
+	padding: 0;
+
+	.page-numbers {
+		border: 1px solid #EEE;
+		border-radius: 2px;
+		color: $color__wp-blue;
+		cursor: pointer;
+		display: inline-block;
+		font-size: ms(-3);
+		line-height: 1;
+		margin: 0;
+		padding: 4px 8px;
+		transition: background .2s ease;
+
+		&.current,
+		&:hover  {
+			background: #EEE;
+			color: $color__base-gray;
+		}
+
+		&.first,
+		&.prev,
+		&.next,
+		&.last {
+			border: none;
+		}
+
+		&.first:before {
+			content: "\f341 \f341";
+			font-family: dashicons;
+			position: relative;
+			top: 2px;
+		}
+
+		&.prev:before {
+			content: "\f341";
+			font-family: dashicons;
+			position: relative;
+			top: 2px;
+		}
+
+		&.next:after {
+			content: "\f345";
+			font-family: dashicons;
+			position: relative;
+			top: 3px;
+		}
+
+		&.last:after {
+			content: "\f345 \f345";
+			font-family: dashicons;
+			position: relative;
+			top: 3px;
+		}
+	}
+}

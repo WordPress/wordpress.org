@@ -1,0 +1,128 @@
+@import "../../variables-site/variables-site";
+
+.single .type-plugin {
+	@extend .clear;
+
+	.plugin-banner {
+		background-size: cover;
+		height: 310px;
+		margin: 0 auto ms(1);
+		max-width: $size__site-main;
+		width: 100%;
+	}
+
+	.plugin-header {
+		@extend .clear;
+		border-bottom: 2px solid #eee;
+		padding: 0 ms(4) ms(1);
+
+		@media ( min-width: 67rem ) {
+			padding: 0 0 ms(1) 0;
+		}
+
+		.plugin-thumbnail {
+			float: left;
+			height: 96px;
+			margin-right: 1rem;
+			width: 96px;
+
+			.plugin-icon {
+				background-size: contain !important;
+				height: 96px !important;
+				width: 96px !important;
+			}
+		}
+
+		.plugin-download {
+			float: right;
+		}
+
+		.plugin-title {
+			clear: none;
+			@extend h3;
+			margin: 0;
+		}
+
+		.byline {
+			color: #78848f;
+		}
+	}
+
+	.entry-content {
+		float: left;
+		width: 65%;
+
+		.read-more {
+			border-bottom: 2px solid #eee;
+			max-height: 200px;
+			overflow:hidden;
+			padding-bottom: 1px;
+
+			p:first-child {
+				margin-top: 0;
+			}
+		}
+
+		.section-toggle {
+			@extend a;
+			font-size: ms(-2);
+			padding-top: 0.5rem;
+			position: relative;
+
+			&:after {
+				content: "\f347";
+				font-family: dashicons;
+				padding-left: 5px;
+				vertical-align: text-top;
+			}
+		}
+	}
+
+	.entry-meta {
+		float: right;
+		width: 30%;
+
+		.plugin-ratings {
+			margin-bottom: 1rem;
+
+			.description {
+				@include font-size( ms-unitless( ms(-2) ) );
+			}
+
+			[class*='dashicons-star-'] {
+				color: #FFB900;
+				display: inline-block;
+				@include font-size( ms-unitless( ms(4) ) );
+				height: auto;
+				margin: 0;
+				width: auto;
+			}
+		}
+		.stars__small {
+			@extend .plugin-ratings;
+			display: inline-block;
+			line-height: 1;
+			margin: 0 10px 0 0;
+
+			[class*='dashicons-star-'] {
+				@include font-size( ms-unitless( ms(0) ) );
+			}
+		}
+
+		.plugin-support {
+			@include font-size( ms-unitless( ms(-2) ) );
+		}
+
+		.plugin-meta ul {
+			@include font-size( ms-unitless( ms(-2) ) );
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+
+			li {
+				padding: 0.5rem 0;
+				border-top: 1px solid #eee;
+			}
+		}
+	}
+}

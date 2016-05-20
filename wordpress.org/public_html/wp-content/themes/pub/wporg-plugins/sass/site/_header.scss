@@ -1,0 +1,81 @@
+@import "../variables-site/variables-site";
+
+#wporg-header {
+	h1 {
+		margin: auto;
+	}
+
+	form input {
+		box-sizing: content-box;
+	}
+
+	.button {
+		box-shadow: none;
+	}
+}
+
+.site-header {
+	padding: 1rem 0;
+	background: $color__wp-blue;
+
+	.site-branding {
+		margin: 0 auto;
+		max-width: $size__site-main;
+		padding: 0 2rem;
+
+		@media ( min-width: 67rem ) {
+			padding: 0;
+		}
+	}
+
+	.site-title {
+		display: inline-block;
+		@include font-size( ms-unitless( ms(4) ) );
+		font-weight: 300;
+		line-height: 1;
+		margin: 0 2rem 0 0;
+		max-width: none;
+
+		a {
+			color: #fff;
+			font-weight: 300;
+		}
+	}
+
+	.site-description {
+		color: #fff;
+		font-size: ms(2);
+		font-weight: 300;
+		margin: -0.4rem auto 2rem;
+		text-align: center;
+	}
+
+	.search-form {
+		margin-bottom: 2rem;
+
+		.search-field {
+			border: none;
+			display: block;
+			margin: 0 auto;
+			max-width: 100%;
+			padding: 0.5rem;
+			width: ms(28);
+		}
+
+		.search-submit {
+			display: none;
+		}
+	}
+
+	.home &,
+	.search & {
+		padding: ms(4) ms(1);
+
+		.site-title {
+			display: inherit;
+			@include font-size( ms-unitless( ms(12) ) );
+			margin: 2rem 0 1rem;
+			text-align: center;
+		}
+	}
+}

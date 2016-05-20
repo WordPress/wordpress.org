@@ -1,0 +1,28 @@
+@import "../../variables-site/variables-site";
+
+.plugin-section {
+	border-bottom: 2px solid #eee;
+	margin: 0 auto ms(14);
+	max-width: $size__site-main;
+	padding-bottom: ms(10);
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+
+	.section-header {
+		position: relative;
+	}
+
+	.section-title {
+		@extend h3;
+		margin-bottom: 3rem;
+	}
+
+	.section-link {
+		@include font-size( ms-unitless( ms(0) ) );
+		position: absolute;
+		right: 0;
+		top: 0.7rem;
+	}
+}

@@ -1,0 +1,23 @@
+@import "../../variables-site/variables-site";
+
+.site-main {
+	margin: 0 auto;
+	max-width: $size__site-main;
+	padding: ms(10) ms(4);
+
+	@media ( min-width: 67rem ) {
+		padding: ms(10) 0;
+
+		.page & {
+			padding: 0 0 ms(10) 0;
+		}
+	}
+
+	.single & {
+		padding: ms(4) 0;
+	}
+
+	.page-title {
+		@extend h3;
+	}
+}

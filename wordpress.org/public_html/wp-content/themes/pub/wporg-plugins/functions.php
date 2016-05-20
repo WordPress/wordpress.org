@@ -1,60 +1,119 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Theme;
-
 /**
- * WP.org Themes' functions and definitions.
+ * Plugin Directory functions and definitions.
  *
- * @package wporg-plugins
+ * @link https://developer.wordpress.org/themes/basics/theme-functions/
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
-function wporg_plugins_setup() {
-	global $themes_allowedtags;
+namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
-	load_theme_textdomain( 'wporg-plugins' );
+/**
+ * Sets up theme defaults and registers support for various WordPress features.
+ *
+ * Note that this function is hooked into the after_setup_theme hook, which
+ * runs before the init hook. The init hook is too late for some features, such
+ * as indicating support for post thumbnails.
+ */
+function setup() {
 
-	include_once __DIR__ . '/template-tags.php';
+	// Add default posts and comments RSS feed links to head.
+	add_theme_support( 'automatic-feed-links' );
 
+	// This theme uses wp_nav_menu() in one location.
+	register_nav_menus( array(
+		'primary' => esc_html__( 'Primary', 'wporg-plugins' ),
+	) );
+
+	/*
+	 * Switch default core markup for search form, comment form, and comments
+	 * to output valid HTML5.
+	 */
 	add_theme_support( 'html5', array(
-		'search-form', 'comment-form', 'comment-list', 'gallery', 'caption'
+		'search-form',
+		'comment-form',
+		'comment-list',
+		'gallery',
+		'caption',
+	) );
+
+	// Set up the WordPress core custom background feature.
+	add_theme_support( 'custom-background', apply_filters( 'wporg_plugins_custom_background_args', array(
+		'default-color' => 'ffffff',
+		'default-image' => '',
+	) ) );
+}
+add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
+
+/**
+ * Set the content width in pixels, based on the theme's design and stylesheet.
+ *
+ * Priority 0 to make it available to lower priority callbacks.
+ *
+ * @global int $content_width
+ */
+function content_width() {
+	$GLOBALS['content_width'] = apply_filters( 'wporg_plugins_content_width', 640 );
+}
+add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
+
+/**
+ * Register widget area.
+ *
+ * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ */
+function widgets_init() {
+
+	register_sidebar( array(
+		'name'          => esc_html__( 'Front Page Sidebar', 'wporg-plugins' ),
+		'id'            => 'sidebar-front-page',
+		'description'   => esc_html__( 'Appears on the bottom of the front page.', 'wporg-plugins' ),
+		'before_widget' => '<div id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h4 class="widget-title">',
+		'after_title'   => '</h4>',
 	) );
 
 	register_sidebar( array(
-		'name'          => 'Single Plugin View Sidebar',
-		'id'            => 'single-plugin-sidebar',
+		'name'          => esc_html__( 'Sidebar', 'wporg-plugins' ),
+		'id'            => 'sidebar-1',
+		'description'   => esc_html__( 'Add widgets here.', 'wporg-plugins' ),
 		'before_widget' => '<div id="%1$s" class="widget %2$s">',
 		'after_widget'  => '</div>',
+		'before_title'  => '<h3 class="widget-title">',
+		'after_title'   => '</h3>',
 	) );
-
-	// No need for canonical lookups
-	remove_action( 'template_redirect', __NAMESPACE__ . '\wp_old_slug_redirect' );
 }
-add_action( 'after_setup_theme', __NAMESPACE__ . '\wporg_plugins_setup' );
+add_action( 'widgets_init', __NAMESPACE__ . '\widgets_init' );
 
 /**
  * Enqueue scripts and styles.
  */
-function wporg_plugins_scripts() {
-	$script_debug = true || defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-	$suffix       = $script_debug ? '' : '.min';
+function scripts() {
+	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . '/css/style.css' );
 
-	// Concatenates core scripts when possible.
-	if ( ! $script_debug ) {
-		$GLOBALS['concatenate_scripts'] = true;
-	}
+	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 
-	$stylesheet = get_stylesheet_uri();
-	if ( is_rtl() ) {
-//		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet ); // TODO, not being generated yet
-	}
-	wp_enqueue_style( 'wporg-plugins', $stylesheet, array(), time() );
-
-	// No Jetpack styles needed.
-	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
+	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_plugins_scripts' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
-function wporg_plugins_body_class( $classes ) {
-	$classes[] = 'plugins-directory';
-	return $classes;
+/**
+ * Don't split plugin content in the front-end.
+ */
+function content() {
+	remove_filter( 'the_content', array( Plugin_Directory::instance(), 'filter_post_content_to_correct_page' ), 1 );
 }
-add_filter( 'body_class', __NAMESPACE__ . '\wporg_plugins_body_class' );
+add_action( 'template_redirect', __NAMESPACE__ . '\content' );
+
+/**
+ * Custom template tags for this theme.
+ */
+require get_template_directory() . '/inc/template-tags.php';
+
+/**
+ * Customizer additions.
+ */
+require get_template_directory() . '/inc/customizer.php';

@@ -1,12 +1,19 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Theme;
-
 /**
  * The template for displaying the footer.
  *
- * @package wporg-plugins
+ * Contains the closing of the #content div and all content after.
+ *
+ * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
-echo '</div>';
+namespace WordPressdotorg\Plugin_Directory\Theme;
+?>
+
+	</div><!-- #content -->
+
+<?php
 
 require WPORGPATH . 'footer.php';

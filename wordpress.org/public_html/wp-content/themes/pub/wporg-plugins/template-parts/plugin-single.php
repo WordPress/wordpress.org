@@ -1,0 +1,64 @@
+<?php
+/**
+ * Template part for displaying posts.
+ *
+ * @link https://codex.wordpress.org/Template_Hierarchy
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
+ */
+
+namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Template;
+
+$content = call_user_func( array( Plugin_Directory::instance(), 'split_post_content_into_pages' ), get_the_content() );
+
+?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+	<?php echo Template::get_plugin_banner( get_post(), 'html' ); ?>
+
+	<header class="plugin-header">
+		<div class="plugin-thumbnail">
+			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+		</div>
+
+		<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+		<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
+		<meta itemprop="fileFormat" content="application/zip">
+
+		<?php the_title( '<h1 class="plugin-title">', '</h1>' ); ?>
+
+		<span class="byline"><?php printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>' ); ?></span>
+	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<?php
+			foreach ( Template::get_plugin_sections() as $section ) :
+				if ( ! array_key_exists( $section['slug'], $content ) ) :
+					continue;
+				endif;
+		?>
+			<h4><?php echo $section['title']; ?></h4>
+
+			<div id="<?php echo esc_attr( $section['slug'] ); ?>" class="read-more" aria-expanded="false">
+				<?php echo apply_filters( 'the_content', $content[ $section['slug'] ] ); ?>
+			</div>
+			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section['slug'] ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
+		<?php endforeach; ?>
+	</div><!-- .entry-content -->
+
+	<div class="entry-meta">
+		<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
+		<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+			<meta itemprop="price" content="0.00" />
+			<meta itemprop="priceCurrency" content="USD" />
+			<span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
+				<span itemprop="name" content="WordPress.org"></span>
+			</span>
+		</span>
+
+		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings' ); ?>
+		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support' ); ?>
+		<?php the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta' ); ?>
+
+	</div><!-- .entry-meta -->
+</article><!-- #post-## -->

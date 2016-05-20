@@ -1,37 +1,49 @@
 <?php
+/**
+ * The main template file.
+ *
+ * This is the most generic template file in a WordPress theme
+ * and one of the two required files for a theme (the other being style.css).
+ * It is used to display a page when nothing more specific matches a query.
+ * E.g., it puts together the home page when no home.php file exists.
+ *
+ * @link https://codex.wordpress.org/Template_Hierarchy
+ *
+ * @package WordPressdotorg\Plugin_Directory\Theme
+ */
+
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
-get_header();
-?>
+get_header(); ?>
 
-<?php get_template_part( 'filter-bar' ); ?>
+	<main id="main" class="site-main" role="main">
 
-<?php get_template_part( 'pagination-bar' ); ?>
+	<?php
+		if ( have_posts() ) :
+			if ( is_home() && ! is_front_page() ) :
+	?>
+		<header>
+			<h1 class="page-title screen-reader-text"><?php single_post_title(); ?></h1>
+		</header>
 
-<div class="wrapper">
-	<div class="col-12" itemscope itemtype="http://schema.org/SoftwareApplication">
-		<?php get_template_part( 'view-intro' ); ?>
+	<?php
+			endif;
 
-		<div class="plugin-group">
-		
-		<?php
-			if ( have_posts() ) {
-				while ( have_posts() ) {
-					the_post();
-					get_template_part( 'plugin-card' );
-				}
-			} else {
-				echo '<p class="no-plugin-results">No plugins match your request.</p>';
-			}
-		?>
+			/* Start the Loop */
+			while ( have_posts() ) :
+				the_post();
 
-		</div>
+				get_template_part( 'template-parts/plugin', 'index' );
+			endwhile;
 
-	</div>
-</div>
+			the_posts_pagination();
 
-<?php get_template_part( 'pagination-bar' ); ?>
+		else :
+			get_template_part( 'template-parts/content', 'none' );
+		endif;
+	?>
 
-<br class="clear" />
+	</main><!-- #main -->
+
 <?php
 get_footer();

@@ -1,0 +1,14 @@
+{
+  "name": "wporg-plugins",
+  "version": "1.0.0",
+  "description": "Theme for the WordPress.org Plugin Directory",
+  "author": "wordpressdotorg",
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-rtlcss": "^2.0.1",
+    "grunt-sass": "^1.2.0"
+  }
+}

@@ -1,0 +1,56 @@
+@import "../variables-site/variables-site";
+@import "../mixins/mixins-master";
+@import "../mixins/modular-scale";
+
+h1, h2, h3, h4, h5, h6 {
+	clear: both;
+	line-height: $font__line-height-body;
+	margin: 2rem 0 1rem;
+}
+
+h1 {
+	@include font-size( ms-unitless( ms(12) ) );
+	font-weight: 300;
+}
+
+h1.title {
+	@include font-size( ms-unitless( ms(-2) ) );
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05rem;
+	color: $color__wp-blue;
+}
+
+h2 {
+	@include font-size( ms-unitless( ms(8) ) );
+	font-weight: 300;
+}
+
+h3 {
+	@include font-size( ms-unitless( ms(4) ) );
+	font-weight: 400;
+}
+
+h4 {
+	@include font-size( ms-unitless( ms(2) ) );
+	font-weight: 600;
+
+	// Override wp4.css.
+	border: none;
+	color: $color__text-main;
+	padding: 0;
+}
+
+h5 {
+	@include font-size( ms-unitless( ms(0) ) );
+	text-transform: uppercase;
+	letter-spacing: 0.01rem;
+	font-weight: 600;
+}
+
+h6 {
+	@include font-size( ms-unitless( ms(-2) ) );
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05rem;
+}

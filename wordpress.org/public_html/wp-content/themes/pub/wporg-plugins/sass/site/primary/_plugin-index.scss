@@ -1,0 +1,61 @@
+.home .type-plugin,
+.search .type-plugin,
+.archive .type-plugin {
+	display: inline-block;
+	margin-right: 4%;
+	margin-bottom: 4%;
+	width: 48%;
+
+	&:nth-of-type( even ) {
+		margin-right: 0;
+	}
+
+	.entry-thumbnail {
+		margin: 0 4% 0 0;
+		display: inline-block;
+		max-width: 128px;
+		vertical-align: top;
+	}
+
+	.entry {
+		display: inline-block;
+		margin: auto;
+		vertical-align: top;
+		width: 66%;
+	}
+
+	.entry-title {
+		@include font-size( ms-unitless( ms(0) ) );
+		margin: 0 0 8px;
+		line-height: 1.3;
+	}
+
+	.plugin-rating {
+		line-height: 1;
+		margin: 0 10px 8px 0;
+
+		.wporg-ratings {
+			display: inline-block;
+			margin-right: 5px;
+		}
+
+		[class*='dashicons-star-'] {
+			color: #ffb900;
+		}
+
+		.rating-count {
+			color: #999;
+			@include font-size( ms-unitless( ms(-2) ) );
+			position: relative;
+			top: -1px;
+		}
+	}
+
+	.entry-excerpt {
+		@include font-size( ms-unitless( ms(-2) ) );
+
+		p {
+			margin: 0 0 8px;
+		}
+	}
+}

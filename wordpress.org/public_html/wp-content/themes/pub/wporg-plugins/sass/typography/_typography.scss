@@ -1,0 +1,25 @@
+@import "../variables-site/variables-site";
+
+html {
+	font-size: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+	color: $color__text-main;
+	font-family: $font__main;
+	font-size: 100%;
+	line-height: $font__line-height-body;
+}
+
+@media( min-width: $ms-breakpoint ) {
+	html {
+		@include font-size(1.3125);
+	}
+}
+
+@import "headings";
+@import "copy";
