@@ -8,7 +8,16 @@ defined( 'WPINC' ) or die();
 <ol>
 	<li>
 		<p>
-			<?php _e( '<strong>Publish your CSS file</strong> to anywhere on the public Internet.', 'wordcamporg' ); ?>
+			<?php _e( '<strong>Publish your CSS file</strong> to one of our supported platforms.', 'wordcamporg' ); ?>
+		</p>
+
+		<p>
+			<?php printf(
+				__( 'Due to security constraints, only certain third-party platforms can be used.
+				We currently only support GitHub, but more platforms can be added if there\'s interest from organizers.
+				To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.', 'wordcamporg' ),
+				'https://meta.trac.wordpress.org/newticket'
+			); ?>
 		</p>
 
 		<p>
@@ -19,15 +28,6 @@ defined( 'WPINC' ) or die();
 	<li>
 		<p>
 			<?php _e( '<strong>Enter the URL</strong> for the CSS file into the input box below.', 'wordcamporg' ); ?>
-		</p>
-
-		<p>
-			<?php printf(
-				__( 'Due to security constraints, only certain third-party platforms can be used.
-				We currently only support GitHub, but more platforms can be added if there\'s interest from organizers.
-				To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.', 'wordcamporg' ),
-				'https://meta.trac.wordpress.org/newticket'
-			); ?>
 		</p>
 
 		<p>
@@ -57,7 +57,7 @@ defined( 'WPINC' ) or die();
 		<p><?php _e( 'Click the <strong>Update</strong> button.', 'wordcamporg' ); ?></p>
 
 		<p>
-			<?php _e( "WordCamp.org will download the file, sanitize it, and store a local copy,
+			<?php _e( "WordCamp.org will download the file, sanitize it, minify it, and store a local copy,
 			then enqueue the local copy as a stylesheet alongside your theme's default stylesheet.", 'wordcamporg' ); ?>
 		</p>
 	</li>

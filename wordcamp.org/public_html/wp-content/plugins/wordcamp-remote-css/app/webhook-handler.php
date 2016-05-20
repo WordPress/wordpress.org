@@ -8,6 +8,11 @@ add_action( 'wp_ajax_'        . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler' 
 add_action( 'wp_ajax_nopriv_' . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        );
 add_action( SYNCHRONIZE_ACTION,              __NAMESPACE__ . '\synchronize_remote_css' );
 
+/*
+ * todo nginx on production fails with a 502 bad gateway if OPTION_REMOTE_CSS_URL is empty, even though dev handles it with an exception
+ * see https://wordpress.slack.com/archives/meta-wordcamp/p1453889720000024
+ */
+
 /**
  * Trigger a synchronization when a push notification is received
  *

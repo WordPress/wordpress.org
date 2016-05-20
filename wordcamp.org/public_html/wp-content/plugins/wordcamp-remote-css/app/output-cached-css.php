@@ -4,7 +4,7 @@ namespace WordCamp\RemoteCSS;
 
 defined( 'WPINC' ) or die();
 
-add_action( 'wp_enqueue_scripts',           __NAMESPACE__ . '\enqueue_cached_css', 11 );  // after the theme's stylesheet, but before before Jetpack Custom CSS's stylesheet
+add_action( 'wp_enqueue_scripts',           __NAMESPACE__ . '\enqueue_cached_css', 11 );  // after the theme's stylesheet, but before Jetpack Custom CSS's stylesheet
 add_action( 'wp_ajax_'        . CSS_HANDLE, __NAMESPACE__ . '\output_cached_css'      );
 add_action( 'wp_ajax_nopriv_' . CSS_HANDLE, __NAMESPACE__ . '\output_cached_css'      );
 add_filter( 'nocache_headers',              __NAMESPACE__ . '\set_cache_headers'      );
