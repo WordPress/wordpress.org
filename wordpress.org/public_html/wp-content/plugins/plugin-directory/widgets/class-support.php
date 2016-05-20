@@ -49,7 +49,7 @@ class Support extends \WP_Widget {
 		<p>
 			<?php
 			/* translators: 1: Number of resolved threads; 2: Number of all threads; */
-			printf( __( '%1$s of %2$s support threads in the last two months have been marked resolved.', 'wporg-plugins' ), $threads, $resolved );
+			printf( __( '%1$s of %2$s support threads in the last two months have been marked resolved.', 'wporg-plugins' ), $resolved, $threads );
 			?>
 		</p>
 		<?php endif; ?>
