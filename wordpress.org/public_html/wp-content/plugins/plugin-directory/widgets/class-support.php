@@ -22,6 +22,8 @@ class Support extends \WP_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
+		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Support', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
+
 		$post        = get_post();
 		$threads     = get_post_meta( $post->ID, 'support_threads', true ) ?: 0;
 		$resolved    = get_post_meta( $post->ID, 'support_threads_resolved', true ) ?: 0;
@@ -41,11 +43,9 @@ class Support extends \WP_Widget {
 		}
 
 		echo $args['before_widget'];
-		?>
+		echo $args['before_title'] . $title . $args['after_title'];
 
-		<h4><?php _e( 'Support', 'wporg-plugins' ); ?></h4>
-
-		<?php if ( $resolutions ) : ?>
+		if ( $resolutions ) : ?>
 		<p>
 			<?php
 			/* translators: 1: Number of resolved threads; 2: Number of all threads; */
