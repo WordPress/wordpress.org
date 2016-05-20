@@ -1187,6 +1187,7 @@ p .section-toggle:not(.button):hover {
 }
 
 .site-header .search-form .search-field {
+  -webkit-appearance: none;
   border: none;
   display: block;
   margin: 0 auto;
