@@ -1,6 +1,5 @@
 @import "../variables-site/variables-site";
 @import "../mixins/mixins-master";
-@import "../mixins/modular-scale";
 
 h1, h2, h3, h4, h5, h6 {
 	clear: both;
@@ -18,7 +17,7 @@ h1.title {
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.05rem;
-	color: $color__wp-blue;
+	color: $color__link;
 }
 
 h2 {
