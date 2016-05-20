@@ -158,7 +158,7 @@ class WCOR_Mailer {
 
 		// Make sure postmeta is synced with $_POST when this is called in the middle of updating a post
 		if ( did_action( 'transition_post_status' ) || did_action( 'save_post' ) ) {
-			$wordcamp_admin->metabox_save( $wordcamp->ID );
+			$wordcamp_admin->metabox_save( $wordcamp->ID, $wordcamp );
 		}
 
 		$wordcamp_meta = get_post_custom( $wordcamp->ID );
