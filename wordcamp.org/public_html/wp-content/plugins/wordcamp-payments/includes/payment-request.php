@@ -1427,7 +1427,7 @@ Thanks for helping us with these details!",
 						get_post_meta( $post->ID, '_camppayments_bank_city', true ),
 						get_post_meta( $post->ID, '_camppayments_bank_state', true ),
 						get_post_meta( $post->ID, '_camppayments_bank_zip_code', true )
-					 ), 0, 35 ),
+					 ), 0, 32 ),
 				'30-ben-bank-country' => get_post_meta( $post->ID, '_camppayments_bank_country_iso3166', true ),
 				'31-supl-id-type' => '',
 				'32-supl-id-value' => '',
