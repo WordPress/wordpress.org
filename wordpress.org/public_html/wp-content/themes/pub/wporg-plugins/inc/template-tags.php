@@ -121,8 +121,8 @@ function wporg_plugins_category_transient_flusher() {
 	// Like, beat it. Dig?
 	delete_transient( 'wporg_plugins_categories' );
 }
-add_action( 'edit_category', 'wporg_plugins_category_transient_flusher' );
-add_action( 'save_post',     'wporg_plugins_category_transient_flusher' );
+add_action( 'edit_category', __NAMESPACE__ . '\wporg_plugins_category_transient_flusher' );
+add_action( 'save_post',     __NAMESPACE__ . '\wporg_plugins_category_transient_flusher' );
 
 
 // Returns an absolute url to the current url, no matter what that actually is.
