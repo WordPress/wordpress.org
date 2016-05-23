@@ -90,7 +90,13 @@ class Builder {
 		}
 		$build_dir = "{$this->tmp_build_dir}/{$this->slug}/";
 
-		$res = SVN::export( $svn_url, $build_dir, array( 'ignore-externals' ) );
+		$svn_params = array();
+		// BudyPress is a special sister project, they have svn:externals.
+		if ( 'buddypress' != $this->slug ) {
+			$svn_params[] = 'ignore-externals';
+		}
+
+		$res = SVN::export( $svn_url, $build_dir, $svn_params );
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
 		}
