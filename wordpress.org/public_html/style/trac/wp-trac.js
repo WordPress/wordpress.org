@@ -22,7 +22,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'commit' : 'Patch is a suggested commit candidate.',
 		'early' : 'Ticket should be addressed early in the next dev cycle.',
 		'i18n-change' : 'A string change, used only after string freeze.',
-		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.'
+		'good-first-bug': 'This ticket is great for a new contributor to work on, generally because it is easy or well-contained.',
+		'fixed-major': 'The commits of this ticket need to be backported.'
 	};
 
 	coreFocusesList = {
@@ -38,7 +39,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'performance' : 'Performance or caching (but not the Cache API component).'
 	};
 
-	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug' ];
+	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major' ];
 
 	// phpDocumentor tags, but also a few common @-terms.
 	reservedTerms = [
