@@ -198,16 +198,16 @@ class Plugin_Directory {
 	 * Register the Shortcodes used within the content.
 	 */
 	public function register_shortcodes() {
+		add_shortcode( 'wporg-plugins-developers',  array( __NAMESPACE__ . '\Shortcodes\Developers',  'display' ) );
 		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\Shortcodes\Upload',      'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 	//	add_shortcode( 'wporg-plugins-stats',       array( __NAMESPACE__ . '\Shortcodes\Stats',       'display' ) );
-	//	add_shortcode( 'wporg-plugins-developer',   array( __NAMESPACE__ . '\Shortcodes\Developer',   'display' ) );
 	}
 
 	public function register_widgets() {
+		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
 		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support' );
-		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
 	}
 
 	/**
@@ -520,7 +520,7 @@ class Plugin_Directory {
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'stats'       => '[wporg-plugins-stats]',
-			'developers'  => '[wporg-plugins-developer]',
+			'developers'  => '[wporg-plugins-developers]',
 		);
 
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
