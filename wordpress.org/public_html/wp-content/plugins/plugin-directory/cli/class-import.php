@@ -83,6 +83,7 @@ class Import {
 				'slug' => $plugin_slug,
 				'status' => $status,
 				'author' => $topic->topic_poster,
+				'override_modified_date' => true,
 				'post_date_gmt' => $topic->topic_start_time,
 				'post_date' => $topic->topic_start_time,
 				'post_modified' => $topic->topic_time,
