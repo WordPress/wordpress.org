@@ -35,6 +35,7 @@ class Developers {
 			</li>
 			<li><a href="<?php echo esc_url( "https://plugins.svn.wordpress.org/{$post->post_name}/" ); ?>" rel="nofollow"><?php _e( 'Subversion Repository', 'wporg-plugins' ); ?></a></li>
 			<li><a href="<?php echo esc_url( "https://plugins.trac.wordpress.org/browser/{$post->post_name}/" ); ?>" rel="nofollow"><?php _e( 'Browse in Trac', 'wporg-plugins' ); ?></a></li>
+			<li><a href="<?php echo esc_url( "https://translate.wordpress.org/projects/wp-plugins/{$post->post_name}/" ); ?>" rel="nofollow"><?php _e( 'Translation Contributors', 'wporg-plugins' ); ?></a></li>
 		</ul>
 	<?php
 	}
