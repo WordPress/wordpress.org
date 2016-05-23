@@ -384,6 +384,11 @@ class Readme_Parser {
 		$stable_tag = preg_replace( '!^/?tags/!i', '', $stable_tag ); // "tags/1.2.3"
 		$stable_tag = preg_replace( '![^a-z0-9_.-]!i', '', $stable_tag );
 
+		// If the stable_tag begins with a ., we treat it as 0.blah
+		if ( '.' == substr( $stable_tag, 0, 1 ) ) {
+			$stable_tag = "0{$stable_tag}";
+		}
+
 		return $stable_tag;
 	}
 

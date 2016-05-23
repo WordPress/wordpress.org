@@ -230,6 +230,18 @@ class Import {
 					'depth' => 'files'
 				)
 			);
+			// Handle tags which we store as 0.blah but are in /tags/.blah
+			if ( ! $svn_export['result'] && '0.' == substr( $stable_tag, 0, 2 ) ) {
+				$_stable_tag = substr( $stable_tag, 1 );
+				$svn_export = SVN::export(
+					self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}",
+					$tmp_dir . '/export',
+					array(
+						'ignore-externals',
+						'depth' => 'files'
+					)
+				);
+			}
 			if ( $svn_export['result'] && false !== $this->find_readme_file( $tmp_dir . '/export' ) ) {
 				$exported = true;
 			} else {

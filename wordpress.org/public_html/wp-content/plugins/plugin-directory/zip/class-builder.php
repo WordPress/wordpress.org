@@ -97,6 +97,12 @@ class Builder {
 		}
 
 		$res = SVN::export( $svn_url, $build_dir, $svn_params );
+		// Handle tags which we store as 0.blah but are in /tags/.blah
+		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
+			$_version = substr( $this->version, 1 );
+			$svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
+			$res = SVN::export( $svn_url, $build_dir, $svn_params );
+		}
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
 		}
