@@ -1523,6 +1523,27 @@ p .section-toggle:not(.button):hover {
   vertical-align: text-top;
 }
 
+.single .type-plugin .entry-content .plugin-developers {
+  list-style-type: none;
+  margin: 0;
+}
+
+.single .type-plugin .entry-content .plugin-developers li {
+  display: inline-block;
+  margin: 0 4% 1rem 0;
+  vertical-align: top;
+  width: 48%;
+}
+
+.single .type-plugin .entry-content .plugin-developers li:nth-of-type(even) {
+  margin-right: 0;
+}
+
+.single .type-plugin .entry-content .plugin-developers .avatar {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
 .single .type-plugin .entry-meta {
   float: right;
   width: 30%;
