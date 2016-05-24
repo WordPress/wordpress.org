@@ -26,22 +26,19 @@ get_header();
 	<main id="main" class="site-main" role="main">
 
 		<?php foreach ( $sections as $section_slug => $section_title ) :
-			if ( false === ( $section_query = wp_cache_get( "{$section_slug}:front_page", 'wporg-plugins' ) ) ) :
-				$section_args = array(
-					'post_type'       => 'plugin',
-					'posts_per_page'  => 4,
-					'plugin_category' => $section_slug,
-				);
+			$section_args = array(
+				'post_type'       => 'plugin',
+				'posts_per_page'  => 4,
+				'plugin_category' => $section_slug,
+			);
 
-				if ( 'popular' === $section_slug ) :
-					$section_args['meta_key'] = 'active_installs';
-					$section_args['orderby']  = 'meta_value_num';
-					unset( $section_args['plugin_category'] );
-				endif;
-
-				$section_query = new \WP_Query( $section_args );
-				wp_cache_set( "{$section_slug}:front_page", $section_query, 'wporg-plugins', DAY_IN_SECONDS );
+			if ( 'popular' === $section_slug ) :
+				$section_args['meta_key'] = 'active_installs';
+				$section_args['orderby']  = 'meta_value_num';
+				unset( $section_args['plugin_category'] );
 			endif;
+
+			$section_query = new \WP_Query( $section_args );
 		?>
 
 			<section class="plugin-section">
