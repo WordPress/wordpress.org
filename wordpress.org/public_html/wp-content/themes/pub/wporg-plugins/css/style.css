@@ -1189,6 +1189,10 @@ p .section-toggle:not(.button):hover {
   margin: auto;
 }
 
+#wporg-header h2.rosetta {
+  clear: none;
+}
+
 #wporg-header form input {
   box-sizing: content-box;
 }
