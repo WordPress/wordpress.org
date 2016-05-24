@@ -33,7 +33,13 @@
 
 <?php } ?>
 
-	<form role="search" method="get" class="searchform" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+	<?php
+		$is_handbook = wporg_is_handbook();
+		$search_url  = $is_handbook ? wporg_get_current_handbook_home_url() : home_url( '/' );
+		$form_class  = $is_handbook ? ' searchform-handbook' : '';
+	?>
+
+	<form role="search" method="get" class="searchform<?php echo esc_attr( $form_class ); ?>" action="<?php echo esc_url( $search_url ); ?>">
 		<div>
 		<label>
 			<label for="search-field" class="screen-reader-text"><?php _ex( 'Search for:', 'label', 'wporg' ); ?></label>
@@ -41,6 +47,8 @@
 		</label>
 		<input type="submit" class="shiny-blue search-submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'wporg' ); ?>">
 		</div>
+
+	<?php if ( ! $is_handbook ) : ?>
 
 		<div class="search-post-type">
 			<span><?php _e( 'Filter by type:', 'wporg' ); ?></span>
@@ -66,6 +74,9 @@
 						<?php echo $checked; ?> /> <?php echo $label; ?></label>
 			<?php } ?>
 		</div>
+
+	<?php endif; ?>
+
 	</form>
 
 </div><!-- /search-guide -->
