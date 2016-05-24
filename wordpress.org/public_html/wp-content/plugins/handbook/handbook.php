@@ -9,6 +9,7 @@ require_once dirname( __FILE__ ) . '/inc/callout-boxes.php';
 require_once dirname( __FILE__ ) . '/inc/glossary.php';
 require_once dirname( __FILE__ ) . '/inc/navigation.php';
 require_once dirname( __FILE__ ) . '/inc/table-of-contents.php';
+require_once dirname( __FILE__ ) . '/inc/template-tags.php';
 require_once dirname( __FILE__ ) . '/inc/email-post-changes.php';
 require_once dirname( __FILE__ ) . '/inc/watchlist.php';
 
