@@ -173,11 +173,11 @@ class DevHub_Formatting {
 		}
 
 		// Link to hook: {@see 'pre_get_search_form'}
-		elseif ( 1 === preg_match( '/^(&#8216;)\w+(&#8217;)$/', $link, $hook ) ) {
-			if ( ! empty( $hook[0] ) ) {
+		elseif ( 1 === preg_match( '/^(?:&#8216;)([\$\w]+)(?:&#8217;)$/', $link, $hook ) ) {
+			if ( ! empty( $hook[1] ) ) {
 				$link = '<a href="' .
 				        get_post_type_archive_link( 'wp-parser-hook' ) .
-				        str_replace( array( '&#8216;', '&#8217;' ), '', $link ) .
+				        sanitize_key( $hook[1] ) . '/' .
 				        '">' . esc_html( $link ) . '</a>';
 			}
 		}
