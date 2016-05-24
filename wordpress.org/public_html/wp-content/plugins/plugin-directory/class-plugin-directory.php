@@ -23,7 +23,7 @@ class Plugin_Directory {
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
-		add_filter( 'term_link', array( $this, 'term_link' ), 10, 3 );
+		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
@@ -223,6 +223,10 @@ class Plugin_Directory {
 			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
 		}
 
+		if ( 'en_US' != get_locale() ) {
+			add_filter( 'get_term', array( __NAMESPACE__ . '\i18n', 'translate_term' ) );
+		}
+
 		// Instantiate our copy of the Jetpack_Search class.
 		if ( class_exists( 'Jetpack' ) && ! class_exists( 'Jetpack_Search' ) ) {
 			require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
@@ -362,13 +366,12 @@ class Plugin_Directory {
 	 *
 	 * @param string   $termlink The generated term link.
 	 * @param \WP_Term $term     The term the link is for.
-	 * @param string   $taxonomy The taxonomy the term is in.
 	 */
-	public function term_link( $termlink, $term, $taxonomy ) {
-		if ( 'plugin_business_model' == $taxonomy ) {
+	public function term_link( $termlink, $term ) {
+		if ( 'plugin_business_model' == $term->taxonomy ) {
 			return false;
 		}
-		if ( 'plugin_built_for' == $taxonomy ) {
+		if ( 'plugin_built_for' == $term->taxonomy ) {
 			return $this->package_link( false, $this->get_plugin_post( $term->slug ) );
 		}
 
