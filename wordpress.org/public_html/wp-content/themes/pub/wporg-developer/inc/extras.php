@@ -96,7 +96,7 @@ add_filter( 'document_title_parts', 'wporg_developer_document_title' );
  * @return string
  */
 function wporg_filter_archive_excerpt( $excerpt ) {
-	if ( ! is_single() ) {
+	if ( ! is_single() && ! wporg_is_handbook() ) {
 
 		$post_id = get_the_ID();
 		$type    = get_post_type_object( get_post_type( $post_id ) )->labels->singular_name;
