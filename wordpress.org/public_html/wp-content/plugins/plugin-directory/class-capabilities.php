@@ -76,7 +76,7 @@ class Capabilities {
 			'read' => true,
 			'plugin_dashboard_access' => true,
 			'plugin_edit_own' => true,
-			'plugin_set_tags' => true,
+			'plugin_set_category' => true,
 			'plugin_add_committer' => true,
 			'plugin_edit_others' => true,
 		);
@@ -92,7 +92,7 @@ class Capabilities {
 			'plugin_reject' => true,
 			'plugin_disable' => true,
 			'plugin_close' => true,
-			'plugin_set_category' => true, // Special categories.
+			'plugin_set_section' => true, // Special categories.
 			'manage_categories' => true, // Let them assign these special categories.
 		) );
 

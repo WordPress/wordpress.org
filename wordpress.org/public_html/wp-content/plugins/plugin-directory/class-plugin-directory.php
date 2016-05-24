@@ -23,6 +23,7 @@ class Plugin_Directory {
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
+		add_filter( 'term_link', array( $this, 'term_link' ), 10, 3 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
@@ -94,43 +95,78 @@ class Plugin_Directory {
 			)
 		) );
 
-		register_taxonomy( 'plugin_category', 'plugin', array(
+		register_taxonomy( 'plugin_section', 'plugin', array(
 			'hierarchical'      => true,
-			'query_var'         => 'plugin_category',
+			'query_var'         => 'plugin_section',
 			'rewrite'           => false,
 			'public'            => true,
-			'show_ui'           => current_user_can( 'plugin_set_category' ),
-			'show_admin_column' => current_user_can( 'plugin_set_category' ),
+			'show_ui'           => current_user_can( 'plugin_set_section' ),
+			'show_admin_column' => current_user_can( 'plugin_set_section' ),
 			'meta_box_cb'       => 'post_categories_meta_box',
 			'capabilities'      => array(
-				'assign_terms' => 'manage_categories',
-			)
+				'assign_terms' => 'plugin_set_section',
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Sections',  'wporg-plugins' ),
+			),
 		) );
 
-		register_taxonomy( 'plugin_tag', 'plugin', array(
+		register_taxonomy( 'plugin_category', 'plugin', array(
 			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
-			'query_var'         => 'plugin_tag',
+			'query_var'         => 'plugin_category',
 			'rewrite'           => array(
 				'hierarchical' => false,
-				'slug'         => 'tags',
+				'slug'         => 'category',
 				'with_front'   => false,
 				'ep_mask'      => EP_TAGS,
 			),
 			'labels'            => array(
-				'name'          => __( 'Plugin Tags',  'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Tag',   'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Tag',     'wporg-plugins' ),
-				'update_item'   => __( 'Update Tag',   'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Tag',  'wporg-plugins' ),
-				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
-				'search_items'  => __( 'Search Tags',  'wporg-plugins' ),
+				'name'          => __( 'Plugin Categories',  'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Category',   'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Category',     'wporg-plugins' ),
+				'update_item'   => __( 'Update Category',   'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Category',  'wporg-plugins' ),
+				'new_item_name' => __( 'New Category Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Categories',  'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
-			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Tags', 'display' ),
+			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
-				'assign_terms' => 'plugin_set_tags'
+				'assign_terms' => 'plugin_set_category'
+			)
+		) );
+
+		register_taxonomy( 'plugin_built_for', 'plugin', array(
+			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+			'query_var'         => 'plugin_built_for',
+			'rewrite'           => false,
+			'labels'            => array(
+				'name'          => __( 'Built For',  'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			//'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'capabilities'      => array(
+				'assign_terms' => 'plugin_set_category'
+			)
+		) );
+
+		register_taxonomy( 'plugin_business_model', 'plugin', array(
+			'hierarchical'      => true, /* for tax_input[] handling on post saves. */
+			'query_var'         => 'plugin_business_model',
+			'rewrite'           => false,
+			'labels'            => array(
+				'name'          => __( 'Business Model',  'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			//'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'capabilities'      => array(
+				'assign_terms' => 'plugin_set_category'
 			)
 		) );
 
@@ -230,8 +266,12 @@ class Plugin_Directory {
 		// %postname% is required.
 		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 
-		// /tags/%slug% is required for tags.
-		$wp_rewrite->set_tag_base( '/tags' );
+		// /tags/ & /category/ shouldn't conflict
+		$wp_rewrite->set_tag_base( '/post-tags' );
+		$wp_rewrite->set_category_base( '/post-categories' );
+
+		// Add our custom capabilitie and roles.
+		Capabilities::add_roles();
 
 		// We require the WordPress.org Ratings plugin also be active.
 		if ( ! is_plugin_active( 'wporg-ratings/wporg-ratings.php' ) ) {
@@ -318,6 +358,24 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Filter the permalink for terms to be more useful.
+	 *
+	 * @param string   $termlink The generated term link.
+	 * @param \WP_Term $term     The term the link is for.
+	 * @param string   $taxonomy The taxonomy the term is in.
+	 */
+	public function term_link( $termlink, $term, $taxonomy ) {
+		if ( 'plugin_business_model' == $taxonomy ) {
+			return false;
+		}
+		if ( 'plugin_built_for' == $taxonomy ) {
+			return $this->package_link( false, $this->get_plugin_post( $term->slug ) );
+		}
+
+		return $termlink;
+	}
+
+	/**
 	 * Checks if the current users is a super admin before allowing terms to be added.
 	 *
 	 * @param string $term The term to add or update.
@@ -350,11 +408,11 @@ class Plugin_Directory {
 
 		switch ( get_query_var( 'browse' ) ) {
 			case 'beta':
-				$wp_query->query_vars['plugin_category'] = 'beta';
+				$wp_query->query_vars['plugin_section'] = 'beta';
 				break;
 
 			case 'featured':
-				$wp_query->query_vars['plugin_category'] = 'featured';
+				$wp_query->query_vars['plugin_section'] = 'featured';
 				break;
 
 			case 'favorites':

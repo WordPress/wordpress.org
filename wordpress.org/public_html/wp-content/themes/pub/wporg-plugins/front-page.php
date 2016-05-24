@@ -29,13 +29,13 @@ get_header();
 			$section_args = array(
 				'post_type'       => 'plugin',
 				'posts_per_page'  => 4,
-				'plugin_category' => $section_slug,
+				'plugin_section' => $section_slug,
 			);
 
 			if ( 'popular' === $section_slug ) :
 				$section_args['meta_key'] = 'active_installs';
 				$section_args['orderby']  = 'meta_value_num';
-				unset( $section_args['plugin_category'] );
+				unset( $section_args['plugin_section'] );
 			endif;
 
 			$section_query = new \WP_Query( $section_args );
