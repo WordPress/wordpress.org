@@ -30,7 +30,6 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		'banners'           => true,
 		'icons'             => true,
 		'active_installs'   => true,
-		'group'             => true,
 		'contributors'      => true,
 	);
 
@@ -151,23 +150,6 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		// Not yet implemented. Shouldn't change the structure of the response though.
 		$plugins = plugins_api( 'query_plugins', array( 'local' => 'hello', 'fields' => $this->fields ) );
 		$this->_check_response_plugin_query( $plugins, 1 );
-	}
-
-	function test_plugins_api_function_action_hot_categories() {
-		$number  = 2;
-		$plugins = plugins_api( 'hot_categories', array( 'number' => $number ) );
-
-		$this->assertEquals( $number, count( $plugins ) );
-		$this->assertInternalType( 'array', $plugins, 'Response array is array' );
-
-		foreach ( $plugins as $hot_category => $category_array ) {
-			$this->assertInternalType( 'array', $category_array, 'Category array is array' );
-			$this->assertArrayHasKey( 'name', $category_array, 'Name exists' );
-			$this->assertArrayHasKey( 'slug', $category_array, 'Slug exists' );
-
-			// Only check the first result.
-			break;
-		}
 	}
 
 	function test_plugins_api_function_action_hot_tags() {
