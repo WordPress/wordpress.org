@@ -78,3 +78,24 @@ function wporg_get_current_handbook() {
 
 	return false;
 }
+
+/**
+ * Returns the home URL for the current handbook post type.
+ *
+ * @return string|false URL on success, false on failure.
+ */
+function wporg_get_current_handbook_home_url() {
+	$handbook = wporg_get_current_handbook();
+	$url      = false;
+
+	if ( $handbook ) {
+		$page = get_page_by_path( $handbook, OBJECT, $handbook );
+		if ( $page ) {
+			$url = get_permalink( $page );
+		} else {
+			$url = get_post_type_archive_link( $handbook );
+		}
+	}
+
+	return $url;
+}
