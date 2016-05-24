@@ -439,6 +439,61 @@ table {
   width: 100%;
 }
 
+.notice {
+  background: #fff;
+  border-left: 4px solid #fff;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+  margin: 1em 0;
+  padding: 1px 12px;
+}
+
+.notice p {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  margin: 0.5em 0;
+  padding: 2px;
+}
+
+.notice.notice-alt {
+  box-shadow: none;
+}
+
+.notice.notice-large {
+  padding: 10px 20px;
+}
+
+.notice.notice-success {
+  border-left-color: #46b450;
+}
+
+.notice.notice-success.notice-alt {
+  background-color: #ecf7ed;
+}
+
+.notice.notice-warning {
+  border-left-color: #ffb900;
+}
+
+.notice.notice-warning.notice-alt {
+  background-color: #fff8e5;
+}
+
+.notice.notice-error {
+  border-left-color: #dc3232;
+}
+
+.notice.notice-error.notice-alt {
+  background-color: #fbeaea;
+}
+
+.notice.notice-info {
+  border-left-color: #00a0d2;
+}
+
+.notice.notice-info.notice-alt {
+  background-color: #e5f5fa;
+}
+
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
