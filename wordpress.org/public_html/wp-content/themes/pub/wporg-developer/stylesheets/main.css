@@ -1170,6 +1170,11 @@ input {
   font-style: italic;
   font-weight: 300;
 }
+.devhub-wrap .handbook h1 {
+  margin: 24px 0;
+  font-size: 20px;
+  font-weight: normal;
+}
 .devhub-wrap .wp-parser-class, .devhub-wrap .wp-parser-function, .devhub-wrap .wp-parser-hook, .devhub-wrap .wp-parser-method {
   border-bottom: 1px solid #dfdfdf;
 }

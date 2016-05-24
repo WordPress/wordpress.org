@@ -960,6 +960,13 @@
 		font-style: italic;
 		font-weight: 300;
 	}
+	.handbook {
+		h1 {
+			margin: 24px 0;
+			font-size: 20px;
+			font-weight: normal;
+		}
+	}
 	.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
 		border-bottom: 1px solid #dfdfdf;
 
