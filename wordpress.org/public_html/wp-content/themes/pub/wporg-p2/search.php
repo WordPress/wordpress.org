@@ -21,7 +21,7 @@
 
 			<ul id="postlist">
 			<?php while ( have_posts() ) : the_post(); ?>
-				<?php wporg_is_handbook() ? get_template_part( 'entry', 'handbook-archive' ) : p2_load_entry(); ?>
+				<?php function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ? get_template_part( 'entry', 'handbook-archive' ) : p2_load_entry(); ?>
 			<?php endwhile; ?>
 			</ul>
 
