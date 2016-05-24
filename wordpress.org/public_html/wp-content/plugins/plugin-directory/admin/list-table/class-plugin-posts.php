@@ -109,8 +109,13 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			'installs'  => __( 'Active installs', 'wporg-plugins' ),
 			'downloads' => __( 'Downloads', 'wporg-plugins' ),
 			'support'   => __( 'Support', 'wporg-plugins' ),
-			'date'      => __( 'Date', 'wporg-plugins' ),
 		);
+
+		if ( current_user_can( 'plugin_review' ) ) {
+			$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
+		}
+
+		$posts_columns['date'] = __( 'Date', 'wporg-plugins' );
 
 		/**
 		 * Filter the columns displayed in the Plugins list table.
