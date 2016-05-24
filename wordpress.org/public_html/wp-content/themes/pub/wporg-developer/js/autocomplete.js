@@ -11,8 +11,12 @@
 		return;
 	}
 
-	var form = $( '.searchform' ),
-		searchfield = $( '#search-field', form ),
+	var form = $( '.searchform' ).not(".searchform-handbook");
+	if ( ! form.length ) {
+		return;
+	}
+
+	var	searchfield = $( '#search-field', form ),
 		processing = false,
 		search = '';
 
