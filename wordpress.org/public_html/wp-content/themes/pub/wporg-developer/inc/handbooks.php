@@ -54,22 +54,6 @@ class Devhub_Handbooks {
 	}
 
 	/**
-	 * Is the current (or specified) post_type one of the DevHub handbook post types?
-	 *
-	 * TOOD: The handbook plugin should probably have this.
-	 *
-	 * @param string $post_type Optional. The post_type to check for being a handbook post type. Default '' (the current post type).
-	 * @return bool
-	 */
-	public static function is_handbook_post_type( $post_type = '' ) {
-		if ( ! $post_type ) {
-			$post_type = get_post_type();
-		}
-
-		return in_array( str_replace( '-handbook', '', $post_type ), self::$post_types );
-	}
-
-	/**
 	 * If a syntax highlighted code block exceeds a given number of lines, wrap the
 	 * markup with other markup to trigger the code expansion/collapse JS handling
 	 * already implemented for the code reference.
