@@ -66,8 +66,8 @@ class Plugin extends Base {
 
 		if ( get_post_meta( $post_id, 'header_author_uri', true ) ) {
 			$result['author'] = sprintf( '<a href="%s">%s</a>', get_post_meta( $post_id, 'header_author_uri', true ), get_post_meta( $post_id, 'header_author', true ) );
-		} elseif ( get_post_meta( $post_id, 'header_aufthor', true )  ) {
-			$result['author'] = get_post_meta( $post_id, 'header_aufthor', true );
+		} elseif ( get_post_meta( $post_id, 'header_author', true )  ) {
+			$result['author'] = get_post_meta( $post_id, 'header_author', true );
 		} else {
 			$result['author'] = get_user_by( 'id', $post->post_author )->display_name;
 		}
@@ -112,7 +112,7 @@ class Plugin extends Base {
 		$result['download_link'] = Template::download_link( $post );
 
 		$result['tags'] = array();
-		if ( $terms = get_the_terms( $post->ID, 'plugin_tag' ) ) {
+		if ( $terms = get_the_terms( $post->ID, 'plugin_category' ) ) {
 			foreach ( $terms as $term ) {
 				$result['tags'][ $term->slug ] = $term->name;
 			}
