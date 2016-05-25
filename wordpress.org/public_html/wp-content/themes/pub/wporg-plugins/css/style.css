@@ -1520,7 +1520,13 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .site-main {
-  padding: 1.5625rem 0;
+  padding: 0 0 1.5625rem;
+}
+
+@media (min-width: 67rem) {
+  .single .site-main {
+    padding: 1.5625rem 0;
+  }
 }
 
 .home .type-plugin,
@@ -1638,9 +1644,13 @@ p .section-toggle:not(.button):hover {
   width: 100%;
 }
 
+.single .type-plugin .plugin-banner + .plugin-header {
+  padding-top: 0;
+}
+
 .single .type-plugin .plugin-header {
   border-bottom: 2px solid #eee;
-  padding: 0 1.5625rem 1.143rem;
+  padding: 1.5625rem 1.5625rem 1.143rem;
 }
 
 @media (min-width: 67rem) {

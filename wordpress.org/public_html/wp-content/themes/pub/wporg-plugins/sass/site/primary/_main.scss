@@ -14,7 +14,11 @@
 	}
 
 	.single & {
-		padding: ms(4) 0;
+		padding: 0 0 ms(4);
+
+		@media ( min-width: 67rem ) {
+			padding: ms(4) 0;
+		}
 	}
 
 	.page-title {

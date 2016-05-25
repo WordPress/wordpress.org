@@ -15,10 +15,14 @@
 		width: 100%;
 	}
 
+	.plugin-banner + .plugin-header {
+		padding-top: 0;
+	}
+
 	.plugin-header {
 		@extend .clear;
 		border-bottom: 2px solid #eee;
-		padding: 0 ms(4) ms(1);
+		padding: ms(4) ms(4) ms(1);
 
 		@media ( min-width: 67rem ) {
 			padding: 0 0 ms(1) 0;
