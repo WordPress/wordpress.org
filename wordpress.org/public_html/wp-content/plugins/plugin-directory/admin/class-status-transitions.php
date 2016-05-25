@@ -111,7 +111,7 @@ class Status_Transitions {
 		}
 
 		// Send email.
-		$subject = sprintf( __( '[WordPress.org Plugins] %s has been approved!', 'wporg-plugins' ), $post->post_title );
+		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
 		/* Translators: Plugin name. */
 		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %s has been approved.', 'wporg-plugins' ), $post->post_title ). "\n";
@@ -129,7 +129,7 @@ class Status_Transitions {
 		$content .= __( 'readme.txt validator:', 'wporg-plugins' ) . "\n";
 		$content .= "https://wordpress.org/plugins/about/validator/\n\n\n";
 
-		$content .= __( 'The WordPress.org Plugins Team', 'wporg-plugins' ) . "\n";
+		$content .= __( 'The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
 		$content .= 'https://make.wordpress.org/plugins';
 
 		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
@@ -150,11 +150,11 @@ class Status_Transitions {
 
 		// Send email.
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
-		$subject = sprintf( __( '[WordPress.org Plugins] %s has been rejected', 'wporg-plugins' ), $post->post_title );
+		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* Translators: Plugin name. */
 		$content  = sprintf( __( 'Unfortunately your plugin hosting request for %s has been rejected.', 'wporg-plugins' ), $post->post_title ). "\n\n\n";
-		$content .= __( 'The WordPress.org Plugins Team', 'wporg-plugins' ) . "\n";
+		$content .= __( 'The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
 		$content .= 'https://make.wordpress.org/plugins';
 
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );

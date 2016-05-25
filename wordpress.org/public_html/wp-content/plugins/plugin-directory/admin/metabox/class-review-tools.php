@@ -30,7 +30,7 @@ class Review_Tools {
 			<form id="contact-author" class="contact-author" method="POST" action="https://supportpress.wordpress.org/plugins/thread-new.php">
 				<input type="hidden" name="to_email" value="<?php echo esc_attr( $author->user_email ); ?>" />
 				<input type="hidden" name="to_name" value="<?php echo esc_attr( $author->display_name ); ?>" />
-				<input type="hidden" name="subject" value="<?php printf( esc_attr__( '[WordPress.org Plugins] Request: %s' ), $post->post_title ); ?>" />
+				<input type="hidden" name="subject" value="<?php printf( esc_attr__( '[WordPress Plugin Directory] Request: %s' ), $post->post_title ); ?>" />
 				<button class="button button-primary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
 			</form>
 			<?php

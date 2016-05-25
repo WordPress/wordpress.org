@@ -325,7 +325,7 @@ class Upload_Handler {
 	public function send_email_notification() {
 
 		/* translators: %s: plugin name */
-		$email_subject = sprintf( __( '[WordPress.org Plugins] New Plugin - %s', 'wporg-plugins' ),
+		$email_subject = sprintf( __( '[WordPress Plugin Directory] New Plugin - %s', 'wporg-plugins' ),
 			$this->plugin['Name']
 		);
 
@@ -333,7 +333,7 @@ class Upload_Handler {
 		$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Plugin Directory. If your plugin is selected to be part of the directory we\'ll send a follow up email.
 
 --
-The WordPress.org Plugins Team
+The WordPress Plugin Directory Team
 https://make.wordpress.org/plugins', 'wporg-plugins' ),
 			$this->plugin['Name']
 		);
