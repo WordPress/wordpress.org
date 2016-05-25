@@ -13,14 +13,17 @@ class Developers {
 	 * @return string
 	 */
 	static function display() {
-		$post       = get_post();
-		$committers = Tools::get_plugin_committers( $post->post_name );
+		$post         = get_post();
+		$committers   = Tools::get_plugin_committers( $post->post_name );
+		$contributors = get_post_meta( $post->ID, 'contributors', true );
+		$contributors = array_unique( array_merge( $committers, $contributors ) );
+		sort( $contributors, SORT_NATURAL );
 
 		$output = '<ul class="plugin-developers">';
-		foreach ( $committers as $committer_slug ) {
-			$committer = get_user_by( 'slug', $committer_slug );
+		foreach ( $contributors as $contributor_slug ) {
+			$contributor = get_user_by( 'login', $contributor_slug );
 
-			$output .= '<li>' . get_avatar( $committer->ID, 32 ) . $committer->display_name . '</li>';
+			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . utf8_encode( $contributor->display_name ) . '</li>';
 		}
 		$output .= '</ul>';
 
