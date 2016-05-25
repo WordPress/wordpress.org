@@ -13,7 +13,9 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<div class="entry-thumbnail">
-		<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+		<a href="<?php the_permalink(); ?>" rel="bookmark">
+			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+		</a>
 	</div><div class="entry">
 		<header class="entry-header">
 			<?php the_title( '<h2 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></h2>' ); ?>
