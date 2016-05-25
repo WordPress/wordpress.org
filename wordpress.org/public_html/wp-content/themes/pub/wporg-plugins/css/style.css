@@ -689,6 +689,7 @@ p .button {
 .download-button:focus {
   background: #008ec2;
   border-color: #006799;
+  box-shadow: 0 1px 0 #006799;
   color: #fff;
 }
 
@@ -936,8 +937,11 @@ p .section-toggle:not(.button):hover {
 --------------------------------------------------------------*/
 .main-navigation {
   clear: both;
-  float: right;
-  padding: 8px 0;
+}
+
+.main-navigation.toggled {
+  padding: 16px 0 0;
+  padding: 1rem 0 0;
 }
 
 .main-navigation ul {
@@ -976,8 +980,9 @@ p .section-toggle:not(.button):hover {
 }
 
 .main-navigation li {
-  float: left;
-  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  padding: 1rem;
 }
 
 .main-navigation a, .main-navigation .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .main-navigation .section-toggle {
@@ -997,17 +1002,50 @@ p .section-toggle:not(.button):hover {
 }
 
 /* Small menu. */
-.menu-toggle,
 .main-navigation.toggled ul {
   display: block;
+}
+
+.menu-toggle {
+  color: #fff;
+  font-size: 25px;
+  font-size: 1.5625rem;
+  height: 56px;
+  height: 3.5rem;
+  overflow: hidden;
+  width: 56px;
+  width: 3.5rem;
+  position: absolute;
+  top: 2px;
+  right: 1rem;
+}
+
+.toggled .menu-toggle:before {
+  content: "\f343";
 }
 
 @media screen and (min-width: 37.5em) {
   .menu-toggle {
     display: none;
   }
+  .main-navigation {
+    float: right;
+  }
+  .main-navigation.toggled {
+    padding: 1px 0;
+  }
   .main-navigation ul {
-    display: block;
+    display: inline-block;
+  }
+  .main-navigation ul li {
+    border: 0;
+    display: inline-block;
+    margin-right: 31.5px;
+    margin-right: 1.5rem;
+    padding: 0;
+  }
+  .main-navigation ul li:last-of-type {
+    margin-right: 0;
   }
 }
 
@@ -1300,8 +1338,9 @@ p .section-toggle:not(.button):hover {
 }
 
 .site-header {
-  padding: 1rem 0;
   background: #0073aa;
+  padding: 1rem 0;
+  position: relative;
 }
 
 .site-header .site-branding {
@@ -1340,21 +1379,51 @@ p .section-toggle:not(.button):hover {
 }
 
 .site-header .search-form {
-  margin-bottom: 2rem;
+  display: inline-block;
 }
 
 .site-header .search-form .search-field {
   -webkit-appearance: none;
-  border: none;
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  padding: 0.5rem;
-  width: 22.7373675443rem;
+  border: 0;
+  border-radius: 2px;
+  font-size: 16px;
+  font-size: 1rem;
+  padding: 5px 10px;
+  position: relative;
+  width: 10rem;
 }
 
-.site-header .search-form .search-submit {
+.site-header .search-form .search-field + .button-search {
   display: none;
+  border-radius: 0 2px 2px 0;
+  height: 32px;
+  margin-left: -6px;
+  position: relative;
+  top: 2px;
+  border-left: none;
+}
+
+.site-header .search-form .search-field + .button-search:active {
+  top: 0;
+  border-right: 1px solid #006799;
+  box-shadow: none;
+  background: #006799;
+}
+
+.site-header .search-form .search-field + .button-search .dashicons {
+  font-size: 16px;
+  font-size: 1rem;
+}
+
+@media (min-width: 67rem) {
+  .site-header .search-form .search-field {
+    border-radius: 2px 0 0 2px;
+    font-size: 10.24px;
+    font-size: 0.64rem;
+  }
+  .site-header .search-form .search-field + .button-search {
+    display: inline-block;
+  }
 }
 
 .home .site-header,
@@ -1369,6 +1438,29 @@ p .section-toggle:not(.button):hover {
   font-size: 3.8146972656rem;
   margin: 2rem 0 1rem;
   text-align: center;
+}
+
+.home .site-header .search-form,
+.search .site-header .search-form {
+  display: inherit;
+  margin-bottom: 2rem;
+}
+
+.home .site-header .search-form .search-field,
+.search .site-header .search-form .search-field {
+  border: none;
+  border-radius: 0;
+  display: block;
+  font-size: inherit;
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 0.5rem;
+  width: 22.7373675443rem;
+}
+
+.home .site-header .search-form .button-search,
+.search .site-header .search-form .button-search {
+  display: none;
 }
 
 /*--------------------------------------------------------------

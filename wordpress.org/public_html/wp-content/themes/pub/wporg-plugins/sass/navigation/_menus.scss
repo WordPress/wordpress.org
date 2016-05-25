@@ -1,7 +1,12 @@
+@import "../variables-site/variables-site";
+
 .main-navigation {
 	clear: both;
-	float: right;
-	padding: 8px 0;
+
+	&.toggled {
+		padding: 16px 0 0;
+		padding: 1rem 0 0;
+	}
 
 	ul {
 		display: none;
@@ -49,8 +54,9 @@
 	}
 	
 	li {
-		float: left;
-		position: relative;
+		border-top: 1px solid rgba( 255, 255, 255, 0.2 );
+		padding: 16px;
+		padding: 1rem;
 
 		&:hover > a,
 		&.focus > a {
@@ -81,17 +87,53 @@
 }
 
 /* Small menu. */
-.menu-toggle,
 .main-navigation.toggled ul {
 	display: block;
+}
+
+.menu-toggle {
+	color: #fff;
+	@include font-size( ms-unitless( ms(4) ) );
+	height: 56px;
+	height: 3.5rem;
+	overflow: hidden;
+	width: 56px;
+	width: 3.5rem;
+	position: absolute;
+	top: 2px;
+	right: 1rem;
+
+	.toggled &:before {
+		content: "\f343";
+	}
 }
 
 @media screen and (min-width: 37.5em) {
 	.menu-toggle {
 		display: none;
 	}
-	.main-navigation ul {
-		display: block;
+	.main-navigation {
+		float: right;
+
+		&.toggled {
+			padding: 1px 0;
+		}
+
+		ul {
+			display: inline-block;
+
+			li {
+				border: 0;
+				display: inline-block;
+				margin-right: 31.5px;
+				margin-right: 1.5rem;
+				padding: 0;
+
+				&:last-of-type {
+					margin-right: 0;
+				}
+			}
+		}
 	}
 }
 

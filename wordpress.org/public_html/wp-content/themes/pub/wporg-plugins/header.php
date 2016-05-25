@@ -34,8 +34,15 @@ require WPORGPATH . 'header.php';
 				<?php get_search_form(); ?>
 			<?php else : ?>
 				<nav id="site-navigation" class="main-navigation" role="navigation">
-					<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', '_s' ); ?></button>
-					<?php wp_nav_menu( array( 'theme_location' => 'primary', 'menu_id' => 'primary-menu' ) ); ?>
+					<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-plugins' ); ?>"></button>
+					<div id="primary-menu" class="menu">
+						<ul>
+							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/favorites' ) ); ?>"><?php esc_html_e( 'Favorites', 'wporg-plugins' ); ?></a></li>
+							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/beta' ) ); ?>"><?php esc_html_e( 'Beta testing', 'wporg-plugins' ); ?></a></li>
+							<li class="page_item"><a href="<?php echo esc_url( home_url( 'about' ) ); ?>"><?php esc_html_e( 'Developers', 'wporg-plugins' ); ?></a></li>
+							<li><?php get_search_form(); ?></li>
+						</ul>
+					</div>
 				</nav><!-- #site-navigation -->
 			<?php endif; ?>
 		</div><!-- .site-branding -->

@@ -225,6 +225,7 @@ p .button {
 	&:focus {
 		background: #008ec2;
 		border-color: #006799;
+		box-shadow: 0 1px 0 #006799;
 		color: #fff;
 	}
 

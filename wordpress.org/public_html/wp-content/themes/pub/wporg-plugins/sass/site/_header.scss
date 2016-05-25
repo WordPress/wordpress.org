@@ -63,8 +63,9 @@
 }
 
 .site-header {
-	padding: 1rem 0;
 	background: $color__wp-blue;
+	padding: 1rem 0;
+	position: relative;
 
 	.site-branding {
 		margin: 0 auto;
@@ -99,20 +100,48 @@
 	}
 
 	.search-form {
-		margin-bottom: 2rem;
+		display: inline-block;
 
 		.search-field {
 			-webkit-appearance: none;
-			border: none;
-			display: block;
-			margin: 0 auto;
-			max-width: 100%;
-			padding: 0.5rem;
-			width: ms(28);
+			border: 0;
+			border-radius: 2px;
+			@include font-size( ms-unitless( ms(0) ) );
+			padding: 5px 10px;
+			position: relative;
+			width: 10rem;
 		}
 
-		.search-submit {
+		.search-field + .button-search {
 			display: none;
+			border-radius: 0 2px 2px 0;
+			height: 32px;
+			margin-left: -6px;
+			position: relative;
+			top: 2px;
+			border-left: none;
+
+			&:active {
+				top: 0;
+				border-right: 1px solid #006799;
+				box-shadow: none;
+				background: #006799;
+			}
+
+			.dashicons {
+				@include font-size( ms-unitless( ms(0) ) );
+			}
+		}
+
+		@media ( min-width: 67rem ) {
+			.search-field {
+				border-radius: 2px 0 0 2px;
+				@include font-size( ms-unitless( ms(-4) ) );
+			}
+
+			.search-field + .button-search {
+				display: inline-block;
+			}
 		}
 	}
 
@@ -125,6 +154,26 @@
 			@include font-size( ms-unitless( ms(12) ) );
 			margin: 2rem 0 1rem;
 			text-align: center;
+		}
+
+		.search-form {
+			display: inherit;
+			margin-bottom: 2rem;
+
+			.search-field {
+				border: none;
+				border-radius: 0;
+				display: block;
+				font-size: inherit;
+				margin: 0 auto;
+				max-width: 100%;
+				padding: 0.5rem;
+				width: ms(28);
+			}
+
+			.button-search {
+				display: none;
+			}
 		}
 	}
 }
