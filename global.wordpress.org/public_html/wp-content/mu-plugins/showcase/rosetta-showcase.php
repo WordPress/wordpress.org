@@ -31,6 +31,7 @@ function rosetta_showcase_register() {
 		'map_meta_cap' => true,
 		'hierarchical' => false,
 		'supports' => array( 'title','excerpt' ),
+		'menu_icon' => 'dashicons-slides',
 	);
 
 	register_post_type( 'showcase', $args );
