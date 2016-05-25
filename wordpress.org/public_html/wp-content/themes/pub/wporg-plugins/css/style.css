@@ -891,6 +891,7 @@ input[type="time"],
 input[type="datetime"],
 input[type="datetime-local"],
 input[type="color"] {
+  -webkit-appearance: none;
   padding: 3px;
 }
 
@@ -1007,6 +1008,9 @@ p .section-toggle:not(.button):hover {
 }
 
 .menu-toggle {
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
   color: #fff;
   font-size: 25px;
   font-size: 1.5625rem;
@@ -1388,7 +1392,6 @@ p .section-toggle:not(.button):hover {
 }
 
 .site-header .search-form .search-field {
-  -webkit-appearance: none;
   border: 0;
   border-radius: 2px;
   font-size: 16px;

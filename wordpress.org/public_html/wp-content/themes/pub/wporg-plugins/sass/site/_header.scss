@@ -103,7 +103,6 @@
 		display: inline-block;
 
 		.search-field {
-			-webkit-appearance: none;
 			border: 0;
 			border-radius: 2px;
 			@include font-size( ms-unitless( ms(0) ) );

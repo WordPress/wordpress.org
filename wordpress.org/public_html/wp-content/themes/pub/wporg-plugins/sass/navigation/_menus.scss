@@ -92,6 +92,9 @@
 }
 
 .menu-toggle {
+	-webkit-appearance: none;
+	background: transparent;
+	border: none;
 	color: #fff;
 	@include font-size( ms-unitless( ms(4) ) );
 	height: 56px;
