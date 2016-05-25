@@ -1389,6 +1389,7 @@ p .section-toggle:not(.button):hover {
 
 .site-header .search-form {
   display: inline-block;
+  width: 100%;
 }
 
 .site-header .search-form .search-field {
@@ -1398,7 +1399,7 @@ p .section-toggle:not(.button):hover {
   font-size: 1rem;
   padding: 5px 10px;
   position: relative;
-  width: 10rem;
+  width: 100%;
 }
 
 .site-header .search-form .search-field + .button-search {
@@ -1428,6 +1429,7 @@ p .section-toggle:not(.button):hover {
     border-radius: 2px 0 0 2px;
     font-size: 10.24px;
     font-size: 0.64rem;
+    width: 10rem;
   }
   .site-header .search-form .search-field + .button-search {
     display: inline-block;
