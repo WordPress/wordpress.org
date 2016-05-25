@@ -1661,9 +1661,13 @@ p .section-toggle:not(.button):hover {
   margin-top: 0;
 }
 
+.single .type-plugin .entry-content .read-more.toggled {
+  max-height: none;
+}
+
 .single .type-plugin .entry-content .section-toggle {
   font-size: 0.8rem;
-  padding-top: 0.5rem;
+  margin-top: 0.5rem;
   position: relative;
 }
 
@@ -1672,6 +1676,10 @@ p .section-toggle:not(.button):hover {
   font-family: dashicons;
   padding-left: 5px;
   vertical-align: text-top;
+}
+
+.single .type-plugin .entry-content .toggled + .section-toggle:after {
+  content: "\f343";
 }
 
 .single .type-plugin .entry-content .plugin-developers {

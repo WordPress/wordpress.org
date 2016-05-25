@@ -61,12 +61,16 @@
 			p:first-child {
 				margin-top: 0;
 			}
+
+			&.toggled {
+				max-height: none;
+			}
 		}
 
 		.section-toggle {
 			@extend a;
 			font-size: ms(-2);
-			padding-top: 0.5rem;
+			margin-top: 0.5rem;
 			position: relative;
 
 			&:after {
@@ -75,6 +79,10 @@
 				padding-left: 5px;
 				vertical-align: text-top;
 			}
+		}
+
+		.toggled + .section-toggle:after {
+			content: "\f343";
 		}
 
 		.plugin-developers {
