@@ -1,27 +1,39 @@
 .home .type-plugin,
 .search .type-plugin,
 .archive .type-plugin {
-	display: inline-block;
-	margin-right: 4%;
 	margin-bottom: 4%;
-	width: 48%;
 
-	&:nth-of-type( even ) {
-		margin-right: 0;
+	@media ( min-width: 67rem ) {
+		display: inline-block;
+		margin-right: 4%;
+		width: 48%;
+
+		&:nth-of-type( even ) {
+			margin-right: 0;
+		}
 	}
 
 	.entry-thumbnail {
-		margin: 0 4% 0 0;
-		display: inline-block;
+		display: none;
 		max-width: 128px;
-		vertical-align: top;
 	}
 
 	.entry {
 		display: inline-block;
 		margin: auto;
 		vertical-align: top;
-		width: 66%;
+	}
+
+	@media ( min-width: 21rem ) {
+		.entry-thumbnail {
+			display: inline-block;
+			margin: 0 4% 0 0;
+			vertical-align: top;
+		}
+
+		.entry {
+			 width: calc(96% - 128px);
+		 }
 	}
 
 	.entry-title {

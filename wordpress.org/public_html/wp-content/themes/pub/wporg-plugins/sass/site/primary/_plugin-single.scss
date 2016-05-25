@@ -4,10 +4,14 @@
 	@extend .clear;
 
 	.plugin-banner {
-		background-size: cover;
-		height: 310px;
+		background-size: 100%;
+		background-position: 50% 50%;
+		display: inline-block;
+		font-size: 0;
+		line-height: 0;
 		margin: 0 auto ms(1);
-		max-width: $size__site-main;
+		padding-top: 32.7%;
+		vertical-align: middle;
 		width: 100%;
 	}
 
@@ -22,15 +26,21 @@
 
 		.plugin-thumbnail {
 			float: left;
+			display: none;
 			height: 96px;
 			margin-right: 1rem;
 			width: 96px;
+
+			@media ( min-width: 26rem ) {
+				display: block;
+			}
 
 			.plugin-icon {
 				background-size: contain !important;
 				height: 96px !important;
 				width: 96px !important;
 			}
+
 		}
 
 		.plugin-download {
@@ -49,8 +59,15 @@
 	}
 
 	.entry-content {
-		float: left;
-		width: 65%;
+		max-width: 800px;
+		max-width: 50rem;
+		padding: 0 ms(4);
+
+		@media ( min-width: 67rem ) {
+			float: left;
+			padding: 0;
+			width: 65%;
+		}
 
 		.read-more {
 			border-bottom: 2px solid #eee;
@@ -108,7 +125,12 @@
 	}
 
 	.entry-meta {
-		float: right;
-		width: 30%;
+		padding: 0 ms(4);
+
+		@media ( min-width: 67rem ) {
+			float: right;
+			padding: 0;
+			width: 30%;
+		}
 	}
 }

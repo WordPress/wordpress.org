@@ -17,12 +17,16 @@
 	.widget {
 		display: inline-block;
 		@include font-size( ms-unitless( ms(-2) ) );
-		margin-right: 5%;
+		margin: 0;
 		vertical-align: top;
-		width: 30%;
 
-		&:last-child {
-			margin-right: 0;
+		@media ( min-width: 67rem ) {
+			margin-right: 5%;
+			width: 30%;
+
+			&:last-child {
+				margin-right: 0;
+			}
 		}
 
 		/* Make sure select elements fit in widgets. */
