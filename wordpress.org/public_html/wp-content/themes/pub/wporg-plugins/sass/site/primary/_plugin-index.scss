@@ -3,7 +3,7 @@
 .archive .type-plugin {
 	margin-bottom: 4%;
 
-	@media ( min-width: 67rem ) {
+	@media screen and ( min-width: $ms-breakpoint ) {
 		display: inline-block;
 		margin-right: 4%;
 		width: 48%;
@@ -24,7 +24,7 @@
 		vertical-align: top;
 	}
 
-	@media ( min-width: 21rem ) {
+	@media screen and ( min-width: 21em ) {
 		.entry-thumbnail {
 			display: inline-block;
 			margin: 0 4% 0 0;

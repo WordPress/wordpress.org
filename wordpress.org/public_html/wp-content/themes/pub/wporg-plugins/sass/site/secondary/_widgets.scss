@@ -10,7 +10,7 @@
 	max-width: $size__site-main;
 	padding: 0 ms(4) ms(10) ms(4);
 
-	@media ( min-width: 67rem ) {
+	@media screen and ( min-width: $ms-breakpoint ) {
 		padding: 0 0 ms(10) 0;
 	}
 
@@ -20,7 +20,7 @@
 		margin: 0;
 		vertical-align: top;
 
-		@media ( min-width: 67rem ) {
+		@media screen and ( min-width: $ms-breakpoint ) {
 			margin-right: 5%;
 			width: 30%;
 

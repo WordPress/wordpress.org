@@ -5,20 +5,16 @@
 	max-width: $size__site-main;
 	padding: ms(10) ms(4);
 
-	@media ( min-width: 67rem ) {
-		padding: ms(10) 0;
-
-		.page & {
-			padding: 0 0 ms(10) 0;
-		}
+	@media screen and ( min-width: 48em ) {
+		padding: ms(10) 10px;
 	}
 
 	.single & {
-		padding: 0 0 ms(4);
+		padding-top: ms(4);
+	}
 
-		@media ( min-width: 67rem ) {
-			padding: ms(4) 0;
-		}
+	.page & {
+		padding-top: 0;
 	}
 
 	.page-title {

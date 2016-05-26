@@ -231,7 +231,7 @@ textarea {
   line-height: 1.5;
 }
 
-@media (min-width: 737px) {
+@media screen and (min-width: 48em) {
   html {
     font-size: 21px;
     font-size: 1.3125rem;
@@ -786,7 +786,7 @@ p .button {
 /* ----------------------------------------------------------------------------
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
-@media screen and (max-width: 782px) {
+@media screen and (max-width: 48em) {
   .button,
   .button.button-large,
   .button.button-small,
@@ -1028,7 +1028,7 @@ p .section-toggle:not(.button):hover {
   content: "\f343";
 }
 
-@media screen and (min-width: 37.5em) {
+@media screen and (min-width: 48em) {
   .menu-toggle {
     display: none;
   }
@@ -1044,8 +1044,8 @@ p .section-toggle:not(.button):hover {
   .main-navigation ul li {
     border: 0;
     display: inline-block;
-    margin-right: 31.5px;
-    margin-right: 1.5rem;
+    margin-right: 16px;
+    margin-right: 1rem;
     padding: 0;
   }
   .main-navigation ul li:last-of-type {
@@ -1179,7 +1179,7 @@ p .section-toggle:not(.button):hover {
   padding: 0 1.5625rem 3.0517578125rem 1.5625rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .home .widget-area {
     padding: 0 0 3.0517578125rem 0;
   }
@@ -1194,7 +1194,7 @@ p .section-toggle:not(.button):hover {
   /* Make sure select elements fit in widgets. */
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .home .widget-area .widget {
     margin-right: 5%;
     width: 30%;
@@ -1355,12 +1355,12 @@ p .section-toggle:not(.button):hover {
 .site-header .site-branding {
   margin: 0 auto;
   max-width: 960px;
-  padding: 0 2rem;
+  padding: 0 1.5625rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .site-header .site-branding {
-    padding: 0;
+    padding: 0 10px;
   }
 }
 
@@ -1424,7 +1424,7 @@ p .section-toggle:not(.button):hover {
   font-size: 1rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .site-header .search-form .search-field {
     border-radius: 2px 0 0 2px;
     font-size: 10.24px;
@@ -1512,23 +1512,18 @@ p .section-toggle:not(.button):hover {
   padding: 3.0517578125rem 1.5625rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .site-main {
-    padding: 3.0517578125rem 0;
-  }
-  .page .site-main {
-    padding: 0 0 3.0517578125rem 0;
+    padding: 3.0517578125rem 10px;
   }
 }
 
 .single .site-main {
-  padding: 0 0 1.5625rem;
+  padding-top: 1.5625rem;
 }
 
-@media (min-width: 67rem) {
-  .single .site-main {
-    padding: 1.5625rem 0;
-  }
+.page .site-main {
+  padding-top: 0;
 }
 
 .home .type-plugin,
@@ -1537,7 +1532,7 @@ p .section-toggle:not(.button):hover {
   margin-bottom: 4%;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .home .type-plugin,
   .search .type-plugin,
   .archive .type-plugin {
@@ -1567,7 +1562,7 @@ p .section-toggle:not(.button):hover {
   vertical-align: top;
 }
 
-@media (min-width: 21rem) {
+@media screen and (min-width: 21em) {
   .home .type-plugin .entry-thumbnail,
   .search .type-plugin .entry-thumbnail,
   .archive .type-plugin .entry-thumbnail {
@@ -1653,13 +1648,7 @@ p .section-toggle:not(.button):hover {
 
 .single .type-plugin .plugin-header {
   border-bottom: 2px solid #eee;
-  padding: 1.5625rem 1.5625rem 1.143rem;
-}
-
-@media (min-width: 67rem) {
-  .single .type-plugin .plugin-header {
-    padding: 0 0 1.143rem 0;
-  }
+  padding-bottom: 1.143rem;
 }
 
 .single .type-plugin .plugin-header .plugin-thumbnail {
@@ -1670,7 +1659,7 @@ p .section-toggle:not(.button):hover {
   width: 96px;
 }
 
-@media (min-width: 26rem) {
+@media screen and (min-width: 26em) {
   .single .type-plugin .plugin-header .plugin-thumbnail {
     display: block;
   }
@@ -1696,12 +1685,11 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .entry-content {
-  max-width: 800px;
-  max-width: 50rem;
-  padding: 0 1.5625rem;
+  max-width: 768px;
+  max-width: 48rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .single .type-plugin .entry-content {
     float: left;
     padding: 0;
@@ -1766,7 +1754,7 @@ p .section-toggle:not(.button):hover {
   padding: 0 1.5625rem;
 }
 
-@media (min-width: 67rem) {
+@media screen and (min-width: 48em) {
   .single .type-plugin .entry-meta {
     float: right;
     padding: 0;

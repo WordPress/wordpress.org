@@ -70,10 +70,10 @@
 	.site-branding {
 		margin: 0 auto;
 		max-width: $size__site-main;
-		padding: 0 2rem;
+		padding: 0 ms(4);
 
-		@media ( min-width: 67rem ) {
-			padding: 0;
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding: 0 10px;
 		}
 	}
 
@@ -133,7 +133,7 @@
 			}
 		}
 
-		@media ( min-width: 67rem ) {
+		@media screen and ( min-width: $ms-breakpoint ) {
 			.search-field {
 				border-radius: 2px 0 0 2px;
 				@include font-size( ms-unitless( ms(-4) ) );

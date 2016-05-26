@@ -22,11 +22,7 @@
 	.plugin-header {
 		@extend .clear;
 		border-bottom: 2px solid #eee;
-		padding: ms(4) ms(4) ms(1);
-
-		@media ( min-width: 67rem ) {
-			padding: 0 0 ms(1) 0;
-		}
+		padding-bottom: ms(1);
 
 		.plugin-thumbnail {
 			float: left;
@@ -35,7 +31,7 @@
 			margin-right: 1rem;
 			width: 96px;
 
-			@media ( min-width: 26rem ) {
+			@media screen and ( min-width: 26em ) {
 				display: block;
 			}
 
@@ -63,11 +59,10 @@
 	}
 
 	.entry-content {
-		max-width: 800px;
-		max-width: 50rem;
-		padding: 0 ms(4);
+		max-width: 768px;
+		max-width: 48rem;
 
-		@media ( min-width: 67rem ) {
+		@media screen and ( min-width: $ms-breakpoint ) {
 			float: left;
 			padding: 0;
 			width: 65%;
@@ -131,7 +126,7 @@
 	.entry-meta {
 		padding: 0 ms(4);
 
-		@media ( min-width: 67rem ) {
+		@media screen and ( min-width: $ms-breakpoint ) {
 			float: right;
 			padding: 0;
 			width: 30%;

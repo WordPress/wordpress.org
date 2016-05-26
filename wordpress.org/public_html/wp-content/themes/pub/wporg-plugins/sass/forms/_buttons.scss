@@ -322,7 +322,7 @@ p .button {
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
 
-@media screen and ( max-width: 782px ) {
+@media screen and ( max-width: $ms-breakpoint ) {
 
 	.button,
 	.button.button-large,

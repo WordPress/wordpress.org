@@ -111,7 +111,7 @@
 	}
 }
 
-@media screen and (min-width: 37.5em) {
+@media screen and ( min-width: $ms-breakpoint ) {
 	.menu-toggle {
 		display: none;
 	}
@@ -128,8 +128,8 @@
 			li {
 				border: 0;
 				display: inline-block;
-				margin-right: 31.5px;
-				margin-right: 1.5rem;
+				margin-right: 16px;
+				margin-right: 1rem;
 				padding: 0;
 
 				&:last-of-type {
