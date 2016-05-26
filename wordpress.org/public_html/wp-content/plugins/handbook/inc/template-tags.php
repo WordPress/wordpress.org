@@ -37,8 +37,27 @@ function wporg_is_handbook( $handbook = '' ) {
 	}
 
 	foreach ( $post_types as $post_type ) {
-		$is_handbook    = ! $handbook || ( $handbook === $post_type );
-		$handbook_query = is_singular( $post_type ) || is_post_type_archive( $post_type );
+		$is_handbook     = ! $handbook || ( $handbook === $post_type );
+		$single_handbook = false;
+
+		if ( is_singular() ) {
+			$queried_obj = get_queried_object();
+
+			if ( $queried_obj ) {
+				$single_handbook = is_singular( $post_type );
+			} else {
+				// Queried object is not set, use the post type query var.		
+				$qv_post_type = get_query_var( 'post_type' );
+
+				if ( is_array( $qv_post_type ) ) {
+					$qv_post_type = reset( $qv_post_type );
+				}
+
+				$single_handbook = ( $post_type === $qv_post_type );
+			}
+		}
+
+		$handbook_query = $single_handbook || is_post_type_archive( $post_type );
 
 		if ( $is_handbook && $handbook_query ) {
 			return true;
