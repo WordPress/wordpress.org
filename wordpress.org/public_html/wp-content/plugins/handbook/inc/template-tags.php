@@ -118,3 +118,14 @@ function wporg_get_current_handbook_home_url() {
 
 	return $url;
 }
+
+/**
+ * Returns the name of the current handbook.
+ *
+ * @return string
+ */
+function wporg_get_current_handbook_name() {
+	$handbook = wporg_get_current_handbook();
+
+	return $handbook ? WPorg_Handbook::get_name( $handbook ) : '';
+}
