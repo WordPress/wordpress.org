@@ -1641,7 +1641,8 @@ p .section-toggle:not(.button):hover {
   font-size: 0;
   line-height: 0;
   margin: 0 auto 1.143rem;
-  padding-top: 32.7%;
+  padding-top: 32.38342%;
+  /* 250px / 722px */
   vertical-align: middle;
   width: 100%;
 }
