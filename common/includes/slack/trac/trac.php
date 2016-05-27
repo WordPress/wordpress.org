@@ -287,6 +287,7 @@ class Trac implements User {
 
 	static function format_for_slack( $text ) {
 		$text = str_replace( "\r\n", "\n", $text );
+		$text = preg_replace( "~^{{{\n?#!([\w+-/]+)$~m", '{{{' , $text ); // {{{#!php
 		$text = trim( str_replace(
 			array( "\n{{{\n", "\n}}}\n", '{{{', '}}}' ),
 			array( "\n```\n", "\n```\n", '`',   '`' ),
