@@ -72,11 +72,11 @@ class Meta extends Trac {
 	protected $ticket_component_filters = array(
 		'International Forums'          => '#meta-i18n',
 		'International Sites (Rosetta)' => '#meta-i18n',
-		'translate.wordpress.org'       => '#meta-i18n',
-		'developer.wordpress.org'       => '#meta-devhub',
+		'Translate Site & Plugins'      => '#meta-i18n',
+		'Developer Hub'                 => '#meta-devhub',
 		'Trac'                          => '#meta-tracdev',
 		'WordPress.tv'                  => '#wptv',
-		'wordcamp.org'                  => '#meta-wordcamp',
+		'WordCamp Site & Plugins'       => '#meta-wordcamp',
 	);
 }
 
