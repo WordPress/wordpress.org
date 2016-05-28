@@ -1,9 +1,9 @@
 <?php
-wp_register_style( 'wporg-translate', 'https://wordpress.org/translate/gp-templates-new/style.css', array( 'base' ), '20160425' );
+wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'base' ), '20160425' );
 gp_enqueue_style( 'wporg-translate' );
 
-wp_register_style( 'chartist', 'https://wordpress.org/translate/gp-templates-new/css/chartist.min.css', array(), '0.9.5' );
-wp_register_script( 'chartist', 'https://wordpress.org/translate/gp-templates-new/js/chartist.min.js', array(), '0.9.5' );
+wp_register_style( 'chartist', plugins_url( 'css/chartist.min.css', __FILE__ ), array(), '0.9.5' );
+wp_register_script( 'chartist', plugins_url( 'js/chartist.min.js', __FILE__ ), array(), '0.9.5' );
 
 
 /**
