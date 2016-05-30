@@ -91,3 +91,8 @@ a {
 	background-color: #7AB7F3;
 	background-image: url('http://example.com/foo.jpg');
 }
+
+.social-navigation .slack a:before {
+	font-family: "Fontawesome";
+	content: "\f198";
+}
