@@ -24,7 +24,7 @@ function log( $error_code, $data = array() ) {
 	if ( $data && ! is_scalar( $data ) ) {
 		$data = (array) $data;
 		redact_keys( $data );
-		$data = str_replace( "\n", '[newline]', serialize( $data ) );
+		$data = str_replace( "\n", '[newline]', wp_json_encode( $data ) );
 	}
 
 	$log_entry = sprintf(
@@ -33,7 +33,7 @@ function log( $error_code, $data = array() ) {
 		$backtrace[0]['line'],
 		$backtrace[1]['function'],
 		$error_code,
-		$data ? ' - ' . $data : ''
+		$data ? ' -- ' . $data : ''
 	);
 
 	error_log( $log_entry );
@@ -65,4 +65,40 @@ function redact_keys( & $data ) {
 	}
 
 	return $data;
+}
+
+/**
+ * Format entries created with log()
+ *
+ * See WordCamp_CLI_Miscellaneous::format_log() for usage instructions.
+ *
+ * @param string $raw_log
+ * @param string $foreign_entries `ignore` or `include` entries that weren't created with log()
+ *
+ * @return string
+ */
+function format_log( $raw_log, $foreign_entries = 'include' ) {
+	$formatted_log        = '';
+	$raw_entries          = explode( "\n", $raw_log );
+	$native_entry_pattern = '/(\[.*?\]) (.*?:.*?) - (.*?) -- (\{.*\})/';
+
+	foreach ( $raw_entries as $entry ) {
+		$is_native_entry = 1 === preg_match( $native_entry_pattern, $entry, $entry_parts );
+
+		if ( $is_native_entry ) {
+			$formatted_log .= sprintf(
+				"\n%s %s - %s\n%s",
+				$entry_parts[1],
+				$entry_parts[2],
+				$entry_parts[3],
+				print_r( json_decode( $entry_parts[4] ), true )
+			);
+		} else {
+			if ( 'ignore' !== $foreign_entries ) {
+				$formatted_log .= $entry . "\n";
+			}
+		}
+	}
+
+	return $formatted_log;
 }

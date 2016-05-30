@@ -89,4 +89,44 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 			WP_CLI::warning( 'This was only a dry-run.' );
 		}
 	}
+
+	/**
+	 * Print a log with our custom entries formatted for humans
+	 *
+	 * ## OPTIONS
+	 *
+	 * <raw_log>
+	 * : The raw log contents, or the filename of the raw log
+	 *
+	 * [--foreign=<action>]
+	 * : Include foreign log entries from the output, or ignore them
+	 * ---
+	 * default: include
+	 * options:
+	 *   - include
+	 *   - ignore
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp wc-misc format-log /var/log/php-errors.log
+	 * wp wc-misc format-log "$(grep 'foo' /var/log/php-errors.log -A 10 -B 10)" |less -S
+	 * wp wc-misc format-log "$(grep 'bar' /var/log/php-errors.log)" --foreign=ignore
+	 *
+	 * @subcommand format-log
+	 *
+	 * @param array $args
+	 * @param array $assoc_args
+	 */
+	public function format_log( $args, $assoc_args ) {
+		list( $raw_log ) = $args;
+
+		if ( is_file( $raw_log ) ) {
+			$raw_log = file_get_contents( $raw_log );
+		}
+
+		$formatted_log = \WordCamp\Logger\format_log( $raw_log, $assoc_args['foreign'] );
+
+		WP_CLI::line( "\n" . $formatted_log );
+	}
 }
