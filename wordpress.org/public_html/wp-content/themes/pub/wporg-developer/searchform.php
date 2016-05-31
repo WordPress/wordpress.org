@@ -61,9 +61,10 @@
 				);
 				
 				$qv_post_type = array_filter( (array) get_query_var( 'post_type' ) );	
+				$no_filters   = get_query_var( 'empty_post_type_search' );
 
-				if ( ! is_search() || in_array( 'any', $qv_post_type ) ) {
-					// no filters used
+				if ( ! is_search() || in_array( 'any', $qv_post_type ) || $no_filters ) {
+					// No filters used.
 					$qv_post_type = array();
 				}
 						

@@ -24,6 +24,22 @@ class DevHub_Search {
 		add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ), 20 );
 		add_filter( 'posts_orderby', array( __CLASS__, 'search_posts_orderby' ), 10, 2 );
 		add_filter( 'the_posts',     array( __CLASS__, 'rerun_empty_exact_search' ), 10, 2 );
+		add_filter( 'query_vars',    array( __CLASS__, 'default_qv_empty_post_type_search' ) );
+	}
+
+	/**
+	 * Add query var to indicate if no post type filters were explicitly used for
+	 * a search.
+	 *
+	 * Defaults the query var 'empty_post_type_search' to false. It is potentially
+	 * set to true elsewhere.
+	 *
+	 * @param array $public_query_vars The array of whitelisted query variables.
+	 * @return array
+	 */
+	public static function default_qv_empty_post_type_search( $public_query_vars ) {
+		$public_query_vars['empty_post_type_search'] = false;
+		return $public_query_vars;
 	}
 
 	/**
@@ -65,6 +81,9 @@ class DevHub_Search {
 		$qv_post_types = array_map( 'sanitize_key', $qv_post_types );
 
 		if ( ! $qv_post_types ) {
+			// Record the fact no post types were explicitly supplied.
+			$query->set( 'empty_post_type_search', true );
+
 			// Not a handbook page, or exact search, or filters used.
 			// Fallback to parsed post types.
 			$query->set( 'post_type', DevHub\get_parsed_post_types() );
