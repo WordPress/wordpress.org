@@ -41,6 +41,10 @@ class WCB_Widget_Sponsors extends WP_Widget {
 			.wcb_widget_sponsors .sponsor-logo img {
 				max-width: 100%;
 				height: auto;
+
+				/* Conform to https://adblockplus.org/acceptable-ads */
+				max-height: 300px;
+				width: auto;
 			}
 		</style>
 
