@@ -28,7 +28,8 @@ function log( $error_code, $data = array() ) {
 	}
 
 	$log_entry = sprintf(
-		'%s:%s - %s:%s%s',
+		'[%s] %s:%s - %s:%s%s',
+		get_unique_request_id(),
 		basename( $backtrace[0]['file'] ),
 		$backtrace[0]['line'],
 		$backtrace[1]['function'],
@@ -68,6 +69,19 @@ function redact_keys( & $data ) {
 }
 
 /**
+ * Generate a unique ID for the current request
+ *
+ * This is useful when debugging race conditions, etc, so that you can identify which log entries belong to each thread.
+ *
+ * Based on https://stackoverflow.com/a/22508709/450127
+ *
+ * @return string
+ */
+function get_unique_request_id() {
+	return hash( 'crc32b', $_SERVER['REMOTE_ADDR'] . $_SERVER['REMOTE_PORT'] . $_SERVER['REQUEST_TIME_FLOAT'] );
+}
+
+/**
  * Format entries created with log()
  *
  * See WordCamp_CLI_Miscellaneous::format_log() for usage instructions.
@@ -80,18 +94,19 @@ function redact_keys( & $data ) {
 function format_log( $raw_log, $foreign_entries = 'include' ) {
 	$formatted_log        = '';
 	$raw_entries          = explode( "\n", $raw_log );
-	$native_entry_pattern = '/(\[.*?\]) (.*?:.*?) - (.*?) -- (\{.*\})/';
+	$native_entry_pattern = '/(\[.*?\]) (\[\w+\]) (.*?:.*?) - (.*?) -- (\{.*\})/';
 
 	foreach ( $raw_entries as $entry ) {
 		$is_native_entry = 1 === preg_match( $native_entry_pattern, $entry, $entry_parts );
 
 		if ( $is_native_entry ) {
 			$formatted_log .= sprintf(
-				"\n%s %s - %s\n%s",
+				"\n%s %s %s - %s\n%s",
 				$entry_parts[1],
 				$entry_parts[2],
 				$entry_parts[3],
-				print_r( json_decode( $entry_parts[4] ), true )
+				$entry_parts[4],
+				print_r( json_decode( $entry_parts[5] ), true )
 			);
 		} else {
 			if ( 'ignore' !== $foreign_entries ) {
