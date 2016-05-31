@@ -59,7 +59,7 @@ class DevHub_Search {
 
 		// Separates searches for handbook pages from non-handbook pages depending on
 		// whether the search was performed within context of a handbook page or not.
-		if ( wporg_is_handbook() ) {
+		if ( get_query_var( 'is_handbook' ) ) {
 			// Search only in current handbook post type.
 			// Just to make sure. post type should already be set.
 			$query->set( 'post_type', wporg_get_current_handbook() );

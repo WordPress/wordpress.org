@@ -34,8 +34,9 @@
 <?php } ?>
 
 	<?php
-		$is_handbook = wporg_is_handbook();
-		$search_url  = $is_handbook ? wporg_get_current_handbook_home_url() : home_url( '/' );
+		$is_handbook = get_query_var( 'is_handbook' );
+		$search_url  = get_query_var( 'current_handbook_home_url' );
+		$search_url  = $search_url ? $search_url : home_url( '/' );
 		$form_class  = $is_handbook ? ' searchform-handbook' : '';
 	?>
 

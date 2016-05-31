@@ -34,6 +34,10 @@ class Devhub_Handbooks {
 	 * @access public
 	 */
 	public static function do_init() {
+		add_filter( 'query_vars',  array( __CLASS__, 'add_query_vars' ) );
+
+		add_action( 'pre_get_posts',  array( __CLASS__, 'pre_get_posts' ), 9 );
+
 		add_action( 'after_switch_theme', array( __CLASS__, 'add_roles' ) );
 
 		add_filter( 'user_has_cap', array( __CLASS__, 'adjust_handbook_editor_caps' ), 11 );
@@ -51,6 +55,40 @@ class Devhub_Handbooks {
 		if ( ! is_admin() ) {
 			add_filter( 'syntaxhighlighter_htmlresult', array( __CLASS__, 'syntaxhighlighter_htmlresult' ) );
 		}
+	}
+
+	/**
+	 * Add public query vars for handbooks.
+	 *
+	 * @param array   $public_query_vars The array of whitelisted query variables.
+	 * @return array Array with public query vars.
+	 */
+	public static function add_query_vars( $public_query_vars ) {
+		$public_query_vars['is_handbook'] = false;
+		$public_query_vars['current_handbook'] = false;
+		$public_query_vars['current_handbook_home_url'] = false;
+		$public_query_vars['current_handbook_name'] = '';
+
+		return $public_query_vars;
+	}
+
+	/**
+	 * Add handbook query vars to the current query.
+	 *
+	 * @param \WP_Query $query
+	 */
+	public static function pre_get_posts( $query ) {
+		$is_handbook = function_exists( 'wporg_is_handbook' ) ? wporg_is_handbook() : false;
+		$query->set( 'is_handbook', $is_handbook );
+
+		$current_handbook = function_exists( 'wporg_get_current_handbook' ) ? wporg_get_current_handbook() : false;
+		$query->set( 'current_handbook', $current_handbook );
+
+		$current_handbook_home_url = function_exists( 'wporg_get_current_handbook_home_url' ) ? wporg_get_current_handbook_home_url() : false;
+		$query->set( 'current_handbook_home_url', $current_handbook_home_url );
+
+		$current_handbook_name = function_exists( 'wporg_get_current_handbook_name' ) ? wporg_get_current_handbook_name() : '';
+		$query->set( 'current_handbook_name', $current_handbook_name );
 	}
 
 	/**

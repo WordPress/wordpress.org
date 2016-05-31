@@ -32,7 +32,7 @@ class DevHub_Redirects {
 	 * Redirects a search query with only one result directly to that result.
 	 */
 	public static function redirect_single_search_match() {
-		if ( is_search() && ! wporg_is_handbook() && 1 == $GLOBALS['wp_query']->found_posts ) {
+		if ( is_search() && ! get_query_var( 'is_handbook' ) && 1 == $GLOBALS['wp_query']->found_posts ) {
 			wp_redirect( get_permalink( get_post() ) );
 			exit();
 		}
