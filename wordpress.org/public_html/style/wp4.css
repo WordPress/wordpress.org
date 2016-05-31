@@ -1911,6 +1911,53 @@ img#wpstats {
 	margin: -10px 10px 0;
 }
 
+.wporg-stats-chart path[fill="#cccccc"] {
+	fill: #cbcdce;
+}
+
+.wporg-stats-chart path[fill="#0011cc"] {
+	fill: #0073aa;
+	cursor: pointer;
+}
+
+.wporg-stats-chart path[fill="#0011cc"]:hover {
+	fill: #00a0d2;
+}
+
+.wporg-stats-chart text[fill="#0011cc"] {
+	fill: #444;
+}
+
+.wporg-stats-chart {
+	width: 650px; /* Avoid jumps when the charts are loaded. */
+	height: 450px;
+	position: relative;
+}
+
+.wporg-stats-chart.loading:before {
+	content: '';
+	display: block;
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -10px 0 0 -10px;
+	background: url(https://s.w.org/wp-includes/images/spinner.gif) no-repeat center;
+	-webkit-background-size: 20px 20px;
+	background-size: 20px 20px;
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
+}
+
+@media print,
+  (-webkit-min-device-pixel-ratio: 1.25),
+  (min-resolution: 120dpi) {
+	.wporg-stats-chart.loading:before {
+		background-image:url(https://s.w.org/wp-includes/images/spinner-2x.gif)
+	}
+}
+
 /* Responsive styling ---------------------------------- */
 
 .wporg-page-download .mobile-notice {
