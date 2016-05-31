@@ -57,11 +57,18 @@ class DevHub_Search {
 				$query->set( 's',         substr( $s, 0, -2 ) ); // remove '()'
 				// Restrict search to function-like content.
 				$query->set( 'post_type', array( 'wp-parser-function', 'wp-parser-method' ) );
-			} else {
-				// Search parsed post types instead of all post types.
-				$query->set( 'post_type', DevHub\get_parsed_post_types() );
 			}
 		}
+
+		// Get post types (if used, or set above)
+		$qv_post_types = array_filter( (array) $query->get( 'post_type' ) );
+		$qv_post_types = array_map( 'sanitize_key', $qv_post_types );
+
+		if ( ! $qv_post_types ) {
+			// Not a handbook page, or exact search, or filters used.
+			// Fallback to parsed post types.
+			$query->set( 'post_type', DevHub\get_parsed_post_types() );
+		} 
 	}
 
 	/**
