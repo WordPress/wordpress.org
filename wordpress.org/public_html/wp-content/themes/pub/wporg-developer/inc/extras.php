@@ -64,17 +64,17 @@ function wporg_developer_document_title( $parts ) {
 		}
 	}
 	// Add handbook name to title if relevent
-	elseif ( is_singular() && false !== strpos( $post_type, 'handbook' ) ) {
+	elseif ( ( is_singular() || is_post_type_archive() ) && false !== strpos( $post_type, 'handbook' ) ) {
 		if ( $post_type_object = get_post_type_object( $post_type ) ) {
-			$handbook_label = " $sep " . get_post_type_object( $post_type )->labels->name;
-			$handbook_name  = " $sep " . \WPorg_Handbook::get_name( $post_type ) . " Handbook";
+			$handbook_label = get_post_type_object( $post_type )->labels->name;
+			$handbook_name  = \WPorg_Handbook::get_name( $post_type ) . " Handbook";
 
 			// Replace title with handbook name if this is landing page for the handbook
 			if ( $title == $handbook_label ) {
 				$title = $handbook_name;
 			// Otherwise, append the handbook name
 			} else {
-				$title .= $handbook_name;
+				$title .= " $sep " . $handbook_name;
 			}
 		}
 	}
