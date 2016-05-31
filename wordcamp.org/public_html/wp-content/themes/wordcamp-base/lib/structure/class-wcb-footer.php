@@ -17,7 +17,7 @@ class WCB_Footer extends WCB_Element {
 
 				<div id="site-generator">
 					<?php do_action( 'twentyten_credits' ); ?>
-					<a href="<?php echo esc_url( __( 'http://wordpress.org/', 'wordcampbase' ) ); ?>" title="<?php esc_attr_e( 'Semantic Personal Publishing Platform', 'wordcampbase' ); ?>" rel="generator"><?php printf( __( 'Proudly powered by %s.', 'wordcampbase' ), 'WordPress' ); ?></a>
+					<a href="<?php echo esc_url( __( 'http://wordpress.org/', 'wordcamporg' ) ); ?>" title="<?php esc_attr_e( 'Semantic Personal Publishing Platform', 'wordcamporg' ); ?>" rel="generator"><?php printf( __( 'Proudly powered by %s.', 'wordcamporg' ), 'WordPress' ); ?></a>
 				</div><!-- #site-generator -->
 
 			</div><!-- #colophon -->

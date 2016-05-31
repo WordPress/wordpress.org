@@ -9,10 +9,10 @@ function __wcb_post_single_meta( $meta ) {
 		return $meta;
 
 	if ( is_object_in_taxonomy( get_post_type(), 'category' ) ) {
-		$meta['category'] = sprintf( __('Posted in %s', 'wordcampbase'), get_the_category_list( ', ' ) );
+		$meta['category'] = sprintf( __('Posted in %s', 'wordcamporg'), get_the_category_list( ', ' ) );
 	}
 	if ( is_object_in_taxonomy( get_post_type(), 'tag' ) ) {
-		$meta['tag'] = sprintf( __('Tagged %s', 'wordcampbase'), get_the_tag_list( '', ', ' ) );
+		$meta['tag'] = sprintf( __('Tagged %s', 'wordcamporg'), get_the_tag_list( '', ', ' ) );
 	}
 
 	$meta['order'][] = 'br';
@@ -72,7 +72,7 @@ function wcb_title_tag() {
 
 	// Add a page number if necessary:
 	if ( $paged >= 2 || $page >= 2 )
-		echo ' | ' . sprintf( __( 'Page %s', 'wordcampbase' ), max( $paged, $page ) );
+		echo ' | ' . sprintf( __( 'Page %s', 'wordcamporg' ), max( $paged, $page ) );
 	echo "</title>";
 }
 

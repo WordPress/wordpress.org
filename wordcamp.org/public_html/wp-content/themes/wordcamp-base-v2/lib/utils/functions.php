@@ -1,7 +1,5 @@
 <?php
 
-load_theme_textdomain( 'wordcampbase', TEMPLATEPATH . '/languages' );
-
 require_once TEMPLATEPATH . "/lib/utils/twentyten-overrides.php";
 require_once TEMPLATEPATH . "/lib/utils/twentyten-functions.php";
 require_once TEMPLATEPATH . "/lib/utils/class-wcb-loader.php";

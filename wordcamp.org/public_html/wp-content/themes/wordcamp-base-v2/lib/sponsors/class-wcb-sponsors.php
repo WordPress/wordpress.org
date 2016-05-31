@@ -24,19 +24,19 @@ class WCB_Sponsors extends WCB_Loader {
 	function register_post_types() {
 		// Sponsor post type labels
 		$labels = array (
-			'name'                  => __( 'Sponsors', 'wordcampbase' ),
-			'singular_name'         => __( 'Sponsor', 'wordcampbase' ),
-			'add_new'               => __( 'Add New', 'wordcampbase' ),
-			'add_new_item'          => __( 'Create New Sponsor', 'wordcampbase' ),
-			'edit'                  => __( 'Edit', 'wordcampbase' ),
-			'edit_item'             => __( 'Edit Sponsor', 'wordcampbase' ),
-			'new_item'              => __( 'New Sponsor', 'wordcampbase' ),
-			'view'                  => __( 'View Sponsor', 'wordcampbase' ),
-			'view_item'             => __( 'View Sponsor', 'wordcampbase' ),
-			'search_items'          => __( 'Search Sponsors', 'wordcampbase' ),
-			'not_found'             => __( 'No sponsors found', 'wordcampbase' ),
-			'not_found_in_trash'    => __( 'No sponsors found in Trash', 'wordcampbase' ),
-			'parent_item_colon'     => __( 'Parent Sponsor:', 'wordcampbase' )
+			'name'                  => __( 'Sponsors', 'wordcamporg' ),
+			'singular_name'         => __( 'Sponsor', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Sponsor', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Sponsor', 'wordcamporg' ),
+			'new_item'              => __( 'New Sponsor', 'wordcamporg' ),
+			'view'                  => __( 'View Sponsor', 'wordcamporg' ),
+			'view_item'             => __( 'View Sponsor', 'wordcamporg' ),
+			'search_items'          => __( 'Search Sponsors', 'wordcamporg' ),
+			'not_found'             => __( 'No sponsors found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No sponsors found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Sponsor:', 'wordcamporg' )
 		);
 
 		// Sponsor post type rewrite
@@ -80,15 +80,15 @@ class WCB_Sponsors extends WCB_Loader {
 
 		// Labels
 		$labels = array (
-			'name'              => __( 'Sponsor Levels', 'wordcampbase'),
-			'singular_name'     => __( 'Sponsor Level', 'wordcampbase'),
-			'search_items'      => __( 'Search Sponsor Levels', 'wordcampbase'),
-			'popular_items'     => __( 'Popular Sponsor Levels', 'wordcampbase'),
-			'all_items'         => __( 'All Sponsor Levels', 'wordcampbase'),
-			'edit_item'         => __( 'Edit Sponsor Level', 'wordcampbase'),
+			'name'              => __( 'Sponsor Levels', 'wordcamporg'),
+			'singular_name'     => __( 'Sponsor Level', 'wordcamporg'),
+			'search_items'      => __( 'Search Sponsor Levels', 'wordcamporg'),
+			'popular_items'     => __( 'Popular Sponsor Levels', 'wordcamporg'),
+			'all_items'         => __( 'All Sponsor Levels', 'wordcamporg'),
+			'edit_item'         => __( 'Edit Sponsor Level', 'wordcamporg'),
 			'update_item'       => __( 'Update Sponsor Level','wordcampbase'),
-			'add_new_item'      => __( 'Add Sponsor Level', 'wordcampbase'),
-			'new_item_name'     => __( 'New Sponsor Level', 'wordcampbase'),
+			'add_new_item'      => __( 'Add Sponsor Level', 'wordcamporg'),
+			'new_item_name'     => __( 'New Sponsor Level', 'wordcamporg'),
 		);
 
 		// Rewrite

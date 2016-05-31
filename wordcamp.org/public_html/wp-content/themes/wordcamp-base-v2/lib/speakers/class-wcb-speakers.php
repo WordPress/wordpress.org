@@ -22,13 +22,13 @@ class WCB_Speakers extends WCB_Loader {
 			$meta_fields = array(
 				'email'     => array(
 					'type'      => 'text',
-					'label'     => __('Gravatar Email', 'wordcampbase'),
+					'label'     => __('Gravatar Email', 'wordcamporg'),
 				)
 			);
 
 			$box = wcb_get_metabox( 'WCB_Post_Metabox' );
 			$box->add_instance( WCB_SPEAKER_POST_TYPE, array(
-				'title'          => __('Gravatar Email', 'wordcampbase'),
+				'title'          => __('Gravatar Email', 'wordcamporg'),
 				'meta_manager'   => $this->meta_manager,
 				'meta_fields'    => $meta_fields,
 			) );
@@ -38,19 +38,19 @@ class WCB_Speakers extends WCB_Loader {
 	function register_post_types() {
 		// Speaker post type labels
 		$labels = array (
-			'name'                  => __( 'Speakers', 'wordcampbase' ),
-			'singular_name'         => __( 'Speaker', 'wordcampbase' ),
-			'add_new'               => __( 'Add New', 'wordcampbase' ),
-			'add_new_item'          => __( 'Create New Speaker', 'wordcampbase' ),
-			'edit'                  => __( 'Edit', 'wordcampbase' ),
-			'edit_item'             => __( 'Edit Speaker', 'wordcampbase' ),
-			'new_item'              => __( 'New Speaker', 'wordcampbase' ),
-			'view'                  => __( 'View Speaker', 'wordcampbase' ),
-			'view_item'             => __( 'View Speaker', 'wordcampbase' ),
-			'search_items'          => __( 'Search Speakers', 'wordcampbase' ),
-			'not_found'             => __( 'No speakers found', 'wordcampbase' ),
-			'not_found_in_trash'    => __( 'No speakers found in Trash', 'wordcampbase' ),
-			'parent_item_colon'     => __( 'Parent Speaker:', 'wordcampbase' )
+			'name'                  => __( 'Speakers', 'wordcamporg' ),
+			'singular_name'         => __( 'Speaker', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Speaker', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Speaker', 'wordcamporg' ),
+			'new_item'              => __( 'New Speaker', 'wordcamporg' ),
+			'view'                  => __( 'View Speaker', 'wordcamporg' ),
+			'view_item'             => __( 'View Speaker', 'wordcamporg' ),
+			'search_items'          => __( 'Search Speakers', 'wordcamporg' ),
+			'not_found'             => __( 'No speakers found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No speakers found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Speaker:', 'wordcamporg' )
 		);
 
 		// Speaker post type rewrite

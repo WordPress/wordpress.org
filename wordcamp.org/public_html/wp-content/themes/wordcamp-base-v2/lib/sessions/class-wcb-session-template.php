@@ -95,13 +95,13 @@ function wcb_session_entry_meta( $meta ) {
 	if ( get_post_type() == WCB_SESSION_POST_TYPE ) {
 		$track  = wcb_get_session_track();
 
-		$meta['speakers']   = sprintf( __('Presented by %s', 'wordcampbase'), wcb_get_session_speakers() );
+		$meta['speakers']   = sprintf( __('Presented by %s', 'wordcamporg'), wcb_get_session_speakers() );
 
 		if ( empty( $track ) ) {
 			$meta['order']  = array('speakers', 'edit');
 
 		} else {
-			$meta['track'] = sprintf( __('%s Track', 'wordcampbase'), $track );
+			$meta['track'] = sprintf( __('%s Track', 'wordcamporg'), $track );
 
 			$link = get_term_link( $track, WCB_TRACK_TAXONOMY );
 			if ( ! is_wp_error( $link ) ) {

@@ -65,7 +65,6 @@ if ( ! function_exists( 'twentyten_setup' ) ):
  * @uses register_nav_menus() To add support for navigation menus.
  * @uses add_custom_background() To add support for a custom background.
  * @uses add_editor_style() To style the visual editor.
- * @uses load_theme_textdomain() For translation/localization support.
  * @uses add_custom_image_header() To add support for a custom header.
  * @uses register_default_headers() To register the default custom header images provided with the theme.
  * @uses set_post_thumbnail_size() To set a custom post thumbnail size.
@@ -83,10 +82,6 @@ function twentyten_setup() {
 	// Add default posts and comments RSS feed links to head
 	add_theme_support( 'automatic-feed-links' );
 
-	// Make theme available for translation
-	// Translations can be filed in the /languages/ directory
-	// load_theme_textdomain( 'wordcampbase', TEMPLATEPATH . '/languages' );
-
 	$locale = get_locale();
 	$locale_file = TEMPLATEPATH . "/languages/$locale.php";
 	if ( is_readable( $locale_file ) )
@@ -94,7 +89,7 @@ function twentyten_setup() {
 
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
-		'primary' => __( 'Primary Navigation', 'wordcampbase' ),
+		'primary' => __( 'Primary Navigation', 'wordcamporg' ),
 	) );
 
 	// This theme allows users to set a custom background
@@ -125,49 +120,49 @@ function twentyten_setup() {
 			'url' => '%s/images/headers/berries.jpg',
 			'thumbnail_url' => '%s/images/headers/berries-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Berries', 'wordcampbase' )
+			'description' => __( 'Berries', 'wordcamporg' )
 		),
 		'cherryblossom' => array(
 			'url' => '%s/images/headers/cherryblossoms.jpg',
 			'thumbnail_url' => '%s/images/headers/cherryblossoms-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Cherry Blossoms', 'wordcampbase' )
+			'description' => __( 'Cherry Blossoms', 'wordcamporg' )
 		),
 		'concave' => array(
 			'url' => '%s/images/headers/concave.jpg',
 			'thumbnail_url' => '%s/images/headers/concave-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Concave', 'wordcampbase' )
+			'description' => __( 'Concave', 'wordcamporg' )
 		),
 		'fern' => array(
 			'url' => '%s/images/headers/fern.jpg',
 			'thumbnail_url' => '%s/images/headers/fern-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Fern', 'wordcampbase' )
+			'description' => __( 'Fern', 'wordcamporg' )
 		),
 		'forestfloor' => array(
 			'url' => '%s/images/headers/forestfloor.jpg',
 			'thumbnail_url' => '%s/images/headers/forestfloor-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Forest Floor', 'wordcampbase' )
+			'description' => __( 'Forest Floor', 'wordcamporg' )
 		),
 		'inkwell' => array(
 			'url' => '%s/images/headers/inkwell.jpg',
 			'thumbnail_url' => '%s/images/headers/inkwell-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Inkwell', 'wordcampbase' )
+			'description' => __( 'Inkwell', 'wordcamporg' )
 		),
 		'path' => array(
 			'url' => '%s/images/headers/path.jpg',
 			'thumbnail_url' => '%s/images/headers/path-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Path', 'wordcampbase' )
+			'description' => __( 'Path', 'wordcamporg' )
 		),
 		'sunset' => array(
 			'url' => '%s/images/headers/sunset.jpg',
 			'thumbnail_url' => '%s/images/headers/sunset-thumbnail.jpg',
 			/* translators: header image description */
-			'description' => __( 'Sunset', 'wordcampbase' )
+			'description' => __( 'Sunset', 'wordcamporg' )
 		)
 	) );
 }
@@ -238,7 +233,7 @@ function twentyten_continue_reading_link() {
 		esc_url( get_permalink() ),
 		sprintf(
 			// translators: The title of the post to continue reading
-			__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'wordcampbase' ),
+			__( 'Continue reading %s <span class="meta-nav">&rarr;</span>', 'wordcamporg' ),
 			sprintf( '<span class="screen-reader-text">%s</span> ', get_the_title() )
 		)
 	);
@@ -310,17 +305,17 @@ function twentyten_comment( $comment, $args, $depth ) {
 		<div id="comment-<?php comment_ID(); ?>">
 		<div class="comment-author vcard">
 			<?php echo get_avatar( $comment, 40 ); ?>
-			<?php printf( __( '%s <span class="says">says:</span>', 'wordcampbase' ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
+			<?php printf( __( '%s <span class="says">says:</span>', 'wordcamporg' ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
 		</div><!-- .comment-author .vcard -->
 		<?php if ( $comment->comment_approved == '0' ) : ?>
-			<em><?php _e( 'Your comment is awaiting moderation.', 'wordcampbase' ); ?></em>
+			<em><?php _e( 'Your comment is awaiting moderation.', 'wordcamporg' ); ?></em>
 			<br />
 		<?php endif; ?>
 
 		<div class="comment-meta commentmetadata"><a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 			<?php
 				/* translators: 1: date, 2: time */
-				printf( __( '%1$s at %2$s', 'wordcampbase' ), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)', 'wordcampbase' ), ' ' );
+				printf( __( '%1$s at %2$s', 'wordcamporg' ), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)', 'wordcamporg' ), ' ' );
 			?>
 		</div><!-- .comment-meta .commentmetadata -->
 
@@ -337,7 +332,7 @@ function twentyten_comment( $comment, $args, $depth ) {
 		case 'trackback' :
 	?>
 	<li class="post pingback">
-		<p><?php _e( 'Pingback:', 'wordcampbase' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __('(Edit)', 'wordcampbase'), ' ' ); ?></p>
+		<p><?php _e( 'Pingback:', 'wordcamporg' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __('(Edit)', 'wordcamporg'), ' ' ); ?></p>
 	<?php
 			break;
 	endswitch;
@@ -356,9 +351,9 @@ endif;
 function twentyten_widgets_init() {
 	// Area 1, located at the top of the sidebar.
 	register_sidebar( array(
-		'name' => __( 'Primary Widget Area', 'wordcampbase' ),
+		'name' => __( 'Primary Widget Area', 'wordcamporg' ),
 		'id' => 'primary-widget-area',
-		'description' => __( 'The primary widget area', 'wordcampbase' ),
+		'description' => __( 'The primary widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -367,9 +362,9 @@ function twentyten_widgets_init() {
 
 	// Area 2, located below the Primary Widget Area in the sidebar. Empty by default.
 	register_sidebar( array(
-		'name' => __( 'Secondary Widget Area', 'wordcampbase' ),
+		'name' => __( 'Secondary Widget Area', 'wordcamporg' ),
 		'id' => 'secondary-widget-area',
-		'description' => __( 'The secondary widget area', 'wordcampbase' ),
+		'description' => __( 'The secondary widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -378,9 +373,9 @@ function twentyten_widgets_init() {
 
 	// Area 3, located in the footer. Empty by default.
 	register_sidebar( array(
-		'name' => __( 'First Footer Widget Area', 'wordcampbase' ),
+		'name' => __( 'First Footer Widget Area', 'wordcamporg' ),
 		'id' => 'first-footer-widget-area',
-		'description' => __( 'The first footer widget area', 'wordcampbase' ),
+		'description' => __( 'The first footer widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -389,9 +384,9 @@ function twentyten_widgets_init() {
 
 	// Area 4, located in the footer. Empty by default.
 	register_sidebar( array(
-		'name' => __( 'Second Footer Widget Area', 'wordcampbase' ),
+		'name' => __( 'Second Footer Widget Area', 'wordcamporg' ),
 		'id' => 'second-footer-widget-area',
-		'description' => __( 'The second footer widget area', 'wordcampbase' ),
+		'description' => __( 'The second footer widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -400,9 +395,9 @@ function twentyten_widgets_init() {
 
 	// Area 5, located in the footer. Empty by default.
 	register_sidebar( array(
-		'name' => __( 'Third Footer Widget Area', 'wordcampbase' ),
+		'name' => __( 'Third Footer Widget Area', 'wordcamporg' ),
 		'id' => 'third-footer-widget-area',
-		'description' => __( 'The third footer widget area', 'wordcampbase' ),
+		'description' => __( 'The third footer widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -411,9 +406,9 @@ function twentyten_widgets_init() {
 
 	// Area 6, located in the footer. Empty by default.
 	register_sidebar( array(
-		'name' => __( 'Fourth Footer Widget Area', 'wordcampbase' ),
+		'name' => __( 'Fourth Footer Widget Area', 'wordcamporg' ),
 		'id' => 'fourth-footer-widget-area',
-		'description' => __( 'The fourth footer widget area', 'wordcampbase' ),
+		'description' => __( 'The fourth footer widget area', 'wordcamporg' ),
 		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
 		'after_widget' => '</li>',
 		'before_title' => '<h3 class="widget-title">',
@@ -444,7 +439,7 @@ if ( ! function_exists( 'twentyten_posted_on' ) ) :
  * @since Twenty Ten 1.0
  */
 function twentyten_posted_on() {
-	printf( __( '<span class="%1$s">Posted on</span> %2$s <span class="meta-sep">by</span> %3$s', 'wordcampbase' ),
+	printf( __( '<span class="%1$s">Posted on</span> %2$s <span class="meta-sep">by</span> %3$s', 'wordcamporg' ),
 		'meta-prep meta-prep-author',
 		sprintf( '<a href="%1$s" title="%2$s" rel="bookmark"><span class="entry-date">%3$s</span></a>',
 			get_permalink(),
@@ -453,7 +448,7 @@ function twentyten_posted_on() {
 		),
 		sprintf( '<span class="author vcard"><a class="url fn n" href="%1$s" title="%2$s">%3$s</a></span>',
 			get_author_posts_url( get_the_author_meta( 'ID' ) ),
-			sprintf( esc_attr__( 'View all posts by %s', 'wordcampbase' ), get_the_author() ),
+			sprintf( esc_attr__( 'View all posts by %s', 'wordcamporg' ), get_the_author() ),
 			get_the_author()
 		)
 	);
@@ -470,11 +465,11 @@ function twentyten_posted_in() {
 	// Retrieves tag list of current post, separated by commas.
 	$tag_list = get_the_tag_list( '', ', ' );
 	if ( $tag_list ) {
-		$posted_in = __( 'This entry was posted in %1$s and tagged %2$s. Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcampbase' );
+		$posted_in = __( 'This entry was posted in %1$s and tagged %2$s. Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcamporg' );
 	} elseif ( is_object_in_taxonomy( get_post_type(), 'category' ) ) {
-		$posted_in = __( 'This entry was posted in %1$s. Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcampbase' );
+		$posted_in = __( 'This entry was posted in %1$s. Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcamporg' );
 	} else {
-		$posted_in = __( 'Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcampbase' );
+		$posted_in = __( 'Bookmark the <a href="%3$s" title="Permalink to %4$s" rel="bookmark">permalink</a>.', 'wordcamporg' );
 	}
 	// Prints the string, replacing the placeholders.
 	printf(

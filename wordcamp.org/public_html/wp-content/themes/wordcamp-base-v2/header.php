@@ -31,7 +31,7 @@
 
 	// Add a page number if necessary:
 	if ( $paged >= 2 || $page >= 2 )
-		echo ' | ' . sprintf( __( 'Page %s', 'wcbs' ), max( $paged, $page ) );
+		echo ' | ' . sprintf( __( 'Page %s', 'wordcamporg' ), max( $paged, $page ) );
 
 	?></title>
 <link rel="profile" href="http://gmpg.org/xfn/11" />
@@ -59,8 +59,8 @@
 		</hgroup>
 
 		<nav role="navigation" class="site-navigation main-navigation">
-			<h1 class="assistive-text"><?php _e( 'Menu', 'wcbs' ); ?></h1>
-			<div class="assistive-text skip-link"><a href="#content" title="<?php esc_attr_e( 'Skip to content', 'wcbs' ); ?>"><?php _e( 'Skip to content', 'wcbs' ); ?></a></div>
+			<h1 class="assistive-text"><?php _e( 'Menu', 'wordcamporg' ); ?></h1>
+			<div class="assistive-text skip-link"><a href="#content" title="<?php esc_attr_e( 'Skip to content', 'wordcamporg' ); ?>"><?php _e( 'Skip to content', 'wordcamporg' ); ?></a></div>
 
 			<?php wp_nav_menu( array( 'theme_location' => 'primary' ) ); ?>
 		</nav>

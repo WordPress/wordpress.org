@@ -66,7 +66,7 @@ class WCB_Metabox {
 	function _set_instance( $screen, $index, $args=array() ) {
 		$defaults = array(
 			// 'id'            => '',
-			'title'         => __( 'Untitled' , 'wordcampbase'),
+			'title'         => __( 'Untitled' , 'wordcamporg'),
 			'context'       => 'side',
 			'priority'      => 'default',
 		);

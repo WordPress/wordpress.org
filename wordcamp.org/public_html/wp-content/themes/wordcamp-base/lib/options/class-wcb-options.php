@@ -19,10 +19,10 @@ class WCB_Options extends WCB_Loader {
 		$this->options['grid'] = new WCB_Radio_Option( array(
 			'key'       => 'grid',
 			'default'   => 'grid960',
-			'label'     => __('Grid Width', 'wordcampbase'),
+			'label'     => __('Grid Width', 'wordcamporg'),
 			'values'   => array(
-				'grid960'   => __( '960px wide', 'wordcampbase' ),
-				'grid720'   => __( '720px wide', 'wordcampbase' ),
+				'grid960'   => __( '960px wide', 'wordcamporg' ),
+				'grid720'   => __( '720px wide', 'wordcamporg' ),
 			)
 		) );
 
@@ -33,7 +33,7 @@ class WCB_Options extends WCB_Loader {
 				'layout'        => array( 12 ),
 				'front_only'    => true,
 			),
-			'label'     => __('After Header', 'wordcampbase'),
+			'label'     => __('After Header', 'wordcamporg'),
 		) );
 
 		$this->options['before_content'] = new WCB_Grid_Option( array(
@@ -43,7 +43,7 @@ class WCB_Options extends WCB_Loader {
 				'layout'        => array( 4,4,4 ),
 				'front_only'    => true,
 			),
-			'label'     => __('Before Content', 'wordcampbase'),
+			'label'     => __('Before Content', 'wordcamporg'),
 		) );
 
 		$this->options['content'] = new WCB_Grid_Option( array(
@@ -56,7 +56,7 @@ class WCB_Options extends WCB_Loader {
 				),
 				'front_only'    => false,
 			),
-			'label'     => __('Content', 'wordcampbase'),
+			'label'     => __('Content', 'wordcamporg'),
 			'type'      => 'content',
 		) );
 
@@ -67,7 +67,7 @@ class WCB_Options extends WCB_Loader {
 				'layout'        => array( 4,4,4 ),
 				'front_only'    => false,
 			),
-			'label'     => __('After Content', 'wordcampbase'),
+			'label'     => __('After Content', 'wordcamporg'),
 		) );
 
 		$this->options['before_footer'] = new WCB_Grid_Option( array(
@@ -77,14 +77,14 @@ class WCB_Options extends WCB_Loader {
 				'layout'        => array( 3,3,3,3 ),
 				'front_only'    => false,
 			),
-			'label'     => __('Before Footer', 'wordcampbase'),
+			'label'     => __('Before Footer', 'wordcamporg'),
 		) );
 
 		$this->options['featured_button'] = new WCB_Button_Option( array(
 			'key'       => 'featured_button',
 			'default'   => array(
 				'visible'       => false,
-				'text'          => __('Register now!', 'wordcampbase'),
+				'text'          => __('Register now!', 'wordcamporg'),
 				'url'           => '',
 			),
 		) );
@@ -92,11 +92,11 @@ class WCB_Options extends WCB_Loader {
 		$this->options['typekit'] = new WCB_Typekit_Option( array(
 			'key'       => 'typekit',
 			'default'   => 'jnd4dds',
-			'label'     => __('Typekit', 'wordcampbase'),
+			'label'     => __('Typekit', 'wordcamporg'),
 			'values'    => array(
-				'default'   => __( 'Use the default Typekit fonts.', 'wordcampbase' ),
-				'custom'    => __( 'Use a custom Typekit key:', 'wordcampbase' ),
-				'off'       => __( 'Do not use any Typekit fonts.', 'wordcampbase' ),
+				'default'   => __( 'Use the default Typekit fonts.', 'wordcamporg' ),
+				'custom'    => __( 'Use a custom Typekit key:', 'wordcamporg' ),
+				'off'       => __( 'Do not use any Typekit fonts.', 'wordcamporg' ),
 			),
 		) );
 	}
@@ -111,7 +111,7 @@ class WCB_Options extends WCB_Loader {
 	}
 
 	function admin_menu() {
-		$page = add_theme_page( __('Theme Options', 'wordcampbase'), __('Theme Options', 'wordcampbase'), 'edit_theme_options', 'wcb-theme-options', array( &$this, 'render' ) );
+		$page = add_theme_page( __('Theme Options', 'wordcamporg'), __('Theme Options', 'wordcamporg'), 'edit_theme_options', 'wcb-theme-options', array( &$this, 'render' ) );
 
 		add_action("wcb_enqueue_scripts_$page", array( &$this, 'enqueue_scripts' ) );
 	}
@@ -141,15 +141,15 @@ class WCB_Options extends WCB_Loader {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h1><?php echo get_current_theme() . ' ' . __( 'Theme Options', 'wordcampbase' ); ?></h1>
+			<h1><?php echo get_current_theme() . ' ' . __( 'Theme Options', 'wordcamporg' ); ?></h1>
 
 			<?php if ( false !== $_REQUEST['updated'] ) : ?>
-				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcampbase' ); ?></strong></p></div>
+				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcamporg' ); ?></strong></p></div>
 			<?php endif; ?>
 
 			<form method="post" action="options.php">
 				<?php settings_fields( 'wcb_theme_options' ); ?>
-				<h3><?php _e('General Options', 'wordcampbase'); ?></h3>
+				<h3><?php _e('General Options', 'wordcamporg'); ?></h3>
 				<table class="form-table">
 					<?php
 					$this->options['grid']->render();
@@ -158,13 +158,13 @@ class WCB_Options extends WCB_Loader {
 					?>
 				</table>
 
-				<h3><?php _e('Theme Layout', 'wordcampbase'); ?></h3>
+				<h3><?php _e('Theme Layout', 'wordcamporg'); ?></h3>
 				<table class="form-table">
 					<?php
 					$rows = array( 'after_header', 'before_content', 'content', 'after_content', 'before_footer' ); ?>
 
 					<tr id="visibility-row">
-						<th><?php esc_html_e( 'Show Rows', 'wordcampbase' ); ?></th>
+						<th><?php esc_html_e( 'Show Rows', 'wordcamporg' ); ?></th>
 						<td>
 							<?php foreach ( $rows as $row ) {
 								$this->options[ $row ]->render_visibility();
@@ -173,7 +173,7 @@ class WCB_Options extends WCB_Loader {
 					</tr>
 
 					<tr>
-						<th><?php esc_html_e( 'Row Layout', 'wordcampbase' ); ?></th>
+						<th><?php esc_html_e( 'Row Layout', 'wordcamporg' ); ?></th>
 						<td>
 							<?php foreach ( $rows as $row ) {
 								$this->options[ $row ]->render_layout();
@@ -183,7 +183,7 @@ class WCB_Options extends WCB_Loader {
 
 				</table>
 				<p class="submit">
-					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'wordcampbase' ); ?>" />
+					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'wordcamporg' ); ?>" />
 				</p>
 			</form>
 		</div>

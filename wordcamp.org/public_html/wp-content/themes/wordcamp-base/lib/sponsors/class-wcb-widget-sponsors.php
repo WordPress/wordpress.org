@@ -6,9 +6,9 @@ class WCB_Widget_Sponsors extends WP_Widget {
 	function WCB_Widget_Sponsors() {
 		$widget_ops = array(
 			'classname' => 'wcb_widget_sponsors',
-			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcampbase' ),
+			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcb_sponsors', __('Sponsors', 'wordcampbase'), $widget_ops );
+		$this->WP_Widget( 'wcb_sponsors', __('Sponsors', 'wordcamporg'), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -37,7 +37,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 
 			while ( wcb_have_sponsors() ):
 				wcb_the_sponsor();
-				?><a class="sponsor-logo" href="<?php the_permalink(); ?>" title="<?php printf( esc_attr__( 'Permalink to %s', 'wordcampbase' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark"><?php
+				?><a class="sponsor-logo" href="<?php the_permalink(); ?>" title="<?php printf( esc_attr__( 'Permalink to %s', 'wordcamporg' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark"><?php
 					if ( has_post_thumbnail() )
 						the_post_thumbnail();
 					else
@@ -56,7 +56,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, array( 'title' => '') );
 		$title = $instance['title'];
 ?>
-		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'wordcampbase'); ?> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" /></label></p>
+		<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'wordcamporg'); ?> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" /></label></p>
 <?php
 	}
 

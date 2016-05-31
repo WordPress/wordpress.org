@@ -23,13 +23,13 @@ class WCB_Sessions extends WCB_Loader {
 			$meta_fields = array(
 				'speakers'  => array(
 					'type'      => 'text',
-					'label'     => __('Speakers', 'wordcampbase'),
+					'label'     => __('Speakers', 'wordcamporg'),
 				)
 			);
 
 			$box = wcb_get_metabox( 'WCB_Post_Metabox' );
 			$box->add_instance( WCB_SESSION_POST_TYPE, array(
-				'title'          => __('Speakers', 'wordcampbase'),
+				'title'          => __('Speakers', 'wordcamporg'),
 				'meta_manager'   => $this->meta_manager,
 				'meta_fields'    => $meta_fields,
 				'context'        => 'normal',
@@ -41,19 +41,19 @@ class WCB_Sessions extends WCB_Loader {
 	function register_post_types() {
 		// Session post type labels
 		$labels = array (
-			'name'                  => __( 'Sessions', 'wordcampbase' ),
-			'singular_name'         => __( 'Session', 'wordcampbase' ),
-			'add_new'               => __( 'Add New', 'wordcampbase' ),
-			'add_new_item'          => __( 'Create New Session', 'wordcampbase' ),
-			'edit'                  => __( 'Edit', 'wordcampbase' ),
-			'edit_item'             => __( 'Edit Session', 'wordcampbase' ),
-			'new_item'              => __( 'New Session', 'wordcampbase' ),
-			'view'                  => __( 'View Session', 'wordcampbase' ),
-			'view_item'             => __( 'View Session', 'wordcampbase' ),
-			'search_items'          => __( 'Search Sessions', 'wordcampbase' ),
-			'not_found'             => __( 'No sessions found', 'wordcampbase' ),
-			'not_found_in_trash'    => __( 'No sessions found in Trash', 'wordcampbase' ),
-			'parent_item_colon'     => __( 'Parent Session:', 'wordcampbase' )
+			'name'                  => __( 'Sessions', 'wordcamporg' ),
+			'singular_name'         => __( 'Session', 'wordcamporg' ),
+			'add_new'               => __( 'Add New', 'wordcamporg' ),
+			'add_new_item'          => __( 'Create New Session', 'wordcamporg' ),
+			'edit'                  => __( 'Edit', 'wordcamporg' ),
+			'edit_item'             => __( 'Edit Session', 'wordcamporg' ),
+			'new_item'              => __( 'New Session', 'wordcamporg' ),
+			'view'                  => __( 'View Session', 'wordcamporg' ),
+			'view_item'             => __( 'View Session', 'wordcamporg' ),
+			'search_items'          => __( 'Search Sessions', 'wordcamporg' ),
+			'not_found'             => __( 'No sessions found', 'wordcamporg' ),
+			'not_found_in_trash'    => __( 'No sessions found in Trash', 'wordcamporg' ),
+			'parent_item_colon'     => __( 'Parent Session:', 'wordcamporg' )
 		);
 
 		// Session post type rewrite
@@ -97,15 +97,15 @@ class WCB_Sessions extends WCB_Loader {
 
 		// Labels
 		$labels = array (
-			'name'              => __( 'Tracks', 'wordcampbase'),
-			'singular_name'     => __( 'Track', 'wordcampbase'),
-			'search_items'      => __( 'Search Tracks', 'wordcampbase'),
+			'name'              => __( 'Tracks', 'wordcamporg'),
+			'singular_name'     => __( 'Track', 'wordcamporg'),
+			'search_items'      => __( 'Search Tracks', 'wordcamporg'),
 			'popular_items'     => __( 'Popular Tracks','wordcampbase'),
-			'all_items'         => __( 'All Tracks', 'wordcampbase'),
-			'edit_item'         => __( 'Edit Track', 'wordcampbase'),
-			'update_item'       => __( 'Update Track', 'wordcampbase'),
-			'add_new_item'      => __( 'Add Track', 'wordcampbase'),
-			'new_item_name'     => __( 'New Track', 'wordcampbase'),
+			'all_items'         => __( 'All Tracks', 'wordcamporg'),
+			'edit_item'         => __( 'Edit Track', 'wordcamporg'),
+			'update_item'       => __( 'Update Track', 'wordcamporg'),
+			'add_new_item'      => __( 'Add Track', 'wordcamporg'),
+			'new_item_name'     => __( 'New Track', 'wordcamporg'),
 		);
 
 		// Rewrite

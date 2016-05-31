@@ -108,7 +108,7 @@ class WCB_Grid_Option extends WCB_Array_Option {
 			<div class="description row-name"><?php echo esc_html( $this->label ); ?></div>
 			<input class="signature" type="hidden" <?php $this->name('layout'); ?> value="<?php echo esc_attr( serialize( $layout ) ); ?>"/>
 			<?php $this->render_row( $layout ); ?>
-			<div class="edit"><a href="#"><?php echo esc_html_e( 'Edit' , 'wordcampbase'); ?></a></div>
+			<div class="edit"><a href="#"><?php echo esc_html_e( 'Edit' , 'wordcamporg'); ?></a></div>
 			<?php if ( $this->type != 'content' ):
 				$front_page_id = esc_attr( "front-page-only-$this->key" );
 				?>
@@ -117,13 +117,13 @@ class WCB_Grid_Option extends WCB_Array_Option {
 						$this->name('front_only');
 						checked( $this->get_option('front_only') );
 						?> />
-					<?php esc_html_e( 'Front page only', 'wordcampbase' ); ?>
+					<?php esc_html_e( 'Front page only', 'wordcamporg' ); ?>
 				</label>
 			<?php endif; ?>
 			<div class="picker">
 				<div class="directions">
-					<?php esc_html_e( 'Choose a new row layout.', 'wordcampbase' ); ?>
-					<a href="#" class="cancel"><?php esc_html_e( 'Cancel' , 'wordcampbase'); ?></a>
+					<?php esc_html_e( 'Choose a new row layout.', 'wordcamporg' ); ?>
+					<a href="#" class="cancel"><?php esc_html_e( 'Cancel' , 'wordcamporg'); ?></a>
 				</div>
 				<?php
 				$current_layout = $this->verbose_row( $this->get_option('layout') );

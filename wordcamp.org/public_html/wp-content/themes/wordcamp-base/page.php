@@ -28,8 +28,8 @@ get_header(); ?>
 
 					<div class="entry-content">
 						<?php the_content(); ?>
-						<?php wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'wordcampbase' ), 'after' => '</div>' ) ); ?>
-						<?php edit_post_link( __( 'Edit', 'wordcampbase' ), '<span class="edit-link">', '</span>' ); ?>
+						<?php wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'wordcamporg' ), 'after' => '</div>' ) ); ?>
+						<?php edit_post_link( __( 'Edit', 'wordcamporg' ), '<span class="edit-link">', '</span>' ); ?>
 					</div><!-- .entry-content -->
 				</div><!-- #post-## -->
 

@@ -12,8 +12,8 @@ class WCB_Sponsor_Order extends WCB_Loader {
 	function admin_menu() {
 		$page = add_submenu_page(
 			'edit.php?post_type=' . WCB_SPONSOR_POST_TYPE,  // Page type
-			__('Order Sponsor Levels', 'wordcampbase'),              // Page title
-			__('Order Sponsor Levels', 'wordcampbase'),              // Menu title
+			__('Order Sponsor Levels', 'wordcamporg'),              // Page title
+			__('Order Sponsor Levels', 'wordcamporg'),              // Menu title
 			'edit_posts',                                   // Capability
 			'sponsor_levels',                               // Menu slug
 			array( &$this, 'render' )                       // Callback
@@ -56,16 +56,16 @@ class WCB_Sponsor_Order extends WCB_Loader {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h2><?php _e( 'Order Sponsor Levels', 'wordcampbase' ); ?></h2>
+			<h2><?php _e( 'Order Sponsor Levels', 'wordcamporg' ); ?></h2>
 
 			<?php if ( false !== $_REQUEST['updated'] ) : ?>
-				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcampbase' ); ?></strong></p></div>
+				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcamporg' ); ?></strong></p></div>
 			<?php endif; ?>
 
 			<form method="post" action="options.php">
 				<?php settings_fields( 'wcb_sponsor_options' ); ?>
 				<div class="description sponsor-order-instructions">
-					<?php _e('Change the order of sponsor levels are displayed in the sponsors page template.', 'wordcampbase'); ?>
+					<?php _e('Change the order of sponsor levels are displayed in the sponsors page template.', 'wordcamporg'); ?>
 				</div>
 				<ul class="sponsor-order">
 				<?php foreach( $levels as $term ): ?>
@@ -76,7 +76,7 @@ class WCB_Sponsor_Order extends WCB_Loader {
 				<?php endforeach; ?>
 				</ul>
 				<p class="submit">
-					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'wordcampbase' ); ?>" />
+					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'wordcamporg' ); ?>" />
 				</p>
 			</form>
 		</div>

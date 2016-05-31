@@ -27,9 +27,9 @@
 
 			<?php do_action( 'wcbs_credits' ); ?>
 
-			<a class="site-info-generator" href="http://wordpress.org/" title="<?php esc_attr_e( 'A Semantic Personal Publishing Platform', 'wcbs' ); ?>" rel="generator"><?php printf( __( 'Proudly powered by %s', 'wcbs' ), 'WordPress' ); ?></a>  
+			<a class="site-info-generator" href="http://wordpress.org/" title="<?php esc_attr_e( 'A Semantic Personal Publishing Platform', 'wordcamporg' ); ?>" rel="generator"><?php printf( __( 'Proudly powered by %s', 'wordcamporg' ), 'WordPress' ); ?></a>
 
-			<a class="site-info-network" href="http://central.wordcamp.org/" title="<?php esc_attr_e( 'Return to WordCamp Central', 'wcbs' ); ?>"><?php _e('Go to WordCamp Central', 'wcbs'); ?></a>
+			<a class="site-info-network" href="http://central.wordcamp.org/" title="<?php esc_attr_e( 'Return to WordCamp Central', 'wordcamporg' ); ?>"><?php _e('Go to WordCamp Central', 'wordcamporg'); ?></a>
 			
 		</div><!-- .site-info -->
 	</footer><!-- .site-footer .site-footer -->

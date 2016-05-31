@@ -70,23 +70,23 @@ class WCB_Structure extends WCB_Loader {
 		$sidebar_args = array(
 			'after_header'      => array(
 				'id'   => 'after-header',
-				'name' => __('After Header', 'wordcampbase'),
+				'name' => __('After Header', 'wordcamporg'),
 			),
 			'before_content'    => array(
 				'id'   => 'before-content',
-				'name' => __('Before Content', 'wordcampbase'),
+				'name' => __('Before Content', 'wordcamporg'),
 			),
 			'content'           => array(
 				'id'   => 'content-row',
-				'name' => __('Content', 'wordcampbase'),
+				'name' => __('Content', 'wordcamporg'),
 			),
 			'after_content'     => array(
 				'id'   => 'after-content',
-				'name' => __('After Content', 'wordcampbase'),
+				'name' => __('After Content', 'wordcamporg'),
 			),
 			'before_footer'     => array(
 				'id'   => 'before-footer',
-				'name' => __('Before Footer', 'wordcampbase'),
+				'name' => __('Before Footer', 'wordcamporg'),
 			),
 		);
 
@@ -99,7 +99,7 @@ class WCB_Structure extends WCB_Loader {
 			$args['grid'] = $option['layout'];
 
 			if ( $option['front_only'] )
-				$args['name'] = sprintf( __('Front Page: %s', 'wordcampbase'), $args['name'] );
+				$args['name'] = sprintf( __('Front Page: %s', 'wordcamporg'), $args['name'] );
 
 			$this->sidebars[ $id ] = new WCB_Sidebar_Row( $args );
 		}
@@ -108,7 +108,7 @@ class WCB_Structure extends WCB_Loader {
 	function full_width_content() {
 		$this->sidebars['content'] = new WCB_Sidebar_Row( array(
 			'id'   => 'content-row',
-			'name' => __('Content', 'wordcampbase'),
+			'name' => __('Content', 'wordcamporg'),
 			'grid' => array( array( 12, 'content' ) ),
 		) );
 	}

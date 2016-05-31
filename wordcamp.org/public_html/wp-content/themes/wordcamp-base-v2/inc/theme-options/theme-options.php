@@ -35,16 +35,16 @@ function wcbs_theme_options_init() {
 	// Register our individual settings fields
 	add_settings_field(
 		'sample_checkbox', // Unique identifier for the field for this section
-		__( 'Sample Checkbox', 'wcbs' ), // Setting field label
+		__( 'Sample Checkbox', 'wordcamporg' ), // Setting field label
 		'wcbs_settings_field_sample_checkbox', // Function that renders the settings field
 		'theme_options', // Menu slug, used to uniquely identify the page; see wcbs_theme_options_add_page()
 		'general' // Settings section. Same as the first argument in the add_settings_section() above
 	);
 
-	add_settings_field( 'sample_text_input', __( 'Sample Text Input', 'wcbs' ), 'wcbs_settings_field_sample_text_input', 'theme_options', 'general' );
-	add_settings_field( 'sample_select_options', __( 'Sample Select Options', 'wcbs' ), 'wcbs_settings_field_sample_select_options', 'theme_options', 'general' );
-	add_settings_field( 'sample_radio_buttons', __( 'Sample Radio Buttons', 'wcbs' ), 'wcbs_settings_field_sample_radio_buttons', 'theme_options', 'general' );
-	add_settings_field( 'sample_textarea', __( 'Sample Textarea', 'wcbs' ), 'wcbs_settings_field_sample_textarea', 'theme_options', 'general' );
+	add_settings_field( 'sample_text_input', __( 'Sample Text Input', 'wordcamporg' ), 'wcbs_settings_field_sample_text_input', 'theme_options', 'general' );
+	add_settings_field( 'sample_select_options', __( 'Sample Select Options', 'wordcamporg' ), 'wcbs_settings_field_sample_select_options', 'theme_options', 'general' );
+	add_settings_field( 'sample_radio_buttons', __( 'Sample Radio Buttons', 'wordcamporg' ), 'wcbs_settings_field_sample_radio_buttons', 'theme_options', 'general' );
+	add_settings_field( 'sample_textarea', __( 'Sample Textarea', 'wordcamporg' ), 'wcbs_settings_field_sample_textarea', 'theme_options', 'general' );
 }
 add_action( 'admin_init', 'wcbs_theme_options_init' );
 
@@ -71,8 +71,8 @@ add_filter( 'option_page_capability_wcbs_options', 'wcbs_option_page_capability'
  */
 function wcbs_theme_options_add_page() {
 	$theme_page = add_theme_page(
-		__( 'Theme Options', 'wcbs' ),   // Name of page
-		__( 'Theme Options', 'wcbs' ),   // Label in menu
+		__( 'Theme Options', 'wordcamporg' ),   // Name of page
+		__( 'Theme Options', 'wordcamporg' ),   // Label in menu
 		'edit_theme_options',                    // Capability required
 		'theme_options',                         // Menu slug, used to uniquely identify the page
 		'wcbs_theme_options_render_page' // Function that renders the options page
@@ -89,27 +89,27 @@ function wcbs_sample_select_options() {
 	$sample_select_options = array(
 		'0' => array(
 			'value' =>	'0',
-			'label' => __( 'Zero', 'wcbs' )
+			'label' => __( 'Zero', 'wordcamporg' )
 		),
 		'1' => array(
 			'value' =>	'1',
-			'label' => __( 'One', 'wcbs' )
+			'label' => __( 'One', 'wordcamporg' )
 		),
 		'2' => array(
 			'value' => '2',
-			'label' => __( 'Two', 'wcbs' )
+			'label' => __( 'Two', 'wordcamporg' )
 		),
 		'3' => array(
 			'value' => '3',
-			'label' => __( 'Three', 'wcbs' )
+			'label' => __( 'Three', 'wordcamporg' )
 		),
 		'4' => array(
 			'value' => '4',
-			'label' => __( 'Four', 'wcbs' )
+			'label' => __( 'Four', 'wordcamporg' )
 		),
 		'5' => array(
 			'value' => '3',
-			'label' => __( 'Five', 'wcbs' )
+			'label' => __( 'Five', 'wordcamporg' )
 		)
 	);
 
@@ -125,15 +125,15 @@ function wcbs_sample_radio_buttons() {
 	$sample_radio_buttons = array(
 		'yes' => array(
 			'value' => 'yes',
-			'label' => __( 'Yes', 'wcbs' )
+			'label' => __( 'Yes', 'wordcamporg' )
 		),
 		'no' => array(
 			'value' => 'no',
-			'label' => __( 'No', 'wcbs' )
+			'label' => __( 'No', 'wordcamporg' )
 		),
 		'maybe' => array(
 			'value' => 'maybe',
-			'label' => __( 'Maybe', 'wcbs' )
+			'label' => __( 'Maybe', 'wordcamporg' )
 		)
 	);
 
@@ -171,7 +171,7 @@ function wcbs_settings_field_sample_checkbox() {
 	?>
 	<label for"sample-checkbox">
 		<input type="checkbox" name="wcbs_theme_options[sample_checkbox]" id="sample-checkbox" <?php checked( 'on', $options['sample_checkbox'] ); ?> />
-		<?php _e( 'A sample checkbox.', 'wcbs' );  ?>
+		<?php _e( 'A sample checkbox.', 'wordcamporg' );  ?>
 	</label>
 	<?php
 }
@@ -183,7 +183,7 @@ function wcbs_settings_field_sample_text_input() {
 	$options = wcbs_get_theme_options();
 	?>
 	<input type="text" name="wcbs_theme_options[sample_text_input]" id="sample-text-input" value="<?php echo esc_attr( $options['sample_text_input'] ); ?>" />
-	<label class="description" for="sample-text-input"><?php _e( 'Sample text input', 'wcbs' ); ?></label>
+	<label class="description" for="sample-text-input"><?php _e( 'Sample text input', 'wordcamporg' ); ?></label>
 	<?php
 }
 
@@ -209,7 +209,7 @@ function wcbs_settings_field_sample_select_options() {
 			echo $p . $r;
 		?>
 	</select>
-	<label class="description" for="sample_theme_options[selectinput]"><?php _e( 'Sample select input', 'wcbs' ); ?></label>
+	<label class="description" for="sample_theme_options[selectinput]"><?php _e( 'Sample select input', 'wordcamporg' ); ?></label>
 	<?php
 }
 
@@ -240,7 +240,7 @@ function wcbs_settings_field_sample_textarea() {
 	$options = wcbs_get_theme_options();
 	?>
 	<textarea class="large-text" type="text" name="wcbs_theme_options[sample_textarea]" id="sample-textarea" cols="50" rows="10" /><?php echo esc_textarea( $options['sample_textarea'] ); ?></textarea>
-	<label class="description" for="sample-textarea"><?php _e( 'Sample textarea', 'wcbs' ); ?></label>
+	<label class="description" for="sample-textarea"><?php _e( 'Sample textarea', 'wordcamporg' ); ?></label>
 	<?php
 }
 
@@ -253,7 +253,7 @@ function wcbs_theme_options_render_page() {
 	?>
 	<div class="wrap">
 		<?php screen_icon(); ?>
-		<h2><?php printf( __( '%s Theme Options', 'wcbs' ), get_current_theme() ); ?></h2>
+		<h2><?php printf( __( '%s Theme Options', 'wordcamporg' ), get_current_theme() ); ?></h2>
 		<?php settings_errors(); ?>
 
 		<form method="post" action="options.php">
