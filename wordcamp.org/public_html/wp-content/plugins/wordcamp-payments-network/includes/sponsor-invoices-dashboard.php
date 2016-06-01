@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\Budgets_Dashboard\Sponsor_Invoices;
+use \WordCamp\Logger;
 
 defined( 'WPINC' ) or die();
 
@@ -217,6 +218,7 @@ function handle_approve_invoice_request() {
 	switch_to_blog( $site_id );
 
 	$quickbooks_result = \WordCamp_QBO_Client::send_invoice_to_quickbooks( $invoice_id );
+	Logger\log( 'send_invoice', compact( 'invoice_id', 'quickbooks_result' ) );
 
 	if ( is_int( $quickbooks_result ) ) {
 		update_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id', absint( $quickbooks_result ) );
@@ -332,6 +334,8 @@ function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 		$qbo_invoice_id   = get_post_meta( $invoice_id, '_wcbsi_qbo_invoice_id',       true );
 		$status_message   = "has been sent to $sponsor_name via $sponsor_email. You will receive another notification when they have paid the invoice.";
 		$invoice_filename = \WordCamp_QBO_Client::get_invoice_filename( $qbo_invoice_id );
+
+		Logger\log( 'get_invoice_filename', compact( 'qbo_invoice_id', 'invoice_filename' ) );
 
 		if ( ! is_wp_error( $invoice_filename ) ) {
 			$attachments[]      = $invoice_filename;

@@ -3,6 +3,8 @@
  * Plugin Name: WordCamp.org QBO Client
  */
 
+use WordCamp\Logger;
+
 class WordCamp_QBO_Client {
 	private static $hmac_key;
 	private static $api_base;
@@ -91,12 +93,15 @@ class WordCamp_QBO_Client {
 			return $cache;
 
 		$request_url = esc_url_raw( self::$api_base . '/classes/' );
-		$response = wp_remote_get( $request_url, array(
+		$request_args = array(
 			'headers' => array(
 				'Content-Type' => 'application/json',
 				'Authorization' => self::_get_auth_header( 'get', $request_url ),
 			),
-		) );
+		);
+		$response = wp_remote_get( $request_url, $request_args );
+
+		Logger\log( 'remote_request', compact( 'request_url', 'request_args', 'response' ) );
 
 		$classes = array();
 
@@ -235,13 +240,16 @@ class WordCamp_QBO_Client {
 
 		$body = json_encode( $body );
 		$request_url = esc_url_raw( self::$api_base . '/expense/' );
-		$response = wp_remote_post( $request_url, array(
+		$request_args = array(
 			'body' => $body,
 			'headers' => array(
 				'Content-Type' => 'application/json',
 				'Authorization' => self::_get_auth_header( 'post', $request_url, $body ),
 			),
-		) );
+		);
+		$response = wp_remote_post( $request_url, $request_args );
+
+		Logger\log( 'remote_request', compact( 'request_url', 'request_args', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$data['last_error'] = $response->get_error_message();
@@ -278,6 +286,8 @@ class WordCamp_QBO_Client {
 	public static function send_invoice_to_quickbooks( $invoice_id ) {
 		$request  = self::build_send_invoice_request( $invoice_id );
 		$response = wp_remote_post( $request['url'], $request['args'] );
+
+		Logger\log( 'remote_request', compact( 'request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$sent = $response->get_error_message();
@@ -389,6 +399,8 @@ class WordCamp_QBO_Client {
 		$request       = self::build_paid_invoices_request( $sent_invoices );
 		$response      = wp_remote_get( $request['url'], $request['args'] );
 
+		Logger\log( 'remote_request', compact( 'request', 'response' ) );
+
 		if ( ! is_wp_error( $response ) ) {
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
@@ -442,6 +454,8 @@ class WordCamp_QBO_Client {
 	public static function get_invoice_filename( $invoice_id ) {
 		$request  = self::build_invoice_filename_request( $invoice_id );
 		$response = wp_remote_get( $request['url'], $request['args'] );
+
+		Logger\log( 'remote_request', compact( 'request', 'response' ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result = $response;
