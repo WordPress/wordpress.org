@@ -1,5 +1,5 @@
 <?php
-wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'base' ), '20160425' );
+wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'base' ), '20160601' );
 gp_enqueue_style( 'wporg-translate' );
 
 wp_register_style( 'chartist', plugins_url( 'css/chartist.min.css', __FILE__ ), array(), '0.9.5' );
