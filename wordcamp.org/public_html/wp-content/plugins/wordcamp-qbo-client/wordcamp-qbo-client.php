@@ -6,6 +6,8 @@
 use WordCamp\Logger;
 
 class WordCamp_QBO_Client {
+	const REMOTE_REQUEST_TIMEOUT = 10; // seconds
+
 	private static $hmac_key;
 	private static $api_base;
 	private static $options;
@@ -94,6 +96,7 @@ class WordCamp_QBO_Client {
 
 		$request_url = esc_url_raw( self::$api_base . '/classes/' );
 		$request_args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Content-Type' => 'application/json',
 				'Authorization' => self::_get_auth_header( 'get', $request_url ),
@@ -241,6 +244,7 @@ class WordCamp_QBO_Client {
 		$body = json_encode( $body );
 		$request_url = esc_url_raw( self::$api_base . '/expense/' );
 		$request_args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'body' => $body,
 			'headers' => array(
 				'Content-Type' => 'application/json',
@@ -356,6 +360,7 @@ class WordCamp_QBO_Client {
 		$oauth_header = self::_get_auth_header( 'post', $request_url, $body );
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => $oauth_header,
 				'Content-Type'  => 'application/json',
@@ -430,6 +435,7 @@ class WordCamp_QBO_Client {
 		$request_url = self::$api_base . '/paid_invoices';
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => self::_get_auth_header( 'get', $request_url, '', $params ),
 				'Content-Type'  => 'application/json',
@@ -487,6 +493,7 @@ class WordCamp_QBO_Client {
 		$request_url = self::$api_base . '/invoice_pdf';
 
 		$args = array(
+			'timeout' => self::REMOTE_REQUEST_TIMEOUT,
 			'headers' => array(
 				'Authorization' => self::_get_auth_header( 'get', $request_url, '', $params ),
 				'Content-Type'  => 'application/json',
