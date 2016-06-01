@@ -40,6 +40,8 @@ class Plugin {
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
+		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
+		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
 
 		// Load the API endpoints.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
@@ -50,9 +52,25 @@ class Plugin {
 	}
 
 	/**
+	 * Registers a menu location for a sub-navigation.
+	 */
+	public function after_setup_theme() {
+		register_nav_menu( 'wporg_header_subsite_nav', 'WordPress.org Header Sub-Navigation' );
+	}
+
+	/**
+	 * Adds the CSS classes from make/polyglots to the body to sync the headline icon.
+	 */
+	function wporg_add_make_site_body_class( $classes ) {
+		$classes[] = 'wporg-make';
+		$classes[] = 'make-polyglots';
+		return $classes;
+	}
+
+	/**
 	 * Registers CLI commands if WP-CLI is loaded.
 	 */
-	function register_cli_commands() {
+	public function register_cli_commands() {
 		WP_CLI::add_command( 'wporg-translate init-locale', __NAMESPACE__ . '\CLI\Init_Locale' );
 	}
 

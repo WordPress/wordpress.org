@@ -3,28 +3,41 @@ global $pagetitle;
 $pagetitle = gp_title();
 require WPORGPATH . 'header.php';
 ?>
-	<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
+<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
+
 <div id="headline">
 	<div class="wrapper">
-		<h2><a href="//make.wordpress.org/polyglots/">Translating WordPress</a></h2>
-		<span id="hello">
-		<a class="menu-link" href="//make.wordpress.org/polyglots/">Blog</a>
-		<a class="menu-link" href="//make.wordpress.org/polyglots/teams/">Teams</a>
-		<a class="menu-link" href="//make.wordpress.org/polyglots/handbook/">Translator Handbook</a>
+		<h2><a href="<?php echo home_url( '/' ); ?>"><?php bloginfo( 'name' ); ?></a></h2>
 		<?php
-		if ( is_user_logged_in() ):
-			$user = wp_get_current_user();
-
-			printf( __('Hi, %s.'), '<a href="'.gp_url( '/settings' ).'">'.$user->user_login.'</a>' );
+		wp_nav_menu( array(
+			'theme_location' => 'wporg_header_subsite_nav',
+			'fallback_cb'    => '__return_false'
+		) );
+		?>
+	</div>
+	<div class="wrapper">
+		<ul class="translate-meta-nav">
+			<?php
+			if ( is_user_logged_in() ) {
+				$user = wp_get_current_user();
+				printf(
+					'<li>logged in as %s</li>',
+					'<a href="' . esc_url( gp_url_profile( $user->user_login ) ) . '">@' . esc_html( $user->user_nicename ) . '</a>'
+				);
+				?>
+				<li><a href="<?php echo esc_url( gp_url( '/settings' ) ); ?>">Settings</a></li>
+				<li><a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">Log out</a></li>
+				<?php
+			} else {
+				?>
+				<li><a href="<?php echo esc_url( wp_login_url() ); ?>"><strong>Log in</strong></a></li>
+				<?php
+			}
 			?>
-			<a href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php _e( 'Log out' ); ?></a>
-		<?php else: ?>
-			<strong><a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a></strong>
-		<?php endif; ?>
-		<?php do_action( 'after_hello' ); ?>
-		</span>
+			</ul>
 	</div>
 </div>
+
 <div class="gp-content">
 
 <div id="gp-js-message"></div>
