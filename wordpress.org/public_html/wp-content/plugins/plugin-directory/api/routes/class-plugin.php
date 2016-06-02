@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\API\Base;
+use WP_REST_Server;
 
 /**
  * An API Endpoint to expose a single Plugin data via api.wordpress.org/plugins/info/1.x
@@ -13,7 +14,7 @@ class Plugin extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/?', array(
-			'methods'  => \WP_REST_Server::READABLE,
+			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'plugin_info' ),
 			'args' => array(
 				'plugin_slug' => array(
@@ -30,14 +31,6 @@ class Plugin extends Base {
 	 * @return array A formatted array of all the data for the plugin.
 	 */
 	function plugin_info( $request ) {
-		/*
-		 * NOTE: Don't try to implement things such as the `fields` support in this endpoint.
-		 *        It's highly unlikely we'll expose the REST API via api.wordpress.org as it is,
-		 *        it'll probably have something in front of it.
-		 *
-		 * NOTE: Don't use any data from the client, such as the user_agent, just stick to what is presented in the GET payload.
-		 *       It can't be cached if it's using data from other sources.
-		 */
 		$plugin_slug = $request['plugin_slug'];
 
 		global $post;
@@ -75,13 +68,14 @@ class Plugin extends Base {
 		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
 		$result['contributors'] = array();
 
-		foreach ( (array)get_post_meta( $post_id, 'contributors', true ) as $contributor ) {
-			$user = get_user_by( 'slug', $contributor );
+		$contributors = get_post_meta( $post_id, 'contributors', true ) ?: array( (int) $post->post_author );
+		foreach ( $contributors as $contributor ) {
+			$user = is_int( $contributor ) ? get_user_by( 'id', $contributor ) : get_user_by( 'slug', $contributor );
 			if ( ! $user ) {
 				continue;
 			}
 
-			$result['contributors'][ $contributor ] = array(
+			$result['contributors'][ $user->user_nicename ] = array(
 				'profile' => $this->get_user_profile_link( $user ),
 				'avatar' => get_avatar_url( $user, array( 'default' => 'monsterid', 'rating' => 'g' ) ),
 				'display_name' => $user->display_name

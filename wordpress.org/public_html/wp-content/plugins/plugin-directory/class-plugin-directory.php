@@ -372,7 +372,8 @@ class Plugin_Directory {
 			return false;
 		}
 		if ( 'plugin_built_for' == $term->taxonomy ) {
-			return $this->package_link( false, $this->get_plugin_post( $term->slug ) );
+			// Term slug = Post Slug = /%postname%/
+			return trailingslashit( home_url( $term->slug ) );
 		}
 
 		return $termlink;

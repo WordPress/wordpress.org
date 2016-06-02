@@ -11,7 +11,6 @@ namespace WordPressdotorg\Plugin_Directory;
  * - downloads.wordpress.org/plugin/hello-dolly.3.2.1.zip
  */
 
-include __DIR__ . '/class-autoloader.php';
-Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
-
+include dirname( __DIR__ ) . '/class-autoloader.php';
+Autoloader\register_class_path( __NAMESPACE__, dirname( __DIR__ ) );
 $serve = new Zip\Serve();
