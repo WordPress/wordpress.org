@@ -22,6 +22,9 @@ class Developers {
 		$output = '<ul class="plugin-developers">';
 		foreach ( $contributors as $contributor_slug ) {
 			$contributor = get_user_by( 'login', $contributor_slug );
+			if ( ! $contributor ) {
+				continue;
+			}
 
 			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . utf8_encode( $contributor->display_name ) . '</li>';
 		}
