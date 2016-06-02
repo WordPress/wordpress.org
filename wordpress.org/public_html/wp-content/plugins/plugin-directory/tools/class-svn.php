@@ -32,7 +32,7 @@ class SVN {
 		$esc_path = escapeshellarg( $path );
 		$esc_url  = escapeshellarg( $url );
 
-		$output = shell_exec( "svn import $esc_options $esc_path $esc_url 2>&1" );
+		$output = self::shell_exec( "svn import $esc_options $esc_path $esc_url 2>&1" );
 		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
@@ -63,7 +63,7 @@ class SVN {
 		$esc_url = escapeshellarg( $url );
 		$esc_destination = escapeshellarg( $destination );
 
-		$output = shell_exec( "svn export $esc_options $esc_url $esc_destination 2>&1" );
+		$output = self::shell_exec( "svn export $esc_options $esc_url $esc_destination 2>&1" );
 		if ( preg_match( '/Exported revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result = true;
@@ -93,7 +93,7 @@ class SVN {
 		$esc_options = self::parse_esc_parameters( $options );
 		$esc_url = escapeshellarg( $url );
 
-		$output = shell_exec( "svn ls $esc_options $esc_url 2>&1" );
+		$output = self::shell_exec( "svn ls $esc_options $esc_url 2>&1" );
 
 		$errors = self::parse_svn_errors( $output );
 		if ( $errors ) {
@@ -161,5 +161,15 @@ class SVN {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Executes a command with 'proper' locale/language settings
+	 * so that utf8 strings are handled correctly.
+	 *
+	 * WordPress.org uses the en_US.UTF-8 locale.
+	 */
+	protected static function shell_exec( $command ) {
+		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command );
 	}
 }

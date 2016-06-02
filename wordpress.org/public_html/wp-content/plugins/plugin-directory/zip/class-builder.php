@@ -113,7 +113,7 @@ class Builder {
 		}
 
 		// Cleanup any symlinks that shouldn't be there
-		exec( sprintf(
+		$this->exec( sprintf(
 			'find %s -type l -print0 | xargs -r0 rm',
 			escapeshellarg( $build_dir )
 		) );
@@ -132,7 +132,7 @@ class Builder {
 	 */
 	protected function fix_directory_dates() {
 		// Find all files, output their modified dates, sort reverse numerically, grab the timestamp from the first entry
-		$latest_file_modified_timestamp = exec( sprintf(
+		$latest_file_modified_timestamp = $this->exec( sprintf(
 			"find %s -type f -printf '%%T@\n' | sort -nr | head -c 10",
 			escapeshellarg( $this->tmp_build_dir )
 		) );
@@ -140,7 +140,7 @@ class Builder {
 			throw new Exception( _METHOD__ . ': Unable to locate the latest modified files timestamp.', 503 );
 		}
 
-		exec( sprintf(
+		$this->exec( sprintf(
 			'find %s -type d -exec touch -m -t %s {} \;',
 			escapeshellarg( $this->tmp_build_dir ),
 			escapeshellarg( date( 'ymdHi.s', $latest_file_modified_timestamp ) )
@@ -153,7 +153,7 @@ class Builder {
 	protected function generate_zip() {
 		// We have to remove the temporary 0-byte file first as zip will complain about not being able to find the zip structures.
 		unlink( $this->tmp_build_file );
-		exec( $cmd = sprintf(
+		$this->exec( sprintf(
 			'cd %s && find %s -print0 | sort -z | xargs -0 zip -Xu %s 2>&1',
 			escapeshellarg( $this->tmp_build_dir ),
 			escapeshellarg( $this->slug ),
@@ -168,8 +168,8 @@ class Builder {
 	/**
 	 * Moves the completed ZIP into it's real-life location.
 	 */
-	function move_into_place() {
-		exec( sprintf(
+	protected function move_into_place() {
+		$this->exec( sprintf(
 			'mv -f %s %s',
 			$this->tmp_build_file,
 			$this->zip_file
@@ -185,8 +185,8 @@ class Builder {
 	 *
 	 * This can also be used for generating a package signature in the future.
 	 */
-	function generate_md5() {
-		exec( sprintf(
+	protected function generate_md5() {
+		$this->exec( sprintf(
 			"md5sum %s | head -c 32 > %s",
 			escapeshellarg( $this->zip_file ),
 			escapeshellarg( $this->md5_file )
@@ -205,8 +205,19 @@ class Builder {
 			unlink( $this->tmp_build_file );
 		}
 		if ( $this->tmp_build_dir ) {
-			exec( sprintf( 'rm -rf %s', escapeshellarg( $this->tmp_build_dir ) ) );
+			$this->exec( sprintf( 'rm -rf %s', escapeshellarg( $this->tmp_build_dir ) ) );
 		}
 	}
+
+	/**
+	 * Executes a command with 'proper' locale/language settings
+	 * so that utf8 strings are handled correctly.
+	 *
+	 * WordPress.org uses the en_US.UTF-8 locale.
+	 */
+	protected function exec( $command, &$output = null, &$return_val = null ) {
+		return exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command, $output, $return_val );
+	}
+
 }
 
