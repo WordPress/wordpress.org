@@ -26,7 +26,6 @@ class Plugin_Directory {
 		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
-		add_filter( 'the_content', array( $this, 'filter_post_content_to_correct_page' ), 1 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'redirect_hidden_plugins' ) );
@@ -205,14 +204,6 @@ class Plugin_Directory {
 		// TODO: browse/favorites/$user
 		add_rewrite_tag( '%browse%', '(featured|popular|beta|new|favorites)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
-
-		add_rewrite_endpoint( 'installation', EP_PERMALINK );
-		add_rewrite_endpoint( 'faq',          EP_PERMALINK );
-		add_rewrite_endpoint( 'screenshots',  EP_PERMALINK );
-		add_rewrite_endpoint( 'changelog',    EP_PERMALINK );
-		add_rewrite_endpoint( 'stats',        EP_PERMALINK );
-		add_rewrite_endpoint( 'developers',   EP_PERMALINK );
-		add_rewrite_endpoint( 'other_notes',  EP_PERMALINK );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
@@ -447,49 +438,6 @@ class Plugin_Directory {
 				break;
 		}
 
-		// Re-route the Endpoints to the `content_page` query var.
-		if ( ! empty( $wp_query->query['name'] ) ) {
-			$plugin_fields = array(
-				'installation',
-				'faq',
-				'screenshots',
-				'changelog',
-				'stats',
-				'developers',
-				'other_notes'
-			);
-
-			foreach ( $plugin_fields as $plugin_field ) {
-				if ( isset( $wp_query->query[ $plugin_field ] ) ) {
-					$wp_query->query['content_page'] = $wp_query->query_vars['content_page'] = $plugin_field;
-					unset( $wp_query->query[ $plugin_field ], $wp_query->query_vars[ $plugin_field ] );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Returns the requested page's content.
-	 *
-	 * @param string $content
-	 * @return string
-	 */
-	public function filter_post_content_to_correct_page( $content ) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return $content;
-		}
-		if ( 'plugin' === get_post()->post_type ) {
-			$page = get_query_var( 'content_page' );
-
-			$content_pages = $this->split_post_content_into_pages( $content );
-			if ( ! isset( $content_pages[ $page ] ) ) {
-				$page = 'description';
-			}
-
-			$content = $content_pages[ $page ];
-		}
-
-		return $content;
 	}
 
 	/**
