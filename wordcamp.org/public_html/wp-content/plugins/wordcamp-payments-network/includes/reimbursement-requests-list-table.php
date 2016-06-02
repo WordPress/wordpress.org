@@ -7,12 +7,18 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 
 	/**
 	 * Define the table columns that will be rendered
+	 *
+	 * @return array
 	 */
 	public function get_columns() {
 		$columns = array(
 			'request_title' => 'Request',
 			'wordcamp_name' => 'WordCamp',
+			'status'        => 'Status',
+			'categories'    => 'Categories',
 			'amount'        => 'Amount',
+			'method'        => 'Method',
+			'attachments'   => 'Attachments',
 		);
 
 		return $columns;
@@ -74,14 +80,33 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Render the value for the Invoice column
+	 * Output a single row in the list table.
+	 *
+	 * Holy cow, switch to blog! Please note that all the
+	 * column_* methods are being run in a switched context.
+	 *
+	 * @param object $item
+	 */
+	public function single_row( $item ) {
+		switch_to_blog( $item->blog_id );
+
+		$request = get_post( $item->request_id );
+		parent::single_row( $request );
+
+		restore_current_blog();
+	}
+
+	/**
+	 * Render the value for the Request column
+	 *
+	 * Note: Runs in a switch_to_blog() context.
 	 *
 	 * @param object $index_row
+	 * 
+	 * @return string
 	 */
-	protected function column_request_title( $index_row ) {
-		$blog_id = $index_row->blog_id;
-		switch_to_blog( $blog_id );
-		$post = get_post( $index_row->request_id );
+	protected function column_request_title( $post ) {
+		$blog_id = get_current_blog_id();
 		$title = get_the_title( $post );
 		$title = empty( $title ) ? '(no title)' : $title;
 		$edit_post_link = add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), admin_url( 'post.php' ) );
@@ -115,29 +140,124 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 		<?php
 
 		$output = ob_get_clean();
-		restore_current_blog();
 		return $output;
 	}
 
 	/**
-	 * Render the value for the Due Date column
+	 * Render the value for the WordCamp column
 	 *
-	 * @param object $index_row
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
 	 */
-	protected function column_amount( $index_row ) {
+	protected function column_wordcamp_name( $request ) {
+		return esc_html( $request->post_title );
+	}
+
+	/**
+	 * Render the value for the Status column
+	 *
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
+	 */
+	public function column_status( $request ) {
+		$status = get_post_status_object( $request->post_status );
+
+		return esc_html( $status->label );
+	}
+
+	/**
+	 * Render the value for the Categories column
+	 *
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
+	 */
+	public function column_categories( $request ) {
+		require_once( WP_PLUGIN_DIR . '/wordcamp-payments/includes/payment-request.php' );
+
+		$categories        = \WordCamp_Budgets::get_payment_categories();
+		$expenses            = get_post_meta( $request->ID, '_wcbrr_expenses', true );
+		$selected_categories = array();
+
+		if ( is_array( $expenses ) ) {
+			foreach ( $expenses as $expense ) {
+				if ( isset( $categories[ $expense['_wcbrr_category'] ] ) ) {
+					$selected_categories[] = $categories[ $expense['_wcbrr_category'] ];
+				}
+			}
+		}
+
+		return implode( '<br />', array_unique( $selected_categories ) );
+	}
+
+	/**
+	 * Render the value for the Amount column
+	 *
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
+	 */
+	protected function column_amount( $request ) {
+		$currency = get_post_meta( $request->ID, '_wcbrr_currency', true );
+		$expenses = get_post_meta( $request->ID, '_wcbrr_expenses', true );
+		$amount   = 0;
+
+		if ( is_array( $expenses ) ) {
+			foreach ( $expenses as $expense ) {
+				$amount += $expense['_wcbrr_amount'];
+			}
+		}
+
 		return wp_kses(
-			\WordCamp\Budgets_Dashboard\format_amount( $index_row->amount, $index_row->currency ),
+			\WordCamp\Budgets_Dashboard\format_amount( $amount, $currency ),
 			array( 'br' => array() )
 		);
 	}
 
 	/**
-	 * Render the value for columns that don't have a explicit handler
+	 * Render the value for the Method column
 	 *
-	 * @param object $index_row
-	 * @param string $column_name
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
 	 */
-	protected function column_default( $index_row, $column_name ) {
-		echo esc_html( $index_row->$column_name );
+	public function column_method( $request ) {
+		$method = get_post_meta( $request->ID, '_wcbrr_payment_method', true );
+
+		return esc_html( $method );
+	}
+
+	/**
+	 * Render the value for the Attachments column
+	 *
+	 * Note: Runs in a switch_to_blog() context.
+	 *
+	 * @param \WP_Post $request
+	 *
+	 * @return string
+	 */
+	public function column_attachments( $request ) {
+		$attachments = get_children( array( 'post_parent' => $request->ID ) );
+		$attachments = array_map( 'wp_get_attachment_url', wp_list_pluck( $attachments, 'ID' ) );
+
+		$output = array();
+		foreach ( $attachments as $attachment ) {
+			$output[] = sprintf( '<a href="%s" target="_blank" class="dashicons dashicons-media-default" title="%s"></a>',
+				esc_url( $attachment ), esc_attr( $attachment ) );
+		}
+
+		return implode( '', $output );
 	}
 }
