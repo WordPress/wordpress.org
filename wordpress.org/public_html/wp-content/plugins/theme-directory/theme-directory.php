@@ -1141,7 +1141,7 @@ add_action( 'wp_head', 'wporg_themes_add_hreflang_link_attributes' );
  * function wporg_themes_on_rosetta_domains( $site, $domain, $path, $segments ) {
  *     // All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
  *     if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/themes/' == substr( $path . '/', 0, 8 ) ) {
- *          $site = get_blog_details( WPORG_THEME_DIRECTORY_BLOGID );
+ *          $site = get_blog_details( WPORG_THEME_DIRECTORY_BLOGID, false );
  *          if ( $site ) {
  *              $site = clone $site;
  *              // 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
