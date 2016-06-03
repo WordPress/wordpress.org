@@ -258,8 +258,6 @@ class Payment_Requests_Dashboard {
 	protected static function render_table_tabs() {
 		?>
 
-		<?php self::$list_table->print_inline_css(); ?>
-
 		<div id="wcp-list-table">
 			<?php self::$list_table->prepare_items(); ?>
 

@@ -13,6 +13,18 @@
 	border-bottom: 1px solid rgba( 0, 0, 0, 0.1 );
 }
 
+#wcp-list-table .search-box {
+	margin-top: 12px;
+}
+
+#wcp-list-table .manage-column.column-payment {
+	width: 30%;
+}
+
+#wcp-list-table .manage-column {
+	width: 10%;
+}
+
 
 /*
  * Sponsor Invoices

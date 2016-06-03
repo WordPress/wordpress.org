@@ -39,27 +39,6 @@ class Payment_Requests_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Outputs inline CSS to be used with the list table.
-	 */
-	public function print_inline_css() {
-		?>
-		<style>
-		#wcp-list-table .search-box {
-			margin-top: 12px;
-		}
-
-		#wcp-list-table .manage-column.column-payment {
-			width: 30%;
-		}
-
-		#wcp-list-table .manage-column {
-			width: 10%;
-		}
-		</style>
-		<?php
-	}
-
-	/**
 	 * Parses query arguments and queries the index table in the database.
 	 */
 	public function prepare_items() {
