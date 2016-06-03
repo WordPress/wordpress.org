@@ -25,5 +25,13 @@ defined( 'WPINC' ) or die();
 		<?php endforeach; ?>
 	</h3>
 
-	<?php $list_table->display(); ?>
+	<div id="wcp-list-table">
+		<form id="posts-filter" action="" method="get">
+			<input type="hidden" name="page"    value="reimbursement-requests-dashboard" />
+			<input type="hidden" name="section" value="<?php echo esc_attr( get_current_section() ); ?>" />
+			
+			<?php $list_table->search_box( __( 'Search Reimbursements', 'wordcamporg' ), 'wcp' ); ?>
+			<?php $list_table->display(); ?>
+		</form>
+	</div>
 </div>

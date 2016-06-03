@@ -4,7 +4,7 @@ namespace WordCamp\Budgets_Dashboard\Reimbursement_Requests;
 
 defined( 'WPINC' ) or die();
 
-const LATEST_DATABASE_VERSION = 3;
+const LATEST_DATABASE_VERSION = 4;
 
 if ( is_network_admin() ) {
 	add_action( 'network_admin_menu',    __NAMESPACE__ . '\register_submenu_page' );
@@ -159,6 +159,7 @@ function upgrade_database() {
 			wordcamp_name  varchar( 75 )             NOT NULL default '',
 			currency       varchar( 3  )             NOT NULL default '',
 			amount         numeric( 10, 2 ) unsigned NOT NULL default '0',
+			keywords       text                      NOT NULL default '',
 
 			PRIMARY KEY  (blog_id, request_id),
 			KEY status (status)
@@ -233,6 +234,7 @@ function update_index_row( $request_id, $request ) {
 		'wordcamp_name'  => get_wordcamp_name(),
 		'currency'       => get_post_meta( $request_id, '_wcbrr_currency', true ),
 		'amount'         => get_amount( $request_id ),
+		'keywords'       => wp_json_encode( get_search_keywords( $request ) ),
 	);
 
 	/*
@@ -245,7 +247,7 @@ function update_index_row( $request_id, $request ) {
 		}
 	}
 
-	$formats = array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%f' );
+	$formats = array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s' );
 
 	$wpdb->replace( get_index_table_name(), $index_row, $formats );
 }
@@ -268,6 +270,53 @@ function get_amount( $request_id ) {
 	}
 
 	return $amount;
+}
+
+/**
+ * Get the search keywords for a Reimbursement Request
+ *
+ * @param \WP_Post $request
+ *
+ * @return array
+ */
+function get_search_keywords( $request ) {
+	$keywords   = array();
+	$expenses   = get_post_meta( $request->ID, '_wcbrr_expenses', true );
+	$categories = \WordCamp_Budgets::get_payment_categories();
+
+	if ( ! empty( $request->post_title ) ) {
+		$keywords[] = $request->post_title;
+	}
+
+	$payer_name = get_post_meta( $request->ID, '_wcbrr_name_of_payer', true );
+	if ( ! empty( $payer_name ) ) {
+		$keywords[] = $payer_name;
+	}
+
+	$payment_method = get_post_meta( $request->ID, '_wcbrr_payment_method', true );
+	if ( ! empty( $payment_method ) ) {
+		$keywords[] = $payment_method;
+	}
+
+	if ( is_array( $expenses ) ) {
+		$keywords[] = get_amount( $request->ID );
+
+		foreach ( $expenses as $expense ) {
+			if ( array_key_exists( $expense['_wcbrr_category'], $categories ) ) {
+				$keywords[] = $expense['_wcbrr_category'];  // Use the category key, because the category value is localized
+			}
+
+			if ( ! empty( $expense['_wcbrr_vendor_name'] ) ) {
+				$keywords[] = $expense['_wcbrr_vendor_name'];
+			}
+
+			if ( ! empty( $expense['_wcbrr_amount'] ) ) {
+				$keywords[] = $expense['_wcbrr_amount'];
+			}
+		}
+	}
+
+	return $keywords;
 }
 
 /**

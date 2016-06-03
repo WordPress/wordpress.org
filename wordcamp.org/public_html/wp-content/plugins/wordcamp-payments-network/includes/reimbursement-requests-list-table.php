@@ -51,18 +51,30 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 		$paged      = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1;
 		$limit      = 30;
 		$offset     = $limit * ( $paged - 1 );
+		$search     = '';
 
-		$this->items = $wpdb->get_results( $wpdb->prepare( "
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$search = $wpdb->prepare(
+				"AND `keywords` LIKE '%%%s%%'",
+				$wpdb->esc_like( wp_unslash( $_REQUEST['s'] ) )
+			);
+		}
+
+		$query = "
 			SELECT *
 			FROM $table_name
-			WHERE status = %s
+			WHERE
+				status = %s
+				{{search}}
 			ORDER BY date_requested ASC
 			LIMIT %d
-			OFFSET %d",
-			$status,
-			$limit,
-			$offset
-		) );
+			OFFSET %d
+		";
+
+		$query = $wpdb->prepare( $query, $status, $limit, $offset );
+		$query = str_replace( '{{search}}', $search, $query );
+
+		$this->items = $wpdb->get_results( $query );
 
 		// A second query is faster than using SQL_CALC_FOUND_ROWS during the first query
 		$total_items = $wpdb->get_var( $wpdb->prepare( "
