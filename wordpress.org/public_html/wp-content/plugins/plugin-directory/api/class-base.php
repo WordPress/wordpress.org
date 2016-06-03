@@ -15,6 +15,7 @@ class Base {
 		new Routes\Plugin();
 		new Routes\Popular_Categories();
 		new Routes\Query_Plugins();
+		new Routes\SVN_Access();
 	}
 
 	/**
