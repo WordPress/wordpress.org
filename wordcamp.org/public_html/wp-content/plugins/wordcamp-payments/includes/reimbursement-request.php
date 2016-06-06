@@ -780,10 +780,6 @@ function _generate_payment_report_default( $args ) {
 			if ( ! empty( $expense['_wcbrr_amount'] ) ) {
 				$amount += floatval( $expense['_wcbrr_amount'] );
 			}
-
-			if ( ! empty( $expense['_wcbrr_category'] ) ) {
-				$categories[] = $expense['_wcbrr_category'];
-			}
 		}
 
 		$amount = number_format( $amount, 2, '.', '' );
@@ -810,10 +806,44 @@ function _generate_payment_report_default( $args ) {
 		if ( ! empty( $row ) ) {
 			fputcsv( $report, $row );
 		}
+
+		// Break out expenses into individual line items
+		foreach ( $expenses as $expense ) {
+			fputcsv( $report, _generate_payment_report_default_line_items( $expense, $row ) );
+		}
 	}
 
 	fclose( $report );
 	return ob_get_clean();
+}
+
+/**
+ * Generate a CSV row for an expense line item
+ *
+ * @param array $expense
+ * @param array $row
+ *
+ * @return array
+ */
+function _generate_payment_report_default_line_items( $expense, $row ) {
+	/*
+	 * Empty out fields we're not going to re-use for the line-item
+	 *
+	 * The ID field is left in, so it can be used to keep line-item fields grouped with their parent when the rows
+	 * are sorted.
+	 */
+	$empty_fields = array( 0, 3, 4, 7, 9, 10, 11, 12 );
+	foreach ( $empty_fields as $index ) {
+		$row[ $index ] = '';
+	}
+
+	// Fill in line-item fields
+	$row[2] = $expense['_wcbrr_vendor_name'] .' - '. $expense['_wcbrr_description'];
+	$row[5] = $expense['_wcbrr_date'];
+	$row[6] = $expense['_wcbrr_amount'];
+	$row[8] = $expense['_wcbrr_category'];
+
+	return $row;
 }
 
 /**
