@@ -362,10 +362,17 @@ function generate_payment_report( $args ) {
 		return new \WP_Error( 'wcb-invalid-post-type', 'Invalid post type.' );
 	}
 
+	// We don't want to export items with empty dates to JPM, etc
+	if ( 'Regular CSV' === $args['export_type']['label'] ) {
+		$include_empty_dates = " OR `{$date_type}` = 0";
+	} else {
+		$include_empty_dates = '';
+	}
+
 	$request_indexes = $wpdb->get_results( $wpdb->prepare( "
 		SELECT *
 		FROM   `{$table_name}`
-		WHERE  `{$date_type}` BETWEEN %d AND %d",
+		WHERE  `{$date_type}` BETWEEN %d AND %d $include_empty_dates",
 		$args['start_date'],
 		$args['end_date']
 	) );

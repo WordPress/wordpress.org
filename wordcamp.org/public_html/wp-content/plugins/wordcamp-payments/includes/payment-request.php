@@ -980,6 +980,12 @@ Thanks for helping us with these details!",
 				$date_vendor_paid = date( 'Y-m-d', $date_vendor_paid );
 			}
 
+			$due_date = get_post_meta( $post->ID, '_camppayments_due_by', true );
+
+			if ( $due_date ) {
+				$due_date = date( 'Y-m-d', absint( $due_date ) );
+			}
+
 			if ( 'null-select-one' === $currency ) {
 				$currency = '';
 			}
@@ -1001,7 +1007,7 @@ Thanks for helping us with these details!",
 				$status->label,
 				$date_vendor_paid,
 				date( 'Y-m-d', get_post_time( 'U', true, $post->ID ) ),
-				date( 'Y-m-d', absint( get_post_meta( $post->ID, '_camppayments_due_by', true ) ) ),
+				$due_date,
 				get_post_meta( $post->ID, '_camppayments_payment_amount', true ),
 				$currency,
 				$category,
