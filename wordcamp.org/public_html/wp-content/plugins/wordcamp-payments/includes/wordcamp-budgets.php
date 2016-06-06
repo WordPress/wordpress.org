@@ -899,6 +899,35 @@ class WordCamp_Budgets {
 	}
 
 	/**
+	 * Get the current post when inside a `map_meta_cap` callback
+	 *
+	 * Normally it's just the global $post, but sometimes you have to dig it out of $args (e.g., a bulk edit)
+	 *
+	 * @param array $args The $args that was passed to the `map_meta_cap` callback
+	 *
+	 * @return WP_Post|null
+	 */
+	public static function get_map_meta_cap_post( $args ) {
+		$post = null;
+
+		/*
+		 * Use a reference to the global $post if it already exists, but don't create one otherwise
+		 *
+		 * i.e., Don't use `global $post` and then assign the result of `get_post()` to that.
+		 *
+		 * If $GLOBAL['post'] didn't already exist and then we created one, then that could have unintentional
+		 * side-effects outside of this function.
+		 */
+		if ( isset( $GLOBALS['post'] ) ) {
+			$post = $GLOBALS['post'];
+		} elseif ( isset( $args[0] ) && is_int( $args[0] ) ) {
+			$post = get_post( $args[0] );
+		}
+
+		return $post;
+	}
+
+	/**
 	 * Insert an entry into a log for one of the custom post types
 	 *
 	 * @param int    $post_id The post ID.

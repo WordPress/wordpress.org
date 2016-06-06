@@ -915,21 +915,30 @@ Thanks for helping us with these details!",
 	 * @param array  $args                  Adds the context to the cap. Typically the object ID.
 	 */
 	public function modify_capabilities( $required_capabilities, $requested_capability, $user_id, $args ) {
-		global $post;
+		// todo maybe centralize this, since almost identical to counterparts in other modules
+		$post = \WordCamp_Budgets::get_map_meta_cap_post( $args );
 
 		if ( is_a( $post, 'WP_Post' ) && self::POST_TYPE == $post->post_type ) {
 			/*
 			 * Only network admins can edit requests once they've been paid.
 			 *
 			 * They can still open the request (in order to view the status and details), but won't be allowed to make any changes to it.
+			 * They can also edit and re-submit requests that were marked as incomplete.
 			 */
-			if ( 'edit_post' == $requested_capability && 'paid' == $post->post_status && isset( $_REQUEST['action'] ) && 'edit' != $_REQUEST['action'] ) {
-				$required_capabilities[] = 'manage_network';
-			}
+			if ( ! in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) {
+				if ( 'edit_post' == $requested_capability && 'wcb-incomplete' != $post->post_status ) {
+					$is_saving_edit = isset( $_REQUEST['action'] ) && 'edit' != $_REQUEST['action'];  // 'edit' is opening the Edit Invoice screen, 'editpost' is when it's submitted
+					$is_bulk_edit   = isset( $_REQUEST['bulk_edit'] );
 
-			// Only network admins can delete requests
-			if ( 'delete_post' == $requested_capability ) {
-				$required_capabilities[] = 'manage_network';
+					if ( $is_saving_edit || $is_bulk_edit ) {
+						$required_capabilities[] = 'manage_network';
+					}
+				}
+
+				// Only network admins can delete requests
+				if ( 'delete_post' == $requested_capability ) {
+					$required_capabilities[] = 'manage_network';
+				}
 			}
 		}
 

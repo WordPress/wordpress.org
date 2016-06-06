@@ -476,8 +476,7 @@ function render_columns( $column, $post_id ) {
  */
 function modify_capabilities( $required_capabilities, $requested_capability, $user_id, $args ) {
 	// todo maybe centralize this, since almost identical to counterpart in payment-requests.php
-
-	global $post;
+	$post = \WordCamp_Budgets::get_map_meta_cap_post( $args );
 
 	if ( is_a( $post, 'WP_Post' ) && POST_TYPE == $post->post_type ) {
 		/*
@@ -487,7 +486,10 @@ function modify_capabilities( $required_capabilities, $requested_capability, $us
 		 */
 		if ( ! in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) {
 			if ( 'edit_post' == $requested_capability ) {
-				if ( isset( $_REQUEST['action'] ) && 'edit' != $_REQUEST['action'] ) {
+				$is_saving_edit = isset( $_REQUEST['action'] ) && 'edit' != $_REQUEST['action'];  // 'edit' is opening the Edit Invoice screen, 'editpost' is when it's submitted
+				$is_bulk_edit   = isset( $_REQUEST['bulk_edit'] );
+
+				if ( $is_saving_edit || $is_bulk_edit ) {
 					$required_capabilities[] = 'manage_network';
 				}
 			}

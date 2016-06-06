@@ -688,7 +688,7 @@ function notify_organizer_request_updated( $new_status, $old_status, $request ) 
  * @param array  $args                  Adds the context to the cap. Typically the object ID.
  */
 function modify_capabilities( $required_capabilities, $requested_capability, $user_id, $args ) {
-	global $post;
+	$post = \WordCamp_Budgets::get_map_meta_cap_post( $args );
 
 	if ( ! is_a( $post, 'WP_Post' ) || POST_TYPE !== $post->post_type ) {
 		return $required_capabilities;
@@ -696,8 +696,17 @@ function modify_capabilities( $required_capabilities, $requested_capability, $us
 
 	$drafted_status             = in_array( $post->post_status, array( 'auto-draft', 'draft' ), true );
 	$draft_or_incomplete_status = $drafted_status || 'wcb-incomplete' === $post->post_status;
+	$is_bulk_edit               = isset( $_REQUEST['bulk_edit'] );
 
 	switch( $requested_capability ) {
+		case 'edit_post':
+			$is_saving_edit = isset( $_REQUEST['action'] ) && 'edit' != $_REQUEST['action'];  // 'edit' is opening the Edit Invoice screen, 'editpost' is when it's submitted
+
+			if ( ( $is_saving_edit && ! $draft_or_incomplete_status ) || $is_bulk_edit ) {
+				$required_capabilities[] = 'manage_network';
+			}
+		break;
+
 		case 'draft_post':
 			if ( $draft_or_incomplete_status ) {
 				$required_capabilities = array( 'edit_posts' );
