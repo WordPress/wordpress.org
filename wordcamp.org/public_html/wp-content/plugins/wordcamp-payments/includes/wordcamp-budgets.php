@@ -112,7 +112,7 @@ class WordCamp_Budgets {
 			__( 'Budget',          'wordcamporg' ),
 			'manage_options',
 			'wordcamp-budget',
-			'__return_empty_string',
+			function() { do_action( 'wcb_render_budget_page' ); },
 			plugins_url( 'images/dollar-sign-icon.svg', dirname( __FILE__ ) ),
 			30
 		);

@@ -19,6 +19,10 @@ if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
 
+	if ( $_SERVER['HTTP_HOST'] == 'testing.wordcamp.org' ) {
+		require_once( __DIR__ . '/includes/budget-tool.php' );
+	}
+
 	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();
 }
