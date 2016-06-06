@@ -452,7 +452,9 @@ function render_columns( $column, $post_id ) {
 			// todo could reuse get_sponsor_name() from dashboard if made some minor modifications
 
 			$sponsor = get_post( get_post_meta( $post_id, '_wcbsi_sponsor_id', true ) );
-			echo esc_html( $sponsor->post_title );
+			if ( is_a( $sponsor, 'WP_Post' ) ) {
+				echo esc_html( $sponsor->post_title );
+			}
 			break;
 
 		case 'payment_amount':
