@@ -14,11 +14,9 @@ use WordPressdotorg\Plugin_Directory\API\Base;
  */
 class SVN_Access extends Base {
 
-	protected $svn_access = array();
-
 	protected $svn_access_table;
 
-	function __construct() {
+	public function __construct() {
 		$this->svn_access_table = PLUGINS_TABLE_PREFIX . 'svn_access';
 
 		register_rest_route( 'plugins/v1', '/svn-access', array(
@@ -31,21 +29,21 @@ class SVN_Access extends Base {
 	/**
 	 * Generates and prints the SVN access file for plugins.svn.
 	 *
-	 * Rather than returning a value, the file is echo'd directly to STDOUT, so it can be piped 
+	 * Rather than returning a value, the file is echo'd directly to STDOUT, so it can be piped
 	 * directly into a file. It exit()'s immediately.
-	 * 
+	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 *
 	 * @return bool false This method will return false if the SVN access file couldn't be generated.
 	 */
 	public function generate_svn_access( $request ) {
-		$this->load_svn_access();
+		$svn_access = $this->load_svn_access();
 
-		if ( empty( $this->svn_access ) ) {
+		if ( empty( $svn_access ) ) {
 			return false;
 			}
 
-		foreach ( $this->svn_access as $slug => $users ) {
+		foreach ( $svn_access as $slug => $users ) {
 			$slug = ltrim( $slug, '/' );
 			echo "\n[/$slug]\n";
 
@@ -53,23 +51,33 @@ class SVN_Access extends Base {
 				echo "$user = $access\n";
 			}
 		}
-		
+
 		exit();
 	}
 
+
+	/**
+	 * Loads the SVN access data from the svn access table.
+	 *
+	 * @access private
+	 *
+	 * @return array SVN access data, keyed by repo, then username.
+	 */
 	private function load_svn_access() {
 		global $wpdb;
 
-		$svn_access = (array) $wpdb->get_results( "SELECT * FROM {$this->svn_access_table}" );
+		$svn_access = array();
 
-		foreach ( $svn_access as $svn_access ) {
-			if ( ! isset( $this->svn_access[ $svn_access->path ] ) ) {
-				$this->svn_access[ $svn_access->path ] = array();
+		$access_data = (array) $wpdb->get_results( "SELECT * FROM {$this->svn_access_table}" );
+
+		foreach ( $access_data as $datum ) {
+			if ( ! isset( $svn_access[ $datum->path ] ) ) {
+				$svn_access[ $datum->path ] = array();
 			}
 
-			$this->svn_access[ $svn_access->path ][ $svn_access->user ] = $svn_access->access;
+			$svn_access[ $datum->path ][ $datum->user ] = $datum->access;
 		}
+
+		return $svn_access;
 	}
-
-
 }
