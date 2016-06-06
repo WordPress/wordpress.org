@@ -726,7 +726,7 @@ function modify_capabilities( $required_capabilities, $requested_capability, $us
 function _generate_payment_report_default( $args ) {
 	$column_headings = array(
 		'WordCamp', 'ID', 'Title', 'Status', 'Paid', 'Requested', 'Amount',
-		'Reason', 'Categories', 'Payment Method', 'Name',
+		'Currency', 'Reason', 'Categories', 'Payment Method', 'Name',
 		'Check Payable To', 'URL',
 	);
 
@@ -794,6 +794,7 @@ function _generate_payment_report_default( $args ) {
 			date( 'Y-m-d', strtotime( $post->post_date_gmt ) ),
 			$amount,
 			$currency,
+			$reason,
 			implode( ',', $categories ),
 			get_post_meta( $post->ID, '_wcbrr_payment_method', true ),
 			get_post_meta( $post->ID, '_wcbrr_name_of_payer', true ),
@@ -832,7 +833,7 @@ function _generate_payment_report_default_line_items( $expense, $row ) {
 	 * The ID field is left in, so it can be used to keep line-item fields grouped with their parent when the rows
 	 * are sorted.
 	 */
-	$empty_fields = array( 0, 3, 4, 7, 9, 10, 11, 12 );
+	$empty_fields = array( 0, 3, 4, 7, 8, 10, 11, 12, 13 );
 	foreach ( $empty_fields as $index ) {
 		$row[ $index ] = '';
 	}
@@ -841,7 +842,7 @@ function _generate_payment_report_default_line_items( $expense, $row ) {
 	$row[2] = $expense['_wcbrr_vendor_name'] .' - '. $expense['_wcbrr_description'];
 	$row[5] = $expense['_wcbrr_date'];
 	$row[6] = $expense['_wcbrr_amount'];
-	$row[8] = $expense['_wcbrr_category'];
+	$row[9] = $expense['_wcbrr_category'];
 
 	return $row;
 }
