@@ -111,10 +111,20 @@ namespace {
 									$commenter = get_user_by( 'id', $comment->user_id );
 									$url = 'https://profiles.wordpress.org/' . esc_attr( $commenter->user_nicename ) . '/';
 									$author = get_the_author_meta( 'display_name', $comment->user_id );
-									$comment_author_link = "<a href='$url' rel='external nofollow' class='url'>$author</a>";
 								} else {
-									$comment_author_link = '';
+									$url = $comment->comment_author_url;
+									$author = $comment->comment_author;
 								}
+
+								$comment_author_link = '';
+								if ( $url ) {
+									$comment_author_link = "<a href='$url' rel='external nofollow' class='url'>";
+								}
+								$comment_author_link .= $author;
+								if ( $url ) {
+									$comment_author_link .= '</a>';
+								}
+
 								printf( __( 'Contributed by %s', 'wporg' ), sprintf( '<cite class="fn">%s</cite>', $comment_author_link ) );
 							?>
 
