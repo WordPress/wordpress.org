@@ -45,7 +45,7 @@ $widget_args = array(
 			<h4><?php echo $section['title']; ?></h4>
 
 			<div id="<?php echo esc_attr( $section['slug'] ); ?>" class="read-more" aria-expanded="false">
-				<?php echo apply_filters( 'the_content', $content[ $section['slug'] ] ); ?>
+				<?php echo apply_filters( 'the_content', $content[ $section['slug'] ], $section['slug'] ); ?>
 			</div>
 			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section['slug'] ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
 		<?php endforeach; ?>
