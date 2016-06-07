@@ -13,12 +13,12 @@ defined( 'WPINC' ) or die();
 
 		<div class="wcb-form-input-wrapper">
 			<?php // todo add selected attribute to select and change first option value to empty string. do for other selects too ?>
-			<select id="_wcbsi_sponsor_id" name="_wcbsi_sponsor_id">
-				<option value="null-select-one">
+			<select id="_wcbsi_sponsor_id" name="_wcbsi_sponsor_id" required>
+				<option value="">
 					<?php _e( '-- Select a Sponsor --', 'wordcamporg' ); ?>
 				</option>
 
-				<option value="null-separator1"></option>
+				<option value=""></option>
 
 				<?php foreach ( $available_sponsors as $sponsor_id => $sponsor ) : ?>
 					<option
@@ -55,12 +55,12 @@ defined( 'WPINC' ) or die();
 		</label>
 
 		<div class="wcb-form-input-wrapper">
-			<select id="_wcbsi_qbo_class_id" name="_wcbsi_qbo_class_id">
-				<option value="null-select-one">
+			<select id="_wcbsi_qbo_class_id" name="_wcbsi_qbo_class_id" required>
+				<option value="">
 					<?php _e( '-- Select a Community --', 'wordcamporg' ); ?>
 				</option>
 
-				<option value="null-separator1"></option>
+				<option value=""></option>
 
 				<?php foreach ( $available_classes as $class_id => $class ) : ?>
 					<option
@@ -99,11 +99,11 @@ defined( 'WPINC' ) or die();
 			<?php _e( 'Currency:', 'wordcamporg' ) ?>
 		</label>
 
-		<select id="_wcbsi_currency" name="_wcbsi_currency">
-			<option value="null-select-one">
+		<select id="_wcbsi_currency" name="_wcbsi_currency" required>
+			<option value="">
 				<?php _e( '-- Select a Currency --', 'wordcamporg' ); ?>
 			</option>
-			<option value="null-separator1"></option>
+			<option value=""></option>
 
 			<?php foreach ( $available_currencies as $currency_key => $currency_name ) : ?>
 				<option value="<?php echo esc_attr( $currency_key ); ?>" <?php selected( $currency_key, $selected_currency ); ?> >

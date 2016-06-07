@@ -39,17 +39,14 @@ jQuery( document ).ready( function( $ ) {
 
 				if ( $.isEmptyObject( info ) ) {
 					infoContainer.html( '' );
-					sendInvoiceButton.prop( 'disabled', true );
 					return;
 
 				} else if ( info.requiredFieldsComplete ) {
 					// todo add info.hasOwnProperty() check
 					infoTemplate = wp.template( 'wcbsi-sponsor-information' );
-					sendInvoiceButton.prop( 'disabled', false );
 
 				} else {
 					infoTemplate = wp.template( 'wcbsi-required-fields-incomplete' );
-					sendInvoiceButton.prop( 'disabled', true );
 				}
 
 				infoContainer.html( infoTemplate( info ) );
