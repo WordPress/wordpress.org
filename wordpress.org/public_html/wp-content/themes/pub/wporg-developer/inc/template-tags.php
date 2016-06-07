@@ -318,7 +318,7 @@ namespace DevHub {
 	 * For development versions, the development suffix ("-beta1", "-RC1") gets removed.
 	 *
 	 * @param  boolean $ignore_minor Use the major release version X.Y.0 instead of the actual version X.Y.Z?
-	 * @return object
+	 * @return object|WP_Error
 	 */
 	function get_current_version_term( $ignore_minor = true ) {
 		$current_version = get_current_version();
@@ -344,7 +344,7 @@ namespace DevHub {
 			'name'   => $current_version,
 		) );
 
-		return $version[0];
+		return is_wp_error( $version ) ? $version : reset( $version );
 	}
 
 	/**

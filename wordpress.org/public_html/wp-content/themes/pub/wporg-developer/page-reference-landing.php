@@ -35,7 +35,9 @@ get_header(); ?>
 
 				<div class="new-in-guide section two-columns clear">
 					<div class="widget box gray">
-						<h3 class="widget-title"><?php $version = DevHub\get_current_version_term(); printf( __( 'New &amp; Updated in WordPress %s:', 'wporg' ), substr( $version->name, 0, -2 ) ); ?></h3>
+					<?php $version = DevHub\get_current_version_term(); ?>
+					<?php if ( $version && ! is_wp_error( $version ) ) : ?>
+						<h3 class="widget-title"><?php printf( __( 'New &amp; Updated in WordPress %s:', 'wporg' ), substr( $version->name, 0, -2 ) ); ?></h3>
 						<div class="widget-content">
 							<ul class="unordered-list no-bullets">
 								<?php
@@ -61,6 +63,7 @@ get_header(); ?>
 								<li class="view-all-new-in"><a href="<?php echo esc_attr( get_term_link( $version, 'wp-parser-since' ) ); ?>"><?php _e( 'View all&hellip;', 'wporg' ); ?></a></li>
 							</ul>
 						</div>
+					<?php endif; ?>
 					</div>
 					<div class="widget box gray">
 						<h3 class="widget-title"><?php _e( 'API', 'wporg' ); ?></h3>
