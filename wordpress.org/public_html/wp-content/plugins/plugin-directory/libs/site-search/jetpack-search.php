@@ -438,7 +438,7 @@ class Jetpack_Search {
 			'blog_id'        => get_current_blog_id(),
 	
 			'query'          => null,    // Search phrase
-			'query_fields'   => array( 'title', 'content', 'author', 'tag', 'category' ),
+			'query_fields'   => array( 'title^2', 'content', 'author', 'tag', 'category', 'slug_ngram', 'contributors' ),
 	
 			'post_type'      => null,  // string or an array
 			'terms'          => array(), // ex: array( 'taxonomy-1' => array( 'slug' ), 'taxonomy-2' => array( 'slug-a', 'slug-b' ) )
@@ -611,7 +611,6 @@ class Jetpack_Search {
 			$es_query_args['filter'] = array( 'match_all' => new stdClass() );
 		}
 	
-	
 		return $es_query_args;
 	}
 
@@ -655,28 +654,38 @@ class Jetpack_Search {
 		$date_origin = date( 'Y-m-d' );
 
 		return array( 
-			 'function_score' => array(
-				 'query' => $query,
-				 'functions' => array(
-					 array(
-						 'gauss'=> array(
-							 'date_gmt' => array(
-								 'origin' => $date_origin,
-								 'scale' => $date_scale,
-								 'decay' => $date_decay,
-							 ) ),
-					 ),
-					array(
-						'field_value_factor' => array(
-							'field' => 'comment_count',
-							'factor' => 1.0,
-							'modifier' => 'log1p',
-						),
-					),
+			'filtered' => array(
+				'query' => array(
+					 'function_score' => array(
+						 'query' => $query,
+						 'functions' => array(
+							 array(
+								 'gauss'=> array(
+									 'date_gmt' => array(
+										 'origin' => $date_origin,
+										 'scale' => $date_scale,
+										 'decay' => $date_decay,
+									 ) ),
+							 ),
+							array(
+								'field_value_factor' => array(
+									'field' => 'meta.active_installs.long',
+									'factor' => 1.0,
+									'modifier' => 'log1p',
+								),
+							),
 
+						 ),
+						 'boost_mode' => 'multiply'
+					 )
 				 ),
-				 'boost_mode' => 'multiply'
-		) );
+				 'filter' => array(
+						'exists' => array(
+							'field' => 'meta.active_installs.long'
+						)
+				 )
+			)
+		);
 	}
 
 }
