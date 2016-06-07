@@ -36,7 +36,7 @@ require WPORGPATH . 'header.php';
 			<?php get_search_form(); ?>
 			<div id="inner-search-icon-container">
 				<div id="inner-search-icon">
-					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php _e( 'Search', 'wporg' ); ?></div>
+					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php _e( 'Search', 'wporg' ); ?></span></div>
 				</div>
 			</div>
 		</div>
