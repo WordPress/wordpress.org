@@ -554,6 +554,28 @@ class Plugin_Directory {
 
 				return array( $ratings );
 				break;
+			case false:
+				// In the event $meta_key is false, the caller wants all meta fields, so we'll append our custom ones here too.
+				remove_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ) );
+
+				// Fetch the existing ones from the database
+				$value = get_metadata( 'post', $object_id, $meta_key );
+
+				// Re-attach ourselves for next time!
+				add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
+
+				$custom_meta_fields = array( 'downloads', 'rating', 'ratings' );
+				$custom_meta_fields = apply_filters( 'wporg_plugins_custom_meta_fields', $custom_meta_fields, $object_id );
+
+				foreach ( $custom_meta_fields as $key ) {
+					// When WordPress calls `get_post_meta( $post_id, false )` it expects an array of maybe_serialize()'d data
+					$shimed_data = $this->filter_shim_postmeta( false, $object_id, $key );
+					if ( $shimed_data ) {
+						$value[ $key ][0] = (string) maybe_serialize( $shimed_data[0] );
+					}
+				}
+
+				break;
 		}
 		return $value;
 	}
