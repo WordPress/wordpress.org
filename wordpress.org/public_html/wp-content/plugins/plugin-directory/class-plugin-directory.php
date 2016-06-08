@@ -216,6 +216,9 @@ class Plugin_Directory {
 
 		if ( 'en_US' != get_locale() ) {
 			add_filter( 'get_term', array( __NAMESPACE__ . '\i18n', 'translate_term' ) );
+			add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
+			add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
+			add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1 );
 		}
 
 		// Instantiate our copy of the Jetpack_Search class.
@@ -438,6 +441,42 @@ class Plugin_Directory {
 				break;
 		}
 
+	}
+
+	/**
+	 * Returns the requested page's content, translated.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	public function translate_post_content( $content, $section = null ) {
+		if ( is_null( $section ) ) {
+			return $content;
+		}
+		return Plugin_i18n::instance()->translate( $section, $content );
+	}
+
+	/**
+	 * Returns the requested page's content, translated.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	public function translate_post_title( $title, $post_id ) {
+		if ( $post_id === get_post()->ID ) {
+			return Plugin_i18n::instance()->translate( 'title', $title );
+		}
+		return $title;
+	}
+
+	/**
+	 * Returns the requested page's excerpt, translated.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	public function translate_post_excerpt( $excerpt ) {
+		return Plugin_i18n::instance()->translate( 'excerpt', $excerpt );
 	}
 
 	/**
