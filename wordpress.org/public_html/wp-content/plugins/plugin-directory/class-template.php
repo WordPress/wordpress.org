@@ -11,8 +11,9 @@ class Template {
 	/**
 	 * Returns a string representing the number of active installs for an item.
 	 *
-	 * @param bool $full whether to include "actuve installs" suffix. Default: true.
-	 * @return string "1+ million" or "1+ milllion active installs" depending on $full.
+	 * @param bool              $full Whether to include "active installs" suffix. Default: true.
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string "1+ million" or "1+ million active installs" depending on $full.
 	 */
 	static function active_installs( $full = true, $post = null ) {
 		$post = get_post( $post );
@@ -66,10 +67,10 @@ class Template {
 	/**
 	 * Displays a plugin's rating with the amount of ratings it has received.
 	 *
-	 * @param \WP_Post|int $post
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return string
 	 */
-	public static function get_star_rating( $post = 0 ) {
+	public static function get_star_rating( $post = null ) {
 		$post = get_post( $post );
 
 		$rating      = get_post_meta( $post->ID, 'rating', true ) ?: 0;
@@ -85,6 +86,7 @@ class Template {
 	}
 
 	/**
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return array
 	 */
 	static function get_plugin_sections( $post = null ) {

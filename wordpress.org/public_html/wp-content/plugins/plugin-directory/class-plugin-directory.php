@@ -358,10 +358,11 @@ class Plugin_Directory {
 	/**
 	 * Filter the permalink for terms to be more useful.
 	 *
-	 * @param string   $termlink The generated term link.
-	 * @param \WP_Term $term     The term the link is for.
+	 * @param string   $term_link The generated term link.
+	 * @param \WP_Term $term      The term the link is for.
+	 * @return string|false
 	 */
-	public function term_link( $termlink, $term ) {
+	public function term_link( $term_link, $term ) {
 		if ( 'plugin_business_model' == $term->taxonomy ) {
 			return false;
 		}
@@ -370,7 +371,7 @@ class Plugin_Directory {
 			return trailingslashit( home_url( $term->slug ) );
 		}
 
-		return $termlink;
+		return $term_link;
 	}
 
 	/**
@@ -446,25 +447,27 @@ class Plugin_Directory {
 	/**
 	 * Returns the requested page's content, translated.
 	 *
-	 * @param string $content
+	 * @param string $content Post content.
+	 * @param string $section Optional. Which readme section to translate.
 	 * @return string
 	 */
 	public function translate_post_content( $content, $section = null ) {
 		if ( is_null( $section ) ) {
 			return $content;
 		}
-		return Plugin_i18n::instance()->translate( $section, $content );
+		return Plugin_I18n::instance()->translate( $section, $content );
 	}
 
 	/**
 	 * Returns the requested page's content, translated.
 	 *
-	 * @param string $content
+	 * @param string $title
+	 * @param int    $post_id
 	 * @return string
 	 */
 	public function translate_post_title( $title, $post_id ) {
 		if ( $post_id === get_post()->ID ) {
-			return Plugin_i18n::instance()->translate( 'title', $title );
+			return Plugin_I18n::instance()->translate( 'title', $title );
 		}
 		return $title;
 	}
@@ -472,11 +475,11 @@ class Plugin_Directory {
 	/**
 	 * Returns the requested page's excerpt, translated.
 	 *
-	 * @param string $content
+	 * @param string $excerpt
 	 * @return string
 	 */
 	public function translate_post_excerpt( $excerpt ) {
-		return Plugin_i18n::instance()->translate( 'excerpt', $excerpt );
+		return Plugin_I18n::instance()->translate( 'excerpt', $excerpt );
 	}
 
 	/**

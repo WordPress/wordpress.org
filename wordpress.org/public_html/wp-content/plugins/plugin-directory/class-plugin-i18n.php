@@ -11,10 +11,17 @@ class Plugin_I18n {
 	/**
 	 * @var string Global cache group for related caching
 	 */
-	var $i18n_cache_group = 'plugins-i18n';
+	public $i18n_cache_group = 'plugins-i18n';
+
+	public $master_project;
 
 	public static $use_cache = true;
 	public static $set_cache = true;
+
+	/**
+	 * @var \wpdb WordPress database abstraction object.
+	 */
+	protected $db;
 
 	/**
 	 * Fetch the instance of the Plugin_I18n class.
@@ -74,11 +81,12 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Cache setting, with proper global cache group
+	 * Cache setting, with proper global cache group.
 	 *
-	 * @param string $slug Plugin slug
-	 * @param string $branch dev|stable
-	 * @param string $suffix Arbitrary cache key suffix, if needed for uniqueness
+	 * @param string $slug    Plugin slug
+	 * @param string $branch  dev|stable
+	 * @param mixed  $content Content to be cached.
+	 * @param string $suffix  Optional. Arbitrary cache key suffix, if needed for uniqueness.
 	 *
 	 * @return bool As returned by wp_cache_set()
 	 */
