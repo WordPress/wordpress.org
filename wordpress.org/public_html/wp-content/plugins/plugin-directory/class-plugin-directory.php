@@ -101,12 +101,12 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => current_user_can( 'plugin_set_section' ),
 			'show_admin_column' => current_user_can( 'plugin_set_section' ),
-			'meta_box_cb'       => 'post_categories_meta_box',
+			'meta_box_cb'       => false, // 'post_categories_meta_box',
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
 			),
 			'labels'            => array(
-				'name'          => __( 'Plugin Sections',  'wporg-plugins' ),
+				'name' => __( 'Plugin Sections', 'wporg-plugins' ),
 			),
 		) );
 
@@ -120,20 +120,20 @@ class Plugin_Directory {
 				'ep_mask'      => EP_TAGS,
 			),
 			'labels'            => array(
-				'name'          => __( 'Plugin Categories',  'wporg-plugins' ),
+				'name'          => __( 'Plugin Categories', 'wporg-plugins' ),
 				'singular_name' => __( 'Plugin Category',   'wporg-plugins' ),
 				'edit_item'     => __( 'Edit Category',     'wporg-plugins' ),
 				'update_item'   => __( 'Update Category',   'wporg-plugins' ),
 				'add_new_item'  => __( 'Add New Category',  'wporg-plugins' ),
 				'new_item_name' => __( 'New Category Name', 'wporg-plugins' ),
-				'search_items'  => __( 'Search Categories',  'wporg-plugins' ),
+				'search_items'  => __( 'Search Categories', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
-				'assign_terms' => 'plugin_set_category'
+				'assign_terms' => 'plugin_set_category',
 			)
 		) );
 
@@ -142,14 +142,14 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_built_for',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name'          => __( 'Built For',  'wporg-plugins' ),
+				'name'          => __( 'Built For', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			//'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
-				'assign_terms' => 'plugin_set_category'
+				'assign_terms' => 'plugin_set_category',
 			)
 		) );
 
@@ -158,14 +158,14 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_business_model',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name'          => __( 'Business Model',  'wporg-plugins' ),
+				'name'          => __( 'Business Model', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			//'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
-				'assign_terms' => 'plugin_set_category'
+				'assign_terms' => 'plugin_set_category',
 			)
 		) );
 
