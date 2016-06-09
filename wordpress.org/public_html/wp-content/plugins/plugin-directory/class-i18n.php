@@ -32,8 +32,9 @@ class i18n {
 	 * This function is never called, and only exists so that out pot tools can detect the strings.
 	 * @ignore
 	 */
-	private function _static_strings() {
-		// Category Terms
+	private function static_strings() {
+
+		// Category Terms.
 		_x( 'Accessibility',              'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Advertising',                'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Analytics',                  'Plugin Category Name', 'wporg-plugins' );
@@ -59,9 +60,9 @@ class i18n {
 		_x( 'Social & Sharing',           'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Taxonomy',                   'Plugin Category Name', 'wporg-plugins' );
 		_x( 'User Management',            'Plugin Category Name', 'wporg-plugins' );
-		_x( 'Utilities',                  'Plugin Category Name', 'wporg-plugins' );
+		_x( 'Utilities & Tools',          'Plugin Category Name', 'wporg-plugins' );
 
-		// Section Terms
+		// Section Terms.
 		_x( 'Beta',     'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Featured', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Popular',  'Plugin Section Name', 'wporg-plugins' );
