@@ -424,6 +424,15 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Committers', 'display' ),
 				'plugin', 'side'
 			);
+
+			if ( current_user_can( 'plugin_add_committer', $post ) ) {
+				add_meta_box(
+					'plugin-stats',
+					__( 'Plugin Stats', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Stats', 'display' ),
+					'plugin', 'normal'
+				);
+			}
 		}
 
 		// Remove unnecessary metaboxes.
