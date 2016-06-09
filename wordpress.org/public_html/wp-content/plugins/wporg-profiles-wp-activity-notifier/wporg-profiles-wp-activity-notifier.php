@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WordPress.org WP Activity Notifier
-Plugin Description: Notifies profiles.wordpress.org when reportable WP activities occur.
+Description: Notifies profiles.wordpress.org when reportable WP activities occur.
 Author: Mert Yazicioglu, Scott Reilly
 Version: 1.1
 */
