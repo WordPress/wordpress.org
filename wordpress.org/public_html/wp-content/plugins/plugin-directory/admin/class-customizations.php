@@ -28,6 +28,7 @@ class Customizations {
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ) );
+		add_filter( 'tax_input_pre', array( $this, 'filter_tax_input' ) );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -447,6 +448,22 @@ class Customizations {
 		if ( isset( $_POST['tested_with'] ) && isset( $_POST['hidden_tested_with'] ) && $_POST['tested_with'] != $_POST['hidden_tested_with'] ) {
 			update_post_meta( $post_id, 'tested', wp_slash( wp_unslash( $_POST['tested_with'] ) ) );
 		}
+	}
+
+	/**
+	 * Filters the value of tax_inputs before saving.
+	 *
+	 * @param array $tax_input Array of taxonomies with selected terms.
+	 * @return array
+	 */
+	public function filter_tax_input( $tax_input ) {
+
+		// Limit the amount of assignable categories to 3.
+		if ( isset( $tax_input['plugin_category'] ) ) {
+			$tax_input['plugin_category'] = array_slice( array_filter( $tax_input['plugin_category'] ), 0, 3 );
+		}
+
+		return $tax_input;
 	}
 
 	/**

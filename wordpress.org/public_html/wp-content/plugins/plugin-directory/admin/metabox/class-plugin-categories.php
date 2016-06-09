@@ -7,6 +7,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
  * @package WordPressdotorg\Plugin_Directory\Admin\Metabox
  */
 class Plugin_Categories {
+
 	/**
 	 * Displays the categories metabox for plugins.
 	 * The HTML here matches what Core uses.
@@ -16,6 +17,10 @@ class Plugin_Categories {
 	static function display( $post ) {
 		?>
 		<div id="taxonomy-plugin_category" class="categorydiv">
+			<div class="notice notice-info inline">
+				<p><?php _e( 'You can assign up to 3 categories.', 'wporg-plugins' ); ?></p>
+			</div>
+
 			<div id="plugin_category-all" class="tabs-panel">
 				<?php // Allows for an empty term set to be sent. 0 is an invalid Term ID and will be ignored by empty() checks. ?>
 				<input type='hidden' name='tax_input[plugin_category][]' value='0' />
@@ -27,4 +32,3 @@ class Plugin_Categories {
 		<?php
 	}
 }
-
