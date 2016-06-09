@@ -57,8 +57,7 @@ class Builder {
 	 */
 	public function build() {
 		try {
-			// The name must have at least 1 `.` in it for CLI `zip` not to complain.
-			$this->tmp_build_file = tempnam( dirname( $this->zip_file ), "tmp-{$this->slug}.{$this->version}" );
+			$this->tmp_build_file = $this->generate_temporary_filename( dirname( $this->zip_file ), "tmp-{$this->slug}.{$this->version}", '.zip' );
 			$this->tmp_build_dir  = $this->tmp_build_file . '-files';
 			mkdir( $this->tmp_build_dir, 0777, true );
 
@@ -77,6 +76,37 @@ class Builder {
 		}/* finally { // PHP 5.5+, meta.svn is limited to PHP 5.4 code still.
 			$this->cleanup();
 		}*/
+	}
+
+	/**
+	 * Generates a temporary unique file in a given directory
+	 *
+	 * Performs a similar job to `tempnam()` with an added suffix and doesn't
+	 * cut off the $prefix at 60 characters.
+	 * As with `tempnam()` the caller is responsible for removing the temorarily file.
+	 *
+	 * Note: `strlen( $prefix . $suffix )` shouldn't exceed 238 characters.
+	 *
+	 * @param string $dir The directory to create the file in.
+	 * @param string $prefix The file prefix.
+	 * @param string $suffix The file suffix, optional.
+	 *
+	 * @return string Filename of unique temporary file.
+	 */
+	protected function generate_temporary_filename( $dir, $prefix, $suffix = '' ) {
+		$i = 0;
+		do {
+			$rand = uniqid();
+			$filename = "{$dir}/{$prefix}-{$rand}{$i}{$suffix}";
+		} while ( false === ($fp = @fopen( $filename, 'x' ) ) && $i++ < 50 );
+
+		if ( $i >= 50 ) {
+			throw new Exception( __METHOD__ . ': Could not find unique filename.' );
+		}
+
+		fclose( $fp );
+
+		return $filename;
 	}
 
 	/**
