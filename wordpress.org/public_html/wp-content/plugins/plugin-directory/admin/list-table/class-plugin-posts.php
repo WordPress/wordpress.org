@@ -259,7 +259,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				__( 'Edit' )
 			);
 
-			if ( current_user_can( 'plugin_edit_others', $post->ID ) ) {
+			if ( current_user_can( 'plugin_review', $post->ID ) ) {
 				$actions['inline hide-if-no-js'] = sprintf(
 					'<a href="#" class="editinline" aria-label="%s">%s</a>',
 					/* translators: %s: post title */
