@@ -174,6 +174,17 @@ class Customizations {
 			$query->query_vars['post_status'] = array( 'publish', 'future', 'draft', 'pending', 'disabled', 'closed', 'rejected', 'approved' );
 		}
 
+		// Make it possible to search for plugins that were submitted from a specific IP.
+		if ( current_user_can( 'plugin_review' ) && ! empty( $query->query['s'] ) && filter_var( $query->query['s'], FILTER_VALIDATE_IP ) ) {
+			$query->query_vars['meta_key']   = '_author_ip';
+			$query->query_vars['meta_value'] = $query->query_vars['s'];
+			unset( $query->query_vars['s'] );
+
+			add_filter( 'get_search_query', function() use ( $query ) {
+				return esc_html( $query->query_vars['meta_value'] );
+			} );
+		}
+
 		$user = wp_get_current_user();
 
 		if ( ! current_user_can( 'plugin_approve' ) && empty( $query->query['post_status']) || ( isset( $query->query['author'] ) && $query->query['author'] == $user->ID ) ) {

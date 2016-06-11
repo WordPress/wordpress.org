@@ -660,7 +660,7 @@ class Plugin_Directory {
 	 *     @type string $description The short description of the plugin.
 	 *     @type string $content     The long description of the plugin.
 	 *     @type array  $tags        The tags associated with the plugin.
-	 *     @type array  $tags        The meta information of the plugin.
+	 *     @type array  $meta        The meta information of the plugin.
 	 * }
 	 * @return \WP_Post|\WP_Error
 	 */

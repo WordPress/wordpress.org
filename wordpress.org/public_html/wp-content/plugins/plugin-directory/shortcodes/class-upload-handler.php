@@ -203,6 +203,7 @@ class Upload_Handler {
 					'assets_banners_color'     => false,
 					'support_threads'          => 0,
 					'support_threads_resolved' => 0,
+					'_author_ip'               => preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] ),
 				),
 			) );
 			if ( is_wp_error( $plugin_post ) ) {

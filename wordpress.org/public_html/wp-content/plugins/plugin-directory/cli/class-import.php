@@ -79,6 +79,8 @@ class Import {
 		}
 
 		if ( ! $plugin ) {
+			$author_ip = $wpdb->get_var( $wpdb->prepare( 'SELECT poster_ip FROM ' . PLUGINS_TABLE_PREFIX . 'posts WHERE topic_id = %s', $topic->topic_id ) );
+
 			$plugin = Plugin_Directory::create_plugin_post( array(
 				'slug' => $plugin_slug,
 				'status' => $status,
@@ -88,6 +90,9 @@ class Import {
 				'post_date' => $topic->topic_start_time,
 				'post_modified' => $topic->topic_time,
 				'post_modified_gmt' => $topic->topic_time,
+				'meta' => array(
+					'_author_ip' => $author_ip,
+				),
 			) );
 		}
 

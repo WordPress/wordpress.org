@@ -78,14 +78,22 @@ class Author_Card {
 			echo '<p>This user is: <strong>' . implode( ', ', $unsavory ) . '</strong></p>';
 		}
 
-		$user_ips = array();// $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT poster_ip FROM plugin_2_posts WHERE poster_id = %s', $author->ID ) );
-		$user_ips = array_filter( $user_ips, 'strlen' );
+		$post_ids = get_posts( array(
+			'fields'         => 'ids',
+			'post_type'      => 'plugin',
+			'author'         => $author->ID,
+			'meta_key'       => '_author_ip',
+			'posts_per_page' => -1,
+		) );
+
+		$user_ips = array_unique( array_map( function( $post_id ) {
+			return get_post_meta( $post_id, '_author_ip', true );
+		}, $post_ids ) );
+
 		if ( $user_ips ) :
 			sort( $user_ips, SORT_NUMERIC );
 
-			$user_ips = array_map( array( 'Author_Card', 'link_ip' ), $user_ips );
-
-			echo '<p>IPs : ' . implode( ', ', $user_ips ) . '</p>';
+			printf( '<p>IPs : %s</p>', implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) ) );
 		endif;
 
 		if ( $author->user_pass == '~~~' ) : ?>
@@ -189,5 +197,18 @@ class Author_Card {
 		 * @param array    $all_plugins      Array of plugin objects for all of user's plugins.
 		 */
 		do_action( 'wporg_plugins_author_card', $post, $author, $all_plugins );
+	}
+
+	/**
+	 * Builds a link to a list of plugins submitted from a given IP.
+	 *
+	 * @param string $ip IP address of the plugin author.
+	 * @return string
+	 */
+	protected static function link_ip( $ip ) {
+		return sprintf( '<a href="%1$s">%2$s</a>', esc_url( add_query_arg( array(
+			'post_type' => 'plugin',
+			's'         => $ip,
+		), admin_url( 'edit.php' ) ) ), $ip );
 	}
 }
