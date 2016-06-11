@@ -380,22 +380,18 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			) );
 		}
 
-		if ( empty( $plugins ) ) {
-			$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( "
-				SELECT COUNT( 1 )
-				FROM $wpdb->posts
-				WHERE post_type = %s
-				AND post_author = %d
-			", $post_type, $current_user_id ) ) );
+		$user_post_count_query = "
+			SELECT COUNT( 1 )
+			FROM $wpdb->posts
+			WHERE post_type = %s
+			AND post_author = %d
+		";
 
-		} else {
-			$user_post_count = intval( $wpdb->get_var( ($wpdb->prepare( "
-				SELECT COUNT( 1 )
-				FROM $wpdb->posts
-				WHERE post_type = %s
-				AND ( post_author = %d OR post_name IN ( %s ) )
-			", $post_type, $current_user_id, implode( ', ', $plugins ) ) ) ) );
+		if ( ! empty( $plugins ) ) {
+			$user_post_count_query = str_replace('AND post_author = %d', "AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )", $user_post_count_query );
 		}
+
+		$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( $user_post_count_query, $post_type, $current_user_id ) ) );
 
 		// Subtract post types that are not included in the admin all list.
 		foreach ( $exclude_states as $state ) {
