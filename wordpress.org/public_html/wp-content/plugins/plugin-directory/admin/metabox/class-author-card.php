@@ -81,6 +81,7 @@ class Author_Card {
 		$post_ids = get_posts( array(
 			'fields'         => 'ids',
 			'post_type'      => 'plugin',
+			'post_status'    => 'any',
 			'author'         => $author->ID,
 			'meta_key'       => '_author_ip',
 			'posts_per_page' => -1,
