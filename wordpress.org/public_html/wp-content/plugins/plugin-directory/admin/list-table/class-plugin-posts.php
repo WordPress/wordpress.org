@@ -23,7 +23,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$per_page = $this->get_items_per_page( 'edit_' . $post_type . '_per_page' );
 
 		/** This filter is documented in wp-admin/includes/post.php */
- 		$per_page = apply_filters( 'edit_posts_per_page', $per_page, $post_type );
+		$per_page = apply_filters( 'edit_posts_per_page', $per_page, $post_type );
 
 		if ( $this->hierarchical_display ) {
 			$total_items = $wp_query->post_count;
@@ -380,12 +380,22 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			) );
 		}
 
-		$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( "
-			SELECT COUNT( 1 )
-			FROM $wpdb->posts
-			WHERE post_type = %s
-			AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )
-		", $post_type, $current_user_id ) ) );
+		if ( empty( $plugins ) ) {
+			$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( "
+				SELECT COUNT( 1 )
+				FROM $wpdb->posts
+				WHERE post_type = %s
+				AND post_author = %d
+			", $post_type, $current_user_id ) ) );
+
+		} else {
+			$user_post_count = intval( $wpdb->get_var( ($wpdb->prepare( "
+				SELECT COUNT( 1 )
+				FROM $wpdb->posts
+				WHERE post_type = %s
+				AND ( post_author = %d OR post_name IN ( %s ) )
+			", $post_type, $current_user_id, implode( ', ', $plugins ) ) ) ) );
+		}
 
 		// Subtract post types that are not included in the admin all list.
 		foreach ( $exclude_states as $state ) {
