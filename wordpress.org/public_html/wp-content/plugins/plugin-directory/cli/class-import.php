@@ -82,15 +82,15 @@ class Import {
 			$author_ip = $wpdb->get_var( $wpdb->prepare( 'SELECT poster_ip FROM ' . PLUGINS_TABLE_PREFIX . 'posts WHERE topic_id = %s', $topic->topic_id ) );
 
 			$plugin = Plugin_Directory::create_plugin_post( array(
-				'slug' => $plugin_slug,
-				'status' => $status,
-				'author' => $topic->topic_poster,
+				'post_name' => $plugin_slug,
+				'post_status' => $status,
+				'post_author' => $topic->topic_poster,
 				'override_modified_date' => true,
 				'post_date_gmt' => $topic->topic_start_time,
 				'post_date' => $topic->topic_start_time,
 				'post_modified' => $topic->topic_time,
 				'post_modified_gmt' => $topic->topic_time,
-				'meta' => array(
+				'meta_input' => array(
 					'_author_ip' => $author_ip,
 				),
 			) );

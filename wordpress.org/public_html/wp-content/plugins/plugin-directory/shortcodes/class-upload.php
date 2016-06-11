@@ -10,6 +10,7 @@ class Upload {
 		ob_start();
 
 		if ( is_user_logged_in() ) :
+			include_once ABSPATH . 'wp-admin/includes/template.php';
 
 			if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) && 'upload' === $_POST['action'] ) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
@@ -40,9 +41,15 @@ class Upload {
 
 			<?php endif; ?>
 
-			<form enctype="multipart/form-data" id="upload_form" method="POST" action="">
+			<form id="upload_form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
+				<fieldset>
+					<legend><?php _e( 'Plugin Categories (up to 3)', 'wporg-plugins' ); ?></legend>
+					<ul class="category-checklist form-no-clear">
+						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
+					</ul>
+				</fieldset>
 				<input type="file" id="zip_file" name="zip_file" size="25"/>
 				<input id="upload_button" class="button" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 

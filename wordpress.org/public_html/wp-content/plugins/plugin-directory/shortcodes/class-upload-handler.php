@@ -174,14 +174,12 @@ class Upload_Handler {
 
 			// Add a Plugin Directory entry for this plugin.
 			$plugin_post = Plugin_Directory::create_plugin_post( array(
-				'title'       => $this->plugin['Name'],
-				'slug'        => $this->plugin_slug,
-				'status'      => 'draft',
-				'author'      => get_current_user_id(),
-				'content'     => $content,
-				'description' => $this->plugin['Description'],
-				'tags'        => $readme->tags,
-				'meta'        => array(
+				'post_title'   => $this->plugin['Name'],
+				'post_name'    => $this->plugin_slug,
+				'post_content' => $content,
+				'post_excerpt' => $this->plugin['Description'],
+				'tax_input'    => wp_unslash( $_POST['tax_input'] ),
+				'meta_input'   => array(
 					'tested'                   => $readme->tested,
 					'requires'                 => $readme->requires,
 					'stable_tag'               => $readme->stable_tag,

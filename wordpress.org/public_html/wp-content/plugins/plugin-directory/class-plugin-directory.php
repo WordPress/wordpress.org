@@ -25,6 +25,7 @@ class Plugin_Directory {
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
 		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
+		add_filter( 'tax_input_pre', array( $this, 'filter_tax_input' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
@@ -32,6 +33,7 @@ class Plugin_Directory {
 
 		// Shim in postmeta support for data which doesn't yet live in postmeta
 		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
+
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
@@ -609,6 +611,24 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Filters the value of tax_inputs before saving.
+	 * 
+	 * Used both in the admin and the uploader.
+	 *
+	 * @param array $tax_input Array of taxonomies with selected terms.
+	 * @return array
+	 */
+	public function filter_tax_input( $tax_input ) {
+
+		// Limit the amount of assignable categories to 3.
+		if ( isset( $tax_input['plugin_category'] ) ) {
+			$tax_input['plugin_category'] = array_slice( array_filter( $tax_input['plugin_category'] ), 0, 3 );
+		}
+
+		return $tax_input;
+	}
+
+	/**
 	 * Retrieve the WP_Post object representing a given plugin.
 	 *
 	 * @param $plugin_slug string|\WP_Post The slug of the plugin to retrieve.
@@ -650,55 +670,69 @@ class Plugin_Directory {
 	/**
 	 * Create a new post entry for a given plugin slug.
 	 *
-	 * @param array $plugin_info {
-	 *     Array of initial plugin post data, all fields are optional.
+	 * @param array $args {
+	 *     An array of elements that make up a post to insert.
 	 *
-	 *     @type string $title       The title of the plugin.
-	 *     @type string $slug        The slug of the plugin.
-	 *     @type string $status      The status of the plugin ( 'publish', 'pending', 'disabled', 'closed' ).
-	 *     @type int    $author      The ID of the plugin author.
-	 *     @type string $description The short description of the plugin.
-	 *     @type string $content     The long description of the plugin.
-	 *     @type array  $tags        The tags associated with the plugin.
-	 *     @type array  $meta        The meta information of the plugin.
+	 *     @type int    $ID                    The post ID. If equal to something other than 0,
+	 *                                         the post with that ID will be updated. Default 0.
+	 *     @type int    $post_author           The ID of the user who added the post. Default is
+	 *                                         the current user ID.
+	 *     @type string $post_date             The date of the post. Default is the current time.
+	 *     @type string $post_date_gmt         The date of the post in the GMT timezone. Default is
+	 *                                         the value of `$post_date`.
+	 *     @type mixed  $post_content          The post content. Default empty.
+	 *     @type string $post_content_filtered The filtered post content. Default empty.
+	 *     @type string $post_title            The post title. Default empty.
+	 *     @type string $post_excerpt          The post excerpt. Default empty.
+	 *     @type string $post_status           The post status. Default 'draft'.
+	 *     @type string $post_type             The post type. Default 'post'.
+	 *     @type string $comment_status        Whether the post can accept comments. Accepts 'open' or 'closed'.
+	 *                                         Default is the value of 'default_comment_status' option.
+	 *     @type string $ping_status           Whether the post can accept pings. Accepts 'open' or 'closed'.
+	 *                                         Default is the value of 'default_ping_status' option.
+	 *     @type string $post_password         The password to access the post. Default empty.
+	 *     @type string $post_name             The post name. Default is the sanitized post title
+	 *                                         when creating a new post.
+	 *     @type string $to_ping               Space or carriage return-separated list of URLs to ping.
+	 *                                         Default empty.
+	 *     @type string $pinged                Space or carriage return-separated list of URLs that have
+	 *                                         been pinged. Default empty.
+	 *     @type string $post_modified         The date when the post was last modified. Default is
+	 *                                         the current time.
+	 *     @type string $post_modified_gmt     The date when the post was last modified in the GMT
+	 *                                         timezone. Default is the current time.
+	 *     @type int    $post_parent           Set this for the post it belongs to, if any. Default 0.
+	 *     @type int    $menu_order            The order the post should be displayed in. Default 0.
+	 *     @type string $post_mime_type        The mime type of the post. Default empty.
+	 *     @type string $guid                  Global Unique ID for referencing the post. Default empty.
+	 *     @type array  $post_category         Array of category names, slugs, or IDs.
+	 *                                         Defaults to value of the 'default_category' option.
+	 *     @type array  $tax_input             Array of taxonomy terms keyed by their taxonomy name. Default empty.
+	 *     @type array  $meta_input            Array of post meta values keyed by their post meta key. Default empty.
 	 * }
 	 * @return \WP_Post|\WP_Error
 	 */
-	static public function create_plugin_post( array $plugin_info ) {
-		$title   = ! empty( $plugin_info['title'] )       ? $plugin_info['title']       : '';
-		$slug    = ! empty( $plugin_info['slug'] )        ? $plugin_info['slug']        : sanitize_title( $title );
-		$status  = ! empty( $plugin_info['status'] )      ? $plugin_info['status']      : 'draft';
-		$author  = ! empty( $plugin_info['author'] )      ? $plugin_info['author']      : 0;
-		$desc    = ! empty( $plugin_info['description'] ) ? $plugin_info['description'] : '';
-		$content = ! empty( $plugin_info['content'] )     ? $plugin_info['content']     : '';
-		$meta    = ! empty( $plugin_info['meta'] )        ? $plugin_info['meta']        : array();
+	public static function create_plugin_post( array $args ) {
+		$title = $args['post_title'] ?: $args['post_name'];
+		$slug  = $args['post_name']  ?: sanitize_title( $title );
 
-		$post_date         = ! empty( $plugin_info['post_date'] )         ? $plugin_info['post_date']         : '';
-		$post_date_gmt     = ! empty( $plugin_info['post_date_gmt'] )     ? $plugin_info['post_date_gmt']     : '';
-		$post_modified     = ! empty( $plugin_info['post_modified'] )     ? $plugin_info['post_modified']     : '';
-		$post_modified_gmt = ! empty( $plugin_info['post_modified_gmt'] ) ? $plugin_info['post_modified_gmt'] : '';
+		$args = wp_parse_args( $args, array(
+			'post_title'        => $title,
+			'post_name'         => $slug,
+			'post_type'         => 'plugin',
+			'post_date'         => '',
+			'post_date_gmt'     => '',
+			'post_modified'     => '',
+			'post_modified_gmt' => '',
+		) );
 
-		$id = wp_insert_post( array(
-			'post_type'    => 'plugin',
-			'post_status'  => $status,
-			'post_name'    => $slug,
-			'post_title'   => $title ?: $slug,
-			'post_author'  => $author,
-			'post_content' => $content,
-			'post_excerpt' => $desc,
-			'meta_input'   => $meta,
-			'post_date'         => $post_date,
-			'post_date_gmt'     => $post_date_gmt,
-			'post_modified'     => $post_modified,
-			'post_modified_gmt' => $post_modified_gmt,
-		), true );
+		$result = wp_insert_post( $args, true );
 
-		if ( is_wp_error( $id ) ) {
-			return $id;
+		if ( ! is_wp_error( $result ) ) {
+			wp_cache_set( $result, $slug, 'plugin-slugs' );
+			$result = get_post( $result );
 		}
 
-		wp_cache_set( $id, $slug, 'plugin-slugs' );
-
-		return get_post( $id );
+		return $result;
 	}
 }
