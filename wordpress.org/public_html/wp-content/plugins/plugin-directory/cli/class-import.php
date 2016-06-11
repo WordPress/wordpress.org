@@ -78,7 +78,7 @@ class Import {
 			$status = 'disabled';
 		}
 
-		if ( ! $plugin ) {			
+		if ( ! $plugin ) {
 			$plugin = Plugin_Directory::create_plugin_post( array(
 				'slug' => $plugin_slug,
 				'status' => $status,
@@ -130,6 +130,11 @@ class Import {
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 		wp_update_post( $plugin );
 		remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
+
+		// Set categories if there aren't any yet. wp-admin takes precedent.
+		if ( ! wp_get_post_terms( $plugin->ID, 'plugin_category', array( 'fields' => 'ids' ) ) ) {
+			wp_set_post_terms( $plugin->ID, Tag_To_Category::map( $readme->tags ), 'plugin_category' );
+		}
 
 		foreach ( $this->readme_fields as $readme_field ) {
 			// Don't change the tested version if a newer version was specified through wp-admin
