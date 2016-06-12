@@ -26,6 +26,8 @@ class Meta extends \WP_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
+		$post = get_post();
+
 		echo $args['before_widget'];
 		?>
 
@@ -41,11 +43,13 @@ class Meta extends \WP_Widget {
 		<ul>
 			<li><?php printf( __( 'Last updated: %s ago', 'wporg-plugins' ), '<span itemprop="dateModified" content="' . esc_attr( get_post_modified_time( 'c' ) ) . '">' . human_time_diff( get_post_modified_time() ) . '</span>' ); ?></li>
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), Template::active_installs( false ) ); ?></li>
-			<li><?php printf( __( 'Category: %s', 'wporg-plugins' ), get_the_term_list( get_post()->ID, 'plugin_category', '', ', ' ) ); ?></li>
-			<?php if ( $built_for = get_the_term_list( get_post()->ID, 'plugin_built_for', '', ', ' ) ) : ?>
+			<?php if ( $categories = get_the_term_list( $post, 'plugin_category', '<div class="tags">', '', '</div>' ) ) : ?>
+				<li><?php printf( __( 'Category: %s', 'wporg-plugins' ), $categories ); ?></li>
+			<?php endif; ?>
+			<?php if ( $built_for = get_the_term_list( $post, 'plugin_built_for', '', ', ' ) ) : ?>
 				<li><?php printf( __( 'Designed to work with: %s', 'wporg-plugins' ), $built_for ); ?></li>
 			<?php endif; ?>
-			<?php if ( $business_model = get_the_term_list( get_post()->ID, 'plugin_business_model', '', ', ' ) ) : ?>
+			<?php if ( $business_model = get_the_term_list( $post, 'plugin_business_model', '', ', ' ) ) : ?>
 				<li><?php printf( __( 'Business Model: %s', 'wporg-plugins' ), $business_model ); ?></li>
 			<?php endif; ?>
 		</ul>

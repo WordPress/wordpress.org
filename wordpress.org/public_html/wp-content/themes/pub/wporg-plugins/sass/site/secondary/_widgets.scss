@@ -98,7 +98,33 @@
 	padding: 0;
 
 	li {
-		padding: 0.5rem 0;
 		border-top: 1px solid #eee;
+		padding: 0.5rem 0;
+	}
+
+	.tags {
+		float: right;
+		text-align: right;
+		width: 70%;
+	}
+
+	[rel="tag"] {
+		background: #eee;
+		border-radius: 2px;
+		color: #000;
+		display: inline-block;
+		@include font-size( ms-unitless( ms(-4) ) );
+		margin: 2px;
+		padding: 3px 6px;
+		position: relative;
+		white-space: nowrap;
+		width: auto;
+
+		&:hover {
+			background: #f3f3f3;
+		}
+		&:active {
+			background: #dfdfdf;
+		}
 	}
 }

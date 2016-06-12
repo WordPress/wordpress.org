@@ -1276,8 +1276,36 @@ p .section-toggle:not(.button):hover {
 }
 
 .plugin-meta ul li {
-  padding: 0.5rem 0;
   border-top: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+
+.plugin-meta ul .tags {
+  float: right;
+  text-align: right;
+  width: 70%;
+}
+
+.plugin-meta ul [rel="tag"] {
+  background: #eee;
+  border-radius: 2px;
+  color: #000;
+  display: inline-block;
+  font-size: 10.24px;
+  font-size: 0.64rem;
+  margin: 2px;
+  padding: 3px 6px;
+  position: relative;
+  white-space: nowrap;
+  width: auto;
+}
+
+.plugin-meta ul [rel="tag"]:hover {
+  background: #f3f3f3;
+}
+
+.plugin-meta ul [rel="tag"]:active {
+  background: #dfdfdf;
 }
 
 /*--------------------------------------------------------------
