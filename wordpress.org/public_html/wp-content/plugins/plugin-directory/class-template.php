@@ -19,7 +19,7 @@ class Template {
 		$post = get_post( $post );
 
 		$count = get_post_meta( $post->ID, 'active_installs', true );
-	
+
 		if ( $count <= 10 ) {
 			$text = __( 'Less than 10', 'wporg-plugins' );
 		} elseif ( $count >= 1000000 ) {
@@ -265,12 +265,19 @@ class Template {
 		if ( ! $plugin ) {
 			return false;
 		}
-		$plugin_slug = $plugin->post_name;
-
-		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true );
 
 		$banner = $banner_2x = false;
-		foreach ( $raw_banners as $file => $info ) {
+		$plugin_slug = $plugin->post_name;
+		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true );
+
+		// Split in rtl and non-rtl banners.
+		$rtl_banners = array_filter( $raw_banners, function( $info ) {
+			return (bool) stristr( $info['filename'], '-rtl' );
+		} );
+		$raw_banners = array_diff_key( $raw_banners, $rtl_banners );
+
+		// Default are non-rtl banners.
+		foreach ( $raw_banners as $info ) {
 			switch ( $info['resolution'] ) {
 				case '1544x500':
 					$banner_2x = self::get_asset_url( $plugin_slug, $info );
@@ -279,6 +286,20 @@ class Template {
 				case '772x250':
 					$banner = self::get_asset_url( $plugin_slug, $info );
 					break;
+			}
+		}
+
+		if ( is_rtl() ) {
+			foreach ( $rtl_banners as $info ) {
+				switch ( $info['resolution'] ) {
+					case '1544x500':
+						$banner_2x = self::get_asset_url( $plugin_slug, $info );
+						break;
+
+					case '772x250':
+						$banner = self::get_asset_url( $plugin_slug, $info );
+						break;
+				}
 			}
 		}
 
@@ -291,7 +312,7 @@ class Template {
 				$id   = "plugin-banner-{$plugin_slug}";
 				$html = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$banner}'); }";
-				if ( ! empty( $icon_2x ) ) {
+				if ( ! empty( $banner_2x ) ) {
 					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$banner_2x}'); } }";
 				}
 				$html .= "</style>";
@@ -299,6 +320,7 @@ class Template {
 
 				return $html;
 				break;
+
 			case 'raw':
 			default:
 				return compact( 'banner', 'banner_2x' );
