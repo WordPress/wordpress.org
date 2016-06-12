@@ -98,7 +98,7 @@ class Plugin_Directory {
 
 		register_taxonomy( 'plugin_section', 'plugin', array(
 			'hierarchical'      => true,
-			'query_var'         => 'plugin_section',
+			'query_var'         => 'browse',
 			'rewrite'           => false,
 			'public'            => true,
 			'show_ui'           => current_user_can( 'plugin_set_section' ),
@@ -108,7 +108,7 @@ class Plugin_Directory {
 				'assign_terms' => 'plugin_set_section',
 			),
 			'labels'            => array(
-				'name' => __( 'Plugin Sections', 'wporg-plugins' ),
+				'name' => __( 'Browse', 'wporg-plugins' ),
 			),
 		) );
 
@@ -408,14 +408,6 @@ class Plugin_Directory {
 		}
 
 		switch ( get_query_var( 'browse' ) ) {
-			case 'beta':
-				$wp_query->query_vars['plugin_section'] = 'beta';
-				break;
-
-			case 'featured':
-				$wp_query->query_vars['plugin_section'] = 'featured';
-				break;
-
 			case 'favorites':
 				$favorites_user = get_current_user_id();
 				if ( !empty( $wp_query->query_vars['favorites_user'] ) ) {
@@ -441,9 +433,28 @@ class Plugin_Directory {
 			case 'popular':
 				$wp_query->query_vars['orderby'] = 'meta_value_num';
 				$wp_query->query_vars['meta_key'] = 'active_installs';
+
+				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse_popular' ) );
 				break;
 		}
+	}
 
+	/**
+	 * Custom callback for pre_get_posts to remove the requirement for plugins to be tagged
+	 * 'popular' to show up when browsing popular plugins.
+	 *
+	 * @ignore
+	 *
+	 * @param string $where WHERE clause.
+	 * @return string
+	 */
+	public function pre_get_posts_sql_browse_popular( $where ) {
+		global $wpdb;
+
+		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse_popular' ) );
+		$term = get_term_by( 'slug', 'popular', 'plugin_section' );
+
+		return str_replace( " AND ( \n  {$wpdb->term_relationships}.term_taxonomy_id IN ({$term->term_id})\n)", '', $where );
 	}
 
 	/**
@@ -612,7 +623,7 @@ class Plugin_Directory {
 
 	/**
 	 * Filters the value of tax_inputs before saving.
-	 * 
+	 *
 	 * Used both in the admin and the uploader.
 	 *
 	 * @param array $tax_input Array of taxonomies with selected terms.

@@ -25,34 +25,34 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 
-		<?php foreach ( $sections as $section_slug => $section_title ) :
+		<?php foreach ( $sections as $browse => $section_title ) :
 			$section_args = array(
-				'post_type'       => 'plugin',
-				'posts_per_page'  => 4,
-				'plugin_section' => $section_slug,
+				'post_type'      => 'plugin',
+				'posts_per_page' => 4,
+				'browse'         => $browse,
 			);
 
-			if ( 'popular' === $section_slug ) :
+			if ( 'popular' === $browse ) :
 				$section_args['meta_key'] = 'active_installs';
 				$section_args['orderby']  = 'meta_value_num';
-				unset( $section_args['plugin_section'] );
+				unset( $section_args['browse'] );
 			endif;
 
 			$section_query = new \WP_Query( $section_args );
-		?>
+			?>
 
 			<section class="plugin-section">
 				<header class="section-header">
 					<h1 class="section-title"><?php echo esc_html( $section_title ); ?></h1>
-					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$section_slug/" ) ); ?>"><?php _ex( 'See all', 'plugins', 'wporg-plugins' ); ?></a>
+					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php _ex( 'See all', 'plugins', 'wporg-plugins' ); ?></a>
 				</header>
 
 				<?php
-					while ( $section_query->have_posts() ) :
-						$section_query->the_post();
+				while ( $section_query->have_posts() ) :
+					$section_query->the_post();
 
-						get_template_part( 'template-parts/plugin', 'index' );
-					endwhile;
+					get_template_part( 'template-parts/plugin', 'index' );
+				endwhile;
 				?>
 			</section>
 
@@ -62,21 +62,21 @@ get_header();
 
 	<aside id="secondary" class="widget-area" role="complementary">
 		<?php
-			the_widget( 'WP_Widget_Text', array(
-				'title' => 'Plugin Authors',
-				'text'  => 'Now what are the possibilities of warp drive? Cmdr Riker\'s nervous system has been invaded by an unknown microorganism. The organisms fuse to the nerve, intertwining at the molecular level. That\'s why the transporter\'s biofilters couldn\'t extract it.',
-			), $widget_args );
+		the_widget( 'WP_Widget_Text', array(
+			'title' => 'Plugin Authors',
+			'text'  => 'Now what are the possibilities of warp drive? Cmdr Riker\'s nervous system has been invaded by an unknown microorganism. The organisms fuse to the nerve, intertwining at the molecular level. That\'s why the transporter\'s biofilters couldn\'t extract it.',
+		), $widget_args );
 
-			the_widget( 'WP_Widget_Text', array(
-				'title' => 'Plugin Reviewers',
-				'text'  => 'Shields up. I recommend we transfer power to phasers and arm the photon torpedoes. Something strange on the detector circuit. The weapons must have disrupted our communicators.',
-			), $widget_args );
+		the_widget( 'WP_Widget_Text', array(
+			'title' => 'Plugin Reviewers',
+			'text'  => 'Shields up. I recommend we transfer power to phasers and arm the photon torpedoes. Something strange on the detector circuit. The weapons must have disrupted our communicators.',
+		), $widget_args );
 
-			the_widget( 'WP_Widget_Text', array(
-				'title' => 'Plugin Handbook',
-				'text'  => 'Communication is not possible. The shuttle has no power. Using the gravitational pull of a star to slingshot back in time? We are going to Starbase Montgomery for Engineering consultations prompted by minor read-out anomalies.',
-			), $widget_args );
+		the_widget( 'WP_Widget_Text', array(
+			'title' => 'Plugin Handbook',
+			'text'  => 'Communication is not possible. The shuttle has no power. Using the gravitational pull of a star to slingshot back in time? We are going to Starbase Montgomery for Engineering consultations prompted by minor read-out anomalies.',
+		), $widget_args );
 		?>
 	</aside><!-- #secondary -->
-<?php
+	<?php
 get_footer();
