@@ -11,56 +11,29 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 
 get_header(); ?>
 
-	<div id="primary" class="content-area">
-		<main id="main" class="site-main" role="main">
+	<main id="main" class="site-main" role="main">
 
-			<section class="error-404 not-found">
-				<header class="page-header">
-					<h1 class="page-title"><?php esc_html_e( 'Oops! That page can&rsquo;t be found.', 'wporg-plugins' ); ?></h1>
-				</header><!-- .page-header -->
+		<section class="error-404 not-found">
+			<header class="page-header">
+				<h1 class="page-title"><?php esc_html_e( 'Oops! That page can&rsquo;t be found.', 'wporg-plugins' ); ?></h1>
+			</header><!-- .page-header -->
 
-				<div class="page-content">
-					<p><?php esc_html_e( 'It looks like nothing was found at this location. Maybe try one of the links below or a search?', 'wporg-plugins' ); ?></p>
+			<div class="page-content">
+				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-plugins' ), get_home_url() ); ?></p>
 
-					<?php
-						get_search_form();
+				<div class="logo-swing">
+					<span class="dashicons dashicons-wordpress wp-logo"></span>
+					<span class="dashicons dashicons-wordpress wp-logo hinge"></span>
+				</div>
+				<script>
+					setTimeout( function() {
+						jQuery( '.hinge' ).hide();
+					}, 1900 );
+				</script>
+			</div><!-- .page-content -->
+		</section><!-- .error-404 -->
 
-						the_widget( 'WP_Widget_Recent_Posts' );
-
-						// Only show the widget if site has multiple categories.
-						if ( wporg_plugins_categorized_blog() ) :
-					?>
-
-					<div class="widget widget_categories">
-						<h2 class="widget-title"><?php esc_html_e( 'Most Used Categories', 'wporg-plugins' ); ?></h2>
-						<ul>
-						<?php
-							wp_list_categories( array(
-								'orderby'    => 'count',
-								'order'      => 'DESC',
-								'show_count' => 1,
-								'title_li'   => '',
-								'number'     => 10,
-							) );
-						?>
-						</ul>
-					</div><!-- .widget -->
-
-					<?php
-						endif;
-
-						/* translators: %1$s: smiley */
-						$archive_content = '<p>' . sprintf( esc_html__( 'Try looking in the monthly archives. %1$s', 'wporg-plugins' ), convert_smilies( ':)' ) ) . '</p>';
-						the_widget( 'WP_Widget_Archives', 'dropdown=1', "after_title=</h2>$archive_content" );
-
-						the_widget( 'WP_Widget_Tag_Cloud' );
-					?>
-
-				</div><!-- .page-content -->
-			</section><!-- .error-404 -->
-
-		</main><!-- #main -->
-	</div><!-- #primary -->
+	</main><!-- #main -->
 
 <?php
 get_footer();

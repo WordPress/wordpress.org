@@ -298,11 +298,10 @@ h6 {
 
 p {
   margin: 1em 0;
-  max-width: 35.527136788rem;
 }
 
 p.subheading {
-  color: #82878C;
+  color: #82878c;
   font-size: 1.25rem;
   font-weight: 300;
   margin: -.4rem auto 2rem;
@@ -395,7 +394,7 @@ blockquote:before, blockquote:after, q:before, q:after {
 }
 
 hr {
-  background-color: #ccc;
+  background-color: #eee;
   border: 0;
   height: 1px;
   margin-bottom: 1.5em;
@@ -1760,6 +1759,102 @@ p .section-toggle:not(.button):hover {
     padding: 0;
     width: 30%;
   }
+}
+
+/*--------------------------------------------------------------
+## 404
+--------------------------------------------------------------*/
+.error404 {
+  background: #0073aa;
+  color: #fff;
+}
+
+.error404 .page-title {
+  text-align: center;
+}
+
+.error404 .page-content {
+  text-align: center;
+}
+
+.error404 .page-content a, .error404 .page-content .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .error404 .page-content .section-toggle {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.error404 .page-content .logo-swing {
+  height: 160px;
+  height: 10rem;
+  margin: 96px auto;
+  margin: 6rem auto;
+  position: relative;
+  text-align: center;
+  width: 160px;
+  width: 10rem;
+}
+
+.error404 .page-content .logo-swing .dashicons-wordpress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  width: 160px;
+  width: 10rem;
+}
+
+.error404 .page-content .logo-swing .dashicons-wordpress:first-of-type {
+  color: #0d7aae;
+}
+
+.error404 .page-content .logo-swing .dashicons-wordpress:before {
+  font-size: 160px;
+  font-size: 10rem;
+}
+
+@keyframes hinge {
+  10% {
+    width: 180px;
+    height: 180px;
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
+  15% {
+    width: 185px;
+    height: 185px;
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
+  20% {
+    width: 180px;
+    height: 180px;
+    transform: rotate3d(0, 0, 1, 5deg);
+  }
+  40% {
+    transform-origin: top left;
+    animation-timing-function: ease-in-out;
+  }
+  60% {
+    transform: rotate3d(0, 0, 1, 40deg);
+    transform-origin: top left;
+    animation-timing-function: ease-in-out;
+  }
+  40%, 80% {
+    transform: rotate3d(0, 0, 1, 60deg);
+    transform-origin: top left;
+    animation-timing-function: ease-in-out;
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, 700px, 0);
+    opacity: 0;
+  }
+}
+
+.hinge {
+  animation-duration: 2s;
+  animation-name: hinge;
+}
+
+.hide {
+  display: none;
 }
 
 /*--------------------------------------------------------------
