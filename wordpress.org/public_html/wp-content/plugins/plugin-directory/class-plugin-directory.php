@@ -252,12 +252,10 @@ class Plugin_Directory {
 	 *
 	 * Setting up the site requires setting up the theme and proper
 	 * rewrite permastructs.
+	 *
+	 * @global \WP_Rewrite $wp_rewrite WordPress rewrite component.
 	 */
 	public function activate() {
-
-		/**
-		 * @var \WP_Rewrite $wp_rewrite WordPress rewrite component.
-		 */
 		global $wp_rewrite;
 
 		// Setup the environment.
@@ -431,11 +429,13 @@ class Plugin_Directory {
 				break;
 
 			case 'popular':
-				$wp_query->query_vars['orderby'] = 'meta_value_num';
-				$wp_query->query_vars['meta_key'] = 'active_installs';
-
 				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse_popular' ) );
 				break;
+		}
+
+		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
+			$wp_query->query_vars['orderby']  = 'meta_value_num';
+			$wp_query->query_vars['meta_key'] = 'active_installs';
 		}
 	}
 
