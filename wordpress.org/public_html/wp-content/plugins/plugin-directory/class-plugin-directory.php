@@ -426,10 +426,12 @@ class Plugin_Directory {
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
 					$wp_query->query_vars['p'] = -1;
 				}
+
+				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 				break;
 
 			case 'popular':
-				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse_popular' ) );
+				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 				break;
 		}
 
@@ -440,21 +442,28 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Custom callback for pre_get_posts to remove the requirement for plugins to be tagged
-	 * 'popular' to show up when browsing popular plugins.
+	 * Callback to remove the requirement for plugins to be tagged with the requested
+	 * plugin_section term.
+	 *
+	 * Used for archives like `popular` or `favorites`, that all active plugins are a part of.
 	 *
 	 * @ignore
 	 *
 	 * @param string $where WHERE clause.
 	 * @return string
 	 */
-	public function pre_get_posts_sql_browse_popular( $where ) {
+	public function pre_get_posts_sql_browse( $where ) {
 		global $wpdb;
 
-		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse_popular' ) );
-		$term = get_term_by( 'slug', 'popular', 'plugin_section' );
+		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 
-		return str_replace( " AND ( \n  {$wpdb->term_relationships}.term_taxonomy_id IN ({$term->term_id})\n)", '', $where );
+		$term = get_term_by( 'slug', get_query_var( 'browse' ), 'plugin_section' );
+
+		if ( $term instanceof \WP_Term ) {
+			$where = str_replace( " AND ( \n  {$wpdb->term_relationships}.term_taxonomy_id IN ({$term->term_id})\n)", '', $where );
+		}
+
+		return $where;
 	}
 
 	/**
