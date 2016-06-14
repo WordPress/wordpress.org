@@ -22,6 +22,9 @@ function setup() {
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
+	// Don't include Adjacent Posts functionality
+	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
+
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
 		'primary' => esc_html__( 'Primary', 'wporg-plugins' ),
