@@ -141,6 +141,10 @@ class Import {
 			wp_set_post_terms( $plugin->ID, Tag_To_Category::map( $readme->tags ), 'plugin_category' );
 		}
 
+		if ( in_array( 'adopt-me', $readme->tags ) ) {
+			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
+		}
+
 		foreach ( $this->readme_fields as $readme_field ) {
 			// Don't change the tested version if a newer version was specified through wp-admin
 			if ( 'tested' == $readme_field && version_compare( get_post_meta( $plugin->ID, 'tested', true ), $readme->$readme_field, '>' ) ) {
