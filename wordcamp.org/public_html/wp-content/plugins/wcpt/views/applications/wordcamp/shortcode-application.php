@@ -93,6 +93,24 @@ defined( 'WPINC' ) or die();
 
 			<div class="PDF_questionDivide" id="pd-divider-31"></div>
 
+			<div class="PDF_question" id="pd-question-34">
+				<div class="qNumber">
+					Q.34
+				</div>
+
+				<div class="qContent">
+					<div class="qText">
+						What is your username on <a href="https://chat.wordpress.org" target="_blank">WordPress' Slack server</a>?
+					</div>
+
+					<div class="PDF_QT100">
+						<input value="" maxlength="500" name="q_4236565_slack_username" class="large" type="text" title="What is your Slack username?" />
+					</div>
+				</div>
+			</div>
+
+			<div class="PDF_questionDivide" id="pd-divider-34"></div>
+
 			<div class="PDF_question" id="pd-question-3">
 				<div class="qNumber">
 					Q.3
