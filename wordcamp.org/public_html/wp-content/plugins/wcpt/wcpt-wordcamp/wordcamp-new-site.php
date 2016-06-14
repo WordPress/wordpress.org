@@ -283,11 +283,6 @@ class WordCamp_New_Site {
 
 		$lead_organizer = $this->get_user_or_current_user( $meta['WordPress.org Username'][0] );
 
-		activate_plugins( array(
-			'camptix/camptix.php',
-			'wc-fonts/wc-fonts.php'
-		) ); // Note: this may not be safe to do with every plugin, especially if it has activation callbacks. Make sure you test any new ones that are added.
-
 		switch_theme( 'twentythirteen' );
 
 		$this->set_default_options( $wordcamp, $meta );
