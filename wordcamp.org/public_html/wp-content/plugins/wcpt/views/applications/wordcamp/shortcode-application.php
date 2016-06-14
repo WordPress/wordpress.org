@@ -70,6 +70,29 @@ defined( 'WPINC' ) or die();
 
 			<div class="PDF_questionDivide" id="pd-divider-2"></div>
 
+			<div class="PDF_question" id="pd-question-31">
+				<div class="qNumber">
+					Q.31
+				</div>
+
+				<div class="qContent">
+					<div class="qText">
+						What is your wordpress.org username?
+						<span class="PDF_mand">*</span>
+					</div>
+
+					<div class="qNote">
+						<p>(This is the username you'd use to log in to http://wordpress.org/support/)</p>
+					</div>
+
+					<div class="PDF_QT100">
+						<input value="" maxlength="500" name="q_4236565_wporg_username" class="large required" type="text" title="What is your wordpress.org username?" required />
+					</div>
+				</div>
+			</div>
+
+			<div class="PDF_questionDivide" id="pd-divider-31"></div>
+
 			<div class="PDF_question" id="pd-question-3">
 				<div class="qNumber">
 					Q.3
@@ -1146,29 +1169,6 @@ defined( 'WPINC' ) or die();
 			</div>
 
 			<div class="PDF_questionDivide" id="pd-divider-30"></div>
-
-			<div class="PDF_question" id="pd-question-31">
-				<div class="qNumber">
-					Q.31
-				</div>
-
-				<div class="qContent">
-					<div class="qText">
-						What is your wordpress.org username?
-						<span class="PDF_mand">*</span>
-					</div>
-
-					<div class="qNote">
-						<p>(This is the username you'd use to log in to http://wordpress.org/support/)</p>
-					</div>
-
-					<div class="PDF_QT100">
-						<input value="" maxlength="500" name="q_4236565_wporg_username" class="large required" type="text" title="What is your wordpress.org username?" required />
-					</div>
-				</div>
-			</div>
-
-			<div class="PDF_questionDivide" id="pd-divider-31"></div>
 
 			<div class="PDF_question" id="pd-question-32">
 				<div class="qNumber">
