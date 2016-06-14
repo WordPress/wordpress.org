@@ -32,6 +32,7 @@ class Customizations {
 		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
+		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
@@ -284,6 +285,17 @@ class Customizations {
 		$send_back = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids', 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), wp_get_referer() );
 		wp_redirect( add_query_arg( array( 'settings-updated' => true ), $send_back ) );
 		exit;
+	}
+
+	/**
+	 * Displays a link to the plugin page when it's published.
+	 *
+	 * @param \WP_Post $post The current post object.
+	 */
+	public function show_permalink( $post ) {
+		if ( 'publish' === $post->post_status ) {
+			echo get_sample_permalink_html( $post );
+		}
 	}
 
 	/**
