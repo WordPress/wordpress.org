@@ -1,0 +1,22 @@
+@import "../../variables-site/variables-site";
+
+.page {
+	.type-page {
+		margin: 0 auto;
+		max-width: ms(32);
+		padding: 0 2rem;
+	}
+
+	h1 {
+		@extend h3;
+	}
+
+	h2 {
+		@extend h5;
+	}
+
+	hr {
+		margin-left: -6.5rem;
+		margin-right: -6.5rem;
+	}
+}

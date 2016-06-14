@@ -326,51 +326,12 @@ p .button {
 
 	.button,
 	.button.button-large,
-	.button.button-small,
-	input#publish,
-	input#save-post,
-	a.preview {
+	.button.button-smallw {
 		font-size: 14px;
 		height: auto;
 		line-height: normal;
 		margin-bottom: 4px;
 		padding: 6px 14px;
 		vertical-align: middle;
-	}
-
-	#media-upload .button {
-		font-size: 13px;
-		line-height: 22px;
-		padding: 0 10px 1px;
-		height: 24px;
-	}
-
-	.media-frame.mode-grid .bulk-select .button {
-		margin-bottom: 0;
-	}
-
-	/* Publish Metabox Options */
-	.save-post-status.button {
-		margin: 0 14px 0 10px; /* 14px right margin to match all other buttons */
-		position: relative;
-	}
-
-	/* Reset responsive styles in Press This, Customizer */
-
-	.wp-customizer .button {
-		font-size: 13px;
-		height: 28px;
-		line-height: 26px;
-		margin: 0;
-		padding: 0 10px 1px;
-		vertical-align: inherit;
-	}
-
-	/* Reset responsive styles on Log in button on iframed login form */
-
-	.interim-login .button.button-large {
-		height: 30px;
-		line-height: 28px;
-		padding: 0 12px 2px;
 	}
 }

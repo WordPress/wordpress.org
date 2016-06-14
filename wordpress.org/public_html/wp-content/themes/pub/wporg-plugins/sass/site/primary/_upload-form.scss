@@ -1,0 +1,69 @@
+.plugin-upload-form {
+	fieldset {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	legend {
+		margin: 1rem 0;
+	}
+
+	.category-checklist {
+		@extend .clear;
+		list-style-type: none;
+		margin: 0 0 2rem;
+
+		li {
+			float: left;
+			padding: 0.5rem 0;
+			width: 50%;
+		}
+
+		@media screen and ( min-width: 48em ) {
+			li {
+				padding: 0;
+			}
+
+			label {
+				@include font-size( ms-unitless( ms(-2) ) );
+			}
+		}
+	}
+
+	@media screen and ( min-width: 48em ) {
+		label.button {
+			line-height: 1.8;
+		}
+
+		.button-primary {
+			font-size: 14px;
+			height: auto;
+			line-height: normal;
+			margin-bottom: 4px;
+			padding: 6px 14px;
+			vertical-align: middle;
+		}
+	}
+
+	.plugin-file {
+		width: 0.1px;
+		height: 0.1px;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		z-index: -1;
+	}
+
+	.button-primary {
+		@extend .button;
+		@extend .button-primary;
+
+		&:hover {
+			@extend .button-primary:hover;
+		}
+		&:focus {
+			@extend .button-primary:focus;
+		}
+	}
+}

@@ -238,7 +238,7 @@ textarea {
   }
 }
 
-h1, h2, h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, h4, h5, h6 {
+h1, h2, h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, .page h1, h4, h5, .page h2, h6 {
   clear: both;
   line-height: 1.5;
   margin: 2rem 0 1rem;
@@ -265,7 +265,7 @@ h2 {
   font-weight: 300;
 }
 
-h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title {
+h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, .page h1 {
   font-size: 25px;
   font-size: 1.5625rem;
   font-weight: 400;
@@ -280,7 +280,7 @@ h4 {
   padding: 0;
 }
 
-h5 {
+h5, .page h2 {
   font-size: 16px;
   font-size: 1rem;
   text-transform: uppercase;
@@ -396,8 +396,8 @@ blockquote:before, blockquote:after, q:before, q:after {
 hr {
   background-color: #eee;
   border: 0;
-  height: 1px;
-  margin-bottom: 1.5em;
+  height: 2px;
+  margin: 5rem auto;
 }
 
 ul, ol {
@@ -499,8 +499,9 @@ table {
 /* ----------------------------------------------------------------------------
   1.0 - Button Layouts
 ---------------------------------------------------------------------------- */
-.button,
+.button, .plugin-upload-form .button-primary,
 .button-primary,
+.plugin-upload-form .button-primary,
 .button-secondary {
   -webkit-appearance: none;
   border: 1px solid;
@@ -526,15 +527,19 @@ input[type="submit"]::-moz-focus-inner {
   padding: 0;
 }
 
-.button.button-large,
-.button-group.button-large .button {
+.button.button-large, .plugin-upload-form .button-large.button-primary,
+.button-group.button-large .button,
+.button-group.button-large .plugin-upload-form .button-primary, .plugin-upload-form
+.button-group.button-large .button-primary {
   height: 1.953125rem;
   line-height: 1;
   padding: 0 1rem;
 }
 
-.button.button-small,
-.button-group.button-small .button {
+.button.button-small, .plugin-upload-form .button-small.button-primary,
+.button-group.button-small .button,
+.button-group.button-small .plugin-upload-form .button-primary, .plugin-upload-form
+.button-group.button-small .button-primary {
   font-size: 10.24px;
   font-size: 0.64rem;
   height: 1.25rem;
@@ -542,34 +547,48 @@ input[type="submit"]::-moz-focus-inner {
   padding: 0 .5rem;
 }
 
-a.button, .single .type-plugin .entry-content .button.section-toggle,
+a.button, .single .type-plugin .entry-content .button.section-toggle, .single .type-plugin .entry-content .plugin-upload-form .section-toggle.button-primary, .plugin-upload-form .single .type-plugin .entry-content .section-toggle.button-primary, .plugin-upload-form a.button-primary,
 a.button-primary,
 .single .type-plugin .entry-content .button-primary.section-toggle,
+.plugin-upload-form a.button-primary,
 a.button-secondary,
 .single .type-plugin .entry-content .button-secondary.section-toggle {
   line-height: 1.5625rem;
 }
 
-a.button.button-large, .single .type-plugin .entry-content .button.button-large.section-toggle,
+a.button.button-large, .single .type-plugin .entry-content .button.button-large.section-toggle, .single .type-plugin .entry-content .plugin-upload-form .button-large.section-toggle.button-primary, .plugin-upload-form .single .type-plugin .entry-content .button-large.section-toggle.button-primary, .plugin-upload-form a.button-large.button-primary,
 .button-group.button-large a.button,
 .button-group.button-large .single .type-plugin .entry-content .button.section-toggle, .single .type-plugin .entry-content
-.button-group.button-large .button.section-toggle {
+.button-group.button-large .button.section-toggle,
+.button-group.button-large .single .type-plugin .entry-content .plugin-upload-form .section-toggle.button-primary, .single .type-plugin .entry-content .plugin-upload-form
+.button-group.button-large .section-toggle.button-primary,
+.button-group.button-large .plugin-upload-form .single .type-plugin .entry-content .section-toggle.button-primary, .plugin-upload-form .single .type-plugin .entry-content
+.button-group.button-large .section-toggle.button-primary,
+.button-group.button-large .plugin-upload-form a.button-primary, .plugin-upload-form
+.button-group.button-large a.button-primary {
   line-height: 1.953125rem;
 }
 
-a.button.button-small, .single .type-plugin .entry-content .button.button-small.section-toggle,
+a.button.button-small, .single .type-plugin .entry-content .button.button-small.section-toggle, .single .type-plugin .entry-content .plugin-upload-form .button-small.section-toggle.button-primary, .plugin-upload-form .single .type-plugin .entry-content .button-small.section-toggle.button-primary, .plugin-upload-form a.button-small.button-primary,
 .button-group.button-small a.button,
 .button-group.button-small .single .type-plugin .entry-content .button.section-toggle, .single .type-plugin .entry-content
-.button-group.button-small .button.section-toggle {
+.button-group.button-small .button.section-toggle,
+.button-group.button-small .single .type-plugin .entry-content .plugin-upload-form .section-toggle.button-primary, .single .type-plugin .entry-content .plugin-upload-form
+.button-group.button-small .section-toggle.button-primary,
+.button-group.button-small .plugin-upload-form .single .type-plugin .entry-content .section-toggle.button-primary, .plugin-upload-form .single .type-plugin .entry-content
+.button-group.button-small .section-toggle.button-primary,
+.button-group.button-small .plugin-upload-form a.button-primary, .plugin-upload-form
+.button-group.button-small a.button-primary {
   line-height: 1.25rem;
 }
 
-.button:active,
-.button:focus {
+.button:active, .plugin-upload-form .button-primary:active,
+.button:focus,
+.plugin-upload-form .button-primary:focus {
   outline: none;
 }
 
-.button.hidden {
+.button.hidden, .plugin-upload-form .hidden.button-primary {
   display: none;
 }
 
@@ -588,8 +607,9 @@ input[type="reset"]:focus {
 /* ----------------------------------------------------------------------------
   2.0 - Default Button Style
 ---------------------------------------------------------------------------- */
-.button,
+.button, .plugin-upload-form .button-primary,
 .button:visited,
+.plugin-upload-form .button-primary:visited,
 .button-secondary {
   background: #f7f7f7;
   border-color: #cccccc;
@@ -598,32 +618,38 @@ input[type="reset"]:focus {
   vertical-align: top;
 }
 
-p .button {
+p .button, p .plugin-upload-form .button-primary, .plugin-upload-form p .button-primary {
   vertical-align: baseline;
 }
 
-.button.hover,
+.button.hover, .plugin-upload-form .hover.button-primary,
 .button:hover,
+.plugin-upload-form .button-primary:hover,
 .button-secondary:hover,
 .button.focus,
+.plugin-upload-form .focus.button-primary,
 .button:focus,
+.plugin-upload-form .button-primary:focus,
 .button-secondary:focus {
   background: #fafafa;
   border-color: #999;
   color: #23282d;
 }
 
-.button.focus,
+.button.focus, .plugin-upload-form .focus.button-primary,
 .button:focus,
+.plugin-upload-form .button-primary:focus,
 .button-secondary:focus,
 .button-link:focus {
   border-color: #5b9dd9;
   box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
 }
 
-.button.active,
+.button.active, .plugin-upload-form .active.button-primary,
 .button.active:hover,
+.plugin-upload-form .active.button-primary:hover,
 .button:active,
+.plugin-upload-form .button-primary:active,
 .button-secondary:active {
   background: #eee;
   border-color: #999;
@@ -631,14 +657,16 @@ p .button {
   transform: translateY(1px);
 }
 
-.button.active:focus {
+.button.active:focus, .plugin-upload-form .active.button-primary:focus {
   border-color: #5b9dd9;
   box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0, 115, 170, 0.8);
 }
 
-.button[disabled],
+.button[disabled], .plugin-upload-form [disabled].button-primary,
 .button:disabled,
+.plugin-upload-form .button-primary:disabled,
 .button.disabled,
+.plugin-upload-form .disabled.button-primary,
 .button-secondary[disabled],
 .button-secondary:disabled,
 .button-secondary.disabled,
@@ -671,7 +699,7 @@ p .button {
 /* ----------------------------------------------------------------------------
   3.0 - Primary Button Style
 ---------------------------------------------------------------------------- */
-.button-primary,
+.button-primary, .plugin-upload-form .button-primary,
 .download-button {
   background: #0085ba;
   border-color: #0073aa #006799 #006799;
@@ -681,7 +709,7 @@ p .button {
   text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
 }
 
-.button-primary.hover, .button-primary:hover, .button-primary.focus, .button-primary:focus,
+.button-primary.hover, .button-primary:hover, .plugin-upload-form .button-primary:hover, .button-primary.focus, .button-primary:focus, .plugin-upload-form .button-primary:focus,
 .download-button.hover,
 .download-button:hover,
 .download-button.focus,
@@ -692,7 +720,7 @@ p .button {
   color: #fff;
 }
 
-.button-primary.focus, .button-primary:focus,
+.button-primary.focus, .button-primary:focus, .plugin-upload-form .button-primary:focus,
 .download-button.focus,
 .download-button:focus {
   box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
@@ -721,16 +749,21 @@ p .button {
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
 }
 
-.button-primary.button.button-hero,
-.download-button.button.button-hero {
+.button-primary.button.button-hero, .plugin-upload-form .button-hero.button-primary,
+.download-button.button.button-hero,
+.plugin-upload-form .download-button.button-hero.button-primary {
   box-shadow: 0 2px 0 #006799;
 }
 
-.button-primary.button.button-hero.active, .button-primary.button.button-hero.active:hover, .button-primary.button.button-hero.active:focus, .button-primary.button.button-hero:active,
+.button-primary.button.button-hero.active, .plugin-upload-form .button-hero.active.button-primary, .button-primary.button.button-hero.active:hover, .plugin-upload-form .button-hero.active.button-primary:hover, .button-primary.button.button-hero.active:focus, .plugin-upload-form .button-hero.active.button-primary:focus, .button-primary.button.button-hero:active, .plugin-upload-form .button-hero.button-primary:active,
 .download-button.button.button-hero.active,
+.plugin-upload-form .download-button.button-hero.active.button-primary,
 .download-button.button.button-hero.active:hover,
+.plugin-upload-form .download-button.button-hero.active.button-primary:hover,
 .download-button.button.button-hero.active:focus,
-.download-button.button.button-hero:active {
+.plugin-upload-form .download-button.button-hero.active.button-primary:focus,
+.download-button.button.button-hero:active,
+.plugin-upload-form .download-button.button-hero.button-primary:active {
   box-shadow: inset 0 3px 0 #006799;
 }
 
@@ -754,30 +787,30 @@ p .button {
   white-space: nowrap;
 }
 
-.button-group > .button {
+.button-group > .button, .plugin-upload-form .button-group > .button-primary {
   display: inline-block;
   border-radius: 0;
   margin-right: -1px;
   z-index: 10;
 }
 
-.button-group > .button-primary {
+.button-group > .button-primary, .plugin-upload-form .button-group > .button-primary {
   z-index: 100;
 }
 
-.button-group > .button:hover {
+.button-group > .button:hover, .plugin-upload-form .button-group > .button-primary:hover {
   z-index: 20;
 }
 
-.button-group > .button:first-child {
+.button-group > .button:first-child, .plugin-upload-form .button-group > .button-primary:first-child {
   border-radius: 3px 0 0 3px;
 }
 
-.button-group > .button:last-child {
+.button-group > .button:last-child, .plugin-upload-form .button-group > .button-primary:last-child {
   border-radius: 0 3px 3px 0;
 }
 
-.button-group > .button:focus {
+.button-group > .button:focus, .plugin-upload-form .button-group > .button-primary:focus {
   position: relative;
   z-index: 1;
 }
@@ -786,13 +819,11 @@ p .button {
   5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
 @media screen and (max-width: 48em) {
-  .button,
+  .button, .plugin-upload-form .button-primary,
   .button.button-large,
-  .button.button-small,
-  input#publish,
-  input#save-post,
-  a.preview,
-  .single .type-plugin .entry-content .preview.section-toggle {
+  .plugin-upload-form .button-large.button-primary,
+  .button.button-smallw,
+  .plugin-upload-form .button-smallw.button-primary {
     font-size: 14px;
     height: auto;
     line-height: normal;
@@ -800,103 +831,320 @@ p .button {
     padding: 6px 14px;
     vertical-align: middle;
   }
-  #media-upload .button {
-    font-size: 13px;
-    line-height: 22px;
-    padding: 0 10px 1px;
-    height: 24px;
-  }
-  .media-frame.mode-grid .bulk-select .button {
-    margin-bottom: 0;
-  }
-  /* Publish Metabox Options */
-  .save-post-status.button {
-    margin: 0 14px 0 10px;
-    /* 14px right margin to match all other buttons */
-    position: relative;
-  }
-  /* Reset responsive styles in Press This, Customizer */
-  .wp-customizer .button {
-    font-size: 13px;
-    height: 28px;
-    line-height: 26px;
-    margin: 0;
-    padding: 0 10px 1px;
-    vertical-align: inherit;
-  }
-  /* Reset responsive styles on Log in button on iframed login form */
-  .interim-login .button.button-large {
-    height: 30px;
-    line-height: 28px;
-    padding: 0 12px 2px;
-  }
+}
+
+/* Include margin and padding in the width calculation of input and textarea. */
+input,
+textarea {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 input[type="text"],
-input[type="email"],
-input[type="url"],
 input[type="password"],
-input[type="search"],
-input[type="number"],
-input[type="tel"],
-input[type="range"],
+input[type="checkbox"],
+input[type="color"],
 input[type="date"],
-input[type="month"],
-input[type="week"],
-input[type="time"],
 input[type="datetime"],
 input[type="datetime-local"],
-input[type="color"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="radio"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"],
+select,
 textarea {
-  color: #666;
-  border: 1px solid #ccc;
+  -webkit-appearance: none;
+  border: 1px solid #ddd;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+  background-color: #fff;
+  color: #32373c;
+  -webkit-transition: 0.05s border-color ease-in-out;
+  transition: 0.05s border-color ease-in-out;
 }
 
 input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="url"]:focus,
 input[type="password"]:focus,
-input[type="search"]:focus,
-input[type="number"]:focus,
-input[type="tel"]:focus,
-input[type="range"]:focus,
+input[type="checkbox"]:focus,
+input[type="color"]:focus,
 input[type="date"]:focus,
-input[type="month"]:focus,
-input[type="week"]:focus,
-input[type="time"]:focus,
 input[type="datetime"]:focus,
 input[type="datetime-local"]:focus,
-input[type="color"]:focus,
+input[type="email"]:focus,
+input[type="month"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="radio"]:focus,
+input[type="tel"]:focus,
+input[type="text"]:focus,
+input[type="time"]:focus,
+input[type="url"]:focus,
+input[type="week"]:focus,
+select:focus,
 textarea:focus {
   color: #111;
 }
 
-select {
-  border: 1px solid #ccc;
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="color"]:focus,
+input[type="date"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="email"]:focus,
+input[type="month"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="text"]:focus,
+input[type="time"]:focus,
+input[type="url"]:focus,
+input[type="week"]:focus,
+input[type="checkbox"]:focus,
+input[type="radio"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #5b9dd9;
+  -webkit-box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+  box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+}
+
+/* rtl:ignore */
+input[type="email"],
+input[type="url"] {
+  direction: ltr;
 }
 
 input[type="text"],
 input[type="email"],
-input[type="url"],
-input[type="password"],
 input[type="search"],
-input[type="number"],
-input[type="tel"],
-input[type="range"],
-input[type="date"],
-input[type="month"],
-input[type="week"],
-input[type="time"],
-input[type="datetime"],
-input[type="datetime-local"],
-input[type="color"] {
-  -webkit-appearance: none;
-  padding: 3px;
+input[type="password"],
+input[type="number"] {
+  padding: 6px 10px;
+}
+
+/* Vertically align the number selector with the input. */
+input[type="number"] {
+  height: 40px;
+  line-height: inherit;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  border: 1px solid #b4b9be;
+  background: #fff;
+  color: #555;
+  clear: none;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 0;
+  margin: -4px 4px 0 0;
+  padding: 0 !important;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 16px;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  -webkit-transition: .05s border-color ease-in-out;
+  transition: .05s border-color ease-in-out;
+  height: 25px;
+  width: 25px;
+}
+
+input[type="checkbox"] {
+  padding: 10px;
+}
+
+input[type="radio"] {
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  margin-right: 4px;
+  line-height: 10px;
+}
+
+input[type="checkbox"]:checked:before,
+input[type="radio"]:checked:before {
+  float: left;
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  font: normal 21px/1 dashicons;
+  speak: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input[type="checkbox"]:checked:before {
+  content: "\f147";
+  color: #1e8cbe;
+  font: normal 30px/1 dashicons;
+  margin: -3px -5px;
+}
+
+input[type="radio"]:checked:before {
+  content: "\2022";
+  text-indent: -9999px;
+  -webkit-border-radius: 50px;
+  border-radius: 50px;
+  font-size: 24px;
+  width: 9px;
+  height: 9px;
+  margin: 7px;
+  line-height: 16px;
+  background-color: #1e8cbe;
+  vertical-align: middle;
+}
+
+@-moz-document url-prefix() {
+  input[type="checkbox"],
+  input[type="radio"],
+  .form-table input.tog {
+    margin-bottom: -1px;
+  }
+}
+
+/* Search */
+input[type="search"] {
+  -webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-decoration {
+  display: none;
+}
+
+.ie8 input[type="password"] {
+  font-family: sans-serif;
+}
+
+textarea,
+input,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+textarea,
+input,
+select {
+  font-size: 16px;
+  padding: 3px 5px;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  /* Reset mobile webkit's default element styling */
 }
 
 textarea {
-  padding-left: 3px;
-  width: 100%;
+  overflow: auto;
+  padding: 2px 6px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+input[type="file"] {
+  padding: 3px 0;
+}
+
+label {
+  cursor: pointer;
+}
+
+input.readonly,
+input[readonly],
+textarea.readonly,
+textarea[readonly] {
+  background-color: #eee;
+}
+
+:-moz-placeholder {
+  color: #a9a9a9;
+}
+
+input:disabled,
+input.disabled,
+select:disabled,
+select.disabled,
+textarea:disabled,
+textarea.disabled {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(222, 222, 222, 0.75);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: rgba(51, 51, 51, 0.5);
+}
+
+input[type="file"]:disabled,
+input[type="file"].disabled,
+input[type="range"]:disabled,
+input[type="range"].disabled {
+  background: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+input[type="checkbox"]:disabled,
+input[type="checkbox"].disabled,
+input[type="radio"]:disabled,
+input[type="radio"].disabled,
+input[type="checkbox"]:disabled:checked:before,
+input[type="checkbox"].disabled:checked:before,
+input[type="radio"]:disabled:checked:before,
+input[type="radio"].disabled:checked:before {
+  opacity: 0.7;
+}
+
+label,
+fieldset label {
+  vertical-align: middle;
+}
+
+/* =Media Queries
+-------------------------------------------------------------- */
+@media screen and (min-width: 48em) {
+  /* Input Elements */
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="password"],
+  input[type="number"] {
+    padding: 0;
+  }
+  input[type="number"] {
+    height: 28px;
+  }
+  input[type="checkbox"] {
+    padding: 0;
+  }
+  input[type="checkbox"]:checked:before {
+    font: normal 21px/1 dashicons;
+    margin: -3px 0 0 -4px;
+  }
+  input[type="radio"],
+  input[type="checkbox"] {
+    height: 16px;
+    width: 16px;
+  }
+  input[type="radio"]:checked:before {
+    width: 6px;
+    height: 6px;
+    margin: 4px;
+  }
+  textarea,
+  input,
+  select {
+    font-size: 14px;
+  }
 }
 
 /*--------------------------------------------------------------
@@ -925,10 +1173,10 @@ a:hover, .single .type-plugin .entry-content .section-toggle:hover, a:active, .s
   outline: 0;
 }
 
-p a:not(.button), p .single .type-plugin .entry-content .section-toggle:not(.button), .single .type-plugin .entry-content p .section-toggle:not(.button),
-p a:not(.button):hover,
-p .single .type-plugin .entry-content .section-toggle:not(.button):hover, .single .type-plugin .entry-content
-p .section-toggle:not(.button):hover {
+p a:not(.button):not(.plugin-upload-form .button-primary), p .single .type-plugin .entry-content .section-toggle:not(.button):not(.plugin-upload-form .button-primary), .single .type-plugin .entry-content p .section-toggle:not(.button):not(.plugin-upload-form .button-primary),
+p a:not(.button):not(.plugin-upload-form .button-primary):hover,
+p .single .type-plugin .entry-content .section-toggle:not(.button):not(.plugin-upload-form .button-primary):hover, .single .type-plugin .entry-content
+p .section-toggle:not(.button):not(.plugin-upload-form .button-primary):hover {
   border: none;
 }
 
@@ -1137,10 +1385,11 @@ p .section-toggle:not(.button):hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear:before, .single .type-plugin:before, .single .type-plugin .plugin-header:before,
+.clear:before, .single .type-plugin:before, .single .type-plugin .plugin-header:before, .plugin-upload-form .category-checklist:before,
 .clear:after,
 .single .type-plugin:after,
 .single .type-plugin .plugin-header:after,
+.plugin-upload-form .category-checklist:after,
 .entry-content:before,
 .entry-content:after,
 .comment-content:before,
@@ -1156,7 +1405,7 @@ p .section-toggle:not(.button):hover {
   table-layout: fixed;
 }
 
-.clear:after, .single .type-plugin:after, .single .type-plugin .plugin-header:after,
+.clear:after, .single .type-plugin:after, .single .type-plugin .plugin-header:after, .plugin-upload-form .category-checklist:after,
 .entry-content:after,
 .comment-content:after,
 .site-header:after,
@@ -1326,7 +1575,7 @@ p .section-toggle:not(.button):hover {
   box-sizing: content-box;
 }
 
-#wporg-header .button {
+#wporg-header .button, #wporg-header .plugin-upload-form .button-primary, .plugin-upload-form #wporg-header .button-primary {
   box-shadow: none;
 }
 
@@ -1886,11 +2135,71 @@ p .section-toggle:not(.button):hover {
 }
 
 /*--------------------------------------------------------------
-## Asides
+## Pages
 --------------------------------------------------------------*/
-.blog .format-aside .entry-title,
-.archive .format-aside .entry-title {
-  display: none;
+.page .type-page {
+  margin: 0 auto;
+  max-width: 35.527136788rem;
+  padding: 0 2rem;
+}
+
+.page hr {
+  margin-left: -6.5rem;
+  margin-right: -6.5rem;
+}
+
+.plugin-upload-form fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plugin-upload-form legend {
+  margin: 1rem 0;
+}
+
+.plugin-upload-form .category-checklist {
+  list-style-type: none;
+  margin: 0 0 2rem;
+}
+
+.plugin-upload-form .category-checklist li {
+  float: left;
+  padding: 0.5rem 0;
+  width: 50%;
+}
+
+@media screen and (min-width: 48em) {
+  .plugin-upload-form .category-checklist li {
+    padding: 0;
+  }
+  .plugin-upload-form .category-checklist label {
+    font-size: 12.8px;
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (min-width: 48em) {
+  .plugin-upload-form label.button, .plugin-upload-form label.button-primary {
+    line-height: 1.8;
+  }
+  .plugin-upload-form .button-primary {
+    font-size: 14px;
+    height: auto;
+    line-height: normal;
+    margin-bottom: 4px;
+    padding: 6px 14px;
+    vertical-align: middle;
+  }
+}
+
+.plugin-upload-form .plugin-file {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
 }
 
 /*--------------------------------------------------------------

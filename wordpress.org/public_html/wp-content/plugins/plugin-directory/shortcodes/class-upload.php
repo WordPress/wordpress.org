@@ -41,22 +41,40 @@ class Upload {
 
 			<?php endif; ?>
 
-			<form id="upload_form" enctype="multipart/form-data" method="POST" action="">
+			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
 				<fieldset>
-					<legend><?php _e( 'Plugin Categories (up to 3)', 'wporg-plugins' ); ?></legend>
-					<ul class="category-checklist form-no-clear">
+					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
+					<ul class="category-checklist">
 						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
 					</ul>
 				</fieldset>
-				<input type="file" id="zip_file" name="zip_file" size="25"/>
-				<input id="upload_button" class="button" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+
+				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+
+				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 
 				<p>
 					<small><?php printf( __( 'Maximum allowed file size: %s', 'wporg-plugins' ), esc_html( self::get_max_allowed_file_size() ) ); ?></small>
 				</p>
 			</form>
+			<script>
+				( function ( $ ) {
+					var $label    = $( 'label.button' ),
+						labelText = $label.text();
+
+					$( '#zip_file' )
+						.on( 'change', function( event ) {
+							var fileName = event.target.value.split( '\\' ).pop();
+
+							fileName ? $label.text( fileName ) : $label.text( labelText );
+						} )
+						.on( 'focus', function() { $label.addClass( 'focus' ); } )
+						.on( 'blur', function() { $label.removeClass( 'focus' ); } );
+				} ( window.jQuery ) );
+			</script>
 
 		<?php else : ?>
 
