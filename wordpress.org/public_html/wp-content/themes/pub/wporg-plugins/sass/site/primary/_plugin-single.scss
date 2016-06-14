@@ -2,6 +2,9 @@
 
 .single .type-plugin {
 	@extend .clear;
+	.plugin-notice {
+		margin-top: 0;
+	}
 
 	.plugin-banner {
 		background-size: 100%;

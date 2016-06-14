@@ -1938,6 +1938,10 @@ p .section-toggle:not(.button):hover {
   margin: 0 0 8px;
 }
 
+.single .type-plugin .plugin-notice {
+  margin-top: 0;
+}
+
 .single .type-plugin .plugin-banner {
   background-size: 100%;
   background-position: 50% 50%;
