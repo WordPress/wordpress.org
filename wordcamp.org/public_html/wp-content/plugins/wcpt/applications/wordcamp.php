@@ -47,14 +47,21 @@ function render_application_shortcode() {
 
 	if ( isset( $_POST['submit-application'] ) ) {
 		$application_data = validate_data( $_POST );
-		create_wordcamp_post( $application_data );
-		notify_applicant_application_received( $application_data['q_1079059_email'], $application_data['q_1079103_wordcamp_location'] );
-		$message = "Thank you for your application! We've received it, and we'll contact you once we've had a chance to review it.";
+
+		if ( is_wp_error( $application_data ) ) {
+			$message = $application_data->get_error_message();
+			$notice_classes = 'notice-error';
+		} else {
+			create_wordcamp_post( $application_data );
+			notify_applicant_application_received( $application_data['q_1079059_email'], $application_data['q_1079103_wordcamp_location'] );
+			$message = "Thank you for your application! We've received it, and we'll contact you once we've had a chance to review it.";
+			$notice_classes = 'notice-success';
+		}
 
 		require( dirname( __DIR__ ) . '/views/applications/common/submission-results.php' );
 	} else {
 		$countries = wcorg_get_countries();
-		
+
 		require( dirname( __DIR__ ) . '/views/applications/wordcamp/shortcode-application.php' );
 	}
 
@@ -66,17 +73,28 @@ function render_application_shortcode() {
  *
  * @param array $unsafe_data
  *
- * @return array
+ * @return array|\WP_Error
  */
 function validate_data( $unsafe_data ) {
 	$safe_data   = array();
 	$unsafe_data = shortcode_atts( get_default_application_values(), $unsafe_data );
+
+	$required_fields = array(
+		'q_1079074_first_name', 'q_1079074_last_name', 'q_1079059_email', 'q_4236565_wporg_username',
+		'q_1079103_wordcamp_location',
+	);
 
 	foreach( $unsafe_data as $key => $value ) {
 		if ( is_array( $value ) ) {
 			$safe_data[ $key ] = array_map( 'sanitize_text_field', $value );
 		} else {
 			$safe_data[ $key ] = sanitize_text_field( $value );
+		}
+	}
+
+	foreach ( $required_fields as $field ) {
+		if ( empty ( $safe_data[ $field ] ) ) {
+			return new \WP_Error( 'required_fields', "Please click on your browser's Back button, and fill in all of the required fields." );
 		}
 	}
 
