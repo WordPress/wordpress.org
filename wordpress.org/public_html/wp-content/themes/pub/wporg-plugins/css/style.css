@@ -240,6 +240,7 @@ textarea {
 
 h1, h2, h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, .page h1, h4, h5, .page h2, h6 {
   clear: both;
+  font-family: inherit;
   line-height: 1.5;
   margin: 2rem 0 1rem;
 }

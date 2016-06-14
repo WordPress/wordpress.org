@@ -3,6 +3,9 @@
 
 h1, h2, h3, h4, h5, h6 {
 	clear: both;
+
+	// Override wp4.css.
+	font-family: inherit;
 	line-height: $font__line-height-body;
 	margin: 2rem 0 1rem;
 }
