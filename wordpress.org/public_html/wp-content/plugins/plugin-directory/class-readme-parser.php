@@ -242,8 +242,9 @@ class Readme_Parser {
 		}
 
 		// Markdownify!
-		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
-		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
+		$this->short_description = $this->parse_markdown( $this->short_description );
+		$this->sections          = array_map( array( $this, 'parse_markdown' ), $this->sections );
+		$this->upgrade_notice    = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
