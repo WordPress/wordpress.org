@@ -44,7 +44,8 @@
 
 .button,
 .button-primary,
-.button-secondary {
+.button-secondary,
+.plugin-upload-form .button-primary {
 	-webkit-appearance: none;
 	border: 1px solid;
 	border-radius: 3px;
@@ -211,7 +212,8 @@ p .button {
 ---------------------------------------------------------------------------- */
 
 .button-primary,
-.download-button {
+.download-button,
+.plugin-upload-form .button-primary {
 	background: #0085ba;
 	border-color: #0073aa #006799 #006799;
 	box-shadow: 0 1px 0 #006799;
@@ -326,7 +328,8 @@ p .button {
 
 	.button,
 	.button.button-large,
-	.button.button-smallw {
+	.button.button-small,
+	.plugin-upload-form .button-primary {
 		font-size: 14px;
 		height: auto;
 		line-height: normal;

@@ -53,9 +53,9 @@
 			background-image: -o-linear-gradient(top, #21759b, #278ab7);
 			background-image: linear-gradient(to bottom, #21759b, #278ab7);
 			border-color: #124560 #2382ae #2382ae #2382ae;
-			color: rgba(255,255,255,0.95);
 			-webkit-box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
 			box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
+			color: rgba(255,255,255,0.95);
 			text-shadow: 0 1px 0 rgba(0,0,0,0.1);
 			transform: none;
 		}
@@ -113,19 +113,17 @@
 		}
 
 		.search-field + .button-search {
-			display: none;
+			border-left: none;
 			border-radius: 0 2px 2px 0;
+			display: none;
 			height: 32px;
 			margin-left: -6px;
-			position: relative;
-			top: 2px;
-			border-left: none;
+			vertical-align: bottom;
 
 			&:active {
-				top: 0;
+				background: #006799;
 				border-right: 1px solid #006799;
 				box-shadow: none;
-				background: #006799;
 			}
 
 			.dashicons {

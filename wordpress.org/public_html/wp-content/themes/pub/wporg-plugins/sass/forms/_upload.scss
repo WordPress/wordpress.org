@@ -35,35 +35,14 @@
 		label.button {
 			line-height: 1.8;
 		}
-
-		.button-primary {
-			font-size: 14px;
-			height: auto;
-			line-height: normal;
-			margin-bottom: 4px;
-			padding: 6px 14px;
-			vertical-align: middle;
-		}
 	}
 
 	.plugin-file {
-		width: 0.1px;
 		height: 0.1px;
 		opacity: 0;
 		overflow: hidden;
 		position: absolute;
+		width: 0.1px;
 		z-index: -1;
-	}
-
-	.button-primary {
-		@extend .button;
-		@extend .button-primary;
-
-		&:hover {
-			@extend .button-primary:hover;
-		}
-		&:focus {
-			@extend .button-primary:focus;
-		}
 	}
 }
