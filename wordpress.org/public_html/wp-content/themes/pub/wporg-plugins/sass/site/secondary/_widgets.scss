@@ -91,11 +91,15 @@
 	@include font-size( ms-unitless( ms(-2) ) );
 }
 
-.plugin-meta ul {
-	@include font-size( ms-unitless( ms(-2) ) );
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
+.plugin-meta {
+	@extend .clear;
+
+	ul {
+		@include font-size( ms-unitless( ms( -2 ) ) );
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
 
 	li {
 		border-top: 1px solid #eee;
@@ -105,7 +109,7 @@
 	.tags {
 		float: right;
 		text-align: right;
-		width: 70%;
+		width: 60%;
 	}
 
 	[rel="tag"] {

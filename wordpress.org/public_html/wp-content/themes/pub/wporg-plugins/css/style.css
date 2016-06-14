@@ -1418,9 +1418,10 @@ p .section-toggle:not(.button):hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear:before, .plugin-upload-form .category-checklist:before, .single .type-plugin:before, .single .type-plugin .plugin-header:before,
+.clear:before, .plugin-upload-form .category-checklist:before, .plugin-meta:before, .single .type-plugin:before, .single .type-plugin .plugin-header:before,
 .clear:after,
 .plugin-upload-form .category-checklist:after,
+.plugin-meta:after,
 .single .type-plugin:after,
 .single .type-plugin .plugin-header:after,
 .entry-content:before,
@@ -1438,7 +1439,7 @@ p .section-toggle:not(.button):hover {
   table-layout: fixed;
 }
 
-.clear:after, .plugin-upload-form .category-checklist:after, .single .type-plugin:after, .single .type-plugin .plugin-header:after,
+.clear:after, .plugin-upload-form .category-checklist:after, .plugin-meta:after, .single .type-plugin:after, .single .type-plugin .plugin-header:after,
 .entry-content:after,
 .comment-content:after,
 .site-header:after,
@@ -1557,18 +1558,18 @@ p .section-toggle:not(.button):hover {
   padding: 0;
 }
 
-.plugin-meta ul li {
+.plugin-meta li {
   border-top: 1px solid #eee;
   padding: 0.5rem 0;
 }
 
-.plugin-meta ul .tags {
+.plugin-meta .tags {
   float: right;
   text-align: right;
-  width: 70%;
+  width: 60%;
 }
 
-.plugin-meta ul [rel="tag"] {
+.plugin-meta [rel="tag"] {
   background: #eee;
   border-radius: 2px;
   color: #000;
@@ -1582,11 +1583,11 @@ p .section-toggle:not(.button):hover {
   width: auto;
 }
 
-.plugin-meta ul [rel="tag"]:hover {
+.plugin-meta [rel="tag"]:hover {
   background: #f3f3f3;
 }
 
-.plugin-meta ul [rel="tag"]:active {
+.plugin-meta [rel="tag"]:active {
   background: #dfdfdf;
 }
 
@@ -1606,6 +1607,7 @@ p .section-toggle:not(.button):hover {
 
 #wporg-header form input {
   box-sizing: content-box;
+  padding: 3px;
 }
 
 #wporg-header .button {
@@ -1715,7 +1717,7 @@ p .section-toggle:not(.button):hover {
   border-left: none;
   border-radius: 0 2px 2px 0;
   display: none;
-  height: 32px;
+  height: 31px;
   margin-left: -6px;
   vertical-align: bottom;
 }
