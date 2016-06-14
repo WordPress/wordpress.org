@@ -51,6 +51,9 @@ class Internal_Stats extends Base {
 
 			foreach ( $stats as $stat_name => $value ) {
 				if ( 'active_installs' == $stat_name ) {
+					// Store an unsanitized private version of the active_installs stat for consistent ordering.
+					update_post_meta( $plugin->ID, '_active_installs', wp_slash( $value ) );
+
 					$value = $this->sanitize_active_installs( $value );
 				} elseif ( 'usage' == $stat_name ) {
 					$value = $this->sanitize_usage_numbers( $value, $plugin );
