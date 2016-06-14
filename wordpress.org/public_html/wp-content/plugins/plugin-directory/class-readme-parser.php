@@ -209,10 +209,6 @@ class Readme_Parser {
 			$this->sections['description'] = $this->short_description;
 		}
 
-		// Sanitize and trim the short_description to match requirements
-		$this->short_description = $this->sanitize_text( $this->short_description );
-		$this->short_description = $this->trim_length( $this->short_description, 150 );
-
 		// Parse out the Upgrade Notice section into it's own data
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
 			$lines = explode( "\n", $this->sections['upgrade_notice'] );
@@ -242,9 +238,14 @@ class Readme_Parser {
 		}
 
 		// Markdownify!
-		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->sections          = array_map( array( $this, 'parse_markdown' ), $this->sections );
 		$this->upgrade_notice    = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
+
+		// Sanitize and trim the short_description to match requirements
+		$this->short_description = $this->sanitize_text( $this->short_description );
+		$this->short_description = $this->trim_length( $this->short_description, 150 );
+		$this->short_description = $this->parse_markdown( $this->short_description );
+		$this->short_description = wp_strip_all_tags( $this->short_description );
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
@@ -279,13 +280,12 @@ class Readme_Parser {
 	}
 
 	protected function trim_length( $desc, $length = 150 ) {
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			if ( mb_strlen( $desc ) > $length ) {
-				$desc = mb_substr( $desc, 0, $length );
-			}
-		} else {
-			if ( strlen( $desc ) > $length ) {
-				$desc = substr( $desc, 0, $length );
+		if ( mb_strlen( $desc ) > $length ) {
+			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
+
+			// If not a full sentence, and one ends within 20% of the end, trim it to that.
+			if ( '.' !== mb_substr( $desc, -1 ) && ( $pos = mb_strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
+				$desc = mb_substr( $desc, 0, $pos + 1 );
 			}
 		}
 
