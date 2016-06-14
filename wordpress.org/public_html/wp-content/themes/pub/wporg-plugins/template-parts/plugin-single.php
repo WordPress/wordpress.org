@@ -32,7 +32,7 @@ $widget_args = array(
 
 		<?php the_title( '<h1 class="plugin-title">', '</h1>' ); ?>
 
-		<span class="byline"><?php printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>' ); ?></span>
+		<span class="byline"><?php printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( utf8_encode( get_the_author() ) ) . '</a></span>' ); ?></span>
 	</header><!-- .entry-header -->
 
 	<div class="entry-content">
