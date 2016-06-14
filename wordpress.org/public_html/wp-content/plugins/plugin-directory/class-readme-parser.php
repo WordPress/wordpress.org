@@ -359,8 +359,11 @@ class Readme_Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
-			if ( get_user_by( 'login', $name ) ) {
-				continue;
+			if ( $user = get_user_by( 'login', $name ) ) {
+				// Check the case of the user login matches.
+				if ( $name !== $user->user_login ) {
+					$users[ $i ] = $user->user_login;
+				}
 			} elseif ( false !== ( $user = get_user_by( 'slug', $name ) ) ) {
 				// Overwrite the nicename with the user_login
 				$users[ $i ] = $user->user_login;
