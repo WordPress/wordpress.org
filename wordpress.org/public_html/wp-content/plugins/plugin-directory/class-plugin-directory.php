@@ -30,10 +30,10 @@ class Plugin_Directory {
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'redirect_hidden_plugins' ) );
+		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 
 		// Shim in postmeta support for data which doesn't yet live in postmeta
 		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
-
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
@@ -540,6 +540,15 @@ class Plugin_Directory {
 
 		if ( $post instanceof \WP_Post && in_array( $post->post_status, array( 'disabled', 'closed' ), true ) && current_user_can( 'edit_post', $post ) ) {
 			wp_safe_redirect( add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ) );
+		}
+	}
+
+	/**
+	 * Prevents Canonical redirecting to other plugins on 404's.
+	 */
+	function prevent_canonical_for_plugins() {
+		if ( is_404() ) {
+			remove_action( 'template_redirect', 'redirect_canonical' );
 		}
 	}
 
