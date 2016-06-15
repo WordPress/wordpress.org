@@ -16,6 +16,7 @@ class Base {
 		new Routes\Popular_Categories();
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();
+		new Routes\Zip_Management();
 	}
 
 	/**
