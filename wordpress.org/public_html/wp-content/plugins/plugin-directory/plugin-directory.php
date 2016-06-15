@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Plugin Directory
- * Plugin URI: http://wordpress.org/plugins/
+ * Plugin URI: https://wordpress.org/plugins/
  * Description: Transforms a WordPress site in The Official Plugin Directory.
- * Version: 0.1
+ * Version: 3.0
  * Author: the WordPress team
  * Author URI: https://wordpress.org/
  * Text Domain: wporg-plugins
