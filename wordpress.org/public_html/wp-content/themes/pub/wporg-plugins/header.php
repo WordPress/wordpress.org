@@ -38,7 +38,7 @@ require WPORGPATH . 'header.php';
 					<div id="primary-menu" class="menu">
 						<ul>
 							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/favorites' ) ); ?>"><?php esc_html_e( 'Favorites', 'wporg-plugins' ); ?></a></li>
-							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/beta' ) ); ?>"><?php esc_html_e( 'Beta testing', 'wporg-plugins' ); ?></a></li>
+							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/beta' ) ); ?>"><?php esc_html_e( 'Beta Testing', 'wporg-plugins' ); ?></a></li>
 							<li class="page_item"><a href="<?php echo esc_url( home_url( 'about' ) ); ?>"><?php esc_html_e( 'Developers', 'wporg-plugins' ); ?></a></li>
 							<li><?php get_search_form(); ?></li>
 						</ul>
