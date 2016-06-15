@@ -42,7 +42,10 @@ if ( post_password_required() ) {
 				if ( is_singular( 'post' ) ) {
 					wp_list_comments();
 				} else {
-					wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ) );
+					$ordered_comments = wporg_developer_get_ordered_notes();
+					if ( $ordered_comments ) {
+						wp_list_comments( array( 'callback' => 'wporg_developer_user_note' ), $ordered_comments );
+					}
 				}
 			?>
 		</ol><!-- .comment-list -->

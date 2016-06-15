@@ -1133,7 +1133,6 @@
 	}
 
 	.source-code-container {
-		border-right: 1px solid #dfdfdf;
 		overflow-x: auto;
 		overflow-y: hidden;
 	}
@@ -1155,6 +1154,15 @@
 
 	// User contributed notes
 	&.single-wp-parser-function, &.single-wp-parser-method, &.single-wp-parser-hook {
+
+		.bad-note .comment-content {
+			opacity: .6;
+		}
+
+		.bad-note .comment-content:hover {
+			opacity: 1;
+		}
+
 		.comment-list,
 		.comment-list ol {
 			list-style: none;
@@ -1163,42 +1171,37 @@
 		}
 
 		.comment-list li {
-			padding: 2rem 1.5rem 1rem;
+			margin-top: 2.5rem;
 			background: #fff;
 			overflow: auto;
-
-			&:first-child {
-				padding-top: 1rem;
-			}
+			border: 1px solid #dfdfdf;
+			border-radius: 2px;
 
 			article {
-				border-bottom: 1px solid #dfdfdf;
-				padding-bottom: 1em;
 				overflow: auto;
 			}
 		}
 
 		.comment-list .avatar {
 			float: left;
-			width: 2.5em;
-			height: 2.5em;
-			margin: -0.5em 1em 0.5em 0;
+			margin: -2px 1em 0 0;
 			padding: 0.125em;
 			border: 1px solid #eee;
 		}
 
 		.comment-author-attribution {
-			font-weight: bold;
 		}
 
 		.comment-meta {
-			margin: 0 0 1.5em 0;
-			font-size: 0.75em;
+			padding: .5em 1em;
+			background-color: #f7f7f7;
+			overflow: auto;
 		}
 
 		.comment-meta .comment-author cite,
 		.comment-meta .comment-author cite a {
 		}
+
 		.comment-meta a {
 		}
 
@@ -1210,6 +1213,22 @@
 			margin-left: 3.75rem;
 			margin-left: 0;
 			clear: both;
+			padding: 2rem 1.5rem .5rem;
+		}
+
+		.comment-footer {
+			margin: 0 1em;
+			padding: 0 0 1em 0;
+			position: relative;
+			overflow: auto;
+
+			a {
+				float: right;
+			}
+
+			p {
+				margin-bottom: 0;
+			}
 		}
 
 		.comment-content ol {
@@ -1268,6 +1287,11 @@
 
 		.comment-author {
 			float: left;
+			line-height: 1.8;
+		}
+
+		#add-user-note {
+			font-size: 1.6rem;
 		}
 	}
 
@@ -1414,10 +1438,9 @@
 	}
 
 	.user-note-voting {
-		font-size: 1.5em;
+		font-size: 1.2em;
 		clear: left;
 		float: left;
-		margin-top: -5px;
 		margin-right: 10px;
 	}
 	.user-note-voting-up .dashicons, .user-note-voting-down .dashicons {
@@ -1429,6 +1452,12 @@
 	.user-note-voting-up {
 		margin-left: -9px;
 	}
+
+	span.user-note-voting-up,
+	span.user-note-voting-down {
+		cursor: default;
+	}
+
 	.user-note-voting-count {
 		margin-right: -2px;
 	}

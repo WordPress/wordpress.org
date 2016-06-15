@@ -1316,7 +1316,6 @@ input {
   padding-left: 0;
 }
 .devhub-wrap .source-code-container {
-  border-right: 1px solid #dfdfdf;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -1331,6 +1330,12 @@ input {
 .devhub-wrap .comment-content a {
   word-wrap: break-word;
 }
+.devhub-wrap.single-wp-parser-function .bad-note .comment-content, .devhub-wrap.single-wp-parser-method .bad-note .comment-content, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content {
+  opacity: .6;
+}
+.devhub-wrap.single-wp-parser-function .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-method .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content:hover {
+  opacity: 1;
+}
 .devhub-wrap.single-wp-parser-function .comment-list,
 .devhub-wrap.single-wp-parser-function .comment-list ol, .devhub-wrap.single-wp-parser-method .comment-list,
 .devhub-wrap.single-wp-parser-method .comment-list ol, .devhub-wrap.single-wp-parser-hook .comment-list,
@@ -1340,38 +1345,44 @@ input {
   padding: 0;
 }
 .devhub-wrap.single-wp-parser-function .comment-list li, .devhub-wrap.single-wp-parser-method .comment-list li, .devhub-wrap.single-wp-parser-hook .comment-list li {
-  padding: 2rem 1.5rem 1rem;
+  margin-top: 2.5rem;
   background: #fff;
   overflow: auto;
-}
-.devhub-wrap.single-wp-parser-function .comment-list li:first-child, .devhub-wrap.single-wp-parser-method .comment-list li:first-child, .devhub-wrap.single-wp-parser-hook .comment-list li:first-child {
-  padding-top: 1rem;
+  border: 1px solid #dfdfdf;
+  border-radius: 2px;
 }
 .devhub-wrap.single-wp-parser-function .comment-list li article, .devhub-wrap.single-wp-parser-method .comment-list li article, .devhub-wrap.single-wp-parser-hook .comment-list li article {
-  border-bottom: 1px solid #dfdfdf;
-  padding-bottom: 1em;
   overflow: auto;
 }
 .devhub-wrap.single-wp-parser-function .comment-list .avatar, .devhub-wrap.single-wp-parser-method .comment-list .avatar, .devhub-wrap.single-wp-parser-hook .comment-list .avatar {
   float: left;
-  width: 2.5em;
-  height: 2.5em;
-  margin: -0.5em 1em 0.5em 0;
+  margin: -2px 1em 0 0;
   padding: 0.125em;
   border: 1px solid #eee;
 }
-.devhub-wrap.single-wp-parser-function .comment-author-attribution, .devhub-wrap.single-wp-parser-method .comment-author-attribution, .devhub-wrap.single-wp-parser-hook .comment-author-attribution {
-  font-weight: bold;
-}
 .devhub-wrap.single-wp-parser-function .comment-meta, .devhub-wrap.single-wp-parser-method .comment-meta, .devhub-wrap.single-wp-parser-hook .comment-meta {
-  margin: 0 0 1.5em 0;
-  font-size: 0.75em;
+  padding: .5em 1em;
+  background-color: #f7f7f7;
+  overflow: auto;
 }
 .devhub-wrap.single-wp-parser-function .comment-content, .devhub-wrap.single-wp-parser-method .comment-content, .devhub-wrap.single-wp-parser-hook .comment-content {
   margin-left: 60px;
   margin-left: 3.75rem;
   margin-left: 0;
   clear: both;
+  padding: 2rem 1.5rem .5rem;
+}
+.devhub-wrap.single-wp-parser-function .comment-footer, .devhub-wrap.single-wp-parser-method .comment-footer, .devhub-wrap.single-wp-parser-hook .comment-footer {
+  margin: 0 1em;
+  padding: 0 0 1em 0;
+  position: relative;
+  overflow: auto;
+}
+.devhub-wrap.single-wp-parser-function .comment-footer a, .devhub-wrap.single-wp-parser-method .comment-footer a, .devhub-wrap.single-wp-parser-hook .comment-footer a {
+  float: right;
+}
+.devhub-wrap.single-wp-parser-function .comment-footer p, .devhub-wrap.single-wp-parser-method .comment-footer p, .devhub-wrap.single-wp-parser-hook .comment-footer p {
+  margin-bottom: 0;
 }
 .devhub-wrap.single-wp-parser-function .comment-content ol, .devhub-wrap.single-wp-parser-method .comment-content ol, .devhub-wrap.single-wp-parser-hook .comment-content ol {
   list-style: decimal inside;
@@ -1406,6 +1417,10 @@ input {
 }
 .devhub-wrap.single-wp-parser-function .comment-author, .devhub-wrap.single-wp-parser-method .comment-author, .devhub-wrap.single-wp-parser-hook .comment-author {
   float: left;
+  line-height: 1.8;
+}
+.devhub-wrap.single-wp-parser-function #add-user-note, .devhub-wrap.single-wp-parser-method #add-user-note, .devhub-wrap.single-wp-parser-hook #add-user-note {
+  font-size: 1.6rem;
 }
 .devhub-wrap.single-post .comment-list,
 .devhub-wrap.single-post .comment-list ol {
@@ -1517,10 +1532,9 @@ input {
   color: #555 !important;
 }
 .devhub-wrap .user-note-voting {
-  font-size: 1.5em;
+  font-size: 1.2em;
   clear: left;
   float: left;
-  margin-top: -5px;
   margin-right: 10px;
 }
 .devhub-wrap .user-note-voting-up .dashicons, .devhub-wrap .user-note-voting-down .dashicons {
@@ -1531,6 +1545,10 @@ input {
 }
 .devhub-wrap .user-note-voting-up {
   margin-left: -9px;
+}
+.devhub-wrap span.user-note-voting-up,
+.devhub-wrap span.user-note-voting-down {
+  cursor: default;
 }
 .devhub-wrap .user-note-voting-count {
   margin-right: -2px;
