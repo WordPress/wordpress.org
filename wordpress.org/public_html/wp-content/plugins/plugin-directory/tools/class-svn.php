@@ -117,6 +117,65 @@ class SVN {
 	}
 
 	/**
+	 * Fetch SVN revisions for a given revision or range of revisions.
+	 *
+	 * @param string       $url      The URL to fetch.
+	 * @param string|array $revision The revision to get information about. Default HEAD.
+	 * @param array        $options  A list of options to pass to SVN. Optional.
+	 *
+	 * @return array {
+	 *   @type array|false $errors   Whether any errors or warnings were encountered.
+	 *   @type array       $log     The SVN log data struct.
+	 * }
+	 */
+	public static function log( $url, $revision = 'HEAD', $options = array() ) {
+		$options[] = 'non-interactive';
+		$options[] = 'verbose';
+		$options[] = 'xml';
+		$options['revision'] = is_array( $revision ) ? "{$revision[0]}:{$revision[1]}" : $revision;
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_url = escapeshellarg( $url );
+
+		$output = self::shell_exec( "svn log $esc_options $esc_url 2>&1" );
+
+		$errors = self::parse_svn_errors( $output );
+
+		$log = array();
+
+		// We use funky string mangling here to extract the XML as it may have been truncated by a SVN error, or suffixed by a SVN warning
+		$xml = substr( $output, $start = stripos( $output, '<?xml' ), $end = ( strripos( $output, '</log>' ) - $start + 6 ) );
+		if ( $xml && false !== $start && false !== $end ) {
+
+			$user_errors = libxml_use_internal_errors( true );
+			$simple_xml = simplexml_load_string( $xml );
+			libxml_use_internal_errors( $user_errors );
+
+			if ( ! $simple_xml ) {
+				$errors[] = "SimpleXML failed to parse input";
+			} else {
+				foreach ( $simple_xml->logentry as $entry ) {
+					$revision = (int) $entry->attributes()['revision'];
+					$paths = array();
+					foreach ( $entry->paths->children() as $p ) {
+						$paths[] = (string) $p;
+					}
+
+					$log[ $revision ] = array(
+						'revision' => $revision,
+						'author'   => (string) $entry->author,
+						'date'     => strtotime( (string) $entry->date ),
+						'paths'    => $paths,
+						'message'  => (string) $entry->msg,
+					);
+				}
+			}
+		}
+
+		return compact( 'log', 'errors' );
+	}
+
+	/**
 	 * Parse and escape the provided SVN arguements for usage on the CLI.
 	 *
 	 * Parameters can be passed as [ param ] or [ param = value ], if the argument is not
