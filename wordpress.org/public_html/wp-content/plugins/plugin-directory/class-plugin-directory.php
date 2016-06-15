@@ -31,7 +31,7 @@ class Plugin_Directory {
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'redirect_hidden_plugins' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
-		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_tabs' ) );
+		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_urls' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 
 		// Shim in postmeta support for data which doesn't yet live in postmeta
@@ -572,11 +572,28 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Handles a redirect for the old /$plugin/$tab_name/ URLs
+	 * Handles a redirect for the old /$plugin/$tab_name/ URLs and search.php
 	 */
-	function redirect_old_plugin_tabs() {
+	function redirect_old_plugin_urls() {
+		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name
 		if ( get_query_var( 'redirect_plugin_tab' ) ) {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
+			die();
+		}
+
+		// We don't have attachments, but /$plugin/random() will hit this check.
+		if ( is_404() ) {
+			// [1] => plugins [2] => example-plugin-name [2..] => random()
+			$plugin_slug = explode( '/', $_SERVER['REQUEST_URI'] )[2];
+			if ( $plugin = self::get_plugin_post( $plugin_slug ) ) {
+				wp_safe_redirect( get_permalink( $plugin->ID ) );
+				die();
+			}
+		}
+
+		// If it's an old search query, handle that too.
+		if ( 'search.php' == get_query_var( 'name' ) && isset( $_GET['q'] ) ) {
+			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ) );
 			die();
 		}
 	}
