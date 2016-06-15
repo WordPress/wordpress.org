@@ -155,7 +155,7 @@ class Plugins_Info_API {
 
 		// Fill in the plugin details
 		foreach ( $response['plugins'] as $i => $plugin_slug ) {
-			$response['plugins'][ $i ] = $this->plugin_information( new Plugins_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
+			$response['plugins'][ $i ] = $this->plugin_information( new Plugins_Info_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
 		}
 
 		// Trim fields
