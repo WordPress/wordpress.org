@@ -31,6 +31,8 @@ class Plugin_Directory {
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'redirect_hidden_plugins' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
+		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_tabs' ) );
+		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 
 		// Shim in postmeta support for data which doesn't yet live in postmeta
 		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
@@ -203,9 +205,16 @@ class Plugin_Directory {
 		) );
 
 		// Add the browse/* views.
-		// TODO: browse/favorites/$user
 		add_rewrite_tag( '%browse%', '(featured|popular|beta|new|favorites)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
+
+		// /browse/ should be the popular archive view.
+		add_rewrite_rule( '^browse$', 'index.php?browse=popular', 'top' );
+		// Create an archive for a users favorites too.
+		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
+
+		// Handle the old plugin tabs URLs
+		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)$', 'index.php?redirect_plugin_tab=$matches[1]/#$matches[2]', 'top' );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
@@ -516,6 +525,15 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Filters the available public query vars to add our custom parameters.
+	 */
+	public function filter_query_vars( $vars ) {
+		$vars[] = 'favorites_user';
+		$vars[] = 'redirect_plugin_tab';
+		return $vars;
+	}
+
+	/**
 	 * Filter for pre_update_option_jetpack_options to ensure CPT posts are seen as public and searchable by TP
 	 *
 	 * @param mixed $new_value
@@ -540,6 +558,7 @@ class Plugin_Directory {
 
 		if ( $post instanceof \WP_Post && in_array( $post->post_status, array( 'disabled', 'closed' ), true ) && current_user_can( 'edit_post', $post ) ) {
 			wp_safe_redirect( add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ) );
+			die();
 		}
 	}
 
@@ -549,6 +568,16 @@ class Plugin_Directory {
 	function prevent_canonical_for_plugins() {
 		if ( is_404() ) {
 			remove_action( 'template_redirect', 'redirect_canonical' );
+		}
+	}
+
+	/**
+	 * Handles a redirect for the old /$plugin/$tab_name/ URLs
+	 */
+	function redirect_old_plugin_tabs() {
+		if ( get_query_var( 'redirect_plugin_tab' ) ) {
+			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
+			die();
 		}
 	}
 
