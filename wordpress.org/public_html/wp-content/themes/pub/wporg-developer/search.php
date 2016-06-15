@@ -31,7 +31,7 @@ get_header(); ?>
 			<?php /* Start the Loop */ ?>
 			<?php while ( have_posts() ) : the_post(); ?>
 
-				<?php get_template_part( 'content', wporg_is_handbook() ? 'handbook-archive' : 'reference-archive' ); ?>
+				<?php get_template_part( 'content', get_query_var( 'is_handbook' ) ? 'handbook-archive' : 'reference-archive' ); ?>
 
 			<?php endwhile; ?>
 
