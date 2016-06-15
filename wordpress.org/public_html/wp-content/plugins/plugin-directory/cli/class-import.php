@@ -22,7 +22,6 @@ class Import {
 	var $readme_fields = array(
 		'tested',
 		'requires',
-		'stable_tag',
 		'donate_link',
 		'upgrade_notice',
 		'contributors',
@@ -45,9 +44,10 @@ class Import {
 	 *
 	 * @throws \Exception
 	 *
-	 * @param string $plugin_slug The slug of the plugin to import.
+	 * @param string $plugin_slug      The slug of the plugin to import.
+	 * @param array  $svn_changed_tags A list of tags/trunk which the SVN change touched. Optional.
 	 */
-	public function import_from_svn( $plugin_slug ) {
+	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ) ) {
 		global $wpdb;
 
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -151,14 +151,7 @@ class Import {
 				continue;
 			}
 
-			if ( 'stable_tag' == $readme_field ) {
-				// The stable_tag needs to come from the trunk readme at all times.
-				$value = $stable_tag;
-			} else {
-				$value = $readme->$readme_field;
-			}
-
-			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
 		}
 
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
@@ -189,6 +182,83 @@ class Import {
 				$user->add_role( 'plugin_committer' );
 			}
 		}
+
+		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true );
+
+		$this->rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags );
+
+		// Finally, set the new version live.
+		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
+	}
+
+	/**
+	 * Rebuild and Invalidate plugin ZIPs on all web nodes using the REST API Endpoints.
+	 *
+	 * @param string $plugin_slug        The plugin slug.
+	 * @param string $stable_tag         The new stable tag.
+	 * @param string $current_stable_tag The new stable tag.
+	 * @param array  $svn_changed_tags   The list of SVN tags modified since last import.
+	 */
+	protected function rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags ) {
+		global $wporg_webs;
+		$invalidate_zips = $rebuild_zips = array();
+
+		foreach ( $svn_changed_tags as $tag ) {
+			if ( 'trunk' == $tag ) {
+				if ( 'trunk' == $stable_tag ) {
+					// Trunk is stable, so we'll need to rebuild the zip
+					$rebuild_zips[] = "{$plugin_slug}.zip";
+				} else {
+					// Trunk isn't stable, so we'll just remove it so it's rebuilt on demand
+					$invalidate_zips[] = "{$plugin_slug}.zip";
+				}
+				continue;
+			}
+			if ( $tag == $stable_tag || $tag == $current_stable_tag ) {
+				$rebuild_zips[] = "{$plugin_slug}.{$tag}.zip";
+			} else {
+				$invalidate_zips[] = "{$plugin_slug}.{$tag}.zip";
+			}
+		}
+		if ( $stable_tag != $current_stable_tag ) {
+			// plugin is updated, ensure that everything is rebuilt.
+			if ( ! in_array( $stable_tag, $svn_changed_tags ) ) {
+				$rebuild_zips[] = "{$plugin_slug}" . ( 'trunk' == $tag ? '' : ".{$stable_tag}" ) . '.zip';
+			}
+		}
+
+		if ( empty( $wporg_webs ) || ( empty( $invalidate_zips ) && empty( $rebuild_zips ) ) ) {
+			return;
+		}
+
+		$urls = array();
+		foreach ( $wporg_webs as $node ) {
+			$urls[] = preg_replace( '!^https?://wordpress.org/!', "http://$node/", site_url( '/wp-json/plugins/v1/zip-management' ) );
+		}
+		$headers = array(
+			'User-Agent' => 'WordPress.org Plugin Directory',
+			'Host' => 'WordPress.org',
+			'Authorization' => 'BEARER ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+		);
+		$body = array(
+			'plugins' => array(
+				$plugin_slug => array(
+					'invalidate' => $invalidate_zips,
+					'rebuild' => $rebuild_zips,
+				)
+			)
+		);
+
+		$results = array();
+		foreach ( $urls as $url ) {
+			$results[ $url ] = wp_remote_post( $url, array(
+				'body' => $body,
+				'headers' => $headers,
+				'sslverify' => false
+			) );
+		}
+
+		// TODO Do something with $results to verify all servers said the rebuilt zip was correct or something.
 	}
 
 	/**
