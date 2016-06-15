@@ -446,7 +446,7 @@ class Plugin_Directory {
 
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
-			$wp_query->query_vars['meta_key'] = 'active_installs';
+			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
 	}
 

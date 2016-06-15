@@ -32,11 +32,11 @@ get_header();
 				'browse'         => $browse,
 			);
 
-			if ( 'popular' === $browse ) :
-				$section_args['meta_key'] = 'active_installs';
+			if ( 'popular' === $browse ) {
+				$section_args['meta_key'] = '_active_installs';
 				$section_args['orderby']  = 'meta_value_num';
 				unset( $section_args['browse'] );
-			endif;
+			}
 
 			$section_query = new \WP_Query( $section_args );
 			?>
