@@ -2076,7 +2076,7 @@ p .section-toggle:not(.button):hover {
 }
 
 /*--------------------------------------------------------------
-## 404
+## Template Hierarchy
 --------------------------------------------------------------*/
 .error404 {
   background: #0073aa;
@@ -2171,9 +2171,6 @@ p .section-toggle:not(.button):hover {
   display: none;
 }
 
-/*--------------------------------------------------------------
-## Pages
---------------------------------------------------------------*/
 .page .type-page {
   margin: 0 auto;
   max-width: 35.527136788rem;
@@ -2183,6 +2180,17 @@ p .section-toggle:not(.button):hover {
 .page hr {
   margin-left: -6.5rem;
   margin-right: -6.5rem;
+}
+
+.archive .site-main {
+  margin-top: 32px;
+  margin-top: 2rem;
+  padding: 0 10px;
+}
+
+.archive .page-header {
+  margin: 32px 0;
+  margin: 2rem 0;
 }
 
 /*--------------------------------------------------------------
