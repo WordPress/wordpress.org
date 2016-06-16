@@ -25,10 +25,9 @@ class Stats {
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => $post->post_name,
 			'l10n' => array(
-				'date'          => __( 'Date', 'wporg-plugins' ),
-				'downloads'     => __( 'Downloads', 'wporg-plugins' ),
-				'noData'        => __( 'No data yet', 'wporg-plugins' ),
-				'otherVersions' => __( 'Other Versions', 'wporg-plugins' ),
+				'date'      => __( 'Date', 'wporg-plugins' ),
+				'downloads' => __( 'Downloads', 'wporg-plugins' ),
+				'noData'    => __( 'No data yet', 'wporg-plugins' ),
 			),
 		) );
 
