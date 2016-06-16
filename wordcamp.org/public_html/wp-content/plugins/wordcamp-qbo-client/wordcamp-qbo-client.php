@@ -6,7 +6,7 @@
 use WordCamp\Logger;
 
 class WordCamp_QBO_Client {
-	const REMOTE_REQUEST_TIMEOUT = 10; // seconds
+	const REMOTE_REQUEST_TIMEOUT = 45; // seconds
 
 	private static $hmac_key;
 	private static $api_base;
