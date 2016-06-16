@@ -33,12 +33,12 @@ class Plugin_I18n {
 		return ! is_null( $instance ) ? $instance : $instance = new Plugin_I18n( $wpdb );
 	}
 
-    function __construct( $db, $tracker = null ) {
-        if ( !empty( $db ) && is_object( $db ) ) {
-            $this->db = $db;
-        }
+	function __construct( $db, $tracker = null ) {
+		if ( !empty( $db ) && is_object( $db ) ) {
+			$this->db = $db;
+		}
 
-        wp_cache_add_global_groups( $this->i18n_cache_group );
+		wp_cache_add_global_groups( $this->i18n_cache_group );
 	}
 
 	/**
@@ -115,7 +115,7 @@ class Plugin_I18n {
 		}
 
 		$branch_id = $this->db->get_var( $this->db->prepare(
-			'SELECT id FROM '.GLOTPRESS_TABLE_PREFIX.'_projects WHERE path = %s',
+			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'projects WHERE path = %s',
 			"wp-plugins/{$slug}/{$branch}"
 		) );
 
@@ -161,7 +161,7 @@ class Plugin_I18n {
 		}
 
 		$originals = $this->db->get_results( $this->db->prepare(
-			'SELECT id, singular, comment FROM '.GLOTPRESS_TABLE_PREFIX.'_originals WHERE project_id = %d AND status = %s ORDER BY CHAR_LENGTH(singular) DESC',
+			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s ORDER BY CHAR_LENGTH(singular) DESC',
 			$branch_id, '+active'
 		) );
 
@@ -197,13 +197,13 @@ class Plugin_I18n {
 		}
 
 		$translation_set_id = $this->db->get_var( $this->db->prepare(
-			'SELECT id FROM '.GLOTPRESS_TABLE_PREFIX.'_translation_sets WHERE project_id = %d AND locale = %s',
+			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
 			$branch_id, $locale ) );
 
 		if ( empty( $translation_set_id ) ) {
 			// Don't give up yet. Might be given fr_FR, which actually exists as locale=fr in GP.
 			$translation_set_id = $this->db->get_var( $this->db->prepare(
-				'SELECT id FROM '.GLOTPRESS_TABLE_PREFIX.'_translation_sets WHERE project_id = %d AND locale = %s',
+				'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
 				$branch_id, preg_replace( '/^([^-]+)(-.+)?$/', '\1', $locale ) ) );
 		}
 
@@ -240,7 +240,7 @@ class Plugin_I18n {
 		}
 
 		$original = $this->db->get_row( $this->db->prepare(
-			'SELECT id, singular, comment FROM '.GLOTPRESS_TABLE_PREFIX.'_originals WHERE project_id = %d AND status = %s AND singular = %s',
+			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s AND singular = %s',
 			$branch_id, '+active', $str
 		) );
 
@@ -349,7 +349,7 @@ class Plugin_I18n {
 			}
 
 			$translation = $this->db->get_var( $this->db->prepare(
-				'SELECT translation_0 FROM '.GLOTPRESS_TABLE_PREFIX.'_translations WHERE original_id = %d AND translation_set_id = %d AND status = %s',
+				'SELECT translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id = %d AND translation_set_id = %d AND status = %s',
 				$original->id, $translation_set_id, 'current'
 			) );
 
@@ -384,6 +384,4 @@ class Plugin_I18n {
 
 		return $content;
 	}
-
 }
-
