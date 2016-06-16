@@ -113,6 +113,7 @@ add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' )
  * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
  */
 function hreflang_link_attributes() {
+	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
 		global $wpdb;
@@ -160,7 +161,7 @@ function hreflang_link_attributes() {
 			return strcasecmp( $a->hreflang, $b->hreflang );
 		} );
 
-		wp_cache_set( 'local-sites', $sites, 'locale-associations', DAY_IN_SECONDS );
+		wp_cache_set( 'local-sites', $sites, 'locale-associations' );
 	}
 
 	foreach ( $sites as $site ) {
