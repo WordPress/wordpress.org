@@ -134,7 +134,9 @@ class Customizations {
 		 * If it doesn't have at least one submenu then users who cannot also publish posts will not be able to access the post type.
 		 */
 		add_submenu_page( 'edit.php?post_type=plugin', 'Plugin Handbook', 'Plugin Handbook', 'read', 'handbook', function() {} );
-		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', function() {} );
+
+		$readme_validator = Readme_Validator::instance();
+		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', array( $readme_validator, 'display' ) );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			remove_menu_page( 'index.php' );
