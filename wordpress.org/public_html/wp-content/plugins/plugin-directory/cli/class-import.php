@@ -92,6 +92,7 @@ class Import {
 				'post_modified_gmt' => $topic->topic_time,
 				'meta_input' => array(
 					'_author_ip' => $author_ip,
+					'_publish'   => $topic->approved,
 				),
 			) );
 		}

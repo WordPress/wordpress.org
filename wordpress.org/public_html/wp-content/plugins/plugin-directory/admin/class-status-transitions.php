@@ -24,6 +24,8 @@ class Status_Transitions {
 	 * Constructor.
 	 */
 	private function __construct() {
+		add_action( 'transition_post_status', array( $this, 'record_status_change' ), 11, 3 );
+
 		add_action( 'approved_plugin', array( $this, 'approved' ), 10, 2 );
 		add_action( 'rejected_plugin', array( $this, 'rejected' ), 10, 2 );
 	}
@@ -62,6 +64,19 @@ class Status_Transitions {
 		wp_die( __( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ), '', array(
 			'back_link' => true,
 		) );
+	}
+
+	/**
+	 * Records the time a plugin was transitioned into a specific status.
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 */
+	public function record_status_change( $new_status, $old_status, $post ) {
+		if ( 'plugin' === $post->post_type ) {
+			update_post_meta( $post->ID, "_{$new_status}", strtotime( $post->post_modified_gmt ) );
+		}
 	}
 
 	/**
