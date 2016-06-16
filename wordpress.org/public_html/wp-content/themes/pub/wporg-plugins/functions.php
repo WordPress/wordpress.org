@@ -71,7 +71,7 @@ function scripts() {
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
-	
+
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-accordion', get_template_directory_uri() . '/js/section-accordion.js', array(), '20160525', true );
 	}
@@ -104,6 +104,80 @@ function customize_preview_js() {
 	wp_enqueue_script( 'wporg_plugins_customizer', get_template_directory_uri() . '/js/customizer.js', array( 'customize-preview' ), '20151215', true );
 }
 add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' );
+
+
+/**
+ * Adds hreflang link attributes to plugin pages.
+ *
+ * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.
+ * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
+ */
+function hreflang_link_attributes() {
+
+	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
+		global $wpdb;
+
+		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+		if ( ! $sites ) {
+			return;
+		}
+
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		foreach ( $sites as $site ) {
+			$gp_locale = \GP_Locales::by_field( 'wp_locale', $site->locale );
+			if ( ! $gp_locale ) {
+				unset( $sites[ $site->locale ] );
+				continue;
+			}
+
+			// Note that Google only supports ISO 639-1 codes.
+			if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_1 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_1;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_2 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_2;
+			} elseif ( isset( $gp_locale->lang_code_iso_639_3 ) ) {
+				$hreflang = $gp_locale->lang_code_iso_639_3;
+			}
+
+			if ( $hreflang ) {
+				$sites[ $site->locale ]->hreflang = strtolower( $hreflang );
+			} else {
+				unset( $sites[ $site->locale ] );
+			}
+		}
+
+		// Add en_US to the list of sites.
+		$sites['en_US'] = (object) array(
+			'locale'    => 'en_US',
+			'hreflang'  => 'en',
+			'subdomain' => ''
+		);
+
+		uasort( $sites, function( $a, $b ) {
+			return strcasecmp( $a->hreflang, $b->hreflang );
+		} );
+
+		wp_cache_set( 'local-sites', $sites, 'locale-associations', DAY_IN_SECONDS );
+	}
+
+	foreach ( $sites as $site ) {
+		$url = sprintf(
+			'https://%swordpress.org%s',
+			$site->subdomain ? "{$site->subdomain}." : '',
+			$_SERVER[ 'REQUEST_URI' ]
+		);
+
+		printf(
+			'<link rel="alternate" href="%s" hreflang="%s" />' . "\n",
+			esc_url( $url ),
+			esc_attr( $site->hreflang )
+		);
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\hreflang_link_attributes' );
 
 /**
  * Custom template tags for this theme.
