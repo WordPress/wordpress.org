@@ -1278,8 +1278,10 @@ p .section-toggle:not(.button):hover {
   color: #fff;
 }
 
-.main-navigation a.active, .main-navigation .single .type-plugin .entry-content .active.section-toggle, .single .type-plugin .entry-content .main-navigation .active.section-toggle {
-  border-color: rgba(255, 255, 255, 0.2);
+@media screen and (min-width: 48em) {
+  .main-navigation a.active, .main-navigation .single .type-plugin .entry-content .active.section-toggle, .single .type-plugin .entry-content .main-navigation .active.section-toggle {
+    border-bottom: 1px solid;
+  }
 }
 
 /* Small menu. */

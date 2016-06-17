@@ -11,6 +11,12 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+$menu_items = array(
+	'/browse/favorites/' => __( 'Favorites', 'wporg-plugins' ),
+	'/browse/beta/'      => __( 'Beta Testing', 'wporg-plugins' ),
+	'/about/'            => __( 'Developers', 'wporg-plugins' ),
+);
+
 $GLOBALS['pagetitle'] = __( 'Plugin Directory &mdash; Free WordPress Plugins', 'wporg-plugins' );
 require WPORGPATH . 'header.php';
 ?>
@@ -33,9 +39,12 @@ require WPORGPATH . 'header.php';
 					<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-plugins' ); ?>"></button>
 					<div id="primary-menu" class="menu">
 						<ul>
-							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/favorites/' ) ); ?>"><?php esc_html_e( 'Favorites', 'wporg-plugins' ); ?></a></li>
-							<li class="page_item"><a href="<?php echo esc_url( home_url( 'browse/beta/' ) ); ?>"><?php esc_html_e( 'Beta Testing', 'wporg-plugins' ); ?></a></li>
-							<li class="page_item"><a href="<?php echo esc_url( home_url( 'about/' ) ); ?>"><?php esc_html_e( 'Developers', 'wporg-plugins' ); ?></a></li>
+							<?php
+							foreach ( $menu_items as $path => $text ) :
+								$class = false !== strpos( $_SERVER['REQUEST_URI'], $path ) ? 'class="active" ' : '';
+							?>
+							<li class="page_item"><a <?php echo $class; ?>href="<?php echo esc_url( home_url( $path ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
+							<?php endforeach; ?>
 							<li><?php get_search_form(); ?></li>
 						</ul>
 					</div>

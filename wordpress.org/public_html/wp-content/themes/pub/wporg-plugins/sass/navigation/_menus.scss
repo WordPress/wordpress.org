@@ -74,8 +74,10 @@
 			color: #fff;
 		}
 
-		&.active {
-			border-color: rgba( 255, 255, 255, 0.2 );
+		@media screen and (min-width: $ms-breakpoint) {
+			&.active {
+				border-bottom: 1px solid;
+			}
 		}
 	}
 
