@@ -29,6 +29,27 @@ class Tools {
 	}
 
 	/**
+	 * Returns the two latest reviews of a specific plugin.
+	 *
+	 * @global \wpdb $wpdb WordPress database abstraction object.
+	 *
+	 * @todo Populate with review title/content.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return array|false
+	 */
+	public static function get_plugin_reviews( $plugin_slug ) {
+		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_reviews", 'wporg-plugins' ) ) ) {
+			global $wpdb;
+
+			$reviews = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ratings WHERE object_type = 'plugin' AND object_slug = %s ORDER BY review_id DESC LIMIT 2", $plugin_slug ) );
+			wp_cache_set( "{$plugin_slug}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
+		}
+
+		return $reviews;
+	}
+
+	/**
 	 * Retrieve a list of users who have commit to a specific plugin.
 	 *
 	 * @param string $plugin_slug The plugin slug.

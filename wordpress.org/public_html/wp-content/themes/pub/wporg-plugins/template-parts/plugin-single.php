@@ -44,17 +44,21 @@ $widget_args = array(
 	<div class="entry-content">
 		<?php
 			$plugin_sections = Template::get_plugin_sections();
+
 			foreach ( array( 'description', 'screenshots', 'faq', 'reviews', 'changelog', 'developers' ) as $section_slug ) :
-				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) ) :
+				$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+
+				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) || empty( $section_content ) ) :
 					continue;
 				endif;
+
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
 		?>
 
 			<div id="<?php echo esc_attr( $section_slug ); ?>" class="read-more" aria-expanded="false">
 				<h2><?php echo $section['title']; ?></h2>
-				<?php echo apply_filters( 'the_content', $content[ $section_slug ], $section_slug ); ?>
+				<?php echo $section_content; ?>
 			</div>
 			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section_slug ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
 		<?php endforeach; ?>

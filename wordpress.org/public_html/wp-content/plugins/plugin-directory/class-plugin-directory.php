@@ -246,6 +246,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-developers',  array( __NAMESPACE__ . '\Shortcodes\Developers',  'display' ) );
 		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\Shortcodes\Upload',      'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
+		add_shortcode( 'wporg-plugins-reviews',     array( __NAMESPACE__ . '\Shortcodes\Reviews',     'display' ) );
 	}
 
 	public function register_widgets() {
@@ -675,6 +676,7 @@ class Plugin_Directory {
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'developers'  => '[wporg-plugins-developers]',
+			'reviews'     => '[wporg-plugins-reviews]',
 		);
 
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
