@@ -414,4 +414,16 @@ class Template {
 			return sprintf( "https://downloads.wordpress.org/plugin/%s.zip", $post->post_name );
 		}
 	}
+
+	/**
+	 * Properly encodes a string to UTF-8.
+	 *
+	 * @param string $string
+	 * @return string
+	 */
+	public static function encode( $string ) {
+		$string = mb_convert_encoding( $string, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
+
+		return ent2ncr( htmlspecialchars_decode( htmlentities( $string, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
+	}
 }

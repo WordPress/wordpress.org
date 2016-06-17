@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -26,7 +27,7 @@ class Developers {
 				continue;
 			}
 
-			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . utf8_encode( $contributor->display_name ) . '</li>';
+			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . Template::encode( $contributor->display_name ) . '</li>';
 		}
 		$output .= '</ul>';
 
