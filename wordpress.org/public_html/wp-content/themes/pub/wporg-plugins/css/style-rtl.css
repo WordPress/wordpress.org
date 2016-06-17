@@ -2046,12 +2046,20 @@ p .section-toggle:not(.button):hover {
   text-transform: uppercase;
 }
 
+.single .type-plugin .entry-content .read-more h1:first-of-type, .single .type-plugin .entry-content .read-more h2:first-of-type, .single .type-plugin .entry-content .read-more h3:first-of-type {
+  margin-top: 0;
+}
+
 .single .type-plugin .entry-content .read-more h4, .single .type-plugin .entry-content .read-more h5, .single .type-plugin .entry-content .read-more h6 {
   font-size: 12.8px;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
+}
+
+.single .type-plugin .entry-content .read-more h4:first-of-type, .single .type-plugin .entry-content .read-more h5:first-of-type, .single .type-plugin .entry-content .read-more h6:first-of-type {
+  margin-top: 0;
 }
 
 .single .type-plugin .entry-content .read-more p:first-child {
