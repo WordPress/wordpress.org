@@ -1890,6 +1890,20 @@ p .section-toggle:not(.button):hover {
   line-height: 1.3;
 }
 
+.home .type-plugin .entry-title a, .home .single .type-plugin .entry-title .entry-content .section-toggle, .single .home .type-plugin .entry-title .entry-content .section-toggle, .home .single .type-plugin .entry-content .entry-title .section-toggle, .single .home .type-plugin .entry-content .entry-title .section-toggle,
+.search .type-plugin .entry-title a,
+.search .single .type-plugin .entry-title .entry-content .section-toggle, .single
+.search .type-plugin .entry-title .entry-content .section-toggle,
+.search .single .type-plugin .entry-content .entry-title .section-toggle, .single
+.search .type-plugin .entry-content .entry-title .section-toggle,
+.archive .type-plugin .entry-title a,
+.archive .single .type-plugin .entry-title .entry-content .section-toggle, .single
+.archive .type-plugin .entry-title .entry-content .section-toggle,
+.archive .single .type-plugin .entry-content .entry-title .section-toggle, .single
+.archive .type-plugin .entry-content .entry-title .section-toggle {
+  font-weight: 400;
+}
+
 .home .type-plugin .plugin-rating,
 .search .type-plugin .plugin-rating,
 .archive .type-plugin .plugin-rating {

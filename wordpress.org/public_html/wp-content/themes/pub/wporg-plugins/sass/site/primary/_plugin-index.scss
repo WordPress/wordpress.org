@@ -40,6 +40,10 @@
 		@include font-size( ms-unitless( ms(0) ) );
 		margin: 0 0 8px;
 		line-height: 1.3;
+
+		a {
+			font-weight: 400;
+		}
 	}
 
 	.plugin-rating {
