@@ -65,6 +65,9 @@ class Readme_Validator {
 	 * Validates readme.txt contents and adds feedback.
 	 */
 	public function validate() {
+		if ( ! isset( $_REQUEST['_wpnonce'] ) ) {
+			return;
+		}
 		check_admin_referer( 'validate-readme' );
 
 		$readme    = '';
