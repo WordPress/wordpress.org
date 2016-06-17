@@ -27,7 +27,11 @@
 			<?php
 				get_search_form();
 
-		else : ?>
+		elseif ( is_tax( 'plugin_section', 'favorites' ) ) : ?>
+
+			<p><?php esc_html_e( 'Seems like you do not like plugins. Boo!', 'wporg-plugins' ); ?></p>
+
+		<?php else : ?>
 
 			<p><?php esc_html_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'wporg-plugins' ); ?></p>
 			<?php
