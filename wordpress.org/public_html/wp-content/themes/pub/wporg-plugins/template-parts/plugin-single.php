@@ -43,17 +43,20 @@ $widget_args = array(
 
 	<div class="entry-content">
 		<?php
-			foreach ( Template::get_plugin_sections() as $section ) :
-				if ( ! array_key_exists( $section['slug'], $content ) || in_array( $section['slug'], array( 'installation', 'other_notes' ) ) ) :
+			$plugin_sections = Template::get_plugin_sections();
+			foreach ( array( 'description', 'screenshots', 'faq', 'reviews' ) as $section_slug ) :
+				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) ) :
 					continue;
 				endif;
+				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
+				$section = array_pop( $section );
 		?>
 
-			<div id="<?php echo esc_attr( $section['slug'] ); ?>" class="read-more" aria-expanded="false">
+			<div id="<?php echo esc_attr( $section_slug ); ?>" class="read-more" aria-expanded="false">
 				<h2><?php echo $section['title']; ?></h2>
-				<?php echo apply_filters( 'the_content', $content[ $section['slug'] ], $section['slug'] ); ?>
+				<?php echo apply_filters( 'the_content', $content[ $section_slug ], $section_slug ); ?>
 			</div>
-			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section['slug'] ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section_slug ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
 		<?php endforeach; ?>
 	</div><!-- .entry-content -->
 
@@ -63,6 +66,5 @@ $widget_args = array(
 			the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support', array(), $widget_args );
 			the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',    array(), $widget_args );
 		?>
-
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->
