@@ -295,7 +295,7 @@ class Customizations {
 	 * @param \WP_Post $post The current post object.
 	 */
 	public function show_permalink( $post ) {
-		if ( 'publish' === $post->post_status ) {
+		if ( 'plugin' === $post->post_type && 'publish' === $post->post_status ) {
 			echo get_sample_permalink_html( $post );
 		}
 	}
