@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
+use WordPressdotorg\Plugin_Directory\CLI\Tag_To_Category;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -566,9 +567,22 @@ class Plugin_Directory {
 		if ( is_404() ) {
 
 			// [1] => plugins [2] => example-plugin-name [2..] => random()
-			$plugin_slug = explode( '/', $_SERVER['REQUEST_URI'] )[2];
+			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
-			if ( $plugin = self::get_plugin_post( $plugin_slug ) ) {
+			if ( 'tags' === $path[2] ) {
+				if ( isset( Tag_To_Category::$map[ $path[3] ] ) ) {
+					wp_safe_redirect( home_url( '/category/' . Tag_To_Category::$map[ $path[3] ] . '/' ) );
+					die();
+				} else if ( isset( $path[3] ) ) {
+					wp_safe_redirect( home_url( '/search/' . $path[3] . '/' ) );
+					die();
+				} else {
+					wp_safe_redirect( home_url( '/' ) );
+					die();
+				}
+			}
+
+			if ( $plugin = self::get_plugin_post( $path[2] ) ) {
 				$is_disabled = in_array( $plugin->post_status, array( 'disabled', 'closed' ), true );
 
 				if ( $is_disabled && current_user_can( 'edit_post', $plugin ) ) {
