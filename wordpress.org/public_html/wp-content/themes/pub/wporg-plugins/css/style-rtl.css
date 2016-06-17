@@ -1839,6 +1839,39 @@ p .section-toggle:not(.button):hover {
   font-weight: 400;
 }
 
+.site-main .no-results {
+  margin: 0 auto;
+  max-width: 35.527136788rem;
+  padding: 0 32px;
+  padding: 0 2rem;
+}
+
+.site-main .no-results .search-form {
+  margin: 32px auto;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.site-main .no-results .search-form:after {
+  content: "\f179";
+  font-family: dashicons;
+  position: absolute;
+  left: 16px;
+  top: 11px;
+}
+
+.site-main .no-results .search-field {
+  font-size: 16px;
+  font-size: 1rem;
+  padding: 8px 8px 8px 40px;
+  padding: 0.5rem 0.5rem 0.5rem 40px;
+  width: 100%;
+}
+
+.site-main .no-results .button-search {
+  display: none;
+}
+
 .home .type-plugin,
 .search .type-plugin,
 .archive .type-plugin {
@@ -2281,39 +2314,6 @@ p .section-toggle:not(.button):hover {
 .search.search-results .page-header {
   margin: 32px 0;
   margin: 2rem 0;
-}
-
-.search .no-results {
-  margin: 0 auto;
-  max-width: 35.527136788rem;
-  padding: 0 32px;
-  padding: 0 2rem;
-}
-
-.search .no-results .search-form {
-  margin: 32px auto;
-  margin: 2rem auto;
-  position: relative;
-}
-
-.search .no-results .search-form:after {
-  content: "\f179";
-  font-family: dashicons;
-  position: absolute;
-  left: 16px;
-  top: 11px;
-}
-
-.search .no-results .search-field {
-  font-size: 16px;
-  font-size: 1rem;
-  padding: 8px 8px 8px 40px;
-  padding: 0.5rem 0.5rem 0.5rem 40px;
-  width: 100%;
-}
-
-.search .no-results .button-search {
-  display: none;
 }
 
 /*--------------------------------------------------------------
