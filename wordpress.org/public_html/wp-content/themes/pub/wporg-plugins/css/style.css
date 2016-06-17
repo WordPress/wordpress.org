@@ -1463,7 +1463,7 @@ p .section-toggle:not(.button):hover {
 
 @media screen and (min-width: 48em) {
   .home .widget-area {
-    padding: 0 0 3.0517578125rem 0;
+    padding: 0 10px 3.0517578125rem;
   }
 }
 
