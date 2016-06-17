@@ -1745,13 +1745,11 @@ p .section-toggle:not(.button):hover {
   }
 }
 
-.home .site-header,
-.search .site-header {
+.home .site-header {
   padding: 1.5625rem 1.143rem;
 }
 
-.home .site-header .site-title,
-.search .site-header .site-title {
+.home .site-header .site-title {
   display: inherit;
   font-size: 61.03515625px;
   font-size: 3.8146972656rem;
@@ -1759,14 +1757,12 @@ p .section-toggle:not(.button):hover {
   text-align: center;
 }
 
-.home .site-header .search-form,
-.search .site-header .search-form {
+.home .site-header .search-form {
   display: inherit;
   margin-bottom: 2rem;
 }
 
-.home .site-header .search-form .search-field,
-.search .site-header .search-form .search-field {
+.home .site-header .search-form .search-field {
   border: none;
   border-radius: 0;
   display: block;
@@ -1777,8 +1773,7 @@ p .section-toggle:not(.button):hover {
   width: 22.7373675443rem;
 }
 
-.home .site-header .search-form .button-search,
-.search .site-header .search-form .button-search {
+.home .site-header .search-form .button-search {
   display: none;
 }
 
@@ -2185,12 +2180,56 @@ p .section-toggle:not(.button):hover {
 .archive .site-main {
   margin-top: 32px;
   margin-top: 2rem;
-  padding: 0 10px;
+  padding-top: 0;
 }
 
 .archive .page-header {
   margin: 32px 0;
   margin: 2rem 0;
+}
+
+.search .site-main {
+  margin-top: 32px;
+  margin-top: 2rem;
+  padding-top: 0;
+}
+
+.search.search-results .page-header {
+  margin: 32px 0;
+  margin: 2rem 0;
+}
+
+.search .no-results {
+  margin: 0 auto;
+  max-width: 35.527136788rem;
+  padding: 0 32px;
+  padding: 0 2rem;
+}
+
+.search .no-results .search-form {
+  margin: 32px auto;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.search .no-results .search-form:after {
+  content: "\f179";
+  font-family: dashicons;
+  position: absolute;
+  left: 16px;
+  top: 11px;
+}
+
+.search .no-results .search-field {
+  font-size: 16px;
+  font-size: 1rem;
+  padding: 8px 8px 8px 40px;
+  padding: 0.5rem 0.5rem 0.5rem 40px;
+  width: 100%;
+}
+
+.search .no-results .button-search {
+  display: none;
 }
 
 /*--------------------------------------------------------------

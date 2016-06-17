@@ -12,8 +12,6 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $GLOBALS['pagetitle'] = __( 'Plugin Directory &mdash; Free WordPress Plugins', 'wporg-plugins' );
-$description = get_bloginfo( 'description', 'display' );
-
 require WPORGPATH . 'header.php';
 ?>
 <div id="page" class="site">
@@ -22,15 +20,13 @@ require WPORGPATH . 'header.php';
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
 			<?php if ( is_front_page() && is_home() ) : ?>
-				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+				<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></h1>
 			<?php else : ?>
-				<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
+				<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></p>
 			<?php endif; ?>
 
-			<?php if ( is_home() || is_search() ) :
-				if ( $description || is_customize_preview() ) : ?>
-				<p class="site-description"><?php echo $description; /* WPCS: xss ok. */ ?></p>
-					<?php endif; ?>
+			<?php if ( is_home() ) : ?>
+				<p class="site-description"><?php _e( 'Plugins extend and expand the functionality of WordPress.', 'wporg-plugins' ); ?></p>
 				<?php get_search_form(); ?>
 			<?php else : ?>
 				<nav id="site-navigation" class="main-navigation" role="navigation">
