@@ -44,7 +44,7 @@ $widget_args = array(
 	<div class="entry-content">
 		<?php
 			foreach ( Template::get_plugin_sections() as $section ) :
-				if ( ! array_key_exists( $section['slug'], $content ) ) :
+				if ( ! array_key_exists( $section['slug'], $content ) || in_array( $section['slug'], array( 'installation', 'other_notes' ) ) ) :
 					continue;
 				endif;
 		?>
