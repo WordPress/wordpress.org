@@ -76,7 +76,8 @@ class Readme_Validator {
 			$url = esc_url_raw( $_REQUEST['readme_url'] );
 
 			if ( strtolower( substr( $url, - 10, 10 ) ) != 'readme.txt' ) {
-				add_settings_error( 'wporg-plugins', 'readme-validator', __( 'URL must end in <code>readme.txt</code>!', 'wporg-plugins' ) );
+				/* Translators: File name; */
+				add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' ) );
 				return;
 			}
 
@@ -98,28 +99,35 @@ class Readme_Validator {
 
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {
-			add_settings_error( 'wporg-plugins', 'readme-validator', __( "Fatal Error:\nNo plugin name detected. Plugin names look like: <code>=== Plugin Name ===</code>", 'wporg-plugins' ) );
+			/* Translators: Plugin header tag; */
+			add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( "Fatal Error:\nNo plugin name detected. Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' ) );
 			return;
 		}
 
 		// Warnings.
 		if ( empty( $readme->requires_at_least ) ) {
-			$warnings[] = __( '<code>Requires at least</code> is missing.', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Requires at least</code>' );
 		}
 		if ( empty( $readme->tested_up_to ) ) {
-			$warnings[] = __( '<code>Tested up to</code> is missing.', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
 		if ( empty( $readme->stable_tag ) ) {
-			$warnings[] = __( '<code>Stable tag</code> is missing.  Hint: If you treat <code>/trunk/</code> as stable, put <code>Stable tag: trunk</code>.', 'wporg-plugins' );
+			/* Translators: 1: Plugin header tag; 2: SVN directory; 3: Plugin header tag; */
+			$warnings[] = sprintf( __( '%1$s is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ), '<code>Stable tag</code>', '<code>/trunk/</code>', '<code>Stable tag: trunk</code>' );
 		}
 		if ( ! count( $readme->contributors ) ) {
-			$warnings[] = __( 'No <code>Contributors</code> listed.', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( 'No %s listed.', 'wporg-plugins' ), '<code>Contributors</code>' );
 		}
 		if ( ! count( $readme->tags ) ) {
-			$warnings[] = __( 'No <code>Tags</code> specified', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( 'No %s specified', 'wporg-plugins' ), '<code>Tags</code>' );
 		}
 		if ( ! empty( $readme->is_excerpt ) ) {
-			$warnings[] = __( 'No <code>== Description ==</code> section was found... your short description section will be used instead.', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( 'No %s section was found... your short description section will be used instead.', 'wporg-plugins' ), '<code>== Description ==</code>' );
 		}
 		if ( ! empty( $readme->is_truncated ) ) {
 			$warnings[] = __( 'Your short description exceeds the 150 character limit.', 'wporg-plugins' );
@@ -138,22 +146,28 @@ class Readme_Validator {
 
 		// Notes.
 		if ( empty( $readme->license ) ) {
-			$notes[] = __( 'No <code>License</code> is specified. WordPress is licensed under &#8220;GPLv2 or later&#8221;', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s is specified. WordPress is licensed under &#8220;GPLv2 or later&#8221;', 'wporg-plugins' ), '<code>License</code>' );
 		}
 		if ( empty( $readme->sections['installation'] ) ) {
-			$notes[] = __( 'No <code>== Installation ==</code> section was found', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Installation ==</code>' );
 		}
 		if ( empty( $readme->sections['frequently_asked_questions'] ) ) {
-			$notes[] = __( 'No <code>== Frequently Asked Questions ==</code> section was found', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Frequently Asked Questions ==</code>' );
 		}
 		if ( empty( $readme->sections['changelog'] ) ) {
-			$notes[] = __( 'No <code>== Changelog ==</code> section was found', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Changelog ==</code>' );
 		}
 		if ( empty( $readme->upgrade_notice ) ) {
-			$notes[] = __( 'No <code>== Upgrade Notice ==</code> section was found', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Upgrade Notice ==</code>' );
 		}
 		if ( empty( $readme->sections['screenshots'] ) ) {
-			$notes[] = __( 'No <code>== Screenshots ==</code> section was found', 'wporg-plugins' );
+			/* Translators: Plugin header tag; */
+			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Screenshots ==</code>' );
 		}
 		if ( empty( $readme->donate_link ) ) {
 			$notes[] = __( 'No donate link was found', 'wporg-plugins' );
@@ -170,14 +184,16 @@ class Readme_Validator {
 			return;
 		}
 
-		add_settings_error( 'wporg-plugins', 'readme-validator', __( 'Your <code>readme.txt</code> rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), 'updated' );
+		/* Translators: File name; */
+		add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( 'Your %s rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), '<code>readme.txt</code>' ), 'updated' );
 	}
 
 	/**
 	 * Help text for the form following after it.
 	 */
 	public function section_description() {
-		echo '<p>' . __( 'Enter the URL to your <code>readme.txt</code> file or paste its content below.' ) . '</p>';
+		/* Translators: File name; */
+		echo '<p>' . sprintf( __( 'Enter the URL to your %s file or paste its content below.' ), '<code>readme.txt</code>' ) . '</p>';
 	}
 
 	/**
