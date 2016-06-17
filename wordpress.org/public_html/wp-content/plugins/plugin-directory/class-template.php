@@ -237,7 +237,7 @@ class Template {
 			case 'html':
 				$id   = "plugin-icon-{$plugin_slug}";
 				$html = "<style type='text/css'>";
-				$html .= "#{$id} { width:128px; height:128px; background-image: url('{$icon}'); background-size:128px 128px; }";
+				$html .= "#{$id} { background-image: url('{$icon}'); } .plugin-icon { background-size: 128px 128px; height: 128px; width: 128px; }";
 				if ( ! empty( $icon_2x ) && ! $generated ) {
 					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$icon_2x}'); } }";
 				}
