@@ -1,3 +1,4 @@
+/* global _gaq */
 ( function( $ ) {
 	$( function() {
 		$( '#main' ).on( 'click', '.section-toggle', function( event ) {
@@ -8,6 +9,8 @@
 			} );
 
 			$( '.read-more:not( #' + sectionId + ')' ).removeClass( 'toggled' ).attr( 'aria-expanded', false );
+
+			_gaq.push(['_trackPageview', window.location.pathname + sectionId + '/' ]);
 		} );
 	} );
 } )( window.jQuery );
