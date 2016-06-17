@@ -1,10 +1,8 @@
 /* global _gaq */
-( function( $ ) {
-	$( function() {
-		$( '#main' ).on( 'click', '.section-toggle', function( event ) {
-			var sectionId = $( event.target ).attr( 'aria-controls' );
-
-			$( '#' + sectionId ).toggleClass( 'toggled' ).attr( 'aria-expanded', function( index, attribute ) {
+( function( $, wporg ) {
+	wporg.plugins = {
+		toggle: function( sectionId ) {
+			$( sectionId ).toggleClass( 'toggled' ).attr( 'aria-expanded', function( index, attribute ) {
 				var notExpanded = 'false' === attribute;
 
 				if ( notExpanded ) {
@@ -14,7 +12,21 @@
 				return notExpanded;
 			} );
 
-			$( '.read-more:not( #' + sectionId + ')' ).removeClass( 'toggled' ).attr( 'aria-expanded', false );
+			$( '.read-more:not(' + sectionId + ')' ).removeClass( 'toggled' ).attr( 'aria-expanded', false );
+		}
+	};
+
+	$( function() {
+		if ( document.location.hash ) {
+			wporg.plugins.toggle( document.location.hash );
+		}
+
+		$( window ).on( 'hashchange', function() {
+			wporg.plugins.toggle( document.location.hash );
+		} );
+
+		$( '#main' ).on( 'click', '.section-toggle', function( event ) {
+			wporg.plugins.toggle( '#' + $( event.target ).attr( 'aria-controls' ) );
 		} );
 	} );
-} )( window.jQuery );
+} )( window.jQuery, window.wporg || {} );
