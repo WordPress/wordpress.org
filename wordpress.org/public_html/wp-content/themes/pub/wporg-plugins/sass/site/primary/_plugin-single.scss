@@ -7,8 +7,8 @@
 	}
 
 	.plugin-banner {
-		background-size: 100%;
 		background-position: 50% 50%;
+		background-size: 100%;
 		display: inline-block;
 		font-size: 0;
 		line-height: 0;
@@ -28,8 +28,8 @@
 		padding-bottom: ms(1);
 
 		.plugin-thumbnail {
-			float: left;
 			display: none;
+			float: left;
 			height: 96px;
 			margin-right: 1rem;
 			width: 96px;
@@ -52,7 +52,8 @@
 
 		.plugin-title {
 			clear: none;
-			@extend h3;
+			@include font-size( ms-unitless( ms(4) ) );
+			font-weight: 400;
 			margin: 0;
 		}
 
@@ -76,6 +77,20 @@
 			max-height: 200px;
 			overflow:hidden;
 			padding-bottom: 1px;
+
+			h1, h2, h3 {
+				@include font-size( ms-unitless( ms(0) ) );
+				font-weight: 600;
+				letter-spacing: 0.01rem;
+				text-transform: uppercase;
+			}
+
+			h4, h5, h6 {
+				@include font-size( ms-unitless( ms(-2) ) );
+				font-weight: 600;
+				letter-spacing: 0.05rem;
+				text-transform: uppercase;
+			}
 
 			p:first-child {
 				margin-top: 0;

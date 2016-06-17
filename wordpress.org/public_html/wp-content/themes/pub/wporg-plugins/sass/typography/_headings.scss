@@ -17,10 +17,10 @@ h1 {
 
 h1.title {
 	@include font-size( ms-unitless( ms(-2) ) );
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.05rem;
 	color: $color__link;
+	font-weight: 600;
+	letter-spacing: 0.05rem;
+	text-transform: uppercase;
 }
 
 h2 {
@@ -35,24 +35,24 @@ h3 {
 
 h4 {
 	@include font-size( ms-unitless( ms(2) ) );
-	font-weight: 600;
 
 	// Override wp4.css.
 	border: none;
 	color: $color__text-main;
+	font-weight: 600;
 	padding: 0;
 }
 
 h5 {
 	@include font-size( ms-unitless( ms(0) ) );
-	text-transform: uppercase;
-	letter-spacing: 0.01rem;
 	font-weight: 600;
+	letter-spacing: 0.01rem;
+	text-transform: uppercase;
 }
 
 h6 {
 	@include font-size( ms-unitless( ms(-2) ) );
 	font-weight: 600;
-	text-transform: uppercase;
 	letter-spacing: 0.05rem;
+	text-transform: uppercase;
 }

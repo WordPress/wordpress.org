@@ -15,7 +15,8 @@
 	}
 
 	.section-title {
-		@extend h3;
+		@include font-size( ms-unitless( ms(4) ) );
+		font-weight: 400;
 		margin-bottom: 3rem;
 	}
 

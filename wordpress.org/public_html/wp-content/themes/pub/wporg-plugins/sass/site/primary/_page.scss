@@ -8,11 +8,15 @@
 	}
 
 	h1 {
-		@extend h3;
+		@include font-size( ms-unitless( ms(4) ) );
+		font-weight: 400;
 	}
 
 	h2 {
-		@extend h5;
+		@include font-size( ms-unitless( ms(0) ) );
+		font-weight: 600;
+		letter-spacing: 0.01rem;
+		text-transform: uppercase;
 	}
 
 	hr {

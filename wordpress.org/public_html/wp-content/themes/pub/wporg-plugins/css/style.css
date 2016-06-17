@@ -238,7 +238,7 @@ textarea {
   }
 }
 
-h1, h2, h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, .page h1, h4, h5, .page h2, h6 {
+h1, h2, h3, h4, h5, h6 {
   clear: both;
   font-family: inherit;
   line-height: 1.5;
@@ -254,10 +254,10 @@ h1 {
 h1.title {
   font-size: 12.8px;
   font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05rem;
   color: #21759b;
+  font-weight: 600;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
 }
 
 h2 {
@@ -266,7 +266,7 @@ h2 {
   font-weight: 300;
 }
 
-h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin .plugin-header .plugin-title, .page h1 {
+h3 {
   font-size: 25px;
   font-size: 1.5625rem;
   font-weight: 400;
@@ -275,26 +275,26 @@ h3, .plugin-section .section-title, .site-main .page-title, .single .type-plugin
 h4 {
   font-size: 20px;
   font-size: 1.25rem;
-  font-weight: 600;
   border: none;
   color: #32373c;
+  font-weight: 600;
   padding: 0;
 }
 
-h5, .page h2 {
+h5 {
   font-size: 16px;
   font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.01rem;
   font-weight: 600;
+  letter-spacing: 0.01rem;
+  text-transform: uppercase;
 }
 
 h6 {
   font-size: 12.8px;
   font-size: 0.8rem;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.05rem;
+  text-transform: uppercase;
 }
 
 p {
@@ -1796,6 +1796,9 @@ p .section-toggle:not(.button):hover {
 }
 
 .plugin-section .section-title {
+  font-size: 25px;
+  font-size: 1.5625rem;
+  font-weight: 400;
   margin-bottom: 3rem;
 }
 
@@ -1828,6 +1831,12 @@ p .section-toggle:not(.button):hover {
 
 .page .site-main {
   padding-top: 0;
+}
+
+.site-main .page-title {
+  font-size: 25px;
+  font-size: 1.5625rem;
+  font-weight: 400;
 }
 
 .home .type-plugin,
@@ -1886,8 +1895,8 @@ p .section-toggle:not(.button):hover {
 .archive .type-plugin .entry-title {
   font-size: 16px;
   font-size: 1rem;
-  margin: 0 0 8px;
   line-height: 1.3;
+  margin: 0 0 8px;
 }
 
 .home .type-plugin .entry-title a, .home .single .type-plugin .entry-title .entry-content .section-toggle, .single .home .type-plugin .entry-title .entry-content .section-toggle, .home .single .type-plugin .entry-content .entry-title .section-toggle, .single .home .type-plugin .entry-content .entry-title .section-toggle,
@@ -1952,8 +1961,8 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .plugin-banner {
-  background-size: 100%;
   background-position: 50% 50%;
+  background-size: 100%;
   display: inline-block;
   font-size: 0;
   line-height: 0;
@@ -1974,8 +1983,8 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .plugin-header .plugin-thumbnail {
-  float: left;
   display: none;
+  float: left;
   height: 96px;
   margin-right: 1rem;
   width: 96px;
@@ -1999,6 +2008,9 @@ p .section-toggle:not(.button):hover {
 
 .single .type-plugin .plugin-header .plugin-title {
   clear: none;
+  font-size: 25px;
+  font-size: 1.5625rem;
+  font-weight: 400;
   margin: 0;
 }
 
@@ -2024,6 +2036,22 @@ p .section-toggle:not(.button):hover {
   max-height: 200px;
   overflow: hidden;
   padding-bottom: 1px;
+}
+
+.single .type-plugin .entry-content .read-more h1, .single .type-plugin .entry-content .read-more h2, .single .type-plugin .entry-content .read-more h3 {
+  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01rem;
+  text-transform: uppercase;
+}
+
+.single .type-plugin .entry-content .read-more h4, .single .type-plugin .entry-content .read-more h5, .single .type-plugin .entry-content .read-more h6 {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
 }
 
 .single .type-plugin .entry-content .read-more p:first-child {
@@ -2184,6 +2212,20 @@ p .section-toggle:not(.button):hover {
   margin: 0 auto;
   max-width: 35.527136788rem;
   padding: 0 2rem;
+}
+
+.page h1 {
+  font-size: 25px;
+  font-size: 1.5625rem;
+  font-weight: 400;
+}
+
+.page h2 {
+  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01rem;
+  text-transform: uppercase;
 }
 
 .page hr {
