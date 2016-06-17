@@ -1,26 +1,52 @@
 @import "../../variables-site/variables-site";
 
 .page {
-	.type-page {
-		margin: 0 auto;
-		max-width: ms(32);
-		padding: 0 2rem;
+	.entry-header {
+		margin-top: 32px;
+		margin-top: 2rem;
+
+		.entry-title {
+			@include font-size(ms-unitless(ms(4)));
+			font-weight: 400;
+			margin: 0 auto;
+			max-width: ms(32);
+			padding: 0 32px;
+			padding: 0 2rem;
+		}
 	}
 
-	h1 {
-		@include font-size( ms-unitless( ms(4) ) );
-		font-weight: 400;
-	}
 
-	h2 {
-		@include font-size( ms-unitless( ms(0) ) );
-		font-weight: 600;
-		letter-spacing: 0.01rem;
-		text-transform: uppercase;
-	}
+	.entry-content {
+		h2 {
+			@include font-size(ms-unitless(ms(4)));
+			font-weight: 400;
+		}
 
-	hr {
-		margin-left: -6.5rem;
-		margin-right: -6.5rem;
+		h3 {
+			@include font-size(ms-unitless(ms(0)));
+			font-weight: 600;
+			letter-spacing: 0.01rem;
+			text-transform: uppercase;
+		}
+
+		section {
+			padding: 32px 0;
+			padding: 2rem 0;
+
+			.container {
+				margin: 0 auto;
+				max-width: ms(32);
+				padding: 0 32px;
+				padding: 0 2rem;
+			}
+
+			&:first-of-type {
+				padding-top: 0;
+			}
+
+			& + section {
+				border-top: 2px solid $color__background-hr;
+			}
+		}
 	}
 }

@@ -2271,19 +2271,28 @@ p .section-toggle:not(.button):hover {
   display: none;
 }
 
-.page .type-page {
+.page .entry-header {
+  margin-top: 32px;
+  margin-top: 2rem;
+}
+
+.page .entry-header .entry-title {
+  font-size: 25px;
+  font-size: 1.5625rem;
+  font-weight: 400;
   margin: 0 auto;
   max-width: 35.527136788rem;
+  padding: 0 32px;
   padding: 0 2rem;
 }
 
-.page h1 {
+.page .entry-content h2 {
   font-size: 25px;
   font-size: 1.5625rem;
   font-weight: 400;
 }
 
-.page h2 {
+.page .entry-content h3 {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
@@ -2291,9 +2300,24 @@ p .section-toggle:not(.button):hover {
   text-transform: uppercase;
 }
 
-.page hr {
-  margin-right: -6.5rem;
-  margin-left: -6.5rem;
+.page .entry-content section {
+  padding: 32px 0;
+  padding: 2rem 0;
+}
+
+.page .entry-content section .container {
+  margin: 0 auto;
+  max-width: 35.527136788rem;
+  padding: 0 32px;
+  padding: 0 2rem;
+}
+
+.page .entry-content section:first-of-type {
+  padding-top: 0;
+}
+
+.page .entry-content section + section {
+  border-top: 2px solid #eee;
 }
 
 .archive .site-main {
