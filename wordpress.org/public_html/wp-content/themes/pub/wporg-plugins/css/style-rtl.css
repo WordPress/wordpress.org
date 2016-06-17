@@ -2063,6 +2063,7 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .entry-content .section-toggle {
+  font-size: 12.8px;
   font-size: 0.8rem;
   margin-top: 0.5rem;
   position: relative;
@@ -2077,6 +2078,16 @@ p .section-toggle:not(.button):hover {
 
 .single .type-plugin .entry-content .toggled + .section-toggle:after {
   content: "\f343";
+}
+
+.single .type-plugin .entry-content .plugin-screenshots {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.single .type-plugin .entry-content .plugin-screenshots figcaption {
+  font-style: italic;
 }
 
 .single .type-plugin .entry-content .plugin-developers {
