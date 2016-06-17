@@ -84,7 +84,7 @@
 				letter-spacing: 0.01rem;
 				text-transform: uppercase;
 
-				&:first-of-type {
+				&:nth-child(2) {
 					margin-top: 0;
 				}
 			}
@@ -95,9 +95,19 @@
 				letter-spacing: 0.05rem;
 				text-transform: uppercase;
 
-				&:first-of-type {
+				&:nth-child(2) {
 					margin-top: 0;
 				}
+			}
+
+			h2:first-of-type {
+				@include font-size( ms-unitless( ms(2) ) );
+
+				// Override wp4.css.
+				border: none;
+				color: $color__text-main;
+				font-weight: 600;
+				padding: 0;
 			}
 
 			p:first-child {
