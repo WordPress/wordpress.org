@@ -29,7 +29,6 @@ class Plugin_Directory {
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
-		add_action( 'template_redirect', array( $this, 'redirect_hidden_plugins' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_urls' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
@@ -546,22 +545,6 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Redirects Committers and Admins to a plugin's edit page if it's disabled or closed.
-	 */
-	public function redirect_hidden_plugins() {
-		if ( ! is_404() ) {
-			return;
-		}
-
-		$post = self::get_plugin_post( get_query_var( 'name', false ) );
-
-		if ( $post instanceof \WP_Post && in_array( $post->post_status, array( 'disabled', 'closed' ), true ) && current_user_can( 'edit_post', $post ) ) {
-			wp_safe_redirect( add_query_arg( array( 'post' => $post->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ) );
-			die();
-		}
-	}
-
-	/**
 	 * Prevents Canonical redirecting to other plugins on 404's.
 	 */
 	function prevent_canonical_for_plugins() {
@@ -579,14 +562,22 @@ class Plugin_Directory {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
 			die();
 		}
-
 		// We don't have attachments, but /$plugin/random() will hit this check.
 		if ( is_404() ) {
+
 			// [1] => plugins [2] => example-plugin-name [2..] => random()
 			$plugin_slug = explode( '/', $_SERVER['REQUEST_URI'] )[2];
+
 			if ( $plugin = self::get_plugin_post( $plugin_slug ) ) {
-				wp_safe_redirect( get_permalink( $plugin->ID ) );
-				die();
+				$is_disabled = in_array( $plugin->post_status, array( 'disabled', 'closed' ), true );
+
+				if ( $is_disabled && current_user_can( 'edit_post', $plugin ) ) {
+					wp_safe_redirect( add_query_arg( array( 'post' => $plugin->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ) );
+					die();
+				} else if ( ! $is_disabled ) {
+					wp_safe_redirect( get_permalink( $plugin->ID ) );
+					die();
+				}
 			}
 		}
 
