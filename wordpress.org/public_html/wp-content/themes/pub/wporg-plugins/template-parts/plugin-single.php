@@ -75,7 +75,7 @@ $widget_args = array(
 		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',    array(), $widget_args );
 		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
 		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support', array(), $widget_args );
-		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Donate', array(), $widget_args );
+		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Donate',  array(), $widget_args );
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->

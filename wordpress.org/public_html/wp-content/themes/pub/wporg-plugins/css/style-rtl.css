@@ -2136,6 +2136,11 @@ p .section-toggle:not(.button):hover {
   padding-bottom: 1px;
 }
 
+.single .type-plugin .entry-content .read-more#reviews {
+  max-height: none;
+  overflow: auto;
+}
+
 .single .type-plugin .entry-content .read-more h1, .single .type-plugin .entry-content .read-more h2, .single .type-plugin .entry-content .read-more h3 {
   font-size: 16px;
   font-size: 1rem;
@@ -2197,10 +2202,10 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .entry-content .reviews-link {
+  display: inline-block;
   font-size: 12.8px;
   font-size: 0.8rem;
   margin-top: 0.5rem;
-  position: relative;
 }
 
 .single .type-plugin .entry-content .reviews-link:after {

@@ -75,8 +75,13 @@
 		.read-more {
 			border-bottom: 2px solid #eee;
 			max-height: 200px;
-			overflow:hidden;
+			overflow: hidden;
 			padding-bottom: 1px;
+
+			&#reviews {
+				max-height: none;
+				overflow: auto;
+			}
 
 			h1, h2, h3 {
 				@include font-size( ms-unitless( ms(0) ) );
@@ -139,9 +144,9 @@
 		}
 
 		.reviews-link {
+			display: inline-block;
 			@include font-size( ms-unitless( ms(-2) ) );
 			margin-top: 0.5rem;
-			position: relative;
 
 			&:after {
 				content: "\f345";
