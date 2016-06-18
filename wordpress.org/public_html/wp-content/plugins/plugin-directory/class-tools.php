@@ -42,7 +42,16 @@ class Tools {
 		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_reviews", 'wporg-plugins' ) ) ) {
 			global $wpdb;
 
-			$reviews = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ratings WHERE object_type = 'plugin' AND object_slug = %s ORDER BY review_id DESC LIMIT 2", $plugin_slug ) );
+			$reviews = $wpdb->get_results( $wpdb->prepare( "
+			SELECT posts.post_text AS post_content, topics.topic_title AS post_title, ratings.rating AS post_rating, ratings.user_id AS post_author
+			FROM ratings
+				INNER JOIN minibb_topics AS topics ON ( ratings.review_id = topics.topic_id )
+				INNER JOIN minibb_posts AS posts ON ( ratings.review_id = posts.topic_id )
+			WHERE
+				ratings.object_type = 'plugin' AND
+				ratings.object_slug = %s AND
+				posts.post_position = 1
+			ORDER BY ratings.review_id DESC LIMIT 2", $plugin_slug ) );
 			wp_cache_set( "{$plugin_slug}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
 		}
 

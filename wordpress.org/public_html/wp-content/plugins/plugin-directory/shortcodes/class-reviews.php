@@ -14,8 +14,7 @@ class Reviews {
 	 * @return string
 	 */
 	static function display() {
-		$post    = get_post();
-		$reviews = array(); //Tools::get_plugin_reviews( $post->post_name );
+		$reviews = Tools::get_plugin_reviews( get_post()->post_name );
 
 		if ( empty( $reviews ) ) {
 			return '';
@@ -24,29 +23,28 @@ class Reviews {
 		ob_start();
 		?>
 
-		<ul class="plugin-reviews">
+		<div class="plugin-reviews">
 			<?php
 			foreach ( $reviews as $review ) :
-				$reviewer = get_user_by( 'id', $review->user_id );
+				$reviewer = get_user_by( 'id', $review->post_author );
 				if ( ! $reviewer ) :
 					continue;
 				endif;
 				?>
-				<li>
-					<article class="plugin-review">
-						<div class="review-avatar"><?php echo get_avatar( $reviewer->ID, 32 ); ?></div>
-						<div class="review">
-							<header>
-								<h3><?php echo $review->topic_ctitle; ?></h3>
-								<?php echo Template::dashicons_stars( $review->rating ); ?>
-								<span class="byline"><?php printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( Template::encode( get_the_author() ) ) . '</a></span>' ); ?></span>
-							</header>
-							<div class="review-content"><?php echo $review->topic_text; ?></div>
-						</div>
-					</article>
-				</li>
+				<article class="plugin-review">
+					<div class="review-avatar">
+						<?php echo get_avatar( $reviewer->ID, 60 ); ?>
+					</div><div class="review">
+						<header>
+							<h3 class="review-title"><?php echo $review->post_title; ?></h3>
+							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
+							<span class="review-author author vcard"><a class="url fn n" href="<?php esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
+						</header>
+						<p class="review-content"><?php echo $review->post_content; ?></p>
+					</div>
+				</article>
 			<?php endforeach; ?>
-		</ul>
+		</div>
 
 		<?php
 		return ob_get_clean();

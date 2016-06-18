@@ -60,7 +60,13 @@ $widget_args = array(
 				<h2><?php echo $section['title']; ?></h2>
 				<?php echo $section_content; ?>
 			</div>
+				<?php if ( 'reviews' === $section_slug ) : ?>
+				<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . get_post()->post_name . '/' ); ?>">
+					<?php printf( __( 'Read all %s reviews', 'wporg-plugins' ), get_post_meta( get_the_ID(), 'num_ratings', true ) ); ?>
+				</a>
+				<?php else : ?>
 			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section_slug ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
+				<?php endif; ?>
 		<?php endforeach; ?>
 	</div><!-- .entry-content -->
 
