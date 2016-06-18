@@ -2,7 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
-use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 
@@ -187,7 +186,7 @@ class Plugin extends Base {
 	 */
 	protected function get_plugin_reviews_markup( $plugin_slug ) {
 		$output = '';
-		foreach ( Tools::get_plugin_reviews( $plugin_slug ) as $review ) {
+		foreach ( $this->get_plugin_reviews_data( $plugin_slug ) as $review ) {
 			$output .= $this->get_plugin_reviews_markup_singular( $review );
 		}
 		return $output;
@@ -244,6 +243,49 @@ class Plugin extends Base {
 <?php
 		return ob_get_clean();
 
+	}
+
+	/**
+	 * Fetch the latest 10 reviews for a given plugin from the database.
+	 *
+	 * This uses raw SQL to query the bbPress tables to fetch reviews.
+	 *
+	 * @param string $plugin_slug The slug of the plugin.
+	 * @return array An array of review details.
+	 */
+	protected function get_plugin_reviews_data( $plugin_slug ) {
+		global $wpdb;
+		if ( ! defined( 'WPORGPATH' ) || ! defined( 'CUSTOM_USER_TABLE' ) ) {
+			// Reviews are stored in the main supoport forum, which isn't open source yet.
+			return array();
+		}
+
+		if ( $reviews = wp_cache_get( $plugin_slug, 'reviews' ) ) {
+			return $reviews;
+		}
+
+		// The forums are the source for users, and also where reviews live.
+		$table_prefix = str_replace( 'users', '', CUSTOM_USER_TABLE );
+		$forum_id = 18; // The Review Forums ID
+
+		$reviews = $wpdb->get_results( $wpdb->prepare( "
+			SELECT
+				t.topic_id, t.topic_title, t.topic_poster, t.topic_start_time,
+				p.post_text,
+				tm_wp.meta_value as wp_version
+			FROM {$table_prefix}topics AS t
+			JOIN {$table_prefix}meta AS tm ON ( tm.object_type = 'bb_topic' AND t.topic_id = tm.object_id AND tm.meta_key = 'is_plugin' )
+			JOIN {$table_prefix}posts as p ON ( t.topic_id = p.topic_id AND post_status = 0 AND post_position = 1 )
+			LEFT JOIN {$table_prefix}meta AS tm_wp ON ( tm_wp.object_type = 'bb_topic' AND t.topic_id = tm_wp.object_id AND tm_wp.meta_key = 'wp_version' )
+			WHERE t.forum_id = %d AND t.topic_status = 0 AND t.topic_sticky = 0 AND tm.meta_value = %s
+			ORDER BY t.topic_start_time DESC
+			LIMIT 10",
+			$forum_id,
+			$plugin_slug
+		) );
+
+		wp_cache_set( $plugin_slug, $reviews, 'reviews' );
+		return $reviews;
 	}
 }
 

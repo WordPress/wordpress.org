@@ -14,9 +14,7 @@ class Reviews {
 	 * @return string
 	 */
 	static function display() {
-		$reviews = Tools::get_plugin_reviews( get_post()->post_name, array(
-			'number' => 2,
-		) );
+		$reviews = Tools::get_plugin_reviews( get_post()->post_name );
 
 		if ( empty( $reviews ) ) {
 			return '';
@@ -28,7 +26,7 @@ class Reviews {
 		<div class="plugin-reviews">
 			<?php
 			foreach ( $reviews as $review ) :
-				$reviewer = get_user_by( 'id', $review->topic_poster );
+				$reviewer = get_user_by( 'id', $review->post_author );
 				if ( ! $reviewer ) :
 					continue;
 				endif;
@@ -38,11 +36,11 @@ class Reviews {
 						<?php echo get_avatar( $reviewer->ID, 60 ); ?>
 					</div><div class="review">
 						<header>
-							<h3 class="review-title"><?php echo $review->topic_title; ?></h3>
-							<?php echo Template::dashicons_stars( $review->rating ); ?>
-							<span class="review-author author vcard"><a class="url fn n" href="<?php esc_url( 'https://profile.wordpress.org/' . $reviewer->user_nicename . '/' ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
+							<h3 class="review-title"><?php echo $review->post_title; ?></h3>
+							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
+							<span class="review-author author vcard"><a class="url fn n" href="<?php esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
 						</header>
-						<p class="review-content"><?php echo $review->post_text; ?></p>
+						<p class="review-content"><?php echo $review->post_content; ?></p>
 					</div>
 				</article>
 			<?php endforeach; ?>
