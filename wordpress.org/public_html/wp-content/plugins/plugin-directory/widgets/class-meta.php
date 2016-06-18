@@ -41,16 +41,21 @@ class Meta extends \WP_Widget {
 		</span>
 
 		<ul>
-			<li><?php printf( __( 'Last updated: %s ago', 'wporg-plugins' ), '<span itemprop="dateModified" content="' . esc_attr( get_post_modified_time( 'c' ) ) . '">' . human_time_diff( get_post_modified_time() ) . '</span>' ); ?></li>
-			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), Template::active_installs( false ) ); ?></li>
-			<?php if ( $categories = get_the_term_list( $post->ID, 'plugin_category', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li><?php printf( _n( 'Category: %s', 'Categories: %s', count( get_the_terms( $post, 'plugin_category' ) ), 'wporg-plugins' ), $categories ); ?></li>
-			<?php endif; ?>
 			<?php if ( $built_for = get_the_term_list( $post->ID, 'plugin_built_for', '', ', ' ) ) : ?>
 				<li><?php printf( __( 'Designed to work with: %s', 'wporg-plugins' ), $built_for ); ?></li>
 			<?php endif; ?>
-			<?php if ( $business_model = get_the_term_list( $post->ID, 'plugin_business_model', '', ', ' ) ) : ?>
-				<li><?php printf( __( 'Business Model: %s', 'wporg-plugins' ), $business_model ); ?></li>
+			<li><?php printf( __( 'Version: %s', 'wporg-plugins' ), '<strong>' . get_post_meta( $post->ID, 'version', true ) . '</strong>' ); ?></li>
+			<li>
+				<?php
+				printf( __( 'Last updated: %s', 'wporg-plugins' ),
+					/* Translators: Plugin modified time. */
+					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span itemprop="dateModified" content="' . esc_attr( get_post_modified_time( 'c' ) ) . '">' . human_time_diff( get_post_modified_time() ) . '</span>' ) . '</strong>'
+				);
+				?>
+			</li>
+			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
+			<?php if ( $categories = get_the_term_list( $post->ID, 'plugin_category', '<div class="tags">', '', '</div>' ) ) : ?>
+				<li><?php printf( _n( 'Category: %s', 'Categories: %s', count( get_the_terms( $post, 'plugin_category' ) ), 'wporg-plugins' ), $categories ); ?></li>
 			<?php endif; ?>
 		</ul>
 

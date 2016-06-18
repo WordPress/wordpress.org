@@ -163,18 +163,15 @@
 			}
 
 			.avatar {
+				border-radius: 50%;
 				margin-right: 10px;
 				vertical-align: middle;
 			}
 		}
 	}
-
-	.entry-meta {
-		padding: 0 ms(4);
-
-		@media screen and ( min-width: $ms-breakpoint ) {
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.entry-meta {
 			float: right;
-			padding: 0;
 			width: 30%;
 		}
 	}

@@ -1528,6 +1528,7 @@ p .section-toggle:not(.button):hover {
 .plugin-ratings .ratings-list .counter-back,
 .plugin-ratings .ratings-list .counter-bar {
   display: inline-block;
+  height: 16px;
   height: 1rem;
   vertical-align: middle;
 }
@@ -1552,6 +1553,50 @@ p .section-toggle:not(.button):hover {
   font-size: 0.8rem;
 }
 
+.plugin-support .counter-container {
+  position: relative;
+  margin-bottom: 16px;
+  margin-bottom: 1rem;
+}
+
+.plugin-support .counter-back,
+.plugin-support .counter-bar {
+  display: inline-block;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.plugin-support .counter-back {
+  background-color: #ececec;
+  width: 100%;
+}
+
+.plugin-support .counter-bar {
+  background-color: #c7e8ca;
+  display: block;
+}
+
+.plugin-support .counter-count {
+  font-size: 10.24px;
+  font-size: 0.64rem;
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 100%;
+  width: calc(100% - 8px);
+}
+
+@media screen and (min-width: 48em) {
+  .plugin-support .counter-count {
+    top: 5px;
+  }
+}
+
+.plugin-meta {
+  margin-top: 32px;
+  margin-top: 2rem;
+}
+
 .plugin-meta ul {
   font-size: 12.8px;
   font-size: 0.8rem;
@@ -1563,6 +1608,10 @@ p .section-toggle:not(.button):hover {
 .plugin-meta li {
   border-top: 1px solid #eee;
   padding: 0.5rem 0;
+}
+
+.plugin-meta li strong {
+  float: right;
 }
 
 .plugin-meta .tags {
@@ -2159,18 +2208,14 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .entry-content .plugin-developers .avatar {
+  border-radius: 50%;
   margin-right: 10px;
   vertical-align: middle;
-}
-
-.single .type-plugin .entry-meta {
-  padding: 0 1.5625rem;
 }
 
 @media screen and (min-width: 48em) {
   .single .type-plugin .entry-meta {
     float: right;
-    padding: 0;
     width: 30%;
   }
 }

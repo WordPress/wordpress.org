@@ -66,6 +66,7 @@
 		.counter-back,
 		.counter-bar {
 			display: inline-block;
+			height: 16px;
 			height: 1rem;
 			vertical-align: middle;
 		}
@@ -89,10 +90,48 @@
 
 .plugin-support {
 	@include font-size( ms-unitless( ms(-2) ) );
+
+	.counter-container {
+		position: relative;
+		margin-bottom: 16px;
+		margin-bottom: 1rem;
+	}
+
+	.counter-back,
+	.counter-bar {
+		display: inline-block;
+		height: 30px;
+		vertical-align: middle;
+	}
+
+	.counter-back {
+		background-color: #ececec;
+		width: 100%;
+	}
+
+	.counter-bar {
+		background-color: #c7e8ca;
+		display: block;
+	}
+
+	.counter-count {
+		@include font-size( ms-unitless( ms(-4) ) );
+		position: absolute;
+		left: 8px;
+		top: 8px;
+		width: 100%;
+		width: calc(100% - 8px);
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			top: 5px;
+		}
+	}
 }
 
 .plugin-meta {
 	@extend .clear;
+	margin-top: 32px;
+	margin-top: 2rem;
 
 	ul {
 		@include font-size( ms-unitless( ms( -2 ) ) );
@@ -104,6 +143,10 @@
 	li {
 		border-top: 1px solid #eee;
 		padding: 0.5rem 0;
+
+		strong {
+			float: right;
+		}
 	}
 
 	.tags {

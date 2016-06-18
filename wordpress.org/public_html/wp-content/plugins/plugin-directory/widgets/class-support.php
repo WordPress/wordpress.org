@@ -8,6 +8,9 @@ namespace WordPressdotorg\Plugin_Directory\Widgets;
  */
 class Support extends \WP_Widget {
 
+	/**
+	 * Support constructor.
+	 */
 	public function __construct() {
 		parent::__construct( 'plugin_support', __( 'Plugin Support', 'wporg-plugins' ), array(
 			'classname'   => 'plugin-support',
@@ -45,22 +48,28 @@ class Support extends \WP_Widget {
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
 
-		if ( $resolutions ) : ?>
-		<p>
-			<?php
-			/* translators: 1: Number of resolved threads; 2: Number of all threads; */
-			printf( _n(
-				'%1$s support thread (of %2$s) in the last two months has been marked resolved.',
-				'%1$s support threads (of %2$s) in the last two months have been marked resolved.',
-				$resolved,
-				'wporg-plugins'
-			), $resolved, $threads );
+		if ( $resolutions ) :
 			?>
-		</p>
+			<p class="aside"><?php _e( 'Issues resolved in last two months:', 'wporg-plugins' ); ?></p>
+			<p class="counter-container">
+				<span class="counter-back">
+					<span class="counter-bar" style="width: <?php echo esc_attr( 100 * $resolved / $threads ); ?>%;"></span>
+				</span>
+				<span class="counter-count">
+					<?php
+					/* Translators: 1: AMount of resolved threads; 2: Amount of total threads; */
+					printf( __( '%1$s out of %2$s'), $resolved, $threads );
+					?>
+				</span>
+			</p>
+
+		<?php else: ?>
+			<p><?php _e( 'Got something to say? Need help?', 'wporg-plugins' ); ?></p>
 		<?php endif; ?>
 
-		<p><?php _e( 'Got something to say? Need help?', 'wporg-plugins' ); ?></p>
-		<p><a class="button" href="<?php echo esc_url( $support_url ); ?>"><?php _e( 'View support forum', 'wporg-plugins' ); ?></a></p>
+		<p>
+			<a class="button" href="<?php echo esc_url( $support_url ); ?>"><?php _e( 'View support forum', 'wporg-plugins' ); ?></a>
+		</p>
 
 		<?php
 		echo $args['after_widget'];
