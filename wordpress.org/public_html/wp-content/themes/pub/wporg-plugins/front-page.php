@@ -64,17 +64,17 @@ get_header();
 		<?php
 		the_widget( 'WP_Widget_Text', array(
 			'title' => 'Plugin Authors',
-			'text'  => 'Now what are the possibilities of warp drive? Cmdr Riker\'s nervous system has been invaded by an unknown microorganism. The organisms fuse to the nerve, intertwining at the molecular level. That\'s why the transporter\'s biofilters couldn\'t extract it.',
+			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Interested in hosting your plugin on WordPress.org? <a href="%s">Find out more about how.</a>', 'wporg-plugins' ), esc_url( home_url( 'about' ) ) ),
+		), $widget_args );
+
+		the_widget( 'WP_Widget_Text', array(
+			'title' => 'Create Your Plugin',
+			'text'  => sprintf( __( 'Interested in building your own plugin? The <a href="%s">Plugin Developer Handbook</a> walks through the steps required with creating a WordPress plugin from scratch and those required with publishing your plugin in the directory.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/' ) ),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
 			'title' => 'Plugin Reviewers',
 			'text'  => 'Shields up. I recommend we transfer power to phasers and arm the photon torpedoes. Something strange on the detector circuit. The weapons must have disrupted our communicators.',
-		), $widget_args );
-
-		the_widget( 'WP_Widget_Text', array(
-			'title' => 'Plugin Handbook',
-			'text'  => 'Communication is not possible. The shuttle has no power. Using the gravitational pull of a star to slingshot back in time? We are going to Starbase Montgomery for Engineering consultations prompted by minor read-out anomalies.',
 		), $widget_args );
 		?>
 	</aside><!-- #secondary -->
