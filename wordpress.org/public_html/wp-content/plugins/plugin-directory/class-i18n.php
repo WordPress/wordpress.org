@@ -63,10 +63,10 @@ class i18n {
 		_x( 'Utilities & Tools',          'Plugin Category Name', 'wporg-plugins' );
 
 		// Section Terms.
-		_x( 'Adopt Me',  'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Beta',      'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Favorites', 'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Featured',  'Plugin Section Name', 'wporg-plugins' );
-		_x( 'Popular',   'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Adopt Me',     'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Beta',         'Plugin Section Name', 'wporg-plugins' );
+		_x( 'My Favorites', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Featured',     'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Popular',      'Plugin Section Name', 'wporg-plugins' );
 	}
 }
