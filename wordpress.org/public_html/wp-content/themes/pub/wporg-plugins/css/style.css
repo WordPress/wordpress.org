@@ -2259,7 +2259,7 @@ p .section-toggle:not(.button):hover {
   letter-spacing: 0.01rem;
   margin: 0 0 8px;
   margin: 0 0 0.5rem;
-  text-transform: uppercase;
+  text-transform: inherit;
 }
 
 .single .type-plugin .entry-content .plugin-reviews .review-author {
