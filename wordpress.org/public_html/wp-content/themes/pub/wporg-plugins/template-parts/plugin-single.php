@@ -46,9 +46,12 @@ $widget_args = array(
 			$plugin_sections = Template::get_plugin_sections();
 
 			foreach ( array( 'description', 'screenshots', 'faq', 'reviews', 'changelog', 'developers' ) as $section_slug ) :
-				$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) ) :
+					continue;
+				endif;
 
-				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) || empty( $section_content ) ) :
+				$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+				if ( empty( $section_content ) ) :
 					continue;
 				endif;
 
