@@ -10,6 +10,7 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+use WordPressdotorg\Plugin_Directory\Template;
 
 $menu_items = array(
 	'/browse/favorites/' => __( 'My Favorites', 'wporg-plugins' ),
@@ -32,7 +33,12 @@ require WPORGPATH . 'header.php';
 			<?php endif; ?>
 
 			<?php if ( is_home() ) : ?>
-				<p class="site-description"><?php _e( 'Extend your WordPress experience with 45,000 plugins.', 'wporg-plugins' ); ?></p>
+				<p class="site-description">
+					<?php
+					/* Translators: Total number of plugins. */
+					printf( __( 'Extend your WordPress experience with %s plugins.', 'wporg-plugins' ), number_format_i18n( Template::get_total_downloads() ) );
+					?>
+				</p>
 				<?php get_search_form(); ?>
 			<?php else : ?>
 				<nav id="site-navigation" class="main-navigation" role="navigation">
