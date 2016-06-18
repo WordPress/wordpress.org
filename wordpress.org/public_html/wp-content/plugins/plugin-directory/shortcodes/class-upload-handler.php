@@ -98,7 +98,7 @@ class Upload_Handler {
 		// Is there already a plugin by a different author?
 		if ( $plugin_post instanceof \WP_Post && $plugin_post->post_author != get_current_user_id() ) {
 			/* translators: 1: plugin slug, 2: style.css */
-			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the name of your plugin and upload it again.', 'wporg-plugins' ),
+			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>'
 			);
 		}
