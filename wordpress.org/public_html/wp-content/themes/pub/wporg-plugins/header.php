@@ -36,7 +36,7 @@ require WPORGPATH . 'header.php';
 				<p class="site-description">
 					<?php
 					/* Translators: Total number of plugins. */
-					printf( __( 'Extend your WordPress experience with %s plugins.', 'wporg-plugins' ), number_format_i18n( Template::get_total_downloads() ) );
+					printf( __( 'Extend your WordPress experience with %s plugins.', 'wporg-plugins' ), number_format_i18n( wp_count_posts( 'plugin' )->publish ) );
 					?>
 				</p>
 				<?php get_search_form(); ?>
