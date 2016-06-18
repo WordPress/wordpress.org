@@ -38,6 +38,20 @@
 
 .plugin-ratings {
 	@include font-size( ms-unitless( ms(-2) ) );
+	position: relative;
+
+	.reviews-link {
+		position: absolute;
+		right: 0;
+		top: 0.3rem;
+
+		&:after {
+			content: "\f345";
+			font-family: dashicons;
+			padding-left: 5px;
+			vertical-align: top;
+		}
+	}
 
 	[class*='dashicons-star-'] {
 		color: #FFB900;
@@ -92,9 +106,9 @@
 	@include font-size( ms-unitless( ms(-2) ) );
 
 	.counter-container {
-		position: relative;
 		margin-bottom: 16px;
 		margin-bottom: 1rem;
+		position: relative;
 	}
 
 	.counter-back,
@@ -116,8 +130,8 @@
 
 	.counter-count {
 		@include font-size( ms-unitless( ms(-4) ) );
-		position: absolute;
 		left: 8px;
+		position: absolute;
 		top: 8px;
 		width: 100%;
 		width: calc(100% - 8px);

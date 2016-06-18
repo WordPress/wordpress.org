@@ -1495,6 +1495,20 @@ p .section-toggle:not(.button):hover {
 .plugin-ratings {
   font-size: 12.8px;
   font-size: 0.8rem;
+  position: relative;
+}
+
+.plugin-ratings .reviews-link {
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+}
+
+.plugin-ratings .reviews-link:after {
+  content: "\f341";
+  font-family: dashicons;
+  padding-right: 5px;
+  vertical-align: top;
 }
 
 .plugin-ratings [class*='dashicons-star-'] {
@@ -1554,9 +1568,9 @@ p .section-toggle:not(.button):hover {
 }
 
 .plugin-support .counter-container {
-  position: relative;
   margin-bottom: 16px;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .plugin-support .counter-back,
@@ -1579,8 +1593,8 @@ p .section-toggle:not(.button):hover {
 .plugin-support .counter-count {
   font-size: 10.24px;
   font-size: 0.64rem;
-  position: absolute;
   right: 8px;
+  position: absolute;
   top: 8px;
   width: 100%;
   width: calc(100% - 8px);
