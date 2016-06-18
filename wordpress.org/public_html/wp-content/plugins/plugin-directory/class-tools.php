@@ -29,30 +29,58 @@ class Tools {
 	}
 
 	/**
-	 * Returns the two latest reviews of a specific plugin.
+	 * Fetch the latest 10 reviews for a given plugin from the database.
+	 *
+	 * This uses raw SQL to query the bbPress tables to fetch reviews.
 	 *
 	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @todo Populate with review title/content.
+	 * @param string $plugin_slug The slug of the plugin.
+	 * @param array  $args        {
+	 *     Optional. Query arguments.
 	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @return array|false
+	 *     @type int $number The amount of reviews to return. Default: 10.
+	 * }
+	 * @return array An array of reviews.
 	 */
-	public static function get_plugin_reviews( $plugin_slug ) {
-		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_reviews", 'wporg-plugins' ) ) ) {
+	public static function get_plugin_reviews( $plugin_slug, $args = array() ) {
+
+		// Reviews are stored in the main support forum, which isn't open sourced yet.
+		if ( ! defined( 'WPORGPATH' ) || ! defined( 'CUSTOM_USER_TABLE' ) ) {
+			return array();
+		}
+
+		if ( false === ( $reviews = wp_cache_get( $plugin_slug, 'reviews' ) ) ) {
 			global $wpdb;
 
+			$args = wp_parse_args( $args, array(
+				'number' => 10,
+			) );
+
+			// The forums are the source for users, and also where reviews live.
+			$table_prefix = str_replace( 'users', '', CUSTOM_USER_TABLE );
+			$forum_id     = 18; // The Review Forums ID.
+
 			$reviews = $wpdb->get_results( $wpdb->prepare( "
-			SELECT posts.post_text AS post_content, topics.topic_title AS post_title, ratings.rating AS post_rating, ratings.user_id AS post_author
-			FROM ratings
-				INNER JOIN minibb_topics AS topics ON ( ratings.review_id = topics.topic_id )
-				INNER JOIN minibb_posts AS posts ON ( ratings.review_id = posts.topic_id )
-			WHERE
-				ratings.object_type = 'plugin' AND
-				ratings.object_slug = %s AND
-				posts.post_position = 1
-			ORDER BY ratings.review_id DESC LIMIT 2", $plugin_slug ) );
-			wp_cache_set( "{$plugin_slug}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
+				SELECT
+					t.topic_id, t.topic_title, t.topic_poster, t.topic_start_time,
+					p.post_text,
+					ratings.rating,
+					tm_wp.meta_value as wp_version
+				FROM {$table_prefix}topics AS t
+				JOIN {$table_prefix}meta AS tm ON ( tm.object_type = 'bb_topic' AND t.topic_id = tm.object_id AND tm.meta_key = 'is_plugin' )
+				JOIN {$table_prefix}posts as p ON ( t.topic_id = p.topic_id AND post_status = 0 AND post_position = 1 )
+				JOIN ratings ON (t.topic_id = ratings.review_id )
+				LEFT JOIN {$table_prefix}meta AS tm_wp ON ( tm_wp.object_type = 'bb_topic' AND t.topic_id = tm_wp.object_id AND tm_wp.meta_key = 'wp_version' )
+				WHERE t.forum_id = %d AND t.topic_status = 0 AND t.topic_sticky = 0 AND tm.meta_value = %s
+				ORDER BY t.topic_start_time DESC
+				LIMIT %d",
+				$forum_id,
+				$plugin_slug,
+				absint( $args['number'] )
+			) );
+
+			wp_cache_set( $plugin_slug, $reviews, 'reviews' );
 		}
 
 		return $reviews;
