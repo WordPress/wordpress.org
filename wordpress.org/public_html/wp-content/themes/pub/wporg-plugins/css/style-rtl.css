@@ -2211,7 +2211,6 @@ p .section-toggle:not(.button):hover {
 .single .type-plugin .entry-content .reviews-link:after {
   content: "\f341";
   font-family: dashicons;
-  padding-right: 5px;
   vertical-align: text-top;
 }
 
