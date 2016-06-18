@@ -12,7 +12,7 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $menu_items = array(
-	'/browse/favorites/' => __( 'Favorites', 'wporg-plugins' ),
+	'/browse/favorites/' => __( 'My Favorites', 'wporg-plugins' ),
 	'/browse/beta/'      => __( 'Beta Testing', 'wporg-plugins' ),
 	'/about/'            => __( 'Developers', 'wporg-plugins' ),
 );
