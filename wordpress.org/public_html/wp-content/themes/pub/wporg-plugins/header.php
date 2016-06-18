@@ -32,7 +32,7 @@ require WPORGPATH . 'header.php';
 			<?php endif; ?>
 
 			<?php if ( is_home() ) : ?>
-				<p class="site-description"><?php _e( 'Plugins extend and expand the functionality of WordPress.', 'wporg-plugins' ); ?></p>
+				<p class="site-description"><?php _e( 'Extend your WordPress experience with 45,000 plugins.', 'wporg-plugins' ); ?></p>
 				<?php get_search_form(); ?>
 			<?php else : ?>
 				<nav id="site-navigation" class="main-navigation" role="navigation">
