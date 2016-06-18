@@ -27,7 +27,7 @@ class Developers {
 				continue;
 			}
 
-			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . ' <a href="' . esc_url( 'https://profiles.wordpress.org/' . $contributor_slug ) . '">' . Template::encode( $contributor->display_name ) . '</a></li>';
+			$output .= '<li>' . get_avatar( $contributor->ID, 32 ) . '<a href="' . esc_url( 'https://profiles.wordpress.org/' . $contributor_slug ) . '">' . Template::encode( $contributor->display_name ) . '</a></li>';
 		}
 		$output .= '</ul>';
 
