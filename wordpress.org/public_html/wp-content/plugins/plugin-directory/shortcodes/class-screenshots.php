@@ -20,6 +20,10 @@ class Screenshots {
 		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true );
 		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true );
 
+		if ( empty( $screen_shots ) ) {
+			return '';
+		}
+
 		/*
 		 * Find the image that corresponds with the text.
 		 * The image numbers are stored within the 'resolution' key.
