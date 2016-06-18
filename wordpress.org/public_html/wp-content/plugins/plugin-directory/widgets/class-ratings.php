@@ -56,7 +56,7 @@ class Ratings extends \WP_Widget {
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
 					</span>
-							<span class="counter-count"><?php echo $ratings[ $stars ]; ?></span>
+							<span class="counter-count"><?php echo number_format_i18n( $ratings[ $stars ] ); ?></span>
 						</a>
 					</li>
 				<?php endforeach; ?>
