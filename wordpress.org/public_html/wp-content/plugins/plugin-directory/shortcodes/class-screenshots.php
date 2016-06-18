@@ -30,7 +30,7 @@ class Screenshots {
 			);
 
 			if ( array_key_exists( $image['resolution'], $descriptions ) ) {
-				$screen_shot .= '<figcaption>' . esc_html( $descriptions[ $image['resolution'] ] ) . '</figcaption>';
+				$screen_shot .= '<figcaption>' . $descriptions[ $image['resolution'] ] . '</figcaption>';
 			}
 
 			$output .= '<li><figure>' . $screen_shot . '</figure></li>';
