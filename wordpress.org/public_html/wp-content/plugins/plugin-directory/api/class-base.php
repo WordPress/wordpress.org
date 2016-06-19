@@ -13,6 +13,7 @@ class Base {
 	static function load_routes() {
 		new Routes\Internal_Stats();
 		new Routes\Plugin();
+		new Routes\Plugin_Translations();
 		new Routes\Popular_Categories();
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();
