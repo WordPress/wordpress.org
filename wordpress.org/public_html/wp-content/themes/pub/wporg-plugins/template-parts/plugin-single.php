@@ -21,7 +21,7 @@ $widget_args = array(
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<?php if ( time() - get_post_modified_time() > 2 * YEAR_IN_SECONDS ) : ?>
 		<div class="plugin-notice notice notice-warning notice-alt">
-			<p><?php _e( 'This plugin <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ); ?></p>
+			<p><?php _e( 'This plugin <strong>hasn&#8217;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ); ?></p>
 		</div><!-- .plugin-notice -->
 	<?php endif; ?>
 
