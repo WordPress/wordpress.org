@@ -449,12 +449,13 @@ class Plugin_Directory {
 				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 				break;
 
+			case 'new':
 			case 'popular':
 				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 				break;
 		}
 
-		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
+		if ( $wp_query->is_archive() && ! $wp_query->is_tax( 'plugin_section', 'new' ) && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
