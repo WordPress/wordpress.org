@@ -120,7 +120,11 @@ class Plugin_Translations extends Plugin {
 				trim( $other_suggest, ' ,' )
 			);
 		} elseif ( 'en_US' !== $current_locale ) {
-			$suggest_string = __( 'This plugin is not yet available in your language. Can you help translating it?', 'wporg-translate' );
+			$suggest_string = sprintf(
+				/* translators: %s: URL to translate.wordpress.org */
+				__( 'This plugin is not yet available in your language. <a href="%s">Can you help translating it?</a>', 'wporg-translate' ),
+				'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug
+			);
 		}
 
 		$result = [
