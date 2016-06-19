@@ -138,7 +138,7 @@ class Readme_Validator {
 		}
 
 		// Notes.
-		if ( empty( $readme->sections['frequently_asked_questions'] ) ) {
+		if ( empty( $readme->sections['faq'] ) ) {
 			/* Translators: Plugin header tag; */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Frequently Asked Questions ==</code>' );
 		}
@@ -150,7 +150,7 @@ class Readme_Validator {
 			/* Translators: Plugin header tag; */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Upgrade Notice ==</code>' );
 		}
-		if ( empty( $readme->sections['screenshots'] ) ) {
+		if ( empty( $readme->screenshots ) ) {
 			/* Translators: Plugin header tag; */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Screenshots ==</code>' );
 		}
