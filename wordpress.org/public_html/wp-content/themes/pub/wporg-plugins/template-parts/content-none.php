@@ -27,13 +27,28 @@
 			<?php
 				get_search_form();
 
-		elseif ( is_tax( 'plugin_section', 'favorites' ) ) : ?>
-
-			<p><?php esc_html_e( 'Seems like you do not like plugins. Boo!', 'wporg-plugins' ); ?></p>
+		elseif ( is_tax( 'plugin_section', 'favorites' ) ) :
+		  if ( is_user_logged_in() ) :
+		    $current_user = wp_get_current_user();
+		?>
+		
+			<p><?php esc_html_e( 'No favorites have been added, yet.', 'wporg-plugins' ); ?></p>
+			
+			<?php if ( get_query_var( 'favorites_user' ) === $current_user->user_nicename ) : ?>
+			<p><?php esc_html_e( 'Find a plugin and mark it as a favorite to see it here.', 'wporg-plugins' ); ?></p>
+			<p><?php printf( __( 'Your favorite plugins are also shared on <a href="%s">your profile</a>.', 'wporg-plugins' ), esc_url( 'https://profile.wordpress.org/' . $current_user->user_nicename ) ); ?></p>
+			<?php endif; ?>
 
 		<?php else : ?>
+		
+			<p><?php printf( __( '<a href="%s">Login to WordPress.org</a> to mark plugins as favorites.', 'wporg-plugins' ), esc_url( 'https://login.wordpress.org/?redirect_to=https%3A%2F%2Fwordpress.org%2Fplugins%2Fbrowse%2Ffavorites%2F' ) ); ?></p>
 
-			<p><?php esc_html_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'wporg-plugins' ); ?></p>
+		<?php
+  		  endif; // is_user_logged_in()
+  		else :
+    ?>
+
+			<p><?php esc_html_e( 'It seems we can&#8217;t find what you&#8217;re looking for. Perhaps searching can help.', 'wporg-plugins' ); ?></p>
 			<?php
 				get_search_form();
 
