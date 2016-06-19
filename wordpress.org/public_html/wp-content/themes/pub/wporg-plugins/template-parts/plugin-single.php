@@ -11,7 +11,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
-$content = call_user_func( array( Plugin_Directory::instance(), 'split_post_content_into_pages' ), get_the_content() );
+$content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 
 $widget_args = array(
 	'before_title' => '<h4 class="widget-title">',

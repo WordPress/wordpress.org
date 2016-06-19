@@ -244,6 +244,7 @@ class Upload_Handler {
 			'new',
 			'updated',
 			'about',
+			'developers',
 			'admin',
 			'wp-admin',
 		);

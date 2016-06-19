@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for the a out page.
+ * The template for the Developers page.
  *
  * @package WordPressdotorg\Plugin_Directory\Theme
  */
@@ -21,7 +21,7 @@ get_header(); ?>
 			<div class="entry-content">
 				<section>
 					<div class="container">
-						<p><?php printf( __( 'You’ve got a cool new plugin and are hoping to give it some exposure. You’re in the right place. Just <a href="%s">ask us to host it for you</a>. You’ll be able to:', 'wporg-plugins' ), esc_url( home_url( 'about/add' ) ) ); ?></p>
+						<p><?php printf( __( 'You’ve got a cool new plugin and are hoping to give it some exposure. You’re in the right place. Just <a href="%s">ask us to host it for you</a>. You’ll be able to:', 'wporg-plugins' ), esc_url( home_url( 'developers/add' ) ) ); ?></p>
 						<ul>
 							<li><?php _e( 'Keep track of how many people have downloaded it.', 'wporg-plugins' ); ?></li>
 							<li><?php _e( 'Let people leave comments about your plugin.', 'wporg-plugins' ); ?></li>
@@ -41,7 +41,7 @@ get_header(); ?>
 						<h3><?php _e( 'Submission is Simple', 'wporg-plugins' ); ?></h3>
 						<ol>
 						    <li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
-						    <li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-plugins' ), esc_url( home_url( 'about/add' ) ) ); ?></li>
+						    <li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-plugins' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
 						    <li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, you will either be approved or emailed and asked to provide more information and/or make corrections.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
 						    <li><?php printf( __( 'Once approved, you’ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you’ll store your plugin.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
 

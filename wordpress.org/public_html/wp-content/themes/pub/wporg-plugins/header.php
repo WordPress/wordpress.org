@@ -15,7 +15,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 $menu_items = array(
 	'/browse/favorites/' => __( 'My Favorites', 'wporg-plugins' ),
 	'/browse/beta/'      => __( 'Beta Testing', 'wporg-plugins' ),
-	'/about/'            => __( 'Developers', 'wporg-plugins' ),
+	'/developers/'       => __( 'Developers', 'wporg-plugins' ),
 );
 
 $GLOBALS['pagetitle'] = __( 'Plugin Directory &mdash; Free WordPress Plugins', 'wporg-plugins' );

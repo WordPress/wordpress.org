@@ -635,7 +635,8 @@ class Plugin_Directory {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
 			die();
 		}
-		// We don't have attachments, but /$plugin/random() will hit this check.
+
+		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
 			// [1] => plugins [2] => example-plugin-name [2..] => random()
@@ -654,6 +655,13 @@ class Plugin_Directory {
 				}
 			}
 
+			// The about page is now over at /developers/
+			if ( 'about' === $path[2] ) {
+				wp_safe_redirect( home_url('/developers/' . ( ( isset( $path[3] ) && 'add' == $path[3] ) ? 'add/' : '' ) ) );
+				die();
+			}
+
+			// Otherwise, handle a plugin redirect
 			if ( $plugin = self::get_plugin_post( $path[2] ) ) {
 				$is_disabled = in_array( $plugin->post_status, array( 'disabled', 'closed' ), true );
 
