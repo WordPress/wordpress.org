@@ -2467,8 +2467,13 @@ p a:not(.button):hover {
   font-weight: 400;
   margin: 0 auto;
   max-width: 35.527136788rem;
-  padding: 0 32px;
-  padding: 0 2rem;
+}
+
+@media screen and (min-width: 48em) {
+  .page .entry-header .entry-title {
+    padding: 0 32px;
+    padding: 0 2rem;
+  }
 }
 
 .page .entry-content h2 {
@@ -2493,8 +2498,13 @@ p a:not(.button):hover {
 .page .entry-content section .container {
   margin: 0 auto;
   max-width: 35.527136788rem;
-  padding: 0 32px;
-  padding: 0 2rem;
+}
+
+@media screen and (min-width: 48em) {
+  .page .entry-content section .container {
+    padding: 0 32px;
+    padding: 0 2rem;
+  }
 }
 
 .page .entry-content section:first-of-type {

@@ -10,8 +10,11 @@
 			font-weight: 400;
 			margin: 0 auto;
 			max-width: ms(32);
-			padding: 0 32px;
-			padding: 0 2rem;
+
+			@media screen and ( min-width: $ms-breakpoint ) {
+				padding: 0 32px;
+				padding: 0 2rem;
+			}
 		}
 	}
 
@@ -36,8 +39,11 @@
 			.container {
 				margin: 0 auto;
 				max-width: ms(32);
-				padding: 0 32px;
-				padding: 0 2rem;
+
+				@media screen and ( min-width: $ms-breakpoint ) {
+					padding: 0 32px;
+					padding: 0 2rem;
+				}
 			}
 
 			&:first-of-type {
