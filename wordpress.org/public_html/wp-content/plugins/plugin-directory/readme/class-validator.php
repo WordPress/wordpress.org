@@ -1,28 +1,27 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory\Admin;
-use \WordPressdotorg\Plugin_Directory\Readme_Parser;
+namespace WordPressdotorg\Plugin_Directory\Readme;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
 /**
  * A wp-admin interface to validate readme files.
  *
- * @package WordPressdotorg\Plugin_Directory\Admin
+ * @package WordPressdotorg\Plugin_Directory\Readme
  */
-class Readme_Validator {
+class Validator {
 
 	/**
-	 * Fetch the instance of the Readme_Validator class.
+	 * Fetch the instance of the Validator class.
 	 *
 	 * @static
 	 */
 	public static function instance() {
 		static $instance = null;
 
-		return ! is_null( $instance ) ? $instance : $instance = new Readme_Validator();
+		return ! is_null( $instance ) ? $instance : $instance = new Validator();
 	}
 
 	/**
-	 * Constructor.
+	 * Validator constructor.
 	 */
 	private function __construct() {
 		add_action( 'plugin_page_readme_validator', array( $this, 'add_form_fields' ) );
@@ -99,7 +98,7 @@ class Readme_Validator {
 		}
 
 		file_put_contents( $temp_file, $readme );
-		$readme = new Readme_Parser( $temp_file );
+		$readme = new Parser( $temp_file );
 
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {

@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Admin;
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
+use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
 
 /**
@@ -135,7 +136,7 @@ class Customizations {
 		 */
 		add_submenu_page( 'edit.php?post_type=plugin', 'Plugin Handbook', 'Plugin Handbook', 'read', 'handbook', function() {} );
 
-		$readme_validator = Readme_Validator::instance();
+		$readme_validator = Validator::instance();
 		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', array( $readme_validator, 'display' ) );
 
 		if ( ! current_user_can( 'manage_options' ) ) {

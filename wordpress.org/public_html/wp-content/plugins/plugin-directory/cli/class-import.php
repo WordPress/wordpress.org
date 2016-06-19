@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\Readme_Parser;
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
@@ -300,7 +300,7 @@ class Import {
 			}
 
 			$trunk_readme_file = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk/{$trunk_readme_file}";
-			$trunk_readme = new Readme_Parser( $trunk_readme_file );
+			$trunk_readme = new Parser( $trunk_readme_file );
 
 			$stable_tag = $trunk_readme->stable_tag;
 		} else {
@@ -354,7 +354,7 @@ class Import {
 
 		// The readme may not actually exist, but that's okay.
 		$readme = $this->find_readme_file( $tmp_dir . '/export' );
-		$readme = new Readme_Parser( $readme );
+		$readme = new Parser( $readme );
 
 		// There must be valid plugin headers though.
 		$plugin_headers = $this->find_plugin_headers( "$tmp_dir/export" );

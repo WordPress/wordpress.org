@@ -1,27 +1,76 @@
 <?php
-namespace WordPressdotorg\Plugin_Directory;
+namespace WordPressdotorg\Plugin_Directory\Readme;
+use WordPressdotorg\Plugin_Directory\Markdown;
 
 /**
  * WordPress.org Plugin Readme Parser.
  *
  * Based on Baikonur_ReadmeParser from https://github.com/rmccue/WordPress-Readme-Parser
  *
- * @package WordPressdotorg\Plugin_Directory
+ * @package WordPressdotorg\Plugin_Directory\Readme
  */
-class Readme_Parser {
-	public $name              = '';
-	public $tags              = array();
-	public $requires          = '';
-	public $tested            = '';
-	public $contributors      = array();
-	public $stable_tag        = '';
-	public $donate_link       = '';
-	public $short_description = '';
-	public $sections          = array();
-	public $upgrade_notice    = array();
-	public $screenshots       = array();
+class Parser {
 
-	// These are the readme sections which we expect
+	/**
+	 * @var string
+	 */
+	public $name = '';
+
+	/**
+	 * @var array
+	 */
+	public $tags = array();
+
+	/**
+	 * @var string
+	 */
+	public $requires = '';
+
+	/**
+	 * @var string
+	 */
+	public $tested = '';
+
+	/**
+	 * @var array
+	 */
+	public $contributors = array();
+
+	/**
+	 * @var string
+	 */
+	public $stable_tag = '';
+
+	/**
+	 * @var string
+	 */
+	public $donate_link = '';
+
+	/**
+	 * @var string
+	 */
+	public $short_description = '';
+
+	/**
+	 * @var array
+	 */
+	public $sections = array();
+
+	/**
+	 * @var array
+	 */
+	public $upgrade_notice = array();
+
+	/**
+	 * @var array
+	 */
+	public $screenshots = array();
+
+	/**
+	 * These are the readme sections that we expect.
+	 *
+	 * @var array
+	 */
 	private $expected_sections = array(
 		'description',
 		'installation',
@@ -32,14 +81,22 @@ class Readme_Parser {
 		'other_notes',
 	);
 
-	// We alias these sections, from => to
+	/**
+	 * We alias these sections, from => to
+	 *
+	 * @var array
+	 */
 	private $alias_sections = array(
 		'frequently_asked_questions' => 'faq',
-		'change_log' => 'changelog',
-		'screenshot' => 'screenshots',
+		'change_log'                 => 'changelog',
+		'screenshot'                 => 'screenshots',
 	);
 
-	// These are the valid header mappings for the header
+	/**
+	 * These are the valid header mappings for the header.
+	 *
+	 * @var array
+	 */
 	private $valid_headers = array(
 		'tested'            => 'tested',
 		'tested up to'      => 'tested',
@@ -51,55 +108,65 @@ class Readme_Parser {
 		'stable tag'        => 'stable_tag',
 	);
 
+	/**
+	 * Parser constructor.
+	 *
+	 * @param string $file
+	 */
 	public function __construct( $file ) {
 		if ( $file ) {
 			$this->parse_readme( $file );
 		}
 	}
 
+	/**
+	 * @param string $file
+	 * @return bool
+	 */
 	protected function parse_readme( $file ) {
 		$contents = file_get_contents( $file );
 		$contents = preg_split( '!\R!', $contents );
-
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
-		// Strip UTF8 BOM if present
-		if ( strpos( $contents[0], "\xEF\xBB\xBF" ) === 0 ) {
+		// Strip UTF8 BOM if present.
+		if ( 0 === strpos( $contents[0], "\xEF\xBB\xBF" ) ) {
 			$contents[0] = substr( $contents[0], 3 );
 		}
 
-		// Convert UTF-16 files
-		if ( strpos( $contents[0], "\xFF\xFE" ) === 0 ) {
+		// Convert UTF-16 files.
+		if ( 0 === strpos( $contents[0], "\xFF\xFE" ) ) {
 			foreach ( $contents as $i => $line ) {
-				$contents[$i] = mb_convert_encoding( $line, 'UTF-8', 'UTF-16' );
+				$contents[ $i ] = mb_convert_encoding( $line, 'UTF-8', 'UTF-16' );
 			}
 		}
 
 		$line       = $this->get_first_nonwhitespace( $contents );
 		$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 
-		// Strip Github style header\n==== underlines
-		if ( '' === trim( $contents[0], '=-' ) ) {
+		// Strip Github style header\n==== underlines.
+		if ( ! empty( $contents ) && '' === trim( $contents[0], '=-' ) ) {
 			array_shift( $contents );
 		}
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
 			$this->name = $line = $this->get_first_nonwhitespace( $contents );
-			// Ensure that the line read wasn't an actual header or description
+
+			// Ensure that the line read wasn't an actual header or description.
 			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
 				$this->name = false;
 				array_unshift( $contents, $line );
 			}
 		}
 
-		// Parse headers
+		// Parse headers.
 		$headers = array();
 
 		$line = $this->get_first_nonwhitespace( $contents );
 		do {
 			$value = null;
-			if ( strpos( $line, ':' ) === false ) {
+			if ( false === strpos( $line, ':' ) ) {
+
 				// Some plugins have line-breaks within the headers.
 				if ( ! empty( $line ) ) {
 					break;
@@ -139,7 +206,7 @@ class Readme_Parser {
 			$this->donate_link = $headers['donate_link'];
 		}
 
-		// Parse the short description
+		// Parse the short description.
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
 			if ( empty( $trimmed ) ) {
@@ -147,7 +214,10 @@ class Readme_Parser {
 				continue;
 			}
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
-			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] ) ) { // Stop after any Markdown heading
+			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] )
+			) {
+
+				// Stop after any Markdown heading.
 				array_unshift( $contents, $line );
 				break;
 			}
@@ -156,10 +226,12 @@ class Readme_Parser {
 		}
 		$this->short_description = trim( $this->short_description );
 
-		// Parse the rest of the body
-		// Prefill the sections, we'll filter out empty sections later.
+		/*
+		 * Parse the rest of the body.
+		 * Pre-fill the sections, we'll filter out empty sections later.
+		 */
 		$this->sections = array_fill_keys( $this->expected_sections, '' );
-		$current = $section_name = $section_title = '';
+		$current        = $section_name = $section_title = '';
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
 			if ( empty( $trimmed ) ) {
@@ -167,8 +239,11 @@ class Readme_Parser {
 				continue;
 			}
 
+			// Stop only after a ## Markdown header, not a ###.
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
-			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] && isset( $trimmed[2] ) && '#' !== $trimmed[2] ) ) { // Stop only after a ## Markdown header, not a ###.
+			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] && isset( $trimmed[2] ) && '#' !== $trimmed[2] )
+			) {
+
 				if ( ! empty( $section_name ) ) {
 					$this->sections[ $section_name ] .= trim( $current );
 				}
@@ -209,9 +284,9 @@ class Readme_Parser {
 			$this->sections['description'] = $this->short_description;
 		}
 
-		// Parse out the Upgrade Notice section into it's own data
+		// Parse out the Upgrade Notice section into it's own data.
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
-			$lines = explode( "\n", $this->sections['upgrade_notice'] );
+			$lines   = explode( "\n", $this->sections['upgrade_notice'] );
 			$version = null;
 			$current = '';
 			while ( ( $line = array_shift( $lines ) ) !== null ) {
@@ -239,10 +314,10 @@ class Readme_Parser {
 		}
 
 		// Markdownify!
-		$this->sections          = array_map( array( $this, 'parse_markdown' ), $this->sections );
-		$this->upgrade_notice    = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
+		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
+		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
 
-		// Sanitize and trim the short_description to match requirements
+		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->trim_length( $this->short_description, 150 );
 		$this->short_description = $this->parse_markdown( $this->short_description );
@@ -251,7 +326,7 @@ class Readme_Parser {
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
 			if ( $screenshots ) {
-				$i = 1; // Screenshots start from 1
+				$i = 1; // Screenshots start from 1.
 				foreach ( $screenshots as $ss ) {
 					$this->screenshots[ $i++ ] = $this->filter_text( $ss[1] );
 				}
@@ -259,12 +334,18 @@ class Readme_Parser {
 			unset( $this->sections['screenshots'] );
 		}
 
-		// Filter the HTML
+		// Filter the HTML.
 		$this->sections = array_map( array( $this, 'filter_text' ), $this->sections );
 
 		return true;
 	}
 
+	/**
+	 * @access protected
+	 *
+	 * @param string $contents
+	 * @return string
+	 */
 	protected function get_first_nonwhitespace( &$contents ) {
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
@@ -276,10 +357,23 @@ class Readme_Parser {
 		return $line;
 	}
 
+	/**
+	 * @access protected
+	 *
+	 * @param string $line
+	 * @return string
+	 */
 	protected function strip_newlines( $line ) {
 		return rtrim( $line, "\r\n" );
 	}
 
+	/**
+	 * @access protected
+	 *
+	 * @param string $desc
+	 * @param int    $length
+	 * @return string
+	 */
 	protected function trim_length( $desc, $length = 150 ) {
 		if ( mb_strlen( $desc ) > $length ) {
 			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
@@ -361,18 +455,22 @@ class Readme_Parser {
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
 			if ( $user = get_user_by( 'login', $name ) ) {
+
 				// Check the case of the user login matches.
 				if ( $name !== $user->user_login ) {
 					$users[ $i ] = $user->user_login;
 				}
 			} elseif ( false !== ( $user = get_user_by( 'slug', $name ) ) ) {
-				// Overwrite the nicename with the user_login
+
+				// Overwrite the nicename with the user_login.
 				$users[ $i ] = $user->user_login;
 			} else {
-				// Unknown user, we'll skip these entirely to encourage correct readmes
+
+				// Unknown user, we'll skip these entirely to encourage correct readme files.
 				unset( $users[ $i ] );
 			}
 		}
+
 		return $users;
 	}
 
@@ -384,11 +482,11 @@ class Readme_Parser {
 	 */
 	protected function sanitize_stable_tag( $stable_tag ) {
 		$stable_tag = trim( $stable_tag );
-	 	$stable_tag = trim( $stable_tag, '"\'' ); // "trunk"
+		$stable_tag = trim( $stable_tag, '"\'' ); // "trunk"
 		$stable_tag = preg_replace( '!^/?tags/!i', '', $stable_tag ); // "tags/1.2.3"
 		$stable_tag = preg_replace( '![^a-z0-9_.-]!i', '', $stable_tag );
 
-		// If the stable_tag begins with a ., we treat it as 0.blah
+		// If the stable_tag begins with a ., we treat it as 0.blah.
 		if ( '.' == substr( $stable_tag, 0, 1 ) ) {
 			$stable_tag = "0{$stable_tag}";
 		}
@@ -396,13 +494,17 @@ class Readme_Parser {
 		return $stable_tag;
 	}
 
+	/**
+	 * @param string $text
+	 * @return string
+	 */
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
+
 		if ( is_null( $markdown ) ) {
 			$markdown = new Markdown();
 		}
 
 		return $markdown->transform( $text );
 	}
-
 }

@@ -1,6 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
-use WordPressdotorg\Plugin_Directory\Readme_Parser;
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
@@ -143,7 +143,7 @@ class Upload_Handler {
 				'<code>readme.md</code>'
 			);
 		}
-		$readme = new Readme_Parser( $readme );
+		$readme = new Parser( $readme );
 
 		// Pass it through Plugin Check and see how great this plugin really is.
 		$result = $this->check_plugin();
