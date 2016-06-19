@@ -250,6 +250,9 @@ class Jetpack_Search {
 		if ( $posts_per_page > 15 )
 			$posts_per_page = 15;
 
+		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-2 years' ) );
+		$date_today = strftime( '%Y-%m-%d' );
+
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
 		$es_wp_query_args = array(
@@ -258,6 +261,8 @@ class Jetpack_Search {
 			'paged'          => $page,
 			'orderby'        => $query->get( 'orderby' ),
 			'order'          => $query->get( 'order' ),
+			// plugin directory specific:
+			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff, 'lte' => $date_today ),
 		);
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -552,13 +557,27 @@ class Jetpack_Search {
 		//  TODO: boost title, tag, and category matches
 		if ( $args['query'] ) {
 			$analyzer = Jetpack_Search::get_analyzer_name( $this->blog_lang );
-			$query = array( 'multi_match' => array(
-				'query'  => $args['query'],
-				'fields' => $args['query_fields'],
-				'operator'  => 'and',
-				'type'  => 'cross_fields',
-				'analyzer' => $analyzer
-			) );
+			$query = array( 
+				'bool' => array(
+					'must' => array(
+						'multi_match' => array(
+							'query'  => $args['query'],
+							'fields' => $args['query_fields'],
+							'type'  => 'cross_fields',
+							'analyzer' => $analyzer
+						),
+					),
+					'should' => array(
+						'multi_match' => array(
+							'query'  => $args['query'],
+							'fields' => $args['query_fields'],
+							'type'  => 'phrase',
+							'analyzer' => $analyzer
+						),
+					),
+				),
+			);
+
 			$es_query_args['query'] = Jetpack_Search::score_query_by_recency( $query );
 
 			if ( ! $args['orderby'] ) {
@@ -610,7 +629,7 @@ class Jetpack_Search {
 		} else {
 			$es_query_args['filter'] = array( 'match_all' => new stdClass() );
 		}
-	
+
 		return $es_query_args;
 	}
 
