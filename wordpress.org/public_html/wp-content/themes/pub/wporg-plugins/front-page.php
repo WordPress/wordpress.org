@@ -64,7 +64,7 @@ get_header();
 		<?php
 		the_widget( 'WP_Widget_Text', array(
 			'title' => 'Plugin Authors',
-			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Interested in hosting your plugin on WordPress.org? <a href="%s">Find out more about how.</a>', 'wporg-plugins' ), esc_url( home_url( 'about' ) ) ),
+			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Interested in hosting your plugin on WordPress.org? <a href="%s">Find out more about how.</a>', 'wporg-plugins' ), esc_url( home_url( 'developers' ) ) ),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
