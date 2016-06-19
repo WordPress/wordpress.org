@@ -426,22 +426,22 @@ class Plugin_Directory {
 
 		switch ( get_query_var( 'browse' ) ) {
 			case 'favorites':
-				$favorites_user = get_current_user_id();
+				$favorites_user = wp_get_current_user();
 				if ( !empty( $wp_query->query_vars['favorites_user'] ) ) {
 					$favorites_user = $wp_query->query_vars['favorites_user'];
 				} elseif ( !empty( $_GET['favorites_user'] ) ) {
 					$favorites_user = $_GET['favorites_user'];
 				}
-				if ( ! is_numeric( $favorites_user ) ) {
+
+				if ( ! $favorites_user instanceof \WP_User ) {
 					$favorites_user = get_user_by( 'slug', $favorites_user );
-					if ( $favorites_user ) {
-						$favorites_user = $favorites_user->ID;
-					}
 				}
 
 				if ( $favorites_user ) {
-					$wp_query->query_vars['post_name__in'] = get_user_meta( $favorites_user, 'plugin_favorites', true );
+					$wp_query->query_vars['favorites_user'] = $favorites_user->user_nicename;
+					$wp_query->query_vars['post_name__in']  = get_user_meta( $favorites_user->ID, 'plugin_favorites', true );
 				}
+
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
 					$wp_query->query_vars['p'] = -1;
 				}
