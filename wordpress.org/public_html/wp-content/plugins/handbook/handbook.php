@@ -231,6 +231,8 @@ class WPorg_Handbook {
 		// Allow customization of the default post type configuration via filter.
 		$config = apply_filters( 'handbook_post_type_defaults', $default_config, $slug );
 
+		$this->label = $config['labels']['name'];
+
 		register_post_type( $this->post_type, $config );
 	}
 
