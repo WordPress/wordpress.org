@@ -267,17 +267,18 @@ class Plugin_I18n {
 			return $content;
 		}
 
-		if ( !empty( $args['post_id'] ) && is_numeric( $args['post_id'] ) ) {
-			$topic = get_post( $args['post_id'] );
-		} else {
-			global $post;
-		}
+		$args = wp_parse_args( $args, [
+			'post_id' => null,
+			'locale'  => '',
+		] );
 
-		if ( empty( $post ) ) {
+		$post = get_post( $args['post_id'] );
+
+		if ( ! $post ) {
 			return $content;
 		}
 
-		if ( !empty( $args['locale'] ) ) {
+		if ( ! empty( $args['locale'] ) ) {
 			$wp_locale = $args['locale'];
 		} else {
 			$wp_locale = get_locale();

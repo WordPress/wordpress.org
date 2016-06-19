@@ -234,7 +234,7 @@ class Plugin_Directory {
 			add_filter( 'get_term', array( __NAMESPACE__ . '\i18n', 'translate_term' ) );
 			add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
 			add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
-			add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1 );
+			add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 		}
 
 		// Instantiate our copy of the Jetpack_Search class.
@@ -507,11 +507,11 @@ class Plugin_Directory {
 	 * @param int    $post_id
 	 * @return string
 	 */
-	public function translate_post_title( $title, $post_id ) {
+	public function translate_post_title( $title, $post_id = null ) {
 		$post = get_post();
 
 		if ( $post instanceof \WP_Post && $post_id === $post->ID ) {
-			$title = Plugin_I18n::instance()->translate( 'title', $title );
+			$title = Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
 		}
 
 		return $title;
@@ -521,10 +521,11 @@ class Plugin_Directory {
 	 * Returns the requested page's excerpt, translated.
 	 *
 	 * @param string $excerpt
+	 * @param \WP_Post $post
 	 * @return string
 	 */
-	public function translate_post_excerpt( $excerpt ) {
-		return Plugin_I18n::instance()->translate( 'excerpt', $excerpt );
+	public function translate_post_excerpt( $excerpt, $post ) {
+		return Plugin_I18n::instance()->translate( 'excerpt', $excerpt, [ 'post_id' => $post ] );
 	}
 
 	/**
