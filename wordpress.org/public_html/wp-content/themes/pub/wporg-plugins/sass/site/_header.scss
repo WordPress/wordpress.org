@@ -148,11 +148,18 @@
 			.search-field {
 				border-radius: 2px 0 0 2px;
 				@include font-size( ms-unitless( ms(-4) ) );
-				width: 10rem;
+				width: 7rem;
 			}
 
 			.search-field + .button-search {
 				display: inline-block;
+				margin-bottom: 0;
+			}
+		}
+
+		@media screen and ( min-width: 60em ) {
+			.search-field {
+				width: 10rem;
 			}
 		}
 	}

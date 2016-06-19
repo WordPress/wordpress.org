@@ -16,16 +16,16 @@
 		padding-top: 32.38342%; /* 250px / 722px */
 		vertical-align: middle;
 		width: 100%;
-	}
 
-	.plugin-banner + .plugin-header {
-		padding-top: 0;
+		@media screen and ( min-width: 60em ) {
+			margin-top: ms(4);
+		}
 	}
 
 	.plugin-header {
 		@extend .clear;
 		border-bottom: 2px solid #eee;
-		padding-bottom: ms(1);
+		padding: ms(1) ms(4);
 
 		.plugin-thumbnail {
 			display: none;
@@ -60,6 +60,15 @@
 		.byline {
 			color: #78848f;
 		}
+	}
+
+	.plugin-banner + .plugin-header {
+		padding-top: 0;
+	}
+
+	.entry-content,
+	.entry-meta {
+		padding: 0 ms(4);
 	}
 
 	.entry-content {
@@ -255,6 +264,13 @@
 	}
 
 	@media screen and ( min-width: $ms-breakpoint ) {
+		.plugin-header,
+		.entry-content,
+		.entry-meta {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
 		.entry-meta {
 			float: right;
 			width: 30%;

@@ -1809,10 +1809,17 @@ p a:not(.button):hover {
     border-radius: 0 2px 2px 0;
     font-size: 10.24px;
     font-size: 0.64rem;
-    width: 10rem;
+    width: 7rem;
   }
   .site-header .search-form .search-field + .button-search {
     display: inline-block;
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (min-width: 60em) {
+  .site-header .search-form .search-field {
+    width: 10rem;
   }
 }
 
@@ -1897,7 +1904,13 @@ p a:not(.button):hover {
 }
 
 .single .site-main {
-  padding-top: 1.5625rem;
+  padding: 0;
+}
+
+@media screen and (min-width: 48em) {
+  .single .site-main {
+    padding: 0 10px 3.0517578125rem;
+  }
 }
 
 .page .site-main {
@@ -2069,13 +2082,15 @@ p a:not(.button):hover {
   width: 100%;
 }
 
-.single .type-plugin .plugin-banner + .plugin-header {
-  padding-top: 0;
+@media screen and (min-width: 60em) {
+  .single .type-plugin .plugin-banner {
+    margin-top: 1.5625rem;
+  }
 }
 
 .single .type-plugin .plugin-header {
   border-bottom: 2px solid #eee;
-  padding-bottom: 1.143rem;
+  padding: 1.143rem 1.5625rem;
 }
 
 .single .type-plugin .plugin-header .plugin-thumbnail {
@@ -2112,6 +2127,15 @@ p a:not(.button):hover {
 
 .single .type-plugin .plugin-header .byline {
   color: #78848f;
+}
+
+.single .type-plugin .plugin-banner + .plugin-header {
+  padding-top: 0;
+}
+
+.single .type-plugin .entry-content,
+.single .type-plugin .entry-meta {
+  padding: 0 1.5625rem;
 }
 
 .single .type-plugin .entry-content {
@@ -2309,6 +2333,12 @@ p a:not(.button):hover {
 }
 
 @media screen and (min-width: 48em) {
+  .single .type-plugin .plugin-header,
+  .single .type-plugin .entry-content,
+  .single .type-plugin .entry-meta {
+    padding-right: 0;
+    padding-left: 0;
+  }
   .single .type-plugin .entry-meta {
     float: left;
     width: 30%;

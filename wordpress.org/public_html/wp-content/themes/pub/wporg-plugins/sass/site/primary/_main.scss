@@ -5,12 +5,16 @@
 	max-width: $size__site-main;
 	padding: ms(10) ms(4);
 
-	@media screen and ( min-width: 48em ) {
+	@media screen and ( min-width: $ms-breakpoint ) {
 		padding: ms(10) 10px;
 	}
 
 	.single & {
-		padding-top: ms(4);
+		padding: 0;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding: 0 10px ms(10);
+		}
 	}
 
 	.page & {
