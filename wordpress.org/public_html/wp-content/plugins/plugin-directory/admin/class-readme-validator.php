@@ -75,6 +75,7 @@ class Readme_Validator {
 		$temp_file = Filesystem::temp_directory() . '/readme.txt';
 		$warnings  = array();
 		$notes     = array();
+
 		if ( ! empty( $_REQUEST['readme_url'] ) ) {
 			$url = esc_url_raw( $_REQUEST['readme_url'] );
 
@@ -108,11 +109,11 @@ class Readme_Validator {
 		}
 
 		// Warnings.
-		if ( empty( $readme->requires_at_least ) ) {
+		if ( empty( $readme->requires ) ) {
 			/* Translators: Plugin header tag; */
 			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Requires at least</code>' );
 		}
-		if ( empty( $readme->tested_up_to ) ) {
+		if ( empty( $readme->tested ) ) {
 			/* Translators: Plugin header tag; */
 			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
@@ -123,17 +124,6 @@ class Readme_Validator {
 		if ( ! count( $readme->contributors ) ) {
 			/* Translators: Plugin header tag; */
 			$warnings[] = sprintf( __( 'No %s listed.', 'wporg-plugins' ), '<code>Contributors</code>' );
-		}
-		if ( ! count( $readme->tags ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( 'No %s specified', 'wporg-plugins' ), '<code>Tags</code>' );
-		}
-		if ( ! empty( $readme->is_excerpt ) ) {
-			/* Translators: Plugin header tag; */
-			$warnings[] = sprintf( __( 'No %s section was found... your short description section will be used instead.', 'wporg-plugins' ), '<code>== Description ==</code>' );
-		}
-		if ( ! empty( $readme->is_truncated ) ) {
-			$warnings[] = __( 'Your short description exceeds the 150 character limit.', 'wporg-plugins' );
 		}
 
 		if ( $warnings ) {
@@ -148,14 +138,6 @@ class Readme_Validator {
 		}
 
 		// Notes.
-		if ( empty( $readme->license ) ) {
-			/* Translators: Plugin header tag; */
-			$notes[] = sprintf( __( 'No %s is specified. WordPress is licensed under &#8220;GPLv2 or later&#8221;', 'wporg-plugins' ), '<code>License</code>' );
-		}
-		if ( empty( $readme->sections['installation'] ) ) {
-			/* Translators: Plugin header tag; */
-			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Installation ==</code>' );
-		}
 		if ( empty( $readme->sections['frequently_asked_questions'] ) ) {
 			/* Translators: Plugin header tag; */
 			$notes[] = sprintf( __( 'No %s section was found', 'wporg-plugins' ), '<code>== Frequently Asked Questions ==</code>' );
