@@ -213,6 +213,7 @@ class Readme_Parser {
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
 			$lines = explode( "\n", $this->sections['upgrade_notice'] );
 			$version = null;
+			$current = '';
 			while ( ( $line = array_shift( $lines ) ) !== null ) {
 				$trimmed = trim( $line );
 				if ( empty( $trimmed ) ) {
