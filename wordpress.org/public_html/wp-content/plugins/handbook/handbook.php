@@ -228,7 +228,7 @@ class WPorg_Handbook {
 	function handbook_sidebar() {
 		register_sidebar( array(
 			'id'          => $this->post_type,
-			'name'        => $this->label,
+			'name'        => sprintf( __( '%s Sidebar', 'wporg' ), $this->label ),
 			'description' => sprintf( __( 'Used on %s pages', 'wporg' ), $this->label ),
 		) );
 		require_once dirname( __FILE__ ) . '/inc/widgets.php';
