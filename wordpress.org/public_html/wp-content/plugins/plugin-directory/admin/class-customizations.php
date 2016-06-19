@@ -441,7 +441,7 @@ class Customizations {
 			'plugin', 'side', 'high'
 		);
 
-		if ( 'publish' === $post->post_status ) {
+		if ( 'draft' !== $post->post_status ) {
 			add_meta_box(
 				'plugin-committers',
 				__( 'Plugin Committers', 'wporg-plugins' ),
