@@ -211,7 +211,12 @@ class WPorg_Handbook {
 	function pre_get_posts( $query ) {
 		if ( $query->is_main_query() && ! $query->is_admin && ! $query->is_search && $query->is_post_type_archive( $this->post_type ) ) {
 			// If the post type has a page to act as an archive index page, get that.
-			if ( $page = get_page_by_path( $this->post_type, OBJECT, $this->post_type ) ) {
+			$page = get_page_by_path( $this->post_type, OBJECT, $this->post_type );
+			if ( ! $page ) {
+				$slug = substr( $this->post_type, 0, -9 );
+				$page = get_page_by_path( $slug, OBJECT, $this->post_type );
+			}
+			if ( $page ) {
 				$query->set( 'p', $page->ID );
 			}
 			$query->set( 'handbook', $this->post_type );
