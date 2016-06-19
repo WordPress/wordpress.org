@@ -6,8 +6,7 @@
  */
 ?>
 
-	<!-- On handbook pages, this gets called twice but will not display the second time. -->
-	<?php get_sidebar( get_post_type() ); ?>
+	<?php if ( ! function_exists( 'wporg_is_handbook' ) || ! wporg_is_handbook() ) { get_sidebar( get_post_type() ); } ?>
 	<div class="clear"></div>
 
 </div> <!-- // wrapper -->
