@@ -56,7 +56,7 @@ class Readme_Validator {
 		add_settings_field( 'readme_url', __( 'URL to readme.txt file', 'wporg-plugins' ), array( $this, 'url_input' ), 'readme_validator', 'default', array(
 			'label_for' => 'readme_url',
 		) );
-		add_settings_field( 'readme_text', __( 'Text of readme.txt', 'wporg-plugins' ),    array( $this, 'textarea' ),  'readme_validator', 'default', array(
+		add_settings_field( 'readme_text', __( 'Text of readme.txt', 'wporg-plugins' ), array( $this, 'textarea' ),  'readme_validator', 'default', array(
 			'label_for' => 'readme_contents',
 		) );
 	}
@@ -78,7 +78,7 @@ class Readme_Validator {
 		if ( ! empty( $_REQUEST['readme_url'] ) ) {
 			$url = esc_url_raw( $_REQUEST['readme_url'] );
 
-			if ( strtolower( substr( $url, - 10, 10 ) ) != 'readme.txt' ) {
+			if ( strtolower( substr( $url, -10 ) ) != 'readme.txt' ) {
 				/* Translators: File name; */
 				add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' ) );
 				return;
@@ -215,7 +215,7 @@ class Readme_Validator {
 	 * Displays a textarea for readme.txt blobs.
 	 */
 	public function textarea() {
-		$text = empty( $_REQUEST['readme_contents'] ) ? '' : $_REQUEST['readme_contents'];
+		$text = empty( $_REQUEST['readme_contents'] ) ? '' : wp_unslash( $_REQUEST['readme_contents'] );
 		?>
 		<label>
 			<textarea type="text" id="readme_contents" class="large-text" name="readme_contents" cols="50" rows="10"><?php echo esc_textarea( $text ); ?></textarea>
