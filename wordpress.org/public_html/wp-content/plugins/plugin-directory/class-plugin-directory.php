@@ -39,6 +39,10 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_urls' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 
+		// oEmbed whitlisting.
+		add_filter( 'embed_oembed_discover', '__return_false' );
+		add_filter( 'oembed_providers', array( $this, 'oembed_whitelist' ) );
+
 		// Shim in postmeta support for data which doesn't yet live in postmeta
 		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
 
@@ -687,6 +691,37 @@ class Plugin_Directory {
 			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
 			die();
 		}
+	}
+
+	/**
+	 * Whitelists the oembed providers whitelist.
+	 *
+	 * Limited to providers that add video support to plugin readme files.
+	 *
+	 * @param array $providers An array of popular oEmbed providers.
+	 * @return array
+	 */
+	public function oembed_whitelist( $providers ) {
+		return array_filter( $providers, function ( $provider ) {
+			$whitelist = array(
+				'youtube.com',
+				'vimeo.com',
+				'wordpress.com',
+				'wordpress.tv',
+				'vine.co',
+				'soundcloud.com',
+				'instagram.com',
+				'mixcloud.com',
+				'cloudup.com',
+			);
+
+			foreach ( $whitelist as $url ) {
+				if ( false !== strpos( $provider[0], $url ) ) {
+					return true;
+				}
+			}
+			return false;
+		} );
 	}
 
 	/**
