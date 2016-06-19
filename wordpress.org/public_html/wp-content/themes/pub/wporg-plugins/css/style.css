@@ -2080,6 +2080,12 @@ p a:not(.button):hover {
   margin: 0 0 8px;
 }
 
+.rtl .dashicons-star-half:before {
+  -webkit-transform: rotateY(180deg);
+  -ms-transform: rotateY(180deg);
+  transform: rotateY(180deg);
+}
+
 .single .type-plugin .plugin-notice {
   margin-top: 0;
 }

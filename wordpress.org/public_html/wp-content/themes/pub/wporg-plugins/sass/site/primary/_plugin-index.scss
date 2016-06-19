@@ -75,3 +75,10 @@
 		}
 	}
 }
+
+// Flip the half star for rating.
+.rtl .dashicons-star-half:before {
+	-webkit-transform: rotateY(180deg);
+	-ms-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+}
