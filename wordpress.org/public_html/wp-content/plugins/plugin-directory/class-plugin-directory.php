@@ -11,6 +11,11 @@ use WordPressdotorg\Plugin_Directory\CLI\Tag_To_Category;
 class Plugin_Directory {
 
 	/**
+	 * Local cache for translated content injected into meta
+	 */
+	private $i18n_meta = array();
+
+	/**
 	 * Fetch the instance of the Plugin_Directory class.
 	 */
 	public static function instance() {
@@ -237,6 +242,10 @@ class Plugin_Directory {
 			require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
 			\Jetpack_Search::instance();
 		}
+
+		// When Jetpack syncs, we want to add filters to inject additional metadata for Jetpack, so it syncs for ElasticSearch indexing.
+		add_action( 'shutdown', array( $this, 'append_meta_for_jetpack' ), 8 );
+
 	}
 
 	/**
@@ -515,6 +524,62 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Shutdown action that will add a filter to inject additional postmeta containing translated content if Jetpack is syncing.
+	 *
+	 */
+	public function append_meta_for_jetpack() {
+		// TEMP: only do this for low numbered plugin IDs, till we're sure it works.
+		if ( get_post()->ID > 200 )
+			return;
+
+		// Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action, so we can get in first.
+		// Fetching the extra meta to inject is expensive, so we only want to do this if a sync is likely.
+		if ( class_exists( 'Jetpack' ) && !empty(\Jetpack::init()->sync->sync) ) {
+			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
+		}
+
+	}
+
+	/**
+	 * Filter for wporg_plugins_custom_meta_fields to inject translated content for ES.
+	 *
+	 * @param array $meta
+	 * @param int $post_id
+	 * @return array
+	 */
+	public function filter_post_meta_i18n( $meta, $post_id ) {
+		// Prevent recursion and repeat runs
+		remove_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ) );
+
+		if ( get_post()->ID == $post_id ) {
+			$locales_to_sync = array( 'fr_fr', 'es_es' ); // This should probably be a list of available translations for the plugin readme.
+
+			global $locale;
+			$_locale = $locale;
+			foreach ( $locales_to_sync as $locale ) {
+				$this->i18n_meta[$post_id]['title_'.$locale] = $this->translate_post_title( get_the_title(), $post_id );
+				$this->i18n_meta[$post_id]['excerpt_'.$locale] = $this->translate_post_excerpt( get_the_excerpt() );
+
+				// Split up the content to translate it in sections
+				$content = '';
+				$sections = $this->split_post_content_into_pages( get_the_content() );
+				foreach ( $sections as $section => $section_content )
+					$content .= $this->translate_post_content( $section_content, $section );
+				$this->i18n_meta[$post_id]['content_'.$locale] = $content;
+
+			}
+
+			$locale = $_locale;
+
+			$meta = array_merge( $meta, array_keys( $this->i18n_meta[$post_id] ) );
+		}
+
+		add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n'), 10, 2 );
+		return $meta;
+	}
+
+
+	/**
 	 * Filter for rest_api_allowed_post_types to enable JP syncing of the CPT
 	 *
 	 * @param array $allowed_post_types
@@ -661,6 +726,10 @@ class Plugin_Directory {
 					}
 				}
 
+				break;
+			default:
+				if ( isset( $this->i18n_meta[ $object_id ][ $meta_key ] ) )
+					return array( $this->i18n_meta[ $object_id ][ $meta_key ] );
 				break;
 		}
 		return $value;
