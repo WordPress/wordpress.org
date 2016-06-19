@@ -118,7 +118,7 @@ class WPorg_Handbook {
 		$this->setting_name = $this->post_type . '_name';
 
 		add_filter( 'user_has_cap',                       array( $this, 'grant_handbook_caps' ) );
-		add_filter( 'widgets_init',                       array( $this, 'register_post_type' ) );
+		add_action( 'widgets_init',                       array( $this, 'register_post_type' ) );
 		add_filter( 'post_type_link',                     array( $this, 'post_type_link' ), 10, 2 );
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
