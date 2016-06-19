@@ -76,7 +76,7 @@ function scripts() {
 		wp_enqueue_script( 'wporg-plugins-accordion', get_template_directory_uri() . '/js/section-accordion.js', array(), '20160525', true );
 
 		$slug = get_queried_object()->post_name;
-		wp_enqueue_script( 'wporg-plugins-locale-banner', get_template_directory_uri() . '/js/locale-banner.js', array(), '20160525', true );
+		wp_enqueue_script( 'wporg-plugins-locale-banner', get_template_directory_uri() . '/js/locale-banner.js', array(), '20160619', true );
 		wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
 			'apiURL' => rest_url( "/plugins/v1/plugin/$slug/translations" ),
 		) );

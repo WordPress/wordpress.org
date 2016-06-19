@@ -10,7 +10,7 @@
 			}
 
 			var $banner = $( '<div />', {
-				'class': 'notification',
+				'class': 'locale-banner',
 				'html': response.suggest_string
 			} );
 

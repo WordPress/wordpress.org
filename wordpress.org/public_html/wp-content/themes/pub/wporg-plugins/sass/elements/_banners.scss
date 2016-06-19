@@ -1,0 +1,13 @@
+.locale-banner {
+	padding: .5rem;
+	background: $color__green;
+	text-align: center;
+	@include font-size(ms-unitless(ms(-2)));
+}
+
+@media (min-width: 67rem) {
+	.locale-banner {
+	  margin: 1rem auto 0;
+	  max-width: $size__site-main;
+	}
+}

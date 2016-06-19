@@ -438,21 +438,6 @@ table {
   width: 100%;
 }
 
-.notification {
-  padding: .5rem;
-  background: #C7E8CA;
-  text-align: center;
-  font-size: 12.8px;
-  font-size: 0.8rem;
-}
-
-@media (min-width: 67rem) {
-  .notification {
-    margin: 1rem auto 0;
-    max-width: 960px;
-  }
-}
-
 .notice {
   background: #fff;
   border-left: 4px solid #fff;
@@ -506,6 +491,21 @@ table {
 
 .notice.notice-info.notice-alt {
   background-color: #e5f5fa;
+}
+
+.locale-banner {
+  padding: .5rem;
+  background: #C7E8CA;
+  text-align: center;
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 67rem) {
+  .locale-banner {
+    margin: 1rem auto 0;
+    max-width: 960px;
+  }
 }
 
 /*--------------------------------------------------------------
