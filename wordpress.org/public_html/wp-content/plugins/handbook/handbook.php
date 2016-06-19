@@ -218,6 +218,8 @@ class WPorg_Handbook {
 			}
 			if ( $page ) {
 				$query->set( 'p', $page->ID );
+				$query->is_singular = true;
+				$query->is_post_type_archive = false;
 			}
 			$query->set( 'handbook', $this->post_type );
 		}
