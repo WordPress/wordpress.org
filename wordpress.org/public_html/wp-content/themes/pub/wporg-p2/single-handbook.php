@@ -10,7 +10,7 @@
 <div class="handbook-name"><span><a href="<?php echo esc_url( get_post_type_archive_link( 'handbook' ) ); ?>"><?php echo esc_html( WPorg_Handbook::get_name() ); ?></a></span></div>
 
 <!-- Also called on in footer but will not display the second time. -->
-<?php get_sidebar( get_post_type() ); ?> 
+<?php get_sidebar( 'handbook' ); ?> 
 
 <div class="sleeve_main">
 
