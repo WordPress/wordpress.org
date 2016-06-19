@@ -61,6 +61,12 @@
 			transform: none;
 		}
 	}
+
+	a:hover,
+	a:focus,
+	a:active {
+		text-decoration: none;
+	}
 }
 
 .site-header {
@@ -89,6 +95,12 @@
 		a {
 			color: #fff;
 			font-weight: 300;
+
+			&:hover,
+			&:focus,
+			&:active {
+				text-decoration: none;
+			}
 		}
 	}
 

@@ -126,7 +126,8 @@
 		}
 
 		.section-toggle {
-			@extend a;
+			color: $color__link;
+			cursor: pointer;
 			@include font-size( ms-unitless( ms(-2) ) );
 			margin-top: 0.5rem;
 			position: relative;

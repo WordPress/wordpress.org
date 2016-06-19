@@ -4,12 +4,20 @@ a {
 	color: $color__link;
 
 	&:visited {
-		color: $color__link-visited;
+		/* Override wp4.css */
+		color: $color__link;
 	}
 	&:hover,
 	&:focus,
 	&:active {
-		color: $color__link-hover;
+		/* Override wp4.css */
+		color: $color__link;
+		text-decoration: underline;
+	}
+	&.button:hover,
+	&.button:focus,
+	&.button:active {
+		text-decoration: none;
 	}
 	&:focus {
 		outline: thin dotted;

@@ -44,13 +44,12 @@ template {
   display: none;
 }
 
-a, .single .type-plugin .entry-content .section-toggle {
+a {
   background-color: transparent;
 }
 
-a:active, .single .type-plugin .entry-content .section-toggle:active,
-a:hover,
-.single .type-plugin .entry-content .section-toggle:hover {
+a:active,
+a:hover {
   outline: 0;
 }
 
@@ -254,7 +253,7 @@ h1 {
 h1.title {
   font-size: 12.8px;
   font-size: 0.8rem;
-  color: #21759b;
+  color: #0073aa;
   font-weight: 600;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
@@ -544,25 +543,19 @@ input[type="submit"]::-moz-focus-inner {
   padding: 0 .5rem;
 }
 
-a.button, .single .type-plugin .entry-content .button.section-toggle,
+a.button,
 a.button-primary,
-.single .type-plugin .entry-content .button-primary.section-toggle,
-a.button-secondary,
-.single .type-plugin .entry-content .button-secondary.section-toggle {
+a.button-secondary {
   line-height: 1.5625rem;
 }
 
-a.button.button-large, .single .type-plugin .entry-content .button.button-large.section-toggle,
-.button-group.button-large a.button,
-.button-group.button-large .single .type-plugin .entry-content .button.section-toggle, .single .type-plugin .entry-content
-.button-group.button-large .button.section-toggle {
+a.button.button-large,
+.button-group.button-large a.button {
   line-height: 1.953125rem;
 }
 
-a.button.button-small, .single .type-plugin .entry-content .button.button-small.section-toggle,
-.button-group.button-small a.button,
-.button-group.button-small .single .type-plugin .entry-content .button.section-toggle, .single .type-plugin .entry-content
-.button-group.button-small .button.section-toggle {
+a.button.button-small,
+.button-group.button-small a.button {
   line-height: 1.25rem;
 }
 
@@ -1186,30 +1179,35 @@ fieldset label {
 /*--------------------------------------------------------------
 ## Links
 --------------------------------------------------------------*/
-a, .single .type-plugin .entry-content .section-toggle {
-  color: #21759b;
+a {
+  color: #0073aa;
 }
 
-a:visited, .single .type-plugin .entry-content .section-toggle:visited {
-  color: #4ca6cf;
+a:visited {
+  /* Override wp4.css */
+  color: #0073aa;
 }
 
-a:hover, .single .type-plugin .entry-content .section-toggle:hover, a:focus, .single .type-plugin .entry-content .section-toggle:focus, a:active, .single .type-plugin .entry-content .section-toggle:active {
-  color: #d54e21;
+a:hover, a:focus, a:active {
+  /* Override wp4.css */
+  color: #0073aa;
+  text-decoration: underline;
 }
 
-a:focus, .single .type-plugin .entry-content .section-toggle:focus {
+a.button:hover, a.button:focus, a.button:active {
+  text-decoration: none;
+}
+
+a:focus {
   outline: thin dotted;
 }
 
-a:hover, .single .type-plugin .entry-content .section-toggle:hover, a:active, .single .type-plugin .entry-content .section-toggle:active {
+a:hover, a:active {
   outline: 0;
 }
 
-p a:not(.button), p .single .type-plugin .entry-content .section-toggle:not(.button), .single .type-plugin .entry-content p .section-toggle:not(.button),
-p a:not(.button):hover,
-p .single .type-plugin .entry-content .section-toggle:not(.button):hover, .single .type-plugin .entry-content
-p .section-toggle:not(.button):hover {
+p a:not(.button),
+p a:not(.button):hover {
   border: none;
 }
 
@@ -1251,7 +1249,7 @@ p .section-toggle:not(.button):hover {
   left: 100%;
 }
 
-.main-navigation ul ul a, .main-navigation ul ul .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .main-navigation ul ul .section-toggle {
+.main-navigation ul ul a {
   width: 200px;
 }
 
@@ -1266,7 +1264,7 @@ p .section-toggle:not(.button):hover {
   padding: 1rem;
 }
 
-.main-navigation a, .main-navigation .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .main-navigation .section-toggle {
+.main-navigation a {
   color: rgba(255, 255, 255, 0.8);
   display: block;
   font-size: 12.8px;
@@ -1274,12 +1272,12 @@ p .section-toggle:not(.button):hover {
   text-decoration: none;
 }
 
-.main-navigation a:hover, .main-navigation .single .type-plugin .entry-content .section-toggle:hover, .single .type-plugin .entry-content .main-navigation .section-toggle:hover, .main-navigation a.active, .main-navigation .single .type-plugin .entry-content .active.section-toggle, .single .type-plugin .entry-content .main-navigation .active.section-toggle {
+.main-navigation a:hover, .main-navigation a.active {
   color: #fff;
 }
 
 @media screen and (min-width: 48em) {
-  .main-navigation a.active, .main-navigation .single .type-plugin .entry-content .active.section-toggle, .single .type-plugin .entry-content .main-navigation .active.section-toggle {
+  .main-navigation a.active {
     border-bottom: 1px solid;
   }
 }
@@ -1528,9 +1526,7 @@ p .section-toggle:not(.button):hover {
 }
 
 .plugin-ratings .ratings-list .counter-container,
-.plugin-ratings .ratings-list .counter-container a,
-.plugin-ratings .ratings-list .counter-container .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content
-.plugin-ratings .ratings-list .counter-container .section-toggle {
+.plugin-ratings .ratings-list .counter-container a {
   width: 100%;
 }
 
@@ -1722,6 +1718,12 @@ p .section-toggle:not(.button):hover {
   transform: none;
 }
 
+#wporg-header a:hover,
+#wporg-header a:focus,
+#wporg-header a:active {
+  text-decoration: none;
+}
+
 .site-header {
   background: #0073aa;
   padding: 1rem 0;
@@ -1750,9 +1752,13 @@ p .section-toggle:not(.button):hover {
   max-width: none;
 }
 
-.site-header .site-title a, .site-header .site-title .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .site-header .site-title .section-toggle {
+.site-header .site-title a {
   color: #fff;
   font-weight: 300;
+}
+
+.site-header .site-title a:hover, .site-header .site-title a:focus, .site-header .site-title a:active {
+  text-decoration: none;
 }
 
 .site-header .site-description {
@@ -1997,17 +2003,9 @@ p .section-toggle:not(.button):hover {
   margin: 0 0 8px;
 }
 
-.home .type-plugin .entry-title a, .home .single .type-plugin .entry-title .entry-content .section-toggle, .single .home .type-plugin .entry-title .entry-content .section-toggle, .home .single .type-plugin .entry-content .entry-title .section-toggle, .single .home .type-plugin .entry-content .entry-title .section-toggle,
+.home .type-plugin .entry-title a,
 .search .type-plugin .entry-title a,
-.search .single .type-plugin .entry-title .entry-content .section-toggle, .single
-.search .type-plugin .entry-title .entry-content .section-toggle,
-.search .single .type-plugin .entry-content .entry-title .section-toggle, .single
-.search .type-plugin .entry-content .entry-title .section-toggle,
-.archive .type-plugin .entry-title a,
-.archive .single .type-plugin .entry-title .entry-content .section-toggle, .single
-.archive .type-plugin .entry-title .entry-content .section-toggle,
-.archive .single .type-plugin .entry-content .entry-title .section-toggle, .single
-.archive .type-plugin .entry-content .entry-title .section-toggle {
+.archive .type-plugin .entry-title a {
   font-weight: 400;
 }
 
@@ -2184,6 +2182,8 @@ p .section-toggle:not(.button):hover {
 }
 
 .single .type-plugin .entry-content .section-toggle {
+  color: #0073aa;
+  cursor: pointer;
   font-size: 12.8px;
   font-size: 0.8rem;
   margin-top: 0.5rem;
@@ -2331,7 +2331,7 @@ p .section-toggle:not(.button):hover {
   text-align: center;
 }
 
-.error404 .page-content a, .error404 .page-content .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .error404 .page-content .section-toggle {
+.error404 .page-content a {
   color: #fff;
   text-decoration: underline;
 }
@@ -2485,7 +2485,7 @@ p .section-toggle:not(.button):hover {
 /*--------------------------------------------------------------
 ## Comments
 --------------------------------------------------------------*/
-.comment-content a, .comment-content .single .type-plugin .entry-content .section-toggle, .single .type-plugin .entry-content .comment-content .section-toggle {
+.comment-content a {
   word-wrap: break-word;
 }
 
@@ -2504,7 +2504,7 @@ p .section-toggle:not(.button):hover {
 .pagination .page-numbers {
   border: 1px solid #EEE;
   border-radius: 2px;
-  color: #21759b;
+  color: #0073aa;
   cursor: pointer;
   display: inline-block;
   font-size: 0.73152rem;
