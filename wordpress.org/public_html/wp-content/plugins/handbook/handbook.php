@@ -125,6 +125,40 @@ class WPorg_Handbook {
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
 		add_action( 'p2_action_links',                    array( $this, 'disable_p2_resolved_posts_action_links' ) );
 		add_action( 'admin_init',                         array( $this, 'add_name_setting' ) );
+		add_filter( 'body_class',                         array( $this, 'add_body_class' ) );
+		add_filter( 'post_class',                         array( $this, 'add_post_class' ) );
+	}
+
+	/**
+	 * Adds 'post-type-archive-handbook' or 'single-handbook' class to body tag
+	 * when appropriate.
+	 *
+	 * @param array $classes Array of body classes.
+	 * @return array
+	 */
+	function add_body_class( $classes ) {
+		if ( is_post_type_archive( $this->post_type )  ) {
+			$classes[] = 'post-type-archive-handbook';
+		} elseif ( is_singular( $this->post_type ) ) {
+			$classes[] = 'single-handbook';
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * Adds 'type-handbook' class to the list of post classes to a handbook post
+	 * when appropriate.
+	 *
+	 * @param array $classes Array of post classes.
+	 * @return array
+	 */
+	function add_post_class( $classes ) {
+		if ( $this->post_type === get_post_type() ) {
+			$classes[] = 'type-handbook';
+		}
+
+		return $classes;
 	}
 
 	function add_name_setting() {
