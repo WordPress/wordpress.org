@@ -671,6 +671,12 @@ class Plugin_Directory {
 			wp_safe_redirect( site_url( '/search/' . urlencode( wp_unslash( $_GET['q'] ) ) . '/' ) );
 			die();
 		}
+
+		// new-style Search links
+		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
+			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
+			die();
+		}
 	}
 
 	/**
