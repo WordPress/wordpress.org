@@ -507,9 +507,12 @@ class Plugin_Directory {
 	 * @return string
 	 */
 	public function translate_post_title( $title, $post_id ) {
-		if ( $post_id === get_post()->ID ) {
-			return Plugin_I18n::instance()->translate( 'title', $title );
+		$post = get_post();
+
+		if ( $post instanceof \WP_Post && $post_id === $post->ID ) {
+			$title = Plugin_I18n::instance()->translate( 'title', $title );
 		}
+
 		return $title;
 	}
 
@@ -529,7 +532,8 @@ class Plugin_Directory {
 	 */
 	public function append_meta_for_jetpack() {
 		// TEMP: only do this for low numbered plugin IDs, till we're sure it works.
-		if ( get_post()->ID > 200 )
+		$post = get_post();
+		if ( $post instanceof \WP_Post && $post->ID > 200 )
 			return;
 
 		// Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action, so we can get in first.
