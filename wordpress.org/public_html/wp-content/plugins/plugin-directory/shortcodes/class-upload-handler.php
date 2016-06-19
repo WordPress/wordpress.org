@@ -160,9 +160,8 @@ class Upload_Handler {
 		// Let's save everything and get things wrapped up.
 
 		// Give the author wp-admin access if they don't have it yet.
-		// @todo: Enable.
 		if ( ! current_user_can( 'plugin_dashboard_access' ) ) {
-		//	wp_get_current_user()->add_role( 'plugin_committer' );
+			wp_get_current_user()->add_role( 'plugin_committer' );
 		}
 
 		// Create a new post on first-time submissions.
