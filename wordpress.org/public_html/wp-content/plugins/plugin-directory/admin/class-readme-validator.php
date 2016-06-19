@@ -36,6 +36,7 @@ class Readme_Validator {
 		?>
 		<div class="wrap">
 			<h2><?php _e( 'WordPress Plugin readme.txt Validator', 'wporg-plugins' ); ?></h2>
+			<?php settings_errors( 'wporg-plugins-readme' ); ?>
 			<form method="post" action="<?php echo esc_url( add_query_arg( array( 'post_type' => 'plugin', 'page' => 'readme_validator' ), admin_url( 'edit.php' ) ) ); ?>">
 				<?php
 				wp_nonce_field( 'validate-readme' );
@@ -74,18 +75,17 @@ class Readme_Validator {
 		$temp_file = Filesystem::temp_directory() . '/readme.txt';
 		$warnings  = array();
 		$notes     = array();
-
 		if ( ! empty( $_REQUEST['readme_url'] ) ) {
 			$url = esc_url_raw( $_REQUEST['readme_url'] );
 
 			if ( strtolower( substr( $url, -10 ) ) != 'readme.txt' ) {
 				/* Translators: File name; */
-				add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' ) );
+				add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' ) );
 				return;
 			}
 
 			if ( ! $readme = @file_get_contents( $url ) ) {
-				add_settings_error( 'wporg-plugins', 'readme-validator', __( 'Invalid readme.txt URL.', 'wporg-plugins' ) );
+				add_settings_error( 'wporg-plugins-readme', 'readme-validator', __( 'Invalid readme.txt URL.', 'wporg-plugins' ) );
 				return;
 			}
 
@@ -103,7 +103,7 @@ class Readme_Validator {
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {
 			/* Translators: Plugin header tag; */
-			add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( "Fatal Error:\nNo plugin name detected. Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' ) );
+			add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( "Fatal Error:\nNo plugin name detected. Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' ) );
 			return;
 		}
 
@@ -143,7 +143,7 @@ class Readme_Validator {
 			}
 			$message .= "</ul>\n</div>";
 
-			add_settings_error( 'wporg-plugins', 'readme-validator', $message, 'notice-warning' );
+			add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-warning' );
 			return;
 		}
 
@@ -183,12 +183,12 @@ class Readme_Validator {
 			}
 			$message .= "</ul>\n</div>";
 
-			add_settings_error( 'wporg-plugins', 'readme-validator', $message, 'notice-info' );
+			add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-info' );
 			return;
 		}
 
 		/* Translators: File name; */
-		add_settings_error( 'wporg-plugins', 'readme-validator', sprintf( __( 'Your %s rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), '<code>readme.txt</code>' ), 'updated' );
+		add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( 'Your %s rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), '<code>readme.txt</code>' ), 'updated' );
 	}
 
 	/**
