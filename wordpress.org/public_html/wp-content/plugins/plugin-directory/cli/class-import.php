@@ -175,9 +175,9 @@ class Import {
 
 		// Give committers a role on this site.
 		foreach ( Tools::get_plugin_committers( $plugin_slug ) as $committer ) {
-			$user = get_user_by( 'slug', $committer );
+			$user = get_user_by( 'login', $committer );
 
-			if ( ! user_can( $user, 'plugin_dashboard_access' ) ) {
+			if ( $user && ! user_can( $user, 'plugin_dashboard_access' ) ) {
 				$user->add_role( 'plugin_committer' );
 			}
 		}
@@ -188,6 +188,9 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
+
+		// Update Jetpack Search
+		\Jetpack::$instance->sync->register_post( $plugin->ID );
 	}
 
 	/**
