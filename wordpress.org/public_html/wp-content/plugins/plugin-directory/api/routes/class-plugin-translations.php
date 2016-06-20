@@ -62,7 +62,10 @@ class Plugin_Translations extends Plugin {
 
 		// Build a list of WordPress locales which we'll suggest to the user.
 		$suggest_locales = array_values( array_intersect( $translated_locales, $locales_from_header ) );
-		$suggest_locales = array_diff( $suggest_locales, [ $current_locale ] );
+		$current_locale_is_suggested = in_array( $current_locale, $suggest_locales );
+		if ( $current_locale_is_suggested ) {
+			$suggest_locales = array_diff( $suggest_locales, [ $current_locale ] );
+		}
 
 		// Get the native language names of the locales.
 		$suggest_named_locales = [];
@@ -85,7 +88,7 @@ class Plugin_Translations extends Plugin {
 			$language = current( $suggest_named_locales );
 			$suggest_string = sprintf(
 				/* translators: %s: native language name. */
-				__( 'This plugin also available in %s.', 'wporg-plugins' ),
+				__( 'This plugin is also available in %s.', 'wporg-plugins' ),
 				sprintf(
 					'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
 					$locale_subdomain_assoc[ $locale ]->subdomain,
@@ -110,7 +113,7 @@ class Plugin_Translations extends Plugin {
 
 			$suggest_string = sprintf(
 				/* translators: 1: native language name, 2: native language names */
-				__( 'This plugin also available in %1$s (also: %2$s).', 'wporg-plugins' ),
+				__( 'This plugin is also available in %1$s (also: %2$s).', 'wporg-plugins' ),
 				sprintf(
 					'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
 					$locale_subdomain_assoc[ $primary_locale ]->subdomain,
@@ -119,7 +122,7 @@ class Plugin_Translations extends Plugin {
 				),
 				trim( $other_suggest, ' ,' )
 			);
-		} elseif ( 'en_US' !== $current_locale ) {
+		} elseif ( 'en_US' !== $current_locale && ! $current_locale_is_suggested ) {
 			$suggest_string = sprintf(
 				/* translators: %s: URL to translate.wordpress.org */
 				__( 'This plugin is not yet available in your language. <a href="%s">Can you help translating it?</a>', 'wporg-translate' ),
