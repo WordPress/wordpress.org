@@ -11,8 +11,9 @@ use Exception;
  */
 class SVN_Watcher {
 
-	const SVN_URL = 'https://plugins.svn.wordpress.org/';
-	const PHP     = '/usr/local/bin/php';
+	const SVN_URL      = 'https://plugins.svn.wordpress.org/';
+	const PHP          = '/usr/local/bin/php';
+	const PROCESS_I18N = false;
 
 	public function __construct() {
 		$this->watch();
@@ -58,11 +59,29 @@ class SVN_Watcher {
 			echo "\$$cmd\n";
 			echo shell_exec( $cmd ) . "\n";
 
-			if ( $this->process_i18n_for_plugin( $plugin_slug) && $plugin_data['readme_touched'] ) {
-// TODO				echo "import GlotPress readme\n";
-			}
-			if ( $this->process_i18n_for_plugin( $plugin_slug) && $plugin_data['code_touched'] ) {
-// TODO				echo "import GlotPress code\n";
+			if ( self::PROCESS_I18N ) {
+				$plugin     = Plugin_Directory::get_plugin_post( $plugin_slug );
+				$stable_tag = $plugin->stable_tag;
+
+				$i18n_processes = [];
+				if ( in_array( 'trunk', $plugin_data['tags_touched'] ) ) {
+					if ( $plugin_data['code_touched'] ) {
+						$i18n_processes[] = 'trunk|code';
+					}
+					if ( $plugin_data['readme_touched'] ) {
+						$i18n_processes[] = 'trunk|readme';
+					}
+				}
+				if ( in_array( $stable_tag, $plugin_data['tags_touched'] ) ) {
+					if ( $plugin_data['code_touched'] ) {
+						$i18n_processes[] = "{$stable_tag}|code";
+					}
+					if ( $plugin_data['readme_touched'] ) {
+						$i18n_processes[] = "{$stable_tag}|readme";
+					}
+				}
+
+				$this->process_i18n_for_plugin( $plugin_slug, $i18n_processes );
 			}
 
 			$this->update_option( $svn_rev_option_name, $plugin_data['revision'] );
@@ -73,10 +92,24 @@ class SVN_Watcher {
 	}
 
 	/**
-	 * Determine Whether i18n processing is enabled for a plugin.
+	 * Processes i18n import tasks.
+	 *
+	 * @param string $plugin_slug
+	 * @param array $i18n_processes
 	 */
-	protected function process_i18n_for_plugin( $plugin_slug ) {
-		return false;
+	protected function process_i18n_for_plugin( $plugin_slug, $i18n_processes ) {
+		foreach ( $i18n_processes as $process ) {
+			list( $tag, $type ) = explode( '|', $process );
+
+			$esc_plugin_slug = escapeshellarg( $plugin_slug );
+			$esc_tag         = escapeshellarg( $tag );
+			$esc_type        = escapeshellarg( $type );
+
+			$cmd = self::PHP . ' ' . dirname( __DIR__ ) . "/bin/import-plugin-to-glotpress.php --plugin {$esc_plugin_slug} --tag {$esc_tag} --type {$esc_type}";
+
+			echo "\n\$$cmd\n";
+			echo shell_exec( $cmd ) . "\n";
+		}
 	}
 
 	/**
