@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
+
 /**
  * Manages the capabilities for the WordPress.org plugins directory.
  *
@@ -10,6 +11,8 @@ class Capabilities {
 
 	/**
 	 * Filters a user's capabilities depending on specific context and/or privilege.
+	 *
+	 * @static
 	 *
 	 * @param array  $required_caps Returns the user's actual capabilities.
 	 * @param string $cap           Capability name.
@@ -71,40 +74,45 @@ class Capabilities {
 		return $required_caps;
 	}
 
+	/**
+	 * Sets up custom roles and makes them available.
+	 *
+	 * @static
+	 */
 	public static function add_roles() {
 		$committer = array(
-			'read' => true,
+			'read'                    => true,
 			'plugin_dashboard_access' => true,
-			'plugin_edit_own' => true,
-			'plugin_set_category' => true,
-			'plugin_add_committer' => true,
-			'plugin_edit_others' => true,
+			'plugin_edit_own'         => true,
+			'plugin_set_category'     => true,
+			'plugin_add_committer'    => true,
+			'plugin_edit_others'      => true,
 		);
 
 		$reviewer = array_merge( $committer, array(
-			'moderate_comments' => true,
+			'moderate_comments'   => true,
 			'plugin_edit_pending' => true,
-			'plugin_review' => true,
+			'plugin_review'       => true,
 		) );
 
 		$admin = array_merge( $reviewer, array(
-			'plugin_approve' => true,
-			'plugin_reject' => true,
-			'plugin_disable' => true,
-			'plugin_close' => true,
+			'plugin_approve'     => true,
+			'plugin_reject'      => true,
+			'plugin_disable'     => true,
+			'plugin_close'       => true,
 			'plugin_set_section' => true, // Special categories.
-			'manage_categories' => true, // Let them assign these special categories.
+			'manage_categories'  => true, // Let them assign these special categories.
 		) );
 
 		// Remove the roles first, incase we've changed the permission set.
 		remove_role( 'plugin_committer' );
-		remove_role( 'plugin_reviewer' );
-		remove_role( 'plugin_admin' );
+		remove_role( 'plugin_reviewer'  );
+		remove_role( 'plugin_admin'     );
 		add_role( 'plugin_committer', 'Plugin Committer', $committer );
-		add_role( 'plugin_reviewer',  'Plugin Reviewer',  $reviewer );
-		add_role( 'plugin_admin',     'Plugin Admin',     $admin );
+		add_role( 'plugin_reviewer',  'Plugin Reviewer',  $reviewer  );
+		add_role( 'plugin_admin',     'Plugin Admin',     $admin     );
 
-		foreach( array( 'contributor', 'author', 'editor', 'administrator' ) as $role ) {
+		foreach ( array( 'contributor', 'author', 'editor', 'administrator' ) as $role ) {
 			$wp_role = get_role( $role );
 
 			if ( ! $wp_role ) {

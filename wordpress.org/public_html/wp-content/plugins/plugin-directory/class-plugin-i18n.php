@@ -13,28 +13,55 @@ class Plugin_I18n {
 	 */
 	public $i18n_cache_group = 'plugins-i18n';
 
+	/**
+	 * @var string
+	 */
 	public $master_project;
 
+	/**
+	 * @static
+	 *
+	 * @var bool
+	 */
 	public static $use_cache = true;
+
+	/**
+	 * @static
+	 *
+	 * @var bool
+	 */
 	public static $set_cache = true;
 
 	/**
+	 * @access protected
+	 *
 	 * @var \wpdb WordPress database abstraction object.
 	 */
 	protected $db;
 
 	/**
 	 * Fetch the instance of the Plugin_I18n class.
+	 *
+	 * @static
 	 */
 	public static function instance() {
 		static $instance = null;
 
 		global $wpdb;
+
 		return ! is_null( $instance ) ? $instance : $instance = new Plugin_I18n( $wpdb );
 	}
 
-	function __construct( $db, $tracker = null ) {
-		if ( !empty( $db ) && is_object( $db ) ) {
+	/**
+	 * Plugin_I18n constructor.
+	 *
+	 * @access private
+	 *
+	 * @param \wpdb $db WordPress database abstraction object.
+	 * @param null $tracker
+	 */
+	private function __construct( $db, $tracker = null ) {
+		if ( ! empty( $db ) && is_object( $db ) ) {
 			$this->db = $db;
 		}
 
@@ -42,41 +69,44 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Generates and returns a standard cache key format, for consistency
+	 * Generates and returns a standard cache key format, for consistency.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
-	 * @param string $suffix Arbitrary cache key suffix, if needed for uniqueness
-	 *
+	 * @param string $suffix Optional. Arbitrary cache key suffix, if needed for uniqueness.
 	 * @return string Cache key
 	 */
-	function cache_key( $slug, $branch, $suffix = null ) {
-		// EG keys
-		// plugin:press-this:stable-readme:originals
-		// plugin:press-this:stable-readme:original:title
-		// plugin:press-this:stable-readme:fr:title
+	public function cache_key( $slug, $branch, $suffix = '' ) {
+
+		/*
+		 * EG keys
+		 * plugin:press-this:stable-readme:originals
+		 * plugin:press-this:stable-readme:original:title
+		 * plugin:press-this:stable-readme:fr:title
+		 */
 		$key = "{$this->master_project}:{$slug}:{$branch}";
-		if ( !empty( $suffix ) ) {
+		if ( ! empty( $suffix ) ) {
 			$key .= ":{$suffix}";
 		}
+
 		return $key;
 	}
 
 	/**
-	 * Cache getting, with proper global cache group
+	 * Cache getting, with proper global cache group.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
-	 * @param string $suffix Arbitrary cache key suffix, if needed for uniqueness
-	 *
+	 * @param string $suffix Optional. Arbitrary cache key suffix, if needed for uniqueness.
 	 * @return bool|mixed As returned by wp_cache_set()
 	 */
-	function cache_get( $slug, $branch, $suffix = null ) {
+	public function cache_get( $slug, $branch, $suffix = '' ) {
 		if ( ! self::$use_cache ) {
 			return false;
 		}
 
 		$key = $this->cache_key( $slug, $branch, $suffix );
+
 		return wp_cache_get( $key, $this->i18n_cache_group );
 	}
 
@@ -87,27 +117,27 @@ class Plugin_I18n {
 	 * @param string $branch  dev|stable
 	 * @param mixed  $content Content to be cached.
 	 * @param string $suffix  Optional. Arbitrary cache key suffix, if needed for uniqueness.
-	 *
 	 * @return bool As returned by wp_cache_set()
 	 */
-	function cache_set( $slug, $branch, $content, $suffix = null ) {
+	public function cache_set( $slug, $branch, $content, $suffix = '' ) {
 		if ( ! self::$set_cache ) {
 			return false;
 		}
 
 		$key = $this->cache_key( $slug, $branch, $suffix );
+
 		return wp_cache_set( $key, $content, $this->i18n_cache_group );
 	}
 
 	/**
-	 * Gets a GlotPress branch ID
+	 * Gets a GlotPress branch ID.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
 	 *
 	 * @return bool|int|mixed
 	 */
-	function get_gp_branch_id( $slug, $branch ) {
+	public function get_gp_branch_id( $slug, $branch ) {
 		$cache_suffix = "branch_id";
 
 		if ( false !== ( $branch_id = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -129,23 +159,24 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Gets GlotPress "originals" based on passed parameters
+	 * Gets GlotPress "originals" based on passed parameters.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
-	 * @param string $key Unique key
-	 * @param string $str String to match in GP
-	 *
+	 * @param string $key    Unique key
+	 * @param string $str    String to match in GP
 	 * @return array|bool|mixed|null
 	 */
-	function get_gp_originals( $slug, $branch, $key, $str ) {
+	public function get_gp_originals( $slug, $branch, $key, $str ) {
+
 		// Try to get a single original with the whole content first (title, etc), if passed, or get them all otherwise.
-		if ( !empty( $key ) && !empty( $str ) ) {
+		if ( ! empty( $key ) && ! empty( $str ) ) {
 			$originals = $this->search_gp_original( $slug, $branch, $key, $str );
-			if ( !empty( $originals ) ) {
+
+			// Do not cache this as originals, search_gp_original() does its own caching.
+			if ( ! empty( $originals ) ) {
 				return array( $originals );
 			}
-			// Do not cache this as originals, search_gp_original() does its own caching
 		}
 
 		$cache_suffix = 'originals';
@@ -166,7 +197,9 @@ class Plugin_I18n {
 		) );
 
 		if ( empty( $originals ) ) {
-			$originals = array(); // still cache if empty, but as array, never false
+
+			// Still cache if empty, but as array, never false.
+			$originals = array();
 		}
 
 		$this->cache_set( $slug, $branch, $originals, $cache_suffix );
@@ -175,15 +208,14 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Get GlotPress translation set ID based on passed params
+	 * Get GlotPress translation set ID based on passed params.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
 	 * @param string $locale EG: fr
-	 *
 	 * @return bool|int|mixed
 	 */
-	function get_gp_translation_set_id( $slug, $branch, $locale ) {
+	public function get_gp_translation_set_id( $slug, $branch, $locale ) {
 		$cache_suffix = "{$locale}:translation_set_id";
 
 		if ( false !== ( $translation_set_id = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -201,10 +233,12 @@ class Plugin_I18n {
 			$branch_id, $locale ) );
 
 		if ( empty( $translation_set_id ) ) {
+
 			// Don't give up yet. Might be given fr_FR, which actually exists as locale=fr in GP.
 			$translation_set_id = $this->db->get_var( $this->db->prepare(
 				'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
-				$branch_id, preg_replace( '/^([^-]+)(-.+)?$/', '\1', $locale ) ) );
+				$branch_id, preg_replace( '/^([^-]+)(-.+)?$/', '\1', $locale )
+			) );
 		}
 
 		if ( empty( $translation_set_id ) ) {
@@ -217,16 +251,15 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Searches GlotPress "originals" for the passed string
+	 * Searches GlotPress "originals" for the passed string.
 	 *
-	 * @param string $slug Plugin slug
+	 * @param string $slug   Plugin slug
 	 * @param string $branch dev|stable
-	 * @param string $key Unique key
-	 * @param string $str String to be searched for
-	 *
+	 * @param string $key    Unique key
+	 * @param string $str    String to be searched for
 	 * @return bool|mixed|null
 	 */
-	function search_gp_original( $slug, $branch, $key, $str ) {
+	public function search_gp_original( $slug, $branch, $key, $str ) {
 		$cache_suffix = "original:{$key}";
 
 		if ( false !== ( $original = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -254,15 +287,15 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Somewhat emulated equivalent of __() for content translation drawn directly from the GlotPress DB
+	 * Somewhat emulated equivalent of __() for content translation drawn directly from the GlotPress DB.
 	 *
-	 * @param string $key Unique key, used for caching
+	 * @param string $key     Unique key, used for caching
 	 * @param string $content Content to be translated
-	 * @param array $args Misc arguments, such as BBPress topic id (otherwise acquired from global $topic_id)
-	 *
-	 * @return mixed
+	 * @param array  $args    Optional. Misc arguments, such as BBPress topic id
+	 *                        (otherwise acquired from global $topic_id).
+	 * @return string
 	 */
-	function translate( $key, $content, $args = array() ) {
+	public function translate( $key, $content, $args = array() ) {
 		if ( empty( $key ) || empty( $content ) ) {
 			return $content;
 		}
@@ -284,9 +317,10 @@ class Plugin_I18n {
 			$wp_locale = get_locale();
 		}
 
-		$server_name  = strtolower( $_SERVER['SERVER_NAME'] );
+		$server_name = strtolower( $_SERVER['SERVER_NAME'] );
 		if ( 'api.wordpress.org' == $server_name ) {
-			// Support formats like fr, haz, and en_GB
+
+			// Support formats like fr, haz, and en_GB.
 			if ( ! empty( $_REQUEST['locale'] ) ) {
 				$wp_locale = preg_replace( '/[^a-zA-Z_]/', '', $_REQUEST['locale'] );
 			} else if ( ! empty( $_REQUEST['request'] ) ) {
@@ -308,8 +342,9 @@ class Plugin_I18n {
 			return $content;
 		}
 
-		$locale = $gp_locale->slug; // The slug is the locale of a translation set.
-		$slug = $post->post_name;
+		// The slug is the locale of a translation set.
+		$locale = $gp_locale->slug;
+		$slug   = $post->post_name;
 
 		$post->stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
 
@@ -325,7 +360,7 @@ class Plugin_I18n {
 
 		$cache_suffix = "{$locale}:{$key}";
 
-		// Try the cache
+		// Try the cache.
 		if ( false !== ( $cache = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
 			// DEBUG
 			// var_dump( array( $slug, $branch, $cache_suffix, $cache ) );
@@ -367,20 +402,19 @@ class Plugin_I18n {
 	}
 
 	/**
-	 * Takes content, searches for $original, and replaces it by $translation
+	 * Takes content, searches for $original, and replaces it by $translation.
 	 *
-	 * @param string $original English string
-	 * @param string $translation Translation
-	 * @param string $content Content to be searched
-	 *
+	 * @param string $original    English string.
+	 * @param string $translation Translation.
+	 * @param string $content     Content to be searched.
 	 * @return mixed
 	 */
-	function translate_gp_original( $original, $translation, $content ) {
+	public function translate_gp_original( $original, $translation, $content ) {
 		if ( false === strpos( $content, '<' ) ) {
 			$content = str_replace( $original, $translation, $content );
 		} else {
 			$original = preg_quote( $original, '/' );
-			$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\\1{$translation}\\3", $content );
+			$content  = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\\1{$translation}\\3", $content );
 		}
 
 		return $content;

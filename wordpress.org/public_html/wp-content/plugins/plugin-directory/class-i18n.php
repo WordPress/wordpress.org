@@ -6,7 +6,7 @@ namespace WordPressdotorg\Plugin_Directory;
  *
  * @package WordPressdotorg\Plugin_Directory
  */
-class i18n {
+class I18n {
 
 	/**
 	 * Translate a Term Name.

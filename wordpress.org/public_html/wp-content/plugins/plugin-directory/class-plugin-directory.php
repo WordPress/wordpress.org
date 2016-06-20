@@ -11,12 +11,18 @@ use WordPressdotorg\Plugin_Directory\CLI\Tag_To_Category;
 class Plugin_Directory {
 
 	/**
-	 * Local cache for translated content injected into meta
+	 * Local cache for translated content injected into meta.
+	 *
+	 * @access private
+	 *
+	 * @var array
 	 */
 	private $i18n_meta = array();
 
 	/**
 	 * Fetch the instance of the Plugin_Directory class.
+	 *
+	 * @static
 	 */
 	public static function instance() {
 		static $instance = null;
@@ -24,6 +30,11 @@ class Plugin_Directory {
 		return ! is_null( $instance ) ? $instance : $instance = new Plugin_Directory();
 	}
 
+	/**
+	 * Plugin_Directory constructor.
+	 *
+	 * @access private
+	 */
 	private function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
@@ -43,20 +54,22 @@ class Plugin_Directory {
 		add_filter( 'embed_oembed_discover', '__return_false' );
 		add_filter( 'oembed_providers', array( $this, 'oembed_whitelist' ) );
 
-		// Shim in postmeta support for data which doesn't yet live in postmeta
+		// Shim in postmeta support for data which doesn't yet live in postmeta.
 		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
 
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
-		// Load the API routes
+		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
 
-		// Load all Admin-specific items.
-		// Cannot be included on `admin_init` to allow access to menu hooks
+		/*
+		 * Load all Admin-specific items.
+		 * Cannot be included on `admin_init` to allow access to menu hooks.
+		 */
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
 
-			add_action( 'wp_insert_post_data', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
+			add_action( 'wp_insert_post_data',    array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
 		}
 
@@ -73,7 +86,7 @@ class Plugin_Directory {
 		wp_cache_add_global_groups( 'wporg-plugins' );
 
 		register_post_type( 'plugin', array(
-			'labels'          => array(
+			'labels'       => array(
 				'name'               => __( 'Plugins',                   'wporg-plugins' ),
 				'singular_name'      => __( 'Plugin',                    'wporg-plugins' ),
 				'menu_name'          => __( 'My Plugins',                'wporg-plugins' ),
@@ -104,7 +117,7 @@ class Plugin_Directory {
 				'read_private_posts' => 'do_not_allow',
 				'delete_posts'       => 'do_not_allow',
 				'create_posts'       => 'do_not_allow',
-			)
+			),
 		) );
 
 		register_taxonomy( 'plugin_section', 'plugin', array(
@@ -147,7 +160,7 @@ class Plugin_Directory {
 			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
-			)
+			),
 		) );
 
 		register_taxonomy( 'plugin_built_for', 'plugin', array(
@@ -155,7 +168,7 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_built_for',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name'          => __( 'Built For', 'wporg-plugins' ),
+				'name' => __( 'Built For', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -163,7 +176,7 @@ class Plugin_Directory {
 			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
-			)
+			),
 		) );
 
 		register_taxonomy( 'plugin_business_model', 'plugin', array(
@@ -171,7 +184,7 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_business_model',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name'          => __( 'Business Model', 'wporg-plugins' ),
+				'name' => __( 'Business Model', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -179,7 +192,7 @@ class Plugin_Directory {
 			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
-			)
+			),
 		) );
 
 		register_post_status( 'pending', array(
@@ -219,23 +232,24 @@ class Plugin_Directory {
 
 		// /browse/ should be the popular archive view.
 		add_rewrite_rule( '^browse$', 'index.php?browse=popular', 'top' );
+
 		// Create an archive for a users favorites too.
 		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
 
-		// Handle the old plugin tabs URLs
+		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)$', 'index.php?redirect_plugin_tab=$matches[1]/#$matches[2]', 'top' );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
 
-		// When this plugin is used in the context of a Rosetta site, handle it gracefully
+		// When this plugin is used in the context of a Rosetta site, handle it gracefully.
 		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 			add_filter( 'option_home',    array( $this, 'rosetta_network_localize_url' ) );
 			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
 		}
 
 		if ( 'en_US' != get_locale() ) {
-			add_filter( 'get_term', array( __NAMESPACE__ . '\i18n', 'translate_term' ) );
+			add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
 			add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
 			add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
 			add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
@@ -249,7 +263,6 @@ class Plugin_Directory {
 
 		// When Jetpack syncs, we want to add filters to inject additional metadata for Jetpack, so it syncs for ElasticSearch indexing.
 		add_action( 'shutdown', array( $this, 'append_meta_for_jetpack' ), 8 );
-
 	}
 
 	/**
@@ -262,9 +275,12 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-reviews',     array( __NAMESPACE__ . '\Shortcodes\Reviews',     'display' ) );
 	}
 
+	/**
+	 *  Register the Widgets used plugin detail pages.
+	 */
 	public function register_widgets() {
-		register_widget( __NAMESPACE__ . '\Widgets\Donate' );
-		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
+		register_widget( __NAMESPACE__ . '\Widgets\Donate'  );
+		register_widget( __NAMESPACE__ . '\Widgets\Meta'    );
 		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support' );
 	}
@@ -390,6 +406,7 @@ class Plugin_Directory {
 			return false;
 		}
 		if ( 'plugin_built_for' == $term->taxonomy ) {
+
 			// Term slug = Post Slug = /%postname%/
 			return trailingslashit( home_url( $term->slug ) );
 		}
@@ -428,12 +445,12 @@ class Plugin_Directory {
 			$wp_query->query_vars['browse'] = 'featured';
 		}
 
-		switch ( $wp_query->query_vars['browse'] ) {
+		switch ( $wp_query->get( 'browse' ) ) {
 			case 'favorites':
 				$favorites_user = wp_get_current_user();
-				if ( !empty( $wp_query->query_vars['favorites_user'] ) ) {
+				if ( ! empty( $wp_query->query_vars['favorites_user'] ) ) {
 					$favorites_user = $wp_query->query_vars['favorites_user'];
-				} elseif ( !empty( $_GET['favorites_user'] ) ) {
+				} elseif ( ! empty( $_GET['favorites_user'] ) ) {
 					$favorites_user = $_GET['favorites_user'];
 				}
 
@@ -449,28 +466,26 @@ class Plugin_Directory {
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
 					$wp_query->query_vars['p'] = -1;
 				}
-
 				break;
 
 			case 'new':
-				$wp_query->query_vars['orderby']  = 'post_modified';
+				$wp_query->query_vars['orderby'] = 'post_modified';
 				break;
 		}
 
-		if ( isset( $wp_query->query['browse'] ) ) {
-			if ( 'beta' != $wp_query->query['browse'] && 'featured' != $wp_query->query['browse'] ) {
-				unset( $wp_query->query_vars['browse'] );
+		if ( isset( $wp_query->query['browse'] ) && 'beta' != $wp_query->query['browse'] && 'featured' != $wp_query->query['browse'] ) {
+			unset( $wp_query->query_vars['browse'] );
 
-				add_filter( 'the_posts', function( $posts, $wp_query ) {
-					// Fix the queried object for the archive view
-					if ( ! $wp_query->queried_object && isset( $wp_query->query['browse'] ) ) {
-						$wp_query->query_vars['browse'] = $wp_query->query['browse'];
-						$wp_query->queried_object = get_term_by( 'slug', $wp_query->query['browse'], 'plugin_section' );
-					}
-					return $posts;
-				}, 10, 2 );
+			add_filter( 'the_posts', function( $posts, $wp_query ) {
 
-			}
+				// Fix the queried object for the archive view.
+				if ( ! $wp_query->queried_object && isset( $wp_query->query['browse'] ) ) {
+					$wp_query->query_vars['browse'] = $wp_query->query['browse'];
+					$wp_query->queried_object       = get_term_by( 'slug', $wp_query->query['browse'], 'plugin_section' );
+				}
+
+				return $posts;
+			}, 10, 2 );
 		}
 
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
@@ -484,9 +499,10 @@ class Plugin_Directory {
 	 *
 	 * @param string $content Post content.
 	 * @param string $section Optional. Which readme section to translate.
+	 * @param int    $post_id Optional. Post ID. Default: 0.
 	 * @return string
 	 */
-	public function translate_post_content( $content, $section = null, $post_id = null ) {
+	public function translate_post_content( $content, $section = null, $post_id = 0 ) {
 		if ( is_null( $section ) ) {
 			return $content;
 		}
@@ -513,8 +529,8 @@ class Plugin_Directory {
 	/**
 	 * Returns the requested page's excerpt, translated.
 	 *
-	 * @param string $excerpt
-	 * @param \WP_Post $post
+	 * @param string       $excerpt
+	 * @param int|\WP_Post $post
 	 * @return string
 	 */
 	public function translate_post_excerpt( $excerpt, $post ) {
@@ -522,57 +538,68 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Shutdown action that will add a filter to inject additional postmeta containing translated content if Jetpack is syncing.
-	 *
+	 * Shutdown action that will add a filter to inject additional postmeta containing translated content if Jetpack
+	 * is syncing.
 	 */
 	public function append_meta_for_jetpack() {
-		// Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action, so we can get in first.
-		// Fetching the extra meta to inject is expensive, so we only want to do this if a sync is likely.
-		if ( class_exists( 'Jetpack' ) && !empty(\Jetpack::$instance->sync->sync) ) {
+
+		/*
+		 * Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action,
+		 * so we can get in first.Fetching the extra meta to inject is expensive, so we only want to do this if a sync
+		 * is likely.
+		 */
+		if ( class_exists( 'Jetpack' ) && ! empty( \Jetpack::$instance->sync->sync ) ) {
 			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
 		}
-
 	}
 
 	/**
 	 * Filter for wporg_plugins_custom_meta_fields to inject translated content for ES.
 	 *
+	 * @global string $locale Current locale.
+	 *
 	 * @param array $meta
-	 * @param int $post_id
+	 * @param int   $post_id
 	 * @return array
 	 */
 	public function filter_post_meta_i18n( $meta, $post_id ) {
-		// Prevent recursion and repeat runs
+
+		// Prevent recursion and repeat runs.
 		remove_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ) );
 
 		if ( $post_id <= 200 ) {
-			$locales_to_sync = array( 'fr_FR', 'es_ES' ); // This should probably be a list of available translations for the plugin readme.
+
+			// This should probably be a list of available translations for the plugin readme.
+			$locales_to_sync = array(
+				'fr_FR',
+				'es_ES',
+			);
 
 			global $locale;
 			$_locale = $locale;
-			foreach ( $locales_to_sync as $locale ) {
-				$this->i18n_meta[$post_id]['title_'.$locale] = $this->translate_post_title( get_the_title( $post_id ), $post_id );
-				$this->i18n_meta[$post_id]['excerpt_'.$locale] = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
 
-				// Split up the content to translate it in sections
-				$content = '';
+			foreach ( $locales_to_sync as $locale ) {
+				$this->i18n_meta[ $post_id ][ 'title_' . $locale ]   = $this->translate_post_title( get_the_title( $post_id ), $post_id );
+				$this->i18n_meta[ $post_id ][ 'excerpt_' . $locale ] = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
+
+				// Split up the content to translate it in sections.
+				$content  = '';
 				$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
 				foreach ( $sections as $section => $section_content ) {
 					$content .= $this->translate_post_content( $section_content, $section, $post_id );
 				}
-				$this->i18n_meta[$post_id]['content_'.$locale] = $content;
-
+				$this->i18n_meta[ $post_id ][ 'content_' . $locale ] = $content;
 			}
 
 			$locale = $_locale;
 
-			$meta = array_merge( $meta, array_keys( $this->i18n_meta[$post_id] ) );
+			$meta = array_merge( $meta, array_keys( $this->i18n_meta[ $post_id ] ) );
 		}
 
-		add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n'), 10, 2 );
+		add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
+
 		return $meta;
 	}
-
 
 	/**
 	 * Filter for rest_api_allowed_post_types to enable JP syncing of the CPT
@@ -582,15 +609,20 @@ class Plugin_Directory {
 	 */
 	public function filter_allowed_post_types( $allowed_post_types ) {
 		$allowed_post_types[] = 'plugin';
+
 		return $allowed_post_types;
 	}
 
 	/**
 	 * Filters the available public query vars to add our custom parameters.
+	 *
+	 * @param array $vars Public query vars.
+	 * @return array
 	 */
 	public function filter_query_vars( $vars ) {
 		$vars[] = 'favorites_user';
 		$vars[] = 'redirect_plugin_tab';
+
 		return $vars;
 	}
 
@@ -601,8 +633,9 @@ class Plugin_Directory {
 	 * @return mixed
 	 */
 	public function filter_jetpack_options( $new_value ) {
-		if ( is_array( $new_value ) && array_key_exists( 'public', $new_value ) )
+		if ( is_array( $new_value ) && array_key_exists( 'public', $new_value ) ) {
 			$new_value['public'] = 1;
+		}
 
 		return $new_value;
 	}
@@ -620,7 +653,8 @@ class Plugin_Directory {
 	 * Handles a redirect for the old /$plugin/$tab_name/ URLs and search.php
 	 */
 	function redirect_old_plugin_urls() {
-		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name
+
+		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin_tab' ) ) {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
 			die();
@@ -629,7 +663,7 @@ class Plugin_Directory {
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
-			// [1] => plugins [2] => example-plugin-name [2..] => random()
+			// [1] => plugins [2] => example-plugin-name [2..] => random().
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
 			if ( 'tags' === $path[2] ) {
@@ -645,18 +679,21 @@ class Plugin_Directory {
 				}
 			}
 
-			// The about page is now over at /developers/
+			// The about page is now over at /developers/.
 			if ( 'about' === $path[2] ) {
-				wp_safe_redirect( home_url('/developers/' . ( ( isset( $path[3] ) && 'add' == $path[3] ) ? 'add/' : '' ) ) );
+				wp_safe_redirect( home_url( '/developers/' . ( ( isset( $path[3] ) && 'add' == $path[3] ) ? 'add/' : '' ) ) );
 				die();
 			}
 
-			// Otherwise, handle a plugin redirect
+			// Otherwise, handle a plugin redirect.
 			if ( $plugin = self::get_plugin_post( $path[2] ) ) {
 				$is_disabled = in_array( $plugin->post_status, array( 'disabled', 'closed' ), true );
 
 				if ( $is_disabled && current_user_can( 'edit_post', $plugin ) ) {
-					wp_safe_redirect( add_query_arg( array( 'post' => $plugin->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ) );
+					wp_safe_redirect( add_query_arg( array(
+						'post'   => $plugin->ID,
+						'action' => 'edit',
+					), admin_url( 'post.php' ) ) );
 					die();
 				} else if ( ! $is_disabled ) {
 					wp_safe_redirect( get_permalink( $plugin->ID ) );
@@ -671,7 +708,7 @@ class Plugin_Directory {
 			die();
 		}
 
-		// new-style Search links
+		// new-style Search links.
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
 			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
 			die();
@@ -705,6 +742,7 @@ class Plugin_Directory {
 					return true;
 				}
 			}
+
 			return false;
 		} );
 	}
@@ -721,31 +759,34 @@ class Plugin_Directory {
 	public function filter_shim_postmeta( $value, $object_id, $meta_key ) {
 		switch ( $meta_key ) {
 			case 'downloads':
-				$post = get_post( $object_id );
+				$post  = get_post( $object_id );
 				$count = Template::get_downloads_count( $post );
-
-				return array( $count );
+				$value = array( $count );
 				break;
+
 			case 'rating':
 				$post = get_post( $object_id );
 				// The WordPress.org global ratings functions
 				if ( ! function_exists( 'wporg_get_rating_avg' ) ) {
 					break;
 				}
-				$rating = wporg_get_rating_avg( 'plugin', $post->post_name );
 
-				return array( $rating );
+				$rating = wporg_get_rating_avg( 'plugin', $post->post_name );
+				$value  = array( $rating );
 				break;
+
 			case 'ratings':
 				$post = get_post( $object_id );
 				if ( ! function_exists( 'wporg_get_rating_counts' ) ) {
 					break;
 				}
-				$ratings = wporg_get_rating_counts( 'plugin', $post->post_name );
 
-				return array( $ratings );
+				$ratings = wporg_get_rating_counts( 'plugin', $post->post_name );
+				$value   = array( $ratings );
 				break;
+
 			case false:
+
 				// In the event $meta_key is false, the caller wants all meta fields, so we'll append our custom ones here too.
 				remove_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ) );
 
@@ -759,20 +800,22 @@ class Plugin_Directory {
 				$custom_meta_fields = apply_filters( 'wporg_plugins_custom_meta_fields', $custom_meta_fields, $object_id );
 
 				foreach ( $custom_meta_fields as $key ) {
-					// When WordPress calls `get_post_meta( $post_id, false )` it expects an array of maybe_serialize()'d data
+
+					// When WordPress calls `get_post_meta( $post_id, false )` it expects an array of maybe_serialize()'d data.
 					$shimed_data = $this->filter_shim_postmeta( false, $object_id, $key );
 					if ( $shimed_data ) {
 						$value[ $key ][0] = (string) maybe_serialize( $shimed_data[0] );
 					}
 				}
-
 				break;
+
 			default:
 				if ( isset( $this->i18n_meta[ $object_id ][ $meta_key ] ) ) {
 					return array( $this->i18n_meta[ $object_id ][ $meta_key ] );
 				}
 				break;
 		}
+
 		return $value;
 	}
 
@@ -822,16 +865,21 @@ class Plugin_Directory {
 	/**
 	 * Retrieve the WP_Post object representing a given plugin.
 	 *
-	 * @param $plugin_slug string|\WP_Post The slug of the plugin to retrieve.
+	 * @static
+	 * @global \WP_Post $post WordPress post object.
+	 *
+	 * @param string|\WP_Post $plugin_slug The slug of the plugin to retrieve.
 	 * @return \WP_Post|bool
 	 */
-	static public function get_plugin_post( $plugin_slug ) {
+	public static function get_plugin_post( $plugin_slug ) {
 		global $post;
+
 		if ( $plugin_slug instanceof \WP_Post ) {
 			return $plugin_slug;
 		}
+
 		// Use the global $post object when it matches to avoid hitting the database.
-		if ( !empty( $post ) && 'plugin' == $post->post_type && $plugin_slug == $post->post_name ) {
+		if ( ! empty( $post ) && 'plugin' == $post->post_type && $plugin_slug == $post->post_name ) {
 			return $post;
 		}
 
@@ -840,12 +888,14 @@ class Plugin_Directory {
 		if ( false !== ( $post_id = wp_cache_get( $plugin_slug, 'plugin-slugs' ) ) && ( $post = get_post( $post_id ) ) ) {
 			// We have a $post.
 		} else {
+
 			// get_post_by_slug();
 			$posts = get_posts( array(
 				'post_type'   => 'plugin',
 				'name'        => $plugin_slug,
 				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft', 'approved' ),
 			) );
+
 			if ( ! $posts ) {
 				$post = false;
 				wp_cache_add( 0, $plugin_slug, 'plugin-slugs' );
@@ -860,6 +910,8 @@ class Plugin_Directory {
 
 	/**
 	 * Create a new post entry for a given plugin slug.
+	 * 
+	 * @static
 	 *
 	 * @param array $args {
 	 *     An array of elements that make up a post to insert.
