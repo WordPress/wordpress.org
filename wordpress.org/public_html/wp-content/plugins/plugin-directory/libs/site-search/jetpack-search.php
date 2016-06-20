@@ -443,7 +443,7 @@ class Jetpack_Search {
 			'blog_id'        => get_current_blog_id(),
 	
 			'query'          => null,    // Search phrase
-			'query_fields'   => array( 'title^2', 'content', 'author', 'tag', 'category', 'slug_ngram', 'contributors' ),
+			'query_fields'   => array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' ),
 	
 			'post_type'      => null,  // string or an array
 			'terms'          => array(), // ex: array( 'taxonomy-1' => array( 'slug' ), 'taxonomy-2' => array( 'slug-a', 'slug-b' ) )
@@ -668,8 +668,9 @@ class Jetpack_Search {
 
 	public static function score_query_by_recency( $query ) {
 		//Newer content gets weighted slightly higher
-		$date_scale = '360d';
-		$date_decay = 0.9;
+		$date_scale = '720d';
+		$date_offset = '180d';
+		$date_decay = 0.95;
 		$date_origin = date( 'Y-m-d' );
 
 		return array( 
@@ -682,6 +683,7 @@ class Jetpack_Search {
 								 'gauss'=> array(
 									 'date_gmt' => array(
 										 'origin' => $date_origin,
+										 'offset' => $date_offset,
 										 'scale' => $date_scale,
 										 'decay' => $date_decay,
 									 ) ),
@@ -690,7 +692,7 @@ class Jetpack_Search {
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
 									'factor' => 1.0,
-									'modifier' => 'log1p',
+									'modifier' => 'sqrt',
 								),
 							),
 
