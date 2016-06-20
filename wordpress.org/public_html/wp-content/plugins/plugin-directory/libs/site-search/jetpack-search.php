@@ -252,6 +252,7 @@ class Jetpack_Search {
 
 		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-2 years' ) );
 		$date_today = strftime( '%Y-%m-%d' );
+		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
 
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
@@ -263,7 +264,7 @@ class Jetpack_Search {
 			'order'          => $query->get( 'order' ),
 			// plugin directory specific:
 			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff, 'lte' => $date_today ),
-			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => '4.0' ),
+			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
 		);
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
