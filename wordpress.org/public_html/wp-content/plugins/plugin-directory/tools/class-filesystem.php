@@ -7,6 +7,12 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Tools
  */
 class Filesystem {
+
+	/**
+	 * Path to temporary directory.
+	 *
+	 * @var string
+	 */
 	const TMP_DIR = '/tmp/plugin-directory/';
 
 	/**
@@ -14,8 +20,9 @@ class Filesystem {
 	 *
 	 * The temporary directory returned will be removed upon script termination.
 	 *
-	 * @param string $prefix The prefix for the directory, 'hello-dolly' for example. Optional.
+	 * @static
 	 *
+	 * @param string $prefix Optional. The prefix for the directory, 'hello-dolly' for example. Default: empty string.
 	 * @return string The temporary directory.
 	 */
 	public static function temp_directory( $prefix = '' ) {
@@ -23,10 +30,10 @@ class Filesystem {
 			mkdir( self::TMP_DIR, 0777 );
 		}
 
-		// Generate a unique filename
+		// Generate a unique filename.
 		$tmp_dir = tempnam( self::TMP_DIR, $prefix );
 
-		// Replace that filename with a directory
+		// Replace that filename with a directory.
 		unlink( $tmp_dir );
 		mkdir( $tmp_dir, 0777 );
 
@@ -39,9 +46,10 @@ class Filesystem {
 	/**
 	 * Extract a ZIP file to a directory.
 	 *
-	 * @param string $zip_file  The ZIP file to extract.
-	 * @param string $directory The Directory to extract the ZIP to. Optional. Default: A Temporary directory.
+	 * @static
 	 *
+	 * @param string $zip_file  The ZIP file to extract.
+	 * @param string $directory Optional. The Directory to extract the ZIP to. Default: A Temporary directory.
 	 * @return string The directory the ZIP was extracted to.
 	 */
 	public static function unzip( $zip_file, $directory = '' ) {
@@ -67,10 +75,11 @@ class Filesystem {
 	/**
 	 * Returns all (usable) files of a given directory.
 	 *
-	 * @param string $directory Path to directory to search.
-	 * @param bool   $recursive Whether to recurse into subdirectories. Default: false.
-	 * @param string $pattern   A regular expression to match files against. Optional.
+	 * @static
 	 *
+	 * @param string $directory Path to directory to search.
+	 * @param bool   $recursive Optional. Whether to recurse into subdirectories. Default: false.
+	 * @param string $pattern   Optional. A regular expression to match files against. Default: null.
 	 * @return array All files within the passed directory.
 	 */
 	public static function list_files( $directory, $recursive = false, $pattern = null ) {
@@ -103,8 +112,9 @@ class Filesystem {
 	/**
 	 * Forcibly remove a directory recursively.
 	 *
-	 * @param string $dir The directory to remove.
+	 * @static
 	 *
+	 * @param string $dir The directory to remove.
 	 * @return bool Whether the directory was removed.
 	 */
 	public static function rmdir( $dir ) {

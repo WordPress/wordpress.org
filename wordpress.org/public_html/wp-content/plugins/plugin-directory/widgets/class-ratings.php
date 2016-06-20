@@ -63,7 +63,7 @@ class Ratings extends \WP_Widget {
 			</ul>
 
 		<?php else : ?>
-			
+
 			<div class="rating">
 				<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
 			</div>
@@ -74,7 +74,7 @@ class Ratings extends \WP_Widget {
 			<div class="user-rating">
 				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '#postform' ); ?>"><?php _e( 'Add your review', 'wporg-plugins' ); ?></a>
 			</div>
-		<?php
+			<?php
 		endif;
 
 		echo $args['after_widget'];

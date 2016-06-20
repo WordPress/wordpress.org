@@ -58,7 +58,7 @@ class Support extends \WP_Widget {
 				<span class="counter-count">
 					<?php
 					/* Translators: 1: AMount of resolved threads; 2: Amount of total threads; */
-					printf( __( '%1$s out of %2$s'), $resolved, $threads );
+					printf( __( '%1$s out of %2$s' ), $resolved, $threads );
 					?>
 				</span>
 			</p>
