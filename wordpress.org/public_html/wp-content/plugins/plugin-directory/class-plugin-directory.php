@@ -415,7 +415,7 @@ class Plugin_Directory {
 	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
 	public function use_plugins_in_query( $wp_query ) {
-		if ( is_admin() || ! $wp_query->is_main_query() ) {
+		if ( is_admin() ) {
 			return;
 		}
 
@@ -428,7 +428,7 @@ class Plugin_Directory {
 			$wp_query->query_vars['browse'] = 'featured';
 		}
 
-		switch ( get_query_var( 'browse' ) ) {
+		switch ( $wp_query->query_vars['browse'] ) {
 			case 'favorites':
 				$favorites_user = wp_get_current_user();
 				if ( !empty( $wp_query->query_vars['favorites_user'] ) ) {
@@ -450,44 +450,33 @@ class Plugin_Directory {
 					$wp_query->query_vars['p'] = -1;
 				}
 
-				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
 				break;
 
 			case 'new':
-			case 'popular':
-				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
+				$wp_query->query_vars['orderby']  = 'post_modified';
 				break;
 		}
 
-		if ( $wp_query->is_archive() && ! $wp_query->is_tax( 'plugin_section', 'new' ) && empty( $wp_query->query_vars['orderby'] ) ) {
+		if ( isset( $wp_query->query['browse'] ) ) {
+			if ( 'beta' != $wp_query->query['browse'] && 'featured' != $wp_query->query['browse'] ) {
+				unset( $wp_query->query_vars['browse'] );
+
+				add_filter( 'the_posts', function( $posts, $wp_query ) {
+					// Fix the queried object for the archive view
+					if ( ! $wp_query->queried_object && isset( $wp_query->query['browse'] ) ) {
+						$wp_query->query_vars['browse'] = $wp_query->query['browse'];
+						$wp_query->queried_object = get_term_by( 'slug', $wp_query->query['browse'], 'plugin_section' );
+					}
+					return $posts;
+				}, 10, 2 );
+
+			}
+		}
+
+		if ( empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
-	}
-
-	/**
-	 * Callback to remove the requirement for plugins to be tagged with the requested
-	 * plugin_section term.
-	 *
-	 * Used for archives like `popular` or `favorites`, that all active plugins are a part of.
-	 *
-	 * @ignore
-	 *
-	 * @param string $where WHERE clause.
-	 * @return string
-	 */
-	public function pre_get_posts_sql_browse( $where ) {
-		global $wpdb;
-
-		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_browse' ) );
-
-		$term = get_term_by( 'slug', get_query_var( 'browse' ), 'plugin_section' );
-
-		if ( $term instanceof \WP_Term ) {
-			$where = str_replace( " AND ( \n  {$wpdb->term_relationships}.term_taxonomy_id IN ({$term->term_id})\n)", '', $where );
-		}
-
-		return $where;
 	}
 
 	/**
