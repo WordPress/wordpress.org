@@ -164,6 +164,7 @@ class Import {
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
 		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
+		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
 
 		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
 		$banner_average_color = '';
