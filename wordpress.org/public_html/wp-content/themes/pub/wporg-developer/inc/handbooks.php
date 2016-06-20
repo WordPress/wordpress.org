@@ -24,6 +24,7 @@ class Devhub_Handbooks {
 	 * @access public
 	 */
 	public static function init() {
+		add_filter( 'handbook_post_type_defaults', array( __CLASS__, 'filter_handbook_post_type_defaults' ), 10, 2 );
 		add_filter( 'handbook_post_types', array( __CLASS__, 'filter_handbook_post_types' ) );
 		add_action( 'init', array( __CLASS__, 'do_init' ) );
 	}
@@ -43,8 +44,6 @@ class Devhub_Handbooks {
 		add_filter( 'user_has_cap', array( __CLASS__, 'adjust_handbook_editor_caps' ), 11 );
 
 		add_filter( 'the_content', array( __CLASS__, 'autolink_credits' ) );
-
-		add_filter( 'handbook_post_type_defaults', array( __CLASS__, 'filter_handbook_post_type_defaults' ), 10, 2 );
 
 		// Add the handbook's 'Watch' action link.
 		if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
