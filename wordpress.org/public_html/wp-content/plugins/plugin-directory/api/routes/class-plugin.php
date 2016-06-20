@@ -57,20 +57,18 @@ class Plugin extends Base {
 		$result['slug'] = $post->post_name;
 		$result['version'] = get_post_meta( $post_id, 'version', true );
 
-		if ( get_post_meta( $post_id, 'header_author_uri', true ) ) {
-			$result['author'] = sprintf( '<a href="%s">%s</a>', get_post_meta( $post_id, 'header_author_uri', true ), get_post_meta( $post_id, 'header_author', true ) );
-		} elseif ( get_post_meta( $post_id, 'header_author', true )  ) {
-			$result['author'] = get_post_meta( $post_id, 'header_author', true );
-		} else {
-			$result['author'] = get_user_by( 'id', $post->post_author )->display_name;
+		$author = get_user_by( 'id', $post->post_author );
+		$result['author'] = $author->display_name;
+		if ( $author->user_url ) {
+			$result['author'] = sprintf( '<a href="%s">%s</a>', $author->user_url, $result['author'] );
 		}
 
 		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
 		$result['contributors'] = array();
 
-		$contributors = get_post_meta( $post_id, 'contributors', true ) ?: array( (int) $post->post_author );
+		$contributors = get_post_meta( $post_id, 'contributors', true ) ?: array( $post->user_login );
 		foreach ( $contributors as $contributor ) {
-			$user = is_int( $contributor ) ? get_user_by( 'id', $contributor ) : get_user_by( 'slug', $contributor );
+			$user = get_user_by( 'slug', $contributor );
 			if ( ! $user ) {
 				continue;
 			}

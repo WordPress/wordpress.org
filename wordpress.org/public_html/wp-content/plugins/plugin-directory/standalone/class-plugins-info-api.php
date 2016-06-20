@@ -220,7 +220,7 @@ class Plugins_Info_API {
 				break;
 	
 			case 'php' :
-				echo serialize( $response );
+				echo serialize( (object) $response );
 				break;
 	
 			case 'xml' :
