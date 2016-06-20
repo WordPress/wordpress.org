@@ -263,6 +263,7 @@ class Jetpack_Search {
 			'order'          => $query->get( 'order' ),
 			// plugin directory specific:
 			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff, 'lte' => $date_today ),
+			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => '4.0' ),
 		);
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -452,6 +453,7 @@ class Jetpack_Search {
 			'author_name'    => array(), // string or an array
 	
 			'date_range'     => null,    // array( 'field' => 'date', 'gt' => 'YYYY-MM-dd', 'lte' => 'YYYY-MM-dd' ); date formats: 'YYYY-MM-dd' or 'YYYY-MM-dd HH:MM:SS'
+			'tested_range'	 => null,
 	
 			'orderby'        => null,    // Defaults to 'relevance' if query is set, otherwise 'date'. Pass an array for multiple orders.
 			'order'          => 'DESC',
@@ -526,6 +528,12 @@ class Jetpack_Search {
 			$field = $args['date_range']['field'];
 			unset( $args['date_range']['field'] );
 			$filters[] = array( 'range' => array( $field => $args['date_range'] ) );
+		}
+
+		if ( !empty( $args['tested_range'] ) && isset( $args['tested_range']['field'] ) ) {
+			$field = $args['tested_range']['field'];
+			unset( $args['tested_range']['field'] );
+			$filters[] = array( 'range' => array( $field => $args['tested_range'] ) );
 		}
 	
 		if ( is_array( $args['terms'] ) ) {
@@ -703,7 +711,7 @@ class Jetpack_Search {
 				 'filter' => array(
 						'exists' => array(
 							'field' => 'meta.active_installs.long'
-						)
+						),
 				 )
 			)
 		);
