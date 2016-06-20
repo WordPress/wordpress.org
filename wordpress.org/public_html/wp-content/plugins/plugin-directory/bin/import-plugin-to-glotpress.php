@@ -49,7 +49,7 @@ $tag         = $opts['tag'];
 $type        = $opts['type'];
 $start_time  = microtime( 1 );
 
-echo "Processing I18N Import for $plugin_slug... ";
+echo "Processing I18N Import for $plugin_slug...\n";
 try {
 	if ( 'readme' === $type ) {
 		$importer = new CLI\I18N\Readme_Import( $plugin_slug );

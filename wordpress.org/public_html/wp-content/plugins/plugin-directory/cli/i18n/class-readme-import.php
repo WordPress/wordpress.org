@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
-use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
@@ -12,7 +11,7 @@ use Exception;
  *
  * @package WordPressdotorg\Plugin_Directory\CLI\I18N
  */
-class Readme_Import {
+class Readme_Import extends I18n_Import {
 	const PLUGIN_SVN_BASE = 'https://plugins.svn.wordpress.org';
 
 	/**
@@ -151,28 +150,10 @@ class Readme_Import {
 			throw new Exception( 'POT file not extracted.' );
 		}
 
-		// @todo: Create/update GP projects.
+		parent::set_glotpress_for_plugin( $this->plugin, 'readme' );
 
 		$branch = ( 'trunk' === $tag ) ? 'dev' : 'stable';
-		$cmd = WPORGTRANSLATE_WPCLI . ' glotpress import-originals ' . escapeshellarg( "wp-plugins/{$this->plugin}/{$branch}-readme" ) . ' ' . escapeshellarg( $pot_file );
-
-		echo "\n\$$cmd\n";
-		echo shell_exec( $cmd ) . "\n";
-
-		// @todo: Fix this.
-		$gp_branch_id = Plugin_I18n::instance()->get_gp_branch_id( $this->plugin, "{$branch}-readme" );
-		if ( $gp_branch_id ) {
-			foreach ( $str_priorities as $str => $prio ) {
-				if ( 1 !== $prio && -1 !== $prio ) {
-					$prio = 0;
-				}
-
-				$wpdb->query( $wpdb->prepare(
-					'UPDATE ' . GLOTPRESS_TABLE_PREFIX . 'originals SET priority = %d WHERE project_id = %d AND status = %s AND singular = %s',
-					$prio, $gp_branch_id, '+active', $str
-				) );
-			}
-		}
+		parent::import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file, $str_priorities );
 	}
 
 	/**
