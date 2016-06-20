@@ -49,6 +49,7 @@ class Customizations {
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
 		add_filter( 'wp_ajax_add-committer',    array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
 		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
+		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 
 		// Page access within wp-admin.
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -399,7 +400,7 @@ class Customizations {
 	 * @return void.
 	 */
 	public function register_admin_metaboxes( $post_type, $post ) {
-		if ( 'plugin' != $post_type ) {
+		if ( 'plugin' !== $post_type ) {
 			return;
 		}
 
@@ -426,6 +427,14 @@ class Customizations {
 				'plugin', 'side'
 			);
 		}
+
+		add_meta_box(
+			'authordiv',
+			__( 'Author', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Author', 'display' ),
+			'plugin', 'normal'
+		);
+
 
 		add_meta_box(
 			'plugin-fields',

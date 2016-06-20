@@ -89,7 +89,7 @@ class Plugin_Directory {
 				'edit_item'          => is_admin() ? __( 'Editing Plugin: %s', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'        => array( 'comments' ),
+			'supports'        => array( 'comments', 'author' ),
 			'public'          => true,
 			'show_ui'         => true,
 			'has_archive'     => true,
