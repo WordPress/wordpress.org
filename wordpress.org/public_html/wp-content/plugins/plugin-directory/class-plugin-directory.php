@@ -497,11 +497,11 @@ class Plugin_Directory {
 	 * @param string $section Optional. Which readme section to translate.
 	 * @return string
 	 */
-	public function translate_post_content( $content, $section = null ) {
+	public function translate_post_content( $content, $section = null, $post_id = null ) {
 		if ( is_null( $section ) ) {
 			return $content;
 		}
-		return Plugin_I18n::instance()->translate( $section, $content );
+		return Plugin_I18n::instance()->translate( $section, $content, [ 'post_id' => $post_id ] );
 	}
 
 	/**
@@ -537,14 +537,9 @@ class Plugin_Directory {
 	 *
 	 */
 	public function append_meta_for_jetpack() {
-		// TEMP: only do this for low numbered plugin IDs, till we're sure it works.
-		$post = get_post();
-		if ( $post instanceof \WP_Post && $post->ID > 200 )
-			return;
-
 		// Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action, so we can get in first.
 		// Fetching the extra meta to inject is expensive, so we only want to do this if a sync is likely.
-		if ( class_exists( 'Jetpack' ) && !empty(\Jetpack::init()->sync->sync) ) {
+		if ( class_exists( 'Jetpack' ) && !empty(\Jetpack::$instance->sync->sync) ) {
 			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
 		}
 
@@ -561,20 +556,21 @@ class Plugin_Directory {
 		// Prevent recursion and repeat runs
 		remove_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ) );
 
-		if ( get_post()->ID == $post_id ) {
-			$locales_to_sync = array( 'fr_fr', 'es_es' ); // This should probably be a list of available translations for the plugin readme.
+		if ( $post_id <= 200 ) {
+			$locales_to_sync = array( 'fr_FR', 'es_ES' ); // This should probably be a list of available translations for the plugin readme.
 
 			global $locale;
 			$_locale = $locale;
 			foreach ( $locales_to_sync as $locale ) {
-				$this->i18n_meta[$post_id]['title_'.$locale] = $this->translate_post_title( get_the_title(), $post_id );
-				$this->i18n_meta[$post_id]['excerpt_'.$locale] = $this->translate_post_excerpt( get_the_excerpt() );
+				$this->i18n_meta[$post_id]['title_'.$locale] = $this->translate_post_title( get_the_title( $post_id ), $post_id );
+				$this->i18n_meta[$post_id]['excerpt_'.$locale] = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
 
 				// Split up the content to translate it in sections
 				$content = '';
-				$sections = $this->split_post_content_into_pages( get_the_content() );
-				foreach ( $sections as $section => $section_content )
-					$content .= $this->translate_post_content( $section_content, $section );
+				$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
+				foreach ( $sections as $section => $section_content ) {
+					$content .= $this->translate_post_content( $section_content, $section, $post_id );
+				}
 				$this->i18n_meta[$post_id]['content_'.$locale] = $content;
 
 			}
@@ -783,8 +779,9 @@ class Plugin_Directory {
 
 				break;
 			default:
-				if ( isset( $this->i18n_meta[ $object_id ][ $meta_key ] ) )
+				if ( isset( $this->i18n_meta[ $object_id ][ $meta_key ] ) ) {
 					return array( $this->i18n_meta[ $object_id ][ $meta_key ] );
+				}
 				break;
 		}
 		return $value;
