@@ -35,6 +35,8 @@ class Query_Plugins extends Base {
 	 * @return array A formatted array of plugin results.
 	 */
 	function query( $request ) {
+		global $wp_query;
+
 		$response = array(
 			'info' => array(
 				'page'    => 0,
@@ -52,14 +54,15 @@ class Query_Plugins extends Base {
 
 		$query['post_type'] = 'plugin';
 
-		$wp_query = new WP_Query( $query );
+		// Use the main query so that is_main_query() is triggered for the filters.
+		$wp_query->query( $query );
 
 		$response['info']['page']    = (int) $wp_query->get_query_var( 'paged' ) ?: 1;
 		$response['info']['pages']   = (int) $wp_query->max_num_pages            ?: 0;
 		$response['info']['results'] = (int) $wp_query->found_posts              ?: 0;
 
 		foreach ( $wp_query->posts as $post ) {
-			$response['plugins'][] = $post->post_name;
+			$response['plugins'][] = $post->post_name ?: get_post( $post->ID )->post_name;
 		}
 
 		return $response;
