@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use WP_User;
 
 /**
  * Various functions used by other processes, will make sense to move to specific classes.
@@ -167,5 +168,71 @@ class Tools {
 				'user' => $user->user_login,
 			)
 		);
+	}
+
+	/**
+	 * Subscribe/Unsubscribe a user to a plugins commits.
+	 *
+	 * Plugin Committers are automatically subscribed to plugin commit
+	 * emails and cannot unsubscribe.
+	 *
+	 * @param string      $plugin_slug The plugin to subscribe to.
+	 * @param int|WP_User $user        The user to subscribe. Default current user.
+	 * @param bool        $subscribe   Whether to subscribe (true) or unsubscribe (false).
+	 *
+	 * @return bool Whether the user is subscribed.
+	 */
+	public static function subscribe_to_plugin_commits( $plugin_slug, $user = 0, $subscribe = true ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$user = new WP_User( $user ?: get_current_user_id() );
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+
+		if ( $subscribe ) {
+			$users[] = $user->ID;
+			$users = array_unique( $users );
+		} else {
+			if ( false !== ( $pos = array_search( $user->ID, $users, true ) ) ) {
+				unset( $users[ $pos ] );
+			}
+		}
+
+		update_post_meta( $post->ID, '_commit_subscribed', $users );
+
+		return self::subscribed_to_plugin_commits( $plugin_slug, $user->ID );
+	}
+
+	/**
+	 * Determine if a user is subscribed to a plugins commits.
+	 *
+	 * Plugin Committers are automatically subscribed to commits, and this
+	 * function does not respect that status.
+	 *
+	 * @param string      $plugin_slug The plugin to subscribe to.
+	 * @param int|WP_User $user        The user to check. Default current user.
+	 *
+	 * @return bool Whether the specified user is subscribed to commits.
+	 */
+	public static function subscribed_to_plugin_commits( $plugin_slug, $user = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$user = new WP_User( $user ?: get_current_user_id() );
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$users = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+
+		return in_array( $user->ID, $users, true );
 	}
 }
