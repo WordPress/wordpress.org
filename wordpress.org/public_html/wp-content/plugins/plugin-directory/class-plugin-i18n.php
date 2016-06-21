@@ -419,4 +419,33 @@ class Plugin_I18n {
 
 		return $content;
 	}
+
+	/**
+	 * Returns a list of translation locales for a given plugin slug and branch.
+	 *
+	 * @param string $slug    Plugin slug.
+	 * @param string $branch  Branch - 'stable-readme' for example.
+	 * @param string $min_percent     Only return locales where percent_translated is >= this value.
+	 * @return array
+	 */
+	public function find_all_translations_for_plugin( $slug, $branch, $min_percent = 0 ) {
+
+		// This naively hits the API. It could probably be re-written to query the DB instead.
+		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $slug . '/' . $branch, array( 'https' ) );
+
+		$out = array();
+		if ( $json = file_get_contents( $api_url ) ) {
+			if ( $data = json_decode( $json ) ) {
+				if ( isset( $data->translation_sets ) ) {
+					foreach ( $data->translation_sets as $translation ) {
+						if ( $translation->percent_translated >= $min_percent )
+							$out[] = $translation->wp_locale;
+					}
+				}
+			}
+		}
+
+		return $out;
+	}
+
 }

@@ -567,34 +567,53 @@ class Plugin_Directory {
 		// Prevent recursion and repeat runs.
 		remove_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ) );
 
-		if ( $post_id <= 200 ) {
+		if ( empty( $this->i18n_meta[ $post_id ] ) ) {
 
-			// This should probably be a list of available translations for the plugin readme.
-			$locales_to_sync = array(
+			$locales_to_sync = array( 
+				// Default locales to translate, just in case we can't determine the available ones
 				'fr_FR',
 				'es_ES',
 			);
+			$post = get_post( $post_id );
+			if ( $post ) {
+				$translations = Plugin_I18n::find_all_translations_for_plugin( $post->post_name, 'stable-readme', 10 ); // at least 10% translated
+				if ( $translations )
+					$locales_to_sync = $translations;
+			}
 
 			global $locale;
 			$_locale = $locale;
 
 			foreach ( $locales_to_sync as $locale ) {
-				$this->i18n_meta[ $post_id ][ 'title_' . $locale ]   = $this->translate_post_title( get_the_title( $post_id ), $post_id );
-				$this->i18n_meta[ $post_id ][ 'excerpt_' . $locale ] = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
+				$the_title = $this->translate_post_title( get_the_title( $post_id ), $post_id );
+				if ( $the_title && $the_title != get_the_title( $post_id ) ) {
+					$this->i18n_meta[ $post_id ][ 'title_' . $locale ] = $the_title;
+				}
+
+				$the_excerpt = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
+				if ( $the_excerpt && $the_excerpt != get_the_excerpt( $post_id ) ) {
+					$this->i18n_meta[ $post_id ][ 'excerpt_' . $locale ] = $the_excerpt;
+				}
 
 				// Split up the content to translate it in sections.
-				$content  = '';
+				$the_content = array();
 				$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
 				foreach ( $sections as $section => $section_content ) {
-					$content .= $this->translate_post_content( $section_content, $section, $post_id );
+					$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
+					if ( $translated_section && $translated_section != $section_content ) {
+						$the_content[] = $translated_section;
+					}
 				}
-				$this->i18n_meta[ $post_id ][ 'content_' . $locale ] = $content;
+				if ( !empty( $the_content ) )
+					$this->i18n_meta[ $post_id ][ 'content_' . $locale ] = implode( $the_content );
 			}
 
 			$locale = $_locale;
 
-			$meta = array_merge( $meta, array_keys( $this->i18n_meta[ $post_id ] ) );
 		}
+
+		if ( is_array( $this->i18n_meta[ $post_id ] ) )
+			$meta = array_merge( $meta, array_keys( $this->i18n_meta[ $post_id ] ) );
 
 		add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
 
