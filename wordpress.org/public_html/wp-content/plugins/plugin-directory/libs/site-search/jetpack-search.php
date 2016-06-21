@@ -267,6 +267,13 @@ class Jetpack_Search {
 			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
 		);
 
+		$locale = get_locale();
+		if ( $locale && substr( $locale, 0, 2 ) !== 'en' ) {
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+		} else {
+			$es_wp_query_args['query_fields'] = array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+		}
+
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
 		// These arguments are in the format for convert_wp_es_to_es_args(), i.e. WP-style.
 		$es_wp_query_args = apply_filters( 'jetpack_search_es_wp_query_args', $es_wp_query_args, $query );
