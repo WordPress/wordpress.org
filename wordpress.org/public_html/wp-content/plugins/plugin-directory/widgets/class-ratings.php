@@ -72,7 +72,7 @@ class Ratings extends \WP_Widget {
 
 		if ( is_user_logged_in() ) : ?>
 			<div class="user-rating">
-				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '#postform' ); ?>"><?php _e( 'Add your review', 'wporg-plugins' ); ?></a>
+				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '#postform' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
 			</div>
 			<?php
 		endif;
