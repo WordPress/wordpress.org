@@ -254,4 +254,45 @@ class Tools {
 
 		return in_array( $user->ID, $users, true );
 	}
+
+	/**
+	 * Retrieve a list of users who are subscribed to plugin commits.
+	 *
+	 * @param string $plugin_slug       The plugin to retrieve subscribers for.
+	 * @param bool   $include_committers Whether to include Plugin Committers in the list. Default false. 
+	 * @return array Array of \WP_User's who are subscribed.
+	 */
+	public static function get_plugin_subscribers( $plugin_slug, $include_committers = false ) {
+		global $wpdb;
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$users = array();
+
+		// These users are subscribed the plugin commits.
+		$subscribers = get_post_meta( $post->ID, '_commit_subscribed', true ) ?: array();
+		foreach ( $subscribers as $subscriber_id ) {
+			$users[] = get_user_by( 'id', $subscriber_id );
+		}
+
+		// Plugin Committers are always subscrived to plugin commits.
+		$committers  = self::get_plugin_committers( $plugin_slug );
+		foreach ( $committers as $committer ) {
+			$users[] = get_user_by( 'login', $committer );
+		}
+
+		// Include the subscribers from the bbPress plugin directory until we've fully migrated.
+		$bbpress_subscribers = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( 'SELECT m.meta_value FROM ' . PLUGINS_TABLE_PREFIX . 'topics t JOIN ' . PLUGINS_TABLE_PREFIX . 'meta m ON ( m.object_type = "bb_topic" AND m.object_id = t.topic_id AND m.meta_key = "commit_subscribed") WHERE t.topic_slug = %s', $plugin_slug ) ) );
+		if ( $bbpress_subscribers ) {
+			foreach ( array_keys( $bbpress_subscribers ) as $subscriber_id ) {
+				$users[] = get_user_by( 'id', $subscriber_id );
+			}
+		}
+
+		$users = array_filter( $users );
+
+		return $users;
+	}
 }
