@@ -13,7 +13,7 @@ class SVN_Watcher {
 
 	const SVN_URL      = 'https://plugins.svn.wordpress.org/';
 	const PHP          = '/usr/local/bin/php';
-	const PROCESS_I18N = false;
+	const PROCESS_I18N = true;
 
 	public function __construct() {
 		$this->watch();
@@ -59,7 +59,7 @@ class SVN_Watcher {
 			echo "\$$cmd\n";
 			echo shell_exec( $cmd ) . "\n";
 
-			if ( self::PROCESS_I18N ) {
+			if ( self::PROCESS_I18N && 'nothing-much' === $plugin_slug ) {
 				$plugin     = Plugin_Directory::get_plugin_post( $plugin_slug );
 				$stable_tag = $plugin->stable_tag;
 
