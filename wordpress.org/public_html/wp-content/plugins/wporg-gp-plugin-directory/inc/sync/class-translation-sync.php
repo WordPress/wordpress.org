@@ -21,10 +21,45 @@ class Translation_Sync {
 	public function register_events() {
 		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_sync' ), 5 );
 		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_sync' ), 5 );
+		add_action( 'gp_originals_imported', array( $this, 'trigger_translation_sync_on_originals_import' ), 5, 5 );
 
 		add_action( 'wporg_translate_sync_plugin_translations', array( $this, 'sync_plugin_translations_on_commit' ) );
 
 		add_action( 'shutdown', array( $this, 'sync_translations' ) );
+	}
+
+	/**
+	 * Triggers a translation sync from dev to stable when originals get imported.
+	 *
+	 * @param string $project_id          Project ID the import was made to.
+	 * @param int    $originals_added     Number or total originals added.
+	 * @param int    $originals_existing  Number of existing originals updated.
+	 * @param int    $originals_obsoleted Number of originals that were marked as obsolete.
+	 * @param int    $originals_fuzzied   Number of originals that were close matches of old ones and thus marked as fuzzy.
+	 */
+	public function trigger_translation_sync_on_originals_import( $project_id, $originals_added, $originals_existing, $originals_obsoleted, $originals_fuzzied ) {
+		if ( ! $originals_added && ! $originals_existing && ! $originals_fuzzied && ! $originals_obsoleted ) {
+			return;
+		}
+
+		$project = GP::$project->get( $project_id );
+		if ( ! $project || ! $this->project_is_plugin( $project->path ) ) {
+			return;
+		}
+
+		// Sync translations only if the stable project was updated.
+		if ( false === strpos( $project->path, '/stable' ) ) {
+			return;
+		}
+
+		$project_parts  = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+		$plugin_slug    = $project_parts[1];
+		$plugin_project = $project_parts[1] . '/' . $this->project_mapping[ $project_parts[2] ];
+
+		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, 'wporg_translate_sync_plugin_translations', [
+			'plugin'     => $plugin_slug,
+			'gp_project' => $plugin_project,
+		] );
 	}
 
 	/**
@@ -37,7 +72,7 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	public function sync_plugin_translations_on_commit( $args ) {
-		$project = GP::$project->by_path( 'wp-plugins/' . $args['gp_project'] );
+		$project = GP::$project->by_path( $this->master_project . '/' . $args['gp_project'] );
 		if ( ! $project ) {
 			return false;
 		}
