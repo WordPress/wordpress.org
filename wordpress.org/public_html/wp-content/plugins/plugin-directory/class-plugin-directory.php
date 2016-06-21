@@ -585,7 +585,7 @@ class Plugin_Directory {
 			$_locale = $locale;
 
 			foreach ( $locales_to_sync as $locale ) {
-				$the_title = $this->translate_post_title( get_the_title( $post_id ), $post_id );
+				$the_title = Plugin_I18n::instance()->translate( 'title', get_the_title( $post_id ), [ 'post_id' => $post_id ] );
 				if ( $the_title && $the_title != get_the_title( $post_id ) ) {
 					$this->i18n_meta[ $post_id ][ 'title_' . $locale ] = $the_title;
 				}
