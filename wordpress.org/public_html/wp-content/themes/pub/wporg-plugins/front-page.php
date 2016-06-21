@@ -63,12 +63,12 @@ get_header();
 	<aside id="secondary" class="widget-area" role="complementary">
 		<?php
 		the_widget( 'WP_Widget_Text', array(
-			'title' => 'Plugin Authors',
+			'title' => __( 'Add Your Plugin', 'wporg-plugins' ),
 			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Interested in hosting your plugin on WordPress.org? <a href="%s">Find out more about how.</a>', 'wporg-plugins' ), esc_url( home_url( 'developers' ) ) ),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
-			'title' => 'Create Your Plugin',
+			'title' => __( 'Create a Plugin', 'wporg-plugins' ),
 			'text'  => sprintf( __( 'Interested in building your own plugin? The <a href="%s">Plugin Developer Handbook</a> walks through the steps required with creating a WordPress plugin from scratch and those required with publishing your plugin in the directory.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/' ) ),
 		), $widget_args );
 
