@@ -38,8 +38,6 @@ class Readme_Import extends I18n_Import {
 	 * @throws Exception
 	 */
 	public function import_from_tag( $tag ) {
-		global $wpdb;
-
 		$files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$this->plugin}/{$tag}" );
 		if ( ! $files ) {
 			throw new Exception( "Plugin has no files in {$tag}." );
@@ -150,10 +148,13 @@ class Readme_Import extends I18n_Import {
 			throw new Exception( 'POT file not extracted.' );
 		}
 
-		parent::set_glotpress_for_plugin( $this->plugin, 'readme' );
+		$result = $this->set_glotpress_for_plugin( $this->plugin, 'readme' );
+		if ( is_wp_error( $result ) ) {
+			throw new Exception( $result->get_error_message() );
+		}
 
 		$branch = ( 'trunk' === $tag ) ? 'dev' : 'stable';
-		parent::import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file, $str_priorities );
+		$this->import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file, $str_priorities );
 	}
 
 	/**
@@ -165,7 +166,7 @@ class Readme_Import extends I18n_Import {
 	 *
 	 * @return array
 	 */
-	function handle_translator_comment( $array, $key, $val ) {
+	private function handle_translator_comment( $array, $key, $val ) {
 		$val = trim( preg_replace( '/[^a-z0-9]/i', ' ', $val ) ); // cleanup key names for display.
 
 		if ( empty( $array[ $key ] ) ) {

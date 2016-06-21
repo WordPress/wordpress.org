@@ -87,11 +87,17 @@ class Code_Import extends I18n_Import {
 			throw new Exception( "POT file couldn't be created." );
 		}
 
-		parent::set_glotpress_for_plugin( $this->plugin, 'code' );
+		$result = $this->set_glotpress_for_plugin( $this->plugin, 'code' );
+		if ( is_wp_error( $result ) ) {
+			throw new Exception( $result->get_error_message() );
+		}
 
 		$branch = ( 'trunk' === $tag ) ? 'dev' : 'stable';
-		parent::import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file );
+		$this->import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file );
 
-		// @todo: Import translations only once.
+		// Import translations on initial import.
+		if ( 'created' === $result ) {
+			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch );
+		}
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
+use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WP_Error;
 
 
@@ -68,14 +69,14 @@ abstract class I18n_Import {
 	}
 
 	/**
-	 * Import generated POT file to GlotPress
+	 * Import generated POT file to GlotPress.
 	 *
-	 * @param string $project GP project slug to import to
-	 * @param string $branch GP project branch to import to (dev|stable)
-	 * @param string $file Path to POT file
+	 * @param string $project       GP project slug to import to
+	 * @param string $branch        GP project branch to import to (dev|stable)
+	 * @param string $file          Path to POT file
 	 * @param array $str_priorities GP string priorities
 	 */
-	function import_pot_to_glotpress_project( $project, $branch, $file, $str_priorities = array() ) {
+	public function import_pot_to_glotpress_project( $project, $branch, $file, $str_priorities = array() ) {
 		global $wpdb;
 
 		// Note: this will only work if the GlotPress project/sub-projects exist.
@@ -99,6 +100,94 @@ abstract class I18n_Import {
 					$prio, $gp_branch_id, '+active', $str
 				) );
 			}
+		}
+	}
+
+	/**
+	 * Import existing plugin translations to GlotPress.
+	 * See translate/bin/translations/import-plugin-translations.php
+	 *
+	 * @param string $export_directory Relative path as provided by Dotorg_Plugins_Tracker.
+	 * @param string $project          GP project slug to import to
+	 * @param string $branch           GP project branch to import to (dev|stable)
+	 */
+	public function import_translations_to_glotpress_project( $export_directory, $project, $branch ) {
+		$files = Filesystem::list_files( $export_directory, true, '/\.po$/' );
+
+		if ( empty( $files ) ) {
+			$files = Filesystem::list_files( $export_directory, true, '/\.mo$/' );
+		}
+
+		foreach ( $files as $file ) {
+			$filename = basename( $file );
+			if ( ! preg_match( '/(?:(.+)-)?([a-z]{2,3}(?:_[A-Z]{2})?(?:_[a-z0-9]+)?).(po|mo)$/', $filename, $match ) ) {
+				continue;
+			}
+
+			list( , , $language, $ext ) = $match;
+
+			// Fix some locales.
+			switch ( $language ) {
+				case 'ga_IR' :
+					$language = 'ga';
+					break;
+				case 'ca_ES' :
+					$language = 'ca';
+					break;
+				case 'el_GR' :
+					$language = 'el';
+					break;
+				case 'af_ZA' :
+					$language = 'af';
+					break;
+				case 'zh_cn' :
+				case 'zh_ZH' :
+					$language = 'zh_CN';
+					break;
+				case 'uk_UA' :
+					$language = 'uk';
+					break;
+				case 'sq_AL' :
+					$language = 'sq';
+					break;
+				case 'ga_IE' :
+					$language = 'ga';
+					break;
+				case 'gu_IN' :
+					$language = 'gu';
+					break;
+				case 'hy_AM' :
+					$language = 'hy';
+					break;
+				case 'eo_EO' :
+					$language = 'eo';
+					break;
+				case 'ar_AR' :
+					$language = 'ar';
+					break;
+				case 'hr_HR' :
+					$language = 'hr';
+					break;
+				case 'cs_CS' :
+					$language = 'cs_CZ';
+					break;
+				case 'vi_VN' :
+					$language = 'vi';
+					break;
+				case 'ja_JP' :
+					$language = 'ja';
+					break;
+				case 'tr' :
+					$language = 'tr_TR';
+					break;
+				case 'be_BY' :
+				case 'be' :
+					$language = 'bel';
+					break;
+			}
+
+			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate import-plugin-translations ' . escapeshellarg( "wp-plugins/{$project}/{$branch}" ) . ' ' . escapeshellarg( $language ) . ' ' . escapeshellarg( $file ) . ' --format=' . escapeshellarg( $ext );
+			echo shell_exec( $cmd . ' 2>&1' );
 		}
 	}
 }
