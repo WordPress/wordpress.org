@@ -686,7 +686,7 @@ class Jetpack_Search {
 		//Newer content gets weighted slightly higher
 		$date_scale = '720d';
 		$date_offset = '180d';
-		$date_decay = 0.95;
+		$date_decay = 0.9;
 		$date_origin = date( 'Y-m-d' );
 
 		return array( 
@@ -697,7 +697,7 @@ class Jetpack_Search {
 						 'functions' => array(
 							 array(
 								 'gauss'=> array(
-									 'date_gmt' => array(
+									 'plugin_modified' => array(
 										 'origin' => $date_origin,
 										 'offset' => $date_offset,
 										 'scale' => $date_scale,
