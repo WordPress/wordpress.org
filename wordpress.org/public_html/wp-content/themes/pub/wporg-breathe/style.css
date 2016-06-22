@@ -2,6 +2,7 @@
  * Theme Name: WordPress.org Breathe
  * Template: p2-breathe
  * Description: Child theme of P2 Breathe, with modifications specifically for WordPress.org.
+ * Supports Oxygen: true
  */
 
 body, button, input, select, textarea,
@@ -93,3 +94,95 @@ input[type="submit"] {
 	color: rgba(255, 255, 255, 0.8);
 	font-size: 16.8px;
 }
+
+/*
+ * p2-breathe/style.css overrides
+ */
+
+body,
+.o2-app-page-title {
+	background-color: #fff;
+}
+
+.o2-app-page-title a {
+	color: #3498db;
+}
+.o2-app-page-title a:visited {
+	color: #4ca6cf;
+}
+
+.o2-post {
+	border-top: 2px solid #ddd;
+}
+.o2-post .o2-post {
+	border-top: 1px solid #ddd;
+}
+
+article.post .o2-post,
+article#post-new .o2-post,
+article.page .o2-post,
+.entry-date,
+.o2-xpost-author .entry-date,
+.o2-xpost-entry-date {
+	display: block;
+	padding-left: 0;
+}
+
+.entry-header,
+article.post .entry-header,
+article#post-new .entry-header,
+article.page .entry-header,
+.entry-title,
+article.post .entry-title,
+article#post-new .entry-title,
+article.page .entry-title,
+.entry-content,
+article footer.entry-meta {
+	display: block;
+	margin-left: 0;
+	padding-left: 0;
+	clear: both;
+}
+
+.entry-meta,
+article.post .entry-header .entry-meta,
+article#post-new .entry-header .entry-meta,
+article.page .entry-header .entry-meta {
+	margin-left: 60px;
+}
+
+.entry-title,
+article.post .entry-title,
+article#post-new .entry-title,
+article.page .entry-title,
+.entry-content,
+.post-content,
+.o2-xpost-content {
+	display: block;
+	clear: both;
+	padding-top: 15px;
+}
+
+.author-avatar,
+article.post a.author-avatar,
+article#post-new a.author-avatar,
+article.page a.author-avatar {
+	box-shadow: none;
+}
+
+.author-avatar img.avatar,
+article.post a.author-avatar img.avatar,
+article#post-new a.author-avatar img.avatar,
+article.page a.author-avatar img.avatar {
+	border-radius: 50%;
+	border: 0;
+	height: 50px !important;
+	width: 50px !important;
+}
+
+.o2-comment .avatar,
+.tag-p2-xpost .avatar {
+	border-radius: 50%;
+	border: 0;
+}
+
