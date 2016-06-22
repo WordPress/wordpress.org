@@ -272,7 +272,7 @@ class Jetpack_Search {
 		);
 
 		$locale = get_locale();
-		if ( $locale && substr( $locale, 0, 2 ) !== 'en' ) {
+		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
 			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
 		} else {
 			$es_wp_query_args['query_fields'] = array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
