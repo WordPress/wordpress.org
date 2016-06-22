@@ -163,6 +163,9 @@ function get_whitelist() {
 			'jerrysarcastic',
 			'roseapplemedia',
 		),
+		'testhere' => array(
+			'ocean90',
+		),
 	);
 }
 
