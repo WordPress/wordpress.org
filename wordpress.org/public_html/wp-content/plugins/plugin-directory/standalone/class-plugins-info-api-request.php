@@ -152,6 +152,8 @@ class Plugins_Info_API_Request {
 		// Views
 		if ( ! empty( $this->args->browse ) ) {
 			$query['browse'] = $this->args->browse;
+			if ( !empty( $this->args->installed_plugins ) )
+				$query['installed_plugins'] = is_array( $this->args->installed_plugins ) ? $this->args->installed_plugins : array();
 
 		} elseif ( ! empty( $this->args->user ) ) {
 			$query['browse'] = 'favorites';

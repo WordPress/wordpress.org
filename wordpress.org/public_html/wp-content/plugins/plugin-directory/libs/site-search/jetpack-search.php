@@ -247,12 +247,19 @@ class Jetpack_Search {
 		$posts_per_page = $query->get( 'posts_per_page' );
 
 		// ES API does not allow more than 15 results at a time
-		if ( $posts_per_page > 15 )
-			$posts_per_page = 15;
+		if ( $posts_per_page > 200 )
+			$posts_per_page = 200;
 
 		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-2 years' ) );
 		$date_today = strftime( '%Y-%m-%d' );
 		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
+
+		// If the request comes from WordPress and the major version string looks sane, use a more specific version constraint
+		if ( preg_match( '|WordPress/(\d+[.]\d+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
+			if ( $matches[1] >= $version_cutoff && $matches[1] <= WP_CORE_STABLE_BRANCH ) {
+				$version_cutoff = sprintf( '%0.1f', $matches[1] - 0.2 );
+			}
+		}
 
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
@@ -271,6 +278,13 @@ class Jetpack_Search {
 								),
 		);
 
+		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API ) {
+			// Look for plugins excluding those already installed
+			if ( isset( $query->query['installed_plugins'] ) ) {
+				$es_wp_query_args['filters'][] = array( 'not' => array( 'terms' => array( 'slug' => $query->query['installed_plugins'] ) ) );
+			}
+		}
+		
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
 			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
@@ -326,6 +340,10 @@ class Jetpack_Search {
 	}
 
 	public function action__pre_get_posts( $query ) {
+		// Treat an API request for the recommended tab as a search, even though there is no search string in the query
+		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API && isset( $query->query['browse'] ) && $query->query['browse'] === 'recommended' )
+			$query->is_search = true;
+
 		if ( ! $query->is_main_query() || ! $query->is_search() )
 			return;
 
@@ -609,6 +627,8 @@ class Jetpack_Search {
 				$args['orderby'] = array( 'relevance' );
 			}
 		} else {
+			$query = array( 'match_all' => array() );
+			$es_query_args['query'] = Jetpack_Search::score_query_by_recency( $query );
 			if ( ! $args['orderby'] ) {
 				$args['orderby'] = array( 'date' );
 			}

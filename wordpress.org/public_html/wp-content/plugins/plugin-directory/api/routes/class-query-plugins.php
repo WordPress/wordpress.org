@@ -18,7 +18,8 @@ class Query_Plugins extends Base {
 		'favorites_user',
 		'plugin_category',
 		's',
-		'author_name'
+		'author_name',
+		'installed_plugins'
 	);
 
 	function __construct() {
