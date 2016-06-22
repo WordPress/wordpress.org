@@ -165,31 +165,52 @@
 
 	.home & {
 		padding: ms(4) ms(1);
+		text-align: center;
 
 		.site-title {
 			display: inherit;
 			@include font-size( ms-unitless( ms(12) ) );
+			margin: 32px 0 16px;
 			margin: 2rem 0 1rem;
-			text-align: center;
 		}
 
 		.search-form {
-			display: inherit;
+			margin-bottom: 32px;
 			margin-bottom: 2rem;
+			position: relative;
+			width: initial;
 
 			.search-field {
 				border: none;
 				border-radius: 0;
+				box-shadow: none;
 				display: block;
 				font-size: inherit;
 				margin: 0 auto;
 				max-width: 100%;
+				padding: 8px;
 				padding: 0.5rem;
 				width: ms(28);
 			}
 
 			.button-search {
-				display: none;
+				background: transparent;
+				border: none;
+				box-shadow: none;
+				color: $color__text-input;
+				height: 45px;
+				padding: 8px 16px;
+				padding: 0.5rem 1rem;
+				position: absolute;
+				right: 0;
+				text-shadow: none;
+				top: 0;
+
+				&:active {
+					background: transparent;
+					border: none;
+					transform: none;
+				}
 			}
 		}
 	}
