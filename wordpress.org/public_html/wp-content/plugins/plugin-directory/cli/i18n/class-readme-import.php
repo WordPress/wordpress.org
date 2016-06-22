@@ -153,7 +153,7 @@ class Readme_Import extends I18n_Import {
 			throw new Exception( $result->get_error_message() );
 		}
 
-		$branch = ( 'trunk' === $tag ) ? 'dev' : 'stable';
+		$branch = ( 'trunk' === $tag ) ? 'dev-readme' : 'stable-readme';
 		$this->import_pot_to_glotpress_project( $this->plugin, $branch, $pot_file, $str_priorities );
 	}
 
