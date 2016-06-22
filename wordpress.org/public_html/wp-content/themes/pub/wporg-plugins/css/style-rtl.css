@@ -1779,7 +1779,7 @@ p a:not(.button):hover {
 }
 
 .site-header .site-description {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1.25rem;
   font-weight: 300;
   margin: -0.4rem auto 2rem;
@@ -2163,6 +2163,7 @@ p a:not(.button):hover {
 }
 
 .single .type-plugin .plugin-header .plugin-favorite-heart {
+  /* FIX ME */
   color: gray;
   line-heght: 3em;
   font-size: 3em;
