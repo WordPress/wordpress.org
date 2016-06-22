@@ -64,17 +64,17 @@ get_header();
 		<?php
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'Add Your Plugin', 'wporg-plugins' ),
-			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Interested in hosting your plugin on WordPress.org? <a href="%s">Find out more about how.</a>', 'wporg-plugins' ), esc_url( home_url( 'developers' ) ) ),
+			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Find out how to <a href="%s">host your plugin</a> on WordPress.org.', 'wporg-plugins' ), esc_url( home_url( 'developers' ) ) ),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'Create a Plugin', 'wporg-plugins' ),
-			'text'  => sprintf( __( 'Interested in building your own plugin? The <a href="%s">Plugin Developer Handbook</a> walks through the steps required with creating a WordPress plugin from scratch and those required with publishing your plugin in the directory.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/' ) ),
+			'text'  => sprintf( __( 'Building a plugin has never been easier. Read through the <a href="%s">Plugin Developer Handbook</a> to learn all about WordPress plugin development.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/' ) ),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
-			'title' => 'Plugin Reviewers',
-			'text'  => 'Shields up. I recommend we transfer power to phasers and arm the photon torpedoes. Something strange on the detector circuit. The weapons must have disrupted our communicators.',
+			'title' => __( 'Stay Up-to-Date', 'wporg-plugins' ),
+			'text'  => sprintf( __( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugin Review Team&#8217;s blog</a>.', 'wporg-plugins' ), esc_url( 'https://make.wordpress.org/plugins/' ) ),
 		), $widget_args );
 		?>
 	</aside><!-- #secondary -->
