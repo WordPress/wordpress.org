@@ -433,8 +433,12 @@ class Plugin_I18n {
 		// This naively hits the API. It could probably be re-written to query the DB instead.
 		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $slug . '/' . $branch, array( 'https' ) );
 
+		$http = new \WP_Http();
+		$result = $http->request( $api_url );
+
 		$out = array();
-		if ( $json = file_get_contents( $api_url ) ) {
+		if ( !is_wp_error( $result ) ) {
+			$json = $result['body'];
 			if ( $data = json_decode( $json ) ) {
 				if ( isset( $data->translation_sets ) ) {
 					foreach ( $data->translation_sets as $translation ) {
