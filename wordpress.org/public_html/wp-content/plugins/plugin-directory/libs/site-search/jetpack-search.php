@@ -265,6 +265,10 @@ class Jetpack_Search {
 			// plugin directory specific:
 			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff, 'lte' => $date_today ),
 			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
+			'filters'		 => array(
+									array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
+									array( 'exists' => array( 'field' => 'meta.active_installs.long' ) ),
+								),
 		);
 
 		$locale = get_locale();
@@ -462,6 +466,7 @@ class Jetpack_Search {
 	
 			'date_range'     => null,    // array( 'field' => 'date', 'gt' => 'YYYY-MM-dd', 'lte' => 'YYYY-MM-dd' ); date formats: 'YYYY-MM-dd' or 'YYYY-MM-dd HH:MM:SS'
 			'tested_range'	 => null,
+			'filters'		 => array(),
 	
 			'orderby'        => null,    // Defaults to 'relevance' if query is set, otherwise 'date'. Pass an array for multiple orders.
 			'order'          => 'DESC',
@@ -542,6 +547,10 @@ class Jetpack_Search {
 			$field = $args['tested_range']['field'];
 			unset( $args['tested_range']['field'] );
 			$filters[] = array( 'range' => array( $field => $args['tested_range'] ) );
+		}
+
+		if ( is_array( $args['filters'] ) ) {
+			$filters = array_merge( $filters, $args['filters'] );
 		}
 	
 		if ( is_array( $args['terms'] ) ) {
@@ -686,7 +695,7 @@ class Jetpack_Search {
 		//Newer content gets weighted slightly higher
 		$date_scale = '720d';
 		$date_offset = '180d';
-		$date_decay = 0.9;
+		$date_decay = 0.7;
 		$date_origin = date( 'Y-m-d' );
 
 		return array( 
@@ -707,7 +716,7 @@ class Jetpack_Search {
 							array(
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
-									'factor' => 1.0,
+									'factor' => 0.8,
 									'modifier' => 'sqrt',
 								),
 							),
@@ -716,11 +725,6 @@ class Jetpack_Search {
 						 'boost_mode' => 'multiply'
 					 )
 				 ),
-				 'filter' => array(
-						'exists' => array(
-							'field' => 'meta.active_installs.long'
-						),
-				 )
 			)
 		);
 	}
