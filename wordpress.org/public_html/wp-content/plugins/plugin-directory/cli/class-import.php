@@ -227,7 +227,7 @@ class Import {
 		if ( $stable_tag != $current_stable_tag ) {
 			// plugin is updated, ensure that everything is rebuilt.
 			if ( ! in_array( $stable_tag, $svn_changed_tags ) ) {
-				$rebuild_zips[] = "{$plugin_slug}" . ( 'trunk' == $tag ? '' : ".{$stable_tag}" ) . '.zip';
+				$rebuild_zips[] = "{$plugin_slug}" . ( 'trunk' == $stable_tag ? '' : ".{$stable_tag}" ) . '.zip';
 			}
 		}
 
