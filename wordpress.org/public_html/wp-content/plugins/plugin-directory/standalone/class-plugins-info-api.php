@@ -142,7 +142,7 @@ class Plugins_Info_API {
 
 		$cache_key = $this->query_plugins_cache_key( $request );
 
-		if ( true || false === ( $response = wp_cache_get( $cache_key, self::CACHE_GROUP ) ) ) {
+		if ( false === ( $response = wp_cache_get( $cache_key, self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/query-plugins', $request->query_plugins_params_for_query() );
 			if ( 200 != $response->status ) {
 				$this->output( (object) array( 'error' => 'Query Failed.' ) );
