@@ -63,70 +63,62 @@ class Plugin_Translations extends Plugin {
 		// Build a list of WordPress locales which we'll suggest to the user.
 		$suggest_locales = array_values( array_intersect( $translated_locales, $locales_from_header ) );
 		$current_locale_is_suggested = in_array( $current_locale, $suggest_locales );
-		if ( $current_locale_is_suggested ) {
-			$suggest_locales = array_diff( $suggest_locales, [ $current_locale ] );
-		}
+		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
 		// Get the native language names of the locales.
 		$suggest_named_locales = [];
 		foreach ( $suggest_locales as $locale ) {
-			$slug = str_replace( '_', '-', $locale );
-			$slug = strtolower( $slug );
-			$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $slug ) );
-			if ( ! $name ) {
-				$fallback_slug = explode( '-', $slug )[0]; // de-de => de
-				$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $fallback_slug ) );
-				$suggest_named_locales[ $locale ] = $name;
-			} else {
+			$name = $this->get_native_language_name( $locale );
+			if ( $name ) {
 				$suggest_named_locales[ $locale ] = $name;
 			}
 		}
 
 		$suggest_string = '';
-		if ( 1 === count( $suggest_named_locales ) ) {
-			$locale = key( $suggest_named_locales );
-			$language = current( $suggest_named_locales );
-			$suggest_string = sprintf(
-				/* translators: %s: native language name. */
-				__( 'This plugin is also available in %s.', 'wporg-plugins' ),
-				sprintf(
-					'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
-					$locale_subdomain_assoc[ $locale ]->subdomain,
-					$plugin_slug,
-					$language
-				)
-			);
-		} elseif ( ! empty( $suggest_named_locales ) ) {
-			$primary_locale = key( $suggest_named_locales );
-			$primary_language = current( $suggest_named_locales );
-			array_shift( $suggest_named_locales );
+		if ( 'en_US' === $current_locale ) {
+			if ( 1 === count( $suggest_named_locales ) ) {
+				$locale = key( $suggest_named_locales );
+				$language = current( $suggest_named_locales );
+				$suggest_string = sprintf(
+					$this->translate( 'This plugin is also available in %s.', $locale ),
+					sprintf(
+						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+						$locale_subdomain_assoc[ $locale ]->subdomain,
+						$plugin_slug,
+						$language
+					)
+				);
+			} elseif ( ! empty( $suggest_named_locales ) ) {
+				$primary_locale = key( $suggest_named_locales );
+				$primary_language = current( $suggest_named_locales );
+				array_shift( $suggest_named_locales );
 
-			$other_suggest = '';
-			foreach ( $suggest_named_locales as $locale => $language ) {
-				$other_suggest .= sprintf(
-					'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>, ',
-					$locale_subdomain_assoc[ $locale ]->subdomain,
-					$plugin_slug,
-					$language
+				$other_suggest = '';
+				foreach ( $suggest_named_locales as $locale => $language ) {
+					$other_suggest .= sprintf(
+						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>, ',
+						$locale_subdomain_assoc[ $locale ]->subdomain,
+						$plugin_slug,
+						$language
+					);
+				}
+
+				$suggest_string = sprintf(
+					$this->translate( 'This plugin is also available in %1$s (also: %2$s).', $primary_locale ),
+					sprintf(
+						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+						$locale_subdomain_assoc[ $primary_locale ]->subdomain,
+						$plugin_slug,
+						$primary_language
+					),
+					trim( $other_suggest, ' ,' )
 				);
 			}
-
+		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated ) {
 			$suggest_string = sprintf(
-				/* translators: 1: native language name, 2: native language names */
-				__( 'This plugin is also available in %1$s (also: %2$s).', 'wporg-plugins' ),
-				sprintf(
-					'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
-					$locale_subdomain_assoc[ $primary_locale ]->subdomain,
-					$plugin_slug,
-					$primary_language
-				),
-				trim( $other_suggest, ' ,' )
-			);
-		} elseif ( 'en_US' !== $current_locale && ! $current_locale_is_suggested ) {
-			$suggest_string = sprintf(
-				/* translators: %s: URL to translate.wordpress.org */
-				__( 'This plugin is not yet available in your language. <a href="%s">Can you help translating it?</a>', 'wporg-translate' ),
-				'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug
+				$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
+				$this->get_native_language_name( $current_locale ),
+				esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 			);
 		}
 
@@ -235,4 +227,82 @@ class Plugin_Translations extends Plugin {
 
 		return false;
 	}
+
+	/**
+	 * Translates a string into a language.
+	 *
+	 * @param string $string The string to translate.
+	 * @param string $wp_locale A WP locale of a language.
+	 *
+	 * @return mixed
+	 */
+	protected function translate( $string, $wp_locale ) {
+		global $wpdb;
+
+		$strings = array(
+			2984793 => 'This plugin is also available in %s.',
+			2984794 => 'This plugin is also available in %1$s (also: %2$s).',
+			2984795 => 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>',
+		);
+
+		$original_id = array_search( $string, $strings, true );
+
+		require_once GLOTPRESS_LOCALES_PATH;
+		$gp_locale = \GP_Locales::by_field( 'wp_locale', $wp_locale )->slug;
+
+		$cache = wp_cache_get( 'original-' . $original_id, 'lang-guess-translations' );
+		if ( false !== $cache ) {
+			return isset( $cache[ $gp_locale ] ) ? $cache[ $gp_locale ] : $string;
+		}
+
+		// Magic number: 348841 is meta/plugins-v3.
+		$translations = $wpdb->get_results( $wpdb->prepare( "
+			SELECT
+				locale as gp_locale, translation_0 as translation
+			FROM translate_translation_sets ts
+			JOIN translate_translations t
+				ON ts.id = t.translation_set_id
+			WHERE
+				project_id = 348841 AND slug = 'default' AND t.status = 'current'
+			AND original_id = %d
+		", $original_id	), OBJECT_K );
+
+		foreach ( $translations as &$translation ) {
+			$translation = $translation->translation;
+		}
+		unset( $translation );
+
+	#	wp_cache_add( 'original-' . $original_id, $translations, 'lang-guess-translations', 900 );
+
+		return isset( $translations[ $gp_locale ] ) ? $translations[ $gp_locale ] : $string;
+	}
+
+	protected function get_native_language_name( $locale ) {
+		global $wpdb;
+
+		$slug = str_replace( '_', '-', $locale );
+		$slug = strtolower( $slug );
+
+		$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $slug ) );
+		if ( ! $name ) {
+			$fallback_slug = explode( '-', $slug )[0]; // de-de => de
+			$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $fallback_slug ) );
+			if ( $name ) {
+				return $name;
+			}
+		} else {
+			return $name;
+		}
+
+		return '';
+	}
 }
+
+// Strings for the POT file.
+
+/* translators: %s: native language name. */
+__( 'This plugin is also available in %s.', 'wporg-plugins' );
+/* translators: 1: native language name, 2: other native language names, comma separated */
+__( 'This plugin is also available in %1$s (also: %2$s).', 'wporg-plugins' );
+/* translators: 1: native language name, 2: URL to translate.wordpress.org */
+__( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', 'wporg-plugins' );
