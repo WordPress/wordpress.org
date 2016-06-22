@@ -46,8 +46,33 @@
 
 		}
 
-		.plugin-download {
+		.plugin-actions {
 			float: right;
+		}
+
+		.plugin-favorite-heart {
+			/* FIX ME */
+			color: gray;
+			line-heght: 3em;
+			font-size: 3em;
+
+			&.favorited,
+			&:hover,
+			&:focus {
+				color: red;
+			}
+
+			&:hover,
+			&:focus {
+				text-decoration: none;
+			}
+
+			&:after {
+				content: "\f487";
+				font-family: dashicons;
+				vertical-align: top;
+			}
+			
 		}
 
 		.plugin-title {

@@ -256,6 +256,68 @@ class Tools {
 	}
 
 	/**
+	 * Determine if a plugin has been favorited by a user.
+	 *
+	 * @param string $plugin_slug The plugin to check.
+	 * @param mixed  $user        The user to check.
+	 * @return bool
+	 */
+	public static function favorited_plugin( $plugin_slug, $user = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$user = new WP_User( $user ?: get_current_user_id() );
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$users_favorites = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
+
+		return in_array( $post->post_name, $users_favorites, true );
+	}
+
+	/**
+	 * Favorite a plugin
+	 *
+	 * @param string $plugin_slug The plugin to favorite
+	 * @param mixed  $user        The user favorite
+	 * @param bool   $favorite    Whether it's a favorite, or unfavorite.
+	 * @return bool
+	 */
+	public static function favorite_plugin( $plugin_slug, $user = 0, $favorite = true ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$user = new WP_User( $user ?: get_current_user_id() );
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		$users_favorites = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
+
+		$already_favorited = in_array( $post->post_name, $users_favorites, true );
+
+		if ( $favorite && $already_favorited ) {
+			return true;
+		} elseif ( $favorite ) {
+			// Add it
+			$users_favorites[] = $post->post_name;
+		} elseif ( ! $favorite && $already_favorited ) {
+			// Remove it
+			unset( $users_favorites[ array_search( $post->post_name, $users_favorites, true ) ] );
+		} else {
+			return true;
+		}
+
+		return update_user_meta( $user->ID, 'plugin_favorites', wp_slash( array_values( $users_favorites ) ) );
+
+	}
+
+	/**
 	 * Retrieve a list of users who are subscribed to plugin commits.
 	 *
 	 * @param string $plugin_slug       The plugin to retrieve subscribers for.

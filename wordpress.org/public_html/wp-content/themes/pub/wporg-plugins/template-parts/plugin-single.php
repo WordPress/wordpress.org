@@ -10,6 +10,7 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 
@@ -32,9 +33,19 @@ $widget_args = array(
 			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
 		</div>
 
-		<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
-		<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
-		<meta itemprop="fileFormat" content="application/zip">
+		<div class="plugin-actions">
+
+			<?php
+			if ( is_user_logged_in() ) {
+				$url = Template::get_favourite_link( $post );
+				echo '<a href="' . esc_url( $url ) . '" class="plugin-favorite-heart' . (Tools::favorited_plugin( $post ) ? ' favorited' : '' ) . '" onclick="jQuery(this).toggleClass(\'favorited\')"></a>';
+			}
+			?>
+
+			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+			<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
+			<meta itemprop="fileFormat" content="application/zip">
+		</div>
 
 		<?php the_title( '<h1 class="plugin-title">', '</h1>' ); ?>
 

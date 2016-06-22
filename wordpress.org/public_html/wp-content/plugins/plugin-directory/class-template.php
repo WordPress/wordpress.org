@@ -461,4 +461,28 @@ class Template {
 
 		return ent2ncr( htmlspecialchars_decode( htmlentities( $string, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
+
+	/**
+	 * Generates a link to toggle a plugin favorites state.
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @param mixed  $user        The user to alter the favorite status for.
+	 * @return string URL to toggle status.
+	 */
+	public static function get_favourite_link( $plugin_slug, $user = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$favorited = Tools::favorited_plugin( $post, $user );
+
+		return add_query_arg(
+			array(
+				'_wpnonce' => wp_create_nonce( 'wp_rest' ),
+				( $favorited ? 'unfavorite' : 'favorite' ) => '1'
+			),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/favorite' )
+		);
+	}
 }

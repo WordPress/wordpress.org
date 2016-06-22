@@ -11,10 +11,11 @@ class Base {
 	 * Initialises each API route we offer.
 	 */
 	static function load_routes() {
-		new Routes\Commit_Subscriptions();
 		new Routes\Internal_Stats();
 		new Routes\Plugin();
 		new Routes\Plugin_Translations();
+		new Routes\Plugin_Favorites();
+		new Routes\Commit_Subscriptions();
 		new Routes\Popular_Categories();
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();

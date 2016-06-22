@@ -2158,8 +2158,29 @@ p a:not(.button):hover {
   width: 96px !important;
 }
 
-.single .type-plugin .plugin-header .plugin-download {
+.single .type-plugin .plugin-header .plugin-actions {
   float: right;
+}
+
+.single .type-plugin .plugin-header .plugin-favorite-heart {
+  /* FIX ME */
+  color: gray;
+  line-heght: 3em;
+  font-size: 3em;
+}
+
+.single .type-plugin .plugin-header .plugin-favorite-heart.favorited, .single .type-plugin .plugin-header .plugin-favorite-heart:hover, .single .type-plugin .plugin-header .plugin-favorite-heart:focus {
+  color: red;
+}
+
+.single .type-plugin .plugin-header .plugin-favorite-heart:hover, .single .type-plugin .plugin-header .plugin-favorite-heart:focus {
+  text-decoration: none;
+}
+
+.single .type-plugin .plugin-header .plugin-favorite-heart:after {
+  content: "\f487";
+  font-family: dashicons;
+  vertical-align: top;
 }
 
 .single .type-plugin .plugin-header .plugin-title {
