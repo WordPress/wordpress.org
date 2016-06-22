@@ -254,13 +254,6 @@ class Jetpack_Search {
 		$date_today = strftime( '%Y-%m-%d' );
 		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
 
-		// If the request comes from WordPress and the major version string looks sane, use a more specific version constraint
-		if ( preg_match( '|WordPress/(\d+[.]\d+)|', $_SERVER['HTTP_USER_AGENT'], $matches ) ) {
-			if ( $matches[1] >= $version_cutoff && $matches[1] <= WP_CORE_STABLE_BRANCH ) {
-				$version_cutoff = sprintf( '%0.1f', $matches[1] - 0.2 );
-			}
-		}
-
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
 		$es_wp_query_args = array(
