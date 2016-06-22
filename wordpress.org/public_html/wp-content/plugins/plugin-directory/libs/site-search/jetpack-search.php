@@ -717,7 +717,7 @@ class Jetpack_Search {
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
 									'factor' => 0.8,
-									'modifier' => 'sqrt',
+									'modifier' => 'log1p',
 								),
 							),
 
