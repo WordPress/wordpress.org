@@ -151,18 +151,21 @@ class Plugin_Translations extends Plugin {
 
 		if ( is_array( $http_locales ) ) {
 			foreach ( $http_locales as $http_locale ) {
-				/*
-				 * Discard English -- it's the default for all browsers,
-				 * ergo not very reliable information
-				 */
-				if ( 'en' === $http_locale || 'en-US' === $http_locale ) {
-					continue;
-				}
-
 				@list( $lang, $region ) = explode( '-', $http_locale );
 				if ( is_null( $region ) ) {
 					$region = $lang;
 				}
+
+				/*
+				 * Discard English -- it's the default for all browsers,
+				 * ergo not very reliable information
+				 */
+				if ( 'en' === $lang ) {
+					continue;
+				}
+
+				// Region should be uppercase.
+				$region = strtoupper( $region );
 
 				if ( $mapped = $this->map_locale( $lang, $region, $available_locales ) ) {
 					$res[] = $mapped;
@@ -272,7 +275,7 @@ class Plugin_Translations extends Plugin {
 		}
 		unset( $translation );
 
-	#	wp_cache_add( 'original-' . $original_id, $translations, 'lang-guess-translations', 900 );
+		wp_cache_add( 'original-' . $original_id, $translations, 'lang-guess-translations', 900 );
 
 		return isset( $translations[ $gp_locale ] ) ? $translations[ $gp_locale ] : $string;
 	}
