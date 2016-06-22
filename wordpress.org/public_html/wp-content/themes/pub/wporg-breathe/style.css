@@ -184,3 +184,26 @@ article.page a.author-avatar img.avatar {
 	border-radius: 50%;
 	border: 0;
 }
+
+/*
+ * Private post status
+ */
+article.status-private {
+	background: #fef0f0;
+}
+
+.status-private .o2-post {
+	position: relative;
+}
+
+.status-private .o2-post:after {
+	content: "\f530";
+	font-family: dashicons;
+	position: absolute;
+	top: -2px;
+	right: 45px;
+	color: #FFF;
+	font-size: 18px;
+	padding: 13px 5px 0px;
+	background: #dc3232 ;
+}
