@@ -2,8 +2,12 @@
 ( function( $ ) {
 
 	$.ajax({
+		type: 'POST',
 		url : wporgLocaleBanner.apiURL,
 		dataType : 'json',
+		data: {
+			'plugin_slug' : wporgLocaleBanner.currentPlugin
+		},
 		success : function( response ) {
 			if ( ! response.suggest_string ) {
 				return;

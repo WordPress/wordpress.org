@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 
 /**
@@ -7,12 +8,12 @@ use WP_REST_Server;
  *
  * @package WordPressdotorg_Plugin_Directory
  */
-class Plugin_Translations extends Plugin {
+class Locale_Banner extends Base {
 
 	function __construct() {
-		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/translations/?', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'translations' ),
+		register_rest_route( 'plugins/v1', '/locale-banner', array(
+			'methods'  => WP_REST_Server::EDITABLE,
+			'callback' => array( $this, 'locale_banner' ),
 			'args' => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
@@ -27,7 +28,7 @@ class Plugin_Translations extends Plugin {
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return array A formatted array of all the data for the plugin.
 	 */
-	function translations( $request ) {
+	function locale_banner( $request ) {
 		global $wpdb;
 
 		$plugin_slug = $request['plugin_slug'];

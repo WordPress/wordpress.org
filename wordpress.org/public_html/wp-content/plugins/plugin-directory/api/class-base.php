@@ -13,7 +13,7 @@ class Base {
 	static function load_routes() {
 		new Routes\Internal_Stats();
 		new Routes\Plugin();
-		new Routes\Plugin_Translations();
+		new Routes\Locale_Banner();
 		new Routes\Plugin_Favorites();
 		new Routes\Commit_Subscriptions();
 		new Routes\Popular_Categories();
