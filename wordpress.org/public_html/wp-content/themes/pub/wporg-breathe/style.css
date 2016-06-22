@@ -3,3 +3,93 @@
  * Template: p2-breathe
  * Description: Child theme of P2 Breathe, with modifications specifically for WordPress.org.
  */
+
+body, button, input, select, textarea,
+.site-header .site-title {
+	font-family: 'Open Sans', sans-serif;
+}
+
+/* wp4.css overrides */
+p a {
+	border-bottom: none;
+}
+
+input[type="submit"] {
+	height: auto;
+}
+
+/* wporg-header overrides */
+#wporg-header input.text {
+	padding: 3px;
+}
+#wporg-header input[type="submit"] {
+	box-shadow: none;
+}
+.site,
+.custom-menu .site,
+.site-branding {
+	box-sizing: border-box;
+	margin: 0 auto;
+	max-width: 960px;
+	padding: 0 10px;
+}
+
+.site-header {
+	background: #0073aa;
+	float: none;
+	margin: 0 0 2em;
+	padding: 21px 0;
+	width: auto;
+}
+
+.site-header .site-title {
+	margin: 0;
+	padding: 0;
+}
+
+.site-header .site-title a {
+	color: #fff;
+	font-size: 33px;
+	font-weight: 300;
+	line-height: 1;
+}
+
+.navigation-main {
+	background: transparent;
+	display: inline-block;
+	float: right;
+	position: inherit;
+	top: auto;
+	left: auto;
+	width: auto;
+}
+
+.navigation-main ul li {
+	display: inline-block;
+	float: none;
+	margin-right: 21px;
+}
+
+.rtl .navigation-main ul li {
+	margin-left: 21px;
+	margin-right: 0;
+}
+
+.navigation-main ul li:last-of-type {
+	margin: 0;
+}
+
+.navigation-main ul li a {
+	padding: 4px 0;
+}
+
+.navigation-main ul li:hover > a,
+.navigation-main ul li.current-menu-item a {
+	background: transparent;
+	text-decoration: underline;
+}
+
+.navigation-main a {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 16.8px;
+}
