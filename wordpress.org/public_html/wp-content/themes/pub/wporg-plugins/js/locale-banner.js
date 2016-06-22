@@ -1,14 +1,14 @@
 /* global wporgLocaleBanner */
 ( function( $ ) {
 
-	$.ajax({
+	$.ajax( {
 		type: 'POST',
-		url : wporgLocaleBanner.apiURL,
-		dataType : 'json',
+		url: wporgLocaleBanner.apiURL,
+		dataType: 'json',
 		data: {
-			'plugin_slug' : wporgLocaleBanner.currentPlugin
+			'plugin_slug': wporgLocaleBanner.currentPlugin
 		},
-		success : function( response ) {
+		success: function ( response ) {
 			if ( ! response.suggest_string ) {
 				return;
 			}
@@ -18,7 +18,11 @@
 				'html': response.suggest_string
 			} );
 
-			$( '.plugin-header' ).after( $banner );
+			if ( $( 'body' ).hasClass( 'single-plugin' ) ) {
+				$( '.plugin-header' ).after( $banner );
+			} else {
+				$( '.site-main' ).prepend( $banner );
+			}
 		}
 	} );
 

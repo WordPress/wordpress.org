@@ -41,20 +41,26 @@ class Locale_Banner extends Base {
 		// Retrieve all the WordPress locales.
 		$all_locales = wp_list_pluck( $locale_subdomain_assoc, 'locale' );
 
-		// Get the active language packs of the plugin.
-		$language_packs = $wpdb->get_results( $wpdb->prepare( "
-			SELECT *
-			FROM language_packs
-			WHERE
-				type = 'plugin' AND
-				domain = %s AND
-				active = 1
-			GROUP BY language",
-			$plugin_slug
-		) );
+		$is_plugin_request = ! empty( $plugin_slug );
 
-		// Retrieve all the WordPress locales in which the plugin is translated.
-		$translated_locales = wp_list_pluck( $language_packs, 'language' );
+		if ( $is_plugin_request ) {
+			// Get the active language packs of the plugin.
+			$language_packs = $wpdb->get_results( $wpdb->prepare( "
+				SELECT *
+				FROM language_packs
+				WHERE
+					type = 'plugin' AND
+					domain = %s AND
+					active = 1
+				GROUP BY language",
+				$plugin_slug
+			) );
+
+			// Retrieve all the WordPress locales in which the plugin is translated.
+			$translated_locales = wp_list_pluck( $language_packs, 'language' );
+		} else {
+			$translated_locales = $all_locales;
+		}
 
 		// Get the WordPress locales based on the HTTP accept language header.
 		$locales_from_header = $this->get_locale_from_header( $all_locales );
@@ -78,44 +84,77 @@ class Locale_Banner extends Base {
 		$suggest_string = '';
 		if ( 'en_US' === $current_locale ) {
 			if ( 1 === count( $suggest_named_locales ) ) {
-				$locale = key( $suggest_named_locales );
+				$locale   = key( $suggest_named_locales );
 				$language = current( $suggest_named_locales );
-				$suggest_string = sprintf(
-					$this->translate( 'This plugin is also available in %s.', $locale ),
-					sprintf(
-						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
-						$locale_subdomain_assoc[ $locale ]->subdomain,
-						$plugin_slug,
-						$language
-					)
-				);
+
+				if ( $is_plugin_request ) {
+					$suggest_string = sprintf(
+						$this->translate( 'This plugin is also available in %s.', $locale ),
+						sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$plugin_slug,
+							$language
+						)
+					);
+				} else {
+					$suggest_string = sprintf(
+						$this->translate( 'The plugin directory is also available in %s.', $locale ),
+						sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>',
+							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$language
+						)
+					);
+				}
 			} elseif ( ! empty( $suggest_named_locales ) ) {
 				$primary_locale = key( $suggest_named_locales );
 				$primary_language = current( $suggest_named_locales );
 				array_shift( $suggest_named_locales );
 
-				$other_suggest = '';
-				foreach ( $suggest_named_locales as $locale => $language ) {
-					$other_suggest .= sprintf(
-						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>, ',
-						$locale_subdomain_assoc[ $locale ]->subdomain,
-						$plugin_slug,
-						$language
+				if ( $is_plugin_request ) {
+					$other_suggest = '';
+					foreach ( $suggest_named_locales as $locale => $language ) {
+						$other_suggest .= sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>, ',
+							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$plugin_slug,
+							$language
+						);
+					}
+
+					$suggest_string = sprintf(
+						$this->translate( 'This plugin is also available in %1$s (also: %2$s).', $primary_locale ),
+						sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
+							$plugin_slug,
+							$primary_language
+						),
+						trim( $other_suggest, ' ,' )
+					);
+				} else {
+					$other_suggest = '';
+					foreach ( $suggest_named_locales as $locale => $language ) {
+						$other_suggest .= sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>, ',
+							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$language
+						);
+					}
+
+					$suggest_string = sprintf(
+						$this->translate( 'The plugin directory is also available in %1$s (also: %2$s).', $primary_locale ),
+						sprintf(
+							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>',
+							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
+							$primary_language
+						),
+						trim( $other_suggest, ' ,' )
 					);
 				}
-
-				$suggest_string = sprintf(
-					$this->translate( 'This plugin is also available in %1$s (also: %2$s).', $primary_locale ),
-					sprintf(
-						'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
-						$locale_subdomain_assoc[ $primary_locale ]->subdomain,
-						$plugin_slug,
-						$primary_language
-					),
-					trim( $other_suggest, ' ,' )
-				);
 			}
-		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated ) {
+		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
 				$this->get_native_language_name( $current_locale ),
@@ -247,9 +286,14 @@ class Locale_Banner extends Base {
 			2984793 => 'This plugin is also available in %s.',
 			2984794 => 'This plugin is also available in %1$s (also: %2$s).',
 			2984795 => 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>',
+			0 => 'The plugin directory is also available in %s.',
+			0 => 'The plugin directory is also available in %1$s (also: %2$s).',
 		);
 
 		$original_id = array_search( $string, $strings, true );
+		if ( ! $original_id ) {
+			return $string;
+		}
 
 		require_once GLOTPRESS_LOCALES_PATH;
 		$gp_locale = \GP_Locales::by_field( 'wp_locale', $wp_locale )->slug;
@@ -310,3 +354,7 @@ __( 'This plugin is also available in %s.', 'wporg-plugins' );
 __( 'This plugin is also available in %1$s (also: %2$s).', 'wporg-plugins' );
 /* translators: 1: native language name, 2: URL to translate.wordpress.org */
 __( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', 'wporg-plugins' );
+/* translators: %s: native language name. */
+__( 'The plugin directory is also available in %s.', 'wporg-plugins' );
+/* translators: 1: native language name, 2: other native language names, comma separated */
+__( 'The plugin directory is also available in %1$s (also: %2$s).', 'wporg-plugins' );
