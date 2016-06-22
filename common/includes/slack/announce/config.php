@@ -103,6 +103,7 @@ function get_whitelist() {
 			'obenland',
 			'adamsilverstein',
 			'michaelarestad',
+			'swissspidy',
 		),
 		'forums' => array(
 			'clorith',
