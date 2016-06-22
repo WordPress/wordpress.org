@@ -1230,12 +1230,12 @@ p a:not(.button):hover {
 ## Menus
 --------------------------------------------------------------*/
 .main-navigation {
+  background: #0073aa;
   clear: both;
-}
-
-.main-navigation.toggled {
-  padding: 16px 0 0;
-  padding: 1rem 0 0;
+  left: 0;
+  position: absolute;
+  top: 60px;
+  width: 100%;
 }
 
 .main-navigation ul {
@@ -1315,7 +1315,7 @@ p a:not(.button):hover {
   width: 56px;
   width: 3.5rem;
   position: absolute;
-  top: 2px;
+  top: -58px;
   right: 1rem;
 }
 
@@ -1329,6 +1329,8 @@ p a:not(.button):hover {
   }
   .main-navigation {
     float: right;
+    position: initial;
+    width: initial;
   }
   .main-navigation.toggled {
     padding: 1px 0;
@@ -1803,7 +1805,6 @@ p a:not(.button):hover {
   border-left: none;
   border-radius: 0 2px 2px 0;
   display: none;
-  height: 31px;
   margin-left: -6px;
   vertical-align: bottom;
 }

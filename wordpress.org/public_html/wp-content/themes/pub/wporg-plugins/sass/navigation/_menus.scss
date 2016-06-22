@@ -1,12 +1,12 @@
 @import "../variables-site/variables-site";
 
 .main-navigation {
+	background: $color__wp-blue;
 	clear: both;
-
-	&.toggled {
-		padding: 16px 0 0;
-		padding: 1rem 0 0;
-	}
+	left: 0;
+	position: absolute;
+	top: 60px;
+	width: 100%;
 
 	ul {
 		display: none;
@@ -105,7 +105,7 @@
 	width: 56px;
 	width: 3.5rem;
 	position: absolute;
-	top: 2px;
+	top: -58px;
 	right: 1rem;
 
 	.toggled &:before {
@@ -119,6 +119,8 @@
 	}
 	.main-navigation {
 		float: right;
+		position: initial;
+		width: initial;
 
 		&.toggled {
 			padding: 1px 0;
