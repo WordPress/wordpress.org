@@ -125,7 +125,6 @@ article.page .o2-post,
 .o2-xpost-author .entry-date,
 .o2-xpost-entry-date {
 	display: block;
-	padding-left: 0;
 }
 
 .entry-header,
@@ -185,4 +184,3 @@ article.page a.author-avatar img.avatar {
 	border-radius: 50%;
 	border: 0;
 }
-
