@@ -146,6 +146,10 @@ function get_whitelist() {
 			'courtneyengle',
 			'chanthaboune',
 		),
+		'wceu-volunteers' => array(
+			'lanche86',
+			'savione',
+		),
 		'wcus-contributor-day' => array(
 			'drew',
 		),
@@ -162,9 +166,6 @@ function get_whitelist() {
 		'wptv' => array(
 			'jerrysarcastic',
 			'roseapplemedia',
-		),
-		'testhere' => array(
-			'ocean90',
 		),
 	);
 }
