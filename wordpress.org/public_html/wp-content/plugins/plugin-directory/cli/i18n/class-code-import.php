@@ -4,6 +4,7 @@ namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use Exception;
+use WP_Error;
 
 /**
  * Class to handle plugin code imports GlotPress.
@@ -52,27 +53,8 @@ class Code_Import extends I18n_Import {
 			throw new Exception( 'Plugin export failed.' );
 		}
 
-		$esc_export_directory = escapeshellarg( $export_directory );
-
-		// Check for a plugin text domain declaration and loading, grep recursively, not necessarily in plugin.php.
-		$has_textdomain_header = shell_exec( 'grep -r -i --include "*.php" "Text Domain:" ' . $esc_export_directory );
-		$has_load_plugin_textdomain = shell_exec( 'grep -r --include "*.php" "\bload_plugin_textdomain\b" ' . $esc_export_directory );
-
-		$has_slug_as_textdomain_header = false;
-		if ( $has_textdomain_header ) {
-			$has_slug_as_textdomain_header = shell_exec( 'grep -r -i --include "*.php" "Text Domain:[[:blank:]]*' . trim( escapeshellarg( $this->plugin ), '\'' ) . '" ' . $esc_export_directory );
-			if ( ! $has_slug_as_textdomain_header ) {
-				echo 'Wrong text domain in header';
-			}
-		} else {
-			echo 'Missing text domain in header';
-		}
-
-		if ( ! $has_load_plugin_textdomain ) {
-			echo 'Missing load_plugin_textdomain()';
-		}
-
-		if ( ! $has_textdomain_header || ! $has_slug_as_textdomain_header || ! $has_load_plugin_textdomain ) {
+		$valid = $this->is_plugin_valid( $export_directory );
+		if ( is_wp_error( $valid ) ) {
 			throw new Exception( 'Plugin is not compatible with language packs.' );
 		}
 
@@ -99,5 +81,41 @@ class Code_Import extends I18n_Import {
 		if ( 'created' === $result ) {
 			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch );
 		}
+	}
+
+	/**
+	 * Checks if a plugin has the correct text domain declarations.
+	 *
+	 * @todo This can be removed/changed if WordPress 4.6 is released.
+	 *
+	 * @param string $export_directory
+	 * @return true|\WP_Error True if valid, WP_Error in case of failures.
+	 */
+	private function is_plugin_valid( $export_directory ) {
+		$error = new WP_Error();
+		$esc_export_directory = escapeshellarg( $export_directory );
+
+		// Check for a plugin text domain declaration and loading, grep recursively, not necessarily in plugin.php.
+		$has_textdomain_header = shell_exec( 'grep -r -i --include "*.php" "Text Domain:" ' . $esc_export_directory );
+		$has_load_plugin_textdomain = shell_exec( 'grep -r --include "*.php" "\bload_plugin_textdomain\b" ' . $esc_export_directory );
+
+		if ( $has_textdomain_header ) {
+			$has_slug_as_textdomain_header = shell_exec( 'grep -r -i --include "*.php" "Text Domain:[[:blank:]]*' . trim( escapeshellarg( $this->plugin ), '\'' ) . '" ' . $esc_export_directory );
+			if ( ! $has_slug_as_textdomain_header ) {
+				$error->add( 'wrong_textdomain', 'Wrong text domain in header.' );
+			}
+		} else {
+			$error->add( 'missing_textdomain', 'Missing text domain in header.' );
+		}
+
+		if ( ! $has_load_plugin_textdomain ) {
+			$error->add( 'missing_load_plugin_textdomain', 'Missing load_plugin_textdomain().' );
+		}
+
+		if ( $error->get_error_codes() ) {
+			return $error;
+		}
+
+		return true;
 	}
 }
