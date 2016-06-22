@@ -232,8 +232,8 @@ textarea {
 
 @media screen and (min-width: 48em) {
   html {
-    font-size: 21px;
-    font-size: 1.3125rem;
+    font-size: 18px;
+    font-size: 1.125rem;
   }
 }
 
