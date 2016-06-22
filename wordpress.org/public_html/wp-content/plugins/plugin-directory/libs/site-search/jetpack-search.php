@@ -711,7 +711,14 @@ class Jetpack_Search {
 										 'offset' => $date_offset,
 										 'scale' => $date_scale,
 										 'decay' => $date_decay,
-									 ) ),
+									 ) ) ,
+								 'linear' => array(
+									 'tested' => array(
+										 'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
+										 'scale' => 0.5,
+										 'decay' => 0.6,
+									 )
+								 ),
 							 ),
 							array(
 								'field_value_factor' => array(
@@ -720,7 +727,6 @@ class Jetpack_Search {
 									'modifier' => 'log1p',
 								),
 							),
-
 						 ),
 						 'boost_mode' => 'multiply'
 					 )
