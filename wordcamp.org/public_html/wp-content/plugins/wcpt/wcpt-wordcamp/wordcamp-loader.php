@@ -141,7 +141,9 @@ class WordCamp_Loader {
 		}
 
 		// Sort by the date it was added to the schedule. See WordCamp_Loader::set_scheduled_date() for details.
-		$query->set( 'orderby', 'menu_order date' );
+		if ( '' === $query->get( 'orderby' ) ) {
+			$query->set( 'orderby', 'menu_order date' );
+		}
 
 		if ( ! empty( $query->query_vars['post_status'] ) ) {
 			return;
