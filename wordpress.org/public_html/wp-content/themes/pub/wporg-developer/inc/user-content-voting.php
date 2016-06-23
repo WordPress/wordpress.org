@@ -263,8 +263,12 @@ class DevHub_User_Contributed_Notes_Voting {
 		}
 
 		$can_vote     = self::user_can_vote( get_current_user_id(), $comment_id );
+		$logged_in    = is_user_logged_in();
 		$comment_link = get_comment_link( $comment_id );
 		$nonce        = wp_create_nonce( 'user-note-vote-' . $comment_id );
+		$disabled_str = __( 'Voting for this note is disabled', 'wporg' );
+		$log_in_str   = __( 'You must log in to vote on the helpfulness of this note', 'wporg' );
+		$log_in_url   = add_query_arg( 'redirect_to', urlencode( $comment_link ), 'https://login.wordpress.org' );
 
 		echo '<div class="user-note-voting" data-nonce="' . esc_attr( $nonce ) . '">';
 
@@ -276,19 +280,19 @@ class DevHub_User_Contributed_Notes_Voting {
 				__( 'Vote up if this note was helpful', 'wporg' );
 			$tag = $user_upvoted ? 'span' : 'a';
 		} else {
-			$title = ! is_user_logged_in() ?
-				__( 'You must log in to vote on the helpfulness of this note', 'wporg' ) :
-				'';
-			$tag = 'span';
+			$title = ! $logged_in ? $log_in_str : $disabled_str;
+			$tag = $logged_in ? 'span' : 'a';
 		}
 		echo "<{$tag} "
 			. 'class="user-note-voting-up' . ( $user_upvoted ? ' user-voted' : '' )
 			. '" title="' . esc_attr( $title )
 			. '" data-id="' . esc_attr( $comment_id )
 			. '" data-vote="up';
-		if ( ! $user_upvoted ) {
-			echo '" href="'
-				. esc_url( add_query_arg( array( '_wpnonce' => $nonce , 'comment' => $comment_id, 'vote' => 'up' ), $comment_link ) );
+		if ( 'a' === $tag ) {
+			$up_url = $logged_in ?
+				add_query_arg( array( '_wpnonce' => $nonce , 'comment' => $comment_id, 'vote' => 'up' ), $comment_link ) :
+				$log_in_url;
+			echo '" href="' . esc_url( $up_url );
 		}
 		echo '">';
 		echo '<span class="dashicons dashicons-arrow-up"></span>';
@@ -314,19 +318,19 @@ class DevHub_User_Contributed_Notes_Voting {
 				__( 'Vote down if this note was not helpful', 'wporg' );
 			$tag = $user_downvoted ? 'span' : 'a';
 		} else {
-			$title = ! is_user_logged_in() ?
-				__( 'You must log in to vote on the helpfulness of this note', 'wporg' ) :
-				'';
-			$tag = 'span';
+			$title = ! $logged_in ? $log_in_str : $disabled_str;
+			$tag = $logged_in ? 'span' : 'a';
 		}
 		echo "<{$tag} "
 			. 'class="user-note-voting-down' . ( $user_downvoted ? ' user-voted' : '' )
 			. '" title="' . esc_attr( $title )
 			. '" data-id="' . esc_attr( $comment_id )
 			. '" data-vote="down';
-		if ( ! $user_downvoted ) {
-			echo '" href="'
-				. esc_url( add_query_arg( array( '_wpnonce' => $nonce , 'comment' => $comment_id, 'vote' => 'down' ), $comment_link ) );
+		if ( 'a' === $tag ) {
+			$down_url = $logged_in ?
+				add_query_arg( array( '_wpnonce' => $nonce , 'comment' => $comment_id, 'vote' => 'down' ), $comment_link ) :
+				$log_in_url;
+			echo '" href="' . esc_url( $down_url );
 		}
 		echo '">';
 		echo '<span class="dashicons dashicons-arrow-down"></span>';
