@@ -1156,7 +1156,7 @@
 	}
 
 	// User contributed notes
-	&.single-wp-parser-function, &.single-wp-parser-method, &.single-wp-parser-hook {
+	&.single-wp-parser-function, &.single-wp-parser-method, &.single-wp-parser-hook, &.single-wp-parser-class {
 
 		.bad-note .comment-content {
 			opacity: .6;
