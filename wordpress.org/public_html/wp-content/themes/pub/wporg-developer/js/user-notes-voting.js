@@ -4,7 +4,7 @@
  */
 
 ( function( $ ) {
-	$( '.user-note-voting a' ).on( 'click', function(e) {
+	$( document ).on( 'click', '.user-note-voting a', function(e) {
 		e.preventDefault();
 
 		var item = $(this);
