@@ -21,10 +21,11 @@ class WordCamp_Loader {
 	 * The main WordCamp Post Type loader
 	 */
 	function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'includes'                          ) );
-		add_action( 'init',           array( $this, 'register_post_types'               ) );
-		add_action( 'init',           array( $this, 'register_post_statuses'            ) );
-		add_filter( 'pre_get_posts',  array( $this, 'query_public_statuses_on_archives' ) );
+		add_action( 'plugins_loaded',      array( $this, 'includes'                          ) );
+		add_action( 'init',                array( $this, 'register_post_types'               ) );
+		add_action( 'init',                array( $this, 'register_post_statuses'            ) );
+		add_filter( 'pre_get_posts',       array( $this, 'query_public_statuses_on_archives' ) );
+		add_action( 'wp_insert_post_data', array( $this, 'set_scheduled_date'                ) );
 	}
 
 	/**
@@ -139,11 +140,42 @@ class WordCamp_Loader {
 			return;
 		}
 
+		// Sort by the date it was added to the schedule. See WordCamp_Loader::set_scheduled_date() for details.
+		$query->set( 'orderby', 'menu_order date' );
+
 		if ( ! empty( $query->query_vars['post_status'] ) ) {
 			return;
 		}
 
 		$query->query_vars['post_status'] = self::get_public_post_statuses();
+	}
+
+	/**
+	 * Save the date that the camp was moved on to the official schedule
+	 *
+	 * It's stored in the `menu_order` field because the purpose of storing it is so we can sort the archives
+	 * by this timestamp. See WordCamp_Loader::query_public_statuses_on_archives().
+	 *
+	 * Sorting by meta fields would be significantly slower, and the `menu_order` field is a good candidate for
+	 * re-purposing because it makes semantic sense and isn't being used.
+	 *
+	 * @param array $post_data
+	 *
+	 * @return array
+	 */
+	public function set_scheduled_date( $post_data ) {
+		if ( 'wcpt-scheduled' !== $post_data['post_status'] || WCPT_POST_TYPE_ID != $post_data['post_type'] ) {
+			return $post_data;
+		}
+
+		// Don't overwrite the original timestamp every time the post is updated
+		if ( ! empty ( $post_data['menu_order'] ) ) {
+			return $post_data;
+		}
+
+		$post_data['menu_order'] = time();
+
+		return $post_data;
 	}
 
 	/**
