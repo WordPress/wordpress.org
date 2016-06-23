@@ -1053,6 +1053,9 @@
 		.callout {
 			margin-top: 30px;
 		}
+		.table-of-contents {
+			width: 300px;
+		}
 	}
 
 	.callout:before {
@@ -1610,6 +1613,10 @@
 				padding-left: 45px;
 				text-indent: -45px;
 			}
+
+			.table-of-contents {
+				width: 200px;
+			}
 		}
 
 		.two-columns .box {
@@ -1640,6 +1647,10 @@
 				line-height: 2rem;
 				text-indent: -20px;
 				font-size: 16px;
+			}
+			.table-of-contents {
+				width: 100%;
+				margin-bottom: 10px;
 			}
 		}
 

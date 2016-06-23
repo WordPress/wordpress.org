@@ -83,7 +83,11 @@
 		<hr/>
 		<section class="explanation">
 			<h2><?php _e( 'More Information', 'wporg' ); ?></h2>
-			<?php echo apply_filters( 'the_content', apply_filters( 'get_the_content', $explanation ) ); ?>
+
+			<?php
+			// Output the explanation. Passed through 'the_content' on retrieval, thus no escaping.
+			echo $explanation;
+			?>
 		</section>
 	<?php endif; ?>
 

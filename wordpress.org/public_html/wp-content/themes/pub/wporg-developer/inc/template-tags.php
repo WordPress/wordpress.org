@@ -1317,7 +1317,23 @@ namespace DevHub {
 		if ( ! $explanation = get_explanation( $post, $published = true ) ) {
 			return '';
 		}
-		return get_post_field( $field, $explanation, $context );
+
+		$post_field = get_post_field( $field, $explanation, $context );
+
+		// If retrieving the explanation content for display, add the TOC if available.
+		if ( 'post_content' === $field && 'display' === $context ) {
+			if ( class_exists( 'WPorg_Handbook_TOC' ) ) :
+				$TOC = new \WPorg_Handbook_TOC( get_parsed_post_types() );
+
+				add_filter( 'the_content', array( $TOC, 'add_toc' ) );
+				$post_field = apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
+				remove_filter( 'the_content', array( $TOC, 'add_toc' ) );
+			else :
+				$post_field = apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
+			endif;
+		}
+
+		return $post_field;
 	}
 
 	/**

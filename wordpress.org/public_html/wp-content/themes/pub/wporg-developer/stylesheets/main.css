@@ -1262,6 +1262,9 @@ input {
 .devhub-wrap .wp-parser-class .callout, .devhub-wrap .wp-parser-function .callout, .devhub-wrap .wp-parser-hook .callout, .devhub-wrap .wp-parser-method .callout {
   margin-top: 30px;
 }
+.devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
+  width: 300px;
+}
 .devhub-wrap .callout:before {
   top: 0.2em;
 }
@@ -1668,6 +1671,9 @@ input {
     padding-left: 45px;
     text-indent: -45px;
   }
+  .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
+    width: 200px;
+  }
   .devhub-wrap .two-columns .box {
     width: 99%;
   }
@@ -1689,6 +1695,10 @@ input {
     line-height: 2rem;
     text-indent: -20px;
     font-size: 16px;
+  }
+  .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
+    width: 100%;
+    margin-bottom: 10px;
   }
   .devhub-wrap.single-wp-parser-function .comment-list li, .devhub-wrap.single-wp-parser-method .comment-list li, .devhub-wrap.single-wp-parser-hook .comment-list li {
     padding-left: 0;
