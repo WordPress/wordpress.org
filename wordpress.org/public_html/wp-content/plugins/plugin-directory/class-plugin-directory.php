@@ -237,7 +237,7 @@ class Plugin_Directory {
 		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
 
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
-		add_rewrite_rule( '^search/(.+)/?$', 'index.php?s=$matches[1]', 'top' );
+		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
 
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin_tab=$matches[1]/#$matches[2]', 'top' );
