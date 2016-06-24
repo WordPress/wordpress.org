@@ -750,14 +750,14 @@ class Jetpack_Search {
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
 									'factor' => 0.8,
-									'modifier' => 'sqrt',
+									'modifier' => 'log2p',
 								),
 							),
 							 array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
 									'factor' => 0.8,
-									'modifier' => 'sqrt',
+									'modifier' => 'log2p',
 								),
 							),
 						 ),
