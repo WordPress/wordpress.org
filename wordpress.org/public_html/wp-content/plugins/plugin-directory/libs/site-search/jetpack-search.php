@@ -604,11 +604,22 @@ class Jetpack_Search {
 						),
 					),
 					'should' => array(
-						'multi_match' => array(
-							'query'  => $args['query'],
-							'fields' => $args['query_fields'],
-							'type'  => 'phrase',
-							'analyzer' => $analyzer
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => $args['query_fields'],
+								'type'  => 'phrase',
+								'analyzer' => $analyzer
+							),
+						),
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => 'title',
+								'type'  => 'phrase',
+								'analyzer' => $analyzer,
+								'boost' => 5,
+							),
 						),
 					),
 				),
@@ -730,14 +741,21 @@ class Jetpack_Search {
 										 'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
 										 'scale' => 0.5,
 										 'decay' => 0.6,
-									 )
+									 ),
 								 ),
 							 ),
-							array(
+							 array(
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
 									'factor' => 0.8,
-									'modifier' => 'log1p',
+									'modifier' => 'sqrt',
+								),
+							),
+							 array(
+								'field_value_factor' => array(
+									'field' => 'support_threads_resolved',
+									'factor' => 0.8,
+									'modifier' => 'sqrt',
 								),
 							),
 						 ),
