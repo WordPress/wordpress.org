@@ -36,7 +36,7 @@ $widget_args = array(
 		<div class="plugin-actions">
 
 			<?php
-			if ( is_user_logged_in() ) {
+			if ( false && is_user_logged_in() ) { // Hide Favorites until it's styled properly.
 				$url = Template::get_favourite_link( $post );
 				echo '<a href="' . esc_url( $url ) . '" class="plugin-favorite-heart' . (Tools::favorited_plugin( $post ) ? ' favorited' : '' ) . '" onclick="jQuery(this).toggleClass(\'favorited\')"></a>';
 			}
