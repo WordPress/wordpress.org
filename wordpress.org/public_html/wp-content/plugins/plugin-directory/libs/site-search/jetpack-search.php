@@ -620,7 +620,7 @@ class Jetpack_Search {
 								'fields' => $args['boost_fields'],
 								'type'  => 'phrase',
 								'analyzer' => $analyzer,
-								'boost' => 5,
+								'boost' => 2,
 							),
 						),
 					),
