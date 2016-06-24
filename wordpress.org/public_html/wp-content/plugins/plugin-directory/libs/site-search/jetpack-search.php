@@ -280,9 +280,11 @@ class Jetpack_Search {
 		
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['boost_fields'] = array( "title_{$locale}", 'title_en' );
 		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( 'title_en^2', 'content_en', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['boost_fields'] = array( 'title_en' );
 		}
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -615,7 +617,7 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => 'title',
+								'fields' => $args['boost_fields'],
 								'type'  => 'phrase',
 								'analyzer' => $analyzer,
 								'boost' => 5,
