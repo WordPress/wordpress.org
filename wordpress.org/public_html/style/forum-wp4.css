@@ -60,6 +60,14 @@ p.login span.mod-login {
 	font-size: 12px;
 }
 
+#forumlist thead tr th, #forumlist tr td.num {
+	padding-left: 2em;
+}
+
+#forumlist thead tr th:first-child {
+	padding-left: inherit;
+}
+
 #forumlist small, .forumlist .num small {
 	font-size: 12px;
 }

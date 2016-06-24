@@ -16,6 +16,15 @@ p.login span.mod-login {
 	font-family: sans-serif;
 }
 
+#forumlist thead tr th, #forumlist tr td.num {
+	padding-right: 2em;
+	padding-left: 0;
+}
+
+#forumlist thead tr th:first-child {
+	padding-right: inherit;
+}
+
 .topictitle .col-9 {
 	margin-right: 255px;
 	margin-left: 0;
