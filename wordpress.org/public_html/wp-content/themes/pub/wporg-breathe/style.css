@@ -10,6 +10,10 @@ body, button, input, select, textarea,
 	font-family: 'Open Sans', sans-serif;
 }
 
+body {
+	line-height: 1.5;
+}
+
 /* wp4.css overrides */
 p a {
 	border-bottom: none;
@@ -38,18 +42,23 @@ input[type="submit"] {
 	background: #0073aa;
 	float: none;
 	margin: 0 0 2em;
-	padding: 21px 0;
+	padding: 18px 0;
 	width: auto;
 }
 
+.site-header .site-branding {
+	height: 32px;
+}
+
 .site-header .site-title {
+	line-height: 1;
 	margin: 0;
 	padding: 0;
 }
 
 .site-header .site-title a {
 	color: #fff;
-	font-size: 33px;
+	font-size: 28px;
 	font-weight: 300;
 	line-height: 1;
 }
