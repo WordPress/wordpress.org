@@ -10,10 +10,6 @@ body, button, input, select, textarea,
 	font-family: 'Open Sans', sans-serif;
 }
 
-body {
-	line-height: 1.5;
-}
-
 /* wp4.css overrides */
 p a {
 	border-bottom: none;
@@ -41,7 +37,7 @@ input[type="submit"] {
 .site-header {
 	background: #0073aa;
 	float: none;
-	margin: 0 0 2em;
+	margin: 0 0 4em;
 	padding: 18px 0;
 	width: auto;
 }
@@ -106,10 +102,18 @@ input[type="submit"] {
 /*
  * p2-breathe/style.css overrides
  */
+body {
+	line-height: 1.5;
+}
 
 body,
+.widget,
 .o2-app-page-title {
-	background-color: #fff;
+	background-color: transparent;
+}
+
+.content-area {
+	width: 71%;
 }
 
 .o2-app-page-title a {
@@ -233,4 +237,10 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericons.open:hover {
 	color: #dc3232;
 	background: #fef0f0;
+}
+
+
+.widget {
+	margin: 0 0 4em;
+	padding: 0;
 }
