@@ -66,7 +66,12 @@ function api_call() {
 		exit;
 	}
 
-	$team = get_security_team();
+	$user_field = 'user_login';
+	if ( isset( $_GET['user_field'] ) && 'user_email' === $_GET['user_field'] ) {
+		$user_field = 'user_email';
+	}
+
+	$team = get_security_team( $user_field );
 	if ( $team === false ) {
 		exit;
 	}
