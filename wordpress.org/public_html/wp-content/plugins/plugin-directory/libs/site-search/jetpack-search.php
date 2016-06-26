@@ -263,7 +263,7 @@ class Jetpack_Search {
 			'orderby'        => $query->get( 'orderby' ),
 			'order'          => $query->get( 'order' ),
 			// plugin directory specific:
-			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff, 'lte' => $date_today ),
+			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
 			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
 			'filters'		 => array(
 									array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
