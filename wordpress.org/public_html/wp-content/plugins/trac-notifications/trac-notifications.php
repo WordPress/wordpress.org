@@ -34,11 +34,7 @@ class wporg_trac_notifications {
 			}
 		}
 
-		if ( 'core' === $trac ) {
-			$this->api = new Trac_Notifications_DB( $GLOBALS['wpdb'] );
-		} else {
-			$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
-		}
+		$this->api = new Trac_Notifications_HTTP_Client( $this->trac_url() . '/wpapi', TRAC_NOTIFICATIONS_API_KEY );
 
 		if ( 'core' === $trac ) {
 			require __DIR__ . '/trac-components.php';
