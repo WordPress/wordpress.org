@@ -280,11 +280,9 @@ class Jetpack_Search {
 		
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}^2", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
-			$es_wp_query_args['boost_fields'] = array( "title_{$locale}", 'title_en' );
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}_ngram^4", 'title_en_ngram^0.5', "content_{$locale}_ngram^2", 'content_en_ngram^0.5', "excerpt_{$locale}_ngram", 'excerpt_en_ngram', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
 		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en^2', 'content_en', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
-			$es_wp_query_args['boost_fields'] = array( 'title_en' );
+			$es_wp_query_args['query_fields'] = array( 'title_en_ngram^4', 'content_en_ngram^2', 'excerpt_en_ngram', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
 		}
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -614,15 +612,6 @@ class Jetpack_Search {
 								'analyzer' => $analyzer
 							),
 						),
-						array(
-							'multi_match' => array(
-								'query'  => $args['query'],
-								'fields' => $args['boost_fields'],
-								'type'  => 'phrase',
-								'analyzer' => $analyzer,
-								'boost' => 2,
-							),
-						),
 					),
 				),
 			);
@@ -719,7 +708,7 @@ class Jetpack_Search {
 
 	public static function score_query_by_recency( $query ) {
 		//Newer content gets weighted slightly higher
-		$date_scale = '720d';
+		$date_scale = '360d';
 		$date_offset = '180d';
 		$date_decay = 0.7;
 		$date_origin = date( 'Y-m-d' );
@@ -749,14 +738,14 @@ class Jetpack_Search {
 							 array(
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
-									'factor' => 0.8,
+									'factor' => 2,
 									'modifier' => 'log2p',
 								),
 							),
 							 array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
-									'factor' => 0.8,
+									'factor' => 1,
 									'modifier' => 'log2p',
 								),
 							),
