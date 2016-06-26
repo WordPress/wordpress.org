@@ -120,7 +120,10 @@ body,
 	background-color: transparent;
 }
 
-.archive .o2-app-page-title {
+.error404 .o2-app-page-title,
+.archive .o2-app-page-title,
+.search .o2-app-page-title,
+.page .o2-app-page-title {
 	color: inherit;
 }
 
