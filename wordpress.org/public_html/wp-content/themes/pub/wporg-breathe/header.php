@@ -19,8 +19,24 @@ require WPORGPATH . 'header.php';
 	</div>
 </header><!-- .site-header -->
 
+<?php
+$welcome = get_page_by_path( 'welcome' );
+
+if ( $welcome ) {
+	setup_postdata( $welcome );
+?>
+<div class="make-welcome-wrapper"><div class="make-welcome">
+	<?php
+	the_content();
+	edit_post_link( __( 'Edit', 'o2' ), '<p class="make-welcome-edit">', '</p>', $welcome->ID );
+	?>
+</div></div>
+<?php
+	wp_reset_postdata();
+}
+?>
+
 <div id="page" class="hfeed site">
 	<?php do_action( 'before' ); ?>
-
 
 	<div id="main" class="site-main clear">

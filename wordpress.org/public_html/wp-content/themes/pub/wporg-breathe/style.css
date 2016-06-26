@@ -276,3 +276,78 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 		border-bottom-color: #0073aa;
 	}
 }
+
+.make-welcome-wrapper {
+	width:100%;
+	background: #eeeeee;
+}
+
+.make-welcome {
+	font-size: 14px;
+	color: #333;
+	line-height: 1.45;
+	width: 100%;
+	max-width: 960px;
+	margin: calc(-4em + 16px) auto 4em auto;
+	padding-bottom: 14px;
+}
+
+.make-welcome h4 {
+	margin: 14px 0;
+}
+
+.make-welcome p {
+	display: inline;
+}
+
+.make-welcome h4,
+.make-welcome .welcome p:first-child {
+	font-weight: normal;
+	font-size: 18px;
+	font-family: "Open Sans", serif;
+}
+
+.make-welcome .column {
+	vertical-align: top;
+	display: inline-block;
+	padding: 0 1.5%;
+}
+
+.make-welcome .welcome {
+	padding-top: 1%;
+}
+
+.make-welcome .o2-appended-tags,
+.make-welcome .o2-post-footer-actions {
+	display: none;
+}
+
+.make-welcome .make-welcome-edit {
+	display: block;
+	text-align: right;
+	margin: 0 5px 5px 0;
+}
+
+@media screen and (min-width: 960px) {
+	.make-welcome {
+		padding-bottom: 0;
+	}
+
+	.make-welcome p {
+		display: block;
+	}
+
+	.make-welcome .column {
+		width: 30%;
+		padding: 1.5%;
+	}
+
+	.make-welcome .welcome p:first-child {
+		font-size: 22px;
+		margin: 12px 0 23px;
+	}
+
+	.make-welcome h4, .make-welcome p {
+		margin-bottom: 14px;
+	}
+}
