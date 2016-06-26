@@ -1169,6 +1169,7 @@ input.text {
 	float: left;
 }
 
+.wporg-make .site-title a:before,
 body.wporg-make #headline h2 a:before {
 	-webkit-font-smoothing: antialiased;
 	display: inline-block;
@@ -1190,6 +1191,22 @@ body.make-meta #headline h2 a:before { content: '\f325'; }
 body.make-training #headline h2 a:before { content: '\f118'; }
 body.make-flow #headline h2 a:before { content: '\f115'; }
 body.make-tv #headline h2 a:before { content: '\f235'; }
+
+.make-core .site-title a:before { content: '\f475'; }
+.make-design .site-title a:before { content: '\f309'; }
+.make-mobile .site-title a:before { content: '\f470'; }
+.make-accessibility .site-title a:before { content: '\f483'; }
+.make-polyglots .site-title2 a:before { content: '\f326'; }
+.make-support .site-title a:before { content: '\f125'; }
+.make-themes .site-title a:before { content: '\f100'; }
+.make-plugins .site-title a:before { content: '\f106'; }
+.make-docs .site-title a:before { content: '\f105'; }
+.make-community .site-title a:before { content: '\f307'; }
+.make-meta .site-title a:before { content: '\f325'; }
+.make-training .site-title a:before { content: '\f118'; }
+.make-systems .site-title a:before { content: '\f107'; }
+.make-flow .site-title a:before { content: '\f115'; }
+.make-tv .site-title a:before { content: '\f235'; }
 
 #headline .login {
 	font-size: 12px;
