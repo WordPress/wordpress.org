@@ -214,7 +214,7 @@ class Plugin_Directory {
 				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => true,
+			'show_ui'           => is_super_admin(),
 			'show_admin_column' => false,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
