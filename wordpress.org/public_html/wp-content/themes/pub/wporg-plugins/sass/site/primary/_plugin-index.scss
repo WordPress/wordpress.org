@@ -62,7 +62,6 @@
 		.rating-count {
 			color: #999;
 			@include font-size( ms-unitless( ms(-2) ) );
-			position: relative;
 			top: -1px;
 		}
 	}

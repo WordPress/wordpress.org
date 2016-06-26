@@ -2087,7 +2087,6 @@ p a:not(.button):hover {
   color: #999;
   font-size: 12.8px;
   font-size: 0.8rem;
-  position: relative;
   top: -1px;
 }
 
