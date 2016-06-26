@@ -30,11 +30,14 @@ input[type="submit"] {
 
 /* wporg-header overrides */
 #wporg-header input.text {
+	font-size: inherit !important;
 	padding: 3px;
 }
+
 #wporg-header input[type="submit"] {
 	box-shadow: none;
 }
+
 .site,
 .custom-menu .site,
 .site-branding {
