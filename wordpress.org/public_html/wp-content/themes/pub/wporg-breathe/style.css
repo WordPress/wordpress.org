@@ -115,7 +115,8 @@ body {
 body,
 .widget,
 .o2-app-page-title,
-.comment.alt {
+.comment.alt,
+.comment.alt .comment.alt {
 	background-color: transparent;
 }
 
