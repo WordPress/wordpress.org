@@ -188,6 +188,14 @@ article.page a.author-avatar img.avatar {
 }
 
 /*
+ * Resolved/unresolved
+ */
+article.state-resolved,
+article.state-unresolved {
+	border-top: 0;
+}
+
+/*
  * Private post status
  */
 article.status-private,
