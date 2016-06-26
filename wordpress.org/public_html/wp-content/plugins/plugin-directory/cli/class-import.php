@@ -142,6 +142,9 @@ class Import {
 			wp_set_post_terms( $plugin->ID, Tag_To_Category::map( $readme->tags ), 'plugin_category' );
 		}
 
+		// Set tags from the readme
+		wp_set_post_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
+
 		if ( in_array( 'adopt-me', $readme->tags ) ) {
 			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
 		}

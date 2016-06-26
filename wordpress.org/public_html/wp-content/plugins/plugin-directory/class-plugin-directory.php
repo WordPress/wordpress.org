@@ -41,7 +41,7 @@ class Plugin_Directory {
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
-		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ) );
+		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ), 10, 2 );
 		add_filter( 'tax_input_pre', array( $this, 'filter_tax_input' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
@@ -192,6 +192,33 @@ class Plugin_Directory {
 			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
+			),
+		) );
+
+		register_taxonomy( 'plugin_tags', 'plugin', array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_tags',
+			'rewrite'           => array(
+				'hierarchical' => false,
+				'slug'         => 'tags',
+				'with_front'   => false,
+				'ep_mask'      => EP_TAGS,
+			),
+			'labels'            => array(
+				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Tag',   'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Tag',     'wporg-plugins' ),
+				'update_item'   => __( 'Update Tag',   'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Tag',  'wporg-plugins' ),
+				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
+				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			'meta_box_cb'       => false,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
 			),
 		) );
 
@@ -420,11 +447,12 @@ class Plugin_Directory {
 	/**
 	 * Checks if the current users is a super admin before allowing terms to be added.
 	 *
-	 * @param string $term The term to add or update.
+	 * @param string $term     The term to add or update.
+	 * @param string $taxonomy The taxonomy of the term.
 	 * @return string|\WP_Error The term to add or update or WP_Error on failure.
 	 */
-	public function pre_insert_term_prevent( $term ) {
-		if ( ! is_super_admin() ) {
+	public function pre_insert_term_prevent( $term, $taxonomy ) {
+		if ( 'plugin_tags' != $taxonomy && ! is_super_admin() ) {
 			$term = new \WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-plugins' ) );
 		}
 
