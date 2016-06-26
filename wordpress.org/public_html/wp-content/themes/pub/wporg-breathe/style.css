@@ -11,7 +11,8 @@ body, button, input, select, textarea,
 }
 
 /* wp4.css overrides */
-p a {
+p a,
+p a:hover {
 	border-bottom: none;
 }
 
@@ -58,6 +59,10 @@ input[type="submit"] {
 	font-size: 28px;
 	font-weight: 300;
 	line-height: 1;
+}
+
+.site-header .site-title a:hover {
+	color: rgba( 255, 255, 255, 0.8 );
 }
 
 .navigation-main {
@@ -109,8 +114,13 @@ body {
 
 body,
 .widget,
-.o2-app-page-title {
+.o2-app-page-title,
+.comment.alt {
 	background-color: transparent;
+}
+
+.archive .o2-app-page-title {
+	color: inherit;
 }
 
 .content-area {
