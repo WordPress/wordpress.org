@@ -166,29 +166,32 @@ article.page .entry-title,
 article.post a.author-avatar,
 article#post-new a.author-avatar,
 article.page a.author-avatar {
+	border: 0;
 	box-shadow: none;
 }
 
-.author-avatar img.avatar,
-article.post a.author-avatar img.avatar,
-article#post-new a.author-avatar img.avatar,
-article.page a.author-avatar img.avatar {
-	border-radius: 50%;
-	border: 0;
-	height: 50px !important;
-	width: 50px !important;
-}
-
+.author-avatar .avatar,
 .o2-comment .avatar,
 .tag-p2-xpost .avatar {
 	border-radius: 50%;
-	border: 0;
+}
+
+.author-avatar img.avatar:hover {
+	border-radius: 0 !important;
+}
+
+article.post a.author-avatar img.avatar,
+article#post-new a.author-avatar img.avatar,
+article.page a.author-avatar img.avatar {
+	height: 50px !important;
+	width: 50px !important;
 }
 
 /*
  * Private post status
  */
-article.status-private {
+article.status-private,
+article.status-private .comment.alt {
 	background: #fef0f0;
 }
 
@@ -205,5 +208,13 @@ article.status-private {
 	color: #FFF;
 	font-size: 18px;
 	padding: 13px 5px 0px;
-	background: #dc3232 ;
+	background: #dc3232;
+}
+
+article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon,
+article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon:hover,
+article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericon.open,
+article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclosure.genericons.open:hover {
+	color: #dc3232;
+	background: #fef0f0;
 }
