@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+#!/usr/bin/php
 <?php
 
 error_reporting(-1);
@@ -101,6 +101,7 @@ class wpdb_quick {
 		if ( ! mysql_select_db( $dbname, $this->dbh ) ) {
 			die( 'Could not select the MySQL database.' );
 		}
+		mysql_set_charset( 'utf8mb4' );
 	}
 
 	function get_results( $query ) {
