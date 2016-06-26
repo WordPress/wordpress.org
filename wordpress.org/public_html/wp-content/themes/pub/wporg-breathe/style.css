@@ -255,3 +255,9 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	margin: 0 0 4em;
 	padding: 0;
 }
+
+@media screen and (min-width: 769px) {
+	#wporg-header ul li a.current ~ .uparrow {
+		border-bottom-color: #0073aa;
+	}
+}
