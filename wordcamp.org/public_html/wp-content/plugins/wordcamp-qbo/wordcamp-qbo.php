@@ -446,7 +446,7 @@ class WordCamp_QBO {
 		$payment_instructions = str_replace( "\t", '', "
 			Please indicate the invoice number in the memo field when making your payment.
 
-			Please remit checks to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768
+			Please remit checks (in USD only) to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768
 
 			For payments via ACH or international wire transfers:
 
