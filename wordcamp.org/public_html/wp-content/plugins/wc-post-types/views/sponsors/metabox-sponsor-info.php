@@ -120,7 +120,9 @@
 			value="<?php echo esc_attr( $vat_number ); ?>"
 		/>
 
-		<span class="description">Only necessary for sponsors invoiced in Euros</span>
+		<span class="description">
+			<?php esc_html_e( 'Only necessary for sponsors invoiced in Euros', 'wordcamporg' ); ?>
+		</span>
 	</li>
 </ul>
 
