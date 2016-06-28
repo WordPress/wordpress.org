@@ -57,8 +57,10 @@ class Translation_Sync {
 		$plugin_project = $project_parts[1] . '/' . $this->project_mapping[ $project_parts[2] ];
 
 		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, 'wporg_translate_sync_plugin_translations', [
-			'plugin'     => $plugin_slug,
-			'gp_project' => $plugin_project,
+			[
+				'plugin'     => $plugin_slug,
+				'gp_project' => $plugin_project,
+			],
 		] );
 	}
 
