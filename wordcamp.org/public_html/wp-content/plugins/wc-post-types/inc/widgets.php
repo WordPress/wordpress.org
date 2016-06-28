@@ -37,13 +37,15 @@ class WCB_Widget_Sponsors extends WP_Widget {
 		<style>
 			.wcb_widget_sponsors .sponsor-logo {
 				display: block;
+				padding-bottom: 10px;
 			}
+
 			.wcb_widget_sponsors .sponsor-logo img {
 				max-width: 100%;
 				height: auto;
 
 				/* Conform to https://adblockplus.org/acceptable-ads */
-				max-height: 300px;
+				max-height: 150px;
 				width: auto;
 			}
 		</style>
@@ -68,7 +70,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 				<?php while ( $sponsors->have_posts() ) : $sponsors->the_post(); ?>
 
 					<a class="sponsor-logo" href="<?php the_permalink(); ?>">
-						<?php ( has_post_thumbnail() ) ? the_post_thumbnail() : the_title(); ?>
+						<?php ( has_post_thumbnail() ) ? the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ) : the_title(); ?>
 					</a>
 
 				<?php endwhile; ?>

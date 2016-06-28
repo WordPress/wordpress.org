@@ -107,3 +107,13 @@
 .wcorg-session-links li:last-child::after {
 	content: '';
 }
+
+/*
+ * [sponsors]
+ */
+.wcorg-sponsors img {
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 150px;
+}

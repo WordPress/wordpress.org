@@ -18,6 +18,7 @@ class WordCamp_Post_Types_Plugin {
 		add_action( 'init', array( $this, 'register_post_types' ) );
 		add_action( 'init', array( $this, 'register_taxonomies' ) );
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'after_theme_setup', array( $this, 'add_image_sizes' ) );
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -79,6 +80,13 @@ class WordCamp_Post_Types_Plugin {
 		$page = add_submenu_page( 'edit.php?post_type=wcb_sponsor', __( 'Order Sponsor Levels', 'wordcamporg' ), __( 'Order Sponsor Levels', 'wordcamporg' ), 'edit_posts', 'sponsor_levels', array( $this, 'render_order_sponsor_levels' ) );
 
 		add_action( "admin_print_scripts-$page", array( $this, 'enqueue_order_sponsor_levels_scripts' ) );
+	}
+
+	/**
+	 * Add custom image sizes
+	 */
+	function add_image_sizes() {
+		add_image_size( 'wcb-sponsor-logo-horizontal-2x', 600, 220, false );
 	}
 
 	/**
@@ -1097,9 +1105,11 @@ class WordCamp_Post_Types_Plugin {
 
 					<div class="wcorg-sponsor-description">
 						<?php if ( 'website' == $attr['link'] && $website ) : ?>
-							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_post_thumbnail(); ?></a>
+							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>">
+								<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ); ?>
+							</a>
 						<?php else : ?>
-							<?php the_post_thumbnail(); ?>
+							<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ); ?>
 						<?php endif; ?>
 
 						<?php the_content(); ?>
