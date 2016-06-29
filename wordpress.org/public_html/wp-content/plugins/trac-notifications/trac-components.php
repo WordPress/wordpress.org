@@ -502,6 +502,7 @@ jQuery( document ).ready( function( $ ) {
 	function render_tickets( $tickets ) {
 		echo '<ul class="ticket-list">';
 		foreach ( $tickets as $ticket ) {
+			$ticket = (object) $ticket;
 			echo '<li><a href="https://core.trac.wordpress.org/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
 			if ( ! empty( $ticket->focuses ) ) {
 				echo ' <span class="focus">' . implode( '</span> <span class="focus">', explode( ', ', esc_html( $ticket->focuses ) ) ) . '</span>';
