@@ -13,6 +13,8 @@
 		unPublishLink = $( '#unpublish-expl' ),
 		rowActions    = $( '#expl-row-actions' );
 
+	var	rowCreateLink = $( '.create-expl' );
+
 	/**
 	 * AJAX handler for creating and associating a new explanation post.
 	 *
@@ -26,7 +28,8 @@
 			error:   createExplError,
 			data:    {
 				nonce:   $( this ).data( 'nonce' ),
-				post_id: $( this ).data( 'id' )
+				post_id: $( this ).data( 'id' ),
+				context: event.data.context
 			}
 		} );
 	}
@@ -37,9 +40,17 @@
 	 * @param {object} data Data response object.
 	 */
 	function createExplSuccess( data ) {
-		createLink.hide();
-		rowActions.html( '<a href="post.php?post=' + data.post_id + '&action=edit">' + wporg.editContentLabel + '</a>' );
-		statusLabel.text( wporg.statusLabel.draft );
+		var editLink = '<a href="post.php?post=' + data.post_id + '&action=edit">' + wporg.editContentLabel + '</a>';
+
+		if ( 'edit' == data.context ) {
+			// Action in the parsed post type edit screen.
+			createLink.hide();
+			rowActions.html( editLink );
+			statusLabel.text( wporg.statusLabel.draft );
+		} else {
+			// Row link in the list table.
+			$( '#post-' + data.parent_id + ' .add-expl' ).html( editLink + ' | ' );
+		}
 	}
 
 	/**
@@ -87,7 +98,8 @@
 	function unPublishError( data ) {}
 
 	// Events.
-	$( '#create-expl' ).on( 'click', createExplanation );
-	$( '#unpublish-expl' ).on( 'click', unPublishExplantaion );
+	createLink.on( 'click', { context: 'edit' }, createExplanation );
+	rowCreateLink.on( 'click', { context: 'list' }, createExplanation );
+	unPublishLink.on( 'click', unPublishExplantaion );
 
 } )( jQuery );

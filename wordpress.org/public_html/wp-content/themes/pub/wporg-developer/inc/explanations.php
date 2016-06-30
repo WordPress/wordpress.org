@@ -36,18 +36,23 @@ class WPORG_Explanations {
 		$this->post_types = DevHub\get_parsed_post_types();
 
 		// Setup.
-		add_action( 'init',                    array( $this, 'register_post_type'     ), 0   );
-		add_action( 'init',                    array( $this, 'remove_editor_support'  ), 100 );
-		add_action( 'edit_form_after_title',   array( $this, 'post_to_expl_controls'  )      );
-		add_action( 'edit_form_top',           array( $this, 'expl_to_post_controls'  )      );
-		add_action( 'admin_bar_menu',          array( $this, 'toolbar_edit_link'      ), 100 );
+		add_action( 'init',                    array( $this, 'register_post_type'     ), 0     );
+		add_action( 'init',                    array( $this, 'remove_editor_support'  ), 100   );
+		add_action( 'edit_form_after_title',   array( $this, 'post_to_expl_controls'  )        );
+		add_action( 'edit_form_top',           array( $this, 'expl_to_post_controls'  )        );
+		add_action( 'admin_bar_menu',          array( $this, 'toolbar_edit_link'      ), 100   );
+
+		// Permissions.
+		add_action( 'after_switch_theme',      array( $this, 'add_roles'              )        );
+		add_filter( 'user_has_cap',            array( $this, 'grant_caps'             )        );
+		add_filter( 'post_row_actions',        array( $this, 'expl_row_action'        ), 10, 2 );
 
 		// Script and styles.
-		add_action( 'admin_enqueue_scripts',   array( $this, 'admin_enqueue_scripts'  )      );
+		add_action( 'admin_enqueue_scripts',   array( $this, 'admin_enqueue_scripts'  )        );
 
 		// AJAX.
-		add_action( 'wp_ajax_new_explanation', array( $this, 'new_explanation'        )      );
-		add_action( 'wp_ajax_un_publish',      array( $this, 'un_publish_explanation' )      );
+		add_action( 'wp_ajax_new_explanation', array( $this, 'new_explanation'        )        );
+		add_action( 'wp_ajax_un_publish',      array( $this, 'un_publish_explanation' )        );
 
 		// Content tweaks.
 		add_filter( 'syntaxhighlighter_precode', 'html_entity_decode' );
@@ -75,6 +80,8 @@ class WPORG_Explanations {
 			'show_ui'           => true,
 			'show_in_menu'      => false,
 			'show_in_nav_menus' => false,
+			'capability_type'   => 'explanation',
+			'map_meta_cap'      => true,
 			'supports'          => array( 'editor', 'revisions' ),
 			'rewrite'           => false,
 			'query_var'         => false,
@@ -153,21 +160,26 @@ class WPORG_Explanations {
 		if ( $this->exp_post_type !== $post->post_type ) {
 			return;
 		}
-
-		$parent = is_a( $post, 'WP_Post' ) ? $post->post_parent : get_post( $post )->post_parent;
-
-		if ( 0 !== $parent ) :
-			$prefix = '<strong>' . __( 'Associated with: ', 'wporg' ) . '</strong>';
-			?>
-			<div class="postbox-container" style="margin-top:20px;width:100%;">
-				<div class="postbox">
-					<div class="inside" style="padding-bottom:0;">
-						<?php edit_post_link( get_the_title( $parent ), $prefix, '', $parent ); ?>
-					</div>
+		?>
+		<div class="postbox-container" style="margin-top:20px;width:100%;">
+			<div class="postbox">
+				<div class="inside" style="padding-bottom:0;">
+					<strong><?php _e( 'Associated with: ', 'wporg' ); ?></strong>
+					<?php
+					// Edit link if the current user can edit, otherwise view link.
+					if ( current_user_can( 'edit_post', $post->post_parent ) ) :
+						edit_post_link( get_the_title( $post->post_parent ), '', '', $post->post_parent );
+					else :
+						printf( '<a href="%1$s">%2$s</a>',
+							esc_url( get_permalink( $post->post_parent ) ),
+							str_replace( 'Explanation: ', '', get_the_title( $post->post_parent ) )
+						);
+					endif;
+					?>
 				</div>
 			</div>
+		</div>
 		<?php
-		endif;
 	}
 
 	/**
@@ -201,6 +213,110 @@ class WPORG_Explanations {
 	}
 
 	/**
+	 * Adds the 'Explanation Editor' role.
+	 *
+	 * @access public
+	 */
+	public function add_roles() {
+		add_role(
+			'expl_editor',
+			__( 'Explanation Editor', 'wporg' ),
+			array(
+				'unfiltered_html'             => true,
+				'read'                        => true,
+				'edit_explanations'           => true,
+				'edit_others_explanations'    => true,
+				'edit_published_explanations' => true,
+				'edit_private_explanations'   => true,
+				'read_private_explanations'   => true,
+			)
+		);
+	}
+
+	/**
+	 * Grants explanation capabilities to users.
+	 *
+	 * @access public
+	 *
+	 * @param array $caps Capabilities.
+	 * @return array Modified capabilities array.
+	 */
+	public function grant_caps( $caps ) {
+
+		if ( ! is_user_member_of_blog() ) {
+			return $caps;
+		}
+
+		$role = wp_get_current_user()->roles[0];
+
+		// Only grant explanation post type caps for admins, editors, and explanation editors.
+		if ( in_array( $role, array( 'administrator', 'editor', 'expl_editor' ) ) ) {
+			$base_caps = array(
+				'edit_explanations', 'edit_others_explanations',
+				'edit_published_explanations', 'edit_posts'
+			);
+
+			foreach ( $base_caps as $cap ) {
+				$caps[ $cap ] = true;
+			}
+
+			$editor_caps = array(
+				'publish_explanations',
+				'delete_explanations', 'delete_others_explanations',
+				'delete_published_explanations', 'delete_private_explanations',
+				'edit_private_explanations', 'read_private_explanations'
+			);
+
+			if ( ! empty( $caps['edit_pages'] ) ) {
+				foreach ( $editor_caps as $cap ) {
+					$caps[ $cap ] = true;
+				}
+			}
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Adds the 'Add/Edit Explanation' row actions to the parsed post type list tables.
+	 *
+	 * @access public
+	 *
+	 * @param array    $actions Row actions.
+	 * @param \WP_Post $post    Parsed post object.
+	 * @return array (Maybe) filtered row actions.
+	 */
+	public function expl_row_action( $actions, $post ) {
+		if ( ! in_array( $post->post_type, \DevHub\get_parsed_post_types() ) ) {
+			return $actions;
+		}
+
+		$expl = \DevHub\get_explanation( $post );
+
+		$expl_action = array();
+
+		if ( $expl ) {
+			if ( ! current_user_can( 'edit_posts', $expl->ID ) ) {
+				return $actions;
+			}
+
+			$expl_action['edit-expl'] = sprintf( '<a href="%1$s" alt="%2$s">%3$s</a>',
+				esc_url( get_edit_post_link( $expl->ID ) ),
+				esc_attr__( 'Edit Explanation', 'wporg' ),
+				__( 'Edit Explanation', 'wporg' )
+			);
+		} else {
+			$expl_action['add-expl'] = sprintf( '<a href="" class="create-expl" data-nonce="%1$s" data-id="%2$s">%3$s</a>',
+				esc_attr( wp_create_nonce( 'create-expl' ) ),
+				esc_attr( $post->ID ),
+				__( 'Add Explanation', 'wporg' )
+			);
+		}
+
+		return array_merge( $expl_action, $actions );
+	}
+
+	/**
 	 * Output the Explanation status controls.
 	 *
 	 * @access public
@@ -215,11 +331,11 @@ class WPORG_Explanations {
 			?>
 			<span id="expl-row-actions" class="expl-row-actions">
 				<a id="edit-expl" href="<?php echo get_edit_post_link( $explanation->ID ); ?>">
-					<?php _e( 'Edit Content', 'wporg' ); ?>
+					<?php _e( 'Edit Explanation', 'wporg' ); ?>
 				</a>
 				<?php if ( 'publish' == get_post_status( $explanation ) ) : ?>
 					<a href="#unpublish" id="unpublish-expl" data-nonce="<?php echo wp_create_nonce( 'unpublish-expl' ); ?>" data-id="<?php the_ID(); ?>">
-						<?php _e( 'Un-publish', 'wporg' ); ?>
+						<?php _e( 'Unpublish', 'wporg' ); ?>
 					</a>
 				<?php endif; ?>
 			</span><!-- .expl-row-actions -->
@@ -249,7 +365,7 @@ class WPORG_Explanations {
 
 		switch( $status = $post->post_status ) {
 			case 'draft' :
-				$label = __( 'Drafted', 'wporg' );
+				$label = __( 'Draft', 'wporg' );
 				break;
 			case 'pending' :
 				$label = __( 'Pending Review', 'wporg' );
@@ -273,17 +389,24 @@ class WPORG_Explanations {
 	 */
 	public function admin_enqueue_scripts() {
 
+		$parsed_post_types = array();
+
+		foreach ( \DevHub\get_parsed_post_types() as $post_type ) {
+			$parsed_post_types[] = $post_type;
+			$parsed_post_types[] = "edit-{$post_type}";
+		}
+
 		if ( in_array( get_current_screen()->id, array_merge(
-				DevHub\get_parsed_post_types(),
+				$parsed_post_types,
 				array( 'wporg_explanations', 'edit-wporg_explanations' )
 		) ) ) {
 			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20141218' );
 			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20141218', true );
 
 			wp_localize_script( 'wporg-explanations', 'wporg', array(
-				'editContentLabel' => __( 'Edit Content', 'wporg' ),
+				'editContentLabel' => __( 'Edit Explanation', 'wporg' ),
 				'statusLabel'      => array(
-					'draft'        => __( 'Drafted', 'wporg' ),
+					'draft'        => __( 'Draft', 'wporg' ),
 					'pending'      => __( 'Pending Review', 'wporg' ),
 					'publish'      => __( 'Published', 'wporg' ),
 				),
@@ -300,6 +423,7 @@ class WPORG_Explanations {
 		check_ajax_referer( 'create-expl', 'nonce' );
 
 		$post_id = empty( $_REQUEST['post_id'] ) ? 0 : absint( $_REQUEST['post_id'] );
+		$context = empty( $_REQUEST['context'] ) ? '' : sanitize_text_field( $_REQUEST['context'] );
 
 		if ( DevHub\get_explanation( $post_id ) ) {
 			wp_send_json_error( new WP_Error( 'post_exists', __( 'Explanation already exists.', 'wporg' ) ) );
@@ -315,7 +439,9 @@ class WPORG_Explanations {
 
 			if ( ! is_wp_error( $explanation ) && 0 !== $explanation ) {
 				wp_send_json_success( array(
-					'post_id' => $explanation
+					'post_id'   => $explanation,
+					'parent_id' => $post_id,
+					'context'   => $context
 				) );
 			} else {
 				wp_send_json_error(
