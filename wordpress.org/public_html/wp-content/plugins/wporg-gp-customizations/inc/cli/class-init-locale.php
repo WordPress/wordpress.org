@@ -62,6 +62,7 @@ class Init_Locale extends WP_CLI_Command {
 				'meta/rosetta',
 				'meta/themes',
 				'meta/plugins',
+				'meta/plugins-v3',
 				'meta/forums',
 				'bbpress/1.1.x',
 			) );
