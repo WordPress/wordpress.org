@@ -41,6 +41,8 @@ class WPORG_Explanations {
 		add_action( 'edit_form_after_title',   array( $this, 'post_to_expl_controls'  )        );
 		add_action( 'edit_form_top',           array( $this, 'expl_to_post_controls'  )        );
 		add_action( 'admin_bar_menu',          array( $this, 'toolbar_edit_link'      ), 100   );
+		add_action( 'admin_menu',              array( $this, 'admin_menu'             )        );
+		add_action( 'load-post-new.php',       array( $this, 'prevent_direct_creation')        );
 
 		// Permissions.
 		add_action( 'after_switch_theme',      array( $this, 'add_roles'              )        );
@@ -78,7 +80,9 @@ class WPORG_Explanations {
 			'public'            => false,
 			'hierarchical'      => false,
 			'show_ui'           => true,
-			'show_in_menu'      => false,
+			'show_in_menu'      => true,
+			'menu_icon'         => 'dashicons-info',
+			'show_in_admin_bar' => false,
 			'show_in_nav_menus' => false,
 			'capability_type'   => 'explanation',
 			'map_meta_cap'      => true,
@@ -96,6 +100,55 @@ class WPORG_Explanations {
 	public function remove_editor_support() {
 		foreach ( $this->post_types as $type ) {
 			remove_post_type_support( $type, 'editor' );
+		}
+	}
+
+	/**
+	 * Customizes admin menu.
+	 *
+	 * - Removes "Add new".
+	 * - Adds count of pending explanations.
+	 *
+	 * @access public
+	 */
+	public function admin_menu() {
+		global $menu;
+
+		$menu_slug = 'edit.php?post_type=' . $this->exp_post_type;
+
+		// Remove 'Add New' from submenu.
+		remove_submenu_page( $menu_slug, 'post-new.php?post_type=' . $this->exp_post_type );
+
+		// Add pending posts count.
+		$counts = wp_count_posts( $this->exp_post_type );
+		$count = $counts->pending;
+		if ( $count ) {
+			// Find the explanations menu item.
+			foreach ( $menu as $i => $item ) {
+				if ( $menu_slug == $item[2] ) {
+					// Modify it to include the pending count.
+					$menu[ $i ][0] = sprintf(
+						__( 'Explanations %s', 'wporg' ),
+						"<span class='update-plugins count-{$count}'><span class='plugin-count'>" . number_format_i18n( $count ) . "</span></span>"
+					);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents direct access to the admin page for creating a new explanation.
+	 *
+	 * Only prevents admin UI access to directly create a new explanation. It does
+	 * not attempt to prevent direct programmatic creation of a new explanation.
+	 *
+	 * @access public
+	 */
+	public function prevent_direct_creation() {
+		if ( $this->exp_post_type == $_GET['post_type'] ) {
+			wp_safe_redirect( admin_url() );
+			exit;
 		}
 	}
 
