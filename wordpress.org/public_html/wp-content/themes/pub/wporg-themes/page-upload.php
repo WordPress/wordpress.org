@@ -18,7 +18,7 @@ if ( have_posts() ) :
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
-				<?php do_shortcode( '[wporg-themes-upload]' ); ?>
+				<?php the_content(); // do_shortcode( '[wporg-themes-upload]' ); ?>
 			</div><!-- .entry-content -->
 
 		</article><!-- #post-## -->
