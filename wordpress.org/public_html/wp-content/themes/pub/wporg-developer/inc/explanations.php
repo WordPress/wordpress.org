@@ -453,8 +453,8 @@ class WPORG_Explanations {
 				$parsed_post_types,
 				array( 'wporg_explanations', 'edit-wporg_explanations' )
 		) ) ) {
-			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20141218' );
-			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20141218', true );
+			wp_enqueue_style( 'wporg-admin', get_template_directory_uri() . '/stylesheets/admin.css', array(), '20160630' );
+			wp_enqueue_script( 'wporg-explanations', get_template_directory_uri() . '/js/explanations.js', array( 'jquery', 'wp-util' ), '20160630', true );
 
 			wp_localize_script( 'wporg-explanations', 'wporg', array(
 				'editContentLabel' => __( 'Edit Explanation', 'wporg' ),
