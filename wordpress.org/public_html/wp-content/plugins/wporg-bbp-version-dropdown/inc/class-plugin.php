@@ -151,7 +151,7 @@ class Plugin {
 	public function get_wp_versions() {
 		$versions = array_merge(
 			array( '0' => '' ),
-			apply_filters( 'get_wp_versions', array() ),
+			apply_filters( 'wporg_bbp_get_wp_versions', array() ),
 			array( 'other' => __( 'Other:', 'wporg' ) )
 		);
 		return $versions;
