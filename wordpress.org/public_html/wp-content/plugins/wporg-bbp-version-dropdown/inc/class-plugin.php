@@ -43,6 +43,11 @@ class Plugin {
 
 		// Scripts and styles
 		add_action( 'bbp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// WordPress.org integration
+		if ( function_exists( 'wporg_get_versions' ) ) {
+			add_filter( 'wporg_bbp_get_wp_versions', 'wporg_get_versions' );
+		}
 	}
 
 	/**
