@@ -338,17 +338,21 @@ jQuery( document ).ready( function( $ ) {
 
 	function generate_component_breakdowns() {
 		if ( isset( $this->breakdown_component_type, $this->breakdown_component_milestone_type, $this->breakdown_component_unreplied ) ) {
-			return;
+			return true;
 		}
 
 		$type_filled = array_fill_keys( array( 'defect (bug)', 'enhancement', 'feature request', 'task (blessed)' ), 0 );
 		$rows = wp_cache_get( 'trac_tickets_by_component_type_milestone' );
 		if ( ! $rows ) {
 			$rows = $this->api->get_tickets_by_component_type_milestone();
+			if ( ! $rows ) {
+				return false; // API error.
+			}
 			wp_cache_add( 'trac_tickets_by_component_type_milestone', $rows, '', 300 );
 		}
 
 		foreach ( $rows as $row ) {
+			$row = (object) $row;
 			if ( empty( $component_type[ $row->component ] ) ) {
 				$component_type[ $row->component ] = $type_filled;
 			}
@@ -369,10 +373,16 @@ jQuery( document ).ready( function( $ ) {
 		$this->breakdown_component_type = $component_type;
 		$this->breakdown_component_milestone_type = $component_milestone_type;
 		$this->breakdown_component_unreplied = $component_unreplied;
+
+		return true;
 	}
 
-	function ticket_table( $component  ) {
-		$this->generate_component_breakdowns();
+	function ticket_table( $component ) {
+		$result = $this->generate_component_breakdowns();
+		if ( ! $result ) {
+			return;
+		}
+
 		$component_type = $this->breakdown_component_type;
 		$component_milestone_type = $this->breakdown_component_milestone_type;
 
@@ -456,8 +466,9 @@ jQuery( document ).ready( function( $ ) {
 
 		if ( $next_milestone ) {
 			$count = count( $next_milestone );
-			echo '<h3>' . sprintf( _n( '%s ticket slated for ' . $next_milestone[0]->milestone, '%s tickets slated for ' . $next_milestone[0]->milestone, $count ), $count ) . '</h3>';
-			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone[0]->milestone ) );
+			$next_milestone_object = (object) $next_milestone[0];
+			echo '<h3>' . sprintf( _n( '%s ticket slated for ' . $next_milestone_object->milestone, '%s tickets slated for ' . $next_milestone_object->milestone, $count ), $count ) . '</h3>';
+			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone_object->milestone ) );
 			$this->render_tickets( $next_milestone );
 		}
 
@@ -554,6 +565,11 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function component_table_row( $post ) {
+		$result = $this->generate_component_breakdowns();
+		if ( ! $result ) {
+			return;
+		}
+
 		static $once = true;
 		if ( $once ) {
 			$once = false;
@@ -561,7 +577,6 @@ jQuery( document ).ready( function( $ ) {
 		}
 
 		$component = $post->post_title;
-		$this->generate_component_breakdowns();
 		$history = $this->api->get_component_history( $component );
 
 		$arrow = '';
