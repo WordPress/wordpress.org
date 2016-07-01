@@ -38,7 +38,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20160129'
+		'20160701'
 	);
 
 	wp_register_style(
@@ -255,6 +255,12 @@ function bb_base_single_topic_description() {
 	$voice_count = sprintf( _n( '%s participant', '%s participants', $voice_count, 'wporg-forums' ), bbp_number_format( $voice_count ) );
 	$last_reply  = bbp_get_topic_last_active_id( $topic_id );
 
+	// WP version
+	$wp_version = '';
+	if ( function_exists( 'WordPressdotorg\Forums\Version_Dropdown\get_topic_version' ) ) {
+		$wp_version = WordPressdotorg\Forums\Version_Dropdown\get_topic_version( $topic_id );
+	}
+
 	?>
 
 	<li class="topic-forum">In: <a href="<?php bbp_forum_permalink( bbp_get_topic_forum_id() ); ?>"><?php bbp_topic_forum_title(); ?></a></li>
@@ -268,7 +274,12 @@ function bb_base_single_topic_description() {
 		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
 		<li class="topic-subscribe"><?php bbp_topic_subscription_link( array( 'before' => '', 'topic_id' => $_topic_id ) ); ?></li>
 		<li class="topic-favorite"><?php bbp_topic_favorite_link( array( 'topic_id' => $_topic_id ) ); ?></li>
-	<?php endif;
+	<?php endif; ?>
+	<?php if ( ! empty( $wp_version ) ) : ?>
+		<li class="wp-version"><?php echo esc_html( $wp_version ); ?></li>
+	<?php endif; ?>
+
+	<?php
 }
 
 function bb_base_single_forum_description() {

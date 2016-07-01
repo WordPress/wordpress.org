@@ -215,6 +215,10 @@ div.bbp-submit-wrapper {
 	content: "\f105";
 }
 
+.sidebar .topic-info li.wp-version:before {
+	content: "\f120";
+}
+
 /* Sticky topics */
 #bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink:before,
 #bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink:before {
