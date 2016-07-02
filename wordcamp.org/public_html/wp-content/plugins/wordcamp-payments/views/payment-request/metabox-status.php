@@ -60,9 +60,20 @@
 			<?php endif; ?>
 
 			<div class="misc-pub-section hide-if-js wcb-mark-incomplete-notes">
-				<label for="wcp_mark_incomplete_notes">What information is needed?</label>
-				<textarea id="wcp_mark_incomplete_notes" name="wcp_mark_incomplete_notes" class="large-text" rows="5"
-					placeholder="Need to attach receipt, etc" <?php echo $incomplete_readonly; ?>><?php echo esc_textarea( $incomplete_notes ); ?></textarea>
+				<label for="wcp_mark_incomplete_notes">
+					<?php esc_html_e( 'What information is needed?', 'wordcamporg' ); ?>
+				</label>
+
+				<textarea
+					id="wcp_mark_incomplete_notes"
+					name="wcp_mark_incomplete_notes"
+					class="large-text"
+					rows="5"
+					placeholder="<?php esc_html_e( 'Need to attach receipt, etc', 'wordcamporg' ); ?>"
+					<?php echo $incomplete_readonly; ?>
+				><?php
+					echo esc_textarea( $incomplete_notes );
+				?></textarea>
 			</div>
 
 			<div class="clear"></div>
