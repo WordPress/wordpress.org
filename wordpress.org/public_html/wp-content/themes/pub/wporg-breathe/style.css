@@ -72,6 +72,12 @@ input[type="submit"] {
 	line-height: 1;
 }
 
+@media (max-width: 400px) {
+	.site-header .site-title a {
+		font-size: 16px;
+	}
+}
+
 .site-header .site-title a:hover {
 	color: rgba( 255, 255, 255, 0.8 );
 }
