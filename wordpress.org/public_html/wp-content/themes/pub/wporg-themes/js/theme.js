@@ -1448,6 +1448,10 @@ window.wp = window.wp || {};
 				event.preventDefault();
 			}
 
+			if ( ! tags ) {
+				return;
+			}
+
 			$( 'body' ).addClass( 'filters-applied' );
 			$( '.filter-links li > a.current' ).removeClass( 'current' );
 			filteringBy.empty();
