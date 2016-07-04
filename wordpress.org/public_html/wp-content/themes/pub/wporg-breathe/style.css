@@ -122,6 +122,20 @@ input[type="submit"] {
 	font-size: 14px;
 }
 
+#secondary-content .navigation-main ul li {
+	display: block;
+	float: left;
+	width: 100%;
+}
+
+#secondary-content .navigation-main a {
+	color: #0073aa;
+}
+
+#secondary-content .navigation-main ul li:hover > a,
+#secondary-content .navigation-main ul li.current-menu-item a {
+}
+
 /*
  * p2-breathe/style.css overrides
  */
