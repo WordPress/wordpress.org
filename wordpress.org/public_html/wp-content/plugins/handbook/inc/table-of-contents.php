@@ -9,9 +9,33 @@ class WPorg_Handbook_TOC {
 
 	protected $styles = '<style> .toc-jump { text-align: right; font-size: 12px; } .page .toc-heading { margin-top: -50px; padding-top: 50px !important; }</style>';
 
-	function __construct( $post_types ) {
+	/**
+	 * Arguments.
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $args = array();
+
+	/**
+	 * Constructor.
+	 *
+	 * @access public
+	 *
+	 * @param array $post_types Post types.
+	 * @param array $args {
+	 *     Optional. Table of Contents arguments. Defualt emtpy array.
+	 *
+	 *     @type string $header_text Header text for the table. HTML-escaped on output.
+	 * }
+	 */
+	public function __construct( $post_types, $args = array() ) {
 		$this->post_types = (array) $post_types;
 		add_action( 'template_redirect', array( $this, 'load_filters' ) );
+
+		$this->args = (object) wp_parse_args( $args, array(
+			'header_text' => __( 'Topics', 'wporg' ),
+		) );
 	}
 
 	function load_filters() {
@@ -29,7 +53,15 @@ class WPorg_Handbook_TOC {
 		return $t . '-handbook';
 	}
 
-	function add_toc( $content ) {
+	/**
+	 * Converts given content to dynamically add the ToC.
+	 *
+	 * @access public
+	 *
+	 * @param string $content Content.
+	 * @return string Modified content.
+	 */
+	public function add_toc( $content ) {
 		$toc = '';
 
 		$items = $this->get_tags( 'h([1-4])', $content );
@@ -41,7 +73,7 @@ class WPorg_Handbook_TOC {
 			$contents_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
 			$toc .= $this->styles;
 			$toc .= '<div class="table-of-contents">';
-			$toc .= "<$contents_header>" . __( 'Topics', 'wporg' ) . "</$contents_header><ul class=\"items\">";
+			$toc .= "<$contents_header>" . esc_html( $this->args->header_text ) . "</$contents_header><ul class=\"items\">";
 			$last_item = false;
 			foreach ( $items as $item ) {
 				if ( $last_item ) {
