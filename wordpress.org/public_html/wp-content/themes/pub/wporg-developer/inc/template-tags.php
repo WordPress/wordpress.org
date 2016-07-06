@@ -549,7 +549,7 @@ namespace DevHub {
 
 			$delimiter = false !== strpos( $signature, '$' ) ? '"' : "'";
 			$signature = $delimiter . $signature . $delimiter;
-			$signature = '<span class="hook-func">' . $hook_type . '</span> ( ' . $signature;
+			$signature = '<span class="hook-func">' . $hook_type . '</span>( ' . $signature;
 			if ( $hook_args ) {
 				$signature .= ', ';
 				$signature .= implode( ', ', $hook_args );
@@ -579,7 +579,7 @@ namespace DevHub {
 			}
 		}
 
-		$signature .= ' (';
+		$signature .= '(';
 		if ( $args = implode( ', ', $args_strings ) ) {
 			$signature .= $args . '&nbsp;';
 		}
@@ -1320,20 +1320,7 @@ namespace DevHub {
 
 		$post_field = get_post_field( $field, $explanation, $context );
 
-		// If retrieving the explanation content for display, add the TOC if available.
-		if ( 'post_content' === $field && 'display' === $context ) {
-			if ( class_exists( 'WPorg_Handbook_TOC' ) ) :
-				$TOC = new \WPorg_Handbook_TOC( get_parsed_post_types() );
-
-				add_filter( 'the_content', array( $TOC, 'add_toc' ) );
-				$post_field = apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
-				remove_filter( 'the_content', array( $TOC, 'add_toc' ) );
-			else :
-				$post_field = apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
-			endif;
-		}
-
-		return $post_field;
+		return apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
 	}
 
 	/**
@@ -1439,5 +1426,32 @@ namespace DevHub {
 
 		echo $form;
 	}
-}
 
+	/**
+	 * Retrieves all content for reference template parts.
+	 *
+	 * @return string Template part markup retrieved via output buffering.
+	 */
+	function get_reference_template_parts() {
+		// Order dictates order of display.
+		$templates = array(
+			'description',
+			'params',
+			'return',
+			'source',
+			'changelog',
+			'explanation',
+			'related',
+			'methods',
+			'notes'
+		);
+
+		ob_start();
+
+		foreach ( $templates as $part ) {
+			get_template_part( 'reference/template', $part );
+		}
+
+		return ob_get_clean();
+	}
+}

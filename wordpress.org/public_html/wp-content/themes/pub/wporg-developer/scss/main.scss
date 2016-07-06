@@ -1056,6 +1056,10 @@
 		.table-of-contents {
 			width: 300px;
 		}
+		.toc-jump {
+			display: inline-block;
+			float: right;
+		}
 	}
 
 	.callout:before {
@@ -1087,19 +1091,6 @@
 	/* = Usage
 	----------------------------------------------- */
 	.usage {
-		article {
-			float: left;
-			width: 50%;
-		}
-
-		.used-by {
-			padding-right: 30px;
-		}
-
-		.uses {
-			padding-left: 30px;
-		}
-
 		ul {
 			line-height: 1.7; /* Slightly increase the line height for more readability */
 			list-style-type: none;
@@ -1428,10 +1419,12 @@
 
 		li {
 			padding-bottom: 6px !important;
+			font-weight: 600;
 
 			ul li,
 			ul li ul li {
 				padding-bottom: 0 !important;
+				font-weight: normal;
 			}
 
 			a {
@@ -1613,24 +1606,28 @@
 				padding-left: 45px;
 				text-indent: -45px;
 			}
-
-			.table-of-contents {
-				width: 200px;
-			}
 		}
 
 		.two-columns .box {
 			width: 99%;
 		}
+	}
+}
 
-		.usage {
-			article {
+@media (max-width: 32em) {
+	.devhub-wrap {
+		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
+			.table-of-contents {
 				width: 100%;
+				margin-bottom: 10px;
 			}
 
-			.uses {
-				padding-left: 0;
-				margin-top: 30px;
+			section {
+				overflow: inherit;
+			}
+
+			hr {
+				clear: both;
 			}
 		}
 	}
@@ -1647,10 +1644,6 @@
 				line-height: 2rem;
 				text-indent: -20px;
 				font-size: 16px;
-			}
-			.table-of-contents {
-				width: 100%;
-				margin-bottom: 10px;
 			}
 		}
 
