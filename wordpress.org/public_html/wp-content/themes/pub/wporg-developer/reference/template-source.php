@@ -12,7 +12,7 @@ $source_file = get_source_file();
 if ( ! empty( $source_file ) ) :
 	?>
 	<hr />
-	<section class="source">
+	<section class="source-content">
 		<h3><?php _e( 'Source', 'wporg' ); ?></h3>
 		<p>
 			<?php printf( __( 'File: %s', 'wporg' ),
@@ -29,10 +29,12 @@ if ( ! empty( $source_file ) ) :
 					<a href="#" class="show-complete-source"><?php _e( 'Expand full source code', 'wporg' ); ?></a>
 					<a href="#" class="less-complete-source"><?php _e( 'Collapse full source code', 'wporg' ); ?></a>
 				</span>
+				<span><a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a></span>
+			</p>
+		<?php else : ?>
+			<p>
+				<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a>
 			</p>
 		<?php endif; ?>
-		<p>
-			<a href="<?php echo get_source_file_link(); ?>"><?php _e( 'View on Trac', 'wporg' ); ?></a>
-		</p>
 	</section>
 <?php endif; ?>
