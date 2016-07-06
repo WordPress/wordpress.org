@@ -23,11 +23,7 @@
 			'header_text' => __( 'Table of Contents', 'wporg' )
 		) );
 
-		add_filter( 'the_content', array( $TOC, 'add_toc' ) );
-
-		$content = apply_filters( 'the_content', $content );
-
-		remove_filter( 'the_content', array( $TOC, 'add_toc' ) );
+		$content = $TOC->add_toc( $content );
 	endif;
 	?>
 
