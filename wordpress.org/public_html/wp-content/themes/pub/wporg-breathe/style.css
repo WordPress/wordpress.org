@@ -313,7 +313,7 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 
 #make-welcome-hide {
 	float: right;
-	margin: 30px;
+	margin: 15px;
 	cursor: pointer;
 }
 
@@ -348,6 +348,16 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	padding: 0 1.5%;
 }
 
+.make-welcome .first-column {
+	width: 71%;
+	display: inline-block;
+}
+
+.make-welcome .second-column {
+	width: 25%;
+	float: right;
+}
+
 .make-welcome .welcome {
 	padding-top: 1%;
 }
@@ -361,6 +371,7 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	display: block;
 	text-align: right;
 	margin: 0 5px 5px 0;
+	clear: both;
 }
 
 @media screen and (min-width: 960px) {
@@ -384,5 +395,14 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 
 	.make-welcome h4, .make-welcome p {
 		margin-bottom: 14px;
+	}
+}
+
+@media screen and (max-width: 1000px) {
+	.make-welcome .first-column,
+	.make-welcome .second-column {
+		width: 100%;
+		float: none;
+		clear: both;
 	}
 }

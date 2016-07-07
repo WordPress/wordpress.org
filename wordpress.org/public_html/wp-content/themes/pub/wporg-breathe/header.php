@@ -26,11 +26,17 @@ $cookie = 'welcome-' . get_current_blog_id();
 
 $hash = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 
-if ( $welcome && md5( $welcome->post_content ) !== $hash ) {
+$content_hash = $welcome ? md5( $welcome->post_content ) : '';
+
+if ( $welcome && ( empty( $hash ) || $content_hash !== $hash ) ) {
+	$columns = preg_split( '|<hr\s*/?>|', $welcome->post_content );
+	if ( count( $columns ) === 2 ) {
+		$welcome->post_content = "<div class='first-column'>\n\n{$columns[0]}</div><div class='second-column'>\n\n{$columns[1]}</div>";
+	}
 	setup_postdata( $welcome );
 ?>
 <div class="make-welcome-wrapper">
-	<span id="make-welcome-hide" class="dashicons dashicons-no" data-hash="<?php echo md5( $welcome->post_content ); ?>" data-cookie="<?php echo $cookie; ?>" title="<?php _e( 'Hide this message', 'p2-breathe' ); ?>"></span>
+	<span id="make-welcome-hide" class="dashicons dashicons-no" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>" title="<?php _e( 'Hide this message', 'p2-breathe' ); ?>"></span>
 	<div class="make-welcome">
 		<?php
 		the_content();
