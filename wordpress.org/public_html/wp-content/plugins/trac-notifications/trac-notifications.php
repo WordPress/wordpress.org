@@ -244,7 +244,7 @@ class wporg_trac_notifications {
 		if ( ! empty( $notifications['component'][ $ticket['component'] ] ) ) {
 			$reasons['component'] = sprintf( 'you have subscribed to the %s component', $ticket['component'] );
 		}
-		if ( ! empty( $notifiations['milestone'][ $ticket['milestone'] ] ) ) {
+		if ( ! empty( $notifications['milestone'][ $ticket['milestone'] ] ) ) {
 			$reasons['milestone'] = sprintf( 'you have subscribed to the %s milestone', $ticket['milestone'] );
 		}
 
