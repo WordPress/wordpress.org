@@ -12,7 +12,7 @@ require WPORGPATH . 'header.php';
 		<?php endif; ?>
 
 		<nav id="site-navigation" class="navigation-main clear" role="navigation">
-			<div class="screen-reader-text skip-link"><a href="#content" title="<?php esc_attr_e( 'Skip to content', 'p2-breathe' ); ?>"><?php _e( 'Skip to content', 'p2-breathe' ); ?></a></div>
+			<div class="screen-reader-text skip-link"><a href="#content" title="<?php _e( 'Skip to content', 'p2-breathe' ); ?>"><?php _e( 'Skip to content', 'p2-breathe' ); ?></a></div>
 
 			<?php wp_nav_menu( array( 'theme_location' => 'primary', 'fallback_cb' => false ) ); ?>
 		</nav><!-- .navigation-main -->
@@ -22,15 +22,22 @@ require WPORGPATH . 'header.php';
 <?php
 $welcome = get_page_by_path( 'welcome' );
 
-if ( $welcome ) {
+$cookie = 'welcome-' . get_current_blog_id();
+
+$hash = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
+
+if ( $welcome && md5( $welcome->post_content ) !== $hash ) {
 	setup_postdata( $welcome );
 ?>
-<div class="make-welcome-wrapper"><div class="make-welcome">
-	<?php
-	the_content();
-	edit_post_link( __( 'Edit', 'o2' ), '<p class="make-welcome-edit">', '</p>', $welcome->ID );
-	?>
-</div></div>
+<div class="make-welcome-wrapper">
+	<span id="make-welcome-hide" class="dashicons dashicons-no" data-hash="<?php echo md5( $welcome->post_content ); ?>" data-cookie="<?php echo $cookie; ?>" title="<?php _e( 'Hide this message', 'p2-breathe' ); ?>"></span>
+	<div class="make-welcome">
+		<?php
+		the_content();
+		edit_post_link( __( 'Edit', 'o2' ), '<p class="make-welcome-edit">', '</p>', $welcome->ID );
+		?>
+	</div>
+</div>
 <?php
 	wp_reset_postdata();
 }

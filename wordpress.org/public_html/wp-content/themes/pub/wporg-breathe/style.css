@@ -307,6 +307,14 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 .make-welcome-wrapper {
 	width:100%;
 	background: #eeeeee;
+	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
+	margin: -4em 0 4em 0 !important;
+}
+
+#make-welcome-hide {
+	float: right;
+	margin: 30px;
+	cursor: pointer;
 }
 
 .make-welcome {
@@ -315,7 +323,7 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	line-height: 1.45;
 	width: 100%;
 	max-width: 960px;
-	margin: calc(-4em + 16px) auto 4em auto;
+	margin: 0px auto;
 	padding-bottom: 14px;
 }
 
