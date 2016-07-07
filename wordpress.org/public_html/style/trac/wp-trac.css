@@ -1140,6 +1140,7 @@ dl.attachments dt {
 #notifications.subscribed a.watching-ticket {
 	display: inline-block;
 }
+#notifications.receiving p.receiving-notifications-because,
 #notifications.block p.receiving-notifications-because,
 #notifications.blocked p.not-receiving-notifications {
 	display: block;
