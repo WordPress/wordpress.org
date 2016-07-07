@@ -1145,6 +1145,7 @@ dl.attachments dt {
 #notifications.blocked p.not-receiving-notifications {
 	display: block;
 }
+#notifications.blocked.receiving p.receiving-notifications-because,
 #notifications.subscribed p.receiving-notifications-because,
 #notifications.subscribed p.not-receiving-notifications,
 #notifications.subscribed a.watch-this-ticket {
