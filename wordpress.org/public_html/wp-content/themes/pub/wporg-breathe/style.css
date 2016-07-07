@@ -85,7 +85,7 @@ input[type="submit"] {
 .navigation-main {
 	background: transparent;
 	position: static;
-	max-width: 960px;
+	max-width: 940px;
 	margin: -32px auto 0px auto;
 	text-align: right;
 }
@@ -319,8 +319,8 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 .make-welcome-wrapper {
-	width:100%;
-	background: #eeeeee;
+	width: 100%;
+	background: #eee;
 	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
 	margin: -4em 0 4em 0 !important;
 }
@@ -336,9 +336,9 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	color: #333;
 	line-height: 1.45;
 	width: 100%;
-	max-width: 960px;
+	max-width: 940px;
 	margin: 0px auto;
-	padding-bottom: 14px;
+	padding: 0 0 14px;
 }
 
 .make-welcome h4 {
@@ -363,12 +363,12 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 .make-welcome .first-column {
-	width: 71%;
+	width: 69%;
 	display: inline-block;
 }
 
 .make-welcome .second-column {
-	width: 25%;
+	width: 28%;
 	float: right;
 }
 
@@ -384,7 +384,7 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 .make-welcome .make-welcome-edit {
 	display: block;
 	text-align: right;
-	margin: 0 5px 5px 0;
+	padding: 0 0 10px 0;
 	clear: both;
 }
 
