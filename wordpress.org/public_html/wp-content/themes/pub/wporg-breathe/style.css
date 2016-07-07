@@ -161,6 +161,17 @@ body,
 	color: inherit;
 }
 
+@media (max-width: 876px) {
+	body.responsive-show {
+		overflow-y: visible;
+		position: static;
+	}
+
+	#page {
+		overflow-x: visible;
+	}
+}
+
 .content-area {
 	width: 71%;
 }
