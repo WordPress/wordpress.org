@@ -190,6 +190,10 @@ body,
 	color: #4ca6cf;
 }
 
+.home .o2-app-page-title {
+	display: none;
+}
+
 .o2-post {
 	border-top: 2px solid #ddd;
 }
