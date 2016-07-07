@@ -67,11 +67,16 @@ abstract class WP_Credits {
 	}
 
 	private function __construct( $version, $gp_locale ) {
-		wp_cache_init();
+		// Don't reinitialize the object cache if the class is used in WordPress context.
+		if ( ! function_exists( 'wp_using_ext_object_cache' ) || ! wp_using_ext_object_cache() ) {
+			wp_cache_init();
+		}
+
 		$this->version = $version;
 		$this->branch  = self::calculate_branch( $this->version );
-		if ( $gp_locale )
+		if ( $gp_locale ) {
 			$this->set_locale_data( $gp_locale );
+		}
 	}
 
 	private function cache_set( $key, $value ) {
