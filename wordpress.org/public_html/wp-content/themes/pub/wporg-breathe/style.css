@@ -120,6 +120,11 @@ input[type="submit"] {
 	font-size: 14px;
 }
 
+#secondary-content .navigation-main {
+	margin-top: 32px;
+	text-align: left;
+}
+
 #secondary-content .navigation-main ul li {
 	display: block;
 	float: left;
