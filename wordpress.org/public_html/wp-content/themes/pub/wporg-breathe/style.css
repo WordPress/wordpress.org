@@ -330,7 +330,8 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 #make-welcome-hide {
-	float: right;
+	position: absolute;
+	right: 0;
 	margin: 15px;
 	cursor: pointer;
 }
@@ -422,5 +423,6 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 		width: 100%;
 		float: none;
 		clear: both;
+		padding: 0 20px;
 	}
 }
