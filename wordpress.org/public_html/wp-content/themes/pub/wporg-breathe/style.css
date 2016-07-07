@@ -84,12 +84,10 @@ input[type="submit"] {
 
 .navigation-main {
 	background: transparent;
-	display: inline-block;
-	float: right;
-	position: inherit;
-	top: auto;
-	left: auto;
-	width: auto;
+	position: static;
+	max-width: 960px;
+	margin: -32px auto 0px auto;
+	text-align: right;
 }
 
 .navigation-main ul li {
