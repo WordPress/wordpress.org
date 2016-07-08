@@ -148,6 +148,7 @@ function get_whitelist() {
 		),
 		'wceu-volunteers' => array(
 			'lanche86',
+			'paolo',
 			'savione',
 		),
 		'wcus-contributor-day' => array(
