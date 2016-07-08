@@ -20,7 +20,7 @@ class Rosetta_Showcase {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
 	}
 
 	/**
@@ -40,7 +40,7 @@ class Rosetta_Showcase {
 	 * Registers the custom post type used for the showcase.
 	 */
 	public function register_post_type() {
-		$labels = array(
+		$labels = [
 			'name'               => _x( 'Showcase', 'post type general name', 'rosetta' ),
 			'singular_name'      => _x( 'Showcase Site', 'post type singular name', 'rosetta' ),
 			'add_new'            => _x( 'Add New', 'showcase item', 'rosetta' ),
@@ -51,9 +51,9 @@ class Rosetta_Showcase {
 			'search_items'       => __( 'Search Showcase', 'rosetta' ),
 			'not_found'          => __( 'Nothing found', 'rosetta' ),
 			'not_found_in_trash' => __( 'Nothing found in Trash', 'rosetta' ),
-		);
+		];
 
-		$args = array(
+		$args = [
 			'labels'               => $labels,
 			'public'               => true,
 			'show_ui'              => true,
@@ -65,10 +65,10 @@ class Rosetta_Showcase {
 			'show_in_nav_menus'    => false,
 			'can_export'           => false,
 			'exclude_from_search'  => true,
-			'supports'             => array( 'title', 'excerpt' ),
+			'supports'             => [ 'title', 'excerpt' ],
 			'menu_icon'            => 'dashicons-slides',
 			'register_meta_box_cb' => [ $this, 'register_showcase_meta_box' ],
-		);
+		];
 
 		register_post_type( $this->post_type, $args );
 	}
@@ -120,7 +120,7 @@ class Rosetta_Showcase {
 		$url = get_post_meta( $post->ID, '_rosetta_showcase_url', true );
 		?>
 		<p><label for="rosetta_showcase_url"><?php _e( 'URL', 'rosetta' ); ?></label>
-			<input style="margin-left: 0; width: 98%" name="rosetta_showcase_url" type="text" value="<?php echo esc_url( $url ); ?>" /></p>
+			<input style="margin-left: 0; width: 98%" name="rosetta_showcase_url" id="rosetta_showcase_url" type="text" value="<?php echo esc_url( $url ); ?>" /></p>
 		<label for="excerpt"><?php _e( 'Description', 'rosetta' ); ?></label>
 		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo $post->post_excerpt; // textarea_escaped ?></textarea>
 		<?php
@@ -157,9 +157,9 @@ class Rosetta_Showcase {
 	/**
 	 * Disables Jetpack's sharing meta box for a showcase item.
 	 *
-	 * @param $enable Whether the metabox is visible
-	 * @param WP_Post $post    Post object.
-	 * @return bool True if metabox is visible, false if not.
+	 * @param bool    $enable Whether the metabox is enabled.
+	 * @param WP_Post $post   Post object.
+	 * @return bool True if metabox is enabled, false if not.
 	 */
 	public function disable_sharing_meta_box( $enable, $post ) {
 		if ( $this->post_type === $post->post_type ) {
