@@ -62,6 +62,10 @@ class WPorg_Handbook_TOC {
 	 * @return string Modified content.
 	 */
 	public function add_toc( $content ) {
+		if ( ! in_the_loop() ) {
+			return $content;
+		}
+
 		$toc = '';
 
 		$items = $this->get_tags( 'h([1-4])', $content );
