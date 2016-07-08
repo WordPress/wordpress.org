@@ -1055,6 +1055,20 @@
 		}
 		.table-of-contents {
 			width: 300px;
+
+			ul {
+				margin-top: 6px;
+			}
+		}
+		ul.items {
+			li {
+				padding-bottom: 0px !important;
+			}
+			a {
+				&:hover {
+					color: #d54e21 !important;
+				}
+			}
 		}
 		.toc-jump {
 			display: inline-block;
@@ -1412,6 +1426,7 @@
 		}
 	}
 
+	// Handbook ToC items.
 	ul.items {
 		margin-bottom: 8px !important;
 		list-style-type: none !important;

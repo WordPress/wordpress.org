@@ -1265,6 +1265,15 @@ input {
 .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
   width: 300px;
 }
+.devhub-wrap .wp-parser-class .table-of-contents ul, .devhub-wrap .wp-parser-function .table-of-contents ul, .devhub-wrap .wp-parser-hook .table-of-contents ul, .devhub-wrap .wp-parser-method .table-of-contents ul {
+  margin-top: 6px;
+}
+.devhub-wrap .wp-parser-class ul.items li, .devhub-wrap .wp-parser-function ul.items li, .devhub-wrap .wp-parser-hook ul.items li, .devhub-wrap .wp-parser-method ul.items li {
+  padding-bottom: 0px !important;
+}
+.devhub-wrap .wp-parser-class ul.items a:hover, .devhub-wrap .wp-parser-function ul.items a:hover, .devhub-wrap .wp-parser-hook ul.items a:hover, .devhub-wrap .wp-parser-method ul.items a:hover {
+  color: #d54e21 !important;
+}
 .devhub-wrap .wp-parser-class .toc-jump, .devhub-wrap .wp-parser-function .toc-jump, .devhub-wrap .wp-parser-hook .toc-jump, .devhub-wrap .wp-parser-method .toc-jump {
   display: inline-block;
   float: right;
