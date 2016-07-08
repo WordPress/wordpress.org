@@ -50,7 +50,7 @@ class WPORG_Codexify {
 	 */
 	public static function convert_base_wiki_link( $matches ) {
 		$matches[1] = preg_replace( '/[\s]+/', '', trim( $matches[1] ) );
-		return '<a href="' . self::BASE_URI . strtr( $matches[1], ' ', '_' ) . '">' . $matches[1] . '</a>';
+		return '<a href="' . esc_url( self::BASE_URI . strtr( $matches[1], ' ', '_' ) ) . '">' . esc_html( $matches[1] ) . '</a>';
 	}
 
 	/**
@@ -62,7 +62,7 @@ class WPORG_Codexify {
 	 */
 	public static function convert_vbar_wiki_link( $matches ) {
 		$matches[1] = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
-		return '<a href="' . self::BASE_URI . strtr( $matches[1], ' ', '_' ) . '">' . $matches[2] . '</a>';
+		return '<a href="' . esc_url( self::BASE_URI . strtr( $matches[1], ' ', '_' ) ) . '">' . esc_html( $matches[2] ) . '</a>';
 	}
 } }
 
