@@ -10,7 +10,7 @@ namespace DevHub;
 
 if ( $params = get_params() ) :
 	?>
-	<hr/>
+	<hr />
 	<section class="parameters">
 		<h3><?php _e( 'Parameters', 'wporg' ); ?></h3>
 		<dl>

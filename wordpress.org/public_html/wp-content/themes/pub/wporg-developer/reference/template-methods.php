@@ -12,7 +12,7 @@ if ( 'wp-parser-class' === get_post_type() ) :
 	if ( $children = get_children( array( 'post_parent' => get_the_ID(), 'post_status' => 'publish' ) ) ) :
 		usort( $children, __NAMESPACE__ . '\\compare_objects_by_name' );
 		?>
-		<hr/>
+		<hr />
 		<section class="class-methods">
 			<h2><?php _e( 'Methods', 'wporg' ); ?></h2>
 			<ul>

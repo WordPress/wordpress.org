@@ -10,7 +10,7 @@ namespace DevHub;
 
 if ( $explanation = get_explanation_field( 'post_content', get_the_ID() ) ) :
 	?>
-	<hr/>
+	<hr />
 	<section class="explanation">
 		<h2><?php _e( 'More Information', 'wporg' ); ?></h2>
 

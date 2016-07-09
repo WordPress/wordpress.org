@@ -11,7 +11,7 @@ namespace DevHub;
 $changelog_data = get_changelog_data();
 if ( ! empty( $changelog_data ) ) :
 	?>
-	<hr/>
+	<hr />
 	<section class="changelog">
 		<h3><?php _e( 'Changelog', 'wporg' ); ?></h3>
 		<ul>

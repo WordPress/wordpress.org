@@ -10,7 +10,7 @@ namespace DevHub;
 
 if ( show_usage_info() ) :
 	?>
-	<hr id="related" />
+	<hr />
 	<section class="related">
 		<h2><?php _e( 'Related', 'wporg' ); ?></h2>
 
