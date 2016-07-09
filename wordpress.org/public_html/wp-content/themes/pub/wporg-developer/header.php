@@ -13,6 +13,8 @@ require WPORGPATH . 'header.php';
 ?>
 
 <div id="page" <?php body_class( 'hfeed site devhub-wrap' ); ?>>
+	<a href="#main" class="screen-reader-text"><?php _e( 'Skip to content', 'wporg' ); ?></a>
+
 	<?php do_action( 'before' ); ?>
 	<header id="masthead" class="site-header" role="banner">
 		<div class="inner-wrap">
