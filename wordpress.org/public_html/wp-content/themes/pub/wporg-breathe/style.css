@@ -86,6 +86,7 @@ input[type="submit"] {
 	background: transparent;
 	position: static;
 	max-width: 940px;
+	height: 32px;
 	margin: -32px auto 0px auto;
 	text-align: right;
 }
