@@ -136,6 +136,7 @@ namespace {
 
 			<li id="comment-<?php comment_ID(); ?>" <?php comment_class( $comment_class ); ?>>
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
+				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a> 
 				<header class="comment-meta">
 					<?php DevHub_User_Contributed_Notes_Voting::show_voting(); ?>
 					<div class="comment-author vcard">
@@ -184,7 +185,7 @@ namespace {
 				</header>
 				<!-- .comment-metadata -->
 
-				<div class="comment-content">
+				<div class="comment-content" id="comment-content-<?php echo $comment->comment_ID; ?>">
 					<?php comment_text(); ?>
 				</div>
 				<!-- .comment-content -->
