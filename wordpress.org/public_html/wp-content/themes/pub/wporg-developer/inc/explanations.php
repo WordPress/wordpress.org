@@ -251,9 +251,11 @@ class WPORG_Explanations {
 			return;
 		}
 
-		if ( ! empty( $screen->post_type ) ) {
-			// Proceed only if there's an explanation for the current reference post type.
-			if ( $explanation = \DevHub\get_explanation( $screen ) ) {
+		// Proceed only if there's an explanation for the current reference post type.
+		if ( ! empty( $screen->post_type ) && $explanation = \DevHub\get_explanation( $screen ) ) {
+
+			// Must be able to edit the explanation.
+			if ( is_user_member_of_blog() && current_user_can( 'edit_explanation', $explanation->ID ) ) {
 				$post_type = get_post_type_object( $this->exp_post_type );
 
 				$wp_admin_bar->add_menu( array(
