@@ -296,6 +296,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		}
 		echo '">';
 		echo '<span class="dashicons dashicons-arrow-up"></span>';
+		echo '<span class="screen-reader-text">' . $title .  '</span>';
 		echo "</{$tag}>";
 
 		// Total count
@@ -307,6 +308,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		echo '<span '
 			. 'class="user-note-voting-count ' . esc_attr( $class ) . '" '
 			. 'title="' . esc_attr( $title ) . '">'
+			. '<span class="screen-reader-text">' . __( 'Vote results for this note: ', 'wporg' ) .  '</span>'
 			. self::count_votes( $comment_id, 'difference' )
 			. '</span>';
 
@@ -334,6 +336,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		}
 		echo '">';
 		echo '<span class="dashicons dashicons-arrow-down"></span>';
+		echo '<span class="screen-reader-text">' . $title .  '</span>';
 		echo "</{$tag}>";
 
 		echo '</div>';
