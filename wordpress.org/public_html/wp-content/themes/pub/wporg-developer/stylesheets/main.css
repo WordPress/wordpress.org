@@ -301,6 +301,7 @@ input {
    */
   /* = Usage
   ----------------------------------------------- */
+  /* Changelog */
   /* Comments */
   /*
    * Content
@@ -1327,6 +1328,12 @@ input {
 }
 .devhub-wrap .show-complete-source, .devhub-wrap .less-complete-source {
   display: none;
+}
+.devhub-wrap table .changelog-version {
+  width: 10%;
+}
+.devhub-wrap table .changelog-desc {
+  width: 90%;
 }
 .devhub-wrap .loop-pagination {
   text-align: center;
