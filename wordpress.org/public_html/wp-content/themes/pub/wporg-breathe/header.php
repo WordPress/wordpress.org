@@ -37,10 +37,12 @@ if ( $welcome && ( empty( $hash ) || $content_hash !== $hash ) ) {
 ?>
 <div class="make-welcome-wrapper">
 	<span id="make-welcome-hide" class="dashicons dashicons-no" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>" title="<?php _e( 'Hide this message', 'p2-breathe' ); ?>"></span>
+	<?php
+	edit_post_link( __( 'Edit', 'o2' ), '<p class="make-welcome-edit">', '</p>', $welcome->ID );
+	?>
 	<div class="make-welcome">
 		<?php
 		the_content();
-		edit_post_link( __( 'Edit', 'o2' ), '<p class="make-welcome-edit">', '</p>', $welcome->ID );
 		?>
 	</div>
 </div>

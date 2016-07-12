@@ -332,13 +332,26 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	background: #eee;
 	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
 	margin: -4em 0 4em 0 !important;
+	position: relative;
+	padding: 2em 0;
 }
 
 #make-welcome-hide {
 	position: absolute;
 	right: 0;
+	top: 0;
 	margin: 15px;
 	cursor: pointer;
+}
+
+.make-welcome-edit {
+	position: absolute;
+	right: 50px;
+	top: 0;
+	padding-right: 15px;
+	border-right: 1px solid #ccc;
+	font-size: 1.3em;
+	line-height: 1.5;
 }
 
 .make-welcome {
@@ -373,12 +386,12 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 .make-welcome .first-column {
-	width: 69%;
+	width: 71%;
 	display: inline-block;
 }
 
 .make-welcome .second-column {
-	width: 28%;
+	width: 25%;
 	float: right;
 }
 
@@ -389,13 +402,6 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 .make-welcome .o2-appended-tags,
 .make-welcome .o2-post-footer-actions {
 	display: none;
-}
-
-.make-welcome .make-welcome-edit {
-	display: block;
-	text-align: right;
-	padding: 0 0 10px 0;
-	clear: both;
 }
 
 @media screen and (min-width: 960px) {
