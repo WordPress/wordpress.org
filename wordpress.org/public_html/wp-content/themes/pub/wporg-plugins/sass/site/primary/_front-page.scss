@@ -17,6 +17,7 @@
 	.section-title {
 		@include font-size( ms-unitless( ms(4) ) );
 		font-weight: 400;
+		margin-bottom: 48px;
 		margin-bottom: 3rem;
 	}
 
@@ -24,6 +25,7 @@
 		@include font-size( ms-unitless( ms(0) ) );
 		position: absolute;
 		right: 0;
+		top: 11.2px;
 		top: 0.7rem;
 	}
 }

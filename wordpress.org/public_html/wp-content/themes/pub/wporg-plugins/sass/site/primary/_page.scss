@@ -28,6 +28,7 @@
 		h3 {
 			@include font-size(ms-unitless(ms(0)));
 			font-weight: 600;
+			letter-spacing: 0.16px;
 			letter-spacing: 0.01rem;
 			text-transform: uppercase;
 		}

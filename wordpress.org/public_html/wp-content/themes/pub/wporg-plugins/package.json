@@ -4,10 +4,16 @@
   "description": "Theme for the WordPress.org Plugin Directory",
   "author": "wordpressdotorg",
   "license": "GPL-2.0",
+  "repository": {
+    "type": "svn",
+    "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-plugins/"
+  },
   "devDependencies": {
+    "autoprefixer": "^6.3.6",
     "grunt": "^1.0.1",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
+    "grunt-postcss": "^0.8.0",
     "grunt-rtlcss": "^2.0.1",
     "grunt-sass": "^1.2.0"
   }

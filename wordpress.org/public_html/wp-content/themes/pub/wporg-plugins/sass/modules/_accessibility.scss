@@ -1,10 +1,10 @@
 /* Text meant only for screen readers. */
 .screen-reader-text {
 	clip: rect(1px, 1px, 1px, 1px);
-	position: absolute !important;
 	height: 1px;
-	width: 1px;
 	overflow: hidden;
+	position: absolute !important;
+	width: 1px;
 
 	&:focus {
 		background-color: $color__background-screen;

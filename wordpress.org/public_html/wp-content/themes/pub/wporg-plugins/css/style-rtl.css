@@ -109,6 +109,8 @@ figure {
 }
 
 hr {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
   box-sizing: content-box;
   height: 0;
 }
@@ -169,6 +171,8 @@ input {
 
 input[type="checkbox"],
 input[type="radio"] {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 0;
 }
@@ -241,6 +245,7 @@ h1, h2, h3, h4, h5, h6 {
   clear: both;
   font-family: inherit;
   line-height: 1.5;
+  margin: 32px 0 16px;
   margin: 2rem 0 1rem;
 }
 
@@ -255,6 +260,7 @@ h1.title {
   font-size: 0.8rem;
   color: #0073aa;
   font-weight: 600;
+  letter-spacing: 0.8px;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
 }
@@ -284,6 +290,7 @@ h5 {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.16px;
   letter-spacing: 0.01rem;
   text-transform: uppercase;
 }
@@ -292,7 +299,7 @@ h6 {
   font-size: 12.8px;
   font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.05rem;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 
@@ -302,22 +309,28 @@ p {
 
 p.subheading {
   color: #82878c;
+  font-size: 20px;
   font-size: 1.25rem;
   font-weight: 300;
-  margin: -.4rem auto 2rem;
+  margin: -6.4px auto 32px;
+  margin: -0.4rem auto 2rem;
   text-align: center;
 }
 
 p.intro {
+  font-size: 20px;
   font-size: 1.25rem;
 }
 
 p.aside {
+  font-size: 12.8px;
   font-size: 0.8rem;
 }
 
 p.note {
+  font-size: 10.24px;
   font-size: 0.64rem;
+  letter-spacing: 0.16px;
   letter-spacing: 0.01rem;
   max-width: 18.1898940355rem;
 }
@@ -370,6 +383,8 @@ big {
 # Elements
 --------------------------------------------------------------*/
 html {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -377,6 +392,8 @@ html {
 *:before,
 *:after {
   /* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
   box-sizing: inherit;
 }
 
@@ -397,6 +414,7 @@ hr {
   background-color: #eee;
   border: 0;
   height: 2px;
+  margin: 80px auto;
   margin: 5rem auto;
 }
 
@@ -441,6 +459,7 @@ table {
 .notice {
   background: #fff;
   border-right: 4px solid #fff;
+  -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
   box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
   margin: 1em 0;
   padding: 1px 12px;
@@ -454,6 +473,7 @@ table {
 }
 
 .notice.notice-alt {
+  -webkit-box-shadow: none;
   box-shadow: none;
 }
 
@@ -494,8 +514,9 @@ table {
 }
 
 .locale-banner {
-  padding: .5rem;
   background: #C7E8CA;
+  padding: 8px;
+  padding: 0.5rem;
   text-align: center;
   font-size: 12.8px;
   font-size: 0.8rem;
@@ -503,6 +524,7 @@ table {
 
 @media (min-width: 67rem) {
   .locale-banner {
+    margin: 16px auto 0;
     margin: 1rem auto 0;
     max-width: 960px;
   }
@@ -518,19 +540,23 @@ table {
 .button-primary,
 .button-secondary,
 .plugin-upload-form .button-primary {
-  -webkit-appearance: none;
   border: 1px solid;
+  -webkit-border-radius: 3px;
   border-radius: 3px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   cursor: pointer;
   display: inline-block;
   font-size: 0.8rem;
-  line-height: 1;
   height: 1.5625rem;
+  line-height: 1;
   margin: 0;
-  padding: 0 .8rem;
+  padding: 0 12.8px;
+  padding: 0 0.8rem;
   text-decoration: none;
   white-space: nowrap;
+  -webkit-appearance: none;
 }
 
 /* Remove the dotted border on :focus and the extra padding in Firefox */
@@ -546,6 +572,7 @@ input[type="submit"]::-moz-focus-inner {
 .button-group.button-large .button {
   height: 1.953125rem;
   line-height: 1;
+  padding: 0 16px;
   padding: 0 1rem;
 }
 
@@ -555,7 +582,8 @@ input[type="submit"]::-moz-focus-inner {
   font-size: 0.64rem;
   height: 1.25rem;
   line-height: 1;
-  padding: 0 .5rem;
+  padding: 0 8px;
+  padding: 0 0.5rem;
 }
 
 a.button,
@@ -590,6 +618,7 @@ input[type="reset"]:active,
 input[type="reset"]:focus {
   background: none;
   border: none;
+  -webkit-box-shadow: none;
   box-shadow: none;
   padding: 0 2px 1px;
   width: auto;
@@ -603,6 +632,7 @@ input[type="reset"]:focus {
 .button-secondary {
   background: #f7f7f7;
   border-color: #cccccc;
+  -webkit-box-shadow: 0 1px 0 #cccccc;
   box-shadow: 0 1px 0 #cccccc;
   color: #555;
   vertical-align: top;
@@ -628,6 +658,7 @@ p .button {
 .button-secondary:focus,
 .button-link:focus {
   border-color: #5b9dd9;
+  -webkit-box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
   box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
 }
 
@@ -637,12 +668,16 @@ p .button {
 .button-secondary:active {
   background: #eee;
   border-color: #999;
+  -webkit-box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
   box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+  -webkit-transform: translateY(1px);
+  -ms-transform: translateY(1px);
   transform: translateY(1px);
 }
 
 .button.active:focus {
   border-color: #5b9dd9;
+  -webkit-box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0, 115, 170, 0.8);
   box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0, 115, 170, 0.8);
 }
 
@@ -655,10 +690,13 @@ p .button {
 .button-disabled {
   background: #f7f7f7 !important;
   border-color: #ddd !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
   color: #a0a5aa !important;
   cursor: default;
-  box-shadow: none !important;
   text-shadow: 0 1px 0 #fff !important;
+  -webkit-transform: none !important;
+  -ms-transform: none !important;
   transform: none !important;
 }
 
@@ -666,7 +704,9 @@ p .button {
 .button-link {
   background: none;
   border: 0;
+  -webkit-border-radius: 0;
   border-radius: 0;
+  -webkit-box-shadow: none;
   box-shadow: none;
   cursor: pointer;
   margin: 0;
@@ -686,6 +726,7 @@ p .button {
 .plugin-upload-form .button-primary {
   background: #0085ba;
   border-color: #0073aa #006799 #006799;
+  -webkit-box-shadow: 0 1px 0 #006799;
   box-shadow: 0 1px 0 #006799;
   color: #fff;
   text-decoration: none;
@@ -703,6 +744,7 @@ p .button {
 .plugin-upload-form .button-primary:focus {
   background: #008ec2;
   border-color: #006799;
+  -webkit-box-shadow: 0 1px 0 #006799;
   box-shadow: 0 1px 0 #006799;
   color: #fff;
 }
@@ -712,6 +754,7 @@ p .button {
 .download-button:focus,
 .plugin-upload-form .button-primary.focus,
 .plugin-upload-form .button-primary:focus {
+  -webkit-box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
   box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
 }
 
@@ -726,6 +769,7 @@ p .button {
 .plugin-upload-form .button-primary:active {
   background: #0073aa;
   border-color: #006799;
+  -webkit-box-shadow: inset 0 2px 0 #006799;
   box-shadow: inset 0 2px 0 #006799;
   vertical-align: top;
 }
@@ -739,6 +783,7 @@ p .button {
 .plugin-upload-form .button-primary.disabled {
   background: #008ec2 !important;
   border-color: #007cb2 !important;
+  -webkit-box-shadow: none !important;
   box-shadow: none !important;
   color: #66c6e4 !important;
   cursor: default;
@@ -748,6 +793,7 @@ p .button {
 .button-primary.button.button-hero,
 .download-button.button.button-hero,
 .plugin-upload-form .button-primary.button.button-hero {
+  -webkit-box-shadow: 0 2px 0 #006799;
   box-shadow: 0 2px 0 #006799;
 }
 
@@ -760,12 +806,14 @@ p .button {
 .plugin-upload-form .button-primary.button.button-hero.active:hover,
 .plugin-upload-form .button-primary.button.button-hero.active:focus,
 .plugin-upload-form .button-primary.button.button-hero:active {
+  -webkit-box-shadow: inset 0 3px 0 #006799;
   box-shadow: inset 0 3px 0 #006799;
 }
 
 .button-primary-disabled {
   background: #008ec2 !important;
   border-color: #007cb2 !important;
+  -webkit-box-shadow: none !important;
   box-shadow: none !important;
   color: #66c6e4 !important;
   cursor: default;
@@ -784,8 +832,9 @@ p .button {
 }
 
 .button-group > .button {
-  display: inline-block;
+  -webkit-border-radius: 0;
   border-radius: 0;
+  display: inline-block;
   margin-left: -1px;
   z-index: 10;
 }
@@ -799,10 +848,12 @@ p .button {
 }
 
 .button-group > .button:first-child {
+  -webkit-border-radius: 0 3px 3px 0;
   border-radius: 0 3px 3px 0;
 }
 
 .button-group > .button:last-child {
+  -webkit-border-radius: 3px 0 0 3px;
   border-radius: 3px 0 0 3px;
 }
 
@@ -856,7 +907,6 @@ input[type="url"],
 input[type="week"],
 select,
 textarea {
-  -webkit-appearance: none;
   background-color: #fff;
   border: 1px solid #ddd;
   -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
@@ -864,6 +914,7 @@ textarea {
   color: #32373c;
   -webkit-transition: 0.05s border-color ease-in-out;
   transition: 0.05s border-color ease-in-out;
+  -webkit-appearance: none;
 }
 
 input[type="text"]:focus,
@@ -972,11 +1023,11 @@ input[type="radio"]:checked:before {
   display: inline-block;
   float: right;
   font: normal 21px/1 dashicons;
+  vertical-align: middle;
+  width: 16px;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   speak: none;
-  vertical-align: middle;
-  width: 16px;
 }
 
 input[type="checkbox"]:checked:before {
@@ -1009,10 +1060,6 @@ input[type="radio"]:checked:before {
 }
 
 /* Search */
-input[type="search"] {
-  -webkit-appearance: textfield;
-}
-
 input[type="search"]::-webkit-search-decoration {
   display: none;
 }
@@ -1149,16 +1196,19 @@ fieldset label {
 }
 
 .plugin-upload-form legend {
+  margin: 16px 0;
   margin: 1rem 0;
 }
 
 .plugin-upload-form .category-checklist {
   list-style-type: none;
+  margin: 0 0 32px;
   margin: 0 0 2rem;
 }
 
 .plugin-upload-form .category-checklist li {
   float: right;
+  padding: 8px 0;
   padding: 0.5rem 0;
   width: 50%;
 }
@@ -1246,11 +1296,12 @@ p a:not(.button):hover {
 }
 
 .main-navigation ul ul {
+  -webkit-box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
   float: right;
+  right: -999em;
   position: absolute;
   top: 1.5em;
-  right: -999em;
   z-index: 99999;
 }
 
@@ -1303,7 +1354,6 @@ p a:not(.button):hover {
 }
 
 .menu-toggle {
-  -webkit-appearance: none;
   background: transparent;
   border: none;
   color: #fff;
@@ -1312,11 +1362,13 @@ p a:not(.button):hover {
   height: 56px;
   height: 3.5rem;
   overflow: hidden;
+  position: absolute;
+  left: 16px;
+  left: 1rem;
+  top: -58px;
   width: 56px;
   width: 3.5rem;
-  position: absolute;
-  top: -58px;
-  left: 1rem;
+  -webkit-appearance: none;
 }
 
 .toggled .menu-toggle:before {
@@ -1378,15 +1430,17 @@ p a:not(.button):hover {
 /* Text meant only for screen readers. */
 .screen-reader-text {
   clip: rect(1px, 1px, 1px, 1px);
-  position: absolute !important;
   height: 1px;
-  width: 1px;
   overflow: hidden;
+  position: absolute !important;
+  width: 1px;
 }
 
 .screen-reader-text:focus {
   background-color: #f1f1f1;
+  -webkit-border-radius: 3px;
   border-radius: 3px;
+  -webkit-box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
   clip: auto !important;
   color: #21759b;
@@ -1516,6 +1570,7 @@ p a:not(.button):hover {
 .plugin-ratings .reviews-link {
   position: absolute;
   left: 0;
+  top: 4.8px;
   top: 0.3rem;
 }
 
@@ -1538,6 +1593,7 @@ p a:not(.button):hover {
 
 .plugin-ratings .ratings-list {
   list-style-type: none;
+  margin: 16px 0;
   margin: 1rem 0;
   padding: 0;
 }
@@ -1563,6 +1619,7 @@ p a:not(.button):hover {
 .plugin-ratings .ratings-list .counter-back {
   background-color: #ececec;
   width: 58%;
+  width: -webkit-calc(100% - 130px);
   width: calc(100% - 130px);
 }
 
@@ -1610,6 +1667,7 @@ p a:not(.button):hover {
   position: absolute;
   top: 8px;
   width: 100%;
+  width: -webkit-calc(100% - 8px);
   width: calc(100% - 8px);
 }
 
@@ -1634,6 +1692,7 @@ p a:not(.button):hover {
 
 .plugin-meta li {
   border-top: 1px solid #eee;
+  padding: 8px 0;
   padding: 0.5rem 0;
 }
 
@@ -1649,6 +1708,7 @@ p a:not(.button):hover {
 
 .plugin-meta [rel="tag"] {
   background: #eee;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
   color: #000;
   display: inline-block;
@@ -1684,11 +1744,14 @@ p a:not(.button):hover {
 }
 
 #wporg-header form input {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
   box-sizing: content-box;
   padding: 3px;
 }
 
 #wporg-header .button {
+  -webkit-box-shadow: none;
   box-shadow: none;
 }
 
@@ -1696,12 +1759,10 @@ p a:not(.button):hover {
   background-color: #21759b;
   background-image: -webkit-gradient(linear, right top, right bottom, from(#2a95c5), to(#21759b));
   background-image: -webkit-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -moz-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -ms-linear-gradient(top, #2a95c5, #21759b);
-  background-image: -o-linear-gradient(top, #2a95c5, #21759b);
   background-image: linear-gradient(to bottom, #2a95c5, #21759b);
-  border-color: #21759b;
   border-bottom-color: #1e6a8d;
+  border-color: #21759b;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
   box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
 }
 
@@ -1709,11 +1770,9 @@ p a:not(.button):hover {
   background-color: #278ab7;
   background-image: -webkit-gradient(linear, right top, right bottom, from(#2e9fd2), to(#21759b));
   background-image: -webkit-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -moz-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -ms-linear-gradient(top, #2e9fd2, #21759b);
-  background-image: -o-linear-gradient(top, #2e9fd2, #21759b);
   background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
   border-color: #1b607f;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
   box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
@@ -1723,15 +1782,14 @@ p a:not(.button):hover {
   background: #1b607f;
   background-image: -webkit-gradient(linear, right top, right bottom, from(#21759b), to(#278ab7));
   background-image: -webkit-linear-gradient(top, #21759b, #278ab7);
-  background-image: -moz-linear-gradient(top, #21759b, #278ab7);
-  background-image: -ms-linear-gradient(top, #21759b, #278ab7);
-  background-image: -o-linear-gradient(top, #21759b, #278ab7);
   background-image: linear-gradient(to bottom, #21759b, #278ab7);
   border-color: #124560 #2382ae #2382ae #2382ae;
   -webkit-box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
   box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  -webkit-transform: none;
+  -ms-transform: none;
   transform: none;
 }
 
@@ -1743,6 +1801,7 @@ p a:not(.button):hover {
 
 .site-header {
   background: #0073aa;
+  padding: 16px 0;
   padding: 1rem 0;
   position: relative;
 }
@@ -1765,6 +1824,7 @@ p a:not(.button):hover {
   font-size: 1.5625rem;
   font-weight: 300;
   line-height: 1;
+  margin: 0 0 0 32px;
   margin: 0 0 0 2rem;
   max-width: none;
 }
@@ -1780,8 +1840,10 @@ p a:not(.button):hover {
 
 .site-header .site-description {
   color: rgba(255, 255, 255, 0.8);
+  font-size: 20px;
   font-size: 1.25rem;
   font-weight: 300;
+  margin: -6.4px auto 32px;
   margin: -0.4rem auto 2rem;
   text-align: center;
 }
@@ -1793,6 +1855,7 @@ p a:not(.button):hover {
 
 .site-header .search-form .search-field {
   border: 0;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
   font-size: 16px;
   font-size: 1rem;
@@ -1803,6 +1866,7 @@ p a:not(.button):hover {
 
 .site-header .search-form .search-field + .button-search {
   border-right: none;
+  -webkit-border-radius: 2px 0 0 2px;
   border-radius: 2px 0 0 2px;
   display: none;
   margin-right: -6px;
@@ -1812,6 +1876,7 @@ p a:not(.button):hover {
 .site-header .search-form .search-field + .button-search:active {
   background: #006799;
   border-left: 1px solid #006799;
+  -webkit-box-shadow: none;
   box-shadow: none;
 }
 
@@ -1822,9 +1887,11 @@ p a:not(.button):hover {
 
 @media screen and (min-width: 48em) {
   .site-header .search-form .search-field {
+    -webkit-border-radius: 0 2px 2px 0;
     border-radius: 0 2px 2px 0;
     font-size: 10.24px;
     font-size: 0.64rem;
+    width: 126px;
     width: 7rem;
   }
   .site-header .search-form .search-field + .button-search {
@@ -1835,6 +1902,7 @@ p a:not(.button):hover {
 
 @media screen and (min-width: 60em) {
   .site-header .search-form .search-field {
+    width: 160px;
     width: 10rem;
   }
 }
@@ -1862,7 +1930,9 @@ p a:not(.button):hover {
 
 .home .site-header .search-form .search-field {
   border: none;
+  -webkit-border-radius: 0;
   border-radius: 0;
+  -webkit-box-shadow: none;
   box-shadow: none;
   display: block;
   font-size: inherit;
@@ -1876,6 +1946,7 @@ p a:not(.button):hover {
 .home .site-header .search-form .button-search {
   background: transparent;
   border: none;
+  -webkit-box-shadow: none;
   box-shadow: none;
   color: #32373c;
   display: block;
@@ -1891,6 +1962,8 @@ p a:not(.button):hover {
 .home .site-header .search-form .button-search:active {
   background: transparent;
   border: none;
+  -webkit-transform: none;
+  -ms-transform: none;
   transform: none;
 }
 
@@ -1916,6 +1989,7 @@ p a:not(.button):hover {
   font-size: 25px;
   font-size: 1.5625rem;
   font-weight: 400;
+  margin-bottom: 48px;
   margin-bottom: 3rem;
 }
 
@@ -1924,6 +1998,7 @@ p a:not(.button):hover {
   font-size: 1rem;
   position: absolute;
   left: 0;
+  top: 11.2px;
   top: 0.7rem;
 }
 
@@ -2042,6 +2117,7 @@ p a:not(.button):hover {
   .home .type-plugin .entry,
   .search .type-plugin .entry,
   .archive .type-plugin .entry {
+    width: -webkit-calc(96% - 128px);
     width: calc(96% - 128px);
   }
 }
@@ -2105,7 +2181,6 @@ p a:not(.button):hover {
 
 .rtl .dashicons-star-half {
   -webkit-transform: rotateY(180deg);
-  -ms-transform: rotateY(180deg);
   transform: rotateY(180deg);
 }
 
@@ -2115,6 +2190,7 @@ p a:not(.button):hover {
 
 .single .type-plugin .plugin-banner {
   background-position: 50% 50%;
+  -webkit-background-size: 100% 100%;
   background-size: 100%;
   display: inline-block;
   font-size: 0;
@@ -2141,6 +2217,7 @@ p a:not(.button):hover {
   display: none;
   float: right;
   height: 96px;
+  margin-left: 16px;
   margin-left: 1rem;
   width: 96px;
 }
@@ -2152,6 +2229,7 @@ p a:not(.button):hover {
 }
 
 .single .type-plugin .plugin-header .plugin-thumbnail .plugin-icon {
+  -webkit-background-size: contain !important;
   background-size: contain !important;
   height: 96px !important;
   width: 96px !important;
@@ -2232,6 +2310,7 @@ p a:not(.button):hover {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.16px;
   letter-spacing: 0.01rem;
   text-transform: uppercase;
 }
@@ -2244,6 +2323,7 @@ p a:not(.button):hover {
   font-size: 12.8px;
   font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.8px;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
 }
@@ -2275,6 +2355,7 @@ p a:not(.button):hover {
   cursor: pointer;
   font-size: 12.8px;
   font-size: 0.8rem;
+  margin-top: 8px;
   margin-top: 0.5rem;
   position: relative;
 }
@@ -2294,6 +2375,7 @@ p a:not(.button):hover {
   display: inline-block;
   font-size: 12.8px;
   font-size: 0.8rem;
+  margin-top: 8px;
   margin-top: 0.5rem;
 }
 
@@ -2344,6 +2426,7 @@ p a:not(.button):hover {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.16px;
   letter-spacing: 0.01rem;
   margin: 0 0 8px;
   margin: 0 0 0.5rem;
@@ -2365,6 +2448,7 @@ p a:not(.button):hover {
     margin-left: 1rem;
   }
   .single .type-plugin .entry-content .plugin-reviews .review {
+    width: -webkit-calc(100% - 60px - 1rem);
     width: calc(100% - 60px - 1rem);
   }
   .single .type-plugin .entry-content .plugin-reviews .review-header {
@@ -2382,6 +2466,7 @@ p a:not(.button):hover {
 
 .single .type-plugin .entry-content .plugin-developers li {
   display: inline-block;
+  margin: 0 0 16px 4%;
   margin: 0 0 1rem 4%;
   vertical-align: top;
   width: 48%;
@@ -2392,6 +2477,7 @@ p a:not(.button):hover {
 }
 
 .single .type-plugin .entry-content .avatar {
+  -webkit-border-radius: 50%;
   border-radius: 50%;
   margin-left: 10px;
   vertical-align: middle;
@@ -2443,10 +2529,10 @@ p a:not(.button):hover {
 }
 
 .error404 .page-content .logo-swing .dashicons-wordpress {
-  position: absolute;
-  top: 0;
   right: 0;
   max-width: none;
+  position: absolute;
+  top: 0;
   width: 160px;
   width: 10rem;
 }
@@ -2460,45 +2546,108 @@ p a:not(.button):hover {
   font-size: 10rem;
 }
 
-@keyframes hinge {
+@-webkit-keyframes hinge {
   10% {
     width: 180px;
     height: 180px;
+    -webkit-transform: rotate3d(0, 0, 1, 0deg);
     transform: rotate3d(0, 0, 1, 0deg);
   }
   15% {
     width: 185px;
     height: 185px;
+    -webkit-transform: rotate3d(0, 0, 1, 0deg);
     transform: rotate3d(0, 0, 1, 0deg);
   }
   20% {
     width: 180px;
     height: 180px;
+    -webkit-transform: rotate3d(0, 0, 1, -5deg);
     transform: rotate3d(0, 0, 1, -5deg);
   }
   40% {
+    -webkit-transform-origin: top right;
     transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
     animation-timing-function: ease-in-out;
   }
   60% {
+    -webkit-transform: rotate3d(0, 0, 1, -40deg);
     transform: rotate3d(0, 0, 1, -40deg);
+    -webkit-transform-origin: top right;
     transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
     animation-timing-function: ease-in-out;
   }
   40%, 80% {
+    -webkit-transform: rotate3d(0, 0, 1, -60deg);
     transform: rotate3d(0, 0, 1, -60deg);
+    -webkit-transform-origin: top right;
     transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
     animation-timing-function: ease-in-out;
     opacity: 1;
   }
   to {
+    -webkit-transform: translate3d(0, 700px, 0);
+    transform: translate3d(0, 700px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes hinge {
+  10% {
+    width: 180px;
+    height: 180px;
+    -webkit-transform: rotate3d(0, 0, 1, 0deg);
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
+  15% {
+    width: 185px;
+    height: 185px;
+    -webkit-transform: rotate3d(0, 0, 1, 0deg);
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
+  20% {
+    width: 180px;
+    height: 180px;
+    -webkit-transform: rotate3d(0, 0, 1, -5deg);
+    transform: rotate3d(0, 0, 1, -5deg);
+  }
+  40% {
+    -webkit-transform-origin: top right;
+    transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
+  }
+  60% {
+    -webkit-transform: rotate3d(0, 0, 1, -40deg);
+    transform: rotate3d(0, 0, 1, -40deg);
+    -webkit-transform-origin: top right;
+    transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
+  }
+  40%, 80% {
+    -webkit-transform: rotate3d(0, 0, 1, -60deg);
+    transform: rotate3d(0, 0, 1, -60deg);
+    -webkit-transform-origin: top right;
+    transform-origin: top right;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
+    opacity: 1;
+  }
+  to {
+    -webkit-transform: translate3d(0, 700px, 0);
     transform: translate3d(0, 700px, 0);
     opacity: 0;
   }
 }
 
 .hinge {
+  -webkit-animation-duration: 2s;
   animation-duration: 2s;
+  -webkit-animation-name: hinge;
   animation-name: hinge;
 }
 
@@ -2536,6 +2685,7 @@ p a:not(.button):hover {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.16px;
   letter-spacing: 0.01rem;
   text-transform: uppercase;
 }
@@ -2608,6 +2758,7 @@ p a:not(.button):hover {
 
 .pagination .page-numbers {
   border: 1px solid #EEE;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
   color: #0073aa;
   cursor: pointer;
@@ -2616,6 +2767,7 @@ p a:not(.button):hover {
   line-height: 1;
   margin: 0;
   padding: 4px 8px;
+  -webkit-transition: background .2s ease;
   transition: background .2s ease;
 }
 

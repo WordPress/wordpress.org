@@ -7,6 +7,7 @@ h1, h2, h3, h4, h5, h6 {
 	// Override wp4.css.
 	font-family: inherit;
 	line-height: $font__line-height-body;
+	margin: 32px 0 16px;
 	margin: 2rem 0 1rem;
 }
 
@@ -19,6 +20,7 @@ h1.title {
 	@include font-size( ms-unitless( ms(-2) ) );
 	color: $color__link;
 	font-weight: 600;
+	letter-spacing: 0.8px;
 	letter-spacing: 0.05rem;
 	text-transform: uppercase;
 }
@@ -46,6 +48,7 @@ h4 {
 h5 {
 	@include font-size( ms-unitless( ms(0) ) );
 	font-weight: 600;
+	letter-spacing: 0.16px;
 	letter-spacing: 0.01rem;
 	text-transform: uppercase;
 }
@@ -53,6 +56,6 @@ h5 {
 h6 {
 	@include font-size( ms-unitless( ms(-2) ) );
 	font-weight: 600;
-	letter-spacing: 0.05rem;
+	letter-spacing: 0.8px;
 	text-transform: uppercase;
 }

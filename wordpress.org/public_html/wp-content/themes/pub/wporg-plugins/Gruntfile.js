@@ -1,7 +1,32 @@
 /*global module:false*/
 module.exports = function(grunt) {
+	grunt.loadNpmTasks('grunt-postcss');
+
 
 	grunt.initConfig({
+		postcss: {
+			options: {
+				processors: [
+					require('autoprefixer')({
+						browsers: [
+							'Android >= 2.1',
+							'Chrome >= 21',
+							'Edge >= 12',
+							'Explorer >= 7',
+							'Firefox >= 17',
+							'Opera >= 12.1',
+							'Safari >= 6.0'
+						],
+						cascade: false
+					})
+				]
+			},
+			dist: {
+				files: {
+					'css/style.css': 'css/style.css'
+				}
+			}
+		},
 		jshint: {
 			files: [
 				'Gruntfile.js',
@@ -91,7 +116,7 @@ module.exports = function(grunt) {
 			},
 			rtl: {
 				files: ['**/style.css'],
-				tasks: ['rtlcss:dynamic']
+				tasks: ['postcss', 'rtlcss:dynamic']
 			}
 		}
 	});

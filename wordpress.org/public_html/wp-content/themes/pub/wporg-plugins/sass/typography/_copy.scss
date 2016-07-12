@@ -5,19 +5,24 @@ p {
 
 	&.subheading {
 		color: #82878c;
-		font-size: ms(2);
+		@include font-size( ms-unitless( ms(2) ) );
 		font-weight: 300;
-		margin: -.4rem auto 2rem;
+		margin: -6.4px auto 32px;
+		margin: -0.4rem auto 2rem;
 		text-align: center;
 	}
+
 	&.intro {
-		font-size: ms(2);
+		@include font-size( ms-unitless( ms(2) ) );
 	}
+
 	&.aside {
-		font-size: ms(-2);
+		@include font-size( ms-unitless( ms(-2) ) );
 	}
+
 	&.note {
-		font-size: ms(-4);
+		@include font-size( ms-unitless( ms(-4) ) );
+		letter-spacing: 0.16px;
 		letter-spacing: 0.01rem;
 		max-width: ms(26);
 	}

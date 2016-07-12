@@ -6,16 +6,19 @@
 	}
 
 	legend {
+		margin: 16px 0;
 		margin: 1rem 0;
 	}
 
 	.category-checklist {
 		@extend .clear;
 		list-style-type: none;
+		margin: 0 0 32px;
 		margin: 0 0 2rem;
 
 		li {
 			float: left;
+			padding: 8px 0;
 			padding: 0.5rem 0;
 			width: 50%;
 		}
