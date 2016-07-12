@@ -121,6 +121,9 @@ function get_whitelist() {
 		'meta' => array(
 			'obenland',
 		),
+		'meta-devhub' => array(
+			'drew',
+		),
 		'meta-i18n' => array(
 			'ocean90',
 		),
