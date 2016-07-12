@@ -34,7 +34,7 @@ if ( $welcome && ( empty( $hash ) || $content_hash !== $hash ) ) :
 ?>
 <div class="make-welcome">
 	<div class="entry-meta">
-		<?php edit_post_link( __( 'Edit', 'o2' ) ); ?>
+		<?php edit_post_link( __( 'Edit', 'o2' ), '', '', $welcome->ID ); ?>
 		<button type="button" id="make-welcome-hide" class="toggle dashicons dashicons-no" data-hash="<?php echo $content_hash; ?>" data-cookie="<?php echo $cookie; ?>" title="<?php esc_attr_e( 'Hide this message', 'p2-breathe' ); ?>"></button>
 	</div>
 	<div class="entry-content clear">

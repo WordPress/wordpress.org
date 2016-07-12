@@ -384,7 +384,11 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 .make-welcome .entry-meta .post-edit-link {
-	margin-right: 15px;
+	margin-right: 10px;
+	font-size: 1.2em;
+    font-weight: normal;
+    padding-right: 15px;
+    border-right: 1px solid #ccc;
 }
 
 .make-welcome .entry-meta [type="button"] {
