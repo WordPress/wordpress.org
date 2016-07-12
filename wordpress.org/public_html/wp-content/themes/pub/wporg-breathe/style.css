@@ -171,7 +171,7 @@ body,
 	#page {
 		overflow-x: hidden;
 	}
-	
+
 	body.responsive-show #page {
 		overflow-x: visible;
 	}
@@ -327,113 +327,106 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	}
 }
 
-.make-welcome-wrapper {
-	width: 100%;
+.make-welcome {
 	background: #eee;
 	/* jQuery slideUp overrides the margin, causing the animation to be a bit funky. !important stops that. */
 	margin: -4em 0 4em 0 !important;
-	position: relative;
 	padding: 2em 0;
+	position: relative;
+	width: 100%;
 }
 
-#make-welcome-hide {
-	position: absolute;
-	right: 0;
-	top: 0;
-	margin: 15px;
-	cursor: pointer;
-}
-
-.make-welcome-edit {
-	position: absolute;
-	right: 50px;
-	top: 0;
-	padding-right: 15px;
-	border-right: 1px solid #ccc;
-	font-size: 1.3em;
-	line-height: 1.5;
-}
-
-.make-welcome {
+.make-welcome .entry-content {
 	font-size: 14px;
 	color: #333;
 	line-height: 1.45;
 	width: 100%;
 	max-width: 940px;
 	margin: 0px auto;
-	padding: 0 0 14px;
+	padding: 0;
 }
 
-.make-welcome h4 {
+.make-welcome .entry-content h4 {
 	margin: 14px 0;
 }
 
-.make-welcome p {
+.make-welcome .entry-content p {
 	display: inline;
 }
 
-.make-welcome h4,
-.make-welcome .welcome p:first-child {
+.make-welcome .entry-content h4,
+.make-welcome .entry-content .welcome p:first-child {
 	font-weight: normal;
 	font-size: 18px;
 	font-family: "Open Sans", serif;
 }
 
-.make-welcome .column {
+.make-welcome .entry-content .column {
 	vertical-align: top;
 	display: inline-block;
 	padding: 0 1.5%;
 }
 
-.make-welcome .first-column {
-	width: 71%;
-	display: inline-block;
-}
-
-.make-welcome .second-column {
-	width: 25%;
-	float: right;
-}
-
-.make-welcome .welcome {
+.make-welcome .entry-content .welcome {
 	padding-top: 1%;
 }
 
-.make-welcome .o2-appended-tags,
-.make-welcome .o2-post-footer-actions {
+.make-welcome .entry-content .o2-appended-tags,
+.make-welcome .entry-content .o2-post-footer-actions {
 	display: none;
 }
 
-@media screen and (min-width: 960px) {
-	.make-welcome {
-		padding-bottom: 0;
-	}
+.make-welcome .entry-meta {
+	margin: 15px;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
 
-	.make-welcome p {
+.make-welcome .entry-meta .post-edit-link {
+	margin-right: 15px;
+}
+
+.make-welcome .entry-meta [type="button"] {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	-webkit-appearance: none;
+	padding: 0;
+	text-shadow: none;
+}
+
+.make-welcome .entry-meta [type="button"]:focus {
+	outline: thin dotted;
+}
+
+@media screen and (min-width: 960px) {
+	.make-welcome .entry-content p {
 		display: block;
 	}
 
-	.make-welcome .column {
+	.make-welcome .entry-content .column {
 		width: 30%;
 		padding: 1.5%;
 	}
 
-	.make-welcome .welcome p:first-child {
+	.make-welcome .entry-content .welcome p:first-child {
 		font-size: 22px;
 		margin: 12px 0 23px;
 	}
 
-	.make-welcome h4, .make-welcome p {
+	.make-welcome .entry-content h4,
+	.make-welcome .entry-content p {
 		margin-bottom: 14px;
 	}
 }
 
 @media screen and (max-width: 1000px) {
-	.make-welcome .first-column,
-	.make-welcome .second-column {
-		width: auto;
-		float: none;
+	.make-welcome .entry-content .content-area,
+	.make-welcome .entry-content .widget-area {
 		clear: both;
+		float: none;
 		padding: 0 20px;
+		width: auto;
 	}
 }
