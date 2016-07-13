@@ -315,10 +315,14 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	background: #fef0f0;
 }
 
-
 .widget {
 	margin: 0 0 4em;
 	padding: 0;
+}
+
+/* Hide image upload button. No image uploads on make blogs. */
+.o2-editor-toolbar-button.genericon-picture {
+	display: none;
 }
 
 @media screen and (min-width: 769px) {
@@ -386,9 +390,9 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 .make-welcome .entry-meta .post-edit-link {
 	margin-right: 10px;
 	font-size: 1.2em;
-    font-weight: normal;
-    padding-right: 15px;
-    border-right: 1px solid #ccc;
+	font-weight: normal;
+	padding-right: 15px;
+	border-right: 1px solid #ccc;
 }
 
 .make-welcome .entry-meta [type="button"] {
