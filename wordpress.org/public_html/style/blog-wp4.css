@@ -148,3 +148,49 @@ h2.fancy:nth-of-type(1) {
 	max-width: 100%;
 	vertical-align: middle;
 }
+
+/**
+ * Post Navigation
+ */
+.nav-links {
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto;
+	border-top: 1px solid #eaeaea;
+	word-wrap: break-word;
+}
+
+.post-navigation {
+	margin: 5em auto;
+	padding: 0;
+}
+
+.post-navigation a {
+	border-bottom: 1px solid #eaeaea;
+	padding: 11px 0 12px;
+	width: 100%;
+}
+
+.post-navigation .meta-nav {
+	color: #777;
+	display: block;
+	font-size: 13px;
+	line-height: 2;
+	text-transform: uppercase;
+}
+
+.post-navigation a {
+	color: #444;
+	display: block;
+	font-weight: 600;
+	text-transform: none;
+}
+
+.post-navigation a:hover {
+	color: #21759b;
+}
+
+.post-navigation .nav-next {
+	text-align: right;
+}
