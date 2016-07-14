@@ -500,7 +500,7 @@ class Plugin_Directory {
 				break;
 
 			case 'new':
-				$wp_query->query_vars['orderby'] = 'post_modified';
+				$wp_query->query_vars['orderby'] = 'post_date';
 				break;
 		}
 
