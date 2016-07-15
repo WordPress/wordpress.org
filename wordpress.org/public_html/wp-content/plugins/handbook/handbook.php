@@ -121,6 +121,7 @@ class WPorg_Handbook {
 		add_action( 'widgets_init',                       array( $this, 'register_post_type' ) );
 		add_filter( 'post_type_link',                     array( $this, 'post_type_link' ), 10, 2 );
 		add_action( 'template_redirect',                  array( $this, 'redirect_handbook_root_page' ) );
+		add_filter( 'template_include',                   array( $this, 'template_include' ) );
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
@@ -272,6 +273,39 @@ class WPorg_Handbook {
 			wp_safe_redirect( get_post_type_archive_link( $this->post_type ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Use 'single-handbook.php' as the fallback template for handbooks.
+	 *
+	 * Applies to handbooks using a post type other than 'handbook', as well as
+	 * the handbook root page.
+	 *
+	 * @param string $template The path of the template to include.
+	 * @return string
+	 */
+	function template_include( $template ) {
+		$handbook_templates = array();
+
+		// For singular handbook pages not of the 'handbook' post type.
+		if ( is_singular( $this->post_type ) && 'handbook' !== $this->post_type ) {
+			$handbook_templates = array( "single-{$this->post_type}.php", 'single-handbook.php' );
+		}
+		// For handbook landing page.
+		elseif ( is_post_type_archive( $this->post_type ) ) {
+			if ( 'handbook' !== $this->post_type ) {
+				$handbook_templates[] = "single-{$this->post_type}.php";
+			}
+			$handbook_templates[] = 'single-handbook.php';
+		}
+
+		if ( $handbook_templates ) {
+			if ( $handbook_template = locate_template( $handbook_templates ) ) {
+				$template = $handbook_template;
+			}
+		}
+
+		return $template;
 	}
 
 	function pre_get_posts( $query ) {
