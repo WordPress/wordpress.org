@@ -325,11 +325,26 @@ class WPorg_Handbook {
 	}
 
 	function handbook_sidebar() {
-		register_sidebar( array(
+		$sidebar_args = array(
 			'id'          => $this->post_type,
 			'name'        => sprintf( __( '%s Sidebar', 'wporg' ), $this->label ),
 			'description' => sprintf( __( 'Used on %s pages', 'wporg' ), $this->label ),
-		) );
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h1 class="widget-title">',
+			'after_title'   => '</h1>',
+		);
+
+		// P2 usage does not necessitate the custom markup used above.
+		// This can be removed once all P2s are converted to o2.
+		if ( class_exists( 'P2' ) ) {
+			foreach ( array( 'before_widget', 'after_widget', 'before_title', 'after_title' ) as $key ) {
+				unset( $sidebar_args[ $key ] );
+			}
+		}
+
+		register_sidebar( $sidebar_args );
+
 		require_once dirname( __FILE__ ) . '/inc/widgets.php';
 		register_widget( 'WPorg_Handbook_Pages_Widget' );
 	}
