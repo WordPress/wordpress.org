@@ -120,6 +120,7 @@ class WPorg_Handbook {
 		add_filter( 'user_has_cap',                       array( $this, 'grant_handbook_caps' ) );
 		add_action( 'widgets_init',                       array( $this, 'register_post_type' ) );
 		add_filter( 'post_type_link',                     array( $this, 'post_type_link' ), 10, 2 );
+		add_action( 'template_redirect',                  array( $this, 'redirect_handbook_root_page' ) );
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
@@ -137,9 +138,7 @@ class WPorg_Handbook {
 	 * @return array
 	 */
 	function add_body_class( $classes ) {
-		if ( is_post_type_archive( $this->post_type )  ) {
-			$classes[] = 'post-type-archive-handbook';
-		} elseif ( is_singular( $this->post_type ) ) {
+		if ( wporg_is_handbook( $this->post_type ) ) {
 			$classes[] = 'single-handbook';
 		}
 
@@ -236,12 +235,43 @@ class WPorg_Handbook {
 		register_post_type( $this->post_type, $config );
 	}
 
-	function post_type_link( $link, $post ) {
-		if ( $post->post_type === $this->post_type && $post->post_name === $this->post_type ) {
-			return get_post_type_archive_link( $this->post_type );
+	/**
+	 * For a handbook page acting as the root page for the handbook, change its
+	 * permalink to be the equivalent of the post type archive link.
+	 *
+	 * @param string  $post_link The post's permalink.
+	 * @param WP_Post $post      The post in question.
+	 */
+	function post_type_link( $post_link, $post ) {
+		$post_type = get_post_type( $post );
+
+		// Only change links for this handbook's post type.
+		if ( $post_type === $this->post_type ) {
+			// Verify post is not a child page and that its slug matches the criteria to
+			// be a handbook root page.
+			$post_slug = get_post_field( 'post_name', $post );
+			if ( ( $post_slug === $post_type || "{$post_slug}-handbook" === $post_type ) && ! wp_get_post_parent_id( $post ) ) {
+				$post_link = get_post_type_archive_link( $post_type );
+			}
 		}
 
-		return $link;
+		return $post_link;
+	}
+
+	/**
+	 * For a handbook page acting as the root page for the handbook, redirect to the
+	 * post type archive link for the handbook.
+	 */
+	function redirect_handbook_root_page() {
+		if ( is_singular( $this->post_type )
+			&&
+			! is_post_type_archive( $this->post_type )
+			&&
+			in_array( get_query_var( 'name' ), array( $this->post_type, substr( $this->post_type, 0, -9 ) ) )
+		) {
+			wp_safe_redirect( get_post_type_archive_link( $this->post_type ) );
+			exit;
+		}
 	}
 
 	function pre_get_posts( $query ) {
@@ -255,7 +285,6 @@ class WPorg_Handbook {
 			if ( $page ) {
 				$query->set( 'p', $page->ID );
 				$query->is_singular = true;
-				$query->is_post_type_archive = false;
 			}
 			$query->set( 'handbook', $this->post_type );
 		}
