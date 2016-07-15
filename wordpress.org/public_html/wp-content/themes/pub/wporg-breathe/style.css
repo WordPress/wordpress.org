@@ -438,3 +438,59 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 		width: auto;
 	}
 }
+
+/*
+ * Handbook
+ */
+
+.single-handbook #secondary {
+	clear: left;
+}
+
+.single-handbook .widget-area {
+	float: left;
+	margin-right: 4%;
+}
+.handbook-header {
+	line-height: 2em;
+}
+.handbook-header h1 {
+	margin-top: 0;
+}
+
+.post-type-archive-handbook .handbook-name a:not(:hover),
+.single-handbook .handbook-name a:not(:hover) {
+	color: inherit;
+}
+
+.handbook-name {
+	text-align: center;
+	color: #aaa;
+	margin-bottom: 1.5em;
+	overflow: hidden;
+	letter-spacing: 2px;
+	font-size: 1.5em;
+	text-transform: uppercase;
+	border-bottom: 0;
+}
+.handbook-name span {
+	display: inline-block;
+	position: relative;
+}
+.handbook-name span:before,
+.handbook-name span:after {
+	content: "";
+	position: absolute;
+	border-top: 1px solid #ccc;
+	top: 49%;
+	width: 600px;
+}
+.handbook-name span:before {
+	right: 100%;
+	margin-right: 10px;
+}
+.handbook-name span:after {
+	left: 100%;
+	margin-left: 10px;
+}
+
