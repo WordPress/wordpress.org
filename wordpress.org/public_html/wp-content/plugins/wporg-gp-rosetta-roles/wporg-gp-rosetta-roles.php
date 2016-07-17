@@ -404,7 +404,7 @@ class WPorg_GP_Rosetta_Roles {
 	 */
 	public function get_blog_prefix( $locale_slug ) {
 		global $wpdb;
-		static $ros_blogs, $ros_locale_assoc;
+		static $ros_locale_assoc;
 
 		$gp_locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $gp_locale || ! isset( $gp_locale->wp_locale ) ) {
@@ -413,10 +413,8 @@ class WPorg_GP_Rosetta_Roles {
 
 		$wp_locale = $gp_locale->wp_locale;
 
-		if ( ! isset( $ros_blogs ) ) {
+		if ( ! isset( $ros_locale_assoc ) ) {
 			$ros_locale_assoc = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
-			// 6 = Rosetta sites
-			$ros_blogs = $wpdb->get_results( "SELECT domain, blog_id FROM $wpdb->blogs WHERE site_id = 6", OBJECT_K );
 		}
 
 		if ( isset( $ros_locale_assoc[ $wp_locale ] ) ) {
@@ -425,8 +423,16 @@ class WPorg_GP_Rosetta_Roles {
 			return false;
 		}
 
-		if ( isset( $ros_blogs[ "$subdomain.wordpress.org" ] ) ) {
-			return 'wporg_' . $ros_blogs[ "$subdomain.wordpress.org" ]->blog_id . '_';
+		$result = get_sites( [
+			'network_id' => get_current_network_id(),
+			'domain'     => "$subdomain.wordpress.org",
+			'path'       => '/',
+			'number'     => 1,
+		] );
+		$site = array_shift( $result );
+
+		if ( $site ) {
+			return 'wporg_' . $site->blog_id . '_';
 		}
 
 		return false;
