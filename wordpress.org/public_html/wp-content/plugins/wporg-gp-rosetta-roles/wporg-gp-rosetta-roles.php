@@ -68,7 +68,7 @@ class WPorg_GP_Rosetta_Roles {
 			return true;
 		}
 
-		if ( $args['action'] !== 'approve' || ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) ) {
+		if ( 'approve' !== $args['action'] || ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) ) {
 			return false;
 		}
 
@@ -81,12 +81,12 @@ class WPorg_GP_Rosetta_Roles {
 		$locale_slug = $locale_and_project_id->locale;
 		$current_project_id = $locale_and_project_id->project_id;
 
-		// Simple check to see if they're an approver or not
+		// Simple check to see if they're an approver or not.
 		if ( ! $this->is_approver_for_locale( $args['user_id'], $locale_slug ) ) {
 			return false;
 		}
 
-		// Grab the list of Projects (or 'all') that the user can approve
+		// Grab the list of Projects (or 'all') that the user can approve.
 		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_slug );
 		if ( ! $project_access_list ) {
 			return false;
@@ -126,14 +126,13 @@ class WPorg_GP_Rosetta_Roles {
 	}
 
 	/**
-	 * Determine if a given user is a Global Admin.
+	 * Determines if a given user is a Global Admin.
 	 *
 	 * Users present as an administrator on global.wordpress.org are treated as a
 	 * global administrator in GlotPress.
 	 *
-	 * @param int $user A BackPress User object or user ID for the user to check.
-	 *
-	 * @return bool
+	 * @param int $user_id User ID.
+	 * @return bool True, if user is an admin, false if not.
 	 */
 	public function is_global_administrator( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
@@ -147,11 +146,11 @@ class WPorg_GP_Rosetta_Roles {
 	}
 
 	/**
-	 * Determine if a given user is a Translation Approver for a Locale.
+	 * Determines if a given user is a Translation Approver for a Locale.
 	 *
-	 * @param int $user A BackPress User object or user ID for the user to check.
-	 *
-	 * @return bool
+	 * @param int    $user_id     User ID.
+	 * @param string $locale_slug The Locale for which we are checking.
+	 * @return bool True, if user is an approver, false if not.
 	 */
 	public function is_approver_for_locale( $user_id, $locale_slug ) {
 		static $cache = null;
@@ -190,15 +189,14 @@ class WPorg_GP_Rosetta_Roles {
 	}
 
 	/**
-	 * Retrieve a list of Project ID's which the current user can approve for.
+	 * Retrieves a list of project ID's which a user can approve for.
 	 *
 	 * This is likely to be incorrrect in the event that the user is a Translation Editor or Global Admin.
 	 * The array item 'all' is special, which means to allow access to all projects.
 	 *
-	 * @param int    $user            A BackPress User object or user ID for the user to check.
-	 * @param string $locale_slug     The Locale for which we are checking
-	 * @param int    $include_children Whether to include the children project ID's in the return
-	 *
+	 * @param int    $user_id          User ID.
+	 * @param string $locale_slug      The Locale for which we are checking.
+	 * @param bool   $include_children Whether to include the children project ID's in the return.
 	 * @return array A list of the Project ID's for which the current user can approve translations for.
 	 */
 	public function get_project_id_access_list( $user_id, $locale_slug, $include_children = false ) {
@@ -226,7 +224,7 @@ class WPorg_GP_Rosetta_Roles {
 		}
 
 		if ( ! $project_access_list ) {
-			return false;
+			return array();
 		}
 
 		if ( in_array( '0', $project_access_list, true ) ) {
@@ -381,7 +379,7 @@ class WPorg_GP_Rosetta_Roles {
 	 *
 	 * @param string $object_type Current object type.
 	 * @param string $object_id   Current object ID.
-	 * @return array Locale and project ID.
+	 * @return array|false Locale and project ID, false on failure.
 	 */
 	public function get_locale_and_project_id( $object_type, $object_id ) {
 		switch ( $object_type ) {
