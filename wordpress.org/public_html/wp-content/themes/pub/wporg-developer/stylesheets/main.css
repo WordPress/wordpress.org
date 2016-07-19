@@ -299,7 +299,7 @@ input {
   /*
    * section styles
    */
-  /* = Usage
+  /* = Related
   ----------------------------------------------- */
   /* Changelog */
   /* Comments */
@@ -1294,14 +1294,14 @@ input {
 .devhub-wrap .single .wp-parser-class, .devhub-wrap .single .wp-parser-function, .devhub-wrap .single .wp-parser-hook, .devhub-wrap .single .wp-parser-method {
   border-bottom-style: none;
 }
-.devhub-wrap .usage ul {
+.devhub-wrap .related ul {
   line-height: 1.7;
   /* Slightly increase the line height for more readability */
   list-style-type: none;
   margin: 0;
   overflow-x: auto;
 }
-.devhub-wrap .usage .show-more, .devhub-wrap .usage .hide-more {
+.devhub-wrap .related .show-more, .devhub-wrap .related .hide-more {
   display: none;
 }
 .devhub-wrap .source-content {
