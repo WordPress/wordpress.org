@@ -1389,10 +1389,13 @@ p a:not(.button):hover {
   }
   .main-navigation ul {
     display: inline-block;
+    font-size: 0;
   }
   .main-navigation ul li {
     border: 0;
     display: inline-block;
+    font-size: 16px;
+    font-size: 1rem;
     margin-left: 16px;
     margin-left: 1rem;
     padding: 0;
@@ -1850,6 +1853,7 @@ p a:not(.button):hover {
 
 .site-header .search-form {
   display: inline-block;
+  font-size: 0;
   width: 100%;
 }
 
@@ -1868,8 +1872,9 @@ p a:not(.button):hover {
   border-right: none;
   -webkit-border-radius: 2px 0 0 2px;
   border-radius: 2px 0 0 2px;
+  font-size: 16px;
+  font-size: 1rem;
   display: none;
-  margin-right: -6px;
   vertical-align: bottom;
 }
 
@@ -1935,7 +1940,8 @@ p a:not(.button):hover {
   -webkit-box-shadow: none;
   box-shadow: none;
   display: block;
-  font-size: inherit;
+  font-size: 16px;
+  font-size: 1rem;
   margin: 0 auto;
   max-width: 100%;
   padding: 8px;

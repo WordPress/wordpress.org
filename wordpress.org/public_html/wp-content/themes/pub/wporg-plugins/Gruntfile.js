@@ -1,9 +1,34 @@
-/*global module:false*/
-module.exports = function(grunt) {
+/* global module:false, require:function */
+
+var webpack       = require( 'webpack' ),
+	webpackConfig = require( './webpack.config' );
+
+module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-postcss');
 
-
 	grunt.initConfig({
+		webpack: {
+			options: webpackConfig,
+			build: {
+				plugins: webpackConfig.plugins.concat(
+					new webpack.optimize.DedupePlugin(),
+					new webpack.optimize.UglifyJsPlugin( {
+						compress: { warnings: false }
+					} )
+				),
+				output: {
+					path: 'js/'
+				}
+			},
+			'build-dev': {
+				debug: true
+			},
+			'watch-dev': {
+				debug: true,
+				watch: true,
+				keepalive: true
+			}
+		},
 		postcss: {
 			options: {
 				processors: [
@@ -30,7 +55,8 @@ module.exports = function(grunt) {
 		jshint: {
 			files: [
 				'Gruntfile.js',
-				'js/**/*.js'
+				'js/**/*.js',
+				'!js/theme.js'
 			],
 			options: grunt.file.readJSON('.jshintrc')
 		},
@@ -106,9 +132,13 @@ module.exports = function(grunt) {
 			}
 		},
 		watch: {
-			js: {
+			jshint: {
 				files: ['<%= jshint.files %>'],
-				tasks: ['jshint']
+				tasks: ['webpack:build-dev', 'jshint']
+			},
+			webpack: {
+				files: ['js/client/**'],
+				tasks: ['webpack:build-dev']
 			},
 			css: {
 				files: ['**/*.scss'],
@@ -117,14 +147,22 @@ module.exports = function(grunt) {
 			rtl: {
 				files: ['**/style.css'],
 				tasks: ['postcss', 'rtlcss:dynamic']
+			},
+			livereload: {
+				options: { livereload: true },
+				files: [ 'css/style.css' ]
 			}
+
 		}
 	});
 
 	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-rtlcss');
+	grunt.loadNpmTasks('grunt-webpack');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('default', ['jshint', 'sass', 'rtlcss:dynamic']);
+	grunt.registerTask('build', ['webpack:build']);
+
 };

@@ -129,10 +129,12 @@
 
 		ul {
 			display: inline-block;
+			font-size: 0;
 
 			li {
 				border: 0;
 				display: inline-block;
+				@include font-size( ms-unitless( ms(0) ) );
 				margin-right: 16px;
 				margin-right: 1rem;
 				padding: 0;

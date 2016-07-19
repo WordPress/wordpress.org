@@ -81,6 +81,13 @@ function scripts() {
 		'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
 		'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
 	) );
+
+	// wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
+	wp_localize_script( 'wporg-plugins-client', 'app_data', array(
+		'api_url' => untrailingslashit( rest_url() ),
+		'nonce'   => wp_create_nonce( 'wp_rest' ),
+	) );
+
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 

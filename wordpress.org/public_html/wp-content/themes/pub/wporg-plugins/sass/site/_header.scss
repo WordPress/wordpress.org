@@ -101,6 +101,7 @@
 
 	.search-form {
 		display: inline-block;
+		font-size: 0;
 		width: 100%;
 
 		.search-field {
@@ -115,8 +116,8 @@
 		.search-field + .button-search {
 			border-left: none;
 			border-radius: 0 2px 2px 0;
+			@include font-size( ms-unitless( ms(0) ) );
 			display: none;
-			margin-left: -6px;
 			vertical-align: bottom;
 
 			&:active {
@@ -175,7 +176,7 @@
 				border-radius: 0;
 				box-shadow: none;
 				display: block;
-				font-size: inherit;
+				@include font-size( ms-unitless( ms(0) ) );
 				margin: 0 auto;
 				max-width: 100%;
 				padding: 8px;
