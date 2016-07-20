@@ -122,6 +122,7 @@ class WPorg_Handbook {
 		add_filter( 'post_type_link',                     array( $this, 'post_type_link' ), 10, 2 );
 		add_action( 'template_redirect',                  array( $this, 'redirect_handbook_root_page' ) );
 		add_filter( 'template_include',                   array( $this, 'template_include' ) );
+		add_filter( 'query_vars',                         array( $this, 'add_query_vars' ) );
 		add_filter( 'pre_get_posts',                      array( $this, 'pre_get_posts' ) );
 		add_action( 'widgets_init',                       array( $this, 'handbook_sidebar' ), 11 ); // After P2
 		add_action( 'wporg_email_changes_for_post_types', array( $this, 'wporg_email_changes_for_post_types' ) );
@@ -266,7 +267,7 @@ class WPorg_Handbook {
 	function redirect_handbook_root_page() {
 		if ( is_singular( $this->post_type )
 			&&
-			! is_post_type_archive( $this->post_type )
+			! get_query_var( 'is_handbook_root' )
 			&&
 			in_array( get_query_var( 'name' ), array( $this->post_type, substr( $this->post_type, 0, -9 ) ) )
 		) {
@@ -292,7 +293,7 @@ class WPorg_Handbook {
 			$handbook_templates = array( "single-{$this->post_type}.php", 'single-handbook.php' );
 		}
 		// For handbook landing page.
-		elseif ( is_post_type_archive( $this->post_type ) ) {
+		elseif ( get_query_var( 'is_handbook_root' ) && get_query_var( 'handbook' ) === $this->post_type ) {
 			if ( 'handbook' !== $this->post_type ) {
 				$handbook_templates[] = "single-{$this->post_type}.php";
 			}
@@ -308,6 +309,18 @@ class WPorg_Handbook {
 		return $template;
 	}
 
+	/**
+	 * Add public query vars for handbooks.
+	 *
+	 * @param array  $public_query_vars The array of whitelisted query variables.
+	 * @return array Array with public query vars.
+	 */
+	function add_query_vars( $public_query_vars ) {
+		$public_query_vars['is_handbook_root'] = false;
+
+		return $public_query_vars;
+	}
+
 	function pre_get_posts( $query ) {
 		if ( $query->is_main_query() && ! $query->is_admin && ! $query->is_search && $query->is_post_type_archive( $this->post_type ) ) {
 			// If the post type has a page to act as an archive index page, get that.
@@ -318,7 +331,12 @@ class WPorg_Handbook {
 			}
 			if ( $page ) {
 				$query->set( 'p', $page->ID );
-				$query->is_singular = true;
+				$query->set('is_handbook_root', true );
+
+				$query->is_archive           = false;
+				$query->is_post_type_archive = false;
+				$query->is_single            = true;
+				$query->is_singular          = true;
 			}
 			$query->set( 'handbook', $this->post_type );
 		}
