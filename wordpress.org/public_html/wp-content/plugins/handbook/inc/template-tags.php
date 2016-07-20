@@ -26,40 +26,45 @@ function wporg_get_handbook_post_types() {
 /**
  * Is the query for an existing handbook page?
  *
- * @param string  $handbook Handbook post type.
- * @return bool             Whether the query is for an existing handbook page. Returns true on handbook pages.
+ * @param string|array  $handbook Handbook post type(s).
+ * @return bool         Whether the query is for an existing handbook page. Returns true on handbook pages.
  */
 function wporg_is_handbook( $handbook = '' ) {
 	$post_types = wporg_get_handbook_post_types();
+	if ( ! is_array( $handbook ) ) {
+		$handbook = $handbook ? (array) $handbook : array();
+	}
 
 	if ( is_admin() || ! $post_types ) {
 		return false;
 	}
 
 	foreach ( $post_types as $post_type ) {
-		$is_handbook     = ! $handbook || ( $handbook === $post_type );
-		$single_handbook = false;
+		// Skip unless checking for all handbooks or for the specified handbook(s).
+		if ( $handbook && ! in_array( $post_type, $handbook ) ) {
+			continue;
+		}
 
-		if ( is_singular() ) {
+		$handbook_query = is_post_type_archive( $post_type ) || get_query_var( 'is_handbook_root' );
+
+		if ( ! $handbook_query && is_singular() ) {
 			$queried_obj = get_queried_object();
 
 			if ( $queried_obj ) {
-				$single_handbook = is_singular( $post_type );
+				$handbook_query = is_singular( $post_type );
 			} else {
-				// Queried object is not set, use the post type query var.		
+				// Queried object is not set, use the post type query var.
 				$qv_post_type = get_query_var( 'post_type' );
 
 				if ( is_array( $qv_post_type ) ) {
 					$qv_post_type = reset( $qv_post_type );
 				}
 
-				$single_handbook = ( $post_type === $qv_post_type );
+				$handbook_query = ( $post_type === $qv_post_type );
 			}
 		}
 
-		$handbook_query = $single_handbook || is_post_type_archive( $post_type );
-
-		if ( $is_handbook && $handbook_query ) {
+		if ( $handbook_query ) {
 			return true;
 		}
 	}
