@@ -21,9 +21,11 @@ module.exports = function( grunt ) {
 				}
 			},
 			'build-dev': {
+				devtool: 'sourcemap',
 				debug: true
 			},
 			'watch-dev': {
+				devtool: 'sourcemap',
 				debug: true,
 				watch: true,
 				keepalive: true
@@ -134,11 +136,7 @@ module.exports = function( grunt ) {
 		watch: {
 			jshint: {
 				files: ['<%= jshint.files %>'],
-				tasks: ['webpack:build-dev', 'jshint']
-			},
-			webpack: {
-				files: ['js/client/**'],
-				tasks: ['webpack:build-dev']
+				tasks: ['jshint']
 			},
 			css: {
 				files: ['**/*.scss'],

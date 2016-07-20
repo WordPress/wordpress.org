@@ -4,7 +4,8 @@
 
 ```
 npm install
-grunt watch
+grunt webpack:watch-dev # Build JS client.
+grunt watch # Run linters, build Sass, etc.
 ```
 
 #### Committing

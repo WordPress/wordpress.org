@@ -86,6 +86,7 @@ function scripts() {
 	wp_localize_script( 'wporg-plugins-client', 'app_data', array(
 		'api_url' => untrailingslashit( rest_url() ),
 		'nonce'   => wp_create_nonce( 'wp_rest' ),
+		'base'    => get_blog_details()->path,
 	) );
 
 }

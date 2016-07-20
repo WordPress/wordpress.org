@@ -4,7 +4,10 @@
  */
 /* global app_data:object */
 
-import jQuery from 'jquery';
+import $ajax from 'jquery/src/ajax';
+import $xhr from 'jquery/src/ajax/xhr';
+
+const $ = Object.assign( {}, $ajax,$xhr );
 
 const API = {
 
@@ -30,8 +33,9 @@ const API = {
 			data: null
 		};
 
-		var xhr = jQuery.ajax( this.api_url + url, {
+		var xhr = $.ajax( this.api_url + url, {
 			data: data,
+			global: false,
 
 			success: ( data ) => {
 				this.lastRequest.isLoading = false;

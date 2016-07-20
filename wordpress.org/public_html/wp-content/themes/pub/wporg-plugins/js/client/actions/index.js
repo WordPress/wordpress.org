@@ -1,4 +1,4 @@
-import { findWhere } from 'underscore';
+import find from 'lodash/find';
 
 /**
  * Internal dependencies.
@@ -8,7 +8,7 @@ import { GET_PAGE } from './action-types';
 
 export const getPage = ( slug ) => (
 	( dispatch, getState ) => {
-		if ( findWhere( getState().pages, { slug: slug } ) ) {
+		if ( find( getState().pages, { slug: slug } ) ) {
 			return;
 		}
 

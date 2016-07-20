@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { findWhere } from 'underscore';
+import find from 'lodash/find';
 
 /**
  * Internal dependencies.
@@ -7,7 +7,7 @@ import { findWhere } from 'underscore';
 import Page from 'components/page';
 
 const mapStateToProps = ( state, ownProps ) => ( {
-	page: findWhere( state.pages, { slug: ownProps.route.path } )
+	page: find( state.pages, { slug: ownProps.route.path } )
 } );
 
 export default connect( mapStateToProps )( Page );

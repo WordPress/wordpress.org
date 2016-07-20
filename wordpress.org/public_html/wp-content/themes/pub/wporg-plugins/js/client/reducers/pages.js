@@ -1,4 +1,4 @@
-import { findWhere } from 'underscore';
+import find from 'lodash/find';
 
 /**
  * Internal dependencies.
@@ -10,7 +10,7 @@ const pages = ( state = [], action ) => { // jshint ignore:line
 	switch ( action.type ) {
 
 		case GET_PAGE:
-			if ( ! findWhere( state, { id: action.page.id } ) ) {
+			if ( ! find( state, { id: action.page.id } ) ) {
 				state = state.concat( [ action.page ] );
 			}
 			break;

@@ -13,6 +13,7 @@ import ArchiveBrowse from 'components/archive-browse';
 export default (
 	<Route path="/" component={ PluginDirectory } >
 		<IndexRoute component={ FrontPage } />
+		<Route path="browse/favorites/:username" component={ ArchiveBrowse } />
 		<Route path="browse/:type" component={ ArchiveBrowse } />
 		<Route path="developers" component={ Page } />
 		<Route path=":plugin" component={ FrontPage } />
