@@ -36,7 +36,6 @@ class WordCamp_Budget_Tool {
             }
 
             $item = $_item;
-            print_r( $item );
         }
 
         $budget['current'] = $data;
