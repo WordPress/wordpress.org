@@ -98,6 +98,7 @@ function get_whitelist() {
 			'drew',
 			'hlashbrooke',
 			'lizkaraffa',
+			'kenshino',
 		),
 		'feature-shinyupdates' => array(
 			'obenland',
