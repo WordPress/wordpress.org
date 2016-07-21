@@ -55,6 +55,7 @@ class Plugin {
 	 */
 	public function form_topic_version_dropdown() {
 		$version = 0;
+		$other_version = '';
 		$versions = $this->get_wp_versions();
 
 		// Post value passed
@@ -115,7 +116,7 @@ class Plugin {
 		}
 	}
 
-	public function get_topic_version( $args = array() ) {
+	public static function get_topic_version( $args = array() ) {
 
 		// Parse arguments against default values
 		$r = bbp_parse_args( $args, array(
