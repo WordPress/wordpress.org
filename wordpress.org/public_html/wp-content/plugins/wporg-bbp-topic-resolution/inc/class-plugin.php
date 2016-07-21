@@ -41,20 +41,34 @@ class Plugin {
 	 * Initializes the plugin.
 	 */
 	public function bbp_loaded() {
-		// Display the form depending on context
+		// Change the topic title when resolved.
+		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
+
+		// Display the form for new/edited topics.
 		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'form_topic_resolution_dropdown' ) );
 		add_action( 'bbp_theme_before_topic_form_subscriptions', array( $this, 'form_topic_resolution_checkbox' ) );
 
-		// Process field submission
+		// Process field submission for topics.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
 
-		// Admin interface for enabling on forums
+		// Indicate if the forum is a support forum.
 		add_filter( 'manage_forum_posts_columns', array( $this, 'add_forum_topic_resolution_column' ), 11 );
 		add_action( 'manage_forum_posts_custom_column', array( $this, 'add_forum_topic_resolution_value' ), 10, 2 );
 
 		// Process field submission
 		// @todo Bulk actions aren't filterable, so this might be hacky.
+	}
+
+	/**
+	 * Add "Resolved" status to title.
+	 */
+	public function get_topic_title( $title, $topic_id ) {
+		$resolved = __( 'Resolved', 'wporg' );
+		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
+		   return sprintf( esc_html( '[%s]: %s' ), $resolved, $title );
+		}
+		return $title;
 	}
 
 	/**
