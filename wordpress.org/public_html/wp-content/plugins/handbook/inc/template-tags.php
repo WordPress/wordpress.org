@@ -73,6 +73,15 @@ function wporg_is_handbook( $handbook = '' ) {
 }
 
 /**
+ * Is the current page acting as a handbook's landing page?
+ *
+ * @return bool True if the current page is the landing page for a handbook, false otherwise.
+ */
+ function wporg_is_handbook_landing_page() {
+	 return get_query_var( 'is_handbook_root' );
+ } 
+
+/**
  * Is the current (or specified) post_type a handbook post type?
  *
  * @param string  $post_type Optional. The post_type to check for being a handbook post type. Default '' (the current post type).
