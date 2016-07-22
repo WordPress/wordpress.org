@@ -144,6 +144,7 @@ li.type-handbook code {
 
 .handbook-page-title {
 	font-size: 2em;
+	padding-left: 0;
 }
 
 li.type-handbook h2 {

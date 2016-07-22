@@ -17,7 +17,7 @@
 <div class="sleeve_main">
 
 	<div id="main">
-		<h2 class="handbook-page-title"><?php the_title(); ?></h2>
+		<h1 class="handbook-page-title"><?php the_title(); ?></h1>
 		<?php if ( have_posts() ) : ?>
 
 			<ul id="postlist">
