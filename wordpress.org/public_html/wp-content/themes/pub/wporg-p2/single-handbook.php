@@ -7,7 +7,9 @@
 ?>
 <?php get_header(); ?>
 
+<?php if ( 'handbook' !== wporg_get_current_handbook() ) { ?>
 <div class="handbook-name"><span><a href="<?php echo esc_url( get_post_type_archive_link( wporg_get_current_handbook() ) ); ?>"><?php echo esc_html( wporg_get_current_handbook_name() ); ?></a></span></div>
+<?php } ?>
 
 <!-- Also called on in footer but will not display the second time. -->
 <?php get_sidebar( 'handbook' ); ?> 
