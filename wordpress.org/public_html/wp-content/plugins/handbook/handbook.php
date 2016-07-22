@@ -133,8 +133,11 @@ class WPorg_Handbook {
 	}
 
 	/**
-	 * Adds 'post-type-archive-handbook' or 'single-handbook' class to body tag
-	 * when appropriate.
+	 * Adds custom handbook-related classes to body tag.
+	 *
+	 * * Adds 'single-handbook' class for any handbook page.
+	 * * Adds 'handbook-landing-page' class for page acting as a handbook landing
+	 *   page.
 	 *
 	 * @param array $classes Array of body classes.
 	 * @return array
@@ -142,6 +145,10 @@ class WPorg_Handbook {
 	function add_body_class( $classes ) {
 		if ( wporg_is_handbook( $this->post_type ) ) {
 			$classes[] = 'single-handbook';
+		}
+
+		if ( wporg_is_handbook_landing_page() ) {
+			$classes[] = 'handbook-landing-page';
 		}
 
 		return $classes;
