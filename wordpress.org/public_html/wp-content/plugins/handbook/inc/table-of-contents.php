@@ -70,6 +70,10 @@ class WPorg_Handbook_TOC {
 
 		$items = $this->get_tags( 'h([1-4])', $content );
 
+		if ( count( $items ) < 2 ) {
+			return $content;
+		}
+
 		for ( $i = 1; $i <= 4; $i++ )
 			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
 
