@@ -414,8 +414,8 @@ class Plugin_I18n {
 			$content = str_replace( $original, $translation, $content );
 		} else {
 			$original = preg_quote( $original, '/' );
-			$content  = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\\1{$translation}\\3", $content );
-		}
+			$content  = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", '${1}___TRANSLATION___${3}', $content ); // Don't use $translation, it may contain backreference-like characters.
+			$content  = str_replace( '___TRANSLATION___', $translation, $content );		}
 
 		return $content;
 	}
