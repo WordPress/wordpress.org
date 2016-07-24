@@ -1,4 +1,3 @@
-import find from 'lodash/find';
 
 /**
  * Internal dependencies.
@@ -6,21 +5,15 @@ import find from 'lodash/find';
 import Api from 'api';
 import { GET_PAGE } from './action-types';
 
-export const getPage = ( slug ) => (
-	( dispatch, getState ) => {
-		if ( find( getState().pages, { slug: slug } ) ) {
+export const getPage = ( slug ) => ( dispatch ) => {
+	Api.get( '/wp/v2/pages', { filter: { name: slug } }, ( data, error ) => {
+		if ( ! data.length || error ) {
 			return;
 		}
 
-		Api.get( '/wp/v2/pages', { filter: { name: slug } }, ( data, error ) => {
-			if ( ! data.length || error ) {
-				return;
-			}
-
-			dispatch({
-				type: GET_PAGE,
-				page: data[0]
-			});
-		});
-	}
-);
+		dispatch( {
+			type: GET_PAGE,
+			page: data[0]
+		} );
+	} );
+};

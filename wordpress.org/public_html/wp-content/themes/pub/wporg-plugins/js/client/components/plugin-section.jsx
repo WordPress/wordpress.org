@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 /**
  * Internal dependencies.
  */
-import FrontPagePlugin from './front-page-plugin';
+import PluginCard from './plugin-card';
 
 export default React.createClass( {
 	displayName: 'PluginSection',
@@ -17,7 +17,7 @@ export default React.createClass( {
 					<Link className="section-link" to={ this.props.section.path }>See all</Link>
 				</header>
 				{ this.props.plugins.map( ( plugin ) =>
-					<FrontPagePlugin key={ plugin.id } plugin={ plugin } />
+					<PluginCard key={ plugin.id } plugin={ plugin } />
 				) }
 			</section>
 		)

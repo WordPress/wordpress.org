@@ -13,10 +13,8 @@ export default React.createClass( {
 	render() {
 		return (
 			<div>
-				<SiteHeader />
-				<SiteMain>
-					{ this.props.children }
-				</SiteMain>
+				{ this.props.header }
+				{ this.props.main }
 			</div>
 		)
 	}

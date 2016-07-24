@@ -1,13 +1,9 @@
 import React from 'react';
 
-import { getPage } from '../actions';
+import { getPage } from 'actions';
 
 export default React.createClass( {
 	displayName: 'Page',
-
-	componentDidMount: function() {
-		this.props.dispatch( getPage( this.props.route.path ) );
-	},
 
 	render() {
 		if ( ! this.props.page ) {
