@@ -368,6 +368,8 @@ class WPorg_Handbook {
 			}
 		}
 
+		$sidebar_args = apply_filters( 'wporg_handbook_sidebar_args', $sidebar_args, $this );
+
 		register_sidebar( $sidebar_args );
 
 		require_once dirname( __FILE__ ) . '/inc/widgets.php';
