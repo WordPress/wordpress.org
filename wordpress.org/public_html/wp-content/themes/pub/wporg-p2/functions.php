@@ -95,3 +95,19 @@ function wporg_p2_fix_utf8_user_suggestions( $users ) {
 }
 add_filter( 'p2_user_suggestion', 'wporg_p2_fix_utf8_user_suggestions', 100 );
 
+/**
+ * Unsets custom wrapper markup defined by handbook plugin for its sidebar.
+ *
+ * @param array          $sidebar_args The sidebar configuration.
+ * @param WPorg_Handbook $handbook     The handbook object.
+ * @return array
+ */
+function wporg_p2_handbook_sidebar_args( $sidebar_args, $handbook ) {
+	foreach ( array( 'before_widget', 'after_widget', 'before_title', 'after_title' ) as $key ) {
+		unset( $sidebar_args[ $key ] );
+	}
+
+	return $sidebar_args;
+}
+add_filter( 'wporg_handbook_sidebar_args', 'wporg_p2_handbook_sidebar_args', 10, 2 );
+
