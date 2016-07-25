@@ -360,14 +360,6 @@ class WPorg_Handbook {
 			'after_title'   => '</h1>',
 		);
 
-		// P2 usage does not necessitate the custom markup used above.
-		// This can be removed once all P2s are converted to o2.
-		if ( class_exists( 'P2' ) ) {
-			foreach ( array( 'before_widget', 'after_widget', 'before_title', 'after_title' ) as $key ) {
-				unset( $sidebar_args[ $key ] );
-			}
-		}
-
 		$sidebar_args = apply_filters( 'wporg_handbook_sidebar_args', $sidebar_args, $this );
 
 		register_sidebar( $sidebar_args );
