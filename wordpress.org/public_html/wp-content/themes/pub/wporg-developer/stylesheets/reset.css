@@ -65,6 +65,7 @@ caption, th, td {
 blockquote, q {
   quotes: "" "";
 }
+
 blockquote:before, blockquote:after, q:before, q:after {
   content: "";
 }
@@ -72,9 +73,11 @@ blockquote:before, blockquote:after, q:before, q:after {
 a:focus {
   outline: thin dotted;
 }
+
 a:hover, a:active {
   outline: 0;
 }
+
 a img {
   border: 0;
 }

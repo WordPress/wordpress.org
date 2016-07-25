@@ -65,6 +65,7 @@ caption, th, td {
 blockquote, q {
   quotes: "" "";
 }
+
 blockquote:before, blockquote:after, q:before, q:after {
   content: "";
 }
@@ -72,9 +73,11 @@ blockquote:before, blockquote:after, q:before, q:after {
 a:focus {
   outline: thin dotted;
 }
+
 a:hover, a:active {
   outline: 0;
 }
+
 a img {
   border: 0;
 }
@@ -269,9 +272,11 @@ input {
 .home .devhub-wrap {
   padding-bottom: 0;
 }
+
 .home .devhub-wrap #content {
   padding: 0;
 }
+
 .home .devhub-wrap .site-header {
   margin-bottom: 0;
 }
@@ -281,33 +286,34 @@ input {
   /* Text meant only for screen readers */
   /* Clearing */
   /* =Content
-  ----------------------------------------------- */
+	----------------------------------------------- */
   /* =Media
-  ----------------------------------------------- */
+	----------------------------------------------- */
   /* Make sure embeds and iframes fit their containers */
   /* =Widgets
-  ----------------------------------------------- */
+	----------------------------------------------- */
   /* Make sure select elements fit in widgets */
   /* Search widget */
   /* =Infinite Scroll
-  ----------------------------------------------- */
+	----------------------------------------------- */
   /* Globally hidden elements when Infinite Scroll is supported and in use. */
   /* When Infinite Scroll has reached its end we need to re-display elements that were hidden (via .neverending) before */
   /*
-   * Header area
-   */
+	 * Header area
+	 */
   /*
-   * section styles
-   */
+	 * section styles
+	 */
   /* = Related
-  ----------------------------------------------- */
+	----------------------------------------------- */
   /* Changelog */
   /* Comments */
   /*
-   * Content
-   *
-   */
+	 * Content
+	 *
+	 */
 }
+
 .devhub-wrap *,
 .devhub-wrap *:before,
 .devhub-wrap *:after {
@@ -315,32 +321,40 @@ input {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+
 .devhub-wrap #content, .devhub-wrap #content-area {
   padding: 0 10px;
 }
+
 .devhub-wrap #content .toc-heading, .devhub-wrap #content-area .toc-heading {
   clear: left;
 }
+
 .devhub-wrap #content table, .devhub-wrap #content-area table {
   border: 1px solid #f0f0f0;
 }
+
 .devhub-wrap #content table th, .devhub-wrap #content-area table th {
   padding: 1em;
   border-bottom: 1px solid #f0f0f0;
   background: #f0f0f0;
 }
+
 .devhub-wrap #content table td, .devhub-wrap #content-area table td {
   padding: 0.8em 1em;
   border: 1px solid #f0f0f0;
 }
+
 .devhub-wrap #content-area,
 .devhub-wrap .inner-wrap {
   margin: 0 auto;
   max-width: 60em;
 }
+
 .devhub-wrap .page-header {
   margin-top: 1em;
 }
+
 .devhub-wrap .devhub-menu .menu {
   list-style: none;
   float: right;
@@ -349,17 +363,21 @@ input {
   padding-top: 22px;
   margin-right: 15px;
 }
+
 .devhub-wrap .devhub-menu .menu li {
   display: inline;
   padding-left: 20px;
 }
+
 .devhub-wrap .devhub-menu .menu a {
   color: #555;
   font-weight: 400;
 }
+
 .devhub-wrap a {
   color: #21759b;
 }
+
 .devhub-wrap .site-main h2,
 .devhub-wrap .site-main h3,
 .devhub-wrap .site-main h4,
@@ -368,6 +386,7 @@ input {
   color: #1e1e1e;
   margin-bottom: 1.5rem;
 }
+
 .devhub-wrap #headline h2 a {
   color: #555;
   font-weight: 300;
@@ -376,6 +395,7 @@ input {
   text-shadow: #fff 0px 1px 0px;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
 .devhub-wrap h1 {
   font-size: 28px;
   font-size: 3rem;
@@ -384,6 +404,7 @@ input {
   font-weight: 300;
   margin-bottom: 1.5rem;
 }
+
 .devhub-wrap h2 {
   font-size: 22px;
   font-size: 2.2rem;
@@ -391,6 +412,7 @@ input {
   line-height: 2.6rem;
   font-weight: 300;
 }
+
 .devhub-wrap h3 {
   font-size: 20px;
   font-size: 2rem;
@@ -398,6 +420,7 @@ input {
   line-height: 2.4rem;
   font-weight: 300;
 }
+
 .devhub-wrap h4 {
   font-size: 18px;
   font-size: 1.8rem;
@@ -406,6 +429,7 @@ input {
   border-bottom: none;
   font-weight: 300;
 }
+
 .devhub-wrap h4 .dashicons {
   font-size: 22px;
   font-size: 2.2rem;
@@ -416,15 +440,18 @@ input {
   height: 2.2rem;
   width: 2.2rem;
 }
+
 .devhub-wrap main {
   font-size: 1.5rem;
 }
+
 .devhub-wrap a.button,
 .devhub-wrap button,
 .devhub-wrap input {
   line-height: normal;
   /* Addresses FF3/4 setting line-height using !important in the UA stylesheet */
 }
+
 .devhub-wrap a.button,
 .devhub-wrap button,
 .devhub-wrap input[type="button"],
@@ -447,6 +474,7 @@ input {
   -webkit-appearance: button;
   /* Corrects inability to style clickable 'input' types in iOS */
 }
+
 .devhub-wrap a.button:hover,
 .devhub-wrap button:hover,
 .devhub-wrap input[type="button"]:hover,
@@ -455,6 +483,7 @@ input {
   border-color: #ccc #bbb #aaa #bbb;
   background: #f0f0f0;
 }
+
 .devhub-wrap a.button:focus, .devhub-wrap a.button:active,
 .devhub-wrap button:focus,
 .devhub-wrap button:active,
@@ -469,6 +498,7 @@ input {
   -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
   box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6), 1px 1px 2px rgba(0, 0, 0, 0.4);
 }
+
 .devhub-wrap a.button.shiny-blue,
 .devhub-wrap button.shiny-blue,
 .devhub-wrap input[type="button"].shiny-blue,
@@ -490,6 +520,7 @@ input {
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
   padding: 3px 8px;
 }
+
 .devhub-wrap a.button.shiny-blue:hover,
 .devhub-wrap button.shiny-blue:hover,
 .devhub-wrap input[type="button"].shiny-blue:hover,
@@ -508,6 +539,7 @@ input {
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
+
 .devhub-wrap input[type="checkbox"],
 .devhub-wrap input[type="radio"] {
   box-sizing: border-box;
@@ -515,6 +547,7 @@ input {
   padding: 0;
   /* Addresses excess padding in IE8/9 */
 }
+
 .devhub-wrap input[type="search"] {
   -webkit-appearance: textfield;
   /* Addresses appearance set to searchfield in S5, Chrome */
@@ -523,16 +556,19 @@ input {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
+
 .devhub-wrap input[type="search"]::-webkit-search-decoration {
   /* Corrects inner padding displayed oddly in S5, Chrome on OSX */
   -webkit-appearance: none;
 }
+
 .devhub-wrap button::-moz-focus-inner,
 .devhub-wrap input::-moz-focus-inner {
   /* Corrects inner padding and border displayed oddly in FF3/4 www.sitepen.com/blog/2008/05/14/the-devils-in-the-details-fixing-dojos-toolbar-buttons/ */
   border: 0;
   padding: 0;
 }
+
 .devhub-wrap input[type="text"],
 .devhub-wrap input[type="email"],
 .devhub-wrap input[type="url"],
@@ -544,6 +580,7 @@ input {
   border: 1px solid #ccc;
   border-radius: 3px;
 }
+
 .devhub-wrap input[type="text"]:focus,
 .devhub-wrap input[type="email"]:focus,
 .devhub-wrap input[type="url"]:focus,
@@ -552,6 +589,7 @@ input {
 .devhub-wrap textarea:focus {
   color: #111;
 }
+
 .devhub-wrap textarea {
   overflow: auto;
   /* Removes default vertical scrollbar in IE6/7/8/9 */
@@ -561,10 +599,12 @@ input {
   /* Improves readability and alignment in all browsers */
   width: 98%;
 }
+
 .devhub-wrap .screen-reader-text {
   clip: rect(1px, 1px, 1px, 1px);
   position: absolute !important;
 }
+
 .devhub-wrap .screen-reader-text:hover,
 .devhub-wrap .screen-reader-text:active,
 .devhub-wrap .screen-reader-text:focus {
@@ -586,6 +626,7 @@ input {
   z-index: 100000;
   /* Above WP toolbar */
 }
+
 .devhub-wrap .clear:before,
 .devhub-wrap .clear:after,
 .devhub-wrap .entry-content:before,
@@ -601,6 +642,7 @@ input {
   content: '';
   display: table;
 }
+
 .devhub-wrap .clear:after,
 .devhub-wrap .entry-content:after,
 .devhub-wrap .comment-content:after,
@@ -609,26 +651,32 @@ input {
 .devhub-wrap .site-footer:after {
   clear: both;
 }
+
 .devhub-wrap .hentry {
   margin: 0 0 1.5em;
 }
+
 .devhub-wrap .byline,
 .devhub-wrap .updated {
   display: none;
 }
+
 .devhub-wrap .single .byline,
 .devhub-wrap .group-blog .byline {
   display: inline;
 }
+
 .devhub-wrap .page-content,
 .devhub-wrap .entry-content,
 .devhub-wrap .entry-summary {
   margin: 1.5em 0 0;
 }
+
 .devhub-wrap .page-links {
   clear: both;
   margin: 0 0 1.5em;
 }
+
 .devhub-wrap .page-content img.wp-smiley,
 .devhub-wrap .entry-content img.wp-smiley,
 .devhub-wrap .comment-content img.wp-smiley {
@@ -637,65 +685,81 @@ input {
   margin-top: 0;
   padding: 0;
 }
+
 .devhub-wrap .wp-caption {
   border: 1px solid #ccc;
   margin-bottom: 1.5em;
   max-width: 100%;
 }
+
 .devhub-wrap .wp-caption img[class*="wp-image-"] {
   display: block;
   margin: 1.2% auto 0;
   max-width: 98%;
 }
+
 .devhub-wrap .wp-caption-text {
   text-align: center;
 }
+
 .devhub-wrap .wp-caption .wp-caption-text {
   margin: 0.8075em 0;
 }
+
 .devhub-wrap .site-main .gallery {
   margin-bottom: 1.5em;
 }
+
 .devhub-wrap .site-main .gallery a img {
   border: none;
   height: auto;
   max-width: 90%;
 }
+
 .devhub-wrap .site-main .gallery dd {
   margin: 0;
 }
+
 .devhub-wrap embed,
 .devhub-wrap iframe,
 .devhub-wrap object {
   max-width: 100%;
 }
+
 .devhub-wrap .widget select {
   max-width: 100%;
 }
+
 .devhub-wrap .widget_search .search-submit {
   display: none;
 }
+
 .devhub-wrap .infinite-scroll .paging-navigation,
 .devhub-wrap .infinite-scroll.neverending .site-footer {
   /* Theme Footer (when set to scrolling) */
   display: none;
 }
+
 .devhub-wrap .infinity-end.neverending .site-footer {
   display: block;
 }
+
 .devhub-wrap .site-header {
   background: none repeat scroll 0 0 #F7F7F7;
   border-bottom: 1px solid #DFDFDF;
   height: 62px;
   margin-bottom: 1em;
 }
+
 .devhub-wrap .site-branding {
   width: 100%;
 }
+
 .devhub-wrap .site-branding a {
   text-decoration: none;
   color: #606060;
 }
+
 .devhub-wrap .site-branding .site-title {
   color: #555555;
   float: left;
@@ -706,16 +770,20 @@ input {
   text-shadow: 0 1px 0 #FFFFFF;
   font-weight: 300;
 }
+
 .devhub-wrap .breadcrumbs {
   font-size: 13px;
   font-size: 1.3rem;
 }
+
 .devhub-wrap .breadcrumbs .active {
   font-weight: 600;
 }
+
 .devhub-wrap .breadcrumb-trail {
   margin-bottom: 1.25em;
 }
+
 .devhub-wrap h1.entry-title,
 .devhub-wrap h1.page-title {
   font-weight: 300;
@@ -724,11 +792,13 @@ input {
   color: #606060;
   text-align: center;
 }
+
 .devhub-wrap h1.entry-title a,
 .devhub-wrap h1.page-title a {
   text-decoration: none;
   color: #606060;
 }
+
 .devhub-wrap h1.single-entry-title,
 .devhub-wrap h2.entry-title {
   text-align: left;
@@ -737,38 +807,47 @@ input {
   padding: 0 0 24px;
   padding: 0 0 2.4rem;
 }
+
 .devhub-wrap h1.single-entry-title a,
 .devhub-wrap h2.entry-title a {
   text-decoration: none;
   color: #606060;
 }
+
 .devhub-wrap section {
   overflow: auto;
 }
+
 .devhub-wrap .home-landing .section {
   padding: 30px 0%;
   padding: 3rem 0%;
 }
+
 .devhub-wrap .color.section {
   color: #fff;
 }
+
 .devhub-wrap .section.blue {
   background: #0F3D57;
   padding: 30px 0;
   padding: 3rem 0;
 }
+
 .devhub-wrap .section.blue .box {
   text-align: center;
 }
+
 .devhub-wrap .section.blue .box .widget-description {
   padding: 1em 15%;
 }
+
 .devhub-wrap .section.blue .widget-title {
   font-size: 62px;
   font-size: 6.2rem;
   line-height: 78px;
   line-height: 7.8rem;
 }
+
 .devhub-wrap .section.blue .widget-title .dashicons {
   font-size: 84px;
   font-size: 8.4rem;
@@ -781,26 +860,31 @@ input {
   margin-right: 16px;
   margin-right: 1.6rem;
 }
+
 .devhub-wrap .section.gray {
   background: #797878;
   color: #fff;
 }
+
 .devhub-wrap .section.gray h2,
 .devhub-wrap .section.gray h3,
 .devhub-wrap .section.gray h4 {
   color: #fff;
 }
+
 .devhub-wrap .section.gray .inner-wrap {
   max-width: 760px;
   max-width: 76rem;
   margin: 1.2em auto 0;
 }
+
 .devhub-wrap .section.gray .inner-wrap .code-ref-left {
   float: left;
   width: 60%;
   clear: none;
   text-align: center;
 }
+
 .devhub-wrap .section.gray .inner-wrap .code-ref-right {
   float: left;
   width: 40%;
@@ -808,6 +892,7 @@ input {
   margin-top: 1.1em;
   text-align: center;
 }
+
 @media (max-width: 43em) {
   .devhub-wrap .section.gray .inner-wrap .code-ref-left,
   .devhub-wrap .section.gray .inner-wrap .code-ref-right {
@@ -824,6 +909,7 @@ input {
     float: none;
   }
 }
+
 .devhub-wrap .section.gray .widget-title {
   font-weight: 300;
   font-size: 40px;
@@ -831,6 +917,7 @@ input {
   line-height: 68px;
   line-height: 6.8rem;
 }
+
 .devhub-wrap .section.gray .widget-title .dashicons {
   font-size: 68px;
   font-size: 6.8rem;
@@ -841,56 +928,69 @@ input {
   height: 6.8rem;
   width: 6.8rem;
 }
+
 .devhub-wrap .section.gray .widget-description {
   margin-left: 85px;
   margin-left: 8.5rem;
 }
+
 .devhub-wrap .section.light-gray {
   background: #f2f2f2;
   color: #606060;
 }
+
 .devhub-wrap .section.light-gray .widget-title {
   color: #606060;
   font-weight: 600;
 }
+
 .devhub-wrap .section.light-gray .widget-title a {
   color: #2D96C2;
 }
+
 .devhub-wrap .section.light-gray a {
   color: #606060;
   text-decoration: none;
 }
+
 .devhub-wrap .section .home-primary-content {
   max-width: 600px;
   max-width: 60rem;
   margin: 0 auto;
 }
+
 .devhub-wrap .box {
   padding: 30px;
   padding: 3rem;
   float: left;
   clear: none;
 }
+
 .devhub-wrap .section.search-section {
   padding-bottom: 0;
 }
+
 .devhub-wrap .reference-landing .section.search-section {
   padding-top: 0;
 }
+
 .devhub-wrap.single div#inner-search, .devhub-wrap.archive div#inner-search {
   background-color: #2e6183;
   margin-top: -1em;
   margin-bottom: 1em;
   padding-top: 2px;
 }
+
 .devhub-wrap.single div#inner-search .section.search-section, .devhub-wrap.archive div#inner-search .section.search-section {
   color: #ffffff;
 }
+
 .devhub-wrap.single div#inner-search div#inner-search-icon-container, .devhub-wrap.archive div#inner-search div#inner-search-icon-container {
   margin: 0 auto;
   max-width: 60em;
   cursor: pointer;
 }
+
 .devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon {
   background-color: #2e6183;
   color: #ffffff;
@@ -906,40 +1006,48 @@ input {
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
 }
+
 .devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search {
   height: auto;
   width: auto;
 }
+
 .devhub-wrap.single div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before, .devhub-wrap.archive div#inner-search div#inner-search-icon-container div#inner-search-icon .dashicons-search:before {
   font-size: 36px;
   line-height: 36px;
 }
+
 .devhub-wrap .archive-filter-form {
   margin: 5rem 0;
   font-size: 1.5rem;
 }
+
 .devhub-wrap .archive-filter-form input[type="submit"] {
   margin-left: .5em;
   padding: 0.2em 0.5em;
   line-height: 1;
   font-size: 1.5rem;
 }
+
 .devhub-wrap .searchform {
   overflow: hidden;
   height: auto;
   margin-bottom: 1em;
 }
+
 .devhub-wrap .searchform input[type="text"], .devhub-wrap .searchform input[type="submit"] {
   height: 50px;
   height: 5rem;
   margin-bottom: 1em;
   width: 100%;
 }
+
 .devhub-wrap .searchform input[type="submit"] {
   width: 85px;
   width: 8.5rem;
   float: left;
 }
+
 .devhub-wrap .searchform label {
   width: 560px;
   width: 56rem;
@@ -948,12 +1056,15 @@ input {
   display: inline-block;
   float: left;
 }
+
 .devhub-wrap .searchform label .search-field input[type="text"] {
   width: 100%;
 }
+
 .devhub-wrap .searchform div {
   overflow: auto;
 }
+
 .devhub-wrap .searchform .search-post-type label {
   border-right: 1px solid #ccc;
   float: none;
@@ -963,49 +1074,60 @@ input {
   padding-left: 0;
   padding-right: 1.3em;
 }
+
 .devhub-wrap .searchform .search-post-type label input {
   padding-left: 0.5em;
 }
+
 .devhub-wrap .searchform .search-post-type label:last-child {
   border-right-width: 0;
 }
+
 .devhub-wrap .search-results-summary {
   font-style: italic;
   margin-bottom: 1em;
 }
+
 .devhub-wrap .reference-landing .section, .devhub-wrap .search-section {
   max-width: 700px;
   max-width: 70rem;
   margin: 0 auto;
   padding: 1.5em 0;
 }
+
 .devhub-wrap .reference-landing .section h2,
 .devhub-wrap .reference-landing .section h3,
 .devhub-wrap .reference-landing .section h4 {
   margin-bottom: 1em;
   color: #404040;
 }
+
 .devhub-wrap .reference-landing .section h2.widget-title,
 .devhub-wrap .reference-landing .section h3.widget-title,
 .devhub-wrap .reference-landing .section h4.widget-title {
   margin-bottom: 0;
 }
+
 .devhub-wrap .reference-landing .section.search-guide {
   padding-bottom: 0;
 }
+
 .devhub-wrap .reference-landing .section.section.topic-guide, .devhub-wrap .reference-landing .section.section.new-in-guide {
   padding-top: 0;
 }
+
 .devhub-wrap .reference-landing .box,
 .devhub-wrap .sidebar .box {
   padding: 0;
   border: 2px solid #cccccc;
   background-color: #eeeeee;
 }
+
 .devhub-wrap .reference-landing .box ul,
 .devhub-wrap .sidebar .box ul {
   padding: 2em;
 }
+
 .devhub-wrap .reference-landing .box .widget-title,
 .devhub-wrap .sidebar .box .widget-title {
   padding: 10px 30px;
@@ -1013,21 +1135,25 @@ input {
   font-size: 16px;
   font-size: 1.6rem;
 }
+
 .devhub-wrap .reference-landing .box .widget-content,
 .devhub-wrap .sidebar .box .widget-content {
   padding: 16px 30px;
   padding: 1.6rem 3rem;
 }
+
 .devhub-wrap #sidebar {
   border: 1px solid #d0d0d0;
   box-shadow: 0px 0px 5px #d0d0d0;
   background-color: #f0f0f0;
 }
+
 .devhub-wrap #sidebar > ul {
   padding: 0;
   margin: 0;
   list-style-type: none;
 }
+
 .devhub-wrap #sidebar > ul li h2.widgettitle {
   background-color: #d0d0d0;
   color: #8a8989;
@@ -1036,15 +1162,18 @@ input {
   font-size: 14px;
   letter-spacing: 2px;
 }
+
 .devhub-wrap #sidebar > ul li .menu > li {
   padding-bottom: 1em;
 }
+
 .devhub-wrap #sidebar > ul li ul {
   list-style-type: none;
   margin: 0 10px;
   padding: 15px 0;
   counter-reset: item;
 }
+
 .devhub-wrap #sidebar > ul li ul li:before {
   content: counter(item);
   counter-increment: item;
@@ -1059,60 +1188,75 @@ input {
   border-radius: 50%;
   vertical-align: top;
 }
+
 .devhub-wrap #sidebar > ul li ul li a {
   font-size: 16px;
   color: #4b4b4b;
   font-weight: bold;
 }
+
 .devhub-wrap #sidebar > ul li ul li > a {
   display: inline-block;
   width: 225px;
 }
+
 .devhub-wrap #sidebar > ul li ul li ul {
   list-style-type: none;
   padding: 0;
   margin: 0 0 0 35px;
 }
+
 .devhub-wrap #sidebar > ul li ul li ul li {
   padding-left: 20px;
 }
+
 .devhub-wrap #sidebar > ul li ul li ul li:before {
   content: none;
 }
+
 .devhub-wrap #sidebar > ul li ul li ul li a {
   font-weight: normal;
   font-size: 14px;
   display: inline;
   margin-left: -20px;
 }
+
 .devhub-wrap #sidebar > ul li ul li ul li ul {
   margin-left: 20px;
 }
+
 .devhub-wrap #sidebar .current-menu-item > a {
   font-weight: bold !important;
   color: #246998;
 }
+
 .devhub-wrap .menu-item-has-children {
   padding-bottom: 15px;
 }
+
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
   overflow: hidden;
 }
+
 .devhub-wrap .three-columns .box {
   width: 31%;
   margin: 1.15%;
 }
+
 .devhub-wrap .two-columns .box {
   width: 48%;
   margin: 1% 1% 1% 0;
 }
+
 .devhub-wrap .new-in-guide.two-columns .box {
   width: 43%;
 }
+
 .devhub-wrap .new-in-guide.two-columns .box:first-child {
   width: 53%;
 }
+
 .devhub-wrap #sidebar,
 .devhub-wrap .no-bullets,
 .devhub-wrap .sidebar .widget ul {
@@ -1120,45 +1264,55 @@ input {
   margin: 0;
   padding: 0;
 }
+
 .devhub-wrap .horizontal-list {
   display: inline;
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
+
 .devhub-wrap .horizontal-list li {
   display: inline;
 }
+
 .devhub-wrap .horizontal-list li a {
   padding: 0px 40px;
   padding: 0 4rem;
   border-left: 1px solid #ccc;
 }
+
 .devhub-wrap .horizontal-list li:first-child a {
   padding-left: 0;
   border-left: none;
 }
+
 .devhub-wrap .view-all-new-in {
   font-style: italic;
 }
+
 .devhub-wrap .box.transparent {
   background: none;
   color: #fff;
 }
+
 .devhub-wrap .box.transparent h2,
 .devhub-wrap .box.transparent h3,
 .devhub-wrap .box.transparent h4 {
   color: #fff;
 }
+
 .devhub-wrap .box.gray {
   background: #fff;
   border: 1px solid #d8d8d8;
 }
+
 .devhub-wrap .box.gray .widget-title {
   color: #666666;
   background: #d8d8d8;
   text-transform: uppercase;
 }
+
 .devhub-wrap .box .unordered-list {
   list-style-type: none;
   padding: 0;
@@ -1168,18 +1322,22 @@ input {
   line-height: 30px;
   line-height: 3rem;
 }
+
 .devhub-wrap .widget-description {
   font-style: italic;
   font-weight: 300;
 }
+
 .devhub-wrap .handbook h1 {
   margin: 24px 0;
   font-size: 20px;
   font-weight: normal;
 }
+
 .devhub-wrap .wp-parser-class, .devhub-wrap .wp-parser-function, .devhub-wrap .wp-parser-hook, .devhub-wrap .wp-parser-method {
   border-bottom: 1px solid #dfdfdf;
 }
+
 .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
   margin: 24px 0;
   padding-left: 100px;
@@ -1188,51 +1346,65 @@ input {
   font-family: monospace;
   font-size: 20px;
 }
+
 .devhub-wrap .wp-parser-class h1 .hook-func, .devhub-wrap .wp-parser-function h1 .hook-func, .devhub-wrap .wp-parser-hook h1 .hook-func, .devhub-wrap .wp-parser-method h1 .hook-func {
   color: #888888;
 }
+
 .devhub-wrap .wp-parser-class h1 .arg-type, .devhub-wrap .wp-parser-function h1 .arg-type, .devhub-wrap .wp-parser-hook h1 .arg-type, .devhub-wrap .wp-parser-method h1 .arg-type {
   color: #cd2f23;
   font-style: italic;
 }
+
 .devhub-wrap .wp-parser-class h1 .arg-name, .devhub-wrap .wp-parser-function h1 .arg-name, .devhub-wrap .wp-parser-hook h1 .arg-name, .devhub-wrap .wp-parser-method h1 .arg-name {
   color: #0f55c8;
 }
+
 .devhub-wrap .wp-parser-class h1 .arg-default, .devhub-wrap .wp-parser-function h1 .arg-default, .devhub-wrap .wp-parser-hook h1 .arg-default, .devhub-wrap .wp-parser-method h1 .arg-default {
   color: #000000;
 }
+
 .devhub-wrap .wp-parser-class h1 a:hover, .devhub-wrap .wp-parser-function h1 a:hover, .devhub-wrap .wp-parser-hook h1 a:hover, .devhub-wrap .wp-parser-method h1 a:hover {
   border-bottom: 1px dotted #21759b;
 }
+
 .devhub-wrap .wp-parser-class h2, .devhub-wrap .wp-parser-function h2, .devhub-wrap .wp-parser-hook h2, .devhub-wrap .wp-parser-method h2 {
   font-family: Georgia, Times, serif;
   margin-bottom: .5em;
 }
+
 .devhub-wrap .wp-parser-class .return-type, .devhub-wrap .wp-parser-function .return-type, .devhub-wrap .wp-parser-hook .return-type, .devhub-wrap .wp-parser-method .return-type {
   font-style: italic;
 }
+
 .devhub-wrap .wp-parser-class .parameters p, .devhub-wrap .wp-parser-function .parameters p, .devhub-wrap .wp-parser-hook .parameters p, .devhub-wrap .wp-parser-method .parameters p {
   margin-bottom: 0;
 }
+
 .devhub-wrap .wp-parser-class .parameters dd .desc .type, .devhub-wrap .wp-parser-class .parameters dd .desc .required, .devhub-wrap .wp-parser-function .parameters dd .desc .type, .devhub-wrap .wp-parser-function .parameters dd .desc .required, .devhub-wrap .wp-parser-hook .parameters dd .desc .type, .devhub-wrap .wp-parser-hook .parameters dd .desc .required, .devhub-wrap .wp-parser-method .parameters dd .desc .type, .devhub-wrap .wp-parser-method .parameters dd .desc .required {
   font-style: italic;
 }
+
 .devhub-wrap .wp-parser-class .parameters dd .default, .devhub-wrap .wp-parser-function .parameters dd .default, .devhub-wrap .wp-parser-hook .parameters dd .default, .devhub-wrap .wp-parser-method .parameters dd .default {
   font-style: italic;
 }
+
 .devhub-wrap .wp-parser-class .parameters .param-hash, .devhub-wrap .wp-parser-function .parameters .param-hash, .devhub-wrap .wp-parser-hook .parameters .param-hash, .devhub-wrap .wp-parser-method .parameters .param-hash {
   margin-left: 1.2em;
   margin-bottom: 0.5em;
 }
+
 .devhub-wrap .wp-parser-class .parameters .param-hash li, .devhub-wrap .wp-parser-function .parameters .param-hash li, .devhub-wrap .wp-parser-hook .parameters .param-hash li, .devhub-wrap .wp-parser-method .parameters .param-hash li {
   margin-top: 1em;
 }
+
 .devhub-wrap .wp-parser-class .learn-more, .devhub-wrap .wp-parser-function .learn-more, .devhub-wrap .wp-parser-hook .learn-more, .devhub-wrap .wp-parser-method .learn-more {
   background-color: #f1f1f1;
   border: 1px solid #dfdfdf;
   border-radius: 5px;
   padding: 20px;
 }
+
 .devhub-wrap .wp-parser-class .deprecated,
 .devhub-wrap .wp-parser-class .private-access, .devhub-wrap .wp-parser-function .deprecated,
 .devhub-wrap .wp-parser-function .private-access, .devhub-wrap .wp-parser-hook .deprecated,
@@ -1241,6 +1413,7 @@ input {
   margin-top: 30px;
   padding: 20px;
 }
+
 .devhub-wrap .wp-parser-class .deprecated p,
 .devhub-wrap .wp-parser-class .private-access p, .devhub-wrap .wp-parser-function .deprecated p,
 .devhub-wrap .wp-parser-function .private-access p, .devhub-wrap .wp-parser-hook .deprecated p,
@@ -1248,52 +1421,66 @@ input {
 .devhub-wrap .wp-parser-method .private-access p {
   margin-bottom: 0px;
 }
+
 .devhub-wrap .wp-parser-class .deprecated, .devhub-wrap .wp-parser-function .deprecated, .devhub-wrap .wp-parser-hook .deprecated, .devhub-wrap .wp-parser-method .deprecated {
   background-color: #fbeaea;
   border: 1px solid #dc3232;
 }
+
 .devhub-wrap .wp-parser-class .deprecated-method, .devhub-wrap .wp-parser-function .deprecated-method, .devhub-wrap .wp-parser-hook .deprecated-method, .devhub-wrap .wp-parser-method .deprecated-method {
   color: #be2423;
   font-style: italic;
 }
+
 .devhub-wrap .wp-parser-class .private-access, .devhub-wrap .wp-parser-function .private-access, .devhub-wrap .wp-parser-hook .private-access, .devhub-wrap .wp-parser-method .private-access {
   border: 1px solid #ffb900;
   background-color: #fff8e5;
 }
+
 .devhub-wrap .wp-parser-class .callout, .devhub-wrap .wp-parser-function .callout, .devhub-wrap .wp-parser-hook .callout, .devhub-wrap .wp-parser-method .callout {
   margin-top: 30px;
 }
+
 .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
   width: 300px;
 }
+
 .devhub-wrap .wp-parser-class .table-of-contents ul, .devhub-wrap .wp-parser-function .table-of-contents ul, .devhub-wrap .wp-parser-hook .table-of-contents ul, .devhub-wrap .wp-parser-method .table-of-contents ul {
   margin-top: 6px;
 }
+
 .devhub-wrap .wp-parser-class ul.items li, .devhub-wrap .wp-parser-function ul.items li, .devhub-wrap .wp-parser-hook ul.items li, .devhub-wrap .wp-parser-method ul.items li {
   padding-bottom: 0px !important;
 }
+
 .devhub-wrap .wp-parser-class ul.items a:hover, .devhub-wrap .wp-parser-function ul.items a:hover, .devhub-wrap .wp-parser-hook ul.items a:hover, .devhub-wrap .wp-parser-method ul.items a:hover {
   color: #d54e21 !important;
 }
+
 .devhub-wrap .wp-parser-class .toc-jump, .devhub-wrap .wp-parser-function .toc-jump, .devhub-wrap .wp-parser-hook .toc-jump, .devhub-wrap .wp-parser-method .toc-jump {
   display: inline-block;
   float: right;
 }
+
 .devhub-wrap .callout:before {
   top: 0.2em;
 }
+
 .devhub-wrap.archive .wp-parser-class h1, .devhub-wrap.archive .wp-parser-function h1, .devhub-wrap.archive .wp-parser-hook h1, .devhub-wrap.archive .wp-parser-method h1, .devhub-wrap.search .wp-parser-class h1, .devhub-wrap.search .wp-parser-function h1, .devhub-wrap.search .wp-parser-hook h1, .devhub-wrap.search .wp-parser-method h1 {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #21759b;
   font-weight: normal;
 }
+
 .devhub-wrap.archive .wp-parser-class div.sourcefile, .devhub-wrap.archive .wp-parser-function div.sourcefile, .devhub-wrap.archive .wp-parser-hook div.sourcefile, .devhub-wrap.archive .wp-parser-method div.sourcefile, .devhub-wrap.search .wp-parser-class div.sourcefile, .devhub-wrap.search .wp-parser-function div.sourcefile, .devhub-wrap.search .wp-parser-hook div.sourcefile, .devhub-wrap.search .wp-parser-method div.sourcefile {
   color: #999999;
   font-style: italic;
 }
+
 .devhub-wrap .single .wp-parser-class, .devhub-wrap .single .wp-parser-function, .devhub-wrap .single .wp-parser-hook, .devhub-wrap .single .wp-parser-method {
   border-bottom-style: none;
 }
+
 .devhub-wrap .related ul {
   line-height: 1.7;
   /* Slightly increase the line height for more readability */
@@ -1301,54 +1488,68 @@ input {
   margin: 0;
   overflow-x: auto;
 }
+
 .devhub-wrap .related .show-more, .devhub-wrap .related .hide-more {
   display: none;
 }
+
 .devhub-wrap .source-content {
   overflow: auto;
 }
+
 .devhub-wrap .source-code-links {
   margin-left: 2em;
   margin-top: 1em;
 }
+
 .devhub-wrap .source-code-links span {
   border-left: 1px solid #999;
   margin-left: 1em;
   padding-left: 1em;
 }
+
 .devhub-wrap .source-code-links span:first-child {
   display: none;
   border-left: 0;
   margin-left: 1em;
   padding-left: 0;
 }
+
 .devhub-wrap .source-code-container {
   overflow-x: auto;
   overflow-y: hidden;
 }
+
 .devhub-wrap .show-complete-source, .devhub-wrap .less-complete-source {
   display: none;
 }
+
 .devhub-wrap table .changelog-version {
   width: 10%;
 }
+
 .devhub-wrap table .changelog-desc {
   width: 90%;
 }
+
 .devhub-wrap .loop-pagination {
   text-align: center;
   font-size: 18px;
   margin-bottom: 20px;
 }
+
 .devhub-wrap .comment-content a {
   word-wrap: break-word;
 }
+
 .devhub-wrap.single-wp-parser-function .bad-note .comment-content, .devhub-wrap.single-wp-parser-method .bad-note .comment-content, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content, .devhub-wrap.single-wp-parser-class .bad-note .comment-content {
   opacity: .6;
 }
+
 .devhub-wrap.single-wp-parser-function .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-method .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-hook .bad-note .comment-content:hover, .devhub-wrap.single-wp-parser-class .bad-note .comment-content:hover {
   opacity: 1;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-list,
 .devhub-wrap.single-wp-parser-function .comment-list ol, .devhub-wrap.single-wp-parser-method .comment-list,
 .devhub-wrap.single-wp-parser-method .comment-list ol, .devhub-wrap.single-wp-parser-hook .comment-list,
@@ -1358,6 +1559,7 @@ input {
   margin: 0 0 1.5em 0;
   padding: 0;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-list li, .devhub-wrap.single-wp-parser-method .comment-list li, .devhub-wrap.single-wp-parser-hook .comment-list li, .devhub-wrap.single-wp-parser-class .comment-list li {
   margin-top: 2.5rem;
   background: #fff;
@@ -1365,20 +1567,24 @@ input {
   border: 1px solid #dfdfdf;
   border-radius: 2px;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-list li article, .devhub-wrap.single-wp-parser-method .comment-list li article, .devhub-wrap.single-wp-parser-hook .comment-list li article, .devhub-wrap.single-wp-parser-class .comment-list li article {
   overflow: auto;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-list .avatar, .devhub-wrap.single-wp-parser-method .comment-list .avatar, .devhub-wrap.single-wp-parser-hook .comment-list .avatar, .devhub-wrap.single-wp-parser-class .comment-list .avatar {
   float: left;
   margin: -2px 1em 0 0;
   padding: 0.125em;
   border: 1px solid #eee;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-meta, .devhub-wrap.single-wp-parser-method .comment-meta, .devhub-wrap.single-wp-parser-hook .comment-meta, .devhub-wrap.single-wp-parser-class .comment-meta {
   padding: .5em 1em;
   background-color: #f7f7f7;
   overflow: auto;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-content, .devhub-wrap.single-wp-parser-method .comment-content, .devhub-wrap.single-wp-parser-hook .comment-content, .devhub-wrap.single-wp-parser-class .comment-content {
   margin-left: 60px;
   margin-left: 3.75rem;
@@ -1386,18 +1592,22 @@ input {
   clear: both;
   padding: 2rem 1.5rem .5rem;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-footer, .devhub-wrap.single-wp-parser-method .comment-footer, .devhub-wrap.single-wp-parser-hook .comment-footer, .devhub-wrap.single-wp-parser-class .comment-footer {
   margin: 0 1em;
   padding: 0 0 1em 0;
   position: relative;
   overflow: auto;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-footer a, .devhub-wrap.single-wp-parser-method .comment-footer a, .devhub-wrap.single-wp-parser-hook .comment-footer a, .devhub-wrap.single-wp-parser-class .comment-footer a {
   float: right;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-footer p, .devhub-wrap.single-wp-parser-method .comment-footer p, .devhub-wrap.single-wp-parser-hook .comment-footer p, .devhub-wrap.single-wp-parser-class .comment-footer p {
   margin-bottom: 0;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-content ol, .devhub-wrap.single-wp-parser-method .comment-content ol, .devhub-wrap.single-wp-parser-hook .comment-content ol, .devhub-wrap.single-wp-parser-class .comment-content ol {
   list-style: decimal inside;
   margin: 0 0 1.5em 0;
@@ -1405,6 +1615,7 @@ input {
   margin: 0 0 1.5em 1.5em;
   padding: 0;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-content ul, .devhub-wrap.single-wp-parser-method .comment-content ul, .devhub-wrap.single-wp-parser-hook .comment-content ul, .devhub-wrap.single-wp-parser-class .comment-content ul {
   list-style: square inside;
   margin: 0 0 1.5em 0;
@@ -1412,65 +1623,81 @@ input {
   margin: 0 0 1.5em 1.5em;
   padding: 0;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-content li, .devhub-wrap.single-wp-parser-method .comment-content li, .devhub-wrap.single-wp-parser-hook .comment-content li, .devhub-wrap.single-wp-parser-class .comment-content li {
   border: none;
   padding: 0;
 }
+
 .devhub-wrap.single-wp-parser-function #respond, .devhub-wrap.single-wp-parser-method #respond, .devhub-wrap.single-wp-parser-hook #respond, .devhub-wrap.single-wp-parser-class #respond {
   overflow: hidden;
 }
+
 .devhub-wrap.single-wp-parser-function #respond .log-in-out a, .devhub-wrap.single-wp-parser-method #respond .log-in-out a, .devhub-wrap.single-wp-parser-hook #respond .log-in-out a, .devhub-wrap.single-wp-parser-class #respond .log-in-out a {
   font-style: italic;
 }
+
 .devhub-wrap.single-wp-parser-function #reply-title small a, .devhub-wrap.single-wp-parser-method #reply-title small a, .devhub-wrap.single-wp-parser-hook #reply-title small a, .devhub-wrap.single-wp-parser-class #reply-title small a {
   font-style: italic;
 }
+
 .devhub-wrap.single-wp-parser-function #respond #submit, .devhub-wrap.single-wp-parser-method #respond #submit, .devhub-wrap.single-wp-parser-hook #respond #submit, .devhub-wrap.single-wp-parser-class #respond #submit {
   float: left;
   margin: 0 0 1.5em;
 }
+
 .devhub-wrap.single-wp-parser-function .comment-author, .devhub-wrap.single-wp-parser-method .comment-author, .devhub-wrap.single-wp-parser-hook .comment-author, .devhub-wrap.single-wp-parser-class .comment-author {
   float: left;
   line-height: 1.8;
 }
+
 .devhub-wrap.single-wp-parser-function #add-user-note, .devhub-wrap.single-wp-parser-method #add-user-note, .devhub-wrap.single-wp-parser-hook #add-user-note, .devhub-wrap.single-wp-parser-class #add-user-note {
   font-size: 1.6rem;
 }
+
 .devhub-wrap.single-post .comment-list,
 .devhub-wrap.single-post .comment-list ol {
   list-style: none;
   margin: 1.5em 0;
   padding: 0;
 }
+
 .devhub-wrap.single-post .comment-list li {
   margin: 1.5em 0;
   padding: 1em 0 0 0;
   border-top: 1px solid #ddd;
 }
+
 .devhub-wrap.single-post .comment-list p {
   margin: 0 0 0 42px;
 }
+
 .devhub-wrap.single-post .comment-list .alt {
   background: inherit;
 }
+
 .devhub-wrap.single-post .comment-meta {
   font-size: 0.65em;
   color: #888;
   float: right;
   margin-top: -15px;
 }
+
 .devhub-wrap.single-post .comment-author img {
   float: left;
   margin: 0 10px 0 0;
 }
+
 .devhub-wrap.single-post .comments-area {
   margin: 1.5em 0 0 0;
 }
+
 .devhub-wrap #content-area.has-sidebar {
   float: none;
   margin: 0 auto;
   width: 60em;
 }
+
 .devhub-wrap .has-sidebar main {
   float: right;
   width: 67%;
@@ -1479,6 +1706,7 @@ input {
   padding: 0 12px;
   padding: 0 1.2rem;
 }
+
 .devhub-wrap .has-sidebar .widget-area {
   float: left;
   overflow: hidden;
@@ -1487,20 +1715,25 @@ input {
   margin: 0;
   clear: none;
 }
+
 .devhub-wrap .has-sidebar .widget-area .widget {
   width: 100%;
 }
+
 .devhub-wrap nav.handbook-navigation .nav-links a {
   width: 49%;
   display: inline-block;
 }
+
 .devhub-wrap nav.handbook-navigation .nav-links a[rel="prev"] {
   text-align: left;
 }
+
 .devhub-wrap nav.handbook-navigation .nav-links a[rel="next"] {
   text-align: right;
   float: right;
 }
+
 .devhub-wrap .table-of-contents {
   float: right;
   width: 200px;
@@ -1510,6 +1743,7 @@ input {
   z-index: 1;
   position: relative;
 }
+
 .devhub-wrap .table-of-contents h2 {
   margin: 0;
   padding-bottom: 3px;
@@ -1520,72 +1754,87 @@ input {
   background: #d0d0d0;
   color: #8a8989;
 }
+
 .devhub-wrap .table-of-contents ul,
 .devhub-wrap .table-of-contents ol {
   margin: 10px 20px;
 }
+
 .devhub-wrap .table-of-contents ul ul,
 .devhub-wrap .table-of-contents ul ol,
 .devhub-wrap .table-of-contents ol ul,
 .devhub-wrap .table-of-contents ol ol {
   margin-right: 0;
 }
+
 .devhub-wrap ul.items {
   margin-bottom: 8px !important;
   list-style-type: none !important;
   padding-right: 10px;
 }
+
 .devhub-wrap ul.items li {
   padding-bottom: 6px !important;
   font-weight: 600;
 }
+
 .devhub-wrap ul.items li ul li,
 .devhub-wrap ul.items li ul li ul li {
   padding-bottom: 0 !important;
   font-weight: normal;
 }
+
 .devhub-wrap ul.items li a {
   color: #555 !important;
 }
+
 .devhub-wrap .user-note-voting {
   font-size: 1.2em;
   clear: left;
   float: left;
   margin-right: 10px;
 }
+
 .devhub-wrap .user-note-voting-up .dashicons, .devhub-wrap .user-note-voting-down .dashicons {
   font-size: 30px;
   height: 30px;
   width: 30px;
   color: #000;
 }
+
 .devhub-wrap .user-note-voting-up {
   margin-left: -9px;
 }
+
 .devhub-wrap span.user-note-voting-up,
 .devhub-wrap span.user-note-voting-down {
   cursor: default;
 }
+
 .devhub-wrap .user-note-voting-count {
   margin-right: -2px;
 }
+
 .devhub-wrap .user-voted.user-note-voting-up .dashicons {
   color: green;
 }
+
 .devhub-wrap .user-voted.user-note-voting-down .dashicons {
   color: red;
 }
+
 .devhub-wrap .syntaxhighlighter {
   /* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
   max-width: 100% !important;
   width: inherit !important;
 }
+
 .devhub-wrap.archive .hentry, .devhub-wrap.blog .hentry {
   padding: 0 0 1.5em 0;
   border-bottom: 1px solid #ddd;
 }
 
-@media (max-width: 60em) {
+@media (max-width: 59.999999em) {
   .devhub-wrap {
     max-width: 100%;
     width: 100%;
@@ -1611,6 +1860,7 @@ input {
     color: #21759b;
   }
 }
+
 @media (min-width: 43em) {
   .devhub-wrap.archive .meta, .devhub-wrap.search .meta {
     float: right;
@@ -1619,6 +1869,7 @@ input {
     float: left;
   }
 }
+
 @media (max-width: 43em) {
   #content-area.has-sidebar main {
     float: right;
@@ -1638,7 +1889,6 @@ input {
   #content-area.has-sidebar .widget-area .widget {
     width: 100%;
   }
-
   .devhub-wrap .three-columns .box,
   .devhub-wrap .section .box,
   .devhub-wrap .home-primary-content,
@@ -1688,6 +1938,7 @@ input {
     width: 99%;
   }
 }
+
 @media (max-width: 32em) {
   .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
     width: 100%;
@@ -1700,11 +1951,11 @@ input {
     clear: both;
   }
 }
+
 @media (max-width: 22em) {
   ul, ol {
     margin-left: 1.2em;
   }
-
   .devhub-wrap .wp-parser-class h1, .devhub-wrap .wp-parser-function h1, .devhub-wrap .wp-parser-hook h1, .devhub-wrap .wp-parser-method h1 {
     padding-left: 20px;
     line-height: 2rem;
