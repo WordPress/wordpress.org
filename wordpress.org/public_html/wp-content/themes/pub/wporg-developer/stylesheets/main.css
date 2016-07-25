@@ -1148,13 +1148,7 @@ input {
   background-color: #f0f0f0;
 }
 
-.devhub-wrap #sidebar > ul {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
-}
-
-.devhub-wrap #sidebar > ul li h2.widgettitle {
+.devhub-wrap #sidebar h1.widget-title {
   background-color: #d0d0d0;
   color: #8a8989;
   text-align: center;
@@ -1163,18 +1157,18 @@ input {
   letter-spacing: 2px;
 }
 
-.devhub-wrap #sidebar > ul li .menu > li {
+.devhub-wrap #sidebar .menu > li {
   padding-bottom: 1em;
 }
 
-.devhub-wrap #sidebar > ul li ul {
+.devhub-wrap #sidebar ul {
   list-style-type: none;
   margin: 0 10px;
-  padding: 15px 0;
+  padding: 5px 0;
   counter-reset: item;
 }
 
-.devhub-wrap #sidebar > ul li ul li:before {
+.devhub-wrap #sidebar ul li:before {
   content: counter(item);
   counter-increment: item;
   background-color: #d0d0d0;
@@ -1189,39 +1183,39 @@ input {
   vertical-align: top;
 }
 
-.devhub-wrap #sidebar > ul li ul li a {
+.devhub-wrap #sidebar ul li a {
   font-size: 16px;
   color: #4b4b4b;
   font-weight: bold;
 }
 
-.devhub-wrap #sidebar > ul li ul li > a {
+.devhub-wrap #sidebar ul li > a {
   display: inline-block;
   width: 225px;
 }
 
-.devhub-wrap #sidebar > ul li ul li ul {
+.devhub-wrap #sidebar ul li ul {
   list-style-type: none;
   padding: 0;
   margin: 0 0 0 35px;
 }
 
-.devhub-wrap #sidebar > ul li ul li ul li {
+.devhub-wrap #sidebar ul li ul li {
   padding-left: 20px;
 }
 
-.devhub-wrap #sidebar > ul li ul li ul li:before {
+.devhub-wrap #sidebar ul li ul li:before {
   content: none;
 }
 
-.devhub-wrap #sidebar > ul li ul li ul li a {
+.devhub-wrap #sidebar ul li ul li a {
   font-weight: normal;
   font-size: 14px;
   display: inline;
   margin-left: -20px;
 }
 
-.devhub-wrap #sidebar > ul li ul li ul li ul {
+.devhub-wrap #sidebar ul li ul li ul {
   margin-left: 20px;
 }
 

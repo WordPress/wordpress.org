@@ -794,70 +794,63 @@
 		border: 1px solid #d0d0d0;
 		box-shadow: 0px 0px 5px #d0d0d0;
 		background-color: #f0f0f0;
-		& > ul {
-			padding: 0;
-			margin: 0;
+		h1.widget-title {
+			background-color: #d0d0d0;
+			color: #8a8989;
+			text-align: center;
+			text-transform: uppercase;
+			font-size: 14px;
+			letter-spacing: 2px;
+		}
+		.menu > li {
+			padding-bottom: 1em;
+		}
+		ul {
 			list-style-type: none;
+			margin: 0 10px;
+			padding: 5px 0;
+			counter-reset: item;
 			li {
-				h2.widgettitle {
-				background-color: #d0d0d0;
-				color: #8a8989;
-				text-align: center;
-				text-transform: uppercase;
-				font-size: 14px;
-				letter-spacing: 2px;
+				&:before {
+					content: counter(item);
+					counter-increment: item;
+					background-color: #d0d0d0;
+					width: 25px;
+					display: inline-block;
+					color: #fff;
+					margin-right: 10px;
+					text-align: center;
+					padding: 3px 0;
+					font-size: 13px;
+					border-radius: 50%;
+					vertical-align: top;
 				}
-				.menu > li {
-					padding-bottom: 1em;
+				a {
+					font-size: 16px;
+					color: #4b4b4b;
+					font-weight: bold;
+				}
+				& > a {
+					display: inline-block;
+					width: 225px;
 				}
 				ul {
 					list-style-type: none;
-					margin: 0 10px;
-					padding: 15px 0;
-					counter-reset: item;
+					padding: 0;
+					margin: 0 0 0 35px;
 					li {
+						padding-left: 20px;
 						&:before {
-							content: counter(item);
-							counter-increment: item;
-							background-color: #d0d0d0;
-							width: 25px;
-							display: inline-block;
-							color: #fff;
-							margin-right: 10px;
-							text-align: center;
-							padding: 3px 0;
-							font-size: 13px;
-							border-radius: 50%;
-							vertical-align: top;
+							content: none;
 						}
 						a {
-							font-size: 16px;
-							color: #4b4b4b;
-							font-weight: bold;
-						}
-						& > a {
-							display: inline-block;
-							width: 225px;
+							font-weight: normal;
+							font-size: 14px;
+							display: inline;
+							margin-left: -20px;
 						}
 						ul {
-							list-style-type: none;
-							padding: 0;
-							margin: 0 0 0 35px;
-							li {
-								padding-left: 20px;
-								&:before {
-									content: none;
-								}
-								a {
-									font-weight: normal;
-									font-size: 14px;
-									display: inline;
-									margin-left: -20px;
-								}
-								ul {
-									margin-left: 20px;
-								}
-							}
+							margin-left: 20px;
 						}
 					}
 				}
