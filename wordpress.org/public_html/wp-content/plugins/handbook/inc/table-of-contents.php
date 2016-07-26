@@ -118,8 +118,9 @@ class WPorg_Handbook_TOC {
 			} else {
 				$first = false;
 			}
-
-			$replacement .= sprintf( '<%1$s class="toc-heading" id="%2$s" tabindex="-1">%3$s <a href="#%2$s" class="anchor">#</a></%1$s>', $tag, $id, $item[2] );
+			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $item[2] );
+			$anchor         = sprintf( '<a href="#%1$s" class="anchor"><span aria-hidden="true">#</span>%2$s</a>', $id, $a11y_text );
+			$replacement   .= sprintf( '<%1$s class="toc-heading" id="%2$s" tabindex="-1">%3$s %4$s</%1$s>', $tag, $id, $item[2], $anchor );
 			$replacements[] = $replacement;
 		}
 
