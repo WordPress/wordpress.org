@@ -245,6 +245,19 @@ class WordCamp_Loader {
 	}
 
 	/**
+	 * Get the statuses where camps should have a mentor
+	 *
+	 * @return array
+	 */
+	public static function get_mentored_post_statuses() {
+		return array_merge(
+			array( 'wcpt-needs-pre-plann' ),
+			self::get_pre_planning_post_statuses(),
+			self::get_public_post_statuses()
+		);
+	}
+
+	/**
 	 * Get the milestones that correspond to each status
 	 *
 	 * @return array

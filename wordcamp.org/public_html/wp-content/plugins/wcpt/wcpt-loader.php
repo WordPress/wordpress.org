@@ -53,6 +53,7 @@ class WCPT_Loader {
 		if ( is_admin() || ( defined( 'DOING_CRON' ) && DOING_CRON ) ) {
 			require_once ( WCPT_DIR . 'wcpt-admin.php' );
 			require_once ( WCPT_DIR . 'wcpt-wordcamp/wordcamp-admin.php' );
+			require_once ( WCPT_DIR . 'mentors/dashboard.php' );
 		}
 	}
 
