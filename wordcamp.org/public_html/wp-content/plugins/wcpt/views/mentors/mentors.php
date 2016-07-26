@@ -13,8 +13,8 @@ defined( 'WPINC' ) or die();
 	<thead>
 		<th>Mentor</th>
 		<th>Email Address</th>
-		<th>Number of Camps</th>
-		<th>Camps Mentoring</th>
+		<th># Currently Mentoring</th>
+		<th>Currently Mentoring</th>
 	</thead>
 
 	<tbody>

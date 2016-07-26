@@ -12,8 +12,8 @@ defined( 'WPINC' ) or die();
 	<h1>WordCamp Mentors Dashboard</h1>
 
 	<p class="description">
-		Note: This page doesn't include people who have agreed to be a mentor, but haven't been assigned to any
-		camps yet.
+		Note: This page doesn't include people who have agreed to be a mentor, but have never been assigned to a
+		camp.
 	</p>
 
 	<ul>
