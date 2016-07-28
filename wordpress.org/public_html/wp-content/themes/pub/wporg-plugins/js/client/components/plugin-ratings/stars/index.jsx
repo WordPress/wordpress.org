@@ -9,7 +9,7 @@ export default React.createClass( {
 			output = '',
 			i = 0;
 
-		for ( i; i <= 5; i++ ) {
+		for ( i; i < 5; i++ ) {
 			switch ( counter ) {
 				case 0:
 					output += template.replace( '%1$s', 'dashicons dashicons-star-empty' );
@@ -30,17 +30,16 @@ export default React.createClass( {
 	},
 
 	render() {
-		const rating      = Math.round( this.props.rating / 0.5 ) * 0.5,
-			titleTemplate = '%s out of 5 stars',
-			title         = titleTemplate.replace( '%s', rating );
+		const titleTemplate = '%s out of 5 stars',
+			title = titleTemplate.replace( '%s', this.props.rating / 20 );
 
 		return (
 			<div
 				className="wporg-ratings"
 				title={ title }
 				data-title-template={ titleTemplate }
-				data-rating={ rating }
-				dangerouslySetInnerHTML={ { __html: this.fillStars( rating ) } }
+				data-rating={ this.props.rating / 20 }
+				dangerouslySetInnerHTML={ { __html: this.fillStars( Math.round( this.props.rating / 10 ) / 2 ) } }
 			></div>
 		)
 	}
