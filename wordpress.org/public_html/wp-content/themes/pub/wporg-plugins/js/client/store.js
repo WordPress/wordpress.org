@@ -8,7 +8,6 @@ import throttle from 'lodash/throttle';
 import reducers from 'reducers';
 import { loadState, saveState } from 'modules/local-storage';
 
-
 const getStore = () => {
 	const store = compose(
 		applyMiddleware( thunk )

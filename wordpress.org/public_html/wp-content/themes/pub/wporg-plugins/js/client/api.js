@@ -55,8 +55,8 @@ const API = {
 		xhr.fail( err => {
 			this.lastRequest.isLoading = false;
 
-			if ( xhr.status === 0 ) {
-				if ( xhr.statusText === 'abort' ) {
+			if ( 0 === xhr.status ) {
+				if ( 'abort' === xhr.statusText ) {
 					// Has been aborted
 					return;
 				} else {
@@ -67,13 +67,11 @@ const API = {
 			if ( err.responseJSON && err.responseJSON[0] ) {
 				this.lastRequest.data = err.responseJSON[0];
 
-				if ( ! callback ) {
-					return;
+				if ( callback ) {
+					callback( null, err.responseJSON[0] );
 				}
-
-				callback( null, err.responseJSON[0] );
 			} else {
-				window.alert( err.statusText );
+				window.console.error( err.statusText );
 			}
 		} );
 

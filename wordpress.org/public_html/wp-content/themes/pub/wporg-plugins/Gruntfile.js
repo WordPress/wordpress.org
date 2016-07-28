@@ -24,7 +24,7 @@ module.exports = function( grunt ) {
 				devtool: 'sourcemap',
 				debug: true
 			},
-			'watch-dev': {
+			watch: {
 				devtool: 'sourcemap',
 				debug: true,
 				watch: true,

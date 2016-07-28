@@ -1912,12 +1912,12 @@ p a:not(.button):hover {
   }
 }
 
-.home .site-header {
+.site-header.home {
   padding: 1.5625rem 1.143rem;
   text-align: center;
 }
 
-.home .site-header .site-title {
+.site-header.home .site-title {
   display: inherit;
   font-size: 61.03515625px;
   font-size: 3.8146972656rem;
@@ -1925,7 +1925,7 @@ p a:not(.button):hover {
   margin: 2rem 0 1rem;
 }
 
-.home .site-header .search-form {
+.site-header.home .search-form {
   margin-bottom: 32px;
   margin-bottom: 2rem;
   max-width: 100%;
@@ -1933,7 +1933,7 @@ p a:not(.button):hover {
   width: initial;
 }
 
-.home .site-header .search-form .search-field {
+.site-header.home .search-form .search-field {
   border: none;
   -webkit-border-radius: 0;
   border-radius: 0;
@@ -1949,7 +1949,7 @@ p a:not(.button):hover {
   width: 22.7373675443rem;
 }
 
-.home .site-header .search-form .button-search {
+.site-header.home .search-form .button-search {
   background: transparent;
   border: none;
   -webkit-box-shadow: none;
@@ -1965,7 +1965,7 @@ p a:not(.button):hover {
   top: 0;
 }
 
-.home .site-header .search-form .button-search:active {
+.site-header.home .search-form .button-search:active {
   background: transparent;
   border: none;
   -webkit-transform: none;

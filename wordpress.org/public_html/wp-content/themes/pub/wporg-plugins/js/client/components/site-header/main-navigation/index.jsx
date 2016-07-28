@@ -1,12 +1,12 @@
 import React from 'react';
 
 import MenuItem from './menu-item';
-import SearchForm from './search-form';
+import SearchForm from 'components/search-form';
 
 export default React.createClass( {
 	displayName: 'MainNavigation',
 
-	getInitialState() {
+	getDefaultProps() {
 		return {
 			menuItems: [
 				{
@@ -26,7 +26,7 @@ export default React.createClass( {
 	},
 
 	render() {
-		var menuItems = this.state.menuItems.map( ( menuItem, key ) => <MenuItem key={ key } item={ menuItem } /> );
+		var menuItems = this.props.menuItems.map( ( menuItem, key ) => <MenuItem key={ key } item={ menuItem } /> );
 
 		return (
 			<nav id="site-navigation" className="main-navigation" role="navigation">

@@ -7,15 +7,16 @@ import createBrowserHistory from 'history/lib/createBrowserHistory';
 /**
  * Internal dependencies.
  */
-import Page from 'containers/page';
+import ArchiveBrowse from 'components/archive/browse';
 import FrontPage from 'components/front-page';
+import NotFound from 'components/404';
+import Page from 'components/page';
 import PluginDirectory from 'components/plugin-directory';
 import SiteHeader from 'components/site-header';
 import SiteMain from 'components/site-main';
-import ArchiveBrowse from 'components/archive-browse';
-import NotFound from 'components/404';
 
 const history = useRouterHistory( createBrowserHistory )( {
+	/** @type {object} app_data Description */
 	basename: app_data.base
 } );
 
@@ -27,8 +28,8 @@ export default (
 				<Route path="browse/favorites/:username" component={ ArchiveBrowse } />
 				<Route path="browse/:type" component={ ArchiveBrowse } />
 				<Route path="developers" component={ Page } />
-				<Route path=":plugin" component={ FrontPage } />
 				<Route path="search/:searchTerm" component={ FrontPage } />
+				<Route path=":plugin" component={ FrontPage } />
 				<Route path="*" component={ NotFound } />
 			</Route>
 		</Route>

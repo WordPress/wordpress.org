@@ -4,7 +4,7 @@ import { withRouter } from 'react-router';
 /**
  * Internal dependencies.
  */
-import SiteHeader from 'components/site-header';
+import SiteHeader from './site-header';
 
 const mapStateToProps = ( state, ownProps ) => ( {
 	isHome: ownProps.router.isActive( '/', true )

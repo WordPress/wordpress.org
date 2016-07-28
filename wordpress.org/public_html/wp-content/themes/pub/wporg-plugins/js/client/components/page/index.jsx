@@ -5,8 +5,8 @@ import find from 'lodash/find';
 /**
  * Internal dependencies.
  */
-import Page from '../components/page';
-import { getPage } from '../actions';
+import Page from './page';
+import { getPage } from 'actions';
 
 class PageContainer extends Component {
 	componentDidMount() {
@@ -14,7 +14,6 @@ class PageContainer extends Component {
 	}
 
 	componentDidUpdate( previousProps ) {
-
 		if ( this.props.route.name !== previousProps.route.name ) {
 			this.getPage();
 		}

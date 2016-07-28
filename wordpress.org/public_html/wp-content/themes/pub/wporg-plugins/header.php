@@ -10,7 +10,6 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
-use WordPressdotorg\Plugin_Directory\Template;
 
 $menu_items = array(
 	'/browse/favorites/' => __( 'My Favorites', 'wporg-plugins' ),
@@ -25,15 +24,11 @@ require WPORGPATH . 'header.php';
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-plugins' ); ?></a>
 
 	<div id="content" class="site-content">
-		<header id="masthead" class="site-header" role="banner">
+		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
-				<?php if ( is_front_page() && is_home() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></h1>
-				<?php else : ?>
-					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></p>
-				<?php endif; ?>
-
 				<?php if ( is_home() ) : ?>
+					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></h1>
+
 					<p class="site-description">
 						<?php
 						/* Translators: Total number of plugins. */
@@ -42,6 +37,8 @@ require WPORGPATH . 'header.php';
 					</p>
 					<?php get_search_form(); ?>
 				<?php else : ?>
+					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></p>
+
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-plugins' ); ?>"></button>
 						<div id="primary-menu" class="menu">

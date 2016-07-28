@@ -42,11 +42,19 @@ export default  React.createClass( {
 				);
 			}
 		} else {
-			helpText =(
+			helpText = (
 				<div className="page-content">
 					<p>It seems we can&#8217;t find what you&#8217;re looking for. Perhaps searching can help.</p>
 				</div>
 			);
+
+			helpText = (
+				<div className="page-content">
+					{ helpText }
+					<SearchForm />
+				</div>
+			);
+
 		}
 
 		return (
