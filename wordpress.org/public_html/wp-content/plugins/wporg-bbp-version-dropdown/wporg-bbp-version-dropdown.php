@@ -2,7 +2,7 @@
 /**
  * Plugin Name: bbPress: Version Dropdown
  * Description: Display a WordPress version dropdown on new/edit topic forms.
- * Version:     2.0
+ * Version:     1.0
  * Author:      WordPress.org
  * Author URI:  http://wordpress.org/
  * License:     GPLv2 or later
