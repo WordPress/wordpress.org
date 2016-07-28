@@ -322,3 +322,34 @@ function bb_base_single_forum_description() {
 		<li class="forum-subscribe"><?php bbp_forum_subscription_link( array( 'forum_id' => $forum_id ) ); ?></li>
 	<?php endif;
 }
+
+function bb_base_before_topics_loop() {
+	do_action( 'bbp_template_notices' );
+
+	if ( ! is_tax( 'topic-tag' ) ) {
+		return;
+	}
+
+	$term_subscription = '';
+	if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
+		$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
+	}
+	?>
+	<div id="topic-tag" class="bbp-topic-tag">
+	<h1 class="entry-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
+	<?php if ( ! empty( $term_subscription ) ) : ?><h2><?php echo $term_subscription; ?></h2><?php endif; ?>
+		<div class="entry-content">
+	<?php
+}
+add_action( 'bbp_template_before_topics_loop', 'bb_base_before_topics_loop' );
+
+function bb_base_after_topics_loop() {
+	if ( ! is_tax( 'topic-tag' ) ) {
+		return;
+	}
+	?>
+		</div>
+	</div><!-- #topic-tag -->
+	<?php
+}
+add_action( 'bbp_template_after_topics_loop', 'bb_base_after_topics_loop' );
