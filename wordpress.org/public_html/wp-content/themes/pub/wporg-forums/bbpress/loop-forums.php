@@ -17,6 +17,18 @@
 
 			<?php bbp_get_template_part( 'loop', 'single-forum' ); ?>
 
+			<?php bbp_list_forums( array(
+				'before'           => '',
+				'after'            => '',
+				'link_before'      => '<ul class="forum"><li class="bbp-forum-info">&mdash; <span class="bbp-forum-title">',
+				'link_after'       => '',
+				'count_before'     => '</span></li><li class="bbp-forum-reply-count">',
+				'count_after'      => '</li></ul>',
+				'separator'        => '',
+				'show_topic_count' => false,
+				'show_reply_count' => true,
+			) ); ?>
+
 		<?php endwhile; ?>
 
 	</li><!-- .bbp-body -->
