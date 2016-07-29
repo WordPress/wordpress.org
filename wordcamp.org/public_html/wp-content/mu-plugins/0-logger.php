@@ -75,6 +75,8 @@ function redact_keys( & $data ) {
  *
  * Based on https://stackoverflow.com/a/22508709/450127
  *
+ * @todo It might be just as good to use getmypid(), but need to research/test first
+ *
  * @return string
  */
 function get_unique_request_id() {

@@ -146,6 +146,42 @@ function wcorg_get_user_by_canonical_names( $name ) {
 }
 
 /**
+ * Extract pieces from a WordCamp.org URL
+ *
+ * @todo find other code that's doing this same task in an ad-hoc manner, and convert it to use this instead
+ *
+ * @param string $url
+ * @param string $part 'city', 'city-domain' (without the year, e.g. seattle.wordcamp.org), 'year'
+ *
+ * @return false|string|int False on errors; an integer for years; a string for city and city-domain
+ */
+function wcorg_get_url_part( $url, $part ) {
+	$url_parts = explode( '.', parse_url( $url, PHP_URL_HOST ) );
+	$result    = false;
+
+	// Make sure it matches the typical year.city.wordcamp.org structure
+	if ( 4 !== count( $url_parts ) ) {
+		return $result;
+	}
+
+	switch( $part ) {
+		case 'city':
+			$result = $url_parts[1];
+			break;
+
+		case 'city-domain':
+			$result = ltrim( strstr( $url, '.' ), '.' );
+			break;
+
+		case 'year':
+			$result = absint( $url_parts[0] );
+			break;
+	}
+
+	return $result;
+}
+
+/**
  * Get ISO-3166 country names and codes
  *
  * @todo move the real functionality from get_valid_countries_iso3166() to here, then have the Budgets plugin,

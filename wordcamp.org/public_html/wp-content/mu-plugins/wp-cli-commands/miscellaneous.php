@@ -110,7 +110,7 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 * wp wc-misc format-log /var/log/php-errors.log
-	 * wp wc-misc format-log "$(grep 'foo' /var/log/php-errors.log -A 10 -B 10)" |less -S
+	 * wp wc-misc format-log "$(grep 'foo' /var/log/php-errors.log --C 10)" |less -S
 	 * wp wc-misc format-log "$(grep 'bar' /var/log/php-errors.log)" --foreign=ignore
 	 *
 	 * @subcommand format-log
