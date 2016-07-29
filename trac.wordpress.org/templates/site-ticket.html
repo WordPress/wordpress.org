@@ -33,12 +33,15 @@
 
   import re
   def wporg_sanitize_user_nicename(str):
-    str = str.lower()
-    str = re.sub(r'[^%a-z0-9\x80-\xff _-]', '', str)
-    str = str.strip()
-    str = re.sub(r'\s+', '-', str)
-    str = re.sub(r'-+', '-', str)
-    str = re.sub(r'_+', '_', str)
+    try:
+      str = str.lower()
+      str = re.sub(r'[^%a-z0-9\x80-\xff _-]', '', str)
+      str = str.strip()
+      str = re.sub(r'\s+', '-', str)
+      str = re.sub(r'-+', '-', str)
+      str = re.sub(r'_+', '_', str)
+    except AttributeError:
+      pass
     return str;
 ?>
 
