@@ -100,7 +100,7 @@ class Plugin {
 			$resolution = $this->get_default_topic_resolution();
 		}
 		?>
-		<p><label for="<?php echo esc_attr( self::META_KEY ); ?>"><?php echo esc_html( __( 'This topic is', 'wporg' ) ); ?></label><br />
+		<p><label for="topic-resolved"><?php esc_html_e( 'This topic is', 'wporg' ); ?></label><br />
 
 		<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved">
 
@@ -128,7 +128,7 @@ class Plugin {
 			return;
 		}
 		?>
-		<p><label for="<?php echo esc_attr( self::META_KEY ); ?>"><input type="checkbox" name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved" value="mu"> <?php echo esc_html( __( 'This topic is not a support question' ) ); ?></label></p>
+		<p><label for="topic-resolved"><input type="checkbox" name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved" value="mu"> <?php esc_html_e( 'This topic is not a support question', 'wporg' ); ?></label></p>
 		<?php
 	}
 
