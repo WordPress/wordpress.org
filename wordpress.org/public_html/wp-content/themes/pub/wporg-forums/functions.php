@@ -5,13 +5,6 @@
  * @package WPBBP
  */
 
-/**
- * Sets up theme defaults and registers support for various WordPress features.
- */
-function wporg_support_setup() {
-	load_theme_textdomain( 'wporg-forums' );
-}
-add_action( 'after_setup_theme', 'wporg_support_setup' );
 
 /**
  * Use the ‘Lead Topic’ uses the single topic part
