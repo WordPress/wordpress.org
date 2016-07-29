@@ -156,6 +156,7 @@ class Plugin {
 		$versions = array_merge(
 			array( '0' => '' ),
 			apply_filters( 'wporg_bbp_get_wp_versions', array() ),
+			/* translators: WordPress Version */
 			array( 'other' => __( 'Other:', 'wporg-forums' ) )
 		);
 		return $versions;
