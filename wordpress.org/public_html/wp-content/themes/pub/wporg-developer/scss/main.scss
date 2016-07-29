@@ -1482,6 +1482,9 @@
 	.user-voted.user-note-voting-down .dashicons {
 		color: red;
 	}
+	.user-submitted-note .dashicons {
+		color: grey;
+	}
 
 	.syntaxhighlighter {
 		/* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */

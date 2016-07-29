@@ -131,10 +131,18 @@ namespace {
 		function wporg_developer_user_note( $comment, $args, $depth ) {
 			$GLOBALS['comment'] = $comment;
 			$count = (int) DevHub_User_Contributed_Notes_Voting::count_votes( $comment->comment_ID, 'difference' );
-			$comment_class = ( -1 > $count ) ? 'bad-note' : '';
+			$curr_user_note = DevHub_User_Contributed_Notes_Voting::is_current_user_note( $comment->comment_ID );
+
+			$comment_class = array();
+			if ( -1 > $count ) {
+				$comment_class[] = 'bad-note';
+			}
+			if ( $curr_user_note ) {
+				$comment_class[] = 'user-submitted-note';
+			}
 			?>
 
-			<li id="comment-<?php comment_ID(); ?>" <?php comment_class( $comment_class ); ?>>
+			<li id="comment-<?php comment_ID(); ?>" <?php comment_class( implode( ' ', $comment_class ) ); ?>>
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a> 
 				<header class="comment-meta">

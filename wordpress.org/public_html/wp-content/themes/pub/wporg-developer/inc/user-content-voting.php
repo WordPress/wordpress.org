@@ -194,9 +194,39 @@ class DevHub_User_Contributed_Notes_Voting {
 		// Comment, if provided, must be approved.
 		if ( $comment_id ) {
 			$can = ( '1' == get_comment( $comment_id )->comment_approved );
+			// Users can't vote on their own comments.
+			if ( $can && self::is_current_user_note( $comment_id ) ) {
+				$can = false;
+			}
 		}
 
 		return apply_filters( 'devhub_user_can_vote', $can, $user_id, $comment_id );
+	}
+
+	/**
+	 * Determines if a note was submitted by the current user.
+	 *
+	 * @param int   $comment_id The comment ID, or empty to use current comment.
+	 * @return bool True if the note was submitted by the current user.
+	 */
+	public static function is_current_user_note( $comment_id = '' ) {
+		if ( ! $comment_id ) {
+			global $comment;
+			$comment_id = $comment->comment_ID;
+		}
+
+		$note    = get_comment( $comment_id );
+		$user_id = get_current_user_id();
+
+		if ( ! $note || ! $user_id ) {
+			return false;
+		}
+
+		if ( (int) $note->user_id === $user_id ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -263,12 +293,17 @@ class DevHub_User_Contributed_Notes_Voting {
 		}
 
 		$can_vote     = self::user_can_vote( get_current_user_id(), $comment_id );
+		$user_note    = self::is_current_user_note( $comment_id );
 		$logged_in    = is_user_logged_in();
 		$comment_link = get_comment_link( $comment_id );
 		$nonce        = wp_create_nonce( 'user-note-vote-' . $comment_id );
 		$disabled_str = __( 'Voting for this note is disabled', 'wporg' );
 		$log_in_str   = __( 'You must log in to vote on the helpfulness of this note', 'wporg' );
 		$log_in_url   = add_query_arg( 'redirect_to', urlencode( $comment_link ), 'https://login.wordpress.org' );
+
+		if ( ! $can_vote && $user_note ) {
+			$disabled_str = __( 'Voting for your own note is disabled', 'wporg' );
+		}
 
 		echo '<div class="user-note-voting" data-nonce="' . esc_attr( $nonce ) . '">';
 
