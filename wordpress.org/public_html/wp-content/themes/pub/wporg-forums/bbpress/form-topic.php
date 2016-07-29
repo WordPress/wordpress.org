@@ -29,7 +29,13 @@
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
-						<p><?php _e( 'Before posting a new topic, be sure to <a href="/search/">search</a> to see if one has been started already.',                              'wporg-forums' ); ?></p>
+						<p><?php
+							printf(
+								/* translators: %s: Search URL */
+								__( 'Before posting a new topic, be sure to <a href="%s">search</a> to see if one has been started already.', 'wporg-forums' ),
+								esc_url( bbp_get_search_url() )
+							);
+						?></p>
 						<p><?php _e( 'Having a problem? Asking a question? Make sure to read the <a href="http://codex.wordpress.org/Forum_Welcome">Forum Welcome</a> to find out how to maximize your odds of getting help!', 'wporg-forums' ); ?></p>
 					</div>
 
