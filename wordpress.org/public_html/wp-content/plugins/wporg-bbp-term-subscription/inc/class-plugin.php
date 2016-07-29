@@ -84,6 +84,7 @@ class Plugin {
 
 		// Check for empty term id.
 		if ( ! $term ) {
+			/* translators: Term: topic tag */
 			bbp_add_error( 'wporg_bbp_subscribe_term_id', __( '<strong>ERROR</strong>: No term was found! Which term are you subscribing/unsubscribing to?', 'wporg-forums' ) );
 
 		// Check for current user.
@@ -117,8 +118,10 @@ class Plugin {
 			$redirect = get_term_link( $term_id );
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
+			/* translators: Term: topic tag */
 			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>ERROR</strong>: There was a problem subscribing to that term!', 'wporg-forums' ) );
 		} elseif ( false === $is_subscribed && 'wporg_bbp_unsubscribe_term' === $action ) {
+			/* translators: Term: topic tag */
 			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>ERROR</strong>: There was a problem unsubscribing from that term!', 'wporg-forums' ) );
 		}
 	}
