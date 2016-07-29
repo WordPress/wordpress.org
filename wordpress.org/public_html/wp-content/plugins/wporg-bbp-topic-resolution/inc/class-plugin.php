@@ -64,7 +64,7 @@ class Plugin {
 	 * Add "Resolved" status to title.
 	 */
 	public function get_topic_title( $title, $topic_id ) {
-		$resolved = __( 'Resolved', 'wporg' );
+		$resolved = __( 'Resolved', 'wporg-forums' );
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
 		   return sprintf( esc_html( '[%s]: %s' ), $resolved, $title );
 		}
@@ -100,7 +100,7 @@ class Plugin {
 			$resolution = $this->get_default_topic_resolution();
 		}
 		?>
-		<p><label for="topic-resolved"><?php esc_html_e( 'This topic is', 'wporg' ); ?></label><br />
+		<p><label for="topic-resolved"><?php esc_html_e( 'This topic is', 'wporg-forums' ); ?></label><br />
 
 		<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved">
 
@@ -128,7 +128,7 @@ class Plugin {
 			return;
 		}
 		?>
-		<p><label for="topic-resolved"><input type="checkbox" name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved" value="mu"> <?php esc_html_e( 'This topic is not a support question', 'wporg' ); ?></label></p>
+		<p><label for="topic-resolved"><input type="checkbox" name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved" value="mu"> <?php esc_html_e( 'This topic is not a support question', 'wporg-forums' ); ?></label></p>
 		<?php
 	}
 
@@ -154,7 +154,7 @@ class Plugin {
 
 	public function add_forum_topic_resolution_column( $columns ) {
 		return array_merge( $columns, array(
-			'bbp_topic_resolution' => __( 'Support', 'wporg' ),
+			'bbp_topic_resolution' => __( 'Support', 'wporg-forums' ),
 		) );
 	}
 
@@ -259,9 +259,9 @@ class Plugin {
 
 	public function get_topic_resolutions() {
 		return apply_filters( 'wporg_bbp_get_topic_resolutions', array(
-				'no'  => __( 'not resolved', 'wporg' ),
-				'yes' => __( 'resolved', 'wporg' ),
-				'mu'  => __( 'not a support question', 'wporg' ),
+				'no'  => __( 'not resolved', 'wporg-forums' ),
+				'yes' => __( 'resolved', 'wporg-forums' ),
+				'mu'  => __( 'not a support question', 'wporg-forums' ),
 		) );
 	}
 

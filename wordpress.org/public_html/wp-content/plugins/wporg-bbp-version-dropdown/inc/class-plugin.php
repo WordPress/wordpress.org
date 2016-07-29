@@ -76,8 +76,8 @@ class Plugin {
 		}
 		?>
 		<p>
-			<label for="wp-version"><?php esc_html_e( 'Version:', 'wporg' ); ?></label><br />
-			<em><?php esc_html_e( 'Select the version of WordPress you are using.', 'wporg' ); ?></em><br />
+			<label for="wp-version"><?php esc_html_e( 'Version:', 'wporg-forums' ); ?></label><br />
+			<em><?php esc_html_e( 'Select the version of WordPress you are using.', 'wporg-forums' ); ?></em><br />
 
 			<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="wp-version">
 				<?php foreach ( $versions as $key => $label ) : ?>
@@ -85,7 +85,7 @@ class Plugin {
 				<?php endforeach; ?>
 			</select>
 
-			<label for="wp-other-version"><?php esc_html_e( 'Enter a different WordPress version here:', 'wporg' ); ?></label>
+			<label for="wp-other-version"><?php esc_html_e( 'Enter a different WordPress version here:', 'wporg-forums' ); ?></label>
 			<input type="text" name="wp_other_version" id="wp-other-version" value="<?php echo esc_attr( $other_version ); ?>">
 		</p>
 		<?php
@@ -110,7 +110,7 @@ class Plugin {
 
 	public function enqueue_scripts() {
 		if ( bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_topic_edit() ) {
-			wp_enqueue_script( 'wporg-bbp-version-dropdown', plugins_url( 'wporg-bbp-version-dropdown.js', dirname( __FILE__ ) ), array( 'jquery' ) );
+			wp_enqueue_script( 'wporg-bbp-version-dropdown', plugins_url( 'wporg-bbp-version-dropdown.js', __DIR__ ), array( 'jquery' ), '20160729', true );
 		}
 	}
 
@@ -156,7 +156,7 @@ class Plugin {
 		$versions = array_merge(
 			array( '0' => '' ),
 			apply_filters( 'wporg_bbp_get_wp_versions', array() ),
-			array( 'other' => __( 'Other:', 'wporg' ) )
+			array( 'other' => __( 'Other:', 'wporg-forums' ) )
 		);
 		return $versions;
 	}

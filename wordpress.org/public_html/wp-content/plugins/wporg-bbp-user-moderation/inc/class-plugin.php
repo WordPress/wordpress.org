@@ -169,19 +169,19 @@ class Plugin {
 		$post_id = intval( $_GET['post_id'] );
 		$post = get_post( $post_id );
 		if ( ! $post ) {
-			bbp_add_error( 'wporg_bbp_flag_post_id', __( '<strong>ERROR</strong>: No post was found! Which topic or reply are you marking for moderation?', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_post_id', __( '<strong>ERROR</strong>: No post was found! Which topic or reply are you marking for moderation?', 'wporg-forums' ) );
 
 		// Check that user id matches post author
 		} elseif ( $post->post_author != intval( $_GET['user_id'] ) ) {
-			bbp_add_error( 'wporg_bbp_flag_post_user', __( '<strong>ERROR</strong>: That author does not match the flagged post.', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_post_user', __( '<strong>ERROR</strong>: That author does not match the flagged post.', 'wporg-forums' ) );
 
 		// Check nonce
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-flag_' . $post->post_author . '_' . $post->ID ) ) {
-			bbp_add_error( 'wporg_bbp_flag_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
 
 		// Check current user's ability to moderate
 		} elseif ( ! current_user_can( 'moderate' ) ) {
-			bbp_add_error( 'wporg_bbp_flag_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to moderate that user!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to moderate that user!', 'wporg-forums' ) );
 		}
 
 		// Bail if errors
@@ -204,9 +204,9 @@ class Plugin {
 			$redirect = bbp_get_topic_permalink( $post_id );
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_flagged && 'bbp_flag_user' === $action ) {
-			bbp_add_error( 'wporg_bbp_flag_user', __( '<strong>ERROR</strong>: There was a problem flagging that user!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_user', __( '<strong>ERROR</strong>: There was a problem flagging that user!', 'wporg-forums' ) );
 		} elseif ( false === $is_flagged && 'bbp_unflag_user' == $action ) {
-			bbp_add_error( 'wporg_bbp_flag_unuser', __( '<strong>ERROR</strong>: There was a problem unflagging that user!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_flag_unuser', __( '<strong>ERROR</strong>: There was a problem unflagging that user!', 'wporg-forums' ) );
 		}
 	}
 
@@ -255,8 +255,8 @@ class Plugin {
 		$r = bbp_parse_args( $args, array(
 			'user_id' => bbp_get_displayed_user_id(),
 			'post_id' => 0,
-			'flag'    => esc_html__( 'Flag Author', 'wporg' ),
-			'unflag'  => esc_html__( 'Unflag Author', 'wporg' ),
+			'flag'    => esc_html__( 'Flag Author', 'wporg-forums' ),
+			'unflag'  => esc_html__( 'Unflag Author', 'wporg-forums' ),
 		), 'get_user_flag_link' );
 
 		if ( empty( $r['user_id'] ) ) {

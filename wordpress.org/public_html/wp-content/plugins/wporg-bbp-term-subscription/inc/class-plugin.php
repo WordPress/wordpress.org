@@ -78,25 +78,25 @@ class Plugin {
 		}
 
 		// Get required data.
-		$user_id = get_current_user_id(); 
+		$user_id = get_current_user_id();
 		$term_id = intval( $_GET['term_id'] );
 		$term = get_term( $term_id );
 
 		// Check for empty term id.
 		if ( ! $term ) {
-			bbp_add_error( 'wporg_bbp_subscribe_term_id', __( '<strong>ERROR</strong>: No term was found! Which term are you subscribing/unsubscribing to?', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_term_id', __( '<strong>ERROR</strong>: No term was found! Which term are you subscribing/unsubscribing to?', 'wporg-forums' ) );
 
 		// Check for current user.
 		} elseif ( empty( $user_id ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_logged_id', __( '<strong>ERROR</strong>: You must be logged in to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-term-subscription_' . $user_id . '_' . $term_id ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
 
 		// Check current user's ability to spectate.
 		} elseif ( ! current_user_can( 'spectate' ) ) {
-			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
 		}
 
 		if ( bbp_has_errors() ) {
@@ -117,9 +117,9 @@ class Plugin {
 			$redirect = get_term_link( $term_id );
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
-			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>ERROR</strong>: There was a problem subscribing to that term!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_subscribe_user', __( '<strong>ERROR</strong>: There was a problem subscribing to that term!', 'wporg-forums' ) );
 		} elseif ( false === $is_subscribed && 'wporg_bbp_unsubscribe_term' === $action ) {
-			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>ERROR</strong>: There was a problem unsubscribing from that term!', 'wporg' ) );
+			bbp_add_error( 'wporg_bbp_unsubscribe_user', __( '<strong>ERROR</strong>: There was a problem unsubscribing from that term!', 'wporg-forums' ) );
 		}
 	}
 
@@ -205,7 +205,7 @@ Topic Link: %3$s
 
 You are receiving this email because you subscribed to a topic tag.
 
-Login and visit the topic to unsubscribe from these emails.', 'wporg' ),
+Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 			$topic_author_name,
 			$topic_content,
 			$topic_url
@@ -296,7 +296,7 @@ Reply Link: %3$s
 
 You are receiving this email because you subscribed to a topic tag.
 
-Login and visit the topic to unsubscribe from these emails.', 'wporg' ),
+Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 			$reply_author_name,
 			$reply_content,
 			$reply_url
@@ -375,7 +375,7 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg' ),
 	 *
 	 * @param $user_id int The user id
 	 * @param $term_id int The term id
-	 * @return bool False if invalid, otherwise true 
+	 * @return bool False if invalid, otherwise true
 	 */
 	public static function add_user_subscription( $user_id = 0, $term_id = 0 ) {
 		if ( empty( $user_id ) || empty( $term_id ) ) {
@@ -383,7 +383,7 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg' ),
 		}
 
 		if ( ! self::is_user_subscribed_to_term( $user_id, $term_id ) ) {
-			add_term_meta( $term_id, self::META_KEY, $user_id ); 
+			add_term_meta( $term_id, self::META_KEY, $user_id );
 			wp_cache_delete( 'wporg_bbp_get_term_subscribers_' . $term_id, 'bbpress_users' );
 		}
 		do_action( 'wporg_bbp_add_user_term_subscription', $user_id, $term_id );
@@ -428,8 +428,8 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg' ),
 		$r = bbp_parse_args( $args, array(
 			'user_id'     => get_current_user_id(),
 			'term_id'     => 0,
-			'subscribe'   => esc_html__( 'Subscribe to this topic tag', 'wporg' ),
-			'unsubscribe' => esc_html__( 'Unsubscribe from this topic tag', 'wporg' ),
+			'subscribe'   => esc_html__( 'Subscribe to this topic tag', 'wporg-forums' ),
+			'unsubscribe' => esc_html__( 'Unsubscribe from this topic tag', 'wporg-forums' ),
 		), 'get_term_subscription_link' );
 		if ( empty( $r['user_id'] ) || empty( $r['term_id'] ) ) {
 			return false;
