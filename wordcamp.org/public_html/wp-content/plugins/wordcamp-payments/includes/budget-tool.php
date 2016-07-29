@@ -3,6 +3,8 @@ class WordCamp_Budget_Tool {
     public static function load() {
         add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ), 9 );
         add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+        add_filter( 'heartbeat_received', array( __CLASS__, 'heartbeat_received' ), 10, 2 );
+        add_filter( 'map_meta_cap', array( __CLASS__, 'map_meta_cap' ), 10, 4 );
     }
 
     public static function admin_menu() {
@@ -18,10 +20,9 @@ class WordCamp_Budget_Tool {
         if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'wcb_budget_noop-options' ) )
             return;
 
-        $budget = get_option( 'wcb_budget', array() );
-
-        // TODO: Add prelim, approved, current logic here.
+        $budget = self::_get_budget();
         $data = json_decode( wp_unslash( $_POST['_wcb_budget_data'] ), true );
+
         $valid_attributes = array( 'type', 'category', 'amount', 'note', 'link', 'name', 'value' );
         foreach ( $data as &$item ) {
             $_item = array();
@@ -38,8 +39,31 @@ class WordCamp_Budget_Tool {
             $item = $_item;
         }
 
-        $budget['current'] = $data;
+        if ( $budget['status'] == 'draft' && ! empty( $_POST['wcb-budget-save-draft'] ) ) {
+            $budget['prelim'] = $data;
+        } elseif ( $budget['status'] == 'draft' && ! empty( $_POST['wcb-budget-submit'] ) ) {
+            $budget['prelim'] = $data;
+            $budget['status'] = 'pending';
+        } elseif ( $budget['status'] == 'pending' && current_user_can( 'wcb_approve_budget' ) ) {
+            if ( ! empty( $_POST['wcb-budget-reject'] ) ) {
+                $budget['status'] = 'draft';
+            } elseif ( ! empty( $_POST['wcb-budget-approve'] ) ) {
+                $budget['status'] = 'approved';
+                $budget['approved_by'] = get_current_user_id();
+
+                // Clone the approved prelim. budget.
+                $budget['approved'] = $budget['prelim'];
+                $budget['working'] = $budget['prelim'];
+            }
+        } elseif ( $budget['status'] == 'approved' && ! empty( $_POST['wcb-budget-update-working'] ) ) {
+            $budget['working'] = $data;
+        } elseif ( $budget['status'] == 'approved' && ! empty( $_POST['wcb-budget-reset'] ) ) {
+            $budget['working'] = $budget['approved'];
+        }
+
         $budget['updated'] = time();
+        $budget['updated_by'] = get_current_user_id();
+
         update_option( 'wcb_budget', $budget, 'no' );
         return;
     }
@@ -49,8 +73,17 @@ class WordCamp_Budget_Tool {
         if ( $screen->id == 'toplevel_page_wordcamp-budget' ) {
             wp_enqueue_script( 'wcb-budget-tool',
                 plugins_url( 'javascript/budget-tool.js', __DIR__ ),
-                array( 'backbone', 'jquery', 'underscore' ), 1 , true );
+                array( 'backbone', 'jquery', 'jquery-ui-sortable', 'heartbeat', 'underscore' ), 2 , true );
         }
+    }
+
+    private static function _get_budget() {
+        $budget = get_option( 'wcb_budget', array(
+            'status' => 'draft',
+            'prelim' => self::_get_default_budget(),
+        ) );
+
+        return $budget;
     }
 
     private static function _get_default_budget() {
@@ -85,8 +118,21 @@ class WordCamp_Budget_Tool {
     }
 
     public static function render() {
-        $budget = get_option( 'wcb_budget' );
-        $budget = ! empty( $budget['current'] ) ? $budget['current'] : self::_get_default_budget();
+        $budget = self::_get_budget();
+
+        $view = ! empty( $_GET['wcb-view'] ) ? $_GET['wcb-view'] : 'prelim';
+        if ( ! in_array( $view, array( 'prelim', 'working', 'approved' ) ) )
+            $view = 'prelim';
+
+        if ( $view == 'prelim' && $budget['status'] == 'approved' )
+            $view = 'approved';
+
+        $editable = false;
+        if ( $view == 'prelim' && $budget['status'] == 'draft' ) {
+            $editable = true;
+        } elseif ( $view == 'working' && $budget['status'] == 'approved' ) {
+            $editable = true;
+        }
 
         if ( ! $inspire_urls = get_site_transient( 'wcb-inspire-urls' ) ) {
             $urls = array( 'https://jawordpressorg.github.io/wapuu/wapuu-archive/original-wapuu.png' );
@@ -102,7 +148,39 @@ class WordCamp_Budget_Tool {
             set_site_transient( 'wcb-inspire-urls', $inspire_urls, 30 * DAY_IN_SECONDS );
         }
 
+        $currencies = WordCamp_Budgets::get_currencies();
+        foreach ( $currencies as $key => $value )
+            if ( substr( $key, 0, 4 ) == 'null' )
+                unset( $currencies[ $key ] );
+
+        ksort( $currencies );
+
         require( dirname( __DIR__ ) . '/views/budget-tool/main.php' );
+    }
+
+    public static function heartbeat_received( $response, $data ) {
+        if ( empty( $data['wcb_budgets_heartbeat'] ) )
+            return $response;
+
+        $response['wcb_budgets'] = array(
+            'nonce' => wp_create_nonce( 'wcb_budget_noop-options' ),
+        );
+
+        return $response;
+    }
+
+    public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
+        global $trusted_deputies;
+
+        if ( $cap == 'wcb_approve_budget' ) {
+            if ( user_can( $user_id, is_multisite() ? 'manage_network' : 'manage_options' ) ) {
+                $caps = array( 'exist' );
+            } elseif ( in_array( $user_id, (array) $trusted_deputies ) ) {
+                $caps = array( 'exist' );
+            }
+        }
+
+        return $caps;
     }
 }
 

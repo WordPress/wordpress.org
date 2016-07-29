@@ -1,7 +1,8 @@
 window.wcb = window.wcb || {models:{}, input:[]};
 
 (function($){
-    var $container = $('.wcb-budget-container tbody'),
+    var $document = $(document),
+        $container = $('.wcb-budget-container tbody'),
         $income = $container.find('.wcb-income-placeholder'),
         $expense = $container.find('.wcb-expense-placeholder'),
         $meta = $container.find('.wcb-meta-placeholder'),
@@ -102,6 +103,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
                 'income': 0,
                 'expenses': 0,
                 'variance': 0,
+                'variance_raw': 0,
                 'per_person': 0
             };
 
@@ -114,8 +116,19 @@ window.wcb = window.wcb || {models:{}, input:[]};
             });
 
             data['variance'] = data['income'] - data['expenses'];
+            data['variance_raw'] = data['variance'];
             var attendees = wcb.table.collection.findWhere({type: 'meta', name: 'attendees'});
             data['per_person'] = attendees ? data['expenses'] / attendees.get('value') : 0;
+
+            data = _.mapObject(data, function(v, k) {
+                if (k == 'variance_raw')
+                    return v;
+
+                return v.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            });
 
             this.template = _.template($('#wcb-tmpl-summary').html(), null, template_options);
             this.$el.html(this.template(data));
@@ -141,9 +154,11 @@ window.wcb = window.wcb || {models:{}, input:[]};
         events: {
             'keyup': 'keyup',
             'click .delete': 'delete',
+            'click .move': 'move',
             'change input': 'editSave',
             'change select.category': 'editSave',
             'change select.link-value': 'linkChange',
+            'change select.value': 'editSave',
 
             'focus input, select': 'focus',
             'blur input, select': 'blur'
@@ -163,8 +178,18 @@ window.wcb = window.wcb || {models:{}, input:[]};
             var $target = $(e.target);
             $target.parents('td').addClass('focused');
 
-            if (($target.hasClass('amount') || $target.hasClass('link-value')) && this.model.get('link') && this.model.linkHasValue())
-                this.$el.find('.amount').val(this.model.get('amount').toFixed(2));
+            if (($target.hasClass('amount') || $target.hasClass('link-value')) && this.model.get('link') && this.model.linkHasValue()) {
+                this.$el.find('.amount').val(this.model.get('amount').toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+            }
+
+            if ($target.hasClass('note') && $target.parents('tr').hasClass('is-new')) {
+                if (_.contains(['New Expense Item', 'New Income Item'], this.model.get('note'))) {
+                    this.$el.find('.note').val('');
+                }
+            }
 
             return this;
         },
@@ -173,8 +198,18 @@ window.wcb = window.wcb || {models:{}, input:[]};
             var $target = $(e.target);
             $target.parents('td').removeClass('focused');
 
-            if (($target.hasClass('amount') || $target.hasClass('link-value')) && this.model.get('link'))
-                this.$el.find('.amount').val(this.model.getRealAmount().toFixed(2));
+            if (($target.hasClass('amount') || $target.hasClass('link-value')) && this.model.get('link')) {
+                this.$el.find('.amount').val(this.model.getRealAmount().toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+            }
+
+            if ($target.hasClass('note') && $target.parents('tr').hasClass('is-new')) {
+                if (_.contains(['New Expense Item', 'New Income Item'], this.model.get('note'))) {
+                    this.$el.find('.note').val(this.model.get('note'));
+                }
+            }
 
             return this;
         },
@@ -182,6 +217,8 @@ window.wcb = window.wcb || {models:{}, input:[]};
         render: function() {
             var data = this.model.toJSON();
             data.realAmount = this.model.getRealAmount();
+            data.realAmountFormatted = data.realAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            data.amountFormatted = data.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             data.linkLabel = this.model.getLinkLabel();
             data.linkHasValue = this.model.linkHasValue();
 
@@ -189,6 +226,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             this.$el.html(this.template(data));
             this.$el.toggleClass('has-changed', this.model.hasChanged() && ! this.model.get('new'));
             this.$el.toggleClass('is-new', this.model.get('new'));
+            this.$el.data('wcb-cid', this.model.cid);
             return this;
         },
 
@@ -204,14 +242,25 @@ window.wcb = window.wcb || {models:{}, input:[]};
 
         editSave: function(e) {
             if (this.model.get('type') == 'meta') {
-                this.model.set('value', this.$el.find('.value').val());
+                var value = this.$el.find('.value').val(),
+                    name = this.model.get('name');
+
+                if (_.contains(['attendees', 'days', 'tracks', 'speakers', 'volunteers'], name)) {
+                    value = parseInt(value.replace(/[^\d.-]/g, '')) || 0;
+                } else if (_.contains(['ticket-price'], name)) {
+                    value = parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+                }
+
+                this.model.set('value', value);
             } else {
                 this.model.set('note', this.$el.find('.note').val());
                 this.model.set('category', this.$el.find('.category').val());
 
                 var $target = $(e.target);
-                if ($target.hasClass('amount') || $target.hasClass('link-value'))
-                    this.model.set('amount', parseFloat(this.$el.find('.amount').val()));
+                if ($target.hasClass('amount') || $target.hasClass('link-value')) {
+                    var amount = parseFloat(this.$el.find('.amount').val().replace(/[^\d.-]/g, ''));
+                    this.model.set('amount', amount || 0);
+                }
             }
 
             this.clearSelection.apply(this);
@@ -246,8 +295,15 @@ window.wcb = window.wcb || {models:{}, input:[]};
         },
 
         delete: function() {
+            if (!confirm('Delete this line item?'))
+                return false;
+
             this.model.destroy();
             wcb.summary.render.apply(wcb.summary);
+            return false;
+        },
+
+        move: function() {
             return false;
         }
     });
@@ -326,7 +382,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'label': 'per speaker',
             'hasValue': true,
             'callback': function(value) {
-                return value * wcb.table.collection.findWhere({type: 'meta', name: 'speakers'}).get('value');
+                return parseFloat(value) * parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'speakers'}).get('value'));
             }
         },
 
@@ -334,7 +390,18 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'label': 'per volunteer',
             'hasValue': true,
             'callback': function(value) {
-                return value * wcb.table.collection.findWhere({type: 'meta', name: 'volunteers'}).get('value');
+                return parseFloat(value) * parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'volunteers'}).get('value'));
+            }
+        },
+
+        'per-speaker-volunteer': {
+            'label': 'per speakers + volunteers',
+            'hasValue': true,
+            'callback': function(value) {
+                return parseFloat(value) * (
+                    parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'volunteers'}).get('value'))
+                    + parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'speakers'}).get('value'))
+                );
             }
         },
 
@@ -342,7 +409,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'label': 'per attendee',
             'hasValue': true,
             'callback': function(value) {
-                return value * wcb.table.collection.findWhere({type: 'meta', name: 'attendees'}).get('value');
+                return parseFloat(value) * parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'attendees'}).get('value'));
             }
         },
 
@@ -350,7 +417,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'label': 'per day',
             'hasValue': true,
             'callback': function(value) {
-                return value * wcb.table.collection.findWhere({type: 'meta', name: 'days'}).get('value');
+                return parseFloat(value) * parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'days'}).get('value'));
             }
         },
 
@@ -358,7 +425,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'label': 'per track',
             'hasValue': true,
             'callback': function(value) {
-                return value * wcb.table.collection.findWhere({type: 'meta', name: 'tracks'}).get('value');
+                return parseFloat(value) * parseInt(wcb.table.collection.findWhere({type: 'meta', name: 'tracks'}).get('value'));
             }
         },
 
@@ -368,7 +435,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
             'callback': function(value) {
                 var attendees = wcb.table.collection.findWhere({type: 'meta', name: 'attendees'}).get('value');
                 var price = wcb.table.collection.findWhere({type: 'meta', name: 'ticket-price'}).get('value');
-                return attendees * price;
+                return parseInt(attendees) * parseFloat(price);
             }
         },
 
@@ -406,7 +473,18 @@ window.wcb = window.wcb || {models:{}, input:[]};
     });
 
     $form.on('submit', function() {
-        $form.find('[name="_wcb_budget_data"]').val(JSON.stringify(wcb.table.collection));
+        $container.find('.wcb-entry').each(function(el){
+            var $this = $(this);
+                model = wcb.table.collection.get($this.data('wcb-cid'));
+
+            model.set({'order': $this.index()}, {silent: true});
+        });
+
+        var sorted = JSON.stringify(wcb.table.collection.sortBy(function(m){
+            return m.get('type') + ':' + (m.get('order')/Math.pow(10,10)).toFixed(10); // Don't ask.
+        }));
+
+        $form.find('[name="_wcb_budget_data"]').val(sorted);
         return true;
     });
 
@@ -414,10 +492,52 @@ window.wcb = window.wcb || {models:{}, input:[]};
     wcb.table = table;
     wcb.summary = new SummaryView();
 
+    // Sort all the input by types, meta first, because linked data in
+    // income and expenses rely on meta values.
+    var types = ['meta', 'expense', 'income'];
+    wcb.input = _.sortBy(wcb.input, function(i) {
+        return types.indexOf(i.type);
+    });
+
     _.each(wcb.input, function(i){
         wcb.table.collection.add(new wcb.models.Entry(i));
     });
 
     wcb.summary.urls = wcb.urls;
     wcb.summary.render();
+
+    // Allow sorting entries.
+    $container.sortable({
+        items: '.wcb-entry',
+        handle: '.move',
+        axis: 'y',
+        placeholder: 'wcb-entry-placeholder',
+        start: function(e, ui) {
+            ui.placeholder.height(ui.item.height());
+        }
+    });
+
+    // Update nonces when necessary.
+    // TODO: Add post locking.
+    $document.on('heartbeat-send', function(e, data) {
+        data['wcb_budgets_heartbeat'] = 1;
+    });
+
+    $document.on('heartbeat-tick', function(e, data) {
+        $('#_wpnonce').val(data.wcb_budgets.nonce);
+    });
+
+    $document.on('click', '#wcb-budget-submit', function() {
+        if (!confirm('Are you sure you would like to submit this budget for approval?'))
+            return false;
+
+        return true;
+    });
+
+    $document.on('click', '#wcb-budget-approve, #wcb-budget-reject', function() {
+        if (!confirm('Are you sure?'))
+            return false;
+
+        return true;
+    });
 }(jQuery));
