@@ -494,3 +494,21 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	margin-left: 10px;
 }
 
+nav.handbook-navigation {
+	font-size: 14px;
+	margin: 2em 0;
+	overflow: auto;
+}
+nav.handbook-navigation .nav-links a {
+	width: 49%;
+	border: 0;
+	display: inline-block;
+}
+nav-handbook-navigation .nav-links a[rel="prev"] {
+	text-align: left;
+}
+nav.handbook-navigation .nav-links a[rel="next"] {
+	text-align: right;
+	float: right;
+}
+
