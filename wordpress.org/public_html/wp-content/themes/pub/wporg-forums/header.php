@@ -15,7 +15,7 @@
 				)</small><br>
 			<?php else : ?>
 				<?php $current_url = esc_url_raw( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); ?>
-				<a href="https://wordpress.org/support/bb-login.php?redirect_to=<?php echo urlencode( $current_url ); ?>"><?php _e( 'Log In', 'wporg-forums' ); ?></a>
+				<a href="<?php echo esc_url( wp_login_url( $current_url ) ); ?>"><?php _e( 'Log In', 'wporg-forums' ); ?></a>
 			<?php endif; ?>
 		</p>
 	</div>
