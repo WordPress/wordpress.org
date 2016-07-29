@@ -1566,6 +1566,10 @@ Thanks for helping us with these details!",
 				$row['48-supl-id-value'] = get_post_meta( $post->ID, '_camppayments_interm_bank_account', true );
 			}
 
+			if ( get_post_meta( $post->ID, '_camppayments_currency', true ) == 'CAD' ) {
+				$row['114-charges'] = 'OUR';
+			}
+
 			// Use for debugging.
 			// print_r( $row );
 
