@@ -75,21 +75,19 @@ class Plugin {
 			$version = 'other';
 		}
 		?>
-		<p><label for="<?php echo esc_attr( self::META_KEY ); ?>"><?php echo esc_html( __('Version', 'wporg') ); ?></label><br />
+		<p>
+			<label for="wp-version"><?php esc_html_e( 'Version:', 'wporg' ); ?></label><br />
+			<em><?php esc_html_e( 'Select the version of WordPress you are using.', 'wporg' ); ?></em><br />
 
-		<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="wp-version">
+			<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="wp-version">
+				<?php foreach ( $versions as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $key, $version ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
 
-		<?php foreach ( $versions as $key => $label ) : ?>
-
-			<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $key, $version ); ?>><?php echo esc_html( $label ); ?></option>
-
-		<?php endforeach; ?>
-
-		</select> <?php esc_html( __( 'Select the version of WordPress you are using', 'wporg' ) ); ?>
-
-		<label for="wp-other-version"><?php echo esc_html( __( 'Enter a different WordPress version here:', 'wporg' ) ); ?></label>
-
-		<input type="text" name="wp_other_version" id="wp-other-version" value="<?php echo esc_attr( $other_version ); ?>"></p>
+			<label for="wp-other-version"><?php esc_html_e( 'Enter a different WordPress version here:', 'wporg' ); ?></label>
+			<input type="text" name="wp_other_version" id="wp-other-version" value="<?php echo esc_attr( $other_version ); ?>">
+		</p>
 		<?php
 	}
 
