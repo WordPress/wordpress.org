@@ -100,7 +100,7 @@ class Plugin {
 			$resolution = $this->get_default_topic_resolution();
 		}
 		?>
-		<p><label for="topic-resolved"><?php esc_html_e( 'This topic is', 'wporg-forums' ); ?></label><br />
+		<p><label for="topic-resolved"><?php esc_html_e( 'Topic Status:', 'wporg-forums' ); ?></label><br />
 
 		<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved">
 
