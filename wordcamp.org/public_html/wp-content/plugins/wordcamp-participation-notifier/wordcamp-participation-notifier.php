@@ -32,7 +32,7 @@ class WordCamp_Participation_Notifier {
 	 * @todo Maybe refactor this to work more like primary_attendee_registered(), so the speaker/sponsor plugins just fire a
 	 *       hook when they're ready to send the notification, rather than this plugin having to be aware of (and
 	 *       coupled to) the internal logic of those plugins.
-	 * 
+	 *
 	 * @param string  $new_status
 	 * @param string  $old_status
 	 * @param WP_Post $post
@@ -73,9 +73,9 @@ class WordCamp_Participation_Notifier {
 	/**
 	 * Updates the activity and associations of a profile when the WordPress.org username on a published speaker
 	 * or organizer post changes.
-	 * 
+	 *
 	 * @todo The handler doesn't support removing activity, but maybe do that here if support is added.
-	 * 
+	 *
 	 * @param WP_Post $post
 	 */
 	protected function published_speaker_post_updated( $post ) {
@@ -86,13 +86,15 @@ class WordCamp_Participation_Notifier {
 		if ( $previous_user_id === $new_user_id ) {
 			return;
 		}
-		
+
+		// todo change this to use an if/elseif/elseif structure, just to be safe
+
 		// A new username was added, so add the activity and association.
 		if ( $new_user_id && ! $previous_user_id ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_activity_payload( $post ) );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'add' ) );
 		}
-		
+
 		// The username was removed, so remove the association.
 		if ( ! $new_user_id && $previous_user_id ) {
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $previous_user_id ) );
@@ -123,7 +125,7 @@ class WordCamp_Participation_Notifier {
 		} elseif( 'publish' == $old_status ) {
 			// Get the $user_id from post meta instead of $_POST in case it changed during the unpublish update.
 			// This makes sure that the association is removed from the same user that it was originally added to.
-			
+
 			$user_id = $this->get_saved_wporg_user_id( $post );
 			$this->remote_post( self::PROFILES_HANDLER_URL, $this->get_post_association_payload( $post, 'remove', $user_id ) );
 		}
@@ -187,7 +189,7 @@ class WordCamp_Participation_Notifier {
 
 	/**
 	 * Builds the payload for an activity notification based on a new post
-	 * 
+	 *
 	 * @param WP_Post $post
 	 * @param int     $user_id
 	 * @param string  $activity_type
@@ -210,15 +212,15 @@ class WordCamp_Participation_Notifier {
 				'user_id'       => $user_id,
 				'wordcamp_id'   => get_current_blog_id(),
 				'wordcamp_name' => get_wordcamp_name(),
-				'wordcamp_date' => empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'F jS', $wordcamp->meta['Start Date (YYYY-mm-dd)' ][0] ), 
+				'wordcamp_date' => empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'F jS', $wordcamp->meta['Start Date (YYYY-mm-dd)' ][0] ),
 				'url'           => site_url(),
 			);
-	
+
 			switch( $post->post_type ) {
 				case 'wcb_speaker':
 					$activity['speaker_id']   = $post->ID;
 				break;
-	
+
 				case 'wcb_organizer':
 					$activity['organizer_id'] = $post->ID;
 				break;
@@ -242,7 +244,7 @@ class WordCamp_Participation_Notifier {
 						$activity['checked_in_count'] = $checked_in->found_posts;
 					}
 				break;
-	
+
 				default:
 					$activity = false;
 				break;
@@ -254,7 +256,7 @@ class WordCamp_Participation_Notifier {
 
 	/**
 	 * Build the payload for an association notification based on a new or updated post
-	 * 
+	 *
 	 * @param WP_Post $post
 	 * @param string  $command 'add' | 'remove'
 	 * @param int     $user_id
@@ -262,7 +264,7 @@ class WordCamp_Participation_Notifier {
 	 */
 	protected function get_post_association_payload( $post, $command, $user_id = null ) {
 		$association = false;
-		
+
 		if ( ! $user_id ) {
 			$user_id = $this->get_new_wporg_user_id( $post );
 		}
@@ -277,12 +279,12 @@ class WordCamp_Participation_Notifier {
 				'wordcamp_name' => get_wordcamp_name(),
 				'url'           => site_url(),
 			);
-			
+
 			switch( $post->post_type ) {
 				case 'wcb_speaker':
 					$association['association'] = 'wordcamp-speaker';
 				break;
-	
+
 				case 'wcb_organizer':
 					$association['association'] = 'wordcamp-organizer';
 				break;
@@ -296,13 +298,13 @@ class WordCamp_Participation_Notifier {
 
 		return apply_filters( 'wpn_post_association_payload', $association, $post, $command, $user_id );
 	}
-	
+
 	/**
 	 * Get the current WordPress.org user_id associated with a custom post
 	 *
 	 * This is called during the context of a post being updated, so the new username is the one submitted in
 	 * the $_POST request, or the currently logged in user, as opposed to the user_id saved in the database.
-	 * 
+	 *
 	 * @param WP_Post $post
 	 * @return false|int
 	 */
@@ -349,7 +351,7 @@ class WordCamp_Participation_Notifier {
 	 * Wrapper for wp_remote_post()
 	 *
 	 * This reduces the amount of duplicated code in the callers, makes them more readable, and logs errors to aid in debugging
-	 * 
+	 *
 	 * @param string $url
 	 * @param array  $body The value intended to be passed to wp_remote_post() as $args['body']
 	 * @return false|array|WP_Error False if a valid $body was not passed; otherwise the results from wp_remote_post()
@@ -359,7 +361,7 @@ class WordCamp_Participation_Notifier {
 
 		if ( $body ) {
 			$response = wp_remote_post( $url, array( 'body' => $body ) );
-		
+
 			if ( is_wp_error( $response ) ) {
 				$error = sprintf(
 					'Received WP_Error message: %s Request was: %s',
@@ -368,7 +370,7 @@ class WordCamp_Participation_Notifier {
 				);
 			} elseif ( 200 != $response['response']['code'] || 1 != (int) $response['body'] ) {
 				// error_log() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-				
+
 				$error = sprintf(
 					'Received HTTP code: %s and body: %s. Request was: %s',
 					$response['response']['code'],
@@ -376,16 +378,16 @@ class WordCamp_Participation_Notifier {
 					print_r( $body, true )
 				);
 			}
-			
+
 			if ( $error ) {
 				error_log( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ) );
-				
+
 				if ( $to = apply_filters( 'wpn_error_email_addresses', array() ) ) {
 					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 				}
 			}
 		}
-		
+
 		return $response;
 	}
 }
