@@ -7,6 +7,7 @@ import { Link } from 'react-router';
  * Internal dependencies.
  */
 import { getPlugin } from 'actions';
+import PluginIcon from 'components/plugin-icon';
 import PluginRatings from 'components/plugin-ratings';
 
 const PluginCard = React.createClass( {
@@ -21,7 +22,7 @@ const PluginCard = React.createClass( {
 
 		return (
 			<article className="plugin type-plugin">
-				<div className="entry-thumbnail"></div>
+				<PluginIcon plugin={ this.props.plugin } />
 				<div className="entry">
 					<header className="entry-header">
 						<h2 className="entry-title">
