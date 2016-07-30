@@ -1102,9 +1102,13 @@ body.reply-edit #bbpress-forums fieldset legend {
 	background-color: inherit;
 }
 
+#bbpress-forums li.bbp-body div.bbp-topic-content ul li,
+#bbpress-forums li.bbp-body div.bbp-reply-content ul li {
+	list-style: square;
+}
+
 #bbpress-forums li.bbp-body div.bbp-topic-content li,
 #bbpress-forums li.bbp-body div.bbp-reply-content li {
-	list-style: square;
 	margin-left: 10px;
 }
 
