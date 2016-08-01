@@ -48,7 +48,7 @@ class WPORG_bbPress_Old_Id_Redirect {
 				$post_type = reset( $post_type );
 			}
 
-			if ( in_array( get_query_var( 'post_type' ), array( 'forum', 'topic' ) ) ) {
+			if ( in_array( $post_type, array( 'forum', 'topic' ) ) ) {
 				$maybe_id = get_query_var( 'name' );
 				if ( is_numeric( $maybe_id ) ) {
 					if ( absint( $maybe_id ) != $maybe_id ) {
