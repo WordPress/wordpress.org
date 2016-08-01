@@ -410,6 +410,8 @@ class WordCamp_QBO {
 		$description       = sanitize_text_field( $description       );
 		$statement_memo    = sanitize_text_field( $statement_memo    );
 
+		$sponsor = array_map( 'sanitize_text_field', $sponsor );
+
 		$line_description = $wordcamp_name;
 		if ( $sponsorship_level ) {
 			$line_description .= " - $sponsorship_level";
@@ -464,6 +466,22 @@ class WordCamp_QBO {
 
 		$payload = array(
 			'PrivateNote' => $statement_memo,
+
+			'CustomField' => array(
+				// WPCS Tax ID
+				array(
+					'DefinitionId' => '1',
+					'Type'         => 'StringType',
+					'StringValue'  => '81-0896291',
+				),
+
+				// Sponsor VAT ID
+				array(
+					'DefinitionId' => '2',
+					'Type'         => 'StringType',
+					'StringValue'  => $sponsor['vat-number'],
+				),
+	        ),
 
 			'Line' => array(
 				array(
@@ -1265,7 +1283,7 @@ class WordCamp_QBO {
 				<?php /* submit_button(); */ ?>
 			</form>
 		</div>
-		
+
 		<script>
 			(function($){
 				$('.qbo-connect').on('click', function(){

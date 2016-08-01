@@ -342,6 +342,7 @@ class WordCamp_QBO_Client {
 				'last-name'     => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_last_name'    ][0] ),
 				'email-address' => is_email(            $sponsor_meta['_wcpt_sponsor_email_address'][0] ),
 				'phone-number'  => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_phone_number' ][0] ),
+				'vat-number'    => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_vat_number'   ][0] ),
 
 				'address1' => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_street_address1'][0] ),
 				'city'     => sanitize_text_field( $sponsor_meta['_wcpt_sponsor_city'           ][0] ),
@@ -376,7 +377,7 @@ class WordCamp_QBO_Client {
 
 	/**
 	 * Get the sponsorship level name assigned to a sponsor
-	 * 
+	 *
 	 * @param int $sponsor_id
 	 *
 	 * @return false|string
