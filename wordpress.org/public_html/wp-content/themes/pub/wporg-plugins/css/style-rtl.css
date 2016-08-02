@@ -2076,112 +2076,82 @@ p a:not(.button):hover {
   display: none;
 }
 
-.home .type-plugin,
-.search .type-plugin,
-.archive .type-plugin {
+.plugin-card {
   margin-bottom: 4%;
 }
 
 @media screen and (min-width: 48em) {
-  .home .type-plugin,
-  .search .type-plugin,
-  .archive .type-plugin {
+  .plugin-card {
     display: inline-block;
     margin-left: 4%;
     width: 48%;
   }
-  .home .type-plugin:nth-of-type(even),
-  .search .type-plugin:nth-of-type(even),
-  .archive .type-plugin:nth-of-type(even) {
+  .plugin-card:nth-of-type(even) {
     margin-left: 0;
   }
 }
 
-.home .type-plugin .entry-thumbnail,
-.search .type-plugin .entry-thumbnail,
-.archive .type-plugin .entry-thumbnail {
+.plugin-card .entry-thumbnail {
   display: none;
   max-width: 128px;
 }
 
-.home .type-plugin .entry,
-.search .type-plugin .entry,
-.archive .type-plugin .entry {
+.plugin-card .entry {
   display: inline-block;
   margin: auto;
   vertical-align: top;
 }
 
 @media screen and (min-width: 21em) {
-  .home .type-plugin .entry-thumbnail,
-  .search .type-plugin .entry-thumbnail,
-  .archive .type-plugin .entry-thumbnail {
+  .plugin-card .entry-thumbnail {
     display: inline-block;
     margin: 0 0 0 4%;
     vertical-align: top;
   }
-  .home .type-plugin .entry,
-  .search .type-plugin .entry,
-  .archive .type-plugin .entry {
+  .plugin-card .entry {
     width: -webkit-calc(96% - 128px);
     width: calc(96% - 128px);
   }
 }
 
-.home .type-plugin .entry-title,
-.search .type-plugin .entry-title,
-.archive .type-plugin .entry-title {
+.plugin-card .entry-title {
   font-size: 16px;
   font-size: 1rem;
   line-height: 1.3;
   margin: 0 0 8px;
 }
 
-.home .type-plugin .entry-title a,
-.search .type-plugin .entry-title a,
-.archive .type-plugin .entry-title a {
+.plugin-card .entry-title a {
   font-weight: 400;
 }
 
-.home .type-plugin .plugin-rating,
-.search .type-plugin .plugin-rating,
-.archive .type-plugin .plugin-rating {
+.plugin-card .plugin-rating {
   line-height: 1;
   margin: 0 0 8px 10px;
 }
 
-.home .type-plugin .plugin-rating .wporg-ratings,
-.search .type-plugin .plugin-rating .wporg-ratings,
-.archive .type-plugin .plugin-rating .wporg-ratings {
+.plugin-card .plugin-rating .wporg-ratings {
   display: inline-block;
   margin-left: 5px;
 }
 
-.home .type-plugin .plugin-rating [class*='dashicons-star-'],
-.search .type-plugin .plugin-rating [class*='dashicons-star-'],
-.archive .type-plugin .plugin-rating [class*='dashicons-star-'] {
+.plugin-card .plugin-rating [class*='dashicons-star-'] {
   color: #ffb900;
 }
 
-.home .type-plugin .plugin-rating .rating-count,
-.search .type-plugin .plugin-rating .rating-count,
-.archive .type-plugin .plugin-rating .rating-count {
+.plugin-card .plugin-rating .rating-count {
   color: #999;
   font-size: 12.8px;
   font-size: 0.8rem;
   top: -1px;
 }
 
-.home .type-plugin .entry-excerpt,
-.search .type-plugin .entry-excerpt,
-.archive .type-plugin .entry-excerpt {
+.plugin-card .entry-excerpt {
   font-size: 12.8px;
   font-size: 0.8rem;
 }
 
-.home .type-plugin .entry-excerpt p,
-.search .type-plugin .entry-excerpt p,
-.archive .type-plugin .entry-excerpt p {
+.plugin-card .entry-excerpt p {
   margin: 0 0 8px;
 }
 
@@ -2505,25 +2475,15 @@ p a:not(.button):hover {
 /*--------------------------------------------------------------
 ## Template Hierarchy
 --------------------------------------------------------------*/
-.error404 {
-  background: #0073aa;
-  color: #fff;
-}
-
-.error404 .page-title {
+.error-404 .page-title {
   text-align: center;
 }
 
-.error404 .page-content {
+.error-404 .page-content {
   text-align: center;
 }
 
-.error404 .page-content a {
-  color: #fff;
-  text-decoration: underline;
-}
-
-.error404 .page-content .logo-swing {
+.error-404 .page-content .logo-swing {
   height: 160px;
   height: 10rem;
   margin: 96px auto;
@@ -2534,22 +2494,13 @@ p a:not(.button):hover {
   width: 10rem;
 }
 
-.error404 .page-content .logo-swing .dashicons-wordpress {
+.error-404 .page-content .logo-swing .wp-logo {
   right: 0;
   max-width: none;
   position: absolute;
   top: 0;
   width: 160px;
   width: 10rem;
-}
-
-.error404 .page-content .logo-swing .dashicons-wordpress:first-of-type {
-  color: #0d7aae;
-}
-
-.error404 .page-content .logo-swing .dashicons-wordpress:before {
-  font-size: 160px;
-  font-size: 10rem;
 }
 
 @-webkit-keyframes hinge {
@@ -2655,10 +2606,6 @@ p a:not(.button):hover {
   animation-duration: 2s;
   -webkit-animation-name: hinge;
   animation-name: hinge;
-}
-
-.hide {
-  display: none;
 }
 
 .page .entry-header {

@@ -6,7 +6,9 @@ import Api from 'api';
 import {
 	GET_PAGE,
 	GET_BROWSE,
-	GET_PLUGIN
+	GET_PLUGIN,
+	GET_PLUGINS,
+	SEARCH_PLUGINS
 } from './action-types';
 
 export const getPage = ( slug ) => ( dispatch ) => {
@@ -45,6 +47,20 @@ export const getPlugin = ( slug ) => ( dispatch ) => {
 		dispatch( {
 			type: GET_PLUGIN,
 			plugin: data
+		} );
+	} );
+};
+
+export const searchPlugins = ( searchTerm ) => ( dispatch ) => {
+	Api.get( '/wp/v2/plugin', { search: searchTerm }, ( data, error, headers ) => {
+		if ( ! data || error ) {
+			return;
+		}
+
+		dispatch( {
+			type: SEARCH_PLUGINS,
+			searchTerm: searchTerm,
+			plugins: data
 		} );
 	} );
 };

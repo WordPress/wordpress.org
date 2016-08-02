@@ -11,7 +11,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Template;
 
 
-?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+?><article id="post-<?php the_ID(); ?>" <?php post_class( 'plugin-card' ); ?>>
 	<div class="entry-thumbnail">
 		<a href="<?php the_permalink(); ?>" rel="bookmark">
 			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>

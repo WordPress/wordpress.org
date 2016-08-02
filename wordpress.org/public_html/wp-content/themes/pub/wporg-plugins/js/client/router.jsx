@@ -12,6 +12,7 @@ import FrontPage from 'components/front-page';
 import NotFound from 'components/404';
 import Page from 'components/page';
 import PluginDirectory from 'components/plugin-directory';
+import Search from 'components/search';
 import SiteHeader from 'components/site-header';
 import SiteMain from 'components/site-main';
 
@@ -28,7 +29,7 @@ export default (
 				<Route path="browse/favorites/:username" component={ ArchiveBrowse } />
 				<Route path="browse/:type" component={ ArchiveBrowse } />
 				<Route path="developers" component={ Page } />
-				<Route path="search/:searchTerm" component={ FrontPage } />
+				<Route path="search/:searchTerm" component={ Search } />
 				<Route path=":plugin" component={ FrontPage } />
 				<Route path="*" component={ NotFound } />
 			</Route>

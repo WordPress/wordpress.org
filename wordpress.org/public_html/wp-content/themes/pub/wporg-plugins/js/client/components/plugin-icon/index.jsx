@@ -1,15 +1,15 @@
 import React from 'react';
 
-/**
- * Internal dependencies.
- */
-
 export default React.createClass( {
 	displayName: 'PluginIcon',
 
 	render() {
 		const { icons, slug } = this.props.plugin;
 		let icon;
+
+		if ( ! icons ) {
+			return <div />;
+		}
 
 		if ( icons[ '1x' ] ) {
 			icon = icons[ '1x' ]

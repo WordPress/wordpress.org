@@ -16,7 +16,7 @@ export default  React.createClass( {
 				<div className="page-content">
 					<p>Sorry, but nothing matched your search terms.</p>
 					<p>Please try again with some different keywords.</p>
-					<SearchForm />
+					<SearchForm searchTerm={ this.props.params.searchTerm } />
 				</div>
 			);
 
@@ -51,7 +51,7 @@ export default  React.createClass( {
 			helpText = (
 				<div className="page-content">
 					{ helpText }
-					<SearchForm />
+					<SearchForm searchTerm={ this.props.params.searchTerm } />
 				</div>
 			);
 

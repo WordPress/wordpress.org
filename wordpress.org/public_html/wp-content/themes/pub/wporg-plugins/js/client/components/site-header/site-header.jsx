@@ -1,8 +1,5 @@
 import React from 'react';
 
-/**
- * Internal dependencies.
- */
 import SearchForm from 'components/search-form';
 import SiteDescription from './site-description';
 import SiteTitle from './site-title';
@@ -20,7 +17,7 @@ export default React.createClass( {
 				<div className="site-branding">
 					<SiteTitle isHome={ this.props.isHome } />
 					<SiteDescription isHome={ this.props.isHome } />
-					{ this.props.isHome ? <SearchForm /> : <MainNavigation /> }
+					{ this.props.isHome ? <SearchForm searchTerm={ this.props.searchTerm } /> : <MainNavigation searchTerm={ this.props.searchTerm } /> }
 				</div>
 			</header>
 		)

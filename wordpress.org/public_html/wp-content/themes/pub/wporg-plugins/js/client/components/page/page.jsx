@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { getPage } from 'actions';
-
 export default React.createClass( {
 	displayName: 'Page',
 

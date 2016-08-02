@@ -1,19 +1,11 @@
 
-.error404 {
-	background: #0073aa;
-	color: #fff;
-
+.error-404 {
 	.page-title {
 		text-align: center;
 	}
 
 	.page-content {
 		text-align: center;
-
-		a {
-			color: #fff;
-			text-decoration: underline;
-		}
 
 		.logo-swing {
 			height: 160px;
@@ -25,22 +17,13 @@
 			width: 160px;
 			width: 10rem;
 
-			.dashicons-wordpress {
+			.wp-logo {
 				left: 0;
 				max-width: none;
 				position: absolute;
 				top: 0;
 				width: 160px;
 				width: 10rem;
-
-				&:first-of-type {
-					color: #0d7aae;
-				}
-			}
-
-			.dashicons-wordpress:before {
-				font-size: 160px;
-				font-size: 10rem;
 			}
 		}
 	}
@@ -86,8 +69,4 @@
 .hinge {
 	animation-duration: 2s;
 	animation-name: hinge;
-}
-
-.hide {
-	display: none;
 }

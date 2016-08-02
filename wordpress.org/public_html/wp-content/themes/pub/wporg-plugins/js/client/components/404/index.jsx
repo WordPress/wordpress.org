@@ -7,7 +7,7 @@ export default React.createClass( {
 	componentDidMount() {
 		setTimeout( function() {
 			jQuery( '.hinge' ).hide();
-		}, 1900 );
+		}, 1800 );
 	},
 
 	render() {
@@ -20,8 +20,8 @@ export default React.createClass( {
 					<p>Try searching from the field above, or go to the <IndexLink to="/">home page</IndexLink>.</p>
 
 					<div className="logo-swing">
-						<span className="dashicons dashicons-wordpress wp-logo" />
-						<span className="dashicons dashicons-wordpress wp-logo hinge" />
+						<img src="http://messislore.com/images/wp-logo-blue-trans-blur.png" className="wp-logo" />
+						<img src="http://messislore.com/images/wp-logo-blue.png" className="wp-logo hinge" />
 					</div>
 				</div>
 			</section>

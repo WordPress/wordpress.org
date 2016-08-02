@@ -22,14 +22,9 @@ get_header(); ?>
 				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-plugins' ), get_home_url() ); ?></p>
 
 				<div class="logo-swing">
-					<span class="dashicons dashicons-wordpress wp-logo"></span>
-					<span class="dashicons dashicons-wordpress wp-logo hinge"></span>
+					<img src="http://messislore.com/images/wp-logo-blue-trans-blur.png" class="wp-logo" />
+					<img src="http://messislore.com/images/wp-logo-blue.png" class="wp-logo" />
 				</div>
-				<script>
-					setTimeout( function() {
-						jQuery( '.hinge' ).hide();
-					}, 1900 );
-				</script>
 			</div><!-- .page-content -->
 		</section><!-- .error-404 -->
 

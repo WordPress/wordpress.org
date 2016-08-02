@@ -35,7 +35,7 @@ export default React.createClass( {
 					<ul>
 						{ menuItems }
 						<li>
-							<SearchForm />
+							<SearchForm searchTerm={ this.props.searchTerm } />
 						</li>
 					</ul>
 				</div>

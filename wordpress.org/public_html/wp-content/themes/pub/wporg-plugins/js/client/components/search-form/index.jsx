@@ -1,15 +1,44 @@
 import React from 'react';
+import { withRouter } from 'react-router';
 
-export default React.createClass( {
-	displayName: 'SearchForm',
+/**
+ * Internal dependencies.
+ */
+import SearchForm from './search-form';
+
+const SearchFormContainer = React.createClass( {
+	getInitialState() {
+		return {
+			searchTerm: this.props.searchTerm
+		};
+	},
+
+	onChange( searchTerm ) {
+		this.setState( {
+			searchTerm: searchTerm
+		} );
+	},
+
+	componentWillReceiveProps( nextProps ) {
+		this.setState( {
+			searchTerm: nextProps.searchTerm
+		} );
+	},
+
+	onSubmit( event ) {
+		var searchTerm = encodeURIComponent( this.state.searchTerm );
+		event.preventDefault();
+
+		if ( searchTerm ) {
+			this.props.router.push( `/search/${ searchTerm }/` );
+		} else {
+			this.props.router.push( '/' );
+		}
+	},
 
 	render() {
-		return (
-			<form role="search" method="get" className="search-form" action="/plugins/">
-				<label htmlFor="s" className="screen-reader-text">Search for:</label>
-				<input type="search" id="s" className="search-field" placeholder="Search plugins" name="s" />
-				<button className="button button-primary button-search"><i className="dashicons dashicons-search"></i></button>
-			</form>
-		)
+		return <SearchForm searchTerm={ this.state.searchTerm } onSubmit={ this.onSubmit } onChange={ this.onChange } />;
 	}
 } );
+
+export default withRouter( SearchFormContainer );
