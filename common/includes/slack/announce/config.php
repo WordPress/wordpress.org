@@ -43,6 +43,7 @@ function get_whitelist() {
 		'core-comments' => array(
 			'rachelbaker',
 		),
+		'core-committers' => get_committers(),
 		'core-customize' => array(
 			'celloexpressions',
 			'ocean90',
@@ -185,3 +186,5 @@ function get_committers() {
 		'peterwilsoncc', 'joemcgill',
 	);
 }
+
+var_dump(get_whitelist());
