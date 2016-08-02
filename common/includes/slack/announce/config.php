@@ -186,5 +186,3 @@ function get_committers() {
 		'peterwilsoncc', 'joemcgill',
 	);
 }
-
-var_dump(get_whitelist());
