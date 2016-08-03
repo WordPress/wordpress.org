@@ -274,6 +274,8 @@ class WPorg_Handbook {
 	function redirect_handbook_root_page() {
 		if ( is_singular( $this->post_type )
 			&&
+			! is_preview()
+			&&
 			! get_query_var( 'is_handbook_root' )
 			&&
 			in_array( get_query_var( 'name' ), array( $this->post_type, substr( $this->post_type, 0, -9 ) ) )
