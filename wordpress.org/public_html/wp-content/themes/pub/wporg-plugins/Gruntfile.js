@@ -12,6 +12,9 @@ module.exports = function( grunt ) {
 			build: {
 				plugins: webpackConfig.plugins.concat(
 					new webpack.optimize.DedupePlugin(),
+					new webpack.DefinePlugin( {
+						'process.env.NODE_ENV': JSON.stringify( 'production' )
+					} ),
 					new webpack.optimize.UglifyJsPlugin( {
 						compress: { warnings: false }
 					} )
