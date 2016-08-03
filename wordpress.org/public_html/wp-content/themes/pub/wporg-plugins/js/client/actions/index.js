@@ -7,7 +7,6 @@ import {
 	GET_PAGE,
 	GET_BROWSE,
 	GET_PLUGIN,
-	GET_PLUGINS,
 	SEARCH_PLUGINS
 } from './action-types';
 
@@ -52,7 +51,7 @@ export const getPlugin = ( slug ) => ( dispatch ) => {
 };
 
 export const searchPlugins = ( searchTerm ) => ( dispatch ) => {
-	Api.get( '/wp/v2/plugin', { search: searchTerm }, ( data, error, headers ) => {
+	Api.get( '/wp/v2/plugin', { search: searchTerm }, ( data, error ) => {
 		if ( ! data || error ) {
 			return;
 		}
