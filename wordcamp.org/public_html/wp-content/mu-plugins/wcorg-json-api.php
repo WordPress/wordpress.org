@@ -17,7 +17,6 @@ add_filter( 'json_prepare_post',           'wcorg_json_expose_whitelisted_meta_d
 add_filter( 'json_prepare_post',           'wcorg_json_expose_additional_post_data',     998, 3 );   // after `wcorg_json_expose_whitelisted_meta_data()`, because anything added before that method gets wiped out
 add_filter( 'json_prepare_post',           'wcorg_json_embed_related_posts',             999, 3 );   // after `wcorg_json_expose_additional_post_data()`
 add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11     );    // after the default endpoints are added in `json_api_default_filters()`
-add_filter( 'wp_cache_eof_tags',           'wcorg_json_cache_requests'                          );
 
 // Allow some routes to skip the JSON REST API v1 plugin.
 add_action( 'parse_request', 'wcorg_json_v2_compat', 9 );
@@ -311,38 +310,6 @@ function wcorg_json_avoid_nested_callback_conflicts() {
 	global $wp_json_media;
 
 	remove_filter( 'json_prepare_post', array( $wp_json_media, 'add_thumbnail_data' ), 10 );
-}
-
-/**
- * Tell WP Super Cache to cache API endpoints
- *
- * @param string $eof_pattern
- *
- * @return string
- */
-function wcorg_json_cache_requests( $eof_pattern ) {
-	global $wp_super_cache_comments;
-
-	$api_request = ( defined( 'JSON_REQUEST' ) && JSON_REQUEST ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
-
-	if ( $api_request ) {
-		// Accept a JSON-formatted string as an end-of-file marker, so that the page will be cached
-		$json_object_pattern     = '^[{].*[}]$';
-		$json_collection_pattern = '^[\[].*[\]]$';
-
-		/* disabling until can set correct header
-		$eof_pattern = str_replace(
-			'<\?xml',
-			sprintf( '<\?xml|%s|%s', $json_object_pattern, $json_collection_pattern ),
-			$eof_pattern
-		);
-		*/
-
-		// Don't append HTML comments to the JSON output, because that would invalidate it
-		$wp_super_cache_comments = false;
-	}
-
-	return $eof_pattern;
 }
 
 /**
