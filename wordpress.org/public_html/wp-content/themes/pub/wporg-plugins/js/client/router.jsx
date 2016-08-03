@@ -4,14 +4,11 @@ import { connect } from 'react-redux';
 import { Router, Route, IndexRoute, useRouterHistory } from 'react-router';
 import createBrowserHistory from 'history/lib/createBrowserHistory';
 
-/**
- * Internal dependencies.
- */
 import ArchiveBrowse from 'components/archive/browse';
 import FrontPage from 'components/front-page';
 import NotFound from 'components/404';
 import Page from 'components/page';
-import PluginDirectory from 'components/plugin-directory';
+import PluginDirectory from 'components';
 import Search from 'components/search';
 import SiteHeader from 'components/site-header';
 import SiteMain from 'components/site-main';
