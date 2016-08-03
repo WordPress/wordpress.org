@@ -37,8 +37,13 @@ class WPORG_bbPress_Old_Id_Redirect {
 		if ( is_404() && '' !== $wp_query->query_vars['name'] ) {
 			global $wpdb;
 
+			$post_type = false;
 			if ( get_query_var( 'post_type' ) ) {
 				$post_type = get_query_var( 'post_type' );
+			}
+
+			if ( ! $post_type ) {
+				return;
 			}
 
 			if ( is_array( $post_type ) ) {
