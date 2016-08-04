@@ -1251,7 +1251,11 @@ class WordCamp_Post_Types_Plugin {
 	 */
 	function add_slides_info_to_session_posts( $content ) {
 		global $post;
-		$enabled_site_ids = apply_filters( 'wcpt_session_post_slides_info_enabled_site_ids', array( 206, 651 ) ); // testing.wordcamp.org, 2016.kansascity
+		$enabled_site_ids = apply_filters( 'wcpt_session_post_slides_info_enabled_site_ids', array(
+			206,  // testing.wordcamp.org
+			648,  // 2016.asheville
+			651,  // 2016.kansascity
+		) );
 
 		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
 			return $content;
