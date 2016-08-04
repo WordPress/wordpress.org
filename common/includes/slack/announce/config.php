@@ -129,6 +129,9 @@ function get_whitelist() {
 		'meta-i18n' => array(
 			'ocean90',
 		),
+		'outreach' => array(
+			'chanthaboune',
+		),
 		'polyglots' => array(
 			'coachbirgit',
 			'deconf',
