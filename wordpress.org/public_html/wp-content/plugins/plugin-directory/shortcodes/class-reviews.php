@@ -38,7 +38,7 @@ class Reviews {
 						<header>
 							<h3 class="review-title"><?php echo $review->post_title; ?></h3>
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
-							<span class="review-author author vcard"><a class="url fn n" href="<?php esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
+							<span class="review-author author vcard"><a class="url fn n" href="<?php echo esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
 						</header>
 						<p class="review-content"><?php echo $review->post_content; ?></p>
 					</div>
