@@ -47,6 +47,22 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
+		 * Gets a user by either login or slug.
+		 *
+		 * @param string         $username The user's login or slug.
+		 * @return WP_User|false WP_User object on success, false on failure.
+		 */
+		protected function get_user( $username ) {
+			$user = get_user_by( 'login', $username );
+
+			if ( ! $user ) {
+				$user = get_user_by( 'slug', $username );
+			}
+
+			return $user;
+		}
+
+		/**
 		 * Actions to run on the 'plugins_loaded' filter.
 		 */
 		public function plugins_loaded() {
@@ -172,7 +188,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Replying to a topic
 		 */
 		private function handle_forum_activity() {
-			$user = get_user_by( 'login', $_POST['user'] );
+			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -218,7 +234,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Creating new plugin
 		 */
 		private function handle_plugin_activity() {
-			$user = get_user_by( 'login', $_POST['user'] );
+			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -250,7 +266,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 *  - Creating new theme
 		 */
 		private function handle_theme_activity() {
-			$user = get_user_by( 'login', $_POST['user'] );
+			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -287,7 +303,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		private function handle_trac_activity() {
 			$args = array();
 
-			$user = get_user_by( 'login', $_POST['user'] );
+			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
@@ -346,7 +362,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$usernames = array_map( 'trim', $usernames );
 				$usernames = array_filter( $usernames );
 				foreach ( $usernames as $username ) {
-					$user = get_user_by( 'login', $username );
+					$user = $this->get_user( $username );
 					if ( empty( $user ) ) continue;
 					$args = array(
 						'user_id'           => $user->ID,
@@ -491,7 +507,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Handles incoming activities for a WordPress install.
 		 */
 		private function handle_wordpress_activity() {
-			$user = get_user_by( 'login', $_POST['user'] );
+			$user = $this->get_user( $_POST['user'] );
 
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
