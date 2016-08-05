@@ -19,7 +19,16 @@ if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
 
-	if ( $_SERVER['HTTP_HOST'] == 'testing.wordcamp.org' ) {
+	if ( in_array( $_SERVER['HTTP_HOST'], array(
+		'testing.wordcamp.org',
+		'2016.milwaukee.wordcamp.org',
+		'2016.pittsburgh.wordcamp.org',
+		'2016.capetown.wordcamp.org',
+		'2016.annarbor.wordcamp.org',
+		'2016.riodejaneiro.wordcamp.org',
+		'2016.milano.wordcamp.org',
+		'2016.cologne.wordcamp.org',
+	) ) ) {
 		require_once( __DIR__ . '/includes/budget-tool.php' );
 	}
 
