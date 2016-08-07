@@ -1,7 +1,7 @@
 jQuery( document ).ready( function( $ ) {
-	
+
 	var WCCSP_Settings = {
-		
+
 		/**
 		 * Constructor
 		 */
@@ -11,7 +11,7 @@ jQuery( document ).ready( function( $ ) {
 
 		/**
 		 * Injects the media modal and assigns the chosen attachment ID to corresponding input field
-		 * 
+		 *
 		 * @param object event
 		 * @returns {boolean}
 		 */

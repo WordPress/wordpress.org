@@ -2,7 +2,7 @@ High priority:
 	default image so organizers know it's an option
 	refactor get_contact_form_shortcode() once https://github.com/Automattic/jetpack/issues/102 is fixed
 		if doesn't happen soon, then add admin notice if missing page w/ contact form or it's not published
-	
+
 Medium priority:
 	add color pickers
 	update image preview after they pick new but before they save/refresh
@@ -12,11 +12,10 @@ Medium priority:
 	select image size from dropdown of available sizes
 		maybe add more custom sizes too
 	make the date lookup less fragile? maybe store blog id in wordcamp post type meta so don't have to rely on url, or just parse_url() to make matching easier
-	
-	
+
+
 Low priority:
 	styles
 		make responsive & mobile-first
 		make contact box align w/ right edge of intro text properly instead of workaround
 	make dashes/underscores consistent in html element ids/names
-	

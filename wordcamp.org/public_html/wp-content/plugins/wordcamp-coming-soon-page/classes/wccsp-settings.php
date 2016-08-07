@@ -24,8 +24,8 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Retrieves all of the settings from the database  
-	 * 
+	 * Retrieves all of the settings from the database
+	 *
 	 * @return array
 	 */
 	public function get_settings() {
@@ -36,7 +36,7 @@ class WCCSP_Settings {
 			'text_color'                 => '#000000',
 			'image_id'                   => 0,
 		);
-			
+
 		$settings = shortcode_atts(
 			$defaults,
 			get_option( 'wccsp_settings', array() )
@@ -47,14 +47,14 @@ class WCCSP_Settings {
 
 	/**
 	 * Register and enqueue the JavaScript we need for the Settings screen
-	 * 
+	 *
 	 * @param string $screen
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
 		if ( 'settings_page_wccsp_settings' != $hook_suffix ) {
 			return;
 		}
-		
+
 		wp_register_script(
 			'wccsp-settings',
 			plugins_url( '/javascript/wccsp-settings.js', __DIR__ ),
@@ -97,11 +97,11 @@ class WCCSP_Settings {
 	public function register_settings() {
 		add_settings_section(
 			'wccsp_default',
-			'', 
+			'',
 			array( $this, 'markup_section_headers' ),
 			'wccsp_settings'
 		);
-		
+
 
 		add_settings_field(
 			'wccsp_enabled',
@@ -147,7 +147,7 @@ class WCCSP_Settings {
 			'wccsp_default',
 			array( 'label_for' => 'wccsp_image_id' )
 		);
-		
+
 
 		register_setting(
 			'wccsp_settings',
@@ -192,13 +192,13 @@ class WCCSP_Settings {
 		if ( 'on' != $new_settings['enabled'] ) {
 			$new_settings['enabled'] = 'off';
 		}
-		
+
 		$new_settings['body_background_color']      = sanitize_text_field( $new_settings['body_background_color'] );
 		$new_settings['container_background_color'] = sanitize_text_field( $new_settings['container_background_color'] );
 		$new_settings['text_color']                 = sanitize_text_field( $new_settings['text_color'] );
-		
+
 		$new_settings['image_id'] = absint( $new_settings['image_id'] );
-		
+
 		return $new_settings;
 	}
 
@@ -217,7 +217,7 @@ class WCCSP_Settings {
 	 */
 	public function render_admin_notices() {
 		$current_screen = get_current_screen();
-		
+
 		if ( 'settings_page_wccsp_settings' != $current_screen->id ) {
 			return;
 		}
@@ -228,7 +228,7 @@ class WCCSP_Settings {
 			'subscriptions' => __( 'Subscriptions', 'wordcamporg' ),
 			'contact-form'  => __( 'Contact Form',  'wordcamporg' ),
 		);
-		
+
 		foreach ( $required_modules as $module_id => $module_name ) {
 			if ( ! in_array( $module_id, $active_modules ) ) {
 				$inactive_required_modules[] = $module_name;

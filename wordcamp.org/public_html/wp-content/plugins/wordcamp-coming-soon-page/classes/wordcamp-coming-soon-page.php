@@ -3,7 +3,7 @@
 class WordCamp_Coming_Soon_Page {
 	protected $override_theme_template;
 	const VERSION = '0.1';
-	
+
 	/**
 	 * Constructor
 	 */
@@ -32,7 +32,7 @@ class WordCamp_Coming_Soon_Page {
 		if ( ! $this->override_theme_template ) {
 			return;
 		}
-		
+
 		$this->dequeue_all_stylesheets();
 		$this->register_twentythirteen_styles();
 
@@ -48,7 +48,7 @@ class WordCamp_Coming_Soon_Page {
 	 * Dequeue all enqueued stylesheets and Custom CSS
 	 */
 	protected function dequeue_all_stylesheets() {
-		foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) { 
+		foreach( $GLOBALS['wp_styles']->queue as $stylesheet ) {
 			wp_dequeue_style( $stylesheet );
 		}
 
@@ -59,8 +59,8 @@ class WordCamp_Coming_Soon_Page {
 	 * Register TwentyThirteen's base styles
 	 */
 	protected function register_twentythirteen_styles() {
-		$twentythirteen_uri = get_theme_root_uri( 'twentythirteen' ) . '/twentythirteen'; 
-		
+		$twentythirteen_uri = get_theme_root_uri( 'twentythirteen' ) . '/twentythirteen';
+
 		if ( ! wp_style_is( 'twentythirteen-fonts', 'registered' ) ) {
 			wp_register_style( 'twentythirteen-fonts', '//fonts.googleapis.com/css?family=Source+Sans+Pro%3A300%2C400%2C700%2C300italic%2C400italic%2C700italic%7CBitter%3A400%2C700&#038;subset=latin%2Clatin-ext', array(), null );
 		}
@@ -81,16 +81,16 @@ class WordCamp_Coming_Soon_Page {
 		if ( ! $this->override_theme_template ) {
 			return;
 		}
-		
+
 		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
 		?>
-		
+
 		<!-- BEGIN wordcamp-coming-soon-page -->
 		<style type="text/css">
 			html, body {
 				color: <?php echo esc_html( $settings['text_color'] ); ?>;
 			}
-			
+
 			#wccsp-container,
 			.widget  {
 				background-color: <?php echo esc_html( $settings['container_background_color'] ); ?>;
@@ -109,7 +109,7 @@ class WordCamp_Coming_Soon_Page {
 
 	/**
 	 * Load the Coming Soon template instead of a theme template
-	 * 
+	 *
 	 * @param string $template
 	 * @return string
 	 */
@@ -117,14 +117,14 @@ class WordCamp_Coming_Soon_Page {
 		if ( $this->override_theme_template ) {
 			$template = dirname( __DIR__ ) . '/views/template-coming-soon.php';
 		}
-		
+
 		return $template;
 	}
 
 	/**
 	 * Collect all of the variables the Coming Soon template will need
 	 * Doing this here keeps the template less cluttered and more of a pure view
-	 * 
+	 *
 	 * @return array
 	 */
 	function get_template_variables() {
@@ -140,21 +140,21 @@ class WordCamp_Coming_Soon_Page {
 
 	/**
 	 * Retrieve the URL of the image displayed in the template
-	 * 
+	 *
 	 * @return string|false
 	 */
 	public function get_image_url() {
 		$settings   = $GLOBALS['WCCSP_Settings']->get_settings();
 		$image_meta = wp_get_attachment_metadata( $settings['image_id'] );
-		$size       = isset( $image_meta['sizes']['wccsp_image_medium_rectangle'] ) ? 'wccsp_image_medium_rectangle' : 'full'; 
+		$size       = isset( $image_meta['sizes']['wccsp_image_medium_rectangle'] ) ? 'wccsp_image_medium_rectangle' : 'full';
 		$image      = wp_get_attachment_image_src( $settings['image_id'], $size );
-		
+
 		return $image ? $image[0] : false;
 	}
 
 	/**
 	 * Retrieve the dates of the WordCamp
-	 * 
+	 *
 	 * @return string|false
 	 */
 	public function get_dates() {
@@ -174,7 +174,7 @@ class WordCamp_Coming_Soon_Page {
 				}
 			}
 		}
-		
+
 		return $dates;
 	}
 
@@ -184,20 +184,20 @@ class WordCamp_Coming_Soon_Page {
 	 * We can't just create an arbitrary shortcode because of https://github.com/Automattic/jetpack/issues/102. Instead we have to use a form that's tied to a page.
 	 * This is somewhat fragile, though. It should work in most cases because the first $page that contains [contact-form] will be the one we automatically create
 	 * when the site is created, but if the organizers delete that and then add multiple forms, the wrong form could be displayed. The alternative approaches also
-	 * have problems, though, and #102 should be fixed relatively soon, so hopefully this will be good enough until it can be refactored. 
+	 * have problems, though, and #102 should be fixed relatively soon, so hopefully this will be good enough until it can be refactored.
 	 * todo Refactor this once #102-jetpack is fixed.
-	 *       
+	 *
 	 * @return string|false
 	 */
 	public function get_contact_form_shortcode() {
 		$contact_form_shortcode = false;
 		$shortcode_regex        = get_shortcode_regex();
-		
+
 		$all_pages = get_posts( array(
 			'post_type'      => 'page',
 			'posts_per_page' => -1,
 		) );
-		
+
 		foreach ( $all_pages as $page ) {
 			preg_match_all( '/' . $shortcode_regex . '/s', $page->post_content, $matches, PREG_SET_ORDER );
 
@@ -206,17 +206,17 @@ class WordCamp_Coming_Soon_Page {
 					global $post;
 					$post = $page;
 					setup_postdata( $post );
-					
+
 					ob_start();
 					echo do_shortcode( $shortcode[0] );
 					$contact_form_shortcode = ob_get_clean();
-					
+
 					wp_reset_postdata();
 					break;
 				}
 			}
 		}
-		
+
 		return $contact_form_shortcode;
 	}
 } // end WordCamp_Coming_Soon_Page
