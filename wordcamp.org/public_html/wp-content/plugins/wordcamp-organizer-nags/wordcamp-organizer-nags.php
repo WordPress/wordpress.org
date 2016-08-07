@@ -170,15 +170,15 @@ class WordCampOrganizerNags {
 
 		<ul class="ul-disc">
 			<?php if ( $this->need_central_about_info ) : ?>
-				<li>Please send us <a href="http://plan.wordcamp.org/first-steps/web-presence/your-page-on-central-wordcamp-org/">the "about" text and banner image</a> for your central.wordcamp.org page.</a></li>
+				<li>Please send us <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/your-page-on-central-wordcamp-org/">the "about" text and banner image</a> for your central.wordcamp.org page.</a></li>
 			<?php endif; ?>
 
 			<?php if ( in_array( 'attendees', $this->needed_pages ) ) : ?>
-				<li>Tickets are on sale now! Don’t forget to <a href="http://plan.wordcamp.org/using-camptix/#attendees-list">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.</li>
+				<li>Tickets are on sale now! Don’t forget to <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/using-camptix-event-ticketing-plugin/#attendees-list">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.</li>
 			<?php endif; ?>
 
 			<?php if ( in_array( 'schedule', $this->needed_pages ) ) : ?>
-				<li>Tickets sell a lot faster when people can see who's speaking at your WordCamp. How about <a href="http://plan.wordcamp.org/first-steps/web-presence/working-with-speakers-sessions-and-sponsors/#schedule">publishing a schedule</a> today?</li>
+				<li>Tickets sell a lot faster when people can see who's speaking at your WordCamp. How about <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/custom-tools-for-building-wordcamp-content/#schedule">publishing a schedule</a> today?</li>
 			<?php endif; ?>
 		</ul>
 
