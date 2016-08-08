@@ -5,9 +5,7 @@ namespace WordPressdotorg\Forums\Topic_Resolution;
 class Plugin {
 
 	/**
-	 * @todo Views: yes/no/mu -- all available for all enabled forums
 	 * @todo Edit enabled forums - will need to be updateable from the admin interface for administrators during forum setup
-	 * @todo Add topic title filter
 	 * Decisions: default topic resolution is 'no'
 	 */
 
@@ -51,6 +49,9 @@ class Plugin {
 		// Process field submission for topics.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
+
+		// Register views.
+		add_action( 'bbp_register_views', array( $this, 'register_views' ) );
 
 		// Indicate if the forum is a support forum.
 		add_filter( 'manage_forum_posts_columns', array( $this, 'add_forum_topic_resolution_column' ), 11 );
@@ -150,6 +151,53 @@ class Plugin {
 			'id'         => $topic_id,
 			'resolution' => $resolution,
 		) );
+	}
+
+	/**
+	 * Register resolution state views.
+	 */
+	public function register_views() {
+		// Not a support topic.
+		bbp_register_view(
+			'support-forum-mu',
+			__( 'Non-support topics', 'wporg-forums' ),
+			apply_filters( 'wporg_bbp_topic_resolution_view_non_support', array(
+				'meta_key'      => 'topic_resolved',
+				'meta_type'     => 'CHAR',
+				'meta_value'    => 'mu',
+				'meta_compare'  => '=',
+				'orderby'       => '',
+				'show_stickies' => false,
+			) )
+		);
+
+		// Resolved.
+		bbp_register_view(
+			'support-forum-yes',
+			__( 'Resolved topics', 'wporg-forums' ),
+			apply_filters( 'wporg_bbp_topic_resolution_view_resolved', array(
+				'meta_key'      => 'topic_resolved',
+				'meta_type'     => 'CHAR',
+				'meta_value'    => 'yes',
+				'meta_compare'  => '=',
+				'orderby'       => '',
+				'show_stickies' => false,
+			) )
+		);
+
+		// Unresolved.
+		bbp_register_view(
+			'support-forum-no',
+			__( 'Unresolved topics', 'wporg-forums' ),
+			apply_filters( 'wporg_bbp_topic_resolution_view_unresolved', array(
+				'meta_key'      => 'topic_resolved',
+				'meta_type'     => 'CHAR',
+				'meta_value'    => 'no',
+				'meta_compare'  => '=',
+				'orderby'       => '',
+				'show_stickies' => false,
+			) )
+		);
 	}
 
 	public function add_forum_topic_resolution_column( $columns ) {
