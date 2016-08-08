@@ -126,15 +126,18 @@ class Controls {
 	 * This returns the latest release in the previous 4 branches, trunk, and
 	 * the current version the plugin is marked as tested with.
 	 *
-	 * @param string $tested_up_to The version which the plugin is currently specified as compatible to.
+	 * @global string $wp_version The WordPress version string.
 	 *
+	 * @param string $tested_up_to The version which the plugin is currently specified as compatible to.
 	 * @return array An array containing 'versions' an array of versions for display, and 'tested_up_to'
 	 *               the sanitized/most recent version of the $tested_up_to parameter.
 	 */
 	protected static function get_tested_up_to_versions( $tested_up_to ) {
 		global $wp_version;
+
 		// Fetch all "compatible" versions, this array is in the form of [ '4.4.2' => [ '4.4.1', '4.4' ], ...]
 		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
+
 			// This function is a global WordPress.org function.
 			$all_versions = wporg_get_version_equivalents();
 		} else {
@@ -142,24 +145,22 @@ class Controls {
 		}
 
 		$versions = array_slice( array_keys( $all_versions ), 0, 4 );
-		// WordPress.org runs trunk, this keeps the highest version selectable as trunk
-		$versions[5] = preg_replace( '!-\d{4,}$!', '', $wp_version );
 
-		$found = false;
 		foreach( $versions as $version ) {
-			if ( isset( $all_versions[ $version ] ) && in_array( $tested_up_to, $all_versions[ $version ] ) ) {
+			if ( in_array( $tested_up_to, $all_versions[ $version ] ) ) {
 				$tested_up_to = $version;
-				$found = true;
 				break;
 			}
 		}
+
 		// If the version specified isn't going to display, insert it into the list.
-		if ( ! $found ) {
-			$versions[4] = $tested_up_to;
-			ksort( $versions );
+		if ( ! in_array( $tested_up_to, $versions ) ) {
+			$versions[] = $tested_up_to;
 		}
+
+		// WordPress.org runs trunk, this keeps the highest version selectable as trunk.
+		$versions[] = preg_replace( '!-\d{4,}$!', '', $wp_version );
 
 		return compact( 'versions', 'tested_up_to' );
 	}
 }
-
