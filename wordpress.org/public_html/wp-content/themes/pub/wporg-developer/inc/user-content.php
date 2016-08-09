@@ -49,12 +49,33 @@ class DevHub_User_Submitted_Content {
 		// Enable shortcodes for comments
 		add_filter( 'comment_text',                    'do_shortcode');
 
+		// Customize allowed tags
+		add_filter( 'wp_kses_allowed_html',            array( __CLASS__, 'wp_kses_allowed_html' ), 10, 2 );
+
 		// Make 'php' the default language
 		add_filter( 'syntaxhighlighter_shortcodeatts', array( __CLASS__, 'syntaxhighlighter_shortcodeatts' ) );
 
 		// Tweak code contained in shortcode
 		add_filter( 'syntaxhighlighter_precode',       array( __CLASS__, 'syntaxhighlighter_precode' ) );
 
+	}
+
+	/**
+	 * Customizes the allowed HTML tags for comments.
+	 *
+	 * @param array  $allowed List of allowed tags and their allowed attributes.
+	 * @param string $context The context for which to retrieve tags.
+	 * @return array
+	 */
+	public static function wp_kses_allowed_html( $allowed, $context ) {
+		// Unfortunately comments don't have a specific context, so apply to any context not explicitly known.
+		if ( ! in_array( $context, array( 'post', 'user_description', 'pre_user_description', 'strip', 'entities', 'explicit' ) ) ) {
+			foreach ( array( 'ol', 'ul', 'li' ) as $tag ) {
+				$allowed[ $tag ] = array();
+			}
+		}
+
+		return $allowed;
 	}
 
 	/**
