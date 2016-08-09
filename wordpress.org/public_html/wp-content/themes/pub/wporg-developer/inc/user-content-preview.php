@@ -35,7 +35,7 @@ class DevHub_Note_Preview {
 	 */
 	public static function scripts_and_styles() {
 		if ( is_singular() ) {
-			wp_enqueue_script( 'wporg-developer-preview', get_template_directory_uri() . '/js/user-notes-preview.js', array( 'jquery', 'quicktags', 'wporg-developer-function-reference' ), '20160606', true );
+			wp_enqueue_script( 'wporg-developer-preview', get_template_directory_uri() . '/js/user-notes-preview.js', array( 'jquery', 'quicktags', 'wporg-developer-function-reference' ), '20160809', true );
 			wp_localize_script( 'wporg-developer-preview', 'wporg_note_preview', array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'preview_nonce' ),
