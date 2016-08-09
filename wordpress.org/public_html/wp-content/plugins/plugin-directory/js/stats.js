@@ -71,7 +71,9 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 			} );
 
 			// Move 'other' versions to the beginning.
-			versionList.unshift( versionList.pop() );
+			if ( 'other' === versionList[ versionList.length - 1 ] ) {
+				versionList.unshift( versionList.pop() );
+			}
 
 			// Add all the versions
 			versionList.forEach( function( version ) {
