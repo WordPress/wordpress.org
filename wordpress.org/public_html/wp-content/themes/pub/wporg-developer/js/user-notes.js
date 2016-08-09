@@ -5,8 +5,22 @@
 
 ( function( $ ) {
 
+	var commentForm = $( '.comment-form textarea' );
+
+	if ( !commentForm.length ) {
+		return;
+	}
+
 	function showCommentForm() {
 		$( '#respond, #add-user-note' ).toggle();
+		
+		var preview = $( '#comment-preview' );
+		if( preview.length && ( wporg_developer_note_preview !== undefined ) ) {
+			preview.show();
+
+			//Initialize preview with textarea and preview selectors
+			wporg_developer_note_preview.init( '.comment-form textarea', '#comment-preview' );
+		}
 
 		if ( pos = $( '#submit' ).position() ) {
 			if ( pos.top < $(window).scrollTop() ) {
@@ -38,7 +52,7 @@
 
 	// Override tab within user notes textarea to actually insert a tab character.
 	// Copied from code within core's wp-admin/js/common.js.
-	$('.comment-form textarea').bind('keydown.wpevent_InsertTab', function(e) {
+	commentForm.bind('keydown.wpevent_InsertTab', function(e) {
 		var el = e.target, selStart, selEnd, val, scroll, sel;
 
 		if ( e.keyCode == 27 ) { // escape key

@@ -87,6 +87,19 @@ if ( post_password_required() ) {
 			'title_reply'         =>  '', //'Add Example'
 		) ); ?>
 
+		<!-- Comment Preview -->
+		<div id='comment-preview' class='comment byuser depth-1' style='display:none;'>
+			<article class='comment-body'>
+				<header class='comment-meta'>
+					<div>
+						<?php _e( 'Preview', 'wporg' ); ?>
+						<span class='spinner' style='display:none'></span>
+					</div>
+				</header>
+				<div class='comment-content'></div>
+			</article>
+		</div>
+
 	<?php endif; ?>
 
 	<?php if ( ! \DevHub\is_parsed_post_type() && comments_open() ) : ?>

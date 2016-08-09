@@ -3,7 +3,7 @@
  *
  * Handles all interactivity on the single function page
  */
-( function( $ ) {
+var wporg_developer = ( function( $ ) {
 	'use strict';
 
 	var $sourceCollapsedHeight;
@@ -28,19 +28,37 @@
 		// 1em (margin) + 10 * 17px + 10. Lines are 1.1em which rounds to 17px: calc( 1em + 17px * 10 + 10 ).
 		// Extra 10px added to partially show next line so it's clear there is more.
 		$sourceCollapsedHeight = 196;
+		sourceCodeDisplay();
+	}
 
-		$( '.source-content' ).find( 'table' ).each( function( t ) {
+	function sourceCodeDisplay( element ) {
+		 
+		if ( element !== undefined ) {
+			// Find table inside a specific source code element if passed.
+			var sourceCode = $( '.source-content', element ).find( 'table' );
+		} else {
+			// Find table inside all source code elements.
+			var sourceCode = $( '.source-content' ).find( 'table' );
+		}
+
+		if ( !sourceCode.length ) {
+			return;
+		}
+
+		sourceCode.each( function( t ) {
 			if ( ( $sourceCollapsedHeight - 12 ) < $( this ).height() ) {
 
 				var sourceContent = $( this ).closest( '.source-content' );
 
 				// Do this with javascript so javascript-less can enjoy the total sourcecode
-				sourceContent.find( '.source-code-container' ).css( { height: $sourceCollapsedHeight + 'px' } );
+				sourceContent.find( '.source-code-container' ).css( {
+					height: $sourceCollapsedHeight + 'px'
+				} );
 
-				sourceContent.find( '.source-code-links').find('span:first' ).show();
+				sourceContent.find( '.source-code-links' ).find( 'span:first' ).show();
 				sourceContent.find( '.show-complete-source' ).show();
-				sourceContent.find( '.show-complete-source' ).on( 'click', toggleCompleteSource );
-				sourceContent.find( '.less-complete-source' ).on( 'click', toggleCompleteSource );
+				sourceContent.find( '.show-complete-source' ).off( 'click.togglesource' ).on( 'click.togglesource', toggleCompleteSource );
+				sourceContent.find( '.less-complete-source' ).off( 'click.togglesource' ).on( 'click.togglesource', toggleCompleteSource );
 			}
 		} );
 	}
@@ -101,4 +119,10 @@
 	}
 
 	$( onLoad );
+
+	// Expose the sourceCodeDisplay() function for usage outside of this function.
+	return {
+		sourceCodeDisplay: sourceCodeDisplay
+	};
+
 } )( jQuery );
