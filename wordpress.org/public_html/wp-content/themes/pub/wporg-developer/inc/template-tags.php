@@ -1327,9 +1327,7 @@ namespace DevHub {
 			return '';
 		}
 
-		$post_field = get_post_field( $field, $explanation, $context );
-
-		return apply_filters( 'the_content', apply_filters( 'get_the_content', $post_field ) );
+		return get_post_field( $field, $explanation, $context );
 	}
 
 	/**

@@ -21,6 +21,10 @@ class DevHub_Formatting {
 	 * Handles adding/removing hooks to perform formatting as needed.
 	 */
 	public static function do_init() {
+		// NOTE: This filtering is temporarily disabled and then restored in
+		// reference/template-explanation.php
+		add_filter( 'the_content', array( __CLASS__, 'fix_unintended_markdown' ), 1 );
+
 		add_filter( 'the_excerpt', array( __CLASS__, 'lowercase_P_dangit_just_once' ) );
 		add_filter( 'the_content', array( __CLASS__, 'make_doclink_clickable' ), 10, 5 );
 
@@ -33,7 +37,6 @@ class DevHub_Formatting {
 		add_filter( 'devhub-parameter-type', array( __CLASS__, 'autolink_references' ) );
 
 		add_filter( 'devhub-format-description', array( __CLASS__, 'fix_param_hash_formatting' ), 9 );
-		add_action( 'the_content', array( __CLASS__, 'fix_unintended_markdown' ) );
 
 		add_filter( 'devhub-function-return-type', array( __CLASS__, 'autolink_references' ) );
 	}
@@ -204,10 +207,7 @@ class DevHub_Formatting {
 	 */
 	public static function fix_unintended_markdown( $content, $post_type = null ) {
 		// Only apply to parsed content that have the em tag.
-		if ( DevHub\is_parsed_post_type( $post_type )
-			&& false !== strpos( $content, '<em>' )
-			&& false === strpos( $content, '<p>' )
-		) {
+		if ( DevHub\is_parsed_post_type( $post_type ) && false !== strpos( $content, '<em>' ) ) {
 			$content = preg_replace_callback(
 				'/([^\s])<em>(.+)<\/em>/',
 				function ( $matches ) {
