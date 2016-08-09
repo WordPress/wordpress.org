@@ -105,7 +105,7 @@ class DevHub_User_Submitted_Content {
 	 */
 	public static function wp_editor_comments() {
 		ob_start();
-		echo '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Note', 'noun', 'wporg' ) . '</label>';
+		echo '<p class="comment-form-comment"><label for="comment">' . _x( 'Add Note or Feedback', 'noun', 'wporg' ) . '</label>';
 		wp_editor( '', 'comment', array(
 			'media_buttons' => false,
 			'textarea_name' => 'comment',

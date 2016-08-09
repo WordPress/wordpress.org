@@ -62,12 +62,14 @@ if ( post_password_required() ) {
 
 	<?php if ( \DevHub\is_parsed_post_type() && DevHub\can_user_post_note( true, get_the_ID() ) ) : ?>
 
-		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note to contribute?', 'wporg' ); ?></a></p>
+		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note or feedback to contribute?', 'wporg' ); ?></a></p>
 
 		<?php comment_form( array(
 			'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
 			'comment_notes_after' => '<p>' .
 				__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
+				'</p><p>' .
+				__( 'Feedback can be to report errors or omissions with the documentation on this page. Such feedback will not be publicly posted.', 'wporg' ) . 
 				'</p><p>' .
 				__( 'Do not use this form for support requests, discussions, spam, bug reports, complaints, or self-promotion. Entries of this nature will be deleted.', 'wporg' ) .
 				'</p><p>' .
@@ -77,9 +79,9 @@ if ( post_password_required() ) {
 				'</p><p class="user-notes-are-gpl">' .
 				sprintf( __( '<strong>NOTE:</strong> All contributions are licensed under <a href="%s">GFDL</a> and are moderated before appearing on the site.', 'wporg' ), 'https://gnu.org/licenses/fdl.html' ) .
 				'</p>',
-			'label_submit'        => __( 'Add Note', 'wporg' ),
+			'label_submit'        => __( 'Add Note or Feedback', 'wporg' ),
 			'must_log_in'         => '<p>' . sprintf(
-				__( 'You must <a href="%s">log in</a> before being able to contribute a note.', 'wporg' ),
+				__( 'You must <a href="%s">log in</a> before being able to contribute a note or feedback.', 'wporg' ),
 				'https://wordpress.org/support/bb-login.php?redirect_to=' . urlencode( get_comments_link() )
 			) . '</p>',
 			'title_reply'         =>  '', //'Add Example'
