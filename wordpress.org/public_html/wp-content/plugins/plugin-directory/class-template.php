@@ -90,12 +90,14 @@ class Template {
 		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		$num_ratings = array_sum( $ratings );
 
-		return '<div class="plugin-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">' .
-		       '<meta itemprop="ratingCount" content="' . esc_attr( $num_ratings ) . '"/>' .
-		       '<meta itemprop="ratingValue" content="' . esc_attr( $rating ) . '"/>' .
-		       Template::dashicons_stars( $rating ) .
-		       '<span class="rating-count">(' . esc_html( $num_ratings ) . ')</span>' .
-		       '</div>';
+		return
+			'<div class="plugin-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">' .
+				'<meta itemprop="ratingCount" content="' . esc_attr( $num_ratings ) . '"/>' .
+				'<meta itemprop="ratingValue" content="' . esc_attr( $rating ) . '"/>' .
+				Template::dashicons_stars( $rating ) .
+				/* translators: 1: number of ratings */
+				'<span class="rating-count">(' . sprintf( __( '%1$s <span class="screen-reader-text">total ratings</span>' ), esc_html( $num_ratings ) ) . ')</span>' .
+			'</div>';
 	}
 
 	/**
@@ -409,7 +411,7 @@ class Template {
 		$title_template = __( '%s out of 5 stars', 'wporg-plugins' );
 		$title          = sprintf( $title_template, $rating );
 
-		$output  = '<div class="wporg-ratings" title="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
+		$output  = '<div class="wporg-ratings" aria-label="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
 		$counter = round( $rating * 2 );
 		for ( $i = 1; $i <= 5; $i++ ) {
 			switch ( $counter ) {

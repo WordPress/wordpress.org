@@ -16,8 +16,8 @@ $sections = array(
 );
 
 $widget_args = array(
-	'before_title' => '<h4 class="widget-title">',
-	'after_title'  => '</h4>',
+	'before_title' => '<h3 class="widget-title">',
+	'after_title'  => '</h3>',
 );
 
 get_header();
@@ -43,8 +43,8 @@ get_header();
 
 			<section class="plugin-section">
 				<header class="section-header">
-					<h1 class="section-title"><?php echo esc_html( $section_title ); ?></h1>
-					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php _ex( 'See all', 'plugins', 'wporg-plugins' ); ?></a>
+					<h2 class="section-title"><?php echo esc_html( $section_title ); ?></h2>
+					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php printf( _x( 'See all %s', 'plugins', 'wporg-plugins' ), "<span class=\"screen-reader-text\">{$section_title}</span>" ); ?></a>
 				</header>
 
 				<?php

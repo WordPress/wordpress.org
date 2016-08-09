@@ -23,6 +23,7 @@ export default React.createClass( {
 				/>
 				<button className="button button-primary button-search">
 					<i className="dashicons dashicons-search"></i>
+					<span className="screen-reader-text">Search plugins</span>
 				</button>
 			</form>
 		)

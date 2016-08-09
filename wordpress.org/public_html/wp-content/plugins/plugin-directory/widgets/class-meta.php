@@ -31,6 +31,7 @@ class Meta extends \WP_Widget {
 		echo $args['before_widget'];
 		?>
 
+		<h3 class="screen-reader-text"><?php echo apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Meta', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ); ?></h3>
 		<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
 		<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
 			<meta itemprop="price" content="0.00" />

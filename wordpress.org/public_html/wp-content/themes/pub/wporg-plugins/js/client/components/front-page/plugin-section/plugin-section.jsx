@@ -17,7 +17,7 @@ export default React.createClass( {
 		return (
 			<section className="plugin-section">
 				<header className="section-header">
-					<h1 className="section-title">{ this.props.section.title }</h1>
+					<h2 className="section-title">{ this.props.section.title }</h2>
 					<Link className="section-link" to={ this.props.section.path }>See all</Link>
 				</header>
 				{ this.props.plugins.map( slug =>

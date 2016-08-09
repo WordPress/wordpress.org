@@ -36,7 +36,7 @@ export default React.createClass( {
 		return (
 			<div
 				className="wporg-ratings"
-				title={ title }
+				aria-label={ title }
 				data-title-template={ titleTemplate }
 				data-rating={ this.props.rating / 20 }
 				dangerouslySetInnerHTML={ { __html: this.fillStars( Math.round( this.props.rating / 10 ) / 2 ) } }
