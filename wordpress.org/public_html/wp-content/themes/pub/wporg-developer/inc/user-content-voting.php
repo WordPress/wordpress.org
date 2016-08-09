@@ -298,6 +298,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		$comment_link = get_comment_link( $comment_id );
 		$nonce        = wp_create_nonce( 'user-note-vote-' . $comment_id );
 		$disabled_str = __( 'Voting for this note is disabled', 'wporg' );
+		$cancel_str   = __( 'Click to cancel your vote', 'wporg' ); 
 		$log_in_str   = __( 'You must log in to vote on the helpfulness of this note', 'wporg' );
 		$log_in_url   = add_query_arg( 'redirect_to', urlencode( $comment_link ), 'https://login.wordpress.org' );
 
@@ -310,10 +311,11 @@ class DevHub_User_Contributed_Notes_Voting {
 		// Up vote link
 		$user_upvoted = self::has_user_upvoted_comment( $comment_id );
 		if ( $can_vote ) {
+			$cancel = $user_upvoted ? '. ' . $cancel_str . '.' : ''; 
 			$title = $user_upvoted ?
-				__( 'You have voted to indicate this note was helpful', 'wporg' ) :
+				__( 'You have voted to indicate this note was helpful', 'wporg' ) . $cancel :
 				__( 'Vote up if this note was helpful', 'wporg' );
-			$tag = $user_upvoted ? 'span' : 'a';
+			$tag = 'a';
 		} else {
 			$title = ! $logged_in ? $log_in_str : $disabled_str;
 			$tag = $logged_in ? 'span' : 'a';
@@ -350,10 +352,11 @@ class DevHub_User_Contributed_Notes_Voting {
 		// Down vote link
 		$user_downvoted = ( $user_upvoted ? false : self::has_user_downvoted_comment( $comment_id ) );
 		if ( $can_vote ) {
+			$cancel = $user_downvoted ? '. ' . $cancel_str . '.' : '';
 			$title = $user_downvoted ?
-				__( 'You have voted to indicate this note was not helpful', 'wporg' ) :
+				__( 'You have voted to indicate this note was not helpful', 'wporg' ) . $cancel :
 				__( 'Vote down if this note was not helpful', 'wporg' );
-			$tag = $user_downvoted ? 'span' : 'a';
+			$tag = 'a';
 		} else {
 			$title = ! $logged_in ? $log_in_str : $disabled_str;
 			$tag = $logged_in ? 'span' : 'a';
@@ -485,9 +488,11 @@ class DevHub_User_Contributed_Notes_Voting {
 		// Get list of people who cast the same vote.
 		$add_to_list = get_comment_meta( $comment_id, $add_to, true );
 
-		// Don't do anything if user is recasting the same vote as before.
+		// Remove user from list if recasting the same vote as before.
 		if ( in_array( $user_id, (array) $add_to_list ) ) {
-			return false;
+			unset( $add_to_list[ array_search( $user_id, $add_to_list ) ] );
+			update_comment_meta( $comment_id, $add_to, $add_to_list );
+			return true;
 		}
 
 		// If the user had previously cast the opposite vote, undo that older vote.
