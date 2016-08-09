@@ -272,7 +272,7 @@ class DevHub_Formatting {
 	 */
 	public static function autolink_references( $text ) {
 		// Temporary: Don't do anything if the text is a hash notation string.
-		if ( '{' === $text[0] ) {
+		if ( $text && '{' === $text[0] ) {
 			return $text;
 		}
 
@@ -421,7 +421,7 @@ class DevHub_Formatting {
 	 */
 	public static function fix_param_hash_formatting( $text ) {
 		// Don't do anything if this isn't a hash notation string.
-		if ( '{' != $text[0] ) {
+		if ( ! $text || '{' != $text[0] ) {
 			return $text;
 		}
 
