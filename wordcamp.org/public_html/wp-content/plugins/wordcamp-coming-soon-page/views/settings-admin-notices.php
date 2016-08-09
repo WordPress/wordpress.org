@@ -1,4 +1,4 @@
-<div class="error">
+<div class="notice notice-error notice-large">
 	<ul>
 		<?php foreach ( $inactive_required_modules as $module ) : ?>
 			<li>

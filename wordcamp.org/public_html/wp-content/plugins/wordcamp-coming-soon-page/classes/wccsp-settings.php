@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * todo
+ * Now that using Customizer, this class isn't really needed and doesn't make sense. Its functions can be moved
+ * into wordcamp-coming-soon-page.php and wccsp-customizer.php
+ */
+
 class WCCSP_Settings {
 	protected $settings;
 	const REQUIRED_CAPABILITY = 'administrator';
@@ -10,9 +16,6 @@ class WCCSP_Settings {
 	public function __construct() {
 		add_action( 'admin_menu',                   array( $this, 'register_settings_pages' ) );
 		add_action( 'init',                         array( $this, 'init' ) );
-		add_action( 'admin_init',                   array( $this, 'register_settings' ) );
-		add_action( 'admin_enqueue_scripts',        array( $this, 'enqueue_scripts' ) );
-		add_action( 'admin_notices',                array( $this, 'render_admin_notices' ) );
 		add_action( 'update_option_wccsp_settings', array( $this, 'clear_static_page_cache' ) );
 	}
 
@@ -31,10 +34,11 @@ class WCCSP_Settings {
 	public function get_settings() {
 		$defaults = array(
 			'enabled'                    => 'off',        // so that sites created before the plugin was deployed won't display the home page when the plugin is activated
-			'body_background_color'      => '#666666',
-			'container_background_color' => '#FFFFFF',
-			'text_color'                 => '#000000',
+			'body_background_color'      => '#0073aa',
 			'image_id'                   => 0,
+			'background_id'              => 0,
+			'container_background_color' => '#FFFFFF', // deprecated
+			'text_color'                 => '#000000', // deprecated
 		);
 
 		$settings = shortcode_atts(
@@ -46,28 +50,27 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Register and enqueue the JavaScript we need for the Settings screen
+	 * Get the URL for the Coming Soon section in the Customizer
 	 *
-	 * @param string $screen
+	 * @return string
 	 */
-	public function enqueue_scripts( $hook_suffix ) {
-		if ( 'settings_page_wccsp_settings' != $hook_suffix ) {
-			return;
-		}
-
-		wp_register_script(
-			'wccsp-settings',
-			plugins_url( '/javascript/wccsp-settings.js', __DIR__ ),
-			array( 'jquery', 'media-upload', 'media-views' ),
-			WordCamp_Coming_Soon_Page::VERSION
+	public function get_customizer_section_url() {
+		$url = add_query_arg(
+			array(
+				'autofocus[section]' => 'wccsp_live_preview',
+				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
+			),
+			admin_url( 'customize.php' )
 		);
 
-		wp_enqueue_media();
-		wp_enqueue_script( 'wccsp-settings' );
+		return $url;
 	}
 
 	/**
-	 * Adds pages to the Admin Panel menu
+	 * Add a link to the Settings menu
+	 *
+	 * Even though this lives in the Customizer, having a link in the regular admin menus helps with
+	 * discoverability.
 	 */
 	public function register_settings_pages() {
 		add_submenu_page(
@@ -75,131 +78,8 @@ class WCCSP_Settings {
 			__( 'Coming Soon', 'wordcamporg' ),
 			__( 'Coming Soon', 'wordcamporg' ),
 			self::REQUIRED_CAPABILITY,
-			'wccsp_settings',
-			array( $this, 'markup_settings_page' )
+			$this->get_customizer_section_url()
 		);
-	}
-
-	/**
-	 * Creates the markup for the Settings page
-	 */
-	public function markup_settings_page() {
-		if ( current_user_can( self::REQUIRED_CAPABILITY ) ) {
-			require_once( dirname( __DIR__ ) . '/views/settings-screen.php' );
-		} else {
-			wp_die( __( 'Access denied.', 'wordcamporg' ) );
-		}
-	}
-
-	/**
-	 * Registers settings sections, fields and settings
-	 */
-	public function register_settings() {
-		add_settings_section(
-			'wccsp_default',
-			'',
-			array( $this, 'markup_section_headers' ),
-			'wccsp_settings'
-		);
-
-
-		add_settings_field(
-			'wccsp_enabled',
-			__( 'Enabled', 'wordcamporg' ),
-			array( $this, 'markup_fields' ),
-			'wccsp_settings',
-			'wccsp_default',
-			array( 'label_for' => 'wccsp_enabled_true' )
-		);
-
-		add_settings_field(
-			'wccsp_body_background_color',
-			__( 'Body Background Color', 'wordcamporg' ),
-			array( $this, 'markup_fields' ),
-			'wccsp_settings',
-			'wccsp_default',
-			array( 'label_for' => 'wccsp_body_background_color' )
-		);
-
-		add_settings_field(
-			'wccsp_container_background_color',
-			__( 'Container Background Color', 'wordcamporg' ),
-			array( $this, 'markup_fields' ),
-			'wccsp_settings',
-			'wccsp_default',
-			array( 'label_for' => 'wccsp_container_background_color' )
-		);
-
-		add_settings_field(
-			'wccsp_text_color',
-			__( 'Text Color', 'wordcamporg' ),
-			array( $this, 'markup_fields' ),
-			'wccsp_settings',
-			'wccsp_default',
-			array( 'label_for' => 'wccsp_text_color' )
-		);
-
-		add_settings_field(
-			'wccsp_image_id',
-			__( 'Image', 'wordcamporg' ),
-			array( $this, 'markup_fields' ),
-			'wccsp_settings',
-			'wccsp_default',
-			array( 'label_for' => 'wccsp_image_id' )
-		);
-
-
-		register_setting(
-			'wccsp_settings',
-			'wccsp_settings',
-			array( $this, 'validate_settings' )
-		);
-	}
-
-	/**
-	 * Adds the section introduction text to the Settings page
-	 *
-	 * @param array $section
-	 */
-	public function markup_section_headers( $section ) {
-		require( dirname( __DIR__ ) . '/views/settings-section-headers.php' );
-	}
-
-	/**
-	 * Delivers the markup for settings fields
-	 *
-	 * @param array $field
-	 */
-	public function markup_fields( $field ) {
-		switch ( $field['label_for'] ) {
-			case 'wccsp_image_id':
-				$image = wp_get_attachment_image_src( $this->settings['image_id'], 'medium' );
-			break;
-		}
-
-		require( dirname( __DIR__ ) . '/views/settings-fields.php' );
-	}
-
-	/**
-	 * Validates submitted setting values before they get saved to the database.
-	 *
-	 * @param array $new_settings
-	 * @return array
-	 */
-	public function validate_settings( $new_settings ) {
-		$new_settings = shortcode_atts( $this->settings, $new_settings );
-
-		if ( 'on' != $new_settings['enabled'] ) {
-			$new_settings['enabled'] = 'off';
-		}
-
-		$new_settings['body_background_color']      = sanitize_text_field( $new_settings['body_background_color'] );
-		$new_settings['container_background_color'] = sanitize_text_field( $new_settings['container_background_color'] );
-		$new_settings['text_color']                 = sanitize_text_field( $new_settings['text_color'] );
-
-		$new_settings['image_id'] = absint( $new_settings['image_id'] );
-
-		return $new_settings;
 	}
 
 	/**
@@ -216,12 +96,6 @@ class WCCSP_Settings {
 	 * Renders notices for the administrator when problems are detected
 	 */
 	public function render_admin_notices() {
-		$current_screen = get_current_screen();
-
-		if ( 'settings_page_wccsp_settings' != $current_screen->id ) {
-			return;
-		}
-
 		$active_modules            = Jetpack::$instance->get_active_modules();
 		$inactive_required_modules = array();
 		$required_modules          = array(
@@ -235,8 +109,12 @@ class WCCSP_Settings {
 			}
 		}
 
+		ob_start();
+
 		if ( $inactive_required_modules ) {
 			require_once( dirname( __DIR__ ) . '/views/settings-admin-notices.php' );
 		}
+
+		return ob_get_clean();
 	}
 } // end WCCSP_Settings

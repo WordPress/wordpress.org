@@ -2,7 +2,7 @@
 
 class WordCamp_Coming_Soon_Page {
 	protected $override_theme_template;
-	const VERSION = '0.1';
+	const VERSION = '0.2';
 
 	/**
 	 * Constructor
@@ -21,12 +21,23 @@ class WordCamp_Coming_Soon_Page {
 	 */
 	public function init() {
 		$settings                      = $GLOBALS['WCCSP_Settings']->get_settings();
-		$this->override_theme_template = 'on' == $settings['enabled'] && ! current_user_can( 'edit_posts' );
+		$show_page                     = 'on' == $settings['enabled'] && ! current_user_can( 'edit_posts' );
+		$this->override_theme_template = $show_page || $this->is_coming_soon_preview();
+	}
+
+	/**
+	 * Check if the current page is our section of the Previewer
+	 *
+	 * @return bool
+	 */
+	public function is_coming_soon_preview() {
+		global $wp_customize;
+
+		return isset( $_GET['wccsp-preview'] ) && $wp_customize->is_preview();
 	}
 
 	/**
 	 * Ensure the template has a consistent base of CSS rules, regardless of the current theme or Custom CSS
-	 * Dequeue irrelevant stylesheets and use TwentyThirteen as the base style
 	 */
 	public function manage_plugin_theme_stylesheets() {
 		if ( ! $this->override_theme_template ) {
@@ -34,13 +45,12 @@ class WordCamp_Coming_Soon_Page {
 		}
 
 		$this->dequeue_all_stylesheets();
-		$this->register_twentythirteen_styles();
 
 		wp_enqueue_style(
 			'wccsp-template',
 			plugins_url( '/css/template-coming-soon.css', __DIR__ ),
-			array( 'twentythirteen-fonts', 'genericons', 'twentythirteen-style', 'admin-bar' ),
-			self::VERSION
+			array(),
+			1
 		);
 	}
 
@@ -56,25 +66,6 @@ class WordCamp_Coming_Soon_Page {
 	}
 
 	/**
-	 * Register TwentyThirteen's base styles
-	 */
-	protected function register_twentythirteen_styles() {
-		$twentythirteen_uri = get_theme_root_uri( 'twentythirteen' ) . '/twentythirteen';
-
-		if ( ! wp_style_is( 'twentythirteen-fonts', 'registered' ) ) {
-			wp_register_style( 'twentythirteen-fonts', '//fonts.googleapis.com/css?family=Source+Sans+Pro%3A300%2C400%2C700%2C300italic%2C400italic%2C700italic%7CBitter%3A400%2C700&#038;subset=latin%2Clatin-ext', array(), null );
-		}
-
-		if ( ! wp_style_is( 'genericons', 'registered' ) ) {
-			wp_register_style( 'genericons', $twentythirteen_uri . '/fonts/genericons.css' );
-		}
-
-		if ( ! wp_style_is( 'twentythirteen-style', 'registered' ) ) {
-			wp_register_style( 'twentythirteen-style', $twentythirteen_uri . '/style.css' );
-		}
-	}
-
-	/**
 	 * Render dynamic CSS styles
 	 */
 	public function render_dynamic_styles() {
@@ -82,29 +73,9 @@ class WordCamp_Coming_Soon_Page {
 			return;
 		}
 
-		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
-		?>
+		extract( $GLOBALS['WordCamp_Coming_Soon_Page']->get_template_variables() );
 
-		<!-- BEGIN wordcamp-coming-soon-page -->
-		<style type="text/css">
-			html, body {
-				color: <?php echo esc_html( $settings['text_color'] ); ?>;
-			}
-
-			#wccsp-container,
-			.widget  {
-				background-color: <?php echo esc_html( $settings['container_background_color'] ); ?>;
-			}
-
-			@media all and ( min-width: 800px ) {
-				html, body {
-					background-color: <?php echo esc_html( $settings['body_background_color'] ); ?>;
-				}
-			}
-		</style>
-		<!-- END wordcamp-coming-soon-page -->
-
-		<?php
+		require_once( dirname( __DIR__ ) . '/css/template-coming-soon-dynamic.php' );
 	}
 
 	/**
@@ -130,16 +101,72 @@ class WordCamp_Coming_Soon_Page {
 	function get_template_variables() {
 		$variables = array(
 			'image_url'              => $this->get_image_url(),
+			'background_url'         => $this->get_bg_image_url(),
 			'dates'                  => $this->get_dates(),
 			'active_modules'         => Jetpack::$instance->get_active_modules(),
 			'contact_form_shortcode' => $this->get_contact_form_shortcode(),
+			'colors'                 => $this->get_colors(),
 		);
 
 		return $variables;
 	}
 
 	/**
-	 * Retrieve the URL of the image displayed in the template
+	 * Retrieve the colors for the template
+	 *
+	 * @return array
+	 */
+	public function get_colors() {
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+
+		if ( ! class_exists( 'Jetpack_Color' ) && function_exists( 'jetpack_require_lib' ) ) {
+			jetpack_require_lib( 'class.color' );
+		}
+
+		// If they never changed from the old default background color, then use the new default
+		$background = $settings['body_background_color'];
+		if ( '#666666' === $background ) {
+			$background = '#0073aa';
+		}
+
+		// Just in case we can't find Jetpack_Color
+		if ( class_exists( 'Jetpack_Color' ) ) {
+			$color     = new Jetpack_Color( $background, 'hex' );
+			$color_hsl = $color->toHsl();
+
+			$lighter_color = new Jetpack_Color( array(
+				$color_hsl['h'],
+				$color_hsl['s'],
+				( $color_hsl['l'] >= 85 ) ? 100 : $color_hsl['l'] + 15
+			), 'hsl' );
+
+			$darker_color = new Jetpack_Color( array(
+				$color_hsl['h'],
+				$color_hsl['s'],
+				( $color_hsl['l'] < 10 ) ? 0 : $color_hsl['l'] - 10
+			), 'hsl' );
+
+			$background_lighter = '#' . $lighter_color->toHex();
+			$background_darker  = '#' . $darker_color->toHex();
+		} else {
+			$background_lighter = $background;
+			$background_darker  = $background;
+		}
+
+		$colors['main']    = $background;
+		$colors['lighter'] = $background_lighter;
+		$colors['darker']  = $background_darker;
+
+		// Not currently customizable
+		$colors['text']       = '#32373c';
+		$colors['light-text'] = '#b4b9be';
+		$colors['border']     = '#00669b';
+
+		return $colors;
+	}
+
+	/**
+	 * Retrieve the URL of the logo image displayed in the template
 	 *
 	 * @return string|false
 	 */
@@ -150,6 +177,19 @@ class WordCamp_Coming_Soon_Page {
 		$image      = wp_get_attachment_image_src( $settings['image_id'], $size );
 
 		return $image ? $image[0] : false;
+	}
+
+	/**
+	 * Retrieve the URL of the background image displayed in the template
+	 *
+	 * @return string|false
+	 */
+	public function get_bg_image_url() {
+		$settings   = $GLOBALS['WCCSP_Settings']->get_settings();
+		$image_meta = wp_get_attachment_metadata(  $settings['background_id']         );
+		$image      = wp_get_attachment_image_src( $settings['background_id'], 'full' );
+
+		return empty( $image[0] ) ? false : $image[0];
 	}
 
 	/**
@@ -164,12 +204,12 @@ class WordCamp_Coming_Soon_Page {
 		if ( isset( $wordcamp_post->ID ) ) {
 			if ( ! empty( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] ) ) {
 				// translators: date format, see https://php.net/date
-				$dates = date_i18n( __( 'l, F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
+				$dates = date_i18n( __( 'F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] );
 
 				if ( ! empty( $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) ) {
 					if ( $wordcamp_post->meta['Start Date (YYYY-mm-dd)'][0] !== $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] ) {
 						// translators: date format, see https://php.net/date
-						$dates .= ' - ' . date_i18n( __( 'l, F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
+						$dates .= ' - ' . date_i18n( __( 'F jS Y' , 'wordcamporg' ), $wordcamp_post->meta['End Date (YYYY-mm-dd)'][0] );
 					}
 				}
 			}

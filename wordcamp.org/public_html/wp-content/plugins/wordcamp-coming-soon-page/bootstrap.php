@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once( __DIR__ . '/classes/wordcamp-coming-soon-page.php' );
 require_once( __DIR__ . '/classes/wccsp-settings.php' );
+require_once( __DIR__ . '/classes/wccsp-customizer.php' );
 
 $GLOBALS['WordCamp_Coming_Soon_Page'] = new WordCamp_Coming_Soon_Page();
+$GLOBALS['WCCSP_Customizer']          = new WCCSP_Customizer();
 $GLOBALS['WCCSP_Settings']            = new WCCSP_Settings();
