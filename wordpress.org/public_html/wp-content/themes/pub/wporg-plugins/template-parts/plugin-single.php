@@ -34,13 +34,23 @@ $widget_args = array(
 		</div>
 
 		<div class="plugin-actions">
-
 			<?php
-			if ( false && is_user_logged_in() ) { // Hide Favorites until it's styled properly.
+			if ( is_user_logged_in() ) :
 				$url = Template::get_favourite_link( $post );
-				echo '<a href="' . esc_url( $url ) . '" class="plugin-favorite-heart' . (Tools::favorited_plugin( $post ) ? ' favorited' : '' ) . '" onclick="jQuery(this).toggleClass(\'favorited\')"></a>';
-			}
-			?>
+				?>
+				<div class="plugin-favorite">
+					<a href="<?php echo esc_url( $url ); ?>" class="plugin-favorite-heart<?php echo Tools::favorited_plugin( $post ) ? ' favorited' : ''; ?>"></a>
+					<script>
+						jQuery( '.plugin-favorite-heart' )
+							.on( 'click touchstart animationend', function() {
+								jQuery( this ).toggleClass( 'is-animating' );
+							} )
+							.on( 'click', function() {
+								jQuery( this ).toggleClass( 'favorited' );
+							} );
+					</script>
+				</div>
+			<?php endif; ?>
 
 			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 			<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
