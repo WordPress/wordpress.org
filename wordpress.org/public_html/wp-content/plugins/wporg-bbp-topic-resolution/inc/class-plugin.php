@@ -241,7 +241,7 @@ class Plugin {
 
 		// Check valid resolution.
 		} elseif ( ! $this->is_valid_topic_resolution( $resolution ) ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_invalid', __( '<strong>ERROR</srong>: That is not a valid topic resolution!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_invalid', __( '<strong>ERROR</strong>: That is not a valid topic resolution!', 'wporg-forums' ) );
 
 		// Check user permissions.
 		} elseif ( ! $this->user_can_resolve( $user_id, $topic->ID ) ) {
