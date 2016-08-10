@@ -267,10 +267,31 @@ function add_attendees_page_to_primary_menu( $attendees_page ) {
  * Determines the name ordering scheme on a per-blog basis
  */
 function set_name_order( $order ) {
-	switch( get_current_blog_id() ) {
-		case 304: // 2013.tokyo
-			$order = 'eastern';
-			break;
+	/*
+	 * These cities normally use an alternate order, but used western in the past, because alternate
+	 * orders were not available. Attendees entered their names in reverse in order to get them to
+	 * appear correctly, so switching to eastern now would result in the names appearing wrong.
+	 */
+	$western_back_compat = array(
+		112, // 2011.tokyo
+		217, // 2012.tokyo
+		406, // 2014.tokyo
+		558, // 2015.tokyo
+	);
+
+	// These cities should always use an alternate order
+	$alternate_orders = array(
+		'tokyo' => 'eastern',
+	);
+
+	if ( in_array( get_current_blog_id(), $western_back_compat, true ) ) {
+		$order = 'western';
+	} else {
+		$current_city = wcorg_get_url_part( site_url(), 'city' );
+
+		if ( array_key_exists( $current_city, $alternate_orders ) ) {
+			$order = $alternate_orders[ $current_city ];
+		}
 	}
 
 	return $order;
