@@ -219,6 +219,10 @@ div.bbp-submit-wrapper {
 	content: "\f120";
 }
 
+.sidebar .topic-info li.topic-resolved:before {
+	content: "\f546";
+}
+
 /* Sticky topics */
 #bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink:before,
 #bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink:before {
