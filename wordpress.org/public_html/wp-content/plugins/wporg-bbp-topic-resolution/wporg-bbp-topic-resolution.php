@@ -26,6 +26,6 @@ include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 Plugin::get_instance();
 
 // Easy access for templates
-function get_topic_resolution( $topic_id ) {
-	return Plugin::get_topic_resolution( array( 'id' => $topic_id ) );
+function get_topic_resolution_form( $topic_id ) {
+	return Plugin::get_instance()->get_topic_resolution_form( array( 'id' => $topic_id ) );
 }

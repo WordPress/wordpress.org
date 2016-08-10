@@ -5,11 +5,6 @@ namespace WordPressdotorg\Forums\Topic_Resolution;
 class Plugin {
 
 	/**
-	 * @todo Edit enabled forums - will need to be updateable from the admin interface for administrators during forum setup
-	 * Decisions: default topic resolution is 'no'
-	 */
-
-	/**
 	 * @var Plugin The singleton instance.
 	 */
 	private static $instance;
@@ -42,13 +37,17 @@ class Plugin {
 		// Change the topic title when resolved.
 		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
 
-		// Display the form for new/edited topics.
+		// Display the form for new/edit topics.
 		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'form_topic_resolution_dropdown' ) );
 		add_action( 'bbp_theme_before_topic_form_subscriptions', array( $this, 'form_topic_resolution_checkbox' ) );
 
 		// Process field submission for topics.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
+
+		// Add form for moderator/user topic resolution update.
+		// @todo Add AJAX processing to front-end topic resolution updates.
+		add_action( 'bbp_post_request', array( $this, 'topic_resolution_handler' ) );
 
 		// Register views.
 		add_action( 'bbp_register_views', array( $this, 'register_views' ) );
@@ -57,7 +56,7 @@ class Plugin {
 		add_filter( 'manage_forum_posts_columns', array( $this, 'add_forum_topic_resolution_column' ), 11 );
 		add_action( 'manage_forum_posts_custom_column', array( $this, 'add_forum_topic_resolution_value' ), 10, 2 );
 
-		// Process field submission
+		// Process changes to a forums support status.
 		// @todo Bulk actions aren't filterable, so this might be hacky.
 	}
 
@@ -81,7 +80,7 @@ class Plugin {
 			return;
 		}
 
-		// Only display on topic edits
+		// Only display on topic edit.
 		if ( ! bbp_is_topic_edit() ) {
 			return;
 		}
@@ -151,6 +150,119 @@ class Plugin {
 			'id'         => $topic_id,
 			'resolution' => $resolution,
 		) );
+	}
+
+	/**
+	 * Output topic resolution as a string or a selection dropdown.
+	 */
+	public function get_topic_resolution_form() {
+		// Only display on forums where this is enabled
+		if ( ! $this->is_enabled_on_forum() ) {
+			return;
+		}
+
+		// Only display on single topic.
+		if ( ! bbp_is_single_topic() && ! bbp_is_topic_edit() ) {
+			return;
+		}
+
+		// Get topic and user data.
+		$topic_id = intval( bbp_get_topic_id() );
+		$topic = bbp_get_topic( $topic_id );
+		if ( ! $topic_id || ! $topic ) {
+			return;
+		}
+
+		// Get the current resolution of this topic.
+		$resolution = $this->get_topic_resolution( array( 'id' => bbp_get_topic_id() ) );
+		if ( empty( $resolution ) ) {
+			$resolution = $this->get_default_topic_resolution();
+		}
+		$resolutions = $this->get_topic_resolutions();
+
+		// Display the current topic resolution if the user can't update it.
+		$user_id = get_current_user_id();
+		if ( bbp_is_topic_edit() || ! $this->user_can_resolve( $user_id, $topic_id ) ) {
+			printf( esc_html__( 'Status: %s', 'wporg-forums' ), $resolutions[ $resolution ] );
+
+		// Display the form to update the topic resolution.
+		} else {
+			?>
+			<form method="POST">
+			<input type="hidden" name="action" value="wporg_bbp_topic_resolution" />
+			<input type="hidden" name="topic_id" value="<?php echo esc_attr( $topic->ID ); ?>" />
+			<?php wp_nonce_field( 'toggle-topic-resolution_' . $topic->ID ); ?>
+			<label for="topic-resolved"><?php esc_html_e( 'Status:', 'wporg-forums' ); ?></label>
+
+			<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="topic-resolved">
+
+			<?php foreach ( $resolutions as $key => $label ) : ?>
+
+				<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $key, $resolution ); ?>><?php echo esc_html( $label ); ?></option>
+
+			<?php endforeach; ?>
+
+			</select>
+			<input type="submit" name="submit" value="<?php esc_attr_e( 'Update', 'wporg-forums' ); ?>" />
+			</form></span>
+			<?php
+		}
+	}
+
+	/**
+	 * Handle a user setting the topic resolution on a given topic.
+	 *
+	 * @param string $action The requested action to compare this function to
+	 */
+	public function topic_resolution_handler( $action = '' ) {
+		if ( ! $this->is_enabled_on_forum() ) {
+			return false;
+		}
+
+		// Bail if the action isn't meant for this function.
+		if ( $action != 'wporg_bbp_topic_resolution' ) {
+			return;
+		}
+
+		// Bail if no topic id or resolution is passed.
+		if ( empty( $_POST['topic_id'] ) || empty( $_POST[ self::META_KEY ] ) ) {
+			return;
+		}
+
+		// Get required data.
+		$topic_id   = intval( $_POST['topic_id'] );
+		$topic      = bbp_get_topic( $topic_id );
+		$user_id    = get_current_user_id();
+		$resolution = $_POST[ self::META_KEY ];
+
+		// Check for empty topic id.
+		if ( empty( $topic_id ) || ! $topic ) {
+			bbp_add_error( 'wporg_bbp_topic_resolution_topic_id', __( '<strong>ERROR</strong>: No topic was found!', 'wporg-forums' ) );
+
+		// Check valid resolution.
+		} elseif ( ! $this->is_valid_topic_resolution( $resolution ) ) {
+			bbp_add_error( 'wporg_bbp_topic_resolution_invalid', __( '<strong>ERROR</srong>: That is not a valid topic resolution!', 'wporg-forums' ) );
+
+		// Check user permissions.
+		} elseif ( ! $this->user_can_resolve( $user_id, $topic->ID ) ) {
+			bbp_add_error( 'wporg_bbp_topic_resolution_permissions', __( '<strong>ERROR</strong>: You don\t have permission to do this!', 'wporg-forums' ) );
+
+		// Check nonce.
+		} elseif ( ! bbp_verify_nonce_request( 'toggle-topic-resolution_' . $topic->ID ) ) {
+			bbp_add_error( 'wporg_bbp_topic_resolution_nonce', __( '<strong>ERROR</strong>: Are you sure you wanted to do that?', 'wporg-forums' ) );
+		}
+
+		if ( bbp_has_errors() ) {
+			return;
+		}
+
+		// Update the topic resolution.
+		$this->set_topic_resolution( array(
+			'id'         => $topic->ID,
+			'resolution' => $resolution,
+		) );
+
+		bbp_redirect( get_permalink( $topic->ID ) );
 	}
 
 	/**
@@ -307,10 +419,22 @@ class Plugin {
 
 	public function get_topic_resolutions() {
 		return apply_filters( 'wporg_bbp_get_topic_resolutions', array(
-				'no'  => __( 'not resolved', 'wporg-forums' ),
-				'yes' => __( 'resolved', 'wporg-forums' ),
-				'mu'  => __( 'not a support question', 'wporg-forums' ),
+			'no'  => __( 'not resolved', 'wporg-forums' ),
+			'yes' => __( 'resolved', 'wporg-forums' ),
+			'mu'  => __( 'not a support question', 'wporg-forums' ),
 		) );
+	}
+
+	/**
+	 * Is a topic resolution string in the array of possible resolutions?
+	 *
+	 * @param string $resolution The resolution to check
+	 * @return bool True if in the array, false if not
+	 */
+	public function is_valid_topic_resolution( $resolution ) {
+		$resolutions = $this->get_topic_resolutions();
+		$retval = in_array( $resolution, array_keys( $resolutions ) );
+		return apply_filters( 'wporg_bbp_is_valid_topic_resolution', $retval, $resolution );
 	}
 
 	public function get_default_topic_resolution() {
@@ -328,5 +452,26 @@ class Plugin {
 			$retval = $this->get_default_topic_resolution();
 		}
 		return apply_filters( 'wporg_bbp_sanitize_topic_resolution', $retval );
+	}
+
+	/**
+	 * Is a given user is allowed to update the resolution of a topic?
+	 *
+	 * @param int $user_id The user id
+	 * @param int $topic_id The topic id
+	 * @return bool True if allowed, false if not
+	 */
+	public function user_can_resolve( $user_id, $topic_id ) {
+		$topic_id = bbp_get_topic_id();
+		if ( $topic_id ) {
+			$post = get_post( $topic_id );
+		}
+
+		if ( $user_id && $post && ( user_can( $user_id, 'moderate' ) || $user_id == $post->post_author ) ) {
+			$retval = true;
+		} else {
+			$retval = false;
+		}
+		return apply_filters( 'wporg_bbp_user_can_resolve', $retval, $user_id, $topic_id );
 	}
 }
