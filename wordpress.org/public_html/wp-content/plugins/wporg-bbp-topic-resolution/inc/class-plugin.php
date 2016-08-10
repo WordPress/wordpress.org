@@ -245,7 +245,7 @@ class Plugin {
 
 		// Check user permissions.
 		} elseif ( ! $this->user_can_resolve( $user_id, $topic->ID ) ) {
-			bbp_add_error( 'wporg_bbp_topic_resolution_permissions', __( '<strong>ERROR</strong>: You don\t have permission to do this!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_topic_resolution_permissions', __( '<strong>ERROR</strong>: You don\'t have permission to do this!', 'wporg-forums' ) );
 
 		// Check nonce.
 		} elseif ( ! bbp_verify_nonce_request( 'toggle-topic-resolution_' . $topic->ID ) ) {
