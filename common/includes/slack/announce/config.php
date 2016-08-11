@@ -32,7 +32,6 @@ function get_whitelist() {
 		),
 		'core' => array(
 			'drew',
-			'helen',
 			'johnbillion',
 			'mike',
 			'obenland',
@@ -54,7 +53,6 @@ function get_whitelist() {
 			'iseulde',
 		),
 		'core-fields' => array(
-			'helen',
 			'sc0ttkclark',
 		),
 		'core-flow' => array(
@@ -91,8 +89,8 @@ function get_whitelist() {
 			'iamtakashi',
 		),
 		'design' => array(
-			'helen',
 			'hugobaeta',
+			'karmatosed',
 			'melchoyce',
 		),
 		'docs' => array(
