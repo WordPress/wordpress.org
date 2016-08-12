@@ -119,8 +119,10 @@ class Plugins_Info_API {
 		if ( !empty( $fields['bare_contributors'] ) ) {
 			$contribs = $response['contributors'];
 			$response['contributors'] = array();
-			foreach ( $contribs as $user => $data ) {
-				$response['contributors'][ $user ] = $data['profile'];
+			if ( $contribs ) {
+				foreach ( $contribs as $user => $data ) {
+					$response['contributors'][ $user ] = $data['profile'];
+				}
 			}
 		}
 
@@ -158,9 +160,9 @@ class Plugins_Info_API {
 			$response['plugins'][ $i ] = $this->plugin_information( new Plugins_Info_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
 		}
 
-		// Trim fields
+		// Trim fields and cast to object
 		foreach ( $response['plugins'] as $i => $plugin_data ) {
-			$response['plugins'][$i] = $this->remove_unexpected_fields( $plugin_data, $request, 'query_plugins' );
+			$response['plugins'][$i] = (object) $this->remove_unexpected_fields( $plugin_data, $request, 'query_plugins' );
 		}
 
 		$this->output( $response );
