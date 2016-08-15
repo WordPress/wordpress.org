@@ -21,7 +21,7 @@ if ( show_usage_info() ) :
 					<?php
 					$uses = get_uses();
 					$uses_to_show = 5;
-					while ( $uses->have_posts() ) : $uses->the_post()
+					if ( $uses ) : while ( $uses->have_posts() ) : $uses->the_post()
 						?>
 						<li>
 							<span><?php echo esc_attr( get_source_file() ); ?>:</span>
@@ -36,7 +36,7 @@ if ( show_usage_info() ) :
 							);
 							?></a>
 						<a href="#" class="hide-more"><?php _e( 'Hide more uses', 'wporg' ); ?></a>
-					<?php endif; ?>
+					<?php endif; endif; ?>
 				</ul>
 			</article>
 		<?php endif; ?>

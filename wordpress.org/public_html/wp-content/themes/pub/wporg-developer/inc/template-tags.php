@@ -986,7 +986,7 @@ namespace DevHub {
 	 */
 	function post_type_has_usage_info( $post_type = null ) {
 		$post_type             = $post_type ? $post_type : get_post_type();
-		$post_types_with_usage = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' );
+		$post_types_with_usage = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook', 'wp-parser-class' );
 
 		return in_array( $post_type, $post_types_with_usage );
 	}
@@ -1000,7 +1000,7 @@ namespace DevHub {
 	 */
 	function post_type_has_uses_info( $post_type = null ) {
 		$post_type             = $post_type ? $post_type : get_post_type();
-		$post_types_with_uses  = array( 'wp-parser-function', 'wp-parser-method' );
+		$post_types_with_uses  = array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-class' );
 
 		return in_array( $post_type, $post_types_with_uses );
 	}
@@ -1011,8 +1011,19 @@ namespace DevHub {
 	 * @return WP_Query A WP_Query object for the posts the current post uses
 	 */
 	function get_uses() {
+		$post_type = get_post_type();
 
-		if ( 'wp-parser-function' === get_post_type() ) {
+		if ( 'wp-parser-class' === $post_type ) {
+			$extends = get_post_meta( get_the_ID(), '_wp-parser_extends', true );
+			if ( ! $extends ) {
+				return;
+			}
+			$connected = new \WP_Query( array(
+				'post_type' => array( 'wp-parser-class' ),
+				'name'      => $extends,
+			) );
+			return $connected;
+		} elseif ( 'wp-parser-function' === $post_type ) {
 			$connection_types = array( 'functions_to_functions', 'functions_to_methods', 'functions_to_hooks' );
 		} else {
 			$connection_types = array( 'methods_to_functions', 'methods_to_methods', 'methods_to_hooks' );
@@ -1047,6 +1058,15 @@ namespace DevHub {
 
 			case 'wp-parser-hook':
 				$connection_types = array( 'functions_to_hooks', 'methods_to_hooks' );
+				break;
+
+			case 'wp-parser-class':
+				$connected = new \WP_Query( array(
+					'post_type'  => array( 'wp-parser-class' ),
+					'meta_key'   => '_wp-parser_extends',
+					'meta_value' => get_post_field( 'post_name', get_post( $post_id ) ),
+				) );
+				return $connected;	
 				break;
 
 			default:
