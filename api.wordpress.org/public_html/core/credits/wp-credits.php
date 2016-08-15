@@ -40,6 +40,7 @@ abstract class WP_Credits {
 		'4.3' => '2015-04-23 00:00:00',
 		'4.4' => '2015-08-18 00:00:00',
 		'4.5' => '2015-12-09 00:00:00',
+		'4.6' => '2016-04-13 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
