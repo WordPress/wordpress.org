@@ -393,11 +393,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Handles incoming activities for WordCamp.
 		 */
 		private function handle_wordcamp_activity() {
-			$user = get_user_by( 'id', $_POST['user_id'] );
+			$user = $this->get_user( $_POST['user'] );
 			$type = '';
 
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user_id'] );
+				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
 			}
 
 			if ( isset( $_POST['speaker_id'] ) && ! empty( $_POST['speaker_id'] ) ) {
