@@ -1006,15 +1006,17 @@ namespace DevHub {
 	}
 
 	/**
-	 * Retrieve a WP_Query object for the posts that the current post uses
+	 * Retrieves a WP_Query object for the posts that the current post uses.
 	 *
-	 * @return WP_Query A WP_Query object for the posts the current post uses
+	 * @param int|WP_Post|null $post Optional. Post ID or post object. Default is global $post.
+	 * @return WP_Query|null   The WP_Query if the post's post type supports 'uses', null otherwise.
 	 */
-	function get_uses() {
-		$post_type = get_post_type();
+	function get_uses( $post = null ) {
+		$post_id   = get_post_field( 'ID', $post );
+		$post_type = get_post_type( $post );
 
 		if ( 'wp-parser-class' === $post_type ) {
-			$extends = get_post_meta( get_the_ID(), '_wp-parser_extends', true );
+			$extends = get_post_meta( $post_id, '_wp-parser_extends', true );
 			if ( ! $extends ) {
 				return;
 			}
@@ -1033,20 +1035,22 @@ namespace DevHub {
 			'post_type'           => array( 'wp-parser-function', 'wp-parser-method', 'wp-parser-hook' ),
 			'connected_type'      => $connection_types,
 			'connected_direction' => array( 'from', 'from', 'from' ),
-			'connected_items'     => get_the_ID(),
+			'connected_items'     => $post_id,
 			'nopaging'            => true,
 		) );
 
 		return $connected;
 	}
 
-	function get_used_by( $post_id = null ) {
+	/**
+	 * Retrieves a WP_Query object for the posts that use the specified post.
+	 *
+	 * @param int|WP_Post|null $post Optional. Post ID or post object. Default is global $post.
+	 * @return WP_Query|null   The WP_Query if the post's post type supports 'used by', null otherwise.
+	 */
+	function get_used_by( $post = null ) {
 
-		if ( empty( $post_id ) ) {
-			$post_id = get_the_ID();
-		}
-
-		switch ( get_post_type() ) {
+		switch ( get_post_type( $post ) ) {
 
 			case 'wp-parser-function':
 				$connection_types = array( 'functions_to_functions', 'methods_to_functions' );
@@ -1064,9 +1068,9 @@ namespace DevHub {
 				$connected = new \WP_Query( array(
 					'post_type'  => array( 'wp-parser-class' ),
 					'meta_key'   => '_wp-parser_extends',
-					'meta_value' => get_post_field( 'post_name', get_post( $post_id ) ),
+					'meta_value' => get_post_field( 'post_name', $post ),
 				) );
-				return $connected;	
+				return $connected;
 				break;
 
 			default:
@@ -1078,7 +1082,7 @@ namespace DevHub {
 			'post_type'           => array( 'wp-parser-function', 'wp-parser-method' ),
 			'connected_type'      => $connection_types,
 			'connected_direction' => array( 'to', 'to' ),
-			'connected_items'     => $post_id,
+			'connected_items'     => get_post_field( 'ID', $post ),
 			'nopaging'            => true,
 		) );
 
