@@ -288,7 +288,7 @@ function mark_invoices_as_paid( $sent_invoices, $paid_invoices ) {
  *
  * @param int    $site_id
  * @param int    $invoice_id
- * $param string $new_status
+ * @param string $new_status
  */
 function update_invoice_status( $site_id, $invoice_id, $new_status ) {
 	switch_to_blog( $site_id );

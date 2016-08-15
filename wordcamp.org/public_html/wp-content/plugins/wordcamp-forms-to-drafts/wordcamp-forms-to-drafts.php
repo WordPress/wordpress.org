@@ -36,6 +36,11 @@ class WordCamp_Forms_To_Drafts {
 	 */
 	public function force_login_to_view_form( $content ) {
 		global $post;
+
+		if ( ! is_a( $post, 'WP_Post' ) ) {
+			return $content;
+		}
+
 		$forms_that_require_login = array( 'call-for-speakers' );
 		$shortcode_pattern        = '/\[contact-form[\D\S]+\[\/contact-form\]/';
 		$form_id                  = get_post_meta( $post->ID, 'wcfd-key', true );
