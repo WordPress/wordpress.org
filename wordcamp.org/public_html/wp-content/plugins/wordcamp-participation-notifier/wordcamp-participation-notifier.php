@@ -205,11 +205,13 @@ class WordCamp_Participation_Notifier {
 		}
 
 		if ( $user_id ) {
+			$user = get_user_by( 'id', $user_id );  // todo This is a temporary workaround for r3806 until everything can be refactored
+
 			$activity = array(
 				'action'        => 'wporg_handle_activity',
 				'source'        => 'wordcamp',
 				'timestamp'     => strtotime( $post->post_modified_gmt ),
-				'user_id'       => $user_id,
+				'user'          => $user->user_login,
 				'wordcamp_id'   => get_current_blog_id(),
 				'wordcamp_name' => get_wordcamp_name(),
 				'wordcamp_date' => empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'F jS', $wordcamp->meta['Start Date (YYYY-mm-dd)' ][0] ),
