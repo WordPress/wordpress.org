@@ -371,18 +371,19 @@ class Template {
 		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
 
 			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png.
-			$format = 'https://s.w.org/plugins/%s/%s?rev=%s';
+			$format = 'https://i0.wp.com/plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/trunk/%3$s?strip=all';
 		} else {
 
 			// Images in the assets folder - /plugin-name/assets/screenshot-1.png.
-			$format = 'https://ps.w.org/%s/assets/%s?rev=%s';
+			$format = 'https://i0.wp.com/plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/assets/%3$s?strip=all';
+
 		}
 
 		return esc_url( sprintf(
 			$format,
+			$asset['revision'],
 			$plugin,
-			$asset['filename'],
-			$asset['revision']
+			$asset['filename']
 		) );
 	}
 
