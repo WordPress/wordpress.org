@@ -359,7 +359,7 @@ namespace DevHub {
 			// However, if the running WP instance appears to not be a release
 			// version, assume a hardcoded version that is at least valid.
 			if ( false !== strpos( $current_version, '-' ) ) {
-				$current_version = '3.9.1';
+				$current_version = '4.6';
 			}
 		}
 
