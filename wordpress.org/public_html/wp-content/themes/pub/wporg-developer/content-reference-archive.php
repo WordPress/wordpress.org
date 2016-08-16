@@ -21,8 +21,8 @@
 	<?php
 	if ( show_usage_info() ) :
 
-		$used_by = get_used_by()->post_count;
-		$uses    = get_uses()->post_count;
+		$used_by = ( $q = get_used_by() ) ? $q->post_count : 0;
+		$uses    = ( $q = get_uses()    ) ? $q->post_count : 0;
 	?>
 	<div class="meta">
 		<?php printf(
