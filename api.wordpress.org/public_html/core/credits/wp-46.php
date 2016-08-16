@@ -70,6 +70,7 @@ class WP_46_Credits extends WP_Credits {
 					'spacedmonkey' => 'Jonny Harris',
 					'rianrietveld' => 'Rian Rietveld ',
 					'mapk'         => 'Mark Uraine',
+					'mattmiklic'   => 'Matt Miklic',
 				),
 			),
 		);
@@ -186,6 +187,7 @@ class WP_46_Credits extends WP_Credits {
 			'jdgrimes',
 			'jeherve',
 			'jeremyfelt',
+			'jerrysarcastic',
 			'jesin',
 			'jfarthing84',
 			'jipmoors',
