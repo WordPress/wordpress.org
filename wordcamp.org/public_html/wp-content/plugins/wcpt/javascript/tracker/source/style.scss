@@ -1,0 +1,17 @@
+/* Show extra data on large screens */
+.filterable-table .milestone,
+.filterable-table .applicant {
+	display: none;
+}
+
+@media screen and ( min-width: 750px ) {
+	.filterable-table .applicant {
+		display: table-cell;
+	}
+}
+
+@media screen and ( min-width: 850px ) {
+	.filterable-table .milestone {
+		display: table-cell;
+	}
+}

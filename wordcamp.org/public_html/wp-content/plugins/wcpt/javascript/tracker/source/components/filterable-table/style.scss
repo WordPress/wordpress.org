@@ -1,0 +1,22 @@
+/* depends on Core's `list-tables` stylesheet */
+
+/*
+ * HeaderCell
+ */
+.filterable-table th button {
+	border: none;
+	background-color: transparent;
+	font-size: 1.4em;
+}
+
+	.filterable-table th button:hover {
+		cursor: pointer;
+	}
+
+
+/*
+ * Row
+ */
+.filterable-table.striped > tbody > :nth-child( odd ) {
+	background-color: #f9f9f9;
+}

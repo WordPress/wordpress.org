@@ -1,0 +1,11 @@
+/* depends on Core's `dashicons` stylesheet */
+
+.sorting-indicator {
+	position: relative;
+	top: 5px;
+	display: inline-block;
+}
+
+	.sorting-indicator:hover {
+		cursor: pointer;
+	}

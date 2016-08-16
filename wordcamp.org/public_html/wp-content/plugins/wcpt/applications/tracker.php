@@ -1,44 +1,37 @@
 <?php
 
 namespace WordPress_Community\Applications\Tracker;
+use \WordCamp_Loader;
 defined( 'WPINC' ) or die();
 
 const SHORTCODE_SLUG = 'application-tracker';
 
-add_shortcode( SHORTCODE_SLUG, __NAMESPACE__ . '\render_status_shortcode' );
-add_action( 'wp_print_styles', __NAMESPACE__ . '\print_shortcode_styles'  );
+add_shortcode( SHORTCODE_SLUG,    __NAMESPACE__ . '\render_status_shortcode' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts'         );
 
 /**
  * Render the [application-tracker] shortcode.
  */
 function render_status_shortcode() {
-	$statuses   = \WordCamp_Loader::get_post_statuses();
-	$milestones = \WordCamp_Loader::map_statuses_to_milestones();
-	$posts      = get_active_wordcamps( $statuses );
-
-	ob_start();
-
-	require_once( dirname( __DIR__ ) . '/wcpt-wordcamp/wordcamp-admin.php'                             );
-	require(      dirname( __DIR__ ) . '/views/applications/tracker/shortcode-application-tracker.php' );
-
-	return ob_get_clean();
+	return '<div id="wpc-application-tracker">Loading Application Tracker...</div>';
 }
 
 /**
  * Get camps that are active enough to be shown on the tracker
  *
- * @param array $statuses
- *
  * @return array
  */
-function get_active_wordcamps( $statuses ) {
+function get_active_wordcamps() {
+	$wordcamps          = array();
+	$statuses           = WordCamp_Loader::get_post_statuses();
+	$milestones         = WordCamp_Loader::map_statuses_to_milestones();
 	$inactive_timestamp = strtotime( '60 days ago' );
 
 	$shown_statuses = $statuses;
 	unset( $shown_statuses[ WCPT_FINAL_STATUS ] );
 	$shown_statuses = array_keys( $shown_statuses );
 
-	$wordcamps = get_posts( array(
+	$raw_posts = get_posts( array(
 		'post_type'      => WCPT_POST_TYPE_ID,
 		'post_status'    => $shown_statuses,
 		'posts_per_page' => 300,
@@ -46,14 +39,21 @@ function get_active_wordcamps( $statuses ) {
 		'orderby'        => 'post_title',
 	) );
 
-	foreach ( $wordcamps as $key => $wordcamp ) {
-		$wordcamp->last_update_timestamp = get_last_update_timestamp( $wordcamp->ID );
+	foreach ( $raw_posts as $key => $post ) {
+		$last_update_timestamp = get_last_update_timestamp( $post->ID );
 
-		if ( $wordcamp->last_update_timestamp <= $inactive_timestamp ) {
-			unset( $wordcamps[ $key ] );
+		if ( $last_update_timestamp <= $inactive_timestamp ) {
+			continue;
 		}
 
-		$wordcamp->url = filter_var( get_post_meta( $wordcamp->ID, 'URL', true ), FILTER_VALIDATE_URL );
+		$wordcamps[] = array(
+			'city'       => $post->post_title,
+			'cityUrl'    => filter_var( get_post_meta( $post->ID, 'URL', true ), FILTER_VALIDATE_URL ),
+			'applicant'  => get_post_meta( $post->ID, 'Organizer Name', true ),
+			'milestone'  => $milestones[ $post->post_status ],
+			'status'     => $statuses[ $post->post_status ],
+			'lastUpdate' => human_time_diff( time(), $last_update_timestamp ) . ' ago',
+		);
 	}
 
 	return $wordcamps;
@@ -79,40 +79,56 @@ function get_last_update_timestamp( $post_id ) {
 }
 
 /**
- * Print CSS styles for the [application-tracker] shortcode.
+ * Enqueue scripts and styles
  */
-function print_shortcode_styles() {
+function enqueue_scripts() {
 	global $post;
 
-	if ( empty( $post->post_content ) || ! has_shortcode( $post->post_content, SHORTCODE_SLUG ) ) {
+	wp_register_script(
+		'wpc-application-tracker',
+		plugins_url( 'javascript/tracker/build/tracker.min.js', dirname( __FILE__ ) ),
+		array(),
+		1,
+		true
+	);
+
+	wp_register_style(
+		'wpc-application-tracker',
+		plugins_url( 'javascript/tracker/build/tracker.min.css', dirname( __FILE__ ) ),
+		array( 'dashicons', 'list-tables' ),
+		1
+	);
+
+	if ( ! is_a( $post, 'WP_POST' ) || ! has_shortcode( $post->post_content, SHORTCODE_SLUG ) ) {
 		return;
 	}
-	
-	?>
 
-	<style type="text/css">
-		.application-tracker.striped > tbody > :nth-child( odd ) {
-			background-color: #f9f9f9;
-		}
+	wp_enqueue_script( 'wpc-application-tracker' );
 
-		/* Show extra data on large screens */
-		.application-tracker .milestone,
-		.application-tracker .applicant {
-			display: none;
-		}
+	wp_localize_script(
+		'wpc-application-tracker',
+		'wpcApplicationTracker',
+		array(
+			'applications'     => get_active_wordcamps(),
+			'displayColumns'   => get_display_columns(),
+			'initialSortField' => 'city',
+		)
+	);
 
-		@media screen and ( min-width: 750px ) {
-			.application-tracker .applicant {
-				display: table-cell;
-			}
-		}
+	wp_enqueue_style( 'wpc-application-tracker' );
+}
 
-		@media screen and ( min-width: 850px ) {
-			.application-tracker .milestone {
-				display: table-cell;
-			}
-		}
-	</style>
-
-	<?php
+/**
+ * Get the columns headers
+ *
+ * @return array
+ */
+function get_display_columns() {
+	return array(
+		'city'       => 'City',
+		'applicant'  => 'Applicant',
+		'milestone'  => 'Milestone',
+		'status'     => 'Status',
+		'lastUpdate' => 'Updated',
+	);
 }
