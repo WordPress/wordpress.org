@@ -289,6 +289,7 @@ class WP_46_Credits extends WP_Credits {
 			'rockwell15',
 			'rodrigosprimo',
 			'ronalfy',
+			'roseapplemedia',
 			'rosso99',
 			'ruudjoyo',
 			'ryelle',
