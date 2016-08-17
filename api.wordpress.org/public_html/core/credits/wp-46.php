@@ -285,6 +285,7 @@ class WP_46_Credits extends WP_Credits {
 			'rafaelangeline',
 			'rahulsprajapati',
 			'ramiy',
+			'realloc',
 			'rmccue',
 			'rockwell15',
 			'rodrigosprimo',
