@@ -733,6 +733,16 @@ p .button {
   text-shadow: 0 -1px 1px #006799, -1px 0 1px #006799, 0 1px 1px #006799, 1px 0 1px #006799;
 }
 
+.button-primary:visited,
+.download-button:visited,
+.plugin-upload-form .button-primary:visited {
+  background: #0085ba;
+  border-color: #0073aa #006799 #006799;
+  -webkit-box-shadow: 0 1px 0 #006799;
+  box-shadow: 0 1px 0 #006799;
+  color: #fff;
+}
+
 .button-primary.hover, .button-primary:hover, .button-primary.focus, .button-primary:focus,
 .download-button.hover,
 .download-button:hover,
