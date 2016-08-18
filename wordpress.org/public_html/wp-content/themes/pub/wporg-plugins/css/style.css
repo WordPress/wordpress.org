@@ -2499,7 +2499,7 @@ p a:not(.button):hover {
   text-transform: uppercase;
 }
 
-.single .type-plugin .entry-content .plugin-faqs dt:after {
+.single .type-plugin .entry-content .plugin-faqs dt:before {
   content: "\f347";
   float: right;
   font-family: dashicons;
@@ -2507,7 +2507,7 @@ p a:not(.button):hover {
   margin: 0 1rem;
 }
 
-.single .type-plugin .entry-content .plugin-faqs dt.open:after {
+.single .type-plugin .entry-content .plugin-faqs dt.open:before {
   content: "\f343";
 }
 

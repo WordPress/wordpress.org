@@ -31,7 +31,7 @@
 		padding: 1rem 0;
 		text-transform: uppercase;
 
-		&:after {
+		&:before {
 			content: "\f347";
 			float: right;
 			font-family: dashicons;
@@ -39,7 +39,7 @@
 			margin: 0 1rem;
 		}
 
-		&.open:after {
+		&.open:before {
 			content: "\f343";
 		}
 	}
