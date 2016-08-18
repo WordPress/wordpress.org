@@ -316,6 +316,7 @@ class WP_46_Credits extends WP_Credits {
 			'stephenharris',
 			'stevenkword',
 			'stubgo',
+			'stuporglue',
 			'sudar',
 			'svovaf',
 			'swissspidy',
