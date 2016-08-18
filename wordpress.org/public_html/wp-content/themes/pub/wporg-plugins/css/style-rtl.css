@@ -2458,20 +2458,6 @@ p a:not(.button):hover {
   content: "\f343";
 }
 
-.single .type-plugin .entry-content .reviews-link {
-  display: inline-block;
-  font-size: 12.8px;
-  font-size: 0.8rem;
-  margin-top: 8px;
-  margin-top: 0.5rem;
-}
-
-.single .type-plugin .entry-content .reviews-link:after {
-  content: "\f341";
-  font-family: dashicons;
-  vertical-align: text-top;
-}
-
 .single .type-plugin .entry-content .plugin-screenshots {
   list-style-type: none;
   margin: 0;
@@ -2480,6 +2466,64 @@ p a:not(.button):hover {
 
 .single .type-plugin .entry-content .plugin-screenshots figcaption {
   font-style: italic;
+}
+
+.single .type-plugin .entry-content .plugin-faqs h2:first-of-type {
+  font-size: 20px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.16px;
+  letter-spacing: 0.01rem;
+  text-transform: uppercase;
+  border: none;
+  color: #32373c;
+  font-weight: 600;
+  padding: 0;
+  text-transform: inherit;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dl {
+  border-bottom: 1px solid #eee;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dt {
+  border-top: 1px solid #eee;
+  cursor: pointer;
+  font-size: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  letter-spacing: 0.05rem;
+  padding: 16px 0;
+  padding: 1rem 0;
+  text-transform: uppercase;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dt:after {
+  content: "\f347";
+  float: left;
+  font-family: dashicons;
+  margin: 0 16px;
+  margin: 0 1rem;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dt.open:after {
+  content: "\f343";
+}
+
+.single .type-plugin .entry-content .plugin-faqs dd {
+  display: none;
+  margin: 0 0 16px;
+  margin: 0 0 1rem;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dd p {
+  margin: 0;
+}
+
+.single .type-plugin .entry-content .plugin-faqs dd p + p {
+  margin-top: 16px;
+  margin-top: 1rem;
 }
 
 .single .type-plugin .entry-content .plugin-reviews {
@@ -2544,6 +2588,20 @@ p a:not(.button):hover {
   .single .type-plugin .entry-content .plugin-reviews .review-author {
     line-height: 1;
   }
+}
+
+.single .type-plugin .entry-content .reviews-link {
+  display: inline-block;
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  margin-top: 0.5rem;
+}
+
+.single .type-plugin .entry-content .reviews-link:after {
+  content: "\f341";
+  font-family: dashicons;
+  vertical-align: text-top;
 }
 
 .single .type-plugin .entry-content .plugin-developers {

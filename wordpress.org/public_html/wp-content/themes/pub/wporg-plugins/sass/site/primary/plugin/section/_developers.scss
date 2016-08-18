@@ -1,0 +1,22 @@
+.plugin-developers {
+	list-style-type: none;
+	margin: 0;
+
+	li {
+		display: inline-block;
+		margin: 0 4% 16px 0;
+		margin: 0 4% 1rem 0;
+		vertical-align: top;
+		width: 48%;
+
+		&:nth-of-type( even ) {
+			margin-right: 0;
+		}
+	}
+}
+
+.avatar {
+	border-radius: 50%;
+	margin-right: 10px;
+	vertical-align: middle;
+}

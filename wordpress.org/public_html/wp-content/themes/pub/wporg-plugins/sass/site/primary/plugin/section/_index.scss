@@ -1,0 +1,76 @@
+@import "../../../../variables-site/variables-site";
+
+.read-more {
+	border-bottom: 2px solid #eee;
+	max-height: 200px;
+	overflow: hidden;
+	padding-bottom: 1px;
+
+	&#reviews {
+		max-height: none;
+		overflow: auto;
+	}
+
+	h1, h2, h3 {
+		@include font-size( ms-unitless( ms(0) ) );
+		font-weight: 600;
+		letter-spacing: 0.16px;
+		letter-spacing: 0.01rem;
+		text-transform: uppercase;
+
+		&:nth-child(2) {
+			margin-top: 0;
+		}
+	}
+
+	h4, h5, h6 {
+		@include font-size( ms-unitless( ms(-2) ) );
+		font-weight: 600;
+		letter-spacing: 0.8px;
+		letter-spacing: 0.05rem;
+		text-transform: uppercase;
+
+		&:nth-child(2) {
+			margin-top: 0;
+		}
+	}
+
+	h2:first-of-type {
+		@include font-size( ms-unitless( ms(2) ) );
+
+		// Override wp4.css.
+		border: none;
+		color: $color__text-main;
+		font-weight: 600;
+		padding: 0;
+		text-transform: inherit;
+	}
+
+	p:first-child {
+		margin-top: 0;
+	}
+
+	&.toggled {
+		max-height: none;
+	}
+}
+
+.section-toggle {
+	color: $color__link;
+	cursor: pointer;
+	@include font-size( ms-unitless( ms(-2) ) );
+	margin-top: 8px;
+	margin-top: 0.5rem;
+	position: relative;
+
+	&:after {
+		content: "\f347";
+		font-family: dashicons;
+		padding-left: 5px;
+		vertical-align: text-top;
+	}
+}
+
+.toggled + .section-toggle:after {
+	content: "\f343";
+}

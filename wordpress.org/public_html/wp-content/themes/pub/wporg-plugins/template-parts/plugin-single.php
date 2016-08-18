@@ -11,6 +11,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+global $section, $section_slug, $section_content;
 
 $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 
@@ -78,20 +79,10 @@ $widget_args = array(
 
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
-		?>
 
-			<div id="<?php echo esc_attr( $section_slug ); ?>" class="read-more" aria-expanded="false">
-				<h2><?php echo $section['title']; ?></h2>
-				<?php echo $section_content; ?>
-			</div>
-				<?php if ( 'reviews' === $section_slug ) : ?>
-				<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . get_post()->post_name . '/' ); ?>">
-					<?php printf( __( 'Read all %s reviews', 'wporg-plugins' ), array_sum( get_post_meta( get_the_ID(), 'ratings', true ) ) ); ?>
-				</a>
-				<?php else : ?>
-			<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section_slug ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
-				<?php endif; ?>
-		<?php endforeach; ?>
+				get_template_part( 'template-parts/section', $section_slug );
+			endforeach;
+		?>
 	</div><!-- .entry-content -->
 
 	<div class="entry-meta">

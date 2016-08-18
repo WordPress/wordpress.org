@@ -1,0 +1,80 @@
+@import "../../../../variables-site/variables-site";
+
+.plugin-reviews {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	.plugin-review + .plugin-review {
+		margin: 32px 0 16px;
+		margin: 2rem 0 1rem;
+	}
+
+	.review-avatar {
+		display: none;
+	}
+
+	.review,
+	.wporg-ratings,
+	.review-author {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.review-header {
+		margin: 0 0 8px;
+		margin: 0 0 0.5rem;
+	}
+
+	.review-title {
+		@include font-size( ms-unitless( ms(0) ) );
+		font-weight: 600;
+		letter-spacing: 0.16px;
+		letter-spacing: 0.01rem;
+		margin: 0 0 8px;
+		margin: 0 0 0.5rem;
+		text-transform: inherit;
+	}
+
+	.review-author {
+		line-height: 1.25;
+		margin-left: 10px;
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.review-avatar {
+			display: inline-block;
+			vertical-align: top;
+
+			.avatar {
+				margin-right: 16px;
+				margin-right: 1rem;
+			}
+		}
+
+		.review {
+			width: calc(100% - 60px - 1rem);
+		}
+
+		.review-header {
+			margin: 0;
+		}
+
+		.review-author {
+			line-height: 1;
+		}
+	}
+}
+
+.reviews-link {
+	display: inline-block;
+	@include font-size( ms-unitless( ms(-2) ) );
+	margin-top: 8px;
+	margin-top: 0.5rem;
+
+	&:after {
+		content: "\f345";
+		font-family: dashicons;
+		vertical-align: text-top;
+	}
+}

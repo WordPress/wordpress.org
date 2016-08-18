@@ -197,6 +197,82 @@ function hreflang_link_attributes() {
 add_action( 'wp_head', __NAMESPACE__ . '\hreflang_link_attributes' );
 
 /**
+ * Temporary FAQ parser until we have all readmes re-imported.
+ *
+ * @param $content
+ * @param $section_slug
+ *
+ * @return string
+ */
+function temporary_faq_parser( $content, $section_slug ) {
+	if ( 'faq' !== $section_slug ) {
+		return $content;
+	}
+
+	if ( strpos( $content, '</dl>' ) ) {
+		return $content;
+	}
+
+	$lines      = explode( "\n", $content );
+	$definition = false;
+
+	$content = "<dl>\n";
+	while ( ( $line = array_shift( $lines ) ) !== null ) {
+		$trimmed = trim( $line );
+		if ( empty( $trimmed ) ) {
+			continue;
+		}
+
+		if ( 0 === strpos( $trimmed, '<h4>' ) ) {
+			if ( $definition ) {
+				$content   .= "</dd>\n";
+				$definition = false;
+			}
+
+			$content .= '<dt aria-expanded="false">' . strip_tags( $line ) . "</dt>\n";
+			continue;
+		}
+
+		if ( ! $definition ) {
+			$content   .= '<dd>' . $line;
+			$definition = true;
+			continue;
+		}
+
+		$content .= "\n" . $line;
+	}
+
+	$content .= "</dd>\n</dl>";
+
+	if ( ! strpos( $content, '</dt>' ) ) {
+		$content = wp_kses( $content, array(
+			'a'          => array(
+				'href'  => true,
+				'title' => true,
+				'rel'   => true,
+			),
+			'blockquote' => array(
+				'cite' => true
+			),
+			'br'         => true,
+			'p'          => true,
+			'code'       => true,
+			'pre'        => true,
+			'em'         => true,
+			'strong'     => true,
+			'ul'         => true,
+			'ol'         => true,
+			'li'         => true,
+			'h3'         => true,
+			'h4'         => true,
+		) );
+	}
+
+	return $content;
+}
+add_filter( 'the_content', __NAMESPACE__ . '\temporary_faq_parser', 10, 2 );
+
+/**
  * Bold archive terms are made here.
  *
  * @param string $term The archive term to bold.
