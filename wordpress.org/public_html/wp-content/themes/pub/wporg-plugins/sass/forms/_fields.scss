@@ -197,7 +197,7 @@ input.readonly,
 input[readonly],
 textarea.readonly,
 textarea[readonly] {
-	background-color: #eee;
+	background-color: $color__background-pre;
 }
 
 :-moz-placeholder {

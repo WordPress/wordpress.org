@@ -410,6 +410,24 @@ blockquote:before, blockquote:after, q:before, q:after {
   content: "";
 }
 
+blockquote {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-right: 2px solid #eee;
+  color: #82878c;
+  font-style: italic;
+  margin: 16px 0;
+  margin: 1rem 0;
+  padding-right: 16px;
+  padding-right: 1rem;
+}
+
+blockquote cite {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
 hr {
   background-color: #eee;
   border: 0;
@@ -2889,7 +2907,7 @@ p a:not(.button):hover {
 }
 
 .pagination .page-numbers {
-  border: 1px solid #EEE;
+  border: 1px solid #eee;
   -webkit-border-radius: 2px;
   border-radius: 2px;
   color: #0073aa;
@@ -2904,7 +2922,7 @@ p a:not(.button):hover {
 }
 
 .pagination .page-numbers.current, .pagination .page-numbers:hover {
-  background: #EEE;
+  background: #eee;
   color: #32373c;
 }
 

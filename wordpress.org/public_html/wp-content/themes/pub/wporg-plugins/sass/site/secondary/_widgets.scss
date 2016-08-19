@@ -157,7 +157,7 @@
 	}
 
 	li {
-		border-top: 1px solid #eee;
+		border-top: 1px solid $color__border;
 		padding: 8px 0;
 		padding: 0.5rem 0;
 
@@ -173,7 +173,7 @@
 	}
 
 	[rel="tag"] {
-		background: #eee;
+		background: $color__background-pre;
 		border-radius: 2px;
 		color: #000;
 		display: inline-block;

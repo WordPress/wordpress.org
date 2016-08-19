@@ -17,11 +17,11 @@
 	}
 
 	dl {
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid $color__border;
 	}
 
 	dt {
-		border-top: 1px solid #eee;
+		border-top: 1px solid $color__border;
 		cursor: pointer;
 		@include font-size( ms-unitless( ms(0) ) );
 		font-weight: 600;

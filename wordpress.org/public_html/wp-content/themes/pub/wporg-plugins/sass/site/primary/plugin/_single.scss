@@ -25,7 +25,7 @@
 
 	.plugin-header {
 		@extend .clear;
-		border-bottom: 2px solid #eee;
+		border-bottom: 2px solid $color__border;
 		padding: ms(1) ms(4);
 
 		.plugin-thumbnail {

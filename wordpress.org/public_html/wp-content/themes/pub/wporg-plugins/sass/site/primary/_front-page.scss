@@ -1,7 +1,7 @@
 @import "../../variables-site/variables-site";
 
 .plugin-section {
-	border-bottom: 2px solid #eee;
+	border-bottom: 2px solid $color__border;
 	margin: 0 auto ms(14);
 	max-width: $size__site-main;
 	padding-bottom: ms(10);

@@ -164,6 +164,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('default', ['jshint', 'sass', 'rtlcss:dynamic']);
-	grunt.registerTask('build', ['webpack:build']);
-
+	grunt.registerTask('css', ['sass', 'postcss', 'rtlcss:dynamic']);
+	grunt.registerTask('build', ['webpack:build', 'css']);
 };

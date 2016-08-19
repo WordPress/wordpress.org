@@ -1,7 +1,7 @@
 @import "../../../../variables-site/variables-site";
 
 .read-more {
-	border-bottom: 2px solid #eee;
+	border-bottom: 2px solid $color__border;
 	max-height: 200px;
 	overflow: hidden;
 	padding-bottom: 1px;
