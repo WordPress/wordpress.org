@@ -56,7 +56,9 @@ class Tools {
 			WHERE
 				ratings.object_type = 'plugin' AND
 				ratings.object_slug = %s AND
-				posts.post_position = 1
+				posts.post_position = 1 AND
+				topics.topic_status = 0 AND
+				topics.topic_sticky = 0
 			ORDER BY ratings.review_id DESC LIMIT 2", $plugin_slug ) );
 
 			wp_cache_set( "{$plugin_slug}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
