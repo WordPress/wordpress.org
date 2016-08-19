@@ -57,12 +57,19 @@ function wcorg_connect_new_site( $blog_id, $user_id ) {
 		return;
 	}
 
+	error_log( sprintf( 'Connecting new site %d for user %d.', $blog_id, $user_id ) );
+
 	$network         = \Jetpack_Network::init();
 	$current_user_id = get_current_user_id();
 
 	wp_set_current_user( $user_id );
-	$network->do_subsiteregister( $blog_id );
+	$result = $network->do_subsiteregister( $blog_id );
+	$active = \Jetpack::is_active();
 	wp_set_current_user( $current_user_id );
 
-	error_log( sprintf( 'Connecting new site %d for user %d.', $blog_id, $user_id ) );
+	if ( is_wp_error( $result ) ) {
+		error_log( sprintf( 'Could not connect site %d for user %d: %s', $blog_id, $user_id, $result->get_error_message() ) );
+	}
+
+	error_log( sprintf( 'Connecting new site %d complete, is_active: %s.', $blog_id, var_export( $active, true ) ) );
 }
