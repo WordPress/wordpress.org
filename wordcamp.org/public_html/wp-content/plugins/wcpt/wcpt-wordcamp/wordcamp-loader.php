@@ -258,6 +258,26 @@ class WordCamp_Loader {
 	}
 
 	/**
+	 * Get the statuses for camps that are currently active
+	 *
+	 * @return array
+	 */
+	public static function get_active_wordcamp_statuses() {
+		return array_merge(
+			array(
+				'wcpt-approved-pre-pl',
+				'wcpt-needs-email',
+				'wcpt-needs-site',
+				'wcpt-needs-polldaddy',
+				'wcpt-needs-mentor',
+				'wcpt-needs-pre-plann',
+			),
+			\WordCamp_Loader::get_pre_planning_post_statuses(),
+			array( 'wcpt-scheduled' )
+		);
+	}
+
+	/**
 	 * Get the milestones that correspond to each status
 	 *
 	 * @return array
