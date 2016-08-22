@@ -46,10 +46,17 @@ class WordCamp_Coming_Soon_Page {
 
 		$this->dequeue_all_stylesheets();
 
+		wp_register_style(
+			'open-sans',
+			'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600',
+			array(),
+			null
+		);
+
 		wp_enqueue_style(
 			'wccsp-template',
 			plugins_url( '/css/template-coming-soon.css', __DIR__ ),
-			array(),
+			array( 'open-sans' ),
 			1
 		);
 	}
