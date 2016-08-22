@@ -50,35 +50,26 @@ class WCCSP_Settings {
 	}
 
 	/**
-	 * Get the URL for the Coming Soon section in the Customizer
-	 *
-	 * @return string
-	 */
-	public function get_customizer_section_url() {
-		$url = add_query_arg(
-			array(
-				'autofocus[section]' => 'wccsp_live_preview',
-				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
-			),
-			admin_url( 'customize.php' )
-		);
-
-		return $url;
-	}
-
-	/**
 	 * Add a link to the Settings menu
 	 *
 	 * Even though this lives in the Customizer, having a link in the regular admin menus helps with
 	 * discoverability.
 	 */
 	public function register_settings_pages() {
+		$menu_slug = add_query_arg(
+			array(
+				'autofocus[section]' => 'wccsp_live_preview',
+				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
+			),
+			'/customize.php'
+		);
+
 		add_submenu_page(
 			'options-general.php',
 			__( 'Coming Soon', 'wordcamporg' ),
 			__( 'Coming Soon', 'wordcamporg' ),
 			self::REQUIRED_CAPABILITY,
-			$this->get_customizer_section_url()
+			$menu_slug
 		);
 	}
 
