@@ -57,7 +57,7 @@ class WordCamp_Coming_Soon_Page {
 			'wccsp-template',
 			plugins_url( '/css/template-coming-soon.css', __DIR__ ),
 			array( 'open-sans' ),
-			1
+			2
 		);
 	}
 
