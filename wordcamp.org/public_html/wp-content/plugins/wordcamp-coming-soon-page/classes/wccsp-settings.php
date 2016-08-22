@@ -34,7 +34,7 @@ class WCCSP_Settings {
 	public function get_settings() {
 		$defaults = array(
 			'enabled'                    => 'off',        // so that sites created before the plugin was deployed won't display the home page when the plugin is activated
-			'body_background_color'      => '#0073aa',
+			'body_background_color'      => '#0073AA',
 			'image_id'                   => 0,
 			'background_id'              => 0,
 			'container_background_color' => '#FFFFFF', // deprecated

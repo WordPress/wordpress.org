@@ -130,12 +130,6 @@ label {
 	display: block;
 }
 
-	label span {
-		margin-left: 8px;
-		text-transform: uppercase;
-		font-size: 16px;
-	}
-
 .jetpack_subscription_widget {
 }
 
@@ -184,9 +178,12 @@ label {
 		margin: 0 0 50px;
 	}
 
-	.wccsp-contact input[type="text"],
-	.wccsp-contact input[type="email"],
-	.wccsp-contact textarea {
+	.wccsp-contact .contact-form input[type="text"],
+	.wccsp-contact .contact-form input[type="email"],
+	.wccsp-contact .contact-form textarea {
+		margin-bottom: 0;
+		width: 100%;
+		max-width: 100%;
 		border: 1px solid #cbcdce;
 	}
 
@@ -194,11 +191,22 @@ label {
 		margin-bottom: 40px;
 	}
 
-	.wccsp-contact label {
+	.wccsp-contact .contact-form label {
 		margin-bottom: 10px;
+		font-weight: normal;
 	}
 
-	.wccsp-contact input[type="submit"] {
+	.wccsp-contact .contact-form label span {
+		margin-left: 8px;
+		text-transform: uppercase;
+		font-size: 16px;
+	}
+
+	.wccsp-contact .contact-submit {
+		text-align: right;
+	}
+
+	.wccsp-contact .contact-form input[type="submit"] {
 		padding: 5px 30px;
 		width: auto;
 	}
@@ -223,3 +231,8 @@ label {
 	.wccsp-footer a:focus {
 		text-decoration: underline;
 	}
+
+/* Hide Jetpack's Infinite Scroll element */
+#infinite-footer {
+	display: none !important;
+}
