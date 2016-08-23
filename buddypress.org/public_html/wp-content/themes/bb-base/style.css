@@ -961,6 +961,7 @@ body.reply-edit .bbp-reply-form code {
 #bbpress-forums div.bbp-topic-content pre,
 #bbpress-forums div.bbp-reply-content pre {
 	background-color: #f0f0f0;
+	max-height: 40em;
 }
 
 body.topic-edit #bbpress-forums fieldset legend,
