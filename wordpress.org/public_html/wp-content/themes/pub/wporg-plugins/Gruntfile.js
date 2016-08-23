@@ -36,6 +36,7 @@ module.exports = function( grunt ) {
 		},
 		postcss: {
 			options: {
+				map: true,
 				processors: [
 					require('autoprefixer')({
 						browsers: [
@@ -52,9 +53,7 @@ module.exports = function( grunt ) {
 				]
 			},
 			dist: {
-				files: {
-					'css/style.css': 'css/style.css'
-				}
+				src: 'css/style.css'
 			}
 		},
 		jshint: {
@@ -67,6 +66,7 @@ module.exports = function( grunt ) {
 		},
 		sass: {
 			options: {
+				sourceMap: true,
 				outputStyle: 'expanded'
 			},
 			dist: {
@@ -143,17 +143,8 @@ module.exports = function( grunt ) {
 			},
 			css: {
 				files: ['**/*.scss'],
-				tasks: ['sass']
-			},
-			rtl: {
-				files: ['**/style.css'],
-				tasks: ['postcss', 'rtlcss:dynamic']
-			},
-			livereload: {
-				options: { livereload: true },
-				files: [ 'css/style.css' ]
+				tasks: ['sass', 'postcss', 'rtlcss:dynamic']
 			}
-
 		}
 	});
 
