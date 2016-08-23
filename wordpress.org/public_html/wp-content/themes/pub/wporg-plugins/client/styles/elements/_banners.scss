@@ -1,0 +1,14 @@
+@import "../mixins/mixins-master";
+@import "../variables-site/variables-site";
+
+.locale-banner {
+	background: $color__green;
+	font-size: ms( 0 );
+	padding: 0.5rem;
+	text-align: center;
+
+	@media ( min-width: 67rem ) {
+		margin: 1rem auto 0;
+		max-width: $size__site-main;
+	}
+}

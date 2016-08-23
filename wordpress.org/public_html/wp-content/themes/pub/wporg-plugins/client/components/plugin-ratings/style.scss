@@ -1,0 +1,15 @@
+.plugin-rating {
+	line-height: 1;
+	margin: 0 10px 8px 0;
+
+	.wporg-ratings {
+		display: inline-block;
+		margin-right: 5px;
+	}
+
+	.rating-count {
+		color: #999;
+		font-size: ms( -2 );
+		top: -1px;
+	}
+}

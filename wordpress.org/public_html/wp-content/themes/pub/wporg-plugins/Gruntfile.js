@@ -49,7 +49,8 @@ module.exports = function( grunt ) {
 							'Safari >= 6.0'
 						],
 						cascade: false
-					})
+					}),
+					require('pixrem')
 				]
 			},
 			dist: {
@@ -60,6 +61,7 @@ module.exports = function( grunt ) {
 			files: [
 				'Gruntfile.js',
 				'js/**/*.js',
+				'client/**/*.js',
 				'!js/theme.js'
 			],
 			options: grunt.file.readJSON('.jshintrc')
@@ -71,9 +73,15 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				files: {
-					'css/style.css': 'sass/style.scss'
+					'css/style.css': 'client/style.scss'
 				}
 			}
+		},
+		sass_globbing: {
+			my_target: {
+				files: { 'client/styles/_components.scss': 'client/components/**/*.scss' },
+			},
+			options: { signature: false }
 		},
 		rtlcss: {
 			options: {
@@ -142,8 +150,8 @@ module.exports = function( grunt ) {
 				tasks: ['jshint']
 			},
 			css: {
-				files: ['**/*.scss'],
-				tasks: ['sass', 'postcss', 'rtlcss:dynamic']
+				files: ['**/*.scss', 'client/components/**/**.scss'],
+				tasks: ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']
 			}
 		}
 	});
@@ -153,8 +161,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-webpack');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-sass-globbing');
 
-	grunt.registerTask('default', ['jshint', 'sass', 'rtlcss:dynamic']);
-	grunt.registerTask('css', ['sass', 'postcss', 'rtlcss:dynamic']);
+	grunt.registerTask('default', ['jshint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);
+	grunt.registerTask('css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
 	grunt.registerTask('build', ['webpack:build', 'css']);
 };

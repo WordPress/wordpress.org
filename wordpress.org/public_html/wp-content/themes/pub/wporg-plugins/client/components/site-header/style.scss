@@ -1,0 +1,20 @@
+.site-header {
+	background: $color__wp-blue;
+	padding: 1rem 0;
+	position: relative;
+
+	.site-branding {
+		margin: 0 auto;
+		max-width: $size__site-main;
+		padding: 0 ms(4);
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding: 0 10px;
+		}
+	}
+
+	&.home {
+		padding: ms(4) ms(1);
+		text-align: center;
+	}
+}

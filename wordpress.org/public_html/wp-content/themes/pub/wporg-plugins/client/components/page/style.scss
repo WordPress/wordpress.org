@@ -1,0 +1,51 @@
+.page {
+	.entry-header {
+		margin-top: 2rem;
+
+		.entry-title {
+			font-size: ms( 4 );
+			font-weight: 400;
+			margin: 0 auto;
+			max-width: ms(32);
+
+			@media screen and ( min-width: $ms-breakpoint ) {
+				padding: 0 2rem;
+			}
+		}
+	}
+
+	.entry-content {
+		h2 {
+			font-size: ms( 4 );
+			font-weight: 400;
+		}
+
+		h3 {
+			font-size: ms( 0 );
+			font-weight: 600;
+			letter-spacing: 0.01rem;
+			text-transform: uppercase;
+		}
+
+		section {
+			padding: 2rem 0;
+
+			.container {
+				margin: 0 auto;
+				max-width: ms(32);
+
+				@media screen and ( min-width: $ms-breakpoint ) {
+					padding: 0 2rem;
+				}
+			}
+
+			&:first-of-type {
+				padding-top: 0;
+			}
+
+			& + section {
+				border-top: 2px solid $color__background-hr;
+			}
+		}
+	}
+}

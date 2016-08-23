@@ -4,7 +4,7 @@ const webpack = require( 'webpack' );
 
 module.exports = {
 	cache: true,
-	entry: [ './js/client/index.jsx' ],
+	entry: [ './client/index.jsx' ],
 	output: {
 		path: __dirname + '/js',
 		filename: 'theme.js'
@@ -23,7 +23,7 @@ module.exports = {
 	resolve: {
 		extensions: ['', '.js', '.jsx'],
 		root: [
-			path.resolve('./js/client')
+			path.resolve('./client')
 		]
 	},
 	// stats: false disables the stats output

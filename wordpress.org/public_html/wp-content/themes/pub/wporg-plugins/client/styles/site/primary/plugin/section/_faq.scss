@@ -1,0 +1,54 @@
+@import "../../../../variables-site/variables-site";
+
+.plugin-faqs {
+	h2:first-of-type {
+		font-size: ms( 2 );
+		font-weight: 600;
+		letter-spacing: 0.01rem;
+		text-transform: uppercase;
+
+		// Override wp4.css.
+		border: none;
+		color: $color__text-main;
+		padding: 0;
+		text-transform: inherit;
+	}
+
+	dl {
+		border-bottom: 1px solid $color__border;
+	}
+
+	dt {
+		border-top: 1px solid $color__border;
+		cursor: pointer;
+		font-size: ms( 0 );
+		font-weight: 600;
+		letter-spacing: 0.05rem;
+		padding: 1rem 0;
+		text-transform: uppercase;
+
+		&:before {
+			content: "\f347";
+			float: right;
+			font-family: dashicons;
+			margin: 0 1rem;
+		}
+
+		&.open:before {
+			content: "\f343";
+		}
+	}
+
+	dd {
+		display: none;
+		margin: 0 0 1rem;
+
+		& p {
+			margin: 0;
+		}
+
+		& p + p {
+			margin-top: 1rem;
+		}
+	}
+}

@@ -1,0 +1,182 @@
+@import "../../../variables-site/variables-site";
+
+.single .type-plugin {
+	@extend .clear;
+
+	.plugin-notice {
+		margin-top: 0;
+	}
+
+	.plugin-banner {
+		background-position: 50% 50%;
+		background-size: 100%;
+		display: inline-block;
+		font-size: 0;
+		line-height: 0;
+		margin: 0 auto ms(1);
+		padding-top: 32.38342%; /* 250px / 722px */
+		vertical-align: middle;
+		width: 100%;
+
+		@media screen and ( min-width: 60em ) {
+			margin-top: ms(4);
+		}
+	}
+
+	.plugin-header {
+		@extend .clear;
+		border-bottom: 2px solid $color__border;
+		padding: ms(1) ms(4);
+
+		.plugin-thumbnail {
+			display: none;
+			float: left;
+			height: 96px;
+			margin-right: 1rem;
+			width: 96px;
+
+			@media screen and ( min-width: 26em ) {
+				display: block;
+			}
+
+			.plugin-icon {
+				background-size: contain !important;
+				height: 96px !important;
+				width: 96px !important;
+			}
+
+		}
+
+		.plugin-actions {
+			float: right;
+		}
+
+		@keyframes favme-anime {
+			0% {
+				opacity: 1;
+				font-size: ms(0);
+				-webkit-text-stroke-color: transparent;
+			}
+			25% {
+				opacity: 0.6;
+				color: #fff;
+				font-size: ms(-2);
+				-webkit-text-stroke-width: 1px;
+				-webkit-text-stroke-color: #dc3232;
+			}
+			75% {
+				opacity: 0.6;
+				color: #fff;
+				font-size: ms(3);
+				-webkit-text-stroke-width: 1px;
+				-webkit-text-stroke-color: #dc3232;
+			}
+			100% {
+				opacity: 1;
+				font-size: ms(2);
+				-webkit-text-stroke-color: transparent;
+			}
+		}
+
+		@keyframes favme-hover {
+			from {
+				font-size: ms( 3 );
+			}
+			80% {
+				font-size: ms( 2 );
+			}
+		}
+
+		.plugin-favorite {
+			display: inline-block;
+			height: 36px;
+			text-align: center;
+			width: 36px;
+
+			.plugin-favorite-heart {
+				align-items: center;
+				color: #cbcdce;
+				display: flex;
+				font-size: ms( 2 );
+				height: 100%;
+				justify-content: center;
+				line-height: 1;
+				transition: all .2s ease;
+
+				&.favorited {
+					color: #dc3232;
+				}
+
+				&:hover {
+					animation: favme-hover .3s infinite alternate;
+				}
+
+				&:hover,
+				&:focus {
+					text-decoration: none;
+				}
+
+				&:after {
+					content: "\f487";
+					font-family: dashicons;
+					vertical-align: top;
+				}
+
+				&.is-animating {
+					animation: favme-anime .3s;
+				}
+			}
+
+		}
+
+		.plugin-title {
+			clear: none;
+			font-size: ms( 4 );
+			font-weight: 400;
+			margin: 0;
+		}
+
+		.byline {
+			color: #78848f;
+		}
+	}
+
+	.plugin-banner + .plugin-header {
+		padding-top: 0;
+	}
+
+	.entry-content,
+	.entry-meta {
+		padding: 0 ms(4);
+	}
+
+	.entry-content {
+		max-width: 48rem;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			float: left;
+			padding: 0;
+			width: 65%;
+		}
+
+		@import 'section/index';
+		@import 'section/screenshots';
+		@import 'section/faq';
+		@import 'section/reviews';
+		@import 'section/developers';
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.plugin-header,
+		.entry-content,
+		.entry-meta {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+		.entry-meta {
+			float: right;
+			width: 30%;
+		}
+	}
+}

@@ -1,0 +1,8 @@
+[class*='dashicons-star-'] {
+	color: #ffb900;
+}
+
+// Flip the half star for rating.
+.rtl .dashicons-star-half {
+	transform: rotateY(180deg);
+}

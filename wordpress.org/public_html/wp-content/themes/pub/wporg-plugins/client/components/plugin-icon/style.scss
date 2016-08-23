@@ -1,0 +1,14 @@
+.entry-thumbnail {
+	display: none;
+	max-width: 128px;
+
+	@media screen and ( min-width: 21em ) {
+			display: inline-block;
+			margin: 0 4% 0 0;
+			vertical-align: top;
+
+			a {
+				display: block;
+			}
+	}
+}
