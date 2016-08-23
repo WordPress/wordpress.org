@@ -765,13 +765,38 @@ namespace DevHub {
 		// Since data stored in meta.
 		$since_meta = get_post_meta( $post_id, '_wp-parser_tags', true );
 
+		$since_tags = wp_filter_object_list( $since_meta, array( 'name' => 'since' ) );
+		$deprecated = wp_filter_object_list( $since_meta, array( 'name' => 'deprecated' ) );
+
+		// If deprecated, add the since version to the term and meta lists.
+		if ( $deprecated ) {
+			$deprecated = array_shift( $deprecated );
+
+			if ( $term = get_term_by( 'name', $deprecated['content'], 'wp-parser-since' ) ) {
+				// Terms.
+				$since_terms[] = $term;
+
+				// Meta.
+				$since_tags[] = $deprecated;
+			}
+		}
+
 		$data = array();
 
 		// Pair the term data with meta data.
 		foreach ( $since_terms as $since_term ) {
-			foreach ( $since_meta as $meta ) {
+			foreach ( $since_tags as $meta ) {
 				if ( is_array( $meta ) && $since_term->name == $meta['content'] ) {
-					$description = empty( $meta['description'] ) ? '' : '<span class="since-description">' . \DevHub_Formatting::format_param_description( $meta['description'] ) . '</span>';
+					// Handle deprecation notice if deprecated.
+					if ( empty( $meta['description'] ) ) {
+						if ( $deprecated ) {
+							$description = get_deprecated( $post_id, false );
+						} else {
+							$description = '';
+						}
+					} else {
+						$description = '<span class="since-description">' . \DevHub_Formatting::format_param_description( $meta['description'] ) . '</span>';
+					}
 
 					$data[ $since_term->name ] = array(
 						'version'     => $since_term->name,
@@ -781,6 +806,7 @@ namespace DevHub {
 				}
 			}
 		}
+
 		return $data;
 	}
 
@@ -819,11 +845,12 @@ namespace DevHub {
 	/**
 	 * Retrieve deprecated notice.
 	 *
-	 * @param int $post_id
-	 *
-	 * @return string
+	 * @param int  $post_id   Optional. Post ID. Default is the ID of the global `$post`.
+	 * @param bool $formatted Optional. Whether to format the deprecation message. Default true.
+	 * @return string Deprecated notice. If `$formatted` is true, will be output in markup
+	 *                for a callout box.
 	 */
-	function get_deprecated( $post_id = null ) {
+	function get_deprecated( $post_id = null, $formatted = true ) {
 		if ( ! $post_id ) {
 			$post_id = get_the_ID();
 		}
@@ -875,15 +902,19 @@ namespace DevHub {
 			$deprecation_info
 		);
 
-		// Use the 'warning' callout box if it's available. Otherwise, fall back to a theme-supported div class.
-		if ( class_exists( 'WPorg_Handbook_Callout_Boxes' ) ) {
-			$callout = new \WPorg_Handbook_Callout_Boxes();
-			$message = $callout->warning_shortcode( array(), $contents );
+		if ( true === $formatted ) {
+			// Use the 'warning' callout box if it's available. Otherwise, fall back to a theme-supported div class.
+			if ( class_exists( 'WPorg_Handbook_Callout_Boxes' ) ) {
+				$callout = new \WPorg_Handbook_Callout_Boxes();
+				$message = $callout->warning_shortcode( array(), $contents );
+			} else {
+				$message  = '<div class="deprecated">';
+				/** This filter is documented in wp-includes/post-template.php */
+				$message .= apply_filters( 'the_content', $contents );
+				$message .= '</div>';
+			}
 		} else {
-			$message  = '<div class="deprecated">';
-			/** This filter is documented in wp-includes/post-template.php */
-			$message .= apply_filters( 'the_content', $contents );
-			$message .= '</div>';
+			$message = $contents;
 		}
 
 		return $message;
