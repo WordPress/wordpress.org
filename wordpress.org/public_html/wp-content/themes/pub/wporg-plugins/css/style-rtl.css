@@ -1217,6 +1217,138 @@ fieldset label {
   }
 }
 
+.search-form {
+  font-size: 0;
+  margin-bottom: 32px;
+  margin-bottom: 2rem;
+  max-width: 100%;
+  position: relative;
+}
+
+.search-form .search-field {
+  border: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  display: block;
+  font-size: 16px;
+  font-size: 1rem;
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 8px;
+  padding: 0.5rem;
+  width: 22.7373675443rem;
+}
+
+.search-form .button-search {
+  border-right: none;
+  -webkit-border-radius: 2px 0 0 2px;
+  border-radius: 2px 0 0 2px;
+  font-size: 16px;
+  font-size: 1rem;
+  position: relative;
+  left: auto;
+  top: auto;
+}
+
+.search-form .button-search:active {
+  background: #006799;
+  border-left: 1px solid #006799;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.search-form .button-search .dashicons {
+  font-size: 16px;
+  font-size: 1rem;
+}
+
+.site-header .search-form {
+  display: inline-block;
+}
+
+.site-header.home .search-form .button-search,
+.site-main .search-form .button-search {
+  background: transparent;
+  border: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  color: #32373c;
+  display: block;
+  height: 45px;
+  padding: 8px 16px;
+  padding: 0.5rem 1rem;
+  position: absolute;
+  left: 0;
+  text-shadow: none;
+  top: 0;
+}
+
+.site-header.home .search-form .button-search:focus,
+.site-main .search-form .button-search:focus {
+  -webkit-box-shadow: 0 0 2px 1px #33b3db;
+  box-shadow: 0 0 2px 1px #33b3db;
+}
+
+.site-header.home .search-form .button-search:active,
+.site-main .search-form .button-search:active {
+  background: transparent;
+  border: none;
+  -webkit-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+
+.site-header:not(.home) .search-form {
+  margin: 0;
+}
+
+.site-header:not(.home) .search-form .search-field {
+  border: 0;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 16px;
+  font-size: 1rem;
+  padding: 5px 10px;
+  position: relative;
+  width: 100%;
+}
+
+@media screen and (min-width: 48em) {
+  .site-header:not(.home) .search-form .search-field {
+    -webkit-border-radius: 0 2px 2px 0;
+    border-radius: 0 2px 2px 0;
+    font-size: 10.24px;
+    font-size: 0.64rem;
+    width: 126px;
+    width: 7rem;
+  }
+  .site-header:not(.home) .search-form .search-field + .button-search {
+    display: inline-block;
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (min-width: 60em) {
+  .site-header:not(.home) .search-form .search-field {
+    width: 160px;
+    width: 10rem;
+  }
+}
+
+.site-main .search-form .search-field {
+  border: 1px solid #ddd;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+  padding: 8px;
+  padding: 0.5rem;
+  width: 100%;
+}
+
 .plugin-upload-form fieldset {
   border: none;
   margin: 0;
@@ -1879,67 +2011,6 @@ p a:not(.button):hover {
   text-align: center;
 }
 
-.site-header .search-form {
-  display: inline-block;
-  font-size: 0;
-  width: 100%;
-}
-
-.site-header .search-form .search-field {
-  border: 0;
-  -webkit-border-radius: 2px;
-  border-radius: 2px;
-  font-size: 16px;
-  font-size: 1rem;
-  padding: 5px 10px;
-  position: relative;
-  width: 100%;
-}
-
-.site-header .search-form .search-field + .button-search {
-  border-right: none;
-  -webkit-border-radius: 2px 0 0 2px;
-  border-radius: 2px 0 0 2px;
-  font-size: 16px;
-  font-size: 1rem;
-  display: none;
-  vertical-align: bottom;
-}
-
-.site-header .search-form .search-field + .button-search:active {
-  background: #006799;
-  border-left: 1px solid #006799;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-
-.site-header .search-form .search-field + .button-search .dashicons {
-  font-size: 16px;
-  font-size: 1rem;
-}
-
-@media screen and (min-width: 48em) {
-  .site-header .search-form .search-field {
-    -webkit-border-radius: 0 2px 2px 0;
-    border-radius: 0 2px 2px 0;
-    font-size: 10.24px;
-    font-size: 0.64rem;
-    width: 126px;
-    width: 7rem;
-  }
-  .site-header .search-form .search-field + .button-search {
-    display: inline-block;
-    margin-bottom: 0;
-  }
-}
-
-@media screen and (min-width: 60em) {
-  .site-header .search-form .search-field {
-    width: 160px;
-    width: 10rem;
-  }
-}
-
 .site-header.home {
   padding: 1.5625rem 1.143rem;
   text-align: center;
@@ -1951,54 +2022,6 @@ p a:not(.button):hover {
   font-size: 3.8146972656rem;
   margin: 32px 0 16px;
   margin: 2rem 0 1rem;
-}
-
-.site-header.home .search-form {
-  margin-bottom: 32px;
-  margin-bottom: 2rem;
-  max-width: 100%;
-  position: relative;
-  width: initial;
-}
-
-.site-header.home .search-form .search-field {
-  border: none;
-  -webkit-border-radius: 0;
-  border-radius: 0;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  display: block;
-  font-size: 16px;
-  font-size: 1rem;
-  margin: 0 auto;
-  max-width: 100%;
-  padding: 8px;
-  padding: 0.5rem;
-  width: 22.7373675443rem;
-}
-
-.site-header.home .search-form .button-search {
-  background: transparent;
-  border: none;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  color: #32373c;
-  display: block;
-  height: 45px;
-  padding: 8px 16px;
-  padding: 0.5rem 1rem;
-  position: absolute;
-  left: 0;
-  text-shadow: none;
-  top: 0;
-}
-
-.site-header.home .search-form .button-search:active {
-  background: transparent;
-  border: none;
-  -webkit-transform: none;
-  -ms-transform: none;
-  transform: none;
 }
 
 /*--------------------------------------------------------------
@@ -2076,32 +2099,6 @@ p a:not(.button):hover {
   max-width: 35.527136788rem;
   padding: 0 32px;
   padding: 0 2rem;
-}
-
-.site-main .no-results .search-form {
-  margin: 32px auto;
-  margin: 2rem auto;
-  position: relative;
-}
-
-.site-main .no-results .search-form:after {
-  content: "\f179";
-  font-family: dashicons;
-  position: absolute;
-  left: 16px;
-  top: 11px;
-}
-
-.site-main .no-results .search-field {
-  font-size: 16px;
-  font-size: 1rem;
-  padding: 8px 8px 8px 40px;
-  padding: 0.5rem 0.5rem 0.5rem 40px;
-  width: 100%;
-}
-
-.site-main .no-results .button-search {
-  display: none;
 }
 
 .plugin-card {

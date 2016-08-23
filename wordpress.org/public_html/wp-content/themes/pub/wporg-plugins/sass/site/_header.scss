@@ -99,60 +99,6 @@
 		text-align: center;
 	}
 
-	.search-form {
-		display: inline-block;
-		font-size: 0;
-		width: 100%;
-
-		.search-field {
-			border: 0;
-			border-radius: 2px;
-			@include font-size( ms-unitless( ms(0) ) );
-			padding: 5px 10px;
-			position: relative;
-			width: 100%;
-		}
-
-		.search-field + .button-search {
-			border-left: none;
-			border-radius: 0 2px 2px 0;
-			@include font-size( ms-unitless( ms(0) ) );
-			display: none;
-			vertical-align: bottom;
-
-			&:active {
-				background: #006799;
-				border-right: 1px solid #006799;
-				box-shadow: none;
-			}
-
-			.dashicons {
-				@include font-size( ms-unitless( ms(0) ) );
-			}
-		}
-
-		@media screen and ( min-width: $ms-breakpoint ) {
-			.search-field {
-				border-radius: 2px 0 0 2px;
-				@include font-size( ms-unitless( ms(-4) ) );
-				width: 126px;
-				width: 7rem;
-			}
-
-			.search-field + .button-search {
-				display: inline-block;
-				margin-bottom: 0;
-			}
-		}
-
-		@media screen and ( min-width: 60em ) {
-			.search-field {
-				width: 160px;
-				width: 10rem;
-			}
-		}
-	}
-
 	&.home {
 		padding: ms(4) ms(1);
 		text-align: center;
@@ -162,48 +108,6 @@
 			@include font-size( ms-unitless( ms(12) ) );
 			margin: 32px 0 16px;
 			margin: 2rem 0 1rem;
-		}
-
-		.search-form {
-			margin-bottom: 32px;
-			margin-bottom: 2rem;
-			max-width: 100%;
-			position: relative;
-			width: initial;
-
-			.search-field {
-				border: none;
-				border-radius: 0;
-				box-shadow: none;
-				display: block;
-				@include font-size( ms-unitless( ms(0) ) );
-				margin: 0 auto;
-				max-width: 100%;
-				padding: 8px;
-				padding: 0.5rem;
-				width: ms(28);
-			}
-
-			.button-search {
-				background: transparent;
-				border: none;
-				box-shadow: none;
-				color: $color__text-input;
-				display: block;
-				height: 45px;
-				padding: 8px 16px;
-				padding: 0.5rem 1rem;
-				position: absolute;
-				right: 0;
-				text-shadow: none;
-				top: 0;
-
-				&:active {
-					background: transparent;
-					border: none;
-					transform: none;
-				}
-			}
 		}
 	}
 }

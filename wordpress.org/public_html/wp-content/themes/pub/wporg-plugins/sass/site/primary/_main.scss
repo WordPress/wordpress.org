@@ -31,30 +31,5 @@
 		max-width: ms(32);
 		padding: 0 32px;
 		padding: 0 2rem;
-
-		.search-form {
-			margin: 32px auto;
-			margin: 2rem auto;
-			position: relative;
-
-			&:after {
-				content: "\f179";
-				font-family: dashicons;
-				position: absolute;
-				right: 16px;
-				top: 11px;
-			}
-		}
-
-		.search-field {
-			@include font-size( ms-unitless( ms(0) ) );
-			padding: 8px 40px 8px 8px;
-			padding: 0.5rem 40px 0.5rem 0.5rem;
-			width: 100%;
-		}
-
-		.button-search {
-			display: none;
-		}
 	}
 }
