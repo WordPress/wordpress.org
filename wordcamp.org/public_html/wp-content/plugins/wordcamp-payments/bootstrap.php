@@ -19,16 +19,24 @@ if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
 
-	if ( in_array( $_SERVER['HTTP_HOST'], array(
-		'testing.wordcamp.org',
-		'2016.milwaukee.wordcamp.org',
-		'2016.pittsburgh.wordcamp.org',
-		'2016.capetown.wordcamp.org',
-		'2016.annarbor.wordcamp.org',
-		'2016.riodejaneiro.wordcamp.org',
-		'2016.milano.wordcamp.org',
-		'2016.cologne.wordcamp.org',
-	) ) ) {
+	$load_budget_tool = true;
+
+	// Don't load the budget tool on these sites.
+	if ( preg_match( '#\.(?:us|europe)\.wordcamp\.org$#', strtolower( $_SERVER['HTTP_HOST'] ) ) ) {
+		$load_budget_tool = false;
+	}
+
+	// Don't load the budget tool on non YYYY. sites.
+	if ( ! preg_match( '#^[0-9]{4}\.#', $_SERVER['HTTP_HOST'] ) ) {
+		$load_budget_tool = false;
+	}
+
+	// Force budget tool on testing.wordcamp.org
+	if ( 'testing.wordcamp.org' == $_SERVER['HTTP_HOST'] ) {
+		$load_budget_tool = true;
+	}
+
+	if ( $load_budget_tool ) {
 		require_once( __DIR__ . '/includes/budget-tool.php' );
 	}
 
