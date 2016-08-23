@@ -2133,6 +2133,9 @@ p a:not(.button):hover {
     margin: 0 0 0 4%;
     vertical-align: top;
   }
+  .plugin-card .entry-thumbnail a {
+    display: block;
+  }
   .plugin-card .entry {
     width: -webkit-calc(96% - 128px);
     width: calc(96% - 128px);
