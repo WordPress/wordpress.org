@@ -1430,6 +1430,73 @@ p a:not(.button):hover {
 }
 
 /*--------------------------------------------------------------
+# WP.org Header
+--------------------------------------------------------------*/
+#wporg-header h1 {
+  margin: auto;
+}
+
+#wporg-header h2.rosetta {
+  clear: none;
+}
+
+#wporg-header form input {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  padding: 3px;
+}
+
+#wporg-header .button {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+#wporg-header .download-button {
+  background-color: #21759b;
+  background-image: -webkit-gradient(linear, right top, right bottom, from(#2a95c5), to(#21759b));
+  background-image: -webkit-linear-gradient(top, #2a95c5, #21759b);
+  background-image: linear-gradient(to bottom, #2a95c5, #21759b);
+  border-bottom-color: #1e6a8d;
+  border-color: #21759b;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
+  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
+}
+
+#wporg-header .download-button:hover, #wporg-header .download-button:focus {
+  background-color: #278ab7;
+  background-image: -webkit-gradient(linear, right top, right bottom, from(#2e9fd2), to(#21759b));
+  background-image: -webkit-linear-gradient(top, #2e9fd2, #21759b);
+  background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
+  border-color: #1b607f;
+  -webkit-box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
+  box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
+  color: #fff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+#wporg-header .download-button:active {
+  background: #1b607f;
+  background-image: -webkit-gradient(linear, right top, right bottom, from(#21759b), to(#278ab7));
+  background-image: -webkit-linear-gradient(top, #21759b, #278ab7);
+  background-image: linear-gradient(to bottom, #21759b, #278ab7);
+  border-color: #124560 #2382ae #2382ae #2382ae;
+  -webkit-box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  -webkit-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+
+#wporg-header a:hover,
+#wporg-header a:focus,
+#wporg-header a:active {
+  text-decoration: none;
+}
+
+/*--------------------------------------------------------------
 # Content
 --------------------------------------------------------------*/
 /*--------------------------------------------------------------
