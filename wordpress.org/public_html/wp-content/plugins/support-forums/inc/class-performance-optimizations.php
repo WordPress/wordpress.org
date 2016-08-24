@@ -21,6 +21,19 @@ class Performance_Optimizations {
 			// @todo Update date to a reasonable range once we're done importing.
 			if ( ! in_array( $view, array( 'plugin', 'theme', 'review' ) ) ) {
 				$r['date_query'] = array( 'after' => '19 months ago' );
+			} else {
+				$term = self::get_term();
+
+				// If there are a lot of results for a single plugin or theme,
+				// order by ID to avoid an INNER JOIN ON.
+				if ( $term && ! is_wp_error( $term ) && property_exists( $term, 'count' ) ) {
+					if ( $term->count > 10000 ) {
+						unset( $r['meta_key'] );
+						unset( $r['meta_type'] );
+
+						$r['orderby'] = 'ID';
+					}
+				}
 			}
 
 		/**
@@ -34,7 +47,8 @@ class Performance_Optimizations {
 			unset( $r['meta_key'] );
 			unset( $r['meta_type'] );
 
-			$r['orderby'] = 'post_date';
+			// This only works because we don't edit dates on forum topics.
+			$r['orderby'] = 'ID';
 			add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ) );
 		}
 		return $r;
@@ -69,5 +83,20 @@ class Performance_Optimizations {
 			remove_filter( 'bbp_topic_pagination', array( __CLASS__, 'topic_pagination' ) );
 		}
 		return $r;
+	}
+
+	/**
+	 * Get the term for a plugin or theme view from query_var.
+	 */
+	public static function get_term() {
+		if ( ! empty( get_query_var( Plugin::get_instance()->plugins->query_var() ) ) ) {
+			$slug = Plugin::get_instance()->plugins->slug();
+			$tax  = Plugin::get_instance()->plugins->taxonomy();
+		} elseif ( ! empty( get_query_var( Plugin::get_instance()->themes->query_var() ) ) ) {
+			$slug = Plugin::get_instance()->themes->slug();
+			$tax  = Plugin::get_instance()->themes->taxonomy();
+		}
+		$term = get_term( $slug, $tax );
+		return $term;
 	}
 }
