@@ -1566,6 +1566,7 @@
 		/* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
 		max-width: 100% !important;
 		width: inherit !important;
+		padding-bottom: 0.5rem !important;
 	}
 
 	&.archive, &.blog {
