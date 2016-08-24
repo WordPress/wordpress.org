@@ -1,0 +1,32 @@
+/* 
+These styles are inserted inline in the comment editor.
+*/
+
+.js .quicktags-toolbar {
+	background-color: #fff;
+	border: none;
+}
+
+.js .wp-core-ui .quicktags-toolbar input.button.button-small:first-of-type {
+	margin: 2px 2px 2px 0;
+}
+
+.js .quicktags-toolbar {
+	padding: 8px 5px 5px 0;
+}
+/* 
+These styles are inserted inline in the comment editor.
+*/
+
+.js .quicktags-toolbar {
+	background-color: #fff;
+	border: none;
+}
+
+.js .wp-core-ui .quicktags-toolbar input.button.button-small:first-of-type {
+	margin: 2px 2px 2px 0;
+}
+
+.js .quicktags-toolbar {
+	padding: 8px 5px 5px 0;
+}

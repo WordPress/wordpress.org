@@ -65,8 +65,10 @@ if ( post_password_required() ) {
 		<p id="add-user-note" style="display:none;"><a href=""><?php _e( 'Have a note or feedback to contribute?', 'wporg' ); ?></a></p>
 
 		<?php comment_form( array(
+			'class_form'          => 'comment-form tab-container',
 			'comment_field'       => DevHub_User_Submitted_Content::wp_editor_comments(),
-			'comment_notes_after' => '<p>' .
+			'comment_notes_after' => DevHub_Note_Preview::comment_preview() .
+			 	'<p>' .
 				__( 'Notes should supplement code reference entries, for example examples, tips, explanations, use-cases, and best practices.', 'wporg' ) .
 				'</p><p>' .
 				__( 'Feedback can be to report errors or omissions with the documentation on this page. Such feedback will not be publicly posted.', 'wporg' ) . 
@@ -86,19 +88,6 @@ if ( post_password_required() ) {
 			) . '</p>',
 			'title_reply'         =>  '', //'Add Example'
 		) ); ?>
-
-		<!-- Comment Preview -->
-		<div id='comment-preview' class='comment byuser depth-1' style='display:none;'>
-			<article class='comment-body'>
-				<header class='comment-meta'>
-					<div>
-						<?php _e( 'Preview', 'wporg' ); ?>
-						<span class='spinner' style='display:none'></span>
-					</div>
-				</header>
-				<div class='comment-content'></div>
-			</article>
-		</div>
 
 	<?php endif; ?>
 

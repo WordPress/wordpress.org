@@ -287,6 +287,8 @@ input {
   /* Clearing */
   /* =Content
 	----------------------------------------------- */
+  /* =Tabs
+	----------------------------------------------- */
   /* =Media
 	----------------------------------------------- */
   /* Make sure embeds and iframes fit their containers */
@@ -675,6 +677,50 @@ input {
 .devhub-wrap .page-links {
   clear: both;
   margin: 0 0 1.5em;
+}
+
+.devhub-wrap .tablist {
+  margin: 0;
+}
+
+.devhub-wrap .tablist li {
+  display: inline-block;
+  list-style: none;
+}
+
+.devhub-wrap .tablist a {
+  border-color: none;
+  background-color: transparent;
+  border-color: transparent;
+  border-image: none;
+  border-style: solid solid none;
+  border-width: 1px 1px 0;
+  display: inline-block;
+  padding: .5em 1em;
+  margin-bottom: -1px;
+}
+
+.devhub-wrap .tablist a[aria-selected],
+.devhub-wrap .tablist a:focus {
+  background-color: #fff;
+  border-color: #ccc;
+  border-radius: 3px 3px 0 0;
+  color: #333;
+}
+
+.devhub-wrap .tab-section {
+  margin-top: 0;
+  padding: 0;
+  border: none;
+}
+
+.devhub-wrap .tab-section[aria-hidden="true"] {
+  display: none;
+}
+
+.devhub-wrap .tab-section:focus {
+  background: #eee;
+  outline: thin dotted;
 }
 
 .devhub-wrap .page-content img.wp-smiley,
@@ -1563,7 +1609,7 @@ input {
   background: #fff;
   overflow: auto;
   border: 1px solid #dfdfdf;
-  border-radius: 2px;
+  border-radius: 0 2px 2px 2px;
 }
 
 .devhub-wrap.single-wp-parser-function .comment-list li article,
@@ -1574,15 +1620,42 @@ input {
   overflow: auto;
 }
 
-.devhub-wrap.single-wp-parser-function #comment-preview, .devhub-wrap.single-wp-parser-method #comment-preview, .devhub-wrap.single-wp-parser-hook #comment-preview, .devhub-wrap.single-wp-parser-class #comment-preview {
+.devhub-wrap.single-wp-parser-function #comment-preview,
+.js .devhub-wrap.single-wp-parser-function .comment-form-comment, .devhub-wrap.single-wp-parser-method #comment-preview,
+.js .devhub-wrap.single-wp-parser-method .comment-form-comment, .devhub-wrap.single-wp-parser-hook #comment-preview,
+.js .devhub-wrap.single-wp-parser-hook .comment-form-comment, .devhub-wrap.single-wp-parser-class #comment-preview,
+.js .devhub-wrap.single-wp-parser-class .comment-form-comment {
+  margin-top: 0;
+  border: 1px solid #ccc;
+  border-radius: 0 3px 3px 3px;
   clear: both;
+}
+
+.devhub-wrap.single-wp-parser-function #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-method #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-hook #comment-preview.tab-section-selected, .devhub-wrap.single-wp-parser-class #comment-preview.tab-section-selected {
+  border-radius: 3px;
 }
 
 .devhub-wrap.single-wp-parser-function #comment-preview .comment-content, .devhub-wrap.single-wp-parser-method #comment-preview .comment-content, .devhub-wrap.single-wp-parser-hook #comment-preview .comment-content, .devhub-wrap.single-wp-parser-class #comment-preview .comment-content {
   min-height: 6em;
 }
 
-.devhub-wrap.single-wp-parser-function #comment-preview .spinner, .devhub-wrap.single-wp-parser-method #comment-preview .spinner, .devhub-wrap.single-wp-parser-hook #comment-preview .spinner, .devhub-wrap.single-wp-parser-class #comment-preview .spinner {
+.devhub-wrap.single-wp-parser-function label[for=comment],
+.devhub-wrap.single-wp-parser-function .comment-form-comment,
+.devhub-wrap.single-wp-parser-function .comment-preview, .devhub-wrap.single-wp-parser-method label[for=comment],
+.devhub-wrap.single-wp-parser-method .comment-form-comment,
+.devhub-wrap.single-wp-parser-method .comment-preview, .devhub-wrap.single-wp-parser-hook label[for=comment],
+.devhub-wrap.single-wp-parser-hook .comment-form-comment,
+.devhub-wrap.single-wp-parser-hook .comment-preview, .devhub-wrap.single-wp-parser-class label[for=comment],
+.devhub-wrap.single-wp-parser-class .comment-form-comment,
+.devhub-wrap.single-wp-parser-class .comment-preview {
+  margin-bottom: 1em;
+}
+
+.js .devhub-wrap.single-wp-parser-function .comment-form-comment, .js .devhub-wrap.single-wp-parser-method .comment-form-comment, .js .devhub-wrap.single-wp-parser-hook .comment-form-comment, .js .devhub-wrap.single-wp-parser-class .comment-form-comment {
+  padding: 0 .7em .7em;
+}
+
+.devhub-wrap.single-wp-parser-function .tablist .spinner, .devhub-wrap.single-wp-parser-method .tablist .spinner, .devhub-wrap.single-wp-parser-hook .tablist .spinner, .devhub-wrap.single-wp-parser-class .tablist .spinner {
   background: url("/wp-includes/images/spinner-2x.gif") no-repeat scroll 0 50%;
   -webkit-background-size: 20px 20px;
   background-size: 20px 20px;

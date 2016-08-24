@@ -3,69 +3,95 @@
  *
  */
 
-var wporg_developer_note_preview = ( function( $ ) {
+( function( $ ) {
 
-	var textarea, preview, previewContent, spinner;
+	var textarea, textareaHeight, text, preview, previewContent, tabs, processing, spinner;
 
-	function init( textarea_selector, preview_selector ) {
+	function init() {
 
-		textarea = $( textarea_selector );
-		preview = $( preview_selector );
+		if ( undefined === wporg_note_preview ) {
+			return;
+		}
 
-		if ( textarea.length && preview.length && ( undefined !== wporg_note_preview ) ) {
+		textarea = $( '.comment-form textarea' );
+		preview = $( '#comment-preview' );
+		tabs = $( '#commentform .tablist' ).find( 'a' );
+		spinner = $( '<span class="spinner" style="display:none;"></span>' );
+		text = '';
+		processing = false;
 
-			previewContent = $( '.comment-content', preview );
-			spinner = $( '.spinner', preview );
+		if ( textarea.length && preview.length && tabs.length ) {
 
-			if ( previewContent.length && spinner.length ) {
+			// Append spinner to preview tab
+			tabs.parents( 'li[role="presentation"]:last' ).append( spinner );
 
-				add_preview_button();
+			previewContent = $( '.preview-content', preview );
 
-				var current_text = textarea.val();
+			if ( previewContent.length ) {
 
-				if ( current_text.length ) {
-					update_preview( current_text );
+				if ( !textarea.val().length ) {
+					previewContent.text( wporg_note_preview.preview_empty );
 				}
 
-				add_preview_events();
+				previewEvents();
 			}
 		}
 	}
 
-	function add_preview_button() {
-		QTags.addButton( 'preview', wporg_note_preview.preview, function() {
-			var pos = preview.position();
-			$( 'html,body' ).animate( {
-				scrollTop: pos.top
-			}, 1000 );
+	function previewEvents() {
+
+		tabs.on( "keydown.note_preview, click.note_preview", function( e ) {
+
+			if ( 'comment-preview' === $( this ).attr( 'aria-controls' ) ) {
+
+				if ( !processing ) {
+					current_text = $.trim( textarea.val() );
+					if ( current_text.length && ( current_text !== wporg_note_preview.preview_empty ) ) {
+						if ( wporg_note_preview.preview_empty === previewContent.text() ) {
+							// Remove "Nothing to preview" if there's new current text.
+							previewContent.text( '' );
+						}
+						// Update the preview.
+						updatePreview( current_text );
+					} else {
+						previewContent.text( wporg_note_preview.preview_empty );
+					}
+				}
+
+				// Remove outline from tab if clicked.
+				if ( "click" === e.type ) {
+					$( this ).blur();
+				}
+			} else {
+				textarea.focus();
+			}
 		} );
-	}
 
-	function add_preview_events() {
-
-		// Update Preview after QuickTag button is clicked.
-		var buttons = $( '#qt_comment_toolbar' ).find( 'input' ).not( '#qt_comment_preview' );
-		buttons.on( 'click', function() {
-			// Set timeout to let the quicktags do it's thing first.
+		// Set preview heigth when the textarea is visible
+		$( '#add-user-note, .table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
+			e.preventDefault();
+			tabs.parents( '.tablist' ).show();
 			setTimeout( function() {
-				update_preview( textarea.val() );
+				textareaHeight = textarea.outerHeight( true );
+				if ( 0 < textareaHeight ) {
+					preview.css( 'min-height', textareaHeight + 'px' );
+				}
 			}, 500 );
 		} );
-
-		// Update Preview after keykup event.
-		// Delay updating the preview by 2 seconds to not overload the server.
-		textarea.bind( 'keyup', debounce( function( e ) {
-			update_preview( $( this ).val() );
-		}, 2000 ) );
-
-		// Display a spinner as soon as the comment form changes input.
-		textarea.bind( 'input propertychange selectionchange', function( e ) {
-			spinner.show();
-		} );
 	}
 
-	function update_preview( content ) {
+	function updatePreview( content ) {
+
+		// Don't update preview if nothing changed
+		if ( text == content ) {
+			spinner.hide();
+			return;
+		}
+
 		spinner.show();
+		text = content;
+		processing = true;
+
 		$.post( wporg_note_preview.ajaxurl, {
 			action: "preview_comment",
 			preview_nonce: wporg_note_preview.nonce,
@@ -73,7 +99,7 @@ var wporg_developer_note_preview = ( function( $ ) {
 		} )
 
 		.done( function( response ) {
-			update_preview_html( response.data.comment );
+			updatePreview_HTML( response.data.comment );
 		} )
 
 		.fail( function( response ) {
@@ -82,18 +108,23 @@ var wporg_developer_note_preview = ( function( $ ) {
 
 		.always( function( response ) {
 			spinner.hide();
+			processing = false;
+
+			// Make first child of the preview focusable
+			preview.children().first().attr( {
+				'tabindex': '0'
+			} );
 		} );
 	}
 
 	// Add toggle links to source code in preview if needed.
-	function update_source_code() {
-
+	function updateSourceCode() {
 		if ( undefined !== wporg_developer ) {
 			wporg_developer.sourceCodeDisplay( preview );
 		}
 	}
 
-	function update_preview_html( content ) {
+	function updatePreview_HTML( content ) {
 		// Update preview content
 		previewContent.html( content );
 
@@ -102,25 +133,10 @@ var wporg_developer_note_preview = ( function( $ ) {
 		}
 
 		// Add toggle link to source code in preview if needed.
-		update_source_code();
+		updateSourceCode();
 		spinner.hide();
 	}
 
-	// https://remysharp.com/2010/07/21/throttling-function-calls
-	function debounce( fn, delay ) {
-		var timer = null;
-		return function() {
-			var context = this,
-				args = arguments;
-			clearTimeout( timer );
-			timer = setTimeout( function() {
-				fn.apply( context, args );
-			}, delay );
-		};
-	}
-
-	return {
-		init: init
-	}
+	init();
 
 } )( jQuery );

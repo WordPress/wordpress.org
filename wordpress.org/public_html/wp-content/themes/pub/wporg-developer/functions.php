@@ -258,7 +258,14 @@ function taxonomy_permalink( $link, $term, $taxonomy ) {
  */
 function header_js() {
 	// Output CSS to hide markup with the class 'hide-if-js'. Ensures the markup is visible if JS is not present.
-	echo "<script type=\"text/javascript\">jQuery( '<style>.hide-if-js { display: none; }</style>' ).appendTo( 'head' );</script>\n";
+	// Add class 'js' to the body element if JavaScript is enabled
+	echo "
+	<script type=\"text/javascript\">
+		jQuery( '<style>.hide-if-js { display: none; }</style>' ).appendTo( 'head' );
+		jQuery( function($) {
+			$( 'body' ).addClass('js');
+		} );
+	</script>\n";
 }
 
 function theme_scripts_styles() {

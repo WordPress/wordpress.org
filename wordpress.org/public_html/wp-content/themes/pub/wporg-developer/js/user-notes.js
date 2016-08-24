@@ -12,30 +12,21 @@
 	}
 
 	function showCommentForm() {
-		$( '#respond, #add-user-note' ).toggle();
-		
-		var preview = $( '#comment-preview' );
-		if( preview.length && ( wporg_developer_note_preview !== undefined ) ) {
-			preview.show();
+		$( '#respond' ).show();
+		$( '#add-user-note').hide();
 
-			//Initialize preview with textarea and preview selectors
-			wporg_developer_note_preview.init( '.comment-form textarea', '#comment-preview' );
-		}
+		var target = $( '#commentform #add-note-or-feedback' );
+		if ( target.length ) {
+			var pos = target.offset();
 
-		if ( pos = $( '#submit' ).position() ) {
-			if ( pos.top < $(window).scrollTop() ) {
-				// Scroll up
-				$( 'html,body' ).animate( {scrollTop:pos.top}, 1000 );
-			}
-			else if ( pos.top + jQuery("selector").height() > $(window).scrollTop() + (window.innerHeight || document.documentElement.clientHeight) ){
-				// Scroll down
-				$( 'html,body' ).animate( {scrollTop:pos.top - (window.innerHeight || document.documentElement.clientHeight) + $( '#submit' ).height() + 30}, 1000 );
-			}
+			$( 'html,body' ).animate( {
+				scrollTop: pos.top
+			}, 1000 );
 		}
 	}
 
 	$( '#respond, #add-user-note' ).toggle();
-	$( '#add-user-note' ).click( function( e ) {
+	$( '#add-user-note, .table-of-contents a[href="#add-note-or-feedback"]' ).click( function( e ) {
 		e.preventDefault();
 
 		showCommentForm();
