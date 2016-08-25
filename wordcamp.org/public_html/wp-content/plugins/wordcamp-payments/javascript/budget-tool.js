@@ -437,14 +437,6 @@ window.wcb = window.wcb || {models:{}, input:[]};
                 var price = wcb.table.collection.findWhere({type: 'meta', name: 'ticket-price'}).get('value');
                 return parseInt(attendees) * parseFloat(price);
             }
-        },
-
-        'random': {
-            'label': 'random',
-            'hasValue': false,
-            'callback': function(value) {
-                return Math.floor((Math.random() * 500) + 1);
-            }
         }
     };
 
