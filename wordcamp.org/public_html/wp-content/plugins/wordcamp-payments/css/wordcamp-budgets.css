@@ -377,7 +377,6 @@ tr#row-payment-method label {
 
 .wcb-budget-container .link-toggle .link-value {
 	position: absolute;
-	background: red;
 	width: 30px;
 	opacity: 0;
 }

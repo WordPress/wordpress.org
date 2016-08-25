@@ -91,7 +91,7 @@ class WordCamp_Budget_Tool {
         if ( $screen->id == 'toplevel_page_wordcamp-budget' ) {
             wp_enqueue_script( 'wcb-budget-tool',
                 plugins_url( 'javascript/budget-tool.js', __DIR__ ),
-                array( 'backbone', 'jquery', 'jquery-ui-sortable', 'heartbeat', 'underscore' ), 2 , true );
+                array( 'backbone', 'jquery', 'jquery-ui-sortable', 'heartbeat', 'underscore' ), 3 , true );
         }
     }
 
