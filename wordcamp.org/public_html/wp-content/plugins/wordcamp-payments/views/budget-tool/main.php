@@ -110,6 +110,7 @@ wcb.editable = <?php echo json_encode( $editable ); ?>;
         <?php if ( $budget['status'] == 'draft' ) : ?>
         <p class="submit">
             <?php submit_button( 'Save Draft', 'secondary', 'wcb-budget-save-draft', false ); ?>
+            <?php submit_button( 'Save &amp; Request Review', 'secondary', 'wcb-budget-request-review', false ); ?>
             <a href="<?php echo admin_url( 'admin.php?page=wordcamp-budget' ); ?>" class="button">Cancel Changes</a>
             <?php submit_button( 'Submit for Approval', 'primary', 'wcb-budget-submit', false ); ?>
         </p>

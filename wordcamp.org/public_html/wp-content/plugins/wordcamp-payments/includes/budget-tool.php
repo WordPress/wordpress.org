@@ -22,6 +22,7 @@ class WordCamp_Budget_Tool {
 
         $budget = self::_get_budget();
         $data = json_decode( wp_unslash( $_POST['_wcb_budget_data'] ), true );
+        $user = get_user_by( 'id', get_current_user_id() );
 
         $valid_attributes = array( 'type', 'category', 'amount', 'note', 'link', 'name', 'value' );
         foreach ( $data as &$item ) {
@@ -40,16 +41,33 @@ class WordCamp_Budget_Tool {
         }
 
         if ( $budget['status'] == 'draft' && ! empty( $_POST['wcb-budget-save-draft'] ) ) {
+            // Save draft
             $budget['prelim'] = $data;
         } elseif ( $budget['status'] == 'draft' && ! empty( $_POST['wcb-budget-submit'] ) ) {
+            // Submit for Approval
             $budget['prelim'] = $data;
             $budget['status'] = 'pending';
+            $domain = parse_url( home_url(), PHP_URL_HOST );
+            $link = esc_url_raw( add_query_arg( 'page', 'wordcamp-budget', admin_url( 'admin.php' ) ) );
+
+            $content = "A budget approval request has been submitted for {$domain} by {$user->user_login}:\n\n{$link}\n\nYours, Mr. Budget Tool";
+            wp_mail( 'support@wordcamp.org', 'Budget Approval Requested: ' . $domain, $content );
+
+        } elseif ( $budget['status'] == 'draft' && ! empty( $_POST['wcb-budget-request-review'] ) ) {
+            // Save draft and request review
+            $budget['prelim'] = $data;
+            $domain = parse_url( home_url(), PHP_URL_HOST );
+            $link = esc_url_raw( add_query_arg( 'page', 'wordcamp-budget', admin_url( 'admin.php' ) ) );
+
+            $content = "A budget review has been requested for {$domain} by {$user->user_login}:\n\n{$link}\n\nYours, Mr. Budget Tool";
+            wp_mail( 'support@wordcamp.org', 'Budget Review Requested: ' . $domain, $content );
+
         } elseif ( $budget['status'] == 'pending' && current_user_can( 'wcb_approve_budget' ) ) {
             if ( ! empty( $_POST['wcb-budget-reject'] ) ) {
                 $budget['status'] = 'draft';
             } elseif ( ! empty( $_POST['wcb-budget-approve'] ) ) {
                 $budget['status'] = 'approved';
-                $budget['approved_by'] = get_current_user_id();
+                $budget['approved_by'] = $user->ID;
 
                 // Clone the approved prelim. budget.
                 $budget['approved'] = $budget['prelim'];
@@ -62,7 +80,7 @@ class WordCamp_Budget_Tool {
         }
 
         $budget['updated'] = time();
-        $budget['updated_by'] = get_current_user_id();
+        $budget['updated_by'] = $user->ID;
 
         update_option( 'wcb_budget', $budget, 'no' );
         return;
