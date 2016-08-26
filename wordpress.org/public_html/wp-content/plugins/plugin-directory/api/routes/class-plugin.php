@@ -87,6 +87,8 @@ class Plugin extends Base {
 		$result['rating'] = get_post_meta( $post_id, 'rating', true ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
 		$result['ratings'] = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
 		$result['num_ratings'] = array_sum( $result['ratings'] );
+		$result['support_threads'] = get_post_meta( $post_id, 'support_threads', true ) ?: 0;
+		$result['support_threads_resolved'] = get_post_meta( $post_id, 'support_threads_resolved', true ) ?: 0;
 		$result['active_installs'] = (int)get_post_meta( $post_id, 'active_installs', true );
 		$result['downloaded'] = get_post_meta( $post_id, 'downloads', true );
 		$result['last_updated'] = gmdate( 'Y-m-d', strtotime( $post->post_modified_gmt ) );
