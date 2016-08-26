@@ -22,7 +22,7 @@ if ( is_admin() ) {
 	$load_budget_tool = true;
 
 	// Don't load the budget tool on these sites.
-	if ( preg_match( '#\.(?:us|europe)\.wordcamp\.org$#', strtolower( $_SERVER['HTTP_HOST'] ) ) ) {
+	if ( preg_match( '#\.europe\.wordcamp\.org$#', strtolower( $_SERVER['HTTP_HOST'] ) ) ) {
 		$load_budget_tool = false;
 	}
 
