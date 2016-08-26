@@ -1955,7 +1955,7 @@ object {
   top: -1px;
 }
 
-.plugin-rating .rating-count .site-main.single {
+.site-main.single .plugin-rating .rating-count {
   display: none;
 }
 

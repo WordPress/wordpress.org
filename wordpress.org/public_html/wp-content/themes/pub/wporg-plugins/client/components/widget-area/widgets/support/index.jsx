@@ -8,6 +8,10 @@ export default React.createClass( {
 		this.resolutions = ( this.props.plugin.support_threads || 'buddypress' === this.props.plugin.slug || 'bbpress' === this.props.plugin.slug );
 	},
 
+	componentDidUpdate() {
+		this.resolutions = this.resolutions || this.props.plugin.support_threads;
+	},
+
 	supportBar() {
 		const { support_threads: threads, support_threads_resolved: resolved } = this.props.plugin;
 
@@ -16,7 +20,7 @@ export default React.createClass( {
 				<p className="aside">Issues resolved in last two months:</p>
 				<p className="counter-container">
 					<span className="counter-back">
-					<span className="counter-bar" style={ { width: `${ 100 * resolved / threads }%` } } />
+						<span className="counter-bar" style={ { width: `${ 100 * resolved / threads }%` } } />
 					</span>
 					<span className="counter-count">
 						{ resolved } out of { threads }
@@ -44,7 +48,7 @@ export default React.createClass( {
 
 	render() {
 		return (
-			<div className="widget widget_text">
+			<div className="widget plugin-support">
 				<h4 className="widget-title">Support</h4>
 				{ this.resolutions ?
 					this.supportBar() :

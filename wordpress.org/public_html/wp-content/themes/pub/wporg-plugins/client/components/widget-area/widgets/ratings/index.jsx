@@ -14,7 +14,7 @@ export default React.createClass( {
 				<PluginRatings rating={ this.props.plugin.rating } ratingCount={ this.props.plugin.num_ratings } />
 
 				<ul className="ratings-list">
-					{ rangeRight( 5, 1 ).map( stars => {
+					{ rangeRight( 1, 6 ).map( stars => {
 						const barWidth = this.props.plugin.num_ratings ? 100 * this.props.plugin.ratings[ stars ] / this.props.plugin.num_ratings : 0;
 
 						return (
