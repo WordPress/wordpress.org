@@ -15,7 +15,7 @@ export default React.createClass( {
 				<meta itemProp="ratingValue" content={ this.props.rating } />
 
 				<Stars rating={ this.props.rating } />
-				<span className="rating-count">({ this.props.ratingCount } <span className="screen-reader-text">total ratings</span>)</span>
+				<span className="rating-count">({ this.props.ratingCount }<span className="screen-reader-text"> total ratings</span>)</span>
 			</div>
 		)
 	}

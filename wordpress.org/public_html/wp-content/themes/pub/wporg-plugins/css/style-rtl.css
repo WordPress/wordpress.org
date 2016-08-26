@@ -1955,6 +1955,10 @@ object {
   top: -1px;
 }
 
+.plugin-rating .rating-count .site-main.single {
+  display: none;
+}
+
 @-webkit-keyframes favme-anime {
   0% {
     opacity: 1;

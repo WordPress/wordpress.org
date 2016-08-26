@@ -4,7 +4,7 @@ export default React.createClass( {
 	displayName: 'DeveloperList',
 
 	render() {
-		if ( ! this.props.contributors.length ) {
+		if ( ! this.props.contributors ) {
 			return <div />;
 		}
 

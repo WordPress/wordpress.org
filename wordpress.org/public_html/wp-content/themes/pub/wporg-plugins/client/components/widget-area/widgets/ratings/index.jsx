@@ -15,7 +15,7 @@ export default React.createClass( {
 
 				<ul className="ratings-list">
 					{ rangeRight( 5, 1 ).map( stars => {
-						const barWidth = this.props.plugin.num_ratings ? 100 * this.props.plugin.num_ratings[ stars ] / this.props.plugin.num_ratings : 0;
+						const barWidth = this.props.plugin.num_ratings ? 100 * this.props.plugin.ratings[ stars ] / this.props.plugin.num_ratings : 0;
 
 						return (
 							<li className="counter-container">
@@ -24,7 +24,7 @@ export default React.createClass( {
 									<span className="counter-back">
 										<span className="counter-bar" style={ { width: `${ barWidth }%` } } />
 									</span>
-									<span className="counter-count">{ this.props.plugin.num_ratings[ stars ] }</span>
+									<span className="counter-count">{ this.props.plugin.ratings[ stars ] }</span>
 								</a>
 							</li>
 						);

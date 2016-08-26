@@ -16,6 +16,10 @@ export default React.createClass( {
 	},
 
 	render() {
+		if ( ! this.props.content ) {
+			return <div />;
+		}
+
 		return (
 			<div id="faq" className="plugin-faqs">
 				<h2>FAQ</h2>

@@ -43,7 +43,7 @@ export default React.createClass( {
 						<DownloadButton plugin={ this.props.plugin } />
 					</div>
 					<h1 className="plugin-title">{ this.props.plugin.name }</h1>
-					<span className="byline">By <span className="author vcard"><a className="url fn n" href={ this.props.plugin.author_profile }>{ this.props.plugin.author }</a></span></span>
+					<span className="byline">By <span className="author vcard" dangerouslySetInnerHTML={ { __html: this.props.plugin.author } } /></span>
 				</header>
 				<div className="entry-content">
 					<Section slug="description" title="Description" content={ this.props.plugin.sections.description } />
