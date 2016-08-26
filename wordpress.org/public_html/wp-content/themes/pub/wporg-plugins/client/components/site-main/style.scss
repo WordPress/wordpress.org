@@ -1,20 +1,22 @@
 .site-main {
 	margin: 0 auto;
 	max-width: $size__site-main;
-	padding: ms(10) ms(4);
+	padding: ms( 10 ) ms( 4 );
 
 	@media screen and ( min-width: $ms-breakpoint ) {
-		padding: ms(10) 10px;
+		padding: ms( 10 ) 10px;
 	}
 
+	&.single,
 	.single & {
 		padding: 0;
 
 		@media screen and ( min-width: $ms-breakpoint ) {
-			padding: 0 10px ms(10);
+			padding: 0 10px ms( 10 );
 		}
 	}
 
+	&.page,
 	.page & {
 		padding-top: 0;
 	}
@@ -26,7 +28,7 @@
 
 	.no-results {
 		margin: 0 auto;
-		max-width: ms(32);
+		max-width: ms( 32 );
 		padding: 0 2rem;
 	}
 }

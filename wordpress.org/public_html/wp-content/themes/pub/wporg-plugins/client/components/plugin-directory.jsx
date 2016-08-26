@@ -9,7 +9,7 @@ export default React.createClass( {
 
 	widgetArea() {
 		return (
-			<WidgetArea>
+			<WidgetArea { ...this.props }>
 				{ this.props.widgets.map( widget =>
 					<TextWidget key={ widget.title } widget={ widget } />
 				) }

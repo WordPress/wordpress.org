@@ -8,6 +8,7 @@ import ArchiveBrowse from 'components/archive/browse';
 import FrontPage from 'components/front-page';
 import NotFound from 'components/404';
 import Page from 'components/page';
+import Plugin from 'components/plugin';
 import PluginDirectory from 'components';
 import Search from 'components/search';
 import SiteHeader from 'components/site-header';
@@ -19,7 +20,7 @@ const history = useRouterHistory( createBrowserHistory )( {
 } );
 
 export default (
-	<Router history={ history }>
+	<Router history={ history } onUpdate={ () => window.scrollTo( 0, 0 ) }>
 		<Route name="root" component={ PluginDirectory }>
 			<Route path="/" components={ { header: SiteHeader, main: SiteMain } }>
 				<IndexRoute component={ FrontPage } />
@@ -27,7 +28,7 @@ export default (
 				<Route path="browse/:type" component={ ArchiveBrowse } />
 				<Route path="developers" component={ Page } />
 				<Route path="search/:searchTerm" component={ Search } />
-				<Route path=":plugin" component={ FrontPage } />
+				<Route path=":slug" component={ Plugin } />
 				<Route path="*" component={ NotFound } />
 			</Route>
 		</Route>

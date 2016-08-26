@@ -1,0 +1,15 @@
+.plugin-banner {
+	background-position: 50% 50%;
+	background-size: 100%;
+	display: inline-block;
+	font-size: 0;
+	line-height: 0;
+	margin: 0 auto ms( 1 );
+	padding-top: 32.38342%; /* 250px / 722px */
+	vertical-align: middle;
+	width: 100%;
+
+	@media screen and ( min-width: 60em ) {
+		margin-top: ms( 4 );
+	}
+}

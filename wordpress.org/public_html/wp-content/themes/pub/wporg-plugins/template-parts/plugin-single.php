@@ -30,7 +30,7 @@ $widget_args = array(
 			</div><!-- .plugin-notice -->
 		<?php endif; ?>
 
-		<div class="plugin-thumbnail">
+		<div class="entry-thumbnail">
 			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
 		</div>
 

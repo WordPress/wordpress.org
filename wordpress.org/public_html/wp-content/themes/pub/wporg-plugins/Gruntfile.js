@@ -36,7 +36,7 @@ module.exports = function( grunt ) {
 		},
 		postcss: {
 			options: {
-				map: true,
+				map: 'build' !== process.argv[2],
 				processors: [
 					require('autoprefixer')({
 						browsers: [
@@ -69,6 +69,8 @@ module.exports = function( grunt ) {
 		sass: {
 			options: {
 				sourceMap: true,
+				// Don't add source map URL in built version.
+				omitSourceMapUrl: 'build' === process.argv[2],
 				outputStyle: 'expanded'
 			},
 			dist: {

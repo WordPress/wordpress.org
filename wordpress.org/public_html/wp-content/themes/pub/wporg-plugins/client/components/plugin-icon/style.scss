@@ -11,4 +11,23 @@
 				display: block;
 			}
 	}
+
+	.single & {
+		display: none;
+		float: left;
+		height: 96px;
+		margin-right: 1rem;
+		width: 96px;
+
+		@media screen and ( min-width: 26em ) {
+			display: block;
+		}
+
+		.plugin-icon {
+			background-size: contain !important;
+			height: 96px !important;
+			width: 96px !important;
+		}
+
+	}
 }

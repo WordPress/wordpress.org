@@ -1,0 +1,64 @@
+.plugin-ratings {
+	font-size: ms( -2 );
+	position: relative;
+
+	.reviews-link {
+		position: absolute;
+		right: 0;
+		top: 0.3rem;
+
+		&:after {
+			content: "\f345";
+			font-family: dashicons;
+			padding-left: 5px;
+			vertical-align: top;
+		}
+	}
+
+	[class*='dashicons-star-'] {
+		color: #FFB900;
+		display: inline-block;
+		font-size: ms( 4 );
+		height: auto;
+		margin: 0;
+		width: auto;
+	}
+
+	.ratings-list {
+		list-style-type: none;
+		margin: 1rem 0;
+		padding: 0;
+
+		.counter-container,
+		.counter-container a {
+			width: 100%;
+		}
+
+		.counter-label {
+			display: inline-block;
+			min-width: 58px;
+		}
+
+		.counter-back,
+		.counter-bar {
+			display: inline-block;
+			height: 1rem;
+			vertical-align: middle;
+		}
+
+		.counter-back {
+			background-color: #ececec;
+			width: 58%;
+			width: calc(100% - 130px);
+		}
+
+		.counter-bar {
+			background-color: #ffc733;
+			display: block;
+		}
+
+		.counter-count {
+			margin-left: 3px;
+		}
+	}
+}

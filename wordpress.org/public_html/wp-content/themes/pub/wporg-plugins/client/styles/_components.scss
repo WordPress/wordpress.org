@@ -6,6 +6,14 @@
 @import "../components/plugin-icon/style";
 @import "../components/plugin-ratings/stars/style";
 @import "../components/plugin-ratings/style";
+@import "../components/plugin/favorite-button/style";
+@import "../components/plugin/plugin-banner/style";
+@import "../components/plugin/sections/developers/style";
+@import "../components/plugin/sections/faq/style";
+@import "../components/plugin/sections/reviews/style";
+@import "../components/plugin/sections/screenshots/style";
+@import "../components/plugin/sections/style";
+@import "../components/plugin/style";
 @import "../components/search-form/style";
 @import "../components/search/style";
 @import "../components/site-header/main-navigation/style";
@@ -14,3 +22,7 @@
 @import "../components/site-header/style";
 @import "../components/site-main/style";
 @import "../components/widget-area/style";
+@import "../components/widget-area/widgets/meta/style";
+@import "../components/widget-area/widgets/ratings/style";
+@import "../components/widget-area/widgets/style";
+@import "../components/widget-area/widgets/support/style";

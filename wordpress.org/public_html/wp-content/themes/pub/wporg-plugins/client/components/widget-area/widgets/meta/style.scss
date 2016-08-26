@@ -1,0 +1,47 @@
+.plugin-meta {
+	@extend .clear;
+	margin-top: 2rem;
+
+	ul {
+		font-size: ms( -2 );
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	li {
+		border-top: 1px solid $color__border;
+		padding: 0.5rem 0;
+
+		strong {
+			float: right;
+		}
+	}
+
+	.tags {
+		float: right;
+		text-align: right;
+		width: 60%;
+	}
+
+	[rel="tag"] {
+		background: $color__background-pre;
+		border-radius: 2px;
+		color: #000;
+		display: inline-block;
+		font-size: ms( -4 );
+		margin: 2px;
+		padding: 3px 6px;
+		position: relative;
+		white-space: nowrap;
+		width: auto;
+
+		&:hover {
+			background: #f3f3f3;
+		}
+		&:active {
+			background: #dfdfdf;
+		}
+	}
+
+}

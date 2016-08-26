@@ -1,0 +1,86 @@
+
+
+@keyframes favme-anime {
+	0% {
+		opacity: 1;
+		font-size: ms(0);
+		-webkit-text-stroke-color: transparent;
+	}
+	25% {
+		opacity: 0.6;
+		color: #fff;
+		font-size: ms(-2);
+		-webkit-text-stroke-width: 1px;
+		-webkit-text-stroke-color: #dc3232;
+	}
+	75% {
+		opacity: 0.6;
+		color: #fff;
+		font-size: ms(3);
+		-webkit-text-stroke-width: 1px;
+		-webkit-text-stroke-color: #dc3232;
+	}
+	100% {
+		opacity: 1;
+		font-size: ms(2);
+		-webkit-text-stroke-color: transparent;
+	}
+}
+
+@keyframes favme-hover {
+	from {
+		font-size: ms( 3 );
+	}
+	80% {
+		font-size: ms( 2 );
+	}
+}
+
+.plugin-favorite {
+	display: inline-block;
+	height: 36px;
+	text-align: center;
+	width: 36px;
+
+	.plugin-favorite-heart {
+		align-items: center;
+		background: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		color: #cbcdce;
+		cursor: pointer;
+		display: flex;
+		font-size: ms( 2 );
+		height: 100%;
+		justify-content: center;
+		line-height: 1;
+		margin: 0;
+		outline: none;
+		padding: 0;
+		transition: all .2s ease;
+
+		&.favorited {
+			color: #dc3232;
+		}
+
+		&:hover {
+			animation: favme-hover .3s infinite alternate;
+		}
+
+		&:hover,
+		&:focus {
+			text-decoration: none;
+		}
+
+		&:after {
+			content: "\f487";
+			font-family: dashicons;
+			vertical-align: top;
+		}
+
+		&.is-animating {
+			animation: favme-anime .3s;
+		}
+	}
+}
