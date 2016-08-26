@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Reviews;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\API\Base;
@@ -95,9 +96,9 @@ class Plugin extends Base {
 
 		$_pages = preg_split( "#<!--section=(.+?)-->#", $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
-			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ] );
+			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
 		}
-		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
+		$result['sections']['reviews'] = Reviews::display();
 		$result['description'] = $result['sections']['description'];
 
 		$result['short_description'] = $post->post_excerpt;
