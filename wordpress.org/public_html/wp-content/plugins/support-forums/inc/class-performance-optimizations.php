@@ -5,7 +5,22 @@ namespace WordPressdotorg\Forums;
 class Performance_Optimizations {
 
 	function __construct() {
+		// Gravatar suppression on lists of topics.
+		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( __CLASS__, 'get_author_link' ) );
+		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( __CLASS__, 'get_author_link' ) );
+
+		// Query simplification.
 		add_filter( 'bbp_after_has_topics_parse_args', array( __CLASS__, 'has_topics' ) );
+	}
+
+	/**
+	 * Remove unnecessary Gravatar display on lists of topics.
+	 */
+	public static function get_author_link( $r ) {
+		if ( ! bbp_is_single_topic() || bbp_is_topic_edit() ) {
+			$r['type'] = 'name';
+		}
+		return $r;
 	}
 
 	/**
@@ -25,13 +40,13 @@ class Performance_Optimizations {
 				$term = self::get_term();
 
 				// If there are a lot of results for a single plugin or theme,
-				// order by ID to avoid an INNER JOIN ON.
+				// order by post_date to avoid an INNER JOIN ON.
 				if ( $term && ! is_wp_error( $term ) && property_exists( $term, 'count' ) ) {
 					if ( $term->count > 10000 ) {
 						unset( $r['meta_key'] );
 						unset( $r['meta_type'] );
 
-						$r['orderby'] = 'ID';
+						$r['orderby'] = 'post_date';
 					}
 				}
 			}
@@ -48,39 +63,7 @@ class Performance_Optimizations {
 			unset( $r['meta_type'] );
 
 			// This only works because we don't edit dates on forum topics.
-			$r['orderby'] = 'ID';
-			add_action( 'pre_get_posts', array( __CLASS__, 'pre_get_posts' ) );
-		}
-		return $r;
-	}
-
-	/**
-	 * If this is a single forum query, don't use SQL_CALC_FOUND_ROWS to find the
-	 * total available topics.
-	 */
-	public static function pre_get_posts( $q ) {
-		if (
-			isset( $q->query['post_type'] ) && $q->query['post_type'] === bbp_get_topic_post_type()
-		) {
-			$q->set( 'no_found_rows', true );
-			add_filter( 'posts_groupby', '__return_empty_string' );
-			add_filter( 'bbp_topic_pagination', array( __CLASS__, 'topic_pagination' ) );
-		}
-	}
-
-	/**
-	 * Instead, use a COUNT(*) query to find total topics in a forum.
-	 */
-	public static function topic_pagination( $r ) {
-		global $wpdb;
-
-		if ( bbp_is_single_forum() ) {
-			$per_page = bbp_get_topics_per_page();
-			$forum_id = bbp_get_forum_id();
-			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE 1=1 AND post_type = 'topic' AND post_parent = %d AND post_status IN ( 'closed', 'publish' )", $forum_id ) );
-
-			$r['total'] = ceil( (int) $total / (int) $per_page );
-			remove_filter( 'bbp_topic_pagination', array( __CLASS__, 'topic_pagination' ) );
+			$r['orderby'] = 'post_date';
 		}
 		return $r;
 	}
