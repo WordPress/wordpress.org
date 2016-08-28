@@ -20,6 +20,7 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets',        1
 add_filter( 'wp_insert_post_data',    __NAMESPACE__ . '\set_request_status',               10, 2 );
 add_action( 'save_post',              __NAMESPACE__ . '\save_request',                     10, 2 );
 add_action( 'transition_post_status', __NAMESPACE__ . '\notify_organizer_request_updated', 10, 3 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\transition_post_status',           10, 3 );
 
 // Miscellaneous
 add_filter( 'map_meta_cap',        __NAMESPACE__ . '\modify_capabilities', 10, 4 );
@@ -196,6 +197,15 @@ function init_meta_boxes() {
 		'wcbrr_expenses',
 		__( 'Expenses', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_expenses_metabox',
+		POST_TYPE,
+		'normal',
+		'high'
+	);
+
+	add_meta_box(
+		'wcp_log',
+		__( 'Log', 'wordcamporg' ),
+		__NAMESPACE__ . '\render_log_metabox',
 		POST_TYPE,
 		'normal',
 		'high'
@@ -473,6 +483,109 @@ function save_request( $post_id, $post ) {
 		\WordCamp_Budgets::attach_existing_files( $post_id, $_POST );
 		add_action( 'save_post', __NAMESPACE__ . '\save_request', 10, 2 );
 	}
+
+	$user = get_user_by( 'id', get_current_user_id() );
+
+	// Look at post status transitions.
+	foreach ( _transition_post_status() as $data ) {
+		list( $new, $old, $transition_post ) = $data;
+
+		// Transitioning a different post.
+		if ( $transition_post->ID != $post->ID )
+			continue;
+
+		if ( $new == 'incomplete' || $new == 'wcb-incomplete' ) {
+			$incomplete_text = get_post_meta( $post->ID, '_wcp_incomplete_notes', true );
+			$incomplete_text = preg_replace( '#\.$#', '', $incomplete_text ); // trailing-undot-it.
+			\WordCamp_Budgets::log( $post->ID, $user->ID, sprintf( 'Marked as incomplete: %s', $incomplete_text ), array(
+				'action' => 'marked-incomplete',
+				'reason' => 'maybe notes',
+			) );
+
+			\WordCamp_Budgets::log( $post->ID, $user->ID, 'Incomplete notification e-mail sent.', array(
+				'action' => 'incomplete-notification-sent',
+			) );
+
+		} elseif ( $new == 'paid' || $new == 'wcb-paid' ) {
+			\WordCamp_Budgets::log( $post->ID, $user->ID, 'Marked as paid', array(
+				'action' => 'marked-paid',
+			) );
+
+			\WordCamp_Budgets::log( $post->ID, $user->ID, 'Paid notification e-mail sent.', array(
+				'action' => 'paid-notification-sent',
+			) );
+
+		} elseif ( $old == 'auto-draft' ) {
+			\WordCamp_Budgets::log( $post->ID, $user->ID, 'Request created', array(
+				'action' => 'updated',
+			) );
+		}
+	}
+
+	\WordCamp_Budgets::log( $post->ID, $user->ID, 'Request updated', array(
+		'action' => 'updated',
+	) );
+}
+
+/**
+ * Add log entries when the post status changes
+ *
+ * @param string  $new
+ * @param string  $old
+ * @param WP_Post $post
+ */
+function transition_post_status( $new, $old, $post ) {
+	if ( $post->post_type != POST_TYPE )
+		return;
+
+	if ( $new == 'auto-draft' || $new == $old )
+		return;
+
+	// Move logging to save_post because transitions are fired before save_post.
+	_transition_post_status( array( $new, $old, $post ) );
+}
+
+/**
+ * A wrapper around a static variable to hold caught transitions.
+ *
+ * @param null|array $set Pass null to retrieve transitions, or an array of transition data to append them.
+ *
+ * @return array Transitions.
+ */
+function _transition_post_status( $set = null ) {
+	static $transitions;
+
+	if ( ! isset( $transitions ) )
+		$transitions = array();
+
+	if ( is_null( $set ) )
+		return $transitions;
+
+	$transitions[] = $set;
+	return $transitions;
+}
+
+/**
+ * Render the Log metabox
+ *
+ * @param WP_Post $post
+ */
+function render_log_metabox( $post ) {
+	$log = get_post_meta( $post->ID, '_wcp_log', true );
+	if ( empty( $log ) )
+		$log = '[]';
+
+	$log = json_decode( $log, true );
+
+	// I wish I had a spaceship.
+	uasort( $log, function( $a, $b ) {
+		if ( $b['timestamp'] == $a )
+			return 0;
+
+		return ( $a['timestamp'] > $b['timestamp'] ) ? -1 : 1;
+	});
+
+	require_once( dirname( __DIR__ ) . '/views/reimbursement-request/metabox-log.php' );
 }
 
 /**
@@ -587,6 +700,10 @@ function validate_and_save_notes( $post, $new_note_message ) {
 
 	update_post_meta( $post->ID, '_wcbrr_notes', $notes );
 	notify_parties_of_new_note( $post, $new_note );
+
+	\WordCamp_Budgets::log( $post->ID, get_current_user_id(), sprintf( 'Note: %s', $new_note_message ), array(
+		'action' => 'note-added',
+	) );
 }
 
 /**
