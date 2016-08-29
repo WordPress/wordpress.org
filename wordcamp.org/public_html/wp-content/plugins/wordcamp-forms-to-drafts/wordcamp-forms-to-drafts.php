@@ -21,22 +21,41 @@ class WordCamp_Forms_To_Drafts {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_filter( 'the_content',              array( $this, 'force_login_to_view_form'    ),  9    );
+		add_action( 'wp_print_styles',          array( $this, 'print_front_end_styles'      )        );
+		add_filter( 'the_content',              array( $this, 'force_login_to_use_form'     ),  9    );
 		add_action( 'template_redirect',        array( $this, 'populate_form_based_on_user' ),  9    );
 		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_sponsors'           ), 10, 3 );
 		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_speakers'           ), 10, 3 );
 	}
 
 	/**
-	 * Force user to login to view certain forms.
+	 * Print CSS for the front-end
+	 */
+	public function print_front_end_styles() {
+		if ( ! $this->form_requires_login( $this->get_current_form_id() ) ) {
+			return;
+		}
+
+		?>
+
+		<style>
+			<?php require_once( __DIR__ . '/front-end.css' ); ?>
+		</style>
+
+		<?php
+	}
+
+	/**
+	 * Force user to login to use certain forms.
 	 *
 	 * @param string $content
 	 *
 	 * @return string
 	 */
-	public function force_login_to_view_form( $content ) {
+	public function force_login_to_use_form( $content ) {
 		$form_id           = $this->get_current_form_id();
-		$shortcode_pattern = '/\[contact-form[\D\S]+\[\/contact-form\]/';
+		$please_login_message = '';
+		// todo realign
 
 		if ( ! $this->form_requires_login( $form_id ) ) {
 			return $content;
@@ -51,15 +70,30 @@ class WordCamp_Forms_To_Drafts {
 				break;
 		}
 
-		if ( ! empty( $please_login_message ) ) {
-			$please_login_message = str_replace(
-				__( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ),
-				$please_login_message,
-				wcorg_login_message( '', get_permalink() )
-			);
+		return $this->inject_disabled_form_elements( $content, $please_login_message );
+	}
 
-			$content = preg_replace( $shortcode_pattern, $please_login_message, $content );
-		}
+	/**
+	 * Inject the HTML elements that are used to disable a form until the user logs in
+	 *
+	 * @param string $content
+	 * @param string $please_login_message
+	 *
+	 * @return string
+	 */
+	protected function inject_disabled_form_elements( $content, $please_login_message ) {
+		$please_login_message = str_replace(
+			__( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ),
+			$please_login_message,
+			wcorg_login_message( '', get_permalink() )
+		);
+
+		// Prevent wpautop() from converting tabs into empty paragraphs in #wcorg-login-message
+		$please_login_message = trim( str_replace( "\t", '', $please_login_message ) );
+
+		$form_wrapper = '<div class="wcfd-disabled-form">' . $please_login_message . '<div class="wcfd-overlay"></div> [contact-form';
+		$content      = str_replace( '[contact-form',   $form_wrapper,           $content );
+		$content      = str_replace( '[/contact-form]', '[/contact-form]</div>', $content );
 
 		return $content;
 	}

@@ -1,0 +1,45 @@
+.wcfd-disabled-form {
+	position: relative;
+}
+
+	.wcfd-disabled-form #wcorg-login-message {
+		position: absolute;
+		z-index: 10;
+		margin: 2.4em;
+		padding: 1.8em;
+		background-color: #F56E28;
+		border-radius: .25em;
+		margin-bottom: 2em;
+	}
+
+		.wcfd-disabled-form #wcorg-login-message p {
+			color: white !important /* !important to prevent theme from unintentionally overriding */;
+		}
+
+			.wcfd-disabled-form #wcorg-login-message p:last-child {
+				margin-bottom: 0;
+			}
+
+			.wcfd-disabled-form #wcorg-login-message a {
+				color: #a20000 !important /* !important to prevent theme from unintentionally overriding */;
+				font-weight: bold;
+			}
+
+	.wcfd-overlay {
+		position: absolute;
+		z-index: 5;
+		width: 100%;
+		height: 100%;
+		background-color: black;
+		opacity: .5;
+	}
+
+	.wcfd-disabled-form div[id^="contact-form-"] {
+		padding: 1.8em;
+	}
+
+@media screen and ( min-width: 470px ) {
+	.wcfd-disabled-form #wcorg-login-message {
+		margin: 4em;
+	}
+}
