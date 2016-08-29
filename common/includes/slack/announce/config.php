@@ -46,6 +46,8 @@ function get_whitelist() {
 		'core-customize' => array(
 			'celloexpressions',
 			'ocean90',
+			'valendesigns',
+			'voldemortensen',
 			'westonruter',
 		),
 		'core-editor' => array(
