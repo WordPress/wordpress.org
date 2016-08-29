@@ -21,10 +21,10 @@ class WordCamp_Forms_To_Drafts {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_filter( 'the_content',              array( $this, 'force_login_to_view_form' ), 9 );
-		add_action( 'template_redirect',        array( $this, 'populate_form_based_on_user' ), 9 );
-		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_sponsors' ), 10, 3 );
-		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_speakers' ), 10, 3 );
+		add_filter( 'the_content',              array( $this, 'force_login_to_view_form'    ),  9    );
+		add_action( 'template_redirect',        array( $this, 'populate_form_based_on_user' ),  9    );
+		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_sponsors'           ), 10, 3 );
+		add_action( 'grunion_pre_message_sent', array( $this, 'call_for_speakers'           ), 10, 3 );
 	}
 
 	/**
@@ -42,26 +42,24 @@ class WordCamp_Forms_To_Drafts {
 			return $content;
 		}
 
-			switch ( $form_id ) {
-				case 'call-for-speakers':
-					$please_login_message = sprintf(
-						__( 'Before submitting your speaker proposal, please <a href="%s">log into your WordPress.org account</a>*.', 'wordcamporg' ),
-						wp_login_url( get_permalink() )
-					);
-					break;
-			}
-
-			if ( ! empty( $please_login_message ) ) {
-				$please_login_message = str_replace(
-					__( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ),
-					$please_login_message,
-					wcorg_login_message( '', get_permalink() )
+		switch ( $form_id ) {
+			case 'call-for-speakers':
+				$please_login_message = sprintf(
+					__( 'Before submitting your speaker proposal, please <a href="%s">log into your WordPress.org account</a>*.', 'wordcamporg' ),
+					wp_login_url( get_permalink() )
 				);
+				break;
+		}
 
-				$content = preg_replace( $shortcode_pattern, $please_login_message, $content );
-			}
+		if ( ! empty( $please_login_message ) ) {
+			$please_login_message = str_replace(
+				__( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ),
+				$please_login_message,
+				wcorg_login_message( '', get_permalink() )
+			);
 
-		// todo realign
+			$content = preg_replace( $shortcode_pattern, $please_login_message, $content );
+		}
 
 		return $content;
 	}
@@ -184,7 +182,7 @@ class WordCamp_Forms_To_Drafts {
 	 * @return string | false
 	 */
 	protected function get_form_key( $submission_id ) {
-		$key = false;
+		$key        = false;
 		$submission = get_post( $submission_id );
 
 		if ( ! empty( $submission->post_parent ) ) {
@@ -203,6 +201,7 @@ class WordCamp_Forms_To_Drafts {
 	 */
 	protected function get_user_id_from_username( $username ) {
 		$user = get_user_by( 'login', $username );
+
 		return empty( $user->ID ) ? 0 : $user->ID;
 	}
 
@@ -324,7 +323,8 @@ class WordCamp_Forms_To_Drafts {
 			'post_type'      => 'wcb_speaker',
 			'posts_per_page' => 1,
 			'post_status'    => array( 'publish', 'pending', 'draft', 'future', 'private' ),    // Trashed speakers are ignored because they'll likely be deleted
-			'meta_query'     => array(
+
+			'meta_query' => array(
 				array(
 					'key'     => '_wcpt_user_id',
 					'value'   => $user_id,
