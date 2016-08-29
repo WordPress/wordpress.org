@@ -45,7 +45,7 @@ class WordCamp_Forms_To_Drafts {
 		switch ( $form_id ) {
 			case 'call-for-speakers':
 				$please_login_message = sprintf(
-					__( 'Before submitting your speaker proposal, please <a href="%s">log into your WordPress.org account</a>*.', 'wordcamporg' ),
+					__( 'Before submitting your speaker proposal, please <a href="%s">log in to WordCamp.org</a> using your Word<em><strong>Press</strong></em>.org account*.', 'wordcamporg' ),
 					wp_login_url( get_permalink() )
 				);
 				break;
