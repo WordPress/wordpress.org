@@ -51,7 +51,10 @@ class WordCamp_Docs {
 	 */
 	public static function default_templates( $templates ) {
 		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/speaker-invitation.php' );
+		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/sponsorship-agreement.php' );
+
 		$templates['speaker-invitation'] = new WordCamp_Docs_Template_Speaker_Invitation;
+		$templates['sponsorship-agreement'] = new WordCamp_Docs_Template_Sponsorship_Agreement;
 
 		return $templates;
 	}
@@ -60,7 +63,7 @@ class WordCamp_Docs {
 	 * Add a menu item.
 	 */
 	public static function admin_menu() {
-		add_menu_page( __( 'WordCamp Docs', 'wordcamporg' ), __( 'Docs', 'wordcamporg' ), 'manage_options', 'wordcamporg', array( __CLASS__, 'render_menu_page' ), 'dashicons-portfolio', 58 );
+		add_menu_page( __( 'WordCamp Docs', 'wordcamporg' ), __( 'Docs', 'wordcamporg' ), 'manage_options', 'wcdocs', array( __CLASS__, 'render_menu_page' ), 'dashicons-portfolio', 58 );
 	}
 
 	/**
@@ -104,7 +107,10 @@ class WordCamp_Docs {
 				$generator->generate_pdf_from_string(
 					$template->render( $data ),
 					sanitize_file_name( $template->get_filename() ),
-					array( 'assets' => $template->get_assets() ) );
+					array(
+						'assets' => $template->get_assets(),
+						'margins' => array( 10, 10, 10, 10 ),
+					) );
 
 				$generator->serve_pdf_to_browser( $template->get_filename(), true );
 				$generator->delete_tmp_folder();
