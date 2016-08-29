@@ -1,0 +1,326 @@
+/* ----------------------------------------------------------------------------
+
+WordPress-style Form Elements
+=============================
+These are the current form element styles for wp-admin. Many of them include the .wp-admin class to be appended which I appended to the html tag on this pen.
+
+Form Styles
+-------------
+All form element styles are minimal and require additional styling for layout.
+
+---------------------------------------------------------------------------- */
+
+/* Include margin and padding in the width calculation of input and textarea. */
+input,
+textarea {
+	box-sizing: border-box;
+}
+
+input[type="checkbox"],
+input[type="color"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="radio"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"],
+select,
+textarea {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+	color: #32373c;
+	outline: none;
+	transition: 0.05s border-color ease-in-out;
+
+	&:focus {
+		border-color: #5b9dd9;
+		box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	}
+}
+
+/* rtl:ignore */
+input[type="email"],
+input[type="url"] {
+	direction: ltr;
+}
+
+/* Vertically align the number selector with the input. */
+input[type="number"] {
+	height: 28px;
+	line-height: inherit;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	background: #fff;
+	border: 1px solid #b4b9be;
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.1 );
+	clear: none;
+	color: #555;
+	cursor: pointer;
+	display: inline-block;
+	height: 16px;
+	line-height: 0;
+	margin: -4px 4px 0 0;
+	min-width: 16px;
+	outline: 0;
+	padding: 0 !important;
+	text-align: center;
+	transition: 0.05s border-color ease-in-out;
+	vertical-align: middle;
+	width: 16px;
+	-webkit-appearance: none;
+
+	&:checked:before {
+		display: inline-block;
+		float: left;
+		font: normal 21px/1 dashicons;
+		vertical-align: middle;
+		width: 16px;
+		speak: none;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	&.disabled,
+	&:disabled,
+	&:disabled:checked:before,
+	&.disabled:checked:before {
+		opacity: 0.7;
+	}
+}
+
+input[type="checkbox"]:checked:before {
+	color: #1e8cbe;
+	content: "\f147";
+	margin: -3px 0 0 -4px;
+}
+
+input[type="radio"] {
+	border-radius: 50%;
+	line-height: 10px;
+	margin-right: 4px;
+
+	&:checked + label:before {
+		color: #82878c;
+	}
+
+	&:checked:before {
+		background-color: #1e8cbe;
+		border-radius: 50px;
+		content: "\2022";
+		font-size: 24px;
+		height: 6px;
+		line-height: 16px;
+		margin: 4px;
+		text-indent: -9999px;
+		width: 6px;
+	}
+}
+
+input[type="reset"]:hover,
+input[type="reset"]:active {
+	color: #00a0d2;
+}
+
+/* Search */
+input[type="search"] {
+	-webkit-appearance: textfield;
+
+	&::-webkit-search-decoration {
+		display: none;
+	}
+}
+
+textarea,
+input,
+select,
+button {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
+textarea,
+input,
+select {
+	border-radius: 0;
+	font-size: 14px;
+	padding: 3px 5px; /* Reset mobile webkit's default element styling */
+}
+
+textarea {
+	line-height: 1.4;
+	overflow: auto;
+	padding: 2px 6px;
+	resize: vertical;
+
+	&.code {
+		line-height: 1.4;
+		padding: 4px 6px 1px 6px;
+	}
+}
+
+label {
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+input,
+select {
+	margin: 1px;
+	padding: 3px 5px;
+}
+
+input.code {
+	padding-top: 6px;
+}
+
+input.readonly,
+input[readonly],
+textarea.readonly,
+textarea[readonly] {
+	background-color: #eee;
+}
+
+:-moz-placeholder,
+.wp-core-ui :-moz-placeholder {
+	color: #a9a9a9;
+}
+
+input:disabled,
+input.disabled,
+select:disabled,
+select.disabled,
+textarea:disabled,
+textarea.disabled {
+	background: rgba( 255, 255, 255, 0.5 );
+	border-color: rgba( 222, 222, 222, 0.75 );
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.04 );
+	color: rgba( 51, 51, 51, 0.5 );
+}
+
+input[type="file"]:disabled,
+input[type="file"].disabled,
+input[type="range"]:disabled,
+input[type="range"].disabled {
+	background: none;
+	box-shadow: none;
+}
+
+input.large-text,
+textarea.large-text {
+	width: 99%;
+}
+
+input.regular-text {
+	width: 25em;
+}
+
+input.small-text {
+	padding: 1px 6px;
+	width: 50px;
+}
+
+input[type="number"].small-text {
+	width: 65px;
+}
+
+input.tiny-text {
+	width: 35px;
+}
+
+input[type="number"].tiny-text {
+	width: 45px;
+}
+
+
+/* =Media Queries
+-------------------------------------------------------------- */
+
+@media screen and ( max-width: 782px ) {
+	/* Input Elements */
+	textarea {
+		-webkit-appearance: none;
+	}
+
+	input[type="text"],
+	input[type="email"],
+	input[type="search"],
+	input[type="password"],
+	input[type="number"] {
+		-webkit-appearance: none;
+		padding: 6px 10px;
+	}
+
+	input[type="number"] {
+		height: 40px;
+	}
+
+	input.code {
+		padding-bottom: 5px;
+		padding-top: 10px;
+	}
+
+	input[type="checkbox"] {
+		-webkit-appearance: none;
+		padding: 10px;
+	}
+
+	input[type="checkbox"]:checked:before {
+		font: normal 30px/1 dashicons;
+		margin: -3px -5px;
+	}
+
+	input[type="radio"],
+	input[type="checkbox"] {
+		height: 25px;
+		width: 25px;
+	}
+
+	input[type="radio"]:checked:before {
+		vertical-align: middle;
+		width: 9px;
+		height: 9px;
+		margin: 7px;
+		line-height: 16px;
+	}
+
+	textarea,
+	input {
+		font-size: 16px;
+	}
+
+	input[type="text"].small-text,
+	input[type="search"].small-text,
+	input[type="password"].small-text,
+	input[type="number"].small-text,
+	input[type="number"].small-text {
+		width: auto;
+		max-width: 55px;
+		display: inline;
+		padding: 3px 6px;
+		margin: 0 3px;
+	}
+
+	input.regular-text {
+		width: 100%;
+	}
+
+	label {
+		font-size: 14px;
+	}
+
+	fieldset label {
+		display: block;
+	}
+}

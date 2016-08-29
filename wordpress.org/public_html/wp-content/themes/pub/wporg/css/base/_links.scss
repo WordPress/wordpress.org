@@ -1,0 +1,25 @@
+a {
+	color: $color__wp-blue;
+
+	&:visited {
+		/* Override wp4.css */
+		color: $color__wp-blue;
+	}
+
+	&:hover,
+	&:focus,
+	&:active {
+		/* Override wp4.css */
+		color: $color__wp-blue;
+		text-decoration: underline;
+	}
+
+	&:focus {
+		outline: thin dotted;
+	}
+
+	&:hover,
+	&:active {
+		outline: 0;
+	}
+}

@@ -1,0 +1,17 @@
+.clear,
+.entry-content,
+.comment-content,
+.site-header,
+.site-content,
+.site-footer {
+	&:before,
+	&:after {
+		content: "";
+		display: table;
+		table-layout: fixed;
+	}
+
+	&:after {
+		clear: both;
+	}
+}

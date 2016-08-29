@@ -1,0 +1,13 @@
+a {
+	&.button:hover,
+	&.button:focus,
+	&.button:active {
+		text-decoration: none;
+	}
+
+	// Override for wp4.css.
+	p &:not(.button),
+	p &:not(.button):hover {
+		border: none;
+	}
+}

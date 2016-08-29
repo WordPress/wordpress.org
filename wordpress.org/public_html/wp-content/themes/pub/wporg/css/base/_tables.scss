@@ -1,0 +1,29 @@
+table {
+	border: 1px solid #eee;
+	//border-spacing: .1rem;
+	border-collapse: collapse;
+	font-size: ms( -2 );
+	margin: 0 0 ms( 0 );
+	padding: 0;
+	width: 100%;
+
+	thead {
+		background: $color__base-gray;
+		color: #fff;
+	}
+
+	th, td {
+		border: 1px solid #eee;
+		font-weight: normal;
+		margin: 0;
+		padding: 0.4rem;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	tbody {
+		tr:nth-child( even ) {
+			background: #f7f7f7;
+		}
+	}
+}

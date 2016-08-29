@@ -1,0 +1,25 @@
+.site-title {
+	display: inline-block;
+	font-size: ms( 4 );
+	font-weight: 300;
+	line-height: 1;
+	margin: 0 2rem 0 0;
+	max-width: none;
+
+	a {
+		color: #fff;
+		font-weight: 300;
+
+		&:hover,
+		&:focus,
+		&:active {
+			text-decoration: none;
+		}
+	}
+
+	.site-header.home & {
+		display: inherit;
+		font-size: ms( 12 );
+		margin: 2rem 0 1rem;
+	}
+}

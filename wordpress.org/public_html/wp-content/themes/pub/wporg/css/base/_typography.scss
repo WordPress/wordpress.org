@@ -1,0 +1,20 @@
+html {
+	font-size: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+	color: $color__base-gray;
+	font-family: "Open Sans", sans-serif;
+	font-size: 100%;
+	line-height: $type__lineheight;
+}
+
+@media screen and ( min-width: $ms-breakpoint ) {
+	html {
+		font-size: 1.125rem;
+	}
+}

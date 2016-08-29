@@ -1,0 +1,53 @@
+#wporg-header {
+	h1 {
+		margin: auto;
+	}
+
+	h2.rosetta {
+		clear: none;
+	}
+
+	form input {
+		box-sizing: content-box;
+		margin: 0;
+		padding: 3px;
+	}
+
+	.button {
+		box-shadow: none;
+	}
+
+	.download-button {
+		background-color: #21759b;
+		background-image: linear-gradient(to bottom, #2a95c5, #21759b);
+		border-bottom-color: #1e6a8d;
+		border-color: #21759b;
+		box-shadow: inset 0 1px 0 rgba( 120, 200, 230, 0.5 );
+
+		&:hover,
+		&:focus {
+			background-color: #278ab7;
+			background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
+			border-color: #1b607f;
+			box-shadow: inset 0 1px 0 rgba(120,200,230,0.6);
+			color: #fff;
+			text-shadow: 0 -1px 0 rgba( 0, 0, 0, 0.3 );
+		}
+
+		&:active {
+			background: #1b607f;
+			background-image: linear-gradient(to bottom, #21759b, #278ab7);
+			border-color: #124560 #2382ae #2382ae #2382ae;
+			box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
+			color: rgba(255,255,255,0.95);
+			text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+			transform: none;
+		}
+	}
+
+	a:hover,
+	a:focus,
+	a:active {
+		text-decoration: none;
+	}
+}

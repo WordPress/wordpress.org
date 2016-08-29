@@ -1,0 +1,53 @@
+.notice {
+	background: #fff;
+	border-left: 4px solid #fff;
+	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
+	margin: 1em 0;
+	padding: 1px 12px;
+
+	p {
+		font-size: ms( -2 );
+		margin: 0.5em 0;
+		padding: 2px;
+	}
+
+	&.notice-alt {
+		box-shadow: none;
+	}
+
+	&.notice-large {
+		padding: 10px 20px;
+	}
+
+	&.notice-success {
+		border-left-color: #46b450;
+	}
+
+	&.notice-success.notice-alt {
+		background-color: #ecf7ed;
+	}
+
+	&.notice-warning {
+		border-left-color: #ffb900;
+	}
+
+	&.notice-warning.notice-alt {
+		background-color: #fff8e5;
+	}
+
+	&.notice-error {
+		border-left-color: #dc3232;
+	}
+
+	&.notice-error.notice-alt {
+		background-color: #fbeaea;
+	}
+
+	&.notice-info {
+		border-left-color: #00a0d2;
+	}
+
+	&.notice-info.notice-alt {
+		background-color: #e5f5fa;
+	}
+}

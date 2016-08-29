@@ -1,0 +1,52 @@
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after { /* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+	box-sizing: inherit;
+}
+
+body {
+	background: #fff; /* Fallback for when there is no custom background color defined. */
+}
+
+blockquote, q {
+	quotes: "" "";
+
+	&:before,
+	&:after {
+		content: "";
+	}
+}
+
+blockquote {
+	// Override wp4.css.
+	background: transparent;
+	border: none;
+	padding: 0;
+
+	border-left: 2px solid #eee;
+	color: #82878c;
+	font-style: italic;
+	margin: 1rem 0;
+	padding-left: 1rem;
+
+	cite {
+		font-size: ms( -2 );
+	}
+}
+
+hr {
+	background-color: #eee;
+	border: 0;
+	height: 2px;
+	margin: 5rem auto;
+}
+
+img {
+	height: auto; /* Make sure images are scaled correctly. */
+	max-width: 100%; /* Adhere to container width. */
+}
+
