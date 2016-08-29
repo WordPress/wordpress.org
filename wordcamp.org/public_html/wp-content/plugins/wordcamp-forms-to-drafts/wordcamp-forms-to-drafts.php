@@ -35,17 +35,13 @@ class WordCamp_Forms_To_Drafts {
 	 * @return string
 	 */
 	public function force_login_to_view_form( $content ) {
-		global $post;
+		$form_id           = $this->get_current_form_id();
+		$shortcode_pattern = '/\[contact-form[\D\S]+\[\/contact-form\]/';
 
-		if ( ! is_a( $post, 'WP_Post' ) ) {
+		if ( ! $this->form_requires_login( $form_id ) ) {
 			return $content;
 		}
 
-		$forms_that_require_login = array( 'call-for-speakers' );
-		$shortcode_pattern        = '/\[contact-form[\D\S]+\[\/contact-form\]/';
-		$form_id                  = get_post_meta( $post->ID, 'wcfd-key', true );
-
-		if ( in_array( $form_id, $forms_that_require_login ) && ! is_user_logged_in() ) {
 			switch ( $form_id ) {
 				case 'call-for-speakers':
 					$please_login_message = sprintf(
@@ -64,9 +60,39 @@ class WordCamp_Forms_To_Drafts {
 
 				$content = preg_replace( $shortcode_pattern, $please_login_message, $content );
 			}
-		}
+
+		// todo realign
 
 		return $content;
+	}
+
+	/**
+	 * Get the WCFD ID of the current form
+	 *
+	 * @return string
+	 */
+	protected function get_current_form_id() {
+		global $post;
+		$form_id = '';
+
+		if ( is_a( $post, 'WP_Post' ) ) {
+			$form_id = get_post_meta( $post->ID, 'wcfd-key', true );
+		}
+
+		return $form_id;
+	}
+
+	/**
+	 * Determine if the current form requires a login to use it
+	 *
+	 * @param string $form_id
+	 *
+	 * @return bool
+	 */
+	protected function form_requires_login( $form_id ) {
+		$forms_that_require_login = array( 'call-for-speakers' );
+
+		return in_array( $form_id, $forms_that_require_login, true ) && ! is_user_logged_in();
 	}
 
 	/**
