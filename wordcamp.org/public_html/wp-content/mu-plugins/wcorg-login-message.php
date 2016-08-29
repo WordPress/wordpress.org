@@ -94,7 +94,7 @@ function wcorg_login_message( $message, $redirect_to = false ) {
 	ob_start();
 	?>
 
-	<div class="message">
+	<div id="wcorg-login-message" class="message">
 		<p><?php echo __( 'Please use your <strong>WordPress.org</strong>* account to log in.', 'wordcamporg' ); ?></p> <?php // todo make this a constant and use it in wordcamp-forms-to-drafts and camptix-extras, since any changes to it will break them unless they're also updated ?>
 
 		<p>
