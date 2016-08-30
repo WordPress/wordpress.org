@@ -43,23 +43,7 @@ get_header(); ?>
 
 			<div id="viewdiv">
 				<ul id="views">
-
-					<?php
-					$view_iterator = 0;
-					$topic_views   = array_keys( array_reverse( bbp_get_views() ) );
-					$view_count    = count( $topic_views );
-
-					foreach ( $topic_views as $view ) : $view_iterator++; ?>
-
-						<li class="view"><a href="<?php bbp_view_url( $view ); ?>"><?php bbp_view_title( $view ); ?></a></li>
-
-						<?php if ( $view_iterator < $view_count ) : ?>|<?php endif; ?>
-
-					<?php endforeach;
-
-					// Unset variables
-					unset( $view_count, $topic_views ); ?>
-
+					<?php wporg_support_get_views(); ?>
 				</ul>
 			</div><!-- #viewdiv -->
 		</div><!-- #col-6 -->

@@ -88,18 +88,50 @@ function wporg_support_breadcrumb() {
 
 /**
  * Register these bbPress views:
- *  View: All Topics
- *  @ToDo View: Not Resolved
- *  @ToDo View: modlook
+ *  View: All topics
+ *  View: Tagged modlook
  *
  * @uses bbp_register_view() To register the view
  */
 function wporg_support_custom_views() {
-	bbp_register_view( 'all-topics', __( 'All Topics', 'wporg-forums' ), array( 'order' => 'DESC' ), false );
-//	bbp_register_view( 'support-forum-no', __( 'Not Resolved', 'wporg-forums' ), array( 'post_status' => 'closed' ), false );
-//	bbp_register_view( 'taggedmodlook', __( 'Tagged modlook', 'wporg-forums' ), array( 'topic-tag' => 'modlook' ) );
+	bbp_register_view( 'all-topics', __( 'All topics', 'wporg-forums' ), array( 'order' => 'DESC' ), false );
+	if ( get_current_user_id() && current_user_can( 'moderate' ) ) {
+		bbp_register_view( 'taggedmodlook', __( 'Tagged modlook', 'wporg-forums' ), array( 'topic-tag' => 'modlook' ) );
+	}
 }
 add_action( 'bbp_register_views', 'wporg_support_custom_views' );
+
+/**
+ * Display an ordered list of bbPress views
+ */
+function wporg_support_get_views() {
+	$all = bbp_get_views();
+	$ordered = array(
+		'all-topics',
+		'no-replies',
+		'support-forum-no',
+		'taggedmodlook',
+	);
+	$found = array();
+	foreach ( $ordered as $view ) {
+		if ( array_key_exists( $view, $all ) ) {
+			$found[] = $view;
+		}
+	}
+	$view_iterator = 0;
+	$view_count    = count( $found );
+
+	foreach ( $found as $view ) : $view_iterator++; ?>
+
+		<li class="view"><a href="<?php bbp_view_url( $view ); ?>"><?php bbp_view_title( $view ); ?></a></li>
+
+		<?php if ( $view_iterator < $view_count ) : ?>|<?php endif; ?>
+
+	<?php endforeach;
+
+	// Unset variables
+	unset( $view_count, $view_iterator, $view, $found, $all, $ordered );
+}
 
 /**
  * Custom Body Classes
