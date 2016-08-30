@@ -124,6 +124,7 @@ function get_whitelist() {
 			'obenland',
 		),
 		'meta-devhub' => array(
+			'coffee2code',
 			'drew',
 		),
 		'meta-i18n' => array(
