@@ -131,21 +131,36 @@ class Status_Transitions {
 		/* Translators: Plugin name. */
 		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %s has been approved.', 'wporg-plugins' ), $post->post_title ). "\n";
 
-		$content .= __( 'Within one hour, you will have access to your SVN repository with your WordPress.org username and password (the same one you use on the forums).', 'wporg-plugins' ) . "\n";
+		$content .= __( 'Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.', 'wporg-plugins' ) . "\n\n";
+
 		$content .= "http://plugins.svn.wordpress.org/{$post->post_name}\n\n";
 
-		$content .= __( 'Here are some handy links to help you get started.', 'wporg-plugins' ) . "\n";
-		$content .= __( 'Using Subversion with the WordPress Plugins Directory', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/svn/\n\n";
-		$content .= __( 'FAQ about the WordPress Plugins Directory', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/faq/\n\n";
-		$content .= __( 'WordPress Plugins Directory readme.txt standard', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/readme.txt\n\n";
-		$content .= __( 'readme.txt validator:', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/validator/\n\n\n";
+		$content .= __( 'Here are some handy links to help you get started.', 'wporg-plugins' ) . "\n\n";
 
-		$content .= __( 'The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
-		$content .= 'https://make.wordpress.org/plugins';
+		$content .= __( 'WordPress Plugin Directory Guidelines:', 'wporg-plugins' ) . "\n";
+		$content .= "https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/\n\n";
+
+		$content .= __( 'Using Subversion with the WordPress Plugin Directory:', 'wporg-plugins' ) . "\n";
+		$content .= "https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/\n\n";
+
+		$content .= __( 'FAQ about the WordPress Plugin Directory:', 'wporg-plugins' ) . "\n";
+		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/\n\n";
+
+		$content .= __( 'WordPress Plugin Directory readme.txt standard:', 'wporg-plugins' ) . "\n";
+		$content .= "https://wordpress.org/plugins/about/readme.txt\n\n";
+
+		$content .= __( 'A readme.txt validator:', 'wporg-plugins' ) . "\n";
+		$content .= "https://wordpress.org/plugins/about/validator/\n\n";
+
+		$content .= __( 'Plugin Assets (header images etc):', 'wporg-plugins' ) . "\n"; 
+		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/\n\n";
+
+		$content .= __( 'If you have issues or questions, please reply to this email and let us know.', 'wporg-plugins' ) . "\n\n";
+
+		$content .= __( 'Enjoy!', 'wporg-plugins' ) . "\n\n";
+
+		$content .= __( '-The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
+		$content .= 'https://make.wordpress.org/plugins/';
 
 		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
