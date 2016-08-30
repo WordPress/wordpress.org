@@ -33,6 +33,7 @@ class Plugin {
 	 */
 	private function __construct() {
 		$this->performance = new Performance_Optimizations;
+		$this->users       = new Users;
 
 		// These modifications are specific to https://wordpress.org/support/
 		$blog_id = get_current_blog_id();
