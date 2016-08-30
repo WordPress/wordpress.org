@@ -23,7 +23,13 @@
 				</ul>
 			</div>
 
+		<?php elseif ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'review', 'active' ) ) ) : ?>
+
+			<?php do_action( 'wporg_compat_view_sidebar' ); ?>
+
 		<?php elseif ( bbp_is_single_topic() || bbp_is_topic_edit() || bbp_is_reply_edit() ) : ?>
+
+			<?php do_action( 'wporg_compat_single_topic_sidebar_pre' ); ?>
 
 			<div>
 				<h3><?php _e( 'Topic Info', 'wporg-forums' ); ?></h3>
