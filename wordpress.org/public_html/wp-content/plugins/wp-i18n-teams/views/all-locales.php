@@ -10,7 +10,7 @@
 			'major-behind-one' => _n_noop( '%s locale behind one major version.', '%s locales behind by one major version.', 'wporg' ),
 			'major-behind-many' => _n_noop( '%s locale behind more than one major version.', '%s locales behind more than one major version.', 'wporg' ),
 			'no-releases' => _n_noop( '%s locale has a site, no release.', '%s locales have a site but never released.', 'wporg' ),
-			'no-site' => _n_noop( '%s locale doesn&#8217;t have a site.', '%s locales don&#8127;t have a site.', 'wporg' ),
+			'no-site' => _n_noop( '%s locale doesn&#8217;t have a site.', '%s locales don&#8217;t have a site.', 'wporg' ),
 		);
 
 		foreach ( $release_statuses as $status => $nooped_plural ) {
@@ -32,7 +32,7 @@
 			'translated-90' => _n_noop( '%s locale has more than 90%%.', '%s locales have more than 90%%.', 'wporg' ),
 			'translated-50' => _n_noop( '%s locale has more than 50%%.', '%s locales have more than 50%%.', 'wporg' ),
 			'translated-50-less' => _n_noop( '%s locale has less than 50%%.', '%s locales have less than 50%%.', 'wporg' ),
-			'no-wp-project' => _n_noop( '%s locale doesn&#8217;t have a WP project.', '%s locales don&#8127;t have a WP project.', 'wporg' ),
+			'no-wp-project' => _n_noop( '%s locale doesn&#8217;t have a WP project.', '%s locales don&#8217;t have a WP project.', 'wporg' ),
 		);
 
 		foreach ( $translation_statuses as $status => $nooped_plural ) {
