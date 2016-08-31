@@ -6,11 +6,15 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 	const COMPAT = 'plugin';
 
-	var $slug = '';
-	var $plugin = '';
+	var $slug   = false;
+	var $plugin = null;
 
 	function compat() {
 		return self::COMPAT;
+	}
+
+	function compat_title() {
+		return __( 'Plugin Support', 'wporg-forums' );
 	}
 
 	function slug() {
@@ -34,14 +38,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	public function __construct() {
-		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// We have to add the custom view before bbPress runs its own action
-			// on parse_query at priority 2.
-			add_action( 'parse_query', array( $this, 'parse_query' ), 1 );
-
-			// Add parent class hooks.
-			add_action( 'plugins_loaded', array( $this, 'init' ) );
-		}
+		$this->init();
 	}
 
 	/**
@@ -53,70 +50,88 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
-		$plugin = $this->get_plugin_data( $slug );
+		$plugin = $this->get_object( $slug );
 		if ( ! $plugin ) {
 			return;
 		} else {
-			$this->slug  = $slug;
-			$this->plugin = $plugin;
+			$this->slug         = $slug;
+			$this->plugin       = $plugin;
+			$this->authors      = $this->get_authors( $slug );
+			$this->contributors = $this->get_contributors( $slug );
 		}
-
-		// Add plugin support view.
-		bbp_register_view(
-			self::COMPAT,
-			__( 'Plugin Support', 'wporg-forums' ),
-			array(
-				'post_parent'   => Plugin::PLUGINS_FORUM_ID,
-				'tax_query'     => array( array(
-					'taxonomy'  => $this->taxonomy(),
-					'field'     => 'slug',
-					'terms'     => $slug,
-				) ),
-				'orderby'       => '',
-				'show_stickies' => false,
-			)
-		);
-
-		// Add plugin review view.
-		bbp_register_view(
-			'reviews',
-			__( 'Reviews', 'wporg-forums' ),
-			array(
-				'post_parent'   => Plugin::REVIEWS_FORUM_ID,
-				'tax_query'     => array( array(
-					'taxonomy'  => $this->taxonomy(),
-					'field'     => 'slug',
-					'terms'     => $slug,
-				) ),
-				'orderby'       => '',
-				'show_stickies' => false,
-			)
-		);
 	}
 
-	public function get_plugin_data( $slug = '' ) {
-		global $wpdb;
+	public function do_view_sidebar() {
+		?>
+		<div>
+			<h3><?php _e( 'Browse Plugins', 'wporg-forums' ); ?></h3>
 
-		if ( ! empty( $this->plugin ) ) {
-			return $this->plugin;
-		}
+			<ul class="plugin-submenu">
+				<li class="view"><a href='//wordpress.org/plugins/'><?php _e( 'Featured', 'wporg' ); ?></a></li>
+				<li class="view"><a href='//wordpress.org/plugins/browse/popular/'><?php _e( 'Most Popular', 'wporg' ); ?></a></li>
+				<li class="view"><a href='//wordpress.org/plugins/browse/favorites/'><?php _e( 'Favorites', 'wporg' ); ?></a></li>
+				<li class="view"><a href='//wordpress.org/plugins/browse/beta/'><?php _e( 'Beta Testing', 'wporg' ); ?></a></li>
+				<li class="view"><a href='/plugins/about/'><?php _e( 'Developers', 'wporg' ); ?></a></li>
+			</ul>
+		</div>
 
-		$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug );
-		$row = $wpdb->get_row( $sql );
-		if ( ! $row ) {
-			return false;
-		} else {
-			$plugin = $row;
-			$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_postmeta WHERE post_id = %d AND meta_key NOT LIKE %s", WPORG_PLUGIN_DIRECTORY_BLOGID, $row->ID, '_trac_ticket_%' );
-			$results = $wpdb->get_results( $sql );
-			if( $results ) {
-				foreach ( $results as $row ) {
-					if ( ! isset( $plugin->{$row->meta_key} ) ) {
-						$plugin->{$row->meta_key} = maybe_unserialize( $row->meta_value );
-					}
-				}
-			}
-		}
-		return $plugin;
+		<div>
+			<h3><?php _e( 'Search Plugins', 'wporg-forums' ); ?></h3>
+
+			<form id="side-search" method="get" action="//wordpress.org/plugins/search.php">
+			<div>
+				<input type="text" class="text" name="q" value="" />
+				<input type="submit" class="button" value="<?php _e( 'Search', 'wporg-forums' ); ?>" />
+			</div>
+			</form>
+		</div>
+		<?php
+	}
+
+	public function do_topic_sidebar() {
+		include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
+		$plugin  = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
+		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">Frequently Asked Questions</a>', esc_attr( $this->slug() ) );
+		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		?>
+		<div>
+			<h3>About this Plugin</h3>
+			<ul>
+				<li><?php echo wporg_get_plugin_icon( $this->slug, 128 ); ?></li>
+				<li style="clear:both;"><?php echo $plugin; ?></li>
+				<?php if ( ! empty( $this->plugin->post_content ) && false !== strpos( $this->plugin->post_content, '<!--section=faq-->' ) ) : ?>
+				<li><?php echo $faq; ?></li>
+				<?php endif; ?>
+				<li><?php echo $support; ?></li>
+				<li><?php echo $reviews; ?></li>
+			</ul>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Return a custom view header string so that get_breadcrumbs will display it.
+	 */
+	public function get_view_header() {
+		$slug        = esc_attr( $this->slug );
+		$description = esc_html__( 'Description', 'wporg-forums' );
+		$support     = esc_html__( 'Support', 'wporg-forums' );
+		$reviews     = esc_html__( 'Reviews', 'wporg-forums' );
+
+		$header = <<<EOT
+		<ul id="sections">
+			<li class="section-description">
+				<a href="//wordpress.org/plugins/{$slug}/">{$description}</a>
+			</li>
+			<li class="section-support">
+				<a href="//wordpress.org/support/plugin/{$slug}/">{$support}</a>
+			<li>
+			<li class="section-reviews">
+				<a href="//wordpress.org/support/plugin/{$slug}/reviews/">{$reviews}</a>
+			</li>
+			</ul>
+EOT;
+		return $header;
 	}
 }

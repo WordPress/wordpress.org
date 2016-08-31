@@ -6,11 +6,15 @@ class Theme_Directory_Compat extends Directory_Compat {
 
 	const COMPAT = 'theme';
 
-	var $slug = '';
-	var $theme = '';
+	var $slug  = false;
+	var $theme = null;
 
 	function compat() {
 		return self::COMPAT;
+	}
+
+	function compat_title() {
+		return __( 'Theme Support', 'wporg-forums' );
 	}
 
 	function slug() {
@@ -34,14 +38,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	public function __construct() {
-		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// We have to add the custom view before bbPress runs its own action
-			// on parse_query at priority 2.
-			add_action( 'parse_query', array( $this, 'parse_query' ), 1 );
-
-			// Add parent class hooks.
-			add_action( 'plugins_loaded', array( $this, 'init' ) );
-		}
+		$this->init();
 	}
 
 	/**
@@ -53,70 +50,83 @@ class Theme_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
-		$theme = $this->get_theme_data( $slug );
+		$theme = $this->get_object( $slug );
 		if ( ! $theme ) {
 			return;
 		} else {
-			$this->slug  = $slug;
-			$this->theme = $theme;
+			$this->slug         = $slug;
+			$this->theme        = $theme;
+			$this->authors      = $this->get_authors( $slug );
+			$this->contributors = $this->get_contributors( $slug );
 		}
-
-		// Add theme support view.
-		bbp_register_view(
-			self::COMPAT,
-			__( 'Theme Support', 'wporg-forums' ),
-			array(
-				'post_parent'   => Plugin::THEMES_FORUM_ID,
-				'tax_query'     => array( array(
-					'taxonomy'  => $this->taxonomy(),
-					'field'     => 'slug',
-					'terms'     => $slug,
-				) ),
-				'orderby'       => '',
-				'show_stickies' => false,
-			)
-		);
-
-		// Add theme review view.
-		bbp_register_view(
-			'reviews',
-			__( 'Reviews', 'wporg-forums' ),
-			array(
-				'post_parent'   => Plugin::REVIEWS_FORUM_ID,
-				'tax_query'     => array( array(
-					'taxonomy'  => $this->taxonomy(),
-					'field'     => 'slug',
-					'terms'     => $slug,
-				) ),
-				'orderby'       => '',
-				'show_stickies' => false,
-			)
-		);
 	}
 
-	public function get_theme_data( $slug = '' ) {
-		global $wpdb;
+	public function do_view_sidebar() {
+		?>
+		<div>
+			<h3><?php _e( 'Browse Themes', 'wporg-forums' ); ?></h3>
 
-		if ( ! empty( $this->theme ) ) {
-			return $this->theme;
-		}
+			<ul class="theme-submenu">
+				<li class="view"><a href="//wordpress.org/themes/"><?php _e( 'Featured', 'wporg-forums' ); ?></a></li>
+				<li class="view"><a href="//wordpress.org/themes/browse/popular/"><?php _e( 'Most Popular', 'wporg-forums' ); ?></a></li>
+				<li class="view"><a href="//wordpress.org/themes/browse/new/"><?php _e( 'Latest', 'wporg-forums' ); ?></a></li>
+				<li class="view"><a href="/themes/getting-started/"><?php _e( 'Theme Authors', 'wporg-forums' ); ?></a></li>
+				<li class="view"><a href="/themes/commercial/"><?php _e( 'Commercial', 'wporg-forums' ); ?></a></li>
+			</ul>
+		</div>
 
-		$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug );
-		$row = $wpdb->get_row( $sql );
-		if ( ! $row ) {
-			return false;
-		} else {
-			$theme = $row;
-			$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_postmeta WHERE post_id = %d AND meta_key NOT LIKE %s", WPORG_THEME_DIRECTORY_BLOGID, $row->ID, '_trac_ticket_%' );
-			$results = $wpdb->get_results( $sql );
-			if( $results ) {
-				foreach ( $results as $row ) {
-					if ( ! isset( $theme->{$row->meta_key} ) ) {
-						$theme->{$row->meta_key} = maybe_unserialize( $row->meta_value );
-					}
-				}
-			}
-		}
-		return $theme;
+		<div>
+			<h3><?php _e( 'Search Themes', 'wporg-forums' ); ?></h3>
+
+			<form id="side-search" method="get" action="//wordpress.org/themes/search.php">
+			<div>
+				<input type="text" class="text" name="q" value="" />
+				<input type="submit" class="button" value="<?php _e( 'Search', 'wporg-forums' ); ?>" />
+			</div>
+			</form>
+		</div>
+		<?php
+	}
+
+	public function do_topic_sidebar() {
+		$theme   = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
+		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		?>
+		<div>
+			<h3>About this Theme</h3>
+			<ul>
+				<li><?php echo $theme; ?></li>
+				<li><?php echo $support; ?></li>
+				<li><?php echo $reviews; ?></li>
+			</ul>
+		</div>
+		<?php
+	}
+
+
+	/**
+	 * Return a custom view header string so that get_breadcrumbs will display it.
+	 */
+	public function get_view_header() {
+		$slug        = esc_attr( $this->slug );
+		$description = esc_html__( 'Description', 'wporg-forums' );
+		$support     = esc_html__( 'Support', 'wporg-forums' );
+		$reviews     = esc_html__( 'Reviews', 'wporg-forums' );
+
+		$header = <<<EOT
+		<ul id="sections">
+			<li class="section-description">
+				<a href="//wordpress.org/themes/{$slug}/">{$description}</a>
+			</li>
+			<li class="section-support">
+				<a href="//wordpress.org/support/theme/{$slug}/">{$support}</a>
+			<li>
+			<li class="section-reviews">
+				<a href="//wordpress.org/support/theme/{$slug}/reviews/">{$reviews}</a>
+			</li>
+			</ul>
+EOT;
+		return $header;
 	}
 }

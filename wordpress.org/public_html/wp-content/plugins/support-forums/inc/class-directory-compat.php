@@ -5,21 +5,82 @@ namespace WordPressdotorg\Forums;
 abstract class Directory_Compat {
 
 	abstract protected function compat();
+	abstract protected function compat_title();
 	abstract protected function slug();
 	abstract protected function title();
 	abstract protected function forum_id();
 	abstract protected function query_var();
 	abstract protected function taxonomy();
+	abstract protected function parse_query();
+	abstract protected function do_view_sidebar();
+	abstract protected function do_topic_sidebar();
+	abstract protected function get_view_header();
 
-	public function __construct() {}
+	var $authors      = null;
+	var $contributors = null;
 
 	public function init() {
+		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
+			// Define the taxonomy and query vars for this view.
+			add_action( 'plugins_loaded', array( $this, 'always_load' ) );
+
+			// We have to add the custom view before bbPress runs its own action
+			// on parse_query at priority 2.
+			add_action( 'parse_query', array( $this, 'parse_query' ), 0 );
+
+			// And this still needs to happen before priority 2.
+			add_action( 'parse_query', array( $this, 'maybe_load' ), 1 );
+
+			// Check to see if an individual topic is compat.
+			add_action( 'template_redirect', array( $this, 'check_topic_for_compat' ) );
+		}
+	}
+
+	public function always_load() {
+		// Add filters necessary for determining which compat file to use.
 		add_action( 'bbp_init',              array( $this, 'register_taxonomy' ) );
 		add_filter( 'query_vars',            array( $this, 'add_query_var' ) );
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
 
-		add_filter( 'bbp_get_view_link',     array( $this, 'get_view_link' ), 10, 2 );
-		add_filter( 'bbp_breadcrumbs',       array( $this, 'breadcrumbs' ) );
+	}
+
+	public function maybe_load() {
+		if ( false !== $this->slug() ) {
+			// This must run before bbPress's parse_query at priority 2.
+			$this->register_views();
+
+			// Add theme-specific filters and actions.
+			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
+
+			// Add output filters and actions.
+			add_filter( 'bbp_get_view_link',  array( $this, 'get_view_link' ), 10, 2 );
+			add_filter( 'bbp_breadcrumbs',    array( $this, 'breadcrumbs' ) );
+			add_filter( 'bbp_get_breadcrumb', array( $this, 'get_breadcrumb' ), 10, 3 );
+		}
+	}
+
+	public function check_topic_for_compat() {
+		if ( bbp_is_single_topic() ) {
+			$slug = wp_get_object_terms( bbp_get_topic_id(), $this->taxonomy(), array( 'fields' => 'slugs' ) );
+
+			// Match found for this compat.
+			if ( ! empty( $slug ) ) {
+				$slug = $slug[0];
+
+				// Basic setup.
+				$this->slug              = $slug;
+				$this->{$this->compat()} = $this->get_object( $slug );
+				$this->authors           = $this->get_authors( $slug );
+				$this->contributors      = $this->get_contributors( $slug );
+
+				// Add output filters and actions.
+				if ( ! empty( $this->authors ) || ! empty( $this->contributors ) ) {
+					add_filter( 'bbp_get_topic_author_link', array( $this, 'author_link' ), 10, 2 );
+					add_filter( 'bbp_get_reply_author_link', array( $this, 'author_link' ), 10, 2 );
+				}
+				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
+			}
+		}
 	}
 
 	public function add_rewrite_rules() {
@@ -28,9 +89,11 @@ abstract class Directory_Compat {
 		$root_id    = $this->compat();
 		$root_var   = $this->query_var();
 		$review_id  = 'reviews';
+		$active_id  = 'active';
 
 		$support_rule = $this->compat() . '/([^/]+)/';
 		$reviews_rule = $this->compat() . '/([^/]+)/' . $review_id . '/';
+		$active_rule  = $this->compat() . '/([^/]+)/' . $active_id . '/';
 
 		$feed_id    = 'feed';
 		$view_id    = bbp_get_view_rewrite_id();
@@ -52,6 +115,11 @@ abstract class Directory_Compat {
 		add_rewrite_rule( $support_rule . $base_rule,  'index.php?' . $view_id . '=' . $root_id . '&' . $root_var . '=$matches[1]',                               $priority );
 		add_rewrite_rule( $support_rule . $paged_rule, 'index.php?' . $view_id . '=' . $root_id . '&' . $root_var . '=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $support_rule . $feed_rule,  'index.php?' . $view_id . '=' . $root_id . '&' . $root_var . '=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add active view rewrite rules.
+		add_rewrite_rule( $active_rule . $base_rule,  'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]',                               $priority );
+		add_rewrite_rule( $active_rule . $paged_rule, 'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $active_rule . $feed_rule,  'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	public function add_query_var( $query_vars ) {
@@ -65,6 +133,65 @@ abstract class Directory_Compat {
 		}
 	}
 
+	public function register_views() {
+
+		// Add support view.
+		bbp_register_view(
+			$this->compat(),
+			$this->compat_title(),
+			array(
+				'post_parent'   => $this->forum_id(),
+				'tax_query'     => array( array(
+					'taxonomy'  => $this->taxonomy(),
+					'field'     => 'slug',
+					'terms'     => $this->slug(),
+				) ),
+				'show_stickies' => false,
+				'orderby'       => 'ID',
+			)
+		);
+
+		// Add reviews view.
+		bbp_register_view(
+			'reviews',
+			__( 'Reviews', 'wporg-forums' ),
+			array(
+				'post_parent'   => Plugin::REVIEWS_FORUM_ID,
+				'meta_query'    => array( array(
+					'key'       => '_bbp_last_active_time',
+					'type'      => 'DATETIME',
+				) ),
+				'tax_query'     => array( array(
+					'taxonomy'  => $this->taxonomy(),
+					'field'     => 'slug',
+					'terms'     => $this->slug(),
+				) ),
+				'show_stickies' => false,
+				'orderby'       => 'meta_value',
+			)
+		);
+
+		// Add recent activity view.
+		bbp_register_view(
+			'active',
+			__( 'Recent Activity', 'wporg-forums' ),
+			array(
+				'post_parent'   => $this->forum_id(),
+				'meta_query'    => array( array(
+					'key'       => '_bbp_last_active_time',
+					'type'      => 'DATETIME',
+				) ),
+				'tax_query'     => array( array(
+					'taxonomy'  => $this->taxonomy(),
+					'field'     => 'slug',
+					'terms'     => $this->slug(),
+				) ),
+				'show_stickies' => false,
+				'orderby'       => 'meta_value',
+			)
+		);
+	}
+
 	/**
 	 * Filter view links to provide prettier links for these subforum views.
 	 */
@@ -72,13 +199,21 @@ abstract class Directory_Compat {
 		global $wp_rewrite;
 
 		$view = bbp_get_view_id( $view );
-		if ( $view != $this->compat() ) {
+		if ( ! in_array( $view, array( 'active', 'reviews', $this->compat() ) ) ) {
 			return $url;
 		}
 
 		// Pretty permalinks.
 		if ( $wp_rewrite->using_permalinks() ) {
-			$url = $wp_rewrite->root . $this->compat() . '/' . $this->slug();
+			switch ( $view ) {
+				case 'active' :
+				case 'reviews' :
+					$url = $wp_rewrite->root . $this->compat() . '/' . $this->slug() . '/' . $view;
+					break;
+
+				default :
+					$url = $wp_rewrite->root . $this->compat() . '/' . $this->slug();
+			}
 			$url = home_url( user_trailingslashit( $url ) );
 
 		// Unpretty permalinks.
@@ -102,7 +237,7 @@ abstract class Directory_Compat {
 		}
 
 		$view = bbp_get_view_id();
-		if ( ! in_array( $view, array( $this->compat(), 'reviews' ) ) ) {
+		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
 			return $r;
 		}
 
@@ -113,5 +248,111 @@ abstract class Directory_Compat {
 			$r[3] = __( 'Reviews', 'wporg-forums' );
 		}
 		return $r;
+	}
+
+	/**
+	 * Prefix a single view-specific header using the breadcrumb filter.
+	 */
+	public function get_breadcrumb( $trail, $crumbs, $r ) {
+		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews' ) ) ) {
+			$view_header = $this->get_view_header();
+			$trail = $view_header . $trail;
+		}
+		return $trail;
+	}
+
+	/**
+	 * @todo Add the author or contributor badge.
+	 */
+	public function author_link( $author_link, $args ) {
+		return $author_link;
+	}
+
+	/**
+	 * Set up and cache the plugin or theme details.
+	 *
+	 * @param string $slug The object slug
+	 */
+	public function get_object( $slug ) {
+		global $wpdb;
+
+		if ( 'theme' == $this->compat() ) {
+			if ( ! is_null( $this->theme ) ) {
+				return $this->theme;
+			}
+		} else {
+			if ( ! is_null( $this->plugin ) ) {
+				return $this->plugin;
+			}
+		}
+
+		// Check the cache.
+		$cache_key = "{$slug}";
+		$cache_group = $this->compat() . '-objects';
+		$compat_object = wp_cache_get( $cache_key, $cache_group );
+		if ( false === $compat_object ) {
+
+			// Get the object information from the correct table.
+			if ( $this->compat() == 'theme' ) {
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
+			} elseif ( $this->compat() == 'plugin' ) {
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
+			}
+
+			wp_cache_set( $cache_key, $compat_object, $cache_group, 86400);
+		}
+		return $compat_object;
+	}
+
+	public function get_authors( $slug ) {
+		global $wpdb;
+
+		if ( null !== $this->authors ) {
+			return $this->authors;
+		}
+
+		// Check the cache.
+		$cache_key = "{$slug}";
+		$cache_group = $this->compat() . '-authors';
+		$authors = wp_cache_get( $cache_key, $cache_group );
+		if ( false === $authors ) {
+
+			if ( $this->compat() == 'theme' ) {
+				$theme = $this->theme;
+				$author = get_user_by( 'id', $this->theme->post_author );
+				$authors = array( $author->user_login );
+			} else {
+				$authors = $wpdb->get_col( $wpdb->prepare( " SELECT user FROM plugin_2_svn_access WHERE `path` = %s", '/' . $slug ) );
+			}
+
+			wp_cache_set( $cache_key, $authors, $cache_group, 3600 );
+		}
+		return $authors;
+	}
+
+	public function get_contributors( $slug ) {
+		global $wpdb;
+
+		if ( null !== $this->contributors ) {
+			return $this->contributors;
+		}
+
+		// Themes do not have contributors right now.
+		if ( $this->compat() == 'theme' ) {
+			$contributors = array();
+			return $contributors;
+		}
+
+		// Check the cache.
+		$cache_key = "{$slug}";
+		$cache_group = $this->compat() . '-contributors';
+		$contributors = wp_cache_get( $cache_key, $cache_group );
+		if ( false === $contributors ) {
+			$contributors = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->base_prefix}%d_postmeta WHERE post_id = %d AND meta_key = %s LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $this->plugin->ID, 'contributors' ) );
+			$contributors = maybe_unserialize( $contributors );
+
+			wp_cache_set( $cache_key, $contributors, $cache_group, 3600 );
+		}
+		return $contributors;
 	}
 }
