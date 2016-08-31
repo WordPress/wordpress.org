@@ -47,16 +47,20 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
-		 * Gets a user by either login or slug.
+		 * Gets a user by either login, slug, or id.
 		 *
-		 * @param string         $username The user's login or slug.
+		 * @param string|int     $username The user's login, slug, or id.
 		 * @return WP_User|false WP_User object on success, false on failure.
 		 */
 		protected function get_user( $username ) {
-			$user = get_user_by( 'login', $username );
+			if ( is_numeric( $username ) && ( absint( $username ) == $username ) ) {
+				$user = get_user_by( 'id', $username );
+			} else {
+				$user = get_user_by( 'login', $username );
+			}
 
 			if ( ! $user ) {
-				$user = get_user_by( 'slug', $username );
+				$user = get_user_by( 'slug', strtolower( $username ) );
 			}
 
 			return $user;
