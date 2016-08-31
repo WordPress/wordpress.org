@@ -23,7 +23,7 @@
 				</ul>
 			</div>
 
-		<?php elseif ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'review', 'active' ) ) ) : ?>
+		<?php elseif ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews', 'active' ) ) ) : ?>
 
 			<?php do_action( 'wporg_compat_view_sidebar' ); ?>
 
