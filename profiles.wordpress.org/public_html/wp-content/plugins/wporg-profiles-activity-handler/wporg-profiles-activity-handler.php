@@ -115,6 +115,27 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		}
 
 		/**
+		 * Checks that required POST arguments are defined and have a value.
+		 *
+		 * Ends request and reports on any missing arguments, if necessary.
+		 *
+		 * @param array $args The array of required POST arguments.
+		 */
+		protected function require_args( $args ) {
+			$missing = array();
+
+			foreach ( $args as $arg ) {
+				if ( empty( $_POST[ $arg ] ) ) {
+					$missing[] = $arg;
+				}
+			}
+
+			if ( $missing ) {
+				die( '-1 Required argument(s) are missing: ' . implode( ', ', $missing ) );
+			}
+		}
+
+		/**
 		 * Primary AJAX handler.
 		 *
 		 * Funnels incoming requests to appropriate sub-handler based on
@@ -194,45 +215,118 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Recognized activities:
 		 *  - Creating new topic
 		 *  - Replying to a topic
+		 *  - Removing a topic
+		 *  - Removing a topic reply
 		 */
 		private function handle_forum_activity() {
 			$user = $this->get_user( $_POST['user'] );
+			$type = '';
 
+			// Check for valid user.
 			if ( ! $user ) {
 				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $_POST['user'] );
 			}
 
-			if ( '1' == $_POST['newTopic'] ) {
-				$action = sprintf(
-					__( 'Created a topic, <a href="%s">%s</a>, on the site %s', 'wporg' ),
-					esc_url( $_POST['url'] ),
-					$_POST['title'],
-					$_POST['site']
-				);
-				$type = 'forum_topic_create';
+			// Check for valid forum activities.
+			$activities = array(
+				'create-topic' => 'forum_topic_create',
+				'remove-topic' => 'forum_topic_remove',
+				'create-reply' => 'forum_reply_create',
+				'remove-reply' => 'forum_reply_remove',
+			);
+			if ( ! empty( $_POST['activity'] ) && ! empty( $activities[ $_POST['activity'] ] ) ) {
+				$type = $activities[ $_POST['activity'] ];
 			} else {
-				$action = sprintf(
-					__( 'Posted a <a href="%s">reply</a> to %s, on the site %s', 'wporg' ),
-					esc_url( $_POST['url'] ),
-					$_POST['title'],
-					$_POST['site']
-				);
-				$type = 'forum_reply_create';
+				return '-1 Unrecognized forum activity.';
 			}
 
+			// Check for required args.
+			$required_args = array( 'forum_id' );
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
+				$required_args[] = 'message';
+				$required_args[] = 'url';
+				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
+			}
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
+				$required_args[] = 'topic_id';
+			} else {
+				$required_args[] = 'post_id';
+			}
+			$this->require_args( $required_args );
+
+			// Determine 'item_id' value based on context.
+			$item_id = in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ?
+				intval( $_POST['topic_id'] ) :
+				intval( $_POST['post_id'] );
+
+			// Find an existing activity uniquely identified by the reported criteria.
+			// For a creation, this prevents duplication and permits a previously
+			// trashed/spammed/unapproved activity to be restored.
+			// For a removal, this is used to find the activity to mark it as spam.
+			// Note: It's unlikely, but possible, that this is a non-unique request.
 			$args = array(
 				'user_id'           => $user->ID,
-				'action'            => $action,
-				'content'           => $_POST['message'],
-				'primary_link'      => $_POST['url'],
 				'component'         => 'forums',
-				'type'              => $type,
-				'item_id'           => 'forum_topic_create' ? intval( $_POST['topic_id'] ) : intval( $_POST['post_id'] ),
+				'type'              => str_replace( 'remove', 'create', $type ),
+				'item_id'           => $item_id,
 				'secondary_item_id' => intval( $_POST['forum_id'] ),
-				'hide_sitewide'     => false,
 			);
+			$activity_id = bp_activity_get_activity_id( $args );
+			$activity_obj = $activity_id ? new BP_Activity_Activity( $activity_id ) : false;
 
-			return bp_activity_add( $args );
+			// Record the creation of a topic or reply.
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
+				if ( $activity_obj ) {
+					bp_activity_mark_as_ham( $activity_obj, 'by_source' );
+					$activity_obj->save();
+
+					return true;
+				}
+
+				// Action message for topic creation.
+				if ( 'forum_topic_create' === $type ) {
+					$action = sprintf(
+						__( 'Created a topic, <i><a href="%s">%s</a></i>, on the site %s', 'wporg' ),
+						esc_url( $_POST['url'] ),
+						esc_html( $_POST['title'] ),
+						esc_html( $_POST['site'] )
+					);
+				}
+				// Action message for reply creation.
+				else {
+					$action = sprintf(
+						__( 'Posted a <a href="%s">reply</a> to <i>%s</i>, on the site %s', 'wporg' ),
+						esc_url( $_POST['url'] ),
+						esc_html( $_POST['title'] ),
+						esc_html( $_POST['site'] )
+					);
+				}
+
+				$args = array(
+					'user_id'           => $user->ID,
+					'action'            => $action,
+					'content'           => esc_html( $_POST['message'] ),
+					'primary_link'      => esc_url( $_POST['url'] ),
+					'component'         => 'forums',
+					'type'              => $type,
+					'item_id'           => $item_id,
+					'secondary_item_id' => intval( $_POST['forum_id'] ),
+					'hide_sitewide'     => false,
+				);
+
+				return bp_activity_add( $args );
+			}
+			// Remove activity related to a topic or reply.
+			elseif ( in_array( $type, array( 'forum_topic_remove', 'forum_reply_remove' ) ) ) {
+				if ( ! $activity_obj ) {
+					return '-1 Activity not previously reported.';
+				}
+
+				bp_activity_mark_as_spam( $activity_obj, 'by_source' );
+				$activity_obj->save();
+
+				return true;
+			}
 		}
 
 		/**
