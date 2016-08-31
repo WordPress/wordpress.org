@@ -376,7 +376,11 @@ class Template {
 
 			// Images in the assets folder - /plugin-name/assets/screenshot-1.png.
 			$format = 'https://i0.wp.com/plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/assets/%3$s?strip=all';
+		}
 
+		// Photon does not support SVG files. https://github.com/Automattic/jetpack/issues/81
+		if ( strpos( $asset['filename'], '.svg' ) ) {
+			$format = str_replace( 'i0.wp.com/', '', $format );
 		}
 
 		return esc_url( sprintf(
