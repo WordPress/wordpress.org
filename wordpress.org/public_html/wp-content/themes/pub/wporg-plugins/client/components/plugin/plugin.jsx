@@ -47,7 +47,7 @@ export default React.createClass( {
 				</header>
 				<div className="entry-content">
 					<Section slug="description" title="Description" content={ this.props.plugin.sections.description } />
-					<Screenshots />
+					<Screenshots screenshots={ this.props.plugin.screenshots } />
 					<FAQ content={ this.props.plugin.sections.faq } />
 					<Reviews slug={ this.props.plugin.slug } content={ this.props.plugin.sections.reviews } numRatings={ this.props.plugin.num_ratings } />
 					<Section slug="changelog" title="Changelog" content={ this.props.plugin.sections.changelog } />

@@ -3,6 +3,17 @@
 	margin: 0;
 	padding: 0;
 
+	h2:first-of-type {
+		font-size: ms( 2 );
+
+		// Override wp4.css.
+		border: none;
+		color: $color__text-main;
+		font-weight: 600;
+		padding: 0;
+		text-transform: inherit;
+	}
+
 	figcaption {
 		font-style: italic;
 	}
