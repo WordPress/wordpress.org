@@ -106,6 +106,21 @@ class Plugin extends Base {
 		$result['short_description'] = $post->post_excerpt;
 		$result['download_link'] = Template::download_link( $post );
 
+		$result['screenshots'] = array();
+		$descriptions = get_post_meta( $post->ID, 'screenshots', true );
+		$screen_shots = get_post_meta( $post->ID, 'assets_screenshots', true ) ?: array();
+
+		/*
+		 * Find the image that corresponds with the text.
+		 * The image numbers are stored within the 'resolution' key.
+		 */
+		foreach ( $screen_shots as $image ) {
+			$result['screenshots'][ $image['resolution'] ] = array(
+				'src'     => Template::get_asset_url( $post->post_name, $image ),
+				'caption' => array_key_exists( $image['resolution'], $descriptions ) ? $descriptions[ $image['resolution'] ] : ''
+			);
+		}
+
 		$result['tags'] = array();
 		if ( $terms = get_the_terms( $post->ID, 'plugin_category' ) ) {
 			foreach ( $terms as $term ) {
@@ -120,7 +135,7 @@ class Plugin extends Base {
 			if ( 'trunk' != $result['stable_tag'] ) {
 				array_push( $versions, 'trunk' );
 			}
-			foreach ( $versions as $version ) {	
+			foreach ( $versions as $version ) {
 				$result['versions'][ $version ] = Template::download_link( $post, $version );
 			}
 		}
@@ -222,7 +237,7 @@ class Plugin extends Base {
 				By <a href="https://profiles.wordpress.org/<?php echo $reviewer->user_nicename; ?>"><?php echo get_avatar( $review->topic_poster, 16, 'monsterid' ); ?></a>
 				<a href="https://profiles.wordpress.org/<?php echo $reviewer->user_nicename; ?>" class="reviewer-name"><?php
 					echo $reviewer->display_name;
-	
+
 					if ( $reviewer->display_name != $reviewer->user_login ) {
 						echo " <small>({$reviewer->user_login})</small>";
 					}
