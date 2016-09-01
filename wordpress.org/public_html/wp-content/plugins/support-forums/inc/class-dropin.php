@@ -36,6 +36,8 @@ class Dropin {
 		remove_action( 'bbp_edit_reply', 'bbp_update_reply' );
 		add_action( 'bbp_new_reply',     array( $this, 'bbp_update_reply' ) );
 		add_action( 'bbp_edit_reply',    array( $this, 'bbp_update_reply' ) );
+
+		remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
 	}
 
 	/**
@@ -286,6 +288,7 @@ class Dropin {
 
 		// Reply meta relating to reply position in tree
 		bbp_update_reply_forum_id( $reply_id, $forum_id );
+		bbp_update_reply_topic_id( $reply_id, $topic_id );
 		bbp_update_reply_to      ( $reply_id, $reply_to );
 
 		// Update associated topic values if this is a new reply
