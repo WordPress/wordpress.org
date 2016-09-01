@@ -6,6 +6,7 @@ class Performance_Optimizations {
 
 	var $term = null;
 	var $query = null;
+	var $bound_id = array();
 
 	function __construct() {
 		// Gravatar suppression on lists of topics.
@@ -43,21 +44,36 @@ class Performance_Optimizations {
 				return $r;
 			}
 
-			// has_topics() uses this by default.
-			if ( isset( $r['meta_key'] ) && '_bbp_last_active_time' == $r['meta_key'] ) {
-				unset( $r['meta_key'] );
-				unset( $r['meta_type'] );
-				$r['orderby'] = 'ID';
+			if ( isset( $r['meta_key'] ) ) {
+				// has_topics() uses this by default.
+				if ( '_bbp_last_active_time' == $r['meta_key'] ) {
+					unset( $r['meta_key'] );
+					unset( $r['meta_type'] );
+					$r['orderby'] = 'ID';
+				// Some views use meta key lookups and should only look at known
+				// open topics.
+				} elseif ( ! empty( $r['meta_key'] ) ) {
+					$r['orderby'] = 'ID';
+					add_filter( 'posts_where', array( $this, 'posts_in_six_months' ) );
+				}
 			}
 
 			// If this is a forum, limit the number of pages we're dealing with.
-			if ( isset( $r['post_parent'] ) && get_post_type( $r['post_parent'] ) === bbp_get_forum_post_type() ) {
+			if ( bbp_is_single_forum() && isset( $r['post_parent'] ) && get_post_type( $r['post_parent'] ) === bbp_get_forum_post_type() ) {
 				$r['no_found_rows'] = true;
 				add_filter( 'bbp_topic_pagination', array( $this, 'forum_pagination' ) );
 				$this->query = $r;
 			}
 		}
 		return $r;
+	}
+
+	public function posts_in_last_six_months( $w ) {
+		global $wpdb;
+
+		$bound_id = $this->get_bound_id( '6 MONTH' );
+		$w .= $wpdb->prepare( " AND ( $wpdb->posts.ID >= %d )", $bound_id );
+		return $w;
 	}
 
 	public function forum_pagination( $r ) {
@@ -72,14 +88,16 @@ class Performance_Optimizations {
 
 		// Try SQL.
 		if ( ! is_null( $this->query ) ) {
-			$count = $wpdb->query( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'topic' AND post_status = 'publish' LIMIT 1", $this->query['post_parent'] ) );
+			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'topic' AND post_status IN ( 'publish', 'closed' ) LIMIT 1", $this->query['post_parent'] ) );
 			if ( $count ) {
 				$r['total'] = $count / bbp_get_topics_per_page();
+				update_post_meta( $this->query['post_parent'], '_bbp_topic_count', $count );
+				update_post_meta( $this->query['post_parent'], '_bbp_total_topic_count', $count );
 				return $r;
 			}
 		}
 
-		// If all else fails...
+		// Give a reasonable default to fall back on.
 		$r['total'] = 10;
 		return $r;
 	}
@@ -106,5 +124,46 @@ class Performance_Optimizations {
 			return false;
 		}
 		return $term;
+	}
+
+	/**
+	 * Get the ID from a topic one year ago so that we can only look at topics
+	 * after that ID.
+	 */
+	public function get_bound_id( $interval ) {
+		global $wpdb;
+
+		if ( ! in_array( $interval, array( '1 WEEK', '1 MONTH', '6 MONTH', '1 YEAR' ) ) ) {
+			$interval = '1 WEEK';
+		}
+
+		if ( array_key_exists( $interval, $this->bound_id ) ) {
+			return $this->bound_id[ $interval ];
+		}
+
+		// Check cache.
+		$cache_key = str_replace( ' ', '-', $interval );
+		$cache_group = 'topic-bound-ids';
+		$bound_id = wp_cache_get( $cache_key, $cache_group );
+		if ( false === $bound_id ) {
+
+			// Use the type_status_date index.
+			$bound_id = $wpdb->get_var( "
+				SELECT `ID`
+				FROM $wpdb->posts
+				WHERE post_type = 'topic'
+					AND post_status IN ( 'publish', 'closed' )
+					AND post_date < DATE_SUB( NOW(), INTERVAL $interval )
+				ORDER BY `ID` DESC
+				LIMIT 1 " );
+			// Set the bound id to 1 if there is not a suitable range.
+			if ( ! $bound_id ) {
+				$bound_id = 1;
+			}
+			$this->bound_id[ $interval ] = $bound_id;
+
+			wp_cache_set( $cache_key, $bound_id, $cache_group, 86400 );
+		}
+		return $bound_id;
 	}
 }

@@ -16,6 +16,8 @@ namespace WordPressdotorg\Forums;
 // Includes
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 include( dirname( __FILE__ ) . '/inc/class-users.php' );
+include( dirname( __FILE__ ) . '/inc/class-dropin.php' );
+include( dirname( __FILE__ ) . '/inc/class-hooks.php' );
 include( dirname( __FILE__ ) . '/inc/class-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-theme-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-plugin-directory-compat.php' );

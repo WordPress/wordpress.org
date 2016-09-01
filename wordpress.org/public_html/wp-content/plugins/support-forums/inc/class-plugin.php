@@ -34,10 +34,12 @@ class Plugin {
 	private function __construct() {
 		$this->performance = new Performance_Optimizations;
 		$this->users       = new Users;
+		$this->hooks       = new Hooks;
 
 		// These modifications are specific to https://wordpress.org/support/
 		$blog_id = get_current_blog_id();
 		if ( $blog_id && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == $blog_id ) {
+			$this->dropin  = new Dropin;
 			$this->themes  = new Theme_Directory_Compat;
 			$this->plugins = new Plugin_Directory_Compat;
 		}
