@@ -16,7 +16,8 @@ class Performance_Optimizations {
 		// Query simplification.
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'has_replies' ) );
-		add_filter( 'bbp_register_view_no_replies', array( $this, 'no_replies' ) );
+		add_filter( 'bbp_register_view_no_replies', array( $this, 'exclude_compat_forums' ) );
+		add_filter( 'bbp_register_view_all_topics', array( $this, 'exclude_compat_forums' ) );
 	}
 
 	/**
@@ -86,7 +87,7 @@ class Performance_Optimizations {
 		return $r;
 	}
 
-	public function no_replies( $r ) {
+	public function exclude_compat_forums( $r ) {
 		$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 		return $r;
 	}
