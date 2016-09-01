@@ -56,7 +56,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 
 	/** WordPress *************************************************************/
 
-	// Add "About WordPress" link
+	// Add WordPress menu
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'wp-logo',
 		'id'     => 'wordpress',
@@ -64,6 +64,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'href'  => 'https://wordpress.org',
 	) );
 
+	// Add "About WordPress" link
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'wordpress',
 		'id'     => 'wp-about',
@@ -95,7 +96,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'href'      => 'https://wordpress.org/support/forum/requests-and-feedback',
 	) );
 
-	/** BuddyPress Developer **/
+	/** WordPress Developer **/
 	$wp_admin_bar->add_group( array(
 		'parent' => 'wordpress',
 		'id'     => 'wp-developer',
@@ -120,7 +121,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 
 	/** bbPress ***************************************************************/
 
-	// Add "About WordPress" link
+	// Add bbPress menu
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'wp-logo',
 		'id'     => 'bbpress',
@@ -128,9 +129,10 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'href'  => 'https://bbpress.org',
 	) );
 
+	// Add "About bbPress" link
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'bbpress',
-		'id'     => 'bbp-about',
+		'id'     => 'bbp-about-alt',
 		'title'  => __( 'About bbPress' ),
 		'href'   => 'https://bbpress.org/about/',
 	) );
@@ -159,7 +161,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'href'      => 'https://bbpress.org/forums/forum/requests-and-feedback',
 	) );
 
-	/** BuddyPress Developer **/
+	/** bbPress Developer **/
 	$wp_admin_bar->add_group( array(
 		'parent' => 'bbpress',
 		'id'     => 'bbp-developer',
@@ -184,7 +186,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 
 	/** BuddyPress ************************************************************/
 
-	// Add "About WordPress" link
+	// Add BuddyPress menu
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'wp-logo',
 		'id'     => 'buddypress',
@@ -192,9 +194,10 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'href'  => 'https://buddypress.org',
 	) );
 
+	// Add "About BuddyPress" link
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'buddypress',
-		'id'     => 'bp-about',
+		'id'     => 'bp-about-alt',
 		'title'  => __( 'About BuddyPress' ),
 		'href'   => 'https://buddypress.org/about/',
 	) );
@@ -212,7 +215,7 @@ function bporg_new_admin_bar_wp_menu( $wp_admin_bar ) {
 		'parent'    => 'buddypress',
 		'id'        => 'bp-support-forums',
 		'title'     => __( 'Support Forums' ),
-		'href'      => 'https://buddypress.org/forums/',
+		'href'      => 'https://buddypress.org/support/',
 	) );
 
 	// Add feedback link
@@ -290,12 +293,11 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 
 	if ( is_user_logged_in() ) {
 
-		// Add an option to visit the site.
+		// Add a link to create a new topic.
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'bp-site-name',
 			'id'     => 'bp-new-topic',
 			'title'  => __( 'Create New Topic' ),
-			'href'   => 'https://buddypress.org/forums/new-topic/'
+			'href'   => 'https://buddypress.org/support/new-topic/'
 		) );
 
 		// Add an option to visit the admin dashboard
@@ -320,7 +322,6 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 	// Not logged in
 	} else {
 		$wp_admin_bar->add_menu( array(
-			'parent' => 'bp-site-name',
 			'id'     => 'bp-login',
 			'title'  => __( 'Log in' ),
 			'href'   => 'https://buddypress.org/login/'
