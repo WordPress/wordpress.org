@@ -290,7 +290,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Action message for topic creation.
 				if ( 'forum_topic_create' === $type ) {
 					$action = sprintf(
-						__( 'Created a topic, <i><a href="%s">%s</a></i>, on the site %s', 'wporg' ),
+						'Created a topic, <i><a href="%s">%s</a></i>, on the site %s',
 						esc_url( $_POST['url'] ),
 						esc_html( $_POST['title'] ),
 						esc_html( $_POST['site'] )
@@ -299,7 +299,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Action message for reply creation.
 				else {
 					$action = sprintf(
-						__( 'Posted a <a href="%s">reply</a> to <i>%s</i>, on the site %s', 'wporg' ),
+						'Posted a <a href="%s">reply</a> to <i>%s</i>, on the site %s',
 						esc_url( $_POST['url'] ),
 						esc_html( $_POST['title'] ),
 						esc_html( $_POST['site'] )
@@ -349,7 +349,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => sprintf(
-					__( 'Released a new plugin, <a href="%s">%s</a>', 'wporg' ),
+					'Released a new plugin, <a href="%s">%s</a>',
 					esc_url( $_POST['url'] ),
 					$_POST['title']
 				),
@@ -381,7 +381,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$args = array(
 				'user_id'           => $user->ID,
 				'action'            => sprintf(
-					__( 'Released a new theme, <a href="%s">%s</a>', 'wporg' ),
+					'Released a new theme, <a href="%s">%s</a>',
 					esc_url( $_POST['url'] ),
 					$_POST['title']
 				),
@@ -419,7 +419,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( __( 'Created a new ticket in %s Trac', 'wporg' ), $_POST['trac'] ),
+					'action'            => sprintf( 'Created a new ticket in %s Trac', $_POST['trac'] ),
 					'content'           => $_POST['title'],
 					'component'         => 'tracs',
 					'type'              => 'trac_ticket_create',
@@ -434,7 +434,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( __( 'Posted a reply to %s in %s Trac', 'wporg' ), $_POST['title'], $_POST['trac'] ),
+					'action'            => sprintf( 'Posted a reply to %s in %s Trac', $_POST['title'], $_POST['trac'] ),
 					'content'           => $_POST['comment'],
 					'component'         => 'tracs',
 					'type'              => 'trac_comment_create',
@@ -450,7 +450,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Record commit to committer's activity stream
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( __( 'Committed [%s] to %s Trac', 'wporg' ), $_POST['changeset'], $_POST['trac'] ),
+					'action'            => sprintf( 'Committed [%s] to %s Trac', $_POST['changeset'], $_POST['trac'] ),
 					'content'           => $_POST['message'],
 					'component'         => 'tracs',
 					'type'              => 'trac_commit_create',
@@ -472,7 +472,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					if ( empty( $user ) ) continue;
 					$args = array(
 						'user_id'           => $user->ID,
-						'action'            => sprintf( __( 'Received props in %s', 'wporg' ), $_POST['trac'] ),
+						'action'            => sprintf( 'Received props in %s', $_POST['trac'] ),
 						'content'           => $_POST['message'],
 						'component'         => 'tracs',
 						'type'              => 'trac_props_mention',
@@ -504,14 +504,14 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
 					$action = sprintf(
-						__( 'Confirmed as a speaker for <a href="%s">%s</a> coming up on %s', 'wporg' ),
+						'Confirmed as a speaker for <a href="%s">%s</a> coming up on %s',
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name'],
 						$_POST['wordcamp_date']
 					);
 				} else {
 					$action = sprintf(
-						__( 'Confirmed as a speaker for <a href="%s">%s</a>', 'wporg' ),
+						'Confirmed as a speaker for <a href="%s">%s</a>',
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name']
 					);
@@ -522,14 +522,14 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
 					$action = sprintf(
-						__( 'Joined the organizing team for <a href="%s">%s</a> coming up %s', 'wporg' ),
+						'Joined the organizing team for <a href="%s">%s</a> coming up %s',
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name'],
 						$_POST['wordcamp_date']
 					);
 				} else {
 					$action = sprintf(
-						__( 'Joined the organizing team for <a href="%s">%s</a>', 'wporg' ),
+						'Joined the organizing team for <a href="%s">%s</a>',
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name']
 					);
@@ -541,20 +541,20 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$type = 'wordcamp_attendee_add';
 
 					$action = sprintf(
-						__( 'Registered to attend <a href="%s">%s</a>', 'wporg' ),
+						'Registered to attend <a href="%s">%s</a>',
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name']
 					);
 
 					if ( isset( $_POST['wordcamp_date'] ) && ! empty( $_POST['wordcamp_date'] ) ) {
-						$action .= ' ' . sprintf( __( 'coming up %s', 'wporg' ), $_POST['wordcamp_date'] );
+						$action .= ' ' . sprintf( 'coming up %s', $_POST['wordcamp_date'] );
 					}
 				} elseif ( 'attendee_checked_in' == $_POST['activity_type'] ) {
 					$type = 'wordcamp_attendee_checked_in';
 					$order = absint( $_POST['checked_in_count'] );
 
 					$action = sprintf(
-						__( 'Is the %s person to arrive at <a href="%s">%s</a>', 'wporg' ),
+						'Is the %s person to arrive at <a href="%s">%s</a>',
 						$this->append_ordinal_suffix( $order ),
 						esc_url( $_POST['url'] ),
 						$_POST['wordcamp_name']
@@ -623,7 +623,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'blog_comment_create';
 				$item_id = $_POST['comment_id'];
 				$action  = sprintf(
-					__( 'Wrote a <a href="%s">comment</a> on the post %s, on the site %s', 'wporg' ),
+					'Wrote a <a href="%s">comment</a> on the post %s, on the site %s',
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
 					$_POST['blog']
@@ -632,7 +632,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
 				$action  = sprintf(
-					__( 'Wrote a new post, <a href="%s">%s</a>, on the site %s', 'wporg' ),
+					'Wrote a new post, <a href="%s">%s</a>, on the site %s',
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
 					$_POST['blog']
