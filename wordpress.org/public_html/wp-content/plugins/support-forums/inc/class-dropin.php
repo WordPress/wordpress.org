@@ -37,7 +37,9 @@ class Dropin {
 		add_action( 'bbp_new_reply',     array( $this, 'bbp_update_reply' ) );
 		add_action( 'bbp_edit_reply',    array( $this, 'bbp_update_reply' ) );
 
-		remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
+		if ( is_admin() ) {
+			remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
+		}
 	}
 
 	/**
