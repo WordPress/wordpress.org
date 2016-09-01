@@ -434,7 +434,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Posted a reply to %s in %s Trac', $_POST['title'], $_POST['trac'] ),
+					'action'            => sprintf( 'Posted a reply to <i>%s</i> in %s Trac', $_POST['title'], $_POST['trac'] ),
 					'content'           => $_POST['comment'],
 					'component'         => 'tracs',
 					'type'              => 'trac_comment_create',
@@ -623,7 +623,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'blog_comment_create';
 				$item_id = $_POST['comment_id'];
 				$action  = sprintf(
-					'Wrote a <a href="%s">comment</a> on the post %s, on the site %s',
+					'Wrote a <a href="%s">comment</a> on the post <i>%s</i>, on the site %s',
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
 					$_POST['blog']
@@ -632,7 +632,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$type    = 'blog_post_create';
 				$item_id = $_POST['post_id'];
 				$action  = sprintf(
-					'Wrote a new post, <a href="%s">%s</a>, on the site %s',
+					'Wrote a new post, <i><a href="%s">%s</a></i>, on the site %s',
 					esc_url( $_POST['url'] ),
 					$_POST['title'],
 					$_POST['blog']
