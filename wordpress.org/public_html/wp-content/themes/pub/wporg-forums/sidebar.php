@@ -67,12 +67,6 @@
 		<?php elseif ( ! bbp_is_single_user() ) : ?>
 
 			<div>
-				<h3><?php _e( 'Forums', 'wporg-forums' ); ?></h3>
-				<?php echo do_shortcode( '[bbp-forum-index]' ); ?>
-			</div>
-			<hr class="hidden" />
-
-			<div>
 				<h3><?php _e( 'Views', 'wporg-forums' ); ?></h3>
 				<ul class="topic-views">
 
