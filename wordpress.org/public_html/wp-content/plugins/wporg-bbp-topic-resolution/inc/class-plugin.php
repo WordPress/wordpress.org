@@ -66,7 +66,7 @@ class Plugin {
 	public function get_topic_title( $title, $topic_id ) {
 		$resolved = __( 'Resolved', 'wporg-forums' );
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
-		   return sprintf( esc_html( '[%s]: %s' ), $resolved, $title );
+		   return sprintf( '[%s] %s', esc_html( $resolved ), $title );
 		}
 		return $title;
 	}
