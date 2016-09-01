@@ -89,9 +89,9 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_topic_sidebar() {
-		$theme   = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
-		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
-		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		$theme   = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
+		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
 		?>
 		<div>
 			<h3>About this Theme</h3>
