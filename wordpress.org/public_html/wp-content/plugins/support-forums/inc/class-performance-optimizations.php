@@ -15,6 +15,7 @@ class Performance_Optimizations {
 
 		// Query simplification.
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics' ) );
+		add_filter( 'bbp_register_view_no_replies', array( $this, 'no_replies' ) );
 	}
 
 	/**
@@ -65,6 +66,11 @@ class Performance_Optimizations {
 				$this->query = $r;
 			}
 		}
+		return $r;
+	}
+
+	public function no_replies( $r ) {
+		$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 		return $r;
 	}
 
