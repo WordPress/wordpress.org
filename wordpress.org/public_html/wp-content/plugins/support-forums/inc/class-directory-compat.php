@@ -96,7 +96,7 @@ abstract class Directory_Compat {
 		if (
 			( bbp_is_single_forum() && bbp_get_forum_id() == $this->forum_id() )
 		||
-			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( $this->compat(), 'reviews', 'active' ) ) )
+			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active' ) ) )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
