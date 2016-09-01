@@ -31,7 +31,7 @@ get_header(); ?>
 			</ul>
 			<h3><?php _e( 'Search the Support Forums', 'wporg-forums' ); ?></h3>
 			<p><?php _e( 'Enter a few words that describe the problem you&rsquo;re having.', 'wporg-forums' ); ?></p>
-			<?php bbp_get_template_part( 'form', 'search' ); ?>
+			<?php bb_base_search_form(); ?>
 			<h3><?php _e( 'Hot Topics', 'wporg-forums' ); ?></h3>
 			<p class="frontpageheatmap">
 				<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>

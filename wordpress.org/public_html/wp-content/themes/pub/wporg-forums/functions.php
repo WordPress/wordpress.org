@@ -176,6 +176,22 @@ add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
 
 /** bb Base *******************************************************************/
 
+function bb_base_search_form() {
+?>
+
+	<form role="search" method="get" id="searchform" action="https://wordpress.org/search/do-search.php">
+		<div>
+			<h3><?php _e( 'Forum Search', 'wporg-forums' ); ?></h3>
+			<label class="screen-reader-text hidden" for="search"><?php _e( 'Search for:', 'wporg-forums' ); ?></label>
+			<input name="search" class="text" id="forumsearchbox" value type="text" />
+			<input name="go" class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" />
+			<input value="1" name="forums" type="hidden">
+		</div>
+	</form>
+
+<?php
+}
+
 function bb_base_topic_search_form() {
 ?>
 
