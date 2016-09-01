@@ -18,6 +18,24 @@ class WPOrg_WP_Activity_Notifier {
 		add_action( 'transition_post_status',    array( $this, 'maybe_notify_new_published_post'   ), 10, 3 );
 		add_action( 'transition_comment_status', array( $this, 'maybe_notify_new_approved_comment' ), 10, 3 );
 		add_action( 'wp_insert_comment',         array( $this, 'insert_comment' ),                    10, 2 );
+
+		// bbPress 2.x topic support
+		add_action( 'bbp_new_topic',             array( $this, 'notify_forum_new_topic' ),               12 );
+		add_action( 'bbp_spammed_topic',         array( $this, 'notify_forum_remove_topic' )                );
+		add_action( 'bbp_unspammed_topic',       array( $this, 'notify_forum_new_topic' )                   );
+		add_action( 'bbp_trashed_topic',         array( $this, 'notify_forum_remove_topic' )                );
+		add_action( 'bbp_untrashed_topic',       array( $this, 'notify_forum_new_topic' )                   );
+		add_action( 'bbp_approved_topic',        array( $this, 'notify_forum_new_topic' )                   );
+		add_action( 'bbp_unapproved_topic',      array( $this, 'notify_forum_remove_topic' )                );
+
+		// bbPress 2.x reply support
+		add_action( 'bbp_new_reply',             array( $this, 'notify_forum_new_reply' ),               12 );
+		add_action( 'bbp_spammed_reply',         array( $this, 'notify_forum_remove_reply' )                );
+		add_action( 'bbp_unspammed_reply',       array( $this, 'notify_forum_new_reply' )                   );
+		add_action( 'bbp_approved_reply',        array( $this, 'notify_forum_new_reply' )                   );
+		add_action( 'bbp_unapproved_reply',      array( $this, 'notify_forum_remove_reply' )                );
+		add_action( 'bbp_trashed_reply',         array( $this, 'notify_forum_remove_reply' )                );
+		add_action( 'bbp_untrashed_reply',       array( $this, 'notify_forum_new_reply' )                   );
 	}
 
 	/**
@@ -177,6 +195,143 @@ class WPOrg_WP_Activity_Notifier {
 		);
 
 		wp_remote_post( $this->activity_handler_url, $args );
+	}
+
+	/**
+	 * Handler to actual send topic-related activity payload.
+	 *
+	 * @access private
+	 *
+	 * @param string $activity. The activity type. One of: create-topic, remove-topic.
+	 * @param int    $topic_id  Topic ID.
+	 */
+	private function _notify_forum_topic_payload( $activity, $topic_id ) {
+
+		// Don't notify if importing.
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return;
+		}
+
+		// Bail if site is private.
+		if ( ! bbp_is_site_public() ) {
+			return;
+		}
+
+		// Only handle recognized activities.
+		if ( ! in_array( $activity, array( 'create-topic', 'remove-topic' ) ) ) {
+			return;
+		}
+
+		// Bail on create-topic if topic is not published.
+		if ( 'create-topic' === $activity && ! bbp_is_topic_published( $topic_id ) ) {
+			return;
+		}
+
+		$args = array(
+			'body' => array(
+				'action'    => 'wporg_handle_activity',
+				'activity'  => $activity,
+				'source'    => 'forum',
+				'user'      => get_user_by( 'id', bbp_get_topic_author_id( $topic_id ) )->user_login,
+				'post_id'   => '',
+				'topic_id'  => $topic_id,
+				'forum_id'  => bbp_get_topic_forum_id( $topic_id ),
+				'title'     => bbp_get_topic_title( $topic_id ),
+				'url'       => bbp_get_topic_permalink( $topic_id ),
+				'message'   => bbp_get_topic_excerpt( $topic_id, 55 ),
+				'site'      => get_bloginfo( 'name' ),
+				'site_url'  => site_url(),
+			)
+		);
+
+		$x = wp_remote_post( $this->activity_handler_url, $args );
+	}
+
+	/**
+	 * Handler for bbPress 2.x topic creation.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function notify_forum_new_topic( $topic_id ) {
+		$this->_notify_forum_topic_payload( 'create-topic', $topic_id );
+	}
+
+	/**
+	 * Handler for bbPress 2.x topic removal.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function notify_forum_remove_topic( $topic_id ) {
+		$this->_notify_forum_topic_payload( 'remove-topic', $topic_id );
+	}
+
+	/**
+	 * Handler to actual send reply-related activity payload.
+	 *
+	 * @access private
+	 *
+	 * @param string $activity. The activity type. One of: create-reply, remove-reply.
+	 * @param int    $reply_id  Reply ID.
+	 */
+	private function _notify_forum_reply_payload( $activity, $reply_id ) {
+
+		// Don't notify if importing.
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return;
+		}
+
+		// Bail if site is private.
+		if ( ! bbp_is_site_public() ) {
+			return;
+		}
+
+		// Only handle recognized activities.
+		if ( ! in_array( $activity, array( 'create-reply', 'remove-reply' ) ) ) {
+			return;
+		}
+
+		// Bail on create-reply if not published.
+		if ( 'create-reply' === $activity && ! bbp_is_reply_published( $reply_id ) ) {
+			return;
+		}
+
+		$args = array(
+			'body' => array(
+				'action'    => 'wporg_handle_activity',
+				'activity'  => $activity,
+				'source'    => 'forum',
+				'user'      => get_user_by( 'id', bbp_get_reply_author_id( $reply_id ) )->user_login,
+				'post_id'   => $reply_id,
+				'topic_id'  => bbp_get_reply_topic_id( $reply_id ),
+				'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
+				'title'     => bbp_get_reply_topic_title( $reply_id ) ,
+				'url'       => bbp_get_reply_url( $reply_id ),
+				'message'   => bbp_get_reply_excerpt( $reply_id, 55 ),
+				'site'      => get_bloginfo( 'name' ),
+				'site_url'  => site_url(),
+			)
+		);
+
+		wp_remote_post( $this->activity_handler_url, $args );
+
+	}
+
+	/**
+	 * Handler for bbPress 2.x topic reply creation.
+	 *
+	 * @param int $reply_id Reply ID.
+	 */
+	public function notify_forum_new_reply( $reply_id ) {
+		$this->_notify_forum_reply_payload( 'create-reply', $reply_id );
+	}
+
+	/**
+	 * Handler for bbPress 2.x topic reply removal.
+	 *
+	 * @param int $reply_id Reply ID.
+	 */
+	public function notify_forum_remove_reply( $reply_id ) {
+		$this->_notify_forum_reply_payload( 'remove-reply', $reply_id );
 	}
 
 }
