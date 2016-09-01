@@ -23,6 +23,8 @@ class Import {
 		'tested',
 		'requires',
 		'donate_link',
+		'license',
+		'license_uri',
 		'upgrade_notice',
 		'contributors',
 		'screenshots'

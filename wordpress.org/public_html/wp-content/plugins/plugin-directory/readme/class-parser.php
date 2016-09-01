@@ -52,6 +52,16 @@ class Parser {
 	public $short_description = '';
 
 	/**
+	 * @var string
+	 */
+	public $license = '';
+
+	/**
+	 * @var string
+	 */
+	public $license_uri = '';
+
+	/**
 	 * @var array
 	 */
 	public $sections = array();
@@ -111,6 +121,8 @@ class Parser {
 		'contributors'      => 'contributors',
 		'donate link'       => 'donate_link',
 		'stable tag'        => 'stable_tag',
+		'license'           => 'license',
+		'license uri'       => 'license_uri',
 	);
 
 	/**
@@ -209,6 +221,17 @@ class Parser {
 		}
 		if ( ! empty( $headers['donate_link'] ) ) {
 			$this->donate_link = $headers['donate_link'];
+		}
+		if ( ! empty( $headers['license'] ) ) {
+			// Handle the many cases of "License: GPLv2 - http://..."
+			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
+				$headers['license_uri'] = $url[1];
+				$headers['license'] = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
+			}
+			$this->license = $headers['license'];
+		}
+		if ( ! empty( $headers['license_uri'] ) ) {
+			$this->license_uri = $headers['license_uri'];
 		}
 
 		// Parse the short description.
