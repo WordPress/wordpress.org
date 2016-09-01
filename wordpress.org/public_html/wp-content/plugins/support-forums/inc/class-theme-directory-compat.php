@@ -104,29 +104,23 @@ class Theme_Directory_Compat extends Directory_Compat {
 		<?php
 	}
 
-
-	/**
-	 * Return a custom view header string so that get_breadcrumbs will display it.
-	 */
-	public function get_view_header() {
+	public function do_view_header() {
 		$slug        = esc_attr( $this->slug );
 		$description = esc_html__( 'Description', 'wporg-forums' );
 		$support     = esc_html__( 'Support', 'wporg-forums' );
 		$reviews     = esc_html__( 'Reviews', 'wporg-forums' );
-
-		$header = <<<EOT
+		?>
 		<ul id="sections">
 			<li class="section-description">
-				<a href="//wordpress.org/themes/{$slug}/">{$description}</a>
+				<a href="//wordpress.org/themes/<?php echo $slug; ?>/"><?php echo $description; ?></a>
 			</li>
 			<li class="section-support">
-				<a href="//wordpress.org/support/theme/{$slug}/">{$support}</a>
+				<a href="//wordpress.org/support/theme/<?php echo $slug; ?>/"><?php echo $support; ?></a>
 			<li>
 			<li class="section-reviews">
-				<a href="//wordpress.org/support/theme/{$slug}/reviews/">{$reviews}</a>
+				<a href="//wordpress.org/support/theme/<?php echo $slug; ?>/reviews/"><?php echo $reviews; ?></a>
 			</li>
-			</ul>
-EOT;
-		return $header;
+		</ul>
+		<?php
 	}
 }

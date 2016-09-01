@@ -14,7 +14,7 @@ abstract class Directory_Compat {
 	abstract protected function parse_query();
 	abstract protected function do_view_sidebar();
 	abstract protected function do_topic_sidebar();
-	abstract protected function get_view_header();
+	abstract protected function do_view_header();
 
 	var $authors      = null;
 	var $contributors = null;
@@ -33,6 +33,12 @@ abstract class Directory_Compat {
 
 			// Check to see if an individual topic is compat.
 			add_action( 'template_redirect', array( $this, 'check_topic_for_compat' ) );
+
+			// Always check to see if a topic title needs a compat prefix.
+			add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 9, 2 );
+
+			// Always check to see if a new topic is being posted.
+			add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		}
 	}
 
@@ -53,9 +59,14 @@ abstract class Directory_Compat {
 			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
 
 			// Add output filters and actions.
-			add_filter( 'bbp_get_view_link',  array( $this, 'get_view_link' ), 10, 2 );
-			add_filter( 'bbp_breadcrumbs',    array( $this, 'breadcrumbs' ) );
-			add_filter( 'bbp_get_breadcrumb', array( $this, 'get_breadcrumb' ), 10, 3 );
+			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
+			add_filter( 'bbp_breadcrumbs',   array( $this, 'breadcrumbs' ) );
+
+			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
+
+			// Handle new topic form at the bottom of support view.
+			add_action( 'wporg_compat_after_single_view',      array( $this, 'add_topic_form' ) );
+			add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_content' ) );
 		}
 	}
 
@@ -81,6 +92,20 @@ abstract class Directory_Compat {
 				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
 			}
 		}
+	}
+
+	public function get_topic_title( $title, $topic_id ) {
+		if ( bbp_is_single_topic() || ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat(), 'reviews', 'active' ) ) ) ) {
+			return $title;
+		}
+
+		$slug = wp_get_object_terms( $topic_id, $this->taxonomy(), array( 'fields' => 'slugs' ) );
+		if ( ! empty( $slug ) ) {
+			$slug = $slug[0];
+			$object = $this->get_object( $slug );
+			$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
+		}
+		return $title;
 	}
 
 	public function add_rewrite_rules() {
@@ -157,17 +182,13 @@ abstract class Directory_Compat {
 			__( 'Reviews', 'wporg-forums' ),
 			array(
 				'post_parent'   => Plugin::REVIEWS_FORUM_ID,
-				'meta_query'    => array( array(
-					'key'       => '_bbp_last_active_time',
-					'type'      => 'DATETIME',
-				) ),
 				'tax_query'     => array( array(
 					'taxonomy'  => $this->taxonomy(),
 					'field'     => 'slug',
 					'terms'     => $this->slug(),
 				) ),
 				'show_stickies' => false,
-				'orderby'       => 'meta_value',
+				'orderby'       => 'ID',
 			)
 		);
 
@@ -251,14 +272,56 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Prefix a single view-specific header using the breadcrumb filter.
+	 * Add the new topic form at the bottom of appropriate views.
 	 */
-	public function get_breadcrumb( $trail, $crumbs, $r ) {
-		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews' ) ) ) {
-			$view_header = $this->get_view_header();
-			$trail = $view_header . $trail;
+	public function add_topic_form() {
+		if ( ! bbp_is_single_view() ) {
+			return;
 		}
-		return $trail;
+
+		$view = bbp_get_view_id();
+		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
+			return;
+		}
+
+		bbp_get_template_part( 'form', 'topic' );
+	}
+
+	public function add_topic_form_content() {
+		if ( ! bbp_is_single_view() ) {
+			return;
+		}
+
+		$view = bbp_get_view_id();
+		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
+			return;
+		}
+
+		if ( 'reviews' == $view ) {
+			$forum_id = Plugin::REVIEWS_FORUM_ID;
+		} else {
+			$forum_id = $this->forum_id();
+		}
+		?>
+		<input type="hidden" name="bbp_forum_id" id="bbp_forum_id" value="<?php echo esc_attr( $forum_id ); ?>" />
+		<input type="hidden" name="wporg_compat" id="wporg_compat" value="<?php echo esc_attr( $this->compat() ); ?>" />
+		<input type="hidden" name="wporg_compat_slug" id="wporg_compat_slug" value="<?php echo esc_attr( $this->slug() ); ?>" />
+		<?php
+	}
+
+	public function topic_post_extras( $topic_id ) {
+		if (
+			( isset( $_POST['wporg_compat'] ) && $_POST['wporg_compat'] == $this->compat() )
+		&&
+			( isset( $_POST['wporg_compat_slug'] ) && $_POST['wporg_compat_slug'] == $this->slug() )
+		) {
+			// Check against the canonical plugin/theme records for slug existence.
+			$object = $this->get_object( $_POST['wporg_compat_slug'] );
+
+			if ( ! empty( $object ) ) {
+				wp_set_object_terms( $topic_id, $this->slug(), $this->taxonomy(), false );
+			}
+		}
 	}
 
 	/**
