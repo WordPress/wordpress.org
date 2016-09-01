@@ -15,6 +15,7 @@ class Performance_Optimizations {
 
 		// Query simplification.
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics' ) );
+		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'has_replies' ) );
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'no_replies' ) );
 	}
 
@@ -32,6 +33,14 @@ class Performance_Optimizations {
 	 * Optimize queries for has_topics as much as possible.
 	 */
 	public function has_topics( $r ) {
+		/**
+		 * Feeds
+		 */
+		if ( is_feed() ) {
+			$r['no_found_rows'] = true;
+			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+		}
+
 		/**
 		 * Filter queries so they are not sorted by the post meta value of
 		 * `_bbp_last_active_time`. This query needs additional optimization
@@ -69,9 +78,25 @@ class Performance_Optimizations {
 		return $r;
 	}
 
+	public function has_replies( $r ) {
+		if ( is_feed() ) {
+			$r['no_found_rows'] = true;
+			add_filter( 'posts_where', array( $this, 'posts_in_last_month' ) );
+		}
+		return $r;
+	}
+
 	public function no_replies( $r ) {
 		$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 		return $r;
+	}
+
+	public function posts_in_last_month( $w ) {
+		global $wpdb;
+
+		$bound_id = $this->get_bound_id( '1 MONTH' );
+		$w .= $wpdb->prepare( " AND ( $wpdb->posts.ID >= %d )", $bound_id );
+		return $w;
 	}
 
 	public function posts_in_last_six_months( $w ) {
