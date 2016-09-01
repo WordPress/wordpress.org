@@ -1,4 +1,4 @@
-<?php if ( !bbp_is_single_forum() ) : ?>
+<?php if ( ! bbp_is_single_forum() && ! bbp_is_single_view() ) : ?>
 
 <div id="bbpress-forums">
 
@@ -98,7 +98,7 @@
 
 					<?php do_action( 'bbp_theme_after_topic_form_tags' ); ?>
 
-					<?php if ( !bbp_is_single_forum() ) : ?>
+					<?php if ( ! bbp_is_single_forum() && ! bbp_is_single_view() ) : ?>
 
 						<?php do_action( 'bbp_theme_before_topic_form_forum' ); ?>
 
@@ -213,7 +213,7 @@
 
 <?php endif; ?>
 
-<?php if ( !bbp_is_single_forum() ) : ?>
+<?php if ( ! bbp_is_single_forum() && ! bbp_is_single_view() ) : ?>
 
 </div>
 
