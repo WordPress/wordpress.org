@@ -7,7 +7,7 @@
 		z-index: 10;
 		margin: 2.4em;
 		padding: 1.8em;
-		background-color: #F56E28;
+		background-color: #DC3232;
 		border-radius: .25em;
 		margin-bottom: 2em;
 	}
@@ -21,7 +21,7 @@
 			}
 
 			.wcfd-disabled-form #wcorg-login-message a {
-				color: #a20000 !important /* !important to prevent theme from unintentionally overriding */;
+				color: black !important /* !important to prevent theme from unintentionally overriding */;
 				font-weight: bold;
 			}
 
