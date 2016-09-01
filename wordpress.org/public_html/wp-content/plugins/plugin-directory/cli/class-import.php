@@ -193,9 +193,6 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
-
-		// Update Jetpack Search
-		\Jetpack::$instance->sync->register_post( $plugin->ID );
 	}
 
 	/**
