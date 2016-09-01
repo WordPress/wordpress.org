@@ -54,7 +54,7 @@ class Performance_Optimizations {
 				// open topics.
 				} elseif ( ! empty( $r['meta_key'] ) ) {
 					$r['orderby'] = 'ID';
-					add_filter( 'posts_where', array( $this, 'posts_in_six_months' ) );
+					add_filter( 'posts_where', array( $this, 'posts_in_last_six_months' ) );
 				}
 			}
 
