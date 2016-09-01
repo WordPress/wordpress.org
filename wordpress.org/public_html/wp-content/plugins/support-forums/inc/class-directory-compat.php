@@ -67,6 +67,7 @@ abstract class Directory_Compat {
 			// Handle new topic form at the bottom of support view.
 			add_action( 'wporg_compat_after_single_view',      array( $this, 'add_topic_form' ) );
 			add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_content' ) );
+			add_filter( 'bbp_current_user_can_access_create_topic_form', array( $this, 'current_user_can_access_create_topic_form' ) );
 		}
 	}
 
@@ -307,6 +308,13 @@ abstract class Directory_Compat {
 		<input type="hidden" name="wporg_compat" id="wporg_compat" value="<?php echo esc_attr( $this->compat() ); ?>" />
 		<input type="hidden" name="wporg_compat_slug" id="wporg_compat_slug" value="<?php echo esc_attr( $this->slug() ); ?>" />
 		<?php
+	}
+
+	public function current_user_can_access_create_topic_form( $retval ) {
+		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat() ) ) ) {
+			$retval = bbp_current_user_can_publish_topics();
+		}
+		return $retval;
 	}
 
 	public function topic_post_extras( $topic_id ) {
