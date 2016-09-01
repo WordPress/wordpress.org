@@ -72,11 +72,9 @@ abstract class Directory_Compat {
 
 	public function check_topic_for_compat() {
 		if ( bbp_is_single_topic() ) {
-			$slug = wp_get_object_terms( bbp_get_topic_id(), $this->taxonomy(), array( 'fields' => 'slugs' ) );
-
-			// Match found for this compat.
-			if ( ! empty( $slug ) ) {
-				$slug = $slug[0];
+			$terms = get_the_terms( bbp_get_topic_id(), $this->taxonomy() );
+			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+				$slug = $terms[0]->slug;
 
 				// Basic setup.
 				$this->slug              = $slug;
@@ -95,15 +93,17 @@ abstract class Directory_Compat {
 	}
 
 	public function get_topic_title( $title, $topic_id ) {
-		if ( bbp_is_single_topic() || ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat(), 'reviews', 'active' ) ) ) ) {
-			return $title;
-		}
-
-		$slug = wp_get_object_terms( $topic_id, $this->taxonomy(), array( 'fields' => 'slugs' ) );
-		if ( ! empty( $slug ) ) {
-			$slug = $slug[0];
-			$object = $this->get_object( $slug );
-			$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
+		if (
+			( bbp_is_single_forum() && bbp_get_forum_id() == $this->forum_id() )
+		||
+			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( $this->compat(), 'reviews', 'active' ) ) )
+		) {
+			$terms = get_the_terms( $topic_id, $this->taxonomy() );
+			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+				$term = $terms[0];
+				$object = $this->get_object( $term->slug );
+				$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
+			}
 		}
 		return $title;
 	}
