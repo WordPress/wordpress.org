@@ -32,6 +32,7 @@ class Moderators {
 			'pending',
 			__( 'Pending', 'wporg-forums' ),
 			array(
+				'meta_key'      => null,
 				'post_type'     => array(
 					'topic',
 					'reply',
