@@ -306,7 +306,7 @@ class WPOrg_WP_Activity_Notifier {
 				'forum_id'  => bbp_get_reply_forum_id( $reply_id ),
 				'title'     => bbp_get_reply_topic_title( $reply_id ) ,
 				'url'       => bbp_get_reply_url( $reply_id ),
-				'message'   => bbp_get_reply_excerpt( $reply_id, 55 ),
+				'message'   => $this->get_reply_excerpt( $reply_id, 15 ),
 				'site'      => get_bloginfo( 'name' ),
 				'site_url'  => site_url(),
 			)
@@ -332,6 +332,75 @@ class WPOrg_WP_Activity_Notifier {
 	 */
 	public function notify_forum_remove_reply( $reply_id ) {
 		$this->_notify_forum_reply_payload( 'remove-reply', $reply_id );
+	}
+
+	/**
+	 * Returns the excerpt of the reply.
+	 *
+	 * This is similar to `bbp_get_reply_excerpt()` except:
+	 *
+	 * - Excerpt length is by number of words and not number of characters.
+	 * - Omits inclusion of any blockquoted text.
+	 *
+	 * @param int $reply_id Optional. The reply id.
+	 * @param int $words    Optional. The number of words for the excerpt. Default 15.
+	 * @return string
+	 */
+	public function get_reply_excerpt( $reply_id = 0, $words = 15 ) {
+		$reply_id = bbp_get_reply_id( $reply_id );
+		$excerpt  = get_post_field( 'post_excerpt', $reply_id );
+
+		if ( ! $excerpt ) {
+			$excerpt = bbp_get_reply_content( $reply_id );
+		}
+
+		$excerpt = $this->trim_text( $excerpt, $words, 'words' );
+		return apply_filters( 'bbp_get_reply_excerpt', $excerpt, $reply_id, $words );
+	}
+
+	/**
+	 * Trims text by words or characters.
+	 *
+	 * @param string $text       The text to trim.
+	 * @param int    $length     Optional. The number of words or characters to try down to. Default 15.
+	 * @param string $trim_style Optional. The manner in which the text should be trimmed. Either 'chars' or 'words'. Default 'words'.
+	 * @return string
+	 */
+	public function trim_text( $text, $length = 15, $trim_style = 'words' ) {
+		$length     = (int) $length;
+		$trim_style = in_array( $trim_style, array( 'chars', 'words' ) ) ? $trim_style : 'words';
+
+		// Remove blockquoted text since the text isn't original.
+		$text = preg_replace( '/<blockquote>.+<\/blockquote>/', '', $text );
+
+		// Strip tags and surrounding whitespace.
+		$text = trim ( strip_tags( $text ) );
+
+		// If trimming by chars, behave like a more multibyte-aware
+		// bbp_get_reply_excerp().
+		if ( 'chars' === $trim_style ) {
+			// Multibyte support
+			if ( function_exists( 'mb_strlen' ) ) {
+				$text_length = mb_strlen( $text );
+			} else {
+				$text_length = strlen( $text );
+			}
+
+			if ( $length && ( $text_length > $length ) ) {
+				if ( function_exists( 'mb_strlen' ) ) {
+					$text = mb_substr( $text, 0, $length - 1 );
+				} else {
+					$text = substr( $text, 0, $length - 1 );
+				}
+				$text .= '&hellip;';
+			}
+		}
+		// Else trim by words.
+		else {
+			$text = wp_trim_words( $text, $length );
+		}
+
+		return $text;
 	}
 
 }
