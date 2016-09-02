@@ -3,9 +3,6 @@
 /**
  * Posts Loop
  *
- * @todo Front-side action buttons
- * @todo Better excerpt styling
- *
  * @package bbPress
  * @subpackage Theme
  */
@@ -24,15 +21,16 @@
 
 		<?php while ( bbp_topics() ) : bbp_the_topic(); ?>
 
-		<ul>
-			<li class="bbp-topic-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a><br />
+			<?php if ( 'topic' == get_post_type() ) : ?>
 
-			<span class="bbp-topic-started-by"><?php printf( __( 'Started by: %1$s', 'wporg-forums' ), bbp_get_topic_author_link( array( 'size' => '14' ) ) ); ?></span>
+				<?php bbp_get_template_part( 'content', 'single-topic-lead' ); ?>
 
-			<span class="bbp-topic-started-in"><?php printf( __( 'in: <a href="%1$s">%2$s</a>', 'wporg-forums' ), bbp_get_forum_permalink( bbp_get_topic_forum_id() ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></span></li>
+			<?php // This actually works. ?>
+			<?php else : bbpress()->reply_query = bbpress()->topic_query; ?>
 
-			<li class="bbp-post-excerpt"><?php the_excerpt(); ?></li>
-		</ul>
+				<?php bbp_get_template_part( 'loop', 'single-reply' ); ?>
+
+			<?php endif; ?>
 
 		<?php endwhile; ?>
 
