@@ -101,7 +101,7 @@
 
 			<div>
 				<h3><?php _e( 'Tags', 'wporg-forums' ); ?></h3>
-				<?php echo do_shortcode( '[bbp-topic-tags]' ); ?>
+				<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>
 			</div>
 
 		<?php endif; ?>
@@ -132,7 +132,7 @@
 
 		<div>
 			<h3><?php _e( 'Tags', 'wporg-forums' ); ?></h3>
-			<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>
+			<?php wp_tag_cloud(); ?>
 		</div>
 
 	<?php endif; ?>
