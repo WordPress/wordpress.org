@@ -12,7 +12,7 @@ export default React.createClass( {
 						<div dangerouslySetInnerHTML={ { __html: this.props.content } } />
 					</div>
 				</div>
-				<a className="reviews-link" href={ `https://wordpress.org/support/view/plugin-reviews/${ this.props.slug }/` }>Read all { this.props.numRatings } reviews</a>
+				<a className="reviews-link" href={ `https://wordpress.org/support/plugin/${ this.props.slug }/reviews/` }>Read all { this.props.numRatings } reviews</a>
 			</div>
 		)
 	}

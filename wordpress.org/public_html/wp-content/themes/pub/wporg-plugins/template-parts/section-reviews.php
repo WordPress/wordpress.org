@@ -14,6 +14,6 @@ global $section, $section_slug, $section_content;
 	<h2><?php echo $section['title']; ?></h2>
 	<?php echo $section_content; ?>
 </div>
-<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . get_post()->post_name . '/' ); ?>">
+<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">
 	<?php printf( __( 'Read all %s reviews', 'wporg-plugins' ), array_sum( get_post_meta( get_the_ID(), 'ratings', true ) ) ); ?>
 </a>

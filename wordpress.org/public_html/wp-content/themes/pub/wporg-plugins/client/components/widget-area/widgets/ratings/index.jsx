@@ -9,7 +9,7 @@ export default React.createClass( {
 	ratingsBreakdown() {
 		return (
 			<div>
-				<a className="reviews-link" href={ `https://wordpress.org/support/view/plugin-reviews/${ this.props.plugin.slug }` }>See all</a>
+				<a className="reviews-link" href={ `https://wordpress.org/support/plugin/${ this.props.plugin.slug }/reviews/` }>See all</a>
 
 				<PluginRatings rating={ this.props.plugin.rating } ratingCount={ this.props.plugin.num_ratings } />
 
@@ -19,7 +19,7 @@ export default React.createClass( {
 
 						return (
 							<li className="counter-container">
-								<a href={ `https://wordpress.org/support/view/plugin-reviews/${ this.props.plugin.slug }?filter=${ stars }` }>
+								<a href={ `https://wordpress.org/support/plugin/${ this.props.plugin.slug }/reviews/?filter=${ stars }` }>
 									<span className="counter-label">{ stars > 1 ? `${ stars } stars` : `${ stars } star` }</span>
 									<span className="counter-back">
 										<span className="counter-bar" style={ { width: `${ barWidth }%` } } />
@@ -44,7 +44,7 @@ export default React.createClass( {
 					<div className="rating"><p>This plugin has not been rated yet.</p></div>
 				}
 				<div className="user-rating">
-					<a className="button button-secondary" href={ `https://wordpress.org/support/view/plugin-reviews/${ this.props.plugin.slug }#postform` }>Add my review</a>
+					<a className="button button-secondary" href={ `https://wordpress.org/support/plugin/${ this.props.plugin.slug }/reviews/#new-post` }>Add my review</a>
 				</div>
 			</div>
 		)
