@@ -10,7 +10,24 @@ class WPOrg_WP_Activity_Notifier {
 
 	private $activity_handler_url = 'https://profiles.wordpress.org/wp-admin/admin-ajax.php';
 
-	public function __construct() {
+	/**
+	 * @var WPOrg_WP_Activity_Notifier The singleton instance.
+	 */
+	private static $instance;
+
+	/**
+	 * Returns always the same instance of this plugin.
+	 *
+	 * @return Plugin
+	 */
+	public static function get_instance() {
+		if ( ! self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	private function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
@@ -405,4 +422,4 @@ class WPOrg_WP_Activity_Notifier {
 
 }
 
-new WPOrg_WP_Activity_Notifier();
+WPOrg_WP_Activity_Notifier::get_instance();
