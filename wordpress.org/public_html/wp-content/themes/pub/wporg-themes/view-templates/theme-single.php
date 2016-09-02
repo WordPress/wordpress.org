@@ -91,7 +91,7 @@
 					<ul>
 						<?php foreach ( range( 5, 1 ) as $stars ) : ?>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/{{ data.id }}?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-themes' ), $stars ) ); ?>">
+							<a href="//wordpress.org/support/theme/{{ data.id }}/reviews/?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-themes' ), $stars ) ); ?>">
 								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-themes' ), $stars ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: {{ 100 * data.ratings[<?php echo $stars; ?>] / data.num_ratings }}%;"></span>
@@ -103,7 +103,7 @@
 					</ul>
 					<# } #>
 
-					<a class="button button-secondary" href="https://wordpress.org/support/view/theme-reviews/{{ data.id }}#postform"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
+					<a class="button button-secondary" href="https://wordpress.org/support/theme/{{ data.id }}/reviews/#new-post"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">

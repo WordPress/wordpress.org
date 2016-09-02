@@ -111,7 +111,7 @@
 							$rating_bar_width = $theme->num_ratings ? 100 * $theme->ratings[$stars] / $theme->num_ratings : 0;
 						?>
 						<li class="counter-container">
-							<a href="//wordpress.org/support/view/theme-reviews/<?php echo $theme->slug; ?>?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-themes' ), $stars ) ); ?>">
+							<a href="//wordpress.org/support/theme/<?php echo $theme->slug; ?>/reviews/?filter=<?php echo $stars; ?>" title="<?php echo esc_attr( sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $stars, 'wporg-themes' ), $stars ) ); ?>">
 								<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-themes' ), $stars ); ?></span>
 								<span class="counter-back">
 									<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
@@ -123,7 +123,7 @@
 					</ul>
 					<?php } ?>
 
-					<a class="button button-secondary" href="https://wordpress.org/support/view/theme-reviews/<?php echo $theme->slug; ?>#postform"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
+					<a class="button button-secondary" href="https://wordpress.org/support/theme/<?php echo $theme->slug; ?>/reviews/#new-post"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">
