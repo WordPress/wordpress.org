@@ -171,7 +171,7 @@ class Template {
 
 				case 'reviews':
 					$title = _x( 'Reviews', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/view/plugin-reviews/' . $plugin_slug;
+					$url   = 'https://wordpress.org/support/plugin/' . $plugin_slug . '/reviews/';
 					break;
 
 				case 'developers':

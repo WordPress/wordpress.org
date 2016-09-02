@@ -39,7 +39,7 @@ class Ratings extends \WP_Widget {
 		<meta itemprop="ratingCount" content="<?php echo esc_attr( $num_ratings ) ?>"/>
 
 		<?php if ( $rating ) : ?>
-			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
+			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
 
 			<div class="rating">
 				<?php echo Template::dashicons_stars( $rating ); ?>
@@ -51,7 +51,7 @@ class Ratings extends \WP_Widget {
 					$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
 					?>
 					<li class="counter-container">
-						<a href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '?filter=' . $stars ); ?>">
+						<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/?filter=' . $stars ); ?>">
 							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugin' ), $stars ); ?></span>
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
@@ -72,7 +72,7 @@ class Ratings extends \WP_Widget {
 
 		if ( is_user_logged_in() ) : ?>
 			<div class="user-rating">
-				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/view/plugin-reviews/' . $post->post_name . '#postform' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
+				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
 			</div>
 			<?php
 		endif;
