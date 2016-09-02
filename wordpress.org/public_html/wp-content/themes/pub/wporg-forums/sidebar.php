@@ -2,7 +2,7 @@
 
 	<?php if ( function_exists( 'is_bbpress' ) && ( is_bbpress() ) || is_page( 'new-topic' ) ) : ?>
 
-		<?php if ( bbp_is_single_forum() ) : ?>
+		<?php if ( bbp_is_single_forum() || ( bb_is_intl_forum() && bb_base_topic_search_query( false ) ) ) : ?>
 
 			<div>
 				<h3><?php _e( 'Forum Info', 'wporg-forums' ); ?></h3>
@@ -12,7 +12,13 @@
 			</div>
 
 			<div>
-				<?php bb_base_search_form(); ?>
+				<?php
+					if ( bb_is_intl_forum() ) :
+						bb_base_topic_search_form();
+					else :
+						bb_base_search_form();
+					endif;
+				?>
 			</div>
 
 			<div>
@@ -47,7 +53,13 @@
 			</div>
 
 			<div>
-				<?php bb_base_search_form(); ?>
+				<?php
+					if ( bb_is_intl_forum() ) :
+						bbp_base_reply_search_form();
+					else :
+						bb_base_search_form();
+					endif;
+				?>
 			</div>
 
 			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>

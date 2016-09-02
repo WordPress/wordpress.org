@@ -399,3 +399,8 @@ function bb_base_after_topics_loop() {
 	<?php
 }
 add_action( 'bbp_template_after_topics_loop', 'bb_base_after_topics_loop' );
+
+function bb_is_intl_forum() {
+	return get_locale() != 'en_US';
+}
+
