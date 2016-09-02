@@ -2169,7 +2169,6 @@ object {
   letter-spacing: 0.05rem;
   padding: 16px 0;
   padding: 1rem 0;
-  text-transform: uppercase;
 }
 
 .plugin-faqs dt:before {
