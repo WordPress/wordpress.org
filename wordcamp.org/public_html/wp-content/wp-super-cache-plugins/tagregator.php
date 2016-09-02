@@ -3,13 +3,6 @@
 namespace WordCamp\WPSC_Plugins\Tagregator;
 defined( 'WPCACHEHOME' ) or die();
 
-/*
- * This plugin depends on the new WPSC REST-API plugin, so it's disabled until that plugin is merged
- *
- * See https://github.com/Automattic/wp-super-cache/pull/121/
- */
-return;
-
 add_cacheaction( 'serve_cache_file_init', __NAMESPACE__ . '\prune_tagregator_requests' );
 
 /**
