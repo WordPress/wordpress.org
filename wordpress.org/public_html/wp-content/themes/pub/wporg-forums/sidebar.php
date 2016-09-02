@@ -55,7 +55,7 @@
 			<div>
 				<?php
 					if ( bb_is_intl_forum() ) :
-						bbp_base_reply_search_form();
+						bb_base_reply_search_form();
 					else :
 						bb_base_search_form();
 					endif;
