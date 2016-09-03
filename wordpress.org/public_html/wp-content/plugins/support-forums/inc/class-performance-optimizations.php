@@ -75,6 +75,10 @@ class Performance_Optimizations {
 				add_filter( 'bbp_topic_pagination', array( $this, 'forum_pagination' ) );
 				$this->query = $r;
 			}
+
+			if ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active' ) ) ) {
+				$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
+			}
 		}
 		return $r;
 	}
@@ -179,12 +183,13 @@ class Performance_Optimizations {
 		$bound_id = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $bound_id ) {
 
-			// Use the type_status_date index.
+			// Use the type_status_date index, excluding reviews because they were imported last.
 			$bound_id = $wpdb->get_var( "
 				SELECT `ID`
 				FROM $wpdb->posts
 				WHERE post_type = 'topic'
 					AND post_status IN ( 'publish', 'closed' )
+					AND post_parent != 21272
 					AND post_date < DATE_SUB( NOW(), INTERVAL $interval )
 				ORDER BY `ID` DESC
 				LIMIT 1 " );
