@@ -13,6 +13,9 @@ class Performance_Optimizations {
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
 
+		// Filters on pre_get_posts.
+		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+
 		// Don't use post_modified/post_modified_gmt to find the most recent content change.
 		add_filter( 'pre_get_lastpostmodified', array( $this, 'pre_get_lastpostmodified' ), 10, 3 );
 
@@ -31,6 +34,15 @@ class Performance_Optimizations {
 			$r['type'] = 'name';
 		}
 		return $r;
+	}
+
+	public function pre_get_posts( $query ) {
+		/**
+		 * Feeds do not need to know the total count for a given query.
+		 */
+		if ( $query->is_feed() ) {
+			$query->set( 'no_found_rows', true );
+		}
 	}
 
 	/**
