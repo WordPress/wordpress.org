@@ -29,14 +29,20 @@
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
-						<p><?php
-							printf(
-								/* translators: %s: Search URL */
-								__( 'Before posting a new topic, be sure to <a href="%s">search</a> to see if one has been started already.', 'wporg-forums' ),
-								esc_url( bbp_get_search_url() )
-							);
-						?></p>
-						<p><?php _e( 'Having a problem? Asking a question? Make sure to read the <a href="http://codex.wordpress.org/Forum_Welcome">Forum Welcome</a> to find out how to maximize your odds of getting help!', 'wporg-forums' ); ?></p>
+						<p><?php _e( 'When posting a new topic, follow these steps:', 'wporg-forums' ); ?></p>
+						<ul>
+							<li><?php
+								/* translators: %s: Codex URL for forum welcome */
+								printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https:///codex.wordpress.org/Forum_Welcome', 'wporg-forums' ) ) );
+							?></li>
+							<li><?php
+								/* translators: %s: URL to search */
+								printf( __( '<strong><a href="%s">Search</a> the forums</strong> to see if your topic has been started already.', 'wporg-forums' ), esc_url( bbp_get_search_url() ) );
+							?></li>
+							<li><?php _e( '<strong>Update to the latest versions</strong> of your plugins, themes, and WordPress.', 'wporg-forums' ); ?></li>
+							<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
+							<li><?php _e( '<strong>Provide any information</strong> you might think is useful. If your issue is visual, note your browser and operating system. If your issue is technical, not your server environment.', 'wporg-forums' ); ?></li>
+						</ul>
 					</div>
 
 				<?php endif; ?>

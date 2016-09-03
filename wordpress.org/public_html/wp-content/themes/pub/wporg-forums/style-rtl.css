@@ -72,3 +72,8 @@ body {
 	direction: ltr;
 	text-align: left;
 }
+
+#bbpress-forums div.bbp-template-notice ul {
+	margin-left: 0;
+	margin-right: 20px;
+}

@@ -126,6 +126,7 @@ div.bbp-template-notice,
 div.indicator-hint {
 	background: #fff8e5;
 	border: 1px solid #ffb900;
+	border-bottom: 3px solid #ffb900;
 	-webkit-border-radius: 0;
 	border-radius: 0;
 }
@@ -134,6 +135,19 @@ div.bbp-template-notice.error,
 div.bbp-template-notice.warning {
 	background: #fbeaea;
 	border: 1px solid #dc3232;
+	border-bottom: 3px solid #dc3232;
+}
+
+div.bbp-template-notice a {
+	text-decoration: underline;
+}
+
+#bbpress-forums div.bbp-template-notice ul {
+	margin-left: 20px;
+}
+
+#bbpress-forums div.bbp-template-notice ul li {
+	list-style: disc;
 }
 
 /* Reply button */
