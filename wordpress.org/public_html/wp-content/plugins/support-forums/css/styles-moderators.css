@@ -1,0 +1,7 @@
+#bbpress-forums .status-archived.even {
+	background-color: #fee !important;
+}
+
+#bbpress-forums .status-archived.odd {
+	background-color: #fdd !important;
+}
