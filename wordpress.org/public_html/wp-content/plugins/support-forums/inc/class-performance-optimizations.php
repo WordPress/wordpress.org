@@ -13,6 +13,9 @@ class Performance_Optimizations {
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
 
+		// Don't use post_modified/post_modified_gmt to find the most recent content change.
+		add_filter( 'pre_get_lastpostmodified', array( $this, 'pre_get_lastpostmodified' ), 10, 3 );
+
 		// Query simplification.
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'has_replies' ) );
@@ -28,6 +31,62 @@ class Performance_Optimizations {
 			$r['type'] = 'name';
 		}
 		return $r;
+	}
+
+	/**
+	 * Forum traffic is high enough that we can avoid a query on post_modified_date
+	 * and just look at the date on the post with the highest id. This filters
+	 * on pre_get_lastpostmodified and caches the result of the simplified query.
+	 *
+	 * By using a different cache key, we can avoid constantly modifying this and
+	 * allow it to time out after five minutes. Otherwise, certain feeds will be
+	 * always have a changed status.
+	 */
+	public function pre_get_lastpostmodified( $retval, $timezone, $post_type ) {
+		global $wpdb;
+
+		// This is largely derived from _get_last_post_time().
+		$timezone = strtolower( $timezone );
+
+		$cache_key = "wporg:lastpostmodified:$timezone";
+		if ( 'any' !== $post_type ) {
+			$cache_key .= ':' . sanitize_key( $post_type );
+		}
+		$cache_group = 'wporg-forums-timeinfo';
+
+		$date = wp_cache_get( $cache_key, $cache_group );
+
+		if ( ! $date ) {
+			if ( 'any' === $post_type ) {
+				$post_types = get_post_types( array( 'public' => true ) );
+				array_walk( $post_types, array( $wpdb, 'escape_by_ref' ) );
+				$post_types = "'" . implode( "', '", $post_types ) . "'";
+			} else {
+				$post_types = "'" . sanitize_key( $post_type ) . "'";
+			}
+
+			switch ( $timezone ) {
+				case 'gmt' :
+					$date = $wpdb->get_var( "SELECT post_date_gmt FROM $wpdb->posts WHERE post_status = 'publish' AND post_type IN ({$post_types}) ORDER BY `ID` DESC LIMIT 1" );
+					break;
+				case 'blog' :
+					$date = $wpdb->get_var( "SELECT post_date FROM $wpdb->posts WHERE post_status = 'publish' AND post_type IN ({$post_types}) ORDER BY `ID` DESC LIMIT 1" );
+					break;
+				case 'server' :
+					$add_seconds_server = date( 'Z' );
+					$date = $wpdb->get_var( "SELECT DATE_ADD( post_date_gmt, INTERVAL '$add_seconds_server' SECOND ) FROM $wpdb->posts WHERE post_status = 'publish' AND post_type IN ({$post_types}) ORDER BY `ID` DESC LIMIT 1" );
+					break;
+			}
+
+			if ( $date ) {
+				wp_cache_set( $cache_key, $date, $cache_group, 5 * MINUTE_IN_SECONDS );
+			}
+		}
+		if ( empty( $date ) ) {
+			return $retval;
+		}
+
+		return $date;
 	}
 
 	/**
