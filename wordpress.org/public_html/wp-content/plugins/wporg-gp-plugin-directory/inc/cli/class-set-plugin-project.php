@@ -3,6 +3,7 @@
 namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
 
 use GP;
+use stdClass;
 use WP_CLI;
 use WP_CLI_Command;
 
