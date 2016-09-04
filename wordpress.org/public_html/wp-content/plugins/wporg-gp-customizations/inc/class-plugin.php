@@ -72,6 +72,7 @@ class Plugin {
 	 */
 	public function register_cli_commands() {
 		WP_CLI::add_command( 'wporg-translate init-locale', __NAMESPACE__ . '\CLI\Init_Locale' );
+		WP_CLI::add_command( 'wporg-translate language-pack', __NAMESPACE__ . '\CLI\Language_Pack' );
 	}
 
 	/**
