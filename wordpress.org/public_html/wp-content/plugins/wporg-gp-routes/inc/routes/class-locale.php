@@ -7,6 +7,7 @@ use GP;
 use GP_Locales;
 use GP_Route;
 use stdClass;
+use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
 
 /**
  * Locale Route Class.
@@ -14,6 +15,21 @@ use stdClass;
  * Provides the route for translate.wordpress.org/locale/$locale.
  */
 class Locale extends GP_Route {
+
+	/**
+	 * Adapter for the rosetta roles plugin.
+	 *
+	 * @var null|Rosetta_Roles
+	 */
+	private $roles_adapter = null;
+
+	public function __construct() {
+		parent::__construct();
+
+		if ( method_exists( Rosetta_Roles::class, 'get_instance' ) ) {
+			$this->roles_adapter = Rosetta_Roles::get_instance();
+		}
+	}
 
 	/**
 	 * Prints projects/translation sets of a top level project.
@@ -44,10 +60,10 @@ class Locale extends GP_Route {
 		$user_id = get_current_user_id();
 		if (
 			! is_user_logged_in() ||
-			! function_exists( 'wporg_gp_rosetta_roles' ) || // Rosetta Roles plugin is not enabled
+			! $this->roles_adapter || // Rosetta Roles plugin is not enabled
 			! (
-				wporg_gp_rosetta_roles()->is_global_administrator( $user_id ) || // Not a global admin
-				wporg_gp_rosetta_roles()->is_approver_for_locale( $user_id, $locale_slug ) // Doesn't have project-level access either
+				$this->roles_adapter->is_global_administrator( $user_id ) || // Not a global admin
+				$this->roles_adapter->is_approver_for_locale( $user_id, $locale_slug ) // Doesn't have project-level access either
 			)
 			// Add check to see if there are any waiting translations for this locale?
 			) {
@@ -564,7 +580,7 @@ class Locale extends GP_Route {
 
 		// Special Waiting Project Tab
 		// This removes the parent_project_id restriction and replaces it with all-translation-editer-projects
-		if ( 'waiting' == $project->slug && is_user_logged_in() && function_exists( 'wporg_gp_rosetta_roles' ) ) {
+		if ( 'waiting' == $project->slug && is_user_logged_in() && $this->roles_adapter ) {
 
 			if ( ! $filter ) {
 				$filter = 'strings-waiting-and-fuzzy';
@@ -573,12 +589,12 @@ class Locale extends GP_Route {
 			$user_id = get_current_user_id();
 
 			// Global Admin or Locale-specific admin
-			$can_approve_for_all = wporg_gp_rosetta_roles()->is_global_administrator( $user_id );
+			$can_approve_for_all = $this->roles_adapter->is_global_administrator( $user_id );
 
 			// Check to see if they have any special approval permissions
 			$allowed_projects = array();
-			if ( ! $can_approve_for_all && wporg_gp_rosetta_roles()->is_approver_for_locale( $user_id, $locale ) ) {
-				$allowed_projects = wporg_gp_rosetta_roles()->get_project_id_access_list( $user_id, $locale, true );
+			if ( ! $can_approve_for_all && $this->roles_adapter->is_approver_for_locale( $user_id, $locale ) ) {
+				$allowed_projects = $this->roles_adapter->get_project_id_access_list( $user_id, $locale, true );
 
 				// Check to see if they can approve for all projects in this locale.
 				if ( in_array( 'all', $allowed_projects ) ) {
@@ -587,7 +603,6 @@ class Locale extends GP_Route {
 				}
 			}
 
-			$parent_project_sql = '';
 			if ( $can_approve_for_all ) {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
 				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
@@ -606,7 +621,6 @@ class Locale extends GP_Route {
 
 			// Limit to only showing base-level projects
 			$parent_project_sql .= " AND tp.parent_project_id IN( (SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1) )";
-
 		}
 
 		$filter_order_by = $filter_where = '';
