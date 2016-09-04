@@ -2,6 +2,9 @@
 
 namespace WordPressdotorg\GlotPress\Rosetta_Roles;
 
+use GP;
+use GP_Locales;
+
 class Plugin {
 
 	/**
