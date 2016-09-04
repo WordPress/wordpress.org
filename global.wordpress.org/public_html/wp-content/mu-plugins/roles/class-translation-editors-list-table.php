@@ -190,7 +190,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			$view_links[ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] = $this->get_view_link( array( 'role' => Rosetta_Roles::TRANSLATION_EDITOR_ROLE ), $translation_editors_inner_html, $class );
 		}
 
-		if ( $count_translation_editors ) {
+		if ( $count_general_translation_editors ) {
 			$class = '';
 			$general_translation_editors_inner_html = sprintf(
 				_n(
