@@ -41,7 +41,7 @@
 							?></li>
 							<li><?php _e( '<strong>Update to the latest versions</strong> of your plugins, themes, and WordPress.', 'wporg-forums' ); ?></li>
 							<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
-							<li><?php _e( '<strong>Provide any information</strong> you might think is useful. If your issue is visual, note your browser and operating system. If your issue is technical, not your server environment.', 'wporg-forums' ); ?></li>
+							<li><?php _e( '<strong>Provide any information</strong> you might think is useful. If your issue is visual, note your browser and operating system. If your issue is technical, note your server environment.', 'wporg-forums' ); ?></li>
 						</ul>
 					</div>
 
