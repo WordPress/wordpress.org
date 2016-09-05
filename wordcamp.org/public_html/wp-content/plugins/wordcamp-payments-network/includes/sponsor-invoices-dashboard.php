@@ -248,22 +248,27 @@ function check_for_paid_invoices() {
 	global $wpdb;
 
 	$table_name = get_index_table_name();
+	$paid_invoices = array();
 
-	/*
-	 * This query is limited at 100 rows to avoid requesting too much data from QBO. In most cases it shouldn't be
-	 * a problem, but it's possible that at some point the number of pending invoices will exceed the limit, and
-	 * we'll need to refactor this to update them in batches.
-	 */
 	$sent_invoices = $wpdb->get_results( "
 		SELECT blog_id, invoice_id, qbo_invoice_id
 		FROM $table_name
 		WHERE status = 'wcbsi_approved'
-		LIMIT 100
+		LIMIT 1000
 	" );
 
-	$paid_invoices = \WordCamp_QBO_Client::get_paid_invoices(
-		wp_list_pluck( $sent_invoices, 'qbo_invoice_id' )
-	);
+	// Batch requests in order to avoid request size limits imposed by QuickBooks, nginx, etc
+	$qbo_invoice_ids = wp_list_pluck( $sent_invoices, 'qbo_invoice_id' );
+	$qbo_invoice_ids = array_chunk( $qbo_invoice_ids, 20 );
+
+	foreach( $qbo_invoice_ids as $batch ) {
+		$paid_invoices = array_merge(
+			$paid_invoices,
+			\WordCamp_QBO_Client::get_paid_invoices( $batch )
+		);
+
+		usleep( 300000 );   // Avoid hitting the API too frequently
+	}
 
 	mark_invoices_as_paid( $sent_invoices, $paid_invoices );
 }
