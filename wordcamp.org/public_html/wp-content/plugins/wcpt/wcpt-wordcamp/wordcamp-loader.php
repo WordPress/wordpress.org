@@ -27,6 +27,7 @@ class WordCamp_Loader {
 		add_filter( 'pre_get_posts',       array( $this, 'query_public_statuses_on_archives' ) );
 		add_action( 'wp_insert_post_data', array( $this, 'set_scheduled_date'                ) );
 		add_filter( 'wordcamp_rewrite_rules', array( $this, 'wordcamp_rewrite_rules' ) );
+		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 	}
 
 	/**
@@ -368,6 +369,18 @@ class WordCamp_Loader {
 	public function wordcamp_rewrite_rules( $rules ) {
 		$rules = array( 'wordcamps/([^/]+)/info/?$' => 'index.php?wordcamp=$matches[1]&wcorg-wordcamp-info=1' ) + $rules;
 		return $rules;
+	}
+
+	/**
+	 * Additional query vars.
+	 *
+	 * @param array $vars Query vars.
+	 *
+	 * @return array Resulting query vars.
+	 */
+	public function query_vars( $vars ) {
+		$vars[] = 'wcorg-wordcamp-info';
+		return $vars;
 	}
 }
 
