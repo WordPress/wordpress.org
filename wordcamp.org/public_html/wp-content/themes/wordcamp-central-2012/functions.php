@@ -840,6 +840,81 @@ class WordCamp_Central_Theme {
 
 		return $map_stats;
 	}
+
+	/**
+	 * Get T-shirt Sizes, a caching wrapper for _get_tshirt_sizes.
+	 *
+	 * @param int $wordcamp_id The WordCamp post ID.
+	 *
+	 * @return array An array of sizes.
+	 */
+	public static function get_tshirt_sizes( $wordcamp_id ) {
+		// TODO: Implement some caching.
+		$sizes = self::_get_tshirt_sizes( $wordcamp_id );
+	}
+
+	/**
+	 * Get T-shirt Sizes.
+	 *
+	 * @param int $wordcamp_id The WordCamp post ID.
+	 *
+	 * @return array An array of sizes.
+	 */
+	private static function _get_tshirt_sizes( $wordcamp_id ) {
+		$wordcamp = get_post( $wordcamp_id );
+		$sizes = array();
+
+		$wordcamp_site_id = absint( get_wordcamp_site_id( $wordcamp ) );
+		if ( ! $wordcamp_site_id )
+			return $sizes;
+
+		wp_suspend_cache_addition( true );
+		switch_to_blog( $wordcamp_site_id );
+
+		$questions = get_posts( array(
+			'post_type' => 'tix_question',
+			'post_status' => 'publish',
+			'posts_per_page' => 100,
+			'fields' => 'ids',
+		) );
+
+		// Aggregate only t-shirt questions.
+		$tshirt_questions = array();
+		foreach ( $questions as $question_id ) {
+			if ( get_post_meta( $question_id, 'tix_type', true ) != 'tshirt' )
+				continue;
+
+			$tshirt_questions[] = $question_id;
+		}
+
+		$paged = 1;
+		while ( $attendees = get_posts( array(
+			'post_type' => 'tix_attendee',
+			'post_status' => array( 'publish', 'pending' ),
+			'posts_per_page' => 200,
+			'paged' => $paged++,
+			'orderby' => 'ID',
+			'order' => 'ASC',
+			'fields' => 'ids',
+		) ) ) {
+			foreach ( $attendees as $attendee_id ) {
+				$answers = get_post_meta( $attendee_id, 'tix_questions', true );
+				foreach ( $answers as $question_id => $answer ) {
+					if ( in_array( $question_id, $tshirt_questions ) ) {
+						if ( ! isset( $sizes[ $answer ] ) )
+							$sizes[ $answer ] = 0;
+
+						$sizes[ $answer ]++;
+					}
+				}
+			}
+		}
+
+		restore_current_blog();
+		wp_suspend_cache_addition( false );
+		arsort( $sizes );
+		return $sizes;
+	}
 }
 
 // Load the theme class, this is where it all starts.

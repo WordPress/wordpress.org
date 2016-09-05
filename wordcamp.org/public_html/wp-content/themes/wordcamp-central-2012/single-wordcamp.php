@@ -3,6 +3,10 @@
  * Single WordCamp (post type) template.
  */
 
+if ( get_query_var( 'wcorg-wordcamp-info' ) ) {
+	return get_template_part( 'single-wordcamp-info' );
+}
+
 get_header(); the_post();
 $wordcamp_title = wcpt_get_wordcamp_title();
 ?>
