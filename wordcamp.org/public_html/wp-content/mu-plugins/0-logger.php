@@ -108,7 +108,7 @@ function format_log( $raw_log, $foreign_entries = 'include' ) {
 				$entry_parts[2],
 				$entry_parts[3],
 				$entry_parts[4],
-				print_r( json_decode( $entry_parts[5] ), true )
+				print_r( json_decode( $entry_parts[5], true ), true )
 			);
 		} else {
 			if ( 'ignore' !== $foreign_entries ) {
