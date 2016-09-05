@@ -312,6 +312,10 @@ span.bbp-admin-links a {
 	background-color: #fff8e5;
 }
 
+#bbpress-forums .bbp-breadcrumb {
+	clear: both;
+}
+
 @media screen and ( min-width: 960px )  {
 
 	div.content {

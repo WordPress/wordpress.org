@@ -50,7 +50,7 @@
 
 			<?php do_action( 'bbp_theme_after_topic_started_by' ); ?>
 
-			<?php if ( ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'review' ) ) ) || ( bbp_is_single_forum() && bbp_get_topic_forum_id() != bbp_get_forum_id() ) ) : ?>
+			<?php if ( ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews' ) ) ) || ( bbp_is_single_forum() && bbp_get_topic_forum_id() != bbp_get_forum_id() ) ) : ?>
 
 				<?php do_action( 'bbp_theme_before_topic_started_in' ); ?>
 

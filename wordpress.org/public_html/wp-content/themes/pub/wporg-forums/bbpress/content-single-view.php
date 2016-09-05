@@ -19,7 +19,7 @@
 
 	<?php if ( bbp_view_query() ) : ?>
 
-		<?php if ( 1 != bbp_get_paged() ) bbp_get_template_part( 'pagination', 'topics' ); ?>
+		<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
 
 		<?php if ( in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ) ) ) : ?>
 
