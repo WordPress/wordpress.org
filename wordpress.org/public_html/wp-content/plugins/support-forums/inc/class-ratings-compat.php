@@ -61,7 +61,7 @@ class Ratings_Compat {
 	public function add_filter_to_posts_clauses( $clauses ) {
 		global $wpdb;
 
-		$clauses['join']  .= " JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
+		$clauses['join']  .= " INNER JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
 		$clauses['where'] .= $wpdb->prepare( " AND ratings.rating = %d", $this->filter );
 
 		return $clauses;
@@ -172,7 +172,7 @@ class Ratings_Compat {
 	// along with an explicit link to return them to the unfiltered view.
 	$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
 	if ( $filter > 0 && $filter < 6 ) {
-		echo '<div class="col-10 reviews-filtered-msg" style="font-style:italic;margin-top:24px;">';
+		echo '<div class="col-9 reviews-filtered-msg" style="font-style:italic;margin-top:24px;">';
 		printf(
 			_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>. <a href="%s">Click here</a> to see all reviews.',
 			    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>. <a href="%s">Click here</a> to see all reviews.',
