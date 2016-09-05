@@ -16,6 +16,7 @@ abstract class Directory_Compat {
 	abstract protected function do_topic_sidebar();
 	abstract protected function do_view_header();
 
+	var $loaded       = false;
 	var $authors      = null;
 	var $contributors = null;
 
@@ -32,7 +33,7 @@ abstract class Directory_Compat {
 			add_action( 'parse_query', array( $this, 'maybe_load' ), 1 );
 
 			// Check to see if an individual topic is compat.
-			add_action( 'template_redirect', array( $this, 'check_topic_for_compat' ) );
+			add_action( 'wp', array( $this, 'check_topic_for_compat' ) );
 
 			// Always check to see if a topic title needs a compat prefix.
 			add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 9, 2 );
@@ -47,32 +48,40 @@ abstract class Directory_Compat {
 		add_action( 'bbp_init',              array( $this, 'register_taxonomy' ) );
 		add_filter( 'query_vars',            array( $this, 'add_query_var' ) );
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
-
 	}
 
+	/**
+	 * At this point, compat, slug, and object should be loaded.
+	 */
 	public function maybe_load() {
-		if ( false !== $this->slug() ) {
+		if ( false !== $this->slug() && false == $this->loaded ) {
 			// This must run before bbPress's parse_query at priority 2.
 			$this->register_views();
 
 			// Add theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
+			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
 
 			// Add output filters and actions.
 			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
 			add_filter( 'bbp_breadcrumbs',   array( $this, 'breadcrumbs' ) );
 
-			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
-
 			// Handle new topic form at the bottom of support view.
 			add_action( 'wporg_compat_after_single_view',      array( $this, 'add_topic_form' ) );
 			add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_content' ) );
 			add_filter( 'bbp_current_user_can_access_create_topic_form', array( $this, 'current_user_can_access_create_topic_form' ) );
+
+			// Instantiate WPORG_Ratings compat mode for reviews.
+			if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
+				$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->get_object( $this->slug() ) );
+			}
+
+			$this->loaded = true;
 		}
 	}
 
 	public function check_topic_for_compat() {
-		if ( bbp_is_single_topic() ) {
+		if ( ( bbp_is_single_topic() || bbp_is_topic_edit() ) && false == $this->loaded ) {
 			$terms = get_the_terms( bbp_get_topic_id(), $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 				$slug = $terms[0]->slug;
@@ -89,6 +98,13 @@ abstract class Directory_Compat {
 					add_filter( 'bbp_get_reply_author_link', array( $this, 'author_link' ), 10, 2 );
 				}
 				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
+
+				// Instantiate WPORG_Ratings compat mode for reviews.
+				if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
+					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->get_object( $this->slug() ) );
+				}
+
+				$this->loaded = true;
 			}
 		}
 	}
@@ -96,6 +112,8 @@ abstract class Directory_Compat {
 	public function get_topic_title( $title, $topic_id ) {
 		if (
 			( bbp_is_single_forum() && bbp_get_forum_id() == $this->forum_id() )
+		||
+			( bbp_is_single_forum() && Plugin::REVIEWS_FORUM_ID == bbp_get_forum_id() )
 		||
 			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active' ) ) )
 		) {
