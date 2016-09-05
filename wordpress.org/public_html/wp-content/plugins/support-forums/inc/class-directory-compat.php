@@ -19,9 +19,13 @@ abstract class Directory_Compat {
 	var $loaded       = false;
 	var $authors      = null;
 	var $contributors = null;
+	var $query        = null;
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
+			// Intercept feed requests prior to bbp_request_feed_trap.
+			add_filter( 'bbp_request', array( $this, 'request' ), 9 );
+
 			// Define the taxonomy and query vars for this view.
 			add_action( 'plugins_loaded', array( $this, 'always_load' ) );
 
@@ -41,6 +45,52 @@ abstract class Directory_Compat {
 			// Always check to see if a new topic is being posted.
 			add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		}
+	}
+
+	/**
+	 * Handle view feeds for this compat.
+	 */
+	public function request( $query_vars ) {
+		if ( isset( $query_vars['feed'] ) && isset( $query_vars[ $this->query_var() ] ) ) {
+
+			// Compat views are hooked in a special order, and need help with feed queries.
+			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( $this->compat(), 'reviews' ) ) ) {
+				$this->query = $query_vars;
+				add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
+			}
+		}
+		return $query_vars;
+	}
+
+	public function get_view_query_args_for_feed( $retval, $view ) {
+		switch ( $this->query['bbp_view'] ) {
+			// Return new topics from the support forum.
+			case $this->compat() :
+				return array(
+					'post_parent'    => $this->forum_id(),
+					'tax_query'      => array( array(
+						'taxonomy'   => $this->taxonomy(),
+						'field'      => 'slug',
+						'terms'      => $this->query[ $this->query_var() ],
+					) ),
+					'show_stickies'  => false,
+				);
+				break;
+
+			// Return new topics from the reviews forum.
+			case 'reviews' :
+				return array(
+					'post_parent'    => Plugin::REVIEWS_FORUM_ID,
+					'tax_query'      => array( array(
+						'taxonomy'   => $this->taxonomy(),
+						'field'      => 'slug',
+						'terms'      => $this->query[ $this->query_var() ],
+					) ),
+					'show_stickies'  => false,
+				);
+				break;
+		}
+		return $retval;
 	}
 
 	public function always_load() {
