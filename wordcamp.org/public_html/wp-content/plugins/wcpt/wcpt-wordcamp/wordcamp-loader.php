@@ -26,6 +26,7 @@ class WordCamp_Loader {
 		add_action( 'init',                array( $this, 'register_post_statuses'            ) );
 		add_filter( 'pre_get_posts',       array( $this, 'query_public_statuses_on_archives' ) );
 		add_action( 'wp_insert_post_data', array( $this, 'set_scheduled_date'                ) );
+		add_filter( 'wordcamp_rewrite_rules', array( $this, 'wordcamp_rewrite_rules' ) );
 	}
 
 	/**
@@ -355,6 +356,18 @@ class WordCamp_Loader {
 			return array( 'wcpt-needs-vetting' );
 
 		return $transitions[ $status ];
+	}
+
+	/**
+	 * Additional rules for the WordCamp post type.
+	 *
+	 * @param array $rules Rewrite rules.
+	 *
+	 * @return array The final rewrite rules.
+	 */
+	public function wordcamp_rewrite_rules( $rules ) {
+		$rules = array( 'wordcamps/([^/]+)/info/?$' => 'index.php?wordcamp=$matches[1]&wcorg-wordcamp-info=1' ) + $rules;
+		return $rules;
 	}
 }
 
