@@ -9,6 +9,9 @@ class Performance_Optimizations {
 	var $bound_id = array();
 
 	function __construct() {
+		// Remove query to get adjacent posts.
+		remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10 );
+
 		// Gravatar suppression on lists of topics.
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
