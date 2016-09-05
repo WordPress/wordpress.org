@@ -69,7 +69,7 @@ class Ratings_Compat {
 
 	public function add_filter_topic_pagination( $r ) {
 		$count = $this->ratings_counts[ $this->filter ];
-		$r['total'] = $count / bbp_get_topics_per_page();
+		$r['total'] = ceil( (int) $count / (int) bbp_get_topics_per_page() );
 		return $r;
 	}
 
