@@ -851,6 +851,7 @@ class WordCamp_Central_Theme {
 	public static function get_tshirt_sizes( $wordcamp_id ) {
 		// TODO: Implement some caching.
 		$sizes = self::_get_tshirt_sizes( $wordcamp_id );
+		return $sizes;
 	}
 
 	/**
