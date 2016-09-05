@@ -45,6 +45,7 @@ class Performance_Optimizations {
 		 */
 		if ( $query->is_feed() ) {
 			$query->set( 'no_found_rows', true );
+			$query->set( 'orderby', 'ID' );
 		}
 	}
 
