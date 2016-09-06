@@ -161,7 +161,8 @@ div.bbp-submit-wrapper {
 	margin-top: 0;
 }
 
-#bbpress-forums .bbp-submit-wrapper .button {
+#bbpress-forums .bbp-submit-wrapper .button,
+#bbpress-forums .submit .button {
 	display: inline-block;
 	text-decoration: none;
 	font-size: 12px;
@@ -184,7 +185,8 @@ div.bbp-submit-wrapper {
 	background-image: linear-gradient(to bottom, #fefefe, #f4f4f4);
 }
 
-#bbpress-forums .bbp-submit-wrapper .button:hover {
+#bbpress-forums .bbp-submit-wrapper .button:hover,
+#bbpress-forums .submit .button:hover {
 	color: #222;
 	border-color: #999;
 	background: #f3f3f3;
