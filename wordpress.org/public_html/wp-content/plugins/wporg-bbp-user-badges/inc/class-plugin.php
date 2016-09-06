@@ -205,7 +205,7 @@ class Plugin {
 			wp_cache_add( $slug, $authors, $type . '_authors', HOUR_IN_SECONDS );
 		}
 
-		return in_array( $user_login, $authors );
+		return $authors && in_array( $user_login, $authors );
 	}
 
 	/**
@@ -247,7 +247,7 @@ class Plugin {
 			wp_cache_add( $slug, $contributors, $type . '_contributors', HOUR_IN_SECONDS );
 		}
 
-		return in_array( $user_login, $contributors );
+		return $contributors && in_array( $user_login, $contributors );
 	}
 
 }
