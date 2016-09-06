@@ -172,7 +172,8 @@ function wporg_support_profile_url( $user_id ) {
 
 	return esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename );
 }
-add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
+// Temporarily remove the redirect to `https://profiles.wordpress.org/`, see #meta1868.
+// add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
 
 /** bb Base *******************************************************************/
 
