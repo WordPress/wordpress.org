@@ -318,6 +318,25 @@ span.bbp-admin-links a {
 	clear: both;
 }
 
+/* User badges */
+
+#bbpress-forums .by-plugin-author,
+#bbpress-forums .by-plugin-contributor,
+#bbpress-forums .by-theme-author,
+#bbpress-forums .by-theme-contributor {
+	border-left: 3px solid green;
+}
+
+#bbpress-forums .author-badge {
+	background-color: green;
+	color: #fff;
+	padding: 0 8px;
+	display: inline-block;
+	float: left;
+	margin-left: -8px;
+	font-style: italic;
+}
+
 @media screen and ( min-width: 960px )  {
 
 	div.content {
