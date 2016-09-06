@@ -31,6 +31,9 @@ if ( $welcome && ( empty( $hash ) || $content_hash !== $hash ) ) :
 		$welcome->post_content = "<div class='content-area'>\n\n{$columns[0]}</div><div class='widget-area'>\n\n{$columns[1]}</div>";
 	}
 	setup_postdata( $welcome );
+
+	// Disable Jetpack sharing buttons.
+	add_filter( 'sharing_show', '__return_false' );
 ?>
 <div class="make-welcome">
 	<div class="entry-meta">
@@ -42,6 +45,7 @@ if ( $welcome && ( empty( $hash ) || $content_hash !== $hash ) ) :
 	</div>
 </div>
 <?php
+	remove_filter( 'sharing_show', '__return_false' );
 	wp_reset_postdata();
 endif;
 ?>
