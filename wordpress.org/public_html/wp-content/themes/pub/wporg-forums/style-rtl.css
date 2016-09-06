@@ -77,3 +77,20 @@ body {
 	margin-left: 0;
 	margin-right: 20px;
 }
+
+/* User badges */
+
+#bbpress-forums .by-plugin-author,
+#bbpress-forums .by-plugin-contributor,
+#bbpress-forums .by-theme-author,
+#bbpress-forums .by-theme-contributor {
+	border-left: inherit;
+	border-right: 3px solid green;
+}
+
+#bbpress-forums .author-badge {
+	float: right;
+	margin-left: 0;
+	margin-right: -8px;
+}
+
