@@ -250,6 +250,7 @@ class Ratings_Compat {
 		}
 
 		bbp_get_template_part( 'form', 'topic' );
+		add_filter( 'bbp_is_topic_edit', '__return_false' );
 	}
 
 	public function do_template_notice() {
