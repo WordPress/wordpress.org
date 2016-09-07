@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GITHUB_URL=$1;
+GITHUB_REPO=$1;
 SVN_PLUGIN=$2;
 
 # Expect ENV vars: $PHP_SVN_USER, $PHP_SVN_PASSWORD
@@ -15,10 +15,11 @@ if [ $? -eq 1 ]; then
 fi;
 
 # Validate all Parameters are present
-if [ ! $GITHUB_URL ] || [ ! $SVN_PLUGIN ] || [ ! $PHP_SVN_USER ] || [ ! $PHP_SVN_PASSWORD ]; then
+if [ ! $GITHUB_REPO ] || [ ! $SVN_PLUGIN ] || [ ! $PHP_SVN_USER ] || [ ! $PHP_SVN_PASSWORD ]; then
 	echo "Invalid Input, missing parameter"; exit 1
 fi
 
+GITHUB_URL="git://github.com/$GITHUB_REPO.git"
 SVN_URL="https://plugins.svn.wordpress.org/$SVN_PLUGIN/trunk/"
 ASSETS_SVN_URL="https://plugins.svn.wordpress.org/$SVN_PLUGIN/assets/"
 

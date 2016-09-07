@@ -1,72 +1,83 @@
 <?php
 /**
- * A easy webhook to allow feature plugins to be sync'd to WordPress.org plugins SVN easier.
+ * This webhook is very basic, but handles syncing a select few featured plugins over to plugins.svn.wordpress.org during development.
+ *
+ * To have your *feature project* handled by this sync script:
+ * - Ensure you're listed on https://make.wordpress.org/core/features-as-plugins/ if you're not, ping in #meta
+ * - Ping in #meta to get your project added to the whitelist within this file
+ * - Add `https://api.wordpress.org/dotorg/github-sync/feature-plugins.php` as a `push` webhook on github with the secret we'll provide you.
+ * - Push to github master and watch https://plugins.trac.wordpress.org/log/$plugin_slug/
+ * - Profit from all the Open Source points you're getting!
  */
 
 require dirname( dirname( __DIR__ ) ) . '/init.php';
 
 class GH2WORG {
 
-	private $whitelisted_repos = array(
-		// Github User/Repo => plugins.svn.wordpress.org/****/trunk/
-		'dd32/feature-plugin-testing' => 'test-plugin-3',
-		'voldemortensen/menu-customizer' => 'menu-customizer',
-		'georgestephanis/two-factor' => 'two-factor',
+	private $whitelisted_repos = [
+		// Github.com/{$user/repo-name} => plugins.svn.wordpress.org/{$slug}/trunk/
+		'dd32/feature-plugin-testing'           => 'test-plugin-3',
+		'georgestephanis/two-factor'            => 'two-factor',
 		'georgestephanis/application-passwords' => 'application-passwords',
-		'obenland/shiny-updates' => 'shiny-updates',
-		'pento/react' => 'react',
-	);
+		'obenland/shiny-updates'                => 'shiny-updates',
+		'pento/react'                           => 'react',
+	];
 
 	function __construct() {
-		$this->populate_post_vars();
-
-		if ( ! $this->verify_github_signature() ) {
-			die( 'Cheating, huh?' );
-		}
-
-		$repo_name = $_POST['repository']['full_name'];
-		$repo_url  = $_POST['repository']['git_url'];
-
-		if ( ! $this->verify_valid_plugin( $repo_name ) ) {
-			die( 'Sorry, This Github repo is not configured for WordPress.org Plugins SVN Github Sync. Please contact us.' );
-		}
+		$repo_name = $this->get_notified_repo();
 
 		$svn_directory = $this->whitelisted_repos[ $repo_name ];
 
-		$this->process_github_to_svn( $repo_url, $svn_directory );
-	}
-
-	function populate_post_vars() {
-		if ( 'application/json' == $_SERVER['HTTP_CONTENT_TYPE'] ) {
-			$_POST = @json_decode( file_get_contents('php://input'), true );
-		} else {
-			// Assuming Magic Quotes disabled like a good host.
-			$_POST = @json_decode( $_POST['payload'], true );
+		if ( ! $repo_name || ! $svn_directory ) {
+			die( 'Sorry, This Github repo is not configured for WordPress.org Plugins SVN Github Sync. Please ping in #meta on Slack for assistance.' );
 		}
+
+		$this->process_github_to_svn( $repo_name, $svn_directory );
 	}
 
-	function verify_github_signature() {
-		if ( empty( $_SERVER['HTTP_X_HUB_SIGNATURE'] ) )
+	/**
+	 * Determines the Github Repo (user/repo) which Github is notifying us about.
+	 *
+	 * - Extracts the repo from both `application/json` and `application/x-www-form-urlencoded` webhook variants.
+	 * - Verifies the signature of the request
+	 *
+	 * @return string|bool Github repo on success, false on failure.
+	 */
+	function get_notified_repo() {
+		$github_payload = file_get_contents( 'php://input' );
+		$signature_of_payload = 'sha1=' . hash_hmac( 'sha1', $github_payload, FEATURE_PLUGIN_GH_SYNC_SECRET );
+
+		if ( ! hash_equals( $signature_of_payload, $_SERVER['HTTP_X_HUB_SIGNATURE'] ) ) {
 			return false;
+		}
 
-		list( $algo, $hash ) = explode( '=', $_SERVER['HTTP_X_HUB_SIGNATURE'], 2 );
+		/*
+		 * Extract the payload from the `php://input` stream, although this is also present in
+		 * $_POST, the Github signature is of this raw data, so we'll use that data.
+		 */
+		if ( 'application/x-www-form-urlencoded' === $_SERVER['HTTP_CONTENT_TYPE'] ) {
+			parse_str( $github_payload, $github_payload );
+			$github_payload = $github_payload['payload'];
+		}
 
-		// Todo? Doesn't handle standard $_POST, only application/json
-		$hmac = hash_hmac( $algo, file_get_contents('php://input' ), FEATURE_PLUGIN_GH_SYNC_SECRET );
-
-		return $hash === $hmac;
+		return json_decode( $github_payload, true )['repository']['full_name'];
 	}
 
-	function verify_valid_plugin( $repo ) {
-		return isset( $this->whitelisted_repos[ $repo ] );
-	}
+	/**
+	 * Triggers the shell script to migrate the Git commit to plugins.svn
+	 *
+	 * @param string $github_repo   The Github Repo which was modified (user/repo).
+	 * @param string $svn_directory The plugins.svn directory/plugin (plugin-slug).
+	 */
+	function process_github_to_svn( $github_repo, $svn_directory ) {
 
-	function process_github_to_svn( $github_url, $svn_directory ) {
-
-		putenv( 'PHP_SVN_USER=' . FEATURE_PLUGIN_GH_SYNC_USER );
+		putenv( 'PHP_SVN_USER='     . FEATURE_PLUGIN_GH_SYNC_USER );
 		putenv( 'PHP_SVN_PASSWORD=' . FEATURE_PLUGIN_GH_SYNC_PASS );
 
-		echo shell_exec( __DIR__ . "/feature-plugins.sh $github_url $svn_directory 2>&1" );
+		$github_repo   = escapeshellarg( $github_repo );
+		$svn_directory = escapeshellarg( $svn_directory );
+
+		echo shell_exec( __DIR__ . "/feature-plugins.sh $github_repo $svn_directory 2>&1" );
 
 		putenv( 'PHP_SVN_USER' );
 		putenv( 'PHP_SVN_PASSWORD' );
