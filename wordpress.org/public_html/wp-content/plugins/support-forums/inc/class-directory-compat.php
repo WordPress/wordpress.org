@@ -126,7 +126,7 @@ abstract class Directory_Compat {
 
 			// Instantiate WPORG_Ratings compat mode for reviews.
 			if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
-				$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->get_object( $this->slug() ) );
+				$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
 			}
 
 			$this->loaded = true;
@@ -154,7 +154,7 @@ abstract class Directory_Compat {
 
 				// Instantiate WPORG_Ratings compat mode for reviews.
 				if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
-					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->get_object( $this->slug() ) );
+					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
 				}
 
 				$this->loaded = true;

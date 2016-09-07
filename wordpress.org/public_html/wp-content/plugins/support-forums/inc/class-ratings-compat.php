@@ -4,27 +4,27 @@ namespace WordPressdotorg\Forums;
 
 class Ratings_Compat {
 
-	var $compat = null;
-	var $slug   = null;
-	var $object = null;
+	var $compat   = null;
+	var $slug     = null;
+	var $object   = null;
+	var $taxonomy = null;
 
 	var $filter = false;
 
-	public function __construct( $compat, $slug, $object, $rating = 0 ) {
+	public function __construct( $compat, $slug, $taxonomy, $object ) {
 		if ( ! class_exists( 'WPORG_Ratings' ) ) {
 			return;
 		}
 
-		if ( empty( $compat ) || empty( $slug ) || empty( $object ) ) {
+		if ( empty( $compat ) || empty( $slug ) || empty( $taxonomy ) || empty( $object ) ) {
 			return;
 		}
 
-		$this->compat = $compat;
-		$this->slug   = $slug;
-		$this->object = $object;
-		$this->rating = $rating;
+		$this->compat   = $compat;
+		$this->slug     = $slug;
+		$this->taxonomy = $taxonomy;
+		$this->object   = $object;
 
-		$this->reviews_count = \WPORG_Ratings::get_rating_count( $this->compat, $this->slug, $this->rating );
 		$this->ratings_counts = \WPORG_Ratings::get_rating_counts( $this->compat, $this->slug );
 		$this->avg_rating = \WPORG_Ratings::get_avg_rating( $this->compat, $this->slug );
 
@@ -40,12 +40,24 @@ class Ratings_Compat {
 			add_filter( 'bbp_topic_pagination', array( $this, 'add_filter_topic_pagination' ) );
 		}
 
+		// Total reviews count. Can be altered using $this->filter if needed.
+		$this->reviews_count = \WPORG_Ratings::get_rating_count( $this->compat, $this->slug, 0 );
+
 		// Set up the single topic.
 		add_action( 'bbp_template_before_lead_topic', array( $this, 'add_topic_stars' ) );
 
 		// Set up ratings view.
 		add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
 		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
+
+		// Add the topic form as either a new or edit form.
+		add_action( 'wporg_compat_new_review_notice', array( $this, 'do_template_notice' ) );
+		add_action( 'wporg_compat_after_single_view', array( $this, 'add_topic_form' ) );
+		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_stars' ), 8 );
+
+		// Check to see if a topic is being created/edited.
+		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
+		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
 	}
 
 	/**
@@ -152,7 +164,7 @@ class Ratings_Compat {
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
-				echo '<a href="#postform" class="btn">';
+				echo '<a href="#new-post" class="btn">';
 				_e( 'Add your own review', 'wporg-forums' );
 				echo '</a>';
 			} else {
@@ -182,5 +194,107 @@ class Ratings_Compat {
 	?>
 </div>
 	<?php
+	}
+
+	/**
+	 * Set the rating on topic creation or edit.
+	 *
+	 * @param int $topic_id The topic id
+	 */
+	public function topic_post_extras( $topic_id ) {
+		if ( isset( $_POST['rating'] ) && in_array( (int) $_POST['rating'], array( 1, 2, 3, 4, 5 ) ) ) {
+			if (
+				Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id )
+			&&
+				bbp_get_topic_author_id( $topic_id ) == get_current_user_id()
+			) {
+				\WPORG_Ratings::set_rating( $topic_id, $this->compat, $this->slug, bbp_get_topic_author_id( $topic_id ), absint( $_POST['rating'] ) );
+			}
+		}
+	}
+
+	public function add_topic_form() {
+		if ( ! $this->is_rating_view() ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			echo '<p>';
+			printf(
+			__( 'You must %s to submit a review.You can also log in or register using the form near the top of this page.' ),
+			sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in', 'verb: You must log in to submit a review.', 'wporg-forums' ) ) );
+			echo '</p>';
+			return;
+		}
+
+		if ( bbp_has_topics( array(
+			'author'       => get_current_user_id(),
+			'post_status'  => 'any',
+			'post_type'    => bbp_get_topic_post_type(),
+			'post_parent'  => Plugin::REVIEWS_FORUM_ID,
+			'tax_query'    => array( array(
+				'taxonomy' => $this->taxonomy,
+				'field'    => 'slug',
+				'terms'    => $this->slug,
+			) ),
+			'no_found_rows' => true,
+			'orderby'       => 'ID',
+		) ) ) {
+			bbp_the_topic();
+			add_filter( 'bbp_is_topic_edit', '__return_true' );
+		} else {
+			add_filter( 'bbp_is_topic_edit', '__return_false' );
+		}
+
+		bbp_get_template_part( 'form', 'topic' );
+	}
+
+	public function do_template_notice() {
+		$report = $rate = '';
+		switch( $this->compat ) {
+			case 'plugin' :
+				$report = __( 'If you are reporting an issue with this plugin, please post %s instead.', 'wporg-forums' );
+				$rate   = __( 'In order to rate a plugin, you must also submit a review.', 'wporg-forums' );
+				break;
+			case 'theme' :
+				$report = __( 'If you are reporting an issue with this theme, please post %s instead.', 'wporg-forums' );
+				$rate   = __( 'In order to rate a theme, you must also submit a review.', 'wporg-forums' );
+				break;
+		}
+		?>
+		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
+		<ul>
+			<li><?php printf( esc_html( $report ), sprintf( '<a href="%s">%s</a>',
+					esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ),
+					_x( 'here', 'please post here instead', 'wporg-forums' )
+				) ); ?></li>
+			<li><?php echo esc_html( $rate ); ?></li>
+			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
+		</ul>
+		<?php
+	}
+
+	public function add_topic_form_stars() {
+		if ( ! $this->is_rating_view() ) {
+			return;
+		}
+
+		if ( bbp_is_topic_edit() && bbp_get_topic_author_id() != get_current_user_id() ) {
+			return;
+		}
+
+		\WPORG_Ratings::get_dashicons_form( $this->compat, $this->slug, true );
+	}
+
+	public function is_rating_view() {
+		if ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
+			return true;
+		}
+
+		if ( bbp_is_topic_edit() && bbp_get_topic_forum_id() == Plugin::REVIEWS_FORUM_ID ) {
+			return true;
+		}
+
+		return false;
 	}
 }
