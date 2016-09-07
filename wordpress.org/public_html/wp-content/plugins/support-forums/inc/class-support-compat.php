@@ -23,19 +23,23 @@ class Support_Compat {
 	}
 
 	/**
-	 * Remove compat forums from forum dropdown.
+	 * Remove compat forums from forum dropdown on front-end display.
 	 *
 	 * @param array $r The function args
 	 * @return array The filtered args
 	 */
 	public function get_dropdown( $r ) {
-		if ( ! isset( $r['post_type'] ) || ! $r['post_type'] == bbp_get_forum_post_type() ) {
+		if ( is_admin() || ! isset( $r['post_type'] ) || ! $r['post_type'] == bbp_get_forum_post_type() ) {
 			return $r;
 		}
 
 		// Set up compat forum exclusion.
 		if ( bbp_is_topic_edit() || bbp_is_single_view() ) {
-			$r['exclude'] = array_unique( array_merge( $r['exclude'], self::get_compat_forums() ) );
+			if ( is_array( $r['exclude'] ) ) {
+				$r['exclude'] = array_unique( array_merge( $r['exclude'], self::get_compat_forums() ) );
+			} elseif( empty( $r['exclude'] ) ) {
+				$r['exclude'] = self::get_compat_forums();
+			}
 
 			if ( self::is_compat_forum( $r['selected'] ) ) {
 				// Prevent forum changes for topics in compat forums.
