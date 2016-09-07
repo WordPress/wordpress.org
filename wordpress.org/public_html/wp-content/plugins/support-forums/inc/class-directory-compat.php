@@ -344,7 +344,8 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Add the new topic form at the bottom of appropriate views.
+	 * Add the new topic form at the bottom of appropriate views; the reviews view
+	 * form addition is handled by Ratings_Compat.
 	 */
 	public function add_topic_form() {
 		if ( ! bbp_is_single_view() ) {
@@ -352,7 +353,7 @@ abstract class Directory_Compat {
 		}
 
 		$view = bbp_get_view_id();
-		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
+		if ( ! in_array( $view, array( $this->compat(), 'active' ) ) ) {
 			return;
 		}
 
