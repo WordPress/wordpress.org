@@ -87,8 +87,8 @@ class Upload_Handler {
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
-			/* translators: 1: plugin slug, 2: style.css */
-			return sprintf( __( 'Sorry, the plugin name %1$s is reserved for use by WordPress. Please change the name of your plugin and upload it again.', 'wporg-plugins' ),
+			/* translators: %s: plugin slug */
+			return sprintf( __( 'Sorry, the plugin name %s is reserved for use by WordPress. Please change the name of your plugin and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>'
 			);
 		}
@@ -97,8 +97,8 @@ class Upload_Handler {
 
 		// Is there already a plugin by a different author?
 		if ( $plugin_post instanceof \WP_Post && $plugin_post->post_author != get_current_user_id() ) {
-			/* translators: 1: plugin slug, 2: style.css */
-			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
+			/* translators: %s: plugin slug */
+			return sprintf( __( 'There is already a plugin called %s by a different author. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>'
 			);
 		}
@@ -106,8 +106,8 @@ class Upload_Handler {
 		if ( ! $this->plugin['Description'] ) {
 			$error = __( 'The plugin has no description.', 'wporg-plugins' );
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
-			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%3$s">Plugin Headers</a>', 'wporg-plugins' ),
+			/* translators: 1: comment header line, 2: Codex URL */
+			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Description:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
 			);
@@ -116,8 +116,8 @@ class Upload_Handler {
 		if ( ! $this->plugin['Version'] ) {
 			$error = __( 'The plugin has no version.', 'wporg-plugins' );
 
-			/* translators: 1: comment header line, 2: style.css, 3: Codex URL */
-			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%3$s">Plugin Headers</a>', 'wporg-plugins' ),
+			/* translators: 1: comment header line, 2: Codex URL */
+			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Version:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
 			);
