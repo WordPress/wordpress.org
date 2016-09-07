@@ -29,6 +29,13 @@
 				<?php if ( ! bbp_is_topic_edit() && ! bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
+
+						<?php if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'reviews' ) ) ) : ?>
+
+							<?php do_action( 'wporg_compat_new_review_notice' ); ?>
+
+						<?php else : ?>
+
 						<p><?php _e( 'When posting a new topic, follow these steps:', 'wporg-forums' ); ?></p>
 						<ul>
 							<li><?php
@@ -43,6 +50,9 @@
 							<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
 							<li><?php _e( '<strong>Provide any information</strong> you might think is useful. If your issue is visual, note your browser and operating system. If your issue is technical, note your server environment.', 'wporg-forums' ); ?></li>
 						</ul>
+
+						<?php endif; ?>
+
 					</div>
 
 				<?php endif; ?>
