@@ -13,12 +13,15 @@
 
 namespace WordPressdotorg\Forums;
 
-// Includes
+// General includes.
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 include( dirname( __FILE__ ) . '/inc/class-users.php' );
 include( dirname( __FILE__ ) . '/inc/class-moderators.php' );
-include( dirname( __FILE__ ) . '/inc/class-dropin.php' );
 include( dirname( __FILE__ ) . '/inc/class-hooks.php' );
+
+// Compat-only includes.
+include( dirname( __FILE__ ) . '/inc/class-dropin.php' );
+include( dirname( __FILE__ ) . '/inc/class-support-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-theme-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-plugin-directory-compat.php' );
