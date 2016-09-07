@@ -89,7 +89,7 @@ class Support_Compat {
 
 		// Check the current view.
 		if ( bbp_is_single_view() ) {
-			$retval = bbp_get_view_id() != 'reviews';
+			$retval = ( bbp_get_view_id() != 'reviews' );
 		}
 
 		return $retval;
