@@ -64,6 +64,11 @@ class Plugin {
 	 * Add "Resolved" status to title.
 	 */
 	public function get_topic_title( $title, $topic_id ) {
+		// Only run when enabled on a topic's forum.
+		if ( ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
+			return $title;
+		}
+
 		$resolved = __( 'Resolved', 'wporg-forums' );
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
 		   return sprintf( '[%s] %s', esc_html( $resolved ), $title );
@@ -327,19 +332,7 @@ class Plugin {
 	}
 
 	public function is_enabled_on_forum( $forum_id = 0 ) {
-		// @todo Make this actually check the option; for testing, 'true' is okay
-		return true;
-
-		$forum = bbp_get_forum( $forum_id );
-		if ( empty( $forum ) ) {
-			return;
-		}
-
-		$enabled = $this->get_enabled_forums();
-		if ( $enabled && in_array( $forum_id, $enabled ) ) {
-			return true;
-		}
-		return false;
+		return apply_filters( 'wporg_bbp_topic_resolution_is_enabled_on_forum', true, $forum_id );
 	}
 
 	public function get_enabled_forums() {
