@@ -15,6 +15,8 @@ class Hooks {
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
 		add_filter( 'oembed_response_data', array( $this, 'disable_oembed_response_data' ), 10, 2 );
+
+		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
 	}
 
 	/**
@@ -60,4 +62,18 @@ class Hooks {
 
 		return $data;
 	}
+
+	/**
+	 * Disable the inline terms and mentions, if they are enabled. 
+	 * Inline terms and mentions are for O2 and should not be running on the support forums.
+	 * If this plugin is moved out of mu-plugins, this function can be removed as well.
+	 *
+	 * This fixes the post editing screens in the admin area on the support forums.
+	 */
+	public function disable_inline_terms() {
+		remove_action( 'init', array( 'Jetpack_Inline_Terms', 'init' ) );
+		remove_action( 'init', array( 'Jetpack_Mentions', 'init' ) );
+	}
+
+
 }
