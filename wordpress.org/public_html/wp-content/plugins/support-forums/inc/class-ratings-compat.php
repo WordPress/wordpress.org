@@ -48,7 +48,6 @@ class Ratings_Compat {
 
 		// Set up ratings view.
 		add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
-		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
 
 		// Add the topic form as either a new or edit form.
 		add_action( 'wporg_compat_new_review_notice', array( $this, 'do_template_notice' ) );
@@ -119,6 +118,9 @@ class Ratings_Compat {
 		if ( ! bbp_is_single_view() || 'reviews' != bbp_get_view_id() ) {
 			return;
 		}
+
+		// Add the filter for topic titles here.
+		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
 		?>
 <link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
 <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
@@ -217,6 +219,7 @@ class Ratings_Compat {
 		if ( ! $this->is_rating_view() ) {
 			return;
 		}
+		remove_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10 );
 
 		if ( ! is_user_logged_in() ) {
 			echo '<p>';
