@@ -12,11 +12,52 @@ class Support_Compat {
 	public function __construct() {
 		if ( ! $this->loaded ) {
 
+			// Exclude compat forums from forum dropdown.
+			add_filter( 'bbp_after_get_dropdown_parse_args', array( $this, 'get_dropdown' ) );
+
 			// Topic resolution modifications.
 			add_filter( 'wporg_bbp_topic_resolution_is_enabled_on_forum', array( $this, 'is_enabled_on_forum' ), 10, 2 );
 
 			$this->loaded = true;
 		}
+	}
+
+	/**
+	 * Remove compat forums from forum dropdown.
+	 *
+	 * @param array $r The function args
+	 * @return array The filtered args
+	 */
+	public function get_dropdown( $r ) {
+		if ( ! isset( $r['post_type'] ) || ! $r['post_type'] == bbp_get_forum_post_type() ) {
+			return $r;
+		}
+
+		// Set up compat forum exclusion.
+		if ( bbp_is_topic_edit() || bbp_is_single_view() ) {
+			$r['exclude'] = array_unique( array_merge( $r['exclude'], self::get_compat_forums() ) );
+
+			if ( self::is_compat_forum( $r['selected'] ) ) {
+				// Prevent forum changes for topics in compat forums.
+				add_filter( 'bbp_get_dropdown', array( $this, 'dropdown' ), 10, 2 );
+			}
+		}
+		return $r;
+	}
+
+	/**
+	 * Disable forum changes on topics in the compat forums.
+	 *
+	 * @param string $retval The dropdown
+	 * @param array $r The function arguments
+	 * @return string The dropdown, or substituted hidden input
+	 */
+	public function dropdown( $retval, $r ) {
+		if ( self::is_compat_forum( $r['selected'] ) ) {
+			$retval = esc_html( bbp_get_forum_title( $r['selected'] ) );
+			$retval .= sprintf( '<input type="hidden" name="bbp_forum_id" id="bbp_forum_id" value="%d" />', (int) $r['selected'] );
+		}
+		return $retval;
 	}
 
 	/**
@@ -43,5 +84,16 @@ class Support_Compat {
 		}
 
 		return $retval;
+	}
+
+	public static function get_compat_forums() {
+		return array( Plugin::PLUGINS_FORUM_ID, Plugin::THEMES_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
+	}
+
+	public static function is_compat_forum( $post_id = 0 ) {
+		if ( empty( $post_id ) ) {
+			return false;
+		}
+		return in_array( $post_id, self::get_compat_forums() );
 	}
 }
