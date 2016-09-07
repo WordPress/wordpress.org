@@ -383,7 +383,7 @@ abstract class Directory_Compat {
 	}
 
 	public function current_user_can_access_create_topic_form( $retval ) {
-		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat() ) ) ) {
+		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( $this->compat(), 'reviews' ) ) ) {
 			$retval = bbp_current_user_can_publish_topics();
 		}
 		return $retval;
