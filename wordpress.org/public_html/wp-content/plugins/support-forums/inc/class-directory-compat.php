@@ -44,6 +44,9 @@ abstract class Directory_Compat {
 
 			// Always check to see if a new topic is being posted.
 			add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
+
+			// Remove new topic form at the bottom of reviews forum.
+			add_filter( 'bbp_get_template_part', array( $this, 'noop_reviews_forum_form_topic' ), 10, 3 );
 		}
 	}
 
@@ -383,6 +386,25 @@ abstract class Directory_Compat {
 			$retval = bbp_current_user_can_publish_topics();
 		}
 		return $retval;
+	}
+
+	/**
+	 * Filter the template fetch to avoid displaying a new topic form in the reviews forum.
+	 *
+	 * @param array $templates The templates to load
+	 * @param string $slug The template slug
+	 * @param string $name The template name
+	 * @return array|false The templates, or false if nooped
+	 */
+	public function noop_reviews_forum_form_topic( $templates, $slug, $name ) {
+		if (
+			'form' == $slug && 'topic' == $name
+		&&
+			bbp_is_single_forum() && Plugin::REVIEWS_FORUM_ID == bbp_get_forum_id()
+		) {
+			return false;
+		}
+		return $templates;
 	}
 
 	public function topic_post_extras( $topic_id ) {
