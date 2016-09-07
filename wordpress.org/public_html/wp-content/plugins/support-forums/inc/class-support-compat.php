@@ -87,6 +87,11 @@ class Support_Compat {
 		   	$retval = ( bbp_get_topic_forum_id() != Plugin::REVIEWS_FORUM_ID );
 		}
 
+		// Check the current view.
+		if ( bbp_is_single_view() ) {
+			$retval = bbp_get_view_id() != 'reviews';
+		}
+
 		return $retval;
 	}
 
