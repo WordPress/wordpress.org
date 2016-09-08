@@ -438,7 +438,7 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = "{$slug}";
+		$cache_key = $slug;
 		$cache_group = $this->compat() . '-objects';
 		$compat_object = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $compat_object ) {
@@ -447,10 +447,22 @@ abstract class Directory_Compat {
 			if ( $this->compat() == 'theme' ) {
 				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
 			} elseif ( $this->compat() == 'plugin' ) {
-				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
+				// @todo Update this when the Plugin Directory switches over to WordPress.
+				$_compat_topic = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . PLUGINS_TABLE_PREFIX . "topics WHERE topic_slug = %s", $slug ) );
+				if ( $_compat_topic ) {
+					$_compat_post  = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . PLUGINS_TABLE_PREFIX . "posts WHERE topic_id = %d AND post_position = 1 LIMIT 1", $_compat_topic->topic_id ) );
+				}
+				if ( $_compat_topic && $_compat_post ) {
+					$compat_object = (object) array(
+						'post_title'   => $_compat_topic->topic_title,
+						'post_name'    => $slug,
+						'post_author'  => $_compat_topic->topic_poster,
+						'post_content' => $_compat_post->post_text,
+					);
+				}
 			}
 
-			wp_cache_set( $cache_key, $compat_object, $cache_group, 86400);
+			wp_cache_set( $cache_key, $compat_object, $cache_group, DAY_IN_SECONDS );
 		}
 		return $compat_object;
 	}
@@ -463,7 +475,7 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = "{$slug}";
+		$cache_key = $slug;
 		$cache_group = $this->compat() . '-authors';
 		$authors = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $authors ) {
@@ -476,7 +488,7 @@ abstract class Directory_Compat {
 				$authors = $wpdb->get_col( $wpdb->prepare( " SELECT user FROM plugin_2_svn_access WHERE `path` = %s", '/' . $slug ) );
 			}
 
-			wp_cache_set( $cache_key, $authors, $cache_group, 3600 );
+			wp_cache_set( $cache_key, $authors, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $authors;
 	}
@@ -495,14 +507,19 @@ abstract class Directory_Compat {
 		}
 
 		// Check the cache.
-		$cache_key = "{$slug}";
+		$cache_key = $slug;
 		$cache_group = $this->compat() . '-contributors';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $contributors ) {
-			$contributors = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->base_prefix}%d_postmeta WHERE post_id = %d AND meta_key = %s LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $this->plugin->ID, 'contributors' ) );
-			$contributors = maybe_unserialize( $contributors );
+			// @todo Update this when the Plugin Directory switches over to WordPress.
+			$contributors = $wpdb->get_var( $wpdb->prepare(
+				"SELECT meta_value FROM plugin_2_meta m LEFT JOIN plugin_2_topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s",
+				$slug, 'bb_topic', 'contributors' ) );
+			if ( $contributors ) {
+				$contributors = unserialize( $contributors );
+			}
 
-			wp_cache_set( $cache_key, $contributors, $cache_group, 3600 );
+			wp_cache_set( $cache_key, $contributors, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $contributors;
 	}
