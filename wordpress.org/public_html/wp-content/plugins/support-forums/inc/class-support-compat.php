@@ -18,6 +18,9 @@ class Support_Compat {
 			// Topic resolution modifications.
 			add_filter( 'wporg_bbp_topic_resolution_is_enabled_on_forum', array( $this, 'is_enabled_on_forum' ), 10, 2 );
 
+			// Load plugin/theme subscriptions.
+			add_action( 'plugins_loaded', array( $this, 'load_compat_subscriptions' ), 9 );
+
 			$this->loaded = true;
 		}
 	}
@@ -93,6 +96,26 @@ class Support_Compat {
 		}
 
 		return $retval;
+	}
+
+	/**
+	 * Enable theme and plugin subscriptions.
+	 */
+	public function load_compat_subscriptions() {
+		if ( class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
+			Plugin::get_instance()->plugin_subscriptions = new Term_Subscription\Plugin( array(
+				'taxonomy' => 'topic-plugin',
+				'labels'   => array(
+					'receipt' => __( 'You are receiving this email because you are subscribed to a plugin.', 'wporg-forums' ),
+				),
+			) );
+			Plugin::get_instance()->theme_subscriptions = new Term_Subscription\Plugin( array(
+				'taxonomy' => 'topic-theme',
+				'labels'   => array(
+					'receipt' => __( 'You are receiving this email because you are subscribed to a theme.', 'wporg-forums' ),
+				),
+			) );
+		}
 	}
 
 	public static function get_compat_forums() {
