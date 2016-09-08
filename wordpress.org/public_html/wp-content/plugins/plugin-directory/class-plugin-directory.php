@@ -817,21 +817,21 @@ class Plugin_Directory {
 			case 'rating':
 				$post = get_post( $object_id );
 				// The WordPress.org global ratings functions
-				if ( ! function_exists( 'wporg_get_rating_avg' ) ) {
+				if ( ! method_exists( '\WPORG_Ratings', 'get_avg_rating' ) ) {
 					break;
 				}
 
-				$rating = wporg_get_rating_avg( 'plugin', $post->post_name );
+				$rating = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name );
 				$value  = array( $rating );
 				break;
 
 			case 'ratings':
 				$post = get_post( $object_id );
-				if ( ! function_exists( 'wporg_get_rating_counts' ) ) {
+				if ( ! method_exists( '\WPORG_Ratings', 'get_rating_counts' ) ) {
 					break;
 				}
 
-				$ratings = wporg_get_rating_counts( 'plugin', $post->post_name );
+				$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name );
 				$value   = array( $ratings );
 				break;
 
