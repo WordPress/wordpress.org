@@ -42,8 +42,9 @@ abstract class Directory_Compat {
 			// Always check to see if a topic title needs a compat prefix.
 			add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 9, 2 );
 
-			// Always check to see if a new topic is being posted.
-			add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
+			// Always check to see if a new topic is being posted; this must run
+			// before subscriptions go out for `bbp_new_topic` at priority 10.
+			add_action( 'bbp_new_topic', array( $this, 'new_topic' ), 9, 4 );
 
 			// Remove new topic form at the bottom of reviews forum.
 			add_filter( 'bbp_get_template_part', array( $this, 'noop_reviews_forum_form_topic' ), 10, 3 );
@@ -101,6 +102,7 @@ abstract class Directory_Compat {
 		add_action( 'bbp_init',              array( $this, 'register_taxonomy' ) );
 		add_filter( 'query_vars',            array( $this, 'add_query_var' ) );
 		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
+		add_filter( 'term_link',             array( $this, 'get_term_link' ), 10, 3 );
 	}
 
 	/**
@@ -114,6 +116,7 @@ abstract class Directory_Compat {
 			// Add theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
+			add_action( 'wporg_compat_before_single_view', array( $this, 'do_subscription_link' ), 11 );
 
 			// Add output filters and actions.
 			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
@@ -404,7 +407,98 @@ abstract class Directory_Compat {
 		return $templates;
 	}
 
-	public function topic_post_extras( $topic_id ) {
+	/**
+	 * Add a subscribe/unsubscribe link to the compat views.
+	 */
+	public function do_subscription_link() {
+		if ( ! class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		if ( ! bbp_is_single_view() || bbp_get_view_id() != $this->compat() ) {
+			return;
+		}
+
+		do_action( 'bbp_template_notices' );
+
+		$term_subscription = '';
+		$term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+		if ( ! $term ) {
+			// New compats won't have any support topics or reviews, so will
+			// not yet exist as a compat term.
+			$term = wp_insert_term( $this->slug(), $this->taxonomy() );
+			$term = get_term( $term['term_id'] );
+		}
+		if ( $term ) {
+			$subscribe = $unsubscribe = '';
+			if ( 'plugin' == $this->compat() ) {
+				$subscribe   = esc_html__( 'Subscribe to this plugin', 'wporg-forums' );
+				$unsubscribe = esc_html__( 'Unsubscribe from this plugin', 'wporg-forums' );
+			} else {
+				$subscribe   = esc_html__( 'Subscribe to this theme', 'wporg-forums' );
+				$unsubscribe = esc_html__( 'Unsubscribe from this theme', 'wporg-forums' );
+			}
+			$term_subscription = Term_Subscription\Plugin::get_subscription_link( array(
+				'term_id'     => $term->term_id,
+				'taxonomy'    => $this->taxonomy(),
+				'subscribe'   => $subscribe,
+				'unsubscribe' => $unsubscribe,
+			) );
+		}
+
+		if ( $term_subscription ) {
+			echo $term_subscription;
+		}
+	}
+
+	/**
+	 * Term subscriptions use `get_term_link` for the redirect. This needs to be
+	 * filtered to redirect to the appropriate theme/plugin support view.
+	 *
+	 * @param string $termlink The term link
+	 * @param object $term The term object
+	 * @param string $taxonomy The taxonomy object
+	 * @return string The term link, or the support view link
+	 */
+	public function get_term_link( $termlink, $term, $taxonomy ) {
+		if ( ! class_exists( 'WordPressdotorg\Forums\Term_Subscription\Plugin' ) ) {
+			return $termlink;
+		}
+
+		// Only do this for the non-public compat taxonomies.
+		if ( $this->taxonomy() != $taxonomy ) {
+			return $termlink;
+		}
+
+		// Are we on a view where this needs filtering?
+		if (
+			( bbp_is_single_view() && $this->compat() == bbp_get_view_id() )
+		||
+			( isset( $_GET['term_id'] ) && isset( $_GET['taxonomy'] ) )
+		) {
+			// Check that the subscription is to this compat.
+			if ( $this->taxonomy() == $taxonomy ) {
+				$paged = get_query_var( 'paged' ) > 1 ? 'page/' . absint( get_query_var( 'paged' ) ) . '/' : '';
+				$termlink = sprintf( 'https://wordpress.org/support/%s/%s/%s', $this->compat(), $this->slug(), $paged );
+			}
+		}
+
+		return $termlink;
+	}
+
+	/**
+	 * Set the compat taxonomy on a topic if that data is provided on new post.
+	 *
+	 * @param int $topic_id The topic id
+	 * @param int $forum_id The forum id
+	 * @param int|array $anonymous_data 0 or anonymous author data
+	 * @param int $topic_author The topic author id
+	 */
+	public function new_topic( $topic_id, $forum_id, $anonymous_data, $topic_author ) {
 		if (
 			( isset( $_POST['wporg_compat'] ) && $_POST['wporg_compat'] == $this->compat() )
 		&&
