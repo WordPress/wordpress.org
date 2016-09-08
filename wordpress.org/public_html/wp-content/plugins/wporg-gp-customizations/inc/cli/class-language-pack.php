@@ -475,8 +475,9 @@ class Language_Pack extends WP_CLI_Command {
 			}
 
 			// Check if percent translated is above threshold.
-			if ( $set->percent_translated() < self::PACKAGE_THRESHOLD ) {
-				WP_CLI::log( "Skip {$wp_locale}, translations below threshold." );
+			$percent_translated = $set->percent_translated();
+			if ( $percent_translated < self::PACKAGE_THRESHOLD ) {
+				WP_CLI::log( "Skip {$wp_locale}, translations below threshold ({$percent_translated}%)." );
 				continue;
 			}
 

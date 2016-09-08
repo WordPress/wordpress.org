@@ -5,9 +5,9 @@ namespace WordPressdotorg\GlotPress\Plugin_Directory\Sync;
 use GP;
 use GP_Locales;
 use GP_Translation;
+use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 
 class Translation_Sync {
-	public $master_project = 'wp-plugins';
 
 	private $queue = array();
 
@@ -43,7 +43,7 @@ class Translation_Sync {
 		}
 
 		$project = GP::$project->get( $project_id );
-		if ( ! $project || ! $this->project_is_plugin( $project->path ) ) {
+		if ( ! $project || ! Plugin::project_is_plugin( $project->path ) ) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	public function sync_plugin_translations_on_commit( $args ) {
-		$project = GP::$project->by_path( $this->master_project . '/' . $args['gp_project'] );
+		$project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT . '/' . $args['gp_project'] );
 		if ( ! $project ) {
 			return false;
 		}
@@ -150,7 +150,7 @@ class Translation_Sync {
 			return;
 		}
 
-		if ( ! $this->project_is_plugin( $project->path ) ) {
+		if ( ! Plugin::project_is_plugin( $project->path ) ) {
 			return;
 		}
 
@@ -286,26 +286,6 @@ class Translation_Sync {
 		$project_cache[ $project_path ] = $project;
 
 		return $project;
-	}
-
-	/**
-	 * Returns whether a project path belongs to the plugins project.
-	 *
-	 * @param string $path Path of a project.
-	 *
-	 * @return bool True if it's a plugin, false if not.
-	 */
-	public function project_is_plugin( $path ) {
-		if ( empty( $path ) ) {
-			return false;
-		}
-
-		$path = '/' . trim( $path, '/' ) . '/';
-		if ( false === strpos( $path, "/{$this->master_project}/" ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
