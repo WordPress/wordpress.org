@@ -1,6 +1,6 @@
 <?php
 // No direct or CLI access.
-if ( ! defined( 'ABSPATH' ) || ! ABSPATH || php_sapi_name() != 'fpm' )
+if ( ! defined( 'ABSPATH' ) || ! ABSPATH || ( defined( 'WP_CLI' ) && WP_CLI ) )
 	return;
 
 // Redirects for plan.wordcamp.org only.
