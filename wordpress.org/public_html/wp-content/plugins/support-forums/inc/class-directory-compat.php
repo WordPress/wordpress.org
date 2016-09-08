@@ -146,10 +146,6 @@ abstract class Directory_Compat {
 				$this->contributors      = $this->get_contributors( $slug );
 
 				// Add output filters and actions.
-				if ( ! empty( $this->authors ) || ! empty( $this->contributors ) ) {
-					add_filter( 'bbp_get_topic_author_link', array( $this, 'author_link' ), 10, 2 );
-					add_filter( 'bbp_get_reply_author_link', array( $this, 'author_link' ), 10, 2 );
-				}
 				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
 
 				// Instantiate WPORG_Ratings compat mode for reviews.
@@ -421,13 +417,6 @@ abstract class Directory_Compat {
 				wp_set_object_terms( $topic_id, $this->slug(), $this->taxonomy(), false );
 			}
 		}
-	}
-
-	/**
-	 * @todo Add the author or contributor badge.
-	 */
-	public function author_link( $author_link, $args ) {
-		return $author_link;
 	}
 
 	/**
