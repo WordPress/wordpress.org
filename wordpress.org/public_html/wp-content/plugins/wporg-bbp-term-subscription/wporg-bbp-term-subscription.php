@@ -19,9 +19,12 @@ define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 
 // Instantiate the Plugin
-Plugin::get_instance();
+new Plugin();
 
 // Easy access for templates
 function get_subscription_link( $term_id ) {
-	return Plugin::get_subscription_link( array( 'term_id' => $term_id ) );
+	return Plugin::get_subscription_link( array(
+		'term_id'  => $term_id,
+		'taxonomy' => 'topic-tag',
+	) );
 }
