@@ -51,12 +51,6 @@ class Plugin {
 		$language_pack_build_trigger = new Language_Pack\Build_Trigger();
 		$language_pack_build_trigger->register_events();
 
-		$language_pack_build_listener = new Language_Pack\Build_Listener(
-			Language_Pack\Build_Trigger::HOOK
-		);
-		$language_pack_build_listener->register_events();
-
-
 		$this->translation_sync = new Sync\Translation_Sync();
 		$this->translation_sync->register_events();
 
