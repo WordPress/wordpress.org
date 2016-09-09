@@ -550,6 +550,22 @@ class Language_Pack extends WP_CLI_Command {
 				continue;
 			}
 
+			// Create build directories.
+			$result = $this->execute_command( sprintf(
+				'mkdir -p %s 2>&1',
+				escapeshellarg( $build_directory )
+			) );
+
+			if ( is_wp_error( $result ) ) {
+				WP_CLI::error_multi_line( $result->get_error_data() );
+				WP_CLI::warning( "Creating build directories for {$wp_locale} failed." );
+
+				// Clean up.
+				$this->execute_command( "rm -rf {$data->svn_checkout}/{$data->domain}" );
+
+				continue;
+			}
+
 			// Move ZIP file to build directory.
 			$result = $this->execute_command( sprintf(
 				'mv %s %s 2>&1',
