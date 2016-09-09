@@ -9,23 +9,23 @@ use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 
 class Translation_Sync {
 
-	private $queue = array();
+	private $queue = [];
 
-	public $project_mapping = array(
+	public $project_mapping = [
 		'dev'           => 'stable',
 		'stable'        => 'dev',
 		'dev-readme'    => 'stable-readme',
 		'stable-readme' => 'dev-readme',
-	);
+	];
 
 	public function register_events() {
-		add_action( 'gp_translation_created', array( $this, 'queue_translation_for_sync' ), 5 );
-		add_action( 'gp_translation_saved', array( $this, 'queue_translation_for_sync' ), 5 );
-		add_action( 'gp_originals_imported', array( $this, 'trigger_translation_sync_on_originals_import' ), 5, 5 );
+		add_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
+		add_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
+		add_action( 'gp_originals_imported', [ $this, 'trigger_translation_sync_on_originals_import' ], 5, 5 );
 
-		add_action( 'wporg_translate_sync_plugin_translations', array( $this, 'sync_plugin_translations_on_commit' ) );
+		add_action( 'wporg_translate_sync_plugin_translations', [ $this, 'sync_plugin_translations_on_commit' ] );
 
-		add_action( 'shutdown', array( $this, 'sync_translations' ) );
+		add_action( 'shutdown', [ $this, 'sync_translations' ] );
 	}
 
 	/**
@@ -166,8 +166,8 @@ class Translation_Sync {
 		}
 
 		// Avoid recursion.
-		remove_action( 'gp_translation_created', array( $this, 'queue_translation_for_sync' ), 5 );
-		remove_action( 'gp_translation_saved', array( $this, 'queue_translation_for_sync' ), 5 );
+		remove_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
+		remove_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
 
 		foreach ( $this->queue as $project_path => $translations ) {
 			$project = $this->get_dev_or_stable_project( $project_path );
@@ -221,21 +221,21 @@ class Translation_Sync {
 	 */
 	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
 		$locale = GP_Locales::by_slug( $new_translation_set->locale );
-		$new_translation = array();
+		$new_translation = [];
 
 		for ( $i = 0; $i < $locale->nplurals; $i++ ) {
 			$new_translation[] = $translation->{"translation_{$i}"};
 		}
 
 		// Check if the translation already exists.
-		$existing_translations = GP::$translation->find( array(
+		$existing_translations = GP::$translation->find( [
 			'translation_set_id' => $new_translation_set->id,
 			'original_id'        => $new_original->id,
-			'status'             => array( 'current', 'waiting' ),
-		) );
+			'status'             => [ 'current', 'waiting' ],
+		] );
 
 		foreach ( $existing_translations as $_existing_translation ) {
-			$existing_translation = array();
+			$existing_translation = [];
 			for ( $i = 0; $i < $locale->nplurals; $i++ ) {
 				$existing_translation[] = $_existing_translation->{"translation_{$i}"};
 			}
@@ -271,7 +271,7 @@ class Translation_Sync {
 		static $project_cache;
 
 		if ( null === $project_cache ) {
-			$project_cache = array();
+			$project_cache = [];
 		}
 
 		if ( isset( $project_cache[ $project_path ] ) ) {

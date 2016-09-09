@@ -22,19 +22,19 @@ class Build_Trigger {
 	 *
 	 * @var array
 	 */
-	private $queue = array();
+	private $queue = [];
 
 	/**
 	 * Registers actions and filters.
 	 */
 	public function register_events() {
-		add_action( 'gp_translation_created', array( $this, 'queue_project_on_translation_edit' ) );
-		add_action( 'gp_translation_saved', array( $this, 'queue_project_on_translation_edit' ) );
-		add_action( 'gp_originals_imported', array( $this, 'queue_project_on_originals_import' ), 10, 5 );
+		add_action( 'gp_translation_created', [ $this, 'queue_project_on_translation_edit' ] );
+		add_action( 'gp_translation_saved', [ $this, 'queue_project_on_translation_edit' ] );
+		add_action( 'gp_originals_imported', [ $this, 'queue_project_on_originals_import' ], 10, 5 );
 
-		add_filter( 'schedule_event', array( $this, 'limit_duplicate_events' ) );
+		add_filter( 'schedule_event', [ $this, 'limit_duplicate_events' ] );
 
-		add_action( 'shutdown', array( $this, 'trigger_build' ) );
+		add_action( 'shutdown', [ $this, 'trigger_build' ] );
 	}
 
 	/**

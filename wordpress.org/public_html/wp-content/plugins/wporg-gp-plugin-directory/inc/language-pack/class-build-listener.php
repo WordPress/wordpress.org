@@ -24,7 +24,7 @@ class Build_Listener {
 	 * Registers actions and filters.
 	 */
 	public function register_events() {
-		add_action( $this->hook, array( $this, 'run_build' ) );
+		add_action( $this->hook, [ $this, 'run_build' ] );
 	}
 
 	/**

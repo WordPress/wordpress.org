@@ -38,7 +38,7 @@ class Plugin {
 	 * Instantiates a new Plugin object.
 	 */
 	private function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
 	}
 
 	/**
