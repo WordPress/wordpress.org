@@ -125,8 +125,14 @@ class Performance_Optimizations {
 		 * - https://bbpress.trac.wordpress.org/ticket/1925
 		 */
 		if ( isset( $r['post_type'] ) && 'topic' == $r['post_type'] ) {
+
 			// Theme and plugin views rely on taxonomy queries.
 			if ( isset( $r['tax_query'] ) ) {
+
+				// Only look at the last year of topics for the active view.
+				if ( bbp_is_single_view() && bbp_get_view_id() == 'active' ) {
+					add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
+				}
 				return $r;
 			}
 
@@ -183,6 +189,14 @@ class Performance_Optimizations {
 		global $wpdb;
 
 		$bound_id = $this->get_bound_id( '6 MONTH' );
+		$w .= $wpdb->prepare( " AND ( $wpdb->posts.ID >= %d )", $bound_id );
+		return $w;
+	}
+
+	public function posts_in_last_year( $w ) {
+		global $wpdb;
+
+		$bound_id = $this->get_bound_id( '1 YEAR' );
 		$w .= $wpdb->prepare( " AND ( $wpdb->posts.ID >= %d )", $bound_id );
 		return $w;
 	}

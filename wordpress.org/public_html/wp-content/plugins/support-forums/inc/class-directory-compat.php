@@ -58,7 +58,7 @@ abstract class Directory_Compat {
 		if ( isset( $query_vars['feed'] ) && isset( $query_vars[ $this->query_var() ] ) ) {
 
 			// Compat views are hooked in a special order, and need help with feed queries.
-			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( $this->compat(), 'reviews' ) ) ) {
+			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( $this->compat(), 'reviews', 'active' ) ) ) {
 				$this->query = $query_vars;
 				add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
 			}
@@ -78,6 +78,7 @@ abstract class Directory_Compat {
 						'terms'      => $this->query[ $this->query_var() ],
 					) ),
 					'show_stickies'  => false,
+					'orderby'        => 'ID',
 				);
 				break;
 
@@ -85,6 +86,21 @@ abstract class Directory_Compat {
 			case 'reviews' :
 				return array(
 					'post_parent'    => Plugin::REVIEWS_FORUM_ID,
+					'tax_query'      => array( array(
+						'taxonomy'   => $this->taxonomy(),
+						'field'      => 'slug',
+						'terms'      => $this->query[ $this->query_var() ],
+					) ),
+					'show_stickies'  => false,
+					'orderby'        => 'ID',
+				);
+				break;
+
+			// Return active topics from the support forum.
+			case 'active' :
+				return array(
+					'post_parent'    => $this->forum_id(),
+					'post_status'    => 'publish',
 					'tax_query'      => array( array(
 						'taxonomy'   => $this->taxonomy(),
 						'field'      => 'slug',
@@ -243,6 +259,8 @@ abstract class Directory_Compat {
 					'terms'     => $this->slug(),
 				) ),
 				'show_stickies' => false,
+				'meta_key'      => null,
+				'meta_compare'  => null,
 				'orderby'       => 'ID',
 			)
 		);
@@ -259,6 +277,8 @@ abstract class Directory_Compat {
 					'terms'     => $this->slug(),
 				) ),
 				'show_stickies' => false,
+				'meta_key'      => null,
+				'meta_compare'  => null,
 				'orderby'       => 'ID',
 			)
 		);
@@ -269,17 +289,13 @@ abstract class Directory_Compat {
 			__( 'Recent Activity', 'wporg-forums' ),
 			array(
 				'post_parent'   => $this->forum_id(),
-				'meta_query'    => array( array(
-					'key'       => '_bbp_last_active_time',
-					'type'      => 'DATETIME',
-				) ),
+				'post_status'   => 'publish',
 				'tax_query'     => array( array(
 					'taxonomy'  => $this->taxonomy(),
 					'field'     => 'slug',
 					'terms'     => $this->slug(),
 				) ),
 				'show_stickies' => false,
-				'orderby'       => 'meta_value',
 			)
 		);
 	}
@@ -335,9 +351,13 @@ abstract class Directory_Compat {
 
 		$r[1] = '<a href="' . esc_url( bbp_get_forum_permalink( $this->forum_id() ) ) . '" class="bbp-breadcrumb-forum">' . esc_html( bbp_get_forum_title( $this->forum_id() ) ) . '</a>';
 		$r[2] = esc_html( $this->title() );
-		if ( 'reviews' == $view ) {
+		if ( in_array( $view, array( 'reviews', 'active' ) ) ) {
 			$r[2] = '<a href="' . esc_url( bbp_get_view_url( $this->compat() ) ) . '" class="bbp-breadcrumb-forum">' . esc_html( $this->title() ) . '</a>';
-			$r[3] = __( 'Reviews', 'wporg-forums' );
+			if ( 'reviews' == $view ) {
+				$r[3] = __( 'Reviews', 'wporg-forums' );
+			} else {
+				$r[3] = __( 'Active Topics', 'wporg-forums' );
+			}
 		}
 		return $r;
 	}
