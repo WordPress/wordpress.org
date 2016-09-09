@@ -3,17 +3,11 @@
 namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
 
 use GP;
+use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 use WP_CLI;
 use WP_CLI_Command;
 
 class Delete_Plugin_Project extends WP_CLI_Command {
-
-	/**
-	 * Holds the path of the master project.
-	 *
-	 * @var string
-	 */
-	private $master_project_path = 'wp-plugins';
 
 	/**
 	 * Delete a plugin project and its translations.
@@ -30,7 +24,7 @@ class Delete_Plugin_Project extends WP_CLI_Command {
 	public function __invoke( $args, $assoc_args ) {
 		global $wpdb;
 
-		$project_path = sprintf( '%s/%s', $this->master_project_path, $args[0] );
+		$project_path = sprintf( '%s/%s', Plugin::GP_MASTER_PROJECT , $args[0] );
 
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {

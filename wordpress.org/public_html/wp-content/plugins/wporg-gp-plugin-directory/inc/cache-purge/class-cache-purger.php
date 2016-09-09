@@ -3,9 +3,9 @@
 namespace WordPressdotorg\GlotPress\Plugin_Directory\Cache_Purge;
 
 use GP;
+use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 
 class Cache_Purger {
-	public $master_project   = 'wp-plugins';
 	public $i18n_cache_group = 'plugins-i18n';
 
 	private $translation_edits_queue = array();
@@ -102,7 +102,7 @@ class Cache_Purger {
 		}
 
 		$path = '/' . trim( $path, '/' ) . '/';
-		if ( false === strpos( $path, "/{$this->master_project}/" ) ) {
+		if ( false === strpos( $path, '/' . Plugin::GP_MASTER_PROJECT . '/' ) ) {
 			return false;
 		}
 
@@ -123,11 +123,11 @@ class Cache_Purger {
 		}
 
 		$project_dirs = explode( '/', trim( $project->path, '/' ) );
-		if ( empty( $project_dirs ) || 3 !== count( $project_dirs ) || $project_dirs[0] !== $this->master_project ) {
+		if ( empty( $project_dirs ) || 3 !== count( $project_dirs ) || Plugin::GP_MASTER_PROJECT !== $project_dirs[0]  ) {
 			return '';
 		}
 
-		return "{$this->master_project}:{$project_dirs[1]}:{$project_dirs[2]}";
+		return Plugin::GP_MASTER_PROJECT . ":{$project_dirs[1]}:{$project_dirs[2]}";
 	}
 
 	/**

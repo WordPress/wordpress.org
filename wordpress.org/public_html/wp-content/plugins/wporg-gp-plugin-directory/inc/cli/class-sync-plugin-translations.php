@@ -34,7 +34,7 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 		remove_action( 'gp_translation_created', array( $translation_sync, 'queue_translation_for_sync' ), 5 );
 		remove_action( 'gp_translation_saved', array( $translation_sync, 'queue_translation_for_sync' ), 5 );
 
-		$project_path = $translation_sync->master_project . '/' . $args[0];
+		$project_path = Plugin::GP_MASTER_PROJECT . '/' . $args[0];
 		$project_src = GP::$project->by_path( $project_path );
 		if ( ! $project_src ) {
 			WP_CLI::error( 'Source project not found!' );

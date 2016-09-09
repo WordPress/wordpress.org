@@ -4,17 +4,11 @@ namespace WordPressdotorg\GlotPress\Plugin_Directory\CLI;
 
 use GP;
 use stdClass;
+use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 use WP_CLI;
 use WP_CLI_Command;
 
 class Set_Plugin_Project extends WP_CLI_Command {
-
-	/**
-	 * Holds the path of the master project.
-	 *
-	 * @var string
-	 */
-	private $master_project_path = 'wp-plugins';
 
 	/**
 	 * Holds the path of the projects to copy translation sets from.
@@ -42,12 +36,12 @@ class Set_Plugin_Project extends WP_CLI_Command {
 
 		$plugin_slug         = $args[0];
 		$process_type        = $args[1];
-		$plugin_project_path = "{$this->master_project_path}/{$plugin_slug}";
+		$plugin_project_path = Plugin::GP_MASTER_PROJECT . "/{$plugin_slug}";
 
 		// Get data for master parent project.
-		$master_project = GP::$project->by_path( $this->master_project_path );
+		$master_project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT );
 		if ( ! $master_project ) {
-			WP_CLI::error( sprintf( "The master project '%s' couldn't be found.", $this->master_project_path ), 2 );
+			WP_CLI::error( sprintf( "The master project '%s' couldn't be found.", Plugin::GP_MASTER_PROJECT ), 2 );
 		}
 
 		// Get plugin details from the API.
