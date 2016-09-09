@@ -60,7 +60,13 @@ class Build_Trigger {
 			return;
 		}
 
-		$project_parts  = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+		$project_parts = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+
+		// No language packs for readmes.
+		if ( ! isset( $project_parts[2] ) || 'dev-readme' === $project_parts[2] || 'stable-readme' === $project_parts[2] ) {
+			return;
+		}
+
 		if ( isset( $project_parts[1] ) ) {
 			$this->queue[ $project_parts[1] ] = true;
 		}
@@ -86,7 +92,13 @@ class Build_Trigger {
 			return;
 		}
 
-		$project_parts  = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+		$project_parts = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+
+		// No language packs for readmes.
+		if ( ! isset( $project_parts[2] ) || 'dev-readme' === $project_parts[2] || 'stable-readme' === $project_parts[2] ) {
+			return;
+		}
+
 		if ( isset( $project_parts[1] ) ) {
 			$this->queue[ $project_parts[1] ] = true;
 		}
