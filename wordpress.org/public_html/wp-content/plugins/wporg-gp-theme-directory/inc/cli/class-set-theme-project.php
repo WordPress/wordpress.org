@@ -4,17 +4,11 @@ namespace WordPressdotorg\GlotPress\Theme_Directory\CLI;
 
 use GP;
 use MakePOT;
+use WordPressdotorg\GlotPress\Theme_Directory\Plugin;
 use WP_CLI;
 use WP_CLI_Command;
 
 class Set_Theme_Project extends WP_CLI_Command {
-
-	/**
-	 * Holds the path of the master project.
-	 *
-	 * @var string
-	 */
-	private $master_project_path = 'wp-themes';
 
 	/**
 	 * Holds the path of the projects to copy translation sets from.
@@ -174,7 +168,7 @@ class Set_Theme_Project extends WP_CLI_Command {
 	 * @return \GP_Project|false GP project on success, false on failure.
 	 */
 	private function find_create_update_glotpress_project( $theme_slug, $theme_data ) {
-		$parent_project = GP::$project->by_path( $this->master_project_path );
+		$parent_project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT );
 		$project_path = $parent_project->path . '/' . $theme_slug;
 
 		$project_args = array(
@@ -220,7 +214,7 @@ class Set_Theme_Project extends WP_CLI_Command {
 	 * @param string $theme_slug The theme to mark inactive.
 	 */
 	private function mark_glotpress_project_inactive( $theme_slug ) {
-		$project = GP::$project->by_path( "{$this->master_project_path}/{$theme_slug}" );
+		$project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT . "/{$theme_slug}" );
 		if ( $project ) {
 			$project->save( array(
 				'active' => 0,
