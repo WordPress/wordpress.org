@@ -24,6 +24,9 @@ class Build_Trigger {
 	 */
 	private $queue = array();
 
+	/**
+	 * Registers actions and filters.
+	 */
 	public function register_events() {
 		add_action( 'gp_translation_created', array( $this, 'queue_project_on_translation_edit' ) );
 		add_action( 'gp_translation_saved', array( $this, 'queue_project_on_translation_edit' ) );
@@ -72,7 +75,7 @@ class Build_Trigger {
 	 * @param int    $originals_obsoleted Number of originals that were marked as obsolete.
 	 * @param int    $originals_fuzzied   Number of originals that were close matches of old ones and thus marked as fuzzy.
 	 */
-	public function queue_project_for_sync_on_originals_import( $project_id, $originals_added, $originals_existing, $originals_obsoleted, $originals_fuzzied ) {
+	public function queue_project_on_originals_import( $project_id, $originals_added, $originals_existing, $originals_obsoleted, $originals_fuzzied ) {
 		if ( ! $originals_added && ! $originals_existing && ! $originals_fuzzied && ! $originals_obsoleted ) {
 			return;
 		}
