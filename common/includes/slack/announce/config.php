@@ -87,8 +87,11 @@ function get_whitelist() {
 			'rmccue',
 		),
 		'core-themes' => array(
-			'karmatosed',
+			'davidakennedy',
 			'iamtakashi',
+			'karmatosed',
+			'laurelfulford',
+			'melchoyce',
 		),
 		'design' => array(
 			'hugobaeta',
