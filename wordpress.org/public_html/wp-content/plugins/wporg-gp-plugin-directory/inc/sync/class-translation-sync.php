@@ -302,6 +302,7 @@ class Translation_Sync {
 		$send = new \Dotorg\Slack\Send( GLOTPRESS_SLACK_WEBHOOK );
 		$send->add_attachment( $attachment );
 		$send->set_username( 'Plugin Translation Sync' );
+		$send->set_icon( ':repeat:' );
 		$send->send( '#meta-language-packs' );
 	}
 }
