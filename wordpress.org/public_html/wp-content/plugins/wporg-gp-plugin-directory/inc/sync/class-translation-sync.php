@@ -96,7 +96,7 @@ class Translation_Sync {
 			}
 
 			// Sync translations in a separate process.
-			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug );
+			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate sync-plugin-translations ' . escapeshellarg( $args['gp_project'] ) . ' ' . escapeshellarg( $translation_set->locale ) . ' --set=' . escapeshellarg( $translation_set->slug ) . ' 2>&1';
 			$output = '';
 			$return_var = 0;
 			exec( $cmd, $output, $return_var );
@@ -289,7 +289,7 @@ class Translation_Sync {
 	}
 
 	/**
-	 * Sends a notifcation to the the Slack channel.
+	 * Sends a notifcation to the Slack channel.
 	 *
 	 * @param array $attachment The attachment of a notification.
 	 */
