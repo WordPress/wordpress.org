@@ -167,6 +167,9 @@ abstract class Directory_Compat {
 				// Add output filters and actions.
 				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
 
+				// Handle topic resolution permissions.
+				add_filter( 'wporg_bbp_user_can_resolve', array( $this, 'user_can_resolve' ), 10, 3 );
+
 				// Instantiate WPORG_Ratings compat mode for reviews.
 				if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
 					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
@@ -175,6 +178,22 @@ abstract class Directory_Compat {
 				$this->loaded = true;
 			}
 		}
+	}
+
+	/**
+	 * Allow plugin/theme authors to resolve a topic on their support forum.
+	 *
+	 * @param bool $retval If the user can set a topic resolution for the topic
+	 * @param int $user_id The user id
+	 * @param int $topic_id The topic id
+	 * @return bool True if the user can set the topic resolution, otherwise false
+	 */
+	public function user_can_resolve( $retval, $user_id, $topic_id ) {
+		$user = get_userdata( $user_id );
+		if ( $user && ! empty( $this->authors ) && in_array( $user->user_login, $this->authors ) ) {
+			$retval = true;
+		}
+		return $retval;
 	}
 
 	public function get_topic_title( $title, $topic_id ) {
