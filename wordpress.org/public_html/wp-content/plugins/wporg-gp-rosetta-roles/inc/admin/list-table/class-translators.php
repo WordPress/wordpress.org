@@ -77,13 +77,20 @@ class Translators extends WP_List_Table {
 		$args['blog_id'] = 0;
 		$args['include'] = $translators;
 
+	#	add_action( 'pre_user_query', [ $this, 'user_query_join_translation_editors' ] );
 		$user_query = new WP_User_Query( $args );
+	#	remove_action( 'pre_user_query', [ $this, 'user_query_join_translation_edtiors' ] );
+
 		$this->items = $user_query->get_results();
 
 		$this->set_pagination_args( array(
 			'total_items' => $user_query->get_total(),
 			'per_page'    => $per_page,
 		) );
+	}
+
+	public function user_query_join_translation_editors( $user_query ) {
+		$user_query->query_from .= ' INNER JOIN translate.translate_translation_editors AS tte ON minibb_users.ID = tte.user_id';
 	}
 
 	/**

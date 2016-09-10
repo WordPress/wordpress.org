@@ -16,7 +16,7 @@ use WordPressdotorg\Autoload;
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 
 if ( ! class_exists( '\WordPressdotorg\Autoload\Autoloader', false ) ) {
-	include __DIR__ . '/vendor/wordpressdotorg/class-autoloader.php';
+	include __DIR__ . '/vendor/wordpressdotorg/autoload/class-autoloader.php';
 }
 
 // Register an Autoloader for all files.
