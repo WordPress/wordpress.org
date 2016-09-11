@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
+use WordPressdotorg\Rosetta\Jetpack;
 use WP_Site;
 
 class Locale_Team implements Site {
@@ -38,6 +39,10 @@ class Locale_Team implements Site {
 	 * Registers actions and filters.
 	 */
 	public function register_events() {
-		// TODO: Implement register_events() method.
+		$jetpack_module_manager = new Jetpack\Module_Manager( [
+			'stats',
+			'markdown',
+		] );
+		$jetpack_module_manager->setup();
 	}
 }

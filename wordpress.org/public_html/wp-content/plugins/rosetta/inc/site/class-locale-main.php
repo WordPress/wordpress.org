@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
+use WordPressdotorg\Rosetta\Jetpack;
 use WordPressdotorg\Rosetta\User;
 use WP_Site;
 
@@ -45,5 +46,14 @@ class Locale_Main implements Site {
 			$user_sync->set_roles_to_sync( [ 'editor' ] );
 			$user_sync->setup();
 		}
+
+		$jetpack_module_manager = new Jetpack\Module_Manager( [
+			'stats',
+			'videopress',
+			'contact-form',
+			'sharedaddy',
+			'shortcodes',
+		] );
+		$jetpack_module_manager->setup();
 	}
 }
