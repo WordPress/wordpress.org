@@ -6,6 +6,20 @@ use WP_Site;
 class Locale_Support implements Site {
 
 	/**
+	 * Domain of this site.
+	 *
+	 * @var string
+	 */
+	public static $domain = '#[a-z-]{2,5}\.wordpress\.org#';
+
+	/**
+	 * Path of this site.
+	 *
+	 * @var string
+	 */
+	public static $path = '/support/';
+
+	/**
 	 * Tests whether this site manager is eligible for a site.
 	 *
 	 * @param WP_Site $site The site object.
@@ -13,7 +27,7 @@ class Locale_Support implements Site {
 	 * @return bool True if site is eligible, false otherwise.
 	 */
 	public static function test( WP_Site $site ) {
-		if ( '/support/' === $site->path ) {
+		if ( self::$path === $site->path ) {
 			return true;
 		}
 
