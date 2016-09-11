@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
+use WordPressdotorg\Rosetta\Filter;
 use WordPressdotorg\Rosetta\Jetpack;
 use WordPressdotorg\Rosetta\User;
 use WP_Site;
@@ -55,5 +56,34 @@ class Locale_Main implements Site {
 			'shortcodes',
 		] );
 		$jetpack_module_manager->setup();
+
+		$options = new Filter\Options();
+		// Options for Jetpack's sharing module.
+		$options->add_option(
+			( new Filter\Option() )
+				->set_name( 'sharing-options' )
+				->set_callback( function() {
+					return [
+						'global' => [
+							'button_style'  => 'icon-text',
+							'sharing_label' => __( 'Share this:', 'rosetta' ),
+							'open_links'    => 'same',
+							'show'          => [ 'post' ],
+							'custom'        => [],
+						],
+					];
+				} )
+		);
+		$options->add_option(
+			( new Filter\Option() )
+				->set_name( 'sharing-services' )
+				->set_callback( function() {
+					return [
+						'visible' => [ 'facebook', 'twitter', 'google-plus-1', 'email' ],
+						'hidden'  => [],
+					];
+				} )
+		);
+		$options->setup();
 	}
 }
