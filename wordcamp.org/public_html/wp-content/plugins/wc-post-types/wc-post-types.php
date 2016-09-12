@@ -1255,6 +1255,7 @@ class WordCamp_Post_Types_Plugin {
 			206,  // testing.wordcamp.org
 			648,  // 2016.asheville
 			651,  // 2016.kansascity
+			623,  // 2016.tampa
 		) );
 
 		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
@@ -1295,6 +1296,7 @@ class WordCamp_Post_Types_Plugin {
 		$enabled_site_ids = apply_filters( 'wcpt_session_post_video_info_enabled_site_ids', array(
 			206,  // testing.wordcamp.org
 			648,  // 2016.asheville
+			623,  // 2016.tampa
 		) );
 
 		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
