@@ -130,6 +130,7 @@ class WPorg_Handbook {
 		add_action( 'admin_init',                         array( $this, 'add_name_setting' ) );
 		add_filter( 'body_class',                         array( $this, 'add_body_class' ) );
 		add_filter( 'post_class',                         array( $this, 'add_post_class' ) );
+		add_filter( 'o2_process_the_content',             array( $this, 'disable_o2_processing' ) );
 	}
 
 	/**
@@ -386,6 +387,16 @@ class WPorg_Handbook {
 		if ( ( $this->post_type == get_post_type() ) && class_exists( 'P2_Resolved_Posts' ) && isset( $GLOBALS['p2_resolved_posts'] ) && is_object( $GLOBALS['p2_resolved_posts'] ) ) {
 			remove_filter( 'p2_action_links', array( P2_Resolved_Posts::instance(), 'p2_action_links' ), 100 );
 		}
+	}
+
+	/**
+	 * Disables handbook post content processing by the o2 plugin.
+	 *
+	 * @param bool $process_with_o2 Is o2 about to process the post content?
+	 * @return bool
+	 */
+	function disable_o2_processing( $process_with_o2 ) {
+		return ( $this->post_type === get_post_type() ) ? false : $process_with_o2;
 	}
 
 }
