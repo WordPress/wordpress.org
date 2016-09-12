@@ -407,7 +407,8 @@ class Plugin {
 
 		$resolution = $this->sanitize_topic_resolution( $r['resolution'] );
 
-		update_post_meta( $r['id'], self::META_KEY, $resolution );
+		update_post_meta( $topic->ID, self::META_KEY, $resolution );
+		wp_cache_delete( $topic->ID, 'post_meta' );
 	}
 
 	public function get_topic_resolutions() {
