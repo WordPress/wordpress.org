@@ -475,7 +475,8 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 
 #content input[type=text],
 #content input[type=password],
-#content textarea {
+#content textarea,
+#content select {
 	border-radius: 3px;
 	border: 1px #c6c6c6 solid;
 	background: #f5f5f5;
