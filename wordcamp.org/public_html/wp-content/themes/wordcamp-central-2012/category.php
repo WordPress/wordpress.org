@@ -16,7 +16,7 @@
 				if ( ! empty( $category_description ) )
 					echo '<div class="archive-meta">' . $category_description . '</div>';
 			?>
-					
+
 			<?php get_search_form(); ?>
 
 			<?php get_template_part( 'navigation-above' ); ?>

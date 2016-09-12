@@ -11,21 +11,21 @@
 	<?php get_search_form(); ?>
 
 	<?php get_template_part( 'navigation-above' ); ?>
-	
+
 	<?php while ( have_posts() ) : the_post(); ?>
 
 			<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-				
+
 				<?php get_template_part( 'content', get_post_format() ); ?>
 
 			</div><!-- #post-## -->
 
 	<?php endwhile; // End the loop. Whew. ?>
-	
+
 	<?php get_template_part( 'navigation-below' ); ?>
-	
+
 	</div><!-- #content -->
-	
+
 </div><!-- #container -->
 
 <?php get_sidebar('blog'); ?>

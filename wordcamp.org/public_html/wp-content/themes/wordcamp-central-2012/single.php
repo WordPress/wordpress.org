@@ -14,18 +14,18 @@ get_header(); ?>
 					<?php while ( have_posts() ) : the_post(); ?>
 
 								<div class="entry-meta">
-									<ul>	
+									<ul>
 										<li class="wc-single-avatar"><?php echo get_avatar( get_the_author_meta('ID'), 140 ); ?></li>
 										<li class="wc-single-author"><strong>Posted by</strong> <?php the_author_posts_link(); ?></li>
-										<li class="wc-single-date"><strong>Posted on</strong> <?php the_date(); ?></li>						
-										<li class="wc-single-cats"><strong>Categories</strong> <?php echo get_the_category_list(', '); ?></li>											
+										<li class="wc-single-date"><strong>Posted on</strong> <?php the_date(); ?></li>
+										<li class="wc-single-cats"><strong>Categories</strong> <?php echo get_the_category_list(', '); ?></li>
 										<?php if ( has_tag() ) : ?>
-											<li><strong>Tags</strong> <?php the_tags(' '); ?></li>	
+											<li><strong>Tags</strong> <?php the_tags(' '); ?></li>
 										<?php endif; ?>
 										<li><?php comments_popup_link('No replies yet', '1 reply', '% replies', 'comments-link', 'Comments are off for this post' ); ?></li>
-										<li class="wc-single-search"><strong>Search</strong> <?php get_search_form(); ?></li>	
+										<li class="wc-single-search"><strong>Search</strong> <?php get_search_form(); ?></li>
 
-									</ul>					
+									</ul>
 								</div><!-- .entry-meta -->
 
 								<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>

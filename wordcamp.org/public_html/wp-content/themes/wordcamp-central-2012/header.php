@@ -86,15 +86,15 @@
 		<div class="wc-hero-intro">
 			<h2>WordCamp is a conference that focuses on everything WordPress.</h2>
 			<p>
-				WordCamps are informal, community-organized events that are put together by WordPress users like you. 
-				Everyone from casual users to core developers participate, share ideas, and get to know each other. 
+				WordCamps are informal, community-organized events that are put together by WordPress users like you.
+				Everyone from casual users to core developers participate, share ideas, and get to know each other.
 			</p>
-			<p class="wc-hero-actions">		
+			<p class="wc-hero-actions">
 				<a href="<?php echo home_url( '/about/' ); ?>" class="wc-hero-learnmore">Learn More</a> or
 				<a href="<?php echo home_url( '/schedule/' ); ?>" class="wc-primary-button">Find a WordCamp</a>
 			</p>
 		</div><!-- .wc-hero-intro -->
-		
+
 		<div class="wc-hero-image cycle-me">
 			<?php
 				// Get image attachments from page Home.
@@ -107,10 +107,10 @@
 					'order' => 'DESC',
 				) );
 			?>
-			
+
 			<?php foreach ( $attachments as $image ) : ?>
-				
-				<?php 
+
+				<?php
 					$image_src = wp_get_attachment_image_src( $image->ID, 'wccentral-thumbnail-hero' );
 					if ( ! $image_src ) continue;
 					list( $src, $width, $height ) = $image_src;
@@ -121,15 +121,15 @@
 					<span class="wc-hero-caption"><?php echo esc_html( $image->post_excerpt ); ?></span>
 					<?php endif; ?>
 				</div>
-				
+
 			<?php endforeach; ?>
-			
+
 		</div><!-- .wc-hero-image -->
-		
+
 		<div class="wc-hero-mailinglist">
 			<?php if ( WordCamp_Central_Theme::can_subscribe() ) : ?>
 			<div class="wc-hero-mailinglist-container">
-				
+
 				<?php if ( WordCamp_Central_Theme::get_subscription_status() == 'success' ) : ?>
 
 					<p class="wc-hero-mailinglist-subscription-status">Thanks for subscribing! <br /> Please check your inbox to confirm your subscription.</p>
@@ -147,11 +147,11 @@
 					<input type="submit" class="wc-hero-mailinglist-submit" value="Go" />
 					</form>
 				<?php endif; // get_subscription_status ?>
-				
+
 			</div>
 			<?php endif; // can_subscribe ?>
 		</div><!-- #wc-hero-mailinglist -->
-	
+
 	</div>
 </div><!-- #wc-hero-panel -->
 <?php endif; // is_front_page ?>

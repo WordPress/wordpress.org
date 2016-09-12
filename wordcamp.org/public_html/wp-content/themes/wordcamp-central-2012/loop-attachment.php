@@ -23,12 +23,12 @@
 						printf( __( '&larr; %s', 'twentyten' ), get_the_title( $post->post_parent ) );
 					?></a></p>
 				<?php endif; ?>
-				
+
 				<div class="entry-meta">
-					<ul>	
+					<ul>
 						<li class="wc-single-avatar"><?php echo get_avatar( get_the_author_meta('ID'), 140 ); ?></li>
 						<li class="wc-single-author"><strong>Posted by</strong> <?php the_author_posts_link(); ?></li>
-						<li class="wc-single-date"><strong>Posted on</strong> <?php the_date(); ?></li>						
+						<li class="wc-single-date"><strong>Posted on</strong> <?php the_date(); ?></li>
 						<li><?php comments_popup_link('No replies yet', '1 reply', '% replies', 'comments-link', 'Comments are off for this post' ); ?></li>
 						<li>
 						<?php
@@ -45,9 +45,9 @@
 						}
 					?>
 						</li>
-						<li class="wc-single-search"><strong>Search</strong> <?php get_search_form(); ?></li>	
-						
-					</ul>					
+						<li class="wc-single-search"><strong>Search</strong> <?php get_search_form(); ?></li>
+
+					</ul>
 				</div><!-- .entry-meta -->
 
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -81,7 +81,7 @@
 								$attachment_height = apply_filters( 'twentyten_attachment_height', 900 );
 								echo wp_get_attachment_image( $post->ID, array( $attachment_width, $attachment_height ) ); // filterable image width with, essentially, no limit for image height.
 							?></a></p>
-	
+
 							<div id="nav-below" class="navigation">
 								<div class="nav-previous"><?php previous_image_link( false ); ?></div>
 								<div class="nav-next"><?php next_image_link( false ); ?></div>

@@ -8,11 +8,11 @@
 	<div id="container" class="group">
 		<div id="content" role="main" class="group">
 			<h1 class="page-title"><?php printf( __( 'Search Results for: %s', 'twentyten' ), '<span>' . get_search_query() . '</span>' ); ?></h1>
-						
+
 			<?php get_search_form(); ?>
-			
+
 			<?php if ( have_posts() ) : ?>
-				
+
 				<?php get_template_part( 'navigation-above' ); ?>
 
 				<?php while ( have_posts() ) : the_post(); ?>
@@ -26,9 +26,9 @@
 				<?php endwhile; // End the loop. Whew. ?>
 
 				<?php get_template_part( 'navigation-below' ); ?>
-				
+
 			<?php else : // have_posts ?>
-				
+
 				<div id="post-0" class="post no-results not-found">
 					<h2 class="entry-title"><?php _e( 'We couldn&#8217;t find anything!', 'twentyten' ); ?></h2>
 					<div class="entry-content">
@@ -36,7 +36,7 @@
 						<p><?php get_search_form(); ?></p>
 					</div><!-- .entry-content -->
 				</div><!-- #post-0 -->
-				
+
 			<?php endif; ?>
 
 		</div><!-- #content -->

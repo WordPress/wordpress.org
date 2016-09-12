@@ -25,9 +25,9 @@
 				</div><!-- #entry-author-info -->
 			<?php endif; ?>
 
-		
+
 			<?php rewind_posts(); // due to the_post() above ?>
-							
+
 			<?php get_search_form(); ?>
 
 			<?php get_template_part( 'navigation-above' ); ?>

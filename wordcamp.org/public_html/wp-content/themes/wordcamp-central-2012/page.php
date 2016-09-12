@@ -20,7 +20,7 @@ get_header(); ?>
 
 				<?php endwhile; // have_posts ?>
 			<?php endif; ?>
-			
+
 		</div><!-- #content -->
 	</div><!-- #container -->
 

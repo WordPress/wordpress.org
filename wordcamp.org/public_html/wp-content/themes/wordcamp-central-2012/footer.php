@@ -20,7 +20,7 @@
 			</a>
 
 			<?php wp_nav_menu( array( 'container_class' => 'menu-footer', 'theme_location' => 'primary', 'depth' => 1 ) ); ?>
-			
+
 		</div><!-- #colophon -->
 	</div><!-- #footer -->
 
