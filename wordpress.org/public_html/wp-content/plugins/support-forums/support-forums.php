@@ -26,6 +26,7 @@ include( dirname( __FILE__ ) . '/inc/class-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-theme-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-plugin-directory-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-ratings-compat.php' );
+include( dirname( __FILE__ ) . '/inc/class-stickies-compat.php' );
 include( dirname( __FILE__ ) . '/inc/class-performance-optimizations.php' );
 
 // Instantiate the plugin on load.

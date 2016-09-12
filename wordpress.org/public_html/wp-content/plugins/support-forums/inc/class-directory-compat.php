@@ -20,6 +20,7 @@ abstract class Directory_Compat {
 	var $authors      = null;
 	var $contributors = null;
 	var $query        = null;
+	var $term         = null;
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
@@ -129,6 +130,9 @@ abstract class Directory_Compat {
 			// This must run before bbPress's parse_query at priority 2.
 			$this->register_views();
 
+			// Set the term for this view so we can reuse it.
+			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+
 			// Add theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
@@ -148,6 +152,11 @@ abstract class Directory_Compat {
 				$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
 			}
 
+			// Instantiate WPORG_Stickies mode for support view.
+			if ( class_exists( 'WordPressdotorg\Forums\Stickies_Compat' ) ) {
+				$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term );
+			}
+
 			$this->loaded = true;
 		}
 	}
@@ -163,6 +172,7 @@ abstract class Directory_Compat {
 				$this->{$this->compat()} = $this->get_object( $slug );
 				$this->authors           = $this->get_authors( $slug );
 				$this->contributors      = $this->get_contributors( $slug );
+				$this->term              = $terms[0];
 
 				// Add output filters and actions.
 				add_action( 'wporg_compat_single_topic_sidebar_pre', array( $this, 'do_topic_sidebar' ) );
@@ -277,7 +287,7 @@ abstract class Directory_Compat {
 					'field'     => 'slug',
 					'terms'     => $this->slug(),
 				) ),
-				'show_stickies' => false,
+				'show_stickies' => true,
 				'meta_key'      => null,
 				'meta_compare'  => null,
 				'orderby'       => 'ID',
@@ -465,7 +475,7 @@ abstract class Directory_Compat {
 		do_action( 'bbp_template_notices' );
 
 		$term_subscription = '';
-		$term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+		$term = $this->term;
 		if ( ! $term ) {
 			// New compats won't have any support topics or reviews, so will
 			// not yet exist as a compat term.
@@ -473,6 +483,7 @@ abstract class Directory_Compat {
 			$term = get_term( $term['term_id'] );
 		}
 		if ( $term ) {
+			$this->term = $term;
 			$subscribe = $unsubscribe = '';
 			if ( 'plugin' == $this->compat() ) {
 				$subscribe   = esc_html__( 'Subscribe to this plugin', 'wporg-forums' );
