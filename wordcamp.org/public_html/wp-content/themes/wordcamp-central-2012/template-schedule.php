@@ -70,6 +70,11 @@ get_header(); ?>
 
 				<ul>
 					<li><strong>RSS Feed</strong> -- Learn <a href="https://central.wordcamp.org/news/2013/12/30/rss-feed-now-available-for-newly-announced-wordcamps/">how to subscribe via RSS</a>.</li>
+					<li>
+						<strong>Android app</strong> --
+						<a href="https://play.google.com/store/apps/details?id=org.wordcamp.android">Install it for free</a>,
+						or <a href="https://github.com/wordpress-mobile/WordCamp-Android">contribute on GitHub</a>.
+					</li>
 					<li><strong>ICS Calendar</strong> -- Add this URL as a remote calendar in your calendar application to subscribe: <?php echo esc_url( site_url( 'calendar.ics' ) ); ?></li>
 					<li><strong>JSON API</strong> -- This can be used by developers of mobile apps, websites, etc: https://central.wordcamp.org/wp-json/posts?type=wordcamp</li>    <?php // URL is hardcoded because the v2 URL for this will probably be different, but back-compat will be maintained ?>
 				</ul>
