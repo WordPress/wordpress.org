@@ -58,12 +58,17 @@ class Plugin {
 	 * @param string $action The requested action to compare this function to
 	 */
 	public function term_subscribe_handler( $action = '' ) {
+		// Bail if the actions aren't meant for this function.
+		if ( ! in_array( $action, self::get_valid_actions() ) ) {
+			return;
+		}
+
 		if ( ! $this->taxonomy ) {
 			return;
 		}
 
 		// Taxonomy mismatch; a different instance should handle this.
-		if ( $this->taxonomy != $_GET['taxonomy'] ) {
+		if ( ! isset( $_GET['taxonomy'] ) || $this->taxonomy != $_GET['taxonomy'] ) {
 			return;
 		}
 
@@ -77,7 +82,7 @@ class Plugin {
 		}
 
 		// Bail if no term id is passed.
-		if ( empty( $_GET['term_id'] ) || empty( $_GET['taxonomy'] ) ) {
+		if ( ! isset( $_GET['term_id'] ) || empty( $_GET['term_id'] ) ) {
 			return;
 		}
 
@@ -158,6 +163,9 @@ class Plugin {
 		if ( ! empty( $forum_subscribers ) ) {
 			$this->subscribers = array_diff( $this->subscribers, $forum_subscribers );
 		}
+
+		// Remove the author from being notified of their own topic.
+		$this->subscribers = array_diff( $this->subscribers, array( bbp_get_topic_author_id( $topic_id ) ) );
 
 		if ( empty( $this->subscribers ) ) {
 			return;
@@ -251,6 +259,9 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 		if ( ! empty( $topic_subscribers ) ) {
 			$this->subscribers = array_diff( $this->subscribers, $topic_subscribers );
 		}
+
+		// Remove the author from being notified of their own reply.
+		$this->subscribers = array_diff( $this->subscribers, array( bbp_get_reply_author_id( $reply_id ) ) );
 
 		if ( empty( $this->subscribers ) ) {
 			return;
