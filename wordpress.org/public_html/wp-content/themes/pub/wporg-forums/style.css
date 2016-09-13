@@ -318,6 +318,31 @@ span.bbp-admin-links a {
 	clear: both;
 }
 
+/* View header */
+
+#bbpress-forums #sections {
+	margin-bottom: 2em;
+	overflow: auto;
+}
+
+#bbpress-forums #sections li {
+	float: left;
+	border-right: 1px solid #999;
+	margin-right: 1em;
+	padding-right: 1em;
+}
+
+#bbpress-forums #sections li:last-child {
+	border-right: 0;
+}
+
+/* Ratings */
+
+#bbpress-forums .review-ratings {
+	overflow: auto;
+	margin-bottom: 2em;
+}
+
 /* User badges */
 
 #bbpress-forums .by-plugin-author,
