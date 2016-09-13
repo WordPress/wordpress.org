@@ -264,6 +264,8 @@ class Stickies_Compat {
 	 * @param array $stickies The sticky topic ids
 	 */
 	public static function set_stickies( $term_id, $stickies = array() ) {
-		return update_term_meta( $term_id, self::META, implode( ',', $stickies ) );
+		$retval = update_term_meta( $term_id, self::META, implode( ',', $stickies ) );
+		wp_cache_delete( $term_id, 'term_meta' );
+		return $retval;
 	}
 }
