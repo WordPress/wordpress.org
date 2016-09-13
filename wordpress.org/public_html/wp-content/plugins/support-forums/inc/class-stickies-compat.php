@@ -24,6 +24,9 @@ class Stickies_Compat {
 		$this->term     = $term;
 		$this->authors  = $authors;
 
+		// Remove global stickies from sticky array.
+		add_filter( 'bbp_get_super_stickies', array( $this, 'get_super_stickies' ) );
+
 		// Add compat stickies to sticky array.
 		add_filter( 'bbp_get_stickies', array( $this, 'get_compat_stickies' ), 10, 2 );
 
@@ -32,6 +35,16 @@ class Stickies_Compat {
 
 		// Add link to topic admin.
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 2 );
+	}
+
+	/**
+	 * Return empty array for super sticky topics in compat mode.
+	 *
+	 * @param array $stickies The super sticky topic ids
+	 * @return array An empty array
+	 */
+	public function get_super_stickies( $stickies ) {
+		return array();
 	}
 
 	/**
