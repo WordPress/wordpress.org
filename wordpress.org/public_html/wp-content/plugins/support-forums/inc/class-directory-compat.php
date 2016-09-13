@@ -56,6 +56,51 @@ abstract class Directory_Compat {
 	 * Handle view feeds for this compat.
 	 */
 	public function request( $query_vars ) {
+		// Redirect some older URLs to the correct location. This can be
+		// removed once nginx rules are in place to handle them.
+		$redirects = array(
+			// RSS: https://wordpress.org/support/rss/plugin/akismet/
+			'rss' => 'rss/' . $this->compat() . '/',
+			// Reviews: https://wordpress.org/support/view/plugin-reviews/akismet/
+			'reviews' => 'view/' . $this->compat() . '-reviews/',
+			// Reviews RSS: https://wordpress.org/support/rss/view/plugin-reviews/akismet/
+			'reviews_rss' => 'rss/view/' . $this->compat() . '-reviews/',
+		);
+		if ( array_key_exists( 'pagename', $query_vars ) ) {
+			$pagename = $query_vars['pagename'];
+
+			foreach ( $redirects as $r => $base ) {
+				$url = false;
+				if ( 0 !== strpos( $pagename, $base ) ) {
+					continue;
+				}
+				$ending = str_replace( $base, '', $pagename );
+				$slug = explode( '/', $ending );
+				if ( $slug ) {
+					switch ( $r ) {
+						case 'rss' :
+							$url = sprintf( 'https://wordpress.org/support/%s/%s/feed/',
+								$this->compat(),
+									sanitize_key( $slug[0] ) );
+							break;
+						case 'reviews' :
+							$url = sprintf( 'https://wordpress.org/support/%s/%s/reviews/',
+								$this->compat(),
+								sanitize_key( $slug[0] ) );
+							break;
+						case 'reviews_rss' :
+							$url = sprintf( 'https://wordpress.org/support/%s/%s/reviews/feed/',
+								$this->compat(),
+								sanitize_key( $slug[0] ) );
+					}
+					if ( $url ) {
+						wp_safe_redirect( esc_url( $url ), 301 );
+						exit;
+					}
+				}
+			}
+		}
+
 		if ( isset( $query_vars['feed'] ) && isset( $query_vars[ $this->query_var() ] ) ) {
 
 			// Compat views are hooked in a special order, and need help with feed queries.
