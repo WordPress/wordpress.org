@@ -83,6 +83,8 @@ function get_whitelist() {
 		'core-restapi' => array(
 			'danielbachhuber',
 			'joehoyle',
+			'kadamwhite',
+			'krogsgard',
 			'rachelbaker',
 			'rmccue',
 		),
