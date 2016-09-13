@@ -179,6 +179,7 @@ class Stickies_Compat {
 		if ( empty( $user_id ) ) {
 			$user_id = get_current_user_id();
 		}
+		$user = get_userdata( $user_id );
 
 		if ( $topic_id ) {
 			$topic = get_post( $topic_id );
@@ -187,14 +188,14 @@ class Stickies_Compat {
 			$term = get_term( $term_id );
 		}
 
-		if ( $user_id && $topic && $term ) {
+		if ( $user && $topic && $term ) {
 			// Moderators.
-			if ( user_can( $user_id, 'moderate' ) ) {
+			if ( user_can( $user->ID, 'moderate' ) ) {
 				$retval = true;
 			}
 
 			// Compat authors.
-			if ( $this->authors && in_array( $user_id, $this->authors ) ) {
+			if ( $this->authors && in_array( $user->user_login, $this->authors ) ) {
 				$retval = true;
 			}
 		}
