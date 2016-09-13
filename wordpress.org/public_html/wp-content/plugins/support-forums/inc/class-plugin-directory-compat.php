@@ -62,6 +62,9 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_view_sidebar() {
+
+		$this->do_topic_sidebar();
+
 		?>
 		<div>
 			<h3><?php _e( 'Browse Plugins', 'wporg-forums' ); ?></h3>
