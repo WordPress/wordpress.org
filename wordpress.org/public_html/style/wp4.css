@@ -1270,6 +1270,10 @@ p.person {
 	font-weight: bold;
 }
 
+#pagebody .submenu li:last-child {
+	border-bottom: 0;
+}
+
 #pagebody .submenu li ul {
 	margin-top: 0 !important;
 	margin-left: 16px !important;
