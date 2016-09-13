@@ -185,6 +185,11 @@ abstract class Directory_Compat {
 					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
 				}
 
+				// Instantiate WPORG_Stickies mode for topic view.
+				if ( class_exists( 'WordPressdotorg\Forums\Stickies_Compat' ) ) {
+					$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term, $this->authors );
+				}
+
 				$this->loaded = true;
 			}
 		}
