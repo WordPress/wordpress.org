@@ -459,6 +459,10 @@ a img.aligncenter {
 	font-size: 1.6em;
 }
 
+.wporg-page-nightly .wrapper {
+	min-height: 250px;
+}
+
 @media screen and (min-width:480px) {
 	#head-search form {
 		margin-left: 0;
