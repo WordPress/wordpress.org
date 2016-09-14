@@ -172,8 +172,8 @@ class Ratings_Compat {
 			} else {
 				echo '<span class="reviews-need-login">';
 				printf(
-					__( 'You must %s to submit a review. You can also log in or register using the form near the top of this page.' ),
-					sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in', 'verb: You must log in to submit a review.', 'wporg-forums' ) ) );
+					__( 'You must %s to submit a review.' ),
+					sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' ) ) );
 				echo '</span>';
 			}
 		?>
@@ -222,8 +222,8 @@ class Ratings_Compat {
 		if ( ! is_user_logged_in() ) {
 			echo '<p>';
 			printf(
-			__( 'You must %s to submit a review. You can also log in or register using the form near the top of this page.' ),
-			sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in', 'verb: You must log in to submit a review.', 'wporg-forums' ) ) );
+			__( 'You must %s to submit a review.' ),
+			sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' ) ) );
 			echo '</p>';
 			return;
 		}
