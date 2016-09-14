@@ -175,6 +175,15 @@ function wporg_support_profile_url( $user_id ) {
 // Temporarily remove the redirect to `https://profiles.wordpress.org/`, see #meta1868.
 // add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
 
+/**
+ * Get user's registration date.
+ */
+function wporg_support_get_user_registered_date( $user_id = 0 ) {
+	$user = get_userdata( bbp_get_user_id( $user_id ) );
+
+	return mysql2date( 'F jS, Y', $user->user_registered );
+}
+
 /** bb Base *******************************************************************/
 
 function bb_base_search_form() {
