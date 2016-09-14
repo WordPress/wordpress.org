@@ -11,6 +11,8 @@
 
 <div id="bbpress-forums">
 
+	<?php bbp_breadcrumb(); ?>
+
 	<?php if ( post_password_required() ) : ?>
 
 		<?php bbp_get_template_part( 'form', 'protected' ); ?>

@@ -52,15 +52,11 @@ add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 /**
  * Customized breadcrumb arguments
  * Breadcrumb Root Text: "WordPress Support"
- * Custom seperator `«` and `»`
+ * Custom separator: `«` and `»`
  *
  * @uses bbp_before_get_breadcrumb_parse_args() To parse the custom arguments
  */
 function wporg_support_breadcrumb() {
-	// HTML
-	$args['before']          = '';
-	$args['after']           = '';
-
 	// Separator
 	$args['sep']             = is_rtl() ? __( '&laquo;', 'wporg-forums' ) : __( '&raquo;', 'wporg-forums' );
 	$args['pad_sep']         = 1;
@@ -85,6 +81,7 @@ function wporg_support_breadcrumb() {
 
 	return $args;
 }
+add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
 
 /**
  * Register these bbPress views:

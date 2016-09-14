@@ -11,6 +11,8 @@
 
 <div id="bbpress-forums">
 
+	<?php bbp_breadcrumb(); ?>
+
 	<h2><?php bbp_topic_title(); ?></h2>
 
 	<?php do_action( 'bbp_template_before_single_topic' ); ?>

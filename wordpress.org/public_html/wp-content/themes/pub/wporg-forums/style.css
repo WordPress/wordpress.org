@@ -75,6 +75,10 @@ a:hover {
 	height: 0;
 }
 
+#bbpress-forums h2 {
+	clear: both;
+}
+
 /**
  * 4.0 Overrides
  */
