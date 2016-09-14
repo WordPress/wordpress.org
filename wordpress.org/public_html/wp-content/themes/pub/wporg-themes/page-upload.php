@@ -14,7 +14,7 @@ if ( have_posts() ) :
 
 		<article id="post-<?php the_ID(); ?>" <?php post_class( 'wrap' ); ?>>
 			<header class="entry-header">
-				<h2 class="entry-title"><?php _e( 'Add Your Theme to the Directory', 'wporg-themes' ); ?></h2>
+				<h2 class="entry-title"><?php _e( 'Submit Your Theme or Theme Update to the Directory', 'wporg-themes' ); ?></h2>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
