@@ -181,7 +181,8 @@ function wporg_support_profile_url( $user_id ) {
 function wporg_support_get_user_registered_date( $user_id = 0 ) {
 	$user = get_userdata( bbp_get_user_id( $user_id ) );
 
-	return mysql2date( 'F jS, Y', $user->user_registered );
+	/* translators: registration date format, see https://secure.php.net/date */
+	return mysql2date( __( 'F jS, Y', 'wporg-forums' ), $user->user_registered );
 }
 
 /** bb Base *******************************************************************/
