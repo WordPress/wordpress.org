@@ -2,7 +2,7 @@
 
 <div id="headline">
 	<div class="wrapper">
-		<h2><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Forums', 'wporg-forums' ); ?></a></h2>
+		<h2><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php _e( 'Support', 'wporg-forums' ); ?></a></h2>
 		<p class="login">
 			<?php if ( is_user_logged_in() ) : ?>
 				<?php echo sprintf( __( 'Howdy, %s', 'wporg-forums' ), '<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>' ); ?>
