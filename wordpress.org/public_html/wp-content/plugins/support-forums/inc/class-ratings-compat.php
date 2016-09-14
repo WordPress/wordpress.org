@@ -172,7 +172,8 @@ class Ratings_Compat {
 			} else {
 				echo '<span class="reviews-need-login">';
 				printf(
-					__( 'You must %s to submit a review.' ),
+					/* translators: %s: translation of verb string "log in or register" */
+					__( 'You must %s to submit a review.', 'wporg-forums' ),
 					sprintf(
 						'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
 						urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
@@ -227,7 +228,8 @@ class Ratings_Compat {
 		if ( ! is_user_logged_in() ) {
 			echo '<p>';
 			printf(
-				__( 'You must %s to submit a review.' ),
+				/* translators: %s: translation of verb string "log in or register" */
+				__( 'You must %s to submit a review.', 'wporg-forums' ),
 				sprintf(
 					'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
 					urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
