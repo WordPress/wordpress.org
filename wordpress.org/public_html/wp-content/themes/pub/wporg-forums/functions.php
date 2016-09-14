@@ -72,7 +72,7 @@ function wporg_support_breadcrumb() {
 
 	// Forum root
 	$args['include_root']    = true;
-	$args['root_text']       = __( 'WordPress Support', 'wporg-forums' );
+	$args['root_text']       = __( 'Support', 'wporg-forums' );
 
 	// Current
 	$args['include_current'] = true;
