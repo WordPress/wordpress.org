@@ -160,7 +160,7 @@ class Ratings_Compat {
 			}
 		?>
 	</div>
-	<div class="col-3">
+	<div class="col-5">
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
 		<?php echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating ); ?><?php echo sprintf( __( '%s out of <span itemprop="bestRating">5</span> stars', 'wporg-forums' ), round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ) ); ?>
 		<div class="reviews-submit-link">
@@ -178,8 +178,6 @@ class Ratings_Compat {
 			}
 		?>
 		</div>
-	</div>
-	<div class="col-1">
 	</div>
 	<?php
 	// If current listing is filtered by rating, display message indicating this,
