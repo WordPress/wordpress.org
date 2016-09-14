@@ -2144,7 +2144,7 @@ h5 {
 	padding: 0 0 0 142px;
 }
 
-.wptv-hero .secondary-videos img {
+.wptv-hero .secondary-videos .video-thumbnail img {
 	width: 130px;
 	height: 75px;
 
@@ -2169,11 +2169,6 @@ h5 {
 	margin-bottom: 20px;
 }
 
-.video-list li img {
-	width: 100%;
-	min-height: 100px;
-}
-
 .video-list li .video-thumbnail {
 	display: block;
 	width: 100%;
@@ -2183,6 +2178,11 @@ h5 {
 
 	overflow: hidden;
 	position: relative;
+}
+
+.video-list li .video-thumbnail img {
+	width: 100%;
+	min-height: 100px;
 }
 
 .video-list.four-col {
