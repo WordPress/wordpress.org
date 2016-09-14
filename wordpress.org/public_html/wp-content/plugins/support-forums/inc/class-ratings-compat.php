@@ -139,7 +139,15 @@ class Ratings_Compat {
 			foreach ( array( 5, 4, 3, 2, 1 ) as $rating ) {
 				$ratings_count = isset( $this->ratings_counts[ $rating ] ) ? $this->ratings_counts[ $rating ] : 0;
 				$ratings_count_total = isset( $this->ratings_counts ) ? array_sum( $this->ratings_counts) : 0;
-				$stars_title = sprintf( _n( 'Click to see reviews that provided a rating of %d star', 'Click to see reviews that provided a rating of %d stars', $rating, 'wporg-forums' ), $rating );
+				$stars_title = sprintf(
+					/* translators: %s: number of stars */
+					_n( 'Click to see reviews that provided a rating of %d star',
+					    'Click to see reviews that provided a rating of %d stars',
+					    $rating,
+					    'wporg-forums' ),
+					$rating
+				);
+				/* translators: %d: number of stars */
 				$stars_text = sprintf( __( '%d stars', 'wporg-forums' ), $rating );
 				$width = 0;
 				if ( $ratings_count && $ratings_count_total ) {
@@ -162,7 +170,13 @@ class Ratings_Compat {
 	</div>
 	<div class="col-5">
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
-		<?php echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating ); ?><?php echo sprintf( __( '%s out of <span itemprop="bestRating">5</span> stars', 'wporg-forums' ), round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ) ); ?>
+		<?php
+			echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating );
+			/* translators: %s: number of stars */
+			printf( __( '%s out of <span itemprop="bestRating">5</span> stars', 'wporg-forums' ),
+				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 )
+			);
+		?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
@@ -172,12 +186,12 @@ class Ratings_Compat {
 			} else {
 				echo '<span class="reviews-need-login">';
 				printf(
-					/* translators: %s: translation of verb string "log in or register" */
-					__( 'You must %s to submit a review.', 'wporg-forums' ),
-					sprintf(
-						'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
+					/* translators: %s: login URL */
+					__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
+					add_query_arg(
+						'redirect_to',
 						urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
-						esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' )
+						'https://login.wordpress.org/'
 					)
 				);
 				echo '</span>';
@@ -192,9 +206,18 @@ class Ratings_Compat {
 	if ( $filter > 0 && $filter < 6 ) {
 		echo '<div class="col-9 reviews-filtered-msg" style="font-style:italic;margin-top:24px;">';
 		printf(
-			_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>. <a href="%s">Click here</a> to see all reviews.',
-			    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>. <a href="%s">Click here</a> to see all reviews.',
-				'wporg-forums' ), $filter, esc_url ( sprintf( '//wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) );
+			/* translators: %d: number of stars */
+			_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+			    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+                $filter,
+                'wporg-forums' ),
+			$filter
+		);
+		printf(
+			/* translators: %s: plugin/theme reviews URL */
+			__( '<a href="%s">Click here</a> to see all reviews.', 'wporg-forums' ),
+			esc_url( sprintf( '//wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) )
+		);
 		echo "</div>\n";
 	}
 	?>
@@ -228,12 +251,12 @@ class Ratings_Compat {
 		if ( ! is_user_logged_in() ) {
 			echo '<p>';
 			printf(
-				/* translators: %s: translation of verb string "log in or register" */
-				__( 'You must %s to submit a review.', 'wporg-forums' ),
-				sprintf(
-					'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
+				/* translators: %s: login URL */
+				__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
+				add_query_arg(
+					'redirect_to',
 					urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
-					esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' )
+					'https://login.wordpress.org/'
 				)
 			);
 			echo '</p>';
@@ -267,21 +290,20 @@ class Ratings_Compat {
 		$report = $rate = '';
 		switch( $this->compat ) {
 			case 'plugin' :
-				$report = __( 'If you are reporting an issue with this plugin, please post %s instead.', 'wporg-forums' );
+				/* translators: %s: plugin support forum URL */
+				$report = __( 'If you are reporting an issue with this plugin, please post <a href="%s">here</a> instead.', 'wporg-forums' );
 				$rate   = __( 'In order to rate a plugin, you must also submit a review.', 'wporg-forums' );
 				break;
 			case 'theme' :
-				$report = __( 'If you are reporting an issue with this theme, please post %s instead.', 'wporg-forums' );
+				/* translators: %s: theme support forum URL */
+				$report = __( 'If you are reporting an issue with this theme, please post <a href="%s">here</a> instead.', 'wporg-forums' );
 				$rate   = __( 'In order to rate a theme, you must also submit a review.', 'wporg-forums' );
 				break;
 		}
 		?>
 		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
-			<li><?php printf( esc_html( $report ), sprintf( '<a href="%s">%s</a>',
-					esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ),
-					_x( 'here', 'please post here instead', 'wporg-forums' )
-				) ); ?></li>
+			<li><?php printf( esc_html( $report ), esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
 		</ul>
