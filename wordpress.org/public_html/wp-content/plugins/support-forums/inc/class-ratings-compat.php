@@ -173,7 +173,12 @@ class Ratings_Compat {
 				echo '<span class="reviews-need-login">';
 				printf(
 					__( 'You must %s to submit a review.' ),
-					sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' ) ) );
+					sprintf(
+						'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
+						urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
+						esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' )
+					)
+				);
 				echo '</span>';
 			}
 		?>
@@ -222,8 +227,13 @@ class Ratings_Compat {
 		if ( ! is_user_logged_in() ) {
 			echo '<p>';
 			printf(
-			__( 'You must %s to submit a review.' ),
-			sprintf( '<a href="https://login.wordpress.org/">%s</a>', esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' ) ) );
+				__( 'You must %s to submit a review.' ),
+				sprintf(
+					'<a href="https://login.wordpress.org/?redirect_to=%s">%s</a>',
+					urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
+					esc_html_x( 'log in or register', 'verb: You must log in or register to submit a review.', 'wporg-forums' )
+				)
+			);
 			echo '</p>';
 			return;
 		}
