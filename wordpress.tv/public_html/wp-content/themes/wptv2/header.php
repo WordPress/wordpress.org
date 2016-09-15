@@ -16,12 +16,12 @@ global $wptv;
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<title><?php wp_title( '|', true, 'right' ); ?></title>
 
-	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv RSS Feed', 'wptv' ); ?>" href="http://wordpress.tv/feed/" />
-	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv Blog RSS Feed', 'wptv' ); ?>" href="http://blog.wordpress.tv/feed/" />
+	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv RSS Feed', 'wptv' ); ?>" href="https://wordpress.tv/feed/" />
+	<link rel="alternate" type="application/rss+xml" title="<?php esc_attr_e( 'WordPress.tv Blog RSS Feed', 'wptv' ); ?>" href="https://blog.wordpress.tv/feed/" />
 	<link rel="profile" href="http://gmpg.org/xfn/11">
 	<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 
-	<script type="text/javascript" src="//use.typekit.com/mgi6udv.js"></script>
+	<script type="text/javascript" src="https://use.typekit.com/mgi6udv.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<?php wp_head(); ?>
 </head>
