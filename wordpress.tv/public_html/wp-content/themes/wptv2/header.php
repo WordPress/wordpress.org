@@ -21,7 +21,7 @@ global $wptv;
 	<link rel="profile" href="http://gmpg.org/xfn/11">
 	<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 
-	<script type="text/javascript" src="http://use.typekit.com/mgi6udv.js"></script>
+	<script type="text/javascript" src="//use.typekit.com/mgi6udv.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<?php wp_head(); ?>
 </head>
