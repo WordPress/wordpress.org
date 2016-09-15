@@ -303,7 +303,7 @@ class Ratings_Compat {
 		?>
 		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
-			<li><?php printf( esc_html( $report ), esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ) ); ?></li>
+			<li><?php printf( $report, esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
 		</ul>
