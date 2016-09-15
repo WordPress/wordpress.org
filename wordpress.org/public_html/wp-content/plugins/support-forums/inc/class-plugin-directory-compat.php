@@ -114,22 +114,5 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_view_header() {
-		$slug        = esc_attr( $this->slug );
-		$description = esc_html__( 'Description', 'wporg-forums' );
-		$support     = esc_html__( 'Support', 'wporg-forums' );
-		$reviews     = esc_html__( 'Reviews', 'wporg-forums' );
-		?>
-		<ul id="sections">
-			<li class="section-description">
-				<a href="//wordpress.org/plugins/<?php echo $slug; ?>/"><?php echo $description; ?></a>
-			</li>
-			<li class="section-support">
-				<a href="//wordpress.org/support/plugin/<?php echo $slug; ?>/"><?php echo $support; ?></a>
-			<li>
-			<li class="section-reviews">
-				<a href="//wordpress.org/support/plugin/<?php echo $slug; ?>/reviews/"><?php echo $reviews; ?></a>
-			</li>
-		</ul>
-		<?php
 	}
 }
