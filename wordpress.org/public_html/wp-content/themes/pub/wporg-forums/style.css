@@ -318,6 +318,21 @@ span.bbp-admin-links a {
 	background-color: #fff8e5;
 }
 
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-trash.even,
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-spam.even {
+	background-color: #fee;
+}
+
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-trash.odd,
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-spam.odd {
+	background-color: #fdd;
+}
+
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-pending.even,
+#bbpress-forums ul.bbp-lead-topic li.bbp-body div.status-pending.odd {
+	background-color: #fef7f1;
+}
+
 #bbpress-forums .bbp-breadcrumb {
 	clear: both;
 }
