@@ -30,6 +30,11 @@ class Plugin {
 	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
+	 * Role of a locale manager.
+	 */
+	const LOCALE_MANAGER_ROLE = 'locale_manager';
+
+	/**
 	 * @var Plugin The singleton instance.
 	 */
 	private static $instance;
@@ -101,8 +106,14 @@ class Plugin {
 		$current_project_id = $locale_and_project_id->project_id;
 
 		// Simple check to see if they're an approver or not.
-		if ( ! $this->is_approver_for_locale( $args['user_id'], $locale_slug ) ) {
+		$role = $this->is_approver_for_locale( $args['user_id'], $locale_slug );
+		if ( ! $role ) {
 			return false;
+		}
+
+		// Locale managers are allowed to approve all projects.
+		if ( self::LOCALE_MANAGER_ROLE === $role ) {
+			return true;
 		}
 
 		// Grab the list of Projects (or 'all') that the user can approve.
@@ -169,7 +180,7 @@ class Plugin {
 	 *
 	 * @param int    $user_id     User ID.
 	 * @param string $locale_slug The Locale for which we are checking.
-	 * @return bool True, if user is an approver, false if not.
+	 * @return false|string Role, if user is an approver, false if not.
 	 */
 	public function is_approver_for_locale( $user_id, $locale_slug ) {
 		static $cache = null;
@@ -201,10 +212,20 @@ class Plugin {
 		}
 
 		$capabilities = $user->{$cap_key};
-		$is_approver = ! empty( $capabilities[ self::TRANSLATION_EDITOR_ROLE ] ) || ! empty( $capabilities[ self::GENERAL_TRANSLATION_EDITOR_ROLE ] );
-		$cache[ $user_id ][ $locale_slug ] = $is_approver;
 
-		return $is_approver;
+		if ( ! empty( $capabilities[ self::LOCALE_MANAGER_ROLE ] ) ) {
+			$cache[ $user_id ][ $locale_slug ] = self::LOCALE_MANAGER_ROLE;
+			return self::LOCALE_MANAGER_ROLE;
+		} elseif ( ! empty( $capabilities[ self::GENERAL_TRANSLATION_EDITOR_ROLE ] ) ) {
+			$cache[ $user_id ][ $locale_slug ] = self::GENERAL_TRANSLATION_EDITOR_ROLE;
+			return self::GENERAL_TRANSLATION_EDITOR_ROLE;
+		} elseif ( ! empty( $capabilities[ self::TRANSLATION_EDITOR_ROLE ] ) ) {
+			$cache[ $user_id ][ $locale_slug ] = self::TRANSLATION_EDITOR_ROLE;
+			return self::TRANSLATION_EDITOR_ROLE;
+		} else {
+			$cache[ $user_id ][ $locale_slug ] = false;
+			return false;
+		}
 	}
 
 	/**

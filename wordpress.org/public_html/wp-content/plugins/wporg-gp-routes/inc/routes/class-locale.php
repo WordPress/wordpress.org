@@ -593,11 +593,11 @@ class Locale extends GP_Route {
 
 			// Check to see if they have any special approval permissions
 			$allowed_projects = array();
-			if ( ! $can_approve_for_all && $this->roles_adapter->is_approver_for_locale( $user_id, $locale ) ) {
+			if ( ! $can_approve_for_all && $role = $this->roles_adapter->is_approver_for_locale( $user_id, $locale ) ) {
 				$allowed_projects = $this->roles_adapter->get_project_id_access_list( $user_id, $locale, true );
 
 				// Check to see if they can approve for all projects in this locale.
-				if ( in_array( 'all', $allowed_projects ) ) {
+				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects ) ) {
 					$can_approve_for_all = true;
 					$allowed_projects = array();
 				}
