@@ -68,11 +68,11 @@ function wporg_support_breadcrumb() {
 	$args['crumb_after']     = '';
 
 	// Home
-	$args['include_home']    = false;
+	$args['include_home']    = true;
+	$args['home_text']       = __( 'Support', 'wporg-forums' );
 
 	// Forum root
-	$args['include_root']    = true;
-	$args['root_text']       = __( 'Support', 'wporg-forums' );
+	$args['include_root']    = false;
 
 	// Current
 	$args['include_current'] = true;
