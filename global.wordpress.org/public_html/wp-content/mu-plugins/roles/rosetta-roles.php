@@ -67,10 +67,6 @@ class Rosetta_Roles {
 
 		$this->gp_locale = $gp_locale;
 
-		add_filter( 'editable_roles', array( $this, 'editable_roles' ) );
-		add_action( 'admin_init', array( $this, 'role_modifications' ) );
-		add_action( 'set_user_role', array( $this, 'restore_translation_editor_role' ), 10, 3 );
-		add_filter( 'gettext_with_context', array( $this, 'rename_user_roles' ), 10, 4 );
 		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
 		add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
 
@@ -78,88 +74,6 @@ class Rosetta_Roles {
 		add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
 
 		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
-	}
-
-	/**
-	 * Registers "(General) Translation Editor" role and modifies editor role.
-	 */
-	public function role_modifications() {
-		if ( ! get_role( self::TRANSLATION_EDITOR_ROLE ) ) {
-			add_role( self::TRANSLATION_EDITOR_ROLE, __( 'Translation Editor', 'rosetta' ), array( 'read' => true, 'level_0' => true ) );
-		}
-
-		if ( ! get_role( self::GENERAL_TRANSLATION_EDITOR_ROLE ) ) {
-			add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE, __( 'General Translation Editor', 'rosetta' ), array( 'read' => true, 'level_0' => true, self::MANAGE_TRANSLATION_EDITORS_CAP => true ) );
-		}
-
-		$editor_role = get_role( 'editor' );
-		if ( $editor_role && ! $editor_role->has_cap( 'remove_users' ) ) {
-			$editor_role->add_cap( 'edit_theme_options' );
-			$editor_role->add_cap( 'list_users' );
-			$editor_role->add_cap( 'promote_users' );
-			$editor_role->add_cap( 'remove_users' );
-		}
-	}
-
-	/**
-	 * Restores the "(General) Translation Editor" role if an user is promoted.
-	 *
-	 * @param int    $user_id   The user ID.
-	 * @param string $role      The new role.
-	 * @param array  $old_roles An array of the user's previous roles.
-	 */
-	public function restore_translation_editor_role( $user_id, $role, $old_roles ) {
-		if ( self::GENERAL_TRANSLATION_EDITOR_ROLE !== $role && in_array( self::TRANSLATION_EDITOR_ROLE, $old_roles ) ) {
-			$user = new WP_User( $user_id );
-			$user->add_role( self::TRANSLATION_EDITOR_ROLE );
-		}
-
-		if ( self::TRANSLATION_EDITOR_ROLE !== $role && in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $old_roles ) ) {
-			$user = new WP_User( $user_id );
-			$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
-		}
-	}
-
-	/**
-	 * Removes "Translation Editor" role and "Administrator" role from
-	 * the list of editable roles.
-	 *
-	 * The list used in wp_dropdown_roles() on users list table.
-	 *
-	 * @param array $roles List of roles.
-	 * @return array Filtered list of editable roles.
-	 */
-	public function editable_roles( $roles ) {
-		unset( $roles[ self::TRANSLATION_EDITOR_ROLE ], $roles[ self::GENERAL_TRANSLATION_EDITOR_ROLE ] );
-
-		if ( ! is_super_admin() && ! is_main_site() ) {
-			unset( $roles['administrator'] );
-		}
-
-		return $roles;
-	}
-
-	/**
-	 * Translates the "Translation Editor" role.
-	 *
-	 * @param string $translation Translated text.
-	 * @param string $text        Text to translate.
-	 * @param string $context     Context information for the translators.
-	 * @param string $domain      Text domain.
-	 * @return string Translated user role.
-	 */
-	public function rename_user_roles( $translation, $text, $context, $domain ) {
-		if ( $domain !== 'default' || $context !== 'User role' ) {
-			return $translation;
-		}
-
-		if ( 'Translation Editor' === $text ) {
-			return __( 'Translation Editor', 'rosetta' );
-		} elseif ( 'General Translation Editor' === $text ) {
-			return __( 'General Translation Editor', 'rosetta' );
-		}
-
-		return $translation;
 	}
 
 	/**
