@@ -4,7 +4,9 @@ namespace WordPressdotorg\Rosetta\Site;
 use WordPressdotorg\Rosetta\Filter;
 use WordPressdotorg\Rosetta\Jetpack;
 use WordPressdotorg\Rosetta\User;
+use WordPressdotorg\Rosetta\User\Role;
 use WP_Site;
+use WP_User;
 
 class Locale_Main implements Site {
 
@@ -48,6 +50,14 @@ class Locale_Main implements Site {
 			$user_sync->setup();
 		}
 
+		$this->initialize_jetpack_customizations();
+		$this->initialize_user_role_customizations();
+	}
+
+	/**
+	 * Initializes customizations for Jetpack.
+	 */
+	private function initialize_jetpack_customizations() {
 		$jetpack_module_manager = new Jetpack\Module_Manager( [
 			'stats',
 			'videopress',
@@ -57,8 +67,8 @@ class Locale_Main implements Site {
 		] );
 		$jetpack_module_manager->setup();
 
-		$options = new Filter\Options();
 		// Options for Jetpack's sharing module.
+		$options = new Filter\Options();
 		$options->add_option(
 			( new Filter\Option() )
 				->set_name( 'sharing-options' )
@@ -85,5 +95,58 @@ class Locale_Main implements Site {
 				} )
 		);
 		$options->setup();
+	}
+
+	/**
+	 * Initializes user role customizations.
+	 */
+	private function initialize_user_role_customizations() {
+		$role_manager = new User\Role_Manager();
+		$role_manager->add_role( new Role\Locale_Manager() );
+		$role_manager->add_role( new Role\General_Translation_Editor() );
+		$role_manager->add_role( new Role\Translation_Editor() );
+		$role_manager->setup();
+
+		add_action( 'set_user_role', [ $this, 'restore_translation_editor_role' ], 10, 3 );
+		add_filter( 'editable_roles', [ $this, 'remove_administrator_from_editable_roles' ] );
+	}
+
+	/**
+	 * Restores the "(General) Translation Editor" role if an user is promoted.
+	 *
+	 * @param int    $user_id   The user ID.
+	 * @param string $role      The new role.
+	 * @param array  $old_roles An array of the user's previous roles.
+	 */
+	public function restore_translation_editor_role( $user_id, $role, $old_roles ) {
+		if (
+			Role\General_Translation_Editor::get_name() !== $role &&
+			in_array( Role\Translation_Editor::get_name(), $old_roles, true )
+		) {
+			$user = new WP_User( $user_id );
+			$user->add_role( Role\Translation_Editor::get_name() );
+		}
+
+		if (
+			Role\Translation_Editor::get_name() !== $role &&
+			in_array( Role\General_Translation_Editor::get_name(), $old_roles, true )
+		) {
+			$user = new WP_User( $user_id );
+			$user->add_role( Role\General_Translation_Editor::get_name() );
+		}
+	}
+
+	/**
+	 * Removes "Administrator" role from the list of editable roles.
+	 *
+	 * @param array $roles List of roles.
+	 * @return array Filtered list of editable roles.
+	 */
+	public function remove_administrator_from_editable_roles( $roles ) {
+		if ( ! is_super_admin() && ! is_main_site() ) {
+			unset( $roles['administrator'] );
+		}
+
+		return $roles;
 	}
 }
