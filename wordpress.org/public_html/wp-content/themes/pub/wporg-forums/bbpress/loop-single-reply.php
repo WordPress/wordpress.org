@@ -12,7 +12,7 @@ if ( bbp_is_single_user_replies() ) : ?>
 <div id="post-<?php bbp_reply_id(); ?>" class="bbp-reply-header">
 	<div class="bbp-meta">
 			<span class="bbp-header">
-				<?php esc_html_e( 'In reply to: ', 'bbpress' ); ?>
+				<?php esc_html_e( 'In reply to: ', 'wporg-forums' ); ?>
 				<a class="bbp-topic-permalink" href="<?php bbp_topic_permalink( bbp_get_reply_topic_id() ); ?>"><?php bbp_topic_title( bbp_get_reply_topic_id() ); ?></a>
 			</span>
 	</div><!-- .bbp-meta -->
