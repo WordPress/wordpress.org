@@ -55,7 +55,10 @@ class Locale_Main implements Site {
 			if ( $team_site ) {
 				$user_sync = new User\Sync();
 				$user_sync->set_destination_site( $team_site );
-				$user_sync->set_roles_to_sync( [ 'editor' ] );
+				$user_sync->set_roles_to_sync( [
+					'editor' => 'editor',
+					Role\Locale_Manager::get_name() => 'editor',
+				] );
 				$user_sync->setup();
 			}
 		}

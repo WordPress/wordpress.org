@@ -47,7 +47,8 @@ class Sync {
 	/**
 	 * Sets the array of roles to sync.
 	 *
-	 * @param array $roles_to_sync An array of roles to sync.
+	 * @param array $roles_to_sync An array of roles to sync. The key of an item
+	 *                             is the source role, the value the destination role.
 	 */
 	public function set_roles_to_sync( array $roles_to_sync ) {
 		$this->roles_to_sync = $roles_to_sync;
@@ -78,7 +79,7 @@ class Sync {
 		remove_action( 'add_user_role',    [ $this, 'add_user_to_site' ], 10 );
 		remove_action( 'set_user_role',    [ $this, 'add_user_to_site' ], 10 );
 
-		if ( ! in_array( $role, $this->roles_to_sync, true ) ) {
+		if ( ! in_array( $role, array_keys( $this->roles_to_sync ), true ) ) {
 			return;
 		}
 
@@ -86,6 +87,6 @@ class Sync {
 			return;
 		}
 
-		add_user_to_blog( $this->destination_site->id, $user_id, $role );
+		add_user_to_blog( $this->destination_site->id, $user_id, $this->roles_to_sync[ $role ] );
 	}
 }
