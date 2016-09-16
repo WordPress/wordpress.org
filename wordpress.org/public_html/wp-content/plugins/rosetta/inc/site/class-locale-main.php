@@ -44,10 +44,20 @@ class Locale_Main implements Site {
 	 */
 	public function register_events() {
 		if ( is_admin() ) {
-			$user_sync = new User\Sync();
-			$user_sync->set_destination_site( get_site_by_path( get_site()->domain, Locale_Team::$path ) );
-			$user_sync->set_roles_to_sync( [ 'editor' ] );
-			$user_sync->setup();
+			// Get the team site.
+			$result = get_sites( [
+				'domain' => get_site()->domain,
+				'path'   => Locale_Team::$path,
+				'number' => 1,
+			] );
+			$team_site = array_shift( $result );
+
+			if ( $team_site ) {
+				$user_sync = new User\Sync();
+				$user_sync->set_destination_site( $team_site );
+				$user_sync->set_roles_to_sync( [ 'editor' ] );
+				$user_sync->setup();
+			}
 		}
 
 		$this->initialize_jetpack_customizations();
