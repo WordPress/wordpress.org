@@ -7,7 +7,18 @@
  * @subpackage Theme
  */
 
-?>
+if ( bbp_is_single_user_replies() ) : ?>
+
+<div id="post-<?php bbp_reply_id(); ?>" class="bbp-reply-header">
+	<div class="bbp-meta">
+			<span class="bbp-header">
+				<?php esc_html_e( 'In reply to: ', 'bbpress' ); ?>
+				<a class="bbp-topic-permalink" href="<?php bbp_topic_permalink( bbp_get_reply_topic_id() ); ?>"><?php bbp_topic_title( bbp_get_reply_topic_id() ); ?></a>
+			</span>
+	</div><!-- .bbp-meta -->
+</div><!-- #post-<?php bbp_reply_id(); ?> -->
+
+<?php endif; ?>
 
 <div id="post-<?php bbp_reply_id(); ?>" <?php bbp_reply_class(); ?>>
 
@@ -45,6 +56,10 @@
 
 	</div><!-- .bbp-reply-content -->
 
+	<?php do_action( 'bbp_theme_before_reply_admin_links' ); ?>
+
 	<?php bbp_reply_admin_links(); ?>
+
+	<?php do_action( 'bbp_theme_after_reply_admin_links' ); ?>
 
 </div><!-- #post-<?php bbp_reply_id(); ?> -->
