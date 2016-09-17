@@ -210,7 +210,7 @@ class Ratings_Compat {
 			_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
 			    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
                 $filter,
-                'wporg-forums' ),
+                'wporg-forums' ) . ' ',
 			$filter
 		);
 		printf(
