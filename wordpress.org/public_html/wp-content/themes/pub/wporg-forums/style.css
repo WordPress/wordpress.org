@@ -75,7 +75,8 @@ a:hover {
 	height: 0;
 }
 
-#bbpress-forums h2 {
+#bbpress-forums h2,
+#bbpress-forums div.reply {
 	clear: both;
 }
 
