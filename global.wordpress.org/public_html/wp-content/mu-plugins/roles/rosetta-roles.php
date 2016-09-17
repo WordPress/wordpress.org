@@ -673,7 +673,8 @@ class Rosetta_Roles {
 	}
 
 	/**
-	 * Fetches all projects from translate.wordpress.org.
+	 * Fetches all parent projects and their direct sub-projects like 'wp'
+	 * and 'wp/dev' or 'wp-plugins' and 'wp-plugins/wordpress-importer'.
 	 *
 	 * @return array List of projects.
 	 */
@@ -689,12 +690,13 @@ class Rosetta_Roles {
 			2804, // Waiting
 		);
 
-		$_projects = $wpdb->get_results( "
+		$_projects = $wpdb->get_results( '
 			SELECT id, name, parent_project_id, slug
 			FROM translate_projects
-			WHERE id NOT IN( " . implode( ',', $ignore_project_ids ) . " )
-			ORDER BY id ASC
-		" );
+			WHERE
+				id NOT IN(' . implode( ',', $ignore_project_ids ) . ') AND
+				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;
+		' );
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
