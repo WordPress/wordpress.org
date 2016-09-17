@@ -68,7 +68,7 @@ class Plugin {
 		$message = "_Time: {$time}_\nImport of theme {$args['theme']} {$args['version']} in process...\n";
 
 		// Import in a separate process.
-		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $args['theme'] ) . ' ' . escapeshellarg( $args['version'] );
+		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-theme-project ' . escapeshellarg( $args['theme'] ) . ' ' . escapeshellarg( $args['version'] ) . ' 2>&1';;
 		$output = '';
 		$return_var = 0;
 		exec( $cmd, $output, $return_var );
