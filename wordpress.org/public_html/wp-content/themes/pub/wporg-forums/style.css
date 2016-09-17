@@ -345,6 +345,10 @@ span.bbp-admin-links a {
 	margin-bottom: 2em;
 }
 
+#bbpress-forums .reviews-filtered-msg {
+	width: initial;
+}
+
 /* User badges */
 
 #bbpress-forums .by-plugin-author,
