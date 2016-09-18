@@ -273,6 +273,18 @@ div.bbp-submit-wrapper {
 	font-size: 12px;
 }
 
+#bbpress-forums div.bbp-topic-author a.bbp-author-name,
+#bbpress-forums div.bbp-reply-author a.bbp-author-name {
+	font-size: 13px;
+	font-weight: bold;
+}
+
+#bbpress-forums .bbp-author-role {
+	margin: 0;
+	border: 0;
+	background-color: initial;
+}
+
 /* Colors */
 a {
 	color: #0073aa;
@@ -410,8 +422,8 @@ span.bbp-admin-links a {
 	}
 
 	#bbpress-forums .bbp-author-role {
-		margin: -20px 0 0;
-		padding: 0 6px;
+		margin: 0;
+		padding: 0;
 	}
 
 	#bbpress-forums p.bbp-topic-post-date,
