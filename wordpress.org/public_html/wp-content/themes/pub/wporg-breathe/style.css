@@ -439,6 +439,19 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	}
 }
 
+.js-disabled-notice {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 1em 0;
+	background: #fbeaea;
+	border-top: 2px solid #dc3232;
+	text-align: center;
+	font-size: 18px;
+	color: #333;
+}
+
 /*
  * Handbook
  */

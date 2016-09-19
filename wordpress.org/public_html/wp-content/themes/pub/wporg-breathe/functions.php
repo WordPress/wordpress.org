@@ -56,3 +56,12 @@ function welcome_box() {
 	endif;
 }
 add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
+
+function javascript_notice() {
+	?>
+	<noscript class="js-disabled-notice">
+		<?php _e( 'Please enable JavaScript to view this page properly.', 'o2' ); ?>
+	</noscript>
+	<?php
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\javascript_notice' );
