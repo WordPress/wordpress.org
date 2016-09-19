@@ -110,15 +110,15 @@
 
 		<div class="feature">
 			<h3><?php _e( 'WordPress', 'wporg-forums' ); ?></h3>
-			<p><a href="http://wordpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/wordpress.gif"/></a>The world&#8217;s most powerful web publishing software.</p>
+			<p><a href="https://wordpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/wordpress.gif"/></a>The world&#8217;s most powerful web publishing software.</p>
 		</div>
 		<div class="feature">
 			<h3><?php _e( 'bbPress', 'wporg-forums' ); ?></h3>
-			<p><a href="http://bbpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/bbpress.gif"/></a>Simple and elegant forum software from the creators of WordPress.</p>
+			<p><a href="https://bbpress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/bbpress.gif"/></a>Simple and elegant forum software from the creators of WordPress.</p>
 		</div>
 		<div style="margin-right: 0pt;" class="feature">
 			<h3><?php _e( 'BuddyPress', 'wporg-forums' ); ?></h3>
-			<p><a href="http://buddypress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/buddypress.gif"/></a>Create a fully featured niche social-network with a few easy clicks.</p>
+			<p><a href="https://buddypress.org"><img width="78" height="58" alt="" src="<?php echo get_template_directory_uri(); ?>/images/buddypress.gif"/></a>Create a fully featured niche social-network with a few easy clicks.</p>
 		</div>
 
 	<?php elseif ( ( ! is_page( 'login' ) && ! is_page( 'register' ) && ! is_page( 'lost-password' ) ) || is_home() || is_singular( 'post' ) || is_archive() ) : ?>

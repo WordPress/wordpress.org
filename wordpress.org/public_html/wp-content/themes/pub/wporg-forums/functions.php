@@ -16,7 +16,7 @@ add_filter( 'bbp_show_lead_topic', '__return_true' );
  * Enqueue scripts and styles.
  *
  * Enqueue existing wordpress.org/support stylesheets
- * @link http://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
+ * @link https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/style
  */
 function wporg_support_scripts() {
 
