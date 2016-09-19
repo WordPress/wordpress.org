@@ -174,7 +174,22 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		},
 
 		hacks: function() {
-			var content = $( '#content' );
+			var content = $( '#content' ),
+				$body = $( document.body );
+
+			// Add deprecated notice for core's test repository.
+			if ( $body.hasClass( 'core' ) && content.hasClass( 'browser' ) ) {
+				$( '#repoindex tbody .odd .name a[href="/browser/tests"]' )
+					.parent()
+					.append( '<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.' );
+
+				if ( window.location.pathname.substring( 0, 14 ) === '/browser/tests' ) {
+					content.before( $( '<div />', {
+						'class': 'system-message warning',
+						'html': 'You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.',
+					} ) );
+				}
+			}
 
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
@@ -193,7 +208,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 			// Ticket-only tweaks.
 			if ( content.hasClass( 'ticket' ) ) {
-				if ( $(document.body).hasClass( 'core' ) ) {
+				if ( $body.hasClass( 'core' ) ) {
 					wpTrac.coreToMeta();
 				}
 
