@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
+use WordPressdotorg\Rosetta\Jetpack;
 use WP_Site;
 
 class Global_WordPress_Org implements Site {
@@ -38,6 +39,8 @@ class Global_WordPress_Org implements Site {
 	 * Registers actions and filters.
 	 */
 	public function register_events() {
-		// TODO: Implement register_events() method.
+		$jetpack_connector = new Jetpack\Connector();
+		add_action( 'wpmu_new_blog', [ $jetpack_connector, 'schedule_connect_event' ], 20, 1 );
+		add_action( $jetpack_connector->get_connect_event_name(), [ $jetpack_connector, 'connect_site' ] );
 	}
 }
