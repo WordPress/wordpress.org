@@ -24,14 +24,14 @@ function wporg_support_scripts() {
 		'bb-base',
 		'//bbpress.org/wp-content/themes/bb-base/style.css',
 		array(),
-		'20150216d'
+		'20160919'
 	);
 
 	wp_register_style(
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20160918'
+		'20160919'
 	);
 
 	wp_register_style(
