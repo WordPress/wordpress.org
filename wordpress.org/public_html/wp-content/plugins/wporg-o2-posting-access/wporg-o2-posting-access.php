@@ -16,6 +16,10 @@ class Plugin {
 	 * Initializes actions and filters.
 	 */
 	public function init() {
+		if ( ! defined( 'O2__PLUGIN_LOADED' ) ) {
+			return;
+		}
+
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
@@ -194,4 +198,4 @@ class Plugin {
 	}
 }
 
-add_action( 'o2_loaded', [ new Plugin(), 'init' ] );
+add_action( 'plugins_loaded', [ new Plugin(), 'init' ] );
