@@ -156,7 +156,7 @@ class Locale_Main implements Site {
 	 * @return array Filtered list of editable roles.
 	 */
 	public function remove_administrator_from_editable_roles( $roles ) {
-		if ( ! is_super_admin() && ! is_main_site() ) {
+		if ( ! is_super_admin() ) {
 			unset( $roles['administrator'] );
 		}
 
