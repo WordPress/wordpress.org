@@ -60,6 +60,7 @@ class Locale_Team implements Site {
 	private function initialize_user_role_customizations() {
 		add_filter( 'user_has_cap', [ $this, 'extend_editors_capabilities' ], 10, 4 );
 		add_filter( 'editable_roles', [ $this, 'remove_administrator_from_editable_roles' ] );
+		add_action( 'customize_register',  [ $this, 'allow_editors_to_change_site_title_in_customizer' ], 20 );
 	}
 
 	/**
@@ -97,5 +98,16 @@ class Locale_Team implements Site {
 		}
 
 		return $roles;
+	}
+
+	/**
+	 * Allows users with the 'edit_theme_options' capability to change the site title
+	 * in the customizer.
+	 *
+	 * @param WP_Customize_Manager $wp_customize The customizer object.
+	 */
+	public function allow_editors_to_change_site_title_in_customizer( $wp_customize ) {
+		$wp_customize->get_setting( 'blogname' )->capability = 'edit_theme_options';
+		$wp_customize->get_setting( 'blogdescription' )->capability = 'edit_theme_options';
 	}
 }
