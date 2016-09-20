@@ -143,7 +143,7 @@ class Plugin {
 			return false;
 		}
 
-		if ( is_user_member_of_blog( $user->ID ) ) {
+		if ( is_user_member_of_blog( $user->ID ) || is_super_admin( $user->ID ) ) {
 			return true;
 		}
 
