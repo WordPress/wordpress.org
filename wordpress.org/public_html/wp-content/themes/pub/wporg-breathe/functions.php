@@ -1,6 +1,9 @@
 <?php
 namespace WordPressdotorg\Make\Breathe;
 
+/**
+ * Sets up theme defaults.
+ */
 function after_setup_theme() {
 	remove_theme_support( 'custom-header' );
 	remove_theme_support( 'custom-background' );
@@ -8,8 +11,35 @@ function after_setup_theme() {
 	remove_action( 'customize_register', 'breathe_customize_register' );
 	remove_action( 'customize_preview_init', 'breathe_customize_preview_js' );
 	remove_filter( 'wp_head', 'breathe_color_styles' );
+
+	add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
+
+/**
+ * Add postMessage support for site title and description in the customizer.
+ *
+ * @param WP_Customize_Manager $wp_customize The customizer object.
+ */
+function customize_register( $wp_customize ) {
+	$wp_customize->get_setting( 'blogname' )->transport = 'postMessage';
+	$wp_customize->get_setting( 'blogdescription' )->transport = 'postMessage';
+
+	if ( isset( $wp_customize->selective_refresh ) ) {
+		$wp_customize->selective_refresh->add_partial( 'blogname', [
+			'selector'            => '.site-title a',
+			'container_inclusive' => false,
+			'render_callback'     => __NAMESPACE__ . '\customize_partial_blogname',
+		] );
+	}
+}
+
+/**
+ * Renders the site title for the selective refresh partial.
+ */
+function customize_partial_blogname() {
+	bloginfo( 'name' );
+}
 
 function styles() {
 	wp_dequeue_style( 'breathe-style' );
