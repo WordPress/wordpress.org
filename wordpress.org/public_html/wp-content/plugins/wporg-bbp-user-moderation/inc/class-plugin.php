@@ -166,7 +166,7 @@ class Plugin {
 		}
 
 		// What action is taking place?
-		$post_id = intval( $_GET['post_id'] );
+		$post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : 0;
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			bbp_add_error( 'wporg_bbp_flag_post_id', __( '<strong>ERROR</strong>: No post was found! Which topic or reply are you marking for moderation?', 'wporg-forums' ) );
