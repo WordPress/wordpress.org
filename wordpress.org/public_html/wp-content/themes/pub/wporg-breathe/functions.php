@@ -1,8 +1,18 @@
 <?php
 namespace WordPressdotorg\Make\Breathe;
 
+function after_setup_theme() {
+	remove_theme_support( 'custom-header' );
+	remove_theme_support( 'custom-background' );
+
+	remove_action( 'customize_register', 'breathe_customize_register' );
+	remove_action( 'customize_preview_init', 'breathe_customize_preview_js' );
+	remove_filter( 'wp_head', 'breathe_color_styles' );
+}
+add_action( 'after_setup_theme', __NAMESPACE__ . '\after_setup_theme', 11 );
+
 function styles() {
-	wp_dequeue_style('breathe-style');
+	wp_dequeue_style( 'breathe-style' );
 	wp_enqueue_style( 'p2-breathe', get_template_directory_uri() . '/style.css' );
 
 	// Cacheing hack
