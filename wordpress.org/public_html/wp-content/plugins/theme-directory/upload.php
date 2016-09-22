@@ -39,7 +39,14 @@ function wporg_themes_render_upload_shortcode() {
 			</p>
 		</form>
 	<?php else : ?>
-		<p><?php printf( __( 'Before you can upload a new theme, <a href="%s">please log in</a>.', 'wporg-themes' ), esc_url( 'https://wordpress.org/support/bb-login.php' ) ); ?><p>
+		<p><?php printf(
+			__( 'Before you can upload a new theme, <a href="%s">please log in</a>.', 'wporg-themes' ),
+			add_query_arg(
+				'redirect_to',
+				urlencode( 'https://wordpress.org/themes/upload/' ),
+				'https://login.wordpress.org/'
+			)
+		); ?><p>
 	<?php endif;
 }
 
