@@ -199,6 +199,14 @@ body,
 	display: none;
 }
 
+.o2-app-controls {
+	font-size: 0.9em;
+}
+
+.o2-app-new-post {
+	margin-bottom: 2em;
+}
+
 .o2-post {
 	border-top: 2px solid #ddd;
 }
