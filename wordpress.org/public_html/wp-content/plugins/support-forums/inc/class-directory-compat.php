@@ -451,7 +451,7 @@ abstract class Directory_Compat {
 		}
 
 		$view = bbp_get_view_id();
-		if ( ! in_array( $view, array( $this->compat(), 'active' ) ) ) {
+		if ( ! in_array( $view, array( $this->compat() ) ) ) {
 			return;
 		}
 
@@ -464,7 +464,7 @@ abstract class Directory_Compat {
 		}
 
 		$view = bbp_get_view_id();
-		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
+		if ( ! in_array( $view, array( $this->compat(), 'reviews' ) ) ) {
 			return;
 		}
 
