@@ -49,6 +49,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
+			// Extend paths which are only available for logged in users.
+			if ( is_user_logged_in() ) {
+				$this->valid_sso_paths['logout'] = '/logout';
+			}
+
 			$redirect_req = $this->_get_safer_redirect_to();
 
 			// Add our host to the list of allowed ones.
@@ -116,8 +121,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								return;
 							}
 						} else if ( is_user_logged_in() ) {
-							// Otherwise, redirect to the login screen.
-							$this->_redirect_to_profile();
+							if ( preg_match( '!^' . $this->valid_sso_paths['logout'] . '/?$!', $_SERVER['REQUEST_URI'] ) ) {
+								// No redirect, ask the user if they really want to log out.
+								return;
+							} else {
+								// Otherwise, redirect to the login screen.
+								$this->_redirect_to_profile();
+							}
 						}
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
