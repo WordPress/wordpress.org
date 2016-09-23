@@ -27,7 +27,7 @@
 
 				<p class="bbp-topic-post-date"><a href="<?php bbp_topic_permalink(); ?>" title="#<?php bbp_topic_id(); ?>" class="bbp-topic-permalink"><?php bbp_topic_post_date( bbp_get_topic_id(), true ); ?></a></p>
 
-				<?php if ( is_super_admin() ) : ?>
+				<?php if ( current_user_can( 'moderate', bbp_topic_id() ) ) : ?>
 
 					<?php do_action( 'bbp_theme_before_topic_author_admin_details' ); ?>
 
