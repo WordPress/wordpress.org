@@ -1,5 +1,3 @@
-
-
 <form name="lostpasswordform" id="lostpasswordform" action="/wp-login.php?action=lostpassword" method="post">
 	<p class="intro"><?php _e( 'Please enter your username or email address. You will receive a link to create a new password via email.', 'wporg-login' ); ?></p>
 	<p>

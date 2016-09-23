@@ -10,7 +10,7 @@ get_header();
 /**
  * Test if the path we're on is one that we use, depending on if it
  * has a partial or not, or load the 404 partial as fallback.
- * 
+ *
  * Note that the path is first validated in WP_WPOrg_SSO::redirect_all_login_or_signup_to_sso().
  * @see https://meta.trac.wordpress.org/browser/sites/trunk/common/includes/wporg-sso/wp-plugin.php
  */
