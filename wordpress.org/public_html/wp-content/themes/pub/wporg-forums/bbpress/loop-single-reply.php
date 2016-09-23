@@ -32,7 +32,7 @@ if ( bbp_is_single_user_replies() ) : ?>
 
 		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
 
-		<?php if ( is_super_admin() ) : ?>
+		<?php if ( current_user_can( 'moderate', bbp_get_reply_topic_id() ) ) : ?>
 
 			<?php do_action( 'bbp_theme_before_reply_author_admin_details' ); ?>
 
