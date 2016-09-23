@@ -107,9 +107,20 @@ abstract class Directory_Compat {
 			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( $this->compat(), 'reviews', 'active' ) ) ) {
 				$this->query = $query_vars;
 				add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
+
+				// Override bbPress topic pubDate handling to show topic time and not last active time
+				add_filter( 'get_post_metadata', array( $this, 'topic_pubdate_correction_for_feed' ), 10, 4 );
 			}
 		}
 		return $query_vars;
+	}
+
+	public function topic_pubdate_correction_for_feed( $value, $object_id, $meta_key, $single ) {
+		// We only care about _bbp_last_active_time in this particular context
+		if ( $meta_key == '_bbp_last_active_time' ) {
+			$value = get_post_time( 'Y-m-d H:i:s', true, $object_id );
+		}
+		return $value;
 	}
 
 	public function get_view_query_args_for_feed( $retval, $view ) {
