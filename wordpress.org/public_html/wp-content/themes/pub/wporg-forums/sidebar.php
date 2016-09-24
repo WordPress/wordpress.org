@@ -38,7 +38,12 @@
 			<?php do_action( 'wporg_compat_single_topic_sidebar_pre' ); ?>
 
 			<div>
-				<h3><?php _e( 'Topic Info', 'wporg-forums' ); ?></h3>
+				<?php if ( wporg_support_is_single_review() ) : ?>
+					<h3><?php _e( 'Review Info', 'wporg-forums' ); ?></h3>
+				<?php else : ?>
+					<h3><?php _e( 'Topic Info', 'wporg-forums' ); ?></h3>
+				<?php endif; ?>
+
 				<ul class="topic-info">
 					<?php bb_base_single_topic_description(); ?>
 				</ul>

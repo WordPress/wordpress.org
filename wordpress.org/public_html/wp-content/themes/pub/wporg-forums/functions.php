@@ -182,6 +182,17 @@ function wporg_support_get_user_registered_date( $user_id = 0 ) {
 	return mysql2date( __( 'F jS, Y', 'wporg-forums' ), $user->user_registered );
 }
 
+/**
+ * Check if the current page is a single review.
+ */
+function wporg_support_is_single_review() {
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) || ! bbp_is_single_topic() ) {
+		return false;
+	}
+
+	return ( WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() );
+}
+
 /** bb Base *******************************************************************/
 
 function bb_base_search_form() {
