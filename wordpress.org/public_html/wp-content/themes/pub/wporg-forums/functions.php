@@ -323,13 +323,35 @@ function bb_base_single_topic_description() {
 
 	?>
 
-	<li class="topic-forum">In: <a href="<?php bbp_forum_permalink( bbp_get_topic_forum_id() ); ?>"><?php bbp_topic_forum_title(); ?></a></li>
-	<?php if ( !empty( $reply_count ) ) : ?><li class="reply-count"><?php echo $reply_count; ?></li><?php endif; ?>
-	<?php if ( !empty( $voice_count ) ) : ?><li class="voice-count"><?php echo $voice_count; ?></li><?php endif; ?>
-	<?php if ( !empty( $last_reply  ) ) : ?>
-		<li class="topic-freshness-author"><?php printf( __( 'Last reply from: %s', 'wporg-forums' ), bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) ) ); ?></li>
+	<li class="topic-forum"><?php
+		/* translators: %s: forum title */
+		printf( __( 'In: %s', 'wporg-forums' ),
+			sprintf( '<a href="%s">%s</a>',
+				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
+				bbp_get_topic_forum_title()
+			)
+		);
+	?></li>
+	<?php if ( !empty( $reply_count ) ) : ?>
+		<li class="reply-count"><?php echo $reply_count; ?></li>
 	<?php endif; ?>
-	<?php if ( !empty( $time_since  ) ) : ?><li class="topic-freshness-time"><?php printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since ); ?></li><?php endif; ?>
+	<?php if ( !empty( $voice_count ) ) : ?>
+		<li class="voice-count"><?php echo $voice_count; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $last_reply  ) ) : ?>
+		<li class="topic-freshness-author"><?php
+			/* translators: %s: reply author link */
+			printf( __( 'Last reply from: %s', 'wporg-forums' ),
+				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
+			);
+		?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $time_since  ) ) : ?>
+		<li class="topic-freshness-time"><?php
+			/* translators: %s: date/time link to the latest post */
+			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
+		?></li>
+	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
 		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
 		<li class="topic-subscribe"><?php bbp_topic_subscription_link( array( 'before' => '', 'topic_id' => $_topic_id ) ); ?></li>
@@ -376,13 +398,37 @@ function bb_base_single_forum_description() {
 	}
 	?>
 
-	<?php if ( bbp_get_forum_parent_id() ) : ?><li class="topic-parent">In: <a href="<?php bbp_forum_permalink( bbp_get_forum_parent_id() ); ?>"><?php bbp_forum_title( bbp_get_forum_parent_id() ); ?></a></li><?php endif; ?>
-	<?php if ( !empty( $topic_count ) ) : ?><li class="topic-count"><?php echo $topic_text; ?></li><?php endif; ?>
-	<?php if ( !empty( $reply_count ) ) : ?><li class="reply-count"><?php echo $reply_text; ?></li><?php endif; ?>
-	<?php if ( !empty( $last_active  ) ) : ?>
-		<li class="forum-freshness-author"><?php printf( __( 'Last post by: %s', 'wporg-forums' ), bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) ) ); ?></li>
+	<?php if ( bbp_get_forum_parent_id() ) : ?>
+		<li class="topic-parent"><?php
+			/* translators: %s: forum title */
+			printf( __( 'In: %s', 'wporg-forums' ),
+				sprintf( '<a href="%s">%s</a>',
+					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
+					bbp_get_forum_title( bbp_get_forum_parent_id() )
+				)
+			);
+		?></li>
 	<?php endif; ?>
-	<?php if ( !empty( $time_since  ) ) : ?><li class="forum-freshness-time"><?php printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since ); ?></li><?php endif; ?>
+	<?php if ( !empty( $topic_count ) ) : ?>
+		<li class="topic-count"><?php echo $topic_text; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $reply_count ) ) : ?>
+		<li class="reply-count"><?php echo $reply_text; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $last_active  ) ) : ?>
+		<li class="forum-freshness-author"><?php
+			/* translators: %s: post author link */
+			printf( __( 'Last post by: %s', 'wporg-forums' ),
+				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
+			);
+		?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $time_since  ) ) : ?>
+		<li class="forum-freshness-time"><?php
+			/* translators: %s: date/time link to the latest post */
+			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
+		?></li>
+	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
 		<li class="forum-subscribe"><?php bbp_forum_subscription_link( array( 'forum_id' => $forum_id ) ); ?></li>
 	<?php endif;
