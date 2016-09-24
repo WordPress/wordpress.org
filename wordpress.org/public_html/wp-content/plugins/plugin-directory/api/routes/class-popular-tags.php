@@ -8,12 +8,12 @@ use WP_REST_Server;
  *
  * @package WordPressdotorg_Plugin_Directory
  */
-class Popular_Categories extends Base {
+class Popular_Tags extends Base {
 
 	function __construct() {
-		register_rest_route( 'plugins/v1', '/popular-categories/?', array(
+		register_rest_route( 'plugins/v1', '/popular-tags/?', array(
 			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'popular_categories' ),
+			'callback' => array( $this, 'popular_tags' ),
 		) );
 	}
 
@@ -23,8 +23,8 @@ class Popular_Categories extends Base {
 	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return array A formatted array of all plugin categories on the site.
 	 */
-	function popular_categories( $request ) {
-		$terms = get_terms( 'plugin_category', array( 'hide_empty' => false, 'orderby' => 'count', 'order' => 'DESC' ) );
+	function popular_tags( $request ) {
+		$terms = get_terms( 'plugin_tags', array( 'hide_empty' => false, 'orderby' => 'count', 'order' => 'DESC' ) );
 
 		$response = array();
 		foreach ( $terms as $term ) {

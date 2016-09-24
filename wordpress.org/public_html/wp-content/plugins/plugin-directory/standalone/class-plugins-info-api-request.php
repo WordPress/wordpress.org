@@ -163,7 +163,7 @@ class Plugins_Info_API_Request {
 
 			// Tags
 			if ( ! empty( $this->args->tag ) ) {
-				$query['plugin_category'] = is_array( $this->args->tag ) ? reset( $this->args->tag ) : $this->args->tag;
+				$query['plugin_tag'] = is_array( $this->args->tag ) ? reset( $this->args->tag ) : $this->args->tag;
 			}
 
 			// Search

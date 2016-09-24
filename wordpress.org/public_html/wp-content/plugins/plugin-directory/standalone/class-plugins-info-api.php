@@ -41,9 +41,9 @@ class Plugins_Info_API {
 				$this->query_plugins( $request );
 				break;
 
-			case 'popular_categories':
+			case 'popular_tags':
 			case 'hot_tags':
-				$this->popular_categories( $request );
+				$this->popular_tags( $request );
 				break;
 
 			default:
@@ -176,10 +176,10 @@ class Plugins_Info_API {
 	}
 
 	/**
-	 * API Endpoint for the 'populat_categories' and 'hot_tags' API endpoints.
+	 * API Endpoint for the 'popular_tags' and 'hot_tags' API endpoints.
 	 */
-	public function popular_categories( $request ) {
-		if ( false === ( $response = false&& wp_cache_get( $cache_key = $this->popular_categories_cache_key( $request ), self::CACHE_GROUP ) ) ) {
+	public function popular_tags( $request ) {
+		if ( false === ( $response = false&& wp_cache_get( $cache_key = $this->popular_tags_cache_key( $request ), self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/popular-categories', array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {
@@ -199,7 +199,7 @@ class Plugins_Info_API {
 	/**
 	 * Generates a cache key for a 'hot_categories' API request.
 	 */
-	protected function popular_categories_cache_key( $request ) {
+	protected function popular_tags_cache_key( $request ) {
 		return 'hot_categories:' . $request->locale;
 	}
 

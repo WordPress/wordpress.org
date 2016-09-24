@@ -16,7 +16,7 @@ class Base {
 		new Routes\Locale_Banner();
 		new Routes\Plugin_Favorites();
 		new Routes\Commit_Subscriptions();
-		new Routes\Popular_Categories();
+		new Routes\Popular_Tags();
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();
 		new Routes\Zip_Management();
