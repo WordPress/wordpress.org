@@ -32,7 +32,6 @@ class Plugin {
 	 * Instantiate a new Plugin object.
 	 */
 	private function __construct() {
-		$this->performance = new Performance_Optimizations;
 		$this->users       = new Users;
 		$this->moderators  = new Moderators;
 		$this->hooks       = new Hooks;
@@ -42,6 +41,9 @@ class Plugin {
 		if ( $blog_id && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == $blog_id ) {
 			$this->dropin          = new Dropin;
 			$this->support_compat  = new Support_Compat;
+
+			// Only load Performance_Optimizations if necessary.
+			$this->performance = new Performance_Optimizations;
 
 			// Ratings_Compat is loaded by Theme_Directory_Compat or
 			// Plugin_Directory_Compat depending on the request.
