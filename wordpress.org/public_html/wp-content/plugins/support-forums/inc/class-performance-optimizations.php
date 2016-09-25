@@ -27,6 +27,10 @@ class Performance_Optimizations {
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'has_replies' ) );
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'exclude_compat_forums' ) );
 		add_filter( 'bbp_register_view_all_topics', array( $this, 'exclude_compat_forums' ) );
+
+		// Editor.
+		add_action( 'wp_ajax_wp-link-ajax', array( $this, 'disable_wp_link_ajax' ), -1 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
@@ -175,6 +179,23 @@ class Performance_Optimizations {
 	public function exclude_compat_forums( $r ) {
 		$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 		return $r;
+	}
+
+	/**
+	 * Replace link AJAX with a short-circuited version.
+	 * @todo Replace link with a custom modal to avoid AJAX call entirely.
+	 */
+	public function disable_wp_link_ajax() {
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			remove_action( 'wp_ajax_wp-link-ajax', 'wp_ajax_wp_link_ajax', 1 );
+			add_action( 'wp_ajax_wp-link-ajax', '__return_zero', 1 );
+		}
+	}
+
+	public function enqueue_styles() {
+		if ( current_user_can( 'participate' ) ) {
+			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ) );
+		}
 	}
 
 	public function posts_in_last_month( $w ) {
