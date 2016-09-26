@@ -49,12 +49,6 @@ class Init_Locale extends WP_CLI_Command {
 			'wp/dev',
 			'wp/dev/admin',
 			'wp/dev/admin/network',
-			'wp/dev/twentyten',
-			'wp/dev/twentyeleven',
-			'wp/dev/twentytwelve',
-			'wp/dev/twentythirteen',
-			'wp/dev/twentyfourteen',
-			'wp/dev/twentyfifteen',
 		);
 
 		if ( 'default' === $slug ) {
@@ -65,6 +59,8 @@ class Init_Locale extends WP_CLI_Command {
 				'meta/plugins-v3',
 				'meta/forums',
 				'bbpress/1.1.x',
+				'meta/o2',
+				'meta/p2-breathe',
 			) );
 		}
 
