@@ -50,6 +50,7 @@ class Locale_Team implements Site {
 		$jetpack_module_manager = new Jetpack\Module_Manager( [
 			'stats',
 			'markdown',
+			'subscriptions',
 		] );
 		$jetpack_module_manager->setup();
 	}
