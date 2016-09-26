@@ -20,6 +20,15 @@
 	border-bottom: 1px solid #555;
 }
 
+.translators-info thead th {
+	vertical-align: top;
+}
+
+.translators-info thead small {
+	font-size: 9px;
+	font-weight: normal;
+}
+
 .translators-info tbody tr {
 	display: none;
 }
@@ -32,6 +41,8 @@
 .translators-info.show-no-releases tbody tr.no-releases,
 .translators-info.show-no-site tbody tr.no-site,
 .translators-info.show-no-wp-project tbody tr.no-wp-project,
+.translators-info.show-has-language-pack tbody tr.has-language-pack,
+.translators-info.show-no-language-pack tbody tr.no-language-pack,
 .translators-info.show-translated-100 tbody tr.translated-100,
 .translators-info.show-translated-95 tbody tr.translated-95,
 .translators-info.show-translated-90 tbody tr.translated-90,
@@ -206,6 +217,9 @@ ul.validators {
 	.translators-info.show-major-behind-many tbody tr.major-behind-many,
 	.translators-info.show-no-releases tbody tr.no-releases,
 	.translators-info.show-no-site tbody tr.no-site,
+	.translators-info.show-no-wp-project tbody tr.no-wp-project,
+	.translators-info.show-has-language-pack tbody tr.has-language-pack,
+	.translators-info.show-no-language-pack tbody tr.no-language-pack,
 	.translators-info.show-translated-100 tbody tr.translated-100,
 	.translators-info.show-translated-95 tbody tr.translated-95,
 	.translators-info.show-translated-90 tbody tr.translated-90,
@@ -246,7 +260,7 @@ ul.validators {
 		padding-left: 40%;
 	}
 
-	.translators-info table tbody td:before {
+	.translators-info table tbody td[data-column-title]:before {
 		content: attr(data-column-title);
 		position: absolute;
 		left: 10px;
@@ -273,23 +287,40 @@ ul.validators {
 		border-top: 1px solid #ccc !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(5) {
+	.translators-info table tbody td:nth-of-type(4) {
 		display: inline-block;
 		padding-left: 40%;
+		padding-right: 5px;
 		width: 30%;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(6) {
+	.translators-info table tbody td:nth-of-type(5) {
 		display: inline-block;
 		padding-left: 0;
 		width: 23%;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(7) {
+	.translators-info table tbody td:nth-of-type(6) {
+		display: inline-block;
+		padding-left: 40%;
+		width: 30%;
 		border-top: 1px solid #ccc !important;
 		border-bottom: none !important;
-		padding-right: none;
+	}
+
+	.translators-info table tbody td:nth-of-type(7) {
+		display: inline-block;
+		padding-left: 0;
+		width: 23%;
+		border-top: 1px solid #ccc !important;
+		border-bottom: none !important;
+	}
+
+	.translators-info table tbody td:nth-of-type(8) {
+		border-top: 1px solid #ccc !important;
+		border-bottom: none !important;
+		padding-right: 0;
 	}
 }

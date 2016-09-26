@@ -81,6 +81,7 @@ class WP_I18n_Teams {
 			$locales = self::get_locales();
 			$locale_data = $this->get_locales_data();
 			$percentages = $this->get_core_translation_data();
+			$language_packs_data = $this->get_language_packs_data();
 			require( __DIR__ . '/views/all-locales.php' );
 		} else {
 			require_once GLOTPRESS_LOCALES_PATH;
@@ -146,6 +147,7 @@ class WP_I18n_Teams {
 
 		$gp_locales = self::get_locales();
 		$translation_data = $this->get_core_translation_data();
+		$language_packs_data = $this->get_language_packs_data();
 		$locale_data = array();
 
 		$statuses = array(
@@ -161,9 +163,11 @@ class WP_I18n_Teams {
 			'translated-90'      => 0,
 			'translated-50'      => 0,
 			'translated-50-less' => 0,
+			'has-language-pack'  => 0,
+			'no-language-pack'   => 0,
 		);
 
-		$wporg_data = $wpdb->get_results( "SELECT locale, subdomain, latest_release FROM locales ORDER BY locale", OBJECT_K );
+		$wporg_data = $wpdb->get_results( 'SELECT locale, subdomain, latest_release FROM locales ORDER BY locale', OBJECT_K );
 
 		foreach ( $gp_locales as $locale ) {
 			$subdomain = $latest_release = '';
@@ -174,19 +178,26 @@ class WP_I18n_Teams {
 			$release_status = self::get_locale_release_status( $subdomain, $latest_release );
 			$statuses[ $release_status ]++;
 
-			if ( isset ( $translation_data[ $locale->wp_locale ] ) ) {
+			if ( isset( $translation_data[ $locale->wp_locale ] ) ) {
 				$translation_status = self::get_locale_translation_status( $translation_data[ $locale->wp_locale ] );
-				$statuses[ $translation_status ]++;
 			} else {
 				$translation_status = 'no-wp-project';
-				$statuses[ 'no-wp-project' ]++;
 			}
+			$statuses[ $translation_status ]++;
+
+			if ( isset( $language_packs_data[ $locale->wp_locale ] ) ) {
+				$language_pack_status = 'has-language-pack';
+			} else {
+				$language_pack_status = 'no-language-pack';
+			}
+			$statuses[ $language_pack_status ]++;
 
 			$locale_data[ $locale->wp_locale ] = array(
-				'release_status'     => $release_status,
-				'translation_status' => $translation_status,
-				'rosetta_site_url'   => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
-				'latest_release'     => $latest_release ? $latest_release : false,
+				'release_status'       => $release_status,
+				'translation_status'   => $translation_status,
+				'language_pack_status' => $language_pack_status,
+				'rosetta_site_url'     => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
+				'latest_release'       => $latest_release ? $latest_release : false,
 			);
 		}
 
