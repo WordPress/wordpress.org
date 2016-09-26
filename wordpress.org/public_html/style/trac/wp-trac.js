@@ -629,6 +629,11 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					this.initTicketParticipants();
 					this.initNonTicketParticipants();
 
+					// Adjusts the query so it doesn't search for 'achment' in case Ryan enters too many characters.
+					var replacer = function ( query ) {
+						return query.replace( /^(achment|achmen|achme|achm|ach|ac|a)/g, '' );
+					};
+
 					$( '#comment' ).atwho({
 						at:        '@',
 						callbacks: {
@@ -639,7 +644,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 						at:         '[att',
 						insertTpl:  '${atwho-at}achment:${name}]',
 						displayTpl: '<li>${display}</li>',
-						data:       this.getAttachments()
+						data:       this.getAttachments(),
+						callbacks: {
+							filter: function( query, data, searchKey ) {
+								return this.callDefault( 'filter', replacer( query ), data, searchKey );
+							},
+							sorter: function( query, items, searchKey ) {
+								return this.callDefault( 'sorter', replacer( query ), items, searchKey );
+							},
+							highlighter: function( li, query ) {
+								return this.callDefault( 'highlighter', li, replacer( query ) );
+							}
+						}
 					});
 				},
 
@@ -765,8 +781,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					// Most recent should show up first.
 					$( $( 'dl.attachments dt' ).get().reverse() ).each( function() {
 						attachments.push({
-							display: $( this ).text(),
-							name: $( this ).find( 'a[title="View attachment"]' ).text()
+							display: $( this ).text().replace( /\n/g,'' ),
+							name: $( this ).find( 'a[title="View attachment"]' ).text().replace( /\n/g,'' )
 						});
 					});
 
