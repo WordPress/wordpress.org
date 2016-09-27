@@ -363,6 +363,9 @@ span.bbp-admin-links a {
 
 /* User badges */
 
+#bbpress-forums .by-moderator {
+	border-left: 3px solid #33B4CE;
+}
 #bbpress-forums .by-plugin-author,
 #bbpress-forums .by-plugin-contributor,
 #bbpress-forums .by-theme-author,
@@ -371,13 +374,21 @@ span.bbp-admin-links a {
 }
 
 #bbpress-forums .author-badge {
-	background-color: green;
 	color: #fff;
 	padding: 0 8px;
 	display: inline-block;
 	float: left;
 	margin-left: -8px;
 	font-style: italic;
+	text-shadow: 1px 1px 3px #666;
+}
+
+#bbpress-forums .author-badge-moderator {
+	background-color: #33B4CE;
+}
+
+#bbpress-forums .author-badge-plugin, #bbpress-forums .author-badge-theme {
+	background-color: green;
 }
 
 @media screen and ( min-width: 960px )  {
@@ -414,6 +425,7 @@ span.bbp-admin-links a {
 		float: none;
 		width: auto;
 		padding-left: 70px;
+		margin-top: 0;
 	}
 
 	#bbpress-forums div.bbp-topic-author a.bbp-author-name,
@@ -432,5 +444,11 @@ span.bbp-admin-links a {
 	#bbpress-forums div.bbp-reply-ip {
 		margin: 0;
 		display: block;
+	}
+
+	#bbpress-forums .author-badge {
+		position: absolute;
+		top: -3px;
+		left: -10px;
 	}
 }
