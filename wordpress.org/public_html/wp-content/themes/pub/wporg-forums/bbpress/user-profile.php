@@ -22,6 +22,13 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		<?php if ( current_user_can( 'moderate' ) ) : ?>
 		<p class="bbp-user-email"><?php        printf( esc_html__( 'Email: %s',           'wporg-forums' ), bbp_get_displayed_user_field( 'user_email' ) ); ?></p>
 		<?php endif; ?>
+
+		<?php if ( $custom_title = get_user_option( 'title', bbp_get_displayed_user_id() ) ) : ?>
+	
+			<p class="bbp-user-custom-title"><?php printf( esc_html__( 'Title: %s',       'wporg-forums' ), esc_html( $custom_title )      ); ?></p>
+	
+		<?php endif; ?>
+
 		<p class="bbp-user-forum-role"><?php   printf( esc_html__( 'Forum Role: %s',      'wporg-forums' ), bbp_get_user_display_role()    ); ?></p>
 		<p class="bbp-user-member-since"><?php printf( esc_html__( 'Member Since: %s',    'wporg-forums' ), wporg_support_get_user_registered_date() ); ?></p>
 		<p class="bbp-user-topic-count"><?php  printf( esc_html__( 'Topics Started: %s',  'wporg-forums' ), bbp_get_user_topic_count_raw() ); ?></p>
