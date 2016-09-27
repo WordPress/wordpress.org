@@ -30,6 +30,12 @@ if ( bbp_is_single_user_replies() ) : ?>
 
 		<?php bbp_user_nicename( bbp_get_reply_author_id(), array( 'before' => '<p class="bbp-user-nicename">@', 'after' => '</p>' ) ); ?>
 
+		<?php if ( $title = get_user_option( 'title', bbp_get_reply_author_id() ) ) : ?>
+
+			<p class="bbp-author-title"><?php echo esc_html( $title ); ?></p>
+
+		<?php endif; ?>
+
 		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
 
 		<?php if ( current_user_can( 'moderate', bbp_get_reply_topic_id() ) ) : ?>

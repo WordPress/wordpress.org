@@ -25,6 +25,12 @@
 
 				<?php bbp_user_nicename( bbp_get_topic_author_id(), array( 'before' => '<p class="bbp-user-nicename">@', 'after' => '</p>' ) ); ?>
 
+				<?php if ( $title = get_user_option( 'title', bbp_get_topic_author_id() ) ) : ?>
+
+					<p class="bbp-author-title"><?php echo esc_html( $title ); ?></p>
+
+				<?php endif; ?>
+
 				<p class="bbp-topic-post-date"><a href="<?php bbp_topic_permalink(); ?>" title="#<?php bbp_topic_id(); ?>" class="bbp-topic-permalink"><?php bbp_topic_post_date( bbp_get_topic_id(), true ); ?></a></p>
 
 				<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>

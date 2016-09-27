@@ -290,6 +290,15 @@ div.bbp-submit-wrapper {
 	background-color: initial;
 }
 
+#bbpress-forums div.bbp-forum-author .bbp-author-title,
+#bbpress-forums div.bbp-reply-author .bbp-author-title,
+#bbpress-forums div.bbp-topic-author .bbp-author-title {
+	font-size: 11px;
+	font-style: italic;
+	margin: 0;
+	word-wrap: break-word;
+}
+
 /* Colors */
 a {
 	color: #0073aa;
