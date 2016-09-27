@@ -31,7 +31,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20160927'
+		'20160927a'
 	);
 
 	wp_register_style(
