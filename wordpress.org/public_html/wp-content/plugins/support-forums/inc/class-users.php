@@ -14,6 +14,9 @@ class Users {
 		// Save Custom Title input value.
 		add_action( 'personal_options_update', array( $this, 'save_custom_title' ), 10, 2 );
 		add_action( 'edit_user_profile_update', array( $this, 'save_custom_title' ), 10, 2 );
+
+		// Custom user contact methods.
+		add_filter( 'user_contactmethods', array( $this, 'custom_contact_methods' ) );
 	}
 
 	/**
@@ -30,6 +33,23 @@ class Users {
 		}
 
 		return $role;
+	}
+
+	/**
+	 * Custom contact methods
+	 *
+	 * @link https://codex.wordpress.org/Plugin_API/Filter_Reference/user_contactmethods
+	 *
+	 * @param array $user_contact_method Array of contact methods.
+	 * @return array An array of contact methods.
+	 */
+	public function custom_contact_methods( $user_contact_method ) {
+		/* Remove legacy user contact methods */
+		unset( $user_contact_method['aim'] );
+		unset( $user_contact_method['yim'] );
+		unset( $user_contact_method['jabber'] );
+
+		return $user_contact_method;
 	}
 
 	/**
