@@ -126,6 +126,11 @@ ul#views {
 	display: inline;
 }
 
+#bbpress-forums p.bbp-topic-post-date,
+#bbpress-forums p.bbp-reply-post-date {
+	margin: 0;
+}
+
 /* Notices */
 div.bbp-template-notice,
 div.indicator-hint {
