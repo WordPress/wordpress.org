@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: bbPress: Show User Badges
- * Description: Display a badge for plugin and theme authors and contributors for replies in their own support forums.
+ * Plugin Name: bbPress: User Badges
+ * Description: Display a badge in user replies as appropriate (such as for a plugin/theme author/contributor, moderator).
  * Version:     1.0
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/

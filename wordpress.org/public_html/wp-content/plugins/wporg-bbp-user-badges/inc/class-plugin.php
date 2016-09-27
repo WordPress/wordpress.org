@@ -54,7 +54,7 @@ class Plugin {
 		add_filter( 'bbp_get_reply_class', array( $this, 'bbp_get_reply_class' ), 10, 2 );
 
 		// Add badge before reply author info.
-		add_action( 'bbp_theme_before_reply_author_details', array( $this, 'wporg_support_add_author_badges' ) );
+		add_action( 'bbp_theme_before_reply_author_details', array( $this, 'add_user_badges' ) );
 	}
 
 	protected function get_author_badge_info() {
@@ -102,6 +102,11 @@ class Plugin {
 	}
 
 	public function bbp_get_reply_class( $classes, $reply_id ) {
+		// Class related to moderators.
+		if ( $this->is_user_moderator() ) {
+			$classes[] = 'by-moderator';
+		}
+
 		// Class related to plugin and theme authors/contributors.
 		if ( $info = $this->get_author_badge_info() ) {
 			if ( $this->is_user_author( $info['user_login'], $info['type'], $info['slug'] ) ) {
@@ -124,7 +129,36 @@ class Plugin {
 	 * Display author badge if reply author is in support or reviews forum for
 	 * the plugin/theme they contribute to.
 	 */
-	public function wporg_support_add_author_badges() {
+	public function add_user_badges() {
+		$output = $this->get_author_badge();
+
+		// Don't assign moderator badge if already assigning author badge.
+		if ( ! $output ) {
+			$output = $this->get_moderator_badge();
+		}
+
+		if ( $output ) {
+			echo $this->format_badge( $output['type'], $output['label'], $output['help'] );
+		}
+	}
+
+	protected function format_badge( $type, $label, $help = '' ) {
+		$output = '';
+
+		if ( $label ) {
+			$output .= sprintf(
+				'<span class="author-badge author-badge-%s" title="%s">%s</span>',
+				esc_attr( $type ),
+				esc_attr( $help ),
+				$label
+			);
+		}
+
+		// Return the markup.
+		return $output;
+	}
+
+	protected function get_author_badge() {
 		if ( ! $info = $this->get_author_badge_info() ) {
 			return;
 		}
@@ -151,19 +185,18 @@ class Plugin {
 			}
 		}
 
-		// Build the markup.
-		$output = '';
-		if ( $label ) {
-			$output .= sprintf(
-				'<span class="author-badge %s-author-badge" title="%s">%s</span>',
-				esc_attr( $info['type'] ),
-				esc_attr( $help ),
-				$label
-			);
+		return $label ? array( 'type' => $info['type'], 'label' => $label, 'help' => $help ) : false;
+	}
+
+	protected function get_moderator_badge() {
+		$label = $help = null;
+
+		if ( $this->is_user_moderator() ) {
+			$label = __( 'Moderator', 'wporg-forums' );
+			$help  = __( 'This person is a moderator on this forum', 'wporg-forums' );
 		}
 
-		// Output the markup.
-		echo $output;
+		return $label ? array( 'type' => 'moderator', 'label' => $label, 'help' => $help ) : false;
 	}
 
 	/**
@@ -250,4 +283,25 @@ class Plugin {
 		return $contributors && in_array( $user_login, $contributors );
 	}
 
+	/**
+	 * Checks if the specified user is a forum moderator or keymaster.
+	 *
+	 * By default, this considers a keymaster as being a moderator for the purpose
+	 * of badging them. Use the $strict argument to check that the user is a
+	 * moderator without considering if they are a keymaster.
+	 *
+	 * @param string $user_id Optional. User ID. Assumes current reply author ID
+	 *                        if not provided.
+	 * @param bool   $strict  Optional. True if user should strictly be checked
+	 *                        for being a moderator, false will also check if they
+	 *                        are a keymaster. Default false.
+	 * @return bool           True if user is a moderator, false otherwise.
+	 */
+	public function is_user_moderator( $user_id = '', $strict = false ) {
+		if ( ! $user_id ) {
+			$user_id = bbp_get_reply_author_id();
+		}
+
+		return ( user_can( $user_id, 'moderate' ) || ( ! $strict && bbp_is_user_keymaster( $user_id ) ) );
+	}
 }
