@@ -185,6 +185,8 @@ function _handle_post_data( &$data ) {
 			}
 
 			$wordcamp_obj = get_post( $payment_data['wordcamp_id'] );
+			$wordcamp_site_id = get_wordcamp_site_id( $wordcamp_obj );
+			$wordcamp_site_url = set_url_scheme( esc_url_raw( get_blog_option( $wordcamp_site_id, 'home', '' ) ), 'https' );
 
 			require_once( __DIR__ . '/stripe-php/init.php' );
 			\Stripe\Stripe::setApiKey( $data['keys']['secret'] );
@@ -198,6 +200,8 @@ function _handle_post_data( &$data ) {
 					'metadata' => array(
 						'invoice_id' => $payment_data['invoice_id'],
 						'wordcamp_id' => $payment_data['wordcamp_id'],
+						'wordcamp_site_id' => $wordcamp_site_id,
+						'wordcamp_url' => $wordcamp_site_url,
 					),
 				) );
 			} catch ( \Stripe\Error\Card $e ) {
