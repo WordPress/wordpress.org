@@ -1,0 +1,14 @@
+.wcorg-sponsor-payment label,
+.wcorg-sponsor-payment .control {
+    float: left;
+    clear: both;
+}
+
+.wcorg-sponsor-payment label {
+    margin-top: 10px;
+}
+
+.wcorg-sponsor-payment .clear {
+    display: block;
+    margin-bottom: 20px;
+}
