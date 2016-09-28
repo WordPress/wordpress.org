@@ -129,6 +129,7 @@ ul#views {
 #bbpress-forums p.bbp-topic-post-date,
 #bbpress-forums p.bbp-reply-post-date {
 	margin: 0;
+	display: block;
 }
 
 /* Notices */
