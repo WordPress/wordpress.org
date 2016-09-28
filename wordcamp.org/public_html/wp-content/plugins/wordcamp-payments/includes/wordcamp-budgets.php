@@ -669,6 +669,7 @@ class WordCamp_Budgets {
 			'JMD' => 'Jamaica Dollar',
 			'JPY' => 'Japan Yen',
 			'JEP' => 'Jersey Pound',
+			'KES' => 'Kenyan Shilling',
 			'KZT' => 'Kazakhstan Tenge',
 			'KPW' => 'Korea (North) Won',
 			'KRW' => 'Korea (South) Won',

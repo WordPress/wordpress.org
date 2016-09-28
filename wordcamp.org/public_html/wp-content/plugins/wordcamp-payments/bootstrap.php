@@ -44,6 +44,7 @@ if ( is_admin() ) {
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();
 }
 
+// todo use BLOG_ID_CURRENT_SITE instead, so it'll work in local dev environments
 if ( $_SERVER['HTTP_HOST'] == 'central.wordcamp.org' ) {
 	require_once( __DIR__ . '/includes/sponsor-payment-stripe.php' );
 }
