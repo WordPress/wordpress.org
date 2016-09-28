@@ -58,6 +58,10 @@ class Plugin {
 	}
 
 	protected function get_author_badge_info() {
+		if ( ! class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+			return;
+		}
+
 		$badgeable_forums = array(
 			\WordPressdotorg\Forums\Plugin::PLUGINS_FORUM_ID,
 			\WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
