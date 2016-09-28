@@ -80,8 +80,6 @@ class Plugin {
 		}
 
 		$user_login = get_user_by( 'id', $user_id )->user_login;
-		$reply_id   = bbp_get_reply_id();
-		$topic_id   = bbp_get_reply_topic_id();
 
 		$support_forum = \WordPressdotorg\Forums\Plugin::get_instance();
 
@@ -101,7 +99,7 @@ class Plugin {
 		return array(
 			'type'       => $type,
 			'slug'       => $slug,
-			'user_login' => $user_login
+			'user_login' => $user_login,
 		);
 	}
 
