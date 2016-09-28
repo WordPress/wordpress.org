@@ -264,3 +264,12 @@ add_filter( 'wordcamp_qbo_client_options', function( $options ) {
 
     return $options;
 });
+
+// Sponsorship payments (Stripe) credentials.
+add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
+	$options['hmac_key'] = WORDCAMP_PAYMENT_STRIPE_HMAC;
+	$options['publishable'] = WORDCAMP_PAYMENT_STRIPE_PUBLISHABLE;
+	$options['secret'] = WORDCAMP_PAYMENT_STRIPE_SECRET;
+
+	return $options;
+});
