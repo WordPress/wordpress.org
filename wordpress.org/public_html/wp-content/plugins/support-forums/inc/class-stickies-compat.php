@@ -114,7 +114,7 @@ class Stickies_Compat {
 		if ( $success && ! is_wp_error( $success ) ) {
 			bbp_redirect( $permalink );
 		} elseif ( true === $is_sticky && 'wporg_bbp_stick_topic' == $action ) {
-			bbp_add_error( 'wporg_bbp_stick_topic', __( '<strong>ERROR<strong>: There was a problem sticking that topic!', 'wporg-forums' ) );
+			bbp_add_error( 'wporg_bbp_stick_topic', __( '<strong>ERROR</strong>: There was a problem sticking that topic!', 'wporg-forums' ) );
 		} elseif ( false === $is_sticky && 'wporg_bbp_unstick_topic' == $action ) {
 			bbp_add_error( 'wporg_bbp_unstick_topic', __( '<strong>ERROR</strong>: There was a problem unsticking that topic!', 'wporg-forums' ) );
 		}
