@@ -21,7 +21,7 @@
 
 				<?php do_action( 'bbp_theme_before_topic_author_details' ); ?>
 
-				<?php bbp_topic_author_link( array( 'sep' => '', 'show_role' => false ) ); ?>
+				<?php bbp_topic_author_link( array( 'sep' => '', 'show_role' => false, 'size' => 100 ) ); ?>
 
 				<?php bbp_user_nicename( bbp_get_topic_author_id(), array( 'before' => '<p class="bbp-user-nicename">@', 'after' => '</p>' ) ); ?>
 
