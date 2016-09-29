@@ -17,7 +17,7 @@
 
 				<li>
 					<a href="<?php echo esc_url( get_edit_post_link( $invoice->ID ) ); ?>">
-						<?php echo esc_html( $invoice->post_title ); ?>
+						<?php echo _draft_or_post_title( $invoice->post_title ); ?>
 					</a>
 				</li>
 
