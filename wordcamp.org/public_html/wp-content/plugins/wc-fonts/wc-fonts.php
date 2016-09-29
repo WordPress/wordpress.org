@@ -12,7 +12,7 @@ class WordCamp_Fonts_Plugin {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		
+
 		add_action( 'wp_head', array( $this, 'wp_head_typekit' ), 102 ); // after safecss_style
 		add_action( 'wp_head', array( $this, 'wp_head_google_web_fonts' ) );
 		add_action( 'wp_head', array( $this, 'wp_head_font_awesome' ) );
@@ -25,14 +25,14 @@ class WordCamp_Fonts_Plugin {
 	function init() {
 		$this->options = (array) get_option( 'wc-fonts-options', array() );
 	}
-	
+
 	/**
 	 * Provides the <head> output for Typekit settings.
 	 */
 	function wp_head_typekit() {
 		if ( ! isset( $this->options['typekit-id'] ) || empty( $this->options['typekit-id'] ) )
 			return;
-			
+
 		printf( '<script type="text/javascript" src="https://use.typekit.com/%s.js"></script>' . "\n", $this->options['typekit-id'] );
 		printf( '<script type="text/javascript">try{Typekit.load();}catch(e){}</script>' );
 	}
@@ -93,7 +93,7 @@ class WordCamp_Fonts_Plugin {
 	function admin_menu() {
 		$fonts = add_theme_page( 'Fonts', 'Fonts', 'edit_theme_options', 'wc-fonts-options', array( $this, 'render_admin_page' ) );
 	}
-	
+
 	/**
 	 * Uses the Settings API to render the Appearance > Fonts page
 	 */
