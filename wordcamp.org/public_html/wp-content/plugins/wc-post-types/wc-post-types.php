@@ -1845,7 +1845,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_speaker', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'speaker', 'with_front' => true ),
-			'supports'          => array( 'title', 'editor', 'revisions', 'comments' ),
+			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'comments' ),
 			'menu_position'     => 20,
 			'public'            => true,
 			'show_ui'           => true,
@@ -1877,7 +1877,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_session', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'session', 'with_front' => false ),
-			'supports'          => array( 'title', 'editor', 'revisions', 'thumbnail' ),
+			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'thumbnail' ),
 			'menu_position'     => 21,
 			'public'            => true,
 			'show_ui'           => true,
