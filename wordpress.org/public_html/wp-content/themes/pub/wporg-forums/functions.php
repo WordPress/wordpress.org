@@ -24,7 +24,7 @@ function wporg_support_scripts() {
 		'bb-base',
 		'//bbpress.org/wp-content/themes/bb-base/style.css',
 		array(),
-		'20160919'
+		'20160929'
 	);
 
 	wp_register_style(
