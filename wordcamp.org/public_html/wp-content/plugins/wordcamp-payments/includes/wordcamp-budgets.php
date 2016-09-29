@@ -55,12 +55,12 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-pending-payment', array (
-			'label' => _x( 'Pending Payment', 'payment request', 'wordcamporg' ),
+			'label' => _x( 'Payment Sent', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
-				'Pending Payment <span class="count">(%s)</span>',
-				'Pending Payment <span class="count">(%s)</span>',
+				'Payment Sent <span class="count">(%s)</span>',
+				'Payment Sent <span class="count">(%s)</span>',
 				'wordcamporg'
 			),
 		) );
