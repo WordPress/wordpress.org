@@ -80,7 +80,7 @@ class WordCamp_Fonts_Plugin {
 
 		add_settings_field(
 			'dashicons',
-			__( 'Dashicons', 'wordcamporg' ),
+			esc_html__( 'Dashicons', 'wordcamporg' ),
 			array( $this, 'field_dashicons' ),
 			'wc-fonts-options',
 			'general'
@@ -91,7 +91,13 @@ class WordCamp_Fonts_Plugin {
 	 * Runs during admin_menu, adds a Fonts section to Appearance
 	 */
 	function admin_menu() {
-		$fonts = add_theme_page( 'Fonts', 'Fonts', 'edit_theme_options', 'wc-fonts-options', array( $this, 'render_admin_page' ) );
+		$fonts = add_theme_page(
+			esc_html__( 'Fonts', 'wordcamporg' ),
+			esc_html__( 'Fonts', 'wordcamporg' ),
+			'edit_theme_options',
+			'wc-fonts-options',
+			array( $this, 'render_admin_page' )
+		);
 	}
 
 	/**
@@ -101,7 +107,7 @@ class WordCamp_Fonts_Plugin {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h1>Fonts</h1>
+			<h1><?php esc_html_e( 'Fonts', 'wordcamporg' ); ?></h1>
 			<?php settings_errors(); ?>
 			<form method="post" action="options.php" enctype="multipart/form-data">
 				<?php
@@ -120,8 +126,12 @@ class WordCamp_Fonts_Plugin {
 	function field_typekit_id() {
 		$value = isset( $this->options['typekit-id'] ) ? $this->options['typekit-id'] : '';
 		?>
+
 		<input type="text" name="wc-fonts-options[typekit-id]" value="<?php echo esc_attr( $value ); ?>" class="regular-text code" />
-		<p class="description">Enter your Typekit Kit ID. No links, no javascript, just the id, we'll handle the rest for you.</p>
+		<p class="description">
+			<?php esc_html_e( "Enter your Typekit Kit ID only. Do not add any URLs or JavaScript.", 'wordcamporg' ); ?>
+		</p>
+
 		<?php
 	}
 
@@ -131,8 +141,15 @@ class WordCamp_Fonts_Plugin {
 	function field_google_web_fonts() {
 		$value = isset( $this->options['google-web-fonts'] ) ? $this->options['google-web-fonts'] : '';
 		?>
-		<textarea rows="5" name="wc-fonts-options[google-web-fonts]" class="large-text code"><?php echo esc_textarea( $value ); ?></textarea>
-		<p class="description">Paste the Google Web Fonts @import URLs in this area, each one on a separate line.</p>
+
+		<textarea rows="5" name="wc-fonts-options[google-web-fonts]" class="large-text code"><?php
+			echo esc_textarea( $value );
+		?></textarea>
+
+		<p class="description">
+			<?php esc_html_e( 'Paste the Google Web Fonts @import URLs in this area, each one on a separate line.', 'wordcamporg' ); ?>
+		</p>
+
 		<?php
 	}
 
@@ -144,7 +161,9 @@ class WordCamp_Fonts_Plugin {
 		?>
 
 		<input type="text" name="wc-fonts-options[font-awesome-url]" value="<?php echo esc_url( $value ); ?>" class="large-text code" />
-		<p class="description">Enter the BootstrapCDN URL for the version you want.</p>
+		<p class="description">
+			<?php esc_html_e( 'Enter the BootstrapCDN URL for the version you want.', 'wordcamporg' ); ?>
+		</p>
 
 		<?php
 	}
@@ -158,7 +177,7 @@ class WordCamp_Fonts_Plugin {
 
 		<label>
 			<input type="checkbox" name="wc-fonts-options[dashicons]" <?php checked( $value ); ?> />
-			<?php _e( 'Enqueue Dashicons', 'wordcamporg' ); ?>
+			<?php esc_html_e( 'Enqueue Dashicons', 'wordcamporg' ); ?>
 		</label>
 
 		<?php
