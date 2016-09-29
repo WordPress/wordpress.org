@@ -1374,6 +1374,7 @@ div.plugin-meta img {
 #bbpress-forums p.bbp-user-nicename {
 	font-weight: bold;
 	color: #888;
+	direction: ltr;
 	word-wrap: break-word;
 	display: inline-block;
 	margin: 0;
