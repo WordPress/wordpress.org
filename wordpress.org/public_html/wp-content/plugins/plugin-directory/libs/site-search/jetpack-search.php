@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * WARNING: This file is distributed verbatim in Jetpack.
  * There should be nothing WordPress.com specific in this file.
@@ -10,7 +10,7 @@
 /*
  * This is a preliminary version of Jetpack Search.
  * It is highly likely that 95% of the time the search will not be using the loop.
- * 
+ *
  */
 
 /*
@@ -277,7 +277,7 @@ class Jetpack_Search {
 				$es_wp_query_args['filters'][] = array( 'not' => array( 'terms' => array( 'slug' => $query->query['installed_plugins'] ) ) );
 			}
 		}
-		
+
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
 			$es_wp_query_args['query_fields'] = array( "title_{$locale}_ngram^4", 'title_en_ngram^0.5', "content_{$locale}_ngram^2", 'content_en_ngram^0.5', "excerpt_{$locale}_ngram", 'excerpt_en_ngram', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
@@ -293,7 +293,7 @@ class Jetpack_Search {
 		$es_query_args = $this->convert_wp_es_to_es_args( $es_wp_query_args );
 
 		//Only trust ES to give us IDs, not the content since it is a mirror
-		$es_query_args['fields'] = array( 
+		$es_query_args['fields'] = array(
 			'post_id',
 			'blog_id'
 		);
@@ -312,7 +312,7 @@ class Jetpack_Search {
 		// Total number of results for paging purposes
 		$this->found_posts = $this->search_result['results']['total'];
 
-		// Don't select anything, posts are inflated by Jetpack_SearchResult_Posts_Iterator 
+		// Don't select anything, posts are inflated by Jetpack_SearchResult_Posts_Iterator
 		// in The Loop, to allow for multi site search
 		return '';
 	}
@@ -465,27 +465,27 @@ class Jetpack_Search {
 	function convert_wp_es_to_es_args( $args ) {
 		$defaults = array(
 			'blog_id'        => get_current_blog_id(),
-	
+
 			'query'          => null,    // Search phrase
 			'query_fields'   => array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' ),
-	
+
 			'post_type'      => null,  // string or an array
 			'terms'          => array(), // ex: array( 'taxonomy-1' => array( 'slug' ), 'taxonomy-2' => array( 'slug-a', 'slug-b' ) )
-	
+
 			'author'         => null,    // id or an array of ids
 			'author_name'    => array(), // string or an array
-	
+
 			'date_range'     => null,    // array( 'field' => 'date', 'gt' => 'YYYY-MM-dd', 'lte' => 'YYYY-MM-dd' ); date formats: 'YYYY-MM-dd' or 'YYYY-MM-dd HH:MM:SS'
 			'tested_range'	 => null,
 			'filters'		 => array(),
-	
+
 			'orderby'        => null,    // Defaults to 'relevance' if query is set, otherwise 'date'. Pass an array for multiple orders.
 			'order'          => 'DESC',
-	
+
 			'posts_per_page' => 10,
 			'offset'         => null,
 			'paged'          => null,
-	
+
 			/**
 			 * Facets. Examples:
 			 * array(
@@ -495,36 +495,36 @@ class Jetpack_Search {
 			 */
 			'facets'         => null,
 		);
-	
+
 		$raw_args = $args; // Keep a copy
-	
+
 		$args = wp_parse_args( $args, $defaults );
-	
+
 		$es_query_args = array(
 			'blog_id' => absint( $args['blog_id'] ),
 			'size'    => absint( $args['posts_per_page'] ),
 		);
 
 		//TODO: limit size to 15
-	
+
 		// ES "from" arg (offset)
 		if ( $args['offset'] ) {
 			$es_query_args['from'] = absint( $args['offset'] );
 		} elseif ( $args['paged'] ) {
 			$es_query_args['from'] = max( 0, ( absint( $args['paged'] ) - 1 ) * $es_query_args['size'] );
 		}
-	
+
 		if ( !is_array( $args['author_name'] ) ) {
 			$args['author_name'] = array( $args['author_name'] );
 		}
-	
+
 		// ES stores usernames, not IDs, so transform
 		if ( ! empty( $args['author'] ) ) {
 			if ( !is_array( $args['author'] ) )
 				$args['author'] = array( $args['author'] );
 			foreach ( $args['author'] as $author ) {
 				$user = get_user_by( 'id', $author );
-	
+
 				if ( $user && ! empty( $user->user_login ) ) {
 					$args['author_name'][] = $user->user_login;
 				}
@@ -537,17 +537,17 @@ class Jetpack_Search {
 		// but they are cached as individual filters, rather than all combined together.
 		// May get performance boost by also caching the top level boolean filter too.
 		$filters = array();
-	
+
 		if ( $args['post_type'] ) {
 			if ( !is_array( $args['post_type'] ) )
 				$args['post_type'] = array( $args['post_type'] );
 			$filters[] = array( 'terms' => array( 'post_type' => $args['post_type'] ) );
 		}
-	
+
 		if ( $args['author_name'] ) {
 			$filters[] = array( 'terms' => array( 'author_login' => $args['author_name'] ) );
 		}
-	
+
 		if ( !empty( $args['date_range'] ) && isset( $args['date_range']['field'] ) ) {
 			$field = $args['date_range']['field'];
 			unset( $args['date_range']['field'] );
@@ -563,7 +563,7 @@ class Jetpack_Search {
 		if ( is_array( $args['filters'] ) ) {
 			$filters = array_merge( $filters, $args['filters'] );
 		}
-	
+
 		if ( is_array( $args['terms'] ) ) {
 			foreach ( $args['terms'] as $tax => $terms ) {
 				$terms = (array) $terms;
@@ -593,7 +593,7 @@ class Jetpack_Search {
 		//  TODO: boost title, tag, and category matches
 		if ( $args['query'] ) {
 			$analyzer = Jetpack_Search::get_analyzer_name( $this->blog_lang );
-			$query = array( 
+			$query = array(
 				'bool' => array(
 					'must' => array(
 						'multi_match' => array(
@@ -628,7 +628,7 @@ class Jetpack_Search {
 				$args['orderby'] = array( 'date' );
 			}
 		}
-	
+
 		// Validate the "order" field
 		switch ( strtolower( $args['order'] ) ) {
 			case 'asc':
@@ -639,7 +639,7 @@ class Jetpack_Search {
 				$args['order'] = 'desc';
 				break;
 		}
-	
+
 		$es_query_args['sort'] = array();
 		foreach ( (array) $args['orderby'] as $orderby ) {
 			// Translate orderby from WP field to ES field
@@ -663,7 +663,7 @@ class Jetpack_Search {
 		if ( empty( $es_query_args['sort'] ) )
 			unset( $es_query_args['sort'] );
 
-	
+
 		if ( ! empty( $filters ) ) {
 			$es_query_args['filter'] = array( 'and' => $filters );
 		} else {
@@ -713,7 +713,7 @@ class Jetpack_Search {
 		$date_decay = 0.7;
 		$date_origin = date( 'Y-m-d' );
 
-		return array( 
+		return array(
 			'filtered' => array(
 				'query' => array(
 					 'function_score' => array(
