@@ -206,8 +206,9 @@ class Jetpack_Search {
 		if ( ! $query->is_main_query() || ! $query->is_search() )
 			return $posts;
 
-		if ( ! is_array( $this->search_result ) )
+		if ( ! is_array( $this->search_result ) || ! isset( $this->search_result['results'] ) ) {
 			return $posts;
+		}
 
 		// This class handles the heavy lifting of transparently switching blogs and inflating posts
 		$this->posts_iterator = new Jetpack_SearchResult_Posts_Iterator();
