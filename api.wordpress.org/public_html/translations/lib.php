@@ -68,7 +68,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$GLOBALS['gp_locales']->locales['nl/formal'] = $nl_formal;
 
 	$de_ch_informal = clone GP_Locales::by_field( 'wp_locale', 'de_CH' );
-	$de_ch_informal->english_name = '(Switzerland, Informal)';
+	$de_ch_informal->english_name = 'German (Switzerland, Informal)';
 	$de_ch_informal->native_name = 'Deutsch (Schweiz, Du)';
 	$de_ch_informal->slug = 'de-ch/informal';
 	$de_ch_informal->wp_locale = 'de_CH_informal';
