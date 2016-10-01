@@ -35,7 +35,7 @@ class WPORG_Codexify {
 	}
 
 	function convert_wiki_links( $content ) {
-		if ( strpos( $content, '[[' ) && strpos( $content, ']]' ) ) {
+		if ( strpos( $content, '[[' ) !== false && strpos( $content, ']]' ) !== false ) {
 			$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\]\]%', array( $this, 'convert_base_wiki_link' ), $content );
 			$content = preg_replace_callback( '%\[\[([ #:\/\w]+)\|([^\]]+)\]\]%', array( $this, 'convert_vbar_wiki_link' ), $content );
 		}
@@ -49,8 +49,8 @@ class WPORG_Codexify {
 	 * @return string
 	 */
 	public static function convert_base_wiki_link( $matches ) {
-		$matches[1] = preg_replace( '/[\s]+/', '', trim( $matches[1] ) );
-		return '<a href="' . esc_url( self::BASE_URI . strtr( $matches[1], ' ', '_' ) ) . '">' . esc_html( $matches[1] ) . '</a>';
+		$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
+		return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[1] ) . '</a>';
 	}
 
 	/**
@@ -61,8 +61,8 @@ class WPORG_Codexify {
 	 * @return string
 	 */
 	public static function convert_vbar_wiki_link( $matches ) {
-		$matches[1] = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
-		return '<a href="' . esc_url( self::BASE_URI . strtr( $matches[1], ' ', '_' ) ) . '">' . esc_html( $matches[2] ) . '</a>';
+		$path = preg_replace( '/[\s]+/', '_', trim( $matches[1] ) );
+		return '<a href="' . esc_url( self::BASE_URI . $path ) . '">' . esc_html( $matches[2] ) . '</a>';
 	}
 } }
 
