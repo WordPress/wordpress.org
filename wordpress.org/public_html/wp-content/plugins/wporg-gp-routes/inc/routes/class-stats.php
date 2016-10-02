@@ -28,10 +28,13 @@ class Stats extends GP_Route {
 
 		// I'm sure there's somewhere to fetch these from statically defined
 		$wp_project = GP::$project->by_path( 'wp' );
+		$previous_wp_version = WP_CORE_STABLE_BRANCH - 0.1;
 		foreach ( GP::$project->find_many( array( 'parent_project_id' => $wp_project->id, 'active' => 1 ), 'name ASC' ) as $wp_sub_project ) {
-			// Prefix the WordPress projects...
-			$wp_sub_project->name = $wp_project->name . ' ' . $wp_sub_project->name;
-			$projects = array_merge( array( $wp_sub_project->path => $wp_sub_project ), $projects );
+			if ( 'dev' === $wp_sub_project->slug || version_compare( $previous_wp_version, (float) $wp_sub_project->name, '<=' ) ) {
+				// Prefix the WordPress projects...
+				$wp_sub_project->name = $wp_project->name . ' ' . $wp_sub_project->name;
+				$projects  = array_merge( array( $wp_sub_project->path => $wp_sub_project ), $projects );
+			}
 		}
 
 		// Load the projects for each display item
