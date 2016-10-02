@@ -259,20 +259,6 @@ h2 {
 
 	public function sanitize( $input ) {
 		$output = array();
-		$data = wp_parse_args( $data, array(
-			'sponsor_name' => '',
-			'sponsor_rep_name' => '',
-			'sponsor_rep_title' => '',
-
-			'agreement_date' => '',
-			'wordcamp_location' => '',
-			'wordcamp_date' => '',
-
-			'sponsorship_amount' => '',
-			'sponsorship_amount_num' => '',
-			'sponsorship_benefits' => '',
-		) );
-
 		foreach ( array(
 			'sponsor_name',
 			'sponsor_rep_name',
@@ -298,8 +284,6 @@ h2 {
 	}
 
 	public function get_assets() {
-		return array(
-			dirname( __FILE__ ) . '/assets/logo.png',
-		);
+		return array();
 	}
 }

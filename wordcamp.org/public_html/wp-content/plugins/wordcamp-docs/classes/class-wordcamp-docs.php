@@ -50,11 +50,13 @@ class WordCamp_Docs {
 	 * @return array Same array of templates with new ones added.
 	 */
 	public static function default_templates( $templates ) {
-		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/speaker-invitation.php' );
 		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/sponsorship-agreement.php' );
+		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/speaker-visa.php' );
+		require_once( WORDCAMP_DOCS__PLUGIN_DIR . 'templates/attendee-visa.php' );
 
-		$templates['speaker-invitation'] = new WordCamp_Docs_Template_Speaker_Invitation;
 		$templates['sponsorship-agreement'] = new WordCamp_Docs_Template_Sponsorship_Agreement;
+		$templates['speaker-visa'] = new WordCamp_Docs_Template_Speaker_Visa;
+		$templates['attendee-visa'] = new WordCamp_Docs_Template_Attendee_Visa;
 
 		return $templates;
 	}
