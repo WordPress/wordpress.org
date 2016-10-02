@@ -30,7 +30,7 @@ require WPORGPATH . 'header.php';
 				<?php
 			} else {
 				?>
-				<li><a href="<?php echo esc_url( wp_login_url() ); ?>"><strong>Log in</strong></a></li>
+				<li><a href="<?php echo esc_url( wp_login_url( gp_url_current() ) ); ?>"><strong>Log in</strong></a></li>
 				<?php
 			}
 			?>
