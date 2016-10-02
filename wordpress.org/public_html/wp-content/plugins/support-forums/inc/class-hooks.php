@@ -15,6 +15,7 @@ class Hooks {
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
 		add_filter( 'oembed_response_data', array( $this, 'disable_oembed_response_data' ), 10, 2 );
+		add_filter( 'embed_oembed_discover', '__return_false' );
 
 		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
 	}
@@ -64,7 +65,7 @@ class Hooks {
 	}
 
 	/**
-	 * Disable the inline terms and mentions, if they are enabled. 
+	 * Disable the inline terms and mentions, if they are enabled.
 	 * Inline terms and mentions are for O2 and should not be running on the support forums.
 	 * If this plugin is moved out of mu-plugins, this function can be removed as well.
 	 *
