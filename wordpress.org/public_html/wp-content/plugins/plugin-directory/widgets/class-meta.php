@@ -57,7 +57,7 @@ class Meta extends \WP_Widget {
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 			<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . (string) get_post_meta( $post->ID, 'tested', true ) . '</strong>' ); ?></li>
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li><?php printf( _n( 'Tags: %s', 'Tags: %s', count( get_the_terms( $post, 'plugin_tags' ) ), 'wporg-plugins' ), $tags ); ?></li>
+				<li><?php printf( _n( 'Tag: %s', 'Tags: %s', count( get_the_terms( $post, 'plugin_tags' ) ), 'wporg-plugins' ), $tags ); ?></li>
 			<?php endif; ?>
 		</ul>
 
