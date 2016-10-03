@@ -83,6 +83,12 @@ class Plugin {
 	 * @return bool True if user has permissions, false if not.
 	 */
 	public function pre_can_user( $verdict, $args ) {
+		// Logged out users have no permissions.
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// No user is allowed to delete something.
 		if ( 'delete' === $args['action'] ) {
 			return false;
 		}
@@ -92,7 +98,8 @@ class Plugin {
 			return true;
 		}
 
-		if ( 'approve' !== $args['action'] || ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) ) {
+		// No permissions for unknown object types.
+		if ( ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) ) {
 			return false;
 		}
 
@@ -102,11 +109,18 @@ class Plugin {
 			return false;
 		}
 
-		$locale_slug = $locale_and_project_id->locale;
-		$current_project_id = $locale_and_project_id->project_id;
+		// Grant permissions to import plugin/theme translations with status 'waiting'.
+		if ( 'import-waiting' === $args['action'] ) {
+			return $this->is_plugin_or_theme_project( $locale_and_project_id->project_id );
+		}
+
+		// The next checks are only for the 'approve' action, no permissions for other actions.
+		if ( 'approve' !== $args['action'] ) {
+			return false;
+		}
 
 		// Simple check to see if they're an approver or not.
-		$role = $this->is_approver_for_locale( $args['user_id'], $locale_slug );
+		$role = $this->is_approver_for_locale( $args['user_id'], $locale_and_project_id->locale );
 		if ( ! $role ) {
 			return false;
 		}
@@ -117,7 +131,7 @@ class Plugin {
 		}
 
 		// Grab the list of Projects (or 'all') that the user can approve.
-		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_slug );
+		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_and_project_id->locale );
 		if ( ! $project_access_list ) {
 			return false;
 		}
@@ -128,17 +142,32 @@ class Plugin {
 		}
 
 		// If current project is a parent ID.
-		if ( in_array( $current_project_id, $project_access_list ) ) {
+		if ( in_array( $locale_and_project_id->project_id, $project_access_list ) ) {
 			return true;
 		}
 
 		// A user is allowed to approve sub projects as well.
-		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_slug, /* $include_children = */ true );
-		if ( in_array( $current_project_id, $project_access_list ) ) {
+		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_and_project_id->locale, /* $include_children = */ true );
+		if ( in_array( $locale_and_project_id->project_id, $project_access_list ) ) {
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Determines if the project is for a plugin or theme.
+	 *
+	 * @param int $project_id Project ID.
+	 * @return bool True, if project is a plugin/theme, false if not.
+	 */
+	public function is_plugin_or_theme_project( $project_id ) {
+		$project = GP::$project->get( $project_id );
+		if ( ! $project ) {
+			return false;
+		}
+
+		return ( 0 === strpos( $project->path, 'wp-plugins/' ) || 0 === strpos( $project->path, 'wp-themes/' ) );
 	}
 
 	/**
