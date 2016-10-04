@@ -106,6 +106,9 @@ function get_whitelist() {
 			'lizkaraffa',
 			'kenshino',
 		),
+		'feature-notifications' => array(
+			'johnbillion',
+		),
 		'feature-shinyupdates' => array(
 			'obenland',
 			'adamsilverstein',
