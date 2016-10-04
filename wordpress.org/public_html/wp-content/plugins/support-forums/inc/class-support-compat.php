@@ -271,7 +271,7 @@ class Support_Compat {
 
 	public static function get_plugin_slugs_by_committer( $user_login ) {
 		global $wpdb;
-		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `path` FROM `" . PLUGINS_TABLE_PREFIX . "svn_access` WHERE `user` = %s AND `access` = 'rw' LIMIT 4", $user_login ) );
+		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `path` FROM `" . PLUGINS_TABLE_PREFIX . "svn_access` WHERE `user` = %s AND `access` = 'rw'", $user_login ) );
 		return $slugs;
 	}
 }
