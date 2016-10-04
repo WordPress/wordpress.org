@@ -42,6 +42,12 @@ gp_tmpl_header();
 	</div>
 </div>
 
+<?php if ( ! $project->active ) : ?>
+	<div class="wporg-notice wporg-notice-warning">
+		<p>This theme is no longer listed in the theme directory. Translations remain for archiving purposes.</p>
+	</div>
+<?php endif; ?>
+
 <div class="stats-table">
 	<table id="stats-table" class="table">
 		<thead>

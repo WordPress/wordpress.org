@@ -91,6 +91,12 @@ gp_tmpl_header();
 	</div>
 </div>
 
+<?php if ( ! $sub_project->active ) : ?>
+	<div class="wporg-notice wporg-notice-warning">
+		<p>This project is no longer actively used. Translations remain for archiving purposes.</p>
+	</div>
+<?php endif; ?>
+
 <?php
 if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) && ! in_array( 'stable', $sub_project_slugs ) ) {
 	?>
