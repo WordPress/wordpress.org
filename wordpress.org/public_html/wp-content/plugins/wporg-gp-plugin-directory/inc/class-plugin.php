@@ -72,6 +72,7 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate set-plugin-project', __NAMESPACE__ . '\CLI\Set_Plugin_Project' );
 		WP_CLI::add_command( 'wporg-translate delete-plugin-project', __NAMESPACE__ . '\CLI\Delete_Plugin_Project' );
 		WP_CLI::add_command( 'wporg-translate sync-plugin-translations', __NAMESPACE__ . '\CLI\Sync_Plugin_Translations' );
+		WP_CLI::add_command( 'wporg-translate update-plugin-project-status', __NAMESPACE__ . '\CLI\Update_Plugin_Project_Status' );
 	}
 
 	/**
