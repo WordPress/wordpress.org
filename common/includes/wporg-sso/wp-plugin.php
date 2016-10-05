@@ -59,8 +59,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Add our host to the list of allowed ones.
 			add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
 
-			// Replace the lost password URL by our own
-			add_filter( 'lostpassword_url', array( &$this, 'lostpassword_url' ), 10, 2 );
+			// Replace some URLs by our own.
+			add_filter( 'lostpassword_url', array( &$this, 'lostpassword_url' ), 20, 2 );
+			add_filter( 'site_url', array( $this, 'login_post_url' ), 20, 3 );
+			add_filter( 'register_url', array( $this, 'register_url' ), 20 );
 
 			if ( preg_match( '!/wp-signup\.php$!', $this->script ) ) {
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
@@ -85,7 +87,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				} else {
 					// Otherwise, filter the login_url to point to the SSO
-					add_action( 'login_url', array( &$this, 'login_url' ), 10, 2 );
+					add_filter( 'login_url', array( $this, 'login_url' ), 20, 2 );
 				}
 
 			} else if ( self::SSO_HOST === $this->host ) {
@@ -162,6 +164,30 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			return $url;
 		}
 
+		/**
+		 * Filters the default login lost URL and returns our custom one instead.
+		 *
+		 * @param string      $url     The complete site URL including scheme and path.
+		 * @param string      $path    Path relative to the site URL. Blank string if no path is specified.
+		 * @param string|null $scheme  Site URL context.
+		 * @return string
+		 */
+		public function login_post_url( $url, $path, $scheme ) {
+			if ( 'login_post' === $scheme ) {
+				return $this->sso_host_url . '/wp-login.php';
+			}
+
+			return $url;
+		}
+
+		/**
+		 * Filters the default registration URL and returns our custom one instead.
+		 *
+		 * @return string
+		 */
+		public function register_url() {
+			return $this->sso_signup_url;
+		}
 
 		/**
 		 * Filters the defaults captions and options for the login form
@@ -185,7 +211,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @param string $redirect
 		 */
 		public function lostpassword_url( $lostpassword_url, $redirect ) {
-			return home_url( $this->valid_sso_paths['lostpassword'] . '/?redirect_to=' . $redirect );
+			return $this->sso_host_url . $this->valid_sso_paths['lostpassword'] . '/?redirect_to=' . $redirect;
 		}
 
 		/**
