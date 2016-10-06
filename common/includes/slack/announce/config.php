@@ -12,6 +12,16 @@ namespace Dotorg\Slack\Announce;
  * values are an array of users.
  */
 function get_whitelist() {
+	$wordcamp_central = array(
+		'andreamiddleton',
+		'camikaos',
+		'chanthaboune',
+		'courtneypk',
+		'hlashbrooke',
+		'iandunn',
+		'rocio',
+	);
+
 	return array(
 		'accessibility' => array(
 			'afercia',
@@ -30,9 +40,8 @@ function get_whitelist() {
 		'cli' => array(
 			'danielbachhuber',
 		),
-		'community-team' => array(
-			'chanthaboune',
-		),
+		'community-events' => $wordcamp_central,
+		'community-team' => $wordcamp_central,
 		'core' => array(
 			'drew',
 			'johnbillion',
@@ -142,6 +151,7 @@ function get_whitelist() {
 		'meta-i18n' => array(
 			'ocean90',
 		),
+		'meta-wordcamp' => $wordcamp_central,
 		'polyglots' => array(
 			'coachbirgit',
 			'deconf',
