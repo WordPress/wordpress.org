@@ -30,6 +30,9 @@ function get_whitelist() {
 		'cli' => array(
 			'danielbachhuber',
 		),
+		'community-team' => array(
+			'chanthaboune',
+		),
 		'core' => array(
 			'drew',
 			'johnbillion',
@@ -138,9 +141,6 @@ function get_whitelist() {
 		),
 		'meta-i18n' => array(
 			'ocean90',
-		),
-		'outreach' => array(
-			'chanthaboune',
 		),
 		'polyglots' => array(
 			'coachbirgit',
