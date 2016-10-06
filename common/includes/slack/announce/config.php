@@ -130,6 +130,7 @@ function get_whitelist() {
 		),
 		'meta' => array(
 			'obenland',
+			'tellyworth',
 		),
 		'meta-devhub' => array(
 			'coffee2code',
