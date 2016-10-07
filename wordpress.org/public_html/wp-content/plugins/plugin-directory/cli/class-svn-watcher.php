@@ -199,7 +199,7 @@ class SVN_Watcher {
 	 */
 	protected function get_head_rev() {
 		$log = SVN::log( self::SVN_URL, 'HEAD' );
-		if ( $log['error'] || ! $log['log'] ) {
+		if ( $log['errors'] || ! $log['log'] ) {
 			throw new Exception( "Unable to determine HEAD revision" );
 		}
 		return array_keys( $log['log'] )[0];
