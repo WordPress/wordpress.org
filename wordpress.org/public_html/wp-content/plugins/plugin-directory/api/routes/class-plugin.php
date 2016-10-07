@@ -67,7 +67,14 @@ class Plugin extends Base {
 		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
 		$result['contributors'] = array();
 
-		$contributors = get_post_meta( $post_id, 'contributors', true ) ?: array( $post->user_login );
+		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
+			$contributors = wp_list_pluck( $contributors, 'slug' );
+		} else {
+			$contributors = array();
+			if ( $author = get_user_by( 'id', $post->post_author ) ) {
+				$contributors[] = $author->user_nicename;
+			}
+		}
 		foreach ( $contributors as $contributor ) {
 			$user = get_user_by( 'slug', $contributor );
 			if ( ! $user ) {

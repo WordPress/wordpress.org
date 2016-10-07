@@ -195,7 +195,23 @@ class Plugin_Directory {
 			),
 		) );
 
-		register_taxonomy( 'plugin_tags', 'plugin', array(
+		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_contributor',
+			'rewrite'           => false,
+			'labels'            => array(
+				'name' => __( 'Plugin Contributors', 'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Contributor', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
 			'query_var'         => 'plugin_tags',
 			'rewrite'           => array(
@@ -452,7 +468,9 @@ class Plugin_Directory {
 	 * @return string|\WP_Error The term to add or update or WP_Error on failure.
 	 */
 	public function pre_insert_term_prevent( $term, $taxonomy ) {
-		if ( 'plugin_tags' != $taxonomy && ! is_super_admin() ) {
+		$allowed_taxonomies = array( 'plugin_tags', 'plugin_contributors' );
+
+		if ( ! in_array( $taxonomy, $allowed_taxonomies ) && ! is_super_admin() ) {
 			$term = new \WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-plugins' ) );
 		}
 
@@ -517,6 +535,17 @@ class Plugin_Directory {
 
 				return $posts;
 			}, 10, 2 );
+		}
+
+		if ( isset( $wp_query->query['author_name'] ) || isset( $wp_query->query['author'] ) ) {
+			$user = isset( $wp_query->query['author_name'] ) ? $wp_query->query['author_name'] : (get_user_by( 'id', $wp_query->query['author'])->user_nicename);
+
+			$wp_query->query_vars['plugin_contributor'] = $user;
+			$wp_query->query_vars['orderby'] = 'post_title';
+			$wp_query->query_vars['order'] = 'ASC';
+
+			unset( $wp_query->query_vars['author_name'], $wp_query->query_vars['author'] );
+
 		}
 
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {

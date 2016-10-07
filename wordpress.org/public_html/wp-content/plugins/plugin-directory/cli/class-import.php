@@ -26,7 +26,6 @@ class Import {
 		'license',
 		'license_uri',
 		'upgrade_notice',
-		'contributors',
 		'screenshots'
 	);
 
@@ -146,6 +145,9 @@ class Import {
 
 		// Set tags from the readme
 		wp_set_post_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
+
+		// Update the contributors list
+		wp_set_post_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
 
 		if ( in_array( 'adopt-me', $readme->tags ) ) {
 			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
