@@ -15,14 +15,20 @@ class Developers {
 	 */
 	static function display() {
 		$post         = get_post();
-		$committers   = Tools::get_plugin_committers( $post->post_name );
-		$contributors = get_post_meta( $post->ID, 'contributors', true );
-		$contributors = array_unique( array_merge( $committers, $contributors ) );
+
+		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
+			$contributors = wp_list_pluck( $contributors, 'slug' );
+		} else {
+			$contributors = array();
+			if ( $author = get_user_by( 'id', $post->post_author ) ) {
+				$contributors[] = $author->user_nicename;
+			}
+		}
 		sort( $contributors, SORT_NATURAL );
 
 		$output = '<ul class="plugin-developers">';
 		foreach ( $contributors as $contributor_slug ) {
-			$contributor = get_user_by( 'login', $contributor_slug );
+			$contributor = get_user_by( 'slug', $contributor_slug );
 			if ( ! $contributor ) {
 				continue;
 			}
