@@ -864,6 +864,24 @@ class Plugin_Directory {
 				$value   = array( $ratings );
 				break;
 
+			case 'tested':
+				// For the tested field, we bump up the minor release to the latest compatible minor release.
+				if ( function_exists( 'wporg_get_version_equivalents' ) ) {
+
+					// As we're on a pre-filter, we'll have to detach, fetch and reattach..
+					remove_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ) );
+					$value = get_metadata( 'post', $object_id, $meta_key );
+					add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
+
+					foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
+						if ( in_array( (string)$value[0], $compatible_with, true ) ) {
+							$value[0] = $latest_compatible_version;
+							break;
+						}
+					}
+				}
+				break;
+
 			case false:
 
 				// In the event $meta_key is false, the caller wants all meta fields, so we'll append our custom ones here too.
@@ -875,7 +893,7 @@ class Plugin_Directory {
 				// Re-attach ourselves for next time!
 				add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
 
-				$custom_meta_fields = array( 'downloads', 'rating', 'ratings' );
+				$custom_meta_fields = array( 'downloads', 'rating', 'ratings', 'tested' );
 				$custom_meta_fields = apply_filters( 'wporg_plugins_custom_meta_fields', $custom_meta_fields, $object_id );
 
 				foreach ( $custom_meta_fields as $key ) {
