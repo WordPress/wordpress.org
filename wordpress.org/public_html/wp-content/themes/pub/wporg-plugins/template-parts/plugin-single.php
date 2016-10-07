@@ -60,7 +60,19 @@ $widget_args = array(
 
 		<?php the_title( '<h1 class="plugin-title">', '</h1>' ); ?>
 
-		<span class="byline"><?php printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( Template::encode( get_the_author() ) ) . '</a></span>' ); ?></span>
+		<span class="byline"><?php
+			$url = get_post_meta( get_the_ID(), 'header_author_uri', true );
+			$author = get_post_meta( get_the_ID(), 'header_author', true ) ?: get_the_author();
+
+			printf(
+				_x( 'By %s', 'post author', 'wporg-plugins' ),
+				'<span class="author vcard">' .
+				( $url ? '<a class="url fn n" href="' . esc_url( $url ) . '">' : '' ) .
+				esc_html( Template::encode( $author ) ) .
+				( $url ? '</a>' : '' ) .
+				'</span>'
+			);
+		?></span>
 	</header><!-- .entry-header -->
 
 	<div class="entry-content">
