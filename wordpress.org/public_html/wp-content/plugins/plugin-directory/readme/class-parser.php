@@ -488,21 +488,22 @@ class Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
-			if ( $user = get_user_by( 'login', $name ) ) {
+			// Contributors should be listed by their WordPress.org Login name (Example: 'Joe Bloggs')
+			$user = get_user_by( 'login', $name );
 
-				// Check the case of the user login matches.
-				if ( $name !== $user->user_login ) {
-					$users[ $i ] = $user->user_login;
-				}
-			} elseif ( false !== ( $user = get_user_by( 'slug', $name ) ) ) {
-
-				// Overwrite the nicename with the user_login.
-				$users[ $i ] = $user->user_login;
-			} else {
-
-				// Unknown user, we'll skip these entirely to encourage correct readme files.
-				unset( $users[ $i ] );
+			// Or failing that, by their user_nicename field (Example: 'joe-bloggs')
+			if ( ! $user ) {
+				$user = get_user_by( 'slug', $name );
 			}
+
+			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
+			if ( ! $user ) {
+				unset( $users[ $i ] );
+				continue;
+			}
+
+			// Overwrite whatever the author has specified with the sanitized nicename.
+			$users[ $i ] = $user->user_nicename;
 		}
 
 		return $users;
