@@ -30,15 +30,31 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			parent::__construct();
 
 			if ( $this->has_host() ) {
-				add_action( 'init', array( &$this, 'redirect_all_login_or_signup_to_sso' ) );
+				add_action( 'init', array( $this, 'redirect_all_login_or_signup_to_sso' ) );
 				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
+
+				add_filter( 'password_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
+				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 			}
 		}
 
 		/**
-		 * Redirect all attempts to get to a WP login or signup to the SSO ones, or to a safe redirect location.
+		 * Replaces the admin email placeholder with a support email
+		 * to avoid using the site's admin email.
+		 *
+		 * @param array $email The email/password change email.
+		 * @return array The email/password change email.
+		 */
+		public function replace_admin_email_in_change_emails( $email ) {
+			$email['headers'] = "From: WordPress.org <donotreply@wordpress.org>\n";
+			$email['message'] = str_replace( '###ADMIN_EMAIL###', self::SUPPORT_EMAIL, $email['message'] );
+			return $email;
+		}
 
+		/**
+		 * Redirect all attempts to get to a WP login or signup to the SSO ones, or to a safe redirect location.
+		 *
 		 * @example add_action( 'init', array( &$wporg_sso, 'redirect_all_wp_login_or_signup_to_sso' ) );
 		 *
 		 * @note Also handles accesses to lost password forms, since wp-login too.

@@ -8,6 +8,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 	class WPOrg_SSO {
 		const SSO_HOST = 'login.wordpress.org';
 
+		const SUPPORT_EMAIL = 'forum-password-resets@wordpress.org';
+
 		public $sso_host_url;
 		public $sso_login_url;
 		public $sso_signup_url;
