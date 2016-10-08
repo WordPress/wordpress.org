@@ -49,6 +49,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
 		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_urls' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
+		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 
 		// oEmbed whitlisting.
 		add_filter( 'embed_oembed_discover', '__return_false' );
@@ -200,8 +201,8 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_contributor',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name' => __( 'Plugin Contributors', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Contributor', 'wporg-plugins' ),
+				'name' => __( 'Authors', 'wporg-plugins' ),
+				'singular_name' => __( 'Author', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -544,8 +545,11 @@ class Plugin_Directory {
 			$wp_query->query_vars['orderby'] = 'post_title';
 			$wp_query->query_vars['order'] = 'ASC';
 
-			unset( $wp_query->query_vars['author_name'], $wp_query->query_vars['author'] );
+			// Treat it as a taxonomy query now, not the author archive.
+			$wp_query->is_author = false;
+			$wp_query->is_tax = true;
 
+			unset( $wp_query->query_vars['author_name'], $wp_query->query_vars['author'] );
 		}
 
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
@@ -703,6 +707,28 @@ class Plugin_Directory {
 		$vars[] = 'redirect_plugin_tab';
 
 		return $vars;
+	}
+
+	/**
+	 * Filters the term names for archive headers to be more useful.
+	 *
+	 * @param string $name The Term Name.
+	 * @return string The Term Name.
+	 */
+	public function filter_single_term_title( $name ) {
+		$term = get_queried_object();
+		if ( ! $term || ! isset( $term->taxonomy ) ) {
+			return $name;
+		}
+
+		switch ( $term->taxonomy ) {
+			case 'plugin_contributors':
+				$user = get_user_by( 'slug', $term->slug );
+				$name = $user->display_name;
+				break;
+		}
+
+		return $name;
 	}
 
 	/**
