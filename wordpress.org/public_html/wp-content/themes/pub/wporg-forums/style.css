@@ -226,6 +226,19 @@ div.bbp-submit-wrapper {
 	margin-top: 0;
 }
 
+#forum-welcome #bbp_search,
+#forum-welcome #forumsearchbox {
+	width: 280px;
+}
+
+#forum-welcome #forumsearchbox {
+	margin-bottom: 20px;
+}
+
+#forum-welcome #searchform h3 {
+	display: none;
+}
+
 .sidebar #ts,
 .sidebar #rs {
 	width: 90%;
