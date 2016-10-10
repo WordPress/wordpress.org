@@ -485,8 +485,8 @@ function bb_base_before_topics_loop() {
 	}
 	?>
 	<div id="topic-tag" class="bbp-topic-tag">
-	<h1 class="entry-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
-	<?php if ( ! empty( $term_subscription ) ) : ?><h2><?php echo $term_subscription; ?></h2><?php endif; ?>
+	<h2 class="entry-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h2>
+	<?php if ( ! empty( $term_subscription ) ) : ?><h3><?php echo $term_subscription; ?></h3><?php endif; ?>
 		<div class="entry-content">
 	<?php
 }
