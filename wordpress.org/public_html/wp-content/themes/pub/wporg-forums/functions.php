@@ -173,7 +173,45 @@ function wporg_support_profile_url( $user_id ) {
 // add_filter( 'bbp_pre_get_user_profile_url', 'wporg_support_profile_url' );
 
 /**
+ * Get user's WordPress.org profile link.
+ *
+ * @param int $user_id
+ * @return string
+ */
+function wporg_support_get_wporg_profile_link( $user_id = 0 ) {
+	$user_nicename = bbp_get_user_nicename( $user_id );
+
+	return sprintf( '<a href="%s">@%s</a>',
+		esc_url( 'https://profiles.wordpress.org/' . $user_nicename ),
+		$user_nicename
+	);
+}
+
+/**
+ * Get user's Slack username.
+ *
+ * @param int $user_id
+ * @return string The user's Slack username (without '@') if user has one.
+ */
+function wporg_support_get_slack_username( $user_id = 0 ) {
+	global $wpdb;
+
+	$user_id = bbp_get_user_id( $user_id );
+	$slack_username = '';
+
+	$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+	if ( $data && ( $data = json_decode( $data, true ) ) ) {
+		$slack_username = $data['name'];
+	}
+
+	return $slack_username;
+}
+
+/**
  * Get user's registration date.
+ *
+ * @param int $user_id
+ * @return string
  */
 function wporg_support_get_user_registered_date( $user_id = 0 ) {
 	$user = get_userdata( bbp_get_user_id( $user_id ) );
