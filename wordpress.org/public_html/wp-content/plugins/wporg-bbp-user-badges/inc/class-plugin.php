@@ -68,11 +68,14 @@ class Plugin {
 			\WordPressdotorg\Forums\Plugin::THEMES_FORUM_ID,
 		);
 
-		if ( ! in_array( bbp_get_forum_id(), $badgeable_forums ) ) {
+		$forum_id = bbp_get_reply_forum_id();
+		$topic_id = bbp_get_reply_topic_id();
+
+		if ( ! in_array( $forum_id, $badgeable_forums ) ) {
 			return;
 		}
 
-		$slug = $type = null;
+		$slugs = $types = array();
 
 		$user_id = bbp_get_reply_author_id();
 		if ( ! $user_id ) {
@@ -81,24 +84,38 @@ class Plugin {
 
 		$user_login = get_user_by( 'id', $user_id )->user_login;
 
-		$support_forum = \WordPressdotorg\Forums\Plugin::get_instance();
-
 		// Check if the thread is associated with a plugin.
-		if ( $slug = $support_forum->plugins->slug ) {
-			$type = 'plugin';
+		if ( $forum_id === \WordPressdotorg\Forums\Plugin::PLUGINS_FORUM_ID ) {
+			$types = array( 'plugin' );
 		}
 		// Else check if the thread is associated with a theme.
-		elseif ( $slug = $support_forum->themes->slug ) {
-			$type = 'theme';
+		elseif ( $forum_id === \WordPressdotorg\Forums\Plugin::THEMES_FORUM_ID ) {
+			$types = array( 'theme' );
+		}
+		// Else check if the thread is a review.
+		elseif ( $forum_id === \WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID ) {
+			// Need to check for plugin AND theme association to know which the review is for.
+			$types = array( 'plugin', 'theme' );
 		}
 		// Else not a type of concern.
 		else {
 			return;
 		}
 
+		foreach ( $types as $type ) {
+			$slugs = wp_get_post_terms( $topic_id, 'topic-' . $type, array( 'fields' => 'slugs' ) );
+			if ( $slugs ) {
+				break;
+			}
+		}
+
+		if ( ! $slugs ) {
+			return;
+		}
+
 		return array(
 			'type'       => $type,
-			'slug'       => $slug,
+			'slug'       => $slugs[0],
 			'user_login' => $user_login,
 		);
 	}
