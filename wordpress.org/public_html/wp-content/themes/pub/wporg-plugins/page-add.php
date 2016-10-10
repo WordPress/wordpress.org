@@ -28,7 +28,6 @@ get_header(); ?>
 						<p><?php _e( 'Even if you&#8217;ve submitted a dozen plugins, take the time to refresh your memory with the following information:', 'wporg-plugins' ); ?>
 						<ul>
 							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/"><?php _e( 'How to use SVN', 'wporg-plugins' ); ?></a></li>
-							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/deploying-your-plugin/"><?php _e( 'Deploying your plugin', 'wporg-plugins' ); ?></a></li>
 							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/"><?php _e( 'Plugin Assets (and how to use them)', 'wporg-plugins' ); ?></a></li>
 							<li><a href="https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/"><?php _e( 'Developer FAQ', 'wporg-plugins' ); ?></a></li>
 						</ul>
