@@ -28,7 +28,6 @@ class Customizations {
 		add_filter( 'dashboard_glance_items', array( $this, 'plugin_glance_items' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		add_action( 'save_post_plugin', array( $this, 'save_plugin_post' ) );
 
 		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -51,10 +50,6 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 
-		// Page access within wp-admin.
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_action( 'load-index.php',    array( $this, 'disable_admin_page' ) );
-		add_action( 'load-profile.php',  array( $this, 'disable_admin_page' ) );
 	}
 
 	/**
@@ -127,44 +122,6 @@ class Customizations {
 	}
 
 	/**
-	 * Customizes the admin menu according to the current user's privileges.
-	 */
-	public function admin_menu() {
-
-		/*
-		 * WordPress requires that the plugin post_type have at least one submenu accessible *other* than itself.
-		 * If it doesn't have at least one submenu then users who cannot also publish posts will not be able to access the post type.
-		 */
-		add_submenu_page( 'edit.php?post_type=plugin', 'Plugin Handbook', 'Plugin Handbook', 'read', 'handbook', function() {} );
-
-		$readme_validator = Validator::instance();
-		add_submenu_page( 'edit.php?post_type=plugin', 'Readme Validator', 'Readme Validator', 'read', 'readme_validator', array( $readme_validator, 'display' ) );
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			remove_menu_page( 'index.php' );
-			remove_menu_page( 'profile.php' );
-		}
-	}
-
-	/**
-	 * Disables admin pages.
-	 */
-	public function disable_admin_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-
-			// Dashboard is plugin dashboard.
-			if ( 'load-index.php' === current_action() ) {
-				wp_safe_redirect( admin_url( 'edit.php?post_type=plugin' ) );
-				exit;
-			}
-
-			wp_die( __( 'You do not have permission to access this page.', 'wporg-plugins' ), '', array(
-				'back_link' => true,
-			) );
-		}
-	}
-
-	/**
 	 * Filter the query in wp-admin to list only plugins relevant to the current user.
 	 *
 	 * @param \WP_Query $query
@@ -189,44 +146,6 @@ class Customizations {
 			} );
 		}
 
-		$user = wp_get_current_user();
-
-		if ( ! current_user_can( 'plugin_approve' ) && empty( $query->query['post_status']) || ( isset( $query->query['author'] ) && $query->query['author'] == $user->ID ) ) {
-			$query->query_vars['author'] = $user->ID;
-
-			$plugins = Tools::get_users_write_access_plugins( $user );
-			if ( $plugins ) {
-				$query->query_vars['post_name__in'] = $plugins;
-				$query->query_vars['post_status']   = 'any';
-
-				add_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
-			}
-		}
-	}
-
-	/**
-	 * Custom callback for pre_get_posts to use an OR query between post_name & post_author
-	 *
-	 * @ignore
-	 *
-	 * @param string $where WHERE clause.
-	 * @return string
-	 */
-	public function pre_get_posts_sql_name_or_user( $where ) {
-		global $wpdb;
-
-		remove_filter( 'posts_where', array( $this, 'pre_get_posts_sql_name_or_user' ) );
-
-		// Replace `post_name IN(..) AND post_author IN (..)`
-		// With `( post_name IN() OR post_author IN() )`
-		$where = preg_replace( "!\s(\S+\.post_name IN .+?)\s*AND\s*(\s\S+\.post_author.+?)AND!i", ' ( $1 OR $2 ) AND', $where );
-
-		// Allow reviewers to also see all pending plugins.
-		if ( current_user_can( 'plugin_edit_pending' ) && ( ! isset( $_GET['author'] ) || ( isset( $_GET['post_status'] ) && in_array( $_GET['post_status'], array( 'draft', 'pending' ) ) ) ) ) {
-			$where .= " OR {$wpdb->posts}.post_status IN ('draft', 'pending')";
-		}
-
-		return $where;
 	}
 
 	/**
@@ -404,29 +323,26 @@ class Customizations {
 			return;
 		}
 
-		// Only plugin reviewers/admins need review-related meta boxes.
-		if ( current_user_can( 'plugin_approve' ) ) {
-			add_meta_box(
-				'internal-notes',
-				__( 'Internal Notes', 'wporg-plugins' ),
-				array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'display' ),
-				'plugin', 'normal', 'high'
-			);
+		add_meta_box(
+			'internal-notes',
+			__( 'Internal Notes', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'display' ),
+			'plugin', 'normal', 'high'
+		);
 
-			add_meta_box(
-				'plugin-review',
-				__( 'Plugin Review Tools', 'wporg-plugins' ),
-				array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
-				'plugin', 'normal', 'high'
-			);
+		add_meta_box(
+			'plugin-review',
+			__( 'Plugin Review Tools', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Review_Tools', 'display' ),
+			'plugin', 'normal', 'high'
+		);
 
-			add_meta_box(
-				'plugin-author',
-				__( 'Author Card', 'wporg-plugins' ),
-				array( __NAMESPACE__ . '\Metabox\Author_Card', 'display' ),
-				'plugin', 'side'
-			);
-		}
+		add_meta_box(
+			'plugin-author',
+			__( 'Author Card', 'wporg-plugins' ),
+			array( __NAMESPACE__ . '\Metabox\Author_Card', 'display' ),
+			'plugin', 'side'
+		);
 
 		add_meta_box(
 			'authordiv',
@@ -459,14 +375,12 @@ class Customizations {
 				'plugin', 'side'
 			);
 
-			if ( current_user_can( 'plugin_add_committer', $post ) ) {
-				add_meta_box(
-					'plugin-stats',
-					__( 'Plugin Stats', 'wporg-plugins' ),
-					array( __NAMESPACE__ . '\Metabox\Stats', 'display' ),
-					'plugin', 'normal'
-				);
-			}
+			add_meta_box(
+				'plugin-stats',
+				__( 'Plugin Stats', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Stats', 'display' ),
+				'plugin', 'normal'
+			);
 		}
 
 		// Remove unnecessary metaboxes.
@@ -476,20 +390,6 @@ class Customizations {
 		// Remove slug metabox unless the slug is editable for the current user.
 		if ( ! in_array( $post->post_status, array( 'draft', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
 			remove_meta_box( 'slugdiv', 'plugin', 'normal' );
-		}
-	}
-
-	/**
-	 * Hook into the save process for the plugin post_type to save extra metadata.
-	 *
-	 * Currently saves the tested_with value.
-	 *
-	 * @param int      $post_id The post_id being updated.
-	 */
-	public function save_plugin_post( $post_id ) {
-		// Save meta information
-		if ( isset( $_POST['tested_with'] ) && isset( $_POST['hidden_tested_with'] ) && $_POST['tested_with'] != $_POST['hidden_tested_with'] ) {
-			update_post_meta( $post_id, 'tested', wp_slash( wp_unslash( $_POST['tested_with'] ) ) );
 		}
 	}
 

@@ -23,12 +23,13 @@ class Capabilities {
 	public static function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
 		switch( $cap ) {
 
+			// TODO: Map these for the users
 			case 'plugin_edit':
 			case 'plugin_add_committer':
 			case 'plugin_remove_committer':
 				$required_caps = array();
 				$post = get_post( $context[0] );
-				if ( ! $post instanceof \WP_Post ) {
+				if ( ! $post ) {
 					$required_caps[] = 'do_not_allow';
 					break;
 				}
@@ -80,20 +81,17 @@ class Capabilities {
 	 * @static
 	 */
 	public static function add_roles() {
-		$committer = array(
-			'read'                    => true,
-			'plugin_dashboard_access' => true,
-			'plugin_edit_own'         => true,
-			'plugin_set_category'     => true,
-			'plugin_add_committer'    => true,
-			'plugin_edit_others'      => true,
-		);
 
-		$reviewer = array_merge( $committer, array(
-			'moderate_comments'   => true,
-			'plugin_edit_pending' => true,
-			'plugin_review'       => true,
-		) );
+		$reviewer = array(
+			'read'                 => true,
+			'plugin_edit_own'      => true,
+			'plugin_set_category'  => true,
+			'plugin_add_committer' => true,
+			'plugin_edit_others'   => true,
+			'moderate_comments'    => true,
+			'plugin_edit_pending'  => true,
+			'plugin_review'        => true,
+		);
 
 		$admin = array_merge( $reviewer, array(
 			'plugin_approve'     => true,
@@ -105,32 +103,19 @@ class Capabilities {
 		) );
 
 		// Remove the roles first, incase we've changed the permission set.
-		remove_role( 'plugin_committer' );
-		remove_role( 'plugin_reviewer'  );
-		remove_role( 'plugin_admin'     );
-		add_role( 'plugin_committer', 'Plugin Committer', $committer );
-		add_role( 'plugin_reviewer',  'Plugin Reviewer',  $reviewer  );
-		add_role( 'plugin_admin',     'Plugin Admin',     $admin     );
+		remove_role( 'plugin_reviewer' );
+		remove_role( 'plugin_admin'    );
+		add_role( 'plugin_reviewer',  'Plugin Reviewer', $reviewer );
+		add_role( 'plugin_admin',     'Plugin Admin',    $admin    );
 
-		foreach ( array( 'contributor', 'author', 'editor', 'administrator' ) as $role ) {
-			$wp_role = get_role( $role );
-
-			if ( ! $wp_role ) {
-				continue;
-			}
-
-			foreach ( $committer as $committer_cap => $value ) {
-				$wp_role->add_cap( $committer_cap );
-			}
-
-			if ( in_array( $role, array( 'editor', 'administrator' ) ) ) {
-				foreach ( $admin as $admin_cap => $value ) {
-					$wp_role->add_cap( $admin_cap );
-				}
+		$wp_admin_role = get_role( 'administrator' );
+		if ( $wp_admin_role ) {
+			foreach ( $admin as $admin_cap => $value ) {
+				$wp_admin_role->add_cap( $admin_cap );
 			}
 		}
 
-		update_option( 'default_role', 'plugin_committer' );
+		update_option( 'default_role', 'subscriber' );
 	}
 }
 

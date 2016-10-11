@@ -182,15 +182,6 @@ class Import {
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
-		// Give committers a role on this site.
-		foreach ( Tools::get_plugin_committers( $plugin_slug ) as $committer ) {
-			$user = get_user_by( 'login', $committer );
-
-			if ( $user && ! user_can( $user, 'plugin_dashboard_access' ) ) {
-				$user->add_role( 'plugin_committer' );
-			}
-		}
-
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true );
 
 		$this->rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags );

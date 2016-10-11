@@ -41,8 +41,6 @@ class Plugin_Directory {
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
-		add_filter( 'pre_insert_term', array( $this, 'pre_insert_term_prevent' ), 10, 2 );
-		add_filter( 'tax_input_pre', array( $this, 'filter_tax_input' ) );
 		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
@@ -128,7 +126,6 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => current_user_can( 'plugin_set_section' ),
 			'show_admin_column' => current_user_can( 'plugin_set_section' ),
-			'meta_box_cb'       => false, // 'post_categories_meta_box',
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
 			),
@@ -158,7 +155,6 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
-			'meta_box_cb'       => array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
@@ -174,7 +170,7 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
@@ -190,7 +186,7 @@ class Plugin_Directory {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			'meta_box_cb'       => false, // array( __NAMESPACE__ . '\Admin\Metabox\Plugin_Categories', 'display' ),
+			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
@@ -453,29 +449,11 @@ class Plugin_Directory {
 			return false;
 		}
 		if ( 'plugin_built_for' == $term->taxonomy ) {
-
 			// Term slug = Post Slug = /%postname%/
 			return trailingslashit( home_url( $term->slug ) );
 		}
 
 		return $term_link;
-	}
-
-	/**
-	 * Checks if the current users is a super admin before allowing terms to be added.
-	 *
-	 * @param string $term     The term to add or update.
-	 * @param string $taxonomy The taxonomy of the term.
-	 * @return string|\WP_Error The term to add or update or WP_Error on failure.
-	 */
-	public function pre_insert_term_prevent( $term, $taxonomy ) {
-		$allowed_taxonomies = array( 'plugin_tags', 'plugin_contributors' );
-
-		if ( ! in_array( $taxonomy, $allowed_taxonomies ) && ! is_super_admin() ) {
-			$term = new \WP_Error( 'not-allowed', __( 'You are not allowed to add terms.', 'wporg-plugins' ) );
-		}
-
-		return $term;
 	}
 
 	/**
@@ -772,11 +750,8 @@ class Plugin_Directory {
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
 			if ( 'tags' === $path[2] ) {
-				if ( isset( Tag_To_Category::$map[ $path[3] ] ) ) {
-					wp_safe_redirect( home_url( '/category/' . Tag_To_Category::$map[ $path[3] ] . '/' ) );
-					die();
-				} else if ( isset( $path[3] ) ) {
-					wp_safe_redirect( home_url( '/search/' . $path[3] . '/' ) );
+				if ( isset( $path[3] ) ) {
+					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ) );
 					die();
 				} else {
 					wp_safe_redirect( home_url( '/' ) );
@@ -792,16 +767,9 @@ class Plugin_Directory {
 
 			// Otherwise, handle a plugin redirect.
 			if ( $plugin = self::get_plugin_post( $path[2] ) ) {
-				$is_disabled = in_array( $plugin->post_status, array( 'disabled', 'closed' ), true );
-
-				if ( $is_disabled && current_user_can( 'edit_post', $plugin ) ) {
-					wp_safe_redirect( add_query_arg( array(
-						'post'   => $plugin->ID,
-						'action' => 'edit',
-					), admin_url( 'post.php' ) ) );
-					die();
-				} else if ( ! $is_disabled ) {
-					wp_safe_redirect( get_permalink( $plugin->ID ) );
+				$permalink = get_permalink( $plugin->ID );
+				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
+					wp_safe_redirect( $permalink );
 					die();
 				}
 			}
@@ -965,24 +933,6 @@ class Plugin_Directory {
 		}
 
 		return $content_pages;
-	}
-
-	/**
-	 * Filters the value of tax_inputs before saving.
-	 *
-	 * Used both in the admin and the uploader.
-	 *
-	 * @param array $tax_input Array of taxonomies with selected terms.
-	 * @return array
-	 */
-	public function filter_tax_input( $tax_input ) {
-
-		// Limit the amount of assignable categories to 3.
-		if ( isset( $tax_input['plugin_category'] ) ) {
-			$tax_input['plugin_category'] = array_slice( array_filter( $tax_input['plugin_category'] ), 0, 3 );
-		}
-
-		return $tax_input;
 	}
 
 	/**
