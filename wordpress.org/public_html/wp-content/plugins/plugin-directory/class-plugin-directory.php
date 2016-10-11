@@ -530,6 +530,60 @@ class Plugin_Directory {
 			unset( $wp_query->query_vars['author_name'], $wp_query->query_vars['author'] );
 		}
 
+		// For singular requests, or self-author profile requests allow restricted post_status items to show on the front-end.
+		if ( is_user_logged_in() && (
+			!empty( $wp_query->query_vars['name'] ) ||
+			(
+				!empty( $wp_query->query_vars['plugin_contributor'] ) &&
+				(
+					current_user_can( 'plugin_review' ) ||
+					0 === strcasecmp( $wp_query->query_vars['plugin_contributor'], wp_get_current_user()->user_nicename )
+				)
+			) )
+		) {
+			$wp_query->query_vars['post_status'] = array( 'pending', 'approved', 'publish', 'closed', 'disabled' );
+
+			add_filter( 'posts_results', function( $posts, $this_wp_query ) use( $wp_query ) {
+				if ( $this_wp_query != $wp_query ) {
+					return $posts;
+				}
+
+				$restricted_access_statii = array_diff( $wp_query->query_vars['post_status'], array( 'publish' ) );
+				foreach ( $posts as $i => $post ) {
+					// If the plugin is not in the restricted statuses list, show it
+					if ( 'plugin' != $post->post_type || ! in_array( $post->post_status, $restricted_access_statii, true ) ) {
+						continue;
+					}
+
+					// Plugin Reviewers can see all sorts of plugins
+					if ( current_user_can( 'plugin_review' ) ) {
+						continue;
+					}
+
+					// Original submitter can always see
+					if ( $post->post_author == get_current_user_id() ) {
+						continue;
+					}
+
+					// Committers (user_login) can always see
+					if ( in_array( wp_get_current_user()->user_login, (array) Tools::get_plugin_committers( $post->post_name ), true ) ) {
+						continue;
+					}
+
+					// Contributors (user_nicename) can always see
+					if ( in_array( wp_get_current_user()->user_nicename, (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'slug' ), true ) ) {
+						continue;
+					}
+
+					// everyone else can't.
+					unset( $posts[ $i ] );
+				}
+
+				return $posts;
+			}, 10, 2 );
+		}
+
+		// By default, all archives are sorted by active installs
 		if ( $wp_query->is_archive() && empty( $wp_query->query_vars['orderby'] ) ) {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';

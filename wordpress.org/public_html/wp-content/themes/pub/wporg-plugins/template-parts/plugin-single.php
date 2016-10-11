@@ -29,6 +29,40 @@ $widget_args = array(
 				<p><?php _e( 'This plugin <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ); ?></p>
 			</div><!-- .plugin-notice -->
 		<?php endif; ?>
+		<?php if ( 'publish' != get_post()->post_status ) :
+				$notice_type = 'notice-error';
+				switch ( get_post()->post_status ) {
+					case 'draft':
+					case 'pending':
+						$message = __( 'This plugin is requested and not visible to the public yet. Please be patient as your plugin gets reviewed.', 'wporg-plugins' );
+						$notice_type = 'notice-info';
+						break;
+
+					case 'approved':
+						$message = __( 'This plugin is approved and awaiting data upload but not visible to the public yet. Once you make your first commit, the plugin will become public.', 'wporg-plugins' );
+						$notice_type = 'notice-info';
+						break;
+
+					case 'rejected':
+						$message = __( 'This plugin is rejected and is not visible to the public.', 'wporg-plugins' );
+						break;
+
+					case 'disabled':
+						if ( current_user_can( 'plugin_approve' ) ) {
+							$message = __( 'This plugin is disabled (closed, but actively serving updates) and is not visible to the public.', 'wporg-plugins' );
+							break;
+						}
+						// fall through
+					default:
+					case 'closed':
+						$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+						break;
+				}
+			?>
+			<div class="plugin-notice notice <?php echo esc_attr( $notice_type ); ?> notice-alt">
+				<p><?php echo $message; ?></p>
+			</div><!-- .plugin-notice -->
+		<?php endif; ?>
 
 		<div class="entry-thumbnail">
 			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
