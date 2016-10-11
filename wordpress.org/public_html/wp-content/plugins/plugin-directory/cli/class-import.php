@@ -149,6 +149,9 @@ class Import {
 		// Update the contributors list
 		wp_set_post_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
 
+		// Update the committers list
+		Tools::sync_plugin_committers_with_taxonomy( $plugin->post_name );
+
 		if ( in_array( 'adopt-me', $readme->tags ) ) {
 			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
 		}

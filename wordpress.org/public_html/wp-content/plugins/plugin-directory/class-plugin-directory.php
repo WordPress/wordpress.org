@@ -39,9 +39,9 @@ class Plugin_Directory {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
-		add_filter( 'post_type_link', array( $this, 'package_link' ), 10, 2 );
-		add_filter( 'term_link', array( $this, 'term_link' ), 10, 2 );
-		add_action( 'pre_get_posts', array( $this, 'use_plugins_in_query' ) );
+		add_filter( 'post_type_link', array( $this, 'filter_post_type_link' ), 10, 2 );
+		add_filter( 'term_link', array( $this, 'filter_term_link' ), 10, 2 );
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
@@ -199,6 +199,22 @@ class Plugin_Directory {
 			'labels'            => array(
 				'name' => __( 'Authors', 'wporg-plugins' ),
 				'singular_name' => __( 'Author', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => false,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
+		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_committer',
+			'rewrite'           => false,
+			'labels'            => array(
+				'name' => __( 'Committers', 'wporg-plugins' ),
+				'singular_name' => __( 'Committer', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -429,7 +445,7 @@ class Plugin_Directory {
 	 * @param \WP_Post $post The Plugin post object.
 	 * @return string
 	 */
-	public function package_link( $link, $post ) {
+	public function filter_post_type_link( $link, $post ) {
 		if ( 'plugin' !== $post->post_type ) {
 			return $link;
 		}
@@ -444,7 +460,7 @@ class Plugin_Directory {
 	 * @param \WP_Term $term      The term the link is for.
 	 * @return string|false
 	 */
-	public function term_link( $term_link, $term ) {
+	public function filter_term_link( $term_link, $term ) {
 		if ( 'plugin_business_model' == $term->taxonomy ) {
 			return false;
 		}
@@ -459,20 +475,23 @@ class Plugin_Directory {
 	/**
 	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
-	public function use_plugins_in_query( $wp_query ) {
+	public function pre_get_posts( $wp_query ) {
 		if ( is_admin() ) {
 			return;
 		}
 
+		// Unless otherwise specified, we start off by querying for publish'd plugins.
 		if ( empty( $wp_query->query_vars['pagename'] ) && ( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] ) ) {
 			$wp_query->query_vars['post_type']   = array( 'plugin' );
 			$wp_query->query_vars['post_status'] = array( 'publish' );
 		}
 
+		// By default, if no query is made, we're querying /browse/featured/
 		if ( empty( $wp_query->query ) ) {
 			$wp_query->query_vars['browse'] = 'featured';
 		}
 
+		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
 			case 'favorites':
 				$favorites_user = wp_get_current_user();
@@ -501,6 +520,7 @@ class Plugin_Directory {
 				break;
 		}
 
+		// For /browse/ requests, we conditionally need to avoid querying the taxonomy for most views (as it's handled in code above)
 		if ( isset( $wp_query->query['browse'] ) && 'beta' != $wp_query->query['browse'] && 'featured' != $wp_query->query['browse'] ) {
 			unset( $wp_query->query_vars['browse'] );
 
@@ -516,10 +536,37 @@ class Plugin_Directory {
 			}, 10, 2 );
 		}
 
+		// Holds a truthful value when viewing an author archive for the current user, or a plugin reviewer viewing an author archive
+		$viewing_own_author_archive = false;
+
+		// Author Archives need to be created
 		if ( isset( $wp_query->query['author_name'] ) || isset( $wp_query->query['author'] ) ) {
 			$user = isset( $wp_query->query['author_name'] ) ? $wp_query->query['author_name'] : (get_user_by( 'id', $wp_query->query['author'])->user_nicename);
 
-			$wp_query->query_vars['plugin_contributor'] = $user;
+			$viewing_own_author_archive = is_user_logged_in() && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
+
+			// Author archives by default list plugins you're a contributor on.
+			$wp_query->query_vars['tax_query'] = array(
+				'relation' => 'OR',
+				array(
+					'taxonomy' => 'plugin_contributors',
+					'field' => 'slug',
+					'terms' => $user
+				)
+			);
+
+			// Author archives for self include plugins you're a committer on, not just publically a contributor
+			// Plugin Reviewers also see plugins you're a committer on here.
+			if ( $viewing_own_author_archive ) {
+				$wp_query->query_vars['tax_query'][] = array(
+					'taxonomy' => 'plugin_committers',
+					'field' => 'slug',
+					'terms' => $user
+				);
+			}
+
+			// TODO: Make plugins owned by `post_author = $current_user_id` show up here when they're not-publish?
+
 			$wp_query->query_vars['orderby'] = 'post_title';
 			$wp_query->query_vars['order'] = 'ASC';
 
@@ -531,16 +578,8 @@ class Plugin_Directory {
 		}
 
 		// For singular requests, or self-author profile requests allow restricted post_status items to show on the front-end.
-		if ( is_user_logged_in() && (
-			!empty( $wp_query->query_vars['name'] ) ||
-			(
-				!empty( $wp_query->query_vars['plugin_contributor'] ) &&
-				(
-					current_user_can( 'plugin_review' ) ||
-					0 === strcasecmp( $wp_query->query_vars['plugin_contributor'], wp_get_current_user()->user_nicename )
-				)
-			) )
-		) {
+		if ( $viewing_own_author_archive || ( is_user_logged_in() && !empty( $wp_query->query_vars['name'] ) ) ) {
+
 			$wp_query->query_vars['post_status'] = array( 'pending', 'approved', 'publish', 'closed', 'disabled' );
 
 			add_filter( 'posts_results', function( $posts, $this_wp_query ) use( $wp_query ) {
@@ -755,6 +794,7 @@ class Plugin_Directory {
 
 		switch ( $term->taxonomy ) {
 			case 'plugin_contributors':
+			case 'plugin_committers':
 				$user = get_user_by( 'slug', $term->slug );
 				$name = $user->display_name;
 				break;

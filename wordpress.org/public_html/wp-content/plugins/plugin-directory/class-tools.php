@@ -121,6 +121,29 @@ class Tools {
 	}
 
 	/**
+	 * Syncs the list of committers from the svn_access table to a taxonomy.
+	 *
+	 * @static
+	 * @param string $plugin_slug The Plugin Slug to sync.
+	 */
+	public static function sync_plugin_committers_with_taxonomy( $plugin_slug ) {
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$committer_slugs = array();
+		foreach ( Tools::get_plugin_committers( $plugin_slug ) as $committer ) {
+			$user = get_user_by( 'login', $committer );
+			if ( $user ) {
+				$committer_slugs[] = $user->user_nicename;
+			}
+		}
+
+		wp_set_post_terms( $post->ID, $committer_slugs, 'plugin_committers' );
+	}
+
+	/**
 	 * Grant a user RW access to a plugin.
 	 *
 	 * @static
@@ -148,14 +171,17 @@ class Tools {
 			return true;
 		}
 
-		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
-		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
-
-		return (bool) $wpdb->insert( PLUGINS_TABLE_PREFIX . 'svn_access', array(
+		$result = (bool) $wpdb->insert( PLUGINS_TABLE_PREFIX . 'svn_access', array(
 			'path'   => "/{$plugin_slug}",
 			'user'   => $user->user_login,
 			'access' => 'rw',
 		) );
+
+		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
+		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
+		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
+
+		return $result;
 	}
 
 	/**
@@ -179,13 +205,16 @@ class Tools {
 			return false;
 		}
 
-		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
-		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
-
-		return $wpdb->delete( PLUGINS_TABLE_PREFIX . 'svn_access', array(
+		$result = (bool) $wpdb->delete( PLUGINS_TABLE_PREFIX . 'svn_access', array(
 			'path' => "/{$plugin_slug}",
 			'user' => $user->user_login,
 		) );
+
+		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
+		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
+		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
+
+		return $result;
 	}
 
 	/**
