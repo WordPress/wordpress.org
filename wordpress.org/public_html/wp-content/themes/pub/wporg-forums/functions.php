@@ -231,6 +231,57 @@ function wporg_support_is_single_review() {
 	return ( WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() );
 }
 
+/**
+ * Display a notice for messages caught in the moderation queue.
+ */
+function wporg_support_add_moderation_notice() {
+	$post_time       = mysql2date( 'U', get_post_field( 'post_date', get_the_ID() ) );
+	$seconds_passed  = current_time( 'timestamp' ) - $post_time;
+	$hours_passed    = (int) ( $seconds_passed / HOUR_IN_SECONDS );
+	$post_status     = get_post_status();
+	$is_moderator    = current_user_can( 'moderate' );
+	$is_user_blocked = ! current_user_can( 'spectate' );
+
+	if ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
+		$notice_class = $notice = '';
+
+		if ( $is_moderator ) {
+			if ( 'spam' === $post_status ) {
+				$notice_class = 'warning';
+				$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
+			} else {
+				$notice = __( 'This post is currently pending.', 'wporg-forums' );
+			}
+		} elseif ( $is_user_blocked ) {
+			// Blocked users get a generic message with no call to action or moderation timeframe.
+			$notice = __( 'This post has been held for moderation by our automated system.', 'wporg-forums' );
+		} elseif ( $hours_passed > 96 ) {
+			$notice_class = 'warning';
+			$notice       = sprintf(
+				/* translators: %s: https://make.wordpress.org/chat/ */
+				__( 'This post was held for moderation by our automated system but has taken longer than expected to get approved. Please come to the #forums channel on <a href="%s">WordPress Slack</a> and let us know. Provide a link to the post.', 'wporg-forums' ),
+				'https://make.wordpress.org/chat/'
+			);
+		} else {
+			$notice = sprintf(
+				/* translators: %d: number of hours */
+				__( 'This post has been held for moderation by our automated system. It will be reviewed within %d hours.', 'wporg-forums' ),
+				72
+			);
+		}
+
+		if ( $notice ) :
+			printf(
+				'<div class="bbp-template-notice %s"><p>%s</p></div>',
+				esc_attr( $notice_class ),
+				$notice
+			);
+		endif;
+	endif;
+}
+add_action( 'bbp_theme_before_topic_content', 'wporg_support_add_moderation_notice' );
+add_action( 'bbp_theme_before_reply_content', 'wporg_support_add_moderation_notice' );
+
 /** bb Base *******************************************************************/
 
 function bb_base_search_form() {

@@ -161,6 +161,11 @@ div.bbp-template-notice a {
 	list-style: disc;
 }
 
+.bbp-topic-content div.bbp-template-notice,
+.bbp-reply-content div.bbp-template-notice {
+	display: inline-block;
+}
+
 /* Reply button */
 div.bbp-submit-wrapper {
 	float: none;
