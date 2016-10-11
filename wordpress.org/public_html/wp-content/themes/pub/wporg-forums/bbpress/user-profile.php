@@ -66,14 +66,26 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			/* translators: %s: user's forum role */
 			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
 		?></p>
+
+		<?php if ( $website = bbp_get_displayed_user_field( 'user_url' ) ) : ?>
+	
+			<p class="bbp-user-website"><?php
+			/* translators: %s: link to user's website */ 
+			printf( esc_html__( 'Website: %s', 'wporg-forums' ), sprintf( '<a href="%s">%s</a>', esc_url( $website ), esc_html( $website ) ) );
+			?></p>
+	
+		<?php endif; ?>
+
 		<p class="bbp-user-member-since"><?php
 			/* translators: %s: user's registration date */
 			printf( esc_html__( 'Member Since: %s', 'wporg-forums' ), wporg_support_get_user_registered_date() );
 		?></p>
+
 		<p class="bbp-user-topic-count"><?php
 			/* translators: %s: number of user's topics */
 			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), bbp_get_user_topic_count_raw() );
 		?></p>
+
 		<p class="bbp-user-reply-count"><?php
 			/* translators: %s: number of user's replies */
 			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), bbp_get_user_reply_count_raw() );
