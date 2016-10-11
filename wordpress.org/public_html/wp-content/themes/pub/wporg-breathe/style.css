@@ -333,6 +333,69 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	display: none;
 }
 
+.o2-post-form-options {
+	margin-top: .8em; /* Same as .o2-editor .o2-editor-footer > a */
+}
+
+.o2-editor-select {
+	background: white url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+YXJyb3ctZG93bjwvdGl0bGU+PHBhdGggZD0iTTE1LjUgNkwxNyA3LjVsLTYuNzUgNi43NUwzLjUgNy41IDUgNmw1LjI1IDUuMjVMMTUuNSA2eiIgZmlsbD0iI2JiYiIgZmlsbC1ydWxlPSJldmVub2RkIi8+PC9zdmc+) no-repeat right 10px center;
+	border-radius: 3px;
+	border: 1px solid #bbb;
+	color: #3498db;
+	cursor: pointer;
+	display: inline-block;
+	margin: 0;
+	outline: 0;
+	overflow: hidden !important;
+	font-size: 13px !important;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	text-decoration: none;
+	vertical-align: top;
+	white-space: nowrap;
+	box-sizing: border-box;
+	padding: 7px 32px 7px 14px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.o2-editor-select:focus,
+.o2-editor-select:hover {
+	color: #000;
+	border-color: #888;
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+YXJyb3ctZG93bjwvdGl0bGU+PHBhdGggZD0iTTE1LjUgNkwxNyA3LjVsLTYuNzUgNi43NUwzLjUgNy41IDUgNmw1LjI1IDUuMjVMMTUuNSA2eiIgZmlsbD0iIzg4OCIgZmlsbC1ydWxlPSJldmVub2RkIi8+PC9zdmc+);
+}
+
+.o2-editor-select:focus {
+	outline: 0;
+	-moz-outline: none;
+	-moz-user-focus: ignore;
+}
+
+.o2-editor-select::-ms-expand {
+	display: none;
+}
+
+.o2-editor-select::-ms-value {
+	background: none;
+	color: #3498db;
+}
+
+.o2-editor-select:-moz-focusring {
+	color: transparent;
+	text-shadow: 0 0 0 #3498db;
+}
+
+.polyglots-post-type-selector {
+	margin: 0 0 1em;
+	text-align: right;
+}
+
+.polyglots-post-type-selector .o2-editor-select {
+	min-width: 180px;
+}
+
 @media screen and (min-width: 769px) {
 	#wporg-header ul li.current-menu-item:after,
 	#wporg-header ul li.current_page_parent:after,
