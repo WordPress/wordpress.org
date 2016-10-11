@@ -78,6 +78,15 @@ body {
 	margin-right: 20px;
 }
 
+#bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
+#bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
+	display: block;
+	position: absolute;
+	left: 30px;
+	right: inherit;
+	bottom: 10px;
+}
+
 /* User badges */
 
 #bbpress-forums .by-moderator {
