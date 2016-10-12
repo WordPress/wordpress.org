@@ -146,7 +146,7 @@ class WordPressTV_Subtitles_Upload {
 
 		$parent = get_post( $video_attachment->post_parent );
 
-		if ( ! $parent || 'publish' != $parent->post_status ) {
+		if ( ! $parent || ! in_array( $parent->post_status, array( 'publish', 'private' ), true ) ) {
 			wp_die( 'You can not subtitle this video.' );
 		}
 

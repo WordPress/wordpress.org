@@ -191,8 +191,9 @@ $video = video_get_info_by_blogpostid( get_current_blog_id(), $video_id );
 $attachment = get_post( $video_id );
 $parent = get_post( $attachment->post_parent );
 
-if ( ! $parent || 'publish' != $parent->post_status )
+if ( ! $parent || ! in_array( $parent->post_status, array( 'publish', 'private' ), true ) ) {
 	wp_die( 'You can not subtitle this video, sorry.' );
+}
 
 get_header();
 
