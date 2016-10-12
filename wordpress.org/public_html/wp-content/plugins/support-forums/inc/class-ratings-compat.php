@@ -154,17 +154,21 @@ class Ratings_Compat {
 					$rating
 				);
 				/* translators: %d: number of stars */
-				$stars_text = sprintf( __( '%d stars', 'wporg-forums' ), $rating );
+				$stars_text = sprintf(
+					/* translators: %d: number of stars */
+					_n( '%d star', '%d stars', $rating, 'wporg-forums' ),
+					$rating
+				);
 				$width = 0;
 				if ( $ratings_count && $ratings_count_total ) {
-					$width = 92 * ( $ratings_count / $ratings_count_total );
+					$width = 100 * ( $ratings_count / $ratings_count_total );
 				}
 				?>
 				<div class="counter-container">
 				<a href="<?php echo esc_url( sprintf( 'https://wordpress.org/support/%s/%s/reviews/?filter=%s', $this->compat, $this->slug, $rating ) ); ?>"
 					title="<?php echo esc_attr( $stars_title ); ?>">
-					<span class="counter-label" style="float:left;margin-right:5px;"><?php echo esc_html( $stars_text ); ?></span>
-					<span class="counter-back" style="height:17px;width:92px;background-color:#ececec;float:left;">
+					<span class="counter-label" style="float:left;margin-right:5px;min-width:58px;"><?php echo esc_html( $stars_text ); ?></span>
+					<span class="counter-back" style="height:17px;width:100px;background-color:#ececec;float:left;">
 						<span class="counter-bar" style="width:<?php echo esc_attr( $width ); ?>px;height:17px;background-color:#ffc733;float:left;"></span>
 					</span>
 				</a>
