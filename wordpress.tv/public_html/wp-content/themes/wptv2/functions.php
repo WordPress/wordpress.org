@@ -844,7 +844,7 @@ function wporg_username_exists( $username ) {
 	$validator_url   = add_query_arg( 'user', $username, 'https://wordpress.org/grav-redirect.php' );
 	$response        = wp_remote_retrieve_headers( wp_remote_get( $validator_url, array( 'redirection' => 0 ) ) );
 
-	if ( array_key_exists( 'location', $response ) ) {
+	if ( !empty( $response['location'] ) ) {
 		if ( false === strpos( $response['location'], 'd=mm' ) ) {
 			$username_exists = true;
 		}
