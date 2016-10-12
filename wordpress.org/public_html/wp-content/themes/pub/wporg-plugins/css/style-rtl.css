@@ -2032,9 +2032,9 @@ object {
 }
 
 .plugin-favorite {
-  display: inline-block;
   height: 36px;
   text-align: center;
+  vertical-align: top;
   width: 36px;
 }
 
@@ -2553,12 +2553,22 @@ object {
   float: left;
 }
 
+.type-plugin .plugin-header .plugin-actions div {
+  display: inline-block;
+  text-align: center;
+}
+
 .type-plugin .plugin-header .plugin-title {
   clear: none;
   font-size: 25px;
   font-size: 1.5625rem;
   font-weight: 400;
   margin: 0;
+}
+
+.type-plugin .plugin-header .plugin-title a {
+  color: inherit;
+  text-decoration: none;
 }
 
 .type-plugin .plugin-header .byline {

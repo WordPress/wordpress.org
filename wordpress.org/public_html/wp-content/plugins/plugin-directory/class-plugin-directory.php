@@ -45,7 +45,7 @@ class Plugin_Directory {
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
-		add_action( 'template_redirect', array( $this, 'redirect_old_plugin_urls' ) );
+		add_action( 'template_redirect', array( $this, 'custom_redirects' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 
@@ -291,6 +291,9 @@ class Plugin_Directory {
 
 		// Create an archive for a users favorites too.
 		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
+
+		// Handle plugin admin requests
+		add_rewrite_rule( '^([^/]+)/admin/?$', 'index.php?name=$matches[1]&plugin_admin=1', 'top' );
 
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
@@ -587,6 +590,7 @@ class Plugin_Directory {
 					return $posts;
 				}
 
+				// TODO: Switch this to the capabilities systems
 				$restricted_access_statii = array_diff( $wp_query->query_vars['post_status'], array( 'publish' ) );
 				foreach ( $posts as $i => $post ) {
 					// If the plugin is not in the restricted statuses list, show it
@@ -776,6 +780,7 @@ class Plugin_Directory {
 	public function filter_query_vars( $vars ) {
 		$vars[] = 'favorites_user';
 		$vars[] = 'redirect_plugin_tab';
+		$vars[] = 'plugin_admin';
 
 		return $vars;
 	}
@@ -827,9 +832,9 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Handles a redirect for the old /$plugin/$tab_name/ URLs and search.php
+	 * Handles all the custom redirects needed in the Plugin Directory.
 	 */
-	function redirect_old_plugin_urls() {
+	function custom_redirects() {
 
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin_tab' ) ) {
@@ -879,6 +884,26 @@ class Plugin_Directory {
 		if ( get_query_var( 's' ) && isset( $_GET['s'] ) ) {
 			wp_safe_redirect( site_url( '/search/' . urlencode( get_query_var( 's' ) ) . '/' ) );
 			die();
+		}
+
+		// TODO: Switch this to the capabilities systems, check if post_author should access
+		// Filter access to the plugin administration area. Only certain users are allowed access.
+		if ( get_query_var( 'plugin_admin' ) && ! current_user_can( 'plugin_review' ) ) {
+			$post = Plugin_Directory::get_plugin_post( get_query_var( 'name' ) );
+			if (
+				// Logged out users can't access plugin admin
+				! is_user_logged_in() ||
+				// Allow access to Committers OR Contributors.
+				! (
+					// Committers can access plugin admin
+					in_array( wp_get_current_user()->user_login, (array) Tools::get_plugin_committers( $post->post_name ), true ) ||
+					// Contributors can access plugin admin (but will have a more limited access)
+					in_array( wp_get_current_user()->user_nicename, (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'slug' ), true )
+				)
+			) {
+				wp_safe_redirect( get_permalink( $post ) );
+				die();
+			}
 		}
 	}
 

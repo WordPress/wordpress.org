@@ -12,6 +12,11 @@
 
 		.plugin-actions {
 			float: right;
+
+			div {
+				display: inline-block;
+				text-align: center;
+			}
 		}
 
 		.plugin-title {
@@ -19,6 +24,11 @@
 			font-size: ms( 4 );
 			font-weight: 400;
 			margin: 0;
+
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
 		}
 
 		.byline {

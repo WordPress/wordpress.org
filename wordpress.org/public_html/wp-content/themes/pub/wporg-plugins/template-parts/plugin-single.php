@@ -86,13 +86,19 @@ $widget_args = array(
 					</script>
 				</div>
 			<?php endif; ?>
+			<div>
+				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+				<?php if ( true /* TODO: Logic on when to show the edit link */ ) : ?>
+					<br>
+					<a class="plugin-edit" href="<?php echo esc_url( get_permalink() . 'admin/' ); ?>"><?php _e( 'Edit Plugin', 'wporg-plugins' ); ?></a>	
+				<?php endif; ?>
+			</div>
 
-			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 			<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
 			<meta itemprop="fileFormat" content="application/zip">
 		</div>
 
-		<?php the_title( '<h1 class="plugin-title">', '</h1>' ); ?>
+		<?php the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>
 
 		<span class="byline"><?php
 			$url = get_post_meta( get_the_ID(), 'header_author_uri', true );
@@ -101,7 +107,7 @@ $widget_args = array(
 			printf(
 				_x( 'By %s', 'post author', 'wporg-plugins' ),
 				'<span class="author vcard">' .
-				( $url ? '<a class="url fn n" href="' . esc_url( $url ) . '">' : '' ) .
+				( $url ? '<a class="url fn n" rel="nofollow" href="' . esc_url( $url ) . '">' : '' ) .
 				esc_html( Template::encode( $author ) ) .
 				( $url ? '</a>' : '' ) .
 				'</span>'
@@ -111,6 +117,9 @@ $widget_args = array(
 
 	<div class="entry-content">
 		<?php
+		if ( get_query_var( 'plugin_admin' ) ) :
+			get_template_part( 'template-parts/section', 'admin' );
+		else:
 			$plugin_sections = Template::get_plugin_sections();
 
 			foreach ( array( 'description', 'screenshots', 'faq', 'reviews', 'changelog', 'developers' ) as $section_slug ) :
@@ -128,6 +137,7 @@ $widget_args = array(
 
 				get_template_part( 'template-parts/section', $section_slug );
 			endforeach;
+		endif; // plugin_admin
 		?>
 	</div><!-- .entry-content -->
 
