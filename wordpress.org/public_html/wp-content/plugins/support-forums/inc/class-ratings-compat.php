@@ -134,7 +134,13 @@ class Ratings_Compat {
 <div class="review-ratings" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
 	<div class="col-3">
 		<div class="reviews-about" style="display:none;" itemprop="itemReviewed"><?php echo esc_html( $this->object->post_title ); ?></div>
-		<div class="reviews-total-count"><?php printf( _n( '<span itemprop="reviewCount">%d</span> review', '<span itemprop="reviewCount">%d</span> reviews', $this->reviews_count ), $this->reviews_count ); ?></div>
+		<div class="reviews-total-count"><?php
+			printf(
+				/* translators: %s: number of reviews */
+				_n( '%d review', '%d reviews', $this->reviews_count, 'wporg-forums' ),
+				'<span itemprop="reviewCount">' . number_format_i18n( $this->reviews_count ) . '</span>'
+			);
+		?></div>
 		<?php
 			foreach ( array( 5, 4, 3, 2, 1 ) as $rating ) {
 				$ratings_count = isset( $this->ratings_counts[ $rating ] ) ? $this->ratings_counts[ $rating ] : 0;
