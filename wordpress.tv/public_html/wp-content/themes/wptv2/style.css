@@ -1616,64 +1616,6 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	font-size: 10px;
 }
 
-#footer {
-	clear: both;
-	height: 3.5em;
-	margin-bottom: 15px;
-	color: #888;
-}
-
-#footer .automattic {
-	width: 400px;
-	float: right;
-	text-align: right;
-	font-size: 11px;
-	letter-spacing: 0.2em;
-	line-height: 3em;
-	padding-top: 13px;
-	padding-right: 2px;
-	text-transform: uppercase;
-	line-height: 28px;
-}
-
-.menu-footer-container {
-	float: left;
-	line-height: 4em;
-	margin-left: 2px;
-	font-size: 13px;
-	margin-bottom: 0;
-}
-
-.menu-footer-container li {
-	display: inline-block;
-}
-
-.menu-footer-container li:last-of-type .dot {
-	display: none;
-}
-
-.menu-footer-container a {
-	color: #6d6d6d;
-}
-
-.menu-footer-container a:hover {
-	color: #21759b;
-}
-
-#footer .automattic img {
-	margin: 0 3px 1px 0;
-	opacity: 1;
-	transition: opacity 0.15s ease-in-out;
-}
-
-#footer .automattic img:hover {
-	opacity: 0.8;
-}
-
-#footer img.videopress {
-	display: inline;
-}
-
 #sidebar h2 {
 	margin: 5px 0 0;
 	padding: 0;
@@ -2536,18 +2478,68 @@ h3#comments {
 ============================================================= */
 
 #footer {
-	background: #F0F0F0;
-
-	margin: 10px 0 0 0;
+	background: #f0f0f0;
+	clear: both;
+	color: #888;
+	height: 3.5em;
+	margin: 10px 0 15px 0;
 	padding: 10px 0;
 }
 
-#footer .dot {
-	margin: 0 10px;
+#footer .automattic {
+	width: 400px;
+	float: right;
+	text-align: right;
+	font-size: 11px;
+	letter-spacing: 0.2em;
+	line-height: 3em;
+	padding-top: 13px;
+	padding-right: 2px;
+	text-transform: uppercase;
+	line-height: 28px;
 }
 
 #footer .automattic a {
 	position: relative;
 	top: 2px;
 	margin: 0 7px;
+}
+
+.menu-footer-container {
+	float: left;
+	line-height: 4em;
+	margin-left: 2px;
+	font-size: 13px;
+	margin-bottom: 0;
+}
+
+.menu-footer-container li {
+	display: inline-block;
+	margin: 0 10px;
+}
+
+.menu-footer-container li:last-of-type:after {
+	content: none;
+}
+
+.menu-footer-container a {
+	color: #6d6d6d;
+}
+
+.menu-footer-container a:hover {
+	color: #21759b;
+}
+
+#footer .automattic img {
+	margin: 0 3px 1px 0;
+	opacity: 1;
+	transition: opacity 0.15s ease-in-out;
+}
+
+#footer .automattic img:hover {
+	opacity: 0.8;
+}
+
+#footer img.videopress {
+	display: inline;
 }
