@@ -598,3 +598,76 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	float: right;
 }
 
+/** Table of Contents */
+.post-type-archive-handbook div.table-of-contents,
+.single-handbook div.table-of-contents {
+	float: right;
+	width: 250px;
+	background: #f7f7f7;
+	border: 1px solid #eee;
+	margin: 0 0 15px 15px;
+	z-index: 1;
+	position: relative;
+	color: #555d66;
+}
+
+@media (min-width: 971px) {
+	.post-type-archive-handbook div.table-of-contents,
+	.single-handbook div.table-of-contents {
+		margin: -15px -30px 15px 15px;
+	}
+}
+
+.post-type-archive-handbook div.table-of-contents h2,
+.single-handbook div.table-of-contents h2,
+.post-type-archive-handbook div.table-of-contents h3,
+.single-handbook div.table-of-contents h3 {
+	margin: 0;
+	padding: 8px 0;
+	text-align: center;
+	font-size: 1.3em;
+	color: #32373c;
+}
+
+.post-type-archive-handbook ul.items,
+.single-handbook ul.items {
+	margin: 0 0 8px;
+	list-style-type: none;
+	padding: 0 15px;
+}
+
+.post-type-archive-handbook ul.items li,
+.single-handbook ul.items li {
+	padding-bottom: 6px;
+}
+
+.post-type-archive-handbook ul.items li ul li,
+.post-type-archive-handbook ul.items li ul li ul li,
+.single-handbook ul.items li ul li,
+.single-handbook ul.items li ul li ul li {
+	padding-bottom: 0;
+}
+
+.post-type-archive-handbook ul.items li a,
+.single-handbook ul.items li a {
+	color: #555d66;
+}
+
+.post-type-archive-handbook ul.items li a:hover,
+.single-handbook ul.items li a:hover {
+	color: #0073aa;
+	text-decoration: underline;
+}
+
+.toc-heading:target {
+	border-left: 5px solid #0073aa;
+	padding-left: 5px;
+	margin-left: -10px;
+}
+
+@media (max-width: 480px) {
+	.post-type-archive-handbook div.table-of-contents,
+	.single-handbook div.table-of-contents {
+		display: none;
+	}
+}
