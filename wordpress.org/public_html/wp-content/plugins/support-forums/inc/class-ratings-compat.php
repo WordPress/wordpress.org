@@ -137,7 +137,7 @@ class Ratings_Compat {
 		<div class="reviews-total-count"><?php
 			printf(
 				/* translators: %s: number of reviews */
-				_n( '%d review', '%d reviews', $this->reviews_count, 'wporg-forums' ),
+				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
 				'<span itemprop="reviewCount">' . number_format_i18n( $this->reviews_count ) . '</span>'
 			);
 		?></div>
