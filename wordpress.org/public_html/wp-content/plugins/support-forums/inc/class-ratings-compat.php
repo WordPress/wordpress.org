@@ -182,9 +182,11 @@ class Ratings_Compat {
 		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
 		<?php
 			echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating );
-			/* translators: %s: number of stars */
-			printf( __( '%s out of <span itemprop="bestRating">5</span> stars', 'wporg-forums' ),
-				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 )
+			printf(
+				/* translators: 1: number of stars in rating, 2: total number of stars (5) */
+				__( '%1$s out of %2$s stars', 'wporg-forums' ),
+				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ),
+				'<span itemprop="bestRating">5</span>'
 			);
 		?>
 		<div class="reviews-submit-link">
