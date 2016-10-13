@@ -7,6 +7,7 @@ class Moderators {
 	const ARCHIVED       = 'archived';
 	const ARCHIVED_META  = '_wporg_bbp_unarchived_post_status';
 	const DEFAULT_STATUS = 'publish';
+	const VIEWS          = array( 'archived', 'pending', 'spam' );
 
 	public function __construct() {
 		// Moderator-specific views.
@@ -24,6 +25,11 @@ class Moderators {
 		add_filter( 'bbp_reply_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 	}
 
+	/**
+	 * Registers views.
+	 *
+	 * Note: Be sure to update class constant VIEWS when adding/removing views.
+	 */
 	public function register_views() {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
