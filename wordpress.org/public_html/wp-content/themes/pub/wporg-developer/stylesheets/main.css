@@ -864,6 +864,10 @@ input {
   overflow: auto;
 }
 
+.devhub-wrap section.error-404 {
+  overflow: visible;
+}
+
 .devhub-wrap .home-landing .section {
   padding: 30px 0%;
   padding: 3rem 0%;

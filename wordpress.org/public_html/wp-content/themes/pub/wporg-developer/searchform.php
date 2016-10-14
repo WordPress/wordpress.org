@@ -5,7 +5,7 @@
  * @package wporg-developer
  */
 ?>
-<div class="search-section section clear <?php if ( ! ( is_page( 'reference' ) || is_search() ) ) { echo 'hide-if-js'; } ?>">
+<div class="search-section section clear <?php if ( ! ( is_page( 'reference' ) || is_search() || is_404() ) ) { echo 'hide-if-js'; } ?>">
 
 <?php if ( is_search() ) { ?>
 
@@ -37,7 +37,11 @@
 		$is_handbook = get_query_var( 'is_handbook' );
 		$search_url  = get_query_var( 'current_handbook_home_url' );
 		$search_url  = $search_url ? $search_url : home_url( '/' );
-		$form_class  = $is_handbook ? ' searchform-handbook' : '';
+		$filters     = ! ( $is_handbook || is_404() );
+		$form_class  = ( $filters ) ? ' searchform-filtered' : '';
+		if ( $is_handbook ) {
+			$form_class .= ' searchform-handbook';
+		}
 	?>
 
 	<form role="search" method="get" class="searchform<?php echo esc_attr( $form_class ); ?>" action="<?php echo esc_url( $search_url ); ?>">
@@ -49,7 +53,7 @@
 		<input type="submit" class="shiny-blue search-submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'wporg' ); ?>">
 		</div>
 
-	<?php if ( ! $is_handbook ) : ?>
+	<?php if ( $filters ) : ?>
 
 		<div class="search-post-type">
 			<span><?php _e( 'Filter by type:', 'wporg' ); ?></span>
