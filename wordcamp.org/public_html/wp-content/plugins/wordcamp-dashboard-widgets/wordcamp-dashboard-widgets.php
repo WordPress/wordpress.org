@@ -1,13 +1,13 @@
 <?php
 
-/* 
- * Plugin Name: WordCamp Organizer Nags
- * Description: Shows admin notices to organizers when they haven't completed a required action yet.
+/*
+ * Plugin Name: WordCamp Dashboard Widgets
+ * Description: Communicate non-urgent messages from Central to organizers through Dashboard widgets.
  * Version:     0.1
  * Author:      Ian Dunn
  */
 
-class WordCampOrganizerNags {
+class WordCamp_Dashboard_Widgets {
 	protected $need_central_about_info, $needed_pages;
 
 	/**
@@ -206,4 +206,4 @@ class WordCampOrganizerNags {
 	}
 }
 
-$GLOBALS['WordCampOrganizerNags'] = new WordCampOrganizerNags();
+$GLOBALS['WordCamp_Dashboard_Widgets'] = new WordCamp_Dashboard_Widgets();
