@@ -105,3 +105,21 @@ function javascript_notice() {
 	<?php
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\javascript_notice' );
+
+/**
+ * Adds each site's slug to the body class, so that CSS rules can target specific sites.
+ *
+ * @param array $classes Array of CSS classes.
+ * @return array Array of CSS classes.
+ */
+function add_site_slug_to_body_class( $classes ) {
+	$current_site = get_site( get_current_blog_id() );
+
+	$classes[] = 'wporg-make';
+	if ( $current_site ) {
+		$classes[] = 'make-' . trim( $current_site->path, '/' );
+	}
+
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\add_site_slug_to_body_class' );
