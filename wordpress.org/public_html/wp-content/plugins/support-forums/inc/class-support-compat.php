@@ -70,7 +70,6 @@ class Support_Compat {
 						'terms'       => $this->get_plugin_slugs_by_committer( $this->query['wporg_user_login'] ),
 					) ),
 					'show_stickies'   => false,
-					'orderby'         => 'ID',
 				);
 				break;
 		}
