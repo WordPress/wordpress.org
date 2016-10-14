@@ -1991,6 +1991,9 @@ img#wpstats {
 .wporg-page-download .download-button-container {
 	text-align: center;
 }
+.wporg-page-mobile {
+	background-color: #f1f1f1;
+}
 .wporg-page-mobile ul#books {
 	display: -moz-box;
 	display: -ms-flexbox;
@@ -2012,6 +2015,8 @@ img#wpstats {
 .wporg-responsive.wporg-page-mobile #books li {
 	padding: 0 14px 15px;
 	box-sizing: border-box;
+	background-color: #fff;
+	border: 1px solid #dedede;
 }
 .wporg-responsive.wporg-page-mobile #books h3 {
 	margin-bottom: 15px;
