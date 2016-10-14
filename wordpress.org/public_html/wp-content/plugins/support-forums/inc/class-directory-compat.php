@@ -252,7 +252,7 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Allow plugin/theme authors to resolve a topic on their support forum.
+	 * Allow plugin/theme authors and contributors to resolve a topic on their support forum.
 	 *
 	 * @param bool $retval If the user can set a topic resolution for the topic
 	 * @param int $user_id The user id
@@ -261,7 +261,14 @@ abstract class Directory_Compat {
 	 */
 	public function user_can_resolve( $retval, $user_id, $topic_id ) {
 		$user = get_userdata( $user_id );
-		if ( $user && ! empty( $this->authors ) && in_array( $user->user_login, $this->authors ) ) {
+		if ( ! $user ) {
+			return $retval;
+		}
+		if (
+			( ! empty( $this->authors ) && in_array( $user->user_login, $this->authors ) )
+		||
+			( ! empty( $this->contributors ) && in_array( $user->user_login, $this->contributors ) )
+		) {
 			$retval = true;
 		}
 		return $retval;
