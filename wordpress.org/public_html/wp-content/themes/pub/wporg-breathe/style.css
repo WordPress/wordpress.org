@@ -368,6 +368,9 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 }
 
 .o2-editor-select:focus {
+	border-color: #5b9dd9;
+	-webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
 	outline: 0;
 	-moz-outline: none;
 	-moz-user-focus: ignore;
@@ -387,13 +390,38 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	text-shadow: 0 0 0 #3498db;
 }
 
+/* make/polyglots post type selector for new posts */
 .polyglots-post-type-selector {
 	margin: 0 0 1em;
 	text-align: right;
 }
 
 .polyglots-post-type-selector .o2-editor-select {
-	min-width: 180px;
+	min-width: 150px;
+}
+
+.polyglots-post-type-selector label {
+	padding: 7px 0;
+	display: inline-block;
+	margin-right: 5px;
+}
+
+.o2-save.disabled,
+.o2-save.disabled:hover,
+.o2-save.disabled:focus {
+	border-color: #bbb;
+	background: #f1f1f1;
+	color: #bbb;
+	cursor: default;
+}
+
+@media (max-width: 640px) {
+	.make-polyglots .o2-post-form-options {
+		float: left;
+		display: block;
+		padding-right: 0;
+		clear: none;
+	}
 }
 
 @media screen and (min-width: 769px) {
