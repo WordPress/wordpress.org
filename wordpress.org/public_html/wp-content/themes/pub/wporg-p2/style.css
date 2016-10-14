@@ -11,6 +11,12 @@ a[href*="//wordpress.slack.com"] {
 	background-size: 13px 13px;
 }
 
+#respond p,
+li ul #respond p,
+p.comment-subscription-form {
+	float: none;
+}
+
 /* Handbook-specific styles */
 
 .post-type-archive-handbook .postcontent a[href*="//"]:not([href*="wordpress.org"]):not([href*="wordpress.slack.com"]),
