@@ -283,6 +283,19 @@ article.page a.author-avatar img.avatar {
 	width: 50px !important;
 }
 
+/* See .entry-meta .entry-date */
+.entry-author-meta {
+	font-size: 0.8em;
+	font-weight: 300;
+	line-height: 1.2;
+	color: #888;
+	margin: .3em 0 0 0;
+}
+
+.entry-author-meta .wporg-username {
+	font-weight: 400;
+}
+
 /*
  * Resolved/unresolved
  */
