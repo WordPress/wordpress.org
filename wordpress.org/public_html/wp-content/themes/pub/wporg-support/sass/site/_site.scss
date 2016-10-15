@@ -1,0 +1,499 @@
+@import "../variables-site/variables-site";
+
+
+body, #pagebody {
+	font-size: ms(0);
+}
+
+main#main {
+	padding: 0 1rem 1rem;
+}
+
+/*--------------------------------------------------------------
+# .site-header 
+--------------------------------------------------------------*/
+.site-header {
+	background: $color__wp-blue;
+	padding: 1rem 0;
+	position: relative;
+	z-index: 100;
+
+	.site-branding {
+		margin: 0 auto;
+		max-width: $size__site-main;
+		padding: 0 ms(4);
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding: 0 10px;
+		}
+	}
+
+	&.home {
+		padding: ms(4) ms(1);
+		text-align: center;
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .site-title
+--------------------------------------------------------------*/
+.site-title {
+	display: inline-block;
+	font-size: ms( 4 );
+	font-weight: 300;
+	line-height: 1;
+	margin: 0 2rem 0 0;
+	max-width: none;
+
+	a {
+		color: #fff;
+		font-weight: 300;
+
+		&:hover,
+		&:focus,
+		&:active {
+			text-decoration: none;
+		}
+	}
+
+	.site-header.home & {
+		display: inherit;
+		font-size: ms( 12 );
+		margin: 2rem 0 1rem;
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .site-description
+--------------------------------------------------------------*/
+.site-description {
+	color: rgba( 255, 255, 255, 0.8);
+	font-size: ms( 2 );
+	font-weight: 300;
+	margin: -0.4rem auto 2rem;
+	text-align: center;
+}
+
+
+/*--------------------------------------------------------------
+# .main-navigation
+--------------------------------------------------------------*/
+.main-navigation {
+	background: $color__wp-blue;
+	clear: both;
+	left: 0;
+	position: absolute;
+	top: 60px;
+	width: 100%;
+
+	ul {
+		display: none;
+		list-style: none;
+		margin: 0;
+		padding-left: 0;
+
+		ul {
+			box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+			float: left;
+			left: -999em;
+			position: absolute;
+			top: 1.5em;
+			z-index: 99999;
+
+			ul {
+				left: -999em;
+				top: 0;
+			}
+
+			li {
+				&:hover > ul,
+				&.focus > ul {
+					left: 100%;
+				}
+			}
+
+			a {
+				width: 200px;
+			}
+
+			:hover > a,
+			.focus > a {
+			}
+
+			a:hover,
+			a.focus {
+			}
+		}
+
+		li:hover > ul,
+		li.focus > ul {
+			left: auto;
+		}
+	}
+
+	li {
+		border-top: 1px solid rgba( 255, 255, 255, 0.2 );
+		padding: 1rem;
+
+		&:hover > a,
+		&.focus > a {
+		}
+	}
+
+	a {
+		color: rgba( 255, 255, 255, 0.8 );
+		display: block;
+		font-size: ms( -2 );
+		text-decoration: none;
+
+		&:hover,
+		&.active {
+			color: #fff;
+		}
+
+		@media screen and (min-width: $ms-breakpoint) {
+			&.active {
+				border-bottom: 1px solid;
+			}
+		}
+	}
+
+	button.button-search {
+		display: none;
+	}
+}
+
+#wporg-header ul li a.current ~ .uparrow {
+	border-bottom: 9px solid $color__wp-blue;	
+}
+#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
+	border-bottom: 9px solid #32373c;
+}
+
+/* Small menu. */
+.main-navigation.toggled ul {
+	display: block;
+}
+
+.menu-toggle.dashicons {
+	background: transparent;
+	border: none;
+	color: #fff;
+	font-size: ms( 4 );
+	height: 3.5rem;
+	overflow: hidden;
+	position: absolute;
+	right: 1rem;
+	top: -58px;
+	width: 3.5rem;
+	-webkit-appearance: none;
+
+	.toggled &:before {
+		content: "\f343";
+	}
+}
+
+@media screen and ( min-width: $ms-breakpoint ) {
+	.menu-toggle.dashicons {
+		display: none;
+	}
+	.main-navigation {
+		float: right;
+		position: initial;
+		width: initial;
+
+		&.toggled {
+			padding: 1px 0;
+		}
+
+		ul {
+			display: inline-block;
+			font-size: 0;
+
+			li {
+				border: 0;
+				display: inline-block;
+				font-size: ms( 0 );
+				margin-right: 1rem;
+				padding: 0;
+
+				&:last-of-type {
+					margin-right: 0;
+				}
+			}
+		}
+
+		button.button-search {
+			display: inline-block;
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .site-main
+--------------------------------------------------------------*/
+.site-main {
+	margin: 0 auto;
+	max-width: $size__site-main;
+	padding: ms(10) ms(4);
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		padding: ms(10) 10px;
+	}
+
+	.single & {
+		padding: 0;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			padding: 0 10px ms(10);
+		}
+	}
+
+	.page & {
+		padding-top: 0;
+	}
+
+	.page-header {
+		h1 {
+			margin: 0;
+		}
+		p {
+			margin: 0.5rem 0;
+		}
+	}
+
+	.page-title {
+		font-size: ms( 4 );
+		font-weight: 400;
+	}
+
+	.no-results {
+		margin: 0 auto;
+		max-width: ms(32);
+		padding: 0 2rem;
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .sidebar
+--------------------------------------------------------------*/
+.sidebar {
+	div {
+
+		&:first-child {
+			margin: 0;
+		}
+
+		ul {
+			margin-bottom:0;
+		}
+		
+		ul > li {
+			font-size: ms(-2);
+			border-top: 1px solid #eee;
+			padding: 0.5rem 0;
+		}
+
+		&:first-child h3 {
+			margin-top: 0;
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .search-form
+--------------------------------------------------------------*/
+.search-form {
+	font-size: 0;
+	margin-bottom: 2rem;
+
+	max-width: 100%;
+	position: relative;
+
+	.search-field {
+		border: none;
+		border-radius: 0;
+		box-shadow: none;
+		display: block;
+		font-size: ms( 0 );
+		margin: 0 auto;
+		max-width: 100%;
+		padding: 0.5rem;
+		width: ms(28);
+	}
+
+	.button-search {
+		border-left: none;
+		border-radius: 0 2px 2px 0;
+		font-size: ms( 0 );
+		position: relative;
+		right: auto;
+		top: auto;
+
+		&:active {
+			background: #006799;
+			border-right: 1px solid #006799;
+			box-shadow: none;
+		}
+
+		.dashicons {
+			font-size: ms( 0 );
+		}
+	}
+
+	.site-header & {
+		display: inline-block;
+	}
+
+	.site-header.home &,
+	.site-main & {
+		.button-search {
+			background: transparent;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+			color: $color__text-input;
+			display: block;
+			height: 45px;
+			padding: 0.5rem 1rem;
+			position: absolute;
+			right: 0;
+			text-shadow: none;
+			top: 0;
+
+			&:focus {
+				box-shadow: 0 0 2px 1px #33b3db;
+			}
+
+			&:active {
+				background: transparent;
+				border: none;
+				transform: none;
+			}
+		}
+	}
+
+	.site-header:not(.home) & {
+		margin: 0;
+
+		.search-field {
+			border: 0;
+			border-radius: 2px;
+			display: inline-block;
+			font-size: ms( 0 );
+			padding: 5px 10px;
+			position: relative;
+			width: 100%;
+		}
+
+		@media screen and (min-width: $ms-breakpoint) {
+			.search-field {
+				border-radius: 2px 0 0 2px;
+				font-size: ms( -4 );
+				width: 7rem;
+			}
+
+			.search-field + .button-search {
+				display: inline-block;
+				margin-bottom: 0;
+			}
+		}
+
+		@media screen and (min-width: 60em) {
+			.search-field {
+				width: 10rem;
+			}
+		}
+	}
+
+	.site-main & .search-field {
+		border: 1px solid $color__border-input;
+		box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+		padding: 0.5rem;
+		width: 100%;
+	}
+}
+
+.search {
+	.site-main {
+		margin-top: 2rem;
+		padding-top: 0;
+	}
+
+	&.search-results .page-header {
+		margin: 2rem 0;
+	}
+}
+
+
+/*--------------------------------------------------------------
+# .page
+--------------------------------------------------------------*/
+.page {
+	.entry-header {
+		margin-top: 2rem;
+
+		.entry-title {
+			font-size: ms( 4 );
+			font-weight: 400;
+			margin: 0 auto;
+			max-width: ms(32);
+
+			@media screen and ( min-width: $ms-breakpoint ) {
+				padding: 0 2rem;
+			}
+		}
+	}
+
+	.entry-content {
+		h2 {
+			font-size: ms( 4 );
+			font-weight: 400;
+		}
+
+		h3 {
+			font-size: ms( 0 );
+			font-weight: 600;
+			letter-spacing: 0.01rem;
+			text-transform: uppercase;
+		}
+
+		section {
+			padding: 2rem 0;
+
+			.container {
+				margin: 0 auto;
+				max-width: ms(32);
+
+				@media screen and ( min-width: $ms-breakpoint ) {
+					padding: 0 2rem;
+				}
+			}
+
+			&:first-of-type {
+				padding-top: 0;
+			}
+
+			& + section {
+				border-top: 2px solid $color__background-hr;
+			}
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------
+# 404 Error page
+--------------------------------------------------------------*/
+
+.error-404 .page-title, .error-404 .page-content {
+	text-align: center;
+}
+
+
+

@@ -1,0 +1,3851 @@
+/**
+ * Theme Name: WordPress.org Support
+ * Theme URI: http://wordpress.org/
+ * Author: WordPress.org
+ * Author URI: http://wordpress.org/
+ * Description: A theme for the Support section of wordpress.org sites
+ * Version: 1.0
+ * License: GNU General Public License v2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * Tags: WordPress, bbPress, Support, Forums
+ * Text Domain: wporg-support
+ */
+/**
+ * This theme, like WordPress, is licensed under the GPL.
+ * Use it to make something cool, have fun, and share what you've learned with others.
+ */
+/* Sass is good */
+/*--------------------------------------------------------------
+# Normalize
+--------------------------------------------------------------*/
+html {
+	font-family: sans-serif;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+	display: block;
+}
+
+audio,
+canvas,
+progress,
+video {
+	display: inline-block;
+	vertical-align: baseline;
+}
+
+audio:not([controls]) {
+	display: none;
+	height: 0;
+}
+
+[hidden],
+template {
+	display: none;
+}
+
+a, .bbpress #bbpress-forums p.bbp-topic-meta a {
+	background-color: transparent;
+}
+
+a:active, .bbpress #bbpress-forums p.bbp-topic-meta a:active,
+a:hover,
+.bbpress #bbpress-forums p.bbp-topic-meta a:hover {
+	outline: 0;
+}
+
+abbr[title] {
+	border-bottom: 1px dotted;
+}
+
+b,
+strong {
+	font-weight: bold;
+}
+
+dfn {
+	font-style: italic;
+}
+
+h1 {
+	font-size: 2em;
+	margin: 0.67em 0;
+}
+
+mark {
+	background: #ff0;
+	color: #000;
+}
+
+small {
+	font-size: 80%;
+}
+
+sub,
+sup {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+sup {
+	top: -0.5em;
+}
+
+sub {
+	bottom: -0.25em;
+}
+
+img {
+	border: 0;
+}
+
+svg:not(:root) {
+	overflow: hidden;
+}
+
+figure {
+	margin: 1em 40px;
+}
+
+hr {
+	box-sizing: content-box;
+	height: 0;
+}
+
+pre {
+	overflow: auto;
+}
+
+code,
+kbd,
+pre,
+samp {
+	font-family: monospace, monospace;
+	font-size: 1em;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+	color: inherit;
+	font: inherit;
+	margin: 0;
+}
+
+button {
+	overflow: visible;
+}
+
+button,
+select {
+	text-transform: none;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	-webkit-appearance: button;
+	cursor: pointer;
+}
+
+button[disabled],
+html input[disabled] {
+	cursor: default;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+	border: 0;
+	padding: 0;
+}
+
+input {
+	line-height: normal;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	box-sizing: border-box;
+	padding: 0;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+	height: auto;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+fieldset {
+	border: 1px solid #c0c0c0;
+	margin: 0 2px;
+	padding: 0.35em 0.625em 0.75em;
+}
+
+legend {
+	border: 0;
+	padding: 0;
+}
+
+textarea {
+	overflow: auto;
+}
+
+optgroup {
+	font-weight: bold;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+td,
+th {
+	padding: 0;
+}
+
+/*--------------------------------------------------------------
+# Original Styles
+--------------------------------------------------------------*/
+/**
+ * 1.0 General
+ */
+html,
+body {
+	background: #fff;
+}
+
+#headline {
+	background: #f7f7f7;
+	border-bottom: 1px solid #dfdfdf;
+}
+
+a:hover, .bbpress #bbpress-forums p.bbp-topic-meta a:hover {
+	text-decoration: none;
+}
+
+/**
+* 2.0 Accesability
+*/
+.hidden,
+#accessibility {
+	height: 0;
+	width: 0;
+	overflow: hidden;
+	position: absolute;
+	background: none;
+	right: -999em;
+}
+
+.screen-reader-text {
+	position: absolute;
+	margin: -1px;
+	padding: 0;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	border: 0;
+	word-wrap: normal !important;
+}
+
+/**
+* 3.0 Clearfix
+*/
+.wrapper:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+
+/**
+ * 4.0 Overrides
+ */
+@media only screen and (min-width: 960px) {
+	.col-6 #bbpress-forums {
+		margin-right: 0;
+	}
+}
+
+#bbpress-forums li.bbp-forum-info {
+	width: 60%;
+}
+
+#bbpress-forums li.bbp-forum-topic-count,
+#bbpress-forums li.bbp-forum-reply-count {
+	width: 20%;
+}
+
+#pagebody ul.forum-info,
+#pagebody ul.forum-feeds,
+#pagebody ul.topic-info,
+#pagebody ul.topic-tags,
+#pagebody ul.topic-views,
+#pagebody ul.topic-admin-links {
+	margin-right: 0;
+}
+
+#pagebody ul a.feed, #pagebody ul .bbpress #bbpress-forums p.bbp-topic-meta a.feed, .bbpress #bbpress-forums p.bbp-topic-meta #pagebody ul a.feed {
+	background: none;
+	padding-right: 0;
+}
+
+.sidebar > div {
+	margin-bottom: 22px;
+}
+
+ul#views {
+	margin: 2px 0 20px;
+	font-size: 12px;
+}
+
+#views li {
+	list-style: none;
+	display: inline;
+}
+
+/* Notices */
+div.bbp-template-notice,
+div.indicator-hint {
+	background: #fff8e5;
+	border: 1px solid #ffb900;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+}
+
+div.bbp-template-notice.error,
+div.bbp-template-notice.warning {
+	background: #fbeaea;
+	border: 1px solid #dc3232;
+}
+
+/* Reply button */
+/* Focus outline */
+#bbpress-forums fieldset.bbp-form textarea,
+#bbpress-forums fieldset.bbp-form select,
+#bbpress-forums fieldset.bbp-form input {
+	outline: 0;
+}
+
+#bbpress-forums fieldset.bbp-form textarea:focus,
+#bbpress-forums fieldset.bbp-form select:focus,
+#bbpress-forums fieldset.bbp-form input:focus {
+	-webkit-box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, 0.8);
+	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, 0.8);
+}
+
+/* Search forms */
+#bbp-search-form {
+	position: relative;
+	margin-top: 0;
+}
+
+.sidebar #ts,
+.sidebar #rs {
+	width: 90%;
+	margin: 0 0 5px;
+}
+
+/* Sidebar */
+.sidebar .topic-info li.reply-count:before,
+.sidebar .forum-info li.reply-count:before {
+	content: "\f125";
+}
+
+.sidebar .forum-info li.topic-count:before {
+	content: "\f105";
+}
+
+.sidebar .topic-info li.wp-version:before {
+	content: "\f120";
+}
+
+.sidebar .topic-info li.topic-resolved:before {
+	content: "\f546";
+}
+
+/* Sticky topics */
+#bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink:before,
+#bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink:before {
+	content: "\f109";
+	color: #ffb900;
+}
+
+.bbp-forum-content ul.sticky,
+.bbp-topics ul.sticky,
+.bbp-topics ul.super-sticky,
+.bbp-topics-front ul.super-sticky {
+	background-color: #fff8e5 !important;
+}
+
+@media screen and (min-width: 960px) {
+	div.content {
+		width: 692px;
+	}
+	div.sidebar {
+		width: 212px;
+	}
+}
+
+/*--------------------------------------------------------------
+# Typography
+--------------------------------------------------------------*/
+html {
+	font-size: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+	color: #32373c;
+	font-family: "Open Sans", sans-serif;
+	font-size: 100%;
+	line-height: 1.5;
+}
+
+@media screen and (min-width: 48em) {
+	html {
+		font-size: 1.125rem;
+	}
+}
+
+h1, h2, h3, h4, .bbp-view .review-ratings .col-5 > div:first-child, h5, h6 {
+	clear: both;
+	font-family: inherit;
+	line-height: 1.5;
+	margin: 2rem 0 1rem;
+}
+
+h1 {
+	font-size: 3.8146972656rem;
+	font-weight: 300;
+}
+
+h1.title {
+	font-size: 0.8rem;
+	color: #0073aa;
+	font-weight: 600;
+	letter-spacing: 0.05rem;
+	text-transform: uppercase;
+}
+
+h2 {
+	font-size: 2.44140625rem;
+	font-weight: 300;
+}
+
+h3 {
+	font-size: 1.5625rem;
+	font-weight: 400;
+}
+
+h4, .bbp-view .review-ratings .col-5 > div:first-child {
+	font-size: 1.25rem;
+	border: none;
+	color: #32373c;
+	font-weight: 600;
+	padding: 0;
+}
+
+h5 {
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: 0.01rem;
+	text-transform: uppercase;
+}
+
+h6 {
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+p {
+	margin: 1em 0;
+}
+
+p.subheading {
+	color: #82878c;
+	font-size: 1.25rem;
+	font-weight: 300;
+	margin: -0.4rem auto 2rem;
+	text-align: center;
+}
+
+p.intro {
+	font-size: 1.25rem;
+}
+
+p.aside {
+	font-size: 0.8rem;
+}
+
+p.note {
+	font-size: 0.64rem;
+	letter-spacing: 0.01rem;
+	max-width: 18.1898940355rem;
+}
+
+dfn, cite, em, i {
+	font-style: italic;
+}
+
+blockquote {
+	margin: 0 1.5em;
+}
+
+address {
+	margin: 0 0 1.5em;
+}
+
+pre {
+	background: #eee;
+	font-family: "Courier 10 Pitch", Courier, monospace;
+	font-size: 0.8rem;
+	line-height: 1.6;
+	margin-bottom: 1.6em;
+	max-width: 100%;
+	overflow: auto;
+	padding: 1.6em;
+}
+
+code, kbd, tt, var {
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+	font-size: 0.8rem;
+}
+
+abbr, acronym {
+	border-bottom: 1px dotted #666;
+	cursor: help;
+}
+
+mark, ins {
+	background: #fff9c0;
+	text-decoration: none;
+}
+
+big {
+	font-size: 125%;
+}
+
+/*--------------------------------------------------------------
+# Elements
+--------------------------------------------------------------*/
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	/* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+	box-sizing: inherit;
+}
+
+body {
+	background: #fff;
+	/* Fallback for when there is no custom background color defined. */
+}
+
+blockquote, q {
+	quotes: "" "";
+}
+
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+
+blockquote {
+	background: transparent;
+	border: none;
+	padding: 0;
+	border-right: 2px solid #eee;
+	color: #82878c;
+	font-style: italic;
+	margin: 1rem 0;
+	padding-right: 1rem;
+}
+
+blockquote cite {
+	font-size: 0.8rem;
+}
+
+hr {
+	background-color: #eee;
+	border: 0;
+	height: 2px;
+	margin: 0 auto;
+}
+
+ul, ol {
+	margin: 0 3em 1.5em 0;
+}
+
+ul {
+	list-style: disc;
+}
+
+ol {
+	list-style: decimal;
+}
+
+li > ul,
+li > ol {
+	margin-bottom: 0;
+	margin-right: 1.5em;
+}
+
+dt {
+	font-weight: bold;
+}
+
+dd {
+	margin: 0 1.5em 1.5em;
+}
+
+.unstyled {
+	padding: 0;
+	margin: 0;
+}
+
+.unstyled li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.meta-list {
+	padding: 0;
+	margin: 0;
+}
+
+.meta-list li {
+	list-style: none;
+	margin: 0;
+	padding: 0.5rem 0;
+	font-size: 0.8rem;
+	border-top: 1px solid #eee;
+}
+
+img {
+	height: auto;
+	/* Make sure images are scaled correctly. */
+	max-width: 100%;
+	/* Adhere to container width. */
+}
+
+table {
+	margin: 0 0 1.5em;
+	width: 100%;
+}
+
+.notice {
+	background: #fff;
+	border-right: 4px solid #fff;
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+	margin: 1em 0;
+	padding: 1px 12px;
+}
+
+.notice p {
+	font-size: 0.8rem;
+	margin: 0.5em 0;
+	padding: 2px;
+}
+
+.notice.notice-alt {
+	box-shadow: none;
+}
+
+.notice.notice-large {
+	padding: 10px 20px;
+}
+
+.notice.notice-success {
+	border-right-color: #46b450;
+}
+
+.notice.notice-success.notice-alt {
+	background-color: #ecf7ed;
+}
+
+.notice.notice-warning {
+	border-right-color: #ffb900;
+}
+
+.notice.notice-warning.notice-alt {
+	background-color: #fff8e5;
+}
+
+.notice.notice-error {
+	border-right-color: #dc3232;
+}
+
+.notice.notice-error.notice-alt {
+	background-color: #fbeaea;
+}
+
+.notice.notice-info {
+	border-right-color: #00a0d2;
+}
+
+.notice.notice-info.notice-alt {
+	background-color: #e5f5fa;
+}
+
+.locale-banner {
+	background: #C7E8CA;
+	font-size: 0.8rem;
+	padding: 0.5rem;
+	text-align: center;
+}
+
+@media (min-width: 67rem) {
+	.locale-banner {
+		margin: 1rem auto 0;
+		max-width: 960px;
+	}
+}
+
+/*--------------------------------------------------------------
+# Forms
+--------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------
+  1.0 - Button Layouts
+---------------------------------------------------------------------------- */
+.button, .sidebar .subscription-toggle,
+.sidebar .favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a,
+.button-primary,
+#bbpress-forums fieldset.bbp-form .button.submit,
+#bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle,
+#bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+#bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn,
+.bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn,
+#bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit,
+.bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit,
+.button-secondary,
+.plugin-upload-form .button-primary,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit {
+	border: 1px solid;
+	border-radius: 3px;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 0.8rem;
+	height: 1.5625rem;
+	line-height: 1;
+	margin: 0;
+	padding: 0 0.8rem;
+	text-decoration: none;
+	white-space: nowrap;
+	-webkit-appearance: none;
+}
+
+/* Remove the dotted border on :focus and the extra padding in Firefox */
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner {
+	border: 0 none;
+	padding: 0;
+}
+
+.button.button-large, .sidebar .button-large.subscription-toggle,
+.sidebar .button-large.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-large.btn, .bbp-view .wporg-bbp-term-subscription a.button-large, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-large, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-large,
+.button-group.button-large .button,
+.button-group.button-large .sidebar .subscription-toggle, .sidebar
+.button-group.button-large .subscription-toggle,
+.button-group.button-large
+.sidebar .favorite-toggle,
+.sidebar
+.button-group.button-large .favorite-toggle,
+.button-group.button-large .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-large .btn,
+.button-group.button-large .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription
+.button-group.button-large a,
+.button-group.button-large .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.button-group.button-large a {
+	height: 1.953125rem;
+	line-height: 1;
+	padding: 0 1rem;
+}
+
+.button.button-small, .sidebar .button-small.subscription-toggle,
+.sidebar .button-small.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-small.btn, .bbp-view .wporg-bbp-term-subscription a.button-small, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-small, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-small,
+.button-group.button-small .button,
+.button-group.button-small .sidebar .subscription-toggle, .sidebar
+.button-group.button-small .subscription-toggle,
+.button-group.button-small
+.sidebar .favorite-toggle,
+.sidebar
+.button-group.button-small .favorite-toggle,
+.button-group.button-small .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-small .btn,
+.button-group.button-small .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription
+.button-group.button-small a,
+.button-group.button-small .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.button-group.button-small a {
+	font-size: 0.64rem;
+	height: 1.25rem;
+	line-height: 1;
+	padding: 0 0.5rem;
+}
+
+a.button, .bbpress #bbpress-forums p.bbp-topic-meta a.button, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .sidebar a.subscription-toggle,
+.sidebar a.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbp-view .wporg-bbp-term-subscription a,
+a.button-primary,
+.bbpress #bbpress-forums p.bbp-topic-meta a.button-primary,
+#bbpress-forums fieldset.bbp-form a.button.submit,
+.bbpress #bbpress-forums p.bbp-topic-meta .sidebar fieldset.bbp-form a.submit.subscription-toggle,
+.bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar fieldset.bbp-form a.submit.favorite-toggle,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link fieldset.bbp-form a.submit.btn,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit,
+#bbpress-forums fieldset.bbp-form .sidebar a.submit.subscription-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form a.submit.subscription-toggle,
+#bbpress-forums fieldset.bbp-form
+.sidebar a.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form a.submit.favorite-toggle,
+#bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link a.submit.btn,
+.bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form a.submit.btn,
+#bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit,
+.bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit,
+a.button-secondary,
+.bbpress #bbpress-forums p.bbp-topic-meta a.button-secondary {
+	line-height: 1.5625rem;
+}
+
+a.button.button-large, .bbpress #bbpress-forums p.bbp-topic-meta a.button.button-large, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.button-large.subscription-toggle, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.button-large.subscription-toggle, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.button-large.favorite-toggle,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.button-large.favorite-toggle, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.button-large.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.button-large.btn, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-large, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-large, .sidebar a.button-large.subscription-toggle,
+.sidebar a.button-large.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link a.button-large.btn, .bbp-view .wporg-bbp-term-subscription a.button-large,
+.button-group.button-large a.button,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta a.button, .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a.button,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar
+.button-group.button-large a.subscription-toggle,
+.button-group.button-large .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a.subscription-toggle,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar
+.button-group.button-large a.favorite-toggle,
+.button-group.button-large
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a.favorite-toggle,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-large a.btn,
+.button-group.button-large .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a.btn,
+.button-group.button-large .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.button-group.button-large a,
+.button-group.button-large .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-large a,
+.button-group.button-large .sidebar a.subscription-toggle, .sidebar
+.button-group.button-large a.subscription-toggle,
+.button-group.button-large
+.sidebar a.favorite-toggle,
+.sidebar
+.button-group.button-large a.favorite-toggle,
+.button-group.button-large .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-large a.btn,
+.button-group.button-large .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription
+.button-group.button-large a {
+	line-height: 1.953125rem;
+}
+
+a.button.button-small, .bbpress #bbpress-forums p.bbp-topic-meta a.button.button-small, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.button-small.subscription-toggle, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.button-small.subscription-toggle, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.button-small.favorite-toggle,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.button-small.favorite-toggle, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.button-small.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.button-small.btn, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-small, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-small, .sidebar a.button-small.subscription-toggle,
+.sidebar a.button-small.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link a.button-small.btn, .bbp-view .wporg-bbp-term-subscription a.button-small,
+.button-group.button-small a.button,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta a.button, .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a.button,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar
+.button-group.button-small a.subscription-toggle,
+.button-group.button-small .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a.subscription-toggle,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar
+.button-group.button-small a.favorite-toggle,
+.button-group.button-small
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a.favorite-toggle,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-small a.btn,
+.button-group.button-small .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a.btn,
+.button-group.button-small .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.button-group.button-small a,
+.button-group.button-small .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.button-group.button-small a,
+.button-group.button-small .sidebar a.subscription-toggle, .sidebar
+.button-group.button-small a.subscription-toggle,
+.button-group.button-small
+.sidebar a.favorite-toggle,
+.sidebar
+.button-group.button-small a.favorite-toggle,
+.button-group.button-small .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.button-group.button-small a.btn,
+.button-group.button-small .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription
+.button-group.button-small a {
+	line-height: 1.25rem;
+}
+
+.button:active, .sidebar .subscription-toggle:active,
+.sidebar .favorite-toggle:active, .bbp-view .review-ratings .col-5 .reviews-submit-link .btn:active, .bbp-view .wporg-bbp-term-subscription a:active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:active,
+.button:focus,
+.sidebar .subscription-toggle:focus,
+.sidebar .favorite-toggle:focus,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:focus,
+.bbp-view .wporg-bbp-term-subscription a:focus,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:focus,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:focus {
+	outline: none;
+}
+
+.button.hidden, .sidebar .hidden.subscription-toggle,
+.sidebar .hidden.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .hidden.btn, .bbp-view .wporg-bbp-term-subscription a.hidden, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.hidden, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.hidden {
+	display: none;
+}
+
+/* Style Reset buttons as simple text links */
+input[type="reset"],
+input[type="reset"]:hover,
+input[type="reset"]:active,
+input[type="reset"]:focus {
+	background: none;
+	border: none;
+	box-shadow: none;
+	padding: 0 2px 1px;
+	width: auto;
+}
+
+/* ----------------------------------------------------------------------------
+  2.0 - Default Button Style
+---------------------------------------------------------------------------- */
+.button, .sidebar .subscription-toggle,
+.sidebar .favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a,
+.button:visited,
+.sidebar .subscription-toggle:visited,
+.sidebar .favorite-toggle:visited,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:visited,
+.bbp-view .wporg-bbp-term-subscription a:visited,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:visited,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:visited,
+.button-secondary {
+	background: #f7f7f7;
+	border-color: #cccccc;
+	box-shadow: 0 1px 0 #cccccc;
+	color: #555;
+	vertical-align: top;
+}
+
+p .button, p .sidebar .subscription-toggle, .sidebar p .subscription-toggle, p
+.sidebar .favorite-toggle,
+.sidebar p .favorite-toggle, p .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .review-ratings .col-5 .reviews-submit-link p .btn, p .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription p a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a {
+	vertical-align: baseline;
+}
+
+.button.hover, .sidebar .hover.subscription-toggle,
+.sidebar .hover.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .hover.btn, .bbp-view .wporg-bbp-term-subscription a.hover, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.hover,
+.button:hover,
+.sidebar .subscription-toggle:hover,
+.sidebar .favorite-toggle:hover,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:hover,
+.bbp-view .wporg-bbp-term-subscription a:hover,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:hover,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:hover,
+.button-secondary:hover,
+.button.focus,
+.sidebar .focus.subscription-toggle,
+.sidebar .focus.favorite-toggle,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .focus.btn,
+.bbp-view .wporg-bbp-term-subscription a.focus,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.focus,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.focus,
+.button:focus,
+.sidebar .subscription-toggle:focus,
+.sidebar .favorite-toggle:focus,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:focus,
+.bbp-view .wporg-bbp-term-subscription a:focus,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:focus,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:focus,
+.button-secondary:focus {
+	background: #fafafa;
+	border-color: #999;
+	color: #23282d;
+}
+
+.button.focus, .sidebar .focus.subscription-toggle,
+.sidebar .focus.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .focus.btn, .bbp-view .wporg-bbp-term-subscription a.focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.focus,
+.button:focus,
+.sidebar .subscription-toggle:focus,
+.sidebar .favorite-toggle:focus,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:focus,
+.bbp-view .wporg-bbp-term-subscription a:focus,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:focus,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:focus,
+.button-secondary:focus,
+.button-link:focus {
+	border-color: #5b9dd9;
+	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+}
+
+.button.active, .sidebar .active.subscription-toggle,
+.sidebar .active.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .active.btn, .bbp-view .wporg-bbp-term-subscription a.active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.active,
+.button.active:hover,
+.sidebar .active.subscription-toggle:hover,
+.sidebar .active.favorite-toggle:hover,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .active.btn:hover,
+.bbp-view .wporg-bbp-term-subscription a.active:hover,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.active:hover,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.active:hover,
+.button:active,
+.sidebar .subscription-toggle:active,
+.sidebar .favorite-toggle:active,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:active,
+.bbp-view .wporg-bbp-term-subscription a:active,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:active,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:active,
+.button-secondary:active {
+	background: #eee;
+	border-color: #999;
+	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+	transform: translateY(1px);
+}
+
+.button.active:focus, .sidebar .active.subscription-toggle:focus,
+.sidebar .active.favorite-toggle:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link .active.btn:focus, .bbp-view .wporg-bbp-term-subscription a.active:focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.active:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.active:focus {
+	border-color: #5b9dd9;
+	box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5), 0 0 3px rgba(0, 115, 170, 0.8);
+}
+
+.button[disabled], .sidebar [disabled].subscription-toggle,
+.sidebar [disabled].favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link [disabled].btn, .bbp-view .wporg-bbp-term-subscription a[disabled], .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a[disabled], .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a[disabled],
+.button:disabled,
+.sidebar .subscription-toggle:disabled,
+.sidebar .favorite-toggle:disabled,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .btn:disabled,
+.bbp-view .wporg-bbp-term-subscription a:disabled,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:disabled,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:disabled,
+.button.disabled,
+.sidebar .disabled.subscription-toggle,
+.sidebar .disabled.favorite-toggle,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .disabled.btn,
+.bbp-view .wporg-bbp-term-subscription a.disabled,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.disabled,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.disabled,
+.button-secondary[disabled],
+.button-secondary:disabled,
+.button-secondary.disabled,
+.button-disabled {
+	background: #f7f7f7 !important;
+	border-color: #ddd !important;
+	box-shadow: none !important;
+	color: #a0a5aa !important;
+	cursor: default;
+	text-shadow: 0 1px 0 #fff !important;
+	transform: none !important;
+}
+
+/* Buttons that look like links, for a cross of good semantics with the visual */
+.button-link {
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	cursor: pointer;
+	margin: 0;
+	outline: none;
+	padding: 0;
+}
+
+.button-link:focus {
+	outline: #5b9dd9 solid 1px;
+}
+
+/* ----------------------------------------------------------------------------
+  3.0 - Primary Button Style
+---------------------------------------------------------------------------- */
+.button-primary, #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit,
+.download-button,
+.plugin-upload-form .button-primary,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit {
+	background: #0085ba;
+	border-color: #0073aa #006799 #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+	text-decoration: none;
+	text-shadow: 0 -1px 1px #006799, -1px 0 1px #006799, 0 1px 1px #006799, 1px 0 1px #006799;
+}
+
+.button-primary:visited, #bbpress-forums fieldset.bbp-form .button.submit:visited, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:visited, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:visited,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:visited, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:visited, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:visited, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:visited, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:visited,
+.download-button:visited,
+.plugin-upload-form .button-primary:visited,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:visited, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:visited,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:visited, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:visited,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:visited, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:visited,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:visited, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:visited,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:visited,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:visited,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:visited, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:visited,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:visited, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:visited,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:visited, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:visited,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:visited, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:visited,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:visited, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:visited {
+	background: #0085ba;
+	border-color: #0073aa #006799 #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+}
+
+.button-primary.hover, #bbpress-forums fieldset.bbp-form .hover.button.submit, #bbpress-forums fieldset.bbp-form .sidebar .hover.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .hover.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .hover.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .hover.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .hover.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .hover.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.hover.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.hover.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.hover.submit, .button-primary:hover, #bbpress-forums fieldset.bbp-form .button.submit:hover, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:hover, .button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .sidebar .focus.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .focus.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .focus.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .focus.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.focus.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.focus.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.focus.submit, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:focus,
+.download-button.hover,
+.download-button:hover,
+.download-button.focus,
+.download-button:focus,
+.plugin-upload-form .button-primary.hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .hover.button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .hover.button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .hover.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .hover.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .hover.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .hover.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .hover.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .hover.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .hover.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .hover.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .hover.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .hover.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .hover.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .hover.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.hover.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.hover.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.hover.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.hover.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.hover.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.hover.submit,
+.plugin-upload-form .button-primary:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:hover, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:hover,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:hover,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:hover,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:hover,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:hover,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:hover,
+.plugin-upload-form .button-primary.focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .focus.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .focus.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .focus.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .focus.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .focus.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .focus.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .focus.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.focus.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.focus.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.focus.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .button-primary:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:focus,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:focus,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:focus,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:focus,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:focus {
+	background: #008ec2;
+	border-color: #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+}
+
+.button-primary.focus, #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form .sidebar .focus.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .focus.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .focus.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .focus.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.focus.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.focus.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.focus.submit, .button-primary:focus, #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:focus,
+.download-button.focus,
+.download-button:focus,
+.plugin-upload-form .button-primary.focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .focus.button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .focus.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .focus.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .focus.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .focus.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .focus.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .focus.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .focus.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .focus.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .focus.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .focus.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.focus.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.focus.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.focus.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.focus.submit,
+.plugin-upload-form .button-primary:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:focus, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:focus,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:focus,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:focus,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:focus,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:focus {
+	box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+}
+
+.button-primary.active, #bbpress-forums fieldset.bbp-form .active.button.submit, #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit, .button-primary.active:hover, #bbpress-forums fieldset.bbp-form .active.button.submit:hover, #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit:hover, .button-primary.active:focus, #bbpress-forums fieldset.bbp-form .active.button.submit:focus, #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit:focus, .button-primary:active, #bbpress-forums fieldset.bbp-form .button.submit:active, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:active, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:active, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:active,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:active, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:active, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:active,
+.download-button.active,
+.download-button.active:hover,
+.download-button.active:focus,
+.download-button:active,
+.plugin-upload-form .button-primary.active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .active.button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .active.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .active.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .active.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.active.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.active.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.active.submit,
+.plugin-upload-form .button-primary.active:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .active.button.submit:hover, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.button.submit:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .active.submit.subscription-toggle:hover,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.subscription-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .active.submit.favorite-toggle:hover,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.favorite-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .active.submit.btn:hover,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.btn:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.active.submit:hover,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.active.submit:hover,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.active.submit:hover,
+.plugin-upload-form .button-primary.active:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .active.button.submit:focus, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.button.submit:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .active.submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .active.submit.subscription-toggle:focus,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .active.submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.subscription-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .active.submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .active.submit.favorite-toggle:focus,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .active.submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.favorite-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .active.submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .active.submit.btn:focus,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .active.submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .active.submit.btn:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.active.submit:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.active.submit:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.active.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.active.submit:focus,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.active.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.active.submit:focus,
+.plugin-upload-form .button-primary:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:active, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:active, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:active,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:active, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:active, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:active,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:active,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:active, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:active,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:active, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:active,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:active, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:active,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:active {
+	background: #0073aa;
+	border-color: #006799;
+	box-shadow: inset 0 2px 0 #006799;
+	vertical-align: top;
+}
+
+.button-primary[disabled], #bbpress-forums fieldset.bbp-form [disabled].button.submit, #bbpress-forums fieldset.bbp-form .sidebar [disabled].submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form [disabled].submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar [disabled].submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form [disabled].submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link [disabled].submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form [disabled].submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a[disabled].submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a[disabled].submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a[disabled].submit, .button-primary:disabled, #bbpress-forums fieldset.bbp-form .button.submit:disabled, #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:disabled, .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:disabled, #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:disabled,
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:disabled, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:disabled, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:disabled, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:disabled, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:disabled, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:disabled, .button-primary.disabled, #bbpress-forums fieldset.bbp-form .disabled.button.submit, #bbpress-forums fieldset.bbp-form .sidebar .disabled.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .disabled.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .disabled.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .disabled.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .disabled.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.disabled.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.disabled.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.disabled.submit,
+.download-button[disabled],
+.download-button:disabled,
+.download-button.disabled,
+.plugin-upload-form .button-primary[disabled],
+.plugin-upload-form #bbpress-forums fieldset.bbp-form [disabled].button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form [disabled].button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar [disabled].submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form [disabled].submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form [disabled].submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form [disabled].submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar [disabled].submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form [disabled].submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form [disabled].submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form [disabled].submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link [disabled].submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form [disabled].submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form [disabled].submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form [disabled].submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a[disabled].submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a[disabled].submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a[disabled].submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a[disabled].submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a[disabled].submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a[disabled].submit,
+.plugin-upload-form .button-primary:disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit:disabled, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.submit:disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle:disabled, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .submit.subscription-toggle:disabled,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle:disabled, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.subscription-toggle:disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .submit.favorite-toggle:disabled, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .submit.favorite-toggle:disabled,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle:disabled,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.favorite-toggle:disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn:disabled, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .submit.btn:disabled,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn:disabled, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .submit.btn:disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit:disabled, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.submit:disabled,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit:disabled, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.submit:disabled,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit:disabled, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.submit:disabled,
+.plugin-upload-form .button-primary.disabled,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .disabled.button.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .disabled.button.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .disabled.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .disabled.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .disabled.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .disabled.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .disabled.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .disabled.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .disabled.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .disabled.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .disabled.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .disabled.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .disabled.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .disabled.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.disabled.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.disabled.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.disabled.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.disabled.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.disabled.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.disabled.submit {
+	background: #008ec2 !important;
+	border-color: #007cb2 !important;
+	box-shadow: none !important;
+	color: #66c6e4 !important;
+	cursor: default;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.button-primary.button.button-hero, #bbpress-forums fieldset.bbp-form .button.button-hero.submit, #bbpress-forums fieldset.bbp-form .sidebar .button-hero.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.submit, .sidebar .button-primary.button-hero.subscription-toggle,
+.sidebar .button-primary.button-hero.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.btn, .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero,
+.download-button.button.button-hero,
+.sidebar .download-button.button-hero.subscription-toggle,
+.sidebar .download-button.button-hero.favorite-toggle,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .download-button.button-hero.btn,
+.bbp-view .wporg-bbp-term-subscription a.download-button.button-hero,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.download-button.button-hero,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.download-button.button-hero,
+.plugin-upload-form .button-primary.button.button-hero,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.button-hero.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.button-hero.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .button-hero.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .button-hero.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .button-hero.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-hero.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-hero.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.button-hero.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.button-hero.submit,
+.plugin-upload-form .sidebar .button-primary.button-hero.subscription-toggle, .sidebar
+.plugin-upload-form .button-primary.button-hero.subscription-toggle,
+.plugin-upload-form
+.sidebar .button-primary.button-hero.favorite-toggle,
+.sidebar
+.plugin-upload-form .button-primary.button-hero.favorite-toggle,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-primary.button-hero.btn,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero, .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.plugin-upload-form a.button-primary.button-hero,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero {
+	box-shadow: 0 2px 0 #006799;
+}
+
+.button-primary.button.button-hero.active, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit, .sidebar .button-primary.button-hero.active.subscription-toggle,
+.sidebar .button-primary.button-hero.active.favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn, .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active, .button-primary.button.button-hero.active:hover, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit:hover, #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit:hover, .sidebar .button-primary.button-hero.active.subscription-toggle:hover,
+.sidebar .button-primary.button-hero.active.favorite-toggle:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn:hover, .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:hover, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:hover, .button-primary.button.button-hero.active:focus, #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit:focus, #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit:focus, .sidebar .button-primary.button-hero.active.subscription-toggle:focus,
+.sidebar .button-primary.button-hero.active.favorite-toggle:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn:focus, .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:focus, .button-primary.button.button-hero:active, #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active, #bbpress-forums fieldset.bbp-form .sidebar .button-hero.submit.subscription-toggle:active, .sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle:active, #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.submit.favorite-toggle:active,
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle:active, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.submit.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.submit.btn:active, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.submit:active, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.submit:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.submit:active, .sidebar .button-primary.button-hero.subscription-toggle:active,
+.sidebar .button-primary.button-hero.favorite-toggle:active, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.btn:active, .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero:active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero:active,
+.download-button.button.button-hero.active,
+.sidebar .download-button.button-hero.active.subscription-toggle,
+.sidebar .download-button.button-hero.active.favorite-toggle,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .download-button.button-hero.active.btn,
+.bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.download-button.button-hero.active,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active,
+.download-button.button.button-hero.active:hover,
+.sidebar .download-button.button-hero.active.subscription-toggle:hover,
+.sidebar .download-button.button-hero.active.favorite-toggle:hover,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .download-button.button-hero.active.btn:hover,
+.bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active:hover,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.download-button.button-hero.active:hover,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active:hover,
+.download-button.button.button-hero.active:focus,
+.sidebar .download-button.button-hero.active.subscription-toggle:focus,
+.sidebar .download-button.button-hero.active.favorite-toggle:focus,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .download-button.button-hero.active.btn:focus,
+.bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active:focus,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.download-button.button-hero.active:focus,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.download-button.button-hero.active:focus,
+.download-button.button.button-hero:active,
+.sidebar .download-button.button-hero.subscription-toggle:active,
+.sidebar .download-button.button-hero.favorite-toggle:active,
+.bbp-view .review-ratings .col-5 .reviews-submit-link .download-button.button-hero.btn:active,
+.bbp-view .wporg-bbp-term-subscription a.download-button.button-hero:active,
+.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.download-button.button-hero:active,
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.download-button.button-hero:active,
+.plugin-upload-form .button-primary.button.button-hero.active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.button-hero.active.submit,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .button-hero.active.submit.subscription-toggle,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.subscription-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .button-hero.active.submit.favorite-toggle,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.favorite-toggle,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-hero.active.submit.btn,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.btn,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-hero.active.submit,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit,
+.plugin-upload-form .sidebar .button-primary.button-hero.active.subscription-toggle, .sidebar
+.plugin-upload-form .button-primary.button-hero.active.subscription-toggle,
+.plugin-upload-form
+.sidebar .button-primary.button-hero.active.favorite-toggle,
+.sidebar
+.plugin-upload-form .button-primary.button-hero.active.favorite-toggle,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-primary.button-hero.active.btn,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active, .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.plugin-upload-form a.button-primary.button-hero.active,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active,
+.plugin-upload-form .button-primary.button.button-hero.active:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit:hover, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.button-hero.active.submit:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle:hover, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .button-hero.active.submit.subscription-toggle:hover,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle:hover, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.subscription-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle:hover, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .button-hero.active.submit.favorite-toggle:hover,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle:hover,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.favorite-toggle:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn:hover, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-hero.active.submit.btn:hover,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.btn:hover,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit:hover, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-hero.active.submit:hover,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit:hover, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit:hover,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit:hover,
+.plugin-upload-form .sidebar .button-primary.button-hero.active.subscription-toggle:hover, .sidebar
+.plugin-upload-form .button-primary.button-hero.active.subscription-toggle:hover,
+.plugin-upload-form
+.sidebar .button-primary.button-hero.active.favorite-toggle:hover,
+.sidebar
+.plugin-upload-form .button-primary.button-hero.active.favorite-toggle:hover,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-primary.button-hero.active.btn:hover,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:hover, .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active:hover,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active:hover, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.plugin-upload-form a.button-primary.button-hero.active:hover,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active:hover,
+.plugin-upload-form .button-primary.button.button-hero.active:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.button-hero.active.submit:focus, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.button-hero.active.submit:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .button-hero.active.submit.subscription-toggle:focus, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .button-hero.active.submit.subscription-toggle:focus,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.subscription-toggle:focus, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.subscription-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.active.submit.favorite-toggle:focus, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .button-hero.active.submit.favorite-toggle:focus,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.active.submit.favorite-toggle:focus,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.favorite-toggle:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.active.submit.btn:focus, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-hero.active.submit.btn:focus,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.active.submit.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.active.submit.btn:focus,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.active.submit:focus, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-hero.active.submit:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.active.submit:focus, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit:focus,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.active.submit:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.button-hero.active.submit:focus,
+.plugin-upload-form .sidebar .button-primary.button-hero.active.subscription-toggle:focus, .sidebar
+.plugin-upload-form .button-primary.button-hero.active.subscription-toggle:focus,
+.plugin-upload-form
+.sidebar .button-primary.button-hero.active.favorite-toggle:focus,
+.sidebar
+.plugin-upload-form .button-primary.button-hero.active.favorite-toggle:focus,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.active.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-primary.button-hero.active.btn:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:focus, .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active:focus,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero.active:focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.plugin-upload-form a.button-primary.button-hero.active:focus,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero.active:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero.active:focus,
+.plugin-upload-form .button-primary.button.button-hero:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.button-hero.submit:active, #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button.button-hero.submit:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .button-hero.submit.subscription-toggle:active, #bbpress-forums fieldset.bbp-form .sidebar
+.plugin-upload-form .button-hero.submit.subscription-toggle:active,
+.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.subscription-toggle:active, .sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.subscription-toggle:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form
+.sidebar .button-hero.submit.favorite-toggle:active, #bbpress-forums fieldset.bbp-form
+.sidebar
+.plugin-upload-form .button-hero.submit.favorite-toggle:active,
+.plugin-upload-form
+.sidebar #bbpress-forums fieldset.bbp-form .button-hero.submit.favorite-toggle:active,
+.sidebar #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.favorite-toggle:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-hero.submit.btn:active, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-hero.submit.btn:active,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-hero.submit.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+.plugin-upload-form .button-hero.submit.btn:active,
+.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.button-hero.submit:active, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-hero.submit:active,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.button-hero.submit:active, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+.plugin-upload-form a.button-hero.submit:active,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.button-hero.submit:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+.plugin-upload-form a.button-hero.submit:active,
+.plugin-upload-form .sidebar .button-primary.button-hero.subscription-toggle:active, .sidebar
+.plugin-upload-form .button-primary.button-hero.subscription-toggle:active,
+.plugin-upload-form
+.sidebar .button-primary.button-hero.favorite-toggle:active,
+.sidebar
+.plugin-upload-form .button-primary.button-hero.favorite-toggle:active,
+.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-primary.button-hero.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link
+.plugin-upload-form .button-primary.button-hero.btn:active,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero:active, .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero:active,
+.plugin-upload-form .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-primary.button-hero:active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta
+.plugin-upload-form a.button-primary.button-hero:active,
+.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-primary.button-hero:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription
+.plugin-upload-form a.button-primary.button-hero:active {
+	box-shadow: inset 0 3px 0 #006799;
+}
+
+.button-primary-disabled {
+	background: #008ec2 !important;
+	border-color: #007cb2 !important;
+	box-shadow: none !important;
+	color: #66c6e4 !important;
+	cursor: default;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ----------------------------------------------------------------------------
+  4.0 - Button Groups
+---------------------------------------------------------------------------- */
+.button-group {
+	display: inline-block;
+	font-size: 0;
+	position: relative;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.button-group > .button, .sidebar .button-group > .subscription-toggle,
+.sidebar .button-group > .favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .btn, .bbp-view .wporg-bbp-term-subscription .button-group > a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta .button-group > a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription .button-group > a {
+	border-radius: 0;
+	display: inline-block;
+	margin-left: -1px;
+	z-index: 10;
+}
+
+.button-group > .button-primary, #bbpress-forums fieldset.bbp-form .button-group > .button.submit, #bbpress-forums fieldset.bbp-form .sidebar .button-group > .submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form .button-group > .submit.subscription-toggle, #bbpress-forums fieldset.bbp-form
+.sidebar .button-group > .submit.favorite-toggle,
+.sidebar #bbpress-forums fieldset.bbp-form .button-group > .submit.favorite-toggle, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .button-group > .submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription .button-group > a.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form .button-group > a.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form .button-group > a.submit {
+	z-index: 100;
+}
+
+.button-group > .button:hover, .sidebar .button-group > .subscription-toggle:hover,
+.sidebar .button-group > .favorite-toggle:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .btn:hover, .bbp-view .wporg-bbp-term-subscription .button-group > a:hover, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta .button-group > a:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription .button-group > a:hover {
+	z-index: 20;
+}
+
+.button-group > .button:first-child, .sidebar .button-group > .subscription-toggle:first-child,
+.sidebar .button-group > .favorite-toggle:first-child, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .btn:first-child, .bbp-view .wporg-bbp-term-subscription .button-group > a:first-child, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta .button-group > a:first-child, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription .button-group > a:first-child {
+	border-radius: 0 3px 3px 0;
+}
+
+.button-group > .button:last-child, .sidebar .button-group > .subscription-toggle:last-child,
+.sidebar .button-group > .favorite-toggle:last-child, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .btn:last-child, .bbp-view .wporg-bbp-term-subscription .button-group > a:last-child, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta .button-group > a:last-child, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription .button-group > a:last-child {
+	border-radius: 3px 0 0 3px;
+}
+
+.button-group > .button:focus, .sidebar .button-group > .subscription-toggle:focus,
+.sidebar .button-group > .favorite-toggle:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link .button-group > .btn:focus, .bbp-view .wporg-bbp-term-subscription .button-group > a:focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta .button-group > a:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription .button-group > a:focus {
+	position: relative;
+	z-index: 1;
+}
+
+/* ----------------------------------------------------------------------------
+  5.0 - Responsive Button Styles
+---------------------------------------------------------------------------- */
+@media screen and (max-width: 48em) {
+	.button, .sidebar .subscription-toggle,
+	.sidebar .favorite-toggle, .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a,
+	.button.button-large,
+	.sidebar .button-large.subscription-toggle,
+	.sidebar .button-large.favorite-toggle,
+	.bbp-view .review-ratings .col-5 .reviews-submit-link .button-large.btn,
+	.bbp-view .wporg-bbp-term-subscription a.button-large,
+	.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-large,
+	.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-large,
+	.button.button-small,
+	.sidebar .button-small.subscription-toggle,
+	.sidebar .button-small.favorite-toggle,
+	.bbp-view .review-ratings .col-5 .reviews-submit-link .button-small.btn,
+	.bbp-view .wporg-bbp-term-subscription a.button-small,
+	.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a.button-small,
+	.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a.button-small,
+	.plugin-upload-form .button-primary,
+	.plugin-upload-form #bbpress-forums fieldset.bbp-form .button.submit, #bbpress-forums fieldset.bbp-form
+	.plugin-upload-form .button.submit,
+	.plugin-upload-form #bbpress-forums fieldset.bbp-form .sidebar .submit.subscription-toggle, #bbpress-forums fieldset.bbp-form .sidebar
+	.plugin-upload-form .submit.subscription-toggle,
+	.plugin-upload-form .sidebar #bbpress-forums fieldset.bbp-form .submit.subscription-toggle, .sidebar #bbpress-forums fieldset.bbp-form
+	.plugin-upload-form .submit.subscription-toggle,
+	.plugin-upload-form #bbpress-forums fieldset.bbp-form
+	.sidebar .submit.favorite-toggle, #bbpress-forums fieldset.bbp-form
+	.sidebar
+	.plugin-upload-form .submit.favorite-toggle,
+	.plugin-upload-form
+	.sidebar #bbpress-forums fieldset.bbp-form .submit.favorite-toggle,
+	.sidebar #bbpress-forums fieldset.bbp-form
+	.plugin-upload-form .submit.favorite-toggle,
+	.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link .submit.btn, #bbpress-forums fieldset.bbp-form .bbp-view .review-ratings .col-5 .reviews-submit-link
+	.plugin-upload-form .submit.btn,
+	.plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form .submit.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #bbpress-forums fieldset.bbp-form
+	.plugin-upload-form .submit.btn,
+	.plugin-upload-form #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription a.submit, #bbpress-forums fieldset.bbp-form .bbp-view .wporg-bbp-term-subscription
+	.plugin-upload-form a.submit,
+	.plugin-upload-form .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form a.submit, .bbp-view .wporg-bbp-term-subscription #bbpress-forums fieldset.bbp-form
+	.plugin-upload-form a.submit,
+	.plugin-upload-form .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form a.submit, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription fieldset.bbp-form
+	.plugin-upload-form a.submit {
+		font-size: 14px;
+		height: auto;
+		line-height: normal;
+		margin-bottom: 4px;
+		padding: 6px 14px;
+		vertical-align: middle;
+	}
+}
+
+/* Include margin and padding in the width calculation of input and textarea. */
+input,
+textarea {
+	box-sizing: border-box;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="checkbox"],
+input[type="color"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="radio"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"],
+select,
+textarea {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+	color: #32373c;
+	transition: 0.05s border-color ease-in-out;
+	-webkit-appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="checkbox"]:focus,
+input[type="color"]:focus,
+input[type="date"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="email"]:focus,
+input[type="month"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="radio"]:focus,
+input[type="tel"]:focus,
+input[type="text"]:focus,
+input[type="time"]:focus,
+input[type="url"]:focus,
+input[type="week"]:focus,
+select:focus,
+textarea:focus {
+	color: #111;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="color"]:focus,
+input[type="date"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="email"]:focus,
+input[type="month"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="text"]:focus,
+input[type="time"]:focus,
+input[type="url"]:focus,
+input[type="week"]:focus,
+input[type="checkbox"]:focus,
+input[type="radio"]:focus,
+select:focus,
+textarea:focus {
+	border-color: #5b9dd9;
+	box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+}
+input[type="email"],
+input[type="url"] {
+	direction: ltr;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="password"],
+input[type="number"] {
+	padding: 6px 10px;
+}
+
+/* Vertically align the number selector with the input. */
+input[type="number"] {
+	height: 40px;
+	line-height: inherit;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	background: #fff;
+	border: 1px solid #b4b9be;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	clear: none;
+	color: #555;
+	cursor: pointer;
+	display: inline-block;
+	height: 25px;
+	line-height: 0;
+	margin: -4px 0 0 4px;
+	min-width: 16px;
+	padding: 0 !important;
+	text-align: center;
+	transition: .05s border-color ease-in-out;
+	vertical-align: middle;
+	width: 25px;
+}
+
+input[type="checkbox"] {
+	padding: 10px;
+}
+
+input[type="radio"] {
+	border-radius: 50%;
+	line-height: 10px;
+	margin-left: 4px;
+}
+
+input[type="checkbox"]:checked:before,
+input[type="radio"]:checked:before {
+	display: inline-block;
+	float: right;
+	font: normal 21px/1 dashicons;
+	vertical-align: middle;
+	width: 16px;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	speak: none;
+}
+
+input[type="checkbox"]:checked:before {
+	color: #1e8cbe;
+	content: "\f147";
+	font: normal 30px/1 dashicons;
+	margin: -3px -5px;
+}
+
+input[type="radio"]:checked:before {
+	background-color: #1e8cbe;
+	border-radius: 50px;
+	content: "\2022";
+	font-size: 24px;
+	height: 9px;
+	line-height: 16px;
+	margin: 7px;
+	text-indent: -9999px;
+	vertical-align: middle;
+	width: 9px;
+}
+
+@-moz-document url-prefix() {
+	input[type="checkbox"],
+	input[type="radio"],
+	.form-table input.tog {
+		margin-bottom: -1px;
+	}
+}
+
+/* Search */
+input[type="search"]::-webkit-search-decoration {
+	display: none;
+}
+
+.ie8 input[type="password"] {
+	font-family: sans-serif;
+}
+
+textarea,
+input,
+select,
+button {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
+textarea,
+input,
+select {
+	border-radius: 0;
+	font-size: 16px;
+	padding: 3px 5px;
+	/* Reset mobile webkit's default element styling */
+}
+
+textarea {
+	line-height: 1.4;
+	overflow: auto;
+	padding: 2px 6px;
+	resize: vertical;
+}
+
+input[type="file"] {
+	padding: 3px 0;
+}
+
+label {
+	cursor: pointer;
+}
+
+input.readonly,
+input[readonly],
+textarea.readonly,
+textarea[readonly] {
+	background-color: #eee;
+}
+
+:-moz-placeholder {
+	color: #a9a9a9;
+}
+
+input:disabled,
+input.disabled,
+select:disabled,
+select.disabled,
+textarea:disabled,
+textarea.disabled {
+	background: rgba(255, 255, 255, 0.5);
+	border-color: rgba(222, 222, 222, 0.75);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+	color: rgba(51, 51, 51, 0.5);
+}
+
+input[type="file"]:disabled,
+input[type="file"].disabled,
+input[type="range"]:disabled,
+input[type="range"].disabled {
+	background: none;
+	box-shadow: none;
+}
+
+input[type="checkbox"]:disabled,
+input[type="checkbox"].disabled,
+input[type="radio"]:disabled,
+input[type="radio"].disabled,
+input[type="checkbox"]:disabled:checked:before,
+input[type="checkbox"].disabled:checked:before,
+input[type="radio"]:disabled:checked:before,
+input[type="radio"].disabled:checked:before {
+	opacity: 0.7;
+}
+
+label,
+fieldset label {
+	vertical-align: middle;
+}
+
+/* =Media Queries
+-------------------------------------------------------------- */
+@media screen and (min-width: 48em) {
+	/* Input Elements */
+	input[type="text"],
+	input[type="email"],
+	input[type="search"],
+	input[type="password"],
+	input[type="number"] {
+		padding: 0;
+	}
+	input[type="number"] {
+		height: 28px;
+	}
+	input[type="checkbox"] {
+		padding: 0;
+	}
+	input[type="checkbox"]:checked:before {
+		font: normal 21px/1 dashicons;
+		margin: -3px -4px 0 0;
+	}
+	input[type="radio"],
+	input[type="checkbox"] {
+		height: 16px;
+		width: 16px;
+	}
+	input[type="radio"]:checked:before {
+		width: 6px;
+		height: 6px;
+		margin: 4px;
+	}
+	textarea,
+	input,
+	select {
+		font-size: 14px;
+	}
+}
+
+.plugin-upload-form fieldset {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+.plugin-upload-form legend {
+	margin: 1rem 0;
+}
+
+.plugin-upload-form .category-checklist {
+	list-style-type: none;
+	margin: 0 0 2rem;
+}
+
+.plugin-upload-form .category-checklist li {
+	float: right;
+	padding: 0.5rem 0;
+	width: 50%;
+}
+
+@media screen and (min-width: 48em) {
+	.plugin-upload-form .category-checklist li {
+		padding: 0;
+	}
+	.plugin-upload-form .category-checklist label {
+		font-size: 0.8rem;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.plugin-upload-form label.button, .plugin-upload-form .sidebar label.subscription-toggle, .sidebar .plugin-upload-form label.subscription-toggle, .plugin-upload-form
+	.sidebar label.favorite-toggle,
+	.sidebar .plugin-upload-form label.favorite-toggle, .plugin-upload-form .bbp-view .review-ratings .col-5 .reviews-submit-link label.btn, .bbp-view .review-ratings .col-5 .reviews-submit-link .plugin-upload-form label.btn {
+		line-height: 1.8;
+	}
+}
+
+.plugin-upload-form .plugin-file {
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	width: 0.1px;
+	z-index: -1;
+}
+
+/*--------------------------------------------------------------
+# Navigation
+--------------------------------------------------------------*/
+/*--------------------------------------------------------------
+## Links
+--------------------------------------------------------------*/
+a, .bbpress #bbpress-forums p.bbp-topic-meta a {
+	color: #0073aa;
+}
+
+a:visited, .bbpress #bbpress-forums p.bbp-topic-meta a:visited {
+	/* Override wp4.css */
+	color: #0073aa;
+}
+
+a:hover, .bbpress #bbpress-forums p.bbp-topic-meta a:hover, a:focus, .bbpress #bbpress-forums p.bbp-topic-meta a:focus, a:active, .bbpress #bbpress-forums p.bbp-topic-meta a:active {
+	/* Override wp4.css */
+	color: #0073aa;
+	text-decoration: underline;
+}
+
+a.button:hover, .bbpress #bbpress-forums p.bbp-topic-meta a.button:hover, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle:hover, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle:hover, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle:hover,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn:hover, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:hover, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .sidebar a.subscription-toggle:hover,
+.sidebar a.favorite-toggle:hover, .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:hover, .bbp-view .wporg-bbp-term-subscription a:hover, a.button:focus, .bbpress #bbpress-forums p.bbp-topic-meta a.button:focus, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle:focus, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle:focus, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle:focus,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn:focus, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:focus, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:focus, .sidebar a.subscription-toggle:focus,
+.sidebar a.favorite-toggle:focus, .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:focus, .bbp-view .wporg-bbp-term-subscription a:focus, a.button:active, .bbpress #bbpress-forums p.bbp-topic-meta a.button:active, .bbpress #bbpress-forums p.bbp-topic-meta .sidebar a.subscription-toggle:active, .sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.subscription-toggle:active, .bbpress #bbpress-forums p.bbp-topic-meta
+.sidebar a.favorite-toggle:active,
+.sidebar .bbpress #bbpress-forums p.bbp-topic-meta a.favorite-toggle:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:active, .bbp-view .review-ratings .col-5 .reviews-submit-link .bbpress #bbpress-forums p.bbp-topic-meta a.btn:active, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a:active, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a:active, .sidebar a.subscription-toggle:active,
+.sidebar a.favorite-toggle:active, .bbp-view .review-ratings .col-5 .reviews-submit-link a.btn:active, .bbp-view .wporg-bbp-term-subscription a:active {
+	text-decoration: none;
+}
+
+a:focus, .bbpress #bbpress-forums p.bbp-topic-meta a:focus {
+	outline: thin dotted;
+}
+
+a:hover, .bbpress #bbpress-forums p.bbp-topic-meta a:hover, a:active, .bbpress #bbpress-forums p.bbp-topic-meta a:active {
+	outline: 0;
+}
+
+p a:not(.button):not(.sidebar .subscription-toggle):not(
+.sidebar .favorite-toggle):not(.bbp-view .review-ratings .col-5 .reviews-submit-link .btn):not(.bbp-view .wporg-bbp-term-subscription a):not(.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a):not(.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a), .bbpress #bbpress-forums p.bbp-topic-meta a:not(.button):not(.sidebar .subscription-toggle):not(
+.sidebar .favorite-toggle):not(.bbp-view .review-ratings .col-5 .reviews-submit-link .btn):not(.bbp-view .wporg-bbp-term-subscription a):not(.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a):not(.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a),
+p a:not(.button):not(.sidebar .subscription-toggle):not(
+.sidebar .favorite-toggle):not(.bbp-view .review-ratings .col-5 .reviews-submit-link .btn):not(.bbp-view .wporg-bbp-term-subscription a):not(.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a):not(.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a):hover, .bbpress #bbpress-forums p.bbp-topic-meta a:not(.button):not(.sidebar .subscription-toggle):not(
+.sidebar .favorite-toggle):not(.bbp-view .review-ratings .col-5 .reviews-submit-link .btn):not(.bbp-view .wporg-bbp-term-subscription a):not(.bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a):not(.bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a):hover {
+	border: none;
+}
+
+/*--------------------------------------------------------------
+## Menus
+--------------------------------------------------------------*/
+.site-main .comment-navigation, .site-main
+.posts-navigation, .site-main
+.post-navigation {
+	margin: 0 0 1.5em;
+	overflow: hidden;
+}
+
+.comment-navigation .nav-previous,
+.posts-navigation .nav-previous,
+.post-navigation .nav-previous {
+	float: right;
+	width: 50%;
+}
+
+.comment-navigation .nav-next,
+.posts-navigation .nav-next,
+.post-navigation .nav-next {
+	float: left;
+	text-align: left;
+	width: 50%;
+}
+
+/*--------------------------------------------------------------
+# Accessibility
+--------------------------------------------------------------*/
+/* Text meant only for screen readers. */
+.screen-reader-text {
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	overflow: hidden;
+	position: absolute !important;
+	width: 1px;
+}
+
+.screen-reader-text:focus {
+	background-color: #f1f1f1;
+	border-radius: 3px;
+	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+	clip: auto !important;
+	color: #21759b;
+	display: block;
+	font-size: 0.875rem;
+	font-weight: bold;
+	height: auto;
+	right: 5px;
+	line-height: normal;
+	padding: 15px 23px 14px;
+	text-decoration: none;
+	top: 5px;
+	width: auto;
+	z-index: 100000;
+	/* Above WP toolbar. */
+}
+
+/* Do not show the outline on the skip link target. */
+#content[tabindex="-1"]:focus {
+	outline: 0;
+}
+
+/*--------------------------------------------------------------
+# Alignments
+--------------------------------------------------------------*/
+.alignleft {
+	display: inline;
+	float: right;
+	margin-left: 1.5em;
+}
+
+.alignright {
+	display: inline;
+	float: left;
+	margin-right: 1.5em;
+}
+
+.aligncenter {
+	clear: both;
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+/*--------------------------------------------------------------
+# Clearings
+--------------------------------------------------------------*/
+.clear:before, .plugin-upload-form .category-checklist:before, .three-up:before, .single-forum main:before,
+.single-topic main:before,
+.bbp-view main:before, .bbp-view .review-ratings:before,
+.clear:after,
+.plugin-upload-form .category-checklist:after,
+.three-up:after,
+.single-forum main:after,
+.single-topic main:after,
+.bbp-view main:after,
+.bbp-view .review-ratings:after,
+.entry-content:before,
+.entry-content:after,
+.comment-content:before,
+.comment-content:after,
+.site-header:before,
+.site-header:after,
+.site-content:before,
+.site-content:after,
+.site-footer:before,
+.site-footer:after {
+	content: "";
+	display: table;
+	table-layout: fixed;
+}
+
+.clear:after, .plugin-upload-form .category-checklist:after, .three-up:after, .single-forum main:after,
+.single-topic main:after,
+.bbp-view main:after, .bbp-view .review-ratings:after,
+.entry-content:after,
+.comment-content:after,
+.site-header:after,
+.site-content:after,
+.site-footer:after {
+	clear: both;
+}
+
+/*--------------------------------------------------------------
+# WP.org Header
+--------------------------------------------------------------*/
+#wporg-header h1 {
+	margin: auto;
+}
+
+#wporg-header h2.rosetta {
+	clear: none;
+}
+
+#wporg-header form input {
+	box-sizing: content-box;
+	padding: 3px;
+}
+
+#wporg-header .button, #wporg-header .sidebar .subscription-toggle, .sidebar #wporg-header .subscription-toggle, #wporg-header
+.sidebar .favorite-toggle,
+.sidebar #wporg-header .favorite-toggle, #wporg-header .bbp-view .review-ratings .col-5 .reviews-submit-link .btn, .bbp-view .review-ratings .col-5 .reviews-submit-link #wporg-header .btn, #wporg-header .bbp-view .wporg-bbp-term-subscription a, .bbp-view .wporg-bbp-term-subscription #wporg-header a, #wporg-header .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta a, .bbp-view .wporg-bbp-term-subscription .bbpress #bbpress-forums p.bbp-topic-meta #wporg-header a, #wporg-header .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-view .wporg-bbp-term-subscription #wporg-header a {
+	box-shadow: none;
+}
+
+#wporg-header .download-button {
+	background-color: #21759b;
+	background-image: linear-gradient(to bottom, #2a95c5, #21759b);
+	border-bottom-color: #1e6a8d;
+	border-color: #21759b;
+	box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
+}
+
+#wporg-header .download-button:hover, #wporg-header .download-button:focus {
+	background-color: #278ab7;
+	background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
+	border-color: #1b607f;
+	box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
+	color: #fff;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+#wporg-header .download-button:active {
+	background: #1b607f;
+	background-image: linear-gradient(to bottom, #21759b, #278ab7);
+	border-color: #124560 #2382ae #2382ae #2382ae;
+	box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+	color: rgba(255, 255, 255, 0.95);
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+	transform: none;
+}
+
+#wporg-header a:hover, #wporg-header .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta #wporg-header a:hover,
+#wporg-header a:focus,
+#wporg-header .bbpress #bbpress-forums p.bbp-topic-meta a:focus, .bbpress #bbpress-forums p.bbp-topic-meta
+#wporg-header a:focus,
+#wporg-header a:active,
+#wporg-header .bbpress #bbpress-forums p.bbp-topic-meta a:active, .bbpress #bbpress-forums p.bbp-topic-meta
+#wporg-header a:active {
+	text-decoration: none;
+}
+
+/*--------------------------------------------------------------
+# Site
+--------------------------------------------------------------*/
+body, #pagebody {
+	font-size: 1rem;
+}
+
+main#main {
+	padding: 0 1rem 1rem;
+}
+
+/*--------------------------------------------------------------
+# .site-header 
+--------------------------------------------------------------*/
+.site-header {
+	background: #0073aa;
+	padding: 1rem 0;
+	position: relative;
+	z-index: 100;
+}
+
+.site-header .site-branding {
+	margin: 0 auto;
+	max-width: 960px;
+	padding: 0 1.5625rem;
+}
+
+@media screen and (min-width: 48em) {
+	.site-header .site-branding {
+		padding: 0 10px;
+	}
+}
+
+.site-header.home {
+	padding: 1.5625rem 1.143rem;
+	text-align: center;
+}
+
+/*--------------------------------------------------------------
+# .site-title
+--------------------------------------------------------------*/
+.site-title {
+	display: inline-block;
+	font-size: 1.5625rem;
+	font-weight: 300;
+	line-height: 1;
+	margin: 0 0 0 2rem;
+	max-width: none;
+}
+
+.site-title a, .site-title .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .site-title a {
+	color: #fff;
+	font-weight: 300;
+}
+
+.site-title a:hover, .site-title .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta .site-title a:hover, .site-title a:focus, .site-title .bbpress #bbpress-forums p.bbp-topic-meta a:focus, .bbpress #bbpress-forums p.bbp-topic-meta .site-title a:focus, .site-title a:active, .site-title .bbpress #bbpress-forums p.bbp-topic-meta a:active, .bbpress #bbpress-forums p.bbp-topic-meta .site-title a:active {
+	text-decoration: none;
+}
+
+.site-header.home .site-title {
+	display: inherit;
+	font-size: 3.8146972656rem;
+	margin: 2rem 0 1rem;
+}
+
+/*--------------------------------------------------------------
+# .site-description
+--------------------------------------------------------------*/
+.site-description {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 1.25rem;
+	font-weight: 300;
+	margin: -0.4rem auto 2rem;
+	text-align: center;
+}
+
+/*--------------------------------------------------------------
+# .main-navigation
+--------------------------------------------------------------*/
+.main-navigation {
+	background: #0073aa;
+	clear: both;
+	right: 0;
+	position: absolute;
+	top: 60px;
+	width: 100%;
+}
+
+.main-navigation ul {
+	display: none;
+	list-style: none;
+	margin: 0;
+	padding-right: 0;
+}
+
+.main-navigation ul ul {
+	box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+	float: right;
+	right: -999em;
+	position: absolute;
+	top: 1.5em;
+	z-index: 99999;
+}
+
+.main-navigation ul ul ul {
+	right: -999em;
+	top: 0;
+}
+
+.main-navigation ul ul li:hover > ul,
+.main-navigation ul ul li.focus > ul {
+	right: 100%;
+}
+
+.main-navigation ul ul a, .main-navigation ul ul .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .main-navigation ul ul a {
+	width: 200px;
+}
+
+.main-navigation ul li:hover > ul,
+.main-navigation ul li.focus > ul {
+	right: auto;
+}
+
+.main-navigation li {
+	border-top: 1px solid rgba(255, 255, 255, 0.2);
+	padding: 1rem;
+}
+
+.main-navigation a, .main-navigation .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .main-navigation a {
+	color: rgba(255, 255, 255, 0.8);
+	display: block;
+	font-size: 0.8rem;
+	text-decoration: none;
+}
+
+.main-navigation a:hover, .main-navigation .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta .main-navigation a:hover, .main-navigation a.active, .main-navigation .bbpress #bbpress-forums p.bbp-topic-meta a.active, .bbpress #bbpress-forums p.bbp-topic-meta .main-navigation a.active {
+	color: #fff;
+}
+
+@media screen and (min-width: 48em) {
+	.main-navigation a.active, .main-navigation .bbpress #bbpress-forums p.bbp-topic-meta a.active, .bbpress #bbpress-forums p.bbp-topic-meta .main-navigation a.active {
+		border-bottom: 1px solid;
+	}
+}
+
+.main-navigation button.button-search {
+	display: none;
+}
+
+#wporg-header ul li a.current ~ .uparrow, #wporg-header ul li .bbpress #bbpress-forums p.bbp-topic-meta a.current ~ .uparrow {
+	border-bottom: 9px solid #0073aa;
+}
+
+#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
+	border-bottom: 9px solid #32373c;
+}
+
+/* Small menu. */
+.main-navigation.toggled ul {
+	display: block;
+}
+
+.menu-toggle.dashicons {
+	background: transparent;
+	border: none;
+	color: #fff;
+	font-size: 1.5625rem;
+	height: 3.5rem;
+	overflow: hidden;
+	position: absolute;
+	left: 1rem;
+	top: -58px;
+	width: 3.5rem;
+	-webkit-appearance: none;
+}
+
+.toggled .menu-toggle.dashicons:before {
+	content: "\f343";
+}
+
+@media screen and (min-width: 48em) {
+	.menu-toggle.dashicons {
+		display: none;
+	}
+	.main-navigation {
+		float: left;
+		position: initial;
+		width: initial;
+	}
+	.main-navigation.toggled {
+		padding: 1px 0;
+	}
+	.main-navigation ul {
+		display: inline-block;
+		font-size: 0;
+	}
+	.main-navigation ul li {
+		border: 0;
+		display: inline-block;
+		font-size: 1rem;
+		margin-left: 1rem;
+		padding: 0;
+	}
+	.main-navigation ul li:last-of-type {
+		margin-left: 0;
+	}
+	.main-navigation button.button-search {
+		display: inline-block;
+	}
+}
+
+/*--------------------------------------------------------------
+# .site-main
+--------------------------------------------------------------*/
+.site-main {
+	margin: 0 auto;
+	max-width: 960px;
+	padding: 3.0517578125rem 1.5625rem;
+}
+
+@media screen and (min-width: 48em) {
+	.site-main {
+		padding: 3.0517578125rem 10px;
+	}
+}
+
+.single .site-main {
+	padding: 0;
+}
+
+@media screen and (min-width: 48em) {
+	.single .site-main {
+		padding: 0 10px 3.0517578125rem;
+	}
+}
+
+.page .site-main {
+	padding-top: 0;
+}
+
+.site-main .page-header h1 {
+	margin: 0;
+}
+
+.site-main .page-header p {
+	margin: 0.5rem 0;
+}
+
+.site-main .page-title {
+	font-size: 1.5625rem;
+	font-weight: 400;
+}
+
+.site-main .no-results {
+	margin: 0 auto;
+	max-width: 35.527136788rem;
+	padding: 0 2rem;
+}
+
+/*--------------------------------------------------------------
+# .sidebar
+--------------------------------------------------------------*/
+.sidebar div:first-child {
+	margin: 0;
+}
+
+.sidebar div ul {
+	margin-bottom: 0;
+}
+
+.sidebar div ul > li {
+	font-size: 0.8rem;
+	border-top: 1px solid #eee;
+	padding: 0.5rem 0;
+}
+
+.sidebar div:first-child h3 {
+	margin-top: 0;
+}
+
+/*--------------------------------------------------------------
+# .search-form
+--------------------------------------------------------------*/
+.search-form {
+	font-size: 0;
+	margin-bottom: 2rem;
+	max-width: 100%;
+	position: relative;
+}
+
+.search-form .search-field {
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	display: block;
+	font-size: 1rem;
+	margin: 0 auto;
+	max-width: 100%;
+	padding: 0.5rem;
+	width: 22.7373675443rem;
+}
+
+.search-form .button-search {
+	border-right: none;
+	border-radius: 2px 0 0 2px;
+	font-size: 1rem;
+	position: relative;
+	left: auto;
+	top: auto;
+}
+
+.search-form .button-search:active {
+	background: #006799;
+	border-left: 1px solid #006799;
+	box-shadow: none;
+}
+
+.search-form .button-search .dashicons {
+	font-size: 1rem;
+}
+
+.site-header .search-form {
+	display: inline-block;
+}
+
+.site-header.home .search-form .button-search,
+.site-main .search-form .button-search {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	color: #32373c;
+	display: block;
+	height: 45px;
+	padding: 0.5rem 1rem;
+	position: absolute;
+	left: 0;
+	text-shadow: none;
+	top: 0;
+}
+
+.site-header.home .search-form .button-search:focus,
+.site-main .search-form .button-search:focus {
+	box-shadow: 0 0 2px 1px #33b3db;
+}
+
+.site-header.home .search-form .button-search:active,
+.site-main .search-form .button-search:active {
+	background: transparent;
+	border: none;
+	transform: none;
+}
+
+.site-header:not(.home) .search-form {
+	margin: 0;
+}
+
+.site-header:not(.home) .search-form .search-field {
+	border: 0;
+	border-radius: 2px;
+	display: inline-block;
+	font-size: 1rem;
+	padding: 5px 10px;
+	position: relative;
+	width: 100%;
+}
+
+@media screen and (min-width: 48em) {
+	.site-header:not(.home) .search-form .search-field {
+		border-radius: 0 2px 2px 0;
+		font-size: 0.64rem;
+		width: 7rem;
+	}
+	.site-header:not(.home) .search-form .search-field + .button-search {
+		display: inline-block;
+		margin-bottom: 0;
+	}
+}
+
+@media screen and (min-width: 60em) {
+	.site-header:not(.home) .search-form .search-field {
+		width: 10rem;
+	}
+}
+
+.site-main .search-form .search-field {
+	border: 1px solid #ddd;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+	padding: 0.5rem;
+	width: 100%;
+}
+
+.search .site-main {
+	margin-top: 2rem;
+	padding-top: 0;
+}
+
+.search.search-results .page-header {
+	margin: 2rem 0;
+}
+
+/*--------------------------------------------------------------
+# .page
+--------------------------------------------------------------*/
+.page .entry-header {
+	margin-top: 2rem;
+}
+
+.page .entry-header .entry-title {
+	font-size: 1.5625rem;
+	font-weight: 400;
+	margin: 0 auto;
+	max-width: 35.527136788rem;
+}
+
+@media screen and (min-width: 48em) {
+	.page .entry-header .entry-title {
+		padding: 0 2rem;
+	}
+}
+
+.page .entry-content h2 {
+	font-size: 1.5625rem;
+	font-weight: 400;
+}
+
+.page .entry-content h3 {
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: 0.01rem;
+	text-transform: uppercase;
+}
+
+.page .entry-content section {
+	padding: 2rem 0;
+}
+
+.page .entry-content section .container {
+	margin: 0 auto;
+	max-width: 35.527136788rem;
+}
+
+@media screen and (min-width: 48em) {
+	.page .entry-content section .container {
+		padding: 0 2rem;
+	}
+}
+
+.page .entry-content section:first-of-type {
+	padding-top: 0;
+}
+
+.page .entry-content section + section {
+	border-top: 2px solid #eee;
+}
+
+/*--------------------------------------------------------------
+# 404 Error page
+--------------------------------------------------------------*/
+.error-404 .page-title, .error-404 .page-content {
+	text-align: center;
+}
+
+/*--------------------------------------------------------------
+# bbPress Specific 
+--------------------------------------------------------------*/
+/* bbPress specific styles */
+/* Many of these override the styles from the plugin */
+section {
+	padding: 4rem 0;
+}
+
+#bbpress-forums {
+	font-size: 1rem;
+	overflow: inherit;
+}
+
+@media (min-width: 48em) {
+	.three-up > div {
+		float: right;
+		width: 30%;
+		margin-left: 5%;
+		font-size: 0.8rem;
+	}
+	.three-up > div:nth-child(3n) {
+		margin-left: 0;
+	}
+}
+
+.three-up.bbp-forums > div {
+	background: transparent;
+	position: relative;
+	border-bottom: 1px solid #eee;
+	margin: 1rem 0;
+}
+
+.three-up.bbp-forums > div a.bbp-forum-title:active, .three-up.bbp-forums > div .bbpress #bbpress-forums p.bbp-topic-meta a.bbp-forum-title:active, .bbpress #bbpress-forums p.bbp-topic-meta .three-up.bbp-forums > div a.bbp-forum-title:active, .three-up.bbp-forums > div a.bbp-forum-title:focus, .three-up.bbp-forums > div .bbpress #bbpress-forums p.bbp-topic-meta a.bbp-forum-title:focus, .bbpress #bbpress-forums p.bbp-topic-meta .three-up.bbp-forums > div a.bbp-forum-title:focus {
+	text-decoration: none;
+}
+
+.three-up.bbp-forums > div h3 {
+	font-size: 1.4rem;
+	margin-bottom: 0;
+}
+
+.three-up.bbp-forums > div p {
+	color: #666666;
+}
+
+.three-up.bbp-forums > div a:hover, .three-up.bbp-forums > div .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta .three-up.bbp-forums > div a:hover {
+	color: #0073aa;
+	text-decoration: none;
+}
+
+.three-up.bbp-forums > div a:hover h3, .three-up.bbp-forums > div .bbpress #bbpress-forums p.bbp-topic-meta a:hover h3, .bbpress #bbpress-forums p.bbp-topic-meta .three-up.bbp-forums > div a:hover h3 {
+	color: #0073aa;
+}
+
+@media (min-width: 48em) {
+	.three-up.bbp-forums > div {
+		height: 200px;
+		border-bottom: none;
+		margin: 0 0 0 5%;
+	}
+	.three-up.bbp-forums > div:nth-child(3n) {
+		margin-left: 0;
+	}
+}
+
+.bbpress #bbpress-forums div.bbp-template-notice {
+	padding: .5rem;
+	border: none;
+	border-radius: 3px;
+}
+
+.bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
+.bbpress #bbpress-forums .bbp-body .bbp-topic-voice-count,
+.bbpress #bbpress-forums .bbp-body .bbp-topic-reply-count {
+	font-size: 0.73152rem;
+}
+
+.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
+.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
+	width: 58%;
+}
+
+@media (min-width: 321px) {
+	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
+		width: 25%;
+	}
+}
+
+.bbpress #bbpress-forums .bbp-topics {
+	border: 1px solid #eee;
+}
+
+.bbpress #bbpress-forums .bbp-topics .bbp-header {
+	background: #0073aa;
+	color: #fff;
+}
+
+.bbpress #bbpress-forums ul.status-closed,
+.bbpress #bbpress-forums ul.status-closed a {
+	color: inherit;
+}
+
+.bbpress #bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
+	background: #eee;
+}
+
+.bbpress #bbpress-forums .bbp-pagination {
+	font-size: 0.8rem;
+	float: left;
+	width: auto;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers {
+	background: #fff;
+	border: 1px solid #B4B9BE;
+	margin-right: 0;
+	color: #757575;
+	padding: 2px 8px;
+	margin-right: -1px;
+	opacity: 1;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers:not(.current):not(.dots):hover {
+	background: #0073aa;
+	color: #fff;
+	text-decoration: none;
+	border: 1px solid #0073aa;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers.current {
+	background: #eee;
+	color: #000;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers.dots {
+	background: #fff;
+	color: #32373c;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers:first-child {
+	border-radius: 0 3px 3px 0;
+}
+
+.bbpress #bbpress-forums .bbp-pagination .page-numbers:last-child {
+	border-radius: 3px 0 0 3px;
+}
+
+.bbpress #bbpress-forums ul.bbp-forums,
+.bbpress #bbpress-forums ul.bbp-lead-topic,
+.bbpress #bbpress-forums ul.bbp-replies,
+.bbpress #bbpress-forums ul.bbp-search-results,
+.bbpress #bbpress-forums ul.bbp-topics {
+	font-size: 0.8rem;
+}
+
+.bbpress li.bbp-forum-freshness,
+.bbpress li.bbp-topic-freshness {
+	text-align: right;
+}
+
+.bbpress main#main {
+	margin-top: 2rem;
+	padding: 0 10px 10px;
+}
+
+.bbpress h1 {
+	font-size: 1.5625rem;
+	font-weight: 400;
+	padding-bottom: 0;
+	margin: 2rem 0 1rem;
+}
+
+.bbpress h1.page-title {
+	margin-top: 0;
+}
+
+.bbpress.single-forum .entry-meta div:first-child h3 {
+	display: none;
+}
+
+.bbpress .forum-titles .bbp-topic-voice-count,
+.bbpress .forum-titles .bbp-topic-reply-count {
+	overflow: hidden;
+}
+
+.bbpress .forum-titles .bbp-topic-voice-count:before,
+.bbpress .forum-titles .bbp-topic-reply-count:before {
+	font: normal 16px/1 'dashicons';
+	margin-left: 100px;
+}
+
+@media (min-width: 321px) {
+	.bbpress .forum-titles .bbp-topic-voice-count:before,
+	.bbpress .forum-titles .bbp-topic-reply-count:before {
+		font: normal 21px/1 'dashicons';
+		margin-right: 20px;
+	}
+}
+
+.bbpress .forum-titles .bbp-topic-voice-count:before {
+	content: "\f307";
+}
+
+.bbpress .forum-titles .bbp-topic-reply-count:before {
+	content: "\f125";
+}
+
+.bbpress li.bbp-header li.bbp-forum-info,
+.bbpress li.bbp-header li.bbp-topic-title {
+	text-align: right !important;
+}
+
+/*--------------------------------------------------------------
+# Buttons
+--------------------------------------------------------------*/
+#bbpress-forums fieldset.bbp-form button {
+	padding: 0 0.8rem;
+	font-size: 0.8rem;
+}
+
+#bbpress-forums .bbp-topic-form fieldset.bbp-form button,
+#bbpress-forums .bbp-reply-form fieldset.bbp-form button {
+	float: none;
+	margin-top: 0;
+}
+
+#bbpress-forums .bbp-submit-wrapper {
+	margin-top: -35px;
+}
+
+@media (max-width: 767px) {
+	#bbpress-forums .bbp-submit-wrapper {
+		margin-top: 0;
+	}
+}
+
+.viewmore {
+	position: relative;
+	padding-left: 18px;
+}
+
+.viewmore:hover {
+	text-decoration: underline !important;
+}
+
+.viewmore:after {
+	content: "\f345";
+	font-family: dashicons;
+	position: absolute;
+	top: 1px;
+	left: 0;
+}
+
+/*--------------------------------------------------------------
+# Forms
+--------------------------------------------------------------*/
+#bbpress-forums fieldset.bbp-form {
+	clear: left;
+}
+
+#bbpress-forums fieldset.bbp-form legend {
+	font-weight: normal;
+	font-size: 1.25rem;
+}
+
+#bbpress-forums fieldset.bbp-form label {
+	font-size: 0.8rem;
+}
+
+#bbpress-forums fieldset.bbp-form p em {
+	font-size: 0.8rem;
+}
+
+#bbpress-forums fieldset.bbp-form p input[type="checkbox"] {
+	margin-bottom: 0;
+}
+
+#bbpress-forums fieldset.bbp-form .bbp-topic-form {
+	margin-top: 1rem;
+	padding-top: 2rem;
+}
+
+#bbpress-forums .bbp-topic-form {
+	clear: left;
+	border-top: 1px solid #eee;
+}
+
+@media (max-width: 767px) {
+	#bbpress-forums input[type="text"] {
+		width: 100%;
+	}
+}
+
+.topic-resolved label {
+	vertical-align: none;
+}
+
+.topic-resolved select {
+	width: 120px;
+	line-height: 1;
+}
+
+select {
+	-webkit-appearance: menulist;
+}
+
+/*--------------------------------------------------------------
+# Homepage
+--------------------------------------------------------------*/
+.home.wporg-support .info-box {
+	text-align: center;
+	max-width: 20rem;
+	margin: 0 auto 4rem;
+}
+
+.home.wporg-support .info-box h3 {
+	margin-top: 1rem;
+}
+
+.home.wporg-support .info-box .dashicons {
+	font-size: 5.9604644775rem;
+	opacity: 0.4;
+	width: auto;
+	height: auto;
+}
+
+@media (min-width: 48em) {
+	.home.wporg-support .info-box {
+		max-width: 100%;
+		margin: 0;
+	}
+}
+
+.home.wporg-support #bbpress-forums div.odd {
+	background: transparent;
+}
+
+.home.wporg-support .col-8 {
+	margin-right: 0;
+}
+
+.home.wporg-support ul#views {
+	text-align: center;
+	font-size: 0.8rem;
+	margin: 0;
+}
+
+.home.wporg-support .helpful-links > div:last-child {
+	font-size: 0.8rem;
+}
+
+@media (min-width: 48em) {
+	.home.wporg-support .helpful-links > div {
+		width: 65%;
+		float: right;
+		margin-left: 5%;
+	}
+	.home.wporg-support .helpful-links > div:last-child {
+		width: 30%;
+		margin-left: 0;
+	}
+}
+
+/*--------------------------------------------------------------
+# .single-forum & .single-topic
+--------------------------------------------------------------*/
+.single-forum main .entry-content,
+.single-forum main .entry-meta,
+.single-topic main .entry-content,
+.single-topic main .entry-meta,
+.bbp-view main .entry-content,
+.bbp-view main .entry-meta {
+	padding: 0;
+}
+
+@media (min-width: 568px) {
+	.single-forum main .entry-content,
+	.single-forum main .entry-meta,
+	.single-topic main .entry-content,
+	.single-topic main .entry-meta,
+	.bbp-view main .entry-content,
+	.bbp-view main .entry-meta {
+		padding: 0 1.5625rem;
+	}
+}
+
+.single-forum main .entry-content,
+.single-topic main .entry-content,
+.bbp-view main .entry-content {
+	max-width: 48rem;
+}
+
+@media screen and (min-width: 48em) {
+	.single-forum main .entry-content,
+	.single-topic main .entry-content,
+	.bbp-view main .entry-content {
+		float: right;
+		padding: 0;
+		width: 65%;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.single-forum main .entry-content,
+	.single-forum main .entry-meta,
+	.single-topic main .entry-content,
+	.single-topic main .entry-meta,
+	.bbp-view main .entry-content,
+	.bbp-view main .entry-meta {
+		padding-right: 0;
+		padding-left: 0;
+	}
+	.single-forum main .entry-meta,
+	.single-topic main .entry-meta,
+	.bbp-view main .entry-meta {
+		float: left;
+		width: 30%;
+	}
+}
+
+div.bbp-template-notice a, div.bbp-template-notice .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta div.bbp-template-notice a {
+	color: #0073aa;
+}
+
+div.bbp-template-notice a:hover, div.bbp-template-notice .bbpress #bbpress-forums p.bbp-topic-meta a:hover, .bbpress #bbpress-forums p.bbp-topic-meta div.bbp-template-notice a:hover {
+	text-decoration: underline;
+	color: #0073aa;
+}
+
+/*--------------------------------------------------------------
+# Single Forum
+--------------------------------------------------------------*/
+.sidebar .forum-info li.forum-subscribe:before,
+.sidebar .topic-info li.topic-subscribe:before,
+.sidebar .topic-info li.topic-favorite:before {
+	content: "";
+}
+
+.sidebar .feed {
+	background: none;
+	padding-right: 0;
+}
+
+.bbp-topic-meta .bbp-topic-freshness-author img.avatar {
+	display: none;
+}
+
+/*--------------------------------------------------------------
+# Single Topic
+--------------------------------------------------------------*/
+.single-topic .entry-content #bbpress-forums {
+	overflow: visible;
+}
+
+.single-topic .entry-content #bbpress-forums ul.bbp-forums,
+.single-topic .entry-content #bbpress-forums ul.bbp-lead-topic,
+.single-topic .entry-content #bbpress-forums ul.bbp-replies,
+.single-topic .entry-content #bbpress-forums ul.bbp-search-results,
+.single-topic .entry-content #bbpress-forums ul.bbp-topics,
+.single-topic .entry-content #bbpress-forums div.bbp-forum-header,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-header,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-header,
+.single-topic .entry-content #bbpress-forums li.bbp-body div.hentry {
+	overflow: visible;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author img.avatar,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-author img.avatar {
+	border-radius: 50%;
+	float: right;
+	width: 50px;
+	height: 50px;
+	max-width: 50px;
+	max-height: 50px;
+	margin: 0;
+	margin-left: 10px;
+	margin-right: -11%;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author img.avatar {
+	margin-right: -19%;
+	margin-top: -6px;
+	width: 80px;
+	height: 80px;
+	max-width: 80px;
+	max-height: 80px;
+}
+
+@media only screen and (max-width: 480px) {
+	.single-topic .entry-content #bbpress-forums div.bbp-reply-author img.avatar,
+	.single-topic .entry-content #bbpress-forums div.bbp-topic-author img.avatar {
+		position: relative;
+		top: 0;
+	}
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-reply-author a.bbp-author-name,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author a.bbp-author-name {
+	clear: none;
+	font-size: 1rem;
+	display: inline-block;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-forum-author a.bbp-author-name,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-author a.bbp-author-name,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author a.bbp-author-name {
+	margin: 0;
+}
+
+.single-topic .entry-content #bbpress-forums ul.bbp-lead-topic li.bbp-body {
+	border: 1px solid #eee;
+	border-top: none;
+}
+
+.single-topic .entry-content #bbpress-forums ul.bbp-lead-topic li.bbp-body div.topic {
+	background: #fbfbfb;
+	padding: 1.5rem 0 1.5rem 1.5rem;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-forum-author,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-author,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author {
+	float: none;
+	text-align: right;
+	width: 100%;
+	margin: 1rem 0 2rem;
+	padding-right: 10%;
+}
+
+.single-topic .entry-content #bbpress-forums .bbp-author-role {
+	margin: 0;
+	border: none;
+	background: none;
+}
+
+.single-topic .entry-content #bbpress-forums .bbp-author-title {
+	margin: 0;
+}
+
+.single-topic .entry-content #bbpress-forums .bbp-user-nicename, .single-topic .entry-content #bbpress-forums .bbp-topic-post-date, .single-topic .entry-content #bbpress-forums .bbp-topic-ip, .single-topic .entry-content #bbpress-forums .bbp-reply-post-date, .single-topic .entry-content #bbpress-forums .bbp-reply-ip, .single-topic .entry-content #bbpress-forums .wporg-bbp-user-flag {
+	font-size: 0.8rem;
+	font-weight: normal;
+	margin: 0;
+	margin-left: 10px;
+	display: inline-block;
+}
+
+.single-topic .entry-content #bbpress-forums .bbp-user-nicename span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .bbp-user-nicename span.bbp-reply-ip, .single-topic .entry-content #bbpress-forums .bbp-topic-post-date span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .bbp-topic-post-date span.bbp-reply-ip, .single-topic .entry-content #bbpress-forums .bbp-topic-ip span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .bbp-topic-ip span.bbp-reply-ip, .single-topic .entry-content #bbpress-forums .bbp-reply-post-date span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .bbp-reply-post-date span.bbp-reply-ip, .single-topic .entry-content #bbpress-forums .bbp-reply-ip span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .bbp-reply-ip span.bbp-reply-ip, .single-topic .entry-content #bbpress-forums .wporg-bbp-user-flag span.bbp-author-ip, .single-topic .entry-content #bbpress-forums .wporg-bbp-user-flag span.bbp-reply-ip {
+	font-size: 0.8rem;
+	font-weight: 400;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-forum-author .bbp-author-role,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-author .bbp-author-role,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-author .bbp-author-role {
+	font-size: 0.8rem;
+	font-style: normal;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-forum-content,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-content,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-content {
+	padding: 0;
+	margin: 0 10% 0 0;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-forum-content a,
+.single-topic .entry-content #bbpress-forums div.bbp-reply-content a,
+.single-topic .entry-content #bbpress-forums div.bbp-topic-content a {
+	font-weight: inherit;
+}
+
+.single-topic .entry-content #bbpress-forums div.bbp-reply-content {
+	margin-right: 11%;
+}
+
+.single-topic .entry-content #bbpress-forums div.even:not(.topic),
+.single-topic .entry-content #bbpress-forums ul.even,
+.single-topic .entry-content #bbpress-forums div.odd,
+.single-topic .entry-content #bbpress-forums ul.odd {
+	background: #fff;
+	border-top: 2px solid #eee;
+	padding: 1.5rem 0;
+}
+
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
+	bottom: 0;
+	left: 0;
+	background: #fbfbfb;
+	padding: 3px 10px;
+}
+
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links a,
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links a {
+	color: #0073aa;
+	text-transform: inherit;
+	font-size: 0.7rem;
+}
+
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links a:hover,
+.single-topic .entry-content #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links a:hover {
+	text-decoration: underline;
+}
+
+.single-topic .entry-content #bbpress-forums .wporg-ratings {
+	display: none;
+}
+
+.single-topic .entry-content #bbpress-forums .topic {
+	position: relative;
+}
+
+.single-topic .entry-content #bbpress-forums .topic > .topic-indicator {
+	display: none;
+}
+
+.single-topic .entry-content #bbpress-forums .topic > .topic-indicator .dashicons {
+	display: none;
+}
+
+.single-topic .entry-content #bbpress-forums .topic.sticky > .topic-indicator, .single-topic .entry-content #bbpress-forums .topic.super-sticky > .topic-indicator, .single-topic .entry-content #bbpress-forums .topic.status-closed > .topic-indicator {
+	display: block;
+	position: absolute;
+	top: -32px;
+	right: -2px;
+	width: 30px;
+}
+
+.single-topic .entry-content #bbpress-forums .topic.sticky .dashicons-admin-post, .single-topic .entry-content #bbpress-forums .topic.super-sticky .dashicons-admin-post {
+	display: block;
+	float: right;
+	color: #fff;
+	background: gold;
+	padding-top: 3px;
+	width: 30px;
+	height: 25px;
+	border-radius: 3px 0 0 3px;
+}
+
+.single-topic .entry-content #bbpress-forums .topic.sticky.status-closed .dashicons-admin-post, .single-topic .entry-content #bbpress-forums .topic.super-sticky.status-closed .dashicons-admin-post {
+	background: #bbb;
+}
+
+.single-topic .entry-content header {
+	background: #fbfbfb;
+	border: 1px solid #eee;
+	border-bottom: none;
+	padding: 1rem 10% 0 2rem;
+}
+
+.single-topic div.bbp-breadcrumb {
+	float: none;
+}
+
+div.bbp-breadcrumb {
+	font-size: 0.8rem;
+	margin-bottom: 15px;
+	color: #767676;
+	line-height: 27px;
+}
+
+div.bbp-breadcrumb p {
+	margin: 0 !important;
+}
+
+.sidebar > div:first-child h3 {
+	display: none;
+}
+
+.sidebar .topic-info li.topic-forum:before {
+	content: '\f230';
+}
+
+/*--------------------------------------------------------------
+# Plugin / Theme specific support pages
+--------------------------------------------------------------*/
+.bbp-view .sidebar h3 {
+	display: none;
+}
+
+.bbp-view .sidebar > div:nth-child(2n),
+.bbp-view .sidebar > div:nth-child(3n) {
+	display: none;
+}
+
+.bbp-view .review-ratings {
+	margin-bottom: 1rem;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.bbp-view .review-ratings .col-3 {
+	font-size: 0.8rem;
+	margin: 0;
+	width: 35%;
+	float: none;
+	border-top: 1px solid #eee;
+}
+
+.bbp-view .review-ratings .col-3 .reviews-total-count {
+	font-weight: bold;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+.bbp-view .review-ratings .col-5 {
+	margin: 0 0 10px 5%;
+	width: 60%;
+	font-size: 0.8rem;
+	float: none;
+}
+
+.bbp-view .review-ratings .col-5 > div:first-child {
+	margin-top: 0;
+}
+
+.bbp-view .review-ratings .col-5 .wporg-ratings {
+	display: inline-block;
+	margin-left: 1rem;
+}
+
+.bbp-view .review-ratings .col-5 .reviews-submit-link {
+	margin-top: 1rem;
+}
+
+@media (max-width: 499px) {
+	.bbp-view .review-ratings {
+		flex-direction: column-reverse;
+	}
+	.bbp-view .review-ratings .col-3, .bbp-view .review-ratings .col-5 {
+		width: 100%;
+	}
+}
+
+.bbp-view .wporg-bbp-term-subscription {
+	margin-bottom: 1rem;
+}
+
+/*--------------------------------------------------------------
+# Infinite scroll
+--------------------------------------------------------------*/
+/* Globally hidden elements when Infinite Scroll is supported and in use. */
+.infinite-scroll .posts-navigation,
+.infinite-scroll.neverending .site-footer {
+	/* Theme Footer (when set to scrolling) */
+	display: none;
+}
+
+/* When Infinite Scroll has reached its end we need to re-display elements that were hidden (via .neverending) before. */
+.infinity-end.neverending .site-footer {
+	display: block;
+}
+
+/*--------------------------------------------------------------
+# Media
+--------------------------------------------------------------*/
+.page-content .wp-smiley,
+.entry-content .wp-smiley,
+.comment-content .wp-smiley {
+	border: none;
+	margin-bottom: 0;
+	margin-top: 0;
+	padding: 0;
+}
+
+/* Make sure embeds and iframes fit their containers. */
+embed,
+iframe,
+object {
+	max-width: 100%;
+}
+
+/*--------------------------------------------------------------
+## Captions
+--------------------------------------------------------------*/
+.wp-caption {
+	margin-bottom: 1.5em;
+	max-width: 100%;
+}
+
+.wp-caption img[class*="wp-image-"] {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.wp-caption .wp-caption-text {
+	margin: 0.8075em 0;
+}
+
+.wp-caption-text {
+	text-align: center;
+}
+
+/*--------------------------------------------------------------
+## Galleries
+--------------------------------------------------------------*/
+.gallery {
+	margin-bottom: 1.5em;
+}
+
+.gallery-item {
+	display: inline-block;
+	text-align: center;
+	vertical-align: top;
+	width: 100%;
+}
+
+.gallery-columns-2 .gallery-item {
+	max-width: 50%;
+}
+
+.gallery-columns-3 .gallery-item {
+	max-width: 33.33%;
+}
+
+.gallery-columns-4 .gallery-item {
+	max-width: 25%;
+}
+
+.gallery-columns-5 .gallery-item {
+	max-width: 20%;
+}
+
+.gallery-columns-6 .gallery-item {
+	max-width: 16.66%;
+}
+
+.gallery-columns-7 .gallery-item {
+	max-width: 14.28%;
+}
+
+.gallery-columns-8 .gallery-item {
+	max-width: 12.5%;
+}
+
+.gallery-columns-9 .gallery-item {
+	max-width: 11.11%;
+}
+
+.gallery-caption {
+	display: block;
+}

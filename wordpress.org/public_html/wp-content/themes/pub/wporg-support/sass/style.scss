@@ -1,0 +1,91 @@
+/**
+ * Theme Name: WordPress.org Support
+ * Theme URI: http://wordpress.org/
+ * Author: WordPress.org
+ * Author URI: http://wordpress.org/
+ * Description: A theme for the Support section of wordpress.org sites
+ * Version: 1.0
+ * License: GNU General Public License v2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * Tags: WordPress, bbPress, Support, Forums
+ * Text Domain: wporg-support
+ */
+/**
+ * This theme, like WordPress, is licensed under the GPL.
+ * Use it to make something cool, have fun, and share what you've learned with others.
+ */
+
+/* Sass is good */
+
+@import "variables-site/variables-site";
+@import "mixins/mixins-master";
+
+/*--------------------------------------------------------------
+# Normalize
+--------------------------------------------------------------*/
+@import "normalize";
+
+/*--------------------------------------------------------------
+# Original Styles
+--------------------------------------------------------------*/
+@import "style-original";
+
+/*--------------------------------------------------------------
+# Typography
+--------------------------------------------------------------*/
+@import "typography/typography";
+
+/*--------------------------------------------------------------
+# Elements
+--------------------------------------------------------------*/
+@import "elements/elements";
+
+/*--------------------------------------------------------------
+# Forms
+--------------------------------------------------------------*/
+@import "forms/forms";
+
+/*--------------------------------------------------------------
+# Navigation
+--------------------------------------------------------------*/
+@import "navigation/navigation";
+
+/*--------------------------------------------------------------
+# Accessibility
+--------------------------------------------------------------*/
+@import "modules/accessibility";
+
+/*--------------------------------------------------------------
+# Alignments
+--------------------------------------------------------------*/
+@import "modules/alignments";
+
+/*--------------------------------------------------------------
+# Clearings
+--------------------------------------------------------------*/
+@import "modules/clearings";
+
+/*--------------------------------------------------------------
+# WP.org Header
+--------------------------------------------------------------*/
+@import "modules/wporg-header";
+
+/*--------------------------------------------------------------
+# Site
+--------------------------------------------------------------*/
+@import "site/site";
+
+/*--------------------------------------------------------------
+# bbPress Specific 
+--------------------------------------------------------------*/
+@import "site/bbpress";
+
+/*--------------------------------------------------------------
+# Infinite scroll
+--------------------------------------------------------------*/
+@import "modules/infinite-scroll";
+
+/*--------------------------------------------------------------
+# Media
+--------------------------------------------------------------*/
+@import "media/media";
