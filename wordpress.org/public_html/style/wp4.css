@@ -1200,7 +1200,7 @@ body.make-tv #headline h2 a:before { content: '\f235'; }
 .make-design .site-title a:before { content: '\f309'; }
 .make-mobile .site-title a:before { content: '\f470'; }
 .make-accessibility .site-title a:before { content: '\f483'; }
-.make-polyglots .site-title2 a:before { content: '\f326'; }
+.make-polyglots .site-title a:before { content: '\f326'; }
 .make-support .site-title a:before { content: '\f125'; }
 .make-themes .site-title a:before { content: '\f100'; }
 .make-plugins .site-title a:before { content: '\f106'; }
