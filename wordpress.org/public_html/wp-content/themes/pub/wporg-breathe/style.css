@@ -292,6 +292,29 @@ article.state-unresolved {
 }
 
 /*
+ * Sticky post
+ */
+.sticky .o2-post {
+	border: 0;
+	border-top: 2px solid #ddd;
+	background: #e5f5fa;
+	position: relative;
+}
+
+.sticky .o2-post:after {
+	content: "\f109";
+	font-family: dashicons;
+	position: absolute;
+	top: -2px;
+	right: 45px;
+	color: #fff;
+	font-size: 18px;
+	padding: 13px 5px 0px;
+	background: #00a0d2;
+}
+
+
+/*
  * Private post status
  */
 article.status-private,
@@ -309,7 +332,7 @@ article.status-private .comment.alt {
 	position: absolute;
 	top: -2px;
 	right: 45px;
-	color: #FFF;
+	color: #fff;
 	font-size: 18px;
 	padding: 13px 5px 0px;
 	background: #dc3232;
