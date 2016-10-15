@@ -21,8 +21,8 @@ class WP_I18n_Teams {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_shortcode( 'wp-locales',      array( $this, 'wp_locales' ) );
 
-		add_filter( 'the_content',  array( $this, 'link_locales' ) );
-		add_filter( 'comment_text', array( $this, 'link_locales' ) );
+		add_filter( 'the_content',  array( $this, 'link_locales' ), 0 );
+		add_filter( 'comment_text', array( $this, 'link_locales' ), 0 );
 	}
 
 	/**
