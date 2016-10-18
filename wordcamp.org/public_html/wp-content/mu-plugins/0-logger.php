@@ -48,7 +48,7 @@ function log( $error_code, $data = array() ) {
  * @return array
  */
 function redact_keys( & $data ) {
-	$redacted_keys = array( 'Authorization' );
+	$redacted_keys = array( 'Authorization', 'password', 'user_pass' );
 	$redacted_keys = array_map( 'strtolower', $redacted_keys ); // to avoid human error
 
 	foreach ( $data as $key => $value ) {
@@ -74,8 +74,6 @@ function redact_keys( & $data ) {
  * This is useful when debugging race conditions, etc, so that you can identify which log entries belong to each thread.
  *
  * Based on https://stackoverflow.com/a/22508709/450127
- *
- * @todo It might be just as good to use getmypid(), but need to research/test first
  *
  * @return string
  */

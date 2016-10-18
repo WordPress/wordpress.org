@@ -20,7 +20,9 @@ function default_jetpack_modules( $modules ) {
 
 /**
  * Never automatically connect new sites to WordPress.com.
- * We offload this part to wp-cron.php because of https.
+ *
+ * Sites don't have SSL certificates when they're first created, so any attempt to connect to WordPress.com would
+ * fail. Instead, connecting is attempted after the SSL has been installed. See wcorg_connect_new_site().
  *
  * @param array $new_value
  * @param array $old_value
@@ -34,20 +36,22 @@ function auto_connect_new_sites( $new_value, $old_value ) {
 }
 
 /**
- * Schedule an attempt to connect this site to Jetpack.
+ * Schedule an attempt to connect Jetpack to WordPress.com
  *
  * @param int $blog_id The blog id.
  */
 function schedule_connect_new_site( $blog_id ) {
 	wp_schedule_single_event(
-		time() + 12 * HOUR_IN_SECONDS + 600,
+		time() + 12 * HOUR_IN_SECONDS + 600, // After the the SSL certificate has been installed
 		'wcorg_connect_new_site',
 		array( $blog_id, get_current_user_id() )
 	);
 }
 
 /**
- * Connect the new site to Jetpack. Runs during wp-cron.php.
+ * Connect Jetpack to WordPress.com
+ *
+ * Runs during wp-cron.php.
  *
  * @param int $blog_id The blog_id to connect.
  * @param int $user_id The user ID who created the new site.
