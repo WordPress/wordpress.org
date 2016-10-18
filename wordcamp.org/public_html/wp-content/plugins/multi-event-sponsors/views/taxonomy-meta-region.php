@@ -4,6 +4,7 @@
 global $wp_list_table;
 
 if ( 'edit' == $wp_list_table->current_action() ) : ?>
+	<?php // todo fatal - call to member function on non-object ?>
 
 	<?php wp_nonce_field( "mes_edit_region_{$region_id}_meta", 'mes_edit_region_meta_nonce' ); ?>
 
