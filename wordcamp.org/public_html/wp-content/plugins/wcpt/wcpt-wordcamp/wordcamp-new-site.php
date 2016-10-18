@@ -1,5 +1,7 @@
 <?php
 
+use \WordCamp\Logger;
+
 class WordCamp_New_Site {
 	protected $new_site_id;
 
@@ -95,21 +97,27 @@ class WordCamp_New_Site {
 	 */
 	public function maybe_create_new_site( $wordcamp_id ) {
 		if ( ! current_user_can( 'manage_sites' ) ) {
+			$current_user_id = get_current_user_id();
+			Logger\log( 'return_no_cap', compact( 'wordcamp_id', 'current_user_id' ) );
 			return;
 		}
 
 		// The sponsor region is required so we can import the relevant sponsors and levels
-		if ( ! get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true ) ) {
+		$sponsor_region = get_post_meta( $wordcamp_id, 'Multi-Event Sponsor Region', true );
+		if ( ! $sponsor_region ) {
+			Logger\log( 'return_no_region', compact( 'wordcamp_id', 'sponsor_region' ) );
 			return;
 		}
 
 		$url = get_post_meta( $wordcamp_id, 'URL', true );
 		if ( ! isset( $_POST[ wcpt_key_to_str( 'create-site-in-network', 'wcpt_' ) ] ) || empty( $url ) ) {
+			Logger\log( 'return_no_request_or_url', compact( 'wordcamp_id', 'url' ) );
 			return;
 		}
 
 		$url_components = parse_url( $url );
 		if ( ! $url_components || empty( $url_components['scheme'] ) || empty( $url_components['host'] ) ) {
+			Logger\log( 'return_invalid_url', compact( 'wordcamp_id', 'url', 'url_components' ) );
 			return;
 		}
 		$path = isset( $url_components['path'] ) ? $url_components['path'] : '';
@@ -119,6 +127,7 @@ class WordCamp_New_Site {
 		$lead_organizer    = $this->get_user_or_current_user( $wordcamp_meta['WordPress.org Username'][0]  );
 		$site_meta         = array( 'public' => 1 );
 		$this->new_site_id = wpmu_create_blog( $url_components['host'], $path, 'WordCamp Event', $lead_organizer->ID, $site_meta );
+		// todo can probably just set the final name here, rather than a generic one here and the final one in set_default_options()
 
 		if ( is_int( $this->new_site_id ) ) {
 			update_post_meta( $wordcamp_id, '_site_id', $this->new_site_id );    // this is used in other plugins to map the `wordcamp` post to it's corresponding site
@@ -131,11 +140,20 @@ class WordCamp_New_Site {
 			) );
 
 			$this->configure_new_site( $wordcamp_id, $wordcamp );
+
+			$new_site_id = $this->new_site_id;
+			Logger\log( 'finished', compact( 'wordcamp_id', 'url', 'lead_organizer', 'new_site_id' ) );
+		} else {
+			$new_site_id = $this->new_site_id;
+			Logger\log( 'no_site_id', compact( 'wordcamp_id', 'url', 'lead_organizer', 'new_site_id' ) );
 		}
 	}
 
 	/**
 	 * Maybe push multi-event sponsors out.
+	 *
+	 * This is only used when _manually_ pushing new sponsors to an existing site via the 'Push Sponsor to Site' checkbox.
+	 * create_post_stubs() is used when the sponsors are automatically pushed to a newly-created site.
 	 *
 	 * @param int $wordcamp_id The WordCamp post id.
 	 */
@@ -267,13 +285,13 @@ class WordCamp_New_Site {
 	/**
 	 * Configure a new site and populate it with default content
 	 *
-	 * @todo Can probably just network-activate plugins instead, but need to test that they work fine in network-activated mode.
-	 *
 	 * @param int     $wordcamp_id
 	 * @param WP_Post $wordcamp
 	 */
 	protected function configure_new_site( $wordcamp_id, $wordcamp ) {
 		if ( ! defined( 'WCPT_POST_TYPE_ID' ) || WCPT_POST_TYPE_ID != $wordcamp->post_type || ! is_numeric( $this->new_site_id ) ) {
+			$new_site_id = $this->new_site_id;
+			Logger\log( 'return_invalid_type_or_id', compact( 'wordcamp_id', 'new_site_id' ) );
 			return;
 		}
 
@@ -289,6 +307,8 @@ class WordCamp_New_Site {
 		$this->create_post_stubs( $wordcamp, $meta, $lead_organizer );
 
 		restore_current_blog();
+
+		Logger\log( 'finished', compact( 'wordcamp_id', 'wordcamp', 'meta', 'lead_organizer' ) );
 	}
 
 	/**
@@ -320,6 +340,8 @@ class WordCamp_New_Site {
 		// Make sure the new blog is https.
 		update_option( 'siteurl', set_url_scheme( get_option( 'siteurl' ), 'https' ) );
 		update_option( 'home',    set_url_scheme( get_option( 'home' ),    'https' ) );
+
+		Logger\log( 'finished', compact( 'admin_email', 'blog_name' ) );
 	}
 
 	/**
@@ -351,9 +373,13 @@ class WordCamp_New_Site {
 				'post_author'  => $lead_organizer->ID,
 				'post_title'   => $page['title'],
 				'post_content' => $page['content']
-			) );
+			), true );
 
-			if ( $page_id ) {
+			if ( is_wp_error( $page_id ) ) {
+				Logger\log( 'insert_post_failed', compact( 'page_id', 'page' ) );
+				continue;
+			}
+
 				// Save post meta
 				if ( ! empty( $page['meta'] ) ) {
 					foreach ( $page['meta'] as $key => $value ) {
@@ -382,10 +408,12 @@ class WordCamp_New_Site {
 				if ( 'wcb_sponsor' == $page['type'] && isset( $page['term'] ) ) {
 					wp_set_object_terms( $page_id, $page['term'], 'wcb_sponsor_level', true );
 				}
-			}
+
+				// todo realign
 		}
 
 		add_action( 'save_post', array( $GLOBALS['wordcamp_admin'], 'metabox_save' ) ); // restore wordcamp meta callback
+		Logger\log( 'finished', compact( 'assigned_sponsor_data', 'stubs', 'blog_name' ) );
 	}
 
 	/**
@@ -728,7 +756,7 @@ class WordCamp_New_Site {
 			'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
 		);
 
-		switch_to_blog( BLOG_ID_CURRENT_SITE );
+		switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
 
 		foreach ( $meta_field_keys as $key ) {
 			$sponsor_meta["_wcpt_sponsor_$key"] = get_post_meta( $assigned_sponsor->ID, "mes_$key", true );

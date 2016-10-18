@@ -224,6 +224,7 @@ class WordCamp_Loader {
 
 			// back-compat
 			'public',
+			// todo this should be 'publish'?
 		);
 	}
 
