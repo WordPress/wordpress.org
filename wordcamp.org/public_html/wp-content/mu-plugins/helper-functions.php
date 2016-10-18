@@ -198,23 +198,20 @@ function wcorg_get_countries() {
 /**
  * Escape a string to be used in a CSV context
  *
- * Malicious input can inject formulas into CSV files, opening up the possibility for phishing attacks,
- * information disclosure, and arbitrary command execution.
- *
- * @see http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
- * @see https://hackerone.com/reports/72785
+ * This is just a wrapper to somewhat de-couple things, without having to manually sync updates to the canonical
+ * function. See CampTix_Plugin::esc_csv() for details.
  *
  * @param array $fields
  *
  * @return array
  */
 function wcorg_esc_csv( $fields ) {
-	$active_content_triggers = array( '=', '+', '-', '@' );
+	require_once( WP_CONTENT_DIR . '/plugins/camptix/camptix.php' );
 
-	foreach( $fields as $index => $field ) {
-		if ( in_array( mb_substr( $field, 0, 1 ), $active_content_triggers, true ) ) {
-			$fields[ $index ] = "'" . $field;
-		}
+	if ( is_callable( 'CampTix_Plugin::esc_csv' ) ) {
+		$fields = CampTix_Plugin::esc_csv( $fields );
+	} else {
+		$fields = array();
 	}
 
 	return $fields;
