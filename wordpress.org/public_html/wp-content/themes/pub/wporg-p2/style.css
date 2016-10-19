@@ -211,6 +211,11 @@ li.type-handbook h4 {
 	margin-left: -236px;
 }
 
+#sidebar .menu-table-of-contents-container ul li > ul li ul {
+	margin-top: 4px;
+	margin-bottom: -4px;
+}
+
 .handbook-name {
 	text-align: center;
 	color: #aaa;
