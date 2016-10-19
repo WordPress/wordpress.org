@@ -152,6 +152,11 @@ body {
 	line-height: 1.5;
 }
 
+ul ul, ul ol,
+ol ol, ol ul {
+	font-size: inherit;
+}
+
 body,
 .widget,
 .o2-app-page-title,
