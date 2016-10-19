@@ -176,6 +176,7 @@ function get_whitelist() {
 		),
 		'wceu-volunteers' => array(
 			'lanche86',
+			'lucasartoni',
 			'paolo',
 			'savione',
 		),
