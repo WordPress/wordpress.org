@@ -88,29 +88,26 @@ class WordCamp_New_Site {
 			return;
 		}
 
-			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
-			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
-			$url = filter_var( $url, FILTER_VALIDATE_URL );
+		$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
+		$url = set_url_scheme( esc_url_raw( $url ), 'https' );
+		$url = filter_var( $url, FILTER_VALIDATE_URL );
 
-			if ( ! $url ) {
-				return;
-			}
+		if ( ! $url ) {
+			return;
+		}
 
-			update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
+		update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
 
-			// If this site exists make sure we update the _site_id mapping.
-			$path             = parse_url( $url, PHP_URL_PATH ) ? parse_url( $url, PHP_URL_PATH ) : '/';
-			$existing_site_id = domain_exists( parse_url( $url, PHP_URL_HOST ), $path, 1 );
+		// If this site exists make sure we update the _site_id mapping.
+		$path             = parse_url( $url, PHP_URL_PATH ) ? parse_url( $url, PHP_URL_PATH ) : '/';
+		$existing_site_id = domain_exists( parse_url( $url, PHP_URL_HOST ), $path, 1 );
 
-			if ( $existing_site_id ) {
-				update_post_meta( $wordcamp_id, '_site_id', absint( $existing_site_id ) );
-			} else {
-				delete_post_meta( $wordcamp_id, '_site_id' );
-			}
-
-		// todo realign
+		if ( $existing_site_id ) {
+			update_post_meta( $wordcamp_id, '_site_id', absint( $existing_site_id ) );
+		} else {
+			delete_post_meta( $wordcamp_id, '_site_id' );
+		}
 	}
-
 
 	/**
 	 * Maybe create a new site in the network
