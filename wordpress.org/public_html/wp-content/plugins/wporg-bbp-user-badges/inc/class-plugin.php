@@ -51,15 +51,31 @@ class Plugin {
 	 */
 	public function bbp_loaded() {
 		// Add class to div containing reply.
+		add_filter( 'bbp_get_topic_class', array( $this, 'bbp_get_topic_class' ), 10, 2 );
 		add_filter( 'bbp_get_reply_class', array( $this, 'bbp_get_reply_class' ), 10, 2 );
 
 		// Add badge before reply author info.
-		add_action( 'bbp_theme_before_reply_author_details', array( $this, 'add_user_badges' ) );
+		add_action( 'bbp_theme_before_topic_author_details', array( $this, 'show_topic_author_badge' ) );
+		add_action( 'bbp_theme_before_reply_author_details', array( $this, 'show_reply_author_badge' ) );
 	}
 
-	protected function get_author_badge_info() {
+	/**
+	 * Return information about the resource item author if they merit a badge.
+	 *
+	 * Author badge is only applicable in support or reviews forums for a plugin
+	 * or theme to which the author is listed as a committer or a contributor.
+	 *
+	 * @access protected
+	 *
+ 	 * @param string $item_type The type of thing whose author is being checked
+	 *                          for badge info. One of 'topic' or 'reply'.
+	 * @param int    $item_id   The ID of the item getting badge assigned.
+	 * @return array|false      Associative array with keys 'type', 'slug', and
+	 *                          'user_login' if author merits a badge, else false.
+	 */
+	protected function get_author_badge_info( $item_type, $item_id ) {
 		if ( ! class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
-			return;
+			return false;
 		}
 
 		$badgeable_forums = array(
@@ -68,19 +84,25 @@ class Plugin {
 			\WordPressdotorg\Forums\Plugin::THEMES_FORUM_ID,
 		);
 
-		$forum_id = bbp_get_reply_forum_id();
-		$topic_id = bbp_get_reply_topic_id();
+		if ( 'topic' === $item_type ) {
+			$forum_id = bbp_get_topic_forum_id();
+			$topic_id = $item_id;
+			$user_id  = bbp_get_topic_author_id();
+		} else {
+			$forum_id = bbp_get_reply_forum_id();
+			$topic_id = bbp_get_reply_topic_id();
+			$user_id  = bbp_get_reply_author_id();
+		}
 
 		if ( ! in_array( $forum_id, $badgeable_forums ) ) {
-			return;
+			return false;
+		}
+
+		if ( ! $user_id ) {
+			return false;
 		}
 
 		$slugs = $types = array();
-
-		$user_id = bbp_get_reply_author_id();
-		if ( ! $user_id ) {
-			return;
-		}
 
 		$user_login = get_user_by( 'id', $user_id )->user_login;
 
@@ -99,7 +121,7 @@ class Plugin {
 		}
 		// Else not a type of concern.
 		else {
-			return;
+			return false;
 		}
 
 		foreach ( $types as $type ) {
@@ -110,7 +132,7 @@ class Plugin {
 		}
 
 		if ( ! $slugs ) {
-			return;
+			return false;
 		}
 
 		return array(
@@ -120,14 +142,53 @@ class Plugin {
 		);
 	}
 
+	/**
+	 * Amends the provided classes for a given topic with badge-related classes.
+	 *
+	 * @param array $classes  Array of existing classes.
+	 * @param int   $topic_id The ID of the topic.
+	 * @return array
+	 */
+	public function bbp_get_topic_class( $classes, $topic_id ) {
+		return $this->get_badge_class( $classes, 'topic', $topic_id );
+	}
+
+	/**
+	 * Amends the provided classes for a given reply with badge-related classes.
+	 *
+	 * @param array $classes  Array of existing classes.
+	 * @param int   $reply_id The ID of the reply.
+	 * @return array
+	 */
 	public function bbp_get_reply_class( $classes, $reply_id ) {
+		return $this->get_badge_class( $classes, 'reply', $reply_id );
+	}
+
+	/**
+	 * Amends the provided classes with badge-related classes.
+	 *
+	 * Possible badge classes:
+	 * - by-moderator (Note: will always be added if author is a moderator)
+	 * - by-plugin-author
+	 * - by-plugin-contributor
+	 * - by-theme-author
+	 * - by-theme-contributor
+	 *
+	 * @access protected
+	 *
+	 * @param array  $classes   Array of existing classes.
+ 	 * @param string $item_type The type of thing getting badge assigned. One of 'topic' or 'reply'.
+	 * @param int    $item_id   The ID of the item getting badge assigned.
+	 * @return array
+	 */
+	protected function get_badge_class( $classes, $item_type, $item_id ) {
 		// Class related to moderators.
 		if ( $this->is_user_moderator() ) {
 			$classes[] = 'by-moderator';
 		}
 
 		// Class related to plugin and theme authors/contributors.
-		if ( $info = $this->get_author_badge_info() ) {
+		if ( $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
 			if ( $this->is_user_author( $info['user_login'], $info['type'], $info['slug'] ) ) {
 				$contrib_type = 'author';
 			} elseif ( $this->is_user_contributor( $info['user_login'], $info['type'], $info['slug'] ) ) {
@@ -145,11 +206,29 @@ class Plugin {
 	}
 
 	/**
-	 * Display author badge if reply author is in support or reviews forum for
-	 * the plugin/theme they contribute to.
+	 * Display badge for topic author if they merit a badge.
 	 */
-	public function add_user_badges() {
-		$output = $this->get_author_badge();
+	public function show_topic_author_badge() {
+		$this->show_user_badge( 'topic', bbp_get_topic_id() );
+	}
+
+	/**
+	 * Display badge for reply author if they merit a badge.
+	 */
+	public function show_reply_author_badge() {
+		$this->show_user_badge( 'reply', bbp_get_reply_id() );
+	}
+
+	/**
+	 * Display badge if the author merits a badge.
+	 *
+	 * @access protected
+	 *
+ 	 * @param string $item_type The type of thing getting badge assigned. One of 'topic' or 'reply'.
+	 * @param int    $item_id   The ID of the item getting badge assigned.
+	 */
+	protected function show_user_badge( $item_type, $item_id ) {
+		$output = $this->get_author_badge( $item_type, $item_id );
 
 		// Don't assign moderator badge if already assigning author badge.
 		if ( ! $output ) {
@@ -161,6 +240,14 @@ class Plugin {
 		}
 	}
 
+	/**
+	 * Returns the HTML formatted badge.
+	 *
+	 * @param $type  string The type of badge.
+	 * @param $label string The label for the badge.
+	 * @param $help  string Optional. Help/descriptive text for the badge.
+	 * @return string
+	 */
 	protected function format_badge( $type, $label, $help = '' ) {
 		$output = '';
 
@@ -177,9 +264,21 @@ class Plugin {
 		return $output;
 	}
 
-	protected function get_author_badge() {
-		if ( ! $info = $this->get_author_badge_info() ) {
-			return;
+	/**
+	 * Get badge if the author merits a badge for being a plugin/theme author or
+	 * contributor.
+	 *
+	 * @access protected
+	 *
+ 	 * @param string $item_type The type of thing getting badge assigned. One of
+	 *                          'topic' or 'reply'.
+	 * @param int    $item_id   The ID of the item getting badge assigned.
+	 * @return array|false      Associative array with keys 'type', 'slug', and
+	 *                          'user_login' if author merits a badge, else null.
+	 */
+	protected function get_author_badge( $item_type, $item_id ) {
+		if ( ! $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
+			return false;
 		}
 
 		$label = $help = null;
@@ -207,6 +306,14 @@ class Plugin {
 		return $label ? array( 'type' => $info['type'], 'label' => $label, 'help' => $help ) : false;
 	}
 
+	/**
+	 * Get badge if the author merits a badge for being a moderator.
+	 *
+	 * @access protected
+	 *
+	 * @return array|false Associative array with keys 'type', 'slug', and
+	 *                     'user_login' if author merits a badge, else false.
+	 */
 	protected function get_moderator_badge() {
 		$label = $help = null;
 
