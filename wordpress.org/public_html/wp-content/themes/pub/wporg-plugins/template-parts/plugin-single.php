@@ -15,11 +15,6 @@ global $section, $section_slug, $section_content;
 
 $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 
-$widget_args = array(
-	'before_title' => '<h4 class="widget-title">',
-	'after_title'  => '</h4>',
-);
-
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<?php echo Template::get_plugin_banner( get_post(), 'html' ); ?>
 
@@ -143,10 +138,7 @@ $widget_args = array(
 
 	<div class="entry-meta">
 		<?php
-		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',    array(), $widget_args );
-		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
-		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support', array(), $widget_args );
-		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Donate',  array(), $widget_args );
+		get_template_part( 'template-parts/plugin-sidebar', ( get_query_var( 'plugin_admin' ) ? 'admin' : '' ) );
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->

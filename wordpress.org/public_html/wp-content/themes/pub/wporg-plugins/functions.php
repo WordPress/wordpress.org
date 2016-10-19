@@ -142,6 +142,12 @@ function customize_preview_js() {
 add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' );
 
 
+function custom_body_class( $classes ) {
+	$classes[] = 'no-js';
+	return $classes;
+}
+add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
+
 /**
  * Adds hreflang link attributes to plugin pages.
  *

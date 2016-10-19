@@ -2198,6 +2198,10 @@ object {
   margin-top: 1rem;
 }
 
+.no-js .plugin-faqs dd {
+	display: block;
+}
+
 .plugin-reviews {
   list-style-type: none;
   margin: 0;
@@ -2469,6 +2473,7 @@ object {
   padding-bottom: 1px;
 }
 
+.no-js .read-more,
 .read-more#reviews {
   max-height: none;
   overflow: auto;
@@ -2537,6 +2542,10 @@ object {
 
 .toggled + .section-toggle:after {
   content: "\f343";
+}
+
+.no-js .section-toggle {
+	display: none;
 }
 
 .type-plugin .plugin-notice {

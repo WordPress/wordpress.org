@@ -51,6 +51,11 @@
 	}
 }
 
+.no-js .read-more {
+	overflow: auto;
+	max-height: none;
+}
+
 .section-toggle {
 	color: $color__link;
 	cursor: pointer;
@@ -68,4 +73,8 @@
 			content: "\f343";
 		}
 	}
+}
+
+.no-js .section-toggle {
+	display: none;
 }

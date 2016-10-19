@@ -9,7 +9,7 @@ export default React.createClass( {
 		return (
 			<div>
 				<div id="developers" className="read-more" aria-expanded="false">
-					<h2>Contributors & Developers</h2>
+					<h2>Authors</h2>
 					<DeveloperList contributors={ this.props.contributors } />
 
 					<h5>Browse the Code</h5>

@@ -339,10 +339,13 @@ class Plugin_Directory {
 	 *  Register the Widgets used plugin detail pages.
 	 */
 	public function register_widgets() {
-		register_widget( __NAMESPACE__ . '\Widgets\Donate'  );
-		register_widget( __NAMESPACE__ . '\Widgets\Meta'    );
-		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
-		register_widget( __NAMESPACE__ . '\Widgets\Support' );
+		register_widget( __NAMESPACE__ . '\Widgets\Donate'        );
+		register_widget( __NAMESPACE__ . '\Widgets\Meta'          );
+		register_widget( __NAMESPACE__ . '\Widgets\Ratings'       );
+		register_widget( __NAMESPACE__ . '\Widgets\Support'       );
+		register_widget( __NAMESPACE__ . '\Widgets\Committers'    );
+		register_widget( __NAMESPACE__ . '\Widgets\Contributors'  );
+		register_widget( __NAMESPACE__ . '\Widgets\Plugin_Review' );
 	}
 
 	/**
