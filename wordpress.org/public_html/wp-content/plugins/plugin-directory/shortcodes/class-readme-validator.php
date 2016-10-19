@@ -20,7 +20,7 @@ class Readme_Validator {
 
 			<form method="post" action="">
 				<p>
-					<input type="text" name="readme_url" size="70" placeholder="https://" value="<?php if ( isset( $_GET['readme_url'] ) ) { echo esc_attr( $_POST['readme_url'] ); } ?>" />
+					<input type="text" name="readme_url" size="70" placeholder="https://" value="<?php if ( isset( $_POST['readme_url'] ) ) { echo esc_attr( $_POST['readme_url'] ); } ?>" />
 					<input type="submit" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
 				</p>
 			</form>
