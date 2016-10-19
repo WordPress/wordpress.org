@@ -82,8 +82,19 @@ class WordCamp_New_Site {
 			return;
 		}
 
+		if ( empty( $_POST[ $field_name ] ) ) {
+			delete_post_meta( $wordcamp_id, 'URL' );
+			delete_post_meta( $wordcamp_id, '_site_id' );
+			return;
+		}
+
 			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
 			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
+			$url = filter_var( $url, FILTER_VALIDATE_URL );
+
+			if ( ! $url ) {
+				return;
+			}
 
 			update_post_meta( $wordcamp_id, $key, esc_url( $url ) );
 
@@ -93,7 +104,8 @@ class WordCamp_New_Site {
 
 			if ( $existing_site_id ) {
 				update_post_meta( $wordcamp_id, '_site_id', absint( $existing_site_id ) );
-				return;
+			} else {
+				delete_post_meta( $wordcamp_id, '_site_id' );
 			}
 
 		// todo realign
