@@ -71,9 +71,6 @@ class Validator {
 		check_admin_referer( 'validate-readme' );
 
 		$readme    = '';
-		$temp_file = Filesystem::temp_directory() . '/readme.txt';
-		$warnings  = array();
-		$notes     = array();
 
 		if ( ! empty( $_REQUEST['readme_url'] ) ) {
 			$url = esc_url_raw( $_REQUEST['readme_url'] );
@@ -97,6 +94,19 @@ class Validator {
 			return;
 		}
 
+		return $this->validate_content( $readme );
+	}
+
+	/**
+	 * Validates content via a string paramater and adds feedback.
+	 */
+	public function validate_content( $readme ) {
+
+		$temp_file = Filesystem::temp_directory() . '/readme.txt';
+		$errors    = array();
+		$warnings  = array();
+		$notes     = array();
+
 		file_put_contents( $temp_file, $readme );
 		$readme = new Parser( $temp_file );
 
@@ -104,7 +114,8 @@ class Validator {
 		if ( empty( $readme->name ) ) {
 			/* Translators: Plugin header tag; */
 			add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( "Fatal Error:\nNo plugin name detected. Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' ) );
-			return;
+			$errors[] = array( 'error', sprintf( __( "Fatal Error:\nNo plugin name detected.    Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' ) );
+			return $errors;
 		}
 
 		// Warnings.
@@ -132,8 +143,10 @@ class Validator {
 			}
 			$message .= "</ul>\n</div>";
 
-			add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-warning' );
-			return;
+			if ( function_exists( 'add_settings_error' ) ) {
+				add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-warning' );
+			}
+			return $message;
 		}
 
 		// Notes.
@@ -164,13 +177,18 @@ class Validator {
 			}
 			$message .= "</ul>\n</div>";
 
-			add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-info' );
-			return;
+			if ( function_exists( 'add_settings_error' ) ) {
+				add_settings_error( 'wporg-plugins-readme', 'readme-validator', $message, 'notice-info' );
+			}
+			return $message;
 		}
 
 		/* Translators: File name; */
-		add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( 'Your %s rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), '<code>readme.txt</code>' ), 'updated' );
+		if ( function_exists( 'add_settings_error' ) ) {
+			add_settings_error( 'wporg-plugins-readme', 'readme-validator', sprintf( __( 'Your %s rocks.  Seriously.  Flying colors.', 'wporg-plugins' ), '<code>readme.txt</code>' ), 'updated' );
+		}
 	}
+
 
 	/**
 	 * Help text for the form following after it.

@@ -335,6 +335,7 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\Shortcodes\Upload',      'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 		add_shortcode( 'wporg-plugins-reviews',     array( __NAMESPACE__ . '\Shortcodes\Reviews',     'display' ) );
+		add_shortcode( 'readme-validator',          array( __NAMESPACE__ . '\Shortcodes\Readme_Validator',     'display' ) );
 	}
 
 	/**
