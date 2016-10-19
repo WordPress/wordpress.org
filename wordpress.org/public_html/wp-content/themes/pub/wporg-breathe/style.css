@@ -140,6 +140,11 @@ input[type="submit"] {
 #secondary-content .navigation-main ul li.current-menu-item a {
 }
 
+#secondary-content .menu-table-of-contents-container ul li > ul li ul {
+	margin-top: 4px;
+	margin-bottom: -4px;
+}
+
 /*
  * p2-breathe/style.css overrides
  */
