@@ -78,7 +78,10 @@ class WordCamp_New_Site {
 
 		$field_name = wcpt_key_to_str( $key, 'wcpt_' );
 
-		if ( 'URL' == $key && 'wc-url' == $field_type && isset( $_POST[ $field_name ] ) ) {
+		if ( 'URL' !== $key || 'wc-url' !== $field_type || ! isset( $_POST[ $field_name ] ) ) {
+			return;
+		}
+
 			$url = strtolower( substr( $_POST[ $field_name ], 0, 4 ) ) == 'http' ? $_POST[ $field_name ] : 'http://' . $_POST[ $field_name ];
 			$url = set_url_scheme( esc_url_raw( $url ), 'https' );
 
@@ -92,7 +95,8 @@ class WordCamp_New_Site {
 				update_post_meta( $wordcamp_id, '_site_id', absint( $existing_site_id ) );
 				return;
 			}
-		}
+
+		// todo realign
 	}
 
 
