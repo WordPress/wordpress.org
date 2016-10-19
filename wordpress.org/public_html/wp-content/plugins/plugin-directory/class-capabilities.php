@@ -21,44 +21,54 @@ class Capabilities {
 	 * @return array Primitive caps.
 	 */
 	public static function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
+		$plugin_edit_cap = false;
 		switch( $cap ) {
-
-			// TODO: Map these for the users
-			case 'plugin_edit':
+			case 'plugin_admin_edit':
 			case 'plugin_add_committer':
 			case 'plugin_remove_committer':
+				$plugin_edit_cap = true;
+				// Fall through
+
+			case 'plugin_admin_view':
+				// Committers + Contributors.
+				// If no committers, post_author.
 				$required_caps = array();
 				$post = get_post( $context[0] );
+
 				if ( ! $post ) {
 					$required_caps[] = 'do_not_allow';
 					break;
 				}
 
-				$user       = new \WP_User( $user_id );
+				$user = new \WP_User( $user_id );
+				if ( $user->has_cap( 'plugin_review' ) ) {
+					$required_caps[] = 'plugin_review';
+					break;
+				}
+
+				// Committers
 				$committers = Tools::get_plugin_committers( $post->post_name );
+				if ( ! $committers && 'publish' === $post->post_status ) {
+					// post_author in the event no committers exist (yet?)
+					$committers = array( get_user_by( 'ID', $post->post_author )->user_login );
+				}
 
-				if ( (int) $post->post_author === $user_id || in_array( $user->user_login, $committers, true ) ) {
-					$required_caps[] = 'plugin_edit_own';
+				if ( in_array( $user->user_login, $committers ) ) {
+					$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
+					break;
+				}
 
-				} else {
-
-					if ( in_array( $post->post_status, array( 'draft', 'pending' ) ) ) {
-						$required_caps[] = 'plugin_review';
-
-					} else {
-						$required_caps[] = 'plugin_approve';
+				if ( ! $plugin_edit_cap ) {
+					// Contributors can view, but not edit.
+					$contributors = (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'name' );
+					if ( in_array( $user->user_nicename, $contributors, true ) ) {
+						$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
+						break;
 					}
 				}
-				break;
 
-			// Don't allow any users to alter the post meta for plugins.
-			case 'add_post_meta':
-			case 'edit_post_meta':
-			case 'delete_post_meta':
-				$post = get_post( $context );
-				if ( $post && 'plugin' == $post->post_type ) {
-					$required_caps[] = 'do_not_allow';
-				}
+				// Else;
+				$required_caps[] = 'do_not_allow';
 				break;
 
 			case 'plugin_transition':
@@ -84,10 +94,7 @@ class Capabilities {
 
 		$reviewer = array(
 			'read'                 => true,
-			'plugin_edit_own'      => true,
 			'plugin_set_category'  => true,
-			'plugin_add_committer' => true,
-			'plugin_edit_others'   => true,
 			'moderate_comments'    => true,
 			'plugin_edit_pending'  => true,
 			'plugin_review'        => true,

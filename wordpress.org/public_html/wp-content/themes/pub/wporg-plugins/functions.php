@@ -82,6 +82,26 @@ function scripts() {
 		'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
 	) );
 
+	if ( get_query_var( 'plugin_admin' ) ) {
+		wp_enqueue_script( 'google-jsapi', 'https://www.google.com/jsapi', array(), false, true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_template_directory_uri() . '/js/stats.js', array( 'jquery', 'google-jsapi' ), '20161019', true );
+
+
+		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
+			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
+			'l10n' => array(
+				'date'      => __( 'Date', 'wporg-plugins' ),
+				'downloads' => __( 'Downloads', 'wporg-plugins' ),
+				'noData'    => __( 'No data yet', 'wporg-plugins' ),
+				'today'     => __( 'Today', 'wporg-plugins' ),
+				'yesterday' => __( 'Yesterday', 'wporg-plugins' ),
+				'last_week' => __( 'Last Week', 'wporg-plugins' ),
+				'all_time'  => __( 'All Time', 'wporg-plugins' ),
+			),
+		) );
+
+	}
+
 	if ( isset( $_REQUEST['react'] ) ) {
 		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
 		wp_localize_script( 'wporg-plugins-client', 'app_data', array(

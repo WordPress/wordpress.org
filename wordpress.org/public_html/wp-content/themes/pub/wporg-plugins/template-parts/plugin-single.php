@@ -88,9 +88,9 @@ $widget_args = array(
 			<?php endif; ?>
 			<div>
 				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
-				<?php if ( true /* TODO: Logic on when to show the edit link */ ) : ?>
+				<?php if ( current_user_can( 'plugin_admin_view', get_post() ) ) : ?>
 					<br>
-					<a class="plugin-edit" href="<?php echo esc_url( get_permalink() . 'admin/' ); ?>"><?php _e( 'Edit Plugin', 'wporg-plugins' ); ?></a>	
+					<a class="plugin-edit" href="<?php echo esc_url( get_permalink() . 'admin/' ); ?>"><?php _e( 'Edit Plugin', 'wporg-plugins' ); ?></a>
 				<?php endif; ?>
 			</div>
 

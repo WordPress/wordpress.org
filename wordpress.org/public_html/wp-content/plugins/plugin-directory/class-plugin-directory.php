@@ -243,7 +243,7 @@ class Plugin_Directory {
 				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => is_super_admin(),
+			'show_ui'           => true,
 			'show_admin_column' => false,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -285,9 +285,6 @@ class Plugin_Directory {
 		// Add the browse/* views.
 		add_rewrite_tag( '%browse%', '(featured|popular|beta|new|favorites)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
-
-		// /browse/ should be the popular archive view.
-		add_rewrite_rule( '^browse$', 'index.php?browse=popular', 'top' );
 
 		// Create an archive for a users favorites too.
 		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
@@ -569,8 +566,6 @@ class Plugin_Directory {
 				);
 			}
 
-			// TODO: Make plugins owned by `post_author = $current_user_id` show up here when they're not-publish?
-
 			$wp_query->query_vars['orderby'] = 'post_title';
 			$wp_query->query_vars['order'] = 'ASC';
 
@@ -591,7 +586,7 @@ class Plugin_Directory {
 					return $posts;
 				}
 
-				// TODO: Switch this to the capabilities systems
+				// Only the 'publish' cap shouldn't be affected by cap checks.
 				$restricted_access_statii = array_diff( $wp_query->query_vars['post_status'], array( 'publish' ) );
 				foreach ( $posts as $i => $post ) {
 					// If the plugin is not in the restricted statuses list, show it
@@ -599,27 +594,12 @@ class Plugin_Directory {
 						continue;
 					}
 
-					// Plugin Reviewers can see all sorts of plugins
-					if ( current_user_can( 'plugin_review' ) ) {
+					// If the current user can view the plugin admin, show it
+					if ( current_user_can( 'plugin_admin_view', $post ) ) {
 						continue;
 					}
 
-					// Original submitter can always see
-					if ( $post->post_author == get_current_user_id() ) {
-						continue;
-					}
-
-					// Committers (user_login) can always see
-					if ( in_array( wp_get_current_user()->user_login, (array) Tools::get_plugin_committers( $post->post_name ), true ) ) {
-						continue;
-					}
-
-					// Contributors (user_nicename) can always see
-					if ( in_array( wp_get_current_user()->user_nicename, (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'slug' ), true ) ) {
-						continue;
-					}
-
-					// everyone else can't.
+					// Else hide it.
 					unset( $posts[ $i ] );
 				}
 
@@ -801,7 +781,7 @@ class Plugin_Directory {
 		switch ( $term->taxonomy ) {
 			case 'plugin_contributors':
 			case 'plugin_committers':
-				$user = get_user_by( 'slug', $term->slug );
+				$user = get_user_by( 'slug', $term->name );
 				$name = $user->display_name;
 				break;
 		}
@@ -887,24 +867,15 @@ class Plugin_Directory {
 			die();
 		}
 
-		// TODO: Switch this to the capabilities systems, check if post_author should access
 		// Filter access to the plugin administration area. Only certain users are allowed access.
-		if ( get_query_var( 'plugin_admin' ) && ! current_user_can( 'plugin_review' ) ) {
-			$post = Plugin_Directory::get_plugin_post( get_query_var( 'name' ) );
-			if (
-				// Logged out users can't access plugin admin
-				! is_user_logged_in() ||
-				// Allow access to Committers OR Contributors.
-				! (
-					// Committers can access plugin admin
-					in_array( wp_get_current_user()->user_login, (array) Tools::get_plugin_committers( $post->post_name ), true ) ||
-					// Contributors can access plugin admin (but will have a more limited access)
-					in_array( wp_get_current_user()->user_nicename, (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'slug' ), true )
-				)
-			) {
-				wp_safe_redirect( get_permalink( $post ) );
-				die();
-			}
+		if ( get_query_var( 'plugin_admin' )  &&
+			! current_user_can(
+				'plugin_admin_view',
+				$post = Plugin_Directory::get_plugin_post( get_query_var( 'name' ) )
+			)
+		) {
+			wp_safe_redirect( get_permalink( $post ) );
+			die();
 		}
 	}
 

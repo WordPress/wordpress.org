@@ -2,7 +2,7 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 
 ( function( $, settings ) {
 	$( function () {
-		jQuery.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267&callback=?', function( downloads ) {
+		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267&callback=?', function( downloads ) {
 			var data = new google.visualization.DataTable(),
 				count = 0,
 				sml;
@@ -44,6 +44,24 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 				width: 532,
 				curveType: 'function'
 			} );
+		} );
+
+		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1&callback=?', function( summary ) {
+			var $tbody = $('table#plugin-download-history-stats tbody:last-child');
+
+			for ( var summary_field in summary ) {
+				if ( ! summary.hasOwnProperty( summary_field ) ) {
+					continue;
+				}
+
+				var text = settings.l10n[summary_field];
+				var count = parseInt(summary[ summary_field ]).toLocaleString();
+
+				$newrow = $("<tr><th scope='row'></th><td>0</td></tr>");
+				$newrow.find( 'th' ).text( text );
+				$newrow.find( 'td' ).text( count );
+				$tbody.append( $newrow );
+			}
 		} );
 
 		$.getJSON( 'https://api.wordpress.org/stats/plugin/1.0/?slug=' + settings.slug + '&callback=?', function ( versions ) {

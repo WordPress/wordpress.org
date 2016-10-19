@@ -375,12 +375,6 @@ class Customizations {
 				'plugin', 'side'
 			);
 
-			add_meta_box(
-				'plugin-stats',
-				__( 'Plugin Stats', 'wporg-plugins' ),
-				array( __NAMESPACE__ . '\Metabox\Stats', 'display' ),
-				'plugin', 'normal'
-			);
 		}
 
 		// Remove unnecessary metaboxes.
