@@ -4,64 +4,35 @@ use WordPressdotorg\Plugin_Directory\Readme\Validator;
 
 class Readme_Validator {
 
-	private $errors = array();
-
-	/**
-	 * Fetch the instance of the Readme_Validator class.
-	 *
-	 * @static
-	 */
-	public static function instance() {
-		static $instance = null;
-
-		return ! is_null( $instance ) ? $instance : $instance = new Readme_Validator();
-	}
-
-	private function __construct() {
-	}
-
-	private function display_errors( $errors ) {
-		if ( is_array( $errors ) && !empty( $errors ) ) {
-			$message = __( 'Warnings:', 'wporg-plugins' ) . "\n<ul class='warning error'>\n";
-			foreach ( $errors as $error ) {
-				$message .= "<li>" . esc_html($error) . "</li>\n";
-			}
-			$message .= "</ul>\n</div>";
-
-			echo $message;
-		}
-
-	}
-
 	/**
 	 * Displays a form to validate readme.txt files and blobs of text.
 	 */
-	public function display() {
-
-		$message = null;
-		if ( !empty( $_POST ) ) {
-			$message = self::validate();
-		}
-
+	public static function display() {
 		?>
 		<div class="wrap">
 			<h2><?php _e( 'WordPress Plugin readme.txt Validator', 'wporg-plugins' ); ?></h2>
-			<?php if ( $message ) echo $message; ?>
-			<form method="post" action="<?php echo esc_url( add_query_arg( array() ) ); ?>">
-				<input type="hidden" name="url" value="1" />
-				<p>http://<input type="text" name="readme_url" size="70" /> <input type="submit" value="Validate!" /></p>
-				<?php
-				wp_nonce_field( 'validate-readme-url' );
-				?>
+
+			<?php
+			if ( $_POST ) {
+				self::validate_readme();
+			}
+			?>
+
+			<form method="post" action="">
+				<p>
+					<input type="text" name="readme_url" size="70" placeholder="https://" value="<?php if ( isset( $_GET['readme_url'] ) ) { echo esc_attr( $_POST['readme_url'] ); } ?>" />
+					<input type="submit" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
+				</p>
 			</form>
+
 			<p><?php _e( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ); ?></p>
-			<form method="post" action="<?php echo esc_url( add_query_arg( array() ) ); ?>">
-				<input type="hidden" name="text" value="1" />
-				<textarea rows="20" cols="100" name="readme_contents"></textarea>
-				<p><input type="submit" value="Validate!" /></p>
-				<?php
-				wp_nonce_field( 'validate-readme-text' );
-				?>
+			<form method="post" action="">
+				<textarea rows="20" cols="100" name="readme_contents" placeholder="=== Plugin Name ==="><?php
+					if ( isset( $_POST['readme_contents'] ) ) {
+						echo esc_textarea( wp_unslash( $_POST['readme_contents'] ) );
+					}
+				?></textarea>
+				<p><input type="submit" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
 		</div>
 		<?php
@@ -70,39 +41,30 @@ class Readme_Validator {
 	/**
 	 * Validates readme.txt contents and adds feedback.
 	 */
-	public function validate() {
+	protected static function validate_readme() {
+		if (  !empty( $_POST['readme_url'] ) ) {
+			$errors = Validator::instance()->validate_url( wp_unslash( $_POST['readme_url'] ) );
 
-		$readme    = '';
+		} elseif ( !empty( $_POST['readme_contents'] ) ) {
+			$errors = Validator::instance()->validate_content( wp_unslash( $_REQUEST['readme_contents'] ) );
 
-		if ( !empty( $_POST['url'] ) 
-			&& !empty( $_POST['readme_url'] ) 
-			&& !empty( $_POST['_wpnonce'] ) 
-			&& wp_verify_nonce( $_POST['_wpnonce'], 'validate-readme-url' ) ) {
-				$url = esc_url_raw( $_POST['readme_url'] );
-
-				if ( strtolower( substr( $url, -10 ) ) != 'readme.txt' ) {
-					/* Translators: File name; */
-					self::instance()->errors[] = sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' );
-					return;
-				}
-
-				if ( ! $readme = @file_get_contents( $url ) ) {
-					self::instance()->errors[] = __( 'Invalid readme.txt URL.', 'wporg-plugins' );
-					return;
-				}
-			}
-		elseif ( !empty( $_POST['text'] ) 
-			&& !empty( $_POST['readme_contents'] ) 
-			&& !empty( $_POST['_wpnonce'] ) 
-			&& wp_verify_nonce( $_POST['_wpnonce'], 'validate-readme-text' ) ) {
-				$readme = wp_unslash( $_REQUEST['readme_contents'] );
-			}
-
-		if ( empty( $readme ) ) {
+		} else {
 			return;
 		}
 
-		return Validator::instance()->validate_content( $readme );
-
+		$error_types = array(
+			'errors'   => __( 'Fatal Errors:', 'wporg-plugins' ),
+			'warnings' => __( 'Warnings:', 'wporg-plugins' ),
+			'notes'    => __( 'Notes:', 'wporg-plugins' )
+		);
+		foreach ( $error_types as $field => $warning_label ) {
+			if ( !empty( $errors[ $field ] ) ) {
+				echo "{$warning_label}\n<ul class='{$field} error'>\n";
+				foreach ( $errors[ $field ] as $notice ) {
+					echo "<li>{$notice}</li>\n";
+				}
+				echo "</ul>\n";
+			}
+		}
 	}
 }
