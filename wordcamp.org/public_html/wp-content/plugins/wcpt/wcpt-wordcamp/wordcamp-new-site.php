@@ -115,6 +115,19 @@ class WordCamp_New_Site {
 	 * @param int $wordcamp_id
 	 */
 	public function maybe_create_new_site( $wordcamp_id ) {
+		/*
+		 * If this were to be called again before it had finished -- e.g., when `WCORMailer::replace_placeholders()`
+		 * calls `WordCamp_Admin::metabox_save()` -- then it would `wpmu_create_blog()` would return a `blog_taken`
+		 * `WP_Error` and `configure_site()` would never be called.
+		 *
+		 * @todo - If no other problems crop up with new site creation by 2016-12-01, then all of the logging
+		 * that was added in r4254 can be removed, to make the code less cluttered and more readable.
+		 */
+		if ( 1 !== did_action( 'wcpt_metabox_save_done' ) ) {
+			Logger\log( 'return_redundant_call' );
+			return;
+		}
+
 		if ( ! current_user_can( 'manage_sites' ) ) {
 			$current_user_id = get_current_user_id();
 			Logger\log( 'return_no_cap', compact( 'wordcamp_id', 'current_user_id' ) );
