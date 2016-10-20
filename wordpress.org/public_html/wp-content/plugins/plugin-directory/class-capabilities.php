@@ -60,10 +60,13 @@ class Capabilities {
 
 				if ( ! $plugin_edit_cap ) {
 					// Contributors can view, but not edit.
-					$contributors = (array) wp_list_pluck( get_the_terms( $post, 'plugin_contributors' ), 'name' );
-					if ( in_array( $user->user_nicename, $contributors, true ) ) {
-						$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
-						break;
+					$terms = get_the_terms( $post, 'plugin_contributors' );
+					if ( is_array( $terms ) ) {
+						$contributors = (array) wp_list_pluck( $terms, 'name' );
+						if ( in_array( $user->user_nicename, $contributors, true ) ) {
+							$required_caps[] = 'exist'; // All users are allowed to exist, even when they have no role.
+							break;
+						}
 					}
 				}
 
