@@ -17,7 +17,7 @@ class Core extends Trac {
 	 * Start regex matches with # as your delimiter.
 	 */
 	protected $commit_path_filters = array(
-		'wp-content/themes'                => array( '#core-themes' => true, '#core' => false ),
+		'wp-content/themes'                => '#core-themes',
 		'customize'                        => '#core-customize',
 		'editor-expand.js'                 => '#core-editor',
 		'wp-admin/css/edit.css'            => '#core-editor',
@@ -37,7 +37,7 @@ class Core extends Trac {
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
-		'Bundled Theme'      => array( '#core-themes' => true, '#core' => false ),
+		'Bundled Theme'      => '#core-themes',
 		'Customize'          => '#core-customize',
 		'Press This'         => '#core-pressthis',
 		'multisite'          => '#core-multisite',
