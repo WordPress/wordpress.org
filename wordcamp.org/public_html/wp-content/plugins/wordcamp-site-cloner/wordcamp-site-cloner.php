@@ -1,24 +1,40 @@
 <?php
 
-namespace WordCamp\Site_Cloner;
-
-defined( 'WPINC' ) or die();
-
 /*
 Plugin Name: WordCamp Site Cloner
 Description: Allows organizers to clone another WordCamp's theme and custom CSS as a starting point for their site.
-Version:     0.1
+Version:     0.2
 Author:      WordCamp.org
 Author URI:  http://wordcamp.org
 License:     GPLv2 or later
 */
 
-// todo if Jetpack_Custom_CSS:get_css is callable, register these, otherwise fatal errors
+namespace WordCamp\Site_Cloner;
+defined( 'WPINC' ) or die();
 
-add_action( 'plugins_loaded',        __NAMESPACE__ . '\get_wordcamp_sites' );
-add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_scripts' );
-add_action( 'admin_menu',            __NAMESPACE__ . '\add_submenu_page' );
-add_action( 'customize_register',    __NAMESPACE__ . '\register_customizer_components' );
+const PRIME_SITES_CRON_ACTION      = 'wcsc_prime_sites';
+const WORDCAMP_SITES_TRANSIENT_KEY = 'wcsc_sites';
+
+/**
+ * Initialization
+ */
+function initialize() {
+	// We rely on the Custom CSS module being available
+	if ( ! class_exists( '\Jetpack' ) ) {
+		return;
+	}
+
+	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_scripts'               );
+	add_action( 'admin_menu',            __NAMESPACE__ . '\add_submenu_page'               );
+	add_action( 'customize_register',    __NAMESPACE__ . '\register_customizer_components' );
+	add_action( 'rest_api_init',         __NAMESPACE__ . '\register_api_endpoints'         );
+	add_action( PRIME_SITES_CRON_ACTION, __NAMESPACE__ . '\prime_wordcamp_sites'           );
+
+	if ( ! wp_next_scheduled( PRIME_SITES_CRON_ACTION ) ) {
+		wp_schedule_event( time(), 'daily', PRIME_SITES_CRON_ACTION );
+	}
+}
+add_action( 'plugins_loaded', __NAMESPACE__ . '\initialize' ); // After Jetpack has loaded
 
 /**
  * Register scripts and styles
@@ -28,16 +44,47 @@ function register_scripts() {
 		'wordcamp-site-cloner',
 		plugin_dir_url( __FILE__ ) . 'wordcamp-site-cloner.css',
 		array(),
-		1
+		2
 	);
 
 	wp_register_script(
 		'wordcamp-site-cloner',
 		plugin_dir_url( __FILE__ ) . 'wordcamp-site-cloner.js',
-		array( 'jquery', 'customize-controls' ),
-		1,
+		array( 'jquery', 'customize-controls', 'wp-backbone' ),
+		2,
 		true
 	);
+
+	wp_localize_script(
+		'wordcamp-site-cloner',
+		'_wcscSettings',
+		array(
+			'apiUrl'        => get_rest_url( null, '/wordcamp-site-cloner/v1/sites/' ),
+			'customizerUrl' => admin_url( 'customize.php' ),
+			'themes'        => get_available_themes(),
+		)
+	);
+}
+
+/**
+ * Get all of the available themes
+ *
+ * @return array
+ */
+function get_available_themes() {
+	/** @var \WP_Theme $theme */
+	$available_themes = array();
+	$raw_themes       = wp_get_themes( array( 'allowed' => true ) );
+
+	foreach ( $raw_themes as $theme ) {
+		$theme_name         = $theme->display( 'Name' );
+		$available_themes[] = array(
+			'slug' => $theme->get_stylesheet(),
+			'name' => $theme_name ?: $theme->get_stylesheet()
+		);
+	}
+
+	return $available_themes;
 }
 
 /**
@@ -52,7 +99,7 @@ function add_submenu_page() {
 		__( 'Clone Another WordCamp', 'wordcamporg' ),
 		__( 'Clone Another WordCamp', 'wordcamporg' ),
 		'switch_themes',
-		'customize.php?autofocus[panel]=wordcamp_site_cloner'
+		'customize.php?autofocus[section]=wcsc_sites'
 	);
 }
 
@@ -63,122 +110,208 @@ function add_submenu_page() {
  */
 function register_customizer_components( $wp_customize ) {
 	require_once( __DIR__ . '/includes/source-site-id-setting.php' );
-	require_once( __DIR__ . '/includes/sites-section.php' );
 	require_once( __DIR__ . '/includes/site-control.php' );
-
-	$wp_customize->register_control_type( __NAMESPACE__ . '\Site_Control' );
 
 	$wp_customize->add_setting( new Source_Site_ID_Setting(
 		$wp_customize,
 		'wcsc_source_site_id',
-		array()
+		array( 'capability' => 'switch_themes' )
 	) );
 
-	$wp_customize->add_panel(
-		'wordcamp_site_cloner',
+	$wp_customize->add_section(
+		'wcsc_sites',
 		array(
-			'type'        => 'wcscPanel',
-			'title'       => __( 'Clone Another WordCamp', 'wordcamporg' ),
-			'description' => __( "Clone another WordCamp's theme and custom CSS as a starting point for your site.", 'wordcamporg' ),
+			'title'      => __( 'Clone Another WordCamp', 'wordcamporg' ),
+			'capability' => 'switch_themes'
 		)
 	);
 
-	$wp_customize->add_section( new Sites_Section(
+	$wp_customize->add_control( new Site_Control(
 		$wp_customize,
-		'wcsc_sites',
+		'wcsc_site_search',
 		array(
-			'panel' => 'wordcamp_site_cloner',
-			'title' => __( 'WordCamp Sites', 'wordcamporg' ),
+			'type'     => 'wcscSearch',
+			'label'    => __( 'Search', 'wordcamporg' ),
+			'settings' => 'wcsc_source_site_id',
+			'section'  => 'wcsc_sites'
 		)
 	) );
-
-	foreach( get_wordcamp_sites() as $wordcamp ) {
-		if ( get_current_blog_id() == $wordcamp['site_id'] ) {
-			continue;
-		}
-
-		$wp_customize->add_control( new Site_Control(
-			$wp_customize,
-			'wcsc_site_id_' . $wordcamp['site_id'],
-			array(
-				'type'           => 'wcscSite',                      // todo should be able to set this in control instead of here, but if do that then control contents aren't rendered
-				'site_id'        => $wordcamp['site_id'],
-				'site_name'      => $wordcamp['name'],
-				'theme_slug'     => $wordcamp['theme_slug'],
-				'screenshot_url' => $wordcamp['screenshot_url'],
-			)
-		) );
-	}
 }
 
 /**
- * Get required data for relevant WordCamp sites
+ * Register the REST API endpoint for the Customizer to use to retriever the site list
+ */
+function register_api_endpoints() {
+	if ( ! current_user_can( 'switch_themes' ) ) {
+		return;
+
+		// todo - use `permission_callback` instead
+	}
+
+	register_rest_route(
+		'wordcamp-site-cloner/v1',
+		'/sites',
+		array(
+			'methods'  => 'GET',
+			'callback' => __NAMESPACE__ . '\sites_endpoint',
+		)
+	);
+}
+
+/**
+ * Handle the response for the Sites endpoint
  *
- * This isn't actually used until register_customizer_components(), but it's called during `plugins_loaded` in
- * order to prime the cache. That has to be done before `setup_theme`, because the Theme Switcher will override
- * the current theme when `?theme=` is present in the URL parameters, and it's safer to just avoid that than to
- * muck with the internals and try to reverse it on the fly.
+ * This always pulls cached data, because Central needs to be the site generating it. See get_wordcamp_sites().
+ *
+ * @return array
+ */
+function sites_endpoint() {
+	$sites        = array();
+	$cached_sites = get_site_transient( WORDCAMP_SITES_TRANSIENT_KEY );
+
+	if ( $cached_sites ) {
+		unset( $cached_sites[ get_current_blog_id() ] );
+
+	    $sites = array_values( $cached_sites );
+	}
+
+	return $sites;
+}
+
+/**
+ * Prime the cache of cloneable WordCamp sites
+ *
+ * This is called via WP Cron.
+ *
+ * @todo - Reintroduce batching from `1112.3.diff` to get more than 500 sites
+ */
+function prime_wordcamp_sites() {
+	// This only needs to run on a single site, then the whole network can use the cached result
+	if ( ! is_main_site() ) {
+		return;
+	}
+
+	// Keep the cache longer than needed, just to be sure that it doesn't expire before the cron job runs again
+	set_site_transient( WORDCAMP_SITES_TRANSIENT_KEY, get_wordcamp_sites(), DAY_IN_SECONDS * 2 );
+}
+
+/**
+ * Get WordCamp sites that are suitable for cloning
  *
  * @return array
  */
 function get_wordcamp_sites() {
-	require_once( WP_PLUGIN_DIR . '/wcpt/wcpt-wordcamp/wordcamp-loader.php' );
-
-	// plugins_loaded is runs on every screen, but we only need this when loading the Customizer and Previewer
-	if ( 'customize.php' != basename( $_SERVER['SCRIPT_NAME'] ) && empty( $_REQUEST['wp_customize'] ) ) {
+	/*
+	 * The post statuses that \WordCamp_Loader::get_public_post_statuses() returns are only created on Central,
+	 * because the plugin isn't active on any other sites.
+	 */
+	if ( ! is_main_site() ) {
 		return array();
 	}
 
-	$transient_key = 'wcsc_sites';
-
-	if ( $sites = get_site_transient( $transient_key ) ) {
-		return $sites;
+	if ( ! \Jetpack::is_module_active( 'custom-css' ) ) {
+		\Jetpack::activate_module( 'custom-css', false, false );
 	}
 
 	switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
 
-	$sites = array();
-	$wordcamps = get_posts( array(
-		'post_type'      => 'wordcamp',
+	$wordcamp_query = new \WP_Query( array(
+		'post_type'      => WCPT_POST_TYPE_ID,
 		'post_status'    => \WordCamp_Loader::get_public_post_statuses(),
-		'posts_per_page' => 125, // todo temporary workaround until able to add filters to make hundreds of sites manageable
+		'posts_per_page' => 500,
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'orderby'        => 'meta_value_num',
+		'order'          => 'DESC',
 
 		'meta_query' => array(
 			array(
+				// New sites won't have finished designs, so ignore them
 				'key'     => 'Start Date (YYYY-mm-dd)',
 				'value'   => strtotime( 'now - 1 month' ),
 				'compare' => '<'
-			),
+			)
 		),
 	) );
 
-	foreach( $wordcamps as $wordcamp ) {
-		$site_id  = get_wordcamp_site_id( $wordcamp );
-		$site_url = get_post_meta( $wordcamp->ID, 'URL', true );
+	$sites = get_filtered_wordcamp_sites( $wordcamp_query->get_posts() );
 
-		if ( ! $site_id || ! $site_url ) {
+	uasort( $sites, __NAMESPACE__ . '\sort_sites_by_year' );
+
+	restore_current_blog();
+
+	return $sites;
+}
+
+/**
+ * Filter out sites that aren't relevant to the Cloner
+ *
+ * @param array $wordcamps
+ *
+ * @return array
+ */
+function get_filtered_wordcamp_sites( $wordcamps ) {
+	$sites = array();
+
+	foreach ( $wordcamps as $wordcamp ) {
+		$site_id    = get_wordcamp_site_id( $wordcamp );
+		$site_url   = get_post_meta( $wordcamp->ID, 'URL',                     true );
+		$start_date = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
+
+		if ( ! $site_id || ! $site_url || ! $start_date ) {
 			continue;
 		}
 
 		switch_to_blog( $site_id );
 
-		$sites[] = array(
-			'site_id'        => $site_id,
-			'name'           => get_wordcamp_name(),
-			'theme_slug'     => get_stylesheet(),
-			'screenshot_url' => get_screenshot_url( $site_url ),
-		);
+		/*
+		 * Sites with Coming Soon enabled probably don't have a finished design yet, so there's no point in
+		 * cloning it.
+		 */
+		if ( ! coming_soon_plugin_enabled() ) {
+			$preprocessor = \Jetpack_Custom_CSS::get_preprocessor();
+			$preprocessor = isset( $preprocessor[ 'name' ] ) ? $preprocessor[ 'name' ] : 'none';
+
+			$sites[ $site_id ] = array(
+				'site_id'          => $site_id,
+				'name'             => get_wordcamp_name(),
+				'theme_slug'       => get_stylesheet(),
+				'screenshot_url'   => get_screenshot_url( $site_url ),
+				'year'             => date( 'Y', $start_date ),
+				'css_preprocessor' => $preprocessor,
+			);
+		}
 
 		restore_current_blog();
 	}
 
-	restore_current_blog();
-
-	set_site_transient( $transient_key, $sites, DAY_IN_SECONDS );
-
 	return $sites;
+}
+
+/**
+ * Determine if the Coming Soon plugin is enabled for the current site
+ *
+ * @return bool
+ */
+function coming_soon_plugin_enabled() {
+	global $WCCSP_Settings;
+	$enabled = false;
+
+	if ( ! is_callable( 'WCCSP_Settings::get_settings' ) ) {
+		return $enabled;
+	}
+
+	// We may need to instantiate the class if this is the first time calling this function
+	if ( ! is_a( $WCCSP_Settings, 'WCCSP_Settings' ) ) {
+		$WCCSP_Settings = new \WCCSP_Settings();
+	}
+
+	$settings = $WCCSP_Settings->get_settings();
+
+	if ( isset( $settings[ 'enabled' ] ) && 'on' === $settings[ 'enabled' ] ) {
+		$enabled = true;
+	}
+
+	return $enabled;
 }
 
 /**
@@ -194,4 +327,20 @@ function get_screenshot_url( $site_url ) {
 	$screenshot_url = add_query_arg( 'w', 275, 'https://www.wordpress.com/mshots/v1/' . rawurlencode( $site_url ) );
 
 	return apply_filters( 'wcsc_site_screenshot_url', $screenshot_url );
+}
+
+/**
+ * Sort arrays by the year
+ *
+ * @param array $site_a
+ * @param array $site_b
+ *
+ * @return int
+ */
+function sort_sites_by_year( $site_a, $site_b ) {
+	if ( $site_a[ 'year' ] === $site_b[ 'year' ] ) {
+		return 0;
+	}
+
+	return ( $site_a[ 'year' ] < $site_b[ 'year' ] ? 1 : -1 );
 }

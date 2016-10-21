@@ -1,21 +1,26 @@
 <?php
 
-namespace WordCamp\Site_Cloner;
+/**
+ * Custom Customizer Control for Search WordCamp sites to clone
+ */
 
+namespace WordCamp\Site_Cloner;
 defined( 'WPINC' ) or die();
 
-/**
- * Custom Customizer Control for a WordCamp site
- */
 class Site_Control extends \WP_Customize_Control {
-	public $site_id, $site_name, $screenshot_url, $theme_slug;
-	public $settings = 'wcsc_source_site_id';
-	public $section  = 'wcsc_sites';
+	public function __construct( $manager, $id, $args = array() ) {
+		parent::__construct( $manager, $id, $args );
+
+		$this->capability = 'edit_theme_options';
+		$this->section    = 'wcsc_sites';
+	}
 
 	/**
 	 * Enqueue scripts and styles
 	 */
 	public function enqueue() {
+		add_action( 'customize_controls_print_footer_scripts', array( $this, 'print_view_templates' ) );
+
 		wp_enqueue_style(  'wordcamp-site-cloner' );
 		wp_enqueue_script( 'wordcamp-site-cloner' );
 	}
@@ -24,14 +29,14 @@ class Site_Control extends \WP_Customize_Control {
 	 * Render the control's content
 	 */
 	public function render_content() {
-		$preview_url = add_query_arg(
-			array(
-				'theme'               => rawurlencode( $this->theme_slug ),
-				'wcsc_source_site_id' => rawurlencode( $this->site_id ),
-			),
-			admin_url( 'customize.php' )
-		);
+		require_once( dirname( __DIR__ ) . '/templates/site-control.php' );
+	}
 
-		require( dirname( __DIR__ ) . '/templates/site-control.php' );
+	/**
+	 * Render the control's Underscores templates
+	 */
+	public function print_view_templates() {
+		require_once( dirname( __DIR__ ) . '/templates/site-option.php'  );
+		require_once( dirname( __DIR__ ) . '/templates/site-filters.php' );
 	}
 }

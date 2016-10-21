@@ -1,15 +1,23 @@
-<?php defined( 'WPINC' ) or die(); ?>
+<?php
 
-<div id="wcsc-site-<?php echo esc_attr( $this->site_id ); ?>" class="wcscSite" data-preview-url="<?php echo esc_url( $preview_url ); ?>">
-	<div class="wcsc-site-screenshot">
-		<img src="<?php echo esc_url( $this->screenshot_url ); ?>" alt="<?php echo esc_attr( $this->site_name ); ?>" />
-	</div>
+/**
+ * Top level template for the output of the Site Cloner Customizer Control
+ */
 
-	<h3 class="wcsc-site-name">
-		<?php echo esc_html( $this->site_name ); ?>
+namespace WordCamp\Site_Cloner;
+defined( 'WPINC' ) or die();
+
+?>
+
+<div id="wcsc-cloner">
+	<h3>
+		<?php esc_html_e( 'WordCamp Sites', 'wordcamporg' ); ?>
+		<span id="wcsc-sites-count" class="title-count wcsc-sites-count"></span>
 	</h3>
 
-	<span id="live-preview-label-<?php echo esc_attr( $this->site_id ); ?>" class="wcsc-live-preview-label">
-		<?php _e( 'Live Preview', 'wordcamporg' ); ?>
-	</span>
+	<div class="filters"></div>
+
+	<div class="wcsc-search">
+		<ul id="wcsc-results"></ul>
+	</div>
 </div>

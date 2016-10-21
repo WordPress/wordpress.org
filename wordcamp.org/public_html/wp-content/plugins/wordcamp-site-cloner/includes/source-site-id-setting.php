@@ -1,7 +1,6 @@
 <?php
 
 namespace WordCamp\Site_Cloner;
-
 defined( 'WPINC' ) or die();
 
 /**
@@ -15,6 +14,7 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 	public $type              = 'wcsc-source-site-id';
 	public $default           = 0;
 	public $sanitize_callback = 'absint';
+
 	protected $preview_source_site_id;
 
 	/**
@@ -28,6 +28,9 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 		add_action( 'wp_head',                 array( $this, 'preview_source_site_css'  ), 99 );   // wp_print_styles is too early; the theme's stylesheet would get enqueued later and take precedence
 		add_filter( 'get_post_metadata',       array( $this, 'preview_jetpack_postmeta' ), 10, 4 );
 		add_filter( 'safecss_skip_stylesheet', array( $this, 'preview_skip_stylesheet'  ) );
+
+		// Disable the current site's Custom CSS from being output
+		remove_action( 'wp_head', array( 'Jetpack_Custom_CSS', 'link_tag' ), 101 );
 	}
 
 	/**
@@ -109,6 +112,8 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 	 * to the URL.
 	 *
 	 * @param int $source_site_id
+	 *
+	 * @return null
 	 */
 	protected function update( $source_site_id ) {
 		switch_to_blog( $source_site_id );

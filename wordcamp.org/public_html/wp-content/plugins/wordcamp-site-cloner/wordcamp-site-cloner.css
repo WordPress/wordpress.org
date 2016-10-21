@@ -1,27 +1,26 @@
-.control-section-wcsc-sites {
-	padding: 0 8px;
+
+.wcsc-filter {
+	margin-bottom: 10px;
 }
 
-	#wcsc-sites {
-		overflow: auto;
-	}
-
-		.wcscSite {
+		.wcsc-site {
 			position: relative;
 			cursor: pointer;
 			border: 1px solid #DEDEDE;
 			box-shadow: 0 1px 1px -1px rgba( 0, 0, 0, 0.1 );
+			margin-top: 5px;
 		}
 
 			.wcsc-site-screenshot {
 				transition: opacity 0.2s ease-in-out 0s;
 			}
 
-				.wcscSite:hover .wcsc-site-screenshot {
+				.wcsc-site:hover .wcsc-site-screenshot {
 					opacity: 0.4;
 				}
 
-			.wcsc-live-preview-label {
+			.wcsc-live-preview-label,
+			.wcsc-previewing-label {
 				opacity: 0;
 				position: absolute;
 				top: 35%;
@@ -38,6 +37,7 @@
 				transition: opacity 0.1s ease-in-out 0s;
 			}
 
-				.wcscSite:hover .wcsc-live-preview-label {
+				.wcsc-site:hover .wcsc-live-preview-label,
+				.wcsc-site .wcsc-previewing-label {
 					opacity: 1;
 				}
