@@ -3121,7 +3121,7 @@ section {
 
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
-	float: right;
+	float: none;
 	width: auto;
 }
 
