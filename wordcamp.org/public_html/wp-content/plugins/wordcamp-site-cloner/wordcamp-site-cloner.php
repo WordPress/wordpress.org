@@ -183,7 +183,8 @@ function sites_endpoint() {
  *
  * This is called via WP Cron.
  *
- * @todo - Reintroduce batching from `1112.3.diff` to get more than 500 sites
+ * @todo - Reintroduce batching from `1112.3.diff` to get more than 500 sites. Will need to fix transient bug
+ * mentioned in `get_wordcamp_sites()` first.
  */
 function prime_wordcamp_sites() {
 	// This only needs to run on a single site, then the whole network can use the cached result
@@ -216,9 +217,14 @@ function get_wordcamp_sites() {
 	switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
 
 	$wordcamp_query = new \WP_Query( array(
+		/*
+		 * todo - There's a bug where a `posts_per_page` value greater than ~250-300 will result in
+		 * `set_site_transient()` calling `add_site_option()` rather than `update_site_option()`,
+		 * and then `get_site_transient()` fails, so `sites_endpoint()` returns an empty array.
+		 */
 		'post_type'      => WCPT_POST_TYPE_ID,
 		'post_status'    => \WordCamp_Loader::get_public_post_statuses(),
-		'posts_per_page' => 500,
+		'posts_per_page' => 250,
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'orderby'        => 'meta_value_num',
 		'order'          => 'DESC',
