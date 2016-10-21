@@ -28,11 +28,33 @@ class Contributors extends \WP_Widget {
 	public function widget( $args, $instance ) {
 		$post = get_post();
 
+		$contributors = (array) wp_list_pluck( (array)get_the_terms( $post, 'plugin_contributors' ), 'name' );
+		$contributors = array_map( function( $user_nicename ) {
+			return get_user_by( 'slug', $user_nicename );
+		}, $contributors );
+
 		echo $args['before_widget'];
 		?>
+		<style>
+			<?php // TODO: Yes, these need to be moved into the CSS somewhere. ?>
+			ul.contributors-list {
+				list-style: none;
+				margin: 0;
+				font-size: 0.9em;
+			}
+			ul.contributors-list li {
+				padding-bottom: 0.5em;
+			}
+		</style>
+		<h3><?php _e( 'Contributors', 'wporg-plugins' ); ?></h3>
+		<p class="widget-subnav"><small><a href="#"><?php _e( 'View the capabilities these users have', 'wporg-plugins' ); ?></a></small></p>
 
-		<h3 class="screen-reader-text"><?php echo apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ); ?></h3>
-
+		<ul id="contributors-list" class="contributors-list read-more" aria-expanded="false">
+		<?php foreach ( $contributors as $contributor ) {
+			echo '<li>' . get_avatar( $contributor->ID, 32 ) . '<a href="' . esc_url( 'https://profiles.wordpress.org/' . $contributor->user_nicename ) . '">' . Template::encode( $contributor->display_name ) . '</a></li>';
+		} ?>
+		</ul>
+		<button type="button" class="button-link section-toggle" aria-controls="contributors-list"><?php _e( 'View more', 'wporg-plugins' ); ?></button>
 
 		<?php
 		echo $args['after_widget'];

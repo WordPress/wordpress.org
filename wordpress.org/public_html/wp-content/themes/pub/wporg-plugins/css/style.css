@@ -1374,6 +1374,11 @@ p a:not(.button):hover {
   outline: 0;
 }
 
+/* hide elements if JS isn't available. */
+.no-js .hide-if-no-js {
+  display: none;
+}
+
 /*--------------------------------------------------------------
 # Alignments
 --------------------------------------------------------------*/
@@ -2199,7 +2204,7 @@ object {
 }
 
 .no-js .plugin-faqs dd {
-	display: block;
+  display: block;
 }
 
 .plugin-reviews {
@@ -2473,7 +2478,6 @@ object {
   padding-bottom: 1px;
 }
 
-.no-js .read-more,
 .read-more#reviews {
   max-height: none;
   overflow: auto;
@@ -2523,6 +2527,11 @@ object {
   max-height: none;
 }
 
+.no-js .read-more {
+  overflow: auto;
+  max-height: none;
+}
+
 .section-toggle {
   color: #0073aa;
   cursor: pointer;
@@ -2545,7 +2554,7 @@ object {
 }
 
 .no-js .section-toggle {
-	display: none;
+  display: none;
 }
 
 .type-plugin .plugin-notice {

@@ -17,7 +17,7 @@ class Developers {
 		$post         = get_post();
 
 		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
-			$contributors = wp_list_pluck( $contributors, 'slug' );
+			$contributors = wp_list_pluck( $contributors, 'name' );
 		} else {
 			$contributors = array();
 			if ( $author = get_user_by( 'id', $post->post_author ) ) {

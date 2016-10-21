@@ -30,3 +30,8 @@
 #content[tabindex="-1"]:focus {
 	outline: 0;
 }
+
+/* hide elements if JS isn't available. */
+.no-js .hide-if-no-js {
+	display: none;
+}
