@@ -2356,6 +2356,14 @@ p a:not(.button):not(.sidebar .subscription-toggle):not(
 	border: none;
 }
 
+p a, .bbpress #bbpress-forums p.bbp-topic-meta a {
+	border-bottom: none;
+}
+
+p a:hover, .bbpress #bbpress-forums p.bbp-topic-meta a:hover {
+	border-bottom: none;
+}
+
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
@@ -3111,7 +3119,7 @@ section {
 
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
-	float: left;
+	float: none;
 	width: auto;
 }
 

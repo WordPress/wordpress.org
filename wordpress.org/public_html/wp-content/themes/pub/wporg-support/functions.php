@@ -34,18 +34,9 @@ function wporg_support_scripts() {
 		'20161011'
 	);
 
-	wp_register_style(
-		'forum-wp4-style-rtl',
-		get_template_directory_uri() . '/style-rtl.css',
-		array( 'forum-wp4-style' ),
-		'20161011'
-	);
+	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
 
 	wp_enqueue_style( 'forum-wp4-style' );
-
-	if ( is_rtl() ) {
-		wp_enqueue_style( 'forum-wp4-style-rtl' );
-	}
 
 	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 }
