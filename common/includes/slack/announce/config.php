@@ -80,7 +80,7 @@ function get_whitelist() {
 			'ocean90',
 			'sergey',
 		),
-		'core-images' => array(
+		'core-media' => array(
 			'joemcgill',
 			'mike',
 			'ocean90',
