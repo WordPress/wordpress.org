@@ -1,3 +1,5 @@
+wp.customize.WordCamp = wp.customize.WordCamp || {};
+
 wp.customize.WordCamp.ComingSoonPage = ( function( $, api ) {
 	'use strict';
 

@@ -205,7 +205,9 @@ class WordCamp_Participation_Notifier {
 		}
 
 		if ( $user_id ) {
-			$user = get_user_by( 'id', $user_id );  // todo This is a temporary workaround for r3806 until everything can be refactored
+			$user = get_user_by( 'id', $user_id );
+				// todo - This is a temporary workaround for r3806 until everything can be refactored.
+				// Refactoring may no longer be necessary, see https://meta.trac.wordpress.org/changeset/3894
 
 			$activity = array(
 				'action'        => 'wporg_handle_activity',

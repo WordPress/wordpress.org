@@ -411,6 +411,7 @@ class WCOR_Reminder {
 	 *
 	 * @param WP_Post $a
 	 * @param WP_Post $b
+	 *
 	 * @return int
 	 */
 	protected function usort_wordcamps_by_year_and_status( $a, $b ) {
