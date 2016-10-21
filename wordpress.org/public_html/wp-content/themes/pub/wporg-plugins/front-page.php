@@ -13,6 +13,7 @@ $sections = array(
 	'featured' => __( 'Featured Plugins', 'wporg-plugins' ),
 	'popular'  => __( 'Popular Plugins', 'wporg-plugins' ),
 	'beta'     => __( 'Beta Plugins', 'wporg-plugins' ),
+	'favorites' => __( 'My Favorites', 'wporg-plugins' ), 
 );
 
 $widget_args = array(
@@ -26,6 +27,11 @@ get_header();
 	<main id="main" class="site-main" role="main">
 
 		<?php foreach ( $sections as $browse => $section_title ) :
+			// Only logged in users can have favorites.
+			if ( 'favorites' === $browse && ! is_user_logged_in() ) {
+				continue;
+			}
+
 			$section_args = array(
 				'post_type'      => 'plugin',
 				'posts_per_page' => 4,
@@ -39,6 +45,11 @@ get_header();
 			}
 
 			$section_query = new \WP_Query( $section_args );
+
+			// If the user doesn't have any favorites, omit the section.
+			if ( 'favorites' === $browse && ! $section_query->have_posts() ) {
+				continue;
+			}
 			?>
 
 			<section class="plugin-section">
