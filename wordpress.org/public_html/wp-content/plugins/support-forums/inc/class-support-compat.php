@@ -9,7 +9,7 @@ class Support_Compat {
 
 	var $loaded     = false;
 	var $query      = null;
-	var $user_login = null;
+	var $user       = null;
 
 	public function __construct() {
 		if ( ! $this->loaded ) {
@@ -37,14 +37,28 @@ class Support_Compat {
 		}
 	}
 
+	/**
+	 * Check the request for the `wporg_user_login`, and then add filters to
+	 * handle either the feed request or the custom view if a user is found.
+	 *
+	 * @param array $query_vars The query vars
+	 * @return array The query vars
+	 */
 	public function request( $query_vars ) {
-		if ( isset( $query_vars['feed'] ) && isset( $query_vars['wporg_user_login'] ) ) {
-			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( 'plugin-committer' ) ) ) {
-				$this->query = $query_vars;
-				add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
+		if ( isset( $query_vars['wporg_user_login'] ) && ! empty( $query_vars['wporg_user_login'] ) && ! $this->user ) {
+			$user = get_user_by( 'slug', $query_vars['wporg_user_login'] );
+			if ( $user ) {
+				// Set the user if available for custom views.
+				$this->user = $user;
 
-				// Override bbPress topic pubDate handling to show topic time and not last active time
-				add_filter( 'get_post_metadata', array( $this, 'topic_pubdate_correction_for_feed' ), 10, 4 );
+				// If this is a feed, add filters to handle the custom view.
+				if ( isset( $query_vars['feed'] ) && isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( 'plugin-committer' ) ) ) {
+					$this->query = $query_vars;
+					add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
+
+					// Override bbPress topic pubDate handling to show topic time and not last active time.
+					add_filter( 'get_post_metadata', array( $this, 'topic_pubdate_correction_for_feed' ), 10, 4 );
+				}
 			}
 		}
 		return $query_vars;
@@ -67,7 +81,7 @@ class Support_Compat {
 					'tax_query'       => array( array(
 						'taxonomy'    => 'topic-plugin',
 						'field'       => 'slug',
-						'terms'       => $this->get_plugin_slugs_by_committer( $this->query['wporg_user_login'] ),
+						'terms'       => self::get_plugin_slugs_by_committer( $this->user->user_login ),
 					) ),
 					'show_stickies'   => false,
 				);
@@ -76,24 +90,26 @@ class Support_Compat {
 		return $retval;
 	}
 
-	public function parse_query() {
-		$user_login = get_query_var( 'wporg_user_login' );
+	/**
+	 * Determine if a custom view needs to be loaded for this query and register
+	 * the view if needed.
+	 *
+	 * @param array $query_vars The query vars
+	 */
+	public function parse_query( $query_vars ) {
 		$view = get_query_var( 'bbp_view' );
-		if ( ! $user_login || ! $view ) {
+		if ( ! $view || ! $this->user ) {
 			return;
 		}
 
-		// Basic setup.
-		$this->user_login = $user_login;
-
 		if ( $view == 'plugin-committer' ) {
 
-			$slugs = $this->get_plugin_slugs_by_committer( $user_login );
+			$slugs = self::get_plugin_slugs_by_committer( $this->user->user_login );
 
 			// Add plugin-committer view.
 			bbp_register_view(
 				'plugin-committer',
-				sprintf( __( 'Plugin Committer &raquo; %s', 'wporg-forums' ), esc_html( $user_login ) ),
+				sprintf( __( 'Plugin Committer &raquo; %s', 'wporg-forums' ), esc_html( $this->user->user_login ) ),
 				array(
 					'post_parent__in' => array( Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID ),
 					'post_status'     => 'publish',
@@ -151,14 +167,14 @@ class Support_Compat {
 
 		// Pretty permalinks.
 		if ( $wp_rewrite->using_permalinks() ) {
-			$url = $wp_rewrite->root . 'view/plugin-committer/' . $this->user_login;
+			$url = $wp_rewrite->root . "view/{$view}/" . $this->user->user_login;
 			$url = home_url( user_trailingslashit( $url ) );
 
 		// Unpretty permalinks.
 		} else {
 			$url = add_query_arg( array(
 				bbp_get_view_rewrite_id() => $view,
-				'wporg_user_login'        => $this->user_login,
+				'wporg_user_login'        => $this->user->user_login,
 			) );
 		}
 		return $url;
@@ -271,6 +287,17 @@ class Support_Compat {
 	public static function get_plugin_slugs_by_committer( $user_login ) {
 		global $wpdb;
 		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `path` FROM `" . PLUGINS_TABLE_PREFIX . "svn_access` WHERE `user` = %s AND `access` = 'rw'", $user_login ) );
-		return $slugs;
+		return self::clean_slugs( $slugs );
+	}
+
+	public static function clean_slugs( $slugs ) {
+		$cleanslugs = array();
+		foreach ( $slugs as $slug ) {
+			$slug = trim( $slug, '/' );
+			if ( ! empty( $slug ) ) {
+				$cleanslugs[] = $slug;
+			}
+		}
+		return $cleanslugs;
 	}
 }
