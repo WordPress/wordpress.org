@@ -52,7 +52,7 @@ class Support_Compat {
 				$this->user = $user;
 
 				// If this is a feed, add filters to handle the custom view.
-				if ( isset( $query_vars['feed'] ) && isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( 'plugin-committer' ) ) ) {
+				if ( isset( $query_vars['feed'] ) && isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( 'plugin-committer', 'plugin-contributor' ) ) ) {
 					$this->query = $query_vars;
 					add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
 
@@ -82,6 +82,18 @@ class Support_Compat {
 						'taxonomy'    => 'topic-plugin',
 						'field'       => 'slug',
 						'terms'       => self::get_plugin_slugs_by_committer( $this->user->user_login ),
+					) ),
+					'show_stickies'   => false,
+				);
+				break;
+			case 'plugin-contributor' :
+				return array(
+					'post_parent__in' => array( Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID ),
+					'post_status'     => 'publish',
+					'tax_query'       => array( array(
+						'taxonomy'    => 'topic-plugin',
+						'field'       => 'slug',
+						'terms'       => $this->get_plugin_slugs_by_contributor( $this->user ),
 					) ),
 					'show_stickies'   => false,
 				);
@@ -124,6 +136,29 @@ class Support_Compat {
 
 			// Add output filters and actions.
 			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
+
+		} elseif ( $view == 'plugin-contributor' ) {
+
+			$slugs = self::get_plugin_slugs_by_contributor( $this->user );
+
+			// Add plugin-contributor view.
+			bbp_register_view(
+				'plugin-contributor',
+				sprintf( __( 'Plugin Contributor &raquo; %s', 'wporg-forums' ), esc_html( $this->user->user_login ) ),
+				array(
+					'post_parent__in' => array( Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID ),
+					'post_status'     => 'publish',
+					'tax_query'       => array( array(
+						'taxonomy'    => 'topic-plugin',
+						'field'       => 'slug',
+						'terms'       => $slugs,
+					) ),
+					'show_stickies'   => false,
+				)
+			);
+
+			// Add output filters and actions.
+			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
 		}
 	}
 
@@ -135,7 +170,8 @@ class Support_Compat {
 	public function add_rewrite_rules() {
 		$priority   = 'top';
 
-		$plugin_committer_rule = bbp_get_view_slug() . '/plugin-committer/([^/]+)/';
+		$plugin_committer_rule   = bbp_get_view_slug() . '/plugin-committer/([^/]+)/';
+		$plugin_contributor_rule = bbp_get_view_slug() . '/plugin-contributor/([^/]+)/';
 
 		$feed_id    = 'feed';
 		$view_id    = bbp_get_view_rewrite_id();
@@ -152,6 +188,11 @@ class Support_Compat {
 		add_rewrite_rule( $plugin_committer_rule . $base_rule,  'index.php?' . $view_id . '=plugin-committer&wporg_user_login=$matches[1]',                               $priority );
 		add_rewrite_rule( $plugin_committer_rule . $paged_rule, 'index.php?' . $view_id . '=plugin-committer&wporg_user_login=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $plugin_committer_rule . $feed_rule,  'index.php?' . $view_id . '=plugin-committer&wporg_user_login=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add plugin contributor rewrite rules.
+		add_rewrite_rule( $plugin_contributor_rule . $base_rule,  'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]',                               $priority );
+		add_rewrite_rule( $plugin_contributor_rule . $paged_rule, 'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $plugin_contributor_rule . $feed_rule,  'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	/**
@@ -161,7 +202,7 @@ class Support_Compat {
 		global $wp_rewrite;
 
 		$view = bbp_get_view_id( $view );
-		if ( ! in_array( $view, array( 'plugin-committer' ) ) ) {
+		if ( ! in_array( $view, array( 'plugin-committer', 'plugin-contributor' ) ) ) {
 			return $url;
 		}
 
@@ -288,6 +329,18 @@ class Support_Compat {
 		global $wpdb;
 		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `path` FROM `" . PLUGINS_TABLE_PREFIX . "svn_access` WHERE `user` = %s AND `access` = 'rw'", $user_login ) );
 		return self::clean_slugs( $slugs );
+	}
+
+	public static function get_plugin_slugs_by_contributor( $user ) {
+		global $wpdb;
+		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `topic_slug` FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE `topic_poster` = %d AND topic_open = 1 AND topic_status = 0", $user->ID ) );
+		$slugs = self::clean_slugs( $slugs );
+		if ( $contributor = $wpdb->get_col( $wpdb->prepare( "SELECT `object_id` FROM `" . PLUGINS_TABLE_PREFIX . "meta` WHERE `object_type` = 'bb_topic' AND `meta_key` = 'contributors' AND `meta_value` LIKE %s", '%"' . str_replace( array( '%', '_' ), array( '\\%', '\\_' ), $user->user_login ) . '"%' ) ) ) {
+			if ( $contributor_slugs = $wpdb->get_col( "SELECT `topic_slug` FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE `topic_id` IN (" . join( ',', $contributor ) . ") AND topic_open = 1 AND topic_status = 0" ) ) {
+				$slugs = array_unique( array_merge( $slugs, $contributor_slugs ) );
+			}
+		}
+		return $slugs;
 	}
 
 	public static function clean_slugs( $slugs ) {
