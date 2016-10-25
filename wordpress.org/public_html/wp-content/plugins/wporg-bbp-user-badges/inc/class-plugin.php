@@ -182,9 +182,12 @@ class Plugin {
 	 * @return array
 	 */
 	protected function get_badge_class( $classes, $item_type, $item_id ) {
+		$has_badge = false;
+
 		// Class related to moderators.
 		if ( $this->is_user_moderator() ) {
 			$classes[] = 'by-moderator';
+			$has_badge = true;
 		}
 
 		// Class related to plugin and theme authors/contributors.
@@ -199,7 +202,12 @@ class Plugin {
 
 			if ( $contrib_type ) {
 				$classes[] = 'by-' . $info['type'] . '-' . $contrib_type;
+				$has_badge = true;
 			}
+		}
+
+		if ( $has_badge ) {
+			$classes[] = 'author-has-badge';
 		}
 
 		return $classes;
