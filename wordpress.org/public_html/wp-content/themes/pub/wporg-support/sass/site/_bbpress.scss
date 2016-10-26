@@ -407,6 +407,7 @@ select {
 --------------------------------------------------------------*/
 .single-forum main, 
 .single-topic main, 
+.topic-tag main,
 .bbp-view main {
 	@extend .clear;
 
@@ -419,7 +420,7 @@ select {
 		}
 	}
 
-	.entry-content {
+	> .entry-content {
 		max-width: 48rem;
 
 		@media screen and ( min-width: $ms-breakpoint ) {
