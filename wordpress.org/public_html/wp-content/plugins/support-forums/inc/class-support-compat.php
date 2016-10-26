@@ -33,6 +33,9 @@ class Support_Compat {
 			// Load plugin/theme subscriptions.
 			add_action( 'plugins_loaded', array( $this, 'load_compat_subscriptions' ), 9 );
 
+			// Adjust breadcrumbs for plugin and theme related topics.
+			add_filter( 'bbp_breadcrumbs', array( $this, 'breadcrumbs' ) );
+
 			$this->loaded = true;
 		}
 	}
@@ -353,4 +356,74 @@ class Support_Compat {
 		}
 		return $cleanslugs;
 	}
+
+	/**
+	 * Modifies breadcrumbs for plugin or theme related support or review topic
+	 * views to insert a link to the specific plugin/theme's support or review
+	 * view.
+	 *
+	 * @param array $r Breadcrumb items.
+	 * @return array
+	 */
+	public function breadcrumbs( $r ) {
+		if ( ! bbp_is_single_topic() ) {
+			return $r;
+		}
+
+		$forum_id = bbp_get_topic_forum_id();
+		$topic_id = bbp_get_topic_id();
+		$slugs = $types = array();
+
+		// Check if the topic is associated with a plugin.
+		if ( $forum_id === Plugin::PLUGINS_FORUM_ID ) {
+			$types = array( 'plugin' );
+		}
+		// Else check if the topic is associated with a theme.
+		elseif ( $forum_id === Plugin::THEMES_FORUM_ID ) {
+			$types = array( 'theme' );
+		}
+		// Else check if the topic is a review.
+		elseif ( $forum_id === Plugin::REVIEWS_FORUM_ID ) {
+			// Need to check for plugin AND theme association to know which the review is for.
+			$types = array( 'plugin', 'theme' );
+		}
+		// Else not a type of concern.
+		else {
+			return $r;
+		}
+
+		foreach ( $types as $type ) {
+			$slugs = wp_get_post_terms( $topic_id, 'topic-' . $type, array( 'fields' => 'slugs' ) );
+			if ( $slugs ) {
+				break;
+			}
+		}
+
+		if ( ! $slugs ) {
+			return $r;
+		}
+
+		$obj = Directory_Compat::get_object_by_slug_and_type( $slugs[0], $type );
+
+		if ( ! $obj ) {
+			return $r;
+		}
+
+		$url = 'https://wordpress.org/support/' . $type . '/' . $obj->post_name . '/';
+		if ( $forum_id === Plugin::REVIEWS_FORUM_ID ) {
+			$url .= 'reviews';
+		}
+
+		$link = sprintf(
+			'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
+			esc_url( $url ),
+			esc_html( $obj->post_title )
+		);
+
+		// Insert link before topic title.
+		array_splice( $r, 2, 0, $link );
+
+		return $r;
+	}
+
 }
