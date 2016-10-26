@@ -649,16 +649,31 @@ abstract class Directory_Compat {
 			}
 		}
 
+		return self::get_object_by_slug_and_type( $slug, $this->compat() );
+	}
+
+	/**
+	 * Get and cache object based on slug and type (plugin or theme).
+	 *
+	 * Suitable for use outside of the class.
+	 *
+	 * @param string $slug The object slug.
+	 * @param string $type The type of the object. Either 'plugin' or 'theme'.
+	 * @return array
+	 */
+	public static function get_object_by_slug_and_type( $slug, $type ) {
+		global $wpdb;
+
 		// Check the cache.
 		$cache_key = $slug;
-		$cache_group = $this->compat() . '-objects';
+		$cache_group = $type . '-objects';
 		$compat_object = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $compat_object ) {
 
 			// Get the object information from the correct table.
-			if ( $this->compat() == 'theme' ) {
+			if ( $type == 'theme' ) {
 				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
-			} elseif ( $this->compat() == 'plugin' ) {
+			} elseif ( $type == 'plugin' ) {
 				// @todo Update this when the Plugin Directory switches over to WordPress.
 				$_compat_topic = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . PLUGINS_TABLE_PREFIX . "topics WHERE topic_slug = %s", $slug ) );
 				if ( $_compat_topic ) {
