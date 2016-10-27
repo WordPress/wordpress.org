@@ -28,10 +28,14 @@ class Contributors extends \WP_Widget {
 	public function widget( $args, $instance ) {
 		$post = get_post();
 
-		$contributors = (array) wp_list_pluck( (array)get_the_terms( $post, 'plugin_contributors' ), 'name' );
-		$contributors = array_map( function( $user_nicename ) {
-			return get_user_by( 'slug', $user_nicename );
-		}, $contributors );
+		if ( $contributors = get_the_terms( $post, 'plugin_contributors' ) ) {
+			$contributors = (array) wp_list_pluck( $contributors, 'name' );
+			$contributors = array_map( function( $user_nicename ) {
+				return get_user_by( 'slug', $user_nicename );
+			}, $contributors );
+		} else {
+			return;
+		}
 
 		echo $args['before_widget'];
 		?>
