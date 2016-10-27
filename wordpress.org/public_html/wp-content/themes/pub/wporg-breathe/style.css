@@ -140,11 +140,6 @@ input[type="submit"] {
 #secondary-content .navigation-main ul li.current-menu-item a {
 }
 
-#secondary-content .menu-table-of-contents-container ul li > ul li ul {
-	margin-top: 4px;
-	margin-bottom: -4px;
-}
-
 /*
  * p2-breathe/style.css overrides
  */
@@ -744,4 +739,56 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	.single-handbook div.table-of-contents {
 		display: none;
 	}
+}
+
+/** Menu */
+
+.widget_wporg_handbook_pages h1 {
+    font-size: 1.6em;
+    font-weight: bold;
+    margin-bottom: 0.6em;
+}
+
+.menu-table-of-contents-container > ul {
+	border-bottom: 1px solid #eee;
+}
+
+#secondary .menu-table-of-contents-container ul {
+	margin-left: 0;
+}
+
+#secondary .menu-table-of-contents-container li {
+	border-top: 1px solid #eee;
+	padding: 0;
+}
+
+.menu-table-of-contents-container > ul > li ul {
+	background-color: #f6f6f6;
+}
+
+.menu-table-of-contents-container a {
+	display: block;
+	width: 100%;
+	padding: 5px 0 5px 10px;
+	color: #23282d;
+}
+
+.menu-table-of-contents-container .current-menu-item a {
+	color: #191e23;
+	font-weight: bold;
+}
+
+.menu-table-of-contents-container > ul > li > ul > li > ul a {
+    border-left: 10px solid #d5d5d5;
+    padding-left: 15px;
+}
+
+.menu-table-of-contents-container a:hover {
+	color: #fff;
+	background-color: #0073aa;
+}
+
+.menu-table-of-contents-container > ul > li > ul > li > ul a:hover {
+    border-left: 0;
+    padding-left: 25px;
 }
