@@ -112,6 +112,9 @@ function get_whitelist() {
 			'karmatosed',
 			'melchoyce',
 		),
+		'design-dashicons' => array(
+			'empireoflight',
+		),
 		'docs' => array(
 			'drew',
 			'hlashbrooke',
