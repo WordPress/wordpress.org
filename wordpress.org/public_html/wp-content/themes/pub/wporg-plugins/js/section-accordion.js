@@ -12,7 +12,20 @@
 				return notExpanded;
 			} );
 
-			$( '.read-more:not(' + sectionId + ')' ).removeClass( 'toggled' ).attr( 'aria-expanded', false );
+			$( '.read-more:not(' + sectionId + ',.short-content)' ).removeClass( 'toggled' ).attr( 'aria-expanded', false );
+		},
+		initial_size: function( selector ) {
+			$( selector ).each( function( i, el) {
+				if ( $(el).height() / el.scrollHeight > 0.8 ) {
+					// Force the section to expand, and hide its button
+					$(el).toggleClass( 'toggled' ).addClass('short-content').attr( 'aria-expanded', true );
+					$( '.section-toggle[aria-controls="' + el.id + '"]' ).hide();
+				} else {
+					// Contract the section and make sure its button is visible
+					$(el).removeClass( 'short-content' ).attr( 'aria-expanded', false );
+					$( '.section-toggle[aria-controls="' + el.id + '"]' ).show();
+				}
+			} );
 		}
 	};
 
@@ -20,6 +33,8 @@
 		if ( document.location.hash ) {
 			wporg.plugins.toggle( document.location.hash );
 		}
+
+		wporg.plugins.initial_size( '.read-more' );
 
 		$( window ).on( 'hashchange', function() {
 			wporg.plugins.toggle( document.location.hash );
