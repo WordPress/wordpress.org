@@ -83,7 +83,7 @@ class wporg_trac_notifications {
 
 	function get_trac_focuses() {
 		if ( 'core' === $this->trac ) {
-			return array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rtl', 'template', 'ui' );
+			return array( 'accessibility', 'administration', 'docs', 'javascript', 'multisite', 'performance', 'rest-api', 'rtl', 'template', 'ui' );
 		}
 		return array();
 	}

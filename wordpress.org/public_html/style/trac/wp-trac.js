@@ -36,6 +36,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'administration' : 'Administration related, but assigned a more specific component.',
 		'template' : 'Relating to theme templating, but assigned a more specific component.',
 		'multisite' : 'Relating to multisite, but assigned a more specific component.',
+		'rest-api' : 'Relating to the REST API, but assigned a more specific component.',
 		'performance' : 'Performance or caching (but not the Cache API component).'
 	};
 
