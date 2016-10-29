@@ -36,6 +36,9 @@ class Support_Compat {
 			// Adjust breadcrumbs for plugin and theme related topics.
 			add_filter( 'bbp_breadcrumbs', array( $this, 'breadcrumbs' ) );
 
+			// Redirect old topic ids to topic permalinks.
+			add_action( 'template_redirect', array( $this, 'redirect_old_topic_id' ), 9 );
+
 			$this->loaded = true;
 		}
 	}
@@ -426,4 +429,38 @@ class Support_Compat {
 		return $r;
 	}
 
+	/**
+	 * In bbPress 1, topics could be referenced using their topic id, and many
+	 * are indexed/linked via this rather than their pretty permalink. The
+	 * custom table topic2post makes it possible to quickly dereference these
+	 * and redirect them appropriately.
+	 */
+	public function redirect_old_topic_id() {
+		global $wpdb;
+		if ( is_404() && 'topic' == get_query_var( 'post_type' ) && is_numeric( get_query_var( 'topic' ) ) ) {
+			$topic_id = absint( get_query_var( 'topic' ) );
+			if ( ! $topic_id ) {
+				return;
+			}
+
+			$cache_key = $topic_id;
+			$cache_group = 'topic2post';
+			$post_id = wp_cache_get( $cache_key, $cache_group );
+			if ( false === $post_id ) {
+				$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}topic2post WHERE topic_id = %d LIMIT 1", $topic_id ) );
+				if ( $post_id ) {
+					$post_id = absint( $post_id );
+					wp_cache_set( $cache_key, $post_id, $cache_group );
+				}
+			}
+
+			if ( $post_id ) {
+				$permalink = get_permalink( $post_id );
+				if ( $permalink ) {
+					wp_safe_redirect( $permalink, 301 );
+					exit;
+				}
+			}
+		}
+	}
 }
