@@ -43,6 +43,7 @@ class Core extends Trac {
 		'multisite'          => '#core-multisite',
 		'Networks and Sites' => '#core-multisite',
 		'REST API'           => '#core-restapi',
+		'rest-api'           => '#core-restapi',
 		'I18N'               => '#core-i18n',
 		'docs'               => '#docs',
 	);
