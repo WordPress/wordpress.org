@@ -211,14 +211,14 @@ class Support_Compat {
 
 		// Pretty permalinks.
 		if ( $wp_rewrite->using_permalinks() ) {
-			$url = $wp_rewrite->root . "view/{$view}/" . $this->user->user_login;
+			$url = $wp_rewrite->root . "view/{$view}/" . $this->user->user_nicename;
 			$url = home_url( user_trailingslashit( $url ) );
 
 		// Unpretty permalinks.
 		} else {
 			$url = add_query_arg( array(
 				bbp_get_view_rewrite_id() => $view,
-				'wporg_user_login'        => $this->user->user_login,
+				'wporg_user_login'        => $this->user->user_nicename,
 			) );
 		}
 		return $url;
