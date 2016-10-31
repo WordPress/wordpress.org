@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 
@@ -104,7 +105,7 @@ class Plugin extends Base {
 
 		$_pages = preg_split( "#<!--section=(.+?)-->#", $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
-			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ] );
+			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
 		}
 		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
 		$result['description'] = $result['sections']['description'];
@@ -203,12 +204,14 @@ class Plugin extends Base {
 	/**
 	 * Returns a HTML formatted representation of the latest 10 reviews for a plugin.
 	 *
+	 * This intentionally uses different markup than what the theme uses, as it's for display within the WordPress Administration area.
+	 *
 	 * @param string $plugin_slug The plugin slug.
 	 * @return string HTML blob of data.
 	 */
 	protected function get_plugin_reviews_markup( $plugin_slug ) {
 		$output = '';
-		foreach ( $this->get_plugin_reviews_data( $plugin_slug ) as $review ) {
+		foreach ( Tools::get_plugin_reviews( $plugin_slug, 10 ) as $review ) {
 			$output .= $this->get_plugin_reviews_markup_singular( $review );
 		}
 		return $output;
@@ -217,97 +220,52 @@ class Plugin extends Base {
 	/**
 	 * Generates a HTML blob for a single review.
 	 *
-	 * @param object $review Single row of data from `self::get_plugin_reviews_data()`
+	 * @param object $review The review data.
 	 * @return string Blob of HTML representing the review.
 	 */
 	protected function get_plugin_reviews_markup_singular( $review ) {
-		$reviewer = get_user_by( 'id', $review->topic_poster );
+		$reviewer = get_user_by( 'id', $review->post_author );
 		ob_start();
-
-		// Copied from bb-theme/wporg/_reviews.php, with quite a few things stripped out.
 ?>
 <div class="review">
 	<div class="review-head">
 		<div class="reviewer-info">
 			<div class="review-title-section">
-				<h4 class="review-title"><?php echo $review->topic_title; ?></h4>
+				<h4 class="review-title"><?php echo esc_html( $review->post_title ); ?></h4>
 				<div class="star-rating"><?php
 					/* Core has .star-rating .star colour styling, which is why we use a custom wrapper and template */
 					echo Template::dashicons_stars( array(
-						'rating' => wporg_get_rating( $review->topic_id ),
+						'rating' => $review->post_rating,
 						'template' => '<span class="star %1$s"></span>',
 					) );
 				?></div>
 			</div>
 			<p class="reviewer">
-				By <a href="https://profiles.wordpress.org/<?php echo $reviewer->user_nicename; ?>"><?php echo get_avatar( $review->topic_poster, 16, 'monsterid' ); ?></a>
-				<a href="https://profiles.wordpress.org/<?php echo $reviewer->user_nicename; ?>" class="reviewer-name"><?php
-					echo $reviewer->display_name;
-
+				<?php
+					$review_author_markup_profile = esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename );
+					$review_author_markup  = '<a href="' . $review_author_markup_profile . '">';
+					$review_author_markup .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
+					$review_author_markup .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
+					$review_author_markup .= $reviewer->display_name;
 					if ( $reviewer->display_name != $reviewer->user_login ) {
-						echo " <small>({$reviewer->user_login})</small>";
+						$review_author_markup .= " <small>({$reviewer->user_login})</small>";
 					}
-				?></a><?php
-					/* // Display author badge next to the person's name if they're reviewing their own thing
-					if ( class_exists( '\WPORG_Extend_Author_Badge' ) ) {
-						echo \WPORG_Extend_Author_Badge::get_instance()->show_author_badge( '', $post->post_id );
-					} */
-				?>,
-				<span class="review-date"><?php echo gmdate( 'F j, Y', strtotime( $review->topic_start_time ) ); ?></span>
-				<?php if ( $review->wp_version ) : ?>
-					<span class="review-wp-version">for WordPress <?php echo $review->wp_version; ?></span>
-				<?php endif; ?>
+					$review_author_markup .= '</a>';
+
+					printf( __( 'By %1$s on %2$s', 'wporg-plugins' ),
+						$review_author_markup,
+						'<span class="review-date">' . gmdate( 'F j, Y', strtotime( $review->post_modified ) ) . '</span>'
+					);
+				?>
 			</p>
 		</div>
 	</div>
-	<div class="review-body"><?php echo $review->post_text; ?></div>
+	<div class="review-body"><?php echo $review->post_content; ?></div>
 </div>
 <?php
 		return ob_get_clean();
 
 	}
 
-	/**
-	 * Fetch the latest 10 reviews for a given plugin from the database.
-	 *
-	 * This uses raw SQL to query the bbPress tables to fetch reviews.
-	 *
-	 * @param string $plugin_slug The slug of the plugin.
-	 * @return array An array of review details.
-	 */
-	protected function get_plugin_reviews_data( $plugin_slug ) {
-		global $wpdb;
-		if ( ! defined( 'WPORGPATH' ) || ! defined( 'CUSTOM_USER_TABLE' ) ) {
-			// Reviews are stored in the main supoport forum, which isn't open source yet.
-			return array();
-		}
-
-		if ( $reviews = wp_cache_get( $plugin_slug, 'reviews' ) ) {
-			return $reviews;
-		}
-
-		// The forums are the source for users, and also where reviews live.
-		$table_prefix = str_replace( 'users', '', CUSTOM_USER_TABLE );
-		$forum_id = 18; // The Review Forums ID
-
-		$reviews = $wpdb->get_results( $wpdb->prepare( "
-			SELECT
-				t.topic_id, t.topic_title, t.topic_poster, t.topic_start_time,
-				p.post_text,
-				tm_wp.meta_value as wp_version
-			FROM {$table_prefix}topics AS t
-			JOIN {$table_prefix}meta AS tm ON ( tm.object_type = 'bb_topic' AND t.topic_id = tm.object_id AND tm.meta_key = 'is_plugin' )
-			JOIN {$table_prefix}posts as p ON ( t.topic_id = p.topic_id AND post_status = 0 AND post_position = 1 )
-			LEFT JOIN {$table_prefix}meta AS tm_wp ON ( tm_wp.object_type = 'bb_topic' AND t.topic_id = tm_wp.object_id AND tm_wp.meta_key = 'wp_version' )
-			WHERE t.forum_id = %d AND t.topic_status = 0 AND t.topic_sticky = 0 AND tm.meta_value = %s
-			ORDER BY t.topic_start_time DESC
-			LIMIT 10",
-			$forum_id,
-			$plugin_slug
-		) );
-
-		wp_cache_set( $plugin_slug, $reviews, 'reviews' );
-		return $reviews;
-	}
 }
 

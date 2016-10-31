@@ -44,24 +44,25 @@ class Tools {
 	 * @param string $plugin_slug The plugin slug.
 	 * @return array|false
 	 */
-	public static function get_plugin_reviews( $plugin_slug ) {
-		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_reviews", 'wporg-plugins' ) ) ) {
+	public static function get_plugin_reviews( $plugin_slug, $number = 2 ) {
+		$number = absint( $number );
+		if ( $number < 1 || $number > 100 ) {
+			$number = 2;
+		}
+		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_last{$number}_reviews", 'wporg-plugins' ) ) ) {
 			global $wpdb;
 
-			$reviews = $wpdb->get_results( $wpdb->prepare( "
-			SELECT posts.post_text AS post_content, topics.topic_title AS post_title, ratings.rating AS post_rating, ratings.user_id AS post_author
-			FROM ratings
-				INNER JOIN minibb_topics AS topics ON ( ratings.review_id = topics.topic_id )
-				INNER JOIN minibb_posts AS posts ON ( ratings.review_id = posts.topic_id )
-			WHERE
-				ratings.object_type = 'plugin' AND
-				ratings.object_slug = %s AND
-				posts.post_position = 1 AND
-				topics.topic_status = 0 AND
-				topics.topic_sticky = 0
-			ORDER BY ratings.review_id DESC LIMIT 2", $plugin_slug ) );
+			$reviews = $wpdb->get_results( $wpdb->prepare(
+			"SELECT
+					post_content, post_title, post_author, post_modified,
+					r.rating as post_rating
+			FROM ratings r
+				LEFT JOIN wporg_419_posts p ON r.post_id = p.ID
+			WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
+			ORDER BY r.review_id DESC
+			LIMIT %d", $plugin_slug, $number ) );
 
-			wp_cache_set( "{$plugin_slug}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
+			wp_cache_set( "{$plugin_slug}_last{$number}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
 		}
 
 		return $reviews;
