@@ -21,6 +21,7 @@ add_filter( 'camptix_default_addons',  __NAMESPACE__ . '\load_addons'           
 add_filter( 'camptix_capabilities',    __NAMESPACE__ . '\modify_capabilities'       );
 add_filter( 'camptix_default_options', __NAMESPACE__ . '\modify_default_options'    );
 add_filter( 'camptix_html_message',    __NAMESPACE__ . '\render_html_emails', 10, 2 );
+add_action( 'camptix_tshirt_report_intro', __NAMESPACE__ . '\tshirt_report_intro_message', 10, 3 );
 
 
 /**
@@ -394,4 +395,29 @@ function render_html_emails( $html_message, $phpmailer ) {
 	$html_message = ob_get_clean();
 
 	return $html_message;
+}
+
+/**
+ * Extend the introduction message for each camp in the tshirt report
+ *
+ * @param string $message
+ * @param int    $site_id
+ * @param array  $sizes
+ *
+ * @return string
+ */
+function tshirt_report_intro_message( $message, $site_id, $sizes ) {
+	switch_to_blog( $site_id );
+
+	$wordcamp = get_wordcamp_post();
+
+	if ( ! empty( $wordcamp->meta['Number of Anticipated Attendees'][0] ) ) {
+		$message = sprintf(
+			"<p>This camp is expecting %d attendees.</p>",
+			$wordcamp->meta['Number of Anticipated Attendees'][0]
+		);
+	}
+
+	restore_current_blog();
+	return $message;
 }

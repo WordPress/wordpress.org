@@ -113,6 +113,9 @@ class WordCamp_CLI_Miscellaneous extends WP_CLI_Command {
 	 * wp wc-misc format-log "$(grep 'foo' /var/log/php-errors.log -C 10)" |less -S
 	 * wp wc-misc format-log "$(grep 'bar' /var/log/php-errors.log)" --foreign=ignore
 	 *
+	 * @todo Sometimes example passing entries as command line param fails because it passes the length limit.
+	 *       Add an example of a good workaround for that.
+	 *
 	 * @subcommand format-log
 	 *
 	 * @param array $args

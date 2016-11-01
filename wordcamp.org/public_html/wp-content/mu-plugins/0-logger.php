@@ -7,13 +7,10 @@ defined( 'WPINC' ) or die();
  * Log an event, with optional additional data
  *
  * SECURITY WARNING: You must redact any sensitive info before it's written to the log file. The best way to do
- * that is to add entries to wcorg_log_redact_keys(), so that the caller remain clean. You can also do it before
- * passing the data to this function, though. Right now this only redacts array keys, but it can be made more
- * sophisticated in the future to handle additional cases.
+ * that is to add entries to redact_keys(), so that the caller remain clean. You can also do it before
+ * passing the data to this function, though.
  *
- * In the future, it may be helpful to decode JSON values and search them for redactable values, and to allow
- * the caller to pass an array of strings that are sensitive and should be redacted. The latter would allow for
- * redacting values that aren't known until runtime, and could be helpful in other cases too.
+ * @todo add current username to every entry, and update wp-cli command parsing regex to match
  *
  * @param string $error_code
  * @param array  $data
@@ -42,6 +39,13 @@ function log( $error_code, $data = array() ) {
 
 /**
  * Redact sensitive values from log entries
+ *
+ * Right now this only redacts array keys, but it can be made more sophisticated in the future to handle
+ * additional cases.
+ *
+ * In the future, it may be helpful to decode JSON values and search them for redactable values, and to allow
+ * the caller to pass an array of strings that are sensitive and should be redacted. The latter would allow for
+ * redacting values that aren't known until runtime, and could be helpful in other cases too.
  *
  * @param array $data
  *
