@@ -3,6 +3,10 @@
 namespace CampTix\Badge_Generator\InDesign;
 defined( 'WPINC' ) or die();
 
+/**
+ * @var string $html_customizer_url
+ */
+
 ?>
 
 <h2>

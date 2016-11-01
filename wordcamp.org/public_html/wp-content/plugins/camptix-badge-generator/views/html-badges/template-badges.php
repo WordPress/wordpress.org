@@ -3,6 +3,12 @@
 namespace CampTix\Badge_Generator\HTML;
 defined( 'WPINC' ) or die();
 
+/**
+ * @global string   $template
+ * @var    array    $attendees
+ * @var    \WP_Post $attendee
+ */
+
 /*
  * template-loader.php includes this file in the global scope, which is ugly. So, include this again from a
  * function, so that we get a nice, clean, local scope.

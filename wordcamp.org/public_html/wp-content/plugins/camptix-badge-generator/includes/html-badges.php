@@ -11,7 +11,6 @@ add_action( 'admin_print_styles',    __NAMESPACE__ . '\print_customizer_styles' 
 add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\remove_all_previewer_styles', 998 );
 add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\enqueue_previewer_scripts',   999 );  // after remove_all_previewer_styles()
 add_filter( 'template_include',      __NAMESPACE__ . '\use_badges_template'              );
-add_filter( 'get_post_metadata',     __NAMESPACE__ . '\add_dynamic_post_meta', 10, 3     );
 
 /**
  * Register our Customizer settings, panels, sections, and controls
@@ -214,84 +213,9 @@ function render_badges_template() {
 		),
 	);
 
-	$attendees = get_posts( array(
-		'post_type'      => 'tix_attendee',
-		'posts_per_page' => -1,
-		'orderby'        => 'title',
-	) );
+	$attendees = Badge_Generator\get_attendees();
 
 	require( dirname( __DIR__ ) . '/views/html-badges/template-badges.php' );
-}
-
-/**
- * Add dynamically-generated "post meta" to `\WP_Post` objects
- *
- * This makes it possible to access dynamic data related to a post object by simply referencing `$post->foo`.
- * That keeps the calling code much cleaner than if it were to have to do something like
- * `$foo = some_custom_logic( get_post_meta( $post->ID, 'bar', true ) ); echo esc_html( $foo )`.
- *
- * @param mixed  $value
- * @param int    $post_id
- * @param string $meta_key
- *
- * @return mixed
- *      `null` to instruct `get_metadata()` to pull the value from the database
- *      Any non-null value will be returned as if it were pulled from the database
- */
-function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
-	/** @global \CampTix_Plugin $camptix */
-	global $camptix;
-
-	$attendee = get_post( $post_id );
-
-	if ( 'tix_attendee' != $attendee->post_type ) {
-		return $value;
-	}
-
-	switch ( $meta_key ) {
-		case 'avatar_url':
-			$value = get_avatar_url( $attendee->tix_email, array( 'size' => 600 ) );
-			break;
-
-		case 'css_classes':
-			$value = get_css_classes( $attendee );
-			break;
-
-		case 'formatted_name':
-			$value = $camptix->format_name_string(
-				'<span class="first-name">%first%</span>
-				 <span class="last-name">%last%</span>',
-				$attendee->tix_first_name,
-				$attendee->tix_last_name
-			);
-			break;
-	}
-
-	return $value;
-}
-
-/**
- * Get the CSS classes for an attendee element
- *
- * @param \WP_Post $attendee
- *
- * @return string
- */
-function get_css_classes( $attendee ) {
-	// Name
-	$classes = array( 'attendee-' . $attendee->post_name );
-
-	// Ticket
-	$ticket    = get_post( $attendee->tix_ticket_id );
-	$classes[] = 'ticket-' . $ticket->post_name;
-
-	// Coupon
-	if ( $attendee->tix_coupon_id ) {
-		$coupon    = get_post( $attendee->tix_coupon_id );
-		$classes[] = 'coupon-' . $coupon->post_name;
-	}
-
-	return implode( ' ', $classes );
 }
 
 /**
