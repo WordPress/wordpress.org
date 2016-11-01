@@ -29,12 +29,10 @@ if ( isset( $template ) && __FILE__ == $template ) {
 
 		else :
 
-			foreach ( $attendees as $attendee_id ) :
-				$attendee_data = get_attendee_data( $attendee_id );
-				
+			foreach ( $attendees as $attendee ) :
 				?>
 
-				<article class="attendee <?php echo esc_attr( $attendee_data['css_classes'] ); ?>">
+				<article class="attendee <?php echo esc_attr( $attendee->css_classes ); ?>">
 					<section class="badge badge-back">
 						<?php require( __DIR__ . '/template-part-badge-contents.php' ); ?>
 					</section>

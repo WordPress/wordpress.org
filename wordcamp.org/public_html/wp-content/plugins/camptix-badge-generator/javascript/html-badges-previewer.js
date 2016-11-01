@@ -4,7 +4,7 @@ wp.customize.CampTixHtmlBadgesPreviewer = ( function( $, api ) {
 	var self = {
 		removedCSS : false
 	};
-	
+
 	/**
 	 * Initialize
 	 */

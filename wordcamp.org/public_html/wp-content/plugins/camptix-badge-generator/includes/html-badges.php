@@ -11,6 +11,7 @@ add_action( 'admin_print_styles',    __NAMESPACE__ . '\print_customizer_styles' 
 add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\remove_all_previewer_styles', 998 );
 add_action( 'wp_enqueue_scripts',    __NAMESPACE__ . '\enqueue_previewer_scripts',   999 );  // after remove_all_previewer_styles()
 add_filter( 'template_include',      __NAMESPACE__ . '\use_badges_template'              );
+add_filter( 'get_post_metadata',     __NAMESPACE__ . '\add_dynamic_post_meta', 10, 3     );
 
 /**
  * Register our Customizer settings, panels, sections, and controls
@@ -175,6 +176,7 @@ function print_customizer_styles() {
  * @return bool
  */
 function is_badges_preview() {
+	/** @global \WP_Customize_Manager $wp_customize */
 	global $wp_customize;
 
 	return isset( $_GET['camptix-badges'] ) && $wp_customize->is_preview();
@@ -203,15 +205,15 @@ function use_badges_template( $template ) {
  * Render the template for HTML badges
  */
 function render_badges_template() {
-	/** @var $camptix \CampTix_Plugin */
+	/** @global \CampTix_Plugin $camptix */
 	global $camptix;
-	
+
 	$allowed_html = array(
 		'span' => array(
 			'class' => true,
 		),
 	);
-	
+
 	$attendees = get_posts( array(
 		'post_type'      => 'tix_attendee',
 		'posts_per_page' => -1,
@@ -222,41 +224,74 @@ function render_badges_template() {
 }
 
 /**
- * Get all the data required to render an attendee badge
+ * Add dynamically-generated "post meta" to `\WP_Post` objects
+ *
+ * This makes it possible to access dynamic data related to a post object by simply referencing `$post->foo`.
+ * That keeps the calling code much cleaner than if it were to have to do something like
+ * `$foo = some_custom_logic( get_post_meta( $post->ID, 'bar', true ) ); echo esc_html( $foo )`.
+ *
+ * @param mixed  $value
+ * @param int    $post_id
+ * @param string $meta_key
+ *
+ * @return mixed
+ *      `null` to instruct `get_metadata()` to pull the value from the database
+ *      Any non-null value will be returned as if it were pulled from the database
+ */
+function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
+	/** @global \CampTix_Plugin $camptix */
+	global $camptix;
+
+	$attendee = get_post( $post_id );
+
+	if ( 'tix_attendee' != $attendee->post_type ) {
+		return $value;
+	}
+
+	switch ( $meta_key ) {
+		case 'avatar_url':
+			$value = get_avatar_url( $attendee->tix_email, array( 'size' => 600 ) );
+			break;
+
+		case 'css_classes':
+			$value = get_css_classes( $attendee );
+			break;
+
+		case 'formatted_name':
+			$value = $camptix->format_name_string(
+				'<span class="first-name">%first%</span>
+				 <span class="last-name">%last%</span>',
+				$attendee->tix_first_name,
+				$attendee->tix_last_name
+			);
+			break;
+	}
+
+	return $value;
+}
+
+/**
+ * Get the CSS classes for an attendee element
  *
  * @param \WP_Post $attendee
  *
- * @return array
+ * @return string
  */
-function get_attendee_data( $attendee ) {
-	/** @var $camptix \CampTix_Plugin */
-	global $camptix;
-	$css_classes = array( 'attendee-' . $attendee->post_name );
+function get_css_classes( $attendee ) {
+	// Name
+	$classes = array( 'attendee-' . $attendee->post_name );
 
-	$first_name     = get_post_meta( $attendee->ID, 'tix_first_name', true );
-	$last_name      = get_post_meta( $attendee->ID, 'tix_last_name',  true );
-	$formatted_name = $camptix->format_name_string(
-		'<span class="first-name">%first%</span>
-		 <span class="last-name">%last%</span>',
-		$first_name,
-		$last_name
-	);
+	// Ticket
+	$ticket    = get_post( $attendee->tix_ticket_id );
+	$classes[] = 'ticket-' . $ticket->post_name;
 
-	$email_address = get_post_meta( $attendee->ID, 'tix_email', true );
-	$avatar_url    = get_avatar_url( $email_address, array( 'size' => 600 ) );
-
-	$ticket        = get_post( get_post_meta( $attendee->ID, 'tix_ticket_id', true ) );
-	$css_classes[] = 'ticket-' . $ticket->post_name;
-
-	$coupon_id = get_post_meta( $attendee->ID, 'tix_coupon_id', true );
-	if ( $coupon_id ) {
-		$coupon        = get_post( $coupon_id );
-		$css_classes[] = 'coupon-' . $coupon->post_name;
+	// Coupon
+	if ( $attendee->tix_coupon_id ) {
+		$coupon    = get_post( $attendee->tix_coupon_id );
+		$classes[] = 'coupon-' . $coupon->post_name;
 	}
 
-	$css_classes = implode( ' ', $css_classes );
-
-	return compact( 'formatted_name', 'email_address', 'avatar_url', 'css_classes' );
+	return implode( ' ', $classes );
 }
 
 /**

@@ -1,5 +1,5 @@
 ## HTML v2
- 
+
 * page-breaking issues in chrome/safari
 	* lots of potential solutions on StackOverflow, but none worked so far.
 	* may need to make font size and avatar size smaller, but prob not if can fix chrome page-break issues
@@ -17,7 +17,7 @@
 
 * add checkbox to include twitter, option to pick arbitrary image, option for name instead of image, etc
 	* can use the [gear] icon like the Menus section does
-	
+
 * move documentation from make/comm/handbook to a `?` icon like menu/widget panels have.
 	* might need custom section markup for that.
 
