@@ -2145,6 +2145,7 @@ object {
   border-radius: 50%;
   margin-right: 10px;
   vertical-align: middle;
+  float: left;
 }
 
 .plugin-faqs h2:first-of-type {
@@ -2170,8 +2171,6 @@ object {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.8px;
-  letter-spacing: 0.05rem;
   padding: 16px 0;
   padding: 1rem 0;
 }
@@ -2465,6 +2464,11 @@ object {
   position: absolute;
   right: 0;
   z-index: 4;
+}
+
+#changelog > div {
+  font-size: 12.8px;
+  font-size: 0.8rem;
 }
 
 .plugin-screenshots {

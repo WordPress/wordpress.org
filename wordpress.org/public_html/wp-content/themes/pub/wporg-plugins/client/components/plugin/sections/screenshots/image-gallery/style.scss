@@ -173,3 +173,8 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 	right: 0;
 	z-index: 4;
 }
+
+// Changelog
+#changelog > div {
+	font-size: ms(-2);
+}
