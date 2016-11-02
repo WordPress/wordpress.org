@@ -2123,6 +2123,20 @@ object {
   }
 }
 
+#changelog {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+#changelog code {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+#changelog h4 {
+  margin-top: 0;
+}
+
 .plugin-developers {
   list-style-type: none;
   margin: 0;
@@ -2464,11 +2478,6 @@ object {
   position: absolute;
   right: 0;
   z-index: 4;
-}
-
-#changelog > div {
-  font-size: 12.8px;
-  font-size: 0.8rem;
 }
 
 .plugin-screenshots {
