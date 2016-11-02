@@ -102,14 +102,12 @@ function scripts() {
 
 	}
 
-	if ( isset( $_REQUEST['react'] ) ) {
-		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
-		wp_localize_script( 'wporg-plugins-client', 'app_data', array(
-			'api_url' => untrailingslashit( rest_url() ),
-			'nonce'   => wp_create_nonce( 'wp_rest' ),
-			'base'    => get_blog_details()->path,
-		) );
-	}
+	wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
+	wp_localize_script( 'wporg-plugins-client', 'app_data', array(
+		'api_url' => untrailingslashit( rest_url() ),
+		'nonce'   => wp_create_nonce( 'wp_rest' ),
+		'base'    => get_blog_details()->path,
+	) );
 
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
