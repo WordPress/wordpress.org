@@ -420,6 +420,14 @@ select {
 		}
 	}
 
+	.wporg-bbp-term-subscription {
+		margin-bottom: 1rem;
+		
+		a {
+			@extend .button;
+		}
+	}
+
 	> .entry-content {
 		max-width: 48rem;
 
@@ -804,15 +812,6 @@ div.bbp-breadcrumb {
 			.col-3, .col-5 {
 				width: 100%;
 			}
-		}
-	}
-
-	// Individual forum page
-	.wporg-bbp-term-subscription {
-		margin-bottom: 1rem;
-		
-		a {
-			@extend .button;
 		}
 	}
 }
