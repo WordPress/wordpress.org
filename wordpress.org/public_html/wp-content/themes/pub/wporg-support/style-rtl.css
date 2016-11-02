@@ -3693,7 +3693,12 @@ div.bbp-template-notice a:hover, div.bbp-template-notice .bbpress #bbpress-forum
 }
 
 .single-topic .entry-content #bbpress-forums .wporg-ratings {
-	display: none;
+	background-color: #fbfbfb;
+	border: 1px solid #eee;
+	border-top: none;
+	border-bottom: none;
+	padding-right: 10%;
+	padding-top: 0.5em;
 }
 
 .single-topic .entry-content #bbpress-forums .topic {

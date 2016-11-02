@@ -642,9 +642,14 @@ div.bbp-template-notice {
 				}
 			}
 
-			// Hide star ratings on single topic for plugin/theme
+			// Ratings
 			.wporg-ratings {
-				display: none;
+				background-color: #fbfbfb;
+				border: 1px solid #eee;
+				border-top: none;
+				border-bottom: none;
+				padding-left: 10%;
+				padding-top: 0.5em;
 			}
 
 
