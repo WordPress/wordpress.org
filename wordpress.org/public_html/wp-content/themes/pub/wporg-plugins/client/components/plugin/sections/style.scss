@@ -9,6 +9,10 @@
 		overflow: auto;
 	}
 
+	&#description {
+		max-height: 400px;
+	}
+
 	h1, h2, h3 {
 		font-size: ms( 0 );
 		font-weight: 600;

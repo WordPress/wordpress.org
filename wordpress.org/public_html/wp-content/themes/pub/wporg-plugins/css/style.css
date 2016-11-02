@@ -2508,6 +2508,10 @@ object {
   overflow: auto;
 }
 
+.read-more#description {
+  max-height: 400px;
+}
+
 .read-more h1, .read-more h2, .read-more h3 {
   font-size: 16px;
   font-size: 1rem;
