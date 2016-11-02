@@ -3138,6 +3138,11 @@ object {
   width: 100%;
 }
 
+.plugin-ratings .ratings-list .counter-container:hover,
+.plugin-ratings .ratings-list .counter-container a:hover {
+  text-decoration: none;
+}
+
 .plugin-ratings .ratings-list .counter-label {
   display: inline-block;
   min-width: 58px;

@@ -32,6 +32,10 @@
 		.counter-container,
 		.counter-container a {
 			width: 100%;
+
+			&:hover {
+				text-decoration: none;
+			}
 		}
 
 		.counter-label {
