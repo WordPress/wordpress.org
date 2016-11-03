@@ -104,7 +104,14 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 
 	switch ( $meta_key ) {
 		case 'avatar_url':
-			$value = get_avatar_url( $attendee->tix_email, array( 'size' => 600 ) );
+			$value = get_avatar_url(
+				$attendee->tix_email,
+				array(
+					'size'    => 1024,
+					'default' => 'blank',
+					'rating'  => 'g'
+				)
+			);
 			break;
 
 		case 'coupon':
