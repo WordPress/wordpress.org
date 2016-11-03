@@ -87,6 +87,14 @@ class Language_Pack extends WP_CLI_Command {
 			WP_CLI::error( 'No translation sets available.' );
 		}
 
+		/**
+		 * Filters the arguments passed to the WP-CLI command.
+		 *
+		 * @param array  $args CLI arguments.
+		 * @param string $slug Slug of the theme.
+		 */
+		$args = apply_filters( 'wporg_translate_language_pack_plugin_args', $args, $slug );
+
 		if ( $args['locale'] ) {
 			$translation_sets = wp_list_filter( $translation_sets, [
 				'locale' => $args['locale'],
@@ -148,6 +156,14 @@ class Language_Pack extends WP_CLI_Command {
 		if ( ! $translation_sets ) {
 			WP_CLI::error( 'No translation sets available.' );
 		}
+
+		/**
+		 * Filters the arguments passed to the WP-CLI command.
+		 *
+		 * @param array  $args CLI arguments.
+		 * @param string $slug Slug of the theme.
+		 */
+		$args = apply_filters( 'wporg_translate_language_pack_theme_args', $args, $slug );
 
 		if ( $args['locale'] ) {
 			$translation_sets = wp_list_filter( $translation_sets, [
