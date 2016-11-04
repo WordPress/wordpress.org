@@ -10,6 +10,8 @@ Text Domain: wporg
 */
 
 class WP_I18n_Teams {
+	const TEAM_PAGE = 'https://make.wordpress.org/polyglots/teams/?locale=%s';
+
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 	}
@@ -17,44 +19,39 @@ class WP_I18n_Teams {
 	/**
 	 * Attaches hooks and registers shortcodes once plugins are loasded.
 	 */
-	function plugins_loaded() {
+	public function plugins_loaded() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_shortcode( 'wp-locales',      array( $this, 'wp_locales' ) );
 
-		add_filter( 'the_content',  array( $this, 'link_locales' ), 0 );
-		add_filter( 'comment_text', array( $this, 'link_locales' ), 0 );
+		add_filter( 'term_link', array( $this, 'link_locales' ), 10, 3 );
 	}
 
 	/**
 	 * Links #locale to the teams page.
 	 *
-	 * @param string $content Post or comment content.
-	 * @return string Filtered post or comment content.
+	 * @param string $termlink Term link URL.
+	 * @param object $term     Term object.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return string URL to teams page of a locale.
 	 */
-	function link_locales( $content ) {
+	public function link_locales( $termlink, $term, $taxonomy ) {
+		if ( 'post_tag' !== $taxonomy ) {
+			return $termlink;
+		}
+
 		static $available_locales;
 
 		if ( ! isset( $available_locales ) ) {
 			$available_locales = self::get_locales();
 			$available_locales = wp_list_pluck( $available_locales, 'wp_locale' );
+			$available_locales = array_flip( $available_locales );
 		}
 
-		$regex = '/\B#([\w]+)\b/';
-		if ( ! preg_match_all( $regex, $content, $matches ) ) {
-			return $content;
+		if ( isset( $available_locales[ $term->name ] ) || isset( $available_locales[ $term->slug ] ) ) {
+			return sprintf( self::TEAM_PAGE, $term->slug );
 		}
 
-		$possible_locales = $matches[1];
-		$possible_locales = array_unique( $possible_locales );
-		$locales = array_intersect( $available_locales, $possible_locales );
-
-		foreach ( $locales as $locale ) {
-			$url         = esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale );
-			$replacement = "<a href='$url'>#$locale</a>";
-			$content     = preg_replace( "/#$locale\b/", $replacement, $content );
-		}
-
-		return $content;
+		return $termlink;
 	}
 
 	/**
