@@ -48,7 +48,7 @@ class WP_I18n_Teams {
 		}
 
 		if ( isset( $available_locales[ $term->name ] ) || isset( $available_locales[ $term->slug ] ) ) {
-			return sprintf( self::TEAM_PAGE, $term->slug );
+			return sprintf( self::TEAM_PAGE, $term->name );
 		}
 
 		return $termlink;
