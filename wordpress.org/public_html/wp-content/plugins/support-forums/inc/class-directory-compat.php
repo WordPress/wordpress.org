@@ -596,12 +596,14 @@ abstract class Directory_Compat {
 		if (
 			( bbp_is_single_view() && $this->compat() == bbp_get_view_id() )
 		||
+			bbp_is_subscriptions()
+		||
 			( isset( $_GET['term_id'] ) && isset( $_GET['taxonomy'] ) )
 		) {
 			// Check that the subscription is to this compat.
 			if ( $this->taxonomy() == $taxonomy ) {
 				$paged = get_query_var( 'paged' ) > 1 ? 'page/' . absint( get_query_var( 'paged' ) ) . '/' : '';
-				$termlink = sprintf( 'https://wordpress.org/support/%s/%s/%s', $this->compat(), $this->slug(), $paged );
+				$termlink = sprintf( 'https://wordpress.org/support/%s/%s/%s', $this->compat(), $term->slug, $paged );
 			}
 		}
 

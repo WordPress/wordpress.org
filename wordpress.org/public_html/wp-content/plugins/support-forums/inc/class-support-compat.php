@@ -308,13 +308,19 @@ class Support_Compat {
 			Plugin::get_instance()->plugin_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy' => 'topic-plugin',
 				'labels'   => array(
-					'receipt' => __( 'You are receiving this email because you are subscribed to a plugin.', 'wporg-forums' ),
+					'subscribed_header'      => __( 'Subscribed Plugins', 'wporg-forums' ),
+					'subscribed_user_notice' => __( 'You are not currently subscribed to any plugins.', 'wporg-forums' ),
+					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any plugins.', 'wporg-forums' ),
+					'receipt'                => __( 'You are receiving this email because you are subscribed to a plugin.', 'wporg-forums' ),
 				),
 			) );
 			Plugin::get_instance()->theme_subscriptions = new Term_Subscription\Plugin( array(
 				'taxonomy' => 'topic-theme',
 				'labels'   => array(
-					'receipt' => __( 'You are receiving this email because you are subscribed to a theme.', 'wporg-forums' ),
+					'subscribed_header'      => __( 'Subscribed Themes', 'wporg-forums' ),
+					'subscribed_user_notice' => __( 'You are not currently subscribed to any themes.', 'wporg-forums' ),
+					'subscribed_anon_notice' => __( 'This user is not currently subscribed to any themes.', 'wporg-forums' ),
+					'receipt'                => __( 'You are receiving this email because you are subscribed to a theme.', 'wporg-forums' ),
 				),
 			) );
 		}
