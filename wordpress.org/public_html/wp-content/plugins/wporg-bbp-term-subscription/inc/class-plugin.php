@@ -20,7 +20,10 @@ class Plugin {
 		$r = wp_parse_args( $args, array(
 			'taxonomy' => 'topic-tag',
 			'labels'   => array(
-				'receipt' => __( 'You are receiving this email because you are subscribed to a topic tag.', 'wporg-forums'),
+				'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
+				'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
+				'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
+				'receipt'                => __( 'You are receiving this email because you are subscribed to a topic tag.', 'wporg-forums'),
 			),
 		) );
 
@@ -49,6 +52,8 @@ class Plugin {
 		// Notify subscribers when a topic or reply with a given term is added.
 		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 4 );
 		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 5 );
+
+		add_action( 'bbp_template_after_user_subscriptions', array( $this, 'user_subscriptions' ) );
 	}
 
 	/**
@@ -122,9 +127,15 @@ class Plugin {
 			$success = self::add_user_subscription( $user_id, $term_id );
 		}
 
+		// Redirect
+		if ( bbp_is_subscriptions() ) {
+			$redirect = bbp_get_subscriptions_permalink( $user_id );
+		} else {
+			$redirect = get_term_link( $term_id );
+		}
+
 		// Success!
 		if ( true === $success ) {
-			$redirect = get_term_link( $term_id );
 			bbp_redirect( $redirect );
 		} elseif ( true === $is_subscribed && 'wporg_bbp_subscribe_term' === $action ) {
 			/* translators: Term: topic tag */
@@ -326,6 +337,46 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 	}
 
 	/**
+	 * Add a term subscription block to the user's profile.
+	 */
+	public function user_subscriptions() {
+		$user_id = bbp_get_user_id();
+		if ( empty( $user_id ) ) {
+			return;
+		}
+		$terms = self::get_user_taxonomy_subscriptions( $user_id, $this->taxonomy );
+		?>
+
+		<div class="bbp-user-subscriptions">
+			<h2 class="entry-title"><?php echo esc_html( $this->labels['subscribed_header'] ); ?></h2>
+			<div class="bbp-user-section">
+			<?php
+			if ( $terms ) {
+				echo '<p id="bbp-term-' . esc_attr( $this->taxonomy ) . '">' . "\n";
+				foreach ( $terms as $term ) {
+					echo '<a href="' . esc_url( get_term_link( $term->term_id ) ) . '">' . esc_html( $term->slug ) . '</a>';
+					if ( get_current_user_id() == $user_id ) {
+						$url = self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy );
+						echo ' (<a href="' . esc_url( self::get_subscription_url( $user_id, $term->term_id, $this->taxonomy ) ) . '">' . esc_html( 'Unsubscribe', 'wporg-forums' ) . '</a>)';
+					}
+					echo "</br>\n";
+				}
+				echo "</p>\n";
+			} else {
+				if ( bbp_get_user_id() == get_current_user_id() ) {
+					echo '<p>' . esc_html( $this->labels['subscribed_user_notice'] ) . '</p>';
+				} else {
+					echo '<p>' . esc_html( $this->labels['subscribed_anon_notice'] ) . '</p>';
+				}
+			}
+			?>
+			</div>
+		</div>
+
+		<?php
+	}
+
+	/**
 	 * Get the user's subscriptions for a given taxonomy; defaults to 'topic-tag'.
 	 *
 	 * @param $user_id int The user id
@@ -433,14 +484,44 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 	}
 
 	/**
-	 * Create the link for subscribing to/unsubscribing from a given term.
+	 * Create the url for subscribing to/unsubscribing from a given term.
 	 *
-	 * @param string $action The action
 	 * @param int $user_id The user id
 	 * @param int $term_id The term id
+	 * @param int $taxonomy The taxonomy
 	 * @return string
 	 */
-	public static function get_subscription_link( $args = array() ) {
+	public static function get_subscription_url( $user_id = 0, $term_id, $taxonomy ) {
+		if ( empty( $user_id ) ) {
+			$user_id = bbp_get_user_id();
+		}
+
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		$term = get_term( $term_id, $taxonomy );
+		if ( ! $term ) {
+			return false;
+		}
+
+		if ( self::is_user_subscribed_to_term( $user_id, $term_id ) ) {
+			$query_args = array( 'action' => 'wporg_bbp_unsubscribe_term', 'term_id' => $term_id, 'taxonomy' => $taxonomy );
+		} else {
+			$query_args = array( 'action' => 'wporg_bbp_subscribe_term', 'term_id' => $term_id, 'taxonomy' => $taxonomy );
+		}
+
+		if ( bbp_is_subscriptions() ) {
+			$permalink = bbp_get_subscriptions_permalink( $user_id );
+		} else {
+			$permalink = get_term_link( $term_id );
+		}
+
+		$url = esc_url( wp_nonce_url( add_query_arg( $query_args, $permalink ), 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $taxonomy ) );
+		return $url;
+	}
+
+	public static function get_subscription_link( $args ) {
 		if ( ! current_user_can( 'spectate' ) ) {
 			return false;
 		}
@@ -455,26 +536,16 @@ Login and visit the topic to unsubscribe from these emails.', 'wporg-forums' ),
 		if ( empty( $r['user_id'] ) || empty( $r['term_id'] ) || empty( $r['taxonomy'] ) ) {
 			return false;
 		}
+
 		$user_id  = $r['user_id'];
 		$term_id  = $r['term_id'];
 		$taxonomy = $r['taxonomy'];
 
-		$term = get_term( $term_id, $taxonomy );
-		if ( ! $term ) {
-			return false;
-		}
-
-		if ( self::is_user_subscribed_to_term( $user_id, $term_id ) ) {
+		$url = self::get_subscription_url( $r['user_id'], $r['term_id'], $r['taxonomy'] );
+		$text = $r['subscribe'];
+		if ( self::is_user_subscribed_to_term( $r['user_id'], $r['term_id'] ) ) {
 			$text = $r['unsubscribe'];
-			$query_args = array( 'action' => 'wporg_bbp_unsubscribe_term', 'term_id' => $term_id, 'taxonomy' => $taxonomy );
-		} else {
-			$text = $r['subscribe'];
-			$query_args = array( 'action' => 'wporg_bbp_subscribe_term', 'term_id' => $term_id, 'taxonomy' => $taxonomy );
 		}
-
-		$permalink = get_term_link( $term_id );
-
-		$url = esc_url( wp_nonce_url( add_query_arg( $query_args, $permalink ), 'toggle-term-subscription_' . $user_id . '_' . $term_id . '_' . $taxonomy ) );
 		return sprintf( "<div class='wporg-bbp-term-subscription'><a href='%s'>%s</a></div>",
 			$url,
 			esc_html( $text ) );
