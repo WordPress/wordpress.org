@@ -281,9 +281,9 @@ class Jetpack_Search {
 
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}_ngram^4", 'title_en_ngram^0.5', "content_{$locale}_ngram^2", 'content_en_ngram^0.5', "excerpt_{$locale}_ngram", 'excerpt_en_ngram', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}^4", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
 		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en_ngram^4', 'content_en_ngram^2', 'excerpt_en_ngram', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( 'title_en^4', 'content_en^2', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
 		}
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -727,7 +727,9 @@ class Jetpack_Search {
 										 'offset' => $date_offset,
 										 'scale' => $date_scale,
 										 'decay' => $date_decay,
-									 ) ) ,
+									 ) ) 
+								 ),
+							 array( 
 								 'linear' => array(
 									 'tested' => array(
 										 'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
