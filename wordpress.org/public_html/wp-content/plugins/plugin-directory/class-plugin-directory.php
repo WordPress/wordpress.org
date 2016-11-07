@@ -672,6 +672,8 @@ class Plugin_Directory {
 		 * is likely.
 		 */
 		if ( class_exists( 'Jetpack' ) && ! empty( \Jetpack::$instance->sync->sync ) ) {
+			// Attempt to work around the problem with options cache poisoning from subdomains
+			refresh_blog_details();
 			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
 		}
 	}
