@@ -85,7 +85,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 				<?php if ( current_user_can( 'plugin_admin_view', get_post() ) ) : ?>
 					<br>
-					<a class="plugin-edit hide-if-no-js" href="<?php echo esc_url( get_permalink() . 'admin/' ); ?>"><?php _e( 'Edit Plugin', 'wporg-plugins' ); ?></a>
+					<a class="plugin-edit hide-if-no-js" href="<?php echo esc_url( get_permalink() . 'admin/' ); ?>"><?php _e( 'Admin', 'wporg-plugins' ); ?></a>
 				<?php endif; ?>
 			</div>
 

@@ -51,7 +51,6 @@ class Contributors extends \WP_Widget {
 			}
 		</style>
 		<h3><?php _e( 'Contributors', 'wporg-plugins' ); ?></h3>
-		<p class="widget-subnav"><small><a href="#"><?php _e( 'View the capabilities these users have', 'wporg-plugins' ); ?></a></small></p>
 
 		<ul id="contributors-list" class="contributors-list read-more" aria-expanded="false">
 		<?php foreach ( $contributors as $contributor ) {
