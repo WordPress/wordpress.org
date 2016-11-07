@@ -2508,7 +2508,7 @@ object {
   overflow: auto;
 }
 
-.read-more#description {
+.read-more:nth-of-type(1) {
   max-height: 400px;
 }
 

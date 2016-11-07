@@ -9,7 +9,7 @@
 		overflow: auto;
 	}
 
-	&#description {
+	&:nth-of-type(1) {
 		max-height: 400px;
 	}
 
