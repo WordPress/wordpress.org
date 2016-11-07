@@ -267,9 +267,9 @@ class Jetpack_Search {
 			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
 			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
 			'filters'		 => array(
-									array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
-									array( 'exists' => array( 'field' => 'meta.active_installs.long' ) ),
-								),
+				array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
+				array( 'exists' => array( 'field' => 'meta.active_installs.long' ) ),
+			),
 		);
 
 		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API ) {
@@ -717,45 +717,46 @@ class Jetpack_Search {
 		return array(
 			'filtered' => array(
 				'query' => array(
-					 'function_score' => array(
-						 'query' => $query,
-						 'functions' => array(
-							 array(
-								 'gauss'=> array(
-									 'plugin_modified' => array(
-										 'origin' => $date_origin,
-										 'offset' => $date_offset,
-										 'scale' => $date_scale,
-										 'decay' => $date_decay,
-									 ) ) 
-								 ),
-							 array( 
-								 'linear' => array(
-									 'tested' => array(
-										 'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
-										 'scale' => 0.5,
-										 'decay' => 0.6,
-									 ),
-								 ),
-							 ),
-							 array(
+					'function_score' => array(
+						'query' => $query,
+						'functions' => array(
+							array(
+								'gauss'=> array(
+									'plugin_modified' => array(
+										'origin' => $date_origin,
+										'offset' => $date_offset,
+										'scale' => $date_scale,
+										'decay' => $date_decay,
+									),
+								),
+							),
+							array( 
+								'linear' => array(
+									'tested' => array(
+										'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
+										'scale' => 0.5,
+										'decay' => 0.6,
+									),
+								),
+							),
+							array(
 								'field_value_factor' => array(
 									'field' => 'meta.active_installs.long',
 									'factor' => 2,
 									'modifier' => 'log2p',
 								),
 							),
-							 array(
+							array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
 									'factor' => 1,
 									'modifier' => 'log2p',
 								),
 							),
-						 ),
-						 'boost_mode' => 'multiply'
-					 )
-				 ),
+						),
+						'boost_mode' => 'multiply'
+					)
+				),
 			)
 		);
 	}
