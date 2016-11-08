@@ -114,6 +114,7 @@ class WPorg_Handbook {
 		}
 
 		$this->label = ucwords( str_replace( array( '-', '_' ), ' ', $this->post_type ) );
+		$this->label = apply_filters( 'handbook_label', $this->label, $this->post_type );
 
 		$this->setting_name = $this->post_type . '_name';
 
