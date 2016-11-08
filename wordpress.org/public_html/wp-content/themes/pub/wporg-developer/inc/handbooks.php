@@ -16,7 +16,7 @@ class Devhub_Handbooks {
 	 * @var array
 	 * @access public
 	 */
-	public static $post_types = array( 'plugin', 'theme' );
+	public static $post_types = array( 'plugin', 'rest-api', 'theme' );
 
 	/**
 	 * Initializer
@@ -26,6 +26,7 @@ class Devhub_Handbooks {
 	public static function init() {
 		add_filter( 'handbook_post_type_defaults', array( __CLASS__, 'filter_handbook_post_type_defaults' ), 10, 2 );
 		add_filter( 'handbook_post_types', array( __CLASS__, 'filter_handbook_post_types' ) );
+		add_filter( 'handbook_label', array( __CLASS__, 'filter_handbook_label' ), 10, 2 );
 		add_action( 'init', array( __CLASS__, 'do_init' ) );
 	}
 
@@ -178,6 +179,23 @@ class Devhub_Handbooks {
 		}
 
 		return $defaults;
+	}
+
+	/**
+	 * Overrides the default handbook label used as the base for various handbook
+	 * post type related strings.
+	 *
+	 * @param string $label     The default label, which is merely a santized
+	 *                          version of the handbook name.
+	 * @param string $post_type The handbook post type.
+	 * @return string
+	 */
+	public static function filter_handbook_label( $label, $post_type ) {
+		if ( 'rest-api-handbook' === $post_type ) {
+			$label = 'REST API Handbook';
+		}
+
+		return $label;
 	}
 
 	/**
