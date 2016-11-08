@@ -164,15 +164,18 @@ class Devhub_Handbooks {
 	 * @access public
 	 *
 	 * @param  array  $defaults  The default post type configuration.
-	 * @param  string $post_type The post type name.
+	 * @param  string $slug      The handbook post type slug.
 	 * @return array
 	 */
-	public static function filter_handbook_post_type_defaults( $defaults, $post_type ) {
-		$defaults['rewrite'] = array(
-			'feeds'      => false,
-			'slug'       => $post_type . 's',
-			'with_front' => false,
-		);
+	public static function filter_handbook_post_type_defaults( $defaults, $slug ) {
+		// Pluralize slug for plugin and theme handbooks.
+		if ( in_array( $slug, array( 'plugin', 'theme' ) ) ) {
+			$defaults['rewrite'] = array(
+				'feeds'      => false,
+				'slug'       => $slug . 's',
+				'with_front' => false,
+			);
+		}
 
 		return $defaults;
 	}
