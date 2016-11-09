@@ -63,10 +63,15 @@
 	display: inline-block;
 	font-size: ms( -2 );
 	margin-top: 0.5rem;
+	text-decoration: none;
 
 	&:after {
 		content: "\f345";
 		font-family: dashicons;
 		vertical-align: text-top;
+		padding-left: 5px;
+		float: right;
+		position: relative;
+		top: 1px;
 	}
 }
