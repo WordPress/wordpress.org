@@ -62,24 +62,28 @@ class WPorg_GP_User_Stats {
 	public function write_stats_to_database() {
 		global $wpdb;
 
+		$now = current_time( 'mysql', 1 );
+
 		$values = array();
 		foreach ( $this->user_stats as $key => $stats ) {
 			list( $user_id, $locale, $locale_slug ) = explode( ',', $key );
 
-			$values[] = $wpdb->prepare( '(%d, %s, %s, %d, %d)',
+			$values[] = $wpdb->prepare( '(%d, %s, %s, %d, %d, %s, %s)',
 				$user_id,
 				$locale,
 				$locale_slug,
 				$stats->suggested,
-				$stats->accepted
+				$stats->accepted,
+				$now,
+				$now
 			);
 
 			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
 			if ( count( $values ) > 50 ) {
 				$wpdb->query(
-					"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
+					"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`, `date_added`, `date_modified`)
 					VALUES " . implode( ', ', $values ) . "
-					ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
+					ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`), `date_modified`=VALUES(`date_modified`)"
 				);
 				$values = array();
 			}
@@ -87,9 +91,9 @@ class WPorg_GP_User_Stats {
 
 		if ( $values ) {
 			$wpdb->query(
-				"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`)
+				"INSERT INTO {$wpdb->user_translations_count} (`user_id`, `locale`, `locale_slug`, `suggested`, `accepted`, `date_added`, `date_modified`)
 				VALUES " . implode( ', ', $values ) . "
-				ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`)"
+				ON DUPLICATE KEY UPDATE `suggested`=`suggested` + VALUES(`suggested`), `accepted`=`accepted` + VALUES(`accepted`), `date_modified`=VALUES(`date_modified`)"
 			);
 		}
 	}
@@ -107,6 +111,8 @@ CREATE TABLE `gp_user_translations_count` (
   `locale_slug` varchar(255) NOT NULL DEFAULT '',
   `suggested` int(10) unsigned NOT NULL DEFAULT '0',
   `accepted` int(10) unsigned NOT NULL DEFAULT '0',
+  `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`locale`,`locale_slug`),
   KEY `locale` (`locale`,`locale_slug`)
