@@ -451,18 +451,19 @@ class Rosetta_Roles {
 
 		$values_to_add = array();
 		foreach ( $projects_to_add as $project_id ) {
-			$values_to_add[] = $wpdb->prepare( '(%d, %d, %s, %s)',
+			$values_to_add[] = $wpdb->prepare( '(%d, %d, %s, %s, %s)',
 				$user->ID,
 				$project_id,
 				$this->gp_locale->slug,
-				'default'
+				'default',
+				current_time( 'mysql', 1 )
 			);
 		}
 
 		if ( $values_to_add ) {
 			$wpdb->query( "
 				INSERT INTO {$wpdb->wporg_translation_editors}
-				(`user_id`,`project_id`, `locale`, `locale_slug`)
+				(`user_id`,`project_id`, `locale`, `locale_slug`, `date_added`)
 				VALUES " . implode( ', ', $values_to_add ) . "
 			" );
 		}
