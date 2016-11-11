@@ -62,8 +62,8 @@ class Language_Pack extends WP_CLI_Command {
 	 * Generates a language pack for a plugin.
 	 *
 	 * Examples:
-	 *   wp --url=translate.wordpress.org wporg-translate language-pack generate plugin nothing-much
-	 *   wp --url=translate.wordpress.org wporg-translate language-pack generate plugin nothing-much --locale=de
+	 *   wp @translate wporg-translate language-pack generate plugin nothing-much
+	 *   wp @translate wporg-translate language-pack generate plugin nothing-much --locale=de
 	 *
 	 * @param string $slug Slug of the plugin.
 	 * @param array  $args Extra arguments.
@@ -140,8 +140,8 @@ class Language_Pack extends WP_CLI_Command {
 	 * Generates a language pack for a theme.
 	 *
 	 * Examples:
-	 *   wp --url=translate.wordpress.org wporg-translate language-pack generate theme twentyeleven
-	 *   wp --url=translate.wordpress.org wporg-translate language-pack generate theme twentyeleven --locale=de
+	 *   wp @translate wporg-translate language-pack generate theme twentyeleven
+	 *   wp @translate wporg-translate language-pack generate theme twentyeleven --locale=de
 	 *
 	 * @param string $slug Slug of the theme.
 	 * @param array  $args Extra arguments.
@@ -438,22 +438,26 @@ class Language_Pack extends WP_CLI_Command {
 			return new WP_Error( 'language_pack_exists', 'The language pack is already imported for this version.' );
 		}
 
+		$now = current_time( 'mysql', 1 );
 		$inserted = $wpdb->insert( 'language_packs', [
-			'type'     => $type,
-			'domain'   => $domain,
-			'language' => $language,
-			'version'  => $version,
-			'updated'  => $updated,
-			'active'   => 1,
+			'type'          => $type,
+			'domain'        => $domain,
+			'language'      => $language,
+			'version'       => $version,
+			'updated'       => $updated,
+			'active'        => 1,
+			'date_added'    => $now,
+			'date_modified' => $now,
 		] );
 
 		if ( ! $inserted ) {
 			return new WP_Error( 'language_pack_not_inserted', 'The language pack was not inserted.' );
 		}
 
-		// Set old language packs for the same version as inactive.
+		// Mark old language packs for the same version as inactive.
 		$wpdb->query( $wpdb->prepare(
-			'UPDATE language_packs SET active = 0 WHERE type = %s AND domain = %s AND language = %s AND version = %s AND id <> %d',
+			'UPDATE language_packs SET active = 0, date_modified = %s WHERE type = %s AND domain = %s AND language = %s AND version = %s AND id <> %d',
+			$now,
 			$type,
 			$domain,
 			$language,
