@@ -97,6 +97,7 @@ class Import {
 				),
 			) );
 		}
+		$plugin->post_status = $status;
 
 		$readme = $data['readme'];
 		$assets = $data['assets'];
@@ -118,19 +119,9 @@ class Import {
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
 		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
 
-		$plugin->post_date     = $topic->topic_start_time;
-		$plugin->post_date_gmt = $topic->topic_start_time;
-		$plugin->override_modified_date = true;
-		$plugin->post_modified     = $topic->topic_time;
-		$plugin->post_modified_gmt = $topic->topic_time;
-
-		$plugin->post_status = $status;
-		if ( ! $plugin->post_title ) {
-			$plugin->post_title = $topic->topic_title;
-		}
-
 		// Bump last updated if the version has changed.
 		if ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
+			$plugin->override_modified_date = true;
 			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
 
@@ -191,6 +182,8 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
+
+		return true;
 	}
 
 	/**
