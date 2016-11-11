@@ -404,17 +404,30 @@ class WordCamp_Post_Types_Plugin {
 			'avatar_size'    => 100,
 			'posts_per_page' => -1,
 			'orderby'        => 'date',
+			'teams'          => '',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby'] = strtolower( $attr['orderby'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
 
-		$organizers = new WP_Query( array(
+		$query_args = array(
 			'post_type' => 'wcb_organizer',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
 			'orderby' => $attr['orderby'],
-		) );
+		);
+
+		if ( ! empty( $attr['teams'] ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'wcb_organizer_team',
+					'field'    => 'slug',
+					'terms'    => explode( ',', $attr['teams'] ),
+				),
+			);
+		}
+
+		$organizers = new WP_Query( $query_args );
 
 		if ( ! $organizers->have_posts() )
 			return '';
@@ -2003,6 +2016,33 @@ class WordCamp_Post_Types_Plugin {
 			'public'                => true,
 			'show_ui'               => true,
 		) );
+
+		// Labels for organizer teams.
+		$labels = array(
+			'name'          => __( 'Teams',         'wordcamporg' ),
+			'singular_name' => __( 'Team',          'wordcamporg' ),
+			'search_items'  => __( 'Search Teams',  'wordcamporg' ),
+			'popular_items' => __( 'Popular Teams', 'wordcamporg' ),
+			'all_items'     => __( 'All Teams',     'wordcamporg' ),
+			'edit_item'     => __( 'Edit Team',     'wordcamporg' ),
+			'update_item'   => __( 'Update Team',   'wordcamporg' ),
+			'add_new_item'  => __( 'Add Team',      'wordcamporg' ),
+			'new_item_name' => __( 'New Team',      'wordcamporg' ),
+		);
+
+		// Register organizer teams taxonomy
+		register_taxonomy(
+			'wcb_organizer_team',
+			'wcb_organizer',
+			array(
+				'labels'       => $labels,
+				'rewrite'      => array( 'slug' => 'team' ),
+				'query_var'    => 'team',
+				'hierarchical' => true,
+				'public'       => true,
+				'show_ui'      => true,
+			)
+		);
 	}
 
 	/**
