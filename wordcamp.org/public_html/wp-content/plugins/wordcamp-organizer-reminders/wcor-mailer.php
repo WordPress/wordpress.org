@@ -97,12 +97,16 @@ class WCOR_Mailer {
 	 * we don't want to be flagged as spam for forging the From header, so we set the Sender header.
 	 * @see http://stackoverflow.com/q/4728393/450127
 	 *
+	 * @todo Switch this and all other instances of hardcoded addresses to use EMAIL_CENTRAL_SUPPORT and
+	 * EMAIL_DEVELOPER_NOTIFICATIONS constants
+	 *
 	 * @param string $to
 	 * @param string $subject
 	 * @param string $body
 	 * @param array  $headers
 	 * @param WP_Post $email
 	 * @param WP_Post $wordcamp
+	 *
 	 * @return bool
 	 */
 	protected function mail( $to, $subject, $body, $headers = array(), $email, $wordcamp ) {

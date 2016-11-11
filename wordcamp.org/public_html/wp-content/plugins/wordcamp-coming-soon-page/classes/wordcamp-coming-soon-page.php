@@ -46,6 +46,10 @@ class WordCamp_Coming_Soon_Page {
 
 		$this->dequeue_all_stylesheets();
 
+		if ( is_user_logged_in() ) {
+			wp_enqueue_style( 'admin-bar' );
+		}
+
 		wp_register_style(
 			'open-sans',
 			'https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,300,400,600',

@@ -419,6 +419,7 @@ class WCOR_Reminder {
 		$b_year = empty( $b->meta['Start Date (YYYY-mm-dd)'][0] ) ? false : date( 'Y', $b->meta['Start Date (YYYY-mm-dd)'][0] );
 
 		$status_weights = array(
+			// @todo - this needs to be updated with new wordcamp post statuses
 			'draft'   => 3,
 			'pending' => 2,
 			'publish' => 1,
