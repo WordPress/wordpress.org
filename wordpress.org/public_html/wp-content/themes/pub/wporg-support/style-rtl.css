@@ -532,6 +532,7 @@ address {
 
 pre {
 	background: #eee;
+	box-sizing: content-box;
 	font-family: "Courier 10 Pitch", Courier, monospace;
 	font-size: 0.8rem;
 	line-height: 1.6;
