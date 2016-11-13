@@ -34,9 +34,48 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
 
+				add_filter( 'allow_password_reset', array( $this, 'disable_password_reset_for_blocked_users' ), 10, 2 );
+				add_filter( 'authenticate', array( $this, 'authenticate_block_check' ), 30 );
+
 				add_filter( 'password_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 			}
+		}
+
+		/**
+		 * Checks if the authenticated user has been marked as blocked.
+		 *
+		 * @param WP_User|WP_Error|null $user WP_User or WP_Error object if a previous
+		 *                                    callback failed authentication.
+		 * @return WP_User|WP_Error WP_User on success, WP_Error on failure.
+		 */
+		public function authenticate_block_check( $user ) {
+			if ( $user instanceof WP_User && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				$support_user = new WP_User( $user->ID, '', WPORG_SUPPORT_FORUMS_BLOGID );
+
+				if ( ! empty( $support_user->allcaps['bbp_blocked'] ) ) {
+					return new WP_Error( 'blocked_account', __( '<strong>ERROR</strong>: Your account has been disabled.', 'wporg-sso' ) );
+				}
+			}
+
+			return $user;
+		}
+
+		/**
+		 * Disables password reset for blocked users.
+		 *
+		 * @param bool $allow   Whether to allow the password to be reset.
+		 * @param int  $user_id The ID of the user attempting to reset a password.
+		 * @return bool True if user is blocked, false if not.
+		 */
+		public function disable_password_reset_for_blocked_users( $allow, $user_id ) {
+			if ( ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+				return $allow;
+			}
+
+			$user = new WP_User( $user_id, '', WPORG_SUPPORT_FORUMS_BLOGID );
+			$is_blocked = ! empty( $user->allcaps['bbp_blocked'] );
+			return ! $is_blocked;
 		}
 
 		/**
