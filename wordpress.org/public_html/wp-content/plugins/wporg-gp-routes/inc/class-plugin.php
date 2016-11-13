@@ -14,12 +14,6 @@ class Plugin {
 	private static $instance;
 
 	/**
-	 *
-	 * @var Sync\Translation_Sync
-	 */
-	public $translation_sync = null;
-
-	/**
 	 * Returns always the same instance of this plugin.
 	 *
 	 * @return Plugin
@@ -116,6 +110,10 @@ class Plugin {
 			GP::$router->prepend( "/projects/wp-themes/$project", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_projects' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/contributors", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_contributors' ) );
 			GP::$router->prepend( "/projects/wp-themes/$project/language-packs", array( __NAMESPACE__ . '\Routes\WP_Themes', 'get_theme_language_packs' ) );
+
+			if ( defined( 'TRANSLATE_MAINTENANCE_ACTIVE' ) ) {
+				GP::$router->prepend( '.*', array( __NAMESPACE__ . '\Routes\Maintenance', 'show_maintenance_message' ) );
+			}
 		}
 	}
 
