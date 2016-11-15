@@ -114,6 +114,7 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 					'rating'  => 'g'
 				)
 			);
+			$value = str_replace( 'secure.gravatar.com', 'en.gravatar.com', $value );   // work around Varnish bug on secure.gravatar.com that causes `503` response codes
 			break;
 
 		case 'coupon':
