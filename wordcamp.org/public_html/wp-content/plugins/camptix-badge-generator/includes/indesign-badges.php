@@ -145,20 +145,24 @@ function get_zip_filename( $assets_folder ) {
  * @throws \Exception
  */
 function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_folder ) {
+	/** @var \CampTix_Plugin $camptix */
+	global $camptix;
+
 	$csv_handle            = fopen( $csv_filename, 'w' );
 	$destination_directory = "Macintosh HD:Users:your_username:Desktop:$zip_local_folder:gravatars:";
 	$empty_twitter         = '';
 	$admin_flags           = get_admin_flags();
+	$questions             = $camptix->get_all_questions();
 
 	if ( ! $csv_handle ) {
 		Logger\log( 'open_csv_failed' );
 		throw new \Exception( __( "Couldn't open CSV file.", 'wordcamporg' ) );
 	}
 
-	fputcsv( $csv_handle, wcorg_esc_csv( get_header_row( $admin_flags ) ) );
+	fputcsv( $csv_handle, wcorg_esc_csv( get_header_row( $admin_flags, $questions ) ) );
 
 	foreach ( $attendees as $attendee ) {
-		$row = get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags );
+		$row = get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags, $questions );
 
 		if ( empty( $row ) ) {
 			continue;
@@ -193,12 +197,14 @@ function get_admin_flags() {
  * Get the header row for the CSV
  *
  * @param array $admin_flags
+ * @param array $questions
  *
  * @return array
  */
-function get_header_row( $admin_flags ) {
+function get_header_row( $admin_flags, $questions ) {
 	$header_row   = array( 'First Name', 'Last Name', 'Email Address', 'Ticket', 'Coupon', 'Twitter', );
 	$header_row   = array_merge( $header_row, array_values( $admin_flags ) );
+	$header_row   = array_merge( $header_row, wp_list_pluck( $questions, 'post_title' ) );
 	$header_row[] = '@Gravatar'; // Prefixed with an @ to let InDesign know that it contains an image. Last because InDesign complains if it's not.
 
 	return $header_row;
@@ -212,10 +218,11 @@ function get_header_row( $admin_flags ) {
  * @param string   $destination_directory
  * @param string   $empty_twitter
  * @param array    $admin_flags
+ * @param array    $questions
  *
  * @return array
  */
-function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags ) {
+function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directory, $empty_twitter, $admin_flags, $questions ) {
 	$row = array();
 
 	if ( 'unknown.attendee@example.org' == $attendee->tix_email ) {
@@ -226,6 +233,7 @@ function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directo
 	$first_name        = ucwords( $attendee->tix_first_name );
 	$gravatar_filename = get_gravatar_filename( $attendee );
 	$attendee_flags    = (array) get_post_meta( $attendee->ID, 'camptix-admin-flag' );
+	$answers           = (array) $attendee->tix_questions;
 
 	if ( file_exists( $gravatar_folder .'/'. $gravatar_filename ) ) {
 		$gravatar_path = $destination_directory . $gravatar_filename;
@@ -238,12 +246,17 @@ function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directo
 		'ticket-name'      => $attendee->ticket,
 		'coupon-name'      => $attendee->coupon,
 		'twitter-username' => format_twitter_username( get_twitter_username( $attendee ), $first_name, $empty_twitter ),
-		'gravatar-path'    => $gravatar_path,
 	);
 
 	foreach ( $admin_flags as $key => $label ) {
 		$row[ $key ] = in_array( $key, $attendee_flags, true ) ? 'yes' : 'no';
 	}
+
+	foreach ( $questions as $question ) {
+		$row[ "question-{$question->ID}" ] = isset( $answers[ $question->ID ] ) ? $answers[ $question->ID ] : '';
+	}
+
+	$row['gravatar-path'] = $gravatar_path;
 
 	return $row;
 }
