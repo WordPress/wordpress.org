@@ -253,7 +253,7 @@ function get_attendee_csv_row( $attendee, $gravatar_folder, $destination_directo
 	}
 
 	foreach ( $questions as $question ) {
-		$row[ "question-{$question->ID}" ] = isset( $answers[ $question->ID ] ) ? $answers[ $question->ID ] : '';
+		$row[ "question-{$question->ID}" ] = get_answer( $question, $answers );
 	}
 
 	$row['gravatar-path'] = $gravatar_path;
@@ -321,6 +321,28 @@ function format_twitter_username( $username, $first_name, $empty_mode = '' ) {
 	}
 
 	return $username;
+}
+
+/**
+ * Get an attendee's answer to a question
+ *
+ * @param \WP_Post $question
+ * @param array    $answers
+ *
+ * @return string
+ */
+function get_answer( $question, $answers ) {
+	if ( ! isset( $answers[ $question->ID ] ) ) {
+		return '';
+	}
+
+	$answer = $answers[ $question->ID ];
+
+	if ( is_array( $answer ) ) {
+		$answer = implode( ', ', $answer );
+	}
+
+	return $answer;
 }
 
 /**
