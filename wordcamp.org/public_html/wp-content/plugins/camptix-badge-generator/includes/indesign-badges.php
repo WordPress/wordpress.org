@@ -284,7 +284,7 @@ function create_zip_file( $zip_filename, $zip_local_folder, $csv_filename, $grav
 	}
 
 	$zip_file    = new \ZipArchive();
-	$open_status = $zip_file->open( $zip_filename, \ZipArchive::OVERWRITE );
+	$open_status = $zip_file->open( $zip_filename, \ZipArchive::CREATE | \ZipArchive::OVERWRITE );
 
 	if ( true !== $open_status ) {
 		Logger\log( 'zip_open_failed', compact( 'zip_filename', 'open_status' ) );
