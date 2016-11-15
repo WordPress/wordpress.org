@@ -400,6 +400,9 @@ function render_html_emails( $html_message, $phpmailer ) {
 /**
  * Extend the introduction message for each camp in the tshirt report
  *
+ * @todo It'd probably be better to pull estimates from the tickets, rather than the wcpt post. Count total # of
+ * tickets, remove any that have "live" or "stream" in the name, then say "Expecting up to N attendees"
+ *
  * @param string $message
  * @param int    $site_id
  * @param array  $sizes

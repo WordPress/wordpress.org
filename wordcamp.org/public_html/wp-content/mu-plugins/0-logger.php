@@ -82,7 +82,13 @@ function redact_keys( & $data ) {
  * @return string
  */
 function get_unique_request_id() {
-	return hash( 'crc32b', $_SERVER['REMOTE_ADDR'] . $_SERVER['REMOTE_PORT'] . $_SERVER['REQUEST_TIME_FLOAT'] );
+	if ( 'cli' === php_sapi_name() ) {
+		$caller = $_SERVER['USER'] . $_SERVER['SSH_CONNECTION'];
+	} else {
+		$caller = $_SERVER['REMOTE_ADDR'] . $_SERVER['REMOTE_PORT'];
+	}
+
+	return hash( 'crc32b', $caller . $_SERVER['REQUEST_TIME_FLOAT'] );
 }
 
 /**
