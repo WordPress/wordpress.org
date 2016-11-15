@@ -65,14 +65,43 @@ function print_admin_styles() {
 /**
  * Get the attendees
  *
+ * @param string|array $ticket_ids        Reduce fetched attendees by the ticket they purchased. The string 'all'
+ *                                        will result in all attendees being fetched, regardless of their
+ *                                        ticket. An array of ticket IDs will result in only the attendees for
+ *                                        those tickets being fetched.
+ * @param string $registered_after        Reduce fetched attendees by their registration date. Any value parseable
+ *                                        by strtotime().
+ *
+ * @todo Maybe optimize this by looking at post_date rather than tix_timestamp
+ *
  * @return array
  */
-function get_attendees() {
-	$attendees = get_posts( array(
+function get_attendees( $ticket_ids = 'all', $registered_after = '' ) {
+	$params = array(
 		'post_type'      => 'tix_attendee',
 		'posts_per_page' => 12000,
+		'order'          => 'ASC',
 		'orderby'        => 'title',
-	) );
+		'meta_query'     => array(),
+	);
+
+	if ( 'all' !== $ticket_ids ) {
+		$params['meta_query'][] = array(
+			'key'     => 'tix_ticket_id',
+			'value'   => $ticket_ids,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( ! empty( $registered_after ) ) {
+		$params['meta_query'][] = array(
+			'key'     => 'tix_timestamp',
+			'value'   => strtotime( $registered_after ),
+			'compare' => '>=',
+		);
+	}
+
+	$attendees = get_posts( $params );
 
 	return $attendees;
 }

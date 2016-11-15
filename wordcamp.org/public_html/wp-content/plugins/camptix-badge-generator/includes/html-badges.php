@@ -213,7 +213,7 @@ function render_badges_template() {
 		),
 	);
 
-	$attendees = Badge_Generator\get_attendees();
+	$attendees = Badge_Generator\get_attendees( 'all' );
 
 	require( dirname( __DIR__ ) . '/views/html-badges/template-badges.php' );
 }

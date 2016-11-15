@@ -24,8 +24,18 @@ function render_indesign_page() {
 
 /**
  * Build the badge assets for InDesign
+ *
+ * @param array $options
  */
-function build_assets() {
+function build_assets( $options ) {
+	$options = shortcode_atts(
+		array(
+			'ticket_ids'       => 'all',
+			'registered_after' => ''
+		),
+		$options
+	);
+
 	try {
 		// Security: assets are intentionally saved to a folder outside the web root. See serve_zip_file() for details.
 		$assets_folder    = sprintf( '%scamptix-badges-%d-%d', get_temp_dir(), get_current_blog_id(), time() );
@@ -33,7 +43,7 @@ function build_assets() {
 		$csv_filename     = $assets_folder . '/attendees.csv';
 		$zip_filename     = get_zip_filename( $assets_folder );
 		$zip_local_folder = pathinfo( $zip_filename, PATHINFO_FILENAME );
-		$attendees        = Badge_Generator\get_attendees();
+		$attendees        = Badge_Generator\get_attendees( $options['ticket_ids'], $options['registered_after'] );
 
 		wp_mkdir_p( $gravatar_folder );
 		download_gravatars( $attendees, $gravatar_folder );
