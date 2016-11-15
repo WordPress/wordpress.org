@@ -125,7 +125,9 @@ function download_single_gravatar( $request_url ) {
 			return $image;
 		}
 
-		$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data
+		if ( isset( $response['body'] ) ) {
+			$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data
+		}
 
 		if ( $attempt_count < 3 ) {
 			Logger\log( 'request_failed_temporarily', compact( 'attendee', 'request_url', 'response', 'attempt_count', 'retry_after' ) );
