@@ -72,25 +72,70 @@ function download_gravatars( $attendees, $gravatar_folder ) {
 			continue;
 		}
 
-		$request_url = str_replace( '=blank', '=404', $attendee->avatar_url );
-		$response    = wp_remote_get( $request_url );
-		$image       = wp_remote_retrieve_body( $response );
-		$status_code = wp_remote_retrieve_response_code( $response );
+		$request_url    = str_replace( '=blank', '=404', $attendee->avatar_url );
+		$gravatar_image = download_single_gravatar( $request_url );
 
-		if ( 404 == $status_code ) {
+		if ( ! $gravatar_image ) {
 			continue;
-		}
-
-		if ( ! $image || 200 != $status_code ) {
-			Logger\log( 'request_failed', compact( 'attendee', 'request_url', 'response' ) );
-			throw new \Exception( __( "Couldn't download all Gravatars.", 'wordcamporg' ) );
 		}
 
 		$filename      = get_gravatar_filename( $attendee );
 		$gravatar_file = fopen( $gravatar_folder . '/' . $filename, 'w' );
 
-		fwrite( $gravatar_file, $image );
+		if ( ! $gravatar_file ) {
+			Logger\log( 'gravatar_open_failed', compact( 'attendee', 'gravatar_folder', 'filename' ) );
+			throw new \Exception( __( "Couldn't save all Gravatars.", 'wordcamporg' ) );
+		}
+
+		fwrite( $gravatar_file, $gravatar_image );
 		fclose( $gravatar_file );
+	}
+}
+
+/**
+ * Download a Gravatar
+ *
+ * Sometimes the HTTP request times out, or Varnish returns a `503` error, but the batch will be ruined if even a
+ * single existing Gravatar cannot be downloaded successfully. In order to mitigate that, we retry the download
+ * multiple times.
+ *
+ * @param string $request_url
+ *
+ * @return bool|string `false` when the user does not have a Gravatar, `string` of image binary data when the
+ *                      image was successfully retrieved.
+ *
+ * @throws \Exception when the HTTP failed even after multiple attempts
+ */
+function download_single_gravatar( $request_url ) {
+	$attempt_count = 1;
+
+	while ( true ) {
+		$response    = wp_remote_get( $request_url );
+		$status_code = wp_remote_retrieve_response_code( $response );
+		$image       = wp_remote_retrieve_body( $response );
+		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
+		$retry_after = min( $retry_after * $attempt_count, 30 );
+
+		// A 404 is expected when the attendee doesn't have a Gravatar setup, so don't retry them
+		if ( 404 == $status_code ) {
+			return false;
+		}
+
+		if ( ! is_wp_error( $response ) && $image ) {
+			return $image;
+		}
+
+		$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data
+
+		if ( $attempt_count < 3 ) {
+			Logger\log( 'request_failed_temporarily', compact( 'attendee', 'request_url', 'response', 'attempt_count', 'retry_after' ) );
+			sleep( $retry_after );
+		} else {
+			Logger\log( 'request_failed_permenantly', compact( 'attendee', 'request_url', 'response' ) );
+			throw new \Exception( __( "Couldn't download all Gravatars.", 'wordcamporg' ) );
+		}
+
+		$attempt_count++;
 	}
 }
 
