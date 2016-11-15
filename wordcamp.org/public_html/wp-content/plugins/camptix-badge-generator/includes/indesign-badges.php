@@ -136,7 +136,7 @@ function get_zip_filename( $assets_folder ) {
 function generate_csv( $csv_filename, $zip_local_folder, $attendees, $gravatar_folder ) {
 	$csv_handle            = fopen( $csv_filename, 'w' );
 	$destination_directory = "Macintosh HD:Users:your_username:Desktop:$zip_local_folder:gravatars:";
-	$empty_twitter         = 'replace';
+	$empty_twitter         = '';
 
 	$header_row = array(
 		'First Name', 'Last Name', 'Email Address', 'Ticket', 'Coupon', 'Twitter',
@@ -246,7 +246,7 @@ function get_twitter_username( $attendee ) {
  *
  * @return string
  */
-function format_twitter_username( $username, $first_name, $empty_mode = 'replace' ) {
+function format_twitter_username( $username, $first_name, $empty_mode = '' ) {
 	if ( empty ( $username ) ) {
 		if ( 'replace' === $empty_mode ) {
 			$username = $first_name;
