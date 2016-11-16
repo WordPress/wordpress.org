@@ -270,8 +270,8 @@ function bporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 
 		return;
 
-	// bbPress Codex
-	} elseif ( bb_base_is_bbpress() ) {
+	// bbPress Network
+	} elseif ( strstr( $_SERVER['HTTP_HOST'], 'bbpress.org' ) ) {
 		$wp_admin_bar->add_menu( array(
 			'id'    => 'bp-site-name',
 			'title' => __( 'bbPress.org' ),
