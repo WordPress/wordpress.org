@@ -125,7 +125,7 @@ function download_single_gravatar( $request_url ) {
 			return $image;
 		}
 
-		if ( isset( $response['body'] ) ) {
+		if ( is_array( $response ) && isset( $response['body'] ) ) {
 			$response['body'] = '[redacted]'; // Avoid cluttering the logs with a ton of binary data
 		}
 
