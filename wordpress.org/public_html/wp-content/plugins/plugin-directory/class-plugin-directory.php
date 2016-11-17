@@ -48,6 +48,7 @@ class Plugin_Directory {
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ) );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
+		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
 
 		// oEmbed whitlisting.
 		add_filter( 'embed_oembed_discover', '__return_false' );
@@ -474,6 +475,18 @@ class Plugin_Directory {
 		}
 
 		return $term_link;
+	}
+
+	/**
+	 * Filter content to make links rel=nofollow on plugin pages only
+	 * @param string	$content	The content.
+	 * @return string
+	 */
+	public function filter_rel_nofollow( $content ) {
+		if ( get_post_type() == 'plugin' )
+			// regex copied from wp_rel_nofollow(). Not calling that function because it messes with slashes.
+			$content = preg_replace_callback('|<a (.+?)>|i', 'wp_rel_nofollow_callback', $content);
+		return $content;
 	}
 
 	/**
