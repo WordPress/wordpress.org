@@ -16,7 +16,7 @@
 		},
 		initial_size: function( selector ) {
 			$( selector ).each( function( i, el) {
-				if ( $(el).height() / el.scrollHeight > 0.8 ) {
+				if ( $(el).height() / el.scrollHeight > 0.8 || el.id == 'screenshots' ) {
 					// Force the section to expand, and hide its button
 					$(el).toggleClass( 'toggled' ).addClass('short-content').attr( 'aria-expanded', true );
 					$( '.section-toggle[aria-controls="' + el.id + '"]' ).hide();

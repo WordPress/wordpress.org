@@ -102,7 +102,7 @@ function scripts() {
 
 	}
 
-	if ( isset( $_REQUEST['react'] ) ) {
+	if ( !isset( $_REQUEST['noreact'] ) ) {
 		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
 		wp_localize_script( 'wporg-plugins-client', 'app_data', array(
 			'api_url' => untrailingslashit( rest_url() ),
