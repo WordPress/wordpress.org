@@ -2501,6 +2501,14 @@ object {
   text-transform: inherit;
 }
 
+.plugin-screenshots .image-gallery-thumbnails-container {
+  max-height: 100px;
+}
+
+.plugin-screenshots .image-gallery-thumbnail {
+  vertical-align: top;
+}
+
 .read-more {
   border-bottom: 2px solid #eee;
   max-height: 200px;
@@ -3254,4 +3262,3 @@ object {
     top: 5px;
   }
 }
-/*# sourceMappingURL=style.css.map */

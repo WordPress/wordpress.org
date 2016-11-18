@@ -13,4 +13,12 @@
 		padding: 0;
 		text-transform: inherit;
 	}
+
+	.image-gallery-thumbnails-container {
+		max-height: 100px;
+	}
+
+	.image-gallery-thumbnail {
+		vertical-align: top;
+	}
 }

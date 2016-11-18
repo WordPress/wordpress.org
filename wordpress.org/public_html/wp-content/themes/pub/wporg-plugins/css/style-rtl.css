@@ -2123,6 +2123,20 @@ object {
   }
 }
 
+#changelog {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+#changelog code {
+  font-size: 12.8px;
+  font-size: 0.8rem;
+}
+
+#changelog h4 {
+  margin-top: 0;
+}
+
 .plugin-developers {
   list-style-type: none;
   margin: 0;
@@ -2145,6 +2159,7 @@ object {
   border-radius: 50%;
   margin-left: 10px;
   vertical-align: middle;
+  float: right;
 }
 
 .plugin-faqs h2:first-of-type {
@@ -2170,8 +2185,6 @@ object {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.8px;
-  letter-spacing: 0.05rem;
   padding: 16px 0;
   padding: 1rem 0;
 }
@@ -2276,12 +2289,17 @@ object {
   font-size: 0.8rem;
   margin-top: 8px;
   margin-top: 0.5rem;
+  text-decoration: none;
 }
 
 .reviews-link:after {
   content: "\f341";
   font-family: dashicons;
   vertical-align: text-top;
+  padding-right: 5px;
+  float: left;
+  position: relative;
+  top: 1px;
 }
 
 .image-gallery {
@@ -2297,14 +2315,16 @@ object {
 
 .image-gallery-content .image-gallery-left-nav,
 .image-gallery-content .image-gallery-right-nav {
-  color: #fff;
-  font-size: 61.035px;
-  font-size: 3.8146972656rem;
+  display: none;
+  font-size: 48.828px;
+  font-size: 3.0517578125rem;
   height: 100%;
   position: absolute;
-  text-shadow: 0 2px 2px #222;
   top: 0;
   z-index: 4;
+  border-color: #eee;
+  -webkit-transition: background 0.1s ease, border 0.1s ease;
+  transition: background 0.1s ease, border 0.1s ease;
 }
 
 @media (max-width: 768px) {
@@ -2317,15 +2337,16 @@ object {
 @media (min-width: 768px) {
   .image-gallery-content .image-gallery-left-nav:hover,
   .image-gallery-content .image-gallery-right-nav:hover {
-    color: #fff;
+    background: #fff;
+    opacity: 0.8;
+    border: 1px solid #eee;
   }
 }
 
 .image-gallery-content .image-gallery-left-nav:before,
 .image-gallery-content .image-gallery-right-nav:before {
-  padding: 15px;
   position: relative;
-  top: -15px;
+  font-family: 'dashicons';
 }
 
 .image-gallery-content .image-gallery-left-nav {
@@ -2333,7 +2354,11 @@ object {
 }
 
 .image-gallery-content .image-gallery-left-nav:before {
-  content: '\027E8';
+  content: '\f341';
+}
+
+.image-gallery-content .image-gallery-left-nav:hover {
+  margin-right: -1px;
 }
 
 .image-gallery-content .image-gallery-right-nav {
@@ -2341,7 +2366,16 @@ object {
 }
 
 .image-gallery-content .image-gallery-right-nav:before {
-  content: '\027E9';
+  content: '\f345';
+}
+
+.image-gallery-content .image-gallery-right-nav:hover {
+  margin-left: -1px;
+}
+
+.image-gallery-content:hover .image-gallery-left-nav,
+.image-gallery-content:hover .image-gallery-right-nav {
+  display: block;
 }
 
 .image-gallery-slides {
@@ -2349,6 +2383,7 @@ object {
   overflow: hidden;
   position: relative;
   white-space: nowrap;
+  border: 1px solid #eee;
 }
 
 .image-gallery-slide {
@@ -2376,6 +2411,8 @@ object {
   line-height: 1.5;
   padding: 10px 20px;
   white-space: normal;
+  font-size: 12.8px;
+  font-size: 0.8rem;
 }
 
 @media (max-width: 768px) {
@@ -2388,7 +2425,6 @@ object {
 .image-gallery-thumbnails {
   background: #fff;
   margin-top: 5px;
-  overflow: hidden;
 }
 
 .image-gallery-thumbnails .image-gallery-thumbnails-container {
@@ -2400,6 +2436,7 @@ object {
 .image-gallery-thumbnail {
   display: table-cell;
   margin-left: 5px;
+  border: 1px solid #eee;
 }
 
 .image-gallery-thumbnail .image-gallery-image {
@@ -2407,26 +2444,23 @@ object {
 }
 
 .image-gallery-thumbnail img {
-  border: 4px solid transparent;
   vertical-align: middle;
   width: 100px;
 }
 
 @media (max-width: 768px) {
   .image-gallery-thumbnail img {
-    border: 3px solid transparent;
     width: 75px;
   }
 }
 
-.image-gallery-thumbnail.active img {
-  border: 4px solid #337ab7;
+.image-gallery-thumbnail:hover {
+  -webkit-box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
 }
 
-@media (max-width: 768px) {
-  .image-gallery-thumbnail.active img {
-    border: 3px solid #337ab7;
-  }
+.image-gallery-thumbnail.active {
+  border: 1px solid #337ab7;
 }
 
 .image-gallery-thumbnail-label {
@@ -2467,8 +2501,12 @@ object {
   text-transform: inherit;
 }
 
-.plugin-screenshots figcaption {
-  font-style: italic;
+.plugin-screenshots .image-gallery-thumbnails-container {
+  max-height: 100px;
+}
+
+.plugin-screenshots .image-gallery-thumbnail {
+  vertical-align: top;
 }
 
 .read-more {
@@ -2481,6 +2519,10 @@ object {
 .read-more#reviews {
   max-height: none;
   overflow: auto;
+}
+
+.read-more:nth-of-type(1) {
+  max-height: 400px;
 }
 
 .read-more h1, .read-more h2, .read-more h3 {
@@ -2547,10 +2589,17 @@ object {
   font-family: dashicons;
   padding-right: 5px;
   vertical-align: text-top;
+  position: relative;
+  float: left;
+  top: 1px;
 }
 
 .toggled + .section-toggle:after {
   content: "\f343";
+}
+
+.section-toggle:hover {
+  text-decoration: underline;
 }
 
 .no-js .section-toggle {
@@ -3076,8 +3125,7 @@ object {
 .plugin-ratings .reviews-link {
   position: absolute;
   left: 0;
-  top: 4.8px;
-  top: 0.3rem;
+  top: 0;
 }
 
 .plugin-ratings .reviews-link:after {
@@ -3107,6 +3155,11 @@ object {
 .plugin-ratings .ratings-list .counter-container,
 .plugin-ratings .ratings-list .counter-container a {
   width: 100%;
+}
+
+.plugin-ratings .ratings-list .counter-container:hover,
+.plugin-ratings .ratings-list .counter-container a:hover {
+  text-decoration: none;
 }
 
 .plugin-ratings .ratings-list .counter-label {
