@@ -2501,6 +2501,10 @@ object {
   text-transform: inherit;
 }
 
+.plugin-screenshots .image-gallery-slides {
+  max-height: 600px;
+}
+
 .plugin-screenshots .image-gallery-thumbnails-container {
   max-height: 100px;
 }
