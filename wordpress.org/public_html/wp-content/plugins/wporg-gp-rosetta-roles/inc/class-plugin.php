@@ -142,17 +142,48 @@ class Plugin {
 		}
 
 		// If current project is a parent ID.
-		if ( in_array( $locale_and_project_id->project_id, $project_access_list ) ) {
+		if ( in_array( $locale_and_project_id->project_id, $project_access_list, true ) ) {
 			return true;
 		}
 
 		// A user is allowed to approve sub projects as well.
-		$project_access_list = $this->get_project_id_access_list( $args['user_id'], $locale_and_project_id->locale, /* $include_children = */ true );
-		if ( in_array( $locale_and_project_id->project_id, $project_access_list ) ) {
+		$parent_project_ids = $this->get_parent_project_ids( $locale_and_project_id->project_id );
+		if ( array_intersect( $project_access_list, $parent_project_ids ) ) {
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Retrieves all parent project IDs of a project.
+	 *
+	 * @param int $project_id ID of a project.
+	 * @return array List of project IDs that are parents of a project.
+	 */
+	private function get_parent_project_ids( $project_id ) {
+		$last_changed = wp_cache_get_last_changed( self::$cache_group );
+
+		$cache_key = 'project:' . $project_id . ':parents:' . $last_changed;
+		$cache = wp_cache_get( $cache_key, self::$cache_group );
+		if ( false !== $cache ) {
+			return $cache;
+		}
+
+		$parent_project_ids = [];
+
+		$parent_project = GP::$project->get( $project_id );
+		$parent_project_id = $parent_project->parent_project_id;
+		while ( $parent_project_id ) {
+			$parent_project_ids[] = $parent_project_id;
+
+			$parent_project = GP::$project->get( $parent_project_id );
+			$parent_project_id = $parent_project->parent_project_id;
+		}
+
+		wp_cache_set( $cache_key, $parent_project_ids, self::$cache_group );
+
+		return $parent_project_ids;
 	}
 
 	/**
@@ -435,6 +466,8 @@ class Plugin {
 	 * Removes all of the project ids from the cache.
 	 */
 	public function clear_project_cache() {
+		wp_cache_set( 'last_changed', microtime(), self::$cache_group );
+
 		$projects = $this->get_all_projects();
 
 		foreach ( $projects as $project ) {
