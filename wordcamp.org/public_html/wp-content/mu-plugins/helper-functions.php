@@ -1,5 +1,7 @@
 <?php
 
+use WordCamp\Logger;
+
 /**
  * Retrieves the `wordcamp` post and postmeta associated with the current site.
  *
@@ -215,4 +217,45 @@ function wcorg_esc_csv( $fields ) {
 	}
 
 	return $fields;
+}
+
+/**
+ * Make a remote HTTP request, and retry if it fails
+ *
+ * Sometimes the HTTP request times out, or there's a temporary server-side error, etc. Some use cases require a
+ * successful request, like stats scripts, where the resulting data would be distorted by a failed response.
+ *
+ * @todo Remove this if https://github.com/rmccue/Requests/issues/222 is implemented
+ *
+ * @param string $request_url
+ * @param array  $request_args
+ *
+ * @return array|WP_Error
+ */
+function wcorg_redundant_remote_get( $request_url, $request_args = array() ) {
+	$attempt_count = 1;
+
+	while ( true ) {
+		$response    = wp_remote_get( $request_url, $request_args );
+		$status_code = wp_remote_retrieve_response_code( $response );
+		$body        = wp_remote_retrieve_body( $response );
+		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' ) ?: 5;
+		$retry_after = min( $retry_after * $attempt_count, 30 );
+
+		if ( ! is_wp_error( $response ) && 200 === $status_code && $body ) {
+			break;
+		}
+
+		if ( $attempt_count < 3 ) {
+			Logger\log( 'request_failed_temporarily', compact( 'request_url', 'request_args', 'response', 'attempt_count', 'retry_after' ) );
+			sleep( $retry_after );
+		} else {
+			Logger\log( 'request_failed_permenantly', compact( 'request_url', 'request_args', 'response' ) );
+			break;
+		}
+
+		$attempt_count++;
+	}
+
+	return $response;
 }
