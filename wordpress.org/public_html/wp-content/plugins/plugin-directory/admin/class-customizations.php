@@ -107,7 +107,7 @@ class Customizations {
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
 				case 'post.php':
-					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 1 );
+					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 2 );
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 1 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
@@ -115,7 +115,7 @@ class Customizations {
 					break;
 
 				case 'edit.php':
-					wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/plugin-list.css', Plugin_Directory\PLUGIN_FILE ), array(), 1 );
+					wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/plugin-list.css', Plugin_Directory\PLUGIN_FILE ), array(), 2 );
 					break;
 			}
 		}

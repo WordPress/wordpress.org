@@ -33,6 +33,11 @@
 	display: none;
 }
 
+input#post_name,
+input#post_author_username {
+	width: 350px;
+}
+
 .button-link:not(.handlediv) {
 	color: #0073aa;
 	-webkit-transition-property: border, background, color;

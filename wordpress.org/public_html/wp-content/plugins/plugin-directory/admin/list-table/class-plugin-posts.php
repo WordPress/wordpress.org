@@ -104,6 +104,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			'cb'        => '<input type="checkbox" />',
 			/* translators: manage posts column name */
 			'title'     => _x( 'Title', 'column name', 'wporg-plugins' ),
+			'author'    => __( 'Submitter', 'wporg-plugins' ),
 			'tested'    => __( 'Tested up to', 'wporg-plugins' ),
 			'rating'    => __( 'Rating', 'wporg-plugins' ),
 			'installs'  => __( 'Active installs', 'wporg-plugins' ),
@@ -111,10 +112,17 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			'support'   => __( 'Support', 'wporg-plugins' ),
 		);
 
-		if ( current_user_can( 'plugin_review' ) ) {
-			$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
+		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
+		$taxonomies = wp_filter_object_list( $taxonomies, array( 'show_admin_column' => true ), 'and', 'name' );
+		$taxonomies = apply_filters( "manage_taxonomies_for_{$post_type}_columns", $taxonomies, $post_type );
+		$taxonomies = array_filter( $taxonomies, 'taxonomy_exists' );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$column_key = 'taxonomy-' . $taxonomy;
+			$posts_columns[ $column_key ] = get_taxonomy( $taxonomy )->labels->name;
 		}
 
+		$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
 		$posts_columns['date'] = __( 'Date', 'wporg-plugins' );
 
 		/**

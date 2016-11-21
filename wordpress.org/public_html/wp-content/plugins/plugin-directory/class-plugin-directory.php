@@ -87,9 +87,9 @@ class Plugin_Directory {
 
 		register_post_type( 'plugin', array(
 			'labels'       => array(
-				'name'               => __( 'Plugins',                   'wporg-plugins' ),
-				'singular_name'      => __( 'Plugin',                    'wporg-plugins' ),
-				'menu_name'          => __( 'My Plugins',                'wporg-plugins' ),
+				'name'               => __( 'Repo Plugins',              'wporg-plugins' ),
+				'singular_name'      => __( 'Repo Plugin',               'wporg-plugins' ),
+				'menu_name'          => __( 'Repo Plugins',              'wporg-plugins' ),
 				'add_new'            => __( 'Add New',                   'wporg-plugins' ),
 				'add_new_item'       => __( 'Add New Plugin',            'wporg-plugins' ),
 				'new_item'           => __( 'New Plugin',                'wporg-plugins' ),
@@ -125,8 +125,8 @@ class Plugin_Directory {
 			'query_var'         => 'browse',
 			'rewrite'           => false,
 			'public'            => true,
-			'show_ui'           => current_user_can( 'plugin_set_section' ),
-			'show_admin_column' => current_user_can( 'plugin_set_section' ),
+			'show_ui'           => true,
+			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
 			),
@@ -155,7 +155,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
-			'show_admin_column' => true,
+			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
 			),
@@ -169,7 +169,7 @@ class Plugin_Directory {
 				'name' => __( 'Built For', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => true,
+			'show_ui'           => false,
 			'show_admin_column' => false,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -185,7 +185,7 @@ class Plugin_Directory {
 				'name' => __( 'Business Model', 'wporg-plugins' ),
 			),
 			'public'            => true,
-			'show_ui'           => true,
+			'show_ui'           => false,
 			'show_admin_column' => false,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -203,7 +203,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
-			'show_admin_column' => false,
+			'show_admin_column' => true,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
 			),
@@ -219,7 +219,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
-			'show_admin_column' => false,
+			'show_admin_column' => true,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
 			),
@@ -245,7 +245,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
-			'show_admin_column' => false,
+			'show_admin_column' => true,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',

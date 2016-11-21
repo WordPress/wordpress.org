@@ -1,9 +1,5 @@
-.fixed .column-tested,
-.fixed .column-rating,
-.fixed .column-installs,
-.fixed .column-downloads,
-.fixed .column-support {
-	width: 12%;
+.fixed .column-rating {
+	width: 100px;
 }
 
 .column-tested .needs-update {
