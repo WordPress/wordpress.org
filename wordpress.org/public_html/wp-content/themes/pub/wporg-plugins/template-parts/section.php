@@ -14,4 +14,10 @@ global $section, $section_slug, $section_content;
 	<h2><?php echo $section['title']; ?></h2>
 	<?php echo $section_content; ?>
 </div>
-<button type="button" class="button-link section-toggle" aria-controls="<?php echo esc_attr( $section_slug ); ?>"><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
+<button
+	type="button"
+	class="button-link section-toggle"
+	aria-controls="<?php echo esc_attr( $section_slug ); ?>"
+	data-show-less="<?php esc_attr_e( 'Show less', 'wporg-plugins' ); ?>"
+	data-read-more="<?php esc_attr_e( 'Read more', 'wporg-plugins' ); ?>"
+><?php _e( 'Read more', 'wporg-plugins' ); ?></button>
