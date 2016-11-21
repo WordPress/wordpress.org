@@ -31,7 +31,7 @@ get_header(); ?>
 
 						<h3><?php _e( 'There are some restrictions', 'wporg-plugins' ); ?></h3>
 						<ul>
-							<li><?php printf( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221; (If you don&#8217;t specify a compatible license, what you check in will considered GPLv2 or later.)', 'wporg-plugins' ), esc_url( 'http://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) ); ?></li>
+							<li><?php printf( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-plugins' ), esc_url( 'http://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) ); ?></li>
 							<li><?php _e( 'The plugin must not do anything illegal or be morally offensive (that&#8217;s subjective, we know).', 'wporg-plugins' ); ?></li>
 							<li><?php printf( __( 'You have to actually use the <a href="%s">Subversion</a> repository we give you in order for your plugin to show up on this site. The WordPress Plugin Directory is a hosting site, not a listing site.', 'wporg-plugins' ), esc_url( 'http://subversion.tigris.org/' ) ); ?></li>
 							<li><?php _e( 'The plugin must not embed external links on the public site (like a &#8220;powered by&#8221; link) without explicitly asking the user&#8217;s permission.', 'wporg-plugins' ); ?></li>
