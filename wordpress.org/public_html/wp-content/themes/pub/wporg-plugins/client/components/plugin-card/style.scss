@@ -1,5 +1,8 @@
 .plugin-card {
+	background-color: #f9f9f9;
 	margin-bottom: 4%;
+	padding: 8px 8px 0 8px;
+	vertical-align: top;
 
 	@media screen and ( min-width: $ms-breakpoint ) {
 		display: inline-block;
@@ -36,6 +39,40 @@
 
 		p {
 			margin: 0 0 8px;
+		}
+	}
+
+	hr {
+		background-color: #fff;
+		margin: auto;
+	}
+
+	footer {
+		span {
+			font-size: ms(-3);
+			width: 48%;
+			display: inline-block;
+			overflow: hidden;
+			white-space: nowrap;
+
+			i {
+				display: inline-block;
+				font-size: 1rem;
+				margin-right: 0.4rem;
+			}
+
+		}
+			
+		.dashicons {
+			margin: 0 2px -1rem;
+			color: #bbb;
+			width: auto;
+			height: auto;
+			display: none;
+
+			@media (min-width:414px) {
+				display: inline-block;
+			}
 		}
 	}
 }

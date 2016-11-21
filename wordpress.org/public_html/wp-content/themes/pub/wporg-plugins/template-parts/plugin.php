@@ -1,6 +1,6 @@
 <?php
 /**
- * Template part for displaying posts.
+ * Template part for displaying plugins.
  *
  * @link https://codex.wordpress.org/Template_Hierarchy
  *
@@ -27,4 +27,24 @@ use WordPressdotorg\Plugin_Directory\Template;
 			<?php the_excerpt(); ?>
 		</div><!-- .entry-excerpt -->
 	</div>
+	<hr>
+	<footer>
+		<span class="plugin-author">
+			<i class="dashicons dashicons-admin-users"></i> <?php echo esc_html( get_post_meta( get_the_ID(), 'header_author', true ) ); ?>
+		</span>
+		<span class="active-installs">
+			<i class="dashicons dashicons-chart-area"></i> <?php printf( __( '%s Active Installs', 'wporg-plugins' ), Template::active_installs(false) ); ?>
+		</span>
+		<span class="tested-with">
+			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) { ?>
+				<i class="dashicons dashicons-wordpress-alt"></i> <?php printf( __( 'Tested with %s', 'wporg-plugins' ), $tested_up_to ); ?></span>
+			<?php } ?>
+		</span>
+		<span class="last-updated">
+			<i class="dashicons dashicons-calendar"></i> <?php
+				/* Translators: Plugin modified time. */
+				printf( __( 'Updated %s ago', 'wporg-plugins' ), human_time_diff( get_post_modified_time() ) ); ?>
+		</span>
+		</span>
+	</footer>
 </article><!-- #post-## -->
