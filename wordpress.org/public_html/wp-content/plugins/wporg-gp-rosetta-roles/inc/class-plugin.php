@@ -142,7 +142,7 @@ class Plugin {
 		}
 
 		// If current project is a parent ID.
-		if ( in_array( $locale_and_project_id->project_id, $project_access_list, true ) ) {
+		if ( in_array( (string) $locale_and_project_id->project_id, $project_access_list, true ) ) {
 			return true;
 		}
 
