@@ -92,7 +92,8 @@ function scripts() {
 
 	}
 
-	if ( !isset( $_REQUEST['noreact'] ) ) {
+	// React is currently only used on detail pages
+	if ( is_single() ) {
 		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
 		wp_localize_script( 'wporg-plugins-client', 'app_data', array(
 			'api_url' => untrailingslashit( rest_url() ),
