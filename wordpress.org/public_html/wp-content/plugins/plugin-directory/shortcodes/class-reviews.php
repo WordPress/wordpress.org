@@ -25,7 +25,7 @@ class Reviews {
 
 		<div class="plugin-reviews">
 			<?php
-			foreach ( $reviews as $review ) :
+		foreach ( $reviews as $review ) :
 				$reviewer = get_user_by( 'id', $review->post_author );
 				if ( ! $reviewer ) :
 					continue;
@@ -36,7 +36,11 @@ class Reviews {
 						<?php echo get_avatar( $reviewer->ID, 60 ); ?>
 					</div><div class="review">
 						<header>
-							<h3 class="review-title"><?php echo $review->post_title; ?></h3>
+							<?php if ( !empty( $review->ID ) ) : ?>
+								<h3 class="review-title"><a class="url" href="<?php echo esc_url( add_query_arg( array( 'p' => $review->ID ), 'https://wordpress.org/support/plugin/' ) ); ?>"><?php echo $review->post_title; ?></a></h3>
+							<?php else: ?>
+								<h3 class="review-title"><?php echo $review->post_title; ?></h3>
+							<?php endif; ?>
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
 							<span class="review-author author vcard"><a class="url fn n" href="<?php echo esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
 						</header>

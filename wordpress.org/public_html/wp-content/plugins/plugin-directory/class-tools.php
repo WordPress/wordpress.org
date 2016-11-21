@@ -54,7 +54,7 @@ class Tools {
 
 			$reviews = $wpdb->get_results( $wpdb->prepare(
 			"SELECT
-					post_content, post_title, post_author, post_modified,
+					ID, post_content, post_title, post_author, post_modified,
 					r.rating as post_rating
 			FROM ratings r
 				LEFT JOIN wporg_419_posts p ON r.post_id = p.ID
