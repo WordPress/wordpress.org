@@ -96,11 +96,14 @@ class Capabilities {
 	public static function add_roles() {
 
 		$reviewer = array(
-			'read'                 => true,
-			'plugin_set_category'  => true,
-			'moderate_comments'    => true,
-			'plugin_edit_pending'  => true,
-			'plugin_review'        => true,
+			'read'                    => true,
+			'plugin_set_category'     => true,
+			'moderate_comments'       => true,
+			'plugin_edit_pending'     => true,
+			'plugin_review'           => true,
+			'plugin_dashboard_access' => true,
+			'plugin_edit'             => true,
+			'plugin_edit_others'      => true,
 		);
 
 		$admin = array_merge( $reviewer, array(
