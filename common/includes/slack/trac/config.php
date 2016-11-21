@@ -31,6 +31,8 @@ class Core extends Trac {
 		'wp-admin/network'                 => '#core-multisite',
 		'#wp-admin/includes/(ms|network)#' => '#core-multisite',
 		'rest-api'                         => '#core-restapi',
+		'#wp-admin/.*(image|media)\b#'     => '#core-media',
+		'#wp-includes/.*(image|media)\b#'  => '#core-media',
 	);
 
 	/**
@@ -45,6 +47,7 @@ class Core extends Trac {
 		'REST API'           => '#core-restapi',
 		'rest-api'           => '#core-restapi',
 		'I18N'               => '#core-i18n',
+		'Media'              => '#core-media',
 		'docs'               => '#docs',
 	);
 }
