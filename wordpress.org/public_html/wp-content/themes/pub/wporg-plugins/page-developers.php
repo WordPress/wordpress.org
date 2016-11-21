@@ -58,7 +58,7 @@ get_header(); ?>
 						<p>
 							<?php
 							/* translators: 1: URL to readme file; 2: URL to readme validator; */
-							printf( __( 'To make your entry in the plugin browser most useful, each plugin should have a readme file named <code>readme.txt</code> that adheres to the <a href="%1$s">WordPress plugin readme file standard</a>. You can put your readme file through the <a href="%2$s">readme validator</a> to check it.', 'wporg-plugins' ), esc_url( home_url( 'files/2016/06/readme.txt' ) ), esc_url( home_url( 'wp-admin/edit.php?post_type=plugin&page=readme_validator' ) ) );
+							printf( __( 'To make your entry in the plugin browser most useful, each plugin should have a readme file named <code>readme.txt</code> that adheres to the <a href="%1$s">WordPress plugin readme file standard</a>. You can put your readme file through the <a href="%2$s">readme validator</a> to check it.', 'wporg-plugins' ), esc_url( home_url( 'files/2016/06/readme.txt' ) ), esc_url( home_url( '/developers/readme-validator/' ) ) );
 							?>
 						</p>
 					</div>
