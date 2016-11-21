@@ -2004,6 +2004,12 @@ object {
   display: none;
 }
 
+.plugin-rating .rating-count a {
+  color: inherit;
+  cursor: hand;
+  text-decoration: none;
+}
+
 @-webkit-keyframes favme-anime {
   0% {
     opacity: 1;

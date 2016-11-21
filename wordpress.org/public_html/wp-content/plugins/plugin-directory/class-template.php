@@ -95,8 +95,15 @@ class Template {
 				'<meta itemprop="ratingCount" content="' . esc_attr( $num_ratings ) . '"/>' .
 				'<meta itemprop="ratingValue" content="' . esc_attr( $rating ) . '"/>' .
 				Template::dashicons_stars( $rating ) .
-				/* translators: 1: number of ratings */
-				'<span class="rating-count">(' . sprintf( __( '%1$s<span class="screen-reader-text"> total ratings</span>' ), esc_html( $num_ratings ) ) . ')</span>' .
+				'<span class="rating-count">(' .
+					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
+					sprintf(
+						/* translators: 1: number of ratings */
+						__( '%1$s<span class="screen-reader-text"> total ratings</span>' ),
+						esc_html( $num_ratings )
+					) .
+				'</a>' .
+				')</span>' .
 			'</div>';
 	}
 

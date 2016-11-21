@@ -15,5 +15,11 @@
 		.site-main.single & {
 			display: none;
 		}
+
+		a {
+			color: inherit;
+			cursor: hand;
+			text-decoration: none;
+		}
 	}
 }
