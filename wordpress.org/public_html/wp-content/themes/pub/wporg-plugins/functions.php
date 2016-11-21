@@ -25,11 +25,6 @@ function setup() {
 	// Don't include Adjacent Posts functionality
 	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 
-	// This theme uses wp_nav_menu() in one location.
-	register_nav_menus( array(
-		'primary' => esc_html__( 'Primary', 'wporg-plugins' ),
-	) );
-
 	/*
 	 * Switch default core markup for search form, comment form, and comments
 	 * to output valid HTML5.
@@ -42,11 +37,6 @@ function setup() {
 		'caption',
 	) );
 
-	// Set up the WordPress core custom background feature.
-	add_theme_support( 'custom-background', apply_filters( 'wporg_plugins_custom_background_args', array(
-		'default-color' => 'ffffff',
-		'default-image' => '',
-	) ) );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
