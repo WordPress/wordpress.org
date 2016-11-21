@@ -121,7 +121,6 @@ class Import {
 
 		// Bump last updated if the version has changed.
 		if ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
-			$plugin->override_modified_date = true;
 			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
 
@@ -401,7 +400,9 @@ class Import {
 	}
 
 	/**
-	 * Filters `wp_insert_post()` to allow a custom modified date to be specified.
+	 * Filters `wp_insert_post()` to respect the presented data.
+	 * This function overrides `wp_insert_post()`s constant updating of
+	 * the post_modified fields.
 	 *
 	 * @param array $data    The data to be inserted into the database.
 	 * @param array $postarr The raw data passed to `wp_insert_post()`.
@@ -409,7 +410,7 @@ class Import {
 	 * @return array The data to insert into the database.
 	 */
 	public function filter_wp_insert_post_data( $data, $postarr ) {
-		if ( !empty( $postarr['override_modified_date'] ) ) {
+		if ( 'plugin' === $postarr['post_type'] ) {
 			$data['post_modified']     = $postarr['post_modified'];
 			$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
 		}
