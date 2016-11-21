@@ -202,6 +202,8 @@ function use_badges_template( $template ) {
 
 /**
  * Render the template for HTML badges
+ *
+ * @todo Need some way of detecting failed HTTP requests for Gravatars and retrying them, like InDesign badges does
  */
 function render_badges_template() {
 	/** @global \CampTix_Plugin $camptix */

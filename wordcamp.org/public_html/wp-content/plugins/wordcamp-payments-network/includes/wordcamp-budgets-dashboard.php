@@ -589,6 +589,7 @@ function convert_currency( $from, $to, $amount ) {
 		$url = add_query_arg( 'env', rawurlencode( 'store://datatables.org/alltableswithkeys' ), $url );
 		$url = add_query_arg( 'q',   rawurlencode( $wpdb->prepare( 'select * from yahoo.finance.xchange where pair = %s', $from . $to ) ), $url );
 
+		// todo use wcorg_redundant_remote_get
 		$request = wp_remote_get( esc_url_raw( $url ) );
 		$body = json_decode( wp_remote_retrieve_body( $request ), true );
 

@@ -256,6 +256,7 @@ class WordCamp_Admin {
 		$coordinates      = false;
 		$request_url      = add_query_arg( 'address', urlencode( $address ), 'https://maps.googleapis.com/maps/api/geocode/json' );
 		$geocode_response = json_decode( wp_remote_retrieve_body( wp_remote_get( $request_url ) ) );
+		// todo use wcorg_redundant_remote_get
 
 		if ( ! empty( $geocode_response->results[0]->geometry->location->lat ) ) {
 			$coordinates = array(

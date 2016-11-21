@@ -3,6 +3,8 @@
  * Plugin Name: WordCamp.org QBO Client
  */
 
+// todo use wcorg_redundant_remote_get for all the calls in this file
+
 use WordCamp\Logger;
 
 class WordCamp_QBO_Client {

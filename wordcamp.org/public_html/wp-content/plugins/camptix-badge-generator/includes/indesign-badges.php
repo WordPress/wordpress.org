@@ -104,7 +104,12 @@ function download_gravatars( $attendees, $gravatar_folder ) {
  * @return bool|string `false` when the user does not have a Gravatar, `string` of image binary data when the
  *                      image was successfully retrieved.
  *
- * @throws \Exception when the HTTP failed even after multiple attempts
+ * @todo If have any problems with downloads failing permenantly, can try doing `str_replace()` on `$request_url`
+ *       in order to change the `size` parameter to `512`.
+ *
+ * @todo Update this to use wcorg_redundant_remote_get() instead, for DRYness
+ *
+ * @throws \Exception when the HTTP request fails
  */
 function download_single_gravatar( $request_url ) {
 	$attempt_count = 1;
@@ -130,10 +135,10 @@ function download_single_gravatar( $request_url ) {
 		}
 
 		if ( $attempt_count < 3 ) {
-			Logger\log( 'request_failed_temporarily', compact( 'attendee', 'request_url', 'response', 'attempt_count', 'retry_after' ) );
+			Logger\log( 'request_failed_temporarily', compact( 'request_url', 'response', 'attempt_count', 'retry_after' ) );
 			sleep( $retry_after );
 		} else {
-			Logger\log( 'request_failed_permenantly', compact( 'attendee', 'request_url', 'response' ) );
+			Logger\log( 'request_failed_permenantly', compact( 'request_url', 'response' ) );
 			throw new \Exception( __( "Couldn't download all Gravatars.", 'wordcamporg' ) );
 		}
 
