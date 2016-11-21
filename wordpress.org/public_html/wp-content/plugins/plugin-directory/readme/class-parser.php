@@ -458,8 +458,9 @@ class Parser {
 
 		$text = wp_kses( $text, $allowed );
 
-		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want.
-		$text = preg_replace( "/(?<![> ])\n/", ' ', $text );
+		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
+		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.
+		//$text = preg_replace( "/(?<![> ])\n/", ' ', $text );
 
 		$text = trim( $text );
 
