@@ -880,6 +880,9 @@ class WordCamp_Admin {
 			'Sponsor Wrangler E-mail Address',
 			'Budget Wrangler Name',
 			'Budget Wrangler E-mail Address',
+
+			// Venue
+			'Physical Address' // used to build stats
 		);
 
 		switch ( $status ) {
