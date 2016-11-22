@@ -14,8 +14,10 @@ for ( var i=0; i < elements.length; i++ ) {
 	images.push( item );
 }
 
-render(
-	<Screenshots screenshots={images}>
-	</Screenshots>,
-	document.getElementById( 'screenshots' )
-);
+if ( images.length > 0 ) {
+	render(
+		<Screenshots screenshots={images}>
+		</Screenshots>,
+		document.getElementById( 'screenshots' )
+	);
+}
