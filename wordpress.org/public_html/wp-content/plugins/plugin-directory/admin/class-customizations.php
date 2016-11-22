@@ -114,9 +114,6 @@ class Customizations {
 					) );
 					break;
 
-				case 'edit.php':
-					wp_enqueue_style( 'plugin-admin-edit-css', plugins_url( 'css/plugin-list.css', Plugin_Directory\PLUGIN_FILE ), array(), 2 );
-					break;
 			}
 		}
 	}

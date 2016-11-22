@@ -105,11 +105,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			/* translators: manage posts column name */
 			'title'     => _x( 'Title', 'column name', 'wporg-plugins' ),
 			'author'    => __( 'Submitter', 'wporg-plugins' ),
-			'tested'    => __( 'Tested up to', 'wporg-plugins' ),
-			'rating'    => __( 'Rating', 'wporg-plugins' ),
-			'installs'  => __( 'Active installs', 'wporg-plugins' ),
-			'downloads' => __( 'Downloads', 'wporg-plugins' ),
-			'support'   => __( 'Support', 'wporg-plugins' ),
 		);
 
 		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
@@ -180,62 +175,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		</tr>
 		<?php
 		$GLOBALS['post'] = $global_post;
-	}
-
-	/**
-	 * Handles the tested up to column output.
-	 *
-	 * @param \WP_Post $post The current WP_Post object.
-	 */
-	public function column_tested( $post ) {
-		$tested = (string) get_post_meta( $post->ID, 'tested', true );
-
-		if ( ! empty( $tested ) ) {
-			$class = version_compare( $tested, WP_CORE_STABLE_BRANCH ) >= 0 ? 'current' :  'needs-update';
-
-			printf( '<span class="%s">%s</span>', $class, $tested );
-		}
-	}
-
-	/**
-	 * Handles the rating column output.
-	 *
-	 * @param \WP_Post $post The current WP_Post object.
-	 */
-	public function column_rating( $post ) {
-		echo Template::dashicons_stars( get_post_meta( $post->ID, 'rating', true ) );
-	}
-
-	/**
-	 * Handles the installs column output.
-	 *
-	 * @param \WP_Post $post The current WP_Post object.
-	 */
-	public function column_installs( $post ) {
-		echo Template::active_installs( false, $post );
-	}
-
-	/**
-	 * Handles the downloads column output.
-	 *
-	 * @param \WP_Post $post The current WP_Post object.
-	 */
-	public function column_downloads( $post ) {
-		echo number_format_i18n( get_post_meta( $post->ID, 'downloads', true ) );
-	}
-
-	/**
-	 * Handles the support column output.
-	 *
-	 * @param \WP_Post $post The current WP_Post object.
-	 */
-	public function column_support( $post ) {
-		$threads    = get_post_meta( $post->ID, 'support_threads', true );
-		$resolved   = get_post_meta( $post->ID, 'support_threads_resolved', true );
-		$unresolved = max( 0, $threads - $resolved );
-		$link_text  = sprintf( __( '%d unresolved', 'wporg-plugins' ), $unresolved );
-
-		printf( '<a href="%s">%s</a>', esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name ), $link_text );
 	}
 
 	/**
