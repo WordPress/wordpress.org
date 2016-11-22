@@ -3,6 +3,8 @@
 namespace WordCamp\Site_Cloner;
 defined( 'WPINC' ) or die();
 
+use \WordCamp\RemoteCSS;
+
 /**
  * Customizer Setting for source site ID
  *
@@ -47,7 +49,13 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 		}
 
 		switch_to_blog( $this->preview_source_site_id );
-		printf( '<style id="wcsc-source-site-custom-css">%s</style>', \Jetpack_Custom_CSS::get_css( true ) );
+
+		printf(
+			'<style id="wcsc-source-site-custom-css">%s %s</style>',
+			$this->get_cached_remote_css(),
+			\Jetpack_Custom_CSS::get_css( true )
+		);
+
 		restore_current_blog();
 	}
 
@@ -106,6 +114,33 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 	}
 
 	/**
+	 * Get the cached remote CSS for the current blog.
+	 *
+	 * @return string
+	 */
+	public function get_cached_remote_css() {
+		$remote_css = '';
+
+		if ( ! function_exists( '\WordCamp\RemoteCSS\get_safe_css_post' ) ) {
+			return $remote_css;
+		}
+
+		$post = RemoteCSS\get_safe_css_post();
+
+		if ( $post instanceof \WP_Post ) {
+			// Sanitization copied from \Jetpack_Custom_CSS::get_css()
+			// so that there is parity with how Jetpack outputs the CSS
+			$remote_css = str_replace(
+				array( '\\\00BB \\\0020', '\0BB \020', '0BB 020' ),
+				'\00BB \0020',
+				$post->post_content_filtered
+			);
+		}
+
+		return $remote_css;
+	}
+
+	/**
 	 * Clone the source site into the current site
 	 *
 	 * If the theme needs to be switched, Core will do that for us because we added the `?theme=` parameter
@@ -123,7 +158,33 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 			return;
 		}
 
-		$source_site_css           = \Jetpack_Custom_CSS::get_css( false );
+		$source_site_css = '';
+
+		// Add Remote CSS first
+		// This maintains the correct cascading order of stylesheet rules
+		if ( $remote_css = $this->get_cached_remote_css() ) {
+			$source_site_css .= sprintf(
+				"/* %s */\n%s\n\n",
+				sprintf(
+					esc_html__( 'Remote CSS from %s', 'wordcamporg' ),
+					esc_url( get_option( 'wcrcss_remote_css_url' ) )
+				),
+				$remote_css
+			);
+		}
+
+		// Add Jetpack Custom CSS second
+		if ( $custom_css = \Jetpack_Custom_CSS::get_css( false ) ) {
+			$source_site_css .= sprintf(
+				"/* %s */\n%s\n\n",
+				sprintf(
+					esc_html__( 'Custom CSS from %s', 'wordcamporg' ),
+					get_bloginfo( 'name' )
+				),
+				$custom_css
+			);
+		}
+
 		$source_site_preprocessor  = get_post_meta( $source_cite_css_post['ID'], 'custom_css_preprocessor', true );
 		$source_site_mode          = get_post_meta( $source_cite_css_post['ID'], 'custom_css_add', true );
 		$source_site_content_width = get_post_meta( $source_cite_css_post['ID'], 'content_width', true );
