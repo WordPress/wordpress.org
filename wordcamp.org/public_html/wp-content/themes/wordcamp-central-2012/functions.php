@@ -325,6 +325,9 @@ class WordCamp_Central_Theme {
 		$markers = apply_filters( 'wcc_get_map_markers', $markers );
 
 		set_transient( $transient_key, $markers, WEEK_IN_SECONDS );
+			// todo this should probably be changed to just DAY_IN_SECONDS to avoid confusion among organizers. -- https://wordpress.slack.com/archives/meta-wordcamp/p1477323414000597
+			// need to understand why it was set for so long in the first place, and test change
+			// should just always display cached data and have cron job to refresh asyncronously
 
 		return $markers;
 	}
@@ -827,11 +830,13 @@ class WordCamp_Central_Theme {
 				}
 			}
 
+			// @todo generate countries automatically from _venue_country_code field, but need to populate older camps first
+
 			// Compile the results
 			$map_stats = array(
 				'wordcamps'  => $wordcamps->found_posts,
 				'cities'     => count( $cities ),
-				'countries'  => 48,
+				'countries'  => 65,
 				'continents' => 6,
 			);
 
