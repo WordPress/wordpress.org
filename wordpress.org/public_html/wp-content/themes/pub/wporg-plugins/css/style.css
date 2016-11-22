@@ -1849,10 +1849,7 @@ object {
 }
 
 .plugin-card {
-  background-color: #f9f9f9;
   margin-bottom: 4%;
-  padding: 8px 8px 0 8px;
-  vertical-align: top;
 }
 
 @media screen and (min-width: 48em) {
@@ -1897,43 +1894,6 @@ object {
 
 .plugin-card .entry-excerpt p {
   margin: 0 0 8px;
-}
-
-.plugin-card hr {
-  background-color: #fff;
-  margin: auto;
-}
-
-.plugin-card footer span {
-  font-size: 11.704px;
-  font-size: 0.73152rem;
-  width: 48%;
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.plugin-card footer span i {
-  display: inline-block;
-  font-size: 16px;
-  font-size: 1rem;
-  margin-right: 6.4px;
-  margin-right: 0.4rem;
-}
-
-.plugin-card footer .dashicons {
-  margin: 0 2px -16px;
-  margin: 0 2px -1rem;
-  color: #bbb;
-  width: auto;
-  height: auto;
-  display: none;
-}
-
-@media (min-width: 414px) {
-  .plugin-card footer .dashicons {
-    display: inline-block;
-  }
 }
 
 .entry-thumbnail {
@@ -2002,12 +1962,6 @@ object {
 
 .site-main.single .plugin-rating .rating-count {
   display: none;
-}
-
-.plugin-rating .rating-count a {
-  color: inherit;
-  cursor: hand;
-  text-decoration: none;
 }
 
 @-webkit-keyframes favme-anime {
@@ -2483,6 +2437,8 @@ object {
   display: table-cell;
   margin-right: 5px;
   border: 1px solid #eee;
+  max-height: 100px;
+  overflow: hidden;
 }
 
 .image-gallery-thumbnail .image-gallery-image {
@@ -2617,6 +2573,10 @@ object {
 
 .read-more.toggled {
   max-height: none;
+}
+
+#screenshots.read-more {
+  border-bottom: none;
 }
 
 .no-js .read-more {
@@ -2867,33 +2827,6 @@ object {
 .search.search-results .page-header {
   margin: 32px 0;
   margin: 2rem 0;
-}
-
-nav .nav-links {
-  text-align: center;
-}
-
-nav .nav-links .page-numbers {
-  background-color: #f9f9f9;
-  min-width: 2em;
-  padding: 8px;
-  display: inline-block;
-  cursor: hand;
-}
-
-nav .nav-links .page-numbers.next, nav .nav-links .page-numbers.prev, nav .nav-links .page-numbers.dots {
-  width: auto;
-  font-size: 0.9em;
-  background: none;
-}
-
-nav .nav-links .page-numbers.dots {
-  cursor: inherit;
-}
-
-nav .nav-links span.page-numbers {
-  font-weight: bold;
-  background-color: #f7f7f7;
 }
 
 .main-navigation {
@@ -3339,3 +3272,4 @@ nav .nav-links span.page-numbers {
     top: 5px;
   }
 }
+/*# sourceMappingURL=style.css.map */

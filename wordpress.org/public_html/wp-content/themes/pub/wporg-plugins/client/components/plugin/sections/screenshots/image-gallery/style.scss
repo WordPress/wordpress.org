@@ -131,6 +131,8 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 	display: table-cell;
 	margin-right: 5px;
 	border: 1px solid #eee;
+	max-height: 100px;
+	overflow: hidden;
 
 	.image-gallery-image {
 		margin: 0;
