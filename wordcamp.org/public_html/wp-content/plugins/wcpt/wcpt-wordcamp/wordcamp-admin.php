@@ -167,11 +167,7 @@ class WordCamp_Admin {
 		// If the venue address was changed, update its coordinates
 		$new_address = $_POST[ wcpt_key_to_str( 'Physical Address', 'wcpt_' ) ];
 		if ( $new_address != get_post_meta( $post_id, 'Physical Address', true ) ) {
-			if ( $coordinates = $this->geocode_address( $new_address ) ) {
-				update_post_meta( $post_id, '_venue_coordinates', $coordinates );
-			} else {
-				delete_post_meta( $post_id, '_venue_coordinates' );
-			}
+			$this->update_venue_address( $post_id, $new_address );
 		}
 
 		// Post meta keys
@@ -240,38 +236,97 @@ class WordCamp_Admin {
 	}
 
 	/**
-	 * Geocode the given address into a latitude and longitude pair.
+	 * Store the individual components of a camp's venue address
 	 *
+	 * These are used for the maps on Central, stats, etc.
+	 *
+	 * @param int    $post_id
 	 * @param string $address
-	 *
-	 * @return mixed
-	 *      false if the geocode request failed
-	 *      array with latitude and longitude indexes if the request succeeded
 	 */
-	function geocode_address( $address ) {
-		if ( ! $address ) {
-			return false;
+	function update_venue_address( $post_id, $address ) {
+		$request_url = add_query_arg(
+			'address',
+			urlencode( $address ),
+			'https://maps.googleapis.com/maps/api/geocode/json'
+		);
+
+		$response = wcorg_redundant_remote_get( $request_url );
+
+		// Don't delete the existing (and probably good) values if the request failed
+		if ( is_wp_error( $response ) ) {
+			return;
 		}
 
-		$coordinates      = false;
-		$request_url      = add_query_arg( 'address', urlencode( $address ), 'https://maps.googleapis.com/maps/api/geocode/json' );
-		$geocode_response = json_decode( wp_remote_retrieve_body( wp_remote_get( $request_url ) ) );
-		// todo use wcorg_redundant_remote_get
+		$meta_values = $this->parse_geocode_response( $response );
 
-		if ( ! empty( $geocode_response->results[0]->geometry->location->lat ) ) {
+		foreach ( $meta_values as $key => $value ) {
+			if ( is_null( $value ) ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Parse the values we want out of the Geocode API response
+	 *
+	 * @see https://developers.google.com/maps/documentation/geocoding/intro#Types API response schema
+	 *
+	 * @param $response
+	 *
+	 * @return array
+	 */
+	protected function parse_geocode_response( $response ) {
+		$body = json_decode( wp_remote_retrieve_body( $response ) );
+		$body = isset ( $body->results[0] ) ? $body->results[0] : null;
+
+		if ( isset( $body->geometry->location->lat ) ) {
 			$coordinates = array(
-				'latitude'  => $geocode_response->results[0]->geometry->location->lat,
-				'longitude' => $geocode_response->results[0]->geometry->location->lng
+				'latitude'  => $body->geometry->location->lat,
+				'longitude' => $body->geometry->location->lng
 			);
 		}
 
-		return $coordinates;
+		if ( isset ( $body->address_components ) ) {
+			foreach ( $body->address_components as $component ) {
+				foreach ( $component->types as $type ) {
+					switch ( $type ) {
+
+						case 'locality':
+						case 'administrative_area_level_1':
+						case 'postal_code':
+							$$type = $component->long_name;
+							break;
+
+						case 'country':
+							$country_code = $component->short_name; // This is not guaranteed to be ISO 3166-1 alpha-2, but should match in most cases
+							$country_name = $component->long_name;
+							break;
+
+					}
+				}
+			}
+		}
+
+		$values = array(
+			'_venue_coordinates'  => isset( $coordinates                 ) ? $coordinates                 : null,
+			'_venue_city'         => isset( $locality                    ) ? $locality                    : null,
+			'_venue_state'        => isset( $administrative_area_level_1 ) ? $administrative_area_level_1 : null,
+			'_venue_country_code' => isset( $country_code                ) ? $country_code                : null,
+			'_venue_country_name' => isset( $country_name                ) ? $country_name                : null,
+			'_venue_zip'          => isset( $postal_code                 ) ? $postal_code                 : null,
+		);
+
+		return $values;
 	}
 
 	/**
 	 * meta_keys ()
 	 *
 	 * Returns post meta key
+	 *
+	 * @param string $meta_group
 	 *
 	 * @return array
 	 */
