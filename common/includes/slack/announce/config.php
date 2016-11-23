@@ -183,16 +183,27 @@ function get_whitelist() {
 			'paolo',
 			'savione',
 		),
+		'wcus' => array(
+			'alx',
+			'camikaos',
+		),
 		'wcus-contributor-day' => array(
+			'alx',
+			'camikaos',
 			'drew',
 		),
 		'wcus-speakers' => array(
 			'alx',
+			'camikaos',
+			'liljimmi',
+			'williamsba',
 		),
 		'wcus-summit' => array(
 			'liljimmi',
 		),
 		'wcus-volunteers' => array(
+			'alx',
+			'camikaos',
 			'ingridmiller',
 			'liamdempsey',
 		),
