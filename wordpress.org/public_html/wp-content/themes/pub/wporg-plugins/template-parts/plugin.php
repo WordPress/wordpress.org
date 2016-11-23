@@ -30,7 +30,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 	<hr>
 	<footer>
 		<span class="plugin-author">
-			<i class="dashicons dashicons-admin-users"></i> <?php echo esc_html( get_post_meta( get_the_ID(), 'header_author', true ) ); ?>
+			<i class="dashicons dashicons-admin-users"></i> <?php echo esc_html( get_post_meta( get_the_ID(), 'header_author', true ) ?: get_the_author() ); ?>
 		</span>
 		<span class="active-installs">
 			<i class="dashicons dashicons-chart-area"></i> <?php printf( __( '%s Active Installs', 'wporg-plugins' ), Template::active_installs(false) ); ?>
