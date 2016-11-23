@@ -322,7 +322,11 @@ class Plugin_Directory {
 		}
 
 		// When Jetpack syncs, we want to add filters to inject additional metadata for Jetpack, so it syncs for ElasticSearch indexing.
-		add_action( 'shutdown', array( $this, 'append_meta_for_jetpack' ), 8 );
+		if ( defined( 'DOING_CRON' ) )
+			$this->append_meta_for_jetpack();
+		else
+			add_action( 'shutdown', array( $this, 'append_meta_for_jetpack' ), 8 );
+
 	}
 
 	/**
@@ -683,8 +687,9 @@ class Plugin_Directory {
 		 * Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action,
 		 * so we can get in first.Fetching the extra meta to inject is expensive, so we only want to do this if a sync
 		 * is likely.
+		 * As of Jetpack 4.4, sync can also run in a cron job, so filter the meta there too.
 		 */
-		if ( class_exists( 'Jetpack' ) && ! empty( \Jetpack::$instance->sync->sync ) ) {
+		if ( class_exists( 'Jetpack' ) && ( defined( 'DOING_CRON' ) || ! empty( \Jetpack::$instance->sync->sync ) ) ) {
 			// Attempt to work around the problem with options cache poisoning from subdomains
 			refresh_blog_details();
 			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
