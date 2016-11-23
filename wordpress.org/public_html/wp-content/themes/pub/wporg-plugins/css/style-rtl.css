@@ -2483,6 +2483,8 @@ object {
   display: table-cell;
   margin-left: 5px;
   border: 1px solid #eee;
+  max-height: 100px;
+  overflow: hidden;
 }
 
 .image-gallery-thumbnail .image-gallery-image {
@@ -2617,6 +2619,10 @@ object {
 
 .read-more.toggled {
   max-height: none;
+}
+
+#screenshots.read-more {
+  border-bottom: none;
 }
 
 .no-js .read-more {
