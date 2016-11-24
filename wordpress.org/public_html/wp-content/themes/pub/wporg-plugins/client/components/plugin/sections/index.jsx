@@ -6,7 +6,7 @@ export default React.createClass( {
 	render() {
 		return (
 			<div>
-				<div id={ this.props.slug } className="read-more" aria-expanded="false">
+				<div id={ this.props.slug } className="section read-more" aria-expanded="false">
 					<h2>{ this.props.title }</h2>
 					<div dangerouslySetInnerHTML={ { __html: this.props.content } } />
 				</div>

@@ -21,7 +21,7 @@ export default React.createClass( {
 		}
 
 		return (
-			<div id="faq" className="plugin-faqs">
+			<div id="faq">
 				<h2>FAQ</h2>
 				<div onClick={ this.toggleAnswer } dangerouslySetInnerHTML={ { __html: this.props.content } } />
 			</div>

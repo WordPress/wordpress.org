@@ -1,4 +1,4 @@
-.plugin-faqs {
+#faq {
 	h2:first-of-type {
 		font-size: ms( 2 );
 		font-weight: 600;
@@ -49,6 +49,6 @@
 	}
 }
 
-.no-js .plugin-faqs dd {
+.no-js #faq dd {
 	display: block;
 }

@@ -15,6 +15,7 @@ class Developers {
 	 */
 	static function display() {
 		$post         = get_post();
+		$output = '';
 
 		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
 			$contributors = wp_list_pluck( $contributors, 'name' );
@@ -26,7 +27,9 @@ class Developers {
 		}
 		sort( $contributors, SORT_NATURAL );
 
-		$output = '<ul class="plugin-developers">';
+		$output .= '<p>' . __( 'This is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ) . '</p>';
+
+		$output .= '<ul class="plugin-developers">';
 		foreach ( $contributors as $contributor_slug ) {
 			$contributor = get_user_by( 'slug', $contributor_slug );
 			if ( ! $contributor ) {

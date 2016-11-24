@@ -64,6 +64,7 @@ function scripts() {
 
 	if ( is_singular( 'plugin' ) ) {
 		wp_enqueue_script( 'wporg-plugins-accordion', get_template_directory_uri() . '/js/section-accordion.js', array(), '20161121', true );
+		wp_enqueue_script( 'wporg-plugins-faq-accordion', get_template_directory_uri() . '/js/section-faq.js', array(), '20161124', true );
 	}
 
 	wp_enqueue_script( 'wporg-plugins-locale-banner', get_template_directory_uri() . '/js/locale-banner.js', array(), '20160622', true );

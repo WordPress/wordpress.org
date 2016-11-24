@@ -11,7 +11,7 @@ namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
-global $section, $section_slug, $section_content;
+global $section, $section_slug, $section_content, $section_read_more;
 
 $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 
@@ -113,24 +113,32 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 	<div class="entry-content">
 		<?php
 		if ( get_query_var( 'plugin_admin' ) ) :
-			get_template_part( 'template-parts/section', 'admin' );
+			get_template_part( 'template-parts/section-admin' );
 		else:
 			$plugin_sections = Template::get_plugin_sections();
 
 			foreach ( array( 'description', 'screenshots', 'faq', 'reviews', 'changelog', 'developers' ) as $section_slug ) :
-				if ( ! array_key_exists( $section_slug, $content ) || in_array( $section_slug, array( 'installation', 'other_notes' ) ) ) :
+				if ( ! isset( $content[ $section_slug ] ) ) {
 					continue;
-				endif;
+				}
 
 				$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
-				if ( empty( $section_content ) ) :
+				if ( empty( $section_content ) ) {
 					continue;
-				endif;
+				}
 
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
 
-				get_template_part( 'template-parts/section', $section_slug );
+				$section_no_read_mores = array( 'screenshots', 'reviews' );
+				// If the FAQ section is the newer `<dl>` form, no need to do read-more for it.
+				if ( false !== stripos( $section_content, '<dl>' ) ) {
+					$section_no_read_mores[] = 'faq';
+				}
+				
+				$section_read_more = ! in_array( $section_slug, $section_no_read_mores );
+
+				get_template_part( 'template-parts/section' );
 			endforeach;
 		endif; // plugin_admin
 		?>

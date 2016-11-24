@@ -15,6 +15,7 @@ class Reviews {
 	 */
 	static function display() {
 		$reviews = Tools::get_plugin_reviews( get_post()->post_name );
+		$review_count = array_sum( get_post_meta( get_the_ID(), 'ratings', true ) );
 
 		if ( empty( $reviews ) ) {
 			return '';
@@ -49,6 +50,10 @@ class Reviews {
 				</article>
 			<?php endforeach; ?>
 		</div>
+
+		<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">
+			<?php printf( __( 'Read all %s reviews', 'wporg-plugins' ), number_format_i18n( $review_count ) ); ?>
+		</a>
 
 		<?php
 		return ob_get_clean();

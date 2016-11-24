@@ -29,7 +29,7 @@
 				var $el = $(el),
 					$section_toggle = $( '.section-toggle[aria-controls="' + el.id + '"]' );
 
-				if ( $el.height() / el.scrollHeight > 0.8 || el.id == 'screenshots' ) {
+				if ( $el.height() / el.scrollHeight > 0.8 ) {
 					// Force the section to expand, and hide its button
 					$el.toggleClass( 'toggled' ).addClass('short-content').attr( 'aria-expanded', true );
 					$section_toggle.hide();
