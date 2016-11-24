@@ -182,7 +182,7 @@ class Template {
 					break;
 
 				case 'developers':
-					$title = _x( 'Authors', 'plugin tab title', 'wporg-plugins' );
+					$title = _x( 'Contributors &amp; Developers', 'plugin tab title', 'wporg-plugins' );
 					$url   = trailingslashit( $permalink ) . '/' . $section_slug . '/';
 					break;
 
