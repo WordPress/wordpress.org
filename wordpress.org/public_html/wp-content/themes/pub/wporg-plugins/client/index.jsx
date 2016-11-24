@@ -7,9 +7,10 @@ import Screenshots from 'components/plugin/sections/screenshots';
 var elements = document.querySelectorAll( '#screenshots figure' );
 var images = [];
 for ( var i=0; i < elements.length; i++ ) {
+	var caption = elements[i].querySelector('figcaption');
 	var item = { 
 		src: elements[i].querySelector('img.screenshot').src,
-		caption: elements[i].querySelector('figcaption').textContent,
+		caption: caption ? caption.textContent : '',
 	}
 	images.push( item );
 }
