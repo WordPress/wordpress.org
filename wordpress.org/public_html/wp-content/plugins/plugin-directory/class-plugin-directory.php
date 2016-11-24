@@ -62,6 +62,13 @@ class Plugin_Directory {
 		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
 
+		// Work around caching issues
+		add_filter( 'pre_option_jetpack_sync_full__started' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__params' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__queue_finished' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__send_started' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__finished' , array( $this, 'bypass_options_cache' ), 10, 2 );
+
 		/*
 		 * Load all Admin-specific items.
 		 * Cannot be included on `admin_init` to allow access to menu hooks.
@@ -632,6 +639,23 @@ class Plugin_Directory {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
+	}
+
+	/**
+	 * Filter to bypass caching for options critical to Jetpack sync to work around race conditions and other unidentified bugs.
+	 * If this works and becomes a permanent solution, it probably belongs elsewhere.
+	 */
+	public function bypass_options_cache( $value, $option ) {
+		global $wpdb;
+		$value = $wpdb->get_var( 
+			$wpdb->prepare(
+				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", 
+				$option
+			)
+		);
+		$value = maybe_unserialize( $value );
+
+		return $value;
 	}
 
 	/**
