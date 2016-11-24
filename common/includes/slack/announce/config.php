@@ -222,6 +222,6 @@ function get_committers() {
 		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
 		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce', 'eric', 'mike',
 		'peterwilsoncc', 'joemcgill', 'davidakennedy', 'adamsilverstein',
-		'jnylen0', 'flixos90'
+		'jnylen', 'flixos90'
 	);
 }
