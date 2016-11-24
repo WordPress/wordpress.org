@@ -221,6 +221,7 @@ function get_committers() {
 		'jorbin', 'boone', 'jeremyfelt', 'pento', 'obenland', 'iseulde',
 		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
 		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce', 'eric', 'mike',
-		'peterwilsoncc', 'joemcgill', 'davidakennedy'
+		'peterwilsoncc', 'joemcgill', 'davidakennedy', 'adamsilverstein',
+		'jnylen0', 'flixos90'
 	);
 }
