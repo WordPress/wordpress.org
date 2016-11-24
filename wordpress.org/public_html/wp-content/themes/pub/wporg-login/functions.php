@@ -6,6 +6,11 @@
  */
 
 /**
+ * No-cache headers.
+ */
+add_action( 'template_redirect', 'nocache_headers', 10, 0 );
+
+/**
  * Registers support for various WordPress features.
  */
 function wporg_login_setup() {
