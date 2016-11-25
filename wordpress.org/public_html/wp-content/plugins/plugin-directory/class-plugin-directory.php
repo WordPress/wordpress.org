@@ -11,15 +11,6 @@ use WordPressdotorg\Plugin_Directory\CLI\Tag_To_Category;
 class Plugin_Directory {
 
 	/**
-	 * Local cache for translated content injected into meta.
-	 *
-	 * @access private
-	 *
-	 * @var array
-	 */
-	private $i18n_meta = array();
-
-	/**
 	 * Fetch the instance of the Plugin_Directory class.
 	 *
 	 * @static
@@ -333,12 +324,6 @@ class Plugin_Directory {
 			\Jetpack_Search::instance();
 		}
 
-		// When Jetpack syncs, we want to add filters to inject additional metadata for Jetpack, so it syncs for ElasticSearch indexing.
-		if ( defined( 'DOING_CRON' ) )
-			$this->append_meta_for_jetpack();
-		else
-			add_action( 'shutdown', array( $this, 'append_meta_for_jetpack' ), 8 );
-
 	}
 
 	/**
@@ -499,9 +484,10 @@ class Plugin_Directory {
 	 * @return string
 	 */
 	public function filter_rel_nofollow( $content ) {
-		if ( get_post_type() == 'plugin' )
+		if ( get_post_type() == 'plugin' ) {
 			// regex copied from wp_rel_nofollow(). Not calling that function because it messes with slashes.
 			$content = preg_replace_callback('|<a (.+?)>|i', 'wp_rel_nofollow_callback', $content);
+		}
 		return $content;
 	}
 
@@ -707,89 +693,79 @@ class Plugin_Directory {
 	}
 
 	/**
-	 * Shutdown action that will add a filter to inject additional postmeta containing translated content if Jetpack
-	 * is syncing.
-	 */
-	public function append_meta_for_jetpack() {
-
-		/*
-		 * Guess if a Jetpack sync is scheduled to run. It runs during shutdown at a lower priority than this action,
-		 * so we can get in first.Fetching the extra meta to inject is expensive, so we only want to do this if a sync
-		 * is likely.
-		 * As of Jetpack 4.4, sync can also run in a cron job, so filter the meta there too.
-		 */
-		if ( class_exists( 'Jetpack' ) && ( defined( 'DOING_CRON' ) || ! empty( \Jetpack::$instance->sync->sync ) ) ) {
-			// Attempt to work around the problem with options cache poisoning from subdomains
-			refresh_blog_details();
-			add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
-		}
-	}
-
-	/**
-	 * Filter for wporg_plugins_custom_meta_fields to inject translated content for ES.
+	 * Fetch all translated content for a given post, and push it into postmeta.
 	 *
 	 * @global string $locale Current locale.
 	 *
-	 * @param array $meta
-	 * @param int   $post_id
+	 * @param int   $post_id	Post ID to update.
+	 * @param int   $min_translated	Translations below this % threshold will not be synced to meta, to save space.
 	 * @return array
 	 */
-	public function filter_post_meta_i18n( $meta, $post_id ) {
+	public function sync_all_translations_to_meta( $post_id, $min_translated = 60, $skip_pfx = array('en_') ) {
 
-		// Prevent recursion and repeat runs.
-		remove_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ) );
-
-		if ( empty( $this->i18n_meta[ $post_id ] ) ) {
-
-			$locales_to_sync = array( 
-				// Default locales to translate, just in case we can't determine the available ones
-				'fr_FR',
-				'es_ES',
-			);
-			$post = get_post( $post_id );
-			if ( $post ) {
-				$translations = Plugin_I18n::find_all_translations_for_plugin( $post->post_name, 'stable-readme', 10 ); // at least 10% translated
-				if ( $translations )
-					$locales_to_sync = $translations;
+		$locales_to_sync = array();
+		$post = get_post( $post_id );
+		if ( $post ) {
+			$translations = Plugin_I18n::find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
+			if ( $translations ) {
+				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
+				foreach ( $translations as $i => $_locale ) {
+					foreach ( $skip_pfx as $pfx )
+						if ( substr( $_locale, 0, strlen( $pfx ) ) === $pfx )
+							unset( $translations[ $i ] );
+				}
+				$locales_to_sync = $translations;
 			}
-
-			global $locale;
-			$_locale = $locale;
-
-			foreach ( $locales_to_sync as $locale ) {
-				$the_title = Plugin_I18n::instance()->translate( 'title', get_the_title( $post_id ), [ 'post_id' => $post_id ] );
-				if ( $the_title && $the_title != get_the_title( $post_id ) ) {
-					$this->i18n_meta[ $post_id ][ 'title_' . $locale ] = $the_title;
-				}
-
-				$the_excerpt = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
-				if ( $the_excerpt && $the_excerpt != get_the_excerpt( $post_id ) ) {
-					$this->i18n_meta[ $post_id ][ 'excerpt_' . $locale ] = $the_excerpt;
-				}
-
-				// Split up the content to translate it in sections.
-				$the_content = array();
-				$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
-				foreach ( $sections as $section => $section_content ) {
-					$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
-					if ( $translated_section && $translated_section != $section_content ) {
-						$the_content[] = $translated_section;
-					}
-				}
-				if ( !empty( $the_content ) )
-					$this->i18n_meta[ $post_id ][ 'content_' . $locale ] = implode( $the_content );
-			}
-
-			$locale = $_locale;
-
 		}
 
-		if ( is_array( $this->i18n_meta[ $post_id ] ) )
-			$meta = array_merge( $meta, array_keys( $this->i18n_meta[ $post_id ] ) );
+		if ( count($locales_to_sync) > 0 ) {
+			foreach ( $locales_to_sync as $locale ) {
+				$this->sync_translation_to_meta( $post_id, $locale );
+			}
+		}
 
-		add_filter( 'wporg_plugins_custom_meta_fields', array( $this, 'filter_post_meta_i18n' ), 10, 2 );
+		return $locales_to_sync;
+	}
 
-		return $meta;
+	/**
+	 * Fetch translated content for a given post and locale, and push it into postmeta.
+	 *
+	 * @global string $locale Current locale.
+	 *
+	 * @param int   $post_id	Post ID to update.
+	 * @param string   $locale	Locale to translate.
+	 */
+	public function sync_translation_to_meta( $post_id, $_locale ) {
+		global $locale;
+		$old_locale = $locale;
+		$locale = $_locale;
+
+		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
+		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
+
+		$the_title = Plugin_I18n::instance()->translate( 'title', get_the_title( $post_id ), [ 'post_id' => $post_id ] );
+		if ( $the_title && $the_title != get_the_title( $post_id ) ) {
+			update_post_meta( $post_id, 'title_' . $locale, $the_title );
+		}
+
+		$the_excerpt = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
+		if ( $the_excerpt && $the_excerpt != get_the_excerpt( $post_id ) ) {
+			update_post_meta( $post_id, 'excerpt_' . $locale, $the_excerpt );
+		}
+
+		// Split up the content to translate it in sections.
+		$the_content = array();
+		$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
+		foreach ( $sections as $section => $section_content ) {
+			$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
+			if ( $translated_section && $translated_section != $section_content ) {
+				$the_content[] = $translated_section;
+			}
+		}
+		if ( !empty( $the_content ) )
+			update_post_meta( $post_id, 'content_' . $locale, implode( $the_content ) );
+
+		$locale = $old_locale;
 	}
 
 	/**
