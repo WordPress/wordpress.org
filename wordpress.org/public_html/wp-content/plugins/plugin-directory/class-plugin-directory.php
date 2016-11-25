@@ -727,7 +727,7 @@ class Plugin_Directory {
 						if ( substr( $_locale, 0, strlen( $pfx ) ) === $pfx )
 							unset( $translations[ $i ] );
 				}
-				$locales_to_sync = $translations;
+				$locales_to_sync = array_unique( $translations );
 			}
 		}
 
