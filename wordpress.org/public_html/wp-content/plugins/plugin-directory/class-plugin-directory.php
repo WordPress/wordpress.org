@@ -41,6 +41,10 @@ class Plugin_Directory {
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
 
+		// Cron tasks.
+		add_action( 'admin_init', array( $this, 'register_cron_tasks' ) );
+		add_action( 'plugin_directory_meta_sync', array( __NAMESPACE__ . '\Jobs\Meta_Sync', 'cron_trigger' ) );
+
 		// oEmbed whitlisting.
 		add_filter( 'embed_oembed_discover', '__return_false' );
 		add_filter( 'oembed_providers', array( $this, 'oembed_whitelist' ) );
@@ -324,6 +328,15 @@ class Plugin_Directory {
 			\Jetpack_Search::instance();
 		}
 
+	}
+
+	/**
+	 * Queue all of our cron tasks.
+	 */
+	function register_cron_tasks() {
+		if ( ! wp_next_scheduled ( 'plugin_directory_meta_sync' ) ) {
+			wp_schedule_event( time(), 'hourly', 'plugin_directory_meta_sync' );
+		}
 	}
 
 	/**
@@ -950,33 +963,6 @@ class Plugin_Directory {
 	 */
 	public function filter_shim_postmeta( $value, $object_id, $meta_key ) {
 		switch ( $meta_key ) {
-			case 'downloads':
-				$post  = get_post( $object_id );
-				$count = Template::get_downloads_count( $post );
-				$value = array( $count );
-				break;
-
-			case 'rating':
-				$post = get_post( $object_id );
-				// The WordPress.org global ratings functions
-				if ( ! method_exists( '\WPORG_Ratings', 'get_avg_rating' ) ) {
-					break;
-				}
-
-				$rating = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name );
-				$value  = array( $rating );
-				break;
-
-			case 'ratings':
-				$post = get_post( $object_id );
-				if ( ! method_exists( '\WPORG_Ratings', 'get_rating_counts' ) ) {
-					break;
-				}
-
-				$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name );
-				$value   = array( $ratings );
-				break;
-
 			case 'tested':
 				// For the tested field, we bump up the minor release to the latest compatible minor release.
 				if ( function_exists( 'wporg_get_version_equivalents' ) ) {
