@@ -1005,11 +1005,6 @@ class Plugin_Directory {
 				}
 				break;
 
-			default:
-				if ( isset( $this->i18n_meta[ $object_id ][ $meta_key ] ) ) {
-					return array( $this->i18n_meta[ $object_id ][ $meta_key ] );
-				}
-				break;
 		}
 
 		return $value;
