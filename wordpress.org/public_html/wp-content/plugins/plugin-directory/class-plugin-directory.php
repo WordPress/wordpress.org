@@ -49,9 +49,7 @@ class Plugin_Directory {
 		add_filter( 'embed_oembed_discover', '__return_false' );
 		add_filter( 'oembed_providers', array( $this, 'oembed_whitelist' ) );
 
-		// Shim in postmeta support for data which doesn't yet live in postmeta.
-		add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
-
+		// Capability mapping
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
 		// Load the API routes.
@@ -950,64 +948,6 @@ class Plugin_Directory {
 
 			return false;
 		} );
-	}
-
-	/**
-	 * Shim in some postmeta values which get retrieved from other locations temporarily.
-	 *
-	 * @param null|array|string $value     The value get_metadata() should return - a single metadata value,
-	 *                                     or an array of values.
-	 * @param int               $object_id Object ID.
-	 * @param string            $meta_key  Meta key.
-	 * @return array
-	 */
-	public function filter_shim_postmeta( $value, $object_id, $meta_key ) {
-		switch ( $meta_key ) {
-			case 'tested':
-				// For the tested field, we bump up the minor release to the latest compatible minor release.
-				if ( function_exists( 'wporg_get_version_equivalents' ) ) {
-
-					// As we're on a pre-filter, we'll have to detach, fetch and reattach..
-					remove_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ) );
-					$value = get_metadata( 'post', $object_id, $meta_key );
-					add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
-
-					foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
-						if ( in_array( (string)$value[0], $compatible_with, true ) ) {
-							$value[0] = $latest_compatible_version;
-							break;
-						}
-					}
-				}
-				break;
-
-			case false:
-
-				// In the event $meta_key is false, the caller wants all meta fields, so we'll append our custom ones here too.
-				remove_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ) );
-
-				// Fetch the existing ones from the database
-				$value = get_metadata( 'post', $object_id, $meta_key );
-
-				// Re-attach ourselves for next time!
-				add_filter( 'get_post_metadata', array( $this, 'filter_shim_postmeta' ), 10, 3 );
-
-				$custom_meta_fields = array( 'downloads', 'rating', 'ratings', 'tested' );
-				$custom_meta_fields = apply_filters( 'wporg_plugins_custom_meta_fields', $custom_meta_fields, $object_id );
-
-				foreach ( $custom_meta_fields as $key ) {
-
-					// When WordPress calls `get_post_meta( $post_id, false )` it expects an array of maybe_serialize()'d data.
-					$shimed_data = $this->filter_shim_postmeta( false, $object_id, $key );
-					if ( $shimed_data ) {
-						$value[ $key ][0] = (string) maybe_serialize( $shimed_data[0] );
-					}
-				}
-				break;
-
-		}
-
-		return $value;
 	}
 
 	/**

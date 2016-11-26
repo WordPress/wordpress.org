@@ -23,6 +23,7 @@ class Meta_Sync {
 	function sync() {
 		$this->sync_downloads();
 		$this->sync_ratings();
+		$this->update_tested_up_to();
 	}
 
 	/**
@@ -38,7 +39,7 @@ class Meta_Sync {
 			"SELECT p.id as post_id, downloads
 			FROM `{$wpdb->posts}` p
 				JOIN `{$bbpress_topic_slug_table}` t ON p.post_name = t.topic_slug
-				LEFT JOIN `{$download_count_table}` c on t.topic_id = c.topic_id
+				JOIN `{$download_count_table}` c on t.topic_id = c.topic_id
 				LEFT JOIN `{$wpdb->postmeta}` pm ON p.id = pm.post_id AND pm.meta_key = 'downloads'
 
 			WHERE
@@ -94,5 +95,42 @@ class Meta_Sync {
 		}
 
 		update_option( 'plugin_last_review_sync', $current_review_time, 'no' );
+	}
+
+	/**
+	 * After WordPress is released, update the 'tested' meta keys to the latest version as
+	 * specified by `wporg_get_version_equivalents()`.
+	 */
+	function update_tested_up_to() {
+		global $wpdb;
+		if ( ! function_exists( 'wporg_get_version_equivalents' ) ) {
+			return;
+		}
+
+		$equivs = wporg_get_version_equivalents();
+		$equivs_key = md5( serialize( $equivs ) );
+		if ( $equivs_key === get_option( 'plugin_last_tested_sync' ) ) {
+			return;
+		}
+
+		$latest_equiv = array();
+		foreach ( $equivs as $latest_compatible_version => $compatible_with ) {
+			foreach ( $compatible_with as $version ) {
+				$latest_equiv[ $version ] = $latest_compatible_version;
+			}
+		}
+
+		$tested_meta_value_esc_sql = '"' . implode( '", "', array_map( 'esc_sql', array_keys( $latest_equiv ) ) ) . '"';
+		$tested_values = $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
+
+		foreach ( $tested_values as $row ) {
+			update_post_meta(
+				$row->post_id,
+				'tested',
+				$latest_equiv[ $row->meta_value ]
+			);
+		}
+
+		update_option( 'plugin_last_tested_sync', $equivs_key );
 	}
 }

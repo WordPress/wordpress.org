@@ -146,13 +146,21 @@ class Import {
 			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
 		}
 
-		foreach ( $this->readme_fields as $readme_field ) {
-			// Don't change the tested version if a newer version was specified through wp-admin
-			if ( 'tested' == $readme_field && version_compare( get_post_meta( $plugin->ID, 'tested', true ), $readme->$readme_field, '>' ) ) {
-				continue;
+		// Update the tested-up-to value
+		$tested = $readme->tested;
+		if ( function_exists( 'wporg_get_version_equivalents' ) ) {
+			foreach ( wporg_get_version_equivalents() as $latest_compatible_version => $compatible_with ) {
+				if ( in_array( $readme->tested, $compatible_with, true ) ) {
+					$tested = $latest_compatible_version;
+					break;
+				}
 			}
+		}
 
-			update_post_meta( $plugin->ID, $readme_field, wp_slash( $readme->$readme_field ) );
+		// Update all readme meta
+		foreach ( $this->readme_fields as $readme_field ) {
+			$value = ( 'tested' == $readme_field ) ? $tested : $readme->field;
+			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
 		}
 
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
