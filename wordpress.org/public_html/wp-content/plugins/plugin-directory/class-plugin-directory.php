@@ -29,6 +29,7 @@ class Plugin_Directory {
 	private function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_shortcodes' ) );
+		add_action( 'init', array( $this, 'remove_other_shortcodes' ), 999 );
 		add_action( 'widgets_init', array( $this, 'register_widgets' ) );
 		add_filter( 'post_type_link', array( $this, 'filter_post_type_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'filter_term_link' ), 10, 2 );
@@ -346,6 +347,28 @@ class Plugin_Directory {
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
 		add_shortcode( 'wporg-plugins-reviews',     array( __NAMESPACE__ . '\Shortcodes\Reviews',     'display' ) );
 		add_shortcode( 'readme-validator',          array( __NAMESPACE__ . '\Shortcodes\Readme_Validator',     'display' ) );
+	}
+
+	/**
+	 * deregister any shortcodes which we haven't explicitly allowed.
+	 */
+	public function remove_other_shortcodes() {
+		global $shortcode_tags;
+		$allowed_shortcodes = array(
+			'youtube',
+			'vimeo',
+			'videopress',
+			'wporg-plugins-developers',
+			'wporg-plugin-upload',
+			'wporg-plugins-screenshots',
+			'wporg-plugins-reviews',
+			'readme-validator'
+		);
+
+		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );
+		foreach ( $not_allowed_shortcodes as $tag ) {
+			remove_shortcode( $tag );
+		}
 	}
 
 	/**
