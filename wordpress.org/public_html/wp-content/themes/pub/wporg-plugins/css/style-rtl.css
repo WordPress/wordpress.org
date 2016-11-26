@@ -2572,6 +2572,10 @@ object {
   max-height: 400px;
 }
 
+.section.read-more#description.toggled {
+  max-height: none;
+}
+
 .section.read-more.toggled {
   max-height: none;
 }

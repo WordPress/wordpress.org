@@ -8,6 +8,10 @@
 
 		&#description {
 			max-height: 400px;
+
+			&.toggled {
+				max-height: none;
+			}
 		}
 
 		&.toggled {
