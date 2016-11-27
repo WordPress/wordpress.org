@@ -20,7 +20,7 @@ class WP_I18n_Teams {
 	 * Attaches hooks and registers shortcodes once plugins are loasded.
 	 */
 	public function plugins_loaded() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ), 20 );
 		add_shortcode( 'wp-locales',      array( $this, 'wp_locales' ) );
 
 		add_filter( 'term_link', array( $this, 'link_locales' ), 10, 3 );
