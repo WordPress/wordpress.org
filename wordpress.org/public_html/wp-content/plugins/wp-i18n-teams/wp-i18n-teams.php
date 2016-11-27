@@ -59,8 +59,8 @@ class WP_I18n_Teams {
 	 */
 	public function enqueue_assets() {
 		if ( is_singular() && false !== strpos( get_post()->post_content, '[wp-locales' ) ) {
-			wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', __FILE__ ), array(), 8 );
-			wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', __FILE__ ), array( 'jquery' ), 3 );
+			wp_enqueue_style( 'wp-i18n-teams', plugins_url( 'css/i18n-teams.css', __FILE__ ), array(), 9 );
+			wp_enqueue_script( 'wp-i18n-teams', plugins_url( 'js/i18n-teams.js', __FILE__ ), array( 'jquery' ), 4 );
 		}
 	}
 
