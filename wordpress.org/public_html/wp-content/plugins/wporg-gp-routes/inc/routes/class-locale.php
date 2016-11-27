@@ -591,10 +591,21 @@ class Locale extends GP_Route {
 			// Global Admin or Locale-specific admin
 			$can_approve_for_all = $this->roles_adapter->is_global_administrator( $user_id );
 
-			// Check to see if they have any special approval permissions
+			// Limit to only showing base-level projects.
+			$base_level_project_sql = '';
+			$base_level_project_ids = $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1" );
+			if ( $base_level_project_ids ) {
+				$ids = implode( ', ', array_map( 'intval', $base_level_project_ids ) );
+				$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
+			}
+
+			// Check to see if they have any special approval permissions.
 			$allowed_projects = array();
 			if ( ! $can_approve_for_all && $role = $this->roles_adapter->is_approver_for_locale( $user_id, $locale ) ) {
 				$allowed_projects = $this->roles_adapter->get_project_id_access_list( $user_id, $locale );
+
+				$allowed_base_level_projects = array_intersect( $allowed_projects, $base_level_project_ids );
+				$allowed_projects = array_diff( $allowed_projects, $base_level_project_ids );
 
 				// Check to see if they can approve for all projects in this locale.
 				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects ) ) {
@@ -606,21 +617,42 @@ class Locale extends GP_Route {
 			if ( $can_approve_for_all ) {
 				// The current user can approve for all projects, so just grab all with any waiting strings.
 				$parent_project_sql = 'AND ( stats.waiting > 0 OR stats.fuzzy > 0 )';
+				$parent_project_sql .= $base_level_project_sql;
 
-			} elseif ( $allowed_projects ) {
-				// The current user can approve for a small set of projects.
-				// We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check
-				$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
-				$parent_project_sql = "AND tp.id IN( $ids ) AND stats.waiting > 0";
+			} elseif ( $allowed_projects || $allowed_base_level_projects ) {
+				$parent_project_sql = 'AND stats.waiting > 0 AND ( (';
+
+				if ( $allowed_projects ) {
+					/*
+					 * The current user can approve for a small set of projects.
+					 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
+					 */
+					$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
+					$parent_project_sql .= "tp.id IN( $ids )";
+					$parent_project_sql .= $base_level_project_sql;
+				} else {
+					$parent_project_sql .= '0=1';
+				}
+
+				$parent_project_sql .= ") OR (";
+
+				if ( $allowed_base_level_projects ) {
+					/*
+					 * The current user can approve all sub-projects of a base level project.
+					 */
+					$ids = implode( ', ', array_map( 'intval', $allowed_base_level_projects ) );
+					$parent_project_sql .= "tp.parent_project_id IN( $ids )";
+				} else {
+					$parent_project_sql .= '0=1';
+				}
+
+				$parent_project_sql .= ") )";
 
 			} else {
 				// The current user can't approve for any locale projects, or is logged out.
 				$parent_project_sql = 'AND 0=1';
 
 			}
-
-			// Limit to only showing base-level projects
-			$parent_project_sql .= " AND tp.parent_project_id IN( (SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1) )";
 		}
 
 		$filter_order_by = $filter_where = '';
