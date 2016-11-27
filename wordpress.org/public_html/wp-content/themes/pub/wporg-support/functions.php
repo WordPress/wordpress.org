@@ -258,7 +258,7 @@ function wporg_support_add_moderation_notice() {
 		} else {
 			$notice = sprintf(
 				/* translators: %d: number of hours */
-				__( 'This post has been held for moderation by our automated system. It will be reviewed within %d hours.', 'wporg-forums' ),
+				_n( 'This post has been held for moderation by our automated system. It will be reviewed within %d hour.', 'This post has been held for moderation by our automated system. It will be reviewed within %d hours.', 72, 'wporg-forums' ),
 				72
 			);
 		}
