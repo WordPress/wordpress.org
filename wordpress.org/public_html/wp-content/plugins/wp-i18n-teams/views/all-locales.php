@@ -87,7 +87,7 @@
 
 					<td data-column-title="<?php esc_attr_e( 'WP Locale', 'wporg' ); ?>"><?php echo esc_html( $locale->wp_locale ); ?></td>
 
-					<td data-column-title="<?php esc_attr_e( 'Version', 'wporg' ); ?>" class="right no-right-border">
+					<td data-column-title="<?php esc_attr_e( 'Version', 'wporg' ); ?>" class="center no-right-border">
 						<?php
 							if ( $locale_data[ $locale->wp_locale ]['rosetta_site_url'] ) {
 								if ( $locale_data[ $locale->wp_locale ]['latest_release'] ) {
@@ -100,7 +100,7 @@
 							}
 						?>
 					</td>
-					<td class="no-left-border nowrap">
+					<td class="center no-left-border nowrap">
 						<?php
 						if ( isset( $language_packs_data[ $locale->wp_locale ] ) ) {
 							echo max( $language_packs_data[ $locale->wp_locale ] );
@@ -112,7 +112,7 @@
 						?>
 					</td>
 
-					<td data-column-title="<?php esc_attr_e( 'GlotPress', 'wporg' ); ?>" class="right no-right-border">
+					<td data-column-title="<?php esc_attr_e( 'GlotPress', 'wporg' ); ?>" class="center no-right-border">
 						<?php if ( isset( $percentages[ $locale->wp_locale ] ) ) : ?>
 							<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>/default/wp/dev">
 								<?php echo $percentages[ $locale->wp_locale ] . '%'; ?>
@@ -121,7 +121,7 @@
 							&mdash;
 						<?php endif; ?>
 					</td>
-					<td class="no-left-border nowrap">
+					<td class="center no-left-border nowrap">
 						<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">
 							<?php echo $locale->slug; ?>
 						</a>
@@ -129,7 +129,7 @@
 
 					<td>
 						<a href="<?php echo esc_url( add_query_arg( 'locale', $locale->wp_locale ) ); ?>">
-							<?php _e( 'Team', 'wporg' ); ?>
+							<?php _e( 'View Team Page', 'wporg' ); ?>
 						</a>
 					</td>
 				</tr>

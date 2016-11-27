@@ -18,6 +18,28 @@
 			<?php endif; ?>
 		</li>
 		<li>
+			<strong><?php _e( 'Team site:', 'wporg' ); ?></strong>
+			<?php if ( $locale_data['team_url'] ) : ?>
+				<a href="<?php echo esc_url( $locale_data['team_url'] ); ?>"><?php
+					$url = parse_url( $locale_data['team_url'] );
+					printf( '%s%s', $url['host'], $url['path'] );
+				?></a>
+			<?php else : ?>
+				&mdash;
+			<?php endif; ?>
+		</li>
+		<li>
+			<strong><?php _e( 'Forums:', 'wporg' ); ?></strong>
+			<?php if ( $locale_data['forums_url'] ) : ?>
+				<a href="<?php echo esc_url( $locale_data['forums_url'] ); ?>"><?php
+					$url = parse_url( $locale_data['forums_url'] );
+					printf( '%s%s', $url['host'], $url['path'] );
+				?></a>
+			<?php else : ?>
+				&mdash;
+			<?php endif; ?>
+		</li>
+		<li>
 			<strong><?php _e( 'Latest release:', 'wporg' ); ?></strong>
 			<?php echo $locale_data['latest_release'] ? $locale_data['latest_release'] : '&mdash;'; ?>
 		</li>
@@ -28,6 +50,10 @@
 		<li>
 			<strong><?php _e( 'GlotPress Locale Code:', 'wporg' ); ?></strong>
 			<?php echo esc_html( $locale->slug ); ?>
+		</li>
+		<li>
+			<strong><?php _e( 'Translation Projects:', 'wporg' ); ?></strong>
+			<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">translate.wordpress.org/locale/<?php echo $locale->slug; ?></a>
 		</li>
 	</ul>
 
@@ -54,7 +80,7 @@
 </div>
 
 
-<h2><?php _e( 'General Translation Editors', 'wporg' ); ?></h2>
+<h2><?php printf( __( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
@@ -63,10 +89,8 @@
 		<?php foreach ( $locale_data['validators'] as $validator ) :
 			?>
 			<li>
-				<a class="user-avatar" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
-					echo get_avatar( $validator['email'], 50 );
-				?></a>
-				<a class="user-name" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo get_avatar( $validator['email'], 60 );
 					echo esc_html( $validator['display_name'] );
 				?></a>
 				<?php
@@ -81,25 +105,27 @@
 
 
 <?php if ( ! empty( $locale_data['project_validators'] ) ) : ?>
-	<h2><?php _e( 'Project Translation Editors', 'wporg' ); ?></h2>
+	<h2><?php printf( __( 'Project Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['project_validators'] ) ) ); ?></h2>
 
 	<ul class="validators project-validators">
 		<?php foreach ( $locale_data['project_validators'] as $validator ) :
 			?>
 			<li>
-				<a class="user-avatar" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
-					echo get_avatar( $validator['email'], 25 );
-				?></a>
-				<a class="user-name" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $validator['nice_name'] ); ?>"><?php
+					echo get_avatar( $validator['email'], 40 );
 					echo esc_html( $validator['display_name'] );
 				?></a>
+				<?php
+				if ( $validator['slack'] ) {
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $validator['slack'], 'https://make.wordpress.org/chat/' );
+				}
+				?>
 			</li>
 		<?php endforeach; ?>
 	</ul>
 <?php endif; ?>
 
-
-<h2><?php _e( 'Translation Contributors', 'wporg' ); ?></h2>
+<h2><?php printf( __( 'All Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
 
 <?php if ( empty( $locale_data['translators'] ) ) : ?>
 	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>

@@ -189,11 +189,36 @@ class WP_I18n_Teams {
 			}
 			$statuses[ $language_pack_status ]++;
 
+			$forums_url = $team_url = '';
+			if ( $subdomain ) {
+				$result = get_sites( array(
+					'domain'   => $subdomain . '.wordpress.org',
+					'path__in' => array( '/support/', '/forums/' ),
+					'number'   => 1,
+				) );
+				$site = array_shift( $result );
+				if ( $site ) {
+					$forums_url = get_home_url( $site->id, '/' );
+				}
+
+				$result = get_sites( array(
+					'domain'   => $subdomain . '.wordpress.org',
+					'path__in' => array( '/team/' ),
+					'number'   => 1,
+				) );
+				$site = array_shift( $result );
+				if ( $site ) {
+					$team_url = get_home_url( $site->id, '/' );
+				}
+			}
+
 			$locale_data[ $locale->wp_locale ] = array(
 				'release_status'       => $release_status,
 				'translation_status'   => $translation_status,
 				'language_pack_status' => $language_pack_status,
 				'rosetta_site_url'     => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
+				'forums_url'           => $forums_url ? $forums_url : false,
+				'team_url'             => $team_url ? $team_url : false,
 				'latest_release'       => $latest_release ? $latest_release : false,
 			);
 		}
@@ -387,12 +412,14 @@ class WP_I18n_Teams {
 					'display_name' => $user->display_name,
 					'email'        => $user->user_email,
 					'nice_name'    => $user->user_nicename,
+					'slack'        => self::get_slack_username( $user->ID ),
 				);
 			} else {
 				$editors[ $user->user_nicename ] = array(
 					'display_name' => $user->user_nicename,
 					'email'        => $user->user_email,
 					'nice_name'    => $user->user_nicename,
+					'slack'        => self::get_slack_username( $user->ID ),
 				);
 			}
 		}

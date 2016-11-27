@@ -3,77 +3,88 @@
  */
 
 .i18n-label.latest {
-	color: #468847;
+	color: #46b450;
 }
 .i18n-label.minor-behind {
-	color: #F7D708;
+	color: #ffb900;
 }
 .i18n-label.major-behind-one {
-	color: #E6A45A;
+	color: #f56e28;
 }
 .i18n-label.major-behind-many {
-	color: #e38587;
+	color: #dc3232;
+}
+
+.i18n-filter {
+	line-height: 2;
+	padding: 0 .25em;
 }
 
 .i18n-filter.current-filter {
 	color: #555;
-	border-bottom: 1px solid #555;
 }
 
-.translators-info thead th {
+.translators-info table thead th {
 	vertical-align: top;
 }
 
-.translators-info thead small {
-	font-size: 9px;
+.translators-info table thead small {
 	font-weight: normal;
 }
 
-.translators-info tbody tr {
+.translators-info table tbody tr {
 	display: none;
 }
 
-.show-all tbody tr,
-.translators-info.show-latest tbody tr.latest,
-.translators-info.show-minor-behind tbody tr.minor-behind,
-.translators-info.show-major-behind-one tbody tr.major-behind-one,
-.translators-info.show-major-behind-many tbody tr.major-behind-many,
-.translators-info.show-no-releases tbody tr.no-releases,
-.translators-info.show-no-site tbody tr.no-site,
-.translators-info.show-no-wp-project tbody tr.no-wp-project,
-.translators-info.show-has-language-pack tbody tr.has-language-pack,
-.translators-info.show-no-language-pack tbody tr.no-language-pack,
-.translators-info.show-translated-100 tbody tr.translated-100,
-.translators-info.show-translated-95 tbody tr.translated-95,
-.translators-info.show-translated-90 tbody tr.translated-90,
-.translators-info.show-translated-50-less tbody tr.translated-50-less,
-.translators-info.show-translated-50 tbody tr.translated-50 {
+.show-all table tbody tr,
+.translators-info.show-latest table tbody tr.latest,
+.translators-info.show-minor-behind table tbody tr.minor-behind,
+.translators-info.show-major-behind-one table tbody tr.major-behind-one,
+.translators-info.show-major-behind-many table tbody tr.major-behind-many,
+.translators-info.show-no-releases table tbody tr.no-releases,
+.translators-info.show-no-site table tbody tr.no-site,
+.translators-info.show-no-wp-project table tbody tr.no-wp-project,
+.translators-info.show-has-language-pack table tbody tr.has-language-pack,
+.translators-info.show-no-language-pack table tbody tr.no-language-pack,
+.translators-info.show-translated-100 table tbody tr.translated-100,
+.translators-info.show-translated-95 table tbody tr.translated-95,
+.translators-info.show-translated-90 table tbody tr.translated-90,
+.translators-info.show-translated-50-less table tbody tr.translated-50-less,
+.translators-info.show-translated-50 table tbody tr.translated-50 {
 	display: table-row;
 }
 
 .locale-version.latest {
-	background: #d2e7ca;
+	background: #c7e8ca;
 }
 .locale-version.minor-behind {
-	background: #fef0c1;
+	background: #ffe399;
 }
 .locale-version.major-behind-one {
-	background: #E6A45A;
+	background: #fbc5a9;
 }
 .locale-version.major-behind-many {
-	background: #e38587;
+	background: #f1adad;
 }
+
 td.right {
 	text-align: right;
 }
+
+td.center {
+	text-align: center;
+}
+
 td.no-left-border {
 	border-left: 0 !important;
 }
+
 td.no-right-border {
 	border-right: 0 !important;
 }
-.translators-info th,
-.translators-info td.nowrap {
+
+.translators-info table th,
+.translators-info table td.nowrap {
 	white-space: nowrap;
 }
 
@@ -112,6 +123,7 @@ td.no-right-border {
 #locale-header ul li.download-button a {
 	font-size: 1.1em;
 	color: white;
+	text-decoration: none;
 }
 #locale-details,
 #main ul#locale-details {
@@ -141,9 +153,44 @@ ul.validators {
 	width: 33%;
 }
 
+.validators li .profile {
+	margin: 6px 0 2px;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 2em;
+	text-decoration: none;
+}
+
+.validators li .avatar {
+	float: left;
+	margin: 0 10px 10px 0;
+	padding: 1px;
+	width: 60px;
+	height: 60px;
+}
+
+.validators .user-slack {
+	display: block;
+}
+
 .validators.project-validators li {
 	width: 25%;
 	margin-bottom: 5px;
+}
+
+.validators.project-validators li .profile {
+	font-size: 13px;
+	line-height: 1.5em;
+}
+
+.validators.project-validators li .avatar {
+	float: left;
+	width: 40px;
+	height: 40px;
+}
+
+.validators.project-validators li .user-slack {
+	font-size: 10px;
 }
 
 @media only screen and (max-width: 850px) {
@@ -156,7 +203,7 @@ ul.validators {
 	}
 }
 
-@media only screen and (max-width: 470px) {
+@media only screen and (max-width: 600px) {
 	.validators li {
 		width: 100%;
 	}
@@ -165,66 +212,55 @@ ul.validators {
 	}
 }
 
-.validators.project-validators img.avatar {
-	margin-right: 5px !important;
-}
-.validators a {
-	text-decoration: none;
-}
-.validators .user-name {
-	font-size: 16px;
-	position: relative;
-	top: .2em;
-}
-.validators.project-validators .user-name {
-	font-size: 13px;
+@media only screen and (max-width: 400px) {
+	.validators.project-validators li {
+		width: 100%;
+	}
 }
 
-.validators .user-slack {
-	display: block;
-	margin-top: .2em;
-}
-
-.translators-info table {
+article.page .translators-info table {
 	width: 100%;
-	margin: .7em 0 1.5em;
-	border: 1px solid #ccc;
+	border: 1px solid #f1f1f1;
 	border-width: 1px 1px 1px 0;
-	border-spacing: 0;
 }
-.translators-info th {
-	background: #ccc;
-	border: 1px solid #ccc;
-	border-width: 1px 0 0 1px;
-	padding: 6px 15px;
+
+article.page .translators-info table tr th {
+	background: #f7f7f7;
+	border: 1px solid #f1f1f1;
+	border-width: 0 0 0 1px;
 }
-.translators-info td {
-	border: 1px solid #ccc;
+
+article.page .translators-info table tr td {
+	border: 1px solid #f1f1f1;
 	border-width: 1px 0 0 1px;
-	padding: 6px 15px;
+}
+
+article.page .translators-info table tr th:first-child,
+article.page .translators-info table tr td:first-child {
+	padding-left: 1em;
+}
+
+article.page .translators-info table tr th:last-child,
+article.page .translators-info table tr td:last-child {
+	padding-right: 1em;
 }
 
 @media (max-width: 768px) {
-	.i18n-filter {
-		line-height: 2;
-		padding: 0 3px;
-	}
-
-	.show-all tbody tr,
-	.translators-info.show-latest tbody tr.latest,
-	.translators-info.show-minor-behind tbody tr.minor-behind,
-	.translators-info.show-major-behind-one tbody tr.major-behind-one,
-	.translators-info.show-major-behind-many tbody tr.major-behind-many,
-	.translators-info.show-no-releases tbody tr.no-releases,
-	.translators-info.show-no-site tbody tr.no-site,
-	.translators-info.show-no-wp-project tbody tr.no-wp-project,
-	.translators-info.show-has-language-pack tbody tr.has-language-pack,
-	.translators-info.show-no-language-pack tbody tr.no-language-pack,
-	.translators-info.show-translated-100 tbody tr.translated-100,
-	.translators-info.show-translated-95 tbody tr.translated-95,
-	.translators-info.show-translated-90 tbody tr.translated-90,
-	.translators-info.show-translated-50-less tbody tr.translated-50-less,
-	.translators-info.show-translated-50 tbody tr.translated-50 {
+	.show-all table tbody tr,
+	.translators-info.show-latest table tbody tr.latest,
+	.translators-info.show-minor-behind table tbody tr.minor-behind,
+	.translators-info.show-major-behind-one table tbody tr.major-behind-one,
+	.translators-info.show-major-behind-many table tbody tr.major-behind-many,
+	.translators-info.show-no-releases table tbody tr.no-releases,
+	.translators-info.show-no-site table tbody tr.no-site,
+	.translators-info.show-no-wp-project table tbody tr.no-wp-project,
+	.translators-info.show-has-language-pack table tbody tr.has-language-pack,
+	.translators-info.show-no-language-pack table tbody tr.no-language-pack,
+	.translators-info.show-translated-100 table tbody tr.translated-100,
+	.translators-info.show-translated-95 table tbody tr.translated-95,
+	.translators-info.show-translated-90 table tbody tr.translated-90,
+	.translators-info.show-translated-50-less table tbody tr.translated-50-less,
+	.translators-info.show-translated-50 table tbody tr.translated-50 {
 		display: block;
 	}
 
@@ -241,26 +277,26 @@ ul.validators {
 	}
 
 	.translators-info table tr {
-		border: 1px solid #ccc !important;
+		border: 1px solid #f1f1f1 !important;
 	}
 
-	.translators-info table tbody th,
-	.translators-info table tbody td {
+	article.page .translators-info table tbody th,
+	article.page .translators-info table tbody td {
 		display: block;
 		text-align: left;
 	}
 
-	.translators-info table tbody tr {
-		margin-top: 20px;
+	article.page .translators-info table tbody tr {
+		margin-top: 2em;
 	}
 
-	.translators-info table tbody td {
-		padding: 6px 10px;
+	article.page .translators-info table tbody td {
 		position: relative;
-		padding-left: 40%;
+		padding: .5em .5em .5em 40%;
+		vertical-align: top;
 	}
 
-	.translators-info table tbody td[data-column-title]:before {
+	article.page .translators-info table tbody td[data-column-title]:before {
 		content: attr(data-column-title);
 		position: absolute;
 		left: 10px;
@@ -268,7 +304,7 @@ ul.validators {
 		font-weight: bold;
 	}
 
-	.translators-info table tbody td:nth-of-type(1) {
+	article.page .translators-info table tbody td:nth-of-type(1) {
 		display: inline-block;
 		padding-left: 40%;
 		padding-right: 5px;
@@ -276,18 +312,18 @@ ul.validators {
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(2) {
+	article.page .translators-info table tbody td:nth-of-type(2) {
 		display: inline-block;
 		padding-left: 0;
 		width: 23%;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(3) {
-		border-top: 1px solid #ccc !important;
+	article.page .translators-info table tbody td:nth-of-type(3) {
+		border-top: 1px solid #f1f1f1 !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(4) {
+	article.page .translators-info table tbody td:nth-of-type(4) {
 		display: inline-block;
 		padding-left: 40%;
 		padding-right: 5px;
@@ -295,31 +331,31 @@ ul.validators {
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(5) {
+	article.page .translators-info table tbody td:nth-of-type(5) {
 		display: inline-block;
 		padding-left: 0;
 		width: 23%;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(6) {
+	article.page .translators-info table tbody td:nth-of-type(6) {
 		display: inline-block;
 		padding-left: 40%;
 		width: 30%;
-		border-top: 1px solid #ccc !important;
+		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(7) {
+	article.page .translators-info table tbody td:nth-of-type(7) {
 		display: inline-block;
 		padding-left: 0;
 		width: 23%;
-		border-top: 1px solid #ccc !important;
+		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 	}
 
-	.translators-info table tbody td:nth-of-type(8) {
-		border-top: 1px solid #ccc !important;
+	article.page .translators-info table tbody td:nth-of-type(8) {
+		border-top: 1px solid #f1f1f1 !important;
 		border-bottom: none !important;
 		padding-right: 0;
 	}
