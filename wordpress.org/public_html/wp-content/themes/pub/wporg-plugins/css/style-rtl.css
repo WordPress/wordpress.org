@@ -379,6 +379,43 @@ big {
   font-size: 125%;
 }
 
+.feedback-survey {
+  background: #fff;
+  -webkit-border-radius: 0 3px 3px 0;
+  border-radius: 0 3px 3px 0;
+  -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  display: block;
+  font-size: 12.8px;
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  position: fixed;
+  left: 0;
+  top: 200px;
+  width: 40px;
+  z-index: 100;
+}
+
+.feedback-survey .survey-msg {
+  display: none;
+}
+
+.feedback-survey:hover {
+  width: auto;
+}
+
+.feedback-survey:hover .survey-msg {
+  display: inline-block;
+}
+
+.feedback-survey a:hover {
+  text-decoration: none;
+}
+
+.feedback-survey .dashicons-megaphone {
+  margin: 2px 0 0 10px;
+}
+
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
@@ -1851,7 +1888,7 @@ object {
 .plugin-card {
   background-color: #f9f9f9;
   margin-bottom: 4%;
-  padding: 8px 8px 0 8px;
+  padding: 15px 15px 8px;
   vertical-align: top;
 }
 
@@ -1896,12 +1933,12 @@ object {
 }
 
 .plugin-card .entry-excerpt p {
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .plugin-card hr {
   background-color: #fff;
-  margin: auto;
+  margin: 15px -15px 8px;
 }
 
 .plugin-card footer span {
@@ -1919,6 +1956,14 @@ object {
   font-size: 1rem;
   margin-left: 6.4px;
   margin-left: 0.4rem;
+}
+
+.plugin-card footer span.last-updated {
+  display: none;
+}
+
+.plugin-card footer span.plugin-author {
+  width: 100%;
 }
 
 .plugin-card footer .dashicons {

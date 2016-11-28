@@ -2049,6 +2049,12 @@ object {
   display: none;
 }
 
+.plugin-rating .rating-count a {
+  color: inherit;
+  cursor: hand;
+  text-decoration: none;
+}
+
 @-webkit-keyframes favme-anime {
   0% {
     opacity: 1;
@@ -2247,7 +2253,7 @@ object {
   float: left;
 }
 
-.plugin-faqs h2:first-of-type {
+#faq h2:first-of-type {
   font-size: 20px;
   font-size: 1.25rem;
   font-weight: 600;
@@ -2260,11 +2266,11 @@ object {
   text-transform: inherit;
 }
 
-.plugin-faqs dl {
+#faq dl {
   border-bottom: 1px solid #eee;
 }
 
-.plugin-faqs dt {
+#faq dt {
   border-top: 1px solid #eee;
   cursor: pointer;
   font-size: 16px;
@@ -2274,7 +2280,7 @@ object {
   padding: 1rem 0;
 }
 
-.plugin-faqs dt:before {
+#faq dt:before {
   content: "\f347";
   float: right;
   font-family: dashicons;
@@ -2282,26 +2288,26 @@ object {
   margin: 0 1rem;
 }
 
-.plugin-faqs dt.open:before {
+#faq dt.open:before {
   content: "\f343";
 }
 
-.plugin-faqs dd {
+#faq dd {
   display: none;
   margin: 0 0 16px;
   margin: 0 0 1rem;
 }
 
-.plugin-faqs dd p {
+#faq dd p {
   margin: 0;
 }
 
-.plugin-faqs dd p + p {
+#faq dd p + p {
   margin-top: 16px;
   margin-top: 1rem;
 }
 
-.no-js .plugin-faqs dd {
+.no-js #faq dd {
   display: block;
 }
 
@@ -2600,23 +2606,26 @@ object {
   vertical-align: top;
 }
 
-.read-more {
+.section.read-more {
   border-bottom: 2px solid #eee;
   max-height: 200px;
   overflow: hidden;
   padding-bottom: 1px;
 }
 
-.read-more#reviews {
-  max-height: none;
-  overflow: auto;
-}
-
-.read-more:nth-of-type(1) {
+.section.read-more#description {
   max-height: 400px;
 }
 
-.read-more h1, .read-more h2, .read-more h3 {
+.section.read-more#description.toggled {
+  max-height: none;
+}
+
+.section.read-more.toggled {
+  max-height: none;
+}
+
+.section h1, .section h2, .section h3 {
   font-size: 16px;
   font-size: 1rem;
   font-weight: 600;
@@ -2625,11 +2634,11 @@ object {
   text-transform: uppercase;
 }
 
-.read-more h1:nth-child(2), .read-more h2:nth-child(2), .read-more h3:nth-child(2) {
+.section h1:nth-child(2), .section h2:nth-child(2), .section h3:nth-child(2) {
   margin-top: 0;
 }
 
-.read-more h4, .read-more h5, .read-more h6 {
+.section h4, .section h5, .section h6 {
   font-size: 12.8px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -2638,11 +2647,11 @@ object {
   text-transform: uppercase;
 }
 
-.read-more h4:nth-child(2), .read-more h5:nth-child(2), .read-more h6:nth-child(2) {
+.section h4:nth-child(2), .section h5:nth-child(2), .section h6:nth-child(2) {
   margin-top: 0;
 }
 
-.read-more h2:first-of-type {
+.section h2:first-of-type {
   font-size: 20px;
   font-size: 1.25rem;
   border: none;
@@ -2652,16 +2661,8 @@ object {
   text-transform: inherit;
 }
 
-.read-more p:first-child {
+.section p:first-child {
   margin-top: 0;
-}
-
-.read-more.toggled {
-  max-height: none;
-}
-
-#screenshots.read-more {
-  border-bottom: none;
 }
 
 .no-js .read-more {
@@ -2912,6 +2913,33 @@ object {
 .search.search-results .page-header {
   margin: 32px 0;
   margin: 2rem 0;
+}
+
+nav .nav-links {
+  text-align: center;
+}
+
+nav .nav-links .page-numbers {
+  background-color: #f9f9f9;
+  min-width: 2em;
+  padding: 8px;
+  display: inline-block;
+  cursor: hand;
+}
+
+nav .nav-links .page-numbers.next, nav .nav-links .page-numbers.prev, nav .nav-links .page-numbers.dots {
+  width: auto;
+  font-size: 0.9em;
+  background: none;
+}
+
+nav .nav-links .page-numbers.dots {
+  cursor: inherit;
+}
+
+nav .nav-links span.page-numbers {
+  font-weight: bold;
+  background-color: #f7f7f7;
 }
 
 .main-navigation {
@@ -3357,4 +3385,3 @@ object {
     top: 5px;
   }
 }
-/*# sourceMappingURL=style.css.map */
