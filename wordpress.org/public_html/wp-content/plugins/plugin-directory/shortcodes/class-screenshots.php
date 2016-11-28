@@ -33,7 +33,7 @@ class Screenshots {
 				Template::get_asset_url( $plugin->post_name, $image )
 			);
 
-			if ( array_key_exists( $image['resolution'], $descriptions ) ) {
+			if ( $descriptions && ! empty( $descriptions[ $image['resolution'] ] ) ) {
 				$screen_shot .= '<figcaption>' . $descriptions[ $image['resolution'] ] . '</figcaption>';
 			}
 
