@@ -2212,3 +2212,32 @@ body.wporg-responsive .col-2 {
 		width: 100%;
 	}
 }
+
+
+/* 
+ *  Notifications
+ */
+
+ .notification {
+	background: #eee;
+	margin: 0;
+	max-width: 100%;
+	padding: 8px 12px;
+	text-align: center;
+}
+
+.notification-info {
+	background: #d9edf7;
+}
+
+.notification-success {
+	background: #c7e8ca;
+}
+
+.notification-warning {
+	background: #fff8e5;
+}
+
+.notification-danger {
+	background: #f2dede;
+}
