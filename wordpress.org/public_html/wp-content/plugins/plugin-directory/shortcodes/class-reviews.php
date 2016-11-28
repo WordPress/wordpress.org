@@ -15,7 +15,8 @@ class Reviews {
 	 */
 	static function display() {
 		$reviews = Tools::get_plugin_reviews( get_post()->post_name );
-		$review_count = array_sum( get_post_meta( get_the_ID(), 'ratings', true ) );
+		$ratings = get_post_meta( get_the_ID(), 'ratings', true ) ?: array();
+		$review_count = array_sum( $ratings );
 
 		if ( empty( $reviews ) ) {
 			return '';
