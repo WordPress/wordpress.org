@@ -392,19 +392,11 @@ big {
   position: fixed;
   left: 0;
   top: 200px;
-  width: 40px;
+  width: auto;
   z-index: 100;
 }
 
 .feedback-survey .survey-msg {
-  display: none;
-}
-
-.feedback-survey:hover {
-  width: auto;
-}
-
-.feedback-survey:hover .survey-msg {
   display: inline-block;
 }
 
