@@ -127,7 +127,7 @@
 						</a>
 					</td>
 
-					<td>
+					<td class="center">
 						<a href="<?php echo esc_url( add_query_arg( 'locale', $locale->wp_locale ) ); ?>">
 							<?php _e( 'View Team Page', 'wporg' ); ?>
 						</a>

@@ -83,8 +83,20 @@ class WP_I18n_Teams {
 		} else {
 			require_once GLOTPRESS_LOCALES_PATH;
 			$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
-			$locale_data = $this->get_extended_locale_data( $locale );
-			require( __DIR__ . '/views/locale-details.php' );
+			if ( $locale ) {
+				$locale_data = $this->get_extended_locale_data( $locale );
+				require( __DIR__ . '/views/locale-details.php' );
+			} else {
+				printf(
+					'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
+					sprintf(
+						__( 'Locale %s doesn&#8217;t exists.', 'wporg' ),
+						'<code>' . esc_html( $_GET['locale'] ) . '</code>'
+					),
+					esc_url( get_permalink() ),
+					__( 'Return to All Locales', 'wporg' )
+				);
+			}
 		}
 
 		return ob_get_clean();
