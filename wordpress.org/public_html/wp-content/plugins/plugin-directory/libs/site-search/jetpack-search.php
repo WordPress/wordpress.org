@@ -56,6 +56,7 @@ class Jetpack_Search {
 	protected $do_found_posts;
 	protected $found_posts = 0;
 
+	protected $search_query;
 	protected $search_result;
 
 	protected $original_blog_id;
@@ -133,6 +134,10 @@ class Jetpack_Search {
 		add_filter( 'wp_search_stopwords', '__return_empty_array', 5 );
 
 		add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'filter__add_date_filter_to_query' ), 10, 2 );
+
+		// Debug
+		if ( file_exists( __DIR__ . '/jetpack-search-debug.php' ) )
+			include_once( __DIR__ . '/jetpack-search-debug.php' );
 	}
 
 	/**
@@ -295,12 +300,23 @@ class Jetpack_Search {
 
 		//Only trust ES to give us IDs, not the content since it is a mirror
 		$es_query_args['fields'] = array(
+			'slug',
+			'support_threads_resolved',
+			'support_threads_percentage',
+			'support_resolution_yes',
+			'support_resolution_no',
+			'support_resolution_percentage',
+			'active_installs',
+			'contributors_active_installs',
+			'tested',
+			'meta.rating.double',
 			'post_id',
 			'blog_id'
 		);
 
 		// This filter is harder to use if you're unfamiliar with ES but it allows complete control over the query
 		$es_query_args = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
+		$this->search_query = $es_query_args;
 
 		// Do the actual search query!
 		$this->search_result = $this->search( $es_query_args );
@@ -422,6 +438,9 @@ class Jetpack_Search {
 		return ( ! empty( $this->search_result ) && ! is_wp_error( $this->search_result ) && is_array( $this->search_result ) && ! empty( $this->search_result['results'] ) ) ? $this->search_result['results'] : false;
 	}
 
+	public function get_search_query() {
+		return $this->search_query;
+	}
 
 	/////////////////////////////////////////////////
 	// Standard Filters Applied to the search query
