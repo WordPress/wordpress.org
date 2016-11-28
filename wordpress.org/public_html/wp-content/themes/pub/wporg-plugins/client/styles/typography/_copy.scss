@@ -67,3 +67,40 @@ mark, ins {
 big {
 	font-size: 125%;
 }
+
+
+// Feedback survey link for acquiring participant's feedback.
+
+.feedback-survey {
+	background: #fff;
+	border-radius: 3px 0 0 3px;
+	box-shadow: 0 0 8px rgba(0,0,0,.2);
+	display: block;	
+	font-size: 0.8rem;
+	padding: 5px 10px;
+	position: fixed;
+	right: 0;
+	top: 200px;
+	width: 40px;
+	z-index: 100;
+
+	.survey-msg {
+		display: none;
+	}
+
+	&:hover {
+		width: auto;
+
+		.survey-msg {
+			display: inline-block;
+		}
+	}
+
+	a:hover {
+		text-decoration: none;
+	}
+
+	.dashicons-megaphone {
+		margin: 2px 10px 0 0;
+	}
+}

@@ -1,7 +1,7 @@
 .plugin-card {
 	background-color: #f9f9f9;
 	margin-bottom: 4%;
-	padding: 8px 8px 0 8px;
+	padding: 15px 15px 8px;
 	vertical-align: top;
 
 	@media screen and ( min-width: $ms-breakpoint ) {
@@ -38,13 +38,13 @@
 		font-size: ms( -2 );
 
 		p {
-			margin: 0 0 8px;
+			margin: 0;
 		}
 	}
 
 	hr {
 		background-color: #fff;
-		margin: auto;
+		margin: 15px -15px 8px;
 	}
 
 	footer {
@@ -59,6 +59,13 @@
 				display: inline-block;
 				font-size: 1rem;
 				margin-right: 0.4rem;
+			}
+
+			&.last-updated {
+				display: none;
+			}
+			&.plugin-author {
+				width: 100%;
 			}
 
 		}
