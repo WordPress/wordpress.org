@@ -309,7 +309,8 @@ class Jetpack_Search {
 			'active_installs',
 			'contributors_active_installs',
 			'tested',
-			'meta.rating.double',
+			'rating',
+			'plugin_modified',
 			'post_id',
 			'blog_id'
 		);
@@ -753,23 +754,34 @@ class Jetpack_Search {
 								'linear' => array(
 									'tested' => array(
 										'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
-										'scale' => 0.5,
+										'offset' => 0.1,
+										'scale' => 0.3,
 										'decay' => 0.6,
 									),
 								),
 							),
 							array(
 								'field_value_factor' => array(
-									'field' => 'meta.active_installs.long',
-									'factor' => 2,
+									'field' => 'active_installs',
+									'factor' => 1,
 									'modifier' => 'log2p',
+									'missing' => 1,
 								),
 							),
 							array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
-									'factor' => 1,
+									'factor' => 2,
 									'modifier' => 'log2p',
+									'missing' => 0,
+								),
+							),
+							array(
+								'field_value_factor' => array(
+									'field' => 'rating',
+									'factor' => 0.5,
+									'modifier' => 'sqrt',
+									'missing' => 3,
 								),
 							),
 						),
