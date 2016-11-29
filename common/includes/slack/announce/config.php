@@ -156,6 +156,7 @@ function get_whitelist() {
 		),
 		'meta-wordcamp' => $wordcamp_central,
 		'polyglots' => array(
+			'casiepa',
 			'coachbirgit',
 			'deconf',
 			'ocean90',
