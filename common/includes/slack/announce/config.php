@@ -86,6 +86,7 @@ function get_whitelist() {
 			'ocean90',
 		),
 		'core-multisite' => array(
+			'flixos90',
 			'jeremyfelt',
 		),
 		'core-passwords' => array(
