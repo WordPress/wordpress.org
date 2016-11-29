@@ -286,9 +286,9 @@ class Jetpack_Search {
 
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}^4", 'title_en^0.5', "content_{$locale}^2", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}^4", 'title_en^0.5', "content_{$locale}", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^4', 'contributors' );
 		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en^4', 'content_en^2', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( 'title_en^4', 'content_en', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^4', 'contributors' );
 		}
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
@@ -763,7 +763,7 @@ class Jetpack_Search {
 							array(
 								'field_value_factor' => array(
 									'field' => 'active_installs',
-									'factor' => 1,
+									'factor' => 0.5,
 									'modifier' => 'log2p',
 									'missing' => 1,
 								),
