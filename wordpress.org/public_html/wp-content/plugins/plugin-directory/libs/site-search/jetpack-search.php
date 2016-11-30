@@ -285,9 +285,9 @@ class Jetpack_Search {
 
 		$locale = get_locale();
 		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}^4", 'title_en^0.5', "content_{$locale}", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^4', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( "title_{$locale}^4", 'title_en^0.5', "content_{$locale}", 'content_en^0.5', "excerpt_{$locale}", 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^0.25', 'slug', 'contributors' );
 		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en^4', 'content_en', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^4', 'contributors' );
+			$es_wp_query_args['query_fields'] = array( 'title_en^4', 'content_en', 'excerpt_en', 'author', 'tag', 'category', 'slug_ngram^0.25', 'slug', 'contributors' );
 		}
 
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
