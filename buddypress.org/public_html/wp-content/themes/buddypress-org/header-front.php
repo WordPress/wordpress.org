@@ -5,7 +5,7 @@
 		<p>BuddyPress helps you build any type of community website using WordPress, with member profiles, activity streams, user groups, messaging, and more.</p>
 		<div>
 			<a href="<?php bloginfo( 'url' ); ?>/download/" id="big-demo-button" class="button">Download BuddyPress &rarr;</a>
-			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=5" alt="Screenshots">
+			<img src="<?php echo get_stylesheet_directory_uri(); ?>/images/screenshots.png?v=6" srcset="<?php bloginfo( 'template_url' ); ?>/images/screenshots.png?v=6 1x <?php bloginfo( 'template_url' ); ?>/images/screenshots-2x.png?v=6 2x" alt="Screenshots">
 		</div>
 	</div></div>
 	<hr class="hidden" />
