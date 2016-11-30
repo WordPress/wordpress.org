@@ -621,7 +621,7 @@ class Jetpack_Search {
 							'query'  => $args['query'],
 							'fields' => $args['query_fields'],
 							'type'  => 'cross_fields',
-							'analyzer' => $analyzer
+							'operator' => 'and',
 						),
 					),
 					'should' => array(
@@ -630,7 +630,6 @@ class Jetpack_Search {
 								'query'  => $args['query'],
 								'fields' => $args['query_fields'],
 								'type'  => 'phrase',
-								'analyzer' => $analyzer
 							),
 						),
 					),
