@@ -273,7 +273,6 @@ class Jetpack_Search {
 			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
 			'filters'		 => array(
 				array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
-				array( 'exists' => array( 'field' => 'meta.active_installs.long' ) ),
 			),
 		);
 
