@@ -18,10 +18,10 @@ add_filter('debug_bar_panels', function($panels) {
 
 
 			echo '<h3>', __( 'Elasticsearch Query:', 'debug-bar' ), '</h3>';
-			echo '<pre>' . esc_html( var_export( $search->get_search_query(), true ) ) . '</pre>';
+			echo '<pre>' . esc_html( json_encode( $search->get_search_query(), JSON_PRETTY_PRINT ) ) . '</pre>';
 
 			echo '<h3>', __( 'Elasticsearch Result:', 'debug-bar' ), '</h3>';
-			echo '<pre>' . esc_html( var_export( $search->get_search_result(), true ) ) . '</pre>';
+			echo '<pre>' . esc_html( json_encode( $search->get_search_result(), JSON_PRETTY_PRINT ) ) . '</pre>';
 
 			echo '</div>';
 		}
