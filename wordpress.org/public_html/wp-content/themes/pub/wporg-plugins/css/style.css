@@ -2598,6 +2598,14 @@ object {
   vertical-align: top;
 }
 
+.plugin-screenshots .image-gallery-thumbnail img {
+  max-height: 100px;
+}
+
+.plugin-screenshots .image-gallery-thumbnails {
+  overflow-x: hidden;
+}
+
 .section.read-more {
   border-bottom: 2px solid #eee;
   max-height: 200px;

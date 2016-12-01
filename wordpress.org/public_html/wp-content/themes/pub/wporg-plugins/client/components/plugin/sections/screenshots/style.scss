@@ -24,5 +24,13 @@
 
 	.image-gallery-thumbnail {
 		vertical-align: top;
+
+		img {
+			max-height: 100px; // See #2274
+		}
+	}
+
+	.image-gallery-thumbnails {
+		overflow-x: hidden;
 	}
 }
