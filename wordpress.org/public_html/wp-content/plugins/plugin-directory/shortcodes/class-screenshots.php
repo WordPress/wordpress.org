@@ -33,8 +33,8 @@ class Screenshots {
 				Template::get_asset_url( $plugin->post_name, $image )
 			);
 
-			if ( $descriptions && ! empty( $descriptions[ $image['resolution'] ] ) ) {
-				$screen_shot .= '<figcaption>' . $descriptions[ $image['resolution'] ] . '</figcaption>';
+			if ( $descriptions && ! empty( $descriptions[ (int)$image['resolution'] ] ) ) {
+				$screen_shot .= '<figcaption>' . $descriptions[ (int)$image['resolution'] ] . '</figcaption>';
 			}
 
 			$output .= '<li><figure>' . $screen_shot . '</figure></li>';
