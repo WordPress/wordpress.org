@@ -18,10 +18,6 @@
 		max-height: 600px;
 	}
 
-	.image-gallery-thumbnails-container {
-		max-height: 100px;
-	}
-
 	.image-gallery-thumbnail {
 		vertical-align: top;
 
@@ -31,6 +27,6 @@
 	}
 
 	.image-gallery-thumbnails {
-		overflow-x: hidden;
+		overflow: hidden;
 	}
 }

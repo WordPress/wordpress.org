@@ -2590,10 +2590,6 @@ object {
   max-height: 600px;
 }
 
-.plugin-screenshots .image-gallery-thumbnails-container {
-  max-height: 100px;
-}
-
 .plugin-screenshots .image-gallery-thumbnail {
   vertical-align: top;
 }
@@ -2603,7 +2599,7 @@ object {
 }
 
 .plugin-screenshots .image-gallery-thumbnails {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .section.read-more {
