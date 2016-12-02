@@ -322,9 +322,10 @@ class Plugin_Directory {
 		}
 
 		// Instantiate our copy of the Jetpack_Search class.
-		if ( class_exists( 'Jetpack' ) && ! class_exists( 'Jetpack_Search' ) ) {
-			require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
-			\Jetpack_Search::instance();
+		if ( class_exists( 'Jetpack' ) && ! class_exists( 'Jetpack_Search' ) 
+			&& !isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
+				require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
+				\Jetpack_Search::instance();
 		}
 
 	}
