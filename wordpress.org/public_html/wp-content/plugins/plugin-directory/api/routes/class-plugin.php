@@ -97,8 +97,8 @@ class Plugin extends Base {
 		$result['support_threads'] = get_post_meta( $post_id, 'support_threads', true ) ?: 0;
 		$result['support_threads_resolved'] = get_post_meta( $post_id, 'support_threads_resolved', true ) ?: 0;
 		$result['active_installs'] = (int)get_post_meta( $post_id, 'active_installs', true );
-		$result['downloaded'] = get_post_meta( $post_id, 'downloads', true );
-		$result['last_updated'] = gmdate( 'Y-m-d', strtotime( $post->post_modified_gmt ) );
+		$result['downloaded'] = intval( get_post_meta( $post_id, 'downloads', true ) );
+		$result['last_updated'] = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
 		$result['added'] = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
 		$result['homepage'] = get_post_meta( $post_id, 'header_plugin_uri', true );
 		$result['sections'] = array();
