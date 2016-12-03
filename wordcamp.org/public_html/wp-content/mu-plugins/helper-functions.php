@@ -280,7 +280,8 @@ function wcord_get_wordcamp_duration( WP_Post $wordcamp ) {
 
 	$duration_raw = $end - $start;
 
-	$duration_days = floor( $duration_raw / DAY_IN_SECONDS );
+	// Add one second and round up to ensure the end date counts as a day as well
+	$duration_days = ceil( ( $duration_raw + 1 ) / DAY_IN_SECONDS );
 
 	return absint( $duration_days );
 }
