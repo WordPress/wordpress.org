@@ -259,3 +259,21 @@ function wcorg_redundant_remote_get( $request_url, $request_args = array() ) {
 
 	return $response;
 }
+
+/**
+ * Take the start and end dates for a WordCamp and calculate how many days it lasts.
+ *
+ * @param WP_Post $wordcamp
+ *
+ * @return int
+ */
+function wcord_get_wordcamp_duration( WP_Post $wordcamp ) {
+	$start = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
+	$end   = get_post_meta( $wordcamp->ID, 'End Date (YYYY-mm-dd)', true );
+
+	$duration_raw = $end - $start;
+
+	$duration_days = floor( $duration_raw / DAY_IN_SECONDS );
+
+	return absint( $duration_days );
+}
