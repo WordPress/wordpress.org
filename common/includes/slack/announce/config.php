@@ -208,6 +208,7 @@ function get_whitelist() {
 			'camikaos',
 			'ingridmiller',
 			'liamdempsey',
+			'bishop',
 		),
 		'wptv' => array(
 			'jerrysarcastic',
