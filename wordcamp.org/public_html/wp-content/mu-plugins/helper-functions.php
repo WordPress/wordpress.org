@@ -268,8 +268,15 @@ function wcorg_redundant_remote_get( $request_url, $request_args = array() ) {
  * @return int
  */
 function wcord_get_wordcamp_duration( WP_Post $wordcamp ) {
+	// @todo Make sure $wordcamp is the correct post type
+
 	$start = get_post_meta( $wordcamp->ID, 'Start Date (YYYY-mm-dd)', true );
 	$end   = get_post_meta( $wordcamp->ID, 'End Date (YYYY-mm-dd)', true );
+
+	// Assume 1 day duration if there is no end date
+	if ( ! $end ) {
+		return 1;
+	}
 
 	$duration_raw = $end - $start;
 
