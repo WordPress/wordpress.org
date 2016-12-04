@@ -211,30 +211,28 @@ class Ratings_Compat {
 		?>
 		</div>
 	</div>
-	<?php
-	// If current listing is filtered by rating, display message indicating this,
-	// along with an explicit link to return them to the unfiltered view.
-	$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
-	if ( $filter > 0 && $filter < 6 ) {
-		echo '<div class="col-9 reviews-filtered-msg" style="font-style:italic;margin-top:24px;">';
-		printf(
-			/* translators: %d: number of stars */
-			_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
-			    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
-                $filter,
-                'wporg-forums' ) . ' ',
-			$filter
-		);
-		printf(
-			/* translators: %s: plugin/theme reviews URL */
-			__( '<a href="%s">Click here</a> to see all reviews.', 'wporg-forums' ),
-			esc_url( sprintf( '//wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) )
-		);
-		echo "</div>\n";
-	}
-	?>
 </div>
-	<?php
+		<?php
+		// If current listing is filtered by rating, display message indicating this,
+		// along with an explicit link to return them to the unfiltered view.
+		$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
+		if ( $filter > 0 && $filter < 6 ) {
+			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
+			printf(
+				/* translators: %d: number of stars */
+				_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+				    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+			        $filter,
+				        'wporg-forums' ) . ' ',
+				$filter
+			);
+			printf(
+				/* translators: %s: plugin/theme reviews URL */
+				__( '<a href="%s">Click here</a> to see all reviews.', 'wporg-forums' ),
+				esc_url( sprintf( '//wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) )
+			);
+			echo "</p>\n";
+		}
 	}
 
 	/**
