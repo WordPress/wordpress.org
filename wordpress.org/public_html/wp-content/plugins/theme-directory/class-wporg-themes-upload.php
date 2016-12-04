@@ -283,6 +283,48 @@ class WPORG_Themes_Upload {
 			);
 		}
 
+		/*
+		 * Add a comment to the trac ticket with the results of the theme check, if any exists.
+		 */
+		if ( !empty( $GLOBALS['themechecks'] ) ) {
+			$tc_errors = $tc_results = array();
+			foreach ( $GLOBALS['themechecks'] as $check ) {
+				if ( $check instanceof \themecheck ) {
+					$error = (array) $check->getError();
+					if ( $error ) {
+						$tc_errors = array_unique( array_merge( $tc_errors, $error ) );
+					}
+				}
+			}
+			if ( $tc_errors ) {
+				foreach ( $tc_errors as $e ) {
+					$trac_left = array( '<strong>', '</strong>' );
+					$trac_right= array( "'''", "'''" );
+					$html_link = '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i';
+					$html_new = '[$1 $2]';
+					$e = preg_replace( $html_link, $html_new, $e );
+					$e = str_replace( $trac_left, $trac_right, $e );
+					$e = preg_replace( '/<pre.*?>/', "\r\n{{{\r\n", $e );
+					$e = str_replace( '</pre>', "\r\n}}}\r\n", $e );
+			
+					$e = preg_replace( '!<span class="[^"]+">([^<]+)</span>!', '$1', $e );
+			
+					if ( 'INFO' !== substr( $e, 0, 4 ) ) {
+						$tc_results[] = '* ' . $e;
+					}
+				}
+			}
+
+			if ( $tc_results ) {
+				$tc_results = implode( "\n", $tc_results );
+
+				$this->trac->ticket_update(
+					$ticket_id,
+					"Theme Check Results:\n" . $tc_results
+				);
+			}
+		}
+
 		// Add a or update the Theme Directory entry for this theme.
 		$this->create_or_update_theme_post( $ticket_id );
 
