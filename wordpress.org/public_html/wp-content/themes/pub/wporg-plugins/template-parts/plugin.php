@@ -33,7 +33,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 			<i class="dashicons dashicons-admin-users"></i> <?php echo esc_html( get_post_meta( get_the_ID(), 'header_author', true ) ?: get_the_author() ); ?>
 		</span>
 		<span class="active-installs">
-			<i class="dashicons dashicons-chart-area"></i> <?php printf( __( '%s Active Installs', 'wporg-plugins' ), Template::active_installs(false) ); ?>
+			<i class="dashicons dashicons-chart-area"></i> <?php printf( __( '%s active installs', 'wporg-plugins' ), Template::active_installs(false) ); ?>
 		</span>
 		<span class="tested-with">
 			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) { ?>
