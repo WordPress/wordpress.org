@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -154,6 +155,39 @@ function excerpt_length( $excerpt ) {
 	return $excerpt;
 }
 add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
+
+/**
+ * Adds meta tags for richer social media integrations.
+ */
+function social_meta_data() {
+	if ( ! is_singular( 'plugin' ) ) {
+		return;
+	}
+
+	$post_id = get_the_ID();
+	$banner  = Template::get_plugin_banner( $post_id );
+	$banner['banner_2x'] = $banner['banner_2x'] ? $banner['banner'] : false;
+	$icon = Template::get_plugin_icon( $post_id );
+
+	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false, 'post' => $post_id ) ) );
+	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt( $post_id ) ) ) );
+	printf( '<meta property="og:site_name" content="WordPress.org" />' . "\n" );
+	printf( '<meta property="og:type" content="website" />' . "\n" );
+	printf( '<meta property="og:url" content="%s" />' . "\n", esc_url( get_permalink( $post_id ) ) );
+	printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );
+	printf( '<meta name="twitter:site" content="@WordPress">' . "\n" );
+
+	if ( $banner['banner_2x'] ) {
+		printf( '<meta name="twitter:image" content="%s" />' . "\n", $banner['banner_2x'] );
+	}
+	if ( isset( $banner['banner'] ) ) {
+		printf( '<meta property="og:image" content="%s" />' . "\n", $banner['banner'] );
+	}
+	if ( ! $icon['generated'] && ( $icon['icon_2x'] || $icon['icon'] ) ) {
+		printf( '<meta name="thumbnail" content="%s" />', $icon['icon_2x'] ?: $icon['icon'] );
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\social_meta_data' );
 
 /**
  * Adds hreflang link attributes to plugin pages.
