@@ -6,13 +6,13 @@ export default React.createClass( {
 	render() {
 		return (
 			<div>
-				<div id="reviews" className="read-more" aria-expanded="false">
+				<div id="reviews" className="read-more">
 					<div className="plugin-reviews">
 						<h2>Reviews</h2>
 						<div dangerouslySetInnerHTML={ { __html: this.props.content } } />
 					</div>
 				</div>
-				<a className="reviews-link" href={ `https://wordpress.org/support/plugin/${ this.props.slug }/reviews/` }>Read all { this.props.numRatings } reviews</a>
+				<a className="reviews-link" href={ `https://wordpress.org/support/plugin/${ this.props.slug }/reviews/` } aria-expanded="false">Read all { this.props.numRatings } reviews</a>
 			</div>
 		)
 	}
