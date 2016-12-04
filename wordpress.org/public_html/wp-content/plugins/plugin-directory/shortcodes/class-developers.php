@@ -53,7 +53,7 @@ class Developers {
 		}
 
 		return $output .
-			'<h5>' . __( 'Browse the code', 'wporg-plugins' ) . '</h5>' .
+			'<h3>' . __( 'Browse the code', 'wporg-plugins' ) . '</h3>' .
 			'<ul>' .
 				'<li>' .
 					'<a href="' . esc_url( "https://plugins.trac.wordpress.org/log/{$post->post_name}/" ) . '" rel="nofollow">' . __( 'Development Log', 'wporg-plugins' ) . '</a>' . "\n" .

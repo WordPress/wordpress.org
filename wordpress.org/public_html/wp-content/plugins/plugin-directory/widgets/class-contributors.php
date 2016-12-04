@@ -39,17 +39,6 @@ class Contributors extends \WP_Widget {
 
 		echo $args['before_widget'];
 		?>
-		<style>
-			<?php // TODO: Yes, these need to be moved into the CSS somewhere. ?>
-			ul.contributors-list {
-				list-style: none;
-				margin: 0;
-				font-size: 0.9em;
-			}
-			ul.contributors-list li {
-				padding-bottom: 0.5em;
-			}
-		</style>
 		<h3><?php _e( 'Contributors', 'wporg-plugins' ); ?></h3>
 
 		<ul id="contributors-list" class="contributors-list read-more" aria-expanded="false">
