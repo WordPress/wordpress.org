@@ -40,18 +40,17 @@ get_header(); ?>
 
 						<h3><?php _e( 'Submission is Simple', 'wporg-plugins' ); ?></h3>
 						<ol>
-						    <li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
-						    <li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-plugins' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
-						    <li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, you will either be approved or emailed and asked to provide more information and/or make corrections.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
-						    <li><?php printf( __( 'Once approved, you&#8217;ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you&#8217;ll store your plugin.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
-
-						    <li>
-						        <?php
-							    /* translators: 1: URL to readme section; 2: URL to home page; */
-							    printf( __( 'Shortly after you upload your plugin (and a <a href="%1$s">readme file</a>!) to that repository, it will be automatically displayed in the <a href="%2$s">plugins browser</a>.', 'wporg-plugins' ), '#readme', esc_url( home_url( '/' ) ) );
-							    ?>
-							 </li>
-						    <li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a> </strong>for more information.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
+							<li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
+							<li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-plugins' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
+							<li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, it will either be approved or you will be emailed and asked to provide more information and/or make corrections.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
+							<li><?php printf( __( 'Once approved, you&#8217;ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you&#8217;ll store your plugin.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
+							<li>
+								<?php
+								/* translators: 1: URL to readme section; 2: URL to home page; */
+								printf( __( 'Shortly after you upload your plugin (and a <a href="%1$s">readme file</a>!) to that repository, it will be automatically displayed in the <a href="%2$s">plugins browser</a>.', 'wporg-plugins' ), '#readme', esc_url( home_url( '/' ) ) );
+								?>
+							</li>
+							<li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a> </strong>for more information.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
 						</ol>
 
 						<h3 id="readme"><?php _e( 'Readme files', 'wporg-plugins' ); ?></h3>
@@ -80,7 +79,7 @@ get_header(); ?>
 			</footer><!-- .entry-footer -->
 		</article><!-- #post-## -->
 
-		<?php endwhile;	?>
+		<?php endwhile; ?>
 
 	</main><!-- #main -->
 
