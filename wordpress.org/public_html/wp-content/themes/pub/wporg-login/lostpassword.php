@@ -1,3 +1,13 @@
+<?php
+/**
+ * The lost-password Template
+ *
+ * @package wporg-login
+ */
+
+get_header();
+?>
+
 <form name="lostpasswordform" id="lostpasswordform" action="/wp-login.php?action=lostpassword" method="post">
 	<p class="intro"><?php _e( 'Please enter your username or email address. You will receive a link to create a new password via email.', 'wporg-login' ); ?></p>
 	<p>
@@ -12,3 +22,5 @@
 <p id="nav">
 	<a href="/"><?php _e( '&larr; Back to login', 'wporg-login' ); ?></a>
 </p>
+
+<?php get_footer(); ?>

@@ -21,7 +21,22 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			'loggedout'    => '/loggedout',
 			'lostpassword' => '/lostpassword',
 			'oauth'        => '/oauth',
+			'register-profile' => '/register/profile/(?P<profile_user>[^/]+)/(?P<profile_nonce>[^/]+)',
+			'register-confirm' => '/register/confirm/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+)',
+			'register'         => '/register',
 		);
+
+		/**
+		 * Holds the route hit in `valid_sso_paths`
+		 * @var bool|string
+		 */
+		static $matched_route = false;
+
+		/**
+		 * Holds any matched route params.
+		 * @var array
+		 */
+		static $matched_route_params = array();
 
 		/**
 		 * Constructor: add our action(s)/filter(s)
@@ -69,12 +84,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @return bool True if user is blocked, false if not.
 		 */
 		public function disable_password_reset_for_blocked_users( $allow, $user_id ) {
-			if ( ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+			if ( ! $allow || ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 				return $allow;
 			}
 
 			$user = new WP_User( $user_id, '', WPORG_SUPPORT_FORUMS_BLOGID );
 			$is_blocked = ! empty( $user->allcaps['bbp_blocked'] );
+
 			return ! $is_blocked;
 		}
 
@@ -149,9 +165,18 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// If on the SSO host
 				if ( ! preg_match( '!/wp-login\.php$!', $this->script ) ) {
 					// ... but not on its login screen.
-					if ( preg_match( '!^(' . implode( '|', $this->valid_sso_paths ) . ')([/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
-						// If we're on the path of interest
+					self::$matched_route = false;
+					self::$matched_route_params = array();
+					foreach ( $this->valid_sso_paths as $route => $regex ) {
+						if ( preg_match( '!^' . $regex . '(?:[/?]{1,2}.*)?$!', $_SERVER['REQUEST_URI'], $matches ) ) {
+							self::$matched_route = $route;
+							self::$matched_route_params = $matches;
+							break;
+						}
+					}
 
+					// If we're on the path of interest
+					if ( self::$matched_route ) {
 						// Add a custom filter others can apply (theme, etc).
 						add_filter( 'is_valid_wporg_sso_path' , '__return_true' );
 
@@ -186,6 +211,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								$this->_redirect_to_profile();
 							}
 						}
+					} elseif ( ( is_admin() && is_super_admin() ) || preg_match( '!^/wp-json(/?$|/.+)!i', $_SERVER['REQUEST_URI'] ) ) {
+						// Do nothing, allow access to wp-admin and wp-json on login.wordpress.org
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
 						$this->_redirect_to_profile();

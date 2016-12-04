@@ -15,7 +15,7 @@
 
 <?php wp_head(); ?>
 </head>
-<body class="wp-core-ui login">
+<body <?php body_class( 'wp-core-ui login' ); ?>>
 
 <div id="login">
 	<h1><a href="https://wordpress.org/" title="WordPress.org" tabindex="-1"><?php _e( 'WordPress.org Login' ); ?></a></h1>

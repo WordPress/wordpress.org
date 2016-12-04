@@ -255,6 +255,7 @@ p.intro, #login .message {
     background: transparent !important;
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
+    overflow: visible;
 }
 
 .mobile #login {
@@ -317,6 +318,72 @@ form#authorize {
 	padding: 6px 5px;
 	text-align: center;
 	width: 100%;
+}
+
+
+body.route-register,
+body.route-register-profile,
+body.route-register-confirm {
+    padding-top: 105px;
+    height: auto;
+}
+
+body.route-register #login,
+body.route-register-profile #login,
+body.route-register-confirm #login {
+	width: 365px;
+}
+
+body.route-register input.input,
+body.route-register-profile input.input,
+body.route-register-confirm input.input {
+	margin-bottom: 0;
+}
+body.route-register #login form p,
+body.route-register-profile #login form p,
+body.route-register-confirm #login form p {
+	margin-bottom: 16px;
+}
+
+body.login form input.input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+	opacity: 0.5;
+}
+body.login form input.input::-moz-placeholder { /* Firefox 19+ */
+	opacity: 0.5;
+}
+body.login form input.input:-ms-input-placeholder { /* IE 10+ */
+	opacity: 0.5;
+}
+body.login form input.input:-moz-placeholder { /* Firefox 18- */
+	opacity: 0.5;
+}
+body.login form input.error {
+	background-color: #FAE5E8;
+	border: 3px solid #D42A41;
+}
+body.login form input.good {
+	border-color: #83c373;
+}
+
+body.route-register #login .message.error,
+body.route-register-profile #login .message.error,
+body.route-register-confirm #login .message.error {
+	border-left-color: #dc3232;
+	margin-bottom: auto !important;
+	margin-left: -24px;
+	padding-left: 24px;
+	padding-right: 0;
+}
+body.route-register .message.error .avatar {
+	float: left;
+	border-radius: 50%;
+	margin-right: 1em;
+}
+
+form .login-mailinglist label {
+	font-size: 12px;
+	line-height: 1;
+	cursor: pointer;
 }
 
 .oauth {
