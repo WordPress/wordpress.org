@@ -102,7 +102,10 @@ body.login {
 	margin:0;
 }
 
-
+.g-recaptcha {
+	width: 304px;
+	margin: 0 auto;
+}
 
 /**
  * #.# Basic CSS
