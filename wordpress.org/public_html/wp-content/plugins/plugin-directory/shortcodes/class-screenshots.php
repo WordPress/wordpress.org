@@ -29,7 +29,7 @@ class Screenshots {
 		 * The image numbers are stored within the 'resolution' key.
 		 */
 		foreach ( $screen_shots as $image ) {
-			$screen_shot = sprintf( '<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" /></a>',
+			$screen_shot = sprintf( '<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" alt="" /></a>',
 				Template::get_asset_url( $plugin->post_name, $image )
 			);
 
