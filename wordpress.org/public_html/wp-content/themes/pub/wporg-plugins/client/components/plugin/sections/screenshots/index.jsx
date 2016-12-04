@@ -7,16 +7,16 @@ export default React.createClass( {
 	displayName: 'Screenshots',
 
 	render() {
-		let items = values( this.props.screenshots ).map( screenshot => {
-			return {
-				original: screenshot.src,
-				thumbnail: screenshot.src + '&width=100',
-				description: screenshot.caption || false
-			}
-		} );
+		const items = values( this.props.screenshots ).map( ( { caption, src } ) => ( {
+			original: src,
+			originalAlt: '',
+			thumbnail: src + '&width=100',
+			thumbnailAlt: caption || '',
+			description: caption || false,
+		} ) );
 
 		if ( ! items ) {
-			return <div />;
+			return;
 		}
 
 		return (
