@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
-use WordPressdotorg\Plugin_Directory\CLI\Tag_To_Category;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -108,9 +107,10 @@ class Plugin_Directory {
 				'edit_item'          => is_admin() ? __( 'Editing Plugin: %s', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
 			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'        => array( 'comments', 'author' ),
+			'supports'        => array( 'comments', 'author', 'custom-fields' ),
 			'public'          => true,
 			'show_ui'         => true,
+			'show_in_rest'    => true,
 			'has_archive'     => true,
 			'rewrite'         => false,
 			'menu_icon'       => 'dashicons-admin-plugins',
@@ -287,6 +287,145 @@ class Plugin_Directory {
 			'public'                    => false,
 			'show_in_admin_status_list' => current_user_can( 'plugin_reject' ),
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
+		) );
+
+		/**
+		 * TODO
+		 * Use register_rest_field() to add array and object meta data to the API:
+		 * ratings, upgrade_notice, contributors, screenshots, sections, assets_screenshots,
+		 * assets_icons, assets_banners,
+		 */
+
+		register_meta( 'post', 'rating', array(
+			'type'              => 'number',
+			'description'       => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// todo 'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'active_installs', array(
+			'type'              => 'integer',
+			'description'       => __( 'Number of installations.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'downloads', array(
+			'type'              => 'integer',
+			'description'       => __( 'Number of downloads', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'tested', array(
+			'description'       => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'requires', array(
+			'description'       => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'stable_tag', array(
+			'description'       => __( 'Stable version of the plugin', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'donate_link', array(
+			'description'       => __( 'Link to donate to the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'version', array(
+			'description'       => __( 'Current stable version.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_name', array(
+			'description'       => __( 'Name of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_plugin_uri', array(
+			'description'       => __( 'URL to the homepage of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_name', array(
+			'description'       => __( 'Name of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_author', array(
+			'description'       => __( 'Name of the plugin author.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_author_uri', array(
+			'description'       => __( 'URL to the homepage of the author.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'header_description', array(
+			'description'       => __( 'Description of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'assets_icons', array(
+			'type'              => 'array',
+			'description'       => __( 'Icon images of the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'assets_banners_color', array(
+			'description'       => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'support_threads', array(
+			'type'              => 'integer',
+			'description'       => __( 'Amount of support threads for the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
+		register_meta( 'post', 'support_threads_resolved', array(
+			'type'              => 'integer',
+			'description'       => __( 'Amount of resolved support threads for the plugin.', 'wporg-plugins' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
 		) );
 
 		// Add the browse/* views.
