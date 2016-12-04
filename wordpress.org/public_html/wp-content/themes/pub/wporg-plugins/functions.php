@@ -141,6 +141,21 @@ function custom_body_class( $classes ) {
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 
 /**
+ * Shorten excerpt length on index pages, so plugins cards are all the same height.
+ *
+ * @param string $excerpt The excerpt.
+ * @return string
+ */
+function excerpt_length( $excerpt ) {
+	if ( is_home() || is_archive() ) {
+		$excerpt = wp_trim_words( $excerpt, 15 );
+	}
+
+	return $excerpt;
+}
+add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_length' );
+
+/**
  * Adds hreflang link attributes to plugin pages.
  *
  * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.
