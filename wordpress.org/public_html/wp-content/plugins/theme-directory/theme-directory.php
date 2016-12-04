@@ -1081,6 +1081,8 @@ function wporg_themes_add_hreflang_link_attributes() {
 				continue;
 			}
 
+			$hreflang = false;
+
 			// Note that Google only supports ISO 639-1 codes.
 			if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
 				$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
@@ -1092,7 +1094,7 @@ function wporg_themes_add_hreflang_link_attributes() {
 				$hreflang = $gp_locale->lang_code_iso_639_3;
 			}
 
-			if ( $hreflang ) {
+			if ( $hreflang && 'art' !== $hreflang ) {
 				$sites[ $site->locale ]->hreflang = strtolower( $hreflang );
 			} else {
 				unset( $sites[ $site->locale ] );
