@@ -415,7 +415,8 @@ class Plugin_I18n {
 		} else {
 			$original = preg_quote( $original, '/' );
 			$content  = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", '${1}___TRANSLATION___${3}', $content ); // Don't use $translation, it may contain backreference-like characters.
-			$content  = str_replace( '___TRANSLATION___', $translation, $content );		}
+			$content  = str_replace( '___TRANSLATION___', $translation, $content );
+		}
 
 		return $content;
 	}
@@ -423,9 +424,9 @@ class Plugin_I18n {
 	/**
 	 * Returns a list of translation locales for a given plugin slug and branch.
 	 *
-	 * @param string $slug    Plugin slug.
-	 * @param string $branch  Branch - 'stable-readme' for example.
-	 * @param string $min_percent     Only return locales where percent_translated is >= this value.
+	 * @param string $slug        Plugin slug.
+	 * @param string $branch      Branch - 'stable-readme' for example.
+	 * @param int    $min_percent Optional. Only return locales where percent_translated is >= this value.
 	 * @return array
 	 */
 	public function find_all_translations_for_plugin( $slug, $branch, $min_percent = 0 ) {
@@ -433,17 +434,17 @@ class Plugin_I18n {
 		// This naively hits the API. It could probably be re-written to query the DB instead.
 		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $slug . '/' . $branch, array( 'https' ) );
 
-		$http = new \WP_Http();
+		$out    = array();
+		$http   = new \WP_Http();
 		$result = $http->request( $api_url );
 
-		$out = array();
-		if ( !is_wp_error( $result ) ) {
-			$json = $result['body'];
-			if ( $data = json_decode( $json ) ) {
-				if ( isset( $data->translation_sets ) ) {
-					foreach ( $data->translation_sets as $translation ) {
-						if ( $translation->percent_translated >= $min_percent )
-							$out[] = $translation->wp_locale;
+		if ( ! is_wp_error( $result ) ) {
+			$data = json_decode( $result['body'] );
+
+			if ( $data && isset( $data->translation_sets ) ) {
+				foreach ( $data->translation_sets as $translation ) {
+					if ( $translation->percent_translated >= $min_percent ) {
+						$out[] = $translation->wp_locale;
 					}
 				}
 			}
@@ -451,5 +452,4 @@ class Plugin_I18n {
 
 		return $out;
 	}
-
 }
