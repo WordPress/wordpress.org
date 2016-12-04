@@ -1,4 +1,5 @@
-google.load( "visualization", "1", { packages: ["corechart"] } );
+/* globals google:object */
+google.load( 'visualization', '1', { packages: ['corechart'] } );
 
 ( function( $, settings ) {
 	$( function () {
@@ -39,7 +40,7 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 					viewWindowMode: 'explicit',
 					viewWindow: { min: 0 }
 				},
-				bar: { groupWidth: ( data.getNumberOfRows() > 100 ? "100%" : null ) },
+				bar: { groupWidth: ( data.getNumberOfRows() > 100 ? '100%' : null ) },
 				height: 350,
 				width: 532,
 				curveType: 'function'
@@ -54,10 +55,10 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 					continue;
 				}
 
-				var text = settings.l10n[summary_field];
-				var count = parseInt(summary[ summary_field ]).toLocaleString();
+				var text = settings.l10n[ summary_field ];
+				var count = parseInt( summary[ summary_field ] ).toLocaleString();
+				var $newrow = $( '<tr><th scope="row"></th><td>0</td></tr>' );
 
-				$newrow = $("<tr><th scope='row'></th><td>0</td></tr>");
 				$newrow.find( 'th' ).text( text );
 				$newrow.find( 'td' ).text( count );
 				$tbody.append( $newrow );
@@ -74,7 +75,7 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 				barValues   = [ '' ],
 				versionList = [],
 				index       = 0,
-				version, data, formatter;
+				data, formatter;
 
 			// Gather and sort the list of versions.
 			$.each( versions, function( version ) {
@@ -85,7 +86,7 @@ google.load( "visualization", "1", { packages: ["corechart"] } );
 			versionList.sort( function( a, b ) {
 				a = a.split( '.' );
 				b = b.split( '.' );
-				return ( a[0] != b[0] ) ? a[0]-b[0] : a[1]-b[1];
+				return ( a[0] !== b[0] ) ? a[0]-b[0] : a[1]-b[1];
 			} );
 
 			// Move 'other' versions to the beginning.

@@ -1,4 +1,4 @@
-/* global module:false, require:function */
+/* global module:false, require:function, process:object */
 
 var webpack       = require( 'webpack' ),
 	webpackConfig = require( './webpack.config' );

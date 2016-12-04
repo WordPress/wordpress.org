@@ -37,7 +37,7 @@
 					if ( 'description' === element.id && $section.children().next( 'p, div' ).first().find( 'video, iframe' ) ) {
 						var height = $section.children().next( 'p,div' ).first().outerHeight( true ) /* embed */ + $section.children().first().outerHeight( true ) /* h2 */;
 
-						if ( height > parseInt( $toggle.css( 'max-height' ) ) ) {
+						if ( height > parseInt( $section.css( 'max-height' ) ) ) {
 							$section.css( 'min-height', height + 'px' );
 						}
 					}
