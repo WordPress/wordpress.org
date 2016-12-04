@@ -183,7 +183,8 @@ class Status_Transitions {
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* Translators: Plugin name. */
-		$content  = sprintf( __( 'Unfortunately your plugin hosting request for %s has been rejected.', 'wporg-plugins' ), $post->post_title ). "\n\n\n";
+		$content  = sprintf( __( 'Unfortunately your plugin submission for %s has been rejected from the WordPress.org Directory.', 'wporg-plugins' ), $post->post_title ). "\n\n\n";
+		$content .= sprintf( __( 'If you believe this to be in error, please email %s with your plugin attached as a zip and explain why you feel your plugin should be an exception.', 'wporg-plugins' ), 'plugins@wordpress.org' ). "\n\n\n";
 		$content .= __( 'The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
 		$content .= 'https://make.wordpress.org/plugins';
 
