@@ -19,3 +19,13 @@
 		max-width: 100%;
 	}
 }
+
+.entry-meta .widget-title {
+	font-size: ms( 2 );
+
+	// Override wp4.css.
+	border: none;
+	color: $color__text-main;
+	font-weight: 600;
+	padding: 0;
+}

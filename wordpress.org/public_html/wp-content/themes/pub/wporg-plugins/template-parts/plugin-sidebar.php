@@ -10,8 +10,8 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $widget_args = array(
-	'before_title' => '<h4 class="widget-title">',
-	'after_title'  => '</h4>',
+	'before_title' => '<h3 class="widget-title">',
+	'after_title'  => '</h3>',
 );
 
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',    array(), $widget_args );

@@ -2220,6 +2220,16 @@ object {
   margin-top: 0;
 }
 
+.contributors-list {
+  list-style: none;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.contributors-list li {
+  padding-bottom: 0.5em;
+}
+
 .plugin-developers {
   list-style-type: none;
   margin: 0;
@@ -3335,6 +3345,15 @@ nav .nav-links span.page-numbers {
 .home .widget select,
 .widget-area.home .widget select {
   max-width: 100%;
+}
+
+.entry-meta .widget-title {
+  font-size: 20px;
+  font-size: 1.25rem;
+  border: none;
+  color: #32373c;
+  font-weight: 600;
+  padding: 0;
 }
 
 .plugin-support {
