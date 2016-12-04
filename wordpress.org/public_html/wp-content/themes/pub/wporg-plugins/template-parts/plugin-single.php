@@ -67,9 +67,14 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 			<?php
 			if ( is_user_logged_in() ) :
 				$url = Template::get_favourite_link( $post );
+				$is_favorited = Tools::favorited_plugin( $post );
 				?>
 				<div class="plugin-favorite">
-					<a href="<?php echo esc_url( $url ); ?>" class="plugin-favorite-heart<?php echo Tools::favorited_plugin( $post ) ? ' favorited' : ''; ?>"></a>
+					<a href="<?php echo esc_url( $url ); ?>" class="plugin-favorite-heart<?php echo $is_favorited ? ' favorited' : ''; ?>">
+						<span class="screen-reader-text">
+							<?php printf( $is_favorited ? __( 'Favorite %s' ) : __( 'Unfavorite %s' ), get_the_title() ); ?>
+						</span>
+					</a>
 					<script>
 						jQuery( '.plugin-favorite-heart' )
 							.on( 'click touchstart animationend', function() {

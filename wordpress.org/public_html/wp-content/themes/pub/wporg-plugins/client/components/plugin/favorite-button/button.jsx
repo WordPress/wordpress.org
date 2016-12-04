@@ -1,39 +1,44 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import includes from 'lodash/includes';
 
-export default React.createClass( {
+const FavoriteButton = React.createClass( {
 	displayName: 'FavoriteButton',
 
-	getInitialState: function() {
-		return {
-			favorite: this.props.initialFavorite
-		};
-	},
-
 	toggleFavorite( event ) {
-		const component = this,
-			$button = jQuery( event.target );
+		const $button = jQuery( event.target );
 
 		this.props.toggleFavorite( event );
 
 		$button.addClass( 'is-animating' ).one( 'animationend', function() {
 			$button.toggleClass( 'is-animating favorited' );
-			component.setState( { favorite: ! component.state.favorite } );
 		} );
 	},
 
 	render() {
 		let classNames = [ 'plugin-favorite-heart' ];
 
-		if ( this.state.favorite ) {
+		if ( this.props.favorite ) {
 			classNames.push( 'favorited' );
 		}
 
 		return (
 			<div className="plugin-favorite">
 				<button type="button" className={ classNames.join( ' ' ) } onClick={ this.toggleFavorite } >
-					<span className="screen-reader-text">{ `Favorite ${ this.props.plugin.name }` }</span>
+					<span className="screen-reader-text">
+						{ this.props.favorite
+							? `Unfavorite ${ this.props.plugin.name }`
+							: `Favorite ${ this.props.plugin.name }`
+						}
+					</span>
 				</button>
 			</div>
 		)
 	}
 } );
+
+export default connect(
+	( state, { plugin } ) => ( {
+		favorite: includes( state.favorites, plugin.slug )
+	} ),
+)( FavoriteButton );

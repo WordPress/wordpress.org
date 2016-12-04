@@ -1,6 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import includes from 'lodash/includes';
 
 import FavoriteButton from './button';
 import {
@@ -9,7 +7,7 @@ import {
 	unfavoritePlugin
 } from 'actions/index';
 
-const FavoriteButtonContainer = React.createClass( {
+export default React.createClass( {
 	componentDidMount() {
 		this.getFavorites();
 	},
@@ -33,12 +31,6 @@ const FavoriteButtonContainer = React.createClass( {
 	},
 
 	render() {
-		return <FavoriteButton { ...this.props } toggleFavorite={ this.toggleFavorite } />;
+		return <FavoriteButton toggleFavorite={ this.toggleFavorite } />;
 	}
 } );
-
-const mapStateToProps = ( state, ownProps ) => ( {
-	initialFavorite: includes( state.favorites, ownProps.plugin.slug )
-} );
-
-export default connect( mapStateToProps )( FavoriteButtonContainer );

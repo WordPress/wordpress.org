@@ -2170,6 +2170,10 @@ object {
   animation: favme-hover .3s infinite alternate;
 }
 
+.plugin-favorite .plugin-favorite-heart:focus {
+  outline: thin dotted;
+}
+
 .plugin-favorite .plugin-favorite-heart:hover, .plugin-favorite .plugin-favorite-heart:focus {
   text-decoration: none;
 }

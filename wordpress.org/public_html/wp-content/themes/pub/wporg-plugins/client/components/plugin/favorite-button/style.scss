@@ -68,6 +68,10 @@
 			animation: favme-hover .3s infinite alternate;
 		}
 
+		&:focus {
+			outline: thin dotted;
+		}
+
 		&:hover,
 		&:focus {
 			text-decoration: none;
