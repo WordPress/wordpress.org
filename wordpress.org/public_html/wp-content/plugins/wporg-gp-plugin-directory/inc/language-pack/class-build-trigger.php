@@ -135,7 +135,7 @@ class Build_Trigger {
 	 * @return bool|stdClass False if there is already an event, otherwise the original event data.
 	 */
 	public function limit_duplicate_events( $event ) {
-		if ( self::HOOK !== $event->hook ) {
+		if ( ! $event || self::HOOK !== $event->hook ) {
 			return $event;
 		}
 
