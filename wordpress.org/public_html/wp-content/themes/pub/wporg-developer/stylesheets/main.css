@@ -1242,7 +1242,7 @@ input {
 
 .devhub-wrap #sidebar ul li > a {
   display: inline-block;
-  width: 225px;
+  width: 75%;
 }
 
 .devhub-wrap #sidebar ul li ul {
