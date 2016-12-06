@@ -5,6 +5,7 @@
   position: relative;
   border-width: 0 0 0 5px;
   border-style: solid;
+  min-width: 170px;
 }
 .callout p {
   margin-bottom: 0.6em;
