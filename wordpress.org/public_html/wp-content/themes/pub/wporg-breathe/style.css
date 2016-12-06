@@ -603,26 +603,26 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	position: relative;
 }
 
-.page-template-full-width .entry-title,
-.page-template-full-width .entry-content,
-.page-template-full-width .entry-summary,
-.page-template-full-width aside {
+.page-template-full-width .content-area .entry-title,
+.page-template-full-width .content-area .entry-content,
+.page-template-full-width .content-area .entry-summary,
+.page-template-full-width .content-area aside {
 	margin-right: 0;
 }
 
-.page-template-full-width .o2-post {
+.page-template-full-width .content-area .o2-post {
 	border-top: 0;
 }
 
-.page-template-full-width .o2-app-header {
+.page-template-full-width .content-area .o2-app-header {
 	padding: 0 1.6em;
 }
 
-.page-template-full-width h2.o2-app-page-title {
+.page-template-full-width .content-area h2.o2-app-page-title {
 	padding: 0;
 }
 
-.page-template-full-width article .entry-header {
+.page-template-full-width .content-area .entry-header {
 	display: none;
 }
 
