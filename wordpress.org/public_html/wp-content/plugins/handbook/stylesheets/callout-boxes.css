@@ -3,7 +3,7 @@
   margin-bottom: 1.5em;
   overflow: auto;
   position: relative;
-  border-width: 1px 1px 3px 1px;
+  border-width: 0 0 0 5px;
   border-style: solid;
 }
 .callout p {
