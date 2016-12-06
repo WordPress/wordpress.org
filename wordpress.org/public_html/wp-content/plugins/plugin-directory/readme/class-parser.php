@@ -142,7 +142,10 @@ class Parser {
 	 */
 	protected function parse_readme( $file ) {
 		$contents = file_get_contents( $file );
-		$contents = preg_split( '!\R!u', $contents );
+		if ( preg_match( '!!u', $contents ) )
+			$contents = preg_split( '!\R!u', $contents );
+		else
+			$contents = preg_split( '!\R!', $contents ); // regex failed due to invalid UTF8 in $contents, see #2298
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
 		// Strip UTF8 BOM if present.
