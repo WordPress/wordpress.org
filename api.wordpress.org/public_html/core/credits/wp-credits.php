@@ -142,10 +142,13 @@ abstract class WP_Credits {
 		global $wpdb;
 		$path = 'wp/' . $path;
 
-		$locale = $gp_locale->slug;
+		$locale_parts = explode( '/', $gp_locale->slug );
+		$locale = $locale_parts[0];
+		$slug   = isset( $locale_parts[1] ) ? $locale_parts[1] : 'default';
 
 		$path   = $wpdb->escape( like_escape( $path ) . '%' );
 		$locale = $wpdb->escape( $locale );
+		$slug   = $wpdb->escape( $slug );
 
 		$date = $wpdb->prepare( "AND tt.date_added > %s", $this->get_start_date() );
 		if ( $end_date = $this->get_end_date() )
@@ -159,7 +162,7 @@ abstract class WP_Credits {
 				ON tp.id = tts.project_id
 			WHERE tp.path LIKE '$path'
 				AND tts.locale = '$locale'
-				AND tts.slug = 'default'
+				AND tts.slug = '$slug'
 				AND ( tt.status = 'current' || tt.status = 'old' )
 				AND tt.user_id IS NOT NULL
 				$date" );
@@ -219,10 +222,13 @@ abstract class WP_Credits {
 
 		$project_ids[] = '0'; // Global validators
 
+		$locale_parts = explode( '/', $gp_locale->slug );
+		$locale = $locale_parts[0];
+
 		return $wpdb->get_col( $wpdb->prepare( "
 			SELECT `user_id` FROM `translate_translation_editors`
 			WHERE `project_id` IN (" . implode( ', ', $project_ids ) . ") AND `locale` = %s
-		", $gp_locale->slug ) );
+		", $locale ) );
 	}
 
 	final protected function get_start_date() {
