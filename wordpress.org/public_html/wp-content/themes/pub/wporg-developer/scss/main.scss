@@ -543,14 +543,14 @@
 			text-align: center;
 
 			.widget-description {
-				padding: 1em 15%;
+				padding: 1em 0;
 			}
 		}
 
 		.widget-title {
 
-			font-size: 62px;
-			font-size: 6.2rem;
+			font-size: 56px;
+			font-size: 5.6rem;
 			line-height: 78px;
 			line-height: 7.8rem;
 			.dashicons {
@@ -562,8 +562,8 @@
 				width: 84px;
 				height: 8.4rem;
 				width: 8.4rem;
-				margin-right: 16px;
-				margin-right: 1.6rem;
+				display: block;
+				margin: 0 auto;
 			}
 		}
 
