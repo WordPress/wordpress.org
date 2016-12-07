@@ -81,11 +81,19 @@ big {
 	position: fixed;
 	right: 0;
 	top: 200px;
-	width: auto;
+	width: 40px;
 	z-index: 100;
 
 	.survey-msg {
-		display: inline-block;
+		display: none;
+	}
+
+	&:hover {
+		width: auto;
+
+		.survey-msg {
+			display: inline-block;
+		}
 	}
 
 	a:hover {
