@@ -77,6 +77,7 @@ get_header(); ?>
 								<li><a href="https://codex.wordpress.org/Options_API">Options</a></li>
 								<li><a href="https://codex.wordpress.org/Plugin_API">Plugins</a></li>
 								<li><a href="https://codex.wordpress.org/Quicktags_API">Quicktags</a></li>
+								<li><a href="https://developer.wordpress.org/rest-api/">REST API</a></li>
 								<li><a href="https://codex.wordpress.org/Rewrite_API">Rewrite</a></li>
 								<li><a href="https://codex.wordpress.org/Settings_API">Settings</a></li>
 								<li><a href="https://codex.wordpress.org/Shortcode_API">Shortcode</a></li>
