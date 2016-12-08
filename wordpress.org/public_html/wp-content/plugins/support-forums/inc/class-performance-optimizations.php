@@ -27,6 +27,42 @@ class Performance_Optimizations {
 		// Editor.
 		add_action( 'wp_ajax_wp-link-ajax', array( $this, 'disable_wp_link_ajax' ), -1 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+
+		// Redirect search results.
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_search_results_to_google_search' ) );
+	}
+
+	/**
+	 * Redirects search results to Google Custom Search.
+	 */
+	public function redirect_search_results_to_google_search() {
+		$is_wp_search  = is_search();
+		$is_bbp_search = bbp_is_search_results();
+
+		if ( ! $is_wp_search && ! $is_bbp_search ) {
+			return;
+		}
+
+		$search_terms = $search_url = '';
+
+		if ( $is_bbp_search ) {
+			$search_terms = bbp_get_search_terms();
+		} elseif ( $is_wp_search ) {
+			$search_terms = get_search_query( false );
+		}
+
+		if ( $search_terms ) {
+			$search_url = sprintf( 'https://wordpress.org/search/%s/?forums=1', urlencode( $search_terms ) );
+			$search_url = esc_url_raw( $search_url );
+		}
+
+		if ( ! $search_url ) {
+			wp_safe_redirect( home_url( '/' ) );
+			exit;
+		}
+
+		wp_safe_redirect( $search_url );
+		exit;
 	}
 
 	public function pre_get_posts( $query ) {
