@@ -95,7 +95,8 @@ $ig-background-black: rgba(0, 0, 0, .4) !default;
 	}
 
 	img {
-		width: 100%;
+		display: block;
+		margin: 0 auto;
 	}
 
 	.image-gallery-description {

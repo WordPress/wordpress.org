@@ -441,14 +441,16 @@ export default class ImageGallery extends React.Component {
 	_renderItem( item ) {
 		return (
 			<figure className="image-gallery-image">
-				<img
-					src={ item.original }
-					alt={ item.originalAlt }
-					srcSet={ item.srcSet }
-					sizes={ item.sizes }
-					onLoad={ this.props.onImageLoad }
-					onError={ this._handleImageError.bind( this ) }
-				/>
+				<a href={ item.original }>
+					<img
+						src={ item.original }
+						alt={ item.originalAlt }
+						srcSet={ item.srcSet }
+						sizes={ item.sizes }
+						onLoad={ this.props.onImageLoad }
+						onError={ this._handleImageError.bind( this ) }
+					/>
+				</a>
 				{
 					item.description &&
 					<figcaption className="image-gallery-description">

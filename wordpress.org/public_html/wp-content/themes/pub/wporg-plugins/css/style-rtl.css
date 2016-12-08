@@ -2507,7 +2507,8 @@ object {
 }
 
 .image-gallery-slide img {
-  width: 100%;
+  display: block;
+  margin: 0 auto;
 }
 
 .image-gallery-slide .image-gallery-description {
