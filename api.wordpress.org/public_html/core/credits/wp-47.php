@@ -480,6 +480,7 @@ class WP_47_Credits extends WP_Credits {
 			'stubgo',
 			'sudar',
 			'superpoincare',
+			'swapnild',
 			'swissspidy',
 			'takahashi_fumiki',
 			'tapsboy',
