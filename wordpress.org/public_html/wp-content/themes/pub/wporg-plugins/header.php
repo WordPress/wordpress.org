@@ -17,7 +17,7 @@ $menu_items = array(
 	'/developers/'       => __( 'Developers', 'wporg-plugins' ),
 );
 
-$GLOBALS['pagetitle'] = __( 'Plugin Directory &mdash; Free WordPress Plugins', 'wporg-plugins' );
+$GLOBALS['pagetitle'] = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 <div id="page" class="site">

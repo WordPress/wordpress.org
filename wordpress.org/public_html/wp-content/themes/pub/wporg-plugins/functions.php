@@ -37,7 +37,6 @@ function setup() {
 		'gallery',
 		'caption',
 	) );
-
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 
@@ -274,11 +273,13 @@ add_action( 'wp_head', __NAMESPACE__ . '\hreflang_link_attributes' );
 function strong_archive_title( $term ) {
 	return '<strong>' . $term . '</strong>';
 }
-add_filter( 'post_type_archive_title', __NAMESPACE__ . '\strong_archive_title' );
-add_filter( 'single_term_title',       __NAMESPACE__ . '\strong_archive_title' );
-add_filter( 'single_cat_title',        __NAMESPACE__ . '\strong_archive_title' );
-add_filter( 'single_tag_title',        __NAMESPACE__ . '\strong_archive_title' );
-add_filter( 'get_the_date',            __NAMESPACE__ . '\strong_archive_title' );
+add_action( 'wp_head', function() {
+	add_filter( 'post_type_archive_title', __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_term_title',       __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_cat_title',        __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_tag_title',        __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'get_the_date',            __NAMESPACE__ . '\strong_archive_title' );
+} );
 
 /**
  * Custom template tags for this theme.
