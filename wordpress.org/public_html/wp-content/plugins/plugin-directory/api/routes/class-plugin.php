@@ -13,6 +13,9 @@ use WP_REST_Server;
  */
 class Plugin extends Base {
 
+	/**
+	 * Plugin constructor.
+	 */
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/?', array(
 			'methods'  => WP_REST_Server::READABLE,
@@ -123,7 +126,7 @@ class Plugin extends Base {
 		 */
 		foreach ( $screen_shots as $image ) {
 			$result['screenshots'][ $image['resolution'] ] = array(
-				'src'     => Template::get_asset_url( $post->post_name, $image ),
+				'src'     => Template::get_asset_url( $post, $image ),
 				'caption' => array_key_exists( $image['resolution'], $descriptions ) ? $descriptions[ $image['resolution'] ] : ''
 			);
 		}

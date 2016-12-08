@@ -116,8 +116,7 @@ class Template {
 	 * @return array
 	 */
 	public static function get_plugin_sections( $post = null ) {
-		$plugin      = get_post( $post );
-		$plugin_slug = $plugin->post_name;
+		$plugin = get_post( $post );
 
 		$default_sections = array(
 			'description',
@@ -173,12 +172,12 @@ class Template {
 
 				case 'support':
 					$title = _x( 'Support', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin_slug;
+					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name;
 					break;
 
 				case 'reviews':
 					$title = _x( 'Reviews', 'plugin tab title', 'wporg-plugins' );
-					$url   = 'https://wordpress.org/support/plugin/' . $plugin_slug . '/reviews/';
+					$url   = 'https://wordpress.org/support/plugin/' . $plugin->post_name . '/reviews/';
 					break;
 
 				case 'developers':
@@ -210,33 +209,28 @@ class Template {
 	 *
 	 * @static
 	 *
-	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
-	 * @param string          $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
+	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
 	 * @return mixed
 	 */
-	public static function get_plugin_icon( $plugin, $output = 'raw' ) {
-		$plugin = Plugin_Directory::instance()->get_plugin_post( $plugin );
-		if ( ! $plugin ) {
-			return false;
-		}
-		$plugin_slug = $plugin->post_name;
-
+	public static function get_plugin_icon( $post = null, $output = 'raw' ) {
+		$plugin    = get_post( $post );
 		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true );
 
 		$icon = $icon_2x = $svg = $generated = false;
 		foreach ( $raw_icons as $file => $info ) {
 			switch ( $info['resolution'] ) {
 				case '256x256':
-					$icon_2x = self::get_asset_url( $plugin_slug, $info );
+					$icon_2x = self::get_asset_url( $plugin, $info );
 					break;
 
 				case '128x128':
-					$icon = self::get_asset_url( $plugin_slug, $info );
+					$icon = self::get_asset_url( $plugin, $info );
 					break;
 
 				/* false = the resolution of the icon, this is NOT disabled */
 				case false && 'icon.svg' == $file:
-					$svg = self::get_asset_url( $plugin_slug, $info );
+					$svg = self::get_asset_url( $plugin, $info );
 					break;
 			}
 		}
@@ -269,7 +263,7 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-icon-{$plugin_slug}";
+				$id    = "plugin-icon-{$plugin->post_name}";
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$icon}'); } .plugin-icon { background-size: cover; height: 128px; width: 128px; }";
 				if ( ! empty( $icon_2x ) && ! $generated ) {
@@ -292,18 +286,14 @@ class Template {
 	 *
 	 * @static
 	 *
-	 * @param \WP_Post|string $plugin An instance of a Plugin post, or the plugin slug.
-	 * @param string          $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
+	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $output Optional. Output type. 'html' or 'raw'. Default: 'raw'.
 	 * @return mixed
 	 */
-	public static function get_plugin_banner( $plugin, $output = 'raw' ) {
-		$plugin = Plugin_Directory::instance()->get_plugin_post( $plugin );
-		if ( ! $plugin ) {
-			return false;
-		}
+	public static function get_plugin_banner( $post = null, $output = 'raw' ) {
+		$plugin = get_post( $post );
 
 		$banner      = $banner_2x = false;
-		$plugin_slug = $plugin->post_name;
 		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true );
 
 		// Split in rtl and non-rtl banners.
@@ -316,11 +306,11 @@ class Template {
 		foreach ( $raw_banners as $info ) {
 			switch ( $info['resolution'] ) {
 				case '1544x500':
-					$banner_2x = self::get_asset_url( $plugin_slug, $info );
+					$banner_2x = self::get_asset_url( $plugin, $info );
 					break;
 
 				case '772x250':
-					$banner = self::get_asset_url( $plugin_slug, $info );
+					$banner = self::get_asset_url( $plugin, $info );
 					break;
 			}
 		}
@@ -329,11 +319,11 @@ class Template {
 			foreach ( $rtl_banners as $info ) {
 				switch ( $info['resolution'] ) {
 					case '1544x500':
-						$banner_2x = self::get_asset_url( $plugin_slug, $info );
+						$banner_2x = self::get_asset_url( $plugin, $info );
 						break;
 
 					case '772x250':
-						$banner = self::get_asset_url( $plugin_slug, $info );
+						$banner = self::get_asset_url( $plugin, $info );
 						break;
 				}
 			}
@@ -345,7 +335,7 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-banner-{$plugin_slug}";
+				$id    = "plugin-banner-{$plugin->post_name}";
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$banner}'); }";
 				if ( ! empty( $banner_2x ) ) {
@@ -370,11 +360,11 @@ class Template {
 	 *
 	 * @static
 	 *
-	 * @param string $plugin Plugin slug.
-	 * @param array  $asset  Assets folder information.
+	 * @param int|\WP_Post|null $post  Optional. Post ID or post object. Defaults to global $post.
+	 * @param array             $asset Assets folder information.
 	 * @return string
 	 */
-	public static function get_asset_url( $plugin, $asset ) {
+	public static function get_asset_url( $post, $asset ) {
 		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
 
 			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png.
@@ -393,7 +383,7 @@ class Template {
 		return esc_url( sprintf(
 			$format,
 			$asset['revision'],
-			$plugin,
+			get_post( $post )->post_name,
 			$asset['filename']
 		) );
 	}
@@ -450,8 +440,8 @@ class Template {
 	/**
 	 * Generate a download link for a given plugin & version.
 	 *
-	 * @param \WP_Post $post    The Plugin Post.
-	 * @param string   $version The version to link to. Optional. Default: latest.
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $version The version to link to. Optional. Default: latest.
 	 * @return string The Download URL.
 	 */
 	static function download_link( $post = null, $version = 'latest' ) {
@@ -485,24 +475,18 @@ class Template {
 	/**
 	 * Generates a link to toggle a plugin favorites state.
 	 *
-	 * @param string $plugin_slug The plugin slug.
-	 * @param mixed  $user        The user to alter the favorite status for.
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @param mixed             $user The user to alter the favorite status for.
 	 * @return string URL to toggle status.
 	 */
-	public static function get_favourite_link( $plugin_slug, $user = 0 ) {
-		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
-		if ( ! $post ) {
-			return false;
-		}
+	public static function get_favorite_link( $post = null, $user = 0 ) {
+		$post = get_post( $post );
 
 		$favorited = Tools::favorited_plugin( $post, $user );
 
-		return add_query_arg(
-			array(
-				'_wpnonce' => wp_create_nonce( 'wp_rest' ),
-				( $favorited ? 'unfavorite' : 'favorite' ) => '1'
-			),
-			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/favorite' )
-		);
+		return add_query_arg( array(
+			'_wpnonce' => wp_create_nonce( 'wp_rest' ),
+			( $favorited ? 'unfavorite' : 'favorite' ) => '1'
+		), home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/favorite' ) );
 	}
 }

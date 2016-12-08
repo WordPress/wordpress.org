@@ -179,7 +179,7 @@ class Import {
 		$banner_average_color = '';
 		if ( $first_banner = reset( $assets['banner'] ) ) {
 			// The Banners are not stored locally, which is why a URL is used here
-			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin_slug, $first_banner ) );
+			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin, $first_banner ) );
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 

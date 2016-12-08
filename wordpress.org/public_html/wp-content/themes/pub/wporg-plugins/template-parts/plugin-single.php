@@ -66,7 +66,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 		<div class="plugin-actions">
 			<?php
 			if ( is_user_logged_in() ) :
-				$url = Template::get_favourite_link( $post );
+				$url = Template::get_favorite_link();
 				$is_favorited = Tools::favorited_plugin( $post );
 				?>
 				<div class="plugin-favorite">
@@ -140,7 +140,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				if ( false !== stripos( $section_content, '<dl>' ) ) {
 					$section_no_read_mores[] = 'faq';
 				}
-				
+
 				$section_read_more = ! in_array( $section_slug, $section_no_read_mores );
 
 				get_template_part( 'template-parts/section' );
