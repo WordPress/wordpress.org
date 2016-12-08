@@ -2,6 +2,8 @@
 
 namespace WordPressdotorg\Forums;
 
+use WP_Error;
+
 class Performance_Optimizations {
 
 	var $term = null;
@@ -30,6 +32,35 @@ class Performance_Optimizations {
 
 		// Redirect search results.
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_search_results_to_google_search' ) );
+
+		// REST API.
+		add_filter( 'rest_endpoints', array( $this, 'disable_rest_api_users_endpoint' ) );
+	}
+
+	/**
+	 * Disables REST API endpoint for users listing.
+	 *
+	 * @link https://core.trac.wordpress.org/ticket/38878
+	 *
+	 * @param array $endpoints The available endpoints.
+	 * @return array The filtered endpoints.
+	 */
+	public function disable_rest_api_users_endpoint( $endpoints ) {
+		foreach ( $endpoints['/wp/v2/users'] as &$handler ) {
+			if ( isset( $handler['methods'] ) && 'GET' === $handler['methods'] ) {
+				$handler['permission_callback'] = function() {
+					return new WP_Error(
+						'rest_not_implemented',
+						__( 'Sorry, you are not allowed to list users.' ),
+						array( 'status' => 501 )
+					);
+				};
+
+				break;
+			}
+		}
+
+		return $endpoints;
 	}
 
 	/**
