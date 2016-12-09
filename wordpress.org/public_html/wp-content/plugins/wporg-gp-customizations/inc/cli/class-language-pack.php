@@ -111,6 +111,10 @@ class Language_Pack extends WP_CLI_Command {
 			$version = $this->get_latest_plugin_version( $slug );
 		}
 
+		if ( ! $version ) {
+			WP_CLI::error( 'No version available.' );
+		}
+
 		$svn_command  = $this->get_svn_command();
 		$svn_checkout = self::get_temp_directory( $slug );
 
@@ -179,6 +183,10 @@ class Language_Pack extends WP_CLI_Command {
 		$version = $args['version'];
 		if ( ! $version ) {
 			$version = $this->get_latest_theme_version( $slug );
+		}
+
+		if ( ! $version ) {
+			WP_CLI::error( 'No version available.' );
 		}
 
 		$svn_command  = $this->get_svn_command();
