@@ -362,8 +362,8 @@ function bb_base_homepage_topics( $args = false ) {
 function bb_base_get_homepage_topics( $args = false ) {
 
 	// Transient settings
-	$expiration    = HOUR_IN_SECONDS;
-	$transient_key = 'bb_base_homepage_topics' . ( is_ssl() ? '_ssl' : '' );
+	$expiration    = MINUTE_IN_SECONDS * 5;
+	$transient_key = 'bb_base_homepage_topics';
 	$output        = get_transient( $transient_key );
 
 	// No transient found, so query for topics again
@@ -427,9 +427,10 @@ function bb_base_support_topics() {
  * @return HTML
  */
 function bb_base_get_support_topics() {
+
 	// Transient settings
-	$expiration    = HOUR_IN_SECONDS;
-	$transient_key = 'bb_base_support_topics' . ( is_ssl() ? '_ssl' : '' );
+	$expiration    = MINUTE_IN_SECONDS * 5;
+	$transient_key = 'bb_base_support_topics';
 	$output        = get_transient( $transient_key );
 
 	// No transient found, so query for topics again
