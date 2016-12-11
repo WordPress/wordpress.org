@@ -93,13 +93,14 @@ gp_tmpl_header();
 
 			printf(
 				'<div class="contributors-list-box%s">
-					<h4><span class="locale-name">%s<span> <span class="contributors-count">%s</span> <span class="locale-code">#%s</span></h4>
+					<h4><span class="locale-name">%s<span> <span class="contributors-count">%s</span> <a href="%s"><span class="locale-code">#%s</span></a></h4>
 					<p><strong>Editors:</strong> %s</p>
 					<p><strong>Contributors:</strong> %s</p>
 				</div>',
 				$has_editors ? ' has-editors' : ' no-editors',
 				$locale->english_name,
 				sprintf( _n( '%s person', '%s persons', $data['count'] ), number_format_i18n( $data['count'] ) ),
+				esc_url( gp_url_join( '/locale', $locale->slug, 'default', $project->path ) ),
 				$locale->wp_locale,
 				wp_sprintf( '%l', $editors_list ),
 				wp_sprintf( '%l', $contributor_list )

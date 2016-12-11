@@ -1423,11 +1423,25 @@ ul.ct-legend {
 
 .locale-project-contributors-table .contributor-name {
 	width: 40%;
+	position: relative;
+}
+
+.locale-project-contributors-table .translation-editor {
+	position: absolute;
+	top: 37px;
+	left: 0;
+	width: 40px;
+	color: #fff;
+	font-weight: 200;
+	line-height: 16px;
+	text-align: center;
+	background-color: #826eb4;
 }
 
 .locale-project-contributors-table .contributor-name span {
 	font-size: 11px;
 	display: block;
+	margin-top: 13px;
 }
 
 .locale-project-contributors-table tr {

@@ -358,13 +358,10 @@ class Locale extends GP_Route {
 			);
 		}
 
+		$editors = array_keys( $locale_contributors['editors'] );
+
 		// Get the names of the contributors.
 		foreach ( $contributors as $contributor ) {
-			if ( isset( $locale_contributors['editors'][ $contributor->user_id ] ) ) {
-				continue;
-			}
-
-
 			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
 				// Update last updated and counts per status.
 				$locale_contributors['contributors'][ $contributor->user_id ]->last_update = max(
@@ -393,9 +390,10 @@ class Locale extends GP_Route {
 				'current_count' => $contributor->current_count,
 				'waiting_count' => $contributor->waiting_count,
 				'fuzzy_count'   => $contributor->fuzzy_count,
+				'is_editor'     => in_array( $user->ID, $editors ),
 			);
 		}
-		unset( $contributors );
+		unset( $contributors, $editors );
 
 		uasort( $locale_contributors['contributors'], array( $this, '_sort_contributors_by_total_count_callback' ) );
 

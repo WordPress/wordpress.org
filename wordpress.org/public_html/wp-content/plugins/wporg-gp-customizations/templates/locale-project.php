@@ -199,6 +199,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 				printf(
 					'<tr>
 						<td class="contributor-name">
+							%s
 							<a href="https://profiles.wordpress.org/%s/">%s %s</a>
 							<span>Last Activity: %s ago</span>
 						</td>
@@ -221,6 +222,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 							</div>
 						<td>
 					</tr>',
+					$contributor->is_editor ? '<span class="translation-editor">Editor</span>' : '',
 					$contributor->nicename,
 					get_avatar( $contributor->email, 40 ),
 					$contributor->display_name ? $contributor->display_name : $contributor->nicename,
