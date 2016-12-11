@@ -413,19 +413,21 @@ class Locale extends GP_Route {
 
 		$contributors = $wpdb->get_results( $wpdb->prepare( "
 			SELECT
-				`user_id`,
-				MAX( `date_added` ) AS `last_update`,
+				`t`.`user_id` as `user_id`,
+				MAX( `t`.`date_added` ) AS `last_update`,
 				COUNT( * ) as `total_count`,
-				COUNT( CASE WHEN `status` = 'current' THEN `status` END ) AS `current_count`,
-				COUNT( CASE WHEN `status` = 'waiting' THEN `status` END ) AS `waiting_count`,
-				COUNT( CASE WHEN `status` = 'fuzzy' THEN `status` END ) AS `fuzzy_count`
-			FROM `{$wpdb->gp_translations}`
+				COUNT( CASE WHEN `t`.`status` = 'current' THEN `t`.`status` END ) AS `current_count`,
+				COUNT( CASE WHEN `t`.`status` = 'waiting' THEN `t`.`status` END ) AS `waiting_count`,
+				COUNT( CASE WHEN `t`.`status` = 'fuzzy' THEN `t`.`status` END ) AS `fuzzy_count`
+			FROM `{$wpdb->gp_translations}` as `t`
+			JOIN `{$wpdb->gp_originals}` as `o`
+				ON `t`.`original_id` = `o`.`id` AND `o`.`status` = '+active'
 			WHERE
-				`translation_set_id` = %d
-				AND `user_id` IS NOT NULL AND `user_id` != 0
-				AND `status` IN( 'current', 'waiting', 'fuzzy' )
-				AND `date_modified` > %s
-			GROUP BY `user_id`
+				`t`.`translation_set_id` = %d
+				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
+				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
+				AND `t`.`date_modified` > %s
+			GROUP BY `t`.`user_id`
 		", $translation_set->id, date( 'Y-m-d', time() - YEAR_IN_SECONDS ) ) );
 
 		return $contributors;
