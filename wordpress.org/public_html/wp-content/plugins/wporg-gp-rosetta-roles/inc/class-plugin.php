@@ -99,12 +99,17 @@ class Plugin {
 		}
 
 		// No permissions for unknown object types.
-		if ( ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set' ) ) ) {
+		if ( ! in_array( $args['object_type'], array( 'project|locale|set-slug', 'translation-set', 'translation' ), true ) ) {
 			return false;
 		}
 
+		// Allow logged in users to submit translations.
+		if ( 'edit' == $args['action'] && 'translation-set' === $args['object_type'] ) {
+			return is_user_logged_in();
+		}
+
 		// Get locale and current project ID.
-		$locale_and_project_id = (object) $this->get_locale_and_project_id( $args['object_type'], $args['object_id'] );
+		$locale_and_project_id = (object) $this->get_locale_and_project_id( $args['object_type'], $args['object_id'], $args );
 		if ( ! $locale_and_project_id ) {
 			return false;
 		}
@@ -481,18 +486,43 @@ class Plugin {
 	 *
 	 * @param string $object_type Current object type.
 	 * @param string $object_id   Current object ID.
+	 * @param array  $args        Optional. Array of additional arguments.
 	 * @return array|false Locale and project ID, false on failure.
 	 */
-	public function get_locale_and_project_id( $object_type, $object_id ) {
+	public function get_locale_and_project_id( $object_type, $object_id, $args = array() ) {
+		static $set_cache = array();
+
 		switch ( $object_type ) {
+			case 'translation' :
+				if ( empty( $args['extra']['translation']->translation_set_id ) ) {
+					break;
+				}
+
+				$translation_set_id = $args['extra']['translation']->translation_set_id;
+				if ( isset( $set_cache[ $translation_set_id ] ) ) {
+					$set = $set_cache[ $translation_set_id ];
+				} else {
+					$set = GP::$translation_set->get( $args['extra']['translation']->translation_set_id );
+					$set_cache[ $translation_set_id ] = $set;
+				}
+
+				return array( 'locale' => $set->locale, 'project_id' => (int) $set->project_id );
+
 			case 'translation-set' :
-				$set = GP::$translation_set->get( $object_id );
+				if ( isset( $set_cache[ $object_id ] ) ) {
+					$set = $set_cache[ $object_id ];
+				} else {
+					$set = GP::$translation_set->get( $object_id );
+					$set_cache[ $object_id ] = $set;
+				}
+
 				return array( 'locale' => $set->locale, 'project_id' => (int) $set->project_id );
 
 			case 'project|locale|set-slug' :
 				list( $project_id, $locale ) = explode( '|', $object_id );
 				return array( 'locale' => $locale, 'project_id' => (int) $project_id );
 		}
+
 		return false;
 	}
 
