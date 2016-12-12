@@ -267,7 +267,7 @@ class Template {
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$icon}'); } .plugin-icon { background-size: cover; height: 128px; width: 128px; }";
 				if ( ! empty( $icon_2x ) && ! $generated ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$icon_2x}'); } }";
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$icon_2x}'); } }";
 				}
 				$html .= "</style>";
 				$html .= "<div class='plugin-icon' id='{$id}'></div>";
@@ -339,7 +339,7 @@ class Template {
 				$html  = "<style type='text/css'>";
 				$html .= "#{$id} { background-image: url('{$banner}'); }";
 				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #{$id} { background-image: url('{$banner_2x}'); } }";
+					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
 				}
 				$html .= "</style>";
 				$html .= "<div class='plugin-banner' id='{$id}'></div>";
