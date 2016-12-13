@@ -148,7 +148,8 @@ function get_unmentored_camps() {
 		'post_status'    => $post_statuses,
 		'posts_per_page' => 10000,
 		'order'          => 'ASC',
-		'orderby'        => 'name',
+		'orderby'        => 'meta_value',
+		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'meta_query'     => array(
 			'relation' => 'OR',
 			array(
@@ -165,7 +166,7 @@ function get_unmentored_camps() {
 
 	foreach ( $posts as $post ) {
 		$email = get_post_meta( $post->ID, 'Mentor E-mail Address', true );
-		$camp_name = $post->post_title;
+		$camp_name = $post->post_title . ' (' . wcpt_get_wordcamp_start_date( $post->ID ) . ')';
 
 		if ( $email ) {
 			$camp_name .= ' *';
@@ -316,8 +317,19 @@ function get_mentor_data( $username ) {
 		$user = \get_user_by( 'login', $username );
 
 		if ( $user instanceof \WP_User ) {
+			// Make sure we get a name
+			if ( $user->display_name ) {
+				$name = $user->display_name;
+			} else if ( $user->nickname ) {
+				$name = $user->nickname;
+			} else if ( $user->first_name && $user->last_name ) {
+				$name = sprintf( '%s %s', $user->first_name, $user->last_name );
+			} else {
+				$name = $username;
+			}
+
 			$data[ $username ] = array(
-				'name'  => $user->display_name,
+				'name'  => $name,
 				'email' => $user->user_email,
 			);
 		}
@@ -345,7 +357,7 @@ function get_all_mentor_data() {
 
 	ksort( $data );
 
-	\set_site_transient( MENTORS_CACHE_KEY, $data, WEEK_IN_SECONDS );
+	\set_site_transient( MENTORS_CACHE_KEY, $data, DAY_IN_SECONDS );
 
 	return $data;
 }
