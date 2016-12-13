@@ -29,9 +29,9 @@ class Plugin_Import {
 	/**
 	 * The cron trigger for the import job.
 	 */
-	public static function cron_trigger( $args ) {
-		$plugin_slug  = $args['plugin'];
-		$changed_tags = $args['tags_touched'];
+	public static function cron_trigger( $plugin_data ) {
+		$plugin_slug  = $plugin_data['plugin'];
+		$changed_tags = $plugin_data['tags_touched'];
 
 		try {
 			$importer = new CLI\Import;

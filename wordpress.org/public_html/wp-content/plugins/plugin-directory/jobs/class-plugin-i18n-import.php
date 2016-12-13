@@ -39,7 +39,7 @@ class Plugin_i18n_Import {
 	 * The cron trigger for the import job.
 	 */
 	public static function cron_trigger( $plugin_data ) {
-		$plugin_slug = $args['plugin'];
+		$plugin_slug = $plugin_data['plugin'];
 
 		$plugin     = Plugin_Directory::get_plugin_post( $plugin_slug );
 		$stable_tag = $plugin->stable_tag;
