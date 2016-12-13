@@ -637,6 +637,7 @@ class WordCamp_Budgets {
 			'KHR' => 'Cambodia Riel',
 			'CAD' => 'Canada Dollar',
 			'KYD' => 'Cayman Islands Dollar',
+			'XAF' => 'Central African CFA Franc',
 			'CLP' => 'Chile Peso',
 			'CNY' => 'China Yuan Renminbi',
 			'COP' => 'Colombia Peso',
