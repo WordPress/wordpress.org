@@ -141,6 +141,9 @@ function get_whitelist() {
 			'ocean90',
 			'gregross',
 		),
+		'hosting-community' => array(
+			'mike',
+		),
 		'marketing' => array(
 			'sararosso',
 		),
