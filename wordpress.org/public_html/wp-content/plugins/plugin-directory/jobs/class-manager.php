@@ -46,6 +46,10 @@ class Manager {
  	 * @return bool|int False on failure, The timestamp on success.
  	 */
 	public static function get_scheduled_time( $hook, $when = 'last' ) {
+
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
 		$crons = _get_cron_array();
 		if ( empty( $crons ) ) {
 			return false;
@@ -85,6 +89,9 @@ class Manager {
  	 */
 	public static function reschedule_event( $hook, $new_timestamp = false, $old_timestamp = false ) {
 		$new_timestatmp = $new_timestamp ?: time();
+
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
 
 		$crons = _get_cron_array();
 		foreach ( $crons as $timestamp => $cron ) {
