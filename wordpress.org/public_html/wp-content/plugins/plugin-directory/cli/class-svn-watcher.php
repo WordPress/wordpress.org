@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Jobs;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use Exception;
 
@@ -13,17 +14,12 @@ class SVN_Watcher {
 
 	const SVN_URL      = 'https://plugins.svn.wordpress.org/';
 	const PHP          = '/usr/local/bin/php';
-	const PROCESS_I18N = true;
-
-	public function __construct() {
-		$this->watch();
-	}
 
 	/**
 	 * This method is responsible for running a loop over all SVN revisions to fetch updated details.
 	 */
 	public function watch() {
-		$svn_rev_option_name = 'svn_rev_' . php_uname( 'n' );
+		$svn_rev_option_name = 'svn_rev_last_processed';
 
 		$last_rev_processed = $this->get_option( $svn_rev_option_name );
 		if ( ! $last_rev_processed ) {
@@ -36,10 +32,13 @@ class SVN_Watcher {
 			$head_rev = $last_rev_processed + 100;
 		}
 
-		if ( $last_rev_processed == $head_rev ) {
+		if ( $last_rev_processed >= $head_rev ) {
 			// Nothing to do!
 			return;
 		}
+
+		// We don't want to re-process the last rev processed, so bump past it
+		$last_rev_processed++;
 
 		echo "Processing changes from $last_rev_processed to $head_rev..\n";
 
@@ -50,66 +49,13 @@ class SVN_Watcher {
 				$plugin_data['tags_touched'][] = 'trunk';
 			}
 
-			$esc_plugin_slug  = escapeshellarg( $plugin_slug );
-			$esc_changed_tags = escapeshellarg( implode( ',', $plugin_data['tags_touched'] ) );
-			$esc_revision     = escapeshellarg( $plugin_data['revision'] );
+			Jobs\Plugin_Import::queue( $plugin_slug, $plugin_data );
 
-			$cmd = self::PHP . ' ' . dirname( __DIR__ ) . "/bin/import-plugin.php --plugin {$esc_plugin_slug} --changed-tags {$esc_changed_tags} --revision {$esc_revision}";
-
-			echo "\$$cmd\n";
-			echo shell_exec( $cmd ) . "\n";
-
-			if ( self::PROCESS_I18N && 'nothing-much' === $plugin_slug ) {
-				$plugin     = Plugin_Directory::get_plugin_post( $plugin_slug );
-				$stable_tag = $plugin->stable_tag;
-
-				$i18n_processes = [];
-				if ( in_array( 'trunk', $plugin_data['tags_touched'] ) ) {
-					if ( $plugin_data['code_touched'] ) {
-						$i18n_processes[] = 'trunk|code';
-					}
-					if ( $plugin_data['readme_touched'] ) {
-						$i18n_processes[] = 'trunk|readme';
-					}
-				}
-				if ( in_array( $stable_tag, $plugin_data['tags_touched'] ) ) {
-					if ( $plugin_data['code_touched'] ) {
-						$i18n_processes[] = "{$stable_tag}|code";
-					}
-					if ( $plugin_data['readme_touched'] ) {
-						$i18n_processes[] = "{$stable_tag}|readme";
-					}
-				}
-
-				$this->process_i18n_for_plugin( $plugin_slug, $i18n_processes );
-			}
-
-			$this->update_option( $svn_rev_option_name, $plugin_data['revision'] );
+			$this->update_option( $svn_rev_option_name, min( $plugin_data['revisions'] ) );
 		}
 
 		// Update it to HEAD again. We do this as $plugin_data['revision'] may be set to PREVHEAD in the event the latest 2 (or more) commits are to a single plugin.
 		$this->update_option( $svn_rev_option_name, $head_rev );
-	}
-
-	/**
-	 * Processes i18n import tasks.
-	 *
-	 * @param string $plugin_slug
-	 * @param array $i18n_processes
-	 */
-	protected function process_i18n_for_plugin( $plugin_slug, $i18n_processes ) {
-		foreach ( $i18n_processes as $process ) {
-			list( $tag, $type ) = explode( '|', $process );
-
-			$esc_plugin_slug = escapeshellarg( $plugin_slug );
-			$esc_tag         = escapeshellarg( $tag );
-			$esc_type        = escapeshellarg( $type );
-
-			$cmd = self::PHP . ' ' . dirname( __DIR__ ) . "/bin/import-plugin-to-glotpress.php --plugin {$esc_plugin_slug} --tag {$esc_tag} --type {$esc_type}";
-
-			echo "\n\$$cmd\n";
-			echo shell_exec( $cmd ) . "\n";
-		}
 	}
 
 	/**
@@ -122,12 +68,12 @@ class SVN_Watcher {
 	protected function get_plugin_changes_between( $rev, $head_rev = 'HEAD' ) {
 
 		$logs = SVN::log( self::SVN_URL, array( $rev, $head_rev ) );
-		if ( $logs['error'] ) {
-			throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['error'] ) );
+		if ( $logs['errors'] ) {
+			throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['errors'] ) );
 		}
 
-		// If no changes (either no log entries, or HEAD was the same as $rev)
-		if ( ! count( $logs['log'] ) || ( 1 == count( $logs['log'] ) && $rev == array_keys( $logs['log'] )[0] ) ) {
+		// nothing new to report
+		if ( ! $logs['log'] ) {
 			return array();
 		}
 
@@ -143,13 +89,13 @@ class SVN_Watcher {
 					'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits
 					'code_touched' => false,
 					'assets_touched' => false,
-					'revision' => PHP_INT_MAX,
+					'revisions' => array(),
 				);
 			}
 			$plugin =& $plugins[ $plugin_slug ];
 
 			// Keep track of the lowest revision number we've seen for this plugin
-			$plugin['revision'] = min( $plugin['revision'], $log['revision'] );
+			$plugin['revisions'][] = $log['revision'];
 			foreach ( $log['paths'] as $path ) {
 				$path_parts = explode('/', trim( $path, '/' ) );
 
@@ -182,11 +128,11 @@ class SVN_Watcher {
 
 		// Sort plugins by minimum revision, it should already be in this order, but double check.
 		uasort( $plugins, function( $a, $b ) {
-			if ( $a['revision'] == $b['revision'] ) {
+			if ( min( $a['revisions'] ) == min( $b['revisions'] ) ) {
 				return 0;
 			}
 
-			return ( $a['revision'] < $b['revision'] ) ? -1 : 1;
+			return ( min( $a['revisions'] ) < min( $b['revisions'] ) ) ? -1 : 1;
 		} );
 
 		return $plugins;
@@ -206,7 +152,7 @@ class SVN_Watcher {
 	}
 
 	/**
-	 * An implementation of `get_option()~ which doesn't utilise the cache.
+	 * An implementation of `get_option()` which doesn't utilise the cache.
 	 * As this is a long-running script, we don't want to hit an alloptions race condition bug.
 	 *
 	 * @param string $option_name The Option to retrieve.

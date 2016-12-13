@@ -159,7 +159,7 @@ class Import {
 
 		// Update all readme meta
 		foreach ( $this->readme_fields as $readme_field ) {
-			$value = ( 'tested' == $readme_field ) ? $tested : $readme->field;
+			$value = ( 'tested' == $readme_field ) ? $tested : $readme->$readme_field;
 			update_post_meta( $plugin->ID, $readme_field, wp_slash( $value ) );
 		}
 

@@ -42,8 +42,7 @@ class Plugin_Directory {
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
 
 		// Cron tasks.
-		add_action( 'admin_init', array( $this, 'register_cron_tasks' ) );
-		add_action( 'plugin_directory_meta_sync', array( __NAMESPACE__ . '\Jobs\Meta_Sync', 'cron_trigger' ) );
+		new Jobs\Manager();
 
 		// oEmbed whitlisting.
 		add_filter( 'embed_oembed_discover', '__return_false' );
@@ -465,16 +464,6 @@ class Plugin_Directory {
 			&& !isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
 				require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
 				\Jetpack_Search::instance();
-		}
-
-	}
-
-	/**
-	 * Queue all of our cron tasks.
-	 */
-	function register_cron_tasks() {
-		if ( ! wp_next_scheduled ( 'plugin_directory_meta_sync' ) ) {
-			wp_schedule_event( time(), 'hourly', 'plugin_directory_meta_sync' );
 		}
 	}
 
