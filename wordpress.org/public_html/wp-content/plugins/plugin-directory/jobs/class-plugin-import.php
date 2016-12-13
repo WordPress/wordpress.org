@@ -40,6 +40,9 @@ class Plugin_Import {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		}
 
+		// Schedule a job to import any i18n changes from this commit
+		Plugin_i18n_Import::queue( $plugin_slug, $plugin_data );
+
 		// Re-schedule any other jobs for this plugin to NOW()
 		$hook = current_filter();
 		if ( $next_timestamp = Manager::get_scheduled_time( $hook, 'next' ) ) {
