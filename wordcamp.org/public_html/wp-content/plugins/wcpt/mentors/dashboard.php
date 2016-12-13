@@ -165,8 +165,14 @@ function get_unmentored_camps() {
 	) );
 
 	foreach ( $posts as $post ) {
+		$start_date = wcpt_get_wordcamp_start_date( $post->ID );
 		$email = get_post_meta( $post->ID, 'Mentor E-mail Address', true );
-		$camp_name = $post->post_title . ' (' . wcpt_get_wordcamp_start_date( $post->ID ) . ')';
+
+		$camp_name = $post->post_title;
+
+		if ( $start_date ) {
+			$camp_name .= " ($start_date)";
+		}
 
 		if ( $email ) {
 			$camp_name .= ' *';
