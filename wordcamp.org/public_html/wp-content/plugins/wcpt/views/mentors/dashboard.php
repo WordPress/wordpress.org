@@ -11,11 +11,6 @@ defined( 'WPINC' ) or die();
 <div class="wrap">
 	<h1>WordCamp Mentors Dashboard</h1>
 
-	<p class="description">
-		Note: This page doesn't include people who have agreed to be a mentor, but have never been assigned to a
-		camp.
-	</p>
-
 	<ul>
 		<li>Number of mentors:             <?php echo count( $mentors );                                ?></li>
 		<li>Active camps being mentored:   <?php echo absint( count_camps_being_mentored( $mentors ) ); ?></li>
@@ -24,4 +19,5 @@ defined( 'WPINC' ) or die();
 
 	<?php require_once( __DIR__ . '/mentors.php'          ); ?>
 	<?php require_once( __DIR__ . '/unmentored-camps.php' ); ?>
+	<?php require_once( __DIR__ . '/manage-mentors.php' ); ?>
 </div>

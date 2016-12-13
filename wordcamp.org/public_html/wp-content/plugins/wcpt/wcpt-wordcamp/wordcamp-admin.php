@@ -1,5 +1,7 @@
 <?php
 
+use WordCamp\Mentors_Dashboard;
+
 if ( ! class_exists( 'WordCamp_Admin' ) ) :
 /**
  * WCPT_Admin
@@ -36,7 +38,6 @@ class WordCamp_Admin {
 
 		// Scripts and CSS
 		add_action( 'admin_enqueue_scripts',                          array( $this, 'admin_scripts' ) );
-		add_action( 'admin_print_scripts',                            array( $this, 'admin_print_scripts' ), 99 );
 		add_action( 'admin_print_styles',                             array( $this, 'admin_styles' ) );
 
 		// Post status transitions
@@ -178,6 +179,11 @@ class WordCamp_Admin {
 			// Get post value
 			$post_value   = wcpt_key_to_str( $key, 'wcpt_' );
 			$values[ $key ] = isset( $_POST[ $post_value ] ) ? esc_attr( $_POST[ $post_value ] ) : '';
+
+			// Don't update protected fields
+			if ( self::is_protected_field( $key ) ) {
+				continue;
+			}
 
 			switch ( $value ) {
 				case 'text'     :
@@ -380,6 +386,7 @@ class WordCamp_Admin {
 					'Travel Wrangler E-mail Address'                 => 'text',
 					'Safety Wrangler Name'                           => 'text',
 					'Safety Wrangler E-mail Address'                 => 'text',
+					'Mentor WordPress.org User Name'                 => 'text',
 					'Mentor Name'                                    => 'text',
 					'Mentor E-mail Address'                          => 'text',
 				);
@@ -460,6 +467,7 @@ class WordCamp_Admin {
 					'Travel Wrangler E-mail Address'                 => 'text',
 					'Safety Wrangler Name'                           => 'text',
 					'Safety Wrangler E-mail Address'                 => 'text',
+					'Mentor WordPress.org User Name'                 => 'text',
 					'Mentor Name'                                    => 'text',
 					'Mentor E-mail Address'                          => 'text',
 
@@ -483,27 +491,39 @@ class WordCamp_Admin {
 	 * Adds jQuery UI
 	 */
 	function admin_scripts() {
-		if ( get_post_type() == WCPT_POST_TYPE_ID )
-			wp_enqueue_script( 'jquery-ui-datepicker' );
-	}
+		wp_register_script(
+			'wcpt-admin',
+			WCPT_URL . 'javascript/wcpt-wordcamp/admin.js',
+			array( 'jquery', 'jquery-ui-datepicker' ),
+			WCPT_VERSION,
+			true
+		);
 
-	/**
-	 * Print our scripts for the Edit WordCamp screen
-	 *
-	 * If this file grows larger, it'd make sense to switch to using wp_enqueue_script().
-	 */
-	function admin_print_scripts() {
-		if ( WCPT_POST_TYPE_ID !== get_post_type() ) {
-			return;
+		// Edit WordCamp screen
+		if ( WCPT_POST_TYPE_ID === get_post_type() ) {
+			wp_enqueue_script( 'wcpt-admin' );
+
+			// Default data
+            $data = array(
+	            'Mentors' => array(
+                    'l10n' => array(
+                        'selectLabel' => esc_html__( 'Available mentors', 'wordcamporg' ),
+                        'confirm'     => esc_html__( 'Update Mentor field contents?', 'wordcamporg' ),
+                    ),
+	            )
+            );
+
+            // Only include mentor data if the Mentor username field is editable
+            if ( current_user_can( 'manage_network' ) ) {
+                $data['Mentors']['data'] = Mentors_Dashboard\get_all_mentor_data();
+            }
+
+			wp_localize_script(
+				'wcpt-admin',
+				'wordCampPostType',
+				$data
+			);
 		}
-
-		?>
-
-		<script>
-			<?php require_once( dirname( __DIR__ ) . '/javascript/wcpt-wordcamp/admin.js' ); ?>
-		</script>
-
-		<?php
 	}
 
 	function admin_styles() {
@@ -904,6 +924,27 @@ class WordCamp_Admin {
 	}
 
 	/**
+	 * Check if a field should be readonly, based on the current user's caps.
+	 *
+	 * @param string $field_name The field to check.
+	 *
+	 * @return bool
+	 */
+	public static function is_protected_field( $field_name ) {
+		$protected_fields = array();
+
+		if ( ! current_user_can( 'manage_network' ) ) {
+			$protected_fields += array(
+				'Mentor WordPress.org User Name',
+				'Mentor Name',
+				'Mentor E-mail Address',
+			);
+		}
+
+		return in_array( $field_name, $protected_fields );
+	}
+
+	/**
 	 * Add our custom admin notice keys to the redirect URL.
 	 *
 	 * Any member can add a key to $this->active_admin_notices to signify that the corresponding message should
@@ -1082,6 +1123,7 @@ function wcpt_metabox( $meta_keys ) {
 
 	foreach ( $meta_keys as $key => $value ) :
 		$object_name = wcpt_key_to_str( $key, 'wcpt_' );
+		$readonly = ( WordCamp_Admin::is_protected_field( $key ) ) ? ' readonly="readonly"' : '';
 	?>
 
 		<div class="inside">
@@ -1089,7 +1131,7 @@ function wcpt_metabox( $meta_keys ) {
 
 				<p>
 					<strong><?php echo $key; ?></strong>:
-					<input type="checkbox" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" <?php checked( get_post_meta( $post_id, $key, true ) ); ?> />
+					<input type="checkbox" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" <?php checked( get_post_meta( $post_id, $key, true ) ); ?><?php echo $readonly; ?> />
 				</p>
 
 			<?php else : ?>
@@ -1107,7 +1149,7 @@ function wcpt_metabox( $meta_keys ) {
 					<?php switch ( $value ) :
 						case 'text' : ?>
 
-							<input type="text" size="36" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>" />
+							<input type="text" size="36" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo $readonly; ?> />
 
 						<?php break;
 						case 'date' :
@@ -1119,12 +1161,12 @@ function wcpt_metabox( $meta_keys ) {
 
 							?>
 
-							<input type="text" size="36" class="date-field" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo $date; ?>" />
+							<input type="text" size="36" class="date-field" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo $date; ?>"<?php echo $readonly; ?> />
 
 						<?php break;
 						case 'textarea' : ?>
 
-							<textarea rows="4" cols="23" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
+							<textarea rows="4" cols="23" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"<?php echo $readonly; ?>><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
 
 						<?php break;
 
