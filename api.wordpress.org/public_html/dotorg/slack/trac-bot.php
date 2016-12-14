@@ -6,8 +6,8 @@ namespace {
 
 	require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-	require WPORGPATH . 'bb-theme/themes/lib/class-IXR.php';
-	require WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
+	require dirname( dirname( __DIR__ ) ) . '/includes/class-IXR.php';
+	require dirname( dirname( __DIR__ ) ) . '/includes/class-trac.php';
 }
 
 namespace Dotorg\Slack\Trac {
