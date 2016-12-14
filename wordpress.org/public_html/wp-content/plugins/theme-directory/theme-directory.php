@@ -517,7 +517,7 @@ function wporg_themes_rollback_version( $post_id, $current_version, $old_status 
 	if ( ! class_exists( 'Trac' ) ) {
 		require_once ABSPATH . WPINC . '/class-IXR.php';
 		require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
-		require_once WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
+		require_once __DIR__ . '/lib/class-trac.php';
 	}
 
 	// Check for tickets that were set to live previously.

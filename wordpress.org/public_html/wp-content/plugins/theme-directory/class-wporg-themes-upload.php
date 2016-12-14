@@ -625,7 +625,7 @@ TICKET;
 			if ( ! class_exists( 'Trac' ) ) {
 				require_once ABSPATH . WPINC . '/class-IXR.php';
 				require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
-				require_once WPORGPATH . 'bb-theme/themes/lib/class-trac.php';
+				require_once __DIR__ . '/lib/class-trac.php';
 			}
 
 			$this->trac = new Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
