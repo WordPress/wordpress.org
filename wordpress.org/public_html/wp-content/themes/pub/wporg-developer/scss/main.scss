@@ -1468,15 +1468,19 @@
 
 	}
 
-	nav.handbook-navigation .nav-links a {
-		width: 49%;
-		display: inline-block;
-		&[rel="prev"] {
-			text-align: left;
-		}
-		&[rel="next"] {
-			text-align: right;
-			float: right;
+	nav.handbook-navigation {
+		margin-bottom: 3em;
+
+		.nav-links a {
+			width: 49%;
+			display: inline-block;
+			&[rel="prev"] {
+				text-align: left;
+			}
+			&[rel="next"] {
+				text-align: right;
+				float: right;
+			}
 		}
 	}
 

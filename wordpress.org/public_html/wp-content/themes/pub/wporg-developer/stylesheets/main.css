@@ -1816,6 +1816,10 @@ input {
   width: 100%;
 }
 
+.devhub-wrap nav.handbook-navigation {
+  margin-bottom: 3em;
+}
+
 .devhub-wrap nav.handbook-navigation .nav-links a {
   width: 49%;
   display: inline-block;
