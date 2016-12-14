@@ -597,7 +597,7 @@ TICKET;
 				$e = str_replace( $trac_left, $trac_right, $e );
 				$e = preg_replace( '/<pre.*?>/', "\r\n{{{\r\n", $e );
 				$e = str_replace( '</pre>', "\r\n}}}\r\n", $e );
-				$e = preg_replace( '!<span class="[^"]+">([^<]+)</span>!', '$1', $e );
+				$e = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $e );
 				$e = str_replace( '<br>', ' ', $e );
 
 				if ( 'INFO' !== substr( $e, 0, 4 ) ) {
