@@ -3,33 +3,16 @@
  * The user profile fields template.
  *
  * This template expects that the global $user variable is set.
- * This template also handles saving of the fields, not ideal, but does the job for now.
  *
  * @package wporg-login
  */
 
 $fields = array(
-	'url'       => '',
-	'from'      => '',
-	'occ'       => '',
-	'interests' => '',
+	'url'       => wp_get_current_user()->user_url ?: '',
+	'from'      => get_user_meta( get_current_user_id(), 'from', true ) ?: '',
+	'occ'       => get_user_meta( get_current_user_id(), 'occ', true ) ?: '',
+	'interests' => get_user_meta( get_current_user_id(), 'interests', true ) ?: '',
 );
-
-foreach ( array_keys( $fields ) as $field ) {
-	if ( $_POST && isset( $_POST['user_fields'][ $field ] ) ) {
-		$fields[ $field ] = sanitize_text_field( wp_unslash( $_POST['user_fields'][ $field ] ) );
-		if ( 'url' == $field ) {
-			wp_update_user( array(
-				'ID' => get_current_user_id(),
-				'user_url' => esc_url( $fields[ $field ] )
-			) );
-		} else {
-			update_user_meta( $user->ID, $field, $fields[ $field ] );
-		}
-	} else {
-		$fields[ $field ] = ( 'url' === $field ) ? $user->user_url : get_user_meta( $user->ID, $field, true );
-	}
-}
 
 ?>
 <p class="login-website">

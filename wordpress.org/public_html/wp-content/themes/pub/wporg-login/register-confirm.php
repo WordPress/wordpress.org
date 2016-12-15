@@ -33,6 +33,8 @@ if ( ! $can_access ) {
 } elseif ( !empty( $_POST['user_pass'] ) ) {
 	$user_pass = wp_unslash( $_POST['user_pass'] );
 
+	wporg_login_save_profile_fields();
+
 	add_filter( 'send_email_change_email', '__return_false' );
 	if ( wp_update_user( wp_slash( array(
 		'ID' => $user->ID,

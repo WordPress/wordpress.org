@@ -24,6 +24,8 @@ if ( ! $can_access ) {
 	die();
 }
 
+wporg_login_save_profile_fields();
+
 wp_enqueue_script( 'wporg-registration' );
 
 get_header();

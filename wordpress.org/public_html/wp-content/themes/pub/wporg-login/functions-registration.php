@@ -37,7 +37,7 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 	}
 
 	$user_id = wpmu_create_user( wp_slash( $user_login ), wp_generate_password(), wp_slash( $user_email ) );
-	if ( ! $user_id || is_wp_error( $user_id ) ) {
+	if ( ! $user_id ) {
 		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg-login' ) );
 	}
 
@@ -77,4 +77,25 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 
 	wp_safe_redirect( '/register/profile/' . $user_login . '/' . $nonce );
 	die();
+}
+
+function wporg_login_save_profile_fields() {
+	if ( ! $_POST || empty( $_POST['user_fields'] ) ) {
+		return;
+	}
+	$fields = array( 'url', 'from', 'occ', 'interests' );
+
+	foreach ( $fields as $field ) {
+		if ( isset( $_POST['user_fields'][ $field ] ) ) {
+			$value = sanitize_text_field( wp_unslash( $_POST['user_fields'][ $field ] ) );
+			if ( 'url' == $field ) {
+				wp_update_user( array(
+					'ID' => get_current_user_id(),
+					'user_url' => esc_url_raw( $value )
+				) );
+			} else {
+				update_user_meta( $user->ID, $field, $value );
+			}
+		}
+	}
 }
