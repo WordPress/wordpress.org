@@ -343,19 +343,34 @@ body.login form input.good {
 	border-color: #83c373;
 }
 
+body.route-register #login .message,
+body.route-register-profile #login .message,
+body.route-register-confirm #login .message {
+	margin-left: -24px;
+	padding-left: 24px;
+	padding-right: 0;
+}
+
 body.route-register #login .message.error,
 body.route-register-profile #login .message.error,
 body.route-register-confirm #login .message.error {
 	border-left-color: #dc3232;
 	margin-bottom: auto !important;
-	margin-left: -24px;
-	padding-left: 24px;
-	padding-right: 0;
 }
 body.route-register .message.error .avatar {
 	float: left;
 	border-radius: 50%;
 	margin-right: 1em;
+}
+
+body.route-register-profile #login .message.info {
+	margin-top: -24px;
+	width: 350px;
+}
+
+body.route-register-profile #login .message.info,
+body.route-register-profile p.intro {
+	margin-bottom: 1em !important;
 }
 
 form .login-mailinglist label {
