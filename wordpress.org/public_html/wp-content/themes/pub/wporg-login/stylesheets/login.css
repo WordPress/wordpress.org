@@ -162,16 +162,6 @@ strong {
 	box-shadow:none;
 }
 
-.side-by-side .btn {
-	display: inline-block;
-	max-width: 144px;
-	margin-right: 11px;
-}
-
-.side-by-side .btn:last-child {
-	margin-right: 0;
-}
-
 .singleline {
 	position:relative;
 	left:-12px;
@@ -306,10 +296,6 @@ form input[type="password"] {
 	font-weight: 400;
 }
 
-form#authorize {
-	margin-bottom: 24px;
-}
-
 #loginform p.submit,
 .login-action-lostpassword p.submit {
 	border: none;
@@ -387,27 +373,6 @@ form .login-mailinglist label {
 	font-size: 12px;
 	line-height: 1;
 	cursor: pointer;
-}
-
-.oauth {
-	width: 100%;
-	background: #32373c;
-	height: auto;
-	overflow: hidden;
-	margin-top: -24px;
-	-webkit-transition: all 0.3s ease;
-	transition: all 0.3s ease;
-}
-
-.oauth > div {
-	text-align: center;
-	margin: 0 auto;
-	padding: 48px 16px;
-	max-width: 1024px;
-}
-
-.oauth > div .partner-logo {
-	margin-bottom: 24px;
 }
 
 @media (max-width:375px) {
