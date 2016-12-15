@@ -360,8 +360,12 @@ body.route-register .message.error .avatar {
 
 form .login-mailinglist label {
 	font-size: 12px;
-	line-height: 1;
 	cursor: pointer;
+}
+
+form .login-mailinglist label input {
+	float: left;
+	margin: 0.5em 0.5em 0 0;
 }
 
 @media (max-width:375px) {
