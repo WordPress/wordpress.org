@@ -12,6 +12,14 @@ body.login {
 	align-items:center;
 }
 
+/* Don't use Flex alignments for the registration pages, doesn't play nice with content that exceeds the window height  */
+body.route-register,
+body.route-register-profile,
+body.route-register-confirm {
+	display: block;
+	margin-top: 100px;
+}
+
 .login-action-lostpassword.login .message,
 .login-action-rp.login .message,
 .login-action-login.login .message,
@@ -304,14 +312,6 @@ form input[type="password"] {
 	width: 100%;
 }
 
-
-body.route-register,
-body.route-register-profile,
-body.route-register-confirm {
-    padding-top: 105px;
-    height: auto;
-}
-
 body.route-register input.input,
 body.route-register-profile input.input,
 body.route-register-confirm input.input {
@@ -383,6 +383,20 @@ form .login-mailinglist label input {
 	margin: 0.5em 0.5em 0 0;
 }
 
+/* Clearfix for the forms, allows for non-flex-mode #login div to stretch over the submit button */
+form:before,
+form:after {
+	content: "";
+	display: table;
+	border-collapse: collapse;
+}
+form:after {
+	clear: both;
+}
+form {
+	min-height: 0; /* clearfix IE7 support */
+}
+
 @media (max-width:375px) {
 	body, html { 
 		background:#FFF; 
@@ -414,5 +428,13 @@ form .login-mailinglist label input {
 	#login h1 a {
 		-webkit-background-size:100%;
 		background-size:100%;
+	}
+}
+
+/* Disable flex display on smaller screens, as it cuts off the centered content */
+@media (max-height: 550px) {
+	body.login {
+		display: block;
+		margin-top: 100px;
 	}
 }
