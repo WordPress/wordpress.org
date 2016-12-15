@@ -6,6 +6,7 @@ jQuery(document).ready(function($){
 	$('#login form').on( 'blur', '#user_login, #user_email', function() {
 		var $this = $(this);
 		if ( ! $this.val() ) {
+			$this.parents('p').nextUntil( 'p', 'div.message.error').remove();
 			return;
 		}
 
