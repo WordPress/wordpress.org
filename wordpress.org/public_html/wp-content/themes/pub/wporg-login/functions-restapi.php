@@ -1,7 +1,7 @@
 <?php
 
 function wporg_login_rest_routes() {
-	register_rest_route( 'wporg/v1', '/username-available/(?P<login>[^/]+)', array(
+	register_rest_route( 'wporg/v1', '/username-available/(?P<login>.*)', array(
 		'methods'  => WP_REST_Server::READABLE,
 		'callback' => 'wporg_login_rest_username_exists'
 	) );
@@ -10,7 +10,7 @@ function wporg_login_rest_routes() {
 		'callback' => 'wporg_login_rest_username_exists'
 	) );
 
-	register_rest_route( 'wporg/v1', '/email-in-use/(?P<email>[^/]*)', array(
+	register_rest_route( 'wporg/v1', '/email-in-use/(?P<email>.*)', array(
 		'methods'  => WP_REST_Server::READABLE,
 		'callback' => 'wporg_login_rest_email_in_use'
 	) );
