@@ -102,11 +102,6 @@ body.login {
 	margin:0;
 }
 
-.g-recaptcha {
-	width: 304px;
-	margin: 0 auto;
-}
-
 /**
  * #.# Basic CSS
  *
@@ -169,7 +164,7 @@ strong {
 }
 
 #login {
-	width: 304px;
+	width: 350px;
 	padding: 24px;
 	margin: 0 auto 0;
 	background: #FFF;
@@ -221,7 +216,7 @@ p.intro, #login .message {
 	padding: 12px;
 	margin:-24px 0 24px -24px;
 	background-color: #fbfbfb;
-	width:304px;
+	width:350px;
 	border-bottom:1px solid #f5f5f5;
 	-webkit-box-shadow:none !important;
 	box-shadow:none !important;
@@ -315,12 +310,6 @@ body.route-register-profile,
 body.route-register-confirm {
     padding-top: 105px;
     height: auto;
-}
-
-body.route-register #login,
-body.route-register-profile #login,
-body.route-register-confirm #login {
-	width: 365px;
 }
 
 body.route-register input.input,
