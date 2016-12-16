@@ -887,8 +887,8 @@ namespace DevHub {
 
 		// If no alternative resource was referenced, use the deprecation string, if
 		// present.
-		if ( ! $deprecation_info && ! empty( $deprecated['content'] ) ) {
-			$deprecation_info = ' ' . sanitize_text_field ( $deprecated['content'] );
+		if ( ! $deprecation_info && ! empty( $deprecated['description'] ) ) {
+			$deprecation_info = ' ' . sanitize_text_field ( $deprecated['description'] );
 			// Many deprecation strings use the syntax "Use function()" instead of the
 			// preferred "Use function() instead." Add it in if missing.
 			if ( false === strpos( $deprecation_info, 'instead' ) ) {
