@@ -96,6 +96,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$plugin  = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
 		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">Frequently Asked Questions</a>', esc_attr( $this->slug() ) );
 		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
 		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
 		?>
 		<div>
@@ -107,6 +108,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 				<li><?php echo $faq; ?></li>
 				<?php endif; ?>
 				<li><?php echo $support; ?></li>
+				<li><?php echo $active; ?></li>
 				<li><?php echo $reviews; ?></li>
 			</ul>
 		</div>

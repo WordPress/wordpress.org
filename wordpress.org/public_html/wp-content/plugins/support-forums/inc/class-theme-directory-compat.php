@@ -94,6 +94,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 	public function do_topic_sidebar() {
 		$theme   = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
 		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$active  = sprintf( '<a href="//wordpress.org/support/theme/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
 		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
 		?>
 		<div>
@@ -101,6 +102,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 			<ul>
 				<li><?php echo $theme; ?></li>
 				<li><?php echo $support; ?></li>
+				<li><?php echo $active; ?></li>
 				<li><?php echo $reviews; ?></li>
 			</ul>
 		</div>
