@@ -137,6 +137,27 @@ function count_camps_being_mentored( $mentors ) {
 }
 
 /**
+ * Count the total number of camps without mentors, with and without a start date.
+ *
+ * @param array $unmentored_camps
+ *
+ * @return int
+ */
+function count_camps_without_mentors( $unmentored_camps ) {
+	$camps = 0;
+
+	if ( isset( $unmentored_camps['yesdate'] ) ) {
+		$camps += count( $unmentored_camps['yesdate'] );
+	}
+
+	if ( isset( $unmentored_camps['nodate'] ) ) {
+		$camps += count( $unmentored_camps['nodate'] );
+	}
+
+	return $camps;
+}
+
+/**
  * Get active camps that haven't been assigned a mentor
  *
  * @return array Multidimensional array of un-mentored camps divided by whether they have a start date set yet.

@@ -14,7 +14,7 @@ defined( 'WPINC' ) or die();
 	<ul class="ul-disc">
 		<li>Number of mentors:             <strong><?php echo count( $mentors ); ?></strong></li>
 		<li>Active camps being mentored:   <strong><?php echo absint( count_camps_being_mentored( $mentors ) ); ?></strong></li>
-		<li>Active camps without a mentor: <strong><?php echo count( $unmentored_camps ); ?></strong></li>
+		<li>Active camps without a mentor: <strong><?php echo absint( count_camps_without_mentors( $unmentored_camps ) ); ?></strong></li>
 	</ul>
 
 	<?php require_once( __DIR__ . '/mentors.php'          ); ?>
