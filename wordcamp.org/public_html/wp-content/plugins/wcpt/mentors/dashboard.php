@@ -288,7 +288,12 @@ function update_usernames() {
  * Display the result of `update_usernames`
  */
 function status_admin_notice() {
-	if ( ! isset( $_GET['wcpt-status'] ) ) {
+	global $pagenow;
+
+	if ( 'edit.php' !== $pagenow ||
+		 ! isset( $_GET['page'] ) ||
+		 'mentors' !== $_GET['page'] ||
+		 ! isset( $_GET['wcpt-status'] ) ) {
 		return;
 	}
 
