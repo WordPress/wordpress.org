@@ -892,6 +892,7 @@ namespace DevHub {
 			// Many deprecation strings use the syntax "Use function()" instead of the
 			// preferred "Use function() instead." Add it in if missing.
 			if ( false === strpos( $deprecation_info, 'instead' ) ) {
+				$deprecation_info = rtrim( $deprecation_info, '. ' );
 				$deprecation_info .= ' instead.'; // Not making translatable since rest of string is not translatable.
 			}
 		}
