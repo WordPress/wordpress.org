@@ -83,12 +83,12 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 		<p class="bbp-user-topic-count"><?php
 			/* translators: %s: number of user's topics */
-			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), bbp_get_user_topic_count_raw() );
+			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_topic_count_raw() ) );
 		?></p>
 
 		<p class="bbp-user-reply-count"><?php
 			/* translators: %s: number of user's replies */
-			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), bbp_get_user_reply_count_raw() );
+			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_reply_count_raw() ) );
 		?></p>
 	</div>
 </div><!-- #bbp-author-topics-started -->
