@@ -18,6 +18,13 @@ add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
  * Initialize admin functionality
  */
 function admin_init() {
+	// Send a nag email about un-mentored camps every Tuesday
+	if ( ! wp_next_scheduled( 'wcpt_mentors_assignment_nag' ) ) {
+		wp_schedule_single_event( strtotime( 'next Tuesday' ), 'wcpt_mentors_assignment_nag' );
+	}
+	add_action( 'wcpt_mentors_assignment_nag', __NAMESPACE__ . '\assignment_nag' );
+
+	// Admin notices
 	if ( isset( $_GET['wcpt-status'] ) ) {
 		add_action( 'admin_notices', __NAMESPACE__ . '\status_admin_notice' );
 	}
@@ -364,4 +371,42 @@ function get_all_mentor_data() {
 	\set_site_transient( MENTORS_CACHE_KEY, $data, DAY_IN_SECONDS );
 
 	return $data;
+}
+
+/**
+ * Send an email nag listing the current un-mentored camps.
+ */
+function assignment_nag() {
+	$unmentored_camps = get_unmentored_camps();
+
+	if ( empty( $unmentored_camps['yesdate'] ) && empty( $unmentored_camps['nodate'] ) ) {
+		return;
+	}
+
+	$dashboard_url = add_query_arg( array(
+		'post_type' => 'wordcamp',
+		'page'      => 'mentors',
+	), admin_url( 'edit.php' ) );
+
+	// Render message
+	ob_start(); ?>
+<?php require_once( dirname( __DIR__ ) . '/views/mentors/unmentored-camps.php' ); ?>
+
+<p><a href="<?php echo esc_url( $dashboard_url ); ?>">Mentors Dashboard &raquo;</a></p>
+<?php
+
+	$to      = array( 'support@wordcamp.org' );
+	$subject = 'WordCamps without a mentor as of ' . gmdate( 'Y-m-d \T H:i:s \Z' );
+	$message = ob_get_clean();
+	$headers = array(
+		'From:         noreply@wordcamp.org',
+		'Content-Type: text/html; charset=UTF-8',
+	);
+
+	wp_mail(
+		array_map( 'sanitize_email', $to ),
+		esc_html( $subject ),
+		wp_kses_post( $message ),
+		array_map( 'esc_html', $headers )
+	);
 }
