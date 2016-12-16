@@ -163,6 +163,7 @@ function get_whitelist() {
 			'casiepa',
 			'coachbirgit',
 			'deconf',
+			'nao',
 			'ocean90',
 			'petya',
 		),
