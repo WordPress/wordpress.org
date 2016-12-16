@@ -22,7 +22,6 @@ function admin_init() {
 	if ( ! wp_next_scheduled( 'wcpt_mentors_assignment_nag' ) ) {
 		wp_schedule_single_event( strtotime( 'next Tuesday' ), 'wcpt_mentors_assignment_nag' );
 	}
-	add_action( 'wcpt_mentors_assignment_nag', __NAMESPACE__ . '\assignment_nag' );
 
 	// Admin notices
 	if ( isset( $_GET['wcpt-status'] ) ) {
@@ -377,6 +376,8 @@ function get_all_mentor_data() {
 
 	return $data;
 }
+
+add_action( 'wcpt_mentors_assignment_nag', __NAMESPACE__ . '\assignment_nag' );
 
 /**
  * Send an email nag listing the current un-mentored camps.
