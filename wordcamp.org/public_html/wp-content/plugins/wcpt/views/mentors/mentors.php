@@ -29,9 +29,7 @@ defined( 'WPINC' ) or die();
 					<ul>
 						<?php foreach ( $mentor['camps_mentoring'] as $camp_id => $camp_name ) : ?>
 							<li>
-								<a href="<?php echo esc_url( admin_url( "post.php?post=$camp_id&action=edit#wcpt_mentor_wordpress_org_user_name" ) ); ?>">
-									<?php echo esc_html( $camp_name ); ?>
-								</a>
+								<a href="<?php echo esc_url( admin_url( "post.php?post=$camp_id&action=edit#wcpt_mentor_wordpress_org_user_name" ) ); ?>"><?php echo esc_html( $camp_name ); ?></a>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -41,4 +39,4 @@ defined( 'WPINC' ) or die();
 	</tbody>
 </table>
 
-<p class="description">(*) Camp has a Mentor email address but not a WordPress.org username.</p>
+<p class="description" style="text-align: right">* Camp has a Mentor email address but not a WordPress.org username.</p>

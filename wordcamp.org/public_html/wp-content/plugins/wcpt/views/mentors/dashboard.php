@@ -11,10 +11,10 @@ defined( 'WPINC' ) or die();
 <div class="wrap">
 	<h1>WordCamp Mentors Dashboard</h1>
 
-	<ul>
-		<li>Number of mentors:             <?php echo count( $mentors );                                ?></li>
-		<li>Active camps being mentored:   <?php echo absint( count_camps_being_mentored( $mentors ) ); ?></li>
-		<li>Active camps without a mentor: <?php echo count( $unmentored_camps );                       ?></li>
+	<ul class="ul-disc">
+		<li>Number of mentors:             <strong><?php echo count( $mentors ); ?></strong></li>
+		<li>Active camps being mentored:   <strong><?php echo absint( count_camps_being_mentored( $mentors ) ); ?></strong></li>
+		<li>Active camps without a mentor: <strong><?php echo count( $unmentored_camps ); ?></strong></li>
 	</ul>
 
 	<?php require_once( __DIR__ . '/mentors.php'          ); ?>
