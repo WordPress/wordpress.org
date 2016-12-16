@@ -45,14 +45,9 @@
 	?>
 
 	<form role="search" method="get" class="searchform<?php echo esc_attr( $form_class ); ?>" action="<?php echo esc_url( $search_url ); ?>">
-		<div>
-		<label>
-			<label for="search-field" class="screen-reader-text"><?php _ex( 'Search for:', 'label', 'wporg' ); ?></label>
-			<input type="text" id="search-field" class="search-field" placeholder="<?php echo esc_attr_x( 'Search &hellip;', 'placeholder', 'wporg' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>" name="s">
-		</label>
-		<input type="submit" class="shiny-blue search-submit" value="<?php echo esc_attr_x( 'Search', 'submit button', 'wporg' ); ?>">
-		</div>
-
+		<label for="search-field" class="screen-reader-text"><?php _ex( 'Search for:', 'label', 'wporg' ); ?></label>
+		<input type="text" id="search-field" class="search-field" placeholder="<?php echo esc_attr_x( 'Search &hellip;', 'placeholder', 'wporg' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>" name="s">
+		<button class="button button-primary button-search"><i class="dashicons dashicons-search"></i><span class="screen-reader-text"><?php _e( 'Search plugins', 'wporg' ); ?></span></button>
 	<?php if ( $filters ) : ?>
 
 		<div class="search-post-type">

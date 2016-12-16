@@ -135,10 +135,6 @@
 		}
 	}
 
-	main {
-		font-size: 1.5rem;
-	}
-
 	a.button,
 	button,
 	input {
@@ -671,10 +667,6 @@
 		clear: none;
 	}
 
-	.section.search-section {
-		padding-bottom: 0;
-	}
-
 	.reference-landing .section.search-section {
 		padding-top: 0;
 	}
@@ -733,17 +725,26 @@
 	.searchform {
 		overflow: hidden;
 		height: auto;
-		margin-bottom: 1em;
-		input[type="text"], input[type="submit"] {
-			height: 50px;
-			height: 5rem;
-			margin-bottom: 1em;
+		position: relative;
+		input[type="text"] {
+			border-radius: 0;
+			margin: 0 auto;
+			padding: 0.5em;
 			width: 100%;
 		}
-		input[type="submit"] {
-			width: 85px;
-			width: 8.5rem;
-			float: left;
+		.button-search {
+			background: transparent;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+			color: #32373c;
+			display: block;
+			height: 40px;
+			padding: 0.5rem 1rem;
+			position: absolute;
+			right: 0;
+			top: 0;
+			text-shadow: none;
 		}
 		label {
 			width: 560px;
@@ -760,6 +761,8 @@
 			overflow: auto;
 		}
 		.search-post-type {
+			margin-top: 1em;
+
 			label {
 				border-right: 1px solid #ccc;
 				float: none;
@@ -787,7 +790,7 @@
 		max-width: 700px;
 		max-width: 70rem;
 		margin: 0 auto;
-		padding: 1.5em 0;
+		padding: 1.5em 1em;
 	}
 
 	.reference-landing {

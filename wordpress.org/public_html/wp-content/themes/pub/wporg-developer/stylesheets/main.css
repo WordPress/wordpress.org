@@ -443,10 +443,6 @@ input {
   width: 2.2rem;
 }
 
-.devhub-wrap main {
-  font-size: 1.5rem;
-}
-
 .devhub-wrap a.button,
 .devhub-wrap button,
 .devhub-wrap input {
@@ -1017,10 +1013,6 @@ input {
   clear: none;
 }
 
-.devhub-wrap .section.search-section {
-  padding-bottom: 0;
-}
-
 .devhub-wrap .reference-landing .section.search-section {
   padding-top: 0;
 }
@@ -1083,20 +1075,29 @@ input {
 .devhub-wrap .searchform {
   overflow: hidden;
   height: auto;
-  margin-bottom: 1em;
+  position: relative;
 }
 
-.devhub-wrap .searchform input[type="text"], .devhub-wrap .searchform input[type="submit"] {
-  height: 50px;
-  height: 5rem;
-  margin-bottom: 1em;
+.devhub-wrap .searchform input[type="text"] {
+  border-radius: 0;
+  margin: 0 auto;
+  padding: 0.5em;
   width: 100%;
 }
 
-.devhub-wrap .searchform input[type="submit"] {
-  width: 85px;
-  width: 8.5rem;
-  float: left;
+.devhub-wrap .searchform .button-search {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #32373c;
+  display: block;
+  height: 40px;
+  padding: 0.5rem 1rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  text-shadow: none;
 }
 
 .devhub-wrap .searchform label {
@@ -1114,6 +1115,10 @@ input {
 
 .devhub-wrap .searchform div {
   overflow: auto;
+}
+
+.devhub-wrap .searchform .search-post-type {
+  margin-top: 1em;
 }
 
 .devhub-wrap .searchform .search-post-type label {
@@ -1143,7 +1148,7 @@ input {
   max-width: 700px;
   max-width: 70rem;
   margin: 0 auto;
-  padding: 1.5em 0;
+  padding: 1.5em 1em;
 }
 
 .devhub-wrap .reference-landing .section h2,
