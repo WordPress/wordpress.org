@@ -1513,7 +1513,7 @@ input {
 }
 
 .devhub-wrap .callout:before {
-  top: 0.2em;
+  top: 0.4em;
 }
 
 .devhub-wrap.archive .wp-parser-class h1, .devhub-wrap.archive .wp-parser-function h1, .devhub-wrap.archive .wp-parser-hook h1, .devhub-wrap.archive .wp-parser-method h1, .devhub-wrap.search .wp-parser-class h1, .devhub-wrap.search .wp-parser-function h1, .devhub-wrap.search .wp-parser-hook h1, .devhub-wrap.search .wp-parser-method h1 {
