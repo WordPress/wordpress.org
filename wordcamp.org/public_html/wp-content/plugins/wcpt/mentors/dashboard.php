@@ -133,10 +133,13 @@ function count_camps_being_mentored( $mentors ) {
 /**
  * Get active camps that haven't been assigned a mentor
  *
- * @return array
+ * @return array Multidimensional array of un-mentored camps divided by whether they have a start date set yet.
  */
 function get_unmentored_camps() {
-	$unmentored_camps = array();
+	$unmentored_camps = array(
+		'yesdate' => array(),
+		'nodate'  => array(),
+	);
 
 	$post_statuses = array_diff(
 		\WordCamp_Loader::get_mentored_post_statuses(),
@@ -148,7 +151,7 @@ function get_unmentored_camps() {
 		'post_status'    => $post_statuses,
 		'posts_per_page' => 10000,
 		'order'          => 'ASC',
-		'orderby'        => 'meta_value',
+		'orderby'        => 'meta_value name',
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'meta_query'     => array(
 			'relation' => 'OR',
@@ -167,18 +170,13 @@ function get_unmentored_camps() {
 	foreach ( $posts as $post ) {
 		$start_date = wcpt_get_wordcamp_start_date( $post->ID );
 		$email = get_post_meta( $post->ID, 'Mentor E-mail Address', true );
+		$section = ( $start_date ) ? 'yesdate' : 'nodate';
 
-		$camp_name = $post->post_title;
-
-		if ( $start_date ) {
-			$camp_name .= " ($start_date)";
-		}
-
-		if ( $email ) {
-			$camp_name .= ' *';
-		}
-
-		$unmentored_camps[ $post->ID ] = $camp_name;
+		$unmentored_camps[ $section ][ $post->ID ] = array(
+			'name'      => $post->post_title,
+			'date'      => $start_date,
+			'has_email' => ! ! $email,
+		);
 	}
 
 	return $unmentored_camps;

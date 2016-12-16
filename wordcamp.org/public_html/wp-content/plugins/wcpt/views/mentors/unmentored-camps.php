@@ -7,26 +7,46 @@ defined( 'WPINC' ) or die();
 
 ?>
 
-<h2>Active Camps without a Mentor</h2>
+<div class="card">
 
-<p class="description">Note: This is based on the <strong>Mentor WordPress.org User Name</strong> field. Some of these camps may have Mentor name and/or email data, but have not yet been updated with the WordPress.org username.</p>
+	<?php if ( $unmentored_camps ) : ?>
 
-<?php if ( $unmentored_camps ) : ?>
+		<h2>Active Camps without a Mentor</h2>
 
-	<ul class="ul-disc">
-		<?php foreach ( $unmentored_camps as $id => $name ) : ?>
-			<li>
-				<a href="<?php echo esc_url( admin_url( "post.php?post=$id&action=edit#wcpt_mentor_wordpress_org_user_name" ) ); ?>">
-					<?php echo esc_html( $name ); ?>
-				</a>
-			</li>
-		<?php endforeach; ?>
-	</ul>
+		<?php if ( ! empty( $unmentored_camps['yesdate'] ) ) : ?>
 
-	<p class="description">(*) Camp has a Mentor email address but no WordPress.org username.</p>
+			<ul class="ul-disc">
+				<?php foreach ( $unmentored_camps['yesdate'] as $id => $camp ) : ?>
+					<li>
+						<a href="<?php echo esc_url( admin_url( "post.php?post=$id&action=edit#wcpt_mentor_wordpress_org_user_name" ) ); ?>"><?php echo esc_html( $camp['name'] ); ?></a> (<?php echo esc_html( $camp['date'] ); ?>)<?php if ( $camp['has_email'] ) : echo ' *'; $unmentored_camps['footnote'] = true; endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 
-<?php else : ?>
+		<?php endif; ?>
+		<?php if ( ! empty( $unmentored_camps['nodate'] ) ) : ?>
 
-	<p>All active camps have been assigned a mentor.</p>
+			<p><strong>No start date yet</strong></p>
 
-<?php endif; ?>
+			<ul class="ul-disc">
+				<?php foreach ( $unmentored_camps['nodate'] as $id => $camp ) : ?>
+					<li>
+						<a href="<?php echo esc_url( admin_url( "post.php?post=$id&action=edit#wcpt_mentor_wordpress_org_user_name" ) ); ?>"><?php echo esc_html( $camp['name'] ); ?></a><?php if ( $camp['has_email'] ) : echo ' *'; $unmentored_camps['footnote'] = true; endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+
+		<?php endif; ?>
+		<?php if ( isset( $unmentored_camps['footnote'] ) ) : ?>
+
+			<p><em>* Camp has a Mentor email address but not a WordPress.org username matching an active Mentor.</em></p>
+
+		<?php endif; ?>
+
+	<?php else : ?>
+
+		<p>All active camps have been assigned a mentor.</p>
+
+	<?php endif; ?>
+
+</div>
