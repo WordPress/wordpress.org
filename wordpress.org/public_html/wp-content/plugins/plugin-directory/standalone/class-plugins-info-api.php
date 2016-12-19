@@ -112,12 +112,6 @@ class Plugins_Info_API {
 			if ( 'reviews' === $field && ! $include ) {
 				unset( $response['sections']['reviews'] );
 			}
-			if ( 'enhanced_faq' === $field ) {
-				if ( $include ) {
-					 $response['sections']['faq'] = $response['sections']['enhanced_faq'];
-				}
-				unset( $response['sections']['enhanced_faq'] );
-			}
 		}
 
 		// Back-compatible routines.
@@ -212,7 +206,7 @@ class Plugins_Info_API {
 	 * Generates a cache key for a 'hot_tags' API request.
 	 */
 	protected function popular_tags_cache_key( $request ) {
-		return 'hot_tags:' . $request->locale;;
+		return 'hot_tags:' . $request->locale;
 	}
 
 	/**

@@ -47,7 +47,6 @@ class Plugins_Info_API_Request {
 		'sections'          => true,
 		'tags'              => true,
 		'tested'            => true,
-		'enhanced_faq'      => false,
 	);
 
 	static $query_plugins_fields_defaults = array(
@@ -66,7 +65,6 @@ class Plugins_Info_API_Request {
 		'short_description' => true,
 		'tags'              => true,
 		'tested'            => true,
-		'enhanced_faq'      => false,
 	);
 
 	public function __construct( $args ) {

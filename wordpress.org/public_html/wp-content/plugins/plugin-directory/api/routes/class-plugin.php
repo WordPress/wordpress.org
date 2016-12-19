@@ -110,10 +110,11 @@ class Plugin extends Base {
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
 			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
 		}
+		$result['sections']['screenshots'] = ''; // placeholder to put screenshots prior to reviews at the end.
 		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
+
 		if ( !empty( $result['sections']['faq'] ) ) {
-			$result['sections']['enhanced_faq'] = $result['sections']['faq'];
-			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['enhanced_faq'] );
+			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['faq'] );
 		} 
 		
 		$result['description'] = $result['sections']['description'];
@@ -134,6 +135,12 @@ class Plugin extends Base {
 				'src'     => Template::get_asset_url( $post, $image ),
 				'caption' => array_key_exists( $image['resolution'], $descriptions ) ? $descriptions[ $image['resolution'] ] : ''
 			);
+		}
+
+		if ( $result['screenshots'] ) {
+			$result['sections']['screenshots'] = $this->get_screenshot_markup( $result['screenshots'] );
+		} else {
+			unset( $result['sections']['screenshots'] );
 		}
 
 		$result['tags'] = array();
@@ -290,6 +297,29 @@ class Plugin extends Base {
 			$markup
 		);
 
+		return $markup;
+	}
+
+	protected function get_screenshot_markup( $screenshots ) {
+		$markup = '<ol>';
+
+		foreach ( $screenshots as $shot ) {
+			if ( $shot['caption'] ) {
+				$markup .= sprintf(
+					'<li><a href="%1$s"><img src="%1$s" alt="%2$s"></a><p>%3$s</p></li>',
+					esc_attr( $shot['src'] ),
+					esc_attr( $shot['caption'] ),
+					$shot['caption']
+				);
+			} else {
+				$markup .= sprintf(
+					'<li><a href="%1$s"><img src="%1$s" alt=""></a></li>',
+					esc_attr( $shot['src'] )
+				);
+			}
+		}
+
+		$markup .= '</ol>';
 		return $markup;
 	}
 
