@@ -112,6 +112,12 @@ class Plugins_Info_API {
 			if ( 'reviews' === $field && ! $include ) {
 				unset( $response['sections']['reviews'] );
 			}
+			if ( 'enhanced_faq' === $field ) {
+				if ( $include ) {
+					 $response['sections']['faq'] = $response['sections']['enhanced_faq'];
+				}
+				unset( $response['sections']['enhanced_faq'] );
+			}
 		}
 
 		// Back-compatible routines.
@@ -179,8 +185,8 @@ class Plugins_Info_API {
 	 * API Endpoint for the 'popular_tags' and 'hot_tags' API endpoints.
 	 */
 	public function popular_tags( $request ) {
-		if ( false === ( $response = false&& wp_cache_get( $cache_key = $this->popular_tags_cache_key( $request ), self::CACHE_GROUP ) ) ) {
-			$response = $this->internal_rest_api_call( 'plugins/v1/popular-categories', array( 'locale' => $request->locale ) );
+		if ( false === ( $response = wp_cache_get( $cache_key = $this->popular_tags_cache_key( $request ), self::CACHE_GROUP ) ) ) {
+			$response = $this->internal_rest_api_call( 'plugins/v1/popular-tags', array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {
 				$response = array( 'error' => 'Temporarily Unavailable' );
@@ -190,17 +196,23 @@ class Plugins_Info_API {
 			}
 		}
 
-		if ( $request->number && count( $response ) > $request->number ) {
-			$response = array_slice( $response, 0, $request->number, true );
+		$number_items_requested = 100;
+		if ( !empty( $request->number ) ) {
+			$number_items_requested = $request->number;
+		}
+
+		if ( count( $response ) > $number_items_requested ) {
+			$response = array_slice( $response, 0, $number_items_requested, true );
 		}
 
 		$this->output( (object) $response );
 	}
+
 	/**
-	 * Generates a cache key for a 'hot_categories' API request.
+	 * Generates a cache key for a 'hot_tags' API request.
 	 */
 	protected function popular_tags_cache_key( $request ) {
-		return 'hot_categories:' . $request->locale;
+		return 'hot_tags:' . $request->locale;;
 	}
 
 	/**

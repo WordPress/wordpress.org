@@ -111,6 +111,11 @@ class Plugin extends Base {
 			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
 		}
 		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
+		if ( !empty( $result['sections']['faq'] ) ) {
+			$result['sections']['enhanced_faq'] = $result['sections']['faq'];
+			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['enhanced_faq'] );
+		} 
+		
 		$result['description'] = $result['sections']['description'];
 
 		$result['short_description'] = $post->post_excerpt;
@@ -268,6 +273,24 @@ class Plugin extends Base {
 <?php
 		return ob_get_clean();
 
+	}
+
+	/**
+	 * Return a 'simplified' markup for the FAQ screen.
+	 * WordPress only supports a whitelisted selection of tags, `<dl>` is not one of them.
+	 *
+	 * @see https://core.trac.wordpress.org/browser/tags/4.7/src/wp-admin/includes/plugin-install.php#L478
+	 * @param string $markup The existing Markup.
+	 * @return string Them markup with `<dt>` replaced with `<h4>` and `<dd>` with `<p>`.
+	 */
+	protected function get_simplified_faq_markup( $markup ) {
+		$markup = str_replace(
+			array( '<dl>', '</dl>', '<dt>', '</dt>', '<dd>', '</dd>' ),
+			array( '',      '',     '<h4>', '</h4>', '<p>',  '</p>'  ),
+			$markup
+		);
+
+		return $markup;
 	}
 
 }

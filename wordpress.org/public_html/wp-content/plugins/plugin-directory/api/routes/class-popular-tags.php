@@ -24,7 +24,12 @@ class Popular_Tags extends Base {
 	 * @return array A formatted array of all plugin categories on the site.
 	 */
 	function popular_tags( $request ) {
-		$terms = get_terms( 'plugin_tags', array( 'hide_empty' => false, 'orderby' => 'count', 'order' => 'DESC' ) );
+		$terms = get_terms( 'plugin_tags', array(
+			'hide_empty' => true,
+			'orderby' => 'count',
+			'order' => 'DESC',
+			'number' => 1000
+		) );
 
 		$response = array();
 		foreach ( $terms as $term ) {
