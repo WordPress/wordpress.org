@@ -79,23 +79,24 @@ class Import {
 			$status = 'disabled';
 		}
 
+		$plugin_existed_already = (bool) $plugin;
 		if ( ! $plugin ) {
 			$author_ip = $wpdb->get_var( $wpdb->prepare( 'SELECT poster_ip FROM ' . PLUGINS_TABLE_PREFIX . 'posts WHERE topic_id = %s', $topic->topic_id ) );
 
+			add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 			$plugin = Plugin_Directory::create_plugin_post( array(
 				'post_name' => $plugin_slug,
 				'post_status' => $status,
 				'post_author' => $topic->topic_poster,
-				'override_modified_date' => true,
 				'post_date_gmt' => $topic->topic_start_time,
 				'post_date' => $topic->topic_start_time,
 				'post_modified' => $topic->topic_time,
 				'post_modified_gmt' => $topic->topic_time,
 				'meta_input' => array(
 					'_author_ip' => $author_ip,
-					'_publish'   => $topic->approved,
 				),
 			) );
+			remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
 		}
 		$plugin->post_status = $status;
 
@@ -119,9 +120,11 @@ class Import {
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
 		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
 
-		// Bump last updated if the version has changed.
+		// Bump last updated if the version has changed, but only if this isn't a fresh import.
 		if ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
-			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			if ( $plugin_existed_already ) {
+				$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
+			}
 		}
 
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
