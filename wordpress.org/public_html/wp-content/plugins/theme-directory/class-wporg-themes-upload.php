@@ -774,13 +774,38 @@ https://make.wordpress.org/themes', 'wporg-themes' ),
 			);
 
 			/* translators: 1: theme name, 2: Trac ticket URL */
-			$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. If your theme is selected to be part of the directory we\'ll send a follow up email.
+			$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Theme Directory. A ticket has been created for the review:
+<%2$s>
 
-Feedback will be provided at %2$s
+** Requirements **
+The theme must pass all the requirements to be included in the Theme Directory. The ticket will be closed if five or more different errors are found.
+<https://make.wordpress.org/themes/handbook/review/required/>
 
---
-The WordPress.org Themes Team
-https://make.wordpress.org/themes', 'wporg-themes' ),
+** Review Process **
+To understand the review process, read the summary in our handbook:
+<https://make.wordpress.org/themes/handbook/review/>
+
+** Accessibility Ready **
+If you\'ve submitted a theme with the accessibility ready tag, it will go through a secondary review process to meet accessibility guidelines.
+Please review the guidelines in our handbook:
+<https://make.wordpress.org/themes/handbook/review/accessibility/>
+
+** Theme Updates **
+You can update your theme any time and it will be added to the ticket. You can do so by bumping up your theme\'s version number in your style.css and uploading a new ZIP file.
+<https://wordpress.org/themes/getting-started/>
+
+** Contribute! **
+You can help speed up the process by making sure that your theme follows all of the requirements. You can also help by becoming a reviewer.
+<https://make.wordpress.org/themes/handbook/get-involved/become-a-reviewer/>
+
+** Questions? **
+If you have questions you can ask the reviewer in the ticket or chat with us on Slack in the #themereview channel. <https://chat.wordpress.org/>
+
+Subscribe to the Theme Review blog to stay up to date with the latest requirements and the ongoing work to improve the review process:
+<https://make.wordpress.org/themes/>
+
+Thank you.
+The WordPress Theme Review Team', 'wporg-themes' ),
 				$this->theme->display( 'Name' ),
 				'https://themes.trac.wordpress.org/ticket/' . $ticket_id
 			);
