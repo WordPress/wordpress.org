@@ -282,10 +282,27 @@ class Import {
 	protected function export_and_parse_plugin( $plugin_slug ) {
 		$tmp_dir = Filesystem::temp_directory( "process-{$plugin_slug}" );
 
+		// We assume the stable tag is trunk to start with.
+		$stable_tag = 'trunk';
+
 		// Find the trunk readme file, list remotely to avoid checking out the entire directory.
-		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" );
+		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" ) ?: array();
+
+		// Find the list of tagged versions of the plugin.
+		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
+		$tagged_versions = array_map( function( $item ) {
+			return rtrim( $item, '/' );
+		}, $tagged_versions );
+
+		// Not all plugins utilise `trunk`, some just tag versions.
 		if ( ! $trunk_files ) {
-			throw new Exception( 'Plugin has no files in trunk.' );
+			if ( ! $tagged_versions ) {
+				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
+			}
+
+			$stable_tag = array_reduce( $tagged_versions, function( $a, $b ) {
+				return version_compare( $a, $b, '>' ) ? $a : $b;
+			} );
 		}
 
 		// A plugin historically doesn't have to have a readme.
@@ -303,8 +320,6 @@ class Import {
 			$trunk_readme = new Parser( $trunk_readme_file );
 
 			$stable_tag = $trunk_readme->stable_tag;
-		} else {
-			$stable_tag = 'trunk';
 		}
 
 		$exported = false;
@@ -337,6 +352,11 @@ class Import {
 			}
 		}
 		if ( ! $exported ) {
+			// Catch the case where exporting a tag finds nothing, but there was nothing in trunk either.
+			if ( ! $trunk_files ) {
+				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
+			}
+
 			$stable_tag = 'trunk';
 			// Either stable_tag = trunk, or the stable_tag tag didn't exist.
 			$svn_export = SVN::export(
@@ -379,11 +399,6 @@ class Import {
 				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location' );
 			}
 		}
-
-		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
-		$tagged_versions = array_map( function( $item ) {
-			return rtrim( $item, '/' );
-		}, $tagged_versions );
 
 		// Find screenshots in the stable plugin folder (but don't overwrite /assets/)
 		foreach ( Filesystem::list_files( "$tmp_dir/export/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
