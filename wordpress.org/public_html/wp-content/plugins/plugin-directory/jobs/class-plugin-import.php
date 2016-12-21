@@ -31,7 +31,7 @@ class Plugin_Import {
 	 */
 	public static function cron_trigger( $plugin_data ) {
 		$plugin_slug  = $plugin_data['plugin'];
-		$changed_tags = $plugin_data['tags_touched'];
+		$changed_tags = isset( $plugin_data['tags_touched'] ) ? $plugin_data['tags_touched'] : array( 'trunk' );
 
 		try {
 			$importer = new CLI\Import;

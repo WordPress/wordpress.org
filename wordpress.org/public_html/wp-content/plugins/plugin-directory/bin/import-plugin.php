@@ -8,7 +8,7 @@ if ( 'cli' != php_sapi_name() ) {
 
 ob_start();
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'async' ) );
 
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
@@ -27,6 +27,8 @@ if ( empty( $opts['changed-tags'] ) ) {
 } else {
 	$opts['changed-tags'] = explode( ',', $opts['changed-tags'] );
 }
+
+$opts['async'] = isset( $opts['async'] );
 
 foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
@@ -55,6 +57,13 @@ if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 $plugin_slug  = $opts['plugin'];
 $changed_tags = $opts['changed-tags'];
 $start_time   = microtime(1);
+
+// If async, queue it to be parsed instead.
+if ( $opts['async'] ) {
+	Jobs\Plugin_Import::queue( $plugin_slug, array( 'tags_touched' => $changed_tags ) );
+	echo "Queueing Import for $plugin_slug... OK\n";
+	die();
+}
 
 echo "Processing Import for $plugin_slug... ";
 try {
