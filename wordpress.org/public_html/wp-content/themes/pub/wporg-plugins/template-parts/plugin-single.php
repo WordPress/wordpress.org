@@ -102,7 +102,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 
 		<span class="byline"><?php
 			$url = get_post_meta( get_the_ID(), 'header_author_uri', true );
-			$author = get_post_meta( get_the_ID(), 'header_author', true ) ?: get_the_author();
+			$author = strip_tags( get_post_meta( get_the_ID(), 'header_author', true ) ) ?: get_the_author();
 
 			printf(
 				_x( 'By %s', 'post author', 'wporg-plugins' ),
