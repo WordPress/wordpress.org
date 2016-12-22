@@ -70,7 +70,7 @@ class Plugins_Info_API {
 
 			if ( 200 != $response->status ) {
 				$response = array( 'error' => 'Plugin not found.' );
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 60*60 ); // 1 hour TTL for 404's?
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 15*60 ); // shorter TTL for missing/erroring plugins.
 			} else {
 				$response = $response->data;
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
@@ -81,8 +81,17 @@ class Plugins_Info_API {
 			return $response;
 		}
 
+		// Backwards compatibility; the API returns null in case of error..
+		if ( isset( $response['error'] ) ) {
+			$this->output( null );
+			return;
+		}
+
+
 		// Only include the fields requested.
-		$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
+		if ( ! isset( $response['error'] ) ) {
+			$response = $this->remove_unexpected_fields( $response, $request, 'plugin_information' );
+		}
 
 		$this->output( (object) $response );
 	}
@@ -147,17 +156,28 @@ class Plugins_Info_API {
 		if ( false === ( $response = wp_cache_get( $cache_key, self::CACHE_GROUP ) ) ) {
 			$response = $this->internal_rest_api_call( 'plugins/v1/query-plugins', $request->query_plugins_params_for_query() );
 			if ( 200 != $response->status ) {
-				$this->output( (object) array( 'error' => 'Query Failed.' ) );
-				return;
+				$response = array( 'error' => 'Query Failed.' );
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
 			}
 		}
 
+		if ( isset( $response['error'] ) ) {
+			$this->output( $response );
+			return;
+		}
+
 		// Fill in the plugin details
 		foreach ( $response['plugins'] as $i => $plugin_slug ) {
-			$response['plugins'][ $i ] = $this->plugin_information( new Plugins_Info_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
+			$plugin = $this->plugin_information( new Plugins_Info_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
+			if ( isset( $plugin['error'] ) ) {
+				unset( $response['plugins'][ $i ] );
+				continue;
+			}
+
+			$response['plugins'][ $i ] = $plugin;
 		}
 
 		// Trim fields and cast to object
@@ -184,10 +204,16 @@ class Plugins_Info_API {
 
 			if ( 200 != $response->status ) {
 				$response = array( 'error' => 'Temporarily Unavailable' );
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
 			}
+		}
+
+		if ( isset( $response['error'] ) ) {
+			$this->output( (object) $response );
+			return;
 		}
 
 		$number_items_requested = 100;
