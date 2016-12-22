@@ -450,13 +450,13 @@ a img.aligncenter {
 
 #download-mobile span.download-ready {
 	font-size: 1.6em;
-	margin-right: 20px;
 }
 
 #download-mobile a.download-button {
 	height: inherit;
 	padding: 10px 15px;
 	font-size: 1.6em;
+	margin-top: 10px;
 }
 
 .wporg-page-nightly .wrapper {
