@@ -227,6 +227,8 @@ function wcorg_esc_csv( $fields ) {
  *
  * @todo Add support for wp_remote_post() too
  * @todo Remove this if https://github.com/rmccue/Requests/issues/222 is implemented
+ * @todo maybe `set_time_limit( absint( ini_get( 'max_execution_time' ) ) + $retry_after );` before sleep()'ing to
+ *       avoid php timeout
  *
  * @param string $request_url
  * @param array  $request_args

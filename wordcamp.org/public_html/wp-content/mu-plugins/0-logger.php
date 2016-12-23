@@ -52,7 +52,7 @@ function log( $error_code, $data = array() ) {
  * @return array
  */
 function redact_keys( & $data ) {
-	$redacted_keys = array( 'Authorization', 'password', 'user_pass' );
+	$redacted_keys = array( 'Authorization', 'password', 'user_pass', 'key', 'apikey', 'api_key' );
 	$redacted_keys = array_map( 'strtolower', $redacted_keys ); // to avoid human error
 
 	foreach ( $data as $key => $value ) {
