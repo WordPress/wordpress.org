@@ -1,5 +1,9 @@
 <?php
 
+/*
+ * @todo Rework to take advantage of Additional CSS in 4.7, rather than duplicating syntax highlighting, etc
+ */
+
 namespace CampTix\Badge_Generator\HTML;
 use \CampTix\Badge_Generator;
 

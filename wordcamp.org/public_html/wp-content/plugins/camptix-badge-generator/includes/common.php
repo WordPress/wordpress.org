@@ -127,7 +127,9 @@ function add_dynamic_post_meta( $value, $post_id, $meta_key ) {
 
 	$attendee = get_post( $post_id );
 
-	// todo return early to avoid a PHP notice when $attendee isn't a WP_Post, like during cron or 404
+	if ( ! is_a( $attendee, 'WP_Post' ) ) {
+		return $value;
+	}
 
 	if ( 'tix_attendee' != $attendee->post_type ) {
 		return $value;
