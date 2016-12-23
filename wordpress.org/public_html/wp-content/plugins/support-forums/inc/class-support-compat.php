@@ -11,6 +11,19 @@ class Support_Compat {
 	var $query      = null;
 	var $user       = null;
 
+	/**
+	 * Forums to be hidden from main forum listing.
+	 *
+	 * @var array
+	 */
+	const HIDDEN_FORUMS = array(
+		21261, // Themes and Templates
+		21262, // Plugins and Hacks
+		21267, // Your WordPress
+		21270, // Meetups
+		21272, // Reviews
+	);
+
 	public function __construct() {
 		if ( ! $this->loaded ) {
 			// Intercept feed requests prior to bbp_request_feed_trap.
@@ -39,7 +52,33 @@ class Support_Compat {
 			// Redirect old topic ids to topic permalinks.
 			add_action( 'template_redirect', array( $this, 'redirect_old_topic_id' ), 9 );
 
+			// Exclude certain forums from forum queries.
+			add_action( 'pre_get_posts', array( $this, 'exclude_hidden_forums' ), 1 );
+
 			$this->loaded = true;
+		}
+	}
+
+	/**
+	 * Excludes certain forums from queries for forums.
+	 *
+	 * Notes:
+	 * - The forums themselves are still meant to be directly accessible.
+	 * - A hidden forum may not necessarily be closed.
+	 *
+	 * @param WP_Query $q Query object.
+	 */
+	public function exclude_hidden_forums( $q ) {
+		if (
+			! is_admin()
+			&&
+			! empty( $q->query_vars['post_type'] )
+			&&
+			bbp_get_forum_post_type() === $q->query_vars['post_type']
+			&&
+			empty( $q->query_vars['forum'] )
+		) {
+			$q->query_vars['post__not_in'] = array_merge( $q->query_vars['post__not_in'], self::HIDDEN_FORUMS );
 		}
 	}
 
