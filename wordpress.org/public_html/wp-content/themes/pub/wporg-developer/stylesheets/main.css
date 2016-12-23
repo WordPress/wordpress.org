@@ -1495,12 +1495,16 @@ input {
   width: 300px;
 }
 
-.devhub-wrap .wp-parser-class .table-of-contents ul, .devhub-wrap .wp-parser-function .table-of-contents ul, .devhub-wrap .wp-parser-hook .table-of-contents ul, .devhub-wrap .wp-parser-method .table-of-contents ul {
-  margin-top: 6px;
+.devhub-wrap .wp-parser-class .table-of-contents > ul, .devhub-wrap .wp-parser-function .table-of-contents > ul, .devhub-wrap .wp-parser-hook .table-of-contents > ul, .devhub-wrap .wp-parser-method .table-of-contents > ul {
+  margin-bottom: 0;
 }
 
 .devhub-wrap .wp-parser-class ul.items li, .devhub-wrap .wp-parser-function ul.items li, .devhub-wrap .wp-parser-hook ul.items li, .devhub-wrap .wp-parser-method ul.items li {
   padding-bottom: 0px !important;
+}
+
+.devhub-wrap .wp-parser-class ul.items > li, .devhub-wrap .wp-parser-function ul.items > li, .devhub-wrap .wp-parser-hook ul.items > li, .devhub-wrap .wp-parser-method ul.items > li {
+  padding-bottom: 8px !important;
 }
 
 .devhub-wrap .wp-parser-class ul.items a:hover, .devhub-wrap .wp-parser-function ul.items a:hover, .devhub-wrap .wp-parser-hook ul.items a:hover, .devhub-wrap .wp-parser-method ul.items a:hover {
@@ -1850,8 +1854,7 @@ input {
 }
 
 .devhub-wrap .table-of-contents h2 {
-  margin: 0;
-  padding-bottom: 3px;
+  padding: 4px 0;
   text-align: center;
   text-transform: uppercase;
   font-size: 1em;
@@ -1862,7 +1865,7 @@ input {
 
 .devhub-wrap .table-of-contents ul,
 .devhub-wrap .table-of-contents ol {
-  margin: 10px 20px;
+  margin: 6px 20px;
 }
 
 .devhub-wrap .table-of-contents ul ul,
@@ -1870,10 +1873,12 @@ input {
 .devhub-wrap .table-of-contents ol ul,
 .devhub-wrap .table-of-contents ol ol {
   margin-right: 0;
+  margin-top: 0;
 }
 
 .devhub-wrap ul.items {
   margin-bottom: 8px !important;
+  margin-top: 16px;
   list-style-type: none !important;
   padding-right: 10px;
 }
