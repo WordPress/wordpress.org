@@ -257,7 +257,7 @@ class Plugins_Info_API {
 				break;
 	
 			case 'php' :
-				echo serialize( (object) $response );
+				echo serialize( $response ? (object) $response : $response );
 				break;
 	
 			case 'xml' :
