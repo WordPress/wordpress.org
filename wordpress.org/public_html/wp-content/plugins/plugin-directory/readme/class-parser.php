@@ -126,6 +126,16 @@ class Parser {
 	);
 
 	/**
+	 * These plugin tags are ignored.
+	 *
+	 * @var array
+	 */
+	private $ignore_tags = array(
+		'plugin',
+		'wordpress',
+	);
+
+	/**
 	 * Parser constructor.
 	 *
 	 * @param string $file
@@ -208,6 +218,7 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
+			$this->tags = array_diff( $this->tags, $this->ignore_tags );
 			$this->tags = array_slice( $this->tags, 0, 5 );
 		}
 		if ( ! empty( $headers['requires'] ) ) {
