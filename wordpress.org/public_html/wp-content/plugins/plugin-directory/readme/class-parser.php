@@ -560,34 +560,34 @@ class Parser {
 		if ( ! is_array( $lines ) ) {
 			$lines = explode( "\n", $lines );
 		}
+		$trimmed_lines = array_map( 'trim', $lines );
 
 		/*
 		 * The heading style being matched in the block. Can be 'heading' or 'bold'.
-		 * Standard Markdown headings (## .. and == ... ==) are matched if they exist.
-		 * Full line bolding is otherwise used as the heading style.
-		 * This will match sections based on which ever style is encountered in a block of text first.
+		 * Standard Markdown headings (## .. and == ... ==) are used, but if none are present.
+		 * full line bolding will be used as a heading style.
 		 */
-		$heading_style = false; // 'heading' or 'bold'
+		$heading_style = 'bold'; // 'heading' or 'bold'
+		foreach ( $trimmed_lines as $trimmed ) {
+			if ( $trimmed[0] == '#' || $trimmed[0] == '=' ) {
+				$heading_style = 'heading';
+				break;
+			}
+		}
 
-		while ( ( $line = array_shift( $lines ) ) !== null ) {
-			$trimmed = trim( $line );
+		$line_count = count( $lines );
+		for ( $i = 0; $i < $line_count; $i++ ) {
+			$line = &$lines[ $i ];
+			$trimmed = &$trimmed_lines[ $i ];
 			if ( ! $trimmed ) {
 				$value .= "\n";
 				continue;
 			}
 
 			$is_heading = false;
-			if (
-				( ! $heading_style || 'heading' == $heading_style ) &&
-				( $trimmed[0] == '#' || $trimmed[0] == '=' )
-				) {
-				$heading_style = 'heading';
+			if ( 'heading' == $heading_style && ( $trimmed[0] == '#' || $trimmed[0] == '=' ) ) {
 				$is_heading = true;
-			} elseif (
-				( ! $heading_style || 'bold' == $heading_style ) &&
-				( substr( $trimmed, 0, 2 ) == '**' && substr( $trimmed, -2 ) == '**' )
-				) {
-				$heading_style = 'bold';
+			} elseif ( 'bold' == $heading_style && ( substr( $trimmed, 0, 2 ) == '**' && substr( $trimmed, -2 ) == '**' ) ) {
 				$is_heading = true;
 			}
 
