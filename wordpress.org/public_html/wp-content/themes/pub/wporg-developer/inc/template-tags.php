@@ -1396,14 +1396,22 @@ namespace DevHub {
 			return '';
 		}
 
-		$tags        = get_post_meta( $post->ID, '_wp-parser_tags', true );
+		$tags = get_post_meta( $post->ID, '_wp-parser_tags', true );
+
 		$access_tags = wp_filter_object_list( $tags, array(
 			'name'    => 'access',
 			'content' => 'private'
 		) );
+		$is_private = ! empty( $access_tags );
+
+		if ( ! $is_private ) {
+			if ( 'private' === get_post_meta( $post->ID, '_wp-parser_visibility', true ) ) {
+				$is_private = true;
+			}
+		}
 
 		// Bail if it isn't private.
-		if ( empty( $access_tags ) ) {
+		if ( ! $is_private ) {
 			return '';
 		}
 
