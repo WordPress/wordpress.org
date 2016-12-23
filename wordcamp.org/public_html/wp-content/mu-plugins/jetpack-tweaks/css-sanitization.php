@@ -1,11 +1,40 @@
 <?php
 
 namespace WordCamp\Jetpack_Tweaks;
+use WordCamp\RemoteCSS;
+use Exception;
+
 defined( 'WPINC' ) or die();
 
+add_filter( 'update_custom_css_data',     __NAMESPACE__ . '\sanitize_custom_css', 15       );	// After Jetpack_Custom_CSS_Enhancements::update_custom_css_data()
 add_action( 'csstidy_optimize_postparse', __NAMESPACE__ . '\sanitize_csstidy_parsed_rules' );
 add_action( 'admin_notices',              __NAMESPACE__ . '\notify_import_rules_stripped'  );
 add_action( 'csstidy_optimize_subvalue',  __NAMESPACE__ . '\sanitize_csstidy_subvalues'    );
+
+/**
+ * Sanitize CSS saved through the Core/Jetpack editor inside the Customizer
+ *
+ * By default, the Additional CSS section is only available to users with `unfiltered_html` -- which nobody on
+ * wordcamp.org has, not even super-admins -- but Jetpack re-maps that to `edit_theme_options`, allowing
+ * regular admins on all sites to use it.
+ *
+ * @param array $post
+ *
+ * @return array
+ */
+function sanitize_custom_css( $post ) {
+	try {
+		$post['css'] = RemoteCSS\sanitize_unsafe_css( $post['css'] );
+	} catch ( Exception $exception ) {
+		/*
+		 * We can't save unsanitized CSS, and also don't want to overwrite the known-good value in the database.
+		 * There's no way to gracefully abort the process and show an error message, so just die.
+		 */
+		wp_die( $exception->getMessage() );
+	}
+
+	return $post;
+}
 
 /**
  * Sanitize parsed Custom CSS rules
@@ -30,6 +59,9 @@ function sanitize_csstidy_parsed_rules( $safecss ) {
 
 /**
  * Notify the user that @import rules were stripped from their CSS
+ *
+ * todo Since WP 4.7 / Jetpack 4.2.2, we also need a way to show this warning in Customizer > Additional CSS. It
+ * 		still needs to work in Remote CSS, though.
  */
 function notify_import_rules_stripped() {
 	global $current_screen;

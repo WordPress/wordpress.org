@@ -34,6 +34,7 @@ class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 				$ajax_url
 			);
 
+			// todo use wcorg_redundant_remote_get
 			$response = wp_remote_get( esc_url_raw( $ajax_url ) );
 
 			if ( is_wp_error( $response ) ) {

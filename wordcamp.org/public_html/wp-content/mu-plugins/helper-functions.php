@@ -225,6 +225,7 @@ function wcorg_esc_csv( $fields ) {
  * Sometimes the HTTP request times out, or there's a temporary server-side error, etc. Some use cases require a
  * successful request, like stats scripts, where the resulting data would be distorted by a failed response.
  *
+ * @todo Add support for wp_remote_post() too
  * @todo Remove this if https://github.com/rmccue/Requests/issues/222 is implemented
  *
  * @param string $request_url
