@@ -3,6 +3,11 @@
 namespace WordCamp\RemoteCSS;
 defined( 'WPINC' ) or die();
 
+/**
+ * @var string $fonts_tool_url
+ * @var string $media_library_url
+ */
+
 ?>
 
 <ul>
@@ -36,7 +41,7 @@ defined( 'WPINC' ) or die();
 	</li>
 
 	<li>
-		<?php _e( "This tool plays nicely with Jetpack's CSS editor, and it's possible to use both.
-		If you do, the rules in the Jetpack editor will take precedence.", 'wordcamporg' ); ?>
+		<?php _e( "This tool plays nicely with the Core/Jetpack editor, and it's possible to use both.
+		If you do, the rules in the Core/Jetpack editor will take precedence.", 'wordcamporg' ); ?>
 	</li>
 </ul>

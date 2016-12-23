@@ -3,10 +3,14 @@
 namespace WordCamp\RemoteCSS;
 defined( 'WPINC' ) or die();
 
+/**
+ * @var string $custom_css_url
+ */
+
 ?>
 
 <p>
-	<?php _e( 'Remote CSS gives you a lot more flexibility in how you develop your site than the Jetpack Custom CSS module.
+	<?php _e( 'Remote CSS gives you a lot more flexibility in how you develop your site than the Core/Jetpack editor.
 	For instance, you can:', 'wordcamporg' ); ?>
 </p>
 
@@ -33,7 +37,7 @@ defined( 'WPINC' ) or die();
 
 <p>
 	<?php printf(
-		__( 'If you\'re looking for something simpler, <a href="%s">Jetpack\'s CSS Editor</a> is a great option.', 'wordcamporg' ),
-		esc_url( $jetpack_editor_url )
+		__( 'If you\'re looking for something simpler, <a href="%s">the Core/Jetpack editor</a> is a great option.', 'wordcamporg' ),
+		esc_url( $custom_css_url )
 	); ?>
 </p>

@@ -1,16 +1,24 @@
 <?php
 
 namespace WordCamp\RemoteCSS;
+use Jetpack_Custom_CSS_Enhancements;
+use Exception;
 
 defined( 'WPINC' ) or die();
 
 /**
  * Synchronizes the local safe/cached copy of the CSS with the canonical, remote source.
  *
+ * @todo Minification was removed from Jetpack 4.2.2, but will probably be added back in the future. Once it is,
+ *       make sure that it's being run here.
+ *
  * @param string $remote_css_url
  */
 function synchronize_remote_css( $remote_css_url ) {
-	sanitize_and_save_unsafe_css( fetch_unsafe_remote_css( $remote_css_url ) );
+	$unsafe_css = fetch_unsafe_remote_css( $remote_css_url );
+	$safe_css   = sanitize_unsafe_css( $unsafe_css );
+
+	save_safe_css( $safe_css );
 	update_option( OPTION_LAST_UPDATE, time() );
 }
 
@@ -49,45 +57,55 @@ function fetch_unsafe_remote_css( $remote_css_url ) {
 }
 
 /**
- * Sanitize unsafe CSS and save the safe version
+ * Sanitize unsafe CSS
  *
- * Note: If we ever need to decouple from Jetpack Custom CSS, then https://github.com/google/caja might be
- * a viable alternative. It'd be nice to have a modular solution, but we'd also have to keep it up to date,
- * and we'd still need to mirror the Output Mode setting.
+ * Jetpack/CSSTidy will validate and normalize the CSS, but they do _NOT_ perform comprehensive sanitization from
+ * a security perspective. So, we still need to add our custom sanitization to the process. That's done in
+ * `mu-plugins/jetpack-tweaks/css-sanitization.php`, but we need to confirm that it actually ran, to protect against
+ * a situation where there was a change in Jetpack/CSSTidy, or in our sanitization, and this function wasn't updated
+ * to reflect them.
  *
  * @param string $unsafe_css
  *
- * @throws \Exception if Jetpack's Custom CSS module isn't available
+ * @return string
+ *
+ * @throws Exception
  */
-function sanitize_and_save_unsafe_css( $unsafe_css ) {
-	if ( ! is_callable( array( '\Jetpack_Custom_CSS', 'save' ) ) ) {
-		throw new \Exception(
-			__( "<code>Jetpack_Custom_CSS::save()</code> is not available.
-			Please make sure Jetpack's Custom CSS module has been activated.", 'wordcamporg' )
-		);
+function sanitize_unsafe_css( $unsafe_css ) {
+	require_once( JETPACK__PLUGIN_DIR . '/modules/custom-css/custom-css-4.7.php' );
+
+	$parser_rules_setup          = has_filter( 'csstidy_optimize_postparse', 'WordCamp\Jetpack_Tweaks\sanitize_csstidy_parsed_rules' );
+	$subvalue_sanitization_setup = has_filter( 'csstidy_optimize_subvalue',  'WordCamp\Jetpack_Tweaks\sanitize_csstidy_subvalues'    );
+
+	if ( ! $parser_rules_setup || ! $subvalue_sanitization_setup ) {
+		throw new Exception( sprintf(
+			// translators: %s is an email address
+			__( "Could not update CSS because sanitization was not available. Please notify us at %s.", 'wordcamporg' ),
+			EMAIL_CENTRAL_SUPPORT
+		) );
 	}
 
-	/*
-	 * Note: In addition to the sanitization that Jetpack_Custom_CSS::save() does, there's additional sanitization
-	 * done by the callbacks in mu-plugins/jetpack-tweaks.php.
-	 */
+	$safe_css = Jetpack_Custom_CSS_Enhancements::sanitize_css( $unsafe_css, array( 'force' => true ) );
 
-	add_filter( 'jetpack_custom_css_pre_post_id', __NAMESPACE__ . '\get_safe_css_post_id' );
+	if ( did_action( 'csstidy_optimize_postparse' ) < 1 || did_action( 'csstidy_optimize_subvalue' ) < 1 ) {
+		throw new Exception( sprintf(
+			// translators: %s is an email address
+			__( "Could not update CSS because sanitization did not run. Please notify us at %s.", 'wordcamporg' ),
+			EMAIL_CENTRAL_SUPPORT
+		) );
+	}
 
-	\Jetpack_Custom_CSS::save( array(
-		'css'             => $unsafe_css,
-		'is_preview'      => false,
-		'preprocessor'    => '',     // This should never be changed to allow pre-processing. See note in validate_remote_css_url()
-		'add_to_existing' => false,  // This isn't actually used, see get_output_mode()
-		'content_width'   => false,
-	) );
+	return $safe_css;
+}
 
-	remove_filter( 'jetpack_custom_css_pre_post_id', __NAMESPACE__ . '\get_safe_css_post_id' );
+/**
+ * Save the safe CSS
+ *
+ * @param string $safe_css
+ */
+function save_safe_css( $safe_css ) {
+	$post = get_safe_css_post();
+	$post->post_content = $safe_css;
 
-	/*
-	 * Jetpack_Custom_CSS::save_revision() caches our post ID because it retrieves the post ID from
-	 * Jetpack_Custom_CSS::post_id() while the get_safe_css_post_id() callback is active. We need to clear that
-	 * to avoid unintended side-effects.
-	 */
-	wp_cache_delete( 'custom_css_post_id' );
+	wp_update_post( $post );
 }

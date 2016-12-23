@@ -4,9 +4,11 @@ namespace WordCamp\RemoteCSS;
 
 defined( 'WPINC' ) or die();
 
-add_action( 'wp_ajax_'        . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        ); // This is useless in production, but useful for manual testing
-add_action( 'wp_ajax_nopriv_' . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        );
-add_action( SYNCHRONIZE_ACTION,              __NAMESPACE__ . '\synchronize_remote_css' );
+if ( is_configured() ) {
+	add_action( 'wp_ajax_'        . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        ); // This is useless in production, but useful for manual testing
+	add_action( 'wp_ajax_nopriv_' . AJAX_ACTION, __NAMESPACE__ . '\webhook_handler'        );
+	add_action( SYNCHRONIZE_ACTION,              __NAMESPACE__ . '\synchronize_remote_css' );
+}
 
 /*
  * todo nginx on production fails with a 502 bad gateway if OPTION_REMOTE_CSS_URL is empty, even though dev handles it with an exception
