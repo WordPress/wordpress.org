@@ -1391,8 +1391,8 @@ namespace DevHub {
 			return '';
 		}
 
-		// Currently only handling private access messages for functions and hooks.
-		if ( ! in_array( get_post_type( $post ), array( 'wp-parser-function', 'wp-parser-hook' ) ) ) {
+		// Currently only handling private access messages for functions, hooks, and methods.
+		if ( ! in_array( get_post_type( $post ), array( 'wp-parser-function', 'wp-parser-hook', 'wp-parser-method' ) ) ) {
 			return '';
 		}
 
