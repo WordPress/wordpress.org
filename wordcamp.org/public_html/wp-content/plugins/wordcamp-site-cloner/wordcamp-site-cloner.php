@@ -269,13 +269,14 @@ function get_filtered_wordcamp_sites( $wordcamps ) {
 
 		switch_to_blog( $site_id );
 
+		$theme_mods = get_option( 'theme_mods_' . get_stylesheet() );
+
 		/*
 		 * Sites with Coming Soon enabled probably don't have a finished design yet, so there's no point in
 		 * cloning it.
 		 */
 		if ( ! coming_soon_plugin_enabled() ) {
-			$preprocessor = \Jetpack_Custom_CSS::get_preprocessor();
-			$preprocessor = isset( $preprocessor[ 'name' ] ) ? $preprocessor[ 'name' ] : 'none';
+			$preprocessor = isset( $theme_mods['jetpack_custom_css']['preprocessor'] ) ? $theme_mods['jetpack_custom_css']['preprocessor'] : 'none';
 
 			$sites[ $site_id ] = array(
 				'site_id'          => $site_id,
