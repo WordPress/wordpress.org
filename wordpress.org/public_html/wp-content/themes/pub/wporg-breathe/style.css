@@ -446,6 +446,11 @@ article.status-private nav.o2-dropdown-actions button.o2-dropdown-actions-disclo
 	text-shadow: 0 0 0 #3498db;
 }
 
+nav.o2-post-footer-actions ul li > a,
+nav.o2-post-footer-actions ul li > span > a {
+	width: inherit;
+}
+
 /* make/polyglots post type selector for new posts */
 .polyglots-post-type-selector {
 	margin: 0 0 1em;
