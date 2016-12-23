@@ -203,17 +203,12 @@ class Plugins_Info_API {
 			$response = $this->internal_rest_api_call( 'plugins/v1/popular-tags', array( 'locale' => $request->locale ) );
 
 			if ( 200 != $response->status ) {
-				$response = array( 'error' => 'Temporarily Unavailable' );
+				$response = array(); // WordPress includes no handling for this API being unavailable, so just return nothing.
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 30 ); // Short expiry for when we've got issues
 			} else {
 				$response = $response->data;
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
 			}
-		}
-
-		if ( isset( $response['error'] ) ) {
-			$this->output( (object) $response );
-			return;
 		}
 
 		$number_items_requested = 100;
