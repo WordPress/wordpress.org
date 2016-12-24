@@ -2,6 +2,7 @@
 
 namespace WordCamp\Jetpack_Tweaks;
 use WordCamp\RemoteCSS;
+use WordCamp\Logger;
 use Exception;
 
 defined( 'WPINC' ) or die();
@@ -30,6 +31,7 @@ function sanitize_custom_css( $post ) {
 		 * We can't save unsanitized CSS, and also don't want to overwrite the known-good value in the database.
 		 * There's no way to gracefully abort the process and show an error message, so just die.
 		 */
+		Logger\log( 'custom_css_sanitization_failed', compact( 'post', 'exception' ) );
 		wp_die( $exception->getMessage() );
 	}
 
