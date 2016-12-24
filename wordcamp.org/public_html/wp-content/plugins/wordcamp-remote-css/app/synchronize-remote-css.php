@@ -87,7 +87,11 @@ function sanitize_unsafe_css( $unsafe_css ) {
 
 	$safe_css = Jetpack_Custom_CSS_Enhancements::sanitize_css( $unsafe_css, array( 'force' => true ) );
 
-	if ( did_action( 'csstidy_optimize_postparse' ) < 1 || did_action( 'csstidy_optimize_subvalue' ) < 1 ) {
+	/*
+	 * It's expected for `csstidy_optimize_subvalue` to not run on some inputs, but `csstidy_optimize_postparse`
+	 * should always run.
+	 */
+	if ( did_action( 'csstidy_optimize_postparse' ) < 1 ) {
 		throw new Exception( sprintf(
 			// translators: %s is an email address
 			__( "Could not update CSS because sanitization did not run. Please notify us at %s.", 'wordcamporg' ),
