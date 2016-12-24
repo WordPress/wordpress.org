@@ -36,6 +36,8 @@ span {
 	background: url('alert(8);');
 }
 
+alert(9);
+
 /* Bindings */
 body {
 }
@@ -69,7 +71,7 @@ a {
 	background-image: url('http://example.com/foo.jpg');
 }
 
-.social-navigation .slack a:before {
+.social-navigation > .slack a:before {
 	font-family: "Fontawesome";
 	content: "\f198";
 }

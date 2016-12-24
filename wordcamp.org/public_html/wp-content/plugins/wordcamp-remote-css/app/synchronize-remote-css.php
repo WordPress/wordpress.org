@@ -111,5 +111,11 @@ function save_safe_css( $safe_css ) {
 	$post = get_safe_css_post();
 	$post->post_content = $safe_css;
 
+	/*
+	 * We don't want KSES running because it will mangle valid CSS. For example, `body > div { color: red; }` will
+	 * become `body &gt; div { color: red; }`. It's also not necessary, since we've already sanitized the CSS.
+	 */
+	kses_remove_filters();
 	wp_update_post( $post );
+	kses_init();
 }
