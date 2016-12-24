@@ -1,5 +1,7 @@
 <?php
 
+use WordCamp\RemoteCSS;
+
 class WCB_Structure extends WCB_Loader {
 	var $body;
 	var $sidebars;
@@ -40,11 +42,9 @@ class WCB_Structure extends WCB_Loader {
 
 		$grid  = wcb_get_option('grid');
 
-		// Check whethec Custom CSS mode is set to Add or Replace.
-		if ( class_exists( 'Jetpack_Custom_CSS' ) && method_exists( 'Jetpack_Custom_CSS', 'get_current_revision' ) ) {
-			$safecss_post = Jetpack_Custom_CSS::get_current_revision();
-			if ( get_post_meta( $safecss_post['ID'], 'custom_css_add', true ) == 'no' )
-				return;
+		// Don't output CSS if Jetpack Custom CSS/RemoteCSS is set to 'replace' mode
+		if ( 'replace' === RemoteCSS\get_output_mode() ) {
+			return;
 		}
 
 		$start_fresh = apply_filters( 'wcb_start_fresh', false );
