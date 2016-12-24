@@ -73,7 +73,8 @@ class WordCamp_Coming_Soon_Page {
 			wp_dequeue_style( $stylesheet );
 		}
 
-		remove_action( 'wp_head', array( 'Jetpack_Custom_CSS', 'link_tag' ), 101 );
+		remove_action( 'wp_head', 'wp_custom_css_cb', 11 ); // todo compat with WP 4.7. this line can be removed when r39616 is merged to the 4.7 branch
+		remove_action( 'wp_head', 'wp_custom_css_cb', 101 );
 	}
 
 	/**
