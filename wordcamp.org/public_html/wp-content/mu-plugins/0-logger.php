@@ -56,6 +56,23 @@ function redact_keys( & $data ) {
 	$redacted_keys = array_map( 'strtolower', $redacted_keys ); // to avoid human error
 
 	foreach ( $data as $key => $value ) {
+		/*
+		 * If an object is cast to an array, the array key for the object's private/protected members will contain
+		 * whitespace, which causes json_decode() to ignore it. So instead, just make a simple array.
+		 *
+		 * The normal backtrace will often be very large, and contain recursive elements, which could lead to a
+		 * script timeout. WP's summary is enough for this purpose.
+		 */
+		if ( is_a( $value, 'Exception' ) ) {
+			$value = array(
+				'message' => $value->getMessage(),
+				'code'    => $value->getCode(),
+				'file'    => $value->getFile(),
+				'line'    => $value->getLine(),
+				'trace'   => wp_debug_backtrace_summary()
+			);
+		}
+
 		if ( is_object( $value ) ) {
 			$value = (array) $value;
 		}
