@@ -186,6 +186,12 @@ body,
 	width: 71%;
 }
 
+@media (max-width: 876px) {
+	.content-area {
+		width: 100%;
+	}
+}
+
 .o2-app-page-title {
   margin: 0 0 10px 0 !important;
   padding: 0;
