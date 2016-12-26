@@ -122,28 +122,16 @@ function enqueue_customizer_scripts() {
 		return;
 	}
 
-	// Enqueue CodeMirror script and style
-	if ( ! is_callable( array( 'Jetpack_Custom_CSS', 'enqueue_scripts' ) ) ) {
-		require_once( JETPACK__PLUGIN_DIR . 'modules/custom-css/custom-css.php' );
-		define( 'SAFECSS_USE_ACE', true );
-	}
-
-	\Jetpack_Custom_CSS::enqueue_scripts( 'appearance_page_editcss' );
-
-	// Dequeue extraneous Jetpack scripts and styles
-	wp_dequeue_script( 'postbox' );
-	wp_dequeue_script( 'custom-css-editor' );
-	wp_dequeue_style( 'custom-css-editor' );
-	wp_dequeue_script( 'jetpack-css-use-codemirror' );
-
 	// Enqueue our scripts
 	wp_enqueue_script(
 		'camptix-html-badges-customizer',
 		plugins_url( 'javascript/html-badges-customizer.js', __DIR__ ),
-		array( 'jquery', 'jetpack-css-codemirror' ),
+		array( 'jquery', 'jetpack-codemirror' ),
 		1,
 		true
 	);
+
+	wp_enqueue_style( 'jetpack-codemirror' );
 
 	wp_localize_script(
 		'camptix-html-badges-customizer',
