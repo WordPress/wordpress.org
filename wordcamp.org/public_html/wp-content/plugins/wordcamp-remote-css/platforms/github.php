@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\RemoteCSS;
+use WP_Error;
 
 defined( 'WPINC' ) or die();
 
@@ -11,6 +12,7 @@ defined( 'WPINC' ) or die();
 
 add_filter( 'wcrcss_trusted_remote_hostnames', __NAMESPACE__ . '\whitelist_trusted_hostnames' );
 add_filter( 'wcrcss_validate_remote_css_url',  __NAMESPACE__ . '\convert_to_api_urls'         );
+add_filter( 'pre_http_request',                __NAMESPACE__ . '\authenticate_requests', 10, 3 );
 add_filter( 'wcrcss_unsafe_remote_css',        __NAMESPACE__ . '\decode_api_response',  10, 2 );
 
 /**
@@ -61,6 +63,55 @@ function convert_to_api_urls( $remote_css_url ) {
 	}
 
 	return $remote_css_url;
+}
+
+/**
+ * Add authentication parameters to GitHub API requests
+ *
+ * This allows us to make 5k requests per hour, instead of just 60.
+ *
+ * @param false|array|WP_Error $preempt      See `pre_http_request`
+ * @param array                $request_args
+ * @param string               $request_url
+ *
+ * @return false|array|WP_Error
+ */
+function authenticate_requests( $preempt, $request_args, $request_url ) {
+	$parsed_url = parse_url( $request_url );
+
+	/*
+	 * SECURITY: Make sure we're only authorizing the requests we're intending to, to avoid the possibility of
+	 * the keys being used for another purpose. That's not likely, but it's better to err on the side of caution.
+	 */
+	$is_relevant_request = GITHUB_API_HOSTNAME === $parsed_url['host']                 &&
+	                       'GET'               === $request_args['method']             &&
+	                       '/repos'            === substr( $parsed_url['path'], 0, 6 ) &&
+	                       '.css'              === substr( $parsed_url['path'], strlen( $parsed_url['path'] ) - 4 );
+
+	if ( $is_relevant_request ) {
+		if ( isset( $parsed_url['query'] ) ) {
+			parse_str( $parsed_url['query'], $request_query_params );
+		} else {
+			$request_query_params = array();
+		}
+
+		$has_authentication_params = array_key_exists( 'client_id',     $request_query_params ) &&
+		                             array_key_exists( 'client_secret', $request_query_params );
+
+		if ( ! $has_authentication_params ) {
+			$request_url = add_query_arg(
+				array(
+					'client_id'     => REMOTE_CSS_GITHUB_ID,
+					'client_secret' => REMOTE_CSS_GITHUB_SECRET
+				),
+				$request_url
+			);
+
+			$preempt = wp_remote_get( $request_url, $request_args );
+		}
+	}
+
+	return $preempt;
 }
 
 /**
