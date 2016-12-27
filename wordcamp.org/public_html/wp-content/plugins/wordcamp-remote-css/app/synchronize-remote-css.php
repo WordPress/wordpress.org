@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\RemoteCSS;
+use WordCamp\Logger;
 use Jetpack_Custom_CSS_Enhancements;
 use Exception;
 
@@ -41,12 +42,15 @@ function fetch_unsafe_remote_css( $remote_css_url ) {
 	);
 
 	if ( is_wp_error( $response ) ) {
+		Logger\log( 'request_error', compact( 'remote_css_url', 'response' ) );
 		throw new \Exception( $response->get_error_message() );
 	}
 
 	$response_code = (int) wp_remote_retrieve_response_code( $response );
 
 	if ( ! in_array( $response_code, array( 200, 301, 302, 303, 307, 308 ), true ) ) {
+		Logger\log( 'invalid_response_code', compact( 'remote_css_url', 'response' ) );
+
 		throw new \Exception( sprintf(
 			__( 'The remote server responded with status code <code>%d</code>, which is not valid.', 'wordcamporg' ),
 			$response_code
