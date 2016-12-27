@@ -10,7 +10,10 @@ defined( 'WPINC' ) or die();
  * that is to add entries to redact_keys(), so that the caller remain clean. You can also do it before
  * passing the data to this function, though.
  *
- * @todo add current username to every entry, and update wp-cli command parsing regex to match
+ * @todo add current username and request url to every entry, and update wp-cli command parsing regex to match
+ * @todo add a $type param with 'error' and 'info' values. errors continue to go to std error log. info is logged
+ *       to separate file, so they don't clutter error log. need to rotate that file. then update callers to use
+ *       new param.
  *
  * @param string $error_code
  * @param array  $data
@@ -52,7 +55,7 @@ function log( $error_code, $data = array() ) {
  * @return array
  */
 function redact_keys( & $data ) {
-	$redacted_keys = array( 'Authorization', 'password', 'user_pass', 'key', 'apikey', 'api_key' );
+	$redacted_keys = array( 'Authorization', 'password', 'user_pass', 'key', 'apikey', 'api_key', 'client_secret' );
 	$redacted_keys = array_map( 'strtolower', $redacted_keys ); // to avoid human error
 
 	foreach ( $data as $key => $value ) {
