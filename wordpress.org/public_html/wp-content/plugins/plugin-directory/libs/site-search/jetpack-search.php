@@ -256,7 +256,7 @@ class Jetpack_Search {
 		if ( $posts_per_page > 200 )
 			$posts_per_page = 200;
 
-		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-2 years' ) );
+		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-8 years' ) );
 		$date_today = strftime( '%Y-%m-%d' );
 		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
 
@@ -269,8 +269,8 @@ class Jetpack_Search {
 			'orderby'        => $query->get( 'orderby' ),
 			'order'          => $query->get( 'order' ),
 			// plugin directory specific:
-			'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
-			'tested_range'	 =>  array( 'field' => 'meta.tested.value', 'gte' => $version_cutoff ),
+			#'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
+			#'tested_range'	 =>  array( 'field' => 'tested', 'gte' => $version_cutoff ),
 			'filters'		 => array(
 				array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
 			),
@@ -729,7 +729,7 @@ class Jetpack_Search {
 		//Newer content gets weighted slightly higher
 		$date_scale = '360d';
 		$date_offset = '180d';
-		$date_decay = 0.7;
+		$date_decay = 0.5;
 		$date_origin = date( 'Y-m-d' );
 
 		return array(
@@ -739,7 +739,7 @@ class Jetpack_Search {
 						'query' => $query,
 						'functions' => array(
 							array(
-								'gauss'=> array(
+								'exp'=> array(
 									'plugin_modified' => array(
 										'origin' => $date_origin,
 										'offset' => $date_offset,
@@ -749,11 +749,11 @@ class Jetpack_Search {
 								),
 							),
 							array( 
-								'linear' => array(
+								'exp' => array(
 									'tested' => array(
 										'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
 										'offset' => 0.1,
-										'scale' => 0.3,
+										'scale' => 0.4,
 										'decay' => 0.6,
 									),
 								),
@@ -761,7 +761,7 @@ class Jetpack_Search {
 							array(
 								'field_value_factor' => array(
 									'field' => 'active_installs',
-									'factor' => 0.5,
+									'factor' => 0.25,
 									'modifier' => 'log2p',
 									'missing' => 1,
 								),
@@ -769,17 +769,17 @@ class Jetpack_Search {
 							array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
-									'factor' => 0.5,
+									'factor' => 0.25,
 									'modifier' => 'log2p',
-									'missing' => 0,
+									'missing' => 0.5,
 								),
 							),
 							array(
 								'field_value_factor' => array(
 									'field' => 'rating',
-									'factor' => 0.5,
+									'factor' => 0.25,
 									'modifier' => 'sqrt',
-									'missing' => 3,
+									'missing' => 2.5,
 								),
 							),
 						),
