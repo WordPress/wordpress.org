@@ -39,8 +39,8 @@ span {
 alert(9);
 
 a {
-	/* This might be safe, but not sure yet, so leaving it here since it should be considered unsafe until proven otherwise. See #1616-meta */
-	background-image: url( 'image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==' );
+/* This might be safe, but not sure yet, so leaving it here since it should be considered unsafe until proven otherwise. See #1616-meta */
+	background-image: url('image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==');
 }
 
 /* Bindings */

@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * @todo Move all of this into the Customizer. Replace the discovery notice with an input field for the URL.
+ *       Not sure how to fit all the contextual help. though. Need a way to display error messages/exceptions
+ *       when saving.
+ */
+
 namespace WordCamp\RemoteCSS;
 defined( 'WPINC' ) or die();
 
