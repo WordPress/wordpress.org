@@ -17,4 +17,3 @@ $widget_args = array(
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta',            array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Committers',      array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Contributors',    array(), $widget_args );
-the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Plugin_Review',   array(), $widget_args );
