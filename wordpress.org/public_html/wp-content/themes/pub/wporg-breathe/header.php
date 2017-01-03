@@ -3,6 +3,7 @@ $GLOBALS['pagetitle'] = get_bloginfo( 'name', 'display' );
 require WPORGPATH . 'header.php';
 ?>
 <header id="masthead" class="site-header" role="banner">
+	<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
 	<div class="site-branding">
 		<?php if ( is_front_page() && is_home() ) : ?>
 			<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>

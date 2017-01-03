@@ -180,6 +180,10 @@ body,
 	body.responsive-show #page {
 		overflow-x: visible;
 	}
+
+	#secondary-toggle:before {
+		top: 0px;
+	}
 }
 
 .content-area {
