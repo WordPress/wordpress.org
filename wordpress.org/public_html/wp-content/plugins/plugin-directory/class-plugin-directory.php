@@ -510,7 +510,6 @@ class Plugin_Directory {
 		register_widget( __NAMESPACE__ . '\Widgets\Support'       );
 		register_widget( __NAMESPACE__ . '\Widgets\Committers'    );
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors'  );
-		register_widget( __NAMESPACE__ . '\Widgets\Plugin_Review' );
 	}
 
 	/**
