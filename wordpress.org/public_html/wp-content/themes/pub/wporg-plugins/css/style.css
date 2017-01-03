@@ -2819,6 +2819,7 @@ object {
 }
 
 .search-form .button-search {
+  border-top: none;
   border-left: none;
   -webkit-border-radius: 0 2px 2px 0;
   border-radius: 0 2px 2px 0;
@@ -2827,6 +2828,7 @@ object {
   position: relative;
   right: auto;
   top: auto;
+  vertical-align: top;
 }
 
 .search-form .button-search:active {
@@ -2885,20 +2887,18 @@ object {
 
 .site-header:not(.home) .search-form .search-field {
   border: 0;
-  -webkit-border-radius: 2px;
-  border-radius: 2px;
+  -webkit-border-radius: 2px 0 0 2px;
+  border-radius: 2px 0 0 2px;
   display: inline-block;
   font-size: 16px;
   font-size: 1rem;
   padding: 5px 10px;
   position: relative;
-  width: 100%;
+  width: auto;
 }
 
 @media screen and (min-width: 48em) {
   .site-header:not(.home) .search-form .search-field {
-    -webkit-border-radius: 2px 0 0 2px;
-    border-radius: 2px 0 0 2px;
     font-size: 0.64rem;
     width: 7rem;
   }

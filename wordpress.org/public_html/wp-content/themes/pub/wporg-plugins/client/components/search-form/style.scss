@@ -18,12 +18,14 @@
 	}
 
 	.button-search {
+		border-top: none;
 		border-left: none;
 		border-radius: 0 2px 2px 0;
 		font-size: ms( 0 );
 		position: relative;
 		right: auto;
 		top: auto;
+		vertical-align: top;
 
 		&:active {
 			background: #006799;
@@ -73,17 +75,16 @@
 
 		.search-field {
 			border: 0;
-			border-radius: 2px;
+			border-radius: 2px 0 0 2px;
 			display: inline-block;
 			font-size: ms( 0 );
 			padding: 5px 10px;
 			position: relative;
-			width: 100%;
+			width: auto;
 		}
 
 		@media screen and (min-width: $ms-breakpoint) {
 			.search-field {
-				border-radius: 2px 0 0 2px;
 				font-size: ms( -4 );
 				width: 7rem;
 			}
