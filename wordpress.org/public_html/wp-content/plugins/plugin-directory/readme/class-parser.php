@@ -328,6 +328,12 @@ class Parser {
 			$this->sections['description'] = $this->short_description;
 		}
 
+		// Suffix the Other Notes section to the description.
+		if ( !empty( $this->sections['other_notes'] ) ) {
+			$this->sections['description'] .= "\n" . $this->sections['other_notes'];
+			unset( $this->sections['other_notes'] );
+		}
+
 		// Parse out the Upgrade Notice section into it's own data.
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
 			$this->upgrade_notice = $this->parse_section( $this->sections['upgrade_notice'] );
