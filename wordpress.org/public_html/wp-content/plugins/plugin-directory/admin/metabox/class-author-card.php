@@ -45,7 +45,7 @@ class Author_Card {
 
 				<span class="profile-links">
 					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>">profile</a> |
-					<a href="//wordpress.org/support/profile/<?php echo $author->user_nicename; ?>">support</a>
+					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>">support</a>
 				</span>
 				<span class="profile-email">
 					&lt;<?php echo $author->user_email; ?>&gt;
@@ -63,19 +63,10 @@ class Author_Card {
 		<?php
 			endif;
 
-		$unsavory = array();
-		if ( property_exists( $author, 'capabilities' ) && isset( $author->capabilities['blocked'] ) && '1' == $author->capabilities['blocked'] ) {
-			$unsavory[] = '<span title="User is banned from logging into WordPress.org">banned</span>';
-		}
-		if ( property_exists( $author, 'elf_not_trusted' ) && '1' == $author->elf_not_trusted ) {
-			$unsavory[] = '<span title="User has been blocked from being able to post in the forums">blocked</span>';
-		}
-		if ( property_exists( $author, 'is_bozo' ) && '1' == $author->is_bozo ) {
-			$unsavory[] = '<span title="User has been flagged by forum moderators as being problematic">a bozo</span>';
-		}
-
-		if ( $unsavory ) {
-			echo '<p>This user is: <strong>' . implode( ', ', $unsavory ) . '</strong></p>';
+		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+			$user = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
+			if ( ! empty( $user->allcaps['bbp_blocked'] ) ) 
+				echo '<p>This user is: <strong><span title="User is banned from logging into WordPress.org">banned</span></strong></p>';
 		}
 
 		$post_ids = get_posts( array(
