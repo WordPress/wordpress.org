@@ -46,6 +46,9 @@ class Devhub_Handbooks {
 
 		add_filter( 'the_content', array( __CLASS__, 'autolink_credits' ) );
 
+		// Add class to REST API handbook reference pages.
+		add_filter( 'body_class', array( __CLASS__, 'add_rest_api_handbook_reference_class' ) );
+
 		// Add the handbook's 'Watch' action link.
 		if ( class_exists( 'WPorg_Handbook_Watchlist' ) && method_exists( 'WPorg_Handbook_Watchlist', 'display_action_link' ) ) {
 			add_action( 'wporg_action_links', array( 'WPorg_Handbook_Watchlist', 'display_action_link' ) );
@@ -226,6 +229,29 @@ class Devhub_Handbooks {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Adds class to REST API handbook reference sub-pages.
+	 *
+	 * Due to special formatting of particular pages in the REST API handbook, a
+	 * class is needed to target CSS rules.
+	 *
+	 * @param array $classes Body classes.
+	 * @return array
+	 */
+	public static function add_rest_api_handbook_reference_class( $classes ) {
+		if (
+			is_single()
+			&&
+			'rest-api-handbook' === get_query_var( 'current_handbook' )
+			&&
+			( ( $parent = wp_get_post_parent_id( get_the_ID() ) ) && ( 'reference' === get_post( $parent )->post_name ) )
+		) {
+			$classes[] = 'rest-api-handbook-reference';
+		}
+
+		return $classes;
 	}
 
 } // Devhub_Handbooks
