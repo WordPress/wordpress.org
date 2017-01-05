@@ -1592,6 +1592,30 @@
 	}
 }
 
+.rest-api-handbook-reference {
+
+	.table-of-contents {
+		float: none;
+		overflow: hidden;
+		width: 100%;
+		margin: 0 auto 1em;
+		clear: both;
+
+		ul.items li ul li {
+			display: inline;
+
+			&::after {
+				content: '; ';
+			}
+
+			&:last-child::after {
+				content: '';
+			}
+		}
+	}
+
+}
+
 @media ( max-width: 59.999999em ) {
 
 	.devhub-wrap {
