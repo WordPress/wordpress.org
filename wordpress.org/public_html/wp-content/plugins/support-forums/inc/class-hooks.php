@@ -21,7 +21,11 @@ class Hooks {
 		add_filter( 'oembed_response_data', array( $this, 'disable_oembed_response_data' ), 10, 2 );
 		add_filter( 'embed_oembed_discover', '__return_false' );
 
+		// Disable inline terms and mentions.
 		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
+
+		// Add notice to reply forms for privileged users in closed forums.
+		add_action( 'bbp_template_notices', array( $this, 'closed_forum_notice_for_moderators' ), 1 );
 	}
 
 	/**
@@ -90,5 +94,31 @@ class Hooks {
 		remove_action( 'init', array( 'Jetpack_Mentions', 'init' ) );
 	}
 
+	/**
+	 * For closed forums, adds a notice to privileged users indicating that
+	 * though the reply form is available, the forum is closed.
+	 *
+	 * Otherwise, unless the topic itself is closed, there is no indication that
+	 * the reply form is only available because of their privileged capabilities.
+	 */
+	public function closed_forum_notice_for_moderators() {
+		if (
+			is_single()
+			&&
+			bbp_current_user_can_access_create_reply_form()
+			&&
+			bbp_is_forum_closed( bbp_get_topic_forum_id() )
+			&&
+			! bbp_is_reply_edit()
+		) {
+			$err_msg = sprintf( esc_html__(
+				'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to do so.',
+				'wporg-forums'),
+				bbp_get_forum_title( bbp_get_topic_forum_id() )
+			);
+
+			bbp_add_error( 'bbp_forum_is_closed', $err_msg, 'message' );
+		}
+	}
 
 }
