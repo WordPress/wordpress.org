@@ -20,7 +20,7 @@ class Support_Compat {
 		21261, // Themes and Templates
 		21262, // Plugins and Hacks
 		21267, // Your WordPress
-		21270, // Meetups
+		21271, // Meetups
 		21272, // Reviews
 	);
 
