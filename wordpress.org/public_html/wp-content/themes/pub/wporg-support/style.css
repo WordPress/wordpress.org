@@ -4614,12 +4614,13 @@ main#main {
 	display: none;
 }
 
-#wporg-header ul li a.current ~ .uparrow, #wporg-header ul li .bbpress #bbpress-forums p.bbp-topic-meta a.current ~ .uparrow {
-	border-bottom: 9px solid #0073aa;
-}
-
-#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
-	border-bottom: 9px solid #32373c;
+@media screen and (min-width: 48em) {
+	#wporg-header ul li a.current ~ .uparrow, #wporg-header ul li .bbpress #bbpress-forums p.bbp-topic-meta a.current ~ .uparrow {
+		border-bottom: 9px solid #0073aa;
+	}
+	#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
+		border-bottom: 9px solid #32373c;
+	}
 }
 
 /* Small menu. */
