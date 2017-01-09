@@ -380,9 +380,9 @@ class DevHub_Formatting {
 						. '(?<!/)'
 						. '\b'                // Word boundary
 						. '('                 // Primary match grouping
-							. 'wpdb|wp_atom_server|wp_xmlrpc_server extends IXR_Server'               // Exceptions that start with lowercase letter
-							. '|AtomFeed|AtomEntry|AtomParser|MagpieRSS|RSSCache|Translations|Walker' // Exceptions that lack an underscore
-							. '|[A-Z][a-zA-Z]+_\w+'                                                   // Most start with uppercase, has underscore
+							. 'wpdb|wp_atom_server|wp_xmlrpc_server' // Exceptions that start with lowercase letter
+							. '|AtomFeed|AtomEntry|AtomParser|MagpieRSS|Requests|RSSCache|Translations|Walker' // Exceptions that lack an underscore
+							. '|_?[A-Z][a-zA-Z]+_\w+'                // Most start with (optional underscore, then) uppercase, has underscore
 						. ')'                 // End primary match grouping
 						. '\b'                // Word boundary
 						. '(?!([<:]|"|\'>))'  // Does not appear within a tag
