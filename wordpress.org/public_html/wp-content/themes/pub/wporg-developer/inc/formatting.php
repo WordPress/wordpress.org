@@ -185,6 +185,22 @@ class DevHub_Formatting {
 			}
 		}
 
+		// Link to class: {@see WP_Query}
+		elseif (
+			( in_array( $link, array(
+				'wpdb', 'wp_atom_server', 'wp_xmlrpc_server', // Exceptions that start with lowercase letter
+				'AtomFeed', 'AtomEntry', 'AtomParser', 'MagpieRSS', 'Requests', 'RSSCache', 'Translations', 'Walker' // Exceptions that lack an underscore
+			) ) )
+			||
+			( 1 === preg_match ( '/^_?[A-Z][a-zA-Z]+_\w+/', $link ) ) // Otherwise, class names start with (optional underscore, then) uppercase and have underscore
+		) {
+			$link = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( get_post_type_archive_link( 'wp-parser-class' ) . sanitize_key( $link ) ),
+				esc_html( $link )
+			);
+		}
+
 		// Link to function: {@see esc_attr()}
 		else {
 			$link = '<a href="' .
