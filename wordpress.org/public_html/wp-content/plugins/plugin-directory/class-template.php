@@ -19,7 +19,7 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true );
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
 
 		if ( $count <= 10 ) {
 			$text = __( 'Less than 10', 'wporg-plugins' );
@@ -130,7 +130,7 @@ class Template {
 			unset( $default_sections[ array_search( 'screenshots', $default_sections ) ] );
 		}
 
-		$raw_sections = get_post_meta( $plugin->ID, 'sections', true );
+		$raw_sections = get_post_meta( $plugin->ID, 'sections', true ) ?: array();
 		$raw_sections = array_unique( array_merge( $raw_sections, $default_sections ) );
 
 		$sections  = array();
@@ -215,7 +215,7 @@ class Template {
 	 */
 	public static function get_plugin_icon( $post = null, $output = 'raw' ) {
 		$plugin    = get_post( $post );
-		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true );
+		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
 
 		$icon = $icon_2x = $svg = $generated = false;
 		foreach ( $raw_icons as $file => $info ) {
@@ -294,7 +294,7 @@ class Template {
 		$plugin = get_post( $post );
 
 		$banner      = $banner_2x = false;
-		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true );
+		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true ) ?: array();
 
 		// Split in rtl and non-rtl banners.
 		$rtl_banners = array_filter( $raw_banners, function ( $info ) {
@@ -448,7 +448,7 @@ class Template {
 		$post = get_post( $post );
 
 		if ( 'latest' == $version || 'latest-stable' == $version ) {
-			$version = get_post_meta( $post->ID, 'stable_tag', true );
+			$version = get_post_meta( $post->ID, 'stable_tag', true ) ?: 'trunk';
 		}
 
 		if ( 'trunk' != $version ) {

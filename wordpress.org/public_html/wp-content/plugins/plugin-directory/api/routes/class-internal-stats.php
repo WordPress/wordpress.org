@@ -108,7 +108,7 @@ class Internal_Stats extends Base {
 	 * @return array An array containing the percentages for the given plugin.
 	 */
 	protected function sanitize_usage_numbers( $usage, $plugin ) {
-		$latest_version = get_post_meta( $plugin->ID, 'version', true );
+		$latest_version = get_post_meta( $plugin->ID, 'version', true ) ?: '0.0';
 		$latest_branch = implode( '.', array_slice( explode('.', $latest_version ), 0, 2 ) );
 
 		// Exclude any version strings higher than the latest plugin version (ie. 99.9)

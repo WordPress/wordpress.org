@@ -59,7 +59,7 @@ class Plugin extends Base {
 		$result = array();
 		$result['name'] = $post->post_title;
 		$result['slug'] = $post->post_name;
-		$result['version'] = get_post_meta( $post_id, 'version', true );
+		$result['version'] = get_post_meta( $post_id, 'version', true ) ?: '0.0';
 
 		$author = get_user_by( 'id', $post->post_author );
 		$result['author'] = $author->display_name;
@@ -91,15 +91,15 @@ class Plugin extends Base {
 			);
 		}
 
-		$result['requires'] = get_post_meta( $post_id, 'requires', true );
-		$result['tested'] = get_post_meta( $post_id, 'tested', true );
+		$result['requires'] = get_post_meta( $post_id, 'requires', true ) ?: false;
+		$result['tested'] = get_post_meta( $post_id, 'tested', true ) ?: false;
 		$result['compatibility'] = array();
-		$result['rating'] = get_post_meta( $post_id, 'rating', true ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
+		$result['rating'] = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
 		$result['ratings'] = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
 		$result['num_ratings'] = array_sum( $result['ratings'] );
-		$result['support_threads'] = get_post_meta( $post_id, 'support_threads', true ) ?: 0;
-		$result['support_threads_resolved'] = get_post_meta( $post_id, 'support_threads_resolved', true ) ?: 0;
-		$result['active_installs'] = (int)get_post_meta( $post_id, 'active_installs', true );
+		$result['support_threads'] = intval( get_post_meta( $post_id, 'support_threads', true ) );
+		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
+		$result['active_installs'] = intval( get_post_meta( $post_id, 'active_installs', true ) );
 		$result['downloaded'] = intval( get_post_meta( $post_id, 'downloads', true ) );
 		$result['last_updated'] = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
 		$result['added'] = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
@@ -123,7 +123,7 @@ class Plugin extends Base {
 		$result['download_link'] = Template::download_link( $post );
 
 		$result['screenshots'] = array();
-		$descriptions = get_post_meta( $post->ID, 'screenshots', true );
+		$descriptions = get_post_meta( $post->ID, 'screenshots', true ) ?: array();
 		$screen_shots = get_post_meta( $post->ID, 'assets_screenshots', true ) ?: array();
 
 		/*
@@ -150,7 +150,7 @@ class Plugin extends Base {
 			}
 		}
 
-		$result['stable_tag'] = get_post_meta( $post_id, 'stable_tag', true );
+		$result['stable_tag'] = get_post_meta( $post_id, 'stable_tag', true ) ?: 'trunk';
 
 		$result['versions'] = array();
 		if ( $versions = get_post_meta( $post_id, 'tagged_versions', true ) ) {
@@ -162,7 +162,7 @@ class Plugin extends Base {
 			}
 		}
 
-		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true );
+		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: false;
 
 		$result['banners'] = array();
 		if ( $banners = Template::get_plugin_banner( $post ) ) {

@@ -186,7 +186,7 @@ class Import {
 		}
 		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
-		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true );
+		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 
 		$this->rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags );
 

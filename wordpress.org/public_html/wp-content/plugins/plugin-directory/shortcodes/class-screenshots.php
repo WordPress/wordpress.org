@@ -17,8 +17,8 @@ class Screenshots {
 		$output = '';
 
 		// All indexed from 1.
-		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true );
-		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true );
+		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true ) ?: array();
+		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();;
 
 		if ( empty( $screen_shots ) ) {
 			return '';

@@ -346,7 +346,7 @@ class Plugin_I18n {
 		$locale = $gp_locale->slug;
 		$slug   = $post->post_name;
 
-		$post->stable_tag = get_post_meta( $post->ID, 'stable_tag', true );
+		$post->stable_tag = get_post_meta( $post->ID, 'stable_tag', true ) ?: 'trunk';
 
 		if ( empty( $slug ) ) {
 			return $content;

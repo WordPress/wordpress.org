@@ -29,7 +29,7 @@ class Ratings extends \WP_Widget {
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Ratings', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
 		$post        = get_post();
-		$rating      = get_post_meta( $post->ID, 'rating', true );
+		$rating      = get_post_meta( $post->ID, 'rating', true ) ?: 0;
 		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		$num_ratings = array_sum( $ratings );
 
