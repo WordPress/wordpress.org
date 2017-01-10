@@ -201,6 +201,7 @@ class Plugin_Directory {
 		register_taxonomy( 'plugin_contributors', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
 			'query_var'         => 'plugin_contributor',
+			'sort'              => true,
 			'rewrite'           => false,
 			'labels'            => array(
 				'name' => __( 'Authors', 'wporg-plugins' ),

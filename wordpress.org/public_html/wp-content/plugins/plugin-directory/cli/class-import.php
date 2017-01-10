@@ -132,21 +132,21 @@ class Import {
 		remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
 
 		// Set categories if there aren't any yet. wp-admin takes precedent.
-		if ( ! wp_get_post_terms( $plugin->ID, 'plugin_category', array( 'fields' => 'ids' ) ) ) {
-			wp_set_post_terms( $plugin->ID, Tag_To_Category::map( $readme->tags ), 'plugin_category' );
+		if ( ! wp_get_object_terms( $plugin->ID, 'plugin_category', array( 'fields' => 'ids' ) ) ) {
+			wp_set_object_terms( $plugin->ID, Tag_To_Category::map( $readme->tags ), 'plugin_category' );
 		}
 
 		// Set tags from the readme
-		wp_set_post_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
+		wp_set_object_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
 
 		// Update the contributors list
-		wp_set_post_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
+		wp_set_object_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
 
 		// Update the committers list
 		Tools::sync_plugin_committers_with_taxonomy( $plugin->post_name );
 
 		if ( in_array( 'adopt-me', $readme->tags ) ) {
-			wp_set_post_terms( $plugin->ID, array( 74 /* Term ID for adopt-me */ ), 'plugin_section' );
+			wp_set_object_terms( $plugin->ID, 'adopt-me', 'plugin_section' );
 		}
 
 		// Update the tested-up-to value

@@ -17,15 +17,19 @@ class Developers {
 		$post         = get_post();
 		$output = '';
 
-		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
-			$contributors = wp_list_pluck( $contributors, 'name' );
-		} else {
+		$contributors = get_terms( array(
+			'taxonomy' => 'plugin_contributors',
+			'object_ids' => array( $post->ID ),
+			'orderby' => 'term_order',
+			'fields' => 'names',
+		) );
+
+		if ( ! $contributors || is_wp_error( $contributors ) ) {
 			$contributors = array();
 			if ( $author = get_user_by( 'id', $post->post_author ) ) {
 				$contributors[] = $author->user_nicename;
 			}
 		}
-		sort( $contributors, SORT_NATURAL );
 
 		$output .= '<p>' . __( 'This is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ) . '</p>';
 
