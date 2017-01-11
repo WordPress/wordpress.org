@@ -794,7 +794,11 @@ class WordCamp_Central_Theme {
 	 * @return string
 	 */
 	public static function shortcode_about_stats( $attributes ) {
-		$map_stats = self::get_map_stats();
+		// Allow stat values to be overridden with shortcode attributes
+	    $map_stats = shortcode_atts( self::get_map_stats(), $attributes, 'wcc_about_stats' );
+
+	    // Sanitize stat values
+        $map_stats = array_map( 'absint', $map_stats );
 
 		ob_start();
 		require( __DIR__ . '/shortcode-about-stats.php' );
