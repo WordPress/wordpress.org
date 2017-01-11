@@ -767,6 +767,16 @@ class Jetpack_Search {
 								),
 							),
 							array(
+								'exp' => array(
+									'active_installs' => array(
+										'origin' => 1000000,
+										'offset' => 0,
+										'scale' => 900000,
+										'decay' => 0.5,
+									),
+								),
+							),
+							array(
 								'field_value_factor' => array(
 									'field' => 'support_threads_resolved',
 									'factor' => 0.25,
