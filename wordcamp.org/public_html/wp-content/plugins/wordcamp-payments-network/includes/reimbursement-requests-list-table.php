@@ -165,7 +165,7 @@ class Reimbursement_Requests_List_Table extends \WP_List_Table {
 	 * @return string
 	 */
 	protected function column_wordcamp_name( $request ) {
-		return esc_html( $request->post_title );
+		return esc_html( get_bloginfo( 'name' ) );
 	}
 
 	/**
