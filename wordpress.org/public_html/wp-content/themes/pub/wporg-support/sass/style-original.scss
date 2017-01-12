@@ -218,6 +218,46 @@ div.bbp-template-notice.warning {
 	background-color: #fff8e5 !important;
 }
 
+/* Resolved topics */
+.topic-resolved-indicator {
+	background-color: #64b450;
+	color: #fff;
+	position: absolute;
+	padding: 4px 12px 4px 6px;
+	right: -3px;
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+}
+
+.bbp-topic-title .resolved:before,
+.topic-resolved-indicator:before {
+	content: "\f147";
+	color: #64b450; /*#46b450;*/
+	font: normal 16px/1 'dashicons';
+	margin-right: 5px;
+	float: left;
+	padding-top: 3px;
+}
+
+.topic-resolved-indicator:before {
+	color: #fff;
+	font-size: 21px;
+	padding-top: 0;
+}
+
+@media screen and ( max-width: 480px ) {
+	.topic-resolved-indicator {
+		padding-top: 2px;
+		padding-bottom: 2px;
+		top: -2rem;
+		right: -1.7rem;
+	}
+
+	.topic-resolved-indicator:before {
+		font-size: 19px;
+	}
+}
+
 @media screen and ( min-width: 960px )  {
 
 	div.content {
