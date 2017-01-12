@@ -50,6 +50,11 @@ function styles() {
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\styles', 11 );
 
+function scripts() {
+	wp_enqueue_script( 'wporg-breathe-chapters', get_stylesheet_directory_uri() . '/js/chapters.js', array( 'jquery' ), '20170112' );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
+
 function inline_scripts() {
 	?>
 	<script type="text/javascript">
