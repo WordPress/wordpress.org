@@ -840,6 +840,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 .menu-table-of-contents-container ul li .dashicons {
   position: absolute;
+  right: 0;
   cursor: pointer;
   border-left: 1px solid #eee;
   border-right: 1px solid #eee;
