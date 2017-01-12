@@ -37,6 +37,9 @@ class Plugin {
 		// Change the topic title when resolved.
 		add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 10, 2 );
 
+		// Add resolved indicator to single topic view.
+		add_action( 'bbp_theme_before_topic_author_details', array( $this, 'single_topic_resolved_indicator' ) );
+
 		// Display the form for new/edit topics.
 		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'form_topic_resolution_dropdown' ) );
 		add_action( 'bbp_theme_before_topic_form_subscriptions', array( $this, 'form_topic_resolution_checkbox' ) );
@@ -65,15 +68,41 @@ class Plugin {
 	 */
 	public function get_topic_title( $title, $topic_id ) {
 		// Only run when enabled on a topic's forum.
-		if ( ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
+		if ( bbp_is_single_topic() || ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
 			return $title;
 		}
 
-		$resolved = __( 'Resolved', 'wporg-forums' );
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
-		   return sprintf( '[%s] %s', esc_html( $resolved ), $title );
+			$title = sprintf(
+				'<span class="resolved" aria-label="%s" title="%s"></span>',
+				esc_attr__( 'Resolved', 'wporg-forums' ),
+				esc_attr__( 'Topic is resolved.', 'wporg-forums' )
+			) . $title;
 		}
+
 		return $title;
+	}
+
+	/**
+	 * Outputs resolved topic indicator.
+	 */
+	public function single_topic_resolved_indicator() {
+		$topic_id = bbp_get_topic_forum_id();
+
+		if (
+			// Must be single topic view
+			! bbp_is_single_topic()
+			||
+			// Must be enabled on the forum
+			! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) )
+			||
+			// Must be a resolved topic
+			'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) )
+		) {
+			return;
+		}
+
+		echo '<span class="topic-resolved-indicator">' . __( 'Answered', 'wporg-forums' ) . '</span>';
 	}
 
 	/**
