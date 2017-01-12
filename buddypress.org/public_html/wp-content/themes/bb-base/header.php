@@ -14,7 +14,6 @@
 	<hr class="hidden" />
 
 <?php get_template_part( 'header', 'front'  ); ?>
-<?php get_template_part( 'header', 'subnav' ); ?>
 
 	<div id="main">
 		<div class="content">
