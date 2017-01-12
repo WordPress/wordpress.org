@@ -102,7 +102,7 @@ class Plugin {
 			return;
 		}
 
-		echo '<span class="topic-resolved-indicator">' . __( 'Answered', 'wporg-forums' ) . '</span>';
+		echo '<span class="topic-resolved-indicator">' . __( 'Resolved', 'wporg-forums' ) . '</span>';
 	}
 
 	/**
