@@ -65,3 +65,10 @@
 		margin: 2px 0 6px -8px;
 	}
 }
+
+@media screen and ( max-width: 480px ) {
+	.author-badge {
+		top: -28px;
+	}
+}
+
