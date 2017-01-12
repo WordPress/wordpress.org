@@ -87,7 +87,7 @@ class Plugin {
 	 * Outputs resolved topic indicator.
 	 */
 	public function single_topic_resolved_indicator() {
-		$topic_id = bbp_get_topic_forum_id();
+		$topic_id = bbp_get_topic_id();
 
 		if (
 			// Must be single topic view
@@ -97,7 +97,7 @@ class Plugin {
 			! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) )
 			||
 			// Must be a resolved topic
-			'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) )
+			'yes' !== $this->get_topic_resolution( array( 'id' => $topic_id ) )
 		) {
 			return;
 		}
