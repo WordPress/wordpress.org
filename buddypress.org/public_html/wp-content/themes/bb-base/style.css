@@ -146,8 +146,7 @@ p.plans {
 	padding: 24px 0;
 	position: relative;
 }
-body:not(.trac) #main,
-body:not(.home-page) #main {
+body:not(.trac):not(.home-page) #main {
 	margin-top: 120px;
 }
 
