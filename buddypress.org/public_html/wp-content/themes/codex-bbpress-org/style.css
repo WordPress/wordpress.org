@@ -11,10 +11,12 @@
 
 /* Layout
 --------------------------------------------------------------------*/
-#main .content {width: 680px;}
+#main .content {
+	width: 680px;
+}
 
-#main {
-        padding-top: 0;
+body.home-page.home #main {
+	margin-top: 120px;
 }
 
 #subnav {
