@@ -1204,13 +1204,16 @@ input {
   background-color: #f0f0f0;
 }
 
-.devhub-wrap #sidebar h1.widget-title {
+.devhub-wrap #sidebar h2.widget-title {
   background-color: #d0d0d0;
   color: #8a8989;
   text-align: center;
   text-transform: uppercase;
   font-size: 14px;
   letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  line-height: 26px;
+  line-height: 2.6rem;
 }
 
 .devhub-wrap #sidebar .menu > li {
