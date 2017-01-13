@@ -362,30 +362,38 @@ class Template {
 	 *
 	 * @param int|\WP_Post|null $post  Optional. Post ID or post object. Defaults to global $post.
 	 * @param array             $asset Assets folder information.
+	 * @param bool              $cdn   Optional. If the url should be CDN'ised. Default true.
 	 * @return string
 	 */
-	public static function get_asset_url( $post, $asset ) {
+	public static function get_asset_url( $post, $asset, $cdn = true ) {
 		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
 
 			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png.
-			$format = 'https://i0.wp.com/plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/trunk/%3$s?strip=all';
+			$format = 'https://plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/trunk/%3$s';
 		} else {
 
 			// Images in the assets folder - /plugin-name/assets/screenshot-1.png.
-			$format = 'https://i0.wp.com/plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/assets/%3$s?strip=all';
+			$format = 'https://plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/assets/%3$s';
 		}
 
 		// Photon does not support SVG files. https://github.com/Automattic/jetpack/issues/81
 		if ( strpos( $asset['filename'], '.svg' ) ) {
-			$format = str_replace( 'i0.wp.com/', '', $format );
+			$cdn = false;
 		}
 
-		return esc_url( sprintf(
+		$url = sprintf(
 			$format,
 			$asset['revision'],
 			get_post( $post )->post_name,
 			$asset['filename']
-		) );
+		);
+
+		// Use Jetpacks Photon CDN when available.
+		if ( $cdn && function_exists( 'jetpack_photon_url' ) ) {
+			$url = jetpack_photon_url( $url, array( 'strip' => 'all' ) );
+		}
+
+		return esc_url( $url );
 	}
 
 	/**
