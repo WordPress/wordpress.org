@@ -262,13 +262,6 @@ article footer.entry-meta {
 	clear: both;
 }
 
-.entry-meta,
-article.post .entry-header .entry-meta,
-article#post-new .entry-header .entry-meta,
-article.page .entry-header .entry-meta {
-	margin-left: 60px;
-}
-
 .entry-title,
 article.post .entry-title,
 article#post-new .entry-title,
