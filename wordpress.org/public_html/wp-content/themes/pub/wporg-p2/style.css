@@ -265,6 +265,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	float: right;
 }
 
+.syntaxhighlighter {
+	/* These are !important due to use of !important in SyntaxHighlighter Evolved plugin. */
+	padding-bottom: 0.1em !important;
+}
+
 /* Responsive design for handbooks */
 @media (max-width: 320px) {
 	.post-type-archive-handbook	#main h2,
