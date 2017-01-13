@@ -115,3 +115,24 @@ body {
 	}
 }
 
+/* Resolved topics */
+.topic-resolved-indicator {
+	padding-left: 12px;
+	padding-right: 6px;
+	left: -3px;
+	right: initial;
+	border-bottom-right-radius: 6px;
+}
+
+@media screen and ( max-width: 480px ) {
+	.topic-resolved-indicator {
+		left: -18px;
+	}
+}
+
+.resolved:before,
+.topic-resolved-indicator:before {
+	margin-left: 3px;
+	float: right;
+}
+
