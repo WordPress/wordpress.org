@@ -167,7 +167,7 @@
 							</div>
 
 							<div>
-								<label for="bbp_topic_edit_reason"><?php printf( __( 'Optional reason for editing:', 'wporg-forums' ), bbp_get_current_user_name() ); ?></label><br />
+								<label for="bbp_topic_edit_reason"><?php _e( 'Optional reason for editing:', 'wporg-forums' ); ?></label><br />
 								<input type="text" value="<?php bbp_form_topic_edit_reason(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_edit_reason" id="bbp_topic_edit_reason" />
 							</div>
 						</fieldset>

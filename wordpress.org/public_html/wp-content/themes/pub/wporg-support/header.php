@@ -27,17 +27,17 @@ $menu_items = array(
 		<header id="masthead" class="site-header <?php echo is_front_page() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
 				<?php if ( is_front_page() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Support','Site title', 'wporg-forums' ); ?></a></h1>
+					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Support', 'Site title', 'wporg-forums' ); ?></a></h1>
 
 					<p class="site-description">
 						<?php
 						/* Translators: subhead */
-						printf( __( 'We\'ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' ) );
+						_e( 'We\'ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' );
 						?>
 					</p>
 					<?php get_search_form(); ?>
 				<?php else : ?>
-					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Support','Site title', 'wporg-forums' ); ?></a></p>
+					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Support', 'Site title', 'wporg-forums' ); ?></a></p>
 
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-forums' ); ?>"></button>
