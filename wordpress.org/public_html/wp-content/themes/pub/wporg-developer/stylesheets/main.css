@@ -538,6 +538,28 @@ input {
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
+.devhub-wrap a.button .dashicons,
+.devhub-wrap button .dashicons,
+.devhub-wrap input[type="button"] .dashicons,
+.devhub-wrap input[type="reset"] .dashicons,
+.devhub-wrap input[type="submit"] .dashicons {
+  vertical-align: text-bottom;
+}
+
+@media (min-width: 43em) and (max-width: 915px) {
+  .devhub-wrap a.button {
+    max-width: 100%;
+    padding: .6em 1em;
+    font-size: 14px;
+    font-size: 1.4rem;
+  }
+  .devhub-wrap .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
 .devhub-wrap input[type="checkbox"],
 .devhub-wrap input[type="radio"] {
   box-sizing: border-box;
@@ -908,6 +930,13 @@ input {
   margin: 0 auto;
 }
 
+@media (min-width: 43em) and (max-width: 915px) {
+  .devhub-wrap .section.blue .widget-title {
+    font-size: 35px;
+    font-size: 3.5rem;
+  }
+}
+
 .devhub-wrap .section.gray {
   background: #797878;
   color: #fff;
@@ -959,7 +988,7 @@ input {
 
 .devhub-wrap .section.gray .widget-title {
   font-weight: 300;
-  font-size: 40px;
+  font-size: 50px;
   font-size: 5rem;
   line-height: 68px;
   line-height: 6.8rem;
@@ -974,6 +1003,13 @@ input {
   width: 6.8px;
   height: 6.8rem;
   width: 6.8rem;
+}
+
+@media (min-width: 43em) and (max-width: 915px) {
+  .devhub-wrap .section.gray .widget-title {
+    font-size: 35px;
+    font-size: 3.5rem;
+  }
 }
 
 .devhub-wrap .section.gray .widget-description {
@@ -1011,6 +1047,13 @@ input {
   padding: 3rem;
   float: left;
   clear: none;
+}
+
+@media (min-width: 43em) and (max-width: 915px) {
+  .devhub-wrap .box {
+    padding: 30px 20px;
+    padding: 3rem 2rem;
+  }
 }
 
 .devhub-wrap .reference-landing .section.search-section {
@@ -1295,6 +1338,12 @@ input {
 .devhub-wrap .three-columns .box {
   width: 31%;
   margin: 1.15%;
+}
+
+@media (min-width: 43em) and (max-width: 915px) {
+  .devhub-wrap .three-columns .box {
+    margin: 1% 0;
+  }
 }
 
 .devhub-wrap .two-columns .box {
