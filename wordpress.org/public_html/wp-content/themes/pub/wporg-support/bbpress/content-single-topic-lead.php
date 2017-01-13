@@ -17,7 +17,7 @@
 
 		<div id="post-<?php bbp_topic_id(); ?>" <?php bbp_topic_class(); ?>>
 			<div class="topic-indicator">
-				<span class="dashicons dashicons-admin-post" title="Sticky Topic"></span>
+				<span class="dashicons dashicons-admin-post" title="<?php esc_attr_e( 'Sticky Topic', 'wporg-forums' ); ?>"></span>
 			</div>
 
 			<div class="bbp-topic-author">
