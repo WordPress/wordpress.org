@@ -24,14 +24,14 @@ class WordCamp_Dashboard_Widgets {
 		if ( $this->show_wordcamp_reminders() ) {
 			wp_add_dashboard_widget(
 				'wordcamp_reminders',
-				'WordCamp Reminders',
+				esc_html__( 'WordCamp Reminders', 'wordcamporg' ),
 				array( $this, 'render_wordcamp_reminders' )
 			);
 		}
 
 		wp_add_dashboard_widget(
 			'new_wordcamporg_tools',
-			'New WordCamp.org Tools',
+			esc_html__( 'New WordCamp.org Tools', 'wordcamporg' ),
 			array( $this, 'render_new_wordcamporg_tools' )
 		);
 
@@ -170,15 +170,45 @@ class WordCamp_Dashboard_Widgets {
 
 		<ul class="ul-disc">
 			<?php if ( $this->need_central_about_info ) : ?>
-				<li>Please send us <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/your-page-on-central-wordcamp-org/">the "about" text and banner image</a> for your central.wordcamp.org page.</a></li>
+				<li>
+					<?php
+						printf(
+							wp_kses(
+								__( 'Please send us <a href="%s">the "about" text and banner image</a> for your central.wordcamp.org page.', 'wordcamporg' ),
+								array( 'a' => array( 'href' => true ) )
+							),
+							'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/your-page-on-central-wordcamp-org/'
+						);
+					?>
+				</li>
 			<?php endif; ?>
 
 			<?php if ( in_array( 'attendees', $this->needed_pages ) ) : ?>
-				<li>Tickets are on sale now! Don’t forget to <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/using-camptix-event-ticketing-plugin/#attendees-list">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.</li>
+				<li>
+					<?php
+						printf(
+							wp_kses(
+								__( 'Tickets are on sale now! Don’t forget to <a href="%s">publish an Attendees page</a>, so everyone can see what amazing people are coming to your WordCamp.', 'wordcamporg' ),
+								array( 'a' => array( 'href' => true ) )
+							),
+							'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/using-camptix-event-ticketing-plugin/#attendees-list'
+						);
+					?>
+					</li>
 			<?php endif; ?>
 
 			<?php if ( in_array( 'schedule', $this->needed_pages ) ) : ?>
-				<li>Tickets sell a lot faster when people can see who's speaking at your WordCamp. How about <a href="https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/custom-tools-for-building-wordcamp-content/#schedule">publishing a schedule</a> today?</li>
+				<li>
+					<?php
+						printf(
+							wp_kses(
+								__( 'Tickets sell a lot faster when people can see who&#8217;s speaking at your WordCamp. How about <a href="%s">publishing a schedule</a> today?', 'wordcamporg' ),
+								array( 'a' => array( 'href' => true ) )
+							),
+							'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/custom-tools-for-building-wordcamp-content/#schedule'
+						);
+					?>
+				</li>
 			<?php endif; ?>
 		</ul>
 
@@ -192,14 +222,42 @@ class WordCamp_Dashboard_Widgets {
 		?>
 
 		<p>
-			<?php _e( "Here are some of the tools we've recently launched to help you organize:", 'wordcamporg' ); ?>
+			<?php esc_html_e( 'Here are some of the tools we&#8217;ve recently launched to help you organize:', 'wordcamporg' ); ?>
 		</p>
 
 		<ul class="ul-disc">
-			<li><a href="https://make.wordpress.org/community/2016/04/26/new-tool-for-creating-personalized-wordcamp-badges/">Create personalized attendee badges</a>.</li>
-			<li><a href="https://make.wordpress.org/community/2016/03/01/new-automated-payments-and-invoicing/">Invoice sponsors, pay vendors, and get reimbursed</a>.</li>
-			<li><a href="https://make.wordpress.org/community/2015/07/09/site-cloner-v1-is-now-available/">Quickly clone another WordCamp site</a> instead of building yours from scratch.</li>
-			<li><a href="https://make.wordpress.org/community/2015/11/24/remote-css-plugin-launched-on-wordcamp-org/">Edit CSS in your local environment</a> and manage it in a GitHub repository.</li>
+			<li>
+				<a href="https://make.wordpress.org/community/2016/04/26/new-tool-for-creating-personalized-wordcamp-badges/">
+					<?php esc_html_e( 'Create personalized attendee badges.', 'wordcamporg' ); ?>
+				</a>
+			</li>
+			<li>
+				<a href="https://make.wordpress.org/community/2016/03/01/new-automated-payments-and-invoicing/">
+					<?php esc_html_e( 'Invoice sponsors, pay vendors, and get reimbursed.', 'wordcamporg' ); ?>
+				</a>
+			</li>
+			<li>
+				<?php
+					printf(
+						wp_kses(
+							__( '<a href="%s">Quickly clone another WordCamp site</a> instead of building yours from scratch.', 'wordcamporg' ),
+							array( 'a' => array( 'href' => true ) )
+						),
+						'https://make.wordpress.org/community/2015/07/09/site-cloner-v1-is-now-available/'
+					);
+				?>
+			</li>
+			<li>
+				<?php
+					printf(
+						wp_kses(
+							__( '<a href="%s">Edit CSS in your local environment</a> and manage it in a GitHub repository.', 'wordcamporg' ),
+							array( 'a' => array( 'href' => true ) )
+						),
+						'https://make.wordpress.org/community/2015/11/24/remote-css-plugin-launched-on-wordcamp-org/'
+					);
+				?>
+			</li>
 		</ul>
 
 		<?php
