@@ -100,7 +100,7 @@ class WordCamp_Dashboard_Widgets {
 		$published_pages    = get_posts( array(
 			'post_type'      => 'page',
 			'post_status'    => 'publish',
-			'posts_per_page' => -1
+			'posts_per_page' => -1,
 		) );
 
 		foreach ( $published_pages as $page ) {
@@ -140,7 +140,7 @@ class WordCamp_Dashboard_Widgets {
 	protected function prioritize_wordcamp_widgets() {
 		global $wp_meta_boxes;
 
-		// Move WordCamp Reminders to the top of the primary column
+		// Move WordCamp Reminders to the top of the primary column.
 		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['wordcamp_reminders'] ) ) {
 			$reminders_temp = $wp_meta_boxes['dashboard']['normal']['core']['wordcamp_reminders'];
 			unset( $wp_meta_boxes['dashboard']['normal']['core']['wordcamp_reminders'] );
@@ -151,7 +151,7 @@ class WordCamp_Dashboard_Widgets {
 			);
 		}
 
-		// Move WordCamp Organizer Survey to the top of the side column
+		// Move WordCamp Organizer Survey to the top of the side column.
 		if ( isset( $wp_meta_boxes['dashboard']['normal']['core']['new_wordcamporg_tools'] ) ) {
 			$wp_meta_boxes['dashboard']['side']['core'] = array_merge(
 				array( 'new_wordcamporg_tools' => $wp_meta_boxes['dashboard']['normal']['core']['new_wordcamporg_tools'] ),
