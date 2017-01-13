@@ -11,6 +11,8 @@ use Exception;
  */
 class Plugin_i18n_Import {
 
+	const PHP = '/usr/local/bin/php';
+
 	/**
 	 * Queue the job 
 	 */
