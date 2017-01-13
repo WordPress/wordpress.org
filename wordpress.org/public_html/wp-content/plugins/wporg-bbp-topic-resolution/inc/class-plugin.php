@@ -72,6 +72,11 @@ class Plugin {
 			return $title;
 		}
 
+		// Don't run when displaying a title attribute via bbp_get_reply_title_fallback(), hooked to 'the_title'
+		if ( doing_filter( 'the_title' ) ) {
+			return $title;
+		}
+
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
 			$title = sprintf(
 				'<span class="resolved" aria-label="%s" title="%s"></span>',
