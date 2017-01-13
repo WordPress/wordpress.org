@@ -584,7 +584,7 @@ class WordCamp_Post_Types_Plugin {
 		$html .= '<tr>';
 
 		// Table headings.
-		$html .= '<th class="wcpt-col-time">Time</th>';
+		$html .= '<th class="wcpt-col-time">' . esc_html__( 'Time', 'wordcamporg' ) . '</th>';
 		foreach ( $columns as $term_id ) {
 			$track = get_term( $term_id, 'wcb_track' );
 			$html .= sprintf(
