@@ -761,7 +761,7 @@ class Jetpack_Search {
 							array(
 								'field_value_factor' => array(
 									'field' => 'active_installs',
-									'factor' => 0.25,
+									'factor' => 0.375,
 									'modifier' => 'log2p',
 									'missing' => 1,
 								),
@@ -772,7 +772,7 @@ class Jetpack_Search {
 										'origin' => 1000000,
 										'offset' => 0,
 										'scale' => 900000,
-										'decay' => 0.5,
+										'decay' => 0.75,
 									),
 								),
 							),
