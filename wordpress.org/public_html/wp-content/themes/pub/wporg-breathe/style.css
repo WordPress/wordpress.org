@@ -908,9 +908,12 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .menu-table-of-contents-container > ul > li > ul > li > ul a:hover, .menu-table-of-contents-container > ul > li > ul > li > ul a.active {
   border-left: 5px solid #0073aa;
 }
-.menu-table-of-contents-container .current-menu-ancestor ul,
 .menu-table-of-contents-container ul.default-open {
   display: block !important;
+}
+.menu-table-of-contents-container .current-menu-item ul,
+.menu-table-of-contents-container .current-menu-ancestor ul {
+	display: block;
 }
 .menu-table-of-contents-container .children {
   overflow: hidden;
