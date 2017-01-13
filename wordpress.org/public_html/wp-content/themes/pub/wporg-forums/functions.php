@@ -31,14 +31,14 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20161011'
+		'20170112'
 	);
 
 	wp_register_style(
 		'forum-wp4-style-rtl',
 		get_template_directory_uri() . '/style-rtl.css',
 		array( 'forum-wp4-style' ),
-		'20161011'
+		'20170112'
 	);
 
 	wp_enqueue_style( 'forum-wp4-style' );
