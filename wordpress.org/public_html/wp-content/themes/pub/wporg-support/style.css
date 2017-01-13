@@ -245,6 +245,11 @@ body {
 	background: #fff;
 }
 
+/* Override style from bbpress.org */
+body:not(.trac):not(.home-page) #main {
+	margin-top: 2rem;
+}
+
 #headline {
 	background: #f7f7f7;
 	border-bottom: 1px solid #dfdfdf;
