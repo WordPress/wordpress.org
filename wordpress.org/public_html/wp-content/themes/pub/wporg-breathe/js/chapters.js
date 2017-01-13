@@ -13,9 +13,7 @@ jQuery(document).ready(function() {
 	jQuery( '.current-menu-item a' ).first()
 		.addClass( 'active' )
 		.parents( '.menu-item-has-children' )
-			.toggleClass( 'open' )
-			.children( '.children' )
-				.slideToggle();
+			.toggleClass( 'open' );
 
 	// Or if wrapped in a div.expandable
 	jQuery( '.menu-item-has-children > div > .dashicons' ).click( function() {
