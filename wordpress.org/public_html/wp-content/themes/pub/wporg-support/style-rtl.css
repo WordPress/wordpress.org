@@ -444,7 +444,7 @@ div.bbp-template-notice.warning {
 	padding-top: 0;
 }
 
-.bbp-user-replies-created .bbp-topic-permalink a, .bbp-user-replies-created .bbp-topic-permalink .bbpress #bbpress-forums p.bbp-topic-meta a, .bbpress #bbpress-forums p.bbp-topic-meta .bbp-user-replies-created .bbp-topic-permalink a {
+.bbp-user-replies-created .bbp-topic-permalink {
 	display: inline-block;
 }
 
