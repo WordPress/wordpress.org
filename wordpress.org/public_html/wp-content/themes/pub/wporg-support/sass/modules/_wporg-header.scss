@@ -52,3 +52,14 @@
 		text-decoration: none;
 	}
 }
+
+/* Prevent the login link from being hidden on mobile devices. */
+@media screen and ( max-width: 782px ) {
+	.wporg-support #wp-toolbar #wp-admin-bar-log-in {
+		display: list-item;
+
+		.ab-item {
+			padding: 0 8px 0 7px;
+		}
+	}
+}
