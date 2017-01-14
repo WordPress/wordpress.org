@@ -5051,6 +5051,7 @@ section {
 }
 
 .bbpress #bbpress-forums div.bbp-template-notice {
+	display: inline-block;
 	padding: .5rem;
 	border: none;
 	border-radius: 3px;
