@@ -5363,6 +5363,25 @@ select {
 	}
 }
 
+.home.wporg-support .themes-plugins {
+	width: 65%;
+	margin: 3rem 0 4rem;
+}
+
+.home.wporg-support .themes-plugins p {
+	font-size: 0.8rem;
+	color: #666666;
+}
+
+.home.wporg-support .themes-plugins p a:hover > .dashicons, .home.wporg-support .themes-plugins .bbpress #bbpress-forums p.bbp-topic-meta a:hover > .dashicons, .bbpress #bbpress-forums .home.wporg-support .themes-plugins p.bbp-topic-meta a:hover > .dashicons {
+	text-decoration: none;
+}
+
+.home.wporg-support .themes-plugins h3 {
+	font-size: 1.4rem;
+	margin-bottom: 0;
+}
+
 /*--------------------------------------------------------------
 # .single-forum & .single-topic
 --------------------------------------------------------------*/
