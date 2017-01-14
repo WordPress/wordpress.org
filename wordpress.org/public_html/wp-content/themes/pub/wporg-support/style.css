@@ -5084,6 +5084,11 @@ section {
 	color: #fff;
 }
 
+.bbpress #bbpress-forums .bbp-topics .bbp-topic-author,
+.bbpress #bbpress-forums .bbp-topics .bbp-reply-author {
+	margin-top: 1.45rem;
+}
+
 .bbpress #bbpress-forums ul.status-closed,
 .bbpress #bbpress-forums ul.status-closed a {
 	color: inherit;

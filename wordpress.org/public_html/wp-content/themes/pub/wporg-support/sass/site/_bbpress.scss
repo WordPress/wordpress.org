@@ -105,6 +105,11 @@ section {
 				background: $color__wp-blue;
 				color: #fff;
 			}
+
+			.bbp-topic-author,
+			.bbp-reply-author {
+				margin-top: 1.45rem;
+			}
 		}
 
 		ul.status-closed, 
