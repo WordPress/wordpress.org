@@ -204,10 +204,11 @@ if ( bbp_is_reply_edit() ) : ?>
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
 			<ul>
-				<li><?php is_user_logged_in()
-					? esc_html_e( 'You cannot reply to this topic.',               'wporg-forums' )
-					: esc_html_e( 'You must be logged in to reply to this topic.', 'wporg-forums' );
-				?></li>
+				<?php if ( is_user_logged_in() ) : ?>
+					<li><?php esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' ); ?></li>
+				<?php else : ?>
+					<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
+				<?php endif; ?>
 			</ul>
 		</div>
 	</div>
