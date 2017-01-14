@@ -213,7 +213,11 @@
 
 	<div id="no-topic-<?php bbp_topic_id(); ?>" class="bbp-no-topic">
 		<div class="bbp-template-notice">
-			<p><?php is_user_logged_in() ? _e( 'You cannot create new topics at this time.', 'wporg-forums' ) : _e( 'You must be logged in to create new topics.', 'wporg-forums' ); ?></p>
+			<?php if ( is_user_logged_in() ) : ?>
+				<p><?php _e( 'You cannot create new topics at this time.', 'wporg-forums' ); ?></p>
+			<?php else : ?>
+				<p><?php printf( __( 'You must be <a href="%s">logged in</a> to create new topics.', 'wporg-forums' ), wp_login_url() ); ?></p>
+			<?php endif; ?>
 		</div>
 	</div>
 
