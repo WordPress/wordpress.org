@@ -403,6 +403,25 @@ select {
 			}
 		}
 	}
+
+	.themes-plugins {
+		width: 65%;
+		margin: 3rem 0 4rem;
+
+		p {
+			font-size: ms(-2);
+			color: #666666;
+
+			a:hover > .dashicons {
+				text-decoration: none;
+			}
+		}
+
+		h3 {
+			font-size: 1.4rem;
+			margin-bottom: 0;
+		}
+	}
 }
 
 
