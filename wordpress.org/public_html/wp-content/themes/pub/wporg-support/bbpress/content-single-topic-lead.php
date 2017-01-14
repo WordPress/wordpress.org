@@ -16,9 +16,11 @@
 	<li class="bbp-body">
 
 		<div id="post-<?php bbp_topic_id(); ?>" <?php bbp_topic_class(); ?>>
-			<div class="topic-indicator">
-				<span class="dashicons dashicons-admin-post" title="<?php esc_attr_e( 'Sticky Topic', 'wporg-forums' ); ?>"></span>
-			</div>
+			<?php if ( bbp_is_topic_sticky() ) : ?>
+				<div class="topic-indicator">
+					<span class="dashicons dashicons-admin-post" title="<?php esc_attr_e( 'Sticky Topic', 'wporg-forums' ); ?>"></span>
+				</div>
+			<?php endif; ?>
 
 			<div class="bbp-topic-author">
 
