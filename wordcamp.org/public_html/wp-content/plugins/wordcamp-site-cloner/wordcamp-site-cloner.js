@@ -47,7 +47,7 @@
 			_.bindAll( this, 'scroller' );
 
 			// Container that will be scrolled within
-			this.$container = $( '#wcsc-cloner' ).parents( 'ul.accordion-section-content' );
+			this.$container = $( '#wcsc-cloner' ).parents( '.wp-full-overlay-sidebar-content' );
 			// Bind scrolling within the container to check for infinite scroll
 			this.$container.bind( 'scroll', _.throttle( this.scroller, 300 ) );
 
@@ -158,12 +158,13 @@
 		},
 
 		paginate : function( pageIndex ) {
-			var collection = this;
+			var collection = this,
+				perPage    = 20;
 
 			pageIndex  = pageIndex || 0;
 
-			collection = _( collection.rest( 20 * pageIndex ) );
-			collection = _( collection.first( 20 ) );
+			collection = _( collection.rest( perPage * pageIndex ) );
+			collection = _( collection.first( perPage ) );
 
 			return collection;
 		},
