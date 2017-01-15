@@ -56,12 +56,16 @@ function scripts() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
 
 function inline_scripts() {
+	$current_site = get_site();
 	?>
 	<script type="text/javascript">
 		var el = document.getElementById( 'make-welcome-hide' );
 		if ( el ) {
 			el.addEventListener( 'click', function( e ) {
-				document.cookie = el.dataset.cookie + '=' + el.dataset.hash + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+				document.cookie = el.dataset.cookie + '=' + el.dataset.hash +
+					'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
+					'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
+					'; path=<?php echo esc_js( $current_site->path ); ?>';
 				jQuery( '.make-welcome' ).slideUp();
 			} );
 		}
