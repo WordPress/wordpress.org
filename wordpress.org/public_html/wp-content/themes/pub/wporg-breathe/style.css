@@ -723,6 +723,19 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	float: right;
 }
 
+.wordcamp-handbook .o2-post {
+	border-top: 0;
+}
+
+.wordcamp-handbook .entry-content {
+	padding-top: 0;
+}
+
+.wordcamp-handbook nav.o2-post-actions button,
+.wordcamp-handbook nav.o2-post-actions ul {
+	top: 12px;
+}
+
 /** Table of Contents */
 .post-type-archive-handbook div.table-of-contents,
 .single-handbook div.table-of-contents {
