@@ -669,6 +669,15 @@ nav.o2-post-footer-actions ul li > span > a {
 	margin-top: 0;
 }
 
+.single-handbook .content-area h1 {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.single-handbook .o2-post {
+	border-top: none;
+}
+
 .post-type-archive-handbook .handbook-name a:not(:hover),
 .single-handbook .handbook-name a:not(:hover) {
 	color: inherit;
