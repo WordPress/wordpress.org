@@ -131,6 +131,10 @@ class WPorg_Handbook {
 		add_filter( 'body_class',                         array( $this, 'add_body_class' ) );
 		add_filter( 'post_class',                         array( $this, 'add_post_class' ) );
 		add_filter( 'o2_process_the_content',             array( $this, 'disable_o2_processing' ) );
+		add_filter( 'o2_application_container',           array( $this, 'o2_application_container' ) );
+		add_filter( 'o2_view_type',                       array( $this, 'o2_view_type' ) );
+		add_filter( 'o2_post_fragment',                   array( $this, 'o2_post_fragment' ) );
+		add_filter( 'comments_open',                      array( $this, 'comments_open', 10, 2 ) );
 	}
 
 	/**
@@ -353,8 +357,8 @@ class WPorg_Handbook {
 			'description' => sprintf( __( 'Used on %s pages', 'wporg' ), $this->label ),
 			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
 			'after_widget'  => '</aside>',
-			'before_title'  => '<h2 class="widget-title">',
-			'after_title'   => '</h2>',
+			'before_title'  => '<h1 class="widget-title">',
+			'after_title'   => '</h1>',
 		);
 
 		$sidebar_args = apply_filters( 'wporg_handbook_sidebar_args', $sidebar_args, $this );
@@ -393,4 +397,63 @@ class WPorg_Handbook {
 		return ( $this->post_type === get_post_type() ) ? false : $process_with_o2;
 	}
 
+	/**
+	 * Use the correct ID for the content container element.
+	 *
+	 * @param string $container The container element ID.
+	 * @return string
+	 */
+	function o2_application_container( $container ) {
+		return ( $this->post_type === get_post_type() ) ? '#primary' : $container;
+	}
+
+	/**
+	 * Tell o2 to use the 'single' view type for handbook pages. This removes a lot of the meta
+	 * cruft around the content.
+	 *
+	 * @param string $view_type The o2 view type.
+	 * @return string
+	 */
+	function o2_view_type( $view_type ) {
+		return ( $this->post_type === get_post_type() ) ? 'single' : $view_type;
+	}
+
+	/**
+	 * Tell o2 to treat the handbook page the same as it would a normal page.
+	 *
+	 * @param array $post_fragment The o2 post fragment
+	 * @return array
+	 */
+	function o2_post_fragment( $post_fragment ) {
+		$post = get_post( $post_fragment['id'] );
+		if ( ! $post ) {
+			return $post_fragment;
+		}
+
+		if ( $post->post_type === $this->post_type ) {
+			$post_fragment['isPage'] = true;
+		}
+
+		return $post_fragment;
+	}
+
+	/**
+	 * Don't show the comment form on handbook pages.
+	 *
+	 * @param bool $open Whether the comments are open or not.
+	 * @param WP_Post|int $post_id The current post.
+	 * @return bool
+	 */
+	function comments_open( $open, $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return $open;
+		}
+
+		if ( $post->post_type === $this->post_type ) {
+			return false;
+		}
+
+		return $open;
+	}
 }
