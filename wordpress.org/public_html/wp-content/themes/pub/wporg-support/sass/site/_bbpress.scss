@@ -40,6 +40,7 @@ section {
 			h3 {
 				font-size: 1.4rem;
 				margin-bottom: 0;
+				margin-top: 0;
 			}
 
 			p {
@@ -60,7 +61,7 @@ section {
 			@media (min-width: $ms-breakpoint) {
 				height: 200px;
 				border-bottom: none;
-				margin: 0 5% 0 0;
+				margin: 2rem 5% 0 0;
 
 				&:nth-child(3n) {
 					margin-right:0;
@@ -405,11 +406,11 @@ select {
 	}
 
 	.themes-plugins {
-		width: 65%;
-		margin: 3rem 0 4rem;
+		margin: 0 0 4rem;
+		border-bottom: 1px solid #eee;
 
 		p {
-			font-size: ms(-2);
+			font-size: ms(0);
 			color: #666666;
 
 			a:hover > .dashicons {
@@ -420,6 +421,17 @@ select {
 		h3 {
 			font-size: 1.4rem;
 			margin-bottom: 0;
+			margin-top: 0;
+		}
+
+		@media (min-width: $ms-breakpoint) {
+			width: 65%;
+			margin: 3rem 0 4rem;
+			border-bottom: none;
+
+			p {
+				font-size: ms(-2);
+			}
 		}
 	}
 }

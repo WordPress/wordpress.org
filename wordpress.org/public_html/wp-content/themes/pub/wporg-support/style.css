@@ -5034,6 +5034,7 @@ section {
 .three-up.bbp-forums > div h3 {
 	font-size: 1.4rem;
 	margin-bottom: 0;
+	margin-top: 0;
 }
 
 .three-up.bbp-forums > div p {
@@ -5053,7 +5054,7 @@ section {
 	.three-up.bbp-forums > div {
 		height: 200px;
 		border-bottom: none;
-		margin: 0 5% 0 0;
+		margin: 2rem 5% 0 0;
 	}
 	.three-up.bbp-forums > div:nth-child(3n) {
 		margin-right: 0;
@@ -5366,12 +5367,12 @@ select {
 }
 
 .home.wporg-support .themes-plugins {
-	width: 65%;
-	margin: 3rem 0 4rem;
+	margin: 0 0 4rem;
+	border-bottom: 1px solid #eee;
 }
 
 .home.wporg-support .themes-plugins p {
-	font-size: 0.8rem;
+	font-size: 1rem;
 	color: #666666;
 }
 
@@ -5382,6 +5383,18 @@ select {
 .home.wporg-support .themes-plugins h3 {
 	font-size: 1.4rem;
 	margin-bottom: 0;
+	margin-top: 0;
+}
+
+@media (min-width: 48em) {
+	.home.wporg-support .themes-plugins {
+		width: 65%;
+		margin: 3rem 0 4rem;
+		border-bottom: none;
+	}
+	.home.wporg-support .themes-plugins p {
+		font-size: 0.8rem;
+	}
 }
 
 /*--------------------------------------------------------------
