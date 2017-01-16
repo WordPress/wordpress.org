@@ -134,7 +134,7 @@ class WPorg_Handbook {
 		add_filter( 'o2_application_container',           array( $this, 'o2_application_container' ) );
 		add_filter( 'o2_view_type',                       array( $this, 'o2_view_type' ) );
 		add_filter( 'o2_post_fragment',                   array( $this, 'o2_post_fragment' ) );
-		add_filter( 'comments_open',                      array( $this, 'comments_open', 10, 2 ) );
+		add_filter( 'comments_open',                      array( $this, 'comments_open' ), 10, 2 );
 	}
 
 	/**
