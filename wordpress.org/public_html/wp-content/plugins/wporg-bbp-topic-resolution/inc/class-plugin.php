@@ -68,7 +68,12 @@ class Plugin {
 	 */
 	public function get_topic_title( $title, $topic_id ) {
 		// Only run when enabled on a topic's forum.
-		if ( bbp_is_single_topic() || ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
+		if ( ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
+			return $title;
+		}
+
+		// Don't run when viewing a single topic or a topic edit page.
+		if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
 			return $title;
 		}
 
