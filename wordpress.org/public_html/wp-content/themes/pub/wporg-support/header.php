@@ -12,9 +12,9 @@
 namespace WordPressdotorg\Forums;
 
 $menu_items = array(
-	'/' 										 => __( 'Forums', 'wporg-forums' ),
-	'https://codex.wordpress.org/Main_Page'      		 => __( 'Documentation', 'wporg-forums' ),
-	'https://make.wordpress.org/support/handbook/'       => __( 'Get Involved', 'wporg-forums' ),
+	'/'                                                                  => __( 'Forums', 'wporg-forums' ),
+	__( 'https://codex.wordpress.org/Main_Page', 'wporg-forums' )        => __( 'Documentation', 'wporg-forums' ),
+	__( 'https://make.wordpress.org/support/handbook/', 'wporg-forums' ) => __( 'Get Involved', 'wporg-forums' ),
 );
 ?>
 
