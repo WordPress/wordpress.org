@@ -108,13 +108,18 @@ input[type="submit"] {
 }
 
 .navigation-main ul li a {
-	padding: 4px 0;
+	padding: 4px 0 0;
 }
 
 .navigation-main ul li:hover > a,
-.navigation-main ul li.current-menu-item a {
+.navigation-main ul li.current-menu-item a,
+.navigation-main ul li.current-menu-item:hover a {
 	background: transparent;
-	text-decoration: underline;
+	border-bottom: 1px solid #fff;
+}
+
+.navigation-main ul li:hover > a {
+	border-bottom: none;
 }
 
 .navigation-main a {
