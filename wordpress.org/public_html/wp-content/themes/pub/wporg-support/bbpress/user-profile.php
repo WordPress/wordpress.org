@@ -67,7 +67,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
 		?></p>
 
-		<?php if ( $website = bbp_get_displayed_user_field( 'user_url' ) ) : ?>
+		<?php if ( is_user_logged_in() && $website = bbp_get_displayed_user_field( 'user_url' ) ) : ?>
 	
 			<p class="bbp-user-website"><?php
 			/* translators: %s: link to user's website */ 
