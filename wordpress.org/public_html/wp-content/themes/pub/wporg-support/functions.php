@@ -38,7 +38,7 @@ function wporg_support_scripts() {
 
 	wp_enqueue_style( 'forum-wp4-style' );
 
-	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
+	wp_enqueue_script( 'wporg-support-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151217', true );
 }
 add_action( 'wp_enqueue_scripts', 'wporg_support_scripts' );
 
