@@ -30,8 +30,9 @@ input[type="submit"] {
 
 /* wporg-header overrides */
 #wporg-header input.text {
-	font-size: inherit !important;
+	font-size: 12px !important;
 	padding: 3px;
+	box-sizing: content-box;
 }
 
 #wporg-header input[type="submit"] {
