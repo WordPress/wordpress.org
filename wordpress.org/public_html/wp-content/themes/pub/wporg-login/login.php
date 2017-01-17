@@ -16,4 +16,15 @@ get_header();
 	<a href="https://login.wordpress.org/register/" title="<?php _e( 'Create an account', 'wporg-login' ); ?>"><?php _e( 'Create an account', 'wporg-login' ); ?></a>
 </p>
 
+<script type="text/javascript">
+setTimeout( function() {
+	try {
+		d = document.getElementById( 'user_login' );
+		d.focus();
+		d.select();
+	} catch( e ){}
+}, 200 );
+</script>
+
+
 <?php get_footer(); ?>
