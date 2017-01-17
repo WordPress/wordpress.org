@@ -658,7 +658,7 @@ nav.o2-post-footer-actions ul li > span > a {
 	clear: left;
 }
 
-.single-handbook .widget-area {
+.single-handbook .site-main .widget-area {
 	float: left;
 	margin-right: 4%;
 }
