@@ -5062,10 +5062,14 @@ section {
 }
 
 .bbpress #bbpress-forums div.bbp-template-notice {
-	display: inline-block;
 	padding: .5rem;
 	border: none;
 	border-radius: 3px;
+}
+
+.bbpress #bbpress-forums .bbp-topic-content div.bbp-template-notice,
+.bbpress #bbpress-forums .bbp-reply-content div.bbp-template-notice {
+	display: inline-block;
 }
 
 .bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
