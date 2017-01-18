@@ -187,6 +187,10 @@ body,
 		overflow-x: visible;
 	}
 
+	#secondary-toggle {
+		margin-left: 22px;
+	}
+
 	#secondary-toggle:before {
 		top: 0px;
 	}
