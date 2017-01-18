@@ -18,6 +18,38 @@ body, button, input, select, textarea,
 	font-family: 'Open Sans', sans-serif;
 }
 
+table {
+/* tables still need 'cellspacing="0"' in the markup */
+	border-collapse: separate;
+	border-spacing: 0;
+	border: 1px solid #eee;
+}
+
+thead {
+	background: #eee;
+}
+
+caption,
+th,
+td {
+	font-weight: 400;
+	text-align: left;
+}
+
+td {
+	border-bottom: 1px solid #eee;
+	padding: 10px;
+}
+
+td:first-of-type {
+	width: 30%;
+	border-right: 1px solid #eee;
+}
+
+tr:last-of-type td {
+	border-bottom: 0;
+}
+
 /* wp4.css overrides */
 p a,
 p a:hover {
