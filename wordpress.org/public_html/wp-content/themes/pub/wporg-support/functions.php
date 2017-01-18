@@ -444,11 +444,6 @@ function bb_base_single_topic_description() {
 			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
 		?></li>
 	<?php endif; ?>
-	<?php if ( is_user_logged_in() ) : ?>
-		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
-		<li class="topic-subscribe"><?php bbp_topic_subscription_link( array( 'before' => '', 'topic_id' => $_topic_id ) ); ?></li>
-		<li class="topic-favorite"><?php bbp_topic_favorite_link( array( 'topic_id' => $_topic_id ) ); ?></li>
-	<?php endif; ?>
 	<?php if ( ! empty( $wp_version ) ) : ?>
 		<li class="wp-version"><?php echo esc_html( $wp_version ); ?></li>
 	<?php endif; ?>
@@ -459,6 +454,11 @@ function bb_base_single_topic_description() {
 	<?php endif; ?>
 	<?php if ( bbp_current_user_can_access_create_reply_form() /*bbp_is_topic_open( $_topic_id )*/ ) : ?>
 		<li class="create-reply"><a href="#new-post"><?php _e( 'Reply to Topic', 'wporg-forums' ); ?></a></li>
+	<?php endif; ?>
+	<?php if ( is_user_logged_in() ) : ?>
+		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
+		<li class="topic-subscribe"><?php bbp_topic_subscription_link( array( 'before' => '', 'topic_id' => $_topic_id ) ); ?></li>
+		<li class="topic-favorite"><?php bbp_topic_favorite_link( array( 'topic_id' => $_topic_id ) ); ?></li>
 	<?php endif; ?>
 
 	<?php
@@ -523,9 +523,6 @@ function bb_base_single_forum_description() {
 			/* translators: %s: date/time link to the latest post */
 			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
 		?></li>
-	<?php endif; ?>
-	<?php if ( is_user_logged_in() ) : ?>
-		<li class="forum-subscribe"><?php bbp_forum_subscription_link( array( 'forum_id' => $forum_id ) ); ?></li>
 	<?php endif;
 }
 
