@@ -5072,6 +5072,14 @@ section {
 	display: inline-block;
 }
 
+.bbpress #bbpress-forums .status-pending div.bbp-template-notice {
+	background: #fff359;
+}
+
+.bbpress #bbpress-forums .status-spam div.bbp-template-notice {
+	background: #f49797;
+}
+
 .bbpress #bbpress-forums .bbp-body .bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-voice-count,
 .bbpress #bbpress-forums .bbp-body .bbp-topic-reply-count {

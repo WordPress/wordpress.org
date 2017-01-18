@@ -86,6 +86,14 @@ section {
 			display: inline-block;
 		}
 
+		.status-pending div.bbp-template-notice {
+			background: #fff359;
+		}
+
+		.status-spam div.bbp-template-notice {
+			background: #f49797;
+		}
+
 		.bbp-body {
 			.bbp-topic-freshness, 
 			.bbp-topic-voice-count, 
