@@ -26,6 +26,9 @@
 				<ul class="forum-feeds">
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php _e( 'Recent Posts', 'wporg-forums' ); ?></a></li>
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic"><?php _e( 'Recent Topics', 'wporg-forums' ); ?></a></li>
+					<?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
+					<li class="create-topic"><a href="#new-post"><?php _e( 'Create Topic', 'wporg-forums' ); ?></a></li>
+					<?php endif; ?>
 				</ul>
 			</div>
 

@@ -457,6 +457,9 @@ function bb_base_single_topic_description() {
 			<li class="topic-resolved"><?php WordPressdotorg\Forums\Topic_Resolution\get_topic_resolution_form( $topic_id ); ?></li>
 		<?php endif; ?>
 	<?php endif; ?>
+	<?php if ( bbp_current_user_can_access_create_reply_form() /*bbp_is_topic_open( $_topic_id )*/ ) : ?>
+		<li class="create-reply"><a href="#new-post"><?php _e( 'Reply to Topic', 'wporg-forums' ); ?></a></li>
+	<?php endif; ?>
 
 	<?php
 }

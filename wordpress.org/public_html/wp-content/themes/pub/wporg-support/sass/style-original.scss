@@ -209,6 +209,11 @@ div.bbp-template-notice.warning {
 	content: "\f546";
 }
 
+.sidebar li.create-topic a:before,
+.sidebar li.create-reply a:before {
+	content: "\f132";
+}
+
 /* Sticky topics */
 #bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink:before,
 #bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink:before {
