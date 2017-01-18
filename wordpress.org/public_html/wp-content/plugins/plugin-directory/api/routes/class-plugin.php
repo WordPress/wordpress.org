@@ -162,7 +162,7 @@ class Plugin extends Base {
 			}
 		}
 
-		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: false;
+		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: '';
 
 		$result['banners'] = array();
 		if ( $banners = Template::get_plugin_banner( $post ) ) {
