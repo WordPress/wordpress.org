@@ -98,7 +98,21 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
 		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
 		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		$create  = '';
+
+		$create_label = '';
+		if ( $this->ratings && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_reply_form() ) {
+			$create_label = \WPORG_Ratings::get_user_rating( 'plugin', $this->slug(), get_current_user_id() ) ?
+				__( 'Edit Review', 'wporg-forums' ) :
+				__( 'Add Review', 'wporg-forums' );
+		} else {
+			$create_label = __( 'Create Topic', 'wporg-forums' );
+		}
+		if ( $create_label ) {
+			$create = sprintf( '<a href="#new-post">%s</a>', $create_label );
+		}
 		?>
+
 		<div>
 			<h3>About this Plugin</h3>
 			<ul>
@@ -110,6 +124,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 				<li><?php echo $support; ?></li>
 				<li><?php echo $active; ?></li>
 				<li><?php echo $reviews; ?></li>
+				<li class="create-topic"><?php echo $create; ?></li>
 			</ul>
 		</div>
 		<?php
