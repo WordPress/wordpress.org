@@ -8,6 +8,15 @@ require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
  */
 class Tests_Plugins_API extends WP_UnitTestCase {
 
+	public $api_endpoint_1_0 = 'http://api.wordpress.org/plugins/info/1.0/';
+	public $api_endpoint_1_1 = 'http://api.wordpress.org/plugins/info/1.1/';
+	public $api_endpoint_plugin_php = 'http://api.wordpress.org/plugins/info/1.0/jetpack.php';
+	public $api_endpoint_plugin_xml = 'http://api.wordpress.org/plugins/info/1.0/jetpack.xml';
+	public $api_endpoint_plugin_json = 'http://api.wordpress.org/plugins/info/1.0/jetpack.json';
+
+	public $user_agent = 'WordPress/4.8'; // Tell the API to use the v3 back-end
+	public $require_tested_value = true;
+
 	public $fields = array(
 		'short_description' => true,
 		'description'       => true,
@@ -31,32 +40,60 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		'icons'             => true,
 		'active_installs'   => true,
 		'contributors'      => true,
+		'donate_link'		=> true,
 	);
 
-	function test_wporg_plugin_api_serialize_php() {
-		$response = wp_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array(
+	function setUp() {
+		parent::setUp();
+		add_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
+	}
+
+	function tearDown() {
+		remove_filter( 'http_headers_useragent', array( $this, 'filter_http_headers_useragent' ) );
+		parent::tearDown();
+	}
+
+	// Override the user-agent header in plugins_api() requests to force the API to use the new WP codebase.
+	function filter_http_headers_useragent( $user_agent ) {
+		return $this->user_agent;
+	}
+
+	function api_remote_post( $url, $action, $request ) {
+		return wp_remote_post( $url, array(
 			'timeout' => 15,
 			'body'    => array(
-				'action'  => 'plugin_information',
-				'request' => serialize( (object) array( 'slug' => 'jetpack', 'fields' => $this->fields ) ),
+				'action'  => $action,
+				'request' => serialize( (object) $request ),
 			),
+			'headers' => array( 'Host', 'api.wordpress.org' ),
 		) );
+	}
+
+	function api_remote_get( $url ) {
+		return wp_remote_get( $url, array(
+			'timeout' => 15,
+			'headers' => array( 'Host', 'api.wordpress.org' ),
+		) );
+	}
+
+	function test_wporg_plugin_api_serialize_php() {
+		$response = $this->api_remote_post( $this->api_endpoint_1_0, 'plugin_information', array( 'slug' => 'jetpack', 'fields' => $this->fields ) );
 		$plugins = maybe_unserialize( wp_remote_retrieve_body( $response ) );
 
 		$this->_check_response_attributes( $plugins );
 	}
 
 	function test_wporg_plugin_api_serialize_php_get() {
-		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), 'http://api.wordpress.org/plugins/info/1.0/jetpack.php' );
-		$response = wp_remote_get( $url );
+		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), $this->api_endpoint_plugin_php );
+		$response = $this->api_remote_get( $url );
 		$plugins  = maybe_unserialize( wp_remote_retrieve_body( $response ) );
 
 		$this->_check_response_attributes( $plugins );
 	}
 
 	function test_wporg_plugin_api_xml() {
-		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), 'http://api.wordpress.org/plugins/info/1.0/jetpack.xml' );
-		$response = wp_remote_get( $url );
+		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), $this->api_endpoint_plugin_xml );
+		$response = $this->api_remote_get( $url );
 		$plugins  = wp_remote_retrieve_body( $response );
 
 		// TODO: validate XML response.
@@ -65,23 +102,25 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 	}
 
 	function test_wporg_plugin_api_json() {
-		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), 'http://api.wordpress.org/plugins/info/1.0/jetpack.json' );
-		$response = wp_remote_get( $url );
+		$url      = add_query_arg( 'fields', implode( ',' , array_keys( $this->fields ) ), $this->api_endpoint_plugin_json );
+		$response = $this->api_remote_get( $url );
 		$plugins  = (object) json_decode( wp_remote_retrieve_body( $response ), true );
 
 		$this->_check_response_attributes( $plugins );
 	}
 
 	function test_wporg_plugin_api_1_1_json() {
-		$response = wp_remote_post( 'http://api.wordpress.org/plugins/info/1.1/', array(
+		$response = wp_remote_post( $this->api_endpoint_1_1, array(
 			'timeout' => 15,
 			'body'    => array(
 				'action'  => 'plugin_information',
 				'request' => (object) array( 'slug' => 'jetpack', 'fields' => $this->fields ),
 			),
-		) );
-		$plugins = (object) json_decode( wp_remote_retrieve_body( $response ), true );
+			'headers' => array( 'Host', 'api.wordpress.org' ),
 
+		) );
+
+		$plugins = (object) json_decode( wp_remote_retrieve_body( $response ), true );
 		$this->_check_response_attributes( $plugins );
 	}
 
@@ -142,7 +181,7 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 	}
 
 	function test_plugins_api_function_action_query_plugins_installed_plugins() {
-		$plugins = plugins_api( 'query_plugins', array( 'installed_plugins' => array( 'jetpack' ), 'fields' => $this->fields ) );
+		$plugins = plugins_api( 'query_plugins', array( 'browse' => 'recommended', 'installed_plugins' => array( 'jetpack' ), 'fields' => $this->fields ) );
 		$this->_check_response_plugin_query( $plugins, 1 );
 	}
 
@@ -198,8 +237,10 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		$this->assertObjectHasAttribute( 'contributors', $plugin_info, 'Contributors exists' );
 		$this->assertAttributeInternalType( 'array', 'contributors', $plugin_info, 'Contributors should be an array' );
 		$this->assertObjectHasAttribute( 'requires', $plugin_info, 'Requires exists' );
-		$this->assertObjectHasAttribute( 'tested', $plugin_info, 'Tested exists' );
-		$this->assertAttributeInternalType( 'string', 'tested', $plugin_info, 'Tested should be a string' );
+		if ( $this->require_tested_value || isset( $plugin_info->tested ) ) {
+			$this->assertObjectHasAttribute( 'tested', $plugin_info, 'Tested exists' );
+			$this->assertAttributeInternalType( 'string', 'tested', $plugin_info, 'Tested should be a string' );
+		}
 		$this->assertObjectHasAttribute( 'compatibility', $plugin_info, 'Compatibility exists' );
 		$this->assertAttributeInternalType( 'array', 'compatibility', $plugin_info, 'Compatibility should be an array' );
 
@@ -224,7 +265,6 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		$this->assertAttributeInternalType( 'string', 'last_updated', $plugin_info, 'Last Updated should be a string' );
 		$this->assertObjectHasAttribute( 'added', $plugin_info, 'Added exists' );
 		$this->assertAttributeInternalType( 'string', 'short_description', $plugin_info, 'Added should be a string' );
-
 		if ( function_exists( 'date_create_from_format' ) ) {
 			$last_updated_date = DateTime::createFromFormat( 'Y-m-d g:ia \G\M\T', $plugin_info->last_updated );
 			$date_time_errors  = DateTime::getLastErrors();
@@ -268,4 +308,16 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		$this->assertObjectHasAttribute( 'icons', $plugin_info, 'Icons exists' );
 		$this->assertAttributeInternalType( 'array', 'icons', $plugin_info, 'Icons should be an array' );
 	}
+}
+
+/**
+ *
+ * @group plugins-api
+ */
+
+class Tests_Plugins_API_Old extends Tests_Plugins_API {
+	public $user_agent = 'WordPress/4.7'; // Tell the API to use the old back-end
+	public $require_tested_value = false; // Old API omits 'tested' if its value is empty
+
+
 }
