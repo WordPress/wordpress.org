@@ -157,7 +157,12 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 
 		restore_current_blog();
 
-		wp_update_custom_css_post( $source_site_css );
+		/*
+		 * The vanilla CSS will be sanitized by Jetpack and our custom sanitization during `update_custom_css_data`.
+		 * The theme mods need to be set _first_, so that the Jetpack knows whether or not a preprocessor should
+		 * be used.
+		 */
 		set_theme_mod( 'jetpack_custom_css', $source_site_theme_mods );
+		wp_update_custom_css_post( $source_site_css );
 	}
 }
