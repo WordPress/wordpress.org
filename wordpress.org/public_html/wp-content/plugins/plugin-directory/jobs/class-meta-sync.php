@@ -33,13 +33,11 @@ class Meta_Sync {
 		global $wpdb;
 
 		$download_count_table = PLUGINS_TABLE_PREFIX . 'download_counts';
-		$bbpress_topic_slug_table = PLUGINS_TABLE_PREFIX . 'topics';
 
 		$changed_download_counts = $wpdb->get_results(
 			"SELECT p.id as post_id, downloads
 			FROM `{$wpdb->posts}` p
-				JOIN `{$bbpress_topic_slug_table}` t ON p.post_name = t.topic_slug
-				JOIN `{$download_count_table}` c on t.topic_id = c.topic_id
+				JOIN `{$download_count_table}` c on p.post_name = c.plugin_slug
 				LEFT JOIN `{$wpdb->postmeta}` pm ON p.id = pm.post_id AND pm.meta_key = 'downloads'
 
 			WHERE

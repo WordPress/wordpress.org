@@ -178,16 +178,49 @@ class Serve {
 	protected function record_stats( $request ) {
 		global $wpdb;
 
-		$stats = array(
+		$stats_dedup_log_table = PLUGINS_TABLE_PREFIX . 'downloads';
+		$stats_download_table = PLUGINS_TABLE_PREFIX . 'download_counts';
+		$stats_download_daily_table = PLUGINS_TABLE_PREFIX . 'stats';
+
+		// Very basic de-duplication for downloads.
+		$recent = $wpdb->get_var( $wpdb->prepare(
+			"SELECT `client_ip`
+			FROM {$stats_dedup_log_table}
+			WHERE
+				plugin_slug = %s AND
+			 	client_ip = %s AND
+			 	user_agent = %s AND
+			 	stamp BETWEEN %s AND %s
+			LIMIT 1",
+			$request['slug'],
+			$_SERVER['REMOTE_ADDR'],
+			$_SERVER['HTTP_USER_AGENT'],
+			gmdate( 'Y-m-d 00:00:00' ),
+			gmdate( 'Y-m-d 23:59:59' )
+		) );
+
+		if ( $recent ) {
+			return;
+		}
+
+		$wpdb->query( $wpdb->prepare(
+			"INSERT INTO {$stats_download_table} (`plugin_slug`, `downloads`) VALUES ( %s, 1 ) ON DUPLICATE KEY UPDATE `downloads` = `downloads` + 1",
+			$stats['plugin_slug']
+		) );
+
+		$wpdb->query( $wpdb->prepare(
+			"INSERT INTO {$stats_download_daily_table} (`plugin_slug`, `stamp`, `downloads`) VALUES ( %s, %s, 1 ) ON DUPLICATE KEY UPDATE `downloads` = `downloads` + 1",
+			$stats['plugin_slug'],
+			gmdate( 'Y-m-d' )
+		) );
+
+		$wpdb->insert( $stats_dedup_log_table, array(
 			'plugin_slug' => $request['slug'],
 			'client_ip'   => $_SERVER['REMOTE_ADDR'],
-			'client_host' => gethostbyaddr( $_SERVER['REMOTE_ADDR'] ),
-			'user_agent'  => $_SERVER['HTTP_USER_AGENT']
-		);
-		// $wpdb->insert( stats_table, $stats );
-		// TODO: This is stored in bbPress tables still.
-		// $post_id = $this->get_post_id( $request['slug'] );
-		// $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value + 1 WHERE post_id = %d AND meta_key = 'downloads'", $post_id ) );
+			'user_agent'  => $_SERVER['HTTP_USER_AGENT'],
+			'stamp'       => gmdate( 'Y-m-d H:i:s' )
+		) );
+
 	}
 
 	/**
