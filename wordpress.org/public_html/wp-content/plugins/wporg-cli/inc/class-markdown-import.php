@@ -104,7 +104,7 @@ class Markdown_Import {
 
 		$markdown = wp_remote_retrieve_body( $response );
 		// Strip YAML doc from the header
-		$markdown = preg_replace( '#^---(.+)---#s', '', $markdown );
+		$markdown = preg_replace( '#^---(.+)---#Us', '', $markdown );
 
 		// Transform to HTML and save the post
 		jetpack_require_lib( 'markdown' );
