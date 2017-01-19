@@ -303,6 +303,10 @@ aside[id^="handbook"] .widget-title {
 	padding: 0;
 }
 
+pre code {
+	padding: 0;
+}
+
 article.post .o2-post,
 article#post-new .o2-post,
 article.page .o2-post,
@@ -582,7 +586,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .make-welcome .entry-content h4,
-.make-welcome .entry-content h3, 
+.make-welcome .entry-content h3,
 .make-welcome .entry-content h2 {
 	margin: 14px 0;
 }
