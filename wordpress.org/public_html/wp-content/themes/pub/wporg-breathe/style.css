@@ -238,6 +238,10 @@ body,
 	}
 }
 
+.widget-title {
+	line-height: 1.2;
+}
+
 .o2-app-page-title {
   margin: 0 0 10px 0 !important;
   padding: 0;
@@ -557,7 +561,8 @@ nav.o2-post-footer-actions ul li > span > a {
 	padding: 0;
 }
 
-.make-welcome .entry-content h4 {
+.make-welcome .entry-content h4, 
+.make-welcome .entry-content h2 {
 	margin: 14px 0;
 }
 
@@ -566,6 +571,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .make-welcome .entry-content h4,
+.make-welcome .entry-content h2,
 .make-welcome .entry-content .welcome p:first-child {
 	font-weight: normal;
 	font-size: 18px;
