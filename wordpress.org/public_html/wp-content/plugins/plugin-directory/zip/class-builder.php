@@ -201,8 +201,8 @@ class Builder {
 	protected function move_into_place() {
 		$this->exec( sprintf(
 			'mv -f %s %s',
-			$this->tmp_build_file,
-			$this->zip_file
+			escapeshellarg( $this->tmp_build_file ),
+			escapeshellarg( $this->zip_file )
 		), $output, $return_value );
 
 		if ( $return_value ) {

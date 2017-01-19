@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\CLI;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
@@ -192,6 +193,9 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
+
+		// Ensure that the API gets the updated data
+		API_Update_Updater::update_single_plugin( $plugin->post_name );
 
 		return true;
 	}

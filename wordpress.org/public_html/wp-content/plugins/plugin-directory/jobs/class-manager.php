@@ -18,9 +18,9 @@ class Manager {
 		add_filter( 'cron_schedules', array( $this, 'register_schedules' ) );
 
 		// The actual cron hooks.
-		add_action( 'plugin_directory_meta_sync', array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
-		add_action( 'plugin_directory_svn_sync',  array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
-		
+		add_action( 'plugin_directory_meta_sync',        array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
+		add_action( 'plugin_directory_svn_sync',         array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
+		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
 
 		// Register the wildcard cron hook tasks.
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
@@ -132,6 +132,9 @@ class Manager {
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_svn_sync' ) ) {
 			wp_schedule_event( time(), 'every_30s', 'plugin_directory_svn_sync' );
+		}
+		if ( ! wp_next_scheduled ( 'plugin_directory_update_api_check' ) ) {
+			wp_schedule_event( time(), 'hourly', 'plugin_directory_update_api_check' );
 		}
 	}
 
