@@ -160,7 +160,7 @@ class Upload_Handler {
 		// Let's save everything and get things wrapped up.
 
 		// Create a new post on first-time submissions.
-		if ( ! ( $plugin_post instanceof \WP_Post ) ) {
+		if ( ! $plugin_post ) {
 			$content = '';
 			foreach ( $readme->sections as $section => $section_content ) {
 				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
@@ -170,9 +170,10 @@ class Upload_Handler {
 			$plugin_post = Plugin_Directory::create_plugin_post( array(
 				'post_title'   => $this->plugin['Name'],
 				'post_name'    => $this->plugin_slug,
+				'post_status'  => 'pending',
 				'post_content' => $content,
 				'post_excerpt' => $this->plugin['Description'],
-			//	'tax_input'    => wp_unslash( $_POST['tax_input'] ),
+			//	'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
 				'meta_input'   => array(
 					'tested'                   => $readme->tested,
 					'requires'                 => $readme->requires,
@@ -195,6 +196,13 @@ class Upload_Handler {
 					'assets_banners_color'     => false,
 					'support_threads'          => 0,
 					'support_threads_resolved' => 0,
+					'downloads'                => 0,
+					'last_updated'             => gmdate( 'Y-m-d H:i:s' ),
+					'plugin_status'            => 'pending',
+					'rating'                   => 0,
+					'ratings'                  => array(),
+					'active_installs'          => 0,
+					'usage'                    => array(),
 					'_author_ip'               => preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] ),
 				),
 			) );
@@ -272,6 +280,7 @@ class Upload_Handler {
 	 * @return bool Whether the plugin passed the checks.
 	 */
 	public function check_plugin() {
+		return true;
 		// Run the checks.
 		// @todo Include plugin checker.
 		// pass $this->plugin_root as the plugin root
