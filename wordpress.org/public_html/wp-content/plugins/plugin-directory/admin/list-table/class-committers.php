@@ -45,6 +45,9 @@ class Committers extends \WP_List_Table {
 	 */
 	public function prepare_items() {
 		$plugin_slug         = get_post()->post_name;
+		if ( ! $plugin_slug ) {
+			return;
+		}
 		$existing_committers = Tools::get_plugin_committers( $plugin_slug );
 		$this->items         = array_map( function ( $user ) {
 			return new \WP_User( $user );
