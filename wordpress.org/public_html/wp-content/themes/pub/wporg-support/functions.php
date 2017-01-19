@@ -453,7 +453,13 @@ function bb_base_single_topic_description() {
 		<?php endif; ?>
 	<?php endif; ?>
 	<?php if ( bbp_current_user_can_access_create_reply_form() /*bbp_is_topic_open( $_topic_id )*/ ) : ?>
-		<li class="create-reply"><a href="#new-post"><?php _e( 'Reply to Topic', 'wporg-forums' ); ?></a></li>
+		<li class="create-reply"><a href="#new-post"><?php
+			if ( wporg_support_is_single_review() ) {
+				_e( 'Reply to Review', 'wporg-forums' );
+			} else {
+				_e( 'Reply to Topic', 'wporg-forums' );
+			}
+		?></a></li>
 	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
 		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
