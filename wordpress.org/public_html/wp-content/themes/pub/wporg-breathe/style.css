@@ -242,6 +242,26 @@ body,
 	line-height: 1.2;
 }
 
+aside[id^="handbook"] .widget-title {
+	font-size: 16px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	background-color: #82878c;
+	padding: 1rem 12px;
+	margin-bottom: 0;
+	color: #fff;
+}
+
+.widget.widget_search {
+	margin-bottom: 3rem;
+}
+.widget_search input[type="search"], #subscribe-email input[type="email"] {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 1rem;
+	font-size: 14px;
+}
+
 .o2-app-page-title {
   margin: 0 0 10px 0 !important;
   padding: 0;
@@ -561,7 +581,8 @@ nav.o2-post-footer-actions ul li > span > a {
 	padding: 0;
 }
 
-.make-welcome .entry-content h4, 
+.make-welcome .entry-content h4,
+.make-welcome .entry-content h3, 
 .make-welcome .entry-content h2 {
 	margin: 14px 0;
 }
@@ -571,6 +592,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .make-welcome .entry-content h4,
+.make-welcome .entry-content h3,
 .make-welcome .entry-content h2,
 .make-welcome .entry-content .welcome p:first-child {
 	font-weight: normal;
@@ -818,22 +840,23 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .post-type-archive-handbook div.table-of-contents h3,
 .single-handbook div.table-of-contents h3 {
 	margin: 0;
-	padding: 8px 0;
-	text-align: center;
+	padding: 7px 12px;
 	font-size: 1.3em;
 	color: #32373c;
+	text-transform: uppercase;
+	border-bottom: 1px solid #eee;
 }
 
 .post-type-archive-handbook ul.items,
 .single-handbook ul.items {
-	margin: 0 0 8px;
+	margin: 0;
 	list-style-type: none;
-	padding: 0 15px;
+	padding: 1rem;
 }
 
 .post-type-archive-handbook ul.items li,
 .single-handbook ul.items li {
-	padding-bottom: 6px;
+	padding: 4px;
 }
 
 .post-type-archive-handbook ul.items li ul li,
@@ -845,7 +868,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 
 .post-type-archive-handbook ul.items li a,
 .single-handbook ul.items li a {
-	color: #555d66;
+	text-decoration: none;
 }
 
 .post-type-archive-handbook ul.items li a:hover,
