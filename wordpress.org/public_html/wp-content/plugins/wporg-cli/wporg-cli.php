@@ -16,3 +16,14 @@ require_once dirname( __FILE__ ) . '/inc/class-markdown-import.php';
 add_action( 'load-post.php', array( 'WPOrg_Cli\Markdown_Import', 'action_load_post_php' ) );
 add_action( 'edit_form_after_title', array( 'WPOrg_Cli\Markdown_Import', 'action_edit_form_after_title' ) );
 add_action( 'save_post', array( 'WPOrg_Cli\Markdown_Import', 'action_save_post' ) );
+
+add_action( 'wp_head', function(){
+	?>
+	<style>
+		pre code {
+			padding: 0;
+			line-height: 16px;
+		}
+	</style>
+	<?php
+});
