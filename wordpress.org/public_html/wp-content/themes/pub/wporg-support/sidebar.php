@@ -30,7 +30,7 @@
 						<li class="create-topic"><a href="#new-post"><?php _e( 'Create Topic', 'wporg-forums' ); ?></a></li>
 					<?php endif; ?>
 					<?php if ( is_user_logged_in() ) : ?>
-						<li class="forum-subscribe"><?php bbp_forum_subscription_link( array( 'forum_id' => $forum_id ) ); ?></li>
+						<li class="forum-subscribe"><?php bbp_forum_subscription_link(); ?></li>
 					<?php endif; ?>
 				</ul>
 			</div>
