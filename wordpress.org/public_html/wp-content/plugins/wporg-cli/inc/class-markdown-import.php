@@ -95,6 +95,7 @@ class Markdown_Import {
 
 		// Transform GitHub repo HTML pages into their raw equivalents
 		$markdown_source = preg_replace( '#https?://github\.com/([^/]+/[^/]+)/blob/(.+)#', 'https://raw.githubusercontent.com/$1/$2', $markdown_source );
+		$markdown_source = add_query_arg( 'v', time(), $markdown_source );
 		$response = wp_remote_get( $markdown_source );
 		if ( is_wp_error( $response ) ) {
 			return $response;
