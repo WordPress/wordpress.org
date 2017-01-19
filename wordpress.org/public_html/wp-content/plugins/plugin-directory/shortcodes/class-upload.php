@@ -44,12 +44,12 @@ class Upload {
 			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 				<input type="hidden" name="action" value="upload"/>
-				<fieldset>
+				<?php /* <fieldset>
 					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
 					<ul class="category-checklist">
 						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
 					</ul>
-				</fieldset>
+				</fieldset> */ ?>
 
 				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
 				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>

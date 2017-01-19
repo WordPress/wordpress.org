@@ -159,11 +159,6 @@ class Upload_Handler {
 		// Passed all tests!
 		// Let's save everything and get things wrapped up.
 
-		// Give the author wp-admin access if they don't have it yet.
-		if ( ! current_user_can( 'plugin_dashboard_access' ) ) {
-			wp_get_current_user()->add_role( 'plugin_committer' );
-		}
-
 		// Create a new post on first-time submissions.
 		if ( ! ( $plugin_post instanceof \WP_Post ) ) {
 			$content = '';
@@ -177,7 +172,7 @@ class Upload_Handler {
 				'post_name'    => $this->plugin_slug,
 				'post_content' => $content,
 				'post_excerpt' => $this->plugin['Description'],
-				'tax_input'    => wp_unslash( $_POST['tax_input'] ),
+			//	'tax_input'    => wp_unslash( $_POST['tax_input'] ),
 				'meta_input'   => array(
 					'tested'                   => $readme->tested,
 					'requires'                 => $readme->requires,
