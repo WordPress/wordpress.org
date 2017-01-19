@@ -148,7 +148,7 @@ class WPorg_Handbook {
 	 * @return array
 	 */
 	function add_body_class( $classes ) {
-		if ( wporg_is_handbook( $this->post_type ) ) {
+		if ( is_singular() && wporg_is_handbook( $this->post_type ) ) {
 			$classes[] = 'single-handbook';
 		}
 
@@ -394,7 +394,7 @@ class WPorg_Handbook {
 	 * @return bool
 	 */
 	function disable_o2_processing( $process_with_o2 ) {
-		return ( $this->post_type === get_post_type() ) ? false : $process_with_o2;
+		return ( is_singular() && $this->post_type === get_post_type() ) ? false : $process_with_o2;
 	}
 
 	/**
@@ -404,7 +404,7 @@ class WPorg_Handbook {
 	 * @return string
 	 */
 	function o2_application_container( $container ) {
-		return ( $this->post_type === get_post_type() ) ? '#primary' : $container;
+		return ( is_singular() && $this->post_type === get_post_type() ) ? '#primary' : $container;
 	}
 
 	/**
@@ -415,7 +415,7 @@ class WPorg_Handbook {
 	 * @return string
 	 */
 	function o2_view_type( $view_type ) {
-		return ( $this->post_type === get_post_type() ) ? 'single' : $view_type;
+		return ( is_singular() && $this->post_type === get_post_type() ) ? 'single' : $view_type;
 	}
 
 	/**
