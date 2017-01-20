@@ -428,6 +428,8 @@ class WordCamp_New_Site {
 			if ( isset( $page['featured_image'] ) ) {
 				$results = media_sideload_image( $page['featured_image'], $page_id );
 
+				Logger\log( 'featured_image', compact( 'wordcamp', 'page', 'results' ) );
+
 				if ( ! is_wp_error( $results ) ) {
 					$attachment_id = get_posts( array(
 						'posts_per_page' => 1,
