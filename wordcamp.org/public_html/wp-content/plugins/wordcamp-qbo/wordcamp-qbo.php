@@ -450,20 +450,18 @@ class WordCamp_QBO {
 		$payment_instructions = str_replace( "\t", '', "
 			Please indicate the invoice number in the memo field when making your payment.
 
-			Please remit checks (in USD only) to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768
+			To pay via credit card, please fill out the payment form at https://central.wordcamp.org/sponsorship-payment/
 
 			For payments via ACH or international wire transfers:
-
 			Beneficiary Name: WordPress Community Support, PBC
 			Banking Address: 132 Hawthorne St, San Francisco, CA 94107-1308, USA
-
 			Bank Name: JPMorgan Chase Bank, N.A.
 			Bank Address: 270 Park Ave, New York, NY 10017, USA
 			SWIFT/BIC: CHASUS33
 			ACH/Domestic Direct deposit Bank Routing & Transit Number: 322271627
 			Account Number: 801658696
 
-			To pay via credit card: Please send the payment via PayPal to sponsor@wordcamp.org. An additional 3% on the payment to cover PayPal fees is highly appreciated."
+			Please remit checks (USD only) to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768"
 		);
 
 		$payload = array(
@@ -483,7 +481,7 @@ class WordCamp_QBO {
 					'Type'         => 'StringType',
 					'StringValue'  => $sponsor['vat-number'],
 				),
-	        ),
+			),
 
 			'Line' => array(
 				array(
@@ -1290,9 +1288,9 @@ class WordCamp_QBO {
 			(function($){
 				$('.qbo-connect').on('click', function(){
 					var $form = $('.wordcamp-qbo-settings'),
-					    nonce = $form.find('input[name="wordcamp-qbo-oauth-nonce"]').val(),
-					    url = '<?php echo esc_js( add_query_arg( 'wordcamp-qbo-oauth-request', 1, admin_url() ) ); ?>',
-					    popup = null;
+						nonce = $form.find('input[name="wordcamp-qbo-oauth-nonce"]').val(),
+						url = '<?php echo esc_js( add_query_arg( 'wordcamp-qbo-oauth-request', 1, admin_url() ) ); ?>',
+						popup = null;
 
 					url += '&wordcamp-qbo-oauth-nonce=' + nonce;
 					popup = window.open(url, 'qbo-oauth', 'width=800, height=560');
