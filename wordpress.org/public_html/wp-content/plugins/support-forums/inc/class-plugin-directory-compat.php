@@ -124,7 +124,9 @@ class Plugin_Directory_Compat extends Directory_Compat {
 				<li><?php echo $support; ?></li>
 				<li><?php echo $active; ?></li>
 				<li><?php echo $reviews; ?></li>
+				<?php if ( $create ) : ?>
 				<li class="create-topic"><?php echo $create; ?></li>
+				<?php endif; ?>
 			</ul>
 		</div>
 		<?php
