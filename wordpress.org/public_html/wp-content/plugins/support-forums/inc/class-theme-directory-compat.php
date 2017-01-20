@@ -103,7 +103,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 			$create_label = \WPORG_Ratings::get_user_rating( 'theme', $this->slug(), get_current_user_id() ) ?
 				__( 'Edit Review', 'wporg-forums' ) :
 				__( 'Add Review', 'wporg-forums' );
-		} elseif ( bbp_current_user_can_access_create_topic_form() ) {
+		} elseif ( bbp_is_single_forum() && bbp_current_user_can_access_create_topic_form() ) {
 			$create_label = __( 'Create Topic', 'wporg-forums' );
 		}
 		if ( $create_label ) {
