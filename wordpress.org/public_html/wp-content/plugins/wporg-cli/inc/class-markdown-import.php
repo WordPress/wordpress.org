@@ -85,9 +85,9 @@ class Markdown_Import {
 	 * Update a post from its Markdown source
 	 */
 	private static function update_post_from_markdown_source( $post_id ) {
-		$markdown_source = get_post_meta( $post_id, self::$meta_key, true );
-		if ( ! $markdown_source ) {
-			return new WP_Error( 'missing-markdown-source', 'Markdown source is missing for post.' );
+		$markdown_source = self::get_markdown_source( $post_id );
+		if ( is_wp_error( $markdown_source ) ) {
+			return $markdown_source;
 		}
 		if ( ! function_exists( 'jetpack_require_lib' ) ) {
 			return new WP_Error( 'missing-jetpack-require-lib', 'jetpack_require_lib() is missing on system.' );
@@ -119,4 +119,15 @@ class Markdown_Import {
 		return true;
 	}
 
+	/**
+	 * Retrieve the markdown source URL for a given post.
+	 */
+	public static function get_markdown_source( $post_id ) {
+		$markdown_source = get_post_meta( $post_id, self::$meta_key, true );
+		if ( ! $markdown_source ) {
+			return new WP_Error( 'missing-markdown-source', 'Markdown source is missing for post.' );
+		}
+
+		return $markdown_source;
+	}
 }
