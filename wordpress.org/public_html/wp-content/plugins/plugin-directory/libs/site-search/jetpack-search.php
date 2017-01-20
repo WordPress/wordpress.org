@@ -283,13 +283,8 @@ class Jetpack_Search {
 			}
 		}
 
-		$locale = get_locale();
-		if ( $locale && $locale !== 'en' && $locale !== 'en_US' ) {
-			$es_wp_query_args['query_fields'] = array( "title_{$locale}^1.2", 'title_en^0.2', "content_{$locale}", 'content_en^0.2', "excerpt_{$locale}^1.2", 'excerpt_en^0.2', 'author', 'tag', 'category', 'slug_ngram^0.005', 'slug^1.2', 'contributors' );
-		} else {
-			$es_wp_query_args['query_fields'] = array( 'title_en^1.2', 'content_en', 'excerpt_en^1.2', 'author', 'tag', 'category', 'slug_ngram^0.005', 'slug^1.2', 'contributors' );
-		}
-
+		$es_wp_query_args['locale'] = get_locale();
+		
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
 		// These arguments are in the format for convert_wp_es_to_es_args(), i.e. WP-style.
 		$es_wp_query_args = apply_filters( 'jetpack_search_es_wp_query_args', $es_wp_query_args, $query );
@@ -487,7 +482,8 @@ class Jetpack_Search {
 			'blog_id'        => get_current_blog_id(),
 
 			'query'          => null,    // Search phrase
-			'query_fields'   => array( 'title_en^2', 'content_en', 'author', 'tag', 'category', 'slug_ngram', 'contributors' ),
+			'query_fields'   => array(), // hacking to be able to do a very different type of query
+			'locale'         => false,
 
 			'post_type'      => null,  // string or an array
 			'terms'          => array(), // ex: array( 'taxonomy-1' => array( 'slug' ), 'taxonomy-2' => array( 'slug-a', 'slug-b' ) )
@@ -606,6 +602,12 @@ class Jetpack_Search {
 			}
 		}
 
+		if ( $args['locale'] && $args['locale'] !== 'en' && $args['locale'] !== 'en_US' ) {
+			$locale = $args['locale'];
+		} else {
+			$locale = 'en';
+		}
+		
 		///////////////////////////////////////////////////////////
 		// Build the query - potentially extracting more filters
 		//  TODO: add auto phrase searching
@@ -618,8 +620,8 @@ class Jetpack_Search {
 					'must' => array(
 						'multi_match' => array(
 							'query'  => $args['query'],
-							'fields' => $args['query_fields'],
-							'type'  => 'cross_fields',
+							'fields' => 'all_content_' . $locale,
+							'boost'  => 0.1,
 							'operator' => 'and',
 						),
 					),
@@ -627,8 +629,58 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => $args['query_fields'],
+								'fields' => array(
+									'title_' . $locale,
+									'excerpt_' . $locale,
+									'description_' . $locale,
+									'taxonomy.plugin_tags.name',
+								),
 								'type'  => 'phrase',
+								'boost' => 2
+							),
+						),
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => array(
+									'title_' . $locale . '.ngram'
+								),
+								'type'  => 'phrase',
+								'boost' => 0.2
+							),
+						),
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => array(
+									'title_' . $locale,
+									'slug_text',
+								),
+								'type'  => 'best_fields',
+								'boost' => 2
+							),
+						),
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => array(
+									'excerpt_' . $locale,
+									'description_' . $locale,
+									'taxonomy.plugin_tags.name',
+								),
+								'type'  => 'best_fields',
+								'boost' => 2
+							),
+						),
+						array(
+							'multi_match' => array(
+								'query'  => $args['query'],
+								'fields' => array(
+									'author',
+									'contributors',
+								),
+								'type'  => 'best_fields',
+								'boost' => 2
 							),
 						),
 					),
@@ -794,7 +846,6 @@ class Jetpack_Search {
 							),
 						),
 						'boost_mode' => 'multiply',
-						'max_boost' => 5,
 					)
 				),
 			)
