@@ -16,10 +16,17 @@
 				<legend>
 
 					<?php
-						if ( bbp_is_topic_edit() )
+						if ( bbp_is_topic_edit() ) {
 							printf( __( 'Now Editing &ldquo;%s&rdquo;', 'wporg-forums' ), bbp_get_topic_title() );
-						else
-							bbp_is_single_forum() ? printf( __( 'Create a new topic in &ldquo;%s Forum&rdquo;', 'wporg-forums' ), bbp_get_forum_title() ) : _e( 'Create a new topic', 'wporg-forums' );
+						} else {
+							if ( bbp_is_single_forum() ) {
+								printf( __( 'Create a new topic in &ldquo;%s Forum&rdquo;', 'wporg-forums' ), bbp_get_forum_title() );
+							} elseif ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
+								_e( 'Create a new review', 'wporg-forums' );
+							} else {
+								_e( 'Create a new topic', 'wporg-forums' );
+							}
+						}
 					?>
 
 				</legend>
