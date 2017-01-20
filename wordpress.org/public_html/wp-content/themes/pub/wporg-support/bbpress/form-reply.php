@@ -204,10 +204,22 @@ if ( bbp_is_reply_edit() ) : ?>
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
 			<ul>
-				<?php if ( is_user_logged_in() ) : ?>
-					<li><?php esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' ); ?></li>
+				<?php if ( wporg_support_is_single_review() ) : ?>
+
+					<?php if ( is_user_logged_in() ) : ?>
+						<li><?php esc_html_e( 'You cannot reply to this review.', 'wporg-forums' ); ?></li>
+					<?php else : ?>
+						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() ); ?></li>
+					<?php endif; ?>
+
 				<?php else : ?>
-					<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
+
+					<?php if ( is_user_logged_in() ) : ?>
+						<li><?php esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' ); ?></li>
+					<?php else : ?>
+						<li><?php printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() ); ?></li>
+					<?php endif; ?>
+
 				<?php endif; ?>
 			</ul>
 		</div>
