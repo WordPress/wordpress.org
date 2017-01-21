@@ -18,7 +18,7 @@ add_action( 'load-post.php', array( 'WPOrg_Cli\Markdown_Import', 'action_load_po
 add_action( 'edit_form_after_title', array( 'WPOrg_Cli\Markdown_Import', 'action_edit_form_after_title' ) );
 add_action( 'save_post', array( 'WPOrg_Cli\Markdown_Import', 'action_save_post' ) );
 
-add_filter( 'get_edit_post_link', array( 'WPOrg_Cli\Handbook', 'redirect_edit_link_to_github' ), 10, 2 );
+add_filter( 'get_edit_post_link', array( 'WPOrg_Cli\Handbook', 'redirect_edit_link_to_github' ), 10, 3 );
 add_filter( 'o2_filter_post_actions', array( 'WPOrg_Cli\Handbook', 'redirect_o2_edit_link_to_github' ), 11, 2 );
 
 add_action( 'wp_head', function(){
