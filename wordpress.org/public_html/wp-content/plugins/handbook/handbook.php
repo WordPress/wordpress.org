@@ -239,7 +239,7 @@ class WPorg_Handbook {
 				'with_front'    => false,
 			),
 			'delete_with_user'  => false,
-			'supports'          => array( 'title', 'editor', 'author', 'thumbnail', 'page-attributes', 'custom-fields', 'revisions' ),
+			'supports'          => array( 'title', 'editor', 'author', 'thumbnail', 'page-attributes', 'custom-fields', 'revisions', 'wpcom-markdown' ),
 		);
 		// Allow customization of the default post type configuration via filter.
 		$config = apply_filters( 'handbook_post_type_defaults', $default_config, $slug );
