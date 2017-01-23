@@ -11,7 +11,6 @@ class Bot {
 		'#buddypress'   => 'buddypress',
 		'#glotpress'    => 'glotpress',
 		'#meta'         => 'meta',
-		'#core-restapi' => false, // ideally: GH WP-API/WP-API
 		'#outreach'     => false,
 	);
 
