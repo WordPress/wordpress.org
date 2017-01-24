@@ -41,6 +41,15 @@ td {
 	padding: 10px;
 }
 
+.entry-content td, 
+.entry-content th { 
+	padding: 1em !important; 
+} 
+
+.entry-content th { 
+	font-weight: bold; 
+}
+
 td:first-of-type {
 	width: 30%;
 	border-right: 1px solid #eee;
