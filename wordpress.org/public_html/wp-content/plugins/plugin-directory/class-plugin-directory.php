@@ -453,12 +453,10 @@ class Plugin_Directory {
 			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
 		}
 
-		if ( 'en_US' != get_locale() ) {
-			add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
-			add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
-			add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
-			add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
-		}
+		add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
+		add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
+		add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
+		add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 
 		// Instantiate our copy of the Jetpack_Search class.
 		if ( class_exists( 'Jetpack' ) && ! class_exists( 'Jetpack_Search' ) 

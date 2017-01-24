@@ -331,7 +331,7 @@ class Plugin_I18n {
 			}
 		}
 
-		if ( ! $wp_locale ) {
+		if ( ! $wp_locale || 'en_US' == $wp_locale ) {
 			return $content;
 		}
 

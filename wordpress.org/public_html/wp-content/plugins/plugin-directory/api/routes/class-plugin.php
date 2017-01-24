@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
@@ -54,10 +55,15 @@ class Plugin extends Base {
 			);
 		}
 
+		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
+		if ( ! empty( $request['locale'] ) && !in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
+			switch_to_locale( $request['locale'] );
+		}
+
 		$post_id = $post->ID;
 
 		$result = array();
-		$result['name'] = $post->post_title;
+		$result['name'] = get_the_title();
 		$result['slug'] = $post->post_name;
 		$result['version'] = get_post_meta( $post_id, 'version', true ) ?: '0.0';
 
@@ -115,11 +121,11 @@ class Plugin extends Base {
 
 		if ( !empty( $result['sections']['faq'] ) ) {
 			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['faq'] );
-		} 
+		}
 		
 		$result['description'] = $result['sections']['description'];
 
-		$result['short_description'] = $post->post_excerpt;
+		$result['short_description'] = get_the_excerpt();
 		$result['download_link'] = Template::download_link( $post );
 
 		$result['screenshots'] = array();
@@ -131,10 +137,14 @@ class Plugin extends Base {
 		 * The image numbers are stored within the 'resolution' key.
 		 */
 		foreach ( $screen_shots as $image ) {
-			$result['screenshots'][ $image['resolution'] ] = array(
-				'src'     => Template::get_asset_url( $post, $image ),
-				'caption' => array_key_exists( $image['resolution'], $descriptions ) ? $descriptions[ $image['resolution'] ] : ''
-			);
+			$src = Template::get_asset_url( $post, $image );
+			$caption = '';
+			if ( $descriptions && !empty( $description[ (int)$image['resolution'] ] ) ) {
+				$caption = $description[ (int)$image['resolution'] ];
+				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $$post->ID ] );
+			}
+
+			$result['screenshots'][ $image['resolution'] ] = compact( 'src', 'caption' );
 		}
 
 		if ( $result['screenshots'] ) {
@@ -144,7 +154,7 @@ class Plugin extends Base {
 		}
 
 		$result['tags'] = array();
-		if ( $terms = get_the_terms( $post->ID, 'plugin_category' ) ) {
+		if ( $terms = get_the_terms( $post->ID, 'plugin_tags' ) ) {
 			foreach ( $terms as $term ) {
 				$result['tags'][ $term->slug ] = $term->name;
 			}

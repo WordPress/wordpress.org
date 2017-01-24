@@ -15,6 +15,10 @@ class I18n {
 	 * @return \WP_Term The term object with a translated `name` field.
 	 */
 	static function translate_term( $term ) {
+		if ( 'en_US' == get_locale() ) {
+			return $term;
+		}
+
 		if ( 'plugin_category' == $term->taxonomy ) {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Category Name', 'wporg-plugins' ) );
 		} elseif ( 'plugin_section' == $term->taxonomy ) {

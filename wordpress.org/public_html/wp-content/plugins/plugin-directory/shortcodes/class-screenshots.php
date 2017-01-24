@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 
 /**
  * The [wporg-plugins-screenshots] shortcode handler to display a plugins screenshots.
@@ -34,7 +35,9 @@ class Screenshots {
 			);
 
 			if ( $descriptions && ! empty( $descriptions[ (int)$image['resolution'] ] ) ) {
-				$screen_shot .= '<figcaption>' . $descriptions[ (int)$image['resolution'] ] . '</figcaption>';
+				$caption = $descriptions[ (int)$image['resolution'] ];
+				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $$plugin->ID ] );
+				$screen_shot .= '<figcaption>' . $caption . '</figcaption>';
 			}
 
 			$output .= '<li><figure>' . $screen_shot . '</figure></li>';
