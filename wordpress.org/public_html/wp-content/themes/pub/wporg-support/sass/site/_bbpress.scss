@@ -100,7 +100,10 @@ section {
 			.bbp-topic-reply-count {
 				font-size: ms(-3);
 			}
+		}
 
+		.bbp-header,
+		.bbp-body {
 			li.bbp-forum-freshness, 
 			li.bbp-topic-freshness {
 				width: 58%;

@@ -5091,12 +5091,16 @@ section {
 	font-size: 0.73152rem;
 }
 
+.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
+.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
 .bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
 .bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
 	width: 58%;
 }
 
 @media (min-width: 321px) {
+	.bbpress #bbpress-forums .bbp-header li.bbp-forum-freshness,
+	.bbpress #bbpress-forums .bbp-header li.bbp-topic-freshness,
 	.bbpress #bbpress-forums .bbp-body li.bbp-forum-freshness,
 	.bbpress #bbpress-forums .bbp-body li.bbp-topic-freshness {
 		width: 25%;
