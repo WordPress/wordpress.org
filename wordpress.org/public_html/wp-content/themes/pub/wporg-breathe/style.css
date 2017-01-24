@@ -255,20 +255,25 @@ aside[id^="handbook"] .widget-title {
 	font-size: 16px;
 	text-transform: uppercase;
 	letter-spacing: 1px;
-	background-color: #82878c;
+	background-color: transparent;
 	padding: 1rem 12px;
 	margin-bottom: 0;
-	color: #fff;
+	color: inherit;
 }
 
 .widget.widget_search {
 	margin-bottom: 3rem;
 }
 .widget_search input[type="search"], #subscribe-email input[type="email"] {
-	width: 100%;
+	width: 90%;
 	box-sizing: border-box;
 	padding: 1rem;
 	font-size: 14px;
+	border: 1px solid #eee;
+}
+
+#secondary-content .widget {
+	background: transparent;
 }
 
 .o2-app-page-title {
@@ -841,6 +846,12 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	color: #555d66;
 }
 
+.single-handbook div.table-of-contents {
+	background-color: #fff;
+	box-shadow: 0 0 8px rgba(0,0,0,0.1);
+	border-radius: 3px;
+}
+
 @media (min-width: 971px) {
 	.post-type-archive-handbook div.table-of-contents,
 	.single-handbook div.table-of-contents {
@@ -924,12 +935,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   list-style: none;
 }
 #secondary .menu-table-of-contents-container ul li {
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(0,0,0,0.05);
   padding: 0;
   position: relative;
 }
 #secondary .menu-table-of-contents-container ul ul {
-	margin-left: 0;
+	margin-left: 12px;
+	border-left: 1px solid rgba(0,0,0,0.05);
 }
 .menu-table-of-contents-container ul li .expandable {
   display: flex;
@@ -941,13 +953,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   position: absolute;
   right: 0;
   cursor: pointer;
-  border-left: 1px solid #eee;
-  border-right: 1px solid #eee;
   padding: 8px;
   display: inline-block;
   width: auto;
   height: 100%;
-  background-color: #fff;
+  color: #0073aa;
+  background-color: #fafafa;
+  border-left: 1px solid rgba(0,0,0,0.05);
 }
 .menu-table-of-contents-container ul li .dashicons:hover {
   color: #fff;
@@ -955,12 +967,17 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 .menu-table-of-contents-container ul li.open > div > .dashicons {
   transform: rotate(180deg);
+  border-right: 1px solid rgba(0,0,0,0.05);
+  border-left: none;
+}
+.menu-table-of-contents-container .open .expandable .dashicons {
+	background: #fff;
+	color: #0073aa;
 }
 .menu-table-of-contents-container ul a {
   display: block;
   width: 100%;
   padding: 8px 40px 8px 8px;
-  color: #23282d;
   text-decoration: none;
 }
 .menu-table-of-contents-container ul a:hover {
@@ -968,11 +985,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   background-color: #0073aa;
 }
 .menu-table-of-contents-container ul a.active {
-  color: #fff !important;
-  background-color: #0073aa;
+  color: #555 !important;
+  background-color: #fff;
 }
 .menu-table-of-contents-container > ul > li:last-child {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 .menu-table-of-contents-container > ul > li .children > li > a {
   padding-left: 13px;
@@ -980,32 +997,12 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 .menu-table-of-contents-container > ul > li .children > li > ul > li > a {
   padding-left: 8px;
 }
-.menu-table-of-contents-container > ul > li > div > a, .menu-table-of-contents-container > ul > li > a {
-  border-left: 5px solid transparent;
-  transition: border-color 0.2s ease;
-}
+
 .menu-table-of-contents-container > ul > li.open > div > a {
-  border-left: 5px solid #0073aa;
   color: #0073aa;
 }
 .menu-table-of-contents-container > ul > li.open > div > a:hover {
   color: #fff;
-}
-.menu-table-of-contents-container > ul > li ul {
-  background-color: #f6f6f6;
-}
-.menu-table-of-contents-container > ul > li > ul > li > ul {
-  padding-left: 16px;
-  background-color: #fff;
-}
-.menu-table-of-contents-container > ul > li > ul > li > ul li {
-  background-color: #f6f6f6;
-}
-.menu-table-of-contents-container > ul > li > ul > li > ul a {
-  border-left: 5px solid #d5d5d5;
-}
-.menu-table-of-contents-container > ul > li > ul > li > ul a:hover, .menu-table-of-contents-container > ul > li > ul > li > ul a.active {
-  border-left: 5px solid #0073aa;
 }
 .menu-table-of-contents-container ul.default-open {
   display: block !important;
@@ -1018,3 +1015,53 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   overflow: hidden;
   display: none;
 }
+
+/* New handbook design */
+.handbook-template-default #page {
+	background: linear-gradient(to right, #fafafa 40%, #fff 40%);
+	max-width: 100%;
+	padding: 0;
+}
+
+.handbook-template-default #main {
+	max-width: 960px;
+	margin: 0 auto;
+	display: flex;
+}
+
+.handbook-template-default header {
+	margin: 0;
+}
+
+.handbook-template-default #secondary {
+	margin: 0;
+}
+
+.handbook-template-default #primary {
+	padding: 4rem 0 4rem 4rem;
+	background: #fff;
+	box-sizing: border-box;
+}
+
+@media(max-width: 876px) {
+	.handbook-template-default #primary {
+		padding: 4rem 20px;
+	}
+}
+
+.handbook-template-default #secondary-content {
+	padding-top: 4rem;
+}
+
+.handbook-template-default .widget_wporg_handbook_pages {
+	background-color: transparent;
+}
+
+.single-handbook nav.o2-post-actions button {
+	top: 10px;
+}
+.handbook-template-default .make-welcome {
+	margin: 0 !important;
+}
+
+
