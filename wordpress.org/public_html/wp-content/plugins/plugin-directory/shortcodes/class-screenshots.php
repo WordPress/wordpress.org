@@ -36,7 +36,8 @@ class Screenshots {
 
 			if ( $descriptions && ! empty( $descriptions[ (int)$image['resolution'] ] ) ) {
 				$caption = $descriptions[ (int)$image['resolution'] ];
-				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $$plugin->ID ] );
+				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $plugin->ID ] );
+				
 				$screen_shot .= '<figcaption>' . $caption . '</figcaption>';
 			}
 

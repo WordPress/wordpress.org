@@ -141,7 +141,7 @@ class Plugin extends Base {
 			$caption = '';
 			if ( $descriptions && !empty( $description[ (int)$image['resolution'] ] ) ) {
 				$caption = $description[ (int)$image['resolution'] ];
-				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $$post->ID ] );
+				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $post->ID ] );
 			}
 
 			$result['screenshots'][ $image['resolution'] ] = compact( 'src', 'caption' );
