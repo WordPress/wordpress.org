@@ -51,7 +51,7 @@
 								?></li>
 								<li><?php
 									/* translators: %s: URL to search */
-									printf( __( '<strong><a href="%s">Search</a> the forums</strong> to see if your topic has been started already.', 'wporg-forums' ), esc_url( bbp_get_search_url() ) );
+									printf( __( '<strong><a href="%s">Search</a> the forums</strong> to see if your topic has been resolved already.', 'wporg-forums' ), esc_url( bbp_get_search_url() ) );
 								?></li>
 								<li><?php _e( '<strong>Update to the latest versions</strong> of your plugins, themes, and WordPress.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
