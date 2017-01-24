@@ -1065,4 +1065,20 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	margin: 0 !important;
 }
 
+/** Make Core **/
+#masthead li.icon a:before {
+	font: 20px/1 'dashicons';
+	display: inline-block;
+	-webkit-font-smoothing: antialiased;
+	vertical-align: middle;
+	padding-bottom: 3px;
+}
+
+#masthead li.icon a {
+	font-size: 0;
+}
+
+#masthead li.newticket a:before { content: "\f119"; }
+#masthead li.timeline a:before { content: "\f321"; }
+#masthead li.browser a:before { content: "\f475"; }
 
