@@ -41,15 +41,6 @@ td {
 	padding: 10px;
 }
 
-.entry-content td,
-.entry-content th {
-	padding: 1em !important;
-}
-
-.entry-content th {
-	font-weight: bold;
-}
-
 td:first-of-type {
 	width: 30%;
 	border-right: 1px solid #eee;
@@ -984,7 +975,8 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   color: #fff;
   background-color: #0073aa;
 }
-.menu-table-of-contents-container ul a.active {
+.menu-table-of-contents-container ul a.active, 
+.menu-table-of-contents-container .current-menu-item > a {
   color: #555 !important;
   background-color: #fff;
 }
