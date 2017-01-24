@@ -107,6 +107,13 @@ ul#views {
 	display: inline;
 }
 
+.bbp-topic-header .bbp-meta .bbp-topic-permalink,
+.bbp-reply-header .bbp-meta .bbp-reply-permalink {
+	float: none;
+	margin-left: 0;
+	color: $color__link;
+}
+
 /* Notices */
 div.bbp-template-notice,
 div.indicator-hint {

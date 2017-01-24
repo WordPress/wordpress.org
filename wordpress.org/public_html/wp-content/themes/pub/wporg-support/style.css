@@ -342,6 +342,13 @@ ul#views {
 	display: inline;
 }
 
+.bbp-topic-header .bbp-meta .bbp-topic-permalink,
+.bbp-reply-header .bbp-meta .bbp-reply-permalink {
+	float: none;
+	margin-left: 0;
+	color: #0073aa;
+}
+
 /* Notices */
 div.bbp-template-notice,
 div.indicator-hint {
@@ -5113,7 +5120,7 @@ section {
 	border: 1px solid #eee;
 }
 
-.bbpress #bbpress-forums .bbp-topics .bbp-header {
+.bbpress #bbpress-forums .bbp-topics > .bbp-header {
 	background: #0073aa;
 	color: #fff;
 }

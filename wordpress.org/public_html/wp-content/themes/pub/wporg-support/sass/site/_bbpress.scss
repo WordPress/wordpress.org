@@ -117,7 +117,7 @@ section {
 		.bbp-topics {
 			border: 1px solid #eee;
 
-			.bbp-header {
+			> .bbp-header {
 				background: $color__wp-blue;
 				color: #fff;
 			}
