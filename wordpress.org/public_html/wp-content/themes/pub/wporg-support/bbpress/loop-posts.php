@@ -10,13 +10,6 @@
 ?>
 
 <ul class="bbp-topics">
-	<li class="bbp-header">
-		<ul class="forum-titles">
-			<li class="bbp-topic-title"><?php esc_html_e( 'Title', 'wporg-forums' ); ?></li>
-			<li class="bbp-post-excerpt"><?php esc_html_e( 'Excerpt', 'wporg-forums' ); ?></li>
-		</ul>
-	</li>
-
 	<li class="bbp-body">
 
 		<?php while ( bbp_topics() ) : bbp_the_topic(); ?>
