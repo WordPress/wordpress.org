@@ -108,8 +108,9 @@
 	}
 	.main-navigation {
 		float: right;
-		position: initial;
-		width: initial;
+		position: relative;
+		width: auto;
+		top: auto;
 
 		&.toggled {
 			padding: 1px 0;
