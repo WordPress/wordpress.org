@@ -46,7 +46,7 @@ class Handbook {
 		}
 
 		if ( 'display' === $context ) {
-			$markdown_source = urlencode( $markdown_source );
+			$markdown_source = esc_url( $markdown_source );
 		}
 
 		return $markdown_source;
