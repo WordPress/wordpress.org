@@ -16,13 +16,14 @@ class Markdown_Import {
 	 * Handle a request to import from the markdown source
 	 */
 	public static function action_load_post_php() {
-		if ( ! isset( $_POST[ self::$submit_name ] )
-			|| ! isset( $_POST[ self::$nonce_name ] )
-			|| ! isset( $_POST['post_ID'] ) ) {
+		if ( ! isset( $_GET[ self::$submit_name ] )
+			|| ! isset( $_GET[ self::$nonce_name ] )
+			|| ! isset( $_GET['post'] ) ) {
 			return;
 		}
-		$post_id = (int) $_POST['post_ID'];
-		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name )
+		$post_id = (int) $_GET['post'];
+		if ( ! current_user_can( 'edit_post', $post_id )
+			|| ! wp_verify_nonce( $_GET[ self::$nonce_name ], self::$input_name )
 			|| ! in_array( get_post_type( $post_id ), self::$supported_post_types, true ) ) {
 			return;
 		}
@@ -52,9 +53,14 @@ class Markdown_Import {
 			placeholder="Enter a URL representing a markdown file to import"
 			size="50" />
 		</label> <?php
-			if ( $markdown_source ) {
-				submit_button( 'Import', 'primary button-small', self::$submit_name, false );
-			} ?>
+			if ( $markdown_source ) :
+				$update_link = add_query_arg( array(
+					self::$submit_name => 'import',
+					self::$nonce_name  => wp_create_nonce( self::$input_name ),
+				), get_edit_post_link( $post->ID, 'raw' ) );
+				?>
+				<a class="button button-small button-primary" href="<?php echo esc_url( $update_link ); ?>">Import</a>
+			<?php endif; ?>
 		<?php wp_nonce_field( self::$input_name, self::$nonce_name ); ?>
 		<?php
 	}
