@@ -3,6 +3,7 @@
 namespace WPOrg_Cli;
 
 use WP_Error;
+use WP_Query;
 
 class Markdown_Import {
 
@@ -11,6 +12,41 @@ class Markdown_Import {
 	private static $nonce_name = 'wporg-cli-markdown-source-nonce';
 	private static $submit_name = 'wporg-cli-markdown-import';
 	private static $supported_post_types = array( 'handbook' );
+
+	/**
+	 * Register our cron task if it doesn't already exist
+	 */
+	public static function action_init() {
+		if ( ! wp_next_scheduled( 'wporg_cli_markdown_import' ) ) {
+			wp_schedule_event( time(), '15_minutes', 'wporg_cli_markdown_import' );
+		}
+	}
+
+	public static function action_wporg_cli_markdown_import() {
+		$q = new WP_Query( array(
+			'post_type'      => 'handbook',
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+			'posts_per_page' => 100,
+		) );
+		$ids = $q->posts;
+		$success = 0;
+		foreach( $ids as $id ) {
+			$ret = self::update_post_from_markdown_source( $id );
+			if ( class_exists( 'WP_CLI' ) ) {
+				if ( is_wp_error( $ret ) ) {
+					\WP_CLI::warning( $ret->get_error_message() );
+				} else {
+					\WP_CLI::log( "Updated {$id} from markdown source" );
+					$success++;
+				}
+			}
+		}
+		if ( class_exists( 'WP_CLI' ) ) {
+			$total = count( $ids );
+			\WP_CLI::success( "Successfully updated {$success} of {$total} handbook pages." );
+		}
+	}
 
 	/**
 	 * Handle a request to import from the markdown source
@@ -85,6 +121,17 @@ class Markdown_Import {
 			$markdown_source = esc_url_raw( $_POST[ self::$input_name ] );
 		}
 		update_post_meta( $post_id, self::$meta_key, $markdown_source );
+	}
+
+	/**
+	 * Filter cron schedules to add a 15 minute schedule
+	 */
+	public static function filter_cron_schedules( $schedules ) {
+		$schedules['15_minutes'] = array(
+			'interval' => 15 * MINUTE_IN_SECONDS,
+			'display'  => '15 minutes'
+		);
+		return $schedules;
 	}
 
 	/**
