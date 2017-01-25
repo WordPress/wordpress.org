@@ -14,7 +14,7 @@ get_header(); ?>
 <?php if ( ! $is_landing_page && 'handbook' !== wporg_get_current_handbook() ) { ?>
 <div class="handbook-name-container">
 	<div class="handbook-name"><span>
-		<a href="<?php echo esc_url( get_post_type_archive_link( wporg_get_current_handbook() ) ); ?>"><?php echo esc_html( wporg_get_current_handbook_name() ); ?></a>
+		<a href="<?php echo esc_url( wporg_get_current_handbook_home_url() ); ?>"><?php echo esc_html( wporg_get_current_handbook_name() ); ?></a>
 	</span></div>
 </div>
 <?php } ?>
