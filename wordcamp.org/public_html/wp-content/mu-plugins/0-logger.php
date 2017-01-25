@@ -10,7 +10,6 @@ defined( 'WPINC' ) or die();
  * that is to add entries to redact_keys(), so that the caller remain clean. You can also do it before
  * passing the data to this function, though.
  *
- * @todo add current username and request url to every entry, and update wp-cli command parsing regex to match
  * @todo add a $type param with 'error' and 'info' values. errors continue to go to std error log. info is logged
  *       to separate file, so they don't clutter error log. need to rotate that file. then update callers to use
  *       new param.
@@ -21,11 +20,21 @@ defined( 'WPINC' ) or die();
 function log( $error_code, $data = array() ) {
 	$backtrace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 2 );
 
-	if ( $data && ! is_scalar( $data ) ) {
-		$data = (array) $data;
-		redact_keys( $data );
-		$data = str_replace( "\n", '[newline]', wp_json_encode( $data ) );
+	if ( 'cli' === php_sapi_name() ) {
+		$data['command'] = sprintf( '%s %s', $_SERVER['_'], implode( ' ', $_SERVER['argv'] ) );
+	} else {
+		$data['request_url'] = sprintf( '%s://%s%s', $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_NAME'], $_SERVER['REQUEST_URI'] );
+
+		// Fall back to IP address if it's too early to detect the user
+		if ( did_action( 'after_setup_theme' ) > 0 ) {
+			$data['current_user'] = get_current_user_id();
+		} else {
+			$data['remote_ip'] = $_SERVER['REMOTE_ADDR'];
+		}
 	}
+
+	redact_keys( $data );
+	$data = str_replace( "\n", '[newline]', wp_json_encode( $data ) );
 
 	$log_entry = sprintf(
 		'[%s] %s:%s - %s:%s%s',
@@ -128,6 +137,7 @@ function format_log( $raw_log, $foreign_entries = 'include' ) {
 
 	foreach ( $raw_entries as $entry ) {
 		$is_native_entry = 1 === preg_match( $native_entry_pattern, $entry, $entry_parts );
+		// todo bug: this should be recognized as native -- [18-Jan-2017 00:33:04 UTC] [b1955769] source-site-id-setting.php:29 - preview:post_val -- [null]
 
 		if ( $is_native_entry ) {
 			$formatted_log .= sprintf(

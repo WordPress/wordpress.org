@@ -291,6 +291,7 @@ function set_name_order( $order ) {
 		$current_city = wcorg_get_url_part( site_url(), 'city' );
 
 		if ( array_key_exists( $current_city, $alternate_orders ) ) {
+			// todo PHP Warning:  array_key_exists(): The first argument should be either a string or an integer
 			$order = $alternate_orders[ $current_city ];
 		}
 	}
