@@ -135,6 +135,7 @@ class WPorg_Handbook {
 		add_filter( 'o2_view_type',                       array( $this, 'o2_view_type' ) );
 		add_filter( 'o2_post_fragment',                   array( $this, 'o2_post_fragment' ) );
 		add_filter( 'comments_open',                      array( $this, 'comments_open' ), 10, 2 );
+		add_filter( 'wp_nav_menu_objects',                array( $this, 'highlight_menu_handbook_link' ) );
 	}
 
 	/**
@@ -456,4 +457,53 @@ class WPorg_Handbook {
 
 		return $open;
 	}
+
+	/**
+	 * Highlights a menu link to the handbook home page when on any constituent
+	 * handbook page.
+	 *
+	 * Assuming the handbook page isn't already directly linked in the menu,
+	 * preference is given to highlight a link to the front page of the current
+	 * handbook. Barring the presence of such a link, it will check to see if
+	 * there is a link to a 'handbook' or 'handbooks' page, which could be the
+	 * case for multi-handbook sites.
+	 *
+	 * @param array $menu_items Array of sorted menu items.
+	 * @return array
+	 */
+	function highlight_menu_handbook_link( $menu_items ) {
+		// Must be on a handbook page that isn't the handbook landing page (which will already be handled).
+		if ( ! is_page( array( 'handbook', 'handbooks' ) ) && ( ! wporg_is_handbook() || wporg_is_handbook_landing_page() ) ) {
+			return $menu_items;
+		}
+
+		// Menu must not have an item that is already noted as being current.
+		$current_menu_item = wp_filter_object_list( $menu_items, array( 'current' => true ) );
+		if ( $current_menu_item ) {
+			return $menu_items;
+		}
+
+		// Menu must have an item that links to handbook home page.
+		$root_handbook_menu_item = wp_filter_object_list( $menu_items, array( 'url' => wporg_get_current_handbook_home_url() ) );
+		if ( ! $root_handbook_menu_item ) {
+			// Or it must have an item that links to a 'handbook' or 'handbooks' page.
+			$page_slug = is_page( 'handbooks' ) ? 'handbooks' : 'handbook';
+			$page = get_page_by_path( $page_slug );
+			if ( $page ) {
+				$url = get_page_link( $page );
+				$root_handbook_menu_item = wp_filter_object_list( $menu_items, array( 'url' => $url ) );
+			}
+		}
+		if ( ! $root_handbook_menu_item ) {
+			return $menu_items;
+		}
+
+		// Add current-menu-item class to the handbook menu item.
+		reset( $root_handbook_menu_item );
+		$handbook_item_index = key( $root_handbook_menu_item );
+		$menu_items[ $handbook_item_index ]->classes[] = 'current-menu-item';
+
+		return $menu_items;
+	}
+
 }
