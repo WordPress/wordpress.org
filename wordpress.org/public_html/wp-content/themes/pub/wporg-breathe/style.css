@@ -771,10 +771,25 @@ nav.o2-post-footer-actions ul li > span > a {
 	color: inherit;
 }
 
+.handbook-name-container {
+	position: absolute;
+	right: 0;
+	width: 75%;
+	margin-left: 25%;
+	background-color: #fff;
+}
+
+@media(max-width: 876px) {
+	.handbook-name-container {
+		width: 100%;
+		margin-left: 0;
+	}
+}
+
 .handbook-name {
 	text-align: center;
 	color: #aaa;
-	margin-bottom: 1.5em;
+	margin-top: 0.5em;
 	overflow: hidden;
 	letter-spacing: 2px;
 	font-size: 1.5em;
@@ -791,15 +806,15 @@ nav.o2-post-footer-actions ul li > span > a {
 	position: absolute;
 	border-top: 1px solid #ccc;
 	top: 49%;
-	width: 600px;
+	width: 100px;
 }
 .handbook-name span:before {
-	right: 100%;
-	margin-right: 10px;
+	left: 0;
+	margin-left: -110px;
 }
 .handbook-name span:after {
-	left: 100%;
-	margin-left: 10px;
+	right: 0;
+	margin-right: -110px;
 }
 
 nav.handbook-navigation {
