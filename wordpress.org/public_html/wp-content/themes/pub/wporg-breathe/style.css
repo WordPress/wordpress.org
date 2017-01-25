@@ -1018,50 +1018,50 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 /* New handbook design */
-.handbook-template-default #page {
+.single-handbook #page {
 	background: linear-gradient(to right, #fafafa 40%, #fff 40%);
 	max-width: 100%;
 	padding: 0;
 }
 
-.handbook-template-default #main {
+.single-handbook #main {
 	max-width: 960px;
 	margin: 0 auto;
 	display: flex;
 }
 
-.handbook-template-default header {
+.single-handbook header {
 	margin: 0;
 }
 
-.handbook-template-default #secondary {
+.single-handbook #secondary {
 	margin: 0;
 }
 
-.handbook-template-default #primary {
+.single-handbook #primary {
 	padding: 4rem 0 4rem 4rem;
 	background: #fff;
 	box-sizing: border-box;
 }
 
 @media(max-width: 876px) {
-	.handbook-template-default #primary {
+	.single-handbook #primary {
 		padding: 4rem 20px;
 	}
 }
 
-.handbook-template-default #secondary-content {
+.single-handbook #secondary-content {
 	padding-top: 4rem;
 }
 
-.handbook-template-default .widget_wporg_handbook_pages {
+.single-handbook .widget_wporg_handbook_pages {
 	background-color: transparent;
 }
 
 .single-handbook nav.o2-post-actions button {
 	top: 10px;
 }
-.handbook-template-default .make-welcome {
+.single-handbook .make-welcome {
 	margin: 0 !important;
 }
 
