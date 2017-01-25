@@ -8,7 +8,7 @@ class WCB_Widget_Sponsors extends WP_Widget {
 			'classname' => 'wcb_widget_sponsors',
 			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcamporg' ),
 		);
-		$this->WP_Widget( 'wcb_sponsors', __('Sponsors', 'wordcamporg'), $widget_ops );
+		WP_Widget::__construct( 'wcb_sponsors', __('Sponsors', 'wordcamporg'), $widget_ops );
 	}
 
 	function widget( $args, $instance ) {
