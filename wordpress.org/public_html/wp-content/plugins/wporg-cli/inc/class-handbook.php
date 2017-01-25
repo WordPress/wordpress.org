@@ -3,11 +3,34 @@
 namespace WPOrg_Cli;
 
 class Handbook {
+
+	/**
+	 * Append a "Edit on GitHub" link to Handbook document titles
+	 */
+	public static function filter_the_title_edit_link( $title ) {
+		// Only apply to the main title for the document
+		if ( ! is_singular( 'handbook' )
+			|| ! is_main_query()
+			|| ! in_the_loop() ) {
+			return $title;
+		}
+
+		$markdown_source = self::get_markdown_edit_link( get_the_ID() );
+		if ( ! $markdown_source ) {
+			return $title;
+		}
+
+		return $title . ' <a class="github-edit" href="' . esc_url( $markdown_source ) . '"><img src="' . esc_url( plugins_url( 'assets/images/github-mark.svg', dirname( __FILE__ ) ) ) . '"> <span>Edit</span></a>';
+	}
+
 	/**
 	 * WP-CLI Handbook pages are maintained in the GitHub repo, so the edit
 	 * link should ridirect to there.
 	 */
 	public static function redirect_edit_link_to_github( $link, $post_id, $context ) {
+		if ( is_admin() ) {
+			return $link;
+		}
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return $link;
@@ -17,8 +40,8 @@ class Handbook {
 			return $link;
 		}
 
-		$markdown_source = Markdown_Import::get_markdown_source( $post_id );
-		if ( is_wp_error( $markdown_source ) ) {
+		$markdown_source = self::get_markdown_edit_link( $post_id );
+		if ( ! $markdown_source ) {
 			return $link;
 		}
 
@@ -46,8 +69,8 @@ class Handbook {
 			return $actions;
 		}
 
-		$markdown_source = Markdown_Import::get_markdown_source( $post_id );
-		if ( is_wp_error( $markdown_source ) ) {
+		$markdown_source = self::get_markdown_edit_link( $post_id );
+		if ( ! $markdown_source ) {
 			return $actions;
 		}
 
@@ -83,5 +106,18 @@ class Handbook {
 		}
 
 		return $actions;
+	}
+
+	private static function get_markdown_edit_link( $post_id ) {
+		$markdown_source = Markdown_Import::get_markdown_source( $post_id );
+		if ( is_wp_error( $markdown_source ) ) {
+			return '';
+		}
+		if ( 'github.com' !== parse_url( $markdown_source, PHP_URL_HOST )
+			|| false !== stripos( $markdown_source, '/edit/master/' ) ) {
+			return $markdown_source;
+		}
+		$markdown_source = str_replace( '/blob/master/', '/edit/master/', $markdown_source );
+		return $markdown_source;
 	}
 }
