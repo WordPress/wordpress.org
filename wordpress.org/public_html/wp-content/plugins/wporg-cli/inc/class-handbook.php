@@ -15,6 +15,9 @@ class Handbook {
 			return $title;
 		}
 
+		// Unhook, so the filter is only run once on the page
+		remove_filter( 'the_title', array( 'WPOrg_Cli\Handbook', 'filter_the_title_edit_link' ) );
+
 		$markdown_source = self::get_markdown_edit_link( get_the_ID() );
 		if ( ! $markdown_source ) {
 			return $title;
