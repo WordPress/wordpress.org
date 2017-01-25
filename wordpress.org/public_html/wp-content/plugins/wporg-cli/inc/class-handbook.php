@@ -88,7 +88,7 @@ class Handbook {
 			'action' => 'edit',
 			'href' => $markdown_source,
 			'classes' => array( 'edit-post-link' ),
-			'rel' => $post_ID,
+			'rel' => $post_id,
 			'initialState' => 'default'
 		);
 
