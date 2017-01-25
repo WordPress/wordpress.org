@@ -825,6 +825,7 @@ class WordCamp_Central_Theme {
 			) );
 
 			// Count the number of cities
+			// @todo use _venue_city field since it'll be more accurate, but need to populate older camps first
 			foreach ( $wordcamps->posts as $wordcamp ) {
 				$url = get_post_meta( $wordcamp->ID, 'URL', true );
 

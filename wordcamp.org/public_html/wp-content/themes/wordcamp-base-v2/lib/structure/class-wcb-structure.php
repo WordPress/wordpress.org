@@ -1,7 +1,5 @@
 <?php
 
-use WordCamp\RemoteCSS;
-
 class WCB_Structure extends WCB_Loader {
 	var $body;
 	var $sidebars;
@@ -43,10 +41,12 @@ class WCB_Structure extends WCB_Loader {
 		$grid  = wcb_get_option('grid');
 
 		// Don't output CSS if Jetpack Custom CSS/RemoteCSS is set to 'replace' mode
-		if ( 'replace' === RemoteCSS\get_output_mode() ) {
+		require_once( JETPACK__PLUGIN_DIR . '/modules/custom-css/custom-css-4.7.php' );
+		if ( Jetpack_Custom_CSS_Enhancements::skip_stylesheet() ) {
 			return;
 		}
 
+		// todo - this filter is not used anywhere and can be removed. Custom CSS and Remote CSS have options for this instead.
 		$start_fresh = apply_filters( 'wcb_start_fresh', false );
 		$child_recs  = array();
 
