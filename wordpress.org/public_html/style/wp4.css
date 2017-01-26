@@ -1197,6 +1197,7 @@ body.make-training #headline h2 a:before { content: '\f118'; }
 body.make-flow #headline h2 a:before { content: '\f115'; }
 body.make-tv #headline h2 a:before { content: '\f235'; }
 body.make-marketing #headline h2 a:before { content: '\f130'; }
+body.make-cli #headline h2 a:before { content: '\f345'; }
 
 .make-core .site-title a:before { content: '\f475'; }
 .make-design .site-title a:before { content: '\f309'; }
@@ -1214,6 +1215,7 @@ body.make-marketing #headline h2 a:before { content: '\f130'; }
 .make-flow .site-title a:before { content: '\f115'; }
 .make-tv .site-title a:before { content: '\f235'; }
 .make-marketing .site-title a:before { content: '\f130'; }
+.make-cli .site-title a:before { content: '\f345'; }
 
 #headline .login {
 	font-size: 12px;
