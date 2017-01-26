@@ -301,12 +301,12 @@ class Ratings_Compat {
 		switch( $this->compat ) {
 			case 'plugin' :
 				/* translators: %s: plugin support forum URL */
-				$report = __( 'If you are reporting an issue with this plugin, please post <a href="%s">here</a> instead.', 'wporg-forums' );
+				$report = __( 'If you are reporting an issue with this plugin, please post in the <a href="%s">plugin support forum</a> instead.', 'wporg-forums' );
 				$rate   = __( 'In order to rate a plugin, you must also submit a review.', 'wporg-forums' );
 				break;
 			case 'theme' :
 				/* translators: %s: theme support forum URL */
-				$report = __( 'If you are reporting an issue with this theme, please post <a href="%s">here</a> instead.', 'wporg-forums' );
+				$report = __( 'If you are reporting an issue with this theme, please post in the <a href="%s">theme support forum</a> instead.', 'wporg-forums' );
 				$rate   = __( 'In order to rate a theme, you must also submit a review.', 'wporg-forums' );
 				break;
 		}
