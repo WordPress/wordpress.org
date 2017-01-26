@@ -3063,8 +3063,9 @@ nav .nav-links span.page-numbers {
   }
   .main-navigation {
     float: left;
-    position: initial;
-    width: initial;
+    position: relative;
+    width: auto;
+    top: auto;
   }
   .main-navigation.toggled {
     padding: 1px 0;
