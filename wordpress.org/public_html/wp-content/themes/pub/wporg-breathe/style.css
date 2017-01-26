@@ -779,6 +779,10 @@ nav.o2-post-footer-actions ul li > span > a {
 	background-color: #fff;
 }
 
+.single-handbook .handbook-name-container + #primary {
+	padding-top: 5rem;
+}
+
 @media(max-width: 876px) {
 	.handbook-name-container {
 		width: 100%;
@@ -789,7 +793,7 @@ nav.o2-post-footer-actions ul li > span > a {
 .handbook-name {
 	text-align: center;
 	color: #aaa;
-	margin-top: 0.5em;
+	margin-top: 1em;
 	overflow: hidden;
 	letter-spacing: 2px;
 	font-size: 1.5em;
@@ -815,6 +819,28 @@ nav.o2-post-footer-actions ul li > span > a {
 .handbook-name span:after {
 	right: 0;
 	margin-right: -110px;
+}
+
+@media (max-width: 640px) {
+	.handbook-name span:before,
+	.handbook-name span:after {
+		width: 50px;
+	}
+
+	.handbook-name span:before {
+		margin-left: -55px;
+	}
+
+	.handbook-name span:after {
+		margin-right: -55px;
+	}
+}
+
+@media (max-width: 480px) {
+	.handbook-name span:before,
+	.handbook-name span:after {
+		width: 0;
+	}
 }
 
 nav.handbook-navigation {
