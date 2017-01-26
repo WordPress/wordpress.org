@@ -21,13 +21,15 @@ class WordCamp_Loader {
 	 * The main WordCamp Post Type loader
 	 */
 	function __construct() {
-		add_action( 'plugins_loaded',      array( $this, 'includes'                          ) );
-		add_action( 'init',                array( $this, 'register_post_types'               ) );
-		add_action( 'init',                array( $this, 'register_post_statuses'            ) );
-		add_filter( 'pre_get_posts',       array( $this, 'query_public_statuses_on_archives' ) );
-		add_action( 'wp_insert_post_data', array( $this, 'set_scheduled_date'                ) );
-		add_filter( 'wordcamp_rewrite_rules', array( $this, 'wordcamp_rewrite_rules' ) );
-		add_filter( 'query_vars', array( $this, 'query_vars' ) );
+		add_action( 'plugins_loaded',                  array( $this, 'includes'                          ) );
+		add_action( 'init',                            array( $this, 'register_post_types'               ) );
+		add_action( 'init',                            array( $this, 'register_post_statuses'            ) );
+		add_filter( 'pre_get_posts',                   array( $this, 'query_public_statuses_on_archives' ) );
+		add_action( 'wp_insert_post_data',             array( $this, 'set_scheduled_date'                ) );
+		add_filter( 'wordcamp_rewrite_rules',          array( $this, 'wordcamp_rewrite_rules'            ) );
+		add_filter( 'query_vars',                      array( $this, 'query_vars'                        ) );
+		add_filter( 'rest_wordcamp_collection_params', array( $this, 'set_rest_post_status_default'      ) );
+		add_action( 'rest_api_init',                   array( $this, 'register_rest_public_fields'       ) );
 	}
 
 	/**
@@ -39,6 +41,7 @@ class WordCamp_Loader {
 	 */
 	function includes () {
 		// Load the files
+		require_once ( WCPT_DIR . 'wcpt-wordcamp/class-wp-rest-wordcamps-controller.php' );
 		require_once ( WCPT_DIR . 'wcpt-wordcamp/wordcamp-template.php' );
 
 		// Quick admin check and load if needed
@@ -92,18 +95,21 @@ class WordCamp_Loader {
 
 		// Register WordCamp post type
 		register_post_type( WCPT_POST_TYPE_ID, array(
-			'labels'            => $wcpt_labels,
-			'rewrite'           => $wcpt_rewrite,
-			'supports'          => $wcpt_supports,
-			'menu_position'     => '100',
-			'public'            => true,
-			'show_ui'           => true,
-			'can_export'        => true,
-			'capability_type'   => 'post',
-			'hierarchical'      => false,
-			'has_archive'       => true,
-			'query_var'         => true,
-			'menu_icon'         => 'dashicons-wordpress',
+			'labels'                => $wcpt_labels,
+			'rewrite'               => $wcpt_rewrite,
+			'supports'              => $wcpt_supports,
+			'menu_position'         => '100',
+			'public'                => true,
+			'show_ui'               => true,
+			'can_export'            => true,
+			'capability_type'       => 'post',
+			'hierarchical'          => false,
+			'has_archive'           => true,
+			'query_var'             => true,
+			'menu_icon'             => 'dashicons-wordpress',
+			'show_in_rest'          => true,
+			'rest_base'             => 'wordcamps',
+			'rest_controller_class' => 'WordCamp_REST_WordCamps_Controller',
 		) );
 	}
 
@@ -351,6 +357,79 @@ class WordCamp_Loader {
 			return array( 'wcpt-needs-vetting' );
 
 		return $transitions[ $status ];
+	}
+
+	/**
+	 * Meta field keys to publicly expose in the v2 REST API
+	 *
+	 * @see wcorg_json_expose_whitelisted_meta_data() in mu-plugins/wcorg-json-api.php
+	 *
+	 * @return array
+	 */
+	public static function get_public_meta_keys() {
+		return array(
+			// Sourced from wcorg_json_expose_whitelisted_meta_data()
+			'Start Date (YYYY-mm-dd)',
+			'End Date (YYYY-mm-dd)',
+			'Location',
+			'URL',
+			'Twitter',
+			'WordCamp Hashtag',
+			'Number of Anticipated Attendees',
+			'Organizer Name',
+			'WordPress.org Username',
+			'Venue Name',
+			'Physical Address',
+			'Maximum Capacity',
+			'Available Rooms',
+			'Website URL',
+			'Exhibition Space Available',
+			// Additional venue data
+			'_venue_coordinates',
+			'_venue_city',
+			'_venue_state',
+			'_venue_country_code',
+			'_venue_country_name',
+			'_venue_zip',
+		);
+	}
+
+	/**
+	 * Register fields to publicly expose in the v2 REST API
+	 *
+	 * @hooked action rest_api_init
+	 */
+	public function register_rest_public_fields() {
+		$keys = self::get_public_meta_keys();
+
+		foreach ( $keys as $key ) {
+			register_rest_field(
+				'wordcamp',
+				$key,
+				array(
+					'get_callback' => function( $object, $field_name ) {
+						return get_post_meta( $object['id'], $field_name, true );
+					}
+				)
+			);
+		}
+	}
+
+	/**
+	 * Change the default status used for the WordCamp CPT in the v2 REST API.
+	 *
+	 * @hooked filter rest_wordcamp_collection_params
+	 *
+	 * @param array $query_params
+	 *
+	 * @return array
+	 */
+	public function set_rest_post_status_default( $query_params ) {
+		if ( isset( $query_params['status'] ) ) {
+			$query_params['status']['default'] = WordCamp_Loader::get_public_post_statuses();
+		}
+
+		return $query_params;
 	}
 
 	/**
