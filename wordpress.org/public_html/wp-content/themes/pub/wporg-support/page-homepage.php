@@ -25,7 +25,7 @@ get_header(); ?>
 					?>"></span>
 					<h3><?php _e( 'Welcome to Support', 'wporg-forums' ); ?></h3>
 					<p><?php _e( 'Our community-based Support Forums are a great place to learn, share, and troubleshoot.', 'wporg-forums' ); ?></p>
-					<p><?php _e( '<a href="https://codex.wordpress.org/Getting_Started_with_WordPress">Start learning</a>', 'wporg-forums' ); ?></p>
+					<p><?php _e( '<a href="https://make.wordpress.org/support/handbook/forum-welcome/">Get started</a>', 'wporg-forums' ); ?></p>
 				</div>
 			</div>
 			<div>
