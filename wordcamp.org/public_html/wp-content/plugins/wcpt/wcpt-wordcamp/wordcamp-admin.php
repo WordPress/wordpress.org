@@ -728,13 +728,6 @@ class WordCamp_Admin {
 			do_action( 'wcpt_added_to_final_schedule', $post );
 		}
 
-		// back-compat for old statuses
-		if ( 'draft' == $old_status && 'pending' == $new_status ) {
-			do_action( 'wcpt_added_to_planning_schedule', $post );
-		} elseif ( 'pending' == $old_status && 'publish' == $new_status ) {
-			do_action( 'wcpt_added_to_final_schedule', $post );
-		}
-
 		// todo add new triggers - which ones?
 	}
 

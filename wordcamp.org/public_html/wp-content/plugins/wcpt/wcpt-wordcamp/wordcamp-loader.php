@@ -221,10 +221,6 @@ class WordCamp_Loader {
 		return array(
 			'wcpt-scheduled',
 			'wcpt-closed',
-
-			// back-compat
-			'public',
-			// todo this should be 'publish'?
 		);
 	}
 
@@ -241,9 +237,6 @@ class WordCamp_Loader {
 			'wcpt-needs-contract',
 			'wcpt-needs-fill-list',
 			'wcpt-needs-schedule',
-
-			// back-compat
-			'pending',
 		);
 	}
 
