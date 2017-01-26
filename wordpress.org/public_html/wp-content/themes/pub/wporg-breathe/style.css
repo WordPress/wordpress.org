@@ -324,10 +324,13 @@ pre code {
 article.post .o2-post,
 article#post-new .o2-post,
 article.page .o2-post,
-.entry-date,
+.entry-date {
+	display: block;
+}
+
 .o2-xpost-author .entry-date,
 .o2-xpost-entry-date {
-	display: block;
+	display:inline-block;
 }
 
 .entry-header,
@@ -351,11 +354,28 @@ article.post .entry-title,
 article#post-new .entry-title,
 article.page .entry-title,
 .entry-content,
-.post-content,
-.o2-xpost-content {
+.post-content {
 	display: block;
 	clear: both;
 	padding-top: 15px;
+}
+
+.o2-xpost-content {
+	display: inline-block;
+	padding-top: 0.5em;
+}
+
+.tag-p2-xpost .o2-post {
+	font-size: 100%;
+	font-style: normal;
+}
+
+.o2-xpost-author .entry-author {
+	font-weight: bold;
+}
+
+article.tag-p2-xpost {
+	margin-bottom: 0;
 }
 
 .author-avatar,
