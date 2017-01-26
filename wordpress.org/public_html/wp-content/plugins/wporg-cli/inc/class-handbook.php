@@ -11,12 +11,10 @@ class Handbook {
 		// Only apply to the main title for the document
 		if ( ! is_singular( 'handbook' )
 			|| ! is_main_query()
-			|| ! in_the_loop() ) {
+			|| ! in_the_loop()
+			|| get_the_ID() !== get_queried_object_id() ) {
 			return $title;
 		}
-
-		// Unhook, so the filter is only run once on the page
-		remove_filter( 'the_title', array( 'WPOrg_Cli\Handbook', 'filter_the_title_edit_link' ) );
 
 		$markdown_source = self::get_markdown_edit_link( get_the_ID() );
 		if ( ! $markdown_source ) {
