@@ -388,7 +388,7 @@ class WPOrg_WP_Activity_Notifier {
 		$trim_style = in_array( $trim_style, array( 'chars', 'words' ) ) ? $trim_style : 'words';
 
 		// Remove blockquoted text since the text isn't original.
-		$text = preg_replace( '/<blockquote>.+<\/blockquote>/', '', $text );
+		$text = preg_replace( '/<blockquote>.+<\/blockquote>/s', '', $text );
 
 		// Strip tags and surrounding whitespace.
 		$text = trim ( strip_tags( $text ) );
