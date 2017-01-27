@@ -47,9 +47,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'access', 'author', 'category', 'copyright', 'deprecated', 'example', 'final',
 		'filesource', 'home', 'ignore', 'inheritdoc', 'internal', 'global', 'license',
 		'link', 'media', 'mention', 'mentions', 'method', 'name', 'notification',
-		'notifications', 'package', 'param', 'property', 'requires', 'return', 'see',
-		'since', 'static', 'staticvar', 'subpackage', 'term', 'terms', 'ticket', 'toc',
-		'todo', 'tutorial', 'type', 'user', 'username', 'uses', 'var', 'version',
+		'notifications', 'package', 'param', 'private', 'property', 'requires', 'return',
+		'see', 'since', 'static', 'staticvar', 'subpackage', 'term', 'terms', 'ticket',
+		'toc', 'todo', 'tutorial', 'type', 'user', 'username', 'uses', 'var', 'version',
 		'wordpress', 'wp',
 	];
 
