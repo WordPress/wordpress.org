@@ -1,5 +1,4 @@
 <?php
-
 /*
 Plugin Name: Official WordPress Events
 Description: Retrieves data on official WordPress events
@@ -8,7 +7,8 @@ Author:      WordPress.org Meta Team
 */
 
 class Official_WordPress_Events {
-	const WORDCAMP_API_BASE_URL = 'http://central.wordcamp.org/wp-json/';
+	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
+	const WORDCAMP_API_VERSION  = 2;
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
 	const POSTS_PER_PAGE        = 50;
@@ -19,7 +19,6 @@ class Official_WordPress_Events {
 	 *
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
-	 * Update WORDCAMP_API_BASE_URL to use HTTPS when central.wordcamp.org supports it
 	 */
 
 
@@ -63,7 +62,7 @@ class Official_WordPress_Events {
 
 	/**
 	 * Get all official events
-	 *
+	 * 
 	 * @return array
 	 */
 	protected function get_all_events() {
@@ -71,18 +70,17 @@ class Official_WordPress_Events {
 		usort( $events, array( $this, 'sort_events' ) );
 
 		// todo Cache results here too, to avoid processing the raw data on each request? If so, then no longer need to cache API call results?
-
+		
 		return $events;
 	}
 
 	/**
-	 * Sort events based on start timestamp
-	 *
+	 * Sort events based on start timestamp 
+	 * 
 	 * This is a callback for usort()
-	 *
+	 * 
 	 * @param $a
 	 * @param $b
-	 *
 	 * @return int
 	 */
 	protected function sort_events( $a, $b ) {
@@ -113,21 +111,71 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Generate the WordCamps endpoint URL for a particular version of the REST API.
+	 *
+	 * @param int $api_version
+	 *
+	 * @return string
+	 */
+	protected function get_wordcamp_events_endpoint( $api_version = 1 ) {
+		switch ( $api_version ) {
+			case 1 :
+			default :
+				$request_params = array(
+					'type'   => 'wordcamp',
+					'filter' => array(
+						'posts_per_page' => self::POSTS_PER_PAGE * .5,  // WordCamps happen much less frequently than meetups
+						// todo request camps that are in the next few months, ordered by start date ASC. requires https://github.com/WP-API/WP-API/issues/479 or customization on the wordcamp.org side
+					),
+				);
+				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' );
+				break;
+
+			case 2 :
+				$request_params = array(
+					'status'   => 'wcpt-scheduled',
+					'per_page' => 100,
+					// todo 100 is the built-in limit for per_page. As the number of WordCamps per year grows, we may need to increase this. See https://github.com/WP-API/WP-API/issues/2914#issuecomment-266222585
+				);
+				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
+				break;
+		}
+
+		return $endpoint;
+	}
+
+	/**
 	 * Retrieve events fromm the WordCamp.org API
 	 *
 	 * @return array
 	 */
 	protected function get_wordcamp_events() {
-		$events         = array();
-		$request_params = array(
-			'type'   => 'wordcamp',
-			'filter' => array(
-				'posts_per_page' => self::POSTS_PER_PAGE * .5,  // WordCamps happen much less frequently than meetups
-				// todo request camps that are in the next few months, ordered by start date ASC. requires https://github.com/WP-API/WP-API/issues/479 or customization on the wordcamp.org side
-			),
-		);
+		$endpoint  = $this->get_wordcamp_events_endpoint( self::WORDCAMP_API_VERSION );
+		$response  = $this->remote_get( esc_url_raw( $endpoint ) );
 
-		$response  = $this->remote_get( esc_url_raw( add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' ) ) );
+		switch ( self::WORDCAMP_API_VERSION ) {
+			case 1 :
+			default :
+				$events = $this->parse_wordcamp_events_api_v1( $response );
+				break;
+
+			case 2 :
+				$events = $this->parse_wordcamp_events_api_v2( $response );
+				break;
+		}
+		
+		return $events;
+	}
+
+	/**
+	 * Parse a response from the v1 API.
+	 *
+	 * @param $response
+	 *
+	 * @return array
+	 */
+	protected function parse_wordcamp_events_api_v1( $response ) {
+		$events    = array();
 		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
 
 		if ( $wordcamps ) {
@@ -174,6 +222,77 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Parse a response from the v2 API.
+	 *
+	 * This does additional sorting of the returned events that the v1 parser doesn't do.
+	 *
+	 * @param $response
+	 *
+	 * @return array
+	 */
+	protected function parse_wordcamp_events_api_v2( $response ) {
+		$events    = array();
+		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
+
+		if ( $wordcamps ) {
+			foreach ( $wordcamps as $wordcamp ) {
+				$event = array(
+					'type'  => 'wordcamp',
+					'title' => $wordcamp->title->rendered,
+				);
+
+				foreach ( $wordcamp as $field => $value ) {
+					switch ( $field ) {
+						case 'Start Date (YYYY-mm-dd)':
+							$value = absint( $value );
+							if ( empty( $value ) || $value < strtotime( '-1 day' ) ) {
+								continue 3;
+							} else {
+								$event['start_timestamp'] = $value;
+							}
+							break;
+
+						case 'End Date (YYYY-mm-dd)':
+							$value = absint( $value );
+							$event['end_timestamp'] = $value;
+							break;
+
+						case 'URL':
+							if ( empty( $value ) ) {
+								continue 3;
+							} else {
+								$event['url'] = $value;
+							}
+							break;
+
+						case 'Location':
+							$event['location'] = $value;
+							break;
+
+						case '_venue_coordinates' :
+							if ( isset( $value->latitude, $value->longitude ) ) {
+								$event['coordinates'] = array(
+									'latitude'  => $value->latitude,
+									'longitude' => $value->longitude,
+								);
+							}
+							break;
+					}
+				}
+
+				$events[] = new Official_WordPress_Event( $event );
+			}
+
+			uasort( $events, array( $this, 'sort_events' ) );
+
+			// Return fewer WordCamps since they happen less frequently than meetups
+			$events = array_slice( $events, 0, self::POSTS_PER_PAGE * 0.5 );
+		}
+
+		return $events;
+	}
+
+	/**
 	 * Get WordPress meetups from the Meetup.com API
 	 *
 	 * @return array
@@ -184,7 +303,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY || ! $groups = $this->get_meetup_group_ids() ) {
 			return $events;
 		}
-
+		
 		$response = $this->remote_get( sprintf(
 			'%s2/events?group_id=%s&time=0,1m&page=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
@@ -207,13 +326,13 @@ class Official_WordPress_Events {
 					$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
 					$location = $this->format_reverse_geocode_address( $location->address_components );
 				}
-
+				
 				$events[] = new Official_WordPress_Event( array(
 					'type'            => 'meetup',
 					'title'           => $meetup->name,
 					'url'             => $meetup->event_url,
 					'start_timestamp' => $start_timestamp,
-					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),      // convert to seconds
+					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),	// convert to seconds
 					'location'        => $location,
 				) );
 			}
@@ -221,7 +340,7 @@ class Official_WordPress_Events {
 
 		return $events;
 	}
-
+	
 	/*
 	 * Gets the IDs of all of the meetup groups associated
 	 * 
@@ -231,7 +350,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY ) {
 			return array();
 		}
-
+		
 		$response = $this->remote_get( sprintf(
 			'%s2/profiles?&member_id=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
@@ -240,16 +359,16 @@ class Official_WordPress_Events {
 		) );
 
 		$group_ids = json_decode( wp_remote_retrieve_body( $response ) );
-
+	
 		if ( ! empty ( $group_ids->results ) ) {
 			$group_ids = wp_list_pluck( $group_ids->results, 'group' );
 			$group_ids = wp_list_pluck( $group_ids, 'id' );
 		}
-
+		
 		if ( ! isset( $group_ids ) || ! is_array( $group_ids ) ) {
 			$group_ids = array();
 		}
-
+		
 		return $group_ids;
 	}
 
@@ -357,7 +476,7 @@ class Official_WordPress_Events {
 					}
 				} elseif ( 200 != $response['response']['code'] ) {
 					// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-
+	
 					$error = sprintf(
 						'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
 						$response['response']['code'],
@@ -365,14 +484,14 @@ class Official_WordPress_Events {
 						$url,
 						print_r( $args, true )
 					);
-
-					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response );
+					
+					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response ); 
 				}
-
+	
 				if ( $error ) {
 					$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
 					trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
-
+	
 					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
 						wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 					}

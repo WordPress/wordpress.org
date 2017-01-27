@@ -7,7 +7,7 @@
  * for events across various event types.
  */
 class Official_WordPress_Event {
-	public $type, $title, $url, $start_timestamp, $end_timestamp, $location;
+	public $type, $title, $url, $start_timestamp, $end_timestamp, $location, $coordinates;
 
 	/**
 	 * Constructor
