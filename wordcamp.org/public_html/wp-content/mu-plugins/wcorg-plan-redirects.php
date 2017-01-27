@@ -3,9 +3,10 @@
 if ( ! defined( 'ABSPATH' ) || ! ABSPATH || ( defined( 'WP_CLI' ) && WP_CLI ) )
 	return;
 
-// Redirects for plan.wordcamp.org only.
-if ( $_SERVER['HTTP_HOST'] != 'plan.wordcamp.org' )
+// Redirects for plan.wordcamp.org front-end only.
+if ( $_SERVER['HTTP_HOST'] != 'plan.wordcamp.org' || is_admin() ) {
 	return;
+}
 
 add_action( 'init', function() {
 	$mapping = array(
