@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: Official WordPress Events
 Description: Retrieves data on official WordPress events
@@ -49,7 +50,7 @@ class Official_WordPress_Events {
 	 */
 	public function render_events() {
 		$events = $this->group_events_by_date( $this->get_all_events() );
-		
+
 		if ( $events ) {
 			require_once( __DIR__ . '/template-events.php' );
 		}
@@ -57,7 +58,7 @@ class Official_WordPress_Events {
 
 	/**
 	 * Get all official events
-	 * 
+	 *
 	 * @return array
 	 */
 	protected function get_all_events() {
@@ -65,17 +66,18 @@ class Official_WordPress_Events {
 		usort( $events, array( $this, 'sort_events' ) );
 
 		// todo Cache results here too, to avoid processing the raw data on each request? If so, then no longer need to cache API call results?
-		
+
 		return $events;
 	}
 
 	/**
-	 * Sort events based on start timestamp 
-	 * 
+	 * Sort events based on start timestamp
+	 *
 	 * This is a callback for usort()
-	 * 
+	 *
 	 * @param $a
 	 * @param $b
+	 *
 	 * @return int
 	 */
 	protected function sort_events( $a, $b ) {
@@ -162,7 +164,7 @@ class Official_WordPress_Events {
 				}
 			}
 		}
-		
+
 		return $events;
 	}
 
@@ -177,7 +179,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY || ! $groups = $this->get_meetup_group_ids() ) {
 			return $events;
 		}
-		
+
 		$response = $this->remote_get( sprintf(
 			'%s2/events?group_id=%s&time=0,1m&page=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
@@ -200,13 +202,13 @@ class Official_WordPress_Events {
 					$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
 					$location = $this->format_reverse_geocode_address( $location->address_components );
 				}
-				
+
 				$events[] = new Official_WordPress_Event( array(
 					'type'            => 'meetup',
 					'title'           => $meetup->name,
 					'url'             => $meetup->event_url,
 					'start_timestamp' => $start_timestamp,
-					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),	// convert to seconds
+					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),      // convert to seconds
 					'location'        => $location,
 				) );
 			}
@@ -214,7 +216,7 @@ class Official_WordPress_Events {
 
 		return $events;
 	}
-	
+
 	/*
 	 * Gets the IDs of all of the meetup groups associated
 	 * 
@@ -224,7 +226,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY ) {
 			return array();
 		}
-		
+
 		$response = $this->remote_get( sprintf(
 			'%s2/profiles?&member_id=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
@@ -233,16 +235,16 @@ class Official_WordPress_Events {
 		) );
 
 		$group_ids = json_decode( wp_remote_retrieve_body( $response ) );
-	
+
 		if ( ! empty ( $group_ids->results ) ) {
 			$group_ids = wp_list_pluck( $group_ids->results, 'group' );
 			$group_ids = wp_list_pluck( $group_ids, 'id' );
 		}
-		
+
 		if ( ! isset( $group_ids ) || ! is_array( $group_ids ) ) {
 			$group_ids = array();
 		}
-		
+
 		return $group_ids;
 	}
 
@@ -350,7 +352,7 @@ class Official_WordPress_Events {
 					}
 				} elseif ( 200 != $response['response']['code'] ) {
 					// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-	
+
 					$error = sprintf(
 						'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
 						$response['response']['code'],
@@ -358,14 +360,14 @@ class Official_WordPress_Events {
 						$url,
 						print_r( $args, true )
 					);
-					
-					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response ); 
+
+					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response );
 				}
-	
+
 				if ( $error ) {
 					$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
 					trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
-	
+
 					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
 						wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 					}
