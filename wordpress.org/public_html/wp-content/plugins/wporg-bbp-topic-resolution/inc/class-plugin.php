@@ -67,7 +67,12 @@ class Plugin {
 	 * Add "Resolved" status to title.
 	 */
 	public function get_topic_title( $title, $topic_id ) {
-		// Only run when enabled on a topic's forum.
+		// Don't run in the admin.
+		if ( is_admin() ) {
+			return $title;
+		}
+
+		// Don't run if not enabled on a topic's forum.
 		if ( ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) ) ) {
 			return $title;
 		}
@@ -77,7 +82,7 @@ class Plugin {
 			return $title;
 		}
 
-		// Don't run when displaying a title attribute via bbp_get_reply_title_fallback(), hooked to 'the_title'
+		// Don't run when displaying a title attribute via bbp_get_reply_title_fallback(), hooked to 'the_title'.
 		if ( doing_filter( 'the_title' ) ) {
 			return $title;
 		}
