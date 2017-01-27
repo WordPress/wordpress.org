@@ -49,11 +49,16 @@ class Official_WordPress_Events {
 	 * Gather the events data and render the events template with it
 	 */
 	public function render_events() {
+		$output = '';
 		$events = $this->group_events_by_date( $this->get_all_events() );
 
 		if ( $events ) {
+			ob_start();
 			require_once( __DIR__ . '/template-events.php' );
+			$output = ob_get_flush();
 		}
+
+		return $output;
 	}
 
 	/**
