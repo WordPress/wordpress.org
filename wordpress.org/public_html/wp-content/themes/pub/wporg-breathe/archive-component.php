@@ -7,9 +7,8 @@
 <?php get_header(); ?>
 
 	<div id="primary" class="content-area">
-		<div class="site-content">
 		<div role="main">
-		<h2>WordPress core components</h2>
+		<h1>WordPress Core Components</h1>
 
 <?php
 	if ( $cached = get_transient( 'trac_components_page' ) ) {
@@ -35,7 +34,6 @@
 ?>
 
 		</div>
-		</div><!-- #content -->
 
 	</div><!-- #primary -->
 	<div id="primary-modal"></div>

@@ -46,8 +46,10 @@ td {
 	padding: 1em !important; 
 } 
 
-.entry-content th { 
-	font-weight: bold; 
+.entry-content th,
+#primary thead td,
+#primary thead th {
+    font-weight: bold;
 }
 
 td:first-of-type {
