@@ -426,13 +426,13 @@ jQuery( document ).ready( function( $ ) {
 			echo $last_x;
 		}
 		echo '<table class="trac-summary">';
-		echo '<tr><th class="title">' . $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) . '</th>';
+		echo '<thead><tr><th class="title">' . $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) . '</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
 				echo '<th>' . $this->trac_query_link( $type, array( 'component' => $component, 'type' => $type, 'group' => 'milestone' ) ) . '</th>';
 			}
 		}
-		echo '</tr>';
+		echo '</tr></thead>';
 		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
 			echo '<tr><th>' . $this->trac_query_link( $milestone, array( 'component' => $component, 'milestone' => $milestone, 'group' => $type ) ) . '</th>';
 			foreach ( $type_count as $type => $count ) {
@@ -573,7 +573,7 @@ jQuery( document ).ready( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><th>Component</th><th style="width: 50px">Tickets</th><th style="width: 50px">7 Days</th><th style="width: 50px">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
+			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
 		}
 
 		$component = $post->post_title;
