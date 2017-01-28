@@ -38,6 +38,13 @@ class Upload {
 						?>
 					</p>
 				</div>
+				<?php
+				if ( '/plugins-wp' === parse_url( home_url(), PHP_URL_PATH ) ) {
+					echo '<div class="notice notice-error notice-alt">
+						<p>Please submit all new plugin requests through the existing form <a href="https://wordpress.org/plugins/add/">available here</a>, You\'re currently viewing the beta version of the upcoming plugin directory, and is only for tesiting purposes.</p>
+					</div>';
+				}
+				?>
 
 			<?php endif; ?>
 
