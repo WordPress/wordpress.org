@@ -786,10 +786,6 @@ nav.o2-post-footer-actions ul li > span > a {
  * Handbook
  */
 
-.single-handbook #secondary {
-	clear: left;
-}
-
 .single-handbook .site-main .widget-area {
 	float: left;
 	margin-right: 4%;
@@ -807,7 +803,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .single-handbook .o2-post {
-	border-top: none;
+	aborder-top: none;
 }
 
 .post-type-archive-handbook .handbook-name a:not(:hover),
@@ -1120,7 +1116,9 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 }
 
 .single-handbook #secondary {
+	clear: left;
 	margin: 0;
+	background: #fafafa;
 }
 
 .single-handbook #primary {
