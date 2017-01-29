@@ -3,6 +3,8 @@
 class Make_Core_Trac_Components {
 	const last_x_days = 7;
 
+	const POST_TYPE_NAME = 'component';
+
 	function __construct( $api ) {
 		$this->api = $api;
 		add_action( 'init', array( $this, 'init' ) );
@@ -15,6 +17,7 @@ class Make_Core_Trac_Components {
 		add_action( 'component_table_row', array( $this, 'component_table_row' ) );
 		add_filter( 'manage_component_posts_columns', array( $this, 'manage_posts_columns' ) );
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
+		add_filter( 'wp_nav_menu_objects', array( $this, 'highlight_menu_component_link' ) );
 	}
 
 	function init() {
@@ -38,7 +41,7 @@ class Make_Core_Trac_Components {
 			'all_items' => 'All Components',
 		);
 
-		register_post_type( 'component', array(
+		register_post_type( self::POST_TYPE_NAME, array(
 			'public' => true,
 			'show_ui' => true,
 			'labels' => $labels,
@@ -64,7 +67,7 @@ class Make_Core_Trac_Components {
 	}
 
 	function pre_get_posts( $query ) {
-		if ( $query->is_main_query() && $query->is_post_type_archive( 'component' ) ) {
+		if ( $query->is_main_query() && $query->is_post_type_archive( self::POST_TYPE_NAME ) ) {
 			$query->set( 'posts_per_page', -1 );
 			$query->set( 'orderby', 'title' );
 			$query->set( 'order', 'asc' );
@@ -97,7 +100,7 @@ class Make_Core_Trac_Components {
 
 	function page_is_component( $post ) {
 		$post = get_post( $post );
-		if ( $post->post_type != 'component' ) {
+		if ( $post->post_type != self::POST_TYPE_NAME ) {
 			return false;
 		}
 		if ( $post->post_parent == 0 ) {
@@ -166,12 +169,54 @@ class Make_Core_Trac_Components {
 		}
 	}
 
+	/**
+	 * Highlights a menu link to the components home page when on any constituent
+	 * component page.
+	 *
+	 * @see WPorg_Handbook::highlight_menu_handbook_link()
+	 *
+	 * @param array $menu_items Array of sorted menu items.
+	 * @return array
+	 */
+	public function highlight_menu_component_link( $menu_items ) {
+		// Must be on a component archive or page.
+		if ( ! is_post_type_archive( self::POST_TYPE_NAME ) && ! is_singular( self::POST_TYPE_NAME ) ) {
+			return $menu_items;
+		}
+
+		// Menu must not have an item that is already noted as being current.
+		$current_menu_item = wp_filter_object_list( $menu_items, array( 'current' => true ) );
+		if ( $current_menu_item ) {
+			return $menu_items;
+		}
+
+		$post_type_data = get_post_type_object( self::POST_TYPE_NAME );
+		$post_type_slug = $post_type_data->rewrite['slug'];
+
+		$page = get_page_by_path( $post_type_slug );
+		if ( ! $page ) {
+			return $menu_items;
+		}
+
+		$components_menu_item = wp_filter_object_list( $menu_items, array( 'object_id' => $page->ID ) );
+		if ( ! $components_menu_item ) {
+			return $menu_items;
+		}
+
+		// Add current-menu-item class to the components menu item.
+		reset( $components_menu_item );
+		$components_item_index = key( $components_menu_item );
+		$menu_items[ $components_item_index ]->classes[] = 'current-menu-item';
+
+		return $menu_items;
+	}
+
 	function wp_enqueue_scripts() {
 		wp_enqueue_style( 'make-core-trac', plugins_url( '/make-core.css', __FILE__ ), array(), '3' );
 	}
 
 	function wp_head() {
-		if ( ! is_singular( 'component' ) && ! is_post_type_archive( 'component' ) ) {
+		if ( ! is_singular( self::POST_TYPE_NAME ) && ! is_post_type_archive( self::POST_TYPE_NAME ) ) {
 			return;
 		}
 ?>
@@ -238,7 +283,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 
 		$subcomponents_query = new WP_Query( array(
-			'post_type' => 'component',
+			'post_type' => self::POST_TYPE_NAME,
 			'post_status' => 'publish',
 			'post_parent' => $post->ID,
 			'update_post_term_cache' => false,
@@ -291,7 +336,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 		restore_current_blog();
 
-		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => 'component', 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
+		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => self::POST_TYPE_NAME, 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
 			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
 			echo "<ul>$sub_pages</ul>";
@@ -622,7 +667,7 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function get_component_maintainers( $component ) {
-		$component_page = get_page_by_title( $component, OBJECT, 'component' );
+		$component_page = get_page_by_title( $component, OBJECT, self::POST_TYPE_NAME );
 		if ( $component_page ) {
 			return $this->get_component_maintainers_by_post( $component_page->ID );
 		} else {
