@@ -41,10 +41,10 @@ td {
 	padding: 10px;
 }
 
-.entry-content td, 
-.entry-content th { 
-	padding: 1em !important; 
-} 
+.entry-content td,
+.entry-content th {
+	padding: 1em !important;
+}
 
 .entry-content th,
 #primary thead td,
@@ -140,7 +140,7 @@ input[type="submit"] {
     .site-header .site-title a {
 		font-size: 13px;
 		font-size: 4.2vw;
-	}   
+	}
 }
 
 .site-header .site-title a:hover {
@@ -152,8 +152,13 @@ input[type="submit"] {
 	position: static;
 	max-width: 940px;
 	height: 32px;
-	margin: -32px auto 0px auto;
+	margin: -32px auto 0 auto;
 	text-align: right;
+	padding: 0;
+}
+
+.navigation-main .menu {
+	line-height: 32px;
 }
 
 .navigation-main ul li {
@@ -172,7 +177,7 @@ input[type="submit"] {
 }
 
 .navigation-main ul li a {
-	padding: 4px 0 0;
+	padding: 0;
 }
 
 .navigation-main ul li:hover > a,
@@ -189,6 +194,11 @@ input[type="submit"] {
 .navigation-main a {
 	color: rgba(255, 255, 255, 0.8);
 	font-size: 14px;
+}
+
+.wporg-make .site-title a:before,
+body.wporg-make #headline h2 a:before {
+	vertical-align: middle; /* overrides wp4.css */
 }
 
 #secondary-content .navigation-main {
@@ -1065,7 +1075,7 @@ nav.handbook-navigation .nav-links a[rel="next"] {
   color: #fff;
   background-color: #0073aa;
 }
-.menu-table-of-contents-container ul a.active, 
+.menu-table-of-contents-container ul a.active,
 .menu-table-of-contents-container .current-menu-item > a {
   color: #555 !important;
   background-color: #fff;
@@ -1154,11 +1164,6 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	display: inline-block;
 	-webkit-font-smoothing: antialiased;
 	vertical-align: middle;
-	padding-bottom: 3px;
-}
-
-#masthead li.icon a {
-	font-size: 0;
 }
 
 #masthead li.newticket a:before { content: "\f119"; }
