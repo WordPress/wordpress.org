@@ -803,7 +803,7 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 .single-handbook .o2-post {
-	aborder-top: none;
+	border-top: none;
 }
 
 .post-type-archive-handbook .handbook-name a:not(:hover),
