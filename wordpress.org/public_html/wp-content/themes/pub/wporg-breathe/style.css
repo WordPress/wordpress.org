@@ -184,7 +184,20 @@ input[type="submit"] {
 .navigation-main ul li.current-menu-item a,
 .navigation-main ul li.current-menu-item:hover a {
 	background: transparent;
+}
+
+.navigation-main ul li:hover > a:after,
+.navigation-main ul li.current-menu-item a:after,
+.navigation-main ul li.current-menu-item:hover a:after {
+	content: '';
+	display: block;
 	border-bottom: 1px solid #fff;
+	position: relative;
+	top: -6px;
+}
+
+.navigation-main ul li.icon a:after {
+	display: none;
 }
 
 .navigation-main ul li:hover > a {
@@ -992,10 +1005,38 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	text-decoration: underline;
 }
 
+/* Highlight current heading and adjust scroll position for fixed toolbar */
 .toc-heading:target {
+	position: relative;
+	padding-top: 50px;
+	margin-top: -50px;
+}
+
+.toc-heading:target:before {
+	content: '';
+	position: absolute;
+	left: -10px;
+	top: 50px;
 	border-left: 5px solid #0073aa;
-	padding-left: 5px;
-	margin-left: -10px;
+	height: 50%;
+	height: calc(100% - 50px);
+}
+
+.toc-jump {
+	position: relative;
+	height: 50px;
+}
+
+.toc-jump:after {
+	content: '';
+	display: table;
+	clear: both;
+}
+
+.toc-jump a {
+	z-index: 1;
+	position: absolute;
+	right: 0;
 }
 
 @media (max-width: 480px) {
@@ -1169,4 +1210,3 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 #masthead li.newticket a:before { content: "\f119"; }
 #masthead li.timeline a:before { content: "\f321"; }
 #masthead li.browser a:before { content: "\f475"; }
-
