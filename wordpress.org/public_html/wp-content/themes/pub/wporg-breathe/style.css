@@ -116,10 +116,31 @@ input[type="submit"] {
 	line-height: 1;
 }
 
-@media (max-width: 400px) {
-	.site-header .site-title a {
-		font-size: 16px;
+@media (max-width: 500px) {
+	.site-header .site-title {
+		max-width: 334px;
+		margin-top: 4px;
 	}
+	.site-header .site-title a {
+		font-size: 17px;
+		font-size: 4.5vw;
+	}
+}
+
+@media (max-width: 400px) {
+	.site-header .site-title {
+		max-width: 295px;
+	}
+}
+
+@media (max-width: 320px) {
+	.site-header .site-title {
+        max-width: 240px;
+	}
+    .site-header .site-title a {
+		font-size: 13px;
+		font-size: 4.2vw;
+	}   
 }
 
 .site-header .site-title a:hover {
@@ -232,6 +253,7 @@ body,
 
 	#secondary-toggle {
 		margin-left: 22px;
+		margin-right: 0px;
 	}
 
 	#secondary-toggle:before {
