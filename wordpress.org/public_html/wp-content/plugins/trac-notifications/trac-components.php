@@ -221,7 +221,7 @@ jQuery( document ).ready( function( $ ) {
 		global $wpdb;
 
 		$post = get_post();
-		if ( ! $this->page_is_component( $post ) || doing_action( 'wp_head' ) || ! did_action( 'wp_head' ) ) {
+		if ( ! $this->page_is_component( $post ) || ! in_the_loop() || doing_action( 'wp_head' ) || ! did_action( 'wp_head' ) ) {
 			return $content;
 		}
 

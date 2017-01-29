@@ -75,8 +75,6 @@ function inline_scripts() {
 add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 
 function welcome_box() {
-	global $post;
-
 	$welcome = get_page_by_path( 'welcome' );
 	$cookie  = 'welcome-' . get_current_blog_id();
 	$hash    = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
@@ -88,8 +86,6 @@ function welcome_box() {
 			$welcome->post_content = "<div class='content-area'>\n\n{$columns[0]}</div><div class='widget-area'>\n\n{$columns[1]}</div>";
 		}
 
-		$post_backup = $post;
-		$post = $welcome; // setup_postdata() doesn't update the global, do it manually to ensure correct context for `the_content` filters.
 		setup_postdata( $welcome );
 
 		// Disable Jetpack sharing buttons
@@ -107,7 +103,6 @@ function welcome_box() {
 	<?php
 		remove_filter( 'sharing_show', '__return_false' );
 		wp_reset_postdata();
-		$post = $post_backup;
 	endif;
 }
 add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
