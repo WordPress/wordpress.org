@@ -138,3 +138,20 @@ function add_site_slug_to_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', __NAMESPACE__ . '\add_site_slug_to_body_class' );
+
+/**
+ * Defines `link_before` and `link_after` to make icon items accessible for screen readers.
+ *
+ * @param object  $args  An object of wp_nav_menu() arguments.
+ * @param WP_Post $item  Menu item data object.
+ * @return object An object of wp_nav_menu() arguments.
+ */
+function add_screen_reader_text_for_icon_menu_items( $args, $item ) {
+	if ( in_array( 'icon', $item->classes, true ) ) {
+		$args->link_before = '<span class="screen-reader-text">';
+		$args->link_after  = '</span>';
+	}
+
+	return $args;
+}
+add_filter( 'nav_menu_item_args', __NAMESPACE__ . '\add_screen_reader_text_for_icon_menu_items', 10, 2 );
