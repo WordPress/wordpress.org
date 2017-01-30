@@ -17,10 +17,11 @@ class Official_WordPress_Events {
 	/*
 	 * @todo
 	 *
-	 * Add pausing to avoid rate limit
 	 * Meetups only pulling 1 week instead of full month
 	 * Maybe pull more than 1 month of meetups
 	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
+	 * Always display cached results, and refresh stale cache asynchronously, to avoid visitors having to wait while the data is pulled
+	 * After async cache refresh, bump remote_get timeout limit to 30 to avoid premature timeouts
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
 	 */
@@ -507,10 +508,37 @@ class Official_WordPress_Events {
 				} else {
 					set_transient( $transient_key, $response, HOUR_IN_SECONDS );
 				}
+
+				$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
 			}
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Maybe pause the script to avoid rate limiting
+	 *
+	 * @param array $headers
+	 */
+	protected function maybe_pause( $headers ) {
+		if ( ! isset( $headers['x-ratelimit-remaining'], $headers['x-ratelimit-reset'] ) ) {
+			return;
+		}
+
+		$remaining = absint( $headers['x-ratelimit-remaining'] );
+		$period    = absint( $headers['x-ratelimit-reset'] );
+
+		// Pause more frequently than we need to, and for longer, just to be safe
+		if ( $remaining > 2 ) {
+			return;
+		}
+
+		if ( $period < 2 ) {
+			$period = 2;
+		}
+
+		sleep( $period );
 	}
 }
 
