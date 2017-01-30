@@ -416,6 +416,7 @@ class WordCamp_Admin {
 					'WordCamp Hashtag'                => 'text',
 					'Number of Anticipated Attendees' => 'text',
 					'Multi-Event Sponsor Region'      => 'mes-dropdown',
+					'Global Sponsorship Grant'        => 'text',
 				);
 				break;
 
@@ -431,6 +432,7 @@ class WordCamp_Admin {
 					'WordCamp Hashtag'                => 'text',
 					'Number of Anticipated Attendees' => 'text',
 					'Multi-Event Sponsor Region'      => 'mes-dropdown',
+					'Global Sponsorship Grant'        => 'text',
 
 					'Organizer Name'                                 => 'text',
 					'WordPress.org Username'                         => 'text',
