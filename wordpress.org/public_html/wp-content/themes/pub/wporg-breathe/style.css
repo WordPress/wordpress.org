@@ -1210,3 +1210,11 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 #masthead li.newticket a:before { content: "\f119"; }
 #masthead li.timeline a:before { content: "\f321"; }
 #masthead li.browser a:before { content: "\f475"; }
+
+/* Override wp4.css form styles for o2 */
+#page .text {
+	height: auto !important;
+	background-color: white !important;
+	font-family: 'Open Sans' !important;
+}
+
