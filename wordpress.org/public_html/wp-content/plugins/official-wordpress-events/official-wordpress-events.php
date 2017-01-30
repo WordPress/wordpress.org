@@ -17,6 +17,7 @@ class Official_WordPress_Events {
 	/*
 	 * @todo
 	 *
+	 * Add pausing to avoid rate limit
 	 * Meetups only pulling 1 week instead of full month
 	 * Maybe pull more than 1 month of meetups
 	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
@@ -44,7 +45,6 @@ class Official_WordPress_Events {
 		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'official_wordpress_events' ) ) {
 			wp_enqueue_style( 'official-wordpress-events' );
 		}
-
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Official_WordPress_Events {
 		usort( $events, array( $this, 'sort_events' ) );
 
 		// todo Cache results here too, to avoid processing the raw data on each request? If so, then no longer need to cache API call results?
-		
+
 		return $events;
 	}
 
@@ -166,7 +166,7 @@ class Official_WordPress_Events {
 				$events = $this->parse_wordcamp_events_api_v2( $response );
 				break;
 		}
-		
+
 		return $events;
 	}
 
@@ -306,7 +306,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY || ! $groups = $this->get_meetup_group_ids() ) {
 			return $events;
 		}
-		
+
 		$groups = array_chunk( $groups, 200, true );
 		foreach( $groups as $group_batch ) {
 			$response = $this->remote_get( sprintf(
@@ -346,7 +346,7 @@ class Official_WordPress_Events {
 
 		return $events;
 	}
-	
+
 	/*
 	 * Gets the IDs of all of the meetup groups associated
 	 * 
@@ -358,7 +358,7 @@ class Official_WordPress_Events {
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY ) {
 			return $group_ids;
 		}
-		
+
 		$request_url = sprintf(
 			'%s2/profiles?&member_id=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
@@ -369,15 +369,15 @@ class Official_WordPress_Events {
 		while ( '' !== $request_url ) {
 			$response = $this->remote_get( $request_url );
 			$body     = json_decode( wp_remote_retrieve_body( $response ) );
-	
+
 			if ( ! empty ( $body->results ) ) {
 				$groups    = wp_list_pluck( $body->results, 'group' );
 				$group_ids = array_merge( $group_ids, wp_list_pluck( $groups, 'id' ) );
 			}
-		
+
 			$request_url = $body->meta->next;
 		}
-		
+
 		return $group_ids;
 	}
 
@@ -485,7 +485,7 @@ class Official_WordPress_Events {
 					}
 				} elseif ( 200 != $response['response']['code'] ) {
 					// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-	
+
 					$error = sprintf(
 						'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
 						$response['response']['code'],
@@ -493,14 +493,14 @@ class Official_WordPress_Events {
 						$url,
 						print_r( $args, true )
 					);
-					
+
 					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response ); 
 				}
-	
+
 				if ( $error ) {
 					$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
 					trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
-	
+
 					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
 						wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 					}
