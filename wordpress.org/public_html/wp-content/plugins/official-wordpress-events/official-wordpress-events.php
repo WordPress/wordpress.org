@@ -17,6 +17,9 @@ class Official_WordPress_Events {
 	/*
 	 * @todo
 	 *
+	 * Meetups only pulling 1 week instead of full month
+	 * Maybe pull more than 1 month of meetups
+	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
 	 */
@@ -304,37 +307,40 @@ class Official_WordPress_Events {
 			return $events;
 		}
 		
-		$response = $this->remote_get( sprintf(
-			'%s2/events?group_id=%s&time=0,1m&page=%d&key=%s',
-			self::MEETUP_API_BASE_URL,
-			implode( ',', $groups ),
-			self::POSTS_PER_PAGE,
-			MEETUP_API_KEY
-		) );
+		$groups = array_chunk( $groups, 200, true );
+		foreach( $groups as $group_batch ) {
+			$response = $this->remote_get( sprintf(
+				'%s2/events?group_id=%s&time=0,1m&page=%d&key=%s',
+				self::MEETUP_API_BASE_URL,
+				implode( ',', $group_batch),
+				self::POSTS_PER_PAGE,
+				MEETUP_API_KEY
+			) );
 
-		$meetups = json_decode( wp_remote_retrieve_body( $response ) );
+			$meetups = json_decode( wp_remote_retrieve_body( $response ) );
 
-		if ( ! empty ( $meetups->results ) ) {
-			$meetups = $meetups->results;
+			if ( ! empty ( $meetups->results ) ) {
+				$meetups = $meetups->results;
 
-			foreach ( $meetups as $meetup ) {
-				$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
+				foreach ( $meetups as $meetup ) {
+					$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
 
-				if ( isset( $meetup->venue ) ) {
-					$location = $this->format_meetup_venue_location( $meetup->venue );
-				} else {
-					$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
-					$location = $this->format_reverse_geocode_address( $location->address_components );
+					if ( isset( $meetup->venue ) ) {
+						$location = $this->format_meetup_venue_location( $meetup->venue );
+					} else {
+						$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
+						$location = $this->format_reverse_geocode_address( $location->address_components );
+					}
+
+					$events[] = new Official_WordPress_Event( array(
+						'type'            => 'meetup',
+						'title'           => $meetup->name,
+						'url'             => $meetup->event_url,
+						'start_timestamp' => $start_timestamp,
+						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
+						'location'        => $location,
+					) );
 				}
-				
-				$events[] = new Official_WordPress_Event( array(
-					'type'            => 'meetup',
-					'title'           => $meetup->name,
-					'url'             => $meetup->event_url,
-					'start_timestamp' => $start_timestamp,
-					'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ),	// convert to seconds
-					'location'        => $location,
-				) );
 			}
 		}
 
@@ -347,26 +353,29 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function get_meetup_group_ids() {
+		$group_ids = array();
+
 		if ( ! defined( 'MEETUP_API_KEY' ) || ! MEETUP_API_KEY ) {
-			return array();
+			return $group_ids;
 		}
 		
-		$response = $this->remote_get( sprintf(
+		$request_url = sprintf(
 			'%s2/profiles?&member_id=%d&key=%s',
 			self::MEETUP_API_BASE_URL,
 			self::MEETUP_MEMBER_ID,
 			MEETUP_API_KEY
-		) );
+		);
 
-		$group_ids = json_decode( wp_remote_retrieve_body( $response ) );
+		while ( '' !== $request_url ) {
+			$response = $this->remote_get( $request_url );
+			$body     = json_decode( wp_remote_retrieve_body( $response ) );
 	
-		if ( ! empty ( $group_ids->results ) ) {
-			$group_ids = wp_list_pluck( $group_ids->results, 'group' );
-			$group_ids = wp_list_pluck( $group_ids, 'id' );
-		}
+			if ( ! empty ( $body->results ) ) {
+				$groups    = wp_list_pluck( $body->results, 'group' );
+				$group_ids = array_merge( $group_ids, wp_list_pluck( $groups, 'id' ) );
+			}
 		
-		if ( ! isset( $group_ids ) || ! is_array( $group_ids ) ) {
-			$group_ids = array();
+			$request_url = $body->meta->next;
 		}
 		
 		return $group_ids;
