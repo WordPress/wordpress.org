@@ -13,7 +13,7 @@ namespace WordPressdotorg\Forums;
 
 $menu_items = array(
 	/* translators: relative link to the forums home page */
-	_x( '/', 'header menu', 'wporg-forums' )                                            => _x( 'Forums', 'header menu', 'wporg-forums' ),
+	_x( '/#bbpress-forums', 'header menu', 'wporg-forums' )                             => _x( 'Forums', 'header menu', 'wporg-forums' ),
 	_x( 'https://codex.wordpress.org/Main_Page', 'header menu', 'wporg-forums' )        => _x( 'Documentation', 'header menu', 'wporg-forums' ),
 	_x( 'https://make.wordpress.org/support/handbook/', 'header menu', 'wporg-forums' ) => _x( 'Get Involved', 'header menu', 'wporg-forums' ),
 );
@@ -46,11 +46,12 @@ $menu_items = array(
 							<ul>
 								<?php
 								foreach ( $menu_items as $path => $text ) :
-									$class = false !== strpos( $_SERVER['REQUEST_URI'], $path ) ? 'class="active" ' : '';
+									$class = '';
 									$url = parse_url( $path );
 									if ( ! empty( $url['host' ] ) ) {
 										$url = esc_url( $path );
 									} else {
+										$class = false !== strpos( $_SERVER['REQUEST_URI'], $url['path'] ) ? 'class="active" ' : '';
 										$url = esc_url( home_url( $path ) );
 									}
 								?>
