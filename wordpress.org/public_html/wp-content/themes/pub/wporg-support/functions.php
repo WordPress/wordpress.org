@@ -539,16 +539,12 @@ function bb_base_before_topics_loop() {
 		return;
 	}
 
-	$term_subscription = '';
-	if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
-		$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
-	}
-
 	bbp_breadcrumb();
 	?>
-	<div id="topic-tag" class="bbp-topic-tag">
-	<h1 class="entry-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
-	<?php if ( ! empty( $term_subscription ) ) : ?><?php echo $term_subscription; ?><?php endif; ?>
+	<header id="topic-tag" class="page-header bbp-topic-tag">
+		<h1 class="page-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
+	</header>
+	<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
 		<div class="entry-content">
 	<?php
 }
@@ -560,7 +556,6 @@ function bb_base_after_topics_loop() {
 	}
 	?>
 		</div>
-	</div><!-- #topic-tag -->
 	<?php
 }
 add_action( 'bbp_template_after_topics_loop', 'bb_base_after_topics_loop' );

@@ -89,6 +89,15 @@
 
 		<?php elseif ( ! bbp_is_single_user() ) : ?>
 
+			<?php
+				$term_subscription = '';
+				if ( is_tax( 'topic-tag' ) && function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
+					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
+				}
+				if ( $term_subscription ) {
+					echo '<div>' . $term_subscription . "</div>\n";
+				}
+			?>
 			<div>
 				<h4><?php _e( 'Views', 'wporg-forums' ); ?></h4>
 				<ul class="topic-views">
