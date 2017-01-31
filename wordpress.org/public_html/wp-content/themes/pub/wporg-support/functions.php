@@ -543,6 +543,8 @@ function bb_base_before_topics_loop() {
 	if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
 		$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
 	}
+
+	bbp_breadcrumb();
 	?>
 	<div id="topic-tag" class="bbp-topic-tag">
 	<h1 class="entry-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
