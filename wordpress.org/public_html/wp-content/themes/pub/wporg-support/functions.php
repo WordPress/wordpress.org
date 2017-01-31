@@ -241,7 +241,15 @@ function wporg_support_add_moderation_notice() {
 		if ( $is_moderator ) {
 			if ( 'spam' === $post_status ) {
 				$notice_class = 'warning';
-				$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
+
+				$reporter = get_post_meta( get_the_ID(), '_bbp_akismet_user', true );
+
+				if ( $reporter ) {
+					/* translators: %s: reporter's username */
+					$notice = sprintf( __( 'This post has been flagged as spam by %s.', 'wporg-forums' ), $reporter );
+				} else {
+					$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
+				}
 			} else {
 				$notice = __( 'This post is currently pending.', 'wporg-forums' );
 			}
