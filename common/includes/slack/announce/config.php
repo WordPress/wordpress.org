@@ -44,6 +44,7 @@ function get_whitelist() {
 		'community-team' => $wordcamp_central,
 		'core' => array(
 			'drew',
+			'jeffpaul',
 			'johnbillion',
 			'mike',
 			'obenland',
