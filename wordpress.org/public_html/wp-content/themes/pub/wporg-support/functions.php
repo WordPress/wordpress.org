@@ -124,6 +124,29 @@ function wporg_support_get_views() {
 }
 
 /**
+ * Limit No Replies view to 21 days by default.
+ *
+ * @param array $args
+ * @return array
+ */
+function wporg_support_limit_no_replies_view( $args ) {
+	$days = 21;
+
+	if ( isset( $_GET['days'] ) ) {
+		$days = (int) $_GET['days'];
+	}
+
+	$args['date_query'] = array(
+		array(
+			'after'  => sprintf( '%s days ago', $days ),
+		),
+	);
+
+	return $args;
+}
+add_filter( 'bbp_register_view_no_replies', 'wporg_support_limit_no_replies_view' );
+
+/**
  * Custom Body Classes
  *
  * @uses get_body_class() To add the `wporg-support` class
