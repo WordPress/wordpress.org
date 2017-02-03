@@ -34,7 +34,6 @@ class Official_WordPress_Events {
 	 *
 	 * Shortcode
 	 * ==============
-	 * Update shortcode to pull from cached DB entries instead of API directly. Probably remove caching from $this->remote_get()
 	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
@@ -64,7 +63,7 @@ class Official_WordPress_Events {
 	public function prime_events_cache() {
 		global $wpdb;
 
-		$events = $this->get_all_events();
+		$events = $this->fetch_upcoming_events();
 
 		foreach ( $events as $event ) {
 			$row_values = array(
@@ -120,7 +119,7 @@ class Official_WordPress_Events {
 	 */
 	public function render_events() {
 		$output = '';
-		$events = $this->group_events_by_date( $this->get_all_events() );
+		$events = $this->group_events_by_date( $this->get_cached_events() );
 
 		if ( $events ) {
 			ob_start();
@@ -132,32 +131,57 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Get all official events
-	 * 
+	 * Get cached events from the local database
+	 *
 	 * @return array
 	 */
-	protected function get_all_events() {
-		$events = array_merge( $this->get_wordcamp_events(), $this->get_meetup_events() );
-		usort( $events, array( $this, 'sort_events' ) );
+	protected function get_cached_events() {
+		global $wpdb;
 
-		return $events;
+		$cached_events = array();
+
+		// Include yesterday's events because server timezone may be ahead of user's timezone
+		$raw_events = $wpdb->get_results( sprintf( "
+			SELECT *
+			FROM `%s`
+			WHERE date_utc >= SUBDATE( CURRENT_DATE(), 1 )
+			ORDER BY date_utc ASC
+			LIMIT 300",
+			self::EVENTS_TABLE
+		) );
+
+		foreach ( $raw_events as $event ) {
+			$cached_events[] = new Official_WordPress_Event( array(
+				'id'              => $event->id,
+				'type'            => $event->type,
+				'source_id'       => $event->source_id,
+				'title'           => $event->title,
+				'url'             => $event->url,
+				'description'     => $event->description,
+				'num_attendees'   => $event->attendees,
+				'meetup_name'     => $event->meetup,
+				'meetup_url'      => $event->meetup_url,
+				'start_timestamp' => strtotime( $event->date_utc ),
+				'end_timestamp'   => strtotime( $event->end_date ),
+				'location'        => $event->location,
+				'country_code'    => $event->country,
+				'latitude'        => $event->latitude,
+				'longitude'       => $event->longitude,
+			) );
+		}
+
+		return $cached_events;
 	}
 
 	/**
-	 * Sort events based on start timestamp 
+	 * Fetch all upcoming official events from various external APIs
 	 * 
-	 * This is a callback for usort()
-	 * 
-	 * @param $a
-	 * @param $b
-	 * @return int
+	 * @return array
 	 */
-	protected function sort_events( $a, $b ) {
-		if ( $a->start_timestamp == $b->start_timestamp ) {
-			return 0;
-		} else {
-			return $a->start_timestamp > $b->start_timestamp ? 1 : -1;
-		}
+	protected function fetch_upcoming_events() {
+		$events = array_merge( $this->get_wordcamp_events(), $this->get_meetup_events() );
+
+		return $events;
 	}
 
 	/**
@@ -535,10 +559,7 @@ class Official_WordPress_Events {
 	/**
 	 * Wrapper for wp_remote_get()
 	 *
-	 * This adds caching and error logging/notification.
-	 *
-	 * @todo It'd be better to always display cached data, but trigger an asynchronous refresh when you detect it's
-	 *       changed, so that the user is never waiting on it to refresh.
+	 * This adds error logging/notification.
 	 *
 	 * @param string $url
 	 * @param array  $args
@@ -549,9 +570,6 @@ class Official_WordPress_Events {
 		$response = $error = false;
 
 		if ( $url ) {
-			$transient_key = 'owe_' . wp_hash( $url . print_r( $args, true ) );
-
-			if ( ! $response = get_transient( $transient_key ) ) {
 				$response = wp_remote_get( $url, $args );
 
 				if ( is_wp_error( $response ) ) {
@@ -586,12 +604,9 @@ class Official_WordPress_Events {
 					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
 						wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 					}
-				} else {
-					set_transient( $transient_key, $response, HOUR_IN_SECONDS );
 				}
 
 				$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
-			}
 		}
 
 		return $response;
