@@ -55,6 +55,8 @@ class Official_WordPress_Events {
 	public function prime_events_cache() {
 		global $wpdb;
 
+		return; // Temporarily disable to avoid PHP 7 syntax errors
+
 		$events = $this->fetch_upcoming_events();
 
 		foreach ( $events as $event ) {
