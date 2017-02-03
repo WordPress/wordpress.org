@@ -427,7 +427,12 @@ class Official_WordPress_Events {
 					} else {
 						$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
 						$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location->address_components );
-						$location          = implode( ', ', $location_parts );
+						$location          = sprintf(
+							'%s%s%s',
+							$location_parts['city'],
+							empty( $location_parts['state'] )        ?  '' : ', ' . $location_parts['state'],
+							empty( $location_parts['country_name'] ) ?  '' : ', ' . $location_parts['country_name']
+						);
 					}
 
 					$events[] = new Official_WordPress_Event( array(
@@ -442,7 +447,7 @@ class Official_WordPress_Events {
 						'start_timestamp' => $start_timestamp,
 						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
 						'location'        => $location,
-						'country_code'    => strtoupper( $meetup->venue->country ?? $location_parts['country'] ?? '' ),
+						'country_code'    => strtoupper( $meetup->venue->country ?? $location_parts['country_code'] ?? '' ),
 						'latitude'        => $meetup->venue->lat ?? $meetup->group->group_lat,
 						'longitude'       => $meetup->venue->lon ?? $meetup->group->group_lon,
 					) );
@@ -526,7 +531,8 @@ class Official_WordPress_Events {
 			} elseif ( 'administrative_area_level_1' == $component->types[0] ) {
 				$address['state'] = $component->short_name;
 			} elseif ( 'country' == $component->types[0] ) {
-				$address['country'] = strtoupper( $component->short_name );
+				$address['country_code'] = strtoupper( $component->short_name );
+				$address['country_name'] = $component->long_name;
 			}
 		}
 
@@ -543,9 +549,9 @@ class Official_WordPress_Events {
 	protected function format_meetup_venue_location( $venue ) {
 		$location = array();
 
-		foreach ( array( 'city', 'state', 'country' ) as $part ) {
+		foreach ( array( 'city', 'state', 'localized_country_name' ) as $part ) {
 			if ( ! empty( $venue->$part ) ) {
-				if ( in_array( $part, array( 'state', 'country' ) ) ) {
+				if ( in_array( $part, array( 'state' ) ) ) {
 					$location[] = strtoupper( $venue->$part );
 				} else {
 					$location[] = $venue->$part;
