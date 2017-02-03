@@ -12,23 +12,83 @@ $cache_group = 'events';
 $cache_life = 12 * 60 * 60;
 $ttl = 12 * 60 * 60; // Time the client should cache the document.
 
+$location_args = array();
+// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
+if ( isset( $_GET['latitude'] ) ) {
+	$location_args['latitude'] = $_GET['latitude'];
+	$location_args['longitude'] = $_GET['longitude'];
+}
+if ( isset( $_GET['country'] ) ) {
+	$location_args['country'] = $_GET['country'];
+}
 
-$location = array(
-	'description' => 'Global',
-	'latitude' => 0,
-	'longitude' => 0,
-);
+// If a precide location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
+if ( isset( $_POST['location_data'] ) ) {
+	$location_args['location_data'] = $_POST['location_data'];
+}
 
-$events = get_events( [ 'number' => 10 ] );
+$location = get_location( $location_args );
+
+$event_args = array();
+if ( isset( $_REQUEST['number'] ) ) {
+	$event_args['number'] = $_REQUEST['number'];
+}
+if ( !empty( $location['latitude'] ) ) {
+	$event_args['nearby'] = array(
+		'latitude'  => $location['latitude'],
+		'longitude' => $location['longitude'],
+	);
+}
+if ( !empty( $location['country'] ) ) {
+	$event_args['country'] = $location['country'];
+}
+
+$events = get_events( $event_args );
 
 header( 'Content-Type: application/json; charset=UTF-8' );
 echo wp_json_encode( compact( 'location', 'events', 'ttl' ) );
+
+function get_location( $args = array() ) {
+
+	// For a country request, no lat/long are returned.
+	if ( isset( $args['country'] ) ) {
+		return array(
+			// TODO include a 'description' key of the country name?
+			'country'     => $args['country'],
+		);
+	}
+
+	// TODO: Actually determine a location for this city.
+	// Support determining a users location from various user-specific data-points to provide a sane default location.
+	// This data is provided by a POST request and should only be made once per user (and upon location change).
+	if ( isset( $args['location_data'] ) ) {
+		// $args['location_data']['ip']
+		// $args['location_data']['timezone']
+		// $args['location_data']['locale']
+	}
+
+	return array(
+		// TODO add the human readable description for locations. Perhaps only for POST requests?
+		'description' => 'Global',
+
+		// TODO ensure we only return rounded/city-level co-ords here
+		'latitude' => $location_args['latitude'] ?? 0,
+		'longitude' => $location_args['longtitude'] ?? 0,
+	);
+}
 
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
 	// Sort to ensure consistent cache keys.
 	ksort( $args );
+
+	if ( isset( $args['number'] ) ) {
+		$args['number'] = min( $args['number'], 100 );
+		if ( ! $args['number'] ) {
+			$args['number'] = 10;
+		}
+	}
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
 /*	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
@@ -37,8 +97,19 @@ function get_events( $args = array() ) {
 
 	$wheres = array();
 	if ( !empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
-		$wheres = 'type = %s';
+		$wheres[] = 'type = %s';
 		$sql_values[] = $args['type'];
+	}
+
+	if ( !empty( $args['nearby'] ) ) {
+		// TODO locate events nearby to these co-ords only.
+	}
+
+	// Allow queries for limiting to specific countries.
+	if ( !empty( $args['country'] ) ) {
+		$wheres[] = 'country = %s';
+		// TODO: Sanitize to 2-character country code?
+		$sql_values[] = $args['country'];
 	}
 
 	// Just show upcoming events
@@ -51,17 +122,17 @@ function get_events( $args = array() ) {
 		$sql_values[] = $args['number'];
 	}
 
-	$sql_where = $ql_limit = '';
+	$sql_where = $sql_limit = '';
 	if ( $wheres ) {
 		$sql_where = 'WHERE ' . implode( ' AND ', $wheres );
 	}
 
 	$raw_events = $wpdb->get_results( $wpdb->prepare(
 		"SELECT
-			title, url,
+			type, title, url,
 			meetup, meetup_url,
-			date_utc, location,
-			latitude, longitude
+			date_utc, date_utc_offset,
+			location, country, latitude, longitude
 		FROM `wporg_events`
 		$sql_where
 		ORDER BY date_utc ASC
@@ -71,21 +142,17 @@ function get_events( $args = array() ) {
 
 	$events = array();
 	foreach ( $raw_events as $event ) {
-		// TODO: Switch from a TEXT location field to city, state, country for query purposes
-		$location = array_filter( array_map( 'trim', explode( ',', $event->location ) ) );
-		$city = $state = $country = '';
-		( count( $location ) == 2 ) ? list( $city, $country ) = $location : list( $city, $state, $country ) = $location;
-
 		$events[] = array(
+			'type'  => $event->type,
 			'title' => $event->title,
 			'url'   => $event->url,
 			'meetup' => $event->meetup,
 			'meetup_url' => $event->meetup_url,
-			'date' => $event->date_utc, // TODO: Mangle to JS date with timezone
+			'date' => $event->date_utc, // TODO: Create a JS parsable date, including the timezone data
 			'location' => array(
-				'city' => $city,
-				'state' => $state,
-				'country' => $country,
+				'location' => $event->location,
+				// TODO: Split this into a new DB field
+				'country' => $event->country ?? end( array_filter( array_map( 'trim', explode( ',', $event->location ) ) ) ),
 				'latitude' => $event->latitude,
 				'longitude' => $event->longitude,
 			)
