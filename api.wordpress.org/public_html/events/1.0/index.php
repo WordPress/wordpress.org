@@ -83,8 +83,9 @@ function get_events( $args = array() ) {
 	// Sort to ensure consistent cache keys.
 	ksort( $args );
 
+	// number should be between 0 and 100, with a default of 10.
 	$args['number'] = $args['number'] ?? 10;
-	$args['number'] = min( $args['number'], 100 );
+	$args['number'] = max( 0, min( $args['number'], 100 ) );
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
 /*	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
