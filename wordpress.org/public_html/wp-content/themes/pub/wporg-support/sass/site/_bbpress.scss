@@ -809,6 +809,10 @@ div.bbp-breadcrumb {
 		> div:nth-child(3n) {
 			display: none;
 		}
+
+		> div.my-account {
+			display: inherit;
+		}
 	}
 
 	// Review page

@@ -5767,6 +5767,10 @@ div.bbp-breadcrumb p {
 	display: none;
 }
 
+.bbp-view .sidebar > div.my-account {
+	display: inherit;
+}
+
 .bbp-view .review-ratings {
 	margin-bottom: 1rem;
 	padding-bottom: 10px;

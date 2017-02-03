@@ -159,7 +159,7 @@
 
 	<?php if ( is_user_logged_in() ) : ?>
 
-		<div>
+		<div class="my-account">
 			<h4><?php _e( 'My Account', 'wporg-forums' ); ?></h4>
 			<ul>
 				<li><?php echo sprintf( __( 'Howdy, %s', 'wporg-forums' ), '<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>' ); ?></li>
