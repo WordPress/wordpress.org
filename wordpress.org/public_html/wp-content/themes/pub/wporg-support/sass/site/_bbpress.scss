@@ -141,6 +141,10 @@ section {
 			@extend a;
 		}
 
+		.wporg-bbp-user-flag.flagged a {
+			color: #f00;
+		}
+
 		.bbp-pagination {
 			font-size: ms(-2);
 			float: none;

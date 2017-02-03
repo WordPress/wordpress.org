@@ -5135,6 +5135,10 @@ section {
 	background: #eee;
 }
 
+.bbpress #bbpress-forums .wporg-bbp-user-flag.flagged a {
+	color: #f00;
+}
+
 .bbpress #bbpress-forums .bbp-pagination {
 	font-size: 0.8rem;
 	float: none;
