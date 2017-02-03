@@ -48,6 +48,16 @@ $events = get_events( $event_args );
 header( 'Content-Type: application/json; charset=UTF-8' );
 echo wp_json_encode( compact( 'location', 'events', 'ttl', 'debug' ) );
 
+function guess_location_from_geonames( $location_name, $timezone, $country ) {
+	global $wpdb;
+	// Look for a location that matches the name.
+	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
+	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM geoname WHERE MATCH(name,asciiname,alternatenames) AGAINST(%s) ORDER BY FIELD(%s, country) DESC, FIELD(%s, timezone) DESC, population DESC LIMIT 1", $location_name, $country, $timezone ) );
+	return $row;
+}
+
+
 function get_location( $args = array() ) {
 
 	// For a country request, no lat/long are returned.
@@ -65,6 +75,23 @@ function get_location( $args = array() ) {
 		// $args['location_data']['ip']
 		// $args['location_data']['timezone']
 		// $args['location_data']['locale']
+
+		$country_code = null;
+		if ( isset( $args['location_data']['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['location_data']['locale'], $match ) ) {
+			$country_code = $match[1];
+		}
+
+		// Location (City) name provided by the user:
+		if ( isset( $args['location_data']['location_name'] ) ) {
+			$guess = guess_location_from_geonames( $args['location_data']['location_name'], $args['location_data']['timezone'] ?? '', $country_code );
+			if ( $guess )
+				return array(
+					'description' => $guess->name,
+					'latitude' => $guess->latitude,
+					'longitude' => $guess->longitude,
+				);
+		}
+				
 	}
 
 	if ( !empty( $args['latitude'] ) && ! empty( $args['longitude'] ) ) {
