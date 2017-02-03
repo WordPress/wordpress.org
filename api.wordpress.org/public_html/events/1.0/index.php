@@ -167,7 +167,7 @@ function get_events( $args = array() ) {
 	$sql_values[] = gmdate( 'Y-m-d' );
 
 	// Limit 
-	if ( !empty( $args['number'] ) ) {
+	if ( isset( $args['number'] ) ) {
 		$sql_limits = 'LIMIT %d';
 		$sql_values[] = $args['number'];
 	}
