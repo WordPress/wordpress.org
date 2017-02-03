@@ -4,10 +4,12 @@
  * An official WordPress event
  * 
  * This doesn't have any real functionality, but it exists to provide a standard data structure
- * for events across various event types.
+ * for events across various event types. It mostly matches the schema for the `wporg_events`
+ * database table.
  */
 class Official_WordPress_Event {
-	public $type, $title, $url, $start_timestamp, $end_timestamp, $location, $coordinates;
+	public $id, $type, $source_id, $title, $url, $description, $num_attendees, $meetup_name, $meetup_url,
+           $start_timestamp, $end_timestamp, $location, $latitude, $longitude;
 
 	/**
 	 * Constructor

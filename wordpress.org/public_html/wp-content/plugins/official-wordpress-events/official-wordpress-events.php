@@ -7,6 +7,7 @@ Author:      WordPress.org Meta Team
 */
 
 class Official_WordPress_Events {
+	const EVENTS_TABLE          = 'wporg_events';
 	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
 	const WORDCAMP_API_VERSION  = 2;
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
@@ -17,11 +18,24 @@ class Official_WordPress_Events {
 	/*
 	 * @todo
 	 *
+	 * Database
+	 * ==============
+	 * `location` field should have full state/county names, not abbreviations
+	 *      Can/should probably remove calls to geocode API in favor of using meetup v2/group or some other endpoint that returns detailed location breakdown
+	 * Once shortcode pulls from db, bump remote_get timeout limit to 30 to avoid premature timeouts
 	 * Meetups only pulling 1 week instead of full month
+	 *      Look at meetup-stats.php and see if any differences are relevant, or if there's anything else that'd be helpful in general
+	 * Check non-latin characters, accents etc to make sure stored properly in db
+	 * Add admin_notice to wordcamp post type to warn when coordinates missing. Also back-fill current ones that are missing.
+	 * PHP timeout @ 100 seconds - should be fixed by switch to pulling from db
+	 * Store wordcamp dates in UTC, and also store timezone? Would need to start collecting timezone for wordcamps and then back-fill old records
 	 * Maybe pull more than 1 month of meetups
+	 *
+	 *
+	 * Shortcode
+	 * ==============
+	 * Update shortcode to pull from cached DB entries instead of API directly. Probably remove caching from $this->remote_get()
 	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
-	 * Always display cached results, and refresh stale cache asynchronously, to avoid visitors having to wait while the data is pulled
-	 * After async cache refresh, bump remote_get timeout limit to 30 to avoid premature timeouts
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
 	 */
@@ -33,6 +47,58 @@ class Official_WordPress_Events {
 	public function __construct() {
 		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts' ) );
 		add_shortcode( 'official_wordpress_events', array( $this, 'render_events' ) );
+
+		add_action( 'owpe_prime_events_cache', array( $this, 'prime_events_cache' ) );
+
+		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
+			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache');
+		}
+	}
+
+	/**
+	 * Prime the cache of WordPress events
+	 *
+	 * WARNING: The database table is used by api.wordpress.org/events/1.0 (and possibly by future versions), so
+	 * be careful to maintain consistency when making any changes to this.
+	 */
+	public function prime_events_cache() {
+		global $wpdb;
+
+		$events = $this->get_all_events();
+
+		foreach ( $events as $event ) {
+			$row_values = array(
+				'id'          => null,
+				'type'        => $event->type,
+				'source_id'   => $event->source_id,
+				'title'       => $event->title,
+				'url'         => $event->url,
+				'description' => $event->description,
+				'attendees'   => $event->num_attendees,
+				'meetup'      => $event->meetup_name,
+				'meetup_url'  => $event->meetup_url,
+				'date_utc'    => date( 'Y-m-d H:i:s', $event->start_timestamp ),
+				'end_date'    => date( 'Y-m-d H:i:s', $event->end_timestamp ),
+				'location'    => $event->location,
+				'latitude'    => $event->latitude,
+				'longitude'   => $event->longitude,
+			);
+
+			// Latitude and longitude are required by the database, so skip events that don't have one
+			if ( empty( $row_values['latitude'] ) || empty( $row_values['longitude'] ) ) {
+				continue;
+			}
+
+			/*
+			 * Insert the events into the table, without creating duplicates
+			 *
+			 * Note: Since replace() is matching against a unique key rather than the primary `id` key, it's
+			 * expected for each row to be deleted and re-inserted, making the IDs increment each time.
+			 *
+			 * See http://stackoverflow.com/a/12205366/450127
+			 */
+			$wpdb->replace( self::EVENTS_TABLE, $row_values );
+		}
 	}
 
 	/**
@@ -72,8 +138,6 @@ class Official_WordPress_Events {
 	protected function get_all_events() {
 		$events = array_merge( $this->get_wordcamp_events(), $this->get_meetup_events() );
 		usort( $events, array( $this, 'sort_events' ) );
-
-		// todo Cache results here too, to avoid processing the raw data on each request? If so, then no longer need to cache API call results?
 
 		return $events;
 	}
@@ -241,8 +305,10 @@ class Official_WordPress_Events {
 		if ( $wordcamps ) {
 			foreach ( $wordcamps as $wordcamp ) {
 				$event = array(
+					'source_id' => $wordcamp->id,
 					'type'  => 'wordcamp',
 					'title' => $wordcamp->title->rendered,
+					'description' => $wordcamp->content->rendered,
 				);
 
 				foreach ( $wordcamp as $field => $value ) {
@@ -269,28 +335,29 @@ class Official_WordPress_Events {
 							}
 							break;
 
+						case 'Number of Anticipated Attendees':
+							$event['num_attendees'] = $value;
+							break;
+
 						case 'Location':
 							$event['location'] = $value;
 							break;
 
 						case '_venue_coordinates' :
 							if ( isset( $value->latitude, $value->longitude ) ) {
-								$event['coordinates'] = array(
-									'latitude'  => $value->latitude,
-									'longitude' => $value->longitude,
-								);
+								$event['latitude']  = $value->latitude;
+								$event['longitude'] = $value->longitude;
 							}
 							break;
 					}
 				}
 
+				if ( $event['start_timestamp'] && empty( $event['end_timestamp'] ) ) {
+					$event['end_timestamp'] = $event['start_timestamp'];
+				}
+
 				$events[] = new Official_WordPress_Event( $event );
 			}
-
-			uasort( $events, array( $this, 'sort_events' ) );
-
-			// Return fewer WordCamps since they happen less frequently than meetups
-			$events = array_slice( $events, 0, self::POSTS_PER_PAGE * 0.5 );
 		}
 
 		return $events;
@@ -335,11 +402,18 @@ class Official_WordPress_Events {
 
 					$events[] = new Official_WordPress_Event( array(
 						'type'            => 'meetup',
+						'source_id'       => $meetup->id,
 						'title'           => $meetup->name,
 						'url'             => $meetup->event_url,
+						'meetup_name'     => $meetup->group->name,
+						'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup->group->urlname ),
+						'description'     => $meetup->description,
+						'num_attendees'   => $meetup->yes_rsvp_count,
 						'start_timestamp' => $start_timestamp,
 						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
 						'location'        => $location,
+						'latitude'        => $meetup->venue->lat ?? $meetup->group->group_lat,
+						'longitude'       => $meetup->venue->lon ?? $meetup->group->group_lon,
 					) );
 				}
 			}
