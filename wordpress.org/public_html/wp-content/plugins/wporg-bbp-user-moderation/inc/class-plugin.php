@@ -270,9 +270,12 @@ class Plugin {
 			return false;
 		}
 
+		$class = 'wporg-bbp-user-flag';
+
 		if ( $this->is_user_flagged( $user_id ) ) {
 			$text = $r['unflag'];
 			$query_args = array( 'action' => 'wporg_bbp_unflag_user', 'user_id' => $user_id );
+			$class .= ' flagged';
 		} else {
 			$text = $r['flag'];
 			$query_args = array( 'action' => 'wporg_bbp_flag_user', 'user_id' => $user_id );
@@ -281,7 +284,8 @@ class Plugin {
 		$permalink = bbp_get_topic_permalink( $post_id );
 
 		$url = esc_url( wp_nonce_url( add_query_arg( $query_args, $permalink ), 'toggle-flag_' . $user_id . '_' . $post_id ) );
-		return sprintf( "<div class='wporg-bbp-user-flag'><a href='%s'>%s</a></div>",
+		return sprintf( "<div class='%s'><a href='%s'>%s</a></div>",
+			$class,
 			$url,
 			esc_html( $text ) );
 	}
