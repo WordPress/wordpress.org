@@ -127,7 +127,7 @@ function get_events( $args = array() ) {
 
 	$wheres = array();
 	if ( !empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
-		$wheres[] = 'type = %s';
+		$wheres[] = '`type` = %s';
 		$sql_values[] = $args['type'];
 	}
 
@@ -144,7 +144,7 @@ function get_events( $args = array() ) {
 				continue;
 			}
 			$bounded_box = get_bounded_coordinates( $args['nearby']['latitude'], $args['nearby']['longitude'], $distance );
-			$nearby_where[] = '( type = %s AND latitude BETWEEN %f AND %f AND longitude BETWEEN %f AND %f )';
+			$nearby_where[] = '( `type` = %s AND `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
 			$sql_values[] = $type;			
 			$sql_values[] = $bounded_box['latitude']['min'];
 			$sql_values[] = $bounded_box['latitude']['max'];
@@ -157,13 +157,13 @@ function get_events( $args = array() ) {
 
 	// Allow queries for limiting to specific countries.
 	if ( !empty( $args['country'] ) ) {
-		$wheres[] = 'country = %s';
+		$wheres[] = '`country` = %s';
 		// TODO: Maybe: Sanitize to 2-character country code?
 		$sql_values[] = $args['country'];
 	}
 
 	// Just show upcoming events
-	$wheres[] = 'date_utc >= %s';
+	$wheres[] = '`date_utc` >= %s';
 	$sql_values[] = gmdate( 'Y-m-d' );
 
 	// Limit 
@@ -179,13 +179,13 @@ function get_events( $args = array() ) {
 
 	$raw_events = $wpdb->get_results( $wpdb->prepare(
 		"SELECT
-			type, title, url,
-			meetup, meetup_url,
-			date_utc, date_utc_offset,
-			location, country, latitude, longitude
+			`type`, `title`, `url`,
+			`meetup`, `meetup_url`,
+			`date_utc`, `date_utc_offset`,
+			`location`, `country`, `latitude`, `longitude`
 		FROM `wporg_events`
 		$sql_where
-		ORDER BY date_utc ASC
+		ORDER BY `date_utc` ASC
 		$sql_limits",
 		$sql_values
 	) );
@@ -202,8 +202,8 @@ function get_events( $args = array() ) {
 			'location' => array(
 				'location' => $event->location,
 				'country' => $event->country,
-				'latitude' => $event->latitude,
-				'longitude' => $event->longitude,
+				'latitude' => (float) $event->latitude,
+				'longitude' => (float) $event->longitude,
 			)
 		);
 	}
