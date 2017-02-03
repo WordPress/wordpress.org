@@ -9,7 +9,7 @@
  */
 class Official_WordPress_Event {
 	public $id, $type, $source_id, $title, $url, $description, $num_attendees, $meetup_name, $meetup_url,
-           $start_timestamp, $end_timestamp, $location, $latitude, $longitude;
+           $start_timestamp, $end_timestamp, $location, $country_code, $latitude, $longitude;
 
 	/**
 	 * Constructor

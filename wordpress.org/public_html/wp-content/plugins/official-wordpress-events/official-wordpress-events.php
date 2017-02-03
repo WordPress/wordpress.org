@@ -80,6 +80,7 @@ class Official_WordPress_Events {
 				'date_utc'    => date( 'Y-m-d H:i:s', $event->start_timestamp ),
 				'end_date'    => date( 'Y-m-d H:i:s', $event->end_timestamp ),
 				'location'    => $event->location,
+				'country'     => $event->country_code,
 				'latitude'    => $event->latitude,
 				'longitude'   => $event->longitude,
 			);
@@ -349,6 +350,10 @@ class Official_WordPress_Events {
 								$event['longitude'] = $value->longitude;
 							}
 							break;
+
+						case '_venue_country_code':
+							$event['country_code'] = strtoupper( $value );
+							break;
 					}
 				}
 
@@ -396,8 +401,9 @@ class Official_WordPress_Events {
 					if ( isset( $meetup->venue ) ) {
 						$location = $this->format_meetup_venue_location( $meetup->venue );
 					} else {
-						$location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
-						$location = $this->format_reverse_geocode_address( $location->address_components );
+						$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
+						$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location->address_components );
+						$location          = implode( ', ', $location_parts );
 					}
 
 					$events[] = new Official_WordPress_Event( array(
@@ -412,6 +418,7 @@ class Official_WordPress_Events {
 						'start_timestamp' => $start_timestamp,
 						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
 						'location'        => $location,
+						'country_code'    => strtoupper( $meetup->venue->country ?? $location_parts['country'] ?? '' ),
 						'latitude'        => $meetup->venue->lat ?? $meetup->group->group_lat,
 						'longitude'       => $meetup->venue->lon ?? $meetup->group->group_lon,
 					) );
@@ -480,13 +487,13 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Formats an address returned from Google's reverse-geocode API
+	 * Parses an address returned from Google's reverse-geocode API
 	 *
 	 * @param array $address_components
 	 *
-	 * @return string
+	 * @return array
 	 */
-	protected function format_reverse_geocode_address( $address_components ) {
+	protected function parse_reverse_geocode_address( $address_components ) {
 		$address = array();
 
 		foreach ( $address_components as $component ) {
@@ -495,11 +502,11 @@ class Official_WordPress_Events {
 			} elseif ( 'administrative_area_level_1' == $component->types[0] ) {
 				$address['state'] = $component->short_name;
 			} elseif ( 'country' == $component->types[0] ) {
-				$address['country'] = $component->short_name;
+				$address['country'] = strtoupper( $component->short_name );
 			}
 		}
 
-		return implode( ', ', $address );
+		return $address;
 	}
 
 	/**
