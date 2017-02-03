@@ -46,7 +46,7 @@ if ( !empty( $location['country'] ) ) {
 $events = get_events( $event_args );
 
 header( 'Content-Type: application/json; charset=UTF-8' );
-echo wp_json_encode( compact( 'location', 'events', 'ttl' ) );
+echo wp_json_encode( compact( 'location', 'events', 'ttl', 'debug' ) );
 
 function get_location( $args = array() ) {
 
@@ -67,13 +67,19 @@ function get_location( $args = array() ) {
 		// $args['location_data']['locale']
 	}
 
-	return array(
-		// TODO add the human readable description for locations. Perhaps only for POST requests?
-		'description' => 'Global',
+	if ( !empty( $args['latitude'] ) && ! empty( $args['longitude'] ) ) {
+		// TODO: Ensure that the data here is rounded to city-level and return the name of the city/region.
+		return array(
+			'description' => "{$args['latitude']}, {$args['longitude']}",
+			'latitude'  => $args['latitude'],
+			'longitude' => $args['longitude']
+		);
+	}
 
-		// TODO ensure we only return rounded/city-level co-ords here
-		'latitude' => $location_args['latitude'] ?? 0,
-		'longitude' => $location_args['longtitude'] ?? 0,
+	return array(
+		'description' => 'Global',
+		'latitude'  => 0,
+		'longitude' => 0,
 	);
 }
 
@@ -98,14 +104,34 @@ function get_events( $args = array() ) {
 		$sql_values[] = $args['type'];
 	}
 
+	// If we want nearby events, create a WHERE based on a bounded box of lat/long co-ordinates.
 	if ( !empty( $args['nearby'] ) ) {
-		// TODO locate events nearby to these co-ords only.
+		$event_distances = array(
+			'meetup' => 100,
+			'wordcamp' => 350,
+		);
+		$nearby_where = array();
+		$nearby_vals = '';
+		foreach ( $event_distances as $type => $distance ) {
+			if ( !empty( $args['type'] ) && $type != $args['type'] ) {
+				continue;
+			}
+			$bounded_box = get_bounded_coordinates( $args['nearby']['latitude'], $args['nearby']['longitude'], $distance );
+			$nearby_where[] = '( type = %s AND latitude BETWEEN %f AND %f AND longitude BETWEEN %f AND %f )';
+			$sql_values[] = $type;			
+			$sql_values[] = $bounded_box['latitude']['min'];
+			$sql_values[] = $bounded_box['latitude']['max'];
+			$sql_values[] = $bounded_box['longitude']['min'];
+			$sql_values[] = $bounded_box['longitude']['max'];
+		}
+		// Build the nearby where as a OR as different event types have different distances.
+		$wheres[] = '(' . implode( ' OR ', $nearby_where ) . ')';
 	}
 
 	// Allow queries for limiting to specific countries.
 	if ( !empty( $args['country'] ) ) {
 		$wheres[] = 'country = %s';
-		// TODO: Sanitize to 2-character country code?
+		// TODO: Maybe: Sanitize to 2-character country code?
 		$sql_values[] = $args['country'];
 	}
 
@@ -145,11 +171,10 @@ function get_events( $args = array() ) {
 			'url'   => $event->url,
 			'meetup' => $event->meetup,
 			'meetup_url' => $event->meetup_url,
-			'date' => $event->date_utc, // TODO: Create a JS parsable date, including the timezone data
+			'date' => $event->date_utc, // TODO: DB stores a local date, not UTC.
 			'location' => array(
 				'location' => $event->location,
-				// TODO: Split this into a new DB field
-				'country' => $event->country ?? end( array_filter( array_map( 'trim', explode( ',', $event->location ) ) ) ),
+				'country' => $event->country,
 				'latitude' => $event->latitude,
 				'longitude' => $event->longitude,
 			)
@@ -158,6 +183,65 @@ function get_events( $args = array() ) {
 
 //	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
 	return $events;	
+}
+
+/**
+ * Create a bounded latitude/longitude box of x KM around specific coordinates.
+ *
+ * @param float $lat            The latitude of the location.
+ * @param float $lon            The longitude of the location.
+ * @param int   $distance_in_km The distance of the bounded box, in KM.
+ * @return array of bounded box.
+ */
+function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
+	// Based on http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates
+
+	$angular_distance = $distance_in_km / 6371; // 6371 = radius of the earth in KM.
+	$lat = deg2rad( $lat );
+	$lon = deg2rad( $lon );
+
+	$earth_min_lat = -1.5707963267949; // = deg2rad(  -90 ) = -PI/2
+	$earth_max_lat =  1.5707963267949; // = deg2rad(   90 ) =  PI/2
+	$earth_min_lon = -3.1415926535898; // = deg2rad( -180 ) = -PI
+	$earth_max_lon =  3.1415926535898; // = deg2rad(  180 ) =  PI
+
+	$minimum_lat = $lat - $angular_distance;
+	$maximum_lat = $lat + $angular_distance;
+	$minimum_lon = $maximum_lon = 0;
+
+	// Ensure that we're not within a pole-area of the world, weirdness will ensure.
+	if ( $minimum_lat > $earth_min_lat && $maximum_lat < $earth_max_lat ) {
+
+		$lon_delta = asin( sin( $angular_distance ) / cos( $lat ) );
+
+		$minimum_lon = $lon - $lon_delta;
+		if ( $minimum_lon < $earth_min_lon ) {
+			$minimum_lon += 2 * pi();
+		}
+
+		$maximum_lon = $lon + $lon_delta;
+		if ( $maximum_lon > $earth_max_lon ) {
+			$maximum_lon -= 2 * pi();
+		}
+
+	} else {
+		// Use a much simpler range in polar regions.
+		$minimum_lat = max( $minimum_lat, $earth_min_lat );
+		$maximum_lat = min( $maximum_lat, $earth_max_lat );
+		$minimum_lon = $earth_min_lon;
+		$maximum_lon = $earth_max_lon;
+	}
+
+	return array(
+		'latitude' => array(
+			'min' => rad2deg( $minimum_lat ),
+			'max' => rad2deg( $maximum_lat )
+		),
+		'longitude' => array(
+			'min' => rad2deg( $minimum_lon ),
+			'max' => rad2deg( $maximum_lon )
+		)
+	);
 }
 
 /*
