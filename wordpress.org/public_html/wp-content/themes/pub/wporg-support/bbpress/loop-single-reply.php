@@ -32,11 +32,13 @@ if ( bbp_is_single_user_replies() ) : ?>
 
 		<?php if ( $title = get_user_option( 'title', bbp_get_reply_author_id() ) ) : ?>
 
-			<br /><p class="bbp-author-title"><?php echo esc_html( $title ); ?></p>
+			<p class="bbp-author-title"><?php echo esc_html( $title ); ?></p>
 
 		<?php endif; ?>
 
-		<br /><p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
+		<div class="bbp-reply-meta">
+
+		<p class="bbp-reply-post-date"><a href="<?php bbp_reply_url(); ?>" title="#<?php bbp_reply_id(); ?>" class="bbp-reply-permalink"><?php bbp_reply_post_date( bbp_get_reply_id(), true ); ?></a></p>
 
 		<?php if ( current_user_can( 'moderate', bbp_get_reply_topic_id() ) ) : ?>
 
@@ -49,6 +51,8 @@ if ( bbp_is_single_user_replies() ) : ?>
 		<?php endif; ?>
 
 		<?php do_action( 'bbp_theme_after_reply_author_details' ); ?>
+
+		</div>
 
 	</div><!-- .bbp-reply-author -->
 
