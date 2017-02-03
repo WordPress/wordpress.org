@@ -31,9 +31,9 @@ function get_events( $args = array() ) {
 	ksort( $args );
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
-	if ( $data = wp_cache_get( $cache_key, $cache_group ) ) {
+/*	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
 		return $data;
-	}
+	}*/
 
 	$wheres = array();
 	if ( !empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
@@ -92,7 +92,7 @@ function get_events( $args = array() ) {
 		);
 	}
 
-	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
+//	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
 	return $events;	
 }
 
