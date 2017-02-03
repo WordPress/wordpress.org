@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: Official WordPress Events
 Description: Retrieves data on official WordPress events
@@ -36,13 +37,12 @@ class Official_WordPress_Events {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts' ) );
-		add_shortcode( 'official_wordpress_events', array( $this, 'render_events' ) );
-
-		add_action( 'owpe_prime_events_cache', array( $this, 'prime_events_cache' ) );
+		add_action( 'wp_enqueue_scripts',           array( $this, 'enqueue_scripts'    ) );
+		add_action( 'owpe_prime_events_cache',      array( $this, 'prime_events_cache' ) );
+		add_shortcode( 'official_wordpress_events', array( $this, 'render_events'      ) );
 
 		if ( ! wp_next_scheduled( 'owpe_prime_events_cache' ) ) {
-			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache');
+			wp_schedule_event( time(), 'hourly', 'owpe_prime_events_cache' );
 		}
 	}
 
@@ -167,7 +167,7 @@ class Official_WordPress_Events {
 
 	/**
 	 * Fetch all upcoming official events from various external APIs
-	 * 
+	 *
 	 * @return array
 	 */
 	protected function fetch_upcoming_events() {
@@ -207,7 +207,7 @@ class Official_WordPress_Events {
 			case 1 :
 			default :
 				$request_params = array(
-					'type'   => 'wordcamp',
+					'type' => 'wordcamp',
 				);
 				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' );
 				break;
@@ -231,8 +231,8 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function get_wordcamp_events() {
-		$endpoint  = $this->get_wordcamp_events_endpoint( self::WORDCAMP_API_VERSION );
-		$response  = $this->remote_get( esc_url_raw( $endpoint ) );
+		$endpoint = $this->get_wordcamp_events_endpoint( self::WORDCAMP_API_VERSION );
+		$response = $this->remote_get( esc_url_raw( $endpoint ) );
 
 		switch ( self::WORDCAMP_API_VERSION ) {
 			case 1 :
@@ -318,9 +318,9 @@ class Official_WordPress_Events {
 		if ( $wordcamps ) {
 			foreach ( $wordcamps as $wordcamp ) {
 				$event = array(
-					'source_id' => $wordcamp->id,
-					'type'  => 'wordcamp',
-					'title' => $wordcamp->title->rendered,
+					'source_id'   => $wordcamp->id,
+					'type'        => 'wordcamp',
+					'title'       => $wordcamp->title->rendered,
 					'description' => $wordcamp->content->rendered,
 				);
 
@@ -336,7 +336,7 @@ class Official_WordPress_Events {
 							break;
 
 						case 'End Date (YYYY-mm-dd)':
-							$value = absint( $value );
+							$value                  = absint( $value );
 							$event['end_timestamp'] = $value;
 							break;
 
@@ -393,67 +393,68 @@ class Official_WordPress_Events {
 		}
 
 		$groups = array_chunk( $groups, 200, true );
-		foreach( $groups as $group_batch ) {
+
+		foreach ( $groups as $group_batch ) {
 			$request_url = sprintf(
 				'%s2/events?group_id=%s&time=0,3m&page=%d&key=%s',
 				self::MEETUP_API_BASE_URL,
-				implode( ',', $group_batch),
+				implode( ',', $group_batch ),
 				200,
 				MEETUP_API_KEY
 			);
 
-			while( '' !== $request_url ) {
-			$response = $this->remote_get( $request_url );
-			$body = json_decode( wp_remote_retrieve_body( $response ) );
+			while ( '' !== $request_url ) {
+				$response = $this->remote_get( $request_url );
+				$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
-			if ( ! empty ( $body->results ) ) {
-				$meetups = $body->results;
+				if ( ! empty ( $body->results ) ) {
+					$meetups = $body->results;
 
-				foreach ( $meetups as $meetup ) {
-					$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
+					foreach ( $meetups as $meetup ) {
+						$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
 
-					if ( isset( $meetup->venue ) ) {
-						$location = $this->format_meetup_venue_location( $meetup->venue );
-					} else {
-						$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
-						$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location->address_components );
-						$location          = sprintf(
-							'%s%s%s',
-							$location_parts['city'],
-							empty( $location_parts['state'] )        ?  '' : ', ' . $location_parts['state'],
-							empty( $location_parts['country_name'] ) ?  '' : ', ' . $location_parts['country_name']
-						);
+						if ( isset( $meetup->venue ) ) {
+							$location = $this->format_meetup_venue_location( $meetup->venue );
+						} else {
+							$geocoded_location = $this->reverse_geocode( $meetup->group->group_lat, $meetup->group->group_lon );
+							$location_parts    = $this->parse_reverse_geocode_address( $geocoded_location->address_components );
+							$location          = sprintf(
+								'%s%s%s',
+								$location_parts['city'],
+								empty( $location_parts['state'] )        ? '' : ', ' . $location_parts['state'],
+								empty( $location_parts['country_name'] ) ? '' : ', ' . $location_parts['country_name']
+							);
+						}
+
+						if ( ! empty( $meetup->venue->country ) ) {
+							$country_code = $meetup->venue->country;
+						} elseif ( ! empty( $location_parts['country_code'] ) ) {
+							$country_code = $location_parts['country_code'];
+						} else {
+							$country_code = '';
+						}
+
+						$events[] = new Official_WordPress_Event( array(
+							'type'            => 'meetup',
+							'source_id'       => $meetup->id,
+							'title'           => $meetup->name,
+							'url'             => $meetup->event_url,
+							'meetup_name'     => $meetup->group->name,
+							'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup->group->urlname ),
+							'description'     => $meetup->description,
+							'num_attendees'   => $meetup->yes_rsvp_count,
+							'start_timestamp' => $start_timestamp,
+							'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
+							'location'        => $location,
+							'country_code'    => $country_code,
+							'latitude'        => empty( $meetup->venue->lat ) ? $meetup->group->group_lat : $meetup->venue->lat,
+							'longitude'       => empty( $meetup->venue->lon ) ? $meetup->group->group_lon : $meetup->venue->lon,
+						) );
 					}
-
-					if ( ! empty( $meetup->venue->country ) ) {
-						$country_code = $meetup->venue->country;
-					} elseif ( ! empty( $location_parts['country_code'] ) ) {
-						$country_code = $location_parts['country_code'];
-					} else {
-						$country_code = '';
-					}
-
-					$events[] = new Official_WordPress_Event( array(
-						'type'            => 'meetup',
-						'source_id'       => $meetup->id,
-						'title'           => $meetup->name,
-						'url'             => $meetup->event_url,
-						'meetup_name'     => $meetup->group->name,
-						'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup->group->urlname ),
-						'description'     => $meetup->description,
-						'num_attendees'   => $meetup->yes_rsvp_count,
-						'start_timestamp' => $start_timestamp,
-						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
-						'location'        => $location,
-						'country_code'    => $country_code,
-						'latitude'        => empty( $meetup->venue->lat ) ? $meetup->group->group_lat : $meetup->venue->lat,
-						'longitude'       => empty( $meetup->venue->lon ) ? $meetup->group->group_lon : $meetup->venue->lon,
-					) );
 				}
-			}
 
-			$request_url = $body->meta->next;
-		}
+				$request_url = $body->meta->next;
+			}
 		}
 
 		return $events;
@@ -503,7 +504,11 @@ class Official_WordPress_Events {
 	 */
 	protected function reverse_geocode( $latitude, $longitude ) {
 		$address  = false;
-		$response = $this->remote_get( sprintf( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false', $latitude, $longitude ) );
+		$response = $this->remote_get( sprintf(
+			'https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s&sensor=false',
+			$latitude,
+			$longitude
+		) );
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
@@ -533,8 +538,10 @@ class Official_WordPress_Events {
 		foreach ( $address_components as $component ) {
 			if ( 'locality' == $component->types[0] ) {
 				$address['city'] = $component->short_name;
+
 			} elseif ( 'administrative_area_level_1' == $component->types[0] ) {
 				$address['state'] = $component->short_name;
+
 			} elseif ( 'country' == $component->types[0] ) {
 				$address['country_code'] = strtoupper( $component->short_name );
 				$address['country_name'] = $component->long_name;
@@ -581,44 +588,44 @@ class Official_WordPress_Events {
 		$response = $error = false;
 
 		if ( $url ) {
-				$args['timeout'] = 30;
-				$response = wp_remote_get( $url, $args );
+			$args['timeout'] = 30;
+			$response        = wp_remote_get( $url, $args );
 
-				if ( is_wp_error( $response ) ) {
-					$error_messages = implode( ', ', $response->get_error_messages() );
+			if ( is_wp_error( $response ) ) {
+				$error_messages = implode( ', ', $response->get_error_messages() );
 
-					if ( false === strpos( $error_messages, 'Operation timed out' ) ) {
-						$error = sprintf(
-							'Received WP_Error message: %s; Request was to %s; Arguments were: %s',
-							$error_messages,
-							$url,
-							print_r( $args, true )
-						);
-					}
-				} elseif ( 200 != $response['response']['code'] ) {
-					// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
-
+				if ( false === strpos( $error_messages, 'Operation timed out' ) ) {
 					$error = sprintf(
-						'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
-						$response['response']['code'],
-						substr( sanitize_text_field( $response['body'] ), 0, 500 ),
+						'Received WP_Error message: %s; Request was to %s; Arguments were: %s',
+						$error_messages,
 						$url,
 						print_r( $args, true )
 					);
-
-					$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response ); 
 				}
+			} elseif ( 200 != $response['response']['code'] ) {
+				// trigger_error() has a message limit of 1024 bytes, so we truncate $response['body'] to make sure that $body doesn't get truncated.
 
-				if ( $error ) {
-					$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
-					trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
+				$error = sprintf(
+					'Received HTTP code: %s and body: %s. Request was to: %s; Arguments were: %s',
+					$response['response']['code'],
+					substr( sanitize_text_field( $response['body'] ), 0, 500 ),
+					$url,
+					print_r( $args, true )
+				);
 
-					if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
-						wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
-					}
+				$response = new WP_Error( 'woe_invalid_http_response', 'Invalid HTTP response code', $response );
+			}
+
+			if ( $error ) {
+				$error = preg_replace( '/&key=[a-z0-9]+/i', '&key=[redacted]', $error );
+				trigger_error( sprintf( '%s error for %s: %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ), sanitize_text_field( $error ) ), E_USER_WARNING );
+
+				if ( $to = apply_filters( 'owe_error_email_addresses', array() ) ) {
+					wp_mail( $to, sprintf( '%s error for %s', __METHOD__, parse_url( site_url(), PHP_URL_HOST ) ), sanitize_text_field( $error ) );
 				}
+			}
 
-				$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
+			$this->maybe_pause( wp_remote_retrieve_headers( $response ) );
 		}
 
 		return $response;
