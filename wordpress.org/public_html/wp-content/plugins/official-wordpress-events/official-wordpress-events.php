@@ -12,8 +12,6 @@ class Official_WordPress_Events {
 	const WORDCAMP_API_VERSION  = 2;
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
-	const POSTS_PER_PAGE        = 50;
-
 
 	/*
 	 * @todo
@@ -21,18 +19,14 @@ class Official_WordPress_Events {
 	 * Database
 	 * ==============
 	 * Can/should probably remove calls to geocode API in favor of using meetup v2/group or some other endpoint that returns detailed location breakdown
-	 * Meetups only pulling 1 week instead of full month
-	 *      Look at meetup-stats.php and see if any differences are relevant, or if there's anything else that'd be helpful in general
+	 * Look at meetup-stats.php and see if any differences are relevant, or if there's anything else that'd be helpful in general
 	 * Check non-latin characters, accents etc to make sure stored properly in db
 	 * Add admin_notice to wordcamp post type to warn when coordinates missing. Also back-fill current ones that are missing.
-	 * PHP timeout @ 100 seconds - should be fixed by switch to pulling from db
 	 * Store wordcamp dates in UTC, and also store timezone? Would need to start collecting timezone for wordcamps and then back-fill old records
-	 * Maybe pull more than 1 month of meetups
 	 *
 	 *
 	 * Shortcode
 	 * ==============
-	 * Make meetups and wordcamps cut off on the same date, so it doesn't look like there aren't any meetups later in the year
 	 * Ability to feature a camp in a hero area
 	 * Add a "load more" button that retrieves more events via AJAX and updates the DOM. Have each click load the next month of events?
 	 */
@@ -214,10 +208,6 @@ class Official_WordPress_Events {
 			default :
 				$request_params = array(
 					'type'   => 'wordcamp',
-					'filter' => array(
-						'posts_per_page' => self::POSTS_PER_PAGE * .5,  // WordCamps happen much less frequently than meetups
-						// todo request camps that are in the next few months, ordered by start date ASC. requires https://github.com/WP-API/WP-API/issues/479 or customization on the wordcamp.org side
-					),
 				);
 				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' );
 				break;
@@ -404,18 +394,20 @@ class Official_WordPress_Events {
 
 		$groups = array_chunk( $groups, 200, true );
 		foreach( $groups as $group_batch ) {
-			$response = $this->remote_get( sprintf(
-				'%s2/events?group_id=%s&time=0,1m&page=%d&key=%s',
+			$request_url = sprintf(
+				'%s2/events?group_id=%s&time=0,3m&page=%d&key=%s',
 				self::MEETUP_API_BASE_URL,
 				implode( ',', $group_batch),
-				self::POSTS_PER_PAGE,
+				200,
 				MEETUP_API_KEY
-			) );
+			);
 
-			$meetups = json_decode( wp_remote_retrieve_body( $response ) );
+			while( '' !== $request_url ) {
+			$response = $this->remote_get( $request_url );
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-			if ( ! empty ( $meetups->results ) ) {
-				$meetups = $meetups->results;
+			if ( ! empty ( $body->results ) ) {
+				$meetups = $body->results;
 
 				foreach ( $meetups as $meetup ) {
 					$start_timestamp = ( $meetup->time / 1000 ) + ( $meetup->utc_offset / 1000 );    // convert to seconds
@@ -451,6 +443,9 @@ class Official_WordPress_Events {
 					) );
 				}
 			}
+
+			$request_url = $body->meta->next;
+		}
 		}
 
 		return $events;
@@ -522,6 +517,10 @@ class Official_WordPress_Events {
 	 */
 	protected function parse_reverse_geocode_address( $address_components ) {
 		$address = array();
+
+		if ( empty( $address_components ) ) {
+			return $address;
+		}
 
 		foreach ( $address_components as $component ) {
 			if ( 'locality' == $component->types[0] ) {
