@@ -20,9 +20,7 @@ class Official_WordPress_Events {
 	 *
 	 * Database
 	 * ==============
-	 * `location` field should have full state/county names, not abbreviations
-	 *      Can/should probably remove calls to geocode API in favor of using meetup v2/group or some other endpoint that returns detailed location breakdown
-	 * Once shortcode pulls from db, bump remote_get timeout limit to 30 to avoid premature timeouts
+	 * Can/should probably remove calls to geocode API in favor of using meetup v2/group or some other endpoint that returns detailed location breakdown
 	 * Meetups only pulling 1 week instead of full month
 	 *      Look at meetup-stats.php and see if any differences are relevant, or if there's anything else that'd be helpful in general
 	 * Check non-latin characters, accents etc to make sure stored properly in db
@@ -576,6 +574,7 @@ class Official_WordPress_Events {
 		$response = $error = false;
 
 		if ( $url ) {
+				$args['timeout'] = 30;
 				$response = wp_remote_get( $url, $args );
 
 				if ( is_wp_error( $response ) ) {
