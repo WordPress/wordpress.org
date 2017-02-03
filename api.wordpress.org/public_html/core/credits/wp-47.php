@@ -33,7 +33,7 @@ class WP_47_Credits extends WP_Credits {
 					'pento'          => array( 'Gary Pendergast',   'Core Developer' ),
 					'jeremyfelt'     => array( 'Jeremy Felt',       'Core Developer' ),
 					'joemcgill'      => array( 'Joe McGill',        'Core Developer' ),
-					'johnbillion'    => array( 'John Blackbourn',   'Core Developer', '0000ba6dd1b089e1746abbfe6281ee3b' ),
+					'johnbillion'    => array( 'John Blackbourn',   'Core Developer' ),
 					'mikeschroder'   => array( 'Mike Schroder',     'Core Developer' ),
 					'swissspidy'     => array( 'Pascal Birchler',   'Core Developer' ),
 					'rachelbaker'    => array( 'Rachel Baker' ,     'Core Developer' ),
