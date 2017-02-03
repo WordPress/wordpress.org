@@ -55,8 +55,6 @@ class Official_WordPress_Events {
 	public function prime_events_cache() {
 		global $wpdb;
 
-		return; // Temporarily disable to avoid PHP 7 syntax errors
-
 		$events = $this->fetch_upcoming_events();
 
 		foreach ( $events as $event ) {
@@ -427,6 +425,14 @@ class Official_WordPress_Events {
 						);
 					}
 
+					if ( ! empty( $meetup->venue->country ) ) {
+						$country_code = $meetup->venue->country;
+					} elseif ( ! empty( $location_parts['country_code'] ) ) {
+						$country_code = $location_parts['country_code'];
+					} else {
+						$country_code = '';
+					}
+
 					$events[] = new Official_WordPress_Event( array(
 						'type'            => 'meetup',
 						'source_id'       => $meetup->id,
@@ -439,9 +445,9 @@ class Official_WordPress_Events {
 						'start_timestamp' => $start_timestamp,
 						'end_timestamp'   => ( empty ( $meetup->duration ) ? $start_timestamp : $start_timestamp + ( $meetup->duration / 1000 ) ), // convert to seconds
 						'location'        => $location,
-						'country_code'    => strtoupper( $meetup->venue->country ?? $location_parts['country_code'] ?? '' ),
-						'latitude'        => $meetup->venue->lat ?? $meetup->group->group_lat,
-						'longitude'       => $meetup->venue->lon ?? $meetup->group->group_lon,
+						'country_code'    => $country_code,
+						'latitude'        => empty( $meetup->venue->lat ) ? $meetup->group->group_lat : $meetup->venue->lat,
+						'longitude'       => empty( $meetup->venue->lon ) ? $meetup->group->group_lon : $meetup->venue->lon,
 					) );
 				}
 			}
