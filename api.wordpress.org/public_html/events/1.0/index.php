@@ -24,16 +24,16 @@ if ( isset( $_GET['country'] ) ) {
 
 // If a precide location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
 if ( isset( $_POST['location_data'] ) ) {
-	$location_args['location_data'] = $_POST['location_data'];
+	$location_args = $_POST['location_data'];
 }
 
 // Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 if ( isset( $_REQUEST['location'] ) ) {
-	$location_args['location_data']['location_name'] = $_REQUEST['location'];
-	if ( isset( $_REQUEST['timezone'] ) && !isset( $location_args['location']['timezone'] ) )
-		$location_args['location_data']['timezone'] = $_REQUEST['timezone'];
-	if ( isset( $_REQUEST['locale'] ) && !isset( $location_args['location']['locale'] ) )
-		$location_args['location_data']['locale'] = $_REQUEST['locale'];
+	$location_args['location_name'] = $_REQUEST['location'];
+	if ( isset( $_REQUEST['timezone'] ) && !isset( $location_args['timezone'] ) )
+		$location_args['timezone'] = $_REQUEST['timezone'];
+	if ( isset( $_REQUEST['locale'] ) && !isset( $location_args['locale'] ) )
+		$location_args['locale'] = $_REQUEST['locale'];
 }
 
 $location = get_location( $location_args );
@@ -87,46 +87,36 @@ function get_location( $args = array() ) {
 		);
 	}
 
-	// TODO: Actually determine a location for this city.
-	// Support determining a users location from various user-specific data-points to provide a sane default location.
-	// This data is provided by a POST request and should only be made once per user (and upon location change).
-	if ( isset( $args['location_data'] ) ) {
-		// $args['location_data']['ip']
-		// $args['location_data']['timezone']
-		// $args['location_data']['locale']
-
-		$country_code = null;
-		if ( isset( $args['location_data']['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['location_data']['locale'], $match ) ) {
-			$country_code = $match[1];
-		}
-
-		// Location (City) name provided by the user:
-		if ( isset( $args['location_data']['location_name'] ) ) {
-			$guess = guess_location_from_geonames( $args['location_data']['location_name'], $args['location_data']['timezone'] ?? '', $country_code );
-			if ( $guess )
-				return array(
-					'description' => $guess->name,
-					'latitude' => $guess->latitude,
-					'longitude' => $guess->longitude,
-					'country' => $guess->country,
-				);
-		}
-
-		// IP:
-		if ( isset( $args['location_data']['ip'] ) ) {
-			$guess = guess_location_from_ip( $args['location_data']['ip'], $args['location_data']['timezone'] ?? '', $country_code );
-			if ( $guess ) {
-				return array(
-					'description' => $guess->ip_city,
-					'latitude' => $guess->ip_latitude,
-					'longitude' => $guess->ip_longitude,
-					'country' => $guess->country_short,
-				);
-			}
-		}
-				
+	$country_code = null;
+	if ( isset( $args['location_data']['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['location_data']['locale'], $match ) ) {
+		$country_code = $match[1];
 	}
 
+	// Location (City) name provided by the user:
+	if ( isset( $args['location_name'] ) ) {
+		$guess = guess_location_from_geonames( $args['location_name'], $args['timezone'] ?? '', $country_code );
+		if ( $guess )
+			return array(
+				'description' => $guess->name,
+				'latitude' => $guess->latitude,
+				'longitude' => $guess->longitude,
+				'country' => $guess->country,
+			);
+	}
+
+	// IP:
+	if ( isset( $args['ip'] ) ) {
+		$guess = guess_location_from_ip( $args['ip'], $args['timezone'] ?? '', $country_code );
+		if ( $guess ) {
+			return array(
+				'description' => $guess->ip_city,
+				'latitude' => $guess->ip_latitude,
+				'longitude' => $guess->ip_longitude,
+				'country' => $guess->country_short,
+				);
+		}
+	}
+				
 	if ( !empty( $args['latitude'] ) && ! empty( $args['longitude'] ) ) {
 		// TODO: Ensure that the data here is rounded to city-level and return the name of the city/region.
 		return array(
