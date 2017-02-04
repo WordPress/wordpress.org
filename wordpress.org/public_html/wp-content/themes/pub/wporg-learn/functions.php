@@ -32,7 +32,12 @@ function learn_remove_frontpage_name_from_title( $parts ) {
 		$parts['title'] = '';
 	}
 
-	return $parts;	
+	return $parts;
 }
 add_filter( 'document_title_parts', 'learn_remove_frontpage_name_from_title' );
 
+function learn_scripts() {
+	wp_enqueue_style( 'wporg-learn-fonts', '//fonts.googleapis.com/css?family=Roboto+Condensed:700', array(), 1, 'screen' );
+	wp_enqueue_style( 'buttons' );
+}
+add_action( 'wp_enqueue_scripts', 'learn_scripts', 9 );
