@@ -1,5 +1,7 @@
 /* global module:false, require:function, process:object */
 
+require( 'es6-promise' ).polyfill();
+
 module.exports = function( grunt ) {
 	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 

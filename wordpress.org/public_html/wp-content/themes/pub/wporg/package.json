@@ -21,6 +21,7 @@
     "grunt-rtlcss": "^2.0.1",
     "grunt-sass": "^1.2.0",
     "grunt-sass-globbing": "^1.5.1",
-    "pixrem": "^3.0.2"
+    "pixrem": "^3.0.2",
+    "es6-promise": "~4.0.5"
   }
 }
