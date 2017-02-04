@@ -54,8 +54,11 @@ if ( !empty( $location['country'] ) ) {
 
 $events = get_events( $event_args );
 
+header( 'Expires: ' . gmdate( 'r', time() + $ttl ) );
+header( 'Access-Control-Allow-Origin: *' );
 header( 'Content-Type: application/json; charset=UTF-8' );
 echo wp_json_encode( compact( 'location', 'events', 'ttl', 'debug' ) );
+
 
 function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	global $wpdb;
@@ -82,7 +85,6 @@ function get_location( $args = array() ) {
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
 		return array(
-			// TODO include a 'description' key of the country name?
 			'country'     => $args['country'],
 		);
 	}
@@ -117,7 +119,10 @@ function get_location( $args = array() ) {
 		}
 	}
 				
-	if ( !empty( $args['latitude'] ) && ! empty( $args['longitude'] ) ) {
+	if (
+		! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
+		! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+	) {
 		// TODO: Ensure that the data here is rounded to city-level and return the name of the city/region.
 		return array(
 			'description' => "{$args['latitude']}, {$args['longitude']}",
@@ -144,9 +149,9 @@ function get_events( $args = array() ) {
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
-/*	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
+	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
 		return $data;
-	}*/
+	}
 
 	$wheres = array();
 	if ( !empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
@@ -179,15 +184,16 @@ function get_events( $args = array() ) {
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( !empty( $args['country'] ) ) {
+	if ( !empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
 		$wheres[] = '`country` = %s';
-		// TODO: Maybe: Sanitize to 2-character country code?
 		$sql_values[] = $args['country'];
 	}
 
 	// Just show upcoming events
 	$wheres[] = '`date_utc` >= %s';
-	$sql_values[] = gmdate( 'Y-m-d' );
+	// Dates are in local-time not UTC, so the API output will contain events that have already happened in some parts of the world.
+	// TODO update this when the UTC dates are stored.
+	$sql_values[] = gmdate( 'Y-m-d', time() - ( 24 * 60 * 60 ) );
 
 	// Limit 
 	if ( isset( $args['number'] ) ) {
@@ -231,7 +237,7 @@ function get_events( $args = array() ) {
 		);
 	}
 
-//	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
+	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
 	return $events;	
 }
 
