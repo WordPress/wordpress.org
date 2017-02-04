@@ -27,6 +27,15 @@ if ( isset( $_POST['location_data'] ) ) {
 	$location_args['location_data'] = $_POST['location_data'];
 }
 
+// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
+if ( isset( $_REQUEST['location'] ) ) {
+	$location_args['location_data']['location_name'] = $_REQUEST['location'];
+	if ( isset( $_REQUEST['timezone'] ) && !isset( $location_args['location']['timezone'] ) )
+		$location_args['location_data']['timezone'] = $_REQUEST['timezone'];
+	if ( isset( $_REQUEST['locale'] ) && !isset( $location_args['location']['locale'] ) )
+		$location_args['location_data']['locale'] = $_REQUEST['locale'];
+}
+
 $location = get_location( $location_args );
 
 $event_args = array();
