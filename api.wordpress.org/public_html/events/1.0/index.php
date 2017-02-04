@@ -66,7 +66,10 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	// Look for a location that matches the name.
 	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM geoname WHERE MATCH(name,asciiname,alternatenames) AGAINST(%s) ORDER BY FIELD(%s, country) DESC, FIELD(%s, timezone) DESC, population DESC LIMIT 1", $location_name, $country, $timezone ) );
+
+	// Strip quotes from the search query and enclose it in double quotes, to force an exact literal search
+	$location_name = '"' . strtr( $location_name, [ '"' => '', "'" => '' ] ) . '"';
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM geoname WHERE MATCH(name,asciiname,alternatenames) AGAINST(%s IN BOOLEAN MODE) ORDER BY FIELD(%s, country) DESC, FIELD(%s, timezone) DESC, population DESC LIMIT 1", $location_name, $country, $timezone ) );
 	return $row;
 }
 
