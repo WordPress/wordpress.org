@@ -1,0 +1,126 @@
+.page-template-get {
+	.site-header {
+		padding: ms(4) ms(1);
+		text-align: center;
+	}
+
+	.site-title {
+		display: inherit;
+		font-size: ms( 12 );
+		margin: 2rem 0 1rem;
+	}
+
+	section {
+		padding: ms(10) ms(4);
+	}
+
+	section.download {
+		text-align: center;
+
+		@media (min-width: $ms-breakpoint) {
+			.container {
+				text-align: initial;
+
+				aside,
+				article {
+					display: inline-block;
+					vertical-align: top;
+				}
+
+				aside {
+					width: 30%;
+				}
+				article {
+					width: 65%;
+				}
+				aside + article,
+				article + aside {
+					margin-left: 5%;
+				}
+			}
+		}
+	}
+
+	section.hosting {
+		text-align: center;
+
+		.three-up {
+			@extend .clear;
+			text-align: initial;
+
+			> div {
+				margin-top: 3rem;
+
+				.logo__bluehost, .logo__getlisted, .logo__wpcom {
+					height: 35px;
+				}
+			}
+
+			@media (min-width: $ms-breakpoint) {
+				> div {
+					float: left;
+					font-size: ms(-2);
+					margin-right: 5%;
+					width: 30%;
+
+					&:last-child {
+						margin-right: 0;
+					}
+				}
+			}
+		}
+	}
+
+	section.apps-mobile {
+		text-align: center;
+
+		.web-stores { //mobile section
+			@extend .clear;
+			margin: 2rem auto 0;
+			width: 100%;
+
+
+			a {
+				display: inline-block;
+				margin: 10px;
+				width: 150px;
+			}
+
+			@media (min-width: $ms-breakpoint) {
+				margin: 4rem auto 0;
+			}
+		}
+		.ios .button-android {
+			display: none;
+		}
+		.android .button-ios {
+			display: none;
+		}
+	}
+
+	section + section {
+		border-top: 2px solid #eee;
+
+	}
+
+	.call-to-action {
+		display: block;
+		font-size: ms(-1);
+		margin: 2rem 0 2rem;
+
+		@media (min-width: $ms-breakpoint) {
+			font-size: ms(-2);
+			margin: 4rem 0 2rem;
+		}
+
+	}
+
+	.dashicons {
+		color: #cbcdce;
+		display: block;
+		font-size: 4rem;
+		height: auto;
+		margin: 0 auto -1rem;
+		width: auto;
+	}
+}
