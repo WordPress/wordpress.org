@@ -39,26 +39,32 @@ if ( isset( $_REQUEST['ip'] ) && !isset( $location_args['ip'] ) )
 
 $location = get_location( $location_args );
 
-$event_args = array();
-if ( isset( $_REQUEST['number'] ) ) {
-	$event_args['number'] = $_REQUEST['number'];
-}
-if ( !empty( $location['latitude'] ) ) {
-	$event_args['nearby'] = array(
-		'latitude'  => $location['latitude'],
-		'longitude' => $location['longitude'],
-	);
-}
-if ( !empty( $location['country'] ) ) {
-	$event_args['country'] = $location['country'];
-}
+if ( false === $location ) {
+	// No location was determined for the request. Bail with an error.
+	$events = array();
+	$error = 'no_location_available';
+} else {
+	$event_args = array();
+	if ( isset( $_REQUEST['number'] ) ) {
+		$event_args['number'] = $_REQUEST['number'];
+	}
+	if ( !empty( $location['latitude'] ) ) {
+		$event_args['nearby'] = array(
+			'latitude'  => $location['latitude'],
+			'longitude' => $location['longitude'],
+		);
+	}
+	if ( !empty( $location['country'] ) ) {
+		$event_args['country'] = $location['country'];
+	}
 
-$events = get_events( $event_args );
+	$events = get_events( $event_args );
+}
 
 header( 'Expires: ' . gmdate( 'r', time() + $ttl ) );
 header( 'Access-Control-Allow-Origin: *' );
 header( 'Content-Type: application/json; charset=UTF-8' );
-echo wp_json_encode( compact( 'location', 'events', 'ttl', 'debug' ) );
+echo wp_json_encode( compact( 'error', 'location', 'events', 'ttl' ) );
 
 
 function guess_location_from_geonames( $location_name, $timezone, $country ) {
@@ -101,13 +107,14 @@ function get_location( $args = array() ) {
 	// Location (City) name provided by the user:
 	if ( isset( $args['location_name'] ) ) {
 		$guess = guess_location_from_geonames( $args['location_name'], $args['timezone'] ?? '', $country_code );
-		if ( $guess )
+		if ( $guess ) {
 			return array(
 				'description' => $guess->name,
 				'latitude' => $guess->latitude,
 				'longitude' => $guess->longitude,
 				'country' => $guess->country,
 			);
+		}
 	}
 
 	// IP:
@@ -119,7 +126,7 @@ function get_location( $args = array() ) {
 				'latitude' => $guess->ip_latitude,
 				'longitude' => $guess->ip_longitude,
 				'country' => $guess->country_short,
-				);
+			);
 		}
 	}
 				
@@ -135,11 +142,13 @@ function get_location( $args = array() ) {
 		);
 	}
 
-	return array(
-		'description' => 'Global',
-		'latitude'  => 0,
-		'longitude' => 0,
-	);
+	// If any of these are specified, and no localitity was guessed based on the above checks, bail with no location.
+	if ( isset( $args['location_name'] ) || isset( $args['ip'] ) || ! empty( $args['latitude'] ) || ! empty( $args['longitude'] ) ) {
+		return false;
+	}
+
+	// No specific location details.
+	return array();
 }
 
 function get_events( $args = array() ) {
