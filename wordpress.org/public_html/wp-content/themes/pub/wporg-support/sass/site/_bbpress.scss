@@ -138,7 +138,15 @@ section {
 		}
 
 		p.bbp-topic-meta a {
-			@extend a;
+			/* Override bb-base/style.css */
+			color: $color__link;
+
+			&:hover,
+			&:focus,
+			&:active {
+				/* Override bb-base/style.css */
+				text-decoration: underline;
+			}
 		}
 
 		.wporg-bbp-user-flag.flagged a {
@@ -272,10 +280,6 @@ section {
 		margin-top: 0;
 	}
 
-	fieldset.bbp-form .button.submit {
-		@extend .button-primary
-	}
-
 	.bbp-submit-wrapper {
 		margin-top: -35px;
 
@@ -283,6 +287,21 @@ section {
 			margin-top: 0;
 		}
 	}
+}
+
+fieldset.bbp-form .button.submit {
+	@extend .button-primary;
+}
+
+.wporg-bbp-term-subscription > a,
+.reviews-submit-link > .btn,
+.subscription-toggle,
+.favorite-toggle {
+	@extend .button;
+}
+
+.wporg-bbp-term-subscription {
+	margin-bottom: 1rem;
 }
 
 .viewmore {
@@ -476,14 +495,6 @@ select {
 		}
 	}
 
-	.wporg-bbp-term-subscription {
-		margin-bottom: 1rem;
-		
-		a {
-			@extend .button;
-		}
-	}
-
 	> .entry-content {
 		max-width: 48rem;
 
@@ -529,11 +540,6 @@ div.bbp-template-notice {
 	.topic-info li.topic-subscribe:before,
 	.topic-info li.topic-favorite:before {
 		content: "";
-	}
-
-	.subscription-toggle,
-	.favorite-toggle {
-		@extend .button;
 	}
 
 	.feed {
@@ -859,10 +865,6 @@ div.bbp-breadcrumb {
 
 			.reviews-submit-link {
 				margin-top: ms(0);
-
-				.btn {
-					@extend .button;
-				}
 			}
 		}
 
