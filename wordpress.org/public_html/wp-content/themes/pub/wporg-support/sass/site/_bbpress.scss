@@ -482,8 +482,13 @@ select {
 --------------------------------------------------------------*/
 .single-forum main, 
 .single-topic main, 
+.single-reply main, 
+.forum-archive main,
 .topic-tag main,
-.bbp-view main {
+.topic-tag-edit main,
+.reply-edit main,
+.bbp-view main,
+.bbp-search main {
 	@extend .clear;
 
 	.entry-content,

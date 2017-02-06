@@ -1880,14 +1880,24 @@ p a:hover {
 --------------------------------------------------------------*/
 .clear:before, .three-up:before, .single-forum main:before,
 .single-topic main:before,
+.single-reply main:before,
+.forum-archive main:before,
 .topic-tag main:before,
-.bbp-view main:before, .bbp-view .review-ratings:before,
+.topic-tag-edit main:before,
+.reply-edit main:before,
+.bbp-view main:before,
+.bbp-search main:before, .bbp-view .review-ratings:before,
 .clear:after,
 .three-up:after,
 .single-forum main:after,
 .single-topic main:after,
+.single-reply main:after,
+.forum-archive main:after,
 .topic-tag main:after,
+.topic-tag-edit main:after,
+.reply-edit main:after,
 .bbp-view main:after,
+.bbp-search main:after,
 .bbp-view .review-ratings:after,
 .entry-content:before,
 .entry-content:after,
@@ -1906,8 +1916,13 @@ p a:hover {
 
 .clear:after, .three-up:after, .single-forum main:after,
 .single-topic main:after,
+.single-reply main:after,
+.forum-archive main:after,
 .topic-tag main:after,
-.bbp-view main:after, .bbp-view .review-ratings:after,
+.topic-tag-edit main:after,
+.reply-edit main:after,
+.bbp-view main:after,
+.bbp-search main:after, .bbp-view .review-ratings:after,
 .entry-content:after,
 .comment-content:after,
 .site-header:after,
@@ -2881,10 +2896,20 @@ select {
 .single-forum main .entry-meta,
 .single-topic main .entry-content,
 .single-topic main .entry-meta,
+.single-reply main .entry-content,
+.single-reply main .entry-meta,
+.forum-archive main .entry-content,
+.forum-archive main .entry-meta,
 .topic-tag main .entry-content,
 .topic-tag main .entry-meta,
+.topic-tag-edit main .entry-content,
+.topic-tag-edit main .entry-meta,
+.reply-edit main .entry-content,
+.reply-edit main .entry-meta,
 .bbp-view main .entry-content,
-.bbp-view main .entry-meta {
+.bbp-view main .entry-meta,
+.bbp-search main .entry-content,
+.bbp-search main .entry-meta {
 	padding: 0;
 }
 
@@ -2893,26 +2918,46 @@ select {
 	.single-forum main .entry-meta,
 	.single-topic main .entry-content,
 	.single-topic main .entry-meta,
+	.single-reply main .entry-content,
+	.single-reply main .entry-meta,
+	.forum-archive main .entry-content,
+	.forum-archive main .entry-meta,
 	.topic-tag main .entry-content,
 	.topic-tag main .entry-meta,
+	.topic-tag-edit main .entry-content,
+	.topic-tag-edit main .entry-meta,
+	.reply-edit main .entry-content,
+	.reply-edit main .entry-meta,
 	.bbp-view main .entry-content,
-	.bbp-view main .entry-meta {
+	.bbp-view main .entry-meta,
+	.bbp-search main .entry-content,
+	.bbp-search main .entry-meta {
 		padding: 0 1.5625rem;
 	}
 }
 
 .single-forum main > .entry-content,
 .single-topic main > .entry-content,
+.single-reply main > .entry-content,
+.forum-archive main > .entry-content,
 .topic-tag main > .entry-content,
-.bbp-view main > .entry-content {
+.topic-tag-edit main > .entry-content,
+.reply-edit main > .entry-content,
+.bbp-view main > .entry-content,
+.bbp-search main > .entry-content {
 	max-width: 48rem;
 }
 
 @media screen and (min-width: 48em) {
 	.single-forum main > .entry-content,
 	.single-topic main > .entry-content,
+	.single-reply main > .entry-content,
+	.forum-archive main > .entry-content,
 	.topic-tag main > .entry-content,
-	.bbp-view main > .entry-content {
+	.topic-tag-edit main > .entry-content,
+	.reply-edit main > .entry-content,
+	.bbp-view main > .entry-content,
+	.bbp-search main > .entry-content {
 		float: right;
 		padding: 0;
 		width: 65%;
@@ -2924,17 +2969,32 @@ select {
 	.single-forum main .entry-meta,
 	.single-topic main .entry-content,
 	.single-topic main .entry-meta,
+	.single-reply main .entry-content,
+	.single-reply main .entry-meta,
+	.forum-archive main .entry-content,
+	.forum-archive main .entry-meta,
 	.topic-tag main .entry-content,
 	.topic-tag main .entry-meta,
+	.topic-tag-edit main .entry-content,
+	.topic-tag-edit main .entry-meta,
+	.reply-edit main .entry-content,
+	.reply-edit main .entry-meta,
 	.bbp-view main .entry-content,
-	.bbp-view main .entry-meta {
+	.bbp-view main .entry-meta,
+	.bbp-search main .entry-content,
+	.bbp-search main .entry-meta {
 		padding-right: 0;
 		padding-left: 0;
 	}
 	.single-forum main .entry-meta,
 	.single-topic main .entry-meta,
+	.single-reply main .entry-meta,
+	.forum-archive main .entry-meta,
 	.topic-tag main .entry-meta,
-	.bbp-view main .entry-meta {
+	.topic-tag-edit main .entry-meta,
+	.reply-edit main .entry-meta,
+	.bbp-view main .entry-meta,
+	.bbp-search main .entry-meta {
 		float: left;
 		width: 30%;
 	}
