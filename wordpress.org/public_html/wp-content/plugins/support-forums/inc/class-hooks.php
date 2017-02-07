@@ -29,6 +29,9 @@ class Hooks {
 
 		// Fix login url links
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
+
+		// Limit no-replies view to certain number of days.
+		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 	}
 
 	/**
@@ -146,6 +149,28 @@ class Hooks {
 			$login_url = $constructed_url;
 		}
 		return $login_url;
+	}
+
+	/**
+	 * Limits No Replies view to 21 days by default.
+	 *
+	 * @param array $args Array of query args for the view.
+	 * @return array
+	 */
+	public function limit_no_replies_view( $args ) {
+		$days = 21;
+
+		if ( isset( $_GET['days'] ) ) {
+			$days = (int) $_GET['days'];
+		}
+
+		$args['date_query'] = array(
+			array(
+				'after'  => sprintf( '%s days ago', $days ),
+			),
+		);
+
+		return $args;
 	}
 
 }
