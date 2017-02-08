@@ -2534,6 +2534,7 @@ section {
 	background: #fff359;
 }
 
+.bbpress #bbpress-forums .status-archived div.bbp-template-notice,
 .bbpress #bbpress-forums .status-spam div.bbp-template-notice {
 	background: #f49797;
 }

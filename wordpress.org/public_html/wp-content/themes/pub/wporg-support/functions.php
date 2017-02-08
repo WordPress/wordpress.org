@@ -235,7 +235,7 @@ function wporg_support_add_moderation_notice() {
 	$is_moderator    = current_user_can( 'moderate' );
 	$is_user_blocked = ! current_user_can( 'spectate' );
 
-	if ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
+	if ( in_array( $post_status, array( 'archived', 'pending', 'spam' ) ) ) :
 		$notice_class = $notice = '';
 
 		if ( $is_moderator ) {
@@ -250,6 +250,8 @@ function wporg_support_add_moderation_notice() {
 				} else {
 					$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
 				}
+			} elseif ( 'archived' === $post_status ) {
+				$notice = __( 'This post is currently archived.', 'wporg-forums' );
 			} else {
 				$notice = __( 'This post is currently pending.', 'wporg-forums' );
 			}
