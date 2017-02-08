@@ -462,14 +462,22 @@ class Support_Compat {
 			$url .= 'reviews';
 		}
 
-		$link = sprintf(
+		// Prefix link to plugin/theme support or review forum with context.
+		if ( 'plugin' === $type ) {
+			/* translators: %s: link to plugin support or review forum */
+			$parent_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+		} else {
+			/* translators: %s: link to theme support or review forum */
+			$parent_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+		}
+		$link = sprintf( $parent_breadcrumb, sprintf(
 			'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
 			esc_url( $url ),
 			esc_html( $obj->post_title )
-		);
+		) );
 
 		// Insert link before topic title.
-		array_splice( $r, 2, 0, $link );
+		array_splice( $r, 1, 1, $link );
 
 		return $r;
 	}

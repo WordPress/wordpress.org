@@ -446,14 +446,25 @@ abstract class Directory_Compat {
 			return $r;
 		}
 
-		$r[1] = '<a href="' . esc_url( bbp_get_forum_permalink( $this->forum_id() ) ) . '" class="bbp-breadcrumb-forum">' . esc_html( bbp_get_forum_title( $this->forum_id() ) ) . '</a>';
-		$r[2] = esc_html( $this->title() );
+		$r[1] = esc_html( $this->title() );
 		if ( in_array( $view, array( 'reviews', 'active' ) ) ) {
-			$r[2] = '<a href="' . esc_url( bbp_get_view_url( $this->compat() ) ) . '" class="bbp-breadcrumb-forum">' . esc_html( $this->title() ) . '</a>';
-			if ( 'reviews' == $view ) {
-				$r[3] = __( 'Reviews', 'wporg-forums' );
+			// Prefix link to plugin/theme support or review forum with context.
+			if ( 'plugin' === $this->compat() ) {
+				/* translators: %s: link to plugin support or review forum */
+				$parent_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
 			} else {
-				$r[3] = __( 'Active Topics', 'wporg-forums' );
+				/* translators: %s: link to theme support or review forum */
+				$parent_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+			}
+			$r[1] = sprintf( $parent_breadcrumb, sprintf(
+				'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
+				esc_url( bbp_get_view_url( $this->compat() ) ),
+				esc_html( $this->title() )
+			) );
+			if ( 'reviews' == $view ) {
+				$r[2] = __( 'Reviews', 'wporg-forums' );
+			} else {
+				$r[2] = __( 'Active Topics', 'wporg-forums' );
 			}
 		}
 		return $r;
