@@ -9,11 +9,11 @@
 
 ?>
 
+<?php bbp_breadcrumb(); ?>
+
 <div id="bbpress-forums">
 
 	<?php do_action( 'wporg_compat_before_single_view' ); ?>
-
-	<?php bbp_breadcrumb(); ?>
 
 	<?php bbp_set_query_name( bbp_get_view_rewrite_id() ); ?>
 
