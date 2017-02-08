@@ -158,6 +158,7 @@
 						<li><a href="//themes.trac.wordpress.org/log/<?php echo $theme->slug; ?>/" rel="nofollow"><?php _e( 'Development Log', 'wporg-themes' ); ?></a></li>
 						<li><a href="//themes.svn.wordpress.org/<?php echo $theme->slug; ?>/" rel="nofollow"><?php _e( 'Subversion Repository', 'wporg-themes' ); ?></a></li>
 						<li><a href="//themes.trac.wordpress.org/browser/<?php echo $theme->slug; ?>/" rel="nofollow"><?php _e( 'Browse in Trac', 'wporg-themes' ); ?></a></li>
+						<li><a href="//themes.trac.wordpress.org/query?keywords=~theme-<?php echo $theme->slug; ?>" rel="nofollow"><?php _e( 'Trac Tickets', 'wporg-themes' ); ?></a></li>
 					</ul>
 				</div><!-- .theme-devs -->
 			</div>
