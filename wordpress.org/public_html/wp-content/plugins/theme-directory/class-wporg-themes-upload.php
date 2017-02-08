@@ -551,6 +551,8 @@ class WPORG_Themes_Upload {
 Theme URL - {$this->theme->display( 'ThemeURI' )}
 Author URL - {$this->theme->display( 'AuthorURI' )}
 
+Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$this->theme->display( 'Version' )}
+
 SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
 ZIP - https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1
 {$this->trac_ticket->parent_link}
