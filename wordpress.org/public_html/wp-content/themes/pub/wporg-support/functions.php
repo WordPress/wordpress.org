@@ -295,6 +295,31 @@ function wporg_support_change_super_sticky_text( $links ) {
 }
 add_filter( 'bbp_topic_admin_links', 'wporg_support_change_super_sticky_text' );
 
+/**
+ * Correct reply URLs for pending posts.
+ *
+ * bbPress appends '/edit/' even to ugly permalinks, which pending posts will
+ * always have.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/2478
+ * @see https://bbpress.trac.wordpress.org/ticket/3054
+ *
+ * @param string $url     URL to edit the post.
+ * @param int    $post_id Post ID.
+ * @return string
+ */
+function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
+	if ( false !== strpos( $url, '?' ) && false !== strpos( $url, '/edit/' ) ) {
+		$url = str_replace( '/edit/', '', $url );
+		$url = add_query_arg( 'edit', '1', $url );
+	}
+
+	return $url;
+}
+add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
+add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
+
+
 /** bb Base *******************************************************************/
 
 function bb_base_search_form() {
