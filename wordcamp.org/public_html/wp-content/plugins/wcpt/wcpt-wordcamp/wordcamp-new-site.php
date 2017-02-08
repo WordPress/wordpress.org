@@ -336,6 +336,9 @@ class WordCamp_New_Site {
 
 		switch_to_blog( $this->new_site_id );
 
+		// Attempt to create the proper upload directories in the context of the new site before post stubs happen
+		wp_upload_dir( null, true, true );
+
 		$lead_organizer = $this->get_user_or_current_user( $meta['WordPress.org Username'][0] );
 
 		switch_theme( 'twentythirteen' );
