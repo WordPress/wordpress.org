@@ -234,28 +234,31 @@ function wporg_support_add_moderation_notice() {
 	$post_status     = get_post_status();
 	$is_moderator    = current_user_can( 'moderate' );
 	$is_user_blocked = ! current_user_can( 'spectate' );
+	$notice_class    = '';
+	$notice          = '';
 
-	if ( in_array( $post_status, array( 'archived', 'pending', 'spam' ) ) ) :
-		$notice_class = $notice = '';
+	if ( $is_moderator && in_array( $post_status, array( 'archived', 'pending', 'spam' ) ) ) :
 
-		if ( $is_moderator ) {
-			if ( 'spam' === $post_status ) {
-				$notice_class = 'warning';
+		if ( 'spam' === $post_status ) {
+			$notice_class = 'warning';
 
-				$reporter = get_post_meta( get_the_ID(), '_bbp_akismet_user', true );
+			$reporter = get_post_meta( get_the_ID(), '_bbp_akismet_user', true );
 
-				if ( $reporter ) {
-					/* translators: %s: reporter's username */
-					$notice = sprintf( __( 'This post has been flagged as spam by %s.', 'wporg-forums' ), $reporter );
-				} else {
-					$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
-				}
-			} elseif ( 'archived' === $post_status ) {
-				$notice = __( 'This post is currently archived.', 'wporg-forums' );
+			if ( $reporter ) {
+				/* translators: %s: reporter's username */
+				$notice = sprintf( __( 'This post has been flagged as spam by %s.', 'wporg-forums' ), $reporter );
 			} else {
-				$notice = __( 'This post is currently pending.', 'wporg-forums' );
+				$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
 			}
-		} elseif ( $is_user_blocked ) {
+		} elseif ( 'archived' === $post_status ) {
+			$notice = __( 'This post is currently archived.', 'wporg-forums' );
+		} else {
+			$notice = __( 'This post is currently pending.', 'wporg-forums' );
+		}
+
+	elseif ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
+
+		if ( $is_user_blocked ) {
 			// Blocked users get a generic message with no call to action or moderation timeframe.
 			$notice = __( 'This post has been held for moderation by our automated system.', 'wporg-forums' );
 		} elseif ( $hours_passed > 96 ) {
@@ -273,14 +276,15 @@ function wporg_support_add_moderation_notice() {
 			);
 		}
 
-		if ( $notice ) :
-			printf(
-				'<div class="bbp-template-notice %s"><p>%s</p></div>',
-				esc_attr( $notice_class ),
-				$notice
-			);
-		endif;
 	endif;
+
+	if ( $notice ) {
+		printf(
+			'<div class="bbp-template-notice %s"><p>%s</p></div>',
+			esc_attr( $notice_class ),
+			$notice
+		);
+	}
 }
 add_action( 'bbp_theme_before_topic_content', 'wporg_support_add_moderation_notice' );
 add_action( 'bbp_theme_before_reply_content', 'wporg_support_add_moderation_notice' );
