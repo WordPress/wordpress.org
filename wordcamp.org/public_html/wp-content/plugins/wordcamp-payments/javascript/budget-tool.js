@@ -99,13 +99,15 @@ window.wcb = window.wcb || {models:{}, input:[]};
         },
 
         render: function() {
-            var data = {
-                'income': 0,
-                'expenses': 0,
-                'variance': 0,
-                'variance_raw': 0,
-                'per_person': 0
-            };
+	        var attendees = wcb.table.collection.findWhere({type: 'meta', name: 'attendees'}),
+	            days      = wcb.table.collection.findWhere({type: 'meta', name: 'days'}),
+                data = {
+                    'income': 0,
+                    'expenses': 0,
+                    'variance': 0,
+                    'variance_raw': 0,
+                    'per_person': 0
+                };
 
             _.each(wcb.table.collection.where({type: 'income'}), function(item) {
                 data['income'] += item.getRealAmount();
@@ -117,8 +119,7 @@ window.wcb = window.wcb || {models:{}, input:[]};
 
             data['variance'] = data['income'] - data['expenses'];
             data['variance_raw'] = data['variance'];
-            var attendees = wcb.table.collection.findWhere({type: 'meta', name: 'attendees'});
-            data['per_person'] = attendees ? data['expenses'] / attendees.get('value') : 0;
+            data['per_person'] = (attendees && days) ? data['expenses'] / attendees.get('value') / days.get('value'): 0;
 
             data = _.mapObject(data, function(v, k) {
                 if (k == 'variance_raw')
