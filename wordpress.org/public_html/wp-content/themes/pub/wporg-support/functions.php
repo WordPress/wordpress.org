@@ -487,7 +487,7 @@ function bb_base_single_topic_description() {
 		<li class="wp-version"><?php echo esc_html( $wp_version ); ?></li>
 	<?php endif; ?>
 	<?php if ( function_exists( 'WordPressdotorg\Forums\Topic_Resolution\get_topic_resolution_form' ) ) : ?>
-		<?php if ( WordPressdotorg\Forums\Topic_Resolution\Plugin::get_instance()->is_enabled_on_forum() ) : ?>
+		<?php if ( WordPressdotorg\Forums\Topic_Resolution\Plugin::get_instance()->is_enabled_on_forum() && ( bbp_is_single_topic() || bbp_is_topic_edit() ) ) : ?>
 			<li class="topic-resolved"><?php WordPressdotorg\Forums\Topic_Resolution\get_topic_resolution_form( $topic_id ); ?></li>
 		<?php endif; ?>
 	<?php endif; ?>
