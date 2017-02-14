@@ -248,6 +248,7 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		$this->assertObjectHasAttribute( 'rating', $plugin_info, 'Rating exists' );
 		$this->assertObjectHasAttribute( 'ratings', $plugin_info, 'Ratings exists' );
 		$this->assertAttributeInternalType( 'array', 'ratings', $plugin_info, 'Ratings should be an array' );
+		$this->assertEquals( array( 5, 4, 3, 2, 1 ), array_keys( $plugin_info->ratings ), 'Ratings should be ordered from 5 to 1' );
 		$this->assertArrayHasKey( '1', $plugin_info->ratings, 'Rating should have an attribute of 1' );
 		$this->assertArrayHasKey( '2', $plugin_info->ratings, 'Rating should have an attribute of 2' );
 		$this->assertArrayHasKey( '3', $plugin_info->ratings, 'Rating should have an attribute of 3' );

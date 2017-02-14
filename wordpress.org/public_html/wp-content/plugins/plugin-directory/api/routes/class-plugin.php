@@ -102,6 +102,8 @@ class Plugin extends Base {
 		$result['compatibility'] = array();
 		$result['rating'] = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
 		$result['ratings'] = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
+		krsort( $result['ratings'] );
+
 		$result['num_ratings'] = array_sum( $result['ratings'] );
 		$result['support_threads'] = intval( get_post_meta( $post_id, 'support_threads', true ) );
 		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
