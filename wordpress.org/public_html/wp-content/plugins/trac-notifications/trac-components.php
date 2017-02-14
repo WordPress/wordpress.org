@@ -317,7 +317,7 @@ jQuery( document ).ready( function( $ ) {
 			wp_reset_postdata();
 		}
 
-		switch_to_blog( 34 ); // Blog ID of make/flow
+		switch_to_blog( 34 ); // Blog ID of make/test
 		$flow_posts = new WP_Query( array(
 			'post_type' => 'post',
 			'post_status' => 'publish',
@@ -325,7 +325,7 @@ jQuery( document ).ready( function( $ ) {
 			'tag_slug__in' => $post->post_name
 		) );
 		if ( $flow_posts->have_posts() ) {
-			echo "<h3>Recent posts on the make/flow blog</h3>\n<ul>";
+			echo "<h3>Recent posts on the make/test blog</h3>\n<ul>";
 			while ( $flow_posts->have_posts() ) {
 				$flow_posts->the_post();
 				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
