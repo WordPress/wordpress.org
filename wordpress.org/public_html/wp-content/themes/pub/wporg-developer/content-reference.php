@@ -20,10 +20,11 @@
 	// If the Handbook TOC is available, use it.
 	if ( class_exists( 'WPorg_Handbook_TOC' ) ) :
 		$TOC = new \WPorg_Handbook_TOC( get_parsed_post_types(), array(
-			'header_text' => __( 'Table of Contents', 'wporg' )
+			'header_text' => __( 'Contents', 'wporg' )
 		) );
 
-		$content = $TOC->add_toc( $content );
+		$content = '<div class="content-toc">' . $TOC->add_toc( $content ) . '</div>';
+
 	endif;
 	?>
 

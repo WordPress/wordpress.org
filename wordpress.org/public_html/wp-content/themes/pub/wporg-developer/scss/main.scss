@@ -1131,13 +1131,21 @@
 			margin-top: 30px;
 		}
 		.table-of-contents {
-			width: 300px;
+			border: none;
+			width: 260px;
+			margin-left: 30px;
+
+			h2 {
+				padding: 3px 0;
+			}
 
 			& > ul {
 				margin-bottom: 0;
 			}
 		}
 		ul.items {
+			margin: 1em 20px !important;
+
 			li {
 				padding-bottom: 0px !important;
 			}
@@ -1145,6 +1153,8 @@
 				padding-bottom: 8px !important;
 			}
 			a {
+				color: #21759b !important;
+
 				&:hover {
 					color: #d54e21 !important;
 				}

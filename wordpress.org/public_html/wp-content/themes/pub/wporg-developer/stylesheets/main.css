@@ -1544,11 +1544,21 @@ input {
 }
 
 .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
-  width: 300px;
+  border: none;
+  width: 260px;
+  margin-left: 30px;
+}
+
+.devhub-wrap .wp-parser-class .table-of-contents h2, .devhub-wrap .wp-parser-function .table-of-contents h2, .devhub-wrap .wp-parser-hook .table-of-contents h2, .devhub-wrap .wp-parser-method .table-of-contents h2 {
+  padding: 3px 0;
 }
 
 .devhub-wrap .wp-parser-class .table-of-contents > ul, .devhub-wrap .wp-parser-function .table-of-contents > ul, .devhub-wrap .wp-parser-hook .table-of-contents > ul, .devhub-wrap .wp-parser-method .table-of-contents > ul {
   margin-bottom: 0;
+}
+
+.devhub-wrap .wp-parser-class ul.items, .devhub-wrap .wp-parser-function ul.items, .devhub-wrap .wp-parser-hook ul.items, .devhub-wrap .wp-parser-method ul.items {
+  margin: 1em 20px !important;
 }
 
 .devhub-wrap .wp-parser-class ul.items li, .devhub-wrap .wp-parser-function ul.items li, .devhub-wrap .wp-parser-hook ul.items li, .devhub-wrap .wp-parser-method ul.items li {
@@ -1557,6 +1567,10 @@ input {
 
 .devhub-wrap .wp-parser-class ul.items > li, .devhub-wrap .wp-parser-function ul.items > li, .devhub-wrap .wp-parser-hook ul.items > li, .devhub-wrap .wp-parser-method ul.items > li {
   padding-bottom: 8px !important;
+}
+
+.devhub-wrap .wp-parser-class ul.items a, .devhub-wrap .wp-parser-function ul.items a, .devhub-wrap .wp-parser-hook ul.items a, .devhub-wrap .wp-parser-method ul.items a {
+  color: #21759b !important;
 }
 
 .devhub-wrap .wp-parser-class ul.items a:hover, .devhub-wrap .wp-parser-function ul.items a:hover, .devhub-wrap .wp-parser-hook ul.items a:hover, .devhub-wrap .wp-parser-method ul.items a:hover {
