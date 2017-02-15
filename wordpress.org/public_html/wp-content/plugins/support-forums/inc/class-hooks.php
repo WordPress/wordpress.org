@@ -32,6 +32,13 @@ class Hooks {
 
 		// Limit no-replies view to certain number of days.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
+
+		// Add extra reply actions before Submit button in reply form.
+		add_action( 'bbp_theme_before_reply_form_submit_wrapper', array( $this, 'add_extra_reply_actions' ) );
+
+		// Process extra reply actions.
+		add_action( 'bbp_new_reply',  array( $this, 'handle_extra_reply_actions' ), 10, 2 );
+		add_action( 'bbp_edit_reply', array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 	}
 
 	/**
@@ -171,6 +178,61 @@ class Hooks {
 		);
 
 		return $args;
+	}
+
+	/**
+	 * Add extra reply actions before Submit button in reply form.
+	 */
+	public function add_extra_reply_actions() {
+		if ( class_exists( 'WordPressdotorg\Forums\Topic_Resolution\Plugin' ) ) :
+			if ( Topic_Resolution\Plugin::get_instance()->user_can_resolve( get_current_user_id(), bbp_get_topic_id() ) ) : ?>
+				<p>
+					<input name="bbp_reply_mark_resolved" id="bbp_reply_mark_resolved" type="checkbox" value="yes" />
+					<label for="bbp_reply_mark_resolved"><?php esc_html_e( 'Reply and mark as resolved', 'wporg-forums' ); ?></label>
+				</p>
+				<?php
+			endif;
+		endif;
+
+		if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
+			<p>
+				<input name="bbp_reply_close_topic" id="bbp_reply_close_topic" type="checkbox" value="yes" />
+				<label for="bbp_reply_close_topic"><?php esc_html_e( 'Reply and close the topic', 'wporg-forums' ); ?></label>
+			</p>
+			<?php
+		endif;
+	}
+
+	/**
+	 * Process extra reply actions.
+	 *
+	 * @param int $reply_id Reply ID.
+	 * @param int $topic_id Topic ID.
+	 */
+	public function handle_extra_reply_actions( $reply_id, $topic_id ) {
+		// Handle "Reply and mark as resolved" checkbox
+		if ( isset( $_POST['bbp_reply_mark_resolved'] ) && 'yes' === $_POST['bbp_reply_mark_resolved'] ) {
+			if ( class_exists( 'WordPressdotorg\Forums\Topic_Resolution\Plugin' ) ) {
+				$topic_resolution_plugin = Topic_Resolution\Plugin::get_instance();
+
+				$plugin_enabled   = $topic_resolution_plugin->is_enabled_on_forum( bbp_get_topic_forum_id( $topic_id ) );
+				$user_can_resolve = $topic_resolution_plugin->user_can_resolve( get_current_user_id(), $topic_id );
+
+				if ( $plugin_enabled && $user_can_resolve ) {
+					$topic_resolution_plugin->set_topic_resolution( array(
+						'id'         => $topic_id,
+						'resolution' => 'yes',
+					) );
+				}
+			}
+		}
+
+		// Handle "Reply and close the topic" checkbox
+		if ( isset( $_POST['bbp_reply_close_topic'] ) && 'yes' === $_POST['bbp_reply_close_topic'] ) {
+			if ( current_user_can( 'moderate', $topic_id ) && bbp_is_topic_open( $topic_id ) ) {
+				bbp_close_topic( $topic_id );
+			}
+		}
 	}
 
 }
