@@ -19,15 +19,15 @@ class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 	public function flush() {
 		$start_timestamp = microtime( true );
 		$error           = '';
-		$sites           = wp_get_sites( array( 'limit' => false ) );
+		$sites           = get_sites( array( 'number' => 10000 ) );
 		$notify          = new \cli\progress\Bar( sprintf( 'Processing %d sites', count( $sites ) ), count( $sites ) );
 
 		WP_CLI::line();
 
 		foreach ( $sites as $site ) {
-			$nonce       = wp_create_nonce( 'flush-rewrite-rules-everywhere-' . $site['blog_id'] );
-			$display_url = $site['domain'] . rtrim( $site['path'], '/' );
-			$ajax_url    = sprintf( 'http://%s%swp-admin/admin-ajax.php', $site['domain'], $site['path'] );
+			$nonce       = wp_create_nonce( 'flush-rewrite-rules-everywhere-' . $site->blog_id );
+			$display_url = $site->domain . rtrim( $site->path, '/' );
+			$ajax_url    = sprintf( 'http://%s%swp-admin/admin-ajax.php', $site->domain, $site->path );
 			$ajax_url    = add_query_arg( array(
 				'action' => 'wcorg_flush_rewrite_rules_everywhere',
 				'nonce'  => $nonce,
