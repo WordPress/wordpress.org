@@ -19,12 +19,16 @@ class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 	public function flush() {
 		$start_timestamp = microtime( true );
 		$error           = '';
-		$sites           = get_sites( array( 'number' => 10000 ) );
+		$sites           = get_sites( array( 'number' => 10000, 'public' => 1 ) );
 		$notify          = new \cli\progress\Bar( sprintf( 'Processing %d sites', count( $sites ) ), count( $sites ) );
 
 		WP_CLI::line();
 
 		foreach ( $sites as $site ) {
+			if ( $site->deleted ) {
+				continue;
+			}
+
 			$nonce       = wp_create_nonce( 'flush-rewrite-rules-everywhere-' . $site->blog_id );
 			$display_url = $site->domain . rtrim( $site->path, '/' );
 			$ajax_url    = sprintf( 'http://%s%swp-admin/admin-ajax.php', $site->domain, $site->path );
