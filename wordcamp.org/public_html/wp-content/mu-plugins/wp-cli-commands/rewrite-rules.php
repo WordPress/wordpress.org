@@ -20,6 +20,7 @@ class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 		$start_timestamp = microtime( true );
 		$error           = '';
 		$sites           = wp_get_sites( array( 'limit' => false ) );
+		$notify          = new \cli\progress\Bar( sprintf( 'Processing %d sites', count( $sites ) ), count( $sites ) );
 
 		WP_CLI::line();
 
@@ -52,12 +53,14 @@ class WordCamp_CLI_Rewrite_Rules extends WP_CLI_Command {
 				}
 			}
 
-			if ( $success ) {
-				WP_CLI::line( sprintf( '%s: Flushed', $display_url ) );
-			} else {
+			if ( ! $success ) {
 				WP_CLI::warning( sprintf( '%s: Failed with error: %s', $display_url, $error ) );
 			}
+
+			$notify->tick();
 		}
+
+		$notify->finish();
 
 		$execution_time = microtime( true ) - $start_timestamp;
 
