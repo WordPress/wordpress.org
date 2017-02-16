@@ -313,9 +313,14 @@ add_filter( 'bbp_topic_admin_links', 'wporg_support_change_super_sticky_text' );
  * @return string
  */
 function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
-	if ( false !== strpos( $url, '?' ) && false !== strpos( $url, '/edit/' ) ) {
-		$url = str_replace( '/edit/', '', $url );
-		$url = add_query_arg( 'edit', '1', $url );
+	if ( false !== strpos( $url, '?' ) ) {
+		if ( false !== strpos( $url, '/edit/' ) ) {
+			$url = str_replace( '/edit/', '', $url );
+			$url = add_query_arg( 'edit', '1', $url );
+		} elseif ( false !== strpos( $url, '%2Fedit%2F' ) ) {
+			$url = str_replace( '%2Fedit%2F', '', $url );
+			$url = add_query_arg( 'edit', '1', $url );
+		}
 	}
 
 	return $url;
