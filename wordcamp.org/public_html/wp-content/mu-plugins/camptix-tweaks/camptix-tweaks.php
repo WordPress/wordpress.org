@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\CampTix_Tweaks;
+use CampTix_Plugin;
 
 defined( 'WPINC' ) or die();
 
@@ -11,6 +12,7 @@ add_action( 'wp_print_styles',                               __NAMESPACE__ . '\p
 add_filter( 'camptix_require_login_please_login_message',    __NAMESPACE__ . '\override_please_login_message'       );
 add_action( 'camptix_form_start_errors',                     __NAMESPACE__ . '\add_form_start_error_messages'       );
 add_action( 'transition_post_status',                        __NAMESPACE__ . '\ticket_sales_opened',          10, 3 );
+add_action( 'camptix_payment_result',                        __NAMESPACE__ . '\track_payment_results',        10, 3 );
 
 // Attendees
 add_filter( 'camptix_name_order',                            __NAMESPACE__ . '\set_name_order'         );
@@ -200,6 +202,77 @@ function ticket_sales_opened( $new_status, $old_status, $tickets_page ) {
 			break;
 		}
 	}
+}
+
+/**
+ * Track payment result stats
+ *
+ * @param string $payment_token
+ * @param int    $result
+ * @param array  $data
+ */
+function track_payment_results( $payment_token, $result, $data ) {
+	if ( is_sandboxed() ) {
+		return;
+	}
+
+	$valid_results = array(
+		CampTix_Plugin::PAYMENT_STATUS_COMPLETED     => 'purchased',
+		CampTix_Plugin::PAYMENT_STATUS_FAILED        => 'failed',
+		CampTix_Plugin::PAYMENT_STATUS_CANCELLED     => 'cancelled',
+		CampTix_Plugin::PAYMENT_STATUS_PENDING       => 'pending',
+		CampTix_Plugin::PAYMENT_STATUS_TIMEOUT       => 'timeout',
+		CampTix_Plugin::PAYMENT_STATUS_REFUNDED      => 'refunded',
+		CampTix_Plugin::PAYMENT_STATUS_REFUND_FAILED => 'refund-failed',
+	);
+
+	$stat_key = ( array_key_exists( $result, $valid_results ) ) ? $valid_results[ $result ] : null;
+
+	if ( ! $stat_key ) {
+		return;
+	}
+
+	/*
+	 * Stats are sent to the local host in dev environments, to avoid distorting the real stats
+	 *
+	 * This is better than returning early, because that would create a situation where an entire function would
+	 * go un-tested until it was deployed to production. The runtime differences between development and
+	 * production should always be kept as minimal as possible.
+	 */
+	$request_domain = 'production' === WORDCAMP_ENVIRONMENT ? 'stats.wordpress.com' : 'wordcamp.dev';
+	$request_url    = sprintf( 'https://%s/g.gif?v=wpcom-no-pv&x_wcorg-tickets=%s', $request_domain, $stat_key );
+	$request_args   = array( 'blocking' => false );
+	$request_result = wp_remote_get( esc_url_raw( $request_url ), $request_args );
+}
+
+/**
+ * Returns true if CampTix is running in sandbox mode.
+ *
+ * @return bool
+ */
+function is_sandboxed() {
+	/** @var $camptix CampTix_Plugin */
+	global $camptix;
+	static $is_sandboxed = null;
+
+	if ( ! is_null( $is_sandboxed ) ) {
+		return $is_sandboxed;
+	}
+
+	$options      = $camptix->get_options();
+	$is_sandboxed = false;
+
+	// If the PayPal sandbox checkbox is set to true in manual settings
+	if ( isset( $options['payment_options_paypal']['sandbox'] ) && $options['payment_options_paypal']['sandbox'] ) {
+		$is_sandboxed = true;
+	}
+
+	// If the WordCamp sandbox is picked from the predefs
+	if ( ! empty( $options['payment_options_paypal']['api_predef'] ) && 'wordcamp-sandbox' == $options['payment_options_paypal']['api_predef'] ) {
+		$is_sandboxed = true;
+	}
+
+	return $is_sandboxed;
 }
 
 /**
