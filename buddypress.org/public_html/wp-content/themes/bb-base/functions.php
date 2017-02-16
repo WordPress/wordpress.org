@@ -526,3 +526,14 @@ function bb_base_register_menus() {
 	register_nav_menu( 'header-nav-menu', 'Main nav bar' );
 }
 add_action( 'init', 'bb_base_register_menus' );
+
+/**
+ * Set embed width to 515 (mostly for forums & posts)
+ */
+function bb_base_embed_defaults( $min_max = array() ) {
+	return array(
+		'width'  => 515,
+		'height' => min( ceil( 515 * 1.5 ), 1000 )
+	);
+}
+add_filter( 'embed_defaults', 'bb_base_embed_defaults' );
