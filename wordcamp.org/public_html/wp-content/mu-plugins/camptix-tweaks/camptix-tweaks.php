@@ -7,6 +7,8 @@ defined( 'WPINC' ) or die();
 
 // Tickets
 add_action( 'camptix_admin_notices',                         __NAMESPACE__ . '\show_sandbox_mode_warning'           );
+add_filter( 'camptix_dashboard_paypal_credentials',          __NAMESPACE__ . '\paypal_credentials'                  );
+add_filter( 'camptix_paypal_predefined_accounts',            __NAMESPACE__ . '\paypal_credentials'                  );
 add_action( 'init',                                          __NAMESPACE__ . '\hide_empty_tickets'                  );
 add_action( 'wp_print_styles',                               __NAMESPACE__ . '\print_login_message_styles'          );
 add_filter( 'camptix_require_login_please_login_message',    __NAMESPACE__ . '\override_please_login_message'       );
@@ -74,6 +76,46 @@ function show_sandbox_mode_warning() {
 			require_once( __DIR__ . '/views/notice-sandbox-mode.php' );
 		}
 	}
+}
+
+/**
+ * Setup our pre-defined payment credentials
+ *
+ * @param array $credentials
+ *
+ * @return array
+ */
+function paypal_credentials( $credentials ) {
+	// Sandbox account
+	$credentials = array(
+		"wordcamp-sandbox" => array(
+			'label'         => "WordCamp Sandbox",
+			'sandbox'       => true,
+			'api_username'  => defined( 'WC_SANDBOX_PAYPAL_NVP_USERNAME'  ) ? WC_SANDBOX_PAYPAL_NVP_USERNAME  : '',
+			'api_password'  => defined( 'WC_SANDBOX_PAYPAL_NVP_PASSWORD'  ) ? WC_SANDBOX_PAYPAL_NVP_PASSWORD  : '',
+			'api_signature' => defined( 'WC_SANDBOX_PAYPAL_NVP_SIGNATURE' ) ? WC_SANDBOX_PAYPAL_NVP_SIGNATURE : '',
+		),
+	);
+
+	/*
+	 * Live API credentials for WordPress Community Support, PBC
+	 *
+	 * This still uses the old 'foundation' array index in order to maintain backwards-compatibility. When an
+	 * organizer saves the form on the Tickets > Setup > Payment screen, an option is saved with the key of the
+	 * selected pre-defined credentials, which correspond to the indexes in the $credentials array. If those keys
+	 * are ever changed, that would break the mapping for sites that that were previously saved using the old key.
+	 */
+	if ( defined( 'WPCS_PAYPAL_NVP_USERNAME' ) ) {
+		$credentials['foundation'] = array(
+			'label'         => 'WordPress Community Support, PBC',
+			'sandbox'       => false,
+			'api_username'  => WPCS_PAYPAL_NVP_USERNAME,
+			'api_password'  => WPCS_PAYPAL_NVP_PASSWORD,
+			'api_signature' => WPCS_PAYPAL_NVP_SIGNATURE,
+		);
+	}
+
+	return $credentials;
 }
 
 /*
