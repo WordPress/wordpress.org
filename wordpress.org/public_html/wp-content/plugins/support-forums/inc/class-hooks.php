@@ -185,7 +185,9 @@ class Hooks {
 	 */
 	public function add_extra_reply_actions() {
 		if ( class_exists( 'WordPressdotorg\Forums\Topic_Resolution\Plugin' ) ) :
-			if ( Topic_Resolution\Plugin::get_instance()->user_can_resolve( get_current_user_id(), bbp_get_topic_id() ) ) : ?>
+			$topic_resolution_plugin = Topic_Resolution\Plugin::get_instance();
+
+			if ( $topic_resolution_plugin->is_enabled_on_forum() && $topic_resolution_plugin->user_can_resolve( get_current_user_id(), bbp_get_topic_id() ) ) : ?>
 				<p>
 					<input name="bbp_reply_mark_resolved" id="bbp_reply_mark_resolved" type="checkbox" value="yes" />
 					<label for="bbp_reply_mark_resolved"><?php esc_html_e( 'Reply and mark as resolved', 'wporg-forums' ); ?></label>
