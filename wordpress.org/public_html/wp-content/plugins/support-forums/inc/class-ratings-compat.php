@@ -229,7 +229,7 @@ class Ratings_Compat {
 			if ( is_user_logged_in() ) {
 				echo '<a href="#new-post" class="btn">';
 				if ( $this->review_exists() ) {
-					_e( 'Edit your own review', 'wporg-forums' );
+					_e( 'Edit your review', 'wporg-forums' );
 				} else {
 					_e( 'Add your own review', 'wporg-forums' );
 				}
