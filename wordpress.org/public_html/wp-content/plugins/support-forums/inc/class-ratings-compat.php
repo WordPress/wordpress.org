@@ -46,6 +46,9 @@ class Ratings_Compat {
 		// Set up the single topic.
 		add_action( 'bbp_template_before_lead_topic', array( $this, 'add_topic_stars' ) );
 
+		// Add a notice with an edit link for an individual review topic.
+		add_action( 'bbp_theme_before_topic_content', array( $this, 'add_edit_review_notice' ) );
+
 		// Set up ratings view.
 		add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
 
@@ -94,6 +97,38 @@ class Ratings_Compat {
 			if ( $rating > 0 ) {
 				echo \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
+		}
+	}
+
+	/**
+	 * Add a notice with an edit link for an individual review topic.
+	 */
+	public function add_edit_review_notice() {
+		if ( bbp_is_single_topic() && Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() ) {
+			if ( bbp_get_topic_author_id() != get_current_user_id() ) {
+				return;
+			}
+
+			$notice = $object_link = $edit_link = '';
+			switch( $this->compat ) {
+				case 'plugin' :
+					/* translators: 1: link to the plugin, 2: review edit URL */
+					$notice = _x( 'This is your review of %1$s, you can <a href="%2$s">edit your review</a> at any time.', 'plugin', 'wporg-forums' );
+					$object_link = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug ), esc_html( $this->object->post_title ) );
+					$edit_url = sprintf( '//wordpress.org/support/plugin/%s/reviews/#new-post', esc_attr( $this->slug ) );
+					break;
+				case 'theme' :
+					/* translators: 1: link to the theme, 2: review edit URL */
+					$notice = _x( 'This is your review of %1$s, you can <a href="%2$s">edit your review</a> at any time.', 'theme', 'wporg-forums' );
+					$object_link = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug ), esc_html( $this->object->post_title ) );
+					$edit_url = sprintf( '//wordpress.org/support/theme/%s/reviews/#new-post', esc_attr( $this->slug ) );
+					break;
+			}
+
+			printf(
+				'<div class="bbp-template-notice info"><p>%s</p></div>',
+				sprintf( $notice, $object_link, $edit_url )
+			);
 		}
 	}
 
@@ -257,7 +292,7 @@ class Ratings_Compat {
 	}
 
 	/**
-	 * Check if the current user already has a review for the plugin being viewed.
+	 * Check if the current user already has a review for the plugin or theme being viewed.
 	 *
 	 * @return bool True if review already exists, false otherwise.
 	 */
