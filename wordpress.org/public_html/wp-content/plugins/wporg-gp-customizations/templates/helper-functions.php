@@ -1,10 +1,9 @@
 <?php
-wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'gp-base' ), '20160601' );
+wp_register_style( 'wporg-translate', plugins_url( 'style.css', __FILE__ ), array( 'gp-base' ), '20170218' );
 gp_enqueue_style( 'wporg-translate' );
 
 wp_register_style( 'chartist', plugins_url( 'css/chartist.min.css', __FILE__ ), array(), '0.9.5' );
 wp_register_script( 'chartist', plugins_url( 'js/chartist.min.js', __FILE__ ), array(), '0.9.5' );
-
 
 /**
  * Adds custom classes to the array of body classes.
