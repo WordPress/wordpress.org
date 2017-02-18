@@ -76,6 +76,9 @@ class Plugin {
 	public function register_routes() {
 		$request_uri = GP::$router->request_uri();
 		$path = '(.+?)';
+		$dir = '([^_/][^/]*)';
+		$project = '([^/]*)/?';
+
 		$locale = '(' . implode( '|', array_map( function( $locale ) { return $locale->slug; }, GP_Locales::locales() ) ) . ')';
 
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
@@ -94,6 +97,11 @@ class Plugin {
 			GP::$router->prepend( '/projects/wp-plugins/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
 			GP::$router->prepend( '/projects/wp-themes/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
 
+			// Re-add locale glossary GET routes because of the redirect route from above. https://github.com/GlotPress/GlotPress-WP/issues/655.
+			GP::$router->prepend( "(/languages)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
+			GP::$router->prepend( "(/languages)/$locale/$dir/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
+			GP::$router->prepend( "(/languages)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
+
 			// Register custom routes.
 			GP::$router->prepend( '/', array( __NAMESPACE__ . '\Routes\Index', 'get_locales' ) );
 			GP::$router->prepend( "/locale/$locale", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
@@ -103,7 +111,8 @@ class Plugin {
 			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
 			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
 
-			$project = '([^/]*)/?';
+
+			// Project routes.
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_projects' ) );
 			GP::$router->prepend( "/projects/wp-plugins/$project/contributors", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_contributors' ) );
 			GP::$router->prepend( "/projects/wp-plugins/$project/language-packs", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_language_packs' ) );
