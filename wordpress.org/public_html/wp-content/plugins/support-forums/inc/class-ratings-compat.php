@@ -311,6 +311,8 @@ class Ratings_Compat {
 				'no_found_rows' => true,
 				'orderby'       => 'ID',
 			) );
+
+			$this->review_topic_query = bbpress()->topic_query;
 		}
 
 		return $this->review_exists;
@@ -338,6 +340,7 @@ class Ratings_Compat {
 		}
 
 		if ( $this->review_exists() ) {
+			bbpress()->topic_query = $this->review_topic_query;
 			bbp_the_topic();
 			add_filter( 'bbp_is_topic_edit', '__return_true' );
 		} else {
