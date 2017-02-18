@@ -193,7 +193,11 @@ class Ratings_Compat {
 		<?php
 			if ( is_user_logged_in() ) {
 				echo '<a href="#new-post" class="btn">';
-				_e( 'Add your own review', 'wporg-forums' );
+				if ( $this->review_exists() ) {
+					_e( 'Edit your own review', 'wporg-forums' );
+				} else {
+					_e( 'Add your own review', 'wporg-forums' );
+				}
 				echo '</a>';
 			} else {
 				echo '<span class="reviews-need-login">';
@@ -252,6 +256,31 @@ class Ratings_Compat {
 		}
 	}
 
+	/**
+	 * Check if the current user already has a review for the plugin being viewed.
+	 *
+	 * @return bool True if review already exists, false otherwise.
+	 */
+	public function review_exists() {
+		if ( ! isset( $this->review_exists ) ) {
+			$this->review_exists = bbp_has_topics( array(
+				'author'       => get_current_user_id(),
+				'post_status'  => 'any',
+				'post_type'    => bbp_get_topic_post_type(),
+				'post_parent'  => Plugin::REVIEWS_FORUM_ID,
+				'tax_query'    => array( array(
+					'taxonomy' => $this->taxonomy,
+					'field'    => 'slug',
+					'terms'    => $this->slug,
+				) ),
+				'no_found_rows' => true,
+				'orderby'       => 'ID',
+			) );
+		}
+
+		return $this->review_exists;
+	}
+
 	public function add_topic_form() {
 		if ( ! $this->is_rating_view() ) {
 			return;
@@ -273,19 +302,7 @@ class Ratings_Compat {
 			return;
 		}
 
-		if ( bbp_has_topics( array(
-			'author'       => get_current_user_id(),
-			'post_status'  => 'any',
-			'post_type'    => bbp_get_topic_post_type(),
-			'post_parent'  => Plugin::REVIEWS_FORUM_ID,
-			'tax_query'    => array( array(
-				'taxonomy' => $this->taxonomy,
-				'field'    => 'slug',
-				'terms'    => $this->slug,
-			) ),
-			'no_found_rows' => true,
-			'orderby'       => 'ID',
-		) ) ) {
+		if ( $this->review_exists() ) {
 			bbp_the_topic();
 			add_filter( 'bbp_is_topic_edit', '__return_true' );
 		} else {
