@@ -431,7 +431,9 @@ class Plugin {
 	 * @return array IDs of the sub projects.
 	 */
 	public function get_sub_project_ids( $project_id ) {
-		$cache_key = 'project:' . $project_id . ':childs';
+		$last_changed = wp_cache_get_last_changed( self::$cache_group );
+
+		$cache_key = 'project:' . $project_id . ':childs:' . $last_changed;
 		$cache = wp_cache_get( $cache_key, self::$cache_group );
 		if ( false !== $cache ) {
 			return $cache;
@@ -479,17 +481,10 @@ class Plugin {
 	}
 
 	/**
-	 * Removes all of the project ids from the cache.
+	 * Updates `last_changed` value for the cache group.
 	 */
 	public function clear_project_cache() {
 		wp_cache_set( 'last_changed', microtime(), self::$cache_group );
-
-		$projects = $this->get_all_projects();
-
-		foreach ( $projects as $project ) {
-			$cache_key = 'project:' . $project->id . ':childs';
-			wp_cache_delete( $cache_key, self::$cache_group );
-		}
 	}
 
 	/**
