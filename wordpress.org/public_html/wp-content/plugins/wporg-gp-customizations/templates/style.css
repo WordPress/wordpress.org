@@ -208,6 +208,31 @@ body.wporg-make #headline h2 a:before {
 	}
 }
 
+#gp-js-message {
+	top: 50px;
+	left: auto !important;
+	right: 50px;
+	font-size: 100%;
+	padding: 1em 1.5em;
+	border-radius: 5px;
+	max-width: 300px;
+}
+
+.gp-js-error {
+	color: #fff;
+	background-color: #dc3232;
+}
+
+.gp-js-notice {
+	color: #333;
+	background-color: #ffb900;
+}
+
+.gp-js-success {
+	color: #fff;
+	background-color: #46b450;
+}
+
 .gp-content {
 	font-family: 'Open Sans', sans-serif !important;
 	margin: 20px auto;
