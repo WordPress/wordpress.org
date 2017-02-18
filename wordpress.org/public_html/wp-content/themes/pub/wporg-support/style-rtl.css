@@ -2647,6 +2647,15 @@ section {
 	font-size: 0.8rem;
 }
 
+.bbpress #wp-link-wrap {
+	font-size: 0.73152rem;
+}
+
+.bbpress #wp-link-wrap #wp-link #link-options label span,
+.bbpress #wp-link-wrap #wp-link #search-panel label span.search-label {
+	width: 90px;
+}
+
 .bbpress li.bbp-forum-freshness,
 .bbpress li.bbp-topic-freshness {
 	text-align: right;

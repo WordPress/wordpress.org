@@ -203,6 +203,15 @@ section {
 		font-size: ms(-2);
 	}
 
+	#wp-link-wrap {
+		font-size: ms(-3);
+	}
+
+	#wp-link-wrap #wp-link #link-options label span,
+	#wp-link-wrap #wp-link #search-panel label span.search-label {
+		width: 90px;
+	}
+
 	li.bbp-forum-freshness, 
 	li.bbp-topic-freshness {
 		text-align: left;
