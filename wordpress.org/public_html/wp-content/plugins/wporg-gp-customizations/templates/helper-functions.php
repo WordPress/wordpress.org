@@ -24,3 +24,28 @@ add_action( 'gp_tmpl_load_locations', function( $locations, $template, $args, $t
 	$locations[] = $core_templates;
 	return $locations;
 }, 50, 4 );
+
+function wporg_gp_is_index() {
+	return GP::$current_route instanceof \WordPressdotorg\GlotPress\Routes\Routes\Index;
+}
+
+/**
+ * Prints JavaScript helper for menu toggle.
+ */
+add_action( 'gp_footer', function() {
+	?>
+	<script>
+		( function( $ ) {
+			$( function() {
+				var $menu = $( '#site-navigation' );
+
+				if ( $menu.length ) {
+					$menu.find( 'button' ).on( 'click', function() {
+						$menu.toggleClass( 'toggled' );
+					} );
+				}
+			} );
+		} )( jQuery );
+	</script>
+	<?php
+} );

@@ -1,82 +1,211 @@
-/* Secondary header design */
-#headline .menu {
-	list-style: none;
-	float: right;
-	font-size: 14px;
-	font-weight: bold;
-	padding-top: 22px;
-	margin-right: 15px;
-}
-
-#headline .menu li {
-	display: inline;
-	padding-left: 20px;
-}
-
-/* Responsive design for secondary header */
-@media (max-width: 480px) {
-	#headline h2 {
-		margin-left: 6px;
-		font-size: 20px;
-	}
-
-	#headline h2 a:before {
-		font-size: 20px;
-		width: 24px;
-	}
-}
-
-@media (max-width: 770px) {
-	#headline {
-		height: auto;
-	}
-
-	#headline h2 {
-		float: none;
-	}
-
-	#headline .menu {
-		float: left;
-		margin: 0;
-		padding: 8px 0;
-		background: #f5f5f5;
-		border-top: 1px solid #d7d7d7;
-		width: 100%;
-	}
-}
-
-.wrapper {
+.site-header {
+	font-family: "Open Sans", sans-serif;
+	line-height: 1.5;
+	color: #32373c;
+	background: #0073aa;
+	padding: 18px 0;
 	position: relative;
+	z-index: 100;
 }
 
-ul.translate-meta-nav {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	font-size: 12px;
+.site-header .site-branding {
+	margin: 0 auto;
+	max-width: 960px;
+	padding: 0 10px;
+}
+
+.site-header.home {
+	padding: 28px 20px;
+	text-align: center;
+}
+
+.site-title {
+	display: inline-block;
+	font-size: 28px;
+	font-weight: 300;
+	line-height: 1;
+	margin: 0 36px 0 0;
+	max-width: none;
+}
+
+.site-title a {
+	color: #fff;
+	font-weight: 300;
+}
+
+p.site-title a {
+	border-bottom: 0;
+	text-decoration: none;
+}
+
+.site-title a:hover,
+.site-title a:focus,
+.site-title a:active {
+	text-decoration: none;
+}
+
+.site-header .site-title a:hover {
+	color: rgba( 255, 255, 255, 0.8 );
+}
+
+.site-header.home .site-title {
+	display: inherit;
+	font-size: 68px;
+	margin: 36px 0 18px;
+}
+
+.site-header.home .site-title a:before {
+	display: none;
+}
+
+.site-description {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 1.25rem;
+	font-weight: 300;
+	margin: -0.4rem auto 2rem;
+	text-align: center;
+}
+
+.navigation-main {
+	background: transparent;
+	max-width: 940px;
+	height: 32px;
+	margin: -32px auto 0 auto;
 	text-align: right;
+	padding: 0;
 }
 
-#headline ul.translate-meta-nav a {
-	color: #0073aa;
+.navigation-main .menu {
+	line-height: 32px;
 }
 
-#headline ul a:hover,
-#headline ul a:focus {
-	color: #00a0d2;
+.navigation-main ul li {
+	display: inline-block;
+	float: none;
+	margin-right: 21px;
 }
 
-@media (min-width: 771px) {
-	ul.translate-meta-nav {
-		position: absolute;
-		bottom: -18px;
-		right: 6px;
+.rtl .navigation-main ul li {
+	margin-left: 21px;
+	margin-right: 0;
+}
+
+.navigation-main ul li:last-of-type {
+	margin: 0;
+}
+
+.navigation-main ul li a {
+	padding: 0;
+}
+
+.navigation-main ul li:hover > a,
+.navigation-main ul li.current-menu-item a,
+.navigation-main ul li.current-menu-item:hover a {
+	color: #fff;
+	background: transparent;
+}
+
+.navigation-main ul li:hover > a:after,
+.navigation-main ul li.current-menu-item a:after,
+.navigation-main ul li.current-menu-item:hover a:after {
+	content: '';
+	display: block;
+	border-bottom: 1px solid #fff;
+	position: relative;
+	top: -6px;
+}
+
+.navigation-main ul li.icon a:after {
+	display: none;
+}
+
+.navigation-main ul li:hover > a {
+	border-bottom: none;
+}
+
+.navigation-main a {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 14px;
+}
+
+.wporg-make .site-title a:before,
+body.wporg-make #headline h2 a:before {
+	vertical-align: middle; /* overrides wp4.css */
+}
+
+.menu-toggle.dashicons {
+	display: none;
+	background: transparent;
+	border: none;
+	color: #fff;
+	font-size: 1.5625rem;
+	height: 3.5rem;
+	overflow: hidden;
+	position: absolute;
+	right: 1rem;
+	top: -58px;
+	width: 3.5rem;
+	-webkit-appearance: none;
+}
+
+.toggled .menu-toggle.dashicons:before {
+	content: "\f343";
+}
+
+@media screen and (max-width: 900px) {
+	.navigation-main ul li {
+		margin-right: 10px;
 	}
 }
 
-ul.translate-meta-nav li {
-	display: inline-block;
-	margin: 0 8px
+@media screen and (min-width: 750px) {
+	#wporg-header ul li a.current ~ .uparrow {
+		border-bottom: 9px solid #0073aa;
+	}
+
+	#wporg-header ul li:hover .nav-submenu ~ .uparrow,
+	#wporg-header ul li .nav-submenu:hover ~ .uparrow {
+		border-bottom: 9px solid #32373c;
+	}
+}
+
+@media screen and (max-width: 750px) {
+	.menu-toggle.dashicons {
+		display: block;
+	}
+
+	.navigation-main {
+		margin: 18px -10px -18px;
+		height: auto;
+		position: relative;
+	}
+
+	.navigation-main .menu {
+		display: none;
+	}
+
+	.toggled .menu {
+		display: block;
+	}
+
+	.navigation-main ul li {
+		display: block;
+		float: none;
+		margin: 0;
+		text-align: left;
+		border-top: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.navigation-main ul li a {
+		display: block;
+		padding: 1rem;
+	}
+
+	.navigation-main ul li:hover > a:after,
+	.navigation-main ul li.current-menu-item a:after,
+	.navigation-main ul li.current-menu-item:hover a:after {
+		display: none;
+	}
 }
 
 .gp-content {
@@ -411,7 +540,20 @@ ul.filter-header-links {
 }
 
 .locales {
-	margin-left: -2.083%;
+	-webkit-column-count: 2;
+	-moz-column-count: 2;
+	column-count: 2;
+	-webkit-column-gap: 30px;
+	-moz-column-gap: 30px;
+	column-gap: 30px;
+}
+
+@media (min-width: 700px) {
+	.locales {
+		-webkit-column-count: 3;
+		-moz-column-count: 3;
+		column-count: 3;
+	}
 }
 
 /* Clearfix */
@@ -444,9 +586,9 @@ ul.filter-header-links {
 }
 
 .locale {
-	float: left;
-	margin: 0 0 2.083% 2.083%;
-	width: 31.25%;
+	margin-bottom: 30px;
+	width: 100%;
+	display: inline-block;
 	border: 1px solid #ccc;
 	-webkit-box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
 	box-shadow: 0 1px 1px -1px rgba(0,0,0,0.1);
@@ -490,6 +632,10 @@ ul.filter-header-links {
 	display: inline-block;
 	margin: 0;
 	padding: 20px 10px 20px 20px;
+}
+
+.locale .name {
+	max-width: calc( 100% - 100px );
 }
 
 .locale .name li,
@@ -959,12 +1105,10 @@ ul.projects-dropdown li > a > span {
 		width: 100%;
 	}
 
-	.locales,
 	.projects {
 		margin-left: 0;
 	}
 
-	.locales .locale,
 	.projects .project {
 		width: 100%;
 		margin-left: 0;
@@ -972,6 +1116,14 @@ ul.projects-dropdown li > a > span {
 
 	.locale-intro {
 		float: none;
+	}
+
+	.locales .locale .name {
+		display: block;
+	}
+
+	.locales .locale .contributors {
+		display: none;
 	}
 
 	.locale-box {
@@ -1024,12 +1176,6 @@ ul.projects-dropdown li > a > span {
 
 	.stats-table td:before {
 		content: attr(data-column-title);
-	}
-}
-
-@media only screen and (max-width: 1120px) {
-	.locales .locale {
-		width: 47.917%;
 	}
 }
 

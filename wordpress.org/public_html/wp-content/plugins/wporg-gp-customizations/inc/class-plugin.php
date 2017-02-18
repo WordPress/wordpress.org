@@ -86,7 +86,7 @@ class Plugin {
 	}
 
 	/**
-	 * Adds the linkt to profile settings to the user actions toolbar menu.
+	 * Adds the link to profile settings to the user actions toolbar menu.
 	 *
 	 * @param \WP_Admin_Bar $wp_admin_bar
 	 */

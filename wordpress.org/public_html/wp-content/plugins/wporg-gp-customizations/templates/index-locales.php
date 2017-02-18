@@ -4,9 +4,6 @@ gp_enqueue_script('common');
 gp_tmpl_header();
 ?>
 
-	<p class="intro"><?php _e('Contribute to WordPress core, themes, and plugins by translating them into your language. Select your locale below to get started.'); ?></p>
-	<p class="intro">If your locale isn’t below, follow the steps in the <a href="https://make.wordpress.org/polyglots/handbook/translating/requesting-a-new-locale/">Translator Handbook</a> to contribute a new locale.</p>
-
 	<div class="filter-header">
 		<ul class="filter-header-links">
 			<li><span class="current"><?php _e( 'Find your locale' ); ?></span></li>
@@ -18,6 +15,8 @@ gp_tmpl_header();
 			<input placeholder="<?php esc_attr_e( 'Search locales...' ); ?>" type="search" id="locales-filter" class="filter-search">
 		</div>
 	</div>
+
+	<p class="intro">If your locale isn’t below, follow the steps in the <a href="https://make.wordpress.org/polyglots/handbook/translating/requesting-a-new-locale/">Translator Handbook</a> to contribute a new locale.</p>
 
 	<div id="locales" class="locales">
 		<?php foreach ( $locales as $locale ) :
