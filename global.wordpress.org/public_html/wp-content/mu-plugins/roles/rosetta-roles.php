@@ -11,6 +11,8 @@ if ( ! class_exists( 'GP_Locales' ) ) {
 	require_once GLOTPRESS_LOCALES_PATH;
 }
 
+require __DIR__ . '/cross-locale-pte.php';
+
 class Rosetta_Roles {
 	/**
 	 * Endpoint for profiles.wordpress.org updates.
@@ -67,13 +69,17 @@ class Rosetta_Roles {
 
 		$this->gp_locale = $gp_locale;
 
-		add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
-		add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
+		if ( ! is_main_site() ) {
+			add_action( 'admin_menu', array( $this, 'register_translation_editors_page' ) );
+			add_filter( 'set-screen-option', array( $this, 'save_custom_screen_options' ), 10, 3 );
 
-		add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
-		add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
+			add_action( 'translation_editor_added', array( $this, 'update_wporg_profile_badge' ) );
+			add_action( 'translation_editor_removed', array( $this, 'update_wporg_profile_badge' ) );
+		}
 
 		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
+
+		Cross_Locale_PTE::init_admin();
 	}
 
 	/**
@@ -92,23 +98,23 @@ class Rosetta_Roles {
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'register_screen_options' ) );
-		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( $this, 'enqueue_scripts' ) );
-		add_action( 'admin_footer-' . $this->translation_editors_page, array( $this, 'print_js_templates' ) );
-		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( $this, 'enqueue_styles' ) );
+		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'admin_footer-' . $this->translation_editors_page, array( __CLASS__, 'print_js_templates' ) );
+		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_styles' ) );
 	}
 
 	/**
 	 * Enqueues scripts.
 	 */
-	public function enqueue_scripts() {
+	public static function enqueue_scripts() {
 		wp_enqueue_script( 'string_score', plugins_url( '/js/string_score.min.js', __FILE__ ), array(), '0.1.22', true );
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone', 'string_score' ), '9', true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone', 'string_score' ), '10', true );
 	}
 
 	/**
 	 * Enqueues styles.
 	 */
-	public function enqueue_styles() {
+	public static function enqueue_styles() {
 		$suffix = is_rtl() ? '-rtl' : '';
 		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '4' );
 	}
@@ -116,7 +122,7 @@ class Rosetta_Roles {
 	/**
 	 * Prints JavaScript templates.
 	 */
-	public function print_js_templates() {
+	public static function print_js_templates() {
 		?>
 		<script id="tmpl-project-checkbox" type="text/html">
 			<# if ( ! data.checkedSubProjects ) {

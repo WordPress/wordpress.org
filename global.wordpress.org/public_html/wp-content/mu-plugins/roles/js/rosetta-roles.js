@@ -254,6 +254,16 @@
 
 			$( '#project-loading' ).remove();
 
+			// Mark the first item as active.
+			var $firstActive = view.$el.find( 'li.active' );
+			if ( ! $firstActive.length ) {
+				$firstActive = view.$el.find( 'li input[type=radio]' );
+			}
+			if ( ! $firstActive.length ) {
+				$firstActive = view.$el.find( 'li:first-child' );
+			}
+			$firstActive.closest( 'li' ).addClass( 'active' );
+
 			this.views.ready();
 
 			return this;

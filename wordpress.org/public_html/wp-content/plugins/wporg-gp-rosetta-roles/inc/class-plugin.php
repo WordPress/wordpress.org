@@ -4,6 +4,9 @@ namespace WordPressdotorg\GlotPress\Rosetta_Roles;
 
 use GP;
 use GP_Locales;
+use Cross_Locale_PTE;
+
+require_once WPMU_PLUGIN_DIR . '/rosetta-network/roles/cross-locale-pte.php';
 
 class Plugin {
 
@@ -67,6 +70,7 @@ class Plugin {
 		add_filter( 'gp_pre_can_user', array( $this, 'pre_can_user' ), 9 , 2 );
 		add_action( 'gp_project_created', array( $this, 'project_created' ) );
 		add_action( 'gp_project_saved', array( $this, 'project_saved' ) );
+		add_filter( 'gp_translation_set_import_status', array( 'Cross_Locale_PTE', 'gp_translation_set_import_status' ), 9, 3 );
 
 		if ( is_admin() ) {
 			$users = new Admin\Translators();
@@ -96,6 +100,13 @@ class Plugin {
 		// Administrators on global.wordpress.org are considered global admins in GlotPress.
 		if ( $this->is_global_administrator( $args['user_id'] ) ) {
 			return true;
+		}
+
+		// Grant permissions to Cross-Locale PTEs.
+		$cross_locale_pte_verdict = Cross_Locale_PTE::gp_pre_can_user( $verdict, $args );
+	#	var_dump($cross_locale_pte_verdict);
+		if ( is_bool( $cross_locale_pte_verdict ) ) {
+			return $cross_locale_pte_verdict;
 		}
 
 		// No permissions for unknown object types.
