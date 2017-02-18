@@ -104,7 +104,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$create  = '';
 
 		$create_label = '';
-		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_reply_form() ) {
+		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_topic_form() ) {
 			$create_label = \WPORG_Ratings::get_user_rating( 'plugin', $this->slug(), get_current_user_id() ) ?
 				__( 'Edit Review', 'wporg-forums' ) :
 				__( 'Add Review', 'wporg-forums' );
