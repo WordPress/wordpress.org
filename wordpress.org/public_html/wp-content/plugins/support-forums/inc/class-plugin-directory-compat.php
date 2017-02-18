@@ -94,10 +94,10 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	public function do_topic_sidebar() {
 		include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 		$plugin  = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
-		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">Frequently Asked Questions</a>', esc_attr( $this->slug() ) );
-		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">%s</a>', esc_attr( $this->slug() ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
+		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
 		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
-		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
 		$create  = '';
 
 		$create_label = '';
@@ -114,7 +114,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		?>
 
 		<div>
-			<h3>About this Plugin</h3>
+			<h3><?php _e( 'About this Plugin', 'wporg-forums' ); ?></h3>
 			<ul>
 				<li><?php echo wporg_get_plugin_icon( $this->slug, 128 ); ?></li>
 				<li style="clear:both;"><?php echo $plugin; ?></li>

@@ -93,9 +93,9 @@ class Theme_Directory_Compat extends Directory_Compat {
 
 	public function do_topic_sidebar() {
 		$theme   = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
-		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">Support Threads</a>', esc_attr( $this->slug() ) );
+		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
 		$active  = sprintf( '<a href="//wordpress.org/support/theme/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
-		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">Reviews</a>', esc_attr( $this->slug() ) );
+		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
 		$create  = '';
 
 		$create_label = '';
@@ -111,7 +111,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 		}
 		?>
 		<div>
-			<h3>About this Theme</h3>
+			<h3><?php _e( 'About this Theme', 'wporg-forums' ); ?></h3>
 			<ul>
 				<li><?php echo $theme; ?></li>
 				<li><?php echo $support; ?></li>
