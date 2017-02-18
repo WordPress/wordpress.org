@@ -46,6 +46,7 @@ class Plugin {
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
+		add_action( 'admin_bar_menu', array( $this, 'replace_login_url_in_admin_bar' ), 20 );
 		add_action( 'admin_bar_init', array( $this, 'show_admin_bar' ) );
 		add_action( 'add_admin_bar_menus', array( $this, 'remove_admin_bar_menus' ) );
 
@@ -88,7 +89,7 @@ class Plugin {
 	/**
 	 * Adds the link to profile settings to the user actions toolbar menu.
 	 *
-	 * @param \WP_Admin_Bar $wp_admin_bar
+	 * @param \WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance.
 	 */
 	public function add_profile_settings_to_admin_bar( $wp_admin_bar ) {
 		$logout_node = $wp_admin_bar->get_node( 'logout' );
@@ -104,6 +105,23 @@ class Plugin {
 		if ( $logout_node ) {
 			$wp_admin_bar->add_node( $logout_node ); // Ensures that logout is the last action.
 		}
+	}
+
+	/**
+	 * Changes the login URL to include a redirect parameter for the current page.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance.
+	 */
+	public function replace_login_url_in_admin_bar( $wp_admin_bar ) {
+		if ( ! $wp_admin_bar->get_node( 'log-in' ) ) {
+			return;
+		}
+
+		$menu = [
+			'id' => 'log-in',
+			'href' => wp_login_url( gp_url_current() ),
+		];
+		$wp_admin_bar->add_menu( $menu );
 	}
 
 	/**
