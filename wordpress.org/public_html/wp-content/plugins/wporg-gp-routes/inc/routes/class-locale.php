@@ -574,7 +574,7 @@ class Locale extends GP_Route {
 
 		$search_sql = '';
 		if ( $search ) {
-			$esc_search = '%%' . like_escape( $search ) . '%%';
+			$esc_search = '%%' . $wpdb->esc_like( $search ) . '%%';
 			$search_sql = $wpdb->prepare( 'AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
 		}
 
