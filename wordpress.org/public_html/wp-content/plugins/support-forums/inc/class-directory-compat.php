@@ -725,7 +725,7 @@ abstract class Directory_Compat {
 				$author = get_user_by( 'id', $this->theme->post_author );
 				$authors = array( $author->user_login );
 			} else {
-				$authors = $wpdb->get_col( $wpdb->prepare( " SELECT user FROM plugin_2_svn_access WHERE `path` = %s", '/' . $slug ) );
+				$authors = $wpdb->get_col( $wpdb->prepare( " SELECT user FROM " . PLUGINS_TABLE_PREFIX . "svn_access WHERE `path` = %s", '/' . $slug ) );
 			}
 
 			wp_cache_set( $cache_key, $authors, $cache_group, HOUR_IN_SECONDS );
@@ -753,7 +753,7 @@ abstract class Directory_Compat {
 		if ( false === $contributors ) {
 			// @todo Update this when the Plugin Directory switches over to WordPress.
 			$contributors = $wpdb->get_var( $wpdb->prepare(
-				"SELECT meta_value FROM plugin_2_meta m LEFT JOIN plugin_2_topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s",
+				"SELECT meta_value FROM " . PLUGINS_TABLE_PREFIX . "meta m LEFT JOIN " . PLUGINS_TABLE_PREFIX . "topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s",
 				$slug, 'bb_topic', 'contributors' ) );
 			if ( $contributors ) {
 				$contributors = unserialize( $contributors );
