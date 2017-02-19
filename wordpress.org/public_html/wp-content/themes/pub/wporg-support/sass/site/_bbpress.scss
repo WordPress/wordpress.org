@@ -830,11 +830,6 @@ div.bbp-breadcrumb {
 			display: none;
 		}
 
-		> div:nth-child(2n), 
-		> div:nth-child(3n) {
-			display: none;
-		}
-
 		> div.my-account {
 			display: inherit;
 		}

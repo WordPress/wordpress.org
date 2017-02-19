@@ -3278,11 +3278,6 @@ div.bbp-breadcrumb p {
 	display: none;
 }
 
-.bbp-view .sidebar > div:nth-child(2n),
-.bbp-view .sidebar > div:nth-child(3n) {
-	display: none;
-}
-
 .bbp-view .sidebar > div.my-account {
 	display: inherit;
 }
