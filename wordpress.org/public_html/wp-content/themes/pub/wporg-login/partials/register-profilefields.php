@@ -7,12 +7,14 @@
  * @package wporg-login
  */
 
-$fields = array(
-	'url'       => wp_get_current_user()->user_url ?: '',
-	'from'      => get_user_meta( get_current_user_id(), 'from', true ) ?: '',
-	'occ'       => get_user_meta( get_current_user_id(), 'occ', true ) ?: '',
-	'interests' => get_user_meta( get_current_user_id(), 'interests', true ) ?: '',
-);
+$user = get_user_by( 'id', get_current_user_id() );
+
+$fields = [
+	'url'       => $user->user_url ?: '',
+	'from'      => $user->from ?: '',
+	'occ'       => $user->occ ?: '',
+	'interests' => $user->interests ?: '',
+];
 
 ?>
 <p class="login-website">
