@@ -4,7 +4,7 @@ function wporg_login_check_recapcha_status() {
 	if ( empty( $_POST['g-recaptcha-response'] ) ) {
 		return false;
 	}
-	
+
 	$verify = array(
      	'secret'   => RECAPTCHA_PRIVKEY,
      	'remoteip' => $_SERVER['REMOTE_ADDR'],
@@ -52,7 +52,7 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 	if ( $user_mailinglist ) {
 		update_user_meta( $user_id, 'notify_list', 'true' );
 	}
-	
+
 	$body  = sprintf( __( 'Hi %s,', 'wporg-login' ), $user_login ) . "\n\n";
 	$body .= __( 'Welcome to WordPress.org! Your new account has been setup.', 'wporg-login' ) . "\n";
 	$body .= "\n";
@@ -91,10 +91,10 @@ function wporg_login_save_profile_fields() {
 			if ( 'url' == $field ) {
 				wp_update_user( array(
 					'ID' => get_current_user_id(),
-					'user_url' => esc_url_raw( $value )
+					'user_url' => esc_url_raw( $value ),
 				) );
 			} else {
-				update_user_meta( $user->ID, $field, $value );
+				update_user_meta( get_current_user_id(), $field, $value );
 			}
 		}
 	}
