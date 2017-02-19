@@ -34,6 +34,8 @@ class Rosetta_Showcase {
 		add_filter( 'manage_' . $this->post_type . '_posts_custom_column', [ $this, 'showcase_custom_column' ], 10, 2 );
 		add_filter( 'manage_edit-' . $this->post_type . '_sortable_columns', [ $this, 'showcase_sortable_columns' ], 10, 0 );
 		add_filter( 'sharing_meta_box_show', [ $this, 'disable_sharing_meta_box' ], 10, 2 );
+		add_theme_support( 'post-thumbnails', [ 'showcase' ] );
+		add_image_size( 'showcase-thumbnail', 440, 330, true );
 	}
 
 	/**
@@ -41,16 +43,20 @@ class Rosetta_Showcase {
 	 */
 	public function register_post_type() {
 		$labels = [
-			'name'               => _x( 'Showcase', 'post type general name', 'rosetta' ),
-			'singular_name'      => _x( 'Showcase Site', 'post type singular name', 'rosetta' ),
-			'add_new'            => _x( 'Add New', 'showcase item', 'rosetta' ),
-			'add_new_item'       => __( 'Add New Site', 'rosetta' ),
-			'edit_item'          => __( 'Edit Site', 'rosetta' ),
-			'new_item'           => __( 'New Site', 'rosetta' ),
-			'view_item'          => __( 'View Site', 'rosetta' ),
-			'search_items'       => __( 'Search Showcase', 'rosetta' ),
-			'not_found'          => __( 'Nothing found', 'rosetta' ),
-			'not_found_in_trash' => __( 'Nothing found in Trash', 'rosetta' ),
+			'name'                  => _x( 'Showcase', 'post type general name', 'rosetta' ),
+			'singular_name'         => _x( 'Showcase Site', 'post type singular name', 'rosetta' ),
+			'add_new'               => _x( 'Add New', 'showcase item', 'rosetta' ),
+			'add_new_item'          => __( 'Add New Site', 'rosetta' ),
+			'edit_item'             => __( 'Edit Site', 'rosetta' ),
+			'new_item'              => __( 'New Site', 'rosetta' ),
+			'view_item'             => __( 'View Site', 'rosetta' ),
+			'search_items'          => __( 'Search Showcase', 'rosetta' ),
+			'not_found'             => __( 'Nothing found', 'rosetta' ),
+			'not_found_in_trash'    => __( 'Nothing found in Trash', 'rosetta' ),
+			'featured_image'        => __( 'Website Screenshot', 'rosetta' ),
+			'set_featured_image'    => __( 'Set website screenshot', 'rosetta' ),
+			'remove_featured_image' => __( 'Remove website screenshot', 'rosetta' ),
+			'use_featured_image'    => __( 'Use as website screenshot', 'rosetta' ),
 		];
 
 		$args = [
@@ -65,7 +71,7 @@ class Rosetta_Showcase {
 			'show_in_nav_menus'    => false,
 			'can_export'           => false,
 			'exclude_from_search'  => true,
-			'supports'             => [ 'title', 'excerpt' ],
+			'supports'             => [ 'title', 'excerpt', 'thumbnail' ],
 			'menu_icon'            => 'dashicons-slides',
 			'register_meta_box_cb' => [ $this, 'register_showcase_meta_box' ],
 		];
@@ -207,18 +213,34 @@ class Rosetta_Showcase {
 				break;
 
 			case 'description' :
-				the_excerpt();
+				if ( has_excerpt() ) {
+					the_excerpt();
+				} else {
+					echo '&mdash;';
+				}
 				break;
 
 			case 'url' :
 				$url = get_post_meta( $post_id, '_rosetta_showcase_url', true );
-				echo '<a href="' . esc_url( $url ) . '">' . esc_url_raw( $url ) . '</a>';
+				if ( $url ) {
+					echo '<a href="' . esc_url( $url ) . '">' . esc_url_raw( $url ) . '</a>';
+				} else {
+					echo '&mdash;';
+				}
 				break;
 
 			case 'shot' :
 				$url = esc_url( get_post_meta( $post_id, '_rosetta_showcase_url', true ) );
-				if ( $url ) {
-					echo '<a href="' . esc_url( $url ) . '" target="_blank"><img width="200" src="https://wordpress.com/mshots/v1/' . urlencode( $url ) . '?w=400" /></a>';
+
+				$image_url = '';
+				if ( has_post_thumbnail( $post_id ) ) {
+					$image_url = get_the_post_thumbnail_url( $post_id, 'showcase-thumbnail' );
+				} elseif ( $url ) {
+					$image_url = 'https://wordpress.com/mshots/v1/' . urlencode( $url ) . '?w=440';
+				}
+
+				if ( $image_url ) {
+					echo '<a href="' . esc_url( $url ) . '" target="_blank"><img src="' . esc_url( $image_url ) . '" width="200" alt=""></a>';
 				}
 				break;
 		}

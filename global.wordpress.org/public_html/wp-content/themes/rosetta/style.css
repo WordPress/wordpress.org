@@ -255,17 +255,27 @@ form#contactme .button-secondary {
 ul#showcase {
 	text-align: center;
 	margin: 0;
-	font-size: 85%;
+	-webkit-column-count: 2;
+	-moz-column-count: 2;
+	column-count: 2;
+	-webkit-column-gap: 15px;
+	-moz-column-gap: 15px;
+	column-gap: 15px;
+}
+
+@media screen and (min-width: 700px) {
+	ul#showcase {
+		-moz-column-count: 4;
+		-webkit-column-count: 4;
+		column-count: 4;
+	}
 }
 
 #showcase li {
-	display: inline-block;
-	margin-right: 6%;
-	width: 20%;
-}
-
-#showcase li:last-child {
-	margin-right: 0;
+	display: block;
+	break-inside: avoid;
+	page-break-inside: avoid;
+	margin-bottom: 30px;
 }
 
 #showcase a.shot {
@@ -274,10 +284,21 @@ ul#showcase {
 	background-color: rgb(245, 245, 245);
 	border: 1px solid rgb(204, 204, 204);
 	padding: 0;
+	line-height: 1;
 }
 
-#showcase a {
-	font-size: 110%;
+#showcase .shot img {
+	width: 220px;
+}
+
+#showcase li,
+#showcase .showcase-url {
+	font-size: small;
+}
+
+#showcase .showcase-url {
+	display: inline-block;
+	margin-top: 6px;
 }
 
 span#showcase-front-slate {

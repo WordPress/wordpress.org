@@ -81,11 +81,19 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 ?>
 	<li>
 		<a class="shot" href="<?php echo esc_url( $url ); ?>">
-			<img src="<?php echo esc_url( $rosetta->screenshot_url( $url, 230 ) ); ?>" width="230" alt="screenshot" />
+			<?php
+			if ( has_post_thumbnail( $item->ID ) ) {
+				echo get_the_post_thumbnail( $item->ID, 'showcase-thumbnail' );
+			} else {
+				?>
+				<img src="<?php echo esc_url( $rosetta->screenshot_url( $url, 220 ) ); ?>" width="220" alt="" />
+				<?php
+			}
+			?>
 		</a>
 		<?php echo esc_html( $item->post_title ); ?>
 		<br />
-		<a href="<?php echo esc_url( $url ); ?>"><?php _e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
+		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php _e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
 	</li>
 <?php
 	endforeach;
