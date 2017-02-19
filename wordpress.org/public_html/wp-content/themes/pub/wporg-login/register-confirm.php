@@ -55,14 +55,14 @@ get_header();
 ?>
 
 <p class="intro">
-<?php _e( 'Complete your WordPress.org Profile information.', 'wporg-login' ); ?>
+<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg-login' ); ?>
 </p>
 
 <form name="registerform" id="registerform" action="" method="post">
 
 		<div class="user-pass1-wrap">
 		<p>
-			<label for="pass1"><?php _e('New Password', 'wporg-login'); ?></label>
+			<label for="pass1"><?php _e( 'Password', 'wporg-login' ); ?></label>
 		</p>
 
 		<div class="wp-pwd">
@@ -84,7 +84,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>	
+	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
 </p>
 
-<?php get_footer(); ?>
+<?php get_footer();
