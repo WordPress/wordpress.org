@@ -1,5 +1,5 @@
 <?php
-$GLOBALS['pagetitle'] = get_bloginfo( 'name', 'display' );
+$GLOBALS['pagetitle'] = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 <header id="masthead" class="site-header" role="banner">
