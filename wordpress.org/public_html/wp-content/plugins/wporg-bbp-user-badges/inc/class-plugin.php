@@ -353,7 +353,7 @@ class Plugin {
 			if ( 'plugin' === $type ) {
 				// Get users who have commit access.
 				$authors = $wpdb->get_col( $wpdb->prepare(
-					"SELECT user FROM plugin_2_svn_access WHERE `path` = %s",
+					"SELECT user FROM " . PLUGINS_TABLE_PREFIX . "svn_access WHERE `path` = %s",
 					'/' . $slug
 				) );
 			}
@@ -395,7 +395,7 @@ class Plugin {
 			if ( 'plugin' === $type ) {
 				// TODO: Change this when the Plugin Directory switches over to WordPress.
 				$contributors = $wpdb->get_var( $wpdb->prepare(
-					'SELECT meta_value FROM plugin_2_meta m LEFT JOIN plugin_2_topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s',
+					'SELECT meta_value FROM ' . PLUGINS_TABLE_PREFIX . 'meta m LEFT JOIN ' . PLUGINS_TABLE_PREFIX . 'topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s',
 					$slug,
 					'bb_topic',
 					'contributors'
