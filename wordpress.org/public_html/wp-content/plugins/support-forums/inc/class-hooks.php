@@ -151,9 +151,14 @@ class Hooks {
 			//
 			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
 			// The SSO code handles the urlencoding of the redirect_to parameter
-			$url_parts = parse_url('https://wordpress.org'.$_SERVER['REQUEST_URI']);
+			$url_parts = parse_url( set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) );
 			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
-			$login_url = $constructed_url;
+
+			if ( class_exists( 'WPOrg_SSO' ) ) {
+				$login_url = $constructed_url;
+			} else {
+				$login_url = add_query_arg( 'redirect_to', urlencode( $constructed_url ), $login_url );
+			}
 		}
 		return $login_url;
 	}
