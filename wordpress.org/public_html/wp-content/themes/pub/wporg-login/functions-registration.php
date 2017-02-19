@@ -6,12 +6,12 @@ function wporg_login_check_recapcha_status() {
 	}
 
 	$verify = array(
-     	'secret'   => RECAPTCHA_PRIVKEY,
-     	'remoteip' => $_SERVER['REMOTE_ADDR'],
-     	'response' => $_POST['g-recaptcha-response'],
+		'secret'   => RECAPTCHA_PRIVKEY,
+		'remoteip' => $_SERVER['REMOTE_ADDR'],
+		'response' => $_POST['g-recaptcha-response'],
 	);
 
-     $resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
+	$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );
 
 	if ( is_wp_error( $resp ) || 200 != wp_remote_retrieve_response_code( $resp ) ) {
 		return false;
