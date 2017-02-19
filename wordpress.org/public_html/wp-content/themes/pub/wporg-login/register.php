@@ -42,15 +42,16 @@ get_header();
 <p class="intro"><?php _e( 'Create a WordPress.org account to start contributing to WordPress, get help in the support forums, or rate and review themes and plugins.', 'wporg-login' ); ?></p>
 
 <form name="registerform" id="registerform" action="/register" method="post">
+
 	<p class="login-username">
 		<label for="user_login"><?php _e( 'Username', 'wporg-login' ); ?></label>
 		<input type="text" name="user_login" id="user_login" class="input <?php if ( $error_user_login ) echo 'error'; ?>" value="<?php echo esc_attr( $user_login ) ?>" size="20" maxlength="60" />
 		<span class="small"><?php _e( 'Required. Only lower case letters (a-z) and numbers (0-9) are allowed.', 'wporg-login' ); ?></span>
 	</p>
 	<?php
-		if ( $error_user_login ) {
-			echo '<div class="message error"><p>' . $error_user_login->get_data()['avatar'] . $error_user_login->get_data()['error'] . '</p></div>';
-		}
+	if ( $error_user_login ) {
+		echo '<div class="message error"><p>' . $error_user_login->get_data()['avatar'] . '<span>' . $error_user_login->get_data()['error'] . '</span></p></div>';
+	}
 	?>
 
 	<p class="login-email">
@@ -59,9 +60,9 @@ get_header();
 		<span class="small"><?php _e( 'Required. Your password will be emailed here.', 'wporg-login' ); ?></span>
 	</p>
 	<?php
-		if ( $error_user_email ) {
-			echo '<div class="message error"><p>' . $error_user_email->get_data()['avatar'] . $error_user_email->get_data()['error'] . '</p></div>';
-		}
+	if ( $error_user_email ) {
+		echo '<div class="message error"><p>' . $error_user_email->get_data()['avatar'] . '<span>' . $error_user_email->get_data()['error'] . '</span></p></div>';
+	}
 	?>
 
 	<p class="login-mailinglist">
@@ -89,7 +90,7 @@ get_header();
 <p id="nav">
 	<a href="/" title="<?php esc_attr_e( 'Already have an account?', 'wporg-login' ); ?>"><?php _e( 'Already have an account?', 'wporg-login' ); ?></a> &nbsp; • &nbsp;
 	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
-	
+
 </p>
 
-<?php get_footer(); ?>
+<?php get_footer();

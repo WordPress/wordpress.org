@@ -6,10 +6,14 @@
 
 body.login {
 	/* Using flexbox to control the vertical alignment of the form and white box */
-	display: -webkit-flex;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	-webkit-align-items:center;
-	align-items:center;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	height: auto;
+	min-height: 100%;
 }
 
 /* Don't use Flex alignments for the registration pages, doesn't play nice with content that exceeds the window height  */
@@ -17,7 +21,7 @@ body.route-register,
 body.route-register-profile,
 body.route-register-confirm {
 	display: block;
-	margin-top: 100px;
+	padding-top: 72px;
 }
 
 .login-action-lostpassword.login .message,
@@ -33,9 +37,9 @@ body.route-register-confirm {
 }
 
 .wp-core-ui .button-primary, .wp-core-ui.login .button-primary {
-	width:100%;
-	height:40px;
-	font-size:14px;
+	width: 100%;
+	height: 40px;
+	font-size: 14px;
 }
 
 #backtoblog {
@@ -43,71 +47,71 @@ body.route-register-confirm {
 }
 
 #pass-strength-result {
-	background: #FFF;
+	background: #fff;
 }
 
 #pass-strength-result.strong {
-	background-color:#FFF;
-	border-color:transparent;
-	color: #46b450;  /* Green */
+	background-color: #fff;
+	border-color: transparent;
+	color: #46b450; /* Green */
 	-webkit-box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -100px 0 #46b450,
 		inset 100px 0 #46b450;
 	box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -100px 0 #46b450,
 		inset 100px 0 #46b450;
 }
 
 #pass-strength-result.good {
-	background-color:#FFF;
-	border-color:transparent;
+	background-color: #fff;
+	border-color: transparent;
 	color: #ffb900; /* Orange */
 	-webkit-box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -80px 0 #ffb900,
 		inset 80px 0 #ffb900;
 	box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -80px 0 #ffb900,
 		inset 80px 0 #ffb900;
 }
 
 #pass-strength-result.bad, #pass-strength-result.short {
-	background-color:#FFF;
-	border-color:transparent;
+	background-color: #fff;
+	border-color: transparent;
 	color: #dc3232; /* Red */
 	-webkit-box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -80px 0 #dc3232,
 		inset 80px 0 #dc3232;
 	box-shadow:
-		inset 0 14px #FFF,
-		inset 0 -14px #FFF,
+		inset 0 14px #fff,
+		inset 0 -14px #fff,
 		inset -80px 0 #dc3232,
 		inset 80px 0 #dc3232;
 }
 
 .reset-pass {
-	margin-bottom:0;
+	margin-bottom: 0;
 }
 
 #loginform {
 	margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
+	padding: 0 !important;
+	background: transparent !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
 }
 
 #login form p {
-	margin:0;
+	margin: 0;
 }
 
 /**
@@ -117,7 +121,7 @@ body.route-register-confirm {
  */
 
 body {
-	color: #555D66;
+	color: #555d66;
 	font-size: 14px;
 }
 
@@ -128,7 +132,7 @@ body {
 }
 
 a {
-	color: #555D66 !important;
+	color: #555d66 !important;
 	text-decoration: underline !important;
 	font-weight: normal;
 	outline: 0;
@@ -161,33 +165,33 @@ strong {
 }
 
 .wp-core-ui .button-primary {
-	-webkit-box-shadow:none;
-	box-shadow:none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 .singleline {
-	position:relative;
-	left:-12px;
-	width:278px;
+	position: relative;
+	left: -12px;
+	width: 278px;
 }
 
 #login {
 	width: 350px;
 	padding: 24px;
-	margin: 0 auto 0;
-	background: #FFF;
+	margin: 72px auto 68px; /* top and bottom values of h1 and #nav */
+	background: #fff;
 	position: relative;
-    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
 }
 
 #login h1 {
 	text-align: center;
-    margin-bottom: 24px;
-    position: absolute;
-    top: -72px;
-    width: 100%;
-    left: 0;
+	margin-bottom: 24px;
+	position: absolute;
+	top: -72px;
+	width: 100%;
+	left: 0;
 }
 
 #login h1 a {
@@ -206,28 +210,28 @@ strong {
 	outline: none;
 	overflow: hidden;
 	display: block;
-	-webkit-transition:none;
-	transition:none;
+	-webkit-transition: none;
+	transition: none;
 }
 
 p.intro, #login .message {
-	margin-bottom:24px !important;
+	margin-bottom: 24px !important;
 }
 
 #login .message + #login_error {
-	margin-top:0 !important;
-	border-top:1px solid #f5f5f5;
+	margin-top: 0 !important;
+	border-top: 1px solid #f5f5f5;
 }
 
 #login #login_error {
 	border-left: 4px solid #00a0d2;
 	padding: 12px;
-	margin:-24px 0 24px -24px;
+	margin: -24px 0 24px -24px;
 	background-color: #fbfbfb;
-	width:350px;
-	border-bottom:1px solid #f5f5f5;
-	-webkit-box-shadow:none !important;
-	box-shadow:none !important;
+	width: 350px;
+	border-bottom: 1px solid #f5f5f5;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
 }
 
 #login #login_error {
@@ -236,26 +240,26 @@ p.intro, #login .message {
 
 #login #nav {
 	font-size: 13px;
-    padding: 0;
-    margin: 24px auto;
-    text-align: center;
-    position: absolute;
-    left: 0;
-    bottom: -68px;
-    width: 100%;
+	padding: 0;
+	margin: 24px auto;
+	text-align: center;
+	position: absolute;
+	left: 0;
+	bottom: -68px;
+	width: 100%;
 }
 
 .login form {
 	margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
-    overflow: visible;
+	padding: 0 !important;
+	background: transparent !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	overflow: visible;
 }
 
 .mobile #login {
-	padding:24px;
+	padding: 24px;
 }
 
 .container {
@@ -279,7 +283,7 @@ form .login-remember {
 
 form .forgetmenot label,
 form .login-remember label {
-	font-size:12px;
+	font-size: 12px;
 	line-height: 1;
 	cursor: pointer;
 }
@@ -317,6 +321,7 @@ body.route-register-profile input.input,
 body.route-register-confirm input.input {
 	margin-bottom: 0;
 }
+
 body.route-register #login form p,
 body.route-register-profile #login form p,
 body.route-register-confirm #login form p {
@@ -326,21 +331,26 @@ body.route-register-confirm #login form p {
 body.login form input.input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
 	opacity: 0.5;
 }
+
 body.login form input.input::-moz-placeholder { /* Firefox 19+ */
 	opacity: 0.5;
 }
+
 body.login form input.input:-ms-input-placeholder { /* IE 10+ */
 	opacity: 0.5;
 }
+
 body.login form input.input:-moz-placeholder { /* Firefox 18- */
 	opacity: 0.5;
 }
+
 body.login form input.error {
-	background-color: #FAE5E8;
-	border: 3px solid #D42A41;
+	background-color: #fbeaea;
+	border: 2px solid #dc3232;
 }
+
 body.login form input.good {
-	border-color: #83c373;
+	border-color: #46b450;
 }
 
 body.route-register #login .message,
@@ -348,19 +358,42 @@ body.route-register-profile #login .message,
 body.route-register-confirm #login .message {
 	margin-left: -24px;
 	padding-left: 24px;
-	padding-right: 0;
+	padding-right: 24px;
+	margin-right: -24px;
+}
+
+body.route-register #login .message p,
+body.route-register-profile #login .message p,
+body.route-register-confirm #login .message p {
+	margin: 0;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
 }
 
 body.route-register #login .message.error,
 body.route-register-profile #login .message.error,
 body.route-register-confirm #login .message.error {
+	margin-bottom: 30px !important;
+	color: #23282d;
+	background: #fbfbfb;
 	border-left-color: #dc3232;
-	margin-bottom: auto !important;
+	-webkit-box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.07),
+		0 -1px 2px rgba(0, 0, 0, 0.07);
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.07),
+		0 -1px 2px rgba(0, 0, 0, 0.07);
 }
+
 body.route-register .message.error .avatar {
-	float: left;
 	border-radius: 50%;
 	margin-right: 1em;
+	max-width: 100%;
+	height: auto;
 }
 
 body.route-register-profile #login .message.info {
@@ -390,44 +423,77 @@ form:after {
 	display: table;
 	border-collapse: collapse;
 }
+
 form:after {
 	clear: both;
 }
+
 form {
 	min-height: 0; /* clearfix IE7 support */
 }
 
-@media (max-width:375px) {
-	body, html { 
-		background:#FFF; 
+@media (max-width: 375px) {
+	body, html {
+		background: #fff;
 	}
+
 	body.login {
-		display:block; /* Overwriting flexbox to remove vertical positioning */
-		align-items:center;
-		margin-top:100px; /* Fix for displaying logo correctly */
+		display: block; /* Overwriting flexbox to remove vertical positioning */
+		padding-top: 20px;
+		padding-bottom: 20px;
 	}
-	#login, .mobile #login {
-		-webkit-box-shadow:none;
-		box-shadow:none;
-		padding:24px;
+
+	#login,
+	.mobile #login {
+		-webkit-box-shadow: none;
+		box-shadow: none;
+		padding: 24px;
 	}
+
 	#login #login_error {
-		margin-left:0;
-		width:100%;
+		margin-left: 0;
+		width: 100%;
+	}
+
+	#login {
+		margin-top: 52px;
+		margin-bottom: 48px;
+	}
+
+	#login #nav {
+		bottom: -48px;
+	}
+
+	#login h1 {
+		top: -52px;
+	}
+
+	body.route-register .message.error .avatar {
+		max-width: 40px
+	}
+
+	#rc-imageselect, .g-recaptcha {
+		margin: 0 auto;
+		transform: scale(0.8);
+		-webkit-transform: scale(0.8);
+		transform-origin: 0 0;
+		-webkit-transform-origin: 0 0;
 	}
 }
 
-@media (max-width:360px) {
+@media (max-width: 360px) {
 	#login {
-		width:100%;
-		padding:20px 24px;
+		width: 100%;
+		padding: 20px 24px;
 	}
+
 	#login h1 {
-		padding:0 24px 24px;
+		padding: 0 24px 24px;
 	}
+
 	#login h1 a {
-		-webkit-background-size:100%;
-		background-size:100%;
+		-webkit-background-size: 100%;
+		background-size: 100%;
 	}
 }
 
@@ -435,6 +501,7 @@ form {
 @media (max-height: 550px) {
 	body.login {
 		display: block;
-		margin-top: 100px;
+		padding-top: 20px;
+		padding-bottom: 20px;
 	}
 }
