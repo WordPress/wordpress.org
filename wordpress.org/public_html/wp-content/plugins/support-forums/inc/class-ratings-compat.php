@@ -352,19 +352,15 @@ class Ratings_Compat {
 	}
 
 	public function do_template_notice() {
-		if ( $this->object->post_author == get_current_user_id() ) {
-			$notice = __( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ) . ' ';
+		if ( $this->object->post_author == get_current_user_id() ) { ?>
+			<p><?php _e( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ); ?></p>
 
-			switch( $this->compat ) {
-				case 'plugin' :
-					$notice .= __( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' );
-					break;
-				case 'theme' :
-					$notice .= __( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' );
-					break;
-			}
+			<?php if ( 'plugin' === $this->compat ) : ?>
+				<p><?php _e( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+			<?php elseif ( 'theme' === $this->compat ) : ?>
+				<p><?php _e( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+			<?php endif;
 
-			echo '<p>' . $notice . '</p>';
 			return;
 		}
 
