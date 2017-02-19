@@ -65,30 +65,6 @@ class Theme_Directory_Compat extends Directory_Compat {
 
 		$this->do_topic_sidebar();
 
-		?>
-		<div>
-			<h3><?php _e( 'Browse Themes', 'wporg-forums' ); ?></h3>
-
-			<ul class="theme-submenu">
-				<li class="view"><a href="//wordpress.org/themes/"><?php _e( 'Featured', 'wporg-forums' ); ?></a></li>
-				<li class="view"><a href="//wordpress.org/themes/browse/popular/"><?php _e( 'Most Popular', 'wporg-forums' ); ?></a></li>
-				<li class="view"><a href="//wordpress.org/themes/browse/new/"><?php _e( 'Latest', 'wporg-forums' ); ?></a></li>
-				<li class="view"><a href="/themes/getting-started/"><?php _e( 'Theme Authors', 'wporg-forums' ); ?></a></li>
-				<li class="view"><a href="/themes/commercial/"><?php _e( 'Commercial', 'wporg-forums' ); ?></a></li>
-			</ul>
-		</div>
-
-		<div>
-			<h3><?php _e( 'Search Themes', 'wporg-forums' ); ?></h3>
-
-			<form id="side-search" method="get" action="//wordpress.org/themes/search.php">
-			<div>
-				<input type="text" class="text" name="q" value="" />
-				<input type="submit" class="button" value="<?php _e( 'Search', 'wporg-forums' ); ?>" />
-			</div>
-			</form>
-		</div>
-		<?php
 	}
 
 	public function do_topic_sidebar() {

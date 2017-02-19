@@ -65,30 +65,6 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 		$this->do_topic_sidebar();
 
-		?>
-		<div>
-			<h3><?php _e( 'Browse Plugins', 'wporg-forums' ); ?></h3>
-
-			<ul class="plugin-submenu">
-				<li class="view"><a href='//wordpress.org/plugins/'><?php _e( 'Featured', 'wporg' ); ?></a></li>
-				<li class="view"><a href='//wordpress.org/plugins/browse/popular/'><?php _e( 'Most Popular', 'wporg' ); ?></a></li>
-				<li class="view"><a href='//wordpress.org/plugins/browse/favorites/'><?php _e( 'Favorites', 'wporg' ); ?></a></li>
-				<li class="view"><a href='//wordpress.org/plugins/browse/beta/'><?php _e( 'Beta Testing', 'wporg' ); ?></a></li>
-				<li class="view"><a href='/plugins/about/'><?php _e( 'Developers', 'wporg' ); ?></a></li>
-			</ul>
-		</div>
-
-		<div>
-			<h3><?php _e( 'Search Plugins', 'wporg-forums' ); ?></h3>
-
-			<form id="side-search" method="get" action="//wordpress.org/plugins/search.php">
-			<div>
-				<input type="text" class="text" name="q" value="" />
-				<input type="submit" class="button" value="<?php _e( 'Search', 'wporg-forums' ); ?>" />
-			</div>
-			</form>
-		</div>
-		<?php
 	}
 
 	public function do_topic_sidebar() {

@@ -189,7 +189,7 @@ abstract class Directory_Compat {
 			// Set the term for this view so we can reuse it.
 			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
 
-			// Add theme-specific filters and actions.
+			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_subscription_link' ), 11 );
