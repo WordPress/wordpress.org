@@ -366,6 +366,11 @@ body.route-register #login .message p,
 body.route-register-profile #login .message p,
 body.route-register-confirm #login .message p {
 	margin: 0;
+}
+
+body.route-register #login .message.with-avatar p,
+body.route-register-profile #login .message.with-avatar p,
+body.route-register-confirm #login .message.with-avatar p {
 	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;

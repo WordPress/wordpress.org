@@ -25,10 +25,10 @@
 					if ( ! datas.available ) {
 						$this.addClass( 'error' );
 						$this.parents( 'p' ).after(
-							"<div class='message error'><p>" +
+							'<div class="message error' + ( datas.avatar ? ' with-avatar' : '' ) +  '"><p>' +
 							( datas.avatar ? datas.avatar : '' ) + '<span>' +
 							datas.error +
-							"</span></p></div>"
+							'</span></p></div>'
 						);
 					} else {
 						$this.addClass( 'good' );

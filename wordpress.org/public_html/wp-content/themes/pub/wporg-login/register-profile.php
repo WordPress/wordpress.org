@@ -30,7 +30,15 @@ wp_enqueue_script( 'wporg-registration' );
 
 get_header();
 ?>
-<div class="message info"><p><?php _e( "Please check your email for a confirmation link to set your password.", 'wporg-login' ); ?></p></div>
+<div class="message info">
+	<p><?php
+		printf(
+			/* translators: %s Email address */
+			__( 'Please check your email %s for a confirmation link to set your password.', 'wporg-login' ),
+			'<code>' . esc_html( wp_get_current_user()->user_email ) . '</code>'
+		);
+	?></p>
+</div>
 
 <p class="intro">
 <?php _e( 'Complete your WordPress.org Profile information.', 'wporg-login' ); ?>
@@ -47,7 +55,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>	
+	<a href="https://wordpress.org/"><?php _e( 'WordPress.org', 'wporg-login' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

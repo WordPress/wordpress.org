@@ -50,7 +50,12 @@ get_header();
 	</p>
 	<?php
 	if ( $error_user_login ) {
-		echo '<div class="message error"><p>' . $error_user_login->get_data()['avatar'] . '<span>' . $error_user_login->get_data()['error'] . '</span></p></div>';
+		printf(
+			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
+			$error_user_login->get_data()['avatar'] ? ' with-avatar' : '',
+			$error_user_login->get_data()['avatar'],
+			$error_user_login->get_data()['error']
+		);
 	}
 	?>
 
@@ -61,7 +66,12 @@ get_header();
 	</p>
 	<?php
 	if ( $error_user_email ) {
-		echo '<div class="message error"><p>' . $error_user_email->get_data()['avatar'] . '<span>' . $error_user_email->get_data()['error'] . '</span></p></div>';
+		printf(
+			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
+			$error_user_email->get_data()['avatar'] ? ' with-avatar' : '',
+			$error_user_email->get_data()['avatar'],
+			$error_user_email->get_data()['error']
+		);
 	}
 	?>
 
