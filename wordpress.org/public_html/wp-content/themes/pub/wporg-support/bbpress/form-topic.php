@@ -89,7 +89,13 @@
 					<?php do_action( 'bbp_theme_before_topic_form_title' ); ?>
 
 					<p>
-						<label for="bbp_topic_title"><?php printf( __( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() ); ?></label><br />
+						<label for="bbp_topic_title"><?php
+							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+								printf( __( 'Review Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+							} else {
+								printf( __( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
+							}
+						?></label><br />
 						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
 					</p>
 
@@ -115,7 +121,13 @@
 					<?php do_action( 'bbp_theme_before_topic_form_tags' ); ?>
 
 					<p>
-						<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
+						<label for="bbp_topic_tags"><?php
+							if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+								_e( 'Review Tags:', 'wporg-forums' );
+							} else {
+								_e( 'Topic Tags:', 'wporg-forums' );
+							}
+						?></label><br />
 						<input type="text" value="<?php bbp_form_topic_tags(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" <?php disabled( bbp_is_topic_spam() ); ?> />
 					</p>
 
