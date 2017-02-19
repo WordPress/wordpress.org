@@ -131,5 +131,14 @@ remove_action( 'wp_head', 'rsd_link' );
 // We don't need all the rest routes either..
 remove_action( 'rest_api_init', 'create_initial_rest_routes', 99 );
 
-// Don't need all the wp-admin specific user metas on user create/update
-add_filter( 'insert_user_meta', '__return_empty_array', 1 );
+/**
+ * Don't need all the wp-admin specific user metas on user create/update.
+ *
+ * @param array $meta Default meta values and keys for the user.
+ * @return array Filtered meta values and keys for the user.
+ */
+function wporg_login_limit_user_meta( $meta ) {
+	$keep = [ 'nickname' ];
+	return array_intersect_key( $meta, array_flip( $keep ) );
+}
+add_filter( 'insert_user_meta', 'wporg_login_limit_user_meta', 1 );
