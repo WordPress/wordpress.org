@@ -21,9 +21,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			'loggedout'    => '/loggedout',
 			'lostpassword' => '/lostpassword',
 			'oauth'        => '/oauth',
-			'register-profile' => '/register/profile/(?P<profile_user>[^/]+)/(?P<profile_nonce>[^/]+)',
-			'register-confirm' => '/register/confirm/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+)',
-			'register'         => '/register',
 		);
 
 		/**
@@ -137,6 +134,13 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Extend paths which are only available for logged in users.
 			if ( is_user_logged_in() ) {
 				$this->valid_sso_paths['logout'] = '/logout';
+			}
+
+			// Extend registration paths only when registration is open.
+			if ( 'user' === get_site_option( 'registration', 'none' ) ) {
+				$this->valid_sso_paths['register-profile'] = '/register/profile/(?P<profile_user>[^/]+)/(?P<profile_nonce>[^/]+)';
+				$this->valid_sso_paths['register-confirm'] = '/register/confirm/(?P<confirm_user>[^/]+)/(?P<confirm_key>[^/]+)';
+				$this->valid_sso_paths['register']         = '/register';
 			}
 
 			$redirect_req = $this->_get_safer_redirect_to();
