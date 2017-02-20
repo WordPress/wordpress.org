@@ -146,10 +146,10 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$redirect_req = $this->_get_safer_redirect_to();
 
 			// Add our host to the list of allowed ones.
-			add_filter( 'allowed_redirect_hosts', array( &$this, 'add_allowed_redirect_host' ) );
+			add_filter( 'allowed_redirect_hosts', array( $this, 'add_allowed_redirect_host' ) );
 
 			// Replace some URLs by our own.
-			add_filter( 'lostpassword_url', array( &$this, 'lostpassword_url' ), 20, 2 );
+			add_filter( 'lostpassword_url', array( $this, 'lostpassword_url' ), 20, 2 );
 			add_filter( 'site_url', array( $this, 'login_post_url' ), 20, 3 );
 			add_filter( 'register_url', array( $this, 'register_url' ), 20 );
 
@@ -215,7 +215,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 									$this->_redirect_to_profile();
 								} else {
 									if ( empty( $_GET['screen'] ) ) {
-										add_filter( 'login_form_defaults', array( &$this, 'login_form_defaults' ) );
+										add_filter( 'login_form_defaults', array( $this, 'login_form_defaults' ) );
 									}
 								}
 								return;
@@ -240,7 +240,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					}
 				} else {
 					// if on login screen, filter network_site_url to make sure our forms go to the SSO host, not wordpress.org
-					add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
+					add_action( 'network_site_url', array( $this, 'login_network_site_url' ), 10, 3 );
 				}
 			}
 		}
@@ -254,7 +254,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @param string $scheme
 		 * @return string
 		 *
-		 * @example add_action( 'network_site_url', array( &$this, 'login_network_site_url' ), 10, 3 );
+		 * @example add_action( 'network_site_url', array( $this, 'login_network_site_url' ), 10, 3 );
 		 */
 		public function login_network_site_url( $url, $path, $scheme ) {
 			if ( self::SSO_HOST === $this->host && preg_match( '!/wp-login\.php$!', $this->script ) ) {

@@ -1,7 +1,7 @@
 <?php
 if ( ! class_exists( 'WPOrg_SSO' ) ) {
 	/**
-	 * Single Sign-On (SSO) handling for WordPress/bbPress/GlotPress instances under *.wordpress.org.
+	 * Single Sign-On (SSO) handling for WordPress/bbPress instances under *.wordpress.org.
 	 *
 	 * @author stephdau
 	 */
@@ -50,7 +50,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			}
 
 			// If we got a host by now, it's a safe wordpress.org-based one, add it to the list of allowed redirects
-			if ( ! empty( $host ) && ! in_array( $host, $hosts ) ){
+			if ( ! empty( $host ) && ! in_array( $host, $hosts ) ) {
 				$hosts[] = $host;
 			}
 
@@ -80,7 +80,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			return $login_url;
 
 		}
-
 
 		/**
 		 * Tests if the current process has $_SERVER['HTTP_HOST'] or not (EG: cron'd processes do not).
@@ -113,7 +112,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
-			} else{
+			} else {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
 				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
@@ -152,10 +151,10 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		/**
 		 * Validates if target URL is within our bounds, then redirects to it if so, or to WP.org homepage (returns if headers already sent).
 		 *
-		 * @param string $to Destination URL
-		 * @param number $status HTTP redirect status, defaults to 302
-		 *
 		 * @note: using our own over wp_safe_redirect(), etc, because not all targeted platforms (WP/BB/GP/etc) implement an equivalent, we run early, etc.
+		 *
+		 * @param string $to     Destination URL
+		 * @param int    $status HTTP redirect status, defaults to 302
 		 */
 		protected function _safe_redirect( $to, $status = 302 ) {
 			if ( headers_sent() ) {
