@@ -12,17 +12,18 @@ class Stickies_Compat {
 	var $object   = null;
 	var $term     = null;
 
-	public function __construct( $compat, $slug, $taxonomy, $object, $term, $authors = array() ) {
+	public function __construct( $compat, $slug, $taxonomy, $object, $term, $authors = array(), $contributors = array() ) {
 		if ( empty( $compat ) || empty( $slug ) || empty( $taxonomy ) || empty( $object ) || empty( $term ) ) {
 			return;
 		}
 
-		$this->compat   = $compat;
-		$this->slug     = $slug;
-		$this->taxonomy = $taxonomy;
-		$this->object   = $object;
-		$this->term     = $term;
-		$this->authors  = $authors;
+		$this->compat       = $compat;
+		$this->slug         = $slug;
+		$this->taxonomy     = $taxonomy;
+		$this->object       = $object;
+		$this->term         = $term;
+		$this->authors      = $authors;
+		$this->contributors = $contributors;
 
 		// Remove global stickies from sticky array.
 		add_filter( 'bbp_get_super_stickies', array( $this, 'get_super_stickies' ) );
@@ -212,6 +213,11 @@ class Stickies_Compat {
 
 			// Compat authors.
 			if ( $this->authors && in_array( $user->user_login, $this->authors ) ) {
+				$retval = true;
+			}
+
+			// Compat contributors.
+			if ( $this->contributors && in_array( $user->user_login, $this->contributors ) ) {
 				$retval = true;
 			}
 		}
