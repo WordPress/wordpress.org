@@ -291,11 +291,18 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * Filters the default lost password URL and returns our custom one instead.
 		 *
-		 * @param string $lostpassword_url
-		 * @param string $redirect
+		 * @param string $lostpassword_url The lost password page URL.
+		 * @param string $redirect         The path to redirect to on login.
+		 * @return string New lost password URL.
 		 */
 		public function lostpassword_url( $lostpassword_url, $redirect ) {
-			return $this->sso_host_url . $this->valid_sso_paths['lostpassword'] . '/?redirect_to=' . $redirect;
+			$lostpassword_url = $this->sso_host_url . $this->valid_sso_paths['lostpassword'];
+
+			if ( ! empty( $redirect ) ) {
+				$lostpassword_url = add_query_arg( 'redirect_to', $redirect, $lostpassword_url );
+			}
+
+			return $lostpassword_url;
 		}
 
 		/**
