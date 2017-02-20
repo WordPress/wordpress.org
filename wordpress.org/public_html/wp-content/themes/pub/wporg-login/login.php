@@ -13,7 +13,7 @@ get_header();
 
 <p id="nav">
 	<a href="/lostpassword/" title="<?php _e( 'Password Lost and Found', 'wporg-login' ); ?>"><?php _e( 'Lost password?', 'wporg-login' ); ?></a> &nbsp; • &nbsp;
-	<a href="https://login.wordpress.org/register/" title="<?php _e( 'Create an account', 'wporg-login' ); ?>"><?php _e( 'Create an account', 'wporg-login' ); ?></a>
+	<a href="<?php echo esc_url( wp_registration_url() ); ?>" title="<?php _e( 'Create an account', 'wporg-login' ); ?>"><?php _e( 'Create an account', 'wporg-login' ); ?></a>
 </p>
 
 <script type="text/javascript">
