@@ -87,22 +87,31 @@
 
 			<?php endif; ?>
 
-		<?php elseif ( ! bbp_is_single_user() ) : ?>
+		<?php elseif ( is_tax( 'topic-tag' ) ) : ?>
 
 			<?php
 				$term_subscription = '';
-				if ( is_tax( 'topic-tag' ) && function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
+				if ( function_exists( 'WordPressdotorg\Forums\Term_Subscription\get_subscription_link' ) ) {
 					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
 				}
 				if ( $term_subscription ) {
 					echo '<div>' . $term_subscription . "</div>\n";
 				}
 			?>
+
+		<?php endif; ?>
+
+		<?php if ( ! bbp_is_single_user() ) : ?>
+
 			<div>
 				<h4><?php _e( 'Views', 'wporg-forums' ); ?></h4>
 				<ul class="topic-views">
 
-					<?php foreach ( bbp_get_views() as $view => $args ) : ?>
+					<?php foreach ( bbp_get_views() as $view => $args ) :
+						if ( in_array( $view, array( 'theme', 'plugin', 'reviews', 'active' ) ) ) {
+							continue;
+						}
+						?>
 
 						<li><a class="bbp-view-title" href="<?php bbp_view_url( $view ); ?>"><?php bbp_view_title( $view ); ?></a></li>
 
@@ -110,6 +119,10 @@
 
 				</ul>
 			</div>
+
+		<?php endif; ?>
+
+		<?php if ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews', 'active' ) ) || is_tax( 'topic-tag' ) ) : ?>
 
 			<div>
 				<h4><?php _e( 'Feeds', 'wporg-forums' ); ?></h4>
