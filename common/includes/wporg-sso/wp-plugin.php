@@ -54,7 +54,21 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 				add_filter( 'password_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
 				add_filter( 'email_change_email', array( $this, 'replace_admin_email_in_change_emails' ) );
+
+				add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
 			}
+		}
+
+		/**
+		 * Inherits the 'registration' option from the main network.
+		 *
+		 * @return string Current registration status.
+		 */
+		public function inherit_registration_option() {
+			remove_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
+			$value = get_network_option( 1, 'registration', 'none' );
+			add_filter( 'pre_site_option_registration', array( $this, 'inherit_registration_option' ) );
+			return $value;
 		}
 
 		/**
