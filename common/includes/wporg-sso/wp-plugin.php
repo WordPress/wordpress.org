@@ -225,8 +225,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 								$this->_redirect_to_profile();
 							}
 						}
-					} elseif ( ( is_admin() && is_super_admin() ) || preg_match( '!^/wp-json(/?$|/.+)!i', $_SERVER['REQUEST_URI'] ) ) {
-						// Do nothing, allow access to wp-admin and wp-json on login.wordpress.org
+					} elseif ( ( is_admin() && is_super_admin() ) || preg_match( '!^/wp-json(/?$|/.+)!i', $_SERVER['REQUEST_URI'] ) || '/xmlrpc.php' === $_SERVER['REQUEST_URI'] ) {
+						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org
 					} elseif ( is_user_logged_in() ) {
 						// Logged in catch all, before last fallback
 						$this->_redirect_to_profile();
