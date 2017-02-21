@@ -73,7 +73,7 @@
 				?>
 			</div-->
 
-			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
+			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) || wporg_support_current_user_can_stick( bbp_get_topic_id() ) ) : ?>
 
 				<div>
 					<?php bbp_topic_admin_links( array (

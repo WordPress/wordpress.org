@@ -300,6 +300,34 @@ function wporg_support_change_super_sticky_text( $links ) {
 add_filter( 'bbp_topic_admin_links', 'wporg_support_change_super_sticky_text' );
 
 /**
+ * Check if the current user can stick a topic to a plugin or theme forum.
+ *
+ * @param int $topic_id Topic ID.
+ * @return bool True if the user can stick the topic, false otherwise.
+ */
+function wporg_support_current_user_can_stick( $topic_id ) {
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
+		return false;
+	}
+
+	$user_can_stick  = false;
+	$stickies        = null;
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
+
+	if ( ! empty( $plugin_instance->plugins->stickies ) ) {
+		$stickies = $plugin_instance->plugins->stickies;
+	} elseif ( ! empty( $plugin_instance->themes->stickies ) ) {
+		$stickies = $plugin_instance->themes->stickies;
+	}
+
+	if ( $stickies ) {
+		$user_can_stick = $stickies->user_can_stick( get_current_user_id(), $stickies->term->term_id, $topic_id );
+	}
+
+	return $user_can_stick;
+}
+ 
+/**
  * Correct reply URLs for pending posts.
  *
  * bbPress appends '/edit/' even to ugly permalinks, which pending posts will
