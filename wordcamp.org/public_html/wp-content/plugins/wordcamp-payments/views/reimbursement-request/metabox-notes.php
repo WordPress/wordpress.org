@@ -34,7 +34,7 @@ defined( 'WPINC' ) or die();
 	<textarea id="wcbrr_new_note" name="wcbrr_new_note" class="large-text"></textarea>
 
 	<?php submit_button(
-		__( 'Add Note', 'wordcamporg' ),
+		esc_html__( 'Add Note', 'wordcamporg' ),
 		'secondary',
 		'wcbrr_add_note'
 	); ?>

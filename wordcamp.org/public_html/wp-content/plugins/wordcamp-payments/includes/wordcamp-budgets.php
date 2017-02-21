@@ -22,7 +22,7 @@ class WordCamp_Budgets {
 		// Uses core's draft status too.
 
 		register_post_status( 'wcb-incomplete', array (
-			'label' => _x( 'Incomplete', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Incomplete', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -33,7 +33,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-pending-approval', array (
-			'label' => _x( 'Pending Approval', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Pending Approval', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -44,7 +44,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-approved', array (
-			'label' => _x( 'Approved', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Approved', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -55,7 +55,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-pending-payment', array (
-			'label' => _x( 'Payment Sent', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Payment Sent', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -66,7 +66,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-paid', array (
-			'label' => _x( 'Paid', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Paid', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -77,7 +77,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-failed', array (
-			'label' => _x( 'Failed', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Failed', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -88,7 +88,7 @@ class WordCamp_Budgets {
 		) );
 
 		register_post_status( 'wcb-cancelled', array (
-			'label' => _x( 'Cancelled', 'payment request', 'wordcamporg' ),
+			'label' => esc_html_x( 'Cancelled', 'payment request', 'wordcamporg' ),
 			'public' => false,
 			'protected' => true,
 			'label_count' => _nx_noop(
@@ -108,8 +108,8 @@ class WordCamp_Budgets {
 	 */
 	public function register_budgets_menu() {
 		add_menu_page(
-			__( 'WordCamp Budget', 'wordcamporg' ),
-			__( 'Budget',          'wordcamporg' ),
+			esc_html__( 'WordCamp Budget', 'wordcamporg' ),
+			esc_html__( 'Budget',          'wordcamporg' ),
 			'manage_options',
 			'wordcamp-budget',
 			function() { do_action( 'wcb_render_budget_page' ); },
@@ -144,8 +144,8 @@ class WordCamp_Budgets {
 			'wordcamp-budgets',
 			'wcbLocalizedStrings',		// todo merge into WordCampBudgets var
 			array(
-				'uploadModalTitle'  => __( 'Attach Supporting Documentation', 'wordcamporg' ),
-				'uploadModalButton' => __( 'Attach Files', 'wordcamporg' ),
+				'uploadModalTitle'  => esc_html__( 'Attach Supporting Documentation', 'wordcamporg' ),
+				'uploadModalButton' => esc_html__( 'Attach Files', 'wordcamporg' ),
 			)
 		);
 
@@ -745,16 +745,16 @@ class WordCamp_Budgets {
 	 */
 	public static function get_payment_categories() {
 		return array(
-			'after-party'     => __( 'After Party',                    'wordcamporg' ),
-			'audio-visual'    => __( 'Audio Visual',                   'wordcamporg' ),
-			'camera-shipping' => __( 'Camera Shipping',                'wordcamporg' ),
-			'food-beverages'  => __( 'Food & Beverage',                'wordcamporg' ),
-			'office-supplies' => __( 'Office Supplies',                'wordcamporg' ),
-			'signage-badges'  => __( 'Signage & Badges',               'wordcamporg' ),
-			'speaker-event'   => __( 'Speaker Event',                  'wordcamporg' ),
-			'swag'            => __( 'Swag (t-shirts, stickers, etc)', 'wordcamporg' ),
-			'venue'           => __( 'Venue',                          'wordcamporg' ),
-			'other'           => __( 'Other',                          'wordcamporg' ), // This one is intentionally last, regardless of alphabetical order
+			'after-party'     => esc_html__( 'After Party',                    'wordcamporg' ),
+			'audio-visual'    => esc_html__( 'Audio Visual',                   'wordcamporg' ),
+			'camera-shipping' => esc_html__( 'Camera Shipping',                'wordcamporg' ),
+			'food-beverages'  => esc_html__( 'Food & Beverage',                'wordcamporg' ),
+			'office-supplies' => esc_html__( 'Office Supplies',                'wordcamporg' ),
+			'signage-badges'  => esc_html__( 'Signage & Badges',               'wordcamporg' ),
+			'speaker-event'   => esc_html__( 'Speaker Event',                  'wordcamporg' ),
+			'swag'            => esc_html__( 'Swag (t-shirts, stickers, etc)', 'wordcamporg' ),
+			'venue'           => esc_html__( 'Venue',                          'wordcamporg' ),
+			'other'           => esc_html__( 'Other',                          'wordcamporg' ), // This one is intentionally last, regardless of alphabetical order
 		);
 	}
 

@@ -33,20 +33,20 @@ add_filter( 'display_post_states', __NAMESPACE__ . '\display_post_states'       
  */
 function register_post_type() {
 	$labels = array(
-		'name'               => _x( 'Reimbursement Requests', 'general reimbursement requests', 'wordcamporg' ),
-		'singular_name'      => _x( 'Reimbursement Request',  'post type singular name',        'wordcamporg' ),
-		'menu_name'          => _x( 'Reimbursement Requests', 'admin menu',                     'wordcamporg' ),
-		'name_admin_bar'     => _x( 'Reimbursement Requests', 'add new on admin bar',           'wordcamporg' ),
-		'add_new'            => _x( 'Add New',                'reimbursement request',          'wordcamporg' ),
+		'name'               => esc_html_x( 'Reimbursement Requests', 'general reimbursement requests', 'wordcamporg' ),
+		'singular_name'      => esc_html_x( 'Reimbursement Request',  'post type singular name',        'wordcamporg' ),
+		'menu_name'          => esc_html_x( 'Reimbursement Requests', 'admin menu',                     'wordcamporg' ),
+		'name_admin_bar'     => esc_html_x( 'Reimbursement Requests', 'add new on admin bar',           'wordcamporg' ),
+		'add_new'            => esc_html_x( 'Add New',                'reimbursement request',          'wordcamporg' ),
 
-		'add_new_item'       => __( 'Add New Reimbursement Request',             'wordcamporg' ),
-		'new_item'           => __( 'New Reimbursement Request',                 'wordcamporg' ),
-		'edit_item'          => __( 'Edit Reimbursement Request',                'wordcamporg' ),
-		'view_item'          => __( 'View Reimbursement Request',                'wordcamporg' ),
-		'all_items'          => __( 'Reimbursements',                            'wordcamporg' ),
-		'search_items'       => __( 'Search Reimbursement Requests',             'wordcamporg' ),
-		'not_found'          => __( 'No Reimbursement Requests found.',          'wordcamporg' ),
-		'not_found_in_trash' => __( 'No Reimbursement Requests found in Trash.', 'wordcamporg' ),
+		'add_new_item'       => esc_html__( 'Add New Reimbursement Request',             'wordcamporg' ),
+		'new_item'           => esc_html__( 'New Reimbursement Request',                 'wordcamporg' ),
+		'edit_item'          => esc_html__( 'Edit Reimbursement Request',                'wordcamporg' ),
+		'view_item'          => esc_html__( 'View Reimbursement Request',                'wordcamporg' ),
+		'all_items'          => esc_html__( 'Reimbursements',                            'wordcamporg' ),
+		'search_items'       => esc_html__( 'Search Reimbursement Requests',             'wordcamporg' ),
+		'not_found'          => esc_html__( 'No Reimbursement Requests found.',          'wordcamporg' ),
+		'not_found_in_trash' => esc_html__( 'No Reimbursement Requests found in Trash.', 'wordcamporg' ),
 	);
 
 	$args = array(
@@ -88,7 +88,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbrr_submitted',
 		array(
-			'label'              => _x( 'Submitted', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Submitted', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Submitted <span class="count">(%s)</span>', 'Submitted <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -98,7 +98,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbrr_info_requested',
 		array(
-			'label'              => _x( 'Information Requested', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Information Requested', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Information Requested <span class="count">(%s)</span>', 'Information Requested <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -108,7 +108,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbrr_rejected',
 		array(
-			'label'              => _x( 'Rejected', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Rejected', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -118,7 +118,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbrr_in_process',
 		array(
-			'label'              => _x( 'Payment in Process', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Payment in Process', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Payment in Process <span class="count">(%s)</span>', 'Payment in Process <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -128,7 +128,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbrr_paid',
 		array(
-			'label'              => _x( 'Paid', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Paid', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Paid <span class="count">(%s)</span>', 'Paid <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -147,7 +147,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'submitdiv',
-		__( 'Status', 'wordcamporg' ),
+		esc_html__( 'Status', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_status_metabox',
 		POST_TYPE,
 		'side',
@@ -156,7 +156,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'wcbrr_notes',
-		__( 'Notes', 'wordcamporg' ),
+		esc_html__( 'Notes', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_notes_metabox',
 		POST_TYPE,
 		'side',
@@ -165,7 +165,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'wcbrr_general_information',
-		__( 'General Information', 'wordcamporg' ),
+		esc_html__( 'General Information', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_general_information_metabox',
 		POST_TYPE,
 		'normal',
@@ -174,13 +174,13 @@ function init_meta_boxes() {
 
 	$introduction_message = sprintf(
 		'<p>%s</p> <p>%s</p>',
-		__( 'This is where you can give us information on how we can reimburse you for approved expenses that you paid out-of-pocket.', 'wordcamporg' ),
-		__( 'Each wire transfer and check costs us processing fees, so if you have multiple out-of-pocket expenses, please try to group them into one reimbursement request.', 'wordcamporg' )
+		esc_html__( 'This is where you can give us information on how we can reimburse you for approved expenses that you paid out-of-pocket.', 'wordcamporg' ),
+		esc_html__( 'Each wire transfer and check costs us processing fees, so if you have multiple out-of-pocket expenses, please try to group them into one reimbursement request.', 'wordcamporg' )
 	);
 
 	add_meta_box(
 		'wcbrr_payment_information',
-		__( 'Payment Information', 'wordcamporg' ),
+		esc_html__( 'Payment Information', 'wordcamporg' ),
 		array( $wcp_payment_request, 'render_payment_metabox' ),    // todo centralize this instead of using directly from another module
 		POST_TYPE,
 		'normal',
@@ -195,7 +195,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'wcbrr_expenses',
-		__( 'Expenses', 'wordcamporg' ),
+		esc_html__( 'Expenses', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_expenses_metabox',
 		POST_TYPE,
 		'normal',
@@ -204,7 +204,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'wcp_log',
-		__( 'Log', 'wordcamporg' ),
+		esc_html__( 'Log', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_log_metabox',
 		POST_TYPE,
 		'normal',
@@ -280,14 +280,14 @@ function render_status_metabox( $post ) {
 
 	$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
 	$current_user_can_edit_request = false;
-	$submit_text = _x( 'Update', 'payment request', 'wordcamporg' );
+	$submit_text = esc_html_x( 'Update', 'payment request', 'wordcamporg' );
 	$submit_note = '';
 
 	if ( current_user_can( 'manage_network' ) ) {
 		$current_user_can_edit_request = true;
 	} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
-		$submit_text = __( 'Submit for Review', 'wordcamporg' );
-		$submit_note = __( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
+		$submit_text = esc_html__( 'Submit for Review', 'wordcamporg' );
+		$submit_note = esc_html__( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
 		$current_user_can_edit_request = true;
 	}
 
@@ -296,7 +296,7 @@ function render_status_metabox( $post ) {
 
 	$request_id         = get_current_blog_id() . '-' . $post->ID;
 	$requested_by       = \WordCamp_Budgets::get_requester_name( $post->post_author );
-	$update_text        = current_user_can( 'manage_network' ) ? __( 'Update Request', 'wordcamporg' ) : __( 'Send Request', 'wordcamporg' );
+	$update_text        = current_user_can( 'manage_network' ) ? esc_html__( 'Update Request', 'wordcamporg' ) : esc_html__( 'Send Request', 'wordcamporg' );
 
 	require_once( dirname( __DIR__ ) . '/views/reimbursement-request/metabox-status.php' );
 }
@@ -349,12 +349,12 @@ function render_general_information_metabox( $post ) {
  */
 function get_reimbursement_reasons() {
 	return array(
-		'last-minute-purchase'   => __( 'Last-minute purchase',                   'wordcamporg' ),
-		'vendor-required-cash'   => __( 'Vendor required cash payment',           'wordcamporg' ),
-		'payment-on-delivery'    => __( 'Vendor required payment at delivery',    'wordcamporg' ),
-		'convenience'            => __( 'Organizer convenience',                  'wordcamporg' ),
-		'central-missed-payment' => __( "Payment by Central didn't come through", 'wordcamporg' ),
-		'other'                  => __( 'Other (describe in next field)',         'wordcamporg' ),
+		'last-minute-purchase'   => esc_html__( 'Last-minute purchase',                   'wordcamporg' ),
+		'vendor-required-cash'   => esc_html__( 'Vendor required cash payment',           'wordcamporg' ),
+		'payment-on-delivery'    => esc_html__( 'Vendor required payment at delivery',    'wordcamporg' ),
+		'convenience'            => esc_html__( 'Organizer convenience',                  'wordcamporg' ),
+		'central-missed-payment' => esc_html__( "Payment by Central didn't come through", 'wordcamporg' ),
+		'other'                  => esc_html__( 'Other (describe in next field)',         'wordcamporg' ),
 	);
 }
 

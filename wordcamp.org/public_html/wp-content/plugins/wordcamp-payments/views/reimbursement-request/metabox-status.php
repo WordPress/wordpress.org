@@ -10,7 +10,7 @@ defined( 'WPINC' ) or die();
 		<?php if ( $current_user_can_edit_request && ! current_user_can( 'manage_network' ) ) : ?>
 		<div id="minor-publishing-actions">
 			<div id="save-action">
-				<?php submit_button( __( 'Save Draft', 'wordcamporg' ), 'button', 'wcb-save-draft', false ); ?>
+				<?php submit_button( esc_html__( 'Save Draft', 'wordcamporg' ), 'button', 'wcb-save-draft', false ); ?>
 				<span class="spinner"></span>
 			</div>
 			<div class="clear"></div>

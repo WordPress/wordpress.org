@@ -10,7 +10,7 @@ defined( 'WPINC' ) or die();
 		<?php if ( in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) : ?>
 			<div id="minor-publishing-actions">
 				<div id="save-action">
-					<?php submit_button( __( 'Save Draft' ), 'secondary', 'wcb-save-draft', false ); ?>
+					<?php submit_button( esc_html__( 'Save Draft' ), 'secondary', 'wcb-save-draft', false ); ?>
 				</div>
 			</div>
 		<?php endif; ?>
@@ -51,9 +51,9 @@ defined( 'WPINC' ) or die();
 			</div>
 
 			<div id="publishing-action">
-				<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr( __( 'Send Invoice', 'wordcamporg' ) ) ?>" />
+				<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr( esc_html__( 'Send Invoice', 'wordcamporg' ) ) ?>" />
 				<?php submit_button(
-					__( 'Send Invoice', 'wordcamporg' ),
+					esc_html__( 'Send Invoice', 'wordcamporg' ),
 					'primary button-large',
 					'send-invoice',
 					false,

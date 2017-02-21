@@ -11,7 +11,7 @@
 			name="<?php echo esc_attr( $name ); ?>"
 			<?php __checked_selected_helper( $required, true, true, 'required' ); ?>
 		>
-			<option value="">(None)</option>
+			<option value=""><?php esc_html_e( '(None)', 'wordcamporg' ); ?></option>
 			<?php foreach ( $options as $value => $option_label ) : ?>
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $selected ); ?>><?php
 					echo esc_html( $option_label['name'] );

@@ -12,7 +12,7 @@
 		    <?php __checked_selected_helper( $required, true, true, 'required' ); ?>
 		>
 			<option value="null-select-one">
-				<?php printf( __( '-- Select a %s --', 'wordcamporg' ), $label ); ?>
+				<?php printf( esc_html__( '-- Select a %s --', 'wordcamporg' ), $label ); ?>
 			</option>
 			<option value="null-separator1"></option>
 

@@ -34,20 +34,20 @@ add_filter( 'map_meta_cap',        __NAMESPACE__ . '\modify_capabilities', 10, 4
  */
 function register_post_type() {
 	$labels = array(
-		'name'               => _x( 'Sponsor Invoices', 'general sponsor invoices', 'wordcamporg' ),
-		'singular_name'      => _x( 'Sponsor Invoice',  'post type singular name',  'wordcamporg' ),
-		'menu_name'          => _x( 'Sponsor Invoices', 'admin menu',               'wordcamporg' ),
-		'name_admin_bar'     => _x( 'Sponsor Invoices', 'add new on admin bar',     'wordcamporg' ),
-		'add_new'            => _x( 'Add New',          'invoice',                  'wordcamporg' ),
+		'name'               => esc_html_x( 'Sponsor Invoices', 'general sponsor invoices', 'wordcamporg' ),
+		'singular_name'      => esc_html_x( 'Sponsor Invoice',  'post type singular name',  'wordcamporg' ),
+		'menu_name'          => esc_html_x( 'Sponsor Invoices', 'admin menu',               'wordcamporg' ),
+		'name_admin_bar'     => esc_html_x( 'Sponsor Invoices', 'add new on admin bar',     'wordcamporg' ),
+		'add_new'            => esc_html_x( 'Add New',          'invoice',                  'wordcamporg' ),
 
-		'add_new_item'       => __( 'Add New Sponsor Invoice',    'wordcamporg' ),
-		'new_item'           => __( 'New Invoice',                'wordcamporg' ),
-		'edit_item'          => __( 'Edit Invoice',               'wordcamporg' ),
-		'view_item'          => __( 'View Invoice',               'wordcamporg' ),
-		'all_items'          => __( 'Sponsor Invoices',           'wordcamporg' ),
-		'search_items'       => __( 'Search Invoices',            'wordcamporg' ),
-		'not_found'          => __( 'No invoice found.',          'wordcamporg' ),
-		'not_found_in_trash' => __( 'No invoice found in Trash.', 'wordcamporg' ),
+		'add_new_item'       => esc_html__( 'Add New Sponsor Invoice',    'wordcamporg' ),
+		'new_item'           => esc_html__( 'New Invoice',                'wordcamporg' ),
+		'edit_item'          => esc_html__( 'Edit Invoice',               'wordcamporg' ),
+		'view_item'          => esc_html__( 'View Invoice',               'wordcamporg' ),
+		'all_items'          => esc_html__( 'Sponsor Invoices',           'wordcamporg' ),
+		'search_items'       => esc_html__( 'Search Invoices',            'wordcamporg' ),
+		'not_found'          => esc_html__( 'No invoice found.',          'wordcamporg' ),
+		'not_found_in_trash' => esc_html__( 'No invoice found in Trash.', 'wordcamporg' ),
 	);
 
 	$args = array(
@@ -71,9 +71,9 @@ function register_post_type() {
  */
 function get_custom_statuses() {
 	return array(
-		'wcbsi_submitted' => __( 'Submitted', 'wordcamporg' ),
-		'wcbsi_approved'  => __( 'Sent',      'wordcamporg' ),
-		'wcbsi_paid'      => __( 'Paid',      'wordcamporg' ),
+		'wcbsi_submitted' => esc_html__( 'Submitted', 'wordcamporg' ),
+		'wcbsi_approved'  => esc_html__( 'Sent',      'wordcamporg' ),
+		'wcbsi_paid'      => esc_html__( 'Paid',      'wordcamporg' ),
 	);
 }
 
@@ -86,7 +86,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbsi_submitted',
 		array(
-			'label'              => _x( 'Submitted', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Submitted', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Submitted <span class="count">(%s)</span>', 'Submitted <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -96,7 +96,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbsi_approved',
 		array(
-			'label'              => _x( 'Sent', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Sent', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Sent <span class="count">(%s)</span>', 'Sent <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -106,7 +106,7 @@ function register_post_statuses() {
 	register_post_status(
 		'wcbsi_paid',
 		array(
-			'label'              => _x( 'Paid', 'post', 'wordcamporg' ),
+			'label'              => esc_html_x( 'Paid', 'post', 'wordcamporg' ),
 			'label_count'        => _nx_noop( 'Paid <span class="count">(%s)</span>', 'Paid <span class="count">(%s)</span>', 'wordcamporg' ),
 			'public'             => true,
 			'publicly_queryable' => false,
@@ -123,7 +123,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'submitdiv',
-		__( 'Status', 'wordcamporg' ),
+		esc_html__( 'Status', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_status_metabox',
 		POST_TYPE,
 		'side',
@@ -132,7 +132,7 @@ function init_meta_boxes() {
 
 	add_meta_box(
 		'wcbsi_sponsor_invoice',
-		__( 'Sponsor Invoice', 'wordcamporg' ),
+		esc_html__( 'Sponsor Invoice', 'wordcamporg' ),
 		__NAMESPACE__ . '\render_sponsor_invoice_metabox',
 		POST_TYPE,
 		'normal',
@@ -248,7 +248,7 @@ function required_fields_complete( $submitted_values, $required_fields ) {
 function render_status_metabox( $post ) {
 	wp_nonce_field( 'status', 'status_nonce' );
 
-	$delete_text = EMPTY_TRASH_DAYS ? __( 'Move to Trash' ) : __( 'Delete Permanently' );
+	$delete_text = EMPTY_TRASH_DAYS ? esc_html__( 'Move to Trash' ) : esc_html__( 'Delete Permanently' );
 
 	/*
 	 * We can't use current_user_can( 'edit_post', N ) in this case, because the restriction only applies when
@@ -430,11 +430,11 @@ function save_invoice( $post_id, $post ) {
 function get_columns( $_columns ) {
 	$columns = array(
 		'cb'             => $_columns['cb'],
-		'author'         => __( 'Author' ),
+		'author'         => esc_html__( 'Author' ),
 		'title'          => $_columns['title'],
 		'date'           => $_columns['date'],
-		'sponsor_name'   => __( 'Sponsor',  'wordcamporg' ),
-		'payment_amount' => __( 'Amount',   'wordcamporg' ),
+		'sponsor_name'   => esc_html__( 'Sponsor',  'wordcamporg' ),
+		'payment_amount' => esc_html__( 'Amount',   'wordcamporg' ),
 	);
 
 	return $columns;

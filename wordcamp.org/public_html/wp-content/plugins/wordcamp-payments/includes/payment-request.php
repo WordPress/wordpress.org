@@ -41,21 +41,21 @@ class WCP_Payment_Request {
 	 */
 	public function register_post_type() {
 		$labels = array(
-			'name'               => _x( 'Vendor Payments', 'post type general name', 'wordcamporg' ),
-			'singular_name'      => _x( 'Vendor Payment', 'post type singular name', 'wordcamporg' ),
-			'menu_name'          => _x( 'Vendor Payments', 'admin menu',             'wordcamporg' ),
-			'name_admin_bar'     => _x( 'Vendor Payment', 'add new on admin bar',    'wordcamporg' ),
-			'add_new'            => _x( 'Add New', 'payment',                        'wordcamporg' ),
+			'name'               => esc_html_x( 'Vendor Payments', 'post type general name', 'wordcamporg' ),
+			'singular_name'      => esc_html_x( 'Vendor Payment', 'post type singular name', 'wordcamporg' ),
+			'menu_name'          => esc_html_x( 'Vendor Payments', 'admin menu',             'wordcamporg' ),
+			'name_admin_bar'     => esc_html_x( 'Vendor Payment', 'add new on admin bar',    'wordcamporg' ),
+			'add_new'            => esc_html_x( 'Add New', 'payment',                        'wordcamporg' ),
 
-			'add_new_item'       => __( 'Add New Vendor Payment',             'wordcamporg' ),
-			'new_item'           => __( 'New Vendor Payment',                 'wordcamporg' ),
-			'edit_item'          => __( 'Edit Vendor Payment',                'wordcamporg' ),
-			'view_item'          => __( 'View Vendor Payment',                'wordcamporg' ),
-			'all_items'          => __( 'Vendor Payments',                    'wordcamporg' ),
-			'search_items'       => __( 'Search Vendor Payments',             'wordcamporg' ),
-			'parent_item_colon'  => __( 'Parent Vendor Payments:',            'wordcamporg' ),
-			'not_found'          => __( 'No Vendor Payments found.',          'wordcamporg' ),
-			'not_found_in_trash' => __( 'No Vendor Payments found in Trash.', 'wordcamporg' )
+			'add_new_item'       => esc_html__( 'Add New Vendor Payment',             'wordcamporg' ),
+			'new_item'           => esc_html__( 'New Vendor Payment',                 'wordcamporg' ),
+			'edit_item'          => esc_html__( 'Edit Vendor Payment',                'wordcamporg' ),
+			'view_item'          => esc_html__( 'View Vendor Payment',                'wordcamporg' ),
+			'all_items'          => esc_html__( 'Vendor Payments',                    'wordcamporg' ),
+			'search_items'       => esc_html__( 'Search Vendor Payments',             'wordcamporg' ),
+			'parent_item_colon'  => esc_html__( 'Parent Vendor Payments:',            'wordcamporg' ),
+			'not_found'          => esc_html__( 'No Vendor Payments found.',          'wordcamporg' ),
+			'not_found_in_trash' => esc_html__( 'No Vendor Payments found in Trash.', 'wordcamporg' )
 		);
 
 		$args = array(
@@ -80,7 +80,7 @@ class WCP_Payment_Request {
 		register_post_status(
 			'paid',
 			array(
-				'label'              => _x( 'Paid', 'post', 'wordcamporg' ),
+				'label'              => esc_html_x( 'Paid', 'post', 'wordcamporg' ),
 				'label_count'        => _nx_noop( 'Paid <span class="count">(%s)</span>', 'Paid <span class="count">(%s)</span>', 'wordcamporg' ),
 				'public'             => true,
 				'publicly_queryable' => false,
@@ -90,7 +90,7 @@ class WCP_Payment_Request {
 		register_post_status(
 			'unpaid',
 			array(
-				'label'              => _x( 'Unpaid', 'post', 'wordcamporg' ),
+				'label'              => esc_html_x( 'Unpaid', 'post', 'wordcamporg' ),
 				'label_count'        => _nx_noop( 'Unpaid <span class="count">(%s)</span>', 'Unpaid <span class="count">(%s)</span>', 'wordcamporg' ),
 				'public'             => true,
 				'publicly_queryable' => false,
@@ -100,7 +100,7 @@ class WCP_Payment_Request {
 		register_post_status(
 			'incomplete',
 			array(
-				'label'              => _x( 'Incomplete', 'post', 'wordcamporg' ),
+				'label'              => esc_html_x( 'Incomplete', 'post', 'wordcamporg' ),
 				'label_count'        => _nx_noop( 'Incomplete <span class="count">(%s)</span>', 'Incomplete <span class="count">(%s)</span>', 'wordcamporg' ),
 				'public'             => true,
 				'publicly_queryable' => false,
@@ -120,7 +120,7 @@ class WCP_Payment_Request {
 
 		add_meta_box(
 			'submitdiv',
-			__( 'Status', 'wordcamporg' ),
+			esc_html__( 'Status', 'wordcamporg' ),
 			array( $this, 'render_status_metabox' ),
 			self::POST_TYPE,
 			'side',
@@ -129,7 +129,7 @@ class WCP_Payment_Request {
 
 		add_meta_box(
 			'wcp_general_info',
-			__( 'General Information', 'wordcamporg' ),
+			esc_html__( 'General Information', 'wordcamporg' ),
 			array( $this, 'render_general_metabox' ),
 			self::POST_TYPE,
 			'normal',
@@ -138,13 +138,13 @@ class WCP_Payment_Request {
 
 		$introduction_message = sprintf(
 			'<p>%s</p> <p>%s</p>',
-			__( 'Direct Deposit or Wire is the fastest way to pay a vendor. Checks and credit card payments can take 3-5 days for us and/or the bank to process.', 'wordcamporg' ),
-			__( 'Each wire transfer costs us processing fees, so please try to avoid multiple wire requests for one vendor.', 'wordcamporg' )
+			esc_html__( 'Direct Deposit or Wire is the fastest way to pay a vendor. Checks and credit card payments can take 3-5 days for us and/or the bank to process.', 'wordcamporg' ),
+			esc_html__( 'Each wire transfer costs us processing fees, so please try to avoid multiple wire requests for one vendor.', 'wordcamporg' )
 		);
 
 		add_meta_box(
 			'wcp_payment_details',
-			__( 'Payment Details', 'wordcamporg' ),
+			esc_html__( 'Payment Details', 'wordcamporg' ),
 			array( $this, 'render_payment_metabox' ),
 			self::POST_TYPE,
 			'normal',
@@ -157,14 +157,14 @@ class WCP_Payment_Request {
 
 		add_meta_box(
 			'wcp_vendor_details',
-			__( 'Vendor Details', 'wordcamporg' ),
+			esc_html__( 'Vendor Details', 'wordcamporg' ),
 			array( $this, 'render_vendor_metabox' ),
 			self::POST_TYPE,
 			'normal',
 			'high'
 		);
 
-		add_meta_box( 'wcp_log', __( 'Log', 'wordcamporg' ), array( $this, 'render_log_metabox' ),
+		add_meta_box( 'wcp_log', esc_html__( 'Log', 'wordcamporg' ), array( $this, 'render_log_metabox' ),
 			self::POST_TYPE, 'normal', 'high' );
 	}
 
@@ -219,14 +219,14 @@ class WCP_Payment_Request {
 
 		$editable_statuses = array( 'auto-draft', 'draft', 'wcb-incomplete' );
 		$current_user_can_edit_request = false;
-		$submit_text = _x( 'Update', 'payment request', 'wordcamporg' );
+		$submit_text = esc_html_x( 'Update', 'payment request', 'wordcamporg' );
 		$submit_note = '';
 
 		if ( current_user_can( 'manage_network' ) ) {
 			$current_user_can_edit_request = true;
 		} elseif ( in_array( $post->post_status, $editable_statuses ) ) {
-			$submit_text = __( 'Submit for Review', 'wordcamporg' );
-			$submit_note = __( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
+			$submit_text = esc_html__( 'Submit for Review', 'wordcamporg' );
+			$submit_note = esc_html__( 'Once submitted for review, this request can not be edited.', 'wordcamporg' );
 			$current_user_can_edit_request = true;
 		}
 
@@ -831,12 +831,12 @@ Thanks for helping us with these details!",
 	public function get_columns( $_columns ) {
 		$columns = array(
 			'cb'             => $_columns['cb'],
-			'author'         => __( 'Author' ),
+			'author'         => esc_html__( 'Author' ),
 			'title'          => $_columns['title'],
 			'date'           => $_columns['date'],
-			'due_by'         => __( 'Due by', 'wordcamporg' ),
-			'vendor_name'    => __( 'Vendor', 'wordcamporg' ),
-			'payment_amount' => __( 'Amount', 'wordcamporg' ),
+			'due_by'         => esc_html__( 'Due by', 'wordcamporg' ),
+			'vendor_name'    => esc_html__( 'Vendor', 'wordcamporg' ),
+			'payment_amount' => esc_html__( 'Amount', 'wordcamporg' ),
 		);
 
 		return $columns;

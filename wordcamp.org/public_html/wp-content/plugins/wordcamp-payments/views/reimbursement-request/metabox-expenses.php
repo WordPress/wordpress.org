@@ -17,7 +17,7 @@ defined( 'WPINC' ) or die();
 		<span class="spinner is-active"></span>
 	</div>
 
-	<?php submit_button( __( 'Add Another Expense', 'wordcamporg' ), 'secondary', 'wcbrr-add-another-expense' ); ?>
+	<?php submit_button( esc_html__( 'Add Another Expense', 'wordcamporg' ), 'secondary', 'wcbrr-add-another-expense' ); ?>
 </fieldset>
 
 <p class="wcb-form-required">

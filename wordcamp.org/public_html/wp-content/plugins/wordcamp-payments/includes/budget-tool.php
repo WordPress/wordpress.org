@@ -8,7 +8,7 @@ class WordCamp_Budget_Tool {
     }
 
     public static function admin_menu() {
-		add_submenu_page( 'wordcamp-budget', __( 'WordCamp Budget', 'wordcamporg' ), __( 'Budget', 'wordcamporg' ), 'manage_options', 'wordcamp-budget' );
+		add_submenu_page( 'wordcamp-budget', esc_html__( 'WordCamp Budget', 'wordcamporg' ), esc_html__( 'Budget', 'wordcamporg' ), 'manage_options', 'wordcamp-budget' );
         add_action( 'wcb_render_budget_page', array( __CLASS__, 'render' ) );
         register_setting( 'wcb_budget_noop', 'wcb_budget_noop', array( __CLASS__, 'validate' ) );
     }
