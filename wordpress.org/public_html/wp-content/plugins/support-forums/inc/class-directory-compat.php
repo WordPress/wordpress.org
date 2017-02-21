@@ -6,6 +6,8 @@ abstract class Directory_Compat {
 
 	abstract protected function compat();
 	abstract protected function compat_title();
+	abstract protected function reviews_title();
+	abstract protected function activity_title();
 	abstract protected function slug();
 	abstract protected function title();
 	abstract protected function forum_id();
@@ -365,7 +367,7 @@ abstract class Directory_Compat {
 		// Add reviews view.
 		bbp_register_view(
 			'reviews',
-			__( 'Reviews', 'wporg-forums' ),
+			$this->reviews_title(),
 			array(
 				'post_parent'   => Plugin::REVIEWS_FORUM_ID,
 				'tax_query'     => array( array(
@@ -383,7 +385,7 @@ abstract class Directory_Compat {
 		// Add recent activity view.
 		bbp_register_view(
 			'active',
-			__( 'Recent Activity', 'wporg-forums' ),
+			$this->activity_title(),
 			array(
 				'post_parent'   => $this->forum_id(),
 				'post_status'   => 'publish',
