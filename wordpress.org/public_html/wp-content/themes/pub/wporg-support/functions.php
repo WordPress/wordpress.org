@@ -293,7 +293,9 @@ add_action( 'bbp_theme_before_reply_content', 'wporg_support_add_moderation_noti
  * Change "Stick (to front)" link text to "Stick (to all forums)".
  */
 function wporg_support_change_super_sticky_text( $links ) {
-	$links['stick'] = bbp_get_topic_stick_link( array( 'super_text' => __( '(to all forums)', 'wporg-forums' ) ) );
+	if ( isset( $links['stick'] ) ) {
+		$links['stick'] = bbp_get_topic_stick_link( array( 'super_text' => __( '(to all forums)', 'wporg-forums' ) ) );
+	}
 
 	return $links;
 }
