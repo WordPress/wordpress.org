@@ -248,7 +248,7 @@ class CampTix_Attendance extends CampTix_Addon {
 	 * Add a new section to the Setup screen.
 	 */
 	public function setup_sections( $sections ) {
-		$sections['attendance-ui'] = __( 'Attendance UI', 'camptix' );
+		$sections['attendance-ui'] = esc_html__( 'Attendance UI', 'wordcamporg' );
 		return $sections;
 	}
 
@@ -261,14 +261,14 @@ class CampTix_Attendance extends CampTix_Addon {
 		if ( 'attendance-ui' != $section )
 			return;
 
-		add_settings_section( 'general', __( 'Attendance UI', 'camptix' ), array( $this, 'setup_controls_section' ), 'camptix_options' );
+		add_settings_section( 'general', esc_html__( 'Attendance UI', 'wordcamporg' ), array( $this, 'setup_controls_section' ), 'camptix_options' );
 
 		// Fields
-		$camptix->add_settings_field_helper( 'attendance-enabled', __( 'Enabled', 'camptix' ), 'field_yesno', 'general',
-			__( "Don't forget to disable the UI after the event is over.", 'camptix' )
+		$camptix->add_settings_field_helper( 'attendance-enabled', esc_html__( 'Enabled', 'wordcamporg' ), 'field_yesno', 'general',
+			esc_html__( "Don't forget to disable the UI after the event is over.", 'wordcamporg' )
 		);
 
-		add_settings_field( 'attendance-secret', __( 'Secret Link' ), array( $this, 'field_secret' ), 'camptix_options', 'general' );
+		add_settings_field( 'attendance-secret', esc_html__( 'Secret Link', 'wordcamporg' ), array( $this, 'field_secret' ), 'camptix_options', 'general' );
 	}
 
 	/**
@@ -284,7 +284,7 @@ class CampTix_Attendance extends CampTix_Addon {
 		<textarea class="large-text" rows="4" readonly><?php echo esc_textarea( $secret_url ); ?></textarea>
 
 		<input id="camptix-attendance-generate" type="checkbox" name="camptix_options[attendance-generate]" value="1" />
-		<label for="camptix-attendance-generate"><?php _e( 'Generate a new secret link (old links will expire)', 'camptix' ); ?></label>
+		<label for="camptix-attendance-generate"><?php esc_html_e( 'Generate a new secret link (old links will expire)', 'wordcamporg' ); ?></label>
 		<?php
 	}
 
@@ -293,9 +293,9 @@ class CampTix_Attendance extends CampTix_Addon {
 	 */
 	public function setup_controls_section() {
 		?>
-		<p>The Attendance UI addon is useful for tracking attendance at the event. It allows registration volunteers to access a mobile-friendly UI during the event, and mark attendees as "attended" or "did not attend" as they register. The UI also offers live search and filters for your convenience.</p>
+		<p><?php esc_html_e( 'The Attendance UI addon is useful for tracking attendance at the event. It allows registration volunteers to access a mobile-friendly UI during the event, and mark attendees as "attended" or "did not attend" as they register. The UI also offers live search and filters for your convenience.', 'wordcamporg' ); ?></p>
 
-		<p><strong>Note</strong>: Anyone with the secret link can access the attendance UI and change attendance data. Please keep this URL secret and change it if necessary.</p>
+		<p><strong><?php esc_html_e( 'Note: Anyone with the secret link can access the attendance UI and change attendance data. Please keep this URL secret and change it if necessary.', 'wordcamporg' ); ?></strong></p>
 		<?php
 	}
 
