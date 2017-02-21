@@ -558,6 +558,8 @@ function bb_base_single_forum_description() {
 	// Has replies
 	if ( !empty( $reply_count ) ) {
 		$reply_text = sprintf( _n( '%s reply', '%s replies', $reply_count, 'wporg-forums' ), bbp_number_format( $reply_count ) );
+	} else {
+		$reply_text = '';
 	}
 
 	// Forum has active data
