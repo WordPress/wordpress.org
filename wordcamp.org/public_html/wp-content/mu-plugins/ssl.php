@@ -24,6 +24,9 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && 'http://' == substr( $_REQUEST['redi
  * WP Super Cache puts http and https requests in the same bucket which
  * generates mixed content warnings and generat breakage all around. The
  * following makes sure only HTTPS requests are cached.
+ *
+ * This is currently superseded by wp-super-cache-plugins/http-https-redirect.php,
+ * but this is intentionally kept in place just to be safe.
  */
 add_action( 'init', function() {
         if ( ! is_ssl() )
@@ -32,6 +35,9 @@ add_action( 'init', function() {
 
 /**
  * Force HTTPS on all WordCamp.org sites that support it.
+ *
+ * This is currently superseded by wp-super-cache-plugins/http-https-redirect.php,
+ * but this is intentionally kept in place just to be safe.
  */
 function wcorg_force_ssl() {
 	if ( php_sapi_name() == 'cli' || is_ssl() )
