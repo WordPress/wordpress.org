@@ -42,16 +42,39 @@ class Hooks {
 	}
 
 	/**
-	 * Remove "Trash" from admin links. Trashing a topic or reply will eventually
-	 * permanently delete it when the trash is emptied. Better to mark it as
-	 * pending or spam.
+	 * Remove some unneeded or redundant admin links for topics and replies,
+	 * move less commonly used inline quick links to 'Topic Admin' sidebar section.
 	 *
 	 * @param array $r       Admin links array.
 	 * @param int   $post_id Topic or reply ID.
 	 * @return array Filtered admin links array.
 	 */
 	public function admin_links( $r, $post_id ) {
+		/*
+		 * Remove 'Trash' from admin links. Trashing a topic or reply will eventually
+		 * permanently delete it when the trash is emptied. Better to mark it as pending or spam.
+		 */
 		unset( $r['trash'] );
+
+		/*
+		 * Remove 'Reply' link. The theme adds its own 'Reply to Topic' sidebar link
+		 * for quick access to reply form, making the default inline link redundant.
+		 */
+		unset( $r['reply'] );
+
+		/*
+		 * The following actions are removed from inline quick links as less commonly used,
+		 * but are still available via 'Topic Admin' sidebar section.
+		 */
+		if ( ! did_action( 'wporg_compat_single_topic_sidebar_pre' ) ) {
+			// Remove 'Merge' link.
+			unset( $r['merge'] );
+
+			// Remove 'Stick' link for moderators, but keep it for plugin/theme authors and contributors.
+			if ( current_user_can( 'moderate', $post_id ) ) {
+				unset( $r['stick'] );
+			}
+		}
 
 		return $r;
 	}
