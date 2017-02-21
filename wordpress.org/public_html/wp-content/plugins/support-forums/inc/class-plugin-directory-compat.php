@@ -15,17 +15,17 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 	function compat_title() {
 		/* translators: %s: plugin title */
-		return sprintf( _x( '%s Support', 'plugin', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Support', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
 	function reviews_title() {
 		/* translators: %s: plugin title */
-		return sprintf( _x( '%s Reviews', 'plugin', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Reviews', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
 	function activity_title() {
 		/* translators: %s: plugin title */
-		return sprintf( _x( '%s Recent Activity', 'plugin', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Recent Activity', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {

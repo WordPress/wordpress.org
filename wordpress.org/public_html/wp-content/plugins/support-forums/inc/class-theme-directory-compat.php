@@ -15,17 +15,17 @@ class Theme_Directory_Compat extends Directory_Compat {
 
 	function compat_title() {
 		/* translators: %s: theme title */
-		return sprintf( _x( '%s Support', 'theme', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Support', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
 	function reviews_title() {
 		/* translators: %s: theme title */
-		return sprintf( _x( '%s Reviews', 'theme', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Reviews', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
 	function activity_title() {
 		/* translators: %s: theme title */
-		return sprintf( _x( '%s Recent Activity', 'theme', 'wporg-forums' ), $this->title() );
+		return sprintf( _x( '[%s] Recent Activity', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {
