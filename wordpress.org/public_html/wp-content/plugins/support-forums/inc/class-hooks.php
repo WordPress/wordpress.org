@@ -9,8 +9,8 @@ class Hooks {
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
 
 		// Display-related filters and actions.
-		add_filter( 'bbp_get_topic_admin_links', array( $this, 'get_admin_links' ), 10, 3 );
-		add_filter( 'bbp_get_reply_admin_links', array( $this, 'get_admin_links' ), 10, 3 );
+		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
+		add_filter( 'bbp_reply_admin_links', array( $this, 'admin_links' ), 10, 3 );
 
 		// Gravatar suppression on lists of topics.
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
@@ -45,14 +45,15 @@ class Hooks {
 	 * Remove "Trash" from admin links. Trashing a topic or reply will eventually
 	 * permanently delete it when the trash is emptied. Better to mark it as
 	 * pending or spam.
+	 *
+	 * @param array $r       Admin links array.
+	 * @param int   $post_id Topic or reply ID.
+	 * @return array Filtered admin links array.
 	 */
-	public function get_admin_links( $retval, $r, $args ) {
-		unset( $r['links']['trash'] );
+	public function admin_links( $r, $post_id ) {
+		unset( $r['trash'] );
 
-		$links = implode( $r['sep'], array_filter( $r['links'] ) );
-		$retval = $r['before'] . $links . $r['after'];
-
-		return $retval;
+		return $r;
 	}
 
 	/**
