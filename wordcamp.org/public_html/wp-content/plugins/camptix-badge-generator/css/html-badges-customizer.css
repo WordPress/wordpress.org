@@ -1,5 +1,9 @@
 #customize-control-cbg_print_badges,
 #customize-control-cbg_reset_css {
-	width: 50%;
+	width: auto;
 	clear: none;
+}
+
+#customize-control-cbg_reset_css {
+	float: right;
 }
