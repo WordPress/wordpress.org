@@ -2645,7 +2645,8 @@ section {
 .bbpress #bbpress-forums ul.bbp-lead-topic,
 .bbpress #bbpress-forums ul.bbp-replies,
 .bbpress #bbpress-forums ul.bbp-search-results,
-.bbpress #bbpress-forums ul.bbp-topics {
+.bbpress #bbpress-forums ul.bbp-topics,
+.bbpress #bbpress-forums #bbp-user-wrapper {
 	font-size: 0.8rem;
 }
 
