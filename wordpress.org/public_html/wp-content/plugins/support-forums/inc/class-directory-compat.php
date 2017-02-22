@@ -510,17 +510,19 @@ abstract class Directory_Compat {
 			return $r;
 		}
 
-		$r[1] = esc_html( $this->title() );
+		// Prefix link to plugin/theme support or review forum with context.
+		if ( 'plugin' === $this->compat() ) {
+			/* translators: %s: link to plugin support or review forum */
+			$compat_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+		} else {
+			/* translators: %s: link to theme support or review forum */
+			$compat_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+		}
+
+		$r[1] = sprintf( $compat_breadcrumb, esc_html( $this->title() ) );
+
 		if ( in_array( $view, array( 'reviews', 'active' ) ) ) {
-			// Prefix link to plugin/theme support or review forum with context.
-			if ( 'plugin' === $this->compat() ) {
-				/* translators: %s: link to plugin support or review forum */
-				$parent_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
-			} else {
-				/* translators: %s: link to theme support or review forum */
-				$parent_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
-			}
-			$r[1] = sprintf( $parent_breadcrumb, sprintf(
+			$r[1] = sprintf( $compat_breadcrumb, sprintf(
 				'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
 				esc_url( bbp_get_view_url( $this->compat() ) ),
 				esc_html( $this->title() )
