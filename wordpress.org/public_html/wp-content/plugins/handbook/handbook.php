@@ -490,8 +490,7 @@ class WPorg_Handbook {
 			$page_slug = is_page( 'handbooks' ) ? 'handbooks' : 'handbook';
 			$page = get_page_by_path( $page_slug );
 			if ( $page ) {
-				$url = get_page_link( $page );
-				$root_handbook_menu_item = wp_filter_object_list( $menu_items, array( 'url' => $url ) );
+				$root_handbook_menu_item = wp_filter_object_list( $menu_items, array( 'object_id' => $page->ID ) );
 			}
 		}
 		if ( ! $root_handbook_menu_item ) {
