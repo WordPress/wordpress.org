@@ -29,6 +29,9 @@ abstract class Directory_Compat {
 			// Intercept feed requests prior to bbp_request_feed_trap.
 			add_filter( 'bbp_request', array( $this, 'request' ), 9 );
 
+			// Add plugin or theme name to view feed titles.
+			add_action( 'bbp_feed', array( $this, 'add_compat_title_to_feed' ) );
+
 			// Define the taxonomy and query vars for this view.
 			add_action( 'plugins_loaded', array( $this, 'always_load' ) );
 
@@ -123,6 +126,65 @@ abstract class Directory_Compat {
 			$value = get_post_time( 'Y-m-d H:i:s', true, $object_id );
 		}
 		return $value;
+	}
+
+	/**
+	 * Add plugin or theme name to view feed titles.
+	 *
+	 * bbPress uses 'All Topics' title for view feeds, which isn't useful when
+	 * dealing with plugin or theme support.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/2078
+	 * @see https://bbpress.trac.wordpress.org/ticket/3064
+	 */
+	public function add_compat_title_to_feed() {
+		if ( empty( $this->query['bbp_view'] ) || empty( $this->query[ $this->query_var() ] ) ) {
+			return;
+		}
+
+		add_filter( 'gettext', array( $this, 'title_correction_for_feed' ), 10, 3 );
+	}
+
+	/**
+	 * Replace 'All Topics' feed title with an appropriate view title
+	 * that includes the plugin or theme name.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/2078
+	 * @see https://bbpress.trac.wordpress.org/ticket/3064
+	 *
+	 * @param string $translation Translated text.
+	 * @param string $text        Text to translate.
+	 * @param string $domain      Text domain.
+	 * @return string New feed title.
+	 */
+	public function title_correction_for_feed( $translation, $text, $domain ) {
+		if ( 'bbpress' !== $domain || 'All Topics' !== $text ) {
+			return $translation;
+		}
+
+		remove_filter( 'gettext', array( $this, 'title_correction_for_feed' ), 10, 3 );
+
+		$object = $this->get_object( $this->query[ $this->query_var() ] );
+		if ( ! $object ) {
+			return $translation;
+		}
+
+		$this->{$this->compat()} = $object;
+
+		switch ( $this->query['bbp_view'] ) {
+			case 'plugin':
+			case 'theme':
+				$translation = $this->compat_title();
+				break;
+			case 'reviews':
+				$translation = $this->reviews_title();
+				break;
+			case 'active':
+				$translation = $this->activity_title();
+				break;
+		}
+
+		return $translation;
 	}
 
 	public function get_view_query_args_for_feed( $retval, $view ) {
