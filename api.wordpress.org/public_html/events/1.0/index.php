@@ -76,6 +76,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	// Strip quotes from the search query and enclose it in double quotes, to force an exact literal search
 	$location_name = '"' . strtr( $location_name, [ '"' => '', "'" => '' ] ) . '"';
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM geoname WHERE MATCH(name,asciiname,alternatenames) AGAINST(%s IN BOOLEAN MODE) ORDER BY FIELD(%s, country) DESC, FIELD(%s, timezone) DESC, population DESC LIMIT 1", $location_name, $country, $timezone ) );
+
 	return $row;
 }
 
@@ -100,12 +101,12 @@ function get_location( $args = array() ) {
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
 		return array(
-			'country'     => $args['country'],
+			'country' => $args['country'],
 		);
 	}
 
 	$country_code = null;
-	if ( isset( $args['location_data']['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['location_data']['locale'], $match ) ) {
+	if ( isset( $args['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['locale'], $match ) ) {
 		$country_code = $match[1];
 	}
 
@@ -134,7 +135,7 @@ function get_location( $args = array() ) {
 			);
 		}
 	}
-				
+
 	if (
 		! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
 		! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
