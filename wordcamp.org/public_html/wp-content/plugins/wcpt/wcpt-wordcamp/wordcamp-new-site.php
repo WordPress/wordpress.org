@@ -642,11 +642,10 @@ class WordCamp_New_Site {
 			array(
 				'title'   => __( 'Call for Sponsors', 'wordcamporg' ),
 				'content' =>
-					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
 					'<p>' . __( 'Blurb with information for potential sponsors.', 'wordcamporg' ) . '</p> ' .
 					'<p>' .
 						sprintf( '
-							[contact-form to="enter-your-address-here@example.net" subject="%s"]
+							[contact-form to="%s" subject="%s"]
 							[contact-field label="%s" type="text"     required="1" /]
 							[contact-field label="%s" type="name"     required="1" /]
 							[contact-field label="%s" type="email"    required="1" /]
@@ -655,6 +654,7 @@ class WordCamp_New_Site {
 							[contact-field label="%s" type="textarea" required="1" /]
 							[contact-field label="%s" type="textarea"              /]
 							[/contact-form]',
+							get_option( 'admin_email' ),
 							__( 'WordCamp Sponsor Request', 'wordcamporg' ),
 							__( 'Contact Name', 'wordcamporg' ),
 							__( 'Company Name', 'wordcamporg' ),
@@ -676,7 +676,7 @@ class WordCamp_New_Site {
 					'<p>' . __( "If you'd like to propose multiple topics, please submit the form multiple times, once for each topic. [Other speaker instructions/info goes here.]", 'wordcamporg' ) . '</p>' .
 					'<p>' .
 						sprintf( '
-							[contact-form subject="%s"]
+							[contact-form to="%s" subject="%s"]
 								[contact-field label="%s" type="name"     required="1" /]
 								[contact-field label="%s" type="email"    required="1" /]
 								[contact-field label="%s" type="text"     required="1" /]
@@ -686,6 +686,7 @@ class WordCamp_New_Site {
 								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="textarea"              /]
 							[/contact-form]',
+							get_option( 'admin_email' ),
 							__( 'WordCamp Speaker Request', 'wordcamporg' ),
 							__( 'Name', 'wordcamporg' ),
 							__( 'Email Address', 'wordcamporg' ),
@@ -707,17 +708,17 @@ class WordCamp_New_Site {
 			array(
 				'title'   => __( 'Call for Volunteers', 'wordcamporg' ),
 				'content' =>
-					'<p>' . __( '<em>Organizers note:</em> Make sure you update the "to" address and other fields before publishing this page!', 'wordcamporg' ) . '</p> ' .
 					'<p>' . __( 'Blurb with information for potential volunteers.', 'wordcamporg' ) . '</p> ' .
 					'<p>' .
 						sprintf( '
-							[contact-form to="enter-your-address-here@example.net" subject="%s"]
+							[contact-form to="%s" subject="%s"]
 								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="email"    required="1" /]
 								[contact-field label="%s" type="textarea" required="1" /]
 								[contact-field label="%s" type="text"     required="1" /]
 								[contact-field label="%s" type="textarea"              /]
 							[/contact-form]',
+							get_option( 'admin_email' ),
 							__( 'WordCamp Volunteer Application', 'wordcamporg' ),
 							__( 'Name', 'wordcamporg' ),
 							__( 'Email', 'wordcamporg' ),

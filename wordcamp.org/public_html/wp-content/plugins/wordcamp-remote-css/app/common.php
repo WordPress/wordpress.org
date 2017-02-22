@@ -199,6 +199,14 @@ function create_new_post( $content = '' ) {
  * This just uses the same mode as Jetpack's CSS post, because it wouldn't make any sense to have them configured
  * with opposite values.
  *
+ * The value is pulled directly from the theme mod, rather than using
+ * `Jetpack_Custom_CSS_Enhancements::skip_stylesheet()`, because we don't want to require that the Custom CSS
+ * module be active in order to use Remote CSS.
+ *
+ * todo If replace mode is on, but Jetpack is deactivated, then the stylesheet won't be removed because
+ *      `style_filter()` won't be activated to remove it. So, maybe we need to require Custom CSS be activated
+ *      all the time anyway?
+ *
  * @return string
  */
 function get_output_mode() {
