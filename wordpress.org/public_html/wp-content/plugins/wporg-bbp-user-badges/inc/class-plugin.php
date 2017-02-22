@@ -40,8 +40,10 @@ class Plugin {
 	 * Instantiates a new Plugin object.
 	 */
 	private function __construct() {
-		self::$plugins_table_prefix = 'wporg_' . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
-		self::$themes_table_prefix  = 'wporg_' . WPORG_THEME_DIRECTORY_BLOGID . '_';
+		global $wpdb;
+
+		self::$plugins_table_prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+		self::$themes_table_prefix  = $wpdb->base_prefix . WPORG_THEME_DIRECTORY_BLOGID . '_';
 
 		add_action( 'bbp_loaded', array( $this, 'bbp_loaded' ) );
 	}
