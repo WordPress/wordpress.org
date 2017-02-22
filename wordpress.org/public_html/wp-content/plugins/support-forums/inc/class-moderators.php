@@ -6,6 +6,7 @@ class Moderators {
 
 	const ARCHIVED       = 'archived';
 	const ARCHIVED_META  = '_wporg_bbp_unarchived_post_status';
+	const MODERATOR_META = '_wporg_bbp_moderator';
 	const DEFAULT_STATUS = 'publish';
 	const VIEWS          = array( 'archived', 'pending', 'spam' );
 
@@ -248,6 +249,7 @@ class Moderators {
 			), true );
 			if ( $post_id ) {
 				update_post_meta( $post->ID, self::ARCHIVED_META, $post->post_status );
+				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_login );
 				return true;
 			}
 		}
@@ -276,6 +278,7 @@ class Moderators {
 			) );
 			if ( $post_id ) {
 				delete_post_meta( $post->ID, self::ARCHIVED_META );
+				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_login );
 				return true;
 			}
 		}

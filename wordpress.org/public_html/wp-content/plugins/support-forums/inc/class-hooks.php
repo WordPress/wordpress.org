@@ -39,6 +39,12 @@ class Hooks {
 		// Process extra reply actions.
 		add_action( 'bbp_new_reply',  array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 		add_action( 'bbp_edit_reply', array( $this, 'handle_extra_reply_actions' ), 10, 2 );
+
+		// Store moderator's username on approve/unapprove actions.
+		add_action( 'bbp_approved_topic',   array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_approved_reply',   array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_unapproved_topic', array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_unapproved_reply', array( $this, 'store_moderator_username' ) );
 	}
 
 	/**
@@ -264,6 +270,15 @@ class Hooks {
 				bbp_close_topic( $topic_id );
 			}
 		}
+	}
+
+	/**
+	 * Store moderator's username on approve/unapprove actions.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function store_moderator_username( $post_id ) {
+		update_post_meta( $post_id, '_wporg_bbp_moderator', wp_get_current_user()->user_login );
 	}
 
 }
