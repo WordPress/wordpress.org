@@ -79,7 +79,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	return $row;
 }
 
-function guess_location_from_ip( $dotted_ip, $timezone, $country ) {
+function guess_location_from_ip( $dotted_ip ) {
 	global $wpdb;
 
 	$long_ip = ip2long( $dotted_ip );
@@ -87,6 +87,11 @@ function guess_location_from_ip( $dotted_ip, $timezone, $country ) {
 		return;
 
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM ip2location WHERE ip_to >= %d ORDER BY ip_to ASC LIMIT 1", $long_ip ) );
+	// Unknown location:
+	if ( ! $row || '-' == $row->country_short ) {
+		return;
+	}
+
 	return $row;
 }
 
@@ -119,7 +124,7 @@ function get_location( $args = array() ) {
 
 	// IP:
 	if ( isset( $args['ip'] ) ) {
-		$guess = guess_location_from_ip( $args['ip'], $args['timezone'] ?? '', $country_code );
+		$guess = guess_location_from_ip( $args['ip'] );
 		if ( $guess ) {
 			return array(
 				'description' => $guess->ip_city,
