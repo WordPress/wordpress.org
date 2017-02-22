@@ -251,9 +251,23 @@ function wporg_support_add_moderation_notice() {
 				$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
 			}
 		} elseif ( 'archived' === $post_status ) {
-			$notice = __( 'This post is currently archived.', 'wporg-forums' );
+			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
+
+			if ( $moderator ) {
+				/* translators: %s: moderator's username */
+				$notice = sprintf( __( 'This post has been archived by %s.', 'wporg-forums' ), $moderator );
+			} else {
+				$notice = __( 'This post is currently archived.', 'wporg-forums' );
+			}
 		} else {
-			$notice = __( 'This post is currently pending.', 'wporg-forums' );
+			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
+
+			if ( $moderator ) {
+				/* translators: %s: moderator's username */
+				$notice = sprintf( __( 'This post has been unapproved by %s.', 'wporg-forums' ), $moderator );
+			} else {
+				$notice = __( 'This post is currently pending.', 'wporg-forums' );
+			}
 		}
 
 	elseif ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
