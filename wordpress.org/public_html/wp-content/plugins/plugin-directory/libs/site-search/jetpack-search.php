@@ -618,8 +618,67 @@ class Jetpack_Search {
 
 		if ( $args['locale'] && $args['locale'] !== 'en' && $args['locale'] !== 'en_US' ) {
 			$locale = $args['locale'];
+
+			//Because most plugins don't have any translations we need to
+			// correct for the very low scores that locale-specific fields.
+			// end up getting. This is caused by the average field length being
+			// very close to zero and thus the BM25 alg discounts fields that are
+			// significantly longer.
+			//
+			// As of 2017-01-23 it looked like we were off by about 10,000x,
+			// so rather than 0.1 we use a much smaller multiplier of en content
+			$en_boost = 0.00001;
+			$matching_fields = array(
+				'all_content_' . $locale,
+				'all_content_en^' . $en_boost
+			);
+			$boost_phrase_fields = array(
+				'title_' . $locale,
+				'excerpt_' . $locale,
+				'description_' . $locale,
+				'title_en^' . $en_boost,
+				'excerpt_en^' . $en_boost,
+				'description_en^' . $en_boost,
+				'taxonomy.plugin_tags.name',
+			);
+			$boost_ngram_fields = array(
+				'title_' . $locale . '.ngram',
+				'title_en.ngram^' . $en_boost
+			);
+			$boost_title_fields = array(
+				'title_' . $locale,
+				'title_en^' . $en_boost,
+				'slug_text',
+			);
+			$boost_content_fields = array(
+				'excerpt_' . $locale,
+				'description_' . $locale,
+				'excerpt_en^' . $en_boost,
+				'description_en^' . $en_boost,
+				'taxonomy.plugin_tags.name',
+			);
 		} else {
-			$locale = 'en';
+			$matching_fields = array(
+				'all_content_en'
+			);
+			$boost_phrase_fields = array(
+				'title_en',
+				'excerpt_en',
+				'description_en',
+				'taxonomy.plugin_tags.name',
+			);
+			$boost_ngram_fields = array(
+				'title_en.ngram'
+			);
+			$boost_title_fields = array(
+				'title_en',
+				'slug_text',
+			);
+			$boost_content_fields = array(
+				'excerpt_en',
+				'description_en',
+				'taxonomy.plugin_tags.name',
+			);
 		}
 		
 		///////////////////////////////////////////////////////////
@@ -634,7 +693,7 @@ class Jetpack_Search {
 					'must' => array(
 						'multi_match' => array(
 							'query'  => $args['query'],
-							'fields' => 'all_content_' . $locale,
+							'fields' => $matching_fields,
 							'boost'  => 0.1,
 							'operator' => 'and',
 						),
@@ -643,12 +702,7 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => array(
-									'title_' . $locale,
-									'excerpt_' . $locale,
-									'description_' . $locale,
-									'taxonomy.plugin_tags.name',
-								),
+								'fields' => $boost_phrase_fields,
 								'type'  => 'phrase',
 								'boost' => 2
 							),
@@ -656,9 +710,7 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => array(
-									'title_' . $locale . '.ngram'
-								),
+								'fields' => $boost_ngram_fields,
 								'type'  => 'phrase',
 								'boost' => 0.2
 							),
@@ -666,10 +718,7 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => array(
-									'title_' . $locale,
-									'slug_text',
-								),
+								'fields' => $boost_title_fields,
 								'type'  => 'best_fields',
 								'boost' => 2
 							),
@@ -677,11 +726,7 @@ class Jetpack_Search {
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
-								'fields' => array(
-									'excerpt_' . $locale,
-									'description_' . $locale,
-									'taxonomy.plugin_tags.name',
-								),
+								'fields' => $boost_content_fields,
 								'type'  => 'best_fields',
 								'boost' => 2
 							),
