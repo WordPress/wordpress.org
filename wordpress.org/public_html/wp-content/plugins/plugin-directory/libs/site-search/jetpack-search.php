@@ -70,6 +70,9 @@ class Jetpack_Search {
 	// but are analyzed with the default analyzer.
 	public static $analyzed_langs = array( 'ar', 'bg', 'ca', 'cs', 'da', 'de', 'el', 'en', 'es', 'eu', 'fa', 'fi', 'fr', 'he', 'hi', 'hu', 'hy', 'id', 'it', 'ja', 'ko', 'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh' );
 
+	const CACHE_GROUP = 'jetpack-search';
+	const CACHE_EXPIRY = 300;
+
 	protected function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
@@ -172,6 +175,12 @@ class Jetpack_Search {
 	 */
 	public function search( $es_args ) {
 		$service_url = 'http://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
+		$json_es_args = json_encode( $es_args );
+		$cache_key = md5( $json_es_args );
+		
+		$cached_response = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		if ( $cached_response !== false )
+			return $cached_response;
 
 		$request = wp_remote_post( $service_url, array(
 			'headers' => array(
@@ -185,7 +194,12 @@ class Jetpack_Search {
 		if ( is_wp_error( $request ) )
 			return $request;
 
-		return json_decode( wp_remote_retrieve_body( $request ), true );
+		$response = json_decode( wp_remote_retrieve_body( $request ), true );
+
+		if ( !isset( $response['error'] ) )
+			wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
+
+		return $response;
 	}
 
 	//TODO: add secured search for posts/comments
