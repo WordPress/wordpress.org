@@ -104,7 +104,6 @@ class Plugin {
 
 		// Grant permissions to Cross-Locale PTEs.
 		$cross_locale_pte_verdict = Cross_Locale_PTE::gp_pre_can_user( $verdict, $args );
-	#	var_dump($cross_locale_pte_verdict);
 		if ( is_bool( $cross_locale_pte_verdict ) ) {
 			return $cross_locale_pte_verdict;
 		}

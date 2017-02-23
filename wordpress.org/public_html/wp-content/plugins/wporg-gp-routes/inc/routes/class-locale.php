@@ -133,6 +133,10 @@ class Locale extends GP_Route {
 			$variants[] = $set_slug;
 		}
 
+		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
+		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+
 		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
 
@@ -187,6 +191,10 @@ class Locale extends GP_Route {
 		}
 
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
+
+		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
+		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
 	}

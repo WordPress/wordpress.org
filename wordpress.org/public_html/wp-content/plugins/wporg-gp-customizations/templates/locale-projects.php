@@ -40,6 +40,15 @@ gp_tmpl_header();
 				}
 				?>
 			</li>
+			<?php if ( $locale_glossary ) : ?>
+				<li class="locale-glossary">
+					<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php _e( 'Locale Glossary', 'glotpress' ); ?></a>
+				</li>
+			<?php elseif ( $can_create_locale_glossary ) : ?>
+				<li class="locale-glossary">
+					<a href="<?php echo esc_url( gp_url_join( gp_url( '/locale' ), $locale_slug, $set_slug, 'glossary' ) ); ?>" class="glossary-link"><?php _e( 'Create Locale Glossary', 'glotpress' ); ?></a>
+				</li>
+			<?php endif; ?>
 		</ul>
 		<div class="contributors">
 			<?php
