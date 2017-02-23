@@ -56,6 +56,15 @@
 								<li><?php _e( '<strong>Update to the latest versions</strong> of your plugins, themes, and WordPress.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Note the exact steps</strong> needed to reproduce your issue.', 'wporg-forums' ); ?></li>
 								<li><?php _e( '<strong>Provide any information</strong> you might think is useful. If your issue is visual, note your browser and operating system. If your issue is technical, note your server environment.', 'wporg-forums' ); ?></li>
+								<li><?php
+									/* translators: 1: Theme Directory URL, 2: Appearance icon, 3: Plugin Directory URL, 4: Plugins icon */
+									printf( __( '<strong>Looking for help with a specific <a href="%1$s">%2$s theme</a> or <a href="%3$s">%4$s plugin</a>?</strong> Don\'t post here &#8211; instead, head to the theme or plugin\'s page and find the "View support forum" link to visit the theme or plugin\'s individual forum.', 'wporg-forums' ),
+										esc_url( __( 'https://wordpress.org/themes/', 'wporg-forums' ) ),
+										'<span class="dashicons dashicons-admin-appearance"></span>',
+										esc_url( __( 'https://wordpress.org/plugins/', 'wporg-forums' ) ),
+										'<span class="dashicons dashicons-admin-plugins"></span>'
+									);
+								?></li>
 							</ul>
 
 						<?php endif; ?>
