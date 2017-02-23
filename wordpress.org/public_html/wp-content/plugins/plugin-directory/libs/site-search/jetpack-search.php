@@ -188,7 +188,7 @@ class Jetpack_Search {
 			),
 			'timeout' => 10,
 			'user-agent' => 'jetpack_search',
-			'body' => json_encode( $es_args ),
+			'body' => $json_es_args,
 		) );
 
 		if ( is_wp_error( $request ) )
