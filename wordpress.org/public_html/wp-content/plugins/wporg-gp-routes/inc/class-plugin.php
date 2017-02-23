@@ -29,7 +29,7 @@ class Plugin {
 	 * Instantiates a new Plugin object.
 	 */
 	private function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
 	}
 
 	/**
@@ -40,11 +40,21 @@ class Plugin {
 			include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 		}
 
-		add_action( 'template_redirect', array( $this, 'register_routes' ), 5 );
+		add_action( 'template_redirect', [ $this, 'register_routes' ], 5 );
+		add_filter( 'gp_locale_glossary_path_prefix', [ $this, 'set_locale_glossary_path_prefix' ] );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
 		}
+	}
+
+	/**
+	 * Changes the path prefix for a locale glossary to '/locale'.
+	 *
+	 * @return string '/locale'
+	 */
+	public function set_locale_glossary_path_prefix() {
+		return '/locale';
 	}
 
 	/**
@@ -55,6 +65,11 @@ class Plugin {
 	 *  - /languages/$locale
 	 *  - /languages/$locale
 	 *  - /languages/$locale/$path
+	 *  - (/languages)/$locale/$dir/glossary
+	 *  - (/languages)/$locale/$dir/glossary/-new
+	 *  - (/languages)/$locale/$dir/glossary/-delete
+	 *  - (/languages)/$locale/$dir/glossary/-export
+	 *  - (/languages)/$locale/$dir/glossary/-import
 	 *  - /profile/$path
 	 *  - /projects/wp-plugins/?
 	 *  - /projects/wp-themes/?
@@ -65,6 +80,11 @@ class Plugin {
 	 *  - /locale/$locale/$path
 	 *  - /locale/$locale/$path/$path
 	 *  - /locale/$locale/$path/$path/$path
+	 *  - (/locale)/$locale/$dir/glossary
+	 *  - (/locale)/$locale/$dir/glossary/-new
+	 *  - (/locale)/$locale/$dir/glossary/-delete
+	 *  - (/locale)/$locale/$dir/glossary/-export
+	 *  - (/locale)/$locale/$dir/glossary/-import
 	 *  - /stats/?
 	 *  - /projects/wp-plugins/$project
 	 *  - /projects/wp-plugins/$project/contributors
@@ -88,6 +108,14 @@ class Plugin {
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
 			GP::$router->remove( "/languages/$locale/$path" );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary" );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary", 'post' );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary/-new", 'post' );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary/-delete", 'post' );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary/-export" );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary/-import" );
+			GP::$router->remove( "(/languages)/$locale/$dir/glossary/-import", 'post' );
+
 			GP::$router->remove( '/profile' );
 			GP::$router->remove( "/profile/$path" );
 
@@ -97,20 +125,21 @@ class Plugin {
 			GP::$router->prepend( '/projects/wp-plugins/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
 			GP::$router->prepend( '/projects/wp-themes/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
 
-			// Re-add locale glossary GET routes because of the redirect route from above. https://github.com/GlotPress/GlotPress-WP/issues/655.
-			GP::$router->prepend( "(/languages)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
-			GP::$router->prepend( "(/languages)/$locale/$dir/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
-			GP::$router->prepend( "(/languages)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
-
 			// Register custom routes.
 			GP::$router->prepend( '/', array( __NAMESPACE__ . '\Routes\Index', 'get_locales' ) );
 			GP::$router->prepend( "/locale/$locale", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
 			GP::$router->prepend( "/locale/$locale/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
 			GP::$router->prepend( "/locale/$locale/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_projects' ) );
 			GP::$router->prepend( "/locale/$locale/$path/$path/$path", array( __NAMESPACE__ . '\Routes\Locale', 'get_locale_project' ) );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-new", array( 'GP_Route_Glossary_Entry', 'glossary_entry_add_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-delete", array( 'GP_Route_Glossary_Entry', 'glossary_entry_delete_post' ), 'post' );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-export", array( 'GP_Route_Glossary_Entry', 'export_glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_get' ) );
+			GP::$router->prepend( "(/locale)/$locale/$dir/glossary/-import", array( 'GP_Route_Glossary_Entry', 'import_glossary_entries_post' ), 'post' );
 			GP::$router->prepend( '/stats', array( __NAMESPACE__ . '\Routes\Stats', 'get_stats_overview' ) );
 			GP::$router->prepend( '/consistency', array( __NAMESPACE__ . '\Routes\Consistency', 'get_search_form' ) );
-
 
 			// Project routes.
 			GP::$router->prepend( "/projects/wp-plugins/$project", array( __NAMESPACE__ . '\Routes\WP_Plugins', 'get_plugin_projects' ) );
