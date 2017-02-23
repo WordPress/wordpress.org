@@ -434,6 +434,16 @@ div.bbp-template-notice.warning {
 	background-color: #fff8e5 !important;
 }
 
+/* Closed topics */
+#bbpress-forums ul.status-closed:not(.sticky) li.bbp-topic-title a.bbp-topic-permalink:before {
+	content: "\f160";
+	color: #bbb;
+	font: normal 16px/1 'dashicons';
+	margin-left: 5px;
+	float: right;
+	padding-top: 2px;
+}
+
 /* Resolved topics */
 .topic-resolved-indicator {
 	background-color: #64b450;
@@ -3225,7 +3235,9 @@ div.bbp-template-notice a:hover {
 	width: 30px;
 }
 
-.single-topic .entry-content #bbpress-forums .topic.sticky .dashicons-admin-post, .single-topic .entry-content #bbpress-forums .topic.super-sticky .dashicons-admin-post {
+.single-topic .entry-content #bbpress-forums .topic.sticky .dashicons-admin-post,
+.single-topic .entry-content #bbpress-forums .topic.super-sticky .dashicons-admin-post,
+.single-topic .entry-content #bbpress-forums .topic.status-closed .dashicons-lock {
 	display: block;
 	float: right;
 	color: #fff;
@@ -3236,7 +3248,8 @@ div.bbp-template-notice a:hover {
 	border-radius: 3px 0 0 3px;
 }
 
-.single-topic .entry-content #bbpress-forums .topic.sticky.status-closed .dashicons-admin-post, .single-topic .entry-content #bbpress-forums .topic.super-sticky.status-closed .dashicons-admin-post {
+.single-topic .entry-content #bbpress-forums .topic.status-closed .dashicons-admin-post,
+.single-topic .entry-content #bbpress-forums .topic.status-closed .dashicons-lock {
 	background: #bbb;
 }
 

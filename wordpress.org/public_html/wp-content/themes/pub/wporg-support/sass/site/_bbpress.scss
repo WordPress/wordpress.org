@@ -764,23 +764,22 @@ div.bbp-template-notice {
 					}
 				}
 
-				&.sticky,
-				&.super-sticky {
+				&.sticky .dashicons-admin-post,
+				&.super-sticky .dashicons-admin-post,
+				&.status-closed .dashicons-lock {
+					display: block;
+					float: left;
+					color: #fff;
+					background: gold;
+					padding-top: 3px;
+					width: 30px;
+					height: 25px;
+					border-radius: 0 3px 3px 0;
+				}
 
-					.dashicons-admin-post {
-						display: block;
-						float: left;
-						color: #fff;
-						background: gold;
-						padding-top: 3px;
-						width: 30px;
-						height: 25px;
-						border-radius: 0 3px 3px 0;
-					}
-
-					&.status-closed .dashicons-admin-post {
-						background: #bbb;
-					}
+				&.status-closed .dashicons-admin-post,
+				&.status-closed .dashicons-lock {
+					background: #bbb;
 				}
 			}
 		}

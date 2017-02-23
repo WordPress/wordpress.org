@@ -20,6 +20,10 @@
 				<div class="topic-indicator">
 					<span class="dashicons dashicons-admin-post" title="<?php esc_attr_e( 'Sticky Topic', 'wporg-forums' ); ?>"></span>
 				</div>
+			<?php elseif ( bbp_is_topic_closed() ) : ?>
+				<div class="topic-indicator">
+					<span class="dashicons dashicons-lock" title="<?php esc_attr_e( 'Closed Topic', 'wporg-forums' ); ?>"></span>
+				</div>
 			<?php endif; ?>
 
 			<div class="bbp-topic-author">
