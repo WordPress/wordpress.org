@@ -67,8 +67,8 @@ class Plugin {
 	 * Add "Resolved" status to title.
 	 */
 	public function get_topic_title( $title, $topic_id ) {
-		// Don't run in the admin.
-		if ( is_admin() ) {
+		// Don't run in the admin or in feeds.
+		if ( is_admin() || is_feed() ) {
 			return $title;
 		}
 
@@ -77,8 +77,8 @@ class Plugin {
 			return $title;
 		}
 
-		// Don't run when viewing a single topic or a topic edit page.
-		if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
+		// Don't run when viewing a single topic, a single reply, a topic edit page, or a reply edit page.
+		if ( bbp_is_single_topic() || bbp_is_single_reply() || bbp_is_topic_edit() || bbp_is_reply_edit() ) {
 			return $title;
 		}
 
