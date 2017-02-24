@@ -18,8 +18,11 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 			if ( $is_user_flagged ) {
 				if ( $moderator ) {
-					/* translators: %s: moderator's username */
-					$msg = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+					$msg = sprintf(
+						/* translators: %s: linked moderator's username */
+						__( 'This user has been flagged by %s.', 'wporg-forums' ),
+						sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $moderator ), $moderator )
+					);
 				} else {
 					$msg = __( 'This user has been flagged.', 'wporg-forums' );
 				}

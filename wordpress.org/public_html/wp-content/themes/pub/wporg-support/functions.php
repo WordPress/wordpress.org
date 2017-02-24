@@ -276,8 +276,11 @@ function wporg_support_add_moderation_notice() {
 
 			if ( $is_user_flagged ) {
 				if ( $moderator ) {
-					/* translators: %s: moderator's username */
-					$notices[] = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+					$notices[] = sprintf(
+						/* translators: %s: linked moderator's username */
+						__( 'This user has been flagged by %s.', 'wporg-forums' ),
+						sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $moderator ), $moderator )
+					);
 				} else {
 					$notices[] = __( 'This user has been flagged.', 'wporg-forums' );
 				}
