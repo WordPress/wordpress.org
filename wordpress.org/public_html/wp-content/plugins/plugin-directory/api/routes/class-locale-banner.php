@@ -82,7 +82,12 @@ class Locale_Banner extends Base {
 		}
 
 		$suggest_string = '';
+
+		// English directory.
 		if ( 'en_US' === $current_locale ) {
+			$current_site = get_site();
+
+			// Only one locale suggestion.
 			if ( 1 === count( $suggest_named_locales ) ) {
 				$locale   = key( $suggest_named_locales );
 				$language = current( $suggest_named_locales );
@@ -91,8 +96,9 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %s.', $locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$current_site->path,
 							$plugin_slug,
 							$language
 						)
@@ -101,12 +107,15 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'The plugin directory is also available in %s.', $locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>',
+							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$current_site->path,
 							$language
 						)
 					);
 				}
+
+			// Multiple locale suggestions.
 			} elseif ( ! empty( $suggest_named_locales ) ) {
 				$primary_locale = key( $suggest_named_locales );
 				$primary_language = current( $suggest_named_locales );
@@ -116,8 +125,9 @@ class Locale_Banner extends Base {
 					$other_suggest = '';
 					foreach ( $suggest_named_locales as $locale => $language ) {
 						$other_suggest .= sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>, ',
+							'<a href="https://%s.wordpress.org%s%s/">%s</a>, ',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$current_site->path,
 							$plugin_slug,
 							$language
 						);
@@ -126,8 +136,9 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %1$s (also: %2$s).', $primary_locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/%s/">%s</a>',
+							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
 							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
+							$current_site->path,
 							$plugin_slug,
 							$primary_language
 						),
@@ -137,8 +148,9 @@ class Locale_Banner extends Base {
 					$other_suggest = '';
 					foreach ( $suggest_named_locales as $locale => $language ) {
 						$other_suggest .= sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>, ',
+							'<a href="https://%s.wordpress.org%s">%s</a>, ',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
+							$current_site->path,
 							$language
 						);
 					}
@@ -146,14 +158,17 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'The plugin directory is also available in %1$s (also: %2$s).', $primary_locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org/plugins-wp/">%s</a>',
+							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
+							$current_site->path,
 							$primary_language
 						),
 						trim( $other_suggest, ' ,' )
 					);
 				}
 			}
+
+		// Localized directory.
 		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
@@ -231,7 +246,7 @@ class Locale_Banner extends Base {
 		if ( preg_match_all( "/$locale_re/i", $header, $matches ) ) {
 			return $matches[0];
 		} else {
-			return array();
+			return [];
 		}
 	}
 
