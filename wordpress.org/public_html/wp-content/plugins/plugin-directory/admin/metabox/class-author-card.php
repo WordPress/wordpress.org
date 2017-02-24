@@ -96,7 +96,7 @@ class Author_Card {
 			if ( empty( $author_commit ) && empty( $author_plugins ) ) {
 				echo 'Not a developer on any plugin.';
 			} else {
-				echo '<strong>' . sprintf( _n( '1 plugin:', '%d plugins:', count( $all_plugins ) ), count( $all_plugins ) ) . '</strong>';
+				echo '<strong>' . sprintf( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ), count( $all_plugins ) ) . '</strong>';
 
 				echo '<ul>';
 				foreach ( $all_plugins as $plugin ) {

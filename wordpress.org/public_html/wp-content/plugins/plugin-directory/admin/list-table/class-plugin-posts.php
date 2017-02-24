@@ -361,7 +361,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					'Mine <span class="count">(%s)</span>',
 					$user_post_count,
 					'posts',
-					'wporg-posts'
+					'wporg-plugins'
 				),
 				number_format_i18n( $user_post_count )
 			);
@@ -387,7 +387,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				'All <span class="count">(%s)</span>',
 				$total_posts,
 				'posts',
-				'wporg-posts'
+				'wporg-plugins'
 			),
 			number_format_i18n( $total_posts )
 		);
@@ -441,7 +441,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					'Sticky <span class="count">(%s)</span>',
 					$this->sticky_posts_count,
 					'posts',
-					'wporg-posts'
+					'wporg-plugins'
 				),
 				number_format_i18n( $this->sticky_posts_count )
 			);

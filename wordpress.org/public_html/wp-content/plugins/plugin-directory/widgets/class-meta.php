@@ -59,7 +59,14 @@ class Meta extends \WP_Widget {
 				<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . $tested_up_to . '</strong>' ); ?></li>
 			<?php } ?>
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li><?php printf( _n( 'Tag: %s', 'Tags: %s', count( get_the_terms( $post, 'plugin_tags' ) ), 'wporg-plugins' ), $tags ); ?></li>
+				<li><?php
+					$terms = get_the_terms( $post, 'plugin_tags' );
+					if ( 1 == count( $terms ) ) {
+						printf( __( 'Tag: %s', 'wporg-plugins' ), $tags );
+					} else {
+						printf( __( 'Tags: %s', 'wporg-plugins' ), $tags );
+					}
+				?></li>
 			<?php endif; ?>
 		</ul>
 

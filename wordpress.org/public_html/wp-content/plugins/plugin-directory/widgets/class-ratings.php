@@ -52,7 +52,7 @@ class Ratings extends \WP_Widget {
 					?>
 					<li class="counter-container">
 						<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/?filter=' . $stars ); ?>">
-							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugin' ), $stars ); ?></span>
+							<span class="counter-label"><?php printf( _n( '%d star', '%d stars', $stars, 'wporg-plugins' ), $stars ); ?></span>
 					<span class="counter-back">
 						<span class="counter-bar" style="width: <?php echo $rating_bar_width; ?>%;"></span>
 					</span>

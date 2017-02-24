@@ -24,8 +24,9 @@ class Template {
 		if ( $count <= 10 ) {
 			$text = __( 'Less than 10', 'wporg-plugins' );
 		} elseif ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
 			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( __( '%d+ million', 'wporg-plugins' ), intdiv( $count, 1000000 ) );
+			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
 			$text = number_format_i18n( $count ) . '+';
 		}

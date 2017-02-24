@@ -80,7 +80,7 @@ class Customizations {
 		$num_posts = wp_count_posts( $post_type );
 
 		if ( $num_posts && $num_posts->publish ) {
-			$text             = sprintf( _n( '%s Plugin', '%s Plugins', $num_posts->publish ), number_format_i18n( $num_posts->publish ) );
+			$text             = sprintf( _n( '%s Plugin', '%s Plugins', $num_posts->publish, 'wporg-plugins' ), number_format_i18n( $num_posts->publish ) );
 			$post_type_object = get_post_type_object( $post_type );
 
 			if ( $post_type_object && current_user_can( $post_type_object->cap->edit_posts ) ) {
@@ -197,7 +197,7 @@ class Customizations {
 			set_transient( 'settings_errors', array( array(
 				'setting' => 'wporg-plugins',
 				'code'    => 'plugins-bulk-rejected',
-				'message' => sprintf( _n( '1 plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
+				'message' => sprintf( _n( '%d plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
 				'type'    => 'updated',
 			) ) );
 		}
@@ -527,11 +527,11 @@ class Customizations {
 		$response['supplemental'] = array(
 			'in_moderation'        => $counts->moderated,
 			'i18n_comments_text'   => sprintf(
-				_n( '%s Comment', '%s Comments', $counts->approved ),
+				_n( '%s Comment', '%s Comments', $counts->approved, 'wporg-plugins' ),
 				number_format_i18n( $counts->approved )
 			),
 			'i18n_moderation_text' => sprintf(
-				_nx( '%s in moderation', '%s in moderation', $counts->moderated, 'comments' ),
+				_nx( '%s in moderation', '%s in moderation', $counts->moderated, 'comments', 'wporg-plugins' ),
 				number_format_i18n( $counts->moderated )
 			)
 		);
