@@ -16,11 +16,17 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( bbp_get_displayed_user_id() );
 			$moderator       = get_user_meta( bbp_get_displayed_user_id(), '_wporg_bbp_moderator', true );
 
-			if ( $is_user_flagged && $moderator ) {
+			if ( $is_user_flagged ) {
+				if ( $moderator ) {
+					/* translators: %s: moderator's username */
+					$msg = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+				} else {
+					$msg = __( 'This user has been flagged.', 'wporg-forums' );
+				}
+
 				printf(
 					'<div class="bbp-template-notice info"><p>%s</p></div>',
-					/* translators: %s: moderator's username */
-					sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator )
+					$msg
 				);
 			}
 		}

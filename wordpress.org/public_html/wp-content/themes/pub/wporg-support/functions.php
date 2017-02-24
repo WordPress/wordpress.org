@@ -274,9 +274,13 @@ function wporg_support_add_moderation_notice() {
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( get_post()->post_author );
 			$moderator       = get_user_meta( get_post()->post_author, '_wporg_bbp_moderator', true );
 
-			if ( $is_user_flagged && $moderator ) {
-				/* translators: %s: moderator's username */
-				$notices[] = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+			if ( $is_user_flagged ) {
+				if ( $moderator ) {
+					/* translators: %s: moderator's username */
+					$notices[] = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+				} else {
+					$notices[] = __( 'This user has been flagged.', 'wporg-forums' );
+				}
 			}
 		endif;
 
