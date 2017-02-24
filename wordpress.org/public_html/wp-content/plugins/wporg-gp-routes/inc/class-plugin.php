@@ -124,6 +124,7 @@ class Plugin {
 			GP::$router->prepend( "/languages/$path", array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_languages' ) );
 			GP::$router->prepend( '/projects/wp-plugins/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
 			GP::$router->prepend( '/projects/wp-themes/?', array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_index' ) );
+			GP::$router->prepend( "/projects/wp/$path/$locale/$dir/glossary", array( __NAMESPACE__ . '\Routes\Redirector', 'redirect_old_glossary' ) );
 
 			// Register custom routes.
 			GP::$router->prepend( '/', array( __NAMESPACE__ . '\Routes\Index', 'get_locales' ) );
