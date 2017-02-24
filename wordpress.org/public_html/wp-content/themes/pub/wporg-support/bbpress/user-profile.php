@@ -12,7 +12,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 <div id="bbp-user-profile" class="bbp-user-profile">
 	<h2 class="entry-title"><?php esc_html_e( 'Profile', 'wporg-forums' ); ?></h2>
 	<div class="bbp-user-section"><?php
-		if ( class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) {
+		if ( current_user_can( 'moderate' ) && class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) {
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( bbp_get_displayed_user_id() );
 			$moderator       = get_user_meta( bbp_get_displayed_user_id(), '_wporg_bbp_moderator', true );
 
