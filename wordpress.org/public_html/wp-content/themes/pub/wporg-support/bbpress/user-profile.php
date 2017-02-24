@@ -14,7 +14,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 	<div class="bbp-user-section"><?php
 		if ( current_user_can( 'moderate' ) && class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) {
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( bbp_get_displayed_user_id() );
-			$moderator       = get_user_meta( bbp_get_displayed_user_id(), '_wporg_bbp_moderator', true );
+			$moderator       = get_user_meta( bbp_get_displayed_user_id(), WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
 
 			if ( $is_user_flagged ) {
 				if ( $moderator ) {

@@ -272,7 +272,7 @@ function wporg_support_add_moderation_notice() {
 
 		if ( class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) :
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( get_post()->post_author );
-			$moderator       = get_user_meta( get_post()->post_author, '_wporg_bbp_moderator', true );
+			$moderator       = get_user_meta( get_post()->post_author, WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
 
 			if ( $is_user_flagged ) {
 				if ( $moderator ) {
