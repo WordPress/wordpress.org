@@ -77,9 +77,11 @@ class Internal_Stats extends Base {
 	 * @return int The sanitized version for display.
 	 */
 	protected function sanitize_active_installs( $active_installs ) {
-		if ( $active_installs > 1000000 ) {
-			// 1 million +;
-			return 1000000;
+		if ( $active_installs > 3000000 ) {
+			// 3 million +;
+			return 3000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
 		} elseif ( $active_installs > 100000 ) {
 			$round = 100000;
 		} elseif ( $active_installs > 10000 ) {
