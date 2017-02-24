@@ -235,7 +235,7 @@ function wporg_support_add_moderation_notice() {
 	$is_moderator    = current_user_can( 'moderate' );
 	$is_user_blocked = ! current_user_can( 'spectate' );
 	$notice_class    = '';
-	$notice          = '';
+	$notices         = array();
 
 	if ( $is_moderator && in_array( $post_status, array( 'archived', 'pending', 'spam' ) ) ) :
 
@@ -246,44 +246,54 @@ function wporg_support_add_moderation_notice() {
 
 			if ( $reporter ) {
 				/* translators: %s: reporter's username */
-				$notice = sprintf( __( 'This post has been flagged as spam by %s.', 'wporg-forums' ), $reporter );
+				$notices[] = sprintf( __( 'This post has been flagged as spam by %s.', 'wporg-forums' ), $reporter );
 			} else {
-				$notice = __( 'This post has been flagged as spam.', 'wporg-forums' );
+				$notices[] = __( 'This post has been flagged as spam.', 'wporg-forums' );
 			}
 		} elseif ( 'archived' === $post_status ) {
 			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
 
 			if ( $moderator ) {
 				/* translators: %s: moderator's username */
-				$notice = sprintf( __( 'This post has been archived by %s.', 'wporg-forums' ), $moderator );
+				$notices[] = sprintf( __( 'This post has been archived by %s.', 'wporg-forums' ), $moderator );
 			} else {
-				$notice = __( 'This post is currently archived.', 'wporg-forums' );
+				$notices[] = __( 'This post is currently archived.', 'wporg-forums' );
 			}
 		} else {
 			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
 
 			if ( $moderator ) {
 				/* translators: %s: moderator's username */
-				$notice = sprintf( __( 'This post has been unapproved by %s.', 'wporg-forums' ), $moderator );
+				$notices[] = sprintf( __( 'This post has been unapproved by %s.', 'wporg-forums' ), $moderator );
 			} else {
-				$notice = __( 'This post is currently pending.', 'wporg-forums' );
+				$notices[] = __( 'This post is currently pending.', 'wporg-forums' );
 			}
 		}
+
+		if ( class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) :
+			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( get_post()->post_author );
+			$moderator       = get_user_meta( get_post()->post_author, '_wporg_bbp_moderator', true );
+
+			if ( $is_user_flagged && $moderator ) {
+				/* translators: %s: moderator's username */
+				$notices[] = sprintf( __( 'This user has been flagged by %s.', 'wporg-forums' ), $moderator );
+			}
+		endif;
 
 	elseif ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
 
 		if ( $is_user_blocked ) {
 			// Blocked users get a generic message with no call to action or moderation timeframe.
-			$notice = __( 'This post has been held for moderation by our automated system.', 'wporg-forums' );
+			$notices[] = __( 'This post has been held for moderation by our automated system.', 'wporg-forums' );
 		} elseif ( $hours_passed > 96 ) {
 			$notice_class = 'warning';
-			$notice       = sprintf(
+			$notices[]    = sprintf(
 				/* translators: %s: https://make.wordpress.org/chat/ */
 				__( 'This post was held for moderation by our automated system but has taken longer than expected to get approved. Please come to the #forums channel on <a href="%s">WordPress Slack</a> and let us know. Provide a link to the post.', 'wporg-forums' ),
 				'https://make.wordpress.org/chat/'
 			);
 		} else {
-			$notice = sprintf(
+			$notices[] = sprintf(
 				/* translators: %d: number of hours */
 				_n( 'This post has been held for moderation by our automated system. It will be reviewed within %d hour.', 'This post has been held for moderation by our automated system. It will be reviewed within %d hours.', 72, 'wporg-forums' ),
 				72
@@ -292,11 +302,11 @@ function wporg_support_add_moderation_notice() {
 
 	endif;
 
-	if ( $notice ) {
+	if ( $notices ) {
 		printf(
 			'<div class="bbp-template-notice %s"><p>%s</p></div>',
 			esc_attr( $notice_class ),
-			$notice
+			implode( '</p><p>', $notices )
 		);
 	}
 }
