@@ -19,6 +19,9 @@ class Plugin {
 	// Back-compat user option name.
 	const USER_META = 'is_bozo';
 
+	// Meta key to store moderator's username on flag/unflag actions.
+	const MODERATOR_META = '_wporg_bbp_moderator';
+
 	/**
 	 * Always return the same instance of this plugin.
 	 *
@@ -228,6 +231,7 @@ class Plugin {
 
 		if ( ! $this->is_user_flagged( $user_id ) ) {
 			update_user_meta( $user_id, self::USER_META, true );
+			update_user_meta( $user_id, self::MODERATOR_META, wp_get_current_user()->user_nicename );
 		}
 		do_action( 'wporg_bbp_flag_user', $user_id );
 
@@ -241,6 +245,7 @@ class Plugin {
 
 		if ( $this->is_user_flagged( $user_id ) ) {
 			delete_user_meta( $user_id, self::USER_META );
+			update_user_meta( $user_id, self::MODERATOR_META, wp_get_current_user()->user_nicename );
 		}
 		do_action( 'wporg_bbp_unflag_user', $user_id );
 
