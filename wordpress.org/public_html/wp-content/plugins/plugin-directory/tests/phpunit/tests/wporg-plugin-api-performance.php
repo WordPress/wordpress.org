@@ -2,13 +2,11 @@
 
 require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 
-
 /**
- * @test
+ *
  * @group plugins-api
  * @group performance
  */
-
 class Tests_Plugins_API_Performance extends WP_UnitTestCase {
 
 	public $api_endpoint_1_0 = 'http://api.wordpress.org/plugins/info/1.0/';

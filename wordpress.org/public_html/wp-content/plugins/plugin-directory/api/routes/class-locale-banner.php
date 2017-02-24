@@ -68,7 +68,7 @@ class Locale_Banner extends Base {
 		$current_locale = get_locale();
 
 		// Build a list of WordPress locales which we'll suggest to the user.
-		$suggest_locales = array_values( array_intersect( $translated_locales, $locales_from_header ) );
+		$suggest_locales = array_values( array_intersect( $locales_from_header, $translated_locales ) );
 		$current_locale_is_suggested = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
@@ -262,8 +262,8 @@ class Locale_Banner extends Base {
 		}
 
 		foreach ( $available_locales as $locale ) {
-			list( $lang, ) = preg_split( '/[_-]/', $locale );
-			if ( $lang  ) {
+			list( $locale_lang, ) = preg_split( '/[_-]/', $locale );
+			if ( $lang === $locale_lang ) {
 				return $locale;
 			}
 		}
