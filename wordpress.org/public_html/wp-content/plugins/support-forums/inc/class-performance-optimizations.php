@@ -362,7 +362,7 @@ class Performance_Optimizations {
 			}
 			$this->bound_id[ $interval ] = $bound_id;
 
-			wp_cache_set( $cache_key, $bound_id, $cache_group, 86400 );
+			wp_cache_set( $cache_key, $bound_id, $cache_group, DAY_IN_SECONDS );
 		}
 		return $bound_id;
 	}
