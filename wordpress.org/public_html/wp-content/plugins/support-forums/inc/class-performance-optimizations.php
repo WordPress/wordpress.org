@@ -352,7 +352,7 @@ class Performance_Optimizations {
 				FROM $wpdb->posts
 				WHERE post_type = 'topic'
 					AND post_status IN ( 'publish', 'closed' )
-					AND post_parent != 21272
+					AND post_parent != " . Plugin::REVIEWS_FORUM_ID . "
 					AND post_date < DATE_SUB( NOW(), INTERVAL $interval )
 				ORDER BY `ID` DESC
 				LIMIT 1 " );
