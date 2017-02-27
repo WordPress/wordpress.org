@@ -28,7 +28,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 				}
 
 				printf(
-					'<div class="bbp-template-notice info"><p>%s</p></div>',
+					'<div class="bbp-template-notice warning"><p>%s</p></div>',
 					$msg
 				);
 			}
