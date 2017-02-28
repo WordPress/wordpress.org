@@ -55,7 +55,16 @@ class Official_WordPress_Events {
 	public function prime_events_cache() {
 		global $wpdb;
 
+		$this->log( 'started call #' . did_action( 'owpe_prime_events_cache' ) );
+
+		if ( did_action( 'owpe_prime_events_cache' ) > 1 ) {
+			$this->log( 'Successive call detected, returning early' );
+			return;
+		}
+
 		$events = $this->fetch_upcoming_events();
+
+		$this->log( sprintf( 'looping through %d events', count( $events ) ) );
 
 		foreach ( $events as $event ) {
 			$row_values = array(
@@ -91,6 +100,8 @@ class Official_WordPress_Events {
 			 */
 			$wpdb->replace( self::EVENTS_TABLE, $row_values );
 		}
+
+		$this->log( 'finished job' );
 	}
 
 	/**
@@ -244,6 +255,8 @@ class Official_WordPress_Events {
 				$events = $this->parse_wordcamp_events_api_v2( $response );
 				break;
 		}
+
+		$this->log( sprintf( 'returning %d events', count( $events ) ) );
 
 		return $events;
 	}
@@ -407,6 +420,8 @@ class Official_WordPress_Events {
 				$response = $this->remote_get( $request_url );
 				$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
+				$this->log( 'fetching more events' );
+
 				if ( ! empty ( $body->results ) ) {
 					$meetups = $body->results;
 
@@ -457,6 +472,8 @@ class Official_WordPress_Events {
 			}
 		}
 
+		$this->log( sprintf( 'returning %d events', count( $events ) ) );
+
 		return $events;
 	}
 
@@ -480,6 +497,8 @@ class Official_WordPress_Events {
 		);
 
 		while ( '' !== $request_url ) {
+			$this->log( 'fetching more groups' );
+
 			$response = $this->remote_get( $request_url );
 			$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
@@ -490,6 +509,8 @@ class Official_WordPress_Events {
 
 			$request_url = $body->meta->next;
 		}
+
+		$this->log( sprintf( 'returning %d groups', count( $group_ids ) ) );
 
 		return $group_ids;
 	}
@@ -511,11 +532,16 @@ class Official_WordPress_Events {
 		) );
 
 		if ( ! is_wp_error( $response ) ) {
+			$this->log( 'geocode successful' );
+
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
 			if ( isset( $body->results[0] ) ) {
 				$address = $body->results[0];
 			}
+		}
+		else {
+			$this->log( 'geocode failed' );
 		}
 
 		return $address;
@@ -653,7 +679,44 @@ class Official_WordPress_Events {
 			$period = 2;
 		}
 
+		$this->log( 'sleeping to avoid api rate limit' );
 		sleep( $period );
+	}
+
+	/**
+	 * Log messages to the database
+	 *
+	 * To avoid storing too much data, the log is reset during each run, and only $limit rows are stored
+	 *
+	 * @param string $message
+	 */
+	protected function log( $message ) {
+		$limit = 500;
+
+		if ( ! isset( $this->log ) ) {
+			$this->log = array();
+		}
+
+		if ( count( $this->log ) > $limit ) {
+			wp_die('early return');
+			return;
+		}
+
+		$backtrace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 2 );
+
+		$this->log[] = sprintf(
+			'%s - %s MB - %s - %s',
+			microtime( true ),
+			number_format( memory_get_usage( true ) / 1024 / 2014, 2 ),
+			$backtrace[1]['function'],
+			$message
+		);
+
+		if ( $limit === count( $this->log ) ) {
+			$this->log[] = array( 'Reached log limit, assuming some kind of infinite loop. Will not log any more messages.' );
+		}
+
+		update_option( 'owpe_log', $this->log, false );
 	}
 }
 
