@@ -681,10 +681,7 @@ class WordPressTV_Theme {
 			return;
 		}
 
-		// Make it easier to contribute to this theme by not assuming WP.com context.
-		if ( function_exists( 'bump_stats_extras' ) ) {
-			bump_stats_extras( 'wptv-activity', 'publish-video' );
-		}
+		bump_stats_extras( 'wptv-activity', 'publish-video' );
 	}
 }
 
@@ -851,4 +848,22 @@ function wporg_username_exists( $username ) {
 	}
 
 	return $username_exists;
+}
+
+if ( ! function_exists( 'bump_stats_extras' ) ) {
+	/**
+	 * Define a stub for `bump_stats_extras()`
+	 *
+	 * This function only exists on WordPress.com, so we need a stub to prevent fatal `undefined function` errors
+	 * in the Meta Environment and other local dev environments.
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @param int    $num
+	 * @param bool   $today
+	 * @param bool   $hour
+	 */
+	function bump_stats_extras( $name, $value, $num = 1, $today = false, $hour = false ) {
+		// This is intentionally empty
+	}
 }

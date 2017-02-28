@@ -488,6 +488,8 @@ class WordPressTV_Subtitles_Upload {
 	 * @param string $message
 	 */
 	function error( $message ) {
+		bump_stats_extras( 'wptv-errors', 'subtitle-upload-failed' );
+
 		wp_safe_redirect( add_query_arg( array(
 			'video' => $this->video_id,
 			'error' => $message,
@@ -499,6 +501,8 @@ class WordPressTV_Subtitles_Upload {
 	 * Redirect to a success page.
 	 */
 	function success() {
+		bump_stats_extras( 'wptv-activity', 'subtitle-uploaded' );
+
 		wp_safe_redirect( add_query_arg( array(
 			'video'   => $this->video_id,
 			'success' => 1,

@@ -55,9 +55,7 @@ class WPTV_Anon_Upload {
 
 		// Normal users won't see the honeypot field, so if there's a value in it, then we can assume the submission is spam from a bot
 		if ( ! isset( $_POST['wptv_honey'] ) || ! empty( $_POST['wptv_honey'] ) ) {
-			if ( function_exists( 'bump_stats_extras' ) ) {
-				bump_stats_extras( 'wptv-spam', 'honeypot_trapped_anon_upload' );
-			}
+			bump_stats_extras( 'wptv-spam', 'honeypot_trapped_anon_upload' );
 
 			return $this->error( 13 );
 		}
@@ -159,6 +157,7 @@ class WPTV_Anon_Upload {
 	}
 
 	function error( $msg ) {
+		bump_stats_extras( 'wptv-errors', 'video-upload-failed' );
 		$this->errors = $msg;
 
 		return false;
