@@ -49,6 +49,14 @@ class Query_Plugins extends Base {
 
 		$query = array_intersect_key( $request->get_params(), array_flip( $this->valid_query_fields ) );
 
+		// Add some sane pagination limits to prevent insane queries.
+		if ( isset( $query['paged'] ) ) {
+			$query['paged'] = min( $query['paged'], 999 );
+		}
+		if ( isset( $query['posts_per_page'] ) ) {
+			$query['posts_per_page'] = min( $query['posts_per_page'], 250 );
+		}
+
 		if ( ! $query ) {
 			return $response;
 		}
