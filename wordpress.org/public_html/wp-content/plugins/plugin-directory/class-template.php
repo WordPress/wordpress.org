@@ -101,7 +101,7 @@ class Template {
 					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
 					sprintf(
 						/* translators: 1: number of ratings */
-						__( '%1$s<span class="screen-reader-text"> total ratings</span>' ),
+						__( '%1$s<span class="screen-reader-text"> total ratings</span>', 'wporg-plugins' ),
 						esc_html( $num_ratings )
 					) .
 				'</a>' .

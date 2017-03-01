@@ -447,7 +447,7 @@ class Customizations {
 
 		$user = wp_get_current_user();
 		if ( ! $user->exists() ) {
-			wp_die( __( 'Sorry, you must be logged in to reply to a comment.' ) );
+			wp_die( __( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
 		}
 
 		$user_ID              = $user->ID;
@@ -469,7 +469,7 @@ class Customizations {
 		}
 
 		if ( '' == $comment_content ) {
-			wp_die( __( 'ERROR: please type a comment.' ) );
+			wp_die( __( 'ERROR: please type a comment.', 'wporg-plugins' ) );
 		}
 
 		$comment_parent = 0;

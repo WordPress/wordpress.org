@@ -53,7 +53,10 @@ class Reviews {
 		</div>
 
 		<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">
-			<?php printf( __( 'Read all %s reviews', 'wporg-plugins' ), number_format_i18n( $review_count ) ); ?>
+			<?php
+				/* translators: %s: number of reviews */
+				printf( _n( 'Read all %s review', 'Read all %s reviews', $review_count, 'wporg-plugins' ), number_format_i18n( $review_count ) );
+			?>
 		</a>
 
 		<?php

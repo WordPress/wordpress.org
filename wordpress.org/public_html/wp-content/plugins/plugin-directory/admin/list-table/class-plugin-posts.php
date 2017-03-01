@@ -73,9 +73,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		if ( current_user_can( $post_type_obj->cap->edit_posts ) ) {
 			if ( $this->is_trash ) {
-				$actions['untrash'] = __( 'Restore' );
+				$actions['untrash'] = __( 'Restore', 'wporg-plugins' );
 			} else {
-				$actions['edit'] = __( 'Edit' );
+				$actions['edit'] = __( 'Edit', 'wporg-plugins' );
 			}
 		}
 
@@ -85,9 +85,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		if ( current_user_can( $post_type_obj->cap->delete_posts ) ) {
 			if ( $this->is_trash || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = __( 'Delete Permanently' );
+				$actions['delete'] = __( 'Delete Permanently', 'wporg-plugins' );
 			} else {
-				$actions['trash'] = __( 'Move to Trash' );
+				$actions['trash'] = __( 'Move to Trash', 'wporg-plugins' );
 			}
 		}
 
@@ -202,16 +202,16 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				'<a href="%s" aria-label="%s">%s</a>',
 				get_edit_post_link( $post->ID ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $title ) ),
-				__( 'Edit' )
+				esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;', 'wporg-plugins' ), $title ) ),
+				__( 'Edit', 'wporg-plugins' )
 			);
 
 			if ( current_user_can( 'plugin_review', $post->ID ) ) {
 				$actions['inline hide-if-no-js'] = sprintf(
 					'<a href="#" class="editinline" aria-label="%s">%s</a>',
 					/* translators: %s: post title */
-					esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline' ), $title ) ),
-					__( 'Quick&nbsp;Edit' )
+					esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline', 'wporg-plugins' ), $title ) ),
+					__( 'Quick&nbsp;Edit', 'wporg-plugins' )
 				);
 			} else {
 				wp_dequeue_script( 'inline-edit-post' );
@@ -224,16 +224,16 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					'<a href="%s" aria-label="%s">%s</a>',
 					wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $post->ID ) ), 'untrash-post_' . $post->ID ),
 					/* translators: %s: post title */
-					esc_attr( sprintf( __( 'Restore &#8220;%s&#8221; from the Trash' ), $title ) ),
-					__( 'Restore' )
+					esc_attr( sprintf( __( 'Restore &#8220;%s&#8221; from the Trash', 'wporg-plugins' ), $title ) ),
+					__( 'Restore', 'wporg-plugins' )
 				);
 			} elseif ( EMPTY_TRASH_DAYS ) {
 				$actions['trash'] = sprintf(
 					'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 					get_delete_post_link( $post->ID ),
 					/* translators: %s: post title */
-					esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash' ), $title ) ),
-					_x( 'Trash', 'verb' )
+					esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'wporg-plugins' ), $title ) ),
+					_x( 'Trash', 'verb', 'wporg-plugins' )
 				);
 			}
 			if ( 'trash' === $post->post_status || ! EMPTY_TRASH_DAYS ) {
@@ -241,8 +241,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 					'<a href="%s" class="submitdelete" aria-label="%s">%s</a>',
 					get_delete_post_link( $post->ID, '', true ),
 					/* translators: %s: post title */
-					esc_attr( sprintf( __( 'Delete &#8220;%s&#8221; permanently' ), $title ) ),
-					__( 'Delete Permanently' )
+					esc_attr( sprintf( __( 'Delete &#8220;%s&#8221; permanently', 'wporg-plugins' ), $title ) ),
+					__( 'Delete Permanently', 'wporg-plugins' )
 				);
 			}
 		}
@@ -252,8 +252,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
 				get_permalink( $post->ID ),
 				/* translators: %s: post title */
-				esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ),
-				__( 'View' )
+				esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'wporg-plugins' ), $title ) ),
+				__( 'View', 'wporg-plugins' )
 			);
 		}
 
