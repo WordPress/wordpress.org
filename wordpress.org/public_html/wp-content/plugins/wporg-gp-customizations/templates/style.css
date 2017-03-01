@@ -274,23 +274,6 @@ body.wporg-make #headline h2 a:before {
 	text-decoration: none;
 }
 
-ul a.edit,
-dt a.edit,
-ul a.edit:hover,
-dt a.edit:hover {
-	color: #fff;
-}
-
-#hello {
-	color: #333;
-	font-weight: normal;
-	float: right;
-	letter-spacing: 0;
-	margin-right: 1em;
-	margin-top: 22px;
-	font-size: 1em;
-}
-
 p.description {
 	margin: 1em;
 }
@@ -312,6 +295,10 @@ span.context {
 	background-color: #a0a5aa;
 }
 
+table.translations thead tr {
+	display: table-row !important;
+}
+
 table.translations td.translation li {
 	border-bottom: 1px dotted #eee;
 }
@@ -331,6 +318,7 @@ table.translations,
 table.translation-sets,
 table.glossary,
 table.locale-sub-projects {
+	font-size: 100%;
 	border-spacing: 0;
 }
 
@@ -379,7 +367,7 @@ table.translations tr:nth-child(4n+3),
 
 table.translations tr.preview.status-current,
 #legend .status-current {
-	background-color: #c1e1b9;
+	background-color: #b5e1b9;
 }
 
 table.translations tr.preview.status-waiting,
@@ -406,12 +394,13 @@ table.translations tr.preview.status-old,
 	background-color: #cdc5e1;
 }
 
+.glossary tr.active,
 table.translations tr.editor {
-	background-color: #eff7ed;
+	background-color: #fbfbfb;
 }
 
 .gp-content .meta {
-	color: #333;
+	color: #32373c;
 }
 
 .gp-content .meta a {
@@ -422,6 +411,11 @@ table.translations tr.editor {
 .gp-content .meta a:hover {
 	color: #00a0d2;
 	border-bottom: 0;
+}
+
+ul a.edit,
+dt a.edit {
+	background: none;
 }
 
 .editor .original {
@@ -437,12 +431,70 @@ table.translations tr.editor {
 }
 
 .editor .meta {
+	background: #fff;
+	border: 1px solid #eee;
+	font-size: 13px;
 	margin: 0;
-	padding-left: 2em;
-	width: 40%;
+	padding: 5px 10px;
+	width: 39%;
+	float: right;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+}
+
+.editor .meta h3 {
+	text-align: center;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 15px;
+}
+
+button.approve strong {
+	color: #46b450;
+}
+
+button.reject strong {
+	color: #dc3232;
+}
+
+button.fuzzy strong {
+	color: #f56e28;
+}
+
+.editor .refs li {
+	font-size: 12px;
+	word-wrap: break-word;
+}
+
+.editor .meta dl {
+	margin: .4em 0;
+}
+
+.editor .clear + .plural-numbers {
+	margin-top: 15px;
+}
+
+.editor .strings .textareas:last-child,
+.editor .plural-numbers + .textareas {
+	margin-bottom: 30px;
+}
+
+.editor .textareas + .clear {
+	margin-top: 30px;
+}
+
+.editor .actions {
+	margin-top: 30px;
+}
+
+.editor .actions .ok {
+	font-size: 14px;
+	height: 26px;
+	vertical-align: middle;
+}
+
+.strings textarea {
+	resize: vertical;
 }
 
 #gp-footer {
@@ -1370,7 +1422,7 @@ ul.language-packs-list {
 }
 
 .ct-chart-contributors .ct-series-a .ct-area { /* current */
-	fill: #c1e1b9;
+	fill: #b5e1b9;
 	fill-opacity: .5;
 }
 
@@ -1418,8 +1470,8 @@ ul.ct-legend {
 }
 
 .ct-legend .ct-series-0:before { /* current */
-	background-color: #c1e1b9;
-	border-color: #c1e1b9;
+	background-color: #b5e1b9;
+	border-color: #b5e1b9;
 }
 
 .ct-legend .ct-series-1:before { /* waiting */
@@ -1806,4 +1858,37 @@ ul.ct-legend {
 	background: #cbcdce;
 	white-space: pre;
 	opacity: .5;
+}
+
+button {
+	background: #f7f7f7;
+	border: 1px solid #ccc;
+	box-shadow: 0 1px 0 #ccc;
+	color: #555;
+	vertical-align: top;
+	border-radius: 3px;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 12px;
+	height: 22px;
+	line-height: 1;
+	margin: 0 1px;
+	padding: 0 10px;
+	text-decoration: none;
+	white-space: nowrap;
+	-webkit-appearance: none;
+}
+
+button:hover,
+button:focus {
+	background: #fafafa;
+	border-color: #999;
+	color: #23282d;
+}
+
+button:focus {
+	border-color: #5b9dd9;
+	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+	outline: 0;
 }
