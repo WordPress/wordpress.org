@@ -122,11 +122,13 @@ section {
 				background: $color__wp-blue;
 				color: #fff;
 			}
+		}
 
-			.bbp-topic-author,
-			.bbp-reply-author {
-				margin-top: 1.45rem;
-			}
+		.bbp-topics .bbp-topic-author,
+		.bbp-topics .bbp-reply-author,
+		.bbp-search-results .bbp-topic-author,
+		.bbp-search-results .bbp-reply-author {
+			margin-top: 1.45rem;
 		}
 
 		ul.status-closed, 
