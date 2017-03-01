@@ -1,71 +1,136 @@
 <?php
 
-$base_dir = dirname( dirname(__DIR__ ) );
-require( $base_dir . '/init.php' );
-require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
-include( $base_dir . '/includes/object-cache.php' );
-include( $base_dir . '/includes/wp-json-encode.php' );
+namespace Dotorg\API\Events;
 
-wp_cache_init();
+/**
+ * Main entry point
+ */
+function main() {
+	global $cache_group, $cache_life;
 
-$cache_group = 'events';
-$cache_life = 12 * 60 * 60;
-$ttl = 12 * 60 * 60; // Time the client should cache the document.
+	bootstrap();
 
-$location_args = array();
-// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
-if ( isset( $_GET['latitude'] ) ) {
-	$location_args['latitude'] = $_GET['latitude'];
-	$location_args['longitude'] = $_GET['longitude'];
-}
-if ( isset( $_GET['country'] ) ) {
-	$location_args['country'] = $_GET['country'];
-}
-
-// If a precide location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
-if ( isset( $_POST['location_data'] ) ) {
-	$location_args = $_POST['location_data'];
-}
-
-// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
-if ( isset( $_REQUEST['location'] ) )
-	$location_args['location_name'] = $_REQUEST['location'];
-if ( isset( $_REQUEST['timezone'] ) && !isset( $location_args['timezone'] ) )
-	$location_args['timezone'] = $_REQUEST['timezone'];
-if ( isset( $_REQUEST['locale'] ) && !isset( $location_args['locale'] ) )
-	$location_args['locale'] = $_REQUEST['locale'];
-if ( isset( $_REQUEST['ip'] ) && !isset( $location_args['ip'] ) )
-	$location_args['ip'] = $_REQUEST['ip'];
-
-$location = get_location( $location_args );
-
-if ( false === $location ) {
-	// No location was determined for the request. Bail with an error.
-	$events = array();
-	$error = 'no_location_available';
-} else {
-	$event_args = array();
-	if ( isset( $_REQUEST['number'] ) ) {
-		$event_args['number'] = $_REQUEST['number'];
-	}
-	if ( !empty( $location['latitude'] ) ) {
-		$event_args['nearby'] = array(
-			'latitude'  => $location['latitude'],
-			'longitude' => $location['longitude'],
-		);
-	}
-	if ( !empty( $location['country'] ) ) {
-		$event_args['country'] = $location['country'];
+	// The test suite just needs the functions defined and doesn't want any headers or output
+	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
+		return;
 	}
 
-	$events = get_events( $event_args );
+	wp_cache_init();
+
+	$cache_group   = 'events';
+	$cache_life    = 12 * 60 * 60;
+	$ttl           = 12 * 60 * 60; // Time the client should cache the document.
+	$location_args = parse_request();
+	$location      = get_location( $location_args );
+	$response      = build_response( $location );
+
+	send_response( $response, $ttl );
 }
 
-header( 'Expires: ' . gmdate( 'r', time() + $ttl ) );
-header( 'Access-Control-Allow-Origin: *' );
-header( 'Content-Type: application/json; charset=UTF-8' );
-echo wp_json_encode( compact( 'error', 'location', 'events', 'ttl' ) );
+/**
+ * Include dependencies
+ */
+function bootstrap() {
+	$base_dir = dirname( dirname(__DIR__ ) );
 
+	require( $base_dir . '/init.php' );
+	require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
+	include( $base_dir . '/includes/object-cache.php' );
+	include( $base_dir . '/includes/wp-json-encode.php' );
+}
+
+/**
+ * Parse and normalize the client's request
+ *
+ * @return array
+ */
+function parse_request() {
+	$location_args = array();
+
+	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
+	if ( isset( $_GET['latitude'] ) ) {
+		$location_args['latitude'] = $_GET['latitude'];
+		$location_args['longitude'] = $_GET['longitude'];
+	}
+
+	if ( isset( $_GET['country'] ) ) {
+		$location_args['country'] = $_GET['country'];
+	}
+
+	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
+	if ( isset( $_POST['location_data'] ) ) {
+		$location_args = $_POST['location_data'];
+	}
+
+	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
+	if ( isset( $_REQUEST['location'] ) ) {
+		$location_args['location_name'] = $_REQUEST['location'];
+	}
+
+	if ( isset( $_REQUEST['timezone'] ) && ! isset( $location_args['timezone'] ) ) {
+		$location_args['timezone'] = $_REQUEST['timezone'];
+	}
+
+	if ( isset( $_REQUEST['locale'] ) && ! isset( $location_args['locale'] ) ) {
+		$location_args['locale'] = $_REQUEST['locale'];
+	}
+
+	if ( isset( $_REQUEST['ip'] ) && ! isset( $location_args['ip'] ) ) {
+		$location_args['ip'] = $_REQUEST['ip'];
+	}
+
+	return $location_args;
+}
+
+/**
+ * Build the API's response to the client's request
+ *
+ * @param array $location
+ *
+ * @return array
+ */
+function build_response( $location ) {
+	if ( false === $location ) {
+		// No location was determined for the request. Bail with an error.
+		$events = array();
+		$error = 'no_location_available';
+	} else {
+		$event_args = array();
+
+		if ( isset( $_REQUEST['number'] ) ) {
+			$event_args['number'] = $_REQUEST['number'];
+		}
+
+		if ( ! empty( $location['latitude'] ) ) {
+			$event_args['nearby'] = array(
+				'latitude' => $location['latitude'],
+				'longitude' => $location['longitude'],
+			);
+		}
+
+		if ( ! empty( $location['country'] ) ) {
+			$event_args['country'] = $location['country'];
+		}
+
+		$events = get_events( $event_args );
+	}
+
+	return compact( 'error', 'location', 'events', 'ttl' );
+}
+
+/**
+ * Send the API's response to the client's request
+ *
+ * @param array $response
+ * @param int   $ttl
+ */
+function send_response( $response, $ttl ) {
+	header( 'Expires: ' . gmdate( 'r', time() + $ttl ) );
+	header( 'Access-Control-Allow-Origin: *' );
+	header( 'Content-Type: application/json; charset=UTF-8' );
+
+	echo wp_json_encode( $response );
+}
 
 function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	global $wpdb;
@@ -318,6 +383,8 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 		)
 	);
 }
+
+main();
 
 /*
 CREATE TABLE `wporg_events` (
