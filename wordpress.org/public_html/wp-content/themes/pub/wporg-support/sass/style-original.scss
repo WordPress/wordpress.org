@@ -279,7 +279,12 @@ div.bbp-template-notice.warning {
 	padding-top: 0;
 }
 
-.bbp-user-replies-created .bbp-topic-permalink {
+.bbp-breadcrumb .resolved:before {
+	padding-top: 5px;
+}
+
+.bbp-reply-header .bbp-topic-permalink,
+.bbp-breadcrumb .bbp-breadcrumb-topic {
 	display: inline-block;
 }
 
