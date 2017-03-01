@@ -236,12 +236,12 @@ function get_location_test_cases() {
 		),
 
 		'ip-south-america' => array(
-			'input' => array( 'ip' => '189.147.186.0' ),
+			'input' => array( 'ip' => '181.66.32.136' ),
 			'expected' => array(
-				'description' => 'mexico city',
-				'latitude'    => '19.42847',
-				'longitude'   => '-99.12766',
-				'country'     => 'MX',
+				'description' => 'lima',
+				'latitude'    => '-12.043333',
+				'longitude'   => '-77.028333',
+				'country'     => 'PE',
 			),
 		),
 	);
