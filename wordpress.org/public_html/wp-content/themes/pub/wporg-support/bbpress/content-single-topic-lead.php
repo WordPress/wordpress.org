@@ -15,7 +15,7 @@ if ( bbp_is_search_results() ) : ?>
 				<?php esc_html_e( 'Forum:', 'wporg-forums' ); ?>
 				<a class="bbp-forum-permalink" href="<?php bbp_forum_permalink( bbp_get_topic_forum_id() ); ?>"><?php bbp_forum_title( bbp_get_topic_forum_id() ); ?></a><br />
 
-				<?php esc_html_e( 'As the topic: ', 'wporg-forums' ); ?>
+				<?php esc_html_e( 'As the topic:', 'wporg-forums' ); ?>
 				<a class="bbp-topic-permalink" href="<?php bbp_topic_permalink( bbp_get_topic_id() ); ?>"><?php bbp_topic_title( bbp_get_topic_id() ); ?></a>
 			</span>
 	</div><!-- .bbp-meta -->
