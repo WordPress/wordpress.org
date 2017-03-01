@@ -2631,6 +2631,10 @@ section {
 	padding-right: 5%;
 }
 
+.bbpress #bbpress-forums .bbp-author-title {
+	margin: 0;
+}
+
 .bbpress #bbpress-forums .bbp-user-nicename,
 .bbpress #bbpress-forums .bbp-topic-post-date,
 .bbpress #bbpress-forums .bbp-topic-ip,
@@ -2657,7 +2661,7 @@ section {
 .bbpress #bbpress-forums div.bbp-reply-content,
 .bbpress #bbpress-forums div.bbp-topic-content {
 	padding: 0;
-	margin: 0 5% 0 0;
+	margin: 0 5% 0 2.5%;
 }
 
 .bbpress #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
@@ -3209,10 +3213,6 @@ div.bbp-template-notice a:hover {
 .single-topic .entry-content #bbpress-forums div.bbp-reply-author,
 .single-topic .entry-content #bbpress-forums div.bbp-topic-author {
 	padding-right: 10%;
-}
-
-.single-topic .entry-content #bbpress-forums .bbp-author-title {
-	margin: 0;
 }
 
 .single-topic .entry-content #bbpress-forums div.bbp-forum-content,

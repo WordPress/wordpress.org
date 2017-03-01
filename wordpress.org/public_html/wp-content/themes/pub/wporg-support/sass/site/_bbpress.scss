@@ -157,6 +157,10 @@ section {
 			padding-left: 5%;
 		}
 
+		.bbp-author-title {
+			margin: 0;
+		}
+
 		.bbp-user-nicename,
 		.bbp-topic-post-date,
 		.bbp-topic-ip,
@@ -183,7 +187,7 @@ section {
 		div.bbp-reply-content, 
 		div.bbp-topic-content {
 			padding: 0;
-			margin: 0 0 0 5%;
+			margin: 0 2.5% 0 5%;
 		}
 
 		li.bbp-body div.type-topic:hover span.bbp-admin-links,
@@ -717,10 +721,6 @@ div.bbp-template-notice {
 			div.bbp-reply-author, 
 			div.bbp-topic-author {
 				padding-left: 10%;
-			}
-
-			.bbp-author-title {
-				margin: 0;
 			}
 
 			div.bbp-forum-content, 
