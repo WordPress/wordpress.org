@@ -332,12 +332,11 @@ class WordCamp_New_Site {
 			return;
 		}
 
-		// Workaround to ensure upload directories are set up
-		wp_remote_get( esc_url( get_home_url( $wordcamp_id ) ) );
-
 		$meta = get_post_custom( $wordcamp_id );
 
 		switch_to_blog( $this->new_site_id );
+
+		add_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );
 
 		$lead_organizer = $this->get_user_or_current_user( $meta['WordPress.org Username'][0] );
 
@@ -345,6 +344,8 @@ class WordCamp_New_Site {
 
 		$this->set_default_options( $wordcamp, $meta );
 		$this->create_post_stubs( $wordcamp, $meta, $lead_organizer );
+
+		remove_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );
 
 		restore_current_blog();
 
