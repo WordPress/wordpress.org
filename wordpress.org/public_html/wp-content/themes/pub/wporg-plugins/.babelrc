@@ -1,3 +1,15 @@
 {
-  "presets": ["es2015", "react"]
+  "plugins": [
+    [ "transform-imports", {
+      "lodash": {
+        "transform": "lodash/${member}",
+        "preventFullImport": true
+      },
+      "state/selectors": {
+        "transform": "state/selectors/${member}",
+        "kebabCase": true
+      }
+    }]
+  ],
+  "presets": ["es2015", "react", "stage-2"]
 }

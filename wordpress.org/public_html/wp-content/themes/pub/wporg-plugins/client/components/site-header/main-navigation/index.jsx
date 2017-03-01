@@ -1,45 +1,59 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { identity } from 'lodash';
+import { localize } from 'i18n-calypso';
 
+/**
+ * Internal dependencies.
+ */
 import MenuItem from './menu-item';
 import SearchForm from 'components/search-form';
 
-export default React.createClass( {
-	displayName: 'MainNavigation',
+export const MainNavigation = ( { menuItems, translate } ) => (
+	<nav id="site-navigation" className="main-navigation" role="navigation">
+		<button
+			className="menu-toggle dashicons dashicons-arrow-down-alt2"
+			aria-controls="primary-menu"
+			aria-expanded="false"
+			aria-label={ translate( 'Primary Menu' ) }
+		/>
+		<div id="primary-menu" className="menu">
+			<ul>
+				{ menuItems.map( ( menuItem, key ) => <MenuItem key={ key } item={ menuItem } /> ) }
+				<li><SearchForm /></li>
+			</ul>
+		</div>
+	</nav>
+);
 
-	getDefaultProps() {
-		return {
-			menuItems: [
-				{
-					path: 'browse/favorites/',
-					label: 'My Favorites'
-				},
-				{
-					path: 'browse/beta/',
-					label: 'Beta Testing'
-				},
-				{
-					path: 'developers/',
-					label: 'Developers'
-				}
-			]
-		}
-	},
+MainNavigation.propTypes = {
+	menuItems: PropTypes.arrayOf( PropTypes.object ),
+	translate: PropTypes.func,
+};
 
-	render() {
-		var menuItems = this.props.menuItems.map( ( menuItem, key ) => <MenuItem key={ key } item={ menuItem } /> );
+MainNavigation.defaultProps = {
+	menuItems: [],
+	translate: identity,
+};
 
-		return (
-			<nav id="site-navigation" className="main-navigation" role="navigation">
-				<button className="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="Primary Menu"></button>
-				<div id="primary-menu" className="menu">
-					<ul>
-						{ menuItems }
-						<li>
-							<SearchForm searchTerm={ this.props.searchTerm } />
-						</li>
-					</ul>
-				</div>
-			</nav>
-		)
-	}
-} );
+export default localize( connect(
+	( state, { translate } ) => ( {
+		menuItems: [
+			{
+				path: 'browse/favorites/',
+				label: translate( 'My Favorites' ),
+			},
+			{
+				path: 'browse/beta/',
+				label: translate( 'Beta Testing' ),
+			},
+			{
+				path: 'developers/',
+				label: translate( 'Developers' ),
+			},
+		],
+	} ),
+)( MainNavigation ) );

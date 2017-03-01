@@ -2,6 +2,12 @@
 	display: none;
 	max-width: 128px;
 
+	.plugin-icon {
+		background-size: cover;
+		height: 128px;
+		width: 128px;
+	}
+
 	@media screen and ( min-width: 21em ) {
 			display: inline-block;
 			margin: 0 4% 0 0;

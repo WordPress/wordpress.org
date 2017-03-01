@@ -34,7 +34,7 @@
 					$button.hide();
 				} else {
 					// If the description starts with an embed/video, set the min-height to include it.
-					if ( 'description' === element.id && $section.children().next( 'p, div' ).first().find( 'video, iframe' ) ) {
+					if ( 'description' === element.id && $section.children().next( 'p, div' ).first().find( 'video, iframe' ).length ) {
 						var height = $section.children().next( 'p,div' ).first().outerHeight( true ) /* embed */ + $section.children().first().outerHeight( true ) /* h2 */;
 
 						if ( height > parseInt( $section.css( 'max-height' ) ) ) {

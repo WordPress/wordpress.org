@@ -1,36 +1,74 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { identity } from 'lodash';
+import { localize } from 'i18n-calypso';
 
-import FavoriteButton from './button';
-import {
-	getFavorites,
-	favoritePlugin,
-	unfavoritePlugin
-} from 'actions/index';
+/**
+ * Internal dependencies.
+ */
+import { favoritePlugin } from 'state/favorites/actions';
+import { isFavorite } from 'state/selectors';
 
-export default React.createClass( {
-	componentDidMount() {
-		this.getFavorites();
-	},
+export class FavoriteButton extends Component {
+	static propTypes = {
+		favorite: PropTypes.bool,
+		favoritePlugin: PropTypes.func,
+		plugin: PropTypes.object,
+		translate: PropTypes.func,
+	};
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.plugin.slug !== previousProps.plugin.slug ) {
-			this.getFavorites();
-		}
-	},
+	static defaultProps = {
+		favorite: false,
+		favoritePlugin: () => {},
+		plugin: {},
+		translate: identity,
+	};
 
-	getFavorites() {
-		this.props.dispatch( getFavorites( this.props.plugin.slug ) );
-	},
+	toggleFavorite = ( event ) => {
+		const $button = jQuery( event.target );
 
-	toggleFavorite( event ) {
-		if ( event.target.classList.contains( 'favorited' ) ) {
-			this.props.dispatch( unfavoritePlugin( this.props.plugin.slug ) );
-		} else {
-			this.props.dispatch( favoritePlugin( this.props.plugin.slug ) );
-		}
-	},
+		this.props.favoritePlugin( this.props.plugin );
+
+		$button.addClass( 'is-animating' ).one( 'animationend', () => {
+			$button.toggleClass( 'is-animating favorited' );
+		} );
+	};
 
 	render() {
-		return <FavoriteButton toggleFavorite={ this.toggleFavorite } />;
+		if ( 0 === pluginDirectory.userId ) {
+			return null;
+		}
+
+		const { favorite, plugin, translate } = this.props;
+		const classNames = [ 'plugin-favorite-heart' ];
+
+		if ( favorite ) {
+			classNames.push( 'favorited' );
+		}
+
+		return (
+			<div className="plugin-favorite">
+				<button type="button" className={ classNames.join( ' ' ) } onClick={ this.toggleFavorite } >
+					<span className="screen-reader-text">
+						{ favorite
+							? translate( 'Unfavorite %(name)s', { components: { name: plugin.name } } )
+							: translate( 'Favorite  %(name)s', { components: { name: plugin.name } } )
+						}
+					</span>
+				</button>
+			</div>
+		);
 	}
-} );
+}
+
+export default connect(
+	( state ) => ( {
+		favorite: isFavorite( state ),
+	} ),
+	{
+		favoritePlugin,
+	},
+)( localize( FavoriteButton ) );

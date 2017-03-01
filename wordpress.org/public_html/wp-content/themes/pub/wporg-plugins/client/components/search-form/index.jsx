@@ -1,44 +1,61 @@
-import React from 'react';
+/**
+ * Internal dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 /**
  * Internal dependencies.
  */
+import { getSearchTerm } from 'state/selectors';
 import SearchForm from './search-form';
 
-const SearchFormContainer = React.createClass( {
-	getInitialState() {
-		return {
-			searchTerm: this.props.searchTerm
-		};
-	},
+export class SearchFormContainer extends Component {
+	static propTypes = {
+		router: PropTypes.object,
+		search: PropTypes.string,
+	};
 
-	onChange( searchTerm ) {
-		this.setState( {
-			searchTerm: searchTerm
-		} );
-	},
+	static defaultProps = {
+		router: {},
+		search: '',
+	};
 
-	componentWillReceiveProps( nextProps ) {
-		this.setState( {
-			searchTerm: nextProps.searchTerm
-		} );
-	},
+	onChange = ( search ) => {
+		this.setState( { search } );
+	};
 
-	onSubmit( event ) {
-		var searchTerm = encodeURIComponent( this.state.searchTerm );
+	onSubmit = ( event ) => {
+		const search = encodeURIComponent( this.state.search );
 		event.preventDefault();
 
-		if ( searchTerm ) {
-			this.props.router.push( `/search/${ searchTerm }/` );
+		if ( search ) {
+			this.props.router.push( `/search/${ search }/` );
 		} else {
 			this.props.router.push( '/' );
 		}
-	},
+	};
+
+	constructor() {
+		super( ...arguments );
+
+		this.state = {
+			search: this.props.search,
+		};
+	}
+
+	componentWillReceiveProps( { search } ) {
+		this.setState( { search } );
+	}
 
 	render() {
-		return <SearchForm searchTerm={ this.state.searchTerm } onSubmit={ this.onSubmit } onChange={ this.onChange } />;
+		return <SearchForm onSubmit={ this.onSubmit } onChange={ this.onChange } />;
 	}
-} );
+}
 
-export default withRouter( SearchFormContainer );
+export default withRouter( connect(
+	( state ) => ( {
+		search: getSearchTerm( state ),
+	} ),
+)( SearchFormContainer ) );

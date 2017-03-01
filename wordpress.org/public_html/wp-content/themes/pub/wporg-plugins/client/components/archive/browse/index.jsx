@@ -1,33 +1,55 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-import { getBrowse } from 'actions';
+/**
+ * Internal dependencies.
+ */
+import { fetchSection, fetchSections } from 'state/sections/actions';
+import { getSection } from 'state/selectors';
 import Browse from './browse';
 
-const BrowseContainer = React.createClass( {
+export class BrowseContainer extends Component {
+	static propTypes = {
+		fetchSection: PropTypes.func,
+		params: PropTypes.object,
+	};
+
+	static defaultProps = {
+		fetchSection: () => {},
+		params: {},
+	};
+
 	componentDidMount() {
-		this.getBrowse();
-	},
+		this.fetchSection();
+	}
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.params.type !== previousProps.params.type ) {
-			this.getBrowse();
+	componentDidUpdate( { params } ) {
+		if ( this.props.params.type !== params.type ) {
+			this.fetchSection();
 		}
-	},
+	}
 
-	getBrowse() {
-		this.props.dispatch( getBrowse( this.props.params.type ) );
-	},
+	fetchSection() {
+		if ( ! this.props.section ) {
+			this.props.fetchSections();
+		}
+		this.props.fetchSection( this.props.params.type );
+	}
 
 	render() {
-		return <Browse { ...this.props } />;
+		return <Browse type={ this.props.params.type } />;
 	}
-} );
+}
 
-const mapStateToProps = ( state, ownProps ) => ( {
-	plugins: state.browse[ ownProps.params.type ]
-} );
-
-export default connect( mapStateToProps )( BrowseContainer );
-
-
+export default connect(
+	( state, { params } ) => ( {
+		section: getSection( state, params.type ),
+	} ),
+	{
+		fetchSection,
+		fetchSections,
+	},
+)( BrowseContainer );

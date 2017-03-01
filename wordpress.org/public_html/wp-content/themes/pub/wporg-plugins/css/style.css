@@ -1407,7 +1407,7 @@ p a:not(.button):hover {
 }
 
 /* Do not show the outline on the skip link target. */
-#content[tabindex="-1"]:focus {
+.site-content[tabindex="-1"]:focus {
   outline: 0;
 }
 
@@ -1986,6 +1986,13 @@ object {
   max-width: 128px;
 }
 
+.entry-thumbnail .plugin-icon {
+  -webkit-background-size: cover;
+  background-size: cover;
+  height: 128px;
+  width: 128px;
+}
+
 @media screen and (min-width: 21em) {
   .entry-thumbnail {
     display: inline-block;
@@ -2218,28 +2225,18 @@ object {
   }
 }
 
-#changelog {
+.plugin-changelog {
   font-size: 12.8px;
   font-size: 0.8rem;
 }
 
-#changelog code {
+.plugin-changelog code {
   font-size: 12.8px;
   font-size: 0.8rem;
 }
 
-#changelog h4 {
+.plugin-changelog h4 {
   margin-top: 0;
-}
-
-.contributors-list {
-  list-style: none;
-  margin: 0;
-  font-size: 0.9em;
-}
-
-.contributors-list li {
-  padding-bottom: 0.5em;
 }
 
 .plugin-developers {
@@ -2267,7 +2264,7 @@ object {
   float: left;
 }
 
-#faq h2:first-of-type {
+.plugin-faq h2:first-of-type {
   font-size: 20px;
   font-size: 1.25rem;
   font-weight: 600;
@@ -2280,11 +2277,11 @@ object {
   text-transform: inherit;
 }
 
-#faq dl {
+.plugin-faq dl {
   border-bottom: 1px solid #eee;
 }
 
-#faq dt {
+.plugin-faq dt {
   border-top: 1px solid #eee;
   cursor: pointer;
   font-size: 16px;
@@ -2294,7 +2291,7 @@ object {
   padding: 1rem 0;
 }
 
-#faq dt:before {
+.plugin-faq dt:before {
   content: "\f347";
   float: right;
   font-family: dashicons;
@@ -2302,27 +2299,27 @@ object {
   margin: 0 1rem;
 }
 
-#faq dt.open:before {
+.plugin-faq dt.open:before {
   content: "\f343";
 }
 
-#faq dd {
+.plugin-faq dd {
   display: none;
   margin: 0 0 16px;
   margin: 0 0 1rem;
 }
 
-#faq dd p {
+.no-js .plugin-faq dd {
+  display: block;
+}
+
+.plugin-faq dd p {
   margin: 0;
 }
 
-#faq dd p + p {
+.plugin-faq dd p + p {
   margin-top: 16px;
   margin-top: 1rem;
-}
-
-.no-js #faq dd {
-  display: block;
 }
 
 .plugin-reviews {
@@ -2632,16 +2629,21 @@ object {
   padding-bottom: 1px;
 }
 
-.section.read-more#description {
+.section.read-more.plugin-description {
   max-height: 400px;
 }
 
-.section.read-more#description.toggled {
+.section.read-more.plugin-description.toggled {
   max-height: none;
 }
 
 .section.read-more.toggled {
   max-height: none;
+}
+
+.no-js .section.read-more {
+  max-height: none;
+  overflow: auto;
 }
 
 .section h1, .section h2, .section h3 {
@@ -2684,11 +2686,6 @@ object {
   margin-top: 0;
 }
 
-.no-js .read-more {
-  overflow: auto;
-  max-height: none;
-}
-
 .section-toggle {
   color: #0073aa;
   cursor: pointer;
@@ -2697,6 +2694,10 @@ object {
   margin-top: 8px;
   margin-top: 0.5rem;
   position: relative;
+}
+
+.no-js .section-toggle {
+  display: none;
 }
 
 .section-toggle:after {
@@ -2715,10 +2716,6 @@ object {
 
 .section-toggle:hover {
   text-decoration: underline;
-}
-
-.no-js .section-toggle {
-  display: none;
 }
 
 .type-plugin .plugin-notice {
@@ -3414,4 +3411,3 @@ nav .nav-links span.page-numbers {
     top: 5px;
   }
 }
-/*# sourceMappingURL=style.css.map */

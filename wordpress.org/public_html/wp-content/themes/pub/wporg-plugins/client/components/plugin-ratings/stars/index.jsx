@@ -1,10 +1,28 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
+import { identity } from 'lodash';
+import { localize } from 'i18n-calypso';
 
-export default React.createClass( {
-	displayName: 'Stars',
+export class Stars extends Component {
+	static propTypes = {
+		rating: PropTypes.number,
+		translate: PropTypes.func,
+	};
 
-	fillStars( rating ) {
-		const template = '<span class="%1$s"></span>';
+	static defaultProps = {
+		rating: 0,
+		translate: identity,
+	};
+
+	/**
+	 * Returns filled stars representative of rating.
+	 *
+	 * @param {Number} rating Plugin rating.
+	 * @return {String} Rating stars.
+	 */
+	fillStars = ( rating ) => {
 		let counter = rating * 2,
 			output = '',
 			i = 0;
@@ -12,35 +30,35 @@ export default React.createClass( {
 		for ( i; i < 5; i++ ) {
 			switch ( counter ) {
 				case 0:
-					output += template.replace( '%1$s', 'dashicons dashicons-star-empty' );
+					output += '<span class="dashicons dashicons-star-empty"></span>';
 					break;
 
 				case 1:
-					output += template.replace( '%1$s', 'dashicons dashicons-star-half' );
+					output += '<span class="dashicons dashicons-star-half"></span>';
 					counter--;
 					break;
 
 				default:
-					output += template.replace( '%1$s', 'dashicons dashicons-star-filled' );
+					output += '<span class="dashicons dashicons-star-filled"></span>';
 					counter -= 2;
 			}
 		}
 
 		return output;
-	},
+	};
 
 	render() {
-		const titleTemplate = '%s out of 5 stars',
-			title = titleTemplate.replace( '%s', this.props.rating / 20 );
+		const { rating, translate } = this.props;
+		const stars =  Math.round( rating / 0.5 ) * 0.5;
 
 		return (
 			<div
 				className="wporg-ratings"
-				aria-label={ title }
-				data-title-template={ titleTemplate }
-				data-rating={ this.props.rating / 20 }
-				dangerouslySetInnerHTML={ { __html: this.fillStars( Math.round( this.props.rating / 10 ) / 2 ) } }
-			></div>
-		)
+				aria-label={ translate( '%(stars)s out of 5 stars', { args: { stars } } ) }
+				dangerouslySetInnerHTML={ { __html: this.fillStars( stars ) } }
+			/>
+		);
 	}
-} );
+}
+
+export default localize( Stars );

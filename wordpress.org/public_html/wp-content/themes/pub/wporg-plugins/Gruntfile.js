@@ -57,14 +57,14 @@ module.exports = function( grunt ) {
 				src: 'css/style.css'
 			}
 		},
-		jshint: {
+		eslint: {
 			files: [
-				'Gruntfile.js',
-				'js/**/*.js',
 				'client/**/*.js',
-				'!js/theme.js'
-			],
-			options: grunt.file.readJSON('.jshintrc')
+				'client/**/*.jsx',
+
+				// External library. For now.
+				'!client/**/**/image-gallery/index.jsx'
+			]
 		},
 		sass: {
 			options: {
@@ -84,6 +84,11 @@ module.exports = function( grunt ) {
 				files: { 'client/styles/_components.scss': 'client/components/**/*.scss' },
 			},
 			options: { signature: false }
+		},
+		shell: {
+			build: {
+				command: './node_modules/wpapi/lib/data/update-default-routes-json.js --endpoint=https://wordpress.org/plugins-wp/wp-json --output=./client'
+			}
 		},
 		rtlcss: {
 			options: {
@@ -147,9 +152,9 @@ module.exports = function( grunt ) {
 			}
 		},
 		watch: {
-			jshint: {
-				files: ['<%= jshint.files %>'],
-				tasks: ['jshint']
+			eslint: {
+				files: ['<%= eslint.files %>'],
+				tasks: ['eslint']
 			},
 			css: {
 				files: ['**/*.scss', 'client/components/**/**.scss'],
@@ -161,11 +166,12 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-rtlcss');
 	grunt.loadNpmTasks('grunt-webpack');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-eslint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-sass-globbing');
+	grunt.loadNpmTasks('grunt-shell');
 
-	grunt.registerTask('default', ['jshint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);
+	grunt.registerTask('default', ['eslint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);
 	grunt.registerTask('css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
-	grunt.registerTask('build', ['webpack:build', 'css']);
+	grunt.registerTask('build', ['webpack:build', 'css', 'shell:build']);
 };

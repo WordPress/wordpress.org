@@ -1,37 +1,53 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import find from 'lodash/find';
 
 /**
  * Internal dependencies.
  */
 import PluginCard from './plugin-card';
-import { getPlugin } from 'actions';
+import { fetchPlugin } from 'state/plugins/actions';
+import { getPlugin } from 'state/selectors';
 
-const PluginCardContainer = React.createClass( {
+export class PluginCardContainer extends Component {
+	static propTypes = {
+		fetchPlugin: PropTypes.func,
+		plugin: PropTypes.object,
+		slug: PropTypes.string,
+	};
+
+	static defaultProps = {
+		fetchPlugin: () => {},
+		plugin: {},
+		slug: '',
+	};
+
 	componentDidMount() {
-		this.getPlugin();
-	},
+		this.fetchPlugin();
+	}
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.slug !== previousProps.slug ) {
-			this.getPlugin();
+	componentDidUpdate( { plugin, slug } ) {
+		if ( this.props.slug !== slug || this.props.plugin !== plugin ) {
+			this.fetchPlugin();
 		}
-	},
+	}
 
-	getPlugin() {
-		this.props.dispatch( getPlugin( this.props.slug ) );
-	},
+	fetchPlugin() {
+	//	this.props.fetchPlugin( this.props.slug );
+	}
 
 	render() {
-		return <PluginCard { ...this.props } />;
+		return <PluginCard plugin={ this.props.plugin } />;
 	}
-} );
+}
 
-const mapStateToProps = ( state, ownProps ) => ( {
-	plugin: find( state.plugins, { slug: ownProps.slug } )
-} );
-
-export default connect( mapStateToProps )( PluginCardContainer );
-
-
+export default connect(
+	( state, { plugin, slug } ) => ( {
+		plugin: plugin || getPlugin( state, slug ),
+	} ),
+	{
+		fetchPlugin,
+	},
+)( PluginCardContainer );

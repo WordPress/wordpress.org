@@ -1,14 +1,20 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
 
-export default React.createClass( {
-	displayName: 'MenuItem',
+export const MenuItem = ( { item } ) => (
+	<li className="page_item">
+		<Link to={ item.path } activeClassName="active">{ item.label }</Link>
+	</li>
+);
 
-	render() {
-		return (
-			<li className="page_item">
-				<Link to={ this.props.item.path } activeClassName="active">{ this.props.item.label }</Link>
-			</li>
-		)
-	}
-} );
+MenuItem.propTypes = {
+	params: PropTypes.shape( {
+		label: PropTypes.string,
+		path: PropTypes.string,
+	} ),
+};
+
+export default MenuItem;

@@ -550,7 +550,7 @@ export default class ImageGallery extends React.Component {
 									}
 								</span>,
 
-								<div className="image-gallery-slides">{ slides }</div>
+								<div key={ this.state.currentIndex } className="image-gallery-slides">{ slides }</div>
 							]
 							:
 							<div className="image-gallery-slides">{ slides }</div>

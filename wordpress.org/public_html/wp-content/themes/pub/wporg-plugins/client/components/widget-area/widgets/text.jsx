@@ -1,14 +1,21 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
 
-export default React.createClass( {
-	displayName: 'TextWidget',
+export const TextWidget = ( { widget } ) => (
+	<div className="widget widget_text">
+		<h3 className="widget-title">{ widget.title }</h3>
+		<div className="textwidget">{ widget.text }</div>
+	</div>
+);
 
-	render() {
-		return (
-			<div className="widget widget_text">
-				<h3 className="widget-title">{ this.props.widget.title }</h3>
-				<div className="textwidget">{ this.props.widget.text }</div>
-			</div>
-		)
-	}
-} );
+TextWidget.propTypes = {
+	widget: PropTypes.object,
+};
+
+TextWidget.defaultProps = {
+	widget: {},
+};
+
+export default TextWidget;

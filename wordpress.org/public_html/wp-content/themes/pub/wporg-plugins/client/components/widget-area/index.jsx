@@ -1,19 +1,29 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
+import { withRouter } from 'react-router';
 
-export default React.createClass( {
-	displayName: 'WidgetArea',
+export const WidgetArea = ( { children, router } ) => {
+	const classNames = [ 'widget-area' ];
 
-	render() {
-		let classNames = [ 'widget-area' ];
-
-		if ( this.props.router.isActive( '/', true ) ) {
-			classNames.push( 'home' );
-		}
-
-		return (
-			<aside id="secondary" className={ classNames.join( ' ' ) } role="complementary">
-				{ this.props.children }
-			</aside>
-		)
+	if ( router.isActive( '/', true ) ) {
+		classNames.push( 'home' );
 	}
-} );
+
+	return (
+		<aside id="secondary" className={ classNames.join( ' ' ) } role="complementary">
+			{ children }
+		</aside>
+	);
+};
+
+WidgetArea.propTypes = {
+	router: PropTypes.object,
+};
+
+WidgetArea.defaultProps = {
+	router: {},
+};
+
+export default withRouter( WidgetArea );

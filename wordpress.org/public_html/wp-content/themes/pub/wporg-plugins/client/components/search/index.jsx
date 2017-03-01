@@ -1,31 +1,48 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
+/**
+ * Internal dependencies.
+ */
 import Search from './search';
-import { searchPlugins } from 'actions';
+import { fetchSearch } from 'state/search/actions';
 
-const SearchContainer = React.createClass( {
+export class SearchContainer extends Component {
+	static propTypes = {
+		fetchSearch: PropTypes.func,
+		params: PropTypes.object,
+	};
+
+	static defaultProps = {
+		fetchSearch: () => {},
+		params: {},
+	};
+
 	componentDidMount() {
-		this.searchPlugins();
-	},
+		this.fetchSearch();
+	}
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.params.searchTerm !== previousProps.params.searchTerm ) {
-			this.searchPlugins();
+	componentDidUpdate( { params } ) {
+		if ( this.props.params.search !== params.search ) {
+			this.fetchSearch();
 		}
-	},
+	}
 
-	searchPlugins() {
-		this.props.dispatch( searchPlugins( this.props.params.searchTerm ) );
-	},
+	fetchSearch() {
+		this.props.fetchSearch( this.props.params.search );
+	}
 
 	render() {
 		return <Search { ...this.props } />;
 	}
-} );
+}
 
-const mapStateToProps = ( state, ownProps ) => ( {
-	plugins: state.search[ ownProps.params.searchTerm ] || null
-} );
-
-export default connect( mapStateToProps )( SearchContainer );
+export default connect(
+	null,
+	{
+		fetchSearch,
+	},
+)( SearchContainer );

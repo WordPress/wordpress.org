@@ -6,7 +6,7 @@
 		overflow: hidden;
 		padding-bottom: 1px;
 
-		&#description {
+		&.plugin-description {
 			max-height: 400px;
 
 			&.toggled {
@@ -18,6 +18,10 @@
 			max-height: none;
 		}
 
+		.no-js & {
+			max-height: none;
+			overflow: auto;
+		}
 	}
 
 	h1, h2, h3 {
@@ -58,17 +62,17 @@
 	}
 }
 
-.no-js .read-more {
-	overflow: auto;
-	max-height: none;
-}
-
 .section-toggle {
 	color: $color__link;
 	cursor: pointer;
 	font-size: ms( -2 );
 	margin-top: 0.5rem;
 	position: relative;
+
+	.no-js & {
+		display: none;
+	}
+
 
 	&:after {
 		content: "\f347";
@@ -87,8 +91,4 @@
 	&:hover {
 		text-decoration: underline;
 	}
-}
-
-.no-js .section-toggle {
-	display: none;
 }

@@ -1,35 +1,47 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import find from 'lodash/find';
 
 /**
  * Internal dependencies.
  */
 import Page from './page';
-import { getPage } from 'actions';
+import { fetchPage } from 'state/pages/actions';
 
-const PageContainer = React.createClass( {
+class PageContainer extends Component {
+	static propTypes = {
+		fetchPage: PropTypes.func,
+		route: PropTypes.object.isRequired,
+	};
+
+	static defaultProps = {
+		fetchPage: () => {},
+	};
+
 	componentDidMount() {
-		this.getPage();
-	},
+		this.fetchPage();
+	}
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.route.path !== previousProps.route.path ) {
-			this.getPage();
+	componentDidUpdate( { route } ) {
+		if ( this.props.route.path !== route.path ) {
+			this.fetchPage();
 		}
-	},
+	}
 
-	getPage() {
-		this.props.dispatch( getPage( this.props.route.path ) );
-	},
+	fetchPage() {
+		this.props.fetchPage( this.props.route.path );
+	}
 
 	render() {
-		return <Page { ...this.props } />;
+		return <Page />;
 	}
-} );
+}
 
-const mapStateToProps = ( state, ownProps ) => ( {
-	page: find( state.pages, { slug: ownProps.route.path } )
-} );
-
-export default connect( mapStateToProps )( PageContainer );
+export default connect(
+	null,
+	{
+		fetchPage,
+	}
+)( PageContainer );

@@ -1,19 +1,28 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
 
-export default React.createClass( {
-	displayName: 'SiteMain',
+export const SiteMain = ( { children, params } ) => {
+	const classNames = [ 'site-main' ];
 
-	render() {
-		let classNames = [ 'site-main' ];
-
-		if ( this.props.params.slug ) {
-			classNames.push( 'single' );
-		}
-
-		return (
-			<main id="main" className={ classNames.join( ' ' ) } role="main">
-				{ this.props.children }
-			</main>
-		)
+	if ( params.slug ) {
+		classNames.push( 'single' );
 	}
-} );
+
+	return (
+		<main id="main" className={ classNames.join( ' ' ) } role="main">
+			{ children }
+		</main>
+	);
+};
+
+SiteMain.propTypes = {
+	params: PropTypes.object,
+};
+
+SiteMain.defaultProps = {
+	params: {},
+};
+
+export default SiteMain;

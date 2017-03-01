@@ -1,4 +1,7 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
 
 /**
@@ -7,31 +10,29 @@ import { Link } from 'react-router';
 import PluginIcon from 'components/plugin-icon';
 import PluginRatings from 'components/plugin-ratings';
 
-export default React.createClass( {
-	displayName: 'PluginCard',
+export const PluginCard = ( { plugin } ) => (
+	<article className="plugin type-plugin plugin-card">
+		<PluginIcon slug={ plugin.slug } />
+		<div className="entry">
+			<header className="entry-header">
+				<h2 className="entry-title">
+					<Link
+						to={ `${ plugin.slug }/` }
+						rel="bookmark"
+						dangerouslySetInnerHTML={ { __html: plugin.title.rendered } }
+					/>
+				</h2>
+			</header>
 
-	render() {
-		if ( ! this.props.plugin ) {
-			return (
-				<div />
-			);
-		}
+			{ plugin.ratings && <PluginRatings rating={ plugin.meta.rating } ratingCount={ plugin.ratings.length } /> }
 
-		return (
-			<article className="plugin type-plugin plugin-card">
-				<PluginIcon plugin={ this.props.plugin } />
-				<div className="entry">
-					<header className="entry-header">
-						<h2 className="entry-title">
-							<Link to={ `${ this.props.plugin.slug }/` } rel="bookmark">{ this.props.plugin.name }</Link>
-						</h2>
-					</header>
+			<div className="entry-excerpt" dangerouslySetInnerHTML={ { __html: plugin.excerpt.rendered } } />
+		</div>
+	</article>
+);
 
-					<PluginRatings rating={ this.props.plugin.rating } ratingCount={ this.props.plugin.num_ratings } />
+PluginCard.propTypes = {
+	plugin: PropTypes.object,
+};
 
-					<div className="entry-excerpt">{ this.props.plugin.short_description }</div>
-				</div>
-			</article>
-		)
-	}
-} );
+export default PluginCard;

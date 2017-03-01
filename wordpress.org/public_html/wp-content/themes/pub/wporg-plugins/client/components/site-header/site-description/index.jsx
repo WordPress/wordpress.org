@@ -1,14 +1,38 @@
-import React from 'react';
-import { IndexLink } from 'react-router';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
+import { identity } from 'lodash';
+import { localize } from 'i18n-calypso';
+import { withRouter } from 'react-router';
 
-export default React.createClass( {
-	displayName: 'SiteDescription',
-
-	render() {
-		if ( this.props.isHome ) {
-			return <p className="site-description">Extend your WordPress experience with 40,000 plugins.</p>;
-		} else {
-			return <span />;
-		}
+/**
+ *
+ * @param {Boolean}  router    Router object.
+ * @param {Function} translate i18n translation function.
+ * @return {*}                 Component or null.
+ * @constructor
+ */
+export const SiteDescription = ( { router, translate } ) => {
+	if ( router.isActive( '/', true ) ) {
+		return (
+			<p className="site-description">
+				{ translate( 'Extend your WordPress experience with 40,000 plugins.' ) }
+			</p>
+		);
 	}
-} );
+
+	return null;
+};
+
+SiteDescription.propTypes = {
+	router: PropTypes.object,
+	translate: PropTypes.func,
+};
+
+SiteDescription.defaultProps = {
+	router: {},
+	translate: identity,
+};
+
+export default withRouter( localize( SiteDescription ) );

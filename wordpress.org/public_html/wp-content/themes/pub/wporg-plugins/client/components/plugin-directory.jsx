@@ -1,30 +1,40 @@
-import React from 'react';
-import { IndexLink } from 'react-router';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
 
+/**
+ * Internal dependencies.
+ */
 import TextWidget from 'components/widget-area/widgets/text';
 import WidgetArea from 'components/widget-area';
 
-export default React.createClass( {
-	displayName: 'PluginDirectory',
-
-	widgetArea() {
-		return (
-			<WidgetArea { ...this.props }>
-				{ this.props.widgets.map( widget =>
+export const PluginDirectory = ( { header, main, router, widgets } ) => (
+	<div>
+		{ header }
+		{ main }
+		{ router.isActive( '/', true ) &&
+			<WidgetArea>
+				{ widgets.map( ( widget ) =>
 					<TextWidget key={ widget.title } widget={ widget } />
 				) }
 			</WidgetArea>
-		);
-	},
+		}
+	</div>
+);
 
-	render() {
-		return (
-			<div>
-				{ this.props.header }
-				{ this.props.main }
-				{ this.props.router.isActive( '/', true ) ? this.widgetArea() : <div /> }
-			</div>
-		)
-	}
-} );
+PluginDirectory.propTypes = {
+	header: PropTypes.object,
+	main: PropTypes.object,
+	router: PropTypes.object,
+	widgets: PropTypes.arrayOf( PropTypes.object ),
+};
 
+PluginDirectory.defaultProps = {
+	header: {},
+	main: {},
+	router: {},
+	widgets: [],
+};
+
+export default PluginDirectory;

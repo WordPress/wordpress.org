@@ -77,7 +77,6 @@ function scripts() {
 		wp_enqueue_script( 'google-jsapi', 'https://www.google.com/jsapi', array(), false, true );
 		wp_enqueue_script( 'wporg-plugins-stats', get_template_directory_uri() . '/js/stats.js', array( 'jquery', 'google-jsapi' ), '20161019', true );
 
-
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
 			'l10n' => array(
@@ -90,16 +89,23 @@ function scripts() {
 				'all_time'  => __( 'All Time', 'wporg-plugins' ),
 			),
 		) );
-
 	}
 
 	// React is currently only used on detail pages
 	if ( is_single() ) {
 		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), false, true );
-		wp_localize_script( 'wporg-plugins-client', 'app_data', array(
-			'api_url' => untrailingslashit( rest_url() ),
-			'nonce'   => wp_create_nonce( 'wp_rest' ),
-			'base'    => get_blog_details()->path,
+		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
+			'endpoint' => untrailingslashit( rest_url() ), // 'https://wordpress.org/plugins-wp/wp-json',
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+			'base'     => get_blog_details()->path,
+			'userId'   => get_current_user_id(),
+		) );
+		wp_localize_script( 'wporg-plugins-client', 'localeData', array(
+			'' => array(
+				'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
+				'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
+				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ) ,
+			),
 		) );
 	}
 

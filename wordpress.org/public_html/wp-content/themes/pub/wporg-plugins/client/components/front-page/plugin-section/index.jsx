@@ -1,34 +1,49 @@
-import React, { Component } from 'react';
+/**
+ * External dependencies.
+ */
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
 /**
  * Internal dependencies.
  */
-import { getBrowse } from 'actions';
+import { fetchSection, fetchSections } from 'state/sections/actions';
 import PluginSection from './plugin-section';
 
 class PluginSectionContainer extends Component {
+	static propTypes = {
+		fetchSection: PropTypes.func,
+		type: PropTypes.string.isRequired,
+	};
+
+	static defaultProps = {
+		fetchBrowse: () => {},
+	};
+
 	componentDidMount() {
-		this.getBrowse();
+		this.props.fetchSections();
+		this.fetchSection();
 	}
 
-	componentDidUpdate( previousProps ) {
-		if ( this.props.section.type !== previousProps.section.type ) {
-			this.getBrowse();
+	componentDidUpdate( { type } ) {
+		if ( this.props.type !== type ) {
+			this.fetchSection();
 		}
 	}
 
-	getBrowse() {
-		this.props.dispatch( getBrowse( this.props.section.type ) );
+	fetchSection() {
+		this.props.fetchSection( this.props.type );
 	}
 
 	render() {
-		return <PluginSection { ...this.props } />;
+		return <PluginSection type={ this.props.type } />;
 	}
 }
 
-const mapStateToProps = ( state, ownProps ) => ( {
-	plugins: state.browse[ ownProps.section.type ].slice( 0, 4 )
-} );
-
-export default connect( mapStateToProps )( PluginSectionContainer );
+export default connect(
+	null,
+	{
+		fetchSection,
+		fetchSections,
+	},
+)( PluginSectionContainer );

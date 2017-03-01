@@ -1,32 +1,57 @@
-import React from 'react';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
 
-export default React.createClass( {
-	displayName: 'PluginBanner',
+/**
+ * Internal dependencies.
+ */
+import { getPlugin } from 'state/selectors';
 
-	render() {
-		const { banners, slug } = this.props.plugin;
-		let banner;
+/**
+ *
+ * @param {Object} plugin Plugin object.
+ * @return {*} React element.
+ * @constructor
+ */
+export const PluginBanner = ( { plugin } ) => {
+	const { banners, slug } = plugin;
 
-		if ( ! banners ) {
-			return <div />;
-		}
-
-		banner = banners[ 'low' ] ? banners[ 'low' ] : banners[ 'high' ];
-
-		if ( ! banner ) {
-			return <div />;
-		}
-
-		return (
-			<div className="entry-banner">
-				<div className="plugin-banner" id={ `plugin-banner-${ slug }` }></div>
-				<style type='text/css'>
-					{ `#plugin-banner-${ slug } { background-image: url('${ banner }'); }` }
-					{ banners[ 'high' ] ?
-						`@media only screen and (-webkit-min-device-pixel-ratio: 1.5) { #plugin-banner-${ slug } { background-image: url('${ banners[ 'high' ] }'); } }` : ''
-					} }
-				</style>
-			</div>
-		)
+	if ( ! banners ) {
+		return null;
 	}
-} );
+
+	const banner = banners.low || banners.high;
+
+	if ( ! banner ) {
+		return null;
+	}
+
+	return (
+		<div className="entry-banner">
+			<div className="plugin-banner" id={ `plugin-banner-${ slug }` } />
+			<style type="text/css">
+				{ `#plugin-banner-${ slug } { background-image: url('${ banner }'); }` }
+				{ banners.high && '@media ' +
+					'only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) ' +
+					`{ #plugin-banner-${ slug } { background-image: url('${ banners.high }'); } }`
+				} }
+			</style>
+		</div>
+	);
+};
+
+PluginBanner.propTypes = {
+	plugin: PropTypes.object,
+};
+
+PluginBanner.defaultProps = {
+	plugin: {},
+};
+
+export default connect(
+	( state ) => ( {
+		plugin: getPlugin( state ),
+	} ),
+)( PluginBanner );

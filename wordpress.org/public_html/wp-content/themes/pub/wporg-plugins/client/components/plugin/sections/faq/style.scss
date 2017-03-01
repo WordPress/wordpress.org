@@ -1,4 +1,4 @@
-#faq {
+.plugin-faq {
 	h2:first-of-type {
 		font-size: ms( 2 );
 		font-weight: 600;
@@ -39,6 +39,10 @@
 		display: none;
 		margin: 0 0 1rem;
 
+		.no-js & {
+			display: block;
+		}
+
 		& p {
 			margin: 0;
 		}
@@ -47,8 +51,4 @@
 			margin-top: 1rem;
 		}
 	}
-}
-
-.no-js #faq dd {
-	display: block;
 }

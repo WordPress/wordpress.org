@@ -4,7 +4,7 @@ const webpack = require( 'webpack' );
 
 module.exports = {
 	cache: true,
-	entry: [ './client/index.jsx' ],
+	entry: [ -1 !== process.argv[2].indexOf( 'build' ) ? './client/build.jsx' : './client/index.jsx' ],
 	output: {
 		path: __dirname + '/js',
 		filename: 'theme.js'
@@ -15,6 +15,10 @@ module.exports = {
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
 				loader: 'babel-loader'
+			},
+			{
+				test: /\.json$/,
+				loader: 'json'
 			}
 		]
 	},

@@ -1,28 +1,29 @@
-import { connect } from 'react-redux';
+/**
+ * External dependencies.
+ */
+import React, { PropTypes } from 'react';
+import { identity } from 'lodash';
+import { localize } from 'i18n-calypso';
 
 /**
  * Internal dependencies.
  */
-import FrontPage from './front-page';
+import PluginSection from './plugin-section';
 
-const mapStateToProps = () => ( {
-	sections: [
-		{
-			path: 'browse/featured/',
-			title: 'Featured Plugins',
-			type: 'featured'
-		},
-		{
-			path: 'browse/popular/',
-			title: 'Popular Plugins',
-			type: 'popular'
-		},
-		{
-			path: 'browse/beta/',
-			title: 'Beta Plugins',
-			type: 'beta'
-		}
-	]
-} );
+const FrontPage = ( { sections } ) => (
+	<div>
+		{ sections.map( ( type ) => <PluginSection key={ type } type={ type } /> ) }
+	</div>
+);
 
-export default connect( mapStateToProps )( FrontPage );
+FrontPage.propTypes = {
+	sections: PropTypes.arrayOf( PropTypes.string ),
+	translate: PropTypes.func,
+};
+
+FrontPage.defaultProps = {
+	sections: [ 'featured', 'popular', 'beta' ],
+	translate: identity,
+};
+
+export default localize( FrontPage );
