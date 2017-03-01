@@ -13,11 +13,7 @@ global $section, $section_slug, $section_content, $section_read_more;
 
 <div
 	id="<?php echo esc_attr( $section_slug ); ?>"
-	<?php if ( $section_read_more ) : ?>
-		class="section read-more"
-	<?php else: ?>
-		class="section"
-	<?php endif; ?>
+	class="plugin-<?php echo esc_attr( $section_slug ); ?> section <?php if ( $section_read_more ) { echo 'read-more'; } ?>"
 >
 	<h2><?php echo $section['title']; ?></h2>
 	<?php echo $section_content; ?>
