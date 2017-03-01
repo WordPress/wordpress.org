@@ -163,7 +163,7 @@
 
 						<p>
 
-							<label for="bbp_stick_topic"><?php _e( 'Topic Type:', 'wporg-forums' ); ?></label><br />
+							<label for="bbp_stick_topic_select"><?php _e( 'Topic Type:', 'wporg-forums' ); ?></label><br />
 
 							<?php bbp_topic_type_select(); ?>
 
