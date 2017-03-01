@@ -38,8 +38,10 @@
 	background-color: $color__theme-author;
 }
 
+.bbp-view .bbp-topics,
+.bbp-search .bbp-search-results,
 #bbp-user-replies-created {
-	.author-has-badge {
+	div.author-has-badge {
 		box-shadow: none;
 		border-left-style: solid;
 		border-left-width: 3px;
@@ -60,9 +62,7 @@
 	}
 
 	.author-badge {
-		position: inherit;
-		float: left;
-		margin: 2px 0 6px -8px;
+		left: 0;
 	}
 }
 

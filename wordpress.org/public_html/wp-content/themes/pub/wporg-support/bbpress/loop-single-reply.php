@@ -7,7 +7,7 @@
  * @subpackage Theme
  */
 
-if ( bbp_is_single_user_replies() ) : ?>
+if ( bbp_is_single_user_replies() || bbp_is_search_results() ) : ?>
 
 <div id="post-<?php bbp_reply_id(); ?>" class="bbp-reply-header">
 	<div class="bbp-meta">

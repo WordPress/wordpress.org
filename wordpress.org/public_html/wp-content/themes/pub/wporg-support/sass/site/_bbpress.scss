@@ -124,11 +124,84 @@ section {
 			}
 		}
 
-		.bbp-topics .bbp-topic-author,
-		.bbp-topics .bbp-reply-author,
-		.bbp-search-results .bbp-topic-author,
-		.bbp-search-results .bbp-reply-author {
-			margin-top: 1.45rem;
+		ul.bbp-lead-topic {
+			margin: 0;
+		}
+
+		ul.bbp-lead-topic li.bbp-body {
+			border: 0;
+		}
+
+		ul.bbp-lead-topic li.bbp-body div.topic {
+			background: transparent;
+		}
+
+		.bbp-search-results div.topic .topic-indicator {
+			display: none;
+		}
+
+		div.bbp-reply-author a.bbp-author-name, 
+		div.bbp-topic-author a.bbp-author-name {
+			clear: none;
+			font-size: ms(0);
+			display: inline-block;
+			margin: 0;
+		}
+
+		div.bbp-reply-author, 
+		div.bbp-topic-author {
+			float: none;
+			text-align: left;
+			width: 100%;
+			margin: 1rem 0 2rem;
+			padding-left: 5%;
+		}
+
+		.bbp-user-nicename,
+		.bbp-topic-post-date,
+		.bbp-topic-ip,
+		.bbp-reply-post-date,
+		.bbp-reply-ip,
+		.wporg-bbp-user-flag {
+			font-size: ms(-2);
+			font-weight: normal;
+			margin: 0;
+			margin-right: 10px;
+			display: inline-block;
+		}
+
+		span.bbp-author-ip {
+			font-size: ms(-2);
+			font-weight: 400;
+		}
+
+		div.topic, 
+		div.reply {
+			padding: 1.5rem 0;
+		}
+
+		div.bbp-reply-content, 
+		div.bbp-topic-content {
+			padding: 0;
+			margin: 0 0 0 5%;
+		}
+
+		li.bbp-body div.type-topic:hover span.bbp-admin-links,
+		li.bbp-body div.type-reply:hover span.bbp-admin-links {
+			bottom: 0;
+			right: 0;
+			background: #fbfbfb;
+			padding: 3px 10px;
+
+			a {
+				color: #0073aa;
+				text-transform: inherit;
+				font-size: 0.7rem;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
 		}
 
 		ul.status-closed, 
@@ -627,66 +700,27 @@ div.bbp-template-notice {
 				}
 			}
 
-			div.bbp-reply-author a.bbp-author-name, 
-			div.bbp-topic-author a.bbp-author-name {
-				clear: none;
-				font-size: ms(0);
-				display: inline-block;
-			}
-
-			div.bbp-forum-author a.bbp-author-name, 
-			div.bbp-reply-author a.bbp-author-name, 
-			div.bbp-topic-author a.bbp-author-name {
-				margin: 0;
+			ul.bbp-lead-topic {
+				margin-bottom: 15px;
 			}
 
 			ul.bbp-lead-topic li.bbp-body {
 				border: 1px solid #eee;
 				border-top: none;
 			}
+
 			ul.bbp-lead-topic li.bbp-body div.topic {
 				background: #fbfbfb;
 				padding: 1.5rem 1.5rem 1.5rem 0;
 			}
 
-			div.bbp-forum-author, 
 			div.bbp-reply-author, 
 			div.bbp-topic-author {
-				float: none;
-				text-align: left;
-				width: 100%;
-				margin: 1rem 0 2rem;
 				padding-left: 10%;
-			}
-
-			.bbp-author-role {
-				margin: 0;
-				border: none;
-				background: none;
 			}
 
 			.bbp-author-title {
 				margin: 0;
-			}
-
-			.bbp-user-nicename, .bbp-topic-post-date, .bbp-topic-ip, .bbp-reply-post-date, .bbp-reply-ip, .wporg-bbp-user-flag {
-				font-size: ms(-2);
-				font-weight: normal;
-				margin: 0;
-				margin-right: 10px;
-				display: inline-block;
-
-				span.bbp-author-ip, span.bbp-reply-ip {
-					font-size: ms(-2);
-					font-weight: 400;
-				}
-			}
-
-			div.bbp-forum-author .bbp-author-role, 
-			div.bbp-reply-author .bbp-author-role, 
-			div.bbp-topic-author .bbp-author-role {
-				font-size: ms(-2);
-				font-style: normal;
 			}
 
 			div.bbp-forum-content, 
@@ -699,6 +733,7 @@ div.bbp-template-notice {
 					font-weight: inherit;
 				}
 			}
+
 			div.bbp-reply-content {
 				margin-left: 11%;
 			}
@@ -709,25 +744,6 @@ div.bbp-template-notice {
 			ul.odd {
 				background: #fff;
 				border-top: 2px solid #eee;
-				padding: 1.5rem 0;
-			}
-
-			li.bbp-body div.type-topic:hover span.bbp-admin-links,
-			li.bbp-body div.type-reply:hover span.bbp-admin-links {
-				bottom: 0;
-				right: 0;
-				background: #fbfbfb;
-				padding: 3px 10px;
-
-				a {
-					color: #0073aa;
-					text-transform: inherit;
-					font-size: 0.7rem;
-
-					&:hover {
-						text-decoration: underline;
-					}
-				}
 			}
 
 			// Ratings
@@ -740,8 +756,7 @@ div.bbp-template-notice {
 				padding-top: 0.5em;
 			}
 
-
-			// Show dashicon if topic is sticky
+			// Show dashicon if topic is sticky or closed
 			.topic {
 				position: relative;
 

@@ -7,7 +7,21 @@
  * @subpackage Theme
  */
 
-?>
+if ( bbp_is_search_results() ) : ?>
+
+<div id="post-<?php bbp_topic_id(); ?>" class="bbp-topic-header">
+	<div class="bbp-meta">
+			<span class="bbp-header">
+				<?php esc_html_e( 'Forum:', 'wporg-forums' ); ?>
+				<a class="bbp-forum-permalink" href="<?php bbp_forum_permalink( bbp_get_topic_forum_id() ); ?>"><?php bbp_forum_title( bbp_get_topic_forum_id() ); ?></a><br />
+
+				<?php esc_html_e( 'As the topic: ', 'wporg-forums' ); ?>
+				<a class="bbp-topic-permalink" href="<?php bbp_topic_permalink( bbp_get_topic_id() ); ?>"><?php bbp_topic_title( bbp_get_topic_id() ); ?></a>
+			</span>
+	</div><!-- .bbp-meta -->
+</div><!-- #post-<?php bbp_topic_id(); ?> -->
+
+<?php endif; ?>
 
 <?php do_action( 'bbp_template_before_lead_topic' ); ?>
 
