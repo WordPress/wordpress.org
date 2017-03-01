@@ -72,7 +72,15 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				<div class="plugin-favorite">
 					<a href="<?php echo esc_url( $url ); ?>" class="plugin-favorite-heart<?php echo $is_favorited ? ' favorited' : ''; ?>">
 						<span class="screen-reader-text">
-							<?php printf( $is_favorited ? __( 'Favorite %s' ) : __( 'Unfavorite %s' ), get_the_title() ); ?>
+							<?php
+								if ( $is_favorited ) {
+									/* translators: %s: plugin name */
+									printf( __( 'Unfavorite %s', 'wporg-plugins' ), get_the_title() );
+								} else {
+									/* translators: %s: plugin name */
+									printf( __( 'Favorite %s', 'wporg-plugins' ), get_the_title() );
+								}
+							?>
 						</span>
 					</a>
 					<script>
