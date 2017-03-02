@@ -77,8 +77,8 @@ class Plugin {
 			return $title;
 		}
 
-		// Don't run when viewing a single topic, a single reply, a topic edit page, or a reply edit page.
-		if ( bbp_is_single_topic() || bbp_is_single_reply() || bbp_is_topic_edit() || bbp_is_reply_edit() ) {
+		// Don't run when viewing a single topic, a topic edit page, or a reply edit page.
+		if ( bbp_is_single_topic() || bbp_is_topic_edit() || bbp_is_reply_edit() ) {
 			return $title;
 		}
 
