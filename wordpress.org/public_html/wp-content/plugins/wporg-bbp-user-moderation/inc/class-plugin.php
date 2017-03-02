@@ -95,7 +95,7 @@ class Plugin {
 	 */
 	public function posts_where( $where ) {
 		global $wpdb;
-		if ( bbp_is_single_forum() || bbp_is_single_topic() ) {
+		if ( did_action( 'wp' ) && ( bbp_is_single_forum() || bbp_is_single_topic() ) ) {
 			if (
 				strpos( $where, $wpdb->prepare( "$wpdb->posts.post_type = %s", bbp_get_topic_post_type() ) ) !== false
 			||
