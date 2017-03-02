@@ -35,7 +35,7 @@
 				</ul>
 			</div>
 
-		<?php elseif ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews', 'active' ) ) ) : ?>
+		<?php elseif ( wporg_support_is_compat_view() ) : ?>
 
 			<?php do_action( 'wporg_compat_view_sidebar' ); ?>
 
@@ -108,7 +108,7 @@
 				<ul class="topic-views">
 
 					<?php foreach ( bbp_get_views() as $view => $args ) :
-						if ( in_array( $view, array( 'theme', 'plugin', 'reviews', 'active' ) ) ) {
+						if ( in_array( $view, wporg_support_get_compat_views() ) ) {
 							continue;
 						}
 						?>
@@ -122,7 +122,7 @@
 
 		<?php endif; ?>
 
-		<?php if ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews', 'active' ) ) || is_tax( 'topic-tag' ) ) : ?>
+		<?php if ( bbp_is_single_view() && ! wporg_support_is_compat_view() || is_tax( 'topic-tag' ) ) : ?>
 
 			<div>
 				<h4><?php _e( 'Feeds', 'wporg-forums' ); ?></h4>

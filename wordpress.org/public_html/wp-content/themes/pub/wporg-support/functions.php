@@ -215,6 +215,8 @@ function wporg_support_get_user_registered_date( $user_id = 0 ) {
 
 /**
  * Check if the current page is a single review.
+ *
+ * @bool True if the current page is a single review, false otherwise.
  */
 function wporg_support_is_single_review() {
 	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) || ! bbp_is_single_topic() ) {
@@ -222,6 +224,31 @@ function wporg_support_is_single_review() {
 	}
 
 	return ( WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() );
+}
+
+/**
+ * Get the list of plugin- and theme-specific views.
+ *
+ * @return array Array of compat views.
+ */
+function wporg_support_get_compat_views() {
+	return array( 'theme', 'plugin', 'reviews', 'active' );
+}
+
+/**
+ * Check if the current page is a plugin- or theme-specific view.
+ *
+ * @param string $view_id View ID to check.
+ * @return bool True if the current page is a compat view, false otherwise.
+ */
+function wporg_support_is_compat_view( $view_id = 0 ) {
+	if ( ! bbp_is_single_view() ) {
+		return false;
+	}
+
+	$view_id = bbp_get_view_id( $view_id );
+
+	return in_array( $view_id, wporg_support_get_compat_views() );
 }
 
 /**
