@@ -216,7 +216,7 @@ function wporg_support_get_user_registered_date( $user_id = 0 ) {
 /**
  * Check if the current page is a single review.
  *
- * @bool True if the current page is a single review, false otherwise.
+ * @return bool True if the current page is a single review, false otherwise.
  */
 function wporg_support_is_single_review() {
 	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) || ! bbp_is_single_topic() ) {
