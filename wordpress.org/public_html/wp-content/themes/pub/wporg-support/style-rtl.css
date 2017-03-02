@@ -2667,6 +2667,18 @@ section {
 	margin: 0 5% 0 2.5%;
 }
 
+.bbpress #bbpress-forums div.bbp-reply-content a,
+.bbpress #bbpress-forums div.bbp-topic-content a {
+	text-decoration: underline;
+	font-weight: inherit;
+}
+
+.bbpress #bbpress-forums div.bbp-reply-content a.mention,
+.bbpress #bbpress-forums div.bbp-topic-content a.mention {
+	text-decoration: none;
+	font-weight: bold;
+}
+
 .bbpress #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
 .bbpress #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
 	bottom: 0;
@@ -3223,12 +3235,6 @@ div.bbp-template-notice a:hover {
 .single-topic .entry-content #bbpress-forums div.bbp-topic-content {
 	padding: 0;
 	margin: 0 10% 0 0;
-}
-
-.single-topic .entry-content #bbpress-forums div.bbp-forum-content a,
-.single-topic .entry-content #bbpress-forums div.bbp-reply-content a,
-.single-topic .entry-content #bbpress-forums div.bbp-topic-content a {
-	font-weight: inherit;
 }
 
 .single-topic .entry-content #bbpress-forums div.bbp-reply-content {

@@ -190,6 +190,18 @@ section {
 			margin: 0 2.5% 0 5%;
 		}
 
+		div.bbp-reply-content a, 
+		div.bbp-topic-content a {
+			text-decoration: underline;
+			font-weight: inherit;
+		}
+
+		div.bbp-reply-content a.mention, 
+		div.bbp-topic-content a.mention {
+			text-decoration: none;
+			font-weight: bold;
+		}
+
 		li.bbp-body div.type-topic:hover span.bbp-admin-links,
 		li.bbp-body div.type-reply:hover span.bbp-admin-links {
 			bottom: 0;
@@ -728,10 +740,6 @@ div.bbp-template-notice {
 			div.bbp-topic-content {
 				padding: 0;
 				margin: 0 0 0 10%;
-
-				a {
-					font-weight: inherit;
-				}
 			}
 
 			div.bbp-reply-content {
