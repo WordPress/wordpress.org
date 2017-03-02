@@ -166,10 +166,14 @@ main#main {
 }
 
 @media screen and (min-width: $ms-breakpoint) {
-	#wporg-header ul li a.current ~ .uparrow {
-		border-bottom: 9px solid $color__wp-blue;	
+	#wporg-header ul li a.current ~ .uparrow,
+	#wporg-header ul li.current-menu-item:after,
+	#wporg-header ul li.current_page_parent:after {
+		border-bottom: 9px solid $color__wp-blue;
 	}
-	#wporg-header ul li:hover .nav-submenu ~ .uparrow, #wporg-header ul li .nav-submenu:hover ~ .uparrow {
+
+	#wporg-header ul li:hover .nav-submenu ~ .uparrow,
+	#wporg-header ul li .nav-submenu:hover ~ .uparrow {
 		border-bottom: 9px solid #32373c;
 	}
 }
