@@ -24,6 +24,10 @@ class Hooks {
 		// Disable inline terms and mentions.
 		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
 
+		// Replace bbp_make_mentions_clickable() to add `class="mention"`.
+		remove_filter( 'bbp_make_clickable', 'bbp_make_mentions_clickable', 8 );
+		add_filter( 'bbp_make_clickable', array( $this, 'make_mentions_clickable' ), 8 );
+
 		// Add notice to reply forms for privileged users in closed forums.
 		add_action( 'bbp_template_notices', array( $this, 'closed_forum_notice_for_moderators' ), 1 );
 
@@ -135,6 +139,44 @@ class Hooks {
 	public function disable_inline_terms() {
 		remove_action( 'init', array( 'Jetpack_Inline_Terms', 'init' ) );
 		remove_action( 'init', array( 'Jetpack_Mentions', 'init' ) );
+	}
+
+	/**
+	 * Make mentions clickable in content areas.
+	 *
+	 * @param string $text Topic or reply content.
+	 * @return string Filtered content.
+	 */
+	function make_mentions_clickable( $text = '' ) {
+		return preg_replace_callback( '#([\s>])@([0-9a-zA-Z-_]+)#i', array( $this, 'make_mentions_clickable_callback' ), $text );
+	}
+
+	/**
+	 * Callback to convert mention matches to HTML A tag.
+	 *
+	 * Replaces bbp_make_mentions_clickable_callback() to add `class="mention"`
+	 * for styling purposes.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/2542
+	 * @see https://bbpress.trac.wordpress.org/ticket/3074
+	 *
+	 * @param array $matches Single Regex Match.
+	 * @return string HTML A tag with link to user profile.
+	 */
+	function make_mentions_clickable_callback( $matches = array() ) {
+
+		// Get user; bail if not found
+		$user = get_user_by( 'slug', $matches[2] );
+		if ( empty( $user ) || bbp_is_user_inactive( $user->ID ) ) {
+			return $matches[0];
+		}
+
+		// Create the link to the user's profile
+		$url    = bbp_get_user_profile_url( $user->ID );
+		$anchor = '<a href="%1$s" class="mention" rel="nofollow">@%2$s</a>';
+		$link   = sprintf( $anchor, esc_url( $url ), esc_html( $user->user_nicename ) );
+
+		return $matches[1] . $link;
 	}
 
 	/**
