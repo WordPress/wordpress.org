@@ -71,17 +71,17 @@
 
 								<?php if ( bbp_is_subscriptions_active() ) : ?>
 
-									<input name="bbp_topic_subscribers" id="bbp_topic_subscribers" type="checkbox" value="1" checked="checked" tabindex="<?php bbp_tab_index(); ?>" />
+									<input name="bbp_topic_subscribers" id="bbp_topic_subscribers" type="checkbox" value="1" checked="checked" />
 									<label for="bbp_topic_subscribers"><?php _e( 'Merge topic subscribers', 'wporg-forums' ); ?></label><br />
 
 								<?php endif; ?>
 
-								<input name="bbp_topic_favoriters" id="bbp_topic_favoriters" type="checkbox" value="1" checked="checked" tabindex="<?php bbp_tab_index(); ?>" />
+								<input name="bbp_topic_favoriters" id="bbp_topic_favoriters" type="checkbox" value="1" checked="checked" />
 								<label for="bbp_topic_favoriters"><?php _e( 'Merge topic favoriters', 'wporg-forums' ); ?></label><br />
 
 								<?php if ( bbp_allow_topic_tags() ) : ?>
 
-									<input name="bbp_topic_tags" id="bbp_topic_tags" type="checkbox" value="1" checked="checked" tabindex="<?php bbp_tab_index(); ?>" />
+									<input name="bbp_topic_tags" id="bbp_topic_tags" type="checkbox" value="1" checked="checked" />
 									<label for="bbp_topic_tags"><?php _e( 'Merge topic tags', 'wporg-forums' ); ?></label><br />
 
 								<?php endif; ?>
@@ -94,7 +94,7 @@
 						</div>
 
 						<div class="bbp-submit-wrapper">
-							<button type="submit" tabindex="<?php bbp_tab_index(); ?>" id="bbp_merge_topic_submit" name="bbp_merge_topic_submit" class="button button-primary submit"><?php _e( 'Submit', 'wporg-forums' ); ?></button>
+							<button type="submit" id="bbp_merge_topic_submit" name="bbp_merge_topic_submit" class="button button-primary submit"><?php _e( 'Submit', 'wporg-forums' ); ?></button>
 						</div>
 					</div>
 

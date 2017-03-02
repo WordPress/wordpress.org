@@ -107,7 +107,7 @@
 								printf( __( 'Topic Title (Maximum Length: %d):', 'wporg-forums' ), bbp_get_title_max_length() );
 							}
 						?></label><br />
-						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
+						<input type="text" id="bbp_topic_title" value="<?php bbp_form_topic_title(); ?>" size="40" name="bbp_topic_title" maxlength="<?php bbp_title_max_length(); ?>" />
 					</p>
 
 					<?php do_action( 'bbp_theme_after_topic_form_title' ); ?>
@@ -118,7 +118,7 @@
 
 						<p>
 							<label for="bbp_reply_content"><?php _e( 'Reply:', 'wporg-forums' ); ?></label><br />
-							<textarea id="bbp_topic_content" tabindex="<?php bbp_tab_index(); ?>" name="bbp_topic_content" cols="60" rows="6"><?php bbp_form_topic_content(); ?></textarea>
+							<textarea id="bbp_topic_content" name="bbp_topic_content" cols="60" rows="6"><?php bbp_form_topic_content(); ?></textarea>
 						</p>
 
 					<?php else : ?>
@@ -139,7 +139,7 @@
 								_e( 'Topic Tags:', 'wporg-forums' );
 							}
 						?></label><br />
-						<input type="text" value="<?php bbp_form_topic_tags(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" <?php disabled( bbp_is_topic_spam() ); ?> />
+						<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" <?php disabled( bbp_is_topic_spam() ); ?> />
 					</p>
 
 					<?php do_action( 'bbp_theme_after_topic_form_tags' ); ?>
@@ -178,7 +178,7 @@
 						<?php do_action( 'bbp_theme_before_topic_form_subscriptions' ); ?>
 
 						<p>
-							<input name="bbp_topic_subscription" id="bbp_topic_subscription" type="checkbox" value="bbp_subscribe" <?php bbp_form_topic_subscribed(); ?> tabindex="<?php bbp_tab_index(); ?>" />
+							<input name="bbp_topic_subscription" id="bbp_topic_subscription" type="checkbox" value="bbp_subscribe" <?php bbp_form_topic_subscribed(); ?> />
 
 							<?php if ( bbp_is_topic_edit() && ( get_the_author_meta( 'ID' ) != bbp_get_current_user_id() ) ) : ?>
 
@@ -202,13 +202,13 @@
 						<fieldset class="bbp-form">
 							<legend><?php _e( 'Revision', 'wporg-forums' ); ?></legend>
 							<div>
-								<input name="bbp_log_topic_edit" id="bbp_log_topic_edit" type="checkbox" value="1" <?php bbp_form_topic_log_edit(); ?> tabindex="<?php bbp_tab_index(); ?>" />
+								<input name="bbp_log_topic_edit" id="bbp_log_topic_edit" type="checkbox" value="1" <?php bbp_form_topic_log_edit(); ?> />
 								<label for="bbp_log_topic_edit"><?php _e( 'Keep a log of this edit:', 'wporg-forums' ); ?></label><br />
 							</div>
 
 							<div>
 								<label for="bbp_topic_edit_reason"><?php _e( 'Optional reason for editing:', 'wporg-forums' ); ?></label><br />
-								<input type="text" value="<?php bbp_form_topic_edit_reason(); ?>" tabindex="<?php bbp_tab_index(); ?>" size="40" name="bbp_topic_edit_reason" id="bbp_topic_edit_reason" />
+								<input type="text" value="<?php bbp_form_topic_edit_reason(); ?>" size="40" name="bbp_topic_edit_reason" id="bbp_topic_edit_reason" />
 							</div>
 						</fieldset>
 
@@ -222,7 +222,7 @@
 
 						<?php do_action( 'bbp_theme_before_topic_form_submit_button' ); ?>
 
-						<button type="submit" tabindex="<?php bbp_tab_index(); ?>" id="bbp_topic_submit" name="bbp_topic_submit" class="button button-primary submit"><?php _e( 'Submit', 'wporg-forums' ); ?></button>
+						<button type="submit" id="bbp_topic_submit" name="bbp_topic_submit" class="button button-primary submit"><?php _e( 'Submit', 'wporg-forums' ); ?></button>
 
 						<?php do_action( 'bbp_theme_after_topic_form_submit_button' ); ?>
 
