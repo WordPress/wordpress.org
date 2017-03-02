@@ -2,6 +2,10 @@
 
 namespace Dotorg\API\Events;
 
+if ( 'cli' !== php_sapi_name() ) {
+	die();
+}
+
 /**
  * Main entry point
  */
