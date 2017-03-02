@@ -186,24 +186,24 @@
 		// Performs a search within the collection
 		// @uses RegExp
 		search: function( term ) {
-			var match, results;
+			var match, results, escapedTerm;
 
 			// Start with a full collection
 			this.reset( this.project._subProjects, { silent: true } );
 
 			// Escape the term string for RegExp meta characters
-			term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
+			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
 			// Consider spaces as word delimiters and match the whole string
 			// so matching terms can be combined
-			term = term.replace( / /g, ')(?=.*' );
-			match = new RegExp( '^(?=.*' + term + ').+', 'i' );
+			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
+			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
 			results = this.filter( function( project ) {
 				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
 				if ( match.test( haystack ) ) {
 					_.each( haystack, function( word ) {
-						var score = word.score( term );
+						var score = word.score( term, .5 );
 						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
 					});
 					return true;
