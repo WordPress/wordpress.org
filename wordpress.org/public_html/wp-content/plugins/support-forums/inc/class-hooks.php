@@ -12,9 +12,10 @@ class Hooks {
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
 		add_filter( 'bbp_reply_admin_links', array( $this, 'admin_links' ), 10, 3 );
 
-		// Gravatar suppression on lists of topics.
+		// Gravatar suppression on lists of topics and revision logs.
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
 		add_filter( 'bbp_after_get_reply_author_link_parse_args', array( $this, 'get_author_link' ) );
+		add_filter( 'bbp_after_get_author_link_parse_args',       array( $this, 'get_author_link' ) );
 
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
@@ -90,10 +91,10 @@ class Hooks {
 	}
 
 	/**
-	 * Suppress Gravatars on lists of topics.
+	 * Suppress Gravatars on lists of topics and revision logs.
 	 */
 	public function get_author_link( $r ) {
-		if ( ! bbp_is_single_topic() || bbp_is_topic_edit() ) {
+		if ( ! bbp_is_single_topic() || bbp_is_topic_edit() || wp_is_post_revision( $r['post_id'] ) ) {
 			$r['type'] = 'name';
 		}
 		return $r;
