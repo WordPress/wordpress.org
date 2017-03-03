@@ -14,7 +14,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	function compat_views() {
-		return array( self::COMPAT, 'reviews', 'active' );
+		return array( self::COMPAT, 'reviews', 'active', 'unresolved' );
 	}
 
 	function compat_title() {
@@ -30,6 +30,11 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	function active_title() {
 		/* translators: %s: plugin title */
 		return sprintf( _x( '[%s] Recent Activity', 'plugin', 'wporg-forums' ), $this->title() );
+	}
+
+	function unresolved_title() {
+		/* translators: %s: plugin title */
+		return sprintf( _x( '[%s] Unresolved Topics', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {
@@ -87,12 +92,13 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 		}
 
-		$plugin  = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
-		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">%s</a>', esc_attr( $this->slug() ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
-		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
-		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
-		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
-		$create  = '';
+		$plugin     = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
+		$faq        = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">%s</a>', esc_attr( $this->slug() ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
+		$support    = sprintf( '<a href="//wordpress.org/support/plugin/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
+		$active     = sprintf( '<a href="//wordpress.org/support/plugin/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
+		$unresolved = sprintf( '<a href="//wordpress.org/support/plugin/%s/unresolved/">%s</a>', esc_attr( $this->slug() ), __( 'Unresolved Topics', 'wporg-forums' ) );
+		$reviews    = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
+		$create     = '';
 
 		$create_label = '';
 		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_topic_form() ) {
@@ -119,6 +125,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 				<?php endif; ?>
 				<li><?php echo $support; ?></li>
 				<li><?php echo $active; ?></li>
+				<li><?php echo $unresolved; ?></li>
 				<li><?php echo $reviews; ?></li>
 				<?php if ( $create ) : ?>
 				<li class="create-topic"><?php echo $create; ?></li>

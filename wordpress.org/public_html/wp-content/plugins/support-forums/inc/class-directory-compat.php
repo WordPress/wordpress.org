@@ -9,6 +9,7 @@ abstract class Directory_Compat {
 	abstract protected function compat_title();
 	abstract protected function reviews_title();
 	abstract protected function active_title();
+	abstract protected function unresolved_title();
 	abstract protected function slug();
 	abstract protected function title();
 	abstract protected function forum_id();
@@ -182,6 +183,9 @@ abstract class Directory_Compat {
 			case 'active':
 				$translation = $this->active_title();
 				break;
+			case 'unresolved':
+				$translation = $this->unresolved_title();
+				break;
 		}
 
 		return $translation;
@@ -228,6 +232,25 @@ abstract class Directory_Compat {
 						'terms'      => $this->query[ $this->query_var() ],
 					) ),
 					'show_stickies'  => false,
+				);
+				break;
+
+			// Return unresolved topics from the support forum.
+			case 'unresolved' :
+				return array(
+					'post_parent'    => $this->forum_id(),
+					'post_status'    => 'publish',
+					'tax_query'      => array( array(
+						'taxonomy'   => $this->taxonomy(),
+						'field'      => 'slug',
+						'terms'      => $this->query[ $this->query_var() ],
+					) ),
+					'meta_key'      => 'topic_resolved',
+					'meta_type'     => 'CHAR',
+					'meta_value'    => 'no',
+					'meta_compare'  => '=',
+					'show_stickies'  => false,
+					'orderby'        => 'ID',
 				);
 				break;
 		}
@@ -357,16 +380,18 @@ abstract class Directory_Compat {
 	}
 
 	public function add_rewrite_rules() {
-		$priority   = 'top';
+		$priority          = 'top';
 
-		$root_id    = $this->compat();
-		$root_var   = $this->query_var();
-		$review_id  = 'reviews';
-		$active_id  = 'active';
+		$root_id           = $this->compat();
+		$root_var          = $this->query_var();
+		$review_id         = 'reviews';
+		$active_id         = 'active';
+		$unresolved_id     = 'unresolved';
 
-		$support_rule = $this->compat() . '/([^/]+)/';
-		$reviews_rule = $this->compat() . '/([^/]+)/' . $review_id . '/';
-		$active_rule  = $this->compat() . '/([^/]+)/' . $active_id . '/';
+		$support_rule      = $this->compat() . '/([^/]+)/';
+		$reviews_rule      = $this->compat() . '/([^/]+)/' . $review_id . '/';
+		$active_rule       = $this->compat() . '/([^/]+)/' . $active_id . '/';
+		$unresolved_rule   = $this->compat() . '/([^/]+)/' . $unresolved_id . '/';
 
 		$feed_id    = 'feed';
 		$view_id    = bbp_get_view_rewrite_id();
@@ -393,6 +418,11 @@ abstract class Directory_Compat {
 		add_rewrite_rule( $active_rule . $base_rule,  'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]',                               $priority );
 		add_rewrite_rule( $active_rule . $paged_rule, 'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $active_rule . $feed_rule,  'index.php?' . $view_id . '=' . $active_id . '&' . $root_var . '=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add unresolved view rewrite rules.
+		add_rewrite_rule( $unresolved_rule . $base_rule,  'index.php?' . $view_id . '=' . $unresolved_id . '&' . $root_var . '=$matches[1]',                               $priority );
+		add_rewrite_rule( $unresolved_rule . $paged_rule, 'index.php?' . $view_id . '=' . $unresolved_id . '&' . $root_var . '=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $unresolved_rule . $feed_rule,  'index.php?' . $view_id . '=' . $unresolved_id . '&' . $root_var . '=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	public function add_query_var( $query_vars ) {
@@ -459,6 +489,27 @@ abstract class Directory_Compat {
 				'show_stickies' => false,
 			)
 		);
+
+		// Add unresolved topics view.
+		bbp_register_view(
+			'unresolved',
+			$this->unresolved_title(),
+			array(
+				'post_parent'   => $this->forum_id(),
+				'post_status'   => 'publish',
+				'tax_query'     => array( array(
+					'taxonomy'  => $this->taxonomy(),
+					'field'     => 'slug',
+					'terms'     => $this->slug(),
+				) ),
+				'meta_key'      => 'topic_resolved',
+				'meta_type'     => 'CHAR',
+				'meta_value'    => 'no',
+				'meta_compare'  => '=',
+				'orderby'       => 'ID',
+				'show_stickies' => false,
+			)
+		);
 	}
 
 	/**
@@ -477,6 +528,7 @@ abstract class Directory_Compat {
 			switch ( $view ) {
 				case 'reviews' :
 				case 'active' :
+				case 'unresolved' :
 					$url = $wp_rewrite->root . $this->compat() . '/' . $this->slug() . '/' . $view;
 					break;
 
@@ -521,7 +573,7 @@ abstract class Directory_Compat {
 
 		$r[1] = sprintf( $compat_breadcrumb, esc_html( $this->title() ) );
 
-		if ( in_array( $view, array( 'reviews', 'active' ) ) ) {
+		if ( in_array( $view, array( 'reviews', 'active', 'unresolved' ) ) ) {
 			$r[1] = sprintf( $compat_breadcrumb, sprintf(
 				'<a href="%s" class="bbp-breadcrumb-forum">%s</a>',
 				esc_url( bbp_get_view_url( $this->compat() ) ),
@@ -529,8 +581,10 @@ abstract class Directory_Compat {
 			) );
 			if ( 'reviews' == $view ) {
 				$r[2] = __( 'Reviews', 'wporg-forums' );
-			} else {
+			} elseif ( 'active' == $view ) {
 				$r[2] = __( 'Active Topics', 'wporg-forums' );
+			} else {
+				$r[2] = __( 'Unresolved Topics', 'wporg-forums' );
 			}
 		}
 		return $r;

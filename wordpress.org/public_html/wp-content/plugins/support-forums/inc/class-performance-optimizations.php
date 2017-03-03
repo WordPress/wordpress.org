@@ -214,7 +214,7 @@ class Performance_Optimizations {
 				$this->query = $r;
 			}
 
-			if ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active' ) ) ) {
+			if ( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active', 'unresolved' ) ) ) {
 				$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 			}
 		}

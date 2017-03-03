@@ -14,7 +14,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	function compat_views() {
-		return array( self::COMPAT, 'reviews', 'active' );
+		return array( self::COMPAT, 'reviews', 'active', 'unresolved' );
 	}
 
 	function compat_title() {
@@ -30,6 +30,11 @@ class Theme_Directory_Compat extends Directory_Compat {
 	function active_title() {
 		/* translators: %s: theme title */
 		return sprintf( _x( '[%s] Recent Activity', 'theme', 'wporg-forums' ), $this->title() );
+	}
+
+	function unresolved_title() {
+		/* translators: %s: theme title */
+		return sprintf( _x( '[%s] Unresolved Topics', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {
@@ -83,11 +88,12 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	public function do_topic_sidebar() {
-		$theme   = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
-		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
-		$active  = sprintf( '<a href="//wordpress.org/support/theme/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
-		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
-		$create  = '';
+		$theme      = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
+		$support    = sprintf( '<a href="//wordpress.org/support/theme/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
+		$active     = sprintf( '<a href="//wordpress.org/support/theme/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
+		$unresolved = sprintf( '<a href="//wordpress.org/support/theme/%s/unresolved/">%s</a>', esc_attr( $this->slug() ), __( 'Unresolved Topics', 'wporg-forums' ) );
+		$reviews    = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
+		$create     = '';
 
 		$create_label = '';
 		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_topic_form() ) {
@@ -107,6 +113,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 				<li><?php echo $theme; ?></li>
 				<li><?php echo $support; ?></li>
 				<li><?php echo $active; ?></li>
+				<li><?php echo $unresolved; ?></li>
 				<li><?php echo $reviews; ?></li>
 				<?php if ( $create ) : ?>
 				<li class="create-topic"><?php echo $create; ?></li>
