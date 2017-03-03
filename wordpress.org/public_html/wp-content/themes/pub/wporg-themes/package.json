@@ -1,12 +1,12 @@
 {
-  "name": "WordPress.org-Themes",
+  "name": "wporg-themes",
   "version": "1.0.0",
-  "description": "Theme for the WordPress.org themes directory.",
+  "description": "Theme for the WordPress Theme Directory.",
   "repository": {
     "type": "svn",
     "url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-themes"
   },
-  "author": "The WordPress.org Team",
+  "author": "wordpressdotorg",
   "license": "GPL-2.0+",
   "devDependencies": {
     "grunt": "~0.4.5",
