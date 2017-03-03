@@ -13,6 +13,10 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		return self::COMPAT;
 	}
 
+	function compat_views() {
+		return array( self::COMPAT, 'reviews', 'active' );
+	}
+
 	function compat_title() {
 		/* translators: %s: plugin title */
 		return sprintf( _x( '[%s] Support', 'plugin', 'wporg-forums' ), $this->title() );
@@ -23,7 +27,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		return sprintf( _x( '[%s] Reviews', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
-	function activity_title() {
+	function active_title() {
 		/* translators: %s: plugin title */
 		return sprintf( _x( '[%s] Recent Activity', 'plugin', 'wporg-forums' ), $this->title() );
 	}
@@ -86,7 +90,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$plugin  = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
 		$faq     = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">%s</a>', esc_attr( $this->slug() ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
 		$support = sprintf( '<a href="//wordpress.org/support/plugin/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
-		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
+		$active  = sprintf( '<a href="//wordpress.org/support/plugin/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
 		$reviews = sprintf( '<a href="//wordpress.org/support/plugin/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
 		$create  = '';
 

@@ -5,9 +5,10 @@ namespace WordPressdotorg\Forums;
 abstract class Directory_Compat {
 
 	abstract protected function compat();
+	abstract protected function compat_views();
 	abstract protected function compat_title();
 	abstract protected function reviews_title();
-	abstract protected function activity_title();
+	abstract protected function active_title();
 	abstract protected function slug();
 	abstract protected function title();
 	abstract protected function forum_id();
@@ -109,7 +110,7 @@ abstract class Directory_Compat {
 		if ( isset( $query_vars['feed'] ) && isset( $query_vars[ $this->query_var() ] ) ) {
 
 			// Compat views are hooked in a special order, and need help with feed queries.
-			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], array( $this->compat(), 'reviews', 'active' ) ) ) {
+			if ( isset( $query_vars['bbp_view'] ) && in_array( $query_vars['bbp_view'], $this->compat_views() ) ) {
 				$this->query = $query_vars;
 				add_filter( 'bbp_get_view_query_args', array( $this, 'get_view_query_args_for_feed' ), 10, 2 );
 
@@ -172,15 +173,14 @@ abstract class Directory_Compat {
 		$this->{$this->compat()} = $object;
 
 		switch ( $this->query['bbp_view'] ) {
-			case 'plugin':
-			case 'theme':
+			case $this->compat():
 				$translation = $this->compat_title();
 				break;
 			case 'reviews':
 				$translation = $this->reviews_title();
 				break;
 			case 'active':
-				$translation = $this->activity_title();
+				$translation = $this->active_title();
 				break;
 		}
 
@@ -344,7 +344,7 @@ abstract class Directory_Compat {
 		||
 			( bbp_is_single_forum() && Plugin::REVIEWS_FORUM_ID == bbp_get_forum_id() )
 		||
-			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), array( 'plugin', 'theme', 'reviews', 'active' ) ) )
+			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), $this->compat_views() ) )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
@@ -447,7 +447,7 @@ abstract class Directory_Compat {
 		// Add recent activity view.
 		bbp_register_view(
 			'active',
-			$this->activity_title(),
+			$this->active_title(),
 			array(
 				'post_parent'   => $this->forum_id(),
 				'post_status'   => 'publish',
@@ -468,15 +468,15 @@ abstract class Directory_Compat {
 		global $wp_rewrite;
 
 		$view = bbp_get_view_id( $view );
-		if ( ! in_array( $view, array( 'active', 'reviews', $this->compat() ) ) ) {
+		if ( ! in_array( $view, $this->compat_views() ) ) {
 			return $url;
 		}
 
 		// Pretty permalinks.
 		if ( $wp_rewrite->using_permalinks() ) {
 			switch ( $view ) {
-				case 'active' :
 				case 'reviews' :
+				case 'active' :
 					$url = $wp_rewrite->root . $this->compat() . '/' . $this->slug() . '/' . $view;
 					break;
 
@@ -506,7 +506,7 @@ abstract class Directory_Compat {
 		}
 
 		$view = bbp_get_view_id();
-		if ( ! in_array( $view, array( $this->compat(), 'reviews', 'active' ) ) ) {
+		if ( ! in_array( $view, $this->compat_views() ) ) {
 			return $r;
 		}
 

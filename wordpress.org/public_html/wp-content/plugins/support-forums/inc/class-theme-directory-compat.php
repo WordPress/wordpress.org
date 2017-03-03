@@ -13,6 +13,10 @@ class Theme_Directory_Compat extends Directory_Compat {
 		return self::COMPAT;
 	}
 
+	function compat_views() {
+		return array( self::COMPAT, 'reviews', 'active' );
+	}
+
 	function compat_title() {
 		/* translators: %s: theme title */
 		return sprintf( _x( '[%s] Support', 'theme', 'wporg-forums' ), $this->title() );
@@ -23,7 +27,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 		return sprintf( _x( '[%s] Reviews', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
-	function activity_title() {
+	function active_title() {
 		/* translators: %s: theme title */
 		return sprintf( _x( '[%s] Recent Activity', 'theme', 'wporg-forums' ), $this->title() );
 	}
@@ -81,7 +85,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 	public function do_topic_sidebar() {
 		$theme   = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
 		$support = sprintf( '<a href="//wordpress.org/support/theme/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
-		$active  = sprintf( '<a href="//wordpress.org/support/theme/%s/active">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
+		$active  = sprintf( '<a href="//wordpress.org/support/theme/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
 		$reviews = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
 		$create  = '';
 
