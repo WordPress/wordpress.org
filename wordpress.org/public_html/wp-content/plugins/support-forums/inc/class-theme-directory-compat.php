@@ -89,10 +89,10 @@ class Theme_Directory_Compat extends Directory_Compat {
 
 	public function do_topic_sidebar() {
 		$theme      = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
-		$support    = sprintf( '<a href="//wordpress.org/support/theme/%s/">%s</a>', esc_attr( $this->slug() ), __( 'Support Threads', 'wporg-forums' ) );
-		$active     = sprintf( '<a href="//wordpress.org/support/theme/%s/active/">%s</a>', esc_attr( $this->slug() ), __( 'Active Topics', 'wporg-forums' ) );
-		$unresolved = sprintf( '<a href="//wordpress.org/support/theme/%s/unresolved/">%s</a>', esc_attr( $this->slug() ), __( 'Unresolved Topics', 'wporg-forums' ) );
-		$reviews    = sprintf( '<a href="//wordpress.org/support/theme/%s/reviews/">%s</a>', esc_attr( $this->slug() ), __( 'Reviews', 'wporg-forums' ) );
+		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
+		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
+		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
+		$reviews    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
 		$create     = '';
 
 		$create_label = '';

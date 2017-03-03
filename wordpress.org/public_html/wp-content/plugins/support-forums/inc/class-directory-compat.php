@@ -86,17 +86,17 @@ abstract class Directory_Compat {
 				if ( $slug ) {
 					switch ( $r ) {
 						case 'rss' :
-							$url = sprintf( 'https://wordpress.org/support/%s/%s/feed/',
+							$url = sprintf( home_url( '/%s/%s/feed/' ),
 								$this->compat(),
 									sanitize_key( $slug[0] ) );
 							break;
 						case 'reviews' :
-							$url = sprintf( 'https://wordpress.org/support/%s/%s/reviews/',
+							$url = sprintf( home_url( '/%s/%s/reviews/' ),
 								$this->compat(),
 								sanitize_key( $slug[0] ) );
 							break;
 						case 'reviews_rss' :
-							$url = sprintf( 'https://wordpress.org/support/%s/%s/reviews/feed/',
+							$url = sprintf( home_url( '/%s/%s/reviews/feed/' ),
 								$this->compat(),
 								sanitize_key( $slug[0] ) );
 					}
@@ -734,7 +734,7 @@ abstract class Directory_Compat {
 			// Check that the subscription is to this compat.
 			if ( $this->taxonomy() == $taxonomy ) {
 				$paged = get_query_var( 'paged' ) > 1 ? 'page/' . absint( get_query_var( 'paged' ) ) . '/' : '';
-				$termlink = sprintf( 'https://wordpress.org/support/%s/%s/%s', $this->compat(), $term->slug, $paged );
+				$termlink = sprintf( home_url( '/%s/%s/%s' ), $this->compat(), $term->slug, $paged );
 			}
 		}
 

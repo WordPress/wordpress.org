@@ -115,13 +115,13 @@ class Ratings_Compat {
 					/* translators: 1: link to the plugin, 2: review edit URL */
 					$notice = _x( 'This is your review of %1$s, you can <a href="%2$s">edit your review</a> at any time.', 'plugin', 'wporg-forums' );
 					$object_link = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug ), esc_html( $this->object->post_title ) );
-					$edit_url = sprintf( '//wordpress.org/support/plugin/%s/reviews/#new-post', esc_attr( $this->slug ) );
+					$edit_url = sprintf( home_url( '/plugin/%s/reviews/#new-post' ), esc_attr( $this->slug ) );
 					break;
 				case 'theme' :
 					/* translators: 1: link to the theme, 2: review edit URL */
 					$notice = _x( 'This is your review of %1$s, you can <a href="%2$s">edit your review</a> at any time.', 'theme', 'wporg-forums' );
 					$object_link = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug ), esc_html( $this->object->post_title ) );
-					$edit_url = sprintf( '//wordpress.org/support/theme/%s/reviews/#new-post', esc_attr( $this->slug ) );
+					$edit_url = sprintf( home_url( '/theme/%s/reviews/#new-post' ), esc_attr( $this->slug ) );
 					break;
 			}
 
@@ -200,7 +200,7 @@ class Ratings_Compat {
 				}
 				?>
 				<div class="counter-container">
-				<a href="<?php echo esc_url( sprintf( 'https://wordpress.org/support/%s/%s/reviews/?filter=%s', $this->compat, $this->slug, $rating ) ); ?>"
+				<a href="<?php echo esc_url( sprintf( home_url( '/%s/%s/reviews/?filter=%s' ), $this->compat, $this->slug, $rating ) ); ?>"
 					title="<?php echo esc_attr( $stars_title ); ?>">
 					<span class="counter-label" style="float:left;margin-right:5px;min-width:58px;"><?php echo esc_html( $stars_text ); ?></span>
 					<span class="counter-back" style="height:17px;width:100px;background-color:#ececec;float:left;">
@@ -241,7 +241,7 @@ class Ratings_Compat {
 					__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
 					add_query_arg(
 						'redirect_to',
-						urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
+						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
 						'https://login.wordpress.org/'
 					)
 				);
@@ -268,7 +268,7 @@ class Ratings_Compat {
 			printf(
 				/* translators: %s: plugin/theme reviews URL */
 				__( '<a href="%s">Click here</a> to see all reviews.', 'wporg-forums' ),
-				esc_url( sprintf( '//wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) )
+				esc_url( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) )
 			);
 			echo "</p>\n";
 		}
@@ -331,7 +331,7 @@ class Ratings_Compat {
 				__( 'You must <a href="%s">log in or register</a> to submit a review.', 'wporg-forums' ),
 				add_query_arg(
 					'redirect_to',
-					urlencode( esc_url_raw( sprintf( 'https://wordpress.org/support/%s/%s/reviews/', $this->compat, $this->slug ) ) ),
+					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
 					'https://login.wordpress.org/'
 				)
 			);
@@ -380,7 +380,7 @@ class Ratings_Compat {
 		?>
 		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
-			<li><?php printf( $report, esc_url( sprintf( 'https://wordpress.org/support/%s/%s/', $this->compat, $this->slug ) ) ); ?></li>
+			<li><?php printf( $report, esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
 		</ul>

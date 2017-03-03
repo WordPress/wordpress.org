@@ -457,7 +457,7 @@ class Support_Compat {
 			return $r;
 		}
 
-		$url = 'https://wordpress.org/support/' . $type . '/' . $obj->post_name . '/';
+		$url = home_url( '/' . $type . '/' . $obj->post_name . '/' );
 		if ( $forum_id === Plugin::REVIEWS_FORUM_ID ) {
 			$url .= 'reviews';
 		}
