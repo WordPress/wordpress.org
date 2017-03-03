@@ -65,6 +65,19 @@ function test_get_location() {
 			$actual_result['description'] = strtolower( $actual_result['description'] );
 		}
 
+		/*
+		 * Normalize coordinates to account for minor differences in the databases
+		 *
+		 * Rounding to three decimal places means that we're still accurate within about 110 meters, which is
+		 * good enough for our purposes.
+		 *
+		 * See https://gis.stackexchange.com/a/8674/49125
+		 */
+		if ( isset( $actual_result['latitude'], $actual_result['longitude'] ) ) {
+			$actual_result['latitude']  = number_format( round( $actual_result['latitude'],  3 ), 3 );
+			$actual_result['longitude'] = number_format( round( $actual_result['longitude'], 3 ), 3 );
+		}
+
 		$passed      = $case['expected'] === $actual_result;
 
 		output_results( $case_id, $passed, $case['expected'], $actual_result );
@@ -120,8 +133,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'nairobi',
-				'latitude'    => '-1.2833300',
-				'longitude'   => '36.8166700',
+				'latitude'    => '-1.283',
+				'longitude'   => '36.817',
 				'country'     => 'KE',
 			),
 		),
@@ -134,8 +147,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'tokyo',
-				'latitude'    => '35.6895000',
-				'longitude'   => '139.6917100',
+				'latitude'    => '35.690',
+				'longitude'   => '139.692',
 				'country'     => 'JP',
 			),
 		),
@@ -148,8 +161,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'berlin',
-				'latitude'    => '52.5243700',
-				'longitude'   => '13.4105300',
+				'latitude'    => '52.524',
+				'longitude'   => '13.411',
 				'country'     => 'DE',
 			),
 		),
@@ -162,8 +175,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'vancouver',
-				'latitude'    => '49.2496600',
-				'longitude'   => '-123.1193400',
+				'latitude'    => '49.250',
+				'longitude'   => '-123.119',
 				'country'     => 'CA',
 			),
 		),
@@ -176,8 +189,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'brisbane',
-				'latitude'    => '-27.4679400',
-				'longitude'   => '153.0280900',
+				'latitude'    => '-27.468',
+				'longitude'   => '153.028',
 				'country'     => 'AU',
 			),
 		),
@@ -190,8 +203,8 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'description' => 'são paulo',
-				'latitude'    => '-23.5475000',
-				'longitude'   => '-46.6361100',
+				'latitude'    => '-23.548',
+				'longitude'   => '-46.636',
 				'country'     => 'BR',
 			),
 		),
@@ -204,8 +217,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '41.191.232.22' ),
 			'expected' => array(
 				'description' => 'harare',
-				'latitude'    => '-17.82935',
-				'longitude'   => '31.05389',
+				'latitude'    => '-17.829',
+				'longitude'   => '31.054',
 				'country'     => 'ZW',
 			),
 		),
@@ -214,8 +227,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '86.108.55.28' ),
 			'expected' => array(
 				'description' => 'amman',
-				'latitude'    => '31.95522',
-				'longitude'   => '35.94503',
+				'latitude'    => '31.955',
+				'longitude'   => '35.945',
 				'country'     => 'JO',
 			),
 		),
@@ -224,8 +237,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '80.95.186.144' ),
 			'expected' => array(
 				'description' => 'belfast',
-				'latitude'    => '54.58333',
-				'longitude'   => '-5.93333',
+				'latitude'    => '54.583',
+				'longitude'   => '-5.933',
 				'country'     => 'GB',
 			),
 		),
@@ -234,8 +247,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '189.147.186.0' ),
 			'expected' => array(
 				'description' => 'mexico city',
-				'latitude'    => '19.42847',
-				'longitude'   => '-99.12766',
+				'latitude'    => '19.428',
+				'longitude'   => '-99.128',
 				'country'     => 'MX',
 			),
 		),
@@ -244,8 +257,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '116.12.57.122' ),
 			'expected' => array(
 				'description' => 'auckland',
-				'latitude'    => '-36.86667',
-				'longitude'   => '174.76667',
+				'latitude'    => '-36.867',
+				'longitude'   => '174.767',
 				'country'     => 'NZ',
 			),
 		),
@@ -254,8 +267,8 @@ function get_location_test_cases() {
 			'input' => array( 'ip' => '181.66.32.136' ),
 			'expected' => array(
 				'description' => 'lima',
-				'latitude'    => '-12.043333',
-				'longitude'   => '-77.028333',
+				'latitude'    => '-12.043',
+				'longitude'   => '-77.028',
 				'country'     => 'PE',
 			),
 		),
