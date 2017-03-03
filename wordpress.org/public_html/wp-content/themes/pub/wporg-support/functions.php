@@ -232,7 +232,7 @@ function wporg_support_is_single_review() {
  * @return array Array of compat views.
  */
 function wporg_support_get_compat_views() {
-	return array( 'theme', 'plugin', 'reviews', 'active' );
+	return array( 'theme', 'plugin', 'reviews', 'active', 'unresolved' );
 }
 
 /**
