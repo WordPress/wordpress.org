@@ -1,12 +1,12 @@
 {
     "name": "wporg-developer",
-    "description": "Theme for developer.wordpress.org",
+    "description": "Theme for WordPress Developer Resources",
     "repository": {
         "type": "svn",
         "url": "https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-developer"
     },
     "author": "wordpressdotorg",
-    "license": "GPLv2 or later",
+    "license": "GPL-2.0+",
     "devDependencies": {
         "grunt": "~0.4.5",
         "grunt-contrib-watch": "~0.6.1",
