@@ -94,9 +94,15 @@ class Hooks {
 	 * Suppress Gravatars on lists of topics and revision logs.
 	 */
 	public function get_author_link( $r ) {
+		// Keep Gravatars in search results and moderator views.
+		if ( bbp_is_search_results() || bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'spam', 'pending', 'archived' ) ) ) {
+			return $r;
+		}
+
 		if ( ! bbp_is_single_topic() || bbp_is_topic_edit() || wp_is_post_revision( $r['post_id'] ) ) {
 			$r['type'] = 'name';
 		}
+
 		return $r;
 	}
 
