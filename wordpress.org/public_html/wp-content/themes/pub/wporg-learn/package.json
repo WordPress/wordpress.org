@@ -1,9 +1,9 @@
 {
   "name": "wporg-learn",
   "version": "1.0.0",
-  "description": "Theme for WordPress.org",
+  "description": "Theme for Learn WordPress",
   "author": "wordpressdotorg",
-  "license": "GPL-2.0",
+  "license": "GPL-2.0+",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
