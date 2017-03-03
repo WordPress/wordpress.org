@@ -13,7 +13,7 @@ $is_moderator_view = class_exists( '\WordPressdotorg\Forums\Moderators' )
 
 ?>
 
-<ul class="bbp-topics">
+<ul class="bbp-topics full-posts">
 	<li class="bbp-body">
 
 		<?php while ( bbp_topics() ) : bbp_the_topic(); ?>

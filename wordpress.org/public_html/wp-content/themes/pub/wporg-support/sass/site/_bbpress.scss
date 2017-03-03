@@ -124,6 +124,14 @@ section {
 			}
 		}
 
+		ul.bbp-lead-topic, 
+		ul.bbp-replies, 
+		ul.bbp-search-results, 
+		ul.bbp-topics.full-posts,
+		li.bbp-body div.hentry {
+			overflow: visible;
+		}
+
 		ul.bbp-lead-topic {
 			margin: 0;
 		}
@@ -140,6 +148,36 @@ section {
 			display: none;
 		}
 
+		div.bbp-topic-author img.avatar, 
+		div.bbp-reply-author img.avatar {
+			border-radius: 50%;
+			float: left;
+			width: 50px;
+			height: 50px;
+			max-width: 50px;
+			max-height: 50px;
+			margin: 0;
+			margin-right: 10px;
+			margin-left: -11%;
+		}
+
+		div.bbp-topic-author img.avatar {
+			margin-left: -19%;
+			margin-top: -6px;
+			width: 80px;
+			height: 80px;
+			max-width: 80px;
+			max-height: 80px;
+		}
+
+		@media only screen and (max-width: 480px) {
+			div.bbp-reply-author img.avatar,
+			div.bbp-topic-author img.avatar {
+				position: relative;
+				top: 0;
+			}
+		}
+
 		div.bbp-reply-author a.bbp-author-name, 
 		div.bbp-topic-author a.bbp-author-name {
 			clear: none;
@@ -154,7 +192,12 @@ section {
 			text-align: left;
 			width: 100%;
 			margin: 1rem 0 2rem;
-			padding-left: 5%;
+			padding-left: 10%;
+		}
+
+		.bbp-user-replies-created div.bbp-reply-author,
+		.bbp-user-replies-created div.bbp-topic-author {
+			padding-left: 1.5rem;
 		}
 
 		.bbp-author-title {
@@ -181,13 +224,22 @@ section {
 
 		div.topic, 
 		div.reply {
-			padding: 1.5rem 0;
+			padding: 1.5rem 1.5rem 1.5rem 0;
 		}
 
 		div.bbp-reply-content, 
 		div.bbp-topic-content {
 			padding: 0;
-			margin: 0 2.5% 0 5%;
+			margin: 0 0 0 10%;
+		}
+
+		div.bbp-reply-content {
+			margin-left: 11%;
+		}
+
+		.bbp-user-replies-created div.bbp-reply-content,
+		.bbp-user-replies-created div.bbp-topic-content {
+			margin-left: 1.5rem;
 		}
 
 		div.bbp-reply-content a, 
@@ -675,47 +727,6 @@ div.bbp-template-notice {
 		#bbpress-forums {
 			overflow: visible;
 
-			ul.bbp-forums, 
-			ul.bbp-lead-topic, 
-			ul.bbp-replies, 
-			ul.bbp-search-results, 
-			ul.bbp-topics,
-			div.bbp-forum-header, 
-			div.bbp-reply-header, 
-			div.bbp-topic-header, 
-			li.bbp-body div.hentry {
-				overflow: visible;
-			}
-
-			div.bbp-topic-author img.avatar, 
-			div.bbp-reply-author img.avatar {
-				border-radius: 50%;
-				float: left;
-				width: 50px;
-				height: 50px;
-				max-width: 50px;
-				max-height: 50px;
-				margin: 0;
-				margin-right: 10px;
-				margin-left: -11%;
-			}
-			div.bbp-topic-author img.avatar {
-				margin-left: -19%;
-				margin-top: -6px;
-				width: 80px;
-				height: 80px;
-				max-width: 80px;
-				max-height: 80px;
-			}
-
-			@media only screen and (max-width: 480px) {
-				div.bbp-reply-author img.avatar,
-				div.bbp-topic-author img.avatar {
-					position: relative;
-					top: 0;
-				}
-			}
-
 			ul.bbp-lead-topic {
 				margin-bottom: 15px;
 			}
@@ -727,23 +738,10 @@ div.bbp-template-notice {
 
 			ul.bbp-lead-topic li.bbp-body div.topic {
 				background: #fbfbfb;
-				padding: 1.5rem 1.5rem 1.5rem 0;
 			}
 
-			div.bbp-reply-author, 
-			div.bbp-topic-author {
-				padding-left: 10%;
-			}
-
-			div.bbp-forum-content, 
-			div.bbp-reply-content, 
-			div.bbp-topic-content {
-				padding: 0;
-				margin: 0 0 0 10%;
-			}
-
-			div.bbp-reply-content {
-				margin-left: 11%;
+			div.reply.status-publish {
+				padding-right: 0;
 			}
 
 			div.even:not(.topic), 
