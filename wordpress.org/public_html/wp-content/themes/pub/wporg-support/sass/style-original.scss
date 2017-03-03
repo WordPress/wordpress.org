@@ -267,26 +267,16 @@ div.bbp-template-notice.warning {
 .topic-resolved-indicator:before {
 	content: "\f147";
 	color: #64b450; /*#46b450;*/
-	font: normal 18px/1 'dashicons';
+	font: normal 18px/0.8 'dashicons';
 	margin-right: 3px;
-	float: left;
-	padding-top: 2px;
+	position: relative;
+	top: 4px;
 }
 
 .topic-resolved-indicator:before {
 	color: #fff;
 	font-size: 21px;
 	padding-top: 0;
-}
-
-.bbp-breadcrumb .resolved:before {
-	padding-top: 5px;
-}
-
-.bbp-topic-header .bbp-topic-permalink,
-.bbp-reply-header .bbp-topic-permalink,
-.bbp-breadcrumb .bbp-breadcrumb-topic {
-	display: inline-block;
 }
 
 @media screen and ( max-width: 480px ) {
