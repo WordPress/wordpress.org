@@ -306,7 +306,7 @@ function wporg_support_add_moderation_notice() {
 					$notices[] = sprintf(
 						/* translators: %s: linked moderator's username */
 						__( 'This user has been flagged by %s.', 'wporg-forums' ),
-						sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $moderator ), $moderator )
+						sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator )
 					);
 				} else {
 					$notices[] = __( 'This user has been flagged.', 'wporg-forums' );
