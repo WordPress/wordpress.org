@@ -714,9 +714,14 @@ div.bbp-template-notice {
 }
 
 .bbp-topic-meta {
+	.bbp-topic-started-by,
 	.bbp-topic-freshness-author {
 		img.avatar {
 			display: none; // Hides the avatar from single forum view.
+		}
+
+		.bbp-author-avatar ~ .bbp-author-name {
+			margin-left: -3px; // Hides non-breaking space after the avatar.
 		}
 	}
 }

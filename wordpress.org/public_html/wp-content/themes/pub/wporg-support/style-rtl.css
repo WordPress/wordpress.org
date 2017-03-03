@@ -3216,8 +3216,14 @@ div.bbp-template-notice a:hover {
 	padding-right: 0;
 }
 
+.bbp-topic-meta .bbp-topic-started-by img.avatar,
 .bbp-topic-meta .bbp-topic-freshness-author img.avatar {
 	display: none;
+}
+
+.bbp-topic-meta .bbp-topic-started-by .bbp-author-avatar ~ .bbp-author-name,
+.bbp-topic-meta .bbp-topic-freshness-author .bbp-author-avatar ~ .bbp-author-name {
+	margin-right: -3px;
 }
 
 /*--------------------------------------------------------------
