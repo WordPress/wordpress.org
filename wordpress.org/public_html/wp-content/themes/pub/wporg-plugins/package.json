@@ -1,9 +1,9 @@
 {
   "name": "wporg-plugins",
   "version": "1.0.0",
-  "description": "Theme for the WordPress.org Plugin Directory",
+  "description": "Theme for WordPress Plugin Directory",
   "author": "wordpressdotorg",
-  "license": "GPL-2.0",
+  "license": "GPL-2.0+",
   "main": "index.php",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
