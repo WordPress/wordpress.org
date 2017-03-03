@@ -98,6 +98,18 @@ function get_location_test_cases() {
 
 
 		/*
+		 * A location couldn't be found
+		 */
+		'city-invalid' => array(
+			'input' => array(
+				'location_name' => 'Rivendell',
+				'ip_address'    => '127.0.0.1'
+			),
+			'expected' => false,
+		),
+
+
+		/*
 		 * The city, locale, and timezone are given
 		 */
 		'city-africa' => array(
