@@ -123,7 +123,7 @@ function get_location_test_cases() {
 
 
 		/*
-		 * The city, locale, and timezone are given
+		 * The English city exonym, locale, and timezone are given
 		 */
 		'city-africa' => array(
 			'input' => array(
@@ -206,6 +206,187 @@ function get_location_test_cases() {
 				'latitude'    => '-23.548',
 				'longitude'   => '-46.636',
 				'country'     => 'BR',
+			),
+		),
+
+
+		/*
+		 * The city endonym, locale, and timezone are given
+		 *
+		 * @todo
+		 * This is currently failling. A query from PHP shows row id 2220957 has "Yaound?" instead of
+		 * "Yaoundé", but it's correct in the database itself.
+		 */
+		 'city-endonym-accents-africa' => array(
+			'input' => array(
+				'location_name' => 'Yaoundé',
+				'locale'        => 'fr_FR',
+				'timezone'      => 'Africa/Douala',
+			),
+			'expected' => array(
+				'description' => 'yaoundé',
+				'latitude'    => '3.867',
+				'longitude'   => '11.517',
+				'country'     => 'CM',
+			),
+		),
+
+		'city-endonym-non-latin-africa' => array(
+			'input' => array(
+				'location_name' => 'አዲስ አበ',
+				'locale'        => 'am',
+				'timezone'      => 'Africa/Addis_Ababa',
+			),
+			'expected' => array(
+				'description' => 'addis ababa',
+				'latitude'    => '9.025',
+				'longitude'   => '38.747',
+				'country'     => 'ET',
+			),
+		),
+
+		'city-endonym-non-latin-length-greater-than-4-asia' => array(
+			'input' => array(
+				'location_name' => '白浜町宇佐崎南',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'shirahamachō-usazakiminami',
+				'latitude'    => '34.783',
+				'longitude'   => '134.717',
+				'country'     => 'JP',
+			),
+		),
+
+		/*
+		 * @todo
+		 *
+		 * This is currently failing, but should pass. It looks like the value is in row 112931.
+		 */
+		'city-endonym-non-latin-length-greater-than-4-asia2' => array(
+			'input' => array(
+				'location_name' => 'تهران',
+				'locale'        => 'fa_IR',
+				'timezone'      => 'Asia/Tehran',
+			),
+			'expected' => array(
+				'description' => 'tehran',
+				'latitude'    => '35.694',
+				'longitude'   => '51.422',
+				'country'     => 'IR',
+			),
+		),
+
+		/*
+		 * @todo
+		 *
+		 * This is currently failing, but should pass. It looks like the value is in row 1174872
+		 */
+		'city-endonym-non-latin-length-greater-than-4-asia3' => array(
+			'input' => array(
+				'location_name' => 'كراچى',
+				'locale'        => 'ur',
+				'timezone'      => 'Asia/Karachi',
+			),
+			'expected' => array(
+				'description' => 'karachi',
+				'latitude'    => '24.906',
+				'longitude'   => '67.082',
+				'country'     => 'TR',
+			),
+		),
+
+		/*
+		 * @todo
+		 *
+		 * This is currently failing, but it should pass. One reason it may be failing is that `ft_min_word_len`
+		 * is set to `4` and `東京` is only `2`.
+		 *
+		 * But, there are others that are failing that are >= 4, though, like `シラオカ`, `しらおか`, `Ширахама`, and
+		 *`すぎと,スギト`. So, there may be additional reasons too.
+		 */
+		'city-endonym-non-latin-length-less-than-4-asia' => array(
+			'input' => array(
+				'location_name' => '東京',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'tokyo',
+				'latitude'    => '35.690',
+				'longitude'   => '139.692',
+				'country'     => 'JP',
+			),
+		),
+
+		'city-endonym-europe' => array(
+			'input' => array(
+				'location_name' => 'Wien',
+				'locale'        => 'de_DE',
+				'timezone'      => 'Europe/Berlin',
+			),
+			'expected' => array(
+				'description' => 'vienna',
+				'latitude'    => '48.208',
+				'longitude'   => '16.372',
+				'country'     => 'AT',
+			),
+		),
+
+		'city-endonym-europe2' => array(
+			'input' => array(
+				'location_name' => 'Москва',
+				'locale'        => 'ru_RU',
+				'timezone'      => 'Europe/Moscow',
+			),
+			'expected' => array(
+				'description' => 'moscow',
+				'latitude'    => '55.752',
+				'longitude'   => '37.616',
+				'country'     => 'RU',
+			),
+		),
+
+		'city-endonym-accents-north-america' => array(
+			'input' => array(
+				'location_name' => 'Ciudad de México',
+				'locale'        => 'en_MX',
+				'timezone'      => 'America/Mexico_City',
+			),
+			'expected' => array(
+				'description' => 'mexico city',
+				'latitude'    => '19.428',
+				'longitude'   => '-99.128',
+				'country'     => 'MX',
+			),
+		),
+
+		'city-endonym-accents-oceania' => array(
+			'input' => array(
+				'location_name' => 'Hagåtña',
+				'locale'        => 'en_US',
+				'timezone'      => 'Pacific/Guam',
+			),
+			'expected' => array(
+				'description' => 'hagåtña',
+				'latitude'    => '13.476',
+				'longitude'   => '144.749',
+				'country'     => 'GU',
+			),
+		),
+
+		'city-endonym-south-america' => array(
+			'input' => array(
+				'location_name' => 'Bogotá',
+				'locale'        => 'es_CO',
+				'timezone'      => 'America/Bogota',
+			),
+			'expected' => array(
+				'description' => 'bogotá',
+				'latitude'    => '4.610',
+				'longitude'   => '-74.082',
+				'country'     => 'CO',
 			),
 		),
 
