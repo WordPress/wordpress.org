@@ -851,6 +851,17 @@ div.bbp-breadcrumb {
 	.topic-info li.topic-forum:before {
 		content: '\f230';
 	}
+
+	.topic-info .topic-freshness-time::before,
+	.forum-info .forum-freshness-time::before {
+		height: 30px;
+	}
+
+	.topic-info .topic-freshness-time a,
+	.forum-info .forum-freshness-time a {
+		display: inline-block;
+	}
+
 }
 
 

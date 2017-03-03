@@ -3337,6 +3337,16 @@ div.bbp-breadcrumb p {
 	content: '\f230';
 }
 
+.sidebar .topic-info .topic-freshness-time::before,
+.sidebar .forum-info .forum-freshness-time::before {
+	height: 30px;
+}
+
+.sidebar .topic-info .topic-freshness-time a,
+.sidebar .forum-info .forum-freshness-time a {
+	display: inline-block;
+}
+
 /*--------------------------------------------------------------
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
