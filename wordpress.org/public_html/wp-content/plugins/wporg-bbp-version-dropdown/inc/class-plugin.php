@@ -109,7 +109,11 @@ class Plugin {
 	}
 
 	public function enqueue_scripts() {
-		if ( bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_topic_edit() ) {
+		if (
+			bbp_is_single_forum() || bbp_is_single_topic() || bbp_is_topic_edit()
+		||
+			bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'theme', 'plugin', 'reviews' ) )
+		) {
 			wp_enqueue_script( 'wporg-bbp-version-dropdown', plugins_url( 'wporg-bbp-version-dropdown.js', __DIR__ ), array( 'jquery' ), '20160729', true );
 		}
 	}
