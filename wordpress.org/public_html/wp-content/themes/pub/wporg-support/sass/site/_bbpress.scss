@@ -81,6 +81,12 @@ section {
 			border-radius: 3px;
 		}
 
+		div.bbp-template-notice p,
+		div.bbp-template-notice li {
+			font-size: 13px;
+			line-height: 160%;
+		}
+
 		.bbp-topic-content div.bbp-template-notice,
 		.bbp-reply-content div.bbp-template-notice {
 			display: inline-block;

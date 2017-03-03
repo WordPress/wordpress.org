@@ -2556,6 +2556,12 @@ section {
 	border-radius: 3px;
 }
 
+.bbpress #bbpress-forums div.bbp-template-notice p,
+.bbpress #bbpress-forums div.bbp-template-notice li {
+	font-size: 13px;
+	line-height: 160%;
+}
+
 .bbpress #bbpress-forums .bbp-topic-content div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content div.bbp-template-notice {
 	display: inline-block;
