@@ -65,8 +65,7 @@ function test_get_location() {
 			$actual_result['description'] = strtolower( $actual_result['description'] );
 		}
 
-		$differences = array_diff_assoc( $case['expected'], $actual_result );
-		$passed      = empty( $differences );
+		$passed      = $case['expected'] === $actual_result;
 
 		output_results( $case_id, $passed, $case['expected'], $actual_result );
 
