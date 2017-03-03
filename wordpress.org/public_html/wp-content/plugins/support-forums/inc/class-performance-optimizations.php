@@ -74,6 +74,10 @@ class Performance_Optimizations {
 			return;
 		}
 
+		if ( false === strpos( home_url(), 'https://wordpress.org/' ) ) {
+			return;
+		}
+
 		$search_terms = $search_url = '';
 
 		if ( $is_bbp_search ) {
