@@ -2556,7 +2556,7 @@ section {
 
 .bbpress #bbpress-forums .bbp-topic-content div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content div.bbp-template-notice {
-	display: inline-block;
+	margin-bottom: 30px;
 }
 
 .bbpress #bbpress-forums .status-pending div.bbp-template-notice {
