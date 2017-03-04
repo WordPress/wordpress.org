@@ -2596,10 +2596,12 @@ section {
 	}
 }
 
+.bbpress #bbpress-forums .bbp-forums,
 .bbpress #bbpress-forums .bbp-topics {
 	border: 1px solid #eee;
 }
 
+.bbpress #bbpress-forums .bbp-forums > .bbp-header,
 .bbpress #bbpress-forums .bbp-topics > .bbp-header {
 	background: #0073aa;
 	color: #fff;
