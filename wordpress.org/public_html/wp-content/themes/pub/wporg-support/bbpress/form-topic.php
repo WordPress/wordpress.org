@@ -78,7 +78,7 @@
 				<?php if ( !bbp_is_topic_edit() && bbp_is_forum_closed() ) : ?>
 
 					<div class="bbp-template-notice">
-						<p><?php _e( 'This forum is marked as closed to new topics, however your posting capabilities still allow you to do so.', 'wporg-forums' ); ?></p>
+						<p><?php _e( 'This forum is marked as closed to new topics, however your posting capabilities still allow you to create a topic.', 'wporg-forums' ); ?></p>
 					</div>
 
 				<?php endif; ?>
