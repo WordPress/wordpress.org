@@ -38,6 +38,22 @@ if ( bbp_is_reply_edit() ) : ?>
 
 				<?php endif; ?>
 
+				<?php if ( bbp_is_forum_closed() && ! bbp_is_reply_edit() ) : ?>
+
+					<div class="bbp-template-notice">
+						<ul>
+							<li><?php
+								printf(
+									/* translators: %s: forum title */
+									esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to do so.', 'wporg-forums' ),
+									bbp_get_forum_title( bbp_get_topic_forum_id() )
+								);
+							?></li>
+						</ul>
+					</div>
+
+				<?php endif; ?>
+
 				<?php if ( current_user_can( 'unfiltered_html' ) ) : ?>
 
 					<div class="bbp-template-notice">
