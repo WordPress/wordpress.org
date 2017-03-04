@@ -2737,6 +2737,11 @@ section {
 	font-weight: bold;
 }
 
+.bbpress #bbpress-forums div.bbp-reply-content .bbp-reply-revision-log-item a,
+.bbpress #bbpress-forums div.bbp-topic-content .bbp-topic-revision-log-item a {
+	text-decoration: none;
+}
+
 .bbpress #bbpress-forums li.bbp-body div.type-topic:hover span.bbp-admin-links,
 .bbpress #bbpress-forums li.bbp-body div.type-reply:hover span.bbp-admin-links {
 	bottom: 0;
