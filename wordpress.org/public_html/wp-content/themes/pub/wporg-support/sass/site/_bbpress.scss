@@ -284,6 +284,19 @@ section {
 			color: inherit;
 		}
 
+		.bbp-topic-meta .bbp-topic-started-by,
+		.bbp-topic-meta .bbp-topic-freshness-author,
+		.bbp-topic-revision-log-item,
+		.bbp-reply-revision-log-item {
+			img.avatar {
+				display: none; // Hides the avatar from single forum view.
+			}
+		
+			a ~ a {
+				margin-left: -3px; // Hides non-breaking space after the avatar.
+			}
+		}
+
 		p.bbp-topic-meta .bbp-topic-started-in a {
 			background: #eee;
 		}
@@ -711,19 +724,6 @@ div.bbp-template-notice {
 	.feed {
 		background: none;
 		padding-left: 0;
-	}
-}
-
-.bbp-topic-meta {
-	.bbp-topic-started-by,
-	.bbp-topic-freshness-author {
-		img.avatar {
-			display: none; // Hides the avatar from single forum view.
-		}
-
-		.bbp-author-avatar ~ .bbp-author-name {
-			margin-left: -3px; // Hides non-breaking space after the avatar.
-		}
 	}
 }
 

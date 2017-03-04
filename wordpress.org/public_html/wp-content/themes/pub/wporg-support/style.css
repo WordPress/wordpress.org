@@ -2764,6 +2764,20 @@ section {
 	color: inherit;
 }
 
+.bbpress #bbpress-forums .bbp-topic-meta .bbp-topic-started-by img.avatar,
+.bbpress #bbpress-forums .bbp-topic-meta .bbp-topic-freshness-author img.avatar,
+.bbpress #bbpress-forums .bbp-topic-revision-log-item img.avatar,
+.bbpress #bbpress-forums .bbp-reply-revision-log-item img.avatar {
+	display: none;
+}
+
+.bbpress #bbpress-forums .bbp-topic-meta .bbp-topic-started-by a ~ a,
+.bbpress #bbpress-forums .bbp-topic-meta .bbp-topic-freshness-author a ~ a,
+.bbpress #bbpress-forums .bbp-topic-revision-log-item a ~ a,
+.bbpress #bbpress-forums .bbp-reply-revision-log-item a ~ a {
+	margin-left: -3px;
+}
+
 .bbpress #bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
 	background: #eee;
 }
@@ -3216,16 +3230,6 @@ div.bbp-template-notice a:hover {
 .sidebar .feed {
 	background: none;
 	padding-left: 0;
-}
-
-.bbp-topic-meta .bbp-topic-started-by img.avatar,
-.bbp-topic-meta .bbp-topic-freshness-author img.avatar {
-	display: none;
-}
-
-.bbp-topic-meta .bbp-topic-started-by .bbp-author-avatar ~ .bbp-author-name,
-.bbp-topic-meta .bbp-topic-freshness-author .bbp-author-avatar ~ .bbp-author-name {
-	margin-left: -3px;
 }
 
 /*--------------------------------------------------------------
