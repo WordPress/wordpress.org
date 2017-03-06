@@ -40,6 +40,7 @@ class Support_Compat {
 			// Parse user's reviews query.
 			add_action( 'parse_query',                     array( $this, 'parse_user_reviews_query' ) );
 			add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'parse_user_reviews_query_args' ) );
+			add_filter( 'bbp_topic_pagination',            array( $this, 'parse_user_reviews_pagination_args' ) );
 			add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_reviews_title_args' ) );
 
 			// Exclude compat forums from forum dropdown.
@@ -232,6 +233,21 @@ class Support_Compat {
 	public function parse_user_reviews_query_args( $args ) {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
 			$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Set 'base' argument for pagination links on user's reviews page.
+	 *
+	 * @param array $args Pagination arguments.
+	 * @return array Filtered pagination arguments.
+	 */
+	public function parse_user_reviews_pagination_args( $args ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'reviews/';
+			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
 		}
 
 		return $args;
