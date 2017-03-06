@@ -291,9 +291,9 @@ class Support_Compat {
 		add_rewrite_rule( $plugin_contributor_rule . $feed_rule,  'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
 
 		// Add user's reviews rewrite rules.
-		add_rewrite_rule( $user_reviews_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1',                              $priority );
-		add_rewrite_rule( $user_reviews_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1' . $paged_id . '=$matches[2]', $priority );
-		add_rewrite_rule( $user_reviews_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1' . $feed_id  . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_reviews_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1',                               $priority );
+		add_rewrite_rule( $user_reviews_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_reviews_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	/**
