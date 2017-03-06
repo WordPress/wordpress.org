@@ -7,6 +7,7 @@ class Hooks {
 	public function __construct() {
 		// Basic behavior filters and actions.
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
+		add_action( 'pre_get_posts', array( $this, 'hide_non_public_forums' ) );
 
 		// Display-related filters and actions.
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
@@ -47,6 +48,20 @@ class Hooks {
 		add_action( 'bbp_approved_reply',   array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_topic', array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_reply', array( $this, 'store_moderator_username' ) );
+	}
+
+	/**
+	 * Remove non-public forums from lists on front end.
+	 *
+	 * By default, bbPress shows all forums to keymasters, including private and
+	 * hidden forums. This ensures that front-end queries include only public forums.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	function hide_non_public_forums( $query ) {
+		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
+			$query->set( 'post_status', 'publish' );
+		}
 	}
 
 	/**
