@@ -368,6 +368,8 @@ abstract class Directory_Compat {
 			( bbp_is_single_forum() && Plugin::REVIEWS_FORUM_ID == bbp_get_forum_id() )
 		||
 			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), $this->compat_views() ) )
+		||
+			( get_query_var( 'wporg_single_user_reviews' ) )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
