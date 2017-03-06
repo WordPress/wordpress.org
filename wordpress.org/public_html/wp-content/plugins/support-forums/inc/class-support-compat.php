@@ -37,6 +37,11 @@ class Support_Compat {
 			// on parse_query at priority 2.
 			add_action( 'parse_query',           array( $this, 'parse_query' ), 0 );
 
+			// Parse user's reviews query.
+			add_action( 'parse_query',                     array( $this, 'parse_user_reviews_query' ) );
+			add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'parse_user_reviews_query_args' ) );
+			add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_reviews_title_args' ) );
+
 			// Exclude compat forums from forum dropdown.
 			add_filter( 'bbp_after_get_dropdown_parse_args', array( $this, 'get_dropdown' ) );
 
@@ -207,8 +212,52 @@ class Support_Compat {
 		}
 	}
 
+	/**
+	 * Set WP_Query::bbp_is_single_user_profile to false on user's reviews page.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	public function parse_user_reviews_query( $query ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			$query->bbp_is_single_user_profile = false;
+		}
+	}
+
+	/**
+	 * Set forum ID for user's reviews query.
+	 *
+	 * @param array $args WP_Query arguments.
+	 */
+	public function parse_user_reviews_query_args( $args ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Set title for user's reviews page.
+	 *
+	 * @param array $title Title parts.
+	 */
+	public function parse_user_reviews_title_args( $title ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			if ( bbp_is_user_home() ) {
+				$title['text'] = __( 'Your Reviews', 'wporg-forums' );
+			} else {
+				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
+				/* translators: user's display name */
+				$title['format'] = __( "%s's Reviews", 'wporg-forums' );
+			}
+		}
+
+		return $title;
+	}
+
 	public function add_query_var( $query_vars ) {
 		$query_vars[] = 'wporg_user_login';
+		$query_vars[] = 'wporg_single_user_reviews';
 		return $query_vars;
 	}
 
@@ -217,9 +266,11 @@ class Support_Compat {
 
 		$plugin_committer_rule   = bbp_get_view_slug() . '/plugin-committer/([^/]+)/';
 		$plugin_contributor_rule = bbp_get_view_slug() . '/plugin-contributor/([^/]+)/';
+		$user_reviews_rule       = bbp_get_user_slug() . '/([^/]+)/reviews/';
 
 		$feed_id    = 'feed';
 		$view_id    = bbp_get_view_rewrite_id();
+		$user_id    = bbp_get_user_rewrite_id();
 		$paged_id   = bbp_get_paged_rewrite_id();
 
 		$feed_slug  = 'feed';
@@ -238,6 +289,11 @@ class Support_Compat {
 		add_rewrite_rule( $plugin_contributor_rule . $base_rule,  'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]',                               $priority );
 		add_rewrite_rule( $plugin_contributor_rule . $paged_rule, 'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $plugin_contributor_rule . $feed_rule,  'index.php?' . $view_id . '=plugin-contributor&wporg_user_login=$matches[1]&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add user's reviews rewrite rules.
+		add_rewrite_rule( $user_reviews_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1',                              $priority );
+		add_rewrite_rule( $user_reviews_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_reviews_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1' . $feed_id  . '=$matches[2]', $priority );
 	}
 
 	/**
