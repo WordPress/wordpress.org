@@ -156,7 +156,7 @@ class Support_Compat {
 	 * Determine if a custom view needs to be loaded for this query and register
 	 * the view if needed.
 	 *
-	 * @param array $query_vars The query vars
+	 * @param WP_Query $query Current query object.
 	 */
 	public function parse_query( $query_vars ) {
 		$view = get_query_var( 'bbp_view' );
@@ -227,6 +227,7 @@ class Support_Compat {
 	 * Set forum ID for user's reviews query.
 	 *
 	 * @param array $args WP_Query arguments.
+	 * @return array Filtered query arguments.
 	 */
 	public function parse_user_reviews_query_args( $args ) {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
@@ -240,6 +241,7 @@ class Support_Compat {
 	 * Set title for user's reviews page.
 	 *
 	 * @param array $title Title parts.
+	 * @return array Filtered title parts.
 	 */
 	public function parse_user_reviews_title_args( $title ) {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
