@@ -227,6 +227,15 @@ function wporg_support_is_single_review() {
 }
 
 /**
+ * Check if the current page is a user's reviews page.
+ *
+ * @return bool True if the page is a user's reviews page, false otherwise.
+ */
+function wporg_support_is_single_user_reviews() {
+	return get_query_var( 'wporg_single_user_reviews' );
+}
+
+/**
  * Get the list of plugin- and theme-specific views.
  *
  * @return array Array of compat views.

@@ -49,6 +49,15 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				</span>
 			</li>
 
+			<li class="<?php if ( wporg_support_is_single_user_reviews() ) :?>current<?php endif; ?>">
+				<span class='bbp-user-replies-created-link'>
+					<a href="<?php bbp_user_profile_url(); ?>reviews/" title="<?php
+						/* translators: %s: user's display name */
+						printf( esc_attr__( "%s's Reviews", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+					?>"><?php esc_html_e( 'Reviews', 'wporg-forums' ); ?></a>
+				</span>
+			</li>
+
 			<?php if ( bbp_is_engagements_active() ) : ?>
 				<li class="<?php if ( bbp_is_single_user_engagements() ) :?>current<?php endif; ?>">
 					<span class='bbp-user-engagements-created-link'>
