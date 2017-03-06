@@ -58,7 +58,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				</span>
 			</li>
 
-			<?php if ( bbp_is_engagements_active() ) : ?>
+			<?php if ( function_exists( 'bbp_is_engagements_active' ) && bbp_is_engagements_active() ) : ?>
 				<li class="<?php if ( bbp_is_single_user_engagements() ) :?>current<?php endif; ?>">
 					<span class='bbp-user-engagements-created-link'>
 						<a href="<?php bbp_user_engagements_url(); ?>" title="<?php
