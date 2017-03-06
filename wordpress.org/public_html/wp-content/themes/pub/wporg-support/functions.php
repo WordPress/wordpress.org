@@ -232,7 +232,7 @@ function wporg_support_is_single_review() {
  * @return bool True if the page is a user's reviews page, false otherwise.
  */
 function wporg_support_is_single_user_reviews() {
-	return get_query_var( 'wporg_single_user_reviews' );
+	return (bool) get_query_var( 'wporg_single_user_reviews' );
 }
 
 /**
