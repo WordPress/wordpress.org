@@ -233,6 +233,8 @@ class Support_Compat {
 	public function parse_user_reviews_query_args( $args ) {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
 			$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
+		} elseif ( bbp_is_single_user_topics() ) {
+			$args['post_parent__not_in'] = array( Plugin::REVIEWS_FORUM_ID );
 		}
 
 		return $args;
