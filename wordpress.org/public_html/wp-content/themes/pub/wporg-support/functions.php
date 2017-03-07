@@ -675,34 +675,6 @@ function bb_base_single_forum_description() {
 	<?php endif;
 }
 
-function bb_base_before_topics_loop() {
-	do_action( 'bbp_template_notices' );
-
-	if ( ! is_tax( 'topic-tag' ) ) {
-		return;
-	}
-
-	bbp_breadcrumb();
-	?>
-	<header id="topic-tag" class="page-header bbp-topic-tag">
-		<h1 class="page-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
-	</header>
-	<?php bbp_get_template_part( 'pagination', 'topics' ); ?>
-		<div class="entry-content">
-	<?php
-}
-add_action( 'bbp_template_before_topics_loop', 'bb_base_before_topics_loop' );
-
-function bb_base_after_topics_loop() {
-	if ( ! is_tax( 'topic-tag' ) ) {
-		return;
-	}
-	?>
-		</div>
-	<?php
-}
-add_action( 'bbp_template_after_topics_loop', 'bb_base_after_topics_loop' );
-
 function bb_is_intl_forum() {
 	return get_locale() != 'en_US';
 }

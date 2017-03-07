@@ -8,13 +8,24 @@
 
 <?php endif; ?>
 
-<div id="bbpress-forums">
+<?php bbp_breadcrumb(); ?>
 
-	<?php if ( bbp_is_topic_tag() ) bbp_topic_tag_description(); ?>
+<?php if ( bbp_is_topic_tag() ) : ?>
+
+	<header id="topic-tag" class="page-header bbp-topic-tag">
+		<h1 class="page-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
+		<?php bbp_topic_tag_description(); ?>
+	</header>
+
+<?php endif; ?>
+
+<div id="bbpress-forums">
 
 	<?php do_action( 'bbp_template_before_topics_index' ); ?>
 
 	<?php if ( bbp_has_topics() ) : ?>
+
+		<?php bbp_get_template_part( 'pagination', 'topics'    ); ?>
 
 		<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
 
