@@ -690,6 +690,11 @@ blockquote cite {
 	font-size: 0.8rem;
 }
 
+blockquote p {
+	display: block;
+	margin: 1em 0;
+}
+
 hr {
 	background-color: #eee;
 	border: 0;
