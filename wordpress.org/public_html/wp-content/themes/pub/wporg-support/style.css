@@ -387,6 +387,7 @@ div.bbp-template-notice.warning {
 
 /* Search forms */
 #bbp-search-form {
+	clear: left;
 	position: relative;
 	margin-top: 0;
 }

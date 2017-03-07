@@ -1,3 +1,6 @@
+
+<?php bbp_breadcrumb(); ?>
+
 <?php if ( bbp_is_forum_archive() || bbp_is_topic_archive() || bbp_is_search() ) : ?>
 
 	<div class="bbp-search-form">
@@ -7,8 +10,6 @@
 	</div>
 
 <?php endif; ?>
-
-<?php bbp_breadcrumb(); ?>
 
 <?php if ( bbp_is_topic_tag() ) : ?>
 
