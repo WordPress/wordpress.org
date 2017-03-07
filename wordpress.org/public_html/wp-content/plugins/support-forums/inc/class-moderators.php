@@ -268,7 +268,7 @@ class Moderators {
 			), true );
 			if ( $post_id ) {
 				update_post_meta( $post->ID, self::ARCHIVED_META, $post->post_status );
-				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_login );
+				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_nicename );
 
 				if ( bbp_is_reply( $post->ID ) ) {
 					bbp_increase_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
@@ -302,7 +302,7 @@ class Moderators {
 			) );
 			if ( $post_id ) {
 				delete_post_meta( $post->ID, self::ARCHIVED_META );
-				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_login );
+				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_nicename );
 
 				if ( bbp_is_reply( $post->ID ) ) {
 					bbp_decrease_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
