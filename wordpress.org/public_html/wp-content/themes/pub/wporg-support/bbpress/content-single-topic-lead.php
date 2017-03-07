@@ -7,7 +7,7 @@
  * @subpackage Theme
  */
 
-if ( bbp_is_search_results() ) : ?>
+if ( bbp_is_single_view() || bbp_is_search_results() ) : ?>
 
 <div id="post-<?php bbp_topic_id(); ?>" class="bbp-topic-header">
 	<div class="bbp-meta">
