@@ -178,6 +178,27 @@ function get_location( $args = array() ) {
 	// Location (City) name provided by the user:
 	if ( isset( $args['location_name'] ) ) {
 		$guess = guess_location_from_geonames( $args['location_name'], $args['timezone'] ?? '', $country_code );
+		$location_word_count = str_word_count( $args['location_name'] );
+
+		/*
+		 * Check if they entered only the country name, e.g. "Germany" or "New Zealand"
+		 *
+		 * This isn't perfect because some of the country names in the database are in a format that regular
+		 * people wouldn't type -- e.g., "Venezuela, Bolvarian Republic Of" -- but this will still match a
+		 * majority of them.
+		 *
+		 * Currently, this only works with English names because that's the only data we have.
+		 */
+		if ( ! $guess ) {
+			$location_country_code = get_country_code_from_name( $args['location_name'] );
+
+			if ( $location_country_code ) {
+				return array(
+					'country' => $location_country_code,
+				);
+			}
+		}
+
 		if ( $guess ) {
 			return array(
 				'description' => $guess->name,
@@ -220,6 +241,33 @@ function get_location( $args = array() ) {
 
 	// No specific location details.
 	return array();
+}
+
+/**
+ * Get the country code that corresponds to the given country name
+ *
+ * @param string $country_name
+ *
+ * @return false|string
+ */
+function get_country_code_from_name( $country_name ) {
+	global $wpdb;
+
+	$country_code = $wpdb->get_var( $wpdb->prepare( "
+		SELECT country_short
+		FROM ip2location
+		WHERE country_long = %s
+		LIMIT 1",
+		$country_name
+	) );
+
+
+	// Convert all errors to boolean false for consistency
+	if ( empty( $country_code ) ) {
+		$country_code = false;
+	}
+
+	return $country_code;
 }
 
 function get_events( $args = array() ) {

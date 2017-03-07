@@ -98,14 +98,40 @@ function test_get_location() {
 function get_location_test_cases() {
 	 $cases = array(
 		/*
-		 * Only the country is given
+		 * Only the country code is given
 		 */
-		'country-australia' => array(
+		'country-code-australia' => array(
 			'input' => array(
 				'country' => 'AU',
 			),
 			'expected' => array(
 				'country' => 'AU'
+			),
+		),
+
+
+		/*
+		 * The country name, locale, and timezone are given
+		 */
+		'country-exonym-1-word' => array(
+			'input' => array(
+				'location_name' => 'Indonesia',
+				'locale'        => 'id_ID',
+				'timezone'      => 'Asia/Jakarta',
+			),
+			'expected' => array(
+				'country' => 'ID'
+			),
+		),
+
+		'country-exonym-2-words' => array(
+			'input' => array(
+				'location_name' => 'Bosnia and Herzegovina',
+				'locale'        => 'bs_BA',
+				'timezone'      => 'Europe/Sarajevo',
+			),
+			'expected' => array(
+				'country' => 'BA'
 			),
 		),
 
