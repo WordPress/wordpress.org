@@ -139,11 +139,26 @@ function send_response( $response, $ttl ) {
  * @param string $timezone
  * @param string $country_code
  *
- * @return false|array false on failure; an array on success
+ * @return false|object false on failure; an object on success
  */
 function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	$guess = guess_location_from_geonames( $location_name, $timezone, $country_code );
 	$location_word_count = str_word_count( $location_name );
+	$location_name_parts = explode( ' ', $location_name );
+
+	/*
+	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the city
+	 */
+	if ( ! $guess && $location_word_count >= 2 ) {
+		// Catch input like "Portland Maine"
+		$guess = guess_location_from_geonames( $location_name_parts[0], $timezone, $country_code );
+	}
+
+	if ( ! $guess && $location_word_count >= 3 ) {
+		// Catch input like "Sao Paulo Brazil"
+		$city_name = sprintf( '%s %s', $location_name_parts[0], $location_name_parts[1] );
+		$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code );
+	}
 
 	// Normalize all errors to boolean false for consistency
 	if ( empty ( $guess ) ) {

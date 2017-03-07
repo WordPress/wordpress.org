@@ -124,6 +124,10 @@ function get_location_test_cases() {
 			),
 		),
 
+		/*
+		 * This is matching a city inside the country before it the country searches run, but that's ok since it's
+		 * good enough for our use cases
+		 */
 		'country-exonym-2-words' => array(
 			'input' => array(
 				'location_name' => 'Bosnia and Herzegovina',
@@ -131,7 +135,10 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Sarajevo',
 			),
 			'expected' => array(
-				'country' => 'BA'
+				'description' => 'pale',
+				'latitude'    => '43.817',
+				'longitude'   => '18.569',
+				'country'     => 'BA'
 			),
 		),
 
@@ -413,6 +420,38 @@ function get_location_test_cases() {
 				'latitude'    => '4.610',
 				'longitude'   => '-74.082',
 				'country'     => 'CO',
+			),
+		),
+
+
+		/*
+		 * A combination of city, region, and country are given, along with the locale and timezone
+		 */
+		'1-word-city-region' => array(
+			'input' => array(
+				'location_name' => 'Portland Maine',
+				'locale'        => 'en_US',
+				'timezone'      => 'America/New_York',
+			),
+			'expected' => array(
+				'description' => 'portland',
+				'latitude'    => '43.661',
+				'longitude'   => '-70.255',
+				'country'     => 'US',
+			),
+		),
+
+		'2-word-city-region' => array(
+			'input' => array(
+				'location_name' => 'São Paulo Brazil',
+				'locale'        => 'pt_BR',
+				'timezone'      => 'America/Sao_Paulo',
+			),
+			'expected' => array(
+				'description' => 'são paulo',
+				'latitude'    => '-23.548',
+				'longitude'   => '-46.636',
+				'country'     => 'BR',
 			),
 		),
 
