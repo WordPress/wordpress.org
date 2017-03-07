@@ -55,7 +55,10 @@ get_header();
 			<section class="plugin-section">
 				<header class="section-header">
 					<h2 class="section-title"><?php echo esc_html( $section_title ); ?></h2>
-					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php printf( _x( 'See all %s', 'plugins', 'wporg-plugins' ), "<span class=\"screen-reader-text\">{$section_title}</span>" ); ?></a>
+					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php
+						/* translators: %s: Section title as an accessibility text for screen readers. */
+						printf( _x( 'See all %s', 'plugins', 'wporg-plugins' ), "<span class=\"screen-reader-text\">{$section_title}</span>" );
+					?></a>
 				</header>
 
 				<?php
