@@ -261,6 +261,27 @@ function wporg_support_is_compat_view( $view_id = 0 ) {
 }
 
 /**
+ * Append 'view=all' to forum, topic, and reply URLs in moderator views.
+ *
+ * @param string $url Forum, topic, or reply URL.
+ * @return string Filtered URL.
+ */
+function wporg_support_maybe_add_view_all( $url ) {
+	if ( ! class_exists( '\WordPressdotorg\Forums\Moderators' ) ) {
+		return $url;
+	}
+
+	if ( bbp_is_single_view() && in_array( bbp_get_view_id(), \WordPressdotorg\Forums\Moderators::VIEWS ) ) {
+		$url = add_query_arg( 'view', 'all', $url );
+	}
+
+	return $url;
+}
+add_filter( 'bbp_get_forum_permalink', 'wporg_support_maybe_add_view_all' );
+add_filter( 'bbp_get_topic_permalink', 'wporg_support_maybe_add_view_all' );
+add_filter( 'bbp_get_reply_url',       'wporg_support_maybe_add_view_all' );
+
+/**
  * Display a notice for messages caught in the moderation queue.
  */
 function wporg_support_add_moderation_notice() {
