@@ -158,11 +158,10 @@
 						<?php do_action( 'bbp_theme_before_topic_form_revisions' ); ?>
 
 						<fieldset class="bbp-form">
-							<legend><?php _e( 'Revision', 'bbpress' ); ?></legend>
-							<div>
+							<legend>
 								<input name="bbp_log_topic_edit" id="bbp_log_topic_edit" type="checkbox" value="1" <?php bbp_form_topic_log_edit(); ?> />
 								<label for="bbp_log_topic_edit"><?php _e( 'Keep a log of this edit:', 'bbpress' ); ?></label><br />
-							</div>
+							</legend>
 
 							<div>
 								<label for="bbp_topic_edit_reason"><?php printf( __( 'Optional reason for editing:', 'bbpress' ), bbp_get_current_user_name() ); ?></label><br />
