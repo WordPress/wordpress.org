@@ -698,7 +698,6 @@ class Official_WordPress_Events {
 		}
 
 		if ( count( $this->log ) > $limit ) {
-			wp_die('early return');
 			return;
 		}
 
