@@ -4,10 +4,12 @@
 	<?php echo $feedback_message; ?>
 
 	<p><?php
+		$user = get_user_by( 'id', $user_id );
 		printf(
-			/* translators: %s: username */
-			__( 'You are currently editing the user %s.', 'rosetta' ),
-			'<em>' . get_user_by( 'id', $user_id )->user_login . '</em>'
+			/* translators: 1: WP.org profile URL, 2: username */
+			__( 'You are currently editing the user <a href="%1$s">%2$s</a>.', 'rosetta' ),
+			'https://profiles.wordpress.org/' . $user->user_nicename,
+			'<em>' . $user->user_login . '</em>'
 		);
 	?></p>
 
