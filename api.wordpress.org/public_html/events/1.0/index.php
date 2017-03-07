@@ -270,23 +270,80 @@ function get_location( $args = array() ) {
 /**
  * Guess the location based on a country identifier inside the given input
  *
+ * This isn't perfect because some of the country names in the database are in a format that regular
+ * people wouldn't type -- e.g., "Venezuela, Bolvarian Republic Of" -- but this will still match a
+ * majority of them.
+ *
+ * Currently, this only works with English names because that's the only data we have.
+ *
  * @param string $location_name
  *
  * @return false|string false on failure; a country code on success
  */
 function guess_location_from_country( $location_name ) {
-	/*
-	 * Check if they entered only the country name, e.g. "Germany" or "New Zealand"
-	 *
-	 * This isn't perfect because some of the country names in the database are in a format that regular
-	 * people wouldn't type -- e.g., "Venezuela, Bolvarian Republic Of" -- but this will still match a
-	 * majority of them.
-	 *
-	 * Currently, this only works with English names because that's the only data we have.
-	 */
-	$location_country_code = get_country_code_from_name( $location_name );
+	// Check if they entered only the country name, e.g. "Germany" or "New Zealand"
+	$country_code = get_country_code_from_name( $location_name );
+	$location_word_count = str_word_count( $location_name );
+	$location_name_parts = explode( ' ', $location_name );
 
-	return $location_country_code;
+	// Check if they entered only the country code, e.g., "GB"
+	if ( ! $country_code ) {
+		$valid_country_codes = get_valid_country_codes();
+
+		if ( in_array( $location_name, $valid_country_codes, true ) ) {
+			$country_code = $location_name;
+		}
+	}
+
+	/*
+	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the country
+	 */
+	if ( ! $country_code && $location_word_count >= 2 ) {
+		// Catch input like "Vancouver Canada"
+		$country_id   = $location_name_parts[ $location_word_count - 1 ];
+		$country_code = get_country_code_from_name( $country_id );
+
+		// Catch input like "London GB"
+		if ( ! $country_code ) {
+			if ( in_array( $country_id, $valid_country_codes, true ) ) {
+				$country_code = $country_id;
+			}
+		}
+	}
+
+	if ( ! $country_code && $location_word_count >= 3 ) {
+		// Catch input like "Santiago De Los Caballeros, Dominican Republic"
+		$country_name = sprintf(
+			'%s %s',
+			$location_name_parts[ $location_word_count - 2 ],
+			$location_name_parts[ $location_word_count - 1 ]
+		);
+		$country_code = get_country_code_from_name( $country_name );
+	}
+
+	if ( ! $country_code && $location_word_count >= 4 ) {
+		// Catch input like "Kaga-Bandoro, Central African Republic"
+		$country_name = sprintf(
+			'%s %s %s',
+			$location_name_parts[ $location_word_count - 3 ],
+			$location_name_parts[ $location_word_count - 2 ],
+			$location_name_parts[ $location_word_count - 1 ]
+		);
+		$country_code = get_country_code_from_name( $country_name );
+	}
+
+	return $country_code;
+}
+
+/**
+ * Get a list of valid country codes
+ *
+ * @return array
+ */
+function get_valid_country_codes() {
+	global $wpdb;
+
+	return $wpdb->get_col( "SELECT DISTINCT country FROM geoname" );
 }
 
 /**

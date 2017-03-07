@@ -426,6 +426,8 @@ function get_location_test_cases() {
 
 		/*
 		 * A combination of city, region, and country are given, along with the locale and timezone
+		 *
+		 * InvalidCity is used in tests that want to bypass the guess_location_from_city() tests and only test the country
 		 */
 		'1-word-city-region' => array(
 			'input' => array(
@@ -452,6 +454,61 @@ function get_location_test_cases() {
 				'latitude'    => '-23.548',
 				'longitude'   => '-46.636',
 				'country'     => 'BR',
+			),
+		),
+
+		'city-1-word-country' => array(
+			'input' => array(
+				'location_name' => 'InvalidCity Canada',
+				'locale'        => 'en_CA',
+				'timezone'      => 'America/Vancouver',
+			),
+			'expected' => array(
+				'country' => 'CA',
+			),
+		),
+
+		'city-2-word-country' => array(
+			'input' => array(
+				'location_name' => 'InvalidCity Dominican Republic',
+				'locale'        => 'es_ES',
+				'timezone'      => 'America/Santo_Domingo',
+			),
+			'expected' => array(
+				'country' => 'DO',
+			),
+		),
+
+		'city-3-word-country' => array(
+			'input' => array(
+				'location_name' => 'InvalidCity Central African Republic',
+				'locale'        => 'fr_FR',
+				'timezone'      => 'Africa/Bangui',
+			),
+			'expected' => array(
+				'country' => 'CF',
+			),
+		),
+
+		'country-code' => array(
+			'input' => array(
+				'location_name' => 'GB',
+				'locale'        => 'en_GB',
+				'timezone'      => 'Europe/London',
+			),
+			'expected' => array(
+				'country' => 'GB',
+			),
+		),
+
+		'city-country-code' => array(
+			'input' => array(
+				'location_name' => 'InvalidCity BI',
+				'locale'        => 'fr_FR',
+				'timezone'      => 'Africa/Bujumbura',
+			),
+			'expected' => array(
+				'country' => 'BI',
 			),
 		),
 
