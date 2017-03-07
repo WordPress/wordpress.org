@@ -2972,43 +2972,29 @@ section {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
-#bbpress-forums .bbp-topic-form,
-#bbpress-forums .bbp-reply-form {
-	clear: right;
-}
-
-#bbpress-forums .bbp-topic-form fieldset.bbp-form,
-#bbpress-forums .bbp-reply-form fieldset.bbp-form {
-	clear: right;
+#bbpress-forums fieldset.bbp-form {
 	margin: 0;
 }
 
-#bbpress-forums .bbp-topic-form fieldset.bbp-form legend,
-#bbpress-forums .bbp-reply-form fieldset.bbp-form legend {
-	display: block;
+#bbpress-forums fieldset.bbp-form legend {
 	font-weight: normal;
 	font-size: 1.25rem;
 }
 
-#bbpress-forums .bbp-topic-form fieldset.bbp-form label,
-#bbpress-forums .bbp-topic-form fieldset.bbp-form p em,
-#bbpress-forums .bbp-reply-form fieldset.bbp-form label,
-#bbpress-forums .bbp-reply-form fieldset.bbp-form p em {
+#bbpress-forums fieldset.bbp-form label,
+#bbpress-forums fieldset.bbp-form p em {
 	font-size: 0.8rem;
 }
 
-#bbpress-forums .bbp-topic-form fieldset.bbp-form input[type="checkbox"],
-#bbpress-forums .bbp-reply-form fieldset.bbp-form input[type="checkbox"] {
+#bbpress-forums fieldset.bbp-form input[type="checkbox"] {
 	margin-bottom: 0;
 }
 
-#bbpress-forums .bbp-topic-form fieldset.log-edit,
-#bbpress-forums .bbp-reply-form fieldset.log-edit {
+#bbpress-forums fieldset.log-edit {
 	margin: 12px 0 8px 0;
 }
 
-#bbpress-forums .bbp-topic-form fieldset.log-edit legend,
-#bbpress-forums .bbp-reply-form fieldset.log-edit legend {
+#bbpress-forums fieldset.log-edit legend {
 	padding: 0;
 	font-size: 0.8rem;
 }
@@ -3024,6 +3010,11 @@ section {
 	margin-top: 1rem;
 	padding-top: 1rem;
 	border-top: 1px solid #eee;
+}
+
+.topic-edit #bbpress-forums .bbp-topic-form legend,
+.reply-edit #bbpress-forums .bbp-reply-form legend {
+	display: block;
 }
 
 .topic-resolved label {

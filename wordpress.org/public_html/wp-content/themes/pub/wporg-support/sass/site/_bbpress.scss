@@ -506,37 +506,30 @@ fieldset.bbp-form .button.submit {
 --------------------------------------------------------------*/
 
 #bbpress-forums {
-	.bbp-topic-form,
-	.bbp-reply-form {
-		clear: right;
+	fieldset.bbp-form {
+		margin: 0;
 
-		fieldset.bbp-form {
-			clear: right;
-			margin: 0;
-
-			legend {
-				display: block;
-				font-weight: normal;
-				font-size: ms(2);
-			}
-
-			label,
-			p em {
-				font-size: ms(-2);
-			}
-
-			input[type="checkbox"] {
-				margin-bottom: 0;
-			}
+		legend {
+			font-weight: normal;
+			font-size: ms(2);
 		}
 
-		fieldset.log-edit {
-			margin: 12px 0 8px 0;
+		label,
+		p em {
+			font-size: ms(-2);
+		}
 
-			legend {
-				padding: 0;
-				font-size: ms(-2);
-			}
+		input[type="checkbox"] {
+			margin-bottom: 0;
+		}
+	}
+
+	fieldset.log-edit {
+		margin: 12px 0 8px 0;
+
+		legend {
+			padding: 0;
+			font-size: ms(-2);
 		}
 	}
 
@@ -552,6 +545,11 @@ fieldset.bbp-form .button.submit {
 	margin-top: 1rem;
 	padding-top: 1rem;
 	border-top: 1px solid #eee;
+}
+
+.topic-edit #bbpress-forums .bbp-topic-form legend,
+.reply-edit #bbpress-forums .bbp-reply-form legend {
+	display: block;
 }
 
 .topic-resolved {
