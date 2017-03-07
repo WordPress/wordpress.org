@@ -192,16 +192,16 @@ function print_css() {
 function add_contextual_help_tabs() {
 	$screen = get_current_screen();
 	$tabs   = array(
-		__( 'Overview',                  'wordcamporg' ),
-		__( 'Basic Setup',               'wordcamporg' ),
-		__( 'Automated Synchronization', 'wordcamporg' ),
-		__( 'Tips',                      'wordcamporg' )
+		'overview'                  => __( 'Overview',                  'wordcamporg' ),
+		'basic-setup'               => __( 'Basic Setup',               'wordcamporg' ),
+		'automated-synchronization' => __( 'Automated Synchronization', 'wordcamporg' ),
+		'tips'                      => __( 'Tips',                      'wordcamporg' )
 	);
 
-	foreach ( $tabs as $tab ) {
+	foreach ( $tabs as $id => $label ) {
 		$screen->add_help_tab( array(
-			'id'       => 'wcrcss-' . sanitize_title( $tab ),
-			'title'    => $tab,
+			'id'       => 'wcrcss-' . $id,
+			'title'    => $label,
 			'callback' => __NAMESPACE__ . '\render_contextual_help_tabs',
 		) );
 	}
