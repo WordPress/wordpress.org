@@ -64,7 +64,8 @@ function parse_request() {
 
 	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 	if ( isset( $_REQUEST['location'] ) ) {
-		$location_args['location_name'] = $_REQUEST['location'];
+		$location_args['location_name'] = trim( $_REQUEST['location'] );
+		$location_args['location_name'] = str_replace( ',', '', $location_args['location_name'] );
 	}
 
 	if ( isset( $_REQUEST['timezone'] ) && ! isset( $location_args['timezone'] ) ) {
