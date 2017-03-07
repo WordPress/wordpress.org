@@ -20,6 +20,7 @@ blockquote, q {
 	&:before,
 	&:after {
 		content: "";
+		margin: 0;
 	}
 }
 
