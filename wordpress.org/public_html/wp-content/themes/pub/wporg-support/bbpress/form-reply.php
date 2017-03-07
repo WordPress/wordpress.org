@@ -150,14 +150,14 @@ if ( bbp_is_reply_edit() ) : ?>
 
 							<?php do_action( 'bbp_theme_before_reply_form_revisions' ); ?>
 
-							<fieldset class="bbp-form">
+							<fieldset class="bbp-form log-edit">
 								<legend>
 									<input name="bbp_log_reply_edit" id="bbp_log_reply_edit" type="checkbox" value="1" <?php bbp_form_reply_log_edit(); ?> />
 									<label for="bbp_log_reply_edit"><?php esc_html_e( 'Keep a log of this edit:', 'wporg-forums' ); ?></label><br />
 								</legend>
 
 								<div>
-									<label for="bbp_reply_edit_reason"><?php printf( esc_html__( 'Optional reason for editing:', 'wporg-forums' ), bbp_get_current_user_name() ); ?></label><br />
+									<label for="bbp_reply_edit_reason"><em><?php esc_html_e( 'Optional reason for editing:', 'wporg-forums' ); ?></em></label><br />
 									<input type="text" value="<?php bbp_form_reply_edit_reason(); ?>" size="40" name="bbp_reply_edit_reason" id="bbp_reply_edit_reason" />
 								</div>
 							</fieldset>

@@ -2,6 +2,8 @@
 
 <div id="bbpress-forums">
 
+	<?php bbp_breadcrumb(); ?>
+
 <?php endif; ?>
 
 <?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
@@ -199,15 +201,14 @@
 
 						<?php do_action( 'bbp_theme_before_topic_form_revisions' ); ?>
 
-						<fieldset class="bbp-form">
-							<legend><?php _e( 'Revision', 'wporg-forums' ); ?></legend>
-							<div>
+						<fieldset class="bbp-form log-edit">
+							<legend>
 								<input name="bbp_log_topic_edit" id="bbp_log_topic_edit" type="checkbox" value="1" <?php bbp_form_topic_log_edit(); ?> />
 								<label for="bbp_log_topic_edit"><?php _e( 'Keep a log of this edit:', 'wporg-forums' ); ?></label><br />
-							</div>
+							</legend>
 
 							<div>
-								<label for="bbp_topic_edit_reason"><?php _e( 'Optional reason for editing:', 'wporg-forums' ); ?></label><br />
+								<label for="bbp_topic_edit_reason"><em><?php _e( 'Optional reason for editing:', 'wporg-forums' ); ?></em></label><br />
 								<input type="text" value="<?php bbp_form_topic_edit_reason(); ?>" size="40" name="bbp_topic_edit_reason" id="bbp_topic_edit_reason" />
 							</div>
 						</fieldset>
