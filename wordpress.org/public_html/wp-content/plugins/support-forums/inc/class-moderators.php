@@ -17,6 +17,11 @@ class Moderators {
 		// Scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
+		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
+		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
+		add_filter( 'bbp_get_topic_permalink',          array( $this, 'add_view_all' ) );
+		add_filter( 'bbp_get_reply_url',                array( $this, 'add_view_all' ) );
+
 		// Archived post status.
 		add_action( 'bbp_register_post_statuses',       array( $this, 'register_post_statuses' ) );
 		add_action( 'bbp_get_request',                  array( $this, 'archive_handler' ) );
@@ -86,6 +91,20 @@ class Moderators {
 		if ( current_user_can( 'moderate' ) ) {
 			wp_enqueue_style( 'support-forums-moderators', plugins_url( 'css/styles-moderators.css', __DIR__ ) );
 		}
+	}
+
+	/**
+	 * Append 'view=all' to forum, topic, and reply URLs in moderator views.
+	 *
+	 * @param string $url Forum, topic, or reply URL.
+	 * @return string Filtered URL.
+	 */
+	function add_view_all( $url ) {
+		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), self::VIEWS ) ) {
+			$url = add_query_arg( 'view', 'all', $url );
+		}
+
+		return $url;
 	}
 
 	public function register_post_statuses() {
