@@ -40,9 +40,11 @@ class Committers extends \WP_Widget {
 			'pluginSlug' => $post->post_name,
 		) );
 
+		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
+
 		echo $args['before_widget'];
+		echo $args['before_title'] . $title . $args['after_title'];
 		?>
-		<h3><?php _e( 'Committers', 'wporg-plugins' ); ?></h3>
 
 		<ul id="committer-list" class="committer-list">
 
@@ -54,7 +56,7 @@ class Committers extends \WP_Widget {
 					</a><br>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $committer->user_email ) . ' ' : ''; ?>
-						<button class="button-link spinner remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
 				</li>
 			<?php endforeach; ?>
@@ -80,6 +82,7 @@ class Committers extends \WP_Widget {
 				</small>
 			</li>
 		</script>
+
 		<?php
 		echo $args['after_widget'];
 	}

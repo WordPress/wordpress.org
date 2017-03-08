@@ -1,10 +1,10 @@
-.plugin-developers {
-	list-style-type: none;
-	margin: 0;
+.plugin-developers .contributors-list {
+	font-size: 0;
 
 	li {
 		display: inline-block;
-		margin: 0 4% 1rem 0;
+		font-size: ms( 0 );
+		margin-right: 4%;
 		vertical-align: top;
 		width: 48%;
 
@@ -12,11 +12,4 @@
 			margin-right: 0;
 		}
 	}
-}
-
-.avatar {
-	border-radius: 50%;
-	margin-right: 10px;
-	vertical-align: middle;
-	float: left;
 }

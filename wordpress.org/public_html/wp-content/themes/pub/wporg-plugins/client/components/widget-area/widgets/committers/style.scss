@@ -16,7 +16,12 @@
 		}
 	}
 
-	.spinner{
+	.avatar {
+		float: left;
+		margin-right: 10px;
+	}
+
+	.spinner {
 		position: relative;
 
 		&:after {

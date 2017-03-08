@@ -37,16 +37,22 @@ class Contributors extends \WP_Widget {
 			return;
 		}
 
-		echo $args['before_widget'];
-		?>
-		<h3><?php _e( 'Contributors', 'wporg-plugins' ); ?></h3>
+		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Contributors', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
-		<ul id="contributors-list" class="contributors-list read-more" aria-expanded="false">
-		<?php foreach ( $contributors as $contributor ) {
-			echo '<li>' . get_avatar( $contributor->ID, 32 ) . '<a href="' . esc_url( 'https://profiles.wordpress.org/' . $contributor->user_nicename ) . '">' . Template::encode( $contributor->display_name ) . '</a></li>';
-		} ?>
+		echo $args['before_widget'];
+		echo $args['before_title'] . $title . $args['after_title'];
+		?>
+
+		<ul id="contributors-list" class="contributors-list">
+			<?php foreach ( $contributors as $contributor ) : ?>
+			<li>
+				<?php echo get_avatar( $contributor->ID, 32 ); ?>
+				<a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $contributor->user_nicename ); ?>">
+					<?php echo Template::encode( $contributor->display_name ); ?>
+				</a>
+			</li>
+			<?php endforeach; ?>
 		</ul>
-		<button type="button" class="button-link section-toggle" aria-controls="contributors-list"><?php _e( 'View more', 'wporg-plugins' ); ?></button>
 
 		<?php
 		echo $args['after_widget'];
