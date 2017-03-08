@@ -15,6 +15,7 @@ function run_tests() {
 
 	$failed = 0;
 	$failed += test_get_location();
+	$failed += test_get_city_from_coordinates();
 
 	printf( "\n\nFinished running all tests. %d failed.\n", $failed );
 }
@@ -578,6 +579,69 @@ function get_location_test_cases() {
 	);
 
 	 return $cases;
+}
+
+/**
+ * Test `get_city_from_coordinates()`
+ *
+ * @todo This can probably be refactored along with test_get_location() into a more abstract/DRY general-purpose
+ *       test runner.
+ *
+ * @return bool The number of failures
+ */
+function test_get_city_from_coordinates() {
+	$failed = 0;
+	$cases  = get_city_from_coordinates_test_cases();
+
+	printf( "\n\nRunning %d city from coordinate tests\n", count( $cases ) );
+
+	foreach ( $cases as $case_id => $case ) {
+		$actual_result = get_city_from_coordinates( $case['input']['latitude'], $case['input']['longitude'] );
+		$passed        = $case['expected'] === $actual_result;
+
+		output_results( $case_id, $passed, $case['expected'], $actual_result );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
+	}
+
+	return $failed;
+}
+
+/**
+ * Get the cases for testing `get_city_from_coordinates()`
+ *
+ * @return array
+ */
+function get_city_from_coordinates_test_cases() {
+	 $cases = array(
+		'lower-latitude-higher-longitude' => array(
+			'input' => array(
+				'latitude'  => '60.199',
+				'longitude' => '24.660'
+			),
+			'expected' => 'Espoo',
+		),
+
+		'higher-latitude-lower-longitude' => array(
+			'input' => array(
+				'latitude'  => '22.000',
+				'longitude' => '95.900'
+			),
+			'expected' => 'Mandalay',
+		),
+
+		'middle-of-no-and-where' => array(
+			'input' => array(
+				'latitude'  => '-23.121',
+				'longitude' => '125.071'
+			),
+			'expected' => false,
+		),
+	);
+
+	return $cases;
 }
 
 run_tests();

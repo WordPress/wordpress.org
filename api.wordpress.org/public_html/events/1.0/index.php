@@ -251,9 +251,10 @@ function get_location( $args = array() ) {
 		! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
 		! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
 	) {
-		// TODO: Ensure that the data here is rounded to city-level and return the name of the city/region.
+		$city = get_city_from_coordinates( $args['latitude'], $args['longitude'] );
+
 		return array(
-			'description' => "{$args['latitude']}, {$args['longitude']}",
+			'description' => $city ? $city : "{$args['latitude']}, {$args['longitude']}",
 			'latitude'  => $args['latitude'],
 			'longitude' => $args['longitude']
 		);
@@ -372,6 +373,40 @@ function get_country_code_from_name( $country_name ) {
 	}
 
 	return $country_code;
+}
+
+/**
+ * Get the name of the city that's closest to the given coordinates
+ *
+ * @todo - This can probably be optimized by SELECT'ing from a derived table of the closest rows, instead of the
+ *         entire table, similar to the technique described at
+ *         http://www.techfounder.net/2009/02/02/selecting-closest-values-in-mysql/
+ *         There's only 140k rows in the table, though, so this is performant for now.
+ *
+ * @param float $latitude
+ * @param float $longitude
+ *
+ * @return false|string
+ */
+function get_city_from_coordinates( $latitude, $longitude ) {
+	global $wpdb;
+
+	$results = $wpdb->get_col( $wpdb->prepare( "
+		SELECT
+			name,
+			ABS( %f - latitude  ) AS latitude_distance,
+			ABS( %f - longitude ) AS longitude_distance
+		FROM geoname
+		HAVING
+			latitude_distance  < 0.3 AND    -- 0.3 degrees is about 30 miles
+			longitude_distance < 0.3
+		ORDER by latitude_distance ASC, longitude_distance ASC
+		LIMIT 1",
+		$latitude,
+		$longitude
+	) );
+
+	return isset( $results[0] ) ? $results[0] : false;
 }
 
 function get_events( $args = array() ) {
