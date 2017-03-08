@@ -311,6 +311,9 @@ class Jetpack_Search {
 		if ( $posts_per_page > 200 )
 			$posts_per_page = 200;
 
+		// ES API does not allow fetching past the 10,000th post
+		$page = min( $page, floor( 9999 / $posts_per_page ) );
+
 		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-8 years' ) );
 		$date_today = strftime( '%Y-%m-%d' );
 		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
@@ -377,7 +380,7 @@ class Jetpack_Search {
 		}
 
 		// Total number of results for paging purposes
-		$this->found_posts = $this->search_result['results']['total'];
+		$this->found_posts = min( $this->search_result['results']['total'], 9999 ); // The Jetpack search API errors out if we try to request past 10k
 
 		// Don't select anything, posts are inflated by Jetpack_SearchResult_Posts_Iterator
 		// in The Loop, to allow for multi site search
