@@ -7,8 +7,8 @@ class Hooks {
 	public function __construct() {
 		// Basic behavior filters and actions.
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
-		add_action( 'pre_get_posts', array( $this, 'hide_non_public_forums' ) );
-		add_filter( 'pre_option__bbp_edit_lock', array( $this, 'increase_edit_lock_time' ) );
+		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
+		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
 
 		// Display-related filters and actions.
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
@@ -21,8 +21,8 @@ class Hooks {
 
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
-		add_filter( 'oembed_response_data', array( $this, 'disable_oembed_response_data' ), 10, 2 );
-		add_filter( 'embed_oembed_discover', '__return_false' );
+		add_filter( 'oembed_response_data',   array( $this, 'disable_oembed_response_data' ), 10, 2 );
+		add_filter( 'embed_oembed_discover',  '__return_false' );
 
 		// Disable inline terms and mentions.
 		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
