@@ -8,6 +8,7 @@ class Hooks {
 		// Basic behavior filters and actions.
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
 		add_action( 'pre_get_posts', array( $this, 'hide_non_public_forums' ) );
+		add_filter( 'pre_option__bbp_edit_lock', array( $this, 'increase_edit_lock_time' ) );
 
 		// Display-related filters and actions.
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
@@ -62,6 +63,15 @@ class Hooks {
 		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
 			$query->set( 'post_status', 'publish' );
 		}
+	}
+
+	/**
+	 * Increase bbPress' default edit lock time from 5 minutes to 1 hour.
+	 *
+	 * @return int Filtered edit lock time.
+	 */
+	function increase_edit_lock_time() {
+		return 60;
 	}
 
 	/**
