@@ -61,7 +61,7 @@ abstract class WP_Credits {
 			if ( file_exists( $file ) ) {
 				require_once $file;
 				$class = 'WP_' . $branch . '_Credits';
-				$credits = new $class( $version, $gp_locale );
+				$credits = new $class( WP_CORE_STABLE_BRANCH, $gp_locale );
 				return $credits;
 			}
 		}
