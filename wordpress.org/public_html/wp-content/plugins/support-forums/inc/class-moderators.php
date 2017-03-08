@@ -99,7 +99,7 @@ class Moderators {
 	 * @param string $url Forum, topic, or reply URL.
 	 * @return string Filtered URL.
 	 */
-	function add_view_all( $url ) {
+	public function add_view_all( $url ) {
 		if ( bbp_is_single_view() && in_array( bbp_get_view_id(), self::VIEWS ) ) {
 			$url = add_query_arg( 'view', 'all', $url );
 		}
