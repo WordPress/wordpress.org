@@ -1,3 +1,9 @@
+<?php if ( ! is_front_page() ) : ?>
+
+	<?php bbp_breadcrumb(); ?>
+
+<?php endif; ?>
+
 <div id="bbpress-forums">
 
 	<?php do_action( 'bbp_template_before_forums_index' ); ?>
