@@ -13,7 +13,7 @@ namespace WordPressdotorg\Forums;
 
 $menu_items = array(
 	/* translators: relative link to the forums home page */
-	_x( '/support/forums/', 'header menu', 'wporg-forums' )                             => _x( 'Forums', 'header menu', 'wporg-forums' ),
+	_x( '/forums/', 'header menu', 'wporg-forums' )                                     => _x( 'Forums', 'header menu', 'wporg-forums' ),
 	_x( 'https://codex.wordpress.org/Main_Page', 'header menu', 'wporg-forums' )        => _x( 'Documentation', 'header menu', 'wporg-forums' ),
 	_x( 'https://make.wordpress.org/support/handbook/', 'header menu', 'wporg-forums' ) => _x( 'Get Involved', 'header menu', 'wporg-forums' ),
 );
