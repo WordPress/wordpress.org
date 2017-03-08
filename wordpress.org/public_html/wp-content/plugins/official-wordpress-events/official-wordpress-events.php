@@ -417,10 +417,12 @@ class Official_WordPress_Events {
 			);
 
 			while ( '' !== $request_url ) {
+				$this->log( 'fetching more events from: ' . var_export( $request_url, true ) );
+
 				$response = $this->remote_get( $request_url );
 				$body     = json_decode( wp_remote_retrieve_body( $response ) );
 
-				$this->log( 'fetching more events' );
+				$this->log( 'pruned response - ' . print_r( $this->prune_response_for_log( $response ), true ) );
 
 				if ( ! empty ( $body->results ) ) {
 					$meetups = $body->results;
@@ -497,10 +499,12 @@ class Official_WordPress_Events {
 		);
 
 		while ( '' !== $request_url ) {
-			$this->log( 'fetching more groups' );
+			$this->log( 'fetching more groups from: ' . var_export( $request_url, true ) );
 
 			$response = $this->remote_get( $request_url );
 			$body     = json_decode( wp_remote_retrieve_body( $response ) );
+
+			$this->log( 'pruned response - ' . print_r( $this->prune_response_for_log( $response ), true ) );
 
 			if ( ! empty ( $body->results ) ) {
 				$groups    = wp_list_pluck( $body->results, 'group' );
@@ -688,6 +692,8 @@ class Official_WordPress_Events {
 	 *
 	 * To avoid storing too much data, the log is reset during each run, and only $limit rows are stored
 	 *
+	 * @todo Remove this when the stuck cron job bug is fixed
+	 *
 	 * @param string $message
 	 */
 	protected function log( $message ) {
@@ -716,6 +722,46 @@ class Official_WordPress_Events {
 		}
 
 		update_option( 'owpe_log', $this->log, false );
+	}
+
+	/**
+	 * Prune an HTTP response so the relevant data can be logged for troubleshooting
+	 *
+	 * @todo Remove this when the stuck cron job bug is fixed
+	 *
+	 * @param WP_HTTP_Response $response
+	 *
+	 * @return array
+	 */
+	protected function prune_response_for_log( $response ) {
+		$pruned_response = (array) $response;
+
+		if ( isset( $pruned_response['body'] ) ) {
+			$pruned_response['original_body_meta'] = sprintf(
+				'type: %s / length: %s',
+				gettype( $pruned_response['body'] ),
+				is_string( $pruned_response['body'] ) ? strlen( $pruned_response['body'] ) : 'not a string'
+			);
+			$pruned_response['body'] = (array) json_decode( $pruned_response['body'] );
+
+			if ( isset( $pruned_response['body']['results'] ) ) {
+				$pruned_response['body']['results'] = 'pruned';
+			}
+		}
+
+		if ( isset( $pruned_response['http_response'] ) ) {
+			unset( $pruned_response['http_response'] );
+		}
+
+		if ( isset( $pruned_response['cookies'] ) ) {
+			unset( $pruned_response['cookies'] );
+		}
+
+		if ( isset( $pruned_response['filename'] ) ) {
+			unset( $pruned_response['filename'] );
+		}
+
+		return $pruned_response;
 	}
 }
 
