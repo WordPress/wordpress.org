@@ -177,27 +177,68 @@ class Jetpack_Search {
 		$service_url = 'http://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
 		$json_es_args = json_encode( $es_args );
 		$cache_key = md5( $json_es_args );
+		$lock_key = 'lock-'.$cache_key;
 		
-		$cached_response = wp_cache_get( $cache_key, self::CACHE_GROUP );
-		if ( $cached_response !== false )
-			return $cached_response;
+		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
-		$request = wp_remote_post( $service_url, array(
-			'headers' => array(
-				'Content-Type' => 'application/json',
-			),
-			'timeout' => 10,
-			'user-agent' => 'jetpack_search',
-			'body' => $json_es_args,
-		) );
+		// Use a temporary lock to prevent cache stampedes. This ensures only one process (per search term per memcache instance) will run the remote post.
+		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
+		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
+			$request = wp_remote_post( $service_url, array(
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'timeout' => 10,
+				'user-agent' => 'jetpack_search',
+				'body' => $json_es_args,
+			) );
 
-		if ( is_wp_error( $request ) )
-			return $request;
+			// If there's a network or HTTP error, we'll intentionally leave the temporary lock to expire in a few seconds.
+			// Other requests during that window will use the stale cached value. We'll try another remote request once this lock expires.
+			if ( is_wp_error( $request ) || 200 != wp_remote_retrieve_response_code( $request ) ) {
 
-		$response = json_decode( wp_remote_retrieve_body( $request ), true );
+				// Lock further requests for the same search for 3-7 seconds. We probably don't need anything more complex like exponential backoff here because this is per search.
+				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
-		if ( !isset( $response['error'] ) )
-			wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
+				if ( is_wp_error( $request ) )
+					trigger_error( 'Plugin directory search: http error '.$request->get_error_message(), E_USER_WARNING );
+				else
+					trigger_error( 'Plugin directory search: http status '.wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
+
+				// If we have a stale cached response, return that. Otherwise, return the error object.
+				if ( $response )
+					return $response; // Stale cached response.
+				return $request; // Fresh error object.
+			}
+
+			$fresh_response = json_decode( wp_remote_retrieve_body( $request ), true );
+
+			if ( !$fresh_response || isset( $fresh_response['error'] ) ) {
+				// As above, lock further requests for the same search for a few seconds
+				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
+
+				if ( isset( $fresh_response['error'] ) )
+					trigger_error( 'Plugin directory search: remote error '.$fresh_response['error'], E_USER_WARNING );
+				else
+					trigger_error( 'Plugin directory search: invalid json response', E_USER_WARNING );
+
+				// Return a stale response if we have one
+				if ( $response )
+					return $response;
+				return $fresh_response; // Fresh error object as a last resort
+
+			} else {
+				// The cached value has a TTL twice as long as the exipration time.
+				// The lock TTL serves as our expiration timer.
+				wp_cache_set( $cache_key, $fresh_response, self::CACHE_GROUP, self::CACHE_EXPIRY * 2 );
+				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, self::CACHE_EXPIRY );
+				$response = $fresh_response;
+			}
+		} else {
+			// Stampede protection has kicked in, AND we have no stale cached value to display. That's bad - possibly indicates cache exhaustion
+			if ( false === $response )
+				trigger_error( 'Plugin directory search: no cached results available during stampede.', E_USER_WARNING );
+		}
 
 		return $response;
 	}
