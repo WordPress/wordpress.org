@@ -299,8 +299,9 @@ class Cross_Locale_PTE {
 		}
 
 		if ( GP::$permission->current_user_can( 'cross-pte', 'translation-set', $old_translation->translation_set_id ) ) {
-			// Set to waiting if a current translation exists by another user.
-			if ( intval( $old_translation->user_id ) !== intval( get_current_user_id() ) ) {
+			// Set to waiting if a current translation exists that was approved by another user.
+			$translation_owner_id = $old_translation->user_id_last_modified ?: $old_translation->user_id;
+			if ( intval( $translation_owner_id ) !== intval( get_current_user_id() ) ) {
 				return 'waiting';
 			}
 		}
@@ -401,9 +402,12 @@ class Cross_Locale_PTE {
 
 		if ( GP::$permission->user_can( $args['user'], 'cross-pte', 'translation-set', $translation->translation_set_id ) ) {
 			$current_translation = GP::$translation->find_one( array( 'translation_set_id' => $translation->translation_set_id, 'original_id' => $translation->original_id, 'status' => 'current' ) );
-			if ( $current_translation && intval( $current_translation->user_id ) !== $args['user']->ID ) {
-				// Current translation was authored by someone else. Disallow setting to current.
-				return $current_translation_by_user[ $cache_key ] = false;
+			if ( $current_translation ) {
+				$translation_owner_id = $current_translation->user_id_last_modified ?: $current_translation->user_id;
+				if ( intval( $translation_owner_id ) !== $args['user']->ID ) {
+					// Current translation was approved by someone else. Disallow setting to current.
+					return $current_translation_by_user[ $cache_key ] = false;
+				}
 			}
 
 			// No current translation exists or it was translated by me: allow.
