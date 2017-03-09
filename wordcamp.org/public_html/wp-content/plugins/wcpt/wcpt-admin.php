@@ -17,7 +17,7 @@ class WCPT_Admin {
 	 *
 	 * Initialize WCPT Admin
 	 */
-	function WCPT_Admin () {
+	function __construct() {
 
 		// Attach the WordCamp Post Type admin init action to the WordPress admin init action.
 		add_action( 'admin_init',               array( $this, 'init' ) );
