@@ -182,6 +182,17 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	return $row;
 }
 
+/**
+ * Determine a location for the given IPv4 address
+ *
+ * @todo - Add support for IPv6 addresses. Otherwise, this will quickly lose effectiveness. As of March 2017, IPv6
+ *         adoption is at 16% globally and rising relatively fast. Some countries are as high as 30%.
+ *         See https://www.google.com/intl/en/ipv6/statistics.html#tab=ipv6-adoption for current stats.
+ *
+ * @param string $dotted_ip
+ *
+ * @return null|object `null` on failure; an object on success
+ */
 function guess_location_from_ip( $dotted_ip ) {
 	global $wpdb;
 
@@ -202,43 +213,44 @@ function get_location( $args = array() ) {
 
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
-		return array(
+		$location = array(
 			'country' => $args['country'],
 		);
 	}
 
 	$country_code = null;
-	if ( isset( $args['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['locale'], $match ) ) {
+	if ( ! $location && ( isset( $args['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['locale'], $match ) ) ) {
 		$country_code = $match[1];
 	}
 
 	// Location was provided by the user:
-	if ( isset( $args['location_name'] ) ) {
+	if ( ! $location && isset( $args['location_name'] ) ) {
 		$guess = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code  );
 
 		if ( $guess ) {
-			return array(
+			$location = array(
 				'description' => $guess->name,
 				'latitude' => $guess->latitude,
 				'longitude' => $guess->longitude,
 				'country' => $guess->country,
 			);
-		}
+		} else {
+			$guess = guess_location_from_country( $args['location_name'] );
 
-		$guess = guess_location_from_country( $args['location_name'] );
-
-		if ( $guess ) {
-			return array(
-				'country' => $guess,
-			);
+			if ( ! $location && $guess ) {
+				$location = array(
+					'country' => $guess,
+				);
+			}
 		}
 	}
 
 	// IP:
-	if ( isset( $args['ip'] ) ) {
+	if ( ! $location && isset( $args['ip'] ) ) {
 		$guess = guess_location_from_ip( $args['ip'] );
+
 		if ( $guess ) {
-			return array(
+			$location = array(
 				'description' => $guess->ip_city,
 				'latitude' => $guess->ip_latitude,
 				'longitude' => $guess->ip_longitude,
@@ -248,25 +260,31 @@ function get_location( $args = array() ) {
 	}
 
 	if (
-		! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
-		! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+		! $location && (
+			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
+			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+		)
 	) {
 		$city = get_city_from_coordinates( $args['latitude'], $args['longitude'] );
 
-		return array(
+		$location = array(
 			'description' => $city ? $city : "{$args['latitude']}, {$args['longitude']}",
 			'latitude'  => $args['latitude'],
 			'longitude' => $args['longitude']
 		);
 	}
 
-	// If any of these are specified, and no localitity was guessed based on the above checks, bail with no location.
-	if ( isset( $args['location_name'] ) || isset( $args['ip'] ) || ! empty( $args['latitude'] ) || ! empty( $args['longitude'] ) ) {
-		return false;
+	if ( ! $location ) {
+		if ( isset( $args['location_name'] ) || isset( $args['ip'] ) || ! empty( $args['latitude'] ) || ! empty( $args['longitude'] ) ) {
+			// If any of these are specified, and no localitity was guessed based on the above checks, bail with no location.
+			$location = false;
+		} else {
+			// No specific location details.
+			$location = array();
+		}
 	}
 
-	// No specific location details.
-	return array();
+	return $location;
 }
 
 /**

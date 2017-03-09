@@ -155,6 +155,14 @@ function get_location_test_cases() {
 			'expected' => false,
 		),
 
+		/*
+		 * No input was provided
+		 */
+		'input-empty' => array(
+			'input'    => array(),
+			'expected' => array(),
+		),
+
 
 		/*
 		 * The English city exonym, locale, and timezone are given
