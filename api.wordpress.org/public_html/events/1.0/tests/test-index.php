@@ -48,6 +48,22 @@ function output_results( $case_id, $passed, $expected_result, $actual_result ) {
 }
 
 /**
+ * Add a cachebusting parameter to bypass the object cache
+ *
+ * Cache keys are generated based on the function's input arguments (e.g., get_location()), so adding a unique
+ * parameter on every function call ensures that the unit tests will never get a cached result.
+ *
+ * @param array $arguments
+ *
+ * @return array
+ */
+function add_cachebusting_parameter( $arguments ) {
+	$arguments['cachebuster'] = microtime( true );
+
+	return $arguments;
+}
+
+/**
  * Test `get_location()`
  *
  * @return bool The number of failures
@@ -59,6 +75,7 @@ function test_get_location() {
 	printf( "\nRunning %d location tests\n", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
+		$case['input'] = add_cachebusting_parameter( $case['input'] );
 		$actual_result = get_location( $case['input'] );
 
 		// Normalize to lowercase to account for inconsistency in the IP database
@@ -604,6 +621,7 @@ function test_get_city_from_coordinates() {
 	printf( "\n\nRunning %d city from coordinate tests\n", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
+		$case['input'] = add_cachebusting_parameter( $case['input'] );
 		$actual_result = get_city_from_coordinates( $case['input']['latitude'], $case['input']['longitude'] );
 		$passed        = $case['expected'] === $actual_result;
 

@@ -9,13 +9,12 @@ function main() {
 	global $cache_group, $cache_life;
 
 	bootstrap();
+	wp_cache_init();
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
 		return;
 	}
-
-	wp_cache_init();
 
 	$cache_group   = 'events';
 	$cache_life    = 12 * 60 * 60;
@@ -210,6 +209,14 @@ function guess_location_from_ip( $dotted_ip ) {
 }
 
 function get_location( $args = array() ) {
+	global $cache_life, $cache_group;
+
+	$cache_key = 'get_location:' . md5( serialize( $args ) );
+	$location  = wp_cache_get( $cache_key, $cache_group );
+
+	if ( false !== $location ) {
+		return $location;
+	}
 
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
@@ -284,6 +291,7 @@ function get_location( $args = array() ) {
 		}
 	}
 
+	wp_cache_set( $cache_key, $location, $cache_group, $cache_life );
 	return $location;
 }
 
