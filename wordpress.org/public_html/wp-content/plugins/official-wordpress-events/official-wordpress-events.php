@@ -470,7 +470,7 @@ class Official_WordPress_Events {
 					}
 				}
 
-				$request_url = $body->meta->next;
+				$request_url = isset( $body->meta->next ) ? $body->meta->next : null;
 			}
 		}
 
@@ -511,7 +511,7 @@ class Official_WordPress_Events {
 				$group_ids = array_merge( $group_ids, wp_list_pluck( $groups, 'id' ) );
 			}
 
-			$request_url = $body->meta->next;
+			$request_url = isset( $body->meta->next ) ? $body->meta->next : null;
 		}
 
 		$this->log( sprintf( 'returning %d groups', count( $group_ids ) ) );
