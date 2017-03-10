@@ -6,7 +6,7 @@ function wporg_login_check_recapcha_status() {
 	}
 
 	$verify = array(
-		'secret'   => RECAPTCHA_PRIVKEY,
+		'secret'   => RECAPTCHA_INVIS_PRIVKEY,
 		'remoteip' => $_SERVER['REMOTE_ADDR'],
 		'response' => $_POST['g-recaptcha-response'],
 	);

@@ -74,6 +74,7 @@ add_action( 'wp_enqueue_scripts', 'wporg_login_scripts' );
 
 function wporg_login_register_scripts() {
 	wp_register_script( 'recaptcha-api', 'https://www.google.com/recaptcha/api.js', array(), '2' );
+	wp_add_inline_script( 'recaptcha-api', 'function onSubmit(token) { document.getElementById("registerform").submit(); }' );
 
 	wp_register_script( 'wporg-registration', get_template_directory_uri() . '/js/registration.js', array( 'recaptcha-api', 'jquery' ), '20170219' );
 	wp_localize_script( 'wporg-registration', 'wporg_registration', array(

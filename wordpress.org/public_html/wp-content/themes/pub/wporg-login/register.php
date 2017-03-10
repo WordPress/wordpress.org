@@ -81,10 +81,6 @@ get_header();
 			<?php _e( 'Subscribe to WordPress Announcements mailing list (a few messages a year)', 'wporg-login' ); ?>
 		</label>
 	</p>
-
-	<p class="login-recaptcha">
-		<div class="g-recaptcha" data-sitekey="<?php echo esc_attr( RECAPTCHA_PUBKEY ); ?>"></div>
-	</p>
 	<?php
 		if ( $error_recapcha_status ) {
 			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg-login' ) . '</p></div>';
@@ -92,7 +88,7 @@ get_header();
 	?>
 
 	<p class="login-submit">
-		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg-login' ); ?>" />
+		<input data-sitekey="<?php echo esc_attr( RECAPTCHA_INVIS_PUBKEY  ); ?>" data-callback='onSubmit' type="submit" name="wp-submit" id="wp-submit" class="g-recaptcha button button-primary" value="<?php esc_attr_e( 'Create Account', 'wporg-login' ); ?>" />
 	</p>
 
 </form>
