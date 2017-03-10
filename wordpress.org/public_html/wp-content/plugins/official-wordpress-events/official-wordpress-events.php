@@ -416,7 +416,7 @@ class Official_WordPress_Events {
 				MEETUP_API_KEY
 			);
 
-			while ( '' !== $request_url ) {
+			while ( ! empty( $request_url ) ) {
 				$this->log( 'fetching more events from: ' . var_export( $request_url, true ) );
 
 				$response = $this->remote_get( $request_url );
@@ -498,7 +498,7 @@ class Official_WordPress_Events {
 			MEETUP_API_KEY
 		);
 
-		while ( '' !== $request_url ) {
+		while ( ! empty( $request_url ) ) {
 			$this->log( 'fetching more groups from: ' . var_export( $request_url, true ) );
 
 			$response = $this->remote_get( $request_url );
