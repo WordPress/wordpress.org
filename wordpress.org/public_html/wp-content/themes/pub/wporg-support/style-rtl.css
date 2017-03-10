@@ -2009,24 +2009,30 @@ main#main {
 	font-size: 0.8rem;
 }
 
-main#main .entry-content,
-main#main .entry-meta {
+.bbpress main#main .entry-content,
+.bbpress main#main .entry-meta,
+.page-template-page-forums-sidebar main#main .entry-content,
+.page-template-page-forums-sidebar main#main .entry-meta {
 	padding: 0;
 }
 
 @media (min-width: 568px) {
-	main#main .entry-content,
-	main#main .entry-meta {
+	.bbpress main#main .entry-content,
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-content,
+	.page-template-page-forums-sidebar main#main .entry-meta {
 		padding: 0 1.5625rem;
 	}
 }
 
-main#main > .entry-content {
+.bbpress main#main > .entry-content,
+.page-template-page-forums-sidebar main#main > .entry-content {
 	max-width: 48rem;
 }
 
 @media screen and (min-width: 48em) {
-	main#main > .entry-content {
+	.bbpress main#main > .entry-content,
+	.page-template-page-forums-sidebar main#main > .entry-content {
 		float: right;
 		padding: 0;
 		width: 65%;
@@ -2034,12 +2040,15 @@ main#main > .entry-content {
 }
 
 @media screen and (min-width: 48em) {
-	main#main .entry-content,
-	main#main .entry-meta {
+	.bbpress main#main .entry-content,
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-content,
+	.page-template-page-forums-sidebar main#main .entry-meta {
 		padding-right: 0;
 		padding-left: 0;
 	}
-	main#main .entry-meta {
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-meta {
 		float: left;
 		width: 30%;
 	}

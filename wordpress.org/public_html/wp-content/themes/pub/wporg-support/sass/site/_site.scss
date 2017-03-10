@@ -11,6 +11,10 @@ main#main {
 	font-size: ms(-2);
 
 	@extend .clear;
+}
+
+.bbpress main#main,
+.page-template-page-forums-sidebar main#main {
 
 	.entry-content,
 	.entry-meta {

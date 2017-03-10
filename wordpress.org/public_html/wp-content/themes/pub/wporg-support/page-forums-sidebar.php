@@ -1,12 +1,9 @@
 <?php
 /**
- * The template for displaying all pages.
+ * Template Name: Page with a Forums Sidebar
  *
- * This is the template that displays all pages by default.
- * Please note that this is the WordPress construct of pages
- * and that other 'pages' on your WordPress site will use a
- * different template.
- *
+ * @package bbPress
+ * @subpackage Theme
  */
 
 get_header(); ?>
@@ -27,6 +24,7 @@ get_header(); ?>
 		<?php endwhile; ?>
 	</div>
 
+	<?php get_sidebar(); ?>
 </main>
 
 <?php get_footer(); ?>
