@@ -2099,6 +2099,18 @@ main#main > .entry-content {
 	margin: 2rem 0 1rem;
 }
 
+@media screen and (max-width: 480px) {
+	.site-header.home .site-title {
+		font-size: 3.0517578125rem;
+	}
+}
+
+@media screen and (max-width: 320px) {
+	.site-header.home .site-title {
+		font-size: 2.44140625rem;
+	}
+}
+
 /*--------------------------------------------------------------
 # .site-description
 --------------------------------------------------------------*/
