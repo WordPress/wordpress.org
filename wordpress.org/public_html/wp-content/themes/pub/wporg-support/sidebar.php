@@ -1,6 +1,6 @@
 <div class="entry-meta sidebar">
 
-	<?php if ( function_exists( 'is_bbpress' ) && ( is_bbpress() ) || is_page( 'new-topic' ) ) : ?>
+	<?php if ( function_exists( 'is_bbpress' ) && ( is_bbpress() ) || is_page() ) : ?>
 
 		<?php if ( bbp_is_single_forum() || ( bb_is_intl_forum() && bb_base_topic_search_query( false ) ) ) : ?>
 

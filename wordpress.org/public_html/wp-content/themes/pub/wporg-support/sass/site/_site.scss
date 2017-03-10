@@ -6,7 +6,43 @@ body, #pagebody {
 }
 
 main#main {
-	padding: 0 1rem 1rem;
+	margin-top: 2rem;
+	padding: 0 10px 10px;
+	font-size: ms(-2);
+
+	@extend .clear;
+
+	.entry-content,
+	.entry-meta {
+		padding: 0;
+
+		@media(min-width:568px) {
+			padding: 0 ms(4);
+		}
+	}
+
+	> .entry-content {
+		max-width: 48rem;
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			float: left;
+			padding: 0; 
+			width: 65%;
+		}
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.entry-content,
+		.entry-meta {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+		.entry-meta {
+			float: right;
+			width: 30%;
+		}
+	}
 }
 
 /*--------------------------------------------------------------

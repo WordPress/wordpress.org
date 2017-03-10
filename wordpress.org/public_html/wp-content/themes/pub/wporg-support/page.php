@@ -11,16 +11,23 @@
 
 get_header(); ?>
 
-<div id="pagebody">
-	<div class="wrapper">
-		<div class="col-12">
-			<?php while ( have_posts() ) : the_post(); ?>
+<main id="main" class="site-main" role="main">
 
-				<?php the_content(); ?>
+	<div class="entry-content">
+		<?php bbp_breadcrumb(); ?>
 
-			<?php endwhile; // end of the loop. ?>
-		</div>
+		<?php while ( have_posts() ) : the_post(); ?>
+
+			<header class="page-header">
+				<h1 class="page-title"><?php the_title(); ?></h1>
+			</header><!-- .page-header -->
+
+			<?php the_content(); ?>
+
+		<?php endwhile; ?>
 	</div>
-</div>
+
+	<?php get_sidebar(); ?>
+</main>
 
 <?php get_footer(); ?>

@@ -1911,26 +1911,10 @@ p a:hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear:before, .three-up:before, .single-forum main:before,
-.single-topic main:before,
-.single-reply main:before,
-.forum-archive main:before,
-.topic-tag main:before,
-.topic-tag-edit main:before,
-.reply-edit main:before,
-.bbp-view main:before,
-.bbp-search main:before, .bbp-view .review-ratings:before,
+.clear:before, main#main:before, .three-up:before, .bbp-view .review-ratings:before,
 .clear:after,
+main#main:after,
 .three-up:after,
-.single-forum main:after,
-.single-topic main:after,
-.single-reply main:after,
-.forum-archive main:after,
-.topic-tag main:after,
-.topic-tag-edit main:after,
-.reply-edit main:after,
-.bbp-view main:after,
-.bbp-search main:after,
 .bbp-view .review-ratings:after,
 .entry-content:before,
 .entry-content:after,
@@ -1947,15 +1931,7 @@ p a:hover {
 	table-layout: fixed;
 }
 
-.clear:after, .three-up:after, .single-forum main:after,
-.single-topic main:after,
-.single-reply main:after,
-.forum-archive main:after,
-.topic-tag main:after,
-.topic-tag-edit main:after,
-.reply-edit main:after,
-.bbp-view main:after,
-.bbp-search main:after, .bbp-view .review-ratings:after,
+.clear:after, main#main:after, .three-up:after, .bbp-view .review-ratings:after,
 .entry-content:after,
 .comment-content:after,
 .site-header:after,
@@ -2028,7 +2004,45 @@ body, #pagebody {
 }
 
 main#main {
-	padding: 0 1rem 1rem;
+	margin-top: 2rem;
+	padding: 0 10px 10px;
+	font-size: 0.8rem;
+}
+
+main#main .entry-content,
+main#main .entry-meta {
+	padding: 0;
+}
+
+@media (min-width: 568px) {
+	main#main .entry-content,
+	main#main .entry-meta {
+		padding: 0 1.5625rem;
+	}
+}
+
+main#main > .entry-content {
+	max-width: 48rem;
+}
+
+@media screen and (min-width: 48em) {
+	main#main > .entry-content {
+		float: right;
+		padding: 0;
+		width: 65%;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	main#main .entry-content,
+	main#main .entry-meta {
+		padding-right: 0;
+		padding-left: 0;
+	}
+	main#main .entry-meta {
+		float: left;
+		width: 30%;
+	}
 }
 
 /*--------------------------------------------------------------
@@ -2567,6 +2581,15 @@ section {
 	line-height: 160%;
 }
 
+.bbpress #bbpress-forums div.bbp-template-notice a {
+	color: #0073aa;
+}
+
+.bbpress #bbpress-forums div.bbp-template-notice a:hover {
+	text-decoration: underline;
+	color: #0073aa;
+}
+
 .bbpress #bbpress-forums .bbp-topic-content div.bbp-template-notice,
 .bbpress #bbpress-forums .bbp-reply-content div.bbp-template-notice {
 	margin-bottom: 30px;
@@ -2870,11 +2893,6 @@ section {
 	text-align: right;
 }
 
-.bbpress main#main {
-	margin-top: 2rem;
-	padding: 0 10px 10px;
-}
-
 .bbpress h1 {
 	font-size: 1.5625rem;
 	font-weight: 400;
@@ -3114,126 +3132,6 @@ select {
 	.home.wporg-support .themes-plugins p {
 		font-size: 0.8rem;
 	}
-}
-
-/*--------------------------------------------------------------
-# .single-forum & .single-topic
---------------------------------------------------------------*/
-.single-forum main .entry-content,
-.single-forum main .entry-meta,
-.single-topic main .entry-content,
-.single-topic main .entry-meta,
-.single-reply main .entry-content,
-.single-reply main .entry-meta,
-.forum-archive main .entry-content,
-.forum-archive main .entry-meta,
-.topic-tag main .entry-content,
-.topic-tag main .entry-meta,
-.topic-tag-edit main .entry-content,
-.topic-tag-edit main .entry-meta,
-.reply-edit main .entry-content,
-.reply-edit main .entry-meta,
-.bbp-view main .entry-content,
-.bbp-view main .entry-meta,
-.bbp-search main .entry-content,
-.bbp-search main .entry-meta {
-	padding: 0;
-}
-
-@media (min-width: 568px) {
-	.single-forum main .entry-content,
-	.single-forum main .entry-meta,
-	.single-topic main .entry-content,
-	.single-topic main .entry-meta,
-	.single-reply main .entry-content,
-	.single-reply main .entry-meta,
-	.forum-archive main .entry-content,
-	.forum-archive main .entry-meta,
-	.topic-tag main .entry-content,
-	.topic-tag main .entry-meta,
-	.topic-tag-edit main .entry-content,
-	.topic-tag-edit main .entry-meta,
-	.reply-edit main .entry-content,
-	.reply-edit main .entry-meta,
-	.bbp-view main .entry-content,
-	.bbp-view main .entry-meta,
-	.bbp-search main .entry-content,
-	.bbp-search main .entry-meta {
-		padding: 0 1.5625rem;
-	}
-}
-
-.single-forum main > .entry-content,
-.single-topic main > .entry-content,
-.single-reply main > .entry-content,
-.forum-archive main > .entry-content,
-.topic-tag main > .entry-content,
-.topic-tag-edit main > .entry-content,
-.reply-edit main > .entry-content,
-.bbp-view main > .entry-content,
-.bbp-search main > .entry-content {
-	max-width: 48rem;
-}
-
-@media screen and (min-width: 48em) {
-	.single-forum main > .entry-content,
-	.single-topic main > .entry-content,
-	.single-reply main > .entry-content,
-	.forum-archive main > .entry-content,
-	.topic-tag main > .entry-content,
-	.topic-tag-edit main > .entry-content,
-	.reply-edit main > .entry-content,
-	.bbp-view main > .entry-content,
-	.bbp-search main > .entry-content {
-		float: right;
-		padding: 0;
-		width: 65%;
-	}
-}
-
-@media screen and (min-width: 48em) {
-	.single-forum main .entry-content,
-	.single-forum main .entry-meta,
-	.single-topic main .entry-content,
-	.single-topic main .entry-meta,
-	.single-reply main .entry-content,
-	.single-reply main .entry-meta,
-	.forum-archive main .entry-content,
-	.forum-archive main .entry-meta,
-	.topic-tag main .entry-content,
-	.topic-tag main .entry-meta,
-	.topic-tag-edit main .entry-content,
-	.topic-tag-edit main .entry-meta,
-	.reply-edit main .entry-content,
-	.reply-edit main .entry-meta,
-	.bbp-view main .entry-content,
-	.bbp-view main .entry-meta,
-	.bbp-search main .entry-content,
-	.bbp-search main .entry-meta {
-		padding-right: 0;
-		padding-left: 0;
-	}
-	.single-forum main .entry-meta,
-	.single-topic main .entry-meta,
-	.single-reply main .entry-meta,
-	.forum-archive main .entry-meta,
-	.topic-tag main .entry-meta,
-	.topic-tag-edit main .entry-meta,
-	.reply-edit main .entry-meta,
-	.bbp-view main .entry-meta,
-	.bbp-search main .entry-meta {
-		float: left;
-		width: 30%;
-	}
-}
-
-div.bbp-template-notice a {
-	color: #0073aa;
-}
-
-div.bbp-template-notice a:hover {
-	text-decoration: underline;
-	color: #0073aa;
 }
 
 /*--------------------------------------------------------------
