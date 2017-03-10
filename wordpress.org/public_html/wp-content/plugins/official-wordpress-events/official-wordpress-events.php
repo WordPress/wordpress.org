@@ -10,7 +10,6 @@ Author:      WordPress.org Meta Team
 class Official_WordPress_Events {
 	const EVENTS_TABLE          = 'wporg_events';
 	const WORDCAMP_API_BASE_URL = 'https://central.wordcamp.org/wp-json/';
-	const WORDCAMP_API_VERSION  = 2;
 	const MEETUP_API_BASE_URL   = 'https://api.meetup.com/';
 	const MEETUP_MEMBER_ID      = 72560962;
 
@@ -207,54 +206,20 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Generate the WordCamps endpoint URL for a particular version of the REST API.
-	 *
-	 * @param int $api_version
-	 *
-	 * @return string
-	 */
-	protected function get_wordcamp_events_endpoint( $api_version = 1 ) {
-		switch ( $api_version ) {
-			case 1 :
-			default :
-				$request_params = array(
-					'type' => 'wordcamp',
-				);
-				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'posts' );
-				break;
-
-			case 2 :
-				$request_params = array(
-					'status'   => 'wcpt-scheduled',
-					'per_page' => 100,
-					// todo 100 is the built-in limit for per_page. As the number of WordCamps per year grows, we may need to increase this. See https://github.com/WP-API/WP-API/issues/2914#issuecomment-266222585
-				);
-				$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
-				break;
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Retrieve events fromm the WordCamp.org API
 	 *
 	 * @return array
 	 */
 	protected function get_wordcamp_events() {
-		$endpoint = $this->get_wordcamp_events_endpoint( self::WORDCAMP_API_VERSION );
+		$request_params = array(
+			'status'   => 'wcpt-scheduled',
+			'per_page' => 100,
+			// Note: With the number of WordCamps per year growing fast, we may need to batch requests in the near future, like we do for meetups
+		);
+
+		$endpoint = add_query_arg( $request_params, self::WORDCAMP_API_BASE_URL . 'wp/v2/wordcamps' );
 		$response = $this->remote_get( esc_url_raw( $endpoint ) );
-
-		switch ( self::WORDCAMP_API_VERSION ) {
-			case 1 :
-			default :
-				$events = $this->parse_wordcamp_events_api_v1( $response );
-				break;
-
-			case 2 :
-				$events = $this->parse_wordcamp_events_api_v2( $response );
-				break;
-		}
+		$events   = $this->parse_wordcamp_events( $response );
 
 		$this->log( sprintf( 'returning %d events', count( $events ) ) );
 
@@ -262,69 +227,13 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Parse a response from the v1 API.
+	 * Parse an event response from the WordCamp.org API.
 	 *
-	 * @param $response
-	 *
-	 * @return array
-	 */
-	protected function parse_wordcamp_events_api_v1( $response ) {
-		$events    = array();
-		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
-
-		if ( $wordcamps ) {
-			foreach ( $wordcamps as $wordcamp ) {
-				if ( empty( $wordcamp->post_meta ) ) {
-					continue;
-				}
-
-				$event = array(
-					'type'  => 'wordcamp',
-					'title' => $wordcamp->title,
-				);
-
-				foreach ( $wordcamp->post_meta as $meta_item ) {
-					switch ( $meta_item->key ) {
-						case 'Start Date (YYYY-mm-dd)':
-							if ( empty( $meta_item->value ) || $meta_item->value < time() ) {
-								// todo this can be removed when we're able to filter the request by post meta (see above)
-
-								continue 3;
-							} else {
-								$event['start_timestamp'] = $meta_item->value;
-							}
-							break;
-
-						case 'End Date (YYYY-mm-dd)':
-							$event['end_timestamp'] = $meta_item->value;
-							break;
-
-						case 'URL':
-						case 'Location':
-							$event[ strtolower( $meta_item->key ) ] = $meta_item->value;
-							break;
-					}
-				}
-
-				if ( ! empty( $event['url'] ) ) {
-					$events[] = new Official_WordPress_Event( $event );
-				}
-			}
-		}
-
-		return $events;
-	}
-
-	/**
-	 * Parse a response from the v2 API.
-	 *
-	 * This does additional sorting of the returned events that the v1 parser doesn't do.
-	 *
-	 * @param $response
+	 * @param array $response
 	 *
 	 * @return array
 	 */
-	protected function parse_wordcamp_events_api_v2( $response ) {
+	protected function parse_wordcamp_events( $response ) {
 		$events    = array();
 		$wordcamps = json_decode( wp_remote_retrieve_body( $response ) );
 
