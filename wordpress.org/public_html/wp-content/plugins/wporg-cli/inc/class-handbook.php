@@ -7,12 +7,12 @@ class Handbook {
 	/**
 	 * Append a "Edit on GitHub" link to Handbook document titles
 	 */
-	public static function filter_the_title_edit_link( $title ) {
+	public static function filter_the_title_edit_link( $title, $id = null ) {
 		// Only apply to the main title for the document
 		if ( ! is_singular( 'handbook' )
 			|| ! is_main_query()
 			|| ! in_the_loop()
-			|| get_the_ID() !== get_queried_object_id() ) {
+			|| $id !== get_queried_object_id() ) {
 			return $title;
 		}
 
