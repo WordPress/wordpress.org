@@ -52,6 +52,45 @@ add_action( 'wp_head', function(){
 		a.github-edit img {
 			height: .8em;
 		}
+		.single-handbook div.table-of-contents {
+			margin: 0;
+			float: none;
+			padding: 0;
+			border: none;
+			box-shadow: none;
+			width: auto;
+		}
+		.single-handbook div.table-of-contents:after {
+			content: " ";
+			display: block;
+			clear: both;
+		}
+		.single-handbook .table-of-contents h2 {
+			display: none;
+		}
+		.single-handbook div.table-of-contents ul {
+			padding: 0;
+			margin-top: 0.4em;
+			margin-bottom: 1.1em;
+		}
+		.single-handbook div.table-of-contents > ul li {
+			display: inline-block;
+			padding: 0;
+			font-size: 12px;
+		}
+		.single-handbook div.table-of-contents > ul li a:after {
+			content: "|";
+			display: inline-block;
+			width: 20px;
+			text-align: center;
+			color: #eeeeee
+		}
+		.single-handbook div.table-of-contents > ul li:last-child a:after {
+			content: "";
+		}
+		.single-handbook div.table-of-contents ul ul {
+			display: none;
+		}
 	</style>
 	<?php
 });
