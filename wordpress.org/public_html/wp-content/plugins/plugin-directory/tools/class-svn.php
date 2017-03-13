@@ -21,13 +21,14 @@ class SVN {
 	 *     @type int  $revision The revision imported.
 	 * }
 	 */
-	public static function import( $path, $url, $message ) {
-		$options     = array(
-			'non-interactive',
-			'm'    => $message,
-			'user' => PLUGIN_SVN_MANAGEMENT_USER,
-			'pass' => PLUGIN_SVN_MANAGEMENT_PASS,
-		);
+	public static function import( $path, $url, $message, $options = array() ) {
+		$options[] = 'non-interactive';
+		$options['m'] = $message;
+		if ( empty( $options['username'] ) ) {
+			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
 		$esc_options = self::parse_esc_parameters( $options );
 
 		$esc_path = escapeshellarg( $path );
@@ -67,6 +68,132 @@ class SVN {
 
 		$output = self::shell_exec( "svn export $esc_options $esc_url $esc_destination 2>&1" );
 		if ( preg_match( '/Exported revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'revision', 'errors' );
+	}
+
+	/**
+	 * Create an SVN Checkout of a URL to a local directory.
+	 *
+	 * @static
+	 *
+	 * @param string $url         The URL to export.
+	 * @param string $destination The local folder to checkout into.
+	 * @param array  $options     Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *     @type bool $result   The result of the operation.
+	 *     @type int  $revision The revision exported.
+	 * }
+	 */
+	public static function checkout( $url, $destination, $options = array() ) {
+		$options[]   = 'non-interactive';
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_url         = escapeshellarg( $url );
+		$esc_destination = escapeshellarg( $destination );
+
+		$output = self::shell_exec( "svn checkout $esc_options $esc_url $esc_destination 2>&1" );
+		if ( preg_match( '/Checked out revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'revision', 'errors' );
+	}
+
+	/**
+	 * Update a SVN checkout.
+	 *
+	 * @static
+	 *
+	 * @param string $checkout The path of the SVN checkout to update.
+	 * @param array  $options  Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *     @type bool $result   The result of the operation.
+	 *     @type int  $revision The revision exported.
+	 * }
+	 */
+	public static function up( $checkout, $options = array() ) {
+		$options[]   = 'non-interactive';
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_checkout = escapeshellarg( $checkout );
+
+		$output = self::shell_exec( "svn up $esc_options $esc_checkout 2>&1" );
+		if ( preg_match( '/Updated to revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'revision', 'errors' );
+	}
+
+	/**
+	 * Add a file in a SVN checkout to be revisioned.
+	 *
+	 * @static
+	 *
+	 * @param string $checkout The path of the file to add to SVN.
+	 * @return array {
+	 *     @type bool $result   The result of the operation.
+	 * }
+	 */
+	public static function add( $file ) {
+		$options[]   = 'non-interactive';
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_file     = escapeshellarg( $file );
+
+		$output = self::shell_exec( "svn add $esc_options $esc_file 2>&1" );
+		if ( preg_match( "/^A/i", $output ) ) {;
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'errors' );
+	}
+
+	/**
+	 * Commit changes in a SVN checkout.
+	 *
+	 * @static
+	 *
+	 * @param string $checkout The local folder to import into SVN.
+	 * @param string $message  The commit message.
+	 * @param array  $options  Any specific options to pass to SVN.
+	 * @return array {
+	 *     @type bool $result   The result of the operation.
+	 *     @type int  $revision The revision imported.
+	 * }
+	 */
+	public static function commit( $checkout, $message, $options = array() ) {
+		$options[] = 'non-interactive';
+		$options['m'] = $message;
+		if ( empty( $options['username'] ) ) {
+			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_checkout = escapeshellarg( $checkout );
+
+		$output = self::shell_exec( "svn commit $esc_options $esc_checkout 2>&1" );
+		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
 		} else {

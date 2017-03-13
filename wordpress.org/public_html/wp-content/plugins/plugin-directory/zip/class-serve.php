@@ -12,28 +12,18 @@ use Exception;
  */
 class Serve {
 
-	const ZIP_DIR = '/tmp/plugin-zipfiles';
-
 	public function __construct() {
 		try {
 			$request = $this->determine_request();
 
-			// Serve & perhaps build if need be
-			$files = $this->get_files( $request );
-			if ( ! file_exists( $files['zip'] ) ) {
-				$builder = new Builder( $request['slug'], $request['version'] );
-				$builder->build();
-				clearstatcache();
-			}
-
-			$this->serve_zip( $files, $request );
+			$this->serve_zip( $request );
 
 			if ( $request['args']['stats'] ) {
 				$this->record_stats( $request );
 			}
 
 		} catch ( Exception $e )  {
-			$this->error( $e->getCode() );
+			$this->error();
 		}
 
 	}
@@ -50,7 +40,7 @@ class Serve {
 		$version = 'trunk';
 
 		if ( ! preg_match( "!^(?P<slug>[a-z0-9-]+)(.(?P<version>.+))?.zip$!i", $zip, $m ) ) {
-			throw new Exception( __METHOD__ . ": Invalid URL" );
+			throw new Exception( __METHOD__ . ": Invalid URL." );
 		}
 
 		$slug = strtolower( $m['slug'] );
@@ -95,7 +85,7 @@ class Serve {
 			$version = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE post_id = %d AND meta_key = 'stable_tag' LIMIT 1", $post_id ) );
 		}
 		if ( ! $version ) {
-			throw new Exception( __METHOD__ . ": A version for $plugin_slug cannot be determined.", 404 );
+			throw new Exception( __METHOD__ . ": A version for $plugin_slug cannot be determined." );
 		}
 
 		return $version;
@@ -120,7 +110,7 @@ class Serve {
 		}
 
 		if ( ! $post_id ) {
-			throw new Exception( __METHOD__ . ": A post_id for $plugin_slug cannot be determined.", 404 );
+			throw new Exception( __METHOD__ . ": A post_id for $plugin_slug cannot be determined." );
 		}
 
 		return $post_id;
@@ -132,40 +122,37 @@ class Serve {
 	 * @param array $request The request object for the request.
 	 * @return array An array containing the files to use for the request, 'zip' and 'md5'.
 	 */
-	protected function get_files( $request ) {
+	protected function get_file( $request ) {
 		if ( empty( $request['version'] ) || 'trunk' == $request['version'] ) {
-			$zip = self::ZIP_DIR . "/{$request['slug']}/{$request['slug']}.zip";
+			return "{$request['slug']}/{$request['slug']}.zip";
 		} else {
-			$zip = self::ZIP_DIR . "/{$request['slug']}/{$request['slug']}.{$request['version']}.zip";
+			return "{$request['slug']}/{$request['slug']}.{$request['version']}.zip";
 		}
-		$md5 = $zip . '.md5';
-
-		return compact( 'zip', 'md5' );
 	}
 
 	/**
 	 * Output a ZIP file with all headers.
 	 *
-	 * @param array $files {
-	 *   Array of files for the request.
-	 *
-	 *   @type string $zip The Zip file to serve.
-	 *   @type string $md5 The MD5 file to use for the Content-MD5 header. Optional.
-	 * }
 	 * @param array $request The request array for the request.
 	 */
-	protected function serve_zip( $files, $request ) {
-		header( 'Content-Type: application/zip' );
-		header( 'Content-Disposition: attachment; filename=' . basename( $files['zip'] ) );
-		if ( !empty( $files['md5'] ) && ( $md5 = file_get_contents( $files['md5'] ) )  ) {
-			header( 'Content-MD5: ' . $md5 );
+	protected function serve_zip( $request ) {
+		$zip = $this->get_file( $request );
+
+		if ( defined( 'PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION' ) ) {
+			$zip_url = PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION . $zip;
+
+			header( 'Content-Type: application/zip' );
+			header( 'Content-Disposition: attachment; filename=' . basename( $zip ) );
+			header( "X-Accel-Redirect: $zip_url" );
+		} else {
+			header( 'Content-Type: text/plain' );
+			echo "This is a request for $zip, this server isn't currently configured to serve zip files.\n";
 		}
 
-		// TODO: Accel Redirect allows for ZIP files to be cached on the LB's
-		// header('X-Accel-Redirect: ' . $accel_redirect );
+		if ( function_exists( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+		}
 
-		header( 'Content-Length: ' . filesize( $files['zip'] ) );
-		readfile( $files['zip'] );
 	}
 
 	/**
@@ -224,23 +211,14 @@ class Serve {
 	}
 
 	/**
-	 * Quit with an Error code.
-	 *
-	 * @param int $code The HTTP Error code, 404 or 503.
+	 * Bail with a 404.
 	 */
-	protected function error( $code = 404 ) {
+	protected function error() {
 		$protocol = isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
 		$protocol .= ' ';
-		switch ( $code ) {
-			case 503:
-				header( $protocol . '503 Service Unavailable' );
-				die( '503 Service Unavailable' );
 
-			default:
-			case 404:
-				header( $protocol . '404 File not found' );
-				die( '404 File not found' );
-		}
+		header( $protocol . '404 File not found' );
+		die( '404 file not found' );
 	}
 
 }

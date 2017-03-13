@@ -120,7 +120,7 @@ class Plugin_Directory {
 				'edit_others_posts'  => 'plugin_edit_others',
 				'publish_posts'      => 'plugin_approve',
 				'read_private_posts' => 'do_not_allow',
-				'delete_posts'       => 'do_not_allow',
+				'delete_posts'       => is_super_admin() ? 'manage_options' : 'do_not_allow',
 				'create_posts'       => 'do_not_allow',
 			),
 		) );
@@ -1005,7 +1005,6 @@ class Plugin_Directory {
 	 * Handles all the custom redirects needed in the Plugin Directory.
 	 */
 	function custom_redirects() {
-
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin_tab' ) ) {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
@@ -1030,7 +1029,13 @@ class Plugin_Directory {
 
 			// The about page is now over at /developers/.
 			if ( 'about' === $path[2] ) {
-				wp_safe_redirect( home_url( '/developers/' . ( ( isset( $path[3] ) && 'add' == $path[3] ) ? 'add/' : '' ) ) );
+				if ( isset( $path[3] ) && 'add' == $path[3] ) {
+					wp_safe_redirect( home_url( '/developers/add/' ) );
+				} elseif ( isset( $path[3] ) && 'validator' == $path[3] ) {
+					wp_safe_redirect( home_url( '/developers/readme-validator/' ) );
+				} else {
+					wp_safe_redirect( home_url( '/developers/' ) );
+				}
 				die();
 			}
 

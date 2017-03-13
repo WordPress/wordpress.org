@@ -10,76 +10,138 @@ use Exception;
  */
 class Builder {
 
-	/**
-	 * The base directory for the ZIP files.
-	 * Zip files will be stored in a sub-directory, such as:
-	 * /tmp/plugin-zipfiles/hello-dolly/hello-dolly.zip
-	 */
-	const ZIP_DIR = '/tmp/plugin-zipfiles';
-	const SVN_URL = 'https://plugins.svn.wordpress.org';
+	const TMP_DIR = '/tmp/plugin-zip-builder';
+	const SVN_URL = 'http://plugins.svn.wordpress.org';
+	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
-	public $zip_file = '';
-	public $md5_file = '';
-	protected $tmp_build_file = '';
+	protected $zip_file = '';
 	protected $tmp_build_dir  = '';
+	protected $tmp_dir = '';
 
+	protected $slug    = '';
+	protected $version = '';
+	protected $context = '';
 
 	/**
-	 * Generate a ZIP for a provided Plugin Version.
+	 * Generate a ZIP for a provided Plugin versions.
 	 *
-	 * @param string $plugin_slug The Plugin slug
-	 * @param string $version     The version to build (tag, or trunk)
+	 * @param string $slug     The plugin slug.
+	 * @param array  $versions The versions of the plugin to build ZIPs for.
+	 * @param string $context  The context of this Builder instance (commit #, etc)
 	 */
-	public function __construct( $slug, $version ) {
-		if ( ! is_dir( self::ZIP_DIR ) ) {
-			mkdir( self::ZIP_DIR, 0777, true );
-			chmod( self::ZIP_DIR, 0777 );
-		}
-		if ( ! is_dir( self::ZIP_DIR . '/' . $slug ) ) {
-			mkdir( self::ZIP_DIR . '/' . $slug, 0777, true );
-			chmod( self::ZIP_DIR . '/' . $slug, 0777 );
+	public function build( $slug, $versions, $context = '' ) {
+		// Bail when in an unconfigured environment.
+		if ( ! defined( 'PLUGIN_ZIP_SVN_URL' ) ) {
+			return false;
 		}
 
-		$this->slug = $slug;
-		$this->version = $version;
+		$this->slug     = $slug;
+		$this->versions = $versions;
+		$this->context  = $context;
 
-		if ( 'trunk' == $this->version ) {
-			$this->zip_file = self::ZIP_DIR . "/{$this->slug}/{$this->slug}.zip";
+		// General TMP directory
+		if ( ! is_dir( self::TMP_DIR ) ) {
+			mkdir( self::TMP_DIR, 0777, true );
+			chmod( self::TMP_DIR, 0777 );
+		}
+
+		// Temp Directory for this instance of the Builder class.
+		$this->tmp_dir = $this->generate_temporary_directory( self::TMP_DIR, $slug );
+
+		// Create a checkout of the ZIP SVN
+		$res_checkout = SVN::checkout(
+			self::ZIP_SVN_URL,
+			$this->tmp_dir,
+			array(
+				'depth' => 'empty',
+				'username' => PLUGIN_ZIP_SVN_USER,
+				'password' => PLUGIN_ZIP_SVN_PASS,
+			)
+		);
+
+		if ( $res_checkout['result'] ) {
+
+			// Ensure the plugins folder exists within svn
+			$plugin_folder = "{$this->tmp_dir}/{$this->slug}/";
+			$res = SVN::up(
+				$plugin_folder,
+				array(
+					'depth' => 'empty'
+				)
+			);
+			if ( ! is_dir( $plugin_folder ) ) {
+				mkdir( $plugin_folder, 0777, true );
+				$res = SVN::add( $plugin_folder );
+			}
+			if ( ! $res['result'] ) {
+				throw new Exception( __METHOD__ . ": Failed to create {$plugin_folder}." );
+			}
 		} else {
-			$this->zip_file = self::ZIP_DIR . "/{$this->slug}/{$this->slug}.{$this->version}.zip";
+			throw new Exception( __METHOD__ . ": Failed to create checkout of {$svn_url}." );
 		}
-		$this->md5_file = $this->zip_file . '.md5';
 
+		// Build the requested ZIPs
+		foreach ( $versions as $version ) {
+			$this->version = $version;
+
+			if ( 'trunk' == $version ) {
+				$this->zip_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.zip";
+			} else {
+				$this->zip_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.{$version}.zip";
+			}
+
+			// Pull the ZIP file down we're going to modify, which may not already exist.
+			SVN::up( $this->zip_file );
+
+			try {
+
+				$this->tmp_build_dir  = $this->zip_file . '-files';
+				mkdir( $this->tmp_build_dir, 0777, true );
+
+				$this->export_plugin();
+				$this->fix_directory_dates();			
+				$this->generate_zip();
+				$this->cleanup_plugin_tmp();
+
+			} catch( Exception $e ) {
+				// In event of error, skip this file this time.
+				$this->cleanup_plugin_tmp();
+
+				// Perform an SVN up to revert any changes made.
+				SVN::up( $this->zip_file );
+				continue;
+			}
+
+			// Add the ZIP file to SVN - This is only really needed for new files which don't exist in SVN.
+			SVN::add( $this->zip_file );			
+		}
+
+		$res = SVN::commit(
+			$this->tmp_dir,
+			$this->context ? $this->context : "Updated ZIPs for {$this->slug}.",
+			array(
+				'username' => PLUGIN_ZIP_SVN_USER,
+				'password' => PLUGIN_ZIP_SVN_PASS,
+			)
+		);
+
+		$this->invalidate_zip_caches( $versions );
+
+		$this->cleanup();
+
+		if ( ! $res['result'] ) {
+			if ( $res['errors'] ) {
+				throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
+			} else {
+				throw new Exception( __METHOD__ . ': Commit failed without error, maybe there were no modified files?' );
+			}
+		}
+
+		return true;
 	}
 
 	/**
-	 * Generate a ZIP for the plugin + version 
-	 */
-	public function build() {
-		try {
-			$this->tmp_build_file = $this->generate_temporary_filename( dirname( $this->zip_file ), "tmp-{$this->slug}.{$this->version}", '.zip' );
-			$this->tmp_build_dir  = $this->tmp_build_file . '-files';
-			mkdir( $this->tmp_build_dir, 0777, true );
-
-			$this->export_plugin();
-			$this->fix_directory_dates();			
-			$this->generate_zip();
-			$this->move_into_place();
-			$this->generate_md5();
-
-			$this->cleanup();
-
-			return true;
-		} catch( Exception $e ) {
-			$this->cleanup();
-			throw $e;
-		}/* finally { // PHP 5.5+, meta.svn is limited to PHP 5.4 code still.
-			$this->cleanup();
-		}*/
-	}
-
-	/**
-	 * Generates a temporary unique file in a given directory
+	 * Generates a temporary unique directory in a given directory
 	 *
 	 * Performs a similar job to `tempnam()` with an added suffix and doesn't
 	 * cut off the $prefix at 60 characters.
@@ -91,9 +153,9 @@ class Builder {
 	 * @param string $prefix The file prefix.
 	 * @param string $suffix The file suffix, optional.
 	 *
-	 * @return string Filename of unique temporary file.
+	 * @return string Path of unique temporary directory.
 	 */
-	protected function generate_temporary_filename( $dir, $prefix, $suffix = '' ) {
+	protected function generate_temporary_directory( $dir, $prefix, $suffix = '' ) {
 		$i = 0;
 		do {
 			$rand = uniqid();
@@ -105,6 +167,13 @@ class Builder {
 		}
 
 		fclose( $fp );
+
+		// Convert file to directory.
+		unlink( $filename );
+		if ( ! mkdir( $filename, 0777, true ) ) {
+			throw new Exception( __METHOD__ . ': Could not convert temporary filename to directory.' );
+		}
+		chmod( $filename, 0777 );
 
 		return $filename;
 	}
@@ -167,7 +236,7 @@ class Builder {
 			escapeshellarg( $this->tmp_build_dir )
 		) );
 		if ( ! $latest_file_modified_timestamp ) {
-			throw new Exception( _METHOD__ . ': Unable to locate the latest modified files timestamp.', 503 );
+			throw new Exception( __METHOD__ . ': Unable to locate the latest modified files timestamp.', 503 );
 		}
 
 		$this->exec( sprintf(
@@ -181,13 +250,15 @@ class Builder {
 	 * Generates the actual ZIP file we've painstakingly created the files for.
 	 */
 	protected function generate_zip() {
-		// We have to remove the temporary 0-byte file first as zip will complain about not being able to find the zip structures.
-		unlink( $this->tmp_build_file );
+		// If we're building an existing zip, remove the existing file first.
+		if ( file_exists( $this->zip_file ) ) {
+			unlink( $this->zip_file );
+		}
 		$this->exec( sprintf(
 			'cd %s && find %s -print0 | sort -z | xargs -0 zip -Xu %s 2>&1',
 			escapeshellarg( $this->tmp_build_dir ),
 			escapeshellarg( $this->slug ),
-			escapeshellarg( $this->tmp_build_file )
+			escapeshellarg( $this->zip_file )
 		), $zip_build_output, $return_value );
 
 		if ( $return_value ) {
@@ -195,35 +266,36 @@ class Builder {
 		}
 	}
 
-	/**
-	 * Moves the completed ZIP into it's real-life location.
-	 */
-	protected function move_into_place() {
-		$this->exec( sprintf(
-			'mv -f %s %s',
-			escapeshellarg( $this->tmp_build_file ),
-			escapeshellarg( $this->zip_file )
-		), $output, $return_value );
-
-		if ( $return_value ) {
-			throw new Exception( __METHOD__ . ': Could not move ZIP into place.', 503 );
-		}
-	}
 
 	/**
-	 * Generates the MD5 for the ZIP file used for serving.
+	 * Purge ZIP caches after ZIP building.
 	 *
-	 * This can also be used for generating a package signature in the future.
+	 * @param array $versions The list of plugin versions of modified zips.
+	 * @return bool
 	 */
-	protected function generate_md5() {
-		$this->exec( sprintf(
-			"md5sum %s | head -c 32 > %s",
-			escapeshellarg( $this->zip_file ),
-			escapeshellarg( $this->md5_file )
-		), $output, $return_code );
+	public function invalidate_zip_caches( $versions ) {
+		// TODO: Implement PURGE 
+		return true;
+		if ( ! defined( 'PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION' ) ) {
+			return true;
+		}
 
-		if ( $return_code ) {
-			throw new Exception( __METHOD__ . ': Failed to create file checksum.', 503 );
+		foreach ( $versions as $version ) {
+			if ( 'trunk' == $version ) {
+				$zip = "{$this->slug}/{$this->slug}.zip";
+			} else {
+				$zip = "{$this->slug}/{$this->slug}.{$version}.zip";
+			}
+
+			foreach ( $plugins_downloads_load_balancer /* TODO */ as $lb ) {
+				$url = 'http://' . $lb . PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION . $zip;
+				wp_remote_request(
+					$url,
+					array(
+						'method' => 'PURGE',
+					)
+				);
+			}
 		}
 	}
 
@@ -231,9 +303,15 @@ class Builder {
 	 * Cleans up any temporary directories created by the ZIP Builder.
 	 */
 	protected function cleanup() {
-		if ( $this->tmp_build_file && file_exists( $this->tmp_build_file ) ) {
-			unlink( $this->tmp_build_file );
+		if ( $this->tmp_dir ) {
+			$this->exec( sprintf( 'rm -rf %s', escapeshellarg( $this->tmp_dir ) ) );
 		}
+	}
+
+	/**
+	 * Cleans up any temporary directories created by the ZIP builder for a specific build.
+	 */
+	protected function cleanup_plugin_tmp() {
 		if ( $this->tmp_build_dir ) {
 			$this->exec( sprintf( 'rm -rf %s', escapeshellarg( $this->tmp_build_dir ) ) );
 		}

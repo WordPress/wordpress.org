@@ -33,9 +33,11 @@ class Plugin_Import {
 		$plugin_slug  = $plugin_data['plugin'];
 		$changed_tags = isset( $plugin_data['tags_touched'] ) ? $plugin_data['tags_touched'] : array( 'trunk' );
 
+		$revision = isset( $plugin_data['revisions'] ) ? max( (array)$plugin_data['revisions'] ) : false;
+
 		try {
 			$importer = new CLI\Import;
-			$importer->import_from_svn( $plugin_slug, $changed_tags );
+			$importer->import_from_svn( $plugin_slug, $changed_tags, $revision );
 		} catch( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		}

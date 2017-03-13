@@ -7,6 +7,7 @@ use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use WordPressdotorg\Plugin_Directory\Zip\Builder;
 use Exception;
 
 /**
@@ -46,10 +47,11 @@ class Import {
 	 *
 	 * @throws \Exception
 	 *
-	 * @param string $plugin_slug      The slug of the plugin to import.
-	 * @param array  $svn_changed_tags A list of tags/trunk which the SVN change touched. Optional.
+	 * @param string $plugin_slug            The slug of the plugin to import.
+	 * @param array  $svn_changed_tags       A list of tags/trunk which the SVN change touched. Optional.
+	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by.
 	 */
-	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ) ) {
+	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
 		global $wpdb;
 
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -189,7 +191,7 @@ class Import {
 
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 
-		$this->rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags );
+		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
@@ -201,73 +203,40 @@ class Import {
 	}
 
 	/**
-	 * Rebuild and Invalidate plugin ZIPs on all web nodes using the REST API Endpoints.
+	 * (Re)build plugin ZIPs affected by this commit.
 	 *
-	 * @param string $plugin_slug        The plugin slug.
-	 * @param string $stable_tag         The new stable tag.
-	 * @param string $current_stable_tag The new stable tag.
-	 * @param array  $svn_changed_tags   The list of SVN tags modified since last import.
+	 * @param string $plugin_slug            The plugin slug.
+	 * @param string $stable_tag             The new stable tag.
+	 * @param string $current_stable_tag     The new stable tag.
+	 * @param array  $svn_changed_tags       The list of SVN tags modified since last import.
+	 * @param string $svn_revision_triggered The SVN revision which triggered the rebuild.
+	 *
+	 * @return bool
 	 */
-	protected function rebuild_invalidate_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags ) {
-		global $wporg_webs;
-		$invalidate_zips = $rebuild_zips = array();
+	protected function rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered = 0 ) {
+		$versions_to_build = $svn_changed_tags;
 
-		foreach ( $svn_changed_tags as $tag ) {
-			if ( 'trunk' == $tag ) {
-				if ( 'trunk' == $stable_tag ) {
-					// Trunk is stable, so we'll need to rebuild the zip
-					$rebuild_zips[] = "{$plugin_slug}.zip";
-				} else {
-					// Trunk isn't stable, so we'll just remove it so it's rebuilt on demand
-					$invalidate_zips[] = "{$plugin_slug}.zip";
-				}
-				continue;
-			}
-			if ( $tag == $stable_tag || $tag == $current_stable_tag ) {
-				$rebuild_zips[] = "{$plugin_slug}.{$tag}.zip";
-			} else {
-				$invalidate_zips[] = "{$plugin_slug}.{$tag}.zip";
-			}
-		}
-		if ( $stable_tag != $current_stable_tag ) {
-			// plugin is updated, ensure that everything is rebuilt.
-			if ( ! in_array( $stable_tag, $svn_changed_tags ) ) {
-				$rebuild_zips[] = "{$plugin_slug}" . ( 'trunk' == $stable_tag ? '' : ".{$stable_tag}" ) . '.zip';
-			}
+		// Ensure that the stable zip is built/rebuilt if need be.
+		if ( $stable_tag != $current_stable_tag && ! in_array( $stable_tag, $versions_to_build ) ) {
+			$versions_to_build[] = $stable_tag;
 		}
 
-		if ( empty( $wporg_webs ) || ( empty( $invalidate_zips ) && empty( $rebuild_zips ) ) ) {
-			return;
+		// Rebuild/Build $build_zips
+		try {
+			// This will rebuild the ZIP.
+			$zip_builder = new Builder();
+			$zip_builder->build(
+				$plugin_slug,
+				array_unique( $versions_to_build ),
+				$svn_revision_triggered ?
+					"{$plugin_slug}: ZIP build triggered by https://plugins.trac.wordpress.org/changeset/{$svn_revision_triggered}" :
+					"{$plugin_slug}: ZIP build triggered by " . php_uname('n')
+			);
+		} catch( Exception $e ) {
+			return false;
 		}
 
-		$urls = array();
-		foreach ( $wporg_webs as $node ) {
-			$urls[] = preg_replace( '!^https?://wordpress.org/!', "http://$node/", site_url( '/wp-json/plugins/v1/zip-management' ) );
-		}
-		$headers = array(
-			'User-Agent' => 'WordPress.org Plugin Directory',
-			'Host' => 'WordPress.org',
-			'Authorization' => 'BEARER ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
-		);
-		$body = array(
-			'plugins' => array(
-				$plugin_slug => array(
-					'invalidate' => $invalidate_zips,
-					'rebuild' => $rebuild_zips,
-				)
-			)
-		);
-
-		$results = array();
-		foreach ( $urls as $url ) {
-			$results[ $url ] = wp_remote_post( $url, array(
-				'body' => $body,
-				'headers' => $headers,
-				'sslverify' => false
-			) );
-		}
-
-		// TODO Do something with $results to verify all servers said the rebuilt zip was correct or something.
+		return true;
 	}
 
 	/**

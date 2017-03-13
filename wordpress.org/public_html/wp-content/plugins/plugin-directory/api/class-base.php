@@ -19,7 +19,6 @@ class Base {
 		new Routes\Popular_Tags();
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();
-		new Routes\Zip_Management();
 		new Routes\Plugin_Committers();
 	}
 
