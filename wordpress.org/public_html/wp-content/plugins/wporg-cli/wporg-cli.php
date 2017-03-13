@@ -91,6 +91,9 @@ add_action( 'wp_head', function(){
 		.single-handbook div.table-of-contents ul ul {
 			display: none;
 		}
+		.single-handbook #secondary {
+			max-width: 240px;
+		}
 	</style>
 	<?php
 });
