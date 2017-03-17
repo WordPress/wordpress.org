@@ -369,7 +369,7 @@ abstract class Directory_Compat {
 		||
 			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), $this->compat_views() ) )
 		||
-			( get_query_var( 'wporg_single_user_reviews' ) )
+			( bbp_is_single_user_topics() || bbp_is_single_user_replies() || get_query_var( 'wporg_single_user_reviews' ) )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
