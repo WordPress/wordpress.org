@@ -363,9 +363,7 @@ abstract class Directory_Compat {
 
 	public function get_topic_title( $title, $topic_id ) {
 		if (
-			( bbp_is_single_forum() && bbp_get_forum_id() == $this->forum_id() )
-		||
-			( bbp_is_single_forum() && Plugin::REVIEWS_FORUM_ID == bbp_get_forum_id() )
+			( bbp_is_single_forum() && in_array( bbp_get_forum_id(), array( $this->forum_id(), Plugin::REVIEWS_FORUM_ID ) ) )
 		||
 			( bbp_is_single_view() && ! in_array( bbp_get_view_id(), $this->compat_views() ) )
 		||
