@@ -52,6 +52,9 @@ function get_whitelist() {
 			'sergey',
 			'wonderboymusic',
 		),
+		'core-bootstrap' => array(
+			'schlessera',
+		),
 		'core-comments' => array(
 			'rachelbaker',
 		),
