@@ -15,9 +15,20 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		if ( current_user_can( 'moderate' ) && class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) {
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( bbp_get_displayed_user_id() );
 			$moderator       = get_user_meta( bbp_get_displayed_user_id(), WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
+			$moderation_date = get_user_meta( bbp_get_displayed_user_id(), WordPressdotorg\Forums\User_Moderation\Plugin::MODERATION_DATE_META, true );
 
 			if ( $is_user_flagged ) {
-				if ( $moderator ) {
+				if ( $moderator && $moderation_date ) {
+					$msg = sprintf(
+						/* translators: 1: linked moderator's username, 2: moderation date, 3: moderation time */
+						__( 'This user has been flagged by %1$s on %2$s at %3$s.', 'wporg-forums' ),
+						sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
+						/* translators: localized date format, see https://secure.php.net/date */
+						mysql2date( __( 'F j, Y', 'wporg-forums' ), $moderation_date ),
+						/* translators: localized time format, see https://secure.php.net/date */
+						mysql2date( __( 'g:i a', 'wporg-forums' ), $moderation_date )
+					);
+				} elseif ( $moderator ) {
 					$msg = sprintf(
 						/* translators: %s: linked moderator's username */
 						__( 'This user has been flagged by %s.', 'wporg-forums' ),

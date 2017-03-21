@@ -309,9 +309,20 @@ function wporg_support_add_moderation_notice() {
 		if ( class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) :
 			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( get_post()->post_author );
 			$moderator       = get_user_meta( get_post()->post_author, WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
+			$moderation_date = get_user_meta( get_post()->post_author, WordPressdotorg\Forums\User_Moderation\Plugin::MODERATION_DATE_META, true );
 
 			if ( $is_user_flagged ) {
-				if ( $moderator ) {
+				if ( $moderator && $moderation_date ) {
+					$notices[] = sprintf(
+						/* translators: 1: linked moderator's username, 2: moderation date, 3: moderation time */
+						__( 'This user has been flagged by %1$s on %2$s.', 'wporg-forums' ),
+						sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
+						/* translators: localized date format, see https://secure.php.net/date */
+						mysql2date( __( 'F j, Y', 'wporg-forums' ), $moderation_date ),
+						/* translators: localized time format, see https://secure.php.net/date */
+						mysql2date( __( 'g:i a', 'wporg-forums' ), $moderation_date )
+					);
+				} elseif ( $moderator ) {
 					$notices[] = sprintf(
 						/* translators: %s: linked moderator's username */
 						__( 'This user has been flagged by %s.', 'wporg-forums' ),
