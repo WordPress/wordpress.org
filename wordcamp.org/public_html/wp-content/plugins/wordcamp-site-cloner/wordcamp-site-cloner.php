@@ -193,6 +193,8 @@ function prime_wordcamp_sites() {
 	}
 
 	// Keep the cache longer than needed, just to be sure that it doesn't expire before the cron job runs again
+	// todo This shouldn't be a transient, it should just be a regular option.
+	//      Transients aren't guaranteed to exist until they expire, so it could expire before the next cron runs
 	set_site_transient( WORDCAMP_SITES_TRANSIENT_KEY, get_wordcamp_sites(), DAY_IN_SECONDS * 2 );
 }
 
@@ -228,15 +230,6 @@ function get_wordcamp_sites() {
 		'meta_key'       => 'Start Date (YYYY-mm-dd)',
 		'orderby'        => 'meta_value_num',
 		'order'          => 'DESC',
-
-		'meta_query' => array(
-			array(
-				// New sites won't have finished designs, so ignore them
-				'key'     => 'Start Date (YYYY-mm-dd)',
-				'value'   => strtotime( 'now - 1 month' ),
-				'compare' => '<'
-			)
-		),
 	) );
 
 	$sites = get_filtered_wordcamp_sites( $wordcamp_query->get_posts() );
