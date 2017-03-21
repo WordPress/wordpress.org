@@ -83,7 +83,10 @@
 <h2><?php printf( __( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
 
 <?php if ( empty( $locale_data['validators'] ) ) : ?>
-	<p><?php printf( __( '%s does not have any validators yet.', 'wporg' ), $locale->english_name ); ?></p>
+	<p><?php
+		/* translators: %s: language name in English */
+		printf( __( '%s does not have General or Project translation editors yet.', 'wporg' ), $locale->english_name );
+	?></p>
 <?php else : ?>
 	<ul class="validators">
 		<?php foreach ( $locale_data['validators'] as $validator ) :
@@ -146,7 +149,8 @@
 <?php endif; ?>
 
 <p class="alert alert-info" role="alert">
-	<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">
-		<?php printf( __( 'Become a translator yourself, check if %s needs some help!', 'wporg' ), $locale->english_name ); ?>
-	</a>
+	<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>"><?php
+		/* translators: %s: language name in English */
+		printf( __( 'Is this a language that you speak? Join the WordPress translation team for %s!', 'wporg' ), $locale->english_name );
+	?></a>
 </p>
