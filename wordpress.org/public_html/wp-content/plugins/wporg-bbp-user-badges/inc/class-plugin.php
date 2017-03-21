@@ -133,7 +133,7 @@ class Plugin {
 			}
 		}
 
-		if ( ! $slugs ) {
+		if ( ! $slugs || is_wp_error( $slugs ) ) {
 			return false;
 		}
 
