@@ -263,10 +263,18 @@ class Hooks {
 	 * Add extra reply actions before Submit button in reply form.
 	 */
 	public function add_extra_reply_actions() {
+		$topic_id = bbp_get_topic_id();
+
 		if ( class_exists( 'WordPressdotorg\Forums\Topic_Resolution\Plugin' ) ) :
 			$topic_resolution_plugin = Topic_Resolution\Plugin::get_instance();
 
-			if ( $topic_resolution_plugin->is_enabled_on_forum() && $topic_resolution_plugin->user_can_resolve( get_current_user_id(), bbp_get_topic_id() ) ) : ?>
+			if (
+				$topic_resolution_plugin->is_enabled_on_forum()
+			&&
+				$topic_resolution_plugin->user_can_resolve( get_current_user_id(), $topic_id )
+			&&
+				'yes' !== $topic_resolution_plugin->get_topic_resolution( array( 'id' => $topic_id ) )
+			) : ?>
 				<p>
 					<input name="bbp_reply_mark_resolved" id="bbp_reply_mark_resolved" type="checkbox" value="yes" />
 					<label for="bbp_reply_mark_resolved"><?php esc_html_e( 'Reply and mark as resolved', 'wporg-forums' ); ?></label>
@@ -275,7 +283,7 @@ class Hooks {
 			endif;
 		endif;
 
-		if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
+		if ( current_user_can( 'moderate', $topic_id ) && ! bbp_is_topic_closed( $topic_id ) ) : ?>
 			<p>
 				<input name="bbp_reply_close_topic" id="bbp_reply_close_topic" type="checkbox" value="yes" />
 				<label for="bbp_reply_close_topic"><?php esc_html_e( 'Reply and close the topic', 'wporg-forums' ); ?></label>
