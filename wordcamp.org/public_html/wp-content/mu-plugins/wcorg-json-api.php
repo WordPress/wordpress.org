@@ -18,6 +18,18 @@ add_filter( 'json_prepare_post',           'wcorg_json_expose_additional_post_da
 add_filter( 'json_prepare_post',           'wcorg_json_embed_related_posts',             999, 3 );   // after `wcorg_json_expose_additional_post_data()`
 add_action( 'wp_json_server_before_serve', 'wcorg_json_avoid_nested_callback_conflicts', 11     );    // after the default endpoints are added in `json_api_default_filters()`
 
+add_filter( 'json_prepare_post',        'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_page',        'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_attachment',  'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_revision',    'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_wcb_speaker', 'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_wcb_session', 'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_wcb_sponsor', 'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_mes',         'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_taxonomy',    'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_term',        'deprecate_v1_endpoints' );
+add_filter( 'json_prepare_user',        'deprecate_v1_endpoints' );
+
 // Allow some routes to skip the JSON REST API v1 plugin.
 add_action( 'parse_request', 'wcorg_json_v2_compat', 9 );
 
@@ -376,4 +388,20 @@ function wcorg_json_pre_get_posts( $query ) {
 			$query->set( 'post_status', WordCamp_Loader::get_public_post_statuses() );
 		}
 	}
+}
+
+/**
+ * Add a deprecation notice to objects in the response
+ *
+ * @param array $response_data
+ *
+ * @return array
+ */
+function deprecate_v1_endpoints( $response_data ) {
+	$response_data = array_merge(
+		array( '_WARNING_DEPRECATED' => 'All v1 endpoints have been deprecated, and will be deactivated after 2018-04-01. Please switch to the v2 endpoints by then, in order to ensure that your application continues to function. If you have any questions, join the #meta-wordcamp channel on Slack or email ' . EMAIL_CENTRAL_SUPPORT ),
+		$response_data
+	);
+
+	return $response_data;
 }
