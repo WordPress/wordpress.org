@@ -277,9 +277,10 @@ abstract class Directory_Compat {
 			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
 
 			// Add plugin- and theme-specific filters and actions.
-			add_action( 'wporg_compat_view_sidebar', array( $this, 'do_view_sidebar' ) );
+			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_view_header' ) );
 			add_action( 'wporg_compat_before_single_view', array( $this, 'do_subscription_link' ), 11 );
+			add_action( 'wporg_compat_before_single_view', array( $this, 'do_search_form' ), 11 );
 
 			// Add output filters and actions.
 			add_filter( 'bbp_get_view_link', array( $this, 'get_view_link' ), 10, 2 );
@@ -702,6 +703,13 @@ abstract class Directory_Compat {
 		if ( $term_subscription ) {
 			echo $term_subscription;
 		}
+	}
+
+	/**
+	 * Display a project-specific search form in compat views.
+	 */
+	function do_search_form() {
+		get_search_form();
 	}
 
 	/**

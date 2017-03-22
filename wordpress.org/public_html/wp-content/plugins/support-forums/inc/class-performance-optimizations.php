@@ -86,6 +86,10 @@ class Performance_Optimizations {
 			$search_terms = get_search_query( false );
 		}
 
+		if ( isset( $_GET['intext'] ) ) {
+			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+		}
+
 		if ( $search_terms ) {
 			$search_url = sprintf( 'https://wordpress.org/search/%s/?forums=1', urlencode( $search_terms ) );
 			$search_url = esc_url_raw( $search_url );
