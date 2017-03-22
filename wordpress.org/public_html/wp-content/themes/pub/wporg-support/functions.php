@@ -261,6 +261,36 @@ function wporg_support_is_compat_view( $view_id = 0 ) {
 }
 
 /**
+ * Get current plugin or theme object in plugin- or theme-specific views.
+ *
+ * @return object|null Plugin or theme object on success, null on failure.
+ */
+function wporg_support_get_compat_object() {
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
+		return null;
+	}
+
+	$object          = null;
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
+
+	if ( ! empty( $plugin_instance->plugins->plugin ) ) {
+		$object = $plugin_instance->plugins->plugin;
+
+		/* translators: %s: link to plugin support or review forum */
+		$object->prefixed_title = sprintf( __( 'Plugin: %s', 'wporg-forums' ), $object->post_title );
+		$object->type           = 'plugin';
+	} elseif ( ! empty( $plugin_instance->themes->theme ) ) {
+		$object = $plugin_instance->themes->theme;
+
+		/* translators: %s: link to theme support or review forum */
+		$object->prefixed_title = sprintf( __( 'Theme: %s', 'wporg-forums' ), $object->post_title );
+		$object->type           = 'theme';
+	}
+
+	return $object;
+}
+
+/**
  * Display a notice for messages caught in the moderation queue.
  */
 function wporg_support_add_moderation_notice() {
