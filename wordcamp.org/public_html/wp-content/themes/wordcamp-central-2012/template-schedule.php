@@ -76,7 +76,11 @@ get_header(); ?>
 						or <a href="https://github.com/wordpress-mobile/WordCamp-Android">contribute on GitHub</a>.
 					</li>
 					<li><strong>ICS Calendar</strong> -- Add this URL as a remote calendar in your calendar application to subscribe: <?php echo esc_url( site_url( 'calendar.ics' ) ); ?></li>
-					<li><strong>JSON API</strong> -- This can be used by developers of mobile apps, websites, etc: https://central.wordcamp.org/wp-json/posts?type=wordcamp</li>    <?php // URL is hardcoded because the v2 URL for this will probably be different, but back-compat will be maintained ?>
+					<li>
+						<strong>JSON API</strong> --
+						This can be used by developers of mobile apps, websites, etc: <?php echo esc_url( get_rest_url( null, 'wp/v2/wordcamps' ) ); ?>.
+						If you'd like to include meetup events too, then you may want to use <a href="https://codex.wordpress.org/WordPress.org_API#Events">api.wordpress.org/events</a> instead.
+					</li>
 				</ul>
 
 			</div><!-- #content -->
