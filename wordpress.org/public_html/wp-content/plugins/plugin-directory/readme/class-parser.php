@@ -379,7 +379,7 @@ class Parser {
 			if ( $this->faq ) {
 				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
-					$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
+					$this->sections['faq'] .= "<dt><button class=\"button-link\" aria-expanded=\"false\">{$question}</button></dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
 			}
