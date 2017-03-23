@@ -16,15 +16,12 @@
 		border-bottom: 1px solid $color__border;
 	}
 
-	.button-link {
+	dt {
 		border-top: 1px solid $color__border;
 		cursor: pointer;
 		font-size: ms( 0 );
 		font-weight: 600;
-		margin-bottom: 1px;
 		padding: 1rem 0;
-		text-align: left;
-		width: 100%;
 
 		&:before {
 			content: "\f347";
@@ -33,13 +30,13 @@
 			margin: 0 1rem;
 		}
 
-		&.no-focus {
-			box-shadow: none;
-			outline: none;
-		}
-
 		&.open:before {
 			content: "\f343";
+		}
+
+		.button-link.no-focus {
+			box-shadow: none;
+			outline: none;
 		}
 	}
 
