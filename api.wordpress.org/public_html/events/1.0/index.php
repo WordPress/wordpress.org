@@ -458,9 +458,10 @@ function get_events( $args = array() ) {
 
 	// If we want nearby events, create a WHERE based on a bounded box of lat/long co-ordinates.
 	if ( !empty( $args['nearby'] ) ) {
+		// Distances in kilometers
 		$event_distances = array(
 			'meetup' => 100,
-			'wordcamp' => 350,
+			'wordcamp' => 400,
 		);
 		$nearby_where = array();
 		$nearby_vals = '';
