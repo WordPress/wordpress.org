@@ -57,6 +57,9 @@ class Upload_Handler {
 	 * @return string Failure or success message.
 	 */
 	public function process_upload() {
+		// Temporarily disable submissions.
+		return __( 'Plugin Submissions are temporarily disabled.', 'wporg-plugins' );
+
 		$zip_file = $_FILES['zip_file']['tmp_name'];
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
