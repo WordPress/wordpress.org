@@ -72,6 +72,8 @@ class Jetpack_Search {
 
 	const CACHE_GROUP = 'jetpack-search';
 	const CACHE_EXPIRY = 300;
+	const ERROR_COUNT_KEY = 'error-count-';
+	const ERROR_COUNT_WINDOW = 60; // seconds
 
 	protected function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
@@ -167,6 +169,53 @@ class Jetpack_Search {
 	/////////////////////////////////////////////////////////
 	// Raw Search Query
 
+	/* 
+	 * Return a count of the number of search API errors within the last ERROR_COUNT_WINDOW seconds
+	 */
+	protected function get_error_volume() {
+		// Use a dual-tick window like nonces
+		$tick = ceil( time() / (self::ERROR_COUNT_WINDOW/2) );
+
+		return intval( wp_cache_get( self::ERROR_COUNT_KEY . $tick, self::CACHE_GROUP ) ) 
+			 + intval( wp_cache_get( self::ERROR_COUNT_KEY . ($tick -1), self::CACHE_GROUP ) );
+	}
+
+	/* 
+	 *	Increment the recent error volume by $count.
+	 */
+	protected function increment_error_volume( $count = 1 ) {
+		// wp_cache_incr() bails if the key does not exist
+		$tick = ceil( time() / (self::ERROR_COUNT_WINDOW/2) );
+		wp_cache_add( self::ERROR_COUNT_KEY . $tick, 0, self::CACHE_GROUP, self::ERROR_COUNT_WINDOW );
+		return wp_cache_incr( self::ERROR_COUNT_KEY . $tick, $count, self::CACHE_GROUP );
+	}
+
+	/*
+	 * Determine whether or not the recent error volume is low enough to allow a fresh API call.
+	 */
+	protected function error_volume_is_low() {
+		// This cache key keeps a global-ish count of recent errors (per memcache instance).
+		// Used for random exponential backoff when errors start to pile up, as they will if there is a network outage for example.
+		$error_volume = max( $this->get_error_volume(), 0 ); // >= 0
+
+		// This gives us a threshold with a gentle curve from 10 down to 0
+		// The idea being that for a small volume of errors ( < 10 ) we'll have a 100% chance of attempting a new search
+		// For 10-15 errors, an 80-90% chance
+		// For 20 errors, a 50% chance
+		// For 40+ errors, a 0% chance
+
+		$threshold = ceil( 10 / ( 1 + pow( $error_volume / 20, 4 ) ) );
+		return mt_rand( 1, 10 ) <= $threshold;
+	}
+
+	/*
+	 * Trigger a search error message and increment the recent error volume.
+	 */
+	protected function search_error( $reason ) {
+		trigger_error( 'Plugin directory search: '.$reason, E_USER_WARNING );
+		return $this->increment_error_volume();
+	}
+
 	/*
 	 * Run a search on the WP.com public API.
 	 *
@@ -184,14 +233,22 @@ class Jetpack_Search {
 		// Use a temporary lock to prevent cache stampedes. This ensures only one process (per search term per memcache instance) will run the remote post.
 		// Other processes will use the stale cached value if it's present, even for a while after the expiration time if a fresh value is still being fetched.
 		if ( wp_cache_add( $lock_key, 1, self::CACHE_GROUP, 15 ) ) {
-			$request = wp_remote_post( $service_url, array(
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
-				'timeout' => 10,
-				'user-agent' => 'jetpack_search',
-				'body' => $json_es_args,
-			) );
+
+			// If the error volume is high, there's a proportionally lower chance that we'll actually attempt to hit the API.
+			if ( $this->error_volume_is_low() ) {
+				$request = wp_remote_post( $service_url, array(
+					'headers' => array(
+						'Content-Type' => 'application/json',
+					),
+					'timeout' => 10,
+					'user-agent' => 'jetpack_search',
+					'body' => $json_es_args,
+				) );
+			} else {
+				trigger_error( 'Plugin directory search: skipping search due to high error volume', E_USER_WARNING );
+				// Hopefully we still have a cached response to return
+				return $response;
+			}
 
 			// If there's a network or HTTP error, we'll intentionally leave the temporary lock to expire in a few seconds.
 			// Other requests during that window will use the stale cached value. We'll try another remote request once this lock expires.
@@ -201,9 +258,9 @@ class Jetpack_Search {
 				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
 				if ( is_wp_error( $request ) )
-					trigger_error( 'Plugin directory search: http error '.$request->get_error_message(), E_USER_WARNING );
+					$this->search_error( 'http error '.$request->get_error_message(), E_USER_WARNING );
 				else
-					trigger_error( 'Plugin directory search: http status '.wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
+					$this->search_error( 'http status '.wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
 
 				// If we have a stale cached response, return that. Otherwise, return the error object.
 				if ( $response )
@@ -218,9 +275,9 @@ class Jetpack_Search {
 				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
 				if ( isset( $fresh_response['error'] ) )
-					trigger_error( 'Plugin directory search: remote error '.$fresh_response['error'], E_USER_WARNING );
+					$this->search_error( 'remote error '.$fresh_response['error'], E_USER_WARNING );
 				else
-					trigger_error( 'Plugin directory search: invalid json response', E_USER_WARNING );
+					$this->search_error( 'invalid json response', E_USER_WARNING );
 
 				// Return a stale response if we have one
 				if ( $response )
