@@ -65,8 +65,24 @@ class Author_Card {
 
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 			$user = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
-			if ( ! empty( $user->allcaps['bbp_blocked'] ) ) 
-				echo '<p>This user is: <strong><span title="User is banned from logging into WordPress.org">banned</span></strong></p>';
+			$statuses = array();
+
+			if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
+				$statuses['banned'] = __( 'User is banned from logging into WordPress.org', 'wporg-plugins' );
+			}
+
+			if ( (bool) get_user_meta( $user->ID, 'is_bozo', true ) ) {
+				$statuses['flagged'] = __( 'User is flagged in the support forums', 'wporg-plugins' );
+			}
+
+			if ( $statuses ) {
+				$labels = array();
+				foreach ( $statuses as $status => $desc ) {
+					$labels[] = sprintf( '<strong><span title="%s">%s</span></strong>', esc_attr( $desc ), $status );
+				}
+				/* translators: %s: Comma-separated list of negative user status labels */
+				echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
+			}
 		}
 
 		$post_ids = get_posts( array(
