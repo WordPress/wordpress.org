@@ -44,6 +44,9 @@ class Hooks {
 		add_action( 'bbp_new_reply',  array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 		add_action( 'bbp_edit_reply', array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 
+		// Honor i18n number formatting.
+		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
+
 		// Store moderator's username on approve/unapprove actions.
 		add_action( 'bbp_approved_topic',   array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_approved_reply',   array( $this, 'store_moderator_username' ) );
@@ -324,6 +327,27 @@ class Hooks {
 		}
 	}
 
+	/**
+	 * Override `bbp_number_format()` to behave like `bbp_number_format_i18n()` under default conditions.
+	 *
+	 * bbPress uses `bbp_number_format()` in lots of places for display.
+	 *
+	 * @param string $formatted_number Formatted number.
+	 * @param string $number           Number before formatting.
+	 * @param bool   $decimals         Display decimals?
+	 * @param int    $dec_point        Decimal point character.
+	 * @param int    $thousands_sep    Thousands separator character.
+	 * @return string
+	 */
+	public function number_format_i18n( $formatted_number, $number, $decimals, $dec_point, $thousands_sep ) {
+		// Format number for i18n unless non-default decimal point or thousands separator provided.
+		if ( '.' === $dec_point && ',' === $thousands_sep ) {
+			$formatted_number = bbp_number_format_i18n( $number, $decimals );
+		}
+
+		return $formatted_number;
+	}
+	
 	/**
 	 * Store moderator's username on approve/unapprove actions.
 	 *
