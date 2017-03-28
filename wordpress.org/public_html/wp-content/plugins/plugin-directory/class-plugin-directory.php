@@ -442,7 +442,7 @@ class Plugin_Directory {
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
 
 		// Handle the old plugin tabs URLs.
-		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin_tab=$matches[1]/#$matches[2]', 'top' );
+		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
@@ -949,6 +949,7 @@ class Plugin_Directory {
 	 */
 	public function filter_query_vars( $vars ) {
 		$vars[] = 'favorites_user';
+		$vars[] = 'redirect_plugin';
 		$vars[] = 'redirect_plugin_tab';
 		$vars[] = 'plugin_admin';
 
@@ -1006,8 +1007,8 @@ class Plugin_Directory {
 	 */
 	function custom_redirects() {
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
-		if ( get_query_var( 'redirect_plugin_tab' ) ) {
-			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin_tab' ) ) );
+		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
+			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ) );
 			die();
 		}
 
