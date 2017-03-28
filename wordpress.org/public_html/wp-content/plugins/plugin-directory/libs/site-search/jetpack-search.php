@@ -223,7 +223,7 @@ class Jetpack_Search {
 	 * @return object : the response from the public api (could be a WP_Error)
 	 */
 	public function search( $es_args ) {
-		$service_url = 'http://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
+		$service_url = 'https://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
 		$json_es_args = json_encode( $es_args );
 		$cache_key = md5( $json_es_args );
 		$lock_key = 'lock-'.$cache_key;
@@ -241,7 +241,7 @@ class Jetpack_Search {
 						'Content-Type' => 'application/json',
 					),
 					'timeout' => 10,
-					'user-agent' => 'jetpack_search',
+					'user-agent' => 'WordPress.org/jetpack_search',
 					'body' => $json_es_args,
 				) );
 			} else {
