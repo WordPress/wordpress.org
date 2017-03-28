@@ -14,7 +14,7 @@
 		ul li.current-menu-item:after,
 		ul li.current_page_parent:after,
 		ul li a.current ~ .uparrow {
-			border-bottom-color: #0073aa;
+			border-bottom-color: $color__wp-blue;
 		}
 	}
 
