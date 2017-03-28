@@ -1041,7 +1041,7 @@ class Plugin_Directory {
 			}
 
 			// Otherwise, handle a plugin redirect.
-			if ( $plugin = self::get_plugin_post( $path[2] ) ) {
+			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
 					wp_safe_redirect( $permalink );
