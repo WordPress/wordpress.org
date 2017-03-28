@@ -7,7 +7,7 @@ if ( 'cli' != php_sapi_name() ) {
 	die();
 }
 
-//ob_start();
+ob_start();
 
 $opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'versions:', 'async' ) );
 
@@ -65,8 +65,8 @@ if ( empty( $versions ) ) {
 	// Rebuild them all!
 	$svn_tags = SVN::ls( "http://plugins.svn.wordpress.org/{$plugin_slug}/tags/" );
 	if ( false === $svn_tags ) {
-		fwrite( STDERR, "Error! Failed to retrieve SVN tag listing." );
-		exit(1);
+		fwrite( STDERR, "{$plugin_slug}: Warning: Failed to retrieve SVN tag listing, proceeding with trunk rebuilding only.\n" );
+		$svn_tags = array();
 	}
 
 	$versions = array_map(
@@ -77,21 +77,26 @@ if ( empty( $versions ) ) {
 }
 
 if ( ! $versions ) {
-	fwrite( STDERR, "Error! No versions specified (or we couldn't find any)" );
+	fwrite( STDERR, "{$plugin_slug}: Error! No versions specified.\n" );
 	exit(1);
 }
 
 echo "Rebuilding ZIPs for $plugin_slug... ";
 try {
 	$zip_builder = new ZIP\Builder();
-	$zip_builder->build(
-		$plugin_slug,
-		$versions,
-		"{$plugin_slug}: Rebuild triggered by " . php_uname('n' )
-	);
+
+	// (re)Build & Commit 5 Zips at a time to avoid limitations.
+	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
+		$zip_builder->build(
+			$plugin_slug,
+			$versions_to_build,
+			"{$plugin_slug}: Rebuild triggered by " . php_uname('n' )
+		);
+	}
 
 	echo "OK. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
 } catch( \Exception $e ) {
 	fwrite( STDERR, "{$plugin_slug}: Zip Rebuild failed: " . $e->getMessage() . "\n" );
+	echo "Failed. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
 	exit(1);
 }
