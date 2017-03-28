@@ -31,7 +31,7 @@ class Screenshots {
 		 */
 		foreach ( $screen_shots as $image ) {
 			$screen_shot = sprintf( '<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" alt="" /></a>',
-				Template::get_asset_url( $plugin, $image )
+				esc_url( Template::get_asset_url( $plugin, $image ) )
 			);
 
 			if ( $descriptions && ! empty( $descriptions[ (int)$image['resolution'] ] ) ) {

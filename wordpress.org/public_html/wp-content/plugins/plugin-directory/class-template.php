@@ -395,7 +395,7 @@ class Template {
 			$url = jetpack_photon_url( $url, array( 'strip' => 'all' ) );
 		}
 
-		return esc_url( $url );
+		return esc_url_raw( $url );
 	}
 
 	/**
