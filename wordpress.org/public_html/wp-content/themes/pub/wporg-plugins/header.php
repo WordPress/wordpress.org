@@ -58,8 +58,5 @@ require WPORGPATH . 'header.php';
 						</div>
 					</nav><!-- #site-navigation -->
 				<?php endif; ?>
-				<div class="feedback-survey"><a href="http://wordpressdotorg.polldaddy.com/s/new-plugin-directory"><span class="dashicons dashicons-megaphone"></span><span class="survey-msg">
-					<?php _e( 'Share your feedback!' ); ?>
-				</span></a></div>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
