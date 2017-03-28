@@ -48,20 +48,20 @@ google.load( 'visualization', '1', { packages: ['corechart'] } );
 		} );
 
 		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1&callback=?', function( summary ) {
-			var $tbody = $('table#plugin-download-history-stats tbody:last-child');
+			var $tbody = $( '#plugin-download-history-stats' ).find( 'tbody:last-child' ),
+				$row, count, field;
 
-			for ( var summary_field in summary ) {
-				if ( ! summary.hasOwnProperty( summary_field ) ) {
+			for ( field in summary ) {
+				if ( ! summary.hasOwnProperty( field ) ) {
 					continue;
 				}
 
-				var text = settings.l10n[ summary_field ];
-				var count = parseInt( summary[ summary_field ] ).toLocaleString();
-				var $newrow = $( '<tr><th scope="row"></th><td>0</td></tr>' );
+				count = parseInt( Number( summary[ field ] ) ).toLocaleString();
+				$row  = $( '<tr><th scope="row"></th><td>0</td></tr>' );
 
-				$newrow.find( 'th' ).text( text );
-				$newrow.find( 'td' ).text( count );
-				$tbody.append( $newrow );
+				$row.find( 'th' ).text( settings.l10n[ field ] );
+				$row.find( 'td' ).text( count );
+				$tbody.append( $row );
 			}
 		} );
 
