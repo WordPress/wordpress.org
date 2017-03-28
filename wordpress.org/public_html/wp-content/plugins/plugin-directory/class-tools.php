@@ -49,7 +49,7 @@ class Tools {
 		if ( $number < 1 || $number > 100 ) {
 			$number = 2;
 		}
-		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_last{$number}_reviews", 'wporg-plugins' ) ) ) {
+		if ( false === ( $reviews = wp_cache_get( "{$plugin_slug}_last{$number}", 'plugin-reviews' ) ) ) {
 			global $wpdb;
 
 			$reviews = $wpdb->get_results( $wpdb->prepare(
@@ -62,7 +62,7 @@ class Tools {
 			ORDER BY r.review_id DESC
 			LIMIT %d", $plugin_slug, $number ) );
 
-			wp_cache_set( "{$plugin_slug}_last{$number}_reviews", $reviews, 'wporg-plugins', HOUR_IN_SECONDS );
+			wp_cache_set( "{$plugin_slug}_last{$number}", $reviews, 'plugin-reviews', 12 * HOUR_IN_SECONDS );
 		}
 
 		return $reviews;
@@ -75,15 +75,20 @@ class Tools {
 	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param string $plugin_slug The plugin slug.
+	 * @param bool   $use_cache   If we should use the cache, or fetch new data.
 	 * @return array The list of user_login's which have commit.
 	 */
-	public static function get_plugin_committers( $plugin_slug ) {
-		if ( false === ( $committers = wp_cache_get( "{$plugin_slug}_committer", 'wporg-plugins' ) ) ) {
+	public static function get_plugin_committers( $plugin_slug, $use_cache = true ) {
+		if ( ! $plugin_slug ) {
+			return array();
+		}
+
+		if ( ! $use_cache || false === ( $committers = wp_cache_get( $plugin_slug, 'plugin-committers' ) ) ) {
 			global $wpdb;
 
 			$committers = $wpdb->get_col( $wpdb->prepare( 'SELECT user FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE path = %s', "/{$plugin_slug}" ) );
 
-			wp_cache_set( "{$plugin_slug}_committer", $committers, 'wporg-plugins' );
+			wp_cache_set( $plugin_slug, $committers, 'plugin-committers', 12 * HOUR_IN_SECONDS );
 		}
 
 		return $committers;
@@ -107,7 +112,7 @@ class Tools {
 			return false;
 		}
 
-		if ( false === ( $plugins = wp_cache_get( "{$user->user_login}_committer", 'wporg-plugins' ) ) ) {
+		if ( false === ( $plugins = wp_cache_get( $user->user_login, 'committer-plugins' ) ) ) {
 			global $wpdb;
 
 			$plugins = $wpdb->get_col( $wpdb->prepare( 'SELECT path FROM `' . PLUGINS_TABLE_PREFIX . 'svn_access' . '` WHERE user = %s', $user->user_login ) );
@@ -115,7 +120,7 @@ class Tools {
 				return trim( $plugin, '/' );
 			}, $plugins );
 
-			wp_cache_set( "{$user->user_login}_committer", $plugins, 'wporg-plugins' );
+			wp_cache_set( $user->user_login, $plugins, 'committer-plugins', 12 * HOUR_IN_SECONDS );
 		}
 
 		return $plugins;
@@ -134,7 +139,7 @@ class Tools {
 		}
 
 		$committer_slugs = array();
-		foreach ( Tools::get_plugin_committers( $plugin_slug ) as $committer ) {
+		foreach ( Tools::get_plugin_committers( $plugin_slug, false /* Do not use the cache */ ) as $committer ) {
 			$user = get_user_by( 'login', $committer );
 			if ( $user ) {
 				$committer_slugs[] = $user->user_nicename;
@@ -161,7 +166,7 @@ class Tools {
 			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! $plugin_slug || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 
@@ -178,8 +183,8 @@ class Tools {
 			'access' => 'rw',
 		) );
 
-		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
-		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
+		wp_cache_delete( $plugin_slug, 'plugin-committers' );
+		wp_cache_delete( $user->user_login, 'committer-plugins' );
 		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
 
 		return $result;
@@ -202,7 +207,7 @@ class Tools {
 			$user = new \WP_User( $user );
 		}
 
-		if ( ! $user->exists() || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
+		if ( ! $user->exists() || ! $plugin_slug || ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 			return false;
 		}
 
@@ -211,8 +216,8 @@ class Tools {
 			'user' => $user->user_login,
 		) );
 
-		wp_cache_delete( "{$plugin_slug}_committer", 'wporg-plugins' );
-		wp_cache_delete( "{$user->user_login}_committer", 'wporg-plugins' );
+		wp_cache_delete( $plugin_slug, 'plugin-committers' );
+		wp_cache_delete( $user->user_login, 'committer-plugins' );
 		Tools::sync_plugin_committers_with_taxonomy( $plugin_slug );
 
 		return $result;
