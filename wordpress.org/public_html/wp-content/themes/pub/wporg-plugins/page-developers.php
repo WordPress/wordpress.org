@@ -40,7 +40,7 @@ get_header(); ?>
 
 						<h3><?php _e( 'Submission is Simple', 'wporg-plugins' ); ?></h3>
 						<ol>
-							<li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
+							<li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ), esc_url(' https://login.wordpress.org/register' ) ); ?></li>
 							<li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-plugins' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
 							<li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, it will either be approved or you will be emailed and asked to provide more information and/or make corrections.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
 							<li><?php printf( __( 'Once approved, you&#8217;ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you&#8217;ll store your plugin.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
