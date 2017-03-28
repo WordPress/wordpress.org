@@ -192,12 +192,12 @@ class Serve {
 
 		$wpdb->query( $wpdb->prepare(
 			"INSERT INTO {$stats_download_table} (`plugin_slug`, `downloads`) VALUES ( %s, 1 ) ON DUPLICATE KEY UPDATE `downloads` = `downloads` + 1",
-			$stats['plugin_slug']
+			$request['slug']
 		) );
 
 		$wpdb->query( $wpdb->prepare(
 			"INSERT INTO {$stats_download_daily_table} (`plugin_slug`, `stamp`, `downloads`) VALUES ( %s, %s, 1 ) ON DUPLICATE KEY UPDATE `downloads` = `downloads` + 1",
-			$stats['plugin_slug'],
+			$request['slug'],
 			gmdate( 'Y-m-d' )
 		) );
 
