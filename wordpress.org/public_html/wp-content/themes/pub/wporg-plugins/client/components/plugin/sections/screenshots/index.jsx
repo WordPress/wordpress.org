@@ -14,7 +14,7 @@ export const Screenshots = ( { screenshots, translate } ) => {
 	const items = map( screenshots, ( { caption, src } ) => ( {
 		original: src,
 		originalAlt: '',
-		thumbnail: src + '&width=100',
+		thumbnail: src,
 		thumbnailAlt: caption || '',
 		description: caption || false,
 	} ) );
