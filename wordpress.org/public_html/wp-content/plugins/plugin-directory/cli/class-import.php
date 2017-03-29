@@ -83,9 +83,7 @@ class Import {
 
 		// Bump last updated if the version has changed, but only if this isn't a fresh import.
 		if ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) {
-			if ( $plugin_existed_already ) {
-				$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
-			}
+			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
 
 		// Plugins should move from 'approved' to 'publish' on first parse
