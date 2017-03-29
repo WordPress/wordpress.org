@@ -371,29 +371,25 @@ class Template {
 		if ( ! empty( $asset['location'] ) && 'plugin' == $asset['location'] ) {
 
 			// Screenshots in the plugin folder - /plugins/plugin-name/screenshot-1.png.
-			$format = 'https://plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/trunk/%3$s';
+			$format = 'https://plugins.svn.wordpress.org/%1$s/trunk/%2$s';
 		} else {
 
 			// Images in the assets folder - /plugin-name/assets/screenshot-1.png.
-			$format = 'https://plugins.svn.wordpress.org/!svn/bc/%1$s/%2$s/assets/%3$s';
-		}
-
-		// Photon does not support SVG files. https://github.com/Automattic/jetpack/issues/81
-		if ( strpos( $asset['filename'], '.svg' ) ) {
-			$cdn = false;
+			$format = 'https://plugins.svn.wordpress.org/%1$s/assets/%2$s';
 		}
 
 		$url = sprintf(
 			$format,
-			$asset['revision'],
 			get_post( $post )->post_name,
 			$asset['filename']
 		);
 
-		// Use Jetpacks Photon CDN when available.
-		if ( $cdn && function_exists( 'jetpack_photon_url' ) ) {
-			$url = jetpack_photon_url( $url, array( 'strip' => 'all' ) );
+		if ( $cdn ) {
+			$url = str_replace( 'plugins.svn.wordpress.org', 'ps.w.org', $url );
 		}
+
+		// Add a cache-buster based on the file revision.
+		$url = add_query_arg( 'rev', $asset['revision'], $url );
 
 		return esc_url_raw( $url );
 	}
