@@ -341,10 +341,17 @@ function wcorg_json_v2_compat( $request ) {
 
 	// Determine if it's a v2 request
 	$is_route_v2 = false;
-	foreach ( rest_get_server()->get_namespaces() as $namespace ) {
-		if ( 0 === strpos( $_SERVER[ 'REQUEST_URI' ], "/$rest_prefix/$namespace" ) ) {
-			$is_route_v2 = true;
-			break;
+
+	if ( rest_get_url_prefix() === trim( $_SERVER['REQUEST_URI'], '/' ) ) {
+		$is_route_v2 = true;
+	}
+
+	if ( ! $is_route_v2 ) {
+		foreach ( rest_get_server()->get_namespaces() as $namespace ) {
+			if ( 0 === strpos( $_SERVER['REQUEST_URI'], "/$rest_prefix/$namespace" ) ) {
+				$is_route_v2 = true;
+				break;
+			}
 		}
 	}
 
