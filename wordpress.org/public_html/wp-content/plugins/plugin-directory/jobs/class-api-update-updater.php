@@ -91,6 +91,20 @@ class API_Update_Updater {
 		$plugin_details_cache_key = 'plugin_details:' . ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug );
 		wp_cache_delete( $plugin_details_cache_key, 'update-check-3' );
 
+		// Clear plugin info caches also
+		if ( defined( 'GLOTPRESS_LOCALES_PATH' ) && GLOTPRESS_LOCALES_PATH ) {
+			require GLOTPRESS_LOCALES_PATH;
+
+			$locales = array_filter( array_values( wp_list_pluck( \GP_Locales::locales(), 'wp_locale' ) ) );
+
+			foreach ( $locales as $locale ) {
+				$cache_key = "plugin_information:"
+					. ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug )
+					. ":{$locale}";
+				wp_cache_delete( $cache_key, 'plugin_api_info' );
+			}
+		}
+
 		return true;
 	}
 
