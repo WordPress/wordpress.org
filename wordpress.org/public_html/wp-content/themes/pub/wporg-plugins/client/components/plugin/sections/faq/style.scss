@@ -34,9 +34,14 @@
 			content: "\f343";
 		}
 
-		.button-link.no-focus {
-			box-shadow: none;
-			outline: none;
+		.button-link {
+			display: inherit;
+			text-align: inherit;
+
+			&.no-focus {
+				box-shadow: none;
+				outline: none;
+			}
 		}
 	}
 
