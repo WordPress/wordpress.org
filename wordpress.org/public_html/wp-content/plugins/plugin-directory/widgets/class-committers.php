@@ -54,19 +54,26 @@ class Committers extends \WP_Widget {
 					<a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $committer->user_nicename ); ?>">
 						<?php echo Template::encode( $committer->display_name ); ?>
 					</a><br>
+
+					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $committer->user_email ) . ' ' : ''; ?>
 						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
+					<?php else: // This is a hack to avoid doing CSS to make the rows not stack badly. someone fix this please. ?>
+						<br>
+					<?php endif; ?>
 				</li>
 			<?php endforeach; ?>
 
+			<?php if ( current_user_can( 'plugin_add_committer', $post ) ) : ?>
 			<li class="new">
 				<form id="add-committer" action="POST">
 					<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
 					<input type="submit" value="<?php esc_attr_e( 'Add', 'wporg-plugins' ); ?>" />
 				</form>
 			</li>
+			<?php endif; ?>
 		</ul>
 		<script id="tmpl-new-committer" type="text/template">
 			<li data-user="{{ data.nicename }}">
