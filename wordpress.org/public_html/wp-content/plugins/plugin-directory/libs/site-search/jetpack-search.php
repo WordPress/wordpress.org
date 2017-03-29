@@ -979,6 +979,13 @@ class Jetpack_Search {
 								),
 							),
 							array(
+								//there aren't that many plugins with more than 1 million (6 total)
+								// we don't need to differentiate them as much
+								'filter' => array(
+									'range' => array( 'active_installs' => array(
+										'lte' => 1000000
+									) )
+								),
 								'exp' => array(
 									'active_installs' => array(
 										'origin' => 1000000,
