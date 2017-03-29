@@ -56,52 +56,10 @@ class Import {
 
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
-// TODO			throw new Exception( "Unknown Plugin" );
-		}
-
-		$data = $this->export_and_parse_plugin( $plugin_slug );
-
-	// TODO: During development while the bbPress variant is still running, we'll pull details from it and allow importing of any plugin.
-		$topic = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . PLUGINS_TABLE_PREFIX . 'topics WHERE topic_slug = %s', $plugin_slug ) );
-
-		if ( ! $plugin && ! $topic ) {
 			throw new Exception( "Unknown Plugin" );
 		}
 
-		// TODO: During development we're just going to import status from bbPress.
-		$status = 'publish';
-		if ( 2 == $topic->topic_open ) {
-			$status = 'approved';
-		} elseif ( 2 == $topic->forum_id ) {
-			$status = 'pending';
-		} elseif ( 4 == $topic->forum_id || 'rejected-' == substr( $topic->topic_slug, 0, 9 ) ) {
-			$status = 'rejected';
-		} elseif ( 1 == $topic->forum_id && 0 == $topic->topic_open ) {
-			$status = 'closed';
-		} elseif ( 3 == $topic->topic_open ) {
-			$status = 'disabled';
-		}
-
-		$plugin_existed_already = (bool) $plugin;
-		if ( ! $plugin ) {
-			$author_ip = $wpdb->get_var( $wpdb->prepare( 'SELECT poster_ip FROM ' . PLUGINS_TABLE_PREFIX . 'posts WHERE topic_id = %s', $topic->topic_id ) );
-
-			add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
-			$plugin = Plugin_Directory::create_plugin_post( array(
-				'post_name' => $plugin_slug,
-				'post_status' => $status,
-				'post_author' => $topic->topic_poster,
-				'post_date_gmt' => $topic->topic_start_time,
-				'post_date' => $topic->topic_start_time,
-				'post_modified' => $topic->topic_time,
-				'post_modified_gmt' => $topic->topic_time,
-				'meta_input' => array(
-					'_author_ip' => $author_ip,
-				),
-			) );
-			remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
-		}
-		$plugin->post_status = $status;
+		$data = $this->export_and_parse_plugin( $plugin_slug );
 
 		$readme = $data['readme'];
 		$assets = $data['assets'];
@@ -128,6 +86,13 @@ class Import {
 			if ( $plugin_existed_already ) {
 				$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 			}
+		}
+
+		// Plugins should move from 'approved' to 'publish' on first parse
+		// `export_and_parse_plugin()` will throw an exception in the case where plugin files cannot be found,
+		// so by this time the plugin should be live.
+		if ( 'approved' === $plugin->post_status ) {
+			$plugin->post_status = 'publish';
 		}
 
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
