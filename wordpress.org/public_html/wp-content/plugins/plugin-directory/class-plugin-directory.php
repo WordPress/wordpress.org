@@ -688,6 +688,9 @@ class Plugin_Directory {
 				if ( $favorites_user ) {
 					$wp_query->query_vars['favorites_user'] = $favorites_user->user_nicename;
 					$wp_query->query_vars['post_name__in']  = get_user_meta( $favorites_user->ID, 'plugin_favorites', true );
+
+					$wp_query->query_vars['orderby'] = 'post_title';
+					$wp_query->query_vars['order'] = 'ASC';
 				}
 
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
