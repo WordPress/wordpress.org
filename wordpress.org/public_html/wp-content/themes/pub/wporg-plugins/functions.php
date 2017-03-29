@@ -154,7 +154,18 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
  */
 function excerpt_length( $excerpt ) {
 	if ( is_home() || is_archive() ) {
-		$excerpt = wp_trim_words( $excerpt, 15 );
+		/*
+		 * translators: If your word count is based on single characters (e.g. East Asian characters),
+		 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
+		 * Do not translate into your own language.
+		 */
+		if ( strpos( _x( 'words', 'Word count type. Do not translate!' ), 'characters' ) === 0 ) {
+			// Use the default limit of 55 characters for East Asian locales.
+			$excerpt = wp_trim_words( $excerpt );
+		} else {
+			// Limit the excerpt to 15 words for other locales.
+			$excerpt = wp_trim_words( $excerpt, 15 );
+		}
 	}
 
 	return $excerpt;
