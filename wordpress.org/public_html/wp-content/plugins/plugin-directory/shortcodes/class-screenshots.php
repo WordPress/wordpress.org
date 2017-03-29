@@ -25,6 +25,8 @@ class Screenshots {
 			return '';
 		}
 
+		ksort( $screen_shots, SORT_NATURAL );
+
 		/*
 		 * Find the image that corresponds with the text.
 		 * The image numbers are stored within the 'resolution' key.
@@ -34,10 +36,10 @@ class Screenshots {
 				esc_url( Template::get_asset_url( $plugin, $image ) )
 			);
 
-			if ( $descriptions && ! empty( $descriptions[ (int)$image['resolution'] ] ) ) {
-				$caption = $descriptions[ (int)$image['resolution'] ];
+			if ( $descriptions && ! empty( $descriptions[ (int) $image['resolution'] ] ) ) {
+				$caption = $descriptions[ (int) $image['resolution'] ];
 				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $plugin->ID ] );
-				
+
 				$screen_shot .= '<figcaption>' . $caption . '</figcaption>';
 			}
 
