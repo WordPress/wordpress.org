@@ -57,6 +57,7 @@ class WordCamp_Post_Types_Plugin {
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 
 		// REST API
+		add_action( 'init',                     array( $this, 'expose_public_post_meta'  )        );
 		add_filter( 'rest_prepare_wcb_speaker', array( $this, 'link_speaker_to_sessions' ), 10, 2 );
 		add_filter( 'rest_prepare_wcb_session', array( $this, 'link_session_to_speakers' ), 10, 2 );
 
@@ -1399,6 +1400,35 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Add non-sensitive meta fields to the speaker/session REST API endpoints
+	 *
+	 * if we ever want to register meta for purposes other than exposing it in the API, then this function will
+	 * probably need to be re-thought and re-factored.
+	 */
+	public function expose_public_post_meta() {
+		$public_session_fields = array(
+			'_wcpt_session_time' => array(
+				'type'   => 'integer',
+				'single' => true,
+			),
+
+			'_wcpt_session_type' => array(
+				'single' => true,
+			),
+
+			'_wcpt_session_slides' => array(
+				'single' => true,
+			),
+
+			'_wcpt_session_video' => array(
+				'single' => true,
+			),
+		);
+
+		wcorg_register_meta_only_on_endpoint( 'post', $public_session_fields, '/wp-json/wp/v2/sessions/' );
+	}
+
+	/**
 	 * Link all sessions to the speaker in the `speakers` API endpoint
 	 *
 	 * This allows clients to request a speaker and get all their sessions embedded in the response, avoiding
@@ -1923,7 +1953,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_speaker', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'speaker', 'with_front' => true ),
-			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'comments' ),
+			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'comments', 'custom-fields' ),
 			'menu_position'     => 20,
 			'public'            => true,
 			'show_ui'           => true,
@@ -1957,7 +1987,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_session', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'session', 'with_front' => false ),
-			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'thumbnail' ),
+			'supports'          => array( 'title', 'editor', 'author', 'revisions', 'thumbnail', 'custom-fields' ),
 			'menu_position'     => 21,
 			'public'            => true,
 			'show_ui'           => true,
