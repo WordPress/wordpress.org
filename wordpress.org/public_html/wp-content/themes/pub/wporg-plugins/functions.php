@@ -183,7 +183,7 @@ function excerpt_length( $excerpt ) {
 		 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
 		 * Do not translate into your own language.
 		 */
-		if ( strpos( _x( 'words', 'Word count type. Do not translate!' ), 'characters' ) === 0 ) {
+		if ( strpos( _x( 'words', 'Word count type. Do not translate!', 'wporg-plugins' ), 'characters' ) === 0 ) {
 			// Use the default limit of 55 characters for East Asian locales.
 			$excerpt = wp_trim_words( $excerpt );
 		} else {
