@@ -445,12 +445,12 @@ class Plugin_Directory {
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
 		// Handle redirects for broken clients that send #'s to the server
-		add_rewrite_rule( '^([^/]+)/\#(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]', 'top' );
+		add_rewrite_rule( '^([^/]+)/\#(.*)/?$', 'index.php?redirect_plugin=$matches[1]', 'top' );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
 
-		// Remvoe the /admin$ redirect to wp-admin
+		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 
 		// When this plugin is used in the context of a Rosetta site, handle it gracefully.
