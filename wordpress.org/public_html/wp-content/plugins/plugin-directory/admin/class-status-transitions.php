@@ -87,28 +87,25 @@ class Status_Transitions {
 	 */
 	public function approved( $post_id, $post ) {
 		$attachments = get_attached_media( 'application/zip', $post_id );
-
-		// If there is no zip we have nothing to commit. Bail.
-		if ( empty( $attachments ) ) {
-			return;
-		}
-
-		$attachment    = end( $attachments );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
 		$dir = Filesystem::temp_directory( $post->post_name );
-		$dir = Filesystem::unzip( get_attached_file( $attachment->ID ), $dir );
 		foreach ( array( 'assets', 'branches', 'tags', 'trunk' ) as $folder ) {
 			mkdir( "$dir/$folder", 0777 );
 		}
 
-		$plugin_root = $this->get_plugin_root( $dir );
-		// If there is no plugin file we have nothing to commit. Bail.
-		if ( empty( $plugin_root ) ) {
-			return;
+		if ( $attachments ) {
+			$attachment = end( $attachments );
+
+			$unzip_dir = Filesystem::unzip( get_attached_file( $attachment->ID ) );
+
+			$plugin_root = $this->get_plugin_root( $unzip_dir );
+
+			if ( $plugin_root ) {
+				rename( $plugin_root, "$dir/trunk" );
+			}
 		}
-		rename( $plugin_root, "$dir/trunk" );
 
 		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
 
@@ -120,11 +117,6 @@ class Status_Transitions {
 		// Grant commit access.
 		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
 
-		// Promote author if they don't have access yet.
-		if ( ! user_can( $plugin_author, 'plugin_dashboard_access' ) ) {
-			$plugin_author->add_role( 'plugin_committer' );
-		}
-
 		// Send email.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
@@ -133,7 +125,7 @@ class Status_Transitions {
 
 		$content .= __( 'Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.', 'wporg-plugins' ) . "\n\n";
 
-		$content .= "http://plugins.svn.wordpress.org/{$post->post_name}\n\n";
+		$content .= "https://plugins.svn.wordpress.org/{$post->post_name}\n\n";
 
 		$content .= __( 'Here are some handy links to help you get started.', 'wporg-plugins' ) . "\n\n";
 
@@ -147,10 +139,10 @@ class Status_Transitions {
 		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/\n\n";
 
 		$content .= __( 'WordPress Plugin Directory readme.txt standard:', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/readme.txt\n\n";
+		$content .= "https://wordpress.org/plugins/developers/#readme\n\n";
 
 		$content .= __( 'A readme.txt validator:', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/about/validator/\n\n";
+		$content .= "https://wordpress.org/plugins/developers/readme-validator/\n\n";
 
 		$content .= __( 'Plugin Assets (header images etc):', 'wporg-plugins' ) . "\n"; 
 		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/\n\n";
