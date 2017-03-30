@@ -444,6 +444,9 @@ class Plugin_Directory {
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
+		// Handle redirects for broken clients that send #'s to the server
+		add_rewrite_rule( '^([^/]+)/\#(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]', 'top' );
+
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
 
@@ -1015,6 +1018,12 @@ class Plugin_Directory {
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ) );
+			die();
+		}
+	
+		// Handle a redirect for /$plugin/#$tab_name to just /$plugin/, because some clients don't like fragments in redirects
+		if ( get_query_var( 'redirect_plugin' ) ) {
+			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/' ) );
 			die();
 		}
 
