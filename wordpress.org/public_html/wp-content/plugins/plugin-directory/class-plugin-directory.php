@@ -435,17 +435,20 @@ class Plugin_Directory {
 		// Create an archive for a users favorites too.
 		add_rewrite_rule( '^browse/favorites/([^/]+)$', 'index.php?browse=favorites&favorites_user=$matches[1]', 'top' );
 
-		// Handle plugin admin requests
-		add_rewrite_rule( '^([^/]+)/admin/?$', 'index.php?name=$matches[1]&plugin_admin=1', 'top' );
-
 		// Add duplicate search rule which will be hit before the following old-plugin tab rules
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
+
+		// Handle plugin admin requests
+		add_rewrite_rule( '^([^/]+)/admin/?$', 'index.php?name=$matches[1]&plugin_admin=1', 'top' );
 
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
 
 		// If changing capabilities around, uncomment this.
 		//Capabilities::add_roles();
+
+		// Remvoe the /admin$ redirect to wp-admin
+		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 
 		// When this plugin is used in the context of a Rosetta site, handle it gracefully.
 		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
