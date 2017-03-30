@@ -321,10 +321,10 @@ function wcord_get_wordcamp_duration( WP_Post $wordcamp ) {
  * @param string $meta_type   Type of object this meta is registered to. 'post', 'user', 'term', etc
  * @param array  $meta_fields An array index by the field slug, with values to be passed to `register_meta()` as
  *                            `$args`. For example, `array( '_wcpt_session_slides' => array( 'single' => true ) )`
- * @param string $endpoint    The full path of the endpoint. For example, '/wp-json/wp/v2/sessions/'
+ * @param string $endpoint    The partial path of the endpoint. For example, '/wp-json/wp/v2/sessions'.
  */
 function wcorg_register_meta_only_on_endpoint( $meta_type, $meta_fields, $endpoint ) {
-	$is_correct_endpoint_request = false !== strpos( $_SERVER['REQUEST_URI'], $endpoint );
+	$is_correct_endpoint_request = false !== strpos( $_SERVER['REQUEST_URI'], untrailingslashit( $endpoint ) );
 
 	if ( ! $is_correct_endpoint_request ) {
 		return;
