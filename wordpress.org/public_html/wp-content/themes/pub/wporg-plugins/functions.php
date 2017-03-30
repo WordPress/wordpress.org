@@ -147,6 +147,30 @@ function custom_body_class( $classes ) {
 add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 
 /**
+ * Append an optimized site name.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ * @return array Filtered title parts.
+ */
+function document_title( $title ) {
+	if ( is_front_page() ) {
+		$title['title'] = __( 'WordPress Plugins', 'wporg-plugins' );
+	} else {
+		$title['site'] = __( 'WordPress Plugins', 'wporg-plugins' );
+	}
+
+	return $title;
+}
+add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title' );
+
+/**
  * Shorten excerpt length on index pages, so plugins cards are all the same height.
  *
  * @param string $excerpt The excerpt.
