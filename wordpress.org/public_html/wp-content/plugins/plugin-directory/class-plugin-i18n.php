@@ -430,26 +430,40 @@ class Plugin_I18n {
 	 * @return array
 	 */
 	public function find_all_translations_for_plugin( $slug, $branch, $min_percent = 0 ) {
+		$post = Plugin_Directory::get_plugin_post( $slug );
+
+		return wp_filter_object_list( $this->get_locales( $post, $branch, $min_percent ), null, null, 'wp_locale' );
+	}
+
+	/**
+	 * Returns a list of locale objects for a given plugin slug and branch.
+	 *
+	 * @param int|\WP_Post|null $post        Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $branch      Optional. Branch - 'stable-readme' for example. Default: 'stable'.
+	 * @param int               $min_percent Optional. Only return locales where percent_translated is >= this value.
+	 *                                       Default: 95.
+	 * @return array
+	 */
+	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
+		$post = get_post( $post );
 
 		// This naively hits the API. It could probably be re-written to query the DB instead.
-		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $slug . '/' . $branch, array( 'https' ) );
+		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, array( 'https' ) );
 
-		$out    = array();
-		$http   = new \WP_Http();
-		$result = $http->request( $api_url );
+		$locales = array();
+		$http    = new \WP_Http();
+		$result  = $http->request( $api_url );
 
 		if ( ! is_wp_error( $result ) ) {
 			$data = json_decode( $result['body'] );
 
-			if ( $data && isset( $data->translation_sets ) ) {
-				foreach ( $data->translation_sets as $translation ) {
-					if ( $translation->percent_translated >= $min_percent ) {
-						$out[] = $translation->wp_locale;
-					}
-				}
+			if ( ! empty( $data->translation_sets ) ) {
+				$locales = array_filter( $data->translation_sets, function( $locale ) use ( $min_percent ) {
+					return $locale->percent_translated >= $min_percent;
+				} );
 			}
 		}
 
-		return $out;
+		return $locales;
 	}
 }
