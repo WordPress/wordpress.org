@@ -1867,6 +1867,8 @@ class WordCamp_Post_Types_Plugin {
 			'hierarchical'      => false,
 			'query_var'         => true,
 			'menu_icon'         => 'dashicons-megaphone',
+			'show_in_rest'      => true,
+			'rest_base'         => 'speakers',
 		) );
 
 		// Session post type labels.
@@ -1899,6 +1901,8 @@ class WordCamp_Post_Types_Plugin {
 			'hierarchical'      => false,
 			'query_var'         => true,
 			'menu_icon'         => 'dashicons-schedule',
+			'show_in_rest'      => true,
+			'rest_base'         => 'sessions',
 		) );
 
 		// Sponsor post type labels.
