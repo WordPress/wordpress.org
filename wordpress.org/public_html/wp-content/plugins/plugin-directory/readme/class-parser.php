@@ -318,11 +318,6 @@ class Parser {
 		// Filter out any empty sections.
 		$this->sections = array_filter( $this->sections );
 
-		// Use the first line of the description for the short description if not provided.
-		if ( empty( $this->short_description ) && ! empty( $this->sections['description'] ) ) {
-			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-		}
-
 		// Use the short description for the description section if not provided.
 		if ( empty( $this->sections['description'] ) ) {
 			$this->sections['description'] = $this->short_description;
@@ -351,6 +346,11 @@ class Parser {
 		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
 		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
 		$this->faq            = array_map( array( $this, 'parse_markdown' ), $this->faq );
+
+		// Use the first line of the description for the short description if not provided.
+		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
+			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
@@ -575,7 +575,7 @@ class Parser {
 		 */
 		$heading_style = 'bold'; // 'heading' or 'bold'
 		foreach ( $trimmed_lines as $trimmed ) {
-			if ( $trimmed[0] == '#' || $trimmed[0] == '=' ) {
+			if ( $trimmed && ( $trimmed[0] == '#' || $trimmed[0] == '=' ) ) {
 				$heading_style = 'heading';
 				break;
 			}
