@@ -45,6 +45,7 @@ class Meta extends \WP_Widget {
 			<?php if ( $built_for = get_the_term_list( $post->ID, 'plugin_built_for', '', ', ' ) ) : ?>
 				<li><?php printf( __( 'Designed to work with: %s', 'wporg-plugins' ), $built_for ); ?></li>
 			<?php endif; ?>
+
 			<li><?php printf( __( 'Version: %s', 'wporg-plugins' ), '<strong>' . get_post_meta( $post->ID, 'version', true ) . '</strong>' ); ?></li>
 			<li>
 				<?php
@@ -55,18 +56,30 @@ class Meta extends \WP_Widget {
 				?>
 			</li>
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
-			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) { ?>
+
+			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) : ?>
 				<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . $tested_up_to . '</strong>' ); ?></li>
-			<?php } ?>
+			<?php endif; ?>
+
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li><?php
+				<li class="clear"><?php
 					$terms = get_the_terms( $post, 'plugin_tags' );
-					if ( 1 == count( $terms ) ) {
+					if ( 1 == count( $terms ) ) :
 						printf( __( 'Tag: %s', 'wporg-plugins' ), $tags );
-					} else {
+					else :
 						printf( __( 'Tags: %s', 'wporg-plugins' ), $tags );
-					}
+					endif;
 				?></li>
+			<?php endif; ?>
+
+			<?php if ( current_user_can( 'plugin_admin_view', $post ) ) : ?>
+				<li class="hide-if-no-js">
+					<?php
+						printf( __( 'Admin access: %s', 'wporg-plugins' ),
+							sprintf( '<strong><a class="plugin-admin" href="%s">%s</a></strong>', esc_url( get_permalink() . 'admin/' ), __( 'View Admin', 'wporg-plugins' ) )
+						);
+					?>
+				</li>
 			<?php endif; ?>
 		</ul>
 
