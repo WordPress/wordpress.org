@@ -171,6 +171,16 @@ function document_title( $title ) {
 add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title' );
 
 /**
+ * Set the separator for the document title.
+ *
+ * @return string Document title separator.
+ */
+function document_title_separator() {
+	return '&mdash;';
+}
+add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
+
+/**
  * Shorten excerpt length on index pages, so plugins cards are all the same height.
  *
  * @param string $excerpt The excerpt.
