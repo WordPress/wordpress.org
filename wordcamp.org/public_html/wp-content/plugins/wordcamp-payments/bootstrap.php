@@ -18,27 +18,7 @@ if ( is_admin() ) {
 	require_once( __DIR__ . '/includes/sponsor-invoice.php' );
 	require_once( __DIR__ . '/includes/reimbursement-request.php' );
 	require_once( __DIR__ . '/includes/encryption.php' );
-
-	$load_budget_tool = true;
-
-	// Don't load the budget tool on these sites.
-	if ( preg_match( '#\.europe\.wordcamp\.org$#', strtolower( $_SERVER['HTTP_HOST'] ) ) ) {
-		$load_budget_tool = false;
-	}
-
-	// Don't load the budget tool on non YYYY. sites.
-	if ( ! preg_match( '#^[0-9]{4}\.#', $_SERVER['HTTP_HOST'] ) ) {
-		$load_budget_tool = false;
-	}
-
-	// Force budget tool on testing.wordcamp.org
-	if ( 'testing.wordcamp.org' == $_SERVER['HTTP_HOST'] ) {
-		$load_budget_tool = true;
-	}
-
-	if ( $load_budget_tool ) {
-		require_once( __DIR__ . '/includes/budget-tool.php' );
-	}
+	require_once( __DIR__ . '/includes/budget-tool.php' );
 
 	$GLOBALS['wordcamp_budgets']    = new WordCamp_Budgets();
 	$GLOBALS['wcp_payment_request'] = new WCP_Payment_Request();
