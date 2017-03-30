@@ -15,7 +15,7 @@ class Developers {
 	 */
 	static function display() {
 		$post   = get_post();
-		$output = '<p>' . __( 'This is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ) . '</p>';
+		$output = '<p>' . sprintf( __( '%s is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ), get_the_title( $post ) ) . '</p>';
 
 		ob_start();
 		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Contributors', array(), array(
