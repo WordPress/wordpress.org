@@ -132,7 +132,7 @@ class Author_Card {
 
 					$plugin_slug = $plugin->post_name;
 					if ( in_array( $plugin->post_status, array( 'draft', 'pending' ) ) ) {
-						$extra .= ' (requested ' . human_time_diff( strtotime( $plugin->topic_start_time ) ) . ' ago)';
+						$extra .= ' (requested ' . human_time_diff( strtotime( $plugin->post_date ) ) . ' ago)';
 						$tooltips[] = 'Requested, remains unapproved.';
 						$classes[]  = 'profile-plugin-requested';
 
