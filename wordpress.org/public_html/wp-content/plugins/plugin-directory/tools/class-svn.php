@@ -205,6 +205,43 @@ class SVN {
 	}
 
 	/**
+	 * Create a folder at a specified SVN location.
+	 *
+	 * @static
+	 *
+	 * @param string $url      The remote URL to create.
+	 * @param string $message  The commit message.
+	 * @param array  $options  Any specific options to pass to SVN.
+	 * @return array {
+	 *     @type bool $result   The result of the operation.
+	 *     @type int  $revision The revision imported.
+	 * }
+	 */
+	public static function mkdir( $url, $message, $options = array() ) {
+		$options[] = 'non-interactive';
+		$options['m'] = $message;
+		if ( empty( $options['username'] ) ) {
+			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		$esc_options = self::parse_esc_parameters( $options );
+
+		$esc_checkout = escapeshellarg( $url );
+
+		$output = self::shell_exec( "svn mkdir $esc_options $esc_checkout 2>&1" );
+		if ( preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
+			$revision = (int) $m['revision'];
+			$result   = true;
+		} else {
+			$result = false;
+			$errors = self::parse_svn_errors( $output );
+		}
+
+		return compact( 'result', 'revision', 'errors' );
+	}
+
+	/**
 	 * List the files in a remote SVN destination.
 	 *
 	 * @static
