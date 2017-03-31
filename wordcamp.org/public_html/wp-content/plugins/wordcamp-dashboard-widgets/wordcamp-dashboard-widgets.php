@@ -227,26 +227,23 @@ class WordCamp_Dashboard_Widgets {
 
 		<ul class="ul-disc">
 			<li>
+				<a href="https://make.wordpress.org/community/2017/03/23/showing-upcoming-local-events-in-wp-admin/">
+					<?php esc_html_e( 'Show Your Upcoming Local Events in wp-admin.', 'wordcamporg' ); ?>
+				</a>
+			</li>
+
+			<li>
 				<a href="https://make.wordpress.org/community/2016/04/26/new-tool-for-creating-personalized-wordcamp-badges/">
 					<?php esc_html_e( 'Create personalized attendee badges.', 'wordcamporg' ); ?>
 				</a>
 			</li>
+
 			<li>
 				<a href="https://make.wordpress.org/community/2016/03/01/new-automated-payments-and-invoicing/">
 					<?php esc_html_e( 'Invoice sponsors, pay vendors, and get reimbursed.', 'wordcamporg' ); ?>
 				</a>
 			</li>
-			<li>
-				<?php
-					printf(
-						wp_kses(
-							__( '<a href="%s">Quickly clone another WordCamp site</a> instead of building yours from scratch.', 'wordcamporg' ),
-							array( 'a' => array( 'href' => true ) )
-						),
-						'https://make.wordpress.org/community/2015/07/09/site-cloner-v1-is-now-available/'
-					);
-				?>
-			</li>
+
 			<li>
 				<?php
 					printf(
