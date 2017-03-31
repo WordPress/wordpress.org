@@ -47,4 +47,4 @@ use WordPressdotorg\Plugin_Directory\Template;
 		</span>
 		</span>
 	</footer>
-</article><!-- #post-## -->
+</article>
