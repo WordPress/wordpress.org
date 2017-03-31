@@ -27,30 +27,28 @@ class Reviews {
 
 		<div class="plugin-reviews">
 			<?php
-		foreach ( $reviews as $review ) :
-				$reviewer = get_user_by( 'id', $review->post_author );
-				if ( ! $reviewer ) :
-					continue;
-				endif;
+			foreach ( $reviews as $review ) :
+				setup_postdata( $review );
 				?>
 				<article class="plugin-review">
 					<div class="review-avatar">
-						<?php echo get_avatar( $reviewer->ID, 60 ); ?>
+						<?php echo get_avatar( get_the_author_meta( 'ID' ), 60 ); ?>
 					</div><div class="review">
 						<header>
-							<?php if ( !empty( $review->ID ) ) : ?>
-								<h3 class="review-title"><a class="url" href="<?php echo esc_url( add_query_arg( array( 'p' => $review->ID ), 'https://wordpress.org/support/plugin/' ) ); ?>"><?php echo $review->post_title; ?></a></h3>
+							<?php if ( ! empty( $review->ID ) ) : ?>
+								<h3 class="review-title"><a class="url" href="<?php echo esc_url( add_query_arg( array( 'p' => $review->ID ), 'https://wordpress.org/support/plugin/' ) ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
 							<?php else: ?>
-								<h3 class="review-title"><?php echo $review->post_title; ?></h3>
+								<h3 class="review-title"><?php echo get_the_title( $review ); ?></h3>
 							<?php endif; ?>
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>
-							<span class="review-author author vcard"><a class="url fn n" href="<?php echo esc_url( get_author_posts_url( $reviewer->ID ) ); ?>"><?php echo Template::encode( $reviewer->display_name ); ?></a></span>
+							<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
 						</header>
-						<p class="review-content"><?php echo $review->post_content; ?></p>
+						<div class="review-content"><?php the_content(); ?></div>
 					</div>
 				</article>
 			<?php endforeach; ?>
 		</div>
+		<?php wp_reset_postdata(); ?>
 
 		<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . get_post()->post_name . '/reviews/' ); ?>">
 			<?php
