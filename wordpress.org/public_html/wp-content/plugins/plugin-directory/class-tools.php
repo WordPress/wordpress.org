@@ -62,7 +62,7 @@ class Tools {
 			ORDER BY r.review_id DESC
 			LIMIT %d", $plugin_slug, $number ) );
 
-			wp_cache_set( "{$plugin_slug}_last{$number}", $reviews, 'plugin-reviews', 12 * HOUR_IN_SECONDS );
+			wp_cache_set( "{$plugin_slug}_last{$number}", $reviews, 'plugin-reviews', HOUR_IN_SECONDS );
 		}
 
 		return $reviews;
