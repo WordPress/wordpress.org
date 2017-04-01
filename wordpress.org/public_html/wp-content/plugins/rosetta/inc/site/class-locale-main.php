@@ -107,6 +107,21 @@ class Locale_Main implements Site {
 					];
 				} )
 		);
+		$options->add_filter_option(
+			( new Filter\Option() )
+				->set_name( 'stats_options' )
+				->set_callback( function( $options ) {
+					$options['roles'] = [
+						'administrator',
+						'editor',
+						'author',
+						Role\Locale_Manager::get_name(),
+					];
+					return $options;
+				} )
+				->set_num_args( 1 )
+		);
+
 		$options->setup();
 	}
 
