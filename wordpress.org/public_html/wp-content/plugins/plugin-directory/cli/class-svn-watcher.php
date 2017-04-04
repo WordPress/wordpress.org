@@ -73,6 +73,9 @@ class SVN_Watcher {
 				// Set it again, so if the next request fails, this exception will be thrown again, until the issue is resolved.
 				wp_cache_set( 'get_plugin_changes_between_failed', time(), 'svn-watch', 60 );
 
+				// Check the status of the cronjobs are sane, as the exception will trigger it to be marked as `failed`.
+				wp_schedule_single_event( time() + 30, 'plugin_directory_check_cronjobs' );
+
 				throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['errors'] ) );
 			} else {
 				// If the job fails again within the next minute, throw an exception (as above)
@@ -161,6 +164,9 @@ class SVN_Watcher {
 	protected function get_head_rev() {
 		$log = SVN::log( self::SVN_URL, 'HEAD' );
 		if ( $log['errors'] || ! $log['log'] ) {
+			// Check the status of the cronjobs are sane, as the exception will trigger it to be marked as `failed`.
+			wp_schedule_single_event( time() + 30, 'plugin_directory_check_cronjobs' );
+
 			throw new Exception( "Unable to determine HEAD revision" );
 		}
 		return array_keys( $log['log'] )[0];

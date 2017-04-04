@@ -14,13 +14,16 @@ class Manager {
 	 */
 	public function __construct() {
 		// Register all the cron task handlers.
-		add_action( 'init', array( $this, 'register_cron_tasks' ) );
+		add_action( 'admin_init', array( $this, 'register_cron_tasks' ) );
 		add_filter( 'cron_schedules', array( $this, 'register_schedules' ) );
 
 		// The actual cron hooks.
 		add_action( 'plugin_directory_meta_sync',        array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_svn_sync',         array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
 		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
+
+		// A cronjob to check cronjobs
+		add_action( 'plugin_directory_check_cronjobs',   array( $this, 'register_cron_tasks' ) );
 
 		// Register the wildcard cron hook tasks.
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
@@ -34,6 +37,7 @@ class Manager {
 	 */
 	public function register_schedules( $schedules ) {
 		$schedules['every_30s'] = array( 'interval' => 30, 'display' => 'Every 30 seconds' );
+		$schedules['every_120s'] = array( 'interval' => 120, 'display' => 'Every 120 seconds' );
 
 		return $schedules;
 	}
@@ -125,16 +129,21 @@ class Manager {
 
 	/**
 	 * Queue all of our cron tasks.
+	 *
+	 * The jobs are queued for 1 minutes time to avoid recurring job failures from repeating too soon.
 	 */
-	function register_cron_tasks() {
+	public function register_cron_tasks() {
 		if ( ! wp_next_scheduled ( 'plugin_directory_meta_sync' ) ) {
-			wp_schedule_event( time(), 'hourly', 'plugin_directory_meta_sync' );
+			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_meta_sync' );
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_svn_sync' ) ) {
-			wp_schedule_event( time(), 'every_30s', 'plugin_directory_svn_sync' );
+			wp_schedule_event( time() + 60, 'every_30s', 'plugin_directory_svn_sync' );
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_update_api_check' ) ) {
-			wp_schedule_event( time(), 'hourly', 'plugin_directory_update_api_check' );
+			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_update_api_check' );
+		}
+		if ( ! wp_next_scheduled ( 'plugin_directory_check_cronjobs' ) ) {
+			wp_schedule_event( time() + 60, 'every_120s', 'plugin_directory_check_cronjobs' );
 		}
 	}
 
@@ -148,7 +157,7 @@ class Manager {
 	 * @param array $cron_array The Cron array.
 	 * @return array The Cron array passed, unchanged.
 	 */
-	function register_colon_based_hook_handlers( $cron_array ) {
+	public function register_colon_based_hook_handlers( $cron_array ) {
 		$wildcard_cron_tasks = array(
 			'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
 			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
