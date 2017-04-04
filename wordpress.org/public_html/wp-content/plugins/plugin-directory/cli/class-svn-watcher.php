@@ -91,6 +91,11 @@ class SVN_Watcher {
 		$plugins = array();
 
 		foreach ( $logs['log'] as $log ) {
+			// Discard automated changes, these should not trigger plugin imports
+			if ( defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) && PLUGIN_SVN_MANAGEMENT_USER == $log['author'] ) {
+				continue;
+			}
+
 			$plugin_slug = explode( '/', $log['paths'][0] )[1];
 
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
