@@ -23,7 +23,7 @@ class API_Update_Updater {
 			WHERE
 				p.post_type = 'plugin'
 				AND (
-					p.post_status IN( 'publish', 'approved', 'disabled', 'closed' ) OR
+					p.post_status IN( 'publish', 'disabled', 'closed' ) OR
 					u.plugin_id IS NOT NULL
 				)
 				AND (
@@ -55,7 +55,7 @@ class API_Update_Updater {
 		global $wpdb;
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
-		if ( ! $post ) {
+		if ( ! $post || ! in_array( $post->post_status, array( 'publish', 'disabled', 'closed' ) ) ) {
 			$wpdb->delete(  $wpdb->prefix . 'update_source', compact( 'plugin_slug' ) );
 			return true;
 		}
@@ -79,7 +79,7 @@ class API_Update_Updater {
 		}
 
 		if (
-			$wpdb->update( $wpdb->prefix . 'update_source', $data, array( 'plugin_slug' => $post->post_name ) ) &&
+			! $wpdb->update( $wpdb->prefix . 'update_source', $data, array( 'plugin_slug' => $post->post_name ) ) &&
 			! $wpdb->get_var( $wpdb->prepare( "SELECT `plugin_slug` FROM `{$wpdb->prefix}update_source` WHERE `plugin_slug` = %s", $post->post_name ) )
 		) {
 			if ( ! $wpdb->insert( $wpdb->prefix . 'update_source', $data ) ) {
