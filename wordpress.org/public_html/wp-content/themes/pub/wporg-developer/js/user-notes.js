@@ -22,6 +22,8 @@
 			$( 'html,body' ).animate( {
 				scrollTop: pos.top
 			}, 1000 );
+
+			$('.wp-editor-area').focus();
 		}
 	}
 
