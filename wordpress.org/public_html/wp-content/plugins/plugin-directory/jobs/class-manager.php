@@ -10,11 +10,11 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 class Manager {
 
 	/**
-	 * A static method for the cron trigger to fire.
+	 * Add all the actions for cron tasks and schedules.
 	 */
 	public function __construct() {
 		// Register all the cron task handlers.
-		add_action( 'admin_init', array( $this, 'register_cron_tasks' ) );
+		add_action( 'init', array( $this, 'register_cron_tasks' ) );
 		add_filter( 'cron_schedules', array( $this, 'register_schedules' ) );
 
 		// The actual cron hooks.

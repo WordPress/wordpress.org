@@ -69,7 +69,17 @@ class SVN_Watcher {
 
 		$logs = SVN::log( self::SVN_URL, array( $rev, $head_rev ) );
 		if ( $logs['errors'] ) {
-			throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['errors'] ) );
+			if ( wp_cache_get( 'get_plugin_changes_between_failed', 'svn-watch' ) ) {
+				// Set it again, so if the next request fails, this exception will be thrown again, until the issue is resolved.
+				wp_cache_set( 'get_plugin_changes_between_failed', time(), 'svn-watch', 60 );
+
+				throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['errors'] ) );
+			} else {
+				// If the job fails again within the next minute, throw an exception (as above)
+				// but for now, just silently let it re-try next iteration, hopefully it was a transient failure / network timeout.
+				wp_cache_set( 'get_plugin_changes_between_failed', time(), 'svn-watch', 60 );
+				return array();
+			}
 		}
 
 		// nothing new to report
