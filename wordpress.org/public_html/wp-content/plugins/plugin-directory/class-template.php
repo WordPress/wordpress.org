@@ -1,6 +1,11 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+// Explicitly require dependencies so this file can be sourced outside the Plugin Directory.
+require_once( __DIR__ . '/class-plugin-geopattern.php' );
+require_once( __DIR__ . '/class-plugin-geopattern-svg.php' );
+require_once( __DIR__ . '/class-plugin-geopattern-svgtext.php' );
+
 /**
  * Various helpers to retrieve data not stored within WordPress.
  *
