@@ -15,7 +15,7 @@
 		$( '#respond' ).show();
 		$( '#add-user-note').hide();
 
-		var target = $( '#commentform #add-note-or-feedback' );
+		var target = $( '#commentform' );
 		if ( target.length ) {
 			var pos = target.offset();
 

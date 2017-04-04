@@ -1821,6 +1821,19 @@ input {
   font-size: 1.6rem;
 }
 
+.devhub-wrap.single-wp-parser-function .text-button, .devhub-wrap.single-wp-parser-method .text-button, .devhub-wrap.single-wp-parser-hook .text-button, .devhub-wrap.single-wp-parser-class .text-button {
+  background: #fff none repeat scroll 0 0;
+  border-color: #ccc #ccc #bbb;
+  border-radius: 3px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 0 5px;
+}
+
+.devhub-wrap.single-wp-parser-function .comment-form ul, .devhub-wrap.single-wp-parser-method .comment-form ul, .devhub-wrap.single-wp-parser-hook .comment-form ul, .devhub-wrap.single-wp-parser-class .comment-form ul {
+  margin-left: 1.5em;
+}
+
 .devhub-wrap.single-post .comment-list,
 .devhub-wrap.single-post .comment-list ol {
   list-style: none;

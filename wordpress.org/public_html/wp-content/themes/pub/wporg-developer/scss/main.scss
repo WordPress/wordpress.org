@@ -1434,6 +1434,19 @@
 		#add-user-note {
 			font-size: 1.6rem;
 		}
+
+		.text-button {
+			background: #fff none repeat scroll 0 0;
+			border-color: #ccc #ccc #bbb;
+			border-radius: 3px;
+			border-style: solid;
+			border-width: 1px;
+			padding: 0 5px;
+		}
+
+		.comment-form ul {
+			margin-left: 1.5em;
+		}
 	}
 
 	&.single-post {
