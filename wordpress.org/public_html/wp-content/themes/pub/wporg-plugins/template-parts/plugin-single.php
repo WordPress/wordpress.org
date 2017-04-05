@@ -153,7 +153,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 
 	<div class="entry-meta">
 		<?php
-		get_template_part( 'template-parts/plugin-sidebar', ( get_query_var( 'plugin_avanced' ) ? 'advanced' : '' ) );
+		get_template_part( 'template-parts/plugin-sidebar', ( get_query_var( 'plugin_advanced' ) ? 'advanced' : '' ) );
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->
