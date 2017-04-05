@@ -177,7 +177,7 @@ input#post_author_username {
 	display: block;
 }
 
-.profile > img {
+.profile .avatar {
 	float: left;
 	height: 48px;
 	margin-right: 8px;

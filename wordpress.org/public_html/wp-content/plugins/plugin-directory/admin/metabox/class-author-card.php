@@ -11,8 +11,10 @@ use WordPressdotorg\Plugin_Directory\Tools;
 class Author_Card {
 	/**
 	 * Displays information about the author of the current plugin.
+	 *
+	 * @param int|WP_Post $post_or_user_id The post or the ID of a specific user.
 	 */
-	public static function display() {
+	public static function display( $post_or_user_id = '' ) {
 		global $wpdb;
 
 		add_action( 'wporg_usercards_after_content', array(
@@ -20,18 +22,31 @@ class Author_Card {
 			'show_warning_flags'
 		), 10, 6 );
 
-		$post   = get_post();
-		$author = get_user_by( 'id', $post->post_author );
+		if ( is_int( $post_or_user_id ) ) {
+			$post   = '';
+			$author = get_user_by( 'id', $post_or_user_id );
+		} else {
+			$post   = $post_or_user_id ?: get_post();
+			$author = get_user_by( 'id', $post->post_author );
+		}
+
+		if ( ! $author ) {
+			return;
+		}
 
 		$author_commit  = Tools::get_users_write_access_plugins( $author );
-		$author_plugins = get_posts( array(
+		$author_plugins_q = array(
 			'author'       => $author->ID,
 			'post_type'    => 'plugin',
-			'post__not_in' => array( $post->ID ),
-		) );
+		);
+		if ( $post ) {
+			$author_plugins_q['post__not_in'] = array( $post->ID );
+		}
+		$author_plugins = get_posts( $author_plugins_q );
 		$all_plugins = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
 		?>
-		<p class="profile">
+		<div class="profile">
+		<p class="profile-personal">
 			<?php echo get_avatar( $author->ID, 48 ); ?>
 			<span class="profile-details">
 				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php echo $author->user_login; ?></a></strong>
@@ -205,6 +220,8 @@ class Author_Card {
 		 * @param array    $all_plugins      Array of plugin objects for all of user's plugins.
 		 */
 		do_action( 'wporg_plugins_author_card', $post, $author, $all_plugins );
+
+		echo '</div>';
 	}
 
 	/**
