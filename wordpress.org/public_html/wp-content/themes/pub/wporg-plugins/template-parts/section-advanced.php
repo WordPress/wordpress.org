@@ -25,4 +25,37 @@ use WordPressdotorg\Plugin_Directory\Template;
 	<table id="plugin-download-history-stats" class="download-history-stats">
 		<tbody></tbody>
 	</table>
+
+	<?php
+
+		$tags = (array) get_post_meta( $post->ID, 'tagged_versions', true );
+		// Sort the versions by version
+		usort( $tags, 'version_compare' );
+		// We'll want to add a Development Version if it exists
+		$tags[] = 'trunk';
+
+		// Remove the current version, this may be trunk.
+		$tags = array_diff( $tags, array( get_post_meta( $post->ID, 'stable_tag', true ) ) );
+
+		// List Trunk, followed by the most recent non-stable release.
+		$tags = array_reverse( $tags );
+
+		if ( $tags ) {
+			echo '<h5>' . __( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
+
+			echo '<select id="prevous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
+			foreach ( $tags as $version ) {
+				$text = ( 'trunk' == $version ? __( 'Development Version', 'wporg-plugins' ) : $version );
+				printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
+			}
+			echo '</select> ';
+
+			printf(
+				'<a href="%s" id="download-previous-link" class="button">%s</a>',
+				esc_url( Template::download_link( $post, reset( $tags ) ) ),
+				__( 'Download', 'wporg-plugins' )
+			);
+		}
+
+	?>
 </div>
