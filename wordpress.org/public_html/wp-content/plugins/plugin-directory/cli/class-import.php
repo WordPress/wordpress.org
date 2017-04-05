@@ -230,8 +230,24 @@ class Import {
 		// Find the list of tagged versions of the plugin.
 		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
 		$tagged_versions = array_map( function( $item ) {
-			return rtrim( $item, '/' );
+			$trimmed_item = rtrim( $item, '/' );
+			if ( $trimmed_item == $item ) {
+				// If attempting to trim `/` off didn't do anything, it was a file and we want to discard it.
+				return null;
+			}
+
+			// Prefix the 0 for plugin versions like 0.1
+			if ( '.' == substr( $trimmed_item, 0, 1 ) ) {
+				$trimmed_item = "0{$trimmed_item}";
+			}
+
+			return $trimmed_item;
 		}, $tagged_versions );
+
+		// Strip out any of the before-found files which we set to NULL
+		$tagged_versions = array_filter( $tagged_versions, function( $item ) {
+			return ! is_null( $item );
+		} );
 
 		// Not all plugins utilise `trunk`, some just tag versions.
 		if ( ! $trunk_files ) {
