@@ -45,7 +45,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 
 			echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
 
-			echo '<select id="prevous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
+			echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
 			foreach ( $tags as $version ) {
 				$text = ( 'trunk' == $version ? __( 'Development Version', 'wporg-plugins' ) : $version );
 				printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );

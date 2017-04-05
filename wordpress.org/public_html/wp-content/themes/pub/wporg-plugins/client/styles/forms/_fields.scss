@@ -30,8 +30,8 @@ textarea {
 	border: 1px solid $color__border-input;
 	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
 	color: $color__text-input;
+	outline: none;
 	transition: 0.05s border-color ease-in-out;
-	-webkit-appearance: none;
 
 	&:focus {
 		color: $color__text-input-focus;
@@ -72,7 +72,8 @@ input[type="text"],
 input[type="email"],
 input[type="search"],
 input[type="password"],
-input[type="number"] {
+input[type="number"],
+select {
 	padding: 6px 10px;
 }
 
@@ -84,6 +85,7 @@ input[type="number"] {
 
 input[type="checkbox"],
 input[type="radio"] {
+	-webkit-appearance: none;
 	background: #fff;
 	border: 1px solid #b4b9be;
 	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.1 );
@@ -175,7 +177,6 @@ input,
 select {
 	border-radius: 0;
 	font-size: 16px;
-	padding: 3px 5px; /* Reset mobile webkit's default element styling */
 }
 
 textarea {
@@ -244,14 +245,14 @@ fieldset label {
 /* =Media Queries
 -------------------------------------------------------------- */
 
-@media screen and ( min-width: 48em ) {
+@media screen and ( min-width: $ms-breakpoint ) {
 	/* Input Elements */
 	input[type="text"],
 	input[type="email"],
 	input[type="search"],
 	input[type="password"],
 	input[type="number"] {
-		padding: 0;
+		padding: 3px 5px;
 	}
 
 	input[type="number"] {
@@ -283,5 +284,6 @@ fieldset label {
 	input,
 	select {
 		font-size: 14px;
+		padding: 3px 5px; /* Reset mobile webkit's default element styling */
 	}
 }
