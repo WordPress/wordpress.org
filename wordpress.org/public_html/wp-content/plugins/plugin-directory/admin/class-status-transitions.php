@@ -95,6 +95,7 @@ class Status_Transitions {
 			mkdir( "$dir/$folder", 0777 );
 		}
 
+		/* Temporarily disable SVN prefill from ZIP files
 		if ( $attachments ) {
 			$attachment = end( $attachments );
 
@@ -106,6 +107,7 @@ class Status_Transitions {
 				rename( $plugin_root, "$dir/trunk" );
 			}
 		}
+		*/
 
 		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
 
