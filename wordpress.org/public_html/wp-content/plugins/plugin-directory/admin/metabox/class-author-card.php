@@ -135,6 +135,7 @@ class Author_Card {
 					$note    = false;
 					$extra   = '';
 					$classes = $tooltips = array();
+					$last_updated = get_post_meta( $plugin->ID, 'last_updated', true );
 
 					if ( in_array( $plugin->post_name, wp_list_pluck( $author_plugins, 'post_name' ) ) ) {
 						$tooltips[] = 'This user submitted this plugin.';
@@ -147,7 +148,7 @@ class Author_Card {
 
 					$plugin_slug = $plugin->post_name;
 					if ( in_array( $plugin->post_status, array( 'draft', 'pending' ) ) ) {
-						$extra .= ' (requested ' . human_time_diff( strtotime( $plugin->post_date ) ) . ' ago)';
+						$extra .= ' (requested ' . human_time_diff( strtotime( $last_updated ) ) . ' ago)';
 						$tooltips[] = 'Requested, remains unapproved.';
 						$classes[]  = 'profile-plugin-requested';
 
@@ -175,7 +176,7 @@ class Author_Card {
 						}
 						$classes[]      = 'profile-plugin-open';
 
-						if ( strtotime( '-2 years' ) > strtotime( $plugin->post_date ) ) {
+						if ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
 							$tooltips[] = 'Plugin is open, but has not been updated in more than two years.';
 							$classes[]  = 'profile-plugin-open-old';
 						}
