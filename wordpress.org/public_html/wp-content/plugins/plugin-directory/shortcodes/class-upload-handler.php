@@ -175,7 +175,7 @@ class Upload_Handler {
 			$plugin_post = Plugin_Directory::create_plugin_post( array(
 				'post_title'   => $this->plugin['Name'],
 				'post_name'    => $this->plugin_slug,
-				'post_status'  => 'pending',
+				'post_status'  => 'draft',
 				'post_content' => $content,
 				'post_excerpt' => $this->plugin['Description'],
 			//	'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
