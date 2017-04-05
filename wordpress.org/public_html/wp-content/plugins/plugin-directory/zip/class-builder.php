@@ -77,11 +77,15 @@ class Builder {
 				throw new Exception( __METHOD__ . ": Failed to create {$plugin_folder}." );
 			}
 		} else {
-			throw new Exception( __METHOD__ . ": Failed to create checkout of {$svn_url}." );
+			throw new Exception( __METHOD__ . ': Failed to create checkout of ' . self::ZIP_SVN_URL . '.' );
 		}
 
 		// Build the requested ZIPs
 		foreach ( $versions as $version ) {
+			// Incase .1 was passed, treat it as 0.1
+			if ( '.' == substr( $version, 0, 1 ) ) {
+				$version = "0{$version}";
+			}
 			$this->version = $version;
 
 			if ( 'trunk' == $version ) {
