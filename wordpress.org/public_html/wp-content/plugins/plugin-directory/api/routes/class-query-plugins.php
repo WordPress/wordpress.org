@@ -19,7 +19,8 @@ class Query_Plugins extends Base {
 		'plugin_category',
 		's',
 		'author_name',
-		'installed_plugins'
+		'installed_plugins',
+		'plugin_tags'
 	);
 
 	function __construct() {
