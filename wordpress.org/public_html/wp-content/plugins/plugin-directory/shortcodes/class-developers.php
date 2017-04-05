@@ -45,10 +45,15 @@ class Developers {
 			);
 			$output .= '<br />';
 		}
+		$output .= '</p>';
 
 		/* Translators: 1: GlotPress URL; 2: Plugin name; */
-		$output .= sprintf( __( '<a href="%1$s">Translate %2$s into your language.</a>', 'wporg-plugins' ), esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $slug ), $title );
-		$output .= '</p>';
+		$output .= '<p>' . sprintf(
+			__( '<a href="%1$s">Translate %2$s into your language.</a>', 'wporg-plugins' ),
+			esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $slug ),
+			$title
+		) . '</p>';
+
 
 		$output   .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 		/* Translators: 1: Trac URL; 2: Development log URL; 3: RSS URL; */
