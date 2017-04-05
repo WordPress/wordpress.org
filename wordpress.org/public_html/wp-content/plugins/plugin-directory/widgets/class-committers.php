@@ -33,12 +33,14 @@ class Committers extends \WP_Widget {
 			return get_user_by( 'login', $user_login );
 		}, $committers );
 
-		wp_enqueue_script( 'wporg-plugins-committers', plugins_url( 'js/committers.js', __FILE__ ), array( 'wp-util' ), true );
-		wp_localize_script( 'wporg-plugins-committers', 'committersWidget', array(
-			'restUrl'    => get_rest_url(),
-			'restNonce'  => wp_create_nonce( 'wp_rest' ),
-			'pluginSlug' => $post->post_name,
-		) );
+		if ( current_user_can( 'plugin_add_committer', $post ) || current_user_can( 'plugin_remove_committer', $post ) ) {
+			wp_enqueue_script( 'wporg-plugins-committers', plugins_url( 'js/committers.js', __FILE__ ), array( 'wp-util' ), true );
+			wp_localize_script( 'wporg-plugins-committers', 'committersWidget', array(
+				'restUrl'    => get_rest_url(),
+				'restNonce'  => wp_create_nonce( 'wp_rest' ),
+				'pluginSlug' => $post->post_name,
+			) );
+		}
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
@@ -60,8 +62,6 @@ class Committers extends \WP_Widget {
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $committer->user_email ) . ' ' : ''; ?>
 						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
-					<?php else: // This is a hack to avoid doing CSS to make the rows not stack badly. someone fix this please. ?>
-						<br>
 					<?php endif; ?>
 				</li>
 			<?php endforeach; ?>
@@ -70,25 +70,26 @@ class Committers extends \WP_Widget {
 			<li class="new">
 				<form id="add-committer" action="POST">
 					<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
-					<input type="submit" value="<?php esc_attr_e( 'Add', 'wporg-plugins' ); ?>" />
+					<button type="submit" class="button button-secondary"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
 				</form>
+
+				<script id="tmpl-new-committer" type="text/template">
+					<li data-user="{{ data.nicename }}">
+						<a class="profile" href="{{ data.profile }}">
+							<img src="{{ data.avatar }}" class="avatar avatar-32 photo" height="32" width="32">
+							{{ data.name }}
+						</a><br>
+						<small>
+							<# if ( data.email ) { #>
+								<span class="email">{{ data.email }}</span>
+							<# } #>
+							<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+						</small>
+					</li>
+				</script>
 			</li>
 			<?php endif; ?>
 		</ul>
-		<script id="tmpl-new-committer" type="text/template">
-			<li data-user="{{ data.nicename }}">
-				<a class="profile" href="{{ data.profile }}">
-					<img src="{{ data.avatar }}" class="avatar avatar-32 photo" height="32" width="32">
-					{{ data.name }}
-				</a><br>
-				<small>
-					<# if ( data.email ) { #>
-						<span class="email">{{ data.email }}</span>
-					<# } #>
-						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
-				</small>
-			</li>
-		</script>
 
 		<?php
 		echo $args['after_widget'];
