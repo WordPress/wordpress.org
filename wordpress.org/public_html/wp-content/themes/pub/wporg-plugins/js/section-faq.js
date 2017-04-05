@@ -6,20 +6,18 @@
 
 			$question.html( $button.text( $question.text() ) );
 		} )
-		.on( 'mousedown keydown', '.button-link', function( event ) {
-			var $question = $( event.target );
+		.on( 'click', function( event ) {
+			var $question = $( event.currentTarget );
 
 			if ( 'keydown' === event.type && 13 !== event.which ) {
 				return;
 			}
 
-			$question.toggleClass( 'no-focus', 'mousedown' === event.type );
-
 			if ( ! $question.is( '.open' ) ) {
-				$question.siblings( '.open' ).toggleClass( 'open' ).attr( 'aria-expanded', false ).parent().next( 'dd' ).slideToggle( 200 );
+				$question.siblings( '.open' ).toggleClass( 'open' ).attr( 'aria-expanded', false ).next( 'dd' ).slideToggle( 200 );
 			}
 
-			$question.parent().toggleClass( 'open' ).attr( 'aria-expanded', function( index, attribute ) {
+			$question.toggleClass( 'open' ).attr( 'aria-expanded', function( index, attribute ) {
 				return 'true' !== attribute;
 			} ).next( 'dd' ).slideToggle( 200 );
 		} );
