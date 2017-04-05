@@ -451,6 +451,7 @@ class WordCamp_QBO {
 			Please indicate the invoice number in the memo field when making your payment.
 
 			To pay via credit card, please fill out the payment form at https://central.wordcamp.org/sponsorship-payment/
+			An additional 2.9% to cover processing fees on credit card payments is highly appreciated but not required.
 
 			For payments via ACH or international wire transfers:
 			Beneficiary Name: WordPress Community Support, PBC
