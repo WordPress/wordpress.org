@@ -72,12 +72,10 @@ class Meta extends \WP_Widget {
 				?></li>
 			<?php endif; ?>
 
-			<?php if ( current_user_can( 'plugin_admin_view', $post ) ) : ?>
+			<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>	
 				<li class="hide-if-no-js">
 					<?php
-						printf( __( 'Admin access: %s', 'wporg-plugins' ),
-							sprintf( '<strong><a class="plugin-admin" href="%s">%s</a></strong>', esc_url( get_permalink() . 'admin/' ), __( 'View Admin', 'wporg-plugins' ) )
-						);
+						printf( '<strong><a class="plugin-admin" href="%s">%s</a></strong>', esc_url( get_permalink() . 'advanced/' ), __( 'Advanced View', 'wporg-plugins' ) );
 					?>
 				</li>
 			<?php endif; ?>

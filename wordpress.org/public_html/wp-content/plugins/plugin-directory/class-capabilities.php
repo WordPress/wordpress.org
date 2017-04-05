@@ -29,6 +29,7 @@ class Capabilities {
 				$plugin_edit_cap = true;
 				// Fall through
 
+			// Although we no longer have a admin view, this capability is still used to determine if the current user is a committer/contributor.
 			case 'plugin_admin_view':
 				// Committers + Contributors.
 				// If no committers, post_author.

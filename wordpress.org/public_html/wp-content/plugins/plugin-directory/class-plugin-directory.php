@@ -439,7 +439,7 @@ class Plugin_Directory {
 		add_rewrite_rule( '^search/([^/]+)/?$', 'index.php?s=$matches[1]', 'top' );
 
 		// Handle plugin admin requests
-		add_rewrite_rule( '^([^/]+)/admin/?$', 'index.php?name=$matches[1]&plugin_admin=1', 'top' );
+		add_rewrite_rule( '^([^/]+)/advanced/?$', 'index.php?name=$matches[1]&plugin_advanced=1', 'top' );
 
 		// Handle the old plugin tabs URLs.
 		add_rewrite_rule( '^([^/]+)/(installation|faq|screenshots|changelog|stats|developers|other_notes)/?$', 'index.php?redirect_plugin=$matches[1]&redirect_plugin_tab=$matches[2]', 'top' );
@@ -960,7 +960,7 @@ class Plugin_Directory {
 		$vars[] = 'favorites_user';
 		$vars[] = 'redirect_plugin';
 		$vars[] = 'redirect_plugin_tab';
-		$vars[] = 'plugin_admin';
+		$vars[] = 'plugin_advanced';
 
 		return $vars;
 	}
@@ -1049,6 +1049,12 @@ class Plugin_Directory {
 				die();
 			}
 
+			// Browse 404's
+			if ( 'browse' === $path[2] ) {
+				wp_safe_redirect( home_url( '/browse/featured/' ) );
+				die();
+			}
+
 			// Otherwise, handle a plugin redirect.
 			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
@@ -1071,16 +1077,6 @@ class Plugin_Directory {
 			die();
 		}
 
-		// Filter access to the plugin administration area. Only certain users are allowed access.
-		if ( get_query_var( 'plugin_admin' )  &&
-			! current_user_can(
-				'plugin_admin_view',
-				$post = Plugin_Directory::get_plugin_post( get_query_var( 'name' ) )
-			)
-		) {
-			wp_safe_redirect( get_permalink( $post ) );
-			die();
-		}
 	}
 
 	/**

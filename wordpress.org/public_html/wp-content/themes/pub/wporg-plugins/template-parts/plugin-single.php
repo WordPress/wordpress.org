@@ -119,8 +119,8 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 
 	<div class="entry-content">
 		<?php
-		if ( get_query_var( 'plugin_admin' ) ) :
-			get_template_part( 'template-parts/section-admin' );
+		if ( get_query_var( 'plugin_advanced' ) ) :
+			get_template_part( 'template-parts/section-advanced' );
 		else:
 			$plugin_sections = Template::get_plugin_sections();
 
@@ -147,13 +147,13 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 
 				get_template_part( 'template-parts/section' );
 			endforeach;
-		endif; // plugin_admin
+		endif; // plugin_advanced
 		?>
 	</div><!-- .entry-content -->
 
 	<div class="entry-meta">
 		<?php
-		get_template_part( 'template-parts/plugin-sidebar', ( get_query_var( 'plugin_admin' ) ? 'admin' : '' ) );
+		get_template_part( 'template-parts/plugin-sidebar', ( get_query_var( 'plugin_avanced' ) ? 'advanced' : '' ) );
 		?>
 	</div><!-- .entry-meta -->
 </article><!-- #post-## -->
