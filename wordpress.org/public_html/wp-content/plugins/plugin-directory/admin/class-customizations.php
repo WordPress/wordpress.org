@@ -237,41 +237,37 @@ class Customizations {
 
 		switch ( $post->post_status ) {
 			case 'draft':
+				$message = __( 'This plugin is newly requested and has not yet been reviewed.', 'wporg-plugins' );
+				$type    = 'notice-info';
+				break;
+
 			case 'pending':
-				$message = __( 'This plugin is requested and not visible to the public yet.', 'wporg-plugins' );
-				if ( ! $is_admin ) {
-					$message .= ' ' . __( 'Please be patient as your plugin gets reviewed.', 'wporg-plugins' );
-				}
+				$message = __( 'This plugin has been reviewed and is currently waiting on developer feedback.', 'wporg-plugins' );
+				$type    = 'notice-warning';
 				break;
 
 			case 'rejected':
-				$message = __( 'This plugin is rejected and is not visible to the public.', 'wporg-plugins' );
-				$type    = 'error';
+				$message = __( 'This plugin has been rejected and is not visible to the public.', 'wporg-plugins' );
+				$type    = 'notice-error';
 				break;
 
 			case 'approved':
-				$message = __( 'This plugin is approved and awaiting data upload but not visible to the public yet.', 'wporg-plugins' );
-				if ( ! $is_admin ) {
-					$message .= ' ' . __( 'Once you make your first commit, the plugin will become public.', 'wporg-plugins' );
-				}
+				$message = __( 'This plugin is approved and awaiting data upload. It is not yet visible to the public.', 'wporg-plugins' );
 				break;
 
 			case 'closed':
-				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
-				$type    = 'error';
+				$message = __( 'This plugin is closed and no longer available for use.', 'wporg-plugins' );
+				$type    = 'notice-error';
 				break;
 
 			case 'disabled':
-				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
-				$type    = 'error';
-				if ( $is_admin ) {
-					$message = __( 'This plugin is disabled (closed, but actively serving updates) and is not visible to the public.', 'wporg-plugins' );
-				}
+				$message = __( 'This plugin is disabled (closed, but actively serving updates).', 'wporg-plugins' );
+				$type    = 'notice-warning';
 				break;
 		}
 
 		if ( $message ) {
-			add_settings_error( 'wporg-plugins', 'status-notice', $message, $type );
+			printf( '<div class="notice %1$s"><p>%2$s</p></div>', esc_attr( $type ), esc_html( $message ) ); 
 		}
 	}
 
