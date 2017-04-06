@@ -231,6 +231,7 @@ class Customizations {
 		}
 
 		$message  = '';
+		$type     = 'updated';
 		$post     = get_post();
 		$is_admin = current_user_can( 'plugin_approve' );
 
@@ -245,6 +246,7 @@ class Customizations {
 
 			case 'rejected':
 				$message = __( 'This plugin is rejected and is not visible to the public.', 'wporg-plugins' );
+				$type    = 'error';
 				break;
 
 			case 'approved':
@@ -256,10 +258,12 @@ class Customizations {
 
 			case 'closed':
 				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+				$type    = 'error';
 				break;
 
 			case 'disabled':
 				$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+				$type    = 'error';
 				if ( $is_admin ) {
 					$message = __( 'This plugin is disabled (closed, but actively serving updates) and is not visible to the public.', 'wporg-plugins' );
 				}
@@ -267,7 +271,7 @@ class Customizations {
 		}
 
 		if ( $message ) {
-			add_settings_error( 'wporg-plugins', 'status-notice', $message, 'updated' );
+			add_settings_error( 'wporg-plugins', 'status-notice', $message, $type );
 		}
 	}
 
