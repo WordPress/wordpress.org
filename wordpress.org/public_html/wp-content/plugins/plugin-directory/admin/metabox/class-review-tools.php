@@ -38,11 +38,17 @@ class Review_Tools {
 
 		add_filter( 'wp_comment_reply', function( $string ) use ( $post ) {
 			$author = get_user_by( 'id', $post->post_author );
+			
+			$type   = 'Notice';
+			if ( $post->post_status == 'draft' || $post->post_status == 'pending' ) {
+				$type = 'Request';
+			}
+			
 			?>
 			<form id="contact-author" class="contact-author" method="POST" action="https://supportpress.wordpress.org/plugins/thread-new.php">
 				<input type="hidden" name="to_email" value="<?php echo esc_attr( $author->user_email ); ?>" />
 				<input type="hidden" name="to_name" value="<?php echo esc_attr( $author->display_name ); ?>" />
-				<input type="hidden" name="subject" value="<?php printf( esc_attr__( '[WordPress Plugin Directory] Request: %s', 'wporg-plugins' ), $post->post_title ); ?>" />
+				<input type="hidden" name="subject" value="<?php printf( esc_attr__( '[WordPress Plugin Directory] %s: %s', 'wporg-plugins' ), $type, $post->post_title ); ?>" />
 				<button class="button button-primary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
 			</form>
 			<?php
