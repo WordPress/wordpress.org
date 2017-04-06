@@ -320,3 +320,39 @@ a.profile-plugin-open {
 .plugin-queue-flagged-critical {
 	background-color: darkred;
 }
+
+/* Additional Author Card styling for Author Cards tool */
+
+.author-cards .main {
+	margin-left: 0;
+	overflow: auto;
+}
+.author-cards .profile {
+	margin: 2px 12px 15px 0;
+	padding: 8px;
+	border: 1px solid #ccc;
+	overflow: auto;
+}
+.author-cards .profile-personal {
+	margin-top: 0.5em;
+}
+.author-cards .profile-links {
+	float: right;
+}
+.author-cards .profile {
+	background: #fff;
+}
+.author-cards .profile {
+	width: 310px;
+	float: left;
+}
+.author-cards .profile .avatar {
+	float: left;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+.author-cards .plugins-plugins li {
+	display: inline;
+	margin-right: 0.5em;
+}
+

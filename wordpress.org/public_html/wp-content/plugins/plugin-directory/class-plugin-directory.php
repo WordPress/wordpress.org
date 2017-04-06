@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Author_Cards;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -72,6 +73,7 @@ class Plugin_Directory {
 		 */
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
+			Author_Cards::instance();
 
 			add_action( 'wp_insert_post_data',    array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
