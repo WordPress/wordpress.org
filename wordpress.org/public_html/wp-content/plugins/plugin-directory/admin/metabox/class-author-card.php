@@ -36,8 +36,9 @@ class Author_Card {
 
 		$author_commit  = Tools::get_users_write_access_plugins( $author );
 		$author_plugins_q = array(
-			'author'       => $author->ID,
-			'post_type'    => 'plugin',
+			'author'         => $author->ID,
+			'post_type'      => 'plugin',
+			'posts_per_page' => -1,
 		);
 		if ( $post ) {
 			$author_plugins_q['post__not_in'] = array( $post->ID );
