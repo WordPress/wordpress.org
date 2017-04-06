@@ -172,15 +172,13 @@ class Author_Card {
 						if ( 'approved' === $plugin->post_status ) {
 							$note       = true;
 							$tooltips[] = 'Plugin is approved, but has no data.';
+						} elseif ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
+							$tooltips[] = 'Plugin is open but has not been updated in more than two years.';
+							$classes[]  = 'profile-plugin-open-old';
 						} else {
 							$tooltips[] = 'Plugin is open.';
 						}
 						$classes[]      = 'profile-plugin-open';
-
-						if ( strtotime( '-2 years' ) > strtotime( $last_updated ) ) {
-							$tooltips[] = 'Plugin is open, but has not been updated in more than two years.';
-							$classes[]  = 'profile-plugin-open-old';
-						}
 					}
 
 					echo '<span>';
