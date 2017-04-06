@@ -15,7 +15,7 @@ var webpackConfig = {
 
 	output : {
 		path     : path.join( __dirname, 'javascript/tracker/build' ),
-		filename : 'tracker.min.js'
+		filename : 'applications.min.js' // renamed from 'tracker', which was getting flagged by ad blockers
 	},
 
 	module : {
@@ -54,7 +54,7 @@ var webpackConfig = {
 			}
 		} ),
 
-		new ExtractTextPlugin( 'tracker.min.css' ),
+		new ExtractTextPlugin( 'applications.min.css' ), // renamed from 'tracker', which was getting flagged by ad blockers
 		new SystemBellPlugin()
 	],
 

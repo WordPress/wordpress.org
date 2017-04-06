@@ -86,7 +86,7 @@ function enqueue_scripts() {
 
 	wp_register_script(
 		'wpc-application-tracker',
-		plugins_url( 'javascript/tracker/build/tracker.min.js', dirname( __FILE__ ) ),
+		plugins_url( 'javascript/tracker/build/applications.min.js', dirname( __FILE__ ) ), // this file was renamed from 'tracker', which was getting flagged by ad blockers
 		array(),
 		1,
 		true
@@ -94,7 +94,7 @@ function enqueue_scripts() {
 
 	wp_register_style(
 		'wpc-application-tracker',
-		plugins_url( 'javascript/tracker/build/tracker.min.css', dirname( __FILE__ ) ),
+		plugins_url( 'javascript/tracker/build/applications.min.css', dirname( __FILE__ ) ), // this file was renamed from 'tracker', which was getting flagged by ad blockers
 		array( 'dashicons', 'list-tables' ),
 		1
 	);
