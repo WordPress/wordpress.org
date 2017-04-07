@@ -195,7 +195,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	);
 
 	$row = $wpdb->get_row( $wpdb->prepare( "
-		SELECT *
+		SELECT name, latitude, longitude, country
 		FROM geoname
 		WHERE
 			MATCH( name, asciiname, alternatenames )
@@ -338,7 +338,15 @@ function guess_location_from_ip( $dotted_ip ) {
 	if ( $long_ip === false )
 		return;
 
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM ip2location WHERE ip_to >= %d ORDER BY ip_to ASC LIMIT 1", $long_ip ) );
+	$row = $wpdb->get_row( $wpdb->prepare( "
+		SELECT ip_city, ip_latitude, ip_longitude, country_short
+		FROM ip2location
+		WHERE ip_to >= %d
+		ORDER BY ip_to ASC
+		LIMIT 1",
+		$long_ip
+	) );
+
 	// Unknown location:
 	if ( ! $row || '-' == $row->country_short ) {
 		return;
