@@ -304,7 +304,7 @@ function get_location_test_cases() {
 			),
 		),
 
-		'city-endonym-non-latin-length-greater-than-4-asia' => array(
+		'city-endonym-ideographic-asia1' => array(
 			'input' => array(
 				'location_name' => '白浜町宇佐崎南',
 				'locale'        => 'ja',
@@ -318,12 +318,7 @@ function get_location_test_cases() {
 			),
 		),
 
-		/*
-		 * @todo
-		 *
-		 * This is currently failing, but should pass. It looks like the value is in row 112931.
-		 */
-		'city-endonym-non-latin-length-greater-than-4-asia2' => array(
+		'city-endonym-ideographic-asia2' => array(
 			'input' => array(
 				'location_name' => 'تهران',
 				'locale'        => 'fa_IR',
@@ -337,12 +332,7 @@ function get_location_test_cases() {
 			),
 		),
 
-		/*
-		 * @todo
-		 *
-		 * This is currently failing, but should pass. It looks like the value is in row 1174872
-		 */
-		'city-endonym-non-latin-length-greater-than-4-asia3' => array(
+		'city-endonym-ideographic-asia3' => array(
 			'input' => array(
 				'location_name' => 'كراچى',
 				'locale'        => 'ur',
@@ -356,16 +346,21 @@ function get_location_test_cases() {
 			),
 		),
 
-		/*
-		 * @todo
-		 *
-		 * This is currently failing, but it should pass. One reason it may be failing is that `ft_min_word_len`
-		 * is set to `4` and `東京` is only `2`.
-		 *
-		 * But, there are others that are failing that are >= 4, though, like `シラオカ`, `しらおか`, `Ширахама`, and
-		 *`すぎと,スギト`. So, there may be additional reasons too.
-		 */
-		'city-endonym-non-latin-length-less-than-4-asia' => array(
+		'city-endonym-ideographic-asia4' => array(
+			'input' => array(
+				'location_name' => '京都',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'kyoto',
+				'latitude'    => '35.021',
+				'longitude'   => '135.754',
+				'country'     => 'JP',
+			),
+		),
+
+		'city-endonym-ideographic-asia5' => array(
 			'input' => array(
 				'location_name' => '東京',
 				'locale'        => 'ja',

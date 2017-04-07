@@ -149,6 +149,10 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the city
+	 *
+	 * This won't work for most ideographic languages, because they don't use the space character as a word
+	 * delimiter. That's ok, though, because `guess_ideographic_location_from_geonames()` should cover those
+	 * cases.
 	 */
 	if ( ! $guess && $location_word_count >= 2 ) {
 		// Catch input like "Portland Maine"
@@ -206,7 +210,114 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 		$timezone
 	) );
 
+	if ( ! is_a( $row, 'stdClass' ) && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
+		$row = guess_ideographic_location_from_geonames( $location_name, $country, $timezone );
+	}
+
 	return $row;
+}
+
+/**
+ * Look for the given ideographic location in the Geonames database
+ *
+ * This is a fallback for situations where the full-text search in `guess_location_from_geonames()` resulted
+ * in a false-negative. MySQL < 5.7.6 doesn't support full-text searches on ideographic languages, because
+ * it cannot determine where the word boundaries are.
+ *
+ * See https://dev.mysql.com/doc/refman/5.7/en/fulltext-restrictions.html
+ *
+ * @param string $location_name
+ * @param string $country
+ * @param string $timezone
+ *
+ * @return stdClass|null
+ */
+function guess_ideographic_location_from_geonames( $location_name, $country, $timezone ) {
+	global $wpdb;
+
+	$ideographic_countries            = get_ideographic_counties();
+	$ideographic_country_placeholders = get_prepare_placeholders( count( $ideographic_countries ), '%s' );
+
+	/*
+	 * The name is wrapped in commas in order to ensure that we're only matching the exact location, which is
+	 * delimited by commas. Otherwise, there would be false positives in situations where `$location_name`
+	 * appears in other rows, which happens sometimes.
+	 *
+	 * Because this will only match entries that are prefixed _and_ postfixed with a comma, it will never match the
+	 * first and last entries in the column. That's ok, though, because the first entry is always an airport code
+	 * in English, which will be matched by other functions. The last entry is often ideographic, so it'd be nice
+	 * to match it, but this is good enough for now.
+	 */
+	$escaped_location_name = sprintf( '%%,%s,%%', $wpdb->esc_like( $location_name ) );
+
+	/*
+	 * REPLACE() is used because sometimes the `alternatenames` column contains entries where the `asciiname` is
+	 * prefixed to an ideographic name; for example: `,Karachi - كراچى,`
+	 *
+	 * If that prefix is not removed, then the LIKE query will fail in those cases, because
+	 * `$escaped_location_name` is wrapped in commas.
+	 *
+	 * The query is restricted to countries where ideographic languages are common, in order to avoid a full-table
+	 * scan.
+	 */
+	$query = "
+		SELECT name, latitude, longitude, country
+		FROM `geoname`
+		WHERE
+			country IN ( $ideographic_country_placeholders ) AND
+			REPLACE( alternatenames, CONCAT( asciiname, ' - ' ), '' ) LIKE %s
+		ORDER BY
+			FIELD( %s, country  ) DESC,
+			FIELD( %s, timezone ) DESC,
+			population DESC
+		LIMIT 1";
+
+	$prepared_query = $wpdb->prepare(
+		$query,
+		array_merge( $ideographic_countries, array( $escaped_location_name, $country, $timezone ) )
+	);
+
+	return $wpdb->get_row( $prepared_query );
+}
+
+/**
+ * Get an array of countries where ideographic languages are common
+ *
+ * Derived from https://en.wikipedia.org/wiki/List_of_writing_systems#List_of_writing_scripts_by_adoption
+ *
+ * @todo Some of these individual countries may be able to be removed, to further narrow the rows that need to be
+ *       scanned by `guess_ideographic_location_from_geonames()`. Some of the entire categories could possibly be
+ *       removed too, but let's err on the side of caution for now.
+ */
+function get_ideographic_counties() {
+	$middle_east  = array( 'AE', 'BH', 'CY', 'EG', 'IL', 'IR', 'IQ', 'JO', 'KW', 'LB', 'OM', 'PS', 'QA', 'SA', 'SY', 'TR', 'YE' );
+	$north_africa = array( 'DZ', 'EH', 'EG', 'LY', 'MA', 'SD', 'SS', 'TN' );
+
+	$abjad_countries       = array_merge( $middle_east, $north_africa, array( 'CN', 'IL', 'IN', 'MY', 'PK' ) );
+	$abugida_countries     = array( 'BD', 'BT', 'ER', 'ET', 'ID', 'IN', 'KH', 'LA', 'LK', 'MV', 'MY', 'MU', 'MM', 'NP', 'PK', 'SG', 'TH' );
+	$logographic_countries = array( 'CN', 'JP', 'KR', 'MY', 'SG');
+
+	$all_ideographic_countries = array_merge( $abjad_countries, $abugida_countries, $logographic_countries );
+
+	return array_unique( $all_ideographic_countries );
+}
+
+/**
+ * Build a string of placeholders to pass to `WPDB::prepare()`
+ *
+ * Sometimes it's convenient to be able to generate placeholders for `prepare()` dynamically. For example, when
+ * looping through a multi-dimensional array where the sub-arrays have distinct counts; or when the total
+ * number of items is too large to conveniently count by hand.
+ *
+ * See https://iandunn.name/2016/03/31/generating-dynamic-placeholders-for-wpdb-prepare/
+ *
+ * @param int    $number The number of placeholders needed
+ * @param string $format An sprintf()-like format accepted by WPDB::prepare()
+ *
+ * @return string
+ */
+function get_prepare_placeholders( $number, $format ) {
+	return implode( ', ', array_fill( 0, $number, $format ) );
 }
 
 /**
