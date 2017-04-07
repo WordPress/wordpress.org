@@ -73,7 +73,7 @@ class Plugin {
 	 *                          for badge info. One of 'topic' or 'reply'.
 	 * @param int    $item_id   The ID of the item getting badge assigned.
 	 * @return array|false      Associative array with keys 'type', 'slug', and
-	 *                          'user_login' if author merits a badge, else false.
+	 *                          'user_nicename' if author merits a badge, else false.
 	 */
 	protected function get_author_badge_info( $item_type, $item_id ) {
 		if ( ! class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
@@ -106,7 +106,7 @@ class Plugin {
 
 		$slugs = $types = array();
 
-		$user_login = get_user_by( 'id', $user_id )->user_login;
+		$user_nicename = get_user_by( 'id', $user_id )->user_nicename;
 
 		// Check if the thread is associated with a plugin.
 		if ( $forum_id === \WordPressdotorg\Forums\Plugin::PLUGINS_FORUM_ID ) {
@@ -140,7 +140,7 @@ class Plugin {
 		return array(
 			'type'       => $type,
 			'slug'       => $slugs[0],
-			'user_login' => $user_login,
+			'user_nicename' => $user_nicename,
 		);
 	}
 
@@ -194,9 +194,9 @@ class Plugin {
 
 		// Class related to plugin and theme authors/contributors.
 		if ( $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
-			if ( $this->is_user_author( $info['user_login'], $info['type'], $info['slug'] ) ) {
+			if ( $this->is_user_author( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
 				$contrib_type = 'author';
-			} elseif ( $this->is_user_contributor( $info['user_login'], $info['type'], $info['slug'] ) ) {
+			} elseif ( $this->is_user_contributor( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
 				$contrib_type = 'contributor';
 			} else {
 				$contrib_type = '';
@@ -284,7 +284,7 @@ class Plugin {
 	 *                          'topic' or 'reply'.
 	 * @param int    $item_id   The ID of the item getting badge assigned.
 	 * @return array|false      Associative array with keys 'type', 'slug', and
-	 *                          'user_login' if author merits a badge, else null.
+	 *                          'user_nicename' if author merits a badge, else null.
 	 */
 	protected function get_author_badge( $item_type, $item_id ) {
 		if ( ! $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
@@ -294,7 +294,7 @@ class Plugin {
 		$label = $help = null;
 
 		// Determine strings to use based on user being an author or contributor.
-		if ( $this->is_user_author( $info['user_login'], $info['type'], $info['slug'] ) ) {
+		if ( $this->is_user_author( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
 			if ( 'plugin' == $info['type'] ) {
 				$label = __( 'Plugin Author', 'wporg-forums' );
 				$help  = __( 'This person is the author of this plugin', 'wporg-forums' );
@@ -303,7 +303,7 @@ class Plugin {
 				$help  = __( 'This person is the author of this theme', 'wporg-forums' );
 			}
 		}
-		elseif ( $this->is_user_contributor( $info['user_login'], $info['type'], $info['slug'] ) ) {
+		elseif ( $this->is_user_contributor( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
 			if ( 'plugin' == $info['type'] ) {
 				$label = __( 'Plugin Contributor', 'wporg-forums' );
 				$help  = __( 'This person is a contributor to this plugin', 'wporg-forums' );
@@ -341,12 +341,12 @@ class Plugin {
 	 * An author is defined as someone who has commit access to a plugin, or is
 	 * the designated author for a theme.
 	 *
-	 * @param string $user_login User login.
+	 * @param string $user_nicename User slug.
 	 * @param string $type       Either 'plugin' or 'theme'.
 	 * @param string $slug       Slug for the plugin or theme.
 	 * @return bool              True if user is an author, false otherwise.
 	 */
-	public function is_user_author( $user_login, $type, $slug ) {
+	public function is_user_author( $user_nicename, $type, $slug ) {
 		if ( 'plugin' === $type ) {
 			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
 		} else {
@@ -354,7 +354,7 @@ class Plugin {
 		}
 		$authors = $compat ? $compat->get_authors( $slug ) : array();
 
-		return $authors && in_array( $user_login, $authors );
+		return $authors && in_array( $user_nicename, $authors );
 	}
 
 	/**
@@ -363,12 +363,12 @@ class Plugin {
 	 * A plugin contributor is someone listed as a contributor in the plugin's readme.txt.
 	 * Currently, themes do not support having contirbutors.
 	 *
-	 * @param string $user_login User login.
+	 * @param string $user_nicename User slug.
 	 * @param string $type       Either 'plugin' or 'theme'.
 	 * @param string $slug       Slug for the plugin or theme.
 	 * @return bool              True if user is a contributor, false otherwise.
 	 */
-	public function is_user_contributor( $user_login, $type, $slug ) {
+	public function is_user_contributor( $user_nicename, $type, $slug ) {
 		if ( 'plugin' === $type ) {
 			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
 		} else {
@@ -376,7 +376,7 @@ class Plugin {
 		}
 		$contributors = $compat ? $compat->get_contributors( $slug ) : array();
 
-		return $contributors && in_array( $user_login, $contributors );
+		return $contributors && in_array( $user_nicename, $contributors );
 	}
 
 	/**
