@@ -132,7 +132,7 @@ class Support_Compat {
 					'tax_query'       => array( array(
 						'taxonomy'    => 'topic-plugin',
 						'field'       => 'slug',
-						'terms'       => self::get_plugin_slugs_by_committer( $this->user->user_login ),
+						'terms'       => self::get_plugin_slugs_by_committer( $this->user->user_nicename ),
 					) ),
 					'show_stickies'   => false,
 				);
@@ -144,7 +144,7 @@ class Support_Compat {
 					'tax_query'       => array( array(
 						'taxonomy'    => 'topic-plugin',
 						'field'       => 'slug',
-						'terms'       => $this->get_plugin_slugs_by_contributor( $this->user ),
+						'terms'       => $this->get_plugin_slugs_by_contributor( $this->user->user_nicename ),
 					) ),
 					'show_stickies'   => false,
 				);
@@ -167,7 +167,7 @@ class Support_Compat {
 
 		if ( $view == 'plugin-committer' ) {
 
-			$slugs = self::get_plugin_slugs_by_committer( $this->user->user_login );
+			$slugs = self::get_plugin_slugs_by_committer( $this->user->user_nicename );
 
 			// Add plugin-committer view.
 			bbp_register_view(
@@ -190,7 +190,7 @@ class Support_Compat {
 
 		} elseif ( $view == 'plugin-contributor' ) {
 
-			$slugs = self::get_plugin_slugs_by_contributor( $this->user );
+			$slugs = self::get_plugin_slugs_by_contributor( $this->user->user_nicename );
 
 			// Add plugin-contributor view.
 			bbp_register_view(
@@ -452,21 +452,39 @@ class Support_Compat {
 		return in_array( $post_id, self::get_compat_forums() );
 	}
 
-	public static function get_plugin_slugs_by_committer( $user_login ) {
+	public static function get_plugin_slugs_by_committer( $user_nicename ) {
 		global $wpdb;
-		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `path` FROM `" . PLUGINS_TABLE_PREFIX . "svn_access` WHERE `user` = %s AND `access` = 'rw'", $user_login ) );
-		return self::clean_slugs( $slugs );
+
+		$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+		$slugs = $wpdb->get_col( $wpdb->prepare(
+			"SELECT post_name
+			 FROM {$prefix}posts AS p
+			 LEFT JOIN {$prefix}term_relationships AS tr ON p.ID = tr.object_id
+			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 LEFT JOIN {$prefix}terms AS t ON tt.term_id = t.term_id
+			 WHERE tt.taxonomy = 'plugin_committers' AND p.post_status = 'publish' AND p.post_type = 'plugin' AND t.slug = %s
+			 ORDER BY p.post_title ASC",
+			$user_nicename
+		) );
+
+		return $slugs;
 	}
 
-	public static function get_plugin_slugs_by_contributor( $user ) {
+	public static function get_plugin_slugs_by_contributor( $user_nicename ) {
 		global $wpdb;
-		$slugs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT `topic_slug` FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE `topic_poster` = %d AND topic_open = 1 AND topic_status = 0", $user->ID ) );
-		$slugs = self::clean_slugs( $slugs );
-		if ( $contributor = $wpdb->get_col( $wpdb->prepare( "SELECT `object_id` FROM `" . PLUGINS_TABLE_PREFIX . "meta` WHERE `object_type` = 'bb_topic' AND `meta_key` = 'contributors' AND `meta_value` LIKE %s", '%"' . str_replace( array( '%', '_' ), array( '\\%', '\\_' ), $user->user_login ) . '"%' ) ) ) {
-			if ( $contributor_slugs = $wpdb->get_col( "SELECT `topic_slug` FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE `topic_id` IN (" . join( ',', $contributor ) . ") AND topic_open = 1 AND topic_status = 0" ) ) {
-				$slugs = array_unique( array_merge( $slugs, $contributor_slugs ) );
-			}
-		}
+
+		$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+		$slugs = $wpdb->get_col( $wpdb->prepare(
+			"SELECT post_name
+			 FROM {$prefix}posts AS p
+			 LEFT JOIN {$prefix}term_relationships AS tr ON p.ID = tr.object_id
+			 LEFT JOIN {$prefix}term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 LEFT JOIN {$prefix}terms AS t ON tt.term_id = t.term_id
+			 WHERE tt.taxonomy = 'plugin_contributors' AND p.post_status = 'publish' AND p.post_type = 'plugin' AND t.slug = %s
+			 ORDER BY p.post_title ASC",
+			$user_nicename
+		) );
+
 		return $slugs;
 	}
 

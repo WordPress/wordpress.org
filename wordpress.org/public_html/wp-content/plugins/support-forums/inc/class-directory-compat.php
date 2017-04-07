@@ -815,19 +815,7 @@ abstract class Directory_Compat {
 			if ( $type == 'theme' ) {
 				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
 			} elseif ( $type == 'plugin' ) {
-				// @todo Update this when the Plugin Directory switches over to WordPress.
-				$_compat_topic = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . PLUGINS_TABLE_PREFIX . "topics WHERE topic_slug = %s", $slug ) );
-				if ( $_compat_topic ) {
-					$_compat_post  = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . PLUGINS_TABLE_PREFIX . "posts WHERE topic_id = %d AND post_position = 1 LIMIT 1", $_compat_topic->topic_id ) );
-				}
-				if ( $_compat_topic && $_compat_post ) {
-					$compat_object = (object) array(
-						'post_title'   => $_compat_topic->topic_title,
-						'post_name'    => $slug,
-						'post_author'  => $_compat_topic->topic_poster,
-						'post_content' => $_compat_post->post_text,
-					);
-				}
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
 			}
 
 			wp_cache_set( $cache_key, $compat_object, $cache_group, DAY_IN_SECONDS );
@@ -853,7 +841,19 @@ abstract class Directory_Compat {
 				$author = get_user_by( 'id', $this->theme->post_author );
 				$authors = array( $author->user_login );
 			} else {
-				$authors = $wpdb->get_col( $wpdb->prepare( " SELECT user FROM " . PLUGINS_TABLE_PREFIX . "svn_access WHERE `path` = %s", '/' . $slug ) );
+				$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+				// Note: Intentionally not considering posts of 'plugin' post_type with
+				// 'post_author' matching this author because the field only relates to
+				// the user who submitted the plugin. It does not confer special access,
+				// rights, or ownership.
+				$authors = $wpdb->get_col( $wpdb->prepare(
+					"SELECT slug
+					 FROM {$prefix}terms AS t
+					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+					 WHERE tt.taxonomy = 'plugin_committers' AND tr.object_id = %d",
+					 $this->plugin->ID
+				) );
 			}
 
 			wp_cache_set( $cache_key, $authors, $cache_group, HOUR_IN_SECONDS );
@@ -879,13 +879,15 @@ abstract class Directory_Compat {
 		$cache_group = $this->compat() . '-contributors';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $contributors ) {
-			// @todo Update this when the Plugin Directory switches over to WordPress.
-			$contributors = $wpdb->get_var( $wpdb->prepare(
-				"SELECT meta_value FROM " . PLUGINS_TABLE_PREFIX . "meta m LEFT JOIN " . PLUGINS_TABLE_PREFIX . "topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s",
-				$slug, 'bb_topic', 'contributors' ) );
-			if ( $contributors ) {
-				$contributors = unserialize( $contributors );
-			}
+			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+			$contributors = $wpdb->get_col( $wpdb->prepare(
+				"SELECT slug
+				 FROM {$prefix}terms AS t
+				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+				 WHERE tt.taxonomy = 'plugin_contributors' AND tr.object_id = %d",
+				 $this->plugin->ID
+			) );
 
 			wp_cache_set( $cache_key, $contributors, $cache_group, HOUR_IN_SECONDS );
 		}
