@@ -347,32 +347,12 @@ class Plugin {
 	 * @return bool              True if user is an author, false otherwise.
 	 */
 	public function is_user_author( $user_login, $type, $slug ) {
-		global $wpdb;
-
-		$authors = wp_cache_get( $slug, $type . '_authors' );
-
-		if ( false === $authors ) {
-			if ( 'plugin' === $type ) {
-				// Get users who have commit access.
-				$authors = $wpdb->get_col( $wpdb->prepare(
-					"SELECT user FROM " . PLUGINS_TABLE_PREFIX . "svn_access WHERE `path` = %s",
-					'/' . $slug
-				) );
-			}
-			else {
-				// TODO: Change this if themes support having more than one author.
-				$author_id = $wpdb->get_var( $wpdb->prepare(
-					"SELECT post_author FROM " . self::$themes_table_prefix . "posts WHERE post_name = %s LIMIT 1",
-					$slug
-				) );
-				if ( $author_id ) {
-					$author = get_user_by( 'id', $author_id );
-					$authors = array( $author->user_login );
-				}
-			}
-
-			wp_cache_add( $slug, $authors, $type . '_authors', HOUR_IN_SECONDS );
+		if ( 'plugin' === $type ) {
+			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
+		} else {
+			$compat = class_exists( '\WordPressdotorg\Forums\Theme' ) ? \WordPressdotorg\Forums\Theme::get_instance()->themes : '';
 		}
+		$authors = $compat ? $compat->get_authors( $slug ) : array();
 
 		return $authors && in_array( $user_login, $authors );
 	}
@@ -389,32 +369,12 @@ class Plugin {
 	 * @return bool              True if user is a contributor, false otherwise.
 	 */
 	public function is_user_contributor( $user_login, $type, $slug ) {
-		global $wpdb;
-
-		$contributors = wp_cache_get( $slug, $type . '_contributors' );
-
-		if ( false === $contributors ) {
-			if ( 'plugin' === $type ) {
-				// TODO: Change this when the Plugin Directory switches over to WordPress.
-				$contributors = $wpdb->get_var( $wpdb->prepare(
-					'SELECT meta_value FROM ' . PLUGINS_TABLE_PREFIX . 'meta m LEFT JOIN ' . PLUGINS_TABLE_PREFIX . 'topics t ON m.object_id = t.topic_id WHERE t.topic_slug = %s AND m.object_type = %s AND m.meta_key = %s',
-					$slug,
-					'bb_topic',
-					'contributors'
-				) );
-
-				if ( $contributors ) {
-					$contributors = unserialize( $contributors );
-				}
-			}
-			else {
-				// Themes have no additional contributors at the moment.
-				// TODO: Change this if themes support specifying contributors.
-				$contributors = array();
-			}
-
-			wp_cache_add( $slug, $contributors, $type . '_contributors', HOUR_IN_SECONDS );
+		if ( 'plugin' === $type ) {
+			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
+		} else {
+			$compat = class_exists( '\WordPressdotorg\Forums\Theme' ) ? \WordPressdotorg\Forums\Theme::get_instance()->themes : '';
 		}
+		$contributors = $compat ? $compat->get_contributors( $slug ) : array();
 
 		return $contributors && in_array( $user_login, $contributors );
 	}
