@@ -1,6 +1,7 @@
 <?php
 
 namespace Dotorg\API\Events;
+use stdClass;
 
 /**
  * Main entry point
@@ -168,15 +169,42 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	return $guess;
 }
 
+/**
+ * Look for the given location in the Geonames database
+ *
+ * @param string $location_name
+ * @param string $timezone
+ * @param string $country
+ *
+ * @return stdClass|null
+ */
 function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	global $wpdb;
 	// Look for a location that matches the name.
 	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
 
-	// Strip quotes from the search query and enclose it in double quotes, to force an exact literal search
-	$location_name = '"' . strtr( $location_name, [ '"' => '', "'" => '' ] ) . '"';
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM geoname WHERE MATCH(name,asciiname,alternatenames) AGAINST(%s IN BOOLEAN MODE) ORDER BY FIELD(%s, country) DESC, FIELD(%s, timezone) DESC, population DESC LIMIT 1", $location_name, $country, $timezone ) );
+	// Strip all quotes from the search query, and then enclose it in double quotes, to force an exact literal search
+	$quoted_location_name = sprintf(
+		'"%s"',
+		strtr( $location_name, [ '"' => '', "'" => '' ] )
+	);
+
+	$row = $wpdb->get_row( $wpdb->prepare( "
+		SELECT *
+		FROM geoname
+		WHERE
+			MATCH( name, asciiname, alternatenames )
+			AGAINST( %s IN BOOLEAN MODE )
+		ORDER BY
+			FIELD( %s, country  ) DESC,
+			FIELD( %s, timezone ) DESC,
+			population DESC
+		LIMIT 1",
+		$quoted_location_name,
+		$country,
+		$timezone
+	) );
 
 	return $row;
 }
