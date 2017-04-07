@@ -141,7 +141,13 @@ class WPORG_Themes_Upload {
 		// determine the theme slug based on the name of the theme in the stylesheet
 		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
 
-		$this->author     = wp_get_current_user();
+		// Do not allow themes with WordPress and Theme in the theme name.
+		if ( false !== strpos( $this->theme_slug, 'wordpress' ) || false !== strpos( $this->theme_slug, 'theme' ) ) {
+			return __( 'You cannot use WordPress or theme in your theme name.', 'wporg-themes' );
+		}
+
+		// Populate author.
+		$this->author = wp_get_current_user();
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
@@ -152,7 +158,7 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// populate the theme post and author
+		// Populate the theme post.
 		$this->theme_post = $this->get_theme_post();
 
 		$theme_description = $this->strip_non_utf8( (string) $this->theme->get( 'Description' ) );
@@ -567,7 +573,7 @@ TICKET;
 		if ( $theme_check_results ) {
 			$this->trac_ticket->description .= "\nTheme Check Results:\n" . $theme_check_results;
 		}
-		
+
 	}
 
 	/*
