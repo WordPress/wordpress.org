@@ -9,6 +9,7 @@ class Hooks {
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
 		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
+		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
 
 		// Display-related filters and actions.
 		add_filter( 'bbp_topic_admin_links', array( $this, 'admin_links' ), 10, 3 );
@@ -75,6 +76,32 @@ class Hooks {
 	 */
 	function increase_edit_lock_time() {
 		return 60;
+	}
+
+	/**
+	 * Disable redirect_guess_404_permalink() for hidden topics.
+	 *
+	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
+	 * from performing a redirect to other unrelated topics.
+	 *
+	 * @param string $redirect_url The redirect URL.
+	 * @return string Filtered redirect URL.
+	 */
+	function disable_redirect_guess_404_permalink( $redirect_url ) {
+		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
+			$hidden_topic = get_posts( array(
+				'name'        => get_query_var( 'name' ),
+				'post_type'   => 'topic',
+				'post_status' => array( 'spam', 'pending', 'archived' ),
+			) );
+			$hidden_topic = reset( $hidden_topic );
+
+			if ( $hidden_topic && ! current_user_can( 'read_topic', $hidden_topic->ID ) ) {
+				$redirect_url = false;
+			}
+		}
+
+		return $redirect_url;
 	}
 
 	/**
