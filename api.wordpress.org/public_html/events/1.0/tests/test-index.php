@@ -352,7 +352,7 @@ function get_location_test_cases() {
 				'description' => 'karachi',
 				'latitude'    => '24.906',
 				'longitude'   => '67.082',
-				'country'     => 'TR',
+				'country'     => 'PK',
 			),
 		),
 
