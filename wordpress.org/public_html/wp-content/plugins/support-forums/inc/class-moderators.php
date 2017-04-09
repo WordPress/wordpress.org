@@ -151,11 +151,6 @@ class Moderators {
 	}
 
 	public function archive_handler( $action = '' ) {
-		if ( ! current_user_can( 'moderate' ) ) {
-			return;
-		}
-		$user_id = get_current_user_id();
-
 		if ( ! in_array( $action, $this->get_valid_actions() ) ) {
 			return;
 		}
@@ -164,9 +159,16 @@ class Moderators {
 			return;
 		}
 
-		$post = get_post( absint( $_GET['post_id'] ) );
+		$user_id = get_current_user_id();
+		$post_id = absint( $_GET['post_id'] );
+
+		$post = get_post( $post_id );
 		if ( ! $post ) {
-			return false;
+			return;
+		}
+
+		if ( ! current_user_can( 'moderate', $post->ID ) ) {
+			return;
 		}
 
 		// Check for empty post id.
@@ -228,23 +230,25 @@ class Moderators {
 	}
 
 	public function get_archive_link( $args = array() ) {
-		if ( ! current_user_can( 'moderate' ) ) {
-			return false;
-		}
-		$user_id = get_current_user_id();
-
 		$r = bbp_parse_args( $args, array(
 			'post_id' => get_the_ID(),
 			'archive' => esc_html__( 'Archive', 'wporg-forums' ),
 			'unarchive' => esc_html__( 'Unarchive', 'wporg-forums' ),
 		), 'get_post_archive_link' );
+
 		if ( empty( $r['post_id'] ) ) {
 			return false;
 		}
+
+		$user_id = get_current_user_id();
 		$post_id = $r['post_id'];
 
 		$post = get_post( $post_id );
 		if ( ! $post ) {
+			return false;
+		}
+
+		if ( ! current_user_can( 'moderate', $post->ID ) ) {
 			return false;
 		}
 
