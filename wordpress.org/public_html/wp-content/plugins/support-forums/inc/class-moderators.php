@@ -24,6 +24,7 @@ class Moderators {
 
 		// Archived post status.
 		add_action( 'bbp_register_post_statuses',       array( $this, 'register_post_statuses' ) );
+		add_filter( 'bbp_get_reply_statuses',           array( $this, 'get_reply_statuses' ), 10, 2 );
 		add_action( 'bbp_get_request',                  array( $this, 'archive_handler' ) );
 		add_filter( 'bbp_after_has_topics_parse_args',  array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
@@ -148,6 +149,25 @@ class Moderators {
 			)
 		);
 
+	}
+
+	/**
+	 * Remove 'Trash' from reply statuses, add 'Archived' status instead.
+	 *
+	 * @param array $r        Reply statuses array.
+	 * @param int   $reply_id Reply ID.
+	 * @return array Filtered reply statuses array.
+	 */
+	public function get_reply_statuses( $r, $reply_id ) {
+		/*
+		 * Remove 'Trash' from reply statuses. Trashing a reply will eventually permanently
+		 * delete it when the trash is emptied. Better to mark it as pending or spam.
+		 */
+		unset( $r['trash'] );
+
+		$r[ self::ARCHIVED ] = _x( 'Archived', 'post', 'wporg-forums' );
+
+		return $r;
 	}
 
 	public function archive_handler( $action = '' ) {
