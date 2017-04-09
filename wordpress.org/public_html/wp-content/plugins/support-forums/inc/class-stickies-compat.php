@@ -207,7 +207,7 @@ class Stickies_Compat {
 
 		if ( $user && $topic && $term ) {
 			// Moderators.
-			if ( user_can( $user->ID, 'moderate' ) ) {
+			if ( user_can( $user->ID, 'moderate', $topic->ID ) ) {
 				$retval = true;
 			}
 
