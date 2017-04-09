@@ -283,8 +283,8 @@ class Plugin {
  	 * @param string $item_type The type of thing getting badge assigned. One of
 	 *                          'topic' or 'reply'.
 	 * @param int    $item_id   The ID of the item getting badge assigned.
-	 * @return array|false      Associative array with keys 'type', 'slug', and
-	 *                          'user_nicename' if author merits a badge, else null.
+	 * @return array|false      Associative array with keys 'type', 'label', and
+	 *                          'help' if author merits a badge, else false.
 	 */
 	protected function get_author_badge( $item_type, $item_id ) {
 		if ( ! $info = $this->get_author_badge_info( $item_type, $item_id ) ) {
@@ -321,8 +321,8 @@ class Plugin {
 	 *
 	 * @access protected
 	 *
-	 * @return array|false Associative array with keys 'type', 'slug', and
-	 *                     'user_login' if author merits a badge, else false.
+	 * @return array|false Associative array with keys 'type', 'label', and
+	 *                     'help' if author merits a badge, else false.
 	 */
 	protected function get_moderator_badge() {
 		$label = $help = null;
