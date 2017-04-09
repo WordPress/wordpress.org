@@ -47,12 +47,6 @@ class Hooks {
 
 		// Honor i18n number formatting.
 		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
-
-		// Store moderator's username on approve/unapprove actions.
-		add_action( 'bbp_approved_topic',   array( $this, 'store_moderator_username' ) );
-		add_action( 'bbp_approved_reply',   array( $this, 'store_moderator_username' ) );
-		add_action( 'bbp_unapproved_topic', array( $this, 'store_moderator_username' ) );
-		add_action( 'bbp_unapproved_reply', array( $this, 'store_moderator_username' ) );
 	}
 
 	/**
@@ -374,14 +368,4 @@ class Hooks {
 
 		return $formatted_number;
 	}
-	
-	/**
-	 * Store moderator's username on approve/unapprove actions.
-	 *
-	 * @param int $post_id Post ID.
-	 */
-	public function store_moderator_username( $post_id ) {
-		update_post_meta( $post_id, '_wporg_bbp_moderator', wp_get_current_user()->user_login );
-	}
-
 }

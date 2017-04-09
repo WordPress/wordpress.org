@@ -43,6 +43,12 @@ class Moderators {
 		add_filter( 'bbp_get_topic_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_reply_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_reply_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
+
+		// Store moderator's username on approve/unapprove actions.
+		add_action( 'bbp_approved_topic',               array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_approved_reply',               array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_unapproved_topic',             array( $this, 'store_moderator_username' ) );
+		add_action( 'bbp_unapproved_reply',             array( $this, 'store_moderator_username' ) );
 	}
 
 	/**
@@ -569,5 +575,14 @@ class Moderators {
 		}
 
 		return $link;
+	}
+
+	/**
+	 * Store moderator's username on approve/unapprove actions.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function store_moderator_username( $post_id ) {
+		update_post_meta( $post_id, self::MODERATOR_META, wp_get_current_user()->user_login );
 	}
 }
