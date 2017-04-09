@@ -839,7 +839,7 @@ abstract class Directory_Compat {
 			if ( $this->compat() == 'theme' ) {
 				$theme = $this->theme;
 				$author = get_user_by( 'id', $this->theme->post_author );
-				$authors = array( $author->user_login );
+				$authors = array( $author->user_nicename );
 			} else {
 				$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
 				// Note: Intentionally not considering posts of 'plugin' post_type with
