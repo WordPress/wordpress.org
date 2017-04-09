@@ -17,9 +17,9 @@ $menu_items = array(
 	_x( 'https://codex.wordpress.org/Main_Page', 'header menu', 'wporg-forums' )        => _x( 'Documentation', 'header menu', 'wporg-forums' ),
 	_x( 'https://make.wordpress.org/support/handbook/', 'header menu', 'wporg-forums' ) => _x( 'Get Involved', 'header menu', 'wporg-forums' ),
 );
-?>
 
-<?php wporg_get_global_header(); ?>
+wporg_get_global_header();
+?>
 
 <div id="page" class="site">
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-forums' ); ?></a>
