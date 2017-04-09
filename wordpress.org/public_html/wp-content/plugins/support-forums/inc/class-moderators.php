@@ -29,6 +29,20 @@ class Moderators {
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 		add_filter( 'bbp_reply_admin_links',            array( $this, 'admin_links' ), 10, 2 );
+
+		// Add valid topic and reply actions.
+		add_filter( 'bbp_get_toggle_topic_actions',     array( $this, 'get_topic_actions' ) );
+		add_filter( 'bbp_get_toggle_reply_actions',     array( $this, 'get_reply_actions' ) );
+
+		// Handle topic and reply actions.
+		add_filter( 'bbp_toggle_topic',                 array( $this, 'handle_topic_actions' ), 10, 3 );
+		add_filter( 'bbp_toggle_reply',                 array( $this, 'handle_reply_actions' ), 10, 3 );
+
+		// Convert toggle links to explicit actions.
+		add_filter( 'bbp_get_topic_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
+		add_filter( 'bbp_get_topic_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
+		add_filter( 'bbp_get_reply_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
+		add_filter( 'bbp_get_reply_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 	}
 
 	/**
@@ -345,5 +359,215 @@ class Moderators {
 			'wporg_bbp_archive_post',
 			'wporg_bbp_unarchive_post',
 		);
+	}
+
+	/**
+	 * Add Spam, Unspam, Unapprove, Approve to the list of valid topic actions.
+	 *
+	 * @param array $actions List of topic actions.
+	 * @return array Filtered list of actions.
+	 */
+	public function get_topic_actions( $actions ) {
+		$actions = array_merge( $actions, array(
+			'wporg_bbp_spam_topic',
+			'wporg_bbp_unspam_topic',
+			'wporg_bbp_unapprove_topic',
+			'wporg_bbp_approve_topic',
+		) );
+
+		return $actions;
+	}
+
+	/**
+	 * Add Spam, Unspam, Unapprove, Approve to the list of valid reply actions.
+	 *
+	 * @param array $actions List of reply actions.
+	 * @return array Filtered list of actions.
+	 */
+	public function get_reply_actions( $actions ) {
+		$actions = array_merge( $actions, array(
+			'wporg_bbp_spam_reply',
+			'wporg_bbp_unspam_reply',
+			'wporg_bbp_unapprove_reply',
+			'wporg_bbp_approve_reply',
+		) );
+
+		return $actions;
+	}
+
+	/**
+	 * Handle Spam, Unspam, Unapprove, Approve topic actions.
+	 *
+	 * By default, bbPress treats them as toggles, which may cause conflicts if
+	 * the same action is performed twice by different moderators.
+	 *
+	 * @param array $retval {
+	 *    @type int    $status      Result of the action.
+	 *    @type string $message     Message displayed in case of an error.
+	 *    @type string $redirect_to URL to redirect to.
+	 *    @type bool   $view_all    Whether to append 'view=all' to the URL.
+	 * }
+	 * @param array  $r    Parsed arguments.
+	 * @param array  $args Raw arguments.
+	 * @return array
+	 */
+	public function handle_topic_actions( $retval, $r, $args ) {
+		$nonce_suffix = bbp_get_topic_post_type() . '_' . (int) $r['id'];
+
+		switch ( $r['action'] ) {
+			case 'wporg_bbp_spam_topic':
+				check_ajax_referer( "spam-{$nonce_suffix}" );
+
+				if ( ! bbp_is_topic_spam( $r['id'] ) ) {
+					$retval['status']   = bbp_spam_topic( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem marking the topic as spam.', 'wporg-forums' );
+				}
+				$retval['view_all'] = true;
+
+				break;
+
+			case 'wporg_bbp_unspam_topic':
+				check_ajax_referer( "spam-{$nonce_suffix}" );
+
+				if ( bbp_is_topic_spam( $r['id'] ) ) {
+					$retval['status']   = bbp_unspam_topic( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unmarking the topic as spam.', 'wporg-forums' );
+				}
+				$retval['view_all'] = false;
+
+				break;
+
+			case 'wporg_bbp_unapprove_topic':
+				check_ajax_referer( "approve-{$nonce_suffix}" );
+
+				if ( ! bbp_is_topic_pending( $r['id'] ) ) {
+					$retval['status']   = bbp_unapprove_topic( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unapproving the topic.', 'wporg-forums' );
+				}
+				$retval['view_all'] = true;
+
+				break;
+
+			case 'wporg_bbp_approve_topic':
+				check_ajax_referer( "approve-{$nonce_suffix}" );
+
+				if ( bbp_is_topic_pending( $r['id'] ) ) {
+					$retval['status']   = bbp_approve_topic( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem approving the topic.', 'wporg-forums' );
+				}
+				$retval['view_all'] = false;
+
+				break;
+		}
+
+		// Add 'view=all' if needed
+		if ( ! empty( $retval['view_all'] ) ) {
+			$retval['redirect_to'] = bbp_add_view_all( $retval['redirect_to'], true );
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Handle Spam, Unspam, Unapprove, Approve reply actions.
+	 *
+	 * By default, bbPress treats them as toggles, which may cause conflicts if
+	 * the same action is performed twice by different moderators.
+	 *
+	 * @param array $retval {
+	 *    @type int    $status      Result of the action.
+	 *    @type string $message     Message displayed in case of an error.
+	 *    @type string $redirect_to URL to redirect to.
+	 *    @type bool   $view_all    Whether to append 'view=all' to the URL.
+	 * }
+	 * @param array  $r    Parsed arguments.
+	 * @param array  $args Raw arguments.
+	 * @return array
+	 */
+	public function handle_reply_actions( $retval, $r, $args ) {
+		$nonce_suffix = bbp_get_reply_post_type() . '_' . (int) $r['id'];
+
+		switch ( $r['action'] ) {
+			case 'wporg_bbp_spam_reply':
+				check_ajax_referer( "spam-{$nonce_suffix}" );
+
+				if ( ! bbp_is_reply_spam( $r['id'] ) ) {
+					$retval['status']   = bbp_spam_reply( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem marking the reply as spam.', 'wporg-forums' );
+				}
+				$retval['view_all'] = true;
+
+				break;
+
+			case 'wporg_bbp_unspam_reply':
+				check_ajax_referer( "spam-{$nonce_suffix}" );
+
+				if ( bbp_is_reply_spam( $r['id'] ) ) {
+					$retval['status']   = bbp_unspam_reply( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unmarking the reply as spam.', 'wporg-forums' );
+				}
+				$retval['view_all'] = false;
+
+				break;
+
+			case 'wporg_bbp_unapprove_reply':
+				check_ajax_referer( "approve-{$nonce_suffix}" );
+
+				if ( ! bbp_is_reply_pending( $r['id'] ) ) {
+					$retval['status']   = bbp_unapprove_reply( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unapproving the reply.', 'wporg-forums' );
+				}
+				$retval['view_all'] = true;
+
+				break;
+
+			case 'wporg_bbp_approve_reply':
+				check_ajax_referer( "approve-{$nonce_suffix}" );
+
+				if ( bbp_is_reply_pending( $r['id'] ) ) {
+					$retval['status']   = bbp_approve_reply( $r['id'] );
+					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem approving the reply.', 'wporg-forums' );
+				}
+				$retval['view_all'] = false;
+
+				break;
+		}
+
+		// Add 'view=all' if needed
+		if ( ! empty( $retval['view_all'] ) ) {
+			$retval['redirect_to'] = bbp_add_view_all( $retval['redirect_to'], true );
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Convert Spam/Unspam, Unapprove/Approve toggle links to explicit actions.
+	 *
+	 * @param string $link Link HTML.
+	 * @param array  $r    Parsed arguments.
+	 * @param array  $args Raw arguments.
+	 * @return string Filtered link.
+	 */
+	public function convert_toggles_to_actions( $link, $r, $args ) {
+		if ( false !== strpos( $link, 'bbp_toggle_topic_spam' ) ) {
+			$action = ( bbp_is_topic_spam( $r['id'] ) ) ? 'wporg_bbp_unspam_topic' : 'wporg_bbp_spam_topic';
+			$link   = str_replace( 'bbp_toggle_topic_spam', $action, $link );
+
+		} elseif ( false !== strpos( $link, 'bbp_toggle_topic_approve' ) ) {
+			$action = ( bbp_is_topic_pending( $r['id'] ) ) ? 'wporg_bbp_approve_topic' : 'wporg_bbp_unapprove_topic';
+			$link   = str_replace( 'bbp_toggle_topic_approve', $action, $link );
+
+		} elseif ( false !== strpos( $link, 'bbp_toggle_reply_spam' ) ) {
+			$action = ( bbp_is_reply_spam( $r['id'] ) ) ? 'wporg_bbp_unspam_reply' : 'wporg_bbp_spam_reply';
+			$link   = str_replace( 'bbp_toggle_reply_spam', $action, $link );
+
+		} elseif ( false !== strpos( $link, 'bbp_toggle_reply_approve' ) ) {
+			$action = ( bbp_is_reply_pending( $r['id'] ) ) ? 'wporg_bbp_approve_reply' : 'wporg_bbp_unapprove_reply';
+			$link   = str_replace( 'bbp_toggle_reply_approve', $action, $link );
+
+		}
+
+		return $link;
 	}
 }
