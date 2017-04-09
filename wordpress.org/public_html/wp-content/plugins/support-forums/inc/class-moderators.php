@@ -583,6 +583,6 @@ class Moderators {
 	 * @param int $post_id Post ID.
 	 */
 	public function store_moderator_username( $post_id ) {
-		update_post_meta( $post_id, self::MODERATOR_META, wp_get_current_user()->user_login );
+		update_post_meta( $post_id, self::MODERATOR_META, wp_get_current_user()->user_nicename );
 	}
 }
