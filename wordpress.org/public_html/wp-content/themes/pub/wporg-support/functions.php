@@ -298,7 +298,7 @@ function wporg_support_add_moderation_notice() {
 	$seconds_passed  = current_time( 'timestamp' ) - $post_time;
 	$hours_passed    = (int) ( $seconds_passed / HOUR_IN_SECONDS );
 	$post_status     = get_post_status();
-	$is_moderator    = current_user_can( 'moderate' );
+	$is_moderator    = current_user_can( 'moderate', get_the_ID() );
 	$is_user_blocked = ! current_user_can( 'spectate' );
 	$notice_class    = '';
 	$notices         = array();

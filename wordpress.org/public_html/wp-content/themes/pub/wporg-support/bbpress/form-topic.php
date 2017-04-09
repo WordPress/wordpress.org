@@ -159,7 +159,7 @@
 
 					<?php endif; ?>
 
-					<?php if ( current_user_can( 'moderate' ) ) : ?>
+					<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
 
 						<?php do_action( 'bbp_theme_before_topic_form_type' ); ?>
 
