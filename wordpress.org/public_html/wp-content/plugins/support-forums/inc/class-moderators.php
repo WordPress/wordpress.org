@@ -44,7 +44,7 @@ class Moderators {
 		add_filter( 'bbp_get_reply_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_reply_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 
-		// Store moderator's username on approve/unapprove actions.
+		// Store moderator's username on Approve/Unapprove actions.
 		add_action( 'bbp_approved_topic',               array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_approved_reply',               array( $this, 'store_moderator_username' ) );
 		add_action( 'bbp_unapproved_topic',             array( $this, 'store_moderator_username' ) );
@@ -288,7 +288,7 @@ class Moderators {
 			), true );
 			if ( $post_id ) {
 				update_post_meta( $post->ID, self::ARCHIVED_META, $post->post_status );
-				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_nicename );
+				$this->store_moderator_username( $post->ID );
 
 				if ( bbp_is_reply( $post->ID ) ) {
 					bbp_increase_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
@@ -322,7 +322,7 @@ class Moderators {
 			) );
 			if ( $post_id ) {
 				delete_post_meta( $post->ID, self::ARCHIVED_META );
-				update_post_meta( $post->ID, self::MODERATOR_META, wp_get_current_user()->user_nicename );
+				$this->store_moderator_username( $post->ID );
 
 				if ( bbp_is_reply( $post->ID ) ) {
 					bbp_decrease_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
@@ -578,7 +578,7 @@ class Moderators {
 	}
 
 	/**
-	 * Store moderator's username on approve/unapprove actions.
+	 * Store moderator's username on Approve/Unapprove and Archive/Unarchive actions.
 	 *
 	 * @param int $post_id Post ID.
 	 */
