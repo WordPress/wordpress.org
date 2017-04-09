@@ -138,8 +138,8 @@ class Plugin {
 		}
 
 		return array(
-			'type'       => $type,
-			'slug'       => $slugs[0],
+			'type'          => $type,
+			'slug'          => $slugs[0],
 			'user_nicename' => $user_nicename,
 		);
 	}
@@ -342,9 +342,9 @@ class Plugin {
 	 * the designated author for a theme.
 	 *
 	 * @param string $user_nicename User slug.
-	 * @param string $type       Either 'plugin' or 'theme'.
-	 * @param string $slug       Slug for the plugin or theme.
-	 * @return bool              True if user is an author, false otherwise.
+	 * @param string $type          Either 'plugin' or 'theme'.
+	 * @param string $slug          Slug for the plugin or theme.
+	 * @return bool                 True if user is an author, false otherwise.
 	 */
 	public function is_user_author( $user_nicename, $type, $slug ) {
 		if ( 'plugin' === $type ) {
@@ -364,9 +364,9 @@ class Plugin {
 	 * Currently, themes do not support having contirbutors.
 	 *
 	 * @param string $user_nicename User slug.
-	 * @param string $type       Either 'plugin' or 'theme'.
-	 * @param string $slug       Slug for the plugin or theme.
-	 * @return bool              True if user is a contributor, false otherwise.
+	 * @param string $type          Either 'plugin' or 'theme'.
+	 * @param string $slug          Slug for the plugin or theme.
+	 * @return bool                 True if user is a contributor, false otherwise.
 	 */
 	public function is_user_contributor( $user_nicename, $type, $slug ) {
 		if ( 'plugin' === $type ) {
