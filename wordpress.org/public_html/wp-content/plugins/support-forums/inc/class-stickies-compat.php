@@ -212,12 +212,12 @@ class Stickies_Compat {
 			}
 
 			// Compat authors.
-			if ( $this->authors && in_array( $user->user_login, $this->authors ) ) {
+			if ( $this->authors && in_array( $user->user_nicename, $this->authors ) ) {
 				$retval = true;
 			}
 
 			// Compat contributors.
-			if ( $this->contributors && in_array( $user->user_login, $this->contributors ) ) {
+			if ( $this->contributors && in_array( $user->user_nicename, $this->contributors ) ) {
 				$retval = true;
 			}
 		}

@@ -353,9 +353,9 @@ abstract class Directory_Compat {
 			return $retval;
 		}
 		if (
-			( ! empty( $this->authors ) && in_array( $user->user_login, $this->authors ) )
+			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors ) )
 		||
-			( ! empty( $this->contributors ) && in_array( $user->user_login, $this->contributors ) )
+			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
 		) {
 			$retval = true;
 		}
