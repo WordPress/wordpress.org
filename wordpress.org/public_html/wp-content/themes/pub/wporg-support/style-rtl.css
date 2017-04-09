@@ -3054,6 +3054,14 @@ section {
 	display: block;
 }
 
+.reply-edit #bbpress-forums .form-reply-to {
+	display: inline-block;
+}
+
+.reply-edit #bbpress-forums .form-reply-to #bbp_reply_to {
+	width: 100%;
+}
+
 .topic-resolved label {
 	vertical-align: none;
 }
