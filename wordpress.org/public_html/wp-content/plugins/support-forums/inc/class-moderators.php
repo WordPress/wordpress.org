@@ -28,6 +28,8 @@ class Moderators {
 		add_action( 'bbp_get_request',                  array( $this, 'archive_handler' ) );
 		add_filter( 'bbp_after_has_topics_parse_args',  array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
+
+		// Adjust the list of admin links for topics and replies.
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 		add_filter( 'bbp_reply_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 
@@ -244,8 +246,44 @@ class Moderators {
 		return $args;
 	}
 
+	/**
+	 * Remove some unneeded or redundant admin links for topics and replies,
+	 * move less commonly used inline quick links to 'Topic Admin' sidebar section.
+	 *
+	 * @param array $r       Admin links array.
+	 * @param int   $post_id Topic or reply ID.
+	 * @return array Filtered admin links array.
+	 */
 	public function admin_links( $r, $post_id ) {
+		/*
+		 * Remove 'Trash' from admin links. Trashing a topic or reply will eventually
+		 * permanently delete it when the trash is emptied. Better to mark it as pending or spam.
+		 */
+		unset( $r['trash'] );
+
+		/*
+		 * Remove 'Reply' link. The theme adds its own 'Reply to Topic' sidebar link
+		 * for quick access to reply form, making the default inline link redundant.
+		 */
+		unset( $r['reply'] );
+
+		/*
+		 * The following actions are removed from inline quick links as less commonly used,
+		 * but are still available via 'Topic Admin' sidebar section.
+		 */
+		if ( ! did_action( 'wporg_compat_single_topic_sidebar_pre' ) ) {
+			// Remove 'Merge' link.
+			unset( $r['merge'] );
+
+			// Remove 'Stick' link for moderators, but keep it for plugin/theme authors and contributors.
+			if ( current_user_can( 'moderate', $post_id ) ) {
+				unset( $r['stick'] );
+			}
+		}
+
+		// Add 'Archive' link.
 		$r['archive'] = $this->get_archive_link( array( 'post_id' => $post_id ) );
+
 		return $r;
 	}
 
