@@ -39,7 +39,7 @@ class Serve {
 		$slug = false;
 		$version = 'trunk';
 
-		if ( ! preg_match( "!^(?P<slug>[a-z0-9-]+)(.(?P<version>.+))?.zip$!i", $zip, $m ) ) {
+		if ( ! preg_match( "!^(?P<slug>[a-z0-9-_]+)(.(?P<version>.+))?.zip$!i", $zip, $m ) ) {
 			throw new Exception( __METHOD__ . ": Invalid URL." );
 		}
 
