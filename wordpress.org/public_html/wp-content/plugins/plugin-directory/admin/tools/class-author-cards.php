@@ -70,7 +70,7 @@ class Author_Cards {
 		echo '<input name="users" type="text" id="users" value="' . esc_attr( $usernames ) . '" class="regular-text">';
 		echo '<p>' . __( 'Comma-separated list of user slugs, logins, and/or email addresses.', 'wporg-plugins' ) . '</p>';
 		echo '</td></tr></tbody></table>';
-		echo '<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="' . __( 'Submit', 'wporg-plugins' ) . '"></p>';
+		echo '<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Submit', 'wporg-plugins' ) . '"></p>';
 		echo '</form>';
 
 		if ( $usernames ) {
