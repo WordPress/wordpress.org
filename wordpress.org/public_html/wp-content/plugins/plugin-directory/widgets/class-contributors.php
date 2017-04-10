@@ -27,7 +27,7 @@ class Contributors extends \WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		$post = get_post();
-		$contributors = get_the_terms( 2, 'plugin_contributors' );
+		$contributors = get_the_terms( $post, 'plugin_contributors' );
 
 		if ( $contributors ) {
 			$contributors = (array) wp_list_pluck( $contributors, 'name' );
