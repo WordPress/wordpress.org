@@ -469,8 +469,8 @@ class Plugin_Directory {
 		add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 
 		// Instantiate our copy of the Jetpack_Search class.
-		if ( class_exists( 'Jetpack' ) && ! class_exists( 'Jetpack_Search' ) 
-			&& !isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
+		if ( class_exists( 'Jetpack' ) && \Jetpack::get_option( 'id' ) && ! class_exists( 'Jetpack_Search' )
+			&& ! isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
 				require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
 				\Jetpack_Search::instance();
 		}
@@ -812,9 +812,9 @@ class Plugin_Directory {
 	 */
 	public function bypass_options_cache( $value, $option ) {
 		global $wpdb;
-		$value = $wpdb->get_var( 
+		$value = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", 
+				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
 				$option
 			)
 		);
@@ -1024,7 +1024,7 @@ class Plugin_Directory {
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ) );
 			die();
 		}
-	
+
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
@@ -1188,7 +1188,7 @@ class Plugin_Directory {
 
 	/**
 	 * Create a new post entry for a given plugin slug.
-	 * 
+	 *
 	 * @static
 	 *
 	 * @param array $args {
