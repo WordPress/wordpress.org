@@ -533,6 +533,38 @@ function get_location_test_cases() {
 			),
 		),
 
+		/*
+		 * Coordinates should take precedence over IP addresses
+		 */
+		'coordinates-over-ip-us' => array(
+			'input' => array(
+				'latitude'  => '47.6062100',
+				'longitude' => '-122.3320700',
+				'ip'        => '192.0.70.251',  // San Francisco, USA
+				'timezone'  => 'America/Los_Angeles',
+				'locale'    => 'en_US',
+			),
+			'expected' => array(
+				'description' => 'seattle',
+				'latitude'    => '47.606',
+				'longitude'   => '-122.332',
+			),
+		),
+
+		'coordinates-over-ip-africa' => array(
+			'input' => array(
+				'latitude'  => '-19.634233',
+				'longitude' => '17.331767',
+				'ip'        => '41.190.96.5',   // Tsumeb, Namibia
+				'timezone'  => 'Africa/Windhoek',
+				'locale'    => 'af',
+			),
+			'expected' => array(
+				'description' => 'otavi',
+				'latitude'    => '-19.634',
+				'longitude'   => '17.332',
+			),
+		),
 
 		/*
 		 * Only the IP is given

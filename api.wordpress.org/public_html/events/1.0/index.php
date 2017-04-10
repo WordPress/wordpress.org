@@ -355,6 +355,13 @@ function guess_location_from_ip( $dotted_ip ) {
 	return $row;
 }
 
+/**
+ * Determine a location for the given parameters
+ *
+ * @param array $args
+ *
+ * @return false|array
+ */
 function get_location( $args = array() ) {
 	global $cache_life, $cache_group;
 
@@ -377,7 +384,23 @@ function get_location( $args = array() ) {
 		$country_code = $match[1];
 	}
 
-	// Location was provided by the user:
+	// Coordinates provided
+	if (
+		! $location && (
+			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
+			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+		)
+	) {
+		$city = get_city_from_coordinates( $args['latitude'], $args['longitude'] );
+
+		$location = array(
+			'description' => $city ? $city : "{$args['latitude']}, {$args['longitude']}",
+			'latitude'    => $args['latitude'],
+			'longitude'   => $args['longitude']
+		);
+	}
+
+	// City was provided by the user:
 	if ( ! $location && isset( $args['location_name'] ) ) {
 		$guess = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code  );
 
@@ -411,21 +434,6 @@ function get_location( $args = array() ) {
 				'country' => $guess->country_short,
 			);
 		}
-	}
-
-	if (
-		! $location && (
-			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
-			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
-		)
-	) {
-		$city = get_city_from_coordinates( $args['latitude'], $args['longitude'] );
-
-		$location = array(
-			'description' => $city ? $city : "{$args['latitude']}, {$args['longitude']}",
-			'latitude'  => $args['latitude'],
-			'longitude' => $args['longitude']
-		);
 	}
 
 	if ( ! $location ) {
