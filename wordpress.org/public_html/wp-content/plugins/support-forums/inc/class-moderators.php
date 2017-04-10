@@ -38,6 +38,8 @@ class Moderators {
 		add_filter( 'bbp_get_toggle_reply_actions',     array( $this, 'get_reply_actions' ) );
 
 		// Handle topic and reply actions.
+		add_filter( 'bbp_get_request',                  array( $this, 'handle_topic_actions_request' ) );
+		add_filter( 'bbp_get_request',                  array( $this, 'handle_reply_actions_request' ) );
 		add_filter( 'bbp_toggle_topic',                 array( $this, 'handle_topic_actions' ), 10, 3 );
 		add_filter( 'bbp_toggle_reply',                 array( $this, 'handle_reply_actions' ), 10, 3 );
 
@@ -461,6 +463,134 @@ class Moderators {
 		) );
 
 		return $actions;
+	}
+
+	/**
+	 * Handle Spam, Unspam, Unapprove, Approve topic actions request.
+	 *
+	 * @param string $action The requested action.
+	 */
+	public function handle_topic_actions_request( $action = '' ) {
+		// Bail if required GET actions aren't passed
+		if ( empty( $_GET['topic_id'] ) ) {
+			return;
+		}
+
+		// What's the topic id?
+		$topic_id = bbp_get_topic_id( (int) $_GET['topic_id'] );
+
+		// Get possible topic-handler actions
+		$possible_actions = $this->get_topic_actions( array() );
+
+		// Bail if action isn't meant for this function
+		if ( ! in_array( $action, $possible_actions ) ) {
+			return;
+		}
+
+		// Make sure topic exists
+		$topic = bbp_get_topic( $topic_id );
+		if ( empty( $topic ) ) {
+			bbp_add_error( 'bbp_toggle_topic_missing', __( '<strong>ERROR:</strong> This topic could not be found or no longer exists.', 'wporg-forums' ) );
+			return;
+		}
+
+		// What is the user doing here?
+		if ( ! current_user_can( 'edit_topic', $topic_id ) ) {
+			bbp_add_error( 'bbp_toggle_topic_permission', __( '<strong>ERROR:</strong> You do not have permission to do that.', 'wporg-forums' ) );
+			return;
+		}
+
+		// Preliminary array
+		$args = array(
+			'id'         => $topic_id,
+			'action'     => $action,
+			'sub_action' => '',
+			'data'       => array( 'ID' => $topic_id )
+		);
+
+		// Default return values
+		$retval = array(
+			'status'      => 0,
+			'message'     => '',
+			'redirect_to' => bbp_get_topic_permalink( $args['id'], bbp_get_redirect_to() ),
+			'view_all'    => false
+		);
+
+		// Do the topic action
+		$retval = $this->handle_topic_actions( $retval, $args, $args );
+
+		// Redirect back to topic
+		if ( ( false !== $retval['status'] ) && ! is_wp_error( $retval['status'] ) ) {
+			bbp_redirect( $retval['redirect_to'] );
+
+		// Handle errors
+		} else {
+			bbp_add_error( 'bbp_toggle_topic', $retval['message'] );
+		}
+	}
+
+	/**
+	 * Handle Spam, Unspam, Unapprove, Approve reply actions request.
+	 *
+	 * @param string $action The requested action.
+	 */
+	public function handle_reply_actions_request( $action = '' ) {
+		// Bail if required GET actions aren't passed
+		if ( empty( $_GET['reply_id'] ) ) {
+			return;
+		}
+
+		// What's the reply id?
+		$reply_id = bbp_get_reply_id( (int) $_GET['reply_id'] );
+
+		// Get possible reply-handler actions
+		$possible_actions = $this->get_reply_actions( array() );
+
+		// Bail if action isn't meant for this function
+		if ( ! in_array( $action, $possible_actions ) ) {
+			return;
+		}
+
+		// Make sure reply exists
+		$reply = bbp_get_reply( $reply_id );
+		if ( empty( $reply ) ) {
+			bbp_add_error( 'bbp_toggle_reply_missing', __( '<strong>ERROR:</strong> This reply could not be found or no longer exists.', 'wporg-forums' ) );
+			return;
+		}
+
+		// What is the user doing here?
+		if ( ! current_user_can( 'edit_reply', $reply_id ) ) {
+			bbp_add_error( 'bbp_toggle_reply_permission', __( '<strong>ERROR:</strong> You do not have permission to do that.', 'wporg-forums' ) );
+			return;
+		}
+
+		// Preliminary array
+		$args = array(
+			'id'         => $reply_id,
+			'action'     => $action,
+			'sub_action' => '',
+			'data'       => array( 'ID' => $reply_id )
+		);
+
+		// Default return values
+		$retval = array(
+			'status'      => 0,
+			'message'     => '',
+			'redirect_to' => bbp_get_reply_url( $args['id'], bbp_get_redirect_to() ),
+			'view_all'    => false
+		);
+
+		// Do the reply action
+		$retval = $this->handle_reply_actions( $retval, $args, $args );
+
+		// Redirect back to reply
+		if ( ( false !== $retval['status'] ) && ! is_wp_error( $retval['status'] ) ) {
+			bbp_redirect( $retval['redirect_to'] );
+
+		// Handle errors
+		} else {
+			bbp_add_error( 'bbp_toggle_reply', $retval['message'] );
+		}
 	}
 
 	/**
