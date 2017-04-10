@@ -98,6 +98,10 @@
 					$commentsList.append( response.responses[0].data ).show();
 
 					$( 'a[className*=\':\']' ).unbind();
+
+					if ( 0 === location.hash.indexOf( '#comment-' ) ) {
+						$( document.body ).animate( { scrollTop: $( location.hash ).offset().top - 100 }, 100 );
+					}
 				}
 			} );
 		},

@@ -39,6 +39,7 @@ class Customizations {
 
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
+		add_filter( 'get_comment_link', array( $this, 'link_internal_notes_to_admin' ), 10, 2 );
 
 		// Admin Metaboxes
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
@@ -108,7 +109,7 @@ class Customizations {
 			switch ( $hook_suffix ) {
 				case 'post.php':
 					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
-					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 1 );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 2 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
 					) );
@@ -410,6 +411,22 @@ class Customizations {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Changes the permalink for internal notes to link to the edit post screen.
+	 *
+	 * @param string $link The comment permalink with '#comment-$id' appended.
+	 * @param \WP_Comment $comment The current comment object.
+	 * @return string The permalink to the given comment.
+	 */
+	public function link_internal_notes_to_admin( $link, $comment ) {
+		if ( 'internal-note' === $comment->comment_type ) {
+			$link = get_edit_post_link( $comment->comment_post_ID );
+			$link = $link . '#comment-' . $comment->comment_ID;
+		}
+
+		return $link;
 	}
 
 	/**
