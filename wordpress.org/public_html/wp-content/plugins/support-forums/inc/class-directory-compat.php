@@ -832,7 +832,7 @@ abstract class Directory_Compat {
 
 		// Check the cache.
 		$cache_key = $slug;
-		$cache_group = $this->compat() . '-authors';
+		$cache_group = $this->compat() . '-authors-slugs';
 		$authors = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $authors ) {
 
@@ -876,7 +876,7 @@ abstract class Directory_Compat {
 
 		// Check the cache.
 		$cache_key = $slug;
-		$cache_group = $this->compat() . '-contributors';
+		$cache_group = $this->compat() . '-contributors-slugs';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $contributors ) {
 			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
