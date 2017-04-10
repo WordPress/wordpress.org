@@ -12,7 +12,7 @@ use WordPressdotorg\Plugin_Directory\Admin\Metabox\Author_Card;
 class Author_Cards {
 
 	/**
-	 * Fetch the instance of the Author_Card class.
+	 * Fetch the instance of the Author_Cards class.
 	 */
 	public static function instance() {
 		static $instance = null;

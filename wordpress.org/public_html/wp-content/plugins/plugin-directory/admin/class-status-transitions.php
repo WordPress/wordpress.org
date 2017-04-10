@@ -12,7 +12,7 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 class Status_Transitions {
 
 	/**
-	 * Fetch the instance of the Status Transitions class.
+	 * Fetch the instance of the Status_Transitions class.
 	 */
 	public static function instance() {
 		static $instance = null;
