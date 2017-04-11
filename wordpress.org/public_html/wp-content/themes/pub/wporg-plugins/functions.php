@@ -176,7 +176,7 @@ add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title' );
  * @return string Document title separator.
  */
 function document_title_separator() {
-	return '&mdash;';
+	return ( is_feed() ) ? '&#8212;' : '&mdash;';
 }
 add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
 
