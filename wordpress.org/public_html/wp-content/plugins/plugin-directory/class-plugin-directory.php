@@ -56,6 +56,9 @@ class Plugin_Directory {
 		// Load the API routes.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
 
+		// Allow post_modified not to be modified when we don't specifically bump it.
+		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
+
 		// Work around caching issues
 		add_filter( 'pre_option_jetpack_sync_full__started' , array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
@@ -83,6 +86,24 @@ class Plugin_Directory {
 
 		register_activation_hook( PLUGIN_FILE, array( $this, 'activate' ) );
 		register_deactivation_hook( PLUGIN_FILE, array( $this, 'deactivate' ) );
+	}
+
+	/**
+	 * Filters `wp_insert_post()` to respect the presented data.
+	 * This function overrides `wp_insert_post()`s constant updating of
+	 * the post_modified fields.
+	 *
+	 * @param array $data    The data to be inserted into the database.
+	 * @param array $postarr The raw data passed to `wp_insert_post()`.
+	 *
+	 * @return array The data to insert into the database.
+	 */
+	public function filter_wp_insert_post_data( $data, $postarr ) {
+		if ( 'plugin' === $postarr['post_type'] ) {
+			$data['post_modified']     = $postarr['post_modified'];
+			$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+		}
+		return $data;
 	}
 
 	/**

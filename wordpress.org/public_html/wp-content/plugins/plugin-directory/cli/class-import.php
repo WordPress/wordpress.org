@@ -93,9 +93,7 @@ class Import {
 			$plugin->post_status = 'publish';
 		}
 
-		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 		wp_update_post( $plugin );
-		remove_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ) );
 
 		// Set categories if there aren't any yet. wp-admin takes precedent.
 		if ( ! wp_get_object_terms( $plugin->ID, 'plugin_category', array( 'fields' => 'ids' ) ) ) {
@@ -375,24 +373,6 @@ class Import {
 		}
 
 		return compact( 'readme', 'stable_tag', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions' );
-	}
-
-	/**
-	 * Filters `wp_insert_post()` to respect the presented data.
-	 * This function overrides `wp_insert_post()`s constant updating of
-	 * the post_modified fields.
-	 *
-	 * @param array $data    The data to be inserted into the database.
-	 * @param array $postarr The raw data passed to `wp_insert_post()`.
-	 *
-	 * @return array The data to insert into the database.
-	 */
-	public function filter_wp_insert_post_data( $data, $postarr ) {
-		if ( 'plugin' === $postarr['post_type'] ) {
-			$data['post_modified']     = $postarr['post_modified'];
-			$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
-		}
-		return $data;
 	}
 
 	/**
