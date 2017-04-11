@@ -91,6 +91,9 @@ class Import {
 		// so by this time the plugin should be live.
 		if ( 'approved' === $plugin->post_status ) {
 			$plugin->post_status = 'publish';
+
+			// The post date should be set to when the plugin is first set live.
+			$plugin->post_date = $plugin->post_date_gmt = current_time( 'mysql' );
 		}
 
 		wp_update_post( $plugin );
