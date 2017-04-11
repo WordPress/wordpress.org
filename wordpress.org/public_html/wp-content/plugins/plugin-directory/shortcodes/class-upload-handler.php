@@ -96,9 +96,17 @@ class Upload_Handler {
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
 
 		// Is there already a plugin by a different author?
-		if ( $plugin_post instanceof \WP_Post && $plugin_post->post_author != get_current_user_id() ) {
+		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			/* translators: %s: plugin slug */
 			return sprintf( __( 'There is already a plugin called %s by a different author. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>'
+			);
+		}
+
+		// Check the plugin can accept uploads (New submissions, or pending further review).
+		if ( $plugin_post && ! in_array( $plugin_post->post_status, array( 'new', 'pending' ) ) ) {
+			/* translators: %s: plugin slug */
+			return sprintf( __( 'There is already a plugin called %s. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>'
 			);
 		}
@@ -170,7 +178,7 @@ class Upload_Handler {
 			$plugin_post = Plugin_Directory::create_plugin_post( array(
 				'post_title'   => $this->plugin['Name'],
 				'post_name'    => $this->plugin_slug,
-				'post_status'  => 'draft',
+				'post_status'  => 'new',
 				'post_content' => $content,
 				'post_excerpt' => $this->plugin['Description'],
 			//	'tax_input'    => wp_unslash( $_POST['tax_input'] ), // for category selection
@@ -204,6 +212,7 @@ class Upload_Handler {
 					'active_installs'          => 0,
 					'usage'                    => array(),
 					'_author_ip'               => preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] ),
+					'_submitted_date'          => time(),
 				),
 			) );
 			if ( is_wp_error( $plugin_post ) ) {

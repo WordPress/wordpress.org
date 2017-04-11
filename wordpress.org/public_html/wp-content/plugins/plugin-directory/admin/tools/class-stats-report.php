@@ -107,7 +107,7 @@ class Stats_Report {
 
 		// # of plugins currently in the queue that are drafts (have not been processed/replied to yet)
 		$stats['in_queue_draft'] = $wpdb->get_var(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'draft'"
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'new'"
 		);
 
 		// # of plugins currently in the queue that are pending (have been initially replied to)
@@ -120,7 +120,7 @@ class Stats_Report {
 
 		// # of plugins currently in the queue submitted during the specified time window
 		$stats['in_queue_from_time_window'] = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'draft','pending' ) AND post_date < %s AND post_date > DATE_SUB( %s, INTERVAL %d DAY )",
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'new','pending' ) AND post_date < %s AND post_date > DATE_SUB( %s, INTERVAL %d DAY )",
 			$args['date'],
 			$args['date'],
 			absint( $args['num_days'] ) + 1
@@ -128,7 +128,7 @@ class Stats_Report {
 
 		// # of plugins currently in the queue that are older than "recently"
 		$stats['in_queue_old'] = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'draft','pending' ) AND post_date < DATE_SUB( %s, INTERVAL %d DAY )",
+			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` IN ( 'new','pending' ) AND post_date < DATE_SUB( %s, INTERVAL %d DAY )",
 			$args['date'],
 			absint( $args['recentdays'] ) + 1
 		) );

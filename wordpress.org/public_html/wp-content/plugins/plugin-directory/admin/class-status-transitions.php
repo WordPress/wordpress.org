@@ -56,7 +56,7 @@ class Status_Transitions {
 		}
 
 		// ...or it's a white-listed status for plugin reviewers.
-		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array( 'draft', 'pending' ) ) ) {
+		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array( 'new', 'pending' ) ) ) {
 			return $data;
 		}
 

@@ -130,7 +130,7 @@ class Customizations {
 		}
 
 		if ( empty( $query->query['post_status'] ) ) {
-			$query->query_vars['post_status'] = array( 'publish', 'future', 'draft', 'pending', 'disabled', 'closed', 'rejected', 'approved' );
+			$query->query_vars['post_status'] = array( 'publish', 'future', 'new', 'pending', 'disabled', 'closed', 'rejected', 'approved' );
 		}
 
 		// Make it possible to search for plugins that were submitted from a specific IP.
@@ -175,7 +175,7 @@ class Customizations {
 		$plugins  = get_posts( array(
 			'post_type'      => 'plugin',
 			'post__in'       => array_map( 'absint', $_REQUEST['post'] ),
-			'post_status'    => array( 'draft', 'pending' ),
+			'post_status'    => array( 'new', 'pending' ),
 			'posts_per_page' => count( $_REQUEST['post'] ),
 		) );
 
@@ -237,7 +237,7 @@ class Customizations {
 		$is_admin = current_user_can( 'plugin_approve' );
 
 		switch ( $post->post_status ) {
-			case 'draft':
+			case 'new':
 				$message = __( 'This plugin is newly requested and has not yet been reviewed.', 'wporg-plugins' );
 				$type    = 'notice-info';
 				break;
@@ -365,7 +365,7 @@ class Customizations {
 			'plugin', 'side', 'high'
 		);
 
-		if ( 'draft' !== $post->post_status ) {
+		if ( 'new' !== $post->post_status && 'pending' != $post->post_status ) {
 			add_meta_box(
 				'plugin-committers',
 				__( 'Plugin Committers', 'wporg-plugins' ),
@@ -380,7 +380,7 @@ class Customizations {
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
 
 		// Remove slug metabox unless the slug is editable for the current user.
-		if ( ! in_array( $post->post_status, array( 'draft', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
+		if ( ! in_array( $post->post_status, array( 'new', 'pending' ) ) || ! current_user_can( 'plugin_approve', $post ) ) {
 			remove_meta_box( 'slugdiv', 'plugin', 'normal' );
 		}
 	}

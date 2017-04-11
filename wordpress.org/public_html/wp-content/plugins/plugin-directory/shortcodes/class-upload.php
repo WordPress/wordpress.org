@@ -31,20 +31,13 @@ class Upload {
 				<div class="plugin-queue-message notice notice-info notice-alt">
 					<p>
 						<?php
-						printf( _n( 'Currently there is %1$s plugin in the review queue.', 'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.', ( $plugins->draft + $plugins->pending ), 'wporg-plugins' ),
-							'<strong>' . ( $plugins->draft + $plugins->pending ) . '</strong>',
-							'<strong>' . $plugins->draft . '</strong>'
+						printf( _n( 'Currently there is %1$s plugin in the review queue.', 'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.', ( $plugins->new + $plugins->pending ), 'wporg-plugins' ),
+							'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
+							'<strong>' . $plugins->new . '</strong>'
 						);
 						?>
 					</p>
 				</div>
-				<?php
-				if ( '/plugins-wp' === parse_url( home_url(), PHP_URL_PATH ) ) {
-					echo '<div class="notice notice-error notice-alt">
-						<p>Please submit all new plugin requests through the existing form <a href="https://wordpress.org/plugins/add/">available here</a>, You\'re currently viewing the beta version of the upcoming plugin directory, and this form is only for testing purposes.</p>
-					</div>';
-				}
-				?>
 
 			<?php endif; ?>
 

@@ -40,12 +40,12 @@ class Controls {
 			return;
 		}
 
-		$statuses = array( 'draft', 'pending' );
+		$statuses = array( 'new', 'pending' );
 		if ( current_user_can( 'plugin_approve', $post ) ) {
-			if ( in_array( $post->post_status, array( 'draft', 'pending', 'rejected', 'approved' ) ) ) {
+			if ( in_array( $post->post_status, array( 'new', 'draft', 'pending', 'rejected', 'approved' ) ) ) {
 				$statuses = array_merge( $statuses, array( 'approved', 'rejected' ) );
 			} else {
-				$statuses = array( 'publish', 'disabled', 'closed' );
+				$statuses = array( 'publish', 'disabled', 'closed', 'pending' );
 			}
 		}
 		?>

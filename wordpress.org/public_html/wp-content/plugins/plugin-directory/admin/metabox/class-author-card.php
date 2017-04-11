@@ -148,7 +148,7 @@ class Author_Card {
 					}
 
 					$plugin_slug = $plugin->post_name;
-					if ( in_array( $plugin->post_status, array( 'draft', 'pending' ) ) ) {
+					if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
 						$extra .= ' (requested ' . human_time_diff( strtotime( $last_updated ) ) . ' ago)';
 						$tooltips[] = 'Requested, remains unapproved.';
 						$classes[]  = 'profile-plugin-requested';

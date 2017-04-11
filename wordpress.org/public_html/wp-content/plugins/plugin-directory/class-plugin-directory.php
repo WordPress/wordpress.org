@@ -283,6 +283,12 @@ class Plugin_Directory {
 			),
 		) );
 
+		register_post_status( 'new', array(
+			'label'                     => _x( 'Pending Initial Review', 'plugin status', 'wporg-plugins' ),
+			'public'                    => false,
+			'show_in_admin_status_list' => current_user_can( 'plugin_review' ),
+			'label_count'               => _n_noop( 'Pending Initial Review <span class="count">(%s)</span>', 'Pending Initial Review <span class="count">(%s)</span>', 'wporg-plugins' ),
+		) );
 		register_post_status( 'pending', array(
 			'label'                     => _x( 'Pending', 'plugin status', 'wporg-plugins' ),
 			'public'                    => false,
@@ -792,7 +798,7 @@ class Plugin_Directory {
 		// For singular requests, or self-author profile requests allow restricted post_status items to show on the front-end.
 		if ( $viewing_own_author_archive || ( is_user_logged_in() && !empty( $wp_query->query_vars['name'] ) ) ) {
 
-			$wp_query->query_vars['post_status'] = array( 'pending', 'approved', 'publish', 'closed', 'disabled' );
+			$wp_query->query_vars['post_status'] = array( 'approved', 'publish', 'closed', 'disabled' );
 
 			add_filter( 'posts_results', function( $posts, $this_wp_query ) use( $wp_query ) {
 				if ( $this_wp_query != $wp_query ) {
@@ -1192,7 +1198,7 @@ class Plugin_Directory {
 			$posts = get_posts( array(
 				'post_type'   => 'plugin',
 				'name'        => $plugin_slug,
-				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'draft', 'approved' ),
+				'post_status' => array( 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ),
 			) );
 
 			if ( ! $posts ) {

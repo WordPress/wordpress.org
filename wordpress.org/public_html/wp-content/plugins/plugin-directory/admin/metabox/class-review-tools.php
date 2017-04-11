@@ -10,29 +10,33 @@ class Review_Tools {
 	static function display() {
 		$post = get_post();
 
-		$zip_url = '';
+		$zip_files = array();
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-			$zip_url = wp_get_attachment_url( $zip_file->ID );
-			break;
+			$zip_files[ $zip_file->post_date ] = wp_get_attachment_url( $zip_file->ID );
 		}
-		if ( ! $zip_url ) {
-			$zip_url = get_post_meta( $post->ID, '_submitted_zip', true );
+		uksort( $zip_files, function( $a, $b ) {
+			return strtotime( $a ) < strtotime( $b );
+		} );
+
+		if ( $zip_url = get_post_meta( $post->ID, '_submitted_zip', true ) ) {
+			// Back-compat only.
+			$zip_files[ 'User provided URL' ] = $zip_url;
 		}
 
-		if ( $zip_url ) {
+		foreach ( $zip_files as $zip_date => $zip_url ) {
 			printf( '<p>' . __( '<strong>Zip file:</strong> %s', 'wporg-plugins' ) . '</p>',
-				sprintf( '<a href="%s">%s</a>', esc_url( $zip_url ), esc_html( $zip_url ) )
+				sprintf( '%s <a href="%s">%s</a>', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ) )
 			);
 		}
 
-		if ( 'pending' != $post->post_status ) {
+		if ( 'pending' != $post->post_status && 'new' != $post->post_status ) {
 			echo "<ul>
 				<li><a href='https://plugins.trac.wordpress.org/log/{$post->post_name}/'>" . __( 'Development Log', 'wporg-plugins' ) . "</a></li>
 				<li><a href='https://plugins.svn.wordpress.org/{$post->post_name}/'>" . __( 'Subversion Repository', 'wporg-plugins' ) . "</a></li>
 				<li><a href='https://plugins.trac.wordpress.org/browser/{$post->post_name}/'>" . __( 'Browse in Trac', 'wporg-plugins' ) . '</a></li>
 			</ul>';
 		}
-		if ( $post->post_excerpt && in_array( $post->post_status, array( 'pending', 'approved' ) ) ) {
+		if ( $post->post_excerpt && in_array( $post->post_status, array( 'new', 'pending', 'approved' ) ) ) {
 			echo '<p>' . strip_tags( $post->post_excerpt ) . '</p>';
 		}
 
@@ -40,7 +44,7 @@ class Review_Tools {
 			$author = get_user_by( 'id', $post->post_author );
 			
 			$type   = 'Notice';
-			if ( $post->post_status == 'draft' || $post->post_status == 'pending' ) {
+			if ( $post->post_status == 'new' || $post->post_status == 'pending' ) {
 				$type = 'Request';
 			}
 			

@@ -79,7 +79,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			}
 		}
 
-		if ( current_user_can( 'plugin_reject' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'draft', 'pending' ) ) ) ) {
+		if ( current_user_can( 'plugin_reject' ) && ( empty( $_REQUEST['post_status'] ) || in_array( $_REQUEST['post_status'], array( 'new', 'pending' ) ) ) ) {
 			$actions['plugin_reject'] = __( 'Reject', 'wporg-plugins' );
 		}
 
@@ -406,7 +406,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				continue;
 			}
 
-			if ( ! current_user_can( 'plugin_approve' ) && ! in_array( $status_name, array( 'draft', 'pending' ) ) ) {
+			if ( ! current_user_can( 'plugin_approve' ) && ! in_array( $status_name, array( 'new', 'pending' ) ) ) {
 				continue;
 			}
 
