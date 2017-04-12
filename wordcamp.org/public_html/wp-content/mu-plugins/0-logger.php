@@ -23,7 +23,12 @@ function log( $error_code, $data = array() ) {
 	if ( 'cli' === php_sapi_name() ) {
 		$data['command'] = sprintf( '%s %s', $_SERVER['_'], implode( ' ', $_SERVER['argv'] ) );
 	} else {
-		$data['request_url'] = sprintf( '%s://%s%s', $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_NAME'], $_SERVER['REQUEST_URI'] );
+		$data['request_url'] = sprintf(
+			'%s://%s%s',
+			$_SERVER['HTTPS'] ? 'https' : 'http',
+			$_SERVER['SERVER_NAME'],
+			$_SERVER['REQUEST_URI']
+		);
 
 		// Fall back to IP address if it's too early to detect the user
 		if ( did_action( 'after_setup_theme' ) > 0 ) {
