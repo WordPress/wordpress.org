@@ -4,7 +4,6 @@
 	<?php echo $feedback_message; ?>
 
 	<p><?php
-		$user = get_user_by( 'id', $user_id );
 		printf(
 			/* translators: %s: WP.org profile link */
 			__( 'You are currently editing the user %s.', 'rosetta' ),
