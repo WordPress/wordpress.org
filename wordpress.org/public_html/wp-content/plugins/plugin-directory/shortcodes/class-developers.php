@@ -55,28 +55,33 @@ class Developers {
 		) . '</p>';
 
 
-		$output   .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
-		/* Translators: 1: Trac URL; 2: Development log URL; 3: RSS URL; */
-		$format    = __( '<a href="%1$s">Browse the code</a> or subscribe to the <a href="%2$s">development log</a> by <a href="%3$s">RSS</a>.' );
-		$email_url = '';
+		$output .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 
 		if ( is_user_logged_in() ) {
-			/* Translators: 1: Trac URL; 2: Development log URL; 3: RSS URL; 4: Email subscription URL; */
-			$format     = __( '<a href="%1$s">Browse the code</a> or subscribe to the <a href="%2$s">development log</a> by <a href="%4$s">email</a> or <a href="%3$s">RSS</a>.' );
 			$subscribed = Tools::subscribed_to_plugin_commits( $post, get_current_user_id() );
 			$email_url  = esc_url( add_query_arg( array(
 				'_wpnonce' => wp_create_nonce( 'wp_rest' ),
 				( $subscribed ? 'unsubscribe' : 'subscribe' ) => '1',
 			), home_url( "wp-json/plugins/v1/plugin/{$slug}/commit-subscription" ) ) );
-		}
 
-		$output .= '<p>' . sprintf(
-			$format,
-			esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
-			esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
-			esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" ),
-			$email_url
-		) . '</p>';
+			$output .= '<p>' . sprintf(
+				/* Translators: 1: Trac URL; 2: SVN repository URL, 3: Development log URL; 4: RSS URL; 5: Email subscription URL; */
+				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">email</a> or <a href="%5$s">RSS</a>.', 'wporg-plugins' ),
+				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
+				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
+				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
+				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" ),
+				$email_url
+			) . '</p>';
+		} else {
+			$output .= '<p>' . sprintf(
+				/* Translators: 1: Trac URL; 2: Development log URL; 3: RSS URL; */
+				__( '<a href="%1$s">Browse the code</a> or subscribe to the <a href="%2$s">development log</a> by <a href="%3$s">RSS</a>.', 'wporg-plugins' ),
+				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
+				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
+				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
+			) . '</p>';
+		}
 
 		return $output;
 	}
