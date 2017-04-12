@@ -301,8 +301,8 @@ class Locale_Banner extends Base {
 			2984793 => 'This plugin is also available in %s.',
 			2984794 => 'This plugin is also available in %1$s (also: %2$s).',
 			2984795 => 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>',
-			0 => 'The plugin directory is also available in %s.',
-			0 => 'The plugin directory is also available in %1$s (also: %2$s).',
+			3004513 => 'The plugin directory is also available in %s.',
+			3004514 => 'The plugin directory is also available in %1$s (also: %2$s).',
 		);
 
 		$original_id = array_search( $string, $strings, true );
@@ -328,7 +328,7 @@ class Locale_Banner extends Base {
 			WHERE
 				project_id = 348841 AND slug = 'default' AND t.status = 'current'
 			AND original_id = %d
-		", $original_id	), OBJECT_K );
+		", $original_id ), OBJECT_K );
 
 		foreach ( $translations as &$translation ) {
 			$translation = $translation->translation;
