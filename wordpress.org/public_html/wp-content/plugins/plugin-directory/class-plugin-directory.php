@@ -229,8 +229,8 @@ class Plugin_Directory {
 			'sort'              => true,
 			'rewrite'           => false,
 			'labels'            => array(
-				'name' => __( 'Authors', 'wporg-plugins' ),
-				'singular_name' => __( 'Author', 'wporg-plugins' ),
+				'name' => __( 'Contributors', 'wporg-plugins' ),
+				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
