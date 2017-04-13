@@ -44,6 +44,8 @@ class Moderators {
 		add_filter( 'bbp_toggle_reply',                 array( $this, 'handle_reply_actions' ), 10, 3 );
 
 		// Convert toggle links to explicit actions.
+		add_filter( 'bbp_get_topic_close_link',         array( $this, 'convert_toggles_to_actions' ), 10, 3 );
+		add_filter( 'bbp_get_topic_stick_link',         array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_topic_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_topic_approve_link',       array( $this, 'convert_toggles_to_actions' ), 10, 3 );
 		add_filter( 'bbp_get_reply_spam_link',          array( $this, 'convert_toggles_to_actions' ), 10, 3 );
@@ -439,6 +441,10 @@ class Moderators {
 	 */
 	public function get_topic_actions( $actions ) {
 		$actions = array_merge( $actions, array(
+			'wporg_bbp_close_topic',
+			'wporg_bbp_open_topic',
+			'wporg_bbp_stick_topic',
+			'wporg_bbp_unstick_topic',
 			'wporg_bbp_spam_topic',
 			'wporg_bbp_unspam_topic',
 			'wporg_bbp_unapprove_topic',
@@ -613,12 +619,52 @@ class Moderators {
 		$nonce_suffix = bbp_get_topic_post_type() . '_' . (int) $r['id'];
 
 		switch ( $r['action'] ) {
+			case 'wporg_bbp_close_topic':
+				check_ajax_referer( "close-{$nonce_suffix}" );
+
+				if ( bbp_is_topic_open( $r['id'] ) ) {
+					$retval['status']  = bbp_close_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem closing the topic.', 'wporg-forums' );
+				}
+
+				break;
+
+			case 'wporg_bbp_open_topic':
+				check_ajax_referer( "close-{$nonce_suffix}" );
+
+				if ( ! bbp_is_topic_open( $r['id'] ) ) {
+					$retval['status']  = bbp_open_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem opening the topic.', 'wporg-forums' );
+				}
+
+				break;
+
+			case 'wporg_bbp_stick_topic':
+				check_ajax_referer( "stick-{$nonce_suffix}" );
+
+				if ( ! bbp_is_topic_sticky( $r['id'] ) ) {
+					$retval['status']  = bbp_stick_topic( $r['id'], ! empty( $_GET['super'] ) );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem sticking the topic.', 'wporg-forums' );
+				}
+
+				break;
+
+			case 'wporg_bbp_unstick_topic':
+				check_ajax_referer( "stick-{$nonce_suffix}" );
+
+				if ( bbp_is_topic_sticky( $r['id'] ) ) {
+					$retval['status']  = bbp_unstick_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unsticking the topic.', 'wporg-forums' );
+				}
+
+				break;
+
 			case 'wporg_bbp_spam_topic':
 				check_ajax_referer( "spam-{$nonce_suffix}" );
 
 				if ( ! bbp_is_topic_spam( $r['id'] ) ) {
-					$retval['status']   = bbp_spam_topic( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem marking the topic as spam.', 'wporg-forums' );
+					$retval['status']  = bbp_spam_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem marking the topic as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -628,8 +674,8 @@ class Moderators {
 				check_ajax_referer( "spam-{$nonce_suffix}" );
 
 				if ( bbp_is_topic_spam( $r['id'] ) ) {
-					$retval['status']   = bbp_unspam_topic( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unmarking the topic as spam.', 'wporg-forums' );
+					$retval['status']  = bbp_unspam_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unmarking the topic as spam.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 
@@ -639,8 +685,8 @@ class Moderators {
 				check_ajax_referer( "approve-{$nonce_suffix}" );
 
 				if ( ! bbp_is_topic_pending( $r['id'] ) ) {
-					$retval['status']   = bbp_unapprove_topic( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem unapproving the topic.', 'wporg-forums' );
+					$retval['status']  = bbp_unapprove_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem unapproving the topic.', 'wporg-forums' );
 				}
 				$retval['view_all'] = true;
 
@@ -650,8 +696,8 @@ class Moderators {
 				check_ajax_referer( "approve-{$nonce_suffix}" );
 
 				if ( bbp_is_topic_pending( $r['id'] ) ) {
-					$retval['status']   = bbp_approve_topic( $r['id'] );
-					$retval['message']  = __( '<strong>ERROR</strong>: There was a problem approving the topic.', 'wporg-forums' );
+					$retval['status']  = bbp_approve_topic( $r['id'] );
+					$retval['message'] = __( '<strong>ERROR</strong>: There was a problem approving the topic.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
 
@@ -748,7 +794,15 @@ class Moderators {
 	 * @return string Filtered link.
 	 */
 	public function convert_toggles_to_actions( $link, $r, $args ) {
-		if ( false !== strpos( $link, 'bbp_toggle_topic_spam' ) ) {
+		if ( false !== strpos( $link, 'bbp_toggle_topic_close' ) ) {
+			$action = ( bbp_is_topic_closed( $r['id'] ) ) ? 'wporg_bbp_open_topic' : 'wporg_bbp_close_topic';
+			$link   = str_replace( 'bbp_toggle_topic_close', $action, $link );
+
+		} elseif ( false !== strpos( $link, 'bbp_toggle_topic_stick' ) ) {
+			$action = ( bbp_is_topic_sticky( $r['id'] ) ) ? 'wporg_bbp_unstick_topic' : 'wporg_bbp_stick_topic';
+			$link   = str_replace( 'bbp_toggle_topic_stick', $action, $link );
+
+		} elseif ( false !== strpos( $link, 'bbp_toggle_topic_spam' ) ) {
 			$action = ( bbp_is_topic_spam( $r['id'] ) ) ? 'wporg_bbp_unspam_topic' : 'wporg_bbp_spam_topic';
 			$link   = str_replace( 'bbp_toggle_topic_spam', $action, $link );
 
