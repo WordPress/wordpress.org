@@ -834,7 +834,7 @@ abstract class Directory_Compat {
 		$cache_key = $slug;
 		$cache_group = $this->compat() . '-authors-slugs';
 		$authors = wp_cache_get( $cache_key, $cache_group );
-		if ( false === $authors ) {
+		if ( ! $authors ) {
 
 			if ( $this->compat() == 'theme' ) {
 				$theme = $this->theme;
@@ -878,7 +878,7 @@ abstract class Directory_Compat {
 		$cache_key = $slug;
 		$cache_group = $this->compat() . '-contributors-slugs';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
-		if ( false === $contributors ) {
+		if ( ! $contributors ) {
 			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
 			$contributors = $wpdb->get_col( $wpdb->prepare(
 				"SELECT slug
