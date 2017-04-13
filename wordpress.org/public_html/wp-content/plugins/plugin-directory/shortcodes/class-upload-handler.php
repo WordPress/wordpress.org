@@ -210,6 +210,7 @@ class Upload_Handler {
 					'rating'                   => 0,
 					'ratings'                  => array(),
 					'active_installs'          => 0,
+					'_active_installs'         => 0,
 					'usage'                    => array(),
 					'_author_ip'               => preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] ),
 					'_submitted_date'          => time(),
