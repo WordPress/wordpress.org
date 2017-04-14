@@ -38,6 +38,7 @@ class Author_Card {
 		$author_plugins_q = array(
 			'author'         => $author->ID,
 			'post_type'      => 'plugin',
+			'post_status'    => array( 'approved', 'closed', 'disabled', 'new', 'pending', 'publish', 'rejected' ),
 			'posts_per_page' => -1,
 		);
 		if ( $post ) {
