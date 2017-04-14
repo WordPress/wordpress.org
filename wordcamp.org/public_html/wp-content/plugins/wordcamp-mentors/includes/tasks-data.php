@@ -119,7 +119,7 @@ function get_task_data() {
 			),
 		),
 		'siq8' => array(
-			'title'   => __( 'Choose a Date', 'wordcamporg' ),
+			'title'   => __( 'Choose a date', 'wordcamporg' ),
 			'excerpt' => __( 'Consider holidays, other events in your city, and other WordCamps in your region. Be sure to have your budget approved and have a contract or agreement for the venue signed by WordCamp Central before you announce your dates.', 'wordcamporg' ),
 			'cat'     => array( 'committee' ),
 			'link'    => array(
@@ -128,7 +128,7 @@ function get_task_data() {
 			),
 		),
 		'lkcs' => array(
-			'title'   => __( 'Get quotes from vendors', 'wordcamporg' ),
+			'title'   => __( 'Get quotes from swag vendors', 'wordcamporg' ),
 			'excerpt' => '',
 			'cat'     => array( 'swag' ),
 		),
@@ -152,7 +152,7 @@ function get_task_data() {
 		),
 		'f087' => array(
 			'title'   => __( 'Confirm your venue', 'wordcamporg' ),
-			'excerpt' => __( 'Make sure you get a contract, agreement or confirmation email. In order to move your WordCamp to scheduled you need some sort of written confirmation that the venue is reserved for your dates. ', 'wordcamporg' ),
+			'excerpt' => __( 'Make sure you get a contract, agreement or confirmation email. In order to move your WordCamp to scheduled you need some sort of written confirmation that the venue is reserved for your dates.', 'wordcamporg' ),
 			'cat'     => array( 'lead' ),
 			'link'    => array(
 				'text' => __( 'Lock in your venue', 'wordcamporg' ),
@@ -162,12 +162,12 @@ function get_task_data() {
 		'asdf' => array(
 			'title'   => __( 'Contributor day venue', 'wordcamporg' ),
 			'excerpt' => __( 'If you\'re hosting a contributor day and it will not be held at your primary venue, find a location now.', 'wordcamporg' ),
-			'cat'     => array( 'committee' ),
+			'cat'     => array( 'committee', 'contributor-day' ),
 		),
 		'75sp' => array(
 			'title'   => __( 'Find after party and speaker event venues', 'wordcamporg' ),
 			'excerpt' => __( 'Please keep in mind that all venues should be open and welcoming to everyone. No age restricted venues. Keep in mind ease of access from your event venue.', 'wordcamporg' ),
-			'cat'     => array( 'after-party' ),
+			'cat'     => array( 'committee', 'after-party', 'speaker' ),
 			'link'    => array(
 				'text' => __( 'Parties', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/planning-details/parties/',
@@ -176,7 +176,7 @@ function get_task_data() {
 		'vbbj' => array(
 			'title'   => __( 'Setup and design your site', 'wordcamporg' ),
 			'excerpt' => '',
-			'cat'     => array( 'web' ),
+			'cat'     => array( 'design', 'web' ),
 			'link'    => array(
 				'text' => __( 'Site setup and design', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/#website',
@@ -208,7 +208,7 @@ function get_task_data() {
 		'erjt' => array(
 			'title'   => __( 'Create documents and templates', 'wordcamporg' ),
 			'excerpt' => __( 'Create/use email templates for sponsorship, volunteers, speakers, etc.', 'wordcamporg' ),
-			'cat'     => array( 'committee' ),
+			'cat'     => array( 'committee', 'sponsor', 'volunteer', 'speaker', 'registration' ),
 			'link'    => array(
 				'text' => __( 'Helpful documents and templates', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/helpful-documents-and-templates/',
@@ -260,7 +260,7 @@ function get_task_data() {
 			),
 		),
 		'3b1k' => array(
-			'title'   => __( 'Determine what volunteers roles are needed', 'wordcamporg' ),
+			'title'   => __( 'Determine which volunteer roles are needed', 'wordcamporg' ),
 			'excerpt' => '',
 			'cat'     => array( 'volunteer' ),
 			'link'    => array(
@@ -355,17 +355,17 @@ function get_task_data() {
 		'84y3' => array(
 			'title'   => __( 'Publish/Announce speakers', 'wordcamporg' ),
 			'excerpt' => __( 'Also ask speakers to promote on their social channels.', 'wordcamporg' ),
-			'cat'     => array( 'speaker' ),
+			'cat'     => array( 'speaker', 'web' ),
 		),
 		'sfrb' => array(
 			'title'   => __( 'Begin posting original content', 'wordcamporg' ),
 			'excerpt' => __( 'In order to drive traffic to the site and keep your followers engaged it\'s a good idea to publish more than just announcements. Try WordCamp stories, speaker profiles, community involvement stories, etc.', 'wordcamporg' ),
-			'cat'     => array( 'committee' ),
+			'cat'     => array( 'committee', 'web' ),
 		),
 		'l931' => array(
 			'title'   => __( 'Publish/Announce sessions and schedule', 'wordcamporg' ),
 			'excerpt' => '',
-			'cat'     => array( 'speaker' ),
+			'cat'     => array( 'speaker', 'web' ),
 		),
 		'p0ns' => array(
 			'title'   => __( 'Order speaker gifts', 'wordcamporg' ),
@@ -375,7 +375,7 @@ function get_task_data() {
 		'03kv' => array(
 			'title'   => __( 'Send a pre-Camp event invite (if having)', 'wordcamporg' ),
 			'excerpt' => __( 'If you\'re hosting a pre-camp event (e.g., a speaker event) make sure you invite the appropriate folks (e.g., speakers, sponsors, volunteers).', 'wordcamporg' ),
-			'cat'     => array( 'speaker' ),
+			'cat'     => array( 'speaker', 'sponsor', 'volunteer' ),
 			'link'    => array(
 				'text' => __( 'Parties', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/planning-details/parties/',
@@ -388,7 +388,7 @@ function get_task_data() {
 		),
 		'bc1e' => array(
 			'title'   => __( 'Design name badges', 'wordcamporg' ),
-			'excerpt' => __( 'Review the guidlines for creating badges before finalizing your design.', 'wordcamporg' ),
+			'excerpt' => __( 'Review the guidelines for creating badges before finalizing your design.', 'wordcamporg' ),
 			'cat'     => array( 'design' ),
 			'link'    => array(
 				'text' => __( 'Create WordCamp Badges', 'wordcamporg' ),
@@ -396,7 +396,7 @@ function get_task_data() {
 			),
 		),
 		'e0uc' => array(
-			'title'   => __( 'Design signage', 'wordcamporg' ),
+			'title'   => __( 'Design event signage', 'wordcamporg' ),
 			'excerpt' => '',
 			'cat'     => array( 'design' ),
 		),
@@ -421,7 +421,7 @@ function get_task_data() {
 		'tpvw' => array(
 			'title'   => __( 'Create backup plans including backup speaker', 'wordcamporg' ),
 			'excerpt' => __( 'If a speaker gets sick, do you have someone who can fill in on the same topic? For out of town speakers, what if they miss their flights? Have one backup speaker per track. Back up speakers should not be rejected applicants.', 'wordcamporg' ),
-			'cat'     => array( 'lead' ),
+			'cat'     => array( 'lead', 'speaker' ),
 		),
 		'r3ge' => array(
 			'title'   => __( 'Remind speakers to send slides', 'wordcamporg' ),
@@ -440,7 +440,7 @@ function get_task_data() {
 		'q97z' => array(
 			'title'   => __( 'Review speaker slides', 'wordcamporg' ),
 			'excerpt' => __( '2 weeks out - Collect slides from speakers and review as a team. This helps avoid any inappropriate content in the presentations (WordCamps should be family-friendly, with no swearing or discriminatory jokes/comments), and also helps you catch any misspellings, fauxgos, or other problems in the slides. Check to make sure they properly camel case WordPress and WordCamp.', 'wordcamporg' ),
-			'cat'     => array( 'committee' ),
+			'cat'     => array( 'committee', 'speaker' ),
 		),
 		'c46e' => array(
 			'title'   => __( 'Confirm catering ', 'wordcamporg' ),
@@ -457,17 +457,17 @@ function get_task_data() {
 			'cat'     => array( 'design' ),
 		),
 		'f1ln' => array(
-			'title'   => __( 'Order signage', 'wordcamporg' ),
+			'title'   => __( 'Order event signage', 'wordcamporg' ),
 			'excerpt' => __( 'Make sure to include additional wayfinding signage and confirm with sponsor coordinator that you\'re meeting sponsor level requirements.', 'wordcamporg' ),
 			'cat'     => array( 'design' ),
 		),
 		'h641' => array(
-			'title'   => __( 'Email Speakers', 'wordcamporg' ),
+			'title'   => __( 'Email speakers', 'wordcamporg' ),
 			'excerpt' => __( 'Email a final confirmation to your speakers. Include the date and time of their talk, when and with whom they should check in the day they\'re speaking, what the av setup is, and any other details you feel they should know. If you\'re hosting a speaker event make sure they have that information as well.', 'wordcamporg' ),
 			'cat'     => array( 'speaker' ),
 		),
 		'svit' => array(
-			'title'   => __( 'Email Sponsors', 'wordcamporg' ),
+			'title'   => __( 'Email sponsors', 'wordcamporg' ),
 			'excerpt' => __( 'Email a final confirmation to your sponsors. Include date and time of their load-in, when they can arrive day of the event, where they will setup and who their on site contact will be. If they\'re invited to your speaker event confirm those details with them as well.', 'wordcamporg' ),
 			'cat'     => array( 'sponsor' ),
 		),
@@ -501,7 +501,7 @@ function get_task_data() {
 			'cat'     => array( 'committee' ),
 		),
 		'hscb' => array(
-			'title'   => __( 'Volunteer Training', 'wordcamporg' ),
+			'title'   => __( 'Volunteer training', 'wordcamporg' ),
 			'excerpt' => __( '1-day prior or early day-of - Make sure your volunteers have all the information they will need to carry out their tasks. Let them know that if someone asks a question to which they do not know the answer it\'s best to say "I don\'t know, but let\'s find out" and ask an organizer.', 'wordcamporg' ),
 			'cat'     => array( 'volunteer' ),
 			'link'    => array(
@@ -522,7 +522,7 @@ function get_task_data() {
 		'gyc3' => array(
 			'title'   => __( 'Have a WordCamp!', 'wordcamporg' ),
 			'excerpt' => __( 'Be present. Breathe. Enjoy the event!', 'wordcamporg' ),
-			'cat'     => array( 'volunteer' ),
+			'cat'     => array( 'committee' ),
 			'link'    => array(
 				'text' => __( 'During WordCamp', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/during-wordcamp/',
