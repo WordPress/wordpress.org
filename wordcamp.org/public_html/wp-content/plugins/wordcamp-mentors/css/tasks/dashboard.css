@@ -1,0 +1,86 @@
+
+.wp-list-table > tbody > .wcm-highlight,
+.wp-list-table > tbody > .wcm-expanded {
+    background-color: #f7fcfe;
+}
+
+.widefat td {
+	vertical-align: middle;
+}
+
+.wcm-task:hover {
+	box-shadow: inset 0 0 7px 7px #f7fcfe;
+	cursor: pointer;
+}
+
+.wcm-task td,
+.wcm-more td {
+	border-bottom: 1px solid #f9f9f9;
+}
+
+.wcm-task.wcm-expanded td {
+	border-bottom-color: #f7fcfe;
+}
+
+.column-task {
+	width: 50%;
+}
+
+.column-task_category ul {
+	margin: 0;
+}
+
+.column-task_category li {
+	color: #fff;
+	float: left;
+	margin: 2px;
+	padding: 3px 6px;
+}
+.rtl .column-task_category li {
+	float: right;
+	margin-right: 0;
+	margin-left: 2px;
+}
+
+.category-after-party {
+	background-color: #a7863d;
+}
+.category-audio-video {
+	background-color: #a4c2f4;
+}
+.category-budget {
+	background-color: #d64db8;
+}
+.category-committee {
+	background-color: #e69138;
+}
+.category-contributor-day {
+	background-color: #c67df4;
+}
+.category-design {
+	background-color: #76a5af;
+}
+.category-food {
+	background-color: #a64d79;
+}
+.category-lead {
+	background-color: #cc0000;
+}
+.category-registration {
+	background-color: #ffa6e7;
+}
+.category-speaker {
+	background-color: #3d85c6;
+}
+.category-sponsor {
+	background-color: #38761d;
+}
+.category-swag {
+	background-color: #93c47d;
+}
+.category-volunteer {
+	background-color: #674ea7;
+}
+.category-web {
+	background-color: #bf9000;
+}
