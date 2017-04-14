@@ -70,7 +70,9 @@ class Readme_Validator {
 		}
 
 		if ( empty( $output ) ) {
-			$output = __( 'No errors detected in the readme.txt file.', 'wporg-plugins' );
+			$output .= '<div class="notice notice-success notice-alt">';
+			$output .= '<p>' . __( 'Congratulations! No errors found.', 'wporg-plugins' ) .'</p>' ;
+			$output .= '</div>';
 		}
 
 		echo $output;
