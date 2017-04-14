@@ -55,9 +55,9 @@ class Stats_Report {
 	 *     @type int $plugin_delist                      The number of plugins delisted within the defined time interval.
 	 *     @type int $plugin_new                         The number of plugins submitted within the defined time interval.
 	 *     @type int $plugin_reject                      The number of plugins rejected within the defined time interval.
-	 *     @type int $in_queue                           The number of plugins currently in the queue (draft or pending).
-	 *     @type int $in_queue_draft                     The number of draft plugins currently in the queue.
-	 *     @type int $in_queue_oending                   The number of pending plugins currently in the queue.
+	 *     @type int $in_queue                           The number of plugins currently in the queue (new or pending).
+	 *     @type int $in_queue_new                       The number of new plugins currently in the queue.
+	 *     @type int $in_queue_pending                   The number of pending plugins currently in the queue.
 	 *     @type int $in_queue_from_time_window          The number of plugins currently in the queue submitted during the specified time window.
 	 *     @type int $in_queue_old                       The number of plugins currently in the queue that are older than "recently".
 	 *     @type int $supportpress_queue_total_open      The number of currently open support threads.
@@ -105,8 +105,8 @@ class Stats_Report {
 		// Plugin Queue
 		// --------------
 
-		// # of plugins currently in the queue that are drafts (have not been processed/replied to yet)
-		$stats['in_queue_draft'] = $wpdb->get_var(
+		// # of plugins currently in the queue that are new (have not been processed/replied to yet)
+		$stats['in_queue_new'] = $wpdb->get_var(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'new'"
 		);
 
@@ -115,8 +115,8 @@ class Stats_Report {
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'pending'"
 		);
 
-		// # of plugins currently in the queue (draft + pending)
-		$stats['in_queue'] = $stats['in_queue_draft'] + $stats['in_queue_pending'];
+		// # of plugins currently in the queue (new + pending)
+		$stats['in_queue'] = $stats['in_queue_new'] + $stats['in_queue_pending'];
 
 		// # of plugins currently in the queue submitted during the specified time window
 		$stats['in_queue_from_time_window'] = $wpdb->get_var( $wpdb->prepare(
@@ -245,10 +245,10 @@ class Stats_Report {
 		<h3><?php _e( 'Plugin Queue Stats (current)', 'wporg-plugins' ); ?></h3>
 
 		<ul style="font-family:Courier New;">
-			<li><?php printf( __( 'Plugins in the queue (draft and pending)* : %d', 'wporg-plugins' ), $stats['in_queue'] ); ?></li>
+			<li><?php printf( __( 'Plugins in the queue (new and pending)* : %d', 'wporg-plugins' ), $stats['in_queue'] ); ?></li>
 			<li><?php printf( __( '&rarr; (older than %1$d days ago)** : %2$d', 'wporg-plugins' ), $stats['recentdays'], $stats['in_queue_old'] ); ?></li>
 			<li><?php printf( __( '&rarr; (%1$s - %2$s) : %3$d', 'wporg-plugins' ), $start_date, $stats['date'], $stats['in_queue_from_time_window'] ); ?></li>
-			<li><?php printf( __( '&rarr; (drafts; not processed or replied to yet)* : %d', 'wporg-plugins' ), $stats['in_queue_draft'] ); ?></li>
+			<li><?php printf( __( '&rarr; (new; not processed or replied to yet)* : %d', 'wporg-plugins' ), $stats['in_queue_new'] ); ?></li>
 			<li><?php printf( __( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ), $stats['in_queue_pending'] ); ?></li>
 		</ul>
 

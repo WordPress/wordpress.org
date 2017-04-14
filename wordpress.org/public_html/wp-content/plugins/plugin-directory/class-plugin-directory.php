@@ -1232,7 +1232,7 @@ class Plugin_Directory {
 	 *     @type string $post_content_filtered The filtered post content. Default empty.
 	 *     @type string $post_title            The post title. Default empty.
 	 *     @type string $post_excerpt          The post excerpt. Default empty.
-	 *     @type string $post_status           The post status. Default 'draft'.
+	 *     @type string $post_status           The post status. Default 'new'.
 	 *     @type string $post_type             The post type. Default 'post'.
 	 *     @type string $comment_status        Whether the post can accept comments. Accepts 'open' or 'closed'.
 	 *                                         Default is the value of 'default_comment_status' option.
