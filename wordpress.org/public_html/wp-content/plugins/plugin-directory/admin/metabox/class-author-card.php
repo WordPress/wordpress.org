@@ -186,7 +186,7 @@ class Author_Card {
 					printf( '<a class="%1$s" title="%2$s" href="%3$s">%4$s</a>',
 						esc_attr( implode( ' ', $classes ) ),
 						esc_attr( implode( ' ', $tooltips ) ),
-						add_query_arg( array( 'post' => $plugin->ID, 'action' => 'edit' ), admin_url( 'post.php' ) ),
+						esc_attr( get_permalink( $plugin ) ),
 						$plugin->post_name
 					);
 
@@ -195,10 +195,11 @@ class Author_Card {
 					}
 
 					$plugin_links = array(
+						'<a href="' . esc_url( get_edit_post_link( $plugin->ID, '' ) ) . '" title="Edit this plugin">Edit</a>',
 						'<a href="//make.wordpress.org/pluginrepo/?s=' . urlencode( esc_attr( $plugin_slug ) ) . '" title="Click to search Pluginrepo P2 for mention of this plugin">P2</a>',
 						'<a href="https://supportpress.wordpress.org/plugins/?q=' . urlencode( esc_attr( $plugin_slug ) ) . '&status=&todo=Search+%C2%BB" title="Click to search Pluginrepo SupportPress for mention of this plugin">SP</a>',
 					);
-					vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $plugin_links );
+					vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $plugin_links );
 
 					if ( $extra ) {
 						echo $extra;
