@@ -52,6 +52,8 @@ class Readme_Validator {
 			return;
 		}
 
+		$output = '';
+
 		$error_types = array(
 			'errors'   => __( 'Fatal Errors:', 'wporg-plugins' ),
 			'warnings' => __( 'Warnings:', 'wporg-plugins' ),
@@ -59,12 +61,18 @@ class Readme_Validator {
 		);
 		foreach ( $error_types as $field => $warning_label ) {
 			if ( !empty( $errors[ $field ] ) ) {
-				echo "{$warning_label}\n<ul class='{$field} error'>\n";
+				$output .= "{$warning_label}\n<ul class='{$field} error'>\n";
 				foreach ( $errors[ $field ] as $notice ) {
-					echo "<li>{$notice}</li>\n";
+					$output .= "<li>{$notice}</li>\n";
 				}
-				echo "</ul>\n";
+				$output .= "</ul>\n";
 			}
 		}
+
+		if ( empty( $output ) ) {
+			$output = __( 'No errors detected in the readme.txt file.', 'wporg-plugins' );
+		}
+
+		echo $output;
 	}
 }
