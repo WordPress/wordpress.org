@@ -22,6 +22,7 @@
 			_.each( $( '#post-body' ).find( '.comments-box' ), PluginEdit.loadComments );
 
 			$( '#add-new-comment' ).on( 'click', 'a.button', PluginEdit.prepareCommentForm );
+			$( '#the-comment-list' ).on( 'click', '.reply a', PluginEdit.addCommentTypeField );
 
 			$( '#add-committer-toggle' ).on( 'click', PluginEdit.toggleCommitterForm );
 
@@ -111,12 +112,18 @@
 
 			window.commentReply && commentReply.addcomment( $( '#post_ID' ).val() );
 
-			// Add a field with the custom comment type.
-			$( '#replyrow' ).find( '.comment-reply' ).append( $( '<input/>' ).attr({
-				type: 'hidden',
-				name: 'comment_type',
-				value: $( '.comments-box' ).data( 'comment-type' )
-			}) );
+			PluginEdit.addCommentTypeField( event );
+		},
+
+		addCommentTypeField: function( event ) {
+			if ( 0 === $( '#replyrow' ).find( '.comment-reply input[name="comment_type"]' ).length ) {
+				// Add a field with the custom comment type.
+				$( '#replyrow' ).find( '.comment-reply' ).append( $( '<input/>' ).attr({
+					type: 'hidden',
+					name: 'comment_type',
+					value: $( '.comments-box' ).data( 'comment-type' )
+				}) );
+			}
 		},
 
 		toggleCommitterForm: function( event ) {

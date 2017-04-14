@@ -109,7 +109,7 @@ class Customizations {
 			switch ( $hook_suffix ) {
 				case 'post.php':
 					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
-					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 2 );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 3 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
 					) );
@@ -508,6 +508,14 @@ class Customizations {
 				if ( wp_set_comment_status( $parent, 'approve' ) ) {
 					$comment_auto_approved = true;
 				}
+			}
+		}
+
+		// Inherit comment type from parent comment.
+		if ( ! $comment_data['comment_type'] ) {
+			$parent = get_comment( $comment_parent );
+			if ( $parent && $parent->comment_post_ID == $comment_post_ID ) {
+				$comment_data['comment_type'] = $parent->comment_type;
 			}
 		}
 
