@@ -201,36 +201,20 @@ class WP_I18n_Teams {
 			}
 			$statuses[ $language_pack_status ]++;
 
-			$forums_url = $team_url = '';
-			if ( $subdomain ) {
-				$result = get_sites( array(
-					'domain'   => $subdomain . '.wordpress.org',
-					'path__in' => array( '/support/', '/forums/' ),
-					'number'   => 1,
-				) );
-				$site = array_shift( $result );
-				if ( $site ) {
-					$forums_url = get_home_url( $site->id, '/' );
-				}
-
-				$result = get_sites( array(
-					'domain'   => $subdomain . '.wordpress.org',
-					'path__in' => array( '/team/' ),
-					'number'   => 1,
-				) );
-				$site = array_shift( $result );
-				if ( $site ) {
-					$team_url = get_home_url( $site->id, '/' );
-				}
-			}
+			$sites = get_sites( [
+				'locale'     => $locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'orderby'    => 'path_length',
+				'number'     => '',
+			] );
 
 			$locale_data[ $locale->wp_locale ] = array(
 				'release_status'       => $release_status,
 				'translation_status'   => $translation_status,
 				'language_pack_status' => $language_pack_status,
-				'rosetta_site_url'     => $subdomain ? 'https://' . $subdomain . '.wordpress.org' : false,
-				'forums_url'           => $forums_url ? $forums_url : false,
-				'team_url'             => $team_url ? $team_url : false,
+				'sites'                => $sites,
+				'subdomain'            => $subdomain,
+				'rosetta_site_url'     => "https://$subdomain.wordpress.org/",
 				'latest_release'       => $latest_release ? $latest_release : false,
 			);
 		}
@@ -271,7 +255,7 @@ class WP_I18n_Teams {
 
 		$latest_release = $locale_data['latest_release'];
 		if ( $latest_release ) {
-			$locale_data['localized_core_url'] = sprintf( '%s/wordpress-%s-%s.zip', $locale_data['rosetta_site_url'], $latest_release, $locale->wp_locale );
+			$locale_data['localized_core_url'] = sprintf( 'https://%s.wordpress.org/wordpress-%s-%s.zip', $locale_data['subdomain'], $latest_release, $locale->wp_locale );
 			$language_packs_data = $this->get_language_packs_data();
 
 			if ( version_compare( $latest_release, '4.0', '>=' ) && ! empty( $language_packs_data[ $locale->wp_locale ] ) ) {
@@ -293,6 +277,7 @@ class WP_I18n_Teams {
 		}
 
 		$contributors = $this->get_contributors( $locale );
+		$locale_data['locale_managers'] = $contributors['locale_managers'];
 		$locale_data['validators'] = $contributors['validators'];
 		$locale_data['project_validators'] = $contributors['project_validators'];
 		$locale_data['translators'] = $contributors['translators'];
@@ -312,7 +297,8 @@ class WP_I18n_Teams {
 			return $cache;
 		}
 
-		$contributors = array();
+		$contributors = [];
+		$contributors['locale_managers'] = $this->get_locale_managers( $locale );
 		$contributors['validators'] = $this->get_general_translation_editors( $locale );
 		$contributors['project_validators'] = $this->get_project_translation_editors( $locale );
 		$contributors['translators'] = $this->get_translation_contributors( $locale );
@@ -354,45 +340,73 @@ class WP_I18n_Teams {
 	}
 
 	/**
+	 * Get the locale managers for the given locale.
+	 *
+	 * @param GP_Locale $locale
+	 * @return array
+	 */
+	private function get_locale_managers( $locale ) {
+		$locale_managers = [];
+
+		$result = get_sites( [
+			'locale'     => $locale->wp_locale,
+			'network_id' => WPORG_GLOBAL_NETWORK_ID,
+			'path'       => '/',
+			'fields'     => 'ids',
+			'number'     => '1',
+		] );
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
+			return $locale_managers;
+		}
+
+		$users = get_users( [
+			'blog_id'     => $site_id,
+			'role'        => 'locale_manager',
+			'count_total' => false,
+		] );
+
+		foreach ( $users as $user ) {
+			$locale_managers[ $user->user_nicename ] = $this->prepare_user( $user );
+		}
+
+		uasort( $locale_managers, [ $this, '_sort_display_name_callback' ] );
+
+		return $locale_managers;
+	}
+
+	/**
 	 * Get the general translation editors for the given locale.
 	 *
 	 * @param GP_Locale $locale
 	 * @return array
 	 */
 	private function get_general_translation_editors( $locale ) {
-		global $wpdb;
+		$editors = [];
 
-		$editors = array();
-
-		$users = $wpdb->get_col( $wpdb->prepare( "
-			SELECT `user_id` FROM `translate_translation_editors`
-			WHERE `project_id` = '0' AND `locale` = %s
-		", $locale->slug ) );
-
-		if ( ! $users ) {
+		$result = get_sites( [
+			'locale'     => $locale->wp_locale,
+			'network_id' => WPORG_GLOBAL_NETWORK_ID,
+			'path'       => '/',
+			'fields'     => 'ids',
+			'number'     => '1',
+		] );
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
 			return $editors;
 		}
 
-		$user_data = $wpdb->get_results( "SELECT ID, user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
-		foreach ( $user_data as $user ) {
-			if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
-				$editors[ $user->user_nicename ] = array(
-					'display_name' => $user->display_name,
-					'email'        => $user->user_email,
-					'nice_name'    => $user->user_nicename,
-					'slack'        => self::get_slack_username( $user->ID ),
-				);
-			} else {
-				$editors[ $user->user_nicename ] = array(
-					'display_name' => $user->user_nicename,
-					'email'        => $user->user_email,
-					'nice_name'    => $user->user_nicename,
-					'slack'        => self::get_slack_username( $user->ID ),
-				);
-			}
+		$users = get_users( [
+			'blog_id'     => $site_id,
+			'role'        => 'general_translation_editor',
+			'count_total' => false,
+		] );
+
+		foreach ( $users as $user ) {
+			$editors[ $user->user_nicename ] = $this->prepare_user( $user );
 		}
 
-		uasort( $editors, array( $this, '_sort_display_name_callback' ) );
+		uasort( $editors, [ $this, '_sort_display_name_callback' ] );
 
 		return $editors;
 	}
@@ -404,41 +418,57 @@ class WP_I18n_Teams {
 	 * @return array
 	 */
 	private function get_project_translation_editors( $locale ) {
-		global $wpdb;
+		$editors = [];
 
-		$editors = array();
-
-		$users = $wpdb->get_col( $wpdb->prepare( "
-			SELECT `user_id` FROM `translate_translation_editors`
-			WHERE `project_id` <> '0' AND `locale` = %s
-		", $locale->slug ) );
-
-		if ( ! $users ) {
+		$result = get_sites( [
+			'locale'     => $locale->wp_locale,
+			'network_id' => WPORG_GLOBAL_NETWORK_ID,
+			'path'       => '/',
+			'fields'     => 'ids',
+			'number'     => '1',
+		] );
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
 			return $editors;
 		}
 
-		$user_data = $wpdb->get_results( "SELECT ID, user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ")" );
-		foreach ( $user_data as $user ) {
-			if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
-				$editors[ $user->user_nicename ] = array(
-					'display_name' => $user->display_name,
-					'email'        => $user->user_email,
-					'nice_name'    => $user->user_nicename,
-					'slack'        => self::get_slack_username( $user->ID ),
-				);
-			} else {
-				$editors[ $user->user_nicename ] = array(
-					'display_name' => $user->user_nicename,
-					'email'        => $user->user_email,
-					'nice_name'    => $user->user_nicename,
-					'slack'        => self::get_slack_username( $user->ID ),
-				);
-			}
+		$users = get_users( [
+			'blog_id'     => $site_id,
+			'role'        => 'translation_editor',
+			'count_total' => false,
+		] );
+
+		foreach ( $users as $user ) {
+			$editors[ $user->user_nicename ] = $this->prepare_user( $user );
 		}
 
-		uasort( $editors, array( $this, '_sort_display_name_callback' ) );
+		uasort( $editors, [ $this, '_sort_display_name_callback' ] );
 
 		return $editors;
+	}
+
+	/**
+	 * Prepares user objects for output.
+	 *
+	 * @param \WP_User $user The user.
+	 * @return array List of user data.
+	 */
+	private function prepare_user( $user ) {
+		if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
+			return [
+				'display_name' => $user->display_name,
+				'email'        => $user->user_email,
+				'nice_name'    => $user->user_nicename,
+				'slack'        => self::get_slack_username( $user->ID ),
+			];
+		} else {
+			return [
+				'display_name' => $user->user_nicename,
+				'email'        => $user->user_email,
+				'nice_name'    => $user->user_nicename,
+				'slack'        => self::get_slack_username( $user->ID ),
+			];
+		}
 	}
 
 	/**

@@ -10,32 +10,18 @@
 
 	<ul id="locale-details">
 		<li>
-			<strong><?php _e( 'Locale site:', 'wporg' ); ?></strong>
-			<?php if ( $locale_data['rosetta_site_url'] ) : ?>
-				<a href="<?php echo esc_url( $locale_data['rosetta_site_url'] ); ?>"><?php echo parse_url( $locale_data['rosetta_site_url'], PHP_URL_HOST ); ?></a>
-			<?php else : ?>
-				&mdash;
-			<?php endif; ?>
-		</li>
-		<li>
-			<strong><?php _e( 'Team site:', 'wporg' ); ?></strong>
-			<?php if ( $locale_data['team_url'] ) : ?>
-				<a href="<?php echo esc_url( $locale_data['team_url'] ); ?>"><?php
-					$url = parse_url( $locale_data['team_url'] );
-					printf( '%s%s', $url['host'], $url['path'] );
-				?></a>
-			<?php else : ?>
-				&mdash;
-			<?php endif; ?>
-		</li>
-		<li>
-			<strong><?php _e( 'Forums:', 'wporg' ); ?></strong>
-			<?php if ( $locale_data['forums_url'] ) : ?>
-				<a href="<?php echo esc_url( $locale_data['forums_url'] ); ?>"><?php
-					$url = parse_url( $locale_data['forums_url'] );
-					printf( '%s%s', $url['host'], $url['path'] );
-				?></a>
-			<?php else : ?>
+			<strong><?php _e( 'Sites:', 'wporg' ); ?></strong>
+			<?php
+			if ( $locale_data['sites'] ) :
+				echo implode( ', ', array_map( function( $site ) {
+					return sprintf(
+						'<a href="%s">%s (%s)</a>',
+						esc_url( $site->home ),
+						esc_html( $site->blogname ),
+						esc_html( $site->domain . $site->path )
+					);
+				},  $locale_data['sites'] ) );
+			else : ?>
 				&mdash;
 			<?php endif; ?>
 		</li>
@@ -79,15 +65,30 @@
 	<?php endif;  ?>
 </div>
 
+<?php if ( ! empty( $locale_data['locale_managers'] ) ) : ?>
+	<h2><?php printf( __( 'Locale Managers (%s)', 'wporg' ), number_format_i18n( count( $locale_data['locale_managers'] ) ) ); ?></h2>
 
-<h2><?php printf( __( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
+	<ul class="validators">
+		<?php foreach ( $locale_data['locale_managers'] as $locale_manager ) :
+			?>
+			<li>
+				<a class="profile" href="https://profiles.wordpress.org/<?php echo esc_attr( $locale_manager['nice_name'] ); ?>"><?php
+					echo get_avatar( $locale_manager['email'], 60 );
+					echo esc_html( $locale_manager['display_name'] );
+					?></a>
+				<?php
+				if ( $locale_manager['slack'] ) {
+					printf( '<span class="user-slack">@%s on <a href="%s">Slack</a></span>', $locale_manager['slack'], 'https://make.wordpress.org/chat/' );
+				}
+				?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+<?php endif; ?>
 
-<?php if ( empty( $locale_data['validators'] ) ) : ?>
-	<p><?php
-		/* translators: %s: language name in English */
-		printf( __( '%s does not have General or Project translation editors yet.', 'wporg' ), $locale->english_name );
-	?></p>
-<?php else : ?>
+<?php if ( ! empty( $locale_data['validators'] ) ) : ?>
+	<h2><?php printf( __( 'General Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['validators'] ) ) ); ?></h2>
+
 	<ul class="validators">
 		<?php foreach ( $locale_data['validators'] as $validator ) :
 			?>
@@ -105,7 +106,6 @@
 		<?php endforeach; ?>
 	</ul>
 <?php endif; ?>
-
 
 <?php if ( ! empty( $locale_data['project_validators'] ) ) : ?>
 	<h2><?php printf( __( 'Project Translation Editors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['project_validators'] ) ) ); ?></h2>
@@ -128,11 +128,9 @@
 	</ul>
 <?php endif; ?>
 
-<h2><?php printf( __( 'All Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
+<?php if ( ! empty( $locale_data['translators'] ) ) : ?>
+	<h2><?php printf( __( 'All Translation Contributors (%s)', 'wporg' ), number_format_i18n( count( $locale_data['translators'] ) ) ); ?></h2>
 
-<?php if ( empty( $locale_data['translators'] ) ) : ?>
-	<p><?php printf( __( '%s does not have any translators yet.', 'wporg' ), $locale->english_name ); ?></p>
-<?php else :?>
 	<p>
 		<?php
 		$translators = array();
@@ -148,9 +146,15 @@
 	</p>
 <?php endif; ?>
 
-<p class="alert alert-info" role="alert">
-	<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>"><?php
+<?php
+$notice = sprintf(
+	'%s <a href="https://translate.wordpress.org/locale/%s">%s</a>',
+	__( 'Is this a language that you speak?', 'wporg' ),
+	esc_attr( $locale->slug ),
+	sprintf(
 		/* translators: %s: language name in English */
-		printf( __( 'Is this a language that you speak? Join the WordPress translation team for %s!', 'wporg' ), $locale->english_name );
-	?></a>
-</p>
+		__( 'Join the WordPress translation team for %s!', 'wporg' ),
+		esc_html( $locale->english_name )
+	)
+);
+echo do_shortcode( "[info]{$notice}[/info]" );

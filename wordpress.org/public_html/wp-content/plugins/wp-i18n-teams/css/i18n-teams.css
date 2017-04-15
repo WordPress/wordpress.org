@@ -245,6 +245,10 @@ article.page .translators-info table tr td:last-child {
 	padding-right: 1em;
 }
 
+article.page .translators-info table td:first-of-type {
+	width: auto;
+}
+
 @media (max-width: 768px) {
 	.show-all table tbody tr,
 	.translators-info.show-latest table tbody tr.latest,
