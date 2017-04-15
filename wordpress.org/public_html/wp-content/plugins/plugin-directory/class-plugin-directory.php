@@ -484,12 +484,6 @@ class Plugin_Directory {
 		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 
-		// When this plugin is used in the context of a Rosetta site, handle it gracefully.
-		if ( 'wordpress.org' != $_SERVER['HTTP_HOST'] && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
-			add_filter( 'option_home',    array( $this, 'rosetta_network_localize_url' ) );
-			add_filter( 'option_siteurl', array( $this, 'rosetta_network_localize_url' ) );
-		}
-
 		add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
 		add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
 		add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
@@ -602,44 +596,6 @@ class Plugin_Directory {
 		flush_rewrite_rules();
 
 		do_action( 'wporg_plugins_deactivation' );
-	}
-
-	/**
-	 * Filter the URLs to use the current localized domain name, rather than WordPress.org.
-	 *
-	 * The Plugin Directory is available at multiple URLs (internationalised domains), this method allows
-	 * for the one blog (a single blog_id) to be presented at multiple URLs yet have correct localised links.
-	 *
-	 * This method works in conjunction with a filter in sunrise.php, duplicated here for transparency:
-	 *
-	 * // Make the Plugin Directory available at /plugins/ on all rosetta sites.
-	 * function wporg_plugins_on_rosetta_domains( $site, $domain, $path, $segments ) {
-	 *     // All non-rosetta networks define DOMAIN_CURRENT_SITE in wp-config.php
-	 *     if ( ! defined( 'DOMAIN_CURRENT_SITE' ) && 'wordpress.org' != $domain && '/plugins/' == substr( $path . '/', 0, 9 ) ) {
-	 *          $site = get_blog_details( WPORG_PLUGIN_DIRECTORY_BLOGID, false );
-	 *          if ( $site ) {
-	 *              $site = clone $site;
-	 *              // 6 = The Rosetta network, this causes the site to be loaded as part of the Rosetta network
-	 *              $site->site_id = 6;
-	 *              return $site;
-	 *          }
-	 *     }
-	 *
-	 *     return $site;
-	 * }
-	 * add_filter( 'pre_get_site_by_path', 'wporg_plugins_on_rosetta_domains', 10, 4 );
-	 *
-	 * @param string $url The URL to be localized.
-	 * @return string
-	 */
-	public function rosetta_network_localize_url( $url ) {
-		static $localized_url = null;
-
-		if ( is_null( $localized_url ) ) {
-			$localized_url = 'https://' . preg_replace( '![^a-z.-]+!', '', $_SERVER['HTTP_HOST'] );
-		}
-
-		return preg_replace( '!^[https]+://wordpress\.org!i', $localized_url, $url );
 	}
 
 	/**
