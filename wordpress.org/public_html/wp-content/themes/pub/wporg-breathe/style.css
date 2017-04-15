@@ -792,14 +792,11 @@ nav.o2-post-footer-actions ul li > span > a {
 	border-top: 0;
 }
 
-.page-template-full-width .content-area .o2-app-header {
-	padding: 0 1.6em;
-}
-
 .page-template-full-width .content-area h2.o2-app-page-title {
 	padding: 0;
 }
 
+.page-template-full-width #nav-below,
 .page-template-full-width .content-area .entry-header {
 	display: none;
 }
