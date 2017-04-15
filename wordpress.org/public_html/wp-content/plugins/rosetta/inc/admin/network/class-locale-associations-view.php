@@ -153,7 +153,7 @@ class Locale_Associations_View implements Admin_Page_View {
 								echo '<ul>';
 								foreach ( $sites as $site ) {
 									printf(
-										'<li><a href="%s">%s (%s)</a>',
+										'<li><a href="%s">%s (%s)</a></li>',
 										esc_url( $site->home ),
 										esc_html( $site->blogname ),
 										esc_html( $site->domain . $site->path )
