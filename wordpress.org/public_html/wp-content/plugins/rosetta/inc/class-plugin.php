@@ -5,7 +5,7 @@ namespace WordPressdotorg\Rosetta;
 class Plugin {
 
 	/**
-	 * @var Plugin The singleton instance.
+	 * @var \WordPressdotorg\Rosetta\Plugin The singleton instance.
 	 */
 	private static $instance;
 
@@ -19,7 +19,7 @@ class Plugin {
 	/**
 	 * Returns always the same instance of this plugin.
 	 *
-	 * @return Plugin
+	 * @return \WordPressdotorg\Rosetta\Plugin
 	 */
 	public static function get_instance() {
 		if ( ! ( self::$instance instanceof Plugin ) ) {
