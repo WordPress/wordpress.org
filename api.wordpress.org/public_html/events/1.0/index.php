@@ -416,7 +416,8 @@ function get_location( $args = array() ) {
 
 			if ( ! $location && $guess ) {
 				$location = array(
-					'country' => $guess,
+					'country'     => $guess['country_short'],
+					'description' => $guess['country_long'],
 				);
 			}
 		}
@@ -461,50 +462,35 @@ function get_location( $args = array() ) {
  *
  * @param string $location_name
  *
- * @return false|string false on failure; a country code on success
+ * @return false|array false on failure; an array with country details on success
  */
 function guess_location_from_country( $location_name ) {
 	// Check if they entered only the country name, e.g. "Germany" or "New Zealand"
-	$country_code = get_country_code_from_name( $location_name );
+	$country             = get_country_from_name( $location_name );
 	$location_word_count = str_word_count( $location_name );
 	$location_name_parts = explode( ' ', $location_name );
-
-	// Check if they entered only the country code, e.g., "GB"
-	if ( ! $country_code ) {
-		$valid_country_codes = get_valid_country_codes();
-
-		if ( in_array( $location_name, $valid_country_codes, true ) ) {
-			$country_code = $location_name;
-		}
-	}
+	$valid_country_codes = get_valid_country_codes();
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the country
 	 */
-	if ( ! $country_code && $location_word_count >= 2 ) {
+	if ( ! $country && $location_word_count >= 2 ) {
 		// Catch input like "Vancouver Canada"
 		$country_id   = $location_name_parts[ $location_word_count - 1 ];
-		$country_code = get_country_code_from_name( $country_id );
-
-		// Catch input like "London GB"
-		if ( ! $country_code ) {
-			if ( in_array( $country_id, $valid_country_codes, true ) ) {
-				$country_code = $country_id;
-			}
-		}
+		$country      = get_country_from_name( $country_id );
 	}
 
-	if ( ! $country_code && $location_word_count >= 3 ) {
+	if ( ! $country && $location_word_count >= 3 ) {
 		// Catch input like "Santiago De Los Caballeros, Dominican Republic"
 		$country_name = sprintf(
 			'%s %s',
 			$location_name_parts[ $location_word_count - 2 ],
 			$location_name_parts[ $location_word_count - 1 ]
 		);
-		$country_code = get_country_code_from_name( $country_name );
+		$country = get_country_from_name( $country_name );
 	}
 
-	if ( ! $country_code && $location_word_count >= 4 ) {
+	if ( ! $country && $location_word_count >= 4 ) {
 		// Catch input like "Kaga-Bandoro, Central African Republic"
 		$country_name = sprintf(
 			'%s %s %s',
@@ -512,10 +498,10 @@ function guess_location_from_country( $location_name ) {
 			$location_name_parts[ $location_word_count - 2 ],
 			$location_name_parts[ $location_word_count - 1 ]
 		);
-		$country_code = get_country_code_from_name( $country_name );
+		$country = get_country_from_name( $country_name );
 	}
 
-	return $country_code;
+	return $country;
 }
 
 /**
@@ -530,30 +516,32 @@ function get_valid_country_codes() {
 }
 
 /**
- * Get the country code that corresponds to the given country name
+ * Get the country that corresponds to the given country name
  *
  * @param string $country_name
  *
- * @return false|string false on failure; a country code on success
+ * @return false|array false on failure; an array with country details on success
  */
-function get_country_code_from_name( $country_name ) {
+function get_country_from_name( $country_name ) {
 	global $wpdb;
 
-	$country_code = $wpdb->get_var( $wpdb->prepare( "
-		SELECT country_short
+	$country = $wpdb->get_row( $wpdb->prepare( "
+		SELECT country_short, country_long
 		FROM ip2location
-		WHERE country_long = %s
+		WHERE
+			country_long  = %s OR
+			country_short = %s
 		LIMIT 1",
+		$country_name,
 		$country_name
-	) );
-
+	), 'ARRAY_A' );
 
 	// Convert all errors to boolean false for consistency
-	if ( empty( $country_code ) ) {
-		$country_code = false;
+	if ( empty( $country ) ) {
+		$country = false;
 	}
 
-	return $country_code;
+	return $country;
 }
 
 /**

@@ -123,7 +123,7 @@ function get_location_test_cases() {
 				'country' => 'AU',
 			),
 			'expected' => array(
-				'country' => 'AU'
+				'country' => 'AU',
 			),
 		),
 
@@ -138,7 +138,8 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Jakarta',
 			),
 			'expected' => array(
-				'country' => 'ID'
+				'country' => 'ID',
+				'description' => 'indonesia',
 			),
 		),
 
@@ -486,6 +487,7 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'country' => 'CA',
+				'description' => 'canada',
 			),
 		),
 
@@ -497,6 +499,7 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'country' => 'DO',
+				'description' => 'dominican republic',
 			),
 		),
 
@@ -508,6 +511,7 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'country' => 'CF',
+				'description' => 'central african republic',
 			),
 		),
 
@@ -519,6 +523,7 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'country' => 'GB',
+				'description' => 'united kingdom',
 			),
 		),
 
@@ -530,6 +535,7 @@ function get_location_test_cases() {
 			),
 			'expected' => array(
 				'country' => 'BI',
+				'description' => 'burundi',
 			),
 		),
 
