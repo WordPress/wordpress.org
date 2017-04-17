@@ -67,11 +67,13 @@ function scripts() {
 		wp_enqueue_script( 'wporg-plugins-faq-accordion', get_template_directory_uri() . '/js/section-faq.js', array(), '20170404', true );
 	}
 
-	wp_enqueue_script( 'wporg-plugins-locale-banner', get_template_directory_uri() . '/js/locale-banner.js', array(), '20160622', true );
-	wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
-		'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
-		'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
-	) );
+	if ( ! is_404() ) {
+		wp_enqueue_script( 'wporg-plugins-locale-banner', get_template_directory_uri() . '/js/locale-banner.js', array(), '20160622', true );
+		wp_localize_script( 'wporg-plugins-locale-banner', 'wporgLocaleBanner', array(
+			'apiURL'        => rest_url( '/plugins/v1/locale-banner' ),
+			'currentPlugin' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
+		) );
+	}
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-jsapi', 'https://www.google.com/jsapi', array(), false, true );
@@ -245,6 +247,10 @@ add_action( 'wp_head', __NAMESPACE__ . '\social_meta_data' );
  * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
  */
 function hreflang_link_attributes() {
+	if ( is_404() ) {
+		return;
+	}
+
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
