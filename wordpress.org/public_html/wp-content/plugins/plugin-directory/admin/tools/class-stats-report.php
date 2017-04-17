@@ -101,6 +101,11 @@ class Stats_Report {
 			) );
 		}
 
+		// Temporary until the above is updated to work with the new directory:
+		foreach ( array( 'plugin_approve', 'plugin_delist', 'plugin_reject' ) as $unused_stat ) {
+			if ( ! $stats[ $unused_stat ] ) $stats[ $unused_stat ] = __( 'N/A', 'wporg-plugins' );
+		}
+
 		// --------------
 		// Plugin Queue
 		// --------------
@@ -237,9 +242,9 @@ class Stats_Report {
 
 		<ul style="font-family:Courier New;">
 			<li><?php printf( __( 'Plugins requested : %d', 'wporg-plugins' ), $stats['plugin_new'] ); ?></li>
-			<li><?php printf( __( 'Plugins rejected : %d', 'wporg-plugins' ),  $stats['plugin_reject'] ); ?></li>
-			<li><?php printf( __( 'Plugins closed : %d', 'wporg-plugins' ),    $stats['plugin_delist'] ); ?></li>
-			<li><?php printf( __( 'Plugins approved : %d', 'wporg-plugins' ),  $stats['plugin_approve'] ); ?></li>
+			<li><?php printf( __( 'Plugins rejected : %s', 'wporg-plugins' ),  $stats['plugin_reject'] ); ?></li>
+			<li><?php printf( __( 'Plugins closed : %s', 'wporg-plugins' ),    $stats['plugin_delist'] ); ?></li>
+			<li><?php printf( __( 'Plugins approved : %s', 'wporg-plugins' ),  $stats['plugin_approve'] ); ?></li>
 		</ul>
 
 		<h3><?php _e( 'Plugin Queue Stats (current)', 'wporg-plugins' ); ?></h3>
