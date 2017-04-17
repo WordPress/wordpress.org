@@ -90,7 +90,7 @@ module.exports = function( grunt ) {
 		},
 		shell: {
 			build: {
-				command: './node_modules/wpapi/lib/data/update-default-routes-json.js --endpoint=https://wordpress.org/plugins-wp/wp-json --output=./client'
+				command: './node_modules/wpapi/lib/data/update-default-routes-json.js --endpoint=https://wordpress.org/plugins/wp-json --output=./client'
 			}
 		},
 		rtlcss: {
