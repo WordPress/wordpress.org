@@ -308,6 +308,7 @@ class WCOR_Reminder {
 			<li>[venue_available_rooms]</li>
 			<li>[venue_url]</li>
 			<li>[venue_contact_info]</li>
+			<li>[venue_exhibition_space_message]</li>
 		</ul>
 
 		<h5>Miscellaneous</h5>

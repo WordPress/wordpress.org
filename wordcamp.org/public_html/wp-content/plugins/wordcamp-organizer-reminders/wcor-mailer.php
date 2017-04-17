@@ -224,6 +224,7 @@ class WCOR_Mailer {
 			'[venue_available_rooms]',
 			'[venue_url]',
 			'[venue_contact_info]',
+			'[venue_exhibition_space_message]',
 
 			// Miscellaneous
 			'[multi_event_sponsor_info]',
@@ -286,6 +287,7 @@ class WCOR_Mailer {
 			empty( $wordcamp_meta['Available Rooms'][0] )     ? 'N/A' : $wordcamp_meta['Available Rooms'][0],
 			empty( $wordcamp_meta['Website URL'][0] )         ? 'N/A' : $wordcamp_meta['Website URL'][0],
 			empty( $wordcamp_meta['Contact Information'][0] ) ? 'N/A' : $wordcamp_meta['Contact Information'][0],
+			empty( $wordcamp_meta['Exhibition Space Available'][0] ) ? 'This event has no exhibition space.' : 'This event might have exhibition space available, please check with the organizers for more information.',
 
 			// Miscellaneous
 			$this->get_mes_info( $wordcamp->ID ),
