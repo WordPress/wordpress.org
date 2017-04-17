@@ -134,7 +134,7 @@ function get_task_data() {
 		),
 		'5j0m' => array(
 			'title'   => __( 'Select caterer and menu for event', 'wordcamporg' ),
-			'excerpt' => __( 'Ensure that you accomodate all dietary requirements.', 'wordcamporg' ),
+			'excerpt' => __( 'Ensure that you accommodate all dietary requirements.', 'wordcamporg' ),
 			'cat'     => array( 'food' ),
 			'link'    => array(
 				'text' => __( 'Food and Beverage', 'wordcamporg' ),
@@ -201,7 +201,7 @@ function get_task_data() {
 			'excerpt' => __( 'Identify internal sponsorship levels and what each level includes.', 'wordcamporg' ),
 			'cat'     => array( 'sponsor' ),
 			'link'    => array(
-				'text' => __( 'Local sponsorshps', 'wordcamporg' ),
+				'text' => __( 'Local sponsorships', 'wordcamporg' ),
 				'url'  => 'https://make.wordpress.org/community/handbook/wordcamp-organizer/planning-details/fundraising/local-wordcamp-sponsorship/',
 			),
 		),
@@ -225,7 +225,7 @@ function get_task_data() {
 		),
 		'9tsp' => array(
 			'title'   => __( 'Open call for sponsors', 'wordcamporg' ),
-			'excerpt' => __( 'Having already reached out to prior sponsors with your completed sponsor packet, it\'s now time to publically open your call for sponsors on your site. At this time you can also reach out to sponsors who have supported other WordCamps in your area.', 'wordcamporg' ),
+			'excerpt' => __( 'Having already reached out to prior sponsors with your completed sponsor packet, it\'s now time to publicly open your call for sponsors on your site. At this time you can also reach out to sponsors who have supported other WordCamps in your area.', 'wordcamporg' ),
 			'cat'     => array( 'sponsor' ),
 			'link'    => array(
 				'text' => __( 'Fundraising', 'wordcamporg' ),
@@ -279,7 +279,7 @@ function get_task_data() {
 		),
 		'uw8g' => array(
 			'title'   => __( 'Open ticket sales', 'wordcamporg' ),
-			'excerpt' => __( 'Set up your tickets -- make sure you ask for dietary preferences and t-shirt sizes (if providing t-shirts). Also ask in registration if attendees require any special acoomodation to attend.', 'wordcamporg' ),
+			'excerpt' => __( 'Set up your tickets. Make sure you ask for dietary preferences and t-shirt sizes (if providing t-shirts). Also ask in registration if attendees require any special accommodation to attend.', 'wordcamporg' ),
 			'cat'     => array( 'registration' ),
 			'link'    => array(
 				'text' => __( 'Selling Tickets', 'wordcamporg' ),
@@ -444,7 +444,7 @@ function get_task_data() {
 		),
 		'c46e' => array(
 			'title'   => __( 'Confirm catering ', 'wordcamporg' ),
-			'excerpt' => __( 'Confirm catering menu for any meals or snacks you have arranged based on attendee numbers. Ensure delivery/ pickup is scheudled. Please do not run out of coffee. At this time confirm menus for any ancillary events (ie: contributor day, speaker event, after party, etc.) you may be having.', 'wordcamporg' ),
+			'excerpt' => __( 'Confirm catering menu for any meals or snacks you have arranged based on attendee numbers. Ensure delivery/pickup is scheduled. Please do not run out of coffee. At this time confirm menus for any ancillary events (ie: contributor day, speaker event, after party, etc.) you may be having.', 'wordcamporg' ),
 			'cat'     => array( 'food' ),
 			'link'    => array(
 				'text' => __( 'Food and Beverage', 'wordcamporg' ),
@@ -473,7 +473,7 @@ function get_task_data() {
 		),
 		'2iiq' => array(
 			'title'   => __( 'Test and prepare equipment from camera kit (if using)', 'wordcamporg' ),
-			'excerpt' => __( 'Check out your kits to make sure everything is there, the batteries are charged, and you or your video coordiantor understnad how to use them.', 'wordcamporg' ),
+			'excerpt' => __( 'Check out your kits to make sure everything is there, the batteries are charged, and you or your video coordinator understands how to use them.', 'wordcamporg' ),
 			'cat'     => array( 'audio-video' ),
 			'link'    => array(
 				'text' => __( 'Video Quick Start Guide', 'wordcamporg' ),
