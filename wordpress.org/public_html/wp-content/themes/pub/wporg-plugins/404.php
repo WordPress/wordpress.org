@@ -22,8 +22,8 @@ get_header(); ?>
 				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-plugins' ), get_home_url() ); ?></p>
 
 				<div class="logo-swing">
-					<img src="http://messislore.com/images/wp-logo-blue-trans-blur.png" class="wp-logo" />
-					<img src="http://messislore.com/images/wp-logo-blue.png" class="wp-logo" />
+					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ); ?>" class="wp-logo" />
+					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue.png' ); ?>" class="wp-logo" />
 				</div>
 			</div><!-- .page-content -->
 		</section><!-- .error-404 -->
