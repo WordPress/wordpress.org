@@ -48,7 +48,10 @@ function render_application_shortcode() {
 	if ( isset( $_POST['submit-application'] ) ) {
 		$application_data = validate_data( $_POST );
 
-		if ( is_wp_error( $application_data ) ) {
+		if ( is_rate_limited() ) {
+			$message        = 'You have submitted too many applications recently. Please wait and try again in a few hours.';
+			$notice_classes = 'notice-error';
+		} else if ( is_wp_error( $application_data ) ) {
 			$message = $application_data->get_error_message();
 			$notice_classes = 'notice-error';
 		} else {
@@ -66,6 +69,44 @@ function render_application_shortcode() {
 	}
 
 	return ob_get_clean();
+}
+
+/**
+ * Check if the application submitter has been rate limited
+ *
+ * This isn't really designed to protect against DDoS or anything sophisticated; it just prevents us from having
+ * to clean up thousands of fake applications when security researchers use bots to probe for vulnerabilities.
+ *
+ * @return bool
+ */
+function is_rate_limited() {
+	$limit = 3;
+
+	$previous_entries = get_posts( array(
+		'post_type'      => WCPT_POST_TYPE_ID,
+		'post_status'    => 'any',
+		'posts_per_page' => $limit,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+		'fields'         => 'ids',
+
+		'date_query' => array(
+			array(
+				'column'    => 'post_date',
+				'after'     => '1 hour ago',
+				'inclusive' => true,
+			),
+		),
+
+		'meta_query' => array(
+			array(
+				'key'   => '_application_submitter_ip_address',
+				'value' => $_SERVER['REMOTE_ADDR'],
+			),
+		),
+	) );
+
+	return count( $previous_entries ) >= $limit;
 }
 
 /**
@@ -192,6 +233,7 @@ function create_wordcamp_post( $data ) {
 
 	// Populate the meta fields
 	add_post_meta( $post_id, '_application_data', $data );
+	add_post_meta( $post_id, '_application_submitter_ip_address', $_SERVER['REMOTE_ADDR'] );
 
 	add_post_meta( $post_id, 'Organizer Name', sprintf(
 		'%s %s',
