@@ -226,6 +226,14 @@ class WordCamp_Dashboard_Widgets {
 		</p>
 
 		<ul class="ul-disc">
+            <?php if ( current_user_can( 'switch_themes' ) ) : ?>
+                <li>
+                    <a href="https://make.wordpress.org/community/2017/04/18/introducing-a-new-mentor-tool-the-planning-checklist/">
+		                <?php esc_html_e( 'Track your progress towards holding a successful WordCamp event.', 'wordcamporg' ); ?>
+                    </a>
+                </li>
+            <?php endif; ?>
+
 			<li>
 				<a href="https://make.wordpress.org/community/2017/03/23/showing-upcoming-local-events-in-wp-admin/">
 					<?php esc_html_e( 'Show Your Upcoming Local Events in wp-admin.', 'wordcamporg' ); ?>
@@ -235,12 +243,6 @@ class WordCamp_Dashboard_Widgets {
 			<li>
 				<a href="https://make.wordpress.org/community/2016/04/26/new-tool-for-creating-personalized-wordcamp-badges/">
 					<?php esc_html_e( 'Create personalized attendee badges.', 'wordcamporg' ); ?>
-				</a>
-			</li>
-
-			<li>
-				<a href="https://make.wordpress.org/community/2016/03/01/new-automated-payments-and-invoicing/">
-					<?php esc_html_e( 'Invoice sponsors, pay vendors, and get reimbursed.', 'wordcamporg' ); ?>
 				</a>
 			</li>
 
