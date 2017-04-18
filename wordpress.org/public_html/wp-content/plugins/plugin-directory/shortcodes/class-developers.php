@@ -17,7 +17,7 @@ class Developers {
 		$post   = get_post();
 		$slug   = $post->post_name;
 		$title  = get_the_title( $post );
-		$output = '<p>' . sprintf( __( '%s is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ), $title ) . '</p>';
+		$output = '<div class="plugin-contributors"><p>' . sprintf( __( '%s is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ), $title ) . '</p>';
 
 		ob_start();
 		the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Contributors', array(), array(
@@ -28,9 +28,10 @@ class Developers {
 		) );
 
 		$output .= ob_get_clean();
+		$output .= '</div>';
 
 		$locales = Plugin_I18n::instance()->get_locales();
-		$output .= '<p>';
+		$output .= '<div class="plugin-development"><p>';
 
 		if ( ! empty( $locales ) ) {
 			$locales_list = implode( ', ', array_map( function( $locale ) use ( $slug ) {
@@ -82,7 +83,7 @@ class Developers {
 				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
 			) . '</p>';
 		}
-
+		$output .= '</div>';
 		return $output;
 	}
 }
