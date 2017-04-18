@@ -31,6 +31,9 @@ class Stickies_Compat {
 		// Add compat stickies to sticky array.
 		add_filter( 'bbp_get_stickies', array( $this, 'get_compat_stickies' ), 10, 2 );
 
+		// Make bbp_is_topic_sticky() recognize compat stickies.
+		add_filter( 'bbp_is_topic_sticky', array( $this, 'is_topic_sticky' ), 10, 2 );
+
 		// Add topic toggle for compat authors.
 		add_action( 'bbp_get_request', array( $this, 'sticky_handler' ) );
 
@@ -41,8 +44,8 @@ class Stickies_Compat {
 	/**
 	 * Return empty array for super sticky topics in compat mode.
 	 *
-	 * @param array $stickies The super sticky topic ids
-	 * @return array An empty array
+	 * @param array $stickies The super sticky topic IDs.
+	 * @return array An empty array.
 	 */
 	public function get_super_stickies( $stickies ) {
 		return array();
@@ -51,15 +54,29 @@ class Stickies_Compat {
 	/**
 	 * Return compat stickies for a given term.
 	 *
-	 * @param array $stickies The sticky topic ids
-	 * @param int $forum_id The forum id
-	 * @return array The sticky topic ids
+	 * @param array $stickies The sticky topic IDs.
+	 * @param int   $forum_id The forum ID.
+	 * @return array The sticky topic IDs.
 	 */
 	public function get_compat_stickies( $stickies, $forum_id ) {
 		if ( $this->term && bbp_is_single_view() && $this->compat == bbp_get_view_id() ) {
 			$stickies = self::get_stickies( $this->term->term_id );
 		}
 		return $stickies;
+	}
+
+	/**
+	 * Check whether a compat topic is sticky.
+	 *
+	 * @param bool $is_sticky Whether the topic is sticky.
+	 * @param int  $topic     The topic ID.
+	 * @return bool Whether the topic is sticky.
+	 */
+	public function is_topic_sticky( $is_sticky, $topic_id ) {
+		if ( $this->term && bbp_is_single_topic() ) {
+			$is_sticky = self::is_sticky( $this->term->term_id, $topic_id );
+		}
+		return $is_sticky;
 	}
 
 	/**
