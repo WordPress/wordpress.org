@@ -84,8 +84,8 @@ class Stickies_Compat {
 	public function sticky_handler( $action = '' ) {
 		// Bail if the action isn't meant for this function.
 		if ( ! in_array( $action, array(
-			'wporg_bbp_stick_topic',
-			'wporg_bbp_unstick_topic',
+			'wporg_bbp_stick_compat_topic',
+			'wporg_bbp_unstick_compat_topic',
 		) ) ) {
 			return;
 		}
@@ -121,9 +121,9 @@ class Stickies_Compat {
 		$success = false;
 
 		// Stick/unstick the topic.
-		if ( 'wporg_bbp_stick_topic' == $action ) {
+		if ( 'wporg_bbp_stick_compat_topic' == $action ) {
 			$success = self::add_sticky( $term->term_id, $topic->ID );
-		} elseif ( 'wporg_bbp_unstick_topic' == $action ) {
+		} elseif ( 'wporg_bbp_unstick_compat_topic' == $action ) {
 			$success = self::remove_sticky( $term->term_id, $topic->ID );
 		}
 
@@ -131,10 +131,10 @@ class Stickies_Compat {
 
 		if ( $success && ! is_wp_error( $success ) ) {
 			bbp_redirect( $permalink );
-		} elseif ( true === $is_sticky && 'wporg_bbp_stick_topic' == $action ) {
-			bbp_add_error( 'wporg_bbp_stick_topic', __( '<strong>ERROR</strong>: There was a problem sticking that topic!', 'wporg-forums' ) );
-		} elseif ( false === $is_sticky && 'wporg_bbp_unstick_topic' == $action ) {
-			bbp_add_error( 'wporg_bbp_unstick_topic', __( '<strong>ERROR</strong>: There was a problem unsticking that topic!', 'wporg-forums' ) );
+		} elseif ( true === $is_sticky && 'wporg_bbp_stick_compat_topic' == $action ) {
+			bbp_add_error( 'wporg_bbp_stick_compat_topic', __( '<strong>ERROR</strong>: There was a problem sticking that topic!', 'wporg-forums' ) );
+		} elseif ( false === $is_sticky && 'wporg_bbp_unstick_compat_topic' == $action ) {
+			bbp_add_error( 'wporg_bbp_unstick_compat_topic', __( '<strong>ERROR</strong>: There was a problem unsticking that topic!', 'wporg-forums' ) );
 		}
 	}
 
@@ -188,10 +188,10 @@ class Stickies_Compat {
 
 		if ( self::is_sticky( $term->term_id, $topic->ID ) ) {
 			$text = $r['unstick'];
-			$query_args = array( 'action' => 'wporg_bbp_unstick_topic', 'topic_id' => $topic->ID, 'term_id' => $term->term_id );
+			$query_args = array( 'action' => 'wporg_bbp_unstick_compat_topic', 'topic_id' => $topic->ID, 'term_id' => $term->term_id );
 		} else {
 			$text = $r['stick'];
-			$query_args = array( 'action' => 'wporg_bbp_stick_topic', 'topic_id' => $topic->ID, 'term_id' => $term->term_id );
+			$query_args = array( 'action' => 'wporg_bbp_stick_compat_topic', 'topic_id' => $topic->ID, 'term_id' => $term->term_id );
 		}
 
 		$permalink = get_permalink( $topic->ID );
