@@ -511,7 +511,7 @@ class WordCamp_New_Site {
 			array(
 				'title'   => __( 'Sponsors', 'wordcamporg' ),
 				'content' =>
-					'<p>'  . __( "<em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit http://central.wordcamp.org/multi-event-sponsorship-packages/. After that, you should add the sponsors that are specific to your event. For non-English sites, make sure the URL below matches Call for Sponsors page.", 'wordcamporg' ) . '</p> ' .
+					'<p>'  . __( "<em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit https://central.wordcamp.org/multi-event-sponsorship-packages/. After that, you should add the sponsors that are specific to your event. For non-English sites, make sure the URL below matches the Call for Sponsors page.", 'wordcamporg' ) . '</p> ' .
 					'<h3>' . __( 'Our Sponsors', 'wordcamporg' ) . '</h3> ' .
 					'<p>'  . __( 'Blurb thanking sponsors', 'wordcamporg' ) . '</p> ' .
 					'<p>[sponsors]</p> ' .
