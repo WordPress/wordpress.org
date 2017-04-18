@@ -345,6 +345,17 @@ class WordCamp_New_Site {
 		$this->set_default_options( $wordcamp, $meta );
 		$this->create_post_stubs( $wordcamp, $meta, $lead_organizer );
 
+		/**
+		 * Hook into the configuration process for a new WordCamp site.
+		 *
+		 * This fires in the context of the newly created site, after the theme has been set and the
+		 * default options and post stubs have been created.
+		 *
+		 * @param int     $wordcamp_id The ID of the new site.
+		 * @param WP_Post $wordcamp    The post object of the WordCamp on Central.
+		 */
+		do_action( 'wcpt_configure_new_site', $wordcamp_id, $wordcamp );
+
 		remove_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );
 
 		restore_current_blog();
