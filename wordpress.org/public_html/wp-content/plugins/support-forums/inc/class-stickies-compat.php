@@ -150,7 +150,7 @@ class Stickies_Compat {
 			return $r;
 		}
 		$user_id = get_current_user_id();
-		if ( ! ( function_exists( 'wporg_support_is_single_review' ) && wporg_support_is_single_review() )
+		if ( Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id()
 			&&
 			$this->user_can_stick( $user_id, $this->term->term_id, $topic_id )
 		) {
