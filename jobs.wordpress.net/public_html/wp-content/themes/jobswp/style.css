@@ -811,7 +811,7 @@ li > ul {
 	content: '\f109';
 }
 .job-cat-item-general:before { /* General */
-	content: '\f227';
+	content: '\f338';
 }
 .job-cat-item-plugin-development:before { /* Plugin  */
 	content: '\f106';
