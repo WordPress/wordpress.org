@@ -416,8 +416,6 @@ class WordCamp_New_Site {
 		);
 
 		// Create actual posts from stubs
-		remove_action( 'save_post', array( $GLOBALS['wordcamp_admin'], 'metabox_save' ) ); // prevent this callback from adding all the meta fields from the corresponding wordcamp post to new posts we create
-
 		foreach ( $stubs as $page ) {
 			$page_id = wp_insert_post( array(
 				'post_type'    => $page['type'],
@@ -464,7 +462,6 @@ class WordCamp_New_Site {
 			}
 		}
 
-		add_action( 'save_post', array( $GLOBALS['wordcamp_admin'], 'metabox_save' ) ); // restore wordcamp meta callback
 		Logger\log( 'finished', compact( 'assigned_sponsor_data', 'stubs', 'blog_name' ) );
 	}
 

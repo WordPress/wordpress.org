@@ -34,7 +34,7 @@ class WordCamp_Admin {
 
 		// Topic metabox actions
 		add_action( 'add_meta_boxes',                                 array( $this, 'metabox' ) );
-		add_action( 'save_post',                                      array( $this, 'metabox_save' ), 10, 2 );
+		add_action( 'save_post_' . WCPT_POST_TYPE_ID,                 array( $this, 'metabox_save' ), 10, 2 );
 
 		// Scripts and CSS
 		add_action( 'admin_enqueue_scripts',                          array( $this, 'admin_scripts' ) );
