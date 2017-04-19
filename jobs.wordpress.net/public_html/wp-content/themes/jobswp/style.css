@@ -1013,6 +1013,9 @@ li > ul {
 	border-top: 1px solid #EEE;
 	width: 100%;
 }
+.post-job-job-info textarea {
+	margin-bottom: 1em;
+}
 .container .grid_5.post-job-contact-info {
 	border-right: 1px solid #EEE;
 	width: 369px;
