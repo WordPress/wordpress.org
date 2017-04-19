@@ -347,11 +347,16 @@ class Plugin {
 	 * @return bool                 True if user is an author, false otherwise.
 	 */
 	public function is_user_author( $user_nicename, $type, $slug ) {
-		if ( 'plugin' === $type ) {
-			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
+		if ( class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+			if ( 'plugin' === $type ) {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->plugins;
+			} else {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->themes;
+			}
 		} else {
-			$compat = class_exists( '\WordPressdotorg\Forums\Theme' ) ? \WordPressdotorg\Forums\Theme::get_instance()->themes : '';
+			$compat = null;
 		}
+
 		$authors = $compat ? $compat->get_authors( $slug ) : array();
 
 		return $authors && in_array( $user_nicename, $authors );
@@ -369,11 +374,16 @@ class Plugin {
 	 * @return bool                 True if user is a contributor, false otherwise.
 	 */
 	public function is_user_contributor( $user_nicename, $type, $slug ) {
-		if ( 'plugin' === $type ) {
-			$compat = class_exists( '\WordPressdotorg\Forums\Plugin' ) ? \WordPressdotorg\Forums\Plugin::get_instance()->plugins : '';
+		if ( class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+			if ( 'plugin' === $type ) {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->plugins;
+			} else {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->themes;
+			}
 		} else {
-			$compat = class_exists( '\WordPressdotorg\Forums\Theme' ) ? \WordPressdotorg\Forums\Theme::get_instance()->themes : '';
+			$compat = null;
 		}
+
 		$contributors = $compat ? $compat->get_contributors( $slug ) : array();
 
 		return $contributors && in_array( $user_nicename, $contributors );

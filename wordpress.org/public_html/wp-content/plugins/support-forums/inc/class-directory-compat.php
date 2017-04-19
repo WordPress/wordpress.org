@@ -837,10 +837,11 @@ abstract class Directory_Compat {
 		if ( ! $authors ) {
 
 			if ( $this->compat() == 'theme' ) {
-				$theme = $this->theme;
-				$author = get_user_by( 'id', $this->theme->post_author );
+				$theme = $this->get_object( $slug );
+				$author = get_user_by( 'id', $theme->post_author );
 				$authors = array( $author->user_nicename );
 			} else {
+				$plugin = $this->get_object( $slug );
 				$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
 				// Note: Intentionally not considering posts of 'plugin' post_type with
 				// 'post_author' matching this author because the field only relates to
@@ -852,7 +853,7 @@ abstract class Directory_Compat {
 					 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
 					 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
 					 WHERE tt.taxonomy = 'plugin_committers' AND tr.object_id = %d",
-					 $this->plugin->ID
+					 $plugin->ID
 				) );
 			}
 
@@ -879,6 +880,7 @@ abstract class Directory_Compat {
 		$cache_group = $this->compat() . '-contributors-slugs';
 		$contributors = wp_cache_get( $cache_key, $cache_group );
 		if ( ! $contributors ) {
+			$plugin = $this->get_object( $slug );
 			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
 			$contributors = $wpdb->get_col( $wpdb->prepare(
 				"SELECT slug
@@ -886,7 +888,7 @@ abstract class Directory_Compat {
 				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
 				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
 				 WHERE tt.taxonomy = 'plugin_contributors' AND tr.object_id = %d",
-				 $this->plugin->ID
+				 $plugin->ID
 			) );
 
 			wp_cache_set( $cache_key, $contributors, $cache_group, HOUR_IN_SECONDS );
