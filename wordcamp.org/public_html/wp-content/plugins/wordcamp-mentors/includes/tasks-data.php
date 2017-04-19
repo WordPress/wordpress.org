@@ -613,6 +613,17 @@ function handle_tasks_reset() {
 add_action( 'admin_post_' . Mentors\PREFIX . '-tasks-reset', __NAMESPACE__ . '\handle_tasks_reset' );
 
 /**
+ * Provision newly-created WordCamp sites with data for the Planning Checklist.
+ *
+ * @return void
+ */
+function provision_new_site() {
+	_reset_tasks();
+}
+
+add_action( 'wcpt_configure_new_site', __NAMESPACE__ . '\provision_new_site' );
+
+/**
  * Reset the list of task posts and their related taxonomy terms.
  *
  * @access private
