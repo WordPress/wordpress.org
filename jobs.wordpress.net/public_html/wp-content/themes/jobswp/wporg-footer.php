@@ -4,7 +4,7 @@
 			<li><a href="https://wordpress.org/about/" title="An introduction to the WordPress project">About</a></li>
 			<li><a href="https://wordpress.org/news/" title="News and Updates">Blog</a></li>
 			<li><a href="https://wordpress.org/hosting/" title="Recommended web hosting providers">Hosting</a></li>
-			<li><a href="http://jobs.wordpress.net/" title="Find or post WordPress jobs">Jobs</a></li>
+			<li><a href="https://jobs.wordpress.net/" title="Find or post WordPress jobs">Jobs</a></li>
 		</ul>
 
 		<ul>
@@ -29,8 +29,8 @@
 		</ul>
 
 		<ul>
-			<li><a href="http://wordpress.com/?ref=wporg-footer" title="Hassle-free WordPress hosting">WordPress.com</a></li>
-			<li><a href="http://ma.tt/" title="Co-founder of WordPress, an example of what WordPress can do">Matt</a></li>
+			<li><a href="https://wordpress.com/?ref=wporg-footer" title="Hassle-free WordPress hosting">WordPress.com</a></li>
+			<li><a href="https://ma.tt/" title="Co-founder of WordPress, an example of what WordPress can do">Matt</a></li>
 			<li><a href="https://wordpress.org/about/privacy/" title="WordPress.org Privacy Policy">Privacy</a></li>
 			<li><a href="https://wordpress.org/about/license/" title="WordPress is open source software">License / GPLv2</a></li>
 		</ul>

@@ -39,7 +39,7 @@
 	<div id="subhead">
 		<div class="container">
 			<div class="grid_3 wporg-link" >
-				<a href="http://wordpress.org" title="<?php esc_attr_e( 'Return to WordPress.org', 'jobswp' ); ?>">&laquo; Return to WordPress.org</a>
+				<a href="https://wordpress.org" title="<?php esc_attr_e( 'Return to WordPress.org', 'jobswp' ); ?>">&laquo; Return to WordPress.org</a>
 			</div>
 			<div class="grid_9">
 				<?php get_search_form(); ?>
