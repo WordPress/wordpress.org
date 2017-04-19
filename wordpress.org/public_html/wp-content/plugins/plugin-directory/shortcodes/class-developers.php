@@ -30,13 +30,27 @@ class Developers {
 		$output .= ob_get_clean();
 		$output .= '</div>';
 
-		$locales = Plugin_I18n::instance()->get_locales();
-		$output .= '<div class="plugin-development"><p>';
+		$output .= '<div class="plugin-development">';
 
+		$locales = Plugin_I18n::instance()->get_locales();
 		if ( ! empty( $locales ) ) {
-			$locales_list = implode( ', ', array_map( function( $locale ) use ( $slug ) {
-				return sprintf( '<a href="%1$s">%2$s</a>', esc_url( "{$locale->locale}.wordpress.org/plugins/{$slug}/" ), $locale->name );
-			}, $locales ) );
+			$output .= '<p>';
+
+			$locale_names = wp_list_pluck( $locales, 'name', 'wp_locale' );
+			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
+
+			$sites = get_sites( [
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'public'     => 1,
+				'path'       => '/',
+				'locale__in' => $wp_locales,
+				'number'     => '',
+			] );
+
+			$locales_list = implode( ', ', array_map( function( $site ) use ( $slug, $locale_names ) {
+				return sprintf( '<a href="%1$s">%2$s</a>', esc_url( "{$site->home}/plugins/{$slug}/" ), $locale_names[ $site->locale ] );
+			}, $sites ) );
+
 			/* Translators: 1: Plugin name; 2: Number of locales; 3: List of locales; */
 			$output .= sprintf( '%1$s has been translated into these %2$d locales: %3$s.', $title, count( $locales ), $locales_list ) . ' ';
 			$output .= sprintf(
@@ -44,9 +58,8 @@ class Developers {
 				__( 'Thank you to <a href="%s">the translators</a> for their contributions.', 'wporg-plugins' ),
 				esc_url( "https://translate.wordpress.org/projects/wp-plugins/{$slug}/contributors" )
 			);
-			$output .= '<br />';
+			$output .= '</p>';
 		}
-		$output .= '</p>';
 
 		/* Translators: 1: GlotPress URL; 2: Plugin name; */
 		$output .= '<p>' . sprintf(
