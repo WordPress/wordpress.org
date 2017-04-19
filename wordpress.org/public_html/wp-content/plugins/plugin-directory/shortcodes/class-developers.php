@@ -17,9 +17,12 @@ class Developers {
 		$post   = get_post();
 		$slug   = $post->post_name;
 		$title  = get_the_title( $post );
-		$output = '<div class="plugin-contributors"><p>' . sprintf(
+
+		$output = '<div class="plugin-contributors">';
+
+		$output .= '<p>' . sprintf(
 			/* translators: %s: plugin name */
-			__( '%s is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ),
+			__( '&#8220;%s&#8221; is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ),
 			$title
 		) . '</p>';
 
@@ -88,7 +91,7 @@ class Developers {
 
 		/* translators: 1: GlotPress URL, 2: plugin name */
 		$output .= '<p>' . sprintf(
-			__( '<a href="%1$s">Translate %2$s into your language.</a>', 'wporg-plugins' ),
+			__( '<a href="%1$s">Translate &#8220;%2$s&#8221; into your language.</a>', 'wporg-plugins' ),
 			esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $slug ),
 			$title
 		) . '</p>';
@@ -104,7 +107,7 @@ class Developers {
 			), home_url( "wp-json/plugins/v1/plugin/{$slug}/commit-subscription" ) ) );
 
 			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL; 4: RSS URL; 5: email subscription UR; */
+				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: RSS URL, 5: email subscription URL */
 				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">email</a> or <a href="%5$s">RSS</a>.', 'wporg-plugins' ),
 				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
 				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
@@ -114,7 +117,7 @@ class Developers {
 			) . '</p>';
 		} else {
 			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL; 2: development log URL, 3: RSS URL */
+				/* translators: 1: Trac URL, 2: development log URL, 3: RSS URL */
 				__( '<a href="%1$s">Browse the code</a> or subscribe to the <a href="%2$s">development log</a> by <a href="%3$s">RSS</a>.', 'wporg-plugins' ),
 				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
 				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
