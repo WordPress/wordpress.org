@@ -143,7 +143,11 @@ class WPORG_Themes_Upload {
 
 		// Do not allow themes with WordPress and Theme in the theme name.
 		if ( false !== strpos( $this->theme_slug, 'wordpress' ) || false !== strpos( $this->theme_slug, 'theme' ) ) {
-			return __( 'You cannot use WordPress or theme in your theme name.', 'wporg-themes' );
+			/* translators: 1: 'WordPress', 2: 'theme' */
+			return sprintf( __( 'You cannot use %1$s or %2$s in your theme name.', 'wporg-themes' ),
+				'WordPress',
+				'theme'
+			);
 		}
 
 		// Populate author.
