@@ -697,7 +697,7 @@ function _reset_tasks() {
 
 	if ( in_array( false, $results, true ) || ! empty( $errors ) ) {
 		foreach ( $errors as $error ) {
-			Logger\log( 'task_error', compact( $error->get_error_code(), $error->get_error_message() ) );
+			Logger\log( 'task_error', $error );
 		}
 
 		return 'reset-errors';
