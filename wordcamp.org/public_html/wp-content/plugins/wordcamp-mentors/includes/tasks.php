@@ -80,43 +80,21 @@ function register_cpt() {
 		'exclude_from_search'   => true,
 		'publicly_queryable'    => false,
 		'rewrite'               => false,
-		'capability_type'       => 'task',
+		'capabilities' => array(
+			'edit_post'          => Mentors\ORGANIZER_CAP,
+			'read_post'          => Mentors\ORGANIZER_CAP,
+			'delete_post'        => Mentors\MENTOR_CAP,
+			'edit_posts'         => Mentors\ORGANIZER_CAP,
+			'edit_others_posts'  => Mentors\ORGANIZER_CAP,
+			'publish_posts'      => Mentors\MENTOR_CAP,
+			'read_private_posts' => Mentors\MENTOR_CAP,
+			'create_posts'       => Mentors\ORGANIZER_CAP,
+		),
 		'show_in_rest'          => true,
 		'rest_controller_class' => __NAMESPACE__ . '\Controller',
 	);
 
 	register_post_type( Mentors\PREFIX . '_task', $args );
-
-	add_filter( 'map_meta_cap', __NAMESPACE__ . '\map_task_caps', 10, 2 );
-}
-
-/**
- * Map CPT capabilities.
- *
- * @since 1.0.0
- *
- * @param array  $caps The user's actual capabilities.
- * @param string $cap  Capability name.
- *
- * @return array
- */
-function map_task_caps( $caps, $cap ) {
-	switch ( $cap ) {
-		case 'edit_task' :
-		case 'edit_tasks' :
-		case 'edit_others_tasks' :
-		case 'read_task' :
-			$caps[] = Mentors\ORGANIZER_CAP;
-			break;
-
-		case 'read_private_tasks' :
-		case 'publish_tasks' :
-		case 'delete_task' :
-			$caps[] = Mentors\MENTOR_CAP;
-			break;
-	}
-
-	return $caps;
 }
 
 /**
