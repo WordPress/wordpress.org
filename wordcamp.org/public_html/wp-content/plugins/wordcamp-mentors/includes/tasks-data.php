@@ -9,6 +9,7 @@ namespace WordCamp\Mentors\Tasks;
 defined( 'WPINC' ) || die();
 
 use WordCamp\Mentors;
+use WordCamp\Logger;
 
 /**
  * Define the task categories for the Planning Checklist.
@@ -680,13 +681,25 @@ function _reset_tasks() {
 			),
 		);
 
-		$post_id = wp_insert_post( $args );
+		$post_id = wp_insert_post( $args, true );
+
+		if ( is_wp_error( $post_id ) ) {
+			$results[] = $post_id;
+			continue;
+		}
 
 		$results[] = wp_set_object_terms( $post_id, $data['cat'], Mentors\PREFIX . '_task_category' );
 	}
 
-	if ( in_array( false, $results, true ) ||
-	     ! empty( array_filter( $results, function( $i ) { return $i instanceof \WP_Error; } ) ) ) {
+	$errors = array_filter( $results, function( $i ) {
+		return $i instanceof \WP_Error;
+	} );
+
+	if ( in_array( false, $results, true ) || ! empty( $errors ) ) {
+		foreach ( $errors as $error ) {
+			Logger\log( 'task_error', compact( $error->get_error_code(), $error->get_error_message() ) );
+		}
+
 		return 'reset-errors';
 	}
 
