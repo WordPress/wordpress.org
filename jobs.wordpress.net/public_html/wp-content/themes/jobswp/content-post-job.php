@@ -132,6 +132,7 @@
 				<li><?php _e( 'You have read the <a href="%s">FAQ</a> and understand everything listed, especially pertaining to what is unacceptable for a job posting.', 'jobswp' ); ?></li>
 				<li><?php _e( 'If you provided a contact email address as your method of contact for job seekers, that email address will be made publicly available and you will likely receive a lot of email.', 'jobswp' );?></li>
 				<li><?php _e( 'Upon successful submission, you will not be able to make any edits. Proofread everything again to make sure it&#8217;s what you want.', 'jobswp' ); ?></li>
+				<li><?php _e( 'It rests on you to vet applicants in whatever manner you see fit. We make absolutely no claims or guarantees as to the identity, capabilities, or reliability of applicants. <strong>Hire at your own risk.</strong>', 'jobswp' ); ?></li>
 				<li><?php _e( 'Upon successful submission, you will be immediately presented with a job token. <strong>MAKE NOTE OF THE TOKEN</strong>. It is your only means of removing the job from the site in a <em>timely</em> fashion.', 'jobswp' ); ?></li>
 			</ul>
 			<p>
