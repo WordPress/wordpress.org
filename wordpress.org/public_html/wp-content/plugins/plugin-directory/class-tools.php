@@ -34,7 +34,7 @@ class Tools {
 	}
 
 	/**
-	 * Returns the two latest reviews of a specific plugin.
+	 * Returns the latest reviews of a specific plugin.
 	 *
 	 * @static
 	 * @global \wpdb $wpdb WordPress database abstraction object.
@@ -44,7 +44,7 @@ class Tools {
 	 * @param string $plugin_slug The plugin slug.
 	 * @return array|false
 	 */
-	public static function get_plugin_reviews( $plugin_slug, $number = 2 ) {
+	public static function get_plugin_reviews( $plugin_slug, $number = 6 ) {
 		$number = absint( $number );
 		if ( $number < 1 || $number > 100 ) {
 			$number = 2;
