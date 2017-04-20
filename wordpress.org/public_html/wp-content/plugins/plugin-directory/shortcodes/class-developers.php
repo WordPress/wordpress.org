@@ -89,11 +89,13 @@ class Developers {
 			$output .= '</p>';
 		}
 
-		/* translators: 1: GlotPress URL, 2: plugin name */
-		$output .= '<p>' . sprintf(
-			__( '<a href="%1$s">Translate &#8220;%2$s&#8221; into your language.</a>', 'wporg-plugins' ),
+		$output .= '<p>' . sprintf( '<a href="%1$s">%2$s</a>',
 			esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $slug ),
-			$title
+			sprintf(
+				/* translators: %s: plugin name */
+				__( 'Translate &#8220;%s&#8221; into your language.', 'wporg-plugins' ),
+				$title
+			)
 		) . '</p>';
 
 
