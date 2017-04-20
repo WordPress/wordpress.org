@@ -1,13 +1,13 @@
 <?php
 /**
- * Template Name: Page with a Forums Sidebar
+ * Template Name: Full-width Page
  *
  * @package WPBBP
  */
 
 get_header(); ?>
 
-	<main id="main" class="site-main page-forums-sidebar" role="main">
+	<main id="main" class="site-main page-full-width" role="main">
 
 		<?php
 		while ( have_posts() ) : the_post();
@@ -16,7 +16,7 @@ get_header(); ?>
 		endwhile; // End of the loop.
 		?>
 
-		<?php get_sidebar(); ?>
-	</main>
+	</main><!-- #main -->
 
-<?php get_footer(); ?>
+<?php
+get_footer();

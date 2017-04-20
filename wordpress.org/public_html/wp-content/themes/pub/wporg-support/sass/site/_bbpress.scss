@@ -72,7 +72,57 @@ section {
 }
 
 
+.bbpress,
+.page-template-page-forums-sidebar {
+	main#main {
+		.entry-content,
+		.entry-meta {
+			padding: 0;
+
+			@media(min-width:568px) {
+				padding: 0 ms(4);
+			}
+		}
+
+		.entry-header .entry-title,
+		.entry-content .container {
+			padding: 0;
+		}
+
+		> .entry-content,
+		> article {
+			max-width: 48rem;
+
+			@media screen and ( min-width: $ms-breakpoint ) {
+				float: left;
+				padding: 0; 
+				width: 65%;
+			}
+		}
+
+		@media screen and ( min-width: $ms-breakpoint ) {
+			.entry-content,
+			.entry-meta {
+				padding-left: 0;
+				padding-right: 0;
+			}
+
+			.entry-meta {
+				float: right;
+				width: 30%;
+			}
+		}
+	}
+}
+
 .bbpress {
+	main#main {
+		margin-top: 2rem;
+		padding: 0 10px 10px;
+
+		@extend .clear;
+	}
+
 	#bbpress-forums {
 
 		div.bbp-template-notice {

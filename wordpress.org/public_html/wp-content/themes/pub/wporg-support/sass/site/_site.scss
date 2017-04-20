@@ -5,50 +5,6 @@ body, #pagebody {
 	font-size: ms(0);
 }
 
-main#main {
-	margin-top: 2rem;
-	padding: 0 10px 10px;
-	font-size: ms(-2);
-
-	@extend .clear;
-}
-
-.bbpress main#main,
-.page-template-page-forums-sidebar main#main {
-
-	.entry-content,
-	.entry-meta {
-		padding: 0;
-
-		@media(min-width:568px) {
-			padding: 0 ms(4);
-		}
-	}
-
-	> .entry-content {
-		max-width: 48rem;
-
-		@media screen and ( min-width: $ms-breakpoint ) {
-			float: left;
-			padding: 0; 
-			width: 65%;
-		}
-	}
-
-	@media screen and ( min-width: $ms-breakpoint ) {
-		.entry-content,
-		.entry-meta {
-			padding-left: 0;
-			padding-right: 0;
-		}
-
-		.entry-meta {
-			float: right;
-			width: 30%;
-		}
-	}
-}
-
 /*--------------------------------------------------------------
 # .site-header 
 --------------------------------------------------------------*/
@@ -307,8 +263,8 @@ main#main {
 		}
 	}
 
-	.page & {
-		padding-top: 0;
+	#page & {
+		padding: 0 10px ms(10);
 	}
 
 	.page-header {
@@ -539,8 +495,44 @@ main#main {
 			}
 		}
 	}
+
+	.submenu {
+		margin-left: 0;
+	}
+
+	.submenu li {
+		border-bottom: 1px solid #dedede;
+		font-size: 12px;
+		line-height: 18px;
+		padding: 5px 0;
+	}
+
+	.submenu li.current {
+		font-weight: bold;
+	}
+
+	.submenu li:last-child {
+		border-bottom: 0;
+	}
+
+	.submenu li ul {
+		margin-left: 16px;
+	}
+
+	.submenu li ul li {
+		border: none;
+		line-height: 1.4em;
+		padding-bottom: 2px;
+	}
 }
 
+.page-template-page-full-width {
+	.entry-header .entry-title,
+	.entry-content section .container {
+		max-width: 100%;
+		padding: 0;
+	}
+}
 
 /*--------------------------------------------------------------
 # 404 Error page

@@ -1911,10 +1911,10 @@ p a:hover {
 /*--------------------------------------------------------------
 # Clearings
 --------------------------------------------------------------*/
-.clear:before, main#main:before, .three-up:before, .bbp-view .review-ratings:before,
+.clear:before, .three-up:before, .bbpress main#main:before, .bbp-view .review-ratings:before,
 .clear:after,
-main#main:after,
 .three-up:after,
+.bbpress main#main:after,
 .bbp-view .review-ratings:after,
 .entry-content:before,
 .entry-content:after,
@@ -1931,7 +1931,7 @@ main#main:after,
 	table-layout: fixed;
 }
 
-.clear:after, main#main:after, .three-up:after, .bbp-view .review-ratings:after,
+.clear:after, .three-up:after, .bbpress main#main:after, .bbp-view .review-ratings:after,
 .entry-content:after,
 .comment-content:after,
 .site-header:after,
@@ -2001,57 +2001,6 @@ main#main:after,
 --------------------------------------------------------------*/
 body, #pagebody {
 	font-size: 1rem;
-}
-
-main#main {
-	margin-top: 2rem;
-	padding: 0 10px 10px;
-	font-size: 0.8rem;
-}
-
-.bbpress main#main .entry-content,
-.bbpress main#main .entry-meta,
-.page-template-page-forums-sidebar main#main .entry-content,
-.page-template-page-forums-sidebar main#main .entry-meta {
-	padding: 0;
-}
-
-@media (min-width: 568px) {
-	.bbpress main#main .entry-content,
-	.bbpress main#main .entry-meta,
-	.page-template-page-forums-sidebar main#main .entry-content,
-	.page-template-page-forums-sidebar main#main .entry-meta {
-		padding: 0 1.5625rem;
-	}
-}
-
-.bbpress main#main > .entry-content,
-.page-template-page-forums-sidebar main#main > .entry-content {
-	max-width: 48rem;
-}
-
-@media screen and (min-width: 48em) {
-	.bbpress main#main > .entry-content,
-	.page-template-page-forums-sidebar main#main > .entry-content {
-		float: right;
-		padding: 0;
-		width: 65%;
-	}
-}
-
-@media screen and (min-width: 48em) {
-	.bbpress main#main .entry-content,
-	.bbpress main#main .entry-meta,
-	.page-template-page-forums-sidebar main#main .entry-content,
-	.page-template-page-forums-sidebar main#main .entry-meta {
-		padding-right: 0;
-		padding-left: 0;
-	}
-	.bbpress main#main .entry-meta,
-	.page-template-page-forums-sidebar main#main .entry-meta {
-		float: left;
-		width: 30%;
-	}
 }
 
 /*--------------------------------------------------------------
@@ -2296,8 +2245,8 @@ main#main {
 	}
 }
 
-.page .site-main {
-	padding-top: 0;
+#page .site-main {
+	padding: 0 10px 3.0517578125rem;
 }
 
 .site-main .page-header h1 {
@@ -2516,6 +2465,41 @@ main#main {
 	border-top: 2px solid #eee;
 }
 
+.page .submenu {
+	margin-right: 0;
+}
+
+.page .submenu li {
+	border-bottom: 1px solid #dedede;
+	font-size: 12px;
+	line-height: 18px;
+	padding: 5px 0;
+}
+
+.page .submenu li.current {
+	font-weight: bold;
+}
+
+.page .submenu li:last-child {
+	border-bottom: 0;
+}
+
+.page .submenu li ul {
+	margin-right: 16px;
+}
+
+.page .submenu li ul li {
+	border: none;
+	line-height: 1.4em;
+	padding-bottom: 2px;
+}
+
+.page-template-page-full-width .entry-header .entry-title,
+.page-template-page-full-width .entry-content section .container {
+	max-width: 100%;
+	padding: 0;
+}
+
 /*--------------------------------------------------------------
 # 404 Error page
 --------------------------------------------------------------*/
@@ -2588,6 +2572,67 @@ section {
 	.three-up.bbp-forums > div:nth-child(3n) {
 		margin-left: 0;
 	}
+}
+
+.bbpress main#main .entry-content,
+.bbpress main#main .entry-meta,
+.page-template-page-forums-sidebar main#main .entry-content,
+.page-template-page-forums-sidebar main#main .entry-meta {
+	padding: 0;
+}
+
+@media (min-width: 568px) {
+	.bbpress main#main .entry-content,
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-content,
+	.page-template-page-forums-sidebar main#main .entry-meta {
+		padding: 0 1.5625rem;
+	}
+}
+
+.bbpress main#main .entry-header .entry-title,
+.bbpress main#main .entry-content .container,
+.page-template-page-forums-sidebar main#main .entry-header .entry-title,
+.page-template-page-forums-sidebar main#main .entry-content .container {
+	padding: 0;
+}
+
+.bbpress main#main > .entry-content,
+.bbpress main#main > article,
+.page-template-page-forums-sidebar main#main > .entry-content,
+.page-template-page-forums-sidebar main#main > article {
+	max-width: 48rem;
+}
+
+@media screen and (min-width: 48em) {
+	.bbpress main#main > .entry-content,
+	.bbpress main#main > article,
+	.page-template-page-forums-sidebar main#main > .entry-content,
+	.page-template-page-forums-sidebar main#main > article {
+		float: right;
+		padding: 0;
+		width: 65%;
+	}
+}
+
+@media screen and (min-width: 48em) {
+	.bbpress main#main .entry-content,
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-content,
+	.page-template-page-forums-sidebar main#main .entry-meta {
+		padding-right: 0;
+		padding-left: 0;
+	}
+	.bbpress main#main .entry-meta,
+	.page-template-page-forums-sidebar main#main .entry-meta {
+		float: left;
+		width: 30%;
+	}
+}
+
+.bbpress main#main {
+	margin-top: 2rem;
+	padding: 0 10px 10px;
 }
 
 .bbpress #bbpress-forums div.bbp-template-notice {
