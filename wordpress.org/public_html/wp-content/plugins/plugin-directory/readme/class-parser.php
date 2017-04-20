@@ -350,7 +350,7 @@ class Parser {
 				),
 				$this->faq
 			);
-			unset( $this->sections['installation'] );
+			//unset( $this->sections['installation'] );
 			$this->sections['faq'] = ''; // Ensure it's set as per faq section above.
 		}
 
