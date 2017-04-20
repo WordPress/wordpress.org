@@ -19,7 +19,7 @@ class Plugins_Info_API {
 
 	function __construct( $format = 'json' ) {
 		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
-			$this->jsonp = $format[1];
+			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
 			$format = 'jsonp';
 		}
 		$this->format = $format;
