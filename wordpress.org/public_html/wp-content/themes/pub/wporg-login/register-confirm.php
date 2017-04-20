@@ -19,7 +19,10 @@ if (
 	wp_set_current_user( $user->ID );
 	list( $reset_time, $hashed_activation_key ) = explode( ':', $user->user_activation_key, 2 );
 
-	$wp_hasher = new PasswordHash( 8, true );
+	if ( empty( $wp_hasher ) ) {
+		require_once ABSPATH . WPINC . '/class-phpass.php';
+		$wp_hasher = new PasswordHash( 8, true );
+	}
 	$can_access = $wp_hasher->CheckPassword( $confirm_key, $hashed_activation_key );
 
 	// Keys are only valid for 7 days (or until used)

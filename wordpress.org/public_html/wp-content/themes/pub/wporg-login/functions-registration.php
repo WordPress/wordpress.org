@@ -44,6 +44,7 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 	// Insert a hashed activation key
 	$activation_key = wp_generate_password( 24, false, false );
 	if ( empty( $wp_hasher ) ) {
+		require_once ABSPATH . WPINC . '/class-phpass.php';
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 	$hashed_activation_key = time() . ':' . $wp_hasher->HashPassword( $activation_key );
