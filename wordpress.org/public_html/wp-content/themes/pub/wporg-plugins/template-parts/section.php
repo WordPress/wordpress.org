@@ -12,7 +12,13 @@ global $section, $section_slug, $section_content, $section_read_more;
 ?>
 
 <div
-	id="<?php echo esc_attr( $section_slug ); ?>"
+<?php if ( !in_array ( $section_slug, array( 'screenshots','faq' ) ) ) { 
+	$prefix = 'tab-'; 
+} else {
+	$prefix = '';
+}
+?>
+	id="<?php echo esc_attr( $prefix.$section_slug ); ?>"
 	class="plugin-<?php echo esc_attr( $section_slug ); ?> section <?php if ( $section_read_more ) { echo 'read-more'; } ?>"
 >
 	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo $section['title']; ?></h2>
@@ -22,7 +28,7 @@ global $section, $section_slug, $section_content, $section_read_more;
 <button
 	type="button"
 	class="button-link section-toggle"
-	aria-controls="<?php echo esc_attr( $section_slug ); ?>"
+	aria-controls="<?php echo esc_attr( $prefix.$section_slug ); ?>"
 	aria-describedby="<?php echo esc_attr( $section_slug . '-header' ); ?>"
 	aria-expanded="false"
 	data-show-less="<?php esc_attr_e( 'Show less', 'wporg-plugins' ); ?>"

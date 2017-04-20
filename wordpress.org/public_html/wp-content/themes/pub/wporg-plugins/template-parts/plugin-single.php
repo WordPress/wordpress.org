@@ -117,6 +117,21 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 		?></span>
 	</header><!-- .entry-header -->
 
+<?php if ( ! get_query_var( 'plugin_advanced' ) ) { ?>
+	<span id="description"></span>
+	<span id="reviews"></span>
+	<span id="installation"></span>
+	<span id="developers"></span>
+	<ul class="tabs clear">
+		<li id="tablink-description"><a href='#description'><?php _e( 'Details', 'wporg-plugins' ); ?></a></li>
+		<li id="tablink-reviews"><a href='#reviews'><?php _e( 'Reviews', 'wporg-plugins' ); ?></a></li>
+<?php if ( isset( $content[ 'installation' ] ) ) { ?>
+		<li id="tablink-installation"><a href='#installation'><?php _e( 'Installation', 'wporg-plugins' ); ?></a></li>
+<?php } ?>
+		<li id="tablink-support"><a href='https://wordpress.org/support/plugin/<?php echo $post->post_name; ?>'><?php _e( 'Support', 'wporg-plugins' ); ?></a></li>
+		<li id="tablink-developers"><a href='#developers'><?php _e( 'Development', 'wporg-plugins' ); ?></a></li>
+    </ul>
+<?php } ?>
 	<div class="entry-content">
 		<?php
 		if ( get_query_var( 'plugin_advanced' ) ) :
@@ -124,7 +139,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 		else:
 			$plugin_sections = Template::get_plugin_sections();
 
-			foreach ( array( 'description', 'screenshots', 'faq', 'reviews', 'changelog', 'developers' ) as $section_slug ) :
+			foreach ( array( 'description', 'screenshots', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
 				if ( ! isset( $content[ $section_slug ] ) ) {
 					continue;
 				}
@@ -137,7 +152,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				$section = wp_list_filter( $plugin_sections, array( 'slug' => $section_slug ) );
 				$section = array_pop( $section );
 
-				$section_no_read_mores = array( 'screenshots', 'reviews' );
+				$section_no_read_mores = array( 'description', 'screenshots', 'installation', 'faq', 'reviews' );
 				// If the FAQ section is the newer `<dl>` form, no need to do read-more for it.
 				if ( false !== stripos( $section_content, '<dl>' ) ) {
 					$section_no_read_mores[] = 'faq';

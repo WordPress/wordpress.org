@@ -18,6 +18,10 @@
 		strong {
 			float: right;
 		}
+		
+		&:first-child {
+			border-top: 0;
+		}
 	}
 
 	.tags {
