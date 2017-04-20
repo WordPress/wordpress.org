@@ -11,7 +11,9 @@
 
 	li {
 		border-top: 1px solid $color__border;
+		display: inline-block;
 		padding: 0.5rem 0;
+		width: 100%;
 
 		strong {
 			float: right;
