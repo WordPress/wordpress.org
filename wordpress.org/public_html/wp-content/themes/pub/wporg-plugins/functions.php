@@ -57,7 +57,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", array(), '20170407a' );
+	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", array(), '20170420' );
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -95,7 +95,7 @@ function scripts() {
 
 	// React is currently only used on detail pages
 	if ( is_single() ) {
-		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), '20170329a', true );
+		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), '20170420', true );
 		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
 			'endpoint' => untrailingslashit( rest_url() ), // 'https://wordpress.org/plugins-wp/wp-json',
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
