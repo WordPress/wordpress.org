@@ -9,6 +9,7 @@ class Plugins_Info_API {
 	const CACHE_EXPIRY = API_CACHE_EXPIRY;
 
 	protected $format = 'json';
+	protected $jsonp  = false;
 	protected $formats = array(
 		'jsonp' => 'application/javascript',
 		'json'  => 'application/json',
@@ -19,7 +20,7 @@ class Plugins_Info_API {
 	function __construct( $format = 'json' ) {
 		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
 			$this->jsonp = $format[1];
-			$format = 'json';
+			$format = 'jsonp';
 		}
 		$this->format = $format;
 	}
