@@ -88,7 +88,7 @@ class Upload_Handler {
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
 			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-			return sprintf( __( 'Sorry, the plugin name %1%s is reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+			return sprintf( __( 'Sorry, the plugin name %1$s is reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
 			);
