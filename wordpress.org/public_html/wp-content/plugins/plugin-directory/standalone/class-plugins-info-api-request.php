@@ -30,6 +30,7 @@ class Plugins_Info_API_Request {
 		'short_description' => false,
 		'tags'              => false,
 		'tested'            => false,
+		'stable_tag'        => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
