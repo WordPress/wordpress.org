@@ -75,7 +75,7 @@ class Upload_Handler {
 		if ( empty( $this->plugin['Name'] ) ) {
 			$error = __( 'The plugin has no name.', 'wporg-plugins' );
 
-			/* translators: 1: comment header line, 2: Codex URL */
+			/* translators: 1: plugin header line, 2: Codex URL */
 			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Plugin Name:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
@@ -87,9 +87,10 @@ class Upload_Handler {
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
-			/* translators: %s: plugin slug */
-			return sprintf( __( 'Sorry, the plugin name %s is reserved for use by WordPress. Please change the name of your plugin and upload it again.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>'
+			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+			return sprintf( __( 'Sorry, the plugin name %1%s is reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'<code>Plugin Name:</code>'
 			);
 		}
 
@@ -97,24 +98,26 @@ class Upload_Handler {
 
 		// Is there already a plugin by a different author?
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
-			/* translators: %s: plugin slug */
-			return sprintf( __( 'There is already a plugin called %s by a different author. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>'
+			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'<code>Plugin Name:</code>'
 			);
 		}
 
 		// Check the plugin can accept uploads (New submissions, or pending further review).
 		if ( $plugin_post && ! in_array( $plugin_post->post_status, array( 'new', 'pending' ) ) ) {
-			/* translators: %s: plugin slug */
-			return sprintf( __( 'There is already a plugin called %s. Please change the name of your plugin in the plugin header file and upload it again.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>'
+			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+			return sprintf( __( 'There is already a plugin called %1$s. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'<code>Plugin Name:</code>'
 			);
 		}
 
 		if ( ! $this->plugin['Description'] ) {
 			$error = __( 'The plugin has no description.', 'wporg-plugins' );
 
-			/* translators: 1: comment header line, 2: Codex URL */
+			/* translators: 1: plugin header line, 2: Codex URL */
 			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Description:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
@@ -124,7 +127,7 @@ class Upload_Handler {
 		if ( ! $this->plugin['Version'] ) {
 			$error = __( 'The plugin has no version.', 'wporg-plugins' );
 
-			/* translators: 1: comment header line, 2: Codex URL */
+			/* translators: 1: plugin header line, 2: Codex URL */
 			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Version:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
@@ -132,7 +135,7 @@ class Upload_Handler {
 		}
 
 		if ( preg_match( '|[^\d\.]|', $this->plugin['Version'] ) ) {
-			/* translators: %s: Version header */
+			/* translators: %s: 'Version:' */
 			return sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
 			);
