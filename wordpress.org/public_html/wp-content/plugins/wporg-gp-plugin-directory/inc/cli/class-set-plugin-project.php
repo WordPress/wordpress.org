@@ -270,7 +270,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 	 */
 	private function get_plugin_details( $slug ) {
 		$http_context = $this->get_http_context();
-		$json = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$slug}.json?fields=stable_tag", false, $http_context );
+		$json = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$slug}.json?fields=stable_tag,short_description", false, $http_context );
 
 		$details = $json && '{' == $json[0] ? json_decode( $json ) : null;
 
