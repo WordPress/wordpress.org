@@ -63,7 +63,7 @@ class Developers {
 			if ( 1 === $locales_count ) {
 				$output .= sprintf(
 					/* translators: 1: plugin name, 2: locale name */
-					__( '%1$s has been translated into %2$s.' ),
+					__( '&#8220;%1$s&#8221; has been translated into %2$s.' ),
 					$title,
 					$locales_list
 				) . ' ';
@@ -71,8 +71,8 @@ class Developers {
 				$output .= sprintf(
 					/* translators: 1: plugin name, 2: number of locales, 3: list of locales */
 					_n(
-						'%1$s has been translated into these %2$d locales: %3$s.',
-						'%1$s has been translated into these %2$d locales: %3$s.',
+						'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
+						'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
 						$locales_count
 					),
 					$title,
