@@ -334,6 +334,11 @@ class WordCamp_New_Site {
 
 		$meta = get_post_custom( $wordcamp_id );
 
+		$mentor = get_user_by( 'login', $meta['Mentor WordPress.org User Name'][0] );
+		if ( $mentor ) {
+			add_user_to_blog( get_wordcamp_site_id( $wordcamp ), $mentor->ID, 'administrator' );
+		}
+
 		switch_to_blog( $this->new_site_id );
 
 		add_filter( 'upload_dir', array( $this, '_fix_wc_upload_dir' ) );

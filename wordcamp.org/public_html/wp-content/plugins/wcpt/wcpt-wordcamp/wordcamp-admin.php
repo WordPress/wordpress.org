@@ -171,6 +171,12 @@ class WordCamp_Admin {
 			$this->update_venue_address( $post_id, $new_address );
 		}
 
+		// If the Mentor username changed, update the site
+		$mentor_username = $_POST[ wcpt_key_to_str( 'Mentor WordPress.org User Name', 'wcpt_' ) ];
+		if ( $mentor_username !== get_post_meta( $post_id, 'Mentor WordPress.org User Name', true ) ) {
+		    $this->add_mentor( $post, $mentor_username );
+        }
+
 		// Post meta keys
 		$wcpt_meta_keys = WordCamp_Admin::meta_keys();
 
@@ -326,6 +332,23 @@ class WordCamp_Admin {
 
 		return $values;
 	}
+
+	/**
+     * Add the Mentor as an administrator on the given site.
+     *
+	 * @param WP_Post $wordcamp        WordCamp post object.
+	 * @param string  $mentor_username Mentor's WP.org user login.
+	 */
+	protected function add_mentor( $wordcamp, $mentor_username ) {
+		$blog_id    = get_wordcamp_site_id( $wordcamp );
+	    $new_mentor = get_user_by( 'login', $mentor_username );
+
+		if ( ! $blog_id || ! $new_mentor ) {
+		    return;
+        }
+
+        add_user_to_blog( $blog_id, $new_mentor->ID, 'administrator' );
+    }
 
 	/**
 	 * meta_keys ()
