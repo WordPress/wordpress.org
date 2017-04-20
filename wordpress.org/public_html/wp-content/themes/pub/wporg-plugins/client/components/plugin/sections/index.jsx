@@ -8,13 +8,14 @@ import { localize } from 'i18n-calypso';
 export const Section = ( { content, slug, title, translate } ) => (
 	<div>
 		<div id={ slug } className={ `section read-more plugin-${ slug }` }>
-			<h2>{ title }</h2>
+			<h2 id={ `${ slug }-header` }>{ title }</h2>
 			<div dangerouslySetInnerHTML={ { __html: content } } />
 		</div>
 		<button
 			type="button"
 			className="button-link section-toggle"
 			aria-controls={ slug }
+			aria-describedby={ `${ slug }-header` }
 			aria-expanded="false"
 			data-show-less={ translate( 'Show less' ) }
 			data-read-more={ translate( 'Read more' ) }

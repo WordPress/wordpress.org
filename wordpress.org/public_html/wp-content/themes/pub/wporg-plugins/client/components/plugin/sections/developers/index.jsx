@@ -15,7 +15,7 @@ import { getPlugin } from 'state/selectors';
 export const Developers = ( { plugin, translate } ) => (
 	<div>
 		<div id="developers" className="section read-more plugin-developers">
-			<h2>{ translate( 'Contributors & Developers' ) }</h2>
+			<h2 id="developers-header">{ translate( 'Contributors & Developers' ) }</h2>
 			<p>
 				{ translate( 'This is open source software. The following people have contributed to this plugin.' ) }
 			</p>
@@ -36,7 +36,13 @@ export const Developers = ( { plugin, translate } ) => (
 				}
 			</p>
 		</div>
-		<button type="button" className="button-link section-toggle" aria-controls="developers" aria-expanded="false">
+		<button
+			type="button"
+			className="button-link section-toggle"
+			aria-controls="developers"
+			aria-describedby="developers-header"
+			aria-expanded="false"
+		>
 			{ translate( 'Read more' ) }
 		</button>
 	</div>
