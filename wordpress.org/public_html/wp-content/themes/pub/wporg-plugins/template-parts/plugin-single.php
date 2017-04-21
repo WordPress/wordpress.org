@@ -128,7 +128,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 <?php if ( isset( $content[ 'installation' ] ) ) { ?>
 		<li id="tablink-installation"><a href='#installation'><?php _e( 'Installation', 'wporg-plugins' ); ?></a></li>
 <?php } ?>
-		<li id="tablink-support"><a href='https://wordpress.org/support/plugin/<?php echo $post->post_name; ?>'><?php _e( 'Support', 'wporg-plugins' ); ?></a></li>
+		<li id="tablink-support"><a href='<?php echo Template::get_support_url(); ?>'><?php _e( 'Support', 'wporg-plugins' ); ?></a></li>
 		<li id="tablink-developers"><a href='#developers'><?php _e( 'Development', 'wporg-plugins' ); ?></a></li>
     </ul>
 <?php } ?>
