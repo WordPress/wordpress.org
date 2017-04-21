@@ -7,19 +7,105 @@ use WP_Query;
 
 class Markdown_Import {
 
+	private static $handbook_manifest = 'https://raw.githubusercontent.com/wp-cli/handbook/master/handbook-manifest.json';
 	private static $input_name = 'wporg-cli-markdown-source';
 	private static $meta_key = 'wporg_cli_markdown_source';
 	private static $nonce_name = 'wporg-cli-markdown-source-nonce';
 	private static $submit_name = 'wporg-cli-markdown-import';
 	private static $supported_post_types = array( 'handbook' );
+	private static $posts_per_page = 100;
 
 	/**
 	 * Register our cron task if it doesn't already exist
 	 */
 	public static function action_init() {
+		if ( ! wp_next_scheduled( 'wporg_cli_manifest_import' ) ) {
+			wp_schedule_event( time(), '15_minutes', 'wporg_cli_manifest_import' );
+		}
 		if ( ! wp_next_scheduled( 'wporg_cli_markdown_import' ) ) {
 			wp_schedule_event( time(), '15_minutes', 'wporg_cli_markdown_import' );
 		}
+	}
+
+	public static function action_wporg_cli_manifest_import() {
+		$response = wp_remote_get( self::$handbook_manifest );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return new WP_Error( 'invalid-http-code', 'Markdown source returned non-200 http code.' );
+		}
+		$manifest = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! $manifest ) {
+			return new WP_Error( 'invalid-manifest', 'Manifest did not unfurl properly.' );;
+		}
+		// Fetch all handbook posts for comparison
+		$q = new WP_Query( array(
+			'post_type'      => 'handbook',
+			'post_status'    => 'publish',
+			'posts_per_page' => self::$posts_per_page,
+		) );
+		$existing = $q->posts;
+		$created = 0;
+		foreach( $manifest as $doc ) {
+			// Already exists
+			if ( wp_filter_object_list( $existing, array( 'post_name' => $doc['slug'] ) ) ) {
+				continue;
+			}
+			$post_parent = null;
+			if ( ! empty( $doc['parent'] ) ) {
+				// Find the parent in the existing set
+				$parents = wp_filter_object_list( $existing, array( 'post_name' => $doc['parent'] ) );
+				if ( ! empty( $parents ) ) {
+					$parent = array_shift( $parents );
+				} else {
+					// Create the parent and add it to the stack
+					if ( isset( $manifest[ $doc['parent'] ] ) ) {
+						$parent_doc = $manifest[ $doc['parent'] ];
+						$parent = self::create_post_from_manifest_doc( $parent_doc );
+						if ( $parent ) {
+							$created++;
+							$existing[] = $parent;
+						} else {
+							continue;
+						}
+					} else {
+						continue;
+					}
+				}
+				$post_parent = $parent->ID;
+			}
+			$post = self::create_post_from_manifest_doc( $doc, $post_parent );
+			if ( $post ) {
+				$created++;
+				$existing[] = $post;
+			}
+		}
+		if ( class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::success( "Successfully created {$created} handbook pages." );
+		}
+	}
+
+	/**
+	 * Create a new handbook page from the manifest document
+	 */
+	private static function create_post_from_manifest_doc( $doc, $post_parent = null ) {
+		$post_data = array(
+			'post_type'   => 'handbook',
+			'post_status' => 'publish',
+			'post_parent' => $post_parent,
+			'post_title'  => $doc['title'], // Can contain slashes
+			'post_name'   => sanitize_title_with_dashes( $doc['slug'] ),
+		);
+		$post_data = wp_slash( $post_data );
+		$post_id = wp_insert_post( $post_data );
+		if ( ! $post_id ) {
+			return false;
+		}
+		if ( class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::log( "Created post {$post_id} for {$doc['title']}." );
+		}
+		update_post_meta( $post_id, self::$meta_key, esc_url_raw( $doc['markdown_source'] ) );
+		return get_post( $post_id );
 	}
 
 	public static function action_wporg_cli_markdown_import() {
@@ -27,7 +113,7 @@ class Markdown_Import {
 			'post_type'      => 'handbook',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
-			'posts_per_page' => 100,
+			'posts_per_page' => self::$posts_per_page,
 		) );
 		$ids = $q->posts;
 		$success = 0;
