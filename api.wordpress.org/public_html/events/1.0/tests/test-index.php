@@ -375,6 +375,21 @@ function get_location_test_cases() {
 			),
 		),
 
+		// The database only has 大阪市 ("Osaka-shi"), not 大阪 ("Osaka"), so an exact match will for 大阪 will fail
+		'city-endonym-ideographic-municipal-unit-asia' => array(
+			'input' => array(
+				'location_name' => '大阪',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'osaka',
+				'latitude'    => '34.694',
+				'longitude'   => '135.502',
+				'country'     => 'JP',
+			),
+		),
+
 		'city-endonym-europe' => array(
 			'input' => array(
 				'location_name' => 'Wien',

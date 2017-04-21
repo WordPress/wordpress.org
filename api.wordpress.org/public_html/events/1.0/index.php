@@ -229,10 +229,12 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
  * @param string $location_name
  * @param string $country
  * @param string $timezone
+ * @param string $mode          'exact' to only return exact matches from the database;
+ *                              'loose' to return any match. This has a high chance of false positives.
  *
  * @return stdClass|null
  */
-function guess_ideographic_location_from_geonames( $location_name, $country, $timezone ) {
+function guess_ideographic_location_from_geonames( $location_name, $country, $timezone, $mode = 'exact' ) {
 	global $wpdb;
 
 	$ideographic_countries            = get_ideographic_counties();
@@ -244,11 +246,14 @@ function guess_ideographic_location_from_geonames( $location_name, $country, $ti
 	 * appears in other rows, which happens sometimes.
 	 *
 	 * Because this will only match entries that are prefixed _and_ postfixed with a comma, it will never match the
-	 * first and last entries in the column. That's ok, though, because the first entry is always an airport code
-	 * in English, which will be matched by other functions. The last entry is often ideographic, so it'd be nice
+	 * first and last entries in the column. That's ok, though, because the first entry is often an airport code
+	 * in English, which is shorter than `ft_min_word_len` anyway. The last entry is often ideographic, so it'd be nice
 	 * to match it, but this is good enough for now.
 	 */
-	$escaped_location_name = sprintf( '%%,%s,%%', $wpdb->esc_like( $location_name ) );
+	$escaped_location_name = sprintf(
+		'loose' === $mode ? '%%%s%%' : '%%,%s,%%',
+		$wpdb->esc_like( $location_name )
+	);
 
 	/*
 	 * REPLACE() is used because sometimes the `alternatenames` column contains entries where the `asciiname` is
@@ -433,6 +438,26 @@ function get_location( $args = array() ) {
 				'latitude' => $guess->ip_latitude,
 				'longitude' => $guess->ip_longitude,
 				'country' => $guess->country_short,
+			);
+		}
+	}
+
+	/*
+	 * If all else fails for a non-ASCII request, cast a wide net and try to find something before giving up, even
+	 * if the chance of success if lower than normal. Returning false is guaranteed failure, so this improves things
+	 * even if it only works 10% of the time.
+	 *
+	 * This must be done as the very last thing before giving up, because the likelihood of false positives is high.
+	 */
+	if ( ! $location && isset( $args['location_name'] ) && 'ASCII' !== mb_detect_encoding( $args['location_name'] ) ) {
+		$guess = guess_ideographic_location_from_geonames( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose' );
+
+		if ( $guess ) {
+			$location = array(
+				'description' => $guess->name,
+				'latitude'    => $guess->latitude,
+				'longitude'   => $guess->longitude,
+				'country'     => $guess->country,
 			);
 		}
 	}
