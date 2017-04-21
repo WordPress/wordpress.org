@@ -246,6 +246,12 @@ class Markdown_Import {
 		// Strip YAML doc from the header
 		$markdown = preg_replace( '#^---(.+)---#Us', '', $markdown );
 
+		$title = null;
+		if ( preg_match( '/^#\s(.+)/', $markdown, $matches ) ) {
+			$title = $matches[1];
+			$markdown = preg_replace( '/^#\s(.+)/', '', $markdown );
+		}
+
 		// Transform to HTML and save the post
 		jetpack_require_lib( 'markdown' );
 		$parser = new \WPCom_GHF_Markdown_Parser;
@@ -254,6 +260,9 @@ class Markdown_Import {
 			'ID'           => $post_id,
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
 		);
+		if ( ! is_null( $title ) ) {
+			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
+		}
 		wp_update_post( $post_data );
 		return true;
 	}
