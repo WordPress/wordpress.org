@@ -400,6 +400,32 @@ class Template {
 	}
 
 	/**
+	 * Returns the URL to the plugin support forum.
+	 *
+	 * @static
+	 *
+	 * @param int|\WP_Post|null $post  Optional. Post ID or post object. Defaults to global $post.
+	 * @return string
+	 */
+	public static function get_support_url( $post = null ) {
+		$post = get_post( $post );
+
+		/*
+		* bbPress and BuddyPress get special treatment here.
+		* In the future we could open this up to all plugins that define a custom support URL.
+		*/
+		if ( 'buddypress' === $post->post_name ) {
+			$url = 'https://buddypress.org/support/';
+		} elseif ( 'bbpress' === $post->post_name ) {
+			$url = 'https://bbpress.org/forums/';
+		} else {
+			$url = 'https://wordpress.org/support/plugin/' . $post->post_name;
+		}
+
+		return $url;
+	}
+
+	/**
 	 * A helper method to create dashicon stars.
 	 *
 	 * @static

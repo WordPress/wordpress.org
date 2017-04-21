@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+use WordPressdotorg\Plugin_Directory\Template; 
 
 /**
  * A Widget to display support information about a plugin.
@@ -31,19 +32,11 @@ class Support extends \WP_Widget {
 		$threads     = get_post_meta( $post->ID, 'support_threads', true ) ?: 0;
 		$resolved    = get_post_meta( $post->ID, 'support_threads_resolved', true ) ?: 0;
 		$resolutions = (bool) $threads;
-		$support_url = 'https://wordpress.org/support/plugin/' . $post->post_name;
+		$support_url = Template::get_support_url();
 
-		/*
-		 * bbPress and BuddyPress get special treatment here.
-		 * In the future we could open this up to all plugins that define a custom support URL.
-		 */
-		if ( 'buddypress' === $post->post_name ) {
+		if ( false === strpos( $support_url, 'https://wordpress.org' ) ) { 
 			$resolutions = false;
-			$support_url = 'https://buddypress.org/support/';
-		} else if ( 'bbpress' === $post->post_name ) {
-			$resolutions = false;
-			$support_url = 'https://bbpress.org/forums/';
-		}
+		} 
 
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
@@ -57,7 +50,7 @@ class Support extends \WP_Widget {
 				</span>
 				<span class="counter-count">
 					<?php
-					/* Translators: 1: AMount of resolved threads; 2: Amount of total threads; */
+					/* Translators: 1: Amount of resolved threads; 2: Amount of total threads; */
 					printf( __( '%1$s out of %2$s', 'wporg-plugins' ), $resolved, $threads );
 					?>
 				</span>
