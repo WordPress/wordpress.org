@@ -93,10 +93,9 @@ class Markdown_Import {
 			'post_type'   => 'handbook',
 			'post_status' => 'publish',
 			'post_parent' => $post_parent,
-			'post_title'  => $doc['title'], // Can contain slashes
+			'post_title'  => sanitize_text_field( wp_slash( $doc['title'] ) ),
 			'post_name'   => sanitize_title_with_dashes( $doc['slug'] ),
 		);
-		$post_data = wp_slash( $post_data );
 		$post_id = wp_insert_post( $post_data );
 		if ( ! $post_id ) {
 			return false;
