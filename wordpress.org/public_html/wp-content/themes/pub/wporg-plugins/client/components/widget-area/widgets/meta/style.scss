@@ -37,8 +37,11 @@
 		display: inline-block;
 		font-size: ms( -4 );
 		margin: 2px;
+		max-width: 95%;
+		overflow: hidden;
 		padding: 3px 6px;
 		position: relative;
+		text-overflow: ellipsis;
 		white-space: nowrap;
 		width: auto;
 
