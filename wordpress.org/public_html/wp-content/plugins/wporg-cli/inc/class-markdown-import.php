@@ -40,7 +40,7 @@ class Markdown_Import {
 		}
 		// Fetch all handbook posts for comparison
 		$q = new WP_Query( array(
-			'post_type'      => 'handbook',
+			'post_type'      => self::$supported_post_types,
 			'post_status'    => 'publish',
 			'posts_per_page' => self::$posts_per_page,
 		) );
@@ -90,7 +90,7 @@ class Markdown_Import {
 	 */
 	private static function create_post_from_manifest_doc( $doc, $post_parent = null ) {
 		$post_data = array(
-			'post_type'   => 'handbook',
+			'post_type'   => self::$supported_post_types,
 			'post_status' => 'publish',
 			'post_parent' => $post_parent,
 			'post_title'  => sanitize_text_field( wp_slash( $doc['title'] ) ),
@@ -109,7 +109,7 @@ class Markdown_Import {
 
 	public static function action_wporg_cli_markdown_import() {
 		$q = new WP_Query( array(
-			'post_type'      => 'handbook',
+			'post_type'      => self::$supported_post_types,
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
 			'posts_per_page' => self::$posts_per_page,
