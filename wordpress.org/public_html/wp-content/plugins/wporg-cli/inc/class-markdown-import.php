@@ -90,7 +90,7 @@ class Markdown_Import {
 	 */
 	private static function create_post_from_manifest_doc( $doc, $post_parent = null ) {
 		$post_data = array(
-			'post_type'   => self::$supported_post_types,
+			'post_type'   => 'handbook',
 			'post_status' => 'publish',
 			'post_parent' => $post_parent,
 			'post_title'  => sanitize_text_field( wp_slash( $doc['title'] ) ),
