@@ -54,39 +54,41 @@ class Developers {
 				'number'     => '',
 			] );
 
-			$locales_list = implode( ', ', array_map( function( $site ) use ( $slug, $locale_names ) {
-				return sprintf( '<a href="%1$s">%2$s</a>', esc_url( "{$site->home}/plugins/{$slug}/" ), $locale_names[ $site->locale ] );
-			}, $sites ) );
+			if ( $sites ) {
+				$locales_list = implode( ', ', array_map( function( $site ) use ( $slug, $locale_names ) {
+					return sprintf( '<a href="%1$s">%2$s</a>', esc_url( "{$site->home}/plugins/{$slug}/" ), $locale_names[ $site->locale ] );
+				}, $sites ) );
 
-			$locales_count = count( $sites );
+				$locales_count = count( $sites );
 
-			if ( 1 === $locales_count ) {
+				if ( 1 === $locales_count ) {
+					$output .= sprintf(
+						/* translators: 1: plugin name, 2: locale name */
+						__( '&#8220;%1$s&#8221; has been translated into %2$s.' ),
+						$title,
+						$locales_list
+					) . ' ';
+				} else {
+					$output .= sprintf(
+						/* translators: 1: plugin name, 2: number of locales, 3: list of locales */
+						_n(
+							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
+							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
+							$locales_count
+						),
+						$title,
+						$locales_count,
+						$locales_list
+					) . ' ';
+				}
+
 				$output .= sprintf(
-					/* translators: 1: plugin name, 2: locale name */
-					__( '&#8220;%1$s&#8221; has been translated into %2$s.' ),
-					$title,
-					$locales_list
-				) . ' ';
-			} else {
-				$output .= sprintf(
-					/* translators: 1: plugin name, 2: number of locales, 3: list of locales */
-					_n(
-						'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
-						'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
-						$locales_count
-					),
-					$title,
-					$locales_count,
-					$locales_list
-				) . ' ';
+					/* translators: URL to translator view */
+					__( 'Thank you to <a href="%s">the translators</a> for their contributions.', 'wporg-plugins' ),
+					esc_url( "https://translate.wordpress.org/projects/wp-plugins/{$slug}/contributors" )
+				);
+				$output .= '</p>';
 			}
-
-			$output .= sprintf(
-				/* translators: URL to translator view */
-				__( 'Thank you to <a href="%s">the translators</a> for their contributions.', 'wporg-plugins' ),
-				esc_url( "https://translate.wordpress.org/projects/wp-plugins/{$slug}/contributors" )
-			);
-			$output .= '</p>';
 		}
 
 		$output .= '<p>' . sprintf( '<a href="%1$s">%2$s</a>',
