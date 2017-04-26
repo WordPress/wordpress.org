@@ -96,7 +96,7 @@ class Upload_Handler {
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
 
-		// Is there already a plugin by a different author?
+		// Is there already a plugin with the same slug by a different author?
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 			return sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
@@ -105,8 +105,8 @@ class Upload_Handler {
 			);
 		}
 
-		// Check the plugin can accept uploads (New submissions, or pending further review).
-		if ( $plugin_post && ! in_array( $plugin_post->post_status, array( 'new', 'pending' ) ) ) {
+		// Is there already a plugin with the same slug by the same author?
+		if ( $plugin_post ) {
 			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 			return sprintf( __( 'There is already a plugin called %1$s. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
