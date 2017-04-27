@@ -284,6 +284,81 @@ function get_location_test_cases() {
 			),
 		),
 
+		'city-with-apostrophe-in-formal-name' => array(
+			'input' => array(
+				'location_name' => "Coeur d'Alene",
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Los_Angeles',
+			),
+			'expected' => array(
+				'description' => "coeur d'alene",
+				'latitude'    => '47.678',
+				'longitude'   => '-116.780',
+				'country'     => 'US',
+			),
+		),
+
+		/*
+		 * todo This is failing. Not sure why at first glance, it looks like it matches the row in the database exactly.
+		 *      It might be a similar issue to `Yaoundé`. If it is, this should still be kept as a separate test after
+		 *      that is fixed, to make sure there aren't regressions with diacritics.
+		 */
+		'city-with-diacritics-in-query' => array(
+			'input' => array(
+				'location_name' => "Doña Ana",
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Denver',
+			),
+			'expected' => array(
+				'description' => "doña ana",
+				'latitude'    => '32.390',
+				'longitude'   => '-106.814',
+				'country'     => 'US',
+			),
+		),
+
+		'city-with-diacritics-in-formal-name-but-not-in-query' => array(
+			'input' => array(
+				'location_name' => "Dona Ana",
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Denver',
+			),
+			'expected' => array(
+				'description' => "doña ana",
+				'latitude'    => '32.390',
+				'longitude'   => '-106.814',
+				'country'     => 'US',
+			),
+		),
+
+		'city-with-period-in-query' => array(
+			'input' => array(
+				'location_name' => "St. Louis",
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Chicago',
+			),
+			'expected' => array(
+				'description' => "st. louis",
+				'latitude'    => '38.627',
+				'longitude'   => '-90.198',
+				'country'     => 'US',
+			),
+		),
+
+		'city-with-period-in-formal-name-but-not-in-query' => array(
+			'input' => array(
+				'location_name' => "St Louis",
+				'locale'        => 'en_US',
+				'timezone'      => 'America/Chicago',
+			),
+			'expected' => array(
+				'description' => "st. louis",
+				'latitude'    => '38.627',
+				'longitude'   => '-90.198',
+				'country'     => 'US',
+			),
+		),
+
 		/*
 		 * The city endonym, locale, and timezone are given
 		 *
