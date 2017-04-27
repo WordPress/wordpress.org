@@ -269,6 +269,20 @@ function get_location_test_cases() {
 			),
 		),
 
+		// Users will often type them without the dash, bypassing an exact match
+		'city-with-dashes-in-formal-name' => array(
+			'input' => array(
+				'location_name' => 'Osakashi',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'osaka',
+				'latitude'    => '34.694',
+				'longitude'   => '135.502',
+				'country'     => 'JP',
+			),
+		),
 
 		/*
 		 * The city endonym, locale, and timezone are given

@@ -211,34 +211,39 @@ function guess_location_from_geonames( $location_name, $timezone, $country ) {
 	) );
 
 	if ( ! is_a( $row, 'stdClass' ) && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
-		$row = guess_ideographic_location_from_geonames( $location_name, $country, $timezone );
+		$row = guess_location_from_geonames_fallback( $location_name, $country, $timezone, 'exact', 'ideographic' );
 	}
 
 	return $row;
 }
 
 /**
- * Look for the given ideographic location in the Geonames database
+ * Look for the given location in the Geonames database using a LIKE query
  *
  * This is a fallback for situations where the full-text search in `guess_location_from_geonames()` resulted
- * in a false-negative. MySQL < 5.7.6 doesn't support full-text searches on ideographic languages, because
- * it cannot determine where the word boundaries are.
+ * in a false-negative.
  *
+ * One situation where this happens is with queries in ideographic languages, because MySQL < 5.7.6 doesn't
+ * support full-text searches for them, because it can't determine where the word boundaries are.
  * See https://dev.mysql.com/doc/refman/5.7/en/fulltext-restrictions.html
+ *
+ * There are also edge cases where the exact query doesn't exist in the database, but a loose LIKE query will find
+ * a similar alternate, like `Osakashi`.
  *
  * @param string $location_name
  * @param string $country
  * @param string $timezone
  * @param string $mode          'exact' to only return exact matches from the database;
  *                              'loose' to return any match. This has a high chance of false positives.
+ * @param string $restrict_counties 'ideographic' to only search in countries where ideographic languages are common;
+ *                                  'none' to search all countries
  *
  * @return stdClass|null
  */
-function guess_ideographic_location_from_geonames( $location_name, $country, $timezone, $mode = 'exact' ) {
+function guess_location_from_geonames_fallback( $location_name, $country, $timezone, $mode = 'exact', $restrict_counties = 'ideographic' ) {
 	global $wpdb;
 
-	$ideographic_countries            = get_ideographic_counties();
-	$ideographic_country_placeholders = get_prepare_placeholders( count( $ideographic_countries ), '%s' );
+	$where = $ideographic_countries = $ideographic_country_placeholders = '';
 
 	/*
 	 * The name is wrapped in commas in order to ensure that we're only matching the exact location, which is
@@ -255,6 +260,17 @@ function guess_ideographic_location_from_geonames( $location_name, $country, $ti
 		$wpdb->esc_like( $location_name )
 	);
 
+	$prepare_args = array( $escaped_location_name, $country, $timezone );
+
+	if ( 'ideographic' == $restrict_counties ) {
+		$ideographic_countries            = get_ideographic_counties();
+		$ideographic_country_placeholders = get_prepare_placeholders( count( $ideographic_countries ), '%s' );
+
+		$where .= "country IN ( $ideographic_country_placeholders ) AND";
+
+		$prepare_args = array_merge( $ideographic_countries, $prepare_args );
+	}
+
 	/*
 	 * REPLACE() is used because sometimes the `alternatenames` column contains entries where the `asciiname` is
 	 * prefixed to an ideographic name; for example: `,Karachi - كراچى,`
@@ -269,7 +285,7 @@ function guess_ideographic_location_from_geonames( $location_name, $country, $ti
 		SELECT name, latitude, longitude, country
 		FROM `geoname`
 		WHERE
-			country IN ( $ideographic_country_placeholders ) AND
+			$where
 			REPLACE( alternatenames, CONCAT( asciiname, ' - ' ), '' ) LIKE %s
 		ORDER BY
 			FIELD( %s, country  ) DESC,
@@ -277,10 +293,7 @@ function guess_ideographic_location_from_geonames( $location_name, $country, $ti
 			population DESC
 		LIMIT 1";
 
-	$prepared_query = $wpdb->prepare(
-		$query,
-		array_merge( $ideographic_countries, array( $escaped_location_name, $country, $timezone ) )
-	);
+	$prepared_query = $wpdb->prepare( $query, $prepare_args );
 
 	return $wpdb->get_row( $prepared_query );
 }
@@ -443,14 +456,18 @@ function get_location( $args = array() ) {
 	}
 
 	/*
-	 * If all else fails for a non-ASCII request, cast a wide net and try to find something before giving up, even
+	 * If all else fails, cast a wide net and try to find something before giving up, even
 	 * if the chance of success if lower than normal. Returning false is guaranteed failure, so this improves things
 	 * even if it only works 10% of the time.
 	 *
 	 * This must be done as the very last thing before giving up, because the likelihood of false positives is high.
 	 */
-	if ( ! $location && isset( $args['location_name'] ) && 'ASCII' !== mb_detect_encoding( $args['location_name'] ) ) {
-		$guess = guess_ideographic_location_from_geonames( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose' );
+	if ( ! $location && isset( $args['location_name'] ) ) {
+		if ( 'ASCII' === mb_detect_encoding( $args['location_name'] ) ) {
+			$guess = guess_location_from_geonames_fallback( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose', 'none' );
+		} else {
+			$guess = guess_location_from_geonames_fallback( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose', 'ideographic' );
+		}
 
 		if ( $guess ) {
 			$location = array(
