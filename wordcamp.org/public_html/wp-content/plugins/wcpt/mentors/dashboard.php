@@ -39,7 +39,7 @@ function add_admin_pages() {
 		'edit.php?post_type=wordcamp',
 		'Mentors',
 		'Mentors',
-		'manage_network',
+		'wordcamp_manage_mentors',
 		'mentors',
 		__NAMESPACE__ . '\render_options_page'
 	);

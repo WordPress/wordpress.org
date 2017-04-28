@@ -539,7 +539,7 @@ class WordCamp_Admin {
             );
 
             // Only include mentor data if the Mentor username field is editable
-            if ( current_user_can( 'manage_network' ) ) {
+            if ( current_user_can( 'wordcamp_manage_mentors' ) ) {
                 $data['Mentors']['data'] = Mentors_Dashboard\get_all_mentor_data();
             }
 
@@ -954,7 +954,7 @@ class WordCamp_Admin {
 	public static function is_protected_field( $field_name ) {
 		$protected_fields = array();
 
-		if ( ! current_user_can( 'manage_network' ) ) {
+		if ( ! current_user_can( 'wordcamp_manage_mentors' ) ) {
 			$protected_fields += array(
 				'Mentor WordPress.org User Name',
 				'Mentor Name',
