@@ -22,12 +22,12 @@ class Author_Card {
 			'show_warning_flags'
 		), 10, 6 );
 
-		if ( is_int( $post_or_user_id ) ) {
+		if ( is_numeric( $post_or_user_id ) ) {
 			$post   = '';
 			$author = get_user_by( 'id', $post_or_user_id );
 		} else {
 			$post   = $post_or_user_id ?: get_post();
-			$author = get_user_by( 'id', $post->post_author );
+			$author = is_object( $post ) ? get_user_by( 'id', $post->post_author ) : '';
 		}
 
 		if ( ! $author ) {
