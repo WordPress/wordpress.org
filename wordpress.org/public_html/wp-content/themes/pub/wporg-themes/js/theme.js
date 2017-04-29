@@ -1112,6 +1112,10 @@ window.wp = window.wp || {};
 			// Set the current theme model
 			this.model = self.collection.get( id );
 
+			if ( _.isUndefined( this.model ) ) {
+				return;
+			}
+
 			// Trigger a route update for the current model
 			themes.router.navigate( themes.router.baseUrl( themes.router.themePath + this.model.id ) );
 			themes.utils.title( this.model.attributes.name );
