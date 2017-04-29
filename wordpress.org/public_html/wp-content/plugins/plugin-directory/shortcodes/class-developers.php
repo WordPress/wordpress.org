@@ -64,7 +64,7 @@ class Developers {
 				if ( 1 === $locales_count ) {
 					$output .= sprintf(
 						/* translators: 1: plugin name, 2: locale name */
-						__( '&#8220;%1$s&#8221; has been translated into %2$s.' ),
+						__( '&#8220;%1$s&#8221; has been translated into %2$s.', 'wporg-plugins' ),
 						$title,
 						$locales_list
 					) . ' ';
@@ -74,7 +74,8 @@ class Developers {
 						_n(
 							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
 							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
-							$locales_count
+							$locales_count,
+							'wporg-plugins'
 						),
 						$title,
 						$locales_count,
