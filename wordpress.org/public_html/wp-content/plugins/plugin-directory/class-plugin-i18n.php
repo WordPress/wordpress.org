@@ -33,13 +33,6 @@ class Plugin_I18n {
 	public static $set_cache = true;
 
 	/**
-	 * @access protected
-	 *
-	 * @var \wpdb WordPress database abstraction object.
-	 */
-	protected $db;
-
-	/**
 	 * Fetch the instance of the Plugin_I18n class.
 	 *
 	 * @static
@@ -47,9 +40,11 @@ class Plugin_I18n {
 	public static function instance() {
 		static $instance = null;
 
-		global $wpdb;
+		if ( ! $instance ) {
+			$instance = new self();
+		}
 
-		return ! is_null( $instance ) ? $instance : $instance = new Plugin_I18n( $wpdb );
+		return $instance;
 	}
 
 	/**
@@ -57,14 +52,8 @@ class Plugin_I18n {
 	 *
 	 * @access private
 	 *
-	 * @param \wpdb $db WordPress database abstraction object.
-	 * @param null $tracker
 	 */
-	private function __construct( $db, $tracker = null ) {
-		if ( ! empty( $db ) && is_object( $db ) ) {
-			$this->db = $db;
-		}
-
+	private function __construct() {
 		wp_cache_add_global_groups( $this->i18n_cache_group );
 	}
 
@@ -138,13 +127,15 @@ class Plugin_I18n {
 	 * @return bool|int|mixed
 	 */
 	public function get_gp_branch_id( $slug, $branch ) {
-		$cache_suffix = "branch_id";
+		global $wpdb;
+
+		$cache_suffix = 'branch_id';
 
 		if ( false !== ( $branch_id = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
 			return $branch_id;
 		}
 
-		$branch_id = $this->db->get_var( $this->db->prepare(
+		$branch_id = $wpdb->get_var( $wpdb->prepare(
 			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'projects WHERE path = %s',
 			"wp-plugins/{$slug}/{$branch}"
 		) );
@@ -168,6 +159,7 @@ class Plugin_I18n {
 	 * @return array|bool|mixed|null
 	 */
 	public function get_gp_originals( $slug, $branch, $key, $str ) {
+		global $wpdb;
 
 		// Try to get a single original with the whole content first (title, etc), if passed, or get them all otherwise.
 		if ( ! empty( $key ) && ! empty( $str ) ) {
@@ -191,7 +183,7 @@ class Plugin_I18n {
 			return array();
 		}
 
-		$originals = $this->db->get_results( $this->db->prepare(
+		$originals = $wpdb->get_results( $wpdb->prepare(
 			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s ORDER BY CHAR_LENGTH(singular) DESC',
 			$branch_id, '+active'
 		) );
@@ -216,6 +208,8 @@ class Plugin_I18n {
 	 * @return bool|int|mixed
 	 */
 	public function get_gp_translation_set_id( $slug, $branch, $locale ) {
+		global $wpdb;
+
 		$cache_suffix = "{$locale}:translation_set_id";
 
 		if ( false !== ( $translation_set_id = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -228,14 +222,14 @@ class Plugin_I18n {
 			return 0;
 		}
 
-		$translation_set_id = $this->db->get_var( $this->db->prepare(
+		$translation_set_id = $wpdb->get_var( $wpdb->prepare(
 			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
 			$branch_id, $locale ) );
 
 		if ( empty( $translation_set_id ) ) {
 
 			// Don't give up yet. Might be given fr_FR, which actually exists as locale=fr in GP.
-			$translation_set_id = $this->db->get_var( $this->db->prepare(
+			$translation_set_id = $wpdb->get_var( $wpdb->prepare(
 				'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
 				$branch_id, preg_replace( '/^([^-]+)(-.+)?$/', '\1', $locale )
 			) );
@@ -260,6 +254,8 @@ class Plugin_I18n {
 	 * @return bool|mixed|null
 	 */
 	public function search_gp_original( $slug, $branch, $key, $str ) {
+		global $wpdb;
+
 		$cache_suffix = "original:{$key}";
 
 		if ( false !== ( $original = $this->cache_get( $slug, $branch, $cache_suffix ) ) ) {
@@ -272,7 +268,7 @@ class Plugin_I18n {
 			return false;
 		}
 
-		$original = $this->db->get_row( $this->db->prepare(
+		$original = $wpdb->get_row( $wpdb->prepare(
 			'SELECT id, singular, comment FROM ' . GLOTPRESS_TABLE_PREFIX . 'originals WHERE project_id = %d AND status = %s AND singular = %s',
 			$branch_id, '+active', $str
 		) );
@@ -296,6 +292,8 @@ class Plugin_I18n {
 	 * @return string
 	 */
 	public function translate( $key, $content, $args = array() ) {
+		global $wpdb;
+
 		if ( empty( $key ) || empty( $content ) ) {
 			return $content;
 		}
@@ -370,7 +368,7 @@ class Plugin_I18n {
 				continue;
 			}
 
-			$translation = $this->db->get_var( $this->db->prepare(
+			$translation = $wpdb->get_var( $wpdb->prepare(
 				'SELECT translation_0 FROM ' . GLOTPRESS_TABLE_PREFIX . 'translations WHERE original_id = %d AND translation_set_id = %d AND status = %s',
 				$original->id, $translation_set_id, 'current'
 			) );
