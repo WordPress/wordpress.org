@@ -1296,6 +1296,14 @@ window.wp = window.wp || {};
 		// in new location
 		searchContainer: $( '.wp-filter .search-form' ),
 
+		initialize: function() {
+			themes.view.Appearance.prototype.initialize.apply( this, arguments );
+
+			this.sortValues = $( '.filter-links li > a' ).map( function() {
+				return $( this ).data( 'sort' );
+			} ).get();
+		},
+
 		// Initial render method
 		render: function() {
 			var self = this;
@@ -1381,13 +1389,19 @@ window.wp = window.wp || {};
 
 			this.sort( sort );
 
-			// Trigger a router.naviagte update
+			// Trigger a router.navigate update
 			themes.router.navigate( themes.router.baseUrl( themes.router.browsePath + sort ) );
 		},
 
 		sort: function( sort ) {
-			var sorter = $( '.filter-links [data-sort="' + sort + '"]'),
-				self = this;
+			var self = this, sorter;
+
+			if ( -1 === _.indexOf( this.sortValues, sort ) ) {
+				sort = 'featured';
+			}
+
+			sorter = $( '.filter-links [data-sort="' + sort + '"]');
+
 			self.clearSearch();
 
 			// Clear filters.
