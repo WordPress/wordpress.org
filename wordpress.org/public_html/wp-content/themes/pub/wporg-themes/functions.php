@@ -47,7 +47,7 @@ function wporg_themes_scripts() {
 	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 9 );
 
 	if ( ! is_singular( 'page' ) ) {
-		wp_enqueue_script( 'google-jsapi', '//www.google.com/jsapi', array( 'jquery' ), null, true );
+		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array( 'jquery' ), null, true );
 		wp_enqueue_script( 'wporg-theme', get_template_directory_uri() . "/js/theme{$suffix}.js", array( 'wp-backbone' ), 10, true );
 
 		wp_localize_script( 'wporg-theme', '_wpThemeSettings', array(

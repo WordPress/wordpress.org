@@ -795,44 +795,46 @@ window.wp = window.wp || {};
 			var self = this;
 
 			$.getJSON( 'https://api.wordpress.org/stats/themes/1.0/downloads.php?slug=' + self.model.get( 'id' ) + '&limit=260&callback=?', function( downloads ) {
-				var data = new google.visualization.DataTable(),
-					count = 0;
+				google.charts.setOnLoadCallback( function() {
+					var data = new google.visualization.DataTable(),
+						count = 0;
 
-				data.addColumn('string', _wpThemeSettings.l10n.date);
-				data.addColumn('number', _wpThemeSettings.l10n.downloads);
+					data.addColumn('string', _wpThemeSettings.l10n.date);
+					data.addColumn('number', _wpThemeSettings.l10n.downloads);
 
-				$.each(downloads, function (key, value) {
-					data.addRow();
-					data.setValue(count, 0, new Date(key).toLocaleDateString() );
-					data.setValue(count, 1, Number(value));
-					count++;
-				});
+					$.each(downloads, function (key, value) {
+						data.addRow();
+						data.setValue(count, 0, new Date(key).toLocaleDateString() );
+						data.setValue(count, 1, Number(value));
+						count++;
+					});
 
-				new google.visualization.ColumnChart(document.getElementById('theme-download-stats-' + self.model.get( 'id' ) )).draw(data, {
-					colors: ['#253578'],
-					legend: {
-						position: 'none'
-					},
-					titlePosition: 'in',
-					axisTitlesPosition: 'in',
-					chartArea: {
-						height: 280,
-						left: 35,
-						width: '98%'
-					},
-					hAxis: {
-						textStyle: {color: 'black', fontSize: 9}
-					},
-					vAxis: {
-						format: '###,###',
-						textPosition: 'out',
-						viewWindowMode: 'explicit',
-						viewWindow: {min: 0}
-					},
-					bar: {
-						groupWidth: ( data.getNumberOfRows() > 100 ) ? "100%" : null
-					},
-					height: 350
+					new google.visualization.ColumnChart(document.getElementById('theme-download-stats-' + self.model.get( 'id' ) )).draw(data, {
+						colors: ['#253578'],
+						legend: {
+							position: 'none'
+						},
+						titlePosition: 'in',
+						axisTitlesPosition: 'in',
+						chartArea: {
+							height: 280,
+							left: 35,
+							width: '98%'
+						},
+						hAxis: {
+							textStyle: {color: 'black', fontSize: 9}
+						},
+						vAxis: {
+							format: '###,###',
+							textPosition: 'out',
+							viewWindowMode: 'explicit',
+							viewWindow: {min: 0}
+						},
+						bar: {
+							groupWidth: ( data.getNumberOfRows() > 100 ) ? '100%' : null
+						},
+						height: 350
+					});
 				});
 			});
 		},
@@ -1705,5 +1707,7 @@ window.wp = window.wp || {};
 })( jQuery );
 
 ( function( google ) {
-	google.load("visualization", "1", {packages:["corechart"]});
+	google.charts.load( 'current', {
+		packages: [ 'corechart' ]
+	});
 })( google );
