@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
+use PO;
+use Translation_Entry;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
@@ -38,7 +40,13 @@ class Readme_Import extends I18n_Import {
 	 * @throws Exception
 	 */
 	public function import_from_tag( $tag ) {
-		$files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$this->plugin}/{$tag}" );
+		if ( 'trunk' === $tag ) {
+			$svn_url = self::PLUGIN_SVN_BASE . "/{$this->plugin}/trunk/";
+		} else {
+			$svn_url = self::PLUGIN_SVN_BASE . "/{$this->plugin}/tags/{$tag}/";
+		}
+
+		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
@@ -56,14 +64,14 @@ class Readme_Import extends I18n_Import {
 			}
 		}
 
-		$readme_file = self::PLUGIN_SVN_BASE . "/{$this->plugin}/{$tag}/{$readme_file}";
-		$readme      = new Parser( $readme_file );
+		$readme_file = "{$svn_url}/{$readme_file}";
+		$readme = new Parser( $readme_file );
 
 		if ( ! class_exists( '\PO' ) ) {
 			require_once ABSPATH . '/wp-includes/pomo/po.php';
 		}
 
-		$pot = new \PO;
+		$pot = new PO;
 		$pot->set_header( 'MIME-Version', '1.0' );
 		$pot->set_header( 'Content-Type', 'text/plain; charset=UTF-8' );
 		$pot->set_header( 'Content-Transfer-Encoding', '8bit' );
@@ -71,7 +79,7 @@ class Readme_Import extends I18n_Import {
 		$str_priorities = [];
 
 		if ( $readme->name ) {
-			$pot->add_entry( new \Translation_Entry( [
+			$pot->add_entry( new Translation_Entry( [
 				'singular'           => $readme->name,
 				'extracted_comments' => 'Plugin name.',
 			] ) );
@@ -80,7 +88,7 @@ class Readme_Import extends I18n_Import {
 		}
 
 		if ( $readme->short_description ) {
-			$pot->add_entry( new \Translation_Entry( [
+			$pot->add_entry( new Translation_Entry( [
 				'singular'           => $readme->short_description,
 				'extracted_comments' => 'Short description.',
 			] ) );
@@ -90,7 +98,7 @@ class Readme_Import extends I18n_Import {
 
 		if ( $readme->screenshots ) {
 			foreach ( $readme->screenshots as $screenshot ) {
-				$pot->add_entry( new \Translation_Entry( [
+				$pot->add_entry( new Translation_Entry( [
 					'singular'           => $screenshot,
 					'extracted_comments' => 'Screenshot description.',
 				] ) );
@@ -134,7 +142,7 @@ class Readme_Import extends I18n_Import {
 		}
 
 		foreach ( $section_strings as $text => $comments ) {
-			$pot->add_entry( new \Translation_Entry( [
+			$pot->add_entry( new Translation_Entry( [
 				'singular'           => $text,
 				'extracted_comments' => 'Found in ' . implode( $comments, ', ' ) . '.',
 			] ) );
