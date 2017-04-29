@@ -1010,6 +1010,13 @@ nav.handbook-navigation .nav-links a[rel="next"] {
 	margin-top: -50px;
 }
 
+/* Remove negative margin because there is no jump link before these headlines */
+.entry-content h2.toc-heading:first-of-type:target,
+.entry-content h3.toc-heading:first-of-type:target,
+h2.toc-heading + h3.toc-heading:target {
+	margin-top: 0;
+}
+
 .toc-heading:target:before {
 	content: '';
 	position: absolute;
