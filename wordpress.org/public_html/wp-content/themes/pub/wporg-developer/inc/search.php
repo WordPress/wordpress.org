@@ -87,7 +87,7 @@ class DevHub_Search {
 			// Not a handbook page, or exact search, or filters used.
 			// Fallback to parsed post types.
 			$query->set( 'post_type', DevHub\get_parsed_post_types() );
-		} 
+		}
 	}
 
 	/**

@@ -298,7 +298,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		$comment_link = get_comment_link( $comment_id );
 		$nonce        = wp_create_nonce( 'user-note-vote-' . $comment_id );
 		$disabled_str = __( 'Voting for this note is disabled', 'wporg' );
-		$cancel_str   = __( 'Click to cancel your vote', 'wporg' ); 
+		$cancel_str   = __( 'Click to cancel your vote', 'wporg' );
 		$log_in_str   = __( 'You must log in to vote on the helpfulness of this note', 'wporg' );
 		$log_in_url   = add_query_arg( 'redirect_to', urlencode( $comment_link ), 'https://login.wordpress.org' );
 
@@ -311,7 +311,7 @@ class DevHub_User_Contributed_Notes_Voting {
 		// Up vote link
 		$user_upvoted = self::has_user_upvoted_comment( $comment_id );
 		if ( $can_vote ) {
-			$cancel = $user_upvoted ? '. ' . $cancel_str . '.' : ''; 
+			$cancel = $user_upvoted ? '. ' . $cancel_str . '.' : '';
 			$title = $user_upvoted ?
 				__( 'You have voted to indicate this note was helpful', 'wporg' ) . $cancel :
 				__( 'Vote up if this note was helpful', 'wporg' );
@@ -389,7 +389,7 @@ class DevHub_User_Contributed_Notes_Voting {
 	 * 'total'           : The total number of votes (upvotes + downvotes)
 	 * 'difference'      : The difference between upvotes and downvotes (upvotes - downvotes)
 	 * 'like_percentage' : The percentage of total votes that upvoted
-	 * 
+	 *
 	 * @access public
 	 *
 	 * @param  string $type The type of count to return.

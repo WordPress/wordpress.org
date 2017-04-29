@@ -75,9 +75,9 @@ namespace {
 	if ( ! function_exists( 'wporg_developer_get_ordered_notes' ) ) :
 		/**
 		 * Get contibuted notes ordered by vote
-		 * 
+		 *
 		 * By default only top level comments are returned.
-		 * If child notes are included use wp_list_comments() or a custom walker for display. 
+		 * If child notes are included use wp_list_comments() or a custom walker for display.
 		 * unapproved notes for the current user are included.
 		 *
 		 * @param integer $post_id Optional. Post id to get comments for
@@ -105,10 +105,10 @@ namespace {
 				$defaults['status'] = 'all';
 			}
 
-			$args = wp_parse_args( $args, $defaults ); 
+			$args = wp_parse_args( $args, $defaults );
 
 			$comments = get_comments( $args );
-		
+
 			if ( ! $comments ) {
 				return;
 			}
@@ -144,7 +144,7 @@ namespace {
 
 			<li id="comment-<?php comment_ID(); ?>" <?php comment_class( implode( ' ', $comment_class ) ); ?>>
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
-				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a> 
+				<a href="#comment-content-<?php echo $comment->comment_ID; ?>" class="screen-reader-text"><?php _e( 'Skip to note content', 'wporg' ); ?></a>
 				<header class="comment-meta">
 					<?php DevHub_User_Contributed_Notes_Voting::show_voting(); ?>
 					<div class="comment-author vcard">
@@ -180,7 +180,7 @@ namespace {
 						&mdash;
 						<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 							<time datetime="<?php comment_time( 'c' ); ?>">
-							<?php 
+							<?php
 								printf( _x( '%1$s ago', '%1$s = human-readable time difference', 'wporg' ),
 									human_time_diff( get_comment_time( 'U' ),
 									current_time( 'timestamp' ) )
@@ -1293,7 +1293,7 @@ namespace DevHub {
 	 *
 	 * The (long) description is stored in the 'post_content' get_post_field.
 	 *
-	 * @param  null|WP_Post Optiona. The post.
+	 * @param  null|WP_Post Optional. The post.
 	 * @return string
 	 */
 	function get_description( $post = null ) {
@@ -1449,8 +1449,8 @@ namespace DevHub {
 	}
 
 	/**
-	 * Displays a post type filter dropdown on taxonomy pages. 
-	 * 
+	 * Displays a post type filter dropdown on taxonomy pages.
+	 *
 	 * @return string HTML filter form.
 	 */
 	function taxonomy_archive_filter() {
@@ -1482,7 +1482,7 @@ namespace DevHub {
 			// Add taxonomy and term when not using permalinks.
 			$form .= "<input type='hidden' name='" . esc_attr( $taxonomy ) . "' value='" . esc_attr( $term ) . "'>";
 		}
-		
+
 		$form .= "<label for='archive-filter'>";
 		$form .= __( 'Filter by type:', 'wporg' ) . ' ';
 		$form .= '<select name="post_type[]" id="archive-filter">';

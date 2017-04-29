@@ -2,15 +2,15 @@
 /**
  * Loop Pagination - A WordPress script for creating paginated links on archive-type pages.
  *
- * The Loop Pagination script was designed to give theme authors a quick way to paginate archive-type 
- * (archive, search, and blog) pages without having to worry about which of the many plugins a user might 
+ * The Loop Pagination script was designed to give theme authors a quick way to paginate archive-type
+ * (archive, search, and blog) pages without having to worry about which of the many plugins a user might
  * possibly be using.  Instead, they can simply build pagination right into their themes.
  *
- * This program is free software; you can redistribute it and/or modify it under the terms of the GNU 
- * General Public License as published by the Free Software Foundation; either version 2 of the License, 
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @package   LoopPagination
@@ -22,7 +22,7 @@
  */
 
 /**
- * Loop pagination function for paginating loops with multiple posts.  This should be used on archive, blog, and 
+ * Loop pagination function for paginating loops with multiple posts.  This should be used on archive, blog, and
  * search pages.  It is not for singular views.
  *
  * @since 0.1.0
@@ -86,15 +86,15 @@ function loop_pagination( $args = array() ) {
 	$page_links = paginate_links( $args );
 
 	/* Remove 'page/1' from the entire output since it's not needed. */
-	$page_links = preg_replace( 
-		array( 
+	$page_links = preg_replace(
+		array(
 			"#(href=['\"].*?){$pagination_base}/1(['\"])#",  // 'page/1'
 			"#(href=['\"].*?){$pagination_base}/1/(['\"])#", // 'page/1/'
 			"#(href=['\"].*?)\?paged=1(['\"])#",             // '?paged=1'
 			"#(href=['\"].*?)&\#038;paged=1(['\"])#"         // '&#038;paged=1'
-		), 
-		'$1$2', 
-		$page_links 
+		),
+		'$1$2',
+		$page_links
 	);
 
 	/* Wrap the paginated links with the $before and $after elements. */

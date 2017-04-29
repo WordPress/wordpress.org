@@ -10,7 +10,6 @@
  */
 class DevHub_Search_Form_Autocomplete {
 
-
 	public function __construct() {
 		$this->init();
 	}

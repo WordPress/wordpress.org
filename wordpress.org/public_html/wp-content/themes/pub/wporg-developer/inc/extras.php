@@ -155,7 +155,7 @@ function wporg_loop_pagination_args( $args ) {
 	if ( $wp_rewrite->using_permalinks() && ! is_search() ) {
 		$pagenum = trailingslashit( preg_replace( '/\?.*/', '', get_pagenum_link() ) );
 		$pagination_base = $wp_rewrite->pagination_base;
-		
+
 		$args['base'] = user_trailingslashit(  $pagenum . "{$pagination_base}/%#%" );
 	}
 
@@ -165,7 +165,7 @@ add_filter( 'loop_pagination_args', 'wporg_loop_pagination_args' );
 
 /**
  * Removes 'page/1' from pagination links with a query string.
- * 
+ *
  * @param  string $page_links Page links HTML.
  * @return string             Page links HTML.
  */
@@ -179,7 +179,7 @@ function wporg_loop_pagination( $page_links ) {
 	if ( isset( $query_string[1] ) ) {
 
 		$query_string = preg_quote( $query_string[1], '#' );
-	
+
 		// Remove 'page/1' from the entire output since it's not needed.
 		$page_links = preg_replace(
 			array(
