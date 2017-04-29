@@ -13,7 +13,7 @@ class Tests_API_Locale_Banner extends WP_UnitTestCase {
 	 * @type array  $expected_sites Rosetta sites that should be present in the banner text.
 	 */
 	function test_locale_banner( $header, $expected_sites ) {
-		$response = wp_remote_post( 'https://wordpress.org/plugins-wp/wp-json/plugins/v1/locale-banner', [
+		$response = wp_remote_post( 'https://wordpress.org/plugins/wp-json/plugins/v1/locale-banner', [
 			'headers' => [
 				'Accept-Language' => $header,
 			],
