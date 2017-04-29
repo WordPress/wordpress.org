@@ -1674,6 +1674,7 @@ window.wp = window.wp || {};
 				self.view.collection.queries.push( themes.data.query );
 
 				_.each( tag.split( '+' ), function( tag ) {
+					tag = tag.toLowerCase().replace( /[^a-z-]/g, '' );
 					$( '#filter-id-' + tag ).prop( 'checked', true );
 				});
 				$( 'body' ).removeClass( 'show-filters' ).addClass( 'show-filters' );
