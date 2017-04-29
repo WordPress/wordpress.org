@@ -317,20 +317,6 @@ class Plugin_I18n {
 			$wp_locale = get_locale();
 		}
 
-		$server_name = strtolower( $_SERVER['SERVER_NAME'] );
-		if ( 'api.wordpress.org' == $server_name ) {
-
-			// Support formats like fr, haz, and en_GB.
-			if ( ! empty( $_REQUEST['locale'] ) ) {
-				$wp_locale = preg_replace( '/[^a-zA-Z_]/', '', $_REQUEST['locale'] );
-			} else if ( ! empty( $_REQUEST['request'] ) ) {
-				$request = maybe_unserialize( $_REQUEST['request'] );
-				if ( ! empty( $request ) && ! empty( $request->locale ) ) {
-					$wp_locale = preg_replace( '/[^a-zA-Z_]/', '', $request->locale );
-				}
-			}
-		}
-
 		if ( ! $wp_locale || 'en_US' == $wp_locale ) {
 			return $content;
 		}
