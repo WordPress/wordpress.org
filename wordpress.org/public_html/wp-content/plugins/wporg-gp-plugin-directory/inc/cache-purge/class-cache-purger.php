@@ -160,6 +160,7 @@ class Cache_Purger {
 
 		wp_cache_delete( "{$prefix}:originals", $this->i18n_cache_group );
 		wp_cache_delete( "{$prefix}:branch_id", $this->i18n_cache_group );
+		wp_cache_delete( "{$prefix}:translation_sets", $this->i18n_cache_group );
 		$this->delete_plugin_i18n_cache_keys_for( $prefix, 'original' );
 
 		$translation_sets = (array) GP::$translation_set->by_project_id( $project_id );
