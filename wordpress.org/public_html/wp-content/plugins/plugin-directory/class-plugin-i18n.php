@@ -1,6 +1,9 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use GP_Locales;
+use WP_Http;
+
 /**
  * Translation for plugin content.
  *
@@ -329,7 +332,7 @@ class Plugin_I18n {
 		}
 
 		require_once GLOTPRESS_LOCALES_PATH;
-		$gp_locale = \GP_Locales::by_field( 'wp_locale', $wp_locale );
+		$gp_locale = GP_Locales::by_field( 'wp_locale', $wp_locale );
 
 		if ( ! $gp_locale || 'en' === $gp_locale->slug ) {
 			return $content;
@@ -440,22 +443,26 @@ class Plugin_I18n {
 	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
 		$post = get_post( $post );
 
-		// This naively hits the API. It could probably be re-written to query the DB instead.
-		$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, array( 'https' ) );
+		$cache_suffix = 'translation_sets';
 
-		$locales = array();
-		$http    = new \WP_Http();
-		$result  = $http->request( $api_url );
+		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
+		if ( false === $translation_sets ) {
+			$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, [ 'https' ] );
+			$response = wp_remote_get( $api_url );
 
-		if ( ! is_wp_error( $result ) ) {
-			$data = json_decode( $result['body'] );
-
-			if ( ! empty( $data->translation_sets ) ) {
-				$locales = array_filter( $data->translation_sets, function( $locale ) use ( $min_percent ) {
-					return $locale->percent_translated >= $min_percent;
-				} );
+			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {
+				$translation_sets = [];
+			} else {
+				$result = json_decode( wp_remote_retrieve_body( $response ) );
+				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
 			}
+
+			$this->cache_set( $post->post_name, $branch, $translation_sets, $cache_suffix );
 		}
+
+		$locales = array_filter( $translation_sets, function( $locale ) use ( $min_percent ) {
+			return $locale->percent_translated >= $min_percent;
+		} );
 
 		return $locales;
 	}
