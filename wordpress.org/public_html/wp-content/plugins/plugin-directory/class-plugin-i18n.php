@@ -9,9 +9,14 @@ namespace WordPressdotorg\Plugin_Directory;
 class Plugin_I18n {
 
 	/**
-	 * @var string Global cache group for related caching
+	 * @var string Global cache group for translations.
 	 */
-	public $i18n_cache_group = 'plugins-i18n';
+	const CACHE_GROUP = 'plugins-i18n';
+
+	/**
+	 * @var int When to expire the cache contents.
+	 */
+	const CACHE_EXPIRE = 3 * DAY_IN_SECONDS;
 
 	/**
 	 * @var string
@@ -54,7 +59,7 @@ class Plugin_I18n {
 	 *
 	 */
 	private function __construct() {
-		wp_cache_add_global_groups( $this->i18n_cache_group );
+		wp_cache_add_global_groups( self::CACHE_GROUP );
 	}
 
 	/**
@@ -96,7 +101,7 @@ class Plugin_I18n {
 
 		$key = $this->cache_key( $slug, $branch, $suffix );
 
-		return wp_cache_get( $key, $this->i18n_cache_group );
+		return wp_cache_get( $key, self::CACHE_GROUP );
 	}
 
 	/**
@@ -115,7 +120,7 @@ class Plugin_I18n {
 
 		$key = $this->cache_key( $slug, $branch, $suffix );
 
-		return wp_cache_set( $key, $content, $this->i18n_cache_group );
+		return wp_cache_set( $key, $content, self::CACHE_GROUP, self::CACHE_EXPIRE );
 	}
 
 	/**
