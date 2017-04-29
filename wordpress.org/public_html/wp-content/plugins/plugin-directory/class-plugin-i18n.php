@@ -19,9 +19,13 @@ class Plugin_I18n {
 	const CACHE_EXPIRE = 3 * DAY_IN_SECONDS;
 
 	/**
+	 * Project slug of the parent project.
+	 *
+	 * @link https://translate.wordpress.org/projects/wp-plugins
+	 *
 	 * @var string
 	 */
-	public $master_project;
+	public $master_project = 'wp-plugins';
 
 	/**
 	 * @static
