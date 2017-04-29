@@ -20,10 +20,10 @@ if ( empty( $opts['abspath'] ) && false !== strpos( __DIR__, 'wp-content' ) ) {
 	$opts['abspath'] = substr( __DIR__, 0, strpos( __DIR__, 'wp-content' ) );
 }
 
-foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
+foreach ( array( 'url', 'abspath', 'plugin', 'tag', 'type' ) as $opt ) {
 	if ( empty( $opts[ $opt ] ) ) {
 		fwrite( STDERR, "Missing Parameter: $opt\n" );
-		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --abspath /home/example/public_html --url https://wordpress.org/plugins/\n" );
+		fwrite( STDERR, "Usage: php {$argv[0]} --plugin hello-dolly --abspath /home/example/public_html --url https://wordpress.org/plugins/ --tag trunk --type readme\n" );
 		fwrite( STDERR, "--url and --abspath will be guessed if possible.\n" );
 		die();
 	}
