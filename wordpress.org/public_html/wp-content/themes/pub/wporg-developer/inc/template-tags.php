@@ -1282,7 +1282,7 @@ namespace DevHub {
 				);
 			}
 
-			$summary = apply_filters( 'the_excerpt', apply_filters( 'get_the_excerpt', $summary ) );
+			$summary = apply_filters( 'the_excerpt', apply_filters( 'get_the_excerpt', $summary, $post ) );
 		}
 
 		return $summary;
