@@ -91,7 +91,7 @@ class Manager {
  	 * @param int $old_timestamp The specific job to schedule. Optional, will affect first job otherwise.
  	 */
 	public static function reschedule_event( $hook, $new_timestamp = false, $old_timestamp = false ) {
-		$new_timestatmp = $new_timestamp ?: time();
+		$new_timestamp = $new_timestamp ?: time();
 
 		// Flush the Cavalcade jobs cache, we need fresh data from the database
 		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
