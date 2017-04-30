@@ -1,7 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
-use WordPressdotorg\Plugin_Directory\CLI;
+
 use Exception;
+use WordPressdotorg\Plugin_Directory\CLI;
 
 /**
  * Import plugin changes into WordPress.

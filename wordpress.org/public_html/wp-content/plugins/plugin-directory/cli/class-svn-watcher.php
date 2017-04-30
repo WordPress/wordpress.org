@@ -1,9 +1,9 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI;
-use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+
+use Exception;
 use WordPressdotorg\Plugin_Directory\Jobs;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
-use Exception;
 
 /**
  * A class that watches SVN and triggers plugin imports into WordPress and GlotPress

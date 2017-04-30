@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**

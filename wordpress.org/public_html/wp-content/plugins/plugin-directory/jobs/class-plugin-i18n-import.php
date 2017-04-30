@@ -2,8 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
-use WordPressdotorg\Plugin_Directory\CLI;
-use Exception;
 
 /**
  * Import plugin string changes to translate.wordpress.org.

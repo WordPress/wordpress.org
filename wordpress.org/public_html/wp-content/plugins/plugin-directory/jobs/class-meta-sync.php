@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
@@ -59,7 +60,7 @@ class Meta_Sync {
 			return;
 		}
 
-		// Sync new (and updated) ratings to postmeta 
+		// Sync new (and updated) ratings to postmeta
 		$last_review_time = get_option( 'plugin_last_review_sync' );
 		$current_review_time = $wpdb->get_var( "SELECT MAX(`date`) FROM `ratings`" );
 

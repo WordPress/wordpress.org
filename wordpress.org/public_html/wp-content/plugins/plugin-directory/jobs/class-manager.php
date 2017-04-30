@@ -1,6 +1,5 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
-use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 /**
  * Manager to wrap up all the logic for Cron tasks.
@@ -82,7 +81,7 @@ class Manager {
 			return min( $timestamps );
 		}
 	}
-	
+
 	/**
  	 * Reschedules a cavalcade job.
  	 * This requires the usage of Cavalcade, and will fail without it.
@@ -121,10 +120,10 @@ class Manager {
 				}
 			}
 		}
-	
+
 		return false;
 	}
-	
+
 
 
 	/**

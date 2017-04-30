@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+
 use WordPressdotorg\Plugin_Directory\CLI;
-use Exception;
 
 /**
  * Watch SVN changesets and queue up jobs to import the changed plugins.
