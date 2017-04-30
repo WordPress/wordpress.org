@@ -21,25 +21,25 @@ class Import {
 	const PLUGIN_SVN_BASE = 'https://plugins.svn.wordpress.org';
 
 	// Readme fields which get stored in plugin meta
-	var $readme_fields = array(
+	public $readme_fields = array(
 		'tested',
 		'requires',
 		'donate_link',
 		'license',
 		'license_uri',
 		'upgrade_notice',
-		'screenshots'
+		'screenshots',
 	);
 
 	// Plugin headers that are stored in plugin meta
-	var $plugin_headers = array(
+	public $plugin_headers = array(
 		// Header    => meta_key
 		'Name'       => 'header_name',
 		'PluginURI'  => 'header_plugin_uri',
 		'Version'    => 'version',
 		'Author'     => 'header_author',
 		'AuthorURI'  => 'header_author_uri',
-		'TextDomain' => 'header_textdomain'
+		'TextDomain' => 'header_textdomain',
 	);
 
 	/**
@@ -52,11 +52,9 @@ class Import {
 	 * @param array  $svn_revision_triggered The SVN revision which this import has been triggered by.
 	 */
 	public function import_from_svn( $plugin_slug, $svn_changed_tags = array( 'trunk' ), $svn_revision_triggered = 0 ) {
-		global $wpdb;
-
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 		if ( ! $plugin ) {
-			throw new Exception( "Unknown Plugin" );
+			throw new Exception( 'Unknown Plugin' );
 		}
 
 		$data = $this->export_and_parse_plugin( $plugin_slug );
@@ -72,7 +70,7 @@ class Import {
 			foreach ( $readme->sections as $section => $section_content ) {
 				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
 			}
-		} elseif ( !empty( $headers->Description ) ) {
+		} elseif ( ! empty( $headers->Description ) ) {
 			$content = "<!--section=description-->\n{$headers->Description}";
 		}
 
