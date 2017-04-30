@@ -1,11 +1,12 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\CLI;
 use Exception;
 
 /**
- * Import plugin string changes into WordPress.
+ * Import plugin string changes to translate.wordpress.org.
  *
  * @package WordPressdotorg\Plugin_Directory\Jobs
  */
@@ -14,15 +15,11 @@ class Plugin_i18n_Import {
 	const PHP = '/usr/local/bin/php';
 
 	/**
-	 * Queue the job 
+	 * Queue the job
 	 */
 	public static function queue( $plugin_slug, $plugin_data ) {
-		if ( 'nothing-much' != $plugin_slug ) {
-			return;
-		}
-
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
-		$when_to_run = time() + 15*MINUTE_IN_SECONDS;
+		$when_to_run = time() + 15 * MINUTE_IN_SECONDS;
 		if ( $next_scheuled = Manager::get_scheduled_time( "import_plugin_i18n:{$plugin_slug}", 'last' ) ) {
 			$when_to_run = $next_scheuled + HOUR_IN_SECONDS;
 		}
