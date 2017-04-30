@@ -49,7 +49,7 @@ class Code_Import extends I18n_Import {
 		$pot_file = "{$tmp_directory}/{$this->plugin}-code.pot";
 		$makepot  = new \MakePOT;
 
-		if ( $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
+		if ( ! $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
 			throw new Exception( "POT file couldn't be created." );
 		}
 

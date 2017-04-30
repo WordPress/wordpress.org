@@ -20,14 +20,32 @@ class Slack {
 	 *
 	 * @var array
 	 */
-	private $attachment = array();
+	private $attachment = [];
 
 	/**
 	 * Holds the text property.
 	 *
 	 * @var array
 	 */
-	private $text = array();
+	private $text = [];
+
+	/**
+	 * Holds Emoji codes for success.
+	 *
+	 * @var array
+	 */
+	private $success_emoji = [
+		':green_heart:', ':white_check_mark:', ':smiley:', ':ok: ',
+	];
+
+	/**
+	 * Holds Emoji codes for failure.
+	 *
+	 * @var array
+	 */
+	private $failure_emoji = [
+		':broken_heart:', ':umbrella_with_rain_drops:', ':cry:', ':sos:',
+	];
 
 	/**
 	 * Constructor.
@@ -62,7 +80,7 @@ class Slack {
 	 * @see https://api.slack.com/docs/attachments
 	 *
 	 * @param string $key   Key of the attachment property.
-	 * @param string $value Value of the attachment property.
+	 * @param mixed  $value Value of the attachment property.
 	 */
 	public function add_attachment( $key, $value ) {
 		$this->attachment[ $key ] = $value;
@@ -97,6 +115,26 @@ class Slack {
 	}
 
 	/**
+	 * Returns a random emoji for a failure message.
+	 *
+	 * @return string Emoji code.
+	 */
+	public function get_failure_emoji() {
+		$index = array_rand( $this->failure_emoji, 1 );
+		return $this->failure_emoji[ $index ];
+	}
+
+	/**
+	 * Returns a random emoji for a success message.
+	 *
+	 * @return string Emoji code.
+	 */
+	public function get_success_emoji() {
+		$index = array_rand( $this->success_emoji, 1 );
+		return $this->success_emoji[ $index ];
+	}
+
+	/**
 	 * Publishes a Slack notifcation to a channel.
 	 *
 	 * @param string $channel The channel to publish the notification to.
@@ -104,30 +142,29 @@ class Slack {
 	 */
 	public function send( $channel ) {
 		$text = $this->get_text();
-		if ( empty( $text ) ) {
-			return false;
+		if ( ! empty( $text ) ) {
+			$this->add_attachment( 'text', $text );
 		}
 
-		$this->add_attachment( 'text', $text );
-		$this->add_attachment( 'mrkdwn_in', array( 'text' ) );
+		$this->add_attachment( 'mrkdwn_in', [ 'text', 'fields' ] );
 
-		$payload = array(
+		$payload = [
 			'icon_emoji'  => ':wordpress:',
 			'username'    => 'Plugin Imports',
 			'channel'     => $channel,
 			'attachments' => $this->get_attachments(),
-		);
+		];
 
 		$payload = json_encode( $payload );
 		$content = http_build_query( compact( 'payload' ) );
 
-		$context = stream_context_create( array(
-			'http' => array(
+		$context = stream_context_create( [
+			'http' => [
 				'method'  => 'POST',
 				'header'  => 'Content-Type: application/x-www-form-urlencoded' . PHP_EOL,
 				'content' => $content,
-			),
-		) );
+			],
+		] );
 
 		$this->flush();
 
@@ -138,7 +175,7 @@ class Slack {
 	 * Resets internal data variables.
 	 */
 	public function flush() {
-		$this->text       = array();
-		$this->attachment = array();
+		$this->text       = [];
+		$this->attachment = [];
 	}
 }
