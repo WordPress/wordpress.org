@@ -9,12 +9,12 @@ namespace WordPressdotorg\Plugin_Directory;
 class I18n {
 
 	/**
-	 * Translate a Term Name.
+	 * Translates term names and descriptions.
 	 *
 	 * @param \WP_Term $term The Term object to translate.
-	 * @return \WP_Term The term object with a translated `name` field.
+	 * @return \WP_Term The term object with a translated `name` and/or `description` field.
 	 */
-	static function translate_term( $term ) {
+	public static function translate_term( $term ) {
 		if ( 'en_US' == get_locale() ) {
 			return $term;
 		}
@@ -23,6 +23,9 @@ class I18n {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Category Name', 'wporg-plugins' ) );
 		} elseif ( 'plugin_section' == $term->taxonomy ) {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Section Name', 'wporg-plugins' ) );
+			if ( $term->description ) {
+				$term->description = esc_html( translate_with_gettext_context( html_entity_decode( $term->description ), 'Plugin Section Description', 'wporg-plugins' ) );
+			}
 		} elseif ( 'plugin_business_model' == $term->taxonomy ) {
 			$term->name = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), 'Plugin Business Model', 'wporg-plugins' ) );
 		}
@@ -38,7 +41,7 @@ class I18n {
 	 */
 	private function static_strings() {
 
-		// Category Terms.
+		// Category terms.
 		_x( 'Accessibility',              'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Advertising',                'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Analytics',                  'Plugin Category Name', 'wporg-plugins' );
@@ -66,11 +69,17 @@ class I18n {
 		_x( 'User Management',            'Plugin Category Name', 'wporg-plugins' );
 		_x( 'Utilities & Tools',          'Plugin Category Name', 'wporg-plugins' );
 
-		// Section Terms.
+		// Section terms.
 		_x( 'Adopt Me',     'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Beta',         'Plugin Section Name', 'wporg-plugins' );
 		_x( 'My Favorites', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Featured',     'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Popular',      'Plugin Section Name', 'wporg-plugins' );
+
+		// Section descriptions.
+		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );
+		_x( 'Beta plugins are in development for possible inclusion in a future version of WordPress.', 'Plugin Section Description', 'wporg-plugins' );
+		_x( 'Plugins contained within this category get displayed on the Featured tab.', 'Plugin Section Description', 'wporg-plugins' );
+		_x( 'The below plugins have been marked as favorites.', 'Plugin Section Description', 'wporg-plugins' );
 	}
 }
