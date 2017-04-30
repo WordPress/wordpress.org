@@ -1,10 +1,10 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
-use WordPressdotorg\Plugin_Directory\Readme\Parser;
-use WordPressdotorg\Plugin_Directory\Tools\SVN;
-use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use Exception;
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
+use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WP_Error;
 
 /**
@@ -13,23 +13,6 @@ use WP_Error;
  * @package WordPressdotorg\Plugin_Directory\CLI\I18N
  */
 class Code_Import extends I18n_Import {
-	const PLUGIN_SVN_BASE = 'https://plugins.svn.wordpress.org';
-
-	/**
-	 * Slug of the plugin.
-	 *
-	 * @var string
-	 */
-	private $plugin;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param string $plugin The plugin slug.
-	 */
-	public function __construct( $plugin ) {
-		$this->plugin = $plugin;
-	}
 
 	/**
 	 * Imports the readme of a specific tag to GlotPress.
@@ -39,9 +22,9 @@ class Code_Import extends I18n_Import {
 	 * @throws Exception
 	 */
 	public function import_from_tag( $tag ) {
-		$plugin_url = self::PLUGIN_SVN_BASE . "/{$this->plugin}/{$tag}";
+		$svn_url = $this->get_plugin_svn_url( $tag );
 
-		$files = SVN::ls( $plugin_url );
+		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
@@ -49,14 +32,14 @@ class Code_Import extends I18n_Import {
 		$tmp_directory = Filesystem::temp_directory( $this->plugin . '-code-' . $tag );
 		$export_directory = $tmp_directory . '/export';
 
-		$res = SVN::export( $plugin_url, $export_directory, [ 'ignore-externals' ] );
+		$res = SVN::export( $svn_url, $export_directory, [ 'ignore-externals' ] );
 		if ( ! $res['result'] ) {
 			throw new Exception( 'Plugin export failed.' );
 		}
 
 		$valid = $this->is_plugin_valid( $export_directory );
 		if ( is_wp_error( $valid ) ) {
-			throw new Exception( 'Plugin is not compatible with language packs.' );
+			throw new Exception( 'Plugin is not compatible with language packs: ' . $valid->get_error_message() );
 		}
 
 		if ( ! class_exists( '\PotExtMeta' ) ) {
@@ -66,7 +49,7 @@ class Code_Import extends I18n_Import {
 		$pot_file = "{$tmp_directory}/{$this->plugin}-code.pot";
 		$makepot  = new \MakePOT;
 
-		if ( ! $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
+		if ( $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
 			throw new Exception( "POT file couldn't be created." );
 		}
 
@@ -93,11 +76,11 @@ class Code_Import extends I18n_Import {
 	 * @return true|\WP_Error True if valid, WP_Error in case of failures.
 	 */
 	private function is_plugin_valid( $export_directory ) {
-		$error  = new WP_Error();
 		$readme = new Parser( $this->find_readme_file( $export_directory ) );
 
 		// Whether plugin files should be checked for valid text domains.
 		if ( empty( $readme->requires ) || version_compare( $readme->requires, '4.6', '<' ) ) {
+			$error  = new WP_Error();
 			$esc_export_directory = escapeshellarg( $export_directory );
 
 			// Check for a plugin text domain declaration and loading, grep recursively, not necessarily in plugin.php.
@@ -121,7 +104,6 @@ class Code_Import extends I18n_Import {
 			if ( $error->get_error_codes() ) {
 				return $error;
 			}
-
 		}
 
 		return true;

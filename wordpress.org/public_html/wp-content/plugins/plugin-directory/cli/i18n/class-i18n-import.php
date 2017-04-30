@@ -1,9 +1,10 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
+
+use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WP_Error;
-
 
 /**
  * Class to handle plugin readme imports GlotPress.
@@ -11,6 +12,45 @@ use WP_Error;
  * @package WordPressdotorg\Plugin_Directory\CLI\I18N
  */
 abstract class I18n_Import {
+
+	/**
+	 * Slug of the plugin.
+	 *
+	 * @var string
+	 */
+	protected $plugin;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $plugin The plugin slug.
+	 */
+	public function __construct( $plugin ) {
+		$this->plugin = $plugin;
+	}
+
+	/**
+	 * Imports a specific tag to GlotPress.
+	 *
+	 * @param string $tag SVN tag of the import.
+	 *
+	 * @throws Exception
+	 */
+	abstract public function import_from_tag( $tag );
+
+	/**
+	 * Returns the SVN URL for a plugins tag.
+	 *
+	 * @param string $tag SVN tag or 'trunk'.
+	 * @return string Plugins SVN URL.
+	 */
+	public function get_plugin_svn_url( $tag ) {
+		if ( 'trunk' === $tag ) {
+			return Import::PLUGIN_SVN_BASE . "/{$this->plugin}/trunk/";
+		} else {
+			return Import::PLUGIN_SVN_BASE . "/{$this->plugin}/tags/{$tag}/";
+		}
+	}
 
 	/**
 	 * Sets the required GlotPress environment for a plugin

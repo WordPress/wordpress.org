@@ -1,12 +1,12 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
+use Exception;
 use PO;
 use Translation_Entry;
-use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
-use Exception;
+use WordPressdotorg\Plugin_Directory\Tools\SVN;
 
 /**
  * Class to handle plugin readme imports GlotPress.
@@ -14,23 +14,6 @@ use Exception;
  * @package WordPressdotorg\Plugin_Directory\CLI\I18N
  */
 class Readme_Import extends I18n_Import {
-	const PLUGIN_SVN_BASE = 'https://plugins.svn.wordpress.org';
-
-	/**
-	 * Slug of the plugin.
-	 *
-	 * @var string
-	 */
-	private $plugin;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param string $plugin The plugin slug.
-	 */
-	public function __construct( $plugin ) {
-		$this->plugin = $plugin;
-	}
 
 	/**
 	 * Imports the readme of a specific tag to GlotPress.
@@ -40,11 +23,7 @@ class Readme_Import extends I18n_Import {
 	 * @throws Exception
 	 */
 	public function import_from_tag( $tag ) {
-		if ( 'trunk' === $tag ) {
-			$svn_url = self::PLUGIN_SVN_BASE . "/{$this->plugin}/trunk/";
-		} else {
-			$svn_url = self::PLUGIN_SVN_BASE . "/{$this->plugin}/tags/{$tag}/";
-		}
+		$svn_url = $this->get_plugin_svn_url( $tag );
 
 		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
