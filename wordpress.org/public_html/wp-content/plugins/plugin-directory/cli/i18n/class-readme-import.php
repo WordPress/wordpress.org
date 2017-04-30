@@ -97,7 +97,7 @@ class Readme_Import extends I18n_Import {
 				}
 			}
 
-			if ( preg_match_all( '|<li>([\s\S]*?)</li>|', $section_text, $matches ) ) {
+			if ( preg_match_all( '|<li>(?!<p>)([\s\S]*?)</li>|', $section_text, $matches ) ) {
 				if ( ! empty( $matches[1] ) ) {
 					foreach ( $matches[1] as $text ) {
 						$section_strings = $this->handle_translator_comment( $section_strings, $text, "{$section_key} list item" );
