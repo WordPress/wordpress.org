@@ -22,8 +22,13 @@ for ( let i = 0; i < elements.length; i++ ) {
 }
 
 if ( images.length > 0 ) {
+	const temp = document.createElement( 'div');
+	const container = document.querySelector( '.entry-content' );
+
 	render(
 		<Screenshots screenshots={ images } />,
-		document.getElementById( 'screenshots' )
+		temp
 	);
+
+	container.replaceChild( temp.querySelector( '#screenshots' ), document.getElementById( 'screenshots' ) );
 }
