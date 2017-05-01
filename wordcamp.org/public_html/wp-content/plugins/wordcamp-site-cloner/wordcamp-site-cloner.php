@@ -324,7 +324,7 @@ function coming_soon_plugin_enabled() {
  * @return string
  */
 function get_screenshot_url( $site_url ) {
-	$screenshot_url = add_query_arg( 'w', 275, 'https://www.wordpress.com/mshots/v1/' . rawurlencode( $site_url ) );
+	$screenshot_url = add_query_arg( 'w', 275, 'https://s0.wp.com/mshots/v1/' . rawurlencode( $site_url ) );
 
 	return apply_filters( 'wcsc_site_screenshot_url', $screenshot_url );
 }
