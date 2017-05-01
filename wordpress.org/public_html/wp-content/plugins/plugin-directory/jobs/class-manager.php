@@ -42,12 +42,12 @@ class Manager {
 	}
 
 	/**
- 	 * Returns the latest time that the scheduled hook will run
- 	 *
- 	 * @param string $hook The hook to look for.
- 	 * @param string $when 'last' or 'next' for when the hook runs.
- 	 * @return bool|int False on failure, The timestamp on success.
- 	 */
+	 * Returns the latest time that the scheduled hook will run.
+	 *
+	 * @param string $hook The hook to look for.
+	 * @param string $when 'last' or 'next' for when the hook runs.
+	 * @return bool|int False on failure, The timestamp on success.
+	 */
 	public static function get_scheduled_time( $hook, $when = 'last' ) {
 
 		// Flush the Cavalcade jobs cache, we need fresh data from the database
@@ -63,6 +63,11 @@ class Manager {
 		foreach ( $crons as $timestamp => $cron ) {
 			if ( isset( $cron[ $hook ] ) ) {
 				foreach ( $cron[ $hook ] as $key => $cron_item ) {
+					// Cavalcade should present this field, if not, bail.
+					if ( empty( $cron_item['_job'] ) ) {
+						continue;
+					}
+
 					if ( 'waiting' === $cron_item['_job']->status ) {
 						$timestamps[] = $timestamp;
 						break;
@@ -83,13 +88,102 @@ class Manager {
 	}
 
 	/**
- 	 * Reschedules a cavalcade job.
- 	 * This requires the usage of Cavalcade, and will fail without it.
- 	 *
- 	 * @param string $hook The Hook to reschedule.
- 	 * @param int $new_timestamp The time to reschedule it to.
- 	 * @param int $old_timestamp The specific job to schedule. Optional, will affect first job otherwise.
- 	 */
+	 * Returns the current scheduled events of a hook.
+	 *
+	 * @param string   $hook           The hook to look for.
+	 * @param int|bool $next_timestamp Optional. Returns events for a specific timestamp.
+	 * @return array Scheduled events.
+	 */
+	public static function get_scheduled_events( $hook, $next_timestamp = false ) {
+
+		// Flush the Cavalcade jobs cache, we need fresh data from the database.
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		$crons = _get_cron_array();
+		if ( empty( $crons ) ) {
+			return [];
+		}
+
+		$events = [];
+
+		foreach ( $crons as $timestamp => $cron ) {
+			if ( isset( $cron[ $hook ] ) ) {
+				foreach ( $cron[ $hook ] as $key => $cron_item ) {
+					// Cavalcade should present this field, if not, bail.
+					if ( empty( $cron_item['_job'] ) ) {
+						continue;
+					}
+
+					if ( 'waiting' !== $cron_item['_job']->status ) {
+						continue;
+					}
+
+					if ( ! $next_timestamp || $next_timestamp === $timestamp ) {
+						$events[] = [
+							'hook'      => $cron_item['_job']->hook,
+							'args'      => $cron_item['_job']->args,
+							'nextrun'   => $timestamp,
+						];
+					}
+				}
+			}
+		}
+
+		return $events;
+	}
+
+	/**
+	 * Updates a cavalcade job.
+	 *
+	 * This requires the usage of Cavalcade, and will fail without it.
+	 *
+	 * @param string $hook           The hook to update.
+	 * @param int    $next_timestamp The time of the schedule to update.
+	 * @param array  $data           The data to update.
+	 * @return bool True on success, false on error.
+	 */
+	public static function update_scheduled_event( $hook, $next_timestamp, $data ) {
+		// Flush the Cavalcade jobs cache, we need fresh data from the database
+		wp_cache_delete( 'jobs', 'cavalcade-jobs' );
+
+		$crons = _get_cron_array();
+		foreach ( $crons as $timestamp => $cron ) {
+			if ( $next_timestamp !== $timestamp ) {
+				continue;
+			}
+
+			if ( isset( $cron[ $hook ] ) ) {
+				foreach ( $cron[ $hook ] as $key => $event ) {
+					// Cavalcade should present this field, if not, bail.
+					if ( empty( $event['_job'] ) ) {
+						return false;
+					}
+
+					if ( 'waiting' !== $event['_job']->status ) {
+						return false;
+					}
+
+					$event['_job']->args = $data['args'];
+					$event['_job']->nextrun = $data['nextrun'];
+					$event['_job']->save();
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Reschedules a cavalcade job.
+	 * This requires the usage of Cavalcade, and will fail without it.
+	 *
+	 * @param string   $hook          The hook to reschedule.
+	 * @param int|bool $new_timestamp The time to reschedule it to.
+	 * @param int|bool $old_timestamp The specific job to schedule. Optional, will affect first job otherwise.
+	 * @return bool True on success, false on error.
+	 */
 	public static function reschedule_event( $hook, $new_timestamp = false, $old_timestamp = false ) {
 		$new_timestamp = $new_timestamp ?: time();
 
@@ -104,7 +198,7 @@ class Manager {
 
 			if ( isset( $cron[ $hook ] ) ) {
 				foreach ( $cron[ $hook ] as $key => $event ) {
-					// Cavalcade should present this field,if not, bail.
+					// Cavalcade should present this field, if not, bail.
 					if ( empty( $event['_job'] ) ) {
 						return false;
 					}

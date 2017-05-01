@@ -16,10 +16,42 @@ class Plugin_i18n_Import {
 	 * Queue the job
 	 */
 	public static function queue( $plugin_slug, $plugin_data ) {
-		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
 		$when_to_run = time() + 15 * MINUTE_IN_SECONDS;
-		if ( $next_scheuled = Manager::get_scheduled_time( "import_plugin_i18n:{$plugin_slug}", 'last' ) ) {
-			$when_to_run = $next_scheuled + HOUR_IN_SECONDS;
+		$next_scheduled = Manager::get_scheduled_time( "import_plugin_i18n:{$plugin_slug}", 'last' );
+
+		// Update a scheduled event if it doesn't run in the next minute.
+		if ( $next_scheduled && $next_scheduled > time() + 1 * MINUTE_IN_SECONDS ) {
+			$next_scheduled_events = Manager::get_scheduled_events( "import_plugin_i18n:{$plugin_slug}",$next_scheduled );
+			if ( $next_scheduled_events ) {
+				$next_scheduled_event = array_shift( $next_scheduled_events );
+
+				$next_scheduled_event['args'][0]['tags_touched'] = array_merge(
+					$next_scheduled_event['args'][0]['tags_touched'],
+					$plugin_data['tags_touched']
+				);
+
+				if ( $plugin_data['readme_touched'] ) {
+					$next_scheduled_event['args'][0]['readme_touched'] = true;
+				}
+
+				if ( $plugin_data['code_touched'] ) {
+					$next_scheduled_event['args'][0]['code_touched'] = true;
+				}
+
+				if ( $plugin_data['assets_touched'] ) {
+					$next_scheduled_event['args'][0]['assets_touched'] = true;
+				}
+
+				$next_scheduled_event['args'][0]['revisions'] = array_merge(
+					$next_scheduled_event['args'][0]['revisions'],
+					$plugin_data['revisions']
+				);
+
+				$result = Manager::update_scheduled_event( "import_plugin_i18n:{$plugin_slug}", $next_scheduled, $next_scheduled_event );
+				if ( $result ) {
+					return;
+				}
+			}
 		}
 
 		wp_schedule_single_event(

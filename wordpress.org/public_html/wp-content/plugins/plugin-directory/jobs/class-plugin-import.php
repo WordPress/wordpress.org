@@ -14,8 +14,8 @@ class Plugin_Import {
 	public static function queue( $plugin_slug, $plugin_data ) {
 		// To avoid a situation where two imports run concurrently, if one is already scheduled, run it 1hr later (We'll trigger it after the current one finishes).
 		$when_to_run = time();
-		if ( $next_scheuled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' ) ) {
-			$when_to_run = $next_scheuled + HOUR_IN_SECONDS;
+		if ( $next_scheduled = Manager::get_scheduled_time( "import_plugin:{$plugin_slug}", 'last' ) ) {
+			$when_to_run = $next_scheduled + HOUR_IN_SECONDS;
 		}
 
 		wp_schedule_single_event(
