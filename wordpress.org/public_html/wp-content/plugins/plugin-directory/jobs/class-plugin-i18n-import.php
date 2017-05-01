@@ -25,10 +25,10 @@ class Plugin_i18n_Import {
 			if ( $next_scheduled_events ) {
 				$next_scheduled_event = array_shift( $next_scheduled_events );
 
-				$next_scheduled_event['args'][0]['tags_touched'] = array_merge(
+				$next_scheduled_event['args'][0]['tags_touched'] = array_unique( array_merge(
 					$next_scheduled_event['args'][0]['tags_touched'],
 					$plugin_data['tags_touched']
-				);
+				) );
 
 				if ( $plugin_data['readme_touched'] ) {
 					$next_scheduled_event['args'][0]['readme_touched'] = true;
@@ -42,10 +42,10 @@ class Plugin_i18n_Import {
 					$next_scheduled_event['args'][0]['assets_touched'] = true;
 				}
 
-				$next_scheduled_event['args'][0]['revisions'] = array_merge(
+				$next_scheduled_event['args'][0]['revisions'] = array_unique( array_merge(
 					$next_scheduled_event['args'][0]['revisions'],
 					$plugin_data['revisions']
-				);
+				) );
 
 				$result = Manager::update_scheduled_event( "import_plugin_i18n:{$plugin_slug}", $next_scheduled, $next_scheduled_event );
 				if ( $result ) {
