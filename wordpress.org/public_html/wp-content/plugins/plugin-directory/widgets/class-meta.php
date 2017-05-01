@@ -32,14 +32,6 @@ class Meta extends \WP_Widget {
 		?>
 
 		<h3 class="screen-reader-text"><?php echo apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Meta', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base ); ?></h3>
-		<link itemprop="applicationCategory" href="http://schema.org/OtherApplication" />
-		<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-			<meta itemprop="price" content="0.00" />
-			<meta itemprop="priceCurrency" content="USD" />
-			<span itemprop="seller" itemscope itemtype="http://schema.org/Organization">
-				<span itemprop="name" content="WordPress.org"></span>
-			</span>
-		</span>
 
 		<ul>
 			<?php if ( $built_for = get_the_term_list( $post->ID, 'plugin_built_for', '', ', ' ) ) : ?>
@@ -51,7 +43,7 @@ class Meta extends \WP_Widget {
 				<?php
 				printf( __( 'Last updated: %s', 'wporg-plugins' ),
 					/* Translators: Plugin modified time. */
-					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span itemprop="dateModified" content="' . esc_attr( get_post_modified_time( 'c' ) ) . '">' . human_time_diff( get_post_modified_time() ) . '</span>' ) . '</strong>'
+					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( get_post_modified_time() ) . '</span>' ) . '</strong>'
 				);
 				?>
 			</li>
@@ -72,7 +64,7 @@ class Meta extends \WP_Widget {
 				?></li>
 			<?php endif; ?>
 
-			<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>	
+			<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
 				<li class="hide-if-no-js">
 					<?php
 						printf( '<strong><a class="plugin-admin" href="%s">%s</a></strong>', esc_url( get_permalink() . 'advanced/' ), __( 'Advanced View', 'wporg-plugins' ) );

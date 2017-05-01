@@ -95,9 +95,7 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				</div>
 			<?php endif; ?>
 
-			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>" itemprop="downloadUrl"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
-			<meta itemprop="softwareVersion" content="<?php echo esc_attr( get_post_meta( get_the_ID(), 'version', true ) ); ?>">
-			<meta itemprop="fileFormat" content="application/zip">
+			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 		</div>
 
 		<?php the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>

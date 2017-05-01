@@ -42,6 +42,7 @@ class Plugin_Directory {
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ) );
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
+		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
 
 		// Cron tasks.
 		new Jobs\Manager();

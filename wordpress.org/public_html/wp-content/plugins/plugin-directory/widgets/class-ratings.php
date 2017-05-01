@@ -36,14 +36,12 @@ class Ratings extends \WP_Widget {
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
 		?>
-		<meta itemprop="ratingCount" content="<?php echo esc_attr( $num_ratings ) ?>"/>
 
 		<?php if ( $rating ) : ?>
 			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
 
 			<div class="rating">
 				<?php echo Template::dashicons_stars( $rating ); ?>
-				<meta itemprop="ratingValue" content="<?php echo esc_attr( $rating ) ?>">
 			</div>
 
 			<ul class="ratings-list">

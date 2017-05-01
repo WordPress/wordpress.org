@@ -14,6 +14,111 @@ require_once( __DIR__ . '/class-plugin-geopattern-svgtext.php' );
 class Template {
 
 	/**
+	 * Prints markup information in the head of a page.
+	 *
+	 * @link http://schema.org/SoftwareApplication
+	 * @link https://developers.google.com/search/docs/data-types/software-apps
+	 *
+	 * @static
+	 */
+	public static function json_ld_schema() {
+		// Schema for the front page.
+		if ( is_front_page() ) :
+			echo PHP_EOL;
+			?>
+<script type="application/ld+json">
+	{
+		"@context": "http://schema.org",
+		"@type": "WebSite",
+		"name": <?php echo wp_json_encode( __( 'WordPress Plugins', 'wporg-plugins' ) ); ?>,
+		"url": <?php echo wp_json_encode( home_url( '/' ) ); ?>,
+		"potentialAction": [
+			{
+				"@type": "SearchAction",
+				"target": <?php echo wp_json_encode( home_url( '?s={search_term_string}' ) ); ?>,
+				"query-input": "required name=search_term_string"
+			}
+		]
+	}
+</script>
+			<?php
+		endif;
+
+		// Schema for plugin pages.
+		if ( is_singular( 'plugin' ) ) :
+			$plugin = get_queried_object();
+
+			$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
+			$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
+			$num_ratings = array_sum( $ratings );
+
+			echo PHP_EOL;
+			?>
+<script type="application/ld+json">
+	[
+		{
+			"@context": "http://schema.org",
+			"@type": "BreadcrumbList",
+			"itemListElement": [
+				{
+					"@type": "ListItem",
+					"position": 1,
+					"item": {
+						"@id": "https://wordpress.org/",
+						"name": "WordPress"
+					}
+				},
+				{
+					"@type": "ListItem",
+					"position": 2,
+					"item": {
+						"@id": <?php echo wp_json_encode( home_url( '/' ) ); ?>,
+						"name": <?php echo wp_json_encode( __( 'WordPress Plugins', 'wporg-plugins' ) ) . PHP_EOL; ?>
+					}
+				}
+			]
+		},
+		{
+			"@context": "http://schema.org",
+			"@type": "SoftwareApplication",
+			"applicationCategory": "http://schema.org/OtherApplication",
+			"name": <?php echo wp_json_encode( get_the_title( $plugin ) ); ?>,
+			"description": <?php echo wp_json_encode( get_the_excerpt( $plugin ) ); ?>,
+			"softwareVersion": <?php echo wp_json_encode( $plugin->version ); ?>,
+			"fileFormat": "application/zip",
+			"downloadUrl": <?php echo wp_json_encode( self::download_link( $plugin ) ); ?>,
+			"dateModified": <?php echo wp_json_encode( get_post_modified_time( 'c', false, $plugin ) ); ?>,
+			"aggregateRating": {
+				"@type": "AggregateRating",
+				"worstRating": 0,
+				"bestRating": 5,
+				"ratingValue": <?php echo wp_json_encode( $rating ); ?>,
+				"ratingCount": <?php echo wp_json_encode( $num_ratings ); ?>,
+				"reviewCount": <?php echo wp_json_encode( $num_ratings ) . PHP_EOL; ?>
+			},
+			"interactionStatistic": {
+				"@type": "InteractionCounter",
+				"interactionType": "http://schema.org/DownloadAction",
+				"userInteractionCount": <?php echo wp_json_encode( self::get_downloads_count( $plugin ) ) . PHP_EOL; ?>
+			},
+			"offers": {
+				"@type": "Offer",
+				"price": "0.00",
+				"priceCurrency": "USD",
+				"seller": {
+					"@type": "Organization",
+					"name": "WordPress.org",
+					"url": "https://wordpress.org"
+				}
+			}
+		}
+	]
+</script>
+			<?php
+		endif;
+	}
+
+	/**
 	 * Returns a string representing the number of active installs for an item.
 	 *
 	 * @static
@@ -98,9 +203,7 @@ class Template {
 		$num_ratings = array_sum( $ratings );
 
 		return
-			'<div class="plugin-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">' .
-				'<meta itemprop="ratingCount" content="' . esc_attr( $num_ratings ) . '"/>' .
-				'<meta itemprop="ratingValue" content="' . esc_attr( $rating ) . '"/>' .
+			'<div class="plugin-rating">' .
 				Template::dashicons_stars( $rating ) .
 				'<span class="rating-count">(' .
 					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
