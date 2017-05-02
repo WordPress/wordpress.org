@@ -1016,7 +1016,7 @@ class Plugin_Directory {
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
 			if ( 'tags' === $path[2] ) {
-				if ( isset( $path[3] ) ) {
+				if ( isset( $path[3] ) && !empty( $path[3] ) ) {
 					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ) );
 					die();
 				} else {
@@ -1043,13 +1043,19 @@ class Plugin_Directory {
 				die();
 			}
 
-			// Otherwise, handle a plugin redirect.
+			// Handle any plugin redirects.
 			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
 					wp_safe_redirect( $permalink );
 					die();
 				}
+			}
+
+			//Otherwise, let's redirect to the search page
+			if ( isset( $path[2] ) && !empty( $path[2] ) ) {
+				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ) );
+				die();
 			}
 		}
 
