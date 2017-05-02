@@ -172,6 +172,18 @@ class Status_Transitions {
 			wp_delete_attachment( $attachment->ID, true );
 		}
 
+		// Prevent recursive calling via wp_update_post().
+		remove_action( 'rejected_plugin', array( $this, 'rejected' ), 10 );
+
+		// Change slug to 'rejected-plugin-name-rejected' to free up 'plugin-name'.
+		wp_update_post( array(
+			'ID'        => $post_id,
+			'post_name' => sprintf( 'rejected-%s-rejected', $post->post_name )
+		) );
+
+		// Re-add action.
+		add_action( 'rejected_plugin', array( $this, 'rejected' ), 10, 2 );
+
 		// Send email.
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
