@@ -165,10 +165,10 @@ function get_location_test_cases() {
 		/*
 		 * A location couldn't be found
 		 */
-		'city-invalid' => array(
+		'city-invalid-private-ip' => array(
 			'input' => array(
 				'location_name' => 'Rivendell',
-				'ip_address'    => '127.0.0.1'
+				'ip'            => '127.0.0.1'
 			),
 			'expected' => false,
 		),
@@ -275,6 +275,22 @@ function get_location_test_cases() {
 				'location_name' => 'Osakashi',
 				'locale'        => 'ja',
 				'timezone'      => 'Asia/Tokyo',
+			),
+			'expected' => array(
+				'description' => 'osaka',
+				'latitude'    => '34.694',
+				'longitude'   => '135.502',
+				'country'     => 'JP',
+			),
+		),
+
+		// If a location is provided, the fallback search should be attempted before an IP search
+		'fallback-with-public-ip' => array(
+			'input' => array(
+				'location_name' => 'Osakashi',
+				'locale'        => 'ja',
+				'timezone'      => 'Asia/Tokyo',
+				'ip'            => '153.163.68.148', // Tokyo
 			),
 			'expected' => array(
 				'description' => 'osaka',

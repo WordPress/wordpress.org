@@ -441,20 +441,6 @@ function get_location( $args = array() ) {
 		}
 	}
 
-	// IP:
-	if ( ! $location && isset( $args['ip'] ) ) {
-		$guess = guess_location_from_ip( $args['ip'] );
-
-		if ( $guess ) {
-			$location = array(
-				'description' => $guess->ip_city,
-				'latitude' => $guess->ip_latitude,
-				'longitude' => $guess->ip_longitude,
-				'country' => $guess->country_short,
-			);
-		}
-	}
-
 	/*
 	 * If all else fails, cast a wide net and try to find something before giving up, even
 	 * if the chance of success if lower than normal. Returning false is guaranteed failure, so this improves things
@@ -486,6 +472,20 @@ function get_location( $args = array() ) {
 		} else {
 			// No specific location details.
 			$location = array();
+		}
+	}
+
+	// IP:
+	if ( ! $location && isset( $args['ip'] ) ) {
+		$guess = guess_location_from_ip( $args['ip'] );
+
+		if ( $guess ) {
+			$location = array(
+				'description' => $guess->ip_city,
+				'latitude'    => $guess->ip_latitude,
+				'longitude'   => $guess->ip_longitude,
+				'country'     => $guess->country_short,
+			);
 		}
 	}
 
