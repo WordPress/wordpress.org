@@ -164,6 +164,7 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
 function document_title( $title ) {
 	if ( is_front_page() ) {
 		$title['title'] = __( 'WordPress Plugins', 'wporg-plugins' );
+		$title['tagline'] = __( 'Plugins extend and expand the functionality of WordPress.', 'wporg-plugins' );
 	} else {
 		$title['site'] = __( 'WordPress Plugins', 'wporg-plugins' );
 	}
