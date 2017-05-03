@@ -844,6 +844,14 @@ nav.o2-post-footer-actions ul li > span > a {
 	padding-top: 5rem;
 }
 
+/*
+ * Callout boxes
+ */
+
+.post .callout {
+	padding-bottom: 0;
+}
+
 @media(max-width: 876px) {
 	.handbook-name-container {
 		width: 100%;
