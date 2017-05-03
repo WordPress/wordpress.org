@@ -137,7 +137,12 @@ class WPorg_Handbook_Callout_Boxes {
 
 			// Callout box output.
 			$output .= "<div class='callout {$class}'>";
+
+			// Temporarily disable o2 processing while formatting content.
+			add_filter( 'o2_process_the_content', '__return_false', 1 );
 			$output .= apply_filters( 'the_content', $content );
+			remove_filter( 'o2_process_the_content', '__return_false', 1 );
+
 			$output .= '</div>';
 		}
 		return $output;
