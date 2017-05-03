@@ -41,6 +41,10 @@ td {
 	padding: 10px;
 }
 
+.entry-content h3 + h4 {
+	margin-top: 1em;
+}
+
 .entry-content td,
 .entry-content th {
 	padding: 1em !important;
