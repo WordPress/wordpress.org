@@ -1048,8 +1048,6 @@ h2.toc-heading + h3.toc-heading:target {
 
 .toc-jump a {
 	z-index: 1;
-	position: absolute;
-	right: 0;
 }
 
 @media (max-width: 480px) {
