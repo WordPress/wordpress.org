@@ -112,7 +112,7 @@ class Developers {
 			), home_url( "wp-json/plugins/v1/plugin/{$slug}/commit-subscription" ) ) );
 
 			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: RSS URL, 5: email subscription URL */
+				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: email subscription URL, 5: RSS URL */
 				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">email</a> or <a href="%5$s">RSS</a>.', 'wporg-plugins' ),
 				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
 				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
