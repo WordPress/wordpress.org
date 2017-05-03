@@ -56,6 +56,11 @@ require __DIR__ . '/inc/user-content-preview.php';
 require __DIR__ . '/inc/user-content-voting.php';
 
 /**
+ * CLI commands custom post type and importer.
+ */
+require __DIR__ . '/inc/cli.php';
+
+/**
  * Explanations for functions. hooks, classes, and methods.
  */
 require( __DIR__ . '/inc/explanations.php' );
