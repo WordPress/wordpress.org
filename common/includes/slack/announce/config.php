@@ -39,6 +39,7 @@ function get_whitelist() {
 		),
 		'cli' => array(
 			'danielbachhuber',
+			'schlessera',
 		),
 		'community-events' => $wordcamp_central,
 		'community-team' => $wordcamp_central,
