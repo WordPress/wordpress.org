@@ -579,7 +579,8 @@ a img.aligncenter {
 		position:absolute;
 		top:46px;
 		left:0;
-		z-index:11;
+		z-index:101;
+		margin-left:0;
 		width:auto;
 	}
 
