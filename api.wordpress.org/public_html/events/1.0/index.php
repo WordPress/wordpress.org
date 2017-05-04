@@ -397,10 +397,7 @@ function get_location( $args = array() ) {
 		);
 	}
 
-	$country_code = null;
-	if ( ! $location && ( isset( $args['locale'] ) && preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $args['locale'], $match ) ) ) {
-		$country_code = $match[1];
-	}
+	$country_code = get_country_code_from_locale( $args['locale'] ?? '' );
 
 	// Coordinates provided
 	if (
@@ -491,6 +488,29 @@ function get_location( $args = array() ) {
 
 	wp_cache_set( $cache_key, $location, $cache_group, $cache_life );
 	return $location;
+}
+
+/**
+ * Extract the country code from the given locale
+ *
+ * @param string $locale
+ *
+ * @return string|null
+ */
+function get_country_code_from_locale( $locale ) {
+	/*
+	 * `en_US` is ignored, because it's the default locale in Core, and many users never set it. That
+	 * leads to a lot of false-positives; e.g., Hampton-Sydney, Virginia, USA instead of Sydney, Australia.
+	 */
+	if ( empty( $locale ) || 'en_US' === $locale ) {
+		return null;
+	}
+
+	preg_match( '/^[a-z]+[-_]([a-z]+)$/i', $locale, $match );
+
+	$country_code = $match[1] ?? null;
+
+	return $country_code;
 }
 
 /**

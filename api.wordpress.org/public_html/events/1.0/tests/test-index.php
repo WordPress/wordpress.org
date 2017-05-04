@@ -255,6 +255,21 @@ function get_location_test_cases() {
 			),
 		),
 
+		// Many users never change the default `en_US` locale in Core
+		'city-oceania-with-en_US' => array(
+			'input' => array(
+				'location_name' => 'Sydney',
+				'locale'        => 'en_US',
+				'timezone'      => 'Australia/Sydney',
+			),
+			'expected' => array(
+				'description' => 'sydney',
+				'latitude'    => '-33.868',
+				'longitude'   => '151.207',
+				'country'     => 'AU',
+			),
+		),
+
 		'city-south-america' => array(
 			'input' => array(
 				'location_name' => 'Sao Paulo',
