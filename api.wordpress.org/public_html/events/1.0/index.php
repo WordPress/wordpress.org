@@ -484,7 +484,7 @@ function get_location( $args = array() ) {
 	}
 
 	// IP:
-	if ( ! $location && isset( $args['ip'] ) ) {
+	if ( ! $location && isset( $args['ip'] ) && ! isset( $args['location_name'] ) ) {
 		$guess = guess_location_from_ip( $args['ip'] );
 
 		if ( $guess ) {
