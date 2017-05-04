@@ -218,6 +218,14 @@ class DevHub_CLI {
 			$title = $matches[1];
 			$markdown = preg_replace( '/^#\swp\s(.+)/', '', $markdown );
 		}
+		$markdown = trim( $markdown );
+
+		// Steal the first sentence as the excerpt
+		$excerpt = '';
+		if ( preg_match( '/^(.+)/', $markdown, $matches ) ) {
+			$excerpt = $matches[1];
+			$markdown = preg_replace( '/^(.+)/', '', $markdown );
+		}
 
 		// Transform to HTML and save the post
 		jetpack_require_lib( 'markdown' );
@@ -226,6 +234,7 @@ class DevHub_CLI {
 		$post_data = array(
 			'ID'           => $post_id,
 			'post_content' => wp_filter_post_kses( wp_slash( $html ) ),
+			'post_excerpt' => sanitize_text_field( wp_slash( $excerpt ) ),
 		);
 		if ( ! is_null( $title ) ) {
 			$post_data['post_title'] = sanitize_text_field( wp_slash( $title ) );
