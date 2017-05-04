@@ -141,8 +141,8 @@ class Plugin extends Base {
 		foreach ( $screen_shots as $image ) {
 			$src = Template::get_asset_url( $post, $image );
 			$caption = '';
-			if ( $descriptions && !empty( $description[ (int)$image['resolution'] ] ) ) {
-				$caption = $description[ (int)$image['resolution'] ];
+			if ( $descriptions && !empty( $descriptions[ (int)$image['resolution'] ] ) ) {
+				$caption = $descriptions[ (int)$image['resolution'] ];
 				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $post->ID ] );
 			}
 
