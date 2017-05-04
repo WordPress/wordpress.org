@@ -68,15 +68,15 @@ function parse_request() {
 		$location_args['location_name'] = str_replace( ',', '', $location_args['location_name'] );
 	}
 
-	if ( isset( $_REQUEST['timezone'] ) && ! isset( $location_args['timezone'] ) ) {
+	if ( isset( $_REQUEST['timezone'] ) ) {
 		$location_args['timezone'] = $_REQUEST['timezone'];
 	}
 
-	if ( isset( $_REQUEST['locale'] ) && ! isset( $location_args['locale'] ) ) {
+	if ( isset( $_REQUEST['locale'] ) ) {
 		$location_args['locale'] = $_REQUEST['locale'];
 	}
 
-	if ( isset( $_REQUEST['ip'] ) && ! isset( $location_args['ip'] ) ) {
+	if ( isset( $_REQUEST['ip'] ) ) {
 		$location_args['ip'] = $_REQUEST['ip'];
 	}
 
