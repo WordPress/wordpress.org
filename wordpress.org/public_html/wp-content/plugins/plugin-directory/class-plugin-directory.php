@@ -529,6 +529,9 @@ class Plugin_Directory {
 		foreach ( $not_allowed_shortcodes as $tag ) {
 			remove_shortcode( $tag );
 		}
+
+		// remove special embed shortcode handling
+		remove_filter( 'the_content', array( $GLOBALS['wp_embed'], 'run_shortcode' ), 8 );
 	}
 
 	/**
