@@ -43,7 +43,7 @@ class Readme_Import extends I18n_Import {
 			}
 		}
 
-		$readme_file = "{$svn_url}/{$readme_file}";
+		$readme_file = "{$svn_url}{$readme_file}";
 		$readme = new Parser( $readme_file );
 
 		if ( ! class_exists( '\PO' ) ) {
