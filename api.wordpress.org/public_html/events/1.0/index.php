@@ -356,6 +356,8 @@ function get_prepare_placeholders( $number, $format ) {
  *         adoption is at 16% globally and rising relatively fast. Some countries are as high as 30%.
  *         See https://www.google.com/intl/en/ipv6/statistics.html#tab=ipv6-adoption for current stats.
  *
+ * @todo - Core sends anonymized IPs like `2a03:2880:2110:df07::`, so make sure those work when implementing IPv6
+ *
  * @param string $dotted_ip
  *
  * @return null|object `null` on failure; an object on success
@@ -625,6 +627,14 @@ function get_country_from_name( $country_name ) {
  *         http://www.techfounder.net/2009/02/02/selecting-closest-values-in-mysql/
  *         There's only 140k rows in the table, though, so this is performant for now.
  *
+ * NOTE: If this causes any performance issues, it's possible that it could be removed entirely. The Core client
+ *       saves the location locally, so it could display that instead of using this. However, there were some
+ *       edge cases early in development that caused us to add this. I don't remember what they were, though, and
+ *       didn't properly document them in r5128. So, if we ever want to attempt removing this, we'll need to test
+ *       for unintended side effects. The Core client would need to be updated to display the saved location, so
+ *       removing this would probably require creating a new version of the endpoint, and leaving this version for
+ *       older installs.
+ *
  * @param float $latitude
  * @param float $longitude
  *
@@ -680,7 +690,7 @@ function get_events( $args = array() ) {
 			'wordcamp' => 400,
 		);
 		$nearby_where = array();
-		$nearby_vals = '';
+
 		foreach ( $event_distances as $type => $distance ) {
 			if ( !empty( $args['type'] ) && $type != $args['type'] ) {
 				continue;
