@@ -109,10 +109,7 @@ class Plugin_i18n_Import {
 			$esc_type        = escapeshellarg( $type );
 
 			$cmd = self::PHP . ' ' . dirname( __DIR__ ) . "/bin/import-plugin-to-glotpress.php --plugin {$esc_plugin_slug} --tag {$esc_tag} --type {$esc_type}";
-
-			echo "\n\$$cmd\n";
-			echo shell_exec( $cmd ) . "\n";
+			exec( $cmd );
 		}
 	}
-
 }

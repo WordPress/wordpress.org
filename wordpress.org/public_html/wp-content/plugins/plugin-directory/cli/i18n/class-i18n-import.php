@@ -74,7 +74,10 @@ abstract class I18n_Import {
 
 		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-plugin-project ' . escapeshellarg( $plugin_slug ) . ' ' . escapeshellarg( $process_type );
 
-		$last_line = system( $cmd, $return_code );
+		$return_code = 0;
+		$output = [];
+		exec( $cmd, $output, $return_code );
+		$last_line = array_pop( $output );
 
 		if ( 0 === $return_code ) {
 			// Get the first word of the last line and return it as the status.
@@ -121,7 +124,7 @@ abstract class I18n_Import {
 
 		// Note: this will only work if the GlotPress project/sub-projects exist.
 		$cmd = WPORGTRANSLATE_WPCLI . ' glotpress import-originals ' . escapeshellarg( "wp-plugins/{$project}/{$branch}" ) . ' ' . escapeshellarg( $file );
-		echo shell_exec( $cmd ) . "\n";
+		exec( $cmd );
 
 		if ( empty( $str_priorities ) ) {
 			return;
@@ -227,7 +230,7 @@ abstract class I18n_Import {
 			}
 
 			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate import-plugin-translations ' . escapeshellarg( "wp-plugins/{$project}/{$branch}" ) . ' ' . escapeshellarg( $language ) . ' ' . escapeshellarg( $file ) . ' --format=' . escapeshellarg( $ext );
-			echo shell_exec( $cmd . ' 2>&1' );
+			exec( $cmd );
 		}
 	}
 }
