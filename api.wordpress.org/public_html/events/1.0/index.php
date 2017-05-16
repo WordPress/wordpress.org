@@ -417,6 +417,8 @@ function rebuild_location_from_event_source( $events ) {
 	foreach ( $events as $event ) {
 		if ( ! empty( $event['location']['location'] ) && ! empty( $event['location']['latitude'] ) ) {
 			$location = $event['location'];
+			$location['description'] = $location['location'];
+			unset( $location['location'] );
 			break;
 		}
 	}
