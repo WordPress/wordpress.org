@@ -73,6 +73,21 @@ function run( $data ) {
 		}
 
 		$text = sprintf( "*@committers:* %s\n_(cc: %s)_", $data['text'], '@' . implode( ', @', $committers ) );
+	} elseif ( $data['command'] === '/deputies' ) {
+		// This is not all deputies; it's only the ones who want to receive `/deputies` pings
+		$pingable_deputies = array(
+			'00sleepy', '_dorsvenabili', 'adityakane', 'andreamiddleton', 'bph', 'brandondove', 'camikaos',
+			'chanthaboune', 'courtneypk', 'drebbits', 'francina', 'gounder', 'heysherie', 'hlashbrooke',
+			'karenalma', 'kcristiano', 'kdrewien', 'kenshino', 'mayukojpn', 'mikelking', 'miss_jwo',
+			'remediosgraphic', 'savione', 'vc27', 'yaycheryl',
+		);
+		$pingable_deputies = array( 'coreymckrill', 'iandunn' ); // todo remove after testing
+
+		if ( ! in_array( $user, $pingable_deputies, true ) ) {
+			return;
+		}
+
+		$text = sprintf( "*/deputies:* %s\n_(CC: %s)_", $data['text'], '@' . implode( ', @', $pingable_deputies ) );
 	} else {
 		if ( ! is_user_whitelisted( $user, $channel ) ) {
 			show_authorization( $user, $channel );
