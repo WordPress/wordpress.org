@@ -717,6 +717,7 @@ function get_location_test_cases() {
 				'latitude'    => '-17.829',
 				'longitude'   => '31.054',
 				'country'     => 'ZW',
+				'internal'    => true,
 			),
 		),
 
@@ -727,6 +728,7 @@ function get_location_test_cases() {
 				'latitude'    => '31.955',
 				'longitude'   => '35.945',
 				'country'     => 'JO',
+				'internal'    => true,
 			),
 		),
 
@@ -737,6 +739,7 @@ function get_location_test_cases() {
 				'latitude'    => '54.617',
 				'longitude'   => '-5.900',
 				'country'     => 'GB',
+				'internal'    => true,
 			),
 		),
 
@@ -747,6 +750,7 @@ function get_location_test_cases() {
 				'latitude'    => '19.414',
 				'longitude'   => '-99.033',
 				'country'     => 'MX',
+				'internal'    => true,
 			),
 		),
 
@@ -757,6 +761,7 @@ function get_location_test_cases() {
 				'latitude'    => '-36.867',
 				'longitude'   => '174.767',
 				'country'     => 'NZ',
+				'internal'    => true,
 			),
 		),
 
@@ -767,6 +772,7 @@ function get_location_test_cases() {
 				'latitude'    => '-12.043',
 				'longitude'   => '-77.028',
 				'country'     => 'PE',
+				'internal'    => true,
 			),
 		),
 	);

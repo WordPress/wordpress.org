@@ -125,6 +125,10 @@ function build_response( $location ) {
 		}
 
 		$events = get_events( $event_args );
+
+		if ( isset( $location['internal'] ) && $location['internal'] ) {
+			$location = rebuild_location_from_event_source( $events );
+		}
 	}
 
 	return compact( 'error', 'location', 'events', 'ttl' );
@@ -352,6 +356,9 @@ function get_prepare_placeholders( $number, $format ) {
 /**
  * Determine a location for the given IPv4 address
  *
+ * NOTE: The location that is found here cannot be returned to the client.
+ *       See `rebuild_location_from_geonames()`.
+ *
  * @todo - Add support for IPv6 addresses. Otherwise, this will quickly lose effectiveness. As of March 2017, IPv6
  *         adoption is at 16% globally and rising relatively fast. Some countries are as high as 30%.
  *         See https://www.google.com/intl/en/ipv6/statistics.html#tab=ipv6-adoption for current stats.
@@ -384,6 +391,37 @@ function guess_location_from_ip( $dotted_ip ) {
 	}
 
 	return $row;
+}
+
+/**
+ * Rebuild the location given to the client from the event source data
+ *
+ * We cannot publicly expose location data that we retrieve from the `ip2location` database, because that would
+ * violate their licensing terms. We can only use the information internally, for the purposes of completing the
+ * program's business logic (determining nearby events).
+ *
+ * Once we have nearby events, though, we can take advantage of the data that's available in the `wporg_events` table.
+ * That table contains the locations details for the event's venue, which was sourced from the respective APIs
+ * (WordCamp.org, Meetup.com, etc). We can return the venue's location data without violating any terms.
+ *
+ * See https://meta.trac.wordpress.org/ticket/2823#comment:15
+ * See https://meta.trac.wordpress.org/ticket/2823#comment:21
+ *
+ * @param array $events
+ *
+ * @return array
+ */
+function rebuild_location_from_event_source( $events ) {
+	$location = array();
+
+	foreach ( $events as $event ) {
+		if ( ! empty( $event['location']['location'] ) && ! empty( $event['location']['latitude'] ) ) {
+			$location = $event['location'];
+			break;
+		}
+	}
+
+	return $location;
 }
 
 /**
@@ -495,6 +533,7 @@ function get_location( $args = array() ) {
 				'latitude'    => $guess->ip_latitude,
 				'longitude'   => $guess->ip_longitude,
 				'country'     => $guess->country_short,
+				'internal'    => true, // this location cannot be shared publicly, see `rebuild_location_from_geonames()`
 			);
 		}
 	}
@@ -697,7 +736,7 @@ function get_events( $args = array() ) {
 			}
 			$bounded_box = get_bounded_coordinates( $args['nearby']['latitude'], $args['nearby']['longitude'], $distance );
 			$nearby_where[] = '( `type` = %s AND `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
-			$sql_values[] = $type;			
+			$sql_values[] = $type;
 			$sql_values[] = $bounded_box['latitude']['min'];
 			$sql_values[] = $bounded_box['latitude']['max'];
 			$sql_values[] = $bounded_box['longitude']['min'];
