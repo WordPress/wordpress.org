@@ -102,11 +102,9 @@ function parse_request() {
  * @return array
  */
 function build_response( $location ) {
-	if ( false === $location ) {
-		// No location was determined for the request. Bail with an error.
-		$events = array();
-		$error = 'no_location_available';
-	} else {
+	$events = array();
+
+	if ( $location ) {
 		$event_args = array();
 
 		if ( isset( $_REQUEST['number'] ) ) {
@@ -129,6 +127,10 @@ function build_response( $location ) {
 		if ( isset( $location['internal'] ) && $location['internal'] ) {
 			$location = rebuild_location_from_event_source( $events );
 		}
+	}
+
+	if ( false === $location ) {
+		$error = 'no_location_available';
 	}
 
 	return compact( 'error', 'location', 'events', 'ttl' );
@@ -409,10 +411,10 @@ function guess_location_from_ip( $dotted_ip ) {
  *
  * @param array $events
  *
- * @return array
+ * @return array|false
  */
 function rebuild_location_from_event_source( $events ) {
-	$location = array();
+	$location = false;
 
 	foreach ( $events as $event ) {
 		if ( ! empty( $event['location']['location'] ) && ! empty( $event['location']['latitude'] ) ) {
