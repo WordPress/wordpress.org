@@ -124,7 +124,7 @@ function build_response( $location ) {
 
 		$events = get_events( $event_args );
 
-		if ( isset( $location['internal'] ) && $location['internal'] ) {
+		if ( empty( $location['description'] ) || ( isset( $location['internal'] ) && $location['internal'] ) ) {
 			$location = rebuild_location_from_event_source( $events );
 		}
 	}
@@ -474,10 +474,8 @@ function get_location( $args = array() ) {
 			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
 		)
 	) {
-		$city = get_city_from_coordinates( $args['latitude'], $args['longitude'] );
-
 		$location = array(
-			'description' => $city ? $city : "{$args['latitude']}, {$args['longitude']}",
+			'description' => false,
 			'latitude'    => $args['latitude'],
 			'longitude'   => $args['longitude']
 		);
@@ -673,48 +671,6 @@ function get_country_from_name( $country_name ) {
 	}
 
 	return $country;
-}
-
-/**
- * Get the name of the city that's closest to the given coordinates
- *
- * @todo - This can probably be optimized by SELECT'ing from a derived table of the closest rows, instead of the
- *         entire table, similar to the technique described at
- *         http://www.techfounder.net/2009/02/02/selecting-closest-values-in-mysql/
- *         There's only 140k rows in the table, though, so this is performant for now.
- *
- * NOTE: If this causes any performance issues, it's possible that it could be removed entirely. The Core client
- *       saves the location locally, so it could display that instead of using this. However, there were some
- *       edge cases early in development that caused us to add this. I don't remember what they were, though, and
- *       didn't properly document them in r5128. So, if we ever want to attempt removing this, we'll need to test
- *       for unintended side effects. The Core client would need to be updated to display the saved location, so
- *       removing this would probably require creating a new version of the endpoint, and leaving this version for
- *       older installs.
- *
- * @param float $latitude
- * @param float $longitude
- *
- * @return false|string
- */
-function get_city_from_coordinates( $latitude, $longitude ) {
-	global $wpdb;
-
-	$results = $wpdb->get_col( $wpdb->prepare( "
-		SELECT
-			name,
-			ABS( %f - latitude  ) AS latitude_distance,
-			ABS( %f - longitude ) AS longitude_distance
-		FROM geoname
-		HAVING
-			latitude_distance  < 0.3 AND    -- 0.3 degrees is about 30 miles
-			longitude_distance < 0.3
-		ORDER by latitude_distance ASC, longitude_distance ASC
-		LIMIT 1",
-		$latitude,
-		$longitude
-	) );
-
-	return isset( $results[0] ) ? $results[0] : false;
 }
 
 function get_events( $args = array() ) {

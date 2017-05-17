@@ -18,7 +18,6 @@ function run_tests() {
 
 	$tests_failed = 0;
 	$tests_failed += test_get_location();
-	$tests_failed += test_get_city_from_coordinates();
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
 
@@ -697,7 +696,7 @@ function get_location_test_cases() {
 				'locale'    => 'en_US',
 			),
 			'expected' => array(
-				'description' => 'seattle',
+				'description' => false,
 				'latitude'    => '47.606',
 				'longitude'   => '-122.332',
 			),
@@ -712,7 +711,7 @@ function get_location_test_cases() {
 				'locale'    => 'af',
 			),
 			'expected' => array(
-				'description' => 'otavi',
+				'description' => false,
 				'latitude'    => '-19.634',
 				'longitude'   => '17.332',
 			),
@@ -789,70 +788,6 @@ function get_location_test_cases() {
 	);
 
 	 return $cases;
-}
-
-/**
- * Test `get_city_from_coordinates()`
- *
- * @todo This can probably be refactored along with test_get_location() into a more abstract/DRY general-purpose
- *       test runner.
- *
- * @return bool The number of failures
- */
-function test_get_city_from_coordinates() {
-	$failed = 0;
-	$cases  = get_city_from_coordinates_test_cases();
-
-	printf( "\n\nRunning %d city from coordinate tests\n", count( $cases ) );
-
-	foreach ( $cases as $case_id => $case ) {
-		$case['input'] = add_cachebusting_parameter( $case['input'] );
-		$actual_result = get_city_from_coordinates( $case['input']['latitude'], $case['input']['longitude'] );
-		$passed        = $case['expected'] === $actual_result;
-
-		output_results( $case_id, $passed, $case['expected'], $actual_result );
-
-		if ( ! $passed ) {
-			$failed++;
-		}
-	}
-
-	return $failed;
-}
-
-/**
- * Get the cases for testing `get_city_from_coordinates()`
- *
- * @return array
- */
-function get_city_from_coordinates_test_cases() {
-	 $cases = array(
-		'lower-latitude-higher-longitude' => array(
-			'input' => array(
-				'latitude'  => '60.199',
-				'longitude' => '24.660'
-			),
-			'expected' => 'Espoo',
-		),
-
-		'higher-latitude-lower-longitude' => array(
-			'input' => array(
-				'latitude'  => '22.000',
-				'longitude' => '95.900'
-			),
-			'expected' => 'Mandalay',
-		),
-
-		'middle-of-no-and-where' => array(
-			'input' => array(
-				'latitude'  => '-23.121',
-				'longitude' => '125.071'
-			),
-			'expected' => false,
-		),
-	);
-
-	return $cases;
 }
 
 run_tests();
