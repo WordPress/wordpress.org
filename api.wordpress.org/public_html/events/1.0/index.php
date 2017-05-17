@@ -409,6 +409,11 @@ function guess_location_from_ip( $dotted_ip ) {
  * See https://meta.trac.wordpress.org/ticket/2823#comment:15
  * See https://meta.trac.wordpress.org/ticket/2823#comment:21
  *
+ * This isn't ideal, since the location it picks is potentially an hour's driving time from the user. If we get a
+ * lot of complaints, we could potentially change this to search the `geonames` database for the name of the city
+ * that was returned by the `ip2location` database. That should be more accurate, but it would require an extra
+ * database lookup, and could potentially fail to return any results.
+ *
  * @param array $events
  *
  * @return array|false
@@ -421,7 +426,15 @@ function rebuild_location_from_event_source( $events ) {
 			$location = $event['location'];
 			$location['description'] = $location['location'];
 			unset( $location['location'] );
-			break;
+
+			/*
+			 * If the event is a WordCamp, continue searching until a meetup is found. Meetups have a much smaller
+			 * search radius in `get_events()`, so they'll be closer to the user's location. Some cities will only
+			 * have WordCamps scheduled at the moment, though, so we can fall back to those.
+			 */
+			if ( 'meetup' === $event['type'] ) {
+				break;
+			}
 		}
 	}
 
