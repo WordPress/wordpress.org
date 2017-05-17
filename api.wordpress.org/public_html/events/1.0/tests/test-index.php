@@ -10,14 +10,25 @@ if ( 'cli' !== php_sapi_name() ) {
  * Main entry point
  */
 function run_tests() {
+	global $wpdb;
 	define( 'RUNNING_TESTS', true );
+	define( 'SAVEQUERIES',   true );
+
 	require_once( dirname( __DIR__ ) . '/index.php' );
 
-	$failed = 0;
-	$failed += test_get_location();
-	$failed += test_get_city_from_coordinates();
+	$tests_failed = 0;
+	$tests_failed += test_get_location();
+	$tests_failed += test_get_city_from_coordinates();
+	$query_count  = count( $wpdb->queries );
+	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
 
-	printf( "\n\nFinished running all tests. %d failed.\n", $failed );
+	printf(
+		"\n\nFinished running all tests.\n\n* %d tests failed\n* %d queries ran in %f seconds\n* Average time per query: %f seconds\n",
+		$tests_failed,
+		$query_count,
+		$query_time,
+		$query_time / $query_count
+	);
 }
 
 /**
