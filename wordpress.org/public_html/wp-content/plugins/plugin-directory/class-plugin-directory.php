@@ -653,7 +653,7 @@ class Plugin_Directory {
 	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
 	public function pre_get_posts( $wp_query ) {
-		if ( is_admin() ) {
+		if ( is_admin() || ! $wp_query->is_main_query() ) {
 			return;
 		}
 
