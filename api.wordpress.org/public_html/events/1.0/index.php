@@ -22,7 +22,7 @@ function main() {
 	$ttl           = 12 * 60 * 60; // Time the client should cache the document.
 	$location_args = parse_request();
 	$location      = get_location( $location_args );
-	$response      = build_response( $location );
+	$response      = build_response( $location, $location_args );
 
 	send_response( $response, $ttl );
 }
@@ -98,10 +98,11 @@ function parse_request() {
  * Build the API's response to the client's request
  *
  * @param array $location
+ * @param array $location_args
  *
  * @return array
  */
-function build_response( $location ) {
+function build_response( $location, $location_args ) {
 	$events = array();
 
 	if ( $location ) {
@@ -124,12 +125,34 @@ function build_response( $location ) {
 
 		$events = get_events( $event_args );
 
-		if ( empty( $location['description'] ) || ( isset( $location['internal'] ) && $location['internal'] ) ) {
-			$location = rebuild_location_from_event_source( $events );
+		/*
+		 * There are two conditions which can cause a location to not have a description:
+		 * 1) When the request only passed latitude/longtude coordinates. We don't lookup
+		 *    a location here because it's too expensive. See r5497.
+		 * 2) When the location was determined by geolocating the IP. We don't return the
+		 *    location here because it would violate the ip2location EULA. See r5491.
+		 *
+		 * For WP 4.8-beta1 those conditions were handled by setting "fuzzy" locations
+		 * instead; the location of the first upcoming event was used, since it will be
+		 * within driving distance of the location that was geolocated.
+		 *
+		 * After beta1 was released, though, there was a lot of feedback about the locations
+		 * being too inaccurate, so we're going to try a different approach for beta2. See
+		 * #40702-core.
+		 *
+		 * @todo Update the user-agent strings if 40702-geoip.2.diff doesn't make it into beta2
+		 * @todo Remove this back-compat code after beta2 has been out for a few days
+		 */
+		$use_fuzzy_locations = false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.7' ) || false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.8-beta1' );
+		if ( $use_fuzzy_locations ) {
+			if ( empty( $location['description'] ) || ( isset( $location['internal'] ) && $location['internal'] ) ) {
+				$location = rebuild_location_from_event_source( $events );
+			}
+		} elseif ( isset( $location['internal'] ) && $location['internal'] ) {
+			// Let the client know that a location was successfully determined based on their IP
+			$location = array( 'ip' => $location_args['ip'] );
 		}
-	}
-
-	if ( false === $location ) {
+	} else {
 		$error = 'no_location_available';
 	}
 
