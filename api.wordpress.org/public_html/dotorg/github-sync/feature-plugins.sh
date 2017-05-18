@@ -100,6 +100,13 @@ fi
 mv -f $WORKING_DIR/_temp-github/* $WORKING_DIR/
 rm -rf $WORKING_DIR/_temp-github
 
+# Commit only if any changes found
+SVN_CHANGES_FOUND=$(svn status -q $WORKING_DIR)
+if [ -z "$SVN_CHANGES_FOUND" ]; then
+	echo "No changes found in the SVN repository."
+	exit 1
+fi
+
 # Do the version number bump with $date (0.1-20150125)
 # Will error if no .php files exist
 MAIN_PLUGIN_FILE=$(grep 'Plugin Name:' $WORKING_DIR/*.php -l | head -n1)
