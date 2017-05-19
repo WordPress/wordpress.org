@@ -718,7 +718,9 @@ function get_location_test_cases() {
 		),
 
 		/*
-		 * Only the IP is given
+		 * Only the IPv4 address is given
+		 *
+		 * See https://awebanalysis.com/en/ipv4-directory/
 		 */
 		'ip-africa' => array(
 			'input' => array( 'ip' => '41.191.232.22' ),
@@ -785,9 +787,82 @@ function get_location_test_cases() {
 				'internal'    => true,
 			),
 		),
+
+		/*
+		 * Only an IPv6 address is given
+		 *
+		 * See https://www.google.com/intl/en/ipv6/statistics.html#tab=per-country-ipv6-adoption&tab=per-country-ipv6-adoption
+		 * See https://awebanalysis.com/en/ipv6-directory/
+		 * See https://www.google.com/search?q=australia+site%3Ahttps%3A%2F%2Fawebanalysis.com%2Fen%2Fipv6-directory%2F
+		 */
+		'ipv6-africa' => array(
+			'input'    => array( 'ip' => '2c0f:f8f0:ffff:ffff:ffff:ffff:ffff:ffff' ),
+			'expected' => array(
+				'description' => 'harare',
+				'latitude'    => '-17.829',
+				'longitude'   => '31.054',
+				'country'     => 'ZW',
+				'internal'    => true,
+			),
+		),
+
+		'ipv6-asia-anonymized' => array(
+			'input'    => array( 'ip' => '2405:200:1000::' ),
+			'expected' => array(
+				'description' => 'mumbai',
+				'latitude'    => '19.014',
+				'longitude'   => '72.848',
+				'country'     => 'IN',
+				'internal'    => true,
+			),
+		),
+
+		'ipv6-europe-anonymized' => array(
+			'input'    => array( 'ip' => '2a02:578:1000::' ),
+			'expected' => array(
+				'description' => 'sint-niklaas',
+				'latitude'    => '51.165',
+				'longitude'   => '4.144',
+				'country'     => 'BE',
+				'internal'    => true,
+			),
+		),
+
+		'ipv6-north-america-anonymized' => array(
+			'input'    => array( 'ip' => '2605:a600::' ),
+			'expected' => array(
+				'description' => 'mountain view',
+				'latitude'    => '37.386',
+				'longitude'   => '-122.084',
+				'country'     => 'US',
+				'internal'    => true,
+			),
+		),
+
+		'ipv6-oceania-collapsed-prefix' => array(
+			'input'    => array( 'ip' => '::ffff:0190:c500' ),
+			'expected' => array(
+				'description' => 'quedjinup',
+				'latitude'    => '-33.634',
+				'longitude'   => '115.084',
+				'country'     => 'AU',
+				'internal'    => true,
+			),
+		),
+
+		'ipv6-south-america' => array(
+			'input'    => array( 'ip' => '2001:1388:6643:2736:10f1:897c:428c:1b3b' ),
+			'expected' => array(
+				'description' => 'ayacucho',
+				'latitude'    => '-13.158',
+				'longitude'   => '-74.224',
+				'country'     => 'PE',
+				'internal'    => true,
+			),
+		),
 	);
 
-	 return $cases;
+	return $cases;
 }
 
 run_tests();

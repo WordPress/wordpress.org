@@ -384,12 +384,6 @@ function get_prepare_placeholders( $number, $format ) {
  * NOTE: The location that is found here cannot be returned to the client.
  *       See `rebuild_location_from_geonames()`.
  *
- * @todo - Add support for IPv6 addresses. Otherwise, this will quickly lose effectiveness. As of March 2017, IPv6
- *         adoption is at 16% globally and rising relatively fast. Some countries are as high as 30%.
- *         See https://www.google.com/intl/en/ipv6/statistics.html#tab=ipv6-adoption for current stats.
- *
- * @todo - Core sends anonymized IPs like `2a03:2880:2110:df07::`, so make sure those work when implementing IPv6
- *
  * @param string $dotted_ip
  *
  * @return null|object `null` on failure; an object on success
@@ -397,14 +391,26 @@ function get_prepare_placeholders( $number, $format ) {
 function guess_location_from_ip( $dotted_ip ) {
 	global $wpdb;
 
-	$long_ip = ip2long( $dotted_ip );
-	if ( $long_ip === false )
+	$long_ip = false;
+
+	if ( filter_var( $dotted_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+		$long_ip = ip2long( $dotted_ip );
+		$from    = 'ip2location';
+		$where   = 'ip_to >= %d';
+	} else if ( filter_var( $dotted_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+		$long_ip = _ip2long_v6( $dotted_ip );
+		$from    = 'ipv62location';
+		$where   = "ip_to >= CAST( %s AS DECIMAL( 39, 0 ) )";
+	}
+
+	if ( false === $long_ip || ! isset( $from, $where ) ) {
 		return;
+	}
 
 	$row = $wpdb->get_row( $wpdb->prepare( "
 		SELECT ip_city, ip_latitude, ip_longitude, country_short
-		FROM ip2location
-		WHERE ip_to >= %d
+		FROM $from
+		WHERE $where
 		ORDER BY ip_to ASC
 		LIMIT 1",
 		$long_ip
@@ -416,6 +422,53 @@ function guess_location_from_ip( $dotted_ip ) {
 	}
 
 	return $row;
+}
+
+/**
+ * Convert an IPv6 address to an IP number than can be queried in the ip2location database.
+ *
+ * PHP doesn't handle integers large enough to accommodate IPv6 numbers (128 bit), so the number needs
+ * to be cast as a string.
+ *
+ * @link https://en.wikipedia.org/wiki/IPv6
+ * @link http://php.net/manual/en/language.types.integer.php
+ *
+ * The code in this function is based on an answer here: http://lite.ip2location.com/faqs
+ *
+ * Uses `inet_pton()` which correctly parses truncated IPv6 addresses such as `2a03:2880:2110:df07::`.
+ * That is important, because Core will send anonymized addresses instead of complete ones.
+ *
+ * @access private
+ *
+ * @param string $address The IPv6 address to convert.
+ *
+ * @return string|bool `false` if invalid address. Otherwise an IP number cast as a string.
+ */
+function _ip2long_v6( $address ) {
+	$int = inet_pton( $address );
+
+	if ( false === $int ) {
+		return false;
+	}
+
+	$bits     = 15;
+	$ipv6long = 0;
+
+	while ( $bits >= 0 ) {
+		$bin = sprintf( "%08b", ( ord( $int[ $bits ] ) ) );
+
+		if ( $ipv6long ) {
+			$ipv6long = $bin . $ipv6long;
+		} else {
+			$ipv6long = $bin;
+		}
+
+		$bits--;
+	}
+
+	$ipv6long = gmp_strval( gmp_init( $ipv6long, 2 ), 10 );
+
+	return $ipv6long;
 }
 
 /**
