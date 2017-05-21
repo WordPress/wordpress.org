@@ -68,7 +68,7 @@ gp_tmpl_header();
 		foreach ( $top_level_projects as $top_level_project ) {
 			printf(
 				'<li><a href="%s"%s>%s</a></li>',
-				gp_url_join( '/locale', $locale_slug, $set_slug, $top_level_project->slug ),
+				esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, $top_level_project->slug ) ),
 				( $top_level_project->path == $project_path ) ? ' class="current"' : '',
 				$top_level_project->name
 			);

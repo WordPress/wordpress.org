@@ -76,7 +76,7 @@ gp_tmpl_header();
 						if ( $sub_project_status->all_count ) {
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
-								gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ),
+								esc_url( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ) ),
 								$sub_project->name,
 								$sub_project_status->percent_complete . '%'
 							);
@@ -87,7 +87,7 @@ gp_tmpl_header();
 
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
-								gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ),
+								esc_url( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ) ),
 								$_sub_project->name,
 								$status->percent_complete . '%'
 							);

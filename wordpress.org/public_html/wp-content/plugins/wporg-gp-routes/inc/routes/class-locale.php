@@ -16,6 +16,8 @@ use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
  */
 class Locale extends GP_Route {
 
+	private $cache_group = 'wporg-translate';
+
 	/**
 	 * Adapter for the rosetta roles plugin.
 	 *
@@ -48,6 +50,10 @@ class Locale extends GP_Route {
 
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
+			return $this->die_with_404();
+		}
+
+		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
 			return $this->die_with_404();
 		}
 
@@ -86,7 +92,6 @@ class Locale extends GP_Route {
 		if ( ! $project ) {
 			return $this->die_with_404();
 		}
-
 
 		$paged_sub_projects = $this->get_paged_active_sub_projects(
 			$project,
@@ -135,7 +140,10 @@ class Locale extends GP_Route {
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+		$locale_glossary = false;
+		if ( $locale_glossary_translation_set ) {
+			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+		}
 
 		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
@@ -151,6 +159,10 @@ class Locale extends GP_Route {
 	public function get_locale_project( $locale_slug, $set_slug, $project_path, $sub_project_path ) {
 		$locale = GP_Locales::by_slug( $locale_slug );
 		if ( ! $locale ) {
+			return $this->die_with_404();
+		}
+
+		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
 			return $this->die_with_404();
 		}
 
@@ -197,6 +209,30 @@ class Locale extends GP_Route {
 		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
+	}
+
+	/**
+	 * Whether a translation set slug exists for a locale.
+	 *
+	 * @param \GP_Locale $locale The locale.
+	 * @param string     $slug   The slug of a translation set.
+	 * @return bool True if slug exists, false if not.
+	 */
+	private function translation_set_slug_exists( $locale, $slug ) {
+		$cache_key = "translation_set_slugs:{$locale->slug}";
+		$slugs = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false === $slugs ) {
+			global $wpdb;
+			$slugs = $wpdb->get_col( $wpdb->prepare(
+				"SELECT DISTINCT(slug) FROM {$wpdb->gp_translation_sets} WHERE locale = %s",
+				$locale->slug
+			) );
+
+			wp_cache_set( $cache_key, $slugs, $this->cache_group, DAY_IN_SECONDS );
+		}
+
+		return in_array( $slug, $slugs, true );
 	}
 
 	/**
