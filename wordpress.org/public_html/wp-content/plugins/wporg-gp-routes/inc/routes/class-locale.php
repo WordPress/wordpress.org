@@ -219,7 +219,7 @@ class Locale extends GP_Route {
 	 * @return bool True if slug exists, false if not.
 	 */
 	private function translation_set_slug_exists( $locale, $slug ) {
-		$cache_key = "translation_set_slugs:{$locale->slug}";
+		/*$cache_key = "translation_set_slugs:{$locale->slug}";
 		$slugs = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $slugs ) {
@@ -230,9 +230,36 @@ class Locale extends GP_Route {
 			) );
 
 			wp_cache_set( $cache_key, $slugs, $this->cache_group, DAY_IN_SECONDS );
+		}*/
+
+		// Hardcoded list because the query above doesn't perform well due to a missing index.
+		$slugs = [
+			'default' => [
+				'default',
+			],
+			'de' => [
+				'default',
+				'formal',
+			],
+			'de-ch' => [
+				'default',
+				'informal',
+			],
+			'nl' => [
+				'default',
+				'formal',
+			],
+			'pt' => [
+				'default',
+				'informal',
+			],
+		];
+
+		if ( isset( $slugs[ $locale->slug ] ) ) {
+			return in_array( $slug, $slugs[ $locale->slug ], true );
 		}
 
-		return in_array( $slug, $slugs, true );
+		return in_array( $slug, $slugs['default'], true );
 	}
 
 	/**
