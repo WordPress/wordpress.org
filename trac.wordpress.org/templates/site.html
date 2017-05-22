@@ -4,7 +4,7 @@
      py:strip="">
 
 <?python
-	scripts_version = '74'
+	scripts_version = '75'
 	project_slug = req.environ['HTTP_HOST'].split(':')[0].split('.')[0]
 	wporg_endpoint = 'https://make.wordpress.org/' + project_slug + '/'
 	is_bug_gardener = 'TICKET_EDIT_DESCRIPTION' in perm(resource)
@@ -126,7 +126,7 @@
 				<div class="wp-notice" id="wp-security-notice">
 					<p><strong>Caution!</strong> This ticket was assigned to the Security component.</p>
 					<p><strong>If this is a potential security vulnerability, DO NOT REPORT IT HERE.</strong></p>
-					<p>Instead, read the <a class="ext-link" href="https://codex.wordpress.org/FAQ_Security"><span class="icon">&nbsp;</span>Security FAQ</a> and email us at <a class="mail-link" href="mailto:security@wordpress.org"><span class="icon">&nbsp;</span>security@wordpress.org</a>.</p>
+					<p>Instead, read the <a class="ext-link" href="https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/"><span class="icon">&nbsp;</span>Security FAQ</a> and visit the <a href="https://hackerone.com/wordpress">WordPress HackerOne program</a>.</p>
 				</div>
 			</py:if>
 
