@@ -80,9 +80,6 @@ fi
 # Back to SVN
 cd $WORKING_DIR
 
-# Update the latest sync rev
-svn propset -q github:lastSync $LATEST_GIT_REV $WORKING_DIR
-
 # Copy Github over SVN
 # Process any Assets first (This is effectively this entire file boiled down to a few lines)
 if [ -d $WORKING_DIR/_temp-github/assets/ ]; then
@@ -106,6 +103,9 @@ if [ -z "$SVN_CHANGES_FOUND" ]; then
 	echo "No changes found in the SVN repository."
 	exit 1
 fi
+
+# Update the latest sync rev
+svn propset -q github:lastSync $LATEST_GIT_REV $WORKING_DIR
 
 # Do the version number bump with $date (0.1-20150125)
 # Will error if no .php files exist
