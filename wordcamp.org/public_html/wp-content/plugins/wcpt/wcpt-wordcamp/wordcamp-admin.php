@@ -43,8 +43,8 @@ class WordCamp_Admin {
 		// Post status transitions
 		add_action( 'transition_post_status',                         array( $this, 'trigger_schedule_actions' ), 10, 3 );
 		add_action( 'transition_post_status',                         array( $this, 'log_status_changes'       ), 10, 3 );
-		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'add_organizer_to_central' ), 10 );
-		add_action( 'wcpt_added_to_planning_schedule',                array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
+		add_action( 'wcpt_approved_for_pre_planning',                 array( $this, 'add_organizer_to_central' ), 10 );
+		add_action( 'wcpt_approved_for_pre_planning',                 array( $this, 'mark_date_added_to_planning_schedule' ), 10 );
 		add_filter( 'wp_insert_post_data',                            array( $this, 'enforce_post_status' ), 10, 2 );
 		add_filter( 'wp_insert_post_data',                            array( $this, 'require_complete_meta_to_publish_wordcamp' ), 11, 2 ); // after enforce_post_status
 
