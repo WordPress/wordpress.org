@@ -4,6 +4,24 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 class Upload {
 
 	/**
+	 * Retrieves plugins in the queue submitted by the current user.
+	 *
+	 * @return array An array of user's plugins.
+	 */
+	public static function get_submitted_plugins() {
+		$plugins = get_posts( array(
+			'post_type'      => 'plugin',
+			'post_status'    => array( 'new', 'pending' ),
+			'author'         => get_current_user_id(),
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+			'posts_per_page' => -1,
+		) );
+
+		return $plugins;
+	}
+
+	/**
 	 * Renders the upload shortcode.
 	 */
 	public static function display() {
@@ -29,15 +47,74 @@ class Upload {
 				?>
 
 				<div class="plugin-queue-message notice notice-info notice-alt">
-					<p>
-						<?php
-						printf( _n( 'Currently there is %1$s plugin in the review queue.', 'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.', ( $plugins->new + $plugins->pending ), 'wporg-plugins' ),
-							'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
-							'<strong>' . $plugins->new . '</strong>'
-						);
-						?>
-					</p>
+					<p><?php
+						if ( 1 === ( $plugins->new + $plugins->pending ) ) {
+							 _e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
+						} else {
+							printf(
+								_n(
+									'Currently there are %1$s plugins in the review queue, %2$s of which is awaiting its initial review.',
+									'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.',
+									$plugins->new,
+									'wporg-plugins'
+								),
+								'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
+								'<strong>' . $plugins->new . '</strong>'
+							);
+						}
+					?></p>
 				</div>
+
+				<?php
+				$submitted_plugins = self::get_submitted_plugins();
+				$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending' ), 0 );
+
+				foreach ( $submitted_plugins as $key => $plugin ) {
+					if ( 'new' === $plugin->post_status ) {
+						$submitted_plugins[ $key ]->status = __( 'Awaiting Review', 'wporg-plugins' );
+						$submitted_counts->new++;
+					} elseif ( 'pending' === $plugin->post_status ) {
+						$submitted_plugins[ $key ]->status = __( 'Being Reviewed', 'wporg-plugins' );
+						$submitted_counts->pending++;
+					}
+				}
+				?>
+
+				<?php if ( $submitted_counts->new + $submitted_counts->pending ) : ?>
+
+					<div class="plugin-queue-message notice notice-warning notice-alt">
+						<p><?php
+							if ( 1 === ( $submitted_counts->new + $submitted_counts->pending ) ) {
+								_e( 'You have 1 plugin in the review queue.', 'wporg-plugins' );
+							} else {
+								printf(
+									_n(
+										'You have %1$s plugins in the review queue, %2$s is being actively reviewed.',
+										'You have %1$s plugins in the review queue, %2$s are being actively reviewed.',
+										$submitted_counts->pending,
+										'wporg-plugins'
+									),
+									'<strong>' . ( $submitted_counts->new + $submitted_counts->pending ) . '</strong>',
+									'<strong>' . $submitted_counts->pending . '</strong>'
+								);
+							}
+						?></p>
+
+						<ul><?php
+							foreach ( $submitted_plugins as $plugin ) {
+								echo '<li>' . esc_html( $plugin->post_title ) . ' &#8212; ' . $plugin->status . "</li>\n";
+							}
+						?></ul>
+
+						<p><?php
+							/* translators: %s: plugins@wordpress.org */
+							printf( __( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
+								'plugins@wordpress.org'
+							);
+						?></p>
+					</div>
+
+				<?php endif; ?>
 
 			<?php endif; ?>
 
