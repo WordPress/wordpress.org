@@ -513,7 +513,11 @@ class WordCamp_New_Site {
 			array(
 				'title'   => __( 'Sponsors', 'wordcamporg' ),
 				'content' =>
-					'<p>'  . __( "<em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit https://central.wordcamp.org/multi-event-sponsorship-packages/. After that, you should add the sponsors that are specific to your event. For non-English sites, make sure the URL below matches the Call for Sponsors page.", 'wordcamporg' ) . '</p> ' .
+					'<p>' . sprintf(
+						/* translators: %s: Global Community Sponsorship page URL */
+						__( "<em>Organizers note:</em> Multi-event sponsors have been automatically created in the Sponsors menu, but you'll need to remove the ones that don't apply to your specific event. To find out which ones apply, please visit the <a href=\"%s\">Global Community Sponsorship</a> handbook page. After that, you should add the sponsors that are specific to your event. For non-English sites, make sure the URL below matches the Call for Sponsors page.", 'wordcamporg' ),
+						'https://make.wordpress.org/community/handbook/wordcamp-organizer/planning-details/fundraising/global-community-sponsorship-for-event-organizers/'
+					) . '</p> ' .
 					'<h3>' . __( 'Our Sponsors', 'wordcamporg' ) . '</h3> ' .
 					'<p>'  . __( 'Blurb thanking sponsors', 'wordcamporg' ) . '</p> ' .
 					'<p>[sponsors]</p> ' .
