@@ -744,11 +744,8 @@ class WordCamp_Admin {
 			return;
 		}
 
-		if ( $old_status == 'wcpt-pre-planning' && $new_status == 'wcpt-pre-planning' ) {
-			// todo - bug: this won't ever run b/c of the early return above.
-			// what commit made this mistake, and why?
-			// what things are tied to this that haven't been running?
-			do_action( 'wcpt_added_to_planning_schedule', $post );
+		if ( 'wcpt-pre-planning' == $new_status ) {
+			do_action( 'wcpt_approved_for_pre_planning', $post );
 		} elseif ( $old_status == 'wcpt-needs-schedule' && $new_status == 'wcpt-scheduled' ) {
 			do_action( 'wcpt_added_to_final_schedule', $post );
 		}

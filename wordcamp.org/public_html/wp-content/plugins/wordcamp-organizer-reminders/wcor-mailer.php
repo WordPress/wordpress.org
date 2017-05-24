@@ -12,6 +12,18 @@ class WCOR_Mailer {
 	 */
 	public function __construct() {
 		$this->triggers = array(
+			'wcor_approved_for_pre_planning' => array(
+				'name'     => 'WordCamp approved for pre-planning',
+				'actions'  => array(
+					array(
+						'name'       => 'wcpt_approved_for_pre_planning',
+						'callback'   => 'send_trigger_approved_for_pre_planning',
+						'priority'   => 10,
+						'parameters' => 1,
+					),
+				),
+			),
+
 			'wcor_added_to_pending_schedule' => array(
 				'name'     => 'WordCamp added to pending schedule',
 				'actions'  => array(
@@ -625,6 +637,17 @@ class WCOR_Mailer {
 		$send_where = get_post_meta( $email_id, 'wcor_send_where' );
 
 		return in_array( 'wcor_send_mes', $send_where );
+	}
+
+	/**
+	 * Sends e-mails hooked to the wcor_approved_for_pre_planning trigger.
+	 *
+	 * This fires when a WordCamp has been approved for pre-planning.
+	 *
+	 * @param WP_Post $wordcamp
+	 */
+	public function send_trigger_approved_for_pre_planning( $wordcamp ) {
+		$this->send_triggered_emails( $wordcamp, 'wcor_approved_for_pre_planning' );
 	}
 
 	/**
