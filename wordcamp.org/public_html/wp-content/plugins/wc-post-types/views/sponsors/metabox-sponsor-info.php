@@ -108,6 +108,20 @@
 	</li>
 
 	<li>
+		<label for="_wcpt_sponsor_twitter_handle">
+			<?php esc_html_e( 'Twitter Handle:', 'wordcamporg' ); ?>
+		</label>
+
+		<input
+			type="text"
+			class="regular-text"
+			id="_wcpt_sponsor_twitter_handle"
+			name="_wcpt_sponsor_twitter_handle"
+			value="<?php echo esc_attr( $twitter_handle ); ?>"
+		/>
+	</li>
+
+	<li>
 		<label for="_wcpt_sponsor_vat_number">
 			<?php _e( 'VAT Number:', 'wordcamporg' ); ?>
 		</label>
