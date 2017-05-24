@@ -16,6 +16,7 @@ function get_whitelist() {
 		'andreamiddleton',
 		'camikaos',
 		'chanthaboune',
+		'coreymckrill',
 		'courtneypk',
 		'hlashbrooke',
 		'iandunn',
@@ -151,6 +152,7 @@ function get_whitelist() {
 		),
 		'marketing' => array(
 			'sararosso',
+			'gidgey',
 		),
 		'meta' => array(
 			'obenland',
