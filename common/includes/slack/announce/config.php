@@ -196,11 +196,6 @@ function get_whitelist() {
 			'paolo',
 			'savione',
 		),
-		'wceu-happiness-bar' => array(
-			'clauzon',
-			'izuvach',
-			'lucasartoni',
-		),
 		'wcus' => array(
 			'alx',
 			'camikaos',
