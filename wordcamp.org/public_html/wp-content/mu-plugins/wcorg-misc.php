@@ -225,8 +225,12 @@ add_action( 'wp_ajax_nopriv_wcorg_flush_rewrite_rules_everywhere', 'wcorg_flush_
  *
  * `wordcamporg` is used by all the custom plugins and themes, so that translators only have to deal with a single
  * GlotPress project, and we only have to install/update a single mofile per locale.
+ *
+ * There is no .mo file for en_US, so don't load the text domain if that is the specified user locale.
  */
-load_textdomain( 'wordcamporg', sprintf( '%s/languages/wordcamporg/wordcamporg-%s.mo', WP_CONTENT_DIR, get_user_locale() ) );
+if ( 'en_US' !== get_user_locale() ) {
+	load_textdomain( 'wordcamporg', sprintf( '%s/languages/wordcamporg/wordcamporg-%s.mo', WP_CONTENT_DIR, get_user_locale() ) );
+}
 
 // WordCamp.org QBO Integration
 add_filter( 'wordcamp_qbo_options', function( $options ) {
