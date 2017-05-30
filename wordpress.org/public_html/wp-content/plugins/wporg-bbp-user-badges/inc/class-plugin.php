@@ -396,7 +396,7 @@ class Plugin {
 	 * of badging them. Use the $strict argument to check that the user is a
 	 * moderator without considering if they are a keymaster.
 	 *
-	 * @param string $user_id Optional. User ID. Assumes current reply author ID
+	 * @param string $user_id Optional. User ID. Assumes current post author ID
 	 *                        if not provided.
 	 * @param bool   $strict  Optional. True if user should strictly be checked
 	 *                        for being a moderator, false will also check if they
@@ -405,9 +405,9 @@ class Plugin {
 	 */
 	public function is_user_moderator( $user_id = '', $strict = false ) {
 		if ( ! $user_id ) {
-			$user_id = bbp_get_reply_author_id();
+			$user_id = get_post_field( 'post_author' );
 		}
 
-		return ( user_can( $user_id, 'moderate' ) || ( ! $strict && bbp_is_user_keymaster( $user_id ) ) );
+		return ( user_can( $user_id, 'moderate', get_the_ID() ) || ( ! $strict && bbp_is_user_keymaster( $user_id ) ) );
 	}
 }

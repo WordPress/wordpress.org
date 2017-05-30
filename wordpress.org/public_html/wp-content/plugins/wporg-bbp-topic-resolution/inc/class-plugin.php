@@ -505,7 +505,7 @@ class Plugin {
 			$post = get_post( $topic_id );
 		}
 
-		if ( $user_id && $post && ( user_can( $user_id, 'moderate' ) || $user_id == $post->post_author ) ) {
+		if ( $user_id && $post && ( user_can( $user_id, 'moderate', $topic_id ) || $user_id == $post->post_author ) ) {
 			$retval = true;
 		} else {
 			$retval = false;
