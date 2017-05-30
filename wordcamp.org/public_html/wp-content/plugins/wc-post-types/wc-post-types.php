@@ -1426,6 +1426,14 @@ class WordCamp_Post_Types_Plugin {
 		);
 
 		wcorg_register_meta_only_on_endpoint( 'post', $public_session_fields, '/wp-json/wp/v2/sessions/' );
+
+		$public_sponsor_fields = array(
+			'_wcpt_sponsor_website' => array(
+				'single' => true,
+			)
+		);
+
+		wcorg_register_meta_only_on_endpoint( 'post', $public_sponsor_fields, '/wp-json/wp/v2/sponsors/' );
 	}
 
 	/**
@@ -2022,7 +2030,7 @@ class WordCamp_Post_Types_Plugin {
 		register_post_type( 'wcb_sponsor', array(
 			'labels'            => $labels,
 			'rewrite'           => array( 'slug' => 'sponsor', 'with_front' => false ),
-			'supports'          => array( 'title', 'editor', 'revisions', 'thumbnail' ),
+			'supports'          => array( 'title', 'editor', 'revisions', 'thumbnail', 'custom-fields' ),
 			'menu_position'     => 21,
 			'public'            => true,
 			'show_ui'           => true,
@@ -2031,6 +2039,8 @@ class WordCamp_Post_Types_Plugin {
 			'hierarchical'      => false,
 			'query_var'         => true,
 			'menu_icon'         => 'dashicons-heart',
+			'show_in_rest'      => true,
+			'rest_base'         => 'sponsors',
 		) );
 
 		// Organizer post type labels.
