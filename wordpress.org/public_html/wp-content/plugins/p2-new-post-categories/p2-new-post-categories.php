@@ -1,103 +1,64 @@
 <?php
 /*
 Plugin Name: P2 New Post Categories
-Description: Adds a category dropdown to P2s new post form.
-Version:     0.2
+Plugin URI:  http://wordpress.org/plugins/p2-new-post-categories
+Description: Adds a category dropdown to P2's new post form.
+Version:     0.3
+Author:      Ian Dunn
+Author URI:  http://iandunn.name
 License:     GPLv2 or Later
 */
 
-/*
- * Note: This has been forked from the original version to conform to WordPress.org conventions.
- */
-
-
 class P2NewPostCategories {
-	const VERSION = '0.2';
+	const VERSION = '0.3';
 
 	/*
 	 * Register hook callbacks
 	 */
 	public function __construct() {
-		add_action( 'wp_head',                              array( $this, 'print_css' ) );
-		add_action( 'wp_footer',                            array( $this, 'print_javascript' ) );
-
+		add_action( 'admin_notices',                        array( $this, 'check_dependencies' ) );
+		add_action( 'wp_enqueue_scripts',                   array( $this, 'enqueue_scripts' ) );
 		add_action( 'p2_post_form',                         array( $this, 'add_new_post_category_dropdown' ) );
 		add_action( 'wp_ajax_p2npc_assign_category',        array( $this, 'assign_category_to_post' ) );
 		add_action( 'wp_ajax_nopriv_p2npc_assign_category', array( $this, 'assign_category_to_post' ) );
 	}
 
-	/*
-	 * Print our CSS
+	/**
+	 * The p2_new_post_submit_success trigger wasn't added until p2 1.5.2 and we can't work without it.  
 	 */
-	public function print_css() {
-		?>
-
-		<!-- Begin P2 New Post Categories -->
-		<style type="text/css">
-			#new_post {
-				position: relative;
-				padding-bottom: 2.25em;
-			}
-
-			#p2-new-post-category {
-				position: absolute;
-				left: 0;
-				bottom: 0;
-			}
-		</style>
-		<!-- End P2 New Post Categories -->
-
-		<?php
+	public function check_dependencies() {
+		$current_theme = wp_get_theme();
+		$parent_theme  = $current_theme->parent();
+		if ( ! $parent_theme ) {
+			$parent_theme = $current_theme;
+		}
+		
+		if ( 'P2' != $parent_theme->get( 'Name' ) || version_compare( $parent_theme->get( 'Version' ), '1.5.2', '<' ) ) {
+			echo '<div class="error">P2 New Post Categories requires p2 version 1.5.2 or above in order to work.</div>';
+		}
 	}
-
+	
 	/*
-	 * Print our JavaScript
+	 * Enqueue our scripts and styles
 	 */
-	public function print_javascript() {
-		?>
+	public function enqueue_scripts() {
+		wp_register_script(
+			'P2NewPostCategories',
+			plugins_url( 'functions.js', __FILE__ ),
+			array( 'jquery', ),
+			self::VERSION,
+			true
+		);
 
-		<!-- Begin P2 New Post Categories -->
-		<script type="text/javascript">
-			( function( $ ) {
+		wp_register_style(
+			'P2NewPostCategories',
+			plugins_url( 'style.css', __FILE__ ),
+			array(),
+			self::VERSION
+		);
 
-				var P2NewPostCategories = {
-
-					/*
-					 * Initialization
-					 */
-					construct : function() {
-						P2NewPostCategories.dropdown         = $( '#p2-new-post-category' );
-						P2NewPostCategories.dropdown_default = P2NewPostCategories.dropdown.val();
-
-						$( document ).on( 'p2_new_post_submit_success', P2NewPostCategories.new_post );
-					},
-
-					/**
-					 * Assign the selected category to the new post
-					 * @param object event
-					 * @param object data
-					 */
-					new_post : function( event, data ) {
-						$.post(
-							ajaxUrl.replace( '?p2ajax=true', '' ), {
-								'action'                      : 'p2npc_assign_category',
-								'post_id'                     : parseInt( data.post_id ),
-								'category_id'                 :	parseInt( P2NewPostCategories.dropdown.val() ),
-								'p2npc_assign_category_nonce' : $( '#p2npc_assign_category_nonce' ).val()
-							}
-						);
-
-						P2NewPostCategories.dropdown.val( parseInt( P2NewPostCategories.dropdown_default ) ).change();
-					}
-				};
-
-				P2NewPostCategories.construct();
-
-			} )( jQuery );
-		</script>
-		<!-- End P2 New Post Categories -->
-
-		<?php
+		wp_enqueue_script( 'P2NewPostCategories' );
+		wp_enqueue_style( 'P2NewPostCategories' );
 	}
 
 	public function add_new_post_category_dropdown() {

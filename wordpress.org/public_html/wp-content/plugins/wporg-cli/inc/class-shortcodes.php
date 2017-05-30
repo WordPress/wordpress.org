@@ -10,7 +10,55 @@ class Shortcodes{
 	 * Register custom shortcodes.
 	 */
 	public static function action_init() {
+		add_shortcode( 'cli-issue-list', array( __CLASS__, 'issue_list' ) );
 		add_shortcode( 'cli-repo-list', array( __CLASS__, 'repo_list' ) );
+	}
+
+	/**
+	 * List all issues with a specific label
+	 */
+	public static function issue_list( $atts ) {
+		if ( isset( $atts['auth_token'] ) ) {
+			self::$auth_token = $atts['auth_token'];
+		}
+		$label = isset( $atts['label'] ) ? $atts['label'] : '';
+		$out = '<h2>' . sprintf( 'Issues labeled "%s"', esc_html( $label ) ) . '</h2>';
+		$url = 'https://api.github.com/orgs/wp-cli/issues';
+		$url = add_query_arg( array_map( 'rawurlencode', array(
+			'per_page' => 100,
+			'labels'   => $label,
+			'filter'   => 'all',
+		) ), $url );
+		$issues = self::github_request( $url );
+		if ( is_wp_error( $issues ) ) {
+			$out .= '<p>' . esc_html( $issues->get_error_message() ) . '</p>' . PHP_EOL;
+			return $out;
+		}
+		if ( empty( $issues ) ) {
+			$out .= '<p>No issues found.</p>' . PHP_EOL;
+			return $out;
+		}
+
+		foreach( $issues as $issue ) {
+			$out .= '<p><strong><a href="' . esc_url( $issue->html_url ) . '">' . esc_html( $issue->title ) . '</a></strong> (' . esc_html( $issue->repository->full_name ) . ')<br />' . PHP_EOL;
+			if ( ! empty( $issue->labels ) ) {
+				foreach( $issue->labels as $label ) {
+					$text_color = '#FFF';
+					$background_color = $label->color;
+					$c_r = hexdec( substr( $background_color, 0, 2 ) );
+					$c_g = hexdec( substr( $background_color, 2, 2 ) );
+					$c_b = hexdec( substr( $background_color, 4, 2 ) );
+					// Light background means dark color
+					if ( ( ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000 ) > 135 ) {
+						$text_color = '#000';
+					}
+					$out .= '<span class="label" style="' . esc_attr( 'display:inline-block;padding-left:3px;padding-right:3px;color:' . $text_color . ';background-color:#' . $background_color ) . '">' . esc_html( $label->name ) . '</span> ';
+				}
+				$out .= '<br />';
+			}
+			$out .= '</p>';
+		}
+		return $out;
 	}
 
 	/**
