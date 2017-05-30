@@ -36,8 +36,8 @@ gp_tmpl_header();
 			<ul class="projects-dropdown">
 				<li><span>Projects</span>
 					<ul>
-						<li><a href="<?php echo esc_url( gp_url_join( gp_url_project( $project ) ), 'contributors' ); ?>">Contributors</a></li>
-						<li><a href="<?php echo esc_url( gp_url_join( gp_url_project( $project ) ), 'language-packs' ); ?>">Language Packs</a></li>
+						<li><a href="<?php echo esc_url( gp_url_join( gp_url_project( $project ), 'contributors' ) ); ?>">Contributors</a></li>
+						<li><a href="<?php echo esc_url( gp_url_join( gp_url_project( $project ), 'language-packs' ) ); ?>">Language Packs</a></li>
 					</ul>
 				</li>
 			</ul>
