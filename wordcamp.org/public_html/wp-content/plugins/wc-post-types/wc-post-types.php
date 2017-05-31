@@ -2096,12 +2096,14 @@ class WordCamp_Post_Types_Plugin {
 
 		// Register the Tracks taxonomy.
 		register_taxonomy( 'wcb_track', 'wcb_session', array(
-			'labels'                => $labels,
-			'rewrite'               => array( 'slug' => 'track' ),
-			'query_var'             => 'track',
-			'hierarchical'          => true,
-			'public'                => true,
-			'show_ui'               => true,
+			'labels'       => $labels,
+			'rewrite'      => array( 'slug' => 'track' ),
+			'query_var'    => 'track',
+			'hierarchical' => true,
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_rest' => true,
+			'rest_base'    => 'session_track',
 		) );
 
 		// Labels for sponsor levels.
@@ -2119,12 +2121,14 @@ class WordCamp_Post_Types_Plugin {
 
 		// Register sponsor level taxonomy
 		register_taxonomy( 'wcb_sponsor_level', 'wcb_sponsor', array(
-			'labels'                => $labels,
-			'rewrite'               => array( 'slug' => 'sponsor_level' ),
-			'query_var'             => 'sponsor_level',
-			'hierarchical'          => true,
-			'public'                => true,
-			'show_ui'               => true,
+			'labels'       => $labels,
+			'rewrite'      => array( 'slug' => 'sponsor_level' ),
+			'query_var'    => 'sponsor_level',
+			'hierarchical' => true,
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_rest' => true,
+			'rest_base'    => 'sponsor_level',
 		) );
 
 		// Labels for organizer teams.
