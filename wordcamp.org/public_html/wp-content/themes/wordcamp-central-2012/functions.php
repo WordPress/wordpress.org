@@ -717,19 +717,43 @@ class WordCamp_Central_Theme {
 		return $query;
 	}
 
-	public static function the_wordcamp_date( $wordcamp_id = 0 ) {
+	/**
+	 * Output the date or date range of a WordCamp event.
+	 *
+	 * @param int  $wordcamp_id The ID of the WordCamp post.
+	 * @param bool $show_year   Optional. True to include the year in the date output.
+	 */
+	public static function the_wordcamp_date( $wordcamp_id = 0, $show_year = false ) {
 		$start_day = wcpt_get_wordcamp_start_date( $wordcamp_id, 'j' );
 		$start_month = wcpt_get_wordcamp_start_date( $wordcamp_id, 'F' );
 		$end_day = wcpt_get_wordcamp_end_date( $wordcamp_id, 'j' );
 		$end_month = wcpt_get_wordcamp_end_date( $wordcamp_id, 'F' );
 
+		if ( $show_year ) {
+			$start_year = wcpt_get_wordcamp_start_date( $wordcamp_id, 'Y' );
+			$end_year   = wcpt_get_wordcamp_end_date( $wordcamp_id, 'Y' );
+		}
+
 		echo "$start_month $start_day";
+
 		if ( $end_day ) {
-			echo '-';
-			if ( $start_month != $end_month )
+			if ( $show_year && $start_year !== $end_year ) {
+				echo ", $start_year";
+			}
+
+			echo '&ndash;';
+
+			if ( $start_month !== $end_month ) {
 				echo "$end_month ";
+			}
 
 			echo $end_day;
+
+			if ( $show_year ) {
+				echo ", $end_year";
+			}
+		} elseif ( $show_year ) {
+			echo ", $start_year";
 		}
 	}
 

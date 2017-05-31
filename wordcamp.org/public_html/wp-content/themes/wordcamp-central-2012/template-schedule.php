@@ -37,29 +37,37 @@ get_header(); ?>
 							) )
 						) )
 					) :
+						global $wcpt_template;
+						$wordcamps = WordCamp_Central_Theme::group_wordcamps_by_year( $wcpt_template->posts );
 					?>
 
-					<ul class="wc-schedule-list">
-					<?php while ( wcpt_wordcamps() ) : wcpt_the_wordcamp(); ?>
+					<?php foreach ( $wordcamps as $year => $posts ) : ?>
+						<h3 class="wc-schedule-year"><?php echo esc_html( $year ); ?></h3>
 
-						<li>
-							<a href="<?php echo esc_url( wcpt_get_wordcamp_url() ); ?>">
-								<?php if ( has_post_thumbnail() ) : ?>
-									<?php the_post_thumbnail( 'wccentral-thumbnail-small', array( 'class' => 'wc-image' ) ); ?>
-								<?php else : ?>
-									<div class="wc-image wp-post-image wordcamp-placeholder-thumb" title="<?php the_title(); ?>"></div>
-								<?php endif; ?>
+						<ul class="wc-schedule-list">
+							<?php foreach ( $posts as $post ) :	setup_postdata( $post ); ?>
 
-								<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
-								<span class="wc-country"><?php wcpt_wordcamp_location(); ?></span>
-								<span class="wc-date">
-									<?php WordCamp_Central_Theme::the_wordcamp_date(); ?>
-								</span>
-							</a>
-						</li>
+								<li>
+									<a href="<?php echo esc_url( WordCamp_Central_Theme::get_best_wordcamp_url( $post->ID ) ); ?>">
+										<?php if ( has_post_thumbnail() ) : ?>
+											<?php the_post_thumbnail( 'wccentral-thumbnail-small', array( 'class' => 'wc-image' ) ); ?>
+										<?php else : ?>
+											<div class="wc-image wp-post-image wordcamp-placeholder-thumb" title="<?php the_title(); ?>"></div>
+										<?php endif; ?>
 
-					<?php endwhile; // wcpt_wordcamps ?>
-				</ul>
+										<h2 class="wc-title"><?php wcpt_wordcamp_title(); ?></h2>
+										<span class="wc-country"><?php wcpt_wordcamp_location( $post->ID ); ?></span>
+
+										<span class="wc-date">
+											<?php WordCamp_Central_Theme::the_wordcamp_date( $post->ID, true ); ?>
+										</span>
+									</a>
+								</li>
+
+							<?php endforeach; // $posts as post ?>
+						</ul>
+					<?php wp_reset_postdata(); endforeach; ?>
+
 				<a href="<?php echo home_url( '/schedule/past-wordcamps/' ); ?>" class="wc-schedule-more">Past WordCamps &rarr;</a>
 
 				<?php endif; // wcpt_has_wordcamps ?>

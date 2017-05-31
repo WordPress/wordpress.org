@@ -64,8 +64,7 @@ get_header(); ?>
 										<span class="wc-country"><?php wcpt_wordcamp_location( $post->ID ); ?></span>
 
 										<span class="wc-date">
-											<?php WordCamp_Central_Theme::the_wordcamp_date( $post->ID ); ?>,
-											<?php wcpt_wordcamp_start_date( $post->ID, 'Y' ); ?>
+											<?php WordCamp_Central_Theme::the_wordcamp_date( $post->ID, true ); ?>
 										</span>
 									</a>
 								</li>
