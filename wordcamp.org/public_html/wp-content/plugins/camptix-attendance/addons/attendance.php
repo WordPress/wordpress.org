@@ -198,7 +198,7 @@ class CampTix_Attendance extends CampTix_Addon {
 		add_filter( 'posts_clauses', function( $clauses ) use ( $search ) {
 			global $wpdb;
 
-			$search = $wpdb->esc_like( $search );
+			$search = $wpdb->esc_like( wp_unslash( $search ) );
 
 			$clauses['join'] .= "
 				INNER JOIN $wpdb->postmeta tix_first_name ON ( ID = tix_first_name.post_id AND tix_first_name.meta_key = 'tix_first_name' )
