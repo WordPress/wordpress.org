@@ -653,7 +653,7 @@ class Plugin_Directory {
 	 * @param \WP_Query $wp_query The WordPress Query object.
 	 */
 	public function pre_get_posts( $wp_query ) {
-		if ( is_admin() || ! $wp_query->is_main_query() ) {
+		if ( is_admin() ) {
 			return;
 		}
 
@@ -720,8 +720,8 @@ class Plugin_Directory {
 		$viewing_own_author_archive = false;
 
 		// Author Archives need to be created
-		if ( isset( $wp_query->query['author_name'] ) || isset( $wp_query->query['author'] ) ) {
-			$user = isset( $wp_query->query['author_name'] ) ? $wp_query->query['author_name'] : (get_user_by( 'id', $wp_query->query['author'])->user_nicename);
+		if ( $wp_query->is_main_query() && ( isset( $wp_query->query['author_name'] ) || isset( $wp_query->query['author'] ) ) ) {
+			$user = isset( $wp_query->query['author_name'] ) ? $wp_query->query['author_name'] : get_user_by( 'id', $wp_query->query['author'] )->user_nicename;
 
 			$viewing_own_author_archive = is_user_logged_in() && ( current_user_can( 'plugin_review' ) || 0 === strcasecmp( $user, wp_get_current_user()->user_nicename ) );
 
@@ -756,7 +756,7 @@ class Plugin_Directory {
 		}
 
 		// For singular requests, or self-author profile requests allow restricted post_status items to show on the front-end.
-		if ( $viewing_own_author_archive || ( is_user_logged_in() && !empty( $wp_query->query_vars['name'] ) ) ) {
+		if ( $wp_query->is_main_query() && ( $viewing_own_author_archive || is_user_logged_in() && !empty( $wp_query->query_vars['name'] ) ) ) {
 
 			$wp_query->query_vars['post_status'] = array( 'approved', 'publish', 'closed', 'disabled' );
 
