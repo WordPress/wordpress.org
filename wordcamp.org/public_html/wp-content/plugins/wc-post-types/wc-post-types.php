@@ -56,14 +56,11 @@ class WordCamp_Post_Types_Plugin {
 		add_filter( 'the_content', array( $this, 'add_video_info_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 
-		// REST API
-		add_action( 'init',                     array( $this, 'expose_public_post_meta'  )        );
-		add_filter( 'rest_prepare_wcb_speaker', array( $this, 'link_speaker_to_sessions' ), 10, 2 );
-		add_filter( 'rest_prepare_wcb_session', array( $this, 'link_session_to_speakers' ), 10, 2 );
-
 		add_filter( 'dashboard_glance_items', array( $this, 'glance_items' ) );
 		add_filter( 'option_default_comment_status', array( $this, 'default_comment_ping_status' ) );
 		add_filter( 'option_default_ping_status', array( $this, 'default_comment_ping_status' ) );
+
+		add_action( 'init', array( $this, 'rest_init' ), 9 );
 	}
 
 	function init() {
@@ -76,6 +73,13 @@ class WordCamp_Post_Types_Plugin {
 	function admin_init() {
 		register_setting( 'wcb_sponsor_options', 'wcb_sponsor_level_order', array( $this, 'validate_sponsor_options' ) );
 		add_action( 'pre_get_posts', array( $this, 'admin_pre_get_posts' ) );
+	}
+
+	/**
+	 * Runs during init, because rest_api_init is too late.
+	 */
+	function rest_init() {
+		require_once( 'inc/rest-api.php' );
 	}
 
 	/**
@@ -1397,104 +1401,6 @@ class WordCamp_Post_Types_Plugin {
 		wp_reset_postdata();
 
 		return $content . $sessions_html;
-	}
-
-	/**
-	 * Add non-sensitive meta fields to the speaker/session REST API endpoints
-	 *
-	 * if we ever want to register meta for purposes other than exposing it in the API, then this function will
-	 * probably need to be re-thought and re-factored.
-	 */
-	public function expose_public_post_meta() {
-		$public_session_fields = array(
-			'_wcpt_session_time' => array(
-				'type'   => 'integer',
-				'single' => true,
-			),
-
-			'_wcpt_session_type' => array(
-				'single' => true,
-			),
-
-			'_wcpt_session_slides' => array(
-				'single' => true,
-			),
-
-			'_wcpt_session_video' => array(
-				'single' => true,
-			),
-		);
-
-		wcorg_register_meta_only_on_endpoint( 'post', $public_session_fields, '/wp-json/wp/v2/sessions/' );
-
-		$public_sponsor_fields = array(
-			'_wcpt_sponsor_website' => array(
-				'single' => true,
-			)
-		);
-
-		wcorg_register_meta_only_on_endpoint( 'post', $public_sponsor_fields, '/wp-json/wp/v2/sponsors/' );
-	}
-
-	/**
-	 * Link all sessions to the speaker in the `speakers` API endpoint
-	 *
-	 * This allows clients to request a speaker and get all their sessions embedded in the response, avoiding
-	 * extra HTTP requests
-	 *
-	 * @param WP_REST_Response $response
-	 * @param WP_Post          $post
-	 *
-	 * @return WP_REST_Response
-	 */
-	function link_speaker_to_sessions( $response, $post ) {
-		$sessions = get_posts( array(
-			'post_type'      => 'wcb_session',
-			'posts_per_page' => 100,
-			'fields'         => 'ids',
-
-			'meta_query' => array(
-				array(
-					'key'   => '_wcpt_speaker_id',
-					'value' => $post->ID,
-				),
-			),
-		) );
-
-		foreach( $sessions as $session_id ) {
-			$response->add_link(
-				'sessions',
-				get_rest_url( null, "/wp/v2/sessions/$session_id" ),
-				array( 'embeddable' => true )
-			);
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Link all speakers to the session in the `sessions` API endpoint
-	 *
-	 * This allows clients to request a session and get all its speakers embedded in the response, avoiding extra
-	 * HTTP requests
-	 *
-	 * @param WP_REST_Response $response
-	 * @param WP_Post          $post
-	 *
-	 * @return WP_REST_Response
-	 */
-	function link_session_to_speakers( $response, $post ) {
-		$speaker_ids = get_post_meta( $post->ID, '_wcpt_speaker_id', false );
-
-		foreach( $speaker_ids as $speaker_id ) {
-			$response->add_link(
-				'speakers',
-				get_rest_url( null, "/wp/v2/speakers/$speaker_id" ),
-				array( 'embeddable' => true )
-			);
-		}
-
-		return $response;
 	}
 
 	/**
