@@ -44,8 +44,7 @@
 					<?php printf(
 						// translators: %s is the name of the blog
 						__(
-							'%s is in the early planning stages.
-							 In the meantime, you can subscribe to be notified when the site goes live, or contact the organizers to get involved.',
+							'%s is in the early planning stages. In the meantime, you can subscribe to updates above, or contact the organizers below to get involved.',
 							'wordcamporg'
 						),
 						esc_html( get_bloginfo( 'name' ) )
