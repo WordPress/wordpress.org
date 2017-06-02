@@ -8,9 +8,9 @@
 
 	<?php if ( $existing_invoices ) : ?>
 
-		<h3>
-			<?php _e( 'Edit Existing Invoices:', 'wordcamporg' ); ?>
-		</h3>
+		<p>
+			<strong><?php _e( 'Existing Invoices:', 'wordcamporg' ); ?></strong>
+		</p>
 
 		<ul class="ul-disc">
 			<?php foreach ( $existing_invoices as $invoice ) : ?>
@@ -23,10 +23,6 @@
 
 			<?php endforeach; ?>
 		</ul>
-
-		<h3>
-			<?php _e( 'Add a New Invoice:', 'wordcamporg' ); ?>
-		</h3>
 
 	<?php endif; ?>
 
