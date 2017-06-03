@@ -1,0 +1,82 @@
+/*
+Theme Name: CampSite 2017
+
+Adding support for languages written in a Right To Left (RTL) direction is easy -
+it's just a matter of overwriting all the horizontal positioning attributes
+of your CSS stylesheet in a separate stylesheet file named rtl.css.
+
+https://codex.wordpress.org/Right-to-Left_Language_Support
+
+*/
+
+/* Reset */
+
+body {
+	direction: rtl;
+	unicode-bidi: embed;
+}
+
+/* Accessibility */
+
+.screen-reader-text:focus {
+	left: auto;
+	right: 5px;
+}
+
+/* Typography */
+
+li > ul,
+li > ol {
+	margin-left: 0;
+	margin-right: 1.5em;
+}
+
+/* Page Navigation */
+
+.page-navigation-container {
+	float: right;
+}
+
+.page-navigation-container ul {
+	padding-right: 0;
+}
+
+.page-navigation-container ul ul {
+	float: right;
+	left: auto;
+	right: -999em;
+}
+
+.page-navigation-container ul ul ul {
+	left: auto;
+	right: -999em;
+}
+
+.page-navigation-container ul ul li:hover > ul,
+.page-navigation-container ul ul li.focus > ul {
+	left: auto;
+	right: 100%;
+}
+
+.page-navigation-container ul li:hover > ul,
+.page-navigation-container ul li.focus > ul {
+	right: auto;
+}
+
+.page-navigation-container li {
+	float: right;
+}
+
+/* Small menu */
+
+.comment-navigation .nav-previous,
+.posts-navigation .nav-previous,
+.post-navigation .nav-previous {
+	float: right;
+}
+.comment-navigation .nav-next,
+.posts-navigation .nav-next,
+.post-navigation .nav-next {
+	float: left;
+	text-align: left;
+}
