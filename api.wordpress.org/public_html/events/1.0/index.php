@@ -721,23 +721,22 @@ function guess_location_from_country( $location_name ) {
 function get_country_from_name( $country_name ) {
 	global $wpdb;
 
-	$country = $wpdb->get_row( $wpdb->prepare( "
-		SELECT country_short, country_long
-		FROM ip2location
-		WHERE
-			country_long  = %s OR
-			country_short = %s
-		LIMIT 1",
-		$country_name,
-		$country_name
-	), 'ARRAY_A' );
+	$field = 'name';
 
-	// Convert all errors to boolean false for consistency
-	if ( empty( $country ) ) {
-		$country = false;
+	if ( strlen( $country_name ) == 2 ) {
+		$field = 'country';
 	}
 
-	return $country;
+	return $wpdb->get_row( $wpdb->prepare( "
+		SELECT
+			country as country_short,
+			name as country_long
+		FROM countrycodes
+		WHERE
+			$field = %s
+		LIMIT 1",
+		$country_name
+	), 'ARRAY_A' );
 }
 
 function get_events( $args = array() ) {
