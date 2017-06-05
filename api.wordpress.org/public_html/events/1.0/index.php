@@ -675,7 +675,7 @@ function guess_location_from_country( $location_name ) {
 	// Check if they entered only the country name, e.g. "Germany" or "New Zealand"
 	$country             = get_country_from_name( $location_name );
 	$location_word_count = str_word_count( $location_name );
-	$location_name_parts = explode( ' ', $location_name );
+	$location_name_parts = preg_split( '/\s+/u', $location_name );
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the country
