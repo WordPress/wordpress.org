@@ -141,7 +141,9 @@ function build_response( $location, $location_args ) {
 		 * #40702-core.
 		 *
 		 * @todo Update the user-agent strings if 40702-geoip.2.diff doesn't make it into beta2
-		 * @todo Remove this back-compat code after beta2 has been out for a few days
+		 * @todo Remove this back-compat code after 4.8.0 has been out for a few days, to avoid
+		 *       impacting the feature plugin in 4.7 installs. rebuild_location_from_event_source()
+		 *       can probably be removed at that time too.
 		 */
 		$use_fuzzy_locations = false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.7' ) || false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.8-beta1' );
 		if ( $use_fuzzy_locations ) {
@@ -386,7 +388,7 @@ function get_prepare_placeholders( $number, $format ) {
  *
  * @param string $dotted_ip
  *
- * @return null|object `null` on failure; an object on success
+ * @return false|object `false` on failure; an object on success
  */
 function guess_location_from_ip( $dotted_ip ) {
 	global $wpdb;
@@ -404,7 +406,7 @@ function guess_location_from_ip( $dotted_ip ) {
 	}
 
 	if ( false === $long_ip || ! isset( $from, $where ) ) {
-		return;
+		return false;
 	}
 
 	$row = $wpdb->get_row( $wpdb->prepare( "
@@ -418,7 +420,7 @@ function guess_location_from_ip( $dotted_ip ) {
 
 	// Unknown location:
 	if ( ! $row || '-' == $row->country_short ) {
-		return;
+		return false;
 	}
 
 	return $row;
