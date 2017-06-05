@@ -676,7 +676,6 @@ function guess_location_from_country( $location_name ) {
 	$country             = get_country_from_name( $location_name );
 	$location_word_count = str_word_count( $location_name );
 	$location_name_parts = explode( ' ', $location_name );
-	$valid_country_codes = get_valid_country_codes();
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the country
@@ -711,16 +710,6 @@ function guess_location_from_country( $location_name ) {
 	return $country;
 }
 
-/**
- * Get a list of valid country codes
- *
- * @return array
- */
-function get_valid_country_codes() {
-	global $wpdb;
-
-	return $wpdb->get_col( "SELECT DISTINCT country FROM geoname" );
-}
 
 /**
  * Get the country that corresponds to the given country name
