@@ -573,7 +573,7 @@ function get_location( $args = array() ) {
 		} else {
 			$guess = guess_location_from_country( $args['location_name'] );
 
-			if ( ! $location && $guess ) {
+			if ( $guess ) {
 				$location = array(
 					'country'     => $guess['country_short'],
 					'description' => $guess['country_long'],
