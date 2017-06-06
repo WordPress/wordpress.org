@@ -26,6 +26,15 @@ function get_user_subroles( $user_id ) {
 }
 
 /**
+ * Check if the current request is proxied.
+ *
+ * @return bool True if the request is proxied.
+ */
+function is_proxied() {
+	return defined( 'WPORG_PROXIED_REQUEST' ) && WPORG_PROXIED_REQUEST;
+}
+
+/**
  * Add capabilities to a user depending on their subroles.
  *
  * @param array    $allcaps The original list of caps for the given user.
