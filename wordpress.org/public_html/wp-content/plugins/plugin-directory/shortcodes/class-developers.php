@@ -117,8 +117,8 @@ class Developers {
 				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
 				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
 				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
-				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" ),
-				$email_url
+				$email_url,
+				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
 			) . '</p>';
 		} else {
 			$output .= '<p>' . sprintf(
