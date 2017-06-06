@@ -279,7 +279,7 @@ class WordCamp_Post_Types_Plugin {
 			'posts_per_page' => -1,
 			'orderby'        => 'date',
 			'order'          => 'desc',
-			'track'          => 'all',
+			'track'          => '',
 			'speaker_link'   => '',
 		), $attr );
 
@@ -291,14 +291,7 @@ class WordCamp_Post_Types_Plugin {
 		$attr['orderby']      = in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ? $attr['orderby']      : 'date';
 		$attr['order']        = in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ? $attr['order']        : 'desc';
 		$attr['speaker_link'] = in_array( $attr['speaker_link'], array( 'permalink'             ) ) ? $attr['speaker_link'] : '';
-
-		/*
-		 * Only allow 2014.capetown to use the new track attribute
-		 * @todo Remove this and update docs after stakeholder review
-		 */
-		if ( ! in_array( get_current_blog_id(), apply_filters( 'wcpt_filter_speakers_by_track_allowed_sites', array( 423 ) ) ) ) {
-			$attr['track'] = 'all';
-		}
+		$attr['track']        = array_map( 'trim', explode( ',', $attr['track'] ) );
 
 		// Fetch all the relevant sessions
 		$session_args = array(
@@ -306,12 +299,12 @@ class WordCamp_Post_Types_Plugin {
 			'posts_per_page' => -1,
 		);
 
-		if ( 'all' != $attr['track'] ) {
+		if ( ! empty( $attr['track'] ) ) {
 			$session_args['tax_query'] = array(
 				array(
 					'taxonomy' => 'wcb_track',
 					'field'    => 'slug',
-					'terms'    => explode( ',', $attr['track'] ),
+					'terms'    => $attr['track'],
 				),
 			);
 		}
@@ -350,7 +343,7 @@ class WordCamp_Post_Types_Plugin {
 			'order'          => $attr['order'],
 		);
 
-		if ( 'all' != $attr['track'] ) {
+		if ( ! empty( $attr['track'] ) ) {
 			$speaker_args['post__in'] = $speaker_ids;
 		}
 
