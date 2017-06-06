@@ -186,30 +186,29 @@ function send_response( $response, $ttl ) {
  */
 function guess_location_from_city( $location_name, $timezone, $country_code ) {
 	$guess = guess_location_from_geonames( $location_name, $timezone, $country_code );
-	$location_word_count = str_word_count( $location_name );
-	$location_name_parts = explode( ' ', $location_name );
+
+	if ( $guess ) {
+		return $guess;
+	}
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the city
 	 *
 	 * This won't work for most ideographic languages, because they don't use the space character as a word
-	 * delimiter. That's ok, though, because `guess_ideographic_location_from_geonames()` should cover those
-	 * cases.
+	 * delimiter.
 	 */
+	$location_name_parts = preg_split( '/\s+/u', $location_name );
+	$location_word_count = count( $location_name_parts );
+
 	if ( ! $guess && $location_word_count >= 2 ) {
 		// Catch input like "Portland Maine"
-		$guess = guess_location_from_geonames( $location_name_parts[0], $timezone, $country_code );
+		$guess = guess_location_from_geonames( $location_name_parts[0], $timezone, $country_code, $wildcard = false );
 	}
 
 	if ( ! $guess && $location_word_count >= 3 ) {
 		// Catch input like "Sao Paulo Brazil"
 		$city_name = sprintf( '%s %s', $location_name_parts[0], $location_name_parts[1] );
-		$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code );
-	}
-
-	// Normalize all errors to boolean false for consistency
-	if ( empty ( $guess ) ) {
-		$guess = false;
+		$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code, $wildcard = false );
 	}
 
 	return $guess;
@@ -224,161 +223,54 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
  *
  * @return stdClass|null
  */
-function guess_location_from_geonames( $location_name, $timezone, $country ) {
+function guess_location_from_geonames( $location_name, $timezone, $country, $wildcard = true ) {
 	global $wpdb;
 	// Look for a location that matches the name.
 	// The FIELD() orderings give preference to rows that match the country and/or timezone, without excluding rows that don't match.
 	// And we sort by population desc, assuming that the biggest matching location is the most likely one.
 
-	// Strip all quotes from the search query, and then enclose it in double quotes, to force an exact literal search
-	$quoted_location_name = sprintf(
-		'"%s"',
-		strtr( $location_name, [ '"' => '', "'" => '' ] )
-	);
-
+	// Exact match
 	$row = $wpdb->get_row( $wpdb->prepare( "
 		SELECT name, latitude, longitude, country
-		FROM geoname
-		WHERE
-			MATCH( name, asciiname, alternatenames )
-			AGAINST( %s IN BOOLEAN MODE )
+		FROM geoname_summary
+		WHERE name = %s
 		ORDER BY
 			FIELD( %s, country  ) DESC,
 			FIELD( %s, timezone ) DESC,
 			population DESC
 		LIMIT 1",
-		$quoted_location_name,
+		$location_name,
 		$country,
 		$timezone
 	) );
 
-	if ( ! is_a( $row, 'stdClass' ) && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
-		$row = guess_location_from_geonames_fallback( $location_name, $country, $timezone, 'exact', 'ideographic' );
+	// Wildcard match
+	if ( ! $row && $wildcard && 'ASCII' !== mb_detect_encoding( $location_name ) ) {
+		$row = $wpdb->get_row( $wpdb->prepare( "
+			SELECT name, latitude, longitude, country
+			FROM geoname_summary
+			WHERE name LIKE %s
+			ORDER BY
+				FIELD( %s, country  ) DESC,
+				FIELD( %s, timezone ) DESC,
+				population DESC
+			LIMIT 1",
+			$location_name . '%',
+			$country,
+			$timezone
+		) );
 	}
+
+	// Suffix the "State", good in some countries (western countries) horrible in others
+	// (where geonames data is not as complete, or region names are similar (but not quite the same) to city names)
+	// LEFT JOIN admin1codes ac ON gs.statecode = ac.code
+	// if ( $row->state && $row->state != $row->name && $row->name NOT CONTAINED WITHIN $row->state? ) {
+	//	 $row->name .= ', ' . $row->state;
+	// }
 
 	return $row;
 }
 
-/**
- * Look for the given location in the Geonames database using a LIKE query
- *
- * This is a fallback for situations where the full-text search in `guess_location_from_geonames()` resulted
- * in a false-negative.
- *
- * One situation where this happens is with queries in ideographic languages, because MySQL < 5.7.6 doesn't
- * support full-text searches for them, because it can't determine where the word boundaries are.
- * See https://dev.mysql.com/doc/refman/5.7/en/fulltext-restrictions.html
- *
- * There are also edge cases where the exact query doesn't exist in the database, but a loose LIKE query will find
- * a similar alternate, like `Osakashi`.
- *
- * @param string $location_name
- * @param string $country
- * @param string $timezone
- * @param string $mode          'exact' to only return exact matches from the database;
- *                              'loose' to return any match. This has a high chance of false positives.
- * @param string $restrict_counties 'ideographic' to only search in countries where ideographic languages are common;
- *                                  'none' to search all countries
- *
- * @return stdClass|null
- */
-function guess_location_from_geonames_fallback( $location_name, $country, $timezone, $mode = 'exact', $restrict_counties = 'ideographic' ) {
-	global $wpdb;
-
-	$where = $ideographic_countries = $ideographic_country_placeholders = '';
-
-	/*
-	 * The name is wrapped in commas in order to ensure that we're only matching the exact location, which is
-	 * delimited by commas. Otherwise, there would be false positives in situations where `$location_name`
-	 * appears in other rows, which happens sometimes.
-	 *
-	 * Because this will only match entries that are prefixed _and_ postfixed with a comma, it will never match the
-	 * first and last entries in the column. That's ok, though, because the first entry is often an airport code
-	 * in English, which is shorter than `ft_min_word_len` anyway. The last entry is often ideographic, so it'd be nice
-	 * to match it, but this is good enough for now.
-	 */
-	$escaped_location_name = sprintf(
-		'loose' === $mode ? '%%%s%%' : '%%,%s,%%',
-		$wpdb->esc_like( $location_name )
-	);
-
-	$prepare_args = array( $escaped_location_name, $country, $timezone );
-
-	if ( 'ideographic' == $restrict_counties ) {
-		$ideographic_countries            = get_ideographic_counties();
-		$ideographic_country_placeholders = get_prepare_placeholders( count( $ideographic_countries ), '%s' );
-
-		$where .= "country IN ( $ideographic_country_placeholders ) AND";
-
-		$prepare_args = array_merge( $ideographic_countries, $prepare_args );
-	}
-
-	/*
-	 * REPLACE() is used because sometimes the `alternatenames` column contains entries where the `asciiname` is
-	 * prefixed to an ideographic name; for example: `,Karachi - كراچى,`
-	 *
-	 * If that prefix is not removed, then the LIKE query will fail in those cases, because
-	 * `$escaped_location_name` is wrapped in commas.
-	 *
-	 * The query is restricted to countries where ideographic languages are common, in order to avoid a full-table
-	 * scan.
-	 */
-	$query = "
-		SELECT name, latitude, longitude, country
-		FROM `geoname`
-		WHERE
-			$where
-			REPLACE( alternatenames, CONCAT( asciiname, ' - ' ), '' ) LIKE %s
-		ORDER BY
-			FIELD( %s, country  ) DESC,
-			FIELD( %s, timezone ) DESC,
-			population DESC
-		LIMIT 1";
-
-	$prepared_query = $wpdb->prepare( $query, $prepare_args );
-
-	return $wpdb->get_row( $prepared_query );
-}
-
-/**
- * Get an array of countries where ideographic languages are common
- *
- * Derived from https://en.wikipedia.org/wiki/List_of_writing_systems#List_of_writing_scripts_by_adoption
- *
- * @todo Some of these individual countries may be able to be removed, to further narrow the rows that need to be
- *       scanned by `guess_ideographic_location_from_geonames()`. Some of the entire categories could possibly be
- *       removed too, but let's err on the side of caution for now.
- */
-function get_ideographic_counties() {
-	$middle_east  = array( 'AE', 'BH', 'CY', 'EG', 'IL', 'IR', 'IQ', 'JO', 'KW', 'LB', 'OM', 'PS', 'QA', 'SA', 'SY', 'TR', 'YE' );
-	$north_africa = array( 'DZ', 'EH', 'EG', 'LY', 'MA', 'SD', 'SS', 'TN' );
-
-	$abjad_countries       = array_merge( $middle_east, $north_africa, array( 'CN', 'IL', 'IN', 'MY', 'PK' ) );
-	$abugida_countries     = array( 'BD', 'BT', 'ER', 'ET', 'ID', 'IN', 'KH', 'LA', 'LK', 'MV', 'MY', 'MU', 'MM', 'NP', 'PK', 'SG', 'TH' );
-	$logographic_countries = array( 'CN', 'JP', 'KR', 'MY', 'SG');
-
-	$all_ideographic_countries = array_merge( $abjad_countries, $abugida_countries, $logographic_countries );
-
-	return array_unique( $all_ideographic_countries );
-}
-
-/**
- * Build a string of placeholders to pass to `WPDB::prepare()`
- *
- * Sometimes it's convenient to be able to generate placeholders for `prepare()` dynamically. For example, when
- * looping through a multi-dimensional array where the sub-arrays have distinct counts; or when the total
- * number of items is too large to conveniently count by hand.
- *
- * See https://iandunn.name/2016/03/31/generating-dynamic-placeholders-for-wpdb-prepare/
- *
- * @param int    $number The number of placeholders needed
- * @param string $format An sprintf()-like format accepted by WPDB::prepare()
- *
- * @return string
- */
-function get_prepare_placeholders( $number, $format ) {
-	return implode( ', ', array_fill( 0, $number, $format ) );
-}
 
 /**
  * Determine a location for the given IPv4 address
@@ -579,30 +471,6 @@ function get_location( $args = array() ) {
 					'description' => $guess['country_long'],
 				);
 			}
-		}
-	}
-
-	/*
-	 * If all else fails, cast a wide net and try to find something before giving up, even
-	 * if the chance of success if lower than normal. Returning false is guaranteed failure, so this improves things
-	 * even if it only works 10% of the time.
-	 *
-	 * This must be done as the very last thing before giving up, because the likelihood of false positives is high.
-	 */
-	if ( ! $location && isset( $args['location_name'] ) ) {
-		if ( 'ASCII' === mb_detect_encoding( $args['location_name'] ) ) {
-			$guess = guess_location_from_geonames_fallback( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose', 'none' );
-		} else {
-			$guess = guess_location_from_geonames_fallback( $args['location_name'], $country_code, $args['timezone'] ?? '', 'loose', 'ideographic' );
-		}
-
-		if ( $guess ) {
-			$location = array(
-				'description' => $guess->name,
-				'latitude'    => $guess->latitude,
-				'longitude'   => $guess->longitude,
-				'country'     => $guess->country,
-			);
 		}
 	}
 

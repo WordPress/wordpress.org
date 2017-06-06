@@ -153,10 +153,6 @@ function get_location_test_cases() {
 			),
 		),
 
-		/*
-		 * This is matching a city inside the country before it the country searches run, but that's ok since it's
-		 * good enough for our use cases
-		 */
 		'country-exonym-2-words' => array(
 			'input' => array(
 				'location_name' => 'Bosnia and Herzegovina',
@@ -164,10 +160,8 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Sarajevo',
 			),
 			'expected' => array(
-				'description' => 'pale',
-				'latitude'    => '43.817',
-				'longitude'   => '18.569',
-				'country'     => 'BA'
+				'country'     => 'BA',
+				'description' => 'bosnia and herzegovina',
 			),
 		),
 
@@ -287,7 +281,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Sao_Paulo',
 			),
 			'expected' => array(
-				'description' => 'são paulo',
+				'description' => 'sao paulo',
 				'latitude'    => '-23.548',
 				'longitude'   => '-46.636',
 				'country'     => 'BR',
@@ -302,7 +296,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'osaka',
+				'description' => 'osakashi',
 				'latitude'    => '34.694',
 				'longitude'   => '135.502',
 				'country'     => 'JP',
@@ -318,7 +312,7 @@ function get_location_test_cases() {
 				'ip'            => '153.163.68.148', // Tokyo
 			),
 			'expected' => array(
-				'description' => 'osaka',
+				'description' => 'osakashi',
 				'latitude'    => '34.694',
 				'longitude'   => '135.502',
 				'country'     => 'JP',
@@ -365,7 +359,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Denver',
 			),
 			'expected' => array(
-				'description' => "doña ana",
+				'description' => "dona ana",
 				'latitude'    => '32.390',
 				'longitude'   => '-106.814',
 				'country'     => 'US',
@@ -393,7 +387,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Chicago',
 			),
 			'expected' => array(
-				'description' => "st. louis",
+				'description' => "st louis",
 				'latitude'    => '38.627',
 				'longitude'   => '-90.198',
 				'country'     => 'US',
@@ -428,7 +422,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Addis_Ababa',
 			),
 			'expected' => array(
-				'description' => 'addis ababa',
+				'description' => 'አዲስ አበባ',
 				'latitude'    => '9.025',
 				'longitude'   => '38.747',
 				'country'     => 'ET',
@@ -442,7 +436,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'shirahamachō-usazakiminami',
+				'description' => '白浜町宇佐崎南',
 				'latitude'    => '34.783',
 				'longitude'   => '134.717',
 				'country'     => 'JP',
@@ -456,7 +450,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tehran',
 			),
 			'expected' => array(
-				'description' => 'tehran',
+				'description' => 'تهران',
 				'latitude'    => '35.694',
 				'longitude'   => '51.422',
 				'country'     => 'IR',
@@ -470,7 +464,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Karachi',
 			),
 			'expected' => array(
-				'description' => 'karachi',
+				'description' => 'كراچى',
 				'latitude'    => '24.906',
 				'longitude'   => '67.082',
 				'country'     => 'PK',
@@ -484,7 +478,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'kyoto',
+				'description' => '京都',
 				'latitude'    => '35.021',
 				'longitude'   => '135.754',
 				'country'     => 'JP',
@@ -498,7 +492,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'tokyo',
+				'description' => '東京',
 				'latitude'    => '35.690',
 				'longitude'   => '139.692',
 				'country'     => 'JP',
@@ -513,7 +507,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Tokyo',
 			),
 			'expected' => array(
-				'description' => 'osaka',
+				'description' => '大阪市',
 				'latitude'    => '34.694',
 				'longitude'   => '135.502',
 				'country'     => 'JP',
@@ -527,7 +521,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Berlin',
 			),
 			'expected' => array(
-				'description' => 'vienna',
+				'description' => 'wien',
 				'latitude'    => '48.208',
 				'longitude'   => '16.372',
 				'country'     => 'AT',
@@ -541,7 +535,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/Moscow',
 			),
 			'expected' => array(
-				'description' => 'moscow',
+				'description' => 'Москва',
 				'latitude'    => '55.752',
 				'longitude'   => '37.616',
 				'country'     => 'RU',
@@ -555,7 +549,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Mexico_City',
 			),
 			'expected' => array(
-				'description' => 'mexico city',
+				'description' => 'ciudad de méxico',
 				'latitude'    => '19.428',
 				'longitude'   => '-99.128',
 				'country'     => 'MX',
