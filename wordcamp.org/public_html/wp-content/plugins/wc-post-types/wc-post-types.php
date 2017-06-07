@@ -281,6 +281,7 @@ class WordCamp_Post_Types_Plugin {
 			'order'          => 'desc',
 			'track'          => '',
 			'speaker_link'   => '',
+			'groups'         => '',
 		), $attr );
 
 		foreach ( array( 'orderby', 'order', 'track', 'speaker_link' ) as $key_for_case_sensitive_value ) {
@@ -292,6 +293,7 @@ class WordCamp_Post_Types_Plugin {
 		$attr['order']        = in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ? $attr['order']        : 'desc';
 		$attr['speaker_link'] = in_array( $attr['speaker_link'], array( 'permalink'             ) ) ? $attr['speaker_link'] : '';
 		$attr['track']        = array_map( 'trim', explode( ',', $attr['track'] ) );
+		$attr['groups']       = array_map( 'trim', explode( ',', $attr['groups'] ) );
 
 		// Fetch all the relevant sessions
 		$session_args = array(
@@ -345,6 +347,16 @@ class WordCamp_Post_Types_Plugin {
 
 		if ( ! empty( $attr['track'] ) ) {
 			$speaker_args['post__in'] = $speaker_ids;
+		}
+
+		if ( ! empty( $attr['groups'] ) ) {
+			$speaker_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'wcb_speaker_group',
+					'field'    => 'slug',
+					'terms'    => $attr['groups'],
+				),
+			);
 		}
 
 		$speakers = new WP_Query( $speaker_args );
@@ -2054,6 +2066,35 @@ class WordCamp_Post_Types_Plugin {
 				'hierarchical' => true,
 				'public'       => true,
 				'show_ui'      => true,
+			)
+		);
+
+		// Labels for speaker groups.
+		$labels = array(
+			'name'          => __( 'Groups',         'wordcamporg' ),
+			'singular_name' => __( 'Group',          'wordcamporg' ),
+			'search_items'  => __( 'Search Groups',  'wordcamporg' ),
+			'popular_items' => __( 'Popular Groups', 'wordcamporg' ),
+			'all_items'     => __( 'All Groups',     'wordcamporg' ),
+			'edit_item'     => __( 'Edit Group',     'wordcamporg' ),
+			'update_item'   => __( 'Update Group',   'wordcamporg' ),
+			'add_new_item'  => __( 'Add Group',      'wordcamporg' ),
+			'new_item_name' => __( 'New Group',      'wordcamporg' ),
+		);
+
+		// Register speaker groups taxonomy
+		register_taxonomy(
+			'wcb_speaker_group',
+			'wcb_speaker',
+			array(
+				'labels'       => $labels,
+				'rewrite'      => array( 'slug' => 'speaker_group' ),
+				'query_var'    => 'speaker_group',
+				'hierarchical' => true,
+				'public'       => true,
+				'show_ui'      => true,
+				'show_in_rest' => true,
+				'rest_base'    => 'speaker_group',
 			)
 		);
 	}
