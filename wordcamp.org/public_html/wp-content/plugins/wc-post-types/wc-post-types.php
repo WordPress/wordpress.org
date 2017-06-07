@@ -279,12 +279,12 @@ class WordCamp_Post_Types_Plugin {
 			'posts_per_page' => -1,
 			'orderby'        => 'date',
 			'order'          => 'desc',
-			'track'          => '',
 			'speaker_link'   => '',
+			'track'          => '',
 			'groups'         => '',
 		), $attr );
 
-		foreach ( array( 'orderby', 'order', 'track', 'speaker_link' ) as $key_for_case_sensitive_value ) {
+		foreach ( array( 'orderby', 'order', 'speaker_link' ) as $key_for_case_sensitive_value ) {
 			$attr[ $key_for_case_sensitive_value ] = strtolower( $attr[ $key_for_case_sensitive_value ] );
 		}
 
@@ -292,8 +292,8 @@ class WordCamp_Post_Types_Plugin {
 		$attr['orderby']      = in_array( $attr['orderby'],      array( 'date', 'title', 'rand' ) ) ? $attr['orderby']      : 'date';
 		$attr['order']        = in_array( $attr['order'],        array( 'asc', 'desc'           ) ) ? $attr['order']        : 'desc';
 		$attr['speaker_link'] = in_array( $attr['speaker_link'], array( 'permalink'             ) ) ? $attr['speaker_link'] : '';
-		$attr['track']        = array_map( 'trim', explode( ',', $attr['track'] ) );
-		$attr['groups']       = array_map( 'trim', explode( ',', $attr['groups'] ) );
+		$attr['track']        = array_filter( explode( ',', $attr['track'] ) );
+		$attr['groups']       = array_filter( explode( ',', $attr['groups'] ) );
 
 		// Fetch all the relevant sessions
 		$session_args = array(
