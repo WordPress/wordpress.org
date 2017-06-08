@@ -290,7 +290,7 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
 				FIELD( %s, timezone ) DESC,
 				population DESC
 			LIMIT 1",
-			$location_name . '%',
+			$wpdb->esc_like( $location_name ) . '%',
 			$country,
 			$timezone
 		) );
