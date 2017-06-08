@@ -187,7 +187,11 @@ class Committers extends \WP_List_Table {
 					break;
 
 				case 'username':
-					$row .= "<strong>$user_object->user_login</strong><br />";
+					$row .= sprintf( '<strong><a href="%s">%s</a></strong><br />&lt;%s&gt;',
+						esc_url( '//profiles.wordpress.org/' . $user_object->user_nicename ),
+						$user_object->user_login,
+						$user_object->user_email
+					);
 					break;
 
 				default:
