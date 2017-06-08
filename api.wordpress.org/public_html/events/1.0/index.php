@@ -205,11 +205,20 @@ function send_response( $response, $ttl ) {
  * @return false|object false on failure; an object on success
  */
 function guess_location_from_city( $location_name, $timezone, $country_code ) {
-	$guess = guess_location_from_geonames( $location_name, $timezone, $country_code );
+	global $cache_group, $cache_life;
+
+	$cache_key = 'guess_location_from_city:' . md5( $location_name . ':' . $timezone . ':' . $country_code );
+	$guess     = wp_cache_get( $cache_key, $cache_group );
 
 	if ( $guess ) {
+		if ( '__NOT_FOUND__' == $guess ) {
+			return false;
+		}
+
 		return $guess;
 	}
+
+	$guess = guess_location_from_geonames( $location_name, $timezone, $country_code );
 
 	/*
 	 * Multi-word queries may contain cities, regions, and countries, so try to extract just the city
@@ -230,6 +239,8 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 		$city_name = sprintf( '%s %s', $location_name_parts[0], $location_name_parts[1] );
 		$guess     = guess_location_from_geonames( $city_name, $timezone, $country_code, $wildcard = false );
 	}
+
+	wp_cache_set( $cache_key, ( $guess ?: '__NOT_FOUND__' ), $cache_group, $cache_life );
 
 	return $guess;
 }
@@ -303,7 +314,18 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
  * @return false|object `false` on failure; an object on success
  */
 function guess_location_from_ip( $dotted_ip ) {
-	global $wpdb;
+	global $wpdb, $cache_group, $cache_life;
+
+	$cache_key = 'guess_location_from_ip:' . $dotted_ip;
+	$location  = wp_cache_get( $cache_key, $cache_group );
+
+	if ( $location !== false ) {
+		if ( '__NOT_FOUND__' == $location ) {
+			return false;
+		}
+
+		return $location;
+	}
 
 	$long_ip = false;
 
@@ -318,6 +340,7 @@ function guess_location_from_ip( $dotted_ip ) {
 	}
 
 	if ( false === $long_ip || ! isset( $from, $where ) ) {
+		wp_cache_set( $cache_key, '__NOT_FOUND__', $cache_group, $cache_life );
 		return false;
 	}
 
@@ -332,8 +355,11 @@ function guess_location_from_ip( $dotted_ip ) {
 
 	// Unknown location:
 	if ( ! $row || '-' == $row->country_short ) {
+		wp_cache_set( $cache_key, '__NOT_FOUND__', $cache_group, $cache_life );
 		return false;
 	}
+
+	wp_cache_set( $cache_key, $row, $cache_group, $cache_life );
 
 	return $row;
 }
@@ -443,13 +469,7 @@ function rebuild_location_from_event_source( $events ) {
 function get_location( $args = array() ) {
 	global $cache_life, $cache_group;
 
-	$cache_key = 'get_location:' . md5( serialize( $args ) );
-	$location  = wp_cache_get( $cache_key, $cache_group );
 	$throttle_geonames = $throttle_ip2location = false;
-
-	if ( false !== $location ) {
-		return $location;
-	}
 
 	// For a country request, no lat/long are returned.
 	if ( isset( $args['country'] ) ) {
@@ -457,8 +477,6 @@ function get_location( $args = array() ) {
 			'country' => $args['country'],
 		);
 	}
-
-	$country_code = get_country_code_from_locale( $args['locale'] ?? '' );
 
 	// Coordinates provided
 	if (
@@ -482,6 +500,7 @@ function get_location( $args = array() ) {
 			return 'temp-request-throttled';
 		}
 
+		$country_code = get_country_code_from_locale( $args['locale'] ?? '' );
 		$guess = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code  );
 
 		if ( $guess ) {
@@ -534,10 +553,6 @@ function get_location( $args = array() ) {
 		}
 	}
 
-	if ( $location !== 'temp-request-throttled' ) {
-		wp_cache_set( $cache_key, $location, $cache_group, $cache_life );
-	}
-
 	return $location;
 }
 
@@ -578,6 +593,19 @@ function get_country_code_from_locale( $locale ) {
  * @return false|array false on failure; an array with country details on success
  */
 function guess_location_from_country( $location_name ) {
+	global $cache_group, $cache_life;
+
+	$cache_key = 'guess_location_from_country:' . $location_name;
+	$country   = wp_cache_get( $cache_key, $cache_group );
+
+	if ( $country ) {
+		if ( '__NOT_FOUND__' == $country ) {
+			return false;
+		}
+
+		return $country;
+	}
+
 	// Check if they entered only the country name, e.g. "Germany" or "New Zealand"
 	$country             = get_country_from_name( $location_name );
 	$location_word_count = str_word_count( $location_name );
@@ -612,6 +640,8 @@ function guess_location_from_country( $location_name ) {
 		);
 		$country = get_country_from_name( $country_name );
 	}
+
+	wp_cache_set( $cache_key, ( $country ?: '__NOT_FOUND__' ), $cache_group, $cache_life );
 
 	return $country;
 }
