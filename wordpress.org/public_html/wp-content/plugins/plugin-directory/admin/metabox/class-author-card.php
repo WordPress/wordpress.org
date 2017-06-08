@@ -50,9 +50,9 @@ class Author_Card {
 		$all_plugins = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
 		?>
 		<div class="profile">
-		<p class="profile-personal">
+		<div class="profile-personal">
 			<?php echo get_avatar( $author->ID, 48 ); ?>
-			<span class="profile-details">
+			<div class="profile-details">
 				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php echo $author->user_login; ?></a></strong>
 				<?php
 					$author_links = array(
@@ -66,15 +66,15 @@ class Author_Card {
 					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>">profile</a> |
 					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>">support</a>
 				</span>
-				<span class="profile-email">
+				<div class="profile-email">
 					&lt;<?php echo $author->user_email; ?>&gt;
 					<span class="profile-sp-link">[ <a href="https://supportpress.wordpress.org/plugins/?sender=<?php echo esc_attr( $author->user_email ); ?>&status=&todo=Search" title="Click to search Pluginrepo SupportPress for emails sent to/from this email address">SP</a> ]</span>
-				</span>
-				<span class="profile-join">
+				</div>
+				<div class="profile-join">
 					Joined <?php echo human_time_diff( strtotime( $author->user_registered ) ); ?> ago (<?php echo date( 'Y-M-d', strtotime( $author->user_registered ) ); ?>)
-				</span>
-			</span>
-		</p>
+				</div>
+			</div>
+		</div>
 		<?php if ( ! empty( $author->user_url ) ) : ?>
 			<p class="profile-url">
 				Author URL: <a href="http://href.li?<?php echo esc_url( $author->user_url ); ?>"><?php echo esc_html( $author->user_url ); ?></a>
