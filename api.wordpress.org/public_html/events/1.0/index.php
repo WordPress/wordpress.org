@@ -12,6 +12,19 @@ function main() {
 	bootstrap();
 	wp_cache_init();
 
+	/*
+	 * Short-circuit some requests if a traffic spike is larger than we can handle.
+	 *
+	 * - A value of `0` means that 0% of requests will be throttled.
+	 * - A value of `100` means that all cache-miss requests will be short-circuited with an error.
+	 * - Any value `n` between `0` and `100` means that `n%` of cache-miss requests will be short-circuited.
+	 *   e.g., `75` means that 75% of cache-miss requests will short-circuited, and 25% will processed normally.
+	 *
+	 * In all of the above scenarios, requests that have cached results will always be served.
+	 */
+	define( 'THROTTLE_GEONAMES',    0 );
+	define( 'THROTTLE_IP2LOCATION', 0 );
+
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
 		return;
@@ -96,13 +109,20 @@ function parse_request() {
 /**
  * Build the API's response to the client's request
  *
- * @param array $location
+ * @param mixed $location      `false` if no location was found;
+ *                             A string with an error code if an error occurred;
+ *                             An array with location details on success.
  * @param array $location_args
  *
  * @return array
  */
 function build_response( $location, $location_args ) {
 	$events = array();
+
+	if ( 'temp-request-throttled' === $location ) {
+		$location = array();
+		$error    = 'temp-request-throttled';
+	}
 
 	if ( $location ) {
 		$event_args = array();
@@ -153,7 +173,7 @@ function build_response( $location, $location_args ) {
 			// Let the client know that a location was successfully determined based on their IP
 			$location = array( 'ip' => $location_args['ip'] );
 		}
-	} else {
+	} elseif ( empty( $error ) ) {
 		$error = 'no_location_available';
 	}
 
@@ -416,13 +436,16 @@ function rebuild_location_from_event_source( $events ) {
  *
  * @param array $args
  *
- * @return false|array
+ * @return false|array|string `false` if no location was found;
+ *                            A string with an error code if an error occurred;
+ *                            An array with location details on success.
  */
 function get_location( $args = array() ) {
 	global $cache_life, $cache_group;
 
 	$cache_key = 'get_location:' . md5( serialize( $args ) );
 	$location  = wp_cache_get( $cache_key, $cache_group );
+	$throttle_geonames = $throttle_ip2location = false;
 
 	if ( false !== $location ) {
 		return $location;
@@ -453,6 +476,12 @@ function get_location( $args = array() ) {
 
 	// City was provided by the user:
 	if ( ! $location && isset( $args['location_name'] ) ) {
+		$throttle_geonames = mt_rand( 1, 100 ) <= THROTTLE_GEONAMES;
+
+		if ( $throttle_geonames ) {
+			return 'temp-request-throttled';
+		}
+
 		$guess = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code  );
 
 		if ( $guess ) {
@@ -486,6 +515,12 @@ function get_location( $args = array() ) {
 
 	// IP:
 	if ( ! $location && isset( $args['ip'] ) && ! isset( $args['location_name'] ) ) {
+		$throttle_ip2location = mt_rand( 1, 100 ) <= THROTTLE_IP2LOCATION;
+
+		if ( $throttle_ip2location ) {
+			return 'temp-request-throttled';
+		}
+
 		$guess = guess_location_from_ip( $args['ip'] );
 
 		if ( $guess ) {
@@ -499,7 +534,10 @@ function get_location( $args = array() ) {
 		}
 	}
 
-	wp_cache_set( $cache_key, $location, $cache_group, $cache_life );
+	if ( $location !== 'temp-request-throttled' ) {
+		wp_cache_set( $cache_key, $location, $cache_group, $cache_life );
+	}
+
 	return $location;
 }
 
