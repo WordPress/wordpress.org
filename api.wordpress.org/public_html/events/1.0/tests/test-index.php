@@ -58,22 +58,6 @@ function output_results( $case_id, $passed, $expected_result, $actual_result ) {
 }
 
 /**
- * Add a cachebusting parameter to bypass the object cache
- *
- * Cache keys are generated based on the function's input arguments (e.g., get_location()), so adding a unique
- * parameter on every function call ensures that the unit tests will never get a cached result.
- *
- * @param array $arguments
- *
- * @return array
- */
-function add_cachebusting_parameter( $arguments ) {
-	$arguments['cachebuster'] = microtime( true );
-
-	return $arguments;
-}
-
-/**
  * Test `get_location()`
  *
  * @return bool The number of failures
@@ -85,7 +69,6 @@ function test_get_location() {
 	printf( "\nRunning %d location tests\n", count( $cases ) );
 
 	foreach ( $cases as $case_id => $case ) {
-		$case['input'] = add_cachebusting_parameter( $case['input'] );
 		$actual_result = get_location( $case['input'] );
 
 		// Normalize to lowercase to account for inconsistency in the IP database
@@ -857,6 +840,22 @@ function get_location_test_cases() {
 	);
 
 	return $cases;
+}
+
+/**
+ * Stub to simulate cache misses, so that the tests always get fresh results
+ *
+ * @return false
+ */
+function wp_cache_get() {
+	return false;
+}
+
+/**
+ * Stub to simulate cache misses, so that the tests always get fresh results
+ */
+function wp_cache_set() {
+	// Intentionally empty
 }
 
 run_tests();

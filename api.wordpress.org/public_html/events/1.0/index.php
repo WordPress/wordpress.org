@@ -10,7 +10,6 @@ function main() {
 	global $cache_group, $cache_life;
 
 	bootstrap();
-	wp_cache_init();
 
 	/*
 	 * Short-circuit some requests if a traffic spike is larger than we can handle.
@@ -30,6 +29,8 @@ function main() {
 		return;
 	}
 
+	wp_cache_init();
+
 	$cache_group   = 'events';
 	$cache_life    = 12 * 60 * 60;
 	$ttl           = 12 * 60 * 60; // Time the client should cache the document.
@@ -48,8 +49,11 @@ function bootstrap() {
 
 	require( $base_dir . '/init.php' );
 	require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
-	include( $base_dir . '/includes/object-cache.php' );
 	include( $base_dir . '/includes/wp-json-encode.php' );
+
+	if ( ! defined( 'RUNNING_TESTS' ) || ! RUNNING_TESTS ) {
+		include( $base_dir . '/includes/object-cache.php' );
+	}
 }
 
 /**
