@@ -752,9 +752,9 @@ function get_location_test_cases() {
 		'ip-north-america' => array(
 			'input' => array( 'ip' => '189.147.186.0' ),
 			'expected' => array(
-				'description' => 'ciudad nezahualcoyotl',
-				'latitude'    => '19.414',
-				'longitude'   => '-99.033',
+				'description' => 'cuauhtemoc',
+				'latitude'    => '19.417',
+				'longitude'   => '-99.157',
 				'country'     => 'MX',
 				'internal'    => true,
 			),
