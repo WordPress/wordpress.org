@@ -158,7 +158,8 @@ function build_response( $location, $location_args ) {
 		$error = 'no_location_available';
 	}
 
-	return compact( 'error', 'location', 'events', 'ttl' );
+	return compact( 'error', 'location', 'events' );
+
 }
 
 /**
