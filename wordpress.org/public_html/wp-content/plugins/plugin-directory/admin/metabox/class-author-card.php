@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
+require_once dirname( dirname( __DIR__ ) ) . '/class-tools.php';
+
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
