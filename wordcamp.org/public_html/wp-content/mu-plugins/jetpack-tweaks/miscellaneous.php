@@ -11,6 +11,8 @@ add_filter( 'jetpack_is_holiday_snow_season', '__return_false' );
 
 /**
  * Modify hooks after Jetpack::init()
+ *
+ * @todo This may be unnecessary and removable since there is now a similar wporg mu-plugin. See [dotorg13221].
  */
 function modify_hooks_after_jetpack_init() {
 	/*
