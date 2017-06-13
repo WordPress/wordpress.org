@@ -83,7 +83,19 @@ class Upload_Handler {
 		}
 
 		// Determine the plugin slug based on the name of the plugin in the main plugin file.
-		$this->plugin_slug = sanitize_title_with_dashes( $this->plugin['Name'] );
+		$this->plugin_slug = remove_accents( $this->plugin['Name'] );
+		$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
+		$this->plugin_slug = sanitize_title_with_dashes( $this->plugin_slug );
+
+		if ( ! $this->plugin_slug ) {
+			$error = __( 'The plugin has an unsupported name.', 'wporg-plugins' );
+
+			/* translators: %s: 'Plugin Name:' */
+			return $error . ' ' . sprintf( __( 'Plugin names can only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+				esc_html( $this->plugin['Name'] ),
+				'<code>Plugin Name:</code>'
+			);
+		}
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
