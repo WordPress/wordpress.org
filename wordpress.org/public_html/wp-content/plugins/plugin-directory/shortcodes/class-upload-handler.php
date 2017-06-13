@@ -113,9 +113,10 @@ class Upload_Handler {
 		if ( $plugin_post ) {
 			$error = __( 'The plugin has already been submitted.', 'wporg-plugins' );
 			
-			/* translators: %s: plugin slug */
-			return $error . ' ' . sprintf( __( 'You have already submitted a plugin called %s. Please be patient and wait for a review. If you have made a mistake, please email plugins@wordpress.org and let us know.', 'wporg-plugins' ),
-				'<code>' . $this->plugin_slug . '</code>'
+			/* translators: 1: plugin slug, 2: plugins@wordpress.org */
+			return $error . ' ' . sprintf( __( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, please email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
+				'<code>' . $this->plugin_slug . '</code>',
+				'plugins@wordpress.org'
 			);
 		}
 
@@ -248,11 +249,21 @@ class Upload_Handler {
 
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
+		/* translators: 1: plugin name, 2: plugin slug, 3: plugins@wordpress.org */
+		$message = sprintf( __( 'Thank you for uploading %1$s to the WordPress Plugin Directory. It has been given the initial plugin slug of %2$s, however that is subject to change based on the results of your code review.' ),
+			esc_html( $this->plugin['Name'] ),
+			'<code>' . $this->plugin_slug . '</code>'
+		) . '</p><p>';
+
+		/* translators: 1: plugins@wordpress.org */
+		$message .= sprintf( __( 'We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - <a href="mailto:%1$s">%1$s</a> - to ensure you receive all our communications.' ),
+			'plugins@wordpress.org'
+		) . '</p><p>';
+
+		$message .= __( 'If there is an error in your submission, such as you require a specific plugin slug or need a different user account to own the plugin, please email us as we can correct many issues before approval.', 'wporg-plugins' );
+
 		// Success!
-		/* translators: 1: plugin name */
-		return sprintf( __( 'Thank you for uploading %1$s to the WordPress Plugin Directory. We&rsquo;ve sent you an email verifying this submission. Please make sure to whitelist our email address - plugins@wordpress.org - to ensure you receive all our communications.', 'wporg-plugins' ),
-			esc_html( $this->plugin['Name'] )
-		);
+		return $message;
 	}
 
 	/**
@@ -359,13 +370,18 @@ class Upload_Handler {
 			$this->plugin['Name']
 		);
 
-		/* translators: 1: plugin name, 2: Trac ticket URL */
-		$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Plugin Directory. If your plugin is selected to be part of the directory we\'ll send a follow up email. If there is a problem with your plugin submission, such as an incorrect display name or slug, please reply to this email and let us know.
+		/* translators: 1: plugin name, 2: plugin slug */
+		$email_content = sprintf( __( 'Thank you for uploading %1$s to the WordPress Plugin Directory. We will review your submission as soon as possible and send you a follow up email with the results.
+
+Your plugin has been given the initial slug of %2$s, however this is subject to change based on the results of your review.
+
+If there is a problem with this submission, such as an incorrect display name or slug, please reply to this email and let us know. In most cases, we can correct errors as long as the plugin has not yet been approved. Please do not submit your plugin multiple times in an attempt to correct the issue, just email us.
 
 --
 The WordPress Plugin Directory Team
 https://make.wordpress.org/plugins', 'wporg-plugins' ),
-			$this->plugin['Name']
+			$this->plugin['Name'],
+			$this->plugin_slug
 		);
 
 		$user_email = wp_get_current_user()->user_email;
