@@ -356,6 +356,8 @@ abstract class Directory_Compat {
 			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors ) )
 		||
 			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
+		|| 
+			( is_a( $user, 'WP_User' ) && $user->supportrep == $this->slug() )
 		) {
 			$retval = true;
 		}
