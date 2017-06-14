@@ -9,7 +9,7 @@
 
 namespace WordCamp\CampSite_2017;
 
-if ( is_front_page() ) {
+if ( is_front_page() && ! is_page_template( 'templates/page-day-of.php' ) ) {
 	$has_active_homepage_sidebar = is_active_sidebar( 'before-content-homepage-1' ) || is_active_sidebar( 'before-content-homepage-2' ) || is_active_sidebar( 'before-content-homepage-3' ) || is_active_sidebar( 'before-content-homepage-4' ) || is_active_sidebar( 'before-content-homepage-5' );
 
 	if ( $has_active_homepage_sidebar ) {
