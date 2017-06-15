@@ -49,6 +49,15 @@ class Meta extends \WP_Widget {
 			</li>
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 
+            <?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
+				<li><?php 
+				_e( 'Requires WordPress Version:', 'wporg-plugins' );
+				echo '<strong>' . esc_html( $requires ) . '</strong>';
+				?></li>
+            <?php endif; ?>
+
+
+
 			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) : ?>
 				<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . $tested_up_to . '</strong>' ); ?></li>
 			<?php endif; ?>
