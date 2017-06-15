@@ -418,17 +418,21 @@ class WordCamp_Post_Types_Plugin {
 			'avatar_size'    => 100,
 			'posts_per_page' => -1,
 			'orderby'        => 'date',
+			'order'          => 'desc',
 			'teams'          => '',
 		), $attr );
 
 		$attr['show_avatars'] = $this->str_to_bool( $attr['show_avatars'] );
 		$attr['orderby'] = strtolower( $attr['orderby'] );
 		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
+		$attr['order']   = strtolower( $attr['order'] );
+		$attr['order']   = ( in_array( $attr['order'], array( 'asc', 'desc' ), true ) ) ? $attr['order'] : 'desc';
 
 		$query_args = array(
-			'post_type' => 'wcb_organizer',
+			'post_type'      => 'wcb_organizer',
 			'posts_per_page' => intval( $attr['posts_per_page'] ),
-			'orderby' => $attr['orderby'],
+			'orderby'        => $attr['orderby'],
+			'order'          => $attr['order'],
 		);
 
 		if ( ! empty( $attr['teams'] ) ) {
