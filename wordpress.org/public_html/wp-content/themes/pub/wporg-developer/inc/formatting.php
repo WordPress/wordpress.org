@@ -180,7 +180,7 @@ class DevHub_Formatting {
 			if ( ! empty( $hook[1] ) ) {
 				$link = '<a href="' .
 				        get_post_type_archive_link( 'wp-parser-hook' ) .
-				        sanitize_key( html_entity_decode( $hook[1] ) ) . '/' .
+				        sanitize_title_with_dashes( html_entity_decode( $hook[1] ) ) . '/' .
 				        '">' . esc_html( $link ) . '</a>';
 			}
 		}
@@ -205,7 +205,7 @@ class DevHub_Formatting {
 		else {
 			$link = '<a href="' .
 			        get_post_type_archive_link( 'wp-parser-function' ) .
-			        str_replace( '()', '', $link ) .
+					sanitize_title_with_dashes( html_entity_decode( $link ) ) .
 			        '">' . esc_html( $link ) . '</a>';
 		}
 		return $link;
