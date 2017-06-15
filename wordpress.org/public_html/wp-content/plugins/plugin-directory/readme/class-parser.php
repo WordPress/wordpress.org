@@ -198,7 +198,7 @@ class Parser {
 			if ( false === strpos( $line, ':' ) ) {
 
 				// Some plugins have line-breaks within the headers.
-				if ( ! empty( $line ) ) {
+				if ( empty( $line ) ) {
 					break;
 				} else {
 					continue;
