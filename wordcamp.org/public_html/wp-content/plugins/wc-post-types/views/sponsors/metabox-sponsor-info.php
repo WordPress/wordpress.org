@@ -141,6 +141,27 @@
 </ul>
 
 <ul class="wcpt-form">
+	<li>
+		<label for="_wcpt_sponsor_country">
+			<?php _e( 'Country:', 'wordcamporg' ) ?>
+		</label>
+
+		<?php // todo add selected attribute to select and change first option value to empty string ?>
+		<select id="_wcpt_sponsor_country" name="_wcpt_sponsor_country">
+			<option value="null" <?php selected( $country, 'null' ); ?>>
+				<?php _e( '-- Select a Country --', 'wordcamporg' ); ?>
+			</option>
+
+			<?php foreach ( $available_countries as $available_country ) : ?>
+				<option value="<?php echo esc_attr( $available_country ); ?>" <?php selected( $available_country, $country ); ?>>
+					<?php echo esc_html( $available_country ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+
+		<?php $this->render_form_field_required_indicator(); ?>
+	</li>
+
 	<li class="wcpt-form-header">
 		<?php _e( 'Address', 'wordcamporg' ); ?>
 	</li>
@@ -204,10 +225,11 @@
 			id="_wcpt_sponsor_state"
 			name="_wcpt_sponsor_state"
 			value="<?php echo esc_attr( $state ); ?>"
-		    required
 		/>
 
-		<?php $this->render_form_field_required_indicator(); ?>
+		<span class="description">
+			<?php esc_html_e( 'Only necessary if you want this to be shown on your invoice', 'wordcamporg' ); ?>
+		</span>
 	</li>
 
 	<li>
@@ -224,27 +246,6 @@
 			maxlength="30"
 		    required
 		/>
-
-		<?php $this->render_form_field_required_indicator(); ?>
-	</li>
-
-	<li>
-		<label for="_wcpt_sponsor_country">
-			<?php _e( 'Country:', 'wordcamporg' ) ?>
-		</label>
-
-		<?php // todo add selected attribute to select and change first option value to empty string ?>
-		<select id="_wcpt_sponsor_country" name="_wcpt_sponsor_country">
-			<option value="null" <?php selected( $country, 'null' ); ?>>
-				<?php _e( '-- Select a Country --', 'wordcamporg' ); ?>
-			</option>
-
-			<?php foreach ( $available_countries as $available_country ) : ?>
-				<option value="<?php echo esc_attr( $available_country ); ?>" <?php selected( $available_country, $country ); ?>>
-					<?php echo esc_html( $available_country ); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
 
 		<?php $this->render_form_field_required_indicator(); ?>
 	</li>
