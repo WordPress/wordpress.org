@@ -629,4 +629,81 @@ class Template {
 			( $favorited ? 'unfavorite' : 'favorite' ) => '1'
 		), home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/favorite' ) );
 	}
+
+	/**
+	 * Adds hreflang link attributes to WordPress.org pages.
+	 *
+	 * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.
+	 * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
+	 */
+	public function hreflang_link_attributes() {
+		global $wpdb;
+
+		wp_cache_add_global_groups( array( 'locale-associations' ) );
+
+		if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
+
+			// get subdomain/locale associations
+			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K ); 
+
+			$sites = Plugin_I18n::instance()->get_locales();
+
+			require_once GLOTPRESS_LOCALES_PATH;
+
+			foreach ( $sites as $key => $site ) {
+				$gp_locale = \GP_Locales::by_field( 'wp_locale', $site->wp_locale );
+				if ( empty( $gp_locale ) ) {
+					unset( $sites[ $key ] );
+					continue;
+				}
+
+				$sites[ $key ]->subdomain = $subdomains[ $site->wp_locale ]->subdomain;
+
+				// Note that Google only supports ISO 639-1 codes.
+				if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
+					$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
+				} elseif ( isset( $gp_locale->lang_code_iso_639_1 ) ) {
+					$hreflang = $gp_locale->lang_code_iso_639_1;
+				} elseif ( isset( $gp_locale->lang_code_iso_639_2 ) ) {
+					$hreflang = $gp_locale->lang_code_iso_639_2;
+				} elseif ( isset( $gp_locale->lang_code_iso_639_3 ) ) {
+					$hreflang = $gp_locale->lang_code_iso_639_3;
+				}
+
+				if ( $hreflang ) {
+					$sites[ $key ]->hreflang = strtolower( $hreflang );
+				} else {
+					unset( $sites[ $key ] );
+				}
+			}
+
+			// Add en_US to the list of sites.
+			$sites['en_US'] = (object) array(
+				'locale'    => 'en_US',
+				'hreflang'  => 'en',
+				'subdomain' => ''
+			);
+
+			uasort( $sites, function( $a, $b ) {
+				return strcasecmp( $a->hreflang, $b->hreflang );
+			} );
+
+
+			wp_cache_set( 'local-sites', $sites, 'locale-associations' );
+		}
+
+		foreach ( $sites as $site ) {
+			$url = sprintf(
+				'https://%swordpress.org%s',
+				$site->subdomain ? "{$site->subdomain}." : '',
+				$_SERVER[ 'REQUEST_URI' ]
+			);
+
+			printf(
+				'<link rel="alternate" href="%s" hreflang="%s" />' . "\n",
+				esc_url( $url ),
+				esc_attr( $site->hreflang )
+			);
+		}
+	}
 }
