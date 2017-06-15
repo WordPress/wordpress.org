@@ -1826,27 +1826,29 @@ class WordCamp_Post_Types_Plugin {
 			return;
 		}
 
-		if ( isset( $_POST['wcpt-meta-sponsor-info'] ) && wp_verify_nonce( $_POST['wcpt-meta-sponsor-info'], 'edit-sponsor-info' ) ) {
+		if ( wp_verify_nonce( filter_input( INPUT_POST, 'wcpt-meta-sponsor-info' ), 'edit-sponsor-info' ) ) {
 			$text_values = array(
 				'company_name',	'first_name', 'last_name', 'email_address', 'phone_number', 'vat_number', 'twitter_handle',
 				'street_address1', 'street_address2', 'city', 'state', 'zip_code', 'country'
 			);
 
 			foreach ( $text_values as $id ) {
-				$values[ $id ] = sanitize_text_field( $_POST["_wcpt_sponsor_$id"] );
+				$values[ $id ] = sanitize_text_field( filter_input( INPUT_POST, '_wcpt_sponsor_' . $id ) );
 			}
 
-			$values['website'] = esc_url_raw( $_POST['_wcpt_sponsor_website'] );
+			$values['website'] = esc_url_raw( filter_input( INPUT_POST, '_wcpt_sponsor_website' ) );
 			// TODO: maybe only allows links to home page, depending on outcome of http://make.wordpress.org/community/2013/12/31/irs-rules-for-corporate-sponsorship-of-wordcamp/
 
 			$values['first_name'] = ucfirst( $values['first_name'] );
 			$values['last_name' ] = ucfirst( $values['last_name' ] );
 
 			foreach( $values as $id => $value ) {
+				$meta_key = '_wcpt_sponsor_' . $id;
+
 				if ( empty( $value ) ) {
-					delete_post_meta( $post_id, "_wcpt_sponsor_$id" );
+					delete_post_meta( $post_id, $meta_key );
 				} else {
-					update_post_meta( $post_id, "_wcpt_sponsor_$id", $value );
+					update_post_meta( $post_id, $meta_key, $value );
 				}
 			}
 		}
