@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 
 /**
  * The Plugin Controls / Publish metabox.
@@ -30,6 +31,40 @@ class Controls {
 	}
 
 	/**
+	 * Get button label for setting the plugin status.
+	 *
+	 * @param string $post_status Plugin post status.
+	 * @return string Status button label.
+	 */
+	public static function get_status_button_label( $post_status ) {
+		switch ( $post_status ) {
+			case 'approved':
+				$label = __( 'Approve' );
+				break;
+			case 'rejected':
+				$label = __( 'Reject' );
+				break;
+			case 'pending':
+				$label = __( 'Mark as Pending' );
+				break;
+			case 'publish':
+				$label = __( 'Open' );
+				break;
+			case 'disabled':
+				$label = __( 'Disable' );
+				break;
+			case 'closed':
+				$label = __( 'Close' );
+				break;
+			default:
+				$label = __( 'Mark as Pending' );
+				break;
+		}
+
+		return $label;
+	}
+
+	/**
 	 * Displays the Plugin Status control in the Publish metabox.
 	 */
 	protected static function display_post_status() {
@@ -41,42 +76,22 @@ class Controls {
 		}
 
 		$statuses = array( 'new', 'pending' );
+
 		if ( current_user_can( 'plugin_approve', $post ) ) {
-			if ( in_array( $post->post_status, array( 'new', 'draft', 'pending', 'rejected', 'approved' ) ) ) {
-				$statuses = array_merge( $statuses, array( 'approved', 'rejected' ) );
-			} else {
-				$statuses = array( 'publish', 'disabled', 'closed', 'pending' );
-			}
+			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
 			<strong id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong>
-			<button type="button" class="button-link edit-plugin-status hide-if-no-js">
-				<span aria-hidden="true"><?php _e( 'Edit', 'wporg-plugins' ); ?></span>
-				<span class="screen-reader-text"><?php _e( 'Edit plugin status', 'wporg-plugins' ); ?></span>
-			</button>
 
-			<div id="plugin-status-select" class="plugin-control-select hide-if-js">
-				<input type="hidden" name="hidden_post_status" id="hidden-post-status" value="<?php echo esc_attr( $post->post_status ); ?>">
-				<label class="screen-reader-text" for="plugin-status"><?php _e( 'Plugin status', 'wporg-plugins' ); ?></label>
-				<select name="post_status" id="plugin-status">
-					<?php
-					foreach ( $statuses as $statii ) {
-						$status_object = get_post_status_object( $statii );
-						printf(
-							'<option value="%s" %s>%s</option>',
-							esc_attr( $statii ),
-							selected( $post->post_status, $statii, false ),
-							esc_html( $status_object->label )
-						);
-					}
-					?>
-				</select>
-				<button type="button" class="save-plugin-status hide-if-no-js button"><?php _e( 'OK', 'wporg-plugins' ); ?></button>
-				<button type="button" class="cancel-plugin-status hide-if-no-js button-link"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
-			</div>
-
+			<p>
+			<?php foreach ( $statuses as $status ) : ?>
+				<button type="submit" name="post_status" value="<?php echo esc_attr( $status ); ?>" class="button set-plugin-status">
+					<?php echo self::get_status_button_label( $status ); ?>
+				</button>
+			<?php endforeach; ?>
+			</p>
 		</div><!-- .misc-pub-section --><?php
 	}
 

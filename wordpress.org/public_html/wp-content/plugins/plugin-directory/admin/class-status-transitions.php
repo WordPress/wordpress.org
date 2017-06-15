@@ -31,6 +31,45 @@ class Status_Transitions {
 	}
 
 	/**
+	 * Get the list of allowed status transitions for a given plugin.
+	 *
+	 * @param string $post_status Plugin post status.
+	 * @return array An array of allowed post status transitions.
+	 */
+	public static function get_allowed_transitions( $post_status ) {
+		switch ( $post_status ) {
+			case 'new':
+				$transitions = array( 'pending', 'approved', 'rejected' );
+				break;
+			case 'pending':
+				$transitions = array( 'approved', 'rejected' );
+				break;
+			case 'approved':
+				// Plugins move from 'approved' to 'publish' on first commit, but cannot be published manually.
+				$transitions = array( 'disabled', 'closed' );
+				break;
+			case 'rejected':
+				// Rejections cannot be recovered.
+				$transitions = array();
+				break;
+			case 'publish':
+				$transitions = array( 'disabled', 'closed' );
+				break;
+			case 'disabled':
+				$transitions = array( 'publish', 'closed' );
+				break;
+			case 'closed':
+				$transitions = array( 'publish', 'disabled' );
+				break;
+			default:
+				$transitions = array( 'new', 'pending' );
+				break;
+		}
+
+		return $transitions;
+	}
+
+	/**
 	 * Checks permissions before allowing a post_status change for plugins.
 	 *
 	 * @param array $data    An array of slashed post data.
@@ -51,7 +90,7 @@ class Status_Transitions {
 		}
 
 		// ...or it's a plugin admin...
-		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) ) {
+		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) && in_array( $postarr['post_status'], self::get_allowed_transitions( $old_status ) ) ) {
 			return $data;
 		}
 

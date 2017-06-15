@@ -74,8 +74,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		if ( current_user_can( $post_type_obj->cap->edit_posts ) ) {
 			if ( $this->is_trash ) {
 				$actions['untrash'] = __( 'Restore', 'wporg-plugins' );
-			} else {
-				$actions['edit'] = __( 'Edit', 'wporg-plugins' );
 			}
 		}
 
@@ -286,6 +284,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		return $this->row_actions( $actions );
+	}
+
+	/**
+	 * Remove the Quick/Bulk Edit hidden row.
+	 */
+	public function inline_edit() {
 	}
 
 	/**
