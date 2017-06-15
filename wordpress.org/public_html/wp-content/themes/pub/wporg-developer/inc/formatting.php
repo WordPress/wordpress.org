@@ -176,7 +176,7 @@ class DevHub_Formatting {
 		}
 
 		// Link to hook: {@see 'pre_get_search_form'}
-		elseif ( 1 === preg_match( '/^(?:&#8216;)([\$\w]+)(?:&#8217;)$/', $link, $hook ) ) {
+		elseif ( 1 === preg_match( '/^(?:\'|(?:&#8216;))([\$\w]+)(?:\'|(?:&#8217;))$/', $link, $hook ) ) {
 			if ( ! empty( $hook[1] ) ) {
 				$link = '<a href="' .
 				        get_post_type_archive_link( 'wp-parser-hook' ) .
