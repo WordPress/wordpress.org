@@ -387,7 +387,7 @@ namespace DevHub {
 		}
 
 		if ( $ignore_minor ) {
-			$version_parts = explode( '.', $current_version, 3 );
+			$version_parts = explode( '-', $current_version, 3 );
 			if ( count( $version_parts ) == 2 ) {
 				$version_parts[] = '0';
 			} else {
@@ -399,7 +399,7 @@ namespace DevHub {
 		$version = get_terms( 'wp-parser-since', array(
 			'number' => '1',
 			'order'  => 'DESC',
-			'name'   => $current_version,
+			'slug'   => $current_version,
 		) );
 
 		return is_wp_error( $version ) ? $version : reset( $version );
