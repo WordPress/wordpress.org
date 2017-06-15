@@ -641,7 +641,7 @@ class Template {
 
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-		if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
+		if ( false === ( $sites = wp_cache_get( 'local-sites-'.get_post()->post_name, 'locale-associations' ) ) ) {
 
 			// get subdomain/locale associations
 			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K ); 
@@ -688,8 +688,7 @@ class Template {
 				return strcasecmp( $a->hreflang, $b->hreflang );
 			} );
 
-
-			wp_cache_set( 'local-sites', $sites, 'locale-associations' );
+			wp_cache_set( 'local-sites-'.get_post()->post_name, $sites, 'locale-associations', DAY_IN_SECONDS );
 		}
 
 		foreach ( $sites as $site ) {
