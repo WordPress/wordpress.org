@@ -225,7 +225,7 @@ class DevHub_Formatting {
 		// Only apply to parsed content that have the em tag.
 		if ( DevHub\is_parsed_post_type( $post_type ) && false !== strpos( $content, '<em>' ) ) {
 			$content = preg_replace_callback(
-				'/([^\s])<em>(.+)<\/em>/',
+				'/([^\s])<em>(.+)<\/em>/U',
 				function ( $matches ) {
 					return $matches[1] . '_' . $matches[2] . '_';
 				},
