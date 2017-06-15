@@ -110,7 +110,7 @@ class Customizations {
 			switch ( $hook_suffix ) {
 				case 'post.php':
 					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
-					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 3 );
+					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 4 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
 						'approvePluginAYS'   => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
 						'rejectPluginAYS'    => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
