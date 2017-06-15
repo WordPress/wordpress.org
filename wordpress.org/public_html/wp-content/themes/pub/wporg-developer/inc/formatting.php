@@ -204,9 +204,9 @@ class DevHub_Formatting {
 		// Link to function: {@see esc_attr()}
 		else {
 			$link = '<a href="' .
-			        get_post_type_archive_link( 'wp-parser-function' ) .
+					get_post_type_archive_link( 'wp-parser-function' ) .
 					sanitize_title_with_dashes( html_entity_decode( $link ) ) .
-			        '">' . esc_html( $link ) . '</a>';
+					'">' . esc_html( $link ) . '</a>';
 		}
 		return $link;
 	}
