@@ -233,6 +233,18 @@ function wporg_themes_reinstate_theme() {
 add_filter( 'admin_action_reinstate', 'wporg_themes_reinstate_theme' );
 
 /**
+ * Remove themes from wp-themes.com upon theme status moving to draft.
+ *
+ * @param WP_Post $post
+ */
+function wporg_themes_remove_draft_themes_from_wpthemescom( $post ) {
+	if ( 'repopackage' === $post->post_type ) {
+		wporg_themes_remove_wpthemescom( $post->post_name );
+	}
+}
+add_action( 'publish_to_draft', 'wporg_themes_remove_draft_themes_from_wpthemescom' );
+
+/**
  * Give the user feedback after suspending or reinstating a theme.
  */
 function wporg_themes_admin_notices() {
