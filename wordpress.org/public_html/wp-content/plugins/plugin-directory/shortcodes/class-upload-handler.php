@@ -173,7 +173,7 @@ class Upload_Handler {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 			
 			/* translators: 1: readme.txt, 2: readme.md */
-			return $error . ' ' . sprintf( __( 'The zip file must include a file named %1$s or %2$s. We recommend using %1s as it will allow you to fully utilize our directory.', 'wporg-plugins' ),
+			return $error . ' ' . sprintf( __( 'The zip file must include a file named %1$s or %2$s. We recommend using %1$s as it will allow you to fully utilize our directory.', 'wporg-plugins' ),
 				'<code>readme.txt</code>',
 				'<code>readme.md</code>'
 			);
