@@ -132,7 +132,7 @@ class Template {
 		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
 
 		if ( $count <= 10 ) {
-			$text = __( 'Less than 10', 'wporg-plugins' );
+			$text = __( 'Fewer than 10', 'wporg-plugins' );
 		} elseif ( $count >= 1000000 ) {
 			$million_count = intdiv( $count, 1000000 );
 			/* translators: %d: The integer number of million active installs */
