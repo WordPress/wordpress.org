@@ -409,7 +409,7 @@ class WordCamp_QBO {
 		$class_id          = sanitize_text_field( $class_id          );
 		$sponsorship_level = sanitize_text_field( $sponsorship_level );
 		$amount            = floatval( $amount                       );
-		$description       = sanitize_text_field( $description       );
+		$description       = trim( sanitize_text_field( $description ) );
 		$statement_memo    = sanitize_text_field( $statement_memo    );
 
 		$sponsor = array_map( 'sanitize_text_field', $sponsor );
@@ -447,7 +447,8 @@ class WordCamp_QBO {
 		$oauth = self::_get_oauth();
 		$oauth->set_token( self::$options['auth']['oauth_token'], self::$options['auth']['oauth_token_secret'] );
 
-		$payment_instructions = str_replace( "\t", '', "
+		// Note: This has a character limit when combined with $description; see $customer_memo
+		$payment_instructions = trim( str_replace( "\t", '', "
 			Please indicate the invoice number in the memo field when making your payment.
 
 			To pay via credit card, please fill out the payment form at https://central.wordcamp.org/sponsorship-payment/
@@ -467,6 +468,20 @@ class WordCamp_QBO {
 			Account Number: 157120285
 
 			Please remit checks (USD only) to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768"
+		) );
+
+		/*
+		 * The API limits CustomerMemo to 1,000 characters. We use 995 to allow for newlines between the two
+		 * values and a bit of safety.
+		 *
+		 * The payment instructions are more important than the description, so the description should be
+		 * sacrificed to make room for the complete instructions.
+		 */
+		$description_limit = abs( 995 - strlen( $payment_instructions ) );
+		$customer_memo = sprintf(
+			"%s\n\n%s",
+			substr( $description, 0, $description_limit ),
+			$payment_instructions
 		);
 
 		$payload = array(
@@ -513,9 +528,8 @@ class WordCamp_QBO {
 				'value' => $customer_id,
 			),
 
-			// Note: the limit for this is 1,000 characters
 			'CustomerMemo' => array(
-				'value' => sprintf( "%s\n%s", $description, $payment_instructions ),
+				'value' => $customer_memo,
 			),
 
 			'SalesTermRef' => array(
