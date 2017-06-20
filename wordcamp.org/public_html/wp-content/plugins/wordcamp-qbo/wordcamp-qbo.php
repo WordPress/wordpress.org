@@ -453,14 +453,18 @@ class WordCamp_QBO {
 			To pay via credit card, please fill out the payment form at https://central.wordcamp.org/sponsorship-payment/
 			An additional 2.9% to cover processing fees on credit card payments is highly appreciated but not required.
 
-			For payments via ACH or international wire transfers:
+			For International Wire Transfers:
 			Beneficiary Name: WordPress Community Support, PBC
 			Banking Address: 132 Hawthorne St, San Francisco, CA 94107-1308, USA
 			Bank Name: JPMorgan Chase Bank, N.A.
 			Bank Address: 270 Park Ave, New York, NY 10017, USA
-			SWIFT/BIC: CHASUS33
-			ACH/Domestic Direct deposit Bank Routing & Transit Number: 322271627
-			Account Number: 801658696
+			Bank Routing and Transit Number: 021000021
+			SWIFT Code: CHASUS33
+			Account Number: 157120285
+
+			For ACH/USA Domestic Direct Deposit:
+			Bank Routing & Transit Number: 322271627
+			Account Number: 157120285
 
 			Please remit checks (USD only) to: WordPress Community Support, PBC, P.O. Box 101768, Pasadena, CA 91189-1768"
 		);
