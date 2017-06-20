@@ -41,7 +41,7 @@ class WordCamp_QBO {
 	 * Runs during plugins_loaded.
 	 */
 	public static function plugins_loaded() {
-		self::$sandbox_mode = apply_filters( 'wordcamp_qbo_sandbox_mode', false );
+		self::$sandbox_mode = WORDCAMP_ENVIRONMENT !== 'production';
 
 		$init_options = wp_parse_args( apply_filters( 'wordcamp_qbo_options', array() ), array(
 			'app_token' => '',
