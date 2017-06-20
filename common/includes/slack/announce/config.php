@@ -87,6 +87,11 @@ function get_whitelist() {
 			'ocean90',
 			'sergey',
 		),
+		'core-js' => array(
+			'adamsilverstein',
+			'aduth',
+			'rmccue',
+		),
 		'core-media' => array(
 			'joemcgill',
 			'mike',
