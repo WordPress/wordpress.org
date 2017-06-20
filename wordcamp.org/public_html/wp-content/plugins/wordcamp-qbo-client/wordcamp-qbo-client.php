@@ -116,7 +116,10 @@ class WordCamp_QBO_Client {
 				$classes = $body;
 		}
 
-		set_transient( $cache_key, $classes, 12 * HOUR_IN_SECONDS );
+		if ( $classes ) {
+			set_transient( $cache_key, $classes, 12 * HOUR_IN_SECONDS );
+		}
+
 		return $classes;
 	}
 
