@@ -376,12 +376,14 @@ class DevHub_Formatting {
 				$content = preg_replace_callback(
 					// Most class names start with an uppercase letter and have an underscore.
 					// The exceptions are explicitly listed since future classes likely won't violate previous statement.
+					// Requests and Translations, due to their higher likelihood of use as a word and not as an inline class
+					//   reference, should be explicitly referenced, e.g. `{@see Requests}`.
 					'~'
 						. '(?<!/)'
 						. '\b'                // Word boundary
 						. '('                 // Primary match grouping
 							. 'wpdb|wp_atom_server|wp_xmlrpc_server' // Exceptions that start with lowercase letter
-							. '|AtomFeed|AtomEntry|AtomParser|MagpieRSS|Requests|RSSCache|Translations|Walker' // Exceptions that lack an underscore
+							. '|AtomFeed|AtomEntry|AtomParser|MagpieRSS|RSSCache|Walker' // Exceptions that lack an underscore
 							. '|_?[A-Z][a-zA-Z]+_\w+'                // Most start with (optional underscore, then) uppercase, has underscore
 						. ')'                 // End primary match grouping
 						. '\b'                // Word boundary
