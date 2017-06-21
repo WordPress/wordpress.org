@@ -30,3 +30,8 @@ These styles are inserted inline in the comment editor.
 .js .quicktags-toolbar {
 	padding: 8px 5px 5px 0;
 }
+
+.devhub-wrap .wp-editor-container {
+	border: none;
+}
+
