@@ -90,7 +90,7 @@ get_header(); ?>
 					<?php } ?>
 
 					<div class="widget box">
-						<h4 class="widget-title"><a href="https://make.wordpress.org/"><?php _e( 'Help Make WordPress ', 'wporg' ); ?><div class="dashicons dashicons-arrow-right-alt2"></div></a></h4>
+						<h4 class="widget-title"><a href="https://make.wordpress.org/" class="make-wp-link"><?php _e( 'Help Make WordPress', 'wporg' ); ?></a></h4>
 					</div>
 				</div>
 			</div>

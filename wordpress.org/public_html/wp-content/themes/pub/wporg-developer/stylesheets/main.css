@@ -1036,6 +1036,13 @@ input {
   text-decoration: none;
 }
 
+.devhub-wrap .section.light-gray a.make-wp-link:after {
+  content: "\f345";
+  font-family: 'dashicons';
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 .devhub-wrap .section .home-primary-content {
   max-width: 600px;
   max-width: 60rem;
