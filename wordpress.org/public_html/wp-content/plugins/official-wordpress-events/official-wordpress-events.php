@@ -416,8 +416,13 @@ class Official_WordPress_Events {
 			$this->log( 'pruned response - ' . print_r( $this->prune_response_for_log( $response ), true ) );
 
 			if ( ! empty ( $body->results ) ) {
-				$groups    = wp_list_pluck( $body->results, 'group' );
-				$group_ids = array_merge( $group_ids, wp_list_pluck( $groups, 'id' ) );
+				foreach ( $body->results as $profile ) {
+					if ( ! isset( $profile->group->id, $profile->role ) || 'Organizer' !== $profile->role ) {
+						continue;
+					}
+
+					$group_ids[] = $profile->group->id;
+				}
 			}
 
 			$request_url = isset( $body->meta->next ) ? $body->meta->next : null;
