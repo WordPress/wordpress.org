@@ -584,7 +584,7 @@ class Template {
 	 * @param string            $version The version to link to. Optional. Default: latest.
 	 * @return string The Download URL.
 	 */
-	static function download_link( $post = null, $version = 'latest' ) {
+	public static function download_link( $post = null, $version = 'latest' ) {
 		$post = get_post( $post );
 
 		if ( 'latest' == $version || 'latest-stable' == $version ) {
@@ -636,7 +636,7 @@ class Template {
 	 * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.
 	 * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
 	 */
-	public function hreflang_link_attributes() {
+	public static function hreflang_link_attributes() {
 		global $wpdb;
 
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
