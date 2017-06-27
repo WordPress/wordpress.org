@@ -114,6 +114,12 @@ function wporg_filter_archive_excerpt( $excerpt ) {
 					case 'filter_reference':
 						$type = __( 'Filter Hook', 'wporg' );
 						break;
+					case 'action_deprecated':
+						$type = __( 'Action Hook (deprecated)', 'wporg' );
+						break;
+					case 'filter_deprecated':
+						$type = __( 'Filter Hook (deprecated)', 'wporg' );
+						break;
 				}
 			}
 		}

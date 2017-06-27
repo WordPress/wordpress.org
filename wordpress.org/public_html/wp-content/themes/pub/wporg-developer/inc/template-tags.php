@@ -555,9 +555,21 @@ namespace DevHub {
 
 			$hook_type = get_post_meta( $post_id, '_wp-parser_hook_type', true );
 			if ( false !== strpos( $hook_type, 'action' ) ) {
-				$hook_type = ( 'action_reference' === $hook_type ) ? 'do_action_ref_array' : 'do_action';
+				if ( 'action_reference' === $hook_type ) {
+					$hook_type = 'do_action_ref_array';
+				} elseif ( 'action_deprecated' === $hook_type ) {
+					$hook_type = 'do_action_deprecated';
+				} else {
+					$hook_type = 'do_action';
+				}
 			} else {
-				$hook_type = ( 'filter_reference' === $hook_type ) ? 'apply_filters_ref_array' : 'apply_filters';
+				if ( 'filter_reference' === $hook_type ) {
+					$hook_type = 'apply_filters_ref_array';
+				} elseif ( 'filter_deprecated' === $hook_type ) {
+					$hook_type = 'apply_filters_deprecated';
+				} else {
+					$hook_type = 'apply_filters';
+				}
 			}
 
 			$delimiter = false !== strpos( $signature, '$' ) ? '"' : "'";
