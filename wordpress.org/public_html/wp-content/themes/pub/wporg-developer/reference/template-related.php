@@ -29,7 +29,7 @@ if ( show_usage_info() ) :
 						?>
 						<li>
 							<span><?php echo esc_attr( get_source_file() ); ?>:</span>
-							<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
+							<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( ! in_array( get_post_type(), array( 'wp-parser-class', 'wp-parser-hook' ) ) ) : ?>()<?php endif; ?></a>
 						</li>
 					<?php endwhile; wp_reset_postdata(); ?>
 					<?php if ( $uses->post_count > $uses_to_show ) : ?>
@@ -58,7 +58,7 @@ if ( show_usage_info() ) :
 					?>
 					<li>
 						<span><?php echo esc_attr( get_source_file() ); ?>:</span>
-						<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( 'wp-parser-hook' !== get_post_type() ) : ?>()<?php endif; ?></a>
+						<a href="<?php the_permalink(); ?>"><?php the_title(); ?><?php if ( ! in_array( get_post_type(), array( 'wp-parser-class', 'wp-parser-hook' ) ) ) : ?>()<?php endif; ?></a>
 					</li>
 				<?php endwhile; wp_reset_postdata(); ?>
 				<?php if ( $used_by->post_count > $used_by_to_show ) : ?>

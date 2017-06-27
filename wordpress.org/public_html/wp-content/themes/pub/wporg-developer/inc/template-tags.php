@@ -534,6 +534,10 @@ namespace DevHub {
 		$args_strings = array();
 		$types        = array();
 
+		if ( 'wp-parser-class' === get_post_type( $post_id ) ) {
+			return $signature;
+		}
+
 		if ( $tags ) {
 			foreach ( $tags as $tag ) {
 				if ( is_array( $tag ) && 'param' == $tag['name'] ) {
