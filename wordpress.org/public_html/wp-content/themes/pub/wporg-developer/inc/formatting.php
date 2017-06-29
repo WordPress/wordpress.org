@@ -159,12 +159,9 @@ class DevHub_Formatting {
 	 * @access public
 	 *
 	 * @param string $link Element string.
-	 * @param bool   $tag  Optional. Whether the element was explicitly provided in a tag
-	 *                     description, such as `@see 'hook_name'` vs in random context.
-	 *                     Default false.
 	 * @return string HTML link markup if a valid element was found.
 	 */
-	public static function link_internal_element( $link, $tag = false ) {
+	public static function link_internal_element( $link ) {
 		// Link to class variable: {@see WP_Rewrite::$index}
 		if ( false !== strpos( $link, '::$' ) ) {
 			// Nothing to link to currently.
@@ -178,11 +175,8 @@ class DevHub_Formatting {
 			        '">' . esc_html( $link ) . '</a>';
 		}
 
-		// Link to hook: {@see 'pre_get_search_form'} (or 'pre_get_search_form' if $tag is true)
-		elseif (
-			1 === preg_match( '/^(?:\'|(?:&#8216;))([\$\w-&;]+)(?:\'|(?:&#8217;))$/', $link, $hook )
-			|| ( true === $tag && 1 === preg_match( '/^(?:\')([\$\w-&;]+)(?:\')$/', $link, $hook ) )
-		) {
+		// Link to hook: {@see 'pre_get_search_form'}
+		elseif ( 1 === preg_match( '/^(?:\'|(?:&#8216;))([\$\w-&;]+)(?:\'|(?:&#8217;))$/', $link, $hook ) ) {
 			if ( ! empty( $hook[1] ) ) {
 				$link = '<a href="' .
 				        get_post_type_archive_link( 'wp-parser-hook' ) .
