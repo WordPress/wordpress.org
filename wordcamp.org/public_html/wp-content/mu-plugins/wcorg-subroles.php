@@ -26,6 +26,20 @@ function get_user_subroles( $user_id ) {
 }
 
 /**
+ * Check if a particular user has a particular subrole.
+ *
+ * @param int    $user_id The ID of the user to check for a subrole.
+ * @param string $subrole The subrole to check for.
+ *
+ * @return bool True if the user has the subrole.
+ */
+function has_subrole( $user_id, $subrole ) {
+	$subroles = get_user_subroles( $user_id );
+
+	return in_array( $subrole, $subroles, true );
+}
+
+/**
  * Check if the current request is proxied.
  *
  * @return bool True if the request is proxied.
@@ -55,6 +69,17 @@ function add_subrole_caps( $allcaps, $caps, $args, $user ) {
 		$newcaps = array();
 		
 		switch ( $subrole ) {
+			case 'jetpack_connector' :
+				$newcaps = array(
+					'manage_network'             => true, // Access to network admin.
+					'jetpack_connect'            => true,
+					'jetpack_reconnect'          => true,
+					'jetpack_disconnect'         => true,
+					'jetpack_network_admin_page' => true,
+					'jetpack_network_sites_page' => true,
+				);
+				break;
+
 			case 'mentor_manager' :
 				// These capabilities only apply on central.wordcamp.org.
 				if ( BLOG_ID_CURRENT_SITE === get_current_blog_id() ) {
@@ -109,6 +134,18 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 					$wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
 					$required_caps[] = $wcpt->cap->edit_posts;
 				}
+			}
+			break;
+
+		// Allow Jetpack Connectors to do connector stuff without needing caps like `manage_network_plugins`.
+		// See Jetpack::jetpack_custom_caps()
+		case 'jetpack_connect':
+		case 'jetpack_reconnect':
+		case 'jetpack_disconnect':
+		case 'jetpack_network_admin_page':
+		case 'jetpack_network_sites_page':
+			if ( has_subrole( get_current_user_id(), 'jetpack_connector' ) ) {
+				$required_caps[] = $meta_cap;
 			}
 			break;
 	}
