@@ -60,10 +60,10 @@ class WordCamp_Docs_Template_Sponsorship_Agreement implements WordCamp_Docs_Temp
 			<label><?php _e( 'WordCamp Location:', 'wordcamporg' ); ?></label>
 			<input name="wordcamp_location" value="<?php echo esc_attr( $data['wordcamp_location'] ); ?>" />
 
-			<label><?php _e( 'Sponsorship Amount (in words):', 'wordcamporg' ); ?></label>
+			<label><?php _e( 'Sponsorship Amount (in words, including the currency):', 'wordcamporg' ); ?></label>
 			<input name="sponsorship_amount" value="<?php echo esc_attr( $data['sponsorship_amount'] ); ?>" />
 
-			<label><?php _e( 'Sponsorship Amount (in numbers):', 'wordcamporg' ); ?></label>
+			<label><?php _e( 'Sponsorship Amount (in numbers, including the currency symbol):', 'wordcamporg' ); ?></label>
 			<input name="sponsorship_amount_num" value="<?php echo esc_attr( $data['sponsorship_amount_num'] ); ?>" />
 
 			<label><?php _e( 'Sponsorship Benefits:', 'wordcamporg' ); ?></label>
@@ -150,7 +150,7 @@ h2 {
 		<p>Location: <?php echo esc_html( $data['wordcamp_location'] ); ?><br />
 		Time Period: <?php echo esc_html( $data['wordcamp_date'] ); ?></p>
 
-		<p>2. Sponsorship Amount. Within 30 days of this Agreement or before the start of the first Sponsored WordCamp, whichever is sooner, the Sponsor agrees to pay <?php echo esc_html( $data['sponsorship_amount'] ); ?> (US$ <?php echo esc_html( $data['sponsorship_amount_num'] ); ?>) to WPCS (the "Sponsorship").</p>
+		<p>2. Sponsorship Amount. Within 30 days of this Agreement or before the start of the first Sponsored WordCamp, whichever is sooner, the Sponsor agrees to pay <?php echo esc_html( $data['sponsorship_amount'] ); ?> (<?php echo esc_html( $data['sponsorship_amount_num'] ); ?>) to WPCS (the "Sponsorship").</p>
 
 		<p>3. Use of Funds. WPCS will use the Sponsorship to cover its costs and the costs of its volunteers and agents in connection with organizing, promoting, and operating the Sponsored WordCamp(s). Any excess remaining after these costs are paid may be used by WPCS for its unrestricted general support.</p>
 
