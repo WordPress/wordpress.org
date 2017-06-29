@@ -42,7 +42,6 @@ class Plugin {
 		add_action( 'wp_default_scripts', array( $this, 'bump_script_versions' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_filter( 'body_class', array( $this, 'wporg_add_make_site_body_class' ) );
-		add_filter( 'wporg_translate_language_pack_theme_args', array( $this, 'set_version_for_twentyseventeen_language_pack' ), 10, 2 );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
@@ -132,23 +131,6 @@ class Plugin {
 		remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu', 60 );
 		remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70 );
 		remove_action( 'admin_bar_menu', 'wp_admin_bar_edit_menu', 80 );
-	}
-
-	/**
-	 * Defines a version for Twenty Seventeen which isn't in the directory yet.
-	 *
-	 * @param array  $args WP-CLI arguments.
-	 * @param string $slug Slug of a theme.
-	 * @return array Filtered WP-CLI arguments.
-	 */
-	public function set_version_for_twentyseventeen_language_pack( $args, $slug ) {
-		if ( 'twentyseventeen' !== $slug || ! empty( $args['version'] ) ) {
-			return $args;
-		}
-
-		$args['version'] = '1.0';
-
-		return $args;
 	}
 
 	/**
