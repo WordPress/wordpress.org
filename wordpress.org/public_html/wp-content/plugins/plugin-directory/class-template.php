@@ -639,6 +639,10 @@ class Template {
 	public static function hreflang_link_attributes() {
 		global $wpdb;
 
+		if ( ! get_post() ) {
+			return;
+		}
+
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
 
 		if ( false === ( $sites = wp_cache_get( 'local-sites-'.get_post()->post_name, 'locale-associations' ) ) ) {
