@@ -196,6 +196,7 @@ section {
 		ul.bbp-topics.full-posts,
 		li.bbp-body div.hentry {
 			overflow: visible;
+			word-wrap: break-word;
 		}
 
 		ul.bbp-lead-topic {
