@@ -41,14 +41,18 @@
 		<div class="wccsp-container">
 			<div class="wccsp-introduction">
 				<p id="wccsp-introduction">
-					<?php printf(
-						// translators: %s is the name of the blog
-						__(
-							'%s is in the early planning stages. In the meantime, you can subscribe to updates above, or contact the organizers below to get involved.',
-							'wordcamporg'
-						),
-						esc_html( get_bloginfo( 'name' ) )
-					); ?>
+					<?php if ( ! empty( $introduction ) ) : ?>
+						<?php echo wp_kses_post( $introduction ); ?>
+					<?php else : ?>
+						<?php printf(
+							/* translators: %s is the name of the blog. */
+							__(
+								'%s is in the early planning stages. In the meantime, you can subscribe to updates above, or contact the organizers below to get involved.',
+								'wordcamporg'
+							),
+							esc_html( get_bloginfo( 'name' ) )
+						); ?>
+					<?php endif; ?>
 				</p>
 			</div><!-- .wccsp-introduction -->
 

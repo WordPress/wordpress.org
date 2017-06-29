@@ -118,6 +118,7 @@ class WordCamp_Coming_Soon_Page {
 			'active_modules'         => Jetpack::$instance->get_active_modules(),
 			'contact_form_shortcode' => $this->get_contact_form_shortcode(),
 			'colors'                 => $this->get_colors(),
+			'introduction'           => $this->get_introduction(),
 		);
 
 		return $variables;
@@ -270,5 +271,16 @@ class WordCamp_Coming_Soon_Page {
 		}
 
 		return $contact_form_shortcode;
+	}
+
+	/**
+	 * Retrieve the optional introduction overwriting the default string.
+	 *
+	 * @return string
+	 */
+	public function get_introduction() {
+		$settings     = $GLOBALS['WCCSP_Settings']->get_settings();
+
+		return $settings['introduction'];
 	}
 } // end WordCamp_Coming_Soon_Page

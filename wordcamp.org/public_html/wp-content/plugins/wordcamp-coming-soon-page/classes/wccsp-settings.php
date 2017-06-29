@@ -39,6 +39,7 @@ class WCCSP_Settings {
 			'background_id'              => 0,
 			'container_background_color' => '#FFFFFF', // deprecated
 			'text_color'                 => '#000000', // deprecated
+			'introduction'               => '',
 		);
 
 		$settings = shortcode_atts(

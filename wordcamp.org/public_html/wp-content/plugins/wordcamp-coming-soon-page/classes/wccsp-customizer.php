@@ -127,6 +127,39 @@ class WCCSP_Customizer {
 				)
 			)
 		);
+
+		$wp_customize->add_setting(
+			'wccsp_settings[introduction]',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'capability'        => $GLOBALS['WCCSP_Settings']::REQUIRED_CAPABILITY,
+				'sanitize_callback' => array( $this, 'sanitize_introduction' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'wccsp_settings[introduction]',
+			array(
+				'label'       => __( 'Custom Message', 'wordcamporg' ),
+				'description' => __( 'This will replace the default message shown beneath the header.', 'wordcamporg' ),
+				'section'     => 'wccsp_live_preview',
+				'type'        => 'textarea',
+			)
+		);
+	}
+
+	/**
+	 * Sanitize the contents of the Custom Message textarea before storing in the database.
+	 *
+	 * This uses the same sanitization strategy as menu item descriptions and post content in wp_insert_post.
+	 *
+	 * @param string $value The unsanitized introduction string.
+	 *
+	 * @return string The sanitized introduction string.
+	 */
+	public function sanitize_introduction( $value ) {
+		return wp_unslash( apply_filters( 'content_save_pre', wp_slash( $value ) ) );
 	}
 
 	/**
