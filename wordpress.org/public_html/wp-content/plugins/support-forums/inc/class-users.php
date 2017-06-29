@@ -14,6 +14,9 @@ class Users {
 
 		// Custom user contact methods.
 		add_filter( 'user_contactmethods', array( $this, 'custom_contact_methods' ) );
+
+		// Only allow 3 published topics from a user in the first 24 hours.
+		add_action( 'bbp_new_topic_pre_insert', array( $this, 'limit_new_user_topics' ) );
 	}
 
 	/**
@@ -60,6 +63,28 @@ class Users {
 		}
 
 		update_user_option( $user_id, 'title', sanitize_text_field( $_POST['title'] ) );
+	}
+
+	/**
+	 * Only allow 3 published topics from a user in the first 24 hours.
+	 *
+	 * If the user has exceeded their limit, move any new topics to moderation queue.
+	 *
+	 * @param array $topic_data Topic data.
+	 * @return array Filtered topic data.
+	 */
+	public function limit_new_user_topics( $topic_data ) {
+		$current_user = wp_get_current_user();
+
+		if ( time() - strtotime( $current_user->user_registered ) >= DAY_IN_SECONDS ) {
+			return $topic_data;
+		}
+
+		if ( 'publish' === $topic_data['post_status'] && bbp_get_user_topic_count_raw( $current_user->ID ) >= 3 ) {
+			$topic_data['post_status'] = 'pending';
+		}
+
+		return $topic_data;
 	}
 
 }
