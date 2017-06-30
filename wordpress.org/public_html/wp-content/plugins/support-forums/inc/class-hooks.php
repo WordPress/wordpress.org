@@ -32,7 +32,10 @@ class Hooks {
 		// Fix login url links
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
 
-		// Limit no-replies view to certain number of days.
+		// Auto-close topics after a certain number of months since the last reply.
+		add_filter( 'bbp_is_topic_closed', array( $this, 'auto_close_old_topics' ), 10, 2 );
+
+		// Limit no-replies view to a certain number of days.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 
 		// Add extra reply actions before Submit button in reply form.
@@ -232,6 +235,26 @@ class Hooks {
 			}
 		}
 		return $login_url;
+	}
+
+	/**
+	 * Auto-close topics after 6 months since the last reply.
+	 *
+	 * @param bool $is_topic_closed Whether the topic is closed.
+	 * @return bool True if closed, false if not.
+	 */
+	public function auto_close_old_topics( $is_topic_closed, $topic_id ) {
+		if ( $is_topic_closed ) {
+			return $is_topic_closed;
+		}
+
+		$last_active_post_date = get_post_field( 'post_date', bbp_get_topic_last_active_id( $topic_id ) );
+
+		if ( ( time() - strtotime( $last_active_post_date ) ) / MONTH_IN_SECONDS >= 6 ) {
+			$is_topic_closed = true;
+		}
+
+		return $is_topic_closed;
 	}
 
 	/**
