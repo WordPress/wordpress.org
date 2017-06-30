@@ -7,6 +7,7 @@ class Hooks {
 	public function __construct() {
 		// Basic behavior filters and actions.
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
+		add_filter( 'bbp_get_form_topic_subscribed',  array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
@@ -43,6 +44,20 @@ class Hooks {
 
 		// Honor i18n number formatting.
 		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
+	}
+
+	/**
+	 * Check "Notify me of follow-up replies via email" checkbox for new topics by default.
+	 *
+	 * @param string $checked Checked value of topic subscription.
+	 * @return string Checked value of topic subscription.
+	 */
+	function check_topic_subscription_checkbox( $checked ) {
+		if ( bbp_is_single_forum() || bbp_is_single_view() ) {
+			$checked = checked( true, true, false );
+		}
+
+		return $checked;
 	}
 
 	/**
