@@ -9,6 +9,10 @@
 
 ?>
 
+<header class="page-header">
+	<h1 class="page-title"><?php bbp_displayed_user_field( 'display_name' ); ?></h1>
+</header>
+
 <div id="bbpress-forums" class="bbpress-wrapper">
 
 	<?php do_action( 'bbp_template_notices' ); ?>
