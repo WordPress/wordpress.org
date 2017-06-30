@@ -77,6 +77,7 @@ function add_subrole_caps( $allcaps, $caps, $args, $user ) {
 					'jetpack_disconnect'         => true,
 					'jetpack_network_admin_page' => true,
 					'jetpack_network_sites_page' => true,
+					'jetpack_manage_modules'     => true,
 				);
 				break;
 
@@ -144,6 +145,7 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 		case 'jetpack_disconnect':
 		case 'jetpack_network_admin_page':
 		case 'jetpack_network_sites_page':
+		case 'jetpack_manage_modules':
 			if ( has_subrole( get_current_user_id(), 'jetpack_connector' ) ) {
 				$required_caps[] = $meta_cap;
 			}
