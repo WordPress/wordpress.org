@@ -52,7 +52,7 @@ class Hooks {
 	 * @param string $checked Checked value of topic subscription.
 	 * @return string Checked value of topic subscription.
 	 */
-	function check_topic_subscription_checkbox( $checked ) {
+	public function check_topic_subscription_checkbox( $checked ) {
 		if ( bbp_is_single_forum() || bbp_is_single_view() ) {
 			$checked = checked( true, true, false );
 		}
@@ -68,7 +68,7 @@ class Hooks {
 	 *
 	 * @param WP_Query $query Current query object.
 	 */
-	function hide_non_public_forums( $query ) {
+	public function hide_non_public_forums( $query ) {
 		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
 			$query->set( 'post_status', 'publish' );
 		}
@@ -79,7 +79,7 @@ class Hooks {
 	 *
 	 * @return int Filtered edit lock time.
 	 */
-	function increase_edit_lock_time() {
+	public function increase_edit_lock_time() {
 		return 60;
 	}
 
@@ -92,7 +92,7 @@ class Hooks {
 	 * @param string $redirect_url The redirect URL.
 	 * @return string Filtered redirect URL.
 	 */
-	function disable_redirect_guess_404_permalink( $redirect_url ) {
+	public function disable_redirect_guess_404_permalink( $redirect_url ) {
 		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
 			$hidden_topic = get_posts( array(
 				'name'        => get_query_var( 'name' ),
@@ -173,7 +173,7 @@ class Hooks {
 	 * @param string $text Topic or reply content.
 	 * @return string Filtered content.
 	 */
-	function make_mentions_clickable( $text = '' ) {
+	public function make_mentions_clickable( $text = '' ) {
 		return preg_replace_callback( '#([\s>])@([0-9a-zA-Z-_]+)#i', array( $this, 'make_mentions_clickable_callback' ), $text );
 	}
 
@@ -189,7 +189,7 @@ class Hooks {
 	 * @param array $matches Single Regex Match.
 	 * @return string HTML A tag with link to user profile.
 	 */
-	function make_mentions_clickable_callback( $matches = array() ) {
+	public function make_mentions_clickable_callback( $matches = array() ) {
 
 		// Get user; bail if not found
 		$user = get_user_by( 'slug', $matches[2] );
