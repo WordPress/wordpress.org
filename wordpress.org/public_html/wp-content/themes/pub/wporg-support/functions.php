@@ -214,6 +214,40 @@ function wporg_support_get_user_registered_date( $user_id = 0 ) {
 }
 
 /**
+ * Return the raw database count of reviews by a user.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int $user_id User ID to get count for.
+ * @return int Raw DB count of reviews.
+ */
+function wporg_support_get_user_review_count( $user_id = 0 ) {
+	global $wpdb;
+
+	$user_id = bbp_get_user_id( $user_id );
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
+		return false;
+	}
+
+	$count = (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT COUNT(*)
+			FROM {$wpdb->posts}
+			WHERE post_type = 'topic'
+				AND post_status IN ( 'publish', 'closed' )
+				AND post_parent = %s
+				AND post_author = %d",
+		WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
+		$user_id
+	) );
+
+	return $count;
+}
+
+/**
  * Check if the current page is a single review.
  *
  * @return bool True if the current page is a single review, false otherwise.

@@ -115,13 +115,20 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		?></p>
 
 		<p class="bbp-user-topic-count"><?php
+			$review_count = wporg_support_get_user_review_count();
+
 			/* translators: %s: number of user's topics */
-			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_topic_count_raw() ) );
+			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_topic_count_raw() - $review_count ) );
 		?></p>
 
 		<p class="bbp-user-reply-count"><?php
 			/* translators: %s: number of user's replies */
 			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_reply_count_raw() ) );
+		?></p>
+
+		<p class="bbp-user-review-count"><?php
+			/* translators: %s: number of user's reviews */
+			printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), number_format_i18n( $review_count ) );
 		?></p>
 	</div>
 </div><!-- #bbp-author-topics-started -->

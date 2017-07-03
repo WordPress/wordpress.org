@@ -54,8 +54,8 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class='bbp-user-replies-created-link'>
 						<a href="<?php bbp_user_profile_url(); ?>reviews/" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "%s's Reviews", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
-						?>"><?php esc_html_e( 'Reviews', 'wporg-forums' ); ?></a>
+							printf( esc_attr__( "%s's Reviews Written", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						?>"><?php esc_html_e( 'Reviews Written', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
 			<?php endif; ?>
