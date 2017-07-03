@@ -226,11 +226,11 @@ function wporg_support_get_user_review_count( $user_id = 0 ) {
 
 	$user_id = bbp_get_user_id( $user_id );
 	if ( empty( $user_id ) ) {
-		return false;
+		return 0;
 	}
 
 	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
-		return false;
+		return 0;
 	}
 
 	$count = (int) $wpdb->get_var( $wpdb->prepare(
@@ -238,7 +238,7 @@ function wporg_support_get_user_review_count( $user_id = 0 ) {
 			FROM {$wpdb->posts}
 			WHERE post_type = 'topic'
 				AND post_status IN ( 'publish', 'closed' )
-				AND post_parent = %s
+				AND post_parent = %d
 				AND post_author = %d",
 		WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
 		$user_id
