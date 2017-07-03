@@ -362,6 +362,8 @@ class Moderators {
 
 				if ( bbp_is_reply( $post->ID ) ) {
 					bbp_increase_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
+				} else {
+					bbp_unstick_topic( $post->ID );
 				}
 
 				return true;
