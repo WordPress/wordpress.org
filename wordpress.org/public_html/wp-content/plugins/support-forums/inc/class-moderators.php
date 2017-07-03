@@ -243,9 +243,13 @@ class Moderators {
 
 	public function add_post_status_to_query( $args = array() ) {
 		if ( bbp_get_view_all() ) {
-			$post_stati = explode( ',', $args['post_status'] );
-			$post_stati[] = self::ARCHIVED;
-			$args['post_status'] = implode( ',', $post_stati );
+			if ( is_array( $args['post_status'] ) ) {
+				$args['post_status'][] = self::ARCHIVED;
+			} else {
+				$post_stati = explode( ',', $args['post_status'] );
+				$post_stati[] = self::ARCHIVED;
+				$args['post_status'] = implode( ',', $post_stati );
+			}
 		}
 		return $args;
 	}
