@@ -11,7 +11,7 @@
 	<div class="entry-content">
 		<?php the_excerpt();
 		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
-		$github_issues = 'https://github.com/issues?q=is%3Aopen+label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli';
+		$github_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli';
 		?>
 		<p><a class="button" href="<?php echo esc_url( $github_issues ); ?>"><?php esc_html_e( 'GitHub Issues', 'wporg' ); ?></a></p>
 		<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'wporg' ) ); ?>
