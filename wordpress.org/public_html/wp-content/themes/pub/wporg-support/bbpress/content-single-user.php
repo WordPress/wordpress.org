@@ -35,7 +35,7 @@
 
 			<?php if ( bbp_is_single_user_topics()            ) bbp_get_template_part( 'user', 'topics-created'  ); ?>
 			<?php if ( bbp_is_single_user_replies()           ) bbp_get_template_part( 'user', 'replies-created' ); ?>
-			<?php if ( wporg_support_is_single_user_reviews() ) bbp_get_template_part( 'user', 'reviews-created' ); ?>
+			<?php if ( wporg_support_is_single_user_reviews() ) bbp_get_template_part( 'user', 'reviews-written' ); ?>
 			<?php if ( bbp_is_single_user_edit()              ) bbp_get_template_part( 'form', 'user-edit'       ); ?>
 			<?php if ( bbp_is_single_user_profile()           ) bbp_get_template_part( 'user', 'profile'         ); ?>
 		</div>
