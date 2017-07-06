@@ -49,7 +49,7 @@
 							<ul>
 								<li><?php
 									/* translators: %s: Handbook URL for forum welcome */
-									printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https://make.wordpress.org/support/handbook/forum-welcome/', 'wporg-forums' ) ) );
+									printf( __( '<strong>Read the <a href="%s">Forum Welcome</a></strong> to find out how to maximize your odds of getting help!', 'wporg-forums' ), esc_url( __( 'https://wordpress.org/support/welcome/', 'wporg-forums' ) ) );
 								?></li>
 								<li><?php
 									/* translators: %s: URL to search */
