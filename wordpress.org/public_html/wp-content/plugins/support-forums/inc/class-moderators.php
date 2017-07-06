@@ -270,6 +270,14 @@ class Moderators {
 		unset( $r['trash'] );
 
 		/*
+		 * Remove 'Unapprove' link. If a post violates the forum rules, it can either be archived
+		 * or marked as spam, but it should not be moved back to moderation queue.
+		 */
+		if ( 'pending' !== get_post_status( $post_id ) ) {
+			unset( $r['approve'] );
+		}
+
+		/*
 		 * Remove 'Reply' link. The theme adds its own 'Reply to Topic' sidebar link
 		 * for quick access to reply form, making the default inline link redundant.
 		 */
