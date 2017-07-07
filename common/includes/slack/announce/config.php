@@ -105,6 +105,9 @@ function get_whitelist() {
 			'georgestephanis',
 			'valendesigns',
 		),
+		'core-php' => array(
+			'flixos90',
+		),
 		'core-restapi' => array(
 			'danielbachhuber',
 			'joehoyle',
