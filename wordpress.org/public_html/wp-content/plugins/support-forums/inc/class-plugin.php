@@ -17,6 +17,11 @@ class Plugin {
 	private static $instance;
 
 	/**
+	 * @var int Plugin DB revision, increments when changes are made to rewrite rules.
+	 */
+	private static $db_version = 5627;
+
+	/**
 	 * Always return the same instance of this plugin.
 	 *
 	 * @return Plugin
@@ -50,5 +55,20 @@ class Plugin {
 			$this->themes          = new Theme_Directory_Compat;
 			$this->plugins         = new Plugin_Directory_Compat;
 		}
+
+		add_action( 'bbp_add_rewrite_rules', array( $this, 'maybe_flush_rewrite_rules' ) );
 	}
+
+	/**
+	 * Check the plugin version to see if rewrite rules should be flushed.
+	 */
+	public function maybe_flush_rewrite_rules() {
+		$db_version_option_name = 'wporg_support_forums_plugin_db_version';
+
+		if ( get_option( $db_version_option_name ) != self::$db_version ) {
+			flush_rewrite_rules();
+			update_option( $db_version_option_name, self::$db_version );
+		}
+	}
+
 }
