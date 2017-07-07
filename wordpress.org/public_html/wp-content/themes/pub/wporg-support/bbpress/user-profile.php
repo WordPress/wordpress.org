@@ -124,10 +124,12 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_reply_count_raw() ) );
 		?></p>
 
-		<p class="bbp-user-review-count"><?php
-			/* translators: %s: number of user's reviews */
-			printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_reviews_count() ) );
-		?></p>
+		<?php if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) : ?>
+			<p class="bbp-user-review-count"><?php
+				/* translators: %s: number of user's reviews */
+				printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_reviews_count() ) );
+			?></p>
+		<?php endif; ?>
 	</div>
 </div><!-- #bbp-author-topics-started -->
 
