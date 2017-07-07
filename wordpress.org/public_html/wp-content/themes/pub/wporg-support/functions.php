@@ -261,12 +261,30 @@ function wporg_support_is_single_review() {
 }
 
 /**
- * Check if the current page is a user's reviews page.
+ * Check if the current page is a user's "Reviews Written" page.
  *
- * @return bool True if the page is a user's reviews page, false otherwise.
+ * @return bool True if the page is a "Reviews Written" page, false otherwise.
  */
 function wporg_support_is_single_user_reviews() {
 	return (bool) get_query_var( 'wporg_single_user_reviews' );
+}
+
+/**
+ * Check if the current page is a user's "Active Topics" page.
+ *
+ * @return bool True if the page is an "Active Topics" page, false otherwise.
+ */
+function wporg_support_is_single_user_active_topics() {
+	return (bool) get_query_var( 'wporg_single_user_active_topics' );
+}
+
+/**
+ * Check if the current page is a user's "Topics Replied To" page.
+ *
+ * @return bool True if the page is a "Topics Replied To" page, false otherwise.
+ */
+function wporg_support_is_single_user_topics_replied_to() {
+	return (bool) get_query_var( 'wporg_single_user_topics_replied_to' );
 }
 
 /**

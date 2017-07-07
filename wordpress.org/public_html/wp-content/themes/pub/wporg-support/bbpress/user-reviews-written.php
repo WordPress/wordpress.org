@@ -9,7 +9,7 @@
 
 do_action( 'bbp_template_before_user_reviews_written' ); ?>
 
-<div id="bbp-user-topics-started" class="bbp-user-topics-started">
+<div id="bbp-user-reviews-written" class="bbp-user-reviews-written">
 	<h2 class="entry-title"><?php esc_html_e( 'Reviews Written', 'wporg-forums' ); ?></h2>
 	<div class="bbp-user-section">
 
@@ -31,6 +31,6 @@ do_action( 'bbp_template_before_user_reviews_written' ); ?>
 		<?php endif; ?>
 
 	</div>
-</div><!-- #bbp-user-topics-started -->
+</div><!-- #bbp-user-reviews-written -->
 
 <?php do_action( 'bbp_template_after_user_reviews_written' );

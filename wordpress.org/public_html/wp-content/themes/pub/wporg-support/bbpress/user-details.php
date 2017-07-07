@@ -51,7 +51,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 
 			<?php if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) : ?>
 				<li class="<?php if ( wporg_support_is_single_user_reviews() ) :?>current<?php endif; ?>">
-					<span class='bbp-user-replies-created-link'>
+					<span class='bbp-user-reviews-link'>
 						<a href="<?php bbp_user_profile_url(); ?>reviews/" title="<?php
 							/* translators: %s: user's display name */
 							printf( esc_attr__( "%s's Reviews Written", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
@@ -59,6 +59,24 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					</span>
 				</li>
 			<?php endif; ?>
+
+			<li class="<?php if ( wporg_support_is_single_user_active_topics() ) :?>current<?php endif; ?>">
+				<span class='bbp-user-active-topics-link'>
+					<a href="<?php bbp_user_profile_url(); ?>active/" title="<?php
+						/* translators: %s: user's display name */
+						printf( esc_attr__( "%s's Active Topics", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+					?>"><?php esc_html_e( 'Active Topics', 'wporg-forums' ); ?></a>
+				</span>
+			</li>
+
+			<li class="<?php if ( wporg_support_is_single_user_topics_replied_to() ) :?>current<?php endif; ?>">
+				<span class='bbp-user-topics-replied-to-link'>
+					<a href="<?php bbp_user_profile_url(); ?>replied-to/" title="<?php
+						/* translators: %s: user's display name */
+						printf( esc_attr__( 'Topics %s Has Replied To', 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+					?>"><?php esc_html_e( 'Topics Replied To', 'wporg-forums' ); ?></a>
+				</span>
+			</li>
 
 			<?php if ( function_exists( 'bbp_is_engagements_active' ) && bbp_is_engagements_active() ) : ?>
 				<li class="<?php if ( bbp_is_single_user_engagements() ) :?>current<?php endif; ?>">
