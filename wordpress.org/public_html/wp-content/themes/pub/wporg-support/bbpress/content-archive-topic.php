@@ -14,7 +14,7 @@
 <?php if ( bbp_is_topic_tag() ) : ?>
 
 	<header id="topic-tag" class="page-header bbp-topic-tag">
-		<h1 class="page-title"><?php printf( esc_html__( 'Topic Tag: %s', 'bbpress' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
+		<h1 class="page-title"><?php printf( esc_html__( 'Topic Tag: %s', 'wporg-forums' ), '<span>' . bbp_get_topic_tag_name() . '</span>' ); ?></h1>
 		<?php bbp_topic_tag_description(); ?>
 	</header>
 
