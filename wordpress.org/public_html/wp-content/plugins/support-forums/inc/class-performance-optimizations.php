@@ -201,6 +201,12 @@ class Performance_Optimizations {
 				return $r;
 			}
 
+			// Only look at the last year of topics for user's "Active Topics" view.
+			if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
+				add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
+				return $r;
+			}
+
 			if ( isset( $r['meta_key'] ) ) {
 				// has_topics() uses this by default.
 				if ( '_bbp_last_active_time' == $r['meta_key'] ) {

@@ -17,6 +17,18 @@ class Users {
 
 		// Only allow 3 published topics from a user in the first 24 hours.
 		add_action( 'bbp_new_topic_pre_insert', array( $this, 'limit_new_user_topics' ) );
+
+		// Add query vars and rewrite rules for user's topic and review queries.
+		add_filter( 'query_vars',            array( $this, 'add_query_vars' ) );
+		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
+
+		// Parse user's topic and review queries.
+		add_action( 'parse_query',                     array( $this, 'parse_user_topics_query' ) );
+		add_filter( 'posts_groupby',                   array( $this, 'parse_user_topics_posts_groupby' ), 10, 2 );
+		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'parse_user_topics_query_args' ) );
+		add_filter( 'bbp_topic_pagination',            array( $this, 'parse_user_topics_pagination_args' ) );
+		add_filter( 'bbp_replies_pagination',          array( $this, 'parse_user_topics_pagination_args' ) );
+		add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_topics_title_args' ) );
 	}
 
 	/**
@@ -85,6 +97,177 @@ class Users {
 		}
 
 		return $topic_data;
+	}
+
+	/**
+	 * Add query vars for user's "Reviews Written", "Active Topics",
+	 * and "Topics Replied To" pages.
+	 *
+	 * @param array $query_vars Query vars.
+	 * @return array Filtered query vars.
+	 */
+	public function add_query_vars( $query_vars ) {
+		$query_vars[] = 'wporg_single_user_reviews';
+		$query_vars[] = 'wporg_single_user_active_topics';
+		$query_vars[] = 'wporg_single_user_topics_replied_to';
+		return $query_vars;
+	}
+
+	/**
+	 * Add rewrite rules for user's "Reviews Written", "Active Topics",
+	 * and "Topics Replied To" pages.
+	 */
+	public function add_rewrite_rules() {
+		$priority   = 'top';
+
+		$user_reviews_rule           = bbp_get_user_slug() . '/([^/]+)/reviews/';
+		$user_active_topics_rule     = bbp_get_user_slug() . '/([^/]+)/active/';
+		$user_topics_replied_to_rule = bbp_get_user_slug() . '/([^/]+)/replied-to/';
+
+		$feed_id    = 'feed';
+		$user_id    = bbp_get_user_rewrite_id();
+		$paged_id   = bbp_get_paged_rewrite_id();
+
+		$feed_slug  = 'feed';
+		$paged_slug = bbp_get_paged_slug();
+
+		$base_rule  = '?$';
+		$feed_rule  = $feed_slug . '/?$';
+		$paged_rule = $paged_slug . '/?([0-9]{1,})/?$';
+
+		// Add user's "Reviews Written" page rewrite rules.
+		add_rewrite_rule( $user_reviews_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1',                               $priority );
+		add_rewrite_rule( $user_reviews_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_reviews_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add user's "Active Topics" page rewrite rules.
+		add_rewrite_rule( $user_active_topics_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1',                               $priority );
+		add_rewrite_rule( $user_active_topics_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_active_topics_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1&' . $feed_id  . '=$matches[2]', $priority );
+
+		// Add user's "Topics Replied To" page rewrite rules.
+		add_rewrite_rule( $user_topics_replied_to_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1',                               $priority );
+		add_rewrite_rule( $user_topics_replied_to_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $paged_id . '=$matches[2]', $priority );
+		add_rewrite_rule( $user_topics_replied_to_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $feed_id  . '=$matches[2]', $priority );
+	}
+
+	/**
+	 * Set WP_Query::bbp_is_single_user_profile to false on user's "Reviews Written",
+	 * "Active Topics", and "Topics Replied To" pages.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	public function parse_user_topics_query( $query ) {
+		if (
+			get_query_var( 'wporg_single_user_reviews' )
+		||
+			get_query_var( 'wporg_single_user_active_topics' )
+		||
+			get_query_var( 'wporg_single_user_topics_replied_to' )
+		) {
+			$query->bbp_is_single_user_profile = false;
+		}
+	}
+
+	/**
+	 * Filter the GROUP BY clause on user's "Topics Replied To" page
+	 * in order to group replies by topic.
+	 *
+	 * @param string   $groupby The GROUP BY clause of the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return string Filtered GROUP BY clause.
+	 */
+	public function parse_user_topics_posts_groupby( $groupby, $query ) {
+		global $wpdb;
+
+		if ( 'reply' === $query->get( 'post_type' ) && get_query_var( 'wporg_single_user_topics_replied_to' ) ) {
+			$groupby = "$wpdb->posts.post_parent";
+		}
+
+		return $groupby;
+	}
+
+	/**
+	 * Set forum ID for user's Reviews query.
+	 *
+	 * @param array $args WP_Query arguments.
+	 * @return array Filtered query arguments.
+	 */
+	public function parse_user_topics_query_args( $args ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
+		} elseif ( bbp_is_single_user_topics() || get_query_var( 'wporg_single_user_active_topics' ) ) {
+			$args['post_parent__not_in'] = array( Plugin::REVIEWS_FORUM_ID );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Set 'base' argument for pagination links on user's "Reviews Written",
+	 * "Active Topics", and "Topics Replied To" pages.
+	 *
+	 * @param array $args Pagination arguments.
+	 * @return array Filtered pagination arguments.
+	 */
+	public function parse_user_topics_pagination_args( $args ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'reviews/';
+			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
+		}
+
+		if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
+			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'active/';
+			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
+		}
+
+		if ( get_query_var( 'wporg_single_user_topics_replied_to' ) ) {
+			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'replied-to/';
+			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Set title for user's "Reviews Written", "Active Topics",
+	 * and "Topics Replied To" pages.
+	 *
+	 * @param array $title Title parts.
+	 * @return array Filtered title parts.
+	 */
+	public function parse_user_topics_title_args( $title ) {
+		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+			if ( bbp_is_user_home() ) {
+				$title['text'] = __( 'Your Reviews Written', 'wporg-forums' );
+			} else {
+				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
+				/* translators: user's display name */
+				$title['format'] = __( "%s's Reviews Written", 'wporg-forums' );
+			}
+		}
+
+		if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
+			if ( bbp_is_user_home() ) {
+				$title['text'] = __( 'Your Active Topics', 'wporg-forums' );
+			} else {
+				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
+				/* translators: user's display name */
+				$title['format'] = __( "%s's Active Topics", 'wporg-forums' );
+			}
+		}
+
+		if ( get_query_var( 'wporg_single_user_topics_replied_to' ) ) {
+			if ( bbp_is_user_home() ) {
+				$title['text'] = __( "Topics You've Replied To", 'wporg-forums' );
+			} else {
+				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
+				/* translators: user's display name */
+				$title['format'] = __( 'Topics %s Has Replied To', 'wporg-forums' );
+			}
+		}
+
+		return $title;
 	}
 
 }
