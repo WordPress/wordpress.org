@@ -18,17 +18,17 @@ get_header(); ?>
 					<div class="widget box box-left transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-welcome-widgets-menus"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
 						<p class="widget-description"><?php _e( 'Want to know all there is to know about theming and WordPress?', 'wporg' ); ?></p>
-						<a href="<?php esc_attr_e( get_post_type_archive_link( 'theme-handbook' ) ); ?>" class="themes-go get-started go button"><?php _e( 'Develop Themes ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
+						<a href="<?php echo esc_url( get_post_type_archive_link( 'theme-handbook' ) ); ?>" class="themes-go get-started go button"><?php _e( 'Develop Themes ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 					<div class="widget box box-right transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-admin-plugins"></div><?php _e( 'Plugins', 'wporg' ); ?></h3>
 						<p class="widget-description"><?php _e( 'Ready to dive deep into the world of plugin authoring?', 'wporg' ); ?></p>
-						<a href="<?php esc_attr_e( get_post_type_archive_link( 'plugin-handbook' ) ); ?>" class="plugins-go get-started go button"><?php _e( 'Develop Plugins ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
+						<a href="<?php echo esc_url( get_post_type_archive_link( 'plugin-handbook' ) ); ?>" class="plugins-go get-started go button"><?php _e( 'Develop Plugins ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 					<div class="widget box box-right transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-controls-repeat"></div><?php _e( 'REST API', 'wporg' ); ?></h3>
 						<p class="widget-description"><?php _e( 'Getting started on making WordPress applications?', 'wporg' ); ?></p>
-						<a href="<?php esc_attr_e( get_post_type_archive_link( 'rest-api-handbook' ) ); ?>" class="rest-api-go get-started go button"><?php _e( 'Make Applications ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
+						<a href="<?php echo esc_url( get_post_type_archive_link( 'rest-api-handbook' ) ); ?>" class="rest-api-go get-started go button"><?php _e( 'Make Applications ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 				</div>
 			</div><!-- /topic-guide -->
