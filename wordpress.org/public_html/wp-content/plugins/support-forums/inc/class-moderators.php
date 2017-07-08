@@ -17,6 +17,9 @@ class Moderators {
 		// Scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
+		// Allow keymasters and moderators to edit users.
+		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
+
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
 		add_filter( 'bbp_get_topic_permalink',          array( $this, 'add_view_all' ) );
@@ -118,6 +121,51 @@ class Moderators {
 		if ( current_user_can( 'moderate' ) ) {
 			wp_enqueue_style( 'support-forums-moderators', plugins_url( 'css/styles-moderators.css', __DIR__ ) );
 		}
+	}
+
+	/**
+	 * Allow keymasters and moderators to edit users without having
+	 * an Administrator role on the site.
+	 *
+	 * @param array  $caps    User's actual capabilities.
+	 * @param string $cap     Capability name.
+	 * @param int    $user_id Current user ID.
+	 * @param array  $args    Capability context, typically the object ID.
+	 * @return array Filtered capabilities.
+	 */
+	function map_meta_caps( $caps, $cap, $user_id, $args ) {
+		switch ( $cap ) {
+			case 'promote_user':
+			case 'promote_users':
+				// Only keymasters can promote users.
+				$caps = array( 'keep_gate' );
+				break;
+
+			case 'edit_user':
+			case 'edit_users':
+				// Bail before "User Role" section is displayed.
+				// See https://bbpress.trac.wordpress.org/ticket/3126
+				if ( did_action( 'bbp_user_edit_after_account' ) && ! bbp_is_user_keymaster( $user_id ) ) {
+					return $caps;
+				}
+
+				// Get the user ID.
+				$_user_id = ! empty( $args[0] )
+					? (int) $args[0]
+					: bbp_get_displayed_user_id();
+
+				// Users can always edit themselves, so only map for others.
+				if ( ! empty( $_user_id ) && ( $_user_id !== $user_id ) ) {
+
+					// Moderators cannot edit keymasters.
+					if ( ! bbp_is_user_keymaster( $_user_id ) ) {
+						$caps = array( 'moderate' );
+					}
+				}
+				break;
+		}
+
+		return $caps;
 	}
 
 	/**
