@@ -127,38 +127,45 @@ class Moderators {
 	 * Allow keymasters and moderators to edit users without having
 	 * an Administrator role on the site.
 	 *
-	 * @param array  $caps    User's actual capabilities.
-	 * @param string $cap     Capability name.
-	 * @param int    $user_id Current user ID.
-	 * @param array  $args    Capability context, typically the object ID.
+	 * @param array  $caps            User's actual capabilities.
+	 * @param string $cap             Capability name.
+	 * @param int    $current_user_id Current user ID.
+	 * @param array  $args            Capability context, typically the object ID.
 	 * @return array Filtered capabilities.
 	 */
-	function map_meta_caps( $caps, $cap, $user_id, $args ) {
+	function map_meta_caps( $caps, $cap, $current_user_id, $args ) {
 		switch ( $cap ) {
 			case 'promote_user':
 			case 'promote_users':
-				// Only keymasters can promote users.
-				$caps = array( 'keep_gate' );
-				break;
-
 			case 'edit_user':
 			case 'edit_users':
 				// Bail before "User Role" section is displayed.
 				// See https://bbpress.trac.wordpress.org/ticket/3126
-				if ( did_action( 'bbp_user_edit_after_account' ) && ! bbp_is_user_keymaster( $user_id ) ) {
+				if ( did_action( 'bbp_user_edit_after_account' ) && ! bbp_is_user_keymaster( $current_user_id ) ) {
 					return $caps;
 				}
 
 				// Get the user ID.
-				$_user_id = ! empty( $args[0] )
+				$user_id_to_check = ! empty( $args[0] )
 					? (int) $args[0]
 					: bbp_get_displayed_user_id();
 
 				// Users can always edit themselves, so only map for others.
-				if ( ! empty( $_user_id ) && ( $_user_id !== $user_id ) ) {
-
+				if ( ! empty( $user_id_to_check ) && ( $user_id_to_check !== $current_user_id ) ) {
 					// Moderators cannot edit keymasters.
-					if ( ! bbp_is_user_keymaster( $_user_id ) ) {
+					if ( bbp_is_user_keymaster( $user_id_to_check ) ) {
+						return $caps;
+					}
+
+					// Moderators and keymasters cannot edit admins or super admins, unless they have the same role.
+					if ( user_can( $user_id_to_check, 'manage_options' ) || is_super_admin( $user_id_to_check ) ) {
+						return $caps;
+					}
+
+					if ( 'promote_user' === $cap || 'promote_users' === $cap ) {
+						// Only keymasters can promote users.
+						$caps = array( 'keep_gate' );
+					} else {
 						$caps = array( 'moderate' );
 					}
 				}
