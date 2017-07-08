@@ -19,6 +19,7 @@ class Moderators {
 
 		// Allow keymasters and moderators to edit users.
 		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
+		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
 
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
@@ -173,6 +174,45 @@ class Moderators {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Allow keymasters and moderators to change user's email address
+	 * without requiring a confirmation.
+	 *
+	 * @param string $action The requested action.
+	 */
+	function edit_user_handler( $action = '' ) {
+		if ( 'bbp-update-user' !== $action || is_admin() || bbp_is_user_home_edit() ) {
+			return;
+		}
+
+		$user_id = bbp_get_displayed_user_id();
+
+		if ( ! bbp_verify_nonce_request( 'update-user_' . $user_id ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_user', $user_id ) || empty( $_POST['email'] ) ) {
+			return;
+		}
+
+		$user_email = bbp_get_displayed_user_field( 'user_email', 'raw' );
+		$new_email  = sanitize_text_field( wp_unslash( $_POST['email'] ) );
+
+		if ( $user_email !== $new_email ) {
+			// Bail if the email address is invalid or already in use.
+			if ( ! is_email( $new_email ) || email_exists( $new_email ) ) {
+				return;
+			}
+
+			// Set the displayed user's email to the new address
+			// so `bbp_edit_user_handler()` does not attempt to update it,
+			// `edit_user()` will handle that instead.
+			bbpress()->displayed_user->user_email = $new_email;
+
+			add_filter( 'send_email_change_email', '__return_false' );
+		}
 	}
 
 	/**
