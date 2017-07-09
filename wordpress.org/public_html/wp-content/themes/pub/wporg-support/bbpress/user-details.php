@@ -60,15 +60,6 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				</li>
 			<?php endif; ?>
 
-			<li class="<?php if ( wporg_support_is_single_user_active_topics() ) :?>current<?php endif; ?>">
-				<span class='bbp-user-active-topics-link'>
-					<a href="<?php bbp_user_profile_url(); ?>active/" title="<?php
-						/* translators: %s: user's display name */
-						printf( esc_attr__( "%s's Active Topics", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
-					?>"><?php esc_html_e( 'Active Topics', 'wporg-forums' ); ?></a>
-				</span>
-			</li>
-
 			<li class="<?php if ( wporg_support_is_single_user_topics_replied_to() ) :?>current<?php endif; ?>">
 				<span class='bbp-user-topics-replied-to-link'>
 					<a href="<?php bbp_user_profile_url(); ?>replied-to/" title="<?php

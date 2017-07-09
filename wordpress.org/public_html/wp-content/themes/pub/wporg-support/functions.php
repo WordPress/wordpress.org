@@ -304,15 +304,6 @@ function wporg_support_is_single_user_reviews() {
 }
 
 /**
- * Check if the current page is a user's "Active Topics" page.
- *
- * @return bool True if the page is an "Active Topics" page, false otherwise.
- */
-function wporg_support_is_single_user_active_topics() {
-	return (bool) get_query_var( 'wporg_single_user_active_topics' );
-}
-
-/**
  * Check if the current page is a user's "Topics Replied To" page.
  *
  * @return bool True if the page is a "Topics Replied To" page, false otherwise.
