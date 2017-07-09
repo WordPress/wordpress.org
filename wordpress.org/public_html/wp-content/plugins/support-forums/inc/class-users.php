@@ -188,16 +188,32 @@ class Users {
 	}
 
 	/**
-	 * Set forum ID for user's Reviews query.
+	 * Set the arguments for user's "Reviews Written" and "Active Topics" queries.
 	 *
 	 * @param array $args WP_Query arguments.
 	 * @return array Filtered query arguments.
 	 */
 	public function parse_user_topics_query_args( $args ) {
-		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
-			$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
-		} elseif ( bbp_is_single_user_topics() || get_query_var( 'wporg_single_user_active_topics' ) ) {
-			$args['post_parent__not_in'] = array( Plugin::REVIEWS_FORUM_ID );
+		// Forums on https://wordpress.org/support/.
+		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) {
+
+			// Set forum ID for topic and review queries.
+			if ( get_query_var( 'wporg_single_user_reviews' ) ) {
+				$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
+			} elseif ( bbp_is_single_user_topics() || get_query_var( 'wporg_single_user_active_topics' ) ) {
+				$args['post_parent__not_in'] = array( Plugin::REVIEWS_FORUM_ID );
+			}
+
+		// Rosetta forums.
+		} else {
+
+			// Only look at the last year of topics for user's "Active Topics" view.
+			// For the main forums, the same is done in Performance_Optimizations::has_topics().
+			if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
+				$args['date_query'] = array( array(
+					'after' => '1 year ago',
+				) );
+			}
 		}
 
 		return $args;
