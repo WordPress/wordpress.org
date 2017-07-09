@@ -35,7 +35,7 @@ class Hooks {
 		// Auto-close topics after a certain number of months since the last reply.
 		add_filter( 'bbp_is_topic_closed', array( $this, 'auto_close_old_topics' ), 10, 2 );
 
-		// Limit no-replies view to a certain number of days.
+		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 
 		// Add extra reply actions before Submit button in reply form.
@@ -258,7 +258,7 @@ class Hooks {
 	}
 
 	/**
-	 * Limits No Replies view to 21 days by default.
+	 * Limits No Replies view to 21 days by default and hides resolved topics.
 	 *
 	 * @param array $args Array of query args for the view.
 	 * @return array
@@ -275,6 +275,13 @@ class Hooks {
 				'after'  => sprintf( '%s days ago', $days ),
 			),
 		);
+
+		$args['meta_query'] = array( array(
+			'key'     => 'topic_resolved',
+			'type'    => 'CHAR',
+			'value'   => 'no',
+			'compare' => '='
+		) );
 
 		return $args;
 	}
