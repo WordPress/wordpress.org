@@ -374,8 +374,6 @@ abstract class Directory_Compat {
 		||
 			get_query_var( 'wporg_single_user_reviews' )
 		||
-			get_query_var( 'wporg_single_user_active_topics' )
-		||
 			get_query_var( 'wporg_single_user_topics_replied_to' )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );

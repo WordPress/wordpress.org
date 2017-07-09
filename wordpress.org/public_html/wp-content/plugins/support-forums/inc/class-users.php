@@ -100,28 +100,24 @@ class Users {
 	}
 
 	/**
-	 * Add query vars for user's "Reviews Written", "Active Topics",
-	 * and "Topics Replied To" pages.
+	 * Add query vars for user's "Reviews Written" and "Topics Replied To" views.
 	 *
 	 * @param array $query_vars Query vars.
 	 * @return array Filtered query vars.
 	 */
 	public function add_query_vars( $query_vars ) {
 		$query_vars[] = 'wporg_single_user_reviews';
-		$query_vars[] = 'wporg_single_user_active_topics';
 		$query_vars[] = 'wporg_single_user_topics_replied_to';
 		return $query_vars;
 	}
 
 	/**
-	 * Add rewrite rules for user's "Reviews Written", "Active Topics",
-	 * and "Topics Replied To" pages.
+	 * Add rewrite rules for user's "Reviews Written" and "Topics Replied To" views.
 	 */
 	public function add_rewrite_rules() {
 		$priority   = 'top';
 
 		$user_reviews_rule           = bbp_get_user_slug() . '/([^/]+)/reviews/';
-		$user_active_topics_rule     = bbp_get_user_slug() . '/([^/]+)/active/';
 		$user_topics_replied_to_rule = bbp_get_user_slug() . '/([^/]+)/replied-to/';
 
 		$feed_id    = 'feed';
@@ -140,11 +136,6 @@ class Users {
 		add_rewrite_rule( $user_reviews_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $paged_id . '=$matches[2]', $priority );
 		add_rewrite_rule( $user_reviews_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_reviews=1&' . $feed_id  . '=$matches[2]', $priority );
 
-		// Add user's "Active Topics" page rewrite rules.
-		add_rewrite_rule( $user_active_topics_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1',                               $priority );
-		add_rewrite_rule( $user_active_topics_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1&' . $paged_id . '=$matches[2]', $priority );
-		add_rewrite_rule( $user_active_topics_rule . $feed_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_active_topics=1&' . $feed_id  . '=$matches[2]', $priority );
-
 		// Add user's "Topics Replied To" page rewrite rules.
 		add_rewrite_rule( $user_topics_replied_to_rule . $base_rule,  'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1',                               $priority );
 		add_rewrite_rule( $user_topics_replied_to_rule . $paged_rule, 'index.php?' . $user_id . '=$matches[1]&wporg_single_user_topics_replied_to=1&' . $paged_id . '=$matches[2]', $priority );
@@ -152,16 +143,14 @@ class Users {
 	}
 
 	/**
-	 * Set WP_Query::bbp_is_single_user_profile to false on user's "Reviews Written",
-	 * "Active Topics", and "Topics Replied To" pages.
+	 * Set WP_Query::bbp_is_single_user_profile to false on user's "Reviews Written"
+	 * and "Topics Replied To" views.
 	 *
 	 * @param WP_Query $query Current query object.
 	 */
 	public function parse_user_topics_query( $query ) {
 		if (
 			get_query_var( 'wporg_single_user_reviews' )
-		||
-			get_query_var( 'wporg_single_user_active_topics' )
 		||
 			get_query_var( 'wporg_single_user_topics_replied_to' )
 		) {
@@ -188,31 +177,19 @@ class Users {
 	}
 
 	/**
-	 * Set the arguments for user's "Reviews Written" and "Active Topics" queries.
+	 * Set the arguments for user's "Reviews Written" query.
 	 *
 	 * @param array $args WP_Query arguments.
 	 * @return array Filtered query arguments.
 	 */
 	public function parse_user_topics_query_args( $args ) {
-		// Forums on https://wordpress.org/support/.
+		// Forums at https://wordpress.org/support/.
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) {
-
 			// Set forum ID for topic and review queries.
 			if ( get_query_var( 'wporg_single_user_reviews' ) ) {
 				$args['post_parent'] = Plugin::REVIEWS_FORUM_ID;
-			} elseif ( bbp_is_single_user_topics() || get_query_var( 'wporg_single_user_active_topics' ) ) {
+			} elseif ( bbp_is_single_user_topics() ) {
 				$args['post_parent__not_in'] = array( Plugin::REVIEWS_FORUM_ID );
-			}
-
-		// Rosetta forums.
-		} else {
-
-			// Only look at the last year of topics for user's "Active Topics" view.
-			// For the main forums, the same is done in Performance_Optimizations::has_topics().
-			if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
-				$args['date_query'] = array( array(
-					'after' => '1 year ago',
-				) );
 			}
 		}
 
@@ -220,8 +197,8 @@ class Users {
 	}
 
 	/**
-	 * Set 'base' argument for pagination links on user's "Reviews Written",
-	 * "Active Topics", and "Topics Replied To" pages.
+	 * Set 'base' argument for pagination links on user's "Reviews Written"
+	 * and "Topics Replied To" views.
 	 *
 	 * @param array $args Pagination arguments.
 	 * @return array Filtered pagination arguments.
@@ -229,11 +206,6 @@ class Users {
 	public function parse_user_topics_pagination_args( $args ) {
 		if ( get_query_var( 'wporg_single_user_reviews' ) ) {
 			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'reviews/';
-			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
-		}
-
-		if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
-			$args['base']  = bbp_get_user_profile_url( bbp_get_displayed_user_id() ) . 'active/';
 			$args['base'] .= bbp_get_paged_slug() . '/%#%/';
 		}
 
@@ -246,8 +218,7 @@ class Users {
 	}
 
 	/**
-	 * Set title for user's "Reviews Written", "Active Topics",
-	 * and "Topics Replied To" pages.
+	 * Set title for user's "Reviews Written" and "Topics Replied To" views.
 	 *
 	 * @param array $title Title parts.
 	 * @return array Filtered title parts.
@@ -260,16 +231,6 @@ class Users {
 				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
 				/* translators: user's display name */
 				$title['format'] = __( "%s's Reviews Written", 'wporg-forums' );
-			}
-		}
-
-		if ( get_query_var( 'wporg_single_user_active_topics' ) ) {
-			if ( bbp_is_user_home() ) {
-				$title['text'] = __( 'Your Active Topics', 'wporg-forums' );
-			} else {
-				$title['text'] = get_userdata( bbp_get_user_id() )->display_name;
-				/* translators: user's display name */
-				$title['format'] = __( "%s's Active Topics", 'wporg-forums' );
 			}
 		}
 

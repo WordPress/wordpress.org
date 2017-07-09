@@ -19,7 +19,7 @@ class Plugin {
 	/**
 	 * @var int Plugin DB revision, increments when changes are made to rewrite rules.
 	 */
-	private static $db_version = 5627;
+	private static $db_version = 5636;
 
 	/**
 	 * Always return the same instance of this plugin.
