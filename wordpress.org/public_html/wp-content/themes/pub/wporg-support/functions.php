@@ -543,6 +543,24 @@ function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
 add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
 add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
 
+/**
+ * Set 'is_single' query var to true on single replies.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/2551
+ * @see https://bbpress.trac.wordpress.org/ticket/3055
+ *
+ * @param array $args Theme compat query vars.
+ * @return array
+ */
+function wporg_support_set_is_single_on_single_replies( $args ) {
+	if ( bbp_is_single_reply() ) {
+		$args['is_single'] = true;
+	}
+
+	return $args;
+}
+add_filter( 'bbp_after_theme_compat_reset_post_parse_args', 'wporg_support_set_is_single_on_single_replies' );
+
 
 /** bb Base *******************************************************************/
 

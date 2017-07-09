@@ -39,7 +39,7 @@
 
 			<?php do_action( 'wporg_compat_view_sidebar' ); ?>
 
-		<?php elseif ( bbp_is_single_topic() || bbp_is_topic_edit() || bbp_is_reply_edit() ) : ?>
+		<?php elseif ( bbp_is_single_topic() || bbp_is_topic_edit() || bbp_is_single_reply() || bbp_is_reply_edit() ) : ?>
 
 			<?php do_action( 'wporg_compat_single_topic_sidebar_pre' ); ?>
 
