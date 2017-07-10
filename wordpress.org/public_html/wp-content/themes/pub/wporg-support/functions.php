@@ -77,6 +77,21 @@ function wporg_support_breadcrumb() {
 add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
 
 /**
+ * Customize arguments for Subscribe/Unsubscribe link.
+ *
+ * Removes '&nbsp;|&nbsp;' separator added by BBP_Default::ajax_subscription().
+ *
+ * @param array $args Arguments passed to bbp_get_user_subscribe_link().
+ * @return array Filtered arguments.
+ */
+function wporg_support_subscribe_link( $args ) {
+	$args['before'] = '';
+
+	return $args;
+}
+add_filter( 'bbp_after_get_user_subscribe_link_parse_args', 'wporg_support_subscribe_link' );
+
+/**
  * Register these bbPress views:
  *  View: All topics
  *  View: Tagged modlook
