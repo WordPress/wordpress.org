@@ -2656,8 +2656,8 @@ section {
 	color: #0073aa;
 }
 
-.bbpress #bbpress-forums .bbp-topic-content div.bbp-template-notice,
-.bbpress #bbpress-forums .bbp-reply-content div.bbp-template-notice {
+.bbpress #bbpress-forums .bbp-topic-content > div.bbp-template-notice,
+.bbpress #bbpress-forums .bbp-reply-content > div.bbp-template-notice {
 	margin-bottom: 30px;
 }
 
@@ -2789,6 +2789,7 @@ section {
 .bbpress #bbpress-forums .bbp-topic-ip,
 .bbpress #bbpress-forums .bbp-reply-post-date,
 .bbpress #bbpress-forums .bbp-reply-ip,
+.bbpress #bbpress-forums .wporg-bbp-user-notes-toggle,
 .bbpress #bbpress-forums .wporg-bbp-user-flag {
 	font-size: 0.8rem;
 	font-weight: normal;

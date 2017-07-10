@@ -146,8 +146,8 @@ section {
 			}
 		}
 
-		.bbp-topic-content div.bbp-template-notice,
-		.bbp-reply-content div.bbp-template-notice {
+		.bbp-topic-content > div.bbp-template-notice,
+		.bbp-reply-content > div.bbp-template-notice {
 			margin-bottom: 30px;
 		}
 
@@ -276,6 +276,7 @@ section {
 		.bbp-topic-ip,
 		.bbp-reply-post-date,
 		.bbp-reply-ip,
+		.wporg-bbp-user-notes-toggle,
 		.wporg-bbp-user-flag {
 			font-size: ms(-2);
 			font-weight: normal;
