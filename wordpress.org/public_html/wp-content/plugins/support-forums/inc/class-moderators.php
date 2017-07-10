@@ -120,7 +120,7 @@ class Moderators {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'moderate' ) ) {
-			wp_enqueue_style( 'support-forums-moderators', plugins_url( 'css/styles-moderators.css', __DIR__ ) );
+			wp_enqueue_style( 'support-forums-moderators', plugins_url( 'css/styles-moderators.css', __DIR__ ), array(), '20170710' );
 		}
 	}
 

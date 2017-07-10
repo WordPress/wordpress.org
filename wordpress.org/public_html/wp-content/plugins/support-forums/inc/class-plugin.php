@@ -38,6 +38,7 @@ class Plugin {
 	 */
 	private function __construct() {
 		$this->users       = new Users;
+		$this->user_notes  = new User_Notes;
 		$this->moderators  = new Moderators;
 		$this->hooks       = new Hooks;
 

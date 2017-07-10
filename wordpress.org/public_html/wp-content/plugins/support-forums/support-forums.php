@@ -16,6 +16,7 @@ namespace WordPressdotorg\Forums;
 // General includes.
 include( dirname( __FILE__ ) . '/inc/class-plugin.php' );
 include( dirname( __FILE__ ) . '/inc/class-users.php' );
+include( dirname( __FILE__ ) . '/inc/class-user-notes.php' );
 include( dirname( __FILE__ ) . '/inc/class-moderators.php' );
 include( dirname( __FILE__ ) . '/inc/class-hooks.php' );
 
