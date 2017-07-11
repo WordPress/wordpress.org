@@ -99,6 +99,7 @@ class User_Notes {
 			'text'      => $note_text,
 			'date'      => current_time( 'mysql' ),
 			'post_id'   => $post_id,
+			'site_id'   => get_current_blog_id(),
 			'moderator' => wp_get_current_user()->user_nicename
 		);
 
@@ -211,10 +212,13 @@ class User_Notes {
 	 * to user profile.
 	 *
 	 * @param int $post_id Post ID. Default 0.
-	 * @param int $user_id User ID. Defaults to the current post author.
+	 * @param int $user_id User ID. Default 0.
+	 * @param int $site_id Site ID. Default 0.
 	 * @return string Post permalink or user profile URL.
 	 */
-	function get_user_note_post_permalink( $post_id = 0, $user_id = 0 ) {
+	function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
+		switch_to_blog( $site_id );
+
 		$post_type = $post_id ? get_post_type( $post_id ) : '';
 
 		if ( 'topic' === $post_type ) {
@@ -226,6 +230,8 @@ class User_Notes {
 		} else {
 			$permalink = bbp_get_user_profile_url( $user_id ) . '#user-notes';
 		}
+
+		restore_current_blog();
 
 		return $permalink;
 	}
@@ -249,8 +255,9 @@ class User_Notes {
 				$this->moderators[ $moderator ] = $moderator;
 			}
 
-			$post_permalink     = $this->get_user_note_post_permalink( $note->post_id, $user_id );
-			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id );
+			$post_site_id       = isset( $note->site_id ) ? (int) $note->site_id : get_current_blog_id();
+			$post_permalink     = $this->get_user_note_post_permalink( $note->post_id, $user_id, $post_site_id );
+			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id, get_current_blog_id() );
 
 			printf( '<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
 				wp_kses( $note->text, array( 'a' => array( 'href' => true ) ) ),
