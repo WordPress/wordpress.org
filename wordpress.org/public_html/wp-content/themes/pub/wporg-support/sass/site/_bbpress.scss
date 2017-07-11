@@ -555,6 +555,12 @@ fieldset.bbp-form .button.submit {
 	}
 }
 
+.rtl .viewmore {
+	&:after {
+		content: "\f341";
+	}
+}
+
 
 
 /*--------------------------------------------------------------

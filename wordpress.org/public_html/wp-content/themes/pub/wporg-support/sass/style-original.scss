@@ -7,7 +7,11 @@ body {
 	background: #fff;
 }
 
-/* Override style from bbpress.org */
+/* Override styles from bbpress.org */
+body {
+	text-align: left;
+}
+
 body:not(.trac):not(.home-page) #main {
 	margin-top: 2rem;
 }
@@ -22,7 +26,7 @@ a:hover {
 }
 
 /**
-* 2.0 Accesability
+* 2.0 Accesibility
 */
 
 .hidden,
@@ -215,6 +219,13 @@ div.bbp-template-notice.warning {
 }
 
 /* Sidebar */
+.sidebar .forum-info li:before,
+.sidebar .topic-info li:before,
+.sidebar div ul li a:before {
+	float: left;
+	margin-right: 5px;
+}
+
 .sidebar .topic-info li.reply-count:before,
 .sidebar .forum-info li.reply-count:before {
 	content: "\f125";

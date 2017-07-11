@@ -244,7 +244,11 @@ body {
 	background: #fff;
 }
 
-/* Override style from bbpress.org */
+/* Override styles from bbpress.org */
+body {
+	text-align: right;
+}
+
 body:not(.trac):not(.home-page) #main {
 	margin-top: 2rem;
 }
@@ -259,7 +263,7 @@ a:hover {
 }
 
 /**
-* 2.0 Accesability
+* 2.0 Accesibility
 */
 .hidden,
 #accessibility {
@@ -407,6 +411,13 @@ div.bbp-template-notice.warning {
 }
 
 /* Sidebar */
+.sidebar .forum-info li:before,
+.sidebar .topic-info li:before,
+.sidebar div ul li a:before {
+	float: right;
+	margin-left: 5px;
+}
+
 .sidebar .topic-info li.reply-count:before,
 .sidebar .forum-info li.reply-count:before {
 	content: "\f125";
@@ -3051,6 +3062,10 @@ section {
 	position: absolute;
 	top: 1px;
 	left: 0;
+}
+
+.rtl .viewmore:after {
+	content: "\f341";
 }
 
 /*--------------------------------------------------------------
