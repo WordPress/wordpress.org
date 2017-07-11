@@ -36,8 +36,8 @@ class User_Notes {
 		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'add_user_notes_toggle_link' ) );
 		add_action( 'bbp_theme_after_reply_author_details', array( $this, 'add_user_notes_toggle_link' ) );
 
-		add_action( 'bbp_theme_after_topic_content',        array( $this, 'display_user_notes_in_content' ) );
-		add_action( 'bbp_theme_after_reply_content',        array( $this, 'display_user_notes_in_content' ) );
+		add_action( 'bbp_theme_before_topic_content',       array( $this, 'display_user_notes_in_content' ) );
+		add_action( 'bbp_theme_before_reply_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_template_after_user_profile',      array( $this, 'display_user_notes_in_profile' ) );
 	}
 
@@ -144,12 +144,7 @@ class User_Notes {
 			return;
 		}
 
-		if ( isset( $user_notes[ $note_id ] ) ) {
-			$post_id = $user_notes[ $note_id ]->post_id;
-			unset( $user_notes[ $note_id ] );
-		} else {
-			$post_id = 0;
-		}
+		unset( $user_notes[ $note_id ] );
 
 		// Reindex the array from 1.
 		if ( $user_notes ) {
