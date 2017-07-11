@@ -5,17 +5,6 @@ namespace WordPressdotorg\Forums;
 class User_Notes {
 
 	/**
-	 * An array of authors who have written notes.
-	 *
-	 * These are stored to avoid looking up user IDs for every note.
-	 *
-	 * @access private
-	 *
-	 * @var array $moderators
-	 */
-	private $moderators = array();
-
-	/**
 	 * An array of all notes for each user.
 	 *
 	 * As users may have written multiple replies in a thread, this will help us
@@ -103,6 +92,15 @@ class User_Notes {
 				'moderator' => wp_get_current_user()->user_nicename
 			);
 		} else {
+			// Only keymasters or the note author can edit a note.
+			if (
+				! current_user_can( 'keep_gate' )
+			&&
+				$user_notes[ $note_id ]->moderator !== wp_get_current_user()->user_nicename
+			) {
+				return;
+			}
+
 			// Save new text for an existing note.
 			$user_notes[ $note_id ]->text = $note_text;
 
@@ -126,7 +124,7 @@ class User_Notes {
 	 * @param string $action Requested action.
 	 */
 	function delete_user_note( $action = '' ) {
-		if ( 'wporg_bbp_delete_user_note' !== $action || ! current_user_can( 'moderate' ) ) {
+		if ( 'wporg_bbp_delete_user_note' !== $action || ! current_user_can( 'keep_gate' ) ) {
 			return;
 		}
 
@@ -258,12 +256,6 @@ class User_Notes {
 		$current_post_type = get_post_type();
 
 		foreach ( $user_notes as $key => $note ) {
-			$moderator = $note->moderator;
-
-			if ( ! isset( $this->moderators[ $moderator ] ) ) {
-				$this->moderators[ $moderator ] = $moderator;
-			}
-
 			$post_site_id       = isset( $note->site_id ) ? (int) $note->site_id : get_current_blog_id();
 			$post_permalink     = $this->get_user_note_post_permalink( $note->post_id, $user_id, $post_site_id );
 			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id, get_current_blog_id() );
@@ -272,8 +264,8 @@ class User_Notes {
 				/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
 				'author' => sprintf( __( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
 					sprintf( '<a href="%s">%s</a>',
-						esc_url( get_home_url( $post_site_id, "/users/$moderator/" ) ),
-						$moderator
+						esc_url( get_home_url( $post_site_id, "/users/{$note->moderator}/" ) ),
+						$note->moderator
 					),
 					esc_url( $post_permalink ),
 					/* translators: localized date format, see https://secure.php.net/date */
@@ -283,8 +275,12 @@ class User_Notes {
 				)
 			);
 
-			if ( $post_site_id == get_current_blog_id() ) {
-
+			// Only keymasters or the note author can edit a note.
+			if (
+				current_user_can( 'keep_gate' ) && $post_site_id == get_current_blog_id()
+			||
+				$note->moderator === wp_get_current_user()->user_nicename
+			) {
 				$note_meta['edit'] = sprintf( '<a href="%s">%s</a>',
 					esc_url(
 						add_query_arg( array(
@@ -295,7 +291,10 @@ class User_Notes {
 					),
 					__( 'Edit', 'wporg-forums' )
 				);
+			}
 
+			// Only keymasters can delete a note.
+			if ( current_user_can( 'keep_gate' ) && $post_site_id == get_current_blog_id() ) {
 				$note_meta['delete'] = sprintf( '<a href="%s">%s</a>',
 					esc_url( wp_nonce_url(
 						add_query_arg( array(
@@ -307,7 +306,6 @@ class User_Notes {
 					) ),
 					__( 'Delete', 'wporg-forums' )
 				);
-
 			}
 
 			printf( '<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
