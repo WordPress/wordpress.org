@@ -207,7 +207,7 @@ class User_Notes {
 			esc_attr( get_the_ID() ),
 			esc_html(
 				/* translators: %d: user notes count */
-				sprintf( __( 'Toggle user notes (%d)', 'wporg-forums' ),
+				sprintf( __( 'User Notes (%d)', 'wporg-forums' ),
 					count( $this->get_user_notes() )
 				)
 			)
