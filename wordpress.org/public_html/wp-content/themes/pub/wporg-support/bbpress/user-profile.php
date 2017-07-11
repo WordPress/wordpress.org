@@ -13,9 +13,11 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 	<h2 class="entry-title"><?php esc_html_e( 'Profile', 'wporg-forums' ); ?></h2>
 	<div class="bbp-user-section"><?php
 		if ( current_user_can( 'moderate' ) && class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) {
-			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( bbp_get_displayed_user_id() );
-			$moderator       = get_user_meta( bbp_get_displayed_user_id(), WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
-			$moderation_date = get_user_meta( bbp_get_displayed_user_id(), WordPressdotorg\Forums\User_Moderation\Plugin::MODERATION_DATE_META, true );
+			$displayed_user_id = bbp_get_displayed_user_id();
+			$plugin_instance   = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance();
+			$is_user_flagged   = $plugin_instance->is_user_flagged( $displayed_user_id );
+			$moderator         = get_user_meta( $displayed_user_id, $plugin_instance::MODERATOR_META, true );
+			$moderation_date   = get_user_meta( $displayed_user_id, $plugin_instance::MODERATION_DATE_META, true );
 
 			if ( $is_user_flagged ) {
 				if ( $moderator && $moderation_date ) {

@@ -386,21 +386,22 @@ function wporg_support_get_compat_object() {
  * Display a notice for messages caught in the moderation queue.
  */
 function wporg_support_add_moderation_notice() {
-	$post_time       = mysql2date( 'U', get_post_field( 'post_date', get_the_ID() ) );
-	$seconds_passed  = current_time( 'timestamp' ) - $post_time;
-	$hours_passed    = (int) ( $seconds_passed / HOUR_IN_SECONDS );
-	$post_status     = get_post_status();
-	$is_moderator    = current_user_can( 'moderate', get_the_ID() );
+	$post            = get_post();
+	$post_time       = mysql2date( 'U', $post->post_date );
+
+	$hours_passed    = (int) ( ( current_time( 'timestamp' ) - $post_time ) / HOUR_IN_SECONDS );
+	$is_moderator    = current_user_can( 'moderate', $post->ID );
 	$is_user_blocked = ! current_user_can( 'spectate' );
+
 	$notice_class    = '';
 	$notices         = array();
 
-	if ( $is_moderator && in_array( $post_status, array( 'archived', 'pending', 'spam' ) ) ) :
+	if ( $is_moderator && in_array( $post->post_status, array( 'archived', 'pending', 'spam' ) ) ) :
 
-		if ( 'spam' === $post_status ) {
+		if ( 'spam' === $post->post_status ) {
 			$notice_class = 'warning';
 
-			$reporter = get_post_meta( get_the_ID(), '_bbp_akismet_user', true );
+			$reporter = get_post_meta( $post->ID, '_bbp_akismet_user', true );
 
 			if ( $reporter ) {
 				/* translators: %s: reporter's username */
@@ -408,8 +409,8 @@ function wporg_support_add_moderation_notice() {
 			} else {
 				$notices[] = __( 'This post has been flagged as spam.', 'wporg-forums' );
 			}
-		} elseif ( 'archived' === $post_status ) {
-			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
+		} elseif ( 'archived' === $post->post_status ) {
+			$moderator = get_post_meta( $post->ID, '_wporg_bbp_moderator', true );
 
 			if ( $moderator ) {
 				/* translators: %s: moderator's username */
@@ -418,7 +419,7 @@ function wporg_support_add_moderation_notice() {
 				$notices[] = __( 'This post is currently archived.', 'wporg-forums' );
 			}
 		} else {
-			$moderator = get_post_meta( get_the_ID(), '_wporg_bbp_moderator', true );
+			$moderator = get_post_meta( $post->ID, '_wporg_bbp_moderator', true );
 
 			if ( $moderator ) {
 				/* translators: %s: moderator's username */
@@ -429,9 +430,10 @@ function wporg_support_add_moderation_notice() {
 		}
 
 		if ( class_exists( 'WordPressdotorg\Forums\User_Moderation\Plugin' ) ) :
-			$is_user_flagged = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance()->is_user_flagged( get_post()->post_author );
-			$moderator       = get_user_meta( get_post()->post_author, WordPressdotorg\Forums\User_Moderation\Plugin::MODERATOR_META, true );
-			$moderation_date = get_user_meta( get_post()->post_author, WordPressdotorg\Forums\User_Moderation\Plugin::MODERATION_DATE_META, true );
+			$plugin_instance = WordPressdotorg\Forums\User_Moderation\Plugin::get_instance();
+			$is_user_flagged = $plugin_instance->is_user_flagged( $post->post_author );
+			$moderator       = get_user_meta( $post->post_author, $plugin_instance::MODERATOR_META, true );
+			$moderation_date = get_user_meta( $post->post_author, $plugin_instance::MODERATION_DATE_META, true );
 
 			if ( $is_user_flagged ) {
 				if ( $moderator && $moderation_date ) {
@@ -456,7 +458,7 @@ function wporg_support_add_moderation_notice() {
 			}
 		endif;
 
-	elseif ( in_array( $post_status, array( 'pending', 'spam' ) ) ) :
+	elseif ( in_array( $post->post_status, array( 'pending', 'spam' ) ) ) :
 
 		if ( $is_user_blocked ) {
 			// Blocked users get a generic message with no call to action or moderation timeframe.
