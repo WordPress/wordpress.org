@@ -271,7 +271,10 @@ class User_Notes {
 			$note_meta = array(
 				/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
 				'author' => sprintf( __( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
-					sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
+					sprintf( '<a href="%s">%s</a>',
+						esc_url( get_home_url( $post_site_id, "/users/$moderator/" ) ),
+						$moderator
+					),
 					esc_url( $post_permalink ),
 					/* translators: localized date format, see https://secure.php.net/date */
 					mysql2date( __( 'F j, Y', 'wporg-forums' ), $note->date ),
