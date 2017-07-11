@@ -90,18 +90,27 @@ class User_Notes {
 		}
 
 		$edit_note = isset( $user_notes[ $note_id ] );
+
 		if ( ! $edit_note ) {
 			$note_id = count( $user_notes ) + 1;
-		}
 
-		// Add the new note to the array of notes.
-		$user_notes[ $note_id ] = (object) array(
-			'text'      => $note_text,
-			'date'      => current_time( 'mysql' ),
-			'post_id'   => $post_id,
-			'site_id'   => get_current_blog_id(),
-			'moderator' => wp_get_current_user()->user_nicename
-		);
+			// Add the new note to the array of notes.
+			$user_notes[ $note_id ] = (object) array(
+				'text'      => $note_text,
+				'date'      => current_time( 'mysql' ),
+				'post_id'   => $post_id,
+				'site_id'   => get_current_blog_id(),
+				'moderator' => wp_get_current_user()->user_nicename
+			);
+		} else {
+			// Save new text for an existing note.
+			$user_notes[ $note_id ]->text = $note_text;
+
+			// Add site ID if missing.
+			if ( ! isset( $user_notes[ $note_id ]->site_id ) ) {
+				$user_notes[ $note_id ]->site_id = get_current_blog_id();
+			}
+		}
 
 		update_user_meta( $user_id, '_wporg_bbp_user_notes', $user_notes );
 
@@ -259,39 +268,49 @@ class User_Notes {
 			$post_permalink     = $this->get_user_note_post_permalink( $note->post_id, $user_id, $post_site_id );
 			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id, get_current_blog_id() );
 
+			$note_meta = array(
+				/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
+				'author' => sprintf( __( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
+					sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
+					esc_url( $post_permalink ),
+					/* translators: localized date format, see https://secure.php.net/date */
+					mysql2date( __( 'F j, Y', 'wporg-forums' ), $note->date ),
+					/* translators: localized time format, see https://secure.php.net/date */
+					mysql2date( __( 'g:i a', 'wporg-forums' ), $note->date )
+				)
+			);
+
+			if ( $post_site_id == get_current_blog_id() ) {
+
+				$note_meta['edit'] = sprintf( '<a href="%s">%s</a>',
+					esc_url(
+						add_query_arg( array(
+							'action'  => 'wporg_bbp_edit_user_note',
+							'user_id' => $user_id,
+							'note_id' => $key,
+						), $post_permalink )
+					),
+					__( 'Edit', 'wporg-forums' )
+				);
+
+				$note_meta['delete'] = sprintf( '<a href="%s">%s</a>',
+					esc_url( wp_nonce_url(
+						add_query_arg( array(
+							'action'  => 'wporg_bbp_delete_user_note',
+							'user_id' => $user_id,
+							'note_id' => $key,
+						), $redirect_on_delete ),
+						sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $key )
+					) ),
+					__( 'Delete', 'wporg-forums' )
+				);
+
+			}
+
 			printf( '<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
 				wp_kses( $note->text, array( 'a' => array( 'href' => true ) ) ),
-				sprintf( '<p class="wporg-bbp-user-note-meta">%s | %s | %s</p>' . "\n",
-					/* translators: 1: author's display name, 2: link to post, 3: user note date, 4: user note time */
-					sprintf( __( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
-						sprintf( '<a href="%s">%s</a>', esc_url( home_url( "/users/$moderator/" ) ), $moderator ),
-						esc_url( $post_permalink ),
-						/* translators: localized date format, see https://secure.php.net/date */
-						mysql2date( __( 'F j, Y', 'wporg-forums' ), $note->date ),
-						/* translators: localized time format, see https://secure.php.net/date */
-						mysql2date( __( 'g:i a', 'wporg-forums' ), $note->date )
-					),
-					sprintf( '<a href="%s">%s</a>',
-						esc_url(
-							add_query_arg( array(
-								'action'  => 'wporg_bbp_edit_user_note',
-								'user_id' => $user_id,
-								'note_id' => $key,
-							), $post_permalink )
-						),
-						__( 'Edit', 'wporg-forums' )
-					),
-					sprintf( '<a href="%s">%s</a>',
-						esc_url( wp_nonce_url(
-							add_query_arg( array(
-								'action'  => 'wporg_bbp_delete_user_note',
-								'user_id' => $user_id,
-								'note_id' => $key,
-							), $redirect_on_delete ),
-							sprintf( 'wporg-bbp-delete-user-note_%d_%d', $user_id, $key )
-						) ),
-						__( 'Delete', 'wporg-forums' )
-					)
+				sprintf( '<p class="wporg-bbp-user-note-meta">%s</p>' . "\n",
+					implode( ' | ', $note_meta )
 				)
 			);
 
