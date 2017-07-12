@@ -11,6 +11,7 @@ class Hooks {
 		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
 
 		// Gravatar suppression on lists of topics and revision logs.
 		add_filter( 'bbp_after_get_topic_author_link_parse_args', array( $this, 'get_author_link' ) );
@@ -117,6 +118,32 @@ class Hooks {
 		}
 
 		return $redirect_url;
+	}
+
+	/**
+	 * Replace Quicktags' blockquote button to remove extra line breaks
+	 * before and after the tag.
+	 */
+	public function replace_quicktags_blockquote_button() { ?>
+		<script type="text/javascript">
+			if ( 'undefined' !== typeof edButtons && 'undefined' !== QTags ) {
+				// Replace Quicktags' blockquote button.
+				edButtons[40]  = new QTags.TagButton(
+					'block',         // Button HTML ID.
+					'b-quote',       // Button's value="...".
+					'<blockquote>',  // Starting tag.
+					'</blockquote>', // Ending tag.
+					'',              // Deprecated, not used.
+					'',              // Button's title="...".
+					'',              // Quicktags instance.
+					{                // Additional attributes.
+						ariaLabel: quicktagsL10n.blockquote,
+						ariaLabelClose: quicktagsL10n.blockquoteClose
+					}
+				);
+			}
+		</script>
+		<?php
 	}
 
 	/**
