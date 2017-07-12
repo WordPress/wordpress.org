@@ -416,8 +416,14 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 			) );
 			$wp_admin_bar->add_menu( array(
 				'parent' => 'user-topics',
+				'id'     => 'engagements',
+				'title'  => __( 'Engagements' ),
+				'href'   => bbp_get_user_engagements_url( bbp_get_current_user_id() ),
+			) );
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'user-topics',
 				'id'     => 'subscriptions',
-				'title'  => __( 'Subscribed Topics' ),
+				'title'  => __( 'Subscriptions' ),
 				'href'   => bbp_get_subscriptions_permalink( bbp_get_current_user_id() ),
 			) );
 			$wp_admin_bar->add_menu( array(
