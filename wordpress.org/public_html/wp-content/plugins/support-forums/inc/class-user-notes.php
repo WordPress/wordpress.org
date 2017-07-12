@@ -42,7 +42,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Checks if a user note is added and save it to the user's meta data.
+	 * Checks if a user note is added and saves it to user's meta data.
 	 *
 	 * @param string $action Requested action.
 	 */
@@ -194,7 +194,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Adds the toggle link for notes to the author area of a post.
+	 * Adds toggle link for notes to the author area of a post.
 	 */
 	function add_user_notes_toggle_link() {
 		if ( ! current_user_can( 'moderate' ) ) {
@@ -249,7 +249,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Displays notes for a particular user and a form for adding new ones.
+	 * Displays notes for a particular user and a form for adding a new note.
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
 	 */
@@ -337,7 +337,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Displays the form for adding new notes or editing existing notes.
+	 * Displays the form for adding a new note or editing an existing note.
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
 	 */
@@ -385,7 +385,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Displays existing notes and the form for adding new ones after post content
+	 * Displays existing notes and the form for adding a new note before post content
 	 * in topics or replies.
 	 */
 	function display_user_notes_in_content() {
@@ -415,7 +415,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Displays existing notes and the form for adding new ones in user profile.
+	 * Displays existing notes and the form for adding a new note in user profile.
 	 */
 	function display_user_notes_in_profile() {
 		if ( ! current_user_can( 'moderate' ) ) {
