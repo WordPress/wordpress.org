@@ -201,17 +201,20 @@ class User_Notes {
 			return;
 		}
 
+		$user_id = get_the_author_meta( 'ID' );
+		$post_id = get_the_ID();
+
 		// Only keymasters can see notes on moderators.
-		if ( user_can( get_post()->post_author, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
+		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
 			return;
 		}
 
 		printf( '<div class="wporg-bbp-user-notes-toggle"><a href="#" data-post-id="%d">%s</a></div>',
-			esc_attr( get_the_ID() ),
+			esc_attr( $post_id ),
 			esc_html(
 				/* translators: %d: user notes count */
 				sprintf( __( 'User Notes (%d)', 'wporg-forums' ),
-					count( $this->get_user_notes() )
+					count( $this->get_user_notes( $user_id ) )
 				)
 			)
 		);
