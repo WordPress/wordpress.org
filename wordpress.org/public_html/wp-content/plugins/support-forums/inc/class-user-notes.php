@@ -33,7 +33,7 @@ class User_Notes {
 	/**
 	 * Registers scripts and styles.
 	 */
-	function enqueue_scripts() {
+	public function enqueue_scripts() {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
@@ -46,7 +46,7 @@ class User_Notes {
 	 *
 	 * @param string $action Requested action.
 	 */
-	function add_user_note( $action = '' ) {
+	public function add_user_note( $action = '' ) {
 		if ( 'wporg_bbp_add_user_note' !== $action || ! current_user_can( 'moderate' ) ) {
 			return;
 		}
@@ -123,7 +123,7 @@ class User_Notes {
 	 *
 	 * @param string $action Requested action.
 	 */
-	function delete_user_note( $action = '' ) {
+	public function delete_user_note( $action = '' ) {
 		if ( 'wporg_bbp_delete_user_note' !== $action || ! current_user_can( 'keep_gate' ) ) {
 			return;
 		}
@@ -173,7 +173,7 @@ class User_Notes {
 	 * @param int $user_id User ID. Defaults to the current post author.
 	 * @return array Array of user notes.
 	 */
-	function get_user_notes( $user_id = 0 ) {
+	public function get_user_notes( $user_id = 0 ) {
 		if ( ! $user_id ) {
 			$user_id = get_the_author_meta( 'ID' );
 		}
@@ -196,7 +196,7 @@ class User_Notes {
 	/**
 	 * Adds toggle link for notes to the author area of a post.
 	 */
-	function add_user_notes_toggle_link() {
+	public function add_user_notes_toggle_link() {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
@@ -231,7 +231,7 @@ class User_Notes {
 	 * @param int $site_id Site ID. Default 0.
 	 * @return string Post permalink or user profile URL.
 	 */
-	function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
+	public function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
 		switch_to_blog( $site_id );
 
 		$post_type = $post_id ? get_post_type( $post_id ) : '';
@@ -256,7 +256,7 @@ class User_Notes {
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
 	 */
-	function display_user_notes( $user_id = 0 ) {
+	public function display_user_notes( $user_id = 0 ) {
 		$note_id    = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
 		$user_notes = $this->get_user_notes( $user_id );
 		$edit_note  = isset( $user_notes[ $note_id ] );
@@ -344,7 +344,7 @@ class User_Notes {
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
 	 */
-	function display_note_form( $user_id = 0 ) {
+	public function display_note_form( $user_id = 0 ) {
 		if ( ! $user_id ) {
 			$user_id = get_the_author_meta( 'ID' );
 		}
@@ -391,7 +391,7 @@ class User_Notes {
 	 * Displays existing notes and the form for adding a new note before post content
 	 * in topics or replies.
 	 */
-	function display_user_notes_in_content() {
+	public function display_user_notes_in_content() {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
@@ -420,7 +420,7 @@ class User_Notes {
 	/**
 	 * Displays existing notes and the form for adding a new note in user profile.
 	 */
-	function display_user_notes_in_profile() {
+	public function display_user_notes_in_profile() {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
