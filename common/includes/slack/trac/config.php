@@ -48,7 +48,7 @@ class Core extends Trac {
 		'rest-api'           => '#core-restapi',
 		'I18N'               => '#core-i18n',
 		'Media'              => '#core-media',
-		'docs'               => '#docs',
+		'docs'               => '#core-docs',
 		'javascript'         => '#core-js',
 	);
 }

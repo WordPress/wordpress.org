@@ -69,6 +69,9 @@ function get_whitelist() {
 			'voldemortensen',
 			'westonruter',
 		),
+		'core-docs' => array(
+			'drew',
+		),
 		'core-editor' => array(
 			'azaozz',
 			'iseulde',
