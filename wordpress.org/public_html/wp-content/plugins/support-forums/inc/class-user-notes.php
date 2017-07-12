@@ -238,10 +238,16 @@ class User_Notes {
 
 		if ( 'topic' === $post_type ) {
 			$permalink = bbp_get_topic_permalink( $post_id ) . '#post-' . (int) $post_id;
-			$permalink = add_query_arg( 'show_user_notes', $post_id, $permalink );
+			$permalink = add_query_arg( array(
+				'view'            => 'all',
+				'show_user_notes' => $post_id,
+			), $permalink );
 		} elseif ( 'reply' === $post_type ) {
 			$permalink = bbp_get_reply_url( $post_id );
-			$permalink = add_query_arg( 'show_user_notes', $post_id, $permalink );
+			$permalink = add_query_arg( array(
+				'view'            => 'all',
+				'show_user_notes' => $post_id,
+			), $permalink );
 		} else {
 			$permalink = bbp_get_user_profile_url( $user_id ) . '#user-notes';
 		}
