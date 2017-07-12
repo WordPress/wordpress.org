@@ -42,7 +42,7 @@ class User_Notes {
 	}
 
 	/**
-	 * Checks if a note is added to a post and save it to the user's meta data.
+	 * Checks if a user note is added and save it to the user's meta data.
 	 *
 	 * @param string $action Requested action.
 	 */
@@ -198,6 +198,11 @@ class User_Notes {
 	 */
 	function add_user_notes_toggle_link() {
 		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		// Only keymasters can see notes on moderators.
+		if ( user_can( get_post()->post_author, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
 			return;
 		}
 
@@ -391,6 +396,11 @@ class User_Notes {
 		$user_id = get_the_author_meta( 'ID' );
 		$post_id = get_the_ID();
 
+		// Only keymasters can see notes on moderators.
+		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
+			return;
+		}
+
 		$show_user_notes = isset( $_GET['show_user_notes'] ) && (int) $_GET['show_user_notes'] == $post_id;
 
 		$class = 'wporg-bbp-user-notes';
@@ -411,11 +421,18 @@ class User_Notes {
 		if ( ! current_user_can( 'moderate' ) ) {
 			return;
 		}
+
+		$user_id = bbp_get_displayed_user_id();
+
+		// Only keymasters can see notes on moderators.
+		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
+			return;
+		}
 		?>
 		<div class="wporg-bbp-user-notes">
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
-				<?php $this->display_user_notes( bbp_get_displayed_user_id() ); ?>
+				<?php $this->display_user_notes( $user_id ); ?>
 			</div>
 		</div>
 		<?php
