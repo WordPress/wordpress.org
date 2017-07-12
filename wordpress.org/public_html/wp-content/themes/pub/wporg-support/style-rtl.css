@@ -3073,6 +3073,7 @@ section {
 --------------------------------------------------------------*/
 #bbpress-forums fieldset.bbp-form {
 	margin: 0;
+	border: 0;
 }
 
 #bbpress-forums fieldset.bbp-form legend {
