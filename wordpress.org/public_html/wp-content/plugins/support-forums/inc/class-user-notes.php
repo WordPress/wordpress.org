@@ -22,8 +22,8 @@ class User_Notes {
 		add_action( 'bbp_post_request',                     array( $this, 'add_user_note' ) );
 		add_action( 'bbp_get_request',                      array( $this, 'delete_user_note' ) );
 
-		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'add_user_notes_toggle_link' ) );
-		add_action( 'bbp_theme_after_reply_author_details', array( $this, 'add_user_notes_toggle_link' ) );
+		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'display_user_notes_toggle_link' ) );
+		add_action( 'bbp_theme_after_reply_author_details', array( $this, 'display_user_notes_toggle_link' ) );
 
 		add_action( 'bbp_theme_before_topic_content',       array( $this, 'display_user_notes_in_content' ) );
 		add_action( 'bbp_theme_before_reply_content',       array( $this, 'display_user_notes_in_content' ) );
@@ -171,7 +171,13 @@ class User_Notes {
 	 * Retrieves all notes for a particular user.
 	 *
 	 * @param int $user_id User ID. Defaults to the current post author.
-	 * @return array Array of user notes.
+	 * @return array {
+	 *     Array of user notes.
+	 *
+	 *     @type int    $count User notes count.
+	 *     @type array  $raw   Array of raw user notes data.
+	 *     @type string $html  User notes output.
+	 * }
 	 */
 	public function get_user_notes( $user_id = 0 ) {
 		if ( ! $user_id ) {
@@ -188,86 +194,14 @@ class User_Notes {
 			$user_notes = array();
 		}
 
-		$this->user_notes[ $user_id ] = $user_notes;
+		$note_id   = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
+		$edit_note = isset( $user_notes[ $note_id ] );
 
-		return $user_notes;
-	}
-
-	/**
-	 * Adds toggle link for notes to the author area of a post.
-	 */
-	public function add_user_notes_toggle_link() {
-		if ( ! current_user_can( 'moderate' ) ) {
-			return;
-		}
-
-		$user_id = get_the_author_meta( 'ID' );
-		$post_id = get_the_ID();
-
-		// Only keymasters can see notes on moderators.
-		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
-			return;
-		}
-
-		printf( '<div class="wporg-bbp-user-notes-toggle"><a href="#" data-post-id="%d">%s</a></div>',
-			esc_attr( $post_id ),
-			esc_html(
-				/* translators: %d: user notes count */
-				sprintf( __( 'User Notes (%d)', 'wporg-forums' ),
-					count( $this->get_user_notes( $user_id ) )
-				)
-			)
+		$this->user_notes[ $user_id ] = (object) array(
+			'count' => count( $user_notes ),
+			'raw'   => $user_notes,
+			'html'  => '',
 		);
-	}
-
-	/**
-	 * Retrieves permalink to the post associated with a note.
-	 *
-	 * If the note is not associated with a particular post, returns a link
-	 * to user profile.
-	 *
-	 * @param int $post_id Post ID. Default 0.
-	 * @param int $user_id User ID. Default 0.
-	 * @param int $site_id Site ID. Default 0.
-	 * @return string Post permalink or user profile URL.
-	 */
-	public function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
-		switch_to_blog( $site_id );
-
-		$post_type = $post_id ? get_post_type( $post_id ) : '';
-
-		if ( 'topic' === $post_type ) {
-			$permalink = bbp_get_topic_permalink( $post_id ) . '#post-' . (int) $post_id;
-			$permalink = add_query_arg( array(
-				'view'            => 'all',
-				'show_user_notes' => $post_id,
-			), $permalink );
-		} elseif ( 'reply' === $post_type ) {
-			$permalink = bbp_get_reply_url( $post_id );
-			$permalink = add_query_arg( array(
-				'view'            => 'all',
-				'show_user_notes' => $post_id,
-			), $permalink );
-		} else {
-			$permalink = bbp_get_user_profile_url( $user_id ) . '#user-notes';
-		}
-
-		restore_current_blog();
-
-		return $permalink;
-	}
-
-	/**
-	 * Displays notes for a particular user and a form for adding a new note.
-	 *
-	 * @param int $user_id User ID. Defaults to the current post author.
-	 */
-	public function display_user_notes( $user_id = 0 ) {
-		$note_id    = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
-		$user_notes = $this->get_user_notes( $user_id );
-		$edit_note  = isset( $user_notes[ $note_id ] );
-
-		$current_post_type = get_post_type();
 
 		foreach ( $user_notes as $key => $note ) {
 			$post_site_id       = isset( $note->site_id ) ? (int) $note->site_id : get_current_blog_id();
@@ -275,8 +209,9 @@ class User_Notes {
 			$redirect_on_delete = $this->get_user_note_post_permalink( get_the_ID(), $user_id, get_current_blog_id() );
 
 			$note_meta = array(
-				/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
-				'author' => sprintf( __( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
+				'author' => sprintf(
+					/* translators: 1: user note author's display name, 2: link to post, 3: date, 4: time */
+					__( 'By %1$s on <a href="%2$s">%3$s at %4$s</a>', 'wporg-forums' ),
 					sprintf( '<a href="%s">%s</a>',
 						esc_url( get_home_url( $post_site_id, "/users/{$note->moderator}/" ) ),
 						$note->moderator
@@ -322,7 +257,8 @@ class User_Notes {
 				);
 			}
 
-			printf( '<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
+			$this->user_notes[ $user_id ]->html .= sprintf(
+				'<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
 				wp_kses( $note->text, array( 'a' => array( 'href' => true ) ) ),
 				sprintf( '<p class="wporg-bbp-user-note-meta">%s</p>' . "\n",
 					implode( ' | ', $note_meta )
@@ -330,19 +266,63 @@ class User_Notes {
 			);
 
 			if ( $edit_note && $key == $note_id ) {
+				ob_start();
 				$this->display_note_form( $user_id );
+				$this->user_notes[ $user_id ]->html .= ob_get_clean();
 			}
 		}
 
 		if ( ! $user_notes ) {
-			printf( '<div class="bbp-template-notice info"><p>%s</p></div>',
+			$this->user_notes[ $user_id ]->html .= sprintf(
+				'<div class="bbp-template-notice info"><p>%s</p></div>',
 				esc_html__( 'No notes have been added for this user.', 'wporg-forums' )
 			);
 		}
 
 		if ( ! $edit_note ) {
+			ob_start();
 			$this->display_note_form( $user_id );
+			$this->user_notes[ $user_id ]->html .= ob_get_clean();
 		}
+
+		return $this->user_notes[ $user_id ];
+	}
+
+	/**
+	 * Retrieves permalink to the post associated with a note.
+	 *
+	 * If the note is not associated with a particular post, returns a link
+	 * to user profile.
+	 *
+	 * @param int $post_id Post ID. Default 0.
+	 * @param int $user_id User ID. Default 0.
+	 * @param int $site_id Site ID. Default 0.
+	 * @return string Post permalink or user profile URL.
+	 */
+	public function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
+		switch_to_blog( $site_id );
+
+		$post_type = $post_id ? get_post_type( $post_id ) : '';
+
+		if ( 'topic' === $post_type ) {
+			$permalink = bbp_get_topic_permalink( $post_id ) . '#post-' . (int) $post_id;
+			$permalink = add_query_arg( array(
+				'view'            => 'all',
+				'show_user_notes' => $post_id,
+			), $permalink );
+		} elseif ( 'reply' === $post_type ) {
+			$permalink = bbp_get_reply_url( $post_id );
+			$permalink = add_query_arg( array(
+				'view'            => 'all',
+				'show_user_notes' => $post_id,
+			), $permalink );
+		} else {
+			$permalink = bbp_get_user_profile_url( $user_id ) . '#user-notes';
+		}
+
+		restore_current_blog();
+
+		return $permalink;
 	}
 
 	/**
@@ -362,7 +342,7 @@ class User_Notes {
 		}
 
 		$note_id    = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
-		$user_notes = $this->get_user_notes( $user_id );
+		$user_notes = $this->get_user_notes( $user_id )->raw;
 
 		if ( isset( $user_notes[ $note_id ] ) ) {
 			$edit_note    = true;
@@ -394,6 +374,33 @@ class User_Notes {
 	}
 
 	/**
+	 * Displays toggle link for notes to the author area of a post.
+	 */
+	public function display_user_notes_toggle_link() {
+		if ( ! current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$user_id = get_the_author_meta( 'ID' );
+		$post_id = get_the_ID();
+
+		// Only keymasters can see notes on moderators.
+		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
+			return;
+		}
+
+		printf( '<div class="wporg-bbp-user-notes-toggle"><a href="#" data-post-id="%d">%s</a></div>',
+			esc_attr( $post_id ),
+			esc_html(
+				/* translators: %d: user notes count */
+				sprintf( __( 'User Notes (%d)', 'wporg-forums' ),
+					$this->get_user_notes( $user_id )->count
+				)
+			)
+		);
+	}
+
+	/**
 	 * Displays existing notes and the form for adding a new note before post content
 	 * in topics or replies.
 	 */
@@ -418,7 +425,7 @@ class User_Notes {
 		}
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>" id="wporg-bbp-user-notes-<?php echo esc_attr( $post_id ); ?>">
-			<?php $this->display_user_notes( $user_id ); ?>
+			<?php echo $this->get_user_notes( $user_id )->html; ?>
 		</div>
 		<?php
 	}
@@ -441,7 +448,7 @@ class User_Notes {
 		<div class="wporg-bbp-user-notes">
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
-				<?php $this->display_user_notes( $user_id ); ?>
+				<?php echo $this->get_user_notes( $user_id )->html; ?>
 			</div>
 		</div>
 		<?php
