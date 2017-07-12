@@ -124,7 +124,11 @@ class Hooks {
 	 * Replace Quicktags' blockquote button to remove extra line breaks
 	 * before and after the tag.
 	 */
-	public function replace_quicktags_blockquote_button() { ?>
+	public function replace_quicktags_blockquote_button() {
+		if ( ! wp_script_is( 'quicktags' ) ) {
+			return;
+		}
+		?>
 		<script type="text/javascript">
 			if ( 'undefined' !== typeof edButtons && 'undefined' !== QTags ) {
 				// Replace Quicktags' blockquote button.
