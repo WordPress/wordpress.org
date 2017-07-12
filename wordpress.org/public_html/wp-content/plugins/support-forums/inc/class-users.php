@@ -5,22 +5,23 @@ namespace WordPressdotorg\Forums;
 class Users {
 
 	public function __construct() {
-		// Add a Custom Title input to user's profile.
-		add_action( 'bbp_user_edit_after_name', array( $this, 'add_custom_title_input' ) );
+		// Add custom fields to user's profile.
+		add_action( 'bbp_user_edit_after_name',        array( $this, 'add_custom_title_input' ) );
+		add_action( 'bbp_user_edit_after',             array( $this, 'add_auto_topic_subscription_checkbox' ) );
 
-		// Save Custom Title input value.
-		add_action( 'personal_options_update', array( $this, 'save_custom_title' ), 10, 2 );
-		add_action( 'edit_user_profile_update', array( $this, 'save_custom_title' ), 10, 2 );
+		// Save custom field values.
+		add_action( 'personal_options_update',         array( $this, 'save_custom_fields' ), 10, 2 );
+		add_action( 'edit_user_profile_update',        array( $this, 'save_custom_fields' ), 10, 2 );
 
 		// Custom user contact methods.
-		add_filter( 'user_contactmethods', array( $this, 'custom_contact_methods' ) );
+		add_filter( 'user_contactmethods',             array( $this, 'custom_contact_methods' ) );
 
 		// Only allow 3 published topics from a user in the first 24 hours.
-		add_action( 'bbp_new_topic_pre_insert', array( $this, 'limit_new_user_topics' ) );
+		add_action( 'bbp_new_topic_pre_insert',        array( $this, 'limit_new_user_topics' ) );
 
 		// Add query vars and rewrite rules for user's topic and review queries.
-		add_filter( 'query_vars',            array( $this, 'add_query_vars' ) );
-		add_action( 'bbp_add_rewrite_rules', array( $this, 'add_rewrite_rules' ) );
+		add_filter( 'query_vars',                      array( $this, 'add_query_vars' ) );
+		add_action( 'bbp_add_rewrite_rules',           array( $this, 'add_rewrite_rules' ) );
 
 		// Parse user's topic and review queries.
 		add_action( 'parse_query',                     array( $this, 'parse_user_topics_query' ) );
@@ -56,25 +57,40 @@ class Users {
 			return;
 		}
 		
+		$title = get_user_option( 'title', bbp_get_displayed_user_id() );
 		?>
 		<div>
 			<label for="title"><?php esc_html_e( 'Custom Title', 'wporg-forums' ); ?></label>
-			<input type="text" name="title" id="title" value="<?php echo esc_attr( get_user_option( 'title', bbpress()->displayed_user->ID ) ); ?>" class="regular-text" />
+			<input type="text" name="title" id="title" value="<?php echo esc_attr( $title ); ?>" class="regular-text" />
 		</div>
-	<?php
+		<?php
 	}
 
 	/**
-	 * Save Custom Title input value.
+	 * Add an auto topic subscription checkbox to user's profile.
+	 */
+	public function add_auto_topic_subscription_checkbox() {
+		$auto_topic_subscription = get_user_option( 'auto_topic_subscription', bbp_get_displayed_user_id() );
+		?>
+		<p>
+			<input name="auto_topic_subscription" id="auto_topic_subscription" type="checkbox" value="yes" <?php checked( $auto_topic_subscription ); ?> />
+			<label for="auto_topic_subscription"><?php esc_html_e( 'Always notify me via email of follow-up posts in any topics I reply to', 'wporg-forums' ); ?></label>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Save custom field values.
 	 *
 	 * @param int $user_id The user ID.
 	 */
-	public function save_custom_title( $user_id ) {
-		if ( ! current_user_can( 'moderate' ) || ! isset( $_POST['title'] ) ) {
-			return;
+	public function save_custom_fields( $user_id ) {
+		if ( current_user_can( 'moderate' ) && isset( $_POST['title'] ) ) {
+			update_user_option( $user_id, 'title', sanitize_text_field( $_POST['title'] ) );
 		}
 
-		update_user_option( $user_id, 'title', sanitize_text_field( $_POST['title'] ) );
+		$auto_topic_subscription = isset( $_POST['auto_topic_subscription'] );
+		update_user_option( $user_id, 'auto_topic_subscription', $auto_topic_subscription );
 	}
 
 	/**

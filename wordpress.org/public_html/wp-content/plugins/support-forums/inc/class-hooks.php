@@ -50,13 +50,20 @@ class Hooks {
 	}
 
 	/**
-	 * Check "Notify me of follow-up replies via email" checkbox for new topics by default.
+	 * Check "Notify me of follow-up replies via email" box for new topics by default.
+	 *
+	 * If the user has enabled "Always notify me via email of follow-up posts" option
+	 * in their profile, check the box for new replies as well.
 	 *
 	 * @param string $checked Checked value of topic subscription.
 	 * @return string Checked value of topic subscription.
 	 */
 	public function check_topic_subscription_checkbox( $checked ) {
-		if ( bbp_is_single_forum() || bbp_is_single_view() ) {
+		if (
+			bbp_is_single_forum() || bbp_is_single_view()
+		||
+			get_user_option( 'auto_topic_subscription' )
+		) {
 			$checked = checked( true, true, false );
 		}
 
