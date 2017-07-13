@@ -374,6 +374,10 @@ div.bbp-template-notice.warning {
 	border: 1px solid #dc3232;
 }
 
+div.bbp-template-notice.updated {
+	background: #ecf7ed;
+}
+
 /* Reply button */
 /* Focus outline */
 #bbpress-forums fieldset.bbp-form textarea,
