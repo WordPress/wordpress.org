@@ -71,6 +71,8 @@ function get_whitelist() {
 		),
 		'core-docs' => array(
 			'drew',
+			'kenshino',
+			'omarreiss',
 		),
 		'core-editor' => array(
 			'azaozz',
