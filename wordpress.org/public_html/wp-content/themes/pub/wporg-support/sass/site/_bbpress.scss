@@ -522,21 +522,21 @@ section {
 			margin-top: 0;
 		}
 	}
-}
 
-fieldset.bbp-form .button.submit {
-	@extend .button-primary;
-}
+	fieldset.bbp-form .button.submit {
+		@extend .button-primary;
+	}
 
-.wporg-bbp-term-subscription > a,
-.reviews-submit-link > .btn,
-.subscription-toggle,
-.favorite-toggle {
-	@extend .button;
-}
+	.wporg-bbp-term-subscription > a,
+	.reviews-submit-link > .btn,
+	.subscription-toggle,
+	.favorite-toggle {
+		@extend .button;
+	}
 
-.wporg-bbp-term-subscription {
-	margin-bottom: 1rem;
+	.wporg-bbp-term-subscription {
+		margin-bottom: 1rem;
+	}
 }
 
 .viewmore {
