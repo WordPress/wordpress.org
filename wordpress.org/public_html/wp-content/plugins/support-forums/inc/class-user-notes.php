@@ -384,6 +384,11 @@ class User_Notes {
 		$user_id = get_the_author_meta( 'ID' );
 		$post_id = get_the_ID();
 
+		// Notes are only displayed for other users.
+		if ( $user_id == get_current_user_id() ) {
+			return;
+		}
+
 		// Only keymasters can see notes on moderators.
 		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
 			return;
@@ -412,6 +417,11 @@ class User_Notes {
 		$user_id = get_the_author_meta( 'ID' );
 		$post_id = get_the_ID();
 
+		// Notes are only displayed for other users.
+		if ( $user_id == get_current_user_id() ) {
+			return;
+		}
+
 		// Only keymasters can see notes on moderators.
 		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
 			return;
@@ -439,6 +449,11 @@ class User_Notes {
 		}
 
 		$user_id = bbp_get_displayed_user_id();
+
+		// Notes are only displayed for other users.
+		if ( $user_id == get_current_user_id() ) {
+			return;
+		}
 
 		// Only keymasters can see notes on moderators.
 		if ( user_can( $user_id, 'moderate' ) && ! current_user_can( 'keep_gate' ) ) {
