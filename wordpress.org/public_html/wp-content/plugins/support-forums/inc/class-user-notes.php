@@ -384,8 +384,8 @@ class User_Notes {
 		$user_id = get_the_author_meta( 'ID' );
 		$post_id = get_the_ID();
 
-		// Notes are only displayed for other users.
-		if ( $user_id == get_current_user_id() ) {
+		// Only super admins can see notes on the current user.
+		if ( ! is_super_admin() && $user_id == get_current_user_id() ) {
 			return;
 		}
 
@@ -417,8 +417,8 @@ class User_Notes {
 		$user_id = get_the_author_meta( 'ID' );
 		$post_id = get_the_ID();
 
-		// Notes are only displayed for other users.
-		if ( $user_id == get_current_user_id() ) {
+		// Only super admins can see notes on the current user.
+		if ( ! is_super_admin() && $user_id == get_current_user_id() ) {
 			return;
 		}
 
@@ -450,8 +450,8 @@ class User_Notes {
 
 		$user_id = bbp_get_displayed_user_id();
 
-		// Notes are only displayed for other users.
-		if ( $user_id == get_current_user_id() ) {
+		// Only super admins can see notes on the current user.
+		if ( ! is_super_admin() && $user_id == get_current_user_id() ) {
 			return;
 		}
 
