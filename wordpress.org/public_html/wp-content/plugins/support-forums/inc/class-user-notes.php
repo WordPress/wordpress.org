@@ -258,8 +258,8 @@ class User_Notes {
 			}
 
 			$this->user_notes[ $user_id ]->html .= sprintf(
-				'<div class="bbp-template-notice warning"><p>%s</p> %s</div>' . "\n",
-				make_clickable( wp_kses( $note->text, array( 'a' => array( 'href' => true ) ) ) ),
+				'<div class="bbp-template-notice warning">%s %s</div>' . "\n",
+				apply_filters( 'comment_text', $note->text, null, array() ),
 				sprintf( '<p class="wporg-bbp-user-note-meta">%s</p>' . "\n",
 					implode( ' | ', $note_meta )
 				)
