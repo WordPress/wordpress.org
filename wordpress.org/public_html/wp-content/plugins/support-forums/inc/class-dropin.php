@@ -25,6 +25,14 @@ class Dropin {
 		remove_action( 'bbp_approved_reply',   'bbp_update_reply_walker' );
 		remove_action( 'bbp_unapproved_reply', 'bbp_update_reply_walker' );
 
+		add_action( 'bbp_trashed_reply',       array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_untrashed_reply',     array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_deleted_reply',       array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_spammed_reply',       array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_unspammed_reply',     array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_approved_reply',      array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_unapproved_reply',    array( $this, 'bbp_update_reply_walker' ) );
+
 		// Avoid bbp_update_topic_walker().
 		remove_action( 'bbp_new_topic',  'bbp_update_topic' );
 		remove_action( 'bbp_edit_topic', 'bbp_update_topic' );
@@ -40,6 +48,33 @@ class Dropin {
 		if ( is_admin() ) {
 			remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
 		}
+	}
+
+	/**
+	 * Handle only the necessary meta stuff from trashing/untrashing, deleting,
+	 * spamming/unspamming, and approving/unapproving a reply.
+	 *
+	 * @param int $reply_id Reply ID.
+	 */
+	function bbp_update_reply_walker( $reply_id ) {
+		// Get the topic ID
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+
+		// Make every effort to get topic id
+		// https://bbpress.trac.wordpress.org/ticket/2529
+		if ( empty( $topic_id ) && ( current_filter() === 'bbp_deleted_reply' ) ) {
+			$topic_id = get_post_field( 'post_parent', $reply_id );
+		}
+
+		// Last reply and active ID's
+		bbp_update_topic_last_reply_id( $topic_id );
+		bbp_update_topic_last_active_id( $topic_id );
+
+		// Get the last active time
+		bbp_update_topic_last_active_time( $topic_id );
+
+		// Counts
+		bbp_update_topic_voice_count( $topic_id );
 	}
 
 	/**
