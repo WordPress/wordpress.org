@@ -464,7 +464,15 @@ class Moderators {
 				$this->store_moderator_username( $post->ID );
 
 				if ( bbp_is_reply( $post->ID ) ) {
-					bbp_increase_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
+					$topic_id = bbp_get_reply_topic_id( $post->ID );
+
+					bbp_update_topic_last_reply_id( $topic_id );
+					bbp_update_topic_last_active_id( $topic_id );
+					bbp_update_topic_last_active_time( $topic_id );
+					bbp_update_topic_voice_count( $topic_id );
+
+					bbp_decrease_topic_reply_count( $topic_id );
+					bbp_increase_topic_reply_count_hidden( $topic_id );
 				} else {
 					bbp_unstick_topic( $post->ID );
 				}
@@ -500,7 +508,15 @@ class Moderators {
 				$this->store_moderator_username( $post->ID );
 
 				if ( bbp_is_reply( $post->ID ) ) {
-					bbp_decrease_topic_reply_count_hidden( bbp_get_reply_topic_id( $post->ID ) );
+					$topic_id = bbp_get_reply_topic_id( $post->ID );
+
+					bbp_update_topic_last_reply_id( $topic_id );
+					bbp_update_topic_last_active_id( $topic_id );
+					bbp_update_topic_last_active_time( $topic_id );
+					bbp_update_topic_voice_count( $topic_id );
+
+					bbp_increase_topic_reply_count( $topic_id );
+					bbp_decrease_topic_reply_count_hidden( $topic_id );
 				}
 
 				return true;
