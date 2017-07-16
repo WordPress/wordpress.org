@@ -36,14 +36,14 @@ class Dropin {
 		// Avoid bbp_update_topic_walker().
 		remove_action( 'bbp_new_topic',  'bbp_update_topic' );
 		remove_action( 'bbp_edit_topic', 'bbp_update_topic' );
-		add_action( 'bbp_new_topic',     array( $this, 'bbp_update_topic' ) );
-		add_action( 'bbp_edit_topic',    array( $this, 'bbp_update_topic' ) );
+		add_action( 'bbp_new_topic',     array( $this, 'bbp_update_topic' ), 10, 5 );
+		add_action( 'bbp_edit_topic',    array( $this, 'bbp_update_topic' ), 10, 5 );
 
 		// Avoid bbp_update_reply_walker().
 		remove_action( 'bbp_new_reply',  'bbp_update_reply' );
 		remove_action( 'bbp_edit_reply', 'bbp_update_reply' );
-		add_action( 'bbp_new_reply',     array( $this, 'bbp_update_reply' ) );
-		add_action( 'bbp_edit_reply',    array( $this, 'bbp_update_reply' ) );
+		add_action( 'bbp_new_reply',     array( $this, 'bbp_update_reply' ), 10, 7 );
+		add_action( 'bbp_edit_reply',    array( $this, 'bbp_update_reply' ), 10, 7 );
 
 		if ( is_admin() ) {
 			remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
