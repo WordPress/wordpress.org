@@ -327,8 +327,7 @@ class Moderators {
 		}
 
 		if ( true === $success ) {
-			$redirect = $this->get_permalink( $post->ID );
-			bbp_redirect( $redirect );
+			bbp_redirect( $permalink );
 		} elseif ( true === $is_archived && 'wporg_bbp_archive_post' === $action ) {
 			bbp_add_error( 'wporg_bbp_archive_post', __( '<strong>ERROR</strong>: There was a problem archiving that post!', 'wporg-forums' ) );
 		} elseif ( false === $is_archived && 'wporg_bbp_unarchive_post' === $action ) {
@@ -541,7 +540,7 @@ class Moderators {
 				$permalink = bbp_get_topic_permalink( $post->ID );
 				break;
 			case 'reply' :
-				$permalink = bbp_get_topic_permalink( bbp_get_reply_topic_id( $post->ID ) );
+				$permalink = bbp_get_reply_url( $post->ID );
 				break;
 			case 'post' :
 			default :
