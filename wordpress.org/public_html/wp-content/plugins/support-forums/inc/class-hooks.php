@@ -11,6 +11,7 @@ class Hooks {
 		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_filter( 'wp_insert_post_data',            array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
 
 		// Gravatar suppression on lists of topics and revision logs.
@@ -118,6 +119,29 @@ class Hooks {
 		}
 
 		return $redirect_url;
+	}
+
+	/**
+	 * Keep the original post date when approving a pending post.
+	 *
+	 * Sets a non-empty 'post_date_gmt' for pending posts to prevent wp_update_post()
+	 * from overwriting the post date on approving.
+	 *
+	 * @param array $data An array of post data.
+	 * @return array Filtered post data.
+	 */
+	public function set_post_date_gmt_for_pending_posts( $data ) {
+		if (
+			in_array( $data['post_type'], array( 'topic', 'reply' ) )
+		&&
+			'pending' === $data['post_status']
+		&&
+			'0000-00-00 00:00:00' === $data['post_date_gmt']
+		) {
+			$data['post_date_gmt'] = get_gmt_from_date( $data['post_date'] );
+		}
+
+		return $data;
 	}
 
 	/**
