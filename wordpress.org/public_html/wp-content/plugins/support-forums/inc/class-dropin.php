@@ -25,13 +25,15 @@ class Dropin {
 		remove_action( 'bbp_approved_reply',   'bbp_update_reply_walker' );
 		remove_action( 'bbp_unapproved_reply', 'bbp_update_reply_walker' );
 
-		add_action( 'bbp_trashed_reply',       array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_untrashed_reply',     array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_deleted_reply',       array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_spammed_reply',       array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_unspammed_reply',     array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_approved_reply',      array( $this, 'bbp_update_reply_walker' ) );
-		add_action( 'bbp_unapproved_reply',    array( $this, 'bbp_update_reply_walker' ) );
+		add_action( 'bbp_trashed_reply',       array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_untrashed_reply',     array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_deleted_reply',       array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_spammed_reply',       array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_unspammed_reply',     array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_approved_reply',      array( $this, 'update_reply_topic_meta' ) );
+		add_action( 'bbp_unapproved_reply',    array( $this, 'update_reply_topic_meta' ) );
+
+		add_action( 'bbp_edit_topic',          array( $this, 'update_old_topic_meta' ) );
 
 		// Avoid bbp_update_topic_walker().
 		remove_action( 'bbp_new_topic',  'bbp_update_topic' );
@@ -56,25 +58,80 @@ class Dropin {
 	 *
 	 * @param int $reply_id Reply ID.
 	 */
-	function bbp_update_reply_walker( $reply_id ) {
-		// Get the topic ID
+	function update_reply_topic_meta( $reply_id ) {
 		$topic_id = bbp_get_reply_topic_id( $reply_id );
 
-		// Make every effort to get topic id
+		// Make every effort to get topic ID.
 		// https://bbpress.trac.wordpress.org/ticket/2529
 		if ( empty( $topic_id ) && ( current_filter() === 'bbp_deleted_reply' ) ) {
 			$topic_id = get_post_field( 'post_parent', $reply_id );
 		}
 
-		// Last reply and active ID's
 		bbp_update_topic_last_reply_id( $topic_id );
 		bbp_update_topic_last_active_id( $topic_id );
-
-		// Get the last active time
 		bbp_update_topic_last_active_time( $topic_id );
-
-		// Counts
 		bbp_update_topic_voice_count( $topic_id );
+	}
+
+	/**
+	 * Adjust the total hidden reply count of a topic (hidden includes trashed,
+	 * spammed, pending, and archived replies).
+	 *
+	 * Extends the native bbPress bbp_update_topic_reply_count_hidden() function
+	 * to include 'archived' status.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3128
+	 *
+	 * @param int $topic_id    Optional. Topic ID to update.
+	 * @param int $reply_count Optional. Set the reply count manually.
+	 * @return int Topic hidden reply count.
+	 */
+	function bbp_update_topic_reply_count_hidden( $topic_id = 0, $reply_count = 0 ) {
+
+		// If it's a reply, then get the parent (topic id)
+		$topic_id = bbp_is_reply( $topic_id )
+			? bbp_get_reply_topic_id( $topic_id )
+			: bbp_get_topic_id( $topic_id );
+
+		// Get replies of topic
+		if ( empty( $reply_count ) ) {
+			$statuses    = array( bbp_get_trash_status_id(), bbp_get_spam_status_id(), bbp_get_pending_status_id(), Moderators::ARCHIVED );
+			$post_status = "'" . implode( "','", $statuses ) . "'";
+			$bbp_db      = bbp_db();
+			$query       = $bbp_db->prepare( "SELECT COUNT(ID) FROM {$bbp_db->posts} WHERE post_parent = %d AND post_status IN ( {$post_status} ) AND post_type = %s", $topic_id, bbp_get_reply_post_type() );
+			$reply_count = $bbp_db->get_var( $query );
+		}
+
+		$reply_count = (int) $reply_count;
+
+		update_post_meta( $topic_id, '_bbp_reply_count_hidden', $reply_count );
+
+		// Filter & return
+		return (int) apply_filters( 'bbp_update_topic_reply_count_hidden', $reply_count, $topic_id );
+	}
+
+	/**
+	 * Update the necessary meta data when editing a topic created before
+	 * 2017-07-17, as those topics can have potentially inaccurate data.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/1971
+	 * @see https://meta.trac.wordpress.org/ticket/2043
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	function update_old_topic_meta( $topic_id ) {
+		// Only run on topics older than 2017-07-17.
+		if ( get_post_field( 'post_date', $topic_id ) >= '2017-07-17' ) {
+			return;
+		}
+
+		bbp_update_topic_last_reply_id( $topic_id );
+		bbp_update_topic_last_active_id( $topic_id );
+		bbp_update_topic_last_active_time( $topic_id );
+		bbp_update_topic_voice_count( $topic_id );
+
+		bbp_update_topic_reply_count( $topic_id );
+		$this->bbp_update_topic_reply_count_hidden( $topic_id );
 	}
 
 	/**
