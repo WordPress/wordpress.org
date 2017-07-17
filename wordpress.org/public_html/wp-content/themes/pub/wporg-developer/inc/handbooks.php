@@ -195,7 +195,7 @@ class Devhub_Handbooks {
 	 */
 	public static function filter_handbook_label( $label, $post_type ) {
 		if ( 'rest-api-handbook' === $post_type ) {
-			$label = 'REST API Handbook';
+			$label = __( 'REST API Handbook', 'wporg' );
 		}
 
 		return $label;
