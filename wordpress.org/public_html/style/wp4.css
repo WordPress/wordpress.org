@@ -1306,6 +1306,10 @@ p.person {
 	list-style: square;
 }
 
+#pagebody .submenu ul {
+	margin-bottom: 0;
+}
+
 a.rsslink {
 	background:url(//s.w.org/style/images/feedicon10.png) top left no-repeat;
 	padding-left: 14px;
