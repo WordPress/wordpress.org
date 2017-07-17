@@ -1133,7 +1133,7 @@ h2.toc-heading + h3.toc-heading:target {
 }
 .menu-table-of-contents-container ul a.active,
 .menu-table-of-contents-container .current-menu-item > a {
-  color: #555 !important;
+  color: #555;
   background-color: #fff;
 }
 .menu-table-of-contents-container > ul > li:last-child {
