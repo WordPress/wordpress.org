@@ -17,7 +17,7 @@ get_header(); ?>
 				<div class="inner-wrap two-columns">
 					<div class="widget box box-left transparent">
 						<h3 class="widget-title"><div class="dashicons dashicons-welcome-widgets-menus"></div><?php _e( 'Themes', 'wporg' ); ?></h3>
-						<p class="widget-description"><?php _e( 'Want to know all there is to know about theming and WordPress?', 'wporg' ); ?></p>
+						<p class="widget-description"><?php _e( 'Want to learn how to start theming WordPress?', 'wporg' ); ?></p>
 						<a href="<?php echo esc_url( get_post_type_archive_link( 'theme-handbook' ) ); ?>" class="themes-go get-started go button"><?php _e( 'Develop Themes ', 'wporg' ); ?><span class="dashicons dashicons-arrow-right-alt2"></span></a>
 					</div>
 					<div class="widget box box-right transparent">
