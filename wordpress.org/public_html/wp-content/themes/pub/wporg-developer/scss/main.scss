@@ -207,13 +207,13 @@
 	}
 
 	@media ( min-width: 43em ) and ( max-width: 915px ) {
-		a.button {
+		.three-columns a.button {
 			max-width: 100%;
 			padding: .6em 1em;
 			font-size: 14px;
 			font-size: 1.4rem;
 		}
-		.dashicons {
+		.three-columns .dashicons {
 			width: 16px;
 			height: 16px;
 			font-size: 16px;
@@ -579,6 +579,8 @@
 				display: block;
 				margin: 0 auto;
 			}
+		}
+		.three-columns .widget-title {
 			@media ( min-width: 43em ) and ( max-width: 915px ) {
 				font-size: 35px;
 				font-size: 3.5rem;
@@ -698,6 +700,8 @@
 		padding: 3rem;
 		float: left;
 		clear: none;
+	}
+	.three-columns .box {
 		@media ( min-width: 43em ) and ( max-width: 915px ) {
 			padding: 30px 20px;
 			padding: 3rem 2rem;

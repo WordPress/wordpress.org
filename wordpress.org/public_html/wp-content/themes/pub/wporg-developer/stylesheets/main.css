@@ -547,13 +547,13 @@ input {
 }
 
 @media (min-width: 43em) and (max-width: 915px) {
-  .devhub-wrap a.button {
+  .devhub-wrap .three-columns a.button {
     max-width: 100%;
     padding: .6em 1em;
     font-size: 14px;
     font-size: 1.4rem;
   }
-  .devhub-wrap .dashicons {
+  .devhub-wrap .three-columns .dashicons {
     width: 16px;
     height: 16px;
     font-size: 16px;
@@ -931,7 +931,7 @@ input {
 }
 
 @media (min-width: 43em) and (max-width: 915px) {
-  .devhub-wrap .section.blue .widget-title {
+  .devhub-wrap .section.blue .three-columns .widget-title {
     font-size: 35px;
     font-size: 3.5rem;
   }
@@ -1057,7 +1057,7 @@ input {
 }
 
 @media (min-width: 43em) and (max-width: 915px) {
-  .devhub-wrap .box {
+  .devhub-wrap .three-columns .box {
     padding: 30px 20px;
     padding: 3rem 2rem;
   }
