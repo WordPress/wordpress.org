@@ -2924,6 +2924,10 @@ section {
 	border-radius: 3px 0 0 3px;
 }
 
+.bbpress #bbpress-forums .bbp-topic-pagination a {
+	border: 1px solid #ddd;
+}
+
 .bbpress #bbpress-forums ul.bbp-forums,
 .bbpress #bbpress-forums ul.bbp-lead-topic,
 .bbpress #bbpress-forums ul.bbp-replies,
