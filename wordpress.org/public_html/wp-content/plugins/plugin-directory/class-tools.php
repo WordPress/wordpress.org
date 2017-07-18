@@ -120,6 +120,9 @@ class Tools {
 				return trim( $plugin, '/' );
 			}, $plugins );
 
+			// Account for rare users with write access to '/'.
+			$plugins = array_filter( $plugins );
+
 			wp_cache_set( $user->user_login, $plugins, 'committer-plugins', 12 * HOUR_IN_SECONDS );
 		}
 
