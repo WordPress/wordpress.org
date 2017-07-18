@@ -47,6 +47,9 @@ class Hooks {
 		add_action( 'bbp_new_reply',  array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 		add_action( 'bbp_edit_reply', array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 
+		// Update topic replies count if the reply status changes on editing.
+		add_filter( 'bbp_edit_reply_pre_insert', array( $this, 'update_replies_count_on_editing_reply' ), 20 );
+
 		// Honor i18n number formatting.
 		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
 	}
@@ -415,6 +418,39 @@ class Hooks {
 				bbp_close_topic( $topic_id );
 			}
 		}
+	}
+
+	/**
+	 * Update topic replies count if the reply status changes on editing.
+	 *
+	 * This is neccesary to properly account for the status change as a result of
+	 * Akismet check or user flagging rather than an explicit moderator action.
+	 *
+	 * @param array $data Reply post data.
+	 * @return array Filtered reply data.
+	 */
+	public function update_replies_count_on_editing_reply( $data ) {
+		// Bail if the reply is not published.
+		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
+			return $data;
+		}
+
+		// Bail if the new status is not pending or spam.
+		if ( ! in_array( $data['post_status'], array( 'pending', 'spam' ) ) ) {
+			return $data;
+		}	
+
+		$topic_id = bbp_get_reply_topic_id( $data['ID'] );
+
+		bbp_update_topic_last_reply_id( $topic_id );
+		bbp_update_topic_last_active_id( $topic_id );
+		bbp_update_topic_last_active_time( $topic_id );
+		bbp_update_topic_voice_count( $topic_id );
+
+		bbp_decrease_topic_reply_count( $topic_id );
+		bbp_increase_topic_reply_count_hidden( $topic_id );
+
+		return $data;
 	}
 
 	/**
