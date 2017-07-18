@@ -188,6 +188,14 @@ function get_whitelist() {
 			'ocean90',
 			'petya',
 		),
+		'polyglots-events' => array(
+			'casiepa',
+			'coachbirgit',
+			'deconf',
+			'nao',
+			'ocean90',
+			'petya',
+		),
 		'themereview' => array(
 			'cais',
 			'chipbennett',
