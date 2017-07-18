@@ -130,6 +130,8 @@ class Hooks {
 	 * Sets a non-empty 'post_date_gmt' for pending posts to prevent wp_update_post()
 	 * from overwriting the post date on approving.
 	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3133
+	 *
 	 * @param array $data An array of post data.
 	 * @return array Filtered post data.
 	 */
