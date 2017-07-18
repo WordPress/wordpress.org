@@ -426,6 +426,8 @@ class Hooks {
 	 * This is neccesary to properly account for the status change as a result of
 	 * Akismet check or user flagging rather than an explicit moderator action.
 	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3132
+	 *
 	 * @param array $data Reply post data.
 	 * @return array Filtered reply data.
 	 */
