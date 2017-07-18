@@ -4,16 +4,9 @@
 
 ( function( $, wp, pluginDirectory ) {
 	var PluginEdit = {
-		$testedWith: {},
 
 		ready: function() {
-			PluginEdit.$testedWith   = $( '#tested-with-select' );
-
-			$( '#submitdiv' )
-				.on( 'click', '.edit-tested-with',     PluginEdit.editTestedWith )
-				.on( 'click', '.save-tested-with',     PluginEdit.updateTestedWith )
-				.on( 'click', '.cancel-tested-with',   PluginEdit.cancelTestedWith )
-				.on( 'click', '.set-plugin-status',    PluginEdit.setPluginStatus );
+			$( '#submitdiv' ).on( 'click', '.set-plugin-status', PluginEdit.setPluginStatus );
 
 			_.each( $( '#post-body' ).find( '.comments-box' ), PluginEdit.loadComments );
 
@@ -37,25 +30,6 @@
 			} );
 
 			$( '#contact-author' ).appendTo( '#plugin-review .inside' );
-		},
-
-		editTestedWith: function() {
-			if ( PluginEdit.$testedWith.is( ':hidden' ) ) {
-				PluginEdit.$testedWith.slideDown( 'fast', function() {
-					$( 'select', PluginEdit.$testedWith ).focus();
-				} );
-				$( this ).hide();
-			}
-		},
-
-		updateTestedWith: function() {
-			PluginEdit.$testedWith.slideUp( 'fast' ).siblings( 'button.edit-tested-with' ).show().focus();
-			$( '#tested-with-display' ).text( $( 'option:selected', PluginEdit.$testedWith ).text() );
-		},
-
-		cancelTestedWith: function() {
-			$( '#tested-with' ).val( $( '#hidden-tested-with' ).val() );
-			PluginEdit.updateTestedWith();
 		},
 
 		setPluginStatus: function() {
@@ -135,6 +109,7 @@
 				$( '#committer-error' ).empty().hide();
 			}
 		}
+
 	};
 
 	$( PluginEdit.ready );
