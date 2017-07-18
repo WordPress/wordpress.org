@@ -37,6 +37,9 @@ class Moderators {
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 		add_filter( 'bbp_reply_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 
+		// Adjust the list of row actions for topics and replies.
+		add_filter( 'post_row_actions',                 array( $this, 'row_actions' ), 11, 2 );
+
 		// Add valid topic and reply actions.
 		add_filter( 'bbp_get_toggle_topic_actions',     array( $this, 'get_topic_actions' ) );
 		add_filter( 'bbp_get_toggle_reply_actions',     array( $this, 'get_reply_actions' ) );
@@ -352,9 +355,9 @@ class Moderators {
 	 * Remove some unneeded or redundant admin links for topics and replies,
 	 * move less commonly used inline quick links to 'Topic Admin' sidebar section.
 	 *
-	 * @param array $r       Admin links array.
+	 * @param array $r       An array of admin links.
 	 * @param int   $post_id Topic or reply ID.
-	 * @return array Filtered admin links array.
+	 * @return array Filtered admin links.
 	 */
 	public function admin_links( $r, $post_id ) {
 		/*
@@ -395,6 +398,29 @@ class Moderators {
 		$r['archive'] = $this->get_archive_link( array( 'post_id' => $post_id ) );
 
 		return $r;
+	}
+
+	/**
+	 * Remove some unneeded or redundant row action links for topics and replies.
+	 *
+	 * @param array   $actions An array of row action links.
+	 * @param WP_Post $post    The post object.
+	 * @return array Filtered row actions links.
+	 */
+	public function row_actions( $actions, $post ) {
+		// Remove 'Trash' link.
+		unset( $actions['trash'] );
+
+		// Remove 'Unapprove' link.
+		unset( $actions['unapproved'] );
+
+		// Remove 'Stick' link for reviews.
+		if ( Plugin::REVIEWS_FORUM_ID == $post->post_parent ) {
+			unset( $actions['stick'] );
+		}
+		
+
+		return $actions;
 	}
 
 	public function get_archive_link( $args = array() ) {
