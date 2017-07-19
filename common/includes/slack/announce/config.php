@@ -187,6 +187,8 @@ function get_whitelist() {
 			'nao',
 			'ocean90',
 			'petya',
+			'sergey',
+			'tobifjellner',
 		),
 		'polyglots-events' => array(
 			'casiepa',
@@ -195,6 +197,8 @@ function get_whitelist() {
 			'nao',
 			'ocean90',
 			'petya',
+			'sergey',
+			'tobifjellner',
 		),
 		'themereview' => array(
 			'cais',
