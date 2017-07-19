@@ -671,6 +671,11 @@ class Plugin_Directory {
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
+			case 'beta':
+				$wp_query->query_vars['meta_key'] = 'last_updated';
+				$wp_query->query_vars['orderby']  = 'meta_value';
+				$wp_query->query_vars['order']    = 'DESC';
+				break;
 			case 'favorites':
 				$favorites_user = wp_get_current_user();
 				if ( ! empty( $wp_query->query_vars['favorites_user'] ) ) {
