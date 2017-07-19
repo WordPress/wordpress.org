@@ -347,7 +347,7 @@ class Plugin_Directory {
 
 		register_meta( 'post', 'downloads', array(
 			'type'              => 'integer',
-			'description'       => __( 'Number of downloads', 'wporg-plugins' ),
+			'description'       => __( 'Number of downloads.', 'wporg-plugins' ),
 			'single'            => true,
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
@@ -368,7 +368,7 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'stable_tag', array(
-			'description'       => __( 'Stable version of the plugin', 'wporg-plugins' ),
+			'description'       => __( 'Stable version of the plugin.', 'wporg-plugins' ),
 			'single'            => true,
 			// TODO 'sanitize_callback' => 'absint',
 			'show_in_rest'      => true,
