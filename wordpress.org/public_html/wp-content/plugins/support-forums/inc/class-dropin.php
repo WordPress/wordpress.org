@@ -34,6 +34,7 @@ class Dropin {
 		add_action( 'bbp_unapproved_reply',    array( $this, 'update_reply_topic_meta' ) );
 
 		add_action( 'bbp_edit_topic',          array( $this, 'update_old_topic_meta' ) );
+		add_action( 'bbp_edit_reply',          array( $this, 'update_old_reply_meta' ) );
 
 		// Avoid bbp_update_topic_walker().
 		remove_action( 'bbp_new_topic',  'bbp_update_topic' );
@@ -132,6 +133,24 @@ class Dropin {
 
 		bbp_update_topic_reply_count( $topic_id );
 		$this->bbp_update_topic_reply_count_hidden( $topic_id );
+	}
+
+	/**
+	 * Update the necessary meta data when editing a reply created before
+	 * 2017-07-17, as those replies can have potentially inaccurate data.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/2110
+	 * @see https://meta.trac.wordpress.org/ticket/2481
+	 *
+	 * @param int $reply_id Reply ID.
+	 */
+	function update_old_reply_meta( $reply_id ) {
+		// Only run on topics older than 2017-07-17.
+		if ( get_post_field( 'post_date', $reply_id ) >= '2017-07-17' ) {
+			return;
+		}
+
+		bbp_update_reply_position( $reply_id );
 	}
 
 	/**
