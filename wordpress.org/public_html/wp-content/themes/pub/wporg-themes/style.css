@@ -702,6 +702,7 @@ body.author .theme-browser .theme .theme-author  {
 	width: 64%;
 	width: -webkit-calc(100% - 88px);
 	width: calc(100% - 88px);
+	overflow: hidden;
 }
 .theme-ratings .counter-bar {
 	background-color: #ffc733;
