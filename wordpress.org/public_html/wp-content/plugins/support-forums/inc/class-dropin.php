@@ -145,8 +145,13 @@ class Dropin {
 	 * @param int $reply_id Reply ID.
 	 */
 	function update_old_reply_meta( $reply_id ) {
-		// Only run on topics older than 2017-07-17.
+		// Only run on replies older than 2017-07-17.
 		if ( get_post_field( 'post_date', $reply_id ) >= '2017-07-17' ) {
+			return;
+		}
+
+		// Don't recaculate position for archived replies.
+		if ( 'archived' === get_post_status( $reply_id ) ) {
 			return;
 		}
 
