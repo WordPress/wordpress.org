@@ -24,3 +24,20 @@ function modify_hooks_after_jetpack_init() {
 }
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\modify_hooks_after_jetpack_init' );
+
+/**
+ * Filter the post types Jetpack has access to, and can synchronize with WordPress.com.
+ *
+ * @see Jetpack's WPCOM_JSON_API_ENDPOINT::_get_whitelisted_post_types();
+ *
+ * @param array $allowed_types Array of whitelisted post types.
+ *
+ * @return array Modified array of whitelisted post types.
+ */
+function add_post_types_to_rest_api( $allowed_types ) {
+	$allowed_types += array( 'wcb_speaker', 'wcb_session', 'wcb_sponsor' );
+
+	return $allowed_types;
+}
+
+add_filter( 'rest_api_allowed_post_types', __NAMESPACE__ . '\add_post_types_to_rest_api' );
