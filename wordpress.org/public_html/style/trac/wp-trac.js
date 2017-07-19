@@ -251,6 +251,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				// Open WikiFormatting links in a new window.
 				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function() {
 					window.open( $( this ).attr( 'href' ) );
+					return false;
 				});
 
 				// Point users to open new tickets when they comment on old tickets.
