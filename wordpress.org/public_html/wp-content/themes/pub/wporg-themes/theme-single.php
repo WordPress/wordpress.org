@@ -37,7 +37,12 @@
 				<?php } ?>
 
 				<div class="theme-meta-info">
-					<p class="updated"><?php printf( __( 'Last updated: %s', 'wporg-themes' ), '<strong>' . date_i18n( 'F j, Y', strtotime( $theme->last_updated ) ) . '</strong>' ); ?></p>
+					<p class="updated">
+						<?php printf( __( 'Last updated: %s', 'wporg-themes' ),
+							/* translators: localized date format, see http://php.net/date */
+							'<strong>' . date_i18n( _x( 'F j, Y', 'last update date format', 'wporg-themes' ), strtotime( $theme->last_updated ) ) . '</strong>'
+						); ?>
+					</p>
 					<?php
 						$active_installs = $theme->active_installs;
 						if ( $active_installs < 10 ) {
