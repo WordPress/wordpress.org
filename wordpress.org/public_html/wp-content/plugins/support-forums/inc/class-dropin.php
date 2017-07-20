@@ -113,7 +113,7 @@ class Dropin {
 
 	/**
 	 * Update the necessary meta data when editing a topic created before
-	 * 2017-07-17, as those topics can have potentially inaccurate data.
+	 * 2017-07-21, as those topics can have potentially inaccurate data.
 	 *
 	 * @see https://meta.trac.wordpress.org/ticket/1971
 	 * @see https://meta.trac.wordpress.org/ticket/2043
@@ -121,8 +121,8 @@ class Dropin {
 	 * @param int $topic_id Topic ID.
 	 */
 	function update_old_topic_meta( $topic_id ) {
-		// Only run on topics older than 2017-07-17.
-		if ( get_post_field( 'post_date', $topic_id ) >= '2017-07-17' ) {
+		// Only run on topics older than 2017-07-21.
+		if ( get_post_field( 'post_date', $topic_id ) >= '2017-07-21' ) {
 			return;
 		}
 

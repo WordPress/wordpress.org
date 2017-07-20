@@ -496,8 +496,10 @@ class Moderators {
 					bbp_update_topic_last_active_time( $topic_id );
 					bbp_update_topic_voice_count( $topic_id );
 
-					bbp_decrease_topic_reply_count( $topic_id );
-					bbp_increase_topic_reply_count_hidden( $topic_id );
+					if ( 'publish' === $post->post_status ) {
+						bbp_decrease_topic_reply_count( $topic_id );
+						bbp_increase_topic_reply_count_hidden( $topic_id );
+					}
 				} else {
 					bbp_unstick_topic( $post->ID );
 				}
@@ -540,8 +542,10 @@ class Moderators {
 					bbp_update_topic_last_active_time( $topic_id );
 					bbp_update_topic_voice_count( $topic_id );
 
-					bbp_increase_topic_reply_count( $topic_id );
-					bbp_decrease_topic_reply_count_hidden( $topic_id );
+					if ( 'publish' === $post_status ) {
+						bbp_increase_topic_reply_count( $topic_id );
+						bbp_decrease_topic_reply_count_hidden( $topic_id );
+					}
 				}
 
 				return true;
