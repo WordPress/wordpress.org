@@ -85,6 +85,7 @@ class Upload_Handler {
 		// Determine the plugin slug based on the name of the plugin in the main plugin file.
 		$this->plugin_slug = remove_accents( $this->plugin['Name'] );
 		$this->plugin_slug = preg_replace( '/[^a-z0-9 _.-]/i', '', $this->plugin_slug );
+		$this->plugin_slug = str_replace( '_', '-', $this->plugin_slug );
 		$this->plugin_slug = sanitize_title_with_dashes( $this->plugin_slug );
 
 		if ( ! $this->plugin_slug ) {
