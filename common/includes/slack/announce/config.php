@@ -54,6 +54,7 @@ function get_whitelist() {
 			'ocean90',
 			'sergey',
 			'wonderboymusic',
+			'welcher',
 		),
 		'core-bootstrap' => array(
 			'schlessera',
