@@ -62,7 +62,7 @@ class User_Notes {
 		}
 
 		// Make sure our nonces are in order.
-		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-add-user-note_%d_%d', $user_id, $post_id ) ) ) {
+		if ( ! bbp_verify_nonce_request( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ) ) ) {
 			return;
 		}
 
@@ -289,6 +289,34 @@ class User_Notes {
 	}
 
 	/**
+	 * Retrieves user notes output for a particular user.
+	 *
+	 * Replaces '###POST_ID###' and '###POST_PERMALINK###' placeholders
+	 * in the note adding/editing form with the current post ID and permalink.
+	 *
+	 * @param int $user_id User ID. Defaults to the current post author.
+	 * @return string User notes output.
+	 */
+	public function get_user_notes_html( $user_id ) {
+		$user_notes = $this->get_user_notes( $user_id )->html;
+
+		if ( ! bbp_is_single_user_profile() ) {
+			$post_id = get_the_ID();
+		} else {
+			$post_id = 0;
+		}
+
+		$post_permalink = $this->get_user_note_post_permalink( $post_id );
+
+		$user_notes = strtr( $user_notes, array(
+			'###POST_ID###'        => esc_attr( $post_id ),
+			'###POST_PERMALINK###' => esc_url( $post_permalink ),
+		) );
+
+		return $user_notes;
+	}
+
+	/**
 	 * Retrieves permalink to the post associated with a note.
 	 *
 	 * If the note is not associated with a particular post, returns a link
@@ -300,7 +328,9 @@ class User_Notes {
 	 * @return string Post permalink or user profile URL.
 	 */
 	public function get_user_note_post_permalink( $post_id = 0, $user_id = 0, $site_id = 0 ) {
-		switch_to_blog( $site_id );
+		if ( $site_id ) {
+			switch_to_blog( $site_id );
+		}
 
 		$post_type = $post_id ? get_post_type( $post_id ) : '';
 
@@ -320,7 +350,9 @@ class User_Notes {
 			$permalink = bbp_get_user_profile_url( $user_id ) . '#user-notes';
 		}
 
-		restore_current_blog();
+		if ( $site_id ) {
+			restore_current_blog();
+		}
 
 		return $permalink;
 	}
@@ -335,12 +367,6 @@ class User_Notes {
 			$user_id = get_the_author_meta( 'ID' );
 		}
 
-		if ( ! bbp_is_single_user_profile() ) {
-			$post_id = get_the_ID();
-		} else {
-			$post_id = 0;
-		}
-
 		$note_id    = isset( $_GET['note_id'] ) ? (int) $_GET['note_id'] : 0;
 		$user_notes = $this->get_user_notes( $user_id )->raw;
 
@@ -353,14 +379,12 @@ class User_Notes {
 			$note_text    = '';
 			$button_label = esc_html__( 'Add your note', 'wporg-forums' );
 		}
-
-		$post_permalink = $this->get_user_note_post_permalink( $post_id );
 		?>
-		<form action="<?php echo esc_url( $post_permalink ); ?>" method="post" class="wporg-bbp-add-user-note">
-			<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d_%d', $user_id, $post_id ) ); ?>
+		<form action="###POST_PERMALINK###" method="post" class="wporg-bbp-add-user-note">
+			<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ) ); ?>
 			<input type="hidden" name="action" value="wporg_bbp_add_user_note">
 			<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
-			<input type="hidden" name="post_id" value="<?php echo esc_attr( $post_id ); ?>">
+			<input type="hidden" name="post_id" value="###POST_ID###">
 			<?php if ( $edit_note ) : ?>
 				<input type="hidden" name="note_id" value="<?php echo esc_attr( $note_id ); ?>">
 			<?php endif; ?>
@@ -435,7 +459,7 @@ class User_Notes {
 		}
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>" id="wporg-bbp-user-notes-<?php echo esc_attr( $post_id ); ?>">
-			<?php echo $this->get_user_notes( $user_id )->html; ?>
+			<?php echo $this->get_user_notes_html( $user_id ); ?>
 		</div>
 		<?php
 	}
@@ -463,7 +487,7 @@ class User_Notes {
 		<div class="wporg-bbp-user-notes">
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
-				<?php echo $this->get_user_notes( $user_id )->html; ?>
+				<?php echo $this->get_user_notes_html( $user_id ); ?>
 			</div>
 		</div>
 		<?php
