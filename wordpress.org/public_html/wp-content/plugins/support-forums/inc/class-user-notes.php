@@ -294,10 +294,10 @@ class User_Notes {
 	 * Replaces '###POST_ID###' and '###POST_PERMALINK###' placeholders
 	 * in the note adding/editing form with the current post ID and permalink.
 	 *
-	 * @param int $user_id User ID. Defaults to the current post author.
+	 * @param int $user_id User ID. Default 0.
 	 * @return string User notes output.
 	 */
-	public function get_user_notes_html( $user_id ) {
+	public function get_user_notes_html( $user_id = 0 ) {
 		$user_notes = $this->get_user_notes( $user_id )->html;
 
 		if ( ! bbp_is_single_user_profile() ) {
