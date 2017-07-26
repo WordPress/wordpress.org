@@ -119,6 +119,19 @@ class Template {
 	}
 
 	/**
+	 * Prints meta description in the head of a page.
+	 *
+	 * @static
+	 */
+	public static function meta_description() {
+		if ( is_singular( 'plugin' ) ) {
+			printf( '<meta name="description" value="%s"/>',
+				esc_attr( get_the_excerpt( get_queried_object() ) )
+			);
+		}
+	}
+
+	/**
 	 * Returns a string representing the number of active installs for an item.
 	 *
 	 * @static

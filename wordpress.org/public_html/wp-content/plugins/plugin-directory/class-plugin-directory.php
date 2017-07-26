@@ -43,6 +43,7 @@ class Plugin_Directory {
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
+		add_action( 'wp_head', array( Template::class, 'meta_description' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 
 		// Cron tasks.
