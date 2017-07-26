@@ -18,6 +18,10 @@
 
 		$( '#committer-list' )
 			.on( 'click', '.remove', function() {
+				if ( ! window.confirm( pluginDir.removeCommitterAYS ) ) {
+					return;
+				}
+
 				var $row = $( this ).addClass( 'spinner' ).parents( 'li' ),
 					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/' + $row.data( 'user' ) + '/?_wpnonce=' + pluginDir.restNonce;
 
