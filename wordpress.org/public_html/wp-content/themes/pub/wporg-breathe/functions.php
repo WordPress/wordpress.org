@@ -150,3 +150,24 @@ function add_screen_reader_text_for_icon_menu_items( $args, $item ) {
 	return $args;
 }
 add_filter( 'nav_menu_item_args', __NAMESPACE__ . '\add_screen_reader_text_for_icon_menu_items', 10, 2 );
+
+/**
+ * Disables Jetpack Mentions on any handbook page or comment.
+ *
+ * More precisely, this prevents the linked mentions from being shown. A more
+ * involved approach (to include clearing meta-cached data) would be needed to
+ * more efficiently prevent mentions from being looked for in the first place.
+ *
+ * @param string $linked  The linked mention.
+ * @param string $mention The term being mentioned.
+ * @return string
+ */
+function disable_mentions_for_handbook( $linked, $mention ) {
+	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() && ! is_single( 'credits' ) ) {
+		return '@' . $mention;
+	}
+
+	return $linked;
+}
+add_filter( 'jetpack_mentions_linked_mention', __NAMESPACE__ . '\disable_mentions_for_handbook', 10, 2 );
+
