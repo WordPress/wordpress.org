@@ -94,14 +94,15 @@ class Locale_Banner extends Base {
 
 				if ( $is_plugin_request ) {
 					$suggest_string = sprintf(
-						$this->translate( 'This plugin is also available in %s.', $locale ),
+						$this->translate( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', $locale ),
 						sprintf(
 							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
 							$current_site->path,
 							$plugin_slug,
 							$language
-						)
+						),
+						esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 					);
 				} else {
 					$suggest_string = sprintf(
@@ -134,7 +135,7 @@ class Locale_Banner extends Base {
 					}
 
 					$suggest_string = sprintf(
-						$this->translate( 'This plugin is also available in %1$s (also: %2$s).', $primary_locale ),
+						$this->translate( 'This plugin is also available in %1$s (also: %2$s). <a href="%3$s">Help improve the translation!</a>', $primary_locale ),
 						sprintf(
 							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
 							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
@@ -142,7 +143,8 @@ class Locale_Banner extends Base {
 							$plugin_slug,
 							$primary_language
 						),
-						trim( $other_suggest, ' ,' )
+						trim( $other_suggest, ' ,' ),
+						esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 					);
 				} else {
 					$other_suggest = '';
