@@ -26,14 +26,16 @@
 	?>
 	<div class="meta">
 		<?php printf(
-			_n( 'Used by <a href="%s">1 function</a>', 'Used by <a href="%s">%d functions</a>', $used_by, 'wporg' ),
-			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
+			/* translators: 1: permalink, 2: number of functions */
+			_n( 'Used by <a href="%1$s">%2$d function</a>', 'Used by <a href="%1$s">%2$d functions</a>', $used_by, 'wporg' ),
+			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#used-by',
 			$used_by
 		); ?>
 		|
 		<?php printf(
-			_n( 'Uses <a href="%s">1 function</a>', 'Uses <a href="%s">%d functions</a>', $uses, 'wporg' ),
-			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#usage',
+			/* translators: 1: permalink, 2: number of functions */
+			_n( 'Uses <a href="%1$s">%2$d function</a>', 'Uses <a href="%1$s">%2$d functions</a>', $uses, 'wporg' ),
+			esc_url( apply_filters( 'the_permalink', get_permalink() ) ) . '#uses',
 			$uses
 		); ?>
 	</div>
