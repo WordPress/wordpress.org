@@ -39,25 +39,25 @@ class Controls {
 	public static function get_status_button_label( $post_status ) {
 		switch ( $post_status ) {
 			case 'approved':
-				$label = __( 'Approve' );
+				$label = __( 'Approve', 'wporg-plugins' );
 				break;
 			case 'rejected':
-				$label = __( 'Reject' );
+				$label = __( 'Reject', 'wporg-plugins' );
 				break;
 			case 'pending':
-				$label = __( 'Mark as Pending' );
+				$label = __( 'Mark as Pending', 'wporg-plugins' );
 				break;
 			case 'publish':
-				$label = __( 'Open' );
+				$label = __( 'Open', 'wporg-plugins' );
 				break;
 			case 'disabled':
-				$label = __( 'Disable' );
+				$label = __( 'Disable', 'wporg-plugins' );
 				break;
 			case 'closed':
-				$label = __( 'Close' );
+				$label = __( 'Close', 'wporg-plugins' );
 				break;
 			default:
-				$label = __( 'Mark as Pending' );
+				$label = __( 'Mark as Pending', 'wporg-plugins' );
 				break;
 		}
 
@@ -85,13 +85,11 @@ class Controls {
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
 			<strong id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong>
 
-			<p>
 			<?php foreach ( $statuses as $status ) : ?>
-				<button type="submit" name="post_status" value="<?php echo esc_attr( $status ); ?>" class="button set-plugin-status">
+				<p><button type="submit" name="post_status" value="<?php echo esc_attr( $status ); ?>" class="button set-plugin-status">
 					<?php echo self::get_status_button_label( $status ); ?>
-				</button>
+				</button></p>
 			<?php endforeach; ?>
-			</p>
 		</div><!-- .misc-pub-section --><?php
 	}
 
