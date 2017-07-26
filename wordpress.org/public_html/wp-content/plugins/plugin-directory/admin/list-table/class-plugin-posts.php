@@ -250,9 +250,83 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	}
 
 	/**
-	 * Remove the Quick/Bulk Edit hidden row.
+	 * Outputs the hidden row displayed when inline editing.
+	 *
+	 * @global string $mode List table view mode.
 	 */
 	public function inline_edit() {
+		global $mode;
+
+		$screen = $this->screen;
+
+		$taxonomy_names = get_object_taxonomies( $screen->post_type );
+		$hierarchical_taxonomies = array();
+
+		foreach ( $taxonomy_names as $taxonomy_name ) {
+
+			$taxonomy = get_taxonomy( $taxonomy_name );
+
+			if ( ! $taxonomy->show_in_quick_edit ) {
+				continue;
+			}
+
+			if ( $taxonomy->hierarchical ) {
+				$hierarchical_taxonomies[] = $taxonomy;
+			}
+		}
+
+		$m = ( isset( $mode ) && 'excerpt' === $mode ) ? 'excerpt' : 'list';
+	?>
+
+	<form method="get"><table style="display: none"><tbody id="inlineedit">
+
+		<tr id="inline-edit"
+			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo $screen->post_type; ?> quick-edit-row quick-edit-row-post"
+			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
+
+		<fieldset class="inline-edit-col-left">
+			<legend class="inline-edit-legend"><?php _e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
+			<div class="inline-edit-col">
+
+			<label>
+				<span class="title"><?php _e( 'Slug', 'wporg-plugins' ); ?></span>
+				<span class="input-text-wrap"><input type="text" name="post_name" value="" /></span>
+			</label>
+
+		</div></fieldset>
+
+	<?php if ( count( $hierarchical_taxonomies ) ) : ?>
+
+		<fieldset class="inline-edit-col-center inline-edit-categories"><div class="inline-edit-col">
+
+	<?php foreach ( $hierarchical_taxonomies as $taxonomy ) : ?>
+
+			<span class="title inline-edit-categories-label"><?php echo esc_html( $taxonomy->labels->name ) ?></span>
+			<input type="hidden" name="tax_input[<?php echo esc_attr( $taxonomy->name ); ?>][]" value="0" />
+			<ul class="cat-checklist <?php echo esc_attr( $taxonomy->name )?>-checklist">
+				<?php wp_terms_checklist( null, array( 'taxonomy' => $taxonomy->name ) ) ?>
+			</ul>
+
+	<?php endforeach; // $hierarchical_taxonomies as $taxonomy ?>
+
+		</div></fieldset>
+
+	<?php endif; // count( $hierarchical_taxonomies ) ?>
+
+		<p class="submit inline-edit-save">
+			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
+			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
+			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
+			<span class="spinner"></span>
+			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />
+			<input type="hidden" name="screen" value="<?php echo esc_attr( $screen->id ); ?>" />
+			<span class="error" style="display:none"></span>
+			<br class="clear" />
+		</p>
+		</td></tr>
+
+		</tbody></table></form>
+<?php
 	}
 
 	/**

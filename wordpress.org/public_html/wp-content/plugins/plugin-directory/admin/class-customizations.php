@@ -32,7 +32,6 @@ class Customizations {
 		add_action( 'load-edit.php', array( $this, 'bulk_reject_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_filter( 'admin_head-edit.php', array( $this, 'plugin_posts_list_table' ) );
-		add_filter( 'post_row_actions', array( $this, 'plugin_row_actions' ) );
 		add_action( 'edit_form_top', array( $this, 'show_permalink' ) );
 		add_action( 'admin_notices', array( $this, 'add_post_status_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
@@ -162,22 +161,6 @@ class Customizations {
 			$wp_list_table = new Plugin_Posts();
 			$wp_list_table->prepare_items();
 		}
-	}
-
-	/**
-	 * Disables Quick Edit for plugins.
-	 *
-	 * @param array $actions An array of row action links.
-	 * @return array Filtered array of row action links.
-	 */
-	public function plugin_row_actions( $actions ) {
-		global $post_type;
-
-		if ( 'plugin' === $post_type ) {
-			unset( $actions['inline hide-if-no-js'] );
-		}
-
-		return $actions;
 	}
 
 	/**
