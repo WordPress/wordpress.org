@@ -35,6 +35,7 @@ class Plugin_Directory {
 		add_filter( 'post_type_link', array( $this, 'filter_post_type_link' ), 10, 2 );
 		add_filter( 'term_link', array( $this, 'filter_term_link' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
+		add_filter( 'found_posts', array( $this, 'filter_found_posts' ), 10, 2 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'filter_allowed_post_types' ) );
 		add_filter( 'pre_update_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
@@ -798,6 +799,18 @@ class Plugin_Directory {
 			$wp_query->query_vars['orderby']  = 'meta_value_num';
 			$wp_query->query_vars['meta_key'] = '_active_installs';
 		}
+	}
+
+	/**
+	 * Filter to limit the total number of found posts in browse queries.
+	 * Stops search crawlers from paginating through the entire DB.
+	 */
+	public function filter_found_posts( $found_posts, $wp_query ) {
+		if ( isset( $wp_query->query['browse'] ) && in_array( 'plugin', $wp_query->query_vars['post_type'] ) ) {
+			return min( $found_posts, 99 * $wp_query->query_vars['posts_per_page'] ); // 99 pages
+		}
+
+		return $found_posts;
 	}
 
 	/**
