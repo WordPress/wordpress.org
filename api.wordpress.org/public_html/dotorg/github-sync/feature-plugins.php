@@ -21,7 +21,6 @@ class GH2WORG {
 		'georgestephanis/application-passwords' => 'application-passwords',
 		'obenland/shiny-updates'                => 'shiny-updates',
 		'pento/react'                           => 'react',
-		'xwp/wp-customize-snapshots'            => 'customize-snapshots',
 		'xwp/wp-core-media-widgets'             => 'wp-core-media-widgets',
 	];
 
