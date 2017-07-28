@@ -46,6 +46,7 @@ function get_whitelist() {
 		'community-team' => $wordcamp_central,
 		'core' => array(
 			'adamsilverstein',
+			'desrosj',
 			'drew',
 			'jeffpaul',
 			'johnbillion',
@@ -99,6 +100,7 @@ function get_whitelist() {
 			'rmccue',
 		),
 		'core-media' => array(
+			'desrosj',
 			'joemcgill',
 			'mike',
 			'ocean90',
