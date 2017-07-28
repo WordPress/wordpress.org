@@ -142,7 +142,7 @@ class WPORG_Themes_Upload {
 		$this->theme_slug = sanitize_title_with_dashes( $this->theme_name );
 
 		// Do not allow themes with WordPress and Theme in the theme name.
-		if ( false !== strpos( $this->theme_slug, 'wordpress' ) || false !== strpos( $this->theme_slug, 'theme' ) ) {
+		if ( false !== strpos( $this->theme_slug, 'wordpress' ) || preg_match( '/\btheme\b/i', $this->theme_slug ) ) {
 			/* translators: 1: 'WordPress', 2: 'theme' */
 			return sprintf( __( 'You cannot use %1$s or %2$s in your theme name.', 'wporg-themes' ),
 				'WordPress',
