@@ -806,7 +806,7 @@ class Plugin_Directory {
 	 * Stops search crawlers from paginating through the entire DB.
 	 */
 	public function filter_found_posts( $found_posts, $wp_query ) {
-		if ( isset( $wp_query->query['browse'] ) && in_array( 'plugin', $wp_query->query_vars['post_type'] ) ) {
+		if ( isset( $wp_query->query['browse'] ) && $wp_query->query_vars['post_type'] == 'plugin' ) {
 			return min( $found_posts, 99 * $wp_query->query_vars['posts_per_page'] ); // 99 pages
 		}
 
