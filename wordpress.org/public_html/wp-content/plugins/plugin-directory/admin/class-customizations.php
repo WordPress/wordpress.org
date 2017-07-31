@@ -37,6 +37,9 @@ class Customizations {
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
 
+		add_filter( 'wp_insert_post_data', array( $this, 'check_existing_plugin_slug_on_post_update' ), 10, 2 );
+		add_filter( 'wp_unique_post_slug', array( $this, 'check_existing_plugin_slug_on_inline_save' ), 10, 6 );
+
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
 		add_filter( 'get_comment_link', array( $this, 'link_internal_notes_to_admin' ), 10, 2 );
@@ -309,6 +312,64 @@ class Customizations {
 		}
 
 		return $post_states;
+	}
+
+	/**
+	 * Check if a plugin with the provided slug already exists.
+	 *
+	 * Runs on 'wp_insert_post_data' when editing a plugin on Edit Plugin screen.
+	 *
+	 * @param array $data    The data to be inserted into the database.
+	 * @param array $postarr The raw data passed to `wp_insert_post()`.
+	 * @return array The data to insert into the database.
+	 */
+	function check_existing_plugin_slug_on_post_update( $data, $postarr ) {
+		if ( 'plugin' !== $data['post_type'] || ! isset( $postarr['ID'] ) ) {
+			return $data;
+		}
+		
+		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $data['post_name'] );
+
+		// Is there already a plugin with the same slug?
+		if ( $existing_plugin && $existing_plugin->ID != $postarr['ID'] ) {
+			wp_die( sprintf(
+				/* translators: %s: plugin slug */
+				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				$data['post_name']
+			) );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Check if a plugin with the provided slug already exists.
+	 *
+	 * Runs on 'wp_unique_post_slug' when editing a plugin via Quick Edit.
+	 *
+	 * @param string $slug          The unique post slug.
+	 * @param int    $post_ID       Post ID.
+	 * @param string $post_status   Post status.
+	 * @param string $post_type     Post type.
+	 * @param int    $post_parent   Post parent ID.
+	 * @param string $original_slug The original post slug.
+	 * @return string The unique post slug.
+	 */
+	function check_existing_plugin_slug_on_inline_save( $slug, $post_ID, $post_status, $post_type, $post_parent, $original_slug ) {
+		if ( 'plugin' !== $post_type ) {
+			return $slug;
+		}
+
+		// Did wp_unique_post_slug() change the slug to avoid a conflict?
+		if ( $slug !== $original_slug ) {
+			wp_die( sprintf(
+				/* translators: %s: plugin slug */
+				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				$original_slug
+			) );
+		}
+
+		return $slug;
 	}
 
 	/**
