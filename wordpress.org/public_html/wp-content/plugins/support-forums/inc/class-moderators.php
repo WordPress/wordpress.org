@@ -517,7 +517,9 @@ class Moderators {
 							$term = $plugin_instance->themes->term;
 						}
 
-						Stickies_Compat::remove_sticky( $term->term_id, $post->ID );
+						if ( $term ) {
+							Stickies_Compat::remove_sticky( $term->term_id, $post->ID );
+						}
 					}
 				}
 
