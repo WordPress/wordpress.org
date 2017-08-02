@@ -292,7 +292,7 @@ class Stickies_Compat {
 
 		$stickies = get_term_meta( $term_id, self::META, true );
 		if ( $stickies ) {
-			$retval = explode( ',', $stickies );
+			$retval = array_map( 'intval', explode( ',', $stickies ) );
 		}
 		return $retval;
 	}
