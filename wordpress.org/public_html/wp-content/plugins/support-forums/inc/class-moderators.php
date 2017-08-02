@@ -395,7 +395,11 @@ class Moderators {
 		}
 
 		// Remove 'Stick' link for reviews or non-public topics.
-		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post_id ) || ! bbp_is_topic_public( $post_id ) ) {
+		if (
+			Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post_id )
+		||
+			! in_array( get_post_status( $post_id ), array( 'publish', 'closed' ) )
+		) {
 			unset( $r['stick'] );
 		}
 
@@ -420,7 +424,11 @@ class Moderators {
 		unset( $actions['unapproved'] );
 
 		// Remove 'Stick' link for reviews or non-public topics.
-		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post->ID ) || ! bbp_is_topic_public( $post->ID ) ) {
+		if (
+			Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post->ID )
+		||
+			! in_array( get_post_status( $post->ID ), array( 'publish', 'closed' ) )
+		) {
 			unset( $actions['stick'] );
 		}
 
