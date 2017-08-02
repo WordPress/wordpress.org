@@ -48,6 +48,11 @@ class Stickies_Compat {
 	 * @return array An empty array.
 	 */
 	public function get_super_stickies( $stickies ) {
+		// If we're archiving a topic, make sure bbp_unstick_topic() gets the correct list.
+		if ( isset( $_GET['action'] ) && 'wporg_bbp_archive_post' === $_GET['action'] ) {
+			return $stickies;
+		}
+
 		return array();
 	}
 
