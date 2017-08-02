@@ -506,7 +506,20 @@ class Moderators {
 					}
 				} else {
 					bbp_unstick_topic( $post->ID );
+
+					if ( Support_Compat::is_compat_forum( $post->post_parent ) ) {
+						$term            = null;
+						$plugin_instance = Plugin::get_instance();
+
+						if ( ! empty( $plugin_instance->plugins->term ) ) {
+							$term = $plugin_instance->plugins->term;
+						} elseif ( ! empty( $plugin_instance->themes->term ) ) {
+							$term = $plugin_instance->themes->term;
 						}
+
+						Stickies_Compat::remove_sticky( $term->term_id, $post->ID );
+					}
+				}
 
 				return true;
 			}
