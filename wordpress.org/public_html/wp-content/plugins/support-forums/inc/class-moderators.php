@@ -394,6 +394,11 @@ class Moderators {
 			}
 		}
 
+		// Remove 'Stick' link for reviews or non-public topics.
+		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post_id ) || ! bbp_is_topic_public( $post_id ) ) {
+			unset( $r['stick'] );
+		}
+
 		// Add 'Archive' link.
 		$r['archive'] = $this->get_archive_link( array( 'post_id' => $post_id ) );
 
@@ -414,11 +419,10 @@ class Moderators {
 		// Remove 'Unapprove' link.
 		unset( $actions['unapproved'] );
 
-		// Remove 'Stick' link for reviews.
-		if ( Plugin::REVIEWS_FORUM_ID == $post->post_parent ) {
+		// Remove 'Stick' link for reviews or non-public topics.
+		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $post->ID ) || ! bbp_is_topic_public( $post->ID ) ) {
 			unset( $actions['stick'] );
 		}
-		
 
 		return $actions;
 	}
@@ -502,7 +506,7 @@ class Moderators {
 					}
 				} else {
 					bbp_unstick_topic( $post->ID );
-				}
+						}
 
 				return true;
 			}
