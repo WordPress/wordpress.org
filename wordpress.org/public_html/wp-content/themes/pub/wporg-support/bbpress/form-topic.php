@@ -159,22 +159,6 @@
 
 					<?php endif; ?>
 
-					<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) ) : ?>
-
-						<?php do_action( 'bbp_theme_before_topic_form_type' ); ?>
-
-						<p>
-
-							<label for="bbp_stick_topic_select"><?php _e( 'Topic Type:', 'wporg-forums' ); ?></label><br />
-
-							<?php bbp_topic_type_select(); ?>
-
-						</p>
-
-						<?php do_action( 'bbp_theme_after_topic_form_type' ); ?>
-
-					<?php endif; ?>
-
 					<?php if ( bbp_is_subscriptions_active() && !bbp_is_anonymous() && ( !bbp_is_topic_edit() || ( bbp_is_topic_edit() && !bbp_is_topic_anonymous() ) ) ) : ?>
 
 						<?php do_action( 'bbp_theme_before_topic_form_subscriptions' ); ?>
