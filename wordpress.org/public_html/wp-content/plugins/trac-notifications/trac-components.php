@@ -355,7 +355,11 @@ jQuery( document ).ready( function( $ ) {
 			echo 'Component maintainers: ';
 			echo '<ul class="maintainers">';
 			foreach ( $maintainers as $maintainer ) {
-				echo '<li><a href="//profiles.wordpress.org/' . esc_attr( $maintainer ) . '">' . get_avatar( get_user_by( 'login', $maintainer )->user_email, 36 ) . "</a> $maintainer</li>";
+				printf( '<li><a href="//profiles.wordpress.org/%s">%s %s</a></li>',
+					esc_attr( $maintainer ),
+					get_avatar( get_user_by( 'login', $maintainer )->user_email, 36 ),
+					$maintainer
+				);
 			}
 			echo "</ul>\n\n";
 		}
