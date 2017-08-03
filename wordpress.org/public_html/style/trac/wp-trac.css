@@ -584,6 +584,13 @@ pre.wiki, pre.literal-block {
 #attachments > div.attachments {
 	border: 1px solid #ccc;
 	padding-right: 1em;
+	position: relative;
+}
+#attachments > div.attachments p {
+	float: none;
+	position: absolute;
+	right: 1em;
+	bottom: 1em;
 }
 #attachments dd {
 	margin-left: 10px
