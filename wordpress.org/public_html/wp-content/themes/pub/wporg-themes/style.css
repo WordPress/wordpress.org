@@ -1514,11 +1514,12 @@ body.full-overlay-active {
 	padding-left: 20px;
 }
 .main-navigation .menu li:first-of-type {
-	 padding-left: 10px;
+	padding-left: 10px;
 }
 
 .main-navigation a {
 	color: #636363;
+	font-size: 14px;
 }
 
 .main-navigation a:hover,
