@@ -213,6 +213,30 @@ class WordCamp_Post_Types_Plugin {
 			wp_enqueue_style( 'jquery-ui' );
 			wp_enqueue_style( 'wp-datepicker-skins' );
 		}
+
+		// Enqueues scripts and styles for sponsors admin page
+		if ( 'wcb_sponsor' == $post_type ) {
+			wp_enqueue_script(
+				'wcb-spon', // Avoid "sponsor" since that's a trigger word for ad blockers.
+				plugins_url( 'js/wcb-spon.js', __FILE__ ),
+				array( 'jquery', 'backbone', 'media-views' ),
+				1,
+				true
+			);
+
+			wp_localize_script(
+				'wcb-spon',
+				'wcbSponsors',
+				array(
+					'l10n' => array(
+						'modalTitle' => __( 'Sponsor Agreement', 'wordcamporg' ),
+					),
+					'modal' => array(
+						'allowedTypes' => array( 'image', 'application/pdf' )
+					),
+				)
+			);
+		}
 	}
 
 	/*
@@ -1416,12 +1440,18 @@ class WordCamp_Post_Types_Plugin {
 	 * Fired during add_meta_boxes, adds extra meta boxes to our custom post types.
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'speaker-info',   __( 'Speaker Info',   'wordcamporg'  ), array( $this, 'metabox_speaker_info'   ), 'wcb_speaker',   'side' );
-		add_meta_box( 'organizer-info', __( 'Organizer Info', 'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
-		add_meta_box( 'speakers-list',  __( 'Speakers',       'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
-		add_meta_box( 'session-info',   __( 'Session Info',   'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
-		add_meta_box( 'sponsor-info',   __( 'Sponsor Info',   'wordcamporg'  ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'normal' );
-		add_meta_box( 'invoice-sponsor', __( 'Invoice Sponsor', 'wordcamporg' ), array( $this, 'metabox_invoice_sponsor' ), 'wcb_sponsor', 'side'   );
+		add_meta_box( 'speaker-info',      __( 'Speaker Info',      'wordcamporg'  ), array( $this, 'metabox_speaker_info'   ), 'wcb_speaker',   'side' );
+		add_meta_box( 'organizer-info',    __( 'Organizer Info',    'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
+		add_meta_box( 'speakers-list',     __( 'Speakers',          'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
+		add_meta_box( 'session-info',      __( 'Session Info',      'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
+		add_meta_box( 'sponsor-info',      __( 'Sponsor Info',      'wordcamporg'  ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'normal' );
+
+		// Enable on 2017.testing only for testing purposes.
+		if ( ! defined( 'WORDCAMP_ENVIRONMENT' ) || 'development' === WORDCAMP_ENVIRONMENT || 829 === get_current_blog_id() ) {
+			add_meta_box( 'sponsor-agreement', __( 'Sponsor Agreement', 'wordcamporg' ),  array( $this, 'metabox_sponsor_agreement' ), 'wcb_sponsor', 'side'   );
+		}
+
+		add_meta_box( 'invoice-sponsor',   __( 'Invoice Sponsor',   'wordcamporg' ),  array( $this, 'metabox_invoice_sponsor' ), 'wcb_sponsor', 'side'   );
 	}
 
 	/**
@@ -1656,6 +1686,18 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Render the Sponsor Agreement metabox view.
+	 *
+	 * @param WP_Post $sponsor
+	 */
+	function metabox_sponsor_agreement( $sponsor ) {
+		$agreement_id  = get_post_meta( $sponsor->ID, '_wcpt_sponsor_agreement', true );
+		$agreement_url = wp_get_attachment_url( $agreement_id );
+
+		require_once( __DIR__ . '/views/sponsors/metabox-sponsor-agreement.php' );
+	}
+
+	/**
 	 * Render the Invoice Sponsor metabox view
 	 *
 	 * @param WP_Post $sponsor
@@ -1858,6 +1900,8 @@ class WordCamp_Post_Types_Plugin {
 
 			$values['first_name'] = ucfirst( $values['first_name'] );
 			$values['last_name' ] = ucfirst( $values['last_name' ] );
+
+			$values['agreement'] = filter_input( INPUT_POST, '_wcpt_sponsor_agreement', FILTER_SANITIZE_NUMBER_INT );
 
 			foreach( $values as $id => $value ) {
 				$meta_key = '_wcpt_sponsor_' . $id;
