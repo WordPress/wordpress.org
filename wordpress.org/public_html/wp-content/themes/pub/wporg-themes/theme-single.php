@@ -37,6 +37,9 @@
 				<?php } ?>
 
 				<div class="theme-meta-info">
+					<p class="version">
+						<?php printf( __( 'Version: %s', 'wporg-themes' ), '<strong>' . $theme->version . '</strong>' ); ?>	
+					</p>
 					<p class="updated">
 						<?php printf( __( 'Last updated: %s', 'wporg-themes' ),
 							/* translators: localized date format, see http://php.net/date */
