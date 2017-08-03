@@ -34,12 +34,16 @@ if ( have_posts() ) :
 					<div class="theme-browser content-filterable">
 						<div class="themes">
 							<?php foreach ( $theme_shops as $shop ) : ?>
+							<?php $shop_name = apply_filters( 'the_title', $shop->shop ); ?>
 							<article id="post-<?php echo esc_attr( $shop->slug ); ?>" class="theme hentry">
 								<div class="theme-screenshot">
-									<img src="<?php echo esc_url( $shop->image ); ?>" alt="">
+									<img src="<?php echo esc_url( $shop->image ); ?>" alt="<?php
+										/* translators: %s: name of theme shop */
+										echo esc_attr( sprintf( __( '%s homepage', 'wporg-themes' ), $shop_name ) );
+									?>">
 								</div>
 								<a class="more-details url" href="<?php echo esc_url( $shop->url ); ?>" rel="bookmark"><?php echo apply_filters( 'the_content', $shop->haiku ); ?></a>
-								<h3 class="theme-name entry-title"><?php echo apply_filters( 'the_title', $shop->shop ); ?></h3>
+								<h3 class="theme-name entry-title"><?php echo $shop_name; ?></h3>
 							</article>
 							<?php endforeach; ?>
 						</div>
