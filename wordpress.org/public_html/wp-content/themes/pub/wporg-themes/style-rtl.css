@@ -1319,7 +1319,6 @@ body.full-overlay-active {
 	border: 1px solid #e5e5e5;
 	box-sizing: border-box;
 	float: right;
-	min-height: 710px;
 	margin: 0 0 0 1%;
 	padding: 10px;
 	width: calc(100% / 4 - 7px);
