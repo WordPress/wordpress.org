@@ -406,13 +406,17 @@ class Plugin_I18n {
 	 * @return mixed
 	 */
 	public function translate_gp_original( $original, $translation, $content ) {
+		$original = preg_quote( $original, '/' );
+
 		if ( false === strpos( $content, '<' ) ) {
-			$content = str_replace( $original, $translation, $content );
+			// Don't use $translation, it may contain backreference-like characters.
+			$content = preg_replace( "/\b{$original}\b/", '___TRANSLATION___', $content );
 		} else {
-			$original = preg_quote( $original, '/' );
-			$content  = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", '${1}___TRANSLATION___${3}', $content ); // Don't use $translation, it may contain backreference-like characters.
-			$content  = str_replace( '___TRANSLATION___', $translation, $content );
+			// Don't use $translation, it may contain backreference-like characters.
+			$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", '${1}___TRANSLATION___${3}', $content );
 		}
+
+		$content = str_replace( '___TRANSLATION___', $translation, $content );
 
 		return $content;
 	}
