@@ -52,6 +52,9 @@ class Hooks {
 
 		// Honor i18n number formatting.
 		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
+
+		// Edit quicktags for reply box
+		add_filter( 'bbp_get_quicktags_settings', array( $this, 'quicktags_settings' ) );
 	}
 
 	/**
@@ -476,5 +479,20 @@ class Hooks {
 		}
 
 		return $formatted_number;
+	}
+
+    /**
+	 * Remove tags from quicktags that don't work for the forums, such as img.
+	 *
+	 * @param array $settings			quicktags settings array
+	 * @return array
+	 */
+	function quicktags_settings ( $settings ) {
+
+		$tags = explode( ',', $settings['buttons'] );
+		$tags = array_diff( $tags, array('img') );
+		$settings['buttons'] = implode( ',', $tags );
+		
+		return $settings;
 	}
 }
