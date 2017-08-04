@@ -8,22 +8,6 @@
 				<!--h4><?php //_e( 'Forum Info', 'wporg-forums' ); ?></h4-->
 				<ul class="forum-info">
 					<?php bb_base_single_forum_description(); ?>
-				</ul>
-			</div>
-
-			<!--div>
-				<?php
-					//if ( bb_is_intl_forum() ) :
-					//	bb_base_topic_search_form();
-					//else :
-					//	bb_base_search_form();
-					//endif;
-				?>
-			</div-->
-
-			<div>
-				<!--h3><?php //_e( 'Forum Feeds', 'wporg-forums' ); ?></h3-->
-				<ul class="forum-feeds">
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php _e( 'Recent Posts', 'wporg-forums' ); ?></a></li>
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic"><?php _e( 'Recent Topics', 'wporg-forums' ); ?></a></li>
 					<?php if ( bbp_current_user_can_access_create_topic_form() ) : ?>
@@ -62,16 +46,6 @@
 					'sep'    => '</li><li>',
 				) ); ?>
 			</div>
-
-			<!--div>
-				<?php
-					//if ( bb_is_intl_forum() ) :
-					//	bb_base_reply_search_form();
-					//else :
-					//	bb_base_search_form();
-					//endif;
-				?>
-			</div-->
 
 			<?php if ( current_user_can( 'moderate', bbp_get_topic_id() ) || wporg_support_current_user_can_stick( bbp_get_topic_id() ) ) : ?>
 

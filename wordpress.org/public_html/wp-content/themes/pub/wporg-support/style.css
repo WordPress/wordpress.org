@@ -414,36 +414,6 @@ div.bbp-template-notice.updated {
 	margin: 0 0 5px;
 }
 
-/* Sidebar */
-.sidebar .forum-info li:before,
-.sidebar .topic-info li:before,
-.sidebar div ul li a:before {
-	float: left;
-	margin-right: 5px;
-}
-
-.sidebar .topic-info li.reply-count:before,
-.sidebar .forum-info li.reply-count:before {
-	content: "\f125";
-}
-
-.sidebar .forum-info li.topic-count:before {
-	content: "\f105";
-}
-
-.sidebar .topic-info li.wp-version:before {
-	content: "\f120";
-}
-
-.sidebar .topic-info li.topic-resolved:before {
-	content: "\f546";
-}
-
-.sidebar li.create-topic a:before,
-.sidebar li.create-reply a:before {
-	content: "\f132";
-}
-
 /* Sticky topics */
 #bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink:before,
 #bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink:before {
@@ -3210,10 +3180,40 @@ select {
 /*--------------------------------------------------------------
 # Single Forum
 --------------------------------------------------------------*/
+.sidebar .forum-info li:before,
+.sidebar .topic-info li:before,
+.sidebar div ul li a:before {
+	float: left;
+	margin-right: 5px;
+}
+
+.sidebar .forum-info .forum-freshness-time::before,
+.sidebar .topic-info .topic-freshness-time::before {
+	height: 30px;
+}
+
+.sidebar .forum-info .forum-freshness-time a,
+.sidebar .topic-info .topic-freshness-time a {
+	display: inline-block;
+}
+
+.sidebar .forum-info li.topic-count:before {
+	content: "\f105";
+}
+
+.sidebar .forum-info li.reply-count:before,
+.sidebar .topic-info li.reply-count:before {
+	content: "\f125";
+}
+
+.sidebar .forum-info li.create-topic a:before,
+.sidebar .topic-info li.create-reply a:before {
+	content: "\f132";
+}
+
 .sidebar .forum-info li.forum-subscribe:before,
-.sidebar .topic-info li.topic-subscribe:before,
-.sidebar .topic-info li.topic-favorite:before {
-	content: "";
+.sidebar .topic-info li.topic-subscribe:before {
+	content: "\f465";
 }
 
 .sidebar .feed {
@@ -3327,17 +3327,19 @@ div.bbp-breadcrumb p {
 }
 
 .sidebar .topic-info li.topic-forum:before {
-	content: '\f230';
+	content: "\f230";
 }
 
-.sidebar .topic-info .topic-freshness-time::before,
-.sidebar .forum-info .forum-freshness-time::before {
-	height: 30px;
+.sidebar .topic-info li.wp-version:before {
+	content: "\f120";
 }
 
-.sidebar .topic-info .topic-freshness-time a,
-.sidebar .forum-info .forum-freshness-time a {
-	display: inline-block;
+.sidebar .topic-info li.topic-resolved:before {
+	content: "\f546";
+}
+
+.sidebar .topic-info li.topic-favorite:before {
+	content: "\f487";
 }
 
 /*--------------------------------------------------------------
