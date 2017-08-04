@@ -471,11 +471,7 @@ function wporg_support_add_moderation_notice() {
 				'https://make.wordpress.org/chat/'
 			);
 		} else {
-			$notices[] = sprintf(
-				/* translators: %d: number of hours */
-				_n( 'This post has been held for moderation by our automated system. It will be reviewed within %d hour.', 'This post has been held for moderation by our automated system. It will be reviewed within %d hours.', 72, 'wporg-forums' ),
-				72
-			);
+			$notices[] = __( 'This post has been held for moderation by our automated system. It will be reviewed within 72 hours.', 'wporg-forums' );
 		}
 
 	endif;
