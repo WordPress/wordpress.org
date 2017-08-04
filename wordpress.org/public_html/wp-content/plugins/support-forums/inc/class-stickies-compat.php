@@ -154,8 +154,16 @@ class Stickies_Compat {
 		if ( ! bbp_is_single_topic() ) {
 			return $r;
 		}
+
 		$user_id = get_current_user_id();
-		if ( isset( $r['stick'] ) && $this->user_can_stick( $user_id, $this->term->term_id, $topic_id ) ) {
+
+		if (
+			Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id()
+		&&
+			in_array( get_post_status( $topic_id ), array( 'publish', 'closed' ) )
+		&&
+			$this->user_can_stick( $user_id, $this->term->term_id, $topic_id )
+		) {
 			$r['stick'] = self::get_stick_link( array( 'topic_id' => $topic_id, 'term_id' => $this->term->term_id ) );
 		} else {
 			unset( $r['stick'] );
