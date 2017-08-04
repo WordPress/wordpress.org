@@ -294,10 +294,7 @@ body, #pagebody {
 --------------------------------------------------------------*/
 .sidebar {
 	div {
-
-		&:first-child {
-			margin: 0;
-		}
+		margin-bottom: 2rem;
 
 		ul {
 			margin-bottom:0;

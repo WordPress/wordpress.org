@@ -338,10 +338,6 @@ a:hover {
 	padding-right: 0;
 }
 
-.sidebar > div {
-	margin-bottom: 22px;
-}
-
 ul#views {
 	margin: 2px 0 20px;
 	font-size: 12px;
@@ -2227,8 +2223,8 @@ body, #pagebody {
 /*--------------------------------------------------------------
 # .sidebar
 --------------------------------------------------------------*/
-.sidebar div:first-child {
-	margin: 0;
+.sidebar div {
+	margin-bottom: 2rem;
 }
 
 .sidebar div ul {

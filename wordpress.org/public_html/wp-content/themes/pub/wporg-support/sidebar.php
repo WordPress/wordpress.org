@@ -1,11 +1,21 @@
 <div class="entry-meta sidebar">
 
+	<?php if ( is_user_logged_in() ) : ?>
+
+		<div class="my-account">
+			<ul>
+				<li><?php echo sprintf( __( 'Howdy, %s', 'wporg-forums' ), '<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>' ); ?></li>
+				<li><a href="<?php echo esc_url( wp_logout_url() ); ?>"><?php _e( 'Log Out', 'wporg-forums' ); ?></a></li>
+			</ul>
+		</div>
+
+	<?php endif; ?>
+
 	<?php if ( function_exists( 'is_bbpress' ) && ( is_bbpress() ) || is_page() ) : ?>
 
 		<?php if ( bbp_is_single_forum() || ( bb_is_intl_forum() && bb_base_topic_search_query( false ) ) ) : ?>
 
 			<div>
-				<!--h4><?php //_e( 'Forum Info', 'wporg-forums' ); ?></h4-->
 				<ul class="forum-info">
 					<?php bb_base_single_forum_description(); ?>
 					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php _e( 'Recent Posts', 'wporg-forums' ); ?></a></li>
@@ -28,12 +38,6 @@
 			<?php do_action( 'wporg_compat_single_topic_sidebar_pre' ); ?>
 
 			<div>
-				<?php if ( wporg_support_is_single_review() ) : ?>
-					<!--h3><?php //_e( 'Review Info', 'wporg-forums' ); ?></h3-->
-				<?php else : ?>
-					<!-- h3><?php //_e( 'Topic Info', 'wporg-forums' ); ?></h3-->
-				<?php endif; ?>
-
 				<ul class="topic-info">
 					<?php bb_base_single_topic_description(); ?>
 				</ul>
@@ -112,18 +116,6 @@
 			</div>
 
 		<?php endif; ?>
-
-	<?php endif; ?>
-
-	<?php if ( is_user_logged_in() ) : ?>
-
-		<div class="my-account">
-			<h4><?php _e( 'My Account', 'wporg-forums' ); ?></h4>
-			<ul>
-				<li><?php echo sprintf( __( 'Howdy, %s', 'wporg-forums' ), '<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>' ); ?></li>
-				<li><a href="<?php echo esc_url( wp_logout_url() ); ?>"><?php _e( 'Log Out', 'wporg-forums' ); ?></a></li>
-			</ul>
-		</div>
 
 	<?php endif; ?>
 
