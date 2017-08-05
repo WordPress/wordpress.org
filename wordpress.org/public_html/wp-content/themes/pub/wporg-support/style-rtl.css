@@ -3182,12 +3182,14 @@ select {
 }
 
 .sidebar .forum-info .forum-freshness-time::before,
-.sidebar .topic-info .topic-freshness-time::before {
+.sidebar .topic-info .topic-freshness-time::before,
+.sidebar .topic-info .topic-freshness-author::before {
 	height: 30px;
 }
 
 .sidebar .forum-info .forum-freshness-time a,
-.sidebar .topic-info .topic-freshness-time a {
+.sidebar .topic-info .topic-freshness-time a,
+.sidebar .topic-info .topic-freshness-author a {
 	display: inline-block;
 }
 

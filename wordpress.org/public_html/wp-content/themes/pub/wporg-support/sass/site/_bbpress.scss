@@ -750,12 +750,14 @@ select {
 	}
 
 	.forum-info .forum-freshness-time::before,
-	.topic-info .topic-freshness-time::before {
+	.topic-info .topic-freshness-time::before,
+	.topic-info .topic-freshness-author::before {
 		height: 30px;
 	}
 
 	.forum-info .forum-freshness-time a,
-	.topic-info .topic-freshness-time a {
+	.topic-info .topic-freshness-time a,
+	.topic-info .topic-freshness-author a {
 		display: inline-block;
 	}
 
