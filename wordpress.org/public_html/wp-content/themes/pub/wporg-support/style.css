@@ -2239,10 +2239,6 @@ body, #pagebody {
 	padding: 0.5rem 0;
 }
 
-.sidebar div:first-child h3 {
-	margin-top: 0;
-}
-
 /*--------------------------------------------------------------
 # .search-form
 --------------------------------------------------------------*/
@@ -2930,10 +2926,6 @@ section {
 	margin-top: 0;
 }
 
-.bbpress.single-forum .entry-meta div:first-child h3 {
-	display: none;
-}
-
 .bbpress .forum-titles .bbp-topic-voice-count,
 .bbpress .forum-titles .bbp-topic-reply-count {
 	overflow: hidden;
@@ -3320,10 +3312,6 @@ div.bbp-breadcrumb p {
 	margin: 0 !important;
 }
 
-.sidebar > div:first-child h3 {
-	display: none;
-}
-
 .sidebar .topic-info li.topic-forum:before {
 	content: "\f230";
 }
@@ -3343,14 +3331,6 @@ div.bbp-breadcrumb p {
 /*--------------------------------------------------------------
 # Plugin / Theme specific support pages
 --------------------------------------------------------------*/
-.bbp-view .sidebar h3 {
-	display: none;
-}
-
-.bbp-view .sidebar > div.my-account {
-	display: inherit;
-}
-
 .bbp-view .review-ratings {
 	margin-bottom: 1rem;
 	padding-bottom: 10px;

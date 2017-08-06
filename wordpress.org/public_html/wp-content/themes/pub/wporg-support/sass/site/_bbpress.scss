@@ -462,12 +462,6 @@ section {
 		}
 	}
 
-	&.single-forum {
-		.entry-meta div:first-child h3 {
-			display: none;
-		}
-	}
-
 	.forum-titles {
 		.bbp-topic-voice-count, 
 		.bbp-topic-reply-count {
@@ -904,10 +898,6 @@ div.bbp-breadcrumb {
 
 .sidebar {
 
-	> div:first-child h3 {
-		display: none;
-	}
-
 	.topic-info li.topic-forum:before {
 		content: "\f230";
 	}
@@ -932,16 +922,6 @@ div.bbp-breadcrumb {
 --------------------------------------------------------------*/
 
 .bbp-view { // This is my hook for both the plugin/theme support review page and the actual plugin/theme support forum
-	.sidebar {
-		h3 {
-			display: none;
-		}
-
-		> div.my-account {
-			display: inherit;
-		}
-	}
-
 	// Review page
 	.review-ratings {
 		@extend .clear;
