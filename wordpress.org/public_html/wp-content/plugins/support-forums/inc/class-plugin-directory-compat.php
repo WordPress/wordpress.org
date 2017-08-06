@@ -114,7 +114,6 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		?>
 
 		<div>
-			<h3><?php _e( 'About this Plugin', 'wporg-forums' ); ?></h3>
 			<ul>
 				<?php if ( function_exists( 'wporg_get_plugin_icon' ) ) : ?>
 				<li><?php echo wporg_get_plugin_icon( $this->slug, 128 ); ?></li>

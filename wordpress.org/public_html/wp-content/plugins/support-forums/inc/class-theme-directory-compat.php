@@ -108,7 +108,6 @@ class Theme_Directory_Compat extends Directory_Compat {
 		}
 		?>
 		<div>
-			<h3><?php _e( 'About this Theme', 'wporg-forums' ); ?></h3>
 			<ul>
 				<li><?php echo $theme; ?></li>
 				<li><?php echo $support; ?></li>
