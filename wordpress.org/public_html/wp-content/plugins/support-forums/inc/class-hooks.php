@@ -4,6 +4,8 @@ namespace WordPressdotorg\Forums;
 
 class Hooks {
 
+	const SITE_URL_META = 'site_url';
+
 	public function __construct() {
 		// Basic behavior filters and actions.
 		add_filter( 'bbp_get_forum_pagination_count', '__return_empty_string' );
@@ -39,6 +41,16 @@ class Hooks {
 
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
+
+		// Display extra topic fields after content.
+		add_action( 'bbp_theme_after_topic_content', array( $this, 'display_extra_topic_fields' ) );
+
+		// Add extra topic fields after Title field in topic form.
+		add_action( 'bbp_theme_after_topic_form_title', array( $this, 'add_extra_topic_fields' ) );
+
+		// Process extra topic fields.
+		add_action( 'bbp_new_topic',  array( $this, 'handle_extra_topic_fields' ), 10, 2 );
+		add_action( 'bbp_edit_topic', array( $this, 'handle_extra_topic_fields' ), 10, 2 );
 
 		// Add extra reply actions before Submit button in reply form.
 		add_action( 'bbp_theme_before_reply_form_submit_wrapper', array( $this, 'add_extra_reply_actions' ) );
@@ -361,6 +373,53 @@ class Hooks {
 	}
 
 	/**
+	 * Display extra topic fields after content.
+	 */
+	public function display_extra_topic_fields() {
+		// Display site URL for logged-in users.
+		if ( is_user_logged_in() ) {
+			$site_url = get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true );
+
+			printf( '<p>%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
+				__( 'Site URL:', 'wporg-forums' ),
+				esc_url( $site_url )
+			);
+		}
+	}
+
+	/**
+	 * Add extra topic fields after Title field in topic form.
+	 */
+	public function add_extra_topic_fields() {
+		$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true ) : '';
+		?>
+		<p>
+			<label for="site_url"><?php _e( 'URL of the site or page you need help with:', 'wporg-forums' ) ?></label><br />
+			<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="100" />
+		</p>
+		<?php
+	}
+
+	/**
+	 * Process extra topic fields.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function handle_extra_topic_fields( $topic_id ) {
+		// Handle "URL of the site or page you need help with" field.
+		if ( isset( $_POST['site_url'] ) ) {
+			$site_url = esc_url_raw( apply_filters( 'pre_user_url', $_POST['site_url'] ) );
+
+			$protocols = implode( '|', array( 'http', 'https' ) );
+			if ( ! preg_match( '/^(' . $protocols . '):/is', $site_url ) ) {
+				$site_url = 'http://' . $site_url;
+			}
+
+			update_post_meta( $topic_id, self::SITE_URL_META, $site_url );
+		}
+	}
+
+	/**
 	 * Add extra reply actions before Submit button in reply form.
 	 */
 	public function add_extra_reply_actions() {
@@ -400,7 +459,7 @@ class Hooks {
 	 * @param int $topic_id Topic ID.
 	 */
 	public function handle_extra_reply_actions( $reply_id, $topic_id ) {
-		// Handle "Reply and mark as resolved" checkbox
+		// Handle "Reply and mark as resolved" checkbox.
 		if ( isset( $_POST['bbp_reply_mark_resolved'] ) && 'yes' === $_POST['bbp_reply_mark_resolved'] ) {
 			if ( class_exists( 'WordPressdotorg\Forums\Topic_Resolution\Plugin' ) ) {
 				$topic_resolution_plugin = Topic_Resolution\Plugin::get_instance();
@@ -417,7 +476,7 @@ class Hooks {
 			}
 		}
 
-		// Handle "Reply and close the topic" checkbox
+		// Handle "Reply and close the topic" checkbox.
 		if ( isset( $_POST['bbp_reply_close_topic'] ) && 'yes' === $_POST['bbp_reply_close_topic'] ) {
 			if ( current_user_can( 'moderate', $topic_id ) && bbp_is_topic_open( $topic_id ) ) {
 				bbp_close_topic( $topic_id );
