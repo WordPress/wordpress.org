@@ -16,33 +16,6 @@
 				'after'  => '</div>',
 			) );
 		?>
-		<?php
-		$children = get_children( array(
-			'post_parent'    => get_the_ID(),
-			'post_type'      => 'command',
-			'posts_per_page' => 250,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		) );
-		if ( $children ) : ?>
-			<h3>SUBCOMMANDS</h3>
-			<table>
-				<thead>
-				<tr>
-					<th>Name</th>
-					<th>Description</th>
-				</tr>
-				</thead>
-				<tbody>
-					<?php foreach( $children as $child ) : ?>
-						<tr>
-							<td><a href="<?php echo apply_filters( 'the_permalink', get_permalink( $child->ID ) ); ?>"><?php echo apply_filters( 'the_title', $child->post_title ); ?></a></td>
-							<td><?php echo apply_filters( 'the_excerpt', $child->post_excerpt ); ?></td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php endif; ?>
 	</div><!-- .entry-content -->
 
 	<footer class="entry-meta">

@@ -272,6 +272,39 @@ class DevHub_CLI {
 			$content = wpautop( $excerpt ) . PHP_EOL . $content;
 		}
 
+		// Append subcommands if they exist
+		$children = get_children( array(
+			'post_parent'    => get_the_ID(),
+			'post_type'      => 'command',
+			'posts_per_page' => 250,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		) );
+		if ( $children ) {
+			ob_start();
+			?>
+			<h3>SUBCOMMANDS</h3>
+			<table>
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+				</tr>
+				</thead>
+				<tbody>
+					<?php foreach( $children as $child ) : ?>
+						<tr>
+							<td><a href="<?php echo apply_filters( 'the_permalink', get_permalink( $child->ID ) ); ?>"><?php echo apply_filters( 'the_title', $child->post_title ); ?></a></td>
+							<td><?php echo apply_filters( 'the_excerpt', $child->post_excerpt ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php
+			$subcommands = ob_get_clean();
+			$content .= PHP_EOL . $subcommands;
+		}
+
 		// Add 'Quick Links' across the top
 		$items = self::get_tags( 'h([1-4])', $content );
 		if ( count( $items ) > 1 ) {
