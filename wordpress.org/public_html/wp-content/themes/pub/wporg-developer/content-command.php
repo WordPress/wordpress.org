@@ -19,8 +19,6 @@
 	</div><!-- .entry-content -->
 
 	<footer class="entry-meta">
-		<p><em>Command documentation is regenerated at every release. To add or update an example, please submit a pull request against the corresponding part of the codebase.</em></p>
-
 		<?php edit_post_link( __( 'Edit', 'wporg' ), '<span class="edit-link">', '</span>' ); ?>
 	</footer><!-- .entry-meta -->
 </article><!-- #post-## -->

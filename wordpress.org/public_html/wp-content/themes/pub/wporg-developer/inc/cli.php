@@ -266,7 +266,6 @@ class DevHub_CLI {
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
 
-		// Append subcommands if they exist
 		$children = get_children( array(
 			'post_parent'    => get_the_ID(),
 			'post_type'      => 'command',
@@ -274,6 +273,7 @@ class DevHub_CLI {
 			'orderby'        => 'title',
 			'order'          => 'ASC',
 		) );
+		// Append subcommands if they exist
 		if ( $children ) {
 			ob_start();
 			?>
@@ -298,6 +298,32 @@ class DevHub_CLI {
 			$subcommands = ob_get_clean();
 			$content .= PHP_EOL . $subcommands;
 		}
+
+		$contributing_bits = array();
+		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
+		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
+		$open_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aopen';
+		$closed_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aclosed';
+		ob_start();
+		?>
+		<div class="github-tracker">
+			<?php if ( $repo_url ) : ?>
+				<a href="<?php echo esc_url( $repo_url ); ?>"><img src="https://make.wordpress.org/cli/wp-content/plugins/wporg-cli/assets/images/github-mark.svg" class="icon-github" /></a>
+				<a href="<?php echo esc_url( rtrim( $repo_url, '/' ) . '/issues/new' ); ?>" class="button">Create New Issue</a>
+			<?php endif; ?>
+			<div class="btn-group">
+				<a href="<?php echo esc_url( $open_issues ); ?>" class="button">View Open Issues</a>
+				<a href="<?php echo esc_url( $closed_issues ); ?>" class="button">View Closed Issues</a>
+			</div>
+		</div>
+		<?php
+		$issues = ob_get_clean();
+		$contributing_bits[] = $issues;
+		$contributing_bits[] = '<p>Command documentation is regenerated at every release. To add or update an example, please submit a pull request against the corresponding part of the codebase.</p>';
+		$contributing_bits[] = '<p>See <a href="https://make.wordpress.org/cli/handbook/contributing/">contributing guidelines</a> for full details on contributing.</p>';
+
+		$contributing = '<h3>CONTRIBUTING</h3>' . PHP_EOL . implode( PHP_EOL, $contributing_bits );
+		$content .= $contributing;
 
 		// Add 'Quick Links' across the top
 		$items = self::get_tags( 'h([1-4])', $content );

@@ -2194,7 +2194,7 @@ input {
 }
 
 .single-command #content h2, .single-command #content h3 {
-  margin-top: 3rem;
+  margin-top: 4rem;
   margin-bottom: 2.5rem;
   font-size: 2.5rem;
 }
@@ -2254,4 +2254,85 @@ input {
 
 .single-command #content table tbody tr:nth-child(even) {
   background: rgba(0, 0, 0, 0.025);
+}
+
+.single-command .devhub-wrap *, .single-command .devhub-wrap *::before, .single-command .devhub-wrap *::after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.single-command .devhub-wrap a.button, .single-command .devhub-wrap button, .single-command .devhub-wrap input[type="button"], .single-command .devhub-wrap input[type="reset"], .single-command .devhub-wrap input[type="submit"] {
+  border: 1px solid;
+  border-color: #ccc;
+  border-radius: 3px;
+  background: #f7f7f7;
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  float: none;
+  height: auto;
+  padding: .8rem 1.2rem;
+  margin: .4rem 0;
+  text-decoration: none;
+  -webkit-appearance: button;
+}
+
+.single-command .devhub-wrap a.button:hover, .single-command .devhub-wrap button:hover, .single-command .devhub-wrap input[type="button"]:hover, .single-command .devhub-wrap input[type="reset"]:hover, .single-command .devhub-wrap input[type="submit"]:hover {
+  border-color: #ccc #bbb #aaa #bbb;
+  background: #eee;
+}
+
+.single-command .devhub-wrap a.button:focus, .single-command .devhub-wrap a.button:active, .single-command .devhub-wrap button:focus, .single-command .devhub-wrap button:active, .single-command .devhub-wrap input[type="button"]:focus, .single-command .devhub-wrap input[type="button"]:active, .single-command .devhub-wrap input[type="reset"]:focus, .single-command .devhub-wrap input[type="reset"]:active, .single-command .devhub-wrap input[type="submit"]:focus, .single-command .devhub-wrap input[type="submit"]:active {
+  border-color: #bbb;
+  background: #eee;
+  -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.single-command .devhub-wrap a.button > span, .single-command .devhub-wrap button > span, .single-command .devhub-wrap input[type="button"] > span, .single-command .devhub-wrap input[type="reset"] > span, .single-command .devhub-wrap input[type="submit"] > span {
+  color: #757575;
+  line-height: 1;
+  font-size: .7rem;
+}
+
+.single-command .devhub-wrap a.button > span.red, .single-command .devhub-wrap button > span.red, .single-command .devhub-wrap input[type="button"] > span.red, .single-command .devhub-wrap input[type="reset"] > span.red, .single-command .devhub-wrap input[type="submit"] > span.red {
+  color: #dc3232;
+}
+
+.single-command .devhub-wrap a.button > span.green, .single-command .devhub-wrap button > span.green, .single-command .devhub-wrap input[type="button"] > span.green, .single-command .devhub-wrap input[type="reset"] > span.green, .single-command .devhub-wrap input[type="submit"] > span.green {
+  color: #46B450;
+}
+
+.single-command .btn-group {
+  display: inline;
+}
+
+.single-command .btn-group > button {
+  position: relative;
+}
+
+@media (min-width: 571px) {
+  .single-command .btn-group > button:first-child {
+    right: -6px;
+    border-radius: 3px 0 0 3px;
+  }
+}
+
+@media (min-width: 571px) {
+  .single-command .btn-group > button:last-child {
+    border-radius: 0 3px 3px 0;
+  }
+}
+
+.single-command .github-tracker {
+  margin-bottom: 1.5em;
+}
+
+.single-command .github-tracker img.icon-github {
+  width: 23px;
+  position: relative;
+  top: 6px;
+  margin-right: 5px;
 }

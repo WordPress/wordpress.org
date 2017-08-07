@@ -1880,7 +1880,7 @@
 .single-command #content {
 
 	h2, h3 {
-		margin-top: 3rem;
+		margin-top: 4rem;
 		margin-bottom: 2.5rem;
 		font-size: 2.5rem;
 	}
@@ -1939,6 +1939,87 @@
 			tr:nth-child(even) {
 				background:rgba(0, 0, 0, .025);
 			}
+		}
+	}
+}
+
+.single-command {
+	.devhub-wrap *, .devhub-wrap *::before, .devhub-wrap *::after {
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+	}
+
+	.devhub-wrap a.button, .devhub-wrap button, .devhub-wrap input[type="button"], .devhub-wrap input[type="reset"], .devhub-wrap input[type="submit"] {
+		border: 1px solid;
+		border-color: #ccc;
+		border-radius: 3px;
+		background: #f7f7f7;
+		color: rgba(0, 0, 0, 0.8);
+		cursor: pointer;
+		font-size: 1.2rem;
+		line-height: 1;
+		float: none;
+		height: auto;
+		padding: .8rem 1.2rem;
+		margin: .4rem 0;
+		text-decoration: none;
+		-webkit-appearance: button;
+
+		&:hover {
+			border-color: #ccc #bbb #aaa #bbb;
+			background: #eee;
+		}
+		
+		&:focus, &:active {
+			border-color: #bbb;
+			background: #eee;
+			-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+			box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+		}
+		
+		> span {
+			color: #757575;
+			line-height: 1;
+			font-size: .7rem;
+			
+			&.red {
+				color: #dc3232;
+			}
+			&.green {
+				color: #46B450;
+			}
+		}
+
+	}
+
+	.btn-group {
+		display: inline;
+		
+		> button {
+			position: relative;
+			
+			&:first-child {
+				@media(min-width: 571px) {
+					right: -6px;
+					border-radius: 3px 0 0 3px;
+				}
+			}
+			&:last-child {
+				@media(min-width: 571px) {
+					border-radius: 0 3px 3px 0;
+				}
+			}
+		}
+	}
+
+	.github-tracker {
+		margin-bottom: 1.5em;
+		img.icon-github {
+			width: 23px;
+			position: relative;
+			top: 6px;
+			margin-right: 5px;
 		}
 	}
 }
