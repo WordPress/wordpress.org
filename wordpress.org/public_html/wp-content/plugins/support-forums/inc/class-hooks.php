@@ -376,10 +376,10 @@ class Hooks {
 	 * Display extra topic fields after content.
 	 */
 	public function display_extra_topic_fields() {
-		// Display site URL for logged-in users.
-		if ( is_user_logged_in() ) {
-			$site_url = get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true );
+		$site_url = get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true );
 
+		// Display site URL for logged-in users.
+		if ( is_user_logged_in() && $site_url ) {
 			printf( '<p>%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
 				__( 'Site URL:', 'wporg-forums' ),
 				esc_url( $site_url )
@@ -410,12 +410,16 @@ class Hooks {
 		if ( isset( $_POST['site_url'] ) ) {
 			$site_url = esc_url_raw( apply_filters( 'pre_user_url', $_POST['site_url'] ) );
 
-			$protocols = implode( '|', array( 'http', 'https' ) );
-			if ( ! preg_match( '/^(' . $protocols . '):/is', $site_url ) ) {
-				$site_url = 'http://' . $site_url;
-			}
+			if ( $site_url ) {
+				$protocols = implode( '|', array( 'http', 'https' ) );
+				if ( ! preg_match( '/^(' . $protocols . '):/is', $site_url ) ) {
+					$site_url = 'http://' . $site_url;
+				}
 
-			update_post_meta( $topic_id, self::SITE_URL_META, $site_url );
+				update_post_meta( $topic_id, self::SITE_URL_META, $site_url );
+			} elseif ( 'bbp_edit_topic' === current_action() ) {
+				delete_post_meta( $topic_id, self::SITE_URL_META );
+			}
 		}
 	}
 
