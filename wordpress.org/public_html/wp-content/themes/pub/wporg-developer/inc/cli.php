@@ -13,6 +13,7 @@ class DevHub_CLI {
 		add_action( 'pre_get_posts', array( __CLASS__, 'action_pre_get_posts' ) );
 		add_action( 'devhub_cli_manifest_import', array( __CLASS__, 'action_devhub_cli_manifest_import' ) );
 		add_action( 'devhub_cli_markdown_import', array( __CLASS__, 'action_devhub_cli_markdown_import' ) );
+		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 	}
 
 	public static function action_init_register_cron_jobs() {
@@ -253,6 +254,18 @@ class DevHub_CLI {
 		}
 
 		return $markdown_source;
+	}
+
+	/**
+	 * Filter the content of command pages
+	 */
+	public static function filter_the_content( $content ) {
+		if ( 'command' !== get_post_type() ) {
+			return $content;
+		}
+		// Transform emdash back to triple-dashes
+		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
+		return $content;
 	}
 
 }
