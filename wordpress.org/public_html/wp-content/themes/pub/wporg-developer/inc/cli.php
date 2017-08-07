@@ -266,12 +266,6 @@ class DevHub_CLI {
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
 
-		// Include the excerpt in the main content well
-		$excerpt = get_the_excerpt();
-		if ( $excerpt ) {
-			$content = wpautop( $excerpt ) . PHP_EOL . $content;
-		}
-
 		// Append subcommands if they exist
 		$children = get_children( array(
 			'post_parent'    => get_the_ID(),
@@ -317,6 +311,12 @@ class DevHub_CLI {
 			}
 			$quick_links = rtrim( $quick_links, ' |' ) . '</small></p>';
 			$content = $quick_links . PHP_EOL . PHP_EOL . $content;
+		}
+
+		// Include the excerpt in the main content well
+		$excerpt = get_the_excerpt();
+		if ( $excerpt ) {
+			$content = '<p class="excerpt">' . $excerpt . '</p>' . PHP_EOL . $content;
 		}
 
 		return $content;
