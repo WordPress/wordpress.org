@@ -2192,3 +2192,34 @@ input {
     margin-left: 0;
   }
 }
+
+.single-command #content table {
+  border-collapse: collapse;
+  border: 1px solid #eee;
+  padding: 0;
+  margin: 0 0 ms(0);
+  font-size: ms(-2);
+  width: 100%;
+}
+
+.single-command #content table thead {
+  background: #eee;
+}
+
+.single-command #content table thead th {
+  font-weight: bold;
+  padding: .7rem .4rem;
+}
+
+.single-command #content table th, .single-command #content table td {
+  padding: .4rem;
+  margin: 0;
+  font-weight: normal;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid #eee;
+}
+
+.single-command #content table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.025);
+}
