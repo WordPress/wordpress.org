@@ -17,6 +17,7 @@ html, body, div, span, h1, h2, p, code, em, img, ins, strong, ol, ul, li, articl
 	font-size: 100%;
 	vertical-align: baseline;
 	background: transparent;
+	-webkit-font-smoothing: antialiased;
 }
 
 article,footer,header,hgroup,menu,nav,section {
