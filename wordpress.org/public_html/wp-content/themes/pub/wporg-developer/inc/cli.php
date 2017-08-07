@@ -260,7 +260,7 @@ class DevHub_CLI {
 	 * Filter the content of command pages
 	 */
 	public static function filter_the_content( $content ) {
-		if ( 'command' !== get_post_type() ) {
+		if ( 'command' !== get_post_type() || ! is_singular() ) {
 			return $content;
 		}
 		// Transform emdash back to triple-dashes
