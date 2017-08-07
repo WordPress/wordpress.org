@@ -265,7 +265,62 @@ class DevHub_CLI {
 		}
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
+
+		// Include the excerpt in the main content well
+		$excerpt = get_the_excerpt();
+		if ( $excerpt ) {
+			$content = wpautop( $excerpt ) . PHP_EOL . $content;
+		}
+
+		// Add 'Quick Links' across the top
+		$items = self::get_tags( 'h([1-4])', $content );
+		if ( count( $items ) > 1 ) {
+			for ( $i = 1; $i <= 4; $i++ ) {
+				$content = self::add_ids_and_jumpto_links( "h$i", $content );
+			}
+			$quick_links = '<p class="quick-links"><small>Quick Links: ';
+			foreach( $items as $item ) {
+				$quick_links .= '<a href="#' . sanitize_title_with_dashes( $item[3] )  . '">' . ucwords( strtolower( $item[3] ) ) . '</a> | ';
+			}
+			$quick_links = rtrim( $quick_links, ' |' ) . '</small></p>';
+			$content = $quick_links . PHP_EOL . PHP_EOL . $content;
+		}
+
 		return $content;
+	}
+
+	protected static function add_ids_and_jumpto_links( $tag, $content ) {
+		$items = self::get_tags( $tag, $content );
+		$first = true;
+		$matches = array();
+		$replacements = array();
+
+		foreach ( $items as $item ) {
+			$replacement = '';
+			$matches[] = $item[0];
+			$id = sanitize_title_with_dashes($item[2]);
+
+			if ( ! $first ) {
+				$replacement .= '<p class="toc-jump"><a href="#top">' . __( 'Top &uarr;', 'wporg' ) . '</a></p>';
+			} else {
+				$first = false;
+			}
+			$a11y_text      = sprintf( '<span class="screen-reader-text">%s</span>', $item[2] );
+			$anchor         = sprintf( '<a href="#%1$s" class="anchor"><span aria-hidden="true">#</span>%2$s</a>', $id, $a11y_text );
+			$replacement   .= sprintf( '<%1$s class="toc-heading" id="%2$s" tabindex="-1">%3$s %4$s</%1$s>', $tag, $id, $item[2], $anchor );
+			$replacements[] = $replacement;
+		}
+
+		if ( $replacements ) {
+			$content = str_replace( $matches, $replacements, $content );
+		}
+
+		return $content;
+	}
+
+	private static function get_tags( $tag, $content ) {
+		preg_match_all( "/(<{$tag}>)(.*)(<\/{$tag}>)/", $content, $matches, PREG_SET_ORDER );
+		return $matches;
 	}
 
 }
