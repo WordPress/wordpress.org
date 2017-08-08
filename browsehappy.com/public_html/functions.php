@@ -63,7 +63,7 @@ function browsehappy_get_browser_data( $browser = false ) {
 			'wikidata' => 'Q1575',
 			'normalized' => 1, // just first number
 			'facebook' => 'internetexplorer',
-			'url' => 'http://windows.microsoft.com/ie',
+			'url' => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
 			'info' => __( '&#8220;Designed to help you take control of your privacy and browse with confidence. Free from&nbsp;Microsoft.&#8221;', 'browsehappy' ),
 		),
 	);
