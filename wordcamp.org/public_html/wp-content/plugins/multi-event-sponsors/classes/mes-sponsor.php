@@ -18,10 +18,11 @@ class MES_Sponsor {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',        array( $this, 'create_post_type' ) );
-		add_action( 'admin_init',  array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post',   array( $this, 'save_post' ), 10, 2 );
-		add_filter( 'the_content', array( $this, 'add_header_footer_text' ) );
+		add_action( 'init',                  array( $this, 'create_post_type' ) );
+		add_action( 'admin_init',            array( $this, 'add_meta_boxes' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ), 20 );
+		add_action( 'save_post',             array( $this, 'save_post' ), 10, 2 );
+		add_filter( 'the_content',           array( $this, 'add_header_footer_text' ) );
 	}
 
 	/**
@@ -86,6 +87,14 @@ class MES_Sponsor {
 			'normal',
 			'default'
 		);
+
+		add_meta_box(
+			'sponsor-agreement',
+			__( 'Sponsor Agreement', 'wordcamporg' ),
+			array( $this, 'markup_meta_boxes' ),
+			MES_Sponsor::POST_TYPE_SLUG,
+			'side'
+		);
 	}
 
 	/**
@@ -125,9 +134,27 @@ class MES_Sponsor {
 
 				$view = 'metabox-contact-information.php';
 				break;
+
+			case 'sponsor-agreement':
+				$agreement_id  = get_post_meta( $post->ID, 'mes_sponsor_agreement', true );
+				$agreement_url = wp_get_attachment_url( $agreement_id );
+				$view          = 'metabox-sponsor-agreement.php';
+				break;
 		}
 
 		require_once( dirname( __DIR__ ) . '/views/'. $view );
+	}
+
+	/**
+	 * Enqueue admin scripts.
+	 */
+	function admin_enqueue() {
+		global $post_type;
+
+		// Enqueues scripts and styles for sponsors admin page
+		if ( self::POST_TYPE_SLUG == $post_type && wp_script_is( 'wcb-spon', 'registered' ) ) {
+			wp_enqueue_script( 'wcb-spon' );
+		}
 	}
 
 	/**
@@ -205,6 +232,13 @@ class MES_Sponsor {
 			} else {
 				delete_post_meta( $post_id, "mes_$field" );
 			}
+		}
+
+		$sponsor_agreement = filter_input( INPUT_POST, '_wcpt_sponsor_agreement', FILTER_SANITIZE_NUMBER_INT );
+		if ( $sponsor_agreement ) {
+			update_post_meta( $post_id, 'mes_sponsor_agreement', $sponsor_agreement );
+		} else {
+			delete_post_meta( $post_id, 'mes_sponsor_agreement' );
 		}
 	}
 

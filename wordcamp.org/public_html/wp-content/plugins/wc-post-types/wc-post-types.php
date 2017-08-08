@@ -207,6 +207,27 @@ class WordCamp_Post_Types_Plugin {
 	function admin_enqueue_scripts() {
 		global $post_type;
 
+		// Register
+		wp_register_script(
+			'wcb-spon', // Avoid "sponsor" since that's a trigger word for ad blockers.
+			plugins_url( 'js/wcb-spon.js', __FILE__ ),
+			array( 'jquery', 'backbone', 'media-views' ),
+			1,
+			true
+		);
+		wp_localize_script(
+			'wcb-spon',
+			'wcbSponsors',
+			array(
+				'l10n' => array(
+					'modalTitle' => __( 'Sponsor Agreement', 'wordcamporg' ),
+				),
+				'modal' => array(
+					'allowedTypes' => array( 'image', 'application/pdf' )
+				),
+			)
+		);
+
 		// Enqueues scripts and styles for session admin page
 		if ( 'wcb_session' == $post_type ) {
 			wp_enqueue_script( 'jquery-ui-datepicker' );
@@ -216,26 +237,7 @@ class WordCamp_Post_Types_Plugin {
 
 		// Enqueues scripts and styles for sponsors admin page
 		if ( 'wcb_sponsor' == $post_type ) {
-			wp_enqueue_script(
-				'wcb-spon', // Avoid "sponsor" since that's a trigger word for ad blockers.
-				plugins_url( 'js/wcb-spon.js', __FILE__ ),
-				array( 'jquery', 'backbone', 'media-views' ),
-				1,
-				true
-			);
-
-			wp_localize_script(
-				'wcb-spon',
-				'wcbSponsors',
-				array(
-					'l10n' => array(
-						'modalTitle' => __( 'Sponsor Agreement', 'wordcamporg' ),
-					),
-					'modal' => array(
-						'allowedTypes' => array( 'image', 'application/pdf' )
-					),
-				)
-			);
+			wp_enqueue_script( 'wcb-spon' );
 		}
 	}
 

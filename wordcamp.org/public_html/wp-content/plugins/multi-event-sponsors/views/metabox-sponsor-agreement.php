@@ -3,6 +3,14 @@
 /* @var string $agreement_url */
 ?>
 
+<?php
+// Use the WC Post Types template if available.
+$template_file = dirname( plugin_dir_path( __FILE__ ), 2 ) . '/wc-post-types/views/sponsors/metabox-sponsor-agreement.php';
+if ( is_readable( $template_file ) ) :
+	require_once $template_file;
+else :
+// WC Post Types template unavailable.
+?>
 <p id="sponsor-agreement-description-container" class="description hidden">
 	<?php
 	printf(
@@ -29,3 +37,4 @@
 </p>
 
 <input id="sponsor-agreement-id" name="_wcpt_sponsor_agreement" type="hidden" value="<?php echo esc_attr( $agreement_id ); ?>" />
+<?php endif; ?>
