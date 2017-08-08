@@ -138,6 +138,7 @@ class MES_Sponsor {
 			case 'sponsor-agreement':
 				$agreement_id  = get_post_meta( $post->ID, 'mes_sponsor_agreement', true );
 				$agreement_url = wp_get_attachment_url( $agreement_id );
+				$mes_id        = false;
 				$view          = 'metabox-sponsor-agreement.php';
 				break;
 		}

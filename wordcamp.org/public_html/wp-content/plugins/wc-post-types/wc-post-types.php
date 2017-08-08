@@ -1696,6 +1696,21 @@ class WordCamp_Post_Types_Plugin {
 		$agreement_id  = get_post_meta( $sponsor->ID, '_wcpt_sponsor_agreement', true );
 		$agreement_url = wp_get_attachment_url( $agreement_id );
 
+		$mes_id = get_post_meta( $sponsor->ID, '_mes_id', true );
+
+		if ( $mes_id ) {
+			switch_to_blog( BLOG_ID_CURRENT_SITE ); // central.wordcamp.org
+
+			$mes_agreement_id = get_post_meta( $mes_id, 'mes_sponsor_agreement', true );
+			if ( $mes_agreement_id ) {
+				$agreement_url = wp_get_attachment_url( $mes_agreement_id );
+			} else {
+				$agreement_url = '';
+			}
+
+			restore_current_blog();
+		}
+
 		require_once( __DIR__ . '/views/sponsors/metabox-sponsor-agreement.php' );
 	}
 

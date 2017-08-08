@@ -1,7 +1,12 @@
 <?php
 /* @var int $agreement_id */
 /* @var string $agreement_url */
+/* @var int $mes_id */
 ?>
+
+<?php if ( $mes_id ) : ?>
+	<p class="description"><?php _e( 'This sponsor has a multi-event agreement.', 'wordcamporg' ); ?></p>
+<?php endif; ?>
 
 <p id="sponsor-agreement-description-container" class="description hidden">
 	<?php
@@ -22,10 +27,10 @@
 </p>
 
 <p id="sponsor-agreement-view-container" class="hidden">
-	<a id="sponsor-agreement-view" class="button secondary" href="<?php echo esc_url( $agreement_url ); ?>" target="sponsor-agreement"><?php esc_html_e( 'View Agreement', 'wordcamporg' ); ?></a>
+	<a id="sponsor-agreement-view" class="button secondary<?php if ( ! $agreement_url ) echo ' hidden'; ?>" href="<?php echo esc_url( $agreement_url ); ?>" target="sponsor-agreement"><?php esc_html_e( 'View Agreement', 'wordcamporg' ); ?></a>
 </p>
 <p id="sponsor-agreement-remove-container" class="hidden">
 	<a id="sponsor-agreement-remove" href="#"><?php esc_html_e( 'Remove Agreement', 'wordcamporg' ); ?></a>
 </p>
 
-<input id="sponsor-agreement-id" name="_wcpt_sponsor_agreement" type="hidden" value="<?php echo esc_attr( $agreement_id ); ?>" />
+<input id="sponsor-agreement-id" name="_wcpt_sponsor_agreement" type="hidden" value="<?php echo esc_attr( $agreement_id ); ?>" <?php disabled( $mes_id > 0 ); ?> />

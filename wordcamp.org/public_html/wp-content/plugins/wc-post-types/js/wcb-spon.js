@@ -31,7 +31,7 @@
 				var attachment = self.frame.state().get( 'selection' ).first().toJSON();
 
 				self.$input.val( attachment.id );
-				self.elements.$view.find( 'a' ).first().attr( 'href', attachment.url );
+				self.elements.$view.find( 'a' ).first().attr( 'href', attachment.url ).removeClass( 'hidden' );
 				self.toggleElements();
 			} );
 
@@ -62,14 +62,22 @@
 		/**
 		 * Toggle the visibility of metabox elements based on the value of the hidden field.
 		 *
+		 * If the hidden field is disabled, it means the sponsor is a multi-event sponsor, so a
+		 * camp-specific agreement should not be added.
+		 *
 		 * @returns {wcbSponsors.view.Agreement}
 		 */
 		toggleElements: function() {
-			var agreementId         = this.$input.val(),
+			var isMES               = this.$input.is( ':disabled' ),
+				agreementId         = this.$input.val(),
 				$uiWithoutAgreement = this.elements.$upload.add( this.elements.$description ),
 				$uiWithAgreement    = this.elements.$view.add( this.elements.$remove );
 
-			if ( agreementId ) {
+			if ( isMES ) {
+				$uiWithoutAgreement.hide();
+				this.elements.$remove.hide();
+				this.elements.$view.show();
+			} else if ( agreementId ) {
 				$uiWithoutAgreement.hide();
 				$uiWithAgreement.show();
 			} else {
