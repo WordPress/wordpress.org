@@ -3,7 +3,7 @@ Browse Happy
 
 Browse Happy is site that identifies the latest versions of modern web browsers in an effort to raise the awareness of the options available. Its goal is to promote use of the most up-to-date browsers for their better security, support, features, performance, and implementation of web standards.
 
-This repository is the theme used for the site [Browse Happy](http://browsehappy.com). The site is powered by [WordPress](https://wordpress.org) and as such this is just a standard (if specific and custom) WordPress theme.
+This repository is the theme used for the site [Browse Happy](https://browsehappy.com). The site is powered by [WordPress](https://wordpress.org) and as such this is just a standard (if specific and custom) WordPress theme.
 
 The official repository is actually located at <https://meta.svn.wordpress.org/sites/trunk/browsehappy.com/>, with an [associated component](https://meta.trac.wordpress.org/query?status=accepted&status=assigned&status=new&status=reopened&status=reviewing&component=browsehappy.com&col=id&col=summary&col=component&col=owner&col=type&col=status&col=priority&order=priority) on the Meta Trac system for bug reports.
 
