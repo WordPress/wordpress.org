@@ -376,14 +376,18 @@ class Hooks {
 	 * Display extra topic fields after content.
 	 */
 	public function display_extra_topic_fields() {
-		$site_url = get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true );
+		$topic_id = bbp_get_topic_id();
 
-		// Display site URL for logged-in users.
-		if ( is_user_logged_in() && $site_url ) {
-			printf( '<p>%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
-				__( 'Site URL:', 'wporg-forums' ),
-				esc_url( $site_url )
-			);
+		if ( Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id( $topic_id ) ) {
+			$site_url = get_post_meta( $topic_id, self::SITE_URL_META, true );
+
+			// Display site URL for logged-in users.
+			if ( is_user_logged_in() && $site_url ) {
+				printf( '<p>%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
+					__( 'Site URL:', 'wporg-forums' ),
+					esc_url( $site_url )
+				);
+			}
 		}
 	}
 
@@ -391,13 +395,17 @@ class Hooks {
 	 * Add extra topic fields after Title field in topic form.
 	 */
 	public function add_extra_topic_fields() {
-		$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( bbp_get_topic_id(), self::SITE_URL_META, true ) : '';
-		?>
-		<p>
-			<label for="site_url"><?php _e( 'URL of the site or page you need help with:', 'wporg-forums' ) ?></label><br />
-			<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="100" />
-		</p>
-		<?php
+		$topic_id = bbp_get_topic_id();
+
+		if ( Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id( $topic_id ) ) :
+			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
+			?>
+			<p>
+				<label for="site_url"><?php _e( 'URL of the site or page you need help with:', 'wporg-forums' ) ?></label><br />
+				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="100" />
+			</p>
+			<?php
+		endif;
 	}
 
 	/**
@@ -408,6 +416,10 @@ class Hooks {
 	public function handle_extra_topic_fields( $topic_id ) {
 		// Handle "URL of the site or page you need help with" field.
 		if ( isset( $_POST['site_url'] ) ) {
+			if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
+				return;
+			}
+
 			$site_url = esc_url_raw( apply_filters( 'pre_user_url', $_POST['site_url'] ) );
 
 			if ( $site_url ) {
