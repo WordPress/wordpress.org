@@ -268,7 +268,10 @@ function browsehappy_locale_notice() {
 		return;
 	?>
 	<div id="i18n-alert">
-		<p><?php printf( __( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' ), '/?locale=en' ); ?></p>
+		<p><?php
+			/* translators: "English" should be translated directly and not to the name of your language. */
+			printf( __( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' ), '/?locale=en' );
+		?></p>
 	</div>
 	<?php
 }
