@@ -4,7 +4,7 @@ namespace WordPressdotorg\Forums;
 
 class Hooks {
 
-	const SITE_URL_META = 'site_url';
+	const SITE_URL_META = '_wporg_bbp_topic_site_url';
 
 	public function __construct() {
 		// Basic behavior filters and actions.
