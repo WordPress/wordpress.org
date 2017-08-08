@@ -100,7 +100,12 @@ class DevHub_CLI {
 		$created = 0;
 		foreach( $manifest as $doc ) {
 			// Already exists
-			if ( wp_filter_object_list( $existing, array( 'cmd_path' => $doc['cmd_path'] ) ) ) {
+			$existing_doc = wp_filter_object_list( $existing, array( 'cmd_path' => $doc['cmd_path'] ) );
+			if ( $existing_doc ) {
+				$existing_doc = array_shift( $existing_doc );
+				if ( ! empty( $doc['repo_url'] ) ) {
+					update_post_meta( $existing_doc['post_id'], 'repo_url', esc_url_raw( $doc['repo_url'] ) );
+				}
 				continue;
 			}
 			if ( self::process_manifest_doc( $doc, $existing, $manifest ) ) {
@@ -131,6 +136,9 @@ class DevHub_CLI {
 		$post = self::create_post_from_manifest_doc( $doc, $post_parent );
 		if ( $post ) {
 			$cmd_path = rtrim( str_replace( home_url( 'cli/commands/' ), '', get_permalink( $post->ID ) ), '/' );
+			if ( ! empty( $doc['repo_url'] ) ) {
+				update_post_meta( $post->ID, 'repo_url', esc_url_raw( $doc['repo_url'] ) );
+			}
 			$existing[ $cmd_path ] = array(
 				'post_id'   => $post->ID,
 				'cmd_path'  => $cmd_path,
