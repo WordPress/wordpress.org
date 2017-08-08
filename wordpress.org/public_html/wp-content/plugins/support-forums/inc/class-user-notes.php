@@ -4,6 +4,8 @@ namespace WordPressdotorg\Forums;
 
 class User_Notes {
 
+	const META = '_wporg_bbp_user_notes';
+
 	/**
 	 * An array of all notes for each user.
 	 *
@@ -73,7 +75,7 @@ class User_Notes {
 		}
 
 		// Get an array of existing notes, or create an array if there are none.
-		$user_notes = get_user_meta( $user_id, '_wporg_bbp_user_notes', true );
+		$user_notes = get_user_meta( $user_id, self::META, true );
 		if ( ! $user_notes ) {
 			$user_notes = array();
 		}
@@ -110,7 +112,7 @@ class User_Notes {
 			}
 		}
 
-		update_user_meta( $user_id, '_wporg_bbp_user_notes', $user_notes );
+		update_user_meta( $user_id, self::META, $user_notes );
 
 		$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 
@@ -147,7 +149,7 @@ class User_Notes {
 		}
 
 		// Get an array of existing notes.
-		$user_notes = get_user_meta( $user_id, '_wporg_bbp_user_notes', true );
+		$user_notes = get_user_meta( $user_id, self::META, true );
 		if ( ! $user_notes ) {
 			return;
 		}
@@ -159,7 +161,7 @@ class User_Notes {
 			$user_notes = array_combine( range( 1, count( $user_notes ) ), array_values( $user_notes ) );
 		}
 
-		update_user_meta( $user_id, '_wporg_bbp_user_notes', $user_notes );
+		update_user_meta( $user_id, self::META, $user_notes );
 
 		$redirect_url = remove_query_arg( array( 'action', 'user_id', 'note_id', '_wpnonce' ) );
 
@@ -189,7 +191,7 @@ class User_Notes {
 			return $this->user_notes[ $user_id ];
 		}
 
-		$user_notes = get_user_meta( $user_id, '_wporg_bbp_user_notes', true );
+		$user_notes = get_user_meta( $user_id, self::META, true );
 		if ( ! $user_notes ) {
 			$user_notes = array();
 		}
