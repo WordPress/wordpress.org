@@ -2841,6 +2841,21 @@ section {
 	text-decoration: underline;
 }
 
+.bbpress #bbpress-forums p.wporg-bbp-topic-site-url {
+	border-top: 1px solid #eee;
+	padding-top: 0.5rem;
+}
+
+.bbpress #bbpress-forums p.wporg-bbp-topic-site-url:before {
+	content: "\f103";
+	color: #000;
+	font-family: dashicons;
+	font: normal 16px/1 'dashicons';
+	margin-left: 5px;
+	float: right;
+	padding-top: 3px;
+}
+
 .bbpress #bbpress-forums .wporg-bbp-user-flag.flagged a {
 	color: #f00;
 }
