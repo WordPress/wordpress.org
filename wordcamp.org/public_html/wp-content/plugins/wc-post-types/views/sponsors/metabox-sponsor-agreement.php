@@ -6,7 +6,7 @@
 	<?php
 	printf(
 		wp_kses(
-			__( '<strong>Instructions:</strong> Upload a PDF or image file of the signed, dated sponsor agreement. You can generate an agreement for this sponsor <a href="%s">here</a>.', 'wordcamporg' ),
+			__( '<strong>Instructions:</strong> You can generate an agreement for this sponsor <a href="%s">here</a>. Upload a PDF or image file of the signed, dated sponsor agreement.', 'wordcamporg' ),
 			array(
 				'a' => array( 'href' => true ),
 				'strong' => true,
@@ -17,7 +17,7 @@
 	?>
 </p>
 <p id="sponsor-agreement-upload-container" class="hidden">
-	<a id="sponsor-agreement-upload" class="button secondary" href="#"><?php esc_html_e( 'Upload Signed Agreement', 'wordcamporg' ); ?></a>
+	<a id="sponsor-agreement-upload" class="button secondary" href="#"><?php esc_html_e( 'Attach Signed Agreement', 'wordcamporg' ); ?></a>
 </p>
 
 <p id="sponsor-agreement-view-container" class="hidden">
