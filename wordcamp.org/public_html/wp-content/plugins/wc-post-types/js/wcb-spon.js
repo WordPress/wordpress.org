@@ -18,6 +18,12 @@
 
 			this.$input = $( '#sponsor-agreement-id' );
 
+			// Bail if the input field doesn't exist, which indicates that this is
+			// a multi-event sponsor whose agreement can't be modified on individual sites.
+			if ( this.$input.length < 1 ) {
+				return this;
+			}
+
 			this.frame = wp.media( {
 				id: 'sponsor-agreement-media-modal',
 				title: wcbSponsors.l10n.modalTitle,
@@ -62,22 +68,14 @@
 		/**
 		 * Toggle the visibility of metabox elements based on the value of the hidden field.
 		 *
-		 * If the hidden field is disabled, it means the sponsor is a multi-event sponsor, so a
-		 * camp-specific agreement should not be added.
-		 *
 		 * @returns {wcbSponsors.view.Agreement}
 		 */
 		toggleElements: function() {
-			var isMES               = this.$input.is( ':disabled' ),
-				agreementId         = this.$input.val(),
+			var agreementId         = this.$input.val(),
 				$uiWithoutAgreement = this.elements.$upload.add( this.elements.$description ),
 				$uiWithAgreement    = this.elements.$view.add( this.elements.$remove );
 
-			if ( isMES ) {
-				$uiWithoutAgreement.hide();
-				this.elements.$remove.hide();
-				this.elements.$view.show();
-			} else if ( agreementId ) {
+			if ( agreementId ) {
 				$uiWithoutAgreement.hide();
 				$uiWithAgreement.show();
 			} else {
