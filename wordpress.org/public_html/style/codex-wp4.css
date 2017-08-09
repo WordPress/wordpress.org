@@ -223,3 +223,19 @@ margin: 1em 0;
 
 .new, .new:link, .new:visited { color: red !important; }
 .new:hover, .new:active { text-decoration: underline !important; }
+
+body.wporg-responsive.wporg-codex .col-10 {
+	margin-left: 14px;
+}
+body.wporg-responsive.wporg-codex .col-2 {
+	position: inherit;
+}
+@media screen and (max-width: 974px) {
+	body.wporg-responsive.wporg-codex .wrapper {
+		display: inherit;
+	}
+	body.wporg-responsive.wporg-codex .col-2 {
+		width: inherit;
+	}
+}
+
