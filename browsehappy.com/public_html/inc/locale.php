@@ -37,21 +37,54 @@ class Browse_Happy_Locale {
 	}
 
 	static function guess_locale() {
-		if ( ! isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) )
+		if ( ! isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
 			return;
-
-		if ( ! preg_match_all( '/([a-z]{2,}(\-[a-z]{2,})?)/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches ) )
-			return;
-
-		$locales = $matches[0];
-
-		foreach ( $locales as $locale ) {
-			if ( strpos( $locale, 'en' ) === 0 )
-				continue;
-
-			if ( $maybe = self::check_variants( $locale ) )
-				return $maybe;
 		}
+
+		$locales = array();
+		$variant = '';
+
+		$langs = explode( ',', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+
+		foreach ( $langs as $lang ) {
+			$lang   = str_replace( 'q=', '', $lang );
+			$parts  = explode( ';', trim( $lang ) );
+			$locale = $parts[0];
+			$weight = empty( $parts[1] ) ? '1.0' : $parts[1];
+
+			$locales[ $locale ] = $weight;
+		}
+
+		// Sort locales by browser-provided weighting.
+		arsort( $locales, SORT_NUMERIC );
+
+		// Find the best locale variant.
+		foreach ( array_keys( $locales ) as $locale_pref ) {
+			// Preference for 'en' or 'en-US' forces default language.
+			if ( in_array( $locale_pref, array( 'en', 'en-US' ) ) ) {
+				break;
+			}
+
+			// Check for the closest language variant.
+			if ( $maybe = self::check_variants( $locale_pref ) ) {
+				$variant = $maybe;
+			}
+
+			// For English, only use an exact variant, otherwise fall back to default.
+			if ( 0 === strpos( $locale_pref, 'en' ) ) {
+				if ( $variant && $variant != str_replace( '-', '_', $locale_pref ) ) {
+					$variant = '';
+				}
+				break;
+			}
+
+			// Stop searching if a valid variant has been found.
+			if ( $variant ) {
+				break;
+			}
+		}
+
+		return $variant;
 	}
 
 	static function check_variants( $locale ) {
