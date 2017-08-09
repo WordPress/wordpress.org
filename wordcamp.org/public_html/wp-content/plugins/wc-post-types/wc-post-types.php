@@ -1442,18 +1442,13 @@ class WordCamp_Post_Types_Plugin {
 	 * Fired during add_meta_boxes, adds extra meta boxes to our custom post types.
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'speaker-info',      __( 'Speaker Info',      'wordcamporg'  ), array( $this, 'metabox_speaker_info'   ), 'wcb_speaker',   'side' );
-		add_meta_box( 'organizer-info',    __( 'Organizer Info',    'wordcamporg'  ), array( $this, 'metabox_organizer_info' ), 'wcb_organizer', 'side' );
-		add_meta_box( 'speakers-list',     __( 'Speakers',          'wordcamporg'  ), array( $this, 'metabox_speakers_list'  ), 'wcb_session',   'side' );
-		add_meta_box( 'session-info',      __( 'Session Info',      'wordcamporg'  ), array( $this, 'metabox_session_info'   ), 'wcb_session',   'normal' );
-		add_meta_box( 'sponsor-info',      __( 'Sponsor Info',      'wordcamporg'  ), array( $this, 'metabox_sponsor_info'   ), 'wcb_sponsor',   'normal' );
-
-		// Enable on 2017.testing only for testing purposes.
-		if ( ! defined( 'WORDCAMP_ENVIRONMENT' ) || 'development' === WORDCAMP_ENVIRONMENT || 829 === get_current_blog_id() ) {
-			add_meta_box( 'sponsor-agreement', __( 'Sponsor Agreement', 'wordcamporg' ),  array( $this, 'metabox_sponsor_agreement' ), 'wcb_sponsor', 'side'   );
-		}
-
-		add_meta_box( 'invoice-sponsor',   __( 'Invoice Sponsor',   'wordcamporg' ),  array( $this, 'metabox_invoice_sponsor' ), 'wcb_sponsor', 'side'   );
+		add_meta_box( 'speaker-info',      __( 'Speaker Info',      'wordcamporg'  ), array( $this, 'metabox_speaker_info'      ), 'wcb_speaker',   'side'   );
+		add_meta_box( 'organizer-info',    __( 'Organizer Info',    'wordcamporg'  ), array( $this, 'metabox_organizer_info'    ), 'wcb_organizer', 'side'   );
+		add_meta_box( 'speakers-list',     __( 'Speakers',          'wordcamporg'  ), array( $this, 'metabox_speakers_list'     ), 'wcb_session',   'side'   );
+		add_meta_box( 'session-info',      __( 'Session Info',      'wordcamporg'  ), array( $this, 'metabox_session_info'      ), 'wcb_session',   'normal' );
+		add_meta_box( 'sponsor-info',      __( 'Sponsor Info',      'wordcamporg'  ), array( $this, 'metabox_sponsor_info'      ), 'wcb_sponsor',   'normal' );
+		add_meta_box( 'sponsor-agreement', __( 'Sponsor Agreement', 'wordcamporg'  ), array( $this, 'metabox_sponsor_agreement' ), 'wcb_sponsor',   'side'   );
+		add_meta_box( 'invoice-sponsor',   __( 'Invoice Sponsor',   'wordcamporg'  ), array( $this, 'metabox_invoice_sponsor'   ), 'wcb_sponsor',   'side'   );
 	}
 
 	/**
