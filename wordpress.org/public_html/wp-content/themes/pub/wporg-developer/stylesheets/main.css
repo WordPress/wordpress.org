@@ -2276,7 +2276,7 @@ input {
   padding: .8rem 1.2rem;
   margin: .4rem 0;
   text-decoration: none;
-  -webkit-appearance: button;
+  -webkit-appearance: none;
 }
 
 .single-command .devhub-wrap a.button:hover, .single-command .devhub-wrap button:hover, .single-command .devhub-wrap input[type="button"]:hover, .single-command .devhub-wrap input[type="reset"]:hover, .single-command .devhub-wrap input[type="submit"]:hover {
