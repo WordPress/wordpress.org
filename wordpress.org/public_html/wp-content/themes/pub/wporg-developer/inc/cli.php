@@ -272,12 +272,7 @@ class DevHub_CLI {
 			return $content;
 		}
 
-		static $doing_filter;
-
-		if ( isset( $doing_filter ) && $doing_filter ) {
-			return $content;
-		}
-		$doing_filter = true;
+		remove_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
@@ -361,7 +356,7 @@ class DevHub_CLI {
 			$content = '<p class="excerpt">' . $excerpt . '</p>' . PHP_EOL . $content;
 		}
 
-		$doing_filter = false;
+		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 
 		return $content;
 	}
