@@ -271,6 +271,14 @@ class DevHub_CLI {
 		if ( 'command' !== get_post_type() || ! is_singular() ) {
 			return $content;
 		}
+
+		static $doing_filter;
+
+		if ( isset( $doing_filter ) && $doing_filter ) {
+			return $content;
+		}
+		$doing_filter = true;
+
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
 
@@ -352,6 +360,8 @@ class DevHub_CLI {
 		if ( $excerpt ) {
 			$content = '<p class="excerpt">' . $excerpt . '</p>' . PHP_EOL . $content;
 		}
+
+		$doing_filter = false;
 
 		return $content;
 	}
