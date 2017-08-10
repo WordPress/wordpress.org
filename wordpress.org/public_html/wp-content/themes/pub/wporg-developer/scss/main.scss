@@ -1889,19 +1889,31 @@
 		padding: 0;
 		font-size: 3.5rem;
 		margin-top: 3rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 		font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
 		a {
 			color: #000;
 		}
 	}
+	
+	.entry-content {
+		margin-top: 2rem;
+	}
 
 	.excerpt {
-		margin-bottom: .8rem;
+		margin-bottom: 1.3rem;
 	}
 
 	.quick-links {
-		margin-bottom: 2.8rem;
+		margin-left: 0.5rem;
+		color: #ABABAB;
+		a {
+			text-decoration: underline;
+			color: #ABABAB;
+			&:hover {
+				color: #757575;
+			}
+		}
 	}
 
 	.toc-jump {
@@ -2012,12 +2024,13 @@
 	}
 
 	.github-tracker {
-		margin-bottom: 1.5em;
+		margin-bottom: 2.5rem;
 		img.icon-github {
 			width: 23px;
 			position: relative;
 			top: 6px;
 			margin-right: 5px;
+			cursor: pointer;
 		}
 	}
 }

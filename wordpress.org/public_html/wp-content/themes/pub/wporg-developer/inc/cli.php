@@ -13,6 +13,7 @@ class DevHub_CLI {
 		add_action( 'pre_get_posts', array( __CLASS__, 'action_pre_get_posts' ) );
 		add_action( 'devhub_cli_manifest_import', array( __CLASS__, 'action_devhub_cli_manifest_import' ) );
 		add_action( 'devhub_cli_markdown_import', array( __CLASS__, 'action_devhub_cli_markdown_import' ) );
+		add_filter( 'breadcrumb_trail', array( __CLASS__, 'filter_breadcrumb_trail' ) );
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 	}
 
@@ -265,6 +266,27 @@ class DevHub_CLI {
 	}
 
 	/**
+	 * Filter the breadcrumb trail to include quick links
+	 */
+	public static function filter_breadcrumb_trail( $breadcrumbs ) {
+		if ( 'command' !== get_post_type() || ! is_singular() ) {
+			return $content;
+		}
+
+		$content = get_queried_object()->post_content;
+		$items = self::get_tags( 'h([1-4])', $content );
+		if ( count( $items ) > 1 ) {
+			$quick_links = '<span class="quick-links">(';
+			foreach( $items as $item ) {
+				$quick_links .= '<a href="#' . sanitize_title_with_dashes( $item[3] )  . '">' . strtolower( $item[3] ) . '</a>|';
+			}
+			$quick_links = rtrim( $quick_links, '|' ) . ')</span>';
+			$breadcrumbs = str_replace( '</div>', $quick_links . '</div>', $breadcrumbs );
+		}
+		return $breadcrumbs;
+	}
+
+	/**
 	 * Filter the content of command pages
 	 */
 	public static function filter_the_content( $content ) {
@@ -310,7 +332,6 @@ class DevHub_CLI {
 			$content .= PHP_EOL . $subcommands;
 		}
 
-		$contributing_bits = array();
 		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
 		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
 		$open_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aopen';
@@ -339,41 +360,33 @@ class DevHub_CLI {
 		<div class="github-tracker">
 			<?php if ( $repo_url ) : ?>
 				<a href="<?php echo esc_url( $repo_url ); ?>"><img src="https://make.wordpress.org/cli/wp-content/plugins/wporg-cli/assets/images/github-mark.svg" class="icon-github" /></a>
-				<a href="<?php echo esc_url( rtrim( $repo_url, '/' ) . '/issues/new' ); ?>" class="button">Create New Issue</a>
 			<?php endif; ?>
 			<div class="btn-group">
 				<a href="<?php echo esc_url( $open_issues ); ?>" class="button">View Open Issues<?php if ( false !== $issue_count['open'] ) { ?> <span class="green">(<?php echo (int) $issue_count['open']; ?>)</span><?php } ?></a>
 				<a href="<?php echo esc_url( $closed_issues ); ?>" class="button">View Closed Issues<?php if ( false !== $issue_count['closed'] ) { ?> <span class="red">(<?php echo (int) $issue_count['closed']; ?>)</span><?php } ?></a>
 			</div>
+			<?php if ( $repo_url ) : ?>
+				<a href="<?php echo esc_url( rtrim( $repo_url, '/' ) . '/issues/new' ); ?>" class="button">Create New Issue</a>
+			<?php endif; ?>
 		</div>
 		<?php
 		$issues = ob_get_clean();
-		$contributing_bits[] = $issues;
-		$contributing_bits[] = '<p>Command documentation is regenerated at every release. To add or update an example, please submit a pull request against the corresponding part of the codebase.</p>';
-		$contributing_bits[] = '<p>See <a href="https://make.wordpress.org/cli/handbook/contributing/">contributing guidelines</a> for full details on contributing.</p>';
-
-		$contributing = '<h3>CONTRIBUTING</h3>' . PHP_EOL . implode( PHP_EOL, $contributing_bits );
-		$content .= $contributing;
-
-		// Add 'Quick Links' across the top
-		$items = self::get_tags( 'h([1-4])', $content );
-		if ( count( $items ) > 1 ) {
-			for ( $i = 1; $i <= 4; $i++ ) {
-				$content = self::add_ids_and_jumpto_links( "h$i", $content );
-			}
-			$quick_links = '<p class="quick-links"><small>Quick Links: ';
-			foreach( $items as $item ) {
-				$quick_links .= '<a href="#' . sanitize_title_with_dashes( $item[3] )  . '">' . ucwords( strtolower( $item[3] ) ) . '</a> | ';
-			}
-			$quick_links = rtrim( $quick_links, ' |' ) . '</small></p>';
-			$content = $quick_links . PHP_EOL . PHP_EOL . $content;
-		}
+		$content = $issues . PHP_EOL . PHP_EOL . $content;
 
 		// Include the excerpt in the main content well
 		$excerpt = get_the_excerpt();
 		if ( $excerpt ) {
 			$content = '<p class="excerpt">' . $excerpt . '</p>' . PHP_EOL . $content;
 		}
+
+		$items = self::get_tags( 'h([1-4])', $content );
+		if ( count( $items ) > 1 ) {
+			for ( $i = 1; $i <= 4; $i++ ) {
+				$content = self::add_ids_and_jumpto_links( "h$i", $content );
+			}
+		}
+
+		$content .= '<p><em>Command documentation is regenerated at every release. To add or update an example, please submit a pull request against the corresponding part of the codebase.</em></p>';
 
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 

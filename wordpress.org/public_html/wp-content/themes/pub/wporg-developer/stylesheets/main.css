@@ -2203,7 +2203,7 @@ input {
   padding: 0;
   font-size: 3.5rem;
   margin-top: 3rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
 }
 
@@ -2211,12 +2211,26 @@ input {
   color: #000;
 }
 
+.single-command #content .entry-content {
+  margin-top: 2rem;
+}
+
 .single-command #content .excerpt {
-  margin-bottom: .8rem;
+  margin-bottom: 1.3rem;
 }
 
 .single-command #content .quick-links {
-  margin-bottom: 2.8rem;
+  margin-left: 0.5rem;
+  color: #ABABAB;
+}
+
+.single-command #content .quick-links a {
+  text-decoration: underline;
+  color: #ABABAB;
+}
+
+.single-command #content .quick-links a:hover {
+  color: #757575;
 }
 
 .single-command #content .toc-jump {
@@ -2325,7 +2339,7 @@ input {
 }
 
 .single-command .github-tracker {
-  margin-bottom: 1.5em;
+  margin-bottom: 2.5rem;
 }
 
 .single-command .github-tracker img.icon-github {
@@ -2333,4 +2347,5 @@ input {
   position: relative;
   top: 6px;
   margin-right: 5px;
+  cursor: pointer;
 }
