@@ -348,7 +348,7 @@ class DevHub_CLI {
 					$data = json_decode( wp_remote_retrieve_body( $response ), true );
 					if ( isset( $data['total_count'] ) ) {
 						$value = $data['total_count'];
-						$ttl = 30 * MINUTE_IN_SECONDS;
+						$ttl = 2 * HOUR_IN_SECONDS;
 					}
 				}
 				set_transient( $cache_key, $value, $ttl );
