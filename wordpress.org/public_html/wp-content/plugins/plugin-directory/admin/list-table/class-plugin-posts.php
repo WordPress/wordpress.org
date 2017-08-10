@@ -318,6 +318,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
 			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
 			<span class="spinner"></span>
+			<input type="hidden" name="post_author" value="" />
 			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />
 			<input type="hidden" name="screen" value="<?php echo esc_attr( $screen->id ); ?>" />
 			<span class="error" style="display:none"></span>
