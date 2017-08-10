@@ -315,6 +315,25 @@ class DevHub_CLI {
 		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
 		$open_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aopen';
 		$closed_issues = 'https://github.com/issues?q=label%3A' . urlencode( 'command:' . str_replace( ' ', '-', $cmd_slug ) ) . '+sort%3Aupdated-desc+org%3Awp-cli+is%3Aclosed';
+		$issue_count = array( 'open' => false, 'closed' => false );
+		foreach( $issue_count as $type => $value ) {
+			$cache_key = 'wpcli_issue_count_' . md5( $cmd_slug . $type );
+			$value = get_transient( $cache_key );
+			if ( false === $value ) {
+				$request_url = 'https://api.github.com/search/issues?q=' . rawurlencode( 'label:command:' . str_replace( ' ', '-', $cmd_slug ) . ' org:wp-cli state:' . $type );
+				$response = wp_remote_get( $request_url );
+				$ttl = 2 * MINUTE_IN_SECONDS;
+				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
+					$data = json_decode( wp_remote_retrieve_body( $response ), true );
+					if ( isset( $data['total_count'] ) ) {
+						$value = $data['total_count'];
+						$ttl = 30 * MINUTE_IN_SECONDS;
+					}
+				}
+				set_transient( $cache_key, $value, $ttl );
+			}
+			$issue_count[ $type ] = $value;
+		}
 		ob_start();
 		?>
 		<div class="github-tracker">
@@ -323,8 +342,8 @@ class DevHub_CLI {
 				<a href="<?php echo esc_url( rtrim( $repo_url, '/' ) . '/issues/new' ); ?>" class="button">Create New Issue</a>
 			<?php endif; ?>
 			<div class="btn-group">
-				<a href="<?php echo esc_url( $open_issues ); ?>" class="button">View Open Issues</a>
-				<a href="<?php echo esc_url( $closed_issues ); ?>" class="button">View Closed Issues</a>
+				<a href="<?php echo esc_url( $open_issues ); ?>" class="button">View Open Issues<?php if ( false !== $issue_count['open'] ) { ?> <span class="green">(<?php echo (int) $issue_count['open']; ?>)</span><?php } ?></a>
+				<a href="<?php echo esc_url( $closed_issues ); ?>" class="button">View Closed Issues<?php if ( false !== $issue_count['closed'] ) { ?> <span class="red">(<?php echo (int) $issue_count['closed']; ?>)</span><?php } ?></a>
 			</div>
 		</div>
 		<?php

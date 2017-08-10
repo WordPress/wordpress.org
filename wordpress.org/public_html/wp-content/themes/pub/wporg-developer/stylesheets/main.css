@@ -2293,8 +2293,6 @@ input {
 
 .single-command .devhub-wrap a.button > span, .single-command .devhub-wrap button > span, .single-command .devhub-wrap input[type="button"] > span, .single-command .devhub-wrap input[type="reset"] > span, .single-command .devhub-wrap input[type="submit"] > span {
   color: #757575;
-  line-height: 1;
-  font-size: .7rem;
 }
 
 .single-command .devhub-wrap a.button > span.red, .single-command .devhub-wrap button > span.red, .single-command .devhub-wrap input[type="button"] > span.red, .single-command .devhub-wrap input[type="reset"] > span.red, .single-command .devhub-wrap input[type="submit"] > span.red {
