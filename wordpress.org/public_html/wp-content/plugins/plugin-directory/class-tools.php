@@ -370,6 +370,7 @@ class Tools {
 		$users = array();
 
 		// Include the subscribers from the bbPress plugin directory until we've fully migrated.
+		/*
 		$bbpress_subscribers = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( 'SELECT m.meta_value FROM ' . PLUGINS_TABLE_PREFIX . 'topics t JOIN ' . PLUGINS_TABLE_PREFIX . 'meta m ON ( m.object_type = "bb_topic" AND m.object_id = t.topic_id AND m.meta_key = "commit_subscribed") WHERE t.topic_slug = %s', $plugin_slug ) ) );
 		if ( $bbpress_subscribers ) {
 			foreach ( array_keys( $bbpress_subscribers ) as $subscriber_id ) {
@@ -378,6 +379,7 @@ class Tools {
 				}
 			}
 		}
+		 */
 
 		// Plugin Committers are always subscrived to plugin commits.
 		$committers  = self::get_plugin_committers( $plugin_slug );
