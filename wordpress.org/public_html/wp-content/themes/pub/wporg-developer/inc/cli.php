@@ -270,7 +270,7 @@ class DevHub_CLI {
 	 */
 	public static function filter_breadcrumb_trail( $breadcrumbs ) {
 		if ( 'command' !== get_post_type() || ! is_singular() ) {
-			return $content;
+			return $breadcrumbs;
 		}
 
 		$content = get_queried_object()->post_content;
