@@ -12,6 +12,7 @@ class WordCamp_Coming_Soon_Page {
 		add_action( 'wp_enqueue_scripts', array( $this, 'manage_plugin_theme_stylesheets' ), 99 );    // (hopefully) after all plugins/themes have enqueued their styles
 		add_action( 'wp_head',            array( $this, 'render_dynamic_styles' ) );
 		add_filter( 'template_include',   array( $this, 'override_theme_template' ) );
+		add_action( 'template_redirect',  array( $this, 'disable_jetpacks_open_graph' ) );
 
 		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
 	}
@@ -102,6 +103,15 @@ class WordCamp_Coming_Soon_Page {
 		}
 
 		return $template;
+	}
+
+	/**
+	 * Disable Jetpack's Open Graph meta tags when the Coming Soon page is active
+	 */
+	public function disable_jetpacks_open_graph() {
+		if ( $this->override_theme_template ) {
+			add_filter( 'jetpack_enable_open_graph', '__return_false' );
+		}
 	}
 
 	/**
