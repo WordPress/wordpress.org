@@ -7,7 +7,6 @@ echo Display::get_display_css(); ?>
 	<thead>
 		<tr>
 			<th style="width:100px">Revision</th>
-			<th style="width:100px">Status</th>
 			<th>Host</th>
 			<th>PHP Version</th>
 			<th>Database Version</th>
@@ -16,7 +15,7 @@ echo Display::get_display_css(); ?>
 	</thead>
 	<tbody>
 		<?php
-		$total_cols = 6;
+		$total_cols = 5;
 		foreach ( $revisions as $revision ) :
 			$rev_id = (int) ltrim( $revision->post_name, 'r' );
 		?>
@@ -49,8 +48,14 @@ echo Display::get_display_css(); ?>
 					}
 					?>
 				<tr>
-					<td></td>
-					<td><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a></td>
+					<td><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a>
+					<?php
+					$display_time = Display::get_display_time( $report->ID );
+					if ( $display_time ) :
+					?>
+						<br /><small><?php echo esc_html( $display_time ); ?></small>
+					<?php endif; ?>
+					</td>
 					<td><?php echo esc_html( $host ); ?></td>
 					<td><?php echo esc_html( Display::get_display_php_version( $report->ID ) ); ?></td>
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>

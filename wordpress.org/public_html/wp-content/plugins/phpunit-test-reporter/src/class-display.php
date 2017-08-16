@@ -41,6 +41,7 @@ class Display {
 					get_queried_object(),
 				),
 			) );
+			$content = '<p><a href="' . esc_url( home_url( 'test-results/' ) ) . '">&larr; Test Results</a></p>' . PHP_EOL . PHP_EOL . $content;
 		}
 
 		return $content;
@@ -121,6 +122,21 @@ class Display {
 		</style>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get the time for display
+	 *
+	 * @return string
+	 */
+	public static function get_display_time( $report_id ) {
+		$results = get_post_meta( $report_id, 'results', true );
+		if ( empty( $results['time'] ) ) {
+			return '';
+		}
+		$minutes = floor( ( (int) $results['time'] / 60 ) % 60 );
+		$seconds = (int) $results['time'] % 60;
+		return "{$minutes}m {$seconds}s";
 	}
 
 	/**

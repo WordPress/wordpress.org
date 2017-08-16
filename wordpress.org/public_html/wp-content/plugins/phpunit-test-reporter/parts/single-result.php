@@ -23,7 +23,14 @@ if ( $parent ) :
 <p><a href="<?php echo esc_url( get_permalink( $parent ) ); ?>">&larr; <?php echo esc_html( $parent->post_name ) . ': ' . apply_filters( 'the_title', get_the_title( $parent ) ); ?></a></p>
 <?php endif; ?>
 
-<p><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a></p>
+<p><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a>
+<?php
+$display_time = Display::get_display_time( $report->ID );
+if ( $display_time ) :
+?>
+	<br /><small><?php echo esc_html( $display_time ); ?></small>
+<?php endif; ?>
+</p>
 
 <h2>Environment</h2>
 

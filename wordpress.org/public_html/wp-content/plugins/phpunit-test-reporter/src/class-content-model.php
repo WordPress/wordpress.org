@@ -16,9 +16,12 @@ class Content_Model {
 					'singular_name' => __( 'Test Result', 'ptr' ),
 				),
 				'public' => true,
-				'has_archive' => true,
+				'has_archive' => false,
 				'show_in_rest' => true,
 				'hierarchical' => true,
+				'rewrite' => array(
+					'slug' => 'test-results',
+				),
 				'supports' => array(
 					'title',
 					'editor',
