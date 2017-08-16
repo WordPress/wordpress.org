@@ -17,7 +17,7 @@ class Display {
 	 * Filter post classes
 	 */
 	public static function filter_post_class( $classes ) {
-		if ( is_singular( 'result' ) ) {
+		if ( is_singular( 'result' ) && get_the_ID() === get_queried_object_id() ) {
 			$classes[] = 'page';
 		}
 		return $classes;
@@ -27,7 +27,7 @@ class Display {
 	 * Render the data for an individual result within the main content well
 	 */
 	public static function filter_the_content( $content ) {
-		if ( ! is_singular( 'result' ) ) {
+		if ( ! is_singular( 'result' ) || get_the_ID() !== get_queried_object_id() ) {
 			return $content;
 		}
 
