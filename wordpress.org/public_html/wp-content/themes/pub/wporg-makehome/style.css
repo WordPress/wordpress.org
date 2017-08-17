@@ -215,7 +215,7 @@ section.get-involved article h2:before {
 }
 
 section.get-involved article.make-core          h2:before { content: "\f475"; }
-section.get-involved article.make-design		h2:before { content: "\f309"; }
+section.get-involved article.make-design        h2:before { content: "\f309"; }
 section.get-involved article.make-mobile        h2:before { content: "\f470"; }
 section.get-involved article.make-accessibility h2:before { content: "\f483"; }
 section.get-involved article.make-polyglots     h2:before { content: '\f326'; }
@@ -227,9 +227,10 @@ section.get-involved article.make-community     h2:before { content: '\f307'; }
 section.get-involved article.make-meta          h2:before { content: '\f325'; }
 section.get-involved article.make-training      h2:before { content: '\f118'; }
 section.get-involved article.make-flow          h2:before { content: '\f115'; }
-section.get-involved article.make-tv          	h2:before { content: '\f235'; }
+section.get-involved article.make-tv            h2:before { content: '\f235'; }
 section.get-involved article.make-marketing     h2:before { content: '\f130'; }
-section.get-involved article.make-cli			h2:before { content: '\f345'; }
+section.get-involved article.make-cli           h2:before { content: '\f345'; }
+section.get-involved article.make-hosting       h2:before { content: '\f176'; }
 
 section.get-involved article.featured-group h2:after {
 	display: block;
