@@ -299,6 +299,9 @@ class DevHub_CLI {
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
 
+		// Transform HTML entity artifacts back to their original
+		$content = str_replace( '&amp;#039;', '\'', $content );
+
 		$content = self::append_subcommands( $content );
 
 		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
