@@ -477,8 +477,8 @@ namespace DevHub {
 	 * @return string
 	 */
 	function get_site_section_title() {
-		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
-		switch ( $parts[1] ) {
+		$parts = explode( '/', $GLOBALS['wp']->request );
+		switch ( $parts[0] ) {
 			case 'resources':
 			case 'resource':
 				return sprintf( __( 'Developer Resources: %s', 'wporg' ), get_the_title() );
@@ -488,6 +488,8 @@ namespace DevHub {
 				return __( 'Plugin Handbook', 'wporg' );
 			case 'themes':
 				return __( 'Theme Handbook', 'wporg' );
+			case 'cli':
+				return __( 'WP-CLI Commands', 'wporg' );
 			default:
 				return __( 'Developer Resources', 'wporg' );
 		}
