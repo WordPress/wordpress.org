@@ -460,12 +460,14 @@ namespace DevHub {
 	 * @return string
 	 */
 	function get_site_section_url() {
-		$parts = explode( '/', $_SERVER['REQUEST_URI'] );
-		switch ( $parts[1] ) {
+		$parts = explode( '/', $GLOBALS['wp']->request );
+		switch ( $parts[0] ) {
 			case 'reference':
 			case 'plugins':
 			case 'themes':
 				return home_url( '/' . $parts[1] . '/' );
+			case 'cli':
+				return home_url( '/cli/commands/' );
 			default:
 				return home_url( '/' );
 		}
