@@ -2211,6 +2211,10 @@ input {
   color: #000;
 }
 
+.single-command #content h2.entry-title a span {
+  color: #949494;
+}
+
 .single-command #content .entry-content {
   margin-top: 2rem;
 }
