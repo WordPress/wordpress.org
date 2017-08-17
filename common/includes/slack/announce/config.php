@@ -218,6 +218,8 @@ function get_whitelist() {
 			'bethsoderberg',
 			'courtneyengle',
 			'chanthaboune',
+			'melindahelt',
+			'juliekuehl',
 		),
 		'wceu-volunteers' => array(
 			'lanche86',
