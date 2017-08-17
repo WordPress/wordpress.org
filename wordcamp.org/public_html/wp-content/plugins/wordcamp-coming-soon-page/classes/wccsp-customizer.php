@@ -32,8 +32,7 @@ class WCCSP_Customizer {
 				'title'      => __( 'Coming Soon Page', 'wordcamporg' ),
 
 				'description' => __(
-					'When enabled, the Coming Soon page will be displayed to logged-out users,
-					giving you a chance to setup all of your content before your site is visible to the world.',
+					'When enabled, the Coming Soon page will be displayed to logged-out users, giving you a chance to setup all of your content before your site is visible to the world.',
 					'wordcamporg'
                 ) . $GLOBALS['WCCSP_Settings']->render_admin_notices(),
 			)

@@ -29,10 +29,13 @@ defined( 'WPINC' ) or die();
 	<?php endif; ?>
 
 	<p>
-		<?php _e(
-			'Remote CSS allows you to develop your CSS in any environment that you choose, and with whatever tools that you prefer.
-			<button type="button" id="wcrcss-open-help-tab" class="button-link">Open the Help tab</button> for detailed instructions.',
-			'wordcamporg'
+		<?php printf(
+			// translators: %s: button attributes
+			__(
+				'Remote CSS allows you to develop your CSS in any environment that you choose, and with whatever tools that you prefer. <button %s>Open the Help tab</button> for detailed instructions.',
+				'wordcamporg'
+			),
+			'type="button" id="wcrcss-open-help-tab" class="button-link"'
 		); ?>
 	</p>
 

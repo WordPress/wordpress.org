@@ -84,10 +84,13 @@ function notify_import_rules_stripped() {
 	<div class="notice notice-warning">
 		<p>
 			<?php printf(
-				__( 'WARNING: <code>@import</code> rules were stripped for security reasons.
-				Please use <a href="%s">the Fonts tool</a> to add web fonts, and merge other stylesheets directly into your custom CSS.',
-				'wordcamporg' ),
-              admin_url( 'themes.php?page=wc-fonts-options' )
+				// translators: 1: '@import', 2: Fonts tool URL
+				__(
+					'WARNING: %1$s rules were stripped for security reasons. Please use <a href="%2$s">the Fonts tool</a> to add web fonts, and merge other stylesheets directly into your custom CSS.',
+					'wordcamporg'
+				),
+				'<code>@import</code>',
+				admin_url( 'themes.php?page=wc-fonts-options' )
             ); ?>
 		</p>
 	</div>

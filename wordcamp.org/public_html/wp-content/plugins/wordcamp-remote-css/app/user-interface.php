@@ -138,10 +138,11 @@ function validate_remote_css_url( $remote_css_url ) {
 
 	if ( ! in_array( $parsed_url['host'], $trusted_hostnames, true ) ) {
 		throw new \Exception( sprintf(
-			__( 'Due to security constraints, only certain third-party platforms can be used,
-			and the URL you provided is not hosted by one of our currently-supported platforms.
-			To request that it be added, please <a href="%s">create a ticket</a> on Meta Trac.',
-			'wordcamporg' ),
+			// translators: %s: WordPress Meta Trac URL
+			__(
+				'Due to security constraints, only certain third-party platforms can be used. We currently only support GitHub, but more platforms can be added if there\'s interest from organizers. To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.',
+				'wordcamporg'
+			),
 			'https://meta.trac.wordpress.org/newticket'
 		) );
 	}
@@ -154,12 +155,14 @@ function validate_remote_css_url( $remote_css_url ) {
 	 * sanitized, which would further couple the plugin to Jetpack.
 	 */
 	if ( '.css' !== substr( $parsed_url['path'], strlen( $parsed_url['path'] ) - 4, 4 ) ) {
-		throw new \Exception(
-			__( 'The URL must be a vanilla CSS file ending in <code>.css</code>.
-			If you\'d like to use SASS/LESS, please compile it into vanilla CSS on your server,
-			and then enter the URL for that file.',
-			'wordcamporg' )
-		);
+		throw new \Exception( sprintf(
+			// translators: %s: '.css'
+			__(
+				'The URL must be a vanilla CSS file ending in %s. If you\'d like to use SASS/LESS, please compile it into vanilla CSS on your server, and then enter the URL for that file.',
+				'wordcamporg'
+			),
+			'<code>.css</code>'
+		) );
 	}
 
 	/*

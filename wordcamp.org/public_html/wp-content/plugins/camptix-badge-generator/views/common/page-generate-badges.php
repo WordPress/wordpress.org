@@ -7,8 +7,7 @@ defined( 'WPINC' ) or die();
 
 <p>
 	<?php _e(
-		'This tool will help you create personalized badges for attendees to wear during the event.
-		There are two methods for this, depending on your preferences:',
+		'This tool will help you create personalized badges for attendees to wear during the event. There are two methods for this, depending on your preferences:',
 		'wordcamporg'
 	); ?>
 </p>
@@ -50,10 +49,9 @@ defined( 'WPINC' ) or die();
 
 <p>
 	<?php printf(
+		// translators: 1: Gravatar.com URL, 2: Notify tool URL
 		__(
-			'Regardless of which method you choose, you\'ll get the best results if you encourage attendees to create <a href="%s">Gravatar</a> accounts before you create the badges.
-			You can use <a href="%s">the Notify tool</a> to e-mail everyone.
-			Make sure to tell them to create their Gravatar account using the same e-mail address that provided when purchasing a ticket.',
+			'Regardless of which method you choose, you\'ll get the best results if you encourage attendees to create <a href="%1$s">Gravatar</a> accounts before you create the badges. You can use <a href="%2$s">the Notify tool</a> to e-mail everyone. Make sure to tell them to create their Gravatar account using the same e-mail address that provided when purchasing a ticket.',
 			'wordcamporg'
 		),
 		'https://gravatar.com',

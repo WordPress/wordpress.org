@@ -13,9 +13,11 @@ defined( 'WPINC' ) or die();
 
 		<p>
 			<?php printf(
-				__( 'Due to security constraints, only certain third-party platforms can be used.
-				We currently only support GitHub, but more platforms can be added if there\'s interest from organizers.
-				To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.', 'wordcamporg' ),
+				// translators: %s: WordPress Meta Trac URL
+				__(
+					'Due to security constraints, only certain third-party platforms can be used. We currently only support GitHub, but more platforms can be added if there\'s interest from organizers. To request an additional platform, please <a href="%s">create a ticket</a> on Meta Trac.',
+					'wordcamporg'
+				),
 				'https://meta.trac.wordpress.org/newticket'
 			); ?>
 		</p>
@@ -31,8 +33,10 @@ defined( 'WPINC' ) or die();
 		</p>
 
 		<p>
-			<?php _e( "If you're using GitHub, you can enter the URL in any of the following formats,
-			but we'll convert them to use the GitHub API.", 'wordcamporg' ); ?>
+			<?php _e(
+				"If you're using GitHub, you can enter the URL in any of the following formats, but we'll convert them to use the GitHub API.",
+				'wordcamporg'
+			); ?>
 		</p>
 
 		<ul>
@@ -57,21 +61,28 @@ defined( 'WPINC' ) or die();
 		<p><?php _e( 'Click the <strong>Update</strong> button.', 'wordcamporg' ); ?></p>
 
 		<p>
-			<?php _e( "WordCamp.org will download the file, sanitize it, minify it, and store a local copy,
-			then enqueue the local copy as a stylesheet alongside your theme's default stylesheet.", 'wordcamporg' ); ?>
+			<?php _e(
+				"WordCamp.org will download the file, sanitize it, minify it, and store a local copy, then enqueue the local copy as a stylesheet alongside your theme's default stylesheet.",
+				'wordcamporg'
+			); ?>
 		</p>
 	</li>
 
 	<li>
-		<?php _e( 'The local copy will need to be <strong>synchronized</strong> whenever you make a change to the file.
-		You can either update manually by pushing the <strong>Update</strong> button again, or update automatically by setting up a webhook.
-		For instructions on setting up a webhook, open the <strong>Automated Synchronization</strong> tab.', 'wordcamporg' ); ?>
+		<?php _e(
+			'The local copy will need to be <strong>synchronized</strong> whenever you make a change to the file. You can either update manually by pushing the <strong>Update</strong> button again, or update automatically by setting up a webhook. For instructions on setting up a webhook, open the <strong>Automated Synchronization</strong> tab.',
+			'wordcamporg'
+		); ?>
 	</li>
 </ol>
 
 <p>
 	<?php printf(
-		__( 'If you run into any problems, you can ask for help in the <code>#meta-wordcamp</code> channel on <a href="%s">Slack</a>.', 'wordcamporg' ),
+		// translators: %s: WordPress Slack URL */
+		__(
+			'If you run into any problems, you can ask for help in the <code>#meta-wordcamp</code> channel on <a href="%s">Slack</a>.',
+			'wordcamporg'
+		),
 		'https://chat.wordpress.org'
 	); ?>
 </p>

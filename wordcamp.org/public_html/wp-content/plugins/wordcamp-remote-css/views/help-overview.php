@@ -10,8 +10,10 @@ defined( 'WPINC' ) or die();
 ?>
 
 <p>
-	<?php _e( 'Remote CSS gives you a lot more flexibility in how you develop your site than the Core/Jetpack editor.
-	For instance, you can:', 'wordcamporg' ); ?>
+	<?php _e(
+		'Remote CSS gives you a lot more flexibility in how you develop your site than the Core/Jetpack editor. For instance, you can:',
+		'wordcamporg'
+	); ?>
 </p>
 
 <ul>
@@ -24,19 +26,22 @@ defined( 'WPINC' ) or die();
 </ul>
 
 <p>
-	<?php _e( "You can use all of those tools, only some of them, or completely different ones.
-	It's up to you how you choose to work.", 'wordcamporg' ); ?>
+	<?php _e(
+		"You can use all of those tools, only some of them, or completely different ones. It's up to you how you choose to work.",
+		'wordcamporg'
+	); ?>
 </p>
 
 <p>
-	<?php _e( "This tool works by fetching your CSS file from a remote server (like GitHub.com), sanitizing the CSS, minifying it,
-	and then storing a local copy on WordCamp.org. The local copy is then enqueued as a stylesheet, either in addition to your theme's stylesheet,
-	or as a replacement for it. The local copy of the CSS is synchronized with the remote file whenever you press the <strong>Update</strong> button,
-	and you can also setup webhook notifications for automatic synchronization when the remote file changes.", 'wordcamporg' ); ?>
+	<?php _e(
+		"This tool works by fetching your CSS file from a remote server (like GitHub.com), sanitizing the CSS, minifying it, and then storing a local copy on WordCamp.org. The local copy is then enqueued as a stylesheet, either in addition to your theme's stylesheet, or as a replacement for it. The local copy of the CSS is synchronized with the remote file whenever you press the <strong>Update</strong> button, and you can also setup webhook notifications for automatic synchronization when the remote file changes.",
+		'wordcamporg'
+	); ?>
 </p>
 
 <p>
 	<?php printf(
+		// translators: %s: URL to Custom CSS section in the Customizer
 		__( 'If you\'re looking for something simpler, <a href="%s">the Core/Jetpack editor</a> is a great option.', 'wordcamporg' ),
 		esc_url( $custom_css_url )
 	); ?>

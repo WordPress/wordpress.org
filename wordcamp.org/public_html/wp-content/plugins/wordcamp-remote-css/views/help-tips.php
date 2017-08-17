@@ -19,9 +19,10 @@ defined( 'WPINC' ) or die();
 	</li>
 
 	<li>
-		<?php _e( "Don't use post IDs as selectors, because they can change between your development environment and production.
-		Instead, use the slug; e.g. <code>body.post-slug-call-for-volunteers</code>, or <code>body.wcb_speaker-slug-sergey-biryukov</code>.
-		Just make sure that you update your CSS if you rename a post.", 'wordcamporg' ); ?>
+		<?php _e(
+			"Don't use post IDs as selectors, because they can change between your development environment and production. Instead, use the slug; e.g. <code>body.post-slug-call-for-volunteers</code>, or <code>body.wcb_speaker-slug-sergey-biryukov</code>. Just make sure that you update your CSS if you rename a post.",
+			'wordcamporg'
+		); ?>
 	</li>
 
 	<li>
@@ -33,15 +34,18 @@ defined( 'WPINC' ) or die();
 
 	<li>
 		<?php printf(
-			__( 'Upload your images to <a href="%s">the Media Library</a> rather than hosting them on 3rd party servers.
-			That way, visitors will avoid an extra DNS request,
-			and you won\'t have to worry about them going offline if there\'s a problem with the external server.', 'wordcamporg' ),
+			__(
+				'Upload your images to <a href="%s">the Media Library</a> rather than hosting them on 3rd party servers. That way, visitors will avoid an extra DNS request, and you won\'t have to worry about them going offline if there\'s a problem with the external server.',
+				'wordcamporg'
+			),
 			esc_url( $media_library_url )
 		); ?>
 	</li>
 
 	<li>
-		<?php _e( "This tool plays nicely with the Core/Jetpack editor, and it's possible to use both.
-		If you do, the rules in the Core/Jetpack editor will take precedence.", 'wordcamporg' ); ?>
+		<?php _e(
+			"This tool plays nicely with the Core/Jetpack editor, and it's possible to use both. If you do, the rules in the Core/Jetpack editor will take precedence.",
+			'wordcamporg'
+		); ?>
 	</li>
 </ul>
