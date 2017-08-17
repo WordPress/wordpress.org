@@ -273,7 +273,7 @@ class DevHub_CLI {
 			return $breadcrumbs;
 		}
 
-		$content = get_queried_object()->post_content;
+		$content = self::append_subcommands( get_queried_object()->post_content );
 		$items = self::get_tags( 'h([1-4])', $content );
 		if ( count( $items ) > 1 ) {
 			$quick_links = '<span class="quick-links">(';
@@ -299,38 +299,7 @@ class DevHub_CLI {
 		// Transform emdash back to triple-dashes
 		$content = str_replace( '&#045;&#8211;', '&#045;&#045;&#045;', $content );
 
-		$children = get_children( array(
-			'post_parent'    => get_the_ID(),
-			'post_type'      => 'command',
-			'posts_per_page' => 250,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		) );
-		// Append subcommands if they exist
-		if ( $children ) {
-			ob_start();
-			?>
-			<h3>SUBCOMMANDS</h3>
-			<table>
-				<thead>
-				<tr>
-					<th>Name</th>
-					<th>Description</th>
-				</tr>
-				</thead>
-				<tbody>
-					<?php foreach( $children as $child ) : ?>
-						<tr>
-							<td><a href="<?php echo apply_filters( 'the_permalink', get_permalink( $child->ID ) ); ?>"><?php echo apply_filters( 'the_title', $child->post_title ); ?></a></td>
-							<td><?php echo apply_filters( 'the_excerpt', $child->post_excerpt ); ?></td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php
-			$subcommands = ob_get_clean();
-			$content .= PHP_EOL . $subcommands;
-		}
+		$content = self::append_subcommands( $content );
 
 		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
 		$cmd_slug = str_replace( 'wp ', '', get_the_title() );
@@ -390,6 +359,42 @@ class DevHub_CLI {
 
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 
+		return $content;
+	}
+
+	protected static function append_subcommands( $content ) {
+		$children = get_children( array(
+			'post_parent'    => get_the_ID(),
+			'post_type'      => 'command',
+			'posts_per_page' => 250,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		) );
+		// Append subcommands if they exist
+		if ( $children ) {
+			ob_start();
+			?>
+			<h3>SUBCOMMANDS</h3>
+			<table>
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+				</tr>
+				</thead>
+				<tbody>
+					<?php foreach( $children as $child ) : ?>
+						<tr>
+							<td><a href="<?php echo apply_filters( 'the_permalink', get_permalink( $child->ID ) ); ?>"><?php echo apply_filters( 'the_title', $child->post_title ); ?></a></td>
+							<td><?php echo apply_filters( 'the_excerpt', $child->post_excerpt ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php
+			$subcommands = ob_get_clean();
+			$content .= PHP_EOL . $subcommands;
+		}
 		return $content;
 	}
 
