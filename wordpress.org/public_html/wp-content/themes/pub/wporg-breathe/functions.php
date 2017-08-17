@@ -86,9 +86,7 @@ function welcome_box() {
 			$welcome->post_content = "<div class='content-area'>\n\n{$columns[0]}</div><div class='widget-area'>\n\n{$columns[1]}</div>";
 		}
 
-		global $post;
-		$post = $welcome;
-		setup_postdata( $post );
+		setup_postdata( $welcome );
 
 		// Disable Jetpack sharing buttons
 		add_filter( 'sharing_show', '__return_false' );
