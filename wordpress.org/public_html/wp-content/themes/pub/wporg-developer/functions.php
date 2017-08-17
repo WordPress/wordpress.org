@@ -223,6 +223,7 @@ function register_nav_menus() {
 
 	\register_nav_menus( array(
 		'devhub-menu' => __( 'Developer Resources Menu', 'wporg' ),
+		'devhub-cli-menu' => __( 'WP-CLI Commands Menu', 'wporg' ),
 	) );
 }
 

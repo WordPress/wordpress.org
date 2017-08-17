@@ -25,8 +25,10 @@ require WPORGPATH . 'header.php';
 				</<?php echo $tag; ?>>
 			</div>
 			<div class="devhub-menu">
-				<?php wp_nav_menu( array(
-					'theme_location'  => 'devhub-menu',
+				<?php
+				$active_menu = is_post_type_archive( 'command' ) || is_singular( 'command' ) ? 'devhub-cli-menu' : 'devhub-menu';
+				wp_nav_menu( array(
+					'theme_location'  => $active_menu,
 					'container_class' => 'menu-container',
 				) ); ?>
 			</div>
