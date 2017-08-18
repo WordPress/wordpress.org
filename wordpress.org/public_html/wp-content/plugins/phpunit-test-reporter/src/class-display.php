@@ -17,7 +17,9 @@ class Display {
 	 * Filter post classes
 	 */
 	public static function filter_post_class( $classes ) {
-		if ( is_singular( 'result' ) && get_the_ID() === get_queried_object_id() ) {
+		if ( is_singular( 'result' )
+			&& get_the_ID() === get_queried_object_id()
+			&& 'result' === get_post_type( get_the_ID() ) ) {
 			$classes[] = 'page';
 		}
 		return $classes;
@@ -27,7 +29,13 @@ class Display {
 	 * Render the data for an individual result within the main content well
 	 */
 	public static function filter_the_content( $content ) {
-		if ( ! is_singular( 'result' ) || get_the_ID() !== get_queried_object_id() ) {
+		if ( ! is_singular( 'result' )
+			|| get_the_ID() !== get_queried_object_id()
+			|| 'result' !== get_post_type( get_the_ID() ) ) {
+			return $content;
+		}
+
+		if ( ! did_action( 'loop_start' ) ) {
 			return $content;
 		}
 

@@ -75,11 +75,6 @@ function inline_scripts() {
 add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 
 function welcome_box() {
-	// Disable for make.wordpress.org/hosting/test-results/*
-	// because it breaks rendering of the page
-	if ( is_singular( 'result' ) ) {
-		return;
-	}
 	$welcome = get_page_by_path( 'welcome' );
 	$cookie  = 'welcome-' . get_current_blog_id();
 	$hash    = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
