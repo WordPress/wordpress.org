@@ -41,6 +41,7 @@ Nicolas Gallagher and Jonathan Neal http://necolas.github.io/normalize.css/
 	## Captions
 	## Galleries
 # WP.org Header
+# WP.org Overrides
 --------------------------------------------------------------*/
 /*--------------------------------------------------------------
 # Normalize
@@ -926,7 +927,7 @@ object {
 }
 
 /*--------------------------------------------------------------
-## WP.org Header
+# WP.org Header
 --------------------------------------------------------------*/
 #wporg-header h1 {
 	margin: auto
@@ -994,4 +995,22 @@ object {
 
 #wporg-header a:active, #wporg-header a:focus, #wporg-header a:hover {
 	text-decoration: none
+}
+
+/*--------------------------------------------------------------
+# WP.org Overrides
+--------------------------------------------------------------*/
+
+/* Make sure all headers inherit from Gutenberg styles, not .org styles */
+h1, h2, h3, h4, h5, h6 {
+	font-family: "Noto Serif", serif;
+}
+
+/* Override the `p a` styling for .org */
+.site-title a {
+	border-bottom: none;
+}
+
+.site-title a:hover {
+	border-bottom-color: #00a0d2;
 }
