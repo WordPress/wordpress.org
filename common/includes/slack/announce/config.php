@@ -115,6 +115,7 @@ function get_whitelist() {
 		),
 		'core-php' => array(
 			'flixos90',
+			'schlessera',
 		),
 		'core-restapi' => array(
 			'danielbachhuber',
