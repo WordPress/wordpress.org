@@ -2392,6 +2392,10 @@ body, #pagebody {
 	text-transform: uppercase;
 }
 
+.page .entry-content a {
+	text-decoration: underline;
+}
+
 .page .entry-content section {
 	padding: 2rem 0;
 }
