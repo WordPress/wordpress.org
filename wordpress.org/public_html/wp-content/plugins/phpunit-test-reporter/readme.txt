@@ -15,5 +15,5 @@ Captures and displays test results from the PHPUnit Test Runner
 
 == Changelog ==
 
-= 0.1.0 (April 15th, 2017) =
+= 0.1.0 (August 21st, 2017) =
 * Initial release.
