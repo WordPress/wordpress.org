@@ -24,6 +24,8 @@ require_once dirname( __FILE__ ) . '/src/class-display.php';
 add_action( 'init', array( 'PTR\Content_Model', 'action_init_register_post_type' ) );
 add_action( 'init', array( 'PTR\Content_Model', 'action_init_register_role' ) );
 add_action( 'init', array( 'PTR\Display', 'action_init_register_shortcode' ) );
+add_action( 'get_post_metadata', array( 'PTR\Display', 'filter_get_post_metadata' ), 10, 4 );
+add_action( 'body_class', array( 'PTR\Display', 'filter_body_class' ) );
 add_action( 'post_class', array( 'PTR\Display', 'filter_post_class' ) );
 add_action( 'the_content', array( 'PTR\Display', 'filter_the_content' ) );
 add_action( 'rest_api_init', array( 'PTR\RestAPI', 'register_routes' ) );

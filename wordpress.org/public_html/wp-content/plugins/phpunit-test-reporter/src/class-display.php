@@ -14,6 +14,32 @@ class Display {
 	}
 
 	/**
+	 * Use the full width template by default when available
+	 */
+	public static function filter_get_post_metadata( $check, $object_id, $meta_key, $single ) {
+		if ( 'result' !== get_post_type( $object_id )
+			|| '_wp_page_template' !== $meta_key ) {
+			return $check;
+		}
+		$template = 'page-templates/full-width.php';
+		$full_width = get_stylesheet_directory() . '/' . $template;
+		if ( ! file_exists( $full_width ) ) {
+			return $check;
+		}
+		return $single ? $template : array( $template );
+	}
+
+	/**
+	 * Filter body classes
+	 */
+	public static function filter_body_class( $classes ) {
+		if ( in_array( 'result-template-full-width', $classes, true ) ) {
+			$classes[] = 'page-template-full-width';
+		}
+		return $classes;
+	}
+
+	/**
 	 * Filter post classes
 	 */
 	public static function filter_post_class( $classes ) {
