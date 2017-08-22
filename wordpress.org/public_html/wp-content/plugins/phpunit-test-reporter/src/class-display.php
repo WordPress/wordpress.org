@@ -94,7 +94,7 @@ class Display {
 			'orderby'          => 'post_name',
 			'order'            => 'DESC',
 		);
-		$paged = get_query_var( 'paged' );
+		$paged = isset( $_GET['rpage'] ) ? (int) $_GET['rpage'] : 0;
 		if ( $paged ) {
 			$query_args['paged'] = $paged;
 		}
@@ -231,8 +231,9 @@ class Display {
 	}
 
 	private static function pagination( $query ) {
+		global $wp;
 		$bignum = 999999999;
-		$base_link = str_replace( $bignum, '%#%', esc_url( get_pagenum_link( $bignum ) ) );
+		$base_link = add_query_arg( 'rpage', '%#%', home_url( trailingslashit( $wp->request ) ) );
 		$max_num_pages = $query->max_num_pages;
 		$current_page = max( 1, $query->get( 'paged' ) );
 		$prev_page_label = '&lsaquo;';
