@@ -357,7 +357,8 @@ input {
   margin-top: 1em;
 }
 
-.devhub-wrap .devhub-menu .menu {
+.devhub-wrap .devhub-menu .menu,
+.devhub-wrap .devhub-cli-menu .menu {
   list-style: none;
   float: right;
   font-size: 14px;
@@ -366,12 +367,14 @@ input {
   margin-right: 15px;
 }
 
-.devhub-wrap .devhub-menu .menu li {
+.devhub-wrap .devhub-menu .menu li,
+.devhub-wrap .devhub-cli-menu .menu li {
   display: inline;
   padding-left: 20px;
 }
 
-.devhub-wrap .devhub-menu .menu a {
+.devhub-wrap .devhub-menu .menu a,
+.devhub-wrap .devhub-cli-menu .menu a {
   color: #555;
   font-weight: 400;
 }
@@ -2156,14 +2159,15 @@ input {
 }
 
 @media (max-width: 32em) {
-  .devhub-wrap .wp-parser-class .table-of-contents, .devhub-wrap .wp-parser-function .table-of-contents, .devhub-wrap .wp-parser-hook .table-of-contents, .devhub-wrap .wp-parser-method .table-of-contents {
+  .devhub-wrap .table-of-contents {
+    float: none;
+    margin-left: 0;
     width: 100%;
-    margin-bottom: 10px;
   }
-  .devhub-wrap .wp-parser-class section, .devhub-wrap .wp-parser-function section, .devhub-wrap .wp-parser-hook section, .devhub-wrap .wp-parser-method section {
+  .devhub-wrap section {
     overflow: inherit;
   }
-  .devhub-wrap .wp-parser-class hr, .devhub-wrap .wp-parser-function hr, .devhub-wrap .wp-parser-hook hr, .devhub-wrap .wp-parser-method hr {
+  .devhub-wrap hr {
     clear: both;
   }
 }

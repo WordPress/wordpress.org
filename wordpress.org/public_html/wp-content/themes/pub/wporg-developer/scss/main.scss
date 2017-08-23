@@ -1824,19 +1824,18 @@
 
 @media (max-width: 32em) {
 	.devhub-wrap {
-		.wp-parser-class, .wp-parser-function, .wp-parser-hook, .wp-parser-method {
-			.table-of-contents {
-				width: 100%;
-				margin-bottom: 10px;
-			}
+		.table-of-contents {
+			float: none;
+			margin-left: 0;
+			width: 100%;
+		}
 
-			section {
-				overflow: inherit;
-			}
+		section {
+			overflow: inherit;
+		}
 
-			hr {
-				clear: both;
-			}
+		hr {
+			clear: both;
 		}
 	}
 }
