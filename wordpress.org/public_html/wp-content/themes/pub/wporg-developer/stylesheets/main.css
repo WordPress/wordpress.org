@@ -2338,9 +2338,6 @@ input {
     right: -6px;
     border-radius: 3px 0 0 3px;
   }
-}
-
-@media (min-width: 571px) {
   .single-command .btn-group > a:last-child {
     border-radius: 0 3px 3px 0;
   }

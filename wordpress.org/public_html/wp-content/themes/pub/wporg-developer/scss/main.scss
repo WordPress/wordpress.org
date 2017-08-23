@@ -2012,14 +2012,12 @@
 		> a {
 			position: relative;
 			
-			&:first-child {
-				@media(min-width: 571px) {
+			@media(min-width: 571px) {
+				&:first-child {
 					right: -6px;
 					border-radius: 3px 0 0 3px;
 				}
-			}
-			&:last-child {
-				@media(min-width: 571px) {
+				&:last-child {
 					border-radius: 0 3px 3px 0;
 				}
 			}
