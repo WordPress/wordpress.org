@@ -86,7 +86,7 @@ class Display {
 	 */
 	public static function render_results( $atts ) {
 
-		$output = '<h2>PHPUnit Test Results</h2>' . PHP_EOL . PHP_EOL;
+		$output = '';
 		$query_args = array(
 			'posts_per_page'   => 5,
 			'post_type'        => 'result',
