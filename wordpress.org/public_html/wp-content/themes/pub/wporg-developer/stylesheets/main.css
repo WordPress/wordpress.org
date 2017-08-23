@@ -1091,9 +1091,9 @@ input {
   background-color: #2e6183;
   color: #ffffff;
   text-align: center;
-  margin-right: 10%;
+  margin-right: 26px;
+  margin-left: 4px;
   float: right;
-  left: 75%;
   padding: 5px;
   -webkit-border-bottom-right-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
