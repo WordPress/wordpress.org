@@ -381,12 +381,19 @@ class Hooks {
 		if ( Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id( $topic_id ) ) {
 			$site_url = get_post_meta( $topic_id, self::SITE_URL_META, true );
 
-			// Display site URL for logged-in users.
-			if ( is_user_logged_in() && $site_url ) {
-				printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
-					__( 'Site URL:', 'wporg-forums' ),
-					esc_url( $site_url )
-				);
+			if ( $site_url ) {
+				// Display site URL for logged-in users only.
+				if ( is_user_logged_in() ) {
+					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow">%2$s</a></p>',
+						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_url( $site_url )
+					);
+				} else {
+					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
+						__( 'The page I need help with:', 'wporg-forums' ),
+						sprintf( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ), wp_login_url() )
+					);
+				}
 			}
 		}
 	}
@@ -401,7 +408,7 @@ class Hooks {
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
-				<label for="site_url"><?php _e( 'URL of the site or page you need help with:', 'wporg-forums' ) ?></label><br />
+				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
 				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="100" />
 			</p>
 			<?php
