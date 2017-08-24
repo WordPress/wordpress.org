@@ -19,7 +19,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="new-reply-<?php bbp_topic_id(); ?>" class="bbp-reply-form">
 
-		<form id="new-post" name="new-post" method="post" action="<?php the_permalink(); ?>">
+		<form id="new-post" name="new-post" method="post" action="<?php ( bbp_is_reply_edit() ) ? bbp_reply_permalink() : '#new-post'; ?>">
 
 			<?php do_action( 'bbp_theme_before_reply_form' ); ?>
 

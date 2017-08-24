@@ -10,7 +10,7 @@
 
 	<div id="new-topic-<?php bbp_topic_id(); ?>" class="bbp-topic-form">
 
-		<form id="new-post" name="new-post" method="post" action="">
+		<form id="new-post" name="new-post" method="post" action="<?php ( bbp_is_topic_edit() ) ? bbp_topic_permalink() : '#new-post'; ?>">
 
 			<?php do_action( 'bbp_theme_before_topic_form' ); ?>
 
