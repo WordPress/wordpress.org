@@ -216,6 +216,7 @@ class Upload_Handler {
 				'meta_input'   => array(
 					'tested'                   => $readme->tested,
 					'requires'                 => $readme->requires,
+					'requires_php'             => $readme->requires_php,
 					'stable_tag'               => $readme->stable_tag,
 					'upgrade_notice'           => $readme->upgrade_notice,
 					'contributors'             => $readme->contributors,

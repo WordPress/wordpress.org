@@ -99,6 +99,7 @@ class Plugin extends Base {
 
 		$result['requires'] = get_post_meta( $post_id, 'requires', true ) ?: false;
 		$result['tested'] = get_post_meta( $post_id, 'tested', true ) ?: false;
+		$result['requires_php'] = get_post_meta( $post_id, 'requires_php', true ) ?: false;
 		$result['compatibility'] = array();
 		$result['rating'] = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
 		$result['ratings'] = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );

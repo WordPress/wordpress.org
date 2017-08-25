@@ -32,6 +32,11 @@ class Parser {
 	public $tested = '';
 
 	/**
+	 * @var string
+	 */
+	public $requires_php = '';
+
+	/**
 	 * @var array
 	 */
 	public $contributors = array();
@@ -117,6 +122,7 @@ class Parser {
 		'tested up to'      => 'tested',
 		'requires'          => 'requires',
 		'requires at least' => 'requires',
+		'requires php'      => 'requires_php',
 		'tags'              => 'tags',
 		'contributors'      => 'contributors',
 		'donate link'       => 'donate_link',
@@ -226,6 +232,9 @@ class Parser {
 		}
 		if ( ! empty( $headers['tested'] ) ) {
 			$this->tested = $headers['tested'];
+		}
+		if ( ! empty( $headers['requires_php'] ) ) {
+			$this->requires_php = $headers['requires_php'];
 		}
 		if ( ! empty( $headers['contributors'] ) ) {
 			$this->contributors = explode( ',', $headers['contributors'] );

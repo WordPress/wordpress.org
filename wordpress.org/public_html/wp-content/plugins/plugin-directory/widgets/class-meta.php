@@ -49,17 +49,22 @@ class Meta extends \WP_Widget {
 			</li>
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 
-            <?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
+			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
 				<li><?php 
 				_e( 'Requires WordPress Version:', 'wporg-plugins' );
 				echo '<strong>' . esc_html( $requires ) . '</strong>';
 				?></li>
-            <?php endif; ?>
-
-
+			<?php endif; ?>
 
 			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) : ?>
 				<li><?php printf( __( 'Tested up to: %s', 'wporg-plugins' ), '<strong>' . $tested_up_to . '</strong>' ); ?></li>
+			<?php endif; ?>
+
+			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
+				<li><?php 
+				_e( 'Requires PHP Version:', 'wporg-plugins' );
+				echo '<strong>' . esc_html( $requires_php ) . '</strong>';
+				?></li>
 			<?php endif; ?>
 
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>

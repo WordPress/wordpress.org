@@ -25,6 +25,7 @@ class Import {
 	public $readme_fields = array(
 		'tested',
 		'requires',
+		'requires_php',
 		'donate_link',
 		'license',
 		'license_uri',

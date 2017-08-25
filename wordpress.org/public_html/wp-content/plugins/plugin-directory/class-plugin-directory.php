@@ -369,6 +369,13 @@ class Plugin_Directory {
 			'show_in_rest'      => true,
 		) );
 
+		register_meta( 'post', 'requires_php', array(
+			'description'       => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
+			'single'            => true,
+			// TODO 'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+		) );
+
 		register_meta( 'post', 'stable_tag', array(
 			'description'       => __( 'Stable version of the plugin.', 'wporg-plugins' ),
 			'single'            => true,

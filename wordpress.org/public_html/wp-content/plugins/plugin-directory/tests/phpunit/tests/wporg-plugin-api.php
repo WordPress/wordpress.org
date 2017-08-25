@@ -23,6 +23,7 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 		'sections'          => true,
 		'tested'            => true,
 		'requires'          => true,
+		'requires_php'      => true,
 		'rating'            => true,
 		'ratings'           => true,
 		'downloaded'        => true,
@@ -241,6 +242,7 @@ class Tests_Plugins_API extends WP_UnitTestCase {
 			$this->assertObjectHasAttribute( 'tested', $plugin_info, 'Tested exists' );
 			$this->assertAttributeInternalType( 'string', 'tested', $plugin_info, 'Tested should be a string' );
 		}
+		$this->assertObjectHasAttribute( 'requires_php', $plugin_info, 'Requires PHP exists' );
 		$this->assertObjectHasAttribute( 'compatibility', $plugin_info, 'Compatibility exists' );
 		$this->assertAttributeInternalType( 'array', 'compatibility', $plugin_info, 'Compatibility should be an array' );
 

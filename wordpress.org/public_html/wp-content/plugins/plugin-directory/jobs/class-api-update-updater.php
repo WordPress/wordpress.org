@@ -71,6 +71,7 @@ class API_Update_Updater {
 			'plugin_name_san' => sanitize_title_with_dashes( get_post_meta( $post->ID, 'header_name', true ) ),
 			'tested'          => get_post_meta( $post->ID, 'tested', true ),
 			'requires'        => get_post_meta( $post->ID, 'requires', true ),
+			'requires_php'    => get_post_meta( $post->ID, 'requires_php', true ),
 			'upgrade_notice'  => '',
 			'last_updated'    => $post->post_modified,
 		);
@@ -122,6 +123,7 @@ CREATE TABLE `{$prefix}_update_source` (
   `plugin_name_san` varchar(255) NOT NULL DEFAULT '',
   `tested` varchar(128) NOT NULL DEFAULT '',
   `requires` varchar(128) NOT NULL DEFAULT '',
+  `requires_php` varchar(128) NOT NULL DEFAULT '',
   `upgrade_notice` text,
   `last_updated` datetime NOT NULL,
   PRIMARY KEY (`plugin_id`),

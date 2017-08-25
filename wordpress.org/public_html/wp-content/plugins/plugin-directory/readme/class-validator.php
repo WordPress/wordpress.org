@@ -75,6 +75,10 @@ class Validator {
 			/* Translators: Plugin header tag; */
 			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Tested up to</code>' );
 		}
+		if ( empty( $readme->requires_php ) ) {
+			/* Translators: Plugin header tag; */
+			$warnings[] = sprintf( __( '%s is missing.', 'wporg-plugins' ), '<code>Requires PHP</code>' );
+		}
 		if ( empty( $readme->stable_tag ) ) {
 			/* Translators: 1: Plugin header tag; 2: SVN directory; 3: Plugin header tag; */
 			$warnings[] = sprintf( __( '%1$s is missing.  Hint: If you treat %2$s as stable, put %3$s.', 'wporg-plugins' ), '<code>Stable tag</code>', '<code>/trunk/</code>', '<code>Stable tag: trunk</code>' );

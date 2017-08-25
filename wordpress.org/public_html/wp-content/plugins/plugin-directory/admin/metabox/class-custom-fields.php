@@ -14,6 +14,7 @@ class Custom_Fields {
 			'stable_tag' => 'Stable Tag',
 			'tested' => 'Tested With',
 			'requires' => 'Requires',
+			'requires_php' => 'Requires PHP',
 			'donate_link' => 'Donate URL',
 			'header_plugin_uri' => 'Plugin URI',
 			'header_author' => 'Plugin Author',
