@@ -78,7 +78,7 @@ function _get_wordcamps() {
 			'order'		  => 'asc',
 			'meta_query'	 => array( array(
 				'key'		=> 'Start Date (YYYY-mm-dd)',
-				'value'	  => strtotime( '-14 days' ),
+				'value'	  => strtotime( '-3 months' ),
 				'compare'	=> '>'
 			) )
 		) );
