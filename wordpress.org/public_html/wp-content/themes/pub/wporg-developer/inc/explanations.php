@@ -219,15 +219,10 @@ class WPORG_Explanations {
 				<div class="inside" style="padding-bottom:0;">
 					<strong><?php _e( 'Associated with: ', 'wporg' ); ?></strong>
 					<?php
-					// Edit link if the current user can edit, otherwise view link.
-					if ( current_user_can( 'edit_post', $post->post_parent ) ) :
-						edit_post_link( get_the_title( $post->post_parent ), '', '', $post->post_parent );
-					else :
-						printf( '<a href="%1$s">%2$s</a>',
-							esc_url( get_permalink( $post->post_parent ) ),
-							str_replace( 'Explanation: ', '', get_the_title( $post->post_parent ) )
-						);
-					endif;
+					printf( '<a href="%1$s">%2$s</a>',
+						esc_url( get_permalink( $post->post_parent ) ),
+						str_replace( 'Explanation: ', '', get_the_title( $post->post_parent ) )
+					);
 					?>
 				</div>
 			</div>
