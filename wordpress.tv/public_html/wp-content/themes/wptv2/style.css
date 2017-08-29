@@ -2505,7 +2505,8 @@ h3#comments {
 	margin: 0 7px;
 }
 
-.menu-footer-container {
+.menu-footer-container,
+#footer div.menu {
 	float: left;
 	line-height: 4em;
 	margin-left: 2px;
@@ -2513,20 +2514,24 @@ h3#comments {
 	margin-bottom: 0;
 }
 
-.menu-footer-container li {
+.menu-footer-container li,
+#footer div.menu li {
 	display: inline-block;
 	margin: 0 10px;
 }
 
-.menu-footer-container li:last-of-type:after {
+.menu-footer-container li:last-of-type:after,
+#footer div.menu li:last-of-type:after {
 	content: none;
 }
 
-.menu-footer-container a {
+.menu-footer-container a,
+#footer div.menu a {
 	color: #6d6d6d;
 }
 
-.menu-footer-container a:hover {
+.menu-footer-container a:hover,
+#footer div.menu a:hover {
 	color: #21759b;
 }
 
