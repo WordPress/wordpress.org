@@ -19,8 +19,24 @@ if ( have_comments() ) :
 ?>
 	<h3 id="comments">
 		<?php
-			printf( _nx( 'One response on &ldquo;%2$s&rdquo;', '%1$s responses on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'wptv' ),
-				number_format_i18n( get_comments_number() ), '<span>' . get_the_title() . '</span>' );
+			$comments_number = get_comments_number();
+			if ( 1 == $comments_number ) {
+				/* translators: %s: post title */
+				printf( _x( 'One response on &ldquo;%2$s&rdquo;', 'comments title', 'wptv' ), '<span>' . get_the_title() . '</span>' );
+			} else {
+				printf(
+					/* translators: 1: number of comments, 2: post title */
+					_nx(
+						'%1$s response on &ldquo;%2$s&rdquo;',
+						'%1$s responses on &ldquo;%2$s&rdquo;',
+						$comments_number,
+						'comments title',
+						'wptv'
+					),
+					number_format_i18n( $comments_number ),
+					'<span>' . get_the_title() . '</span>'
+				);
+			}
 		?>
 	</h3>
 
