@@ -1455,12 +1455,16 @@ blockquote {
 	margin-bottom: 22px;
 }
 
-ul#books, ul#otherbooks {
+.wporg-page-about-books #pagebody h2 {
+	margin-bottom: 1em;
+}
+
+#pagebody ul.books, ul#otherbooks {
 	list-style: none;
 	margin: 0;
 }
 
-#books .image, #otherbooks .image {
+#pagebody .books .image, #otherbooks .image {
 	width: 200px;
 	display: block;
 	float: left;
@@ -1469,15 +1473,15 @@ ul#books, ul#otherbooks {
 	border-right: 1px solid #dadada;
 }
 
-#books img, #otherbooks img {
+#pagebody .books img, #otherbooks img {
 	border: 1px solid #dadada;
 }
 
-#books.mobile img {
+#pagebody .books.mobile img {
 	border:none;
 }
 
-#books li, #otherbooks li {
+#pagebody .books li, #otherbooks li {
 	background: #f5f5f5;
 	border: 1px solid #dadada;
 	border-right-color: #eee;
@@ -1488,7 +1492,7 @@ ul#books, ul#otherbooks {
 	width: 100%;
 }
 
-#books h3, #otherbooks h3 {
+#pagebody .books h3, #otherbooks h3 {
 	margin: 18px 0 5px 0;
 	font: 21px Georgia, Times, "Times New Roman", serif;
 }
@@ -1501,27 +1505,27 @@ ul#books, ul#otherbooks {
 	font-size:18px;
 }
 
-#books p, #otherbooks p {
+#pagebody .books p, #otherbooks p {
 	padding-right: 22px;
 	padding-left: 22px;
 	margin-bottom: 7px;
 	line-height: 1.4em;
 }
 
-#books .author, #otherbooks .author {
+#pagebody .books .author, #otherbooks .author {
 	font: italic 15px Georgia, Times, "Times New Roman", serif;
 	margin-bottom: 11px;
 	color: #888;
 }
 
-#books .published, #otherbooks .published {
+#pagebody .books .published, #otherbooks .published {
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.2em;
 	color: #888;
 }
 
-#books h3 a, #otherbooks h3 a {
+#pagebody .books h3 a, #otherbooks h3 a {
 	font-weight: normal;
 }
 
@@ -2006,34 +2010,34 @@ img#wpstats {
 .wporg-page-mobile {
 	background-color: #f1f1f1;
 }
-.wporg-page-mobile ul#books {
+.wporg-page-mobile #pagebody ul.books {
 	display: -moz-box;
 	display: -ms-flexbox;
 	display: flex;
 	flex-wrap: wrap;
 }
-.wporg-page-mobile #books li {
+.wporg-page-mobile #pagebody .books li {
 	width: 49%;
 	margin-left: 1%;
 	clear: none;
 }
-.wporg-page-mobile #books li:first-child {
+.wporg-page-mobile #pagebody .books li:first-child {
 	margin-left: 0;
 	margin-right: 1%;
 }
-.wporg-responsive.wporg-page-mobile #books p {
+.wporg-responsive.wporg-page-mobile #pagebody .books p {
 	margin-bottom: 14px;
 }
-.wporg-responsive.wporg-page-mobile #books li {
+.wporg-responsive.wporg-page-mobile #pagebody .books li {
 	padding: 0 14px 15px;
 	box-sizing: border-box;
 	background-color: #fff;
 	border: 1px solid #dedede;
 }
-.wporg-responsive.wporg-page-mobile #books h3 {
+.wporg-responsive.wporg-page-mobile #pagebody .books h3 {
 	margin-bottom: 15px;
 }
-.wporg-responsive.wporg-page-mobile #books .image {
+.wporg-responsive.wporg-page-mobile #pagebody .books .image {
 	float: right;
 	border-right: 0;
 	border-left: 1px solid #dadada;
@@ -2119,7 +2123,7 @@ body.wporg-responsive .col-2 {
 		min-height: inherit;
 	}
 
-	.wporg-responsive.wporg-page-mobile #books li {
+	.wporg-responsive.wporg-page-mobile #pagebody .books li {
 		width: 100%;
 		margin-left: 0;
 		margin-right: 0;
@@ -2206,16 +2210,16 @@ body.wporg-responsive .col-2 {
 		display: none;
 	}
 
-	.wporg-page-about-books #books li {
+	.wporg-page-about-books #pagebody .books li {
 		padding: 0 18px 18px;
 		box-sizing: border-box;
 	}
-	.wporg-page-about-books #books .image {
+	.wporg-page-about-books #pagebody .books .image {
 		border-right: 0;
 		float: none;
 		width: inherit;
 	}
-	.wporg-page-about-books #books p {
+	.wporg-page-about-books #pagebody .books p {
 		padding-right: 0;
 		padding-left: 0;
 	}

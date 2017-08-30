@@ -218,31 +218,31 @@ a.rsslink {
 	float: right;
 }
 
-#books .image {
+#pagebody .books .image {
 	float: right;
 	border-left: 1px solid #dadada;
 }
 
-#books img {
+#pagebody .books img {
 	border: 1px solid #dadada;
 }
 
-#books li {
+#pagebody .books li {
 	border-left-color: #eee;
 	border-right-color: #dadada;
 	float: right;
 }
 
-#books h3 {
+#pagebody .books h3 {
 	font-family:sans-serif;
 }
 
-#books p {
+#pagebody .books p {
 	padding-left: 22px;
 	padding-right: 0;
 }
 
-#books .author {
+#pagebody .books .author {
 	font: normal 15px sans-serif;
 }
 
