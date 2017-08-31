@@ -155,7 +155,7 @@ class Meeting_Post_Type {
 				}
 			} else if ( 'occurrence' === $post->recurring ) {
 				try {
-					// advance the start date in the current month until it's past now
+					// advance the occurrence day in the current month until it's past now
 					$start = new DateTime( $post->start_date . ' ' . $post->time . ' GMT' );
 					$next  = $start;
 					$now   = new DateTime();
@@ -167,7 +167,7 @@ class Meeting_Post_Type {
 
 					foreach ( $post->occurrence as $index ) {
 						foreach ( $months as $month ) {
-							$next->modify( $numerals[ $index - 1 ] . ' ' . $day_name . ' of ' . $month );
+							$next = new DateTime( $numerals[ $index - 1 ] . ' ' . $day_name . ' of ' . $month );
 							if ( $next > $now ) {
 								break 2;
 							}
