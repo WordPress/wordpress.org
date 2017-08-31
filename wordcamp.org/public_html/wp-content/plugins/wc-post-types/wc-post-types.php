@@ -1123,7 +1123,10 @@ class WordCamp_Post_Types_Plugin {
 		global $post;
 
 		$attr = shortcode_atts( array(
-			'link' => 'none'
+			'link'           => 'none',
+			'title'          => 'visible',
+			'content'        => 'full',
+			'excerpt_length' => 55,
 		), $attr );
 
 		$attr['link'] = strtolower( $attr['link'] );
@@ -1154,10 +1157,14 @@ class WordCamp_Post_Types_Plugin {
 				<?php $website = get_post_meta( get_the_ID(), '_wcpt_sponsor_website', true ); ?>
 
 				<div id="wcorg-sponsor-<?php the_ID(); ?>" class="wcorg-sponsor">
-					<?php if ( 'website' == $attr['link'] && $website ) : ?>
-						<h3><a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_title(); ?></a></h3>
-					<?php else : ?>
-						<h3><?php the_title(); ?></h3>
+					<?php if ( 'visible' === $attr['title'] ) : ?>
+						<?php if ( 'website' === $attr['link'] && $website ) : ?>
+							<h3><a href="<?php echo esc_attr( esc_url( $website ) ); ?>"><?php the_title(); ?></a></h3>
+						<?php elseif ( 'post' === $attr['link'] ) : ?>
+							<h3><a href="<?php echo esc_attr( esc_url( get_permalink() ) ); ?>"><?php the_title(); ?></a></h3>
+						<?php else : ?>
+							<h3><?php the_title(); ?></h3>
+						<?php endif; ?>
 					<?php endif; ?>
 
 					<div class="wcorg-sponsor-description">
@@ -1165,11 +1172,25 @@ class WordCamp_Post_Types_Plugin {
 							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>">
 								<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x', array( 'alt' => get_the_title() ) ); ?>
 							</a>
+						<?php elseif ( 'post' == $attr['link'] ) : ?>
+							<a href="<?php echo esc_attr( esc_url( get_permalink() ) ); ?>">
+								<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x', array( 'alt' => get_the_title() ) ); ?>
+							</a>
 						<?php else : ?>
 							<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x', array( 'alt' => get_the_title() ) ); ?>
 						<?php endif; ?>
 
-						<?php the_content(); ?>
+						<?php if ( 'full' === $attr['content'] ) : ?>
+							<?php the_content(); ?>
+						<?php elseif ( 'excerpt' === $attr['content'] ) : ?>
+							<?php echo wpautop(
+								wp_trim_words(
+									get_the_content(),
+									absint( $attr['excerpt_length'] ),
+									apply_filters( 'excerpt_more', ' ' . '&hellip;' )
+								)
+							); ?>
+						<?php endif; ?>
 					</div>
 				</div><!-- #sponsor -->
 				<?php endwhile; ?>
