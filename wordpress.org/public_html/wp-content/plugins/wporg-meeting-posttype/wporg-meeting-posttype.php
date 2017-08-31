@@ -64,7 +64,7 @@ class Meeting_Post_Type {
 					'relation'=>'AND',
 					array(
 						'key'=>'recurring',
-						'value'=>array('weekly','monthly', '1'),
+						'value'=>array( 'weekly', 'biweekly', 'monthly', '1' ),
 						'compare'=>'NOT IN',
 					),
 					array(
@@ -79,7 +79,7 @@ class Meeting_Post_Type {
 					'relation'=>'AND',
 					array(
 						'key'=>'recurring',
-						'value'=>array('weekly', 'monthly', '1'),
+						'value'=>array( 'weekly', 'biweekly', 'monthly', '1' ),
 						'compare'=>'IN',
 					),
 					array(
@@ -127,6 +127,20 @@ class Meeting_Post_Type {
 						$next->modify('+ '.$weekdiff.' weeks');
 					}
 					$post->next_date = $next->format( 'Y-m-d' );
+				} catch (Exception $e) {
+					// if the datetime is invalid, then set the post->next_date to the start date instead
+					$post->next_date = $post->start_date;
+				}
+			} else if ( $post->recurring == 'biweekly' ) {
+				try {
+					// advance the start date 2 weeks at a time until it's past now
+					$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
+					$next = $start;
+					$now = new DateTime();
+					while ( $now > $next ) {
+						$next->modify('+2 weeks');
+					}
+					$post->next_date = $next->format('Y-m-d');
 				} catch (Exception $e) {
 					// if the datetime is invalid, then set the post->next_date to the start date instead
 					$post->next_date = $post->start_date;
@@ -258,10 +272,12 @@ class Meeting_Post_Type {
 			<input type="text" name="time" class="time" value="<?php echo esc_attr($time); ?>">
 		</label>
 		<label for="recurring"><?php _e( 'Recurring: ', 'wporg' ); ?>
+			<input type="radio" name="recurring" value="weekly" id="weekly" class="regular-radio" <?php checked( $recurring, 'weekly' ); ?>>
 			<label for="weekly"><?php _e( 'Weekly', 'wporg' ); ?></label>
-			<input type="radio" name="recurring" value="weekly" class="regular-radio" <?php checked( $recurring, 'weekly' ); ?>>
+			<input type="radio" name="recurring" value="biweekly" id="biweekly" class="regular-radio" <?php checked( $recurring, 'biweekly' ); ?>>
+			<label for="biweekly"><?php _e( 'Biweekly', 'wporg' ); ?></label>
+			<input type="radio" name="recurring" value="monthly" id="monthly" class="regular-radio" <?php checked( $recurring, 'monthly' ); ?>>
 			<label for="monthly"><?php _e( 'Monthly', 'wporg' ); ?></label>
-			<input type="radio" name="recurring" value="monthly" class="regular-radio" <?php checked( $recurring, 'monthly' ); ?>>
 		</label>
 		</p>
 		<p>
@@ -331,7 +347,7 @@ class Meeting_Post_Type {
 		$meta['start_date'] = ( isset( $_POST['start_date'] ) ? esc_textarea( $_POST['start_date'] ) : '' );
 		$meta['end_date'] = ( isset( $_POST['end_date'] ) ? esc_textarea( $_POST['end_date'] ) : '' );
 		$meta['time'] = ( isset( $_POST['time'] ) ? esc_textarea( $_POST['time'] ) : '' );
-		$meta['recurring'] = ( isset ( $_POST['recurring'] ) && ( in_array( $_POST['recurring'], array('weekly', 'monthly') ) ) ? ( $_POST['recurring'] ) : '' );
+		$meta['recurring'] = ( isset ( $_POST['recurring'] ) && ( in_array( $_POST['recurring'], array( 'weekly', 'biweekly', 'monthly' ) ) ) ? ( $_POST['recurring'] ) : '' );
 		$meta['link'] = ( isset( $_POST['link'] ) ? esc_url( $_POST['link'] ) : '' );
 		$meta['location'] = ( isset( $_POST['location'] ) ? esc_textarea( $_POST['location'] ) : '' );
 
