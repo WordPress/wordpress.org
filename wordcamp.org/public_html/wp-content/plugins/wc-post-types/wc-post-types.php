@@ -1163,10 +1163,10 @@ class WordCamp_Post_Types_Plugin {
 					<div class="wcorg-sponsor-description">
 						<?php if ( 'website' == $attr['link'] && $website ) : ?>
 							<a href="<?php echo esc_attr( esc_url( $website ) ); ?>">
-								<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ); ?>
+								<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x', array( 'alt' => get_the_title() ) ); ?>
 							</a>
 						<?php else : ?>
-							<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x' ); ?>
+							<?php the_post_thumbnail( 'wcb-sponsor-logo-horizontal-2x', array( 'alt' => get_the_title() ) ); ?>
 						<?php endif; ?>
 
 						<?php the_content(); ?>
