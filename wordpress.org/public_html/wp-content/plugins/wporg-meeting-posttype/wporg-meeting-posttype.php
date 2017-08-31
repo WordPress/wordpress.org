@@ -118,12 +118,15 @@ class Meeting_Post_Type {
 				try {
 					// from the start date, advance the week until it's past now
 					$start = new DateTime( $post->start_date.' '.$post->time.' GMT' );
+					$next = $start;
 					$now = new DateTime();
-					$interval = $start->diff($now);
-					// add one to days to account for events that happened earlier today
-					$weekdiff = ceil( ($interval->days+1) / 7 );
-					$next = strtotime( "{$post->start_date} + {$weekdiff} weeks" );
-					$post->next_date = date('Y-m-d', $next);
+					if ( $now > $next ) {
+						$interval = $start->diff($now);
+						// add one to days to account for events that happened earlier today
+						$weekdiff = ceil( ($interval->days+1) / 7 );
+						$next->modify('+ '.$weekdiff.' weeks');
+					}
+					$post->next_date = $next->format( 'Y-m-d' );
 				} catch (Exception $e) {
 					// if the datetime is invalid, then set the post->next_date to the start date instead
 					$post->next_date = $post->start_date;
