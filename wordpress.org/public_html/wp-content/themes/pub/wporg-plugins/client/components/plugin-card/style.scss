@@ -50,7 +50,6 @@
 	footer {
 		span {
 			font-size: ms(-3);
-			width: 48%;
 			display: inline-block;
 			overflow: hidden;
 			white-space: nowrap;
@@ -68,6 +67,10 @@
 				width: 100%;
 			}
 
+		}
+
+		span.active-installs {
+			min-width: 48%;
 		}
 			
 		.dashicons {
