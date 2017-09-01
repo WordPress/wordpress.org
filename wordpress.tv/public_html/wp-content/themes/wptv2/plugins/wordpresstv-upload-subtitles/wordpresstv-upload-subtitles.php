@@ -126,7 +126,7 @@ class WordPressTV_Subtitles_Upload {
 		$author_email   = $this->sanitize_text( $_POST['wptv_author_email'] );
 
 		if ( empty( $_POST['wptv_language'] ) ) {
-			$this->error( 8 );
+			$this->error( 7 );
 		}
 
 		$language            = $_POST['wptv_language'];
