@@ -2098,6 +2098,7 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 #content .post .entry-content img {
 	margin-top: 10px;
 	margin-bottom: 10px;
+	max-width: 100%;
 }
 
 #content .entry-content .wp-caption {
