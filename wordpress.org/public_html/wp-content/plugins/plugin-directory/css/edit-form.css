@@ -74,6 +74,7 @@ input#post_author_username {
 
 #poststuff .comments-meta-box.postbox .inside,
 #poststuff .committers-meta-box.postbox .inside,
+#poststuff .support-reps-meta-box.postbox .inside,
 .comments-meta-box .column-comment p {
 	margin: 0;
 	padding: 0;
@@ -102,7 +103,8 @@ input#post_author_username {
 }
 
 .comments-meta-box .comments-box,
-.committers-meta-box .wp-list-table {
+.committers-meta-box .wp-list-table,
+.support-reps-meta-box .wp-list-table {
 	border: 0 none;
 }
 
@@ -137,24 +139,28 @@ input#post_author_username {
 	}
 }
 
-/* Committers meta box */
-.add-committer {
+/* Committers and Support Reps meta boxes */
+.add-committer,
+.add-support-rep {
 	padding: 0 12px 12px;
 }
 
-.add-committer .button-link {
+.add-committer .button-link,
+.add-support-rep .button-link {
 	font-weight: 600;
 	margin: 10px 0;
 }
 
-.add-committer input[type="text"] {
+.add-committer input[type="text"],
+.add-support-rep input[type="text"] {
 	margin: 0 0 1em;
 	max-width: 260px;
 	vertical-align: baseline;
 	width: 100%;
 }
 
-.add-committer .notice {
+.add-committer .notice,
+.add-support-rep .notice {
 	display: block;
 	padding: 0.5em 0 0.5em 1em;
 }
@@ -264,12 +270,14 @@ a.profile-plugin-open {
 	background-color: #fde3e3;
 }
 
-.plugin-committers > div {
+.plugin-committers > div,
+.plugin-support-reps > div {
 	overflow-x: hidden;
 	white-space: nowrap;
 }
 
-.plugin-committer-email {
+.plugin-committer-email,
+.plugin-support-rep-email {
 	font-size: smaller;
 }
 

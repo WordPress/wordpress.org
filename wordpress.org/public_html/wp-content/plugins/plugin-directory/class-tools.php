@@ -227,6 +227,87 @@ class Tools {
 	}
 
 	/**
+	 * Retrieve a list of support reps for a specific plugin.
+	 *
+	 * @static
+	 *
+	 * @param string $plugin_slug The plugin slug.
+	 * @return array The list of user_nicename's which are support reps.
+	 */
+	public static function get_plugin_support_reps( $plugin_slug ) {
+		if ( ! $plugin_slug ) {
+			return array();
+		}
+
+		if ( false === ( $support_reps = wp_cache_get( $plugin_slug, 'plugin-support-reps' ) ) ) {
+			$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+			$support_reps = wp_get_object_terms( $post->ID, 'plugin_support_reps', array( 'fields' => 'names' ) );
+
+			wp_cache_set( $plugin_slug, $support_reps, 'plugin-support-reps', 12 * HOUR_IN_SECONDS );
+		}
+
+		return $support_reps;
+	}
+
+	/**
+	 * Add a user as a support rep for a plugin.
+	 *
+	 * @static
+	 *
+	 * @param string          $plugin_slug The plugin slug.
+	 * @param string|\WP_User $user        The user to add.
+	 * @return bool
+	 */
+	public static function add_plugin_support_rep( $plugin_slug, $user ) {
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
+		}
+
+		if ( ! $user->exists() || ! $plugin_slug ) {
+			return false;
+		}
+
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		if ( ! $post ) {
+			return false;
+		}
+
+		$result = wp_add_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
+
+		return $result;
+	}
+
+	/**
+	 * Remove a user as a support rep for a plugin.
+	 *
+	 * @static
+	 *
+	 * @param string          $plugin_slug The plugin slug.
+	 * @param string|\WP_User $user        The user to remove.
+	 * @return bool
+	 */
+	public static function remove_plugin_support_rep( $plugin_slug, $user ) {
+		if ( ! $user instanceof \WP_User ) {
+			$user = new \WP_User( $user );
+		}
+
+		if ( ! $user->exists() || ! $plugin_slug ) {
+			return false;
+		}
+
+		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+
+		if ( ! $post ) {
+			return false;
+		}
+
+		$result = wp_remove_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
+
+		return $result;
+	}
+
+	/**
 	 * Subscribe/Unsubscribe a user to a plugins commits.
 	 *
 	 * Plugin Committers are automatically subscribed to plugin commit

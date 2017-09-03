@@ -21,6 +21,7 @@ the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support',    array(), $wid
 // If the user is not a contributor/committer for the plugin, we'll show the Donate metabox instead of the committer metabox.
 if ( current_user_can( 'plugin_admin_view', $post ) ) {
 	the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Committers', array(), $widget_args );
+	the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Support_Reps', array(), $widget_args );
 } else {
 	the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Donate', array(), $widget_args );
 }

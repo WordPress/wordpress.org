@@ -9,7 +9,7 @@ _get_list_table( 'WP_List_Table' );
  *
  * @package WordPressdotorg\Plugin_Directory\Admin\List_Table
  */
-class Committers extends \WP_List_Table {
+class Support_Reps extends \WP_List_Table {
 
 	/**
 	 * Constructor.
@@ -20,8 +20,8 @@ class Committers extends \WP_List_Table {
 	 */
 	public function __construct( $args = array() ) {
 		parent::__construct( array(
-			'singular' => 'committer',
-			'plural'   => 'committers',
+			'singular' => 'support_rep',
+			'plural'   => 'support_reps',
 			'screen'   => isset( $args['screen'] ) ? $args['screen'] : 'plugin',
 		) );
 	}
@@ -32,7 +32,7 @@ class Committers extends \WP_List_Table {
 	 * @return bool
 	 */
 	public function ajax_user_can() {
-		return current_user_can( 'plugin_remove_committer' );
+		return current_user_can( 'plugin_remove_support_rep' );
 	}
 
 	/**
@@ -48,10 +48,10 @@ class Committers extends \WP_List_Table {
 		if ( ! $plugin_slug ) {
 			return;
 		}
-		$existing_committers = Tools::get_plugin_committers( $plugin_slug );
-		$this->items         = array_map( function ( $user ) {
+		$existing_support_reps = Tools::get_plugin_support_reps( $plugin_slug );
+		$this->items           = array_map( function ( $user ) {
 			return new \WP_User( $user );
-		}, $existing_committers );
+		}, $existing_support_reps );
 	}
 
 	/**
@@ -60,7 +60,7 @@ class Committers extends \WP_List_Table {
 	 * @access public
 	 */
 	public function no_items() {
-		_e( 'No committers found.', 'wporg-plugins' );
+		_e( 'No support reps found.', 'wporg-plugins' );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Committers extends \WP_List_Table {
 				<col width="40px" />
 				<col />
 			</colgroup>
-			<tbody id="the-committer-list" data-wp-lists="list:committer">
+			<tbody id="the-support-rep-list" data-wp-lists="list:support-rep">
 				<?php $this->display_rows_or_placeholder(); ?>
 			</tbody>
 		</table>
@@ -118,17 +118,17 @@ class Committers extends \WP_List_Table {
 			echo "\n\t" . $this->single_row( $user_object );
 		}
 		?>
-		<tr id="add-committer" class="add-committer wp-hidden-children">
+		<tr id="add-support-rep" class="add-support-rep wp-hidden-children">
 			<td colspan="2">
-				<button type="button" id="add-committer-toggle" class="button-link"><?php _e( '+ Add New Committer', 'wporg-plugins' ); ?></button>
+				<button type="button" id="add-support-rep-toggle" class="button-link"><?php _e( '+ Add New Support Rep', 'wporg-plugins' ); ?></button>
 				<p class="wp-hidden-child">
-					<?php wp_nonce_field( 'add-committer', '_ajax_nonce', false ); ?>
-					<span id="committer-error" class="notice notice-alt notice-error" style="display:none;"></span>
+					<?php wp_nonce_field( 'add-support-rep', '_ajax_nonce', false ); ?>
+					<span id="support-rep-error" class="notice notice-alt notice-error" style="display:none;"></span>
 					<label>
-						<input type="text" name="add_committer" class="form-required" value="" aria-required="true" placeholder="<?php esc_attr_e( 'WordPress.org username', 'wporg-plugins' ); ?>">
-						<span class="screen-reader-text"><?php _e( 'Add a new committer', 'wporg-plugins' ); ?></span>
+						<input type="text" name="add_support_rep" class="form-required" value="" aria-required="true" placeholder="<?php esc_attr_e( 'WordPress.org username', 'wporg-plugins' ); ?>">
+						<span class="screen-reader-text"><?php _e( 'Add a new support rep', 'wporg-plugins' ); ?></span>
 					</label>
-					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Committer', 'wporg-plugins' ); ?>">
+					<input type="button" id="add-support-rep-submit" class="button" data-wp-lists="add:the-support-rep-list:add-support-rep::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Support Rep', 'wporg-plugins' ); ?>">
 				</p>
 			</td>
 		</tr>
@@ -150,24 +150,24 @@ class Committers extends \WP_List_Table {
 		$user_object->filter = 'display';
 		list( $columns, $hidden, $primary ) = $this->get_column_info();
 
-		// Set up the hover actions for this committer.
+		// Set up the hover actions for this support rep.
 		$actions = array();
 
-		// Check if the committer for this row is removable.
+		// Check if the support rep for this row is removable.
 		$post_id = get_post()->ID;
-		if ( current_user_can( 'plugin_remove_committer', $post_id ) && $user_object->ID != get_current_user_id() ) {
-			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-committer-list:committer-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;committer=' . $user_object->ID, "remove-committer-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . "</a>";
+		if ( current_user_can( 'plugin_remove_support_rep', $post_id ) && $user_object->ID != get_current_user_id() ) {
+			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-support-rep-list:support-rep-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;support-rep=' . $user_object->ID, "remove-support-rep-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . "</a>";
 		}
 
 		/**
-		 * Filter the action links displayed under each committer in the Committers list table.
+		 * Filter the action links displayed under each support rep in the Support Reps list table.
 		 *
 		 * @param array    $actions     An array of action links to be displayed.
-		 * @param \WP_User $user_object WP_User object for the currently-listed committer.
+		 * @param \WP_User $user_object WP_User object for the currently-listed support rep.
 		 */
-		$actions = apply_filters( 'committer_row_actions', $actions, $user_object );
+		$actions = apply_filters( 'support_rep_row_actions', $actions, $user_object );
 
-		$row = "<tr id='committer-$user_object->ID'>";
+		$row = "<tr id='support-rep-$user_object->ID'>";
 
 		foreach ( $columns as $column_name => $column_display_name ) {
 			$data    = 'data-colname="' . wp_strip_all_tags( $column_display_name ) . '"';
@@ -202,7 +202,7 @@ class Committers extends \WP_List_Table {
 					 * @param string $column_name Column name.
 					 * @param int    $user_id     ID of the currently-listed user.
 					 */
-					$row .= apply_filters( 'manage_committers_custom_column', '', $column_name, $user_object->ID );
+					$row .= apply_filters( 'manage_support_reps_custom_column', '', $column_name, $user_object->ID );
 			}
 			if ( $primary === $column_name ) {
 				$row .= $this->row_actions( $actions );

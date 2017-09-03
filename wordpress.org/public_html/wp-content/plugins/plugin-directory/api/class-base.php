@@ -20,6 +20,7 @@ class Base {
 		new Routes\Query_Plugins();
 		new Routes\SVN_Access();
 		new Routes\Plugin_Committers();
+		new Routes\Plugin_Support_Reps();
 	}
 
 	/**

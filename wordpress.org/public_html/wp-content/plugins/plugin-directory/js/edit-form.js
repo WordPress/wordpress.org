@@ -29,6 +29,22 @@
 				$( 'input[name="add_committer"]', '#add-committer' ).val( '' ).focus();
 			} );
 
+			$( '#add-support-rep-toggle' ).on( 'click', PluginEdit.toggleSupportRepForm );
+
+			$( '#the-support-rep-list' ).wpList({
+				alt: false,
+				confirm: function( element, settings, action ) {
+					if ( 'support-rep' === settings.what && 'delete' === action ) {
+						return confirm( pluginDirectory.removeSupportRepAYS );
+					}
+					return true;
+				},
+				addAfter: PluginEdit.supportRepRequestAfter,
+				delAfter: PluginEdit.supportRepRequestAfter
+			}).on( 'wpListAddEnd', function() {
+				$( 'input[name="add_support_rep"]', '#add-support-rep' ).val( '' ).focus();
+			} );
+
 			$( '#contact-author' ).appendTo( '#plugin-review .inside' );
 		},
 
@@ -107,6 +123,29 @@
 				$( '#committer-error' ).html( data.parsed.responses[0].errors[0].message ).show();
 			} else {
 				$( '#committer-error' ).empty().hide();
+			}
+		},
+
+		toggleSupportRepForm: function( event ) {
+			var $form = $( '#add-support-rep' );
+
+			// Show/hide form.
+			$form.toggleClass( 'wp-hidden-children' );
+
+			// Focus on the input field, and on enter add the support rep, don't save post.
+			$( 'input[name="add_support_rep"]', $form ).focus().on( 'keydown', function( event ) {
+				if ( 13 === event.which ) {
+					event.preventDefault();
+					$( '#add-support-rep-submit', $form ).click();
+				}
+			} );
+		},
+
+		supportRepRequestAfter: function( response, data ) {
+			if ( data.parsed.errors ) {
+				$( '#support-rep-error' ).html( data.parsed.responses[0].errors[0].message ).show();
+			} else {
+				$( '#support-rep-error' ).empty().hide();
 			}
 		}
 

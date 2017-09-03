@@ -48,10 +48,13 @@ class Customizations {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
-		add_filter( 'postbox_classes_plugin_internal-notes',    array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
-		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
-		add_filter( 'wp_ajax_add-committer',    array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
-		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
+		add_filter( 'postbox_classes_plugin_internal-notes',      array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
+		add_filter( 'postbox_classes_plugin_plugin-committers',   array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
+		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps',     'postbox_classes' ) );
+		add_filter( 'wp_ajax_add-committer',        array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
+		add_filter( 'wp_ajax_delete-committer',     array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
+		add_filter( 'wp_ajax_add-support-rep',      array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
+		add_filter( 'wp_ajax_delete-support-rep',   array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 
 	}
@@ -114,9 +117,10 @@ class Customizations {
 					wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js', Plugin_Directory\PLUGIN_FILE ), array( 'wp-util', 'wp-lists' ), 5 );
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
-						'approvePluginAYS'   => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
-						'rejectPluginAYS'    => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
-						'removeCommitterAYS' => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
+						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
+						'removeCommitterAYS'  => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
 					) );
 					break;
 
@@ -436,6 +440,12 @@ class Customizations {
 				'plugin', 'side'
 			);
 
+			add_meta_box(
+				'plugin-support-reps',
+				__( 'Plugin Support Reps', 'wporg-plugins' ),
+				array( __NAMESPACE__ . '\Metabox\Support_Reps', 'display' ),
+				'plugin', 'side'
+			);
 		}
 
 		// Remove unnecessary metaboxes.
@@ -495,7 +505,7 @@ class Customizations {
 	/**
 	 * Saves a comment that is not built-in.
 	 *
-	 * We pretty much have to replicate all of `wp_ajax_replyto_comment()` to be able to comment on draft posts.
+	 * We pretty much have to replicate all of `wp_ajax_replyto_comment()` to be able to comment on pending posts.
 	 */
 	public function save_custom_comment() {
 		$comment_post_ID = (int) $_POST['comment_post_ID'];

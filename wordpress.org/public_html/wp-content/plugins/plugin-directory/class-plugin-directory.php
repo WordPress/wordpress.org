@@ -260,6 +260,22 @@ class Plugin_Directory {
 			),
 		) );
 
+		register_taxonomy( 'plugin_support_reps', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
+			'hierarchical'      => false,
+			'query_var'         => 'plugin_support_rep',
+			'rewrite'           => false,
+			'labels'            => array(
+				'name' => __( 'Support Reps', 'wporg-plugins' ),
+				'singular_name' => __( 'Support Rep', 'wporg-plugins' ),
+			),
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'capabilities'      => array(
+				'assign_terms' => 'do_not_allow',
+			),
+		) );
+
 		register_taxonomy( 'plugin_tags', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
 			'query_var'         => 'plugin_tags',
@@ -554,6 +570,7 @@ class Plugin_Directory {
 		register_widget( __NAMESPACE__ . '\Widgets\Support'       );
 		register_widget( __NAMESPACE__ . '\Widgets\Committers'    );
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors'  );
+		register_widget( __NAMESPACE__ . '\Widgets\Support_Reps'  );
 	}
 
 	/**

@@ -26,6 +26,8 @@ class Capabilities {
 			case 'plugin_admin_edit':
 			case 'plugin_add_committer':
 			case 'plugin_remove_committer':
+			case 'plugin_add_support_rep':
+			case 'plugin_remove_support_rep':
 				$plugin_edit_cap = true;
 				// Fall through
 
