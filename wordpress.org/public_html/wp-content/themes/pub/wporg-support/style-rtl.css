@@ -2860,6 +2860,11 @@ section {
 	padding-top: 3px;
 }
 
+.bbpress #bbpress-forums p.wporg-bbp-topic-site-url a {
+	display: inline-block;
+	word-break: break-all;
+}
+
 .bbpress #bbpress-forums .wporg-bbp-user-flag.flagged a {
 	color: #f00;
 }

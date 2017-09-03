@@ -31,7 +31,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20170821'
+		'20170903'
 	);
 
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
@@ -248,16 +248,16 @@ function wporg_support_get_user_topics_count( $user_id = 0 ) {
 		return 0;
 	}
 
-	$count = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*)
-			FROM {$wpdb->posts}
-			WHERE post_type = 'topic'
-				AND post_status IN ( 'publish', 'closed' )
-				AND post_parent <> %d
-				AND post_author = %d",
-		WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
-		$user_id
-	) );
+		$count = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*)
+				FROM {$wpdb->posts}
+				WHERE post_type = 'topic'
+					AND post_status IN ( 'publish', 'closed' )
+					AND post_parent <> %d
+					AND post_author = %d",
+			WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
+			$user_id
+		) );
 
 	return $count;
 }
@@ -282,16 +282,16 @@ function wporg_support_get_user_reviews_count( $user_id = 0 ) {
 		return 0;
 	}
 
-	$count = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*)
-			FROM {$wpdb->posts}
-			WHERE post_type = 'topic'
-				AND post_status IN ( 'publish', 'closed' )
-				AND post_parent = %d
-				AND post_author = %d",
-		WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
-		$user_id
-	) );
+		$count = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*)
+				FROM {$wpdb->posts}
+				WHERE post_type = 'topic'
+					AND post_status IN ( 'publish', 'closed' )
+					AND post_parent = %d
+					AND post_author = %d",
+			WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
+			$user_id
+		) );
 
 	return $count;
 }

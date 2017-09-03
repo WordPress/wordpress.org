@@ -394,6 +394,11 @@ section {
 			padding-top: 3px;
 		}
 
+		p.wporg-bbp-topic-site-url a {
+			display: inline-block;
+			word-break: break-all;
+		}
+
 		.wporg-bbp-user-flag.flagged a {
 			color: #f00;
 		}
