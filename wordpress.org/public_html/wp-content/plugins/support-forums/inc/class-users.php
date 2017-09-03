@@ -30,6 +30,9 @@ class Users {
 		add_filter( 'bbp_topic_pagination',            array( $this, 'parse_user_topics_pagination_args' ) );
 		add_filter( 'bbp_replies_pagination',          array( $this, 'parse_user_topics_pagination_args' ) );
 		add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_topics_title_args' ) );
+
+		// Clear user's topics and reviews count cache.
+		add_action( 'bbp_new_topic',                   array( $this, 'clear_user_topics_count_cache' ), 10, 4 );
 	}
 
 	/**
@@ -283,16 +286,21 @@ class Users {
 			return 0;
 		}
 
-		$count = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*)
-				FROM {$wpdb->posts}
-				WHERE post_type = 'topic'
-					AND post_status IN ( 'publish', 'closed' )
-					AND post_parent <> %d
-					AND post_author = %d",
-			Plugin::REVIEWS_FORUM_ID,
-			$user_id
-		) );
+		// Check cache.
+		$count = wp_cache_get( $user_id, 'user-topics-count' );
+		if ( false === $count ) {
+			$count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*)
+					FROM {$wpdb->posts}
+					WHERE post_type = 'topic'
+						AND post_status IN ( 'publish', 'closed' )
+						AND post_parent <> %d
+						AND post_author = %d",
+				Plugin::REVIEWS_FORUM_ID,
+				$user_id
+			) );
+			wp_cache_set( $user_id, $count, 'user-topics-count' );
+		}
 
 		return $count;
 	}
@@ -317,18 +325,39 @@ class Users {
 			return 0;
 		}
 
-		$count = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*)
-				FROM {$wpdb->posts}
-				WHERE post_type = 'topic'
-					AND post_status IN ( 'publish', 'closed' )
-					AND post_parent = %d
-					AND post_author = %d",
-			Plugin::REVIEWS_FORUM_ID,
-			$user_id
-		) );
+		// Check cache.
+		$count = wp_cache_get( $user_id, 'user-reviews-count' );
+		if ( false === $count ) {
+			$count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*)
+					FROM {$wpdb->posts}
+					WHERE post_type = 'topic'
+						AND post_status IN ( 'publish', 'closed' )
+						AND post_parent = %d
+						AND post_author = %d",
+				Plugin::REVIEWS_FORUM_ID,
+				$user_id
+			) );
+			wp_cache_set( $user_id, $count, 'user-reviews-count' );
+		}
 
 		return $count;
+	}
+
+	/**
+	 * Clear user's topics and reviews count cache.
+	 *
+	 * @param int   $topic_id       Topic ID.
+	 * @param int   $forum_id       Forum ID.
+	 * @param array $anonymous_data Anonymous poster data.
+	 * @param int   $topic_author   Topic author ID.
+	 */
+	public function clear_user_topics_count_cache( $topic_id, $forum_id, $anonymous_data, $topic_author ) {
+		if ( Plugin::REVIEWS_FORUM_ID != $forum_id ) {
+			wp_cache_delete( $topic_author, 'user-topics-count' );
+		} else {
+			wp_cache_delete( $topic_author, 'user-reviews-count' );
+		}
 	}
 
 }
