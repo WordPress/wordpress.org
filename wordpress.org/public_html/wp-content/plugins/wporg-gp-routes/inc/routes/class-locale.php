@@ -252,6 +252,7 @@ class Locale extends GP_Route {
 			'pt' => [
 				'default',
 				'informal',
+				'ao90',
 			],
 		];
 
