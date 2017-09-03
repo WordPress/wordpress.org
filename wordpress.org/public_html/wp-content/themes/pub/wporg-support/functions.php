@@ -231,69 +231,33 @@ function wporg_support_get_user_registered_date( $user_id = 0 ) {
 /**
  * Return the raw database count of topics by a user, excluding reviews.
  *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
  * @param int $user_id User ID to get count for.
  * @return int Raw DB count of topics.
  */
 function wporg_support_get_user_topics_count( $user_id = 0 ) {
-	global $wpdb;
-
-	$user_id = bbp_get_user_id( $user_id );
-	if ( empty( $user_id ) ) {
-		return 0;
-	}
-
 	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
 		return 0;
 	}
 
-		$count = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*)
-				FROM {$wpdb->posts}
-				WHERE post_type = 'topic'
-					AND post_status IN ( 'publish', 'closed' )
-					AND post_parent <> %d
-					AND post_author = %d",
-			WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
-			$user_id
-		) );
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
 
-	return $count;
+	return $plugin_instance->users->get_user_topics_count( $user_id );
 }
 
 /**
  * Return the raw database count of reviews by a user.
  *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
  * @param int $user_id User ID to get count for.
  * @return int Raw DB count of reviews.
  */
 function wporg_support_get_user_reviews_count( $user_id = 0 ) {
-	global $wpdb;
-
-	$user_id = bbp_get_user_id( $user_id );
-	if ( empty( $user_id ) ) {
-		return 0;
-	}
-
 	if ( ! class_exists( 'WordPressdotorg\Forums\Plugin' ) ) {
 		return 0;
 	}
 
-		$count = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*)
-				FROM {$wpdb->posts}
-				WHERE post_type = 'topic'
-					AND post_status IN ( 'publish', 'closed' )
-					AND post_parent = %d
-					AND post_author = %d",
-			WordPressdotorg\Forums\Plugin::REVIEWS_FORUM_ID,
-			$user_id
-		) );
+	$plugin_instance = WordPressdotorg\Forums\Plugin::get_instance();
 
-	return $count;
+	return $plugin_instance->users->get_user_reviews_count( $user_id );
 }
 
 /**
