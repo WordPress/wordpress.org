@@ -78,6 +78,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			$this->plugin       = $plugin;
 			$this->authors      = $this->get_authors( $slug );
 			$this->contributors = $this->get_contributors( $slug );
+			$this->support_reps = $this->get_support_reps( $slug );
 		}
 	}
 

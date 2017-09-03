@@ -23,6 +23,7 @@ abstract class Directory_Compat {
 	var $loaded       = false;
 	var $authors      = null;
 	var $contributors = null;
+	var $support_reps = null;
 	var $query        = null;
 	var $term         = null;
 
@@ -316,6 +317,7 @@ abstract class Directory_Compat {
 				$this->{$this->compat()} = $this->get_object( $slug );
 				$this->authors           = $this->get_authors( $slug );
 				$this->contributors      = $this->get_contributors( $slug );
+				$this->support_reps      = $this->get_support_reps( $slug );
 				$this->term              = $terms[0];
 
 				// Add output filters and actions.
@@ -331,7 +333,7 @@ abstract class Directory_Compat {
 
 				// Instantiate WPORG_Stickies mode for topic view.
 				if ( class_exists( 'WordPressdotorg\Forums\Stickies_Compat' ) ) {
-					$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term, $this->authors, $this->contributors );
+					$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term, $this->authors, $this->contributors, $this->support_reps );
 				}
 
 				$this->loaded = true;
@@ -340,7 +342,8 @@ abstract class Directory_Compat {
 	}
 
 	/**
-	 * Allow plugin/theme authors and contributors to resolve a topic on their support forum.
+	 * Allow plugin/theme authors, contributors, and support reps to resolve a topic
+	 * on their support forum.
 	 *
 	 * @param bool $retval If the user can set a topic resolution for the topic
 	 * @param int $user_id The user id
@@ -357,6 +360,10 @@ abstract class Directory_Compat {
 		||
 			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
 		|| 
+			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps ) )
+		|| 
+			// Back-compat for support reps added before https://meta.trac.wordpress.org/changeset/5867,
+			// can be removed once they are re-added via the Plugin Directory UI.
 			( is_a( $user, 'WP_User' ) && $user->supportrep == $this->slug() )
 		) {
 			$retval = true;
@@ -900,5 +907,39 @@ abstract class Directory_Compat {
 			wp_cache_set( $cache_key, $contributors, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $contributors;
+	}
+
+	public function get_support_reps( $slug ) {
+		global $wpdb;
+
+		if ( null !== $this->support_reps ) {
+			return $this->support_reps;
+		}
+
+		// Themes do not have support reps right now.
+		if ( $this->compat() == 'theme' ) {
+			$support_reps = array();
+			return $support_reps;
+		}
+
+		// Check the cache.
+		$cache_key = $slug;
+		$cache_group = $this->compat() . '-support-reps-slugs';
+		$support_reps = wp_cache_get( $cache_key, $cache_group );
+		if ( ! $support_reps ) {
+			$plugin = $this->get_object( $slug );
+			$prefix = $wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_';
+			$support_reps = $wpdb->get_col( $wpdb->prepare(
+				"SELECT slug
+				 FROM {$prefix}terms AS t
+				 LEFT JOIN {$prefix}term_taxonomy AS tt ON tt.term_id = t.term_id
+				 LEFT JOIN {$prefix}term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+				 WHERE tt.taxonomy = 'plugin_support_reps' AND tr.object_id = %d",
+				 $plugin->ID
+			) );
+
+			wp_cache_set( $cache_key, $support_reps, $cache_group, HOUR_IN_SECONDS );
+		}
+		return $support_reps;
 	}
 }
