@@ -198,6 +198,8 @@ class Plugin {
 				$contrib_type = 'author';
 			} elseif ( $this->is_user_contributor( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
 				$contrib_type = 'contributor';
+			} elseif ( $this->is_user_support_rep( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
+				$contrib_type = 'support-rep';
 			} else {
 				$contrib_type = '';
 			}
@@ -312,6 +314,15 @@ class Plugin {
 				$help  = __( 'This person is a contributor to this theme', 'wporg-forums' );
 			}
 		}
+		elseif ( $this->is_user_support_rep( $info['user_nicename'], $info['type'], $info['slug'] ) ) {
+			if ( 'plugin' == $info['type'] ) {
+				$label = __( 'Plugin Support', 'wporg-forums' );
+				$help  = __( 'This person is a support representative for this plugin', 'wporg-forums' );
+			} else {
+				$label = __( 'Theme Support', 'wporg-forums' );
+				$help  = __( 'This person is a support representative for this theme', 'wporg-forums' );
+			}
+		}
 
 		return $label ? array( 'type' => $info['type'], 'label' => $label, 'help' => $help ) : false;
 	}
@@ -387,6 +398,32 @@ class Plugin {
 		$contributors = $compat ? $compat->get_contributors( $slug ) : array();
 
 		return $contributors && in_array( $user_nicename, $contributors );
+	}
+
+	/**
+	 * Checks if the specified user is a support rep for the specified plugin/theme.
+	 *
+	 * A support representative is someone assigned as such by the plugin or theme author.
+	 *
+	 * @param string $user_nicename User slug.
+	 * @param string $type          Either 'plugin' or 'theme'.
+	 * @param string $slug          Slug for the plugin or theme.
+	 * @return bool                 True if user is a support rep, false otherwise.
+	 */
+	public function is_user_support_rep( $user_nicename, $type, $slug ) {
+		if ( class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+			if ( 'plugin' === $type ) {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->plugins;
+			} else {
+				$compat = \WordPressdotorg\Forums\Plugin::get_instance()->themes;
+			}
+		} else {
+			$compat = null;
+		}
+
+		$support_reps = $compat ? $compat->get_support_reps( $slug ) : array();
+
+		return $support_reps && in_array( $user_nicename, $support_reps );
 	}
 
 	/**
