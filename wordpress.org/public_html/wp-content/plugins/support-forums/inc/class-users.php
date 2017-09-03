@@ -306,7 +306,7 @@ class Users {
 	}
 
 	/**
-	 * Cle the raw database count of reviews by a user.
+	 * Return the raw database count of reviews by a user.
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
