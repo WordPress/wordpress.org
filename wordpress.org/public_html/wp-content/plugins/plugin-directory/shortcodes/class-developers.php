@@ -39,47 +39,38 @@ class Developers {
 
 		$output .= '<div class="plugin-development">';
 
-		$locales = Plugin_I18n::instance()->get_locales();
+		$locales = Plugin_I18n::instance()->get_translations( $slug );
 		if ( ! empty( $locales ) ) {
 			$output .= '<p>';
 
-			$locale_names = wp_list_pluck( $locales, 'name', 'wp_locale' );
 			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
-
-			$sites = get_sites( [
+			$locales_count = get_sites( [
 				'network_id' => WPORG_GLOBAL_NETWORK_ID,
 				'public'     => 1,
 				'path'       => '/',
 				'locale__in' => $wp_locales,
 				'number'     => '',
+				'count'      => true,
 			] );
 
-			if ( $sites ) {
-				$locales_list = implode( ', ', array_map( function( $site ) use ( $slug, $locale_names ) {
-					return sprintf( '<a href="%1$s">%2$s</a>', esc_url( "{$site->home}/plugins/{$slug}/" ), $locale_names[ $site->locale ] );
-				}, $sites ) );
-
-				$locales_count = count( $sites );
-
+			if ( $locales_count ) {
 				if ( 1 === $locales_count ) {
 					$output .= sprintf(
 						/* translators: 1: plugin name, 2: locale name */
 						__( '&#8220;%1$s&#8221; has been translated into %2$s.', 'wporg-plugins' ),
-						$title,
-						$locales_list
+						$title
 					) . ' ';
 				} else {
 					$output .= sprintf(
-						/* translators: 1: plugin name, 2: number of locales, 3: list of locales */
+						/* translators: 1: plugin name, 2: number of locales */
 						_n(
-							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
-							'&#8220;%1$s&#8221; has been translated into these %2$d locales: %3$s.',
+							'&#8220;%1$s&#8221; has been translated into %2$d locales',
+							'&#8220;%1$s&#8221; has been translated into %2$d locales.',
 							$locales_count,
 							'wporg-plugins'
 						),
 						$title,
-						$locales_count,
-						$locales_list
+						$locales_count
 					) . ' ';
 				}
 

@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -50,7 +51,7 @@ class Meta extends \WP_Widget {
 			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
-				<li><?php 
+				<li><?php
 				_e( 'Requires WordPress Version:', 'wporg-plugins' );
 				echo '<strong>' . esc_html( $requires ) . '</strong>';
 				?></li>
@@ -61,20 +62,71 @@ class Meta extends \WP_Widget {
 			<?php endif; ?>
 
 			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
-				<li><?php 
+				<li><?php
 				_e( 'Requires PHP Version:', 'wporg-plugins' );
 				echo '<strong>' . esc_html( $requires_php ) . '</strong>';
 				?></li>
 			<?php endif; ?>
 
+			<?php
+			$available_languages = $this->available_languages();
+			if ( $available_languages ) :
+				$available_languages_count = count( $available_languages );
+				?>
+				<li>
+					<?php
+					if ( 1 === $available_languages_count ) {
+						_e( 'Language:', 'wporg-plugins' );
+					} else {
+						_e( 'Languages:', 'wporg-plugins' );
+					}
+
+					echo '<div class="languages">';
+
+					if ( $available_languages_count > 1 ) :
+						?>
+						<button type="button" class="button-link popover-trigger" aria-expanded="false" data-target="popover-languages">
+							<?php
+							printf(
+								/* translators: %s: Number of available languages */
+								_x( 'See all %s', 'languages' ),
+								$available_languages_count
+							)
+							?>
+						</button>
+						<div id="popover-languages" class="popover is-top-right">
+							<div class="popover-arrow"></div>
+
+							<button type="button" class="button-link popover-close" aria-label="<?php esc_attr_e( 'Close this popover', 'wporg-plugins' ); ?>">
+								<?php _e( 'Close', 'wporg-plugins' ); ?>
+							</button>
+
+							<div class="popover-inner">
+								<?php echo wp_sprintf( '%l.', $available_languages ); ?>
+							</div>
+						</div>
+						<?php
+					else :
+						echo current( $available_languages );
+					endif;
+
+					echo '</div>';
+					?>
+				</li>
+				<?php
+			endif;
+			?>
+
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
 				<li class="clear"><?php
 					$terms = get_the_terms( $post, 'plugin_tags' );
-					if ( 1 == count( $terms ) ) :
+					if ( 1 == count( $terms ) ) {
+						/* translators: %s: tag list */
 						printf( __( 'Tag: %s', 'wporg-plugins' ), $tags );
-					else :
+					} else {
+						/* translators: %s: tag list */
 						printf( __( 'Tags: %s', 'wporg-plugins' ), $tags );
-					endif;
+					}
 				?></li>
 			<?php endif; ?>
 
@@ -89,5 +141,54 @@ class Meta extends \WP_Widget {
 
 		<?php
 		echo $args['after_widget'];
+	}
+
+	/**
+	 * Retrieves available languages.
+	 *
+	 * @return array List of available languages.
+	 */
+	private function available_languages() {
+		$post    = get_post();
+		$slug    = $post->post_name;
+		$locales = Plugin_I18n::instance()->get_translations( $slug );
+		$languages = [];
+
+		// We assume that the main language is English US, even though this
+		// is not true for all plugins. Add it the list for localized directories.
+		if ( 'en_US' !== get_locale() ) {
+			$languages['English (US)'] = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( "https://wordpress.org/plugins/{$slug}/" ),
+				'English (US)'
+			);
+		}
+
+		if ( ! empty( $locales ) ) {
+			$locale_names = wp_list_pluck( $locales, 'name', 'wp_locale' );
+			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
+
+			$sites = get_sites( [
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'public'     => 1,
+				'path'       => '/',
+				'locale__in' => $wp_locales,
+				'number'     => '',
+			] );
+
+			if ( $sites ) {
+				foreach ( $sites as $site ) {
+					$languages[ $locale_names[ $site->locale ] ] = sprintf(
+						'<a href="%1$s">%2$s</a>',
+						esc_url( "{$site->home}/plugins/{$slug}/" ),
+						$locale_names[ $site->locale ]
+					);
+				}
+			}
+		}
+
+		ksort( $languages, SORT_NATURAL );
+
+		return $languages;
 	}
 }

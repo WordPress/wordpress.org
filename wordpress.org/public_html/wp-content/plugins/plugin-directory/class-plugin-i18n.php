@@ -470,4 +470,44 @@ class Plugin_I18n {
 
 		return $locales;
 	}
+
+	/**
+	 * Returns a list of locale objects for available language packs.
+	 *
+	 * @param string $plugin_slug Slug of a plugin.
+	 * @return array List of locale objects.
+	 */
+	public function get_translations( $plugin_slug ) {
+		global $wpdb;
+
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		// Get the active language packs of the plugin.
+		$locales = $wpdb->get_col( $wpdb->prepare( "
+			SELECT `language`
+			FROM language_packs
+			WHERE
+				type = 'plugin' AND
+				domain = %s AND
+				active = 1
+			GROUP BY `language`",
+			$plugin_slug
+		) );
+
+		$translations = [];
+
+		foreach ( $locales as $locale ) {
+			$gp_locale = GP_Locales::by_field( 'wp_locale', $locale );
+			if ( ! $gp_locale ) {
+				continue;
+			}
+
+			$translations[] = (object) [
+				'name'      => $gp_locale->english_name,
+				'wp_locale' => $locale,
+			];
+		}
+
+		return $translations;
+	}
 }
