@@ -6,12 +6,14 @@
 	box-shadow: -4px 0 0 white, -6px 0 0 $color__moderator;
 }
 .by-plugin-author,
-.by-plugin-contributor {
+.by-plugin-contributor,
+.by-plugin-support-rep {
 	box-shadow: -4px 0 0 white, -6px 0 0 $color__plugin-author;
 }
 
 .by-theme-author,
-.by-theme-contributor {
+.by-theme-contributor,
+.by-theme-support-rep {
 	box-shadow: -4px 0 0 white, -6px 0 0 $color__theme-author;
 }
 
