@@ -102,6 +102,11 @@ a.button.button-large,
 	line-height: ms( 6 );
 }
 
+a.button.button-xl,
+.button-group.button-xl a.button {
+	line-height: ms( 8 );
+}
+
 a.button.button-small,
 .button-group.button-small a.button {
 	line-height: ms( 2 );
