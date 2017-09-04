@@ -74,6 +74,13 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 	$de_ch_informal->wp_locale = 'de_CH_informal';
 	$GLOBALS['gp_locales']->locales['de-ch/informal'] = $de_ch_informal;
 
+	$pt_pt_ao90 = clone GP_Locales::by_field( 'wp_locale', 'pt_PT' );
+	$pt_pt_ao90->english_name = 'Portuguese (Portugal, AO90)';
+	$pt_pt_ao90->native_name = 'Português (AO90)';
+	$pt_pt_ao90->slug = 'pt/ao90';
+	$pt_pt_ao90->wp_locale = 'pt_PT_ao90';
+	$GLOBALS['gp_locales']->locales['pt/ao90'] = $pt_pt_ao90;
+
 	$base_url = is_ssl() ? 'https' : 'http';
 	$base_url .= '://downloads.wordpress.org/translation/';
 	$base_url .= ( $type == 'core' ) ? 'core' : "$type/$domain";
