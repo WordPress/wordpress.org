@@ -10,10 +10,12 @@ jQuery(document).ready(function() {
 	jQuery( '.menu-item-has-children > ul ul' ).addClass( 'default-open' );
 
 	// Open the current menu
-	jQuery( '.current-menu-item a' ).first()
+	jQuery( '.menu-table-of-contents-container .current-menu-item a' ).first()
 		.addClass( 'active' )
 		.parents( '.menu-item-has-children' )
-			.toggleClass( 'open' );
+			.toggleClass( 'open' )
+		.find( '> div > .dashicons' )
+			.attr( 'aria-expanded', true );
 
 	// Or if wrapped in a div.expandable
 	jQuery( '.menu-item-has-children > div > .dashicons' ).click( function() {
@@ -22,7 +24,7 @@ jQuery(document).ready(function() {
 		jQuery( this ).parent().siblings( '.children' ).slideToggle();
 
 		menuToggle.toggleClass( 'open' );
-		menuToggle.attr( 'aria-expanded', menuToggle.hasClass( 'open' ) );
+		jQuery( this ).attr( 'aria-expanded', menuToggle.hasClass( 'open' ) );
 	} );
 } );
 
