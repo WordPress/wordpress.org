@@ -409,7 +409,7 @@ class Hooks {
 			?>
 			<p>
 				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
-				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="100" />
+				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="200" />
 			</p>
 			<?php
 		endif;
