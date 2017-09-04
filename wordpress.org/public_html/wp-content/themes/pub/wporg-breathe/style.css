@@ -1106,9 +1106,14 @@ h2.toc-heading + h3.toc-heading:target {
   height: 100%;
   color: #0073aa;
   background-color: #fafafa;
+  border: 0;
   border-left: 1px solid rgba(0,0,0,0.05);
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-appearance: none;
 }
-.menu-table-of-contents-container ul li .dashicons:hover {
+.menu-table-of-contents-container ul li .dashicons:hover,
+.menu-table-of-contents-container ul li .dashicons:focus {
   color: #fff;
   background-color: #0073aa;
 }
@@ -1117,7 +1122,7 @@ h2.toc-heading + h3.toc-heading:target {
   border-right: 1px solid rgba(0,0,0,0.05);
   border-left: none;
 }
-.menu-table-of-contents-container .open .expandable .dashicons {
+.menu-table-of-contents-container .open .expandable .dashicons:not(:focus) {
 	background: #fff;
 	color: #0073aa;
 }
@@ -1127,7 +1132,8 @@ h2.toc-heading + h3.toc-heading:target {
   padding: 8px 40px 8px 8px;
   text-decoration: none;
 }
-.menu-table-of-contents-container ul a:hover {
+.menu-table-of-contents-container ul a:hover,
+.menu-table-of-contents-container ul a:focus {
   color: #fff;
   background-color: #0073aa;
 }
@@ -1146,7 +1152,7 @@ h2.toc-heading + h3.toc-heading:target {
   padding-left: 8px;
 }
 
-.menu-table-of-contents-container > ul > li.open > div > a {
+.menu-table-of-contents-container > ul > li.open > div > a:not(:focus) {
   color: #0073aa;
 }
 .menu-table-of-contents-container > ul > li.open > div > a:hover {
