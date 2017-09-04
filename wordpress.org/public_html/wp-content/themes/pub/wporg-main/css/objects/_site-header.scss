@@ -1,0 +1,26 @@
+.site-header {
+	.home & {
+		background: #0073aa;
+		padding: 18px 36px;
+
+		@media (min-width: 737px) {
+			padding: 1.5625rem
+		}
+
+		.site-title {
+			color: #fff;
+			display: block;
+			font-size: ms( 12 );
+			font-weight: 300;
+			line-height: 1;
+			margin: 2rem 0 1rem;
+			text-align: center;
+		}
+
+		.site-description {
+			color: #fff;
+			max-width: 35.52714rem;
+			padding: 11px 0;
+		}
+	}
+}
