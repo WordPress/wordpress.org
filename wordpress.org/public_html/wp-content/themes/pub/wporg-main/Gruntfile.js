@@ -140,7 +140,7 @@ module.exports = function( grunt ) {
 				tasks: ['jshint']
 			},
 			css: {
-				files: ['**/*.scss'],
+				files: ['**/*.scss', '../wporg/css/**/*scss'],
 				tasks: ['css']
 			}
 		}
