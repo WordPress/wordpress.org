@@ -89,7 +89,7 @@ class Meta extends \WP_Widget {
 							<?php
 							printf(
 								/* translators: %s: Number of available languages */
-								_x( 'See all %s', 'languages' ),
+								_x( 'See all %s', 'languages', 'wporg-plugins' ),
 								$available_languages_count
 							)
 							?>

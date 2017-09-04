@@ -54,25 +54,17 @@ class Developers {
 			] );
 
 			if ( $locales_count ) {
-				if ( 1 === $locales_count ) {
-					$output .= sprintf(
-						/* translators: 1: plugin name, 2: locale name */
-						__( '&#8220;%1$s&#8221; has been translated into %2$s.', 'wporg-plugins' ),
-						$title
-					) . ' ';
-				} else {
-					$output .= sprintf(
-						/* translators: 1: plugin name, 2: number of locales */
-						_n(
-							'&#8220;%1$s&#8221; has been translated into %2$d locales',
-							'&#8220;%1$s&#8221; has been translated into %2$d locales.',
-							$locales_count,
-							'wporg-plugins'
-						),
-						$title,
-						$locales_count
-					) . ' ';
-				}
+				$output .= sprintf(
+					/* translators: 1: plugin name, 2: number of locales */
+					_n(
+						'&#8220;%1$s&#8221; has been translated into %2$d locale.',
+						'&#8220;%1$s&#8221; has been translated into %2$d locales.',
+						$locales_count,
+						'wporg-plugins'
+					),
+					$title,
+					number_format_i18n( $locales_count )
+				) . ' ';
 
 				$output .= sprintf(
 					/* translators: URL to translator view */
