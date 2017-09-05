@@ -1,0 +1,33 @@
+.page {
+	.entry-header {
+		background: $color__wp-blue;
+		padding: 1rem 0;
+		position: relative;
+
+		.entry-title {
+			color: #fff;
+			font-size: ms( 4 );
+			font-weight: 300;
+			line-height: 1;
+			margin: 0 auto;
+			max-width: 960px;
+			padding: 0 ms(4);
+
+			@media screen and (min-width: $ms-breakpoint) {
+				padding: 0 10px;
+			}
+		}
+
+		&.home {
+			padding: ms(4) ms(1);
+			text-align: center;
+		}
+	}
+
+	.entry-content,
+	.entry-footer {
+		margin: 0 auto;
+		max-width: 960px;
+		padding: ms( 10 ) ms( 4 );
+	}
+}

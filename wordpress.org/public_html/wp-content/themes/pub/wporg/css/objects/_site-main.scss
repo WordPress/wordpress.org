@@ -18,7 +18,9 @@
 
 	&.page,
 	.page & {
-		padding-top: 0;
+		margin: auto;
+		max-width: none;
+		padding: 0;
 	}
 
 	.page-title {
