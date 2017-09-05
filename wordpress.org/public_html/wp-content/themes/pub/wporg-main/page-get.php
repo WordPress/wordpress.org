@@ -1,118 +1,132 @@
 <?php
-/**
- * Page template for the Get WordPress page.
- *
- * @package wporg-main
- */
-
 require WPORGPATH . 'header.php';
 ?>
+	<div id="page" class="site">
+	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-main' ); ?></a>
 
-	<div id="page" class="site page-template-get">
-		<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg-main' ); ?></a>
+	<div id="content" class="site-content">
+	<header id="masthead" class="site-header" role="banner">
+		<div class="site-branding">
+			<p class="site-title"><a href="<?php echo esc_url( home_url( '/get' ) ); ?>"><?php _e( 'Get WordPress', 'wporg-main' ); ?></a></p>
 
-		<div id="content" class="site-content">
-		<header id="masthead" class="site-header" role="banner">
-			<div class="site-branding">
-				<h1 class="site-title">
-					<a href="<?php echo esc_url( home_url( '/get/' ) ); ?>" rel="home">
-						<?php _e( 'Get WordPress', 'wporg-main' ); ?>
-					</a>
-				</h1>
+			<nav id="site-navigation" class="main-navigation" role="navigation">
+				<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
+				<?php wp_nav_menu( array( 'theme_location' => 'primary', 'menu_id' => 'primary-menu', 'depth' => 1 ) ); ?>
+			</nav><!-- #site-navigation -->
+		</div><!-- .site-branding -->
+	</header><!-- #masthead -->
 
-				<p class="site-description">
-					<?php _e( 'Use the software that powers over 25% of the Internet.', 'wporg-main' ); ?>
-				</p>
-			</div><!-- .site-branding -->
-		</header><!-- #masthead -->
+	<main id="main" class="site-main" role="main">
 
-		<main id="main" class="site-main" role="main">
+		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+			<div class="entry-content">
+				<section>
+					<div class="container">
+						<h3><?php _e( 'Requirements', 'wporg-main' ); ?></h3>
 
-			<?php while ( have_posts() ) : the_post(); ?>
+						<p><?php printf( __( 'You&#8217;ve got a cool new plugin and are hoping to give it some exposure. You&#8217;re in the right place. Just <a href="%s">ask us to host it for you</a>. You&#8217;ll be able to:', 'wporg-main' ), esc_url( home_url( 'developers/add' ) ) ); ?></p>
+						<ul>
+							<li><?php _e( 'Keep track of how many people have downloaded it.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Let people leave comments about your plugin.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Get your plugin rated against all the other cool WordPress plugins.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Give your plugin lots of exposure in this centralized repository.', 'wporg-main' ); ?></li>
+						</ul>
 
-			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-				<div class="entry-content">
+						<h3><?php _e( 'There are some restrictions', 'wporg-main' ); ?></h3>
+						<ul>
+							<li><?php printf( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-main' ), esc_url( 'http://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) ); ?></li>
+							<li><?php _e( 'The plugin must not do anything illegal or be morally offensive (that&#8217;s subjective, we know).', 'wporg-main' ); ?></li>
+							<li><?php printf( __( 'You have to actually use the <a href="%s">Subversion</a> repository we give you in order for your plugin to show up on this site. The WordPress Plugin Directory is a hosting site, not a listing site.', 'wporg-main' ), esc_url( 'http://subversion.tigris.org/' ) ); ?></li>
+							<li><?php _e( 'The plugin must not embed external links on the public site (like a &#8220;powered by&#8221; link) without explicitly asking the user&#8217;s permission.', 'wporg-main' ); ?></li>
+							<li><?php printf( __( 'Your plugin must abide by our list of <a href="%s">detailed guidelines</a>, which include not being a spammer and not abusing the systems.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' ) ); ?></li>
+						</ul>
 
-					<section class="download">
-						<h2><?php _e( 'Priceless, and also free' ); ?></h2>
-						<p class="subheading"><?php _e( 'Download WordPress and use it on your site.' ); ?></p>
-						<div class="call-to-action">
-							<button class="button button-primary button-xl"><?php _e( 'Download WordPress 4.4.2' ); ?></button>
-						</div>
+						<h3><?php _e( 'Submission is Simple', 'wporg-main' ); ?></h3>
+						<ol>
+							<li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-main' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
+							<li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-main' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
+							<li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, it will either be approved or you will be emailed and asked to provide more information and/or make corrections.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
+							<li><?php printf( __( 'Once approved, you&#8217;ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you&#8217;ll store your plugin.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
+							<li>
+								<?php
+								/* translators: 1: URL to readme section; 2: URL to home page; */
+								printf( __( 'Shortly after you upload your plugin (and a <a href="%1$s">readme file</a>!) to that repository, it will be automatically displayed in the <a href="%2$s">plugins browser</a>.', 'wporg-main' ), '#readme', esc_url( home_url( '/' ) ) );
+								?>
+							</li>
+							<li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a> </strong>for more information.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
+						</ol>
 
-						<div class="container">
-							<aside>
-								<h4><?php _e( 'Requirements' ); ?></h4>
-								<p class="aside"><?php printf( __( 'We recommend servers running version 5.6 or greater of <a href="%1$s">PHP</a>/<a href="%2$s">MySQL</a> and version 10.0 or greater of <a href="%3$s">MariaDB</a>.' ), '', '', '' ); ?></p>
+						<h3 id="readme"><?php _e( 'Readme files', 'wporg-main' ); ?></h3>
+						<p>
+							<?php
+							/* translators: 1: URL to readme file; 2: URL to readme validator; */
+							printf( __( 'To make your entry in the plugin browser most useful, each plugin should have a readme file named <code>readme.txt</code> that adheres to the <a href="%1$s">WordPress plugin readme file standard</a>. You can put your readme file through the <a href="%2$s">readme validator</a> to check it.', 'wporg-main' ), esc_url( home_url( 'files/2016/06/readme.txt' ) ), esc_url( home_url( '/developers/readme-validator/' ) ) );
+							?>
+						</p>
+					</div>
+				</section>
+				<section>
+					<div class="container">
+						<h3><?php _e( 'Beta Releases', 'wporg-main' ); ?></h3>
 
-								<p class="aside"><?php printf( __( 'We also recommend either <a href="%1$s">Apache</a> or <a href="%1$s">Nginx</a> as the most robust options for running WordPress, but neither is required.' ), '', '' ); ?></p>
-							</aside><article>
-								<h4><?php _e( 'Installation' ); ?></h4>
-								<p><?php printf( __( 'With our famous 5-minute installation, setting up WordPress for the first time is simple. We’ve created a <a href="%1$s">handy guide</a> to see you through the installation process.' ), '' ); ?></p>
-								<h4><?php _e( 'Release notifications' ); ?></h4>
-								<p><?php printf( __( 'Want to get notified about WordPress releases? Join the <a href="%1$s">WordPress Announcements mailing list</a> and we will send a friendly message whenever there is a new stable release.' ), '' ); ?></p>
-							</article>
-						</div>
-						<a href="#" class="call-to-action"><?php _e( 'Discover other ways to get WordPress' ); ?></a>
-					</section>
+						<p><?php printf( __( 'You&#8217;ve got a cool new plugin and are hoping to give it some exposure. You&#8217;re in the right place. Just <a href="%s">ask us to host it for you</a>. You&#8217;ll be able to:', 'wporg-main' ), esc_url( home_url( 'developers/add' ) ) ); ?></p>
+						<ul>
+							<li><?php _e( 'Keep track of how many people have downloaded it.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Let people leave comments about your plugin.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Get your plugin rated against all the other cool WordPress plugins.', 'wporg-main' ); ?></li>
+							<li><?php _e( 'Give your plugin lots of exposure in this centralized repository.', 'wporg-main' ); ?></li>
+						</ul>
 
-					<section class="hosting">
-						<span class="dashicons dashicons-cloud"></span>
-						<h2><?php _e( 'WordPress Hosting' ); ?></h2>
-						<p class="subheading"><?php _e( 'Choosing a hosting provider can be difficult, so we have selected a few of the best to get you started.' ); ?></p>
+						<h3><?php _e( 'There are some restrictions', 'wporg-main' ); ?></h3>
+						<ul>
+							<li><?php printf( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-main' ), esc_url( 'http://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) ); ?></li>
+							<li><?php _e( 'The plugin must not do anything illegal or be morally offensive (that&#8217;s subjective, we know).', 'wporg-main' ); ?></li>
+							<li><?php printf( __( 'You have to actually use the <a href="%s">Subversion</a> repository we give you in order for your plugin to show up on this site. The WordPress Plugin Directory is a hosting site, not a listing site.', 'wporg-main' ), esc_url( 'http://subversion.tigris.org/' ) ); ?></li>
+							<li><?php _e( 'The plugin must not embed external links on the public site (like a &#8220;powered by&#8221; link) without explicitly asking the user&#8217;s permission.', 'wporg-main' ); ?></li>
+							<li><?php printf( __( 'Your plugin must abide by our list of <a href="%s">detailed guidelines</a>, which include not being a spammer and not abusing the systems.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/' ) ); ?></li>
+						</ul>
 
-						<div class="three-up">
-							<div>
-								<img src="<?php echo esc_url( get_theme_file_uri( 'images/logo-bluehost.png' ) ); ?>" class="logo__bluehost" />
-								<p><?php _e( 'Our optimized hosting is fast, secure, and simple. We are turning our passion for WordPress into the most amazing managed platform for your WordPress websites ever.' ); ?></p>
-								<a href=""><?php _e( 'Visit Bluehost' ); ?></a>
-							</div>
-							<div>
-								<img src="<?php echo esc_url( get_theme_file_uri( 'images/logo-getlisted.png' ) ); ?>" class="logo__getlisted" />
-								<p><?php _e( 'Would you like to get your hosting company listed on this page? Click through and read up on how to do it. There’s a few hoops to jump through, but nothing impossible.' ); ?></p>
-								<a href=""><?php _e( 'Get listed' ); ?></a>
-							</div>
-							<div>
-								<img src="<?php echo esc_url( get_theme_file_uri( 'images/logo-wpcom.png' ) ); ?>" class="logo__wpcom" />
-								<p><?php _e( 'WordPress.com is the easiest way to create a free website or blog. It’s a powerful hosting platform that grows with you. We offer expert support for your WordPress site.' ); ?></p>
-								<a href=""><?php _e( 'Visit WordPress.com' ); ?></a>
-							</div>
-						</div>
-						<a href="" class="call-to-action"><?php _e( 'See all of our recommended hosts' ); ?></a>
-					</section>
+						<h3><?php _e( 'Submission is Simple', 'wporg-main' ); ?></h3>
+						<ol>
+							<li><?php printf( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-main' ), esc_url( 'https://wordpress.org/support/register.php' ) ); ?></li>
+							<li><?php printf( __( '<a href="%s">Submit your plugin for review</a>.', 'wporg-main' ), esc_url( home_url( 'developers/add' ) ) ); ?></li>
+							<li><?php printf( __( 'After your plugin is <a href="%s">manually reviewed</a>, it will either be approved or you will be emailed and asked to provide more information and/or make corrections.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#questions-about-submissions-and-approval' ) ); ?></li>
+							<li><?php printf( __( 'Once approved, you&#8217;ll be given access to a <a id="subversion" href="%s">Subversion Repository</a> where you&#8217;ll store your plugin.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/' ) ); ?></li>
+							<li>
+								<?php
+								/* translators: 1: URL to readme section; 2: URL to home page; */
+								printf( __( 'Shortly after you upload your plugin (and a <a href="%1$s">readme file</a>!) to that repository, it will be automatically displayed in the <a href="%2$s">plugins browser</a>.', 'wporg-main' ), '#readme', esc_url( home_url( '/' ) ) );
+								?>
+							</li>
+							<li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a> </strong>for more information.', 'wporg-main' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
+						</ol>
 
-					<section class="apps-mobile">
-						<span class="dashicons dashicons-smartphone"></span>
-						<h2><?php _e( 'Inspiration strikes anywhere, anytime' ); ?></h2>
-						<p class="subheading"><?php _e( 'Create or update content on the go; try our mobile apps.' ); ?></p>
+						<h3 id="readme"><?php _e( 'Readme files', 'wporg-main' ); ?></h3>
+						<p>
+							<?php
+							/* translators: 1: URL to readme file; 2: URL to readme validator; */
+							printf( __( 'To make your entry in the plugin browser most useful, each plugin should have a readme file named <code>readme.txt</code> that adheres to the <a href="%1$s">WordPress plugin readme file standard</a>. You can put your readme file through the <a href="%2$s">readme validator</a> to check it.', 'wporg-main' ), esc_url( home_url( 'files/2016/06/readme.txt' ) ), esc_url( home_url( '/developers/readme-validator/' ) ) );
+							?>
+						</p>
+					</div>
+				</section>
+			</div><!-- .entry-content -->
 
-						<div class="web-stores">
-							<a href="" class="button-ios"><img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-apple.png' ) ); ?>" /></a>
-							<a href="" class="button-android"><img src="<?php echo esc_url( get_theme_file_uri( 'images/badge-google-play.png' ) ); ?>" /></a>
-						</div>
-						<a href="" class="call-to-action"><?php _e( 'Learn more about our mobile apps' ); ?></a>
-					</section>
-
-				</div><!-- .entry-content -->
-
-				<footer class="entry-footer">
-					<?php
-					edit_post_link(
-						sprintf(
-						/* translators: %s: Name of current post */
-							esc_html__( 'Edit %s', 'wporg-main' ),
-							the_title( '<span class="screen-reader-text">"', '"</span>', false )
-						),
-						'<span class="edit-link">',
-						'</span>'
-					);
-					?>
-				</footer><!-- .entry-footer -->
-			</article><!-- #post-## -->
-
-			<?php endwhile; ?>
-
-		</main><!-- #main -->
+			<footer class="entry-footer">
+				<?php
+				edit_post_link(
+					sprintf(
+					/* translators: %s: Name of current post */
+						esc_html__( 'Edit %s', 'wporg-main' ),
+						the_title( '<span class="screen-reader-text">"', '"</span>', false )
+					),
+					'<span class="edit-link">',
+					'</span>'
+				);
+				?>
+			</footer><!-- .entry-footer -->
+		</article><!-- #post-## -->
+	</main><!-- #main -->
 
 <?php
 get_footer();
