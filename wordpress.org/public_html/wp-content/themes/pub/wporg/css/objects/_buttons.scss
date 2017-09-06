@@ -258,7 +258,7 @@ p .button {
 	&.active:hover,
 	&.active:focus,
 	&:active {
-		background: #0073aa;
+		background: $color__wp-blue;
 		border-color: #006799;
 		box-shadow: inset 0 2px 0 #006799;
 		vertical-align: top;

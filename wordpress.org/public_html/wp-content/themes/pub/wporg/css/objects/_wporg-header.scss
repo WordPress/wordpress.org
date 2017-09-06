@@ -50,4 +50,12 @@
 	a:active {
 		text-decoration: none;
 	}
+
+	@media screen and (min-width: 769px) {
+		ul li.current-menu-item:after,
+		ul li.current_page_parent:after,
+		ul li a.current ~ .uparrow {
+			border-bottom-color: $color__wp-blue;
+		}
+	}
 }

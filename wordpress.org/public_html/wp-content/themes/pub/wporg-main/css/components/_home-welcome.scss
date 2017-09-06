@@ -1,5 +1,6 @@
 .home-welcome {
 	background: #fff;
+	border-bottom: 1px solid #dfdfdf;
 	color: #32373c;
 	font-family: "Open Sans", sans-serif;
 	font-weight: 400;
@@ -51,7 +52,7 @@
 		max-width: 50rem;
 		padding: 3.05176rem 1.5625rem;
 
-		&:last-child {
+		&:last-of-type {
 			border-bottom: none;
 		}
 
@@ -248,18 +249,6 @@
 		}
 	}
 
-	#home-below {
-		ol, ul {
-			margin: 0;
-		}
-
-		h4 {
-			border-bottom: 1px solid #dedede;
-			font-size: inherit;
-			padding-bottom: 4px;
-		}
-	}
-
 	#showcase-link {
 		font-size: 14px;
 	}
@@ -282,5 +271,25 @@
 	@media (min-width: 67rem) {
 		margin: 1rem auto 0;
 		max-width: 50rem;
+	}
+}
+
+#home-below {
+	margin-bottom: 14px;
+
+	h4 {
+		border-bottom: 1px solid #dedede;
+		font-size: inherit;
+		padding-bottom: 4px;
+	}
+
+	h5 {
+		line-height: 1;
+		margin: 0;
+		text-transform: none;
+	}
+
+	ol, ul {
+		margin: 0;
 	}
 }
