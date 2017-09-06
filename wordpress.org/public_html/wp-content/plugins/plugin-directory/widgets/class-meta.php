@@ -154,16 +154,6 @@ class Meta extends \WP_Widget {
 		$locales = Plugin_I18n::instance()->get_translations( $slug );
 		$languages = [];
 
-		// We assume that the main language is English US, even though this
-		// is not true for all plugins. Add it the list for localized directories.
-		if ( 'en_US' !== get_locale() ) {
-			$languages['English (US)'] = sprintf(
-				'<a href="%1$s">%2$s</a>',
-				esc_url( "https://wordpress.org/plugins/{$slug}/" ),
-				'English (US)'
-			);
-		}
-
 		if ( ! empty( $locales ) ) {
 			$locale_names = wp_list_pluck( $locales, 'name', 'wp_locale' );
 			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
@@ -185,6 +175,16 @@ class Meta extends \WP_Widget {
 					);
 				}
 			}
+		}
+
+		// We assume that the main language is English US, even though this
+		// is not true for all plugins.
+		if ( $languages || 'en_US' !== get_locale() ) {
+			$languages['English (US)'] = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( "https://wordpress.org/plugins/{$slug}/" ),
+				'English (US)'
+			);
 		}
 
 		ksort( $languages, SORT_NATURAL );
