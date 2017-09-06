@@ -1,0 +1,36 @@
+.post-navigation {
+	margin: 5em auto;
+	padding: 0;
+
+	a {
+		border-bottom: 1px solid #eaeaea;
+		color: #444;
+		display: block;
+		font-weight: 600;
+		padding: 11px 0 12px;
+		text-transform: none;
+		width: 100%;
+
+		&:hover {
+			color: #21759b;
+		}
+	}
+
+	.nav-links {
+		border-top: 1px solid #eaeaea;
+		hyphens: auto;
+		word-wrap: break-word;
+	}
+
+	.meta-nav {
+		color: #777;
+		display: block;
+		font-size: 13px;
+		line-height: 2;
+		text-transform: uppercase;
+	}
+
+	.nav-next {
+		text-align: right;
+	}
+}

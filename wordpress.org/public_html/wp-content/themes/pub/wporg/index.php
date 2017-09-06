@@ -16,7 +16,7 @@ namespace WordPressdotorg\Theme;
 
 get_header(); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="site-main col-8" role="main">
 
 		<?php
 		if ( have_posts() ) :
@@ -25,7 +25,7 @@ get_header(); ?>
 			while ( have_posts() ) :
 				the_post();
 
-				get_template_part( 'content' );
+				get_template_part( 'template-parts/content' );
 			endwhile;
 
 			the_posts_pagination();
@@ -38,4 +38,5 @@ get_header(); ?>
 	</main><!-- #main -->
 
 	<?php
+get_sidebar();
 get_footer();

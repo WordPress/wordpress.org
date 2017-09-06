@@ -1,0 +1,23 @@
+.entry-footer {
+	> span {
+		margin-right: 1rem;
+
+		:last-of-type {
+			margin: 0;
+		}
+	}
+
+	.updated:not(.published) {
+		display: none;
+	}
+
+	.sticky .posted-on,
+	.byline {
+		display: none;
+	}
+
+	.single .byline,
+	.group-blog .byline {
+		display: inline;
+	}
+}

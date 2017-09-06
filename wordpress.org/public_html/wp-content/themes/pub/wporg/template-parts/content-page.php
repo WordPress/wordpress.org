@@ -9,7 +9,7 @@
 
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'col-9' ); ?>>
 	<header class="entry-header">
 		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 	</header><!-- .entry-header -->
@@ -19,7 +19,7 @@
 		the_content();
 
 		wp_link_pages( array(
-			'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'wporg-plugins' ),
+			'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'wporg' ),
 			'after'  => '</div>',
 		) );
 		?>
@@ -30,7 +30,7 @@
 		edit_post_link(
 			sprintf(
 			/* translators: %s: Name of current post */
-				esc_html__( 'Edit %s', 'wporg-plugins' ),
+				esc_html__( 'Edit %s', 'wporg' ),
 				the_title( '<span class="screen-reader-text">"', '"</span>', false )
 			),
 			'<span class="edit-link">',
@@ -39,3 +39,6 @@
 		?>
 	</footer><!-- .entry-footer -->
 </article><!-- #post-## -->
+<aside class="col-3" role="complementary">
+	<?php get_sidebar( 'page' ); ?>
+</aside>

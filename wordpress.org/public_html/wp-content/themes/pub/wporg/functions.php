@@ -173,3 +173,8 @@ function hreflang_link_attributes() {
 	}
 }
 add_action( 'wp_head', __NAMESPACE__ . '\hreflang_link_attributes' );
+
+/**
+ * Custom template tags.
+ */
+require_once get_template_directory() . '/inc/template-tags.php';

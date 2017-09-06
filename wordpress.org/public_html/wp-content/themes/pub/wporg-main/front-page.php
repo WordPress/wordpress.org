@@ -114,12 +114,13 @@ require WPORGPATH . 'header.php';
 				<h4><a href="https://wordpress.org/news/"><?php _e( 'News From Our Blog' ); ?></a></h4>
 
 				<?php
-				foreach ( get_posts( [ 'numberposts' => 1 ] ) as $featured_post ) :
-					setup_postdata( $featured_post );
+				$featured = new \WP_Query( [ 'posts_per_page' => 1 ] );
+				while ( $featured->have_posts() ) :
+					$featured->the_post();
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
 					echo '<p>' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</p>';
-				endforeach;
-				wp_reset_postdata();
+				endwhile;
+				wp_reset_query();
 				?>
 			</div>
 

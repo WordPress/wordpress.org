@@ -1,12 +1,15 @@
 <?php
 /**
- * The header for our theme.
+ * The template for displaying all pages.
  *
- * This is the template that displays all of the <head> section and everything up until <div id="content">
+ * This is the template that displays all pages by default.
+ * Please note that this is the WordPress construct of pages
+ * and that other 'pages' on your WordPress site may use a
+ * different template.
  *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ * @link https://codex.wordpress.org/Template_Hierarchy
  *
- * @package WordPressdotorg\Theme
+ * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
 namespace WordPressdotorg\Theme;
@@ -17,13 +20,3 @@ require WPORGPATH . 'header.php';
 	<a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'wporg' ); ?></a>
 
 	<div id="content" class="site-content">
-		<header id="masthead" class="site-header" role="banner">
-			<div class="site-branding">
-				<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
-
-				<nav id="site-navigation" class="main-navigation" role="navigation">
-					<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg' ); ?>"></button>
-					<?php wp_nav_menu( array( 'theme_location' => 'primary', 'menu_id' => 'primary-menu', 'depth' => 1 ) ); ?>
-				</nav><!-- #site-navigation -->
-			</div><!-- .site-branding -->
-		</header><!-- #masthead -->
