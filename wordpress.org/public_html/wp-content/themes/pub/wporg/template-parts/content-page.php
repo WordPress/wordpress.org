@@ -9,7 +9,7 @@
 
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'col-9' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<header class="entry-header">
 		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 	</header><!-- .entry-header -->
@@ -39,6 +39,3 @@
 		?>
 	</footer><!-- .entry-footer -->
 </article><!-- #post-## -->
-<aside class="col-3" role="complementary">
-	<?php get_sidebar( 'page' ); ?>
-</aside>
