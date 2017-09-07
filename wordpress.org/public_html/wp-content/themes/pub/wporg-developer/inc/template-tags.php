@@ -465,7 +465,7 @@ namespace DevHub {
 			case 'reference':
 			case 'plugins':
 			case 'themes':
-				return home_url( '/' . $parts[1] . '/' );
+				return home_url( '/' . $parts[0] . '/' );
 			case 'cli':
 				return home_url( '/cli/commands/' );
 			default:
