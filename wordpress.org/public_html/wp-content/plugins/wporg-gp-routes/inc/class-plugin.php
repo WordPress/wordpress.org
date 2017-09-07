@@ -104,6 +104,7 @@ class Plugin {
 		if ( gp_startswith( $request_uri, '/' . GP::$router->api_prefix . '/' ) ) { // API requests.
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
+			GP::$router->remove( '/profile' );
 		} else {
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
