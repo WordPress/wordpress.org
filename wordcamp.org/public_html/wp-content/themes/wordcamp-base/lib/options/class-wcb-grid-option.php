@@ -25,7 +25,7 @@ class WCB_Grid_Option extends WCB_Array_Option {
 	}
 
 	function validate_layout( $input ) {
-		$input = unserialize( $input );
+		$input = json_decode( $input );
 		if ( ! is_array( $input ) )
 			return null;
 
@@ -106,7 +106,7 @@ class WCB_Grid_Option extends WCB_Array_Option {
 		?>
 		<div id="<?php echo esc_attr("grid-row-$this->key"); ?>" class="grid-row-layout clearfix <?php echo $this->get_option('visible') ? 'visible' : ''; ?>">
 			<div class="description row-name"><?php echo esc_html( $this->label ); ?></div>
-			<input class="signature" type="hidden" <?php $this->name('layout'); ?> value="<?php echo esc_attr( serialize( $layout ) ); ?>"/>
+			<input class="signature" type="hidden" <?php $this->name('layout'); ?> value="<?php echo esc_attr( wp_json_encode( $layout ) ); ?>"/>
 			<?php $this->render_row( $layout ); ?>
 			<div class="edit"><a href="#"><?php echo esc_html_e( 'Edit' , 'wordcamporg'); ?></a></div>
 			<?php if ( $this->type != 'content' ):
@@ -133,7 +133,7 @@ class WCB_Grid_Option extends WCB_Array_Option {
 					foreach ( $rows as $row ):
 						$active = $this->verbose_row( $row ) == $current_layout; ?>
 						<a href="#" class="grid-row-selector <?php echo $active ? 'active' : ''; ?>">
-							<input class="grid-row-signature" type="hidden" value="<?php echo esc_attr( serialize( $row ) ); ?>"/>
+							<input class="grid-row-signature" type="hidden" value="<?php echo esc_attr( wp_json_encode( $row ) ); ?>"/>
 							<?php $this->render_row( $row ); ?>
 						</a>
 					<?php endforeach; ?>
