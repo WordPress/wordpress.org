@@ -36,5 +36,3 @@ function wcb_get( $component='' ) {
 	else
 		return $wcb_manager;
 }
-
-?>

@@ -87,7 +87,7 @@ function wcb_typekit_scripts() {
 		return;
 
 	?>
-	<script type="text/javascript" src="http://use.typekit.com/<?php echo esc_attr( $kit_id ); ?>.js"></script>
+	<script type="text/javascript" src="//use.typekit.com/<?php echo esc_attr( $kit_id ); ?>.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<?php
 }

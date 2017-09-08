@@ -141,7 +141,7 @@ class WCB_Options extends WCB_Loader {
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>
-			<h2><?php echo get_current_theme() . ' ' . __( 'Theme Options', 'wordcamporg' ); ?></h2>
+			<h1><?php echo get_current_theme() . ' ' . __( 'Theme Options', 'wordcamporg' ); ?></h1>
 
 			<?php if ( false !== $_REQUEST['updated'] ) : ?>
 				<div class="updated fade"><p><strong><?php _e( 'Options saved', 'wordcamporg' ); ?></strong></p></div>

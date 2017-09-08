@@ -16,7 +16,8 @@ class WCB_Radio_Option extends WCB_Option {
 		if ( empty( $values ) )
 			return;
 		if ( empty( $this->default ) || ! array_key_exists( $this->default, $this->values ) )
-			$this->default = @$this->values[0];
+			if ( isset( $this->values[0] ) )
+				$this->default = $this->values[0];
 	}
 
 	function validate( $input ) {
