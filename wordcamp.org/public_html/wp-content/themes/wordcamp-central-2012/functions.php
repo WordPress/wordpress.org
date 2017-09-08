@@ -60,15 +60,6 @@ class WordCamp_Central_Theme {
 		add_image_size( 'wccentral-thumbnail-past', 130, 60, true );
 		add_image_size( 'wccentral-thumbnail-hero', 493, 315, true );
 
-		// Schedule for cache busting
-		if ( ! wp_next_scheduled( 'wccentral_cache_busters' ) ) {
-			wp_schedule_event( time(), 'hourly', 'wccentral_cache_busters' );
-		}
-		add_action( 'wccentral_cache_busters', array( __CLASS__, 'cache_busters' ) );
-
-		// Uncomment for debugging
-		// wp_clear_scheduled_hook( 'wccentral_cache_busters' );
-
 		// Can I haz editor style?
 		add_editor_style();
 	}
@@ -107,16 +98,6 @@ class WordCamp_Central_Theme {
 	static function pre_get_posts( $query ) {
 		if ( $query->is_search && $query->is_main_query() && ! is_admin() )
 			$query->set( 'post_type', 'post' );
-	}
-
-	/**
-	 * Fired during wccentral_cache_busters, typically during a Cron API request.
-	 * @todo maybe use self:: (php 5.3) instead of call_user_func
-	 */
-	static function cache_busters() {
-		$busters = array( 'get_photos', 'get_videos' );
-		foreach ( $busters as $method )
-			call_user_func( array( __CLASS__, $method ) );
 	}
 
 	/**
@@ -460,84 +441,6 @@ class WordCamp_Central_Theme {
 		// Cache in transients
 		wp_cache_set( 'wccentral_sessions_' . $count, $sessions );
 		return $sessions;
-	}
-
-	/**
-	 * Get WordCamp Photos
-	 *
-	 * Uses the Flickr API to fetch photos tagged wordcamp sf,
-	 * caches data in options. Cached data is busted with the Cron API.
-	 * @uses wp_remote_get
-	 * @return array of photos or an empty array
-	 */
-	public static function get_photos() {
-
-		// Always serve cached data
-		$photos = get_option( 'wccentral_photos', array() );
-		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
-			return $photos;
-
-		// Attempt to update the cache if it was a cron request.
-		$feed_url = 'http://api.flickr.com/services/feeds/photos_public.gne?format=php_serial&tagmode=any&tags=wcsf,wordcamp%20san%20francisco,wordcampsf,wcsf2011,wordcamp%20sf';
-
-		$response = wp_remote_get( $feed_url );
-		if ( is_wp_error( $response ) )
-			return array();
-
-		$feed = unserialize( wp_remote_retrieve_body( $response ) );
-		$photos = $feed['items'];
-
-		if ( ! empty( $photos ) ) {
-			update_option( 'wccentral_photos', $photos );
-		}
-
-		return $photos;
-	}
-
-	/**
-	 * Get WordCamp Videos
-	 *
-	 * Reads the WordPress.tv WordCamp category feed for the
-	 * latest WordCamp videos. Caches in options, busts via Cron API.
-	 *
-	 * @uses fetch_feed
-	 * @return assoc array of videos or empty array
-	 */
-	public static function get_videos( $count = 4 ) {
-
-		// Always serve cached data
-		$videos = get_option( 'wccentral_videos', array() );
-		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
-			return array_slice( $videos, 0, $count );
-
-		$videos = array();
-		$feed_url = 'http://wordpress.tv/category/wordcamptv/feed/?x=2';
-		$feed = fetch_feed( $feed_url );
-
-		if ( is_wp_error( $feed ) )
-			return $videos;
-
-		$maxitems = $feed->get_item_quantity( 10 );
-		$items = $feed->get_items( 0, $maxitems );
-		foreach ( $items as $item ) {
-
-			// Media feed
-			$enclosure = $item->get_enclosure();
-
-			$videos[] = array(
-				'thumbnail' => $enclosure->get_thumbnail(),
-				'title' => $item->get_title(),
-				'permalink' => $item->get_permalink(),
-			);
-		}
-
-		if ( ! empty( $videos ) ) {
-			update_option( 'wccentral_videos', $videos );
-		}
-
-
-		$videos = array_slice( $videos, 0, $count );
-		return $videos;
 	}
 
 	/**
