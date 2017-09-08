@@ -37,11 +37,6 @@ class WordCamp_Post_Types_Plugin_Back_Compat {
 			if ( $old_site_id && ! $old_site_excepted ) {
 				add_action( 'wcpt_back_compat_init', array( $this, 'wcpt_back_compat_init' ) );
 			}
-
-			// Base theme should not load the following modules.
-			add_filter( 'wcb_load_component_speakers', '__return_false' );
-			add_filter( 'wcb_load_component_sessions', '__return_false' );
-			add_filter( 'wcb_load_component_sponsors', '__return_false' );
 		}
 	}
 
