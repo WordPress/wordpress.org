@@ -43,21 +43,6 @@ function wcbs_setup() {
 	require( get_template_directory() . '/inc/template-tags.php' );
 
 	/**
-	 * Custom functions that act independently of the theme templates
-	 */
-	//require( get_template_directory() . '/inc/tweaks.php' );
-
-	/**
-	 * Custom Theme Options
-	 */
-	//require( get_template_directory() . '/inc/theme-options/theme-options.php' );
-
-	/**
-	 * WordPress.com-specific functions and definitions
-	 */
-	//require( get_template_directory() . '/inc/wpcom.php' );
-
-	/**
 	 * Add default posts and comments RSS feed links to head
 	 */
 	add_theme_support( 'automatic-feed-links' );

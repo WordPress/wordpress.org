@@ -77,22 +77,6 @@ function wcb_title_tag() {
 }
 
 /**
- * Print the typekit script tags.
- */
-function wcb_typekit_scripts() {
-	$option = wcb_get_option( 'typekit' );
-	$kit_id = apply_filters( 'wcb_typekit_id', $option );
-
-	if ( empty( $kit_id ) )
-		return;
-
-	?>
-	<script type="text/javascript" src="//use.typekit.com/<?php echo esc_attr( $kit_id ); ?>.js"></script>
-	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-	<?php
-}
-
-/**
  * Get the value for the <meta name="viewport"> tag
  *
  * @return string
