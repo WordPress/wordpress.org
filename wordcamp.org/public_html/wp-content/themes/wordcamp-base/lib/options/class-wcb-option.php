@@ -4,7 +4,7 @@ class WCB_Option {
 	var $key;
 	var $default;
 
-	function WCB_Option( $args ) {
+	function __construct( $args ) {
 		$defaults = array(
 			'key' => '',
 			'default' => '',

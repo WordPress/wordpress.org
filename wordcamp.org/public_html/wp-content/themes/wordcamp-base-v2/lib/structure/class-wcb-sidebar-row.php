@@ -1,7 +1,7 @@
 <?php
 
 class WCB_Sidebar_Row extends WCB_Container {
-	function WCB_Sidebar_Row( $args ) {
+	function __construct( $args ) {
 		$defaults = array(
 			'id'    => '',
 			'class' => '',
@@ -14,7 +14,7 @@ class WCB_Sidebar_Row extends WCB_Container {
 		if ( empty( $id ) || empty( $name ) || empty( $grid ) )
 			return;
 
-		parent::WCB_Container( array(
+		parent::__construct( array(
 			'id' => $id,
 			'class' => "grid_$width sidebar-row $class",
 		) );

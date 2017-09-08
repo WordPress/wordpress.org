@@ -4,8 +4,8 @@ class WCB_Container extends WCB_Elements {
 	var $attrs;
 	var $tag;
 
-	function WCB_Container( $args=array(), $elements=array() ) {
-		parent::WCB_Elements( $elements );
+	function __construct( $args=array(), $elements=array() ) {
+		parent::__construct( $elements );
 
 		$defaults = array(
 			'id' => '',

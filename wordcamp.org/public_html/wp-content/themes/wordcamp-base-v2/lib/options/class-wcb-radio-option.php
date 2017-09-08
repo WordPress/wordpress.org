@@ -4,8 +4,8 @@ class WCB_Radio_Option extends WCB_Option {
 	var $label;
 	var $values;
 
-	function WCB_Radio_Option( $args ) {
-		parent::WCB_Option( $args );
+	function __construct( $args ) {
+		parent::__construct( $args );
 		$defaults = array(
 			'label' => '',
 			'values' => array()

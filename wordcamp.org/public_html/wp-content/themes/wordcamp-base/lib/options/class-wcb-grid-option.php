@@ -5,8 +5,8 @@ class WCB_Grid_Option extends WCB_Array_Option {
 	var $type;
 	var $keys = array('visible', 'layout', 'front_only');
 
-	function WCB_Grid_Option( $args ) {
-		parent::WCB_Array_Option( $args );
+	function __construct( $args ) {
+		parent::__construct( $args );
 		$defaults = array(
 			'label' => '',
 			'type' => 'sidebar'

@@ -3,8 +3,8 @@
 class WCB_Typekit_Option extends WCB_Radio_Option {
 	var $kit_regex = '|^([a-zA-Z0-9]{5}[a-zA-Z0-9]*)$|i';
 
-	function WCB_Typekit_Option( $args ) {
-		parent::WCB_Radio_Option( $args );
+	function __construct( $args ) {
+		parent::__construct( $args );
 
 		// If the 'custom' label exists, tack on an input field (potentially with the kit id).
 		if ( ! empty( $this->values['custom'] ) ) {

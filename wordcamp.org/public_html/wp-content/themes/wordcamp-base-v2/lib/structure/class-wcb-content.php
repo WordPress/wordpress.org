@@ -3,9 +3,9 @@
 class WCB_Content extends WCB_Container {
 	var $open = false;
 
-	function WCB_Content( $args ) {
+	function __construct( $args ) {
 		// $args = wp_parse_args( $args, array( 'id' => 'main' ) );
-		parent::WCB_Container( $args );
+		parent::__construct( $args );
 	}
 
 	function before() {

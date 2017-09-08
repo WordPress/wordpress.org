@@ -3,8 +3,8 @@
 class WCB_Array_Option extends WCB_Option {
 	var $keys = array();
 
-	function WCB_Array_Option( $args ) {
-		parent::WCB_Option( $args );
+	function __construct( $args ) {
+		parent::__construct( $args );
 	}
 	/**
 	 * Overload get_option to optionally return a key within the returned option.

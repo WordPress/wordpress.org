@@ -1,7 +1,7 @@
 <?php
 
 class WCB_Loader {
-	function WCB_Loader() {
+	function __construct() {
 		$this->constants();
 		$this->includes();
 		$this->hooks();

@@ -4,7 +4,7 @@ class WCB_Elements extends WCB_Element {
 	var $elements = array();
 	var $_queue = array();
 
-	function WCB_Elements( $elements=array() ) {
+	function __construct( $elements=array() ) {
 		$this->add( $elements );
 	}
 

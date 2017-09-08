@@ -4,7 +4,7 @@ class WCB_Sidebar extends WCB_Element {
 	var $id;
 	var $args;
 	
-	function WCB_Sidebar( $args ) {
+	function __construct( $args ) {
 		$defaults = array(
 			'class'             => '',
 			// id, name, description left to their register_sidebar defaults.

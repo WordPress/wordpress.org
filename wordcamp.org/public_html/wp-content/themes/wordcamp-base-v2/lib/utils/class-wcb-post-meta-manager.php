@@ -6,7 +6,7 @@ class WCB_Post_Meta_Manager {
 	var $keys;
 	var $_key_prefix;
 
-	function WCB_Post_Meta_Manager( $args ) {
+	function __construct( $args ) {
 		$defaults = array(
 			'prefix'    => '',
 			'private'   => true,

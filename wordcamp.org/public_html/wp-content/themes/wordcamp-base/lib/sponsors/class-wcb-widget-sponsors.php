@@ -3,7 +3,7 @@
 if ( ! class_exists( 'WCB_Widget_Sponsors' ) ) :
 class WCB_Widget_Sponsors extends WP_Widget {
 
-	function WCB_Widget_Sponsors() {
+	function __construct() {
 		$widget_ops = array(
 			'classname' => 'wcb_widget_sponsors',
 			'description' => __( 'Your WordCamp&#8217;s Sponsors', 'wordcamporg' ),
