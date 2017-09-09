@@ -404,7 +404,11 @@ class Hooks {
 	public function add_extra_topic_fields() {
 		$topic_id = bbp_get_topic_id();
 
-		if ( Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id( $topic_id ) ) :
+		if (
+			Plugin::REVIEWS_FORUM_ID != bbp_get_topic_forum_id( $topic_id )
+		&&
+			( ! bbp_is_single_view() || 'reviews' !== bbp_get_view_id() )
+		) :
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
