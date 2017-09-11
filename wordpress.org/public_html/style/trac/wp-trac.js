@@ -408,6 +408,18 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
+			// Prevent marking a ticket as a duplicate of itself
+			$('#propertyform').submit( function() {
+				var action = $('input[name="action"]:checked').val(),
+					currentTicket = parseInt( $('.trac-id').text().replace('#', '') ),
+					duplicateTicket = parseInt( $('#action_dupe').val() );
+
+				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
+					$('#action_dupe').val('')
+					return false;
+				}
+			});
+
 			// Add a 'Show only commits/attachments' view option to tickets
 			$('label[for="trac-comments-only-toggle"]').text('Show only comment text');
 			$('form#prefs')
