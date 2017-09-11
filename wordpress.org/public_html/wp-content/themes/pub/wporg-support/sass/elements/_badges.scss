@@ -54,12 +54,14 @@
 	}
 
 	.by-plugin-author,
-	.by-plugin-contributor {
+	.by-plugin-contributor,
+	.by-plugin-support-rep {
 		border-left-color: $color__plugin-author;
 	}
 
 	.by-theme-author,
-	.by-theme-contributor {
+	.by-theme-contributor,
+	.by-theme-support-rep {
 		border-left-color: $color__theme-author;
 	}
 

@@ -869,19 +869,25 @@ table {
 
 .bbp-view .bbp-topics .by-plugin-author,
 .bbp-view .bbp-topics .by-plugin-contributor,
+.bbp-view .bbp-topics .by-plugin-support-rep,
 .bbp-search .bbp-search-results .by-plugin-author,
 .bbp-search .bbp-search-results .by-plugin-contributor,
+.bbp-search .bbp-search-results .by-plugin-support-rep,
 .bbp-user-replies-created .by-plugin-author,
-.bbp-user-replies-created .by-plugin-contributor {
+.bbp-user-replies-created .by-plugin-contributor,
+.bbp-user-replies-created .by-plugin-support-rep {
 	border-right-color: #f06723;
 }
 
 .bbp-view .bbp-topics .by-theme-author,
 .bbp-view .bbp-topics .by-theme-contributor,
+.bbp-view .bbp-topics .by-theme-support-rep,
 .bbp-search .bbp-search-results .by-theme-author,
 .bbp-search .bbp-search-results .by-theme-contributor,
+.bbp-search .bbp-search-results .by-theme-support-rep,
 .bbp-user-replies-created .by-theme-author,
-.bbp-user-replies-created .by-theme-contributor {
+.bbp-user-replies-created .by-theme-contributor,
+.bbp-user-replies-created .by-theme-support-rep {
 	border-right-color: #4e3288;
 }
 
