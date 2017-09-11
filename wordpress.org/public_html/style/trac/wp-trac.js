@@ -192,7 +192,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}
 			}
 
-			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space
+			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space.
 			$('th a[href*="sort=Comments"]').html('<div class="dashicons dashicons-admin-comments"></div>');
 			$('th a[href*="sort=Stars"]').html('<div class="dashicons dashicons-star-empty"></div>');
 
@@ -288,7 +288,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
-			// Add After the Deadline (only add it if it loaded)
+			// Add After the Deadline (only add it if it loaded).
 			if ( $.isFunction( $.fn.addProofreader ) ) {
 				$('textarea').addProofreader();
 				$('.AtD_proofread_button').each(function() {
@@ -296,7 +296,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
-			// Add custom buttons to the formatting toolbar
+			// Add custom buttons to the formatting toolbar.
 			// http://trac.edgewall.org/browser/tags/trac-1.0.9/trac/htdocs/js/wikitoolbar.js
 			(function($) {
 				function extendWikiFormattingToolbar() {
@@ -307,7 +307,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 
 					$wikitoolbar = $textarea.parents( 'div.trac-resizable' ).siblings( 'div.wikitoolbar' );
 
-					// after = ID of an existing button
+					// after = ID of an existing button.
 					function addButton( id, title, after, fn ) {
 						var $button = $( '<a />', { 'href': '#', 'id': id, 'title': title, 'tabIndex': 400 } );
 						$button.on( 'click', function() {
@@ -356,14 +356,14 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				$( 'textarea.wikitext' ).each( extendWikiFormattingToolbar );
 			})(jQuery);
 
-			// Force 'Attachments' and 'Modify Ticket' to be shown
+			// Force 'Attachments' and 'Modify Ticket' to be shown.
 			$('#attachments').removeClass('collapsed');
 			$("#modify").parent().removeClass('collapsed');
 
-			// Push live comment previews above 'Modify Ticket'
+			// Push live comment previews above 'Modify Ticket'.
 			$('#ticketchange').insertAfter('#trac-add-comment');
 
-			// Toggle the security notice on component change, if rendered
+			// Toggle the security notice on component change, if rendered.
 			if ( $('#wp-security-notice').length ) {
 				$('#field-component').change( function() {
 					$('#wp-security-notice').toggle( 'Security' === $(this).val() );
@@ -397,7 +397,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					$(this).parent().find('input[type=text], select').removeAttr('tabindex');
 				});
 
-			// Clear the milestone on wontfix, duplicate, worksforme, invalid
+			// Clear the milestone on wontfix, duplicate, worksforme, invalid.
 			var milestone = $('#field-milestone');
 			if ( ! milestone.prop('disabled') ) {
 				$('#propertyform').submit( function() {
@@ -408,7 +408,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
-			// Prevent marking a ticket as a duplicate of itself
+			// Prevent marking a ticket as a duplicate of itself.
 			$('#propertyform').submit( function() {
 				var action = $('input[name="action"]:checked').val(),
 					currentTicket = parseInt( $('.trac-id').text().replace('#', '') ),
@@ -420,7 +420,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}
 			});
 
-			// Add a 'Show only commits/attachments' view option to tickets
+			// Add a 'Show only commits/attachments' view option to tickets.
 			$('label[for="trac-comments-only-toggle"]').text('Show only comment text');
 			$('form#prefs')
 				.has('#trac-comments-order')
@@ -432,7 +432,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}
 				$('div.change')
 					.hide()
-						// Best we can do to target a
+						// Best we can do to target a.
 						.has('.comment > p > a.changeset')
 							.has('.comment div.message p a.ticket')
 							.show()
@@ -442,7 +442,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					.show();
 			});
 
-			// List commits between #ticket and #attachments
+			// List commits between #ticket and #attachments.
 			if ( $( '#content.ticket' ).length ) {
 				var $commitChanges = $( 'div.change' ).has( '.comment > p > a.changeset' ).has( '.comment div.message p a.ticket' ),
 					$commits = $( '<ul/>' ), commitCount = 0;
@@ -493,7 +493,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				return ! $div.hasClass( 'collapsed' );
 			});
 
-			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting)
+			// 'User Interface' preferences tab => 'Help Links' (and removes icons-only setting).
 			var uitab = $('#tab_userinterface');
 			if ( uitab.length ) {
 				if ( uitab.hasClass('active') ) {
