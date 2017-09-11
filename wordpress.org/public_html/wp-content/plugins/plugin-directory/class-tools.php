@@ -275,6 +275,8 @@ class Tools {
 
 		$result = wp_add_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
 
+		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
+
 		return $result;
 	}
 
@@ -303,6 +305,8 @@ class Tools {
 		}
 
 		$result = wp_remove_object_terms( $post->ID, $user->user_nicename, 'plugin_support_reps' );
+
+		wp_cache_delete( $plugin_slug, 'plugin-support-reps' );
 
 		return $result;
 	}
