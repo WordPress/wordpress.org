@@ -254,6 +254,13 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					return false;
 				});
 
+				// Submit comment form on Cmd/Ctrl + Enter.
+				$( '#comment' ).keydown( function( event ) {
+					if ( event.ctrlKey && ( event.keyCode == 10 || event.keyCode == 13 ) ) {
+						$( 'input[name="submit"]' ).click();
+					}
+				});
+
 				// Point users to open new tickets when they comment on old tickets.
 				if ( $('#ticket').find('.milestone').hasClass('closed') ) {
 					var component = $('#field-component').val(), ticket_id = $('.trac-id').text(),
