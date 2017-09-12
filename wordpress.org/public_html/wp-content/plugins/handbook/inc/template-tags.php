@@ -45,7 +45,7 @@ function wporg_is_handbook( $handbook = '' ) {
 			continue;
 		}
 
-		$handbook_query = is_post_type_archive( $post_type ) || get_query_var( 'is_handbook_root' );
+		$handbook_query = is_post_type_archive( $post_type ) || wporg_is_handbook_landing_page();
 
 		if ( ! $handbook_query && is_singular() ) {
 			$queried_obj = get_queried_object();
@@ -78,7 +78,7 @@ function wporg_is_handbook( $handbook = '' ) {
  * @return bool True if the current page is the landing page for a handbook, false otherwise.
  */
  function wporg_is_handbook_landing_page() {
-	 return get_query_var( 'is_handbook_root' );
+	 return $GLOBALS['wp_query']->is_handbook_root;
  } 
 
 /**
