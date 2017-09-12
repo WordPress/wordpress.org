@@ -66,6 +66,7 @@ function get_whitelist() {
 		'core-committers' => get_committers(),
 		'core-customize' => array(
 			'celloexpressions',
+			'jeffpaul',
 			'ocean90',
 			'valendesigns',
 			'voldemortensen',
