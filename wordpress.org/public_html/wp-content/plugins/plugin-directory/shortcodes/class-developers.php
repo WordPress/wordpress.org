@@ -105,9 +105,10 @@ class Developers {
 			) . '</p>';
 		} else {
 			$output .= '<p>' . sprintf(
-				/* translators: 1: Trac URL, 2: development log URL, 3: RSS URL */
-				__( '<a href="%1$s">Browse the code</a> or subscribe to the <a href="%2$s">development log</a> by <a href="%3$s">RSS</a>.', 'wporg-plugins' ),
+				/* translators: 1: Trac URL, 2: SVN repository URL, 3: development log URL, 4: RSS URL */
+				__( '<a href="%1$s">Browse the code</a>, check out the <a href="%2$s">SVN repository</a>, or subscribe to the <a href="%3$s">development log</a> by <a href="%4$s">RSS</a>.', 'wporg-plugins' ),
 				esc_url( "https://plugins.trac.wordpress.org/browser/{$slug}/" ),
+				esc_url( "https://plugins.svn.wordpress.org/{$slug}/" ),
 				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/" ),
 				esc_url( "https://plugins.trac.wordpress.org/log/{$slug}/?limit=100&mode=stop_on_copy&format=rss" )
 			) . '</p>';
