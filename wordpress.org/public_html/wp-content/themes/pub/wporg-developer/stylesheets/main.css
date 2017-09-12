@@ -1336,10 +1336,6 @@ input {
   color: #246998;
 }
 
-.devhub-wrap .menu-item-has-children {
-  padding-bottom: 15px;
-}
-
 .devhub-wrap .reference-landing .box ul {
   padding: 0;
   overflow: hidden;
