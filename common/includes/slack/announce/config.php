@@ -143,8 +143,9 @@ function get_whitelist() {
 		'docs' => array(
 			'drew',
 			'hlashbrooke',
-			'lizkaraffa',
 			'kenshino',
+			'lizkaraffa',
+			'zzap',
 		),
 		'feature-notifications' => array(
 			'johnbillion',
