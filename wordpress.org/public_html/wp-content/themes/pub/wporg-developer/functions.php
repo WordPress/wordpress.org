@@ -116,7 +116,9 @@ function init() {
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 
-	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items', 10, 2 );
+	// Modify default breadcrumbs.
+	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_hooks', 10, 2 );
+	add_filter( 'breadcrumb_trail_items',  __NAMESPACE__ . '\\breadcrumb_trail_items_for_handbook_root', 10, 2 );
 
 	add_filter( 'wp_parser_skip_duplicate_hooks', '__return_true' );
 
@@ -142,10 +144,10 @@ function theme_title_separator(){
  * be shown.
  *
  * @param  array $items The breadcrumb trail items
- * @param  array $args  Original arg
+ * @param  array $args  Original args
  * @return array
  */
-function breadcrumb_trail_items( $items, $args ) {
+function breadcrumb_trail_items_for_hooks( $items, $args ) {
 	$post_type = 'wp-parser-hook';
 
 	// Bail early when not the single archive for hook
@@ -161,6 +163,29 @@ function breadcrumb_trail_items( $items, $args ) {
 	$items[3] = $items[4];
 	// Unset the last element since it shifted up in trail hierarchy
 	unset( $items[4] );
+
+	return $items;
+}
+
+/**
+ * Fix breadcrumb for handbook root pages.
+ *
+ * The handbook root/landing pages do not need a duplicated breadcrumb trail
+ * item that simply links to the currently loaded page. The trailing breadcrumb
+ * item is already the unlinked handbook name, which is sufficient.
+ *
+ * @param  array $items The breadcrumb trail items
+ * @param  array $args  Original args
+ * @return array
+ */
+function breadcrumb_trail_items_for_handbook_root( $items, $args ) {
+	// Bail early if not a handbook landing page.
+	if ( ! function_exists( 'wporg_is_handbook_landing_page' ) || ! wporg_is_handbook_landing_page() ) {
+		return $items;
+	}
+
+	// Unset link to current handbook.
+	unset( $items[1] );
 
 	return $items;
 }
