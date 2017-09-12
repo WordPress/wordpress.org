@@ -161,39 +161,43 @@ class Status_Transitions {
 		// Send email.
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
-		/* Translators: Plugin name. */
-		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %s has been approved.', 'wporg-plugins' ), $post->post_title ). "\n\n";
+		/* translators: 1: plugin name, 2: plugin slug */
+		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %1$s has been approved.
 
-		$content .= __( 'Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.', 'wporg-plugins' ) . "\n\n";
+Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.
 
-		$content .= "https://plugins.svn.wordpress.org/{$post->post_name}\n\n";
+https://plugins.svn.wordpress.org/%2$s
 
-		$content .= __( 'Here are some handy links to help you get started.', 'wporg-plugins' ) . "\n\n";
+Here are some handy links to help you get started.
 
-		$content .= __( 'WordPress Plugin Directory Guidelines:', 'wporg-plugins' ) . "\n";
-		$content .= "https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/\n\n";
+WordPress Plugin Directory Guidelines:
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 
-		$content .= __( 'Using Subversion with the WordPress Plugin Directory:', 'wporg-plugins' ) . "\n";
-		$content .= "https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/\n\n";
+Using Subversion with the WordPress Plugin Directory:
+https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
 
-		$content .= __( 'FAQ about the WordPress Plugin Directory:', 'wporg-plugins' ) . "\n";
-		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/\n\n";
+FAQ about the WordPress Plugin Directory:
+https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/
 
-		$content .= __( 'WordPress Plugin Directory readme.txt standard:', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/developers/#readme\n\n";
+WordPress Plugin Directory readme.txt standard:
+https://wordpress.org/plugins/developers/#readme
 
-		$content .= __( 'A readme.txt validator:', 'wporg-plugins' ) . "\n";
-		$content .= "https://wordpress.org/plugins/developers/readme-validator/\n\n";
+A readme.txt validator:
+https://wordpress.org/plugins/developers/readme-validator/
 
-		$content .= __( 'Plugin Assets (header images etc):', 'wporg-plugins' ) . "\n"; 
-		$content .= "https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/\n\n";
+Plugin Assets (header images, etc):
+https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
 
-		$content .= __( 'If you have issues or questions, please reply to this email and let us know.', 'wporg-plugins' ) . "\n\n";
+If you have issues or questions, please reply to this email and let us know.
 
-		$content .= __( 'Enjoy!', 'wporg-plugins' ) . "\n\n";
+Enjoy!
 
-		$content .= __( '-The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
-		$content .= 'https://make.wordpress.org/plugins/';
+--
+The WordPress Plugin Directory Team
+https://make.wordpress.org/plugins', 'wporg-plugins' ),
+			$post->post_title,
+			$post->post_name
+		);
 
 		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
@@ -227,11 +231,17 @@ class Status_Transitions {
 		$email   = get_user_by( 'id', $post->post_author )->user_email;
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
-		/* Translators: Plugin name. */
-		$content  = sprintf( __( 'Unfortunately your plugin submission for %s has been rejected from the WordPress.org Directory.', 'wporg-plugins' ), $post->post_title ). "\n\n\n";
-		$content .= sprintf( __( 'If you believe this to be in error, please email %s with your plugin attached as a zip and explain why you feel your plugin should be an exception.', 'wporg-plugins' ), 'plugins@wordpress.org' ). "\n\n\n";
-		$content .= __( 'The WordPress Plugin Directory Team', 'wporg-plugins' ) . "\n";
-		$content .= 'https://make.wordpress.org/plugins';
+		/* translators: 1: plugin name, 2: plugins@wordpress.org */
+		$content  = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress.org Directory.
+
+If you believe this to be in error, please email %2$s with your plugin attached as a zip and explain why you feel your plugin should be an exception.
+
+--
+The WordPress Plugin Directory Team
+https://make.wordpress.org/plugins', 'wporg-plugins' ),
+			$post->post_title,
+			'plugins@wordpress.org'
+		);
 
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
