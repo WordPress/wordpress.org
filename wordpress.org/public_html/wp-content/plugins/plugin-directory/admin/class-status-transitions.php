@@ -232,7 +232,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* translators: 1: plugin name, 2: plugins@wordpress.org */
-		$content  = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress.org Directory.
+		$content  = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
 
 If you believe this to be in error, please email %2$s with your plugin attached as a zip and explain why you feel your plugin should be an exception.
 
