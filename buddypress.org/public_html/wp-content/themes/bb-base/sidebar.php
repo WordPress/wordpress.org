@@ -1,7 +1,7 @@
 </div>
 <div class="sidebar">
 
-	<?php if ( function_exists( 'is_bbpress' ) && ( is_bbpress() ) || is_page( 'new-topic' ) ) : ?>
+	<?php if ( ( function_exists( 'is_bbpress' ) && is_bbpress() && ! is_front_page() ) || is_page( 'new-topic' ) ) : ?>
 
 		<?php if ( bbp_is_single_forum() || bb_base_topic_search_query( false ) ) : ?>
 

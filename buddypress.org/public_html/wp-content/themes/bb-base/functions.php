@@ -537,3 +537,16 @@ function bb_base_embed_defaults( $min_max = array() ) {
 	);
 }
 add_filter( 'embed_defaults', 'bb_base_embed_defaults' );
+
+/**
+ * Make sure bbPress core styling is enqueued on the front page
+ */
+function bb_base_filter_is_bbpress( $in_bbpress = false ) {
+
+	if ( is_front_page() ) {
+		$in_bbpress = true;
+	}
+
+	return $in_bbpress;
+}
+add_filter( 'is_bbpress', 'bb_base_filter_is_bbpress' );
