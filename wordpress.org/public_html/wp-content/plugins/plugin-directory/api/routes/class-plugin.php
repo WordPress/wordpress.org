@@ -76,9 +76,18 @@ class Plugin extends Base {
 		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
 		$result['contributors'] = array();
 
-		if ( $contributors = get_the_terms( $post->ID, 'plugin_contributors' ) ) {
-			$contributors = wp_list_pluck( $contributors, 'slug' );
-		} else {
+		$contributors = get_terms( array(
+			'taxonomy' => 'plugin_contributors',
+			'object_ids' => array( $post->ID ),
+			'orderby' => 'term_order',
+			'fields' => 'names',
+		) );
+
+		if ( is_wp_error( $contributors ) ) {
+			$contributors = array();
+		}
+
+		if ( ! $contributors ) {
 			$contributors = array();
 			if ( $author = get_user_by( 'id', $post->post_author ) ) {
 				$contributors[] = $author->user_nicename;
