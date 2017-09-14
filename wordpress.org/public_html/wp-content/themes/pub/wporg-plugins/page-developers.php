@@ -50,7 +50,7 @@ get_header(); ?>
 								printf( __( 'Shortly after you upload your plugin (and a <a href="%1$s">readme file</a>!) to that repository, it will be automatically displayed in the <a href="%2$s">plugins browser</a>.', 'wporg-plugins' ), '#readme', esc_url( home_url( '/' ) ) );
 								?>
 							</li>
-							<li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a> </strong>for more information.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
+							<li><?php printf( __( 'Check out the <strong><a href="%s">FAQ</a></strong> for more information.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/' ) ); ?></li>
 						</ol>
 
 						<h3 id="readme"><?php _e( 'Readme files', 'wporg-plugins' ); ?></h3>
