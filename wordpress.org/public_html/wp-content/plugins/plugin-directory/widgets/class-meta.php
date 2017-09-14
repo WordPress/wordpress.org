@@ -89,9 +89,9 @@ class Meta extends \WP_Widget {
 							<?php
 							printf(
 								/* translators: %s: Number of available languages */
-								_x( 'See all %s', 'languages', 'wporg-plugins' ),
+								_nx( 'See all %s', 'See all %s', $available_languages_count, 'languages', 'wporg-plugins' ),
 								$available_languages_count
-							)
+							);
 							?>
 						</button>
 						<div id="popover-languages" class="popover is-top-right">
