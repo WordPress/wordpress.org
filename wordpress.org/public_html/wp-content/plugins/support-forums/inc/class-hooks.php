@@ -12,6 +12,7 @@ class Hooks {
 		add_filter( 'bbp_get_form_topic_subscribed',  array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                  array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',      array( $this, 'increase_edit_lock_time' ) );
+		add_filter( 'bbp_map_meta_caps',              array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
 		add_filter( 'redirect_canonical',             array( $this, 'disable_redirect_guess_404_permalink' ) );
 		add_filter( 'wp_insert_post_data',            array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',        array( $this, 'replace_quicktags_blockquote_button' ) );
@@ -111,6 +112,37 @@ class Hooks {
 	 */
 	public function increase_edit_lock_time() {
 		return 60;
+	}
+
+	/**
+	 * Disallow editing topics or replies past edit lock time for non-moderators.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3164
+	 *
+	 * @param array  $caps    User's actual capabilities.
+	 * @param string $cap     Capability name.
+	 * @param int    $user_id Current user ID.
+	 * @param array  $args    Capability context, typically the object ID.
+	 * @return array Filtered capabilities.
+	 */
+	function disallow_editing_past_lock_time( $caps, $cap, $user_id, $args ) {
+		switch ( $cap ) {
+			case 'edit_topic':
+			case 'edit_reply':
+				$post = get_post( $args[0] );
+
+				if (
+					$post && bbp_past_edit_lock( $post->post_date_gmt )
+				&&
+					! user_can( $user_id, 'moderate', $post->ID )
+				) {
+					$caps = array( 'do_not_allow' );
+				}	
+
+				break;
+		}
+
+		return $caps;
 	}
 
 	/**
