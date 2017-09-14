@@ -68,12 +68,6 @@ get_header(); ?>
 
 		<section class="clear helpful-links">
 			<div>
-				<h3><?php _e( 'Hot Topics', 'wporg-forums' ); ?></h3>
-				<p class="frontpageheatmap">
-					<?php wp_tag_cloud( array( 'smallest' => 14, 'largest' => 24, 'number' => 22, 'taxonomy' => bbp_get_topic_tag_tax_id() ) ); ?>
-				</p>
-			</div>
-			<div>
 				<h3><?php _e( 'Helpful Links', 'wporg-forums' ); ?></h3>
 				<ul class="meta-list">
 					<li><?php _e( '<a href="https://codex.wordpress.org/New_To_WordPress_-_Where_to_Start">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
