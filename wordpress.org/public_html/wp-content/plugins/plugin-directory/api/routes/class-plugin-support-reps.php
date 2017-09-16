@@ -91,7 +91,18 @@ class Plugin_Support_Reps extends Base {
 
 	function add_support_rep( $request ) {
 		$user = new WP_User( $request['support_rep'] );
-		if ( ! $user->exists() ) {
+
+		// If user_login is not found, try searching by user_nicename.
+		if ( ! $user || ! $user->exists() ) {
+			$user = get_user_by( 'slug', $request['support_rep'] );
+		}
+
+		// If user_nicename is not found, try searching by user_email.
+		if ( ! $user || ! $user->exists() ) {
+			$user = get_user_by( 'email', $request['support_rep'] );
+		}
+
+		if ( ! $user || ! $user->exists() ) {
 			return new WP_Error( 'plugin_user_not_found', __( 'The provided user could not be found.', 'wporg-plugins' ) );
 		}
 
@@ -106,7 +117,18 @@ class Plugin_Support_Reps extends Base {
 
 	function remove_support_rep( $request ) {
 		$user = new WP_User( $request['support_rep'] );
-		if ( ! $user->exists() ) {
+
+		// If user_login is not found, try searching by user_nicename.
+		if ( ! $user || ! $user->exists() ) {
+			$user = get_user_by( 'slug', $request['support_rep'] );
+		}
+
+		// If user_nicename is not found, try searching by user_email.
+		if ( ! $user || ! $user->exists() ) {
+			$user = get_user_by( 'email', $request['support_rep'] );
+		}
+
+		if ( ! $user || ! $user->exists() ) {
 			return new WP_Error( 'plugin_user_not_found', __( 'The provided user could not be found.', 'wporg-plugins' ) );
 		}
 
