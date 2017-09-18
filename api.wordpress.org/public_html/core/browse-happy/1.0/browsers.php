@@ -29,52 +29,54 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 
 	$data = array(
 		'Internet Explorer' => (object) array(
-			'name' => 'Internet Explorer',
-			'wikipedia' => 'Internet_Explorer',
-			'normalized' => 1, // just first number
-			'url' => 'http://www.microsoft.com/windows/internet-explorer/',
-			'img_src' => $http . 'ie.png',
+			'name'        => 'Internet Explorer',
+			'wikipedia'   => 'Internet_Explorer',
+			'normalized'  => 1, // just first number
+			'url'         => 'http://www.microsoft.com/windows/internet-explorer/',
+			'img_src'     => $http . 'ie.png',
 			'img_src_ssl' => $https . 'ie.png',
 		),
 		'Firefox' => (object) array(
-			'name' => 'Mozilla Firefox',
-			'wikipedia' => 'Firefox',
-			'normalized' => 1.5, // include second number if non-zero
-			'url' => 'http://www.firefox.com/',
-			'img_src' => $http . 'firefox.png',
+			'name'        => 'Mozilla Firefox',
+			'wikipedia'   => 'Firefox',
+			'normalized'  => 1.5, // include second number if non-zero
+			'url'         => 'http://www.firefox.com/',
+			'img_src'     => $http . 'firefox.png',
 			'img_src_ssl' => $https . 'firefox.png',
 		),
 		'Safari' => (object) array(
-			'name' => 'Safari',
-			'wikipedia' => 'Safari',
-			'normalized' => 1.5, // include second number if non-zero
-			'url' => 'http://www.apple.com/safari/',
-			'img_src' => $http . 'safari.png',
+			'name'        => 'Safari',
+			'wikipedia'   => 'Safari',
+			'normalized'  => 1.5, // include second number if non-zero
+			'url'         => 'http://www.apple.com/safari/',
+			'img_src'     => $http . 'safari.png',
 			'img_src_ssl' => $https . 'safari.png',
 		),
 		'Opera' => (object) array(
-			'name' => 'Opera',
-			'wikipedia' => 'Opera',
-			'normalized' => 2, // include second number
-			'url' => 'http://www.opera.com/',
-			'img_src' => $http . 'opera.png',
+			'name'        => 'Opera',
+			'wikipedia'   => 'Opera',
+			'normalized'  => 2, // include second number
+			'url'         => 'http://www.opera.com/',
+			'img_src'     => $http . 'opera.png',
 			'img_src_ssl' => $https . 'opera.png',
 		),
 		'Chrome' => (object) array(
-			'name' => 'Google Chrome',
-			'wikipedia' => 'Google_Chrome',
-			'normalized' => 1, // just first number
-			'url' => 'http://www.google.com/chrome',
-			'img_src' => $http . 'chrome.png',
+			'name'        => 'Google Chrome',
+			'wikipedia'   => 'Google_Chrome',
+			'normalized'  => 1, // just first number
+			'url'         => 'http://www.google.com/chrome',
+			'img_src'     => $http . 'chrome.png',
 			'img_src_ssl' => $https . 'chrome.png',
 		),
 	);
 
-	if ( false === $browser )
+	if ( false === $browser ) {
 		return $data;
+	}
 
-	if ( ! isset( $data[ $browser ] ) )
+	if ( ! isset( $data[ $browser ] ) ) {
 		return false;
+	}
 
 	return $data[ $browser ];
 }

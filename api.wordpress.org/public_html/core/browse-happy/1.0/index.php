@@ -11,8 +11,9 @@ if ( ! empty( $_GET['jsonp'] ) ) {
 	header( 'Content-Type: application/javascript' );
 }
 
-if ( empty( $_REQUEST['useragent'] ) )
+if ( empty( $_REQUEST['useragent'] ) ) {
 	return;
+}
 
 $user_agent = $_REQUEST['useragent'];
 $data = browsehappy_parse_user_agent( $user_agent );
@@ -23,12 +24,13 @@ if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'WordPress/' ) && 1 === rand( 1,
 	bh_record_data( $user_agent, $data );
 }
 
-if ( $jsonp )
+if ( $jsonp ) {
 	echo $jsonp.'('.json_encode($data).')';
-elseif ( defined( 'JSON_RESPONSE' ) )
+} elseif ( defined( 'JSON_RESPONSE' ) ) {
 	echo json_encode( $data );
-else
+} else {
 	echo serialize( $data );
+}
 
 function bh_record_data( $ua, $data ) {
 	global $wpdb;
