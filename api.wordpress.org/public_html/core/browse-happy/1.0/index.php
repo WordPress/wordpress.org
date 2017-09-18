@@ -32,6 +32,12 @@ if ( $jsonp ) {
 	echo serialize( $data );
 }
 
+/**
+ * Logs anonymized user-agent data.
+ *
+ * @param string $ua   The user-agent string.
+ * @param array  $data Parsed user-agent data.
+ */
 function bh_record_data( $ua, $data ) {
 	global $wpdb;
 

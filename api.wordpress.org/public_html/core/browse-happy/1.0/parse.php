@@ -6,12 +6,23 @@
 require dirname( __FILE__ ) . '/browsers.php';
 
 /**
-* Parses a user agent string into its important parts
-*
-* @param string $user_agent
-*
-* @return array containing platform, name, and version
-*/
+ * Parses a user agent string into its important parts.
+ *
+ * @param string $user_agent The user agent string for a browser.
+ * @return array {
+ *     Array containing data based on the parsing of the user agent.
+ *
+ *     @type string $platform        The platform running the browser.
+ *     @type string $name            The name of the browser.
+ *     @type string $version         The reported version of the browser.
+ *     @type string $update_url      The URL to obtain the update for the browser.
+ *     @type string $img_src         The non-HTTPS URL for the browser's logo image.
+ *     @type string $img_src_ssl     The HTTPS URL for the browser's logo image.
+ *     @type string $current_version The current latest version of the browser.
+ *     @type bool   $upgrade         Is there an update available for the browser?
+ *     @type bool   $insecure        Is the browser insecure?
+ * }
+ */
 function browsehappy_parse_user_agent( $user_agent ) {
 	$data = array();
 
@@ -103,6 +114,13 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	return $data;
 }
 
+/**
+ * Returns the current version for the given browser.
+ *
+ * @param string $name The name of the browser.
+ * @return string      The version for the browser or an empty string if an
+ *                     unknown browser.
+ */
 function get_browser_version_from_name( $name ) {
 	$versions = get_browser_current_versions();
 

@@ -7,10 +7,13 @@
  */
 
 /**
- * Browser current version numbers.
+ * Returns current version numbers for all browsers.
  *
  * These are for major release branches, not full build numbers.
  * Firefox 3.6, 4, etc., not Chrome 11.0.696.65.
+ *
+ * @return array Associative array of browser names with their respective
+ *               current (or somewhat current) version number.
  */
 function get_browser_current_versions() {
 	return array(
@@ -22,6 +25,23 @@ function get_browser_current_versions() {
 	);
 }
 
+/**
+ * Returns browser data for a given browser.
+ *
+ * @param string|false $browser The name of the browser. Default false.
+ * @return false|array {
+ *     Array of data about the browser. False if the browser is unknown.
+ *
+ *     @type string    $name        Name of the browser.
+ *     @type string    $wikipedia   Wikipedia name for the browser.
+ *     @type int|float $normalized  How should browser version number be
+ *                                  normalized? 1 == just first number, else
+ *                                  include second number (i.e. decimal value)
+ *     @type string    $url         The home URL for the browser.
+ *     @type string    $img_src     The non-HTTPs URL for the browser's logo image.
+ *     @type string    $img_src_ssl The HTTPS URL for the browser's logo image.
+ * }
+ */
 function browsehappy_api_get_browser_data( $browser = false ) {
 
 	$http = 'http://s.wordpress.org/images/browsers/';
