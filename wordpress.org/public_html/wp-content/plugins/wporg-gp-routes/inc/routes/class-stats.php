@@ -19,7 +19,7 @@ class Stats extends GP_Route {
 			'meta/rosetta' => false,
 			'meta/browsehappy' => false,
 			'meta/themes' => false,
-			'meta/plugins' => false,
+			'meta/plugins-v3' => false,
 			'meta/forums' => false,
 			'apps/android' => false,
 			'apps/ios' => false,
