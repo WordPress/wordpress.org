@@ -52,7 +52,7 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'name'        => 'Internet Explorer',
 			'wikipedia'   => 'Internet_Explorer',
 			'normalized'  => 1, // just first number
-			'url'         => 'http://www.microsoft.com/windows/internet-explorer/',
+			'url'         => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
 			'img_src'     => $http . 'ie.png',
 			'img_src_ssl' => $https . 'ie.png',
 		),
@@ -60,7 +60,7 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'name'        => 'Mozilla Firefox',
 			'wikipedia'   => 'Firefox',
 			'normalized'  => 1.5, // include second number if non-zero
-			'url'         => 'http://www.firefox.com/',
+			'url'         => 'https://www.firefox.com/',
 			'img_src'     => $http . 'firefox.png',
 			'img_src_ssl' => $https . 'firefox.png',
 		),
@@ -68,7 +68,7 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'name'        => 'Safari',
 			'wikipedia'   => 'Safari',
 			'normalized'  => 1.5, // include second number if non-zero
-			'url'         => 'http://www.apple.com/safari/',
+			'url'         => 'https://www.apple.com/safari/',
 			'img_src'     => $http . 'safari.png',
 			'img_src_ssl' => $https . 'safari.png',
 		),
@@ -76,7 +76,7 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'name'        => 'Opera',
 			'wikipedia'   => 'Opera',
 			'normalized'  => 2, // include second number
-			'url'         => 'http://www.opera.com/',
+			'url'         => 'https://www.opera.com/',
 			'img_src'     => $http . 'opera.png',
 			'img_src_ssl' => $https . 'opera.png',
 		),
@@ -84,7 +84,7 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'name'        => 'Google Chrome',
 			'wikipedia'   => 'Google_Chrome',
 			'normalized'  => 1, // just first number
-			'url'         => 'http://www.google.com/chrome',
+			'url'         => 'https://www.google.com/chrome',
 			'img_src'     => $http . 'chrome.png',
 			'img_src_ssl' => $https . 'chrome.png',
 		),
