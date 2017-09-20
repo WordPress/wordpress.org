@@ -31,7 +31,7 @@ get_header( 'page' ); ?>
 			get_template_part( 'template-parts/content' );
 		endwhile;
 
-		the_posts_navigation();
+		the_posts_pagination();
 
 	else :
 		get_template_part( 'template-parts/content', 'none' );

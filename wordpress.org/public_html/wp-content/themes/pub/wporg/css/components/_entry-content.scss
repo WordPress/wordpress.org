@@ -1,0 +1,9 @@
+.entry-content {
+	p:first-child {
+		margin-top: 0;
+	}
+
+	.post-password-form input[type="submit"] {
+		@extend .button;
+	}
+}
