@@ -222,7 +222,7 @@ function create_wordcamp_post( $data ) {
 		'post_type'   => WCPT_POST_TYPE_ID,
 		'post_title'  => 'WordCamp ' . $data['q_1079103_wordcamp_location'],
 		'post_status' => WCPT_DEFAULT_STATUS,
-		'post_author' => is_a( $user, 'WP_User' ) ? $user->ID : 0,
+		'post_author' => is_a( $user, 'WP_User' ) ? $user->ID : 7694169, // Set `wordcamp` as author if supplied username is not valid
 	);
 
 	$post_id = wp_insert_post( $post, true );
