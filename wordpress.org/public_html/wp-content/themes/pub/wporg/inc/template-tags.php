@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom Twenty Sixteen template tags
+ * Custom template tags
  *
  * Eventually, some of the functionality here could be replaced by core features.
  *
@@ -61,7 +61,7 @@ function entry_date() {
 		get_the_modified_date()
 	);
 
-	printf( '<span class="posted-on"><span class="screen-reader-text">%1$s </span><a href="%2$s" rel="bookmark">%3$s</a></span>',
+	printf( '<span class="posted-on">%1$s <a href="%2$s" rel="bookmark">%3$s</a></span>',
 		_x( 'Posted on', 'Used before publish date.', 'wporg' ),
 		esc_url( get_permalink() ),
 		$time_string
@@ -129,13 +129,12 @@ endif;
 
 /**
  * Flushes out the transients used in wporg_categorized_blog().
- *
- * @since Twenty Sixteen 1.0
  */
 function category_transient_flusher() {
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 		return;
 	}
+
 	// Like, beat it. Dig?
 	delete_transient( 'wporg_categories' );
 }

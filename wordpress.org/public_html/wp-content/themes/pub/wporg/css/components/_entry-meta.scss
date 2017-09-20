@@ -1,4 +1,6 @@
-.entry-footer {
+.entry-meta {
+	font-size: ms( -2 );
+
 	> span {
 		margin-right: 1rem;
 
@@ -11,13 +13,13 @@
 		display: none;
 	}
 
-	.sticky .posted-on,
+	.sticky & .posted-on,
 	.byline {
 		display: none;
 	}
 
-	.single .byline,
-	.group-blog .byline {
+	.single & .byline,
+	.group-blog & .byline {
 		display: inline;
 	}
 }

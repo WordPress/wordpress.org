@@ -128,11 +128,13 @@
 		}
 	}
 
-	.comment-form {
-		padding-top: 1.6em;
+	.comment-reply-title a {
+		font-weight: inherit;
+	}
 
+	.comment-form {
 		label {
-			font-size: 12px;
+			font-size: ms( -2 );
 			font-weight: 700;
 			display: block;
 			letter-spacing: 0.04em;
@@ -141,7 +143,8 @@
 
 		input[type="text"],
 		input[type="email"],
-		input[type="url"] {
+		input[type="url"],
+		textarea {
 			width: 100%;
 		}
 	}

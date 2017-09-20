@@ -12,9 +12,9 @@ namespace WordPressdotorg\Theme;
 	<header class="entry-header">
 		<?php if ( is_sticky() && is_home() && ! is_paged() ) : ?>
 			<span class="sticky-post"><?php _e( 'Featured', 'wporg' ); ?></span>
-		<?php endif; ?>
-
 		<?php
+		endif;
+
 		if ( is_single() ) :
 			the_title( '<h2 class="entry-title">', '</h2>' );
 		else :
@@ -22,6 +22,8 @@ namespace WordPressdotorg\Theme;
 		endif;
 		?>
 	</header><!-- .entry-header -->
+
+	<div class="entry-meta"><?php entry_meta(); ?></div>
 
 	<div class="entry-content">
 		<?php
@@ -44,8 +46,6 @@ namespace WordPressdotorg\Theme;
 
 	<footer class="entry-footer">
 		<?php
-		entry_meta();
-
 		edit_post_link(
 			sprintf(
 				/* translators: %s: Name of current post */
