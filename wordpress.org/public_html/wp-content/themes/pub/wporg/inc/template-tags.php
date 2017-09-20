@@ -17,7 +17,23 @@ if ( ! function_exists( __NAMESPACE__ . '\entry_meta' ) ) :
  */
 function entry_meta() {
 	if ( in_array( get_post_type(), array( 'post', 'attachment' ) ) ) {
-		entry_date();
+		$time_string = sprintf( '<a href="%1$s" rel="bookmark">%2$s</a>',
+			esc_url( get_permalink() ),
+			get_entry_date()
+		);
+
+		$author_string = sprintf(
+			'<span class="entry-author vcard"><a class="url fn n" href="%1$s">%2$s</a></span>',
+			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
+			get_the_author()
+		);
+
+		printf(
+			/* translators: 1: post date 2: post author */
+			'<span class="posted-on">' . __( 'Posted on %1$s by %2$s.', 'wporg' ) . '</span>',
+			$time_string,
+			$author_string
+		);
 	}
 
 	$format = get_post_format();
@@ -41,32 +57,41 @@ function entry_meta() {
 }
 endif;
 
-if ( ! function_exists( __NAMESPACE__ . '\entry_date' ) ) :
-/**
- * Prints HTML with date information for current post.
- *
- * Create your own  WordPressdotorg\Theme\entry_date() function to override in a child theme.
- */
-function entry_date() {
-	$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
+if ( ! function_exists( __NAMESPACE__ . '\get_entry_date' ) ) :
+	/**
+	 * Prints HTML with published and updated information for current post.
+	 *
+	 * Create your own  WordPressdotorg\Theme\get_entry_date() function to override in a child theme.
+	 */
+	function get_entry_date() {
+		$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
 
-	if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
-		$time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time><time class="updated" datetime="%3$s">%4$s</time>';
+		if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
+			$time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time><time class="updated" datetime="%3$s">%4$s</time>';
+		}
+
+		return sprintf( $time_string,
+			esc_attr( get_the_date( 'c' ) ),
+			get_the_date(),
+			esc_attr( get_the_modified_date( 'c' ) ),
+			get_the_modified_date()
+		);
 	}
+endif;
 
-	$time_string = sprintf( $time_string,
-		esc_attr( get_the_date( 'c' ) ),
-		get_the_date(),
-		esc_attr( get_the_modified_date( 'c' ) ),
-		get_the_modified_date()
-	);
-
-	printf( '<span class="posted-on">%1$s <a href="%2$s" rel="bookmark">%3$s</a></span>',
-		_x( 'Posted on', 'Used before publish date.', 'wporg' ),
-		esc_url( get_permalink() ),
-		$time_string
-	);
-}
+if ( ! function_exists( __NAMESPACE__ . '\entry_date' ) ) :
+	/**
+	 * Prints HTML with date information for current post.
+	 *
+	 * Create your own  WordPressdotorg\Theme\entry_date() function to override in a child theme.
+	 */
+	function entry_date() {
+		printf( '<span class="posted-on">%1$s <a href="%2$s" rel="bookmark">%3$s</a></span>',
+			_x( 'Posted on', 'Used before publish date.', 'wporg' ),
+			esc_url( get_permalink() ),
+			get_entry_date()
+		);
+	}
 endif;
 
 if ( ! function_exists( __NAMESPACE__ . '\entry_taxonomies' ) ) :

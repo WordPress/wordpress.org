@@ -29,7 +29,7 @@ namespace WordPressdotorg\Theme;
 		<?php
 			/* translators: %s: Name of current post */
 			the_content( sprintf(
-				__( 'Continue reading<span class="screen-reader-text"> "%s"</span>', 'wporg' ),
+				__( 'Continue reading<span class="screen-reader-text"> "%s"</span> &rarr;', 'wporg' ),
 				get_the_title()
 			) );
 

@@ -11,7 +11,7 @@ namespace WordPressdotorg\Theme;
 
 get_header( 'page' ); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="site-main col-8" role="main">
 
 		<?php
 			while ( have_posts() ) :
@@ -39,4 +39,5 @@ get_header( 'page' ); ?>
 	</main><!-- #main -->
 
 <?php
+get_sidebar();
 get_footer();
