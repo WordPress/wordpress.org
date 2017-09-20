@@ -56,6 +56,12 @@
 		ul li.current_page_parent:after,
 		ul li a.current ~ .uparrow {
 			border-bottom-color: $color__wp-blue;
+
+			body.blog &,
+			body.single &,
+			body.archive & {
+				border-bottom-color: #f7f7f7;
+			}
 		}
 	}
 }
