@@ -24,7 +24,17 @@ require dirname( __FILE__ ) . '/browsers.php';
  * }
  */
 function browsehappy_parse_user_agent( $user_agent ) {
-	$data = array();
+	$data = array(
+		'name'            => '',
+		'version'         => '',
+		'platform'        => '',
+		'update_url'      => '',
+		'img_src'         => '',
+		'img_src_ssl'     => '',
+		'current_version' => '',
+		'upgrade'         => false,
+		'insecure'        => false,
+	);
 
 	if ( preg_match(
 		'/^.+?(?P<platform>Android|iPhone|iPad|Windows|Linux|Macintosh|Windows Phone OS|RIM Tablet OS|PlayBook)(?: NT)*(?: [ix]?[0-9._]+)*(;|\))/im',
@@ -94,13 +104,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['platform'] = $data['name'];
 	}
 
-	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone' ) ) ) {
-		$data['name'] = $data['platform'];
-	}
-
 	// If Version/x.x.x was specified in UA string
 	if ( ! empty( $version ) ) {
 		$data['version'] = $version;
+	}
+
+	// Don't fetch additional browser data for non-mobile platform browsers.
+	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone' ) ) ) {
+		return $data;
 	}
 
 	$browser_data            = browsehappy_api_get_browser_data( $data['name'] );
