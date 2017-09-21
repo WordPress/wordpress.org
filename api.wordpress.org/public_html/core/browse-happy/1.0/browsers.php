@@ -44,8 +44,11 @@ function get_browser_current_versions() {
  */
 function browsehappy_api_get_browser_data( $browser = false ) {
 
-	$http = 'http://s.wordpress.org/images/browsers/';
-	$https = 'https://wordpress.org/images/browsers/';
+	$http  = 'http://s.w.org/images/browsers/';
+	$https = 'https://s.w.org/images/browsers/';
+
+	// Cache buster; increment whenever a browser logo image is updated.
+	$cache_buster = 1;
 
 	$data = array(
 		'Internet Explorer' => (object) array(
@@ -53,40 +56,40 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'wikipedia'   => 'Internet_Explorer',
 			'normalized'  => 1, // just first number
 			'url'         => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
-			'img_src'     => $http . 'ie.png',
-			'img_src_ssl' => $https . 'ie.png',
+			'img_src'     => $http  . 'ie.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'ie.png' . "?{$cache_buster}",
 		),
 		'Firefox' => (object) array(
 			'name'        => 'Mozilla Firefox',
 			'wikipedia'   => 'Firefox',
 			'normalized'  => 1.5, // include second number if non-zero
 			'url'         => 'https://www.firefox.com/',
-			'img_src'     => $http . 'firefox.png',
-			'img_src_ssl' => $https . 'firefox.png',
+			'img_src'     => $http  . 'firefox.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'firefox.png' . "?{$cache_buster}",
 		),
 		'Safari' => (object) array(
 			'name'        => 'Safari',
 			'wikipedia'   => 'Safari',
 			'normalized'  => 1.5, // include second number if non-zero
 			'url'         => 'https://www.apple.com/safari/',
-			'img_src'     => $http . 'safari.png',
-			'img_src_ssl' => $https . 'safari.png',
+			'img_src'     => $http  . 'safari.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'safari.png' . "?{$cache_buster}",
 		),
 		'Opera' => (object) array(
 			'name'        => 'Opera',
 			'wikipedia'   => 'Opera',
 			'normalized'  => 2, // include second number
 			'url'         => 'https://www.opera.com/',
-			'img_src'     => $http . 'opera.png',
-			'img_src_ssl' => $https . 'opera.png',
+			'img_src'     => $http  . 'opera.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'opera.png' . "?{$cache_buster}",
 		),
 		'Chrome' => (object) array(
 			'name'        => 'Google Chrome',
 			'wikipedia'   => 'Google_Chrome',
 			'normalized'  => 1, // just first number
 			'url'         => 'https://www.google.com/chrome',
-			'img_src'     => $http . 'chrome.png',
-			'img_src_ssl' => $https . 'chrome.png',
+			'img_src'     => $http  . 'chrome.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'chrome.png' . "?{$cache_buster}",
 		),
 	);
 
