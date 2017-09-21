@@ -156,7 +156,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			],
 			[
 				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
-				'Linux Mobile Safari 4.0',
+				'Android Mobile Safari 4.0',
 			],
 			[
 				'Mozilla/5.0 (iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10',

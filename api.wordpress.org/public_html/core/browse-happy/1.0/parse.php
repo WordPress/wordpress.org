@@ -44,6 +44,11 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['platform'] = $regs['platform'];
 	}
 
+	// Properly set platform if Android is actually being reported.
+	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
+		$data['platform'] = 'Android';
+	}
+
 	preg_match_all(
 		'%(?P<name>Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Opera|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
