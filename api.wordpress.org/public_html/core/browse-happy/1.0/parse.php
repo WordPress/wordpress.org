@@ -114,7 +114,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['version'] = $version;
 	}
 
-	// Don't fetch additional browser data for non-mobile platform browsers.
+	// Don't fetch additional browser data for mobile platform browsers.
 	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone' ) ) ) {
 		return $data;
 	}
