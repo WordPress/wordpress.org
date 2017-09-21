@@ -60,6 +60,16 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
 				'Windows Internet Explorer 9.0',
 			],
+			// #2587
+			[
+				'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)',
+				'Windows Internet Explorer 10.0',
+			],
+			// #2587
+			[
+				'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
+				'Windows Internet Explorer 11',
+			],
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.21022)',
 				'Windows Firefox 3.5.5',
@@ -214,6 +224,19 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 		$result = $parsed['platform'] . ' ' . $parsed['name'] . ' ' . $parsed['version'];
 
 		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @dataProvider data_browse_happy
+	 *
+	 * @param string $header 'User-Agent' header value.
+	 */
+	function test_insecure_browsers( $header ) {
+		$parsed = browsehappy_parse_user_agent( $header );
+
+		if ( 'Internet Explorer' === $parsed['name'] && version_compare( $parsed['version'], '11', '<' ) ) {
+			$this->assertTrue( $parsed['insecure'] );
+		}
 	}
 
 }

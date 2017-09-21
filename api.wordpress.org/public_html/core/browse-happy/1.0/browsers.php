@@ -21,7 +21,7 @@ function get_browser_current_versions() {
 		'Firefox'           => '16',
 		'Opera'             => '12.11',
 		'Safari'            => '5',
-		'Internet Explorer' => '9', // Left at 9 until Windows 7 adopts 10
+		'Internet Explorer' => '11',
 	);
 }
 
