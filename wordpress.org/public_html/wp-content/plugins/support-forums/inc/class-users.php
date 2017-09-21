@@ -32,7 +32,13 @@ class Users {
 		add_filter( 'bbp_before_title_parse_args',     array( $this, 'parse_user_topics_title_args' ) );
 
 		// Clear user's topics and reviews count cache.
-		add_action( 'bbp_new_topic',                   array( $this, 'clear_user_topics_count_cache' ), 10, 4 );
+		add_action( 'bbp_new_topic',                   array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_spammed_topic',               array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_unspammed_topic',             array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_approved_topic',              array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'bbp_unapproved_topic',            array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'wporg_bbp_archived_topic',        array( $this, 'clear_user_topics_count_cache' ) );
+		add_action( 'wporg_bbp_unarchived_topic',      array( $this, 'clear_user_topics_count_cache' ) );
 	}
 
 	/**
@@ -347,16 +353,15 @@ class Users {
 	/**
 	 * Clear user's topics and reviews count cache.
 	 *
-	 * @param int   $topic_id       Topic ID.
-	 * @param int   $forum_id       Forum ID.
-	 * @param array $anonymous_data Anonymous poster data.
-	 * @param int   $topic_author   Topic author ID.
+	 * @param int $topic_id Topic ID.
 	 */
-	public function clear_user_topics_count_cache( $topic_id, $forum_id, $anonymous_data, $topic_author ) {
-		if ( Plugin::REVIEWS_FORUM_ID != $forum_id ) {
-			wp_cache_delete( $topic_author, 'user-topics-count' );
+	public function clear_user_topics_count_cache( $topic_id ) {
+		$post = get_post( $topic_id );
+		
+		if ( Plugin::REVIEWS_FORUM_ID != $post->post_parent ) {
+			wp_cache_delete( $post->post_author, 'user-topics-count' );
 		} else {
-			wp_cache_delete( $topic_author, 'user-reviews-count' );
+			wp_cache_delete( $post->post_author, 'user-reviews-count' );
 		}
 	}
 

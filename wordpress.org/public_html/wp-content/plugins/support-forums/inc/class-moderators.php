@@ -512,6 +512,8 @@ class Moderators {
 						bbp_decrease_topic_reply_count( $topic_id );
 						bbp_increase_topic_reply_count_hidden( $topic_id );
 					}
+
+					do_action( 'wporg_bbp_archived_reply', $post->ID );
 				} else {
 					bbp_unstick_topic( $post->ID );
 
@@ -529,6 +531,8 @@ class Moderators {
 							Stickies_Compat::remove_sticky( $term->term_id, $post->ID );
 						}
 					}
+
+					do_action( 'wporg_bbp_archived_topic', $post->ID );
 				}
 
 				return true;
@@ -573,6 +577,10 @@ class Moderators {
 						bbp_increase_topic_reply_count( $topic_id );
 						bbp_decrease_topic_reply_count_hidden( $topic_id );
 					}
+
+					do_action( 'wporg_bbp_unarchived_reply', $post->ID );
+				} else {
+					do_action( 'wporg_bbp_unarchived_topic', $post->ID );
 				}
 
 				return true;
