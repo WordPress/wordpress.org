@@ -81,7 +81,7 @@ class Stats extends GP_Route {
 		unset( $rows, $locale_key, $set );
 
 		// Append the Plugins/Themes waiting strings
-		$parent_project_ids = implode(',', array(
+		/*$parent_project_ids = implode(',', array(
 			GP::$project->by_path( 'wp-plugins' )->id,
 			GP::$project->by_path( 'wp-themes' )->id,
 		) );
@@ -103,7 +103,7 @@ class Stats extends GP_Route {
 			}
 
 			$translation_locale_statuses[ $locale_key ]['waiting'] += (int) $set->waiting_strings;
-		}
+		}*/
 
 		// Calculate a list of [Locale] = % subtotals
 		$translation_locale_complete = array();
