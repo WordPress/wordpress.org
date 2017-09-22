@@ -13,6 +13,11 @@ class WordCamp_Coming_Soon_Page {
 		add_action( 'wp_head',            array( $this, 'render_dynamic_styles' ) );
 		add_filter( 'template_include',   array( $this, 'override_theme_template' ) );
 		add_action( 'template_redirect',  array( $this, 'disable_jetpacks_open_graph' ) );
+		add_action( 'admin_bar_menu',     array( $this, 'admin_bar_menu_item' ), 1000 );
+		add_action( 'admin_head',         array( $this, 'admin_bar_styling' ) );
+		add_action( 'wp_head',            array( $this, 'admin_bar_styling' ) );
+		add_action( 'admin_notices',      array( $this, 'block_new_post_admin_notice' ) );
+		add_filter( 'get_post_metadata',  array( $this, 'jetpack_dont_email_post_to_subs' ), 10, 4 );
 
 		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
 	}
@@ -293,4 +298,107 @@ class WordCamp_Coming_Soon_Page {
 
 		return $settings['introduction'];
 	}
+
+	/**
+	 * Display notice in admin bar when Coming Soon mode is on.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance, passed by reference
+	 */
+	function admin_bar_menu_item( $wp_admin_bar ) {
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+		if ( $settings['enabled'] !== 'on' ) {
+			return;
+		}
+
+		$menu_slug   = add_query_arg(
+			array(
+				'autofocus[section]' => 'wccsp_live_preview',
+				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
+			),
+			'/customize.php'
+		);
+		$setting_url = admin_url( $menu_slug );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$setting_url = '';
+		}
+
+		$wp_admin_bar->add_node( array(
+			'id'     => 'wordcamp-coming-soon-info',
+			'href'   => $setting_url,
+			'parent' => 'root-default',
+			'title'  => __( 'Coming Soon Mode ON', 'wordcamporg' ),
+			'meta'   => array( 'class' => 'wc-coming-soon-info' ),
+		) );
+	}
+
+	/**
+	 * Styles for the Coming Soon flag in the Admin bar.
+	 */
+	public function admin_bar_styling() {
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+		if ( $settings['enabled'] !== 'on' ) {
+			return;
+		}
+
+		echo '<style type="text/css">#wpadminbar .wc-coming-soon-info, #wpadminbar .wc-coming-soon-info a { background: #FFE399; color: #23282d }</style>';
+	}
+
+	/*
+	 * Show a notice if Coming Soon is enabled.
+	 *
+	 * Explain to users why publishing is disabled when Coming Soon is enabled.
+	 */
+	public function block_new_post_admin_notice() {
+		$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+		if ( $settings['enabled'] !== 'on' ) {
+			return;
+		}
+
+		$menu_slug   = add_query_arg(
+			array(
+				'autofocus[section]' => 'wccsp_live_preview',
+				'url'                => rawurlencode( add_query_arg( 'wccsp-preview', '', site_url() ) ),
+			),
+			'/customize.php'
+		);
+		$setting_url = admin_url( $menu_slug );
+
+		$screen = get_current_screen();
+		if ( trim( $screen->id ) == 'post' ) {
+			$class = 'notice notice-warning';
+			$message = sprintf(
+				__( '<a href="%s">Coming Soon mode</a> is enabled. Site subscribers will not receive email notifications about published posts.', 'wordcamporg' ),
+				esc_url( $setting_url )
+			);
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				$message = wp_strip_all_tags( $message );
+			}
+
+			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+		}
+	}
+
+	/**
+	 * Disable sending of Jetpack emails when Coming Soon mode is on.
+	 *
+	 * @param null|array|string $value     The value get_metadata() should return - a single metadata value,
+	 *                                     or an array of values.
+	 * @param int               $object_id Object ID.
+	 * @param string            $meta_key  Meta key.
+	 * @param bool              $single    Whether to return only the first value of the specified $meta_key.
+	 */
+	function jetpack_dont_email_post_to_subs( $value, $object_id, $meta_key, $single ) {
+		if ( '_jetpack_dont_email_post_to_subs' === $meta_key ) {
+			$settings = $GLOBALS['WCCSP_Settings']->get_settings();
+
+			if ( $settings['enabled'] === 'on' ) {
+				return true;
+			}
+		}
+
+		return $value;
+	}
+
 } // end WordCamp_Coming_Soon_Page
