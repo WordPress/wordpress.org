@@ -47,6 +47,12 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 			$args['post_type'] = $post->post_type;
 		}
 
+		$post_type_obj = get_post_type_object( $post->post_type );
+
+		if ( current_user_can( $post_type_obj->cap->read_private_posts ) ) {
+			$args['post_status'] = array( 'publish', 'private' );
+		}
+
 		// Exclude root handbook page from the table of contents.
 		$page = get_page_by_path( $this->append_suffix( $post->post_type ), OBJECT, $post->post_type );
 		if ( ! $page ) {
