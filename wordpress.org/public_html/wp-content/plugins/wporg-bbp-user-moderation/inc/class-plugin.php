@@ -62,10 +62,10 @@ class Plugin {
 			add_filter( 'bbp_edit_topic_pre_insert', array( $this, 'pre_insert' ) );
 			add_filter( 'bbp_new_reply_pre_insert',  array( $this, 'pre_insert' ) );
 			add_filter( 'bbp_edit_reply_pre_insert', array( $this, 'pre_insert' ) );
-
-			// Alter queries for moderated users.
-			add_filter( 'posts_where', array( $this, 'posts_where' ) );
 		}
+
+		// Alter queries for the current user.
+		add_filter( 'posts_where', array( $this, 'posts_where' ) );
 
 		// Add views and actions for moderators.
 		if ( user_can( $user_id, 'moderate' ) ) {
@@ -94,7 +94,7 @@ class Plugin {
 	}
 
 	/**
-	 * Adjust the query for moderated users.
+	 * Adjust the query for the current user.
 	 */
 	public function posts_where( $where ) {
 		global $wpdb;
@@ -105,7 +105,11 @@ class Plugin {
 				strpos( $where, $wpdb->prepare( "$wpdb->posts.post_type = %s", bbp_get_reply_post_type() ) ) !== false
 			) {
 				$original = $wpdb->prepare( "$wpdb->posts.post_status = %s OR ", bbp_get_public_status_id() );
-				$replacement = $wpdb->prepare( " ( $wpdb->posts.post_status = '%s' AND $wpdb->posts.post_author = '%d' ) OR ", bbp_get_pending_status_id(), get_current_user_id() );
+				$replacement = $wpdb->prepare( " ( $wpdb->posts.post_status IN ( %s, %s ) AND $wpdb->posts.post_author = '%d' ) OR ",
+					bbp_get_pending_status_id(),
+					bbp_get_spam_status_id(),
+					get_current_user_id()
+				);
 				$where = str_replace( $original, $original . $replacement, $where );
 			}
 		}
