@@ -11,19 +11,26 @@ class Ratings_Compat {
 
 	var $filter = false;
 
-	public function __construct( $compat, $slug, $taxonomy, $object ) {
+	public function __construct( $args ) {
 		if ( ! class_exists( 'WPORG_Ratings' ) ) {
 			return;
 		}
 
-		if ( empty( $compat ) || empty( $slug ) || empty( $taxonomy ) || empty( $object ) ) {
+		$args = wp_parse_args( $args, array(
+			'compat'       => '',
+			'slug'         => '',
+			'taxonomy'     => '',
+			'object'       => '',
+		) );
+
+		if ( ! $args['compat'] || ! $args['slug'] || ! $args['taxonomy'] || ! $args['object'] ) {
 			return;
 		}
 
-		$this->compat   = $compat;
-		$this->slug     = $slug;
-		$this->taxonomy = $taxonomy;
-		$this->object   = $object;
+		$this->compat   = $args['compat'];
+		$this->slug     = $args['slug'];
+		$this->taxonomy = $args['taxonomy'];
+		$this->object   = $args['object'];
 
 		$this->ratings_counts = \WPORG_Ratings::get_rating_counts( $this->compat, $this->slug );
 		$this->avg_rating = \WPORG_Ratings::get_avg_rating( $this->compat, $this->slug );

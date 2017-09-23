@@ -12,19 +12,30 @@ class Stickies_Compat {
 	var $object   = null;
 	var $term     = null;
 
-	public function __construct( $compat, $slug, $taxonomy, $object, $term, $authors = array(), $contributors = array(), $support_reps = array() ) {
-		if ( empty( $compat ) || empty( $slug ) || empty( $taxonomy ) || empty( $object ) || empty( $term ) ) {
+	public function __construct( $args ) {
+		$args = wp_parse_args( $args, array(
+			'compat'       => '',
+			'slug'         => '',
+			'taxonomy'     => '',
+			'object'       => '',
+			'term'         => '',
+			'authors'      => array(),
+			'contributors' => array(),
+			'support_reps' => array(),
+		) );
+
+		if ( ! $args['compat'] || ! $args['slug'] || ! $args['taxonomy'] || ! $args['object'] || ! $args['term'] ) {
 			return;
 		}
 
-		$this->compat       = $compat;
-		$this->slug         = $slug;
-		$this->taxonomy     = $taxonomy;
-		$this->object       = $object;
-		$this->term         = $term;
-		$this->authors      = $authors;
-		$this->contributors = $contributors;
-		$this->support_reps = $support_reps;
+		$this->compat       = $args['compat'];
+		$this->slug         = $args['slug'];
+		$this->taxonomy     = $args['taxonomy'];
+		$this->object       = $args['object'];
+		$this->term         = $args['term'];
+		$this->authors      = $args['authors'];
+		$this->contributors = $args['contributors'];
+		$this->support_reps = $args['support_reps'];
 
 		// Remove global stickies from sticky array.
 		add_filter( 'bbp_get_super_stickies', array( $this, 'get_super_stickies' ) );

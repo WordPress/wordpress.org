@@ -294,12 +294,23 @@ abstract class Directory_Compat {
 
 			// Instantiate WPORG_Ratings compat mode for reviews.
 			if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
-				$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
+				$this->ratings = new Ratings_Compat( array(
+					'compat'   => $this->compat(),
+					'slug'     => $this->slug(),
+					'taxonomy' => $this->taxonomy(),
+					'object'   => $this->get_object( $this->slug() ),
+				) );
 			}
 
 			// Instantiate WPORG_Stickies mode for support view.
 			if ( class_exists( 'WordPressdotorg\Forums\Stickies_Compat' ) ) {
-				$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term );
+				$this->stickies = new Stickies_Compat( array(
+					'compat'   => $this->compat(),
+					'slug'     => $this->slug(),
+					'taxonomy' => $this->taxonomy(),
+					'object'   => $this->get_object( $this->slug() ),
+					'term'     => $this->term,
+				) );
 			}
 
 			$this->loaded = true;
@@ -328,12 +339,26 @@ abstract class Directory_Compat {
 
 				// Instantiate WPORG_Ratings compat mode for reviews.
 				if ( class_exists( 'WPORG_Ratings' ) && class_exists( 'WordPressdotorg\Forums\Ratings_Compat' ) ) {
-					$this->ratings = new Ratings_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ) );
+					$this->ratings = new Ratings_Compat( array(
+						'compat'   => $this->compat(),
+						'slug'     => $this->slug(),
+						'taxonomy' => $this->taxonomy(),
+						'object'   => $this->get_object( $this->slug() ),
+					) );
 				}
 
 				// Instantiate WPORG_Stickies mode for topic view.
 				if ( class_exists( 'WordPressdotorg\Forums\Stickies_Compat' ) ) {
-					$this->stickies = new Stickies_Compat( $this->compat(), $this->slug(), $this->taxonomy(), $this->get_object( $this->slug() ), $this->term, $this->authors, $this->contributors, $this->support_reps );
+					$this->stickies = new Stickies_Compat( array(
+						'compat'       => $this->compat(),
+						'slug'         => $this->slug(),
+						'taxonomy'     => $this->taxonomy(),
+						'object'       => $this->get_object( $this->slug() ),
+						'term'         => $this->term,
+						'authors'      => $this->authors,
+						'contributors' => $this->contributors,
+						'support_reps' => $this->support_reps,
+					) );
 				}
 
 				$this->loaded = true;
