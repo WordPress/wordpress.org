@@ -125,7 +125,12 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	$data['img_src_ssl']     = $browser_data ? $browser_data->img_src_ssl : '';
 	$data['current_version'] = get_browser_version_from_name( $data['name'] );
 	$data['upgrade']         = ( ! empty( $data['current_version'] ) && version_compare( $data['version'], $data['current_version'], '<' ) );
-	$data['insecure']        = ( 'Internet Explorer' == $data['name'] && version_compare( $data['version'], '11', '<' ) );
+
+	if ( 'Internet Explorer' === $data['name'] && version_compare( $data['version'], '11', '<' ) ) {
+		$data['insecure'] = true;
+	} elseif ( 'Opera' === $data['name'] && version_compare( $data['version'], '12.18', '<' ) ) {
+		$data['insecure'] = true;
+	}
 
 	return $data;
 }

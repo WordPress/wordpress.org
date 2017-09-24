@@ -114,6 +114,11 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; de) Opera 11.01',
 				'Windows Opera 11.01',
 			],
+			// #3161
+			[
+				'Opera/9.80 (Windows NT 6.2; WOW64) Presto/2.12.388 Version/12.18',
+				'Windows Opera 12.18',
+			],
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; tr-TR) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
 				'Windows Safari 5.0.4',
@@ -240,6 +245,8 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 		$parsed = browsehappy_parse_user_agent( $header );
 
 		if ( 'Internet Explorer' === $parsed['name'] && version_compare( $parsed['version'], '11', '<' ) ) {
+			$this->assertTrue( $parsed['insecure'] );
+		} elseif ( 'Opera' === $parsed['name'] && version_compare( $parsed['version'], '12.18', '<' ) ) {
 			$this->assertTrue( $parsed['insecure'] );
 		}
 	}
