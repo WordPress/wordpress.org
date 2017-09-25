@@ -90,6 +90,9 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.41 Safari/534.7',
 				'Windows Chrome 7.0.517.41',
 			],
+
+			// Opera
+
 			[
 				'Opera/9.80 (Windows NT 6.0; U; en) Presto/2.8.99 Version/11.10',
 				'Windows Opera 11.10',
@@ -114,11 +117,47 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; de) Opera 11.01',
 				'Windows Opera 11.01',
 			],
+			[
+				'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36 OPR/36.0.2130.80',
+				'Windows Opera 36.0.2130.80',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991',
+				'Windows Opera 43.0.2442.991',
+			],
+			[
+				'Opera/9.80 (X11; Linux zvav; U; en) Presto/2.8.119 Version/11.10',
+				'Linux Opera 11.10',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 OPR/37.0.2178.31 (Edition beta)',
+				'Linux Opera 37.0.2178.31',
+			],
+			[
+				'Opera/9.80 (Macintosh; Intel Mac OS X 10.10.5) Presto/2.12.388 Version/12.16',
+				'Macintosh Opera 12.16',
+			],
 			// #3161
 			[
 				'Opera/9.80 (Windows NT 6.2; WOW64) Presto/2.12.388 Version/12.18',
 				'Windows Opera 12.18',
 			],
+
+			// Opera Mini
+
+			[
+				'Opera/9.80 (Android; Opera Mini/24.0.2254/62.178; U; en) Presto/2.12.423 Version/12.16',
+				'Android Opera Mini 12.16',
+			],
+			[
+				'Opera/9.80 (J2ME/MIDP; Opera Mini/4.2/28.3590; U; en) Presto/2.8.119 Version/11.10',
+				'Mobile Opera Mini 11.10',
+			],
+			[
+				'Opera/9.80 (SpreadTrum; Opera Mini/4.4.31492/66.299; U; en) Presto/2.12.423 Version/12.16',
+				'Mobile Opera Mini 12.16',
+			],
+
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; tr-TR) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
 				'Windows Safari 5.0.4',

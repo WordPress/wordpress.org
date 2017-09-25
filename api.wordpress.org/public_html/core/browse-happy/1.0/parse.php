@@ -39,7 +39,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	);
 
 	if ( preg_match(
-		'/^.+?(?P<platform>Android|iPhone|iPad|Windows|Linux|Macintosh|Windows Phone OS|RIM Tablet OS|PlayBook)(?: NT)*(?: [ix]?[0-9._]+)*(;|\))/im',
+		'/^.+?(?P<platform>Android|iPhone|iPad|Windows|Linux|Macintosh|Windows Phone OS|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
 		$user_agent,
 		$regs
 	) ) {
@@ -56,7 +56,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	}
 
 	preg_match_all(
-		'%(?P<name>Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Opera|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -69,7 +69,22 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		unset( $result['version'][ $key ] );
 	}
 
-	if ( 'AppleWebKit' == $result['name'][0] ) {
+	// Opera
+	if (
+		false !== ( $key = array_search( 'Opera Mini', $result['name'] ) )
+	||
+		false !== ( $key = array_search( 'Opera', $result['name'] ) )
+	||
+		false !== ( $key = array_search( 'OPR', $result['name'] ) )
+	) {
+		$data['name'] = $result['name'][ $key ];
+		if ( 'OPR' === $data['name'] ) {
+			$data['name'] = 'Opera';
+		} elseif ( 'Opera Mini' === $data['name'] ) {
+			$data['mobile'] = true;
+		}
+		$data['version'] = $result['version'][ $key ];
+	} elseif ( 'AppleWebKit' == $result['name'][0] ) {
 		if ( $key = array_search( 'Mobile Safari', $result['name'] ) ) {
 			$data['name'] = 'Mobile Safari';
 		// } elseif ( ( 'Android' == $data['platform'] && !($key = 0) ) || $key = array_search( 'Chrome', $result['name'] ) ) {
@@ -87,9 +102,6 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$key = 0;
 			$data['name'] = 'webkit';
 		}
-		$data['version'] = $result['version'][ $key ];
-	} elseif ( $key = array_search( 'Opera', $result['name'] ) ) {
-		$data['name'] = $result['name'][ $key ];
 		$data['version'] = $result['version'][ $key ];
 	} elseif ( 'MSIE' == $result['name'][0] ) {
 		if ( $key = array_search( 'IEMobile', $result['name'] ) ) {
