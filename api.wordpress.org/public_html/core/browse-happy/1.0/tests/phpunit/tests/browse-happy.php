@@ -298,7 +298,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	function test_mobile_browsers( $header ) {
 		$parsed = browsehappy_parse_user_agent( $header );
 
-		if ( in_array( $parsed['platform'], array( 'Android', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS' ) ) ) {
+		if ( in_array( $parsed['platform'], array( 'Android', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
 			$this->assertTrue( $parsed['mobile'] );
 		} else {
 			$this->assertFalse( $parsed['mobile'] );

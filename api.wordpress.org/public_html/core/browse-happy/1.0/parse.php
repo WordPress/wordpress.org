@@ -51,7 +51,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['platform'] = 'Android';
 	}
 
-	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS' ) ) ) {
+	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
 		$data['mobile'] = true;
 	}
 
