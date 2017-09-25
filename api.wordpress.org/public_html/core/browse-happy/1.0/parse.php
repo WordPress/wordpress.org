@@ -21,6 +21,7 @@ require dirname( __FILE__ ) . '/browsers.php';
  *     @type string $current_version The current latest version of the browser.
  *     @type bool   $upgrade         Is there an update available for the browser?
  *     @type bool   $insecure        Is the browser insecure?
+ *     @type bool   $mobile          Is the browser on a mobile platform?
  * }
  */
 function browsehappy_parse_user_agent( $user_agent ) {
@@ -34,6 +35,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		'current_version' => '',
 		'upgrade'         => false,
 		'insecure'        => false,
+		'mobile'          => false,
 	);
 
 	if ( preg_match(
@@ -47,6 +49,10 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	// Properly set platform if Android is actually being reported.
 	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
 		$data['platform'] = 'Android';
+	}
+
+	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS' ) ) ) {
+		$data['mobile'] = true;
 	}
 
 	preg_match_all(
@@ -114,8 +120,13 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['version'] = $version;
 	}
 
-	// Don't fetch additional browser data for mobile platform browsers.
-	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone' ) ) ) {
+	if ( $data['mobile'] ) {
+		// Generically set "Mobile" as the platform if a platform hasn't been set.
+		if ( ! $data['platform'] ) {
+			$data['platform'] = 'Mobile';
+		}
+
+		// Don't fetch additional browser data for mobile platform browsers at this time.
 		return $data;
 	}
 
