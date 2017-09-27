@@ -1,9 +1,18 @@
 .site-content {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: $size__site-main;
+	padding: 0 ms( 4 );
 
 	@media screen and (min-width: $ms-breakpoint) {
 		padding: 0 10px ms( 10 );
+	}
+
+	@media screen and (max-width: $ms-breakpoint) {
+		.site-main {
+			float: none;
+			margin: 0;
+			width: auto;
+		}
 	}
 
 	.home &,

@@ -3,24 +3,51 @@
 
 	.page-numbers {
 		background-color: #f9f9f9;
+		cursor: hand;
+		display: inline-block;
 		min-width: 2em;
 		padding: 8px;
-		display: inline-block;
-		cursor: hand;
 
 		&.next,
 		&.prev,
 		&.dots {
-			width: auto;
-			font-size: 0.9em;
 			background: none;
+			font-size: 0.9em;
+			width: auto;
 		}
 		&.dots {
 			cursor: inherit;
 		}
+
+		@media screen and (max-width: $ms-breakpoint) {
+			&.prev,
+			&.next {
+				font-size: 0;
+				min-width: initial;
+				padding: 0;
+			}
+
+			&.prev:before,
+			&.next:after {
+				background-color: #f9f9f9;
+				display: inline-block;
+				font-size: ms( 0 );
+				line-height: 1.5;
+				min-width: 2em;
+				padding: 8px;
+			}
+
+			&.prev:before {
+				content: '\2039'; /* &lsaquo; */
+			}
+
+			&.next:after {
+				content: '\203A'; /* &rsaquo; */
+			}
+		}
 	}
 	span.page-numbers {
-		font-weight: bold;
 		background-color: #f7f7f7;
+		font-weight: bold;
 	}
 }
