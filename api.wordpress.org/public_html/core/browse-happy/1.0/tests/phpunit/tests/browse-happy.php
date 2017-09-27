@@ -20,6 +20,58 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	 */
 	function data_browse_happy() {
 		return [
+
+			// Camino
+
+			[
+				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en; rv:1.8.1.11) Gecko/20071128 Camino/1.5.4',
+				'Macintosh Camino 1.5.4',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; it; rv:1.8.1.21) Gecko/20090327 Camino/1.6.7 (MultiLang) (like Firefox/2.0.0.21pre)',
+				'Macintosh Camino 1.6.7',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en; rv:1.9.0.18) Gecko/2010021619 Camino/2.0.2 (like Firefox/3.0.18)',
+				'Macintosh Camino 2.0.2',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; it; rv:1.9.0.19) Gecko/2010111021 Camino/2.0.6 (MultiLang) (like Firefox/3.0.19)',
+				'Macintosh Camino 2.0.6',
+			],
+
+			// Chrome
+
+			[
+				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.41 Safari/534.7',
+				'Windows Chrome 7.0.517.41',
+			],
+			[
+				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.98 Safari/534.13',
+				'Windows Chrome 9.0.597.98',
+			],
+			[
+				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.114 Safari/534.16',
+				'Windows Chrome 10.0.648.114',
+			],
+
+			// Firefox
+
+			[
+				'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.21022)',
+				'Windows Firefox 3.5.5',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',
+				'Macintosh Firefox 3.6.3',
+			],
+			[
+				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15 FirePHP/0.5',
+				'Windows Firefox 3.6.15',
+			],
+
+			// Internet Explorer
+
 			[
 				'Mozilla/4.0 (Windows; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727)',
 				'Windows Internet Explorer 6.0',
@@ -60,42 +112,40 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
 				'Windows Internet Explorer 9.0',
 			],
-			// #2587
-			[
+			[ // #2587
 				'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)',
 				'Windows Internet Explorer 10.0',
 			],
-			// #2587
-			[
+			[ // #2587
 				'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
 				'Windows Internet Explorer 11',
 			],
 			[
-				'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.21022)',
-				'Windows Firefox 3.5.5',
+				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) Asus;Galaxy6',
+				'Windows Phone OS Internet Explorer Mobile 7.0',
 			],
 			[
-				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15 FirePHP/0.5',
-				'Windows Firefox 3.6.15',
+				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0; LG; GW910)',
+				'Windows Phone OS Internet Explorer Mobile 7.0',
 			],
 			[
-				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.98 Safari/534.13',
-				'Windows Chrome 9.0.597.98',
-			],
-			[
-				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.114 Safari/534.16',
-				'Windows Chrome 10.0.648.114',
-			],
-			[
-				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.41 Safari/534.7',
-				'Windows Chrome 7.0.517.41',
+				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) LG;LG-E900h)',
+				'Windows Phone OS Internet Explorer Mobile 7.0',
 			],
 
 			// Opera
 
 			[
-				'Opera/9.80 (Windows NT 6.0; U; en) Presto/2.8.99 Version/11.10',
-				'Windows Opera 11.10',
+				'Opera/9.80 (X11; Linux zvav; U; en) Presto/2.8.119 Version/11.10',
+				'Linux Opera 11.10',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 OPR/37.0.2178.31 (Edition beta)',
+				'Linux Opera 37.0.2178.31',
+			],
+			[
+				'Opera/9.80 (Macintosh; Intel Mac OS X 10.10.5) Presto/2.12.388 Version/12.16',
+				'Macintosh Opera 12.16',
 			],
 			[
 				'Opera/9.80 (Windows NT 5.1; U; cs) Presto/2.7.62 Version/11.01',
@@ -118,29 +168,20 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Opera 11.01',
 			],
 			[
+				'Opera/9.80 (Windows NT 6.0; U; en) Presto/2.8.99 Version/11.10',
+				'Windows Opera 11.10',
+			],
+			[ // #3161
+				'Opera/9.80 (Windows NT 6.2; WOW64) Presto/2.12.388 Version/12.18',
+				'Windows Opera 12.18',
+			],
+			[
 				'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36 OPR/36.0.2130.80',
 				'Windows Opera 36.0.2130.80',
 			],
 			[
 				'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991',
 				'Windows Opera 43.0.2442.991',
-			],
-			[
-				'Opera/9.80 (X11; Linux zvav; U; en) Presto/2.8.119 Version/11.10',
-				'Linux Opera 11.10',
-			],
-			[
-				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 OPR/37.0.2178.31 (Edition beta)',
-				'Linux Opera 37.0.2178.31',
-			],
-			[
-				'Opera/9.80 (Macintosh; Intel Mac OS X 10.10.5) Presto/2.12.388 Version/12.16',
-				'Macintosh Opera 12.16',
-			],
-			// #3161
-			[
-				'Opera/9.80 (Windows NT 6.2; WOW64) Presto/2.12.388 Version/12.18',
-				'Windows Opera 12.18',
 			],
 
 			// Opera Mini
@@ -158,13 +199,11 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mobile Opera Mini 12.16',
 			],
 
+			// Safari
+
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; tr-TR) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
 				'Windows Safari 5.0.4',
-			],
-			[
-				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',
-				'Macintosh Firefox 3.6.3',
 			],
 			[
 				'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_4_11; en) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7',
@@ -183,29 +222,16 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Macintosh Safari 5.0',
 			],
 			[
-				'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; it; rv:1.9.0.19) Gecko/2010111021 Camino/2.0.6 (MultiLang) (like Firefox/3.0.19)',
-				'Macintosh Camino 2.0.6',
-			],
-			[
-				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en; rv:1.9.0.18) Gecko/2010021619 Camino/2.0.2 (like Firefox/3.0.18)',
-				'Macintosh Camino 2.0.2',
-			],
-			[
-				'Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; it; rv:1.8.1.21) Gecko/20090327 Camino/1.6.7 (MultiLang) (like Firefox/2.0.0.21pre)',
-				'Macintosh Camino 1.6.7',
-			],
-			[
-				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en; rv:1.8.1.11) Gecko/20071128 Camino/1.5.4',
-				'Macintosh Camino 1.5.4',
-			],
-			[
 				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
 				'Android Mobile Safari 4.0',
 			],
-			// #1323
-			[
+			[ // #1323
 				'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/45.0.2454.95 Mobile Safari/537.36',
 				'Android Mobile Safari 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 3.1; en-us; GT-P7510 Build/HMJ37) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13',
+				'Android Safari 4.0',
 			],
 			[
 				'Mozilla/5.0 (iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10',
@@ -216,25 +242,16 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'iPad Safari 4.0.4',
 			],
 			[
-				'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_6 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8E200 Safari/6533.18.5',
-				'iPhone Safari 5.0.2',
-			],
-			[
 				'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C25 Safari/419.3',
 				'iPhone Safari 3.0',
 			],
 			[
-				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) Asus;Galaxy6',
-				'Windows Phone OS Internet Explorer Mobile 7.0',
+				'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_6 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8E200 Safari/6533.18.5',
+				'iPhone Safari 5.0.2',
 			],
-			[
-				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0; LG; GW910)',
-				'Windows Phone OS Internet Explorer Mobile 7.0',
-			],
-			[
-				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) LG;LG-E900h)',
-				'Windows Phone OS Internet Explorer Mobile 7.0',
-			],
+
+			// Miscellaneous
+
 			[
 				'Mozilla/4.0 (compatible; Linux 2.6.10) NetFront/3.3 Kindle/1.0 (screen 600x800)',
 				'Kindle Kindle 1.0',
@@ -255,10 +272,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) RockMelt/0.9.58.494 Chrome/11.0.696.71 Safari/534.24',
 				'Macintosh RockMelt 0.9.58.494',
 			],
-			[
-				'Mozilla/5.0 (Linux; U; Android 3.1; en-us; GT-P7510 Build/HMJ37) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13',
-				'Android Safari 4.0',
-			],
+
 		];
 	}
 
