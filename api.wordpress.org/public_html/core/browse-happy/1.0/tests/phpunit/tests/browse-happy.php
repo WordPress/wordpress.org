@@ -43,6 +43,34 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			// Chrome
 
 			[
+				'Mozilla/5.0 (Linux; Android 4.4.2; ASUS_T00J Build/KVT49L) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Safari/537.36',
+				'Android Chrome 30.0.0.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; Android 6.0.1; SM-T800 Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.107 Safari/537.36',
+				'Android Chrome 60.0.3112.107',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
+				'Linux Chrome 44.0.2403.157',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36',
+				'Linux Chrome 51.0.2704.106',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17',
+				'Macintosh Chrome 24.0.1312.57',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
+				'Macintosh Chrome 42.0.2311.90',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+				'Macintosh Chrome 56.0.2924.87',
+			],
+			[
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.41 Safari/534.7',
 				'Windows Chrome 7.0.517.41',
 			],
@@ -54,9 +82,45 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.114 Safari/534.16',
 				'Windows Chrome 10.0.648.114',
 			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36',
+				'Windows Chrome 41.0.2272.118',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+				'Windows Chrome 54.0.2840.99',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+				'Windows Chrome 60.0.3112.113',
+			],
 
 			// Firefox
 
+			[
+				'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/20.0 (Chrome)',
+				'Linux Firefox 20.0',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)',
+				'Linux Firefox 47.0',
+			],
+			[
+				'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0',
+				'Linux Firefox 54.0',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0',
+				'Macintosh Firefox 40.0',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:50.0) Gecko/20100101 Firefox/50.0',
+				'Macintosh Firefox 50.0',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:53.0) Gecko/20100101 Firefox/53.0',
+				'Macintosh Firefox 53.0',
+			],
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.21022)',
 				'Windows Firefox 3.5.5',
@@ -68,6 +132,26 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15 FirePHP/0.5',
 				'Windows Firefox 3.6.15',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0',
+				'Windows Firefox 41.0',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
+				'Windows Firefox 50.0',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0',
+				'Windows Firefox 52.0',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0',
+				'Windows Firefox 54.0',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/64.0',
+				'Windows Firefox 64.0',
 			],
 
 			// Internet Explorer
@@ -107,6 +191,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) ; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; InfoPath.3; Tablet PC 2.0)',
 				'Windows Internet Explorer 8.0',
+			],
+			[
+				'Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)',
+				'Windows Internet Explorer 9.0',
 			],
 			[
 				'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
@@ -222,6 +310,14 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Macintosh Safari 5.0',
 			],
 			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/601.4.4 (KHTML, like Gecko) Version/9.0.3 Safari/601.4.4',
+				'Macintosh Safari 9.0.3',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8',
+				'Macintosh Safari 10.1.2',
+			],
+			[
 				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
 				'Android Mobile Safari 4.0',
 			],
@@ -242,12 +338,28 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'iPad Safari 4.0.4',
 			],
 			[
+				'Mozilla/5.0 (iPad; CPU OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1',
+				'iPad Safari 9.0',
+			],
+			[
+				'Mozilla/5.0 (iPad; CPU OS 10_2_1 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0 Mobile/14D27 Safari/602.1',
+				'iPad Safari 10.0',
+			],
+			[
 				'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C25 Safari/419.3',
 				'iPhone Safari 3.0',
 			],
 			[
 				'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_6 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8E200 Safari/6533.18.5',
 				'iPhone Safari 5.0.2',
+			],
+			[
+				'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13E188a Safari/601.1',
+				'iPhone Safari 9.0',
+			],
+			[
+				'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0 Mobile/14D27 Safari/602.1',
+				'iPhone Safari 10.0',
 			],
 
 			// Miscellaneous
