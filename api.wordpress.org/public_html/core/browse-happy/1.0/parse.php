@@ -92,6 +92,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['name'] = 'RockMelt';
 		} elseif ( $key = array_search( 'Chrome', $result['name'] ) ) {
 			$data['name'] = 'Chrome';
+			$version = '';
 		} elseif ( ! empty( $data['platform'] ) && 'PlayBook' == $data['platform'] ) {
 			$data['name'] = 'PlayBook';
 		} elseif ( $key = array_search( 'Kindle', $result['name'] ) ) {
