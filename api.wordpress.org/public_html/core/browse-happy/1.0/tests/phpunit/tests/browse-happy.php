@@ -460,6 +460,8 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			$this->assertTrue( $parsed['insecure'] );
 		} elseif ( 'Opera' === $parsed['name'] && version_compare( $parsed['version'], '12.18', '<' ) ) {
 			$this->assertTrue( $parsed['insecure'] );
+		} elseif ( 'Safari' === $parsed['name'] && version_compare( $parsed['version'], '10', '<' ) && ! $parsed['mobile'] ) {
+			$this->assertTrue( $parsed['insecure'] );
 		} else {
 			$this->assertFalse( $parsed['insecure'] );
 		}

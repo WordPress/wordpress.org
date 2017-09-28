@@ -21,7 +21,7 @@ function get_browser_current_versions() {
 		'Firefox'           => '16',
 		'Microsoft Edge'    => '15.15063',
 		'Opera'             => '12.18',
-		'Safari'            => '5',
+		'Safari'            => '11',
 		'Internet Explorer' => '11',
 	);
 }
