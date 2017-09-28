@@ -39,7 +39,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	);
 
 	if ( preg_match(
-		'/^.+?(?P<platform>Android|iPhone|iPad|Windows|Linux|Macintosh|Windows Phone OS|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
+		'/^.+?(?P<platform>Windows Phone( OS)?|Android|iPhone|iPad|Windows|Linux|Macintosh|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
 		$user_agent,
 		$regs
 	) ) {
@@ -49,6 +49,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	// Properly set platform if Android is actually being reported.
 	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
 		$data['platform'] = 'Android';
+	} elseif ( 'Windows Phone' === $data['platform'] ) {
+		$data['platform'] = 'Windows Phone OS';
 	}
 
 	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
@@ -115,8 +117,12 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	} elseif ( 'Trident' == $result['name'][0] ) {
 		// IE 11 and beyond have switched to Trident
 		// http://msdn.microsoft.com/en-us/library/ie/hh869301%28v=vs.85%29.aspx
-		$data['name'] = 'Internet Explorer';
-		if( '7.0' == $result['version'][0] ) {
+		if ( $key = array_search( 'IEMobile', $result['name'] ) ) {
+			$data['name'] = 'Internet Explorer Mobile';
+		} else {
+			$data['name'] = 'Internet Explorer';
+		}
+		if ( '7.0' == $result['version'][0] ) {
 			$data['version'] = '11';
 		}
 	} else {

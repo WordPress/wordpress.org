@@ -220,6 +220,22 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) LG;LG-E900h)',
 				'Windows Phone OS Internet Explorer Mobile 7.0',
 			],
+			[
+				'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0; NOKIA; Lumia 710)',
+				'Windows Phone OS Internet Explorer Mobile 9.0',
+			],
+			[
+				'Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)',
+				'Windows Phone OS Internet Explorer Mobile 10.0',
+			],
+			[
+				'Mozilla/5.0 (Mobile; Windows Phone 8.1; Android 4.0; ARM; Trident/7.0; Touch; rv:11.0; IEMobile/11.0; Microsoft; Lumia 435) like iPhone OS 7_0_3 Mac OS X AppleWebKit/537 (KHTML, like Gecko) Mobile Safari/537',
+				'Windows Phone OS Internet Explorer Mobile 11',
+			],
+			[
+				'Mozilla/5.0 (Windows Phone 8.1; ARM; Trident/7.0; Touch; rv:11.0; IEMobile/11.0; NOKIA; Lumia 520) like Gecko',
+				'Windows Phone OS Internet Explorer Mobile 11',
+			],
 
 			// Opera
 
