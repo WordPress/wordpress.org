@@ -419,6 +419,35 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * Test that the 'upgrade' parsed data field is correct.
+	 *
+	 * @dataProvider data_browse_happy
+	 *
+	 * @param string $header 'User-Agent' header value.
+	 */
+	function test_upgrade_browsers( $header ) {
+		$parsed = browsehappy_parse_user_agent( $header );
+
+		// Currently, mobile browsers are not flagged as upgradable.
+		if ( $parsed['mobile'] ) {
+			$this->assertFalse( $parsed['upgrade'] );
+			return;
+		}
+
+		$versions = get_browser_current_versions();
+
+		if ( ! empty( $versions[ $parsed['name'] ] ) ) {
+			if ( version_compare( $parsed['version'], $versions[ $parsed['name'] ], '<' ) ) {
+				$this->assertTrue( $parsed['upgrade'] );
+			} else {
+				$this->assertFalse( $parsed['upgrade'] );
+			}
+		} else {
+			$this->assertFalse( $parsed['upgrade'] );
+		}
+	}
+
+	/**
 	 * @dataProvider data_browse_happy
 	 *
 	 * @param string $header 'User-Agent' header value.
