@@ -160,6 +160,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	if ( 'Internet Explorer' === $data['name'] && version_compare( $data['version'], '11', '<' ) ) {
 		$data['insecure'] = true;
+	} elseif ( 'Firefox' === $data['name'] && version_compare( $data['version'], '52', '<' ) ) {
+		$data['insecure'] = true;
 	} elseif ( 'Opera' === $data['name'] && version_compare( $data['version'], '12.18', '<' ) ) {
 		$data['insecure'] = true;
 	} elseif ( 'Safari' === $data['name'] && version_compare( $data['version'], '10', '<' ) ) {

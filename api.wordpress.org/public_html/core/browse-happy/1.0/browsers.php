@@ -18,7 +18,7 @@
 function get_browser_current_versions() {
 	return array(
 		'Chrome'            => '18', // Lowest version at the moment (mobile)
-		'Firefox'           => '16',
+		'Firefox'           => '56',
 		'Microsoft Edge'    => '15.15063',
 		'Opera'             => '12.18',
 		'Safari'            => '11',
