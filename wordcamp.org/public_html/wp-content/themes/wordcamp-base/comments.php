@@ -31,10 +31,24 @@
 ?>
 
 <?php if ( have_comments() ) : ?>
-			<h3 id="comments-title"><?php
-			printf( _n( 'One Response to %2$s', '%1$s Responses to %2$s', get_comments_number(), 'wordcamporg' ),
-			number_format_i18n( get_comments_number() ), '<em>' . get_the_title() . '</em>' );
-			?></h3>
+			<h3 id="comments-title">
+				<?php
+				if ( 1 === get_comments_number() ) {
+ 		            printf(
+	                    /* translators: %s: post title */
+		                esc_html_x( 'One Response to &ldquo;%s&rdquo;', 'comments title', 'wordcamporg' ),
+		                '<span>' . get_the_title() . '</span>'
+	                );
+ 		        } else {
+					printf(
+						/* translators: 1: number of comments, 2: post title */
+						esc_html( _nx( '%1$s Response to &ldquo;%2$s&rdquo;', '%1$s Responses to &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'wordcamporg' ) ),
+						number_format_i18n( get_comments_number() ),
+						'<span>' . get_the_title() . '</span>'
+					);
+ 		        }
+				?>
+			</h3>
 
 <?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through? ?>
 			<div class="navigation">
