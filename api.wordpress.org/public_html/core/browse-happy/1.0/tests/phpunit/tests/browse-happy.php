@@ -237,6 +237,37 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Phone OS Internet Explorer Mobile 11',
 			],
 
+			// Microsoft Edge
+
+			[
+				'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240',
+				'Windows Microsoft Edge 12.10240',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586',
+				'Windows Microsoft Edge 13.10586',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393',
+				'Windows Microsoft Edge 14.14393',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063',
+				'Windows Microsoft Edge 15.15063'
+			],
+			[
+				'Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 LTE) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.10586',
+				'Windows Phone OS Microsoft Edge 13.10586',
+			],
+			[
+				'Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Mobile Safari/537.36 Edge/14.14393',
+				'Windows Phone OS Microsoft Edge 14.14393',
+			],
+			[
+				'Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Xbox; Xbox One) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15063',
+				'Windows Phone OS Microsoft Edge 15.15063',
+			],
+
 			// Opera
 
 			[

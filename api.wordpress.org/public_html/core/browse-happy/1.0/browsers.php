@@ -19,6 +19,7 @@ function get_browser_current_versions() {
 	return array(
 		'Chrome'            => '18', // Lowest version at the moment (mobile)
 		'Firefox'           => '16',
+		'Microsoft Edge'    => '15.15063',
 		'Opera'             => '12.18',
 		'Safari'            => '5',
 		'Internet Explorer' => '11',
@@ -58,6 +59,14 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 			'url'         => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
 			'img_src'     => $http  . 'ie.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'ie.png' . "?{$cache_buster}",
+		),
+		'Edge' => (object) array(
+			'name'        => 'Microsoft Edge',
+			'wikipedia'   => 'Microsoft Edge',
+			'normalized'  => 1, // include second number if non-zero
+			'url'         => 'https://www.microsoft.com/en-us/windows/microsoft-edge',
+			'img_src'     => $http  . 'edge.png' . "?{$cache_buster}",
+			'img_src_ssl' => $https . 'edge.png' . "?{$cache_buster}",
 		),
 		'Firefox' => (object) array(
 			'name'        => 'Mozilla Firefox',
