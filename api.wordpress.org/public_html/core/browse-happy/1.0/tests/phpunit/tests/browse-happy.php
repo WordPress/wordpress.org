@@ -286,6 +286,17 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Phone OS Microsoft Edge 15.15063',
 			],
 
+			// Nokia Browser
+
+			[
+				'Mozilla/5.0 (Linux; Android 4.1.2; Nokia_X Build/JZO54K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.82 Mobile Safari/537.36 NokiaBrowser/1.2.0.12',
+				'Android Nokia Browser 1.2.0.12',
+			],
+			[
+				'Mozilla/5.0 (MeeGo; NokiaN9) AppleWebKit/534.13 (KHTML, like Gecko) NokiaBrowser/8.5.0 Mobile Safari/534.13',
+				'Mobile Nokia Browser 8.5.0',
+			],
+
 			// Opera
 
 			[

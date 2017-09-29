@@ -58,7 +58,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	}
 
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -86,6 +86,12 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['mobile'] = true;
 		}
 		$data['version'] = $result['version'][ $key ];
+	}
+	// Nokia Browser
+	elseif ( $key = array_search( 'NokiaBrowser', $result['name'] ) ) {
+		$data['name']     = 'Nokia Browser';
+		$data['version']  = $result['version'][ $key ];
+		$data['mobile']   = true;
 	} elseif ( 'AppleWebKit' == $result['name'][0] ) {
 		if ( $key = array_search( 'Edge', $result['name'] ) ) {
 			$data['name'] = 'Microsoft Edge';
