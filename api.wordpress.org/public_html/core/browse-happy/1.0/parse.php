@@ -71,8 +71,12 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		unset( $result['version'][ $key ] );
 	}
 
+	// No indentifiers provided
+	if ( empty( $result['name'] ) ) {
+		$data['name'] = 'unknown';
+	}
 	// Opera
-	if (
+	elseif (
 		false !== ( $key = array_search( 'Opera Mini', $result['name'] ) )
 	||
 		false !== ( $key = array_search( 'Opera', $result['name'] ) )
@@ -122,7 +126,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			}
 		} else {
 			$key = 0;
-			$data['name'] = 'webkit';
+			$data['name'] = 'unknown';
+			$result['version'][ $key ] = '';
 		}
 		$data['version'] = $result['version'][ $key ];
 	} elseif ( 'MSIE' == $result['name'][0] ) {

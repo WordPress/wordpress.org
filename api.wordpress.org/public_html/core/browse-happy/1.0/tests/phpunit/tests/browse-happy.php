@@ -449,6 +449,25 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Macintosh RockMelt 0.9.58.494',
 			],
 
+			// Unknown
+
+			[
+				'Dalvik/1.6.0 (Linux; U; Android 4.1.1; BroadSign Xpress 1.0.14 B- (720) Build/JRO03H)',
+				'Android unknown',
+			],
+			[ // on Galaxy SIII
+				'Dalvik/1.6.0 (Linux; U; Android 4.4.2; SCH-I535 Build/KOT49H)',
+				'Android unknown',
+			],
+			[
+				'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13F69 [FBAN/FBIOS;FBAV/59.0.0.51.142;FBBV/33266808;FBRV/0;FBDV/iPhone7,1;FBMD/iPhone;FBSN/iPhone OS;FBSV/9.3.2;FBSS/3;FBCR/Telkomsel;FBID/phone;FBLC/en_US;FBOP/5] evaliant',
+				'iPhone unknown', // Actually: iPhone Facebook App 59.0.0.51.142
+			],
+			[
+				'Nokia-MIT-Browser/3.0',
+				'unknown', // It's really a Nokia Browser, but not critical to recognize as such.
+			],
+
 		];
 	}
 
@@ -462,7 +481,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 		$parsed = browsehappy_parse_user_agent( $header );
 		$result = $parsed['platform'] . ' ' . $parsed['name'] . ' ' . $parsed['version'];
 
-		$this->assertEquals( $expected, $result );
+		$this->assertEquals( $expected, trim( $result ) );
 	}
 
 	/**
