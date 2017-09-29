@@ -35,9 +35,6 @@ function get_browser_current_versions() {
  *
  *     @type string    $name        Name of the browser.
  *     @type string    $wikipedia   Wikipedia name for the browser.
- *     @type int|float $normalized  How should browser version number be
- *                                  normalized? 1 == just first number, else
- *                                  include second number (i.e. decimal value)
  *     @type string    $url         The home URL for the browser.
  *     @type string    $img_src     The non-HTTPs URL for the browser's logo image.
  *     @type string    $img_src_ssl The HTTPS URL for the browser's logo image.
@@ -55,7 +52,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Internet Explorer' => (object) array(
 			'name'        => 'Internet Explorer',
 			'wikipedia'   => 'Internet_Explorer',
-			'normalized'  => 1, // just first number
 			'url'         => 'https://support.microsoft.com/en-us/help/17621/internet-explorer-downloads',
 			'img_src'     => $http  . 'ie.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'ie.png' . "?{$cache_buster}",
@@ -63,7 +59,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Edge' => (object) array(
 			'name'        => 'Microsoft Edge',
 			'wikipedia'   => 'Microsoft Edge',
-			'normalized'  => 1, // include second number if non-zero
 			'url'         => 'https://www.microsoft.com/en-us/windows/microsoft-edge',
 			'img_src'     => $http  . 'edge.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'edge.png' . "?{$cache_buster}",
@@ -71,7 +66,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Firefox' => (object) array(
 			'name'        => 'Mozilla Firefox',
 			'wikipedia'   => 'Firefox',
-			'normalized'  => 1.5, // include second number if non-zero
 			'url'         => 'https://www.firefox.com/',
 			'img_src'     => $http  . 'firefox.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'firefox.png' . "?{$cache_buster}",
@@ -79,7 +73,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Safari' => (object) array(
 			'name'        => 'Safari',
 			'wikipedia'   => 'Safari',
-			'normalized'  => 1.5, // include second number if non-zero
 			'url'         => 'https://www.apple.com/safari/',
 			'img_src'     => $http  . 'safari.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'safari.png' . "?{$cache_buster}",
@@ -87,7 +80,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Opera' => (object) array(
 			'name'        => 'Opera',
 			'wikipedia'   => 'Opera',
-			'normalized'  => 2, // include second number
 			'url'         => 'https://www.opera.com/',
 			'img_src'     => $http  . 'opera.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'opera.png' . "?{$cache_buster}",
@@ -95,7 +87,6 @@ function browsehappy_api_get_browser_data( $browser = false ) {
 		'Chrome' => (object) array(
 			'name'        => 'Google Chrome',
 			'wikipedia'   => 'Google_Chrome',
-			'normalized'  => 1, // just first number
 			'url'         => 'https://www.google.com/chrome',
 			'img_src'     => $http  . 'chrome.png' . "?{$cache_buster}",
 			'img_src_ssl' => $https . 'chrome.png' . "?{$cache_buster}",
