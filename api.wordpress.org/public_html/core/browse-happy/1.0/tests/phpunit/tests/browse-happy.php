@@ -22,8 +22,13 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 		return [
 
 			// Android Browser
+
 			[
 				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+				'Android Android Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; NOOK BNTV250 Build/GINGERBREAD 1.4.3) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Safari/533.1',
 				'Android Android Browser 4.0',
 			],
 			[
@@ -32,6 +37,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			],
 			[
 				'Mozilla/5.0 (Linux; U; Android 4.0.4; pt-br; MZ608 Build/7.7.1-141-7-FLEM-UMTS-LA) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30',
+				'Android Android Browser 4.0',
+			],
+			[ // on Galaxy SIII
+				'Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; SCH-I535 Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30',
 				'Android Android Browser 4.0',
 			],
 
@@ -59,6 +68,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/5.0 (Linux; Android 4.4.2; ASUS_T00J Build/KVT49L) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Safari/537.36',
 				'Android Chrome 30.0.0.0',
+			],
+			[ // on Galaxy SIII
+				'Mozilla/5.0 (Linux; Android 4.3; SGH-I747M Build/JSS15J) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.99 Mobile Safari/537.36',
+				'Android Chrome 32.0.1700.99',
 			],
 			[ // #1323
 				'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/45.0.2454.95 Mobile Safari/537.36',
