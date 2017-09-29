@@ -21,6 +21,20 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	function data_browse_happy() {
 		return [
 
+			// Android Browser
+			[
+				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+				'Android Android Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 3.1; en-us; GT-P7510 Build/HMJ37) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13',
+				'Android Android Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.0.4; pt-br; MZ608 Build/7.7.1-141-7-FLEM-UMTS-LA) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30',
+				'Android Android Browser 4.0',
+			],
+
 			// Camino
 
 			[
@@ -45,6 +59,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/5.0 (Linux; Android 4.4.2; ASUS_T00J Build/KVT49L) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Safari/537.36',
 				'Android Chrome 30.0.0.0',
+			],
+			[ // #1323
+				'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/45.0.2454.95 Mobile Safari/537.36',
+				'Android Chrome 45.0.2454.95',
 			],
 			[
 				'Mozilla/5.0 (Linux; Android 6.0.1; SM-T800 Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.107 Safari/537.36',
@@ -363,18 +381,6 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8',
 				'Macintosh Safari 10.1.2',
-			],
-			[
-				'Mozilla/5.0 (Linux; U; Android 2.2; en-us; SGH-T959 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
-				'Android Mobile Safari 4.0',
-			],
-			[ // #1323
-				'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/45.0.2454.95 Mobile Safari/537.36',
-				'Android Mobile Safari 4.0',
-			],
-			[
-				'Mozilla/5.0 (Linux; U; Android 3.1; en-us; GT-P7510 Build/HMJ37) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13',
-				'Android Safari 4.0',
 			],
 			[
 				'Mozilla/5.0 (iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10',

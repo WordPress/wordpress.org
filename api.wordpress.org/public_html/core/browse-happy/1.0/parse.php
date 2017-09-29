@@ -90,7 +90,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		if ( $key = array_search( 'Edge', $result['name'] ) ) {
 			$data['name'] = 'Microsoft Edge';
 		} elseif ( $key = array_search( 'Mobile Safari', $result['name'] ) ) {
-			$data['name'] = 'Mobile Safari';
+			if ( $key2 = array_search( 'Chrome', $result['name'] ) ) {
+				$data['name'] = 'Chrome';
+				$version = $result['version'][ $key2 ];
+			} elseif ( 'Android' === $data['platform'] ) {
+				$data['name'] = 'Android Browser';
+			} else {
+				$data['name'] = 'Mobile Safari';
+			}
 		// } elseif ( ( 'Android' == $data['platform'] && !($key = 0) ) || $key = array_search( 'Chrome', $result['name'] ) ) {
 		} elseif ( $key = array_search( 'RockMelt', $result['name'] ) ) {
 			$data['name'] = 'RockMelt';
@@ -102,7 +109,11 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		} elseif ( $key = array_search( 'Kindle', $result['name'] ) ) {
 			$data['name'] = 'Kindle';
 		} elseif ( $key = array_search( 'Safari', $result['name'] ) ) {
-			$data['name'] = 'Safari';
+			if ( 'Android' === $data['platform'] ) {
+				$data['name'] = 'Android Browser';
+			} else {
+				$data['name'] = 'Safari';
+			}
 		} else {
 			$key = 0;
 			$data['name'] = 'webkit';
