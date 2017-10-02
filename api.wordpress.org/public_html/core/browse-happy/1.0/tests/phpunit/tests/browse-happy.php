@@ -508,6 +508,33 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'iPhone Safari 10.0',
 			],
 
+			// UC Browser
+
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.4.2; id; SM-G900 Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 UCBrowser/9.9.2.467 U3/0.8.0 Mobile Safari/534.30 evaliant',
+				'Android UC Browser 9.9.2.467',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.2.2; en-US; Micromax A102 Build/MicromaxA102) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 UCBrowser/11.1.0.882 U3/0.8.0 Mobile Safari/534.30',
+				'Android UC Browser 11.1.0.882',
+			],
+			[
+				'UCWEB/8.8 (iPhone; CPU OS_6; en-US)AppleWebKit/534.1 U3/3.0.0 Mobile',
+				'iPhone UC Browser 8.8',
+			],
+			[
+				'UCWEB/2.0 (Java; U; MIDP-2.0; Nokia203/20.37) U2/1.0.0 UCBrowser/8.7.0.218 U2/1.0.0 Mobile',
+				'Mobile UC Browser 8.7.0.218',
+			],
+			[
+				'Nokia5200/2.0 (05.00) Profile/MIDP-2.0 Configuration/CLDC-1.1 UCWEB/2.0 (Java; U; MIDP-2.0; id; Nokia5200) U2/1.0.0 UCBrowser/9.5.0.449 U2/1.0.0 Mobile',
+				'Mobile UC Browser 9.5.0.449',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.2; ARM; Trident/7.0; Touch; rv:11.0; WPDesktop) like Gecko UCBrowser/4.2.1.541',
+				'Windows UC Browser 4.2.1.541',
+			],
+
 			// Miscellaneous
 
 			[
