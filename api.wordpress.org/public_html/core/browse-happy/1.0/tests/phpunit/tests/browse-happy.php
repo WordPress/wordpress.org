@@ -260,7 +260,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			],
 			[ // #2587
 				'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
-				'Windows Internet Explorer 11',
+				'Windows Internet Explorer 11.0',
 			],
 			[
 				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) Asus;Galaxy6',
@@ -284,11 +284,11 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			],
 			[
 				'Mozilla/5.0 (Mobile; Windows Phone 8.1; Android 4.0; ARM; Trident/7.0; Touch; rv:11.0; IEMobile/11.0; Microsoft; Lumia 435) like iPhone OS 7_0_3 Mac OS X AppleWebKit/537 (KHTML, like Gecko) Mobile Safari/537',
-				'Windows Phone OS Internet Explorer Mobile 11',
+				'Windows Phone OS Internet Explorer Mobile 11.0',
 			],
 			[
 				'Mozilla/5.0 (Windows Phone 8.1; ARM; Trident/7.0; Touch; rv:11.0; IEMobile/11.0; NOKIA; Lumia 520) like Gecko',
-				'Windows Phone OS Internet Explorer Mobile 11',
+				'Windows Phone OS Internet Explorer Mobile 11.0',
 			],
 
 			// Kindle Browser

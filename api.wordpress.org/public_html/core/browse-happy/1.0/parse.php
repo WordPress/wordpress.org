@@ -164,7 +164,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['name'] = 'Internet Explorer';
 		}
 		if ( '7.0' == $result['version'][0] ) {
-			$data['version'] = '11';
+			$data['version'] = '11.0';
 		}
 	} else {
 		$data['name'] = $result['name'][0];
