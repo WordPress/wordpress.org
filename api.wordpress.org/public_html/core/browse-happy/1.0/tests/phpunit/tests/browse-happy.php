@@ -262,6 +262,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
 				'Windows Internet Explorer 11.0',
 			],
+			[ // Fictitious Trident version
+				'Mozilla/5.0 (Windows NT 6.3; Trident/34.0; rv:38.0) like Gecko',
+				'Windows Internet Explorer 34.0',
+			],
 			[
 				'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0) Asus;Galaxy6',
 				'Windows Phone OS Internet Explorer Mobile 7.0',

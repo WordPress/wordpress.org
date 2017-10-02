@@ -147,7 +147,29 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$result['version'][ $key ] = '';
 		}
 		$data['version'] = $result['version'][ $key ];
-	} elseif ( 'MSIE' == $result['name'][0] ) {
+	}
+	// Trident (Internet Explorer)
+	elseif ( false !== ( $key = array_search( 'Trident', $result['name'] ) ) ) {
+		// IE 8-10 more reliably report version via Trident token than MSIE token.
+		// IE 11 uses Trident token without an MSIE token.
+		// https://msdn.microsoft.com/library/hh869301(v=vs.85).aspx
+		if ( $key2 = array_search( 'IEMobile', $result['name'] ) ) {
+			$data['name'] = 'Internet Explorer Mobile';
+			$data['version'] = $result['version'][ $key2 ];
+		} else {
+			$data['name'] = 'Internet Explorer';
+			$trident_ie_mapping = array(
+				'4.0' => '8.0',
+				'5.0' => '9.0',
+				'6.0' => '10.0',
+				'7.0' => '11.0',
+			);
+			$ver = $result['version'][ $key ];
+			$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
+		}
+	}
+	// Internet Explorer (pre v8.0)
+	elseif ( 'MSIE' == $result['name'][0] ) {
 		if ( $key = array_search( 'IEMobile', $result['name'] ) ) {
 			$data['name'] = 'Internet Explorer Mobile';
 		} else {
@@ -155,18 +177,9 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$key = 0;
 		}
 		$data['version'] = $result['version'][ $key ];
-	} elseif ( 'Trident' == $result['name'][0] ) {
-		// IE 11 and beyond have switched to Trident
-		// http://msdn.microsoft.com/en-us/library/ie/hh869301%28v=vs.85%29.aspx
-		if ( $key = array_search( 'IEMobile', $result['name'] ) ) {
-			$data['name'] = 'Internet Explorer Mobile';
-		} else {
-			$data['name'] = 'Internet Explorer';
-		}
-		if ( '7.0' == $result['version'][0] ) {
-			$data['version'] = '11.0';
-		}
-	} else {
+	}
+	// Fall back to whatever is being reported.
+	else {
 		$data['name'] = $result['name'][0];
 		$data['version'] = $result['version'][0];
 	}
