@@ -37,6 +37,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		'insecure'        => false,
 		'mobile'          => false,
 	);
+	$mobile_device = '';
 
 	if ( preg_match(
 		'/^.+?(?P<platform>Windows Phone( OS)?|Android|iPhone|iPad|Windows|Linux|Macintosh|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
@@ -53,11 +54,23 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		} else {
 			$data['platform'] = 'Android';
 		}
-	} elseif ( 'Windows Phone' === $data['platform'] ) {
+	}
+	// Normalize Windows Phone OS name when "OS" is omitted.
+	elseif ( 'Windows Phone' === $data['platform'] ) {
 		$data['platform'] = 'Windows Phone OS';
 	}
+	// Generically detect some mobile devices.
+	elseif (
+		! $data['platform']
+	&&
+		preg_match( '/BlackBerry|Nokia|SonyEricsson/', $user_agent, $matches )
+	) {
+		$data['platform'] = 'Mobile';
+		$mobile_device    = $matches[0];
+	}
 
-	if ( in_array( $data['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
+	// Flag known mobile platforms as mobile.
+	if ( in_array( $data['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
 		$data['mobile'] = true;
 	}
 
@@ -145,6 +158,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$key = 0;
 			$data['name'] = 'unknown';
 			$result['version'][ $key ] = '';
+			$version = '';
 		}
 		$data['version'] = $result['version'][ $key ];
 	}

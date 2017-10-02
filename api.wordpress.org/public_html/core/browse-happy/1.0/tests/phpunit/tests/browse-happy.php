@@ -515,8 +515,20 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'iPhone unknown', // Actually: iPhone Facebook App 59.0.0.51.142
 			],
 			[
+				'BlackBerry; U; Blackberry 9900; en',
+				'Mobile unknown',
+			],
+			[
+				'BlackBerry8520/5.0.0.592 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/168',
+				'Mobile unknown',
+			],
+			[
 				'Nokia-MIT-Browser/3.0',
-				'unknown', // It's really a Nokia Browser, but not critical to recognize as such.
+				'Mobile unknown', // It's really a Nokia Browser, but not critical to recognize as such.
+			],
+			[
+				'SonyEricssonW995a/R1GB Browser/NetFront/3.4 Profile/MIDP-2.1 Configuration/CLDC-1.1 JavaPlatform/JP-8.4.4',
+				'Mobile unknown',
 			],
 
 		];
