@@ -445,6 +445,29 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mobile Opera Mini 12.16',
 			],
 
+			// QQ Browser
+
+			[
+				'MQQBrowser/2.0,Nokia6681/2.0',
+				'Mobile QQ Browser 2.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.4.2; zh-cn; GT-I9500 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko)Version/4.0 MQQBrowser/5.0 QQ-URL-Manager Mobile Safari/537.36',
+				'Android QQ Browser 5.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.3; zh-cn; SM-T2556 Build/JLS36C) AppleWebKit/537.36 (KHTML, like Gecko)Version/4.0 Chrome/37.0.0.0 MQQBrowser/6.9 Mobile Safari/537.36',
+				'Android QQ Browser 6.9',
+			],
+			[
+				'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; QQBrowser/6.12)',
+				'Windows QQ Browser 6.12',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.3226.400 QQBrowser/9.6.11681.400',
+				'Windows QQ Browser 9.6.11681.400',
+			],
+
 			// Safari
 
 			[
