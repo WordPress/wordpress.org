@@ -90,7 +90,11 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// No indentifiers provided
 	if ( empty( $result['name'] ) ) {
-		$data['name'] = 'unknown';
+		if ( 'BlackBerry' === $mobile_device ) {
+			$data['name'] = 'BlackBerry Browser';
+		} else {
+			$data['name'] = 'unknown';
+		}
 	}
 	// Opera
 	elseif (
@@ -137,6 +141,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
 				$data['name'] = 'Android Browser';
 			} elseif ( 'Fire OS' === $data['platform'] ) {
 				$data['name'] = 'Kindle Browser';
+			} elseif ( false !== strpos( $user_agent, 'BlackBerry' ) || false !== strpos( $user_agent, 'BB10' ) ) {
+				$data['name']   = 'BlackBerry Browser';
+				$data['mobile'] = true;
+
+				if ( false !== stripos( $user_agent, 'BB10' ) ) {
+					$result['version'][ $key ] = '';
+					$version = '';
+				}
 			} else {
 				$data['name'] = 'Mobile Safari';
 			}

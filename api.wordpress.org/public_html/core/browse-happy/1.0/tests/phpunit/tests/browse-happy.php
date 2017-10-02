@@ -67,6 +67,25 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Android Android Browser 4.0',
 			],
 
+			// BlackBerry Browser
+
+			[
+				'Mozilla/5.0 (BB10; Touch) AppleWebKit/537.35+ (KHTML, like Gecko) Version/10.3.2.2876 Mobile Safari/537.35+',
+				'Mobile BlackBerry Browser',
+			],
+			[
+				'BlackBerry; U; Blackberry 9900; en',
+				'Mobile BlackBerry Browser',
+			],
+			[
+				'BlackBerry8520/5.0.0.592 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/168',
+				'Mobile BlackBerry Browser',
+			],
+			[
+				'Mozilla/5.0 (BlackBerry; U; BlackBerry 9720; en) AppleWebKit/534.11+ (KHTML, like Gecko) Version/7.1.0.1121 Mobile Safari/534.11+',
+				'Mobile BlackBerry Browser 7.1.0.1121',
+			],
+
 			// Camino
 
 			[
@@ -513,14 +532,6 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13F69 [FBAN/FBIOS;FBAV/59.0.0.51.142;FBBV/33266808;FBRV/0;FBDV/iPhone7,1;FBMD/iPhone;FBSN/iPhone OS;FBSV/9.3.2;FBSS/3;FBCR/Telkomsel;FBID/phone;FBLC/en_US;FBOP/5] evaliant',
 				'iPhone unknown', // Actually: iPhone Facebook App 59.0.0.51.142
-			],
-			[
-				'BlackBerry; U; Blackberry 9900; en',
-				'Mobile unknown',
-			],
-			[
-				'BlackBerry8520/5.0.0.592 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/168',
-				'Mobile unknown',
 			],
 			[
 				'Nokia-MIT-Browser/3.0',
