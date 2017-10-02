@@ -21,6 +21,29 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	function data_browse_happy() {
 		return [
 
+			// Amazon Silk
+
+			[
+				'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; Silk/1.0.146.3-Gen4_12000410) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 Silk-Accelerated=true',
+				'Fire OS Amazon Silk 1.0.146.3',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us; Silk/1.0.146.3-Gen4_12000410) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16 Silk-Accelerated=true',
+				'Fire OS Amazon Silk 1.0.146.3',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.0.3; en-us; KFTT Build/IML74K) AppleWebKit/537.36 (KHTML, like Gecko) Silk/3.68 like Chrome/39.0.2171.93 Safari/537.36',
+				'Fire OS Amazon Silk 3.68',
+			],
+			[
+				'Mozilla/5.0 (Linux; Android 4.0.3; KFTT Build/IML74K) AppleWebKit/537.36 (KHTML, like Gecko) Silk/51.2.1 like Chrome/51.0.2704.81 Safari/537.36',
+				'Fire OS Amazon Silk 51.2.1',
+			],
+			[
+				'Mozilla/5.0 (Linux; Android 5.1.1; KFDOWI Build/LVY48F) AppleWebKit/537.36 (KHTML, like Gecko) Silk/58.2.6 like Chrome/58.0.3029.83 Safari/537.36',
+				'Fire OS Amazon Silk 58.2.6',
+			],
+
 			// Android Browser
 
 			[
@@ -268,6 +291,29 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Phone OS Internet Explorer Mobile 11',
 			],
 
+			// Kindle Browser
+
+			[
+				'Mozilla/4.0 (compatible; Linux 2.6.10) NetFront/3.3 Kindle/1.0 (screen 600x800)',
+				'Fire OS Kindle Browser 1.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/528.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)',
+				'Fire OS Kindle Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/538.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)',
+				'Fire OS Kindle Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; Kindle Fire Build/GINGERBREAD) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+				'Fire OS Kindle Browser 4.0',
+			],
+			[
+				'Mozilla/5.0 (X11; U; Linux armv7l like Android; en-us) AppleWebKit/531.2+ (KHTML, like Gecko) Version/5.0 Safari/533.2+ Kindle/3.0+',
+				'Fire OS Kindle Browser 5.0',
+			],
+
 			// Microsoft Edge
 
 			[
@@ -442,18 +488,6 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			// Miscellaneous
 
 			[
-				'Mozilla/4.0 (compatible; Linux 2.6.10) NetFront/3.3 Kindle/1.0 (screen 600x800)',
-				'Kindle Kindle 1.0',
-			],
-			[
-				'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/528.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)',
-				'Kindle Kindle 4.0',
-			],
-			[
-				'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/538.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)',
-				'Kindle Kindle 4.0',
-			],
-			[
 				'Mozilla/5.0 (PlayBook; U; RIM Tablet OS 1.0.0; en-US) AppleWebKit/534.8 (KHTML, like Gecko) Version/0.0.1 Safari/534.8',
 				'PlayBook PlayBook 0.0.1',
 			],
@@ -555,7 +589,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	function test_mobile_browsers( $header ) {
 		$parsed = browsehappy_parse_user_agent( $header );
 
-		if ( in_array( $parsed['platform'], array( 'Android', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
+		if ( in_array( $parsed['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
 			$this->assertTrue( $parsed['mobile'] );
 		} else {
 			$this->assertFalse( $parsed['mobile'] );

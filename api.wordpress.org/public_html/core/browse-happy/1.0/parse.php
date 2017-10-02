@@ -48,17 +48,21 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Properly set platform if Android is actually being reported.
 	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
-		$data['platform'] = 'Android';
+		if ( strpos( $user_agent, 'Kindle' ) ) {
+			$data['platform'] = 'Fire OS';
+		} else {
+			$data['platform'] = 'Android';
+		}
 	} elseif ( 'Windows Phone' === $data['platform'] ) {
 		$data['platform'] = 'Windows Phone OS';
 	}
 
-	if ( in_array( $data['platform'], array( 'Android', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
+	if ( in_array( $data['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
 		$data['mobile'] = true;
 	}
 
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|Trident|Camino|Kindle|Firefox|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|Trident|Silk|Camino|Kindle|Firefox|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -92,11 +96,24 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['version'] = $result['version'][ $key ];
 	}
 	// Nokia Browser
-	elseif ( $key = array_search( 'NokiaBrowser', $result['name'] ) ) {
+	elseif ( false !== ( $key = array_search( 'NokiaBrowser', $result['name'] ) ) ) {
 		$data['name']     = 'Nokia Browser';
 		$data['version']  = $result['version'][ $key ];
 		$data['mobile']   = true;
-	} elseif ( 'AppleWebKit' == $result['name'][0] ) {
+	}
+	// Amazon Silk
+	elseif ( false !== ( $key = array_search( 'Silk', $result['name'] ) ) ) {
+		$data['name']     = 'Amazon Silk';
+		$data['version']  = $result['version'][ $key ];
+		$version          = '';
+	}
+	// Kindle Browser
+	elseif ( false !== ( $key = array_search( 'Kindle', $result['name'] ) ) ) {
+		$data['name']     = 'Kindle Browser';
+		$data['version']  = $result['version'][ $key ];
+	}
+	// AppleWebKit-emulating browsers
+	elseif ( 'AppleWebKit' == $result['name'][0] ) {
 		if ( $key = array_search( 'Edge', $result['name'] ) ) {
 			$data['name'] = 'Microsoft Edge';
 		} elseif ( $key = array_search( 'Mobile Safari', $result['name'] ) ) {
@@ -105,6 +122,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 				$version = $result['version'][ $key2 ];
 			} elseif ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
+			} elseif ( 'Fire OS' === $data['platform'] ) {
+				$data['name'] = 'Kindle Browser';
 			} else {
 				$data['name'] = 'Mobile Safari';
 			}
@@ -116,8 +135,6 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$version = '';
 		} elseif ( ! empty( $data['platform'] ) && 'PlayBook' == $data['platform'] ) {
 			$data['name'] = 'PlayBook';
-		} elseif ( $key = array_search( 'Kindle', $result['name'] ) ) {
-			$data['name'] = 'Kindle';
 		} elseif ( $key = array_search( 'Safari', $result['name'] ) ) {
 			if ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
@@ -154,8 +171,10 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['version'] = $result['version'][0];
 	}
 
-	if ( in_array( $data['name'], array( 'Kindle' ) ) ) {
-		$data['platform'] = $data['name'];
+	// Set the platform for Amazon-related browsers.
+	if ( in_array( $data['name'], array( 'Amazon Silk', 'Kindle Browser' ) ) ) {
+		$data['platform'] = 'Fire OS';
+		$data['mobile']   = true;
 	}
 
 	// If Version/x.x.x was specified in UA string
