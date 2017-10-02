@@ -61,6 +61,13 @@ require __DIR__ . '/inc/user-content-voting.php';
 require __DIR__ . '/inc/cli.php';
 
 /**
+ * REST API handbook.
+ */
+if ( class_exists( '\\WordPressdotorg\\Markdown\\Importer' ) ) {
+	require __DIR__ . '/inc/rest-api.php';
+}
+
+/**
  * Explanations for functions. hooks, classes, and methods.
  */
 require( __DIR__ . '/inc/explanations.php' );
