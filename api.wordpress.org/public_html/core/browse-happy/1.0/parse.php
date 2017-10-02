@@ -75,7 +75,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	}
 
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|Trident|Silk|Camino|Kindle|Firefox|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|Trident|Silk|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -137,6 +137,11 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	// Kindle Browser
 	elseif ( false !== ( $key = array_search( 'Kindle', $result['name'] ) ) ) {
 		$data['name']     = 'Kindle Browser';
+		$data['version']  = $result['version'][ $key ];
+	}
+	// Samsung Browser
+	elseif ( false !== ( $key = array_search( 'SamsungBrowser', $result['name'] ) ) ) {
+		$data['name']     = 'Samsung Browser';
 		$data['version']  = $result['version'][ $key ];
 	}
 	// AppleWebKit-emulating browsers

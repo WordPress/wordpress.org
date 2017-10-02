@@ -508,6 +508,21 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'iPhone Safari 10.0',
 			],
 
+			// Samsung Browser
+
+			[
+				'Mozilla/5.0 (Linux; Android 5.1.1; SAMSUNG SM-G360T1 Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/3.3 Chrome/38.0.2125.102 Mobile Safari/537.36',
+				'Android Samsung Browser 3.3',
+			],
+			[
+				'Mozilla/5.0 (Linux; Android 7.0; SAMSUNG SM-G950U Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/5.4 Chrome/51.0.2704.106 Mobile Safari/537.36',
+				'Android Samsung Browser 5.4',
+			],
+			[
+				'Mozilla/5.0 (SMART-TV; Linux; Tizen 2.4.0) AppleWebkit/538.1 (KHTML, like Gecko) SamsungBrowser/1.1 TV Safari/538.1',
+				'Linux Samsung Browser 1.1',
+			],
+
 			// UC Browser
 
 			[
