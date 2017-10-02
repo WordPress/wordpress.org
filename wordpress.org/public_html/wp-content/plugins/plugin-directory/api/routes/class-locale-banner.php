@@ -366,9 +366,9 @@ class Locale_Banner extends Base {
 // Strings for the POT file.
 
 /* translators: %s: native language name. */
-__( 'This plugin is also available in %s.', 'wporg-plugins' );
+__( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', 'wporg-plugins' );
 /* translators: 1: native language name, 2: other native language names, comma separated */
-__( 'This plugin is also available in %1$s (also: %2$s).', 'wporg-plugins' );
+__( 'This plugin is also available in %1$s (also: %2$s). <a href="%3$s">Help improve the translation!</a>', 'wporg-plugins' );
 /* translators: 1: native language name, 2: URL to translate.wordpress.org */
 __( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', 'wporg-plugins' );
 /* translators: %s: native language name. */
