@@ -360,7 +360,7 @@ class Customizations {
 	 * @return string The unique post slug.
 	 */
 	function check_existing_plugin_slug_on_inline_save( $slug, $post_ID, $post_status, $post_type, $post_parent, $original_slug ) {
-		if ( 'plugin' !== $post_type ) {
+		if ( 'plugin' !== $post_type || 'rejected' === $post_status ) {
 			return $slug;
 		}
 
