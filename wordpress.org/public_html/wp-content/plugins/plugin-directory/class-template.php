@@ -223,7 +223,7 @@ class Template {
 					sprintf(
 						/* translators: 1: number of ratings */
 						__( '%1$s<span class="screen-reader-text"> total ratings</span>', 'wporg-plugins' ),
-						esc_html( $num_ratings )
+						number_format_i18n( $num_ratings )
 					) .
 				'</a>' .
 				')</span>' .
@@ -661,7 +661,7 @@ class Template {
 		if ( false === ( $sites = wp_cache_get( 'local-sites-'.get_post()->post_name, 'locale-associations' ) ) ) {
 
 			// get subdomain/locale associations
-			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K ); 
+			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
 
 			$sites = Plugin_I18n::instance()->get_locales();
 
