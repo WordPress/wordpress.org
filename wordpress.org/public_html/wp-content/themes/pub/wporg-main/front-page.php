@@ -104,17 +104,12 @@ require WPORGPATH . 'header.php';
 			</section>
 		</div>
 
-		<div id="home-below" class="home-below">
-			<div class="col-2">
-				<h4><a href="https://wordpress.org/about/swag/"><?php _e( 'WordPress&nbsp;Swag' ); ?></a></h4>
-				<a href="https://wordpress.org/about/swag/"><img width="132" height="177" src="https://wpdotorg.files.wordpress.com/2015/10/gray-tshirt-swag.jpg" alt="<?php esc_attr_e( 'WordPress Swag' ); ?>" /></a>
-			</div>
-
+		<div id="home-below" class="home-below row gutters">
 			<div class="col-4">
 				<h4><a href="https://wordpress.org/news/"><?php _e( 'News From Our Blog' ); ?></a></h4>
 
 				<?php
-				$featured = new \WP_Query( [ 'posts_per_page' => 1 ] );
+				$featured = new \WP_Query( [ 'posts_per_page' => 1, 'ignore_sticky_posts' => true ] );
 				while ( $featured->have_posts() ) :
 					$featured->the_post();
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
@@ -132,6 +127,11 @@ require WPORGPATH . 'header.php';
 					<li class="two"><span></span><?php printf( __( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.' ), esc_url( 'https://wordpress.org/download/' ) ); ?></li>
 					<li class="three"><span></span><?php printf( __( '<a href="%s">Read the Documentation</a> and become a WordPress expert yourself, impress your friends.' ), esc_url( 'https://developer.wordpress.org' ) ); ?></li>
 				</ol>
+			</div>
+
+			<div class="col-2 first">
+				<h4><a href="https://wordpress.org/about/swag/"><?php _e( 'WordPress&nbsp;Swag' ); ?></a></h4>
+				<a href="https://wordpress.org/about/swag/"><img width="132" height="177" src="https://wpdotorg.files.wordpress.com/2015/10/gray-tshirt-swag.jpg" alt="<?php esc_attr_e( 'WordPress Swag' ); ?>" /></a>
 			</div>
 
 			<div class="col-2">

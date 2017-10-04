@@ -71,7 +71,7 @@
 			color: #fff;
 		}
 
-		@media screen and (min-width: $ms-breakpoint) {
+	@include breakpoint( $ms-breakpoint ) {
 			&.active {
 				border-bottom: 1px solid;
 			}

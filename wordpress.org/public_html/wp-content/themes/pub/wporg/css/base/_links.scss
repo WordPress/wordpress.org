@@ -22,4 +22,10 @@ a {
 	&:active {
 		outline: 0;
 	}
+
+	p &,
+	p &:hover {
+		/* Override wp4.css */
+		border: none;
+	}
 }

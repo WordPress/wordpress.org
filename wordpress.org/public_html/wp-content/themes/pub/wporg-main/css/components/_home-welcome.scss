@@ -8,7 +8,7 @@
 	max-width: initial;
 	padding: 0;
 
-	@media (min-width: 737px) {
+	@include breakpoint( $ms-breakpoint ) {
 		font-size: 18px;
 	}
 
@@ -50,7 +50,7 @@
 		border-bottom: 2px solid #eee;
 		margin: 0 auto;
 		max-width: 50rem;
-		padding: 3.05176rem 1.5625rem;
+		padding: ms( 10 ) ms( 4 );
 
 		&:last-of-type {
 			border-bottom: none;
@@ -102,7 +102,7 @@
 				text-align: center;
 				width: 50%;
 
-				@media (max-width: 739px) {
+			@include breakpoint( 739px ) {
 					&:nth-child(n+7) {
 						border-bottom: none;
 					}
@@ -111,7 +111,7 @@
 					}
 				}
 
-				@media (min-width: 740px) {
+				@include breakpoint( 740px ) {
 					width: 25%;
 					height: 200px;
 
@@ -181,7 +181,7 @@
 		margin: 2rem 0;
 		text-align: center;
 
-		@media (min-width: 737px) {
+		@include breakpoint( $ms-breakpoint ) {
 			font-size: .8rem;
 			margin: 4rem 0 2rem;
 		}
@@ -268,7 +268,7 @@
 	width: inherit;
 
 
-	@media (min-width: 67rem) {
+	@include breakpoint( 67rem ) {
 		margin: 1rem auto 0;
 		max-width: 50rem;
 	}
@@ -276,6 +276,18 @@
 
 #home-below {
 	margin-bottom: 14px;
+	padding: 0 ms( 1 );
+
+
+	@include breakpoint( sm ) {
+		display: block;
+
+		.col-2 {
+			display: inline-block;
+			vertical-align: top;
+			width: calc( 50% - #{$grid-gutter} );
+		}
+	}
 
 	h4 {
 		border-bottom: 1px solid #dedede;

@@ -247,7 +247,7 @@ input[type="number"].tiny-text {
 /* =Media Queries
 -------------------------------------------------------------- */
 
-@media screen and ( max-width: 782px ) {
+@include breakpoint( 0, 782px ) {
 	/* Input Elements */
 	textarea {
 		-webkit-appearance: none;

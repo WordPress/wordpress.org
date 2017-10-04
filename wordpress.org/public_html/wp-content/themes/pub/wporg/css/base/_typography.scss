@@ -13,7 +13,7 @@ textarea {
 	line-height: $type__lineheight;
 }
 
-@media screen and ( min-width: $ms-breakpoint ) {
+@include breakpoint( $ms-breakpoint ) {
 	html {
 		font-size: 1.125rem;
 	}

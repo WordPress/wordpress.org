@@ -19,7 +19,7 @@
 			cursor: inherit;
 		}
 
-		@media screen and (max-width: $ms-breakpoint) {
+		@include breakpoint( 0, $ms-breakpoint ) {
 			&.prev,
 			&.next {
 				font-size: 0;

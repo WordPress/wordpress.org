@@ -51,7 +51,13 @@
 		text-decoration: none;
 	}
 
-	@media screen and (min-width: 769px) {
+	@include breakpoint( sm ) {
+		ul li a {
+			height: auto;
+		}
+	}
+
+	@include breakpoint( 769px ) {
 		ul li.current-menu-item:after,
 		ul li.current_page_parent:after,
 		ul li a.current ~ .uparrow {

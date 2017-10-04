@@ -1,6 +1,6 @@
 .page-template-get {
 	.site-header {
-		padding: ms(4) ms(1);
+		padding: ms( 4 ) ms( 1 );
 		text-align: center;
 	}
 
@@ -11,13 +11,13 @@
 	}
 
 	section {
-		padding: ms(10) ms(4);
+		padding: ms( 10 ) ms( 4 );
 	}
 
 	section.download {
 		text-align: center;
 
-		@media (min-width: $ms-breakpoint) {
+		@include breakpoint( $ms-breakpoint ) {
 			.container {
 				text-align: initial;
 
@@ -59,7 +59,7 @@
 			@media (min-width: $ms-breakpoint) {
 				> div {
 					float: left;
-					font-size: ms(-2);
+					font-size: ms( -2 );
 					margin-right: 5%;
 					width: 30%;
 
@@ -86,7 +86,7 @@
 				width: 150px;
 			}
 
-			@media (min-width: $ms-breakpoint) {
+			@include breakpoint( $ms-breakpoint ) {
 				margin: 4rem auto 0;
 			}
 		}
@@ -108,8 +108,8 @@
 		font-size: ms(-1);
 		margin: 2rem 0 2rem;
 
-		@media (min-width: $ms-breakpoint) {
-			font-size: ms(-2);
+		@include breakpoint( $ms-breakpoint ) {
+			font-size: ms( -2 );
 			margin: 4rem 0 2rem;
 		}
 

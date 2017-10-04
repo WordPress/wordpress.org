@@ -1,3 +1,11 @@
 .widget-area {
 	font-size: ms( -2 );
+
+	@include breakpoint( 480px, $sm ) {
+		@include flex;
+
+		.widget {
+			width: calc( 50% - #{$grid-gutter} );
+		}
+	}
 }
