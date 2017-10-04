@@ -44,20 +44,11 @@ function get_whitelist() {
 		),
 		'community-events' => $wordcamp_central,
 		'community-team' => $wordcamp_central,
-		'core' => array(
-			'adamsilverstein',
+		'core' => array_merge( get_committers(), array(
 			'desrosj',
-			'drew',
-			'flixos90',
 			'jeffpaul',
-			'johnbillion',
-			'mike',
-			'obenland',
-			'ocean90',
-			'sergey',
-			'wonderboymusic',
 			'welcher',
-		),
+		) ),
 		'core-bootstrap' => array(
 			'schlessera',
 		),
@@ -271,6 +262,6 @@ function get_committers() {
 		'westonruter', 'afercia', 'karmatosed', 'rmccue', 'michaelarestad',
 		'swissspidy', 'rachelbaker', 'joehoyle', 'melchoyce', 'eric', 'mike',
 		'peterwilsoncc', 'joemcgill', 'davidakennedy', 'adamsilverstein',
-		'jnylen', 'flixos90'
+		'jnylen', 'flixos90', 'iandunn', 'kadamwhite', 'matias',
 	);
 }
