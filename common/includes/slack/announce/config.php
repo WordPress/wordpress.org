@@ -48,6 +48,7 @@ function get_whitelist() {
 			'adamsilverstein',
 			'desrosj',
 			'drew',
+			'flixos90',
 			'jeffpaul',
 			'johnbillion',
 			'mike',
