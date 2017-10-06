@@ -392,6 +392,11 @@ input {
   margin-bottom: 1.5rem;
 }
 
+.devhub-wrap .site-main a {
+  border: 0;
+  text-decoration: underline;
+}
+
 .devhub-wrap #headline h2 a {
   color: #555;
   font-weight: 300;
