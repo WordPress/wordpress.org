@@ -397,7 +397,9 @@ input {
   text-decoration: underline;
 }
 
-.devhub-wrap .site-main .table-of-contents a {
+.devhub-wrap .site-main .table-of-contents a,
+.devhub-wrap .site-main .toc-heading a,
+.devhub-wrap .site-main .toc-jump a {
   text-decoration: none;
 }
 

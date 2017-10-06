@@ -88,7 +88,9 @@
 			text-decoration: underline;
 		}
 
-		.table-of-contents a {
+		.table-of-contents a,
+		.toc-heading a,
+		.toc-jump a {
 			text-decoration: none;
 		}
 	}
