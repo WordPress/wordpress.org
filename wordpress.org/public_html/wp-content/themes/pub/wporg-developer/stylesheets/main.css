@@ -397,6 +397,10 @@ input {
   text-decoration: underline;
 }
 
+.devhub-wrap .site-main .table-of-contents a {
+  text-decoration: none;
+}
+
 .devhub-wrap #headline h2 a {
   color: #555;
   font-weight: 300;
