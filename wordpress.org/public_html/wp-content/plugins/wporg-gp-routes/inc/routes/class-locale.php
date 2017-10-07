@@ -736,6 +736,14 @@ class Locale extends GP_Route {
 		}
 		switch ( $filter_name ) {
 			default:
+				if ( ! is_user_logged_in() || ! in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+					if ( 'wp' === $project->slug ) {
+						$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name DESC';
+					} else {
+						$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
+					}
+					break;
+				}
 			case 'special':
 				// Float favorites to the start, but only if they have untranslated strings
 				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
