@@ -10,25 +10,61 @@ gp_tmpl_header();
 <p>Analyze translation consistency across projects.</p>
 
 
-<form action="" method="get" class="consistency-form">
-	<p>
-		<input type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
-		<?php
-		$options     = [];
-		$options[''] = 'Select a locale';
-		$options     = array_merge( $options, $sets );
-		echo gp_select( 'set', $options, $set, [ 'class' => 'consistency-form-locale', 'required' => 'required' ] );
-		?>
-		<button type="submit" class="consistency-form-submit">Search</button>
+<form action="/consistency" method="get" class="consistency-form">
+	<p class="consistency-fields">
+		<span class="consistency-field">
+			<label for="original">Original</label>
+			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
+		</span>
+
+		<span class="consistency-field">
+			<label for="set">Locale</label>
+			<?php
+			$locale_options = [
+				'' => 'Select a locale',
+			];
+			$locale_options = array_merge( $locale_options, $sets );
+			echo gp_select(
+				'set',
+				$locale_options,
+				$set,
+				[
+					'class'    => 'consistency-form-locale',
+					'required' => 'required',
+				]
+			);
+			?>
+		</span>
+
+		<span class="consistency-field">
+			<label for="project">Project</label>
+			<?php
+			$project_options = [
+				'' => 'All Projects',
+			];
+			$project_options = $project_options + $projects;
+			echo gp_select(
+				'project',
+				$project_options,
+				$project,
+				[
+					'class' => 'consistency-form-project',
+				]
+			);
+			?>
+		</span>
 	</p>
 
-	<p class="consistency-form-filters">
+	<p>
 		<label>
 			<input type="checkbox" name="search_case_sensitive" value="1"<?php checked( $search_case_sensitive ); ?>>
 			Case Sensitive
 		</label>
 	</p>
 
+	<p>
+		<button type="submit" class="consistency-form-submit">Analyze</button>
+	</p>
 </form>
 
 <?php
@@ -37,16 +73,17 @@ if ( $performed_search && ! $results ) {
 
 } elseif ( $performed_search && $results ) {
 	$translations_unique_count = count( $translations_unique );
-	if ( 1 === $translations_unique_count ) {
+	$has_different_translations = $translations_unique_count > 1;
+	if ( ! $has_different_translations ) {
 		echo '<p class="notice">All originals have the same translations</p>';
 	} else {
-		echo '<div class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
+		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
 		echo '<ul class="translations-unique hidden">';
 		foreach ( $translations_unique as $translation ) {
 			printf(
-				'<li data-id="%s">%s</li>',
-				md5( $translation ),
-				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) )
+				'<li>%s <a href="#%s">&darr;</a></li>',
+				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
+				esc_attr( sanitize_title( 't-' . $translation ) )
 			);
 		}
 		echo '</ul>';
@@ -61,6 +98,8 @@ if ( $performed_search && ! $results ) {
 		</thead>
 		<tbody>
 			<?php
+			$previous_translation = '';
+
 			foreach ( $results as $result ) {
 				$project_name = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
@@ -75,6 +114,15 @@ if ( $performed_search && ! $results ) {
 					$original_context = sprintf(
 						' <span class="context">%s</span>',
 						esc_translation( $result->original_context )
+					);
+				}
+
+				if ( $has_different_translations && $previous_translation !== $result->translation ) {
+					$previous_translation = $result->translation;
+					printf(
+						'<tr id="%s" class="new-translation"><td colspan="2"><strong>%s</strong> <a href="#translations-overview">&uarr;</a></td></tr>',
+						esc_attr( sanitize_title( 't-' . $result->translation ) ),
+						esc_translation( $result->translation )
 					);
 				}
 

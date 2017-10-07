@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\GlotPress\Routes\Routes;
 
+use GP;
 use GP_Locales;
 use GP_Route;
 
@@ -14,14 +15,22 @@ class Consistency extends GP_Route {
 
 	private $cache_group = 'wporg-translate';
 
+	const PROJECTS = [
+		1   => 'WordPress',
+		523 => 'Themes',
+		17  => 'Plugins',
+		487 => 'Meta',
+		281 => 'Apps',
+	];
+
 	/**
 	 * Prints a search form and the search results for a consistency view.
 	 */
 	public function get_search_form() {
 		$sets = $this->get_translation_sets();
 
-		$search = $set = '';
-		$search_case_sensitive = true;
+		$search = $set = $project = '';
+		$search_case_sensitive = false;
 
 		if ( ! empty( $_REQUEST['search'] ) ) {
 			$search = wp_unslash( $_REQUEST['search'] );
@@ -34,8 +43,12 @@ class Consistency extends GP_Route {
 			}
 		}
 
-		if ( ! empty( $_REQUEST ) && empty( $_REQUEST['search_case_sensitive'] ) ) {
-			$search_case_sensitive = false;
+		if ( ! empty( $_REQUEST['search_case_sensitive'] ) ) {
+			$search_case_sensitive = true;
+		}
+
+		if ( ! empty( $_REQUEST['project'] ) && isset( self::PROJECTS[ $_REQUEST['project'] ] ) ) {
+			$project = $_REQUEST['project'];
 		}
 
 		$locale_is_rtl = false;
@@ -52,11 +65,14 @@ class Consistency extends GP_Route {
 				'search'         => $search,
 				'set'            => $set,
 				'case_sensitive' => $search_case_sensitive,
+				'project'        => $project,
 			] );
 
 			$translations = wp_list_pluck( $results, 'translation', 'translation_id' );
 			$translations_unique = array_unique( $translations );
 		}
+
+		$projects = self::PROJECTS;
 
 		$this->tmpl( 'consistency', get_defined_vars() );
 	}
@@ -108,6 +124,12 @@ class Consistency extends GP_Route {
 		$locale = $wpdb->prepare( '%s', $locale );
 		$slug = $wpdb->prepare( '%s', $slug );
 
+		$project_where = '';
+		if ( $args['project'] ) {
+			$project = GP::$project->get( $args['project'] );
+			$project_where = $wpdb->prepare( 'AND p.path LIKE %s', $wpdb->esc_like( $project->path ) . '/%' );
+		}
+
 		$results = $wpdb->get_results( "
 			SELECT
 				p.name AS project_name,
@@ -133,6 +155,7 @@ class Consistency extends GP_Route {
 				AND t.status = 'current'
 				AND o.status = '+active' AND o.singular {$search}
 				AND ts.locale = {$locale} AND ts.slug = {$slug}
+				{$project_where}
 			LIMIT 0, 500
 		" );
 
@@ -147,6 +170,6 @@ class Consistency extends GP_Route {
 	}
 
 	public function _sort_callback( $a, $b ) {
-		return strnatcmp( $a->translation, $b->translation );
+		return strnatcasecmp( $a->translation, $b->translation );
 	}
 }
