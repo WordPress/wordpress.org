@@ -174,7 +174,6 @@ code, kbd, tt, var {
 }
 
 abbr, acronym {
-  border-bottom: 1px dotted #666;
   cursor: help;
 }
 
@@ -398,8 +397,7 @@ input {
 }
 
 .devhub-wrap .site-main .table-of-contents a,
-.devhub-wrap .site-main .toc-heading a,
-.devhub-wrap .site-main .toc-jump a {
+.devhub-wrap .site-main .toc-heading a {
   text-decoration: none;
 }
 
