@@ -160,6 +160,13 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 			?>
 
 			<?php
+			if ( 'wp-plugins' === $project->path ) {
+				// Ensure consistent order of development and stable projects.
+				usort( $sub_projects, function( $a, $b ) {
+					return strnatcasecmp( $a->name, $b->name );
+				} );
+			}
+
 			foreach ( $sub_projects as $sub_project ) {
 				$status = $sub_project_statuses[ $sub_project->id ];
 				?>
@@ -235,7 +242,7 @@ if ( 'wp-plugins' === $project->path && ! in_array( 'dev', $sub_project_slugs ) 
 					$contributor->nicename,
 					get_avatar( $contributor->email, 40 ),
 					$contributor->display_name ? $contributor->display_name : $contributor->nicename,
-					human_time_diff( strtotime(  $contributor->last_update ) ),
+					human_time_diff( strtotime( $contributor->last_update ) ),
 					number_format_i18n( $contributor->total_count ),
 					number_format_i18n( $contributor->current_count ),
 					number_format_i18n( $contributor->waiting_count ),
