@@ -39,6 +39,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	);
 	$mobile_device = '';
 
+	// Identify platform/OS in user-agent string.
 	if ( preg_match(
 		'/^.+?(?P<platform>Windows Phone( OS)?|Android|iPhone|iPad|Windows|Linux|Macintosh|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
 		$user_agent,
@@ -46,6 +47,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	) ) {
 		$data['platform'] = $regs['platform'];
 	}
+
+	// Find tokens of interest in user-agent string.
+	preg_match_all(
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|Trident|Silk|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		$user_agent,
+		$result,
+		PREG_PATTERN_ORDER
+	);
 
 	// Properly set platform if Android is actually being reported.
 	if ( 'Linux' === $data['platform'] && false !== strpos( $user_agent, 'Android' ) ) {
@@ -74,15 +83,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['mobile'] = true;
 	}
 
-	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|Trident|Silk|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
-		$user_agent,
-		$result,
-		PREG_PATTERN_ORDER
-	);
-
 	// If Version/x.x.x was specified in UA string store it and ignore it
-	if ( $key = array_search( 'Version', $result['name'] ) ) {
+	if ( false !== ( $key = array_search( 'Version', $result['name'] ) ) ) {
 		$version = $result['version'][ $key ];
 		unset( $result['name'][ $key ] );
 		unset( $result['version'][ $key ] );
@@ -150,12 +152,42 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		$data['name']     = 'Samsung Browser';
 		$data['version']  = $result['version'][ $key ];
 	}
+	// Trident (Internet Explorer)
+	elseif ( false !== ( $key = array_search( 'Trident', $result['name'] ) ) ) {
+		// IE 8-10 more reliably report version via Trident token than MSIE token.
+		// IE 11 uses Trident token without an MSIE token.
+		// https://msdn.microsoft.com/library/hh869301(v=vs.85).aspx
+		if ( false !== ( $key2 = array_search( 'IEMobile', $result['name'] ) ) ) {
+			$data['name'] = 'Internet Explorer Mobile';
+			$data['version'] = $result['version'][ $key2 ];
+		} else {
+			$data['name'] = 'Internet Explorer';
+			$trident_ie_mapping = array(
+				'4.0' => '8.0',
+				'5.0' => '9.0',
+				'6.0' => '10.0',
+				'7.0' => '11.0',
+			);
+			$ver = $result['version'][ $key ];
+			$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
+		}
+	}
+	// Internet Explorer (pre v8.0)
+	elseif ( false !== ( $key = array_search( 'MSIE', $result['name'] ) ) ) {
+		if ( false !== ( $key = array_search( 'IEMobile', $result['name'] ) ) ) {
+			$data['name'] = 'Internet Explorer Mobile';
+		} else {
+			$data['name'] = 'Internet Explorer';
+			$key = 0;
+		}
+		$data['version'] = $result['version'][ $key ];
+	}
 	// AppleWebKit-emulating browsers
-	elseif ( 'AppleWebKit' == $result['name'][0] ) {
-		if ( $key = array_search( 'Edge', $result['name'] ) ) {
+	elseif ( false !== ( $key = array_search( 'AppleWebKit', $result['name'] ) ) ) {
+		if ( false !== ( $key = array_search( 'Edge', $result['name'] ) ) ) {
 			$data['name'] = 'Microsoft Edge';
-		} elseif ( $key = array_search( 'Mobile Safari', $result['name'] ) ) {
-			if ( $key2 = array_search( 'Chrome', $result['name'] ) ) {
+		} elseif ( false !== ( $key = array_search( 'Mobile Safari', $result['name'] ) ) ) {
+			if ( false !== ( $key2 = array_search( 'Chrome', $result['name'] ) ) ) {
 				$data['name'] = 'Chrome';
 				$version = $result['version'][ $key2 ];
 			} elseif ( 'Android' === $data['platform'] ) {
@@ -174,14 +206,14 @@ function browsehappy_parse_user_agent( $user_agent ) {
 				$data['name'] = 'Mobile Safari';
 			}
 		// } elseif ( ( 'Android' == $data['platform'] && !($key = 0) ) || $key = array_search( 'Chrome', $result['name'] ) ) {
-		} elseif ( $key = array_search( 'RockMelt', $result['name'] ) ) {
+		} elseif ( false !== ( $key = array_search( 'RockMelt', $result['name'] ) ) ) {
 			$data['name'] = 'RockMelt';
-		} elseif ( $key = array_search( 'Chrome', $result['name'] ) ) {
+		} elseif ( false !== ( $key = array_search( 'Chrome', $result['name'] ) ) ) {
 			$data['name'] = 'Chrome';
 			$version = '';
 		} elseif ( ! empty( $data['platform'] ) && 'PlayBook' == $data['platform'] ) {
 			$data['name'] = 'PlayBook';
-		} elseif ( $key = array_search( 'Safari', $result['name'] ) ) {
+		} elseif ( false !== ( $key = array_search( 'Safari', $result['name'] ) ) ) {
 			if ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
 			} else {
@@ -192,36 +224,6 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['name'] = 'unknown';
 			$result['version'][ $key ] = '';
 			$version = '';
-		}
-		$data['version'] = $result['version'][ $key ];
-	}
-	// Trident (Internet Explorer)
-	elseif ( false !== ( $key = array_search( 'Trident', $result['name'] ) ) ) {
-		// IE 8-10 more reliably report version via Trident token than MSIE token.
-		// IE 11 uses Trident token without an MSIE token.
-		// https://msdn.microsoft.com/library/hh869301(v=vs.85).aspx
-		if ( $key2 = array_search( 'IEMobile', $result['name'] ) ) {
-			$data['name'] = 'Internet Explorer Mobile';
-			$data['version'] = $result['version'][ $key2 ];
-		} else {
-			$data['name'] = 'Internet Explorer';
-			$trident_ie_mapping = array(
-				'4.0' => '8.0',
-				'5.0' => '9.0',
-				'6.0' => '10.0',
-				'7.0' => '11.0',
-			);
-			$ver = $result['version'][ $key ];
-			$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
-		}
-	}
-	// Internet Explorer (pre v8.0)
-	elseif ( 'MSIE' == $result['name'][0] ) {
-		if ( $key = array_search( 'IEMobile', $result['name'] ) ) {
-			$data['name'] = 'Internet Explorer Mobile';
-		} else {
-			$data['name'] = 'Internet Explorer';
-			$key = 0;
 		}
 		$data['version'] = $result['version'][ $key ];
 	}
