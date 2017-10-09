@@ -472,6 +472,25 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Symbian Ovi Browser 5.5.0.0.27'
 			],
 
+			// Pale Moon
+
+			[
+				'Mozilla/5.0 (X11; Linux x86_64; rv:2.1) Gecko/20100101 Goanna/20160701 PaleMoon/26.3.3',
+				'Linux Pale Moon 26.3.3',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64; rv:38.9) Gecko/20100101 Goanna/2.2 Firefox/38.9 PaleMoon/26.5.0',
+				'Linux Pale Moon 26.5.0',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:38.9) Gecko/20100101 Goanna/2.1 Firefox/38.9 PaleMoon/26.3.3',
+				'Windows Pale Moon 26.3.3',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:45.9) Gecko/20100101 Goanna/3.2 Firefox/45.9 PaleMoon/27.3.0',
+				'Windows Pale Moon 27.3.0',
+			],
+
 			// QQ Browser
 
 			[
