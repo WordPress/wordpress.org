@@ -41,7 +41,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Identify platform/OS in user-agent string.
 	if ( preg_match(
-		'/^.+?(?P<platform>Windows Phone( OS)?|Android|iPhone|iPad|Windows|Linux|Macintosh|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
+		'/^.+?(?P<platform>Windows Phone( OS)?|Symbian|SymbOS|Android|iPhone|iPad|Windows|Linux|Macintosh|RIM Tablet OS|PlayBook)(?: (NT|zvav))*(?: [ix]?[0-9._]+)*(;|\))/im',
 		$user_agent,
 		$regs
 	) ) {
@@ -50,7 +50,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Find tokens of interest in user-agent string.
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|Trident|Silk|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|SymbianOS|Symbian|S40OviBrowser|Trident|Silk|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -68,6 +68,20 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	elseif ( 'Windows Phone' === $data['platform'] ) {
 		$data['platform'] = 'Windows Phone OS';
 	}
+	// Standardize Symbian OS name.
+	elseif (
+		in_array( $data['platform'], array( 'Symbian', 'SymbOS' ) )
+	||
+		false !== ( $key = array_search( 'SymbianOS', $result['name'] ) )
+	||
+		false !== ( $key = array_search( 'Symbian', $result['name'] ) )
+	) {
+		if ( ! in_array( $data['platform'], array( 'Symbian', 'SymbOS' ) ) ) {
+			unset( $result['name'][ $key ] );
+			unset( $result['version'][ $key ] );
+		}
+		$data['platform'] = 'Symbian';
+	}
 	// Generically detect some mobile devices.
 	elseif (
 		! $data['platform']
@@ -79,7 +93,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	}
 
 	// Flag known mobile platforms as mobile.
-	if ( in_array( $data['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
+	if ( in_array( $data['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Symbian', 'Windows Phone OS' ) ) ) {
 		$data['mobile'] = true;
 	}
 
@@ -216,6 +230,9 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		} elseif ( false !== ( $key = array_search( 'Safari', $result['name'] ) ) ) {
 			if ( 'Android' === $data['platform'] ) {
 				$data['name'] = 'Android Browser';
+			} elseif ( 'Symbian' === $data['platform'] ) {
+				$data['name'] = 'Nokia Browser';
+				$result['version'][ $key ] = '';
 			} else {
 				$data['name'] = 'Safari';
 			}
@@ -226,6 +243,13 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$version = '';
 		}
 		$data['version'] = $result['version'][ $key ];
+	}
+	// Ovi Browser
+	elseif ( false !== ( $key = array_search( 'S40OviBrowser', $result['name'] ) ) ) {
+		$data['name']     = 'Ovi Browser';
+		$data['version']  = $result['version'][ $key ];
+		$data['platform'] = 'Symbian';
+		$data['mobile']   = true;
 	}
 	// Fall back to whatever is being reported.
 	else {

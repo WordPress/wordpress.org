@@ -62,6 +62,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (Linux; U; Android 4.0.4; pt-br; MZ608 Build/7.7.1-141-7-FLEM-UMTS-LA) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30',
 				'Android Android Browser 4.0',
 			],
+			[
+				'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; IdeaTab S6000-F Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30',
+				'Android Android Browser 4.0', // Actually: Symbian, but not worth accurately detecting.
+			],
 			[ // on Galaxy SIII
 				'Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; SCH-I535 Build/KOT49H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30',
 				'Android Android Browser 4.0',
@@ -378,6 +382,18 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mozilla/5.0 (MeeGo; NokiaN9) AppleWebKit/534.13 (KHTML, like Gecko) NokiaBrowser/8.5.0 Mobile Safari/534.13',
 				'Mobile Nokia Browser 8.5.0',
 			],
+			[
+				'Nokia5250/10.0.011 (SymbianOS/9.4; U; Series60/5.0 Mozilla/5.0; Profile/MIDP-2.1 Configuration/CLDC-1.1 ) AppleWebKit/525 (KHTML, like Gecko) Safari/525 3gpp-gba',
+				'Symbian Nokia Browser',
+			],
+			[
+				'Mozilla/5.0 (SymbianOS/9.4; Series60/5.0 Nokia5233/51.1.002; Profile/MIDP-2.1 Configuration/CLDC-1.1 ) AppleWebKit/533.4 (KHTML, like Gecko) NokiaBrowser/7.3.1.33 Mobile Safari/533.4 3gpp-gba',
+				'Symbian Nokia Browser 7.3.1.33',
+			],
+			[
+				'Mozilla/5.0 (Symbian/3; Series60/5.3 NokiaN8-00/111.040.1511; Profile/MIDP-2.1 Configuration/CLDC-1.1 ) AppleWebKit/535.1 (KHTML, like Gecko) NokiaBrowser/8.3.1.4 Mobile Safari/535.1 3gpp-gba',
+				'Symbian Nokia Browser 8.3.1.4',
+			],
 
 			// Opera
 
@@ -443,6 +459,17 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 			[
 				'Opera/9.80 (SpreadTrum; Opera Mini/4.4.31492/66.299; U; en) Presto/2.12.423 Version/12.16',
 				'Mobile Opera Mini 12.16',
+			],
+			[
+				'Opera/9.80 (J2ME/MIDP; Opera Mini/9.80 (S60; SymbOS; Opera Mobi/23.348; U; en) Presto/2.5.25 Version/10.54',
+				'Symbian Opera Mini 10.54',
+			],
+
+			// Ovi Browser
+
+			[
+				'Mozilla/5.0 (Series40; Nokia2055/03.20; Profile/MIDP-2.1 Configuration/CLDC-1.1) Gecko/20100401 S40OviBrowser/5.5.0.0.27',
+				'Symbian Ovi Browser 5.5.0.0.27'
 			],
 
 			// QQ Browser
@@ -569,6 +596,10 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Mobile UC Browser 9.5.0.449',
 			],
 			[
+				'UCWEB/2.0 (Symbian; U; S60 V5; en-US; Nokia5233) U2/1.0.0 UCBrowser/9.2.0.336 U2/1.0.0 Mobile',
+				'Symbian UC Browser 9.2.0.336',
+			],
+			[
 				'Mozilla/5.0 (Windows NT 6.2; ARM; Trident/7.0; Touch; rv:11.0; WPDesktop) like Gecko UCBrowser/4.2.1.541',
 				'Windows UC Browser 4.2.1.541',
 			],
@@ -681,7 +712,7 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 	function test_mobile_browsers( $header ) {
 		$parsed = browsehappy_parse_user_agent( $header );
 
-		if ( in_array( $parsed['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Windows Phone OS' ) ) ) {
+		if ( in_array( $parsed['platform'], array( 'Android', 'Fire OS', 'iPad', 'iPhone', 'Mobile', 'PlayBook', 'RIM Tablet OS', 'Symbian', 'Windows Phone OS' ) ) ) {
 			$this->assertTrue( $parsed['mobile'] );
 		} else {
 			$this->assertFalse( $parsed['mobile'] );
