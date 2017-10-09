@@ -914,7 +914,7 @@ class WordCamp_Post_Types_Plugin {
 			'track'          => 'all',
 			'speaker_link'   => 'wporg', // anchor|wporg|permalink|none
 			'posts_per_page' => -1,
-			'orderby'        => 'date', // date|title|rand
+			'orderby'        => 'date', // date|title|rand|session_time
 			'order'          => 'desc', // asc|desc
 		), $attr );
 
@@ -933,7 +933,7 @@ class WordCamp_Post_Types_Plugin {
 		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
 			$attr['speaker_link'] = 'anchor';   // todo this is inconsistent with the values passed to shortcode_atts, and probably not needed if the default above is changed to 'anchor'
 
-		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand' ) ) ) ? $attr['orderby'] : 'date';
+		$attr['orderby'] = ( in_array( $attr['orderby'], array( 'date', 'title', 'rand', 'session_time' ) ) ) ? $attr['orderby'] : 'date';
 
 		if ( 'asc' != $attr['order'] ) {
 			$attr['order'] = 'desc';
@@ -987,6 +987,12 @@ class WordCamp_Post_Types_Plugin {
 				'field'    => 'slug',
 				'terms'    => $attr['track'],
 			);
+		}
+
+		// Order by session date/time.
+		if ( 'session_time' === $args['orderby'] ) {
+			$args['meta_key'] = '_wcpt_session_time';
+			$args['orderby']  = 'meta_value_num title';
 		}
 
 		// Fetch sessions.

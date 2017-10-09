@@ -505,7 +505,7 @@ class WordCamp_New_Site {
 				'title'   => __( 'Sessions', 'wordcamporg' ),
 				'content' =>
 					'<p>' . __( '<em>Organizers note:</em> You can enter content for this page in the Sessions menu item in the sidebar.', 'wordcamporg' ) . '</p> ' .
-					'<p>[sessions]</p>',
+					'<p>[sessions orderby="session_time" order="asc"]</p>',
 				'status'  => 'publish',
 				'type'    => 'page',
 			),
