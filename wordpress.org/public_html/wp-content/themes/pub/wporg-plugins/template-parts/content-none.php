@@ -36,7 +36,7 @@
 			
 			<?php if ( get_query_var( 'favorites_user' ) === $current_user->user_nicename ) : ?>
 			<p><?php esc_html_e( 'Find a plugin and mark it as a favorite to see it here.', 'wporg-plugins' ); ?></p>
-			<p><?php printf( __( 'Your favorite plugins are also shared on <a href="%s">your profile</a>.', 'wporg-plugins' ), esc_url( 'https://profile.wordpress.org/' . $current_user->user_nicename ) ); ?></p>
+			<p><?php printf( __( 'Your favorite plugins are also shared on <a href="%s">your profile</a>.', 'wporg-plugins' ), esc_url( 'https://profiles.wordpress.org/' . $current_user->user_nicename ) ); ?></p>
 			<?php endif; ?>
 
 		<?php else : ?>
