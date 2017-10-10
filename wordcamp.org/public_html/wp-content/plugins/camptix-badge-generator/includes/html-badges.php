@@ -228,7 +228,6 @@ function remove_all_previewer_styles() {
 
 	remove_all_actions( 'wp_print_styles' );
 
-	remove_action( 'wp_head', 'wp_custom_css_cb', 11 ); // todo compat with WP 4.7. this line can be removed when r39616 is merged to the 4.7 branch
 	remove_action( 'wp_head', 'wp_custom_css_cb', 101 );
 }
 

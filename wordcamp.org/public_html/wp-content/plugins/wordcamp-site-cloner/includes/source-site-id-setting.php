@@ -34,7 +34,6 @@ class Source_Site_ID_Setting extends \WP_Customize_Setting {
 		add_filter( 'safecss_skip_stylesheet', array( $this, 'preview_skip_stylesheet'  ), 15 );   // After Jetpack_Custom_CSS_Enhancements::preview_skip_stylesheet()
 
 		// Disable the current site's Custom CSS from being output
-		remove_action( 'wp_head', 'wp_custom_css_cb', 11 ); // todo compat with WP 4.7. this line can be removed when r39616 is merged to the 4.7 branch
 		remove_action( 'wp_head', 'wp_custom_css_cb', 101 );
 	}
 
