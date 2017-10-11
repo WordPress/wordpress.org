@@ -341,6 +341,37 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Fire OS Kindle Browser 5.0',
 			],
 
+			// Konqueror
+
+			[
+				'Mozilla/5.0 (X11; FreeBSD) AppleWebKit/537.21 (KHTML, like Gecko) konqueror/4.14.3 Safari/537.21',
+				'FreeBSD Konqueror 4.14.3',
+			],
+			[
+				'Mozilla/5.0 (compatible; Konqueror/3; Linux)',
+				'Linux Konqueror 3',
+			],
+			[
+				'Mozilla/5.0 (compatible; Konqueror/4.4; Linux 2.6.32-22-generic; X11; en_US) KHTML/4.4.3 (like Gecko) Kubuntu',
+				'Linux Konqueror 4.4',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.21 (KHTML, like Gecko) konqueror/4.14.2 Safari/537.21',
+				'Linux Konqueror 4.14.2',
+			],
+			[
+				'Mozilla/5.0 (compatible; Konqueror/4.1; OpenBSD) KHTML/4.1.4 (like Gecko)',
+				'OpenBSD Konqueror 4.1',
+			],
+			[
+				'Mozilla/5.0 (compatible; Konqueror/3.5; SunOS) KHTML/3.5.1 (like Gecko)',
+				'SunOS Konqueror 3.5',
+			],
+			[
+				'Mozilla/5.0 (Windows; Windows i686) KHTML/4.10.2 (like Gecko) Konqueror/4.10',
+				'Windows Konqueror 4.10',
+			],
+
 			// Microsoft Edge
 
 			[
