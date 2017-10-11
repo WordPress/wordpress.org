@@ -172,6 +172,49 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Chrome 60.0.3112.113',
 			],
 
+			// Chromium
+
+			[
+				'Mozilla/5.0 (Linux; Ubuntu 14.04 like Android 4.4) AppleWebKit/537.36 Chromium/35.0.1870.2 Mobile Safari/537.36',
+				'Android Chromium 35.0.1870.2',
+			],
+			[
+				'Mozilla/5.0 (Linux; Ubuntu 15.04 like Android 4.4) AppleWebKit/537.36 Chromium/55.0.2883.75 Mobile Safari/537.36',
+				'Android Chromium 55.0.2883.75',
+			],
+			[
+				'Mozilla/5.0 (X11; FreeBSD amd64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/57.0.2987.110 Safari/537.36',
+				'FreeBSD Chromium 57.0.2987.110',
+			],
+			[
+				'Mozilla/5.0 (iPhone; U; en-us; CPU OS 3_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.37 Chromium/57.0.2987.133',
+				'iPhone Chromium 57.0.2987.133',
+			],
+			[
+				'Mozilla/5.0 (SMART-TV; X11; Linux armv7l) AppleWebKit/537.42 (KHTML, like Gecko) Chromium/25.0.1349.2 Chrome/25.0.1349.2 Safari/537.42',
+				'Linux Chromium 25.0.1349.2',
+			],
+			[
+				'Mozilla/5.0 (Linux; Ubuntu 14.04) AppleWebKit/537.36 Chromium/35.0.1870.2 Safari/537.36',
+				'Linux Chromium 35.0.1870.2',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/58.0.3029.110 Chrome/58.0.3029.110 Safari/537.36',
+				'Linux Chromium 58.0.3029.110',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/61.0.3163.79 Chrome/61.0.3163.79 Safari/537.36',
+				'Macintosh Chromium 61.0.3163.79',
+			],
+			[
+				'LiveSlides/1.6.12.0 Office/16.0 (Microsoft Windows 10 Home 6.2.9200.0) CefSharp/43.0.0.0 Cef/r3.2357.1287.g861c26e Chromium/43.0.2357.130',
+				'Chromium 43.0.2357.130',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/41.0.2228.0 Chrome/41.0.2228.0 Safari/537.36',
+				'Windows Chromium 41.0.2228.0',
+			],
+
 			// Firefox
 
 			[
