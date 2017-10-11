@@ -522,6 +522,21 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows Pale Moon 27.3.0',
 			],
 
+			// Puffin
+
+			[
+				'Mozilla/5.0 (Linux; Android 4.4.2; BLOOM Build/KOT49H; it-it) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Puffin/6.1.3.1599AP',
+				'Android Puffin 6.1.3.1599',
+			],
+			[
+				'Mozilla/5.0 (iPad; CPU OS 9_3_5 like Mac OS X; en-CA) AppleWebKit/537.36 (KHTML, like Gecko) Version/9.3.5 Mobile/13G36 Safari/537.36 Puffin/5.2.0IT Chrome/55.0.2623',
+				'iPad Puffin 5.2.0',
+			],
+			[
+				'Mozilla/5.0 (X11; U; Linux x86_64; en-us) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.114 Safari/537.36 Puffin/4.8.0.2965AP',
+				'Mobile Puffin 4.8.0.2965',
+			],
+
 			// QQ Browser
 
 			[
