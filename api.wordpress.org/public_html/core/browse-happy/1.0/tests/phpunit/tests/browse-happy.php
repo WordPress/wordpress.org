@@ -677,6 +677,21 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Windows UC Browser 4.2.1.541',
 			],
 
+			// Vivaldi
+
+			[
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36 Vivaldi/1.2.490.43',
+				'Linux Vivaldi 1.2.490.43',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.98 Safari/537.36 Vivaldi/1.6.689.40',
+				'Macintosh Vivaldi 1.6.689.40',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.98 Safari/537.36 Vivaldi/1.6.689.40',
+				'Windows Vivaldi 1.6.689.40',
+			],
+
 			// Miscellaneous
 
 			[

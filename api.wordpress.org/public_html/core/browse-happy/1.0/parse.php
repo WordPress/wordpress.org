@@ -50,7 +50,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Find tokens of interest in user-agent string.
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|SymbianOS|Symbian|S40OviBrowser|Trident|Silk|Konqueror|PaleMoon|SeaMonkey|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|SymbianOS|Symbian|S40OviBrowser|Trident|Silk|Konqueror|PaleMoon|SeaMonkey|Vivaldi|Camino|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
@@ -183,6 +183,11 @@ function browsehappy_parse_user_agent( $user_agent ) {
 	// SeaMonkey
 	elseif ( false !== ( $key = array_search( 'SeaMonkey', $result['name'] ) ) ) {
 		$data['name']     = 'SeaMonkey';
+		$data['version']  = $result['version'][ $key ];
+	}
+	// Vivaldi
+	elseif ( false !== ( $key = array_search( 'Vivaldi', $result['name'] ) ) ) {
+		$data['name']     = 'Vivaldi';
 		$data['version']  = $result['version'][ $key ];
 	}
 	// Trident (Internet Explorer)
