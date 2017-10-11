@@ -623,6 +623,29 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 				'Linux Samsung Browser 1.1',
 			],
 
+			// SeaMonkey
+
+			[
+				'Mozilla/5.0 (X11; FreeBSD i386; rv:43.0) Gecko/20100101 Firefox/43.0 SeaMonkey/2.40',
+				'FreeBSD SeaMonkey 2.40',
+			],
+			[
+				'Mozilla/5.0 (X11; Linux i686; rv:49.0) Gecko/20100101 Firefox/49.0 SeaMonkey/2.46',
+				'Linux SeaMonkey 2.46',
+			],
+			[
+				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:43.0) Gecko/20100101 Firefox/43.0 SeaMonkey/2.40',
+				'Macintosh SeaMonkey 2.40',
+			],
+			[
+				'Mozilla/5.0 (X11; OpenBSD i386; rv:36.0) Gecko/20100101 Firefox/36.0 SeaMonkey/2.33.1',
+				'OpenBSD SeaMonkey 2.33.1',
+			],
+			[
+				'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0 SeaMonkey/2.40',
+				'Windows SeaMonkey 2.40',
+			],
+
 			// UC Browser
 
 			[
