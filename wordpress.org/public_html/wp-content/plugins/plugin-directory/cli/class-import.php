@@ -195,7 +195,8 @@ class Import {
 				array_unique( $versions_to_build ),
 				$svn_revision_triggered ?
 					"{$plugin_slug}: ZIP build triggered by https://plugins.trac.wordpress.org/changeset/{$svn_revision_triggered}" :
-					"{$plugin_slug}: ZIP build triggered by " . php_uname('n')
+					"{$plugin_slug}: ZIP build triggered by " . php_uname('n'),
+				$stable_tag
 			);
 		} catch( Exception $e ) {
 			return false;

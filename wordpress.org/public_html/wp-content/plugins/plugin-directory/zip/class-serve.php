@@ -36,32 +36,47 @@ class Serve {
 	protected function determine_request() {
 		$zip = basename( parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
 
-		$slug = false;
-		$version = 'trunk';
-
-		if ( ! preg_match( "!^(?P<slug>[a-z0-9-_]+)(.(?P<version>.+))?.zip$!i", $zip, $m ) ) {
+		if ( ! preg_match( "!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.(?P<request_type>zip|checksums\.json)$!i", $zip, $m ) ) {
 			throw new Exception( __METHOD__ . ": Invalid URL." );
 		}
 
 		$slug = strtolower( $m['slug'] );
-		if ( isset( $m['version'] ) ) {
+
+		$version = 'trunk';
+		if ( isset( $m['version'] ) && '' !== $m['version'] ) {
 			$version = $m['version'];
 		}
-
 		if ( 'latest-stable' == $version ) {
 			$version = $this->get_stable_tag( $slug );
+		}
+
+		if ( 'zip' == strtolower( $m['request_type'] ) ) {
+			$checksum_request = false;
+		} else {
+			$checksum_request = true;
+
+			// Checksum requests for 'trunk' are not possible.
+			if ( 'trunk' == $version ) {
+				throw new Exception( __METHOD__ . ": Checksum requests must include a version." );
+			}
+
 		}
 
 		$args = array(
 			'stats' => true,
 		);
-		if ( isset( $_GET['stats'] ) ) {
+
+		if ( $checksum_request ) {
+			$args['stats'] = false;
+
+		} elseif ( isset( $_GET['stats'] ) ) {
 			$args['stats'] = (bool) $_GET['stats'];
+
 		} elseif ( isset( $_GET['nostats'] ) ) {
 			$args['stats'] = !empty( $_GET['nostats'] );
 		}
 
-		return compact( 'zip', 'slug', 'version', 'args' );
+		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request' );
 	}
 
 	/**
@@ -117,17 +132,23 @@ class Serve {
 	}
 
 	/**
-	 * Returns the files to use for the request.
+	 * Returns the file to be served for the request.
 	 *
 	 * @param array $request The request object for the request.
-	 * @return array An array containing the files to use for the request, 'zip' and 'md5'.
+	 * @return array The file to serve.
 	 */
 	protected function get_file( $request ) {
-		if ( empty( $request['version'] ) || 'trunk' == $request['version'] ) {
+		// Checksum requests must include a version
+		if ( $request['checksum_request'] ) {
+			return "{$request['slug']}/{$request['slug']}.{$request['version']}.checksums.json";
+
+		} elseif ( empty( $request['version'] ) || 'trunk' == $request['version'] ) {
 			return "{$request['slug']}/{$request['slug']}.zip";
+
 		} else {
 			return "{$request['slug']}/{$request['slug']}.{$request['version']}.zip";
 		}
+
 	}
 
 	/**
@@ -136,17 +157,21 @@ class Serve {
 	 * @param array $request The request array for the request.
 	 */
 	protected function serve_zip( $request ) {
-		$zip = $this->get_file( $request );
+		$file = $this->get_file( $request );
 
 		if ( defined( 'PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION' ) ) {
-			$zip_url = PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION . $zip;
+			$file_url = PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION . $file;
 
-			header( 'Content-Type: application/zip' );
-			header( 'Content-Disposition: attachment; filename=' . basename( $zip ) );
-			header( "X-Accel-Redirect: $zip_url" );
+			if ( $request['checksum_request'] ) {
+				header( 'Content-Type: application/json' );
+			} else {
+				header( 'Content-Type: application/zip' );
+				header( 'Content-Disposition: attachment; filename=' . basename( $file ) );
+			}
+			header( "X-Accel-Redirect: $file_url" );
 		} else {
 			header( 'Content-Type: text/plain' );
-			echo "This is a request for $zip, this server isn't currently configured to serve zip files.\n";
+			echo "This is a request for $file, this server isn't currently configured to serve files.\n";
 		}
 
 		if ( function_exists( 'fastcgi_finish_request' ) ) {

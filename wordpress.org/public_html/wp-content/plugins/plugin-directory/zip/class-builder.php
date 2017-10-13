@@ -14,30 +14,33 @@ class Builder {
 	const SVN_URL = 'http://plugins.svn.wordpress.org';
 	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
-	protected $zip_file = '';
-	protected $tmp_build_dir  = '';
-	protected $tmp_dir = '';
+	protected $zip_file      = '';
+	protected $checksum_file = '';
+	protected $tmp_build_dir = '';
+	protected $tmp_dir       = '';
 
-	protected $slug    = '';
-	protected $version = '';
-	protected $context = '';
+	protected $slug       = '';
+	protected $version    = '';
+	protected $context    = '';
+	protected $stable_tag = '';
 
 	/**
-	 * Generate a ZIP for a provided Plugin versions.
+	 * Generate a ZIP for a provided Plugin tags.
 	 *
 	 * @param string $slug     The plugin slug.
 	 * @param array  $versions The versions of the plugin to build ZIPs for.
 	 * @param string $context  The context of this Builder instance (commit #, etc)
 	 */
-	public function build( $slug, $versions, $context = '' ) {
+	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
 		// Bail when in an unconfigured environment.
 		if ( ! defined( 'PLUGIN_ZIP_SVN_URL' ) ) {
 			return false;
 		}
 
-		$this->slug     = $slug;
-		$this->versions = $versions;
-		$this->context  = $context;
+		$this->slug       = $slug;
+		$this->versions   = $versions;
+		$this->context    = $context;
+		$this->stable_tag = $stable_tag;
 
 		// General TMP directory
 		if ( ! is_dir( self::TMP_DIR ) ) {
@@ -96,6 +99,8 @@ class Builder {
 
 			// Pull the ZIP file down we're going to modify, which may not already exist.
 			SVN::up( $this->zip_file );
+			// This is done within the checksum generation function due to us not knowing the checksum filename until export_plugin().
+			// SVN::up( $this->checksum_file );
 
 			try {
 
@@ -103,8 +108,12 @@ class Builder {
 				mkdir( $this->tmp_build_dir, 0777, true );
 
 				$this->export_plugin();
-				$this->fix_directory_dates();			
+				$this->fix_directory_dates();
+
 				$this->generate_zip();
+
+				$this->generate_checksums();
+
 				$this->cleanup_plugin_tmp();
 
 			} catch( Exception $e ) {
@@ -113,11 +122,17 @@ class Builder {
 
 				// Perform an SVN up to revert any changes made.
 				SVN::up( $this->zip_file );
+				if ( $this->checksum_file ) {
+					SVN::up( $this->checksum_file );
+				}
 				continue;
 			}
 
 			// Add the ZIP file to SVN - This is only really needed for new files which don't exist in SVN.
-			SVN::add( $this->zip_file );			
+			SVN::add( $this->zip_file );
+			if ( $this->checksum_file ) {
+				SVN::add( $this->checksum_file );
+			}
 		}
 
 		$res = SVN::commit(
@@ -142,6 +157,106 @@ class Builder {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Generates a JSON file containing the checksums of the files within the ZIP.
+	 *
+	 * In the event that a previous ZIP for this version exists, checksums for all versions of the file will be included.
+	 */
+	function generate_checksums() {
+		// Only enable this for the `exploit-scanner` plugin for the time being.
+		if ( 'exploit-scanner' != $this->slug ) {
+			return;
+		}
+
+		// Don't create checksums for trunk.
+		if ( ! $this->stable_tag || ( 'trunk' == $this->version && 'trunk' != $this->stable_tag && '' != $this->stable_tag ) ) {
+			return;
+		}
+
+		// Fetch the plugin headers
+		$plugin_data = false;
+		foreach ( glob( $this->tmp_build_dir . '/' . $this->slug . '/*.php' ) as $filename ) {
+			$plugin_data = get_plugin_data( $filename, false, false );
+
+			if ( $plugin_data['Name'] && '' !== $plugin_data['Version'] ) {
+				break;
+			}
+		}
+
+		if ( ! $plugin_data || '' === $plugin_data['Version'] ) {
+			return;
+		}
+
+		$plugin_version = $plugin_data['Version'];
+		// Catch malformed version strings.
+		if ( basename( $plugin_version ) != $plugin_version ) {
+			return;
+		}
+
+		$this->checksum_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.{$plugin_version}.checksums.json";
+
+		// Checkout the Checksum file for this plugin version
+		SVN::up( $this->checksum_file );
+
+		// Existing checksums?
+		$existing_json_checksum_file = file_exists( $this->checksum_file );
+
+		$this->exec( sprintf(
+			'cd %s && find . -type f -print0 | sort -z | xargs -0 md5sum 2>&1',
+			escapeshellarg( $this->tmp_build_dir . '/' . $this->slug )
+		), $checksum_output, $return_value );
+
+		if ( $return_value ) {
+		//	throw new Exception( __METHOD__ . ': Checksum generation failed, return code: ' . $return_value, 503 );
+		// For now, just silently bail.
+			return;
+		}
+
+		$checksums = array();
+		foreach ( $checksum_output as $line ) {
+			list( $md5, $filename ) = preg_split( '!\s+!', $line );
+			$filename = preg_replace( '!^./!', '', $filename );
+			$checksums[ trim( $filename ) ] = trim( $md5 );
+		}
+
+		$json_checksum_file = (object) array(
+			'plugin'     => $this->slug,
+			'version'    => $plugin_version,
+			'source_tag' => $this->version,
+			'zip'        => basename( $this->zip_file ),
+			'checksums'  => $checksums
+		);
+
+		// If the checksum file exists already, merge it into this one.
+		if ( $existing_json_checksum_file ) {
+			$existing_json_checksum_file = json_decode( file_get_contents( $this->checksum_file ) );
+
+			if ( $existing_json_checksum_file && ! empty( $existing_json_checksum_file->checksums ) ) {
+				foreach ( $existing_json_checksum_file->checksums as $file => $checksum_details ) {
+
+					if ( ! isset( $json_checksum_file->checksums[ $file ] ) ) {
+						// Deleted file, include it in checksums.
+						$json_checksum_file->checksums[ $file ] = $checksum_details;
+
+					} elseif ( $json_checksum_file->checksums[ $file ] != $checksum_details ) {
+						// Checksum has changed, include both in the resulting json file.
+						if ( is_array( $checksum_details ) ) {
+							$checksum_details[] = $json_checksum_file->checksums[ $file ];
+							$json_checksum_file->checksums[ $file ] = $checksum_details;
+						} else {
+							$json_checksum_file->checksums[ $file ] = array(
+								$json_checksum_file->checksums[ $file ],
+								$checksum_details
+							);
+						}
+					}
+				}
+			}
+		}
+
+		file_put_contents( $this->checksum_file, wp_json_encode( $json_checksum_file ) );
 	}
 
 	/**
@@ -278,7 +393,7 @@ class Builder {
 	 * @return bool
 	 */
 	public function invalidate_zip_caches( $versions ) {
-		// TODO: Implement PURGE 
+		// TODO: Implement PURGE
 		return true;
 		if ( ! defined( 'PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION' ) ) {
 			return true;

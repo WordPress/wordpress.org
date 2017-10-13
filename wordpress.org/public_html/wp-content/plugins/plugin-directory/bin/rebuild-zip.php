@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 
 // This script should only be called in a CLI environment.
@@ -85,12 +86,19 @@ echo "Rebuilding ZIPs for $plugin_slug... ";
 try {
 	$zip_builder = new ZIP\Builder();
 
+	$plugin_post = Plugin_Directory::get_plugin_post( $plugin_slug );
+	if ( ! $plugin_post ) {
+		throw new Exception( "Could not locate plugin post" );
+	}
+	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true ) ?? 'trunk';
+
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
 		$zip_builder->build(
 			$plugin_slug,
 			$versions_to_build,
-			"{$plugin_slug}: Rebuild triggered by " . php_uname('n' )
+			"{$plugin_slug}: Rebuild triggered by " . php_uname('n' ),
+			$stable_tag
 		);
 	}
 
