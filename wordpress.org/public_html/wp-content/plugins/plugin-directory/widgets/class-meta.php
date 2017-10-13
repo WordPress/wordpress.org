@@ -48,7 +48,7 @@ class Meta extends \WP_Widget {
 				);
 				?>
 			</li>
-			<li><?php printf( __( 'Active installs: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
+			<li><?php printf( __( 'Active installations: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
 				<li><?php

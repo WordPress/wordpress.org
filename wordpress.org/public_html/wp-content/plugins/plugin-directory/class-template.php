@@ -132,13 +132,13 @@ class Template {
 	}
 
 	/**
-	 * Returns a string representing the number of active installs for an item.
+	 * Returns a string representing the number of active installations for an item.
 	 *
 	 * @static
 	 *
-	 * @param bool              $full Optional. Whether to include "active installs" suffix. Default: true.
+	 * @param bool              $full Optional. Whether to include "active installations" suffix. Default: true.
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
-	 * @return string "1+ million" or "1+ million active installs" depending on $full.
+	 * @return string "1+ million" or "1+ million active installations" depending on $full.
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
@@ -154,7 +154,7 @@ class Template {
 			$text = number_format_i18n( $count ) . '+';
 		}
 
-		return $full ? sprintf( __( '%s active installs', 'wporg-plugins' ), $text ) : $text;
+		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
 	}
 
 	/**
