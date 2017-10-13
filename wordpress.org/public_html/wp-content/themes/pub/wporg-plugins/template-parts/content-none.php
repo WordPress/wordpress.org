@@ -41,7 +41,7 @@
 
 		<?php else : ?>
 		
-			<p><?php printf( __( '<a href="%s">Login to WordPress.org</a> to mark plugins as favorites.', 'wporg-plugins' ), esc_url( 'https://login.wordpress.org/?redirect_to=https%3A%2F%2Fwordpress.org%2Fplugins%2Fbrowse%2Ffavorites%2F' ) ); ?></p>
+			<p><?php printf( __( '<a href="%s">Login to WordPress.org</a> to mark plugins as favorites.', 'wporg-plugins' ), esc_url( wp_login_url( 'https://wordpress.org/plugins/browse/favorites/' ) ) ); ?></p>
 
 		<?php
   		  endif; // is_user_logged_in()

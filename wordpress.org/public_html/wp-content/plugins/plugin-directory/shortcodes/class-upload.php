@@ -159,7 +159,7 @@ class Upload {
 
 		<?php else : ?>
 
-			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( 'https://login.wordpress.org/' ) ); ?></p>
+			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( wp_login_url() ) ); ?></p>
 
 		<?php endif; // is_user_logged_in()
 
