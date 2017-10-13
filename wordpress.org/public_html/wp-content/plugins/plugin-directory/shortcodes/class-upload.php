@@ -85,7 +85,7 @@ class Upload {
 					<div class="plugin-queue-message notice notice-warning notice-alt">
 						<p><?php
 							if ( 1 === $submitted_counts->total ) {
-								_e( 'You have 1 plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
+								_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
 							} else {
 								printf(
 									_n(
