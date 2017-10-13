@@ -30,6 +30,21 @@ class Upload {
 		if ( is_user_logged_in() ) :
 			include_once ABSPATH . 'wp-admin/includes/template.php';
 
+			$submitted_plugins = self::get_submitted_plugins();
+			$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending' ), 0 );
+
+			$submitted_counts->total = count( $submitted_plugins );
+
+			foreach ( $submitted_plugins as $key => $plugin ) {
+				if ( 'new' === $plugin->post_status ) {
+					$submitted_plugins[ $key ]->status = __( 'Awaiting Review', 'wporg-plugins' );
+					$submitted_counts->new++;
+				} elseif ( 'pending' === $plugin->post_status ) {
+					$submitted_plugins[ $key ]->status = __( 'Being Reviewed', 'wporg-plugins' );
+					$submitted_counts->pending++;
+				}
+			}
+
 			if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) && 'upload' === $_POST['action'] ) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
 					$uploader = new Upload_Handler;
@@ -65,36 +80,21 @@ class Upload {
 					?></p>
 				</div>
 
-				<?php
-				$submitted_plugins = self::get_submitted_plugins();
-				$submitted_counts  = (object) array_fill_keys( array( 'new', 'pending' ), 0 );
-
-				foreach ( $submitted_plugins as $key => $plugin ) {
-					if ( 'new' === $plugin->post_status ) {
-						$submitted_plugins[ $key ]->status = __( 'Awaiting Review', 'wporg-plugins' );
-						$submitted_counts->new++;
-					} elseif ( 'pending' === $plugin->post_status ) {
-						$submitted_plugins[ $key ]->status = __( 'Being Reviewed', 'wporg-plugins' );
-						$submitted_counts->pending++;
-					}
-				}
-				?>
-
-				<?php if ( $submitted_counts->new + $submitted_counts->pending ) : ?>
+				<?php if ( $submitted_counts->total ) : ?>
 
 					<div class="plugin-queue-message notice notice-warning notice-alt">
 						<p><?php
-							if ( 1 === ( $submitted_counts->new + $submitted_counts->pending ) ) {
-								_e( 'You have 1 plugin in the review queue.', 'wporg-plugins' );
+							if ( 1 === $submitted_counts->total ) {
+								_e( 'You have 1 plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
 							} else {
 								printf(
 									_n(
-										'You have %1$s plugins in the review queue, %2$s is being actively reviewed.',
-										'You have %1$s plugins in the review queue, %2$s are being actively reviewed.',
+										'You have %1$s plugins in the review queue, %2$s is being actively reviewed. Please wait for them to be approved before submitting any more.',
+										'You have %1$s plugins in the review queue, %2$s are being actively reviewed. Please wait for them to be approved before submitting any more.',
 										$submitted_counts->pending,
 										'wporg-plugins'
 									),
-									'<strong>' . ( $submitted_counts->new + $submitted_counts->pending ) . '</strong>',
+									'<strong>' . $submitted_counts->total . '</strong>',
 									'<strong>' . $submitted_counts->pending . '</strong>'
 								);
 							}
@@ -114,50 +114,54 @@ class Upload {
 						?></p>
 					</div>
 
-				<?php endif; ?>
+				<?php endif; // $submitted_counts->total ?>
 
-			<?php endif; ?>
+			<?php endif; // wp_verify_nonce() && 'upload' === $_POST['action'] ?>
 
-			<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
-				<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
-				<input type="hidden" name="action" value="upload"/>
-				<?php /* <fieldset>
-					<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
-					<ul class="category-checklist">
-						<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
-					</ul>
-				</fieldset> */ ?>
+			<?php if ( ! $submitted_counts->total ) : ?>
 
-				<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-				<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
+					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
+					<input type="hidden" name="action" value="upload"/>
+					<?php /* <fieldset>
+						<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
+						<ul class="category-checklist">
+							<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
+						</ul>
+					</fieldset> */ ?>
 
-				<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
+					<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+					<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
 
-				<p>
-					<small><?php printf( __( 'Maximum allowed file size: %s', 'wporg-plugins' ), esc_html( self::get_max_allowed_file_size() ) ); ?></small>
-				</p>
-			</form>
-			<script>
-				( function ( $ ) {
-					var $label    = $( 'label.button' ),
-						labelText = $label.text();
+					<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 
-					$( '#zip_file' )
-						.on( 'change', function( event ) {
-							var fileName = event.target.value.split( '\\' ).pop();
+					<p>
+						<small><?php printf( __( 'Maximum allowed file size: %s', 'wporg-plugins' ), esc_html( self::get_max_allowed_file_size() ) ); ?></small>
+					</p>
+				</form>
+				<script>
+					( function ( $ ) {
+						var $label    = $( 'label.button' ),
+							labelText = $label.text();
 
-							fileName ? $label.text( fileName ) : $label.text( labelText );
-						} )
-						.on( 'focus', function() { $label.addClass( 'focus' ); } )
-						.on( 'blur', function() { $label.removeClass( 'focus' ); } );
-				} ( window.jQuery ) );
-			</script>
+						$( '#zip_file' )
+							.on( 'change', function( event ) {
+								var fileName = event.target.value.split( '\\' ).pop();
+
+								fileName ? $label.text( fileName ) : $label.text( labelText );
+							} )
+							.on( 'focus', function() { $label.addClass( 'focus' ); } )
+							.on( 'blur', function() { $label.removeClass( 'focus' ); } );
+					} ( window.jQuery ) );
+				</script>
+
+			<?php endif; // ! $submitted_counts->total ?>
 
 		<?php else : ?>
 
 			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( 'https://login.wordpress.org/' ) ); ?></p>
 
-		<?php endif;
+		<?php endif; // is_user_logged_in()
 
 		return ob_get_clean();
 	}
