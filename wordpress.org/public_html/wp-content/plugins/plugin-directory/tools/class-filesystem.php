@@ -80,14 +80,19 @@ class Filesystem {
 	 * @param string $directory Path to directory to search.
 	 * @param bool   $recursive Optional. Whether to recurse into subdirectories. Default: false.
 	 * @param string $pattern   Optional. A regular expression to match files against. Default: null.
+	 * @param int    $depth     Optional. Recursion depth. Default: -1 (infinite).
 	 * @return array All files within the passed directory.
 	 */
-	public static function list_files( $directory, $recursive = false, $pattern = null ) {
+	public static function list_files( $directory, $recursive = false, $pattern = null, $depth = -1 ) {
 		if ( $recursive ) {
 			$iterator = new \RecursiveIteratorIterator(
 				new \RecursiveDirectoryIterator( $directory ),
 				\RecursiveIteratorIterator::SELF_FIRST
 			);
+
+			if ( $depth > -1 ) {
+				$iterator->setMaxDepth( $depth );
+			}
 		} else {
 			$iterator = new \DirectoryIterator( $directory );
 		}

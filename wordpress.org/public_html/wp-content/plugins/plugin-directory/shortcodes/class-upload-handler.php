@@ -60,7 +60,7 @@ class Upload_Handler {
 		$zip_file = $_FILES['zip_file']['tmp_name'];
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
-		$plugin_files = Filesystem::list_files( $this->plugin_dir, true /* Recursive */, '!\.php$!i' );
+		$plugin_files = Filesystem::list_files( $this->plugin_dir, true /* Recursive */, '!\.php$!i', 1 /* Depth */ );
 		foreach ( $plugin_files as $plugin_file ) {
 			$plugin_data = get_plugin_data( $plugin_file, false, false ); // No markup/translation needed.
 			if ( ! empty( $plugin_data['Name'] ) ) {

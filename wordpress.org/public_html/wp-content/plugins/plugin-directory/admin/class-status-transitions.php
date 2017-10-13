@@ -263,7 +263,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 	 */
 	private function get_plugin_root( $dir ) {
 		$plugin_root  = '';
-		$plugin_files = Filesystem::list_files( $dir, true /* Recursive */, '!\.php$!i' );
+		$plugin_files = Filesystem::list_files( $dir, true /* Recursive */, '!\.php$!i', 1 /* Depth */ );
 
 		foreach ( $plugin_files as $plugin_file ) {
 
