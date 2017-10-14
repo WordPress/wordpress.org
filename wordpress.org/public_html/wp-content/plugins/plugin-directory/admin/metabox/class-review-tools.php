@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * The Plugin Review metabox.
@@ -45,6 +46,14 @@ class Review_Tools {
 		add_filter( 'wp_comment_reply', function( $string ) use ( $post ) {
 			$author = get_user_by( 'id', $post->post_author );
 
+			$committers = Tools::get_plugin_committers( $post->post_name );
+			$committers = array_map( function ( $user_login ) {
+				return get_user_by( 'login', $user_login );
+			}, $committers );
+
+			$cc_emails = wp_list_pluck( $committers, 'user_email' );
+			$cc_emails = implode( ', ', array_diff( $cc_emails, array( $author->user_email ) ) );
+
 			if ( 'new' === $post->post_status || 'pending' === $post->post_status ) {
 				/* translators: %s: plugin title */
 				$subject = sprintf( __( '[WordPress Plugin Directory] Request: %s', 'wporg-plugins' ), $post->post_title );
@@ -60,6 +69,7 @@ class Review_Tools {
 			<form id="contact-author" class="contact-author" method="POST" action="https://supportpress.wordpress.org/plugins/thread-new.php">
 				<input type="hidden" name="to_email" value="<?php echo esc_attr( $author->user_email ); ?>" />
 				<input type="hidden" name="to_name" value="<?php echo esc_attr( $author->display_name ); ?>" />
+				<input type="hidden" name="cc" value="<?php echo esc_attr( $cc_emails ); ?>" />
 				<input type="hidden" name="subject" value="<?php echo esc_attr( $subject ); ?>" />
 				<button class="button button-primary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
 			</form>
