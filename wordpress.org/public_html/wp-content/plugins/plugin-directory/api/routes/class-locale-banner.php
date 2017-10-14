@@ -72,13 +72,12 @@ class Locale_Banner extends Base {
 		$current_locale_is_suggested = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
+		require_once GLOTPRESS_LOCALES_PATH;
+
 		// Get the native language names of the locales.
 		$suggest_named_locales = [];
 		foreach ( $suggest_locales as $locale ) {
-			$name = $this->get_native_language_name( $locale );
-			if ( $name ) {
-				$suggest_named_locales[ $locale ] = $name;
-			}
+			$suggest_named_locales[ $locale ] = \GP_Locales::by_field( 'wp_locale', $locale )->native_name;
 		}
 
 		$suggest_string = '';
@@ -174,7 +173,7 @@ class Locale_Banner extends Base {
 		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
-				$this->get_native_language_name( $current_locale ),
+				\GP_Locales::by_field( 'wp_locale', $current_locale )->native_name,
 				esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 			);
 		}
@@ -312,7 +311,6 @@ class Locale_Banner extends Base {
 			return $string;
 		}
 
-		require_once GLOTPRESS_LOCALES_PATH;
 		$gp_locale = \GP_Locales::by_field( 'wp_locale', $wp_locale )->slug;
 
 		$cache = wp_cache_get( 'original-' . $original_id, 'lang-guess-translations' );
@@ -340,26 +338,6 @@ class Locale_Banner extends Base {
 		wp_cache_add( 'original-' . $original_id, $translations, 'lang-guess-translations', 900 );
 
 		return isset( $translations[ $gp_locale ] ) ? $translations[ $gp_locale ] : $string;
-	}
-
-	protected function get_native_language_name( $locale ) {
-		global $wpdb;
-
-		$slug = str_replace( '_', '-', $locale );
-		$slug = strtolower( $slug );
-
-		$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $slug ) );
-		if ( ! $name ) {
-			$fallback_slug = explode( '-', $slug )[0]; // de-de => de
-			$name = $wpdb->get_var( $wpdb->prepare( 'SELECT name FROM languages WHERE slug = %s', $fallback_slug ) );
-			if ( $name ) {
-				return $name;
-			}
-		} else {
-			return $name;
-		}
-
-		return '';
 	}
 }
 
