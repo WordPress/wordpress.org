@@ -167,6 +167,16 @@ class Locale_Banner extends Base {
 						trim( $other_suggest, ' ,' )
 					);
 				}
+
+			// Non-English locale in header, no translations.
+			} elseif ( $locales_from_header ) {
+				$locale = reset( $locales_from_header );
+
+				$suggest_string = sprintf(
+					$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $locale ),
+					\GP_Locales::by_field( 'wp_locale', $locale )->native_name,
+					esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
+				);
 			}
 
 		// Localized directory.
