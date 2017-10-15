@@ -136,4 +136,12 @@
 	.popover-inner {
 		text-align: left;
 	}
+
+	.popover-inner p:first-child {
+		margin-top: 0;
+	}
+
+	.popover-inner p:last-child {
+		margin-bottom: 0;
+	}
 }

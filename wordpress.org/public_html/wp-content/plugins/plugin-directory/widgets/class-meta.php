@@ -102,7 +102,13 @@ class Meta extends \WP_Widget {
 							</button>
 
 							<div class="popover-inner">
-								<?php echo wp_sprintf( '%l.', $available_languages ); ?>
+								<p><?php echo wp_sprintf( '%l.', $available_languages ); ?></p>
+								<p><?php
+									printf( '<a href="%s">%s</a>',
+										esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $post->post_name ),
+										__( 'Translate into your language', 'wporg-plugins' )
+									);
+								?></p>
 							</div>
 						</div>
 						<?php
