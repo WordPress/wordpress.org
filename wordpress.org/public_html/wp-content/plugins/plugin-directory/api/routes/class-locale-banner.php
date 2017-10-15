@@ -173,7 +173,7 @@ class Locale_Banner extends Base {
 				$locale = reset( $locales_from_header );
 
 				$suggest_string = sprintf(
-					$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $locale ),
+					$this->translate( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', $locale ),
 					\GP_Locales::by_field( 'wp_locale', $locale )->native_name,
 					esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 				);
@@ -182,7 +182,7 @@ class Locale_Banner extends Base {
 		// Localized directory.
 		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
 			$suggest_string = sprintf(
-				$this->translate( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
+				$this->translate( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
 				\GP_Locales::by_field( 'wp_locale', $current_locale )->native_name,
 				esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
 			);
@@ -311,7 +311,7 @@ class Locale_Banner extends Base {
 		$strings = array(
 			2984793 => 'This plugin is also available in %s.',
 			2984794 => 'This plugin is also available in %1$s (also: %2$s).',
-			2984795 => 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>',
+			2984795 => 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>',
 			3004513 => 'The plugin directory is also available in %s.',
 			3004514 => 'The plugin directory is also available in %1$s (also: %2$s).',
 		);
@@ -358,7 +358,7 @@ __( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the tran
 /* translators: 1: native language name, 2: other native language names, comma separated */
 __( 'This plugin is also available in %1$s (also: %2$s). <a href="%3$s">Help improve the translation!</a>', 'wporg-plugins' );
 /* translators: 1: native language name, 2: URL to translate.wordpress.org */
-__( 'This plugin is not available in %1$s yet. <a href="%2$s">Help translate it!</a>', 'wporg-plugins' );
+__( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', 'wporg-plugins' );
 /* translators: %s: native language name. */
 __( 'The plugin directory is also available in %s.', 'wporg-plugins' );
 /* translators: 1: native language name, 2: other native language names, comma separated */
