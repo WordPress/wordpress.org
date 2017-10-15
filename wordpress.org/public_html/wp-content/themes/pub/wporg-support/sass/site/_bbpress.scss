@@ -457,6 +457,11 @@ section {
 		font-size: ms(-2);
 	}
 
+	#bbpress-forums #bbp-user-wrapper ul.bbp-topics,
+	#bbpress-forums #bbp-user-wrapper ul.bbp-replies {
+		clear: both;
+	}
+
 	#wp-link-wrap {
 		font-size: ms(-3);
 	}

@@ -2931,6 +2931,11 @@ section {
 	font-size: 0.8rem;
 }
 
+.bbpress #bbpress-forums #bbp-user-wrapper ul.bbp-topics,
+.bbpress #bbpress-forums #bbp-user-wrapper ul.bbp-replies {
+	clear: both;
+}
+
 .bbpress #wp-link-wrap {
 	font-size: 0.73152rem;
 }
