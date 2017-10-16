@@ -14,20 +14,27 @@ class Controls {
 	 * The HTML here matches what Core uses.
 	 */
 	static function display() {
-		echo '<div class="submitbox" id="submitpost">';
-			echo '<div id="misc-publishing-actions">';
+		?>
+		<div class="submitbox" id="submitpost">
+			<div id="misc-publishing-actions">
+				<?php
 				self::display_post_status();
 
 				if ( 'publish' === get_post_status() ) {
 					self::display_tested_up_to();
 				}
-			echo '</div>';
+				?>
+			</div>
 
-			echo '<div id="major-publishing-actions"><div id="publishing-action">';
-				echo '<span class="spinner"></span>';
-				printf( '<input type="submit" name="save_changes" id="publish" class="button button-primary button-large" value="%s">', __( 'Save Changes', 'wporg-plugins' ) );
-			echo '</div><div class="clear"></div></div>';
-		echo '</div>';
+			<div id="major-publishing-actions">
+				<div id="publishing-action">
+					<span class="spinner"></span>
+					<input type="submit" name="save_changes" id="publish" class="button button-primary button-large" value="<?php esc_attr_e( 'Save Changes', 'wporg-plugins' ); ?>">
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -65,6 +72,21 @@ class Controls {
 	}
 
 	/**
+	 * Get reasons for closing or disabling a plugin.
+	 *
+	 * @return array Close/disable reason labels.
+	 */
+	public static function get_close_reasons() {
+		return array(
+			'security-issue'                => __( 'Security Issue', 'wporg-plugins' ),
+			'author-request'                => __( 'Author Request', 'wporg-plugins' ),
+			'guideline-violation'           => __( 'Guideline Violation', 'wporg-plugins' ),
+			'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
+			'merged-into-core'              => __( 'Merged into Core', 'wporg-plugins' ),
+		);
+	}
+
+	/**
 	 * Displays the Plugin Status control in the Publish metabox.
 	 */
 	protected static function display_post_status() {
@@ -80,15 +102,55 @@ class Controls {
 		if ( current_user_can( 'plugin_approve', $post ) ) {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
+
+		$close_reasons = self::get_close_reasons();
+		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
+
+		if ( isset( $close_reasons[ $close_reason ] ) ) {
+			$reason_label   = $close_reasons[ $close_reason ];
+			$reason_unknown = false;
+		} else {
+			$reason_label   = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+			$reason_unknown = true;
+		}
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>
 			<strong id="plugin-status-display"><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong>
 
+			<?php if ( 'closed' === $post->post_status ) : ?>
+
+				<p><?php printf( __( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $reason_label . '</strong>' ); ?></p>
+
+			<?php elseif ( 'disabled' === $post->post_status ) : ?>
+
+				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $reason_label . '</strong>' ); ?></p>
+
+			<?php endif; ?>
+
+			<?php if (
+					( in_array( 'closed', $statuses, true ) || in_array( 'disabled', $statuses, true ) )
+				&&
+					! in_array( $post->post_status, array( 'closed', 'disabled' ) ) || $reason_unknown
+				) : ?>
+
+				<p>
+					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
+					<select name="close_reason" id="close_reason">
+						<?php foreach ( $close_reasons as $key => $label ) : ?>
+							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+
+			<?php endif; ?>
+
 			<?php foreach ( $statuses as $status ) : ?>
+
 				<p><button type="submit" name="post_status" value="<?php echo esc_attr( $status ); ?>" class="button set-plugin-status">
 					<?php echo self::get_status_button_label( $status ); ?>
 				</button></p>
+
 			<?php endforeach; ?>
 		</div><!-- .misc-pub-section --><?php
 	}

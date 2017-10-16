@@ -40,6 +40,8 @@ class Customizations {
 		add_filter( 'wp_insert_post_data', array( $this, 'check_existing_plugin_slug_on_post_update' ), 10, 2 );
 		add_filter( 'wp_unique_post_slug', array( $this, 'check_existing_plugin_slug_on_inline_save' ), 10, 6 );
 
+		add_action( 'save_post', array( $this, 'save_close_reason' ), 10, 2 );
+
 		add_action( 'wp_ajax_replyto-comment', array( $this, 'save_custom_comment' ), 0 );
 		add_filter( 'comment_row_actions', array( $this, 'custom_comment_row_actions' ), 10, 2 );
 		add_filter( 'get_comment_link', array( $this, 'link_internal_notes_to_admin' ), 10, 2 );
@@ -50,13 +52,12 @@ class Customizations {
 
 		add_filter( 'postbox_classes_plugin_internal-notes',      array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-committers',   array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
-		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps',     'postbox_classes' ) );
-		add_filter( 'wp_ajax_add-committer',        array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer'    ) );
+		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps',   'postbox_classes' ) );
+		add_filter( 'wp_ajax_add-committer',        array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer' ) );
 		add_filter( 'wp_ajax_delete-committer',     array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
 		add_filter( 'wp_ajax_add-support-rep',      array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
 		add_filter( 'wp_ajax_delete-support-rep',   array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
-
 	}
 
 	/**
@@ -374,6 +375,28 @@ class Customizations {
 		}
 
 		return $slug;
+	}
+
+	/**
+	 * Save the reason for closing or disabling a plugin.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 */
+	public function save_close_reason( $post_id, $post ) {
+		if ( 'plugin' !== $post->post_type || ! isset( $_POST['close_reason'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_approve', $post_id ) ) {
+			return;
+		}
+
+		if ( ! in_array( $post->post_status, array( 'closed', 'disabled' ) ) ) {
+			return;
+		}
+
+		update_post_meta( $post_id, '_close_reason', sanitize_key( $_POST['close_reason'] ) );
 	}
 
 	/**
