@@ -136,8 +136,7 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Identify platform/OS in user-agent string.
 	if ( preg_match(
-		'/^.+?'                                                   // Possibly starts with one or more characters
-		. '(?P<platform>'                                         // Capture subpattern matches into 'platform' array
+		'/(?P<platform>'                                          // Capture subpattern matches into 'platform' array
 		.     'Windows Phone( OS)?|Symbian|SymbOS|Android|iPhone' // Platform tokens
 		.     '|iPad|Windows|Linux|Macintosh|FreeBSD|OpenBSD'     // More platform tokens
 		.     '|SunOS|RIM Tablet OS|PlayBook'                     // More platform tokens
