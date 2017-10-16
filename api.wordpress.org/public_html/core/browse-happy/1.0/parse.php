@@ -136,7 +136,21 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Identify platform/OS in user-agent string.
 	if ( preg_match(
-		'/^.+?(?P<platform>Windows Phone( OS)?|Symbian|SymbOS|Android|iPhone|iPad|Windows|Linux|Macintosh|FreeBSD|OpenBSD|SunOS|RIM Tablet OS|PlayBook)(?: (NT|amd64|armv7l|zvav))*(?: [ix]?[0-9._]+(\-[0-9a-z\.\-]+)?)*(;|\))/im',
+		'/^.+?'                                                   // Possibly starts with one or more characters
+		. '(?P<platform>'                                         // Capture subpattern matches into 'platform' array
+		.     'Windows Phone( OS)?|Symbian|SymbOS|Android|iPhone' // Platform tokens
+		.     '|iPad|Windows|Linux|Macintosh|FreeBSD|OpenBSD'     // More platform tokens
+		.     '|SunOS|RIM Tablet OS|PlayBook'                     // More platform tokens
+		. ')'
+		. '(?:'
+		.     ' (NT|amd64|armv7l|zvav)'                           // Possibly followed by specific modifiers/specifiers
+		. ')*'
+		. '(?:'
+		.     ' [ix]?[0-9._]+'                                    // Possibly followed by architecture modifier (e.g. x86_64)
+		.     '(\-[0-9a-z\.\-]+)?'                                // Possibly followed by a hypenated version number
+		. ')*'
+		. '(;|\))'                                                // Ending in a semi-colon or close parenthesis
+		. '/im',                                                  // Case insensitive, multiline
 		$user_agent,
 		$regs
 	) ) {
@@ -145,7 +159,22 @@ function browsehappy_parse_user_agent( $user_agent ) {
 
 	// Find tokens of interest in user-agent string.
 	preg_match_all(
-		'%(?P<name>Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB|QQBrowser|SymbianOS|Symbian|S40OviBrowser|Trident|Silk|Konqueror|PaleMoon|Puffin|SeaMonkey|Vivaldi|Camino|Chromium|Kindle|Firefox|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile|Version)(?:[/ ])(?P<version>[0-9.]+)%im',
+		  '%(?P<name>'                                            // Capture subpattern matches into the 'name' array
+		.     'Opera Mini|Opera|OPR|Edge|UCBrowser|UCWEB'         // Browser tokens
+		.     '|QQBrowser|SymbianOS|Symbian|S40OviBrowser'        // More browser tokens
+		.     '|Trident|Silk|Konqueror|PaleMoon|Puffin'           // More browser tokens
+		.     '|SeaMonkey|Vivaldi|Camino|Chromium|Kindle|Firefox' // More browser tokens
+		.     '|SamsungBrowser|(?:Mobile )?Safari|NokiaBrowser'   // More browser tokens
+		.     '|MSIE|RockMelt|AppleWebKit|Chrome|IEMobile'        // More browser tokens
+		.     '|Version'                                          // Version token
+		. ')'
+		. '(?:'
+		.     '[/ ]'                                              // Forward slash or space
+		. ')'
+		. '(?P<version>'                                          // Capture subpattern matches into 'version' array
+		.     '[0-9.]+'                                           // One or more numbers and/or decimal points
+		. ')'
+		. '%im',                                                  // Case insensitive, multiline
 		$user_agent,
 		$result,
 		PREG_PATTERN_ORDER
