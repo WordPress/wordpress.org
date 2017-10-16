@@ -6,6 +6,101 @@
 require dirname( __FILE__ ) . '/browsers.php';
 
 /**
+ * Returns an associative array of explicit browser token names and their
+ * associated info.
+ *
+ * Explicit tokens are tokens that, if present, indicate a specific browser.
+ *
+ * If a browser is not identified by an explicit token, or requires special
+ * handling not supported by the default handler, then a new conditional block
+ * for the browser instead needs to be added in browsehappy_parse_user_agent().
+ *
+ * In any case, the browser token name also needs to be added to the regex for
+ * browser tokens in browsehappy_parse_user_agent().
+ *
+ * @return array {
+ *     Associative array of browser tokens and their associated data.
+ *
+ *     @type array $data {
+ *         Associative array of browser data. All are optional.
+ *
+ *         @type string $name        Name of browser, if it differs from the
+ *                                   token name. Default is token name.
+ *         @type bool   $use_version Should the 'Version' token, if present,
+ *                                   supercede the version associated with the
+ *                                   browser token? Default false.
+ *         @type bool   $mobile      Does the browser signify the platform is
+ *                                   mobile (for situations where it may no
+ *                                   already be apparent)? Default false.
+ *         @type string $platform    The name of the platform, to supercede
+ *                                   whatever platform may have been detected.
+ *                                   Default empty string.
+ *     }
+ * }
+ */
+function browsehappy_get_explicit_browser_tokens() {
+	 return array(
+		'Camino'          => array(),
+		'Chromium'        => array(),
+		'Edge'            => array(
+			'name'        => 'Microsoft Edge',
+		),
+		'Kindle'          => array(
+			'name'        => 'Kindle Browser',
+			'use_version' => true,
+		),
+		'Konqueror'       => array(),
+		'konqueror'       => array(
+			'name'        => 'Konqueror',
+		),
+		'NokiaBrowser'    => array(
+			'name'        => 'Nokia Browser',
+			'mobile'      => true,
+		),
+		'Opera Mini'      => array( // Must be before 'Opera'
+			'mobile'      => true,
+			'use_version' => true,
+		),
+		'Opera'           => array(
+			'use_version' => true,
+		),
+		'OPR'             => array(
+			'name'        => 'Opera',
+			'use_version' => true,
+		),
+		'PaleMoon'        => array(
+			'name'        => 'Pale Moon',
+		),
+		'QQBrowser'       => array(
+			'name'        => 'QQ Browser',
+		),
+		'RockMelt'        => array(),
+		'SamsungBrowser'  => array(
+			'name'        => 'Samsung Browser',
+		),
+		'SeaMonkey'       => array(),
+		'Silk'            => array(
+			'name'        => 'Amazon Silk',
+		),
+		'S40OviBrowser'   => array(
+			'name'        => 'Ovi Browser',
+			'mobile'      => true,
+			'platform'    => 'Symbian',
+		),
+		'UCBrowser'       => array( // Must be before 'UCWEB'
+			'name'        => 'UC Browser',
+		),
+		'UCWEB'           => array(
+			'name'        => 'UC Browser',
+		),
+		'Vivaldi'         => array(),
+		'IEMobile'        => array( // Keep last just in case
+			'name'        => 'Internet Explorer Mobile',
+		),
+	);
+}
+
+/**
  * Parses a user agent string into its important parts.
  *
  * @param string $user_agent The user agent string for a browser.
@@ -104,6 +199,8 @@ function browsehappy_parse_user_agent( $user_agent ) {
 		unset( $result['version'][ $key ] );
 	}
 
+	$explicit_tokens = browsehappy_get_explicit_browser_tokens();
+
 	// No indentifiers provided
 	if ( empty( $result['name'] ) ) {
 		if ( 'BlackBerry' === $mobile_device ) {
@@ -112,78 +209,22 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['name'] = 'unknown';
 		}
 	}
-	// Opera
-	elseif (
-		false !== ( $key = array_search( 'Opera Mini', $result['name'] ) )
-	||
-		false !== ( $key = array_search( 'Opera', $result['name'] ) )
-	||
-		false !== ( $key = array_search( 'OPR', $result['name'] ) )
-	) {
-		$data['name'] = $result['name'][ $key ];
-		if ( 'OPR' === $data['name'] ) {
-			$data['name'] = 'Opera';
-		} elseif ( 'Opera Mini' === $data['name'] ) {
+	// Explicitly identified browser (info defined above in $explicit_tokens).
+	elseif ( $found = array_intersect( array_keys( $explicit_tokens ), $result['name'] ) ) {
+		$tokens = array_combine( $result['name'], $result['version'] );
+		$token = reset( $found );
+
+		$data['name']    = $explicit_tokens[ $token ]['name'] ?? $token;
+		$data['version'] = $tokens[ $token ];
+		if ( empty( $explicit_tokens[ $token ]['use_version'] ) ) {
+			$version = '';
+		}
+		if ( ! empty( $explicit_tokens[ $token ]['mobile'] ) ) {
 			$data['mobile'] = true;
 		}
-		$data['version'] = $result['version'][ $key ];
-	}
-	// UC Browser
-	elseif (
-		false !== ( $key = array_search( 'UCBrowser', $result['name'] ) )
-	||
-		false !== ( $key = array_search( 'UCWEB', $result['name'] ) )
-	) {
-		$data['name']     = 'UC Browser';
-		$data['version']  = $result['version'][ $key ];
-		$version          = '';
-	}
-	// QQ Browser
-	elseif ( false !== ( $key = array_search( 'QQBrowser', $result['name'] ) ) ) {
-		$data['name']     = 'QQ Browser';
-		$data['version']  = $result['version'][ $key ];
-		$version          = '';
-	}
-	// Nokia Browser
-	elseif ( false !== ( $key = array_search( 'NokiaBrowser', $result['name'] ) ) ) {
-		$data['name']     = 'Nokia Browser';
-		$data['version']  = $result['version'][ $key ];
-		$data['mobile']   = true;
-	}
-	// Amazon Silk
-	elseif ( false !== ( $key = array_search( 'Silk', $result['name'] ) ) ) {
-		$data['name']     = 'Amazon Silk';
-		$data['version']  = $result['version'][ $key ];
-		$version          = '';
-	}
-	// Kindle Browser
-	elseif ( false !== ( $key = array_search( 'Kindle', $result['name'] ) ) ) {
-		$data['name']     = 'Kindle Browser';
-		$data['version']  = $result['version'][ $key ];
-	}
-	// Samsung Browser
-	elseif ( false !== ( $key = array_search( 'SamsungBrowser', $result['name'] ) ) ) {
-		$data['name']     = 'Samsung Browser';
-		$data['version']  = $result['version'][ $key ];
-	}
-	// Chromium
-	elseif ( false !== ( $key = array_search( 'Chromium', $result['name'] ) ) ) {
-		$data['name']     = 'Chromium';
-		$data['version']  = $result['version'][ $key ];
-	}
-	// Konqueror
-	elseif (
-		false !== ( $key = array_search( 'Konqueror', $result['name'] ) )
-	||
-		false !== ( $key = array_search( 'konqueror', $result['name'] ) )
-	) {
-		$data['name']     = 'Konqueror';
-		$data['version']  = $result['version'][ $key ];
-	}
-	// Pale Moon
-	elseif ( false !== ( $key = array_search( 'PaleMoon', $result['name'] ) ) ) {
-		$data['name']     = 'Pale Moon';
-		$data['version']  = $result['version'][ $key ];
+		if ( ! empty( $explicit_tokens[ $token ]['platform'] ) ) {
+			$data['platform'] = $explicit_tokens[ $token ]['platform'];
+		}
 	}
 	// Puffin
 	elseif ( false !== ( $key = array_search( 'Puffin', $result['name'] ) ) ) {
@@ -196,51 +237,30 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$data['platform'] = '';
 		}
 	}
-	// SeaMonkey
-	elseif ( false !== ( $key = array_search( 'SeaMonkey', $result['name'] ) ) ) {
-		$data['name']     = 'SeaMonkey';
-		$data['version']  = $result['version'][ $key ];
-	}
-	// Vivaldi
-	elseif ( false !== ( $key = array_search( 'Vivaldi', $result['name'] ) ) ) {
-		$data['name']     = 'Vivaldi';
-		$data['version']  = $result['version'][ $key ];
-	}
 	// Trident (Internet Explorer)
 	elseif ( false !== ( $key = array_search( 'Trident', $result['name'] ) ) ) {
 		// IE 8-10 more reliably report version via Trident token than MSIE token.
 		// IE 11 uses Trident token without an MSIE token.
 		// https://msdn.microsoft.com/library/hh869301(v=vs.85).aspx
-		if ( false !== ( $key2 = array_search( 'IEMobile', $result['name'] ) ) ) {
-			$data['name'] = 'Internet Explorer Mobile';
-			$data['version'] = $result['version'][ $key2 ];
-		} else {
-			$data['name'] = 'Internet Explorer';
-			$trident_ie_mapping = array(
-				'4.0' => '8.0',
-				'5.0' => '9.0',
-				'6.0' => '10.0',
-				'7.0' => '11.0',
-			);
-			$ver = $result['version'][ $key ];
-			$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
-		}
+		$data['name'] = 'Internet Explorer';
+		$trident_ie_mapping = array(
+			'4.0' => '8.0',
+			'5.0' => '9.0',
+			'6.0' => '10.0',
+			'7.0' => '11.0',
+		);
+		$ver = $result['version'][ $key ];
+		$data['version'] = $trident_ie_mapping[ $ver ] ?? $ver; 
 	}
 	// Internet Explorer (pre v8.0)
 	elseif ( false !== ( $key = array_search( 'MSIE', $result['name'] ) ) ) {
-		if ( false !== ( $key = array_search( 'IEMobile', $result['name'] ) ) ) {
-			$data['name'] = 'Internet Explorer Mobile';
-		} else {
-			$data['name'] = 'Internet Explorer';
-			$key = 0;
-		}
+		$data['name'] = 'Internet Explorer';
+		$key = 0;
 		$data['version'] = $result['version'][ $key ];
 	}
 	// AppleWebKit-emulating browsers
 	elseif ( false !== ( $key = array_search( 'AppleWebKit', $result['name'] ) ) ) {
-		if ( false !== ( $key = array_search( 'Edge', $result['name'] ) ) ) {
-			$data['name'] = 'Microsoft Edge';
-		} elseif ( false !== ( $key = array_search( 'Mobile Safari', $result['name'] ) ) ) {
+		if ( false !== ( $key = array_search( 'Mobile Safari', $result['name'] ) ) ) {
 			if ( false !== ( $key2 = array_search( 'Chrome', $result['name'] ) ) ) {
 				$data['name'] = 'Chrome';
 				$version = $result['version'][ $key2 ];
@@ -260,8 +280,6 @@ function browsehappy_parse_user_agent( $user_agent ) {
 				$data['name'] = 'Mobile Safari';
 			}
 		// } elseif ( ( 'Android' == $data['platform'] && !($key = 0) ) || $key = array_search( 'Chrome', $result['name'] ) ) {
-		} elseif ( false !== ( $key = array_search( 'RockMelt', $result['name'] ) ) ) {
-			$data['name'] = 'RockMelt';
 		} elseif ( false !== ( $key = array_search( 'Chrome', $result['name'] ) ) ) {
 			$data['name'] = 'Chrome';
 			$version = '';
@@ -283,13 +301,6 @@ function browsehappy_parse_user_agent( $user_agent ) {
 			$version = '';
 		}
 		$data['version'] = $result['version'][ $key ];
-	}
-	// Ovi Browser
-	elseif ( false !== ( $key = array_search( 'S40OviBrowser', $result['name'] ) ) ) {
-		$data['name']     = 'Ovi Browser';
-		$data['version']  = $result['version'][ $key ];
-		$data['platform'] = 'Symbian';
-		$data['mobile']   = true;
 	}
 	// Fall back to whatever is being reported.
 	else {

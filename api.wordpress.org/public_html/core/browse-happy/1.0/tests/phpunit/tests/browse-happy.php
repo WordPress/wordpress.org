@@ -865,4 +865,21 @@ class Tests_Browse_Happy extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	function test_browsehappy_get_explicit_browser_tokens() {
+		$tokens = browsehappy_get_explicit_browser_tokens();
+
+		$this->assertTrue( is_array( $tokens ) );
+
+		$this->assertArrayHasKey( 'Camino', $tokens );
+		$this->assertEmpty( $tokens['Camino'] );
+
+		$this->assertArrayHasKey( 'S40OviBrowser', $tokens );
+		$this->assertArrayHasKey( 'name', $tokens['S40OviBrowser'] );
+		$this->assertEquals( 'Ovi Browser', $tokens['S40OviBrowser']['name'] );
+		$this->assertArrayHasKey( 'mobile', $tokens['S40OviBrowser'] );
+		$this->assertTrue( $tokens['S40OviBrowser']['mobile'] );
+		$this->assertArrayHasKey( 'platform', $tokens['S40OviBrowser'] );
+		$this->assertEquals( 'Symbian', $tokens['S40OviBrowser']['platform'] );
+	}
+
 }
