@@ -43,10 +43,10 @@ class WordCamp_Docs_Template_Speaker_Visa implements WordCamp_Docs_Template {
 		</style>
 
 		<div class="wcorg-docs-form">
-			<label><?php _e( 'Attendee First Name:', 'wordcamporg' ); ?></label>
+			<label><?php _e( 'Speaker First Name:', 'wordcamporg' ); ?></label>
 			<input name="attendee_first_name" value="<?php echo esc_attr( $data['attendee_first_name'] ); ?>" />
 
-			<label><?php _e( 'Attendee Last Name:', 'wordcamporg' ); ?></label>
+			<label><?php _e( 'Speaker Last Name:', 'wordcamporg' ); ?></label>
 			<input name="attendee_last_name" value="<?php echo esc_attr( $data['attendee_last_name'] ); ?>" />
 
 			<label><?php _e( 'Country of Residency:', 'wordcamporg' ); ?></label>
