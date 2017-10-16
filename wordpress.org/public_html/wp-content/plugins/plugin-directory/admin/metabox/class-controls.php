@@ -131,7 +131,7 @@ class Controls {
 			<?php if (
 					( in_array( 'closed', $statuses, true ) || in_array( 'disabled', $statuses, true ) )
 				&&
-					! in_array( $post->post_status, array( 'closed', 'disabled' ) ) || $reason_unknown
+					( ! in_array( $post->post_status, array( 'closed', 'disabled' ) ) || $reason_unknown )
 				) : ?>
 
 				<p>
