@@ -244,7 +244,7 @@ class Builder {
 						// Checksum has changed, include both in the resulting json file.
 						if ( is_array( $checksum_details ) ) {
 							$checksum_details[] = $json_checksum_file->checksums[ $file ];
-							$json_checksum_file->checksums[ $file ] = $checksum_details;
+							$json_checksum_file->checksums[ $file ] = array_unique( $checksum_details );
 						} else {
 							$json_checksum_file->checksums[ $file ] = array(
 								$json_checksum_file->checksums[ $file ],
