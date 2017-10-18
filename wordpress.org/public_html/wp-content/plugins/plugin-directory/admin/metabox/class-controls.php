@@ -83,6 +83,7 @@ class Controls {
 			'guideline-violation'           => __( 'Guideline Violation', 'wporg-plugins' ),
 			'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
 			'merged-into-core'              => __( 'Merged into Core', 'wporg-plugins' ),
+			'unused'                        => __( 'Unused', 'wporg-plugins' ),
 		);
 	}
 
