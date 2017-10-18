@@ -26,8 +26,10 @@ function rosetta_after_setup_theme() {
 		'flex-width'    => true,
 	) );
 
-	register_nav_menu( 'rosetta_main', __( 'Main Menu', 'rosetta' ) );
-
+	register_nav_menus( [
+		'rosetta_main'      => __( 'Main Menu', 'rosetta' ),
+		'rosetta_resources' => __( 'Resources', 'rosetta' ),
+	] );
 	remove_action( 'wp_head', 'locale_stylesheet' );
 }
 add_action( 'after_setup_theme', 'rosetta_after_setup_theme' );

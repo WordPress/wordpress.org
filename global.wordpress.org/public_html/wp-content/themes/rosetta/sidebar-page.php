@@ -31,6 +31,18 @@ endif;
 
 <p><?php _e( 'For help with installing or using WordPress, consult our documentation in your language.', 'rosetta' ); ?></p>
 
-<ul>
-	<?php wp_list_bookmarks( 'categorize=0&category_before=&category_after=&title_li=&' ); ?>
-</ul>
+<?php
+if ( has_nav_menu( 'rosetta_resources' ) ) {
+	wp_nav_menu( [
+		'theme_location' => 'rosetta_resources',
+		'container'      => false,
+		'depth'          => 1,
+		'fallback_cb'    => false,
+	] );
+} else {
+	?>
+	<ul>
+		<?php wp_list_bookmarks( 'categorize=0&category_before=&category_after=&title_li=&' ); ?>
+	</ul>
+	<?php
+}
