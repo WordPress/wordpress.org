@@ -126,7 +126,7 @@ class Upload {
 
 			<?php endif; // wp_verify_nonce() && 'upload' === $_POST['action'] ?>
 
-			<?php if ( ! $upload_result && ! $submitted_counts->total || is_wp_error( $upload_result ) ) : ?>
+			<?php if ( ! $submitted_counts->total && ( ! $upload_result || is_wp_error( $upload_result ) ) ) : ?>
 
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
