@@ -45,10 +45,18 @@ class Upload {
 				}
 			}
 
+			$upload_result = false;
+
 			if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) && 'upload' === $_POST['action'] ) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
-					$uploader = new Upload_Handler;
-					$message  = $uploader->process_upload();
+					$uploader      = new Upload_Handler;
+					$upload_result = $uploader->process_upload();
+
+					if ( is_wp_error( $upload_result ) ) {
+						$message = $upload_result->get_error_message();
+					} else {
+						$message = $upload_result;
+					}
 				else :
 					$message = __( 'Error in file upload.', 'wporg-plugins' );
 				endif;
@@ -118,7 +126,7 @@ class Upload {
 
 			<?php endif; // wp_verify_nonce() && 'upload' === $_POST['action'] ?>
 
-			<?php if ( ! $submitted_counts->total ) : ?>
+			<?php if ( ! $upload_result && ! $submitted_counts->total || is_wp_error( $upload_result ) ) : ?>
 
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>

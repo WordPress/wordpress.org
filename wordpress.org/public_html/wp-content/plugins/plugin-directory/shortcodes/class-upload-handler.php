@@ -54,7 +54,7 @@ class Upload_Handler {
 	 *
 	 * Runs various tests and creates plugin post.
 	 *
-	 * @return string Failure or success message.
+	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload() {
 		$zip_file = $_FILES['zip_file']['tmp_name'];
@@ -75,11 +75,12 @@ class Upload_Handler {
 		if ( empty( $this->plugin['Name'] ) ) {
 			$error = __( 'Error: The plugin has no name.', 'wporg-plugins' );
 
-			/* translators: 1: plugin header line, 2: Codex URL */
-			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+			return new \WP_Error( 'no_name', $error . ' ' . sprintf(
+				/* translators: 1: plugin header line, 2: Codex URL */
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Plugin Name:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
-			);
+			) );
 		}
 
 		// Determine the plugin slug based on the name of the plugin in the main plugin file.
@@ -91,22 +92,24 @@ class Upload_Handler {
 		if ( ! $this->plugin_slug ) {
 			$error = __( 'Error: The plugin has an unsupported name.', 'wporg-plugins' );
 
-			/* translators: %s: 'Plugin Name:' */
-			return $error . ' ' . sprintf( __( 'Plugin names can only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+			return new \WP_Error( 'unsupported_name', $error . ' ' . sprintf(
+				/* translators: %s: 'Plugin Name:' */
+				__( 'Plugin names can only contain latin letters (A-z), numbers, spaces, and hyphens. Please change the %s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				esc_html( $this->plugin['Name'] ),
 				'<code>Plugin Name:</code>'
-			);
+			) );
 		}
 
 		// Make sure it doesn't use a slug deemed not to be used by the public.
 		if ( $this->has_reserved_slug() ) {
 			$error = __( 'Error: The plugin has a reserved name.', 'wporg-plugins' );
 			
-			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-			return $error . ' ' . sprintf( __( 'Your chosen plugin name - %1$s - has been reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+			return new \WP_Error( 'reserved_name', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+				__( 'Your chosen plugin name - %1$s - has been reserved for use by WordPress. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
-			);
+			) );
 		}
 
 		$plugin_post = Plugin_Directory::get_plugin_post( $this->plugin_slug );
@@ -115,69 +118,77 @@ class Upload_Handler {
 		if ( $plugin_post && $plugin_post->post_author != get_current_user_id() ) {
 			$error = __( 'Error: The plugin already exists.', 'wporg-plugins' );
 			
-			/* translators: 1: plugin slug, 2: 'Plugin Name:' */
-			return $error . ' ' . sprintf( __( 'There is already a plugin called %1$s by a different author. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
+			return new \WP_Error( 'already_exists', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: 'Plugin Name:' */
+				__( 'There is already a plugin called %1$s by a different author. Please change the %2$s line in your main plugin file and upload it again.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'<code>Plugin Name:</code>'
-			);
+			) );
 		}
 
 		// Is there already a plugin with the same slug by the same author?
 		if ( $plugin_post ) {
 			$error = __( 'Error: The plugin has already been submitted.', 'wporg-plugins' );
 			
-			/* translators: 1: plugin slug, 2: plugins@wordpress.org */
-			return $error . ' ' . sprintf( __( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, please email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
+			return new \WP_Error( 'already_submitted', $error . ' ' . sprintf(
+				/* translators: 1: plugin slug, 2: plugins@wordpress.org */
+				__( 'You have already submitted a plugin called %1$s. Please be patient and wait for a review. If you have made a mistake, please email <a href="mailto:%2$s">%2$s</a> and let us know.', 'wporg-plugins' ),
 				'<code>' . $this->plugin_slug . '</code>',
 				'plugins@wordpress.org'
-			);
+			) );
 		}
 
 		if ( ! $this->plugin['Description'] ) {
 			$error = __( 'Error: The plugin has no description.', 'wporg-plugins' );
 
-			/* translators: 1: plugin header line, 2: Codex URL */
-			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+			return new \WP_Error( 'no_description', $error . ' ' . sprintf(
+				/* translators: 1: plugin header line, 2: Codex URL */
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Description:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
-			);
+			) );
 		}
 
 		if ( ! $this->plugin['Version'] ) {
 			$error = __( 'Error: The plugin has no version.', 'wporg-plugins' );
 
-			/* translators: 1: plugin header line, 2: Codex URL */
-			return $error . ' ' . sprintf( __( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
+			return new \WP_Error( 'no_version', $error . ' ' . sprintf(
+				/* translators: 1: plugin header line, 2: Codex URL */
+				__( 'Add a %1$s line to your main plugin file and upload the plugin again. <a href="%2$s">Plugin Headers</a>', 'wporg-plugins' ),
 				'<code>Version:</code>',
 				__( 'https://codex.wordpress.org/File_Header', 'wporg-plugins' )
-			);
+			) );
 		}
 
 		if ( preg_match( '|[^\d\.]|', $this->plugin['Version'] ) ) {
 			$error = __( 'Error: Plugin versions are expected to be numbers.', 'wporg-plugins' );
 			
-			/* translators: %s: 'Version:' */
-			return $error . ' ' . sprintf( __( 'Version strings can only contain numeric and period characters (like 1.2). Please fix the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
+			return new \WP_Error( 'invalid_version', $error . ' ' . sprintf(
+				/* translators: %s: 'Version:' */
+				__( 'Version strings can only contain numeric and period characters (like 1.2). Please fix the %s line in your main plugin file and upload the plugin again.', 'wporg-plugins' ),
 				'<code>Version:</code>'
-			);
+			) );
 		}
 
 		// Prevent duplicate URLs.
 		if ( ! empty( $this->plugin['PluginURI'] ) && ! empty( $this->plugin['AuthorURI'] ) && $this->plugin['PluginURI'] == $this->plugin['AuthorURI'] ) {
 			$error = __( 'Error: Your plugin and author URIs are the same.', 'wporg-plugins' );
 			
-			return $error . ' ' . __( 'A plugin URL is a page/site that provides details about this specific plugin. An author URL is a page/site that provides information about the author of the plugin. You are not required to provide both, so pick the one that best applies to your URL.', 'wporg-plugins' );
+			return new \WP_Error( 'plugin_author_uri', $error . ' ' .
+				__( 'A plugin URL is a page/site that provides details about this specific plugin. An author URL is a page/site that provides information about the author of the plugin. You are not required to provide both, so pick the one that best applies to your URL.', 'wporg-plugins' )
+			);
 		}
 
 		$readme = $this->find_readme_file();
 		if ( empty( $readme ) ) {
 			$error = __( 'Error: The plugin has no readme.', 'wporg-plugins' );
 			
-			/* translators: 1: readme.txt, 2: readme.md */
-			return $error . ' ' . sprintf( __( 'The zip file must include a file named %1$s or %2$s. We recommend using %1$s as it will allow you to fully utilize our directory.', 'wporg-plugins' ),
+			return new \WP_Error( 'no_readme', $error . ' ' . sprintf(
+				/* translators: 1: readme.txt, 2: readme.md */
+				__( 'The zip file must include a file named %1$s or %2$s. We recommend using %1$s as it will allow you to fully utilize our directory.', 'wporg-plugins' ),
 				'<code>readme.txt</code>',
 				'<code>readme.md</code>'
-			);
+			) );
 		}
 		$readme = new Parser( $readme );
 
@@ -188,11 +199,12 @@ class Upload_Handler {
 		if ( ! $result ) {
 			$error = __( 'Error: The plugin has failed the automated checks.', 'wporg-plugins' );
 			
-			/* translators: 1: Plugin Check Plugin URL, 2: make.wordpress.org/plugins */
-			return $error . ' ' . sprintf( __( 'Please correct the problems with the plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
+			return new \WP_Error( 'failed_checks', $error . ' ' . sprintf(
+				/* translators: 1: Plugin Check Plugin URL, 2: make.wordpress.org/plugins */
+				__( 'Please correct the problems with the plugin and upload it again. You can also use the <a href="%1$s">Plugin Check Plugin</a> to test your plugin before uploading. If you have any questions about this please post them to %2$s.', 'wporg-plugins' ),
 				'//wordpress.org/plugins/plugin-check/',
 				'<a href="https://make.wordpress.org/plugins">https://make.wordpress.org/plugins</a>'
-			);
+			) );
 		}
 
 		// Passed all tests!
