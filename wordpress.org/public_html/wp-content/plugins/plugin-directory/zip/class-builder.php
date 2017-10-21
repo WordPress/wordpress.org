@@ -166,7 +166,7 @@ class Builder {
 	 */
 	function generate_checksums() {
 		// Only enable this for the `exploit-scanner` plugin for the time being.
-		if ( 'exploit-scanner' != $this->slug ) {
+		if ( 'exploit-scanner' != $this->slug && 'test-plugin-3' != $this->slug ) {
 			return;
 		}
 
