@@ -76,8 +76,7 @@ class Plugin {
 		}
 		?>
 		<p>
-			<label for="wp-version"><?php esc_html_e( 'Version:', 'wporg-forums' ); ?></label><br />
-			<em><?php esc_html_e( 'Select the version of WordPress you are using.', 'wporg-forums' ); ?></em><br />
+			<label for="wp-version"><?php esc_html_e( 'Select the version of WordPress you are using:', 'wporg-forums' ); ?></label><br />
 
 			<select name="<?php echo esc_attr( self::META_KEY ); ?>" id="wp-version">
 				<?php foreach ( $versions as $key => $label ) : ?>
