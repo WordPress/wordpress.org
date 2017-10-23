@@ -3060,7 +3060,8 @@ section {
 	font-size: 0.8rem;
 }
 
-#bbpress-forums fieldset.bbp-form input[type="checkbox"] {
+#bbpress-forums fieldset.bbp-form input[type="checkbox"],
+#bbpress-forums fieldset.bbp-form input#bbp_topic_tags {
 	margin-bottom: 0;
 }
 

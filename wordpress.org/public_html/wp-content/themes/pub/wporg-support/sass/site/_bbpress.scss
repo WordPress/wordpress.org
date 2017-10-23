@@ -605,7 +605,8 @@ section {
 			font-size: ms(-2);
 		}
 
-		input[type="checkbox"] {
+		input[type="checkbox"],
+		input#bbp_topic_tags {
 			margin-bottom: 0;
 		}
 	}
