@@ -93,6 +93,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 			include_once WPORGPATH . 'extend/plugins-plugins/_plugin-icons.php';
 		}
 
+		$icon       = '';
 		$plugin     = sprintf( '<a href="//wordpress.org/plugins/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->plugin->post_title ) );
 		$faq        = sprintf( '<a href="//wordpress.org/plugins/%s/faq/">%s</a>', esc_attr( $this->slug() ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
 		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
@@ -100,6 +101,10 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
 		$reviews    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
 		$create     = '';
+
+		if ( function_exists( 'wporg_get_plugin_icon' ) ) {
+			$icon = wporg_get_plugin_icon( $this->slug, 128 );
+		}
 
 		$create_label = '';
 		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_topic_form() ) {
@@ -116,8 +121,8 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 		<div>
 			<ul>
-				<?php if ( function_exists( 'wporg_get_plugin_icon' ) ) : ?>
-				<li><?php echo wporg_get_plugin_icon( $this->slug, 128 ); ?></li>
+				<?php if ( $icon ) : ?>
+				<li><?php echo $icon; ?></li>
 				<?php endif; ?>
 				<li style="clear:both;"><?php echo $plugin; ?></li>
 				<?php if ( ! empty( $this->plugin->post_content ) && false !== strpos( $this->plugin->post_content, '<!--section=faq-->' ) ) : ?>
