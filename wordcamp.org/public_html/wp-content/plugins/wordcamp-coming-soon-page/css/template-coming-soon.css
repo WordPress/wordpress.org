@@ -232,6 +232,12 @@ label {
 		text-decoration: underline;
 	}
 
+#wpadminbar .wc-coming-soon-info .ab-item,
+#wpadminbar .wc-coming-soon-info a {
+    background: #FFE399;
+    color: #23282d;
+}
+
 /* Hide Jetpack's Infinite Scroll element */
 #infinite-footer {
 	display: none !important;
