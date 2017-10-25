@@ -4,18 +4,22 @@
  */
 class WordCamp_Docs_Template_Attendee_Visa implements WordCamp_Docs_Template {
 	public function form( $data ) {
+		$wordcamp    = get_wordcamp_post();
+		$start_date  = ! empty( $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) ? date( 'j F Y', $wordcamp->meta['Start Date (YYYY-mm-dd)'][0] ) : '';
+		$end_date    = ! empty( $wordcamp->meta['End Date (YYYY-mm-dd)'][0] )   ? date( 'j F Y', $wordcamp->meta['End Date (YYYY-mm-dd)'][0] )   : $start_date;
+
 		$data = wp_parse_args( $data, array(
 			'attendee_first_name' => '',
 			'attendee_last_name' => '',
 			'country_of_residency' => '',
 			'passport_number' => '',
 
-			'wordcamp_name' => '',
-			'wordcamp_location' => '',
-			'wordcamp_date_start' => '',
-			'wordcamp_date_end' => '',
+			'wordcamp_name'       => $wordcamp->post_title          ?? '',
+			'wordcamp_location'   => $wordcamp->meta['Location'][0] ?? '',
+			'wordcamp_date_start' => $start_date,
+			'wordcamp_date_end'   => $end_date,
 
-			'organizer_name' => '',
+			'organizer_name'     => $wordcamp->meta['Organizer Name'][0] ?? '',
 			'organizer_contacts' => '',
 		) );
 		?>
@@ -41,6 +45,10 @@ class WordCamp_Docs_Template_Attendee_Visa implements WordCamp_Docs_Template {
 			clear: both;
 		}
 		</style>
+
+		<h2>
+			<?php _e( 'Attendee Visa Letter', 'wordcamporg' ); ?>
+		</h2>
 
 		<div class="wcorg-docs-form">
 			<label><?php _e( 'Attendee First Name:', 'wordcamporg' ); ?></label>
