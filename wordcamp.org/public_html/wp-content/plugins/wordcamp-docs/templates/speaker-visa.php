@@ -5,8 +5,8 @@
 class WordCamp_Docs_Template_Speaker_Visa implements WordCamp_Docs_Template {
 	public function form( $data ) {
 		$data = wp_parse_args( $data, array(
-			'attendee_first_name' => '',
-			'attendee_last_name' => '',
+			'speaker_first_name'   => '',
+			'speaker_last_name'    => '',
 			'country_of_residency' => '',
 			'passport_number' => '',
 
@@ -42,12 +42,16 @@ class WordCamp_Docs_Template_Speaker_Visa implements WordCamp_Docs_Template {
 		}
 		</style>
 
+		<h2>
+			<?php _e( 'Speaker Visa Letter', 'wordcamporg' ); ?>
+		</h2>
+
 		<div class="wcorg-docs-form">
 			<label><?php _e( 'Speaker First Name:', 'wordcamporg' ); ?></label>
-			<input name="attendee_first_name" value="<?php echo esc_attr( $data['attendee_first_name'] ); ?>" />
+			<input name="speaker_first_name" value="<?php echo esc_attr( $data['speaker_first_name'] ); ?>" />
 
 			<label><?php _e( 'Speaker Last Name:', 'wordcamporg' ); ?></label>
-			<input name="attendee_last_name" value="<?php echo esc_attr( $data['attendee_last_name'] ); ?>" />
+			<input name="speaker_last_name" value="<?php echo esc_attr( $data['speaker_last_name'] ); ?>" />
 
 			<label><?php _e( 'Country of Residency:', 'wordcamporg' ); ?></label>
 			<input name="country_of_residency" value="<?php echo esc_attr( $data['country_of_residency'] ); ?>" />
@@ -163,7 +167,7 @@ h2 {
 
 		<p>To Whom It May Concern:</p>
 
-		<p>This letter is to confirm that <?php echo esc_html( $data['attendee_first_name'] ); ?> <?php echo esc_html( $data['attendee_last_name'] ); ?>
+		<p>This letter is to confirm that <?php echo esc_html( $data['speaker_first_name'] ); ?> <?php echo esc_html( $data['speaker_last_name'] ); ?>
 		<?php echo esc_html( $data['country_of_residency'] ); ?> passport number <?php echo esc_html( $data['passport_number'] ); ?>,
 		has been invited to speak at <?php echo esc_html( $data['wordcamp_name'] ); ?>, a community-organized event focusing on WordPress
 		development and technology.</p>
@@ -171,7 +175,7 @@ h2 {
 		<p>WordPress is a web software you can use to create a beautiful website or blog. The core software is built by hundreds of community
 		volunteers. The mission of the WordPress open source project is to democratize publishing through Open Source, GPL software.</p>
 
-		<p>To fulfill speaking duties at <?php echo esc_html( $data['wordcamp_name'] ); ?>, <?php echo esc_html( $data['attendee_first_name'] ); ?>
+		<p>To fulfill speaking duties at <?php echo esc_html( $data['wordcamp_name'] ); ?>, <?php echo esc_html( $data['speaker_first_name'] ); ?>
 		will need to be in <?php echo esc_html( $data['wordcamp_location'] ); ?> from <?php echo esc_html( $data['wordcamp_date_start'] ); ?>
 		through <?php echo esc_html( $data['wordcamp_date_end'] ); ?>.
 
@@ -196,8 +200,8 @@ h2 {
 	public function sanitize( $input ) {
 		$output = array();
 		foreach ( array(
-			'attendee_first_name',
-			'attendee_last_name',
+			'speaker_first_name',
+			'speaker_last_name',
 			'country_of_residency',
 			'passport_number',
 			'wordcamp_name',
