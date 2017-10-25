@@ -349,6 +349,7 @@ function notify_organizer_status_changed( $site_id, $invoice_id, $new_status ) {
 	} elseif ( 'paid' === $new_status ) {
 		$status_message = "has been paid by $sponsor_name. Go ahead and publish them to your website!";
 	} else {
+		restore_current_blog();
 		return;
 	}
 
