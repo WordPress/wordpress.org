@@ -51,6 +51,7 @@ add_filter( 'pre_update_option_blog_public', 'wcorg_enforce_public_blog_option' 
  * We want to let organizers use shortcodes inside Text widgets
  */
 add_filter( 'widget_text', 'do_shortcode' );
+// todo can remove this after ugprade to 4.9
 
 /**
  * Output a menu via a shortcode
@@ -282,9 +283,9 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
  * Many of WordCamp.org's CPTs make extensive use of meta boxes. Since these are not currently supported in the
  * Gutenberg editor, this limits the Gutenberg content editing links to posts and pages.
  *
- * TODO: revisit this when Gutenberg supports meta boxes.
+ * TODO: revisit this when Gutenberg supports "advanced" meta boxes.
  */
-add_filter( 'gutenberg_add_edit_link_for_post_type', function( $bool, $post_type ) {
+add_filter( 'gutenberg_can_edit_post_type', function( $bool, $post_type ) {
 	$allowed_post_types = array(
 		'post',
 		'page',
