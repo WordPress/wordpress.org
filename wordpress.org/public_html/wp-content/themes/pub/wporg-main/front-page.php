@@ -18,7 +18,7 @@ require WPORGPATH . 'header.php';
 ?>
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
-			<p class="site-title"><?php _e( 'Meet WordPress', 'wporg-main' ); ?></p>
+			<p class="site-title"><?php _e( 'Meet WordPress', 'wporg' ); ?></p>
 
 			<p class="site-description"><?php _e( 'WordPress is open source software you can use to create a beautiful website, blog, or app' ); ?></p>
 		</div><!-- .site-branding -->

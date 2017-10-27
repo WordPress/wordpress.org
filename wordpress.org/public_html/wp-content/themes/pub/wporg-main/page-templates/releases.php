@@ -22,7 +22,7 @@ get_header( 'page' ); ?>
 				if ( isset( $releases['latest'] ) ) :
 					rosetta_release_row( null, null, null, true );
 					?>
-					<h3 id="latest"><?php _e( 'Latest release', 'wporg-main' ); ?></h3>
+					<h3 id="latest"><?php _e( 'Latest release', 'wporg' ); ?></h3>
 					<table class="releases latest">
 						<?php echo rosetta_release_row( $releases['latest'], 'alt' ); ?>
 					</table>
@@ -35,7 +35,7 @@ get_header( 'page' ); ?>
 					foreach ( $releases['branches'] as $branch => $branch_release ):
 						rosetta_release_row( null, null, null, true );
 						?>
-						<h3><?php printf( __( '%s Branch', 'wporg-main' ), $branch );?></h3>
+						<h3><?php printf( __( '%s Branch', 'wporg' ), $branch );?></h3>
 						<table class="releases">
 							<?php
 							foreach ( $branch_release as $release ) :
@@ -49,7 +49,7 @@ get_header( 'page' ); ?>
 
 				if ( ! empty( $releases['betas'] ) ) :
 					?>
-					<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'wporg-main' ); ?></h3>
+					<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 					<table id="beta" class="releases">
 						<?php
 						rosetta_release_row( null, null, null, true );
@@ -62,7 +62,7 @@ get_header( 'page' ); ?>
 					<?php
 				endif; # any betas
 			else: # no releases
-				echo '<p>' . __( 'There are no releases, yet.', 'wporg-main' ) . '</p>';
+				echo '<p>' . __( 'There are no releases, yet.', 'wporg' ) . '</p>';
 			endif; # if releases
 			?>
 		</div><!-- .entry-content -->
@@ -71,7 +71,7 @@ get_header( 'page' ); ?>
 		edit_post_link(
 			sprintf(
 			/* translators: %s: Name of current post */
-				esc_html__( 'Edit %s', 'wporg-main' ),
+				esc_html__( 'Edit %s', 'wporg' ),
 				the_title( '<span class="screen-reader-text">"', '"</span>', false )
 			),
 			'<footer class="entry-footer"><span class="edit-link">',

@@ -20,7 +20,7 @@ function setup() {
 
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
-		'rosetta_main' => esc_html__( 'Rosetta', 'wporg-main' ),
+		'rosetta_main' => esc_html__( 'Rosetta', 'wporg' ),
 	) );
 
 }
