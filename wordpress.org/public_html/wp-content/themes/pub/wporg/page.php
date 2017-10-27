@@ -16,7 +16,7 @@ namespace WordPressdotorg\Theme;
 
 get_header( 'page' ); ?>
 
-	<main id="main" class="site-main" role="main">
+	<main id="main" class="site-main col-12" role="main">
 
 		<?php
 		while ( have_posts() ) : the_post();

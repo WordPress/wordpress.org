@@ -30,6 +30,14 @@
 			padding: 1.6em 0;
 		}
 
+		article:not(:only-child) {
+			padding-bottom: 0;
+		}
+
+		article + .comment-respond {
+			padding-bottom: 1.6em;
+		}
+
 		.children {
 			list-style: none;
 			margin: 0;
@@ -63,17 +71,11 @@
 
 		a {
 			color: #777;
-			border-bottom: 1px solid #dfdfdf;
-
-			&:hover,
-			&:focus {
-				color: #d54e21;
-				border-bottom-color: #d54e21;
-			}
 		}
 	}
 
 	.comment-metadata {
+		font-size: ms( -2 );
 		margin-bottom: 1.6em;
 
 		.edit-link {

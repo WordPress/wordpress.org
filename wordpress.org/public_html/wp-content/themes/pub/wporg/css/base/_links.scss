@@ -28,4 +28,13 @@ a {
 		/* Override wp4.css */
 		border: none;
 	}
+
+	p &,
+	li > & {
+		text-decoration: underline;
+
+		&:hover {
+			color: #d54e21;
+		}
+	}
 }

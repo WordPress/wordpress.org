@@ -1,4 +1,8 @@
 .page {
+	.gutters .col-12 {
+		width: 100%;
+	}
+
 	.entry-header {
 		background: $color__wp-blue;
 		padding: 1rem 0;
