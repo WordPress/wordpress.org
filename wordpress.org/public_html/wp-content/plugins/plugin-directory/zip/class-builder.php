@@ -11,7 +11,7 @@ use Exception;
 class Builder {
 
 	const TMP_DIR = '/tmp/plugin-zip-builder';
-	const SVN_URL = 'http://plugins.svn.wordpress.org';
+	const SVN_URL = 'https://plugins.svn.wordpress.org';
 	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
 	protected $zip_file      = '';
@@ -23,6 +23,9 @@ class Builder {
 	protected $version    = '';
 	protected $context    = '';
 	protected $stable_tag = '';
+
+	// The SVN url of the plugin version being packaged.
+	protected $plugin_version_svn_url = '';
 
 	/**
 	 * Generate a ZIP for a provided Plugin tags.
@@ -203,56 +206,83 @@ class Builder {
 		// Existing checksums?
 		$existing_json_checksum_file = file_exists( $this->checksum_file );
 
-		$this->exec( sprintf(
-			'cd %s && find . -type f -print0 | sort -z | xargs -0 md5sum 2>&1',
-			escapeshellarg( $this->tmp_build_dir . '/' . $this->slug )
-		), $checksum_output, $return_value );
+		$checksums = array(
+			'md5' => array(),
+			'sha256' => array()
+		);
+		foreach ( array( 'md5' => 'md5sum', 'sha256' => 'sha256sum' ) as $checksum_type => $checksum_bin ) {
+			$this->exec( sprintf(
+				'cd %s && find . -type f -print0 | sort -z | xargs -0 ' . $checksum_bin . ' 2>&1',
+				escapeshellarg( $this->tmp_build_dir . '/' . $this->slug )
+			), $checksum_output, $return_value );
 
-		if ( $return_value ) {
-		//	throw new Exception( __METHOD__ . ': Checksum generation failed, return code: ' . $return_value, 503 );
-		// For now, just silently bail.
-			return;
-		}
+			if ( $return_value ) {
+			//	throw new Exception( __METHOD__ . ': Checksum generation failed, return code: ' . $return_value, 503 );
+			// TODO For now, just silently keep going.
+				continue;
+			}
 
-		$checksums = array();
-		foreach ( $checksum_output as $line ) {
-			list( $md5, $filename ) = preg_split( '!\s+!', $line );
-			$filename = preg_replace( '!^./!', '', $filename );
-			$checksums[ trim( $filename ) ] = trim( $md5 );
+			foreach ( $checksum_output as $line ) {
+				list( $checksum, $filename ) = preg_split( '!\s+!', $line );
+				$filename = trim( preg_replace( '!^./!', '', $filename ) );
+				$checksum = trim( $checksum );
+				$checksums[ $checksum_type][ $filename ] = $checksum;
+			}
 		}
 
 		$json_checksum_file = (object) array(
 			'plugin'     => $this->slug,
 			'version'    => $plugin_version,
-			'source_tag' => $this->version,
-			'zip'        => basename( $this->zip_file ),
-			'checksums'  => $checksums
+			'source'     => $this->plugin_version_svn_url,
+			'zip'        => 'https://downloads.wordpress.org/plugins/' . basename( $this->zip_file ),
+			'md5'        => $checksums['md5'],
+			'sha256'     => $checksums['sha256'],
 		);
 
 		// If the checksum file exists already, merge it into this one.
 		if ( $existing_json_checksum_file ) {
 			$existing_json_checksum_file = json_decode( file_get_contents( $this->checksum_file ) );
 
-			if ( $existing_json_checksum_file && ! empty( $existing_json_checksum_file->checksums ) ) {
-				foreach ( $existing_json_checksum_file->checksums as $file => $checksum_details ) {
+			// Sometimes plugin versions exist in multiple tags/zips, include all the SVN urls & ZIP urls
+			foreach ( array( 'source', 'zip' ) as $maybe_different ) {
+				if ( !empty( $existing_json_checksum_file->{$maybe_different} ) &&
+					$existing_json_checksum_file->{$maybe_different} != $json_checksum_file->{$maybe_different}
+				) {
+					$json_checksum_file->{$maybe_different} = array_unique( array_merge(
+						(array) $existing_json_checksum_file->{$maybe_different},
+ 						(array) $json_checksum_file->{$maybe_different}
+					) );
 
-					if ( ! isset( $json_checksum_file->checksums[ $file ] ) ) {
-						// Deleted file, include it in checksums.
-						$json_checksum_file->checksums[ $file ] = $checksum_details;
-
-					} elseif ( $json_checksum_file->checksums[ $file ] != $checksum_details ) {
-						// Checksum has changed, include both in the resulting json file.
-						if ( is_array( $checksum_details ) ) {
-							$checksum_details[] = $json_checksum_file->checksums[ $file ];
-							$json_checksum_file->checksums[ $file ] = array_unique( $checksum_details );
-						} else {
-							$json_checksum_file->checksums[ $file ] = array(
-								$json_checksum_file->checksums[ $file ],
-								$checksum_details
-							);
-						}
+					// Reduce single arrays back to a string when possible.
+					if ( 1 == count( $json_checksum_file->{$maybe_different} ) ) {
+						$json_checksum_file->{$maybe_different} = array_shift( $json_checksum_file->{$maybe_different} );
 					}
 				}
+			}
+
+			// Combine Checksums from existing files and the new files
+			foreach ( array( 'md5', 'sha256' ) as $checksum_type ) {
+				if ( ! $existing_json_checksum_file || empty( $existing_json_checksum_file->{$checksum_type} ) ) {
+					continue;
+				}
+				$existing_checksums = (array) $existing_json_checksum_file->{$checksum_type}; // Assoc array => Object in JSON
+				$new_checksums = &$json_checksum_file->{$checksum_type}; // byref to update new array
+
+				foreach ( $existing_checksums as $file => $checksums ) {
+					if ( ! isset( $new_checksums[ $file ] ) ) {
+						// Deleted file, include it in checksums.
+						$new_checksums[ $file ] = $existing_checksums[ $file ];
+
+					} elseif ( $new_checksums[ $file ] != $existing_checksums[ $file ] ) {
+						// Checksum has changed, include both in the resulting json file.
+
+						$new_checksums[ $file ] = array_unique( array_merge(
+							(array) $existing_checksums[ $file ], // May already be an array
+ 							(array) $new_checksums[ $file ]
+						) );
+					}
+				}
+
 			}
 		}
 
@@ -302,10 +332,11 @@ class Builder {
 	 */
 	protected function export_plugin() {
 		if ( 'trunk' == $this->version ) {
-			$svn_url = self::SVN_URL . "/{$this->slug}/trunk/";
+			$this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/trunk/";
 		} else {
-			$svn_url = self::SVN_URL . "/{$this->slug}/tags/{$this->version}/";
+			$this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/tags/{$this->version}/";
 		}
+
 		$build_dir = "{$this->tmp_build_dir}/{$this->slug}/";
 
 		$svn_params = array();
@@ -314,12 +345,12 @@ class Builder {
 			$svn_params[] = 'ignore-externals';
 		}
 
-		$res = SVN::export( $svn_url, $build_dir, $svn_params );
+		$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
 			$_version = substr( $this->version, 1 );
-			$svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
-			$res = SVN::export( $svn_url, $build_dir, $svn_params );
+			 $this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
+			$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
