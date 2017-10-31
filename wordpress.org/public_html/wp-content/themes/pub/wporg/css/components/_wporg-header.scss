@@ -45,6 +45,10 @@
 			height: 52px; /* 88 header height - 36 top padding */
 			line-height: 22px;
 			padding: 0;
+
+			&:hover {
+				text-decoration: none;
+			}
 		}
 	}
 

@@ -17,11 +17,29 @@ namespace WordPressdotorg\MainTheme;
  * as indicating support for post thumbnails.
  */
 function setup() {
-
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
 		'rosetta_main' => esc_html__( 'Rosetta', 'wporg' ),
 	) );
-
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
+
+/**
+ * Registers theme-specific widgets.
+ */
+function widgets() {
+	include_once get_stylesheet_directory() . '/widgets/class-wporg-widget-download.php';
+
+	register_widget( __NAMESPACE__ . '\WPORG_Widget_Download' );
+	register_widget( 'WP_Widget_Links' );
+
+	add_filter( 'widget_links_args', function( $args ) {
+		$args['categorize']      = 0;
+		$args['category_before'] = '';
+		$args['category_after']  = '';
+		$args['title_li']        = __( 'Resources', 'wporg' );
+
+		return $args;
+	} );
+}
+add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );

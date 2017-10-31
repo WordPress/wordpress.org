@@ -11,7 +11,7 @@ $releases = $GLOBALS['rosetta']->rosetta->get_releases_breakdown();
 the_post();
 get_header( 'page' ); ?>
 
-	<article id="post-<?php the_ID(); ?>" <?php post_class(); ?> role="main">
+	<article id="post-<?php the_ID(); ?>" <?php post_class( 'col-12' ); ?> role="main">
 		<header class="entry-header">
 			<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 		</header><!-- .entry-header -->
