@@ -349,7 +349,7 @@ class Builder {
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
 			$_version = substr( $this->version, 1 );
-			 $this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
+			$this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
 			$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
