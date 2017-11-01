@@ -31,8 +31,8 @@ get_header( 'wporg' );
 			<section class="intro">
 				<p class="subheading"><?php _e( 'Beautiful designs, powerful features, and the freedom to build anything you want. WordPress is both free and priceless at the same time.' ); ?></p>
 				<div class="screenshots">
-					<img src="https://s.w.org/images/home/screen-themes.png?1" class="dashboard" />
-					<img src="https://s.w.org/images/home/iphone-themes.png?1" class="dashboard-mobile" />
+					<img src="https://s.w.org/images/home/screen-themes.png?3" class="dashboard" />
+					<img src="https://s.w.org/images/home/iphone-themes.png?3" class="dashboard-mobile" />
 				</div>
 			</section>
 
@@ -113,7 +113,7 @@ get_header( 'wporg' );
 				while ( $featured->have_posts() ) :
 					$featured->the_post();
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
-					echo '<p>' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</p>';
+					echo apply_filters( 'the_excerpt', get_the_excerpt() );
 				endwhile;
 				wp_reset_query();
 				?>
@@ -137,7 +137,7 @@ get_header( 'wporg' );
 			<div class="col-2">
 				<h4><a href="https://wordpress.org/showcase/"><?php _e( 'WordPress&nbsp;Users' ); ?></a></h4>
 
-				<ul id="notable-users">
+				<ul id="notable-users" class="notable-users">
 					<?php
 						$links = array(
 							'nytimes'       => 'https://wordpress.org/showcase/tag/new-york-times/',
@@ -159,11 +159,11 @@ get_header( 'wporg' );
 						endforeach;
 					?>
 				</ul>
-				<p id="showcase-link"><a href="https://wordpress.org/showcase/"><?php _e( '&hellip; and hundreds more' ); ?></a></p>
+				<a class="showcase-link" href="https://wordpress.org/showcase/"><?php _e( '&hellip; and hundreds more' ); ?></a>
 			</div>
 		</div>
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

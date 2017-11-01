@@ -112,8 +112,8 @@
 				}
 
 				@include breakpoint( 740px ) {
-					width: 25%;
 					height: 200px;
+					width: 25%;
 
 					&:nth-child(4n) {
 						border-right: none;
@@ -189,7 +189,7 @@
 
 	.community-2 {
 		align-items: flex-start;
-		background: url(https://s.w.org/images/home/community-1.jpg) center bottom no-repeat;
+		background: url(https://s.w.org/images/home/community-2.jpg?3) center bottom no-repeat;
 		background-size: cover;
 		border: none;
 		display: flex;
@@ -230,7 +230,7 @@
 		padding-right: 0;
 
 		> div {
-			background: url(https://s.w.org/images/home/collage-min.jpg) center top;
+			background: url(https://s.w.org/images/home/collage-min.jpg?3) center top;
 			background-size: cover;
 			box-shadow: inset 0 0 8px rgba(0, 0, 0, .4);
 			height: 300px;
@@ -303,7 +303,84 @@
 		text-transform: none;
 	}
 
+	h4, h5 {
+		a {
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
 	ol, ul {
 		margin: 0;
+	}
+
+	.steps {
+		list-style: none;
+		padding: 0;
+
+		li {
+			margin-bottom: 1rem;
+			padding-left: 2.5rem;
+			position: relative;
+
+			span {
+				background: url(//s.w.org/style/images/steps.png) no-repeat;
+				background-size: 93px 31px;
+				content: '';
+				height: 31px;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 31px;
+
+				@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+				only screen and (min-resolution: 1.5dppx),
+				only screen and (min-resolution: 144dpi) {
+					background-image: url(//s.w.org/style/images/steps-2x.png);
+				}
+			}
+		}
+
+		.one span {
+			background-position: 0 0;
+		}
+
+		.two span {
+			background-position: -31px 0;
+		}
+
+		.three span {
+			background-position: -62px 0;
+		}
+	}
+
+	.notable-users {
+		list-style: none;
+		padding: 0;
+
+		li a {
+			border: 1px solid #f5f5f5;
+			border-right-color: #dedede;
+			border-bottom-color: #dedede;
+			display: block;
+			height: 59px;
+			margin-bottom: 8px;
+			width: 130px;
+
+			&:active {
+				border: 1px solid #dedede;
+				border-right-color: #f5f5f5;
+				border-bottom-color: #f5f5f5;
+			}
+		}
+	}
+
+	.showcase-link {
+		display: block;
+		font-size: ms( -4 );
+		margin: 1rem 0;
 	}
 }

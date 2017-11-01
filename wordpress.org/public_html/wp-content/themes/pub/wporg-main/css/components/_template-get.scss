@@ -56,7 +56,7 @@
 				}
 			}
 
-			@media (min-width: $ms-breakpoint) {
+			@include breakpoint( $ms-breakpoint) {
 				> div {
 					float: left;
 					font-size: ms( -2 );

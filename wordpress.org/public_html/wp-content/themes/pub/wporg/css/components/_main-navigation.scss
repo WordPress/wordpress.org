@@ -102,7 +102,7 @@
 	}
 }
 
-@media screen and ( min-width: $ms-breakpoint ) {
+@include breakpoint( $ms-breakpoint ) {
 	.menu-toggle {
 		display: none;
 	}

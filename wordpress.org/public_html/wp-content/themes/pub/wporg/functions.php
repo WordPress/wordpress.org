@@ -75,12 +75,24 @@ function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
 	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css" );
 
-	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
+	//wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+	if ( ! is_front_page() && is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
+
+	// No Jetpack scripts needed.
+	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
+	wp_dequeue_script( 'devicepx' );
+
+	/*
+	 * No Grofiles needed.
+	 *
+	 * Enqueued so that it's overridden in the global footer.
+	 */
+	wp_register_script( 'grofiles-cards', false );
+	wp_enqueue_script( 'grofiles-cards' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
 
