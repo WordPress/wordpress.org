@@ -104,7 +104,9 @@ function add_classic_param_to_admin_menus() {
 				adminBarNewPostLink    = $( '#wp-admin-bar-new-post'    ).children( 'a' ),
 				adminBarNewPageLink    = $( '#wp-admin-bar-new-page'    ).children( 'a' ),
 				adminMenuNewPostLink   = $( '#menu-posts'    ).children( '.wp-submenu' ).children( 'li' ).children( 'a[href="post-new.php"]' ),
-				adminMenuNewPageLink   = $( '#menu-pages'    ).children( '.wp-submenu' ).children( 'li' ).children( 'a[href="post-new.php?post_type=page"]' );
+				adminMenuNewPageLink   = $( '#menu-pages'    ).children( '.wp-submenu' ).children( 'li' ).children( 'a[href="post-new.php?post_type=page"]' ),
+				editPostAddNewLink     = $( '.page-title-action[href$="post-new.php"]' ),
+				editPageAddNewLink     = $( '.page-title-action[href$="post-new.php?post_type=page"]' );
 
 			// Admin Bar
 			$( adminBarNewContentLink ).attr( 'href', jQuery( adminBarNewContentLink ).attr( 'href' ) + '?classic-editor' );
@@ -114,6 +116,10 @@ function add_classic_param_to_admin_menus() {
 			// Admin sidebar menu
 			$( adminMenuNewPostLink ).attr( 'href', jQuery( adminMenuNewPostLink ).attr( 'href' ) + '?classic-editor' );
 			$( adminMenuNewPageLink ).attr( 'href', jQuery( adminMenuNewPageLink ).attr( 'href' ) + '&classic-editor' );
+
+			// "Add New" links on "Edit {Post|Page}" screens
+			$( editPostAddNewLink ).attr( 'href', jQuery( editPostAddNewLink ).attr( 'href' ) + '?classic-editor' );
+			$( editPageAddNewLink ).attr( 'href', jQuery( editPageAddNewLink ).attr( 'href' ) + '&classic-editor' );
 		} );
 	</script>
 
