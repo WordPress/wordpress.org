@@ -3,6 +3,15 @@
 namespace WordCamp\Budgets\Reimbursement_Requests;
 defined( 'WPINC' ) or die();
 
+/** @var \WP_Post $post */
+/** @var string   $name_of_payer */
+/** @var array    $available_currencies */
+/** @var string   $selected_currency  */
+/** @var array    $available_reasons */
+/** @var string   $selected_reason */
+/** @var string   $other_reason */
+/** @var int      $date_paid */
+
 ?>
 
 <fieldset <?php disabled( user_can_edit_request( $post ), false ); ?> >
@@ -30,15 +39,17 @@ defined( 'WPINC' ) or die();
 			</label>
 
 			<select id="_wcbrr_currency" name="_wcbrr_currency">
-				<option value="null-select-one">
+				<option value="">
 					<?php _e( '-- Select a Currency --', 'wordcamporg' ); ?>
 				</option>
-				<option value="null-separator1"></option>
+				<option value=""></option>
 
 				<?php foreach ( $available_currencies as $currency_key => $currency_name ) : ?>
 					<option value="<?php echo esc_attr( $currency_key ); ?>" <?php selected( $currency_key, $selected_currency ); ?> >
 						<?php echo esc_html( $currency_name ); ?>
-						<?php // todo - For better UX, prepend the code to the name (USD - United States Dollar), and sort by the code. Updating the sorting in get_currencies(). Also make this change other places this is used ?>
+						<?php if ( $currency_key ) : ?>
+							(<?php echo esc_html( $currency_key ); ?>)
+						<?php endif; ?>
 					</option>
 				<?php endforeach; ?>
 			</select>
@@ -52,10 +63,10 @@ defined( 'WPINC' ) or die();
 			</label>
 
 			<select id="_wcbrr_reason" name="_wcbrr_reason">
-				<option value="null-select-one">
+				<option value="">
 					<?php _e( '-- Select a Reason --', 'wordcamporg' ); ?>
 				</option>
-				<option value="null-separator1"></option>
+				<option value=""></option>
 
 				<?php foreach ( $available_reasons as $reason_key => $reason_name ) : ?>
 					<option value="<?php echo esc_attr( $reason_key ); ?>" <?php selected( $reason_key, $selected_reason ); ?> >

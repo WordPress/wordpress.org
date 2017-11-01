@@ -171,8 +171,6 @@ class WordCamp_Budget_Tool {
             if ( substr( $key, 0, 4 ) == 'null' )
                 unset( $currencies[ $key ] );
 
-        ksort( $currencies );
-
         require( dirname( __DIR__ ) . '/views/budget-tool/main.php' );
     }
 

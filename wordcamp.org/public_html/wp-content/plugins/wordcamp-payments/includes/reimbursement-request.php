@@ -894,7 +894,7 @@ function _generate_payment_report_default( $args ) {
 		$amount = 0;
 		$categories = array();
 
-		if ( strpos( $currency, 'null' ) === 0 ) {
+		if ( false !== strpos( $currency, 'null' ) ) {
 			$currency = '';
 		}
 

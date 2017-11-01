@@ -17,10 +17,10 @@ defined( 'WPINC' ) or die();
 			</label>
 
 			<select id="_wcbrr_category_{{data.id}}" name="_wcbrr_category_{{data.id}}">
-				<option value="null-select-one">
+				<option value="">
 					<?php _e( '-- Select a Category --', 'wordcamporg' ); ?>
 				</option>
-				<option value="null-separator1"></option>
+				<option value=""></option>
 
 				<# _.each( wcbPaymentCategories, function( categoryName, categoryKey ) { #>
 					<# selected = data._wcbrr_category === categoryKey ? 'selected' : ''; #>

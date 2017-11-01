@@ -459,7 +459,7 @@ function render_columns( $column, $post_id ) {
 
 		case 'payment_amount':
 			$currency = get_post_meta( $post_id, '_wcbsi_currency', true );
-			if ( false === strpos( $currency, 'null' ) ) {
+			if ( $currency && false === strpos( $currency, 'null' ) ) {
 				echo esc_html( $currency ) . ' ';
 			}
 

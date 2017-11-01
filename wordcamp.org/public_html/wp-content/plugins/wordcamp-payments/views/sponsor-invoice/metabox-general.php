@@ -108,6 +108,9 @@ defined( 'WPINC' ) or die();
 			<?php foreach ( $available_currencies as $currency_key => $currency_name ) : ?>
 				<option value="<?php echo esc_attr( $currency_key ); ?>" <?php selected( $currency_key, $selected_currency ); ?> >
 					<?php echo esc_html( $currency_name ); ?>
+					<?php if ( $currency_key ) : ?>
+						(<?php echo esc_html( $currency_key ); ?>)
+					<?php endif; ?>
 				</option>
 			<?php endforeach; ?>
 		</select>

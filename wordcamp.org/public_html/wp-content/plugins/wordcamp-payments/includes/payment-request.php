@@ -864,7 +864,7 @@ Thanks for helping us with these details!",
 		switch ( $column ) {
 			case 'payment_amount':
 				$currency = get_post_meta( $post_id, '_camppayments_currency', true );
-				if ( false === strpos( $currency, 'null' ) ) {
+				if ( $currency && false === strpos( $currency, 'null' ) ) {
 					echo esc_html( $currency ) . ' ';
 				}
 
@@ -995,7 +995,7 @@ Thanks for helping us with these details!",
 				$due_date = date( 'Y-m-d', absint( $due_date ) );
 			}
 
-			if ( 'null-select-one' === $currency ) {
+			if ( false !== strpos( $currency, 'null' ) ) {
 				$currency = '';
 			}
 

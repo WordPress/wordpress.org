@@ -10,7 +10,6 @@ defined( 'WPINC' ) or die();
 const STEP_SELECT_INVOICE = 1;
 const STEP_PAYMENT_DETAILS = 2;
 const STEP_PAYMENT_SUCCESS = 3;
-
 const CSS_VERSION = 1;
 
 /**
@@ -109,7 +108,7 @@ function _handle_post_data( &$data ) {
 			}
 
 			$currency = $_POST['currency'];
-			if ( ! array_key_exists( $currency, $data['currencies'] ) or strpos( $currency, 'null' ) === 0 ) {
+			if ( ! array_key_exists( $currency, $data['currencies'] ) || false !== strpos( $currency, 'null' ) ) {
 				$data['errors'][] = 'Invalid currency.';
 				return;
 			}

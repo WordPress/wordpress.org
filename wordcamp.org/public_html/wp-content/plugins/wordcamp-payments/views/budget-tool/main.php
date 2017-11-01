@@ -178,9 +178,21 @@ wcb.editable = <?php echo json_encode( $editable ); ?>;
 
             <# if (data.name == 'currency') { #>
                 <select class="value">
-                    <# _.each(wcb.currencies, function(v, k) { #>
-                    <option value="{{k}}" <#if(k==data.value){#>selected<#}#>>{{k}} - {{v}}</option>
-                    <# }); #>
+					<option value="">
+						<?php _e( '-- Select a Currency --', 'wordcamporg' ); ?>
+					</option>
+
+					<option value=""></option>
+
+					<# _.each( wcb.currencies, function( value, key ) { #>
+						<option value="{{key}}" <# if( key === data.value ) { #> selected <# } #> >
+							{{value}}
+
+							<# if ( key ) { #>
+								({{key}})
+							<# } #>
+						</option>
+					<# }); #>
                 </select>
             <# } else { #>
                 <input class="value" type="text" value="{{data.value}}" />
