@@ -84,7 +84,7 @@ function add_classic_param_to_add_new_button() {
 	<script type="text/javascript">
 		document.addEventListener( 'DOMContentLoaded', function() {
 			jQuery( '.split-page-title-action' ).children( 'a' ).each( function( index, element ) {
-				jQuery( element ).attr( 'href', jQuery( element ).attr( 'href' ) + 'classic-editor' );
+				jQuery( element ).attr( 'href', jQuery( element ).attr( 'href' ) + '&classic-editor' );
 			} );
 		} );
 	</script>
@@ -99,6 +99,7 @@ function add_classic_param_to_admin_menus() {
 
 	<script>
 		document.addEventListener( 'DOMContentLoaded', function() {
+			var $ = jQuery.noConflict();
 			var adminBarNewContentLink = $( '#wp-admin-bar-new-content' ).children( 'a' ),
 				adminBarNewPostLink    = $( '#wp-admin-bar-new-post'    ).children( 'a' ),
 				adminBarNewPageLink    = $( '#wp-admin-bar-new-page'    ).children( 'a' ),
