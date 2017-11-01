@@ -276,24 +276,3 @@ add_filter( 'wcorg_sponsor_payment_stripe', function( $options ) {
 
 	return $options;
 });
-
-/**
- * Limit which post types get a Gutenberg edit link.
- *
- * Many of WordCamp.org's CPTs make extensive use of meta boxes. Since these are not currently supported in the
- * Gutenberg editor, this limits the Gutenberg content editing links to posts and pages.
- *
- * TODO: revisit this when Gutenberg supports "advanced" meta boxes.
- */
-add_filter( 'gutenberg_can_edit_post_type', function( $bool, $post_type ) {
-	$allowed_post_types = array(
-		'post',
-		'page',
-	);
-
-	if ( ! in_array( $post_type, $allowed_post_types, true ) ) {
-		return false;
-	}
-
-	return $bool;
-}, 10, 2 );
