@@ -81,9 +81,17 @@ class Import {
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
 		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
 
-		// Bump last updated if the version has changed, or if the post_modified is empty (which is the case for many initial checkins).
-		if ( ( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
-			 ( $plugin->post_modified == '0000-00-00 00:00:00' ) ) {
+		/*
+		 * Bump last updated if:
+		 * - The version has changed.
+		 * - The post_modified is empty, which is the case for many initial checkins.
+		 * - A tag (or trunk) commit is made to the current stable. The build has changed, even if not new version.
+		 */
+		if (
+			( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
+			$plugin->post_modified == '0000-00-00 00:00:00' ||
+			( $svn_changed_tags && in_array( $svn_changed_tags, ( $stable_tag ?: 'trunk' ), true ) )
+		) {
 			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
 
@@ -135,6 +143,9 @@ class Import {
 		}
 
 		foreach ( $this->plugin_headers as $plugin_header => $meta_field ) {
+			if ( 'Version' == $plugin_header ) {
+				continue; // We'll specifically update the latest version after everything is built.
+			}
 			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
@@ -159,7 +170,8 @@ class Import {
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
 		// Finally, set the new version live.
-		update_post_meta( $plugin->ID, 'stable_tag', $stable_tag );
+		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
+		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
