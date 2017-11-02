@@ -90,7 +90,7 @@ class Import {
 		if (
 			( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
-			( $svn_changed_tags && in_array( $svn_changed_tags, ( $stable_tag ?: 'trunk' ), true ) )
+			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
 			$plugin->post_modified = $plugin->post_modified_gmt = current_time( 'mysql' );
 		}
