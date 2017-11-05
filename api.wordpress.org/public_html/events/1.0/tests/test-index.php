@@ -819,9 +819,9 @@ function get_location_test_cases() {
 		'ipv6-oceania-collapsed-prefix' => array(
 			'input'    => array( 'ip' => '::ffff:0190:c500' ),
 			'expected' => array(
-				'description' => 'quedjinup',
-				'latitude'    => '-33.634',
-				'longitude'   => '115.084',
+				'description' => 'sydney',
+				'latitude'    => '-33.868',
+				'longitude'   => '151.207',
 				'country'     => 'AU',
 				'internal'    => true,
 			),
