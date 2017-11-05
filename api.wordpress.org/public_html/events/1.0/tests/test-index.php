@@ -18,6 +18,8 @@ function run_tests() {
 
 	$tests_failed = 0;
 	$tests_failed += test_get_location();
+	$tests_failed += test_get_events();
+	$tests_failed += test_build_response();
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
 
@@ -39,6 +41,10 @@ function run_tests() {
  * @param mixed $actual_result
  */
 function output_results( $case_id, $passed, $expected_result, $actual_result ) {
+	if ( $passed ) {
+		return;
+	}
+
 	printf(
 		"\n* %s: %s",
 		$case_id,
@@ -835,6 +841,175 @@ function get_location_test_cases() {
 				'longitude'   => '-74.224',
 				'country'     => 'PE',
 				'internal'    => true,
+			),
+		),
+	);
+
+	return $cases;
+}
+
+/**
+ * Test `get_events()`
+ *
+ * @return bool The number of failures
+ */
+function test_get_events() {
+	$failed = 0;
+	$cases  = get_events_test_cases();
+
+	printf( "\n\nRunning %d events tests\n", count( $cases ) );
+
+	foreach ( $cases as $case_id => $case ) {
+		$actual_result = get_events( $case['input'] );
+
+		$passed = $case['expected']['count'] === count( $actual_result ) &&
+			! empty( $actual_result[0]['url'] ) &&
+			strtotime( $actual_result[0]['date'] ) > time() - ( 2 * 24 * 60 * 60 ) &&
+			$case['expected']['country'] === strtoupper( $actual_result[0]['location']['country'] );
+
+		output_results( $case_id, $passed, $case['expected'], $actual_result );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
+	}
+
+	return $failed;
+}
+
+/**
+ * Get the cases for testing `get_location()`
+ *
+ * @return array
+ */
+function get_events_test_cases() {
+	$cases = array(
+		'2-near-mumbai' => array(
+			'input' => array(
+				'number' => '2',
+				'nearby' => array(
+					'latitude'  => '19.024704',
+					'longitude' => '72.853966',
+				),
+			),
+			'expected' => array(
+				'count'   => 2,
+				'country' => 'IN',
+			),
+		),
+
+		'1-in-australia' => array(
+			'input' => array(
+				'number' => '1',
+				'country' => 'AU',
+			),
+			'expected' => array(
+				'count'   => 1,
+				'country' => 'AU',
+			),
+		),
+	);
+
+	return $cases;
+}
+
+/**
+ * Test `build_response()`
+ *
+ * @todo It might be better to do more abstracted tests of `main()`, rather than coupling to the
+ *       internals of `build_request()`.
+ *
+ * @return bool The number of failures
+ */
+function test_build_response() {
+	$failed = 0;
+	$cases  = build_response_test_cases();
+
+	printf( "\n\nRunning %d build_response() tests\n", count( $cases ) );
+
+	foreach ( $cases as $case_id => $case ) {
+		$actual_result = build_response( $case['input']['location'], $case['input']['location_args'] );
+
+		$passed = $case['expected']['location'] === $actual_result['location'] &&
+			isset( $case['expected']['error'] ) === isset( $actual_result['error'] );
+
+		if ( $passed && $case['expected']['events'] ) {
+			$passed = ! empty( $actual_result['events'] ) &&
+				! empty( $actual_result['events'][0]['url'] ) &&
+				strtotime( $actual_result['events'][0]['date'] ) > time() - ( 2 * 24 * 60 * 60 );
+		}
+
+		if ( $passed && isset( $case['expected']['error'] ) ) {
+			$passed = $case['expected']['error'] === $actual_result['error'];
+		}
+
+		output_results( $case_id, $passed, $case['expected'], $actual_result );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
+	}
+
+	return $failed;
+}
+
+/**
+ * Get the cases for testing `build_response()`
+ *
+ * @return array
+ */
+function build_response_test_cases() {
+	$cases = array(
+		'utrecht-ip' => array(
+			'input' => array(
+				'location' => array(
+					'latitude'  => '52.090284',
+					'longitude' => '5.124719',
+					'internal'  => true,
+				),
+				'location_args' => array( 'ip' => '84.31.177.21' ),
+			),
+			'expected' => array(
+				'location' => array(
+					'ip' => '84.31.177.21',
+				),
+				'events' => true,
+			),
+		),
+
+		'canada-country' => array(
+			'input' => array(
+				'location' => array(
+					'country' => 'CA',
+				),
+			),
+			'expected' => array(
+				'location' => array(
+					'country' => 'CA',
+				),
+				'events' => true,
+			),
+		),
+
+		'throttled' => array(
+			'input' => array(
+				'location' => 'temp-request-throttled',
+			),
+			'expected' => array(
+				'location' => array(),
+				'error'    => 'temp-request-throttled',
+				'events'   => false,
+			),
+		),
+
+		'no-location' => array(
+			'input' => array(
+				'location' => array(),
+			),
+			'expected' => array(
+				'location' => array(),
+				'error'    => 'no_location_available',
+				'events'   => false,
 			),
 		),
 	);
