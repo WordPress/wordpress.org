@@ -19,6 +19,7 @@ function run_tests() {
 	$tests_failed = 0;
 	$tests_failed += test_get_location();
 	$tests_failed += test_get_events();
+	$tests_failed += test_add_regional_wordcamps();
 	$tests_failed += test_build_response();
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
@@ -1015,6 +1016,56 @@ function build_response_test_cases() {
 	);
 
 	return $cases;
+}
+
+/**
+ * Test `add_regional_events()`
+ *
+ * @return int
+ */
+function test_add_regional_wordcamps() {
+	$failed = 0;
+
+	$local_events = get_events( array(
+		'number' => '5',
+		'nearby' => array(
+			'latitude'  => '-33.849951',
+			'longitude' => '18.426246',
+		),
+	) );
+
+	// Make sure there's at least one event, otherwise there could be false positives.
+	if ( ! $local_events ) {
+		$local_events[] = array( 'title' => 'Mock Event' );
+	}
+
+	printf( "\n\nRunning %d add_regional_wordcamps() tests\n", 2 );
+
+	// Test that no changes were made if the user agent isn't Core.
+	$events_no_user_agent = add_regional_wordcamps( $local_events, '' );
+
+	if ( $events_no_user_agent !== $local_events ) {
+		$failed++;
+		output_results( 'no-user-agent', false, $local_events, $events_no_user_agent );
+	}
+
+	/*
+	 * Test that local events were unharmed if the user agent is Core.
+	 *
+	 * There isn't an easy way to mock time(), so this doesn't test that the events were added
+	 * correctly. It just makes sure that local events weren't removed.
+	 */
+	$events_core_user_agent = add_regional_wordcamps( $local_events, 'WordPress/4.9; https://example.org' );
+
+	if (
+		count( $events_core_user_agent ) < count( $local_events ) ||
+		! in_array( $local_events[0], $events_core_user_agent, true )
+	) {
+		$failed++;
+		output_results( 'core-user-agent', false, 'local events were not affected', $events_core_user_agent );
+	}
+
+	return $failed;
 }
 
 /**

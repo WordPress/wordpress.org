@@ -147,6 +147,7 @@ function build_response( $location, $location_args ) {
 		}
 
 		$events = get_events( $event_args );
+		$events = add_regional_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'] );
 
 		/*
 		 * There are two conditions which can cause a location to not have a description:
@@ -781,6 +782,80 @@ function get_events( $args = array() ) {
 
 	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
 	return $events;	
+}
+
+/**
+ * Add regional WordCamps to the Events Widget in Core for extra promotion.
+ *
+ * @param array  $local_events
+ * @param string $user_agent
+ *
+ * @return array
+ */
+function add_regional_wordcamps( $local_events, $user_agent ) {
+	$time = time();
+	$regional_wordcamps = array();
+
+	/*
+	 * Limit effects to the Events Widget in Core.
+	 * Otherwise this would return unexpected results to other clients.
+	 *
+	 * This is the closest we can get to detecting Core, so it'll still distort results for any
+	 * plugins that are fetching events with `wp_remote_get()`.
+	 */
+	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
+		return $local_events;
+	}
+
+	if ( $time <= strtotime( 'December 2nd, 2017' ) ) {
+		$regional_wordcamps[] = array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp US',
+			'url'        => 'https://2017.us.wordcamp.org/',
+			'meetup'     => '',
+			'meetup_url' => '',
+			'date'       => '2017-12-01 00:00:00',
+
+			'location' => array(
+				'location'  => 'Nashville, TN, USA',
+				'country'   => 'US',
+				'latitude'  => 36.1566085,
+				'longitude' => -86.7784909,
+			)
+		);
+	}
+
+	if ( $time >= strtotime( 'May 14th, 2018' ) && $time <= strtotime( 'June 15th, 2018' ) ) {
+		$regional_wordcamps[] = array(
+			'type'       => 'wordcamp',
+			'title'      => 'WordCamp Europe',
+			'url'        => 'https://2018.europe.wordcamp.org/',
+			'meetup'     => '',
+			'meetup_url' => '',
+			'date'       => '2018-06-14 00:00:00',
+
+			'location' => array(
+				'location'  => 'Belgrade, Serbia',
+				'country'   => 'RS',
+				'latitude'  => 44.808497,
+				'longitude' => 20.432285,
+			)
+		);
+	}
+
+	/**
+	 * Remove duplicates events.
+	 * Favor the regional event since it'll be pinned to the top.
+	 */
+	foreach ( $regional_wordcamps as $regional_event ) {
+		foreach ( $local_events as $local_key => $local_event ) {
+			if ( parse_url( $regional_event['url'], PHP_URL_HOST ) === parse_url( $local_event['url'], PHP_URL_HOST ) ) {
+				unset( $local_events[ $local_key ] );
+			}
+		}
+	}
+
+	return array_merge( $regional_wordcamps, $local_events );
 }
 
 /**
