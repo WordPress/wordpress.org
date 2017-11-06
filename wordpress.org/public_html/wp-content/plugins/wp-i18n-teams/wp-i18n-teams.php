@@ -176,7 +176,7 @@ class WP_I18n_Teams {
 			'no-language-pack'   => 0,
 		);
 
-		$wporg_data = $wpdb->get_results( 'SELECT locale, subdomain, latest_release FROM locales ORDER BY locale', OBJECT_K );
+		$wporg_data = $wpdb->get_results( 'SELECT locale, subdomain, latest_release FROM wporg_locales ORDER BY locale', OBJECT_K );
 
 		foreach ( $gp_locales as $locale ) {
 			$subdomain = $latest_release = '';
