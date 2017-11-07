@@ -53,6 +53,7 @@ class Init_Locale extends WP_CLI_Command {
 
 		if ( 'default' === $slug ) {
 			$projects = array_merge( $projects, array(
+				'meta/wordpress-org',
 				'meta/rosetta',
 				'meta/themes',
 				'meta/plugins',
