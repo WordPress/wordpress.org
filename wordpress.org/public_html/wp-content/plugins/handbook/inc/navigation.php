@@ -30,6 +30,44 @@ class WPorg_Handbook_Navigation {
 		if ( is_active_widget( false, false, WPorg_Handbook_Pages_Widget::get_widget_id_base(), true ) ) {
 			self::$using_pages_widget = true;
 		}
+
+		// Override o2 navigation defaults.
+		add_filter( 'o2_post_fragment', array( __CLASS__, 'o2_post_fragment' ), 10, 2 );
+	}
+
+	/**
+	 * Overrides the o2 post fragment data to use data pertaining to the post
+	 * navigation handled by this plugin rather than o2's default post
+	 * navigation presumptions.
+	 *
+	 * @param array $fragment The post fragments used by o2's templates.
+	 * @param int   $post_id  The post ID.
+	 * @return array
+	 */
+	public static function o2_post_fragment( $fragment, $post_id ) {
+		$prev = $next = false;
+
+		if ( self::$using_pages_widget ) {
+			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget( $post_id );
+		} else {
+			$adjacent = self::get_adjacent_posts_via_menu( $menu_name, $post_id );
+		}
+
+		// If an array wasn't returned, then handbook navigation does not apply.
+		if ( ! is_array( $adjacent ) ) {
+			return $fragment;
+		}
+
+		list( $prev, $next ) = $adjacent;
+
+		$fragment['hasPrevPost']   = ! empty( $prev );
+		$fragment['prevPostTitle'] = $prev ? $prev->title : '';
+		$fragment['prevPostURL']   = $prev ? $prev->url   : '';
+		$fragment['hasNextPost']   = ! empty( $next );
+		$fragment['nextPostTitle'] = $next ? $next->title : '';
+		$fragment['nextPostURL']   = $next ? $next->url   : '';
+
+		return $fragment;
 	}
 
 	/**
