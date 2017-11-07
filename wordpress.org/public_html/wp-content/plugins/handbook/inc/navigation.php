@@ -48,11 +48,19 @@ class WPorg_Handbook_Navigation {
 	 *                          widget is not in use. Default 'Table of Contents'.
 	 */
 	public static function show_nav_links( $menu_name = 'Table of Contents' ) {
+		$prev = $next = false;
+
 		if ( self::$using_pages_widget ) {
-			self::navigate_via_handbook_pages_widget();
+			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget();
 		} else {
-			self::navigate_via_menu( $menu_name );
+			$adjacent = self::get_adjacent_posts_via_menu( $menu_name );
 		}
+
+		if ( is_array( $adjacent ) ) {
+			list( $prev, $next ) = $adjacent;
+		}
+
+		self::output_navigation( $prev, $next );
 	}
 
 	/**
@@ -60,16 +68,43 @@ class WPorg_Handbook_Navigation {
 	 * handbook widget settings.
 	 *
 	 * @access protected
+	 *
+	 * @param int|WP_Post $post        Optional. The post object or ID. Default is
+	 *                                 global post.
+	 * @param string      $type        Optional. The type of adjacent post(s) to
+	 *                                 return. One of 'prev', 'next', or 'both'.
+	 *                                 Default 'both'.
+	 * @param int|WP_Post $source_post Optional. The post requesting an adjacent
+	 *                                 post, if not $post itself. Default ''.
+	 * @return null|array {
+	 *    The previous and next post.
+	 *
+	 *    @type false|object $prev Object containing 'title' and 'url' for previous post.
+	 *    @type false|object $prev Object containing 'title' and 'url' for next post.
+	 * }
 	 */
-	protected static function navigate_via_handbook_pages_widget() {
+	protected static function get_adjacent_posts_via_handbook_pages_widget( $post = '', $type = 'both', $source_post = '' ) {
 		// Get current post.
-		if ( ! $post = get_post() ) {
+		if ( ! $post = get_post( $post ) ) {
 			return;
 		}
 
 		// Bail unless a handbook page.
-		if ( ! in_array( get_post_type(), WPorg_Handbook_Init::get_post_types() ) ) {
+		if ( ! wporg_is_handbook_post_type( get_post_type( $post ) ) ) {
 			return;
+		}
+
+		// Determine which adjacent post(s) to find.
+		if ( in_array( $type, array( 'prev', 'next' ) ) ) {
+			if ( 'prev' === $type ) {
+				$get_prev = true;
+				$get_next = false;
+			} else {
+				$get_prev = false;
+				$get_next = true;
+			}
+		} else {
+			$get_prev = $get_next = true;
 		}
 
 		// Get settings for widget.
@@ -85,25 +120,34 @@ class WPorg_Handbook_Navigation {
 		}
 
 		// Cache key format is pages:{post type}:{sort column}(:{excluded})?.
-		$cache_key = 'pages:' . get_post_type() . ':' . $sort_column;
+		$cache_key = 'pages:' . get_post_type( $post ) . ':' . $sort_column;
 		if ( $exclude ) {
 			$cache_key .= ':' . str_replace( ' ', '', $exclude );
 		}
 		$cache_group = 'wporg_handbook:' . get_current_blog_id();
 
+		$post_status = array( 'publish' );
+		if ( current_user_can( get_post_type_object( get_post_type( $post ) )->cap->read_private_posts ) ) {
+			$post_status[] = 'private';
+		}
+
 		// Get the hierarchically and menu_order ordered list of handbook pages.
 		$handbook_pages = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $handbook_pages ) {
 			if ( 'menu_order' === $sort_column ) {
-				$sort_column = 'menu_order, post_title';
+				$sort_column = array( 'menu_order' => 'ASC', 'post_title' => 'ASC' );
 			}
 
-			$handbook_pages = get_pages( array(
-				'echo'        => 0,
-				'exclude'     => $exclude,
-				'post_type'   => get_post_type(),
-				'sort_column' => $sort_column,
-				'sort_order'  => 'asc',
+			$parent_id = wp_get_post_parent_id( $post );
+
+			$handbook_pages = get_posts( array(
+				'exclude'        => $exclude,
+				'post_parent'    => $parent_id,
+				'post_status'    => $post_status,
+				'post_type'      => get_post_type( $post ),
+				'orderby'        => $sort_column,
+				'order'          => 'ASC',
+				'posts_per_page' => -1,
 			) );
 
 			if ( $handbook_pages ) {
@@ -111,36 +155,78 @@ class WPorg_Handbook_Navigation {
 			}
 		}
 
+		$prev = $next = false;
+
 		// Determine the previous and next handbook pages.
 		if ( $handbook_pages ) {
-			$current_page  = wp_list_filter( $handbook_pages, array( 'ID' => get_the_ID() ) );
+			$current_page  = wp_list_filter( $handbook_pages, array( 'ID' => $post->ID ) );
 			$current_index = array_keys( $current_page );
 
-			if ( $current_index ) {
+			if ( false !== $current_index ) {
 				$current_index = $current_index[0];
 				$current_page  = $current_page[ $current_index ];
 
-				$prev = $next = false;
-
-				if ( array_key_exists( $current_index - 1, $handbook_pages ) ) {
+				// The previous post is the post's immediate sibling.
+				// It's debatable if it should be the last leaf node of the previous
+				// sibling's last child (since if you are on that leaf node, the next
+				// post is the current post). That's what the custom menu-based
+				// navigation does, but it is easier to do there than here.
+				if ( $get_prev && array_key_exists( $current_index - 1, $handbook_pages ) ) {
 					$prev = $handbook_pages[ $current_index - 1 ];
 					$prev = (object) array(
 						'url'   => get_the_permalink( $prev->ID ),
-						'title' => get_the_title( $prev->ID )
+						'title' => get_the_title( $prev->ID ),
 					);
 				}
 
-				if ( array_key_exists( $current_index + 1, $handbook_pages ) ) {
+				// If no previous yet, then it's the parent, if there is one.
+				if ( $get_prev && ! $prev && $parent_id ) {
+					$prev = (object) array(
+						'url'   => get_the_permalink( $parent_id ),
+						'title' => get_the_title( $parent_id ),
+					);
+				}
+
+				// The next post may be this post's first child.
+				if ( $get_next && ! $source_post ) {
+					$children = get_posts( array(
+						'exclude'        => $exclude,
+						'post_parent'    => $post->ID,
+						'post_status'    => $post_status,
+						'post_type'      => get_post_type( $post ),
+						'orderby'        => $sort_column,
+						'order'          => 'ASC',
+						'posts_per_page' => 1,
+					) );
+					if ( $children ) {
+						$next = (object) array(
+							'url'   => get_the_permalink( $children[0]->ID ),
+							'title' => get_the_title( $children[0]->ID ),
+						);
+					}
+				}
+
+				// If no next yet, get next sibling.
+				if ( $get_next && ! $next && array_key_exists( $current_index + 1, $handbook_pages ) ) {
 					$next = $handbook_pages[ $current_index + 1 ];
 					$next = (object) array(
 						'url'   => get_the_permalink( $next->ID ),
-						'title' => get_the_title( $next->ID )
+						'title' => get_the_title( $next->ID ),
 					);
 				}
 
-				self::output_navigation( $prev, $next );
+				// If no next yet, recursively check for a next ancestor.
+				if ( $get_next && ! $next && $parent_id ) {
+					$parent_next = self::get_adjacent_posts_via_handbook_pages_widget( $parent_id, 'next', $post->ID );
+					if ( is_array( $parent_next ) ) {
+						$next = $parent_next[1];
+					}
+				}
+
 			}
 		}
+
+		return array( $prev, $next );
 	}
 
 	/**
@@ -150,10 +236,18 @@ class WPorg_Handbook_Navigation {
 	 * @access protected
 	 *
 	 * @param string $menu_name The name of the menu to use for nav ordering.
+	 * @param int|WP_Post $post Optional. The post object or ID. Default is global
+	 *                          post.
+	 * @return null|array {
+	 *    The previous and next post.
+	 *
+	 *    @type false|object $prev Object containing 'title' and 'url' for previous post.
+	 *    @type false|object $prev Object containing 'title' and 'url' for next post.
+	 * }
 	 */
-	protected static function navigate_via_menu( $menu_name ) {
+	protected static function get_adjacent_posts_via_menu( $menu_name, $post = '' ) {
 		// Get current post.
-		if ( ! $post = get_post() ) {
+		if ( ! $post = get_post( $post ) ) {
 			return;
 		}
 
@@ -171,7 +265,7 @@ class WPorg_Handbook_Navigation {
 			return;
 		}
 
-		// Find the previous post (note: preview menu item may not be a post).
+		// Find the previous post (note: previous menu item may not be a post).
 		$previous = null;
 		for ( $n = $i-1; $n >= 0; $n-- ) {
 			if ( isset( $menu_items[ $n ] ) && is_a( $menu_items[ $n ], 'WP_Post' ) ) {
@@ -190,7 +284,7 @@ class WPorg_Handbook_Navigation {
 			}
 		}
 
-		self::output_navigation( $previous, $next );
+		return array( $previous, $next );
 	}
 
 	/**
@@ -239,4 +333,3 @@ class WPorg_Handbook_Navigation {
 }
 
 WPorg_Handbook_Navigation::init();
-
