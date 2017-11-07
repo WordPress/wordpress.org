@@ -598,15 +598,14 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 /* ------------------------------------- */
 
 .regional-camps-promo {
-	/* background-color: #e0f5fa; */
 	background-color: #000000;
-	text-align: center;
 }
 
 .regional-camps-promo img {
 	display: block;
 	max-width: 960px;
 	margin: 0 auto;
+	width: 100%;
 }
 
 /* !Main Navigation */

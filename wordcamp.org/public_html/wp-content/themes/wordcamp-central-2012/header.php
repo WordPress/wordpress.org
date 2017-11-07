@@ -63,13 +63,18 @@
 <?php if ( date_create( 'now' ) <= date_create( '2017-12-04' ) ) : ?>
 	<section class="regional-camps-promo">
 		<a href="https://2017.us.wordcamp.org/tickets/">
-			<img
-				src="https://s.w.org/images/home/wcus-banner-2017.png"
-				srcset="
-					https://s.w.org/images/home/wcus-banner-2017_small.png 800w,
-					https://s.w.org/images/home/wcus-banner-2017.png 900w,
-					https://s.w.org/images/home/wcus-banner-2017x2.png 1800w"
-				alt="WordCamp US 2017 in Nashville banner" />
+			<picture>
+				<source
+					srcset="
+						https://central.wordcamp.org/files/2017/11/wcc-wcus-2017.png,
+						https://central.wordcamp.org/files/2017/11/wcc-wcus-2017_2x.png 2x"
+					media="(min-width: 500px)" />
+				<source
+					srcset="https://central.wordcamp.org/files/2017/11/wcc-wcus-2017_mobile.png" />
+				<img
+					src="https://central.wordcamp.org/files/2017/11/wcc-wcus-2017.png"
+					alt="WordCamp US 2017 in Nashville banner" />
+			</picture>
 		</a>
 	</section>
 <?php endif; ?>
