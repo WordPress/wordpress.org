@@ -59,6 +59,21 @@
 </head>
 
 <body <?php body_class(); ?>>
+
+<?php if ( date_create( 'now' ) <= date_create( '2017-12-04' ) ) : ?>
+	<section class="regional-camps-promo">
+		<a href="https://2017.us.wordcamp.org/tickets/">
+			<img
+				src="https://s.w.org/images/home/wcus-banner-2017.png"
+				srcset="
+					https://s.w.org/images/home/wcus-banner-2017_small.png 800w,
+					https://s.w.org/images/home/wcus-banner-2017.png 900w,
+					https://s.w.org/images/home/wcus-banner-2017x2.png 1800w"
+				alt="WordCamp US 2017 in Nashville banner" />
+		</a>
+	</section>
+<?php endif; ?>
+
 <div id="header" class="group">
 	<div id="masthead" class="group">
 		<?php /*  Allow screen readers / text browsers to skip the navigation menu and get right to the good stuff */ ?>

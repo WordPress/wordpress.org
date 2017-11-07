@@ -23,6 +23,7 @@ Tags:			light
 	d. Buttons
 	e. Common Elements
 	f. Header & Footer
+	g. Regional Camps Promo
 02. Homepage
 	a. Hero Panel
 	b. Content Blocks
@@ -591,6 +592,21 @@ li:after { content: "."; display: block; height: 0; clear: both; visibility: hid
 
 	text-indent: -99999px;
 	display: block;
+}
+
+/* !01g. Regional Camps Promo */
+/* ------------------------------------- */
+
+.regional-camps-promo {
+	/* background-color: #e0f5fa; */
+	background-color: #000000;
+	text-align: center;
+}
+
+.regional-camps-promo img {
+	display: block;
+	max-width: 960px;
+	margin: 0 auto;
 }
 
 /* !Main Navigation */
