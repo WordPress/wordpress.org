@@ -249,6 +249,24 @@ ol ol, ol ul {
 	font-size: inherit;
 }
 
+a,
+a:visited,
+a:active,
+.entry-meta .entry-actions:hover a,
+.entry-meta .entry-actions:hover a:visited,
+.comment-meta .comment-actions:hover a,
+.comment-meta .comment-actions:hover a:visited,
+#help dt,
+#media-buttons .button,
+.responsive-link,
+.entry-meta .entry-date:hover,
+.comment-meta .comment-date:hover,
+.o2-xpost-entry-date:hover,
+.o2-comment-actions ul li a:before,
+.o2-comment-actions ul li a span {
+	color: #0072a9;
+}
+
 body,
 .widget,
 .o2-app-page-title,
@@ -337,7 +355,7 @@ aside[id^="handbook"] .widget-title {
 }
 
 .o2-app-page-title a {
-	color: #3498db;
+	color: #0072a9;
 }
 .o2-app-page-title a:visited {
 	color: #4ca6cf;
@@ -563,7 +581,7 @@ article.type-handbook.status-private .o2-post:after {
 	background: white url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+YXJyb3ctZG93bjwvdGl0bGU+PHBhdGggZD0iTTE1LjUgNkwxNyA3LjVsLTYuNzUgNi43NUwzLjUgNy41IDUgNmw1LjI1IDUuMjVMMTUuNSA2eiIgZmlsbD0iI2JiYiIgZmlsbC1ydWxlPSJldmVub2RkIi8+PC9zdmc+) no-repeat right 10px center;
 	border-radius: 3px;
 	border: 1px solid #bbb;
-	color: #3498db;
+	color: #0072a9;
 	cursor: pointer;
 	display: inline-block;
 	margin: 0;
@@ -604,12 +622,12 @@ article.type-handbook.status-private .o2-post:after {
 
 .o2-editor-select::-ms-value {
 	background: none;
-	color: #3498db;
+	color: #0072a9;
 }
 
 .o2-editor-select:-moz-focusring {
 	color: transparent;
-	text-shadow: 0 0 0 #3498db;
+	text-shadow: 0 0 0 #0072a9;
 }
 
 nav.o2-post-footer-actions ul li > a,
