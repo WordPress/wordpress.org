@@ -149,6 +149,17 @@ h2.fancy:nth-of-type(1) {
 	vertical-align: middle;
 }
 
+.wporg-blog-news .wp-block-image {
+	margin: 0;
+}
+
+.wporg-blog-news .wp-block-separator {
+	margin: 2em 0 3em;
+	max-width: 100%;
+	border: none;
+	border-top: 1px solid #dfdfdf;
+}
+
 /**
  * Post Navigation
  */
