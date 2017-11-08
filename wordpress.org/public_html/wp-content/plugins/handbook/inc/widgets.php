@@ -21,24 +21,51 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 		return self::$widget_id_base;
 	}
 
-	function __construct() {
-		$widget_ops = array('classname' => 'widget_wporg_handbook_pages', 'description' => __( 'Your site&#8217;s Handbook Pages', 'wporg' ) );
+	public function __construct() {
+		$widget_ops = array(
+			'classname' => 'widget_wporg_handbook_pages',
+			'description' => __( 'Your site&#8217;s Handbook Pages', 'wporg' ),
+			'customize_selective_refresh' => true,
+		);
 		WP_Widget::__construct( self::get_widget_id_base(), __( 'Handbook Pages', 'wporg' ), $widget_ops );
 	}
 
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		$args['after_title'] = '</h2>' . "\n" . '<div class="menu-table-of-contents-container">' . "\n";
 		$args['after_widget'] = '</div>';
 
-		add_filter( 'widget_pages_args',    array( $this, 'handbook_post_type' ) );
+		add_filter( 'widget_pages_args',    array( $this, 'handbook_post_type' ), 10, 2 );
 		add_filter( 'page_css_class',       array( $this, 'amend_page_css_class' ) );
 		parent::widget( $args, $instance );
 		remove_filter( 'page_css_class',    array( $this, 'amend_page_css_class' ) );
 		remove_filter( 'widget_pages_args', array( $this, 'handbook_post_type' ) );
 	}
 
-	function handbook_post_type( $args ) {
+	public function form( $instance ) {
+		parent::form( $instance );
+
+		$checked = $instance['show_home'] ? 'checked="checked"' : '';
+		?>
+		<p>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id('show_home') ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_home' ) ); ?>" type="checkbox" value="1" <?php echo $checked ?> />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_home' ) ); ?>"><?php _e( 'List the home page' ); ?></label>
+		</p>
+		<?php
+	}
+
+	public function update( $new_instance, $old_instance ) {
+		$instance = parent::update( $new_instance, $old_instance );
+		$instance['show_home'] = (bool) $new_instance['show_home'];
+
+		return $instance;
+	}
+
+	public function handbook_post_type( $args, $instance ) {
 		$post = get_post();
+
+		if ( ! isset( $instance['show_home'] ) ) {
+			$instance['show_home'] = false;
+		}
 
 		$this->post_types = (array) apply_filters( 'handbook_post_types', $this->post_types );
 		$this->post_types = array_map( array( $this, 'append_suffix' ), $this->post_types );
@@ -59,14 +86,14 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 			$slug = substr( $post->post_type, 0, -9 );
 			$page = get_page_by_path( $slug, OBJECT, $post->post_type );
 		}
-		if ( $page ) {
+		if ( $page && ! $instance['show_home'] ) {
 			$args['exclude'] = $page->ID;
 		}
 
 		return $args;
 	}
 
-	function append_suffix( $t ) {
+	public function append_suffix( $t ) {
 		if ( in_array( $t, array( 'handbook', 'page' ) ) ) {
 			return $t;
 		}
@@ -82,7 +109,7 @@ class WPorg_Handbook_Pages_Widget extends WP_Widget_Pages {
 	 *
 	 * @return array
 	 */
-	function amend_page_css_class( $css_class ) {
+	public function amend_page_css_class( $css_class ) {
 		$class_name_map = array(
 			'current_page_ancestor'  => 'current-menu-ancestor',
 			'current_page_item'      => 'current-menu-item',
