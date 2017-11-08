@@ -208,7 +208,8 @@ input[type="submit"] {
 	border-bottom: none;
 }
 
-.navigation-main a {
+.navigation-main a,
+.navigation-main a:visited {
 	color: rgba(255, 255, 255, 0.8);
 	font-size: 14px;
 }
