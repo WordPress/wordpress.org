@@ -126,10 +126,17 @@
 				&:hover {
 					color: #eee;
 				}
+			}
 
-				&.current {
+			&.current,
+			&.current-menu-item {
+				a {
 					color: #eee;
 				}
+			}
+
+			.uparrow {
+				display: none;
 			}
 		}
 
@@ -157,8 +164,8 @@
 
 	.download-button {
 		background: #21759b linear-gradient(to bottom, #2a95c5, #21759b);
-		border-color: #21759b;
 		border-bottom-color: #1e6a8d;
+		border-color: #21759b;
 		box-shadow: inset 0 1px 0 rgba( 120, 200, 230, 0.5 );
 
 		&:hover,
@@ -251,19 +258,19 @@
 		}
 
 		h2.rosetta {
-			padding: 36px 27px 0;
 			float: left;
+			padding: 36px 27px 0;
 		}
 
 		#wporg-header-menu {
-			position: static;
 			float:left;
-			margin: -15px 0 0;
-			padding: 0;
-			min-width: 0;
-			max-width: inherit;
-			width: 100%;
 			list-style: none;
+			margin: -15px 0 0;
+			max-width: inherit;
+			min-width: 0;
+			padding: 0;
+			position: static;
+			width: 100%;
 		}
 
 		ul li {
@@ -271,82 +278,78 @@
 			position:relative;
 
 			a {
-				font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
-				font-weight: 600;
-				display: block;
-				line-height: 34px;
-				padding: 0 6px;
-				margin: 0 4px;
-				font-size: 13px;
 				color: #eee;
+				display: block;
+				font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+				font-size: 13px;
+				font-weight: 600;
 				height: 46px;
+				line-height: 34px;
+				margin: 0 4px;
+				padding: 0 6px;
 
 				&.current ~ .uparrow {
-					width: 0;
-					height: 0;
+					border-bottom: 9px solid #f7f7f7;
 					border-left: 9px solid transparent;
 					border-right: 9px solid transparent;
-					border-bottom: 9px solid #f7f7f7;
+					height: 0;
 					margin: -8px auto 0 auto;
+					width: 0;
 				}
-			}
-
-			&#download .uparrow {
-				display:none;
 			}
 
 			&.current-menu-item:after,
 			&.current_page_parent:after {
-				content: '';
-				position: absolute;
-				left: 50%;
-				width: 0;
-				height: 0;
+				border-bottom: 9px solid #f7f7f7;
 				border-left: 9px solid transparent;
 				border-right: 9px solid transparent;
-				border-bottom: 9px solid #f7f7f7;
+				content: '';
+				height: 0;
+				left: 50%;
 				margin: -8px 0 0 -9px;
+				position: absolute;
+				width: 0;
 			}
 
 			&:hover .nav-submenu ~ .uparrow,
 			.nav-submenu:hover ~ .uparrow {
-				width: 0;
-				height: 0;
+				border-bottom: 9px solid #32373c;
 				border-left: 9px solid transparent;
 				border-right: 9px solid transparent;
-				border-bottom: 9px solid #32373c;
+				height: 0;
 				margin: -10px auto 0 auto;
+				width: 0;
 			}
 
 			.nav-submenu li {
 				float: none;
 
 				a {
-					margin-left: 6px;
 					height: 34px;
 					line-height: 34px;
+					margin-left: 6px;
 				}
 			}
 		}
 
 		.nav-submenu {
-			display:none!important;/* Prevents #wporg-header ul overwriting this */
-			min-width: 0;
 			background: #32373c;
-			margin-top: -1px;
 			border: #32373c solid 1px;
-			border-top:0;
+			border-top: 0;
+			display: none !important;/* Prevents #wporg-header ul overwriting this */
+			margin-top: -1px;
+			min-width: 0;
 		}
 
 		ul li:hover .nav-submenu,
 		ul li .nav-submenu:hover {
-			display:block!important;/* Prevents #wporg-header ul overwriting this */
-			position:absolute;
-			top:46px;
+			display: block !important;/* Prevents #wporg-header ul overwriting this */
 			left:0;
-			z-index:101;
 			margin-left:0;
-			width:auto;
+			position: absolute;
+			top: 46px;
+			width: auto;
+			z-index: 101;
 		}
 
 		#headline h2 {
@@ -412,6 +415,8 @@
 	@include breakpoint( $sm ) {
 		display: none;
 	}
+
+	-webkit-font-smoothing: antialiased;
 }
 
 #download-mobile {
