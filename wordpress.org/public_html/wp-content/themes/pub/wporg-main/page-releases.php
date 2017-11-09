@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Releases
+ * Template for displaying a release archive page.
  *
  * @package WordPressdotorg\MainTheme
  */
@@ -20,11 +20,11 @@ get_header( 'page' ); ?>
 			<?php
 			if ( ! empty( $releases ) ) :
 				if ( isset( $releases['latest'] ) ) :
-					rosetta_release_row( null, null, null, true );
+					release_row( [], '', '', true );
 					?>
 					<h3 id="latest"><?php _e( 'Latest release', 'wporg' ); ?></h3>
 					<table class="releases latest">
-						<?php echo rosetta_release_row( $releases['latest'], 'alt' ); ?>
+						<?php release_row( $releases['latest'], 'alt' ); ?>
 					</table>
 					<?php
 				endif;
@@ -33,44 +33,44 @@ get_header( 'page' ); ?>
 					echo '<a name="older" id="older"></a>';
 
 					foreach ( $releases['branches'] as $branch => $branch_release ):
-						rosetta_release_row( null, null, null, true );
+						release_row( [], '', '', true );
 						?>
 						<h3><?php printf( __( '%s Branch', 'wporg' ), $branch );?></h3>
 						<table class="releases">
 							<?php
 							foreach ( $branch_release as $release ) :
-								rosetta_release_row( $release, 'alt' );
+								release_row( $release, 'alt' );
 							endforeach;
 							?>
 						</table>
 						<?php
 					endforeach;
-				endif; # any branches
+				endif; // any branches
 
 				if ( ! empty( $releases['betas'] ) ) :
 					?>
 					<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 					<table id="beta" class="releases">
 						<?php
-						rosetta_release_row( null, null, null, true );
+						release_row( [], '', '', true );
 						foreach ( $releases['betas'] as $release ):
-							rosetta_release_row( $release, 'alt', 'beta-first' );
+							release_row( $release, 'alt', 'beta-first' );
 						endforeach;
 						?>
 					</table>
 
 					<?php
-				endif; # any betas
-			else: # no releases
+				endif; // any betas
+			else: // no releases
 				echo '<p>' . __( 'There are no releases, yet.', 'wporg' ) . '</p>';
-			endif; # if releases
+			endif; // if releases
 			?>
 		</div><!-- .entry-content -->
 
 		<?php
 		edit_post_link(
 			sprintf(
-			/* translators: %s: Name of current post */
+				/* translators: %s: Name of current post */
 				esc_html__( 'Edit %s', 'wporg' ),
 				the_title( '<span class="screen-reader-text">"', '"</span>', false )
 			),

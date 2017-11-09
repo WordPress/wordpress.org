@@ -43,3 +43,8 @@ function widgets() {
 	} );
 }
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
+
+/**
+ * Custom template tags.
+ */
+require_once get_stylesheet_directory() . '/inc/template-tags.php';
