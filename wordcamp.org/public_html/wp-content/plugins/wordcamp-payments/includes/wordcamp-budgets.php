@@ -5,6 +5,7 @@
  */
 class WordCamp_Budgets {
 	const VERSION = '0.1.4';
+	const PAYMENT_INFO_RETENTION_PERIOD = 14; // days
 
 	/**
 	 * Constructor
@@ -13,6 +14,7 @@ class WordCamp_Budgets {
 		add_action( 'init', array( __CLASS__, 'register_post_statuses' ) );
 		add_action( 'admin_menu',             array( $this, 'register_budgets_menu' )     );
 		add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_common_assets' ), 11 );
+		add_filter( 'user_has_cap',           array( __CLASS__, 'user_can_view_payment_details' ), 10, 4 );
 	}
 
 	/**
@@ -974,6 +976,38 @@ class WordCamp_Budgets {
 
 		return $post;
 	}
+
+	/**
+	 * Limit access to payment details to protect privacy.
+	 *
+	 * Only network admins and the request's author should be able to see the details. Trusted deputies
+	 * do not need access, since they can't issue payments.
+	 *
+	 * @filter user_has_cap.
+	 *
+	 * @param array   $users_capabilities  All of the user's capabilities.
+	 * @param array   $mapped_capabilities All capabilities required to perform the given capability.
+	 * @param array   $args                (optional) Additional parameters passed to WP_User::has_cap().
+	 * @param WP_User $user                The user whose capabilities we're modifying.
+	 *
+	 * @return array
+	 */
+	public static function user_can_view_payment_details( $users_capabilities, $mapped_capabilities, $args, $user ) {
+		global $post;
+
+		$target_capability = 'view_wordcamp_payment_details';
+		$users_capabilities[ $target_capability ] = false;
+
+		/*
+		 * We also want network admins to have access, but it isn't necessary to explicitly add them
+		 * here, because `has_cap()` always returns `true` for them.
+		 */
+		if ( in_array( $target_capability, $args ) && isset( $post->post_author ) && $post->post_author == $user->ID ) {
+			$users_capabilities[ $target_capability ] = true;
+		}
+
+		return $users_capabilities;
+    }
 
 	/**
 	 * Insert an entry into a log for one of the custom post types

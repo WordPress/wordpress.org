@@ -1,8 +1,17 @@
+<?php if ( current_user_can( 'view_wordcamp_payment_details' ) ) : ?>
+
 <?php if ( ! empty( $box['args']['introduction_message'] ) ) : ?>
 	<p>
 		<?php echo wp_kses( $box['args']['introduction_message'], array( 'p' => array() ) ); ?>
 	</p>
 <?php endif; ?>
+
+	<p>
+		<?php echo esc_html( sprintf(
+			__( "Payment information will be redacted %d days after the payment has been sent. Until then, it will be available to you and to trusted network administrators.", 'wordcamporg' ),
+			WordCamp_Budgets::PAYMENT_INFO_RETENTION_PERIOD
+		) ); ?>
+	</p>
 
 <fieldset <?php disabled( $box['args']['fields_enabled'], false ); ?> >
 
@@ -94,3 +103,9 @@
 <p class="wcb-form-required">
 	<?php esc_html_e( '* required', 'wordcamporg' ); ?>
 </p>
+
+<?php else : ?>
+
+	<?php esc_html_e( 'Only the request author and network administrators can view payment details.', 'wordcamporg' ); ?>
+
+<?php endif; ?>
