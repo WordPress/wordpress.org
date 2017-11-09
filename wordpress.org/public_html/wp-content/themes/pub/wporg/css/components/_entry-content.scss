@@ -6,4 +6,15 @@
 	.post-password-form input[type="submit"] {
 		@extend .button;
 	}
+
+	[class*="col-"] {
+		& ~ h1,
+		& ~ h2,
+		& ~ h3,
+		& ~ h4,
+		& ~ h5,
+		& ~ h6 {
+			clear: none;
+		}
+	}
 }

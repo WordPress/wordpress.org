@@ -415,8 +415,6 @@
 	@include breakpoint( $sm ) {
 		display: none;
 	}
-
-	-webkit-font-smoothing: antialiased;
 }
 
 #download-mobile {
