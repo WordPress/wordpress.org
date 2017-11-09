@@ -84,7 +84,7 @@ get_header( 'wporg' );
 				</ul>
 				<p><?php
 					/* translators: %s: Link to Plugin Directory. */
-					printf( __( 'Extend WordPress with over 45,000 plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%s">much more</a>.', 'wporg' ), esc_url( _x( 'https://wordpress.org/plugins/', 'Link to local plugin directory', 'wporg' ) ) ); ?></p>
+					printf( __( 'Extend WordPress with over 45,000 plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%s">much more</a>.', 'wporg' ), esc_url( home_url( '/plugins/' ) ) ); ?></p>
 			</section>
 
 			<section class="community-2">
@@ -99,14 +99,14 @@ get_header( 'wporg' );
 				<h2><?php _e( 'Get Started with WordPress', 'wporg' ); ?></h2>
 				<p class="subheading"><?php _e( 'Over 60 million people have chosen WordPress to power the place on the web they call &ldquo;home&rdquo; &mdash; join the family.', 'wporg' ); ?></p>
 				<div class="cta-wrapper">
-					<a href="https://wordpress.org/download/" class="button button-primary button-xl"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
+					<a href="<?php echo esc_url( get_downloads_url() ); ?>" class="button button-primary button-xl"><?php _e( 'Get WordPress', 'wporg' ); ?></a>
 				</div>
 			</section>
 		</div>
 
 		<div id="home-below" class="home-below row gutters">
 			<div class="col-4">
-				<h4><a href="<?php echo esc_url( _x( 'https://wordpress.org/news/', 'Link to local news blog', 'wporg' ) ); ?>"><?php _e( 'News From Our Blog', 'wporg' ); ?></a></h4>
+				<h4><a href="<?php echo get_permalink( get_option( 'page_for_posts' ) ); ?>"><?php _e( 'News From Our Blog', 'wporg' ); ?></a></h4>
 
 				<?php
 				$featured = new \WP_Query( [ 'posts_per_page' => 1, 'ignore_sticky_posts' => true ] );
@@ -124,7 +124,7 @@ get_header( 'wporg' );
 
 				<ol class="steps">
 					<li class="one"><span></span><?php printf( __( '<a href="%s">Find a Web Host</a> and get great hosting while supporting WordPress at the same&nbsp;time.', 'wporg' ), esc_url( 'https://wordpress.org/hosting/' ) ); ?></li>
-					<li class="two"><span></span><?php printf( __( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.', 'wporg' ),  esc_url( _x( 'https://wordpress.org/downloads/', 'Link to local downloads page', 'wporg' ) ) ); ?></li>
+					<li class="two"><span></span><?php printf( __( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.', 'wporg' ),  esc_url( get_downloads_url() ) ); ?></li>
 					<li class="three"><span></span><?php printf( __( '<a href="%s">Read the Documentation</a> and become a WordPress expert yourself, impress your friends.', 'wporg' ), esc_url( 'https://developer.wordpress.org' ) ); ?></li>
 				</ol>
 			</div>

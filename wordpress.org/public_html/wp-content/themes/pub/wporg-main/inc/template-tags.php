@@ -52,3 +52,26 @@ function release_row( $release, $alt_class = '', $first_of_branch_class = '', $r
 	</tr>
 	<?php
 }
+
+/**
+ * Rerieve the localised downloads link.
+ *
+ * Uses the 'releases' page if exists, falling back to the 'txt-download' page for older sites, and finally, the english downloads page.
+ */
+function get_downloads_url() {
+	static $downloads_url = null;
+	if ( is_null( $downloads_url ) ) {
+		$releases_page = get_page_by_path( 'releases' );
+		if ( ! $releases_page ) {
+			$releases_page = get_page_by_path( 'txt-download' );
+		}
+
+		if ( $releases_page ) {
+			$downloads_url = get_permalink( $releases_page );
+		}
+		if ( ! $downloads_url ) {
+			$downloads_url = 'https://wordpress.org/downloads/';
+		}
+	}
+	return $downloads_url;
+}
