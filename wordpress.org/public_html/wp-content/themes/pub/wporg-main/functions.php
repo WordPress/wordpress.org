@@ -45,6 +45,25 @@ function widgets() {
 add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
 
 /**
+ * Turns a menu item that links to the Downloads page into a download button.
+ *
+ * @param array $menu_items The menu items, sorted by each menu item's menu order.
+ * @return array
+ */
+function nav_menu_objects( $menu_items ) {
+	foreach ( $menu_items as $menu_item ) {
+		if ( false !== stripos( $menu_item->url, 'txt-download' ) ) {
+			$menu_item->classes = array_merge( $menu_item->classes, ['button', 'button-primary', 'download'] );
+			$menu_item->title   = _x( 'Download WordPress', 'Menu title', 'wporg' );
+			break;
+		}
+	}
+
+	return $menu_items;
+}
+add_action( 'wp_nav_menu_objects', __NAMESPACE__ . '\nav_menu_objects' );
+
+/**
  * Custom template tags.
  */
 require_once get_stylesheet_directory() . '/inc/template-tags.php';
