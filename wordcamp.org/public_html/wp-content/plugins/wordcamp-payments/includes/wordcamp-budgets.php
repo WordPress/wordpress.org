@@ -484,6 +484,10 @@ class WordCamp_Budgets {
 	 * @param int $post_id
 	 */
 	public static function validate_save_payment_method_fields( $post_id, $meta_key_prefix ) {
+		if ( ! current_user_can( 'view_wordcamp_payment_details' ) ) {
+			return;
+		}
+
 		foreach ( $_POST as $key => $unsafe_value ) {
 			$unsafe_value = wp_unslash( $unsafe_value );
 
