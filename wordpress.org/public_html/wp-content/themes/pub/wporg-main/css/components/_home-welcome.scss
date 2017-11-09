@@ -102,7 +102,7 @@
 				text-align: center;
 				width: 50%;
 
-			@include breakpoint( 739px ) {
+				@include breakpoint( 0, 739px ) {
 					&:nth-child(n+7) {
 						border-bottom: none;
 					}
