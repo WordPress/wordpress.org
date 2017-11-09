@@ -17,7 +17,7 @@ get_header( 'page' ); ?>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
-				<aside class="col-3 <?php echo is_rtl() ? 'alignleft' : 'alignright' ?>">
+				<aside class="col-3 alignright">
 					<?php
 					the_widget( __NAMESPACE__ . '\WPORG_Widget_Download' );
 
