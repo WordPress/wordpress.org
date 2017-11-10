@@ -690,6 +690,9 @@ function validate_and_save_notes( $post, $new_note_message ) {
 	}
 
 	$notes = get_post_meta( $post->ID, '_wcbrr_notes', true );
+	if ( ! is_array( $notes ) ) {
+		$notes = array();
+	}
 
 	$new_note = array(
 		'timestamp' => time(),
