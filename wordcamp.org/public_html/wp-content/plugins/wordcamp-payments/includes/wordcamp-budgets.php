@@ -5,7 +5,7 @@
  */
 class WordCamp_Budgets {
 	const VERSION = '0.1.4';
-	const PAYMENT_INFO_RETENTION_PERIOD = 14; // days
+	const PAYMENT_INFO_RETENTION_PERIOD = 7; // days
 
 	/**
 	 * Constructor
