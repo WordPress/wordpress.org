@@ -915,6 +915,10 @@ function _import_process_entry( $entry ) {
 function redact_paid_requests() {
 	global $wpdb;
 
+	if ( ! is_main_site() ) {
+		return;
+	}
+
 	$reimbursements_index = Reimbursements_Dashboard\get_index_table_name();
 	$vendors_index        = Payment_Requests_Dashboard::get_table_name();
 	$encrypted_fields     = WordCamp_Budgets::get_encrypted_fields();
