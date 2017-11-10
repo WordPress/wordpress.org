@@ -44,6 +44,10 @@ class WCP_Encryption {
 			return new WP_Error( 'encryption-error', 'Only strings can be encrypted.' );
 		}
 
+		if ( REDACTED_VALUE === $raw_data ) {
+			return $raw_data;
+		}
+
 		if ( ! self::init() ) {
 			return new WP_Error( 'encryption-error', 'Could not init encryption keys.' );
 		}

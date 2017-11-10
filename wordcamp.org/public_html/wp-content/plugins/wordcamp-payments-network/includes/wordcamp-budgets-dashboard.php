@@ -1,7 +1,17 @@
 <?php
 
 namespace WordCamp\Budgets_Dashboard;
+
+use WordCamp_Budgets;
+use WCP_Payment_Request;
+use Payment_Requests_Dashboard;
+use WordCamp\Budgets\Reimbursement_Requests;
+use WordCamp\Budgets_Dashboard\Reimbursement_Requests AS Reimbursements_Dashboard;
+
 defined( 'WPINC' ) or die();
+
+define( 'REDACTED_VALUE',               '[deleted for privacy]'    );
+define( 'REDACT_PAID_REQUESTS_CRON_ID', 'wcb_redact_paid_requests' );
 
 /*
  * Core functionality and helper functions shared between modules
@@ -16,6 +26,12 @@ add_action( 'admin_init', __NAMESPACE__ . '\process_export_request' );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_approve', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_set_pending_payment', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_import_request', 11 );
+
+add_action( REDACT_PAID_REQUESTS_CRON_ID, __NAMESPACE__ . '\redact_paid_requests' );
+
+if ( ! wp_next_scheduled( REDACT_PAID_REQUESTS_CRON_ID ) ) {
+	wp_schedule_event( time(), 'twicedaily', REDACT_PAID_REQUESTS_CRON_ID );
+}
 
 /**
  * Register the Budgets Dashboard menu
@@ -891,6 +907,79 @@ function _import_process_entry( $entry ) {
 	// All good.
 	$entry['processed'] = true;
 	return $entry;
+}
+
+/**
+ * Redact payment information when it's no longer needed, to protect privacy.
+ */
+function redact_paid_requests() {
+	global $wpdb;
+
+	$reimbursements_index = Reimbursements_Dashboard\get_index_table_name();
+	$vendors_index        = Payment_Requests_Dashboard::get_table_name();
+	$encrypted_fields     = WordCamp_Budgets::get_encrypted_fields();
+	$retention_period     = strtotime( WordCamp_Budgets::PAYMENT_INFO_RETENTION_PERIOD . ' days ago' );
+
+	$paid_reimbursements = $wpdb->get_results( "
+		SELECT blog_id, request_id, date_paid
+		FROM `$reimbursements_index`
+		WHERE status = 'wcb-paid'
+	" );
+
+	$paid_vendors = $wpdb->get_results( "
+		SELECT blog_id, post_id AS request_id, paid AS date_paid
+		FROM `$vendors_index`
+		WHERE status = 'wcb-paid'
+	" );
+
+	foreach ( array_merge( $paid_reimbursements, $paid_vendors ) as $indexed_reimbursement ) {
+		switch_to_blog( $indexed_reimbursement->blog_id );
+
+		$reimbursement_post = get_post( $indexed_reimbursement->request_id );
+		$field_prefix       = get_encrypted_field_prefix( $reimbursement_post->post_type );
+
+		if ( $indexed_reimbursement->date_paid < $retention_period ) {
+			foreach ( $encrypted_fields as $field ) {
+				$field = $field_prefix . $field;
+
+				if ( ! empty( $reimbursement_post->$field ) && REDACTED_VALUE !== $reimbursement_post->$field ) {
+					update_post_meta( $reimbursement_post->ID, $field, REDACTED_VALUE );
+				}
+			}
+		}
+
+		restore_current_blog();
+	}
+}
+
+/**
+ * Get the encrypted field prefix for the given post type
+ *
+ * @todo Instead of hardcoding them here and in the Payments modules, it'd be better to setup
+ *       constants and use those everywhere.
+ *
+ * @see WordCamp_Budgets::validate_save_payment_method_fields()
+ *
+ * @param string $post_type
+ *
+ * @return string
+ */
+function get_encrypted_field_prefix( $post_type ) {
+	switch ( $post_type ) {
+		case Reimbursement_Requests\POST_TYPE:
+			$prefix = '_wcbrr_';
+			break;
+
+		case WCP_Payment_Request::POST_TYPE:
+			$prefix = '_camppayments_';
+			break;
+
+		default:
+			$prefix = '';
+			break;
+	}
+
+	return $prefix;
 }
 
 class WCB_Import_Results {
