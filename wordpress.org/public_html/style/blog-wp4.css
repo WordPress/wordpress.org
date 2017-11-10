@@ -150,7 +150,7 @@ h2.fancy:nth-of-type(1) {
 }
 
 .wporg-blog-news .wp-block-image {
-	margin: 0;
+	margin: 0 0 1em 0;
 }
 
 .wporg-blog-news .wp-block-separator {
