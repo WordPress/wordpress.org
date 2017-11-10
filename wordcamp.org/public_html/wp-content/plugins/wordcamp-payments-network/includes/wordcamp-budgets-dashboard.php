@@ -15,7 +15,6 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts', 10, 1 )
 add_action( 'admin_init', __NAMESPACE__ . '\process_export_request' );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_approve', 11 );
 add_action( 'admin_init', __NAMESPACE__ . '\process_action_set_pending_payment', 11 );
-
 add_action( 'admin_init', __NAMESPACE__ . '\process_import_request', 11 );
 
 /**

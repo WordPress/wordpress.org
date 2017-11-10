@@ -202,6 +202,7 @@ function update_index_row( $request_id, $request ) {
 	update_post_meta( $request->ID, '_wcb_updated_timestamp', time() );
 
 	// Back-compat.
+	// Warning/@todo: See note in WCP_Payment_Request::render_status_metabox()
 	$back_compat_statuses = array(
 		'wcbrr_submitted' => 'pending-approval',
 		'wcbrr_info_requested' => 'wcb-incomplete',

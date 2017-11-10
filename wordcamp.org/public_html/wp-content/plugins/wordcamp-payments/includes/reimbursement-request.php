@@ -265,6 +265,7 @@ function user_can_edit_request( $post ) {
 function render_status_metabox( $post ) {
 	wp_nonce_field( 'status', 'status_nonce' );
 
+	// Warning/@todo: See note in WCP_Payment_Request::render_status_metabox()
 	$back_compat_statuses = array(
 		'wcbrr_submitted'      => 'wcb-pending-approval',
 		'wcbrr_info_requested' => 'wcb-incomplete',
@@ -866,6 +867,7 @@ function _generate_payment_report_default( $args ) {
 
 		$post = get_post( $entry->request_id );
 
+		// Warning/@todo: See note in WCP_Payment_Request::render_status_metabox()
 		$back_compat_statuses = array(
 			'wcbrr_submitted'      => 'wcb-pending-approval',
 			'wcbrr_info_requested' => 'wcb-incomplete',

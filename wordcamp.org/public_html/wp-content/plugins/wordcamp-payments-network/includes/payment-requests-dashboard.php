@@ -138,6 +138,7 @@ class Payment_Requests_Dashboard {
 			$keywords[] = $amount;
 		}
 
+		// Warning/@todo: See note in WCP_Payment_Request::render_status_metabox()
 		$back_compat_statuses = array(
 			'unpaid' => 'draft',
 			'incomplete' => 'wcb-incomplete',

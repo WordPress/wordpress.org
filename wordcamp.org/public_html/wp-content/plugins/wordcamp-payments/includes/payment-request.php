@@ -206,6 +206,17 @@ class WCP_Payment_Request {
 	public function render_status_metabox( $post ) {
 		wp_nonce_field( 'status', 'status_nonce' );
 
+		/*
+		 * @todo Remove $back_compat_statuses everywhere.
+		 *
+		 * They add a lot of fragility because they're not DRY and the data isn't consistent and
+		 * predictable. They appear in many of the modules in both the wordcamp-payments and
+		 * wordcamp-payments-network plugins.
+		 *
+		 * It seems like it'd be much better to just run a script over all sites and convert the
+		 * data to the new statuses. Need to investigate why that wasn't done to begin with, in
+		 * case there are some problems that make this more complicated than it appears.
+		 */
 		$back_compat_statuses = array(
 			'unpaid' => 'draft',
 			'incomplete' => 'wcb-incomplete',
@@ -525,6 +536,7 @@ class WCP_Payment_Request {
 			return $states;
 
 		// Back-compat
+		// Warning/@todo: See note in render_status_metabox()
 		$back_compat_statuses = array(
 			'unpaid' => 'draft',
 			'incomplete' => 'wcb-incomplete',
@@ -962,6 +974,7 @@ Thanks for helping us with these details!",
 
 			$post = get_post( $entry->post_id );
 
+			// Warning/@todo: See note in render_status_metabox()
 			$back_compat_statuses = array(
 				'unpaid' => 'draft',
 				'incomplete' => 'wcb-incomplete',
