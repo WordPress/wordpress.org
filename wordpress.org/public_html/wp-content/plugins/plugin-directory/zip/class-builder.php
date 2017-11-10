@@ -206,10 +206,7 @@ class Builder {
 		// Existing checksums?
 		$existing_json_checksum_file = file_exists( $this->checksum_file );
 
-		$checksums = array(
-			'md5' => array(),
-			'sha256' => array()
-		);
+		$checksums = array();
 		foreach ( array( 'md5' => 'md5sum', 'sha256' => 'sha256sum' ) as $checksum_type => $checksum_bin ) {
 			$this->exec( sprintf(
 				'cd %s && find . -type f -print0 | sort -z | xargs -0 ' . $checksum_bin . ' 2>&1',
@@ -226,17 +223,21 @@ class Builder {
 				list( $checksum, $filename ) = preg_split( '!\s+!', $line );
 				$filename = trim( preg_replace( '!^./!', '', $filename ) );
 				$checksum = trim( $checksum );
-				$checksums[ $checksum_type][ $filename ] = $checksum;
+
+				if ( ! isset( $checksums[ $filename ] ) ) {
+					$checksums[ $filename ] = array( 'md5' => array(), 'sha256' => array() );
+				}
+
+				$checksums[ $filename ][ $checksum_type ] = $checksum;
 			}
 		}
 
 		$json_checksum_file = (object) array(
-			'plugin'     => $this->slug,
-			'version'    => $plugin_version,
-			'source'     => $this->plugin_version_svn_url,
-			'zip'        => 'https://downloads.wordpress.org/plugins/' . basename( $this->zip_file ),
-			'md5'        => $checksums['md5'],
-			'sha256'     => $checksums['sha256'],
+			'plugin'  => $this->slug,
+			'version' => $plugin_version,
+			'source'  => $this->plugin_version_svn_url,
+			'zip'     => 'https://downloads.wordpress.org/plugins/' . basename( $this->zip_file ),
+			'files'   => $checksums,
 		);
 
 		// If the checksum file exists already, merge it into this one.
@@ -261,30 +262,29 @@ class Builder {
 			}
 
 			// Combine Checksums from existing files and the new files
-			foreach ( array( 'md5', 'sha256' ) as $checksum_type ) {
-				if ( ! $existing_json_checksum_file || empty( $existing_json_checksum_file->{$checksum_type} ) ) {
-					continue;
-				}
-				$existing_checksums = (array) $existing_json_checksum_file->{$checksum_type}; // Assoc array => Object in JSON
-				$new_checksums = &$json_checksum_file->{$checksum_type}; // byref to update new array
+			foreach ( $existing_json_checksum_file->files as $file => $checksums ) {
+				if ( ! isset( $json_checksum_file->files[ $file ] ) ) {
+					// Deleted file, use existing checksums.
+					$json_checksum_file->files[ $file ] = $checksums;
 
-				foreach ( $existing_checksums as $file => $checksums ) {
-					if ( ! isset( $new_checksums[ $file ] ) ) {
-						// Deleted file, include it in checksums.
-						$new_checksums[ $file ] = $existing_checksums[ $file ];
-
-					} elseif ( $new_checksums[ $file ] != $existing_checksums[ $file ] ) {
-						// Checksum has changed, include both in the resulting json file.
-
-						$new_checksums[ $file ] = array_unique( array_merge(
-							(array) $existing_checksums[ $file ], // May already be an array
- 							(array) $new_checksums[ $file ]
+				} elseif ( $checksums !== $json_checksum_file->files[ $file ] ) {
+					// Checksum has changed, include both in the resulting json file.
+					foreach ( array( 'md5', 'sha256' ) as $checksum_type ) {
+						$json_checksum_file->files[ $file ][ $checksum_type ] = array_unique( array_merge(
+							(array) $checksums->{$checksum_type}, // May already be an array
+ 							(array) $json_checksum_file->files[ $file ][ $checksum_type ]
 						) );
+						// Reduce single arrays back to a string when possible.
+						if ( 1 == count( $json_checksum_file->files[ $file ][ $checksum_type ] ) ) {
+							$json_checksum_file->files[ $file ][ $checksum_type ] = array_shift( $json_checksum_file->files[ $file ][ $checksum_type ] );
+						}
 					}
 				}
-
 			}
+
 		}
+
+		ksort( $json_checksum_file->files );
 
 		file_put_contents( $this->checksum_file, wp_json_encode( $json_checksum_file ) );
 	}
