@@ -8,7 +8,7 @@
 
 	<p>
 		<?php echo esc_html( sprintf(
-			__( "Payment information will be redacted %d days after the payment has been sent. Until then, it will be available to you and to trusted network administrators.", 'wordcamporg' ),
+			__( "Payment information will be deleted %d days after the payment has been sent. Until then, it will be available to you and to trusted network administrators.", 'wordcamporg' ),
 			WordCamp_Budgets::PAYMENT_INFO_RETENTION_PERIOD
 		) ); ?>
 	</p>
