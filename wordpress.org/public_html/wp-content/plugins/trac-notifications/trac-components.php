@@ -641,7 +641,10 @@ jQuery( document ).ready( function( $ ) {
 			echo '<td><a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a></td>';
 		}
 
-		$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
+		$open_tickets = 0;
+		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
+			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
+		}
 		echo '<td class="right"><a href="https://core.trac.wordpress.org/component/' . esc_attr( str_replace( ' ', '+', $component ) ) . '">' . $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			echo '<td class="right">' . $arrow . ' ' . sprintf( "%+d", $history['change'] ) . '</td>';
