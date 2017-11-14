@@ -47,7 +47,12 @@ class Upload {
 
 			$upload_result = false;
 
-			if ( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' ) && 'upload' === $_POST['action'] ) :
+			if (
+				! empty( $_POST['_wpnonce'] )
+				&& wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
+				&& 'upload' === $_POST['action']
+				&& ! $submitted_counts->total
+			) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
 					$uploader      = new Upload_Handler;
 					$upload_result = $uploader->process_upload();
