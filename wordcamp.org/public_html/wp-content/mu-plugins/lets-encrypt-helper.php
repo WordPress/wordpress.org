@@ -70,6 +70,7 @@ class WordCamp_Lets_Encrypt_Helper {
 		}
 
 		// Back-compat domains.
+		// @todo Most (but not all) of these are redirects that also exist in sunrise.php. Setup a common function for both of them to pull from, so that things are DRY.
 		$domains[] = '2006.wordcamp.org';
 		$domains[] = '2007.wordcamp.org';
 		$domains[] = 'bg.wordcamp.org';
@@ -85,6 +86,7 @@ class WordCamp_Lets_Encrypt_Helper {
 		$domains[] = 'utah.wordcamp.org';
 		$domains[] = 'wordcampsf.org';
 		$domains[] = 'wordcampsf.com';
+		$domains[] = '2017.zilina.wordcamp.org';
 
 		$domains = array_unique( $domains );
 		$domains = apply_filters( 'wordcamp_letsencrypt_domains', $domains );
