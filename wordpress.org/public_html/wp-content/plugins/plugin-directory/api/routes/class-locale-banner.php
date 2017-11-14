@@ -309,8 +309,8 @@ class Locale_Banner extends Base {
 		global $wpdb;
 
 		$strings = array(
-			2984793 => 'This plugin is also available in %s.',
-			2984794 => 'This plugin is also available in %1$s (also: %2$s).',
+			5118332 => 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>',
+			5118333 => 'This plugin is also available in %1$s (also: %2$s). <a href="%3$s">Help improve the translation!</a>',
 			2984795 => 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>',
 			3004513 => 'The plugin directory is also available in %s.',
 			3004514 => 'The plugin directory is also available in %1$s (also: %2$s).',
