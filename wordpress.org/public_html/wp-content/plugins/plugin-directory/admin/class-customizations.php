@@ -267,7 +267,7 @@ class Customizations {
 				break;
 
 			case 'closed':
-				$message = __( 'This plugin is closed and no longer available for use.', 'wporg-plugins' );
+				$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
 				$type    = 'notice-error';
 				break;
 

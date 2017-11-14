@@ -14,6 +14,7 @@ use WordPressdotorg\Plugin_Directory\Tools;
 global $section, $section_slug, $section_content, $section_read_more;
 
 $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
+$status  = get_post_status();
 
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<?php echo Template::get_plugin_banner( get_post(), 'html' ); ?>
@@ -24,9 +25,9 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				<p><?php _e( 'This plugin <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ); ?></p>
 			</div><!-- .plugin-notice -->
 		<?php endif; ?>
-		<?php if ( 'publish' != get_post()->post_status ) :
+		<?php if ( 'publish' !== $status ) :
 				$notice_type = 'notice-error';
-				switch ( get_post()->post_status ) {
+				switch ( $status ) {
 					case 'draft':
 					case 'pending':
 						$message = __( 'This plugin is requested and not visible to the public yet. Please be patient as your plugin gets reviewed.', 'wporg-plugins' );
@@ -39,24 +40,39 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 						break;
 
 					case 'rejected':
-						$message = __( 'This plugin is rejected and is not visible to the public.', 'wporg-plugins' );
+						$message = __( 'This plugin has been rejected and is not visible to the public.', 'wporg-plugins' );
 						break;
 
 					case 'disabled':
 						if ( current_user_can( 'plugin_approve' ) ) {
-							$message = __( 'This plugin is disabled (closed, but actively serving updates) and is not visible to the public.', 'wporg-plugins' );
+							$message = __( 'This plugin is disabled (closed, but actively serving updates).', 'wporg-plugins' );
+							break;
+						} else {
+							$message = __( 'This plugin has been closed for new installs.', 'wporg-plugins' );
 							break;
 						}
 						// fall through
 					default:
 					case 'closed':
-						$message = __( 'This plugin is closed and is not visible to the public.', 'wporg-plugins' );
+						$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
 						break;
 				}
 			?>
 			<div class="plugin-notice notice <?php echo esc_attr( $notice_type ); ?> notice-alt">
 				<p><?php echo $message; ?></p>
 			</div><!-- .plugin-notice -->
+
+			<?php if ( in_array( $status, array( 'closed', 'disabled' ) ) && get_current_user_id() == get_post()->post_author ) : ?>
+				<div class="plugin-notice notice notice-info notice-alt">
+					<p><?php
+						printf(
+							/* translators: 1: plugins@wordpress.org */
+							__( 'If you did not request this change, please contact <a href="mailto:%1$s">%1$s</a> for a status. All developers with commit access are contacted when a plugin is closed, with the reasons why, so check your spam email too.', 'wporg-plugins' ),
+							'plugins@wordpress.org'
+						);
+					?></p>
+				</div><!-- .plugin-notice -->
+			<?php endif; ?>
 		<?php endif; ?>
 
 		<div class="entry-thumbnail">
@@ -95,7 +111,9 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 				</div>
 			<?php endif; ?>
 
-			<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+			<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', get_post() ) ) : ?>
+				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+			<?php endif; ?>
 		</div>
 
 		<?php the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>

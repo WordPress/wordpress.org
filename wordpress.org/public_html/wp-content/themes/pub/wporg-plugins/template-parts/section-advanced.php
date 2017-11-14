@@ -40,7 +40,7 @@ use WordPressdotorg\Plugin_Directory\Template;
 		// List Trunk, followed by the most recent non-stable release.
 		$tags = array_reverse( $tags );
 
-		if ( $tags ) {
+		if ( $tags && 'publish' === get_post_status() ) {
 			echo '<h5>' . __( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
 
 			echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';

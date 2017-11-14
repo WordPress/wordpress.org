@@ -44,7 +44,7 @@ class Plugin_Directory {
 		add_filter( 'single_term_title', array( $this, 'filter_single_term_title' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
-		add_action( 'wp_head', array( Template::class, 'meta_description' ), 1 );
+		add_action( 'wp_head', array( Template::class, 'output_meta' ), 1 );
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 
 		// Cron tasks.
@@ -317,7 +317,7 @@ class Plugin_Directory {
 		) );
 		register_post_status( 'disabled', array(
 			'label'                     => _x( 'Disabled', 'plugin status', 'wporg-plugins' ),
-			'public'                    => false,
+			'public'                    => true,
 			'show_in_admin_status_list' => current_user_can( 'plugin_disable' ),
 			'label_count'               => _n_noop( 'Disabled <span class="count">(%s)</span>', 'Disabled <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
@@ -329,7 +329,7 @@ class Plugin_Directory {
 		) );
 		register_post_status( 'closed', array(
 			'label'                     => _x( 'Closed', 'plugin status', 'wporg-plugins' ),
-			'public'                    => false,
+			'public'                    => true,
 			'show_in_admin_status_list' => current_user_can( 'plugin_close' ),
 			'label_count'               => _n_noop( 'Closed <span class="count">(%s)</span>', 'Closed <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
@@ -788,7 +788,7 @@ class Plugin_Directory {
 		}
 
 		// For singular requests, or self-author profile requests allow restricted post_status items to show on the front-end.
-		if ( $wp_query->is_main_query() && ( $viewing_own_author_archive || is_user_logged_in() && !empty( $wp_query->query_vars['name'] ) ) ) {
+		if ( $wp_query->is_main_query() && ( $viewing_own_author_archive || is_user_logged_in() && ! empty( $wp_query->query_vars['name'] ) ) ) {
 
 			$wp_query->query_vars['post_status'] = array( 'approved', 'publish', 'closed', 'disabled' );
 
@@ -816,6 +816,14 @@ class Plugin_Directory {
 
 				return $posts;
 			}, 10, 2 );
+		}
+
+		// Allow anyone to view a closed plugin directly from its page. It won't show in search results or lists.
+		if ( $wp_query->is_main_query() && ! empty( $wp_query->query_vars['name'] ) ) {
+			$wp_query->query_vars['post_status'] = (array) $wp_query->query_vars['post_status'];
+			$wp_query->query_vars['post_status'][] = 'closed';
+			$wp_query->query_vars['post_status'][] = 'disabled';
+			$wp_query->query_vars['post_status'] = array_unique( $wp_query->query_vars['post_status'] );
 		}
 
 		// By default, all archives are sorted by active installs

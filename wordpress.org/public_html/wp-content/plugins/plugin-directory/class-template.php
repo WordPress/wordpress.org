@@ -45,15 +45,25 @@ class Template {
 		endif;
 
 		// Schema for plugin pages.
-		if ( is_singular( 'plugin' ) ) :
-			$plugin = get_queried_object();
+		if ( is_singular( 'plugin' ) && 'publish' === get_post_status( get_queried_object_id() ) ) {
+			self::plugin_json_jd_schema( get_queried_object() );
+		}
+	}
 
-			$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
-			$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
-			$num_ratings = array_sum( $ratings );
+	/**
+	 * Prints JSON LD schema for a specific plugin.
+	 *
+	 * @static
+	 *
+	 * @param \WP_Post $plugin Plugin to output JSON LD Schema for.
+	 */
+	protected static function plugin_json_jd_schema( $plugin ) {
+		$rating      = get_post_meta( $plugin->ID, 'rating', true ) ?: 0;
+		$ratings     = get_post_meta( $plugin->ID, 'ratings', true ) ?: [];
+		$num_ratings = array_sum( $ratings );
 
-			echo PHP_EOL;
-			?>
+		echo PHP_EOL;
+		?>
 <script type="application/ld+json">
 	[
 		{
@@ -114,21 +124,29 @@ class Template {
 		}
 	]
 </script>
-			<?php
-		endif;
+		<?php
 	}
 
 	/**
-	 * Prints meta description in the head of a page.
+	 * Prints meta tags in the head of a page.
 	 *
 	 * @static
 	 */
-	public static function meta_description() {
+	public static function output_meta() {
+		$metas = [];
+
 		if ( is_singular( 'plugin' ) ) {
-			printf( '<meta name="description" value="%s"/>',
-				esc_attr( get_the_excerpt( get_queried_object() ) )
+			$metas[] = sprintf( '<meta name="description" value="%s" />',
+				esc_attr( get_the_excerpt() )
 			);
+
+			// Add noindex on disabled plugin page.
+			if ( 'publish' !== get_post_status() ) {
+				$metas[] = '<meta name="robots" content="noindex" />';
+			}
 		}
+
+		echo implode( "\n", $metas );
 	}
 
 	/**
