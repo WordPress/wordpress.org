@@ -1447,16 +1447,16 @@ Thanks for helping us with these details!",
 				'23-blank' => '',
 
 				'24-id-type' => 'SWIFT',
-				'25-id-value' => get_post_meta( $post->ID, '_camppayments_bank_bic', true ),
-				'26-ben-bank-name' => substr( get_post_meta( $post->ID, '_camppayments_bank_name', true ), 0, 35 ),
-				'27-ben-bank-address-1' => substr( get_post_meta( $post->ID, '_camppayments_bank_street_address', true ), 0, 35 ),
+				'25-id-value'           => WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_bic', true ) ),
+				'26-ben-bank-name'      => substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_name',           true ) ), 0, 35 ),
+				'27-ben-bank-address-1' => substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_street_address', true ) ), 0, 35 ),
 				'28-ben-bank-address-2' => '',
 				'29-ben-bank-address-3' => substr( sprintf( '%s %s %s',
-						get_post_meta( $post->ID, '_camppayments_bank_city', true ),
-						get_post_meta( $post->ID, '_camppayments_bank_state', true ),
-						get_post_meta( $post->ID, '_camppayments_bank_zip_code', true )
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_city',     true ) ),
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_state',    true ) ),
+						WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_zip_code', true ) )
 					 ), 0, 32 ),
-				'30-ben-bank-country' => get_post_meta( $post->ID, '_camppayments_bank_country_iso3166', true ),
+				'30-ben-bank-country' => WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_bank_country_iso3166', true ) ),
 				'31-supl-id-type' => '',
 				'32-supl-id-value' => '',
 
@@ -1558,25 +1558,25 @@ Thanks for helping us with these details!",
 			);
 
 			// If an intermediary bank is given.
-			$interm_swift = get_post_meta( $post->ID, '_camppayments_interm_bank_swift', true );
+			$interm_swift = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_swift', true ) );
 			if ( ! empty( $iterm_swift ) ) {
 				$row['40-id-type'] = 'SWIFT';
 				$row['41-id-value'] = $interm_swift;
 
-				$row['42-interm-bank-name'] = substr( get_post_meta( $post->ID, '_camppayments_interm_bank_name', true ), 0, 35 );
-				$row['43-interm-bank-address-1'] = substr( get_post_meta( $post->ID, '_camppayments_interm_bank_street_address', true ), 0, 35 );
+				$row['42-interm-bank-name']      = substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_name',           true ) ), 0, 35 );
+				$row['43-interm-bank-address-1'] = substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_street_address', true ) ), 0, 35 );
 
 				$row['44-interm-bank-address-2'] = '';
 				$row['45-interm-bank-address-3'] = substr( sprintf( '%s %s %s',
-					get_post_meta( $post->ID, '_camppayments_interm_bank_city', true ),
-					get_post_meta( $post->ID, '_camppayments_interm_bank_state', true ),
-					get_post_meta( $post->ID, '_camppayments_interm_bank_zip_code', true )
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_city',     true ) ),
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_state',    true ) ),
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_zip_code', true ) )
 				), 0, 32 );
 
-				$row['46-interm-bank-country'] = get_post_meta( $post->ID, '_camppayments_interm_bank_country_iso3166', true );
+				$row['46-interm-bank-country'] = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_country_iso3166', true ) );
 
 				$row['47-supl-id-type'] = 'ACCT';
-				$row['48-supl-id-value'] = get_post_meta( $post->ID, '_camppayments_interm_bank_account', true );
+				$row['48-supl-id-value'] = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_camppayments_interm_bank_account', true ) );
 			}
 
 			if ( get_post_meta( $post->ID, '_camppayments_currency', true ) == 'CAD' ) {

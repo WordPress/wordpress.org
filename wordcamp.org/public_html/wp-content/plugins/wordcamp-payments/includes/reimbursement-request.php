@@ -5,6 +5,7 @@
  */
 
 namespace WordCamp\Budgets\Reimbursement_Requests;
+use WCP_Encryption;
 
 defined( 'WPINC' ) or die();
 
@@ -1053,7 +1054,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 		$payable_to = html_entity_decode( $payable_to ); // J&amp;J to J&J
 		$countries = \WordCamp_Budgets::get_valid_countries_iso3166();
 
-		$vendor_country_code = get_post_meta( $post->ID, '_wcbrr_check_country', true );
+		$vendor_country_code = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_country', true ) );
 		if ( ! empty( $countries[ $vendor_country_code ] ) ) {
 			$vendor_country_code = $countries[ $vendor_country_code ]['alpha3'];
 		}
@@ -1085,7 +1086,7 @@ function _generate_payment_report_jpm_checks( $args ) {
 		// Payee Address Record
 		fputcsv( $report, wcorg_esc_csv( array(
 			'PYEADD',
-			substr( get_post_meta( $post->ID, '_wcbrr_check_street_address', true ), 0, 35 ),
+			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_street_address', true ) ), 0, 35 ),
 			'',
 		) ), ',', '|' );
 
@@ -1095,9 +1096,9 @@ function _generate_payment_report_jpm_checks( $args ) {
 		// Payee Postal Record
 		fputcsv( $report, wcorg_esc_csv( array(
 			'PYEPOS',
-			substr( get_post_meta( $post->ID, '_wcbrr_check_city', true ), 0, 35 ),
-			substr( get_post_meta( $post->ID, '_wcbrr_check_state', true ), 0, 35 ),
-			substr( get_post_meta( $post->ID, '_wcbrr_check_zip_code', true ), 0, 10 ),
+			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_city',     true ) ), 0, 35 ),
+			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_state',    true ) ), 0, 35 ),
+			substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_check_zip_code', true ) ), 0, 10 ),
 			substr( $vendor_country_code, 0, 3 ),
 		) ), ',', '|' );
 
@@ -1399,16 +1400,16 @@ function _generate_payment_report_jpm_wires( $args ) {
 			'23-blank' => '',
 
 			'24-id-type' => 'SWIFT',
-			'25-id-value' => get_post_meta( $post->ID, '_wcbrr_bank_bic', true ),
-			'26-ben-bank-name' => substr( get_post_meta( $post->ID, '_wcbrr_bank_name', true ), 0, 35 ),
-			'27-ben-bank-address-1' => substr( get_post_meta( $post->ID, '_wcbrr_bank_street_address', true ), 0, 35 ),
+			'25-id-value'           => WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_bic', true ) ),
+			'26-ben-bank-name'      => substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_name',           true ) ), 0, 35 ),
+			'27-ben-bank-address-1' => substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_street_address', true ) ), 0, 35 ),
 			'28-ben-bank-address-2' => '',
 			'29-ben-bank-address-3' => substr( sprintf( '%s %s %s',
-					get_post_meta( $post->ID, '_wcbrr_bank_city', true ),
-					get_post_meta( $post->ID, '_wcbrr_bank_state', true ),
-					get_post_meta( $post->ID, '_wcbrr_bank_zip_code', true )
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_city',     true ) ),
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_state',    true ) ),
+					WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_zip_code', true ) )
 				 ), 0, 35 ),
-			'30-ben-bank-country' => get_post_meta( $post->ID, '_wcbrr_bank_country_iso3166', true ),
+			'30-ben-bank-country' => WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_bank_country_iso3166', true ) ),
 			'31-supl-id-type' => '',
 			'32-supl-id-value' => '',
 
@@ -1510,25 +1511,25 @@ function _generate_payment_report_jpm_wires( $args ) {
 		);
 
 		// If an intermediary bank is given.
-		$interm_swift = get_post_meta( $post->ID, '_wcbrr_interm_bank_swift', true );
+		$interm_swift = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_swift', true ) );
 		if ( ! empty( $iterm_swift ) ) {
 			$row['40-id-type'] = 'SWIFT';
 			$row['41-id-value'] = $interm_swift;
 
-			$row['42-interm-bank-name'] = substr( get_post_meta( $post->ID, '_wcbrr_interm_bank_name', true ), 0, 35 );
-			$row['43-interm-bank-address-1'] = substr( get_post_meta( $post->ID, '_wcbrr_interm_bank_street_address', true ), 0, 35 );
+			$row['42-interm-bank-name']      = substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_name',           true ) ), 0, 35 );
+			$row['43-interm-bank-address-1'] = substr( WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_street_address', true ) ), 0, 35 );
 
 			$row['44-interm-bank-address-2'] = '';
 			$row['45-interm-bank-address-3'] = substr( sprintf( '%s %s %s',
-				get_post_meta( $post->ID, '_wcbrr_interm_bank_city', true ),
-				get_post_meta( $post->ID, '_wcbrr_interm_bank_state', true ),
-				get_post_meta( $post->ID, '_wcbrr_interm_bank_zip_code', true )
+				WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_city',     true ) ),
+				WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_state',    true ) ),
+				WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_zip_code', true ) )
 			), 0, 32 );
 
-			$row['46-interm-bank-country'] = get_post_meta( $post->ID, '_wcbrr_interm_bank_country_iso3166', true );
+			$row['46-interm-bank-country'] = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_country_iso3166', true ) );
 
 			$row['47-supl-id-type'] = 'ACCT';
-			$row['48-supl-id-value'] = get_post_meta( $post->ID, '_wcbrr_interm_bank_account', true );
+			$row['48-supl-id-value'] = WCP_Encryption::maybe_decrypt( get_post_meta( $post->ID, '_wcbrr_interm_bank_account', true ) );
 		}
 
 		if ( get_post_meta( $post->ID, '_wcbrr_currency', true ) == 'CAD' ) {
