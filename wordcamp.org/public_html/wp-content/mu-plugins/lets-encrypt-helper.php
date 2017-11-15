@@ -87,6 +87,7 @@ class WordCamp_Lets_Encrypt_Helper {
 		$domains[] = 'wordcampsf.org';
 		$domains[] = 'wordcampsf.com';
 		$domains[] = '2017.zilina.wordcamp.org';
+		$domains[] = '2018.wurzburg.wordcamp.org';
 
 		$domains = array_unique( $domains );
 		$domains = apply_filters( 'wordcamp_letsencrypt_domains', $domains );
