@@ -200,7 +200,7 @@ class WPorg_Handbook_Navigation {
 			$current_page  = wp_list_filter( $handbook_pages, array( 'ID' => $post->ID ) );
 			$current_index = array_keys( $current_page );
 
-			if ( false !== $current_index ) {
+			if ( ! empty( $current_index ) ) {
 				$current_index = $current_index[0];
 				$current_page  = $current_page[ $current_index ];
 
