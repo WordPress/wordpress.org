@@ -109,13 +109,18 @@ get_header( 'wporg' );
 				<h4><a href="<?php echo get_permalink( get_option( 'page_for_posts' ) ); ?>"><?php _e( 'News From Our Blog', 'wporg' ); ?></a></h4>
 
 				<?php
-				$featured = new \WP_Query( [ 'posts_per_page' => 1, 'ignore_sticky_posts' => true ] );
+				$featured = new \WP_Query( [
+					'posts_per_page'      => 1,
+					'post_status'         => 'publish',
+					'ignore_sticky_posts' => true,
+					'no_found_rows'       => true,
+				] );
 				while ( $featured->have_posts() ) :
 					$featured->the_post();
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
 					echo apply_filters( 'the_excerpt', get_the_excerpt() );
 				endwhile;
-				wp_reset_query();
+				wp_reset_postdata();
 				?>
 			</div>
 
