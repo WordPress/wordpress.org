@@ -30,14 +30,14 @@ function release_row( $release) {
 /**
  * Rerieve the localised downloads link.
  *
- * Uses the 'releases' page if exists, falling back to the 'txt-download' page for older sites, and finally, the english downloads page.
+ * Uses the 'txt-download' page if exists, falling back to the 'releases' page for older sites, and finally, the english downloads page.
  */
 function get_downloads_url() {
 	static $downloads_url = null;
 	if ( is_null( $downloads_url ) ) {
-		$releases_page = get_page_by_path( 'releases' );
+		$releases_page = get_page_by_path( 'txt-download' );
 		if ( ! $releases_page ) {
-			$releases_page = get_page_by_path( 'txt-download' );
+			$releases_page = get_page_by_path( 'releases' );
 		}
 
 		if ( $releases_page ) {
