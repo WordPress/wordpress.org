@@ -490,6 +490,7 @@ class WP_49_Credits extends WP_Credits {
 			'tharsheblows',
 			'thekt12',
 			'thingsym',
+			'thulshof',
 			'timmydcrawford',
 			'timothyblynjacobs',
 			'tinkerbelly',
