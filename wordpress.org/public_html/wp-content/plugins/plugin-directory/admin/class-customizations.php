@@ -397,6 +397,7 @@ class Customizations {
 		}
 
 		update_post_meta( $post_id, '_close_reason', sanitize_key( $_POST['close_reason'] ) );
+		update_post_meta( $post_id, '_close_date',   current_time( 'mysql' ) );
 	}
 
 	/**
