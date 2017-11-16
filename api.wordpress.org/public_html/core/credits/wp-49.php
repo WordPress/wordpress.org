@@ -456,7 +456,7 @@ class WP_49_Credits extends WP_Credits {
 			'sgr33n',
 			'shamim51',
 			'shelob9',
-			'shital',
+			'shital-patel',
 			'shooper',
 			'shramee',
 			'sixhours',
