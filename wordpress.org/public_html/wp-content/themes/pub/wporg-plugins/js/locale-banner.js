@@ -1,6 +1,10 @@
 /* global wporgLocaleBanner */
 ( function( $ ) {
 
+	if ( $( 'body' ).hasClass( 'single-plugin' ) && ! $( 'article' ).hasClass( 'status-publish' ) ) {
+		return;
+	}
+
 	$.ajax( {
 		type: 'POST',
 		url: wporgLocaleBanner.apiURL,
