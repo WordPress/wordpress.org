@@ -797,8 +797,9 @@ class Plugin_Directory {
 					return $posts;
 				}
 
-				// Only the 'publish' cap shouldn't be affected by cap checks.
-				$restricted_access_statii = array_diff( $wp_query->query_vars['post_status'], array( 'publish' ) );
+				// Published, closed, or disabled plugins shouldn't be affected by cap checks.
+				$restricted_access_statii = array_diff( $wp_query->query_vars['post_status'], array( 'publish', 'closed', 'disabled' ) );
+
 				foreach ( $posts as $i => $post ) {
 					// If the plugin is not in the restricted statuses list, show it
 					if ( 'plugin' != $post->post_type || ! in_array( $post->post_status, $restricted_access_statii, true ) ) {
