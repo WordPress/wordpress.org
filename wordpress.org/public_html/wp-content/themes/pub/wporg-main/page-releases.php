@@ -20,11 +20,10 @@ get_header( 'page' ); ?>
 			<?php
 			if ( ! empty( $releases ) ) :
 				if ( isset( $releases['latest'] ) ) :
-					release_row( [], '', '', true );
 					?>
 					<h3 id="latest"><?php _e( 'Latest release', 'wporg' ); ?></h3>
 					<table class="releases latest">
-						<?php release_row( $releases['latest'], 'alt' ); ?>
+						<?php release_row( $releases['latest'] ); ?>
 					</table>
 					<?php
 				endif;
@@ -33,13 +32,12 @@ get_header( 'page' ); ?>
 					echo '<a name="older" id="older"></a>';
 
 					foreach ( $releases['branches'] as $branch => $branch_release ):
-						release_row( [], '', '', true );
 						?>
 						<h3><?php printf( __( '%s Branch', 'wporg' ), $branch );?></h3>
 						<table class="releases">
 							<?php
 							foreach ( $branch_release as $release ) :
-								release_row( $release, 'alt' );
+								release_row( $release );
 							endforeach;
 							?>
 						</table>
@@ -52,9 +50,8 @@ get_header( 'page' ); ?>
 					<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 					<table id="beta" class="releases">
 						<?php
-						release_row( [], '', '', true );
 						foreach ( $releases['betas'] as $release ):
-							release_row( $release, 'alt', 'beta-first' );
+							release_row( $release );
 						endforeach;
 						?>
 					</table>
