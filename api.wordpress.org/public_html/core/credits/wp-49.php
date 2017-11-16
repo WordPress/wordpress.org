@@ -389,7 +389,6 @@ class WP_49_Credits extends WP_Credits {
 			'paaljoachim',
 			'palmiak',
 			'parthsanghvi',
-			'patel',
 			'pauldechov',
 			'paulwilde',
 			'pbearne',
