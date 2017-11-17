@@ -303,7 +303,12 @@ body,
 	}
 
 	#secondary-toggle:before {
-		top: 0px;
+		top: 0;
+		color: #fff;
+	}
+
+	body.responsive-show #secondary-toggle:before {
+		color: #0073aa;
 	}
 }
 
