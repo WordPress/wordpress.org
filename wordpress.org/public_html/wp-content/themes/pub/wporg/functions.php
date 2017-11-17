@@ -11,7 +11,7 @@ namespace WordPressdotorg\Theme;
 
 // Register path to fallback files.
 if ( ! defined( 'WPORGPATH' ) ) {
-	define( 'WPORGPATH', get_theme_file_path( '/inc/' ) );
+	define( 'WPORGPATH', get_parent_theme_file_path( '/inc/' ) );
 }
 
 /**
