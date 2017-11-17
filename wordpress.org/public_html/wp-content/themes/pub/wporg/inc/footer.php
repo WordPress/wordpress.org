@@ -10,16 +10,9 @@
  */
 ?>
 
-
-	<footer id="colophon" class="site-footer">
-		<div class="site-info">
-			<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'wporg' ) ); ?>"><?php
-				/* translators: %s: CMS name, i.e. WordPress. */
-				printf( esc_html__( 'Proudly powered by %s', 'wporg' ), 'WordPress' );
-				?></a>
-		</div><!-- .site-info -->
-	</footer><!-- #colophon -->
-</div><!-- #page -->
+<div id="wporg-footer">
+	<h6 class="aligncenter cip-image">Code is Poetry.</h6>
+</div>
 
 <?php wp_footer(); ?>
 
