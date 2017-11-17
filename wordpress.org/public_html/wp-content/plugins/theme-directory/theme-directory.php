@@ -1067,7 +1067,7 @@ function wporg_themes_add_hreflang_link_attributes() {
 	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
 		global $wpdb;
 
-		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
 		if ( ! $sites ) {
 			return;
 		}
