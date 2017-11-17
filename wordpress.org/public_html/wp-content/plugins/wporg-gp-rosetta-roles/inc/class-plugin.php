@@ -549,7 +549,7 @@ class Plugin {
 		$wp_locale = $gp_locale->wp_locale;
 
 		if ( ! isset( $ros_locale_assoc ) ) {
-			$ros_locale_assoc = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+			$ros_locale_assoc = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
 		}
 
 		if ( isset( $ros_locale_assoc[ $wp_locale ] ) ) {
