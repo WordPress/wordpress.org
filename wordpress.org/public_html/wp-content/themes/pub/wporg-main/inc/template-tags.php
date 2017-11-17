@@ -10,9 +10,9 @@ namespace WordPressdotorg\MainTheme;
 /**
  * Displays a table row with release information.
  *
- * @param array  $release
+ * @param array $release
  */
-function release_row( $release) {
+function release_row( $release ) {
 	?>
 	<tr>
 		<td><?php echo esc_html( $release['version'] ); ?></td>
@@ -34,8 +34,10 @@ function release_row( $release) {
  */
 function get_downloads_url() {
 	static $downloads_url = null;
+
 	if ( is_null( $downloads_url ) ) {
 		$releases_page = get_page_by_path( 'txt-download' );
+
 		if ( ! $releases_page ) {
 			$releases_page = get_page_by_path( 'releases' );
 		}
@@ -43,9 +45,11 @@ function get_downloads_url() {
 		if ( $releases_page ) {
 			$downloads_url = get_permalink( $releases_page );
 		}
+
 		if ( ! $downloads_url ) {
 			$downloads_url = 'https://wordpress.org/downloads/';
 		}
 	}
+
 	return $downloads_url;
 }

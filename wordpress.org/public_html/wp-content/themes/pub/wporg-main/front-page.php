@@ -14,6 +14,12 @@
 
 namespace WordPressdotorg\MainTheme;
 
+global $rosetta;
+
+$showcase   = $rosetta->showcase->front();
+$swag_class = $showcase ? 'col-4' : 'col-2';
+$user_class = $showcase ? 'col-12' : 'col-2';
+
 get_header( 'wporg' );
 ?>
 	<header id="masthead" class="site-header" role="banner">
@@ -134,17 +140,41 @@ get_header( 'wporg' );
 				</ol>
 			</div>
 
-			<div class="col-2 first">
+			<div class="<?php echo esc_attr( $swag_class ); ?> first">
 				<h4><a href="https://wordpress.org/about/swag/"><?php _e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
-				<a href="https://wordpress.org/about/swag/"><img width="132" height="177" src="https://wpdotorg.files.wordpress.com/2015/10/gray-tshirt-swag.jpg" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" /></a>
+				<a href="https://wordpress.org/about/swag/">
+					<?php if ( $showcase ) : ?>
+						<img width="288" height="288" src="https://s.w.org/images/home/swag_col-2.png" srcset="https://s.w.org/images/home/swag_col-2_x2.jpg x2" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
+					<?php else : ?>
+						<img width="132" height="177" src="https://s.w.org/images/home/swag_col-1.jpg?1" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
+					<?php endif; ?>
+				</a>
 			</div>
 
-			<div class="col-2">
+			<div class="<?php echo esc_attr( $user_class ); ?>">
 				<h4><a href="https://wordpress.org/showcase/"><?php _e( 'WordPress&nbsp;Users', 'wporg' ); ?></a></h4>
 
-				<ul id="notable-users" class="notable-users">
-					<?php
-						$links = array(
+				<?php if ( $showcase ) : ?>
+					<div id="notable-users" class="notable-users col-12 row gutters">
+						<?php
+						foreach ( $showcase as $showcase_post ) :
+							$post_url  = get_permalink( $showcase_post->ID );
+							$thumbnail = has_post_thumbnail( $showcase_post->ID )
+								? get_the_post_thumbnail( $showcase_post->ID, 'showcase-thumbnail' )
+								: sprintf( '<img src="%1$s" width="220" alt="%2$s" />', esc_url( $rosetta->screenshot_url( $post_url, 220 ) ), esc_attr( $showcase_post->post_title ) );
+
+							printf(
+								'<div class="col-3"><a href="%1$s">%2$s</a></div>',
+								esc_url( $post_url ),
+								$thumbnail
+							);
+						endforeach;
+						?>
+					</div>
+				<?php else : ?>
+					<ul id="notable-users" class="notable-users">
+						<?php
+						$user_links = [
 							'nytimes'       => 'https://wordpress.org/showcase/tag/new-york-times/',
 							'cnn'           => 'https://wordpress.org/showcase/tag/cnn/',
 							'rollingstones' => 'https://wordpress.org/showcase/the-rolling-stones/',
@@ -153,22 +183,24 @@ get_header( 'wporg' );
 							'motleycrue'    => 'https://wordpress.org/showcase/motley-crue/',
 							'blondie'       => 'https://wordpress.org/showcase/blondie/',
 							'marthastewart' => 'https://wordpress.org/showcase/themarthablog/',
-						);
+						];
 
-						foreach ( array_rand( $links, 3 ) as $slug ) :
+						foreach ( array_rand( $user_links, 3 ) as $slug ) :
 							printf(
 								'<li><a href="%1$s"><img src="https://s.w.org/images/notableusers/%2$s-2x.png" alt="%2$s" width="130" height="57" /></a></li>',
-								$links[ $slug ],
+								$user_links[ $slug ],
 								$slug
 							);
 						endforeach;
-					?>
-				</ul>
+						?>
+					</ul>
+				<?php endif; ?>
+
 				<a class="showcase-link" href="https://wordpress.org/showcase/"><?php _e( '&hellip; and hundreds more', 'wporg' ); ?></a>
 			</div>
 		</div>
 
 	</main><!-- #main -->
 
-<?php
+	<?php
 get_footer();
