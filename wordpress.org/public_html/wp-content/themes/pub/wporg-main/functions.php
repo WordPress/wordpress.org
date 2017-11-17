@@ -52,7 +52,7 @@ add_action( 'widgets_init', __NAMESPACE__ . '\widgets' );
  */
 function nav_menu_objects( $menu_items ) {
 	foreach ( $menu_items as $menu_item ) {
-		if ( false !== stripos( $menu_item->url, 'txt-download' ) ) {
+		if ( false !== stripos( $menu_item->url, 'download/' ) || 'page-templates/download.php' === get_page_template_slug( $menu_item->object_id ) ) {
 			$menu_item->classes = array_merge( $menu_item->classes, ['button', 'button-primary', 'download'] );
 			$menu_item->title   = _x( 'Download WordPress', 'Menu title', 'wporg' );
 			break;
