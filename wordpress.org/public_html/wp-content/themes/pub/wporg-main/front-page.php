@@ -20,7 +20,7 @@ get_header( 'wporg' );
 		<div class="site-branding">
 			<p class="site-title"><?php _e( 'Meet WordPress', 'wporg' ); ?></p>
 
-			<p class="site-description"><?php _e( 'WordPress is open source software you can use to create a beautiful website, blog, or app', 'wporg' ); ?></p>
+			<p class="site-description"><?php _e( 'WordPress is open source software you can use to create a beautiful website, blog, or app.', 'wporg' ); ?></p>
 		</div><!-- .site-branding -->
 	</header><!-- #masthead -->
 
@@ -42,7 +42,7 @@ get_header( 'wporg' );
 				<div class="collage">
 
 				</div>
-				<p class="cta-link"><a href="https://wordpress.org/showcase/"><?php _e( 'Discover more sites built with WordPress', 'wporg' ); ?></a>.</p>
+				<p class="cta-link"><a href="https://wordpress.org/showcase/"><?php _e( 'Discover more sites built with WordPress', 'wporg' ); ?></a></p>
 			</section>
 
 			<section class="features">
