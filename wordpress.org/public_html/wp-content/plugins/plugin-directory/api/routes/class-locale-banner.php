@@ -35,7 +35,7 @@ class Locale_Banner extends Base {
 
 		// Get the locale subdomain associations used to link languages to their local site.
 		$locale_subdomain_assoc = $wpdb->get_results(
-			"SELECT locale, subdomain FROM locales WHERE locale NOT LIKE '%\_%\_%'", OBJECT_K // Don't grab variants, for now.
+			"SELECT locale, subdomain FROM locales WHERE wporg_locale NOT LIKE '%\_%\_%'", OBJECT_K // Don't grab variants, for now.
 		);
 
 		// Retrieve all the WordPress locales.

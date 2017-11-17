@@ -676,10 +676,10 @@ class Template {
 
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-		if ( false === ( $sites = wp_cache_get( 'local-sites-'.get_post()->post_name, 'locale-associations' ) ) ) {
+		if ( false === ( $sites = wp_cache_get( 'local-sites-' . get_post()->post_name, 'locale-associations' ) ) ) {
 
 			// get subdomain/locale associations
-			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
+			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
 
 			$sites = Plugin_I18n::instance()->get_locales();
 
