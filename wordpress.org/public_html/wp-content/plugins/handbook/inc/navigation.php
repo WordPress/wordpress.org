@@ -169,6 +169,8 @@ class WPorg_Handbook_Navigation {
 			$post_status[] = 'private';
 		}
 
+		$parent_id = false;
+
 		// Get the hierarchically and menu_order ordered list of handbook pages.
 		$handbook_pages = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $handbook_pages ) {
