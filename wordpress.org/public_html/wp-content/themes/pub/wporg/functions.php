@@ -14,6 +14,11 @@ if ( ! defined( 'WPORGPATH' ) ) {
 	define( 'WPORGPATH', get_parent_theme_file_path( '/inc/' ) );
 }
 
+// Make sure market share is available.
+if ( ! defined( 'WP_MARKET_SHARE' ) ) {
+	define( 'WP_MARKET_SHARE', 29 );
+}
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *

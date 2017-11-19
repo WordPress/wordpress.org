@@ -44,7 +44,7 @@ get_header( 'wporg' );
 
 			<section class="showcase">
 				<h2><?php _e( 'Trusted by the Best', 'wporg' ); ?></h2>
-				<p class="subheading"><?php _e( '28% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ); ?></p>
+				<p class="subheading"><?php printf( __( '%s of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ), WP_MARKET_SHARE . '%' ); ?></p>
 				<div class="collage">
 
 				</div>
