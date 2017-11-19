@@ -2,8 +2,6 @@
 /**
  * Custom template tags
  *
- * Eventually, some of the functionality here could be replaced by core features.
- *
  * @package WordPressdotorg\Theme
  */
 
