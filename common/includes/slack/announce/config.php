@@ -225,6 +225,9 @@ function get_whitelist() {
 		'wcus' => array(
 			'alx',
 			'camikaos',
+			'randy_hicks',
+			'bishop',
+			'dustinmeza',
 		),
 		'wcus-contributor-day' => array(
 			'alx',
