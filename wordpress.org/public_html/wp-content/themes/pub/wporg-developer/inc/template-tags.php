@@ -387,13 +387,13 @@ namespace DevHub {
 		}
 
 		if ( $ignore_minor ) {
-			$version_parts = explode( '-', $current_version, 3 );
+			$version_parts = explode( '.', $current_version, 3 );
 			if ( count( $version_parts ) == 2 ) {
 				$version_parts[] = '0';
 			} else {
 				$version_parts[2] = '0';
 			}
-			$current_version = implode( '.', $version_parts );
+			$current_version = implode( '-', $version_parts );
 		}
 
 		$version = get_terms( 'wp-parser-since', array(
