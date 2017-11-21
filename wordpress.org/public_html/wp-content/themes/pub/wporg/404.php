@@ -23,12 +23,19 @@ get_header(); ?>
 
 				<div class="logo-swing">
 					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ); ?>" class="wp-logo" />
-					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue.png' ); ?>" class="wp-logo" />
+					<img id="hinge" src="<?php echo get_theme_file_uri( '/images/wp-logo-blue.png' ); ?>" class="wp-logo hinge" />
 				</div>
 			</div><!-- .page-content -->
 		</section><!-- .error-404 -->
 
 	</main><!-- #main -->
 
+	<script>
+		setTimeout( function() {
+			document.getElementById( 'hinge' ).hidden = true;
+		}, 1900 );
+	</script>
+
 <?php
+
 get_footer();
