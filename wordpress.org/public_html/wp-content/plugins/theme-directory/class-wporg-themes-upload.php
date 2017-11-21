@@ -529,6 +529,10 @@ class WPORG_Themes_Upload {
 			$this->trac_ticket->keywords[] = 'accessibility-ready';
 		}
 
+		if ( in_array( 'holiday', $this->theme->get( 'Tags' ) ) ) {
+			$this->trac_ticket->keywords[] = 'holiday';
+		}
+
 		// Priority
 		$this->trac_ticket->priority = 'new theme';
 		if ( ! empty( $this->theme_post->_status ) ) {
