@@ -1151,10 +1151,11 @@ function wcpt_metabox( $meta_keys ) {
 
 	// @todo When you refactor meta_keys() to support changing labels -- see note in meta_keys() -- also make it support these notes
 	$messages = array(
-		'Telephone'                => 'Required for shipping.',
-		'Mailing Address'          => 'Shipping address.',
-		'Physical Address'         => 'Please include the city, state/province and country.', // So it can be geocoded correctly for the map
-		'Global Sponsorship Grant' => 'Deprecated.'
+		'Telephone'                       => 'Required for shipping.',
+		'Mailing Address'                 => 'Shipping address.',
+		'Physical Address'                => 'Please include the city, state/province and country.', // So it can be geocoded correctly for the map
+		'Global Sponsorship Grant Amount' => 'No commas, thousands separators or currency symbols. Ex. 1234.56',
+		'Global Sponsorship Grant'        => 'Deprecated.',
 	);
 
 	foreach ( $meta_keys as $key => $value ) :
@@ -1190,7 +1191,7 @@ function wcpt_metabox( $meta_keys ) {
 						<?php break;
 						case 'number' : ?>
 
-							<input type="number" size="16" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo $readonly; ?> />
+							<input type="number" size="16" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>" step="any" min="0"<?php echo $readonly; ?> />
 
 						<?php break;
 						case 'date' :
