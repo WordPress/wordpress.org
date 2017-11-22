@@ -135,12 +135,14 @@ class Users {
 			'href'   => bbp_get_user_replies_created_url( $user_id ),
 		) );
 
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'user-topics',
-			'id'     => 'reviews-written',
-			'title'  => __( 'Reviews Written', 'wporg-forums' ),
-			'href'   => bbp_get_user_profile_url( $user_id ) . 'reviews/',
-		) );
+		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'user-topics',
+				'id'     => 'reviews-written',
+				'title'  => __( 'Reviews Written', 'wporg-forums' ),
+				'href'   => bbp_get_user_profile_url( $user_id ) . 'reviews/',
+			) );
+		}
 
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'user-topics',
