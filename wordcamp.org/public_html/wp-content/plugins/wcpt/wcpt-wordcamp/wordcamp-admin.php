@@ -197,6 +197,10 @@ class WordCamp_Admin {
 					update_post_meta( $post_id, $key, $values[ $key ] );
 					break;
 
+				case 'number' :
+					update_post_meta( $post_id, $key, floatval( $values[ $key ] ) );
+					break;
+
 				case 'checkbox' :
 					if ( ! empty( $values[ $key ] ) && 'on' == $values[ $key ] ) {
 						update_post_meta( $post_id, $key, true );
@@ -206,10 +210,18 @@ class WordCamp_Admin {
 					break;
 
 				case 'date' :
-					if ( !empty( $values[ $key ] ) )
+					if ( !empty( $values[ $key ] ) ) {
 						$values[ $key ] = strtotime( $values[ $key ] );
+					}
 
 					update_post_meta( $post_id, $key, $values[ $key ] );
+					break;
+
+				case 'select-currency' :
+					$currencies = WordCamp_Budgets::get_currencies();
+					$new_value  = ( array_key_exists( $values[ $key ], $currencies ) ) ? $values[ $key ] : '';
+
+					update_post_meta( $post_id, $key, $new_value );
 					break;
 
 				default:
@@ -430,32 +442,37 @@ class WordCamp_Admin {
 
 			case 'wordcamp':
 				$retval = array (
-					'Start Date (YYYY-mm-dd)'         => 'date',
-					'End Date (YYYY-mm-dd)'           => 'date',
-					'Location'                        => 'text',
-					'URL'                             => 'wc-url',
-					'E-mail Address'                  => 'text',    // Note: This is the address for the entire organizing team, which is different than the "Email Address" field
-					'Twitter'                         => 'text',
-					'WordCamp Hashtag'                => 'text',
-					'Number of Anticipated Attendees' => 'text',
-					'Multi-Event Sponsor Region'      => 'mes-dropdown',
-					'Global Sponsorship Grant'        => 'text',
+					'Start Date (YYYY-mm-dd)'           => 'date',
+					'End Date (YYYY-mm-dd)'             => 'date',
+					'Location'                          => 'text',
+					'URL'                               => 'wc-url',
+					'E-mail Address'                    => 'text',
+					// Note: This is the address for the entire organizing team, which is different than the "Email Address" field
+					'Twitter'                           => 'text',
+					'WordCamp Hashtag'                  => 'text',
+					'Number of Anticipated Attendees'   => 'text',
+					'Multi-Event Sponsor Region'        => 'mes-dropdown',
+					'Global Sponsorship Grant Currency' => 'select-currency',
+					'Global Sponsorship Grant Amount'   => 'number',
+					'Global Sponsorship Grant'          => 'text',
 				);
 				break;
 
 			case 'all':
 			default:
 				$retval = array(
-					'Start Date (YYYY-mm-dd)'         => 'date',
-					'End Date (YYYY-mm-dd)'           => 'date',
-					'Location'                        => 'text',
-					'URL'                             => 'wc-url',
-					'E-mail Address'                  => 'text',
-					'Twitter'                         => 'text',
-					'WordCamp Hashtag'                => 'text',
-					'Number of Anticipated Attendees' => 'text',
-					'Multi-Event Sponsor Region'      => 'mes-dropdown',
-					'Global Sponsorship Grant'        => 'text',
+					'Start Date (YYYY-mm-dd)'           => 'date',
+					'End Date (YYYY-mm-dd)'             => 'date',
+					'Location'                          => 'text',
+					'URL'                               => 'wc-url',
+					'E-mail Address'                    => 'text',
+					'Twitter'                           => 'text',
+					'WordCamp Hashtag'                  => 'text',
+					'Number of Anticipated Attendees'   => 'text',
+					'Multi-Event Sponsor Region'        => 'mes-dropdown',
+					'Global Sponsorship Grant Currency' => 'select-currency',
+					'Global Sponsorship Grant Amount'   => 'number',
+					'Global Sponsorship Grant'          => 'text',
 
 					'Organizer Name'                                 => 'text',
 					'WordPress.org Username'                         => 'text',
@@ -1134,9 +1151,10 @@ function wcpt_metabox( $meta_keys ) {
 
 	// @todo When you refactor meta_keys() to support changing labels -- see note in meta_keys() -- also make it support these notes
 	$messages = array(
-		'Telephone'       => 'Required for shipping.',
-		'Mailing Address' => 'Shipping address.',
-		'Physical Address' => 'Please include the city, state/province and country.', // So it can be geocoded correctly for the map
+		'Telephone'                => 'Required for shipping.',
+		'Mailing Address'          => 'Shipping address.',
+		'Physical Address'         => 'Please include the city, state/province and country.', // So it can be geocoded correctly for the map
+		'Global Sponsorship Grant' => 'Deprecated.'
 	);
 
 	foreach ( $meta_keys as $key => $value ) :
@@ -1170,6 +1188,11 @@ function wcpt_metabox( $meta_keys ) {
 							<input type="text" size="36" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo $readonly; ?> />
 
 						<?php break;
+						case 'number' : ?>
+
+							<input type="number" size="16" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>" value="<?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?>"<?php echo $readonly; ?> />
+
+						<?php break;
 						case 'date' :
 
 							// Quick filter on dates
@@ -1185,6 +1208,27 @@ function wcpt_metabox( $meta_keys ) {
 						case 'textarea' : ?>
 
 							<textarea rows="4" cols="23" name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"<?php echo $readonly; ?>><?php echo esc_attr( get_post_meta( $post_id, $key, true ) ); ?></textarea>
+
+						<?php break;
+						case 'select-currency' :
+							$currencies = WordCamp_Budgets::get_currencies(); ?>
+
+							<?php if ( $readonly ) :
+								$value = get_post_meta( $post_id, $key, true ); ?>
+								<select name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>"<?php echo $readonly; ?>>
+									<option value="<?php echo esc_attr( $value ); ?>" selected>
+										<?php echo ( $value ) ? esc_html( $currencies[ $value ] . ' (' . $value . ')' ) : ''; ?>
+									</option>
+								</select>
+							<?php else : ?>
+								<select name="<?php echo $object_name; ?>" id="<?php echo $object_name; ?>">
+									<?php foreach ( $currencies as $symbol => $name ) : ?>
+										<option value="<?php echo esc_attr( $symbol ); ?>"<?php selected( $symbol, get_post_meta( $post_id, $key, true ) ); ?>>
+											<?php echo ( $symbol ) ? esc_html( $name . ' (' . $symbol . ')' ) : ''; ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							<?php endif; ?>
 
 						<?php break;
 
