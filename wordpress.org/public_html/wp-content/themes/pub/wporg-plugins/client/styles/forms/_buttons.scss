@@ -89,6 +89,10 @@ a.button,
 a.button-primary,
 a.button-secondary {
 	line-height: ms(4);
+
+	&:hover {
+		border: inherit;
+	}
 }
 
 a.button.button-large,
