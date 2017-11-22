@@ -16,6 +16,9 @@ class Users {
 		// Custom user contact methods.
 		add_filter( 'user_contactmethods',             array( $this, 'custom_contact_methods' ) );
 
+		// Add "My Account" submenu items to admin bar for quick access.
+		add_action( 'admin_bar_menu',                  array( $this, 'add_my_account_submenu_items' ) );
+
 		// Only allow 3 published topics from a user in the first 24 hours.
 		add_action( 'bbp_new_topic_pre_insert',        array( $this, 'limit_new_user_topics' ) );
 
@@ -100,6 +103,74 @@ class Users {
 
 		$auto_topic_subscription = isset( $_POST['auto_topic_subscription'] );
 		update_user_option( $user_id, 'auto_topic_subscription', $auto_topic_subscription );
+	}
+
+	/**
+	 * Add "My Account" submenu items to admin bar for quick access.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar WP_Admin_Bar instance, passed by reference.
+	 */
+	function add_my_account_submenu_items( $wp_admin_bar ) {
+		$user_id = bbp_get_current_user_id();
+
+		$wp_admin_bar->add_group( array(
+			'parent' => 'my-account',
+			'id'     => 'user-topics',
+			'meta'   => array(
+				'class' => 'ab-sub-secondary',
+			),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'topics-started',
+			'title'  => __( 'Topics Started', 'wporg-forums' ),
+			'href'   => bbp_get_user_topics_created_url( $user_id ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'replies-created',
+			'title'  => __( 'Replies Created', 'wporg-forums' ),
+			'href'   => bbp_get_user_replies_created_url( $user_id ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'reviews-written',
+			'title'  => __( 'Reviews Written', 'wporg-forums' ),
+			'href'   => bbp_get_user_profile_url( $user_id ) . 'reviews/',
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'replied-to',
+			'title'  => __( 'Topics Replied To', 'wporg-forums' ),
+			'href'   => bbp_get_user_profile_url( $user_id ) . 'replied-to/',
+		) );
+
+		if ( function_exists( 'bbp_is_engagements_active' ) && bbp_is_engagements_active() ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'user-topics',
+				'id'     => 'engagements',
+				'title'  => __( 'Engagements', 'wporg-forums' ),
+				'href'   => bbp_get_user_engagements_url( $user_id ),
+			) );
+		}
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'subscriptions',
+			'title'  => __( 'Subscriptions', 'wporg-forums' ),
+			'href'   => bbp_get_subscriptions_permalink( $user_id ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'user-topics',
+			'id'     => 'favorites',
+			'title'  => __( 'Favorite Topics', 'wporg-forums' ),
+			'href'   => bbp_get_favorites_permalink( $user_id ),
+		) );
 	}
 
 	/**
