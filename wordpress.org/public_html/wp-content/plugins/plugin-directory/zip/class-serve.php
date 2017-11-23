@@ -34,9 +34,16 @@ class Serve {
 	 * @return array An array containing the vital details for the ZIP request.
 	 */
 	protected function determine_request() {
-		$zip = basename( parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+		$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		$zip  = basename( $path );
 
-		if ( ! preg_match( "!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.(?P<request_type>zip|checksums\.json)$!i", $zip, $m ) ) {
+		if ( preg_match( "!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip$!i", $zip, $m ) ) {
+			// ZIP
+			$checksum_request = false;
+		} elseif ( preg_match( "!^/plugin-checksums/(?P<slug>[a-z0-9-_]+)/(?P<version>.+?)(\.json)?$!i", $path, $m ) ) {
+			// Checksums
+			$checksum_request = true;
+		} else {
 			throw new Exception( __METHOD__ . ": Invalid URL." );
 		}
 
@@ -50,16 +57,9 @@ class Serve {
 			$version = $this->get_stable_tag( $slug );
 		}
 
-		if ( 'zip' == strtolower( $m['request_type'] ) ) {
-			$checksum_request = false;
-		} else {
-			$checksum_request = true;
-
-			// Checksum requests for 'trunk' are not possible.
-			if ( 'trunk' == $version ) {
-				throw new Exception( __METHOD__ . ": Checksum requests must include a version." );
-			}
-
+		// Checksum requests for 'trunk' are not possible.
+		if ( $checksum_request && 'trunk' == $version ) {
+			throw new Exception( __METHOD__ . ": Checksum requests must include a version." );
 		}
 
 		$args = array(
