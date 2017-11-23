@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * The Plugin Controls / Publish metabox.
@@ -72,22 +73,6 @@ class Controls {
 	}
 
 	/**
-	 * Get reasons for closing or disabling a plugin.
-	 *
-	 * @return array Close/disable reason labels.
-	 */
-	public static function get_close_reasons() {
-		return array(
-			'security-issue'                => __( 'Security Issue', 'wporg-plugins' ),
-			'author-request'                => __( 'Author Request', 'wporg-plugins' ),
-			'guideline-violation'           => __( 'Guideline Violation', 'wporg-plugins' ),
-			'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
-			'merged-into-core'              => __( 'Merged into Core', 'wporg-plugins' ),
-			'unused'                        => __( 'Unused', 'wporg-plugins' ),
-		);
-	}
-
-	/**
 	 * Displays the Plugin Status control in the Publish metabox.
 	 */
 	protected static function display_post_status() {
@@ -104,16 +89,11 @@ class Controls {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 
-		$close_reasons = self::get_close_reasons();
-		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$close_reasons  = Template::get_close_reasons();
+		$close_reason   = (string) get_post_meta( $post->ID, '_close_reason', true );
 
-		if ( isset( $close_reasons[ $close_reason ] ) ) {
-			$reason_label   = $close_reasons[ $close_reason ];
-			$reason_unknown = false;
-		} else {
-			$reason_label   = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
-			$reason_unknown = true;
-		}
+		$reason_label   = Template::get_close_reason();
+		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
 		?>
 		<div class="misc-pub-section misc-pub-plugin-status">
 			<label for="post_status"><?php _e( 'Status:', 'wporg-plugins' ); ?></label>

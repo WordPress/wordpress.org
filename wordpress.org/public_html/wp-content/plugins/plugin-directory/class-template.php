@@ -662,6 +662,43 @@ class Template {
 	}
 
 	/**
+	 * Returns the reasons for closing or disabling a plugin.
+	 *
+	 * @return array Close/disable reason labels.
+	 */
+	public static function get_close_reasons() {
+		return array(
+			'security-issue'                => __( 'Security Issue', 'wporg-plugins' ),
+			'author-request'                => __( 'Author Request', 'wporg-plugins' ),
+			'guideline-violation'           => __( 'Guideline Violation', 'wporg-plugins' ),
+			'licensing-trademark-violation' => __( 'Licensing/Trademark Violation', 'wporg-plugins' ),
+			'merged-into-core'              => __( 'Merged into Core', 'wporg-plugins' ),
+			'unused'                        => __( 'Unused', 'wporg-plugins' ),
+		);
+	}
+
+	/**
+	 * Returns the close/disable reason for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string Close/disable reason.
+	 */
+	public static function get_close_reason( $post = null ) {
+		$post = get_post( $post );
+
+		$close_reasons = self::get_close_reasons();
+		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
+		
+		if ( isset( $close_reasons[ $close_reason ] ) ) {
+			$reason_label = $close_reasons[ $close_reason ];
+		} else {
+			$reason_label = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		}
+
+		return $reason_label;
+	}
+
+	/**
 	 * Adds hreflang link attributes to WordPress.org pages.
 	 *
 	 * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.

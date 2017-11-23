@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 require_once dirname( dirname( __DIR__ ) ) . '/class-tools.php';
 
+use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -152,7 +153,7 @@ class Author_Card {
 
 					$plugin_slug = $plugin->post_name;
 					if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
-						$extra .= ' (requested ' . human_time_diff( strtotime( $last_updated ) ) . ' ago)';
+						$extra .= sprintf( '(requested %s ago)', human_time_diff( strtotime( $last_updated ) ) );
 						$tooltips[] = 'Requested, remains unapproved.';
 						$classes[]  = 'profile-plugin-requested';
 
@@ -162,10 +163,12 @@ class Author_Card {
 						$plugin_slug = substr( $plugin_slug, 9, - 9 );
 
 					} elseif ( 'closed' === $plugin->post_status ) {
+						$extra .= sprintf( '(closed: %s)', Template::get_close_reason( $plugin ) );
 						$tooltips[] = 'Plugin is closed.';
 						$classes[]  = 'profile-plugin-closed';
 
 					} elseif ( 'disabled' === $plugin->post_status ) {
+						$extra .= sprintf( '(disabled: %s)', Template::get_close_reason( $plugin ) );
 						$tooltips[] = 'Plugin is disabled (updates are active).';
 						$classes[]  = 'profile-plugin-closed';
 						$note = true;
@@ -205,7 +208,7 @@ class Author_Card {
 					vprintf( '<span class="profile-sp-link">[ %s | %s | %s ]</span>', $plugin_links );
 
 					if ( $extra ) {
-						echo $extra;
+						echo ' ' . $extra;
 					}
 
 					echo '</span></li>';
