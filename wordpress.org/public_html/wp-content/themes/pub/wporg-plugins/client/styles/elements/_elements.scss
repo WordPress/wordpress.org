@@ -25,15 +25,13 @@ blockquote, q {
 
 blockquote {
 	// Override wp4.css.
-	background: transparent;
+	background: $color__background-pre;
 	border: none;
-	padding: 0;
 
-	border-left: 2px solid $color__border;
 	color: #82878c;
 	font-style: italic;
 	margin: 1rem 0;
-	padding-left: 1rem;
+	padding: 1rem 2rem;
 
 	cite {
 		font-size: ms( -2 );
