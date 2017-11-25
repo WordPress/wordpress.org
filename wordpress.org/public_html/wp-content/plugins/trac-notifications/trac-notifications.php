@@ -123,6 +123,10 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
+		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], "manage_ticket_notifications" ) ) {
+			wp_send_json_error();
+		}
+
 		$username = wp_get_current_user()->user_login;
 
 		$ticket = absint( $_POST['trac-ticket-sub'] );
@@ -179,7 +183,10 @@ class wporg_trac_notifications {
 		}
 		$tickets = array_intersect( $queried_tickets, $subscribed_tickets );
 		$tickets = array_map( 'intval', array_values( $tickets ) );
-		wp_send_json_success( array( 'tickets' => $tickets ) );
+		wp_send_json_success( array(
+			'tickets' => $tickets,
+			'nonce' => wp_create_nonce( 'manage_ticket_notifications' )
+		) );
 	}
 
 	function trac_notifications_box_render() {
@@ -310,7 +317,10 @@ class wporg_trac_notifications {
 	</div>
 	<?php
 		$this->ticket_notes( $ticket, $username, $meta );
-		$send = array( 'notifications-box' => ob_get_clean() );
+		$send = array(
+			'notifications-box' => ob_get_clean(),
+			'nonce' => wp_create_nonce( 'manage_ticket_notifications' )
+		);
 		if ( isset( $this->components ) ) {
 			$send['maintainers'] = $this->components->get_component_maintainers( $ticket['component'] );
 		}

@@ -1135,7 +1135,7 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		}()),
 
 		notifications: (function() {
-			var notifications, endpoint, _ticket;
+			var notifications, endpoint, _ticket, _nonce;
 
 			function init( settings ) {
 				$( hide_cc_field );
@@ -1143,6 +1143,9 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 					return;
 				}
 				endpoint = settings.endpoint;
+				if ( settings.nonce ) {
+					_nonce = settings.nonce;
+				}
 				if ( settings.ticket ) {
 					_ticket = settings.ticket;
 					ticketInit( _ticket );
@@ -1195,6 +1198,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 							maintainerLabels( data.data.maintainers );
 						//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
 						}
+
+						if ( data.data.nonce ) {
+							_nonce = data.data.nonce;
+						}
 					}
 				});
 			}
@@ -1232,15 +1239,17 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				});
 			}
 
-			function save( action, ticket ) {
+			function save( action, ticket, nonce ) {
 				ticket = ticket || _ticket;
+				nonce = nonce || _nonce;
 				$.ajax({
 					type: 'POST',
 					url: endpoint,
 					xhrFields: { withCredentials: true },
 					data: {
 						'trac-ticket-sub': ticket,
-						action: action
+						action: action,
+						nonce: nonce
 					}
 				});
 			}
@@ -1316,6 +1325,10 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 				}).success( function( data ) {
 					if ( ! data.success ) {
 						return;
+					}
+
+					if ( data.data.nonce ) {
+						_nonce = data.data.nonce;
 					}
 
 					stars.each( function() {
