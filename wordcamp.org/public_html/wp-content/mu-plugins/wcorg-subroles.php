@@ -69,26 +69,34 @@ function add_subrole_caps( $allcaps, $caps, $args, $user ) {
 		$newcaps = array();
 		
 		switch ( $subrole ) {
-			case 'jetpack_connector' :
-				$newcaps = array(
-					'manage_network'             => true, // Access to network admin.
-					'jetpack_connect'            => true,
-					'jetpack_reconnect'          => true,
-					'jetpack_disconnect'         => true,
-					'jetpack_network_admin_page' => true,
-					'jetpack_network_sites_page' => true,
-					'jetpack_manage_modules'     => true,
-				);
-				break;
-
+			/**
+			 * Mentor Manager
+			 *
+			 * - Access and use the WordCamp Mentors Dashboard screen on Central.
+			 * - Edit `wordcamp` posts on Central.
+			 */
 			case 'mentor_manager' :
 				// These capabilities only apply on central.wordcamp.org.
 				if ( BLOG_ID_CURRENT_SITE === get_current_blog_id() ) {
 					$newcaps = array(
-						'read'                    => true, // Access to wp-admin.
-						'edit_posts'              => true, // Access to WCPT posts.
-						'edit_published_posts'    => true, // Access to WCPT posts.
-						'wordcamp_manage_mentors' => true,
+						'read'                       => true, // Access to wp-admin.
+						'wordcamp_manage_mentors'    => true,
+						'wordcamp_wrangle_wordcamps' => true,
+					);
+				}
+				break;
+
+			/**
+			 * WordCamp Wrangler
+			 *
+			 * - Edit `wordcamp` posts on Central.
+			 */
+			case 'wordcamp_wrangler' :
+				// These capabilities only apply on central.wordcamp.org.
+				if ( BLOG_ID_CURRENT_SITE === get_current_blog_id() ) {
+					$newcaps = array(
+						'read'                       => true, // Access to wp-admin.
+						'wordcamp_wrangle_wordcamps' => true,
 					);
 				}
 				break;
@@ -114,40 +122,36 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\add_subrole_caps', 10, 4 );
  */
 function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 	$required_caps = array();
+	$current_user  = get_user_by( 'id', $user_id );
 
 	switch ( $meta_cap ) {
 		case 'wordcamp_manage_mentors' :
+		case 'wordcamp_wrangle_wordcamps' :
 			$required_caps[] = $meta_cap;
 			break;
 
-		// Allow mentor managers to edit WCPT posts.
-		// @todo Change the capability type of WCPT to something custom so this isn't necessary.
-		case 'edit_post' :
-		case 'edit_others_posts' :
-			if ( defined( 'WCPT_POST_TYPE_ID' ) && current_user_can( 'wordcamp_manage_mentors' ) ) {
-				if ( ! empty( $args ) ) {
-					$post_type = get_post_type( $args[0] );
-				} else {
-					$post_type = get_post_type();
-				}
-
-				if ( WCPT_POST_TYPE_ID === $post_type ) {
-					$wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
-					$required_caps[] = $wcpt->cap->edit_posts;
-				}
+		// Allow WordCamp Wranglers to edit WordCamp posts.
+		case 'edit_wordcamps' :
+		case 'edit_published_wordcamps' :
+		case 'edit_wordcamp' :
+		case 'edit_others_wordcamps' :
+			if ( $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
+				$required_caps[] = 'wordcamp_wrangle_wordcamps';
 			}
 			break;
 
-		// Allow Jetpack Connectors to do connector stuff without needing caps like `manage_network_plugins`.
-		// See Jetpack::jetpack_custom_caps()
-		case 'jetpack_connect':
-		case 'jetpack_reconnect':
-		case 'jetpack_disconnect':
-		case 'jetpack_network_admin_page':
-		case 'jetpack_network_sites_page':
-		case 'jetpack_manage_modules':
-			if ( has_subrole( get_current_user_id(), 'jetpack_connector' ) ) {
-				$required_caps[] = $meta_cap;
+		// WP_Posts_List_Table checks the `edit_post` cap regardless of post type :/
+		case 'edit_post' :
+			if ( ! empty( $args ) ) {
+				$post_type = get_post_type( $args[0] );
+			} else {
+				$post_type = get_post_type();
+			}
+
+			if ( defined( 'WCPT_POST_TYPE_ID' ) && WCPT_POST_TYPE_ID === $post_type ) {
+				if ( $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
+					$required_caps[] = 'wordcamp_wrangle_wordcamps';
+				}
 			}
 			break;
 	}
