@@ -885,17 +885,18 @@ function test_get_events() {
  */
 function get_events_test_cases() {
 	$cases = array(
-		'2-near-mumbai' => array(
+		// This assumes there will always be at least 2 upcoming events, so it needs to be a very active community.
+		'2-near-seattle' => array(
 			'input' => array(
 				'number' => '2',
 				'nearby' => array(
-					'latitude'  => '19.024704',
-					'longitude' => '72.853966',
+					'latitude'  => '47.609023',
+					'longitude' => '-122.335903',
 				),
 			),
 			'expected' => array(
 				'count'   => 2,
-				'country' => 'IN',
+				'country' => 'US',
 			),
 		),
 
