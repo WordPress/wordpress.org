@@ -86,6 +86,47 @@ input[type="submit"] {
 	box-shadow: none;
 }
 
+#wporg-header ul li.download {
+	float: right;
+	height: 34px;
+	margin-right: 14px;
+	overflow: hidden;
+	padding: 0 0 34px;
+}
+
+@media screen and (max-width: 820px) {
+	#wporg-header ul li.download {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	#wporg-header ul li.download {
+		display: block;
+		float: none;
+		margin: 10px 20px 20px;
+		padding-bottom: 0;
+		height: auto;
+	}
+	#wporg-header ul li.download a {
+		padding: 4px 10px;
+	}
+}
+
+#wporg-header ul li.download a {
+	margin: 0;
+	padding: 0 16px;
+}
+
+#wporg-header ul li.download a:hover {
+	color: #eee;
+}
+
+#wporg-header ul li.download.current a,
+#wporg-header ul li.download.current-menu-item a {
+	color: #eee;
+}
+
 .site,
 .custom-menu .site,
 .site-branding {
