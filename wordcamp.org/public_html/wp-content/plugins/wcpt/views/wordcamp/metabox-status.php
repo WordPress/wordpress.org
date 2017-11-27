@@ -1,4 +1,8 @@
-<?php defined( 'WPINC' ) or die(); ?>
+<?php
+defined( 'WPINC' ) || die();
+
+$wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
+?>
 
 <div id="submitpost" class="wcb submitbox">
 	<div id="minor-publishing">
@@ -7,7 +11,7 @@
 				<label>
 					WordCamp Status:
 
-					<?php if ( current_user_can( 'manage_network' ) ) : ?>
+					<?php if ( current_user_can( $wcpt->cap->edit_posts ) ) : ?>
 
 						<span id="post-status-display">
 							<select name="post_status">
@@ -47,7 +51,7 @@
 	
 	<div id="major-publishing-actions">
 		<div id="delete-action">
-			<?php if ( current_user_can( 'delete_post', $post->ID ) ) : ?>
+			<?php if ( current_user_can( $wcpt->cap->delete_post, $post->ID ) ) : ?>
 				<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>">
 					<?php _e( 'Delete', 'wordcamporg' ); ?>
 				</a>

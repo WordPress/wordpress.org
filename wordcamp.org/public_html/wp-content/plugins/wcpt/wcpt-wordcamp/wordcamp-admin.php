@@ -101,8 +101,8 @@ class WordCamp_Admin {
 			'low'
 		);
 
-		// Notes are private, so only show them to network admins
-		if ( current_user_can( 'manage_network' ) ) {
+		// Notes are private, so only show them to WordCamp Wranglers
+		if ( current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
 			add_meta_box(
 				'wcpt_notes',
 				__( 'Add a Note', 'wordcamporg' ),
@@ -842,8 +842,10 @@ class WordCamp_Admin {
 		}
 
 		if ( ! empty( $post_data['post_status'] ) ) {
-			// Only network admins can change WordCamp statuses.
-			if ( ! current_user_can( 'manage_network' ) ) {
+			$wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
+
+			// Only WordCamp Wranglers can change WordCamp statuses.
+			if ( ! current_user_can( $wcpt->cap->edit_posts ) ) {
 				$post_data['post_status'] = $post->post_status;
 			}
 
