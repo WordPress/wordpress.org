@@ -31,7 +31,7 @@ function wporg_support_scripts() {
 		'forum-wp4-style',
 		get_template_directory_uri() . '/style.css',
 		array( 'bb-base' ),
-		'20171023'
+		'20171127'
 	);
 
 	wp_style_add_data( 'forum-wp4-style', 'rtl', 'replace' );
@@ -490,7 +490,7 @@ function wporg_support_current_user_can_stick( $topic_id ) {
 
 	return $user_can_stick;
 }
- 
+
 /**
  * Correct reply URLs for pending posts.
  *
