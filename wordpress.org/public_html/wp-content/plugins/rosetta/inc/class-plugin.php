@@ -33,6 +33,7 @@ class Plugin {
 	 */
 	private function __construct() {
 		add_action( 'plugins_loaded', [ $this, 'plugins_loaded' ], 1 );
+		add_action( 'wp_nav_menu_objects', [ $this, 'download_button_menu_item' ], 11 );
 
 		$this->sites = [
 			Site\Global_WordPress_Org::class,
@@ -61,6 +62,24 @@ class Plugin {
 
 		// Customizations for all sites.
 		$this->filter_date_options();
+	}
+
+	/**
+	 * Turns a menu item that links to the Downloads page into a download button.
+	 *
+	 * @param array $menu_items The menu items, sorted by each menu item's menu order.
+	 * @return array
+	 */
+	public function download_button_menu_item( $menu_items ) {
+		foreach ( $menu_items as $menu_item ) {
+			if ( false !== stripos( $menu_item->url, 'download/' ) || 'page-templates/download.php' === get_page_template_slug( $menu_item->object_id ) ) {
+				$menu_item->classes = array_merge( $menu_item->classes, ['button', 'button-primary', 'download'] );
+				$menu_item->title   = _x( 'Download WordPress', 'Menu title', 'rosetta' );
+				break;
+			}
+		}
+
+		return $menu_items;
 	}
 
 	/**
