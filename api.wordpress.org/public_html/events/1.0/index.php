@@ -149,32 +149,8 @@ function build_response( $location, $location_args ) {
 		$events = get_events( $event_args );
 		$events = add_regional_wordcamps( $events, $_SERVER['HTTP_USER_AGENT'] );
 
-		/*
-		 * There are two conditions which can cause a location to not have a description:
-		 * 1) When the request only passed latitude/longtude coordinates. We don't lookup
-		 *    a location here because it's too expensive. See r5497.
-		 * 2) When the location was determined by geolocating the IP. We don't return the
-		 *    location here because it would violate the ip2location EULA. See r5491.
-		 *
-		 * For WP 4.8-beta1 those conditions were handled by setting "fuzzy" locations
-		 * instead; the location of the first upcoming event was used, since it will be
-		 * within driving distance of the location that was geolocated.
-		 *
-		 * After beta1 was released, though, there was a lot of feedback about the locations
-		 * being too inaccurate, so we're going to try a different approach for beta2. See
-		 * #40702-core.
-		 *
-		 * @todo Update the user-agent strings if 40702-geoip.2.diff doesn't make it into beta2
-		 * @todo Remove this back-compat code after 4.8.0 has been out for a few days, to avoid
-		 *       impacting the feature plugin in 4.7 installs. rebuild_location_from_event_source()
-		 *       can probably be removed at that time too.
-		 */
-		$use_fuzzy_locations = false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.7' ) || false !== strpos( $_SERVER['HTTP_USER_AGENT'], '4.8-beta1' );
-		if ( $use_fuzzy_locations ) {
-			if ( empty( $location['description'] ) || ( isset( $location['internal'] ) && $location['internal'] ) ) {
-				$location = rebuild_location_from_event_source( $events );
-			}
-		} elseif ( isset( $location['internal'] ) && $location['internal'] ) {
+		// Internal location data cannot be exposed in the response, see get_location().
+		if ( isset( $location['internal'] ) && $location['internal'] ) {
 			// Let the client know that a location was successfully determined based on their IP
 			$location = array( 'ip' => $location_args['ip'] );
 		}
@@ -417,52 +393,6 @@ function _ip2long_v6( $address ) {
 }
 
 /**
- * Rebuild the location given to the client from the event source data
- *
- * We cannot publicly expose location data that we retrieve from the `ip2location` database, because that would
- * violate their licensing terms. We can only use the information internally, for the purposes of completing the
- * program's business logic (determining nearby events).
- *
- * Once we have nearby events, though, we can take advantage of the data that's available in the `wporg_events` table.
- * That table contains the locations details for the event's venue, which was sourced from the respective APIs
- * (WordCamp.org, Meetup.com, etc). We can return the venue's location data without violating any terms.
- *
- * See https://meta.trac.wordpress.org/ticket/2823#comment:15
- * See https://meta.trac.wordpress.org/ticket/2823#comment:21
- *
- * This isn't ideal, since the location it picks is potentially an hour's driving time from the user. If we get a
- * lot of complaints, we could potentially change this to search the `geonames` database for the name of the city
- * that was returned by the `ip2location` database. That should be more accurate, but it would require an extra
- * database lookup, and could potentially fail to return any results.
- *
- * @param array $events
- *
- * @return array|false
- */
-function rebuild_location_from_event_source( $events ) {
-	$location = false;
-
-	foreach ( $events as $event ) {
-		if ( ! empty( $event['location']['location'] ) && ! empty( $event['location']['latitude'] ) ) {
-			$location = $event['location'];
-			$location['description'] = $location['location'];
-			unset( $location['location'] );
-
-			/*
-			 * If the event is a WordCamp, continue searching until a meetup is found. Meetups have a much smaller
-			 * search radius in `get_events()`, so they'll be closer to the user's location. Some cities will only
-			 * have WordCamps scheduled at the moment, though, so we can fall back to those.
-			 */
-			if ( 'meetup' === $event['type'] ) {
-				break;
-			}
-		}
-	}
-
-	return $location;
-}
-
-/**
  * Determine a location for the given parameters
  *
  * @param array $args
@@ -553,7 +483,12 @@ function get_location( $args = array() ) {
 				'latitude'    => $guess->ip_latitude,
 				'longitude'   => $guess->ip_longitude,
 				'country'     => $guess->country_short,
-				'internal'    => true, // this location cannot be shared publicly, see `rebuild_location_from_geonames()`
+
+				/*
+				 * ip2location's EULA forbids exposing the derived location publicly, so flag the
+				 * data for internal use only.
+				 */
+				'internal' => true,
 			);
 		}
 	}
