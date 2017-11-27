@@ -105,6 +105,44 @@ ul, ol {
 	margin: 0 0 22px 0;
 }
 
+/* WP.org header download button */
+#wporg-header .download {
+	float: right;
+	height: 34px;
+	margin-right: 14px;
+	overflow: hidden;
+	padding: 0 0 34px;
+}
+
+@media screen and (max-width:820px) {
+	#wporg-header .download {
+		display: none;
+	}
+}
+
+@media screen and (max-width:768px) {
+	#wporg-header .download {
+		display: block;
+		float: none;
+		margin: 10px 20px 20px;
+		padding-bottom: 0;
+		height: auto;
+	}
+
+	#wporg-header .download a {
+		padding: 4px 10px;
+	}
+}
+
+#wporg-header .download a {
+	margin: 0;
+	padding: 0 16px;
+}
+
+#wporg-header .download a:hover {
+	color: #eee;
+}
+
 /*------------------------------------------------------------------------------
   16.0 - Themes
 ------------------------------------------------------------------------------*/
