@@ -1900,60 +1900,412 @@ p a:hover {
 /*--------------------------------------------------------------
 # WP.org Header
 --------------------------------------------------------------*/
+#wporg-header {
+	background: #23282d;
+	height: 140px;
+	position: relative;
+	text-align: center;
+	width: 100%;
+}
+
+#wporg-header .wrapper {
+	margin: 0 auto;
+	max-width: 960px;
+}
+
 #wporg-header h1 {
+	display: inline-block;
 	margin: auto;
+	width: 303px;
+}
+
+#wporg-header h1 a {
+	background: url(//s.w.org/style/images/wp-header-logo.png?1) center left no-repeat;
+	background-size: 303px 53px;
+	display: block;
+	height: 88px;
+	text-indent: -9999px;
+	width: 303px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx), only screen and (min-resolution: 144dpi) {
+	#wporg-header h1 a {
+		background-image: url(//s.w.org/style/images/wp-header-logo-2x.png?1);
+	}
 }
 
 #wporg-header h2.rosetta {
 	clear: none;
+	color: #dfdfdf;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 30px;
+	margin: 0;
 }
 
-#wporg-header form input {
-	box-sizing: content-box;
-	padding: 3px;
+#wporg-header h2.rosetta a {
+	border-bottom: none;
+	color: #dfdfdf;
+	display: block;
+	height: 52px;
+	/* 88 header height - 36 top padding */
+	line-height: 22px;
+	padding: 0;
 }
 
-#wporg-header .button, #wporg-header #bbpress-forums .wporg-bbp-term-subscription > a, #bbpress-forums #wporg-header .wporg-bbp-term-subscription > a, #wporg-header
-#bbpress-forums .reviews-submit-link > .btn,
-#bbpress-forums #wporg-header .reviews-submit-link > .btn, #wporg-header
-#bbpress-forums .subscription-toggle,
-#bbpress-forums #wporg-header .subscription-toggle, #wporg-header
-#bbpress-forums .favorite-toggle,
-#bbpress-forums #wporg-header .favorite-toggle {
-	box-shadow: none;
-}
-
-#wporg-header .download-button {
-	background-color: #21759b;
-	background-image: linear-gradient(to bottom, #2a95c5, #21759b);
-	border-bottom-color: #1e6a8d;
-	border-color: #21759b;
-	box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.5);
-}
-
-#wporg-header .download-button:hover, #wporg-header .download-button:focus {
-	background-color: #278ab7;
-	background-image: linear-gradient(to bottom, #2e9fd2, #21759b);
-	border-color: #1b607f;
-	box-shadow: inset 0 1px 0 rgba(120, 200, 230, 0.6);
-	color: #fff;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-}
-
-#wporg-header .download-button:active {
-	background: #1b607f;
-	background-image: linear-gradient(to bottom, #21759b, #278ab7);
-	border-color: #124560 #2382ae #2382ae #2382ae;
-	box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
-	color: rgba(255, 255, 255, 0.95);
-	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-	transform: none;
-}
-
-#wporg-header a:hover,
-#wporg-header a:focus,
-#wporg-header a:active {
+#wporg-header h2.rosetta a:hover {
 	text-decoration: none;
+}
+
+#wporg-header #wporg-header-menu {
+	background: #23282d;
+	right: -75%;
+	list-style: none;
+	margin: 0;
+	max-width: 75%;
+	min-width: 200px;
+	padding: 20px 0 0;
+	position: absolute;
+	text-align: right;
+	transition: right 0.3s;
+	z-index: 100000;
+}
+
+#wporg-header #wporg-header-menu.active {
+	right: 0;
+}
+
+#wporg-header ul li {
+	list-style-type: none;
+	position: relative;
+}
+
+#wporg-header ul li a {
+	color: #eee;
+	display: block;
+	font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+	font-size: 13px;
+	font-weight: 600;
+	height: 34px;
+	line-height: 34px;
+	margin: 0 4px;
+	padding: 10px 30px;
+	text-decoration: none;
+}
+
+#wporg-header ul li a.subcurrent {
+	font-weight: bold;
+}
+
+@media (max-width: 768px) {
+	#wporg-header ul li a {
+		height: auto;
+	}
+}
+
+#wporg-header ul li#download, #wporg-header ul li.download {
+	float: left;
+	height: 34px;
+	margin-left: 14px;
+	overflow: hidden;
+	padding: 0 0 34px;
+}
+
+@media screen and (max-width: 820px) {
+	#wporg-header ul li#download, #wporg-header ul li.download {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	#wporg-header ul li#download, #wporg-header ul li.download {
+		display: block;
+		float: none;
+		margin: 10px 20px 20px;
+		padding-bottom: 0;
+		height: auto;
+	}
+	#wporg-header ul li#download a, #wporg-header ul li.download a {
+		padding: 4px 10px;
+	}
+}
+
+#wporg-header ul li#download a, #wporg-header ul li.download a {
+	margin: 0;
+	padding: 0 16px;
+}
+
+#wporg-header ul li#download a:hover, #wporg-header ul li.download a:hover {
+	color: #eee;
+}
+
+#wporg-header ul li#download.current a, #wporg-header ul li#download.current-menu-item a, #wporg-header ul li.download.current a, #wporg-header ul li.download.current-menu-item a {
+	color: #eee;
+}
+
+#wporg-header ul li#download .uparrow, #wporg-header ul li.download .uparrow {
+	display: none;
+}
+
+#wporg-header ul li a:hover,
+#wporg-header ul li a.current,
+#wporg-header ul li.current-menu-item a,
+#wporg-header ul li.current_page_parent a {
+	color: #00a0d2;
+}
+
+#wporg-header .nav-submenu {
+	display: none;
+	margin-bottom: 10px;
+	margin-top: -15px;
+	padding: 0;
+	position: static;
+}
+
+#wporg-header .nav-submenu li a {
+	height: 24px;
+	line-height: 24px;
+	margin-right: 20px;
+}
+
+@media screen and (min-width: 768px) {
+	#wporg-header #head-search {
+		float: left;
+		margin-left: 14px;
+		padding-top: 30px;
+	}
+}
+
+#wporg-header #head-search form {
+	border-bottom: 1px solid #3f3f3f;
+	display: inline-block;
+	margin-right: 60px;
+	width: 288px;
+}
+
+#wporg-header #head-search form input.text {
+	background: #191e23;
+	border: 0;
+	border-radius: 0;
+	box-sizing: content-box;
+	color: #b4b9be;
+	float: right;
+	font-family: "Open Sans", sans-serif;
+	font-size: 12px;
+	height: 24px;
+	margin: 0;
+	outline: none;
+	padding: 3px;
+	vertical-align: top;
+	width: 256px;
+}
+
+#wporg-header #head-search form input.text::-moz-placeholder {
+	color: #eee;
+}
+
+@media screen and (max-width: 480px) {
+	#wporg-header #head-search form input.text {
+		width: 216px;
+	}
+}
+
+#wporg-header #head-search form [type="submit"] {
+	background: #191e23 url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831) no-repeat 2px 4px;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	float: right;
+	height: 30px;
+	margin: 0;
+	padding: 0;
+	text-shadow: none !important;
+	width: 26px;
+}
+
+@media screen and (max-width: 480px) {
+	#wporg-header #head-search form {
+		width: 248px;
+	}
+}
+
+@media screen and (min-width: 480px) {
+	#wporg-header #head-search form {
+		margin-right: 0;
+	}
+}
+
+@media screen and (min-width: 768px) {
+	#wporg-header {
+		height: 120px;
+		text-align: inherit;
+	}
+	#wporg-header h1 {
+		float: right;
+		padding-right: 10px;
+	}
+	#wporg-header h2.rosetta {
+		float: right;
+		padding: 36px 27px 0;
+	}
+	#wporg-header #wporg-header-menu {
+		float: right;
+		list-style: none;
+		margin: -15px 0 0;
+		max-width: inherit;
+		min-width: 0;
+		padding: 0;
+		position: static;
+		width: 100%;
+	}
+	#wporg-header ul li {
+		float: right;
+		position: relative;
+	}
+	#wporg-header ul li a {
+		color: #eee;
+		display: block;
+		font-family: "Open Sans", Helvetica, Arial, "Liberation Sans", sans-serif;
+		font-size: 13px;
+		font-weight: 600;
+		height: 46px;
+		line-height: 34px;
+		margin: 0 4px;
+		padding: 0 6px;
+	}
+	#wporg-header ul li a.current ~ .uparrow {
+		border-bottom: 9px solid #f7f7f7;
+		border-right: 9px solid transparent;
+		border-left: 9px solid transparent;
+		height: 0;
+		margin: -8px auto 0 auto;
+		width: 0;
+	}
+	#wporg-header ul li.current-menu-item:after, #wporg-header ul li.current_page_parent:after {
+		border-bottom: 9px solid #f7f7f7;
+		border-right: 9px solid transparent;
+		border-left: 9px solid transparent;
+		content: '';
+		height: 0;
+		right: 50%;
+		margin: -8px -9px 0 0;
+		position: absolute;
+		width: 0;
+	}
+	#wporg-header ul li:hover .nav-submenu ~ .uparrow,
+	#wporg-header ul li .nav-submenu:hover ~ .uparrow {
+		border-bottom: 9px solid #32373c;
+		border-right: 9px solid transparent;
+		border-left: 9px solid transparent;
+		height: 0;
+		margin: -10px auto 0 auto;
+		width: 0;
+	}
+	#wporg-header ul li .nav-submenu li {
+		float: none;
+	}
+	#wporg-header ul li .nav-submenu li a {
+		height: 34px;
+		line-height: 34px;
+		margin-right: 6px;
+	}
+	#wporg-header .nav-submenu {
+		background: #32373c;
+		border: #32373c solid 1px;
+		border-top: 0;
+		display: none !important;
+		/* Prevents #wporg-header ul overwriting this */
+		margin-top: -1px;
+		min-width: 0;
+	}
+	#wporg-header ul li:hover .nav-submenu,
+	#wporg-header ul li .nav-submenu:hover {
+		display: block !important;
+		/* Prevents #wporg-header ul overwriting this */
+		right: 0;
+		margin-right: 0;
+		position: absolute;
+		top: 46px;
+		width: auto;
+		z-index: 101;
+	}
+	#wporg-header #headline h2 {
+		text-rendering: optimizeLegibility;
+	}
+	#wporg-header ul li.current-menu-item:after,
+	#wporg-header ul li.current_page_parent:after,
+	#wporg-header ul li a.current ~ .uparrow {
+		border-bottom-color: #0073aa;
+	}
+}
+
+#mobile-menu-button {
+	display: block;
+	float: right;
+	font-family: 'dashicons';
+	font-size: 16px;
+	font-style: normal;
+	font-weight: normal;
+	height: 32px;
+	right: 10px;
+	line-height: 1;
+	position: absolute;
+	text-align: center;
+	text-decoration: inherit;
+	top: 75px;
+	transition: color .1s ease-in;
+	vertical-align: top;
+	width: 39px;
+	-webkit-font-smoothing: antialiased;
+}
+
+#mobile-menu-button:before {
+	border: none;
+	box-sizing: border-box;
+	color: #888;
+	content: '\f228';
+	display: inline-block;
+	float: right;
+	font: normal 50px/1 'Dashicons';
+	height: 32px;
+	margin: 0;
+	outline: none;
+	padding: 3px;
+	text-decoration: none;
+	vertical-align: middle;
+	width: 39px;
+	-webkit-font-smoothing: antialiased;
+}
+
+#mobile-menu-button:hover {
+	background: none;
+}
+
+@media screen and (min-width: 768px) {
+	#mobile-menu-button {
+		display: none;
+	}
+}
+
+#download-mobile {
+	background: #f7f7f7;
+	border-bottom: 1px solid #dddddd;
+}
+
+#download-mobile .wrapper {
+	padding: 20px 0;
+	text-align: center;
+}
+
+#download-mobile span.download-ready {
+	font-size: 1.6em;
+	margin: 0 0.25em;
+}
+
+#download-mobile a.download-button {
+	font-size: 1.6em;
+	height: inherit;
+	margin: 10px 0.25em;
+	padding: 10px 15px;
 }
 
 /*--------------------------------------------------------------
