@@ -168,11 +168,6 @@ class Builder {
 	 * In the event that a previous ZIP for this version exists, checksums for all versions of the file will be included.
 	 */
 	function generate_checksums() {
-		// Only enable this for the `exploit-scanner` plugin for the time being.
-		if ( 'exploit-scanner' != $this->slug && 'test-plugin-3' != $this->slug ) {
-			return;
-		}
-
 		// Don't create checksums for trunk.
 		if ( ! $this->stable_tag || ( 'trunk' == $this->version && 'trunk' != $this->stable_tag && '' != $this->stable_tag ) ) {
 			return;
