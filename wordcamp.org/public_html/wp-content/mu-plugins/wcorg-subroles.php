@@ -135,7 +135,7 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 		case 'edit_published_wordcamps' :
 		case 'edit_wordcamp' :
 		case 'edit_others_wordcamps' :
-			if ( $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
+			if ( $current_user && $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
 				$required_caps[] = 'wordcamp_wrangle_wordcamps';
 			}
 			break;
@@ -149,7 +149,7 @@ function map_subrole_caps( $primitive_caps, $meta_cap, $user_id, $args ) {
 			}
 
 			if ( defined( 'WCPT_POST_TYPE_ID' ) && WCPT_POST_TYPE_ID === $post_type ) {
-				if ( $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
+				if ( $current_user && $current_user->has_cap( 'wordcamp_wrangle_wordcamps' ) ) {
 					$required_caps[] = 'wordcamp_wrangle_wordcamps';
 				}
 			}
