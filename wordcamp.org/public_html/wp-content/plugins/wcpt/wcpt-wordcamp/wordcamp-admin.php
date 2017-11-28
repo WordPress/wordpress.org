@@ -845,7 +845,7 @@ class WordCamp_Admin {
 			$wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
 
 			// Only WordCamp Wranglers can change WordCamp statuses.
-			if ( ! current_user_can( $wcpt->cap->edit_posts ) ) {
+			if ( ! current_user_can( 'wordcamp_wrangle_wordcamps' ) ) {
 				$post_data['post_status'] = $post->post_status;
 			}
 

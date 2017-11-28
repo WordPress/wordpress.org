@@ -11,7 +11,7 @@ $wcpt = get_post_type_object( WCPT_POST_TYPE_ID );
 				<label>
 					WordCamp Status:
 
-					<?php if ( current_user_can( $wcpt->cap->edit_posts ) ) : ?>
+					<?php if ( current_user_can( 'wordcamp_wrangle_wordcamps' ) ) : ?>
 
 						<span id="post-status-display">
 							<select name="post_status">

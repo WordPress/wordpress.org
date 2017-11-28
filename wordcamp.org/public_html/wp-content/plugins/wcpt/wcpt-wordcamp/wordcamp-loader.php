@@ -23,6 +23,7 @@ class WordCamp_Loader {
 	function __construct() {
 		add_action( 'plugins_loaded',                  array( $this, 'includes'                          ) );
 		add_action( 'init',                            array( $this, 'register_post_types'               ) );
+		add_action( 'init',                            array( $this, 'register_post_capabilities'        ) );
 		add_action( 'init',                            array( $this, 'register_post_statuses'            ) );
 		add_filter( 'pre_get_posts',                   array( $this, 'query_public_statuses_on_archives' ) );
 		add_action( 'wp_insert_post_data',             array( $this, 'set_scheduled_date'                ) );
@@ -112,6 +113,22 @@ class WordCamp_Loader {
 			'rest_base'             => 'wordcamps',
 			'rest_controller_class' => 'WordCamp_REST_WordCamps_Controller',
 		) );
+	}
+
+	/**
+	 * Allow some site roles to see WordCamp posts.
+	 */
+	public function register_post_capabilities() {
+		$roles = array(
+			'contributor',
+			'author',
+			'editor',
+			'administrator',
+		);
+
+		foreach ( $roles as $role ) {
+			get_role( $role )->add_cap( 'edit_wordcamps' );
+		}
 	}
 
 	public function register_post_statuses() {
