@@ -6,6 +6,14 @@ class DevHub_CLI {
 	private static $meta_key = 'wporg_cli_markdown_source';
 	private static $supported_post_types = array( 'command' );
 	private static $posts_per_page = 350;
+	private static $non_bundled_commands = array(
+		'https://github.com/wp-cli/admin-command',
+		'https://github.com/wp-cli/dist-archive-command',
+		'https://github.com/wp-cli/doctor-command',
+		'https://github.com/wp-cli/find-command',
+		'https://github.com/wp-cli/profile-command',
+		'https://github.com/wp-cli/scaffold-package-command',
+	);
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'action_init_register_cron_jobs' ) );
@@ -273,7 +281,9 @@ class DevHub_CLI {
 			return $breadcrumbs;
 		}
 
-		$content = self::append_subcommands( get_queried_object()->post_content );
+		$content = get_queried_object()->post_content;
+		$content = self::prepend_installation( $content );
+		$content = self::append_subcommands( $content );
 		$items = self::get_tags( 'h([1-4])', $content );
 		if ( count( $items ) > 1 ) {
 			$quick_links = '<span class="quick-links">(';
@@ -302,6 +312,7 @@ class DevHub_CLI {
 		// Transform HTML entity artifacts back to their original
 		$content = str_replace( '&amp;#039;', '\'', $content );
 
+		$content = self::prepend_installation( $content );
 		$content = self::append_subcommands( $content );
 
 		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
@@ -362,6 +373,35 @@ class DevHub_CLI {
 
 		add_filter( 'the_content', array( __CLASS__, 'filter_the_content' ) );
 
+		return $content;
+	}
+
+	protected static function prepend_installation( $content ) {
+		$repo_url = get_post_meta( get_the_ID(), 'repo_url', true );
+
+		// Only non-bundled commands
+		if ( ! in_array( $repo_url, self::$non_bundled_commands, true ) ) {
+			return;
+		}
+		$repo_slug = str_replace( 'https://github.com/', '', $repo_url );
+		ob_start(); ?>
+		<h3>INSTALLING</h3>
+
+		<p>Use the <code><?php the_title(); ?></code> command by installing the command's package:</p>
+
+		<pre><code>wp package install <?php echo esc_html( $repo_slug ); ?></code></pre>
+
+		<p>Once the package is successfully installed, the <code><?php the_title(); ?></code> command will appear in the list of available commands.</p>
+		<?php
+		$installing_instructions = ob_get_clean();
+		// Insert before OPTIONS but after description if OPTIONS exists
+		$options_match = '#<h3>OPTIONS<\/h3>#';
+		if ( preg_match( $options_match, $content ) ) {
+			$content = preg_replace( $options_match, $installing_instructions . '$0', $content );
+		} else {
+			// Otherwise, appending to description is fine.
+			$content .= $installing_instructions;
+		}
 		return $content;
 	}
 
