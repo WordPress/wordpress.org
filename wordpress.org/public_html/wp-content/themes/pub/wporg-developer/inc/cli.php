@@ -381,7 +381,7 @@ class DevHub_CLI {
 
 		// Only non-bundled commands
 		if ( ! in_array( $repo_url, self::$non_bundled_commands, true ) ) {
-			return;
+			return $content;
 		}
 		$repo_slug = str_replace( 'https://github.com/', '', $repo_url );
 		ob_start(); ?>
