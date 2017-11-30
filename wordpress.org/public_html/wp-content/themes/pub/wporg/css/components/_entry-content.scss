@@ -1,4 +1,7 @@
 .entry-content {
+	hyphens: auto;
+	word-wrap: break-word;
+
 	p:first-child {
 		margin-top: 0;
 	}

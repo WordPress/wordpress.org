@@ -124,7 +124,7 @@ get_header( 'wporg' );
 				while ( $featured->have_posts() ) :
 					$featured->the_post();
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
-					echo apply_filters( 'the_excerpt', get_the_excerpt() );
+					echo '<div class="entry-summary">' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</div>';
 				endwhile;
 				wp_reset_postdata();
 				?>
