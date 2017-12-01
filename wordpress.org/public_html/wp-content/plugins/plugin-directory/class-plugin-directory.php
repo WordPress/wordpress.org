@@ -915,12 +915,12 @@ class Plugin_Directory {
 	 * @param int   $min_translated	Translations below this % threshold will not be synced to meta, to save space.
 	 * @return array
 	 */
-	public function sync_all_translations_to_meta( $post_id, $min_translated = 60, $skip_pfx = array('en_') ) {
+	public function sync_all_translations_to_meta( $post_id, $min_translated = 40, $skip_pfx = array('en_') ) {
 
 		$locales_to_sync = array();
 		$post = get_post( $post_id );
 		if ( $post ) {
-			$translations = Plugin_I18n::find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
+			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
 			if ( $translations ) {
 				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
 				foreach ( $translations as $i => $_locale ) {
@@ -951,33 +951,41 @@ class Plugin_Directory {
 	 */
 	public function sync_translation_to_meta( $post_id, $_locale ) {
 		global $locale;
+
 		$old_locale = $locale;
+		// Keep track of the original untranslated strings
+		$orig_title = get_the_title( $post_id );
+		$orig_excerpt = get_the_excerpt( $post_id );
+		$orig_content = get_post_field( 'post_content', $post_id );
 		$locale = $_locale;
 
 		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
 		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
 
-		$the_title = Plugin_I18n::instance()->translate( 'title', get_the_title( $post_id ), [ 'post_id' => $post_id ] );
-		if ( $the_title && $the_title != get_the_title( $post_id ) ) {
+		$the_title = Plugin_I18n::instance()->translate( 'title', $orig_title, [ 'post_id' => $post_id ] );
+		if ( $the_title && $the_title != $orig_title ) {
 			update_post_meta( $post_id, 'title_' . $locale, $the_title );
 		}
 
-		$the_excerpt = $this->translate_post_excerpt( get_the_excerpt( $post_id ), $post_id );
-		if ( $the_excerpt && $the_excerpt != get_the_excerpt( $post_id ) ) {
+		$the_excerpt = $this->translate_post_excerpt( $orig_excerpt, $post_id );
+		if ( $the_excerpt && $the_excerpt != $orig_excerpt ) {
 			update_post_meta( $post_id, 'excerpt_' . $locale, $the_excerpt );
 		}
 
 		// Split up the content to translate it in sections.
 		$the_content = array();
-		$sections = $this->split_post_content_into_pages( get_the_content( $post_id ) );
+		$sections = $this->split_post_content_into_pages( $orig_content );
 		foreach ( $sections as $section => $section_content ) {
 			$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
 			if ( $translated_section && $translated_section != $section_content ) {
-				$the_content[] = $translated_section;
+				// ES expects the section delimiters to still be present
+				$the_content[ $section ] = "<!--section={$section}-->\n" . $translated_section;
 			}
 		}
-		if ( !empty( $the_content ) )
+
+		if ( !empty( $the_content ) ) {
 			update_post_meta( $post_id, 'content_' . $locale, implode( $the_content ) );
+		}
 
 		$locale = $old_locale;
 	}
