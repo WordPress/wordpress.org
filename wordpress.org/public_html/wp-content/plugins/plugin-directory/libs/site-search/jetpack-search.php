@@ -717,7 +717,7 @@ class Jetpack_Search {
 			}
 		}
 
-		if ( $args['locale'] && $args['locale'] !== 'en' && $args['locale'] !== 'en_US' ) {
+		if ( $args['locale'] && $args['locale'] !== 'en' && substr( $args['locale'], 0, 3 ) !== 'en_' ) {
 			$locale = $args['locale'];
 
 			//Because most plugins don't have any translations we need to
