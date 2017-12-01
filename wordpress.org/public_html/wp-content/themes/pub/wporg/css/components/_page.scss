@@ -1,4 +1,4 @@
-.page {
+body.page {
 	.gutters .col-12 {
 		width: 100%;
 	}
@@ -13,7 +13,7 @@
 			font-weight: 300;
 			line-height: 1;
 			margin: 0 auto;
-			max-width: 960px;
+			max-width: 60em;
 			padding: 0 ms( 4 );
 
 			@include breakpoint( $ms-breakpoint ) {
@@ -30,7 +30,7 @@
 	.entry-content,
 	.entry-footer {
 		margin: 0 auto;
-		max-width: 960px;
+		max-width: 60em;
 		padding: ms( 10 ) ms( 4 );
 	}
 }
