@@ -17,13 +17,18 @@ $content = Plugin_Directory::instance()->split_post_content_into_pages( get_the_
 $status  = get_post_status();
 
 ?><article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<?php echo Template::get_plugin_banner( get_post(), 'html' ); ?>
+    <?php
+    // Don't show the plugin banner for closed plugins
+    if ( ! in_array( $status, array( 'closed', 'disabled' ) ) ) {
+	    echo Template::get_plugin_banner( get_post(), 'html' );
+    }
+    ?>
 
 	<header class="plugin-header">
 		<?php if ( time() - get_post_modified_time() > 2 * YEAR_IN_SECONDS ) : ?>
 			<div class="plugin-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This plugin <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ); ?></p>
-			</div><!-- .plugin-notice -->
+			</div>
 		<?php endif; ?>
 		<?php if ( 'publish' !== $status ) :
 				$notice_type = 'notice-error';
@@ -65,26 +70,25 @@ $status  = get_post_status();
 					$message .= sprintf( __( 'This plugin was closed on %s.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
 				}
             }
+
+		if ( ! in_array( $status, array( 'closed', 'disabled' ) ) ) {
+				    // the notice for closed and disabled is shown below the Description header, because we don't output the readme there
 			?>
+            <!-- .plugin-notice -->
 			<div class="plugin-notice notice <?php echo esc_attr( $notice_type ); ?> notice-alt">
 				<p><?php echo $message; ?></p>
-			</div><!-- .plugin-notice -->
-
-			<?php if ( in_array( $status, array( 'closed', 'disabled' ) ) && get_current_user_id() == get_post()->post_author ) : ?>
-				<div class="plugin-notice notice notice-info notice-alt">
-					<p><?php
-						printf(
-							/* translators: 1: plugins@wordpress.org */
-							__( 'If you did not request this change, please contact <a href="mailto:%1$s">%1$s</a> for a status. All developers with commit access are contacted when a plugin is closed, with the reasons why, so check your spam email too.', 'wporg-plugins' ),
-							'plugins@wordpress.org'
-						);
-					?></p>
-				</div><!-- .plugin-notice -->
-			<?php endif; ?>
+			</div>
+            <!-- .plugin-notice -->
+        <?php } ?>
 		<?php endif; ?>
 
 		<div class="entry-thumbnail">
-			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+            <?php
+            // Don't show the icon for closed plugins
+            if ( ! in_array( $status, array( 'closed', 'disabled' ) ) ) {
+			    echo Template::get_plugin_icon( get_post(), 'html' );
+            }
+            ?>
 		</div>
 
 		<div class="plugin-actions">
@@ -123,8 +127,15 @@ $status  = get_post_status();
 				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
 			<?php endif; ?>
 		</div>
-
-		<?php the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>
+	
+		<?php
+		if ( in_array( $status, array( 'closed', 'disabled' ) ) ) {
+			add_filter( 'the_title', function( $title, $id ) {
+				$post = get_post( $id );
+				return $post->post_name;
+			}, 10, 2 );
+		}
+        the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>
 
 		<span class="byline"><?php
 			$url = get_post_meta( get_the_ID(), 'header_author_uri', true );
@@ -149,7 +160,7 @@ $status  = get_post_status();
 	<ul class="tabs clear">
 		<li id="tablink-description"><a href='#description'><?php _e( 'Details', 'wporg-plugins' ); ?></a></li>
 		<li id="tablink-reviews"><a href='#reviews'><?php _e( 'Reviews', 'wporg-plugins' ); ?></a></li>
-<?php if ( isset( $content[ 'installation' ] ) ) { ?>
+<?php if ( isset( $content[ 'installation' ] ) && ! in_array( $status, array( 'closed', 'disabled' ) ) ) { ?>
 		<li id="tablink-installation"><a href='#installation'><?php _e( 'Installation', 'wporg-plugins' ); ?></a></li>
 <?php } ?>
 		<li id="tablink-support"><a href='<?php echo Template::get_support_url(); ?>'><?php _e( 'Support', 'wporg-plugins' ); ?></a></li>
@@ -168,7 +179,25 @@ $status  = get_post_status();
 					continue;
 				}
 
-				$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+				if ( 'description' === $section_slug && in_array( $status, array( 'closed', 'disabled' ) ) ) {
+			        // Don't show the description for closed plugins
+					$section_content = '<div class="plugin-notice notice notice-error notice-alt"><p>' . $message . '</p></div>';
+		            if ( get_current_user_id() == get_post()->post_author ) {
+			            $section_content .= '<div class="plugin-notice notice notice-info notice-alt"><p>' .
+			                                sprintf(
+			                                /* translators: 1: plugins@wordpress.org */
+				                                __( 'If you did not request this change, please contact <a href="mailto:%1$s">%1$s</a> for a status. All developers with commit access are contacted when a plugin is closed, with the reasons why, so check your spam email too.', 'wporg-plugins' ),
+				                                'plugins@wordpress.org'
+			                                ) . '</p></div><!-- .plugin-notice -->';
+		            }
+				}
+				else if ( in_array( $section_slug, array( 'screenshots', 'installation', 'faq', 'changelog' ) ) && in_array( $status, array( 'closed', 'disabled' ) ) ) {
+			        $section_content = '';
+				}
+				else {
+					$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
+				}
+
 				if ( empty( $section_content ) ) {
 					continue;
 				}

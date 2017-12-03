@@ -13,6 +13,21 @@ use WordPressdotorg\Plugin_Directory\Template;
 ?>
 
 <div id="admin" class="section">
+    <?php
+    $status  = get_post_status();
+    if ( in_array( $status, array( 'closed', 'disabled' ) ) ) {
+	    echo '<div class="plugin-notice notice notice-error notice-alt"><p>' . __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' ) . '</p></div>';
+	    if ( get_current_user_id() == get_post()->post_author ) {
+		    echo '<div class="plugin-notice notice notice-info notice-alt"><p>' .
+		                        sprintf(
+		                        /* translators: 1: plugins@wordpress.org */
+			                        __( 'If you did not request this change, please contact <a href="mailto:%1$s">%1$s</a> for a status. All developers with commit access are contacted when a plugin is closed, with the reasons why, so check your spam email too.', 'wporg-plugins' ),
+			                        'plugins@wordpress.org'
+		                        ) . '</p></div><!-- .plugin-notice -->';
+	    }
+    }
+
+    ?>
 	<h2><?php _e( 'Plugin Stats', 'wporg-plugins' ); ?></h2>
 
 	<h4><?php _e( 'Active versions', 'wporg-plugins' ); ?></h4>
