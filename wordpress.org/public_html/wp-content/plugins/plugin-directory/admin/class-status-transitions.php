@@ -334,11 +334,16 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 	 * @param integer $post_id The Post ID.
 	 */
 	private function audit_log( $message, $post_id ) {
+		$user = wp_get_current_user();
+
 		$comment = array(
-			'comment_type'    => 'audit_log',
-			'comment_post_ID' => $post_id,
-			'user_id'  => get_current_user_id(),
-			'comment_content' => $message,
+			'comment_author'       => $user->display_name,
+			'comment_author_email' => $user->user_email,
+			'comment_author_url'   => $user->user_url,	
+			'comment_type'         => 'audit_log',
+			'comment_post_ID'      => $post_id,
+			'user_id'              => get_current_user_id(),
+			'comment_content'      => $message,
 		);
 		wp_insert_comment( $comment );
 	}
