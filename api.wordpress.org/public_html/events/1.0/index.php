@@ -24,6 +24,8 @@ function main() {
 	define( 'THROTTLE_GEONAMES',    0 );
 	define( 'THROTTLE_IP2LOCATION', 0 );
 
+	defined( 'DAY_IN_SECONDS' ) or define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
+
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
 		return;
@@ -695,7 +697,7 @@ function get_events( $args = array() ) {
 	$wheres[] = '`date_utc` >= %s';
 	// Dates are in local-time not UTC, so the API output will contain events that have already happened in some parts of the world.
 	// TODO update this when the UTC dates are stored.
-	$sql_values[] = gmdate( 'Y-m-d', time() - ( 24 * 60 * 60 ) );
+	$sql_values[] = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );
 
 	// Limit 
 	if ( isset( $args['number'] ) ) {
