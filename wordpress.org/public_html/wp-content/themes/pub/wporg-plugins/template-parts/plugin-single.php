@@ -54,9 +54,17 @@ $status  = get_post_status();
 						// fall through
 					default:
 					case 'closed':
-						$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
+						$message        = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
 						break;
 				}
+
+            if ( in_array( $status, array( 'closed', 'disabled' ) ) ) {
+	            $closed_date    = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
+	            if ( ! empty( $closed_date ) ) {
+		            $message .= '<br/>';
+					$message .= sprintf( __( 'This plugin was closed on %s.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
+				}
+            }
 			?>
 			<div class="plugin-notice notice <?php echo esc_attr( $notice_type ); ?> notice-alt">
 				<p><?php echo $message; ?></p>
