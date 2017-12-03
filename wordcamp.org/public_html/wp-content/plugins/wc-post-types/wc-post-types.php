@@ -676,6 +676,7 @@ class WordCamp_Post_Types_Plugin {
 				$session              = get_post( $entry[ $term_id ] );
 				$session_title        = apply_filters( 'the_title', $session->post_title );
 				$session_tracks       = get_the_terms( $session->ID, 'wcb_track' );
+				$session_categories   = get_the_terms( $session->ID, 'wcb_session_category' );
 				$session_track_titles = is_array( $session_tracks ) ? implode( ', ', wp_list_pluck( $session_tracks, 'name' ) ) : '';
 				$session_type         = get_post_meta( $session->ID, '_wcpt_session_type', true );
 
@@ -701,6 +702,12 @@ class WordCamp_Post_Types_Plugin {
 				if ( is_array( $session_tracks ) ) {
 					foreach ( $session_tracks as $session_track ) {
 						$classes[] = 'wcb-track-' . $session_track->slug;
+					}
+				}
+
+				if ( is_array( $session_categories ) ) {
+					foreach ( $session_categories as $session_category ) {
+						$classes[] = 'wcb-session-category-' . $session_category->slug;
 					}
 				}
 
@@ -2121,6 +2128,31 @@ class WordCamp_Post_Types_Plugin {
 			'show_ui'      => true,
 			'show_in_rest' => true,
 			'rest_base'    => 'session_track',
+		) );
+
+		// Labels for categories.
+		$labels = array(
+			'name'              => __( 'Categories', 'wordcamporg' ),
+			'singular_name'     => __( 'Category', 'wordcamporg' ),
+			'search_items'      => __( 'Search Categories', 'wordcamporg' ),
+			'popular_items'     => __( 'Popular Categories','wordcamporg' ),
+			'all_items'         => __( 'All Categories', 'wordcamporg' ),
+			'edit_item'         => __( 'Edit Category', 'wordcamporg' ),
+			'update_item'       => __( 'Update Category', 'wordcamporg' ),
+			'add_new_item'      => __( 'Add Category', 'wordcamporg' ),
+			'new_item_name'     => __( 'New Category', 'wordcamporg' ),
+		);
+
+		// Register the Categories taxonomy.
+		register_taxonomy( 'wcb_session_category', 'wcb_session', array(
+			'labels'       => $labels,
+			'rewrite'      => array( 'slug' => 'session_category' ),
+			'query_var'    => 'session_category',
+			'hierarchical' => true,
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_rest' => true,
+			'rest_base'    => 'session_category',
 		) );
 
 		// Labels for sponsor levels.
