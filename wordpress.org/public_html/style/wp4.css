@@ -1539,18 +1539,18 @@ a.rsslink {
 	border: none;
 }
 
-#wporg-footer h6 {
+#wporg-footer .cip {
 	clear: both;
 	float: none;
 	text-align: center;
-	margin-top: 35px;
+	margin: 35px auto 0 auto;
 	font-size: 16px;
 	letter-spacing: 0.3em;
 	text-transform: uppercase;
 	color: #cccccc;
 }
 
-#wporg-footer h6.cip-image {
+#wporg-footer .cip-image {
 	background: url(//s.w.org/style/images/codeispoetry.png?1) center center no-repeat;
 	background-size: 190px 15px;
 	width: 190px;
@@ -1561,7 +1561,7 @@ a.rsslink {
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
        only screen and (min-resolution: 1.5dppx),
 	   only screen and (min-resolution: 144dpi) {
-	#wporg-footer h6.cip-image {
+	#wporg-footer .cip-image {
 		background-image: url(//s.w.org/style/images/codeispoetry-2x.png?1);
 	}
 }
