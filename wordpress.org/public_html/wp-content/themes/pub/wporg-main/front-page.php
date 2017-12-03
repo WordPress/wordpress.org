@@ -144,7 +144,7 @@ get_header( 'wporg' );
 				<h4><a href="https://wordpress.org/about/swag/"><?php _e( 'WordPress&nbsp;Swag', 'wporg' ); ?></a></h4>
 				<a href="https://wordpress.org/about/swag/">
 					<?php if ( $showcase ) : ?>
-						<img width="288" height="288" src="https://s.w.org/images/home/swag_col-2.png" srcset="https://s.w.org/images/home/swag_col-2_x2.jpg 2x" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
+						<img width="288" height="288" src="https://s.w.org/images/home/swag_col-2.png" srcset="https://s.w.org/images/home/swag_col-2_x2.png 2x" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
 					<?php else : ?>
 						<img width="132" height="177" src="https://s.w.org/images/home/swag_col-1.jpg?1" alt="<?php esc_attr_e( 'WordPress Swag', 'wporg' ); ?>" />
 					<?php endif; ?>
