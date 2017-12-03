@@ -75,6 +75,9 @@ class Plugin_Directory {
 		add_filter( 'pre_option_jetpack_sync_full__finished' , array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__finished', '__return_null' );
 
+		// Fix login URLs in admin bar
+		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
+
 		/*
 		 * Load all Admin-specific items.
 		 * Cannot be included on `admin_init` to allow access to menu hooks.
@@ -864,6 +867,31 @@ class Plugin_Directory {
 
 		return $value;
 	}
+
+	/**
+	 * Adjust the login URL to point back to whatever part of the support forums we're
+	 * currently looking at. This allows the redirect to come back to the same place
+	 * instead of the main /support URL by default.
+	 */
+	public function fix_login_url( $login_url, $redirect, $force_reauth ) {
+		// modify the redirect_to for the support forums to point to the current page
+		if ( 0 === strpos($_SERVER['REQUEST_URI'], '/plugins' ) ) {
+			// Note that this is not normal because of the code in /mu-plugins/wporg-sso/class-wporg-sso.php.
+			// The login_url function there expects the redirect_to as the first parameter passed into it instead of the second
+			// Since we're changing this with a filter on login_url, then we have to change the login_url to the
+			// place we want to redirect instead, and then let the SSO plugin do the rest.
+			//
+			// If the SSO code gets fixed, this will need to be modified.
+			//
+			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
+			// The SSO code handles the urlencoding of the redirect_to parameter
+			$url_parts = parse_url('https://wordpress.org'.$_SERVER['REQUEST_URI']);
+			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
+			$login_url = $constructed_url;
+		}
+		return $login_url;
+	}
+
 
 	/**
 	 * Returns the requested page's content, translated.
