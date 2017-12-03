@@ -324,11 +324,6 @@ function get_location_test_cases() {
 			),
 		),
 
-		/*
-		 * todo This is failing. Not sure why at first glance, it looks like it matches the row in the database exactly.
-		 *      It might be a similar issue to `Yaoundé`. If it is, this should still be kept as a separate test after
-		 *      that is fixed, to make sure there aren't regressions with diacritics.
-		 */
 		'city-with-diacritics-in-query' => array(
 			'input' => array(
 				'location_name' => "Doña Ana",
@@ -389,7 +384,7 @@ function get_location_test_cases() {
 		 * The city endonym, locale, and timezone are given
 		 *
 		 * @todo
-		 * This is currently failling. A query from PHP shows row id 2220957 has "Yaound?" instead of
+		 * This is currently failing. A query from PHP shows row id 2220957 has "Yaound?" instead of
 		 * "Yaoundé", but it's correct in the database itself.
 		 */
 		 'city-endonym-accents-africa' => array(
@@ -529,6 +524,36 @@ function get_location_test_cases() {
 				'description' => 'Москва',
 				'latitude'    => '55.752',
 				'longitude'   => '37.616',
+				'country'     => 'RU',
+			),
+		),
+
+		// https://meta.trac.wordpress.org/ticket/3295
+		'city-endonym-europe3-uppercase' => array(
+			'input' => array(
+				'location_name' => 'Санкт-Петербург',
+				'locale'        => 'ru_RU',
+				'timezone'      => 'Europe/Moscow',
+			),
+			'expected' => array(
+				'description' => 'Санкт-Петербург',
+				'latitude'    => '59.894',
+				'longitude'   => '30.264',
+				'country'     => 'RU',
+			),
+		),
+
+		// https://meta.trac.wordpress.org/ticket/3295
+		'city-endonym-europe3-lowercase' => array(
+			'input' => array(
+				'location_name' => 'санкт-петербург',
+				'locale'        => 'ru_RU',
+				'timezone'      => 'Europe/Moscow',
+			),
+			'expected' => array(
+				'description' => 'Санкт-Петербург',
+				'latitude'    => '59.894',
+				'longitude'   => '30.264',
 				'country'     => 'RU',
 			),
 		),
