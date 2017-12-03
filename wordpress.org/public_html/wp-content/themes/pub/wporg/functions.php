@@ -147,19 +147,8 @@ function hreflang_link_attributes() {
 				continue;
 			}
 
-			// Note that Google only supports ISO 639-1 codes.
-			if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
-				$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
-			} elseif ( isset( $gp_locale->lang_code_iso_639_1 ) ) {
-				$hreflang = $gp_locale->lang_code_iso_639_1;
-			} elseif ( isset( $gp_locale->lang_code_iso_639_2 ) ) {
-				$hreflang = $gp_locale->lang_code_iso_639_2;
-			} elseif ( isset( $gp_locale->lang_code_iso_639_3 ) ) {
-				$hreflang = $gp_locale->lang_code_iso_639_3;
-			}
-
-			if ( $hreflang ) {
-				$sites[ $site->locale ]->hreflang = strtolower( $hreflang );
+			if ( isset( $gp_locale->slug ) ) {
+				$sites[ $site->locale ]->hreflang = $gp_locale->slug;
 			} else {
 				unset( $sites[ $site->locale ] );
 			}
