@@ -1,16 +1,10 @@
 a {
 	color: $color__wp-blue;
-
-	&:visited {
-		/* Override wp4.css */
-		color: $color__wp-blue;
-	}
+	text-decoration: none;
 
 	&:hover,
 	&:focus,
 	&:active {
-		/* Override wp4.css */
-		color: $color__wp-blue;
 		text-decoration: underline;
 	}
 
@@ -21,12 +15,6 @@ a {
 	&:hover,
 	&:active {
 		outline: 0;
-	}
-
-	p &,
-	p &:hover {
-		/* Override wp4.css */
-		border: none;
 	}
 
 	p &,

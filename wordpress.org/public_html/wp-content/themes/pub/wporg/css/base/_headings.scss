@@ -1,8 +1,5 @@
 h1, h2, h3, h4, h5, h6 {
 	clear: both;
-
-	// Override wp4.css.
-	font-family: inherit;
 	line-height: $type__lineheight;
 	margin: 2rem 0 1rem;
 }
@@ -24,9 +21,6 @@ h3 {
 
 h4 {
 	font-size: ms( 2 );
-
-	// Override wp4.css.
-	border: none;
 	color: $color__base-gray;
 	font-weight: 600;
 	padding: 0;

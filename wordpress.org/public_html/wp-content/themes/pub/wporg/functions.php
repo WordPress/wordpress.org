@@ -122,7 +122,7 @@ function style_src( $src, $handle ) {
 
 	return $src;
 }
-add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
+//add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
 
 /**
  * Add postMessage support for site title and description for the Theme Customizer.

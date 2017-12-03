@@ -2,19 +2,8 @@
 // Copyright (c) 2009-2017, Imperavi LLC.
 // License: MIT
 
-// wp4.css override
-.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
-	float: inherit;
+[class*="col-"] {
 	margin: inherit;
-}
-
-.col-3 ul {
-	margin: 0 0 1.5em 3em;
-}
-
-.col-9 h2 {
-	margin: 2rem 0 1rem;
-	font-family: inherit;
 }
 
 // Grid Row
