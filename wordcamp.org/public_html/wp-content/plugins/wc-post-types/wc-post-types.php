@@ -50,10 +50,13 @@ class WordCamp_Post_Types_Plugin {
 		add_shortcode( 'organizers', array( $this, 'shortcode_organizers' ) );
 		add_shortcode( 'schedule', array( $this, 'shortcode_schedule' ) );
 
+		add_filter( 'body_class', array( $this, 'session_category_slugs_to_body_tag' ) );
+
 		add_filter( 'the_content', array( $this, 'add_avatar_to_speaker_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_speaker_info_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_slides_info_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_video_info_to_session_posts' ) );
+		add_filter( 'the_content', array( $this, 'add_session_categories_to_session_posts' ) );
 		add_filter( 'the_content', array( $this, 'add_session_info_to_speaker_posts' ) );
 
 		add_filter( 'dashboard_glance_items', array( $this, 'glance_items' ) );
@@ -1413,6 +1416,55 @@ class WordCamp_Post_Types_Plugin {
 	}
 
 	/**
+	 * Append a session's categories to its post content.
+	 *
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	function add_session_categories_to_session_posts( $content ) {
+		global $post;
+
+		if ( ! $this->is_single_cpt_post( 'wcb_session' ) ) {
+			return $content;
+		}
+
+		$session_categories_html = '';
+
+		$session_categories_list = get_the_term_list( $post->ID, 'wcb_session_category', '', _x( ', ', 'Used between list items, there is a space after the comma.', 'wordcamporg' ) );
+		if ( $session_categories_list ) {
+			$session_categories_html = sprintf(
+				'<span class="session-categories-links"><span class="screen-reader-text">%1$s </span>%2$s</span>',
+				_x( 'Categories', 'Used before session category names.', 'wordcamporg' ),
+				$session_categories_list
+			);
+		}
+
+		return $content . $session_categories_html;
+	}
+
+	/**
+	 * Add the sessions's category slugs to the body tag.
+	 *
+	 * @param array $body_classes
+	 *
+	 * @return array
+	 */
+	function session_category_slugs_to_body_tag( $body_classes ) {
+		if ( 'wcb_session' === get_post_type() ) {
+			$session_categories = get_the_terms( get_post(), 'wcb_session_category' );
+
+			if ( is_array( $session_categories ) ) {
+				foreach ( $session_categories as $session_category ) {
+					$body_classes[] = 'wcb_session_category-' . $session_category->slug;
+				}
+			}
+		}
+
+		return $body_classes;
+	}
+
+	/**
 	 * Add session information to Speaker posts
 	 *
 	 * We don't enable it for sites that were created before it was committed, because some will have already
@@ -2146,7 +2198,7 @@ class WordCamp_Post_Types_Plugin {
 		// Register the Categories taxonomy.
 		register_taxonomy( 'wcb_session_category', 'wcb_session', array(
 			'labels'       => $labels,
-			'rewrite'      => array( 'slug' => 'session_category' ),
+			'rewrite'      => array( 'slug' => 'session-category' ),
 			'query_var'    => 'session_category',
 			'hierarchical' => true,
 			'public'       => true,
