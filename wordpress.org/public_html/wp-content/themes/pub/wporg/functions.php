@@ -57,6 +57,8 @@ function setup() {
 		'default-image' => '',
 	) ) );
 
+	add_theme_support( 'wp4-styles' );
+
 	$GLOBALS['pagetitle'] = __( 'WordPress.org', 'wporg' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
@@ -78,7 +80,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", [], time() );
+	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", ['dashicons', 'open-sans'], '20171202' );
 
 	//wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -100,6 +102,27 @@ function scripts() {
 	wp_enqueue_script( 'grofiles-cards' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
+
+/**
+ * Filters an enqueued style's fully-qualified URL.
+ *
+ * @param string $src    The source URL of the enqueued style.
+ * @param string $handle The style's registered handle.
+ */
+function style_src( $src, $handle ) {
+	// Use CDN url.
+	if ( in_array( $handle, ['wporg-style', 'dashicons'], true ) ) {
+		$src = str_replace( get_home_url(), 'https://s.w.org', $src );
+	}
+
+	// Remove version argument.
+	if ( in_array( $handle, ['open-sans'], true ) ) {
+		$src = remove_query_arg( 'ver', $src );
+	}
+
+	return $src;
+}
+add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
 
 /**
  * Add postMessage support for site title and description for the Theme Customizer.
