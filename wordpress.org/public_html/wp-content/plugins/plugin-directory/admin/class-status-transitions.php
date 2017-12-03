@@ -1,5 +1,7 @@
 <?php
+
 namespace WordPressdotorg\Plugin_Directory\Admin;
+
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
@@ -10,7 +12,6 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
  * @package WordPressdotorg\Plugin_Directory\Admin
  */
 class Status_Transitions {
-
 	/**
 	 * Fetch the instance of the Status_Transitions class.
 	 */
@@ -31,6 +32,7 @@ class Status_Transitions {
 	 * Get the list of allowed status transitions for a given plugin.
 	 *
 	 * @param string $post_status Plugin post status.
+	 *
 	 * @return array An array of allowed post status transitions.
 	 */
 	public static function get_allowed_transitions( $post_status ) {
@@ -71,6 +73,7 @@ class Status_Transitions {
 	 *
 	 * @param array $data    An array of slashed post data.
 	 * @param array $postarr An array of sanitized, but otherwise unmodified post data.
+	 *
 	 * @return array
 	 */
 	public static function can_change_post_status( $data, $postarr ) {
@@ -92,7 +95,10 @@ class Status_Transitions {
 		}
 
 		// ...or it's a white-listed status for plugin reviewers.
-		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array( 'new', 'pending' ) ) ) {
+		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array(
+				'new',
+				'pending',
+			) ) ) {
 			return $data;
 		}
 
@@ -127,6 +133,13 @@ class Status_Transitions {
 			case 'rejected':
 				$this->rejected( $post->ID, $post );
 				break;
+			case 'publish':
+				$this->clean_closed_date( $post->ID );
+				break;
+			case 'disabled':
+			case 'closed':
+				$this->save_close_reason( $post->ID );
+				break;
 		}
 
 		// Record the time a plugin was transitioned into a specific status.
@@ -140,7 +153,7 @@ class Status_Transitions {
 	 * @param \WP_Post $post    Post object.
 	 */
 	public function approved( $post_id, $post ) {
-		$attachments = get_attached_media( 'application/zip', $post_id );
+		$attachments   = get_attached_media( 'application/zip', $post_id );
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
@@ -177,7 +190,7 @@ class Status_Transitions {
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
 		/* translators: 1: plugin name, 2: plugin slug */
-		$content  = sprintf( __( 'Congratulations, your plugin hosting request for %1$s has been approved.
+		$content = sprintf( __( 'Congratulations, your plugin hosting request for %1$s has been approved.
 
 Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.
 
@@ -214,6 +227,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 			$post->post_name
 		);
 
+		$this->audit_log( 'Plugin approved.', $post_id );
 		wp_mail( $plugin_author->user_email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
@@ -233,7 +247,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		// Change slug to 'rejected-plugin-name-rejected' to free up 'plugin-name'.
 		wp_update_post( array(
 			'ID'        => $post_id,
-			'post_name' => sprintf( 'rejected-%s-rejected', $post->post_name )
+			'post_name' => sprintf( 'rejected-%s-rejected', $post->post_name ),
 		) );
 
 		// Send email.
@@ -241,7 +255,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* translators: 1: plugin name, 2: plugins@wordpress.org */
-		$content  = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
+		$content = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
 
 If you believe this to be in error, please email %2$s with your plugin attached as a zip and explain why you feel your plugin should be an exception.
 
@@ -252,6 +266,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 			'plugins@wordpress.org'
 		);
 
+		$this->audit_log( 'Plugin rejected.', $post_id );
 		wp_mail( $email, $subject, $content, 'From: plugins@wordpress.org' );
 	}
 
@@ -259,6 +274,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 	 * Returns the path to a plugins root directory.
 	 *
 	 * @param string $dir Directory to search in.
+	 *
 	 * @return string
 	 */
 	private function get_plugin_root( $dir ) {
@@ -277,5 +293,53 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		}
 
 		return $plugin_root;
+	}
+
+	/**
+	 * Deletes the plugin closed date meta field.
+	 *
+	 * @param integer $post_id Post ID.
+	 */
+	public function clean_closed_date( $post_id ) {
+		delete_post_meta( $post_id, 'plugin_closed_date' );
+		delete_post_meta( $post_id, '_close_reason' );
+	}
+
+	/**
+	 * Save the reason for closing or disabling a plugin.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function save_close_reason( $post_id ) {
+		if ( ! isset( $_POST['close_reason'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_approve', $post_id ) ) {
+			return;
+		}
+
+		$close_reason = sanitize_key( $_POST['close_reason'] );
+
+		update_post_meta( $post_id, '_close_reason', $close_reason );
+		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
+
+		$this->audit_log( sprintf( 'Plugin closed for: %s', $close_reason ), $post_id );
+	}
+
+	/**
+	 * Saves an audit_log comment for the plugin.
+	 *
+	 * @param string  $message The message for the audit log.
+	 * @param integer $post_id The Post ID.
+	 */
+	private function audit_log( $message, $post_id ) {
+		$comment = array(
+			'comment_type'    => 'audit_log',
+			'comment_post_ID' => $post_id,
+			'comment_author'  => get_current_user_id(),
+			'comment_content' => $message,
+		);
+		wp_insert_comment( $comment );
 	}
 }

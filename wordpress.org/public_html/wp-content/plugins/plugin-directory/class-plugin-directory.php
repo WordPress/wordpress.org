@@ -343,8 +343,6 @@ class Plugin_Directory {
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
-		add_action( 'transition_post_status', array( $this, 'plugin_close_date' ), 10, 3 );
-
 		/**
 		 * TODO
 		 * Use register_rest_field() to add array and object meta data to the API:
@@ -1341,19 +1339,4 @@ class Plugin_Directory {
 		return $result;
 	}
 
-	/**
-	 * Save the date a plugin was closed and delete that date when it's reopened.
-	 *
-	 * @param string  $new_status The new plugin status.
-	 * @param string  $old_status The old plugin status.
-	 * @param WP_Post $post Post data.
-	 */
-	public function plugin_close_date( $new_status, $old_status, $post ) {
-		if ( in_array( $new_status, array( 'closed', 'disabled' ) ) ) {
-			update_post_meta( $post->ID, 'plugin_closed_date', current_time( 'mysql' ) );
-		}
-		if ( 'publish' === $new_status && in_array( $old_status, array( 'closed', 'disabled' ) ) ) {
-			delete_post_meta( $post->ID, 'plugin_closed_date' );
-		}
-	}
 }
