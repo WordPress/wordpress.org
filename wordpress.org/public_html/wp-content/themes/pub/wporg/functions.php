@@ -108,6 +108,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
  *
  * @param string $src    The source URL of the enqueued style.
  * @param string $handle The style's registered handle.
+ * @return string
  */
 function style_src( $src, $handle ) {
 	// Use CDN url.
@@ -122,7 +123,7 @@ function style_src( $src, $handle ) {
 
 	return $src;
 }
-//add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
+add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
 
 /**
  * Add postMessage support for site title and description for the Theme Customizer.
