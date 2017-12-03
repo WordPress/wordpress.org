@@ -21,6 +21,7 @@ function run_tests() {
 	$tests_failed += test_get_events();
 	$tests_failed += test_add_regional_wordcamps();
 	$tests_failed += test_build_response();
+	$tests_failed += test_is_client_core();
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
 
@@ -1017,6 +1018,37 @@ function build_response_test_cases() {
 	);
 
 	return $cases;
+}
+
+/**
+ * Test `is_client_core()`.
+ *
+ * @return int
+ */
+function test_is_client_core() {
+	$failed = 0;
+	$cases  = array(
+		''                                   => false,
+		'Contains WordPress but no slash'    => false,
+		'WordPress/4.9; https://example.org' => true,
+		'WordPress/10.0'                     => true,
+	);
+
+	printf( "\n\nRunning %d is_client_core() tests\n", count( $cases ) );
+
+	foreach ( $cases as $user_agent => $expected_result ) {
+		$actual_result = is_client_core( $user_agent );
+
+		$passed = $expected_result === $actual_result;
+
+		output_results( $user_agent, $passed, $expected_result, $actual_result );
+
+		if ( ! $passed ) {
+			$failed++;
+		}
+	}
+
+	return $failed;
 }
 
 /**

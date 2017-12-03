@@ -163,6 +163,30 @@ function build_response( $location, $location_args ) {
 }
 
 /**
+ * Determine if the client making the API request is WordPress Core.
+ *
+ * This can be used to limit the effects of some data processing to just the Events Widget in
+ * Core. Otherwise, those changes would result in unexpected data for other clients, like
+ * having WordCamps stuck to the end of the request by `stick_wordcamps()`.
+ *
+ * Ideally this would be isolated to Core itself, and exclude plugins using `wp_remote_get()`.
+ * There isn't a good way to do that, though, so plugins will still get unexpected results.
+ * They can set a custom user agent to get the raw data, though.
+ *
+ * @param string $user_agent
+ *
+ * @return bool
+ */
+function is_client_core( $user_agent ) {
+	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
+	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Send the API's response to the client's request
  *
  * @param array $response
@@ -731,14 +755,7 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
 	$time = time();
 	$regional_wordcamps = array();
 
-	/*
-	 * Limit effects to the Events Widget in Core.
-	 * Otherwise this would return unexpected results to other clients.
-	 *
-	 * This is the closest we can get to detecting Core, so it'll still distort results for any
-	 * plugins that are fetching events with `wp_remote_get()`.
-	 */
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
+	if ( ! is_client_core( $user_agent ) ) {
 		return $local_events;
 	}
 
