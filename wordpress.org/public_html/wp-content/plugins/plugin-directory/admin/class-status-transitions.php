@@ -337,7 +337,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$comment = array(
 			'comment_type'    => 'audit_log',
 			'comment_post_ID' => $post_id,
-			'comment_author'  => get_current_user_id(),
+			'user_id'  => get_current_user_id(),
 			'comment_content' => $message,
 		);
 		wp_insert_comment( $comment );
