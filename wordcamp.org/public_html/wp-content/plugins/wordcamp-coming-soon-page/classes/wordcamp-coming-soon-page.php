@@ -8,16 +8,17 @@ class WordCamp_Coming_Soon_Page {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init',               array( $this, 'init' ), 11 );                               // after WCCSP_Settings::init()
-		add_action( 'wp_enqueue_scripts', array( $this, 'manage_plugin_theme_stylesheets' ), 99 );    // (hopefully) after all plugins/themes have enqueued their styles
-		add_action( 'wp_head',            array( $this, 'render_dynamic_styles' ) );
-		add_filter( 'template_include',   array( $this, 'override_theme_template' ) );
-		add_action( 'template_redirect',  array( $this, 'disable_jetpacks_open_graph' ) );
-		add_action( 'admin_bar_menu',     array( $this, 'admin_bar_menu_item' ), 1000 );
-		add_action( 'admin_head',         array( $this, 'admin_bar_styling' ) );
-		add_action( 'wp_head',            array( $this, 'admin_bar_styling' ) );
-		add_action( 'admin_notices',      array( $this, 'block_new_post_admin_notice' ) );
-		add_filter( 'get_post_metadata',  array( $this, 'jetpack_dont_email_post_to_subs' ), 10, 4 );
+		add_action( 'init',                       array( $this, 'init' ), 11 );                               // after WCCSP_Settings::init()
+		add_action( 'wp_enqueue_scripts',         array( $this, 'manage_plugin_theme_stylesheets' ), 99 );    // (hopefully) after all plugins/themes have enqueued their styles
+		add_action( 'wp_head',                    array( $this, 'render_dynamic_styles' ) );
+		add_filter( 'template_include',           array( $this, 'override_theme_template' ) );
+		add_action( 'template_redirect',          array( $this, 'disable_jetpacks_open_graph' ) );
+		add_filter( 'rest_authentication_errors', array( $this, 'disable_rest_endpoints' ) );
+		add_action( 'admin_bar_menu',             array( $this, 'admin_bar_menu_item' ), 1000 );
+		add_action( 'admin_head',                 array( $this, 'admin_bar_styling' ) );
+		add_action( 'wp_head',                    array( $this, 'admin_bar_styling' ) );
+		add_action( 'admin_notices',              array( $this, 'block_new_post_admin_notice' ) );
+		add_filter( 'get_post_metadata',          array( $this, 'jetpack_dont_email_post_to_subs' ), 10, 4 );
 
 		add_image_size( 'wccsp_image_medium_rectangle', 500, 300 );
 	}
@@ -116,6 +117,21 @@ class WordCamp_Coming_Soon_Page {
 		if ( $this->override_theme_template ) {
 			add_filter( 'jetpack_enable_open_graph', '__return_false' );
 		}
+	}
+
+	/**
+	 * Disable the REST API for unauthenticated requests when the Coming Soon page is active.
+	 */
+	public function disable_rest_endpoints( $access ) {
+		if ( $this->override_theme_template ) {
+			return new WP_Error(
+				'rest_cannot_access',
+				__( 'The REST API is not available while the site is in Coming Soon mode.', 'wordcamporg' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return $access;
 	}
 
 	/**
