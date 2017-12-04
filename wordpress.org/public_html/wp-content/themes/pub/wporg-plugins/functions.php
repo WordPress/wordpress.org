@@ -37,6 +37,8 @@ function setup() {
 		'gallery',
 		'caption',
 	) );
+
+	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 

@@ -2,19 +2,21 @@
 	.entry-header {
 		margin-top: 2rem;
 
+		@include breakpoint( $ms-breakpoint ) {
+			padding: 0 2rem;
+		}
+
 		.entry-title {
 			font-size: ms( 4 );
 			font-weight: 400;
-			margin: 0 auto;
-			max-width: ms(32);
-
-			@media screen and ( min-width: $ms-breakpoint ) {
-				padding: 0 2rem;
-			}
 		}
 	}
 
 	.entry-content {
+		@include breakpoint( $ms-breakpoint ) {
+			padding: 0 2rem;
+		}
+
 		h2 {
 			font-size: ms( 4 );
 			font-weight: 400;
@@ -27,21 +29,8 @@
 			text-transform: uppercase;
 		}
 
-		a {
-			text-decoration: underline;
-		}
-
 		section {
 			padding: 2rem 0;
-
-			.container {
-				margin: 0 auto;
-				max-width: ms(32);
-
-				@media screen and ( min-width: $ms-breakpoint ) {
-					padding: 0 2rem;
-				}
-			}
 
 			&:first-of-type {
 				padding-top: 0;

@@ -4,7 +4,7 @@ var webpack       = require( 'webpack' ),
 	webpackConfig = require( './webpack.config' );
 
 module.exports = function( grunt ) {
-	grunt.loadNpmTasks('grunt-postcss');
+	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 
 	grunt.initConfig({
 		webpack: {
@@ -38,7 +38,7 @@ module.exports = function( grunt ) {
 			options: {
 				map: 'build' !== process.argv[2],
 				processors: [
-					require('autoprefixer')({
+					require( 'autoprefixer' )( {
 						browsers: [
 							'Android >= 2.1',
 							'Chrome >= 21',
@@ -49,8 +49,8 @@ module.exports = function( grunt ) {
 							'Safari >= 6.0'
 						],
 						cascade: false
-					}),
-					require('pixrem'),
+					} ),
+					require( 'pixrem' ),
 					require('cssnano')({
 						mergeRules: false
 					})
@@ -83,8 +83,34 @@ module.exports = function( grunt ) {
 			}
 		},
 		sass_globbing: {
-			my_target: {
-				files: { 'client/styles/_components.scss': 'client/components/**/*.scss' },
+			itcss: {
+				files: (function() {
+					var files = {};
+
+					['settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps'].forEach( function( component ) {
+						var paths = [
+							'../wporg/css/' + component + '/**/*.scss',
+							'!../wporg/css/' + component + '/_' + component + '.scss'
+						];
+
+						if ( isChild ) {
+							paths.push( 'client/styles/' + component + '/**/*.scss' );
+							paths.push( '!client/styles/' + component + '/_' + component + '.scss' );
+						}
+
+						if ( 'components' === component ) {
+							paths.push( 'client/components/**/*.scss' );
+							paths.push( '!../wporg/css/components/_search.scss' );
+							paths.push( '!../wporg/css/components/_main-navigation.scss' );
+							paths.push( '!../wporg/css/components/_entry-meta.scss' );
+							paths.push( '!../wporg/css/components/_page.scss' );
+						}
+
+						files[ 'client/styles/' + component + '/_' + component + '.scss' ] = paths;
+					} );
+
+					return files;
+				}())
 			},
 			options: { signature: false }
 		},
@@ -160,18 +186,19 @@ module.exports = function( grunt ) {
 				tasks: ['eslint']
 			},
 			css: {
-				files: ['**/*.scss', 'client/components/**/**.scss'],
-				tasks: ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']
+				files: ['**/*.scss', '../wporg/css/**/*scss', 'client/components/**/**.scss'],
+				tasks: ['css']
 			}
 		}
 	});
 
 	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-rtlcss');
+	grunt.loadNpmTasks('grunt-postcss');
+	grunt.loadNpmTasks('grunt-sass-globbing');
 	grunt.loadNpmTasks('grunt-webpack');
 	grunt.loadNpmTasks('grunt-eslint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-sass-globbing');
 	grunt.loadNpmTasks('grunt-shell');
 
 	grunt.registerTask('default', ['eslint', 'sass_globbing', 'sass', 'rtlcss:dynamic']);

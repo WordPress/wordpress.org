@@ -19,8 +19,7 @@ get_header(); ?>
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
-				<section>
-					<div class="container">
+
 						<p><?php printf( __( 'You&#8217;ve got a cool new plugin and are hoping to give it some exposure. You&#8217;re in the right place. Just <a href="%s">ask us to host it for you</a>. You&#8217;ll be able to:', 'wporg-plugins' ), esc_url( home_url( 'developers/add/' ) ) ); ?></p>
 						<ul>
 							<li><?php _e( 'Keep track of how many people have downloaded it.', 'wporg-plugins' ); ?></li>
@@ -60,8 +59,6 @@ get_header(); ?>
 							printf( __( 'To make your entry in the plugin browser most useful, each plugin should have a readme file named <code>readme.txt</code> that adheres to the <a href="%1$s">WordPress plugin readme file standard</a>. You can put your readme file through the <a href="%2$s">readme validator</a> to check it.', 'wporg-plugins' ), esc_url( home_url( 'files/2017/03/readme.txt' ) ), esc_url( home_url( '/developers/readme-validator/' ) ) );
 							?>
 						</p>
-					</div>
-				</section>
 			</div><!-- .entry-content -->
 
 			<footer class="entry-footer">
