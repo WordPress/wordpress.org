@@ -359,6 +359,7 @@ class Template {
 		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
 
 		$icon = $icon_2x = $svg = $generated = false;
+
 		foreach ( $raw_icons as $file => $info ) {
 			switch ( $info['resolution'] ) {
 				case '256x256':
@@ -386,7 +387,7 @@ class Template {
 			$icon = $icon_2x;
 		}
 
-		if ( ! $icon ) {
+		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
 
 			$icon = new Plugin_Geopattern;

@@ -59,7 +59,7 @@ $status  = get_post_status();
 						// fall through
 					default:
 					case 'closed':
-						$message        = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
+						$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );
 						break;
 				}
 
@@ -83,12 +83,7 @@ $status  = get_post_status();
 		<?php endif; ?>
 
 		<div class="entry-thumbnail">
-            <?php
-            // Don't show the icon for closed plugins
-            if ( ! in_array( $status, array( 'closed', 'disabled' ) ) ) {
-			    echo Template::get_plugin_icon( get_post(), 'html' );
-            }
-            ?>
+			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
 		</div>
 
 		<div class="plugin-actions">
