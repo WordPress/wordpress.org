@@ -123,14 +123,14 @@ $status  = get_post_status();
 			<?php endif; ?>
 		</div>
 	
-		<?php
+		<?php 
 		if ( in_array( $status, array( 'closed', 'disabled' ) ) ) {
-			add_filter( 'the_title', function( $title, $id ) {
-				$post = get_post( $id );
-				return $post->post_name;
-			}, 10, 2 );
+			$plugin_title = $post->post_name;
+		} else {
+			$plugin_title = get_the_title();
 		}
-        the_title( '<h1 class="plugin-title"><a href="' . esc_url( get_permalink() ) . '">', '</a></h1>' ); ?>
+		?>
+		<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo $plugin_title; ?></a></h1>
 
 		<span class="byline"><?php
 			$url = get_post_meta( get_the_ID(), 'header_author_uri', true );
