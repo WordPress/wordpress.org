@@ -59,7 +59,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", array(), '20171124' );
+	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", ['open-sans'], '20171124' );
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -114,8 +114,46 @@ function scripts() {
 		) );
 	}
 
+	// No Jetpack scripts needed.
+	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
+	wp_dequeue_script( 'devicepx' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts' );
+
+/**
+ * Filters an enqueued script & style's fully-qualified URL.
+ *
+ * @param string $src    The source URL of the enqueued script/style.
+ * @param string $handle The style's registered handle.
+ * @return string
+ */
+function loader_src( $src, $handle ) {
+	$cdn_urls = [
+		'dashicons',
+		'wp-embed',
+	//	'wporg-plugins-style',
+		'wporg-plugins-navigation',
+		'wporg-plugins-skip-link-focus-fix',
+		'wporg-plugins-popover',
+		'wporg-plugins-locale-banner',
+		'wporg-plugins-stats',
+		'wporg-plugins-client',
+	];
+
+	// Use CDN url.
+	if ( in_array( $handle, $cdn_urls, true ) ) {
+		$src = str_replace( get_home_url(), 'https://s.w.org', $src );
+	}
+
+	// Remove version argument.
+	if ( in_array( $handle, ['open-sans'], true ) ) {
+		$src = remove_query_arg( 'ver', $src );
+	}
+
+	return $src;
+}
+add_filter( 'style_loader_src',  __NAMESPACE__ . '\loader_src', 10, 2 );
+add_filter( 'script_loader_src', __NAMESPACE__ . '\loader_src', 10, 2 );
 
 /**
  * Don't split plugin content in the front-end.
