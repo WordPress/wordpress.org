@@ -301,7 +301,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 	 * @param integer $post_id Post ID.
 	 */
 	public function clean_closed_date( $post_id ) {
-		delete_post_meta( $post_id, '_close_date' );
+		delete_post_meta( $post_id, 'plugin_closed_date' );
 		delete_post_meta( $post_id, '_close_reason' );
 	}
 
@@ -322,7 +322,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$close_reason = sanitize_key( $_POST['close_reason'] );
 
 		update_post_meta( $post_id, '_close_reason', $close_reason );
-		update_post_meta( $post_id, '_close_date', current_time( 'mysql' ) );
+		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
 
 		$this->audit_log( sprintf( 'Plugin closed for: %s', $close_reason ), $post_id );
 	}
