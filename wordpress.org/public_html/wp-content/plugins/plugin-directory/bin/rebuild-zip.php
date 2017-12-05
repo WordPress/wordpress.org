@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
+use Exception;
 
 // This script should only be called in a CLI environment.
 if ( 'cli' != php_sapi_name() ) {
@@ -103,7 +104,7 @@ try {
 	}
 
 	echo "OK. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
-} catch( \Exception $e ) {
+} catch( Exception $e ) {
 	fwrite( STDERR, "{$plugin_slug}: Zip Rebuild failed: " . $e->getMessage() . "\n" );
 	echo "Failed. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
 	exit(1);
