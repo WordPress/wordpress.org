@@ -207,6 +207,11 @@ function get_whitelist() {
 			'jcastaneda',
 			'karmatosed',
 		),
+		'tide' => array(
+			'jeffpaul',
+			'lukecarbis',
+			'valendesigns',
+		),
 		'training' => array(
 			'courtneydawn',
 			'liljimmi',
