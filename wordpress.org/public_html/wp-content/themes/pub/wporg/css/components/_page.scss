@@ -13,7 +13,7 @@ body.page {
 			font-weight: 300;
 			line-height: 1;
 			margin: 0 auto;
-			max-width: 60em;
+			max-width: 960px;
 			padding: 0 ms( 4 );
 
 			@include breakpoint( $ms-breakpoint ) {
@@ -30,7 +30,7 @@ body.page {
 	.entry-content,
 	.entry-footer {
 		margin: 0 auto;
-		max-width: 60em;
+		max-width: 960px;
 		padding: ms( 10 ) ms( 4 );
 	}
 }

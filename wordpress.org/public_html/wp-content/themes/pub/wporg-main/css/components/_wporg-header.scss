@@ -1,0 +1,14 @@
+#wporg-header {
+	@include breakpoint( $sm ) {
+		ul li.current-menu-item:after,
+		ul li.current_page_parent:after,
+		ul li a.current ~ .uparrow {
+			body.blog &,
+			body.search &,
+			body.single &,
+			body.archive & {
+				border-bottom-color: #f7f7f7;
+			}
+		}
+	}
+}
