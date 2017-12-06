@@ -39,38 +39,38 @@
 	.plugin-banner + .plugin-header {
 		padding-top: 0;
 	}
-	
-	.tabs { 
-		list-style: none; 
-		margin:0; 
+
+	.tabs {
+		list-style: none;
+		margin:0;
 		border-bottom: 2px solid #eee;
-		
-		li { 
-			display: inline-block; 
-			margin-bottom: -2px; 
-			border: 2px solid transparent; 
-			font-size: 0.8rem; 
-			color: #0073aa; 
+
+		li {
+			display: inline-block;
+			margin-bottom: -2px;
+			border: 2px solid transparent;
+			font-size: 0.8rem;
+			color: #0073aa;
 			transition: background .2s ease;
-			
-			a { 
+
+			a {
 				border: 0;
-				display: block; 
-				padding: 0.64rem 1.25rem; 
-				background: white; 
+				display: block;
+				padding: 0.64rem 1.25rem;
+				background: white;
 				text-decoration: none;
-				
-				&.active, &:hover { 
-					background: #eee; 
+
+				&.active, &:hover {
+					background: #eee;
 				}
 			}
-			
+
 			&.active, &:hover {
 				padding-bottom: 0 !important;
 				border: 2px solid #eee;
 			}
 		}
-		
+
 		@media screen and (max-width:34em) {
 			border-top: 2px solid #eee;
 
@@ -97,12 +97,12 @@
 			padding: 0;
 			width: 65%;
 		}
-		
-		> div { 
+
+		> div {
 			display:none;
 			border: 0;
-			
-			~ button { 
+
+			~ button {
 				display:none;
 				border: 0;
 			}
@@ -112,34 +112,22 @@
 			text-decoration: underline;
 		}
 
-		tr { 
-			border-bottom: 1px solid #eee; 
-			
-			&:first-child { 
-				border-top: 1px solid #eee; 
-			}
-			
-			td { 
-				padding: 0.2rem 0.4rem; 
-			}
-		}
-		
 		#admin {
 			display:block !important;
 		}
 	}
-	
+
 	.entry-meta {
 		padding: 0 ms( 4 );
 	}
-	
-	span#description, 
-	span#reviews, 
-	span#developers, 
+
+	span#description,
+	span#reviews,
+	span#developers,
 	span#installation {
 		position:fixed;
 	}
-	
+
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .tabs li#tablink-description ,
 	span#reviews:target ~ .tabs li#tablink-reviews,
 	span#installation:target ~ .tabs li#tablink-installation,
@@ -151,7 +139,7 @@
 		padding-bottom: 2px;
 		background: #fff;
 	}
-	
+
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
@@ -159,18 +147,18 @@
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
 	span#reviews:target ~ .entry-content #tab-reviews,
 	span#installation:target ~ .entry-content #tab-installation,
-	span#developers:target ~ .entry-content #tab-changelog, 
+	span#developers:target ~ .entry-content #tab-changelog,
 	span#developers:target ~ .entry-content #tab-developers,
 	span#developers:target ~ .entry-content #tab-developers ~ button,
 	span#developers:target ~ .entry-content #tab-developers .plugin-development {
 		display:block;
 	}
-	
+
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers .plugin-development,
 	span#developers:target ~ .entry-content #tab-developers .plugin-contributors {
 		display:none;
 	}
-	
+
 	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-meta .plugin-contributors,
 	span#reviews:target ~ .entry-meta .plugin-meta,
 	span#reviews:target ~ .entry-meta .plugin-support,
@@ -179,13 +167,12 @@
 	span#installation:target ~ .entry-meta .plugin-contributors {
 		display:none;
 	}
-	
+
 	.plugin-reviews .plugin-review + .plugin-review {
-		margin: 32px 0 16px;
 		margin: 2rem 0 1rem;
 		padding-bottom: 1rem;
 	}
-	
+
 	article.plugin-review {
 		border-bottom: 2px solid #eee;
 	}
