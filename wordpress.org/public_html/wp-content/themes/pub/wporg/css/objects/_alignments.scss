@@ -16,3 +16,13 @@
 	margin-left: auto;
 	margin-right: auto;
 }
+
+@include breakpoint( 0, 480px ) {
+	.alignleft,
+	.alignright {
+		display: block;
+		float: none;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
