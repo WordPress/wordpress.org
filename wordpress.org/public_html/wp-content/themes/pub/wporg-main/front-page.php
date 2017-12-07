@@ -98,6 +98,7 @@ get_header( 'wporg' );
 				<div class="container">
 					<h2><?php _e( 'Community', 'wporg' ); ?></h2>
 					<p class="subheading"><?php _e( 'Hundreds of thousands of developers, content creators, and site owners gather at monthly meetups in 436 cities worldwide', 'wporg' ); ?>.</p>
+					<a class="button button-secondary button-large" href="https://make.wordpress.org/community/meetups-landing-page"><?php _e( 'Find a local WordPress community', 'wporg' ); ?></a>
 				</div>
 			</section>
 
