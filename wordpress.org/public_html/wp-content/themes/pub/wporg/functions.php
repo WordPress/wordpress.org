@@ -80,7 +80,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", ['dashicons', 'open-sans'], '20171206' );
+	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", ['dashicons', 'open-sans'], '20171207' );
 
 	//wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
