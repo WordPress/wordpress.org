@@ -36,6 +36,9 @@ use WordPressdotorg\Plugin_Directory\Template;
 	<h4><?php _e( 'Downloads Per Day', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-download-stats" class="chart download-stats"></div>
 
+	<h4><?php _e( 'Active Install Growth', 'wporg-plugins' ); ?></h4>
+	<div id="plugin-growth-stats" class="chart download-stats"></div>
+
 	<h5><?php _e( 'Downloads history', 'wporg-plugins' ); ?></h5>
 	<table id="plugin-download-history-stats" class="download-history-stats">
 		<tbody></tbody>
