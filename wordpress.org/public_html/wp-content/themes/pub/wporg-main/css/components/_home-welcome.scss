@@ -279,8 +279,6 @@
 	font-size: ms( -2 );
 	margin: 0 auto ms( 0 );
 	padding: 0 ms( 1 );
-	width: 960px;
-
 
 	@include breakpoint( sm ) {
 		display: block;
