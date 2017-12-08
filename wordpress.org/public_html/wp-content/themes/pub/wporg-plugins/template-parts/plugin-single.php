@@ -67,6 +67,7 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 			get_template_part( 'template-parts/section-advanced' );
 		else :
 			$plugin_sections = Template::get_plugin_sections();
+
 			foreach ( array( 'description', 'screenshots', 'installation', 'faq', 'reviews', 'developers', 'changelog' ) as $section_slug ) :
 				if ( ! isset( $content[ $section_slug ] ) ) {
 					continue;
@@ -90,7 +91,7 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 				$section = array_pop( $section );
 
 				$section_no_read_mores = array( 'description', 'screenshots', 'installation', 'faq', 'reviews' );
-				// If the FAQ section is the newer `<dl>` form, no need to do readmore for it.
+				// If the FAQ section is the newer `<dl>` form, no need to do read-more for it.
 				if ( false !== stripos( $section_content, '<dl>' ) ) {
 					$section_no_read_mores[] = 'faq';
 				}
