@@ -346,7 +346,7 @@ class Template {
 	}
 
 	/**
-	 * Retrieve the Plugin Icon details for a plugin.
+	 * Retrieve the Plugin banner details for a plugin.
 	 *
 	 * @static
 	 *
@@ -434,6 +434,10 @@ class Template {
 	 */
 	public static function get_plugin_banner( $post = null, $output = 'raw' ) {
 		$plugin = get_post( $post );
+
+		if ( in_array( $plugin->post_status, ['disabled', 'closed'], true ) ) {
+			return false;
+		}
 
 		$banner      = $banner_2x = false;
 		$raw_banners = get_post_meta( $plugin->ID, 'assets_banners', true ) ?: array();
@@ -689,7 +693,7 @@ class Template {
 
 		$close_reasons = self::get_close_reasons();
 		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
-		
+
 		if ( isset( $close_reasons[ $close_reason ] ) ) {
 			$reason_label = $close_reasons[ $close_reason ];
 		} else {
