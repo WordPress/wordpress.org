@@ -68,6 +68,8 @@ function get_whitelist() {
 			'drew',
 			'kenshino',
 			'omarreiss',
+			'johnbillion',
+			'atimmer',
 		),
 		'core-editor' => array(
 			'azaozz',
