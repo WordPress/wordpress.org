@@ -1401,6 +1401,40 @@ namespace DevHub {
 	}
 
 	/**
+	 * Retrieve the post content from an explanation post.
+	 *
+	 * @param int|WP_Post $_post Post ID or object for the function, hook, class, or method post
+	 *                           to retrieve an explanation field for.
+	 * @return string The post content of the explanation.
+	 */
+	function get_explanation_content( $_post ) {
+		global $post;
+
+		// Temporarily remove filter.
+		remove_filter( 'the_content', array( 'DevHub_Formatting', 'fix_unintended_markdown' ), 1 );
+
+		// Store original global post.
+		$orig = $post;
+
+		// Set global post to the explanation post.
+		$post = get_explanation( $_post );
+
+		// Get explanation's raw post content.
+		$content = get_explanation_field( 'post_content', $_post );
+
+		// Pass the content through expected content filters.
+		$content = apply_filters( 'the_content', apply_filters( 'get_the_content', $content ) );
+
+		// Restore original global post.
+		$post = $orig;
+
+		// Restore filter.
+		add_filter( 'the_content', array( 'DevHub_Formatting', 'fix_unintended_markdown' ), 1 );
+
+		return $content;
+	}
+
+	/**
 	 * Generates a private access message for a private element.
 	 *
 	 * @param int|WP_Post $post Optional. Post object or ID. Default global `$post`.
