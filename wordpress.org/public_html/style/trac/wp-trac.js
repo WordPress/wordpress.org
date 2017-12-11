@@ -38,7 +38,8 @@ var wpTrac, coreKeywordList, gardenerKeywordList, coreFocusesList;
 		'template' : 'Relating to theme templating, but assigned a more specific component.',
 		'multisite' : 'Relating to multisite, but assigned a more specific component.',
 		'rest-api' : 'Relating to the REST API, but assigned a more specific component.',
-		'performance' : 'Performance or caching (but not the Cache API component).'
+		'performance' : 'Performance or caching (but not the Cache API component).',
+		'coding-standards' : 'Coding Standards focus.'
 	};
 
 	gardenerKeywordList = [ 'commit', 'early', 'i18n-change', 'good-first-bug', 'fixed-major' ];
