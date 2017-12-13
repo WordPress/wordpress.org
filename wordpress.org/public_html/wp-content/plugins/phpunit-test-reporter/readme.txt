@@ -13,6 +13,8 @@ Captures and displays test results from the PHPUnit Test Runner
 
 Captures and displays test results from the PHPUnit Test Runner
 
+For more details, [please read through the project overview](https://make.wordpress.org/hosting/test-results-getting-started/).
+
 == Changelog ==
 
 = 0.1.0 (August 21st, 2017) =

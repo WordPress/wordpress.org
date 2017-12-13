@@ -21,7 +21,7 @@ class Display {
 			|| '_wp_page_template' !== $meta_key ) {
 			return $check;
 		}
-		$template = 'page-templates/full-width.php';
+		$template   = 'page-templates/full-width.php';
 		$full_width = get_stylesheet_directory() . '/' . $template;
 		if ( ! file_exists( $full_width ) ) {
 			return $check;
@@ -66,15 +66,19 @@ class Display {
 		}
 
 		if ( get_queried_object()->post_parent ) {
-			$content = ptr_get_template_part( 'single-result', array(
-				'report' => get_queried_object(),
-			) );
+			$content = ptr_get_template_part(
+				'single-result', array(
+					'report' => get_queried_object(),
+				)
+			);
 		} else {
-			$content = ptr_get_template_part( 'result-set', array(
-				'revisions' => array(
-					get_queried_object(),
-				),
-			) );
+			$content = ptr_get_template_part(
+				'result-set', array(
+					'revisions' => array(
+						get_queried_object(),
+					),
+				)
+			);
 			$content = '<p><a href="' . esc_url( home_url( 'test-results/' ) ) . '">&larr; Test Results</a></p>' . PHP_EOL . PHP_EOL . $content;
 		}
 
@@ -86,15 +90,15 @@ class Display {
 	 */
 	public static function render_results( $atts ) {
 
-		$output = '';
+		$output     = '';
 		$query_args = array(
-			'posts_per_page'   => 5,
-			'post_type'        => 'result',
-			'post_parent'      => 0,
-			'orderby'          => 'post_name',
-			'order'            => 'DESC',
+			'posts_per_page' => 5,
+			'post_type'      => 'result',
+			'post_parent'    => 0,
+			'orderby'        => 'post_name',
+			'order'          => 'DESC',
 		);
-		$paged = isset( $_GET['rpage'] ) ? (int) $_GET['rpage'] : 0;
+		$paged      = isset( $_GET['rpage'] ) ? (int) $_GET['rpage'] : 0;
 		if ( $paged ) {
 			$query_args['paged'] = $paged;
 		}
@@ -104,9 +108,11 @@ class Display {
 			return $output;
 		}
 		$output .= self::get_display_css();
-		$output .= ptr_get_template_part( 'result-set', array(
-			'revisions' => $rev_query->posts,
-		) );
+		$output .= ptr_get_template_part(
+			'result-set', array(
+				'revisions' => $rev_query->posts,
+			)
+		);
 		ob_start();
 		self::pagination( $rev_query );
 		$output .= ob_get_clean();
@@ -181,7 +187,7 @@ class Display {
 	 */
 	public static function get_display_php_version( $report_id ) {
 		$php_version = 'Unknown';
-		$env = get_post_meta( $report_id, 'env', true );
+		$env         = get_post_meta( $report_id, 'env', true );
 		if ( ! empty( $env['php_version'] ) ) {
 			$php_version = 'PHP ' . $env['php_version'];
 		}
@@ -196,9 +202,9 @@ class Display {
 	 */
 	public static function get_display_mysql_version( $report_id ) {
 		$mysql_version = 'Unknown';
-		$env = get_post_meta( $report_id, 'env', true );
+		$env           = get_post_meta( $report_id, 'env', true );
 		if ( ! empty( $env['mysql_version'] ) ) {
-			$bits = explode( ',', $env['mysql_version'] );
+			$bits          = explode( ',', $env['mysql_version'] );
 			$mysql_version = $bits[0];
 		}
 		return $mysql_version;
@@ -212,7 +218,7 @@ class Display {
 	 */
 	public static function get_display_extensions( $report_id ) {
 		$extensions = array();
-		$env = get_post_meta( $report_id, 'env', true );
+		$env        = get_post_meta( $report_id, 'env', true );
 		if ( ! empty( $env['php_modules'] ) ) {
 			foreach ( $env['php_modules'] as $module => $version ) {
 				if ( ! empty( $version ) ) {
@@ -232,22 +238,22 @@ class Display {
 
 	private static function pagination( $query ) {
 		global $wp;
-		$bignum = 999999999;
-		$base_link = add_query_arg( 'rpage', '%#%', home_url( trailingslashit( $wp->request ) ) );
-		$max_num_pages = $query->max_num_pages;
-		$current_page = max( 1, $query->get( 'paged' ) );
+		$bignum          = 999999999;
+		$base_link       = add_query_arg( 'rpage', '%#%', home_url( trailingslashit( $wp->request ) ) );
+		$max_num_pages   = $query->max_num_pages;
+		$current_page    = max( 1, $query->get( 'paged' ) );
 		$prev_page_label = '&lsaquo;';
 		$next_page_label = '&rsaquo;';
-		$args = array(
-			'base'          => $base_link,
-			'format'        => '',
-			'current'       => $current_page,
-			'total'         => $max_num_pages,
-			'prev_text'     => $prev_page_label,
-			'next_text'     => $next_page_label,
-			'type'          => 'array',
-			'end_size'      => 1,
-			'mid_size'      => 2,
+		$args            = array(
+			'base'      => $base_link,
+			'format'    => '',
+			'current'   => $current_page,
+			'total'     => $max_num_pages,
+			'prev_text' => $prev_page_label,
+			'next_text' => $next_page_label,
+			'type'      => 'array',
+			'end_size'  => 1,
+			'mid_size'  => 2,
 		);
 
 		if ( $max_num_pages <= 1 ) {

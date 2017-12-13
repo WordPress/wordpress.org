@@ -9,20 +9,21 @@ class Content_Model {
 	 * @return  null
 	 */
 	public static function action_init_register_post_type() {
-		register_post_type( 'result',
+		register_post_type(
+			'result',
 			array(
-				'labels' => array(
-					'name' => __( 'Test Results', 'ptr' ),
+				'labels'       => array(
+					'name'          => __( 'Test Results', 'ptr' ),
 					'singular_name' => __( 'Test Result', 'ptr' ),
 				),
-				'public' => true,
-				'has_archive' => false,
+				'public'       => true,
+				'has_archive'  => false,
 				'show_in_rest' => true,
 				'hierarchical' => true,
-				'rewrite' => array(
+				'rewrite'      => array(
 					'slug' => 'test-results',
 				),
-				'supports' => array(
+				'supports'     => array(
 					'title',
 					'editor',
 					'author',
@@ -31,13 +32,13 @@ class Content_Model {
 				),
 				'map_meta_cap' => true,
 				'capabilities' => array(
-					'edit_post' => 'edit_result',
-					'edit_posts' => 'edit_results',
-					'edit_others_posts' => 'edit_others_results',
-					'publish_posts' => 'publish_results',
-					'read_post' => 'read_result',
+					'edit_post'          => 'edit_result',
+					'edit_posts'         => 'edit_results',
+					'edit_others_posts'  => 'edit_others_results',
+					'publish_posts'      => 'publish_results',
+					'read_post'          => 'read_result',
 					'read_private_posts' => 'read_private_results',
-					'delete_post' => 'delete_result',
+					'delete_post'        => 'delete_result',
 				),
 			)
 		);
@@ -48,9 +49,11 @@ class Content_Model {
 	 */
 	public static function action_init_register_role() {
 		if ( ! get_role( 'test-reporter' ) ) {
-			add_role( 'test-reporter', __( 'Test Reporter', 'ptr' ), array(
-				'read' => true,
-			) );
+			add_role(
+				'test-reporter', __( 'Test Reporter', 'ptr' ), array(
+					'read' => true,
+				)
+			);
 		}
 		$role = get_role( 'test-reporter' );
 		if ( $role ) {

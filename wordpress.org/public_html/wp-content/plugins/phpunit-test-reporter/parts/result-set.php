@@ -24,21 +24,21 @@ echo Display::get_display_css(); ?>
 				<th colspan="<?php echo (int) $total_cols - 1; ?>"><?php echo wp_kses_post( apply_filters( 'the_title', $revision->post_title ) ); ?></th>
 			</tr>
 			<?php
-			$query_args = array(
-				'posts_per_page'   => 10,
-				'post_type'        => 'result',
-				'post_parent'      => $revision->ID,
-				'orderby'          => 'post_title',
-				'order'            => 'ASC',
+			$query_args   = array(
+				'posts_per_page' => 10,
+				'post_type'      => 'result',
+				'post_parent'    => $revision->ID,
+				'orderby'        => 'post_title',
+				'order'          => 'ASC',
 			);
 			$report_query = new WP_Query( $query_args );
 			if ( ! empty( $report_query->posts ) ) :
 				foreach ( $report_query->posts as $report ) :
-					$status = 'Errored';
+					$status       = 'Errored';
 					$status_title = 'No results found for test.';
-					$results = get_post_meta( $report->ID, 'results', true );
+					$results      = get_post_meta( $report->ID, 'results', true );
 					if ( isset( $results['failures'] ) ) {
-						$status = 0 === (int) $results['failures'] && 0 === (int) $results['errors'] ? 'Passed' : 'Failed';
+						$status       = 0 === (int) $results['failures'] && 0 === (int) $results['errors'] ? 'Passed' : 'Failed';
 						$status_title = (int) $results['tests'] . ' tests, ' . (int) $results['failures'] . ' failed, ' . (int) $results['errors'] . ' errors';
 					}
 					$host = 'Unknown';

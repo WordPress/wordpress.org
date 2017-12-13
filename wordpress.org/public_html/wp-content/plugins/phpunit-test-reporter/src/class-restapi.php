@@ -13,31 +13,31 @@ class RestAPI {
 	public static function register_routes() {
 		register_rest_route(
 			'wp-unit-test-api/v1', 'results', array(
-				'methods' => 'POST',
-				'callback' => array( __CLASS__, 'add_results_callback' ),
-				'args' => array(
-					'commit' => array(
-						'required' => true,
-						'description' => 'The SVN commit changeset number.',
-						'type' => 'numeric',
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'add_results_callback' ),
+				'args'                => array(
+					'commit'  => array(
+						'required'          => true,
+						'description'       => 'The SVN commit changeset number.',
+						'type'              => 'numeric',
 						'validate_callback' => array( __CLASS__, 'validate_callback' ),
 					),
 					'results' => array(
-						'required' => true,
-						'description' => 'phpunit results in JSON format.',
-						'type' => 'string',
+						'required'          => true,
+						'description'       => 'phpunit results in JSON format.',
+						'type'              => 'string',
 						'validate_callback' => array( __CLASS__, 'validate_callback' ),
 					),
 					'message' => array(
-						'required' => true,
-						'description' => 'The SVN commit message.',
-						'type' => 'string',
+						'required'          => true,
+						'description'       => 'The SVN commit message.',
+						'type'              => 'string',
 						'validate_callback' => array( __CLASS__, 'validate_callback' ),
 					),
-					'env' => array(
-						'required' => true,
-						'description' => 'JSON blob containing information about the environment.',
-						'type' => 'string',
+					'env'     => array(
+						'required'          => true,
+						'description'       => 'JSON blob containing information about the environment.',
+						'type'              => 'string',
 						'validate_callback' => array( __CLASS__, 'validate_callback' ),
 					),
 				),
@@ -50,37 +50,47 @@ class RestAPI {
 		switch ( $key ) {
 			case 'commit':
 				if ( ! is_numeric( $value ) ) {
-					return new WP_Error( 'rest_invalid', __( 'Value must be numeric.', 'ptr' ), array(
-						'status' => 400,
-					) );
+					return new WP_Error(
+						'rest_invalid', __( 'Value must be numeric.', 'ptr' ), array(
+							'status' => 400,
+						)
+					);
 				}
 				return true;
 			case 'message':
 				if ( empty( $value ) || ! is_string( $value ) ) {
-					return new WP_Error( 'rest_invalid', __( 'Value must be a non-empty string.', 'ptr' ), array(
-						'status' => 400,
-					) );
+					return new WP_Error(
+						'rest_invalid', __( 'Value must be a non-empty string.', 'ptr' ), array(
+							'status' => 400,
+						)
+					);
 				}
 				return true;
 			case 'env':
 			case 'results':
 				if ( null === json_decode( $value ) ) {
-					return new WP_Error( 'rest_invalid', __( 'Value must be encoded JSON.', 'ptr' ), array(
-						'status' => 400,
-					) );
+					return new WP_Error(
+						'rest_invalid', __( 'Value must be encoded JSON.', 'ptr' ), array(
+							'status' => 400,
+						)
+					);
 				}
 				return true;
 		}
-		return new WP_Error( 'rest_invalid', __( 'Invalid key specified.', 'ptr' ), array(
-			'status' => 400,
-		) );
+		return new WP_Error(
+			'rest_invalid', __( 'Invalid key specified.', 'ptr' ), array(
+				'status' => 400,
+			)
+		);
 	}
 
 	public static function permission() {
 		if ( ! current_user_can( 'edit_results' ) ) {
-			return new WP_Error( 'rest_unauthorized', __( 'Sorry, you are not allowed to create results.', 'ptr' ), array(
-				'status' => is_user_logged_in() ? 403 : 401,
-			) );
+			return new WP_Error(
+				'rest_unauthorized', __( 'Sorry, you are not allowed to create results.', 'ptr' ), array(
+					'status' => is_user_logged_in() ? 403 : 401,
+				)
+			);
 		}
 		return true;
 	}
@@ -93,21 +103,23 @@ class RestAPI {
 		if ( $post ) {
 			$parent_id = $post->ID;
 		} else {
-			$parent_id = wp_insert_post( array(
-				'post_title' => $parameters['message'],
-				'post_name' => $slug,
-				'post_status' => 'publish',
-				'post_type' => 'result',
-			) );
+			$parent_id = wp_insert_post(
+				array(
+					'post_title'  => $parameters['message'],
+					'post_name'   => $slug,
+					'post_status' => 'publish',
+					'post_type'   => 'result',
+				)
+			);
 		}
 
 		$current_user = wp_get_current_user();
 
 		$args = array(
 			'post_parent' => $parent_id,
-			'post_type' => 'result',
+			'post_type'   => 'result',
 			'numberposts' => 1,
-			'author' => $current_user->ID,
+			'author'      => $current_user->ID,
 		);
 
 		// Check to see if the test result already exist.
@@ -116,12 +128,12 @@ class RestAPI {
 			$post_id = $results[0]->ID;
 		} else {
 			$results = array(
-				'post_title' => $current_user->user_login . ' - ' . $slug,
+				'post_title'   => $current_user->user_login . ' - ' . $slug,
 				'post_content' => '',
-				'post_status' => 'publish',
-				'post_author' => $current_user->ID,
-				'post_type' => 'result',
-				'post_parent' => $parent_id,
+				'post_status'  => 'publish',
+				'post_author'  => $current_user->ID,
+				'post_type'    => 'result',
+				'post_parent'  => $parent_id,
 			);
 
 			// Store the results.
@@ -132,7 +144,7 @@ class RestAPI {
 			return $post_id;
 		}
 
-		$env = isset( $parameters['env'] ) ? json_decode( $parameters['env'], true ) : array();
+		$env     = isset( $parameters['env'] ) ? json_decode( $parameters['env'], true ) : array();
 		$results = isset( $parameters['results'] ) ? json_decode( $parameters['results'], true ) : array();
 
 		update_post_meta( $post_id, 'env', $env );
@@ -141,8 +153,8 @@ class RestAPI {
 		// Create the response object.
 		$response = new \WP_REST_Response(
 			array(
-				'id'    => $post_id,
-				'link'  => get_permalink( $post_id ),
+				'id'   => $post_id,
+				'link' => get_permalink( $post_id ),
 			)
 		);
 
