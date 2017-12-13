@@ -218,6 +218,10 @@ body.wporg-make #headline h2 a:before {
 	max-width: 300px;
 }
 
+#gp-js-message:empty {
+	display: none;
+}
+
 .gp-js-error {
 	color: #fff;
 	background-color: #dc3232;
@@ -1918,4 +1922,15 @@ button:focus {
 	border-color: #5b9dd9;
 	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
 	outline: 0;
+}
+
+#legend {
+	clear: both;
+	float: left;
+	padding: 0;
+	margin: 1em 0;
+}
+
+#legend + .actionlist {
+	margin: 0;
 }
