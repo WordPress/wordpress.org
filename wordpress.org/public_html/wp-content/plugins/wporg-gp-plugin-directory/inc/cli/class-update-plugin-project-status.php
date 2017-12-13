@@ -15,8 +15,8 @@ class Update_Plugin_Project_Status extends WP_CLI_Command {
 	public function __invoke() {
 		global $wpdb;
 
-		if ( ! defined( 'PLUGINS_TABLE_PREFIX' ) ) {
-			WP_CLI::error( 'PLUGINS_TABLE_PREFIX is not defined.' );
+		if ( ! defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
+			WP_CLI::error( 'WPORG_PLUGIN_DIRECTORY_BLOGID is not defined.' );
 		}
 
 		$parent_project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT );
@@ -26,24 +26,24 @@ class Update_Plugin_Project_Status extends WP_CLI_Command {
 
 		$plugins = GP::$project->many( "SELECT * FROM {$wpdb->gp_projects} WHERE parent_project_id = %d", $parent_project->id );
 		if ( ! $plugins ) {
-			WP_CLI::error( 'No plugins founds.' );
+			WP_CLI::error( 'No plugins found.' );
 		}
 
 		foreach ( $plugins as $plugin ) {
 			$plugin_status = $this->get_plugin_status( $plugin->slug );
 
-			if ( 'published' === $plugin_status && ! $plugin->active ) {
-				$plugin->save( array(
+			if ( 'publish' === $plugin_status && ! $plugin->active ) {
+				$plugin->save( [
 					'active' => 1,
-				) );
+				] );
 				WP_CLI::log( sprintf(
 					'Plugin `%s` has been activated.',
 					$plugin->slug
 				) );
-			} elseif ( 'published' !== $plugin_status && $plugin->active ) {
-				$plugin->save( array(
+			} elseif ( 'publish' !== $plugin_status && $plugin->active ) {
+				$plugin->save( [
 					'active' => 0,
-				) );
+				] );
 				WP_CLI::log( sprintf(
 					'Plugin `%s` has been deactivated.',
 					$plugin->slug
@@ -55,31 +55,24 @@ class Update_Plugin_Project_Status extends WP_CLI_Command {
 	/**
 	 * Retrieves the current plugin status.
 	 *
-	 * @param $plugin_slug The plugin slug.
-	 *
+	 * @param string $plugin_slug The plugin slug.
 	 * @return false|string Status on success, false on failure.
 	 */
 	protected function get_plugin_status( $plugin_slug ) {
-		global $wpdb;
+		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+		$posts = get_posts( [
+			'post_type'   => 'plugin',
+			'name'        => $plugin_slug,
+			'post_status' => [ 'publish', 'pending', 'disabled', 'closed', 'new', 'draft', 'approved' ],
+		] );
+		restore_current_blog();
 
-		$topic = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . PLUGINS_TABLE_PREFIX . 'topics WHERE topic_slug = %s', $plugin_slug ) );
-		if ( ! $topic ) {
+		if ( ! $posts ) {
 			return false;
 		}
 
-		$status = 'published';
-		if ( 2 == $topic->topic_open ) {
-			$status = 'approved';
-		} elseif ( 2 == $topic->forum_id ) {
-			$status = 'pending';
-		} elseif ( 4 == $topic->forum_id || 'rejected-' == substr( $topic->topic_slug, 0, 9 ) ) {
-			$status = 'rejected';
-		} elseif ( 1 == $topic->forum_id && 0 == $topic->topic_open ) {
-			$status = 'closed';
-		} elseif ( 3 == $topic->topic_open ) {
-			$status = 'disabled';
-		}
+		$plugin = array_shift( $posts );
 
-		return $status;
+		return $plugin->post_status;
 	}
 }
