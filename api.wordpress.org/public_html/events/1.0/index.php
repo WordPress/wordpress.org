@@ -885,14 +885,16 @@ CREATE TABLE `wporg_events` (
   `meetup` varchar(255) DEFAULT NULL,
   `meetup_url` text,
   `date_utc` datetime NOT NULL,
+  `date_utc_offset` varchar(32) DEFAULT NULL,
   `end_date` datetime NOT NULL,
   `location` text,
+  `country` varchar(64) DEFAULT NULL,
   `latitude` double NOT NULL,
   `longitude` double NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_source_id` (`type`,`source_id`),
-  KEY `latitude` (`latitude`),
-  KEY `longitude` (`longitude`),
-  KEY `date` (`date_utc`)
+  KEY `date` (`date_utc`),
+  KEY `country` (`country`),
+  KEY `lat_lon` (`latitude`,`longitude`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 */
