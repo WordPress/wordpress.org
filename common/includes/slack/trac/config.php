@@ -50,6 +50,7 @@ class Core extends Trac {
 		'Media'              => '#core-media',
 		'docs'               => '#core-docs',
 		'javascript'         => '#core-js',
+		'coding-standards'   => '#core-coding-standards',
 	);
 }
 
