@@ -123,6 +123,11 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The published post
 	 */
 	public function notify_new_blog_post( $post ) {
+		// Don't notify if importing.
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return;
+		}
+
 		$author = get_user_by( 'id', $post->post_author );
 
 		$content = wp_trim_words(
@@ -190,6 +195,10 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param WP_Post $post The comment's post
 	 */
 	private function notify_new_approved_comment( $comment, $post ) {
+		// Don't notify if importing.
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return;
+		}
 
 		if ( ! $comment->user_id )
 			return;
