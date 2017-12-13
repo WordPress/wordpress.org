@@ -5,6 +5,7 @@
  */
 
 require( 'inc/back-compat.php' );
+require_once( 'inc/favorite-schedule-shortcode.php' );
 
 class WordCamp_Post_Types_Plugin {
 	protected $wcpt_permalinks;
@@ -513,120 +514,15 @@ class WordCamp_Post_Types_Plugin {
 	 * @todo cleanup
 	 */
 	function shortcode_schedule( $attr, $content ) {
-		$attr = shortcode_atts( array(
-			'date'         => null,
-			'tracks'       => 'all',
-			'speaker_link' => 'anchor', // anchor|wporg|permalink|none
-			'session_link' => 'permalink', // permalink|anchor|none
-		), $attr );
+		$this->enqueue_schedule_shortcode_dependencies();
 
-		foreach ( array( 'tracks', 'speaker_link', 'session_link' ) as $key_for_case_sensitive_value ) {
-			$attr[ $key_for_case_sensitive_value ] = strtolower( $attr[ $key_for_case_sensitive_value ] );
-		}
+		$attr                        = preprocess_schedule_attributes( $attr );
+		$tracks                      = get_schedule_tracks( $attr['tracks'] );
+		$tracks_explicitly_specified = 'all' !== $attr['tracks'];
+		$sessions                    = get_schedule_sessions( $attr['date'], $tracks_explicitly_specified, $tracks );
+		$columns                     = get_schedule_columns( $tracks, $sessions, $tracks_explicitly_specified );
 
-		if ( ! in_array( $attr['speaker_link'], array( 'anchor', 'wporg', 'permalink', 'none' ) ) )
-			$attr['speaker_link'] = 'anchor';
-
-		if ( ! in_array( $attr['session_link'], array( 'permalink', 'anchor', 'none' ) ) )
-			$attr['session_link'] = 'permalink';
-
-		$columns = array();
-		$tracks = array();
-
-		$query_args = array(
-			'post_type'      => 'wcb_session',
-			'posts_per_page' => -1,
-			'meta_query'     => array(
-				'relation'   => 'AND',
-				array(
-					'key'     => '_wcpt_session_time',
-					'compare' => 'EXISTS',
-				),
-			),
-		);
-
-		if ( 'all' == $attr['tracks'] ) {
-			// Include all tracks.
-			$tracks = get_terms( 'wcb_track' );
-		} else {
-			// Loop through given tracks and look for terms.
-			$terms = array_map( 'trim', explode( ',', $attr['tracks'] ) );
-			foreach ( $terms as $term_slug ) {
-				$term = get_term_by( 'slug', $term_slug, 'wcb_track' );
-				if ( $term )
-					$tracks[ $term->term_id ] = $term;
-			}
-
-			// If tracks were provided, restrict the lookup in WP_Query.
-			if ( ! empty( $tracks ) ) {
-				$query_args['tax_query'][] = array(
-					'taxonomy' => 'wcb_track',
-					'field'    => 'id',
-					'terms'    => array_values( wp_list_pluck( $tracks, 'term_id' ) ),
-				);
-			}
-		}
-
-		if ( $attr['date'] && strtotime( $attr['date'] ) ) {
-			$query_args['meta_query'][] = array(
-				'key'   => '_wcpt_session_time',
-				'value' => array(
-					strtotime( $attr['date'] ),
-					strtotime( $attr['date'] . ' +1 day' ),
-				),
-				'compare' => 'BETWEEN',
-				'type'    => 'NUMERIC',
-			);
-		}
-
-		// Use tracks to form the columns.
-		if ( $tracks ) {
-			foreach ( $tracks as $track )
-				$columns[ $track->term_id ] = $track->term_id;
-		} else {
-			$columns[ 0 ] = 0;
-		}
-
-		unset( $tracks );
-
-		// Loop through all sessions and assign them into the formatted
-		// $sessions array: $sessions[ $time ][ $track ] = $session_id
-		// Use 0 as the track ID if no tracks exist
-
-		$sessions = array();
-		$sessions_query = new WP_Query( $query_args );
-		foreach ( $sessions_query->posts as $session ) {
-			$time = absint( get_post_meta( $session->ID, '_wcpt_session_time', true ) );
-			$tracks = get_the_terms( $session->ID, 'wcb_track' );
-
-			if ( ! isset( $sessions[ $time ] ) )
-				$sessions[ $time ] = array();
-
-			if ( empty( $tracks ) ) {
-				$sessions[ $time ][ 0 ] = $session->ID;
-			} else {
-				foreach ( $tracks as $track )
-					$sessions[ $time ][ $track->term_id ] = $session->ID;
-			}
-		}
-
-		// Sort all sessions by their key (timestamp).
-		ksort( $sessions );
-
-		// Remove empty columns unless tracks have been explicitly specified
-		if ( 'all' == $attr['tracks'] ) {
-			$used_terms = array();
-
-			foreach ( $sessions as $time => $entry )
-				if ( is_array( $entry ) )
-					foreach ( $entry as $term_id => $session_id )
-						$used_terms[ $term_id ] = $term_id;
-
-			$columns = array_intersect( $columns, $used_terms );
-			unset( $used_terms );
-		}
-
-		$html = '<table class="wcpt-schedule" border="0">';
+		$html  = '<table class="wcpt-schedule" border="0">';
 		$html .= '<thead>';
 		$html .= '<tr>';
 
@@ -717,6 +613,11 @@ class WordCamp_Post_Types_Plugin {
 				$classes[] = 'wcpt-session-type-' . $session_type;
 				$classes[] = 'wcb-session-' . $session->post_name;
 
+				// Favourite session star-icon.
+				$content = '<div class="wcb-session-favourite-icon">';
+				$content .= '<a class="fav-session-button"><span class="dashicons dashicons-star-filled"></span></a></div>';
+				$content .= '<div class="wcb-session-cell-content">';
+
 				// Determine the session title
 				if ( 'permalink' == $attr['session_link'] && 'session' == $session_type )
 					$session_title_html = sprintf( '<a class="wcpt-session-title" href="%s">%s</a>', esc_url( get_permalink( $session->ID ) ), $session_title );
@@ -725,7 +626,7 @@ class WordCamp_Post_Types_Plugin {
 				else
 					$session_title_html = sprintf( '<span class="wcpt-session-title">%s</span>', $session_title );
 
-				$content = $session_title_html;
+				$content .= $session_title_html;
 
 				$speakers_names = array();
 				foreach ( $speakers as $speaker ) {
@@ -748,6 +649,9 @@ class WordCamp_Post_Types_Plugin {
 				if ( count( $speakers_names ) )
 					$content .= sprintf( ' <span class="wcpt-session-speakers">%s</span>', implode( ', ', $speakers_names ) );
 
+				// End of cell-content.
+				$content .= '</div>';
+
 				$columns_clone = $columns;
 
 				// If the next element in the table is the same as the current one, use colspan
@@ -765,7 +669,7 @@ class WordCamp_Post_Types_Plugin {
 					}
 				}
 
-				$columns_html .= sprintf( '<td colspan="%d" class="%s" data-track-title="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $session_track_titles, $content );
+				$columns_html .= sprintf( '<td colspan="%d" class="%s" data-track-title="%s" data-session-id="%s">%s</td>', $colspan, esc_attr( implode( ' ', $classes ) ), $session_track_titles, esc_attr( $session->ID ), $content );
 			}
 
 			$global_session      = $colspan == count( $columns ) ? ' global-session' : '';
@@ -779,13 +683,88 @@ class WordCamp_Post_Types_Plugin {
 
 		$html .= '</tbody>';
 		$html .= '</table>';
+		$html .= $this->fav_session_email_form();
 		return $html;
+	}
+
+	/**
+	 * Enqueue style and scripts needed for [schedule] shortcode.
+	 */
+	function enqueue_schedule_shortcode_dependencies() {
+		wp_enqueue_style( 'dashicons' );
+
+		wp_enqueue_script(
+			'favourite-sessions',
+			plugin_dir_url( __FILE__ ) . 'js/favourite-sessions.js',
+			array( 'jquery' ),
+			filemtime( plugin_dir_path( __FILE__ ) . 'js/favourite-sessions.js' ),
+			true
+		);
+
+		wp_localize_script(
+			'favourite-sessions',
+			'favSessionsPhpObject',
+			array(
+				'root' => esc_url_raw( rest_url() ),
+				'i18n' => array(
+					'reqTimeOut' => esc_html__( 'Sorry, the email request timed out.', 'wordcamporg' ),
+					'otherError' => esc_html__( 'Sorry, the email request failed.',    'wordcamporg' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Return HTML code for email form used to send/share favourite sessions over email.
+	 *
+	 * Both form and button/link to show/hide the form can be styled using classes email-form
+	 * and show-email-form, respectively.
+	 *
+	 * @return string HTML code that represents the form to send emails and a link to show and hide it.
+	 */
+	function fav_session_email_form() {
+		static $email_form_count = 0;
+
+		// Skip email form if it is disabled or it was already added to document.
+		if ( email_fav_sessions_disabled() || $email_form_count !== 0 ) {
+			return '';
+		}
+
+		ob_start();
+		?>
+
+		<div class="email-form fav-session-email-form-hide">
+			<div id="fav-session-email-form">
+				<?php esc_html_e( 'Send me my favorite sessions:', 'wordcamporg' ); ?>
+
+				<form id="fav-sessions-form">
+					<input type="text" name="email_address" id="fav-sessions-email-address" placeholder="my@email.com" />
+					<input type="submit" value="<?php esc_attr_e( 'Send', 'wordcamporg' ); ?>" />
+				</form>
+			</div>
+			<div class="fav-session-email-wait-spinner"></div>
+			<div class="fav-session-email-result"></div>
+		</div>
+
+		<a class="show-email-form" href="javascript:">
+			<span class="dashicons dashicons-star-filled"></span>
+			<span class="dashicons dashicons-email-alt"></span>
+		</a>
+
+		<?php
+		$email_form = ob_end_flush();
+
+		$email_form_count++;
+
+		return $email_form;
 	}
 
 	/**
 	 * Returns a speaker's WordPress.org profile url (if username set)
 	 *
 	 * @param $speaker_id int The speaker's post id.
+	 *
+	 * @return NULL|string
 	 */
 	function get_speaker_wporg_permalink( $speaker_id ) {
 		$post = get_post( $speaker_id );

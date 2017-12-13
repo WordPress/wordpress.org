@@ -6,7 +6,11 @@
  */
 
 namespace WordCamp\Post_Types\REST_API;
+use WP_Rest_Server;
+
 defined( 'WPINC' ) || die();
+
+require_once( 'favorite-schedule-shortcode.php' );
 
 /**
  * Add non-sensitive meta fields to the speaker/session REST API endpoints
@@ -111,7 +115,57 @@ function register_additional_rest_fields() {
 	} // End if().
 }
 
+
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_additional_rest_fields' );
+
+
+/**
+ * Register route for sending schedule of favourite sessions via e-mail.
+ *
+ * This can be disabled in email_fav_sessions_disabled() from favorite-schedule-shortcode.php.
+ *
+ * @return void
+ */
+function register_fav_sessions_email(){
+	register_rest_route(
+		'wc-post-types/v1',     // REST namespace + API version
+		'/email-fav-sessions/', // URL slug
+		array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => 'send_favourite_sessions_email',
+			'args'     => array(
+				'email-address' => array(
+					'required' => true,
+					'validate_callback' => function( $value, $request, $param ) {
+						return is_email( $value );
+					},
+					'sanitize_callback' => function( $value, $request, $param ) {
+						return sanitize_email( $value );
+					},
+				),
+
+				'session-list' => array(
+					'required' => true,
+					'validate_callback' => function( $value, $request, $param ) {
+						$session_ids = explode( ',', $value );
+						$session_count = count( $session_ids );
+						for ( $i = 0; $i < $session_count; $i++ ) {
+							if ( ! is_numeric( $session_ids[ $i ] ) ) {
+								return false;
+							}
+						}
+						return true;
+					},
+					'sanitize_callback' => function( $value, $request, $param ) {
+						$session_ids = explode( ',', $value );
+						return implode( ',', array_filter( $session_ids, 'is_numeric' ) );
+					},
+				),
+			)
+		)
+	);
+}
+add_action( 'rest_api_init', __NAMESPACE__ . '\register_fav_sessions_email' );
 
 /**
  * Link all sessions to the speaker in the `speakers` API endpoint
