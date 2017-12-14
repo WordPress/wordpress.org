@@ -223,7 +223,7 @@ function extras_feed_init() {
 function wpsc_scripts() {
 	wp_enqueue_script( 'jquery' ); // explicit enqueue
 	wp_enqueue_script( 'jquery-cycle', get_template_directory_uri() . '/js/jquery.cycle2.min.js', array( 'jquery' ) );
-	wp_enqueue_script( 'wpsc-scripts', get_template_directory_uri() . '/js/scripts.js', array( 'jquery', 'jquery-cycle' ), 'aaa' );
+	wp_enqueue_script( 'wpsc-scripts', get_template_directory_uri() . '/js/scripts.js', array( 'jquery', 'jquery-cycle' ), '20171214' );
 }
 add_action('wp_enqueue_scripts', 'wpsc_scripts');
 
