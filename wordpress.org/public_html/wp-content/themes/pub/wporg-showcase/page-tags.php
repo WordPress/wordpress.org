@@ -9,7 +9,7 @@ get_header();
 <div id="pagebody">
 	<div class="wrapper">
 		<?php get_sidebar( 'left' ); ?>
-		<div class="col-7">
+		<div class="col-5">
 			<?php breadcrumb(); ?>
 			<div class="heatmap">
 				<?php wp_tag_cloud( 'smallest=9&largest=38&number=1000' ); ?>

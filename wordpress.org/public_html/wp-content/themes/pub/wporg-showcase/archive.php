@@ -9,7 +9,7 @@ query_posts( $query_string . '&meta_key=ratings_average&orderby=meta_value_num' 
 	<div class="wrapper">
 
 		<?php get_sidebar( 'left' ); ?>
-		<div class="col-7">
+		<div class="col-5">
 		<?php breadcrumb(); ?>
 
 		<?php if ( have_posts() ) : ?>

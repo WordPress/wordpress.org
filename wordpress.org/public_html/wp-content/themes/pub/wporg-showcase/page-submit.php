@@ -19,9 +19,9 @@ if ( !empty( $_POST ) ) {
 ?>
 
 <div id="pagebody">
-        <div class="wrapper">
+	<div class="wrapper">
 			<?php get_template_part( 'sidebar', 'left' ); ?>
-                <div class="col-7">
+			<div class="col-5">
 
 <?php if ( $_POST && ! $error ) : ?>
 	<div id="return">

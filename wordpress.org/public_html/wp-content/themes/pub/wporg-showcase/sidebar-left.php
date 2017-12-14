@@ -1,4 +1,4 @@
-		<div class="col-2 secondary">
+		<div class="col-2 secondary leftsidebar">
 			<a href="<?php echo home_url( '/submit-a-wordpress-site/' ); ?>" class="wpsc-submit-site"><?php _e( 'Submit a Site &rarr;', 'wporg-showcase' ); ?></a>
 
 			<h4 class="search"><?php _e( 'Search', 'wporg-showcase' ); ?></h4>

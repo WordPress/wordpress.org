@@ -1,7 +1,21 @@
-jQuery(document).ready(function($) { 
-	$(".wpsc-hero-slide-container").cycle({
-		fx:		'scrollHorz',
-	    pager:  '.wpsc-slide-nav',
-	    timeout: 8000
-	}); 
-});
+( function ( $ ) {
+	$( 'document' ).ready( function () {
+		toggle_wpsc_mobile_menu = function () {
+			if ( !$( '.leftsidebar' ).hasClass( 'wpscMobileMenuSlideIn' ) ) {
+				$( '.leftsidebar' ).animate( {
+					left: "+=209"
+				} );
+				$( '.leftsidebar' ).addClass( 'wpscMobileMenuSlideIn' );
+			} else {
+				$( '.leftsidebar' ).animate( {
+					left: "-=209"
+				} );
+				$( '.leftsidebar' ).removeClass( 'wpscMobileMenuSlideIn' );
+			}
+		};
+
+		if ( $( '#pagebody' ).hasClass( 'post' ) ) {
+			$( '.currentSiteRating' ).css( 'display', 'block' );
+		}
+	} );
+} )( jQuery );

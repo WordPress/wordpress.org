@@ -10,15 +10,19 @@ get_header();
 	<?php if ( have_posts() ) : ?>
 
 		<div class="wpsc-hero group">
-			<div class="wpsc-hero-slide-container no-js">
+			<div class="wpsc-hero-slide-container no-js cycle-slideshow" data-cycle-pager=".wpsc-slide-pager" data-cycle-fx="scrollHorz" data-cycle-auto-height="container" data-cycle-timeout="8000" data-cycle-slides="> div">
 
 				<?php while ( have_posts() ) : the_post(); ?>
 
 					<div class="wpsc-hero-slide">
 						<div class="wpsc-hero-slide-content">
+							<div class="wpsc-hero-slide-content-left">
 							<a href="<?php the_permalink(); ?>" class="wpsc-hero-slide-img">
 								<?php site_screenshot_tag( 457 ); ?>
 							</a>
+							</div>
+							<div class="wpsc-hero-slide-content-right">
+								<div class="wpsc-hero-slide-content-right-wrapper">
 							<h3><a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></h3>
 
 							<?php $wpsc_url = esc_url( get_post_meta( $post->ID, 'domain', true ) ); ?>
@@ -36,13 +40,15 @@ get_header();
 							<a class="wpsc-hero-learnmore" href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
 								<?php _e( 'Learn More &rarr;', 'wporg-showcase' ); ?>
 							</a>
+								</div>
+							</div>
 						</div><!-- .wpsc-hero-slide-content -->
 					</div><!-- .wpsc-hero-slide -->
 
 				<?php endwhile; ?>
 
 			</div>
-			<div class="wpsc-slide-nav"></div>
+			<div class="wpsc-slide-nav"><div class="wpsc-slide-pager"></div></div>
 		</div> <!-- .wpsc-hero -->
 
 	<?php endif; ?>
@@ -52,7 +58,7 @@ get_header();
 		<?php get_sidebar( 'left' ); ?>
 
 		<div class="col-7 main-content">
-
+		<div class="maincontentwrapper">
 			<?php query_posts( array( 'cat' => 4, 'posts_per_page' => 3, 'tag' => 'business', 'orderby' => 'rand' ) ); ?>
 			<?php if ( have_posts() ) : ?>
 			<h3><?php _e( 'Featured Business Sites', 'wporg-showcase' ); ?></h3>
@@ -100,6 +106,7 @@ get_header();
 
 			<?php endif; // have_posts ?>
 
+		</div>
 		</div>
 	</div>
 </div>

@@ -2,7 +2,7 @@
 <div id="pagebody">
 	<div class="wrapper archives">
 		<?php get_sidebar( 'left' ); ?>
-		<div class="col-7">
+		<div class="col-5">
 		<?php
 			breadcrumb();
 			$num_posts = 400;

@@ -3,7 +3,7 @@
 <div id="pagebody">
 	<div class="wrapper">
 		<?php get_sidebar( 'left' ); ?>
-		<div class="col-7">
+		<div class="col-5">
 
 			<?php if ( have_posts() ) : ?>
 				<?php while ( have_posts() ) : the_post(); ?>
