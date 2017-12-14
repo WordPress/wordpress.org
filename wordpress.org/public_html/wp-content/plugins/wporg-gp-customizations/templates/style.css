@@ -434,6 +434,11 @@ dt a.edit {
 	box-sizing: border-box;
 }
 
+.editor .strings {
+	width: 60%;
+	float: left;
+}
+
 .editor .meta {
 	background: #fff;
 	border: 1px solid #eee;
