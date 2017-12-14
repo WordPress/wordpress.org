@@ -11,6 +11,7 @@ if ( 'cli' !== php_sapi_name() ) {
  */
 function run_tests() {
 	global $wpdb;
+
 	define( 'RUNNING_TESTS', true );
 	define( 'SAVEQUERIES',   true );
 
@@ -22,6 +23,7 @@ function run_tests() {
 	$tests_failed += test_add_regional_wordcamps();
 	$tests_failed += test_build_response();
 	$tests_failed += test_is_client_core();
+
 	$query_count  = count( $wpdb->queries );
 	$query_time   = array_sum( array_column( $wpdb->queries, 1 ) );
 
@@ -97,7 +99,7 @@ function test_get_location() {
 			$actual_result['longitude'] = number_format( round( $actual_result['longitude'], 3 ), 3 );
 		}
 
-		$passed      = $case['expected'] === $actual_result;
+		$passed = $case['expected'] === $actual_result;
 
 		output_results( $case_id, $passed, $case['expected'], $actual_result );
 
@@ -115,7 +117,7 @@ function test_get_location() {
  * @return array
  */
 function get_location_test_cases() {
-	 $cases = array(
+	$cases = array(
 		/*
 		 * Only the country code is given
 		 */
@@ -139,7 +141,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Asia/Jakarta',
 			),
 			'expected' => array(
-				'country' => 'ID',
+				'country'     => 'ID',
 				'description' => 'indonesia',
 			),
 		),
@@ -387,7 +389,7 @@ function get_location_test_cases() {
 		 * This is currently failing. A query from PHP shows row id 2220957 has "Yaound?" instead of
 		 * "Yaoundé", but it's correct in the database itself.
 		 */
-		 'city-endonym-accents-africa' => array(
+		'city-endonym-accents-africa' => array(
 			'input' => array(
 				'location_name' => 'Yaoundé',
 				'locale'        => 'fr_FR',
@@ -640,7 +642,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Vancouver',
 			),
 			'expected' => array(
-				'country' => 'CA',
+				'country'     => 'CA',
 				'description' => 'canada',
 			),
 		),
@@ -652,7 +654,7 @@ function get_location_test_cases() {
 				'timezone'      => 'America/Santo_Domingo',
 			),
 			'expected' => array(
-				'country' => 'DO',
+				'country'     => 'DO',
 				'description' => 'dominican republic',
 			),
 		),
@@ -664,7 +666,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Bangui',
 			),
 			'expected' => array(
-				'country' => 'CF',
+				'country'     => 'CF',
 				'description' => 'central african republic',
 			),
 		),
@@ -676,7 +678,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Europe/London',
 			),
 			'expected' => array(
-				'country' => 'GB',
+				'country'     => 'GB',
 				'description' => 'united kingdom',
 			),
 		),
@@ -688,7 +690,7 @@ function get_location_test_cases() {
 				'timezone'      => 'Africa/Bujumbura',
 			),
 			'expected' => array(
-				'country' => 'BI',
+				'country'     => 'BI',
 				'description' => 'burundi',
 			),
 		),
@@ -889,9 +891,9 @@ function test_get_events() {
 		$actual_result = get_events( $case['input'] );
 
 		$passed = $case['expected']['count'] === count( $actual_result ) &&
-			! empty( $actual_result[0]['url'] ) &&
-			strtotime( $actual_result[0]['date'] ) > time() - ( 2 * 24 * 60 * 60 ) &&
-			$case['expected']['country'] === strtoupper( $actual_result[0]['location']['country'] );
+		          ! empty( $actual_result[0]['url'] ) &&
+		          strtotime( $actual_result[0]['date'] ) > time() - ( 2 * 24 * 60 * 60 ) &&
+		          $case['expected']['country'] === strtoupper( $actual_result[0]['location']['country'] );
 
 		output_results( $case_id, $passed, $case['expected'], $actual_result );
 
@@ -927,7 +929,7 @@ function get_events_test_cases() {
 
 		'1-in-australia' => array(
 			'input' => array(
-				'number' => '1',
+				'number'  => '1',
 				'country' => 'AU',
 			),
 			'expected' => array(
@@ -957,13 +959,13 @@ function test_build_response() {
 	foreach ( $cases as $case_id => $case ) {
 		$actual_result = build_response( $case['input']['location'], $case['input']['location_args'] );
 
-		$passed = $case['expected']['location'] === $actual_result['location'] &&
-			isset( $case['expected']['error'] ) === isset( $actual_result['error'] );
+		$passed = $case['expected']['location']       === $actual_result['location'] &&
+		          isset( $case['expected']['error'] ) === isset( $actual_result['error'] );
 
 		if ( $passed && $case['expected']['events'] ) {
 			$passed = ! empty( $actual_result['events'] ) &&
-				! empty( $actual_result['events'][0]['url'] ) &&
-				strtotime( $actual_result['events'][0]['date'] ) > time() - ( 2 * 24 * 60 * 60 );
+			          ! empty( $actual_result['events'][0]['url'] ) &&
+			          strtotime( $actual_result['events'][0]['date'] ) > time() - ( 2 * 24 * 60 * 60 );
 		}
 
 		if ( $passed && isset( $case['expected']['error'] ) ) {
@@ -1062,8 +1064,7 @@ function test_is_client_core() {
 
 	foreach ( $cases as $user_agent => $expected_result ) {
 		$actual_result = is_client_core( $user_agent );
-
-		$passed = $expected_result === $actual_result;
+		$passed        = $expected_result === $actual_result;
 
 		output_results( $user_agent, $passed, $expected_result, $actual_result );
 

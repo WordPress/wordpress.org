@@ -31,10 +31,10 @@ function main() {
 	 * In all of the above scenarios, requests that have cached results will always be served.
 	 */
 	define( 'THROTTLE_STICKY_WORDCAMPS', false );
-	define( 'THROTTLE_GEONAMES',    0 );
-	define( 'THROTTLE_IP2LOCATION', 0 );
+	define( 'THROTTLE_GEONAMES',         0 );
+	define( 'THROTTLE_IP2LOCATION',      0 );
 
-	defined( 'DAY_IN_SECONDS' ) or define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
+	defined( 'DAY_IN_SECONDS'  ) or define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
 	defined( 'WEEK_IN_SECONDS' ) or define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
@@ -58,7 +58,7 @@ function main() {
  * Include dependencies
  */
 function bootstrap() {
-	$base_dir = dirname( dirname(__DIR__ ) );
+	$base_dir = dirname( dirname( __DIR__ ) );
 
 	require( $base_dir . '/init.php' );
 	require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
@@ -79,7 +79,7 @@ function parse_request() {
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
 	if ( isset( $_GET['latitude'] ) ) {
-		$location_args['latitude'] = $_GET['latitude'];
+		$location_args['latitude']  = $_GET['latitude'];
 		$location_args['longitude'] = $_GET['longitude'];
 	}
 
@@ -112,9 +112,9 @@ function parse_request() {
 		 * actual public address.
 		 */
 		$public_ip = filter_var(
-		    $_REQUEST['ip'],
-		    FILTER_VALIDATE_IP,
-		    FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+			$_REQUEST['ip'],
+			FILTER_VALIDATE_IP,
+			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
 
 		$location_args['ip'] = $public_ip ? $public_ip : $_SERVER['REMOTE_ADDR'];
@@ -152,7 +152,7 @@ function build_response( $location, $location_args ) {
 
 		if ( ! empty( $location['latitude'] ) ) {
 			$event_args['nearby'] = array(
-				'latitude' => $location['latitude'],
+				'latitude'  => $location['latitude'],
 				'longitude' => $location['longitude'],
 			);
 		}
@@ -361,6 +361,7 @@ function guess_location_from_ip( $dotted_ip ) {
 
 	if ( false === $long_ip || ! isset( $from, $where ) ) {
 		wp_cache_set( $cache_key, '__NOT_FOUND__', $cache_group, $cache_life );
+
 		return false;
 	}
 
@@ -376,6 +377,7 @@ function guess_location_from_ip( $dotted_ip ) {
 	// Unknown location:
 	if ( ! $row || '-' == $row->country_short ) {
 		wp_cache_set( $cache_key, '__NOT_FOUND__', $cache_group, $cache_life );
+
 		return false;
 	}
 
@@ -475,14 +477,14 @@ function get_location( $args = array() ) {
 		}
 
 		$country_code = get_country_code_from_locale( $args['locale'] ?? '' );
-		$guess = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code  );
+		$guess        = guess_location_from_city( $args['location_name'], $args['timezone'] ?? '', $country_code );
 
 		if ( $guess ) {
 			$location = array(
 				'description' => $guess->name,
-				'latitude' => $guess->latitude,
-				'longitude' => $guess->longitude,
-				'country' => $guess->country,
+				'latitude'    => $guess->latitude,
+				'longitude'   => $guess->longitude,
+				'country'     => $guess->country,
 			);
 		} else {
 			$guess = guess_location_from_country( $args['location_name'] );
@@ -595,8 +597,8 @@ function guess_location_from_country( $location_name ) {
 	 */
 	if ( ! $country && $location_word_count >= 2 ) {
 		// Catch input like "Vancouver Canada"
-		$country_id   = $location_name_parts[ $location_word_count - 1 ];
-		$country      = get_country_from_name( $country_id );
+		$country_id = $location_name_parts[ $location_word_count - 1 ];
+		$country    = get_country_from_name( $country_id );
 	}
 
 	if ( ! $country && $location_word_count >= 3 ) {
@@ -683,34 +685,35 @@ function get_events( $args = array() ) {
 	}
 
 	$wheres = array();
-	if ( !empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
-		$wheres[] = '`type` = %s';
+	if ( ! empty( $args['type'] ) && in_array( $args['type'], array( 'meetup', 'wordcamp' ) ) ) {
+		$wheres[]     = '`type` = %s';
 		$sql_values[] = $args['type'];
 	}
 
 	// If we want nearby events, create a WHERE based on a bounded box of lat/long co-ordinates.
-	if ( !empty( $args['nearby'] ) ) {
+	if ( ! empty( $args['nearby'] ) ) {
 		$nearby_where = array();
 
 		foreach ( $event_distances as $type => $distance ) {
-			if ( !empty( $args['type'] ) && $type != $args['type'] ) {
+			if ( ! empty( $args['type'] ) && $type != $args['type'] ) {
 				continue;
 			}
-			$bounded_box = get_bounded_coordinates( $args['nearby']['latitude'], $args['nearby']['longitude'], $distance );
+
+			$bounded_box    = get_bounded_coordinates( $args['nearby']['latitude'], $args['nearby']['longitude'], $distance );
 			$nearby_where[] = '( `type` = %s AND `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
-			$sql_values[] = $type;
-			$sql_values[] = $bounded_box['latitude']['min'];
-			$sql_values[] = $bounded_box['latitude']['max'];
-			$sql_values[] = $bounded_box['longitude']['min'];
-			$sql_values[] = $bounded_box['longitude']['max'];
+			$sql_values[]   = $type;
+			$sql_values[]   = $bounded_box['latitude']['min'];
+			$sql_values[]   = $bounded_box['latitude']['max'];
+			$sql_values[]   = $bounded_box['longitude']['min'];
+			$sql_values[]   = $bounded_box['longitude']['max'];
 		}
 		// Build the nearby where as a OR as different event types have different distances.
 		$wheres[] = '(' . implode( ' OR ', $nearby_where ) . ')';
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( !empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
-		$wheres[] = '`country` = %s';
+	if ( ! empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
+		$wheres[]     = '`country` = %s';
 		$sql_values[] = $args['country'];
 	}
 
@@ -723,7 +726,7 @@ function get_events( $args = array() ) {
 
 	// Limit 
 	if ( isset( $args['number'] ) ) {
-		$sql_limits = 'LIMIT %d';
+		$sql_limits   = 'LIMIT %d';
 		$sql_values[] = $args['number'];
 	}
 
@@ -757,16 +760,16 @@ function get_events( $args = array() ) {
 	$events = array();
 	foreach ( $raw_events as $event ) {
 		$events[] = array(
-			'type'  => $event->type,
-			'title' => $event->title,
-			'url'   => $event->url,
-			'meetup' => $event->meetup,
+			'type'       => $event->type,
+			'title'      => $event->title,
+			'url'        => $event->url,
+			'meetup'     => $event->meetup,
 			'meetup_url' => $event->meetup_url,
-			'date' => $event->date_utc, // TODO: DB stores a local date, not UTC.
-			'location' => array(
-				'location' => $event->location,
-				'country' => $event->country,
-				'latitude' => (float) $event->latitude,
+			'date'       => $event->date_utc, // TODO: DB stores a local date, not UTC.
+			'location'   => array(
+				'location'  => $event->location,
+				'country'   => $event->country,
+				'latitude'  => (float) $event->latitude,
 				'longitude' => (float) $event->longitude,
 			)
 		);
@@ -774,7 +777,7 @@ function get_events( $args = array() ) {
 
 	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
 
-	return $events;	
+	return $events;
 }
 
 /**
@@ -857,11 +860,11 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 
 	if ( ! empty( $request_args['nearby'] ) ) {
 		$bounded_box = get_bounded_coordinates( $request_args['nearby']['latitude'], $request_args['nearby']['longitude'], $distance );
-		$where[]  = '( `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
-		$values[] = $bounded_box['latitude']['min'];
-		$values[] = $bounded_box['latitude']['max'];
-		$values[] = $bounded_box['longitude']['min'];
-		$values[] = $bounded_box['longitude']['max'];
+		$where[]     = '( `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
+		$values[]    = $bounded_box['latitude']['min'];
+		$values[]    = $bounded_box['latitude']['max'];
+		$values[]    = $bounded_box['longitude']['min'];
+		$values[]    = $bounded_box['longitude']['max'];
 	}
 
 	// Allow queries for limiting to specific countries.
@@ -903,7 +906,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
  * @return array
  */
 function add_regional_wordcamps( $local_events, $user_agent ) {
-	$time = time();
+	$time               = time();
 	$regional_wordcamps = array();
 
 	if ( ! is_client_core( $user_agent ) ) {
@@ -967,14 +970,15 @@ function add_regional_wordcamps( $local_events, $user_agent ) {
  * @param float $lat            The latitude of the location.
  * @param float $lon            The longitude of the location.
  * @param int   $distance_in_km The distance of the bounded box, in KM.
+ *
  * @return array of bounded box.
  */
 function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	// Based on http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates
 
 	$angular_distance = $distance_in_km / 6371; // 6371 = radius of the earth in KM.
-	$lat = deg2rad( $lat );
-	$lon = deg2rad( $lon );
+	$lat              = deg2rad( $lat );
+	$lon              = deg2rad( $lon );
 
 	$earth_min_lat = -1.5707963267949; // = deg2rad(  -90 ) = -PI/2
 	$earth_max_lat =  1.5707963267949; // = deg2rad(   90 ) =  PI/2
@@ -985,21 +989,19 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	$maximum_lat = $lat + $angular_distance;
 	$minimum_lon = $maximum_lon = 0;
 
-	// Ensure that we're not within a pole-area of the world, weirdness will ensure.
+	// Ensure that we're not within a pole-area of the world, weirdness will ensue.
 	if ( $minimum_lat > $earth_min_lat && $maximum_lat < $earth_max_lat ) {
-
-		$lon_delta = asin( sin( $angular_distance ) / cos( $lat ) );
-
+		$lon_delta   = asin( sin( $angular_distance ) / cos( $lat ) );
 		$minimum_lon = $lon - $lon_delta;
+		$maximum_lon = $lon + $lon_delta;
+
 		if ( $minimum_lon < $earth_min_lon ) {
 			$minimum_lon += 2 * pi();
 		}
 
-		$maximum_lon = $lon + $lon_delta;
 		if ( $maximum_lon > $earth_max_lon ) {
 			$maximum_lon -= 2 * pi();
 		}
-
 	} else {
 		// Use a much simpler range in polar regions.
 		$minimum_lat = max( $minimum_lat, $earth_min_lat );
