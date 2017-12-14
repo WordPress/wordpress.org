@@ -367,7 +367,8 @@ body,
 	line-height: 1.2;
 }
 
-aside[id^="handbook"] .widget-title {
+aside[id^="handbook"] .widget-title,
+aside[id^="nav_menu"] .widget-title {
 	font-size: 16px;
 	text-transform: uppercase;
 	letter-spacing: 1px;
@@ -1136,7 +1137,8 @@ h2.toc-heading + h3.toc-heading:target {
 
 /** Menu */
 
-#secondary aside.widget_wporg_handbook_pages {
+#secondary aside.widget_wporg_handbook_pages,
+#secondary aside.widget_nav_menu {
 	font-size: 16px;
 }
 
