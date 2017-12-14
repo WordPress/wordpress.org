@@ -14,6 +14,15 @@ function main() {
 	/*
 	 * Short-circuit some requests if a traffic spike is larger than we can handle.
 	 *
+	 * THROTTLE_STICKY_WORDCAMPS prevents the additional `SELECT` query in `get_sticky_wordcamp()`. This is the
+	 * least intrusive throttle for users, and should be tried first.
+	 *
+	 * If that doesn't help enough, then start throttling ip2location, since those happen automatically
+	 * and are therefore less likely to be noticed by users. Throttling Geonames should be a last
+	 * resort, since users will notice those the most, and will sometimes retry their requests,
+	 * which makes the problem worse.
+	 *
+	 * THROTTLE_{ GEONAMES | IP2LOCATION }
 	 * - A value of `0` means that 0% of requests will be throttled.
 	 * - A value of `100` means that all cache-miss requests will be short-circuited with an error.
 	 * - Any value `n` between `0` and `100` means that `n%` of cache-miss requests will be short-circuited.
@@ -21,10 +30,12 @@ function main() {
 	 *
 	 * In all of the above scenarios, requests that have cached results will always be served.
 	 */
+	define( 'THROTTLE_STICKY_WORDCAMPS', false );
 	define( 'THROTTLE_GEONAMES',    0 );
 	define( 'THROTTLE_IP2LOCATION', 0 );
 
 	defined( 'DAY_IN_SECONDS' ) or define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
+	defined( 'WEEK_IN_SECONDS' ) or define( 'WEEK_IN_SECONDS', 7 * DAY_IN_SECONDS );
 
 	// The test suite just needs the functions defined and doesn't want any headers or output
 	if ( defined( 'RUNNING_TESTS' ) && RUNNING_TESTS ) {
@@ -131,7 +142,9 @@ function build_response( $location, $location_args ) {
 	}
 
 	if ( $location ) {
-		$event_args = array();
+		$event_args = array(
+			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+		);
 
 		if ( isset( $_REQUEST['number'] ) ) {
 			$event_args['number'] = $_REQUEST['number'];
@@ -641,6 +654,13 @@ function get_country_from_name( $country_name ) {
 	), 'ARRAY_A' );
 }
 
+/**
+ * Get upcoming events for the requested location.
+ *
+ * @param array $args
+ *
+ * @return array
+ */
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
@@ -650,6 +670,12 @@ function get_events( $args = array() ) {
 	// number should be between 0 and 100, with a default of 10.
 	$args['number'] = $args['number'] ?? 10;
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
+
+	// Distances in kilometers
+	$event_distances = array(
+		'meetup'   => 100,
+		'wordcamp' => 400,
+	);
 
 	$cache_key = 'events:' . md5( serialize( $args ) );
 	if ( false !== ( $data = wp_cache_get( $cache_key, $cache_group ) ) ) {
@@ -664,11 +690,6 @@ function get_events( $args = array() ) {
 
 	// If we want nearby events, create a WHERE based on a bounded box of lat/long co-ordinates.
 	if ( !empty( $args['nearby'] ) ) {
-		// Distances in kilometers
-		$event_distances = array(
-			'meetup' => 100,
-			'wordcamp' => 400,
-		);
 		$nearby_where = array();
 
 		foreach ( $event_distances as $type => $distance ) {
@@ -695,6 +716,7 @@ function get_events( $args = array() ) {
 
 	// Just show upcoming events
 	$wheres[] = '`date_utc` >= %s';
+
 	// Dates are in local-time not UTC, so the API output will contain events that have already happened in some parts of the world.
 	// TODO update this when the UTC dates are stored.
 	$sql_values[] = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );
@@ -723,6 +745,15 @@ function get_events( $args = array() ) {
 		$sql_values
 	) );
 
+	if ( should_stick_wordcamp( $args, $raw_events ) ) {
+		$sticky_wordcamp = get_sticky_wordcamp( $args, $event_distances['wordcamp'] );
+
+		if ( $sticky_wordcamp ) {
+			array_pop( $raw_events );
+			array_push( $raw_events, $sticky_wordcamp );
+		}
+	}
+
 	$events = array();
 	foreach ( $raw_events as $event ) {
 		$events[] = array(
@@ -742,7 +773,125 @@ function get_events( $args = array() ) {
 	}
 
 	wp_cache_set( $cache_key, $events, $cache_group, $cache_life );
+
 	return $events;	
+}
+
+/**
+ * Determine if conditions for sticking a WordCamp event to the response are met.
+ *
+ * @param array $request_args
+ * @param array $raw_events
+ *
+ * @return bool
+ */
+function should_stick_wordcamp( $request_args, $raw_events ) {
+	if ( THROTTLE_STICKY_WORDCAMPS ) {
+		return false;
+	}
+
+	// $raw_events already contains all the events that are coming up
+	if ( count( $raw_events ) < $request_args['number'] ) {
+		return false;
+	}
+
+	if ( ! $request_args['is_client_core'] ) {
+		return false;
+	}
+
+	$event_types = array_column( $raw_events, 'type' );
+
+	if ( in_array( 'wordcamp', $event_types, true ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Get the WordCamp that should be stuck to the response.
+ *
+ * WordCamps are large, all-day (or multi-day) events that require more of attendees that meetups do. Attendees
+ * need to have more advanced notice of when they're occurring. In a city with an active meetup, the camp
+ * might not show up in the Events Widget until a week or two before it happens, which isn't enough time.
+ *
+ * @param array $request_args
+ * @param int   $distance
+ *
+ * @return object|false A database row on success; `false` on failure.
+ */
+function get_sticky_wordcamp( $request_args, $distance ) {
+	global $wpdb;
+
+	$sticky_wordcamp_query = build_sticky_wordcamp_query( $request_args, $distance );
+	$sticky_wordcamp       = $wpdb->get_results( $wpdb->prepare(
+		$sticky_wordcamp_query['query'],
+		$sticky_wordcamp_query['values']
+	) );
+
+	if ( ! empty( $sticky_wordcamp[0]->type ) ) {
+		return $sticky_wordcamp[0];
+	}
+
+	return false;
+}
+
+/**
+ * Build the database query for fetching the WordCamp to stick to the response.
+ *
+ * @param array $request_args
+ * @param int   $distance
+ *
+ * @return array
+ */
+function build_sticky_wordcamp_query( $request_args, $distance ) {
+	$where = $values = array();
+
+	/*
+	 * How far ahead the query should search for an upcoming camp. It should be high enough that attendees have
+	 * enough time to prepare for the event, but low enough that it doesn't crowd out meetups that are happening
+	 * in the mean-time, or make the content of the Events Widget feel less dynamic. Always having fresh content
+	 * there is one of the things that makes the widget engaging.
+	 */
+	$date_upper_bound = 6 * WEEK_IN_SECONDS;
+
+	if ( ! empty( $request_args['nearby'] ) ) {
+		$bounded_box = get_bounded_coordinates( $request_args['nearby']['latitude'], $request_args['nearby']['longitude'], $distance );
+		$where[]  = '( `latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f )';
+		$values[] = $bounded_box['latitude']['min'];
+		$values[] = $bounded_box['latitude']['max'];
+		$values[] = $bounded_box['longitude']['min'];
+		$values[] = $bounded_box['longitude']['max'];
+	}
+
+	// Allow queries for limiting to specific countries.
+	if ( ! empty( $request_args['country'] ) && preg_match( '![a-z]{2}!i', $request_args['country'] ) ) {
+		$where[]  = '`country` = %s';
+		$values[] = $request_args['country'];
+	}
+
+	$where = implode( ' AND ', $where );
+
+	$query = "
+		SELECT
+			`type`, `title`, `url`,
+			`meetup`, `meetup_url`,
+			`date_utc`, `date_utc_offset`,
+			`location`, `country`, `latitude`, `longitude`
+		FROM `wporg_events`
+		WHERE
+			`type` = 'wordcamp' AND
+			$where AND
+			`date_utc` >= %s AND
+			`date_utc` <= %s
+		ORDER BY `date_utc` ASC
+		LIMIT 1"
+	;
+
+	$values[] = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );
+	$values[] = gmdate( 'Y-m-d', time() + $date_upper_bound );
+
+	return compact( 'query', 'values' );
 }
 
 /**

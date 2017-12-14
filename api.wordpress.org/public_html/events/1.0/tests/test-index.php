@@ -600,7 +600,6 @@ function get_location_test_cases() {
 			),
 		),
 
-
 		/*
 		 * A combination of city, region, and country are given, along with the locale and timezone
 		 *
@@ -1131,14 +1130,14 @@ function test_add_regional_wordcamps() {
  *
  * @return false
  */
-function wp_cache_get() {
+function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
 	return false;
 }
 
 /**
  * Stub to simulate cache misses, so that the tests always get fresh results
  */
-function wp_cache_set() {
+function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
 	// Intentionally empty
 }
 
