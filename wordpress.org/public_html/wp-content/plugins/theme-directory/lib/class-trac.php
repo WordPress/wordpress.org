@@ -1,69 +1,129 @@
 <?php
-class Trac {
-	var $rpc;
-	const attributes = 3;
+/**
+ * Class to interact with Trac's RPC API.
+ *
+ * @package WordPressdotorg\Theme_Directory
+ */
 
-	function __construct( $username, $password, $host, $path = '/', $port = 80, $ssl = FALSE ) {
-		// Assume URL to $host, ignore $path, $port, $ssl
+/**
+ * Class Trac
+ */
+class Trac {
+
+	/**
+	 * Attributes key in RPC response array.
+	 */
+	const ATTRIBUTES = 3;
+
+	/**
+	 * Holds a reference to \WP_HTTP_IXR_Client.
+	 *
+	 * @var \WP_HTTP_IXR_Client
+	 */
+	protected $rpc;
+
+	/**
+	 * Trac constructor.
+	 *
+	 * @param string $username Trac username.
+	 * @param string $password Trac password.
+	 * @param string $host     Server to use.
+	 * @param string $path     Path.
+	 * @param int    $port     Which port to use. Default: 80.
+	 * @param bool   $ssl      Whether to use SSL. Default: false.
+	 */
+	public function __construct( $username, $password, $host, $path = '/', $port = 80, $ssl = false ) {
+		// Assume URL to $host, ignore $path, $port, $ssl.
 		$this->rpc = new WP_HTTP_IXR_Client( $host );
 
-		$http_basic_auth = 'Basic ';
+		$http_basic_auth  = 'Basic ';
 		$http_basic_auth .= base64_encode( $username . ':' . $password );
 
 		$this->rpc->headers['Authorization'] = $http_basic_auth;
 	}
 
-	function ticket_create( $subj, $desc, $attr = array() ) {
-		if ( empty( $attr ) )
+	/**
+	 * Creates a new Trac ticket.
+	 *
+	 * @param string $subj Ticket subject line.
+	 * @param string $desc Ticket description.
+	 * @param array  $attr Ticket attributes. Default: Empty array.
+	 * @return bool|mixed
+	 */
+	public function ticket_create( $subj, $desc, $attr = array() ) {
+		if ( empty( $attr ) ) {
 			$attr = new IXR_Value( array(), 'struct' );
+		}
+
 		$ok = $this->rpc->query( 'ticket.create', $subj, $desc, $attr );
-		if ( !$ok ) {
+		if ( ! $ok ) {
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar
 			// print_r( $this->rpc );
-			return FALSE;
-		}
-
-		return $this->rpc->getResponse();
-	}
-
-	function ticket_update( $id, $comment, $attr = array(), $notify = false ) {
-		if ( empty( $attr['_ts'] ) ) {
-			$get = $this->ticket_get( $id );
-			$attr['_ts'] = $get['_ts'];
-		}
-		if ( empty( $attr['action'] ) )
-			$attr['action'] = 'leave';
-
-		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
-		if ( ! $ok )
 			return false;
-
-		return $this->rpc->getResponse();
-	}
-
-	function ticket_query( $search ) {
-		$ok = $this->rpc->query( 'ticket.query', $search );
-		if ( !$ok ) {
-			return FALSE;
 		}
 
 		return $this->rpc->getResponse();
 	}
 
 	/**
-	 * @return [id, time_created, time_changed, attributes] or false on failure.
+	 * Updates a Trac ticket.
+	 *
+	 * @param int    $id      Ticket number.
+	 * @param string $comment Comment.
+	 * @param array  $attr    Ticket attributes. Default: Empty array.
+	 * @param bool   $notify  Whether to notify. Default: false.
+	 * @return bool|mixed
 	 */
-	function ticket_get( $id ) {
-		$ok = $this->rpc->query( 'ticket.get', $id );
-		if ( !$ok ) {
-			return FALSE;
+	public function ticket_update( $id, $comment, $attr = array(), $notify = false ) {
+		if ( empty( $attr['_ts'] ) ) {
+			$get         = $this->ticket_get( $id );
+			$attr['_ts'] = $get['_ts'];
+		}
+		if ( empty( $attr['action'] ) ) {
+			$attr['action'] = 'leave';
 		}
 
-		$response = $this->rpc->getResponse();
+		$ok = $this->rpc->query( 'ticket.update', $id, $comment, $attr, $notify );
+		if ( ! $ok ) {
+			return false;
+		}
+
+		return $this->rpc->getResponse();
+	}
+
+	/**
+	 * Queries Trac tickets.
+	 *
+	 * @param string $search Trac search query.
+	 * @return bool|mixed
+	 */
+	public function ticket_query( $search ) {
+		$ok = $this->rpc->query( 'ticket.query', $search );
+		if ( ! $ok ) {
+			return false;
+		}
+
+		return $this->rpc->getResponse();
+	}
+
+	/**
+	 * Gets a specific Trac ticket.
+	 *
+	 * @param int $id Trac ticket id.
+	 * @return [id, time_created, time_changed, attributes] or false on failure.
+	 */
+	public function ticket_get( $id ) {
+		$ok = $this->rpc->query( 'ticket.get', $id );
+		if ( ! $ok ) {
+			return false;
+		}
+
+		$response       = $this->rpc->getResponse();
 		$response['id'] = $response[0];
-		foreach ( $response[ self::attributes ] as $key => $value ) {
+		foreach ( $response[ self::ATTRIBUTES ] as $key => $value ) {
 			$response[ $key ] = $value;
 		}
+
 		return $response;
 	}
 }
-
