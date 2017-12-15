@@ -265,12 +265,14 @@ class Builder {
 
 			// Combine Checksums from existing files and the new files
 			foreach ( $existing_json_checksum_file->files as $file => $checksums ) {
-				if ( isset( $skip_bad_files[ $file ] ) ) {
-					// See https://meta.trac.wordpress.org/ticket/3335
-					// This is a partial filename, which shouldn't have been in the checksums.
-					continue;
-				}
+
 				if ( ! isset( $json_checksum_file->files[ $file ] ) ) {
+					if ( isset( $skip_bad_files[ $file ] ) ) {
+						// See https://meta.trac.wordpress.org/ticket/3335
+						// This is a partial filename, which shouldn't have been in the checksums.
+						continue;
+					}
+
 					// Deleted file, use existing checksums.
 					$json_checksum_file->files[ $file ] = $checksums;
 
