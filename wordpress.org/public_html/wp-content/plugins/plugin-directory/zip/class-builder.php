@@ -201,8 +201,10 @@ class Builder {
 		// Existing checksums?
 		$existing_json_checksum_file = file_exists( $this->checksum_file );
 
+		$skip_bad_files = array();
 		$checksums = array();
 		foreach ( array( 'md5' => 'md5sum', 'sha256' => 'sha256sum' ) as $checksum_type => $checksum_bin ) {
+			$checksum_output = array();
 			$this->exec( sprintf(
 				'cd %s && find . -type f -print0 | sort -z | xargs -0 ' . $checksum_bin . ' 2>&1',
 				escapeshellarg( $this->tmp_build_dir . '/' . $this->slug )
@@ -215,9 +217,14 @@ class Builder {
 			}
 
 			foreach ( $checksum_output as $line ) {
-				list( $checksum, $filename ) = preg_split( '!\s+!', $line );
+				list( $checksum, $filename ) = preg_split( '!\s+!', $line, 2 );
 				$filename = trim( preg_replace( '!^./!', '', $filename ) );
 				$checksum = trim( $checksum );
+
+				// See https://meta.trac.wordpress.org/ticket/3335 - Filenames like 'Testing Test' truncated to 'Testing'
+				if ( preg_match( '!^(\S+)\s+\S!', $filename, $m ) ) {
+					$skip_bad_files[ $m[1] ] = true;
+				}
 
 				if ( ! isset( $checksums[ $filename ] ) ) {
 					$checksums[ $filename ] = array( 'md5' => array(), 'sha256' => array() );
@@ -258,6 +265,11 @@ class Builder {
 
 			// Combine Checksums from existing files and the new files
 			foreach ( $existing_json_checksum_file->files as $file => $checksums ) {
+				if ( isset( $skip_bad_files[ $file ] ) ) {
+					// See https://meta.trac.wordpress.org/ticket/3335
+					// This is a partial filename, which shouldn't have been in the checksums.
+					continue;
+				}
 				if ( ! isset( $json_checksum_file->files[ $file ] ) ) {
 					// Deleted file, use existing checksums.
 					$json_checksum_file->files[ $file ] = $checksums;
