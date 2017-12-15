@@ -278,6 +278,7 @@
 #home-below {
 	font-size: ms( -2 );
 	margin: 0 auto ms( 0 );
+	max-width: 960px;
 	padding: 0 ms( 1 );
 
 	@include breakpoint( sm ) {
@@ -378,6 +379,15 @@
 
 		&.col-12 {
 			margin-bottom: 0;
+		}
+
+		@include breakpoint( 420px, 768px ) {
+			flex-direction: row;
+			flex-wrap: wrap;
+
+			.col-3 {
+				width: 48%;
+			}
 		}
 	}
 
