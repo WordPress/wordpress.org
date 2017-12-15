@@ -1413,9 +1413,9 @@ class WordCamp_Post_Types_Plugin {
 		$session_categories_list = get_the_term_list( $post->ID, 'wcb_session_category', '', _x( ', ', 'Used between list items, there is a space after the comma.', 'wordcamporg' ) );
 		if ( $session_categories_list ) {
 			$session_categories_html = sprintf(
-				'<span class="session-categories-links"><span class="screen-reader-text">%1$s </span>%2$s</span>',
-				_x( 'Categories', 'Used before session category names.', 'wordcamporg' ),
-				$session_categories_list
+				'<span class="session-categories-links"><span class="screen-reader-text">%1$s</span> %2$s</span>',
+				esc_html_x( 'Categories', 'Used before session category names.', 'wordcamporg' ),
+				wp_kses_post( $session_categories_list )
 			);
 		}
 
