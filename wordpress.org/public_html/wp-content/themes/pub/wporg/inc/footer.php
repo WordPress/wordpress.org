@@ -8,6 +8,7 @@
  *
  * @package WordPressdotorg\Theme
  */
+
 ?>
 
 <div id="wporg-footer">

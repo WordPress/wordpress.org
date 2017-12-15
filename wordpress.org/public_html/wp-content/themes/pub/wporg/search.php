@@ -16,7 +16,15 @@ get_header(); ?>
 		<?php if ( have_posts() ) : ?>
 
 			<header class="page-header">
-				<h1 class="page-title"><?php printf( __( 'Search Results for: %s', 'wporg' ), get_search_query() ); ?></h1>
+				<h1 class="page-title">
+					<?php
+					printf(
+						/* translators: Search query. */
+						esc_html__( 'Search Results for: %s', 'wporg' ),
+						get_search_query()
+					);
+					?>
+				</h1>
 			</header><!-- .page-header -->
 
 			<?php
@@ -30,7 +38,7 @@ get_header(); ?>
 					<?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
 				</header><!-- .entry-header -->
 
-				<?php if ( 'post' == get_post_type() ) : ?>
+				<?php if ( 'post' === get_post_type() ) : ?>
 					<div class="entry-meta"><?php entry_meta(); ?></div>
 				<?php endif; ?>
 
@@ -42,7 +50,7 @@ get_header(); ?>
 					<?php
 					edit_post_link(
 						sprintf(
-						/* translators: %s: Name of current post */
+							/* translators: %s: Name of current post */
 							__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'wporg' ),
 							get_the_title()
 						),
@@ -59,7 +67,7 @@ get_header(); ?>
 
 			the_posts_pagination();
 
-		// If no content, include the "No posts found" template.
+			// If no content, include the "No posts found" template.
 		else :
 			get_template_part( 'template-parts/content', 'none' );
 

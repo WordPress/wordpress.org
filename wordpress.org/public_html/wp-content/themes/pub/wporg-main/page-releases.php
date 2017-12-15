@@ -6,10 +6,12 @@
  */
 
 namespace WordPressdotorg\MainTheme;
+
 $releases = $GLOBALS['rosetta']->rosetta->get_releases_breakdown();
 
 the_post();
-get_header( 'page' ); ?>
+get_header();
+?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'col-12' ); ?> role="main">
 		<header class="entry-header">
@@ -21,7 +23,7 @@ get_header( 'page' ); ?>
 			if ( ! empty( $releases ) ) :
 				if ( isset( $releases['latest'] ) ) :
 					?>
-					<h3 id="latest"><?php _e( 'Latest release', 'wporg' ); ?></h3>
+					<h3 id="latest"><?php esc_html_e( 'Latest release', 'wporg' ); ?></h3>
 					<table class="releases latest">
 						<?php release_row( $releases['latest'] ); ?>
 					</table>
@@ -31,9 +33,17 @@ get_header( 'page' ); ?>
 				if ( ! empty( $releases['branches'] ) ) :
 					echo '<a name="older" id="older"></a>';
 
-					foreach ( $releases['branches'] as $branch => $branch_release ):
+					foreach ( $releases['branches'] as $branch => $branch_release ) :
 						?>
-						<h3><?php printf( __( '%s Branch', 'wporg' ), $branch );?></h3>
+						<h3>
+							<?php
+							printf(
+								/* translators: Version number. */
+								esc_html__( '%s Branch', 'wporg' ),
+								esc_html( $branch )
+							);
+							?>
+						</h3>
 						<table class="releases">
 							<?php
 							foreach ( $branch_release as $release ) :
@@ -43,24 +53,24 @@ get_header( 'page' ); ?>
 						</table>
 						<?php
 					endforeach;
-				endif; // any branches
+				endif; // Any branches.
 
 				if ( ! empty( $releases['betas'] ) ) :
 					?>
-					<h3 id="betas"><?php _e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
+					<h3 id="betas"><?php esc_html_e( 'Beta &amp; RC releases', 'wporg' ); ?></h3>
 					<table id="beta" class="releases">
 						<?php
-						foreach ( $releases['betas'] as $release ):
+						foreach ( $releases['betas'] as $release ) :
 							release_row( $release );
 						endforeach;
 						?>
 					</table>
 
 					<?php
-				endif; // any betas
-			else: // no releases
-				echo '<p>' . __( 'There are no releases, yet.', 'wporg' ) . '</p>';
-			endif; // if releases
+				endif; // Any betas.
+			else : // No releases.
+				echo '<p>' . esc_html__( 'There are no releases, yet.', 'wporg' ) . '</p>';
+			endif; // if releases.
 			?>
 		</div><!-- .entry-content -->
 
@@ -76,5 +86,6 @@ get_header( 'page' ); ?>
 		);
 		?>
 	</article><!-- #post-## -->
+
 <?php
 get_footer();

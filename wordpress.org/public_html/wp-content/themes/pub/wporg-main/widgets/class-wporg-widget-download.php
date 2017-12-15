@@ -23,8 +23,8 @@ class WPORG_Widget_Download extends \WP_Widget {
 	 */
 	public function __construct() {
 		parent::__construct( 'wporg_download', __( 'Download', 'wporg' ), array(
-			'classname' => 'widget_download',
-			'description' => __( 'WordPress download button.', 'wporg' ),
+			'classname'                   => 'widget_download',
+			'description'                 => __( 'WordPress download button.', 'wporg' ),
 			'customize_selective_refresh' => true,
 		) );
 	}
@@ -50,18 +50,40 @@ class WPORG_Widget_Download extends \WP_Widget {
 			return;
 		}
 
+		// phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+
 		echo $args['before_widget'];
 		?>
 		<div>
 			<a class="button button-primary button-large" href="<?php echo esc_url( $latest_release['zip_url'] ); ?>" role="button">
-				<?php echo apply_filters( 'no_orphans', sprintf( __( 'Download WordPress %s', 'wporg' ), $latest_release['version'] ) ); ?>
+				<?php
+				echo apply_filters( 'no_orphans', sprintf(
+					/* translators: WordPress version. */
+					__( 'Download WordPress %s', 'wporg' ),
+					$latest_release['version']
+				) );
+				?>
 			</a>
-			<div><?php printf( __( '.zip &mdash; %s MB', 'wporg' ), esc_html( $latest_release['zip_size_mb'] ) ); ?></div>
+			<div>
+				<?php
+				printf(
+					/* translators: Size of .zip file. */
+					__( '.zip &mdash; %s MB', 'wporg' ),
+					esc_html( $latest_release['zip_size_mb'] )
+				);
+				?>
+			</div>
 		</div>
 
 		<div>
 			<a href="<?php echo esc_url( $latest_release['targz_url'] ); ?>">
-				<?php printf( __( 'Download .tar.gz &mdash; %s MB', 'wporg' ), esc_html( $latest_release['tar_size_mb'] ) ); ?>
+				<?php
+				printf(
+					/* translators: Size of .tar.gz file. */
+					__( 'Download .tar.gz &mdash; %s MB', 'wporg' ),
+					esc_html( $latest_release['tar_size_mb'] )
+				);
+				?>
 			</a>
 		</div>
 		<?php

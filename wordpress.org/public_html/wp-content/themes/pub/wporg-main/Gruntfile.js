@@ -1,3 +1,9 @@
+/**
+ * Gruntfile.js
+ *
+ * @package WordPressdotorg\MainTheme
+ */
+
 /* global module:false, require:function, process:object */
 
 require( 'es6-promise' ).polyfill();
@@ -22,7 +28,7 @@ module.exports = function( grunt ) {
 						],
 						cascade: false
 					} ),
-					require( 'pixrem' )
+					require( 'pixrem' ),
 				]
 			},
 			dist: {
@@ -30,10 +36,7 @@ module.exports = function( grunt ) {
 			}
 		},
 		jshint: {
-			files: [
-				'Gruntfile.js',
-				'js/**/*.js'
-			],
+			files: [ 'Gruntfile.js', 'js/**/*.js' ],
 			options: grunt.file.readJSON( '.jshintrc' )
 		},
 		sass: {
@@ -55,10 +58,7 @@ module.exports = function( grunt ) {
 					var files = {};
 
 					['settings', 'tools', 'generic', 'base', 'objects', 'components', 'trumps'].forEach( function( component ) {
-						var paths = [
-							'../wporg/css/' + component + '/**/*.scss',
-							'!../wporg/css/' + component + '/_' + component + '.scss'
-						];
+						var paths = ['../wporg/css/' + component + '/**/*.scss', '!../wporg/css/' + component + '/_' + component + '.scss'];
 
 						if ( isChild ) {
 							paths.push( 'css/' + component + '/**/*.scss' );
@@ -75,7 +75,7 @@ module.exports = function( grunt ) {
 		},
 		rtlcss: {
 			options: {
-				// rtlcss options
+				// rtlcss options.
 				opts: {
 					clean: false,
 					processUrls: { atrule: true, decl: false },
@@ -90,7 +90,7 @@ module.exports = function( grunt ) {
 								scope: 'url',
 								ignoreCase: false
 							}
-						}
+						} // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
 					]
 				},
 				saveUnmodified: false,
@@ -106,24 +106,24 @@ module.exports = function( grunt ) {
 							{
 								expr: /content/im,
 								action: function( prop, value ) {
-									if ( value === '"\\f141"' ) { // dashicons-arrow-left
+									if ( value === '"\\f141"' ) { // dashicons-arrow-left.
 										value = '"\\f139"';
-									} else if ( value === '"\\f340"' ) { // dashicons-arrow-left-alt
+									} else if ( value === '"\\f340"' ) { // dashicons-arrow-left-alt.
 										value = '"\\f344"';
-									} else if ( value === '"\\f341"' ) { // dashicons-arrow-left-alt2
+									} else if ( value === '"\\f341"' ) { // dashicons-arrow-left-alt2.
 										value = '"\\f345"';
-									} else if ( value === '"\\f139"' ) { // dashicons-arrow-right
+									} else if ( value === '"\\f139"' ) { // dashicons-arrow-right.
 										value = '"\\f141"';
-									} else if ( value === '"\\f344"' ) { // dashicons-arrow-right-alt
+									} else if ( value === '"\\f344"' ) { // dashicons-arrow-right-alt.
 										value = '"\\f340"';
-									} else if ( value === '"\\f345"' ) { // dashicons-arrow-right-alt2
+									} else if ( value === '"\\f345"' ) { // dashicons-arrow-right-alt2.
 										value = '"\\f341"';
 									}
 									return { prop: prop, value: value };
 								}
-							}
+							} // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
 						]
-					}
+					} // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
 				]
 			},
 			dynamic: {
@@ -150,14 +150,14 @@ module.exports = function( grunt ) {
 		grunt.config.merge( { postcss: { options : { processors: [ require( 'cssnano' ) ] } } } );
 	}
 
-	grunt.loadNpmTasks('grunt-sass');
-	grunt.loadNpmTasks('grunt-rtlcss');
-	grunt.loadNpmTasks('grunt-postcss');
-	grunt.loadNpmTasks('grunt-sass-globbing');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks( 'grunt-sass' );
+	grunt.loadNpmTasks( 'grunt-rtlcss' );
+	grunt.loadNpmTasks( 'grunt-postcss' );
+	grunt.loadNpmTasks( 'grunt-sass-globbing' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 
-	grunt.registerTask('css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic']);
-	grunt.registerTask('default', ['jshint', 'css']);
-	grunt.registerTask('build', ['css']);
+	grunt.registerTask( 'css', ['sass_globbing', 'sass', 'postcss', 'rtlcss:dynamic'] );
+	grunt.registerTask( 'default', ['jshint', 'css'] );
+	grunt.registerTask( 'build', ['css'] );
 };

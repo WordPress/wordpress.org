@@ -34,10 +34,8 @@ function widgets() {
 	register_widget( 'WP_Widget_Links' );
 
 	add_filter( 'widget_links_args', function( $args ) {
-		$args['categorize']      = 0;
-		$args['category_before'] = '';
-		$args['category_after']  = '';
-		$args['title_li']        = __( 'Resources', 'wporg' );
+		$args['categorize'] = 0;
+		$args['title_li']   = __( 'Resources', 'wporg' );
 
 		return $args;
 	} );

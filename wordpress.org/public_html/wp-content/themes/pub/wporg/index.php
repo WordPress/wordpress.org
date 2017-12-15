@@ -14,7 +14,8 @@
 
 namespace WordPressdotorg\Theme;
 
-get_header(); ?>
+get_header();
+?>
 
 	<main id="main" class="site-main col-9" role="main">
 
@@ -37,6 +38,6 @@ get_header(); ?>
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_sidebar();
 get_footer();

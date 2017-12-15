@@ -31,7 +31,7 @@ function setup() {
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
-	// Don't include Adjacent Posts functionality
+	// Don't include Adjacent Posts functionality.
 	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 
 	// This theme uses wp_nav_menu() in one location.
@@ -80,9 +80,10 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", ['dashicons', 'open-sans'], '20171207' );
+	wp_enqueue_style( 'wporg-style', get_stylesheet_directory_uri() . "/css/style{$suffix}.css", [ 'dashicons', 'open-sans' ], '20171207' );
 
-	//wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
+	// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar
+	// wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 
 	if ( ! is_front_page() && is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
@@ -122,7 +123,7 @@ function style_src( $src, $handle ) {
 	}
 
 	// Remove version argument.
-	if ( in_array( $handle, ['open-sans'], true ) ) {
+	if ( in_array( $handle, [ 'open-sans' ], true ) ) {
 		$src = remove_query_arg( 'ver', $src );
 	}
 
@@ -136,8 +137,8 @@ add_filter( 'style_loader_src', __NAMESPACE__ . '\style_src', 10, 2 );
  * @param \WP_Customize_Manager $wp_customize Theme Customizer object.
  */
 function customize_register( $wp_customize ) {
-	$wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';
-	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
+	$wp_customize->get_setting( 'blogname' )->transport        = 'postMessage';
+	$wp_customize->get_setting( 'blogdescription' )->transport = 'postMessage';
 }
 add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 
@@ -147,7 +148,7 @@ add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 function customize_preview_js() {
 	wp_enqueue_script( 'wporg_plugins_customizer', get_template_directory_uri() . '/js/customizer.js', array( 'customize-preview' ), '20151215', true );
 }
-add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' );
+add_action( 'customize_preview_init', __NAMESPACE__ . '\customize_preview_js' );
 
 
 /**
@@ -159,9 +160,12 @@ add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' )
 function hreflang_link_attributes() {
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-	if ( false === ( $sites = wp_cache_get( 'local-sites', 'locale-associations' ) ) ) {
+	$sites = wp_cache_get( 'local-sites', 'locale-associations' );
+
+	if ( false === $sites ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$sites = $wpdb->get_results( 'SELECT locale, subdomain FROM locales', OBJECT_K );
 		if ( ! $sites ) {
 			return;
@@ -187,7 +191,7 @@ function hreflang_link_attributes() {
 		$sites['en_US'] = (object) array(
 			'locale'    => 'en_US',
 			'hreflang'  => 'en',
-			'subdomain' => ''
+			'subdomain' => '',
 		);
 
 		uasort( $sites, function( $a, $b ) {
@@ -201,7 +205,7 @@ function hreflang_link_attributes() {
 		$url = sprintf(
 			'https://%swordpress.org%s',
 			$site->subdomain ? "{$site->subdomain}." : '',
-			$_SERVER[ 'REQUEST_URI' ]
+			$_SERVER['REQUEST_URI'] // phpcs:ignore
 		);
 
 		printf(

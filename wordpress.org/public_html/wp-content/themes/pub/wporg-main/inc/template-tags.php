@@ -5,12 +5,14 @@
  * @package WordPressdotorg\MainTheme
  */
 
+// phpcs:disable WordPress.VIP.RestrictedFunctions.get_page_by_path_get_page_by_path
+
 namespace WordPressdotorg\MainTheme;
 
 /**
  * Displays a table row with release information.
  *
- * @param array $release
+ * @param array $release Release to be processed.
  */
 function release_row( $release ) {
 	?>
@@ -28,7 +30,7 @@ function release_row( $release ) {
 }
 
 /**
- * Rerieve the localised downloads link.
+ * Retrieve the localised downloads link.
  *
  * Uses the 'txt-download' page if exists, falling back to the 'releases' page for older sites, and finally, the english downloads page.
  */

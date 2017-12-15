@@ -8,7 +8,8 @@
 namespace WordPressdotorg\MainTheme;
 
 the_post();
-get_header( 'page' ); ?>
+get_header();
+?>
 
 	<main id="main" class="site-main col-12" role="main">
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -21,12 +22,10 @@ get_header( 'page' ); ?>
 					<?php
 					the_widget( __NAMESPACE__ . '\WPORG_Widget_Download' );
 
-					printf( '<div class="widget %s">', 'widget_links' );
 					the_widget( 'WP_Widget_Links', array(), array(
 						'before_title' => '<h4>',
-						'after_title'  => '</h4>' . '<p>' . __( 'For help with installing or using WordPress, consult our documentation in your language.', 'wporg' ) . '</p>',
+						'after_title'  => '</h4><p>' . __( 'For help with installing or using WordPress, consult our documentation in your language.', 'wporg' ) . '</p>',
 					) );
-					echo '</div>';
 					?>
 				</aside>
 
@@ -56,5 +55,5 @@ get_header( 'page' ); ?>
 		</article><!-- #post-## -->
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

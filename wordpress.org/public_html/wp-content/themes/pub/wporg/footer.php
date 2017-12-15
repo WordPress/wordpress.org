@@ -10,10 +10,10 @@
  */
 
 namespace WordPressdotorg\Theme;
+
 ?>
 
 	</div><!-- #content -->
 
-	<?php
-
+<?php
 require WPORGPATH . 'footer.php';

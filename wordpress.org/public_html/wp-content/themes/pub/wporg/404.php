@@ -19,11 +19,19 @@ get_header(); ?>
 			</header><!-- .page-header -->
 
 			<div class="page-content">
-				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg' ), get_home_url() ); ?></p>
+				<p>
+					<?php
+					printf(
+						/* translators: Home URL. */
+						__( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg' ), // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+						esc_url( get_home_url() )
+					);
+					?>
+				</p>
 
 				<div class="logo-swing">
-					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ); ?>" class="wp-logo" />
-					<img id="hinge" src="<?php echo get_theme_file_uri( '/images/wp-logo-blue.png' ); ?>" class="wp-logo hinge" />
+					<img src="<?php echo esc_url( get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ) ); ?>" class="wp-logo" />
+					<img id="hinge" src="<?php echo esc_url( get_theme_file_uri( '/images/wp-logo-blue.png' ) ); ?>" class="wp-logo hinge" />
 				</div>
 			</div><!-- .page-content -->
 		</section><!-- .error-404 -->

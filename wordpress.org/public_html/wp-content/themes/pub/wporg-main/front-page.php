@@ -12,6 +12,8 @@
  * @package WordPressdotorg\Theme
  */
 
+// phpcs:disable WordPress.XSS.EscapeOutput.UnsafePrintingFunction, WordPress.XSS.EscapeOutput.OutputNotEscaped
+
 namespace WordPressdotorg\MainTheme;
 
 global $rosetta;
@@ -44,7 +46,15 @@ get_header( 'wporg' );
 
 			<section class="showcase">
 				<h2><?php _e( 'Trusted by the Best', 'wporg' ); ?></h2>
-				<p class="subheading"><?php printf( __( '%s of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ), WP_MARKET_SHARE . '%' ); ?></p>
+				<p class="subheading">
+					<?php
+					printf(
+						/* translators: WordPress market share: 29%; */
+						__( '%s of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
+						WP_MARKET_SHARE . '%'
+					);
+					?>
+				</p>
 				<div class="collage">
 
 				</div>
@@ -88,9 +98,12 @@ get_header( 'wporg' );
 						<?php _e( 'Easy and<br />Accessible', 'wporg' ); ?>
 					</li>
 				</ul>
-				<p><?php
+				<p>
+					<?php
 					/* translators: %s: Link to Plugin Directory. */
-					printf( __( 'Extend WordPress with over 45,000 plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%s">much more</a>.', 'wporg' ), esc_url( home_url( '/plugins/' ) ) ); ?></p>
+					printf( __( 'Extend WordPress with over 45,000 plugins to help your website meet your needs. Add an online store, galleries, mailing lists, forums, analytics, and <a href="%s">much more</a>.', 'wporg' ), esc_url( home_url( '/plugins/' ) ) );
+					?>
+				</p>
 			</section>
 
 			<section class="community-2">
@@ -122,8 +135,10 @@ get_header( 'wporg' );
 					'ignore_sticky_posts' => true,
 					'no_found_rows'       => true,
 				] );
+
 				while ( $featured->have_posts() ) :
 					$featured->the_post();
+
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
 					echo '<div class="entry-summary">' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</div>';
 				endwhile;
@@ -135,9 +150,36 @@ get_header( 'wporg' );
 				<h4><?php _e( 'It&rsquo;s Easy&nbsp;As&hellip;', 'wporg' ); ?></h4>
 
 				<ol class="steps">
-					<li class="one"><span></span><?php printf( __( '<a href="%s">Find a Web Host</a> and get great hosting while supporting WordPress at the same&nbsp;time.', 'wporg' ), esc_url( 'https://wordpress.org/hosting/' ) ); ?></li>
-					<li class="two"><span></span><?php printf( __( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.', 'wporg' ),  esc_url( get_downloads_url() ) ); ?></li>
-					<li class="three"><span></span><?php printf( __( '<a href="%s">Read the Documentation</a> and become a WordPress expert yourself, impress your friends.', 'wporg' ), esc_url( 'https://developer.wordpress.org' ) ); ?></li>
+					<li class="one">
+						<span></span>
+						<?php
+						printf(
+							/* translators: URL to Hosting page. */
+							__( '<a href="%s">Find a Web Host</a> and get great hosting while supporting WordPress at the same&nbsp;time.', 'wporg' ),
+							esc_url( 'https://wordpress.org/hosting/' )
+						);
+						?>
+					</li>
+					<li class="two">
+						<span></span>
+						<?php
+						printf(
+							/* translators: URL to Downloads page. */
+							__( '<a href="%s">Download &amp; Install WordPress</a> with our famous 5-minute&nbsp;installation. Feel like a rock star.', 'wporg' ),
+							esc_url( get_downloads_url() )
+						);
+						?>
+					</li>
+					<li class="three">
+						<span></span>
+						<?php
+						printf(
+							/* translators: URL to Developer Hub. */
+							__( '<a href="%s">Read the Documentation</a> and become a WordPress expert yourself, impress your friends.', 'wporg' ),
+							esc_url( 'https://developer.wordpress.org' )
+						);
+						?>
+					</li>
 				</ol>
 			</div>
 
@@ -203,5 +245,5 @@ get_header( 'wporg' );
 
 	</main><!-- #main -->
 
-	<?php
+<?php
 get_footer();

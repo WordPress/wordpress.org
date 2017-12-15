@@ -10,6 +10,7 @@
  */
 
 namespace WordPressdotorg\Theme;
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>

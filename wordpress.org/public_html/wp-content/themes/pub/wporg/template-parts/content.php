@@ -6,16 +6,17 @@
  */
 
 namespace WordPressdotorg\Theme;
+
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 	<header class="entry-header">
 		<?php if ( is_sticky() && is_home() && ! is_paged() ) : ?>
-			<span class="sticky-post"><?php _e( 'Featured', 'wporg' ); ?></span>
+			<span class="sticky-post"><?php esc_html_e( 'Featured', 'wporg' ); ?></span>
 		<?php
 		endif;
 
-		if ( is_single() ) :
+		if ( is_single() ) : // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
 			the_title( '<h2 class="entry-title">', '</h2>' );
 		else :
 			the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' );
@@ -27,8 +28,8 @@ namespace WordPressdotorg\Theme;
 
 	<div class="entry-content">
 		<?php
-			/* translators: %s: Name of current post */
 			the_content( sprintf(
+				/* translators: %s: Name of current post */
 				__( 'Continue reading<span class="screen-reader-text"> "%s"</span> &rarr;', 'wporg' ),
 				get_the_title()
 			) );

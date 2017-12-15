@@ -9,12 +9,12 @@
 
 namespace WordPressdotorg\Theme;
 
-get_header( 'page' ); ?>
+get_header();
+?>
 
 	<main id="main" class="site-main col-8" role="main">
 
-	<?php
-	if ( have_posts() ) : ?>
+	<?php if ( have_posts() ) : ?>
 
 		<header class="page-header">
 			<?php
@@ -36,7 +36,8 @@ get_header( 'page' ); ?>
 	else :
 		get_template_part( 'template-parts/content', 'none' );
 
-	endif; ?>
+	endif;
+	?>
 
 	</main><!-- #main -->
 
