@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -23,7 +24,7 @@ function setup() {
 	// Add default posts and comments RSS feed links to head.
 	add_theme_support( 'automatic-feed-links' );
 
-	// Don't include Adjacent Posts functionality
+	// Don't include Adjacent Posts functionality.
 	remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 
 	/*
@@ -59,7 +60,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\content_width', 0 );
  */
 function scripts() {
 	$suffix = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", ['open-sans'], '20171206a' );
+	wp_enqueue_style( 'wporg-plugins-style', get_template_directory_uri() . "/css/style{$suffix}.css", [ 'open-sans', 'dashicons' ], '20171206a' );
 
 	wp_enqueue_script( 'wporg-plugins-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 	wp_enqueue_script( 'wporg-plugins-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -97,7 +98,7 @@ function scripts() {
 		) );
 	}
 
-	// React is currently only used on detail pages
+	// React is currently only used on detail pages.
 	if ( is_single() ) {
 		wp_enqueue_script( 'wporg-plugins-client', get_template_directory_uri() . '/js/theme.js', array(), '20170501', true );
 		wp_localize_script( 'wporg-plugins-client', 'pluginDirectory', array(
@@ -110,7 +111,7 @@ function scripts() {
 			'' => array(
 				'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
 				'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
-				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ) ,
+				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
 			),
 		) );
 	}
@@ -147,13 +148,13 @@ function loader_src( $src, $handle ) {
 	}
 
 	// Remove version argument.
-	if ( in_array( $handle, ['open-sans'], true ) ) {
+	if ( in_array( $handle, [ 'open-sans' ], true ) ) {
 		$src = remove_query_arg( 'ver', $src );
 	}
 
 	return $src;
 }
-add_filter( 'style_loader_src',  __NAMESPACE__ . '\loader_src', 10, 2 );
+add_filter( 'style_loader_src', __NAMESPACE__ . '\loader_src', 10, 2 );
 add_filter( 'script_loader_src', __NAMESPACE__ . '\loader_src', 10, 2 );
 
 /**
@@ -170,8 +171,8 @@ add_action( 'template_redirect', __NAMESPACE__ . '\content' );
  * @param \WP_Customize_Manager $wp_customize Theme Customizer object.
  */
 function customize_register( $wp_customize ) {
-	$wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';
-	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
+	$wp_customize->get_setting( 'blogname' )->transport        = 'postMessage';
+	$wp_customize->get_setting( 'blogdescription' )->transport = 'postMessage';
 }
 add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 
@@ -181,9 +182,14 @@ add_action( 'customize_register', __NAMESPACE__ . '\customize_register' );
 function customize_preview_js() {
 	wp_enqueue_script( 'wporg_plugins_customizer', get_template_directory_uri() . '/js/customizer.js', array( 'customize-preview' ), '20151215', true );
 }
-add_action( 'customize_preview_init',  __NAMESPACE__ . '\customize_preview_js' );
+add_action( 'customize_preview_init', __NAMESPACE__ . '\customize_preview_js' );
 
-
+/**
+ * Filters the list of CSS body classes for the current post or page.
+ *
+ * @param array $classes An array of body classes.
+ * @return array
+ */
 function custom_body_class( $classes ) {
 	$classes[] = 'no-js';
 	return $classes;
@@ -205,7 +211,7 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
  */
 function document_title( $title ) {
 	if ( is_front_page() ) {
-		$title['title'] = __( 'WordPress Plugins', 'wporg-plugins' );
+		$title['title']   = __( 'WordPress Plugins', 'wporg-plugins' );
 		$title['tagline'] = __( 'Plugins extend and expand the functionality of WordPress.', 'wporg-plugins' );
 	} else {
 		$title['site'] = __( 'WordPress Plugins', 'wporg-plugins' );
@@ -259,9 +265,10 @@ function social_meta_data() {
 		return;
 	}
 
-	$banner  = Template::get_plugin_banner();
+	$icon   = Template::get_plugin_icon();
+	$banner = Template::get_plugin_banner();
+
 	$banner['banner_2x'] = $banner['banner_2x'] ? $banner['banner'] : false;
-	$icon = Template::get_plugin_icon();
 
 	printf( '<meta property="og:title" content="%s" />' . "\n", the_title_attribute( array( 'echo' => false ) ) );
 	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( strip_tags( get_the_excerpt() ) ) );
@@ -294,10 +301,10 @@ function strong_archive_title( $term ) {
 }
 add_action( 'wp_head', function() {
 	add_filter( 'post_type_archive_title', __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_term_title',       __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_cat_title',        __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'single_tag_title',        __NAMESPACE__ . '\strong_archive_title' );
-	add_filter( 'get_the_date',            __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_term_title', __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_cat_title', __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'single_tag_title', __NAMESPACE__ . '\strong_archive_title' );
+	add_filter( 'get_the_date', __NAMESPACE__ . '\strong_archive_title' );
 } );
 
 /**

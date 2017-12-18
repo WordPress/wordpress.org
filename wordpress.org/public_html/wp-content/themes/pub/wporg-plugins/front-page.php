@@ -10,10 +10,10 @@
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
 $sections = array(
-	'featured' => __( 'Featured Plugins', 'wporg-plugins' ),
-	'popular'  => __( 'Popular Plugins', 'wporg-plugins' ),
-	'beta'     => __( 'Beta Plugins', 'wporg-plugins' ),
-	'favorites' => __( 'My Favorites', 'wporg-plugins' ), 
+	'featured'  => __( 'Featured Plugins', 'wporg-plugins' ),
+	'popular'   => __( 'Popular Plugins', 'wporg-plugins' ),
+	'beta'      => __( 'Beta Plugins', 'wporg-plugins' ),
+	'favorites' => __( 'My Favorites', 'wporg-plugins' ),
 );
 
 $widget_args = array(
@@ -26,7 +26,8 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 
-		<?php foreach ( $sections as $browse => $section_title ) :
+		<?php
+		foreach ( $sections as $browse => $section_title ) :
 			// Only logged in users can have favorites.
 			if ( 'favorites' === $browse && ! is_user_logged_in() ) {
 				continue;
@@ -55,10 +56,15 @@ get_header();
 			<section class="plugin-section">
 				<header class="section-header">
 					<h2 class="section-title"><?php echo esc_html( $section_title ); ?></h2>
-					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>"><?php
-						/* translators: %s: Section title as an accessibility text for screen readers. */
-						printf( _x( 'See all %s', 'plugins', 'wporg-plugins' ), "<span class=\"screen-reader-text\">{$section_title}</span>" );
-					?></a>
+					<a class="section-link" href="<?php echo esc_url( home_url( "browse/$browse/" ) ); ?>">
+						<?php
+						printf(
+							/* translators: %s: Section title as an accessibility text for screen readers. */
+							esc_html_x( 'See all %s', 'plugins', 'wporg-plugins' ),
+							'<span class="screen-reader-text">' . esc_html( $section_title ) . '</span>'
+						);
+						?>
+					</a>
 				</header>
 
 				<?php
@@ -78,19 +84,32 @@ get_header();
 		<?php
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'Add Your Plugin', 'wporg-plugins' ),
-			'text'  => sprintf( __( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Find out how to <a href="%s">host your plugin</a> on WordPress.org.', 'wporg-plugins' ), esc_url( home_url( 'developers' ) ) ),
+			'text'  => sprintf(
+				/* translators: URL to Developers page. */
+				__( 'The WordPress Plugin Directory is the largest directory of free and open source WordPress plugins. Find out how to <a href="%s">host your plugin</a> on WordPress.org.', 'wporg-plugins' ),
+				esc_url( home_url( 'developers' ) )
+			),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'Create a Plugin', 'wporg-plugins' ),
-			'text'  => sprintf( __( 'Building a plugin has never been easier. Read through the <a href="%s">Plugin Developer Handbook</a> to learn all about WordPress plugin development.', 'wporg-plugins' ), esc_url( 'https://developer.wordpress.org/plugins/' ) ),
+			'text'  => sprintf(
+				/* translators: URL to Developer Handbook. */
+				__( 'Building a plugin has never been easier. Read through the <a href="%s">Plugin Developer Handbook</a> to learn all about WordPress plugin development.', 'wporg-plugins' ),
+				esc_url( 'https://developer.wordpress.org/plugins/' )
+			),
 		), $widget_args );
 
 		the_widget( 'WP_Widget_Text', array(
 			'title' => __( 'Stay Up-to-Date', 'wporg-plugins' ),
-			'text'  => sprintf( __( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugin Review Team&#8217;s blog</a>.', 'wporg-plugins' ), esc_url( 'https://make.wordpress.org/plugins/' ) ),
+			'text'  => sprintf(
+				/* translators: URL to make/plugins site. */
+				__( 'Plugin development is constantly changing with each new WordPress release. Keep up with the latest changes by following the <a href="%s">Plugin Review Team&#8217;s blog</a>.', 'wporg-plugins' ),
+				esc_url( 'https://make.wordpress.org/plugins/' )
+			),
 		), $widget_args );
 		?>
 	</aside><!-- #secondary -->
-	<?php
+
+<?php
 get_footer();

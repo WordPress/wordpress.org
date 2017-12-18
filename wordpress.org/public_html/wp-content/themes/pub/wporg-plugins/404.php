@@ -19,11 +19,16 @@ get_header(); ?>
 			</header><!-- .page-header -->
 
 			<div class="page-content">
-				<p><?php printf( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-plugins' ), get_home_url() ); ?></p>
+				<p>
+					<?php
+					/* translators: URL to home page. */
+					printf( wp_kses_post( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg-plugins' ) ), esc_url( get_home_url() ) );
+					?>
+				</p>
 
 				<div class="logo-swing">
-					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ); ?>" class="wp-logo" />
-					<img src="<?php echo get_theme_file_uri( '/images/wp-logo-blue.png' ); ?>" class="wp-logo" />
+					<img src="<?php echo esc_url( get_theme_file_uri( '/images/wp-logo-blue-trans-blur.png' ) ); ?>" class="wp-logo" />
+					<img src="<?php echo esc_url( get_theme_file_uri( '/images/wp-logo-blue.png' ) ); ?>" class="wp-logo" />
 				</div>
 			</div><!-- .page-content -->
 		</section><!-- .error-404 -->

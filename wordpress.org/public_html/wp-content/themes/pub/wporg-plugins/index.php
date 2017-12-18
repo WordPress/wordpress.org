@@ -14,29 +14,29 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
-get_header(); ?>
+get_header();
+?>
 
 	<main id="main" class="site-main" role="main">
 
 	<?php
-		if ( have_posts() ) :
-			if ( is_home() && ! is_front_page() ) :
-	?>
+	if ( have_posts() ) :
+		if ( is_home() && ! is_front_page() ) :
+		?>
 		<header>
 			<h1 class="page-title screen-reader-text"><?php single_post_title(); ?></h1>
 		</header>
+		<?php
+		endif;
 
-	<?php
-			endif;
+		/* Start the Loop */
+		while ( have_posts() ) :
+			the_post();
 
-			/* Start the Loop */
-			while ( have_posts() ) :
-				the_post();
+			get_template_part( 'template-parts/plugin', 'index' );
+		endwhile;
 
-				get_template_part( 'template-parts/plugin', 'index' );
-			endwhile;
-
-			the_posts_pagination();
+		the_posts_pagination();
 
 		else :
 			get_template_part( 'template-parts/content', 'none' );

@@ -8,13 +8,14 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
 global $section, $section_slug, $section_content, $section_read_more, $post;
 
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
-$is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
+$is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -24,19 +25,22 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 		<?php the_active_plugin_notice(); ?>
 
 		<div class="entry-thumbnail">
-			<?php echo Template::get_plugin_icon( $post, 'html' ); ?>
+			<?php
+			// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			echo Template::get_plugin_icon( $post, 'html' );
+			?>
 		</div>
 
 		<div class="plugin-actions">
 			<?php the_plugin_favorite_button(); ?>
 
 			<?php if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) : ?>
-				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php _e( 'Download', 'wporg-plugins' ); ?></a>
+				<a class="plugin-download button download-button button-large" href="<?php echo esc_url( Template::download_link() ); ?>"><?php esc_html_e( 'Download', 'wporg-plugins' ); ?></a>
 			<?php endif; ?>
 		</div>
 
 		<?php $plugin_title = $is_closed ? $post->post_name : get_the_title(); ?>
-		<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo $plugin_title; ?></a></h1>
+		<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
 
 		<span class="byline"><?php the_author_byline(); ?></span>
 	</header><!-- .entry-header -->
@@ -47,17 +51,17 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 		<span id="installation"></span>
 		<span id="developers"></span>
 		<ul class="tabs clear">
-			<li id="tablink-description"><a href="#description"><?php _e( 'Details', 'wporg-plugins' ); ?></a></li>
-			<li id="tablink-reviews"><a href="#reviews"><?php _e( 'Reviews', 'wporg-plugins' ); ?></a></li>
+			<li id="tablink-description"><a href="#description"><?php esc_html_e( 'Details', 'wporg-plugins' ); ?></a></li>
+			<li id="tablink-reviews"><a href="#reviews"><?php esc_html_e( 'Reviews', 'wporg-plugins' ); ?></a></li>
 			<?php if ( isset( $content['installation'] ) && ! $is_closed ) : ?>
 				<li id="tablink-installation">
-					<a href="#installation"><?php _e( 'Installation', 'wporg-plugins' ); ?></a>
+					<a href="#installation"><?php esc_html_e( 'Installation', 'wporg-plugins' ); ?></a>
 				</li>
 			<?php endif; ?>
 			<li id="tablink-support">
-				<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php _e( 'Support', 'wporg-plugins' ); ?></a>
+				<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
 			</li>
-			<li id="tablink-developers"><a href="#developers"><?php _e( 'Development', 'wporg-plugins' ); ?></a></li>
+			<li id="tablink-developers"><a href="#developers"><?php esc_html_e( 'Development', 'wporg-plugins' ); ?></a></li>
 		</ul>
 	<?php endif; ?>
 
@@ -79,7 +83,7 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 					// Don't show the description for closed plugins.
 					$section_content = get_closed_plugin_notice();
 
-				} else if ( ! in_array( $section_slug, ['screenshots', 'installation', 'faq', 'changelog'], true ) || ! $is_closed ) {
+				} elseif ( ! in_array( $section_slug, [ 'screenshots', 'installation', 'faq', 'changelog' ], true ) || ! $is_closed ) {
 					$section_content = trim( apply_filters( 'the_content', $content[ $section_slug ], $section_slug ) );
 				}
 
@@ -96,11 +100,11 @@ $is_closed = in_array( get_post_status(), ['closed', 'disabled'], true );
 					$section_no_read_mores[] = 'faq';
 				}
 
-				$section_read_more = ! in_array( $section_slug, $section_no_read_mores );
+				$section_read_more = ! in_array( $section_slug, $section_no_read_mores, true );
 
 				get_template_part( 'template-parts/section' );
 			endforeach;
-		endif; // plugin_advanced
+		endif; // plugin_advanced.
 		?>
 	</div><!-- .entry-content -->
 

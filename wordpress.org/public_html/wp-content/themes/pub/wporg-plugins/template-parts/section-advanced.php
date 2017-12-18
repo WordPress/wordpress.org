@@ -8,6 +8,7 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+
 use WordPressdotorg\Plugin_Directory\Template;
 
 global $post;
@@ -16,18 +17,18 @@ global $post;
 <div id="admin" class="section">
 	<?php the_closed_plugin_notice(); ?>
 
-	<h2><?php _e( 'Plugin Stats', 'wporg-plugins' ); ?></h2>
+	<h2><?php esc_html_e( 'Plugin Stats', 'wporg-plugins' ); ?></h2>
 
-	<h4><?php _e( 'Active versions', 'wporg-plugins' ); ?></h4>
+	<h4><?php esc_html_e( 'Active versions', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-version-stats" class="chart version-stats"></div>
 
-	<h4><?php _e( 'Downloads Per Day', 'wporg-plugins' ); ?></h4>
+	<h4><?php esc_html_e( 'Downloads Per Day', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-download-stats" class="chart download-stats"></div>
 
-	<h4><?php _e( 'Active Install Growth', 'wporg-plugins' ); ?></h4>
+	<h4><?php esc_html_e( 'Active Install Growth', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-growth-stats" class="chart download-stats"></div>
 
-	<h5><?php _e( 'Downloads history', 'wporg-plugins' ); ?></h5>
+	<h5><?php esc_html_e( 'Downloads history', 'wporg-plugins' ); ?></h5>
 	<table id="plugin-download-history-stats" class="download-history-stats">
 		<tbody></tbody>
 	</table>
@@ -46,12 +47,12 @@ global $post;
 		// List Trunk, followed by the most recent non-stable release.
 		$tags = array_reverse( $tags );
 
-		echo '<h5>' . __( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
-		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . __( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
+		echo '<h5>' . esc_html__( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
+		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
 
 		echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
 		foreach ( $tags as $version ) {
-			$text = ( 'trunk' == $version ? __( 'Development Version', 'wporg-plugins' ) : $version );
+			$text = ( 'trunk' === $version ? esc_html__( 'Development Version', 'wporg-plugins' ) : $version );
 			printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
 		}
 		echo '</select> ';
@@ -59,7 +60,7 @@ global $post;
 		printf(
 			'<a href="%s" id="download-previous-link" class="button">%s</a>',
 			esc_url( Template::download_link( $post, reset( $tags ) ) ),
-			__( 'Download', 'wporg-plugins' )
+			esc_html__( 'Download', 'wporg-plugins' )
 		);
 	}
 	?>

@@ -40,6 +40,7 @@
     "jquery": "^3.1.0",
     "lodash": "^4.13.1",
     "pixrem": "^3.0.2",
+    "postcss": "^6.0.14",
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "react-redux": "^4.4.5",
@@ -49,6 +50,7 @@
     "redux": "^3.5.2",
     "redux-router": "^2.1.2",
     "redux-thunk": "^2.1.0",
+    "rtlcss": "^2.2.1",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
   },

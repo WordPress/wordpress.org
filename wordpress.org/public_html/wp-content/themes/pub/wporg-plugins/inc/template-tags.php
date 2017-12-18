@@ -8,39 +8,15 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
-// Returns an absolute url to the current url, no matter what that actually is.
-function wporg_plugins_self_link() {
-	$site_path = preg_replace( '!^' . preg_quote( parse_url( home_url(), PHP_URL_PATH ), '!' ) . '!', '', $_SERVER['REQUEST_URI'] );
-	return home_url( $site_path );
-}
-
-function wporg_plugins_template_last_updated() {
-	return '<span title="' . get_the_time('Y-m-d') . '">' . sprintf( _x( '%s ago', 'wporg-plugins' ), human_time_diff( get_the_time( 'U' ), current_time( 'timestamp' ) ) ) . '</span>';
-}
-
-function wporg_plugins_template_compatible_up_to() {
-	$tested = get_post_meta( get_the_id(), 'tested', true ) ;
-	if ( ! $tested ) {
-		$tested = _x( 'unknown', 'unknown version', 'wporg-plugins' );
-	}
-	return esc_html( $tested );
-}
-
-function wporg_plugins_template_requires() {
-	return esc_html( get_post_meta( get_the_id(), 'requires', true ) );
-}
-
-function wporg_plugins_the_version() {
-	return esc_html( get_post_meta( get_the_id(), 'version', true ) );
-}
-
-function wporg_plugins_download_link() {
-	return esc_url( Template::download_link( get_the_id() ) );
-}
-
+/**
+ * Returns a list of authors.
+ *
+ * @return string
+ */
 function wporg_plugins_template_authors() {
 	$contributors = get_post_meta( get_the_id(), 'contributors', true );
 
@@ -57,7 +33,7 @@ function wporg_plugins_template_authors() {
 	}
 
 	$author_links = array();
-	$and_more = false;
+	$and_more     = false;
 	foreach ( $authors as $user ) {
 		$author_links[] = sprintf( '<a href="%s">%s</a>', 'https://profiles.wordpress.org/' . $user->user_nicename . '/', $user->display_name );
 		if ( count( $author_links ) > 5 ) {
@@ -67,12 +43,11 @@ function wporg_plugins_template_authors() {
 	}
 
 	if ( $and_more ) {
-		return sprintf( '<cite> By: %s, and others.</cite>', implode(', ', $author_links ) );
+		return sprintf( '<cite> By: %s, and others.</cite>', implode( ', ', $author_links ) );
 	} else {
-		return sprintf( '<cite> By: %s</cite>', implode(', ', $author_links ) );
+		return sprintf( '<cite> By: %s</cite>', implode( ', ', $author_links ) );
 	}
 }
-
 
 /**
  * Displays a plugin banner.
@@ -80,7 +55,7 @@ function wporg_plugins_template_authors() {
  * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
  */
 function the_plugin_banner( $post = null ) {
-	echo Template::get_plugin_banner( $post, 'html' );
+	echo Template::get_plugin_banner( $post, 'html' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -94,32 +69,32 @@ function the_plugin_favorite_button( $post = null ) {
 	}
 
 	$is_favorited = Tools::favorited_plugin( get_post( $post ) );
-?>
-<div class="plugin-favorite">
-	<a href="<?php echo esc_url( Template::get_favorite_link() ); ?>" class="plugin-favorite-heart<?php echo $is_favorited ? ' favorited' : ''; ?>">
+	?>
+	<div class="plugin-favorite">
+		<a href="<?php echo esc_url( Template::get_favorite_link() ); ?>" class="plugin-favorite-heart<?php echo $is_favorited ? ' favorited' : ''; ?>">
 		<span class="screen-reader-text">
 			<?php
 			if ( $is_favorited ) {
 				/* translators: %s: plugin name */
-				printf( __( 'Unfavorite %s', 'wporg-plugins' ), get_the_title() );
+				printf( esc_html__( 'Unfavorite %s', 'wporg-plugins' ), get_the_title() );
 			} else {
 				/* translators: %s: plugin name */
-				printf( __( 'Favorite %s', 'wporg-plugins' ), get_the_title() );
+				printf( esc_html__( 'Favorite %s', 'wporg-plugins' ), get_the_title() );
 			}
 			?>
 		</span>
-	</a>
-	<script>
-		jQuery( '.plugin-favorite-heart' )
-			.on( 'click touchstart animationend', function() {
-				jQuery( this ).toggleClass( 'is-animating' );
-			} )
-			.on( 'click', function() {
-				jQuery( this ).toggleClass( 'favorited' );
-			} );
-	</script>
-</div>
-<?php
+		</a>
+		<script>
+			jQuery( '.plugin-favorite-heart' )
+				.on( 'click touchstart animationend', function () {
+					jQuery( this ).toggleClass( 'is-animating' );
+				} )
+				.on( 'click', function () {
+					jQuery( this ).toggleClass( 'favorited' );
+				} );
+		</script>
+	</div>
+	<?php
 }
 
 /**
@@ -132,10 +107,10 @@ function the_author_byline( $post = null ) {
 
 	$url    = get_post_meta( $post->ID, 'header_author_uri', true );
 	$author = strip_tags( get_post_meta( $post->ID, 'header_author', true ) ) ?: get_the_author();
-	$author = esc_html( Template::encode( $author ) );
 	$author = $url ? '<a class="url fn n" rel="nofollow" href="' . esc_url( $url ) . '">' . $author . '</a>' : $author;
 
-	printf( _x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard">' . $author . '</span>' );
+	/* translators: post author. */
+	printf( esc_html_x( 'By %s', 'post author', 'wporg-plugins' ), '<span class="author vcard">' . wp_kses_post( $author ) . '</span>' );
 }
 
 /**
@@ -144,8 +119,8 @@ function the_author_byline( $post = null ) {
  * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
  */
 function the_active_plugin_notice( $post = null ) {
-	if ( ! in_array( get_post_status( $post ), ['rejected', 'closed'], true ) ) {
-		echo get_plugin_status_notice( $post );
+	if ( ! in_array( get_post_status( $post ), [ 'rejected', 'closed' ], true ) ) {
+		echo wp_kses_post( get_plugin_status_notice( $post ) );
 	};
 }
 
@@ -155,7 +130,7 @@ function the_active_plugin_notice( $post = null ) {
  * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
  */
 function the_closed_plugin_notice( $post = null ) {
-	echo get_closed_plugin_notice( $post );
+	echo wp_kses_post( get_closed_plugin_notice( $post ) );
 }
 
 /**
@@ -168,13 +143,13 @@ function get_closed_plugin_notice( $post = null ) {
 	$post   = get_post( $post );
 	$notice = '';
 
-	if ( in_array( get_post_status( $post ), ['rejected', 'closed'], true ) ) {
+	if ( in_array( get_post_status( $post ), [ 'rejected', 'closed' ], true ) ) {
 		$notice = get_plugin_status_notice( $post );
 
-		if ( get_current_user_id() == $post->post_author ) {
+		if ( get_current_user_id() === (int) $post->post_author ) {
 			$info_notice = '<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div><!-- .plugin-notice -->';
 			$message     = sprintf(
-			/* translators: 1: plugins@wordpress.org */
+				/* translators: 1: plugins@wordpress.org */
 				__( 'If you did not request this change, please contact <a href="mailto:%1$s">%1$s</a> for a status. All developers with commit access are contacted when a plugin is closed, with the reasons why, so check your spam email too.', 'wporgplugins' ),
 				'plugins@wordpress.org'
 			);
@@ -243,6 +218,7 @@ function get_plugin_status_notice( $post = null ) {
 		case 'closed':
 			$closed_date = get_post_meta( get_the_ID(), 'plugin_closed_date', true );
 			if ( ! empty( $closed_date ) ) {
+				/* translators: Closing date. */
 				$message = sprintf( __( 'This plugin was closed on %s and is no longer available for download.', 'wporg-plugins' ), mysql2date( get_option( 'date_format' ), $closed_date ) );
 			} else {
 				$message = __( 'This plugin has been closed and is no longer available for download.', 'wporg-plugins' );

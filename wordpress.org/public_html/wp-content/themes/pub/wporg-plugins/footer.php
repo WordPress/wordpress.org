@@ -10,6 +10,7 @@
  */
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
+
 ?>
 
 	</div><!-- #content -->

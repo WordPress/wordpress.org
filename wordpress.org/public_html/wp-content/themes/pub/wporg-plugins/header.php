@@ -27,21 +27,21 @@ require WPORGPATH . 'header.php';
 		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
 				<?php if ( is_home() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></h1>
+					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Plugins', 'Site title', 'wporg-plugins' ); ?></a></h1>
 
 					<p class="site-description">
 						<?php
 						$plugin_count = wp_count_posts( 'plugin' )->publish;
 						printf(
 							/* Translators: Total number of plugins. */
-							_n( 'Extend your WordPress experience with %s plugin.', 'Extend your WordPress experience with %s plugins.', $plugin_count, 'wporg-plugins' ),
-							number_format_i18n( $plugin_count )
+							esc_html( _n( 'Extend your WordPress experience with %s plugin.', 'Extend your WordPress experience with %s plugins.', $plugin_count, 'wporg-plugins' ) ),
+							esc_html( number_format_i18n( $plugin_count ) )
 						);
 						?>
 					</p>
 					<?php get_search_form(); ?>
 				<?php else : ?>
-					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _ex( 'Plugins','Site title', 'wporg-plugins' ); ?></a></p>
+					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Plugins', 'Site title', 'wporg-plugins' ); ?></a></p>
 
 					<nav id="site-navigation" class="main-navigation" role="navigation">
 						<button class="menu-toggle dashicons dashicons-arrow-down-alt2" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e( 'Primary Menu', 'wporg-plugins' ); ?>"></button>
@@ -49,9 +49,9 @@ require WPORGPATH . 'header.php';
 							<ul>
 								<?php
 								foreach ( $menu_items as $path => $text ) :
-									$class = false !== strpos( $_SERVER['REQUEST_URI'], $path ) ? 'class="active" ' : '';
+									$class = false !== strpos( $_SERVER['REQUEST_URI'], $path ) ? 'active' : ''; // phpcs:ignore
 								?>
-								<li class="page_item"><a <?php echo $class; ?>href="<?php echo esc_url( home_url( $path ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
+								<li class="page_item"><a class="<?php echo esc_attr( $class ); ?>" href="<?php echo esc_url( home_url( $path ) ); ?>"><?php echo esc_html( $text ); ?></a></li>
 								<?php endforeach; ?>
 								<li><?php get_search_form(); ?></li>
 							</ul>
