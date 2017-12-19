@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -22,21 +23,21 @@ class Capabilities {
 	 */
 	public static function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
 		$plugin_edit_cap = false;
-		switch( $cap ) {
+		switch ( $cap ) {
 			case 'plugin_admin_edit':
 			case 'plugin_add_committer':
 			case 'plugin_remove_committer':
 			case 'plugin_add_support_rep':
 			case 'plugin_remove_support_rep':
 				$plugin_edit_cap = true;
-				// Fall through
 
-			// Although we no longer have a admin view, this capability is still used to determine if the current user is a committer/contributor.
+				// Fall through
+				// Although we no longer have a admin view, this capability is still used to determine if the current user is a committer/contributor.
 			case 'plugin_admin_view':
 				// Committers + Contributors.
 				// If no committers, post_author.
 				$required_caps = array();
-				$post = get_post( $context[0] );
+				$post          = get_post( $context[0] );
 
 				if ( ! $post ) {
 					$required_caps[] = 'do_not_allow';
@@ -97,7 +98,6 @@ class Capabilities {
 	 * @static
 	 */
 	public static function add_roles() {
-
 		$reviewer = array(
 			'read'                    => true,
 			'plugin_set_category'     => true,
@@ -120,9 +120,9 @@ class Capabilities {
 
 		// Remove the roles first, incase we've changed the permission set.
 		remove_role( 'plugin_reviewer' );
-		remove_role( 'plugin_admin'    );
-		add_role( 'plugin_reviewer',  'Plugin Reviewer', $reviewer );
-		add_role( 'plugin_admin',     'Plugin Admin',    $admin    );
+		remove_role( 'plugin_admin' );
+		add_role( 'plugin_reviewer', 'Plugin Reviewer', $reviewer );
+		add_role( 'plugin_admin', 'Plugin Admin', $admin );
 
 		$wp_admin_role = get_role( 'administrator' );
 		if ( $wp_admin_role ) {
@@ -134,4 +134,3 @@ class Capabilities {
 		update_option( 'default_role', 'subscriber' );
 	}
 }
-

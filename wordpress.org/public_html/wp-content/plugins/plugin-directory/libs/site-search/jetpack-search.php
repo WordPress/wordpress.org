@@ -49,7 +49,7 @@
  *
  */
 
-require_once( __DIR__ . '/class.jetpack-searchresult-posts-iterator.php' );
+require_once __DIR__ . '/class.jetpack-searchresult-posts-iterator.php';
 
 class Jetpack_Search {
 
@@ -66,35 +66,36 @@ class Jetpack_Search {
 
 	protected static $instance;
 
-	//Languages with custom analyzers, other languages are supported,
+	// Languages with custom analyzers, other languages are supported,
 	// but are analyzed with the default analyzer.
 	public static $analyzed_langs = array( 'ar', 'bg', 'ca', 'cs', 'da', 'de', 'el', 'en', 'es', 'eu', 'fa', 'fi', 'fr', 'he', 'hi', 'hu', 'hy', 'id', 'it', 'ja', 'ko', 'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr', 'zh' );
 
-	const CACHE_GROUP = 'jetpack-search';
-	const CACHE_EXPIRY = 300;
-	const ERROR_COUNT_KEY = 'error-count-';
+	const CACHE_GROUP        = 'jetpack-search';
+	const CACHE_EXPIRY       = 300;
+	const ERROR_COUNT_KEY    = 'error-count-';
 	const ERROR_COUNT_WINDOW = 60; // seconds
 
 	protected function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 
-	public function __clone() { wp_die( "Please don't __clone WPCOM_elasticsearch" ); }
+	public function __clone() {
+		wp_die( "Please don't __clone WPCOM_elasticsearch" ); }
 
-	public function __wakeup() { wp_die( "Please don't __wakeup WPCOM_elasticsearch" ); }
+	public function __wakeup() {
+		wp_die( "Please don't __wakeup WPCOM_elasticsearch" ); }
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
-			self::$instance = new Jetpack_Search;
+			self::$instance = new Jetpack_Search();
 			self::$instance->setup();
 		}
 		return self::$instance;
 	}
 
 	public function setup() {
-		//TODO: only enable if this site is public (otherwise we don't have content)
-		//TODO: check that the module is activated
-
+		// TODO: only enable if this site is public (otherwise we don't have content)
+		// TODO: check that the module is activated
 		$this->jetpack_blog_id = Jetpack::get_option( 'id' );
 
 		if ( ! is_admin() ) {
@@ -104,22 +105,20 @@ class Jetpack_Search {
 
 	public function set_lang( $lang = false ) {
 		if ( ! $lang ) {
-			//TODO: don't think this works for Jetpack
+			// TODO: don't think this works for Jetpack
 			$blog = get_blog_details( $blog_id );
 			$lang = get_lang_code_by_id( $blog->lang_id );
 		}
 		$this->blog_lang = $lang;
 	}
 
-	/////////////////////////////////////////////////////
+	//
 	// Lots of hooks
-
 	public function init_hooks() {
 		// Checks to see if we need to worry about found_posts
 		add_filter( 'post_limits_request', array( $this, 'filter__post_limits_request' ), 999, 2 );
 
-		# Note: Advanced Post Cache hooks in at 10 so it's important to hook in before that
-
+		// Note: Advanced Post Cache hooks in at 10 so it's important to hook in before that
 		// Force $q['cache_results'] = false; this prevents the un-inflated WP_Post objects from being stored in cache
 		add_action( 'pre_get_posts', array( $this, 'action__pre_get_posts' ), 5 );
 
@@ -141,8 +140,9 @@ class Jetpack_Search {
 		add_filter( 'jetpack_search_es_wp_query_args', array( $this, 'filter__add_date_filter_to_query' ), 10, 2 );
 
 		// Debug
-		if ( file_exists( __DIR__ . '/jetpack-search-debug.php' ) )
-			include_once( __DIR__ . '/jetpack-search-debug.php' );
+		if ( file_exists( __DIR__ . '/jetpack-search-debug.php' ) ) {
+			include_once __DIR__ . '/jetpack-search-debug.php';
+		}
 	}
 
 	/**
@@ -151,8 +151,8 @@ class Jetpack_Search {
 	 * Handles inflating the post, switching to the appropriate blog context, and setting up post data
 	 */
 	public function register_loop_hooks() {
-		add_action( 'loop_start', 	array( $this, 'action__loop_start' ) );
-		add_action( 'loop_end', 	array( $this, 'action__loop_end' ) );
+		add_action( 'loop_start', array( $this, 'action__loop_start' ) );
+		add_action( 'loop_end', array( $this, 'action__loop_end' ) );
 	}
 
 	/**
@@ -161,31 +161,30 @@ class Jetpack_Search {
 	 * Needs to be called when the search Loop is complete, so later queries are not affected
 	 */
 	public function unregister_loop_hooks() {
-		remove_action( 'the_post', 		array( $this, 'action__the_post' ) );
-		remove_action( 'loop_end', 		array( $this, 'action__loop_end' ) );
+		remove_action( 'the_post', array( $this, 'action__the_post' ) );
+		remove_action( 'loop_end', array( $this, 'action__loop_end' ) );
 	}
 
 
-	/////////////////////////////////////////////////////////
+	//
 	// Raw Search Query
-
-	/* 
+	/*
 	 * Return a count of the number of search API errors within the last ERROR_COUNT_WINDOW seconds
 	 */
 	protected function get_error_volume() {
 		// Use a dual-tick window like nonces
-		$tick = ceil( time() / (self::ERROR_COUNT_WINDOW/2) );
+		$tick = ceil( time() / ( self::ERROR_COUNT_WINDOW / 2 ) );
 
-		return intval( wp_cache_get( self::ERROR_COUNT_KEY . $tick, self::CACHE_GROUP ) ) 
-			 + intval( wp_cache_get( self::ERROR_COUNT_KEY . ($tick -1), self::CACHE_GROUP ) );
+		return intval( wp_cache_get( self::ERROR_COUNT_KEY . $tick, self::CACHE_GROUP ) )
+			 + intval( wp_cache_get( self::ERROR_COUNT_KEY . ( $tick - 1 ), self::CACHE_GROUP ) );
 	}
 
-	/* 
+	/*
 	 *	Increment the recent error volume by $count.
 	 */
 	protected function increment_error_volume( $count = 1 ) {
 		// wp_cache_incr() bails if the key does not exist
-		$tick = ceil( time() / (self::ERROR_COUNT_WINDOW/2) );
+		$tick = ceil( time() / ( self::ERROR_COUNT_WINDOW / 2 ) );
 		wp_cache_add( self::ERROR_COUNT_KEY . $tick, 0, self::CACHE_GROUP, self::ERROR_COUNT_WINDOW );
 		return wp_cache_incr( self::ERROR_COUNT_KEY . $tick, $count, self::CACHE_GROUP );
 	}
@@ -203,7 +202,6 @@ class Jetpack_Search {
 		// For 10-15 errors, an 80-90% chance
 		// For 20 errors, a 50% chance
 		// For 40+ errors, a 0% chance
-
 		$threshold = ceil( 10 / ( 1 + pow( $error_volume / 20, 4 ) ) );
 		return mt_rand( 1, 10 ) <= $threshold;
 	}
@@ -212,7 +210,7 @@ class Jetpack_Search {
 	 * Trigger a search error message and increment the recent error volume.
 	 */
 	protected function search_error( $reason ) {
-		trigger_error( 'Plugin directory search: '.$reason, E_USER_WARNING );
+		trigger_error( 'Plugin directory search: ' . $reason, E_USER_WARNING );
 		return $this->increment_error_volume();
 	}
 
@@ -223,11 +221,11 @@ class Jetpack_Search {
 	 * @return object : the response from the public api (could be a WP_Error)
 	 */
 	public function search( $es_args ) {
-		$service_url = 'https://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
+		$service_url  = 'https://public-api.wordpress.com/rest/v1/sites/' . $this->jetpack_blog_id . '/search';
 		$json_es_args = json_encode( $es_args );
-		$cache_key = md5( $json_es_args );
-		$lock_key = 'lock-'.$cache_key;
-		
+		$cache_key    = md5( $json_es_args );
+		$lock_key     = 'lock-' . $cache_key;
+
 		$response = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		// Use a temporary lock to prevent cache stampedes. This ensures only one process (per search term per memcache instance) will run the remote post.
@@ -237,12 +235,12 @@ class Jetpack_Search {
 			// If the error volume is high, there's a proportionally lower chance that we'll actually attempt to hit the API.
 			if ( $this->error_volume_is_low() ) {
 				$request = wp_remote_post( $service_url, array(
-					'headers' => array(
+					'headers'    => array(
 						'Content-Type' => 'application/json',
 					),
-					'timeout' => 10,
+					'timeout'    => 10,
 					'user-agent' => 'WordPress.org/jetpack_search',
-					'body' => $json_es_args,
+					'body'       => $json_es_args,
 				) );
 			} else {
 				trigger_error( 'Plugin directory search: skipping search due to high error volume', E_USER_WARNING );
@@ -257,31 +255,35 @@ class Jetpack_Search {
 				// Lock further requests for the same search for 3-7 seconds. We probably don't need anything more complex like exponential backoff here because this is per search.
 				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
-				if ( is_wp_error( $request ) )
-					$this->search_error( 'http error '.$request->get_error_message(), E_USER_WARNING );
-				else
-					$this->search_error( 'http status '.wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
+				if ( is_wp_error( $request ) ) {
+					$this->search_error( 'http error ' . $request->get_error_message(), E_USER_WARNING );
+				} else {
+					$this->search_error( 'http status ' . wp_remote_retrieve_response_code( $request ), E_USER_WARNING );
+				}
 
 				// If we have a stale cached response, return that. Otherwise, return the error object.
-				if ( $response )
+				if ( $response ) {
 					return $response; // Stale cached response.
+				}
 				return $request; // Fresh error object.
 			}
 
 			$fresh_response = json_decode( wp_remote_retrieve_body( $request ), true );
 
-			if ( !$fresh_response || isset( $fresh_response['error'] ) ) {
+			if ( ! $fresh_response || isset( $fresh_response['error'] ) ) {
 				// As above, lock further requests for the same search for a few seconds
 				wp_cache_set( $lock_key, 1, self::CACHE_GROUP, mt_rand( 3, 7 ) );
 
-				if ( isset( $fresh_response['error'] ) )
-					$this->search_error( 'remote error '.$fresh_response['error'], E_USER_WARNING );
-				else
+				if ( isset( $fresh_response['error'] ) ) {
+					$this->search_error( 'remote error ' . $fresh_response['error'], E_USER_WARNING );
+				} else {
 					$this->search_error( 'invalid json response', E_USER_WARNING );
+				}
 
 				// Return a stale response if we have one
-				if ( $response )
+				if ( $response ) {
 					return $response;
+				}
 				return $fresh_response; // Fresh error object as a last resort
 
 			} else {
@@ -293,22 +295,22 @@ class Jetpack_Search {
 			}
 		} else {
 			// Stampede protection has kicked in, AND we have no stale cached value to display. That's bad - possibly indicates cache exhaustion
-			if ( false === $response )
+			if ( false === $response ) {
 				trigger_error( 'Plugin directory search: no cached results available during stampede.', E_USER_WARNING );
+			}
 		}
 
 		return $response;
 	}
 
-	//TODO: add secured search for posts/comments
-
-	/////////////////////////////////////////////////////////
+	// TODO: add secured search for posts/comments
+	//
 	// Insert the ES results into the Loop when searching
 	//
-
 	public function filter__post_limits_request( $limits, $query ) {
-		if ( ! $query->is_search() )
+		if ( ! $query->is_search() ) {
 			return $limits;
+		}
 
 		if ( empty( $limits ) || $query->get( 'no_found_rows' ) ) {
 			$this->do_found_posts = false;
@@ -320,8 +322,9 @@ class Jetpack_Search {
 	}
 
 	public function filter__the_posts( $posts, $query ) {
-		if ( ! $query->is_main_query() || ! $query->is_search() )
+		if ( ! $query->is_main_query() || ! $query->is_search() ) {
 			return $posts;
+		}
 
 		if ( ! is_array( $this->search_result ) || ! isset( $this->search_result['results'] ) ) {
 			return $posts;
@@ -339,14 +342,15 @@ class Jetpack_Search {
 			// Create an empty WP_Post object that will be inflated later
 			$post = new stdClass();
 
-			$post->ID 		= $result['fields']['post_id'];
-			$post->blog_id 	= $result['fields']['blog_id'];
+			$post->ID      = $result['fields']['post_id'];
+			$post->blog_id = $result['fields']['blog_id'];
 
 			// Run through get_post() to add all expected properties (even if they're empty)
 			$post = get_post( $post );
 
-			if ( $post )
+			if ( $post ) {
 				$posts[] = $post;
+			}
 		}
 
 		// Listen for the start/end of The Loop, to add some action handlers for transparently loading the post
@@ -358,22 +362,24 @@ class Jetpack_Search {
 	public function filter__posts_request( $sql, $query ) {
 		global $wpdb;
 
-		if ( ! $query->is_main_query() || ! $query->is_search() )
+		if ( ! $query->is_main_query() || ! $query->is_search() ) {
 			return $sql;
+		}
 
-		$page = ( $query->get( 'paged' ) ) ? absint( $query->get( 'paged' ) ) : 1;
+		$page           = ( $query->get( 'paged' ) ) ? absint( $query->get( 'paged' ) ) : 1;
 		$posts_per_page = $query->get( 'posts_per_page' );
 
 		// ES API does not allow more than 15 results at a time
-		if ( $posts_per_page > 200 )
+		if ( $posts_per_page > 200 ) {
 			$posts_per_page = 200;
+		}
 
 		// ES API does not allow fetching past the 10,000th post
 		$page = min( $page, floor( 9999 / $posts_per_page ) );
 
-		$date_cutoff = strftime( '%Y-%m-%d', strtotime( '-8 years' ) );
-		$date_today = strftime( '%Y-%m-%d' );
-		$version_cutoff = ( defined('WP_CORE_STABLE_BRANCH') ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5) : '4.0' );
+		$date_cutoff    = strftime( '%Y-%m-%d', strtotime( '-8 years' ) );
+		$date_today     = strftime( '%Y-%m-%d' );
+		$version_cutoff = ( defined( 'WP_CORE_STABLE_BRANCH' ) ? sprintf( '%0.1f', WP_CORE_STABLE_BRANCH - 0.5 ) : '4.0' );
 
 		// Start building the WP-style search query args
 		// They'll be translated to ES format args later
@@ -384,9 +390,9 @@ class Jetpack_Search {
 			'orderby'        => $query->get( 'orderby' ),
 			'order'          => $query->get( 'order' ),
 			// plugin directory specific:
-			#'date_range'	 =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
-			#'tested_range'	 =>  array( 'field' => 'tested', 'gte' => $version_cutoff ),
-			'filters'		 => array(
+			// 'date_range'    =>  array( 'field' => 'modified', 'gte' => $date_cutoff ),
+			// 'tested_range'  =>  array( 'field' => 'tested', 'gte' => $version_cutoff ),
+			'filters'        => array(
 				array( 'term' => array( 'disabled' => array( 'value' => false ) ) ),
 			),
 		);
@@ -399,7 +405,7 @@ class Jetpack_Search {
 		}
 
 		$es_wp_query_args['locale'] = get_locale();
-		
+
 		// You can use this filter to modify the search query parameters, such as controlling the post_type.
 		// These arguments are in the format for convert_wp_es_to_es_args(), i.e. WP-style.
 		$es_wp_query_args = apply_filters( 'jetpack_search_es_wp_query_args', $es_wp_query_args, $query );
@@ -407,7 +413,7 @@ class Jetpack_Search {
 		// Convert the WP-style args into ES args
 		$es_query_args = $this->convert_wp_es_to_es_args( $es_wp_query_args );
 
-		//Only trust ES to give us IDs, not the content since it is a mirror
+		// Only trust ES to give us IDs, not the content since it is a mirror
 		$es_query_args['fields'] = array(
 			'slug',
 			'support_threads_resolved',
@@ -421,11 +427,11 @@ class Jetpack_Search {
 			'rating',
 			'plugin_modified',
 			'post_id',
-			'blog_id'
+			'blog_id',
 		);
 
 		// This filter is harder to use if you're unfamiliar with ES but it allows complete control over the query
-		$es_query_args = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
+		$es_query_args      = apply_filters( 'jetpack_search_es_query_args', $es_query_args, $query );
 		$this->search_query = $es_query_args;
 
 		// Do the actual search query!
@@ -446,26 +452,30 @@ class Jetpack_Search {
 
 
 	public function filter__found_posts_query( $sql, $query ) {
-		if ( ! $query->is_main_query() || ! $query->is_search() )
+		if ( ! $query->is_main_query() || ! $query->is_search() ) {
 			return $sql;
+		}
 
 		return '';
 	}
 
 	public function filter__found_posts( $found_posts, $query ) {
-		if ( ! $query->is_main_query() || ! $query->is_search() )
+		if ( ! $query->is_main_query() || ! $query->is_search() ) {
 			return $found_posts;
+		}
 
 		return $this->found_posts;
 	}
 
 	public function action__pre_get_posts( $query ) {
 		// Treat an API request for the recommended tab as a search, even though there is no search string in the query
-		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API && isset( $query->query['browse'] ) && $query->query['browse'] === 'recommended' )
+		if ( defined( 'WPORG_IS_API' ) && WPORG_IS_API && isset( $query->query['browse'] ) && $query->query['browse'] === 'recommended' ) {
 			$query->is_search = true;
+		}
 
-		if ( ! $query->is_main_query() || ! $query->is_search() )
+		if ( ! $query->is_main_query() || ! $query->is_search() ) {
 			return;
+		}
 
 		$query->set( 'cache_results', false );
 	}
@@ -489,8 +499,9 @@ class Jetpack_Search {
 		}
 
 		// Restore the original blog, if we're not on it
-		if ( get_current_blog_id() !== $this->original_blog_id )
+		if ( get_current_blog_id() !== $this->original_blog_id ) {
 			switch_to_blog( $this->original_blog_id );
+		}
 	}
 
 	public function action__the_post( &$post ) {
@@ -498,37 +509,43 @@ class Jetpack_Search {
 
 		$post = $this->get_post_by_index( $wp_query->current_post );
 
-		if ( ! $post )
+		if ( ! $post ) {
 			return;
+		}
 
 		// Do some additional setup that normally happens in setup_postdata(), but gets skipped
 		// in this plugin because the posts hadn't yet been inflated.
-		$authordata 	= get_userdata( $post->post_author );
+		$authordata = get_userdata( $post->post_author );
 
-		$currentday 	= mysql2date('d.m.y', $post->post_date, false);
-		$currentmonth 	= mysql2date('m', $post->post_date, false);
+		$currentday   = mysql2date( 'd.m.y', $post->post_date, false );
+		$currentmonth = mysql2date( 'm', $post->post_date, false );
 
-		$numpages = 1;
+		$numpages  = 1;
 		$multipage = 0;
-		$page = get_query_var('page');
-		if ( ! $page )
+		$page      = get_query_var( 'page' );
+		if ( ! $page ) {
 			$page = 1;
-		if ( is_single() || is_page() || is_feed() )
+		}
+		if ( is_single() || is_page() || is_feed() ) {
 			$more = 1;
+		}
 		$content = $post->post_content;
 		if ( false !== strpos( $content, '<!--nextpage-->' ) ) {
-			if ( $page > 1 )
+			if ( $page > 1 ) {
 				$more = 1;
+			}
 			$content = str_replace( "\n<!--nextpage-->\n", '<!--nextpage-->', $content );
 			$content = str_replace( "\n<!--nextpage-->", '<!--nextpage-->', $content );
 			$content = str_replace( "<!--nextpage-->\n", '<!--nextpage-->', $content );
 			// Ignore nextpage at the beginning of the content.
-			if ( 0 === strpos( $content, '<!--nextpage-->' ) )
+			if ( 0 === strpos( $content, '<!--nextpage-->' ) ) {
 				$content = substr( $content, 15 );
-			$pages = explode('<!--nextpage-->', $content);
-			$numpages = count($pages);
-			if ( $numpages > 1 )
+			}
+			$pages    = explode( '<!--nextpage-->', $content );
+			$numpages = count( $pages );
+			if ( $numpages > 1 ) {
 				$multipage = 1;
+			}
 		} else {
 			$pages = array( $post->post_content );
 		}
@@ -542,8 +559,9 @@ class Jetpack_Search {
 	}
 
 	public function get_search_result( $raw = false ) {
-		if ( $raw )
+		if ( $raw ) {
 			return $this->search_result;
+		}
 
 		return ( ! empty( $this->search_result ) && ! is_wp_error( $this->search_result ) && is_array( $this->search_result ) && ! empty( $this->search_result['results'] ) ) ? $this->search_result['results'] : false;
 	}
@@ -552,10 +570,9 @@ class Jetpack_Search {
 		return $this->search_query;
 	}
 
-	/////////////////////////////////////////////////
+	//
 	// Standard Filters Applied to the search query
 	//
-
 	public function filter__add_date_filter_to_query( $es_wp_query_args, $query ) {
 		if ( $query->get( 'year' ) ) {
 			if ( $query->get( 'monthnum' ) ) {
@@ -579,18 +596,20 @@ class Jetpack_Search {
 				$date_end   = $query->get( 'year' ) . '-12-31 23:59:59';
 			}
 
-			$es_wp_query_args['date_range'] = array( 'field' => 'date', 'gte' => $date_start, 'lte' => $date_end );
+			$es_wp_query_args['date_range'] = array(
+				'field' => 'date',
+				'gte'   => $date_start,
+				'lte'   => $date_end,
+			);
 		}
 
 		return $es_wp_query_args;
 	}
 
-	/////////////////////////////////////////////////
+	//
 	// Helpers for manipulating queries
 	//
-
 	// Someday: Should we just use ES_WP_Query???
-
 	// Converts WP-style args to ES args
 	function convert_wp_es_to_es_args( $args ) {
 		$defaults = array(
@@ -607,8 +626,8 @@ class Jetpack_Search {
 			'author_name'    => array(), // string or an array
 
 			'date_range'     => null,    // array( 'field' => 'date', 'gt' => 'YYYY-MM-dd', 'lte' => 'YYYY-MM-dd' ); date formats: 'YYYY-MM-dd' or 'YYYY-MM-dd HH:MM:SS'
-			'tested_range'	 => null,
-			'filters'		 => array(),
+			'tested_range'   => null,
+			'filters'        => array(),
 
 			'orderby'        => null,    // Defaults to 'relevance' if query is set, otherwise 'date'. Pass an array for multiple orders.
 			'order'          => 'DESC',
@@ -636,8 +655,7 @@ class Jetpack_Search {
 			'size'    => absint( $args['posts_per_page'] ),
 		);
 
-		//TODO: limit size to 15
-
+		// TODO: limit size to 15
 		// ES "from" arg (offset)
 		if ( $args['offset'] ) {
 			$es_query_args['from'] = absint( $args['offset'] );
@@ -645,14 +663,15 @@ class Jetpack_Search {
 			$es_query_args['from'] = max( 0, ( absint( $args['paged'] ) - 1 ) * $es_query_args['size'] );
 		}
 
-		if ( !is_array( $args['author_name'] ) ) {
+		if ( ! is_array( $args['author_name'] ) ) {
 			$args['author_name'] = array( $args['author_name'] );
 		}
 
 		// ES stores usernames, not IDs, so transform
 		if ( ! empty( $args['author'] ) ) {
-			if ( !is_array( $args['author'] ) )
+			if ( ! is_array( $args['author'] ) ) {
 				$args['author'] = array( $args['author'] );
+			}
 			foreach ( $args['author'] as $author ) {
 				$user = get_user_by( 'id', $author );
 
@@ -662,7 +681,7 @@ class Jetpack_Search {
 			}
 		}
 
-		//////////////////////////////////////////////////
+		//
 		// Build the filters from the query elements.
 		// Filters rock because they are cached from one query to the next
 		// but they are cached as individual filters, rather than all combined together.
@@ -670,8 +689,9 @@ class Jetpack_Search {
 		$filters = array();
 
 		if ( $args['post_type'] ) {
-			if ( !is_array( $args['post_type'] ) )
+			if ( ! is_array( $args['post_type'] ) ) {
 				$args['post_type'] = array( $args['post_type'] );
+			}
 			$filters[] = array( 'terms' => array( 'post_type' => $args['post_type'] ) );
 		}
 
@@ -679,13 +699,13 @@ class Jetpack_Search {
 			$filters[] = array( 'terms' => array( 'author_login' => $args['author_name'] ) );
 		}
 
-		if ( !empty( $args['date_range'] ) && isset( $args['date_range']['field'] ) ) {
+		if ( ! empty( $args['date_range'] ) && isset( $args['date_range']['field'] ) ) {
 			$field = $args['date_range']['field'];
 			unset( $args['date_range']['field'] );
 			$filters[] = array( 'range' => array( $field => $args['date_range'] ) );
 		}
 
-		if ( !empty( $args['tested_range'] ) && isset( $args['tested_range']['field'] ) ) {
+		if ( ! empty( $args['tested_range'] ) && isset( $args['tested_range']['field'] ) ) {
 			$field = $args['tested_range']['field'];
 			unset( $args['tested_range']['field'] );
 			$filters[] = array( 'range' => array( $field => $args['tested_range'] ) );
@@ -720,7 +740,7 @@ class Jetpack_Search {
 		if ( $args['locale'] && $args['locale'] !== 'en' && substr( $args['locale'], 0, 3 ) !== 'en_' ) {
 			$locale = $args['locale'];
 
-			//Because most plugins don't have any translations we need to
+			// Because most plugins don't have any translations we need to
 			// correct for the very low scores that locale-specific fields.
 			// end up getting. This is caused by the average field length being
 			// very close to zero and thus the BM25 alg discounts fields that are
@@ -728,12 +748,12 @@ class Jetpack_Search {
 			//
 			// As of 2017-01-23 it looked like we were off by about 10,000x,
 			// so rather than 0.1 we use a much smaller multiplier of en content
-			$en_boost = 0.00001;
-			$matching_fields = array(
+			$en_boost             = 0.00001;
+			$matching_fields      = array(
 				'all_content_' . $locale,
-				'all_content_en^' . $en_boost
+				'all_content_en^' . $en_boost,
 			);
-			$boost_phrase_fields = array(
+			$boost_phrase_fields  = array(
 				'title_' . $locale,
 				'excerpt_' . $locale,
 				'description_' . $locale,
@@ -742,11 +762,11 @@ class Jetpack_Search {
 				'description_en^' . $en_boost,
 				'taxonomy.plugin_tags.name',
 			);
-			$boost_ngram_fields = array(
+			$boost_ngram_fields   = array(
 				'title_' . $locale . '.ngram',
-				'title_en.ngram^' . $en_boost
+				'title_en.ngram^' . $en_boost,
 			);
-			$boost_title_fields = array(
+			$boost_title_fields   = array(
 				'title_' . $locale,
 				'title_en^' . $en_boost,
 				'slug_text',
@@ -759,19 +779,19 @@ class Jetpack_Search {
 				'taxonomy.plugin_tags.name',
 			);
 		} else {
-			$matching_fields = array(
-				'all_content_en'
+			$matching_fields      = array(
+				'all_content_en',
 			);
-			$boost_phrase_fields = array(
+			$boost_phrase_fields  = array(
 				'title_en',
 				'excerpt_en',
 				'description_en',
 				'taxonomy.plugin_tags.name',
 			);
-			$boost_ngram_fields = array(
-				'title_en.ngram'
+			$boost_ngram_fields   = array(
+				'title_en.ngram',
 			);
-			$boost_title_fields = array(
+			$boost_title_fields   = array(
 				'title_en',
 				'slug_text',
 			);
@@ -781,21 +801,21 @@ class Jetpack_Search {
 				'taxonomy.plugin_tags.name',
 			);
 		}
-		
-		///////////////////////////////////////////////////////////
+
+		//
 		// Build the query - potentially extracting more filters
-		//  TODO: add auto phrase searching
-		//  TODO: add fuzzy searching to correct for spelling mistakes
-		//  TODO: boost title, tag, and category matches
+		// TODO: add auto phrase searching
+		// TODO: add fuzzy searching to correct for spelling mistakes
+		// TODO: boost title, tag, and category matches
 		if ( $args['query'] ) {
 			$analyzer = Jetpack_Search::get_analyzer_name( $this->blog_lang );
-			$query = array(
+			$query    = array(
 				'bool' => array(
-					'must' => array(
+					'must'   => array(
 						'multi_match' => array(
-							'query'  => $args['query'],
-							'fields' => $matching_fields,
-							'boost'  => 0.1,
+							'query'    => $args['query'],
+							'fields'   => $matching_fields,
+							'boost'    => 0.1,
 							'operator' => 'and',
 						),
 					),
@@ -804,32 +824,32 @@ class Jetpack_Search {
 							'multi_match' => array(
 								'query'  => $args['query'],
 								'fields' => $boost_phrase_fields,
-								'type'  => 'phrase',
-								'boost' => 2
+								'type'   => 'phrase',
+								'boost'  => 2,
 							),
 						),
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
 								'fields' => $boost_ngram_fields,
-								'type'  => 'phrase',
-								'boost' => 0.2
+								'type'   => 'phrase',
+								'boost'  => 0.2,
 							),
 						),
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
 								'fields' => $boost_title_fields,
-								'type'  => 'best_fields',
-								'boost' => 2
+								'type'   => 'best_fields',
+								'boost'  => 2,
 							),
 						),
 						array(
 							'multi_match' => array(
 								'query'  => $args['query'],
 								'fields' => $boost_content_fields,
-								'type'  => 'best_fields',
-								'boost' => 2
+								'type'   => 'best_fields',
+								'boost'  => 2,
 							),
 						),
 						array(
@@ -839,8 +859,8 @@ class Jetpack_Search {
 									'author',
 									'contributors',
 								),
-								'type'  => 'best_fields',
-								'boost' => 2
+								'type'   => 'best_fields',
+								'boost'  => 2,
 							),
 						),
 					),
@@ -853,7 +873,7 @@ class Jetpack_Search {
 				$args['orderby'] = array( 'relevance' );
 			}
 		} else {
-			$query = array( 'match_all' => array() );
+			$query                  = array( 'match_all' => array() );
 			$es_query_args['query'] = Jetpack_Search::score_query_by_recency( $query );
 			if ( ! $args['orderby'] ) {
 				$args['orderby'] = array( 'date' );
@@ -876,24 +896,24 @@ class Jetpack_Search {
 			// Translate orderby from WP field to ES field
 			// todo: add support for sorting by title, num likes, num comments, num views, etc
 			switch ( $orderby ) {
-				case 'relevance' :
-					//never order by score ascending
+				case 'relevance':
+					// never order by score ascending
 					$es_query_args['sort'][] = array( '_score' => array( 'order' => 'desc' ) );
 					break;
-				case 'date' :
+				case 'date':
 					$es_query_args['sort'][] = array( 'date' => array( 'order' => $args['order'] ) );
 					break;
-				case 'ID' :
+				case 'ID':
 					$es_query_args['sort'][] = array( 'id' => array( 'order' => $args['order'] ) );
 					break;
-				case 'author' :
+				case 'author':
 					$es_query_args['sort'][] = array( 'author.raw' => array( 'order' => $args['order'] ) );
 					break;
 			}
 		}
-		if ( empty( $es_query_args['sort'] ) )
+		if ( empty( $es_query_args['sort'] ) ) {
 			unset( $es_query_args['sort'] );
-
+		}
 
 		if ( ! empty( $filters ) ) {
 			$es_query_args['filter'] = array( 'and' => $filters );
@@ -910,23 +930,24 @@ class Jetpack_Search {
 			$analyzer = $lang_code . '_analyzer';
 		} else {
 			$split_lang = explode( '-', $lang_code );
-			if ( in_array( $split_lang[0], Jetpack_Search::$analyzed_langs ) )
+			if ( in_array( $split_lang[0], Jetpack_Search::$analyzed_langs ) ) {
 				$analyzer = $split_lang[0] . '_analyzer';
+			}
 		}
 		return $analyzer;
 	}
 
-	////////////////////////////////////////////
+	//
 	// ES Filter Manipulation
-
 	/*
 	 * And an existing filter object with a list of additional filters.
 	 *   Attempts to optimize the filters somewhat.
 	 */
 	public static function and_es_filters( $curr_filter, $filters ) {
-		if ( !is_array( $curr_filter ) || isset( $curr_filter['match_all'] ) ) {
-			if ( 1 == count( $filters ) )
+		if ( ! is_array( $curr_filter ) || isset( $curr_filter['match_all'] ) ) {
+			if ( 1 == count( $filters ) ) {
 				return $filters[0];
+			}
 
 			return array( 'and' => $filters );
 		}
@@ -934,88 +955,89 @@ class Jetpack_Search {
 		return array( 'and' => array_merge( array( $curr_filter ), $filters ) );
 	}
 
-	////////////////////////////////////////////
+	//
 	// ES Query Manipulation
-
 	public static function score_query_by_recency( $query ) {
-		//Newer content gets weighted slightly higher
-		$date_scale = '360d';
+		// Newer content gets weighted slightly higher
+		$date_scale  = '360d';
 		$date_offset = '180d';
-		$date_decay = 0.5;
+		$date_decay  = 0.5;
 		$date_origin = date( 'Y-m-d' );
 
 		return array(
 			'filtered' => array(
 				'query' => array(
 					'function_score' => array(
-						'query' => $query,
-						'functions' => array(
+						'query'      => $query,
+						'functions'  => array(
 							array(
-								'exp'=> array(
+								'exp' => array(
 									'plugin_modified' => array(
 										'origin' => $date_origin,
 										'offset' => $date_offset,
-										'scale' => $date_scale,
-										'decay' => $date_decay,
+										'scale'  => $date_scale,
+										'decay'  => $date_decay,
 									),
 								),
 							),
-							array( 
+							array(
 								'exp' => array(
 									'tested' => array(
 										'origin' => sprintf( '%0.1f', WP_CORE_STABLE_BRANCH ),
 										'offset' => 0.1,
-										'scale' => 0.4,
-										'decay' => 0.6,
+										'scale'  => 0.4,
+										'decay'  => 0.6,
 									),
 								),
 							),
 							array(
 								'field_value_factor' => array(
-									'field' => 'active_installs',
-									'factor' => 0.375,
+									'field'    => 'active_installs',
+									'factor'   => 0.375,
 									'modifier' => 'log2p',
-									'missing' => 1,
+									'missing'  => 1,
 								),
 							),
 							array(
-								//there aren't that many plugins with more than 1 million (6 total)
+								// there aren't that many plugins with more than 1 million (6 total)
 								// we don't need to differentiate them as much
 								'filter' => array(
-									'range' => array( 'active_installs' => array(
-										'lte' => 1000000
-									) )
+									'range' => array(
+										'active_installs' => array(
+											'lte' => 1000000,
+										),
+									),
 								),
-								'exp' => array(
+								'exp'    => array(
 									'active_installs' => array(
 										'origin' => 1000000,
 										'offset' => 0,
-										'scale' => 900000,
-										'decay' => 0.75,
+										'scale'  => 900000,
+										'decay'  => 0.75,
 									),
 								),
 							),
 							array(
 								'field_value_factor' => array(
-									'field' => 'support_threads_resolved',
-									'factor' => 0.25,
+									'field'    => 'support_threads_resolved',
+									'factor'   => 0.25,
 									'modifier' => 'log2p',
-									'missing' => 0.5,
+									'missing'  => 0.5,
 								),
 							),
 							array(
 								'field_value_factor' => array(
-									'field' => 'rating',
-									'factor' => 0.25,
+									'field'    => 'rating',
+									'factor'   => 0.25,
 									'modifier' => 'sqrt',
-									'missing' => 2.5,
+									'missing'  => 2.5,
 								),
 							),
 						),
 						'boost_mode' => 'multiply',
-					)
+					),
 				),
-			)
+			),
 		);
 	}
 

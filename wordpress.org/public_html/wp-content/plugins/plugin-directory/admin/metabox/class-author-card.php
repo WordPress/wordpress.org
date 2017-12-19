@@ -23,7 +23,7 @@ class Author_Card {
 
 		add_action( 'wporg_usercards_after_content', array(
 			__NAMESPACE__ . '\Author_Card',
-			'show_warning_flags'
+			'show_warning_flags',
 		), 10, 6 );
 
 		if ( is_numeric( $post_or_user_id ) ) {
@@ -38,7 +38,7 @@ class Author_Card {
 			return;
 		}
 
-		$author_commit  = Tools::get_users_write_access_plugins( $author );
+		$author_commit    = Tools::get_users_write_access_plugins( $author );
 		$author_plugins_q = array(
 			'author'         => $author->ID,
 			'post_type'      => 'plugin',
@@ -49,7 +49,7 @@ class Author_Card {
 			$author_plugins_q['post__not_in'] = array( $post->ID );
 		}
 		$author_plugins = get_posts( $author_plugins_q );
-		$all_plugins = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
+		$all_plugins    = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} WHERE post_name IN ('" . implode( "', '", array_merge( $author_commit, wp_list_pluck( $author_plugins, 'post_name' ) ) ) . "')" );
 		?>
 		<div class="profile">
 		<div class="profile-personal">
@@ -58,11 +58,13 @@ class Author_Card {
 				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>"><?php echo $author->user_login; ?></a></strong>
 				<?php
 					$author_links = array(
-						sprintf( '<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
+						sprintf(
+							'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
 							urlencode( esc_attr( $author->user_nicename ) ),
 							esc_attr__( 'Click to search Pluginrepo P2 for mentions of this author', 'wporg-plugins' )
 						),
-						sprintf( '<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
+						sprintf(
+							'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
 							urlencode( esc_attr( $author->user_nicename ) ),
 							esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this author', 'wporg-plugins' )
 						),
@@ -76,20 +78,26 @@ class Author_Card {
 				</span>
 				<div class="profile-email">
 					&lt;<?php echo $author->user_email; ?>&gt;
-					<span class="profile-sp-link"><?php
-						printf( '[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
+					<span class="profile-sp-link">
+					<?php
+						printf(
+							'[ <a href="https://supportpress.wordpress.org/plugins/?sender=%s&status=&todo=Search" title="%s">SP</a> ]',
 							esc_attr( $author->user_email ),
 							esc_attr__( 'Click to search Pluginrepo SupportPress for emails sent to/from this email address', 'wporg-plugins' )
 						);
-					?></span>
+					?>
+					</span>
 				</div>
-				<div class="profile-join"><?php
+				<div class="profile-join">
+				<?php
 					/* translators: 1: time ago, 2: registration date */
-					printf( __( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
+					printf(
+						__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
 						human_time_diff( strtotime( $author->user_registered ) ),
 						date( 'Y-M-d', strtotime( $author->user_registered ) )
 					);
-				?></div>
+				?>
+				</div>
 			</div>
 		</div>
 
@@ -102,7 +110,7 @@ class Author_Card {
 
 		<?php
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
-			$user = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
+			$user     = new \WP_User( $author, '', WPORG_SUPPORT_FORUMS_BLOGID );
 			$statuses = array();
 
 			if ( ! empty( $user->allcaps['bbp_blocked'] ) ) {
@@ -122,7 +130,8 @@ class Author_Card {
 			if ( $statuses ) {
 				$labels = array();
 				foreach ( $statuses as $status ) {
-					$labels[] = sprintf( '<strong><span title="%s">%s</span></strong>',
+					$labels[] = sprintf(
+						'<strong><span title="%s">%s</span></strong>',
 						esc_attr( $status['desc'] ),
 						$status['text']
 					);
@@ -149,7 +158,8 @@ class Author_Card {
 			sort( $user_ips, SORT_NUMERIC );
 
 			/* translators: %s: comma-separated list of plugin author's IP addresses */
-			printf( '<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
+			printf(
+				'<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
 				implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
 			);
 		endif;
@@ -169,9 +179,9 @@ class Author_Card {
 				echo '<ul>';
 				foreach ( $all_plugins as $plugin ) {
 					echo '<li>';
-					$note    = false;
-					$extra   = '';
-					$classes = $tooltips = array();
+					$note         = false;
+					$extra        = '';
+					$classes      = $tooltips = array();
 					$last_updated = get_post_meta( $plugin->ID, 'last_updated', true );
 
 					if ( in_array( $plugin->post_name, wp_list_pluck( $author_plugins, 'post_name' ) ) ) {
@@ -186,7 +196,8 @@ class Author_Card {
 					$plugin_slug = $plugin->post_name;
 					if ( in_array( $plugin->post_status, array( 'new', 'pending' ) ) ) {
 						/* translators: %s: time ago */
-						$extra .= sprintf( __( '(requested %s ago)', 'wporg-plugins' ),
+						$extra     .= sprintf(
+							__( '(requested %s ago)', 'wporg-plugins' ),
 							human_time_diff( strtotime( $last_updated ) )
 						);
 						$tooltips[] = __( 'Requested, remains unapproved.', 'wporg-plugins' );
@@ -199,7 +210,8 @@ class Author_Card {
 
 					} elseif ( 'closed' === $plugin->post_status ) {
 						/* translators: %s: close/disable reason */
-						$extra .= sprintf( __( '(closed: %s)', 'wporg-plugins' ),
+						$extra     .= sprintf(
+							__( '(closed: %s)', 'wporg-plugins' ),
 							Template::get_close_reason( $plugin )
 						);
 						$tooltips[] = __( 'Plugin is closed.', 'wporg-plugins' );
@@ -207,12 +219,13 @@ class Author_Card {
 
 					} elseif ( 'disabled' === $plugin->post_status ) {
 						/* translators: %s: close/disable reason */
-						$extra .= sprintf( __( '(disabled: %s)', 'wporg-plugins' ),
+						$extra     .= sprintf(
+							__( '(disabled: %s)', 'wporg-plugins' ),
 							Template::get_close_reason( $plugin )
 						);
 						$tooltips[] = __( 'Plugin is disabled (updates are active).', 'wporg-plugins' );
 						$classes[]  = 'profile-plugin-closed';
-						$note = true;
+						$note       = true;
 
 					} else {
 						// Plugin is some fashion of open.
@@ -225,12 +238,13 @@ class Author_Card {
 						} else {
 							$tooltips[] = __( 'Plugin is open.', 'wporg-plugins' );
 						}
-						$classes[]      = 'profile-plugin-open';
+						$classes[] = 'profile-plugin-open';
 					}
 
 					echo '<span>';
 
-					printf( '<a class="%1$s" title="%2$s" href="%3$s">%4$s</a>',
+					printf(
+						'<a class="%1$s" title="%2$s" href="%3$s">%4$s</a>',
 						esc_attr( implode( ' ', $classes ) ),
 						esc_attr( implode( ' ', $tooltips ) ),
 						esc_attr( get_permalink( $plugin ) ),
@@ -242,16 +256,19 @@ class Author_Card {
 					}
 
 					$plugin_links = array(
-						sprintf( '<a href="%s" title="%s">%s</a>',
+						sprintf(
+							'<a href="%s" title="%s">%s</a>',
 							esc_url( get_edit_post_link( $plugin->ID, '' ) ),
 							esc_attr__( 'Edit this plugin', 'wporg-plugins' ),
 							__( 'Edit', 'wporg-plugins' )
 						),
-						sprintf( '<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
+						sprintf(
+							'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
 							urlencode( esc_attr( $plugin_slug ) ),
 							esc_attr__( 'Click to search Pluginrepo P2 for mentions of this plugin', 'wporg-plugins' )
 						),
-						sprintf( '<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
+						sprintf(
+							'<a href="https://supportpress.wordpress.org/plugins/?q=%s&status=&todo=Search+%%C2%%BB" title="%s">SP</a>',
 							urlencode( esc_attr( $plugin_slug ) ),
 							esc_attr__( 'Click to search Pluginrepo SupportPress for mentions of this plugin', 'wporg-plugins' )
 						),
@@ -289,9 +306,13 @@ class Author_Card {
 	 * @return string
 	 */
 	protected static function link_ip( $ip ) {
-		return sprintf( '<a href="%1$s">%2$s</a>', esc_url( add_query_arg( array(
-			'post_type' => 'plugin',
-			's'         => $ip,
-		), admin_url( 'edit.php' ) ) ), $ip );
+		return sprintf(
+			'<a href="%1$s">%2$s</a>',
+			esc_url( add_query_arg( array(
+				'post_type' => 'plugin',
+				's'         => $ip,
+			), admin_url( 'edit.php' ) ) ),
+			$ip
+		);
 	}
 }

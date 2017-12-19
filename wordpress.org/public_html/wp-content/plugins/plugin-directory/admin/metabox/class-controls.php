@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -89,8 +90,8 @@ class Controls {
 			$statuses = Status_Transitions::get_allowed_transitions( $post->post_status );
 		}
 
-		$close_reasons  = Template::get_close_reasons();
-		$close_reason   = (string) get_post_meta( $post->ID, '_close_reason', true );
+		$close_reasons = Template::get_close_reasons();
+		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
 
 		$reason_label   = Template::get_close_reason();
 		$reason_unknown = ( _x( 'Unknown', 'unknown close reason', 'wporg-plugins' ) === $reason_label );
@@ -109,11 +110,13 @@ class Controls {
 
 			<?php endif; ?>
 
-			<?php if (
+			<?php
+			if (
 					( in_array( 'closed', $statuses, true ) || in_array( 'disabled', $statuses, true ) )
 				&&
 					( ! in_array( $post->post_status, array( 'closed', 'disabled' ) ) || $reason_unknown )
-				) : ?>
+				) :
+				?>
 
 				<p>
 					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
@@ -133,7 +136,8 @@ class Controls {
 				</button></p>
 
 			<?php endforeach; ?>
-		</div><!-- .misc-pub-section --><?php
+		</div><!-- .misc-pub-section -->
+		<?php
 	}
 
 	/**
@@ -147,8 +151,8 @@ class Controls {
 		<div class="misc-pub-section misc-pub-tested">
 			<label for="tested_with"><?php _e( 'Tested With:', 'wporg-plugins' ); ?></label>
 			<strong id="tested-with-display"><?php echo ( $tested_up_to ? sprintf( 'WordPress %s', $tested_up_to ) : $unknown_string ); ?></strong>
-
-		</div><!-- .misc-pub-section --><?php
+		</div><!-- .misc-pub-section -->
+		<?php
 	}
 
 }

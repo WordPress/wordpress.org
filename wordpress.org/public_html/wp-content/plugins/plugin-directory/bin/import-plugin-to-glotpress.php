@@ -14,7 +14,7 @@ $opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'tag:', 'type:', 'no-s
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
 	$opts['plugin'] = $argv[1];
-	$argv[1] = '--plugin ' . $argv[1];
+	$argv[1]        = '--plugin ' . $argv[1];
 }
 if ( empty( $opts['url'] ) ) {
 	$opts['url'] = 'https://wordpress.org/plugins/';
@@ -41,13 +41,13 @@ if ( ! in_array( $opts['type'], [ 'code', 'readme' ] ) ) {
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 
-include rtrim( $opts['abspath'], '/' ) . '/wp-load.php';
+require rtrim( $opts['abspath'], '/' ) . '/wp-load.php';
 
 if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 	fwrite( STDERR, "Error! This site doesn't have the Plugin Directory plugin enabled.\n" );
 	if ( defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 		fwrite( STDERR, "Run the following command instead:\n" );
-		fwrite( STDERR, "\tphp " . implode( ' ', $argv ) . " --url " . get_site_url( WPORG_PLUGIN_DIRECTORY_BLOGID, '/' ) . "\n" );
+		fwrite( STDERR, "\tphp " . implode( ' ', $argv ) . ' --url ' . get_site_url( WPORG_PLUGIN_DIRECTORY_BLOGID, '/' ) . "\n" );
 	}
 	die();
 }

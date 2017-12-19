@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -14,8 +15,8 @@ class Reviews {
 	 * @return string
 	 */
 	static function display() {
-		$reviews = Tools::get_plugin_reviews( get_post()->post_name );
-		$ratings = get_post_meta( get_the_ID(), 'ratings', true ) ?: array();
+		$reviews      = Tools::get_plugin_reviews( get_post()->post_name );
+		$ratings      = get_post_meta( get_the_ID(), 'ratings', true ) ?: array();
 		$review_count = array_sum( $ratings );
 
 		if ( empty( $reviews ) ) {
@@ -37,7 +38,7 @@ class Reviews {
 						<header>
 							<?php if ( ! empty( $review->ID ) ) : ?>
 								<h3 class="review-title"><a class="url" href="<?php echo esc_url( add_query_arg( array( 'p' => $review->ID ), 'https://wordpress.org/support/plugin/' ) ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
-							<?php else: ?>
+							<?php else : ?>
 								<h3 class="review-title"><?php echo get_the_title( $review ); ?></h3>
 							<?php endif; ?>
 							<?php echo Template::dashicons_stars( $review->post_rating ); ?>

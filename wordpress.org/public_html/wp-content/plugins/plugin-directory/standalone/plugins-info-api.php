@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 die();
 
 /**
@@ -11,11 +12,11 @@ die();
 define( 'WPORGPATH', dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/' );
 
 $_REQUEST = array(
-	'method' => 'plugin_information',
+	'method'  => 'plugin_information',
 	'request' => array(
-		'slug' => 'hello-dolly',
+		'slug'   => 'hello-dolly',
 		'fields' => 'active_installs',
-	)
+	),
 );
 
 $format  = 'json'; // json, jsonp, xml, or php

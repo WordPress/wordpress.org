@@ -29,7 +29,7 @@ class Code_Import extends I18n_Import {
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
 
-		$tmp_directory = Filesystem::temp_directory( $this->plugin . '-code-' . $tag );
+		$tmp_directory    = Filesystem::temp_directory( $this->plugin . '-code-' . $tag );
 		$export_directory = $tmp_directory . '/export';
 
 		$res = SVN::export( $svn_url, $export_directory, [ 'ignore-externals' ] );
@@ -47,7 +47,7 @@ class Code_Import extends I18n_Import {
 		}
 
 		$pot_file = "{$tmp_directory}/{$this->plugin}-code.pot";
-		$makepot  = new \MakePOT;
+		$makepot  = new \MakePOT();
 
 		if ( ! $makepot->wp_plugin( $export_directory, $pot_file, $this->plugin ) || ! file_exists( $pot_file ) ) {
 			throw new Exception( "POT file couldn't be created." );
@@ -80,7 +80,7 @@ class Code_Import extends I18n_Import {
 
 		// Whether plugin files should be checked for valid text domains.
 		if ( empty( $readme->requires ) || version_compare( $readme->requires, '4.6', '<' ) ) {
-			$error  = new WP_Error();
+			$error                = new WP_Error();
 			$esc_export_directory = escapeshellarg( $export_directory );
 
 			// Check for a plugin text domain declaration and loading, grep recursively, not necessarily in plugin.php.

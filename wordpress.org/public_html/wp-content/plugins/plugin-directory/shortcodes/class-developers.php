@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -14,9 +15,9 @@ class Developers {
 	 * @return string
 	 */
 	static function display() {
-		$post   = get_post();
-		$slug   = $post->post_name;
-		$title  = get_the_title( $post );
+		$post  = get_post();
+		$slug  = $post->post_name;
+		$title = get_the_title( $post );
 
 		$output = '<div class="plugin-contributors">';
 
@@ -43,7 +44,7 @@ class Developers {
 		if ( ! empty( $locales ) ) {
 			$output .= '<p>';
 
-			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
+			$wp_locales    = wp_list_pluck( $locales, 'wp_locale' );
 			$locales_count = get_sites( [
 				'network_id' => WPORG_GLOBAL_NETWORK_ID,
 				'public'     => 1,
@@ -75,7 +76,8 @@ class Developers {
 			}
 		}
 
-		$output .= '<p>' . sprintf( '<a href="%1$s">%2$s</a>',
+		$output .= '<p>' . sprintf(
+			'<a href="%1$s">%2$s</a>',
 			esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $slug ),
 			sprintf(
 				/* translators: %s: plugin name */
@@ -83,7 +85,6 @@ class Developers {
 				$title
 			)
 		) . '</p>';
-
 
 		$output .= '<h3>' . __( 'Interested in development?', 'wporg-plugins' ) . '</h3>';
 
@@ -114,6 +115,7 @@ class Developers {
 			) . '</p>';
 		}
 		$output .= '</div>';
+
 		return $output;
 	}
 }

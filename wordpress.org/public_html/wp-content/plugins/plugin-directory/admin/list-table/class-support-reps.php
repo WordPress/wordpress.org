@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
+
 use WordPressdotorg\Plugin_Directory\Tools;
 
 _get_list_table( 'WP_List_Table' );
@@ -44,14 +45,14 @@ class Support_Reps extends \WP_List_Table {
 	 * @global string $usersearch
 	 */
 	public function prepare_items() {
-		$plugin_slug         = get_post()->post_name;
+		$plugin_slug = get_post()->post_name;
 		if ( ! $plugin_slug ) {
 			return;
 		}
-		$existing_support_reps = Tools::get_plugin_support_reps( $plugin_slug );
-		$this->items           = array_map( function ( $user ) {
+
+		$this->items = array_map( function ( $user ) {
 			return new \WP_User( $user );
-		}, $existing_support_reps );
+		}, Tools::get_plugin_support_reps( $plugin_slug ) );
 	}
 
 	/**
@@ -147,7 +148,7 @@ class Support_Reps extends \WP_List_Table {
 		if ( ! ( $user_object instanceof \WP_User ) ) {
 			$user_object = get_userdata( (int) $user_object );
 		}
-		$user_object->filter = 'display';
+		$user_object->filter                = 'display';
 		list( $columns, $hidden, $primary ) = $this->get_column_info();
 
 		// Set up the hover actions for this support rep.
@@ -156,7 +157,7 @@ class Support_Reps extends \WP_List_Table {
 		// Check if the support rep for this row is removable.
 		$post_id = get_post()->ID;
 		if ( current_user_can( 'plugin_remove_support_rep', $post_id ) && $user_object->ID != get_current_user_id() ) {
-			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-support-rep-list:support-rep-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;support-rep=' . $user_object->ID, "remove-support-rep-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . "</a>";
+			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-support-rep-list:support-rep-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;support-rep=' . $user_object->ID, "remove-support-rep-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . '</a>';
 		}
 
 		/**
@@ -187,7 +188,8 @@ class Support_Reps extends \WP_List_Table {
 					break;
 
 				case 'username':
-					$row .= sprintf( '<strong><a href="%s">%s</a></strong><br />&lt;%s&gt;',
+					$row .= sprintf(
+						'<strong><a href="%s">%s</a></strong><br />&lt;%s&gt;',
 						esc_url( '//profiles.wordpress.org/' . $user_object->user_nicename ),
 						$user_object->user_login,
 						$user_object->user_email

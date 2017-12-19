@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 
@@ -14,7 +15,7 @@ class Locale_Banner extends Base {
 		register_rest_route( 'plugins/v1', '/locale-banner', array(
 			'methods'  => WP_REST_Server::EDITABLE,
 			'callback' => array( $this, 'locale_banner' ),
-			'args' => array(
+			'args'     => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
@@ -68,8 +69,8 @@ class Locale_Banner extends Base {
 		$current_locale = get_locale();
 
 		// Build a list of WordPress locales which we'll suggest to the user.
-		$suggest_locales = array_values( array_intersect( $locales_from_header, $translated_locales ) );
-		$current_locale_is_suggested = in_array( $current_locale, $suggest_locales );
+		$suggest_locales              = array_values( array_intersect( $locales_from_header, $translated_locales ) );
+		$current_locale_is_suggested  = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
 		require_once GLOTPRESS_LOCALES_PATH;
@@ -115,9 +116,9 @@ class Locale_Banner extends Base {
 					);
 				}
 
-			// Multiple locale suggestions.
+				// Multiple locale suggestions.
 			} elseif ( ! empty( $suggest_named_locales ) ) {
-				$primary_locale = key( $suggest_named_locales );
+				$primary_locale   = key( $suggest_named_locales );
 				$primary_language = current( $suggest_named_locales );
 				array_shift( $suggest_named_locales );
 
@@ -168,7 +169,7 @@ class Locale_Banner extends Base {
 					);
 				}
 
-			// Non-English locale in header, no translations.
+				// Non-English locale in header, no translations.
 			} elseif ( $locales_from_header ) {
 				$locale = reset( $locales_from_header );
 
@@ -179,7 +180,7 @@ class Locale_Banner extends Base {
 				);
 			}
 
-		// Localized directory.
+			// Localized directory.
 		} elseif ( ! $current_locale_is_suggested && ! $current_locale_is_translated && $is_plugin_request ) {
 			$suggest_string = sprintf(
 				$this->translate( 'This plugin is not translated into %1$s yet. <a href="%2$s">Help translate it!</a>', $current_locale ),
@@ -253,7 +254,8 @@ class Locale_Banner extends Base {
 	 */
 	protected function get_http_locales( $header ) {
 		$locale_part_re = '[a-z]{2,}';
-		$locale_re = "($locale_part_re(\-$locale_part_re)?)";
+		$locale_re      = "($locale_part_re(\-$locale_part_re)?)";
+
 		if ( preg_match_all( "/$locale_re/i", $header, $matches ) ) {
 			return $matches[0];
 		} else {
@@ -270,8 +272,8 @@ class Locale_Banner extends Base {
 	 * @return string|false Our locale matching $lang and $region, false otherwise.
 	 */
 	protected function map_locale( $lang, $region, $available_locales ) {
-		$uregion = strtoupper( $region );
-		$ulang   = strtoupper( $lang );
+		$uregion  = strtoupper( $region );
+		$ulang    = strtoupper( $lang );
 		$variants = array(
 			"$lang-$region",
 			"{$lang}_$region",
@@ -352,7 +354,6 @@ class Locale_Banner extends Base {
 }
 
 // Strings for the POT file.
-
 /* translators: %s: native language name. */
 __( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', 'wporg-plugins' );
 /* translators: 1: native language name, 2: other native language names, comma separated */

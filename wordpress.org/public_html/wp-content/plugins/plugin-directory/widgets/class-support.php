@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
-use WordPressdotorg\Plugin_Directory\Template; 
+
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * A Widget to display support information about a plugin.
@@ -34,15 +35,15 @@ class Support extends \WP_Widget {
 		$resolutions = (bool) $threads;
 		$support_url = Template::get_support_url();
 
-		if ( false === strpos( $support_url, 'https://wordpress.org' ) ) { 
+		if ( false === strpos( $support_url, 'https://wordpress.org' ) ) {
 			$resolutions = false;
-		} 
+		}
 
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
 
 		if ( $resolutions ) :
-			?>
+		?>
 			<p class="aside"><?php _e( 'Issues resolved in last two months:', 'wporg-plugins' ); ?></p>
 			<p class="counter-container">
 				<span class="counter-back">
@@ -56,7 +57,7 @@ class Support extends \WP_Widget {
 				</span>
 			</p>
 
-		<?php else: ?>
+		<?php else : ?>
 			<p><?php _e( 'Got something to say? Need help?', 'wporg-plugins' ); ?></p>
 		<?php endif; ?>
 

@@ -61,10 +61,10 @@ class Import {
 
 		$data = $this->export_and_parse_plugin( $plugin_slug );
 
-		$readme = $data['readme'];
-		$assets = $data['assets'];
-		$headers = $data['plugin_headers'];
-		$stable_tag = $data['stable_tag'];
+		$readme          = $data['readme'];
+		$assets          = $data['assets'];
+		$headers         = $data['plugin_headers'];
+		$stable_tag      = $data['stable_tag'];
 		$tagged_versions = $data['tagged_versions'];
 
 		$content = '';
@@ -88,7 +88,7 @@ class Import {
 		 * - A tag (or trunk) commit is made to the current stable. The build has changed, even if not new version.
 		 */
 		if (
-			( !isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
+			( ! isset( $headers->Version ) || $headers->Version != get_post_meta( $plugin->ID, 'version', true ) ) ||
 			$plugin->post_modified == '0000-00-00 00:00:00' ||
 			( $svn_changed_tags && in_array( ( $stable_tag ?: 'trunk' ), $svn_changed_tags, true ) )
 		) {
@@ -149,13 +149,13 @@ class Import {
 			update_post_meta( $plugin->ID, $meta_field, ( isset( $headers->$plugin_header ) ? wp_slash( $headers->$plugin_header ) : '' ) );
 		}
 
-		update_post_meta( $plugin->ID, 'tagged_versions',    wp_slash( $tagged_versions ) );
-		update_post_meta( $plugin->ID, 'sections',           wp_slash( array_keys( $readme->sections ) ) );
+		update_post_meta( $plugin->ID, 'tagged_versions', wp_slash( $tagged_versions ) );
+		update_post_meta( $plugin->ID, 'sections', wp_slash( array_keys( $readme->sections ) ) );
 		update_post_meta( $plugin->ID, 'assets_screenshots', wp_slash( $assets['screenshot'] ) );
-		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
-		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
-		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
-		update_post_meta( $plugin->ID, 'plugin_status',      wp_slash( $plugin->post_status ) );
+		update_post_meta( $plugin->ID, 'assets_icons', wp_slash( $assets['icon'] ) );
+		update_post_meta( $plugin->ID, 'assets_banners', wp_slash( $assets['banner'] ) );
+		update_post_meta( $plugin->ID, 'last_updated', wp_slash( $plugin->post_modified_gmt ) );
+		update_post_meta( $plugin->ID, 'plugin_status', wp_slash( $plugin->post_status ) );
 
 		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
 		$banner_average_color = '';
@@ -171,7 +171,7 @@ class Import {
 
 		// Finally, set the new version live.
 		update_post_meta( $plugin->ID, 'stable_tag', wp_slash( $stable_tag ) );
-		update_post_meta( $plugin->ID, 'version',    wp_slash( $headers->Version ) );
+		update_post_meta( $plugin->ID, 'version', wp_slash( $headers->Version ) );
 
 		// Ensure that the API gets the updated data
 		API_Update_Updater::update_single_plugin( $plugin->post_name );
@@ -207,10 +207,10 @@ class Import {
 				array_unique( $versions_to_build ),
 				$svn_revision_triggered ?
 					"{$plugin_slug}: ZIP build triggered by https://plugins.trac.wordpress.org/changeset/{$svn_revision_triggered}" :
-					"{$plugin_slug}: ZIP build triggered by " . php_uname('n'),
+					"{$plugin_slug}: ZIP build triggered by " . php_uname( 'n' ),
 				$stable_tag
 			);
-		} catch( Exception $e ) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 
@@ -246,6 +246,7 @@ class Import {
 		$tagged_versions = SVN::ls( "https://plugins.svn.wordpress.org/{$plugin_slug}/tags/" ) ?: array();
 		$tagged_versions = array_map( function( $item ) {
 			$trimmed_item = rtrim( $item, '/' );
+
 			if ( $trimmed_item == $item ) {
 				// If attempting to trim `/` off didn't do anything, it was a file and we want to discard it.
 				return null;
@@ -287,7 +288,7 @@ class Import {
 			}
 
 			$trunk_readme_file = self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk/{$trunk_readme_file}";
-			$trunk_readme = new Parser( $trunk_readme_file );
+			$trunk_readme      = new Parser( $trunk_readme_file );
 
 			$stable_tag = $trunk_readme->stable_tag;
 		}
@@ -299,18 +300,18 @@ class Import {
 				$tmp_dir . '/export',
 				array(
 					'ignore-externals',
-					'depth' => 'files'
+					'depth' => 'files',
 				)
 			);
 			// Handle tags which we store as 0.blah but are in /tags/.blah
 			if ( ! $svn_export['result'] && '0.' == substr( $stable_tag, 0, 2 ) ) {
 				$_stable_tag = substr( $stable_tag, 1 );
-				$svn_export = SVN::export(
+				$svn_export  = SVN::export(
 					self::PLUGIN_SVN_BASE . "/{$plugin_slug}/tags/{$_stable_tag}",
 					$tmp_dir . '/export',
 					array(
 						'ignore-externals',
-						'depth' => 'files'
+						'depth' => 'files',
 					)
 				);
 			}
@@ -334,7 +335,7 @@ class Import {
 				$tmp_dir . '/export',
 				array(
 					'ignore-externals',
-					'depth' => 'files' // Only export the root files, we don't need the rest to read the plugin headers/screenshots
+					'depth' => 'files', // Only export the root files, we don't need the rest to read the plugin headers/screenshots
 				)
 			);
 			if ( ! $svn_export['result'] || empty( $svn_export['revision'] ) ) {
@@ -353,7 +354,11 @@ class Import {
 		}
 
 		// Now we look in the /assets/ folder for banners, screenshots, and icons.
-		$assets = array( 'screenshot' => array(), 'banner' => array(), 'icon' => array() );
+		$assets            = array(
+			'screenshot' => array(),
+			'banner'     => array(),
+			'icon'       => array(),
+		);
 		$svn_assets_folder = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/assets/", true /* verbose */ );
 		if ( $svn_assets_folder ) { // /assets/ may not exist.
 			foreach ( $svn_assets_folder as $asset ) {
@@ -361,31 +366,33 @@ class Import {
 				if ( ! preg_match( '!^(?P<type>screenshot|banner|icon)(-(?P<resolution>[\dx]+)(-rtl)?\.(png|jpg|jpeg|gif)|\.svg)$!i', $asset['filename'], $m ) ) {
 					continue;
 				}
-				$type = $m['type'];
-				$filename = $asset['filename'];
-				$revision = $asset['revision'];
-				$location = 'assets';
+
+				$type       = $m['type'];
+				$filename   = $asset['filename'];
+				$revision   = $asset['revision'];
+				$location   = 'assets';
 				$resolution = isset( $m['resolution'] ) ? $m['resolution'] : false;
+
 				$assets[ $type ][ $asset['filename'] ] = compact( 'filename', 'revision', 'resolution', 'location' );
 			}
 		}
 
 		// Find screenshots in the stable plugin folder (but don't overwrite /assets/)
 		foreach ( Filesystem::list_files( "$tmp_dir/export/", false /* non-recursive */, '!^screenshot-\d+\.(jpeg|jpg|png|gif)$!' ) as $plugin_screenshot ) {
-			$filename = basename( $plugin_screenshot );
+			$filename      = basename( $plugin_screenshot );
 			$screenshot_id = substr( $filename, strpos( $filename, '-' ) + 1 );
 			$screenshot_id = substr( $screenshot_id, 0, strpos( $screenshot_id, '.' ) );
 
-			if ( isset( $assets['screenshot'][ $filename ]  ) ) {
+			if ( isset( $assets['screenshot'][ $filename ] ) ) {
 				// Skip it, it exists within /assets/ already
 				continue;
 			}
 
 			$assets['screenshot'][ $filename ] = array(
-				'filename' => $filename,
-				'revision' => $svn_export['revision'],
+				'filename'   => $filename,
+				'revision'   => $svn_export['revision'],
 				'resolution' => $screenshot_id,
-				'location' => 'plugin',
+				'location'   => 'plugin',
 			);
 		}
 

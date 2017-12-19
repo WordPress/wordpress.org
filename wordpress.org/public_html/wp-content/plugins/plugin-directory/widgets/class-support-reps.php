@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -9,6 +10,7 @@ use WordPressdotorg\Plugin_Directory\Tools;
  * @package WordPressdotorg\Plugin_Directory\Widgets
  */
 class Support_Reps extends \WP_Widget {
+
 	/**
 	 * Support Reps constructor.
 	 */

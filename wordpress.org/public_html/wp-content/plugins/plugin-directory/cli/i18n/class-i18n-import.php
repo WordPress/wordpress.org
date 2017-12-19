@@ -75,7 +75,7 @@ abstract class I18n_Import {
 		$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate set-plugin-project ' . escapeshellarg( $plugin_slug ) . ' ' . escapeshellarg( $process_type );
 
 		$return_code = 0;
-		$output = [];
+		$output      = [];
 		exec( $cmd, $output, $return_code );
 		$last_line = array_pop( $output );
 
@@ -103,7 +103,7 @@ abstract class I18n_Import {
 				case 5:
 					$return = new WP_Error( 'create-failure', 'An undefined error occurred while creating the main GlotPress project.' );
 					break;
-				default :
+				default:
 					$return = new WP_Error( 'undefined', 'An undefined error occurred while setting the GlotPress projects.' );
 			}
 		}
@@ -117,7 +117,7 @@ abstract class I18n_Import {
 	 * @param string $project       GP project slug to import to
 	 * @param string $branch        GP project branch to import to (dev|stable)
 	 * @param string $file          Path to POT file
-	 * @param array $str_priorities GP string priorities
+	 * @param array  $str_priorities GP string priorities
 	 */
 	public function import_pot_to_glotpress_project( $project, $branch, $file, $str_priorities = array() ) {
 		global $wpdb;
@@ -171,60 +171,60 @@ abstract class I18n_Import {
 
 			// Fix some locales.
 			switch ( $language ) {
-				case 'ga_IR' :
+				case 'ga_IR':
 					$language = 'ga';
 					break;
-				case 'ca_ES' :
+				case 'ca_ES':
 					$language = 'ca';
 					break;
-				case 'el_GR' :
+				case 'el_GR':
 					$language = 'el';
 					break;
-				case 'af_ZA' :
+				case 'af_ZA':
 					$language = 'af';
 					break;
-				case 'zh_cn' :
-				case 'zh_ZH' :
+				case 'zh_cn':
+				case 'zh_ZH':
 					$language = 'zh_CN';
 					break;
-				case 'uk_UA' :
+				case 'uk_UA':
 					$language = 'uk';
 					break;
-				case 'sq_AL' :
+				case 'sq_AL':
 					$language = 'sq';
 					break;
-				case 'ga_IE' :
+				case 'ga_IE':
 					$language = 'ga';
 					break;
-				case 'gu_IN' :
+				case 'gu_IN':
 					$language = 'gu';
 					break;
-				case 'hy_AM' :
+				case 'hy_AM':
 					$language = 'hy';
 					break;
-				case 'eo_EO' :
+				case 'eo_EO':
 					$language = 'eo';
 					break;
-				case 'ar_AR' :
+				case 'ar_AR':
 					$language = 'ar';
 					break;
-				case 'hr_HR' :
+				case 'hr_HR':
 					$language = 'hr';
 					break;
-				case 'cs_CS' :
+				case 'cs_CS':
 					$language = 'cs_CZ';
 					break;
-				case 'vi_VN' :
+				case 'vi_VN':
 					$language = 'vi';
 					break;
-				case 'ja_JP' :
+				case 'ja_JP':
 					$language = 'ja';
 					break;
-				case 'tr' :
+				case 'tr':
 					$language = 'tr_TR';
 					break;
-				case 'be_BY' :
-				case 'be' :
+				case 'be_BY':
+				case 'be':
 					$language = 'bel';
 					break;
 			}

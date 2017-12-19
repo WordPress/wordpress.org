@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Author_Cards;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Stats_Report;
@@ -58,21 +59,21 @@ class Plugin_Directory {
 		add_filter( 'map_meta_cap', array( __NAMESPACE__ . '\Capabilities', 'map_meta_cap' ), 10, 4 );
 
 		// Load the API routes.
-		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'load_routes' ) );
+		add_action( 'rest_api_init', array( __NAMESPACE__ . '\API\Base', 'init' ) );
 
 		// Allow post_modified not to be modified when we don't specifically bump it.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
 		// Work around caching issues
-		add_filter( 'pre_option_jetpack_sync_full__started' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__started', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__params' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__params', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__params', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__queue_finished' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__queue_finished', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__queue_finished', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__send_started' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__send_started', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__send_started', '__return_null' );
-		add_filter( 'pre_option_jetpack_sync_full__finished' , array( $this, 'bypass_options_cache' ), 10, 2 );
+		add_filter( 'pre_option_jetpack_sync_full__finished', array( $this, 'bypass_options_cache' ), 10, 2 );
 		add_filter( 'default_option_jetpack_sync_full__finished', '__return_null' );
 
 		// Fix login URLs in admin bar
@@ -87,7 +88,7 @@ class Plugin_Directory {
 			Author_Cards::instance();
 			Stats_Report::instance();
 
-			add_action( 'wp_insert_post_data',    array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
+			add_action( 'wp_insert_post_data', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'can_change_post_status' ), 10, 2 );
 			add_action( 'transition_post_status', array( __NAMESPACE__ . '\Admin\Status_Transitions', 'instance' ) );
 		}
 
@@ -123,29 +124,29 @@ class Plugin_Directory {
 
 		register_post_type( 'plugin', array(
 			'labels'       => array(
-				'name'               => __( 'Repo Plugins',              'wporg-plugins' ),
-				'singular_name'      => __( 'Repo Plugin',               'wporg-plugins' ),
-				'menu_name'          => __( 'Repo Plugins',              'wporg-plugins' ),
-				'add_new'            => __( 'Add New',                   'wporg-plugins' ),
-				'add_new_item'       => __( 'Add New Plugin',            'wporg-plugins' ),
-				'new_item'           => __( 'New Plugin',                'wporg-plugins' ),
-				'view_item'          => __( 'View Plugin',               'wporg-plugins' ),
-				'search_items'       => __( 'Search Plugins',            'wporg-plugins' ),
-				'not_found'          => __( 'No plugins found',          'wporg-plugins' ),
+				'name'               => __( 'Repo Plugins', 'wporg-plugins' ),
+				'singular_name'      => __( 'Repo Plugin', 'wporg-plugins' ),
+				'menu_name'          => __( 'Repo Plugins', 'wporg-plugins' ),
+				'add_new'            => __( 'Add New', 'wporg-plugins' ),
+				'add_new_item'       => __( 'Add New Plugin', 'wporg-plugins' ),
+				'new_item'           => __( 'New Plugin', 'wporg-plugins' ),
+				'view_item'          => __( 'View Plugin', 'wporg-plugins' ),
+				'search_items'       => __( 'Search Plugins', 'wporg-plugins' ),
+				'not_found'          => __( 'No plugins found', 'wporg-plugins' ),
 				'not_found_in_trash' => __( 'No plugins found in Trash', 'wporg-plugins' ),
 
 				// Context only available in admin, not in toolbar.
 				'edit_item'          => is_admin() ? __( 'Editing Plugin: %s', 'wporg-plugins' ) : __( 'Edit Plugin', 'wporg-plugins' ),
 			),
-			'description'     => __( 'A Repo Plugin', 'wporg-plugins' ),
-			'supports'        => array( 'comments', 'author', 'custom-fields' ),
-			'public'          => true,
-			'show_ui'         => true,
-			'show_in_rest'    => true,
-			'has_archive'     => true,
-			'rewrite'         => false,
-			'menu_icon'       => 'dashicons-admin-plugins',
-			'capabilities'    => array(
+			'description'  => __( 'A Repo Plugin', 'wporg-plugins' ),
+			'supports'     => array( 'comments', 'author', 'custom-fields' ),
+			'public'       => true,
+			'show_ui'      => true,
+			'show_in_rest' => true,
+			'has_archive'  => true,
+			'rewrite'      => false,
+			'menu_icon'    => 'dashicons-admin-plugins',
+			'capabilities' => array(
 				'edit_post'          => 'plugin_edit',
 				'read_post'          => 'read',
 				'edit_posts'         => 'plugin_dashboard_access',
@@ -183,10 +184,10 @@ class Plugin_Directory {
 			),
 			'labels'            => array(
 				'name'          => __( 'Plugin Categories', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Category',   'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Category',     'wporg-plugins' ),
-				'update_item'   => __( 'Update Category',   'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Category',  'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Category', 'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Category', 'wporg-plugins' ),
+				'update_item'   => __( 'Update Category', 'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Category', 'wporg-plugins' ),
 				'new_item_name' => __( 'New Category Name', 'wporg-plugins' ),
 				'search_items'  => __( 'Search Categories', 'wporg-plugins' ),
 			),
@@ -236,7 +237,7 @@ class Plugin_Directory {
 			'sort'              => true,
 			'rewrite'           => false,
 			'labels'            => array(
-				'name' => __( 'Contributors', 'wporg-plugins' ),
+				'name'          => __( 'Contributors', 'wporg-plugins' ),
 				'singular_name' => __( 'Contributor', 'wporg-plugins' ),
 			),
 			'public'            => true,
@@ -252,7 +253,7 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_committer',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name' => __( 'Committers', 'wporg-plugins' ),
+				'name'          => __( 'Committers', 'wporg-plugins' ),
 				'singular_name' => __( 'Committer', 'wporg-plugins' ),
 			),
 			'public'            => true,
@@ -268,7 +269,7 @@ class Plugin_Directory {
 			'query_var'         => 'plugin_support_rep',
 			'rewrite'           => false,
 			'labels'            => array(
-				'name' => __( 'Support Reps', 'wporg-plugins' ),
+				'name'          => __( 'Support Reps', 'wporg-plugins' ),
 				'singular_name' => __( 'Support Rep', 'wporg-plugins' ),
 			),
 			'public'            => true,
@@ -290,10 +291,10 @@ class Plugin_Directory {
 			),
 			'labels'            => array(
 				'name'          => __( 'Plugin Tags', 'wporg-plugins' ),
-				'singular_name' => __( 'Plugin Tag',   'wporg-plugins' ),
-				'edit_item'     => __( 'Edit Tag',     'wporg-plugins' ),
-				'update_item'   => __( 'Update Tag',   'wporg-plugins' ),
-				'add_new_item'  => __( 'Add New Tag',  'wporg-plugins' ),
+				'singular_name' => __( 'Plugin Tag', 'wporg-plugins' ),
+				'edit_item'     => __( 'Edit Tag', 'wporg-plugins' ),
+				'update_item'   => __( 'Update Tag', 'wporg-plugins' ),
+				'add_new_item'  => __( 'Add New Tag', 'wporg-plugins' ),
 				'new_item_name' => __( 'New Tag Name', 'wporg-plugins' ),
 				'search_items'  => __( 'Search Tags', 'wporg-plugins' ),
 			),
@@ -351,11 +352,11 @@ class Plugin_Directory {
 		 */
 
 		register_meta( 'post', 'rating', array(
-			'type'              => 'number',
-			'description'       => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'type'         => 'number',
+			'description'  => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// todo 'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'active_installs', array(
@@ -375,31 +376,31 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'tested', array(
-			'description'       => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'requires', array(
-			'description'       => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'requires_php', array(
-			'description'       => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'stable_tag', array(
-			'description'       => __( 'Stable version of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Stable version of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'donate_link', array(
@@ -410,17 +411,17 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'version', array(
-			'description'       => __( 'Current stable version.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Current stable version.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'header_name', array(
-			'description'       => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'header_plugin_uri', array(
@@ -431,17 +432,17 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'header_name', array(
-			'description'       => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'header_author', array(
-			'description'       => __( 'Name of the plugin author.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Name of the plugin author.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'header_author_uri', array(
@@ -452,25 +453,25 @@ class Plugin_Directory {
 		) );
 
 		register_meta( 'post', 'header_description', array(
-			'description'       => __( 'Description of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Description of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'assets_icons', array(
-			'type'              => 'array',
-			'description'       => __( 'Icon images of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'type'         => 'array',
+			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'assets_banners_color', array(
-			'description'       => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
+			'description'  => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
+			'single'       => true,
 			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
+			'show_in_rest' => true,
 		) );
 
 		register_meta( 'post', 'support_threads', array(
@@ -509,7 +510,7 @@ class Plugin_Directory {
 		add_rewrite_rule( '^([^/]+)/\#(.*)/?$', 'index.php?name=$matches[1]', 'top' );
 
 		// If changing capabilities around, uncomment this.
-		//Capabilities::add_roles();
+		// Capabilities::add_roles();
 
 		// Remove the /admin$ redirect to wp-admin
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
@@ -522,7 +523,7 @@ class Plugin_Directory {
 		// Instantiate our copy of the Jetpack_Search class.
 		if ( class_exists( 'Jetpack' ) && \Jetpack::get_option( 'id' ) && ! class_exists( 'Jetpack_Search' )
 			&& ! isset( $_GET['s'] ) ) { // Don't run the ES query if we're going to redirect to the pretty search URL
-				require_once( __DIR__ . '/libs/site-search/jetpack-search.php' );
+				require_once __DIR__ . '/libs/site-search/jetpack-search.php';
 				\Jetpack_Search::instance();
 		}
 	}
@@ -531,11 +532,11 @@ class Plugin_Directory {
 	 * Register the Shortcodes used within the content.
 	 */
 	public function register_shortcodes() {
-		add_shortcode( 'wporg-plugins-developers',  array( __NAMESPACE__ . '\Shortcodes\Developers',  'display' ) );
-		add_shortcode( 'wporg-plugin-upload',       array( __NAMESPACE__ . '\Shortcodes\Upload',      'display' ) );
+		add_shortcode( 'wporg-plugins-developers', array( __NAMESPACE__ . '\Shortcodes\Developers', 'display' ) );
+		add_shortcode( 'wporg-plugin-upload', array( __NAMESPACE__ . '\Shortcodes\Upload', 'display' ) );
 		add_shortcode( 'wporg-plugins-screenshots', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'display' ) );
-		add_shortcode( 'wporg-plugins-reviews',     array( __NAMESPACE__ . '\Shortcodes\Reviews',     'display' ) );
-		add_shortcode( 'readme-validator',          array( __NAMESPACE__ . '\Shortcodes\Readme_Validator',     'display' ) );
+		add_shortcode( 'wporg-plugins-reviews', array( __NAMESPACE__ . '\Shortcodes\Reviews', 'display' ) );
+		add_shortcode( 'readme-validator', array( __NAMESPACE__ . '\Shortcodes\Readme_Validator', 'display' ) );
 	}
 
 	/**
@@ -551,7 +552,7 @@ class Plugin_Directory {
 			'wporg-plugin-upload',
 			'wporg-plugins-screenshots',
 			'wporg-plugins-reviews',
-			'readme-validator'
+			'readme-validator',
 		);
 
 		$not_allowed_shortcodes = array_diff( array_keys( $shortcode_tags ), $allowed_shortcodes );
@@ -567,13 +568,13 @@ class Plugin_Directory {
 	 *  Register the Widgets used plugin detail pages.
 	 */
 	public function register_widgets() {
-		register_widget( __NAMESPACE__ . '\Widgets\Donate'        );
-		register_widget( __NAMESPACE__ . '\Widgets\Meta'          );
-		register_widget( __NAMESPACE__ . '\Widgets\Ratings'       );
-		register_widget( __NAMESPACE__ . '\Widgets\Support'       );
-		register_widget( __NAMESPACE__ . '\Widgets\Committers'    );
-		register_widget( __NAMESPACE__ . '\Widgets\Contributors'  );
-		register_widget( __NAMESPACE__ . '\Widgets\Support_Reps'  );
+		register_widget( __NAMESPACE__ . '\Widgets\Donate' );
+		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
+		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
+		register_widget( __NAMESPACE__ . '\Widgets\Support' );
+		register_widget( __NAMESPACE__ . '\Widgets\Committers' );
+		register_widget( __NAMESPACE__ . '\Widgets\Contributors' );
+		register_widget( __NAMESPACE__ . '\Widgets\Support_Reps' );
 	}
 
 	/**
@@ -668,13 +669,14 @@ class Plugin_Directory {
 
 	/**
 	 * Filter content to make links rel=nofollow on plugin pages only
-	 * @param string	$content	The content.
+	 *
+	 * @param string $content    The content.
 	 * @return string
 	 */
 	public function filter_rel_nofollow( $content ) {
 		if ( get_post_type() == 'plugin' ) {
 			// regex copied from wp_rel_nofollow(). Not calling that function because it messes with slashes.
-			$content = preg_replace_callback('|<a (.+?)>|i', 'wp_rel_nofollow_callback', $content);
+			$content = preg_replace_callback( '|<a (.+?)>|i', 'wp_rel_nofollow_callback', $content );
 		}
 		return $content;
 	}
@@ -705,6 +707,7 @@ class Plugin_Directory {
 				$wp_query->query_vars['orderby']  = 'meta_value';
 				$wp_query->query_vars['order']    = 'DESC';
 				break;
+
 			case 'favorites':
 				$favorites_user = wp_get_current_user();
 				if ( ! empty( $wp_query->query_vars['favorites_user'] ) ) {
@@ -722,7 +725,7 @@ class Plugin_Directory {
 					$wp_query->query_vars['post_name__in']  = get_user_meta( $favorites_user->ID, 'plugin_favorites', true );
 
 					$wp_query->query_vars['orderby'] = 'post_title';
-					$wp_query->query_vars['order'] = 'ASC';
+					$wp_query->query_vars['order']   = 'ASC';
 				}
 
 				if ( ! $favorites_user || ! $wp_query->query_vars['post_name__in'] ) {
@@ -765,9 +768,9 @@ class Plugin_Directory {
 				'relation' => 'OR',
 				array(
 					'taxonomy' => 'plugin_contributors',
-					'field' => 'slug',
-					'terms' => $user
-				)
+					'field'    => 'slug',
+					'terms'    => $user,
+				),
 			);
 
 			// Author archives for self include plugins you're a committer on, not just publically a contributor
@@ -775,17 +778,17 @@ class Plugin_Directory {
 			if ( $viewing_own_author_archive ) {
 				$wp_query->query_vars['tax_query'][] = array(
 					'taxonomy' => 'plugin_committers',
-					'field' => 'slug',
-					'terms' => $user
+					'field'    => 'slug',
+					'terms'    => $user,
 				);
 			}
 
 			$wp_query->query_vars['orderby'] = 'post_title';
-			$wp_query->query_vars['order'] = 'ASC';
+			$wp_query->query_vars['order']   = 'ASC';
 
 			// Treat it as a taxonomy query now, not the author archive.
 			$wp_query->is_author = false;
-			$wp_query->is_tax = true;
+			$wp_query->is_tax    = true;
 
 			unset( $wp_query->query_vars['author_name'], $wp_query->query_vars['author'] );
 		}
@@ -795,7 +798,7 @@ class Plugin_Directory {
 
 			$wp_query->query_vars['post_status'] = array( 'approved', 'publish', 'closed', 'disabled' );
 
-			add_filter( 'posts_results', function( $posts, $this_wp_query ) use( $wp_query ) {
+			add_filter( 'posts_results', function( $posts, $this_wp_query ) use ( $wp_query ) {
 				if ( $this_wp_query != $wp_query ) {
 					return $posts;
 				}
@@ -824,10 +827,10 @@ class Plugin_Directory {
 
 		// Allow anyone to view a closed plugin directly from its page. It won't show in search results or lists.
 		if ( $wp_query->is_main_query() && ! empty( $wp_query->query_vars['name'] ) ) {
-			$wp_query->query_vars['post_status'] = (array) $wp_query->query_vars['post_status'];
+			$wp_query->query_vars['post_status']   = (array) $wp_query->query_vars['post_status'];
 			$wp_query->query_vars['post_status'][] = 'closed';
 			$wp_query->query_vars['post_status'][] = 'disabled';
-			$wp_query->query_vars['post_status'] = array_unique( $wp_query->query_vars['post_status'] );
+			$wp_query->query_vars['post_status']   = array_unique( $wp_query->query_vars['post_status'] );
 		}
 
 		// By default, all archives are sorted by active installs
@@ -855,12 +858,10 @@ class Plugin_Directory {
 	 */
 	public function bypass_options_cache( $value, $option ) {
 		global $wpdb;
-		$value = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
-				$option
-			)
-		);
+		$value = $wpdb->get_var( $wpdb->prepare(
+			"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
+			$option
+		) );
 		$value = maybe_unserialize( $value );
 
 		return $value;
@@ -873,7 +874,7 @@ class Plugin_Directory {
 	 */
 	public function fix_login_url( $login_url, $redirect, $force_reauth ) {
 		// modify the redirect_to for the support forums to point to the current page
-		if ( 0 === strpos($_SERVER['REQUEST_URI'], '/plugins' ) ) {
+		if ( 0 === strpos( $_SERVER['REQUEST_URI'], '/plugins' ) ) {
 			// Note that this is not normal because of the code in /mu-plugins/wporg-sso/class-wporg-sso.php.
 			// The login_url function there expects the redirect_to as the first parameter passed into it instead of the second
 			// Since we're changing this with a filter on login_url, then we have to change the login_url to the
@@ -883,9 +884,9 @@ class Plugin_Directory {
 			//
 			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
 			// The SSO code handles the urlencoding of the redirect_to parameter
-			$url_parts = parse_url('https://wordpress.org'.$_SERVER['REQUEST_URI']);
-			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
-			$login_url = $constructed_url;
+			$url_parts       = parse_url( 'https://wordpress.org' . $_SERVER['REQUEST_URI'] );
+			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . ( isset( $url_parts['path'] ) ? $url_parts['path'] : '' );
+			$login_url       = $constructed_url;
 		}
 		return $login_url;
 	}
@@ -939,28 +940,30 @@ class Plugin_Directory {
 	 *
 	 * @global string $locale Current locale.
 	 *
-	 * @param int   $post_id	Post ID to update.
-	 * @param int   $min_translated	Translations below this % threshold will not be synced to meta, to save space.
+	 * @param int $post_id    Post ID to update.
+	 * @param int $min_translated Translations below this % threshold will not be synced to meta, to save space.
 	 * @return array
 	 */
-	public function sync_all_translations_to_meta( $post_id, $min_translated = 40, $skip_pfx = array('en_') ) {
+	public function sync_all_translations_to_meta( $post_id, $min_translated = 40, $skip_pfx = array( 'en_' ) ) {
 
 		$locales_to_sync = array();
-		$post = get_post( $post_id );
+		$post            = get_post( $post_id );
 		if ( $post ) {
 			$translations = Plugin_I18n::instance()->find_all_translations_for_plugin( $post->post_name, 'stable-readme', $min_translated ); // at least $min_translated % translated
 			if ( $translations ) {
 				// Eliminate translations that start with unwanted prefixes, so we don't waste space on near-duplicates like en_AU, en_CA etc.
 				foreach ( $translations as $i => $_locale ) {
-					foreach ( $skip_pfx as $pfx )
-						if ( substr( $_locale, 0, strlen( $pfx ) ) === $pfx )
+					foreach ( $skip_pfx as $pfx ) {
+						if ( substr( $_locale, 0, strlen( $pfx ) ) === $pfx ) {
 							unset( $translations[ $i ] );
+						}
+					}
 				}
 				$locales_to_sync = array_unique( $translations );
 			}
 		}
 
-		if ( count($locales_to_sync) > 0 ) {
+		if ( count( $locales_to_sync ) > 0 ) {
 			foreach ( $locales_to_sync as $locale ) {
 				$this->sync_translation_to_meta( $post_id, $locale );
 			}
@@ -974,22 +977,21 @@ class Plugin_Directory {
 	 *
 	 * @global string $locale Current locale.
 	 *
-	 * @param int   $post_id	Post ID to update.
-	 * @param string   $locale	Locale to translate.
+	 * @param int    $post_id    Post ID to update.
+	 * @param string $locale  Locale to translate.
 	 */
 	public function sync_translation_to_meta( $post_id, $_locale ) {
 		global $locale;
 
 		$old_locale = $locale;
 		// Keep track of the original untranslated strings
-		$orig_title = get_the_title( $post_id );
+		$orig_title   = get_the_title( $post_id );
 		$orig_excerpt = get_the_excerpt( $post_id );
 		$orig_content = get_post_field( 'post_content', $post_id );
-		$locale = $_locale;
+		$locale       = $_locale;
 
 		// Update postmeta values for the translated title, excerpt, and content, if they are available and different from the originals.
 		// There is a bug here, in that no attempt is made to remove old meta values for translations that do not have new translations.
-
 		$the_title = Plugin_I18n::instance()->translate( 'title', $orig_title, [ 'post_id' => $post_id ] );
 		if ( $the_title && $the_title != $orig_title ) {
 			update_post_meta( $post_id, 'title_' . $locale, $the_title );
@@ -1002,7 +1004,7 @@ class Plugin_Directory {
 
 		// Split up the content to translate it in sections.
 		$the_content = array();
-		$sections = $this->split_post_content_into_pages( $orig_content );
+		$sections    = $this->split_post_content_into_pages( $orig_content );
 		foreach ( $sections as $section => $section_content ) {
 			$translated_section = $this->translate_post_content( $section_content, $section, $post_id );
 			if ( $translated_section && $translated_section != $section_content ) {
@@ -1011,7 +1013,7 @@ class Plugin_Directory {
 			}
 		}
 
-		if ( !empty( $the_content ) ) {
+		if ( ! empty( $the_content ) ) {
 			update_post_meta( $post_id, 'content_' . $locale, implode( $the_content ) );
 		}
 
@@ -1108,7 +1110,7 @@ class Plugin_Directory {
 			$path = explode( '/', $_SERVER['REQUEST_URI'] );
 
 			if ( 'tags' === $path[2] ) {
-				if ( isset( $path[3] ) && !empty( $path[3] ) ) {
+				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
 					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ) );
 					die();
 				} else {
@@ -1144,8 +1146,8 @@ class Plugin_Directory {
 				}
 			}
 
-			//Otherwise, let's redirect to the search page
-			if ( isset( $path[2] ) && !empty( $path[2] ) ) {
+			// Otherwise, let's redirect to the search page
+			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
 				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ) );
 				die();
 			}
@@ -1204,7 +1206,7 @@ class Plugin_Directory {
 	 * @return array
 	 */
 	public function split_post_content_into_pages( $content ) {
-		$_pages        = preg_split( "#<!--section=(.+?)-->#", $content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages        = preg_split( '#<!--section=(.+?)-->#', $content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		$content_pages = array(
 			'screenshots' => '[wporg-plugins-screenshots]',
 			'developers'  => '[wporg-plugins-developers]',
@@ -1317,7 +1319,7 @@ class Plugin_Directory {
 	 */
 	public static function create_plugin_post( array $args ) {
 		$title = $args['post_title'] ?: $args['post_name'];
-		$slug  = $args['post_name']  ?: sanitize_title( $title );
+		$slug  = $args['post_name'] ?: sanitize_title( $title );
 
 		$args = wp_parse_args( $args, array(
 			'post_title'        => $title,

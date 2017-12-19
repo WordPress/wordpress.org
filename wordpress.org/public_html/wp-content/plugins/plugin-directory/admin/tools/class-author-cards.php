@@ -24,7 +24,7 @@ class Author_Cards {
 	 * Constructor.
 	 */
 	private function __construct() {
-		add_action( 'admin_menu',            array( $this, 'add_to_menu' ) );
+		add_action( 'admin_menu', array( $this, 'add_to_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
@@ -37,10 +37,10 @@ class Author_Cards {
 		switch ( $hook_suffix ) {
 			case 'tools_page_authorcards':
 				wp_enqueue_style( 'plugin-admin-post-css', plugins_url( 'css/edit-form.css', Plugin_Directory\PLUGIN_FILE ), array( 'edit' ), 4 );
-			break;
+				break;
 		}
 	}
-	
+
 	public function add_to_menu() {
 		add_submenu_page(
 			'tools.php',

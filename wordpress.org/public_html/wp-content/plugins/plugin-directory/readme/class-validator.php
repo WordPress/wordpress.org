@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Readme;
+
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
 /**
@@ -33,7 +34,7 @@ class Validator {
 			/* Translators: File name; */
 			$error = sprintf( __( 'URL must end in %s!', 'wporg-plugins' ), '<code>readme.txt</code>' );
 			return array(
-				'errors' => array( $error )
+				'errors' => array( $error ),
 			);
 		}
 
@@ -41,7 +42,7 @@ class Validator {
 		if ( ! $readme_text = wp_remote_retrieve_body( $readme ) ) {
 			$error = __( 'Invalid readme.txt URL.', 'wporg-plugins' );
 			return array(
-				'errors' => array( $error )
+				'errors' => array( $error ),
 			);
 		}
 
@@ -63,7 +64,7 @@ class Validator {
 		// Fatal errors.
 		if ( empty( $readme->name ) ) {
 			/* Translators: Plugin header tag; */
-			$errors[] = sprintf( __( "No plugin name detected. Plugin names look like: %s", 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' );
+			$errors[] = sprintf( __( 'No plugin name detected. Plugin names look like: %s', 'wporg-plugins' ), '<code>=== Plugin Name ===</code>' );
 		}
 
 		// Warnings.

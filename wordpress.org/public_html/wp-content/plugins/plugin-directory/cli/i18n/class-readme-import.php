@@ -44,13 +44,13 @@ class Readme_Import extends I18n_Import {
 		}
 
 		$readme_file = "{$svn_url}{$readme_file}";
-		$readme = new Parser( $readme_file );
+		$readme      = new Parser( $readme_file );
 
 		if ( ! class_exists( '\PO' ) ) {
 			require_once ABSPATH . '/wp-includes/pomo/po.php';
 		}
 
-		$pot = new PO;
+		$pot = new PO();
 		$pot->set_header( 'MIME-Version', '1.0' );
 		$pot->set_header( 'Content-Type', 'text/plain; charset=UTF-8' );
 		$pot->set_header( 'Content-Transfer-Encoding', '8bit' );
@@ -128,7 +128,7 @@ class Readme_Import extends I18n_Import {
 		}
 
 		$tmp_directory = Filesystem::temp_directory( $this->plugin . '-readme-' . $tag );
-		$pot_file = "{$tmp_directory}/{$this->plugin}-readme.pot";
+		$pot_file      = "{$tmp_directory}/{$this->plugin}-readme.pot";
 
 		$exported = $pot->export_to_file( $pot_file );
 		if ( ! $exported ) {
@@ -147,7 +147,7 @@ class Readme_Import extends I18n_Import {
 	/**
 	 * Handles GlotPress "extracted comments" for translators to get context for each string translations.
 	 *
-	 * @param array $array Empty or existing arrays of string and comments
+	 * @param array  $array Empty or existing arrays of string and comments
 	 * @param string $key Unique key
 	 * @param string $val Comment value
 	 *

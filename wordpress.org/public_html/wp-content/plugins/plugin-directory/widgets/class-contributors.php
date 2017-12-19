@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -29,10 +30,10 @@ class Contributors extends \WP_Widget {
 		$post = get_post();
 
 		$contributors = get_terms( array(
-			'taxonomy' => 'plugin_contributors',
+			'taxonomy'   => 'plugin_contributors',
 			'object_ids' => array( $post->ID ),
-			'orderby' => 'term_order',
-			'fields' => 'names',
+			'orderby'    => 'term_order',
+			'fields'     => 'names',
 		) );
 
 		if ( is_wp_error( $contributors ) ) {

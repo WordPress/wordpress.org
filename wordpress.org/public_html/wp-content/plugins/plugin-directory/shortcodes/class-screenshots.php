@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 
@@ -19,7 +20,7 @@ class Screenshots {
 
 		// All indexed from 1.
 		$descriptions = get_post_meta( $plugin->ID, 'screenshots', true ) ?: array();
-		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();;
+		$screen_shots = get_post_meta( $plugin->ID, 'assets_screenshots', true ) ?: array();
 
 		if ( empty( $screen_shots ) ) {
 			return '';
@@ -32,7 +33,8 @@ class Screenshots {
 		 * The image numbers are stored within the 'resolution' key.
 		 */
 		foreach ( $screen_shots as $image ) {
-			$screen_shot = sprintf( '<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" alt="" /></a>',
+			$screen_shot = sprintf(
+				'<a href="%1$s" rel="nofollow"><img class="screenshot" src="%1$s" alt="" /></a>',
 				esc_url( Template::get_asset_url( $plugin, $image ) )
 			);
 

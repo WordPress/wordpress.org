@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -21,11 +22,11 @@ class Plugin extends Base {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/?', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'plugin_info' ),
-			'args' => array(
+			'args'     => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-				)
-			)
+				),
+			),
 		) );
 	}
 
@@ -49,22 +50,22 @@ class Plugin extends Base {
 				array(
 					'status' => \WP_HTTP::BAD_REQUEST,
 					'params' => array(
-						'plugin_slug' => 'Invalid parameter.'
-					)
+						'plugin_slug' => 'Invalid parameter.',
+					),
 				)
 			);
 		}
 
 		// Support returning API data in different locales, even on wordpress.org (for api.wordpress.org usage)
-		if ( ! empty( $request['locale'] ) && !in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
+		if ( ! empty( $request['locale'] ) && ! in_array( strtolower( $request['locale'] ), array( 'en_us', 'en' ) ) ) {
 			switch_to_locale( $request['locale'] );
 		}
 
 		$post_id = $post->ID;
 
-		$result = array();
-		$result['name'] = get_the_title();
-		$result['slug'] = $post->post_name;
+		$result            = array();
+		$result['name']    = get_the_title();
+		$result['slug']    = $post->post_name;
 		$result['version'] = get_post_meta( $post_id, 'version', true ) ?: '0.0';
 
 		$result['author'] = strip_tags( get_post_meta( $post_id, 'header_author', true ) ) ?: get_user_by( 'id', $post->post_author )->display_name;
@@ -74,13 +75,13 @@ class Plugin extends Base {
 
 		// Profile of the original plugin submitter
 		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
-		$result['contributors'] = array();
+		$result['contributors']   = array();
 
 		$contributors = get_terms( array(
-			'taxonomy' => 'plugin_contributors',
+			'taxonomy'   => 'plugin_contributors',
 			'object_ids' => array( $post->ID ),
-			'orderby' => 'term_order',
-			'fields' => 'names',
+			'orderby'    => 'term_order',
+			'fields'     => 'names',
 		) );
 
 		if ( is_wp_error( $contributors ) ) {
@@ -93,6 +94,7 @@ class Plugin extends Base {
 				$contributors[] = $author->user_nicename;
 			}
 		}
+
 		foreach ( $contributors as $contributor ) {
 			$user = get_user_by( 'slug', $contributor );
 			if ( ! $user ) {
@@ -100,59 +102,62 @@ class Plugin extends Base {
 			}
 
 			$result['contributors'][ $user->user_nicename ] = array(
-				'profile' => $this->get_user_profile_link( $user ),
-				'avatar' => get_avatar_url( $user, array( 'default' => 'monsterid', 'rating' => 'g' ) ),
-				'display_name' => $user->display_name
+				'profile'      => $this->get_user_profile_link( $user ),
+				'avatar'       => get_avatar_url( $user, array(
+					'default' => 'monsterid',
+					'rating'  => 'g',
+				) ),
+				'display_name' => $user->display_name,
 			);
 		}
 
-		$result['requires'] = get_post_meta( $post_id, 'requires', true ) ?: false;
-		$result['tested'] = get_post_meta( $post_id, 'tested', true ) ?: false;
-		$result['requires_php'] = get_post_meta( $post_id, 'requires_php', true ) ?: false;
+		$result['requires']      = get_post_meta( $post_id, 'requires', true ) ?: false;
+		$result['tested']        = get_post_meta( $post_id, 'tested', true ) ?: false;
+		$result['requires_php']  = get_post_meta( $post_id, 'requires_php', true ) ?: false;
 		$result['compatibility'] = array();
-		$result['rating'] = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
-		$result['ratings'] = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
+		$result['rating']        = ( get_post_meta( $post_id, 'rating', true ) ?: 0 ) * 20; // Stored as 0.0 ~ 5.0, API outputs as 0..100
+		$result['ratings']       = array_map( 'intval', (array) get_post_meta( $post_id, 'ratings', true ) );
 		krsort( $result['ratings'] );
 
-		$result['num_ratings'] = array_sum( $result['ratings'] );
-		$result['support_threads'] = intval( get_post_meta( $post_id, 'support_threads', true ) );
+		$result['num_ratings']              = array_sum( $result['ratings'] );
+		$result['support_threads']          = intval( get_post_meta( $post_id, 'support_threads', true ) );
 		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
-		$result['active_installs'] = intval( get_post_meta( $post_id, 'active_installs', true ) );
-		$result['downloaded'] = intval( get_post_meta( $post_id, 'downloads', true ) );
-		$result['last_updated'] = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
-		$result['added'] = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
-		$result['homepage'] = get_post_meta( $post_id, 'header_plugin_uri', true );
-		$result['sections'] = array();
+		$result['active_installs']          = intval( get_post_meta( $post_id, 'active_installs', true ) );
+		$result['downloaded']               = intval( get_post_meta( $post_id, 'downloads', true ) );
+		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
+		$result['added']                    = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
+		$result['homepage']                 = get_post_meta( $post_id, 'header_plugin_uri', true );
+		$result['sections']                 = array();
 
-		$_pages = preg_split( "#<!--section=(.+?)-->#", $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+		$_pages = preg_split( '#<!--section=(.+?)-->#', $post->post_content, - 1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
 		for ( $i = 0; $i < count( $_pages ); $i += 2 ) {
 			$result['sections'][ $_pages[ $i ] ] = apply_filters( 'the_content', $_pages[ $i + 1 ], $_pages[ $i ] );
 		}
 		$result['sections']['screenshots'] = ''; // placeholder to put screenshots prior to reviews at the end.
-		$result['sections']['reviews'] = $this->get_plugin_reviews_markup( $post->post_name );
+		$result['sections']['reviews']     = $this->get_plugin_reviews_markup( $post->post_name );
 
-		if ( !empty( $result['sections']['faq'] ) ) {
+		if ( ! empty( $result['sections']['faq'] ) ) {
 			$result['sections']['faq'] = $this->get_simplified_faq_markup( $result['sections']['faq'] );
 		}
-		
+
 		$result['description'] = $result['sections']['description'];
 
 		$result['short_description'] = get_the_excerpt();
-		$result['download_link'] = Template::download_link( $post );
+		$result['download_link']     = Template::download_link( $post );
 
 		$result['screenshots'] = array();
-		$descriptions = get_post_meta( $post->ID, 'screenshots', true ) ?: array();
-		$screen_shots = get_post_meta( $post->ID, 'assets_screenshots', true ) ?: array();
+		$descriptions          = get_post_meta( $post->ID, 'screenshots', true ) ?: array();
+		$screen_shots          = get_post_meta( $post->ID, 'assets_screenshots', true ) ?: array();
 
 		/*
 		 * Find the image that corresponds with the text.
 		 * The image numbers are stored within the 'resolution' key.
 		 */
 		foreach ( $screen_shots as $image ) {
-			$src = Template::get_asset_url( $post, $image );
+			$src     = Template::get_asset_url( $post, $image );
 			$caption = '';
-			if ( $descriptions && !empty( $descriptions[ (int)$image['resolution'] ] ) ) {
-				$caption = $descriptions[ (int)$image['resolution'] ];
+			if ( $descriptions && ! empty( $descriptions[ (int) $image['resolution'] ] ) ) {
+				$caption = $descriptions[ (int) $image['resolution'] ];
 				$caption = Plugin_I18n::instance()->translate( 'screenshot-' . $image['resolution'], $caption, [ 'post_id' => $post->ID ] );
 			}
 
@@ -198,21 +203,20 @@ class Plugin extends Base {
 
 		$result['icons'] = array();
 		if ( $icons = Template::get_plugin_icon( $post ) ) {
-			if ( !empty( $icons['icon'] ) && empty( $icons['generated'] ) ) {
+			if ( ! empty( $icons['icon'] ) && empty( $icons['generated'] ) ) {
 				$result['icons']['1x'] = $icons['icon'];
-			} elseif ( !empty( $icons['icon'] ) && ! empty( $icons['generated'] ) ) {
+			} elseif ( ! empty( $icons['icon'] ) && ! empty( $icons['generated'] ) ) {
 				$result['icons']['default'] = $icons['icon'];
 			}
-			if ( !empty( $icons['icon_2x'] ) ) {
+			if ( ! empty( $icons['icon_2x'] ) ) {
 				$result['icons']['2x'] = $icons['icon_2x'];
 			}
-			if ( !empty( $icons['svg'] ) ) {
+			if ( ! empty( $icons['svg'] ) ) {
 				$result['icons']['svg'] = $icons['svg'];
 			}
 		}
 
 		// That's all folks!
-
 		return $result;
 	}
 
@@ -224,7 +228,7 @@ class Plugin extends Base {
 	 */
 	protected function get_user_profile_link( $user ) {
 		$u = false;
-		if ( $user instanceOf \WP_User ) {
+		if ( $user instanceof \WP_User ) {
 			$u = $user;
 		} else {
 			if ( is_numeric( $user ) ) {
@@ -273,30 +277,33 @@ class Plugin extends Base {
 		<div class="reviewer-info">
 			<div class="review-title-section">
 				<h4 class="review-title"><?php echo esc_html( $review->post_title ); ?></h4>
-				<div class="star-rating"><?php
+				<div class="star-rating">
+				<?php
 					/* Core has .star-rating .star colour styling, which is why we use a custom wrapper and template */
 					echo Template::dashicons_stars( array(
-						'rating' => $review->post_rating,
+						'rating'   => $review->post_rating,
 						'template' => '<span class="star %1$s"></span>',
 					) );
-				?></div>
+				?>
+				</div>
 			</div>
 			<p class="reviewer">
 				<?php
-					$review_author_markup_profile = esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename );
-					$review_author_markup  = '<a href="' . $review_author_markup_profile . '">';
-					$review_author_markup .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
-					$review_author_markup .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
-					$review_author_markup .= $reviewer->display_name;
-					if ( $reviewer->display_name != $reviewer->user_login ) {
-						$review_author_markup .= " <small>({$reviewer->user_login})</small>";
-					}
-					$review_author_markup .= '</a>';
+				$review_author_markup_profile = esc_url( 'https://profiles.wordpress.org/' . $reviewer->user_nicename );
+				$review_author_markup         = '<a href="' . $review_author_markup_profile . '">';
+				$review_author_markup        .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
+				$review_author_markup        .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
+				$review_author_markup        .= $reviewer->display_name;
+				if ( $reviewer->display_name != $reviewer->user_login ) {
+					$review_author_markup .= " <small>({$reviewer->user_login})</small>";
+				}
+				$review_author_markup .= '</a>';
 
-					printf( __( 'By %1$s on %2$s', 'wporg-plugins' ),
-						$review_author_markup,
-						'<span class="review-date">' . gmdate( 'F j, Y', strtotime( $review->post_modified ) ) . '</span>'
-					);
+				printf(
+					__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					$review_author_markup,
+					'<span class="review-date">' . gmdate( 'F j, Y', strtotime( $review->post_modified ) ) . '</span>'
+				);
 				?>
 			</p>
 		</div>
@@ -305,7 +312,6 @@ class Plugin extends Base {
 </div>
 <?php
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -319,7 +325,7 @@ class Plugin extends Base {
 	protected function get_simplified_faq_markup( $markup ) {
 		$markup = str_replace(
 			array( '<dl>', '</dl>', '<dt>', '</dt>', '<dd>', '</dd>' ),
-			array( '',      '',     '<h4>', '</h4>', '<p>',  '</p>'  ),
+			array( '',     '',      '<h4>', '</h4>', '<p>',  '</p>'  ),
 			$markup
 		);
 
@@ -348,6 +354,4 @@ class Plugin extends Base {
 		$markup .= '</ol>';
 		return $markup;
 	}
-
 }
-

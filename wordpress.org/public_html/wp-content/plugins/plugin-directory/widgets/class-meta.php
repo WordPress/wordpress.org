@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -42,7 +43,8 @@ class Meta extends \WP_Widget {
 			<li><?php printf( __( 'Version: %s', 'wporg-plugins' ), '<strong>' . get_post_meta( $post->ID, 'version', true ) . '</strong>' ); ?></li>
 			<li>
 				<?php
-				printf( __( 'Last updated: %s', 'wporg-plugins' ),
+				printf(
+					__( 'Last updated: %s', 'wporg-plugins' ),
 					/* Translators: Plugin modified time. */
 					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( get_post_modified_time() ) . '</span>' ) . '</strong>'
 				);
@@ -51,10 +53,12 @@ class Meta extends \WP_Widget {
 			<li><?php printf( __( 'Active installations: %s', 'wporg-plugins' ), '<strong>' . Template::active_installs( false ) . '</strong>' ); ?></li>
 
 			<?php if ( $requires = (string) get_post_meta( $post->ID, 'requires', true ) ) : ?>
-				<li><?php
+				<li>
+				<?php
 				_e( 'Requires WordPress Version:', 'wporg-plugins' );
 				echo '<strong>' . esc_html( $requires ) . '</strong>';
-				?></li>
+				?>
+				</li>
 			<?php endif; ?>
 
 			<?php if ( $tested_up_to = (string) get_post_meta( $post->ID, 'tested', true ) ) : ?>
@@ -62,10 +66,12 @@ class Meta extends \WP_Widget {
 			<?php endif; ?>
 
 			<?php if ( $requires_php = (string) get_post_meta( $post->ID, 'requires_php', true ) ) : ?>
-				<li><?php
+				<li>
+				<?php
 				_e( 'Requires PHP Version:', 'wporg-plugins' );
 				echo '<strong>' . esc_html( $requires_php ) . '</strong>';
-				?></li>
+				?>
+				</li>
 			<?php endif; ?>
 
 			<?php
@@ -75,11 +81,7 @@ class Meta extends \WP_Widget {
 				?>
 				<li>
 					<?php
-					if ( 1 === $available_languages_count ) {
-						_e( 'Language:', 'wporg-plugins' );
-					} else {
-						_e( 'Languages:', 'wporg-plugins' );
-					}
+					echo esc_html( _n( 'Language:', 'Languages:', 'wporg-plugins', $available_languages_count ) );
 
 					echo '<div class="languages">';
 
@@ -103,12 +105,15 @@ class Meta extends \WP_Widget {
 
 							<div class="popover-inner">
 								<p><?php echo wp_sprintf( '%l.', $available_languages ); ?></p>
-								<p><?php
-									printf( '<a href="%s">%s</a>',
+								<p>
+								<?php
+									printf(
+										'<a href="%s">%s</a>',
 										esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $post->post_name ),
 										__( 'Translate into your language', 'wporg-plugins' )
 									);
-								?></p>
+								?>
+								</p>
 							</div>
 						</div>
 						<?php
@@ -124,22 +129,23 @@ class Meta extends \WP_Widget {
 			?>
 
 			<?php if ( $tags = get_the_term_list( $post->ID, 'plugin_tags', '<div class="tags">', '', '</div>' ) ) : ?>
-				<li class="clear"><?php
+				<li class="clear">
+					<?php
 					$terms = get_the_terms( $post, 'plugin_tags' );
-					if ( 1 == count( $terms ) ) {
-						/* translators: %s: tag list */
-						printf( __( 'Tag: %s', 'wporg-plugins' ), $tags );
-					} else {
-						/* translators: %s: tag list */
-						printf( __( 'Tags: %s', 'wporg-plugins' ), $tags );
-					}
-				?></li>
+					/* translators: %s: tag list */
+					printf( _n( 'Tag: %s', 'Tags: %s', count( $terms ), 'wporg-plugins' ), $tags );
+					?>
+				</li>
 			<?php endif; ?>
 
 			<?php if ( ! get_query_var( 'plugin_advanced' ) ) : ?>
 				<li class="hide-if-no-js">
 					<?php
-						printf( '<strong><a class="plugin-admin" href="%s">%s</a></strong>', esc_url( get_permalink() . 'advanced/' ), __( 'Advanced View', 'wporg-plugins' ) );
+					printf(
+						'<strong><a class="plugin-admin" href="%s">%s</a></strong>',
+						esc_url( get_permalink() . 'advanced/' ),
+						__( 'Advanced View', 'wporg-plugins' )
+					);
 					?>
 				</li>
 			<?php endif; ?>
@@ -155,14 +161,14 @@ class Meta extends \WP_Widget {
 	 * @return array List of available languages.
 	 */
 	private function available_languages() {
-		$post    = get_post();
-		$slug    = $post->post_name;
-		$locales = Plugin_I18n::instance()->get_translations( $slug );
+		$post      = get_post();
+		$slug      = $post->post_name;
+		$locales   = Plugin_I18n::instance()->get_translations( $slug );
 		$languages = [];
 
 		if ( ! empty( $locales ) ) {
 			$locale_names = wp_list_pluck( $locales, 'name', 'wp_locale' );
-			$wp_locales = wp_list_pluck( $locales,'wp_locale' );
+			$wp_locales   = wp_list_pluck( $locales, 'wp_locale' );
 
 			$sites = get_sites( [
 				'network_id' => WPORG_GLOBAL_NETWORK_ID,

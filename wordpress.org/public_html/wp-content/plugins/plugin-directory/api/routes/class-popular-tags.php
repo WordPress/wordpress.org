@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 
@@ -26,9 +27,9 @@ class Popular_Tags extends Base {
 	function popular_tags( $request ) {
 		$terms = get_terms( 'plugin_tags', array(
 			'hide_empty' => true,
-			'orderby' => 'count',
-			'order' => 'DESC',
-			'number' => 1000
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'number'     => 1000,
 		) );
 
 		$response = array();

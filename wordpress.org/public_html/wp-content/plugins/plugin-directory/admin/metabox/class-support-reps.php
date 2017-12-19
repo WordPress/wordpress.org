@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+
 use WordPressdotorg\Plugin_Directory\Admin\List_Table;
 use WordPressdotorg\Plugin_Directory\Tools;
 
@@ -35,8 +36,8 @@ class Support_Reps {
 	 * Ajax handler for adding a new support rep.
 	 */
 	public static function add_support_rep() {
-		$login    = isset( $_POST['add_support_rep'] ) ? sanitize_user( $_POST['add_support_rep'] ) : '';
-		$post_id  = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+		$login   = isset( $_POST['add_support_rep'] ) ? sanitize_user( $_POST['add_support_rep'] ) : '';
+		$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( 'add-support-rep' );
 
@@ -84,7 +85,7 @@ class Support_Reps {
 	 * Ajax handler for removing a support rep.
 	 */
 	public static function remove_support_rep() {
-		$id      = isset( $_POST['id'] )      ? (int) $_POST['id']      : 0;
+		$id      = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
 		$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( "remove-support-rep-$id" );

@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 use WP_Query;
@@ -20,7 +21,7 @@ class Query_Plugins extends Base {
 		's',
 		'author_name',
 		'installed_plugins',
-		'plugin_tags'
+		'plugin_tags',
 	);
 
 	function __construct() {
@@ -40,7 +41,7 @@ class Query_Plugins extends Base {
 		global $wp_query;
 
 		$response = array(
-			'info' => array(
+			'info'    => array(
 				'page'    => 0,
 				'pages'   => 0,
 				'results' => 0,
@@ -68,8 +69,8 @@ class Query_Plugins extends Base {
 		$wp_query->query( $query );
 
 		$response['info']['page']    = (int) $wp_query->get( 'paged' ) ?: 1;
-		$response['info']['pages']   = (int) $wp_query->max_num_pages  ?: 0;
-		$response['info']['results'] = (int) $wp_query->found_posts    ?: 0;
+		$response['info']['pages']   = (int) $wp_query->max_num_pages ?: 0;
+		$response['info']['results'] = (int) $wp_query->found_posts ?: 0;
 
 		foreach ( $wp_query->posts as $post ) {
 			$response['plugins'][] = $post->post_name ?: get_post( $post->ID )->post_name;

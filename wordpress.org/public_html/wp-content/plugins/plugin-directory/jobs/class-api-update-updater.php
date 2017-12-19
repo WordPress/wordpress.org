@@ -57,11 +57,11 @@ class API_Update_Updater {
 		$post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		if ( ! $post || ! in_array( $post->post_status, array( 'publish', 'disabled', 'closed' ) ) ) {
-			$wpdb->delete(  $wpdb->prefix . 'update_source', compact( 'plugin_slug' ) );
+			$wpdb->delete( $wpdb->prefix . 'update_source', compact( 'plugin_slug' ) );
 			return true;
 		}
 
-		$data = array(
+		$data           = array(
 			'plugin_id'       => $post->ID,
 			'plugin_slug'     => $post->post_name,
 			'available'       => 'publish' === $post->post_status || 'disabled' === $post->post_status,
@@ -101,7 +101,7 @@ class API_Update_Updater {
 			$locales = array_filter( array_values( wp_list_pluck( \GP_Locales::locales(), 'wp_locale' ) ) );
 
 			foreach ( $locales as $locale ) {
-				$cache_key = "plugin_information:"
+				$cache_key = 'plugin_information:'
 					. ( strlen( $plugin_slug ) > 200 ? 'md5:' . md5( $plugin_slug ) : $plugin_slug )
 					. ":{$locale}";
 				wp_cache_delete( $cache_key, 'plugin_api_info' );

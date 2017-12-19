@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use WP_User;
 
 /**
@@ -53,14 +54,17 @@ class Tools {
 			global $wpdb;
 
 			$reviews = $wpdb->get_results( $wpdb->prepare(
-			"SELECT
+				"SELECT
 					ID, post_content, post_title, post_author, post_modified,
 					r.rating as post_rating
-			FROM ratings r
-				LEFT JOIN wporg_419_posts p ON r.post_id = p.ID
-			WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
-			ORDER BY r.review_id DESC
-			LIMIT %d", $plugin_slug, $number ) );
+				FROM ratings r
+					LEFT JOIN wporg_419_posts p ON r.post_id = p.ID
+				WHERE r.object_type = 'plugin' AND r.object_slug = %s AND p.post_status = 'publish'
+				ORDER BY r.review_id DESC
+				LIMIT %d",
+				$plugin_slug,
+				$number
+			) );
 
 			wp_cache_set( "{$plugin_slug}_last{$number}", $reviews, 'plugin-reviews', HOUR_IN_SECONDS );
 		}
@@ -240,7 +244,7 @@ class Tools {
 		}
 
 		if ( false === ( $support_reps = wp_cache_get( $plugin_slug, 'plugin-support-reps' ) ) ) {
-			$post = Plugin_Directory::get_plugin_post( $plugin_slug );
+			$post         = Plugin_Directory::get_plugin_post( $plugin_slug );
 			$support_reps = wp_get_object_terms( $post->ID, 'plugin_support_reps', array( 'fields' => 'names' ) );
 
 			wp_cache_set( $plugin_slug, $support_reps, 'plugin-support-reps', 12 * HOUR_IN_SECONDS );
@@ -340,7 +344,7 @@ class Tools {
 
 		if ( $subscribe ) {
 			$users[] = $user->ID;
-			$users = array_unique( $users );
+			$users   = array_unique( $users );
 		} else {
 			if ( false !== ( $pos = array_search( $user->ID, $users, true ) ) ) {
 				unset( $users[ $pos ] );
@@ -422,8 +426,7 @@ class Tools {
 			return false;
 		}
 
-		$users_favorites = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
-
+		$users_favorites   = get_user_meta( $user->ID, 'plugin_favorites', true ) ?: array();
 		$already_favorited = in_array( $post->post_name, $users_favorites, true );
 
 		if ( $favorite && $already_favorited ) {
@@ -446,7 +449,7 @@ class Tools {
 	 * Retrieve a list of users who are subscribed to plugin commits.
 	 *
 	 * @param string $plugin_slug       The plugin to retrieve subscribers for.
-	 * @param bool   $include_committers Whether to include Plugin Committers in the list. Default false. 
+	 * @param bool   $include_committers Whether to include Plugin Committers in the list. Default false.
 	 * @return array Array of \WP_User's who are subscribed.
 	 */
 	public static function get_plugin_subscribers( $plugin_slug, $include_committers = false ) {
@@ -467,7 +470,7 @@ class Tools {
 		 */
 
 		// Plugin Committers are always subscrived to plugin commits.
-		$committers  = self::get_plugin_committers( $plugin_slug );
+		$committers = self::get_plugin_committers( $plugin_slug );
 		foreach ( $committers as $committer ) {
 			if ( $committer && $user = get_user_by( 'login', $committer ) ) {
 				$users[] = $user;

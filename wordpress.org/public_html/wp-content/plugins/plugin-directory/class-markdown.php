@@ -41,7 +41,7 @@ class Markdown extends \Michelf\MarkdownExtra {
 		 * When doing markdown, first take any user formatted code blocks and turn them into backticks so that
 		 * markdown will preserve things like underscores in code blocks.
 		 */
-		$text = preg_replace_callback( "!(<pre><code>|<code>)(.*?)(</code></pre>|</code>)!s", array( $this, 'code_trick_decodeit_cb' ), $text );
+		$text = preg_replace_callback( '!(<pre><code>|<code>)(.*?)(</code></pre>|</code>)!s', array( $this, 'code_trick_decodeit_cb' ), $text );
 		$text = str_replace( array( "\r\n", "\r" ), "\n", $text );
 
 		// Markdown can do inline code, we convert bbPress style block level code to Markdown style.

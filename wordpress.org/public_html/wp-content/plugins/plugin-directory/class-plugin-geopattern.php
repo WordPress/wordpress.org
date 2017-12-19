@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use RedeyeVentures\GeoPattern\GeoPattern;
 
 require __DIR__ . '/libs/geopattern-1.1.0/geopattern_loader.php';
@@ -90,10 +91,9 @@ class Plugin_Geopattern extends GeoPattern {
 
 		$this->generatePattern();
 
-		#if ( $this->svg->getWidth() < $width || $this->svg->getHeight() < $height ) {
+		// if ( $this->svg->getWidth() < $width || $this->svg->getHeight() < $height ) {
 			$this->svg->setViewBox( 0, 0, $this->svg->getWidth(), $this->svg->getHeight() );
-		#}
-
+		// }
 		if ( $this->text ) {
 			$inner = $this->svg;
 

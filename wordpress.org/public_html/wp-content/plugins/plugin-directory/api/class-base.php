@@ -1,16 +1,26 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Plugin_I18n;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * @package WordPressdotorg_Plugin_Directory
  */
-
 class Base {
 	/**
-	 * Initialises each API route we offer.
+	 * Initializes REST API customizations.
 	 */
-	static function load_routes() {
+	public static function init() {
+		self::load_routes();
+		self::load_fields();
+	}
+
+	/**
+	 * Loads all API route we offer.
+	 */
+	public static function load_routes() {
 		new Routes\Internal_Stats();
 		new Routes\Plugin();
 		new Routes\Locale_Banner();
@@ -21,6 +31,17 @@ class Base {
 		new Routes\SVN_Access();
 		new Routes\Plugin_Committers();
 		new Routes\Plugin_Support_Reps();
+	}
+
+	/**
+	 * Loads all API field for existing WordPress object types we offer.
+	 */
+	public static function load_fields() {
+		new Fields\Plugin\Banners();
+		new Fields\Plugin\Icons();
+		new Fields\Plugin\Rating();
+		new Fields\Plugin\Ratings();
+		new Fields\Plugin\Screenshots();
 	}
 
 	/**
@@ -57,7 +78,4 @@ class Base {
 
 		return true;
 	}
-
 }
-
-

@@ -2,9 +2,9 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 // Explicitly require dependencies so this file can be sourced outside the Plugin Directory.
-require_once( __DIR__ . '/class-plugin-geopattern.php' );
-require_once( __DIR__ . '/class-plugin-geopattern-svg.php' );
-require_once( __DIR__ . '/class-plugin-geopattern-svgtext.php' );
+require_once __DIR__ . '/class-plugin-geopattern.php';
+require_once __DIR__ . '/class-plugin-geopattern-svg.php';
+require_once __DIR__ . '/class-plugin-geopattern-svgtext.php';
 
 /**
  * Various helpers to retrieve data not stored within WordPress.
@@ -136,7 +136,8 @@ class Template {
 		$metas = [];
 
 		if ( is_singular( 'plugin' ) ) {
-			$metas[] = sprintf( '<meta name="description" value="%s" />',
+			$metas[] = sprintf(
+				'<meta name="description" value="%s" />',
 				esc_attr( get_the_excerpt() )
 			);
 
@@ -191,7 +192,7 @@ class Template {
 			global $wpdb;
 
 			// TODO: While the plugin ZIPs are still being served by bbPress, the download stats are stored there.
-			$count = $wpdb->get_var( $wpdb->prepare( "SELECT downloads FROM `" . PLUGINS_TABLE_PREFIX . "download_counts` WHERE topic_id = (SELECT topic_id FROM `" . PLUGINS_TABLE_PREFIX . "topics` WHERE topic_slug = %s )", $post->post_name ) );
+			$count = $wpdb->get_var( $wpdb->prepare( 'SELECT downloads FROM `' . PLUGINS_TABLE_PREFIX . 'download_counts` WHERE topic_id = (SELECT topic_id FROM `' . PLUGINS_TABLE_PREFIX . 'topics` WHERE topic_slug = %s )', $post->post_name ) );
 
 			wp_cache_set( $post->ID, $count, 'plugin_download_count', HOUR_IN_SECONDS );
 		}
@@ -211,7 +212,7 @@ class Template {
 		if ( false === ( $count = wp_cache_get( 'plugin_download_count', 'plugin_download_count' ) ) ) {
 			global $wpdb;
 
-			$count = $wpdb->get_var( "SELECT SUM(downloads) FROM `" . PLUGINS_TABLE_PREFIX . "stats`" );
+			$count = $wpdb->get_var( 'SELECT SUM(downloads) FROM `' . PLUGINS_TABLE_PREFIX . 'stats`' );
 			wp_cache_set( 'plugin_download_count', $count, 'plugin_download_count', DAY_IN_SECONDS );
 		}
 
@@ -233,8 +234,7 @@ class Template {
 		$ratings     = get_post_meta( $post->ID, 'ratings', true ) ?: array();
 		$num_ratings = array_sum( $ratings );
 
-		return
-			'<div class="plugin-rating">' .
+		return '<div class="plugin-rating">' .
 				Template::dashicons_stars( $rating ) .
 				'<span class="rating-count">(' .
 					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
@@ -355,10 +355,14 @@ class Template {
 	 * @return mixed
 	 */
 	public static function get_plugin_icon( $post = null, $output = 'raw' ) {
-		$plugin    = get_post( $post );
-		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
+		$plugin = get_post( $post );
 
-		$icon = $icon_2x = $svg = $generated = false;
+		if ( in_array( $plugin->post_status, [ 'disabled', 'closed' ], true ) ) {
+			return false;
+		}
+
+		$raw_icons = get_post_meta( $plugin->ID, 'assets_icons', true ) ?: array();
+		$icon      = $icon_2x = $svg = $generated = false;
 
 		foreach ( $raw_icons as $file => $info ) {
 			switch ( $info['resolution'] ) {
@@ -390,7 +394,7 @@ class Template {
 		if ( ! $icon || 'publish' !== $plugin->post_status ) {
 			$generated = true;
 
-			$icon = new Plugin_Geopattern;
+			$icon = new Plugin_Geopattern();
 			$icon->setString( $plugin->post_name );
 
 			// Use the average color of the first known banner as the icon background color
@@ -411,7 +415,7 @@ class Template {
 				if ( ! empty( $icon_2x ) && ! $generated ) {
 					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$icon_2x}'); } }";
 				}
-				$html .= "</style>";
+				$html .= '</style>';
 				$html .= "<div class='plugin-icon' id='{$id}'></div>";
 
 				return $html;
@@ -424,7 +428,7 @@ class Template {
 	}
 
 	/**
-	 * Retrieve the Plugin Icon details for a plugin.
+	 * Retrieve the Plugin banner details for a plugin.
 	 *
 	 * @static
 	 *
@@ -435,7 +439,7 @@ class Template {
 	public static function get_plugin_banner( $post = null, $output = 'raw' ) {
 		$plugin = get_post( $post );
 
-		if ( in_array( $plugin->post_status, ['disabled', 'closed'], true ) ) {
+		if ( in_array( $plugin->post_status, [ 'disabled', 'closed' ], true ) ) {
 			return false;
 		}
 
@@ -487,7 +491,7 @@ class Template {
 				if ( ! empty( $banner_2x ) ) {
 					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
 				}
-				$html .= "</style>";
+				$html .= '</style>';
 				$html .= "<div class='plugin-banner' id='{$id}'></div>";
 
 				return $html;
@@ -579,7 +583,8 @@ class Template {
 	 * @return string The Rating HTML.
 	 */
 	public static function dashicons_stars( $args = array() ) {
-		$args = wp_parse_args( ( is_numeric( $args ) ? array( 'rating' => $args ) : $args ), array(
+		$args = is_numeric( $args ) ? array( 'rating' => $args ) : $args;
+		$args = wp_parse_args( $args, array(
 			'rating'   => 0,
 			'template' => '<span class="%1$s"></span>',
 		) );
@@ -628,9 +633,9 @@ class Template {
 		}
 
 		if ( 'trunk' != $version ) {
-			return sprintf( "https://downloads.wordpress.org/plugin/%s.%s.zip", $post->post_name, $version );
+			return sprintf( 'https://downloads.wordpress.org/plugin/%s.%s.zip', $post->post_name, $version );
 		} else {
-			return sprintf( "https://downloads.wordpress.org/plugin/%s.zip", $post->post_name );
+			return sprintf( 'https://downloads.wordpress.org/plugin/%s.zip', $post->post_name );
 		}
 	}
 
@@ -661,8 +666,8 @@ class Template {
 		$favorited = Tools::favorited_plugin( $post, $user );
 
 		return add_query_arg( array(
-			'_wpnonce' => wp_create_nonce( 'wp_rest' ),
-			( $favorited ? 'unfavorite' : 'favorite' ) => '1'
+			'_wpnonce'                                 => wp_create_nonce( 'wp_rest' ),
+			( $favorited ? 'unfavorite' : 'favorite' ) => '1',
 		), home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/favorite' ) );
 	}
 
@@ -758,21 +763,21 @@ class Template {
 			$sites['en_US'] = (object) array(
 				'locale'    => 'en_US',
 				'hreflang'  => 'en',
-				'subdomain' => ''
+				'subdomain' => '',
 			);
 
 			uasort( $sites, function( $a, $b ) {
 				return strcasecmp( $a->hreflang, $b->hreflang );
 			} );
 
-			wp_cache_set( 'local-sites-'.get_post()->post_name, $sites, 'locale-associations', DAY_IN_SECONDS );
+			wp_cache_set( 'local-sites-' . get_post()->post_name, $sites, 'locale-associations', DAY_IN_SECONDS );
 		}
 
 		foreach ( $sites as $site ) {
 			$url = sprintf(
 				'https://%swordpress.org%s',
 				$site->subdomain ? "{$site->subdomain}." : '',
-				$_SERVER[ 'REQUEST_URI' ]
+				$_SERVER['REQUEST_URI']
 			);
 
 			printf(

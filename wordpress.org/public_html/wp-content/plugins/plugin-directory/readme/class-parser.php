@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Readme;
+
 use WordPressdotorg\Plugin_Directory\Markdown;
 
 /**
@@ -158,10 +159,11 @@ class Parser {
 	 */
 	protected function parse_readme( $file ) {
 		$contents = file_get_contents( $file );
-		if ( preg_match( '!!u', $contents ) )
+		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
-		else
+		} else {
 			$contents = preg_split( '!\R!', $contents ); // regex failed due to invalid UTF8 in $contents, see #2298
+		}
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
 		// Strip UTF8 BOM if present.
@@ -211,9 +213,9 @@ class Parser {
 				}
 			}
 
-			$bits = explode( ':', trim( $line ), 2 );
+			$bits                = explode( ':', trim( $line ), 2 );
 			list( $key, $value ) = $bits;
-			$key = strtolower( trim( $key, " \t*-\r\n" ) );
+			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
 			if ( isset( $this->valid_headers[ $key ] ) ) {
 				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
 			}
@@ -251,7 +253,7 @@ class Parser {
 			// Handle the many cases of "License: GPLv2 - http://..."
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
 				$headers['license_uri'] = $url[1];
-				$headers['license'] = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
 			}
 			$this->license = $headers['license'];
 		}
@@ -267,7 +269,7 @@ class Parser {
 				continue;
 			}
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
-			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] )
+				 ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] )
 			) {
 
 				// Stop after any Markdown heading.
@@ -294,7 +296,7 @@ class Parser {
 
 			// Stop only after a ## Markdown header, not a ###.
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
-			     ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] && isset( $trimmed[2] ) && '#' !== $trimmed[2] )
+				 ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] && isset( $trimmed[2] ) && '#' !== $trimmed[2] )
 			) {
 
 				if ( ! empty( $section_name ) ) {
@@ -311,7 +313,7 @@ class Parser {
 
 				// If we encounter an unknown section header, include the provided Title, we'll filter it to other_notes later.
 				if ( ! in_array( $section_name, $this->expected_sections ) ) {
-					$current .= '<h3>' . $section_title . '</h3>';
+					$current     .= '<h3>' . $section_title . '</h3>';
 					$section_name = 'other_notes';
 				}
 				continue;
@@ -333,7 +335,7 @@ class Parser {
 		}
 
 		// Suffix the Other Notes section to the description.
-		if ( !empty( $this->sections['other_notes'] ) ) {
+		if ( ! empty( $this->sections['other_notes'] ) ) {
 			$this->sections['description'] .= "\n" . $this->sections['other_notes'];
 			unset( $this->sections['other_notes'] );
 		}
@@ -347,7 +349,7 @@ class Parser {
 
 		// Display FAQs as a definition list.
 		if ( isset( $this->sections['faq'] ) ) {
-			$this->faq = $this->parse_section( $this->sections['faq'] );
+			$this->faq             = $this->parse_section( $this->sections['faq'] );
 			$this->sections['faq'] = '';
 		}
 
@@ -355,11 +357,11 @@ class Parser {
 		if ( $this->has_unique_installation_instructions() ) {
 			$this->faq = array_merge(
 				array(
-					__( 'Installation Instructions', 'wporg-plugins' ) => $this->sections['installation']
+					__( 'Installation Instructions', 'wporg-plugins' ) => $this->sections['installation'],
 				),
 				$this->faq
 			);
-			//unset( $this->sections['installation'] );
+			// unset( $this->sections['installation'] );
 			$this->sections['faq'] = ''; // Ensure it's set as per faq section above.
 		}
 
@@ -400,7 +402,7 @@ class Parser {
 			if ( $this->faq ) {
 				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
-					$question_slug = sanitize_title_with_dashes( $question );
+					$question_slug          = sanitize_title_with_dashes( $question );
 					$this->sections['faq'] .= "<dt id='{$question_slug}'>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
@@ -496,14 +498,12 @@ class Parser {
 
 		$text = force_balance_tags( $text );
 		// TODO: make_clickable() will act inside shortcodes.
-		//$text = make_clickable( $text );
-
+		// $text = make_clickable( $text );
 		$text = wp_kses( $text, $allowed );
 
 		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
 		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.
-		//$text = preg_replace( "/(?<![> ])\n/", ' ', $text );
-
+		// $text = preg_replace( "/(?<![> ])\n/", ' ', $text );
 		$text = trim( $text );
 
 		return $text;
@@ -515,7 +515,8 @@ class Parser {
 	 * @param string $text
 	 * @return string
 	 */
-	protected function sanitize_text( $text ) { // not fancy
+	protected function sanitize_text( $text ) {
+		// not fancy
 		$text = strip_tags( $text );
 		$text = esc_html( $text );
 		$text = trim( $text );
@@ -582,7 +583,7 @@ class Parser {
 	 * @return array
 	 */
 	protected function parse_section( $lines ) {
-		$key = $value = '';
+		$key    = $value = '';
 		$return = array();
 
 		if ( ! is_array( $lines ) ) {
@@ -605,7 +606,7 @@ class Parser {
 
 		$line_count = count( $lines );
 		for ( $i = 0; $i < $line_count; $i++ ) {
-			$line = &$lines[ $i ];
+			$line    = &$lines[ $i ];
 			$trimmed = &$trimmed_lines[ $i ];
 			if ( ! $trimmed ) {
 				$value .= "\n";
@@ -626,7 +627,7 @@ class Parser {
 
 				$value = '';
 				// Trim off the first character of the line, as we know that's the heading style we're expecting to remove.
-				$key   = trim( $line, $trimmed[0] . " \t" );
+				$key = trim( $line, $trimmed[0] . " \t" );
 				continue;
 			}
 

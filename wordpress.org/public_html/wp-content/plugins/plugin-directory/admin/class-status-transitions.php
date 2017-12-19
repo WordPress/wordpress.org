@@ -95,10 +95,12 @@ class Status_Transitions {
 		}
 
 		// ...or it's a white-listed status for plugin reviewers.
-		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array( $postarr['post_status'], array(
+		if ( current_user_can( 'plugin_review', $postarr['ID'] ) && in_array(
+			$postarr['post_status'], array(
 				'new',
 				'pending',
-			) ) ) {
+			)
+		) ) {
 			return $data;
 		}
 
@@ -130,12 +132,15 @@ class Status_Transitions {
 			case 'approved':
 				$this->approved( $post->ID, $post );
 				break;
+
 			case 'rejected':
 				$this->rejected( $post->ID, $post );
 				break;
+
 			case 'publish':
 				$this->clean_closed_date( $post->ID );
 				break;
+
 			case 'disabled':
 			case 'closed':
 				$this->save_close_reason( $post->ID );
@@ -162,7 +167,8 @@ class Status_Transitions {
 			mkdir( "$dir/$folder", 0777 );
 		}
 
-		/* Temporarily disable SVN prefill from ZIP files
+		/*
+		 Temporarily disable SVN prefill from ZIP files
 		if ( $attachments ) {
 			$attachment = end( $attachments );
 
@@ -190,7 +196,9 @@ class Status_Transitions {
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been approved!', 'wporg-plugins' ), $post->post_title );
 
 		/* translators: 1: plugin name, 2: plugin slug */
-		$content = sprintf( __( 'Congratulations, your plugin hosting request for %1$s has been approved.
+		$content = sprintf(
+			__(
+				'Congratulations, your plugin hosting request for %1$s has been approved.
 
 Within one hour you will have access to your SVN repository with the WordPress.org username and password you used to log in and submit your request. Your username is case sensitive.
 
@@ -222,7 +230,8 @@ Enjoy!
 
 --
 The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins' ),
+https://make.wordpress.org/plugins', 'wporg-plugins'
+			),
 			$post->post_title,
 			$post->post_name
 		);
@@ -255,13 +264,16 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$subject = sprintf( __( '[WordPress Plugin Directory] %s has been rejected', 'wporg-plugins' ), $post->post_title );
 
 		/* translators: 1: plugin name, 2: plugins@wordpress.org */
-		$content = sprintf( __( 'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
+		$content = sprintf(
+			__(
+				'Unfortunately your plugin submission for %1$s has been rejected from the WordPress Plugin Directory.
 
 If you believe this to be in error, please email %2$s with your plugin attached as a zip and explain why you feel your plugin should be an exception.
 
 --
 The WordPress Plugin Directory Team
-https://make.wordpress.org/plugins', 'wporg-plugins' ),
+https://make.wordpress.org/plugins', 'wporg-plugins'
+			),
 			$post->post_title,
 			'plugins@wordpress.org'
 		);
@@ -339,7 +351,7 @@ https://make.wordpress.org/plugins', 'wporg-plugins' ),
 		$comment = array(
 			'comment_author'       => $user->display_name,
 			'comment_author_email' => $user->user_email,
-			'comment_author_url'   => $user->user_url,	
+			'comment_author_url'   => $user->user_url,
 			'comment_type'         => 'internal-note',
 			'comment_post_ID'      => $post_id,
 			'user_id'              => get_current_user_id(),

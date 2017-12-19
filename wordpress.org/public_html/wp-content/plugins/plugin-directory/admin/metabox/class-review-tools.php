@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
+
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -13,7 +14,7 @@ class Review_Tools {
 
 		$zip_files = array();
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-			$zip_files[ $zip_file->post_date ] = array(	wp_get_attachment_url( $zip_file->ID ), $zip_file );
+			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
 		}
 		uksort( $zip_files, function( $a, $b ) {
 			return strtotime( $a ) < strtotime( $b );
@@ -21,13 +22,14 @@ class Review_Tools {
 
 		if ( $zip_url = get_post_meta( $post->ID, '_submitted_zip', true ) ) {
 			// Back-compat only.
-			$zip_files[ 'User provided URL' ] = array( $zip_url, null );
+			$zip_files['User provided URL'] = array( $zip_url, null );
 		}
 
 		foreach ( $zip_files as $zip_date => $zip ) {
 			list( $zip_url, $zip_file ) = $zip;
-			$zip_size = ( is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : __( 'unknown size', 'wporg-plugins' ) );
-			printf( '<p>' . __( '<strong>Zip file:</strong> %s', 'wporg-plugins' ) . '</p>',
+			$zip_size                   = ( is_object( $zip_file ) ? size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 ) : __( 'unknown size', 'wporg-plugins' ) );
+			printf(
+				'<p>' . __( '<strong>Zip file:</strong> %s', 'wporg-plugins' ) . '</p>',
 				sprintf( '%s <a href="%s">%s</a> (%s)', esc_html( $zip_date ), esc_url( $zip_url ), esc_html( $zip_url ), esc_html( $zip_size ) )
 			);
 		}
@@ -64,7 +66,7 @@ class Review_Tools {
 				/* translators: %s: plugin title */
 				$subject = sprintf( __( '[WordPress Plugin Directory] Notice: %s', 'wporg-plugins' ), $post->post_title );
 			}
-			
+
 			?>
 			<form id="contact-author" class="contact-author" method="POST" action="https://supportpress.wordpress.org/plugins/thread-new.php">
 				<input type="hidden" name="to_email" value="<?php echo esc_attr( $author->user_email ); ?>" />
@@ -74,6 +76,7 @@ class Review_Tools {
 				<button class="button button-primary" type="submit"><?php _e( 'Contact plugin author', 'wporg-plugins' ); ?></button>
 			</form>
 			<?php
+
 			return $string;
 		} );
 	}

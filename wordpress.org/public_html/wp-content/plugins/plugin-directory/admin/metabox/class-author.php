@@ -14,9 +14,13 @@ class Author {
 	 * Displays information about the author of the current plugin.
 	 */
 	public static function display() {
-		$post  = get_post();
-		$value = empty( $post->ID ) ? get_current_user_id() : $post->post_author;
-		$user  = new \WP_User( $value );
+		$post   = get_post();
+		$value  = empty( $post->ID ) ? get_current_user_id() : $post->post_author;
+		$user   = new \WP_User( $value );
+		$source = add_query_arg( array(
+			'action'      => 'plugin-author-lookup',
+			'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_author_lookup' ),
+		), admin_url( 'admin-ajax.php' ) );
 
 		?>
 		<label><input id="post_author_username" type="text" value="<?php echo esc_attr( $user->user_login ); ?>" /></label>
@@ -26,7 +30,7 @@ class Author {
 		<script>
 			jQuery( function( $ ) {
 				$( '#post_author_username' ).autocomplete( {
-					source: '<?php echo add_query_arg( array( 'action' => 'plugin-author-lookup', '_ajax_nonce' => wp_create_nonce( 'wporg_plugins_author_lookup' ) ), admin_url( 'admin-ajax.php' ) ); ?>',
+					source: '<?php echo esc_js( $source ); ?>',
 					minLength: 2,
 					delay: 700,
 					autoFocus: true,

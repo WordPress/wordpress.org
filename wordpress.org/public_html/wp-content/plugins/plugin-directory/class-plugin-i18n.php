@@ -63,7 +63,6 @@ class Plugin_I18n {
 	 * Plugin_I18n constructor.
 	 *
 	 * @access private
-	 *
 	 */
 	private function __construct() {
 		wp_cache_add_global_groups( self::CACHE_GROUP );
@@ -236,7 +235,8 @@ class Plugin_I18n {
 
 		$translation_set_id = $wpdb->get_var( $wpdb->prepare(
 			'SELECT id FROM ' . GLOTPRESS_TABLE_PREFIX . 'translation_sets WHERE project_id = %d AND locale = %s',
-			$branch_id, $locale ) );
+			$branch_id, $locale
+		) );
 
 		if ( empty( $translation_set_id ) ) {
 
@@ -455,13 +455,13 @@ class Plugin_I18n {
 
 		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
 		if ( false === $translation_sets ) {
-			$api_url = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, [ 'https' ] );
+			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch, [ 'https' ] );
 			$response = wp_remote_get( $api_url );
 
 			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {
 				$translation_sets = [];
 			} else {
-				$result = json_decode( wp_remote_retrieve_body( $response ) );
+				$result           = json_decode( wp_remote_retrieve_body( $response ) );
 				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
 			}
 

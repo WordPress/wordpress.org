@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 
@@ -20,8 +21,8 @@ class SVN_Access extends Base {
 		$this->svn_access_table = PLUGINS_TABLE_PREFIX . 'svn_access';
 
 		register_rest_route( 'plugins/v1', '/svn-access', array(
-			'methods'  => \WP_REST_Server::READABLE,
-			'callback' => array( $this, 'generate_svn_access' ),
+			'methods'             => \WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'generate_svn_access' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
 		) );
 	}
@@ -41,7 +42,7 @@ class SVN_Access extends Base {
 
 		if ( empty( $svn_access ) ) {
 			return false;
-			}
+		}
 
 		foreach ( $svn_access as $slug => $users ) {
 			$slug = ltrim( $slug, '/' );

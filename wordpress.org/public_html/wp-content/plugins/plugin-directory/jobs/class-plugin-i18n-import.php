@@ -16,12 +16,12 @@ class Plugin_i18n_Import {
 	 * Queue the job
 	 */
 	public static function queue( $plugin_slug, $plugin_data ) {
-		$when_to_run = time() + 15 * MINUTE_IN_SECONDS;
+		$when_to_run    = time() + 15 * MINUTE_IN_SECONDS;
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin_i18n:{$plugin_slug}", 'last' );
 
 		// Update a scheduled event if it doesn't run in the next minute.
 		if ( $next_scheduled && $next_scheduled > time() + 1 * MINUTE_IN_SECONDS ) {
-			$next_scheduled_events = Manager::get_scheduled_events( "import_plugin_i18n:{$plugin_slug}",$next_scheduled );
+			$next_scheduled_events = Manager::get_scheduled_events( "import_plugin_i18n:{$plugin_slug}", $next_scheduled );
 			if ( $next_scheduled_events ) {
 				$next_scheduled_event = array_shift( $next_scheduled_events );
 
@@ -58,7 +58,7 @@ class Plugin_i18n_Import {
 			$when_to_run,
 			"import_plugin_i18n:{$plugin_slug}",
 			array(
-				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data )
+				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data ),
 			)
 		);
 
@@ -98,7 +98,7 @@ class Plugin_i18n_Import {
 	 * Processes i18n import tasks.
 	 *
 	 * @param string $plugin_slug
-	 * @param array $i18n_processes
+	 * @param array  $i18n_processes
 	 */
 	public static function process_i18n_for_plugin( $plugin_slug, $i18n_processes ) {
 		foreach ( $i18n_processes as $process ) {

@@ -54,7 +54,7 @@ class Upload {
 				&& ! $submitted_counts->total
 			) :
 				if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) :
-					$uploader      = new Upload_Handler;
+					$uploader      = new Upload_Handler();
 					$upload_result = $uploader->process_upload();
 
 					if ( is_wp_error( $upload_result ) ) {
@@ -75,56 +75,65 @@ class Upload {
 				?>
 
 				<div class="plugin-queue-message notice notice-info notice-alt">
-					<p><?php
-						if ( 1 === ( $plugins->new + $plugins->pending ) ) {
-							 _e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
-						} else {
-							printf(
-								_n(
-									'Currently there are %1$s plugins in the review queue, %2$s of which is awaiting its initial review.',
-									'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.',
-									$plugins->new,
-									'wporg-plugins'
-								),
-								'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
-								'<strong>' . $plugins->new . '</strong>'
-							);
-						}
-					?></p>
+					<p>
+					<?php
+					if ( 1 === ( $plugins->new + $plugins->pending ) ) {
+						 _e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
+					} else {
+						printf(
+							_n(
+								'Currently there are %1$s plugins in the review queue, %2$s of which is awaiting its initial review.',
+								'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.',
+								$plugins->new,
+								'wporg-plugins'
+							),
+							'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
+							'<strong>' . $plugins->new . '</strong>'
+						);
+					}
+					?>
+					</p>
 				</div>
 
 				<?php if ( $submitted_counts->total ) : ?>
 
 					<div class="plugin-queue-message notice notice-warning notice-alt">
-						<p><?php
-							if ( 1 === $submitted_counts->total ) {
-								_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
-							} else {
-								printf(
-									_n(
-										'You have %1$s plugins in the review queue, %2$s is being actively reviewed. Please wait for them to be approved before submitting any more.',
-										'You have %1$s plugins in the review queue, %2$s are being actively reviewed. Please wait for them to be approved before submitting any more.',
-										$submitted_counts->pending,
-										'wporg-plugins'
-									),
-									'<strong>' . $submitted_counts->total . '</strong>',
-									'<strong>' . $submitted_counts->pending . '</strong>'
-								);
-							}
-						?></p>
+						<p>
+						<?php
+						if ( 1 === $submitted_counts->total ) {
+							_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
+						} else {
+							printf(
+								_n(
+									'You have %1$s plugins in the review queue, %2$s is being actively reviewed. Please wait for them to be approved before submitting any more.',
+									'You have %1$s plugins in the review queue, %2$s are being actively reviewed. Please wait for them to be approved before submitting any more.',
+									$submitted_counts->pending,
+									'wporg-plugins'
+								),
+								'<strong>' . $submitted_counts->total . '</strong>',
+								'<strong>' . $submitted_counts->pending . '</strong>'
+							);
+						}
+						?>
+						</p>
 
-						<ul><?php
-							foreach ( $submitted_plugins as $plugin ) {
-								echo '<li>' . esc_html( $plugin->post_title ) . ' &#8212; ' . $plugin->status . "</li>\n";
-							}
-						?></ul>
+						<ul>
+						<?php
+						foreach ( $submitted_plugins as $plugin ) {
+							echo '<li>' . esc_html( $plugin->post_title ) . ' &#8212; ' . $plugin->status . "</li>\n";
+						}
+						?>
+						</ul>
 
-						<p><?php
+						<p>
+						<?php
 							/* translators: %s: plugins@wordpress.org */
-							printf( __( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
+							printf(
+								__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
 								'plugins@wordpress.org'
 							);
-						?></p>
+						?>
+						</p>
 					</div>
 
 				<?php endif; // $submitted_counts->total ?>
@@ -136,12 +145,15 @@ class Upload {
 				<form id="upload_form" class="plugin-upload-form" enctype="multipart/form-data" method="POST" action="">
 					<?php wp_nonce_field( 'wporg-plugins-upload' ); ?>
 					<input type="hidden" name="action" value="upload"/>
-					<?php /* <fieldset>
+					<?php
+					/*
+					<fieldset>
 						<legend><?php _e( 'Select categories (up to 3)', 'wporg-plugins' ); ?></legend>
 						<ul class="category-checklist">
 							<?php wp_terms_checklist( 0, array( 'taxonomy' => 'plugin_category' ) ); ?>
 						</ul>
-					</fieldset> */ ?>
+					</fieldset> */
+?>
 
 					<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
 					<label class="button button-secondary" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
@@ -174,7 +186,8 @@ class Upload {
 
 			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( wp_login_url() ) ); ?></p>
 
-		<?php endif; // is_user_logged_in()
+		<?php
+		endif; // is_user_logged_in()
 
 		return ob_get_clean();
 	}

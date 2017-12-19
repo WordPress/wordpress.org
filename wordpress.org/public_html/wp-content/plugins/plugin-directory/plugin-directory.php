@@ -21,7 +21,7 @@ namespace WordPressdotorg\Plugin_Directory;
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 
 // Register an Autoloader for all files
-include __DIR__ . '/class-autoloader.php';
+require __DIR__ . '/class-autoloader.php';
 Autoloader\register_class_path( __NAMESPACE__, __DIR__ );
 
 // Instantiate the Plugin Directory

@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use RedeyeVentures\GeoPattern\SVGElements\Base;
 
 /**
@@ -20,12 +21,12 @@ class Plugin_Geopattern_SVGText extends Base {
 	protected $text;
 
 	/**
-	 * @param       $text
-	 * @param       $x
-	 * @param       $y
-	 * @param       $text_anchor
-	 * @param       $style
-	 * @param array $args
+	 * @param string $text
+	 * @param string $x
+	 * @param string $y
+	 * @param string $text_anchor
+	 * @param string $style
+	 * @param array  $args
 	 */
 	function __construct( $text, $x, $y, $text_anchor, $style, $args = array() ) {
 		$this->elements = array(

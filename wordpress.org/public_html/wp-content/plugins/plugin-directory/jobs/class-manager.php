@@ -17,12 +17,12 @@ class Manager {
 		add_filter( 'cron_schedules', array( $this, 'register_schedules' ) );
 
 		// The actual cron hooks.
-		add_action( 'plugin_directory_meta_sync',        array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
-		add_action( 'plugin_directory_svn_sync',         array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
+		add_action( 'plugin_directory_meta_sync', array( __NAMESPACE__ . '\Meta_Sync', 'cron_trigger' ) );
+		add_action( 'plugin_directory_svn_sync', array( __NAMESPACE__ . '\SVN_Watcher', 'cron_trigger' ) );
 		add_action( 'plugin_directory_update_api_check', array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger' ) );
 
 		// A cronjob to check cronjobs
-		add_action( 'plugin_directory_check_cronjobs',   array( $this, 'register_cron_tasks' ) );
+		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
 
 		// Register the wildcard cron hook tasks.
 		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
@@ -35,8 +35,14 @@ class Manager {
 	 * Register any cron schedules needed.
 	 */
 	public function register_schedules( $schedules ) {
-		$schedules['every_30s'] = array( 'interval' => 30, 'display' => 'Every 30 seconds' );
-		$schedules['every_120s'] = array( 'interval' => 120, 'display' => 'Every 120 seconds' );
+		$schedules['every_30s']  = array(
+			'interval' => 30,
+			'display'  => 'Every 30 seconds',
+		);
+		$schedules['every_120s'] = array(
+			'interval' => 120,
+			'display'  => 'Every 120 seconds',
+		);
 
 		return $schedules;
 	}
@@ -120,9 +126,9 @@ class Manager {
 
 					if ( ! $next_timestamp || $next_timestamp === $timestamp ) {
 						$events[] = [
-							'hook'      => $cron_item['_job']->hook,
-							'args'      => $cron_item['_job']->args,
-							'nextrun'   => $timestamp,
+							'hook'    => $cron_item['_job']->hook,
+							'args'    => $cron_item['_job']->args,
+							'nextrun' => $timestamp,
 						];
 					}
 				}
@@ -163,7 +169,7 @@ class Manager {
 						return false;
 					}
 
-					$event['_job']->args = $data['args'];
+					$event['_job']->args    = $data['args'];
 					$event['_job']->nextrun = $data['nextrun'];
 					$event['_job']->save();
 
@@ -226,16 +232,16 @@ class Manager {
 	 * The jobs are queued for 1 minutes time to avoid recurring job failures from repeating too soon.
 	 */
 	public function register_cron_tasks() {
-		if ( ! wp_next_scheduled ( 'plugin_directory_meta_sync' ) ) {
+		if ( ! wp_next_scheduled( 'plugin_directory_meta_sync' ) ) {
 			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_meta_sync' );
 		}
-		if ( ! wp_next_scheduled ( 'plugin_directory_svn_sync' ) ) {
+		if ( ! wp_next_scheduled( 'plugin_directory_svn_sync' ) ) {
 			wp_schedule_event( time() + 60, 'every_30s', 'plugin_directory_svn_sync' );
 		}
-		if ( ! wp_next_scheduled ( 'plugin_directory_update_api_check' ) ) {
+		if ( ! wp_next_scheduled( 'plugin_directory_update_api_check' ) ) {
 			wp_schedule_event( time() + 60, 'hourly', 'plugin_directory_update_api_check' );
 		}
-		if ( ! wp_next_scheduled ( 'plugin_directory_check_cronjobs' ) ) {
+		if ( ! wp_next_scheduled( 'plugin_directory_check_cronjobs' ) ) {
 			wp_schedule_event( time() + 60, 'every_120s', 'plugin_directory_check_cronjobs' );
 		}
 	}
@@ -256,20 +262,23 @@ class Manager {
 			'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
 		);
 
-		foreach ( $cron_array as $timestamp => $handlers ) {
-			if ( ! is_numeric( $timestamp ) ) {
-				continue;
-			}
-			foreach ( $handlers as $hook => $jobs ) {
-				$pos = strpos( $hook, ':' );
-				if ( ! $pos ) {
+		if ( is_array( $cron_array ) ) {
+			foreach ( $cron_array as $timestamp => $handlers ) {
+				if ( ! is_numeric( $timestamp ) ) {
 					continue;
 				}
 
-				$partial_hook = substr( $hook, 0, $pos );
+				foreach ( $handlers as $hook => $jobs ) {
+					$pos = strpos( $hook, ':' );
+					if ( ! $pos ) {
+						continue;
+					}
 
-				if ( isset( $wildcard_cron_tasks[ $partial_hook ] ) ) {
-					add_action( $hook, $wildcard_cron_tasks[ $partial_hook ], 10, PHP_INT_MAX );
+					$partial_hook = substr( $hook, 0, $pos );
+
+					if ( isset( $wildcard_cron_tasks[ $partial_hook ] ) ) {
+						add_action( $hook, $wildcard_cron_tasks[ $partial_hook ], 10, PHP_INT_MAX );
+					}
 				}
 			}
 		}

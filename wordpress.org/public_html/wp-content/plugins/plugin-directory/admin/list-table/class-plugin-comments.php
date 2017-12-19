@@ -37,7 +37,7 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 	public function display( $output_empty = false ) {
 		$singular = $this->_args['singular'];
 
-		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
+		wp_nonce_field( 'fetch-list-' . get_class( $this ), '_ajax_fetch_list_nonce' );
 		?>
 		<table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" data-comment-type="<?php echo esc_attr( $this->comment_type ); ?>" style="display:none;">
 			<colgroup>
@@ -46,9 +46,9 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 			</colgroup>
 			<tbody id="the-comment-list"<?php if ( $singular ) { echo " data-wp-lists='list:$singular'"; } ?>>
 			<?php
-				if ( ! $output_empty ) {
-					$this->display_rows_or_placeholder();
-				}
+			if ( ! $output_empty ) {
+				$this->display_rows_or_placeholder();
+			}
 			?>
 			</tbody>
 		</table>

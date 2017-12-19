@@ -4,15 +4,15 @@ class TestUrlSchemes extends WP_UnitTestCase {
 
 	function http_get( $uri ) {
 		$base_url = 'https://wordpress.org';
-		$url = $base_url . $uri;
+		$url      = $base_url . $uri;
 
 		$http_args = array(
 			'timeout' => 15,
-			#'body' => array(
-			#	'action' => $action,
-			#	'request' => serialize( $args )
-			#),
-			#'user-agent' => $user_agent,
+			// 'body' => array(
+			// 'action' => $action,
+			// 'request' => serialize( $args )
+			// ),
+			// 'user-agent' => $user_agent,
 		);
 		$request = wp_remote_get( $url, $http_args );
 
@@ -22,7 +22,7 @@ class TestUrlSchemes extends WP_UnitTestCase {
 	function urlProvider() {
 		return [
 			[ '/plugins/add/' ],
-			[ '/plugins/about/'],
+			[ '/plugins/about/' ],
 			[ '/plugins/about/guidelines/' ],
 			[ '/plugins/about/svn/' ],
 			[ '/plugins/about/faq/' ],
@@ -60,7 +60,7 @@ class TestUrlSchemes extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider urlProvider
-	*/
+	 */
 	function test_url( $url ) {
 		$response = $this->http_get( $url );
 		$this->assertFalse( is_wp_error( $response ), ( is_wp_error( $response ) ? $response->get_error_message() : '' ) );

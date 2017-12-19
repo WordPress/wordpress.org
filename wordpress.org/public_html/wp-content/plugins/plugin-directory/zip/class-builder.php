@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Zip;
+
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use Exception;
 
@@ -10,8 +11,8 @@ use Exception;
  */
 class Builder {
 
-	const TMP_DIR = '/tmp/plugin-zip-builder';
-	const SVN_URL = 'https://plugins.svn.wordpress.org';
+	const TMP_DIR     = '/tmp/plugin-zip-builder';
+	const SVN_URL     = 'https://plugins.svn.wordpress.org';
 	const ZIP_SVN_URL = PLUGIN_ZIP_SVN_URL;
 
 	protected $zip_file      = '';
@@ -59,7 +60,7 @@ class Builder {
 			self::ZIP_SVN_URL,
 			$this->tmp_dir,
 			array(
-				'depth' => 'empty',
+				'depth'    => 'empty',
 				'username' => PLUGIN_ZIP_SVN_USER,
 				'password' => PLUGIN_ZIP_SVN_PASS,
 			)
@@ -69,10 +70,11 @@ class Builder {
 
 			// Ensure the plugins folder exists within svn
 			$plugin_folder = "{$this->tmp_dir}/{$this->slug}/";
+
 			$res = SVN::up(
 				$plugin_folder,
 				array(
-					'depth' => 'empty'
+					'depth' => 'empty',
 				)
 			);
 			if ( ! is_dir( $plugin_folder ) ) {
@@ -104,10 +106,9 @@ class Builder {
 			SVN::up( $this->zip_file );
 			// This is done within the checksum generation function due to us not knowing the checksum filename until export_plugin().
 			// SVN::up( $this->checksum_file );
-
 			try {
 
-				$this->tmp_build_dir  = $this->zip_file . '-files';
+				$this->tmp_build_dir = $this->zip_file . '-files';
 				mkdir( $this->tmp_build_dir, 0777, true );
 
 				$this->export_plugin();
@@ -119,7 +120,7 @@ class Builder {
 
 				$this->cleanup_plugin_tmp();
 
-			} catch( Exception $e ) {
+			} catch ( Exception $e ) {
 				// In event of error, skip this file this time.
 				$this->cleanup_plugin_tmp();
 
@@ -202,8 +203,11 @@ class Builder {
 		$existing_json_checksum_file = file_exists( $this->checksum_file );
 
 		$skip_bad_files = array();
-		$checksums = array();
-		foreach ( array( 'md5' => 'md5sum', 'sha256' => 'sha256sum' ) as $checksum_type => $checksum_bin ) {
+		$checksums      = array();
+		foreach ( array(
+			'md5'    => 'md5sum',
+			'sha256' => 'sha256sum',
+		) as $checksum_type => $checksum_bin ) {
 			$checksum_output = array();
 			$this->exec( sprintf(
 				'cd %s && find . -type f -print0 | sort -z | xargs -0 ' . $checksum_bin . ' 2>&1',
@@ -211,13 +215,14 @@ class Builder {
 			), $checksum_output, $return_value );
 
 			if ( $return_value ) {
-			//	throw new Exception( __METHOD__ . ': Checksum generation failed, return code: ' . $return_value, 503 );
-			// TODO For now, just silently keep going.
+				// throw new Exception( __METHOD__ . ': Checksum generation failed, return code: ' . $return_value, 503 );
+				// TODO For now, just silently keep going.
 				continue;
 			}
 
 			foreach ( $checksum_output as $line ) {
 				list( $checksum, $filename ) = preg_split( '!\s+!', $line, 2 );
+
 				$filename = trim( preg_replace( '!^./!', '', $filename ) );
 				$checksum = trim( $checksum );
 
@@ -227,7 +232,10 @@ class Builder {
 				}
 
 				if ( ! isset( $checksums[ $filename ] ) ) {
-					$checksums[ $filename ] = array( 'md5' => array(), 'sha256' => array() );
+					$checksums[ $filename ] = array(
+						'md5'    => array(),
+						'sha256' => array(),
+					);
 				}
 
 				$checksums[ $filename ][ $checksum_type ] = $checksum;
@@ -248,12 +256,12 @@ class Builder {
 
 			// Sometimes plugin versions exist in multiple tags/zips, include all the SVN urls & ZIP urls
 			foreach ( array( 'source', 'zip' ) as $maybe_different ) {
-				if ( !empty( $existing_json_checksum_file->{$maybe_different} ) &&
+				if ( ! empty( $existing_json_checksum_file->{$maybe_different} ) &&
 					$existing_json_checksum_file->{$maybe_different} != $json_checksum_file->{$maybe_different}
 				) {
 					$json_checksum_file->{$maybe_different} = array_unique( array_merge(
 						(array) $existing_json_checksum_file->{$maybe_different},
- 						(array) $json_checksum_file->{$maybe_different}
+						(array) $json_checksum_file->{$maybe_different}
 					) );
 
 					// Reduce single arrays back to a string when possible.
@@ -281,8 +289,9 @@ class Builder {
 					foreach ( array( 'md5', 'sha256' ) as $checksum_type ) {
 						$json_checksum_file->files[ $file ][ $checksum_type ] = array_unique( array_merge(
 							(array) $checksums->{$checksum_type}, // May already be an array
- 							(array) $json_checksum_file->files[ $file ][ $checksum_type ]
+							(array) $json_checksum_file->files[ $file ][ $checksum_type ]
 						) );
+
 						// Reduce single arrays back to a string when possible.
 						if ( 1 == count( $json_checksum_file->files[ $file ][ $checksum_type ] ) ) {
 							$json_checksum_file->files[ $file ][ $checksum_type ] = array_shift( $json_checksum_file->files[ $file ][ $checksum_type ] );
@@ -290,7 +299,6 @@ class Builder {
 					}
 				}
 			}
-
 		}
 
 		ksort( $json_checksum_file->files );
@@ -316,9 +324,9 @@ class Builder {
 	protected function generate_temporary_directory( $dir, $prefix, $suffix = '' ) {
 		$i = 0;
 		do {
-			$rand = uniqid();
+			$rand     = uniqid();
 			$filename = "{$dir}/{$prefix}-{$rand}{$i}{$suffix}";
-		} while ( false === ($fp = @fopen( $filename, 'x' ) ) && $i++ < 50 );
+		} while ( false === ( $fp = @fopen( $filename, 'x' ) ) && $i++ < 50 );
 
 		if ( $i >= 50 ) {
 			throw new Exception( __METHOD__ . ': Could not find unique filename.' );
@@ -357,9 +365,9 @@ class Builder {
 		$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
-			$_version = substr( $this->version, 1 );
+			$_version                     = substr( $this->version, 1 );
 			$this->plugin_version_svn_url = self::SVN_URL . "/{$this->slug}/tags/{$_version}/";
-			$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
+			$res                          = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
 			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
@@ -448,12 +456,10 @@ class Builder {
 
 			foreach ( $plugins_downloads_load_balancer /* TODO */ as $lb ) {
 				$url = 'http://' . $lb . PLUGIN_ZIP_X_ACCEL_REDIRECT_LOCATION . $zip;
-				wp_remote_request(
-					$url,
-					array(
-						'method' => 'PURGE',
-					)
-				);
+
+				wp_remote_request( $url, array(
+					'method' => 'PURGE',
+				) );
 			}
 		}
 	}

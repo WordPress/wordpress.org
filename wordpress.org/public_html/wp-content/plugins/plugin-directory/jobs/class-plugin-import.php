@@ -22,7 +22,7 @@ class Plugin_Import {
 			$when_to_run,
 			"import_plugin:{$plugin_slug}",
 			array(
-				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data )
+				array_merge( array( 'plugin' => $plugin_slug ), $plugin_data ),
 			)
 		);
 	}
@@ -34,12 +34,12 @@ class Plugin_Import {
 		$plugin_slug  = $plugin_data['plugin'];
 		$changed_tags = isset( $plugin_data['tags_touched'] ) ? $plugin_data['tags_touched'] : array( 'trunk' );
 
-		$revision = isset( $plugin_data['revisions'] ) ? max( (array)$plugin_data['revisions'] ) : false;
+		$revision = isset( $plugin_data['revisions'] ) ? max( (array) $plugin_data['revisions'] ) : false;
 
 		try {
-			$importer = new CLI\Import;
+			$importer = new CLI\Import();
 			$importer->import_from_svn( $plugin_slug, $changed_tags, $revision );
-		} catch( Exception $e ) {
+		} catch ( Exception $e ) {
 			fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
 		}
 

@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 
@@ -18,8 +19,8 @@ class Internal_Stats extends Base {
 
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/update-stats', array(
-			'methods'  => \WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'bulk_update_stats' ),
+			'methods'             => \WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
 		) );
 	}
@@ -111,7 +112,7 @@ class Internal_Stats extends Base {
 	 */
 	protected function sanitize_usage_numbers( $usage, $plugin ) {
 		$latest_version = get_post_meta( $plugin->ID, 'version', true ) ?: '0.0';
-		$latest_branch = implode( '.', array_slice( explode('.', $latest_version ), 0, 2 ) );
+		$latest_branch  = implode( '.', array_slice( explode( '.', $latest_version ), 0, 2 ) );
 
 		// Exclude any version strings higher than the latest plugin version (ie. 99.9)
 		foreach ( $usage as $version => $count ) {
@@ -125,7 +126,7 @@ class Internal_Stats extends Base {
 		$percent_cut_off = 5;
 
 		// Calculate the percentage of each version branch
-		$total = array_sum( $usage );
+		$total  = array_sum( $usage );
 		$others = array();
 		foreach ( $usage as $version => $count ) {
 			$percent = round( $count / $total * 100, 2 );
@@ -140,10 +141,10 @@ class Internal_Stats extends Base {
 
 		// If there was only one version < $percent_cut_off then display it as-is
 		if ( count( $others ) == 1 ) {
-			$version = array_keys( $others );
-			$version = array_shift( $version );
+			$version           = array_keys( $others );
+			$version           = array_shift( $version );
 			$usage[ $version ] = round( $others[ $version ] / $total * 100, 2 );
-		// Else we'll add an 'others' version.
+			// Else we'll add an 'others' version.
 		} elseif ( count( $others ) > 1 ) {
 			$usage['other'] = round( array_sum( $others ) / $total * 100, 2 );
 		}

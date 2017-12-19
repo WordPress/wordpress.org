@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -13,20 +14,24 @@ class Commit_Subscriptions extends Base {
 
 	public function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/commit-subscription', array(
-			'methods'  => \WP_REST_Server::READABLE,
-			'callback' => array( $this, 'subscribe' ),
-			'args' => array(
+			'methods'             => \WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'subscribe' ),
+			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
 				),
-				'subscribe' => array(
-					'validate_callback' => function( $bool ) { return is_numeric( $bool ); },
+				'subscribe'   => array(
+					'validate_callback' => function( $bool ) {
+						return is_numeric( $bool );
+					},
 				),
 				'unsubscribe' => array(
-					'validate_callback' => function( $bool ) { return is_numeric( $bool ); },
+					'validate_callback' => function( $bool ) {
+						return is_numeric( $bool );
+					},
 				),
 			),
-			'permission_callback' => 'is_user_logged_in'
+			'permission_callback' => 'is_user_logged_in',
 		) );
 	}
 
@@ -41,7 +46,7 @@ class Commit_Subscriptions extends Base {
 		header( "Location: $location" );
 
 		$result = array(
-			"location" => $location,
+			'location' => $location,
 		);
 
 		if ( ! isset( $request['subscribe'] ) && ! isset( $request['unsubscribe'] ) ) {

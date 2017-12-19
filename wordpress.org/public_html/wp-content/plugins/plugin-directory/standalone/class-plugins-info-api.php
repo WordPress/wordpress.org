@@ -2,14 +2,14 @@
 namespace WordPressdotorg\Plugin_Directory\Standalone;
 
 // The API caches here expire every 24~25hours, avoids cache races when multiple change at the same time.
-define( 'API_CACHE_EXPIRY', 24*60*60 + rand( 0, 60*60 ) );
+define( 'API_CACHE_EXPIRY', 24 * 60 * 60 + rand( 0, 60 * 60 ) );
 class Plugins_Info_API {
 
 	const CACHE_GROUP  = 'plugin_api_info';
 	const CACHE_EXPIRY = API_CACHE_EXPIRY;
 
-	protected $format = 'json';
-	protected $jsonp  = false;
+	protected $format  = 'json';
+	protected $jsonp   = false;
 	protected $formats = array(
 		'jsonp' => 'application/javascript',
 		'json'  => 'application/json',
@@ -20,7 +20,7 @@ class Plugins_Info_API {
 	function __construct( $format = 'json' ) {
 		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
 			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
-			$format = 'jsonp';
+			$format      = 'jsonp';
 		}
 		$this->format = $format;
 	}
@@ -52,7 +52,7 @@ class Plugins_Info_API {
 					die( '<p>Action not implemented. <a href="http://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
 					$this->output( (object) array(
-						'error' => 'Action not implemented'
+						'error' => 'Action not implemented',
 					) );
 				}
 				break;
@@ -71,7 +71,7 @@ class Plugins_Info_API {
 
 			if ( 200 != $response->status ) {
 				$response = array( 'error' => 'Plugin not found.' );
-				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 15*60 ); // shorter TTL for missing/erroring plugins.
+				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, 15 * 60 ); // shorter TTL for missing/erroring plugins.
 			} else {
 				$response = $response->data;
 				wp_cache_set( $cache_key, $response, self::CACHE_GROUP, self::CACHE_EXPIRY );
@@ -87,7 +87,6 @@ class Plugins_Info_API {
 			$this->output( null );
 			return;
 		}
-
 
 		// Only include the fields requested.
 		if ( ! isset( $response['error'] ) ) {
@@ -128,8 +127,8 @@ class Plugins_Info_API {
 
 		// Back-compatible routines.
 		// WordPress 4.x and older need a "bare" contributor map
-		if ( !empty( $fields['bare_contributors'] ) ) {
-			$contribs = $response['contributors'];
+		if ( ! empty( $fields['bare_contributors'] ) ) {
+			$contribs                 = $response['contributors'];
 			$response['contributors'] = array();
 			if ( $contribs ) {
 				foreach ( $contribs as $user => $data ) {
@@ -146,12 +145,12 @@ class Plugins_Info_API {
 	 */
 	public function query_plugins( $request ) {
 		$response = array(
-			'info' => array(
-				'page' => 0,
-				'pages' => 0,
+			'info'    => array(
+				'page'    => 0,
+				'pages'   => 0,
 				'results' => 0,
 			),
-			'plugins' => array()
+			'plugins' => array(),
 		);
 
 		$cache_key = $this->query_plugins_cache_key( $request );
@@ -174,7 +173,14 @@ class Plugins_Info_API {
 
 		// Fill in the plugin details
 		foreach ( $response['plugins'] as $i => $plugin_slug ) {
-			$plugin = $this->plugin_information( new Plugins_Info_API_Request( array( 'slug' => $plugin_slug, 'locale' => $request->locale ) ), true );
+			$plugin = $this->plugin_information(
+				new Plugins_Info_API_Request(
+					array(
+						'slug'   => $plugin_slug,
+						'locale' => $request->locale,
+					)
+				), true
+			);
 			if ( isset( $plugin['error'] ) ) {
 				unset( $response['plugins'][ $i ] );
 				continue;
@@ -185,7 +191,7 @@ class Plugins_Info_API {
 
 		// Trim fields and cast to object
 		foreach ( $response['plugins'] as $i => $plugin_data ) {
-			$response['plugins'][$i] = (object) $this->remove_unexpected_fields( $plugin_data, $request, 'query_plugins' );
+			$response['plugins'][ $i ] = (object) $this->remove_unexpected_fields( $plugin_data, $request, 'query_plugins' );
 		}
 
 		$this->output( $response );
@@ -215,7 +221,7 @@ class Plugins_Info_API {
 		}
 
 		$number_items_requested = 100;
-		if ( !empty( $request->number ) ) {
+		if ( ! empty( $request->number ) ) {
 			$number_items_requested = $request->number;
 		}
 
@@ -241,8 +247,8 @@ class Plugins_Info_API {
 
 		switch ( $this->format ) {
 			default:
-			case 'json' :
-			case 'jsonp' :
+			case 'json':
+			case 'jsonp':
 				if ( ! function_exists( 'wp_json_encode' ) && defined( 'WPORGAPIPATH' ) ) {
 					require WPORGAPIPATH . '/includes/wp-json-encode.php';
 				}
@@ -253,12 +259,12 @@ class Plugins_Info_API {
 					echo $json;
 				}
 				break;
-	
-			case 'php' :
+
+			case 'php':
 				echo serialize( $response ? (object) $response : $response );
 				break;
-	
-			case 'xml' :
+
+			case 'xml':
 				echo '<' . '?xml version="1.0" encoding="utf-8"?' . ">\n";
 				echo "<plugin>\n";
 				$this->php_to_xml( $response );
@@ -280,14 +286,14 @@ class Plugins_Info_API {
 		global $wpdb;
 		define( 'REST_REQUEST', true );
 
-		$host = $_SERVER['HTTP_HOST'];
-		$request_uri = $_SERVER['REQUEST_URI'];
-		$_SERVER['HTTP_HOST'] = 'wordpress.org';
+		$host                   = $_SERVER['HTTP_HOST'];
+		$request_uri            = $_SERVER['REQUEST_URI'];
+		$_SERVER['HTTP_HOST']   = 'wordpress.org';
 		$_SERVER['REQUEST_URI'] = '/plugins/';
 
 		require_once WPORGPATH . '/wp-load.php';
 
-		$_SERVER['HTTP_HOST'] = $host;
+		$_SERVER['HTTP_HOST']   = $host;
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
 		return true;
@@ -321,7 +327,7 @@ class Plugins_Info_API {
 		if ( is_null( $xml_tag ) ) {
 			$xml_tag = function( $tag, $type, $empty = false ) {
 				static $NameStartChar = ':A-Z_a-z\xC0-\xD6\xD8-\xF6\xF8-\x{2FF}\x{370}-\x{37D}\x{37F}-\x{1FFF}\x{200C}-\x{200D}\x{2070}-\x{218F}\x{2C00}-\x{2FEF}\x{3001}-\x{D7FF}\x{F900}-\x{FDCF}\x{FDF0}-\x{FFFD}\x{10000}-\x{EFFFF}';
-				static $NameChar = '.0-9\xB7\x{0300}-\x{036F}\x{203F}-\x{2040}-';
+				static $NameChar      = '.0-9\xB7\x{0300}-\x{036F}\x{203F}-\x{2040}-';
 
 				$start_right = $empty ? ' />' : '>';
 
@@ -339,20 +345,20 @@ class Plugins_Info_API {
 
 		echo str_repeat( "\t", $tabs );
 		switch ( $type = gettype( $data ) ) {
-			case 'string' :
+			case 'string':
 				$data = '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $data ) . ']]>';
-			case 'boolean' :
-			case 'integer' :
-			case 'double' :
-			case 'float' :
+			case 'boolean':
+			case 'integer':
+			case 'double':
+			case 'float':
 				list( $start, $close ) = $xml_tag( $key, $type, false );
 				echo "$start$data$close";
 				break;
-			case 'NULL' :
+			case 'NULL':
 				list( $start, $close ) = $xml_tag( $key, $type, true );
 				echo $start;
 				break;
-			case 'array' :
+			case 'array':
 				if ( empty( $data ) ) {
 					list( $start, $close ) = $xml_tag( $key, $type, true );
 					echo $start;
@@ -367,13 +373,13 @@ class Plugins_Info_API {
 				echo str_repeat( "\t", $tabs );
 				echo $close;
 				break;
-			case 'object' :
-				if ( !$array = get_object_vars( $data ) ) {
-					if ( !$tabs ) {
+			case 'object':
+				if ( ! $array = get_object_vars( $data ) ) {
+					if ( ! $tabs ) {
 						break;
 					}
 
-					list( $start, $close ) = $xml_tag( $key, $type, true);
+					list( $start, $close ) = $xml_tag( $key, $type, true );
 					echo $start;
 					break;
 				}
@@ -390,9 +396,9 @@ class Plugins_Info_API {
 					echo $close;
 				}
 				break;
-			case 'resource' :
-			case 'unknown type' :
-			default :
+			case 'resource':
+			case 'unknown type':
+			default:
 				break;
 		}
 		if ( $tabs ) {

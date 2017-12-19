@@ -35,7 +35,10 @@ class Slack {
 	 * @var array
 	 */
 	private $success_emoji = [
-		':green_heart:', ':white_check_mark:', ':smiley:', ':ok: ',
+		':green_heart:',
+		':white_check_mark:',
+		':smiley:',
+		':ok: ',
 	];
 
 	/**
@@ -44,7 +47,10 @@ class Slack {
 	 * @var array
 	 */
 	private $failure_emoji = [
-		':broken_heart:', ':umbrella_with_rain_drops:', ':cry:', ':sos:',
+		':broken_heart:',
+		':umbrella_with_rain_drops:',
+		':cry:',
+		':sos:',
 	];
 
 	/**

@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -19,58 +20,58 @@ class Plugin_Support_Reps extends Base {
 	function __construct() {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/support-reps/?', array(
 			array(
-				'methods'  => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'list_support_reps' ),
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'list_support_reps' ),
 				'permission_callback' => function( $request ) {
 					return current_user_can(
 						'plugin_admin_edit',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
-				'args' => array(
+				'args'                => array(
 					'plugin_slug' => array(
 						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-						'required' => true,
+						'required'          => true,
 					),
-				)
+				),
 			),
 			array(
-				'methods'  => WP_REST_Server::CREATABLE,
-				'callback' => array( $this, 'add_support_rep' ),
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_support_rep' ),
 				'permission_callback' => function( $request ) {
 					return current_user_can(
 						'plugin_add_support_rep',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
-				'args' => array(
+				'args'                => array(
 					'plugin_slug' => array(
 						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-						'required' => true,
+						'required'          => true,
 					),
-				)
-			)
+				),
+			),
 		) );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/support-reps/(?P<support_rep>[^/]+)/?', array(
-			'methods'  => WP_REST_Server::DELETABLE,
-			'callback' => array( $this, 'remove_support_rep' ),
+			'methods'             => WP_REST_Server::DELETABLE,
+			'callback'            => array( $this, 'remove_support_rep' ),
 			'permission_callback' => function( $request ) {
 				return current_user_can(
 					'plugin_remove_support_rep',
 					Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 				);
 			},
-			'args' => array(
+			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
-					'required' => true,
+					'required'          => true,
 				),
 				'support_rep' => array(
 					'validate_callback' => array( $this, 'validate_user_slug_callback' ),
-					'required' => true,
-				)
-			)
+					'required'          => true,
+				),
+			),
 		) );
 	}
 
@@ -82,7 +83,7 @@ class Plugin_Support_Reps extends Base {
 
 		$support_reps = array();
 		foreach ( (array) Tools::get_plugin_support_reps( $plugin_slug ) as $user_nicename ) {
-			$user = get_user_by( 'slug', $user_nicename );
+			$user           = get_user_by( 'slug', $user_nicename );
 			$support_reps[] = $this->user_support_rep_details( $user );
 		}
 
@@ -157,7 +158,7 @@ class Plugin_Support_Reps extends Base {
 			'nicename' => $user->user_nicename,
 			'profile'  => esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename ),
 			'avatar'   => get_avatar_url( $user->ID, 32 ),
-			'name'     => Template::encode( $user->display_name )
+			'name'     => Template::encode( $user->display_name ),
 		);
 
 		if ( current_user_can( 'plugin_review' ) ) {

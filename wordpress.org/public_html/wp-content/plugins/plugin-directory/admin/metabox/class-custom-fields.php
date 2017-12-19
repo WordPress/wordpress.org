@@ -10,16 +10,16 @@ class Custom_Fields {
 	static function display() {
 		$post   = get_post();
 		$fields = array(
-			'version' => 'Latest Plugin Version',
-			'stable_tag' => 'Stable Tag',
-			'tested' => 'Tested With',
-			'requires' => 'Requires',
-			'requires_php' => 'Requires PHP',
-			'donate_link' => 'Donate URL',
-			'header_plugin_uri' => 'Plugin URI',
-			'header_author' => 'Plugin Author',
-			'header_author_uri' => 'Plugin Author URI',
-			'header_textdomain' => 'Plugin TextDomain',
+			'version'            => 'Latest Plugin Version',
+			'stable_tag'         => 'Stable Tag',
+			'tested'             => 'Tested With',
+			'requires'           => 'Requires',
+			'requires_php'       => 'Requires PHP',
+			'donate_link'        => 'Donate URL',
+			'header_plugin_uri'  => 'Plugin URI',
+			'header_author'      => 'Plugin Author',
+			'header_author_uri'  => 'Plugin Author URI',
+			'header_textdomain'  => 'Plugin TextDomain',
 			'header_description' => 'Plugin Description',
 		);
 

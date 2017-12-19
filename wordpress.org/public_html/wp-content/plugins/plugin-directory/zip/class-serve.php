@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Zip;
+
 use Exception;
 
 /**
@@ -21,8 +22,7 @@ class Serve {
 			if ( $request['args']['stats'] ) {
 				$this->record_stats( $request );
 			}
-
-		} catch ( Exception $e )  {
+		} catch ( Exception $e ) {
 			$this->error();
 		}
 
@@ -37,14 +37,14 @@ class Serve {
 		$path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		$zip  = basename( $path );
 
-		if ( preg_match( "!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip$!i", $zip, $m ) ) {
+		if ( preg_match( '!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip$!i', $zip, $m ) ) {
 			// ZIP
 			$checksum_request = false;
-		} elseif ( preg_match( "!^/plugin-checksums/(?P<slug>[a-z0-9-_]+)/(?P<version>.+?)(\.json)?$!i", $path, $m ) ) {
+		} elseif ( preg_match( '!^/plugin-checksums/(?P<slug>[a-z0-9-_]+)/(?P<version>.+?)(\.json)?$!i', $path, $m ) ) {
 			// Checksums
 			$checksum_request = true;
 		} else {
-			throw new Exception( __METHOD__ . ": Invalid URL." );
+			throw new Exception( __METHOD__ . ': Invalid URL.' );
 		}
 
 		$slug = strtolower( $m['slug'] );
@@ -59,7 +59,7 @@ class Serve {
 
 		// Checksum requests for 'trunk' are not possible.
 		if ( $checksum_request && 'trunk' == $version ) {
-			throw new Exception( __METHOD__ . ": Checksum requests must include a version." );
+			throw new Exception( __METHOD__ . ': Checksum requests must include a version.' );
 		}
 
 		$args = array(
@@ -73,7 +73,7 @@ class Serve {
 			$args['stats'] = (bool) $_GET['stats'];
 
 		} elseif ( isset( $_GET['nostats'] ) ) {
-			$args['stats'] = !empty( $_GET['nostats'] );
+			$args['stats'] = ! empty( $_GET['nostats'] );
 		}
 
 		return compact( 'zip', 'slug', 'version', 'args', 'checksum_request' );
@@ -92,6 +92,7 @@ class Serve {
 
 		// Determine the stable_tag
 		$meta = wp_cache_get( $post_id, 'post_meta' );
+
 		$version = false;
 		if ( isset( $meta['stable_tag'][0] ) ) {
 			$version = $meta['stable_tag'][0];
@@ -190,8 +191,8 @@ class Serve {
 	protected function record_stats( $request ) {
 		global $wpdb;
 
-		$stats_dedup_log_table = PLUGINS_TABLE_PREFIX . 'downloads';
-		$stats_download_table = PLUGINS_TABLE_PREFIX . 'download_counts';
+		$stats_dedup_log_table      = PLUGINS_TABLE_PREFIX . 'downloads';
+		$stats_download_table       = PLUGINS_TABLE_PREFIX . 'download_counts';
 		$stats_download_daily_table = PLUGINS_TABLE_PREFIX . 'stats';
 
 		// Very basic de-duplication for downloads.
@@ -200,9 +201,9 @@ class Serve {
 			FROM {$stats_dedup_log_table}
 			WHERE
 				plugin_slug = %s AND
-			 	client_ip = %s AND
-			 	user_agent = %s AND
-			 	stamp BETWEEN %s AND %s
+				client_ip = %s AND
+				user_agent = %s AND
+				stamp BETWEEN %s AND %s
 			LIMIT 1",
 			$request['slug'],
 			$_SERVER['REMOTE_ADDR'],
@@ -230,16 +231,15 @@ class Serve {
 			'plugin_slug' => $request['slug'],
 			'client_ip'   => $_SERVER['REMOTE_ADDR'],
 			'user_agent'  => $_SERVER['HTTP_USER_AGENT'],
-			'stamp'       => gmdate( 'Y-m-d H:i:s' )
+			'stamp'       => gmdate( 'Y-m-d H:i:s' ),
 		) );
-
 	}
 
 	/**
 	 * Bail with a 404.
 	 */
 	protected function error() {
-		$protocol = isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+		$protocol  = isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
 		$protocol .= ' ';
 
 		header( $protocol . '404 File not found' );

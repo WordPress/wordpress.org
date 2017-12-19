@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
+
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Template;
 
@@ -20,7 +21,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$this->set_hierarchical_display( is_post_type_hierarchical( $this->screen->post_type ) && 'menu_order title' === $wp_query->query['orderby'] );
 
 		$post_type = $this->screen->post_type;
-		$per_page = $this->get_items_per_page( 'edit_' . $post_type . '_per_page' );
+		$per_page  = $this->get_items_per_page( 'edit_' . $post_type . '_per_page' );
 
 		/** This filter is documented in wp-admin/includes/post.php */
 		$per_page = apply_filters( 'edit_posts_per_page', $per_page, $post_type );
@@ -32,7 +33,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		} else {
 			$post_counts = (array) wp_count_posts( $post_type, 'readable' );
 
-			if ( isset( $_REQUEST['post_status'] ) && in_array( $_REQUEST['post_status'] , $avail_post_stati ) ) {
+			if ( isset( $_REQUEST['post_status'] ) && in_array( $_REQUEST['post_status'], $avail_post_stati ) ) {
 				$total_items = $post_counts[ $_REQUEST['post_status'] ];
 			} elseif ( isset( $_REQUEST['show_sticky'] ) && $_REQUEST['show_sticky'] ) {
 				$total_items = $this->sticky_posts_count;
@@ -59,7 +60,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
-			'per_page' => $per_page
+			'per_page'    => $per_page,
 		) );
 	}
 
@@ -68,7 +69,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
-		$actions = array();
+		$actions       = array();
 		$post_type_obj = get_post_type_object( $this->screen->post_type );
 
 		if ( current_user_can( $post_type_obj->cap->edit_posts ) ) {
@@ -91,10 +92,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	public function get_columns() {
 		$post_type     = $this->screen->post_type;
 		$posts_columns = array(
-			'cb'        => '<input type="checkbox" />',
+			'cb'     => '<input type="checkbox" />',
 			/* translators: manage posts column name */
-			'title'     => _x( 'Title', 'column name', 'wporg-plugins' ),
-			'author'    => __( 'Submitter', 'wporg-plugins' ),
+			'title'  => _x( 'Title', 'column name', 'wporg-plugins' ),
+			'author' => __( 'Submitter', 'wporg-plugins' ),
 		);
 
 		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
@@ -103,12 +104,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$taxonomies = array_filter( $taxonomies, 'taxonomy_exists' );
 
 		foreach ( $taxonomies as $taxonomy ) {
-			$column_key = 'taxonomy-' . $taxonomy;
+			$column_key                   = 'taxonomy-' . $taxonomy;
 			$posts_columns[ $column_key ] = get_taxonomy( $taxonomy )->labels->name;
 		}
 
 		$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
-		$posts_columns['date'] = __( 'Date', 'wporg-plugins' );
+		$posts_columns['date']     = __( 'Date', 'wporg-plugins' );
 
 		/**
 		 * Filter the columns displayed in the Plugins list table.
@@ -132,12 +133,12 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	 * @global \WP_Post $post
 	 *
 	 * @param int|\WP_Post $post
-	 * @param int         $level
+	 * @param int          $level
 	 */
 	public function single_row( $post, $level = 0 ) {
 		$global_post = get_post();
 
-		$post = get_post( $post );
+		$post                = get_post( $post );
 		$this->current_level = $level;
 
 		$GLOBALS['post'] = $post;
@@ -154,7 +155,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		if ( $post->post_parent ) {
-			$count = count( get_post_ancestors( $post->ID ) );
+			$count     = count( get_post_ancestors( $post->ID ) );
 			$classes[] = 'level-' . $count;
 		} else {
 			$classes[] = 'level-0';
@@ -183,9 +184,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		}
 
 		$post_type_object = get_post_type_object( $post->post_type );
-		$can_edit_post = current_user_can( 'edit_post', $post->ID );
-		$actions = array();
-		$title = _draft_or_post_title();
+		$can_edit_post    = current_user_can( 'edit_post', $post->ID );
+		$actions          = array();
+		$title            = _draft_or_post_title();
 
 		if ( $can_edit_post && 'trash' != $post->post_status ) {
 			$actions['edit'] = sprintf(
@@ -259,11 +260,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 		$screen = $this->screen;
 
-		$taxonomy_names = get_object_taxonomies( $screen->post_type );
+		$taxonomy_names          = get_object_taxonomies( $screen->post_type );
 		$hierarchical_taxonomies = array();
 
 		foreach ( $taxonomy_names as $taxonomy_name ) {
-
 			$taxonomy = get_taxonomy( $taxonomy_name );
 
 			if ( ! $taxonomy->show_in_quick_edit ) {
@@ -301,10 +301,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 	<?php foreach ( $hierarchical_taxonomies as $taxonomy ) : ?>
 
-			<span class="title inline-edit-categories-label"><?php echo esc_html( $taxonomy->labels->name ) ?></span>
+			<span class="title inline-edit-categories-label"><?php echo esc_html( $taxonomy->labels->name ); ?></span>
 			<input type="hidden" name="tax_input[<?php echo esc_attr( $taxonomy->name ); ?>][]" value="0" />
-			<ul class="cat-checklist <?php echo esc_attr( $taxonomy->name )?>-checklist">
-				<?php wp_terms_checklist( null, array( 'taxonomy' => $taxonomy->name ) ) ?>
+			<ul class="cat-checklist <?php echo esc_attr( $taxonomy->name ); ?>-checklist">
+				<?php wp_terms_checklist( null, array( 'taxonomy' => $taxonomy->name ) ); ?>
 			</ul>
 
 	<?php endforeach; // $hierarchical_taxonomies as $taxonomy ?>
@@ -354,9 +354,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$all_args        = array( 'post_type' => $post_type );
 		$mine            = '';
 
-		$plugins = Tools::get_users_write_access_plugins( $current_user_id );
-		$plugins = array_map( 'sanitize_title_for_query', $plugins );
-		$exclude_states   = get_post_stati( array(
+		$plugins        = Tools::get_users_write_access_plugins( $current_user_id );
+		$plugins        = array_map( 'sanitize_title_for_query', $plugins );
+		$exclude_states = get_post_stati( array(
 			'show_in_admin_all_list' => false,
 		) );
 
@@ -377,7 +377,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		";
 
 		if ( ! empty( $plugins ) ) {
-			$user_post_count_query = str_replace('AND post_author = %d', "AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )", $user_post_count_query );
+			$user_post_count_query = str_replace( 'AND post_author = %d', "AND ( post_author = %d OR post_name IN ( '" . implode( "','", $plugins ) . "' ) )", $user_post_count_query );
 		}
 
 		$user_post_count = intval( $wpdb->get_var( $wpdb->prepare( $user_post_count_query, $post_type, $current_user_id ) ) );
@@ -394,7 +394,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 			$mine_args = array(
 				'post_type' => $post_type,
-				'author'    => $current_user_id
+				'author'    => $current_user_id,
 			);
 
 			$mine_inner_html = sprintf(
@@ -409,14 +409,15 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			);
 
 			if ( ! current_user_can( 'plugin_review' ) ) {
-				$status_links['mine'] = $this->get_edit_link( $mine_args, $mine_inner_html, 'current' );;
+				$status_links['mine'] = $this->get_edit_link( $mine_args, $mine_inner_html, 'current' );
+
 				return $status_links;
 			} else {
 				$mine = $this->get_edit_link( $mine_args, $mine_inner_html, $class );
 			}
 
 			$all_args['all_posts'] = 1;
-			$class = '';
+			$class                 = '';
 		}
 
 		if ( empty( $class ) && ( $this->is_base_request() || isset( $_REQUEST['all_posts'] ) ) ) {
@@ -439,7 +440,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$status_links['mine'] = $mine;
 		}
 
-		foreach ( get_post_stati(array('show_in_admin_status_list' => true), 'objects') as $status ) {
+		foreach ( get_post_stati( array( 'show_in_admin_status_list' => true ), 'objects' ) as $status ) {
 			$class = '';
 
 			$status_name = $status->name;
@@ -452,13 +453,13 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				continue;
 			}
 
-			if ( isset($_REQUEST['post_status']) && $status_name === $_REQUEST['post_status'] ) {
+			if ( isset( $_REQUEST['post_status'] ) && $status_name === $_REQUEST['post_status'] ) {
 				$class = 'current';
 			}
 
 			$status_args = array(
 				'post_status' => $status_name,
-				'post_type' => $post_type,
+				'post_type'   => $post_type,
 			);
 
 			$status_label = sprintf(
@@ -473,8 +474,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$class = ! empty( $_REQUEST['show_sticky'] ) ? 'current' : '';
 
 			$sticky_args = array(
-				'post_type'	=> $post_type,
-				'show_sticky' => 1
+				'post_type'   => $post_type,
+				'show_sticky' => 1,
 			);
 
 			$sticky_inner_html = sprintf(
@@ -489,11 +490,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			);
 
 			$sticky_link = array(
-				'sticky' => $this->get_edit_link( $sticky_args, $sticky_inner_html, $class )
+				'sticky' => $this->get_edit_link( $sticky_args, $sticky_inner_html, $class ),
 			);
 
 			// Sticky comes after Publish, or if not listed, after All.
-			$split = 1 + array_search( ( isset( $status_links['publish'] ) ? 'publish' : 'all' ), array_keys( $status_links ) );
+			$split        = 1 + array_search( ( isset( $status_links['publish'] ) ? 'publish' : 'all' ), array_keys( $status_links ) );
 			$status_links = array_merge( array_slice( $status_links, 0, $split ), $sticky_link, array_slice( $status_links, $split ) );
 		}
 

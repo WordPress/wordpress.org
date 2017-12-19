@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin;
+
 use \WordPressdotorg\Plugin_Directory;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
@@ -48,13 +49,13 @@ class Customizations {
 		add_action( 'add_meta_boxes', array( $this, 'register_admin_metaboxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'replace_title_global' ) );
 
-		add_filter( 'postbox_classes_plugin_internal-notes',      array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
-		add_filter( 'postbox_classes_plugin_plugin-committers',   array( __NAMESPACE__ . '\Metabox\Committers',     'postbox_classes' ) );
-		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps',   'postbox_classes' ) );
-		add_filter( 'wp_ajax_add-committer',        array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer' ) );
-		add_filter( 'wp_ajax_delete-committer',     array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
-		add_filter( 'wp_ajax_add-support-rep',      array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
-		add_filter( 'wp_ajax_delete-support-rep',   array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
+		add_filter( 'postbox_classes_plugin_internal-notes', array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
+		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers', 'postbox_classes' ) );
+		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'postbox_classes' ) );
+		add_filter( 'wp_ajax_add-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer' ) );
+		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
+		add_filter( 'wp_ajax_add-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
+		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 	}
 
@@ -203,12 +204,14 @@ class Customizations {
 		}
 
 		if ( $rejected ) {
-			set_transient( 'settings_errors', array( array(
-				'setting' => 'wporg-plugins',
-				'code'    => 'plugins-bulk-rejected',
-				'message' => sprintf( _n( '%d plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
-				'type'    => 'updated',
-			) ) );
+			set_transient( 'settings_errors', array(
+				array(
+					'setting' => 'wporg-plugins',
+					'code'    => 'plugins-bulk-rejected',
+					'message' => sprintf( _n( '%d plugin rejected.', '%d plugins rejected.', $rejected, 'wporg-plugins' ), $rejected ),
+					'type'    => 'updated',
+				),
+			) );
 		}
 
 		$send_back = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids', 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), wp_get_referer() );
@@ -276,7 +279,7 @@ class Customizations {
 		}
 
 		if ( $message ) {
-			printf( '<div class="notice %1$s"><p>%2$s</p></div>', esc_attr( $type ), esc_html( $message ) ); 
+			printf( '<div class="notice %1$s"><p>%2$s</p></div>', esc_attr( $type ), esc_html( $message ) );
 		}
 	}
 
@@ -330,7 +333,7 @@ class Customizations {
 		if ( 'plugin' !== $data['post_type'] || ! isset( $postarr['ID'] ) ) {
 			return $data;
 		}
-		
+
 		$existing_plugin = Plugin_Directory\Plugin_Directory::get_plugin_post( $data['post_name'] );
 
 		// Is there already a plugin with the same slug?
@@ -415,7 +418,6 @@ class Customizations {
 			'plugin', 'normal'
 		);
 
-
 		add_meta_box(
 			'plugin-fields',
 			__( 'Plugin Meta', 'wporg-plugins' ),
@@ -448,7 +450,7 @@ class Customizations {
 		}
 
 		// Remove unnecessary metaboxes.
-		remove_meta_box( 'commentsdiv',      'plugin', 'normal' );
+		remove_meta_box( 'commentsdiv', 'plugin', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'plugin', 'normal' );
 
 		// Remove slug metabox unless the slug is editable for the current user.
@@ -488,7 +490,7 @@ class Customizations {
 	/**
 	 * Changes the permalink for internal notes to link to the edit post screen.
 	 *
-	 * @param string $link The comment permalink with '#comment-$id' appended.
+	 * @param string      $link The comment permalink with '#comment-$id' appended.
 	 * @param \WP_Comment $comment The current comment object.
 	 * @return string The permalink to the given comment.
 	 */
@@ -601,7 +603,7 @@ class Customizations {
 
 		ob_start();
 		if ( isset( $_REQUEST['mode'] ) && 'dashboard' == $_REQUEST['mode'] ) {
-			require_once( ABSPATH . 'wp-admin/includes/dashboard.php' );
+			require_once ABSPATH . 'wp-admin/includes/dashboard.php';
 			_wp_dashboard_recent_comments_row( $comment );
 		} else {
 			if ( isset( $_REQUEST['mode'] ) && 'single' == $_REQUEST['mode'] ) {
@@ -617,7 +619,7 @@ class Customizations {
 			'what'     => 'comment',
 			'id'       => $comment->comment_ID,
 			'data'     => $comment_list_item,
-			'position' => $position
+			'position' => $position,
 		);
 
 		$counts                   = wp_count_comments();
@@ -630,7 +632,7 @@ class Customizations {
 			'i18n_moderation_text' => sprintf(
 				_nx( '%s in moderation', '%s in moderation', $counts->moderated, 'comments', 'wporg-plugins' ),
 				number_format_i18n( $counts->moderated )
-			)
+			),
 		);
 
 		if ( $comment_auto_approved && isset( $parent ) ) {

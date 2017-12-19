@@ -1,9 +1,9 @@
 <?php
 
-add_filter('debug_bar_panels', function($panels) {
+add_filter( 'debug_bar_panels', function( $panels ) {
 	class Debug_Bar_Search extends Debug_Bar_Panel {
 		function init() {
-			$this->title( __('Search', 'debug-bar') );
+			$this->title( __( 'Search', 'debug-bar' ) );
 		}
 
 		function prerender() {
@@ -11,11 +11,9 @@ add_filter('debug_bar_panels', function($panels) {
 		}
 
 		function render() {
-
 			$search = Jetpack_Search::instance();
 
 			echo "<div id='debug-bar-jetpack-search'>";
-
 
 			echo '<h3>', __( 'Elasticsearch Query:', 'debug-bar' ), '</h3>';
 			echo '<pre>' . esc_html( json_encode( $search->get_search_query(), JSON_PRETTY_PRINT ) ) . '</pre>';
@@ -29,4 +27,4 @@ add_filter('debug_bar_panels', function($panels) {
 
 	$panels[] = new Debug_Bar_Search();
 	return $panels;
-});
+} );

@@ -14,7 +14,7 @@ class Meta_Sync {
 	 * A static method for the cron trigger to fire.
 	 */
 	public static function cron_trigger() {
-		$class = new Meta_Sync;
+		$class = new Meta_Sync();
 		$class->sync();
 	}
 
@@ -61,15 +61,15 @@ class Meta_Sync {
 		}
 
 		// Sync new (and updated) ratings to postmeta
-		$last_review_time = get_option( 'plugin_last_review_sync' );
-		$current_review_time = $wpdb->get_var( "SELECT MAX(`date`) FROM `ratings`" );
+		$last_review_time    = get_option( 'plugin_last_review_sync' );
+		$current_review_time = $wpdb->get_var( 'SELECT MAX(`date`) FROM `ratings`' );
 
 		if ( strtotime( $last_review_time ) >= strtotime( $current_review_time ) ) {
 			return;
 		}
 
 		// Get the plugin slugs for whom extra reviews have been made, or ratings changed.
-		$slugs = $wpdb->get_col( $sql = $wpdb->prepare(
+		$slugs = $wpdb->get_col( $wpdb->prepare(
 			"SELECT distinct object_slug FROM `ratings` WHERE object_type = 'plugin' AND `date` >= %s AND `date` < %s",
 			$last_review_time,
 			$current_review_time
@@ -106,7 +106,7 @@ class Meta_Sync {
 			return;
 		}
 
-		$equivs = wporg_get_version_equivalents();
+		$equivs     = wporg_get_version_equivalents();
 		$equivs_key = md5( serialize( $equivs ) );
 		if ( $equivs_key === get_option( 'plugin_last_tested_sync' ) ) {
 			return;
@@ -120,7 +120,7 @@ class Meta_Sync {
 		}
 
 		$tested_meta_value_esc_sql = '"' . implode( '", "', array_map( 'esc_sql', array_keys( $latest_equiv ) ) ) . '"';
-		$tested_values = $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
+		$tested_values             = $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'tested' AND meta_value IN( {$tested_meta_value_esc_sql} )" );
 
 		foreach ( $tested_values as $row ) {
 			update_post_meta(

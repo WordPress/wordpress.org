@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
+
 use RedeyeVentures\GeoPattern\SVG;
 
 /**
@@ -40,17 +41,17 @@ class Plugin_Geopattern_SVG extends SVG {
 	}
 
 	/**
-	 * @param       $text
-	 * @param       $x
-	 * @param       $y
-	 * @param       $text_anchor
-	 * @param       $style
-	 * @param array $args
+	 * @param string $text
+	 * @param string $x
+	 * @param string $y
+	 * @param string $text_anchor
+	 * @param string $style
+	 * @param array  $args
 	 *
 	 * @return $this
 	 */
 	public function addText( $text, $x, $y, $text_anchor, $style, $args = array() ) {
-		$element = new Plugin_Geopattern_SVGText( $text, $x, $y, $text_anchor, $style, $args );
+		$element          = new Plugin_Geopattern_SVGText( $text, $x, $y, $text_anchor, $style, $args );
 		$this->svgString .= $element;
 
 		return $this;

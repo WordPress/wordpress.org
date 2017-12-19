@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
+
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -35,9 +36,9 @@ class Ratings extends \WP_Widget {
 
 		echo $args['before_widget'];
 		echo $args['before_title'] . $title . $args['after_title'];
-		?>
 
-		<?php if ( $rating ) : ?>
+		if ( $rating ) :
+		?>
 			<a class="reviews-link" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' ); ?>"><?php _ex( 'See all', 'reviews', 'wporg-plugins' ); ?></a>
 
 			<div class="rating">
@@ -45,7 +46,8 @@ class Ratings extends \WP_Widget {
 			</div>
 
 			<ul class="ratings-list">
-				<?php foreach ( range( 5, 1 ) as $stars ) :
+				<?php
+				foreach ( range( 5, 1 ) as $stars ) :
 					$rating_bar_width = $num_ratings ? 100 * $ratings[ $stars ] / $num_ratings : 0;
 					?>
 					<li class="counter-container">
@@ -66,13 +68,13 @@ class Ratings extends \WP_Widget {
 				<p><?php _e( 'This plugin has not been rated yet.', 'wporg-plugins' ); ?></p>
 			</div>
 
-		<?php endif; // $rating
+		<?php endif; // $rating ?>
 
-		if ( is_user_logged_in() ) : ?>
+		<?php if ( is_user_logged_in() ) : ?>
 			<div class="user-rating">
 				<a class="button button-secondary" href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/#new-post' ); ?>"><?php _e( 'Add my review', 'wporg-plugins' ); ?></a>
 			</div>
-			<?php
+		<?php
 		endif;
 
 		echo $args['after_widget'];

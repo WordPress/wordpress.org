@@ -13,7 +13,7 @@ $opts = getopt( '', array( 'url:', 'abspath:', 'plugin:', 'changed-tags:', 'asyn
 // Guess the default parameters:
 if ( empty( $opts ) && $argc == 2 ) {
 	$opts['plugin'] = $argv[1];
-	$argv[1] = '--plugin ' . $argv[1];
+	$argv[1]        = '--plugin ' . $argv[1];
 }
 if ( empty( $opts['url'] ) ) {
 	$opts['url'] = 'https://wordpress.org/plugins/';
@@ -43,20 +43,20 @@ foreach ( array( 'url', 'abspath', 'plugin' ) as $opt ) {
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 
-include rtrim( $opts['abspath'], '/' ) . '/wp-load.php';
+require rtrim( $opts['abspath'], '/' ) . '/wp-load.php';
 
 if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Plugin_Directory' ) ) {
 	fwrite( STDERR, "Error! This site doesn't have the Plugin Directory plugin enabled.\n" );
 	if ( defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 		fwrite( STDERR, "Run the following command instead:\n" );
-		fwrite( STDERR, "\tphp " . implode( ' ', $argv ) . " --url " . get_site_url( WPORG_PLUGIN_DIRECTORY_BLOGID, '/' ) . "\n" );
+		fwrite( STDERR, "\tphp " . implode( ' ', $argv ) . ' --url ' . get_site_url( WPORG_PLUGIN_DIRECTORY_BLOGID, '/' ) . "\n" );
 	}
 	die();
 }
 
 $plugin_slug  = $opts['plugin'];
 $changed_tags = $opts['changed-tags'];
-$start_time   = microtime(1);
+$start_time   = microtime( 1 );
 
 // If async, queue it to be parsed instead.
 if ( $opts['async'] ) {
@@ -67,12 +67,12 @@ if ( $opts['async'] ) {
 
 echo "Processing Import for $plugin_slug... ";
 try {
-	$importer = new CLI\Import;
+	$importer = new CLI\Import();
 	$importer->import_from_svn( $plugin_slug, $changed_tags );
-	echo "OK. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
-} catch( \Exception $e ) {
-	echo "Failed. Took " . round( microtime(1) - $start_time, 2 )  . "s\n";
+	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
+} catch ( \Exception $e ) {
+	echo 'Failed. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
 
 	fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );
-	exit(1);
+	exit( 1 );
 }

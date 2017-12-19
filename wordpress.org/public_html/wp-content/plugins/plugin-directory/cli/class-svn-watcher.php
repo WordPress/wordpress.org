@@ -12,8 +12,8 @@ use WordPressdotorg\Plugin_Directory\Tools\SVN;
  */
 class SVN_Watcher {
 
-	const SVN_URL      = 'https://plugins.svn.wordpress.org/';
-	const PHP          = '/usr/local/bin/php';
+	const SVN_URL = 'https://plugins.svn.wordpress.org/';
+	const PHP     = '/usr/local/bin/php';
 
 	/**
 	 * This method is responsible for running a loop over all SVN revisions to fetch updated details.
@@ -76,7 +76,7 @@ class SVN_Watcher {
 				// Check the status of the cronjobs are sane, as the exception will trigger it to be marked as `failed`.
 				wp_schedule_single_event( time() + 30, 'plugin_directory_check_cronjobs' );
 
-				throw new Exception( "Could not fetch plugins.svn logs: " . implode( ', ', $logs['errors'] ) );
+				throw new Exception( 'Could not fetch plugins.svn logs: ' . implode( ', ', $logs['errors'] ) );
 			} else {
 				// If the job fails again within the next minute, throw an exception (as above)
 				// but for now, just silently let it re-try next iteration, hopefully it was a transient failure / network timeout.
@@ -103,11 +103,11 @@ class SVN_Watcher {
 
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 				$plugins[ $plugin_slug ] = array(
-					'tags_touched' => array(), // trunk is a tag too!
+					'tags_touched'   => array(), // trunk is a tag too!
 					'readme_touched' => false, // minor optimization, only parse readme i18n on readme-related commits
-					'code_touched' => false,
+					'code_touched'   => false,
 					'assets_touched' => false,
-					'revisions' => array(),
+					'revisions'      => array(),
 				);
 			}
 			$plugin =& $plugins[ $plugin_slug ];
@@ -115,7 +115,7 @@ class SVN_Watcher {
 			// Keep track of the lowest revision number we've seen for this plugin
 			$plugin['revisions'][] = $log['revision'];
 			foreach ( $log['paths'] as $path ) {
-				$path_parts = explode('/', trim( $path, '/' ) );
+				$path_parts = explode( '/', trim( $path, '/' ) );
 
 				if ( ! isset( $path_parts[1] ) ) {
 					continue;
@@ -139,7 +139,6 @@ class SVN_Watcher {
 				if ( ! $plugin['code_touched'] && ( '/' == substr( $path, -1 ) || '.php' == substr( $path, -4 ) ) ) {
 					$plugin['code_touched'] = true;
 				}
-
 			}
 			$plugin['tags_touched'] = array_unique( $plugin['tags_touched'] );
 		}
@@ -167,7 +166,7 @@ class SVN_Watcher {
 			// Check the status of the cronjobs are sane, as the exception will trigger it to be marked as `failed`.
 			wp_schedule_single_event( time() + 30, 'plugin_directory_check_cronjobs' );
 
-			throw new Exception( "Unable to determine HEAD revision" );
+			throw new Exception( 'Unable to determine HEAD revision' );
 		}
 		return array_keys( $log['log'] )[0];
 	}
@@ -181,6 +180,7 @@ class SVN_Watcher {
 	 */
 	protected function get_option( $option_name ) {
 		global $wpdb;
+
 		return maybe_unserialize( $wpdb->get_var( $wpdb->prepare(
 			"SELECT option_value FROM $wpdb->options WHERE option_name = %s",
 			$option_name
