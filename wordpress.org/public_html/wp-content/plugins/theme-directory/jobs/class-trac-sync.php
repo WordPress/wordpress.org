@@ -107,7 +107,7 @@ class Trac_Sync {
 	public static function get_theme_id( $ticket_id ) {
 		$post_id = 0;
 
-		$post_ids = new WP_Query( [
+		$post_ids = new \WP_Query( [
 			'fields'         => 'ids',
 			'post_status'    => 'any',
 			'post_type'      => 'repopackage',
