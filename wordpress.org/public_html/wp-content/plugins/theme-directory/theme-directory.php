@@ -29,6 +29,11 @@ include __DIR__ . '/admin-edit.php';
 // Load the query modifications needed for the directory.
 include __DIR__ . '/query-modifications.php';
 
+// Load repo jobs.
+include __DIR__ . '/jobs/class-manager.php';
+include __DIR__ . '/jobs/class-trac-sync.php';
+new WordPressdotorg\Theme_Directory\Jobs\Manager();
+
 /**
  * Things to change on activation.
  */
