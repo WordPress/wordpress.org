@@ -30,7 +30,7 @@ class Author {
 		<script>
 			jQuery( function( $ ) {
 				$( '#post_author_username' ).autocomplete( {
-					source: '<?php echo esc_js( $source ); ?>',
+					source: '<?php echo $source; ?>',
 					minLength: 2,
 					delay: 700,
 					autoFocus: true,
