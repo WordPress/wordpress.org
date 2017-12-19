@@ -443,8 +443,6 @@ function _ip2long_v6( $address ) {
  *                            An array with location details on success.
  */
 function get_location( $args = array() ) {
-	global $cache_life, $cache_group;
-
 	$throttle_geonames = $throttle_ip2location = false;
 
 	// For a country request, no lat/long are returned.
@@ -724,7 +722,7 @@ function get_events( $args = array() ) {
 	// TODO update this when the UTC dates are stored.
 	$sql_values[] = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );
 
-	// Limit 
+	// Limit
 	if ( isset( $args['number'] ) ) {
 		$sql_limits   = 'LIMIT %d';
 		$sql_values[] = $args['number'];
