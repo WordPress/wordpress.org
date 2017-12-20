@@ -59,7 +59,7 @@ gp_tmpl_header();
 		}
 		echo '</ul>';
 	} else {
-		echo '<p>The are no language packs yet.</p>';
+		echo '<p>There are no language packs yet.</p>';
 	}
 	?>
 </div>
