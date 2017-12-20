@@ -2001,6 +2001,10 @@ input {
   color: #000;
 }
 
+.devhub-wrap .site-main .user-note-voting-down, .devhub-wrap .site-main .user-note-voting-up {
+  text-decoration: none;
+}
+
 .devhub-wrap .user-note-voting-up {
   margin-left: -9px;
 }

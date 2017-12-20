@@ -1630,6 +1630,11 @@
 		width: 30px;
 		color: #000;
 	}
+	.site-main {
+		.user-note-voting-down, .user-note-voting-up {
+			text-decoration: none;
+		}
+	}
 	.user-note-voting-up {
 		margin-left: -9px;
 	}
