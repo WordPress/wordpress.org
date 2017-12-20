@@ -1,3 +1,39 @@
+table {
+	border: 1px solid #eee;
+	border-spacing: 0;
+	border-collapse: collapse;
+	font-size: 12.8px;
+	font-size: 0.8rem;
+	margin: 0 0 16px;
+	margin: 0 0 1rem;
+	padding: 0;
+	width: 100%;
+}
+
+table thead {
+	background: #32373c;
+	color: #fff;
+}
+
+table th,
+table td {
+	border: 1px solid #eee;
+	font-weight: normal;
+	margin: 0;
+	padding: 6.4px;
+	padding: 0.4rem;
+	text-align: left;
+	vertical-align: top;
+}
+
+table th {
+	font-weight: 700;
+}
+
+table tbody tr:nth-child(even) {
+	background: #f7f7f7;
+}
+
 #wporg-header ul li a.current ~ .uparrow {
 	border-bottom-color: #ffffff;
 }
