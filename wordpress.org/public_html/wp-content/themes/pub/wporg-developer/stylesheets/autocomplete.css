@@ -23,7 +23,6 @@ div.awesomplete li:hover mark, div.awesomplete li[aria-selected="true"] mark {
 .devhub-wrap div.awesomplete > ul {
 	max-height: 13.5em;
 	color: #404040;
-	margin-top: -.9em;
 	overflow: auto;
 	background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.9));
 }
