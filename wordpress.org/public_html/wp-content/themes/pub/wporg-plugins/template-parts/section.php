@@ -20,7 +20,7 @@ $classes = implode( ' ', $classes );
 
 <div id="<?php echo esc_attr( $prefix . $section_slug ); ?>" class="<?php echo esc_attr( $classes ); ?>">
 	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo esc_html( $section['title'] ); ?></h2>
-	<?php echo wp_kses_post( $section_content ); ?>
+	<?php echo $section_content; ?>
 </div>
 <?php if ( $section_read_more ) : ?>
 	<button
