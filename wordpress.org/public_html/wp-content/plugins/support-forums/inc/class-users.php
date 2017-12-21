@@ -173,6 +173,36 @@ class Users {
 			'title'  => __( 'Favorite Topics', 'wporg-forums' ),
 			'href'   => bbp_get_favorites_permalink( $user_id ),
 		) );
+
+		if ( current_user_can( 'moderate' ) ) {
+			$wp_admin_bar->add_group( array(
+				'parent' => 'my-account',
+				'id'     => 'moderator-views',
+				'meta'   => array(
+					'class' => 'ab-sub-secondary',
+				),
+			) );
+
+			$moderator_views = array(
+				'all-topics',
+				'no-replies',
+				'support-forum-no',
+				'taggedmodlook',
+			);
+
+			foreach ( $moderator_views as $view ) {
+				if ( ! bbp_get_view_id( $view ) ) {
+					continue;
+				}
+
+				$wp_admin_bar->add_menu( array(
+					'parent' => 'moderator-views',
+					'id'     => $view,
+					'title'  => bbp_get_view_title( $view ),
+					'href'   => bbp_get_view_url( $view ),
+				) );
+			}
+		}
 	}
 
 	/**
