@@ -110,32 +110,27 @@ add_action( 'bbp_register_views', 'wporg_support_custom_views' );
  * Display an ordered list of bbPress views
  */
 function wporg_support_get_views() {
-	$all = bbp_get_views();
-	$ordered = array(
+	$views = array(
 		'all-topics',
 		'no-replies',
 		'support-forum-no',
 		'taggedmodlook',
 	);
-	$found = array();
-	foreach ( $ordered as $view ) {
-		if ( array_key_exists( $view, $all ) ) {
-			$found[] = $view;
+
+	$output = array();
+
+	foreach ( $views as $view ) {
+		if ( ! bbp_get_view_id( $view ) ) {
+			continue;
 		}
+
+		$output[] = sprintf( '<li class="view"><a href="%s">%s</a></li>',
+			esc_url( bbp_get_view_url( $view ) ),
+			bbp_get_view_title( $view )
+		);
 	}
-	$view_iterator = 0;
-	$view_count    = count( $found );
 
-	foreach ( $found as $view ) : $view_iterator++; ?>
-
-		<li class="view"><a href="<?php bbp_view_url( $view ); ?>"><?php bbp_view_title( $view ); ?></a></li>
-
-		<?php if ( $view_iterator < $view_count ) : ?>|<?php endif; ?>
-
-	<?php endforeach;
-
-	// Unset variables
-	unset( $view_count, $view_iterator, $view, $found, $all, $ordered );
+	echo implode( ' | ', $output );
 }
 
 /**
