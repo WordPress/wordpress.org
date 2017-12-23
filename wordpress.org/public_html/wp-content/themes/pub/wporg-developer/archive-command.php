@@ -21,8 +21,8 @@ get_header(); ?>
 				<table>
 					<thead>
 						<tr>
-							<th>Command</th>
-							<th>Description</th>
+							<th><?php _e( 'Command', 'wporg' ); ?></th>
+							<th><?php _e( 'Description', 'wporg' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
