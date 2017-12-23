@@ -689,7 +689,7 @@ ul.filter-header-links {
 }
 
 .contribute-button {
-	height: 26px;
+	min-height: 26px;
 }
 
 .contribute-button a {
@@ -705,6 +705,17 @@ ul.filter-header-links {
 
 .contribute-button a:hover {
 	color: #333;
+}
+
+@media (max-width: 782px) {
+	.contribute-button {
+		max-width: 90%;
+	}
+
+	.contribute-button a {
+		padding: 0;
+		white-space: normal;
+	}
 }
 
 .locale-button {
