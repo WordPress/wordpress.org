@@ -8,7 +8,7 @@
  *
  * @package Gutenbergtheme
  */
-
+$GLOBALS['pagetitle'] = wp_get_document_title();
 require WPORGPATH . 'header.php';
 ?>
 
