@@ -65,7 +65,7 @@ get_header(); ?>
 						<p><?php echo wp_kses_post( __( 'Once your plugin is approved, it <em>cannot</em> be renamed.', 'wporg-plugins' ) ); ?></p>
 
 						<h3><?php esc_html_e( 'I made a mistake in my plugin name. Should I resubmit?', 'wporg-plugins' ); ?></h3>
-						<p><?php echo wp_kses_post( __( 'Please don&#8217;t! Instead email <code>plugins@wordpress.org</code> and we can rename your plugin as long as it&#8217;s not approved. Since we check emails first, the odds are we&#8217;ll catch it. If we don&#8217;t, just email us and explain the mistake. We&#8217;ll explain what do to.', 'wporg-plugins' ) ); ?></p>
+						<p><?php echo wp_kses_post( __( 'Please don&#8217;t! Instead email <code>plugins@wordpress.org</code> and we can rename your plugin as long as it&#8217;s not approved. Since we check emails first, the odds are we&#8217;ll catch it. If we don&#8217;t, just email us and explain the mistake. We&#8217;ll explain what to do.', 'wporg-plugins' ) ); ?></p>
 
 						<h3><?php esc_html_e( 'Why was I told my plugin name was unacceptable?', 'wporg-plugins' ); ?></h3>
 						<p>
