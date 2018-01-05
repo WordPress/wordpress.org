@@ -138,6 +138,14 @@ defined( 'WPINC' ) or die();
 			<p class="description">
 				<?php _e( 'No commas, thousands separators or currency symbols. Ex. 1234.56', 'wordcamporg' ); ?>
 			</p>
+			<p class="description" style="font-weight: bold;">
+				<?php
+				printf(
+					__( 'For amounts under $250 USD or equivalent, please <a href="%s">create a microsponsor ticket</a> instead, to reduce our administrative burden. Thanks!', 'wordcamporg' ),
+					'https://make.wordpress.org/community/handbook/wordcamp-organizer/first-steps/web-presence/using-camptix-event-ticketing-plugin/#creating-tickets'
+				);
+				?>
+			</p>
 		</div>
 	</li>
 
