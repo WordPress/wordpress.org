@@ -2272,11 +2272,11 @@ input {
 
 .single-command #content table thead th {
   font-weight: bold;
-  padding: .7rem .4rem;
+  padding: 1em;
 }
 
 .single-command #content table th, .single-command #content table td {
-  padding: .4rem;
+  padding: 0.8em 1em;
   margin: 0;
   font-weight: normal;
   text-align: left;
