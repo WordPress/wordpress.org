@@ -43,8 +43,8 @@ if ( have_posts() ) :
 					); ?>
 				</p>
 				<p>
-					<?php printf( __( 'Further resources for theme developers can be found in the Codex on the <a href="%s">Theme Development page</a>.', 'wporg-themes' ),
-						__( 'https://codex.wordpress.org/Theme_Development', 'wporg-themes' )
+					<?php printf( __( 'Further resources for theme developers can be found in the <a href="%s">Theme Developer Handbook</a>.', 'wporg-themes' ),
+						__( 'https://developer.wordpress.org/themes/', 'wporg-themes' )
 					); ?>
 				</p>
 				<p>
