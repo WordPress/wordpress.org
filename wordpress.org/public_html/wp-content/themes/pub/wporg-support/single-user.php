@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 
-<div id="pagebody">
+<main id="main" class="site-main" role="main">
 	<div class="wrapper">
 		<div id="bbp-user-<?php bbp_current_user_id(); ?>" class="bbp-single-user">
 			<div class="entry-content">
@@ -10,6 +10,6 @@
 			</div><!-- .entry-content -->
 		</div><!-- #bbp-user-<?php bbp_current_user_id(); ?> -->
 	</div>
-</div>
+</main>
 
 <?php get_footer(); ?>
