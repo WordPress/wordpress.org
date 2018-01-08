@@ -43,9 +43,11 @@ class Plugin {
 		add_action( 'template_redirect', [ $this, 'register_routes' ], 5 );
 		add_filter( 'gp_locale_glossary_path_prefix', [ $this, 'set_locale_glossary_path_prefix' ] );
 
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			$this->register_cli_commands();
-		}
+		add_filter( 'cron_schedules', [ $this, 'register_cron_schedules' ] );
+		add_action( 'init', [ $this, 'register_cron_events' ] );
+		add_action( 'wporg_translate_update_existing_locales_cache', [ $this, 'update_existing_locales_cache' ] );
+		add_action( 'wporg_translate_update_translation_status_cache', [ $this, 'update_translation_status_cache' ] );
+		add_action( 'wporg_translate_update_contributors_count_cache', [ $this, 'update_contributors_count_cache' ] );
 	}
 
 	/**
@@ -158,9 +160,103 @@ class Plugin {
 	}
 
 	/**
+	 * Filters the non-default cron schedules.
+	 *
+	 * @param array $schedules An array of non-default cron schedules.
+	 * @return array  An array of non-default cron schedules.
+	 */
+	public function register_cron_schedules( $schedules ) {
+		$schedules['15_minutes'] = array(
+			'interval' => 15 * MINUTE_IN_SECONDS,
+			'display'  => 'Every 15 minutes',
+		);
+
+		return $schedules;
+	}
+
+	/**
 	 * Registers CLI commands if WP-CLI is loaded.
 	 */
-	function register_cli_commands() {
-		WP_CLI::add_command( 'wporg-translate update-cache', __NAMESPACE__ . '\CLI\Update_Caches' );
+	public function register_cron_events() {
+		if ( ! wp_next_scheduled( 'wporg_translate_update_existing_locales_cache' ) ) {
+			wp_schedule_event( time(), '15_minutes', 'wporg_translate_update_existing_locales_cache' );
+		}
+
+		if ( ! wp_next_scheduled( 'wporg_translate_update_translation_status_cache' ) ) {
+			wp_schedule_event( time() + 3 * MINUTE_IN_SECONDS, '15_minutes', 'wporg_translate_update_translation_status_cache' );
+		}
+
+		if ( ! wp_next_scheduled( 'wporg_translate_update_contributors_count_cache' ) ) {
+			wp_schedule_event( time() + 6 * MINUTE_IN_SECONDS, '15_minutes', 'wporg_translate_update_contributors_count_cache' );
+		}
+	}
+
+	/**
+	 * Calculates the translation status of the WordPress project per locale.
+	 */
+	public function update_translation_status_cache() {
+		global $wpdb;
+
+		if ( ! isset( $wpdb->project_translation_status ) ) {
+			return;
+		}
+
+		$translation_status = $wpdb->get_results( $wpdb->prepare(
+			"SELECT `locale`, `all` AS `all_count`, `waiting` AS `waiting_count`, `current` AS `current_count`, `fuzzy` AS `fuzzy_count`
+			FROM {$wpdb->project_translation_status}
+			WHERE `project_id` = %d AND `locale_slug` = %s",
+			2, 'default' // 2 = wp/dev
+		), OBJECT_K );
+
+		if ( ! $translation_status ) {
+			return;
+		}
+
+		wp_cache_set( 'translation-status', $translation_status, 'wporg-translate' );
+	}
+
+	/**
+	 * Updates contributors count per locale.
+	 */
+	public function update_contributors_count_cache() {
+		global $wpdb;
+
+		if ( ! isset( $wpdb->user_translations_count ) ) {
+			return;
+		}
+
+		$locales   = GP::$translation_set->existing_locales();
+		$db_counts = $wpdb->get_results(
+			"SELECT `locale`, COUNT( DISTINCT user_id ) as `count` FROM {$wpdb->user_translations_count} WHERE `accepted` > 0 GROUP BY `locale`",
+			OBJECT_K
+		);
+
+		if ( ! $db_counts || ! $locales ) {
+			return;
+		}
+
+		$counts = array();
+		foreach ( $locales as $locale ) {
+			if ( isset( $db_counts[ $locale ] ) ) {
+				$counts[ $locale ] = (int) $db_counts[ $locale ]->count;
+			} else {
+				$counts[ $locale ] = 0;
+			}
+		}
+
+		wp_cache_set( 'contributors-count', $counts, 'wporg-translate' );
+	}
+
+	/**
+	 * Updates cache for existing locales.
+	 */
+	public function update_existing_locales_cache() {
+		$existing_locales = GP::$translation_set->existing_locales();
+
+		if ( ! $existing_locales ) {
+			return;
+		}
+
+		wp_cache_set( 'existing-locales', $existing_locales, 'wporg-translate' );
 	}
 }
