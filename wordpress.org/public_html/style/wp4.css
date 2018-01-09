@@ -277,9 +277,10 @@ a img.aligncenter {
 	width: 26px;
 	background: #191e23;
 	background-image: url(//s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831);
-	background-position: 100% 2px;
+	background-position: 3px 5px;
 	background-repeat: no-repeat;
-	border-radius:0;
+	border-radius: 0;
+	margin: 0;
 	padding: 0;
 }
 
