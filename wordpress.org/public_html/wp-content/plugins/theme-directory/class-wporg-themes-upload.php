@@ -550,7 +550,7 @@ class WPORG_Themes_Upload {
 		// Diff line.
 		$this->trac_ticket->diff_line = '';
 		if ( ! empty( $this->theme_post->max_version ) ) {
-			$this->trac_ticket->diff_line = "\n" . sprintf( __( 'Diff with previous version: %s', 'wporg-themes' ), "https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n" );
+			$this->trac_ticket->diff_line = "\nDiff with previous version: https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n";
 		}
 
 		// Description
