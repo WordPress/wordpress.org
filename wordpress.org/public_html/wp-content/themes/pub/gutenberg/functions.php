@@ -184,3 +184,5 @@ add_action( 'wporg_gutenberg_markdown_import', array( 'Import_Gutendocs', 'actio
 add_filter( 'the_title', array( 'Gutenberg_Handbook', 'filter_the_title_edit_link' ), 10, 2 );
 add_filter( 'get_edit_post_link', array( 'Gutenberg_Handbook', 'redirect_edit_link_to_github' ), 10, 3 );
 add_filter( 'o2_filter_post_actions', array( 'Gutenberg_Handbook', 'redirect_o2_edit_link_to_github' ), 11, 2 );
+
+add_filter( 'handbook_display_toc', '__return_false' );
