@@ -1326,6 +1326,14 @@ window.wp = window.wp || {};
 					return;
 				}
 
+				if ( $( 'body' ).hasClass( 'modal-open' ) ) {
+					return;
+				}
+
+				if ( self.collection.length < themes.data.settings.postsPerPage ) {
+					return;
+				}
+
 				// Set loadingThemes to true and bump page instance of currentQuery.
 				self.collection.loadingThemes = true;
 				self.collection.currentQuery.page++;
