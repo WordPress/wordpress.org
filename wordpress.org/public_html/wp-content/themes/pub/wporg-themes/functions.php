@@ -44,7 +44,7 @@ function wporg_themes_scripts() {
 	if ( is_rtl() ) {
 		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet );
 	}
-	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 12 );
+	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 13 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
