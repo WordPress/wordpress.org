@@ -77,6 +77,10 @@ class WPorg_Handbook_TOC {
 		for ( $i = 1; $i <= 4; $i++ )
 			$content = $this->add_ids_and_jumpto_links( "h$i", $content );
 
+		if ( ! apply_filters( 'handbook_display_toc', true ) ) {
+			return $content;
+		}
+
 		if ( $items ) {
 			$contents_header = 'h' . $items[0][2]; // Duplicate the first <h#> tag in the document.
 			$toc .= $this->styles;
