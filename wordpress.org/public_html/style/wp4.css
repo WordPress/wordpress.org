@@ -394,8 +394,6 @@ a img.aligncenter {
 	left: 10px;
 	display: block;
 	float: left;
-	width: 39px;
-	height: 32px;
 	vertical-align: top;
 	text-align: center;
 	text-decoration: inherit;
@@ -416,8 +414,6 @@ a img.aligncenter {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 3px;
-	width: 39px;
-	height: 32px;
 	outline: none;
 	border: none;
 	color: #888;
