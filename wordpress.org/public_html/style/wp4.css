@@ -323,10 +323,6 @@ a img.aligncenter {
 	height: 34px;
 }
 
-#wporg-header ul li#download a.current {
-	color: #eee;
-}
-
 #wporg-header ul li a:hover,
 #wporg-header ul li a.current,
 #wporg-header ul li.current-menu-item a,
@@ -360,9 +356,17 @@ a img.aligncenter {
 	overflow: hidden;
 }
 
+.wporg-page-download #wporg-header #download {
+	display: none;
+}
+
 #wporg-header ul li#download a {
 	margin: 0;
 	padding: 0 16px;
+}
+
+#wporg-header ul li#download a.current {
+	color: #eee;
 }
 
 #wporg-header ul li#download a:hover {
