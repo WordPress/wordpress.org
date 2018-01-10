@@ -705,12 +705,9 @@ a.contribute-button:hover {
 }
 
 @media (max-width: 782px) {
-	.contribute-button {
-		max-width: 90%;
-	}
-
-	.contribute-button a {
-		padding: 0;
+	a.contribute-button {
+		max-width: 92%;
+		padding: 0 5px;
 		white-space: normal;
 	}
 }
