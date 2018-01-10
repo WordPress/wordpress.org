@@ -393,6 +393,9 @@ a img.aligncenter {
 }
 
 #mobile-menu-button {
+	background: none;
+	border: none;
+	box-shadow: none;
 	position: absolute;
 	top: 75px;
 	left: 10px;
@@ -406,8 +409,12 @@ a img.aligncenter {
 	font-size: 16px;
 	font-family: 'dashicons';
 	line-height: 1;
+	padding: 1px;
+	text-shadow: none;
 	-webkit-transition: color .1s ease-in 0;
 	-moz-transition: color .1s ease-in 0;
+	transition: color .1s ease-in 0;
+	-webkit-appearance: none;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -426,10 +433,6 @@ a img.aligncenter {
 	text-decoration: none;
 	font: normal 50px/1 'Dashicons';
 	-webkit-font-smoothing: antialiased;
-}
-
-#mobile-menu-button:hover {
-	background:none;
 }
 
 #download-mobile {
