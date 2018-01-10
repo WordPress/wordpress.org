@@ -10,7 +10,7 @@ import { identity, map } from 'lodash';
  */
 import ImageGallery from './image-gallery';
 
-export const Screenshots = ( { screenshots, translate } ) => {
+export const Screenshots = ( { screenshots } ) => {
 	const items = map( screenshots, ( { caption, src } ) => ( {
 		original: src,
 		originalAlt: '',
@@ -22,7 +22,7 @@ export const Screenshots = ( { screenshots, translate } ) => {
 	if ( items ) {
 		return (
 			<div id="screenshots" className="plugin-screenshots">
-				<h2>{ translate( 'Screenshots' ) }</h2>
+				<h2>{ localeData.screenshots }</h2>
 				<ImageGallery items={ items } />
 			</div>
 		);

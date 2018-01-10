@@ -113,6 +113,7 @@ function scripts() {
 				'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
 				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),
 			),
+		    'screenshots' => __( 'Screenshots', 'wporg-plugins' ),
 		) );
 	}
 
