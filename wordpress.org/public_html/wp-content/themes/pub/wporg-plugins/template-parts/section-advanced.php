@@ -33,35 +33,5 @@ global $post;
 		<tbody></tbody>
 	</table>
 
-	<?php
-	if ( 'publish' === $post->post_status ) {
-		$tags = (array) get_post_meta( $post->ID, 'tagged_versions', true );
-		// Sort the versions by version.
-		usort( $tags, 'version_compare' );
-		// We'll want to add a Development Version if it exists.
-		$tags[] = 'trunk';
-
-		// Remove the current version, this may be trunk.
-		$tags = array_diff( $tags, array( get_post_meta( $post->ID, 'stable_tag', true ) ) );
-
-		// List Trunk, followed by the most recent non-stable release.
-		$tags = array_reverse( $tags );
-
-		echo '<h5>' . esc_html__( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
-		echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
-
-		echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
-		foreach ( $tags as $version ) {
-			$text = ( 'trunk' === $version ? esc_html__( 'Development Version', 'wporg-plugins' ) : $version );
-			printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
-		}
-		echo '</select> ';
-
-		printf(
-			'<a href="%s" id="download-previous-link" class="button">%s</a>',
-			esc_url( Template::download_link( $post, reset( $tags ) ) ),
-			esc_html__( 'Download', 'wporg-plugins' )
-		);
-	}
-	?>
+	<?php the_previous_version_download(); ?>
 </div>

@@ -238,3 +238,47 @@ function get_plugin_status_notice( $post = null ) {
 
 	return $message;
 }
+
+/**
+ * Displays a select element with links to previous plugin version to download.
+ *
+ * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+ */
+function the_previous_version_download( $post = null ) {
+	$post = get_post( $post );
+
+	if ( 'publish' !== $post->post_status ) {
+		return;
+	}
+
+	$tags = (array) get_post_meta( $post->ID, 'tagged_versions', true );
+	// Sort the versions by version.
+	usort( $tags, 'version_compare' );
+	// We'll want to add a Development Version if it exists.
+	$tags[] = 'trunk';
+	// Remove the current version, this may be trunk.
+	$tags = array_diff( $tags, array( get_post_meta( $post->ID, 'stable_tag', true ) ) );
+
+	if ( empty( $tags ) ) {
+		return;
+	}
+
+	// List Trunk, followed by the most recent non-stable release.
+	$tags = array_reverse( $tags );
+
+	echo '<h5>' . esc_html__( 'Previous Versions', 'wporg-plugins' ) . '</h5>';
+	echo '<div class="plugin-notice notice notice-info notice-alt"><p>' . esc_html__( 'Previous versions of this plugin may not be secure or stable and are available for testing purposes only.', 'wporg-plugins' ) . '</p></div>';
+
+	echo '<select class="previous-versions" onchange="getElementById(\'download-previous-link\').href=this.value;">';
+	foreach ( $tags as $version ) {
+		$text = ( 'trunk' === $version ? esc_html__( 'Development Version', 'wporg-plugins' ) : $version );
+		printf( '<option value="%s">%s</option>', esc_attr( Template::download_link( $post, $version ) ), esc_html( $text ) );
+	}
+	echo '</select> ';
+
+	printf(
+		'<a href="%s" id="download-previous-link" class="button">%s</a>',
+		esc_url( Template::download_link( $post, reset( $tags ) ) ),
+		esc_html__( 'Download', 'wporg-plugins' )
+	);
+}
