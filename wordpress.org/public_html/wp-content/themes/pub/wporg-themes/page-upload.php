@@ -18,6 +18,7 @@ if ( have_posts() ) :
 			</header><!-- .entry-header -->
 
 			<div class="entry-content">
+				<p><?php esc_html_e( 'Your theme will be submitted for review to be distributed on the official WordPress.org Theme Directory.', 'wporg-themes' ); ?></p>
 				<?php the_content(); // do_shortcode( '[wporg-themes-upload]' ); ?>
 			</div><!-- .entry-content -->
 
