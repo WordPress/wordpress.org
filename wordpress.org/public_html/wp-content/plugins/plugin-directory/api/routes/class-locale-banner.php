@@ -85,7 +85,12 @@ class Locale_Banner extends Base {
 
 		// English directory.
 		if ( 'en_US' === $current_locale ) {
-			$current_site = get_site();
+			$current_path   = get_site()->path;
+			$referring_path = wp_parse_url( $request->get_header( 'referer' ), PHP_URL_PATH );
+
+			if ( $referring_path && '/' === $referring_path[0] ) {
+				$current_path = $referring_path;
+			}
 
 			// Only one locale suggestion.
 			if ( 1 === count( $suggest_named_locales ) ) {
@@ -96,10 +101,9 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', $locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
+							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
-							$current_site->path,
-							$plugin_slug,
+							esc_url( $current_path ),
 							$language
 						),
 						esc_url( 'https://translate.wordpress.org/projects/wp-plugins/' . $plugin_slug )
@@ -110,7 +114,7 @@ class Locale_Banner extends Base {
 						sprintf(
 							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
-							$current_site->path,
+							esc_url( $current_path ),
 							$language
 						)
 					);
@@ -126,10 +130,9 @@ class Locale_Banner extends Base {
 					$other_suggest = '';
 					foreach ( $suggest_named_locales as $locale => $language ) {
 						$other_suggest .= sprintf(
-							'<a href="https://%s.wordpress.org%s%s/">%s</a>, ',
+							'<a href="https://%s.wordpress.org%s/">%s</a>, ',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
-							$current_site->path,
-							$plugin_slug,
+							esc_url( $current_path ),
 							$language
 						);
 					}
@@ -137,10 +140,9 @@ class Locale_Banner extends Base {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %1$s (also: %2$s). <a href="%3$s">Help improve the translation!</a>', $primary_locale ),
 						sprintf(
-							'<a href="https://%s.wordpress.org%s%s/">%s</a>',
+							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
-							$current_site->path,
-							$plugin_slug,
+							esc_url( $current_path ),
 							$primary_language
 						),
 						trim( $other_suggest, ' ,' ),
@@ -152,7 +154,7 @@ class Locale_Banner extends Base {
 						$other_suggest .= sprintf(
 							'<a href="https://%s.wordpress.org%s">%s</a>, ',
 							$locale_subdomain_assoc[ $locale ]->subdomain,
-							$current_site->path,
+							esc_url( $current_path ),
 							$language
 						);
 					}
@@ -162,7 +164,7 @@ class Locale_Banner extends Base {
 						sprintf(
 							'<a href="https://%s.wordpress.org%s">%s</a>',
 							$locale_subdomain_assoc[ $primary_locale ]->subdomain,
-							$current_site->path,
+							esc_url( $current_path ),
 							$primary_language
 						),
 						trim( $other_suggest, ' ,' )
