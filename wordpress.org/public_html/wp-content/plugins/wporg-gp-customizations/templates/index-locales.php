@@ -47,9 +47,7 @@ gp_tmpl_header();
 					<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
 				</div>
 				<div class="locale-button">
-					<div class="button contribute-button">
-						<?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), 'Contribute Translation' ) ?>
-					</div>
+					<?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), 'Contribute Translation', [ 'class' => 'button contribute-button' ] ); ?>
 				</div>
 			</div>
 		<?php endforeach; ?>
