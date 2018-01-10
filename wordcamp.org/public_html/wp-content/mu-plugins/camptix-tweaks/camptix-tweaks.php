@@ -9,6 +9,7 @@ defined( 'WPINC' ) or die();
 add_action( 'camptix_admin_notices',                         __NAMESPACE__ . '\show_sandbox_mode_warning'           );
 add_filter( 'camptix_dashboard_paypal_credentials',          __NAMESPACE__ . '\paypal_credentials'                  );
 add_filter( 'camptix_paypal_predefined_accounts',            __NAMESPACE__ . '\paypal_credentials'                  );
+add_filter( 'camptix_stripe_predefined_accounts',            __NAMESPACE__ . '\stripe_credentials'                  );
 add_action( 'init',                                          __NAMESPACE__ . '\hide_empty_tickets'                  );
 add_action( 'wp_print_styles',                               __NAMESPACE__ . '\print_login_message_styles'          );
 add_filter( 'camptix_require_login_please_login_message',    __NAMESPACE__ . '\override_please_login_message'       );
@@ -113,6 +114,37 @@ function paypal_credentials( $credentials ) {
 			'api_username'  => WPCS_PAYPAL_NVP_USERNAME,
 			'api_password'  => WPCS_PAYPAL_NVP_PASSWORD,
 			'api_signature' => WPCS_PAYPAL_NVP_SIGNATURE,
+		);
+	}
+
+	return $credentials;
+}
+
+/**
+ * Setup our pre-defined Stripe payment credentials.
+ *
+ * @param array $credentials
+ *
+ * @return array
+ */
+function stripe_credentials( $credentials ) {
+	// Sandbox account
+	$credentials = array(
+		'wpcs-sandbox' => array(
+			'label'          => 'WordCamp Sandbox',
+			'sandbox'        => true,
+			'api_public_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_PUBLIC : '',
+			'api_secret_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET' ) ? WORDCAMP_CAMPTIX_STRIPE_TEST_SECRET : '',
+		),
+	);
+
+	// Production account
+	if ( defined( 'WORDCAMP_CAMPTIX_STRIPE_LIVE_PUBLIC' ) ) {
+		$credentials['wpcs-production'] = array(
+			'label'          => 'WordPress Community Support, PBC',
+			'sandbox'        => false,
+			'api_public_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_LIVE_PUBLIC' ) ? WORDCAMP_CAMPTIX_STRIPE_LIVE_PUBLIC : '',
+			'api_secret_key' => defined( 'WORDCAMP_CAMPTIX_STRIPE_LIVE_SECRET' ) ? WORDCAMP_CAMPTIX_STRIPE_LIVE_SECRET : '',
 		);
 	}
 
