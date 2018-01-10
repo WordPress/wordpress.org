@@ -104,7 +104,7 @@
 					</ul>
 					<# } #>
 
-					<a class="button button-secondary" href="https://wordpress.org/support/theme/{{ data.id }}/reviews/#new-post"><?php _e( 'Add your review', 'wporg-themes' ); ?></a>
+					<a class="button button-secondary" href="https://wordpress.org/support/theme/{{ data.id }}/reviews/#new-post"><?php _e( 'Add my review', 'wporg-themes' ); ?></a>
 				</div><!-- .theme-rating -->
 
 				<div class="theme-support">
