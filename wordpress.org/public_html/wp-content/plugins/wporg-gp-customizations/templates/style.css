@@ -688,22 +688,19 @@ ul.filter-header-links {
 	border-color: #509040;
 }
 
-.contribute-button {
-	min-height: 26px;
-}
-
-.contribute-button a {
-	vertical-align: baseline;
+a.contribute-button {
 	color: #555;
 	line-height: 26px;
 	padding: 0 10px 5px;
 	-webkit-appearance: none;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
+	min-height: 26px;
+	vertical-align: baseline;
 	white-space: nowrap;
 }
 
-.contribute-button a:hover {
+a.contribute-button:hover {
 	color: #333;
 }
 

@@ -203,9 +203,7 @@ gp_tmpl_header();
 			</div>
 
 			<div class="project-bottom">
-				<div class="button contribute-button">
-					<?php echo gp_link_get( $project_url, 'Translate Project' ) ?>
-				</div>
+				<?php echo gp_link_get( $project_url, 'Translate Project', [ 'class' => 'button contribute-button' ] ); ?>
 			</div>
 		</div>
 		<?php
