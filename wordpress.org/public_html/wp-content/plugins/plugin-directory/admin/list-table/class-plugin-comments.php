@@ -41,8 +41,9 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 		?>
 		<table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" data-comment-type="<?php echo esc_attr( $this->comment_type ); ?>" style="display:none;">
 			<colgroup>
+				<col width="15%">
+				<col width="65%">
 				<col width="20%">
-				<col width="80%">
 			</colgroup>
 			<tbody id="the-comment-list"<?php if ( $singular ) { echo " data-wp-lists='list:$singular'"; } ?>>
 			<?php
@@ -53,5 +54,21 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 			</tbody>
 		</table>
 	<?php
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function get_column_info() {
+		return [
+			[
+				'author'  => __( 'Author' ),
+				'comment' => _x( 'Comment', 'column name' ),
+				'date'    => __( 'Date' ),
+			],
+			[],
+			[],
+			'comment',
+		];
 	}
 }

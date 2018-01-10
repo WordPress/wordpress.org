@@ -69,7 +69,7 @@
 					comment_type: $commentsList.data( 'comment-type' )
 				};
 
-			wp.ajax.post( 'get-comments', data ).always( function( response ) {
+			wp.ajax.post( 'get-notes', data ).always( function( response ) {
 				response = wpAjax.parseAjaxResponse( response );
 
 				if ( 'object' == typeof response && response.responses[0] ) {

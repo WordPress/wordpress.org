@@ -38,4 +38,60 @@ class Internal_Notes {
 		$wp_list_table->display( true );
 		wp_comment_trashnotice();
 	}
+
+	/**
+	 * Ajax handler for getting notes.
+	 *
+	 * @global int $post_id
+	 *
+	 * @param string $action Action to perform.
+	 */
+	function get_notes( $action ) {
+		global $post_id;
+		if ( empty( $action ) ) {
+			$action = 'get-comments';
+		}
+		check_ajax_referer( $action );
+
+		if ( empty( $post_id ) && ! empty( $_REQUEST['p'] ) ) {
+			$id = absint( $_REQUEST['p'] );
+			if ( ! empty( $id ) ) {
+				$post_id = $id;
+			}
+		}
+
+		if ( empty( $post_id ) ) {
+			wp_die( -1 );
+		}
+		$wp_list_table = new Plugin_Comments( [
+			'screen' => convert_to_screen( [ 'screen' => 'edit-comments' ] ),
+		] );
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_die( -1 );
+		}
+
+		$wp_list_table->prepare_items();
+
+		if ( ! $wp_list_table->has_items() ) {
+			wp_die( 1 );
+		}
+
+		$x = new \WP_Ajax_Response();
+		ob_start();
+		foreach ( $wp_list_table->items as $comment ) {
+			if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) && 0 === $comment->comment_approved ) {
+				continue;
+			}
+			get_comment( $comment );
+			$wp_list_table->single_row( $comment );
+		}
+		$comment_list_item = ob_get_clean();
+
+		$x->add( [
+			'what' => 'comments',
+			'data' => $comment_list_item,
+		] );
+		$x->send();
+	}
 }

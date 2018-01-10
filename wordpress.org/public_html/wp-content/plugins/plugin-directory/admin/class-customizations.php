@@ -52,6 +52,7 @@ class Customizations {
 		add_filter( 'postbox_classes_plugin_internal-notes', array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-committers', array( __NAMESPACE__ . '\Metabox\Committers', 'postbox_classes' ) );
 		add_filter( 'postbox_classes_plugin_plugin-support-reps', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'postbox_classes' ) );
+		add_filter( 'wp_ajax_get-notes', array( __NAMESPACE__ . '\Metabox\Internal_Notes', 'get_notes' ) );
 		add_filter( 'wp_ajax_add-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'add_committer' ) );
 		add_filter( 'wp_ajax_delete-committer', array( __NAMESPACE__ . '\Metabox\Committers', 'remove_committer' ) );
 		add_filter( 'wp_ajax_add-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'add_support_rep' ) );
