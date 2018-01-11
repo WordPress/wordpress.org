@@ -488,7 +488,11 @@ window.wp = window.wp || {};
 			);
 
 			// Format the Last Updated date, prefering
-			data.last_updated = updated.toLocaleDateString( false, {day:"numeric", month:"long", year:"numeric"} );
+			data.last_updated = updated.toLocaleDateString( l10n.locale, {
+				day:   'numeric',
+				month: 'long',
+				year:  'numeric',
+			} );
 
 			// If last updated plus 2 years is in the past, it's outdated.
 			data.is_outdated = updated.setYear(updated.getYear() + 1902).valueOf() < new Date().valueOf();

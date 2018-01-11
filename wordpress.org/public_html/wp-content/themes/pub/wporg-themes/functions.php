@@ -66,6 +66,7 @@ function wporg_themes_scripts() {
 				),
 			),
 			'l10n' => array(
+				'locale'            => str_replace( '_', '-', get_locale() ),
 				'search'            => __( 'Search Themes', 'wporg-themes' ),
 				'searchPlaceholder' => __( 'Search themes...', 'wporg-themes' ), // placeholder (no ellipsis)
 				'error'             => __( 'An unexpected error occurred.', 'wporg-themes' ),
