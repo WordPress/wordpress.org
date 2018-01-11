@@ -25,6 +25,8 @@ function wporg_themes_setup() {
 	// No need for canonical lookups
 	remove_action( 'template_redirect', 'redirect_canonical' );
 	remove_action( 'template_redirect', 'wp_old_slug_redirect' );
+
+	add_theme_support( 'wp4-styles' );
 }
 add_action( 'after_setup_theme', 'wporg_themes_setup' );
 
@@ -40,11 +42,8 @@ function wporg_themes_scripts() {
 		$GLOBALS['concatenate_scripts'] = true;
 	}
 
-	$stylesheet = get_stylesheet_uri();
-	if ( is_rtl() ) {
-		$stylesheet = str_replace( '.css', '-rtl.css', $stylesheet );
-	}
-	wp_enqueue_style( 'wporg-themes', $stylesheet, array(), 13 );
+	$rtl = is_rtl() ? '-rtl' : '';
+	wp_enqueue_style( 'wporg-themes', get_stylesheet_directory_uri() . "/css/style{$rtl}.css", [ 'open-sans', 'dashicons' ], 13 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
@@ -91,10 +90,6 @@ function wporg_themes_scripts() {
 
 	// No Jetpack styles needed.
 	add_filter( 'jetpack_implode_frontend_css', '__return_false' );
-
-	// No dashicons needed.
-	wp_deregister_style( 'dashicons' );
-	wp_register_style( 'dashicons', '' );
 
 	/*
 	 * No Grofiles needed.

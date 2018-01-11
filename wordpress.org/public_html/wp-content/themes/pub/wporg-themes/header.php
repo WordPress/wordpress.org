@@ -9,12 +9,15 @@ $GLOBALS['pagetitle'] = __( 'Theme Directory &mdash; Free WordPress Themes', 'wp
 
 require WPORGPATH . 'header.php';
 ?>
-
-<div id="headline">
-	<div class="wrapper">
-		<h2 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php _e( 'Theme Directory', 'wporg-themes' ); ?></a></h2>
+<header id="masthead" class="site-header" role="banner">
+	<div class="site-branding">
+		<?php if ( is_home() ) : ?>
+		<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Theme Directory', 'Site title', 'wporg-themes' ); ?></a></h1>
+		<?php else : ?>
+			<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Theme Directory', 'Site title', 'wporg-themes' ); ?></a></p>
+		<?php endif; ?>
 	</div>
-</div>
+</header>
 <nav id="site-navigation" class="main-navigation" role="navigation">
 	<ul id="menu-theme-directory" class="menu">
 		<li><a href="<?php echo home_url( '/commercial/' ); ?>"><?php _e( 'Commercial Themes', 'wporg-themes' ); ?></a></li>

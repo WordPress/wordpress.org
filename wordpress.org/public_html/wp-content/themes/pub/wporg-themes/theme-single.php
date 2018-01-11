@@ -9,7 +9,7 @@
 	<div class="theme-wrap">
 		<div class="theme-about hentry" itemscope itemtype="http://schema.org/CreativeWork">
 			<?php if ( time() - strtotime( $theme->last_updated ) > 2 * YEAR_IN_SECONDS ) { ?>
-			<div class="theme-notice notice notice-warning">
+			<div class="theme-notice notice notice-warning notice-alt">
 				<p><?php _e( 'This theme <strong>hasn&#146;t been updated in over 2 years</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ); ?></p>
 			</div><!-- .theme-notice -->
 			<?php } ?>
@@ -31,7 +31,7 @@
 				</div>
 
 				<?php if ( !empty( $theme->parent ) ) { ?>
-				<div class="theme-notice notice notice-info">
+				<div class="theme-notice notice notice-info notice-alt">
 					<p class="parent"><?php printf( __( 'This is a child theme of %s.', 'wporg-themes' ), sprintf( '<a href="%1$s">%2$s</a>', home_url( $theme->parent['slug'] . '/' ), esc_html( $theme->parent['name'] ) ) ); ?></p>
 				</div>
 				<?php } ?>
