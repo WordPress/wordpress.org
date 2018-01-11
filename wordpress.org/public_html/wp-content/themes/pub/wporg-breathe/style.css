@@ -851,6 +851,14 @@ nav.o2-post-footer-actions ul li > span > a {
 }
 
 /*
+ * 404 Page
+ */
+
+.error404 #nav-below {
+	border: none;
+}
+
+/*
  * Page Templates
  */
 
