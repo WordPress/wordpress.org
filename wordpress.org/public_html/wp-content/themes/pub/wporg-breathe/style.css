@@ -434,6 +434,13 @@ aside[id^="nav_menu"] .widget-title {
 	padding: 0;
 }
 
+.o2-post #searchform {
+	margin-bottom: 1.5em;
+}
+.o2-post #searchform:last-child {
+	margin-bottom: 5em;
+}
+
 pre code {
 	padding: 0;
 }
