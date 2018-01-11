@@ -518,6 +518,7 @@ class Plugin_Directory {
 		add_filter( 'get_term', array( __NAMESPACE__ . '\I18n', 'translate_term' ) );
 		add_filter( 'the_content', array( $this, 'translate_post_content' ), 1, 2 );
 		add_filter( 'the_title', array( $this, 'translate_post_title' ), 1, 2 );
+		add_filter( 'single_post_title', array( $this, 'translate_post_title' ), 1, 2 );
 		add_filter( 'get_the_excerpt', array( $this, 'translate_post_excerpt' ), 1, 2 );
 
 		// Instantiate our copy of the Jetpack_Search class.
@@ -915,9 +916,9 @@ class Plugin_Directory {
 	 * @return string
 	 */
 	public function translate_post_title( $title, $post_id = null ) {
-		$post = get_post();
+		$post = get_post( $post_id );
 
-		if ( $post instanceof \WP_Post && $post_id === $post->ID ) {
+		if ( $post instanceof \WP_Post ) {
 			$title = Plugin_I18n::instance()->translate( 'title', $title, [ 'post_id' => $post ] );
 		}
 
