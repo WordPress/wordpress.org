@@ -363,7 +363,7 @@ function generate_email_body( $wordcamp_name, $fav_sessions_lookup ) {
  * @return bool true if email functionality should be disabled, false otherwise.
  */
 function email_fav_sessions_disabled() {
-	return true;    // @todo enable after finish discussing abuse mitigation
+	return false;
 }
 
 /**
