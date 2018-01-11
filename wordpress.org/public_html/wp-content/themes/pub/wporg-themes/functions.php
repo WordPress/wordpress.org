@@ -43,7 +43,7 @@ function wporg_themes_scripts() {
 	}
 
 	$rtl = is_rtl() ? '-rtl' : '';
-	wp_enqueue_style( 'wporg-themes', get_stylesheet_directory_uri() . "/css/style{$rtl}.css", [ 'open-sans', 'dashicons' ], 13 );
+	wp_enqueue_style( 'wporg-themes', get_stylesheet_directory_uri() . "/css/style{$rtl}.css", [ 'open-sans', 'dashicons' ], 14 );
 
 	if ( ! is_singular( 'page' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
