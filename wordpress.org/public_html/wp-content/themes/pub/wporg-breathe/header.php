@@ -15,7 +15,7 @@ require WPORGPATH . 'header.php';
 	<nav id="site-navigation" class="navigation-main clear" role="navigation">
 		<div class="screen-reader-text skip-link"><a href="#content" title="<?php _e( 'Skip to content', 'p2-breathe' ); ?>"><?php _e( 'Skip to content', 'p2-breathe' ); ?></a></div>
 
-		<?php wp_nav_menu( array( 'theme_location' => 'primary', 'fallback_cb' => false ) ); ?>
+		<?php wp_nav_menu( array( 'theme_location' => 'primary', 'fallback_cb' => false, 'depth' => 1 ) ); ?>
 	</nav><!-- .navigation-main -->
 </header><!-- .site-header -->
 
