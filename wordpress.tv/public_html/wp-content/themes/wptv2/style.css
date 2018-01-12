@@ -1482,7 +1482,7 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 }
 
 #content {
-	width: 630px;
+	width: 100%;
 	float: left;
 }
 
@@ -1568,7 +1568,10 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 }
 
 #commentform textarea {
-	width: 600px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
 	height: 100px;
 	margin-bottom: 5px;
 }
@@ -1796,7 +1799,7 @@ a {
 
 .secondary-content {
 	float: right;
-	width: 170px;
+	width: 200px;
 	margin: 0 0 50px 0;
 }
 
@@ -2426,7 +2429,7 @@ h3#comments {
 
 .category-wordcamptv .secondary-content {
 	float: left;
-	width: 170px;
+	width: 200px;
 }
 
 .category-wordcamptv .primary-content {
