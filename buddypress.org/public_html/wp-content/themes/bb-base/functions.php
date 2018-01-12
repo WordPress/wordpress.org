@@ -77,10 +77,10 @@ function bb_base_topic_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Forum Search', 'bbporg'); ?></h3>
-			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'bbporg' ); ?></label>
+			<h3><?php _e( 'Forum Search', 'bborg'); ?></h3>
+			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -92,10 +92,10 @@ function bb_base_reply_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Reply Search', 'bbporg'); ?></h3>
-			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'bbporg' ); ?></label>
+			<h3><?php _e( 'Reply Search', 'bborg'); ?></h3>
+			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -107,10 +107,10 @@ function bb_base_plugin_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Plugin Search', 'bbporg'); ?></h3>
-			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'bbporg' ); ?></label>
+			<h3><?php _e( 'Plugin Search', 'bborg'); ?></h3>
+			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'bborg' ); ?></label>
 			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" />
-			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bbporg' ); ?>" />
+			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'bborg' ); ?>" />
 		</div>
 	</form>
 
@@ -173,18 +173,40 @@ function bb_base_single_topic_description() {
 	$time_since  = bbp_get_topic_freshness_link( $topic_id );
 
 	// Singular/Plural
-	$voice_count = sprintf( _n( '%s participant', '%s participants', $voice_count, 'bbpress' ), bbp_number_format( $voice_count ) );
+	$voice_count = sprintf( _n( '%s participant', '%s participants', $voice_count, 'bborg' ), bbp_number_format( $voice_count ) );
 	$last_reply  = bbp_get_topic_last_active_id( $topic_id );
 
 	?>
 
-	<li class="topic-forum">In: <a href="<?php bbp_forum_permalink( bbp_get_topic_forum_id() ); ?>"><?php bbp_topic_forum_title(); ?></a></li>
-	<?php if ( !empty( $reply_count ) ) : ?><li class="reply-count"><?php echo $reply_count; ?></li><?php endif; ?>
-	<?php if ( !empty( $voice_count ) ) : ?><li class="voice-count"><?php echo $voice_count; ?></li><?php endif; ?>
-	<?php if ( !empty( $last_reply  ) ) : ?>
-		<li class="topic-freshness-author"><?php printf( __( 'Last reply from: %s', 'bbporg' ), bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) ) ); ?></li>
+	<li class="topic-forum"><?php
+		/* translators: %s: forum title */
+		printf( __( 'In: %s', 'bborg' ),
+			sprintf( '<a href="%s">%s</a>',
+				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
+				bbp_get_topic_forum_title()
+			)
+		);
+	?></li>
+	<?php if ( !empty( $reply_count ) ) : ?>
+		<li class="reply-count"><?php echo $reply_count; ?></li>
 	<?php endif; ?>
-	<?php if ( !empty( $time_since  ) ) : ?><li class="topic-freshness-time"><?php printf( __( 'Last activity: %s', 'bbporg' ), $time_since ); ?></li><?php endif; ?>
+	<?php if ( !empty( $voice_count ) ) : ?>
+		<li class="voice-count"><?php echo $voice_count; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $last_reply  ) ) : ?>
+		<li class="topic-freshness-author"><?php
+			/* translators: %s: reply author link */
+			printf( __( 'Last reply from: %s', 'bborg' ),
+				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
+			);
+		?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $time_since  ) ) : ?>
+		<li class="topic-freshness-time"><?php
+			/* translators: %s: date/time link to the latest post */
+			printf( __( 'Last activity: %s', 'bborg' ), $time_since );
+		?></li>
+	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
 		<?php $_topic_id = bbp_is_reply_edit() ? bbp_get_reply_topic_id() : $topic_id; ?>
 		<li class="topic-subscribe"><?php bbp_topic_subscription_link( array( 'before' => '', 'topic_id' => $_topic_id ) ); ?></li>
@@ -207,7 +229,7 @@ function bb_base_single_forum_description() {
 
 	// Has replies
 	if ( !empty( $reply_count ) ) {
-		$reply_text = sprintf( _n( '%s reply', '%s replies', $reply_count, 'bbpress' ), bbp_number_format( $reply_count ) );
+		$reply_text = sprintf( _n( '%s reply', '%s replies', $reply_count, 'bborg' ), bbp_number_format( $reply_count ) );
 	}
 
 	// Forum has active data
@@ -217,17 +239,41 @@ function bb_base_single_forum_description() {
 
 	// Forum has no last active data
 	} else {
-		$topic_text      = sprintf( _n( '%s topic', '%s topics', $topic_count, 'bbpress' ), bbp_number_format( $topic_count ) );
+		$topic_text      = sprintf( _n( '%s topic', '%s topics', $topic_count, 'bborg' ), bbp_number_format( $topic_count ) );
 	}
 	?>
 
-	<?php if ( bbp_get_forum_parent_id() ) : ?><li class="topic-parent">In: <a href="<?php bbp_forum_permalink( bbp_get_forum_parent_id() ); ?>"><?php bbp_forum_title( bbp_get_forum_parent_id() ); ?></a></li><?php endif; ?>
-	<?php if ( !empty( $topic_count ) ) : ?><li class="topic-count"><?php echo $topic_text; ?></li><?php endif; ?>
-	<?php if ( !empty( $reply_count ) ) : ?><li class="reply-count"><?php echo $reply_text; ?></li><?php endif; ?>
-	<?php if ( !empty( $last_active  ) ) : ?>
-		<li class="forum-freshness-author"><?php printf( __( 'Last post by: %s', 'bbporg' ), bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) ) ); ?></li>
+	<?php if ( bbp_get_forum_parent_id() ) : ?>
+		<li class="topic-parent"><?php
+			/* translators: %s: forum title */
+			printf( __( 'In: %s', 'bborg' ),
+				sprintf( '<a href="%s">%s</a>',
+					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
+					bbp_get_forum_title( bbp_get_forum_parent_id() )
+				)
+			);
+		?></li>
 	<?php endif; ?>
-	<?php if ( !empty( $time_since  ) ) : ?><li class="forum-freshness-time"><?php printf( __( 'Last activity: %s', 'bbporg' ), $time_since ); ?></li><?php endif; ?>
+	<?php if ( !empty( $topic_count ) ) : ?>
+		<li class="topic-count"><?php echo $topic_text; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $reply_count ) ) : ?>
+		<li class="reply-count"><?php echo $reply_text; ?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $last_active  ) ) : ?>
+		<li class="forum-freshness-author"><?php
+			/* translators: %s: post author link */
+			printf( __( 'Last post by: %s', 'bborg' ),
+				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_active ) )
+			);
+		?></li>
+	<?php endif; ?>
+	<?php if ( !empty( $time_since  ) ) : ?>
+		<li class="forum-freshness-time"><?php
+			/* translators: %s: date/time link to the latest post */
+			printf( __( 'Last activity: %s', 'bborg' ), $time_since );
+		?></li>
+	<?php endif; ?>
 	<?php if ( is_user_logged_in() ) : ?>
 		<li class="forum-subscribe"><?php bbp_forum_subscription_link( array( 'forum_id' => $forum_id ) ); ?></li>
 	<?php endif;
