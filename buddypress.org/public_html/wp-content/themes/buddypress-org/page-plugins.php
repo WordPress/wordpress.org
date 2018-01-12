@@ -12,7 +12,14 @@
 				<div class="bbp-pagination">
 					<div class="bbp-pagination-count">
 
-						<?php printf( 'Viewing %1$s to %2$s (%3$s)', number_format_i18n( $from_num ), number_format_i18n( $to_num ), number_format_i18n( $plugins->info['results'] ) ); ?>
+						<?php
+							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
+							printf( __( 'Viewing %1$s to %2$s (%3$s)', 'bporg' ),
+								number_format_i18n( $from_num ),
+								number_format_i18n( $to_num ),
+								number_format_i18n( $plugins->info['results'] )
+							);
+						?>
 
 					</div>
 
@@ -40,20 +47,26 @@
 
 						$plugin_author_id = 0;
 
-						if ( !empty( $plugin->contributors ) ) {
+						if ( ! empty( $plugin->contributors ) ) {
 							$plugin_author    = get_user_by( 'login', key( $plugin->contributors ) );
 							$plugin_author_id = $plugin_author->ID;
 						}
 				?>
 
 				<div class="single-plugin">
-					<h3 class="plugin-title"><a href="<?php echo esc_url( 'https://wordpress.org/extend/plugins/' . $plugin->slug ); ?>/" title="Plugin Information"><?php echo esc_html( $plugin->name ); ?></a></h3>
+					<h3 class="plugin-title"><a href="<?php echo esc_url( 'https://wordpress.org/plugins/' . $plugin->slug ); ?>/"><?php echo esc_html( $plugin->name ); ?></a></h3>
 
 					<div class="plugin-meta">
-						<?php if ( !empty( $plugin->version  ) ) : ?><div>Version: <?php echo esc_html( $plugin->version ); ?></div><?php if ( !empty( $plugin->requires ) ) : ?><?php endif; ?><?php endif; ?>
-						<?php if ( !empty( $plugin->requires ) ) : ?><div>Requires: <?php echo esc_html( $plugin->requires ); ?></div><?php if ( !empty( $plugin->tested ) ) : ?><?php endif; ?><?php endif; ?>
-						<?php if ( !empty( $plugin->tested   ) ) : ?><div>Compatible up to: <?php echo esc_html( $plugin->tested ); ?></div><?php endif; ?>
-						<div>Rating: <?php echo $plugin->rating_html; // raw html - do not escape ?></div>
+						<?php if ( ! empty( $plugin->version ) ) : ?>
+							<div><?php _e( 'Version:', 'bporg' ); ?> <?php echo esc_html( $plugin->version ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! empty( $plugin->requires ) ) : ?>
+							<div><?php _e( 'Requires:', 'bporg' ); ?> <?php echo esc_html( $plugin->requires ); ?></div>
+						<?php endif; ?>
+						<?php if ( ! empty( $plugin->tested ) ) : ?>
+							<div><?php _e( 'Compatible up to:', 'bporg' ); ?> <?php echo esc_html( $plugin->tested ); ?></div>
+						<?php endif; ?>
+						<div><?php _e( 'Rating:', 'bporg' ); ?> <?php echo $plugin->rating_html; // raw html - do not escape ?></div>
 					</div>
 
 					<p class="plugin-description" style="font-size: 12px">
@@ -67,7 +80,14 @@
 				<div class="bbp-pagination">
 					<div class="bbp-pagination-count">
 
-						<?php printf( 'Viewing %1$s to %2$s (%3$s)', number_format_i18n( $from_num ), number_format_i18n( $to_num ), number_format_i18n( $plugins->info['results'] ) ); ?>
+						<?php
+							/* translators: 1: starting number of plugins, 2: ending number, 3: total number */
+							printf( __( 'Viewing %1$s to %2$s (%3$s)', 'bporg' ),
+								number_format_i18n( $from_num ),
+								number_format_i18n( $to_num ),
+								number_format_i18n( $plugins->info['results'] )
+							);
+						?>
 
 					</div>
 
