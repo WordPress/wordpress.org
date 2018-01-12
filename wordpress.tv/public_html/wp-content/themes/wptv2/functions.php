@@ -869,3 +869,38 @@ if ( ! function_exists( 'bump_stats_extras' ) ) {
 		// This is intentionally empty
 	}
 }
+
+/**
+ * Eliminates widows in strings by replace the breaking space that appears before the last word
+ * with a non-breaking space.
+ *
+ * @link http://www.shauninman.com/post/heap/2006/08/22/widont_wordpress_plugin Typesetting widows
+ *
+ * @param string $str Optional. String to operate on.
+ * @return string
+ */
+function wptv_widont( $str = '' ) {
+	// Don't apply on non-tablet mobile devices so the browsers can fit to the viewport properly.
+	if (
+		function_exists( 'jetpack_is_mobile' ) && jetpack_is_mobile() &&
+		class_exists( 'Jetpack_User_Agent_Info' ) && ! Jetpack_User_Agent_Info::is_tablet()
+	) {
+		return $str;
+	}
+
+	// We're dealing with whitespace from here out, let's not have any false positives. :)
+	$str = trim( $str );
+
+	// If string contains three or fewer words, don't join.
+	if ( count( preg_split( '#\s+#', $str ) ) <= 3 ) {
+		return $str;
+	}
+
+	// Don't join if words exceed a certain length: minimum 5 characters, default 15 characters, filterable via `widont_max_word_length`.
+	$widont_max_word_length = max( 8, absint( apply_filters( 'widont_max_word_length', 8 ) ) );
+	$regex = '#\s+([^\s]{1,' . $widont_max_word_length . '})\s+([^\s]{1,' . $widont_max_word_length . '})$#';
+
+	return preg_replace( $regex, ' $1&nbsp;$2', $str );
+}
+remove_filter( 'the_title', 'widont' );
+add_filter( 'the_title', 'wptv_widont' );
