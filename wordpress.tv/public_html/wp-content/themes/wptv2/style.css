@@ -338,7 +338,7 @@ input[type=submit], button, .button {
 	padding: 4px 8px;
 	font-size: 12px;
 	font-weight: 400;
-	color: #555 !important;
+	color: #555;
 	text-shadow: 0 1px 0 #fff;
 	-webkit-transition: all 0.25s ease-in-out;
 	-moz-transition: all 0.25s ease-in-out;
@@ -351,7 +351,7 @@ input[type=submit], button, .button {
 
 input[type=submit]:hover, button:hover, .button:hover, input[type=submit]:focus, button:focus, .button:focus {
 	cursor: pointer;
-	color: #000 !important;
+	color: #000;
 	text-decoration: none;
 	border: 1px solid #bbb;
 	border-bottom-color: #888;
