@@ -752,7 +752,7 @@ class WordCamp_Post_Types_Plugin {
 		</a>
 
 		<?php
-		$email_form = ob_end_flush();
+		$email_form = ob_get_clean();
 
 		$email_form_count++;
 
