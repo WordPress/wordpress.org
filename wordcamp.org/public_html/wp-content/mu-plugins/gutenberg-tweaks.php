@@ -84,7 +84,12 @@ function add_classic_param_to_add_new_button() {
 	<script type="text/javascript">
 		document.addEventListener( 'DOMContentLoaded', function() {
 			jQuery( '.split-page-title-action' ).children( 'a' ).each( function( index, element ) {
-				jQuery( element ).attr( 'href', jQuery( element ).attr( 'href' ) + '&classic-editor' );
+				var href = jQuery( element ).attr( 'href' );
+				if ( ! href.match(/\?/) ) {
+					jQuery( element ).attr( 'href', href + '?classic-editor' );
+				} else {
+					jQuery( element ).attr( 'href', href + '&classic-editor' );
+				}
 			} );
 		} );
 	</script>
