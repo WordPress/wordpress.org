@@ -1,8 +1,12 @@
 <?php
-/*
+/**
  * WordCamp.tv Archives
  *
  * Yearly, monthly, daily, author and whatever falls back to archive.php.
+ *
+ * @global WP_Query          $wp_query
+ * @global WP_Post           $post
+ * @global WordPressTV_Theme $wptv
  */
 
 get_header();

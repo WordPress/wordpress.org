@@ -2,7 +2,7 @@
 /**
  * WordPress.tv Header Template
  *
- * @global $wptv
+ * @global WordPressTV_Theme $wptv
  */
 
 global $wptv;

@@ -44,6 +44,8 @@ class WordPressTV_Theme {
 
 	/**
 	 * Different posts_per_page settings for different views. Runs during pre_get_posts.
+	 *
+	 * @param WP_Query $query The WP_Query instance.
 	 */
 	function posts_per_page( $query ) {
 		$posts_per_page = $query->get( 'posts_per_page' );
@@ -169,6 +171,8 @@ class WordPressTV_Theme {
 
 	/**
 	 * Render the Video Info box
+	 *
+	 * @global WP_Post $post
 	 */
 	function render_video_info_metabox() {
 		global $post;
@@ -189,7 +193,7 @@ class WordPressTV_Theme {
 	/**
 	 * Save the values of meta box fields
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	function save_meta_box_fields( $post_id, $post ) {
@@ -255,9 +259,8 @@ class WordPressTV_Theme {
 	 * Relies on various other filters used once.
 	 * @todo optimize the get_tax_query part.
 	 *
-	 * @param string $search
+	 * @param string   $search
 	 * @param WP_Query $query
-	 *
 	 * @return string
 	 */
 	function search_posts_search( $search, &$query ) {
@@ -310,9 +313,8 @@ class WordPressTV_Theme {
 	 * This adds the JOIN clause resulting from the taxonomy
 	 * search. Make sure this filter runs only once per WP_Query request.
 	 *
-	 * @param string $join
+	 * @param string   $join
 	 * @param WP_Query $query
-	 *
 	 * @return string
 	 */
 	function search_posts_join( $join, &$query ) {
@@ -335,9 +337,8 @@ class WordPressTV_Theme {
 	 * search query matches content and one or more taxonomies.
 	 * This filter glues all duplicates. Use only once per WP_Query.
 	 *
-	 * @param string $group_by
+	 * @param string   $group_by
 	 * @param WP_Query $query
-	 *
 	 * @return string
 	 */
 	function search_posts_groupby( $group_by, &$query ) {
@@ -354,7 +355,6 @@ class WordPressTV_Theme {
 	 * Returns a $tax_query array for an improved search.
 	 *
 	 * @param string $search
-	 *
 	 * @return array
 	 */
 	function get_tax_query( $search ) {
@@ -395,8 +395,8 @@ class WordPressTV_Theme {
 	 * fired via the wptv_list_comments callback wrapper.
 	 *
 	 * @param object $comment
-	 * @param array $args
-	 * @param int $depth
+	 * @param array  $args
+	 * @param int    $depth
 	 */
 	function list_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -444,7 +444,6 @@ class WordPressTV_Theme {
 	 * Get VodPod Thumbnails, used by the_video_image
 	 *
 	 * @param string $code
-	 *
 	 * @return string
 	 */
 	function get_vodpod_thumbnails( $code ) {
@@ -540,8 +539,8 @@ class WordPressTV_Theme {
 	/**
 	 * Outputs the video image
 	 *
-	 * @param int $h
-	 * @param int $w
+	 * @param int  $h
+	 * @param int  $w
 	 * @param bool $arrow
 	 * @param bool $html_code
 	 */
@@ -596,7 +595,6 @@ class WordPressTV_Theme {
 	 * Removes shortcodes from $originalcontent global
 	 *
 	 * @param string $content
-	 *
 	 * @return mixed
 	 */
 	function remove_shortcodes( $content ) {
@@ -609,7 +607,6 @@ class WordPressTV_Theme {
 	 * Returns the home URL
 	 *
 	 * @param string $path
-	 *
 	 * @return mixed|void
 	 */
 	public function home_url( $path = '' ) {
@@ -661,7 +658,8 @@ class WordPressTV_Theme {
 	 * @param string $before
 	 * @param string $sep
 	 * @param string $after
-	 * @param bool $display_count
+	 * @param bool   $display_count
+	 * @return bool|void False if there are no terms.
 	 */
 	public function the_terms( $taxonomy = 'post_tag', $before = '', $sep = '', $after = '', $display_count = true ) {
 		$terms = get_the_terms( get_post()->ID, $taxonomy );
@@ -718,9 +716,9 @@ class WordCampTV_Walker_Nav_Menu extends Walker {
 	 *
 	 * @param string $output
 	 * @param object $item
-	 * @param int $depth
-	 * @param array $args
-	 * @param int $id
+	 * @param int    $depth
+	 * @param array  $args
+	 * @param int    $id
 	 */
 	function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
 
@@ -786,8 +784,7 @@ add_action( 'wp_enqueue_scripts', 'wptv_enqueue_scripts' );
  * in head of document, based on current view.
  *
  * @param string $title Default title text for current view.
- * @param string $sep Optional separator.
- *
+ * @param string $sep   Optional separator.
  * @return string The filtered title.
  */
 function wptv_wp_title( $title, $sep ) {
@@ -819,7 +816,6 @@ add_filter( 'wp_title', 'wptv_wp_title', 10, 2 );
  * Append the slide URL to the excerpt
  *
  * @param string $excerpt
- *
  * @return string
  */
 function wptv_excerpt_slides( $excerpt ) {
@@ -840,7 +836,6 @@ add_filter( 'get_the_excerpt', 'wptv_excerpt_slides' );
  * will be 'retro', and if it doesn't it'll be 'mm'.
  *
  * @param string $username
- *
  * @return bool
  */
 function wporg_username_exists( $username ) {

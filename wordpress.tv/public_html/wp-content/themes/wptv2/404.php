@@ -1,8 +1,12 @@
 <?php
-/*
+/**
  * WordCamp.tv Index Fallback
  *
  * It will be weird if somebody sees this (but okay if 404)
+ *
+ * @global WP_Query          $wp_query
+ * @global WP_Post           $post
+ * @global WordPressTV_Theme $wptv
  */
 
 get_header();

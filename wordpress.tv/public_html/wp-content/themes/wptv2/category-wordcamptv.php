@@ -1,8 +1,10 @@
 <?php
-/*
+/**
  * WordCampTV Category Archives
  *
  * Requires a special display, hence the template.
+ *
+ * @global WordPressTV_Theme $wptv
  */
 
 $featured = new WP_Query( array(

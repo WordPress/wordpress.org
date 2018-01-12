@@ -1,6 +1,8 @@
 <?php
 /**
  * Breadcrumbs template part, use with get_template_part()
+ *
+ * @global WordPressTV_Theme $wptv
  */
 
 global $wptv;

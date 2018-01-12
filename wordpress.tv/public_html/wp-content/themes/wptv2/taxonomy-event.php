@@ -1,8 +1,11 @@
 <?php
-/*
+/**
  * Event Taxonomy Archives
  *
  * Displays for event listings like individual WordCamps.
+ *
+ * @global WP_Query          $wp_query
+ * @global WordPressTV_Theme $wptv
  *
  * @todo cleanup and merge with category.php
  */

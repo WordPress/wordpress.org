@@ -1,6 +1,8 @@
 <?php
 /**
  * WordPress.tv Front Page Template
+ *
+ * @global WordPressTV_Theme $wptv
  */
 
 $featured_params = array(

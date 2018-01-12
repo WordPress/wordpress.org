@@ -1,9 +1,15 @@
 <?php
 /**
  * Single Video Template
+ *
+ * @global WordPressTV_Theme $wptv
+ * @global string            $originalcontent
  */
+
 global $wptv, $originalcontent;
-get_header(); the_post();
+
+get_header();
+the_post();
 ?>
 <div class="wptv-hero group">
 	<div class="container">

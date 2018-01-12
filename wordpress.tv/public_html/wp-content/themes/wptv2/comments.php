@@ -1,7 +1,8 @@
 <?php
 /**
  * WordPress.tv Comments Template
- * @uses global $wptv->list_comments
+ *
+ * @global WordPressTV_Theme $wptv
  */
 
 /*

@@ -1,4 +1,9 @@
 <?php
+/**
+ *
+ * @global WP_Query $wp_query
+ */
+
 global $wp_query;
 
 // See improved improved (yes, improved twice) search.

@@ -1,9 +1,12 @@
 <?php
-/*
+/**
  * Category Archives
  *
  * Used for categories display, especially the to-do category.
  * Fallback to others as well.
+ *
+ * @global WP_Query          $wp_query
+ * @global WordPressTV_Theme $wptv
  */
 
 global $wp_query, $wptv;

@@ -1,4 +1,12 @@
-<?php global $wptv, $originalcontent; ?>
+<?php
+/**
+ *
+ * @global WordPressTV_Theme $wptv
+ * @global string            $originalcontent
+ */
+
+global $wptv, $originalcontent;
+?>
 
 <div class="secondary-content video-info">
 	<h5>Published</h5>
