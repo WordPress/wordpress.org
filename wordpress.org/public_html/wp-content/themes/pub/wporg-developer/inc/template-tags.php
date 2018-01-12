@@ -1329,6 +1329,20 @@ namespace DevHub {
 	}
 
 	/**
+	 * Gets list of additional resources linked via `@see` tags.
+	 *
+	 * @param  null|WP_Post Optional. The post.
+	 * @return array
+	 */
+	function get_see_tags( $post = null ) {
+		$post = get_post( $post );
+
+		$tags = get_post_meta( $post->ID, '_wp-parser_tags', true );
+
+		return wp_list_filter( $tags, array( 'name' => 'see' ) );
+	}
+
+	/**
 	 * Should the search bar be shown?
 	 *
 	 * @return bool True if search bar should be shown.
