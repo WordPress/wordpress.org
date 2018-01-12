@@ -458,7 +458,7 @@ class DevHub_Formatting {
 			$skip_closing_li = false;
 
 			// Handle nested hashes.
-			if ( '{' === $description[0] || '{' === $name ) {
+			if ( ( $description && '{' === $description[0] ) || '{' === $name ) {
 				$description = ltrim( $description, '{' ) . '<ul class="param-hash">';
 				$skip_closing_li = true;
 			} elseif ( '}' === substr( $description, -1 ) ) {
