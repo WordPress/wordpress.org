@@ -484,7 +484,14 @@ class WordPressTV_Theme {
 			if ( 'wpvideo' == $shortcode[2] ) {
 				$attributes = shortcode_parse_atts( $shortcode[0] );
 				$image      = video_image_url_by_guid( rtrim( $attributes[1], ']' ), 'fmt_dvd' ); // dvd image has width = 640
-				$video      = sprintf( '[%s %s w="605"]', $shortcode[2], trim( $shortcode[3] ) );
+				$hd_param   = '';
+
+				// Only set HD param is it won't already be set from `$shortcode[3]`.
+				if ( ! array_key_exists( 'hd', $attributes ) ) {
+					$hd_param = sprintf( 'hd="%d"', (bool) get_option( 'video_player_high_quality', false ) );
+				}
+
+				$video      = sprintf( '[%s %s w="605" %s]', $shortcode[2], trim( $shortcode[3] ), $hd_param );
 				$video      = apply_filters( 'the_content', $video );
 			}
 		}
