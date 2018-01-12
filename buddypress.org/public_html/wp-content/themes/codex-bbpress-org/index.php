@@ -1,7 +1,13 @@
 <?php get_header(); ?>
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
 			<h3 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark"><?php the_title(); ?></a></h3>
-			<cite><?php printf( __( 'Published on %s by %s', 'bbporg' ), get_the_time( 'F jS, Y' ), get_the_author_link() ); ?></cite>
+			<cite><?php
+				/* translators: 1: post date, 2: post author */
+				printf( __( 'Published on %1$s by %2$s', 'bbporg' ),
+					get_the_time( 'F jS, Y' ),
+					get_the_author_link()
+				);
+			?></cite>
 			<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_excerpt(); ?></div>
 			<?php $post_authors[get_the_author_meta( 'ID' )] += 1; ?>
 <?php endwhile;  ?>
