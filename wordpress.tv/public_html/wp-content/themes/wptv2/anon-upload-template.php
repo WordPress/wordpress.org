@@ -58,7 +58,7 @@ function anon_upload_css() {
 
 		.video-upload p {
 			margin: 16px 0;
-			overflow: auto;
+			overflow: hidden;
 		}
 
 		.video-upload h3 {
