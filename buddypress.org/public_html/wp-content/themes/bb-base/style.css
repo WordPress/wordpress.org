@@ -455,6 +455,14 @@ h4 {
 	color: #333;
 }
 
+/* Push the page down so that #target links are correct */
+:target:before {
+	content: "";
+	display: block;
+	height: 130px; /* fixed header height*/
+	margin: -130px 0 0; /* negative fixed header height */
+}
+
 /* =Lists
 -------------------------------------------------------------- */
 
