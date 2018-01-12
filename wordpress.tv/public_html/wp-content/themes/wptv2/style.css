@@ -138,8 +138,12 @@ a, a:link, a:visited {
 	text-decoration: none;
 }
 
-a:hover, a:active {
+a:hover, a:focus, a:active {
 	color: #d54e21;
+}
+
+a:focus {
+	outline: thin dotted;
 }
 
 em, cite {
@@ -267,15 +271,13 @@ div.success p {
 	line-height: 57px;
 }
 
-#menu li a, #menu li a:link, #menu li a:visited {
+#menu li a,
+#menu li a:link,
+#menu li a:visited {
 	padding: 5px;
 	color: #555;
 	text-decoration: none;
 	border: 0;
-}
-
-#menu li a:hover, #menu li a:active {
-	color: #21759b !important;
 }
 
 #menu .current-menu-item > a,
@@ -701,8 +703,12 @@ div.desc p {
 	color: #f7f7f7;
 }
 
-.videowrapper a:hover, .videowrapper a:active {
+.videowrapper a:hover, .videowrapper a:focus, .videowrapper a:active {
 	color: #d54e21;
+}
+
+.videowrapper a:focus {
+	text-decoration: underline;
 }
 
 .videowrapper .sleeve {
@@ -986,7 +992,8 @@ img.videothumb {
 	background: url(./i/arrow.png) no-repeat center center;
 }
 
-.thevideo .ui-tabs a:hover span {
+.thevideo .ui-tabs a:hover span,
+.thevideo .ui-tabs a:focus span {
 	background-color: none !important;
 }
 
@@ -1202,7 +1209,8 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	cursor: pointer;
 }
 
-.ui-tabs a:hover {
+.ui-tabs a:hover,
+.ui-tabs a:focus {
 	color: #d54e21;
 	cursor: pointer;
 }
@@ -1285,7 +1293,8 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	padding: 0 4px;
 }
 
-.searchwordcamptv form #wordcampsubmit:hover {
+.searchwordcamptv form #wordcampsubmit:hover,
+.searchwordcamptv form #wordcampsubmit:focus {
 	background: #B3B3B3;
 	color: #f7f7f7;
 }
@@ -1402,8 +1411,12 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	color: #444;
 }
 
-.linklist h3 a:hover, .linklist h3 a:active {
+.linklist h3 a:hover, .linklist h3 a:focus, .linklist h3 a:active {
 	color: #d54e21;
+}
+
+.linklist h3 a:focus {
+	text-decoration: underline;
 }
 
 .linklist .more {
@@ -1417,8 +1430,12 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	color: #333;
 }
 
-.linklist .more:hover, .linklist .more:active {
+.linklist .more:hover, .linklist .more:focus, .linklist .more:active {
 	color: #d54e21;
+}
+
+.linklist .more:focus {
+	text-decoration: underline;
 }
 
 .linklist .sleeve {
@@ -1490,16 +1507,16 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	color: #222;
 }
 
-#comments a:hover, #comments a:active {
+#comments a:hover, #comments a:focus, #comments a:active {
 	color: #d54e21;
+}
+
+#comments a:focus {
+	text-decoration: underline;
 }
 
 #comments .commenttext a, #comments .commenttext a:link, #comments .commenttext a:visited {
 	color: #21759b;;
-}
-
-#comments a:hover, #comments a:active {
-	color: #d54e21;
 }
 
 #respond {
@@ -1867,8 +1884,9 @@ a {
 	color: #545454;
 }
 
-#menu li a:hover {
-	color: #d54e21 !important;
+#menu li a:hover,
+#menu li a:focus {
+	color: #d54e21;
 }
 
 #menu #searchform {
@@ -1965,8 +1983,13 @@ h5 {
 	color: #8B8B8B;
 }
 
-.breadcrumb a:hover {
+.breadcrumb a:hover,
+.breadcrumb a:focus {
 	color: #464646;
+}
+
+.breadcrumb a:focus {
+	text-decoration: underline;
 }
 
 .breadcrumb .arrow {
@@ -2054,8 +2077,13 @@ h5 {
 	font-weight: normal;
 }
 
-.wptv-hero .main-video .video-event a:hover {
+.wptv-hero .main-video .video-event a:hover,
+.wptv-hero .main-video .video-event a:focus {
 	color: #fff;
+}
+
+.wptv-hero .main-video .video-event a:focus {
+	text-decoration: underline;
 }
 
 .wptv-hero .main-video .video-event .tag-count {
@@ -2531,8 +2559,14 @@ h3#comments {
 }
 
 .menu-footer-container a:hover,
-#footer div.menu a:hover {
+.menu-footer-container a:focus,
+#footer div.menu a:hover,
+#footer div.menu a:focus {
 	color: #21759b;
+}
+.menu-footer-container a:focus,
+#footer div.menu a:focus {
+	text-decoration: underline;
 }
 
 #footer .automattic img {
