@@ -102,6 +102,12 @@ class Display {
 		if ( $paged ) {
 			$query_args['paged'] = $paged;
 		}
+		if ( isset( $_GET['rper_page'] ) ) {
+			$per_page = (int) $_GET['rper_page'];
+			if ( $per_page > 1 && $per_page <= 40 ) {
+				$query_args['posts_per_page'] = $per_page;
+			}
+		}
 		$rev_query = new WP_Query( $query_args );
 		if ( empty( $rev_query->posts ) ) {
 			$output .= '<p>No revisions found</p>';
@@ -238,8 +244,12 @@ class Display {
 
 	private static function pagination( $query ) {
 		global $wp;
-		$bignum          = 999999999;
-		$base_link       = add_query_arg( 'rpage', '%#%', home_url( trailingslashit( $wp->request ) ) );
+		$bignum    = 999999999;
+		$base_link = home_url( trailingslashit( $wp->request ) );
+		if ( isset( $_GET['rper_page'] ) ) {
+			$base_link = add_query_arg( 'rper_page', (int) $_GET['rper_page'], $base_link );
+		}
+		$base_link       = add_query_arg( 'rpage', '%#%', $base_link );
 		$max_num_pages   = $query->max_num_pages;
 		$current_page    = max( 1, $query->get( 'paged' ) );
 		$prev_page_label = '&lsaquo;';
