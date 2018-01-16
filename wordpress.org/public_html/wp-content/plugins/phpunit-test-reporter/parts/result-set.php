@@ -10,7 +10,6 @@ echo Display::get_display_css(); ?>
 			<th>Host</th>
 			<th>PHP Version</th>
 			<th>Database Version</th>
-			<th>Extensions</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -52,7 +51,6 @@ echo Display::get_display_css(); ?>
 					<td><?php echo esc_html( $host ); ?></td>
 					<td><?php echo esc_html( Display::get_display_php_version( $report->ID ) ); ?></td>
 					<td><?php echo esc_html( Display::get_display_mysql_version( $report->ID ) ); ?></td>
-					<td><?php echo esc_html( Display::get_display_extensions( $report->ID ) ); ?></td>
 				</tr>
 			<?php
 				endforeach;
