@@ -18,18 +18,11 @@
 		width: 303px;
 
 		a {
-			background: url( //s.w.org/style/images/wp-header-logo.png?1 ) center left no-repeat;
-			background-size: 303px 53px;
+			background: url( //s.w.org/style/images/wporg-logo.svg?3 ) center left no-repeat;
+			background-size: 290px 46px;
 			display: block;
 			height: 88px;
 			text-indent: -9999px;
-			width: 303px;
-
-			@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
-			only screen and (min-resolution: 1.5dppx),
-			only screen and (min-resolution: 144dpi) {
-				background-image: url( //s.w.org/style/images/wp-header-logo-2x.png?1 );
-			}
 		}
 	}
 
@@ -131,12 +124,7 @@
 			}
 
 			&.current,
-			&.current-menu-item {
-				a {
-					color: #eee;
-				}
-			}
-
+			&.current-menu-item,
 			.uparrow {
 				display: none;
 			}
@@ -203,7 +191,7 @@
 			}
 
 			[type="submit"] {
-				background: #191e23 url( //s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831 ) no-repeat 2px 4px;
+				background: #191e23 url( //s.w.org/wp-includes/images/admin-bar-sprite.png?d=20120831 ) no-repeat 2px 5px;
 				border: none;
 				border-radius: 0;
 				box-shadow: none;
@@ -342,22 +330,25 @@
 }
 
 #mobile-menu-button {
+	background: none;
+	border: none;
+	box-shadow: none;
 	display: block;
 	float: left;
 	font-family: 'dashicons';
 	font-size: 16px;
 	font-style: normal;
 	font-weight: normal;
-	height: 32px;
 	left: 10px;
 	line-height: 1;
+	padding: 1px;
 	position: absolute;
 	text-align: center;
 	text-decoration: inherit;
+	text-shadow: none;
 	top: 75px;
 	transition: color .1s ease-in;
 	vertical-align: top;
-	width: 39px;
 	-webkit-font-smoothing: antialiased;
 
 	&:before {
@@ -368,18 +359,12 @@
 		display: inline-block;
 		float: left;
 		font: normal 50px/1 'Dashicons';
-		height: 32px;
 		margin: 0;
 		outline: none;
 		padding: 3px;
 		text-decoration: none;
 		vertical-align: middle;
-		width: 39px;
 		-webkit-font-smoothing: antialiased;
-	}
-
-	&:hover {
-		background:none;
 	}
 
 	@include breakpoint( $sm ) {
