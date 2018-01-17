@@ -95,6 +95,14 @@ abstract class Directory_Compat {
 							$url = sprintf( home_url( '/%s/%s/reviews/' ),
 								$this->compat(),
 								sanitize_key( $slug[0] ) );
+							// Append the star filter if included in a reviews URL
+							// See https://meta.trac.wordpress.org/ticket/3376
+							if ( isset( $_GET['filter'] ) ) {
+								$filter = absint( $_GET['filter'] );
+								if ( $filter >= 1 && $filter <= 5 ) {
+									$url = add_query_arg( array( 'filter' => $filter ), $url );
+								}
+							}
 							break;
 						case 'reviews_rss' :
 							$url = sprintf( home_url( '/%s/%s/reviews/feed/' ),
