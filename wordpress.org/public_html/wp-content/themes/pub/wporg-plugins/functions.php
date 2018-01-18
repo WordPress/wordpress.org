@@ -108,7 +108,7 @@ function scripts() {
 			'userId'   => get_current_user_id(),
 		) );
 		wp_localize_script( 'wporg-plugins-client', 'localeData', array(
-			'' => array(
+			''            => array(
 				'Plural-Forms' => _x( 'nplurals=2; plural=n != 1;', 'plural forms', 'wporg-plugins' ),
 				'Language'     => _x( 'en', 'language (fr, fr_CA)', 'wporg-plugins' ),
 				'localeSlug'   => _x( 'en', 'locale slug', 'wporg-plugins' ),

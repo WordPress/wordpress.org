@@ -168,15 +168,6 @@
 		display:none;
 	}
 
-	.plugin-reviews .plugin-review + .plugin-review {
-		margin: 2rem 0 1rem;
-		padding-bottom: 1rem;
-	}
-
-	article.plugin-review {
-		border-bottom: 2px solid #eee;
-	}
-
 	@media screen and ( min-width: $ms-breakpoint ) {
 		.plugin-header,
 		.entry-content,

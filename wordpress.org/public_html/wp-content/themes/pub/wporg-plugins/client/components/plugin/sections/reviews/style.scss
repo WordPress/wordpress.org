@@ -3,8 +3,14 @@
 	margin: 0;
 	padding: 0;
 
-	.plugin-review + .plugin-review {
+	.plugin-review {
+		border-bottom: 2px solid #eee;
 		margin: 2rem 0 1rem;
+		padding-bottom: 1rem;
+
+		&:first-child {
+			margin-top: 0;
+		}
 	}
 
 	.review-avatar {
