@@ -17,7 +17,14 @@ if (
 	$user->exists()
 ) {
 	wp_set_current_user( $user->ID );
-	list( $reset_time, $hashed_activation_key ) = explode( ':', $user->user_activation_key, 2 );
+
+	$user_activation_key = $user->user_activation_key;
+	if ( ! $user_activation_key ) {
+		// The activation key may not be in the cached user object, so we'll fetch it manually.
+		$user_activation_key = $wpdb->get_var( $wpdb->prepare( "SELECT user_activation_key FROM {$wpdb->users} WHERE ID = %d", $user->ID ) );
+	}
+
+	list( $reset_time, $hashed_activation_key ) = explode( ':', $user_activation_key, 2 );
 
 	if ( empty( $wp_hasher ) ) {
 		require_once ABSPATH . WPINC . '/class-phpass.php';

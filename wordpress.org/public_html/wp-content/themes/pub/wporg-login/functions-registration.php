@@ -48,7 +48,9 @@ function wporg_login_create_user( $user_login, $user_email, $user_mailinglist = 
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 	$hashed_activation_key = time() . ':' . $wp_hasher->HashPassword( $activation_key );
-	$bool = $wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed_activation_key ), array( 'ID' => $user_id ) );
+
+	$wpdb->update( $wpdb->users, array( 'user_activation_key' => $hashed_activation_key ), array( 'ID' => $user_id ) );
+	clean_user_cache( $user_id );
 
 	if ( $user_mailinglist ) {
 		update_user_meta( $user_id, 'notify_list', 'true' );
