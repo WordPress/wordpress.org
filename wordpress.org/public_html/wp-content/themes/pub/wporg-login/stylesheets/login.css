@@ -303,6 +303,10 @@ form input[type="password"] {
 	font-weight: 400;
 }
 
+.login .password-input-wrapper {
+	display: inherit;
+}
+
 #loginform p.submit,
 .login-action-lostpassword p.submit {
 	border: none;
