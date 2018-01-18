@@ -3,23 +3,30 @@
  *
  */
 
-( function( $ ) {
-	$( document ).on( 'click', '.user-note-voting a', function(e) {
-		e.preventDefault();
+( function( $, wp ) {
+	$( '#user-note-voting' ).on( 'click', '.user-note-voting-up, .user-note-voting-down', function( event ) {
+		event.preventDefault();
 
-		var item = $(this);
+		var $item = $( this ),
+			comment = $item.closest( '.comment' );
 
-		$.post(ajaxurl, {
-				action:   "note_vote",
-				comment:  $(this).attr('data-id'),
-				vote:     $(this).attr('data-vote'),
-				_wpnonce: $(this).parent().attr('data-nonce')
-			}, function(data) {
-				if ("0" != data) {
-					item.closest('.user-note-voting').replaceWith(data);
+		$.post(
+			ajaxurl,
+			{
+				action:   'note_vote',
+				comment:  $item.attr( 'data-id' ),
+				vote:     $item.attr( 'data-vote' ),
+				_wpnonce: $item.parent().attr( 'data-nonce' )
+			},
+			function( data ) {
+				if ( '0' !== data ) {
+					$item.closest( '.user-note-voting' ).replaceWith( data );
+					wp.a11y.speak( $( '.user-note-voting-count', comment ).text() );
 				}
-			}, "text"
+			},
+			'text'
 		);
+
 		return false;
-	});
-} )( jQuery );
+	} );
+} )( window.jQuery, window.wp );
