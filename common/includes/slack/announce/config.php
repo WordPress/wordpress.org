@@ -216,6 +216,7 @@ function get_whitelist() {
 		),
 		'training' => array(
 			'courtneydawn',
+			'donkiely',
 			'liljimmi',
 			'bethsoderberg',
 			'courtneyengle',
