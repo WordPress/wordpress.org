@@ -434,12 +434,13 @@ jQuery( document ).ready( function( $ ) {
 
 		$component_type = $this->breakdown_component_type;
 		$component_milestone_type = $this->breakdown_component_milestone_type;
+		$component_count = isset( $component_type[ $component ] ) ? array_sum( $component_type[ $component ] ) : 0;
 
 		if ( is_singular() ) {
 			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( 'https://core.trac.wordpress.org/newticket?component=' . urlencode( $component ) ) . '">Create a new ticket</a></div>';
 		}
 
-		if ( ! $component_count = array_sum( $component_type[ $component ] ) ) {
+		if ( ! $component_count ) {
 			if ( is_singular() ) {
 				echo '<h3>No open tickets!</h3>';
 			}
