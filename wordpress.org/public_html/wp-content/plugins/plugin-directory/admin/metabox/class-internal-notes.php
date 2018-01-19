@@ -64,7 +64,7 @@ class Internal_Notes {
 			wp_die( -1 );
 		}
 		$wp_list_table = new Plugin_Comments( [
-			'screen' => convert_to_screen( [ 'screen' => 'edit-comments' ] ),
+			'screen' => convert_to_screen( 'edit-comments' ),
 		] );
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
