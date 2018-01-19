@@ -371,19 +371,19 @@ class Template {
 					break;
 
 				case '128x128':
-					$icon = self::get_asset_url( $plugin, $info );
+					$icon_1x = self::get_asset_url( $plugin, $info );
 					break;
 
 				/* false = the resolution of the icon, this is NOT disabled */
 				case false && 'icon.svg' == $file:
-					$svg = self::get_asset_url( $plugin, $info );
+					$icon = $svg = self::get_asset_url( $plugin, $info );
 					break;
 			}
 		}
 
-		// Fallback to SVG if it exists.
-		if ( ! $icon && $svg ) {
-			$icon = $svg;
+		// Fallback to 1x if it exists.
+		if ( ! $icon && $icon_1x ) {
+			$icon = $icon_1x;
 		}
 
 		// Fallback to 2x if it exists.
@@ -411,8 +411,8 @@ class Template {
 			case 'html':
 				$id    = "plugin-icon-{$plugin->post_name}";
 				$html  = "<style type='text/css'>";
-				$html .= "#{$id} { background-image: url('{$icon}'); } .plugin-icon { background-size: cover; height: 128px; width: 128px; }";
-				if ( ! empty( $icon_2x ) && ! $generated ) {
+				$html .= "#{$id} { background-image: url('{$icon}'); }";
+				if ( ! empty( $icon_2x ) && ! $generated && ! $svg ) {
 					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 144dpi) { #{$id} { background-image: url('{$icon_2x}'); } }";
 				}
 				$html .= '</style>';
