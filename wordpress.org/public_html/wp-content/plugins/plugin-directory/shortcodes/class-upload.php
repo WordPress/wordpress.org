@@ -78,15 +78,16 @@ class Upload {
 					<p>
 					<?php
 					if ( 1 === ( $plugins->new + $plugins->pending ) ) {
-						 _e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
+						esc_html_e( 'Currently there is 1 plugin in the review queue.', 'wporg-plugins' );
 					} else {
 						printf(
-							_n(
+							/* translators: 1: Total amount of pending plugins; 2: Amount of new plugins. */
+							esc_html( _n(
 								'Currently there are %1$s plugins in the review queue, %2$s of which is awaiting its initial review.',
 								'Currently there are %1$s plugins in the review queue, %2$s of which are awaiting their initial review.',
 								$plugins->new,
 								'wporg-plugins'
-							),
+							) ),
 							'<strong>' . ( $plugins->new + $plugins->pending ) . '</strong>',
 							'<strong>' . $plugins->new . '</strong>'
 						);
@@ -101,15 +102,16 @@ class Upload {
 						<p>
 						<?php
 						if ( 1 === $submitted_counts->total ) {
-							_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
+							esc_html_e( 'You already have a plugin in the review queue. Please wait for it to be approved before submitting any more.', 'wporg-plugins' );
 						} else {
 							printf(
-								_n(
+								/* translators: 1: Total amount of plugins; 2: Amount of pending plugins. */
+								esc_html( _n(
 									'You have %1$s plugins in the review queue, %2$s is being actively reviewed. Please wait for them to be approved before submitting any more.',
 									'You have %1$s plugins in the review queue, %2$s are being actively reviewed. Please wait for them to be approved before submitting any more.',
 									$submitted_counts->pending,
 									'wporg-plugins'
-								),
+								) ),
 								'<strong>' . $submitted_counts->total . '</strong>',
 								'<strong>' . $submitted_counts->pending . '</strong>'
 							);
@@ -127,8 +129,8 @@ class Upload {
 
 						<p>
 						<?php
-							/* translators: %s: plugins@wordpress.org */
 							printf(
+								/* translators: plugins@wordpress.org */
 								__( 'Please wait at least 7 business days before asking for an update status from <a href="mailto:%1$s">%1$s</a>.', 'wporg-plugins' ),
 								'plugins@wordpress.org'
 							);
@@ -161,7 +163,15 @@ class Upload {
 					<input id="upload_button" class="button button-primary" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
 
 					<p>
-						<small><?php printf( __( 'Maximum allowed file size: %s', 'wporg-plugins' ), esc_html( self::get_max_allowed_file_size() ) ); ?></small>
+						<small>
+							<?php
+							printf(
+								/* translators: Maximum allowed file size. */
+								esc_html__( 'Maximum allowed file size: %s', 'wporg-plugins' ),
+								esc_html( self::get_max_allowed_file_size() )
+							);
+							?>
+						</small>
 					</p>
 				</form>
 				<script>
@@ -184,7 +194,15 @@ class Upload {
 
 		<?php else : ?>
 
-			<p><?php printf( __( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ), esc_url( wp_login_url() ) ); ?></p>
+			<p>
+			<?php
+			printf(
+				/* translators: Login URL */
+				__( 'Before you can upload a new plugin, <a href="%s">please log in</a>.', 'wporg-plugins' ),
+				esc_url( wp_login_url() )
+			);
+			?>
+			</p>
 
 		<?php
 		endif; // is_user_logged_in()
