@@ -92,7 +92,7 @@ class wporg_trac_notifications {
 		$tree = array();
 		$subcomponents = array(
 			'Comments' => array( 'Pings/Trackbacks' ),
-			'Editor' => array( 'Autosave', 'Press This', 'Quick/Bulk Edit', 'TinyMCE' ),
+			'Editor' => array( 'Autosave', 'Quick/Bulk Edit', 'TinyMCE' ),
 			'Formatting' => array( 'Charset', 'Shortcodes' ),
 			'Media' => array( 'Embeds', 'Gallery', 'Upload' ),
 			'Permalinks' => array( 'Canonical', 'Rewrite Rules' ),
