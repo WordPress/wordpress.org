@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress.tv Blog">
+
+	<file>.</file>
+
+	<!-- Show sniff codes -->
+	<arg value="s"/>
+
+	<rule ref="WordPress" />
+	<rule ref="WordPress-Docs" />
+</ruleset>

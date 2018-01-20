@@ -1,0 +1,137 @@
+/*
+Theme Name: WordPress.tv Blog v2
+Theme URI: http://blog.wordpress.tv
+Description: WordPress.tv Blog v2 Theme
+Version: 2.0
+Author: Automattic
+Author URI: http://automattic.com/
+*/
+
+/* Elements */
+
+.entry-content img {
+	height: auto;
+	width: 100%;
+}
+
+/* Contain floats */
+.post:before,
+.post:after,
+.widget:before,
+.widget:after {
+	content: "";
+	display: table;
+}
+
+.post:after,
+.widget:after {
+	clear: both;
+}
+
+.post, .widget {
+	*zoom: 1;
+}
+
+/* Layout */
+
+.blog .primary-content {
+	margin-bottom: 50px;
+}
+
+/* Search */
+
+.secondary-content #searchform,
+.primary-content #searchform {
+	margin: 0;
+	float: none;
+}
+
+.secondary-content #searchform input#s {
+	width: 92px;
+}
+
+.secondary-content #searchform input#searchsubmit,
+.primary-content #searchform input#searchsubmit {
+	margin: 0
+}
+
+/* Widgets */
+
+.widget {
+	margin-bottom: 10px;
+}
+
+/* Post Meta */
+
+.post-meta {
+	border-bottom: 1px #eee solid;
+	color: #aaa;
+	font-size: 13px;
+	font-style: italic;
+	margin: 0 0 20px 0;
+	padding: 0 0 10px 0;
+}
+
+.avatar {
+	box-shadow: none;
+	float: left;
+	margin: 3px 0 0 0;
+	width: 110px;
+}
+
+.post {
+	margin: 30px 0 0 0;
+}
+
+.primary-content .post .entry {
+	float: right;
+	width: 560px;
+}
+
+.single .post .entry {
+	float: none;
+	width: auto;
+}
+
+/* Typography */
+
+.entry p {
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.entry h3.post-title {
+	font-size: 24px;
+	margin: 0;
+	border: 0;
+}
+
+#page .wptv-hero .page-title {
+	float: none;
+	width: 940px;
+	margin: -8px auto 10px auto;
+}
+
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4,
+.entry-content h5 {
+	border-bottom: 0
+}
+
+.entry-content h3 {
+	margin: 20px 0 10px 0;
+	padding: 0;
+}
+
+.blog .entry ul,
+.primary-content .entry ul {
+	margin: 0 0 20px 16px;
+}
+
+.blog .entry ul li,
+.primary-content .entry ul li {
+	list-style: disc;
+	margin: 5px 0;
+}
