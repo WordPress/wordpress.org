@@ -43,17 +43,17 @@ class Meta extends \WP_Widget {
 			<li><?php printf( __( 'Version: %s', 'wporg-plugins' ), '<strong>' . get_post_meta( $post->ID, 'version', true ) . '</strong>' ); ?></li>
 			<li>
 				<?php
-				$modefied_time = get_post_modified_time();
+				$modified_time = get_post_modified_time();
 
 				// Fallback for approved plugins that are not published yet.
-				if ( $modefied_time < 0 ) {
-					$modefied_time = get_post_time();
+				if ( $modified_time < 0 ) {
+					$modified_time = get_post_time();
 				}
 
 				printf(
 					__( 'Last updated: %s', 'wporg-plugins' ),
 					/* Translators: Plugin modified time. */
-					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modefied_time ) . '</span>' ) . '</strong>'
+					'<strong>' . sprintf( __( '%s ago', 'wporg-plugins' ), '<span>' . human_time_diff( $modified_time ) . '</span>' ) . '</strong>'
 				);
 				?>
 			</li>
