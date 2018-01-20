@@ -1134,7 +1134,7 @@ class Plugin_Directory {
 
 			// Browse 404's
 			if ( 'browse' === $path[2] ) {
-				wp_safe_redirect( home_url( '/browse/featured/' ) );
+				wp_safe_redirect( home_url( '/' ) );
 				die();
 			}
 
