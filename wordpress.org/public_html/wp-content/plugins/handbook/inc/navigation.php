@@ -47,6 +47,11 @@ class WPorg_Handbook_Navigation {
 	public static function o2_post_fragment( $fragment, $post_id ) {
 		$prev = $next = false;
 
+		// Bail unless a handbook page.
+		if ( ! wporg_is_handbook_post_type( get_post_type( $post_id ) ) ) {
+			return $fragment;
+		}
+
 		if ( self::$using_pages_widget ) {
 			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget( $post_id );
 		} else {
