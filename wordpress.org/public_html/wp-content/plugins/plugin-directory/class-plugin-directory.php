@@ -1132,9 +1132,16 @@ class Plugin_Directory {
 				die();
 			}
 
-			// Browse 404's
+			// Browse 404s.
 			if ( 'browse' === $path[2] ) {
 				wp_safe_redirect( home_url( '/' ) );
+				die();
+			}
+
+			// The readme.txt page.
+			if ( 'readme.txt' === $path[2] ) {
+				header( 'Content-type: text/plain' );
+				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
 				die();
 			}
 
@@ -1147,7 +1154,7 @@ class Plugin_Directory {
 				}
 			}
 
-			// Otherwise, let's redirect to the search page
+			// Otherwise, let's redirect to the search page.
 			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
 				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ) );
 				die();
