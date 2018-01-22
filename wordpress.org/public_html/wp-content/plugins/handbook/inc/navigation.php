@@ -169,7 +169,7 @@ class WPorg_Handbook_Navigation {
 			$post_status[] = 'private';
 		}
 
-		$parent_id = false;
+		$parent_id = wp_get_post_parent_id( $post );
 
 		// Get the hierarchically and menu_order ordered list of handbook pages.
 		$handbook_pages = wp_cache_get( $cache_key, $cache_group );
@@ -177,8 +177,6 @@ class WPorg_Handbook_Navigation {
 			if ( 'menu_order' === $sort_column ) {
 				$sort_column = array( 'menu_order' => 'ASC', 'post_title' => 'ASC' );
 			}
-
-			$parent_id = wp_get_post_parent_id( $post );
 
 			$handbook_pages = get_posts( array(
 				'exclude'        => $exclude,
