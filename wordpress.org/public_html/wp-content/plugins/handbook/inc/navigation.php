@@ -50,7 +50,7 @@ class WPorg_Handbook_Navigation {
 		if ( self::$using_pages_widget ) {
 			$adjacent = self::get_adjacent_posts_via_handbook_pages_widget( $post_id );
 		} else {
-			$adjacent = self::get_adjacent_posts_via_menu( $menu_name, $post_id );
+			$adjacent = self::get_adjacent_posts_via_menu( 'Table of Contents', $post_id );
 		}
 
 		// If an array wasn't returned, then handbook navigation does not apply.
