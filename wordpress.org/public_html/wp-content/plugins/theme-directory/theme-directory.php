@@ -791,7 +791,13 @@ function wporg_themes_theme_information( $slug ) {
  * Switches to the appropriate blog for the query.
  */
 function wporg_themes_query_api( $method, $args = array() ) {
-	include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
+	if ( ! class_exists( 'Themes_API' ) ) {
+		if ( file_exists( __DIR__ . '/class-themes-api.php' ) ) {
+			include_once __DIR__ . '/class-themes-api.php';
+		} else {
+			include_once API_WPORGPATH . 'themes/info/1.0/class-themes-api.php';
+		}
+	}
 
 	$api = new Themes_API( $method, $args );
 
