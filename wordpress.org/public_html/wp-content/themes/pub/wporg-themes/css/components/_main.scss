@@ -3,12 +3,7 @@ body {
 	background: #f1f1f1;
 }
 
-p a,
-p a:hover {
-	border: none;
-}
-
-/* Dowload Chart RTL horizontal scrolling fix */
+/* Download Chart RTL horizontal scrolling fix */
 .chart > div > div > div > div {
 	left: -10000px !important;
 	right: auto !important;
@@ -60,15 +55,6 @@ ul, ol {
 	font-weight: 300;
 	line-height: 1.3;
 	margin: 0 0 20px;
-}
-
-.entry-content {
-	font-size: 16px;
-	line-height: 1.6;
-}
-
-.entry-content p {
-	margin: 0 0 22px 0;
 }
 
 /*------------------------------------------------------------------------------
