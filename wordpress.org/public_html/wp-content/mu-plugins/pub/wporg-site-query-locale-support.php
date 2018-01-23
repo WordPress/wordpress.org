@@ -6,6 +6,8 @@
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
  * License:     GPLv2 or later
+ *
+ * @package WordPressdotorg\ExtendedSiteQuery
  */
 
 namespace WordPressdotorg\ExtendedSiteQuery;
@@ -35,12 +37,12 @@ function extend_sites_clauses( $clauses, $query ) {
 	}
 
 	if ( ! empty( $query->query_vars['locale__in'] ) ) {
-		$sql = LOCALES_TABLES . '.locale IN (' . implode( ',', array_fill( 0, count( $query->query_vars['locale__in'] ), '%s' ) ) . ')';
+		$sql     = LOCALES_TABLES . '.locale IN (' . implode( ',', array_fill( 0, count( $query->query_vars['locale__in'] ), '%s' ) ) . ')';
 		$where[] = $wpdb->prepare( $sql, $query->query_vars['locale__in'] );
 	}
 
 	if ( ! empty( $query->query_vars['locale__not_in'] ) ) {
-		$sql = LOCALES_TABLES . '.locale NOT IN (' . implode( ',', array_fill( 0, count( $query->query_vars['locale__not_in'] ), '%s' ) ) . ')';
+		$sql     = LOCALES_TABLES . '.locale NOT IN (' . implode( ',', array_fill( 0, count( $query->query_vars['locale__not_in'] ), '%s' ) ) . ')';
 		$where[] = $wpdb->prepare( $sql, $query->query_vars['locale__not_in'] );
 	}
 
@@ -62,15 +64,19 @@ add_filter( 'sites_clauses', __NAMESPACE__ . '\extend_sites_clauses', 10, 2 );
  * @param \WP_Site_Query $query The site query.
  */
 function add_locale_to_default_query_vars( $query ) {
-	$query->query_var_defaults = array_merge( $query->query_var_defaults, [ 'locale' => '', 'locale__in' => '', 'locale__not_in' => '' ] );
+	$query->query_var_defaults = array_merge( $query->query_var_defaults, [
+		'locale'         => '',
+		'locale__in'     => '',
+		'locale__not_in' => '',
+	] );
 }
 add_action( 'parse_site_query', __NAMESPACE__ . '\add_locale_to_default_query_vars' );
 
 /**
  * Adds 'locale' field to site details.
  *
- * @param stdClass $details The site details.
- * @return stdClass Site details.
+ * @param \stdClass $details The site details.
+ * @return \stdClass Site details.
  */
 function add_locale_to_site_details( $details ) {
 	if ( ! $details->lang_id ) {

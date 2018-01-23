@@ -6,6 +6,8 @@
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
  * License:     GPLv2 or later
+ *
+ * @package WordPressdotorg\AllowMoreHtmlInComments
  */
 
 namespace WordPressdotorg\AllowMoreHtmlInComments;
@@ -54,6 +56,7 @@ function force_filtered_html_on_import( $force ) {
 	if ( $force ) {
 		kses_init_filters();
 		p2_kses_init();
+
 		// Don't have core fire kses_init_filters(), we already did.
 		return false;
 	}

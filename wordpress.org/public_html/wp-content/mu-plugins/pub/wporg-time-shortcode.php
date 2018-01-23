@@ -6,6 +6,8 @@
  * Author:      WordPress.org
  * Author URI:  https://wordpress.org/
  * License:     GPLv2 or later
+ *
+ * @package WordPressdotorg\TimeShortcode
  */
 
 namespace WordPressdotorg\TimeShortcode;
@@ -49,7 +51,7 @@ function time_shortcode( $attr, $content = '' ) {
 
 	// Try to parse the time, relative to the post time. Or current time, if an attr is set.
 	$timestamp = ! isset( $attr[0] ) ? get_the_date( 'U' ) : time();
-	$time = strtotime( $gmtcontent, $timestamp );
+	$time      = strtotime( $gmtcontent, $timestamp );
 
 	// If that didn't work, give up.
 	if ( false === $time || -1 === $time ) {
