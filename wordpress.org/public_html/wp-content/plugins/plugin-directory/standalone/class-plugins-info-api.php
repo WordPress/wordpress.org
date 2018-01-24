@@ -82,8 +82,8 @@ class Plugins_Info_API {
 			return $response;
 		}
 
-		// Backwards compatibility; the API returns null in case of error..
-		if ( isset( $response['error'] ) ) {
+		// Backwards compatibility; the PHP api endpoints return `null` in case of an error.
+		if ( isset( $response['error'] ) && 'php' === $this->format ) {
 			$this->output( null );
 			return;
 		}
